@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui">
+
+    <!-- ============================================================================ -->
+    <!-- MATERIAL DESIGN 3 STYLES - MyVocaList                                       -->
+    <!-- Typography, Buttons, Cards, Inputs following MD3 guidelines                 -->
+    <!-- ============================================================================ -->
+
+    <!-- ============================================================================ -->
+    <!-- TYPOGRAPHY SCALE (Material Design 3)                                        -->
+    <!-- ============================================================================ -->
+
+    <!-- Display Styles (Largest - Rare use, hero sections) -->
+    <Style x:Key="DisplayLarge" TargetType="Label">
+        <Setter Property="FontSize" Value="57" />
+        <Setter Property="LineHeight" Value="64" />
+        <Setter Property="TextColor" Value="{StaticResource OnBackground}" />
+    </Style>
+
+    <Style x:Key="DisplayMedium" TargetType="Label">
+        <Setter Property="FontSize" Value="45" />
+        <Setter Property="LineHeight" Value="52" />
+        <Setter Property="TextColor" Value="{StaticResource OnBackground}" />
+    </Style>
+
+    <Style x:Key="DisplaySmall" TargetType="Label">
+        <Setter Property="FontSize" Value="36" />
+        <Setter Property="LineHeight" Value="44" />
+        <Setter Property="TextColor" Value="{StaticResource OnBackground}" />
+    </Style>
+
+    <!-- Headline Styles (Page/Section titles) -->
+    <Style x:Key="HeadlineLarge" TargetType="Label">
+        <Setter Property="FontSize" Value="32" />
+        <Setter Property="LineHeight" Value="40" />
+        <Setter Property="TextColor" Value="{StaticResource OnBackground}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style x:Key="HeadlineMedium" TargetType="Label">
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="LineHeight" Value="36" />
+        <Setter Property="TextColor" Value="{StaticResource OnBackground}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style x:Key="HeadlineSmall" TargetType="Label">
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="LineHeight" Value="32" />
+        <Setter Property="TextColor" Value="{StaticResource OnBackground}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <!-- Title Styles (Card titles, list item titles) -->
+    <Style x:Key="TitleLarge" TargetType="Label">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="LineHeight" Value="28" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style x:Key="TitleMedium" TargetType="Label">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="LineHeight" Value="24" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style x:Key="TitleSmall" TargetType="Label">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="LineHeight" Value="20" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <!-- Body Styles (Main content text) -->
+    <Style x:Key="BodyLarge" TargetType="Label">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="LineHeight" Value="24" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+    </Style>
+
+    <Style x:Key="BodyMedium" TargetType="Label">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="LineHeight" Value="20" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+    </Style>
+
+    <Style x:Key="BodySmall" TargetType="Label">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="LineHeight" Value="16" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
+    </Style>
+
+    <!-- Label Styles (Captions, metadata, small text) -->
+    <Style x:Key="LabelLarge" TargetType="Label">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="LineHeight" Value="20" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style x:Key="LabelMedium" TargetType="Label">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="LineHeight" Value="16" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style x:Key="LabelSmall" TargetType="Label">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="LineHeight" Value="16" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
+    </Style>
+
+    <!-- ============================================================================ -->
+    <!-- BUTTON STYLES (Material Design 3)                                           -->
+    <!-- ============================================================================ -->
+
+    <!-- Filled Button (Primary Action - Highest Emphasis) -->
+    <Style x:Key="FilledButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="{StaticResource OnPrimary}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="Padding" Value="24,10" />
+        <Setter Property="Shadow">
+            <Shadow Brush="{StaticResource Shadow}" Offset="0,2" Radius="4" Opacity="0.3" />
+        </Setter>
+    </Style>
+
+    <!-- Filled Tonal Button (Secondary with surface tint) -->
+    <Style x:Key="FilledTonalButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource SecondaryContainer}" />
+        <Setter Property="TextColor" Value="{StaticResource OnSecondaryContainer}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="Padding" Value="24,10" />
+    </Style>
+
+    <!-- Outlined Button (Medium Emphasis) -->
+    <Style x:Key="OutlinedButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="Padding" Value="24,10" />
+    </Style>
+
+    <!-- Text Button (Low Emphasis) -->
+    <Style x:Key="TextButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="Padding" Value="12,10" />
+    </Style>
+
+	<Style x:Key="FilledDestructiveButton" TargetType="Button" BasedOn="{StaticResource FilledButton}">
+		<Setter Property="BackgroundColor" Value="{StaticResource Error}" />
+		<Setter Property="TextColor" Value="{StaticResource OnError}" />
+	</Style>
+	<Style x:Key="OutlinedIconButton" TargetType="Frame">
+		<Setter Property="BackgroundColor" Value="Transparent" />
+		<Setter Property="BorderColor" Value="{StaticResource Outline}" />
+		<Setter Property="CornerRadius" Value="24" />
+		<Setter Property="WidthRequest" Value="48" />
+		<Setter Property="HeightRequest" Value="48" />
+		<Setter Property="Padding" Value="0" />
+	</Style>
+	<Style x:Key="FilledTonalIconButton" TargetType="Frame">
+		<Setter Property="BackgroundColor" Value="{StaticResource SurfaceVariant}" />
+		<Setter Property="CornerRadius" Value="24" />
+		<Setter Property="WidthRequest" Value="48" />
+		<Setter Property="HeightRequest" Value="48" />
+		<Setter Property="Padding" Value="0" />
+	</Style>
+
+    <!-- Elevated Button (with shadow) -->
+    <Style x:Key="ElevatedButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="Padding" Value="24,10" />
+        <Setter Property="Shadow">
+            <Shadow Brush="{StaticResource Shadow}" Offset="0,2" Radius="4" Opacity="0.3"  />
+        </Setter>
+    </Style>
+	
+	
+
+    <!-- ============================================================================ -->
+    <!-- CARD STYLES (Material Design 3)                                             -->
+    <!-- ============================================================================ -->
+
+    <!-- Elevated Card (with shadow - for list items) -->
+    <Style x:Key="ElevatedCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+        <Setter Property="BorderColor" Value="Transparent" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Margin" Value="0,4" />
+        <Setter Property="Shadow">
+            <Shadow Brush="{StaticResource Shadow}" Offset="0,2" Radius="4" Opacity="0.3"  />
+        </Setter>
+    </Style>
+
+    <!-- Filled Card (with background tint) -->
+    <Style x:Key="FilledCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
+        <Setter Property="BorderColor" Value="Transparent" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Margin" Value="0,4" />
+    </Style>
+
+    <!-- Outlined Card (with border) -->
+    <Style x:Key="OutlinedCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BorderColor" Value="{StaticResource OutlineVariant}" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Margin" Value="0,4" />
+    </Style>
+
+    <!-- Gradient Card (Your custom style - keep for branding) -->
+    <Style x:Key="GradientCard" TargetType="Frame">
+        <Setter Property="Background" Value="{StaticResource CardBackgroundGradient}" />
+        <Setter Property="BorderColor" Value="{StaticResource OutlineVariant}" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Margin" Value="0,8" />
+    </Style>
+
+    <!-- ============================================================================ -->
+    <!-- INPUT FIELD STYLES (Material Design 3)                                      -->
+    <!-- ============================================================================ -->
+
+    <Style x:Key="MaterialEntry" TargetType="Entry">
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="HeightRequest" Value="56" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="ClearButtonVisibility" Value="WhileEditing" />
+        <Setter Property="IsSpellCheckEnabled" Value="False" />
+        <Setter Property="IsTextPredictionEnabled" Value="True" />
+    </Style>
+
+    <!-- Material Entry Container (Frame wrapper for border/corner radius) -->
+    <Style x:Key="MaterialEntryContainer" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceVariant}" />
+        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="HeightRequest" Value="56" />
+        <Setter Property="Margin" Value="0,8" />
+    </Style>
+
+    <!-- Material Editor (Multi-line text input) -->
+    <Style x:Key="MaterialEditor" TargetType="Editor">
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceVariant}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="MinimumHeightRequest" Value="120" />
+        <Setter Property="Margin" Value="0,8" />
+        <Setter Property="IsSpellCheckEnabled" Value="False" />
+        <Setter Property="IsTextPredictionEnabled" Value="True" />
+    </Style>
+
+    <!-- Field Label (Above input fields) - MD3 Label Large -->
+    <Style x:Key="FieldLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="LineHeight" Value="16" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="Margin" Value="16,0,0,4" />
+    </Style>
+
+    <!-- Helper Text (Below input fields) - MD3 Body Small -->
+    <Style x:Key="HelperText" TargetType="Label">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="LineHeight" Value="16" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="Margin" Value="16,4,16,0" />
+    </Style>
+
+    <Style x:Key="ErrorText" TargetType="Label">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="LineHeight" Value="16" />
+        <Setter Property="TextColor" Value="{StaticResource Error}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="Margin" Value="16,4,16,0" />
+    </Style>
+
+    <!-- ============================================================================ -->
+    <!-- FLOATING ACTION BUTTON (FAB)                                                -->
+    <!-- ============================================================================ -->
+
+    <!-- FAB Container (Your signature gold gradient) -->
+    <Style x:Key="FabContainer" TargetType="uranium:StatefulContentView">
+        <Setter Property="WidthRequest" Value="56" />
+        <Setter Property="HeightRequest" Value="56" />
+        <!--<Setter Property="CornerRadius" Value="28" />-->
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <!--<Setter Property="BorderColor" Value="Transparent" />
+        <Setter Property="HasShadow" Value="True" />-->
+        <!--<Setter Property="Padding" Value="0" />-->
+        <!--<Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="End" />-->
+        <!--<Setter Property="Margin" Value="0,0,16,16" />-->
+        <Setter Property="Background" Value="{StaticResource FabGradient}" />
+        <Setter Property="Shadow">
+            <Shadow Brush="{StaticResource Shadow}" Offset="0,2" Radius="4" Opacity="0.3" />
+        </Setter>
+    </Style>
+    
+
+    <!-- FAB Icon Label -->
+    <Style x:Key="FabIcon" TargetType="Label">
+        <Setter Property="Text" Value="+" />
+        <Setter Property="TextColor" Value="{StaticResource OnTertiary}" />
+        <Setter Property="FontSize" Value="32" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="HorizontalTextAlignment" Value="Center" />
+        <Setter Property="VerticalTextAlignment" Value="Center" />
+    </Style>
+
+    <!-- ============================================================================ -->
+    <!-- DIVIDER                                                                      -->
+    <!-- ============================================================================ -->
+
+    <Style x:Key="Divider" TargetType="BoxView">
+        <Setter Property="BackgroundColor" Value="{StaticResource OutlineVariant}" />
+        <Setter Property="HeightRequest" Value="1" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="Margin" Value="0,8" />
+    </Style>
+
+    <!-- ============================================================================ -->
+    <!-- CONTAINER STYLES (Layout helpers)                                           -->
+    <!-- ============================================================================ -->
+
+    <!-- Page Container (Standard padding) -->
+    <Style x:Key="PageContainer" TargetType="VerticalStackLayout">
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Spacing" Value="16" />
+    </Style>
+
+    <!-- Section Container (Grouped content) -->
+    <Style x:Key="SectionContainer" TargetType="VerticalStackLayout">
+        <Setter Property="Spacing" Value="8" />
+        <Setter Property="Margin" Value="0,0,0,24" />
+        <Setter Property="BackgroundColor" Value="{StaticResource Neutral20}"></Setter>
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Spacing" Value="16" />
+    </Style>
+
+</ResourceDictionary>

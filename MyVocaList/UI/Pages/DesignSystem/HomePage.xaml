@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<uranium:UraniumContentPage 
+            x:Class="MyVocaList.UI.Pages.DesignSystem.HomePage"
+            xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+            xmlns:v="clr-namespace:UraniumUI.Validations;assembly=UraniumUI.Validations.DataAnnotations"
+            xmlns:local="clr-namespace:MyVocaList.UI.Pages.DesignSystem"
+            xmlns:component="clr-namespace:MyVocaList.UI.Components"
+            Title="DS Home"
+            StyleClass="CardBackgroundGradient">
+    
+    <VerticalStackLayout>
+        <Label 
+        Text="Design System Home"
+        Style="{StaticResource TitleLarge}"/>
+        
+        <Label 
+        Text="Here you find a set of pages demonstrating the stablished Design System (UI/UX). All desmonstrations are built on top of UraniumUI. 
+            The goal is to ensure cross-platform UX/UX identity across all targeted OS"
+        Style="{StaticResource TitleSmall}"/>
+
+
+        <Label 
+            Text="Material Design 3 documentation : " Style="{StaticResource LabelLarge}"/>
+        
+        <Label 
+            Text="https://m3.material.io/"
+            Style="{StaticResource LabelMedium}"/>
+        
+    </VerticalStackLayout>
+    
+</uranium:UraniumContentPage>

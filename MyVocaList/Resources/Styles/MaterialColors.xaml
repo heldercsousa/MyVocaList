@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- ============================================================================ -->
+    <!-- MATERIAL DESIGN 3 COLOR SYSTEM - MyVocaList                                -->
+    <!-- MyVocaList Brand Theme - Dark Mode (HCT-GENERATED)                         -->
+    <!-- Generated using MaterialColorUtilities library                             -->
+    <!-- Your Signature Colors: Pink + Purple + Gold                               -->
+    <!-- ============================================================================ -->
+
+    <!-- ============================================================================ -->
+    <!-- PRIMARY TONAL PALETTE (Pink #E91E63)                                      -->
+    <!-- ============================================================================ -->
+
+    <!-- Base: #FFE91E63 | Hue: 8,4° | Chroma: 92,9 | Tone: 50,9 -->
+
+    <Color x:Key="Primary0">#FF000000</Color>
+    <Color x:Key="Primary10">#FF400014</Color>
+    <Color x:Key="Primary20">#FF660025</Color>
+    <Color x:Key="Primary30">#FF900038</Color>
+    <Color x:Key="Primary40">#FFBC004B</Color>
+    <Color x:Key="Primary50">#FFE61A61</Color>
+    <Color x:Key="Primary60">#FFFF4E7C</Color>
+    <Color x:Key="Primary70">#FFFF869D</Color>
+    <Color x:Key="Primary80">#FFFFB2BE</Color>
+    <Color x:Key="Primary90">#FFFFD9DE</Color>
+    <Color x:Key="Primary95">#FFFFECEE</Color>
+    <Color x:Key="Primary99">#FFFFFBFF</Color>
+    <Color x:Key="Primary100">#FFFFFFFF</Color>
+
+    <!-- ============================================================================ -->
+    <!-- SECONDARY TONAL PALETTE (Purple #8B4CB8)                                     -->
+    <!-- ============================================================================ -->
+
+    <!-- Base: #FF8B4CB8 | Hue: 314,6° | Chroma: 59,5 | Tone: 44,4 -->
+
+    <Color x:Key="Secondary0">#FF000000</Color>
+    <Color x:Key="Secondary10">#FF2F004D</Color>
+    <Color x:Key="Secondary20">#FF4D007A</Color>
+    <Color x:Key="Secondary30">#FF662592</Color>
+    <Color x:Key="Secondary40">#FF7F41AC</Color>
+    <Color x:Key="Secondary50">#FF9A5BC7</Color>
+    <Color x:Key="Secondary60">#FFB675E4</Color>
+    <Color x:Key="Secondary70">#FFD190FF</Color>
+    <Color x:Key="Secondary80">#FFE2B5FF</Color>
+    <Color x:Key="Secondary90">#FFF3DAFF</Color>
+    <Color x:Key="Secondary95">#FFFBECFF</Color>
+    <Color x:Key="Secondary99">#FFFFFBFF</Color>
+    <Color x:Key="Secondary100">#FFFFFFFF</Color>
+
+    <!-- ============================================================================ -->
+    <!-- TERTIARY TONAL PALETTE (Gold #FFD700)                                    -->
+    <!-- ============================================================================ -->
+
+    <!-- Base: #FFFFD700 | Hue: 96,7° | Chroma: 64,5 | Tone: 86,9 -->
+
+    <Color x:Key="Tertiary0">#FF000000</Color>
+    <Color x:Key="Tertiary10">#FF221B00</Color>
+    <Color x:Key="Tertiary20">#FF3A3000</Color>
+    <Color x:Key="Tertiary30">#FF544600</Color>
+    <Color x:Key="Tertiary40">#FF705D00</Color>
+    <Color x:Key="Tertiary50">#FF8C7500</Color>
+    <Color x:Key="Tertiary60">#FFAA8F00</Color>
+    <Color x:Key="Tertiary70">#FFC9A900</Color>
+    <Color x:Key="Tertiary80">#FFE9C400</Color>
+    <Color x:Key="Tertiary90">#FFFFE16D</Color>
+    <Color x:Key="Tertiary95">#FFFFF0C2</Color>
+    <Color x:Key="Tertiary99">#FFFFFBFF</Color>
+    <Color x:Key="Tertiary100">#FFFFFFFF</Color>
+
+    <!-- ============================================================================ -->
+    <!-- ERROR TONAL PALETTE (Red #F44336)                                          -->
+    <!-- ============================================================================ -->
+
+    <!-- Base: #FFF44336 | Hue: 26,0° | Chroma: 86,7 | Tone: 55,6 -->
+
+    <Color x:Key="Error0">#FF000000</Color>
+    <Color x:Key="Error10">#FF410001</Color>
+    <Color x:Key="Error20">#FF690002</Color>
+    <Color x:Key="Error30">#FF930005</Color>
+    <Color x:Key="Error40">#FFBB1614</Color>
+    <Color x:Key="Error50">#FFE0342A</Color>
+    <Color x:Key="Error60">#FFFF5545</Color>
+    <Color x:Key="Error70">#FFFF8A7B</Color>
+    <Color x:Key="Error80">#FFFFB4A9</Color>
+    <Color x:Key="Error90">#FFFFDAD5</Color>
+    <Color x:Key="Error95">#FFFFEDEA</Color>
+    <Color x:Key="Error99">#FFFFFBFF</Color>
+    <Color x:Key="Error100">#FFFFFFFF</Color>
+
+    <!-- ============================================================================ -->
+    <!-- NEUTRAL TONAL PALETTES (Derived from Primary)                              -->
+    <!-- ============================================================================ -->
+
+    <!-- Base: Purple-tinted neutrals | Hue: 290° | Chroma: 6 | Tone: 50 -->
+    <!-- Derived from Secondary Purple for nightlife aesthetic -->
+
+    <Color x:Key="Neutral0">#FF000000</Color>
+    <Color x:Key="Neutral10">#FF1C1621</Color>
+    <Color x:Key="Neutral20">#FF312A36</Color>
+    <Color x:Key="Neutral30">#FF47404D</Color>
+    <Color x:Key="Neutral40">#FF5F5765</Color>
+    <Color x:Key="Neutral50">#FF78707E</Color>
+    <Color x:Key="Neutral60">#FF938A98</Color>
+    <Color x:Key="Neutral70">#FFAEA5B3</Color>
+    <Color x:Key="Neutral80">#FFCAC1CE</Color>
+    <Color x:Key="Neutral90">#FFE6DDEA</Color>
+    <Color x:Key="Neutral95">#FFF4EBF5</Color>
+    <Color x:Key="Neutral99">#FFFFFBFF</Color>
+    <Color x:Key="Neutral100">#FFFFFFFF</Color>
+
+
+    <!-- Base: Magenta-tinted variants | Hue: 300° | Chroma: 12 | Tone: 50 -->
+    <!-- Higher chroma for more vibrant surfaces -->
+
+    <Color x:Key="NeutralVariant0">#FF000000</Color>
+    <Color x:Key="NeutralVariant10">#FF211525</Color>
+    <Color x:Key="NeutralVariant20">#FF372A3B</Color>
+    <Color x:Key="NeutralVariant30">#FF4E3F53</Color>
+    <Color x:Key="NeutralVariant40">#FF66576B</Color>
+    <Color x:Key="NeutralVariant50">#FF7F6F84</Color>
+    <Color x:Key="NeutralVariant60">#FF9A899F</Color>
+    <Color x:Key="NeutralVariant70">#FFB5A4BA</Color>
+    <Color x:Key="NeutralVariant80">#FFD1BFD6</Color>
+    <Color x:Key="NeutralVariant90">#FFEEDAF2</Color>
+    <Color x:Key="NeutralVariant95">#FFF9E8F9</Color>
+    <Color x:Key="NeutralVariant99">#FFFFFBFF</Color>
+    <Color x:Key="NeutralVariant100">#FFFFFFFF</Color>
+
+
+    <!-- ============================================================================ -->
+    <!-- DARK MODE SEMANTIC TOKENS (Primary Theme)                                  -->
+    <!-- ============================================================================ -->
+
+    <!-- Primary Role Colors (DARK MODE - Bright on Dark) -->
+    <Color x:Key="Primary">#FFFFB2BE</Color>
+    <!-- Primary80 -->
+    <Color x:Key="OnPrimary">#FF660025</Color>
+    <!-- Primary20 -->
+    <Color x:Key="PrimaryContainer">#FF900038</Color>
+    <!-- Primary30 -->
+    <Color x:Key="OnPrimaryContainer">#FFFFD9DE</Color>
+    <!-- Primary90 -->
+
+    <!-- Secondary Role Colors (DARK MODE) -->
+    <Color x:Key="Secondary">#FFE2B5FF</Color>
+    <!-- Secondary80 -->
+    <Color x:Key="OnSecondary">#FF4D007A</Color>
+    <!-- Secondary20 -->
+    <Color x:Key="SecondaryContainer">#FF662592</Color>
+    <!-- Secondary30 -->
+    <Color x:Key="OnSecondaryContainer">#FFF3DAFF</Color>
+    <!-- Secondary90 -->
+
+    <!-- Tertiary Role Colors (DARK MODE) -->
+    <Color x:Key="Tertiary">#FFE9C400</Color>
+    <!-- Tertiary80 -->
+    <Color x:Key="OnTertiary">#FF3A3000</Color>
+    <!-- Tertiary20 -->
+    <Color x:Key="TertiaryContainer">#FF544600</Color>
+    <!-- Tertiary30 -->
+    <Color x:Key="OnTertiaryContainer">#FFFFE16D</Color>
+    <!-- Tertiary90 -->
+
+    <!-- Error Role Colors (DARK MODE) -->
+    <Color x:Key="Error">#FFFFB4A9</Color>
+    <!-- Error80 -->
+    <Color x:Key="OnError">#FF690002</Color>
+    <!-- Error20 -->
+    <Color x:Key="ErrorContainer">#FF930005</Color>
+    <!-- Error30 -->
+    <Color x:Key="OnErrorContainer">#FFFFDAD5</Color>
+    <!-- Error90 -->
+
+    <!-- Background & Surface (DARK MODE - Very Dark) -->
+    <Color x:Key="Background">#FF1C1621</Color>
+    <!-- NEW Neutral10 - Deep purple-black -->
+    <Color x:Key="OnBackground">#FFE6DDEA</Color>
+    <!-- NEW Neutral90 - Soft purple-white -->
+    <Color x:Key="Surface">#FF1C1621</Color>
+    <!-- NEW Neutral10 -->
+    <Color x:Key="OnSurface">#FFE6DDEA</Color>
+    <!-- NEW Neutral90 -->
+    <Color x:Key="SurfaceVariant">#FF4E3F53</Color>
+    <!-- NEW NeutralVariant30 - Deep purple-gray -->
+    <Color x:Key="OnSurfaceVariant">#FFD1BFD6</Color>
+    <!-- NEW NeutralVariant80 - Light purple-gray -->
+    
+    <Color x:Key="SurfaceContainer">#FF312A36</Color>
+    <Color x:Key="SurfaceContainerHigh">#FF47404D</Color>
+    <!-- Neutral20 -->
+    <Color x:Key="SurfaceContainerHighest">#FF5F5765</Color>
+    <Color x:Key="SurfaceDim">#FF000000</Color>
+    <!-- Neutral0 - unchanged -->
+    <Color x:Key="SurfaceBright">#FF312A36</Color>
+    <!-- Neutral30 -->
+
+    <Color x:Key="Outline">#FF9A899F</Color>
+    <!-- NeutralVariant60 -->
+    <Color x:Key="OutlineVariant">#FF4E3F53</Color>
+    <!-- NeutralVariant30 -->
+
+    <!-- Inverse Colors (DARK MODE) -->
+    <Color x:Key="InverseSurface">#FFE6DDEA</Color>
+    <!-- NEW Neutral90 -->
+    <Color x:Key="InverseOnSurface">#FF312A36</Color>
+    <!-- NEW Neutral20 -->
+    <Color x:Key="InversePrimary">#FFBC004B</Color>
+    <!-- Primary40 - unchanged -->
+
+    <!-- Scrim & Shadow -->
+    <Color x:Key="Scrim">#FF000000</Color>
+    <!-- Neutral0 -->
+    <Color x:Key="Shadow">#FF000000</Color>
+    <!-- Neutral0 -->
+
+    <!-- ============================================================================ -->
+    <!-- LIGHT MODE SEMANTIC TOKENS (Future v2.0)                                   -->
+    <!-- Uncomment when implementing light mode                                     -->
+    <!-- ============================================================================ -->
+
+    <!--
+    LIGHT MODE CONFIGURATION (Currently Disabled - For Future Use)
+
+    To enable light mode, uncomment and adjust these semantic token mappings:
+
+    Primary="Primary40" OnPrimary="Primary100"
+    PrimaryContainer="Primary90" OnPrimaryContainer="Primary10"
+
+    Secondary="Secondary40" OnSecondary="Secondary100"
+    SecondaryContainer="Secondary90" OnSecondaryContainer="Secondary10"
+
+    Tertiary="Tertiary40" OnTertiary="Tertiary100"
+    TertiaryContainer="Tertiary90" OnTertiaryContainer="Tertiary10"
+
+    Error="Error40" OnError="Error100"
+    ErrorContainer="Error90" OnErrorContainer="Error10"
+
+    Background="Neutral99" OnBackground="Neutral10"
+    Surface="Neutral99" OnSurface="Neutral10"
+    SurfaceVariant="NeutralVariant90" OnSurfaceVariant="NeutralVariant30"
+    SurfaceDim="Neutral95" SurfaceBright="Neutral99"
+
+    Outline="NeutralVariant50" OutlineVariant="NeutralVariant80"
+
+    InverseSurface="Neutral20" InverseOnSurface="Neutral95"
+    InversePrimary="Primary80"
+
+    Scrim="Neutral0" Shadow="Neutral0"
+    -->
+
+    <!-- ============================================================================ -->
+    <!-- GRADIENTS (Using Tonal Palette Values)                                     -->
+    <!-- ============================================================================ -->
+
+    <!-- App Background Gradient (Dark Purple) -->
+    <LinearGradientBrush x:Key="AppBackgroundGradient" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource Neutral10}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Primary10}" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- Card Background Gradient (Diagonal Purple) -->
+    <LinearGradientBrush x:Key="CardBackgroundGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource Primary20}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Secondary30}" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- Selected Item Gradient (Pink to Purple) -->
+    <LinearGradientBrush x:Key="SelectedGradient" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource Primary30}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Secondary40}" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- Button Gradient (Bright Pink to Purple) -->
+    <LinearGradientBrush x:Key="ButtonGradient" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource Primary70}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Secondary70}" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- FAB Gradient (Gold to Pink) -->
+    <LinearGradientBrush x:Key="FabGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource Tertiary80}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Primary70}" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- ============================================================================ -->
+    <!-- SEMANTIC COLORS (For Specific Use Cases)                                   -->
+    <!-- ============================================================================ -->
+
+    <!-- Success (for positive feedback) -->
+    <Color x:Key="Success">#2E7D32</Color>
+    <Color x:Key="OnSuccess">#FFFFFF</Color>
+
+    <!-- Warning (for caution states) -->
+    <Color x:Key="Warning">#FF9800</Color>
+    <Color x:Key="OnWarning">#FFFFFF</Color>
+
+    <!-- Info (for informational elements) -->
+    <Color x:Key="Info">#2196F3</Color>
+    <Color x:Key="OnInfo">#FFFFFF</Color>
+</ResourceDictionary>
