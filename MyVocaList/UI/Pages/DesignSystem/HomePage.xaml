@@ -1,33 +1,47 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <uranium:UraniumContentPage 
-            x:Class="MyVocaList.UI.Pages.DesignSystem.HomePage"
-            xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-            xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-            xmlns:v="clr-namespace:UraniumUI.Validations;assembly=UraniumUI.Validations.DataAnnotations"
-            xmlns:local="clr-namespace:MyVocaList.UI.Pages.DesignSystem"
-            xmlns:component="clr-namespace:MyVocaList.UI.Components"
-            Title="DS Home"
-            StyleClass="CardBackgroundGradient">
+    x:Class="MyVocaList.UI.Pages.DesignSystem.HomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     
-    <VerticalStackLayout>
-        <Label 
-        Text="Design System Home"
-        Style="{StaticResource TitleLarge}"/>
-        
-        <Label 
-        Text="Here you find a set of pages demonstrating the stablished Design System (UI/UX). All desmonstrations are built on top of UraniumUI. 
-            The goal is to ensure cross-platform UX/UX identity across all targeted OS"
-        Style="{StaticResource TitleSmall}"/>
+    Title="DS Home">
+    <!--xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"-->
+    <ScrollView>
+        <VerticalStackLayout Background="{StaticResource AppBackgroundGradient}" Padding="20" Spacing="20">
 
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Design System" Style="{StaticResource HeadlineLarge}" TextColor="{StaticResource OnBackground}" />
+                <Label Text="MyVocaList Brand Identity" Style="{StaticResource BodyMedium}" TextColor="{StaticResource OnSurfaceVariant}" />
+            </VerticalStackLayout>
 
-        <Label 
-            Text="Material Design 3 documentation : " Style="{StaticResource LabelLarge}"/>
-        
-        <Label 
-            Text="https://m3.material.io/"
-            Style="{StaticResource LabelMedium}"/>
-        
-    </VerticalStackLayout>
-    
+            <Frame Style="{StaticResource GradientCard}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Bem-vindo ao MD3" Style="{StaticResource TitleLarge}" TextColor="{StaticResource OnPrimary}" />
+                    <Label Text="Este guia demonstra a consistência de UI/UX entre Android, iOS e Windows utilizando UraniumUI." 
+                           Style="{StaticResource BodyMedium}" TextColor="{StaticResource OnPrimary}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="Documentação e Referências" Style="{StaticResource TitleMedium}" Margin="0,10,0,0"/>
+
+            <Frame StyleClass="FilledCard">
+                <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                    <!--<Image Source="{FontImageSource FontFamily=MaterialSymbolsOutlined, Glyph={x:Static m:MaterialSymbols.Language}, Color={StaticResource Primary}}" />-->
+                    <VerticalStackLayout>
+                        <Label Text="Material Design 3" Style="{StaticResource LabelLarge}" />
+                        <Label Text="m3.material.io" Style="{StaticResource LabelSmall}" />
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Frame>
+
+            <Label 
+    Text="https://m3.material.io/"
+    Style="{StaticResource LabelMedium}"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </uranium:UraniumContentPage>
+
+

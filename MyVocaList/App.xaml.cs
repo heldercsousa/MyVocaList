@@ -6,9 +6,9 @@ public partial class App : Application
 	{
 		InitializeComponent();
 
-		//MainPage = new AppShell();
+		MainPage = new AppShell();
 
 		// TEMPORÁRIO: Abrir direto o Design System para validação
-        this.MainPage = new MyVocaList.UI.Pages.DesignSystem.DesignSystemPage();
+        //this.MainPage = new MyVocaList.UI.Pages.DesignSystem.DesignSystemPage();
     }
 }

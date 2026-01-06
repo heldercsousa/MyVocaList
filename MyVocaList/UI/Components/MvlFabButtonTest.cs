@@ -9,19 +9,17 @@ public class MvlFabButtonTest : ImageButton, IPageAttachment
 {
     public MvlFabButtonTest()
     {
-        BackgroundColor = Color.FromArgb("#512BD4");
-        WidthRequest = 56;
-        HeightRequest = 56;
-        CornerRadius = 28;
+        // Em vez de cor fixa, usamos o estilo que definimos no MaterialStyles.xaml
+        // Isso garante que ele use seu gradiente "Ouro" em qualquer plataforma.
+        this.Style = (Style)Application.Current.Resources["FabContainer"];
 
-        // Add shadow effect
-        Shadow = new Shadow
-        {
-            Brush = Colors.Black,
-            Offset = new Point(2, 2),
-            Radius = 8,
-            Opacity = 0.3f
-        };
+        this.WidthRequest = 56;
+        this.HeightRequest = 56;
+
+        // O ícone deve vir do Material Symbols para ser 100% MD3
+        // Você pode usar o Label customizado que já criamos
+        var icon = new Label { Style = (Style)Application.Current.Resources["FabIcon"] };
+        // Se estiver usando StatefulContentView, adicione o ícone como conteúdo
 
         Clicked += OnFabClicked;
     }

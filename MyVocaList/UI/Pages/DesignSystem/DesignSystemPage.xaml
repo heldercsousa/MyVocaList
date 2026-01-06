@@ -4,311 +4,44 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-    xmlns:v="clr-namespace:UraniumUI.Validations;assembly=UraniumUI.Validations.DataAnnotations"
-    xmlns:local="clr-namespace:MyVocaList.UI.Pages.DesignSystem"
-    xmlns:component="clr-namespace:MyVocaList.UI.Components"
-    Title="UraniumUI Fundamentals"
-    StyleClass="CardBackgroundGradient">
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    Title="UI Fundamentals">
 
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="24">
 
+            <!-- Typography Section -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Tipografia MD3" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+                <Label Text="Display Large" StyleClass="Display.Large" />
+                <Label Text="Headline Medium" StyleClass="Headline.Medium" />
+                <Label Text="Body Large (Conteúdo Principal)" StyleClass="Body.Large" />
+            </VerticalStackLayout>
 
-    <VerticalStackLayout>
-        <VerticalStackLayout Style="{StaticResource SectionContainer}">
-            <Label Text="Button Styles"   Style="{StaticResource LabelMedium}"/>
-            <BoxView Margin="20,0"/>
-            <FlexLayout JustifyContent="SpaceBetween" Wrap="Wrap">
-                <Button StyleClass="ElevatedButton" Text="Elevated" />
-                <Button StyleClass="ElevatedButton" IsEnabled="False" Text="Elevated OFF" />
-            </FlexLayout>
-            <BoxView Margin="20,0"/>
-            <FlexLayout JustifyContent="SpaceBetween" Wrap="Wrap">
-                <Button StyleClass="FilledButton" Text="Filled" />
-                <Button StyleClass="FilledButton" IsEnabled="False" Text="Filled OFF" />
-            </FlexLayout>
-            <BoxView Margin="20,0"/>
-            <FlexLayout JustifyContent="SpaceBetween" Wrap="Wrap">
-                <Button StyleClass="FilledTonalButton" Text="Filled Tonal" />
-                <Button StyleClass="FilledTonalButton" IsEnabled="False" Text="Filled Tonal OFF" />
-            </FlexLayout>
-            <BoxView Margin="20,0"/>
-            <FlexLayout JustifyContent="SpaceBetween" Wrap="Wrap">
-                <Button StyleClass="OutlinedButton" Text="Outlined" />
-                <Button StyleClass="OutlinedButton" IsEnabled="False" Text="Outlined OFF" />
-            </FlexLayout>
-            <BoxView Margin="20,0"/>
-            <FlexLayout JustifyContent="SpaceBetween" Wrap="Wrap">
-                <Button StyleClass="TextButton" Text="Text" />
-                <Button StyleClass="TextButton" IsEnabled="False" Text="Text OFF" />
-            </FlexLayout>
-        </VerticalStackLayout>
+            <!-- Buttons Section - SIMPLIFIED -->
+            <VerticalStackLayout Spacing="12">
+                <Label Text="Botões Material Design 3" StyleClass="Title.Medium" />
 
-        <VerticalStackLayout Style="{StaticResource SectionContainer}">
-            <Label Text="Stateful Content View" Style="{StaticResource LabelMedium}"/>
+                <!-- Only 2 buttons to reduce load -->
+                <Button Text="Filled Button" StyleClass="FilledButton" />
+                <Button Text="Outlined Button" StyleClass="OutlinedButton" />
+            </VerticalStackLayout>
 
-            <BoxView Margin="0,20"/>
-            <uranium:StatefulContentView>
-                <Border Padding="20" BackgroundColor="{StaticResource Primary}" Stroke="{StaticResource Secondary}" StrokeShape="{RoundRectangle CornerRadius=20}">
-                    <Label Text="This is a stateful view" TextColor="{StaticResource OnPrimary}" />
-                </Border>
-            </uranium:StatefulContentView>
-        </VerticalStackLayout>
-       
-        
-    </VerticalStackLayout>
-    
-    <!--<ScrollView>
-        <VerticalStackLayout>
+            <!-- Cards Section -->
+            <VerticalStackLayout Spacing="12">
+                <Label Text="Contêineres" StyleClass="Title.Medium" />
 
-            --><!-- Section 1: UraniumContentPage --><!--
-            <Border StyleClass="SurfaceContainer,Rounded,Elevation2">
-                <VerticalStackLayout>
-                    <Label Text="1. UraniumContentPage"/>
-                    <Label Text="Base page class providing infrastructure for UraniumUI components and attachments"/>
-                </VerticalStackLayout>
-            </Border>
+                <Frame StyleClass="ElevatedCard">
+                    <Label Text="Card Elevado" StyleClass="Body.Medium" />
+                </Frame>
 
-            --><!-- Section 2: StatefulContentView --><!--
-            <Border StyleClass="SurfaceContainer,Rounded,Elevation2">
-                <VerticalStackLayout>
-                    <Label Text="2. StatefulContentView"/>
-                    <Label Text="Interactive view with visual states for hover and press"/>
-
-                    <uranium:StatefulContentView>
-                        <Border StyleClass="PrimaryContainer,Rounded,Elevation1">
-                            <Label Text="Tap or Hover Me!"/>
-                        </Border>
-                    </uranium:StatefulContentView>
-                </VerticalStackLayout>
-            </Border>
-
-            --><!-- Section 3: GridLayout --><!--
-            <Border StyleClass="SurfaceContainer,Rounded,Elevation2">
-                <VerticalStackLayout>
-                    <Label Text="3. GridLayout"/>
-                    <Label Text="Automatic grid positioning without manual row/column definitions"/>
-
-                    <uranium:GridLayout RowCount="2" ColumnCount="3">
-                        <BoxView StyleClass="PrimaryContainer,Rounded,Elevation1"/>
-                        <BoxView StyleClass="SecondaryContainer,Rounded,Elevation1"/>
-                        <BoxView StyleClass="TertiaryContainer,Rounded,Elevation1"/>
-                        <BoxView StyleClass="PrimaryContainer,Rounded,Elevation1"/>
-                        <BoxView StyleClass="SecondaryContainer,Rounded,Elevation1"/>
-                        <BoxView StyleClass="TertiaryContainer,Rounded,Elevation1"/>
-                    </uranium:GridLayout>
-                </VerticalStackLayout>
-            </Border>
-
-            --><!-- Section 4: AutoFormView --><!--
-            <Border StyleClass="SurfaceContainer,Rounded,Elevation2">
-                <VerticalStackLayout>
-                    <Label Text="4. AutoFormView"/>
-                    <Label Text="Automatic form generation from ViewModel with DataAnnotations"/>
-
-                    <Border StyleClass="PrimaryContainer,Rounded,Elevation1">
-                        <VerticalStackLayout>
-                            <uranium:AutoFormView x:Name="AutoFormDemo">
-                                <uranium:AutoFormView.ItemsLayout>
-                                    <uranium:GridLayout ColumnCount="2"/>
-                                </uranium:AutoFormView.ItemsLayout>
-                            </uranium:AutoFormView>
-
-                            <Button Text="Show Form Data" 
-                                    Clicked="OnShowAutoFormData"
-                                    StyleClass="FilledButton"/>
-                        </VerticalStackLayout>
-                    </Border>
-                </VerticalStackLayout>
-            </Border>
-
-            --><!-- Section 5: Dropdown --><!--
-            <Border StyleClass="SurfaceContainer,Rounded,Elevation2">
-                <VerticalStackLayout>
-                    <Label Text="5. Dropdown"/>
-                    <Label Text="Custom dropdown component alternative to Picker"/>
-
-                    <uranium:Dropdown x:Name="SampleDropdown" 
-                                     Placeholder="Select an option"/>
-
-                    <Label Text="Selected: None" x:Name="DropdownSelectedLabel"/>
-                </VerticalStackLayout>
-            </Border>
-
-            --><!-- Section 6: ExpanderView --><!--
-            <Border StyleClass="SurfaceContainer,Rounded,Elevation2">
-                <VerticalStackLayout>
-                    <Label Text="6. ExpanderView"/>
-                    <Label Text="Collapsible accordion sections"/>
-
-                    <uranium:ExpanderView>
-                        <uranium:ExpanderView.Header>
-                            <Border StyleClass="PrimaryContainer,Rounded">
-                                <Label Text="Section 1: Basic Information"/>
-                            </Border>
-                        </uranium:ExpanderView.Header>
-                        <Border StyleClass="SecondaryContainer,Rounded">
-                            <Label Text="This is the content of Section 1. Click the header to collapse."/>
-                        </Border>
-                    </uranium:ExpanderView>
-
-                    <uranium:ExpanderView>
-                        <uranium:ExpanderView.Header>
-                            <Border StyleClass="SecondaryContainer,Rounded">
-                                <Label Text="Section 2: Advanced Features"/>
-                            </Border>
-                        </uranium:ExpanderView.Header>
-                        <Border StyleClass="TertiaryContainer,Rounded">
-                            <Label Text="Multiple sections can be open simultaneously with smooth animations."/>
-                        </Border>
-                    </uranium:ExpanderView>
-                </VerticalStackLayout>
-            </Border>
-
-            --><!-- Section 7: Validations --><!--
-            <Border StyleClass="SurfaceContainer,Rounded,Elevation2">
-                <VerticalStackLayout>
-                    <Label Text="7. Validations"/>
-                    <Label Text="Two validation systems: InputKit and DataAnnotations"/>
-
-                    <Border StyleClass="PrimaryContainer,Rounded,Elevation1">
-                        <VerticalStackLayout>
-                            <Label Text="InputKit Validations"/>
-                            <Label Text="RequiredValidation, RegexValidation, LettersOnlyValidation, MinLengthValidation, MaxLengthValidation"/>
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <Border StyleClass="SecondaryContainer,Rounded,Elevation1">
-                        <VerticalStackLayout>
-                            <Label Text="DataAnnotations"/>
-                            <Label Text="[Required], [StringLength], [EmailAddress], [Phone], [Range]"/>
-                        </VerticalStackLayout>
-                    </Border>
-                </VerticalStackLayout>
-            </Border>
-
-            --><!-- Section 8: Material TextFields --><!--
-            <Border StyleClass="SurfaceContainer,Rounded,Elevation2">
-                <VerticalStackLayout>
-                    <Label Text="8. Material TextField"/>
-                    <Label Text="Material Design text fields with real-time validation"/>
-
-                    <Border StyleClass="SecondaryContainer,Rounded,Elevation1">
-                        <VerticalStackLayout>
-
-                            <material:TextField Title="Username">
-                                <validation:RequiredValidation />
-                            </material:TextField>
-
-                            <material:TextField Title="Email">
-                                <validation:RequiredValidation />
-                                <validation:RegexValidation 
-                                    Pattern="{x:Static input:AdvancedEntry.REGEX_EMAIL}"/>
-                            </material:TextField>
-
-                            <material:TextField Title="Full Name">
-                                <validation:RequiredValidation />
-                                <validation:LettersOnlyValidation AllowSpaces="True" />
-                            </material:TextField>
-
-                            <material:TextField Title="Password" IsPassword="True">
-                                <validation:RequiredValidation />
-                                <validation:MinLengthValidation MinLength="6" />
-                                <validation:MaxLengthValidation MaxLength="20" />
-                            </material:TextField>
-
-                        </VerticalStackLayout>
-                    </Border>
-                </VerticalStackLayout>
-            </Border>
-
-            --><!-- Section 9: FormView --><!--
-            <Border StyleClass="SurfaceContainer,Rounded,Elevation2">
-                <VerticalStackLayout>
-                    <Label Text="9. FormView"/>
-                    <Label Text="Complete form with coordinated validation and submit button"/>
-
-                    <Border StyleClass="TertiaryContainer,Rounded,Elevation1">
-                        <input:FormView x:Name="ContactForm">
-
-                            <Label Text="Contact Form"/>
-
-                            <material:TextField Title="Your Name" x:Name="FormName">
-                                <validation:RequiredValidation />
-                                <validation:MinLengthValidation MinLength="2" />
-                            </material:TextField>
-
-                            <material:TextField Title="Email" x:Name="FormEmail">
-                                <validation:RequiredValidation />
-                                <validation:RegexValidation 
-                                    Pattern="{x:Static input:AdvancedEntry.REGEX_EMAIL}"/>
-                            </material:TextField>
-
-                            <material:EditorField Title="Message" x:Name="FormMessage">
-                                <material:EditorField.Validations>
-                                    <validation:RequiredValidation />
-                                    <validation:MinLengthValidation MinLength="10" />
-                                </material:EditorField.Validations>
-                            </material:EditorField>
-
-                            <material:CheckBox x:Name="FormTerms" Text="I accept terms and conditions">
-                                <material:CheckBox.Validations>
-                                    <validation:RequiredValidation />
-                                </material:CheckBox.Validations>
-                            </material:CheckBox>
-
-                            <Button Text="Submit Form" 
-                                    Clicked="OnFormSubmit"
-                                    input:FormView.IsSubmitButton="True"
-                                    StyleClass="FilledButton"/>
-
-                        </input:FormView>
-                    </Border>
-                </VerticalStackLayout>
-            </Border>
-
-            --><!-- Section 10: Material Containers & Elevation --><!--
-            <Border StyleClass="SurfaceContainer,Rounded,Elevation2">
-                <VerticalStackLayout>
-                    <Label Text="10. Material Containers and Elevation"/>
-                    <Label Text="Your custom Material Design 3 theme colors in action"/>
-
-                    <Border StyleClass="PrimaryContainer,Rounded,Elevation1">
-                        <Label Text="PrimaryContainer - Pink"/>
-                    </Border>
-
-                    <Border StyleClass="SecondaryContainer,Rounded,Elevation1">
-                        <Label Text="SecondaryContainer - Purple"/>
-                    </Border>
-
-                    <Border StyleClass="TertiaryContainer,Rounded,Elevation1">
-                        <Label Text="TertiaryContainer - Gold"/>
-                    </Border>
-
-                    <Label Text="Elevation Levels:"/>
-
-                    <Border StyleClass="SurfaceContainer,Elevation0">
-                        <Label Text="Elevation0 - No shadow"/>
-                    </Border>
-
-                    <Border StyleClass="SurfaceContainer,Elevation1">
-                        <Label Text="Elevation1 - Subtle shadow"/>
-                    </Border>
-
-                    <Border StyleClass="SurfaceContainer,Elevation2">
-                        <Label Text="Elevation2 - Medium shadow"/>
-                    </Border>
-
-                    <Border StyleClass="SurfaceContainer,Elevation3">
-                        <Label Text="Elevation3 - Pronounced shadow"/>
-                    </Border>
-                </VerticalStackLayout>
-            </Border>
+                <Frame StyleClass="OutlinedCard">
+                    <Label Text="Card Com Borda" StyleClass="Body.Medium" />
+                </Frame>
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
-    </ScrollView>-->
-
-    <!-- FAB Attachment -->
-    <uranium:UraniumContentPage.Attachments>
-        <component:MvlFabButtonTest />
-    </uranium:UraniumContentPage.Attachments>
+    </ScrollView>
 
 </uranium:UraniumContentPage>

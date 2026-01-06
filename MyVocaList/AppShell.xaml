@@ -3,13 +3,21 @@
     x:Class="MyVocaList.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:MyVocaList"
-    Shell.FlyoutBehavior="Disabled"
-    Title="View">
+    xmlns:ds="clr-namespace:MyVocaList.UI.Pages.DesignSystem"
+    Title="MyVocaList">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <TabBar>
+        <Tab Title="Home" Icon="home_icon.png">
+            <ShellContent
+                ContentTemplate="{DataTemplate ds:HomePage}"
+                Route="HomePage" />
+        </Tab>
+
+        <Tab Title="Design System" Icon="design_icon.png">
+            <ShellContent
+                ContentTemplate="{DataTemplate ds:DesignSystemPage}"
+                Route="DesignSystemPage" />
+        </Tab>
+    </TabBar>
 
 </Shell>
