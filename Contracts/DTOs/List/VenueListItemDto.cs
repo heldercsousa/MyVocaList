@@ -3,12 +3,12 @@ using System.Runtime.CompilerServices;
 
 namespace MyVocaList.Contracts.DTOs.List
 {
-    public class EstabelecimentoListItemDto : INotifyPropertyChanged
+    public class VenueListItemDto : INotifyPropertyChanged
     {
         private bool _isSelected;
 
         public int Id { get; set; }
-        public string Nome { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public bool HasEvents { get; set; }
         public string StatusText => HasEvents ? "COM EVENTOS" : "";
 
