@@ -2,6 +2,7 @@
 
 ## 2026
 
+- **01/07/2026** - Enhancement - Migrated entire Services layer from Legacy_MyVocaList_MVP/Services to MyVocaList/Services with complete translation to English (renamed IPessoaService to IPersonService, IEstabelecimentoService to IVenueService, and all related implementations). Added project references to Infra, Contracts, and Domain. Migrated 16 service files including DatabaseService, LanguageService, PersonService, VenueService, QueueService, TextNormalizationService, LocalizationResourceManager, TranslateExtension, LoggingConfiguration, and GlobalExceptionHandler
 - **01/07/2026** - Enhancement - Created fresh InitialCreate migration with English table and column names, preserving all custom SQL requirements from legacy migrations (NOCASE_NOACCENT collation on all string columns, indexes on FullNameNormalized/Email/BirthdayDayMonth)
 - **01/07/2026** - Enhancement - Updated PersonConfiguration to include Email and BirthdayDayMonth properties with performance indexes for homonym differentiation
 - **01/07/2026** - Enhancement - Updated AppDbContextFactory to use CollationInterceptor for migrations, ensuring NOCASE_NOACCENT collation is available during migration generation
