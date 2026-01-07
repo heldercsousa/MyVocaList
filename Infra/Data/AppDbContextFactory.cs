@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using MyVocaList.Infra.Data.Interceptors;
 
 namespace MyVocaList.Infra.Data
 {
@@ -14,7 +15,10 @@ namespace MyVocaList.Infra.Data
 
             // For design-time, use absolute path in temporary directory
             string dbPath = Path.Combine(Path.GetTempPath(), "myvocalist_design.db");
-            optionsBuilder.UseSqlite($"Data Source={dbPath}");
+
+            // Add CollationInterceptor to ensure NOCASE_NOACCENT collation is registered for migrations
+            optionsBuilder.UseSqlite($"Data Source={dbPath}")
+                          .AddInterceptors(new CollationInterceptor());
 
             return new AppDbContext(optionsBuilder.Options);
         }

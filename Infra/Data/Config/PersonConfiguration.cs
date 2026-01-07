@@ -36,9 +36,27 @@ namespace MyVocaList.Infra.Data.Config
                    .IsRequired()
                    .HasDefaultValue(0);
 
+            // Email for differentiation and marketing (optional)
+            builder.Property(p => p.Email)
+                   .HasColumnType("TEXT")
+                   .IsRequired();
+
+            // Birthday for intelligent differentiation (required format: "DD/MM")
+            builder.Property(p => p.BirthdayDayMonth)
+                   .HasColumnType("TEXT")
+                   .IsRequired();
+
             // Optimized index for fast search by normalized name
             builder.HasIndex(p => p.FullNameNormalized)
                    .HasDatabaseName("IX_People_FullNameNormalized");
+
+            // Index for email lookup and differentiation
+            builder.HasIndex(p => p.Email)
+                   .HasDatabaseName("IX_People_Email");
+
+            // Index for birthday lookup (future functionality: birthday notifications)
+            builder.HasIndex(p => p.BirthdayDayMonth)
+                   .HasDatabaseName("IX_People_BirthdayDayMonth");
         }
     }
 }
