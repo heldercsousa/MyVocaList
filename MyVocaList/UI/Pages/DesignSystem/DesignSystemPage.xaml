@@ -4,44 +4,42 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     Title="UI Fundamentals">
 
     <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="24">
+        <VerticalStackLayout Style="{StaticResource PageContainer}">
 
-            <!-- Typography Section -->
-            <VerticalStackLayout Spacing="8">
-                <Label Text="Tipografia MD3" StyleClass="Title.Medium" />
+            <VerticalStackLayout>
+                <Label Text="Tipografia MD3" Style="{StaticResource TitleMedium}" />
                 <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
-                <Label Text="Display Large" StyleClass="Display.Large" />
-                <Label Text="Headline Medium" StyleClass="Headline.Medium" />
-                <Label Text="Body Large (Conteúdo Principal)" StyleClass="Body.Large" />
+                <Label Text="Headline Large" Style="{StaticResource HeadlineLarge}" />
+                <Label Text="Headline Medium" Style="{StaticResource HeadlineMedium}" />
+                <Label Text="Body Large (Conteúdo Principal)" Style="{StaticResource BodyMedium}" />
             </VerticalStackLayout>
 
-            <!-- Buttons Section - SIMPLIFIED -->
-            <VerticalStackLayout Spacing="12">
-                <Label Text="Botões Material Design 3" StyleClass="Title.Medium" />
+            <VerticalStackLayout>
+                <Label Text="Botões Material Design 3" Style="{StaticResource TitleMedium}" />
 
-                <!-- Only 2 buttons to reduce load -->
+                <!-- UraniumUI styles on regular Button -->
                 <Button Text="Filled Button" StyleClass="FilledButton" />
+                <Button Text="Filled Tonal Button" StyleClass="FilledTonalButton" />
                 <Button Text="Outlined Button" StyleClass="OutlinedButton" />
             </VerticalStackLayout>
 
-            <!-- Cards Section -->
-            <VerticalStackLayout Spacing="12">
-                <Label Text="Contêineres" StyleClass="Title.Medium" />
 
-                <Frame StyleClass="ElevatedCard">
-                    <Label Text="Card Elevado" StyleClass="Body.Medium" />
+
+            <VerticalStackLayout>
+                <Label Text="Contêineres" Style="{StaticResource TitleMedium}" />
+
+                <Frame Style="{StaticResource ElevatedCard}">
+                    <Label Text="Card Elevado (Com Sombra)" Style="{StaticResource BodyMedium}" />
                 </Frame>
 
-                <Frame StyleClass="OutlinedCard">
-                    <Label Text="Card Com Borda" StyleClass="Body.Medium" />
+                <Frame Style="{StaticResource OutlinedCard}">
+                    <Label Text="Card Com Borda" Style="{StaticResource BodyMedium}" />
                 </Frame>
             </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>
-
 </uranium:UraniumContentPage>

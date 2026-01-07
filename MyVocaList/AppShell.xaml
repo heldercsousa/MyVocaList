@@ -7,17 +7,11 @@
     Title="MyVocaList">
 
     <TabBar>
-        <Tab Title="Home" Icon="home_icon.png">
-            <ShellContent
-                ContentTemplate="{DataTemplate ds:HomePage}"
-                Route="HomePage" />
+        <Tab Title="Home" Icon="home">
+            <ShellContent ContentTemplate="{DataTemplate ds:HomePage}" Route="HomePage" />
         </Tab>
-
-        <Tab Title="Design System" Icon="design_icon.png">
-            <ShellContent
-                ContentTemplate="{DataTemplate ds:DesignSystemPage}"
-                Route="DesignSystemPage" />
+        <Tab Title="Design System" Icon="tune">
+            <ShellContent ContentTemplate="{DataTemplate ds:DesignSystemPage}" Route="DesignSystemPage" />
         </Tab>
     </TabBar>
-
 </Shell>

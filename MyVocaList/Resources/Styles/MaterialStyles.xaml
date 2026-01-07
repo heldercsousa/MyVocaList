@@ -4,6 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui">
 
+    <!-- ========================================================================= -->
+    <!-- CONTAINER STYLES                                                          -->
+    <!-- ========================================================================= -->
+
     <Style x:Key="PageContainer" TargetType="VerticalStackLayout">
         <Setter Property="Padding" Value="16" />
         <Setter Property="Spacing" Value="16" />
@@ -16,12 +20,61 @@
         <Setter Property="Margin" Value="0,0,0,24" />
     </Style>
 
+    <!-- ========================================================================= -->
+    <!-- MATERIAL DESIGN 3 CARDS                                                   -->
+    <!-- ========================================================================= -->
+
+    <!-- Elevated Card: Surface with shadow elevation -->
+    <Style x:Key="ElevatedCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainer}" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="HasShadow" Value="True" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <!-- Outlined Card: Surface with border, no shadow -->
+    <Style x:Key="OutlinedCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <!-- Filled Card: Elevated surface color, no shadow -->
+    <Style x:Key="FilledCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHigh}" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <!-- ========================================================================= -->
+    <!-- CUSTOM CARDS (MyVocaList-specific)                                        -->
+    <!-- ========================================================================= -->
+
+    <!-- Gradient Card: Decorative card with gradient background -->
     <Style x:Key="GradientCard" TargetType="Frame">
         <Setter Property="Background" Value="{StaticResource CardBackgroundGradient}" />
         <Setter Property="CornerRadius" Value="16" />
         <Setter Property="HasShadow" Value="False" />
         <Setter Property="Padding" Value="16" />
     </Style>
+
+    <!-- Welcome Card: Primary container for hero content -->
+    <Style x:Key="WelcomeCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryContainer}" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="Padding" Value="16" />
+    </Style>
+
+    <!-- ========================================================================= -->
+    <!-- FAB (Floating Action Button)                                              -->
+    <!-- ========================================================================= -->
 
     <Style x:Key="FabContainer" TargetType="uranium:StatefulContentView">
         <Setter Property="WidthRequest" Value="56" />
@@ -31,6 +84,10 @@
             <Shadow Brush="{StaticResource Shadow}" Offset="0,2" Radius="4" Opacity="0.3" />
         </Setter>
     </Style>
+
+    <!-- ========================================================================= -->
+    <!-- SHELL & NAVIGATION STYLES                                                 -->
+    <!-- ========================================================================= -->
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
         <Setter Property="Shell.BackgroundColor" Value="{StaticResource Surface}" />
@@ -46,5 +103,11 @@
         <Setter Property="BarBackgroundColor" Value="{StaticResource Surface}" />
         <Setter Property="BarTextColor" Value="{StaticResource OnSurface}" />
     </Style>
+
+    <!-- ========================================================================= -->
+    <!-- IMPORTANT: NO IMPLICIT LABEL STYLE                                        -->
+    <!-- UraniumUI.Material handles ALL Label styling including colors             -->
+    <!-- Adding an implicit Label style here BREAKS UraniumUI's StyleClass system  -->
+    <!-- ========================================================================= -->
 
 </ResourceDictionary>

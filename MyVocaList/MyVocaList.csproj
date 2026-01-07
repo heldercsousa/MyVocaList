@@ -65,7 +65,6 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
 		<PackageReference Include="UraniumUI.Dialogs.Mopups" Version="2.12.1" />
 		<PackageReference Include="UraniumUI.Icons.FontAwesome" Version="2.12.1" />
-		<PackageReference Include="UraniumUI.Icons.MaterialSymbols" Version="2.12.1" />
 		<PackageReference Include="UraniumUI.Material" Version="2.12.1" />
 		<PackageReference Include="UraniumUI.Validations.DataAnnotations" Version="2.12.1" />
 	</ItemGroup>
