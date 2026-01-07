@@ -170,6 +170,10 @@ Before debugging further, verify these common failure points:
 - **Wrong icon glyph class**: Use `MaterialOutlined.Star` not `MaterialRegular.Star` after migrating from deprecated MaterialIcons
 - **Extension methods not recognized**: Ensure you've added `using UraniumUI;` at the top of MauiProgram.cs
 
+## UraniumUI resources code source references for further customization:
+https://github.com/enisn/UraniumUI/blob/develop/src/UraniumUI.Material/Resources
+
 ## Conclusion
 
 The typography issue stems from a misconception — UraniumUI expects you to define your own Label styles using the `Class` attribute on Style elements. The syntax `StyleClass="Headline.Large"` is correct XAML, but those classes simply aren't provided. For icons, the fix is straightforward: call `AddMaterialSymbolsFonts()` (or equivalent) inside `ConfigureFonts()`, declare the proper XAML namespace, and use `FontImageSource` with `{x:Static}` glyph references. Staying on **UraniumUI v2.12.1 or earlier** is essential for .NET 8 compatibility until you're ready to migrate to .NET 9.
+

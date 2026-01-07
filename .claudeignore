@@ -1,0 +1,181 @@
+# ============================================
+# .claudeignore - MyVocaList
+# Updated: December 16, 2025
+# ============================================
+
+# Standard .NET build artifacts
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio files
+.vs/
+.suo
+*.user
+*.usercode
+*.resharper
+*.resharper.user
+*.resharper.[a-z0-9]*
+*.cache
+*.swo
+*.stash
+*.nvcrunch
+
+# Package files
+*.nupkg
+*.snupkg
+[Pp]ackages/
+# except packages folder in the root, which is used as an MSBuild target
+!**/packages/build/
+!**/packages/repositories/
+!**/packages/config
+
+# Temporary files and logs
+temp/
+*[Tt]emp/
+*.log
+*.tlog
+*.sdf
+*.vssscc
+*.stackdump
+*.aps
+*.ncb
+*.opensdf
+*.VC.db
+*.VC.opendb
+
+# Misc other files
+[Dd]ebug/
+[Rr]elease/
+publish/
+build/
+install/
+artifact/
+artifacts/
+
+# OS-specific files
+.DS_Store
+.idea/
+
+# Secret and credential files (essential for security)
+*.env
+*.pem
+*.keycdcd
+**/secrets/
+**/credentials/
+
+# MAUI specific files (build outputs, etc.)
+*.apk
+*.aab
+*.ipa
+*.app
+*.exe
+*.dll
+*.pdb
+*.winmd
+*.pri
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+*.vsix
+*.xap
+*.xaml.g.cs
+*.xaml.g.vb
+*.designer.cs
+*.designer.vb
+*.datasource
+*.android.js
+*.android.txt
+*.android.rc
+*.ios.js
+*.ios.txt
+*.ios.rc
+*.windows.js
+*.windows.txt
+*.windows.rc
+# deobfuscation files (optional, can be useful for debugging)
+proguard_logs/
+# Native code build outputs
+*.so
+*.dylib
+*.dll.config
+
+# Rider files
+.idea/
+
+# VS Code files
+.vscode/
+
+# VS files
+*.code-workspace
+*.vs/
+dotnet-tools.json
+
+# Auto generated files (if you don't want Claude to modify them)
+**/Migrations/  # Se não quer que Claude mexa em migrations antigas
+**/wwwroot/lib/  # Bibliotecas de terceiros no wwwroot
+
+# Performance and load test results
+**/TestResults/
+**/*.trx
+
+# If there are large test datasets/files
+**/TestData/**/*.json
+**/TestData/**/*.xml
+**/TestData/**/*.csv
+
+# Metadata files (not needed by Claude Code)
+.gitignore              
+.gitattributes          
+.editorconfig           
+
+# Console Projects folders - usually not needed for AI analysis since they´re just tools used once in a while and no other code depends on them
+Console/**
+
+# Large documentation files (PDFs, Word docs, Images, etc.) when not needed
+**/[Dd]ocs/**/*.pdf
+**/[Dd]ocs/**/*.docx
+**/[Dd]ocs/**/*.png
+**/[Dd]ocs/**/*.jpg
+**/[Dd]ocs/**/*.jpeg
+**/[Dd]ocs/**/*.gif
+**/[Dd]ocs/**/*.svg
+**/[Dd]ocs/**/*.txt
+**/[Dd]ocs/[Cc]hangelog/[Aa]rchive/**
+**/[Dd]ocs/[Ss]ocial [Nn]etworks/**
+
+# ============================================
+# AI LEARNING DOCUMENTATION (Helder's personal learning - not needed by Claude Code)
+# These files are for learning Python/ML, not for MAUI development
+# Claude Code should read CLAUDE.md for AI integration overview
+# ============================================
+**/[Dd]ocs/[Gg]uides/[Aa][Ii]/**
+
+# Exception: Keep MAUI_INTEGRATION_GUIDE.md accessible if implementing AI services
+# Uncomment line below when actively implementing AI integration:
+# !**/[Dd]ocs/[Gg]uides/[Aa][Ii]/MAUI_INTEGRATION_GUIDE.md
+
+# Other Guides (keep most excluded, allow specific ones as needed)
+**/[Dd]ocs/[Gg]uides/**             
+!Docs/Guides/MyVocalist_migration_material_design_guide.md  # temporary needed guide
+
+# Resources
+**/[Vv]iew/[Rr]esources/AppIcon/*.resx
+**/[Vv]iew/[Rr]esources/**/*.png
+**/[Vv]iew/[Rr]esources/**/*.jpg
+**/[Vv]iew/[Rr]esources/**/*.jpeg
+**/[Vv]iew/[Rr]esources/**/*.gif
+**/[Vv]iew/[Rr]esources/[Ff]onts/**/*.ttf
+**/[Vv]iew/[Rr]esources/[Ss]trings/**/*.resx
+
+# SQLite database files are not needed to be read by Claude Code each session
+*.db
+*.db3
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Batch files
+*.bat

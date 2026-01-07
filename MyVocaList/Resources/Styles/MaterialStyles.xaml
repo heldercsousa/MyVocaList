@@ -110,4 +110,69 @@
     <!-- Adding an implicit Label style here BREAKS UraniumUI's StyleClass system  -->
     <!-- ========================================================================= -->
 
+    <!-- ========================================================================= -->
+    <!-- MATERIAL DESIGN 3 TYPOGRAPHY SYSTEM                                       -->
+    <!-- ========================================================================= -->
+
+    <!-- Display Typography -->
+    <Style TargetType="Label" Class="Headline.Large">
+        <Setter Property="FontSize" Value="32" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style TargetType="Label" Class="Headline.Medium">
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style TargetType="Label" Class="Headline.Small">
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <!-- Title Typography -->
+    <Style TargetType="Label" Class="Title.Large">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style TargetType="Label" Class="Title.Medium">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style TargetType="Label" Class="Title.Small">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <!-- Body Typography -->
+    <Style TargetType="Label" Class="Body.Large">
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <Style TargetType="Label" Class="Body.Medium">
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <Style TargetType="Label" Class="Body.Small">
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <!-- Label Typography -->
+    <Style TargetType="Label" Class="Label.Large">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+    </Style>
+
+    <Style TargetType="Label" Class="Label.Medium">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+    </Style>
+
+    <Style TargetType="Label" Class="Label.Small">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+    </Style>
+
 </ResourceDictionary>

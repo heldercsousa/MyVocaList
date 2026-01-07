@@ -13,25 +13,25 @@
                 <Label Text="🧪 Headline.Large" StyleClass="Headline.Large" />
                 <Label Text="🧪 Body.Medium" StyleClass="Body.Medium" />
                 
-                <Label Text="Design System" Style="{StaticResource HeadlineLarge}" />
-                <Label Text="MyVocaList Brand Identity" Style="{StaticResource BodyMedium}" />
+                <Label Text="Design System" StyleClass="Headline.Large" />
+                <Label Text="MyVocaList Brand Identity" StyleClass="Body.Medium" />
             </VerticalStackLayout>
 
             <Frame Style="{StaticResource WelcomeCard}">
                 <VerticalStackLayout>
-                    <Label Text="Bem-vindo ao MD3" Style="{StaticResource TitleLarge}" />
-                    <Label Text="Este guia demonstra a consistência de UI/UX entre Android iOS e Windows utilizando UraniumUI." Style="{StaticResource BodyMedium}" />
+                    <Label Text="Bem-vindo ao MD3" StyleClass="Title.Large" />
+                    <Label Text="Este guia demonstra a consistência de UI/UX entre Android iOS e Windows utilizando UraniumUI." StyleClass="Body.Medium" />
                 </VerticalStackLayout>
             </Frame>
 
-            <Label Text="Documentação e Referências" Style="{StaticResource TitleMedium}" />
+            <Label Text="Documentação e Referências" StyleClass="Title.Medium" />
 
             <Frame Style="{StaticResource FilledCard}">
                 <HorizontalStackLayout>
                     <BoxView WidthRequest="24" HeightRequest="24" Color="{StaticResource Primary}" />
                     <VerticalStackLayout>
-                        <Label Text="Material Design 3" Style="{StaticResource LabelLarge}" />
-                        <Label Text="https://m3.material.io/" Style="{StaticResource LabelSmall}" />
+                        <Label Text="Material Design 3" StyleClass="Label.Large" />
+                        <Label Text="https://m3.material.io/" StyleClass="Label.Small" />
                     </VerticalStackLayout>
                 </HorizontalStackLayout>
             </Frame>

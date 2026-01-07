@@ -10,15 +10,15 @@
         <VerticalStackLayout Style="{StaticResource PageContainer}">
 
             <VerticalStackLayout>
-                <Label Text="Tipografia MD3" Style="{StaticResource TitleMedium}" />
+                <Label Text="Tipografia MD3" StyleClass="Title.Medium" />
                 <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
-                <Label Text="Headline Large" Style="{StaticResource HeadlineLarge}" />
-                <Label Text="Headline Medium" Style="{StaticResource HeadlineMedium}" />
-                <Label Text="Body Large (Conteúdo Principal)" Style="{StaticResource BodyMedium}" />
+                <Label Text="Headline Large" StyleClass="Headline.Large" />
+                <Label Text="Headline Medium" StyleClass="Headline.Medium" />
+                <Label Text="Body Large (Conteúdo Principal)" StyleClass="Body.Medium" />
             </VerticalStackLayout>
 
             <VerticalStackLayout>
-                <Label Text="Botões Material Design 3" Style="{StaticResource TitleMedium}" />
+                <Label Text="Botões Material Design 3" StyleClass="Title.Medium" />
 
                 <!-- UraniumUI styles on regular Button -->
                 <Button Text="Filled Button" StyleClass="FilledButton" />
@@ -29,14 +29,14 @@
 
 
             <VerticalStackLayout>
-                <Label Text="Contêineres" Style="{StaticResource TitleMedium}" />
+                <Label Text="Contêineres" StyleClass="Title.Medium" />
 
                 <Frame Style="{StaticResource ElevatedCard}">
-                    <Label Text="Card Elevado (Com Sombra)" Style="{StaticResource BodyMedium}" />
+                    <Label Text="Card Elevado (Com Sombra)" StyleClass="Body.Medium" />
                 </Frame>
 
                 <Frame Style="{StaticResource OutlinedCard}">
-                    <Label Text="Card Com Borda" Style="{StaticResource BodyMedium}" />
+                    <Label Text="Card Com Borda" StyleClass="Body.Medium" />
                 </Frame>
             </VerticalStackLayout>
 
