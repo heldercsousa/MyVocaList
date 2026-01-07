@@ -1,0 +1,24 @@
+using MyVocaList.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace MyVocaList.Infra.Data.Config
+{
+    /// <summary>
+    /// Entity Framework configuration for Venue entity
+    /// </summary>
+    public class VenueConfiguration : IEntityTypeConfiguration<Venue>
+    {
+        public void Configure(EntityTypeBuilder<Venue> builder)
+        {
+            builder.HasKey(e => e.Id);
+
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
+
+            builder.Property(e => e.Name)
+                   .HasColumnType("TEXT")
+                   .IsRequired()
+                   .HasMaxLength(30); // Multilingual support: EN, PT, ES, FR, JA, KO
+        }
+    }
+}

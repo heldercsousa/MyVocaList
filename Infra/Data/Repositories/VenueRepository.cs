@@ -1,0 +1,165 @@
+using MyVocaList.Domain;
+using Microsoft.EntityFrameworkCore;
+using MyVocaList.Infra.Utils;
+using System.Diagnostics;
+using System.Linq.Expressions;
+
+namespace MyVocaList.Infra.Data.Repositories
+{
+    /// <summary>
+    /// Repository implementation for Venue entity operations
+    /// </summary>
+    public class VenueRepository : BaseRepository<Venue>, IVenueRepository
+    {
+        public VenueRepository(AppDbContext context) : base(context) { }
+
+        /// <summary>
+        /// Gets venue by exact name match.
+        /// Trimming handled automatically by DatabaseLoadingInterceptor
+        /// </summary>
+        public async Task<Venue?> GetByNameAsync(string name) => await ( Guard.IsNullOrWhiteSpace(name) ?
+            Task.FromResult<Venue?>(null) : _context.Venues.FirstOrDefaultAsync(v => v.Name == name));
+
+        /// <summary>
+        /// Searches venues by name starting with the search term (case and accent insensitive).
+        /// SQLite-specific: LIKE ignores column collation, so we must explicitly COLLATE both operands.
+        /// When migrating to SQL Server: replace with simple StartsWith() which respects column collation.
+        /// Trimming handled automatically by DatabaseLoadingInterceptor
+        /// </summary>
+        public async Task<IEnumerable<Venue>> SearchByNameStartsWithAsync(string searchTerm, int maxResults = 10)
+        {
+            if (Guard.IsNullOrWhiteSpace(searchTerm))
+                return new List<Venue>();
+
+            // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides
+            return await _context.Venues
+                .Where(v => EF.Functions.Like(
+                    EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
+                    EF.Functions.Collate(searchTerm, "NOCASE_NOACCENT") + "%"))
+                .Take(maxResults)
+                .OrderBy(v => v.Name)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Searches venues by name containing the search term (case and accent insensitive).
+        /// SQLite-specific: LIKE ignores column collation, so we must explicitly COLLATE both operands.
+        /// When migrating to SQL Server: replace with simple Contains() which respects column collation.
+        /// Trimming handled automatically by DatabaseLoadingInterceptor
+        /// </summary>
+        public async Task<IEnumerable<Venue>> SearchByNameContainsAsync(string searchTerm, int maxResults = 10)
+        {
+            if (Guard.IsNullOrWhiteSpace(searchTerm))
+                return new List<Venue>();
+
+            // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides
+            return await _context.Venues
+                .Where(v => EF.Functions.Like(
+                    EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
+                    "%" + EF.Functions.Collate(searchTerm, "NOCASE_NOACCENT") + "%"))
+                .Take(maxResults)
+                .OrderBy(v => v.Name)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Gets all venues ordered by name
+        /// </summary>
+        public override async Task<IEnumerable<Venue>> GetAllAsync() =>
+            await _context.Venues
+                .OrderBy(v => v.Name)
+                .ToListAsync();
+
+        /// <summary>
+        /// Searches venues with event information (case and accent insensitive).
+        /// SQLite-specific: LIKE ignores column collation, so we must explicitly COLLATE both operands.
+        /// When migrating to SQL Server: replace with simple Contains() which respects column collation.
+        /// Trimming handled automatically by DatabaseLoadingInterceptor
+        /// </summary>
+        public async Task<IEnumerable<(Venue venue, bool hasEvents)>> SearchWithHasEventsAsync(string? query)
+        {
+            var q = _context.Venues.AsQueryable();
+
+            if (!Guard.IsNullOrWhiteSpace(query))
+            {
+                // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides
+                q = q.Where(v => EF.Functions.Like(
+                    EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
+                    "%" + EF.Functions.Collate(query, "NOCASE_NOACCENT") + "%"));
+            }
+
+            return await q
+                .Select(v => new
+                {
+                    Venue = v,
+                    HasEvents = v.Events.Any()
+                })
+                .OrderBy(x => x.Venue.Name)
+                .Select(x => ValueTuple.Create(x.Venue, x.HasEvents))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<(Venue venue, bool hasEvents)>> GetAllWithHasEventsAsync() =>
+            await _context.Venues
+                .Select(v => new
+                {
+                    Venue = v,
+                    HasEvents = v.Events.Count > 0
+                })
+                .OrderBy(x => x.Venue.Name)
+                .Select(x => ValueTuple.Create(x.Venue, x.HasEvents))
+                .ToListAsync();
+
+        public async Task<IEnumerable<(Venue venue, bool hasEvents)>> GetByIdsWithHasEventsAsync(IEnumerable<int> ids) =>
+            await _context.Venues
+                .Where(v => ids.Contains(v.Id))
+                .Select(v => new
+                {
+                    Venue = v,
+                    HasEvents = v.Events.Count > 0
+                })
+                .Select(x => ValueTuple.Create(x.Venue, x.HasEvents))
+                .ToListAsync();
+
+        /// <summary>
+        /// Gets a paginated list of venues with event information flag (case and accent insensitive search).
+        /// SQLite-specific: LIKE ignores column collation, so we must explicitly COLLATE both operands.
+        /// When migrating to SQL Server: replace with simple Contains() which respects column collation.
+        /// Trimming handled automatically by DatabaseLoadingInterceptor
+        /// </summary>
+        public async Task<(IEnumerable<(Venue venue, bool hasEvents)> items, int totalCount)> GetPagedWithEventInfoAsync(
+            int pageNumber,
+            int pageSize,
+            string? query = null)
+        {
+            var q = _context.Venues.AsQueryable();
+
+            if (!Guard.IsNullOrWhiteSpace(query))
+            {
+                // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides
+                q = q.Where(v => EF.Functions.Like(EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"), "%" + EF.Functions.Collate(query, "NOCASE_NOACCENT") + "%"));
+            }
+
+            var totalCount = await q.CountAsync();
+
+            var itemsQ = q
+                .OrderBy(v => v.Name)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(v => new
+                {
+                    Venue = v,
+                    HasEvents = v.Events.Count > 0
+                });
+
+            Debug.WriteLine(">>>>>>> SQL venue paging and filtering");
+            Debug.WriteLine(itemsQ.ToQueryString());
+
+            var items = await itemsQ
+                .Select(x => ValueTuple.Create(x.Venue, x.HasEvents))
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+    }
+}
