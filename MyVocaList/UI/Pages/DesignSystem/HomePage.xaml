@@ -10,6 +10,9 @@
         <VerticalStackLayout Style="{StaticResource PageContainer}">
 
             <VerticalStackLayout>
+                <Label Text="🧪 Headline.Large" StyleClass="Headline.Large" />
+                <Label Text="🧪 Body.Medium" StyleClass="Body.Medium" />
+                
                 <Label Text="Design System" Style="{StaticResource HeadlineLarge}" />
                 <Label Text="MyVocaList Brand Identity" Style="{StaticResource BodyMedium}" />
             </VerticalStackLayout>

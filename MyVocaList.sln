@@ -13,6 +13,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Services", "Serv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Infra", "Infra\MyVocaList.Infra.csproj", "{9F6E0A44-58C4-440A-A741-00CC0DA3178D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Guides", "Guides", "{BA6A55FE-517A-4967-8B26-D966E7CFFFDD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Guides\UraniumUI_StylesNotWorking.md = Docs\Guides\UraniumUI_StylesNotWorking.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +32,7 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Debug|x64.Build.0 = Debug|Any CPU
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -86,5 +94,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BA6A55FE-517A-4967-8B26-D966E7CFFFDD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
 	EndGlobalSection
 EndGlobal
