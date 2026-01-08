@@ -97,11 +97,21 @@ UraniumUI (Material Design 3)
 
 ### MD3 Component Guidelines
 - **Buttons**: Use `StyleClass="FilledButton"`, `"FilledTonalButton"`, `"OutlinedButton"`, `"TextButton"`
-- **Icons**: Use `material:ButtonIcon.Icon="{x:Static m:MaterialOutlined.IconName}"`
 - **Typography**: Use `StyleClass="Headline.Large"`, `"Title.Medium"`, `"Body.Medium"`, etc.
 - **Containers**: Use `Style="{StaticResource ElevatedCard}"`, `"{StaticResource OutlinedCard}"`
 - **Layouts**: Use VerticalStackLayout, HorizontalStackLayout, FlexLayout without inline spacing
-- **Icon Buttons**: Follow https://m3.material.io/components/icon-buttons/overview
+
+### Buttons with Material Symbols Icons
+Use `FontImageSource` in `Button.ImageSource` property:
+```xml
+<Button Text="Home" StyleClass="FilledButton">
+    <Button.ImageSource>
+        <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Home}" />
+    </Button.ImageSource>
+</Button>
+```
+- Available FontFamily: `MaterialOutlined`, `MaterialFilled`, `MaterialRound`
+- Namespace: `xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"`
 
 ### Required References
 - UraniumUI Docs: https://enisn-projects.io/docs/en/uranium/latest/

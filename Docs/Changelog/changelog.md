@@ -2,6 +2,7 @@
 
 ## 2026
 
+- **01/08/2026** - Fix - Fixed Material Symbols icon buttons in DesignSystemPage.xaml by replacing incorrect `material:ButtonIcon.Icon` syntax with proper `FontImageSource` in `Button.ImageSource` property as per UraniumUI documentation. Updated CLAUDE.md with correct icon button syntax examples
 - **01/08/2026** - Fix - Fixed SVG icon display section in DesignSystemPage.xaml by replacing Button components with Label list (Button Icon property not supported for SVG files in UraniumUI Material buttons)
 - **01/08/2026** - Fix - Removed all inline styles from DesignSystemPage.xaml to ensure MD3 compliance. Replaced Grid+Image with Button components using Icon property. Changed HorizontalStackLayout to FlexLayout. All styling now uses StyleClass or StaticResource only
 - **01/08/2026** - Enhancement - Added XAML Styling and MD3 Compliance section to CLAUDE.md with strict rules forbidding inline styles (Spacing, Margin, WidthRequest, HeightRequest, etc.). Added references to UraniumUI and Material Design 3 documentation
