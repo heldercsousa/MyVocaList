@@ -89,15 +89,15 @@
                 <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
 
                 <Label Text="Custom SVG Icons (Current TabBar)" StyleClass="Title.Small" />
-                <Label Text="These SVG files are used in AppShell TabBar" StyleClass="Body.Medium" />
+                <Label Text="These SVG files are used in AppShell TabBar. Check the bottom navigation to see them in action." StyleClass="Body.Medium" />
 
                 <VerticalStackLayout>
-                    <Button Icon="home" Text="home.svg (outline)" StyleClass="TextButton" />
-                    <Button Icon="home_fill" Text="home_fill.svg (filled)" StyleClass="TextButton" />
-                    <Button Icon="home_round" Text="home_round.svg (rounded)" StyleClass="TextButton" />
-                    <Button Icon="tune" Text="tune.svg (outline)" StyleClass="TextButton" />
-                    <Button Icon="tune_fill" Text="tune_fill.svg (filled)" StyleClass="TextButton" />
-                    <Button Icon="tune_round" Text="tune_round.svg (rounded)" StyleClass="TextButton" />
+                    <Label Text="• home.svg (outline)" StyleClass="Body.Medium" />
+                    <Label Text="• home_fill.svg (filled)" StyleClass="Body.Medium" />
+                    <Label Text="• home_round.svg (rounded)" StyleClass="Body.Medium" />
+                    <Label Text="• tune.svg (outline)" StyleClass="Body.Medium" />
+                    <Label Text="• tune_fill.svg (filled)" StyleClass="Body.Medium" />
+                    <Label Text="• tune_round.svg (rounded)" StyleClass="Body.Medium" />
                 </VerticalStackLayout>
 
                 <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
