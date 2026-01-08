@@ -66,40 +66,21 @@
                     </Button>
                 </FlexLayout>
 
-                <Label Text="Sharp Variant" StyleClass="Body.Medium" />
+                <Label Text="Additional Examples" StyleClass="Body.Medium" />
                 <FlexLayout>
-                    <Button Text="Home" StyleClass="FilledTonalButton">
+                    <Button Text="Add" StyleClass="FilledTonalButton">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Home}" />
+                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Add}" />
                         </Button.ImageSource>
                     </Button>
-                    <Button Text="Tune" StyleClass="FilledTonalButton">
+                    <Button Text="Search" StyleClass="OutlinedButton">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Tune}" />
+                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Search}" />
                         </Button.ImageSource>
                     </Button>
-                    <Button Text="Favorite" StyleClass="FilledTonalButton">
+                    <Button Text="Settings" StyleClass="TextButton">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Favorite}" />
-                        </Button.ImageSource>
-                    </Button>
-                </FlexLayout>
-
-                <Label Text="Rounded Variant" StyleClass="Body.Medium" />
-                <FlexLayout>
-                    <Button Text="Home" StyleClass="OutlinedButton">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialRound" Glyph="{x:Static m:MaterialRound.Home}" />
-                        </Button.ImageSource>
-                    </Button>
-                    <Button Text="Tune" StyleClass="OutlinedButton">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialRound" Glyph="{x:Static m:MaterialRound.Tune}" />
-                        </Button.ImageSource>
-                    </Button>
-                    <Button Text="Favorite" StyleClass="OutlinedButton">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialRound" Glyph="{x:Static m:MaterialRound.Favorite}" />
+                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Settings}" />
                         </Button.ImageSource>
                     </Button>
                 </FlexLayout>
@@ -127,7 +108,7 @@
                             <Label.FormattedText>
                                 <FormattedString>
                                     <Span Text="✓ Material Symbols:" FontAttributes="Bold" />
-                                    <Span Text="&#x0a;• 2,500+ icons from Google Material Design&#x0a;• Works in Buttons, Labels, Cards&#x0a;• Cannot be used directly in Shell TabBar Icon property&#x0a;&#x0a;" />
+                                    <Span Text="&#x0a;• 2,500+ icons from Google Material Design&#x0a;• Use FontImageSource in Button.ImageSource&#x0a;• Cannot be used directly in Shell TabBar Icon property&#x0a;• Examples shown with MaterialOutlined variant&#x0a;&#x0a;" />
                                     <Span Text="✓ Custom SVG Files:" FontAttributes="Bold" />
                                     <Span Text="&#x0a;• Perfect for TabBar icons (Shell Icon property)&#x0a;• Full control over design&#x0a;• Smaller bundle size&#x0a;• Supports currentColor for theming" />
                                 </FormattedString>
