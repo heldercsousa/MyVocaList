@@ -69,3 +69,44 @@ Types: `feat:`, `fix:`, `refactor:`, `docs:`, `perf:`, `test:`
 MediatR, FluentValidation, Serilog, EF Core 9, SQLite
 UraniumUI (Material Design 3)
 ```
+
+## XAML Styling - Material Design 3 Compliance
+
+### Strict Rules
+**NEVER use inline styles.** All styling must come from StyleClass or StaticResource.
+
+### Forbidden Inline Properties
+```xml
+<!-- ❌ WRONG - Never use these inline -->
+<VerticalStackLayout Spacing="16">
+<HorizontalStackLayout Margin="10,20,10,20">
+<Button Padding="8" CornerRadius="12">
+<Image WidthRequest="32" HeightRequest="32">
+<Grid ColumnSpacing="10" RowSpacing="5">
+<Label FontSize="14" TextColor="Red">
+```
+
+### Correct MD3 Approach
+```xml
+<!-- ✅ CORRECT - Use StyleClass or StaticResource -->
+<VerticalStackLayout>
+<Button StyleClass="FilledButton">
+<Label StyleClass="Body.Medium">
+<Frame Style="{StaticResource ElevatedCard}">
+```
+
+### MD3 Component Guidelines
+- **Buttons**: Use `StyleClass="FilledButton"`, `"FilledTonalButton"`, `"OutlinedButton"`, `"TextButton"`
+- **Icons**: Use `material:ButtonIcon.Icon="{x:Static m:MaterialOutlined.IconName}"`
+- **Typography**: Use `StyleClass="Headline.Large"`, `"Title.Medium"`, `"Body.Medium"`, etc.
+- **Containers**: Use `Style="{StaticResource ElevatedCard}"`, `"{StaticResource OutlinedCard}"`
+- **Layouts**: Use VerticalStackLayout, HorizontalStackLayout, FlexLayout without inline spacing
+- **Icon Buttons**: Follow https://m3.material.io/components/icon-buttons/overview
+
+### Required References
+- UraniumUI Docs: https://enisn-projects.io/docs/en/uranium/latest/
+- Material Design 3: https://m3.material.io/components/
+- Must work smoothly on Android, iOS, and Windows
+
+### Exception
+BoxView dividers may use `HeightRequest="1"` for 1px structural height only.
