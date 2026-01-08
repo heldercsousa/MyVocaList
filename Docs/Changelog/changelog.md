@@ -2,6 +2,7 @@
 
 ## 2026
 
+- **01/08/2026** - Fix - Replaced all `MaterialFilled` references with `MaterialSharp` in DesignSystemPage.xaml (MaterialFilled does not exist in UraniumUI.Icons.MaterialSymbols package). Available icon variants are MaterialOutlined, MaterialSharp, and MaterialRound. Updated CLAUDE.md with correct FontFamily values and added warning note
 - **01/08/2026** - Fix - Fixed Material Symbols icon buttons in DesignSystemPage.xaml by replacing incorrect `material:ButtonIcon.Icon` syntax with proper `FontImageSource` in `Button.ImageSource` property as per UraniumUI documentation. Updated CLAUDE.md with correct icon button syntax examples
 - **01/08/2026** - Fix - Fixed SVG icon display section in DesignSystemPage.xaml by replacing Button components with Label list (Button Icon property not supported for SVG files in UraniumUI Material buttons)
 - **01/08/2026** - Fix - Removed all inline styles from DesignSystemPage.xaml to ensure MD3 compliance. Replaced Grid+Image with Button components using Icon property. Changed HorizontalStackLayout to FlexLayout. All styling now uses StyleClass or StaticResource only

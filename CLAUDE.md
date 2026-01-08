@@ -110,8 +110,9 @@ Use `FontImageSource` in `Button.ImageSource` property:
     </Button.ImageSource>
 </Button>
 ```
-- Available FontFamily: `MaterialOutlined`, `MaterialFilled`, `MaterialRound`
+- Available FontFamily: `MaterialOutlined`, `MaterialSharp`, `MaterialRound`
 - Namespace: `xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"`
+- Note: There is NO `MaterialFilled` - use `MaterialSharp` for sharp-cornered icons
 
 ### Required References
 - UraniumUI Docs: https://enisn-projects.io/docs/en/uranium/latest/

@@ -66,21 +66,21 @@
                     </Button>
                 </FlexLayout>
 
-                <Label Text="Filled Variant" StyleClass="Body.Medium" />
+                <Label Text="Sharp Variant" StyleClass="Body.Medium" />
                 <FlexLayout>
                     <Button Text="Home" StyleClass="FilledTonalButton">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialFilled" Glyph="{x:Static m:MaterialFilled.Home}" />
+                            <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Home}" />
                         </Button.ImageSource>
                     </Button>
                     <Button Text="Tune" StyleClass="FilledTonalButton">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialFilled" Glyph="{x:Static m:MaterialFilled.Tune}" />
+                            <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Tune}" />
                         </Button.ImageSource>
                     </Button>
                     <Button Text="Favorite" StyleClass="FilledTonalButton">
                         <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialFilled" Glyph="{x:Static m:MaterialFilled.Favorite}" />
+                            <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Favorite}" />
                         </Button.ImageSource>
                     </Button>
                 </FlexLayout>
