@@ -2,6 +2,7 @@
 
 ## 2026
 
+- **01/08/2026** - Fix - Removed all Material Symbols icon examples from DesignSystemPage.xaml due to font loading errors (MaterialSymbolsOutlined.ttf not found) and severe performance issues (443+ frames skipped causing 3+ second load times). Simplified page to only show custom SVG icons section. Removed Material Symbols namespaces. Page now loads instantly with zero MaterialButton warnings
 - **01/08/2026** - Fix - Removed MaterialSharp and MaterialRound variants from DesignSystemPage.xaml due to compatibility issues with UraniumUI.Icons.MaterialSymbols 2.10.0. Only MaterialOutlined is verified working. Replaced variant examples with additional MaterialOutlined icon examples showing different button styles (FilledTonalButton, OutlinedButton, TextButton). Updated CLAUDE.md to only document MaterialOutlined as verified working
 - **01/08/2026** - Fix - Replaced all `MaterialFilled` references with `MaterialSharp` in DesignSystemPage.xaml (MaterialFilled does not exist in UraniumUI.Icons.MaterialSymbols package). Available icon variants are MaterialOutlined, MaterialSharp, and MaterialRound. Updated CLAUDE.md with correct FontFamily values and added warning note
 - **01/08/2026** - Fix - Fixed Material Symbols icon buttons in DesignSystemPage.xaml by replacing incorrect `material:ButtonIcon.Icon` syntax with proper `FontImageSource` in `Button.ImageSource` property as per UraniumUI documentation. Updated CLAUDE.md with correct icon button syntax examples

@@ -4,8 +4,6 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     Title="UI Fundamentals">
 
     <ScrollView>
@@ -43,74 +41,21 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout>
-                <Label Text="Icon Comparison: SVG vs Material Symbols" StyleClass="Title.Medium" />
+                <Label Text="TabBar Icons" StyleClass="Title.Medium" />
                 <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
 
-                <Label Text="Material Symbols Icons (UraniumUI)" StyleClass="Title.Small" />
-                <Label Text="Outlined Variant" StyleClass="Body.Medium" />
-                <FlexLayout>
-                    <Button Text="Home" StyleClass="FilledButton">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Home}" />
-                        </Button.ImageSource>
-                    </Button>
-                    <Button Text="Tune" StyleClass="FilledButton">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Tune}" />
-                        </Button.ImageSource>
-                    </Button>
-                    <Button Text="Favorite" StyleClass="FilledButton">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Favorite}" />
-                        </Button.ImageSource>
-                    </Button>
-                </FlexLayout>
+                <Label Text="Custom SVG Icons" StyleClass="Title.Small" />
+                <Label Text="The app uses custom SVG files for TabBar icons visible in the bottom navigation." StyleClass="Body.Medium" />
 
-                <Label Text="Additional Examples" StyleClass="Body.Medium" />
-                <FlexLayout>
-                    <Button Text="Add" StyleClass="FilledTonalButton">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Add}" />
-                        </Button.ImageSource>
-                    </Button>
-                    <Button Text="Search" StyleClass="OutlinedButton">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Search}" />
-                        </Button.ImageSource>
-                    </Button>
-                    <Button Text="Settings" StyleClass="TextButton">
-                        <Button.ImageSource>
-                            <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Settings}" />
-                        </Button.ImageSource>
-                    </Button>
-                </FlexLayout>
-
-                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
-
-                <Label Text="Custom SVG Icons (Current TabBar)" StyleClass="Title.Small" />
-                <Label Text="These SVG files are used in AppShell TabBar. Check the bottom navigation to see them in action." StyleClass="Body.Medium" />
-
-                <VerticalStackLayout>
-                    <Label Text="• home.svg (outline)" StyleClass="Body.Medium" />
-                    <Label Text="• home_fill.svg (filled)" StyleClass="Body.Medium" />
-                    <Label Text="• home_round.svg (rounded)" StyleClass="Body.Medium" />
-                    <Label Text="• tune.svg (outline)" StyleClass="Body.Medium" />
-                    <Label Text="• tune_fill.svg (filled)" StyleClass="Body.Medium" />
-                    <Label Text="• tune_round.svg (rounded)" StyleClass="Body.Medium" />
-                </VerticalStackLayout>
-
-                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
-
-                <Label Text="Comparison Summary" StyleClass="Title.Small" />
                 <Frame Style="{StaticResource OutlinedCard}">
                     <VerticalStackLayout>
                         <Label StyleClass="Body.Medium">
                             <Label.FormattedText>
                                 <FormattedString>
-                                    <Span Text="✓ Material Symbols:" FontAttributes="Bold" />
-                                    <Span Text="&#x0a;• 2,500+ icons from Google Material Design&#x0a;• Use FontImageSource in Button.ImageSource&#x0a;• Cannot be used directly in Shell TabBar Icon property&#x0a;• Examples shown with MaterialOutlined variant&#x0a;&#x0a;" />
-                                    <Span Text="✓ Custom SVG Files:" FontAttributes="Bold" />
-                                    <Span Text="&#x0a;• Perfect for TabBar icons (Shell Icon property)&#x0a;• Full control over design&#x0a;• Smaller bundle size&#x0a;• Supports currentColor for theming" />
+                                    <Span Text="Available Icons:" FontAttributes="Bold" />
+                                    <Span Text="&#x0a;• home.svg, home_fill.svg, home_round.svg&#x0a;• tune.svg, tune_fill.svg, tune_round.svg&#x0a;&#x0a;" />
+                                    <Span Text="Benefits:" FontAttributes="Bold" />
+                                    <Span Text="&#x0a;• Works with Shell TabBar Icon property&#x0a;• Multiple variants for different states&#x0a;• Supports currentColor for dynamic theming&#x0a;• Minimal bundle size&#x0a;• Full control over design" />
                                 </FormattedString>
                             </Label.FormattedText>
                         </Label>
