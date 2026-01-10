@@ -30,5 +30,8 @@
         <Tab Title="Design System" Icon="tune">
             <ShellContent ContentTemplate="{DataTemplate ds:DesignSystemPage}" Route="DesignSystemPage" />
         </Tab>
+        <Tab Title="Plain MAUI" Icon="tune">
+            <ShellContent ContentTemplate="{DataTemplate ds:PlainMauiPage}" Route="PlainMauiPage" />
+        </Tab>
     </TabBar>
 </Shell>

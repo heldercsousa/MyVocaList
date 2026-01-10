@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MyVocaList.UI.Pages.DesignSystem.PlainMauiPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Plain MAUI">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="24">
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="MD3 Typography" FontSize="18" FontAttributes="Bold" />
+                <BoxView HeightRequest="1" Color="Gray" />
+                <Label Text="Headline Large" FontSize="32" />
+                <Label Text="Headline Medium" FontSize="28" />
+                <Label Text="Body Large (Main Content)" FontSize="16" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Material Design 3 Buttons" FontSize="18" FontAttributes="Bold" />
+                <Button Text="Filled Button" BackgroundColor="#6750A4" TextColor="White" />
+                <Button Text="Filled Tonal Button" BackgroundColor="#E8DEF8" TextColor="#1D192B" />
+                <Button Text="Outlined Button" BackgroundColor="Transparent" BorderColor="#79747E" BorderWidth="1" TextColor="#1D192B" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Containers" FontSize="18" FontAttributes="Bold" />
+
+                <Frame BorderColor="Transparent" BackgroundColor="#F7F2FA" CornerRadius="12" Padding="16" HasShadow="True">
+                    <Label Text="Elevated Card (With Shadow)" FontSize="16" />
+                </Frame>
+
+                <Frame BorderColor="#CAC4D0" BackgroundColor="Transparent" CornerRadius="12" Padding="16" HasShadow="False">
+                    <Label Text="Card With Border" FontSize="16" />
+                </Frame>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Icons" FontSize="18" FontAttributes="Bold" />
+                <BoxView HeightRequest="1" Color="Gray" />
+
+                <Frame BorderColor="#CAC4D0" BackgroundColor="Transparent" CornerRadius="12" Padding="16" HasShadow="False">
+                    <VerticalStackLayout Spacing="4">
+                        <Label FontSize="16">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Available Icon Systems:" FontAttributes="Bold" />
+                                    <Span Text="&#x0a;&#x0a;" />
+                                    <Span Text="SVG Icons:" FontAttributes="Bold" />
+                                    <Span Text="&#x0a;• Used in TabBar (bottom navigation)&#x0a;• Custom icons: home.svg, tune.svg&#x0a;• Dynamic theming support&#x0a;&#x0a;" />
+                                    <Span Text="Material Symbols:" FontAttributes="Bold" />
+                                    <Span Text="&#x0a;• 2,500+ icons available&#x0a;• Use FontImageSource in XAML&#x0a;• FontFamily=&quot;MaterialOutlined&quot;&#x0a;&#x0a;" />
+                                    <Span Text="Note:" FontAttributes="Bold" />
+                                    <Span Text="&#x0a;Material Symbols examples removed temporarily due to Android font loading performance issues." />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
