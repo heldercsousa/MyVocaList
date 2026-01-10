@@ -71,7 +71,8 @@ Types: `feat:`, `fix:`, `refactor:`, `docs:`, `perf:`, `test:`
 **CRITICAL**: After completing any task, ALWAYS follow this sequence:
 1. Update `Docs/Changelog/changelog.md` with the changes
 2. Create a git commit with all changes
-3. Never skip these steps - they are mandatory for every task completion
+3. Push the commit to remote repository
+4. Never skip these steps - they are mandatory for every task completion
 
 ## Stack
 ```
