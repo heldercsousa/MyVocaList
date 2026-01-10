@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:enisn-projects.io)",
+      "WebFetch(domain:m3.material.io)",
+      "Bash(unzip:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(dotnet clean:*)",
+      "Bash(git rm:*)"
+    ]
+  }
+}

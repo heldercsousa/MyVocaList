@@ -28,11 +28,10 @@
 
             <Frame Style="{StaticResource FilledCard}">
                 <HorizontalStackLayout>
-                    <BoxView WidthRequest="24" HeightRequest="24" Color="{StaticResource Primary}" />
-                    <VerticalStackLayout>
-                        <Label Text="Material Design 3" StyleClass="Label.Large" />
-                        <Label Text="https://m3.material.io/" StyleClass="Label.Small" />
-                    </VerticalStackLayout>
+                    <Label Text="Material Design 3" StyleClass="Label.Large" />
+                    <Label Text="https://m3.material.io/" StyleClass="Label.Small" />
+                    <Label Text="Google fonts: " StyleClass="Label.Large" />
+                    <Label Text="https://fonts.google.com/" StyleClass="Label.Small" />
                 </HorizontalStackLayout>
             </Frame>
 
