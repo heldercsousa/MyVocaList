@@ -4,10 +4,13 @@
 Karaoke queue management with round-based progression. .NET MAUI 8.0 (net8.0-android).
 
 ## Language
-Code, comments, logs: **English only**
+Code, comments, logs, UI text: **English only**
 
 ## Translation
-Translate any non-English text (comments, strings, logs) to English when encountered.
+**CRITICAL**: All text in the codebase must be in English. When creating or updating any code:
+- Translate any non-English text (comments, strings, logs, UI labels, error messages) to English immediately
+- This applies to ALL files: XAML, C#, configuration files, documentation
+- No exceptions: even placeholder text, test data, and temporary strings must be in English
 
 ## Comments
 - **Only**: classes, records, structs, methods (XML summary)
@@ -63,6 +66,12 @@ Types: `feat:`, `fix:`, `refactor:`, `docs:`, `perf:`, `test:`
 - Format: `- **MM/dd/yyyy** - Type - Description`
 - Types: Enhancement | Fix
 - **Update after every completed task**
+
+## Workflow
+**CRITICAL**: After completing any task, ALWAYS follow this sequence:
+1. Update `Docs/Changelog/changelog.md` with the changes
+2. Create a git commit with all changes
+3. Never skip these steps - they are mandatory for every task completion
 
 ## Stack
 ```

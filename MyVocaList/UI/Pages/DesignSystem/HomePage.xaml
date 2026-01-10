@@ -19,20 +19,32 @@
 
             <Frame Style="{StaticResource WelcomeCard}">
                 <VerticalStackLayout>
-                    <Label Text="Bem-vindo ao MD3" StyleClass="Title.Large" />
-                    <Label Text="Este guia demonstra a consistência de UI/UX entre Android iOS e Windows utilizando UraniumUI." StyleClass="Body.Medium" />
+                    <Label Text="Welcome to MD3" StyleClass="Title.Large" />
+                    <Label Text="This guide demonstrates UI/UX consistency across Android, iOS, and Windows using UraniumUI." StyleClass="Body.Medium" />
                 </VerticalStackLayout>
             </Frame>
 
-            <Label Text="Documentação e Referências" StyleClass="Title.Medium" />
+            <Label Text="Documentation and References" StyleClass="Title.Medium" />
 
             <Frame Style="{StaticResource FilledCard}">
-                <HorizontalStackLayout>
-                    <Label Text="Material Design 3" StyleClass="Label.Large" />
-                    <Label Text="https://m3.material.io/" StyleClass="Label.Small" />
-                    <Label Text="Google fonts: " StyleClass="Label.Large" />
-                    <Label Text="https://fonts.google.com/" StyleClass="Label.Small" />
-                </HorizontalStackLayout>
+                <VerticalStackLayout>
+                    <HorizontalStackLayout>
+                        <Label Text="Material Design 3: " StyleClass="Label.Large" />
+                        <Label Text="https://m3.material.io/" StyleClass="Label.Small" TextColor="{StaticResource Primary}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnUrlTapped" CommandParameter="https://m3.material.io/" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout>
+                        <Label Text="Google Fonts: " StyleClass="Label.Large" />
+                        <Label Text="https://fonts.google.com/" StyleClass="Label.Small" TextColor="{StaticResource Primary}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnUrlTapped" CommandParameter="https://fonts.google.com/" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
             </Frame>
 
         </VerticalStackLayout>
