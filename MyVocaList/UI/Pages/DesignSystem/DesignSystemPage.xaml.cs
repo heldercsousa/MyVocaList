@@ -20,9 +20,9 @@ public partial class DesignSystemPage : UraniumContentPage
         Console.WriteLine($"DesignSystemPage: Constructor completed after {_stopwatch.ElapsedMilliseconds}ms");
     }
 
-    //protected override void OnAppearing()
-    //{
-    //    base.OnAppearing();
-    //    Console.WriteLine($"DesignSystemPage: OnAppearing completed after {_stopwatch.ElapsedMilliseconds}ms from constructor");
-    //}
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        Console.WriteLine($"DesignSystemPage: OnAppearing completed after {_stopwatch.ElapsedMilliseconds}ms from constructor");
+    }
 }

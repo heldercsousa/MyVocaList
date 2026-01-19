@@ -18,11 +18,11 @@ public partial class HomePage : UraniumContentPage
         Console.WriteLine($"HomePage: Constructor completed after {_stopwatch.ElapsedMilliseconds}ms");
     }
 
-    //protected override void OnAppearing()
-    //{
-    //    base.OnAppearing();
-    //    Console.WriteLine($"HomePage: OnAppearing completed after {_stopwatch.ElapsedMilliseconds}ms from constructor");
-    //}
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        Console.WriteLine($"HomePage: OnAppearing completed after {_stopwatch.ElapsedMilliseconds}ms from constructor");
+    }
 
     /// <summary>
     /// Opens the URL in the default browser when a link is tapped

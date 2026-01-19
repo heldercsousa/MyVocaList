@@ -2,6 +2,7 @@
 
 ## 2026
 
+- **01/19/2026** - Enhancement - Upgraded project from .NET 8 to .NET 9 for improved Android UI performance and main thread optimization. Updated target frameworks (net9.0-android, net9.0-windows), NuGet packages (UraniumUI 2.12.1→2.14.0, CommunityToolkit.Maui 9.1.1→11.0.0, Microsoft.Extensions.Logging.Debug 8.0.1→9.0.0), and replaced deprecated Application.MainPage with CreateWindow override to comply with .NET 9 application initialization pattern. This upgrade addresses frame skipping issues and native UI thread contention warnings
 - **01/19/2026** - Fix - Fixed reflection exception in early runtime execution caused by incorrect Console.WriteLine syntax. Changed from unsupported named placeholders (e.g., "{ElapsedMs}") to proper string interpolation syntax in DesignSystemPage, HomePage, and PlainMauiPage
 - **01/10/2026** - Enhancement - Created PlainMauiPage for UraniumUI performance comparison using vanilla MAUI components. Added ILogger-based performance tracking to HomePage, DesignSystemPage, and PlainMauiPage with Stopwatch logging in constructor and OnAppearing lifecycle methods. Added new tab to AppShell for side-by-side performance testing
 - **01/10/2026** - Fix - Removed unused FontAwesome and Material Symbols font loading from MauiProgram.cs to eliminate 3-second UI freeze during app startup (181 skipped frames). Translated remaining Portuguese text in DesignSystemPage.xaml to English (Typography, Buttons, Containers sections)
