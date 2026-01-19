@@ -9,22 +9,20 @@ namespace MyVocaList.UI.Pages.DesignSystem;
 /// </summary>
 public partial class DesignSystemPage : UraniumContentPage
 {
-    private readonly ILogger<DesignSystemPage> _logger;
     private readonly Stopwatch _stopwatch;
 
-    public DesignSystemPage(ILogger<DesignSystemPage> logger)
+    public DesignSystemPage()
     {
-        _logger = logger;
         _stopwatch = Stopwatch.StartNew();
 
-        _logger.LogInformation("DesignSystemPage: Constructor started");
+        Console.WriteLine($"DesignSystemPage: Constructor started");
         InitializeComponent();
-        _logger.LogInformation("DesignSystemPage: Constructor completed after {ElapsedMs}ms", _stopwatch.ElapsedMilliseconds);
+        Console.WriteLine($"DesignSystemPage: Constructor completed after {_stopwatch.ElapsedMilliseconds}ms");
     }
 
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
-        _logger.LogInformation("DesignSystemPage: OnAppearing completed after {ElapsedMs}ms from constructor", _stopwatch.ElapsedMilliseconds);
-    }
+    //protected override void OnAppearing()
+    //{
+    //    base.OnAppearing();
+    //    Console.WriteLine($"DesignSystemPage: OnAppearing completed after {_stopwatch.ElapsedMilliseconds}ms from constructor");
+    //}
 }

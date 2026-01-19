@@ -8,22 +8,20 @@ namespace MyVocaList.UI.Pages.DesignSystem;
 /// </summary>
 public partial class PlainMauiPage : ContentPage
 {
-    private readonly ILogger<PlainMauiPage> _logger;
     private readonly Stopwatch _stopwatch;
 
-    public PlainMauiPage(ILogger<PlainMauiPage> logger)
+    public PlainMauiPage()
     {
-        _logger = logger;
         _stopwatch = Stopwatch.StartNew();
 
-        _logger.LogInformation("PlainMauiPage: Constructor started");
+        Console.WriteLine($"PlainMauiPage: Constructor started");
         InitializeComponent();
-        _logger.LogInformation("PlainMauiPage: Constructor completed after {ElapsedMs}ms", _stopwatch.ElapsedMilliseconds);
+        Console.WriteLine($"PlainMauiPage: Constructor completed after {_stopwatch.ElapsedMilliseconds}ms");
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        _logger.LogInformation("PlainMauiPage: OnAppearing completed after {ElapsedMs}ms from constructor", _stopwatch.ElapsedMilliseconds);
+        Console.WriteLine($"PlainMauiPage: OnAppearing completed after {_stopwatch.ElapsedMilliseconds}ms from constructor");
     }
 }

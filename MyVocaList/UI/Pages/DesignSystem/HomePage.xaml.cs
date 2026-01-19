@@ -6,24 +6,23 @@ namespace MyVocaList.UI.Pages.DesignSystem;
 
 public partial class HomePage : UraniumContentPage
 {
-    private readonly ILogger<HomePage> _logger;
+
     private readonly Stopwatch _stopwatch;
 
-    public HomePage(ILogger<HomePage> logger)
+    public HomePage()
     {
-        _logger = logger;
         _stopwatch = Stopwatch.StartNew();
 
-        _logger.LogInformation("HomePage: Constructor started");
+        Console.WriteLine($"HomePage: Constructor started");
         InitializeComponent();
-        _logger.LogInformation("HomePage: Constructor completed after {ElapsedMs}ms", _stopwatch.ElapsedMilliseconds);
+        Console.WriteLine($"HomePage: Constructor completed after {_stopwatch.ElapsedMilliseconds}ms");
     }
 
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
-        _logger.LogInformation("HomePage: OnAppearing completed after {ElapsedMs}ms from constructor", _stopwatch.ElapsedMilliseconds);
-    }
+    //protected override void OnAppearing()
+    //{
+    //    base.OnAppearing();
+    //    Console.WriteLine($"HomePage: OnAppearing completed after {_stopwatch.ElapsedMilliseconds}ms from constructor");
+    //}
 
     /// <summary>
     /// Opens the URL in the default browser when a link is tapped
