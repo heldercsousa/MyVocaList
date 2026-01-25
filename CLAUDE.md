@@ -63,11 +63,27 @@ if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException();
 **MANDATORY**: All UI operations MUST execute on the platform's native UI thread. Violation causes freezes, frame skips, and crashes.
 
 ### Golden Rules
-
 1. **NEVER block the UI thread** - No `Task.Wait()`, `.Result`, or synchronous I/O
 2. **ALWAYS marshal UI updates** - Use `Dispatcher` for cross-thread UI access
 3. **NEVER modify ObservableCollection from background threads**
 4. **ALWAYS use `async Task`** - Never `async void` (except event handlers)
+
+### Custom UI components
+- **ONLY**: when really necessary. Priority for Uranium and HorusSoftware built-in controls usage. Secondary priority for MAUI built-in controls.
+- **BEFORE CREATION**: 
+            1. be sure no existing control meets the requirements.    
+            2. be sure there is no way to achieve the requirements by composition of existing controls.
+- **MUST**: 1. not generate concurrency with Android/iOS/Windows buit-in UI thread safety rules, otherwise performance will degrade (thread safety rules).
+            2. **have some reminder** to be sistematicaly observed by manual testing.
+            3. have XML documentation warning about thread safety.
+            4. have unit tests for thread safety.
+            5. be tested extensively on all platforms.
+            6. have performance information logged for every UI rendering operations (loading, scrolling, animations, etc).
+            7. take advantage of MD3 buit-in animations, shapes, UI and UX reactions overall, styles and every other feature provided by UraniumUI and HorusSoftware.Maui.MaterialDesignControls.
+- **NEVER**: 1. have custom animation.
+            2. have MAUI custom behaviors.
+            3. have complex layout calculations.
+            4. code to perform visual (render) responses to user´s interactions (e.g. show a shape in the button´s background when user taps it), including single rendering operations like adding an iddle shape somewhere. 
 
 ### Required Pattern for UI Updates
 
@@ -232,6 +248,9 @@ Use `FontImageSource` in `Button.ImageSource` property:
 ### Required References
 - UraniumUI Docs: https://enisn-projects.io/docs/en/uranium/latest/
 - Material Design 3: https://m3.material.io/components/
+- HorusSoftware.Maui.MaterialDesignControls: 
+                  1. GitHub Repository :https://github.com/HorusSoftwareUY/Maui.MaterialDesignControls
+                  2. Blog da Empresa (Artigos Técnicos): https://www.horus.com.uy/blog/
 - Must work smoothly on Android, iOS, and Windows
 
 ### Exception
