@@ -53,6 +53,31 @@ public static class MauiProgram
 			System.Diagnostics.Debug.WriteLine($"[MDC] {sender}: {ex}");
 		});
 
+		// Theme colors loaded from MaterialColors.xaml (no hard-coded values)
+		var darkTheme = new MaterialTheme
+		{
+			Primary = ThemeResourceLoader.GetColor("Primary"),
+			OnPrimary = ThemeResourceLoader.GetColor("OnPrimary"),
+			PrimaryContainer = ThemeResourceLoader.GetColor("PrimaryContainer"),
+			OnPrimaryContainer = ThemeResourceLoader.GetColor("OnPrimaryContainer"),
+			Secondary = ThemeResourceLoader.GetColor("Secondary"),
+			OnSecondary = ThemeResourceLoader.GetColor("OnSecondary"),
+			SecondaryContainer = ThemeResourceLoader.GetColor("SecondaryContainer"),
+			OnSecondaryContainer = ThemeResourceLoader.GetColor("OnSecondaryContainer"),
+			Error = ThemeResourceLoader.GetColor("Error"),
+			OnError = ThemeResourceLoader.GetColor("OnError"),
+			ErrorContainer = ThemeResourceLoader.GetColor("ErrorContainer"),
+			OnErrorContainer = ThemeResourceLoader.GetColor("OnErrorContainer"),
+			Surface = ThemeResourceLoader.GetColor("Surface"),
+			OnSurface = ThemeResourceLoader.GetColor("OnSurface"),
+			SurfaceVariant = ThemeResourceLoader.GetColor("SurfaceVariant"),
+			OnSurfaceVariant = ThemeResourceLoader.GetColor("OnSurfaceVariant"),
+			Outline = ThemeResourceLoader.GetColor("Outline"),
+			OutlineVariant = ThemeResourceLoader.GetColor("OutlineVariant")
+		};
+
+		options.ConfigureThemes(darkTheme: darkTheme, lightTheme: null);
+
 		// US English date/time format
 		options.ConfigureStringFormat(new MaterialFormatOptions
 		{
