@@ -2,6 +2,7 @@
 
 ## 2026
 
+- **01/27/2026** - Enhancement - Created ComponentsPage_Typography page showing all 15 MD3 typography roles (Display, Headline, Title, Body, Label with Large/Medium/Small variants) using Roboto font family. Added route registration in AppShell. Includes typography guidelines card
 - **01/27/2026** - Enhancement - Created ThemeResourceLoader to load MDC theme colors from MaterialColors.xaml at runtime, avoiding hard-coded hex values in MauiProgram.cs while maintaining theme consistency
 - **01/27/2026** - Enhancement - Updated CLAUDE.md with dark-theme-only policy, no-hard-coded-values rule, and US English locale guidance. Fixed date/time format in MauiProgram.cs to US English (MM/dd/yyyy, h:mm tt)
 - **01/27/2026** - Fix - Removed ConfigureThemesFromResources() from MauiProgram.cs that caused TargetInvocationException at startup. Added missing SurfaceContainerLow color to MaterialColors.xaml

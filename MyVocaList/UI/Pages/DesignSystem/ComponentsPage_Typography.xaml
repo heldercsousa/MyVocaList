@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<uranium:UraniumContentPage
+    x:Class="MyVocaList.UI.Pages.DesignSystem.ComponentsPage_Typography"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    Title="Typography">
+
+    <ScrollView>
+        <VerticalStackLayout Style="{StaticResource PageContainer}">
+
+            <Label Text="Material Design 3 Typography" StyleClass="Headline.Large" />
+            <Label Text="15 type scale roles using Roboto font family" StyleClass="Body.Medium"
+                   TextColor="{StaticResource OnSurfaceVariant}" />
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Display Styles" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+                <Label Text="Display Large (57sp)" StyleClass="Display.Large" />
+                <Label Text="Display Medium (45sp)" StyleClass="Display.Medium" />
+                <Label Text="Display Small (36sp)" StyleClass="Display.Small" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Headline Styles" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+                <Label Text="Headline Large (32sp)" StyleClass="Headline.Large" />
+                <Label Text="Headline Medium (28sp)" StyleClass="Headline.Medium" />
+                <Label Text="Headline Small (24sp)" StyleClass="Headline.Small" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Title Styles" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+                <Label Text="Title Large (22sp)" StyleClass="Title.Large" />
+                <Label Text="Title Medium (16sp)" StyleClass="Title.Medium" />
+                <Label Text="Title Small (14sp)" StyleClass="Title.Small" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Body Styles" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+                <Label Text="Body Large (16sp) - Primary content text for longer passages" StyleClass="Body.Large" />
+                <Label Text="Body Medium (14sp) - Secondary content and descriptions" StyleClass="Body.Medium" />
+                <Label Text="Body Small (12sp) - Captions and tertiary information" StyleClass="Body.Small" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Label Styles" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+                <Label Text="Label Large (14sp) - Buttons and prominent labels" StyleClass="Label.Large" />
+                <Label Text="Label Medium (12sp) - Tags and badges" StyleClass="Label.Medium" />
+                <Label Text="Label Small (11sp) - Timestamps and metadata" StyleClass="Label.Small" />
+            </VerticalStackLayout>
+
+            <Frame Style="{StaticResource FilledCard}">
+                <VerticalStackLayout>
+                    <Label Text="Typography Guidelines" StyleClass="Title.Medium" />
+                    <Label StyleClass="Body.Medium" TextColor="{StaticResource OnSurfaceVariant}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Font Family: " FontAttributes="Bold" />
+                                <Span Text="Roboto (Regular, Medium, Bold)" />
+                                <Span Text="&#x0a;&#x0a;" />
+                                <Span Text="Display: " FontAttributes="Bold" />
+                                <Span Text="Hero text and large headlines" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="Headline: " FontAttributes="Bold" />
+                                <Span Text="Page titles and section headers" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="Title: " FontAttributes="Bold" />
+                                <Span Text="Card titles and list headers" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="Body: " FontAttributes="Bold" />
+                                <Span Text="Main content and descriptions" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="Label: " FontAttributes="Bold" />
+                                <Span Text="Buttons, inputs and metadata" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</uranium:UraniumContentPage>
