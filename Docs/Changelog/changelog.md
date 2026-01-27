@@ -2,6 +2,7 @@
 
 ## 2026
 
+- **01/27/2026** - Enhancement - Created ThreadSafeViewModelBase in UI/ViewModels with SetProperty, OnPropertyChanged, RunOnUiThread, and RunOnUiThreadAsync helpers for thread-safe UI updates
 - **01/27/2026** - Enhancement - Added MaterialDesignControls.InitializeComponents() to App.xaml.cs with conditional compilation for mobile platforms
 - **01/27/2026** - Enhancement - Updated MauiProgram.cs with Roboto fonts, Material Symbols icons, and HorusSoftware MaterialDesignControls 2.2.0 (mobile platforms only). Added conditional compilation for MDC since it does not support Windows
 - **01/27/2026** - Enhancement - Added Roboto font family (Regular, Medium, Bold) for Material Design 3 typography compliance. Fonts placed in Resources/Fonts with automatic MauiFont build action
