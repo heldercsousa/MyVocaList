@@ -53,10 +53,11 @@ public static class MauiProgram
 			System.Diagnostics.Debug.WriteLine($"[MDC] {sender}: {ex}");
 		});
 
+		// US English date/time format
 		options.ConfigureStringFormat(new MaterialFormatOptions
 		{
-			DateFormat = "dd/MM/yyyy",
-			TimeFormat = "HH:mm"
+			DateFormat = "MM/dd/yyyy",
+			TimeFormat = "h:mm tt"
 		});
 	}
 #endif

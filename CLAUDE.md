@@ -194,11 +194,32 @@ Types: `feat:`, `fix:`, `refactor:`, `docs:`, `perf:`, `test:`
 3. Push the commit to remote repository
 4. Never skip these steps - they are mandatory for every task completion
 
+## Theme & Locale
+- **Theme**: Dark mode ONLY. No light mode implementation.
+- **Locale**: US English (en-US). Date format: MM/dd/yyyy. Time format: h:mm tt.
+
+## No Hard-Coded Values
+**CRITICAL**: Never hard-code colors, dimensions, or style values in C# code.
+- **Colors**: Define ONLY in `MaterialColors.xaml`
+- **Styles**: Define ONLY in `MaterialStyles.xaml`
+- **Typography**: Use StyleClass from XAML resources
+- **MauiProgram.cs**: Configuration only, NO color/style definitions
+
+```csharp
+// ❌ WRONG - Hard-coded in C#
+themes.Primary = Color.FromArgb("#FFB2BE");
+button.BackgroundColor = Colors.Red;
+
+// ✅ CORRECT - Reference from XAML
+BackgroundColor="{StaticResource Primary}"
+Style="{StaticResource ElevatedCard}"
+```
+
 ## Stack
 ```
 MediatR, FluentValidation, Serilog, EF Core 9, SQLite
 UraniumUI 2.14 (Material Design 3)
-HorusSoftware.Maui.MaterialDesignControls 10.0 (MD3 Components)
+HorusSoftware.Maui.MaterialDesignControls 2.2.0 (MD3 Components - mobile only)
 ```
 ## Component Library Stack
 
@@ -212,7 +233,7 @@ HorusSoftware.Maui.MaterialDesignControls 10.0 (MD3 Components)
   - TextField, validation controls
   - Grid, StackLayout, FlexLayout
 
-#### 2. HorusSoftware.Maui.MaterialDesignControls 10.0.0 (Specialized MDC)
+#### 2. HorusSoftware.Maui.MaterialDesignControls 2.2.0 (Specialized MDC - mobile only)
 - **Use when:** UraniumUI doesn't provide component
 - **Provides:**
   - MaterialCard
