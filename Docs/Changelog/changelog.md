@@ -2,6 +2,7 @@
 
 ## 2026
 
+- **01/27/2026** - Enhancement - Updated MauiProgram.cs with Roboto fonts, Material Symbols icons, and HorusSoftware MaterialDesignControls 2.2.0 (mobile platforms only). Added conditional compilation for MDC since it does not support Windows
 - **01/27/2026** - Enhancement - Added Roboto font family (Regular, Medium, Bold) for Material Design 3 typography compliance. Fonts placed in Resources/Fonts with automatic MauiFont build action
 - **01/19/2026** - Enhancement - Upgraded project from .NET 8 to .NET 9 for improved Android UI performance and main thread optimization. Updated target frameworks (net9.0-android, net9.0-windows), NuGet packages (UraniumUI 2.12.1→2.14.0, CommunityToolkit.Maui 9.1.1→11.0.0, Microsoft.Extensions.Logging.Debug 8.0.1→9.0.0), and replaced deprecated Application.MainPage with CreateWindow override to comply with .NET 9 application initialization pattern. This upgrade addresses frame skipping issues and native UI thread contention warnings
 - **01/19/2026** - Fix - Fixed reflection exception in early runtime execution caused by incorrect Console.WriteLine syntax. Changed from unsupported named placeholders (e.g., "{ElapsedMs}") to proper string interpolation syntax in DesignSystemPage, HomePage, and PlainMauiPage
