@@ -1,5 +1,6 @@
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
+using MyVocaList.UI.Services;
 using UraniumUI;
 #if ANDROID || IOS || MACCATALYST
 using HorusStudio.Maui.MaterialDesignControls;
@@ -31,7 +32,8 @@ public static class MauiProgram
 				fonts.AddMaterialSymbolsFonts();
 			});
 
-		// Register Services (ThreadSafeDialogService added in Task 5)
+		// Register Services
+		builder.Services.AddSingleton<IThreadSafeDialogService, ThreadSafeDialogService>();
 
 #if DEBUG
 		builder.Logging.AddDebug();
