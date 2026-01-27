@@ -2,6 +2,7 @@
 
 ## 2026
 
+- **01/27/2026** - Fix - Removed ConfigureThemesFromResources() from MauiProgram.cs that caused TargetInvocationException at startup. Added missing SurfaceContainerLow color to MaterialColors.xaml
 - **01/27/2026** - Enhancement - Updated MaterialStyles.xaml with complete MD3 typography using Roboto fonts (15 roles with LineHeight), list item styles (1/2/3-line), and selection control styles (MD3CheckBox, MD3Switch, MD3Slider)
 - **01/27/2026** - Enhancement - Created ThreadSafeDialogService in UI/Services with IThreadSafeDialogService interface providing ConfirmAsync, AlertAsync, and PromptAsync methods. Registered as singleton in MauiProgram.cs DI container
 - **01/27/2026** - Enhancement - Created ThreadSafeViewModelBase in UI/ViewModels with SetProperty, OnPropertyChanged, RunOnUiThread, and RunOnUiThreadAsync helpers for thread-safe UI updates

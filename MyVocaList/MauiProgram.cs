@@ -53,7 +53,6 @@ public static class MauiProgram
 			System.Diagnostics.Debug.WriteLine($"[MDC] {sender}: {ex}");
 		});
 
-		options.ConfigureThemesFromResources();
 		options.ConfigureStringFormat(new MaterialFormatOptions
 		{
 			DateFormat = "dd/MM/yyyy",

@@ -188,9 +188,9 @@
     <Color x:Key="OnSurfaceVariant">#FFD1BFD6</Color>
     <!-- NEW NeutralVariant80 - Light purple-gray -->
     
+    <Color x:Key="SurfaceContainerLow">#FF251E2A</Color>
     <Color x:Key="SurfaceContainer">#FF312A36</Color>
     <Color x:Key="SurfaceContainerHigh">#FF47404D</Color>
-    <!-- Neutral20 -->
     <Color x:Key="SurfaceContainerHighest">#FF5F5765</Color>
     <Color x:Key="SurfaceDim">#FF000000</Color>
     <!-- Neutral0 - unchanged -->
