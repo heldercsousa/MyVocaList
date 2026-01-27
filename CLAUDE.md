@@ -200,7 +200,87 @@ MediatR, FluentValidation, Serilog, EF Core 9, SQLite
 UraniumUI 2.14 (Material Design 3)
 HorusSoftware.Maui.MaterialDesignControls 10.0 (MD3 Components)
 ```
+## Component Library Stack
 
+### Three-Layer Component Architecture
+
+#### 1. UraniumUI 2.14.0 (Primary Framework)
+- **Provides:**
+  - UraniumContentPage
+  - Implicit styling via StyleClass
+  - Material Design 3 theming system
+  - TextField, validation controls
+  - Grid, StackLayout, FlexLayout
+
+#### 2. HorusSoftware.Maui.MaterialDesignControls 10.0.0 (Specialized MDC)
+- **Use when:** UraniumUI doesn't provide component
+- **Provides:**
+  - MaterialCard
+  - MaterialFloatingButton
+  - MaterialIconButton
+  - MaterialProgressIndicator
+  - MaterialDivider
+  - MaterialDatePicker
+  - MaterialTimePicker
+  - MaterialSnackbar
+  - MaterialCheckBox
+- **Initialization:** MaterialDesignControls.InitializeComponents() in App.xaml.cs
+- **Configuration:** Use ConfigureMDC() in MauiProgram.cs
+
+#### 3. MAUI 9.0 Native (Foundation)
+- **Provides:** Platform-native controls
+- **Use when:** UraniumUI/HorusSoftware don't provide
+- **Examples:**
+  - CollectionView
+  - SwipeView
+  - Native buttons/labels
+- **Styling:** Apply via StaticResource from MaterialColors.xaml
+
+---
+
+### Decision Tree for Components
+
+```
+Need a component?
+│
+├─ Check if UraniumUI provides it?
+│  │
+│  ├─ YES → Use UraniumUI
+│  │        └─ Apply StyleClass for consistent theming
+│  │
+│  └─ NO → Continue to step 2
+│
+├─ Check if HorusSoftware MDC provides it?
+│  │
+│  ├─ YES → Use HorusSoftware MDC
+│  │        ├─ Configure via ConfigureMDC() in MauiProgram.cs
+│  │        └─ Style using semantic colors from MaterialColors.xaml
+│  │
+│  └─ NO → Continue to step 3
+│
+└─ Use MAUI native control
+   └─ Apply custom styling via MaterialColors.xaml and MaterialStyles.xaml
+```
+
+---
+
+### Important: No Custom Controls Without Review
+
+Before creating a custom control, follow this checklist:
+
+1. **Verify UraniumUI doesn't provide**
+   - Check UraniumUI.Material docs thoroughly
+   
+2. **Verify HorusSoftware MDC doesn't provide**
+   - Review available MaterialDesignControls components
+   
+3. **Check if MAUI native + styling satisfies requirements**
+   - Test with native control + MaterialColors.xaml styling
+   
+4. **Only then: Create custom component**
+   - Include thread-safety documentation
+   - Document why existing solutions don't work
+   
 ## XAML Styling - Material Design 3 Compliance
 
 ### Strict Rules
