@@ -104,15 +104,22 @@ Create subset font with only needed icons:
 
 ### Performance Results
 **Before (with Material Symbols):**
-- Constructor: 566ms
-- Frame skips: 44 frames
-- Font loading errors in logs
+- Constructor: 575ms
+- Frame skips: 43 frames
+- Material Symbols font loading errors in logs
 
 **After (with SVG):**
-- Constructor: 438ms (23% improvement)
-- Frame skips: 36 frames (18% improvement)
+- Constructor: 438ms
+- Frame skips: 36 frames
 - No font loading errors
 - Icons render correctly
+
+**Analysis:**
+- Time reduction: ~137ms (24% faster)
+- Frame reduction: 7 fewer frames (16% fewer)
+- **Main win:** Eliminated font loading errors and warnings, not dramatic performance improvement
+- Remaining 438ms/36 frames is from page initialization (InitializeComponent, MDC styles, XAML parsing)
+- Performance is similar to before, but without font-related issues
 
 ### Files Modified
 - `DSButtonsPage.xaml` (2026-01-28) - Removed Material Symbols, using SVG icons
