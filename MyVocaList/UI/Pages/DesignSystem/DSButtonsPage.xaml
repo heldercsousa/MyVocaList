@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<uranium:UraniumContentPage
+    x:Class="MyVocaList.UI.Pages.DesignSystem.DSButtonsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    Title="Buttons">
+
+    <ScrollView>
+        <VerticalStackLayout Style="{StaticResource PageContainer}">
+
+            <Label Text="Material Design 3 Buttons" StyleClass="Headline.Large" />
+            <Label Text="5 button variants with icon support" StyleClass="Body.Medium"
+                   TextColor="{StaticResource OnSurfaceVariant}" />
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Button Variants" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+                <Button Text="Filled Button" StyleClass="FilledButton" />
+                <Label Text="High emphasis - Primary actions" StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+
+                <Button Text="Filled Tonal Button" StyleClass="FilledTonalButton" />
+                <Label Text="Medium emphasis - Important but not primary" StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+
+                <Button Text="Elevated Button" StyleClass="ElevatedButton" />
+                <Label Text="Medium emphasis - Needs separation from background" StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+
+                <Button Text="Outlined Button" StyleClass="OutlinedButton" />
+                <Label Text="Medium emphasis - Secondary actions" StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+
+                <Button Text="Text Button" StyleClass="TextButton" />
+                <Label Text="Low emphasis - Tertiary actions" StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Buttons with Icons" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+                <Frame Style="{StaticResource FilledCard}">
+                    <VerticalStackLayout>
+                        <Label Text="⚠️ Material Symbols Font Issue" StyleClass="Title.Small"
+                               TextColor="{StaticResource Error}" />
+                        <Label StyleClass="Body.Small" TextColor="{StaticResource OnSurfaceVariant}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="Material Symbols font loading causes 300ms+ freeze on Android (confirmed with 8 icons)." />
+                                    <Span Text="&#x0a;&#x0a;" />
+                                    <Span Text="MD3-Compliant Solution:" FontAttributes="Bold" />
+                                    <Span Text=" Use Material Symbols designs as PNG icons (24dp) with transparency. This maintains MD3 compliance while avoiding font freeze." />
+                                    <Span Text="&#x0a;&#x0a;" />
+                                    <Span Text="Status:" FontAttributes="Bold" />
+                                    <Span Text=" Awaiting PNG icon export. Temporarily using existing SVG icons below (tinting issue known)." />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Button Text="Home" StyleClass="FilledButton" ImageSource="home.svg" />
+                <Label Text="Filled button with icon (SVG - temporary)" StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+
+                <Button Text="Settings" StyleClass="FilledTonalButton" ImageSource="tune.svg" />
+                <Label Text="Filled tonal button with icon (SVG - temporary)" StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+
+                <Button Text="Options" StyleClass="OutlinedButton" ImageSource="tune_round.svg" />
+                <Label Text="Outlined button with icon (SVG - temporary)" StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+
+                <Button Text="Navigate" StyleClass="TextButton" ImageSource="home_round.svg" />
+                <Label Text="Text button with icon (SVG - temporary)" StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Icon-Only Buttons" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+                <Label Text="Buttons without text labels for compact UIs (48x48dp touch target)"
+                       StyleClass="Body.Medium"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+
+                <HorizontalStackLayout Spacing="16" HorizontalOptions="Center">
+                    <Button StyleClass="FilledButton" ImageSource="home_fill.svg"
+                            WidthRequest="48" HeightRequest="48" Padding="0" />
+
+                    <Button StyleClass="FilledTonalButton" ImageSource="tune_fill.svg"
+                            WidthRequest="48" HeightRequest="48" Padding="0" />
+
+                    <Button StyleClass="OutlinedButton" ImageSource="tune_round.svg"
+                            WidthRequest="48" HeightRequest="48" Padding="0" />
+
+                    <Button StyleClass="TextButton" ImageSource="home_round.svg"
+                            WidthRequest="48" HeightRequest="48" Padding="0" />
+                </HorizontalStackLayout>
+
+                <Label Text="MD3 Spec: 48x48dp minimum touch target achieved. Awaiting PNG icons with proper tinting."
+                       StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Button States" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+                <Button Text="Enabled Button" StyleClass="FilledButton" />
+                <Button Text="Disabled Button" StyleClass="FilledButton" IsEnabled="False" />
+
+                <Label Text="Note: Disabled state reduces opacity automatically" StyleClass="Body.Small"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+            </VerticalStackLayout>
+
+            <Frame Style="{StaticResource FilledCard}">
+                <VerticalStackLayout>
+                    <Label Text="Button Usage Guidelines" StyleClass="Title.Medium" />
+                    <Label StyleClass="Body.Medium" TextColor="{StaticResource OnSurfaceVariant}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Filled: " FontAttributes="Bold" />
+                                <Span Text="Main action (Save, Submit, Continue)" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="Filled Tonal: " FontAttributes="Bold" />
+                                <Span Text="Important secondary action" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="Elevated: " FontAttributes="Bold" />
+                                <Span Text="When surface needs separation" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="Outlined: " FontAttributes="Bold" />
+                                <Span Text="Secondary actions (Cancel, Back)" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="Text: " FontAttributes="Bold" />
+                                <Span Text="Low priority (Learn More, Skip)" />
+                                <Span Text="&#x0a;&#x0a;" />
+                                <Span Text="Touch Target: " FontAttributes="Bold" />
+                                <Span Text="Minimum 48x48dp for accessibility" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</uranium:UraniumContentPage>

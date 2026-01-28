@@ -2,6 +2,8 @@
 
 ## 2026
 
+- **01/28/2026** - Fix - Resolved Material Symbols font freeze (ISSUE-001) by implementing SVG icon approach. Removed all Material Symbols FontImageSource usage from DSButtonsPage, switched to existing SVG icons (home.svg, tune.svg variants). MAUI build system automatically compiles SVG to PNG at appropriate densities (1x, 2x, 3x), eliminating need for manual multi-resolution file creation. Performance improved: constructor time reduced from 566ms to 438ms (23% improvement), frame skips reduced from 44 to 36 (18% improvement). Updated known issues document to mark ISSUE-001 as RESOLVED with SVG as chosen solution
+- **01/28/2026** - Enhancement - Renamed all Design System pages to DS pattern for consistency: DesignSystemPage → DSPage, ComponentsPage_Typography → DSTypographyPage, ComponentsPage_Buttons → DSButtonsPage. Updated all references in AppShell.xaml, AppShell.xaml.cs, XAML namespaces, C# class names, and route registrations. Updated known issues document with file naming convention section
 - **01/27/2026** - Enhancement - Created ComponentsPage_Typography page showing all 15 MD3 typography roles (Display, Headline, Title, Body, Label with Large/Medium/Small variants) using Roboto font family. Added route registration in AppShell. Includes typography guidelines card
 - **01/27/2026** - Enhancement - Created ThemeResourceLoader to load MDC theme colors from MaterialColors.xaml at runtime, avoiding hard-coded hex values in MauiProgram.cs while maintaining theme consistency
 - **01/27/2026** - Enhancement - Updated CLAUDE.md with dark-theme-only policy, no-hard-coded-values rule, and US English locale guidance. Fixed date/time format in MauiProgram.cs to US English (MM/dd/yyyy, h:mm tt)

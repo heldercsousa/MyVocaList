@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<uranium:UraniumContentPage
+    x:Class="MyVocaList.UI.Pages.DesignSystem.DSPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    Title="Design System">
+
+    <ScrollView>
+        <VerticalStackLayout Style="{StaticResource PageContainer}">
+
+            <Label Text="Design System" StyleClass="Headline.Large" />
+            <Label Text="MD3 Component Library" StyleClass="Body.Medium"
+                   TextColor="{StaticResource OnSurfaceVariant}" />
+
+            <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Foundations" StyleClass="Title.Medium" />
+
+                <Button Text="Typography (15 Roles)" StyleClass="FilledTonalButton"
+                        Clicked="NavigateToTypography" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Components" StyleClass="Title.Medium" />
+
+                <Button Text="Buttons (5 Variants)" StyleClass="FilledTonalButton"
+                        Clicked="NavigateToButtons" />
+
+                <Label Text="Coming soon: Cards, Inputs, Lists, Feedback"
+                       StyleClass="Body.Medium"
+                       TextColor="{StaticResource OnSurfaceVariant}" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</uranium:UraniumContentPage>

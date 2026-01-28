@@ -9,6 +9,7 @@ public partial class AppShell : Shell
 		InitializeComponent();
 
 		// Register Design System routes
-		Routing.RegisterRoute("ComponentsPage_Typography", typeof(ComponentsPage_Typography));
+		Routing.RegisterRoute("DSTypographyPage", typeof(DSTypographyPage));
+		Routing.RegisterRoute("DSButtonsPage", typeof(DSButtonsPage));
 	}
 }

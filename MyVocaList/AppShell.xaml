@@ -22,16 +22,18 @@
 
         Note: Material Symbols (FontImageSource) cannot be used directly
         in Tab.Icon property. For Material Symbols comparison, see Design System page.
+
+        MD3 Standard: Maximum 5 tabs for bottom navigation
         -->
 
-        <Tab Title="Home" Icon="home">
-            <ShellContent ContentTemplate="{DataTemplate ds:HomePage}" Route="HomePage" />
+        <Tab Title="Design System" Icon="home">
+            <ShellContent ContentTemplate="{DataTemplate ds:DSPage}" Route="DSPage" />
         </Tab>
-        <Tab Title="Design System" Icon="tune">
-            <ShellContent ContentTemplate="{DataTemplate ds:DesignSystemPage}" Route="DesignSystemPage" />
+        <Tab Title="Typography" Icon="tune">
+            <ShellContent ContentTemplate="{DataTemplate ds:DSTypographyPage}" Route="DSTypographyPage" />
         </Tab>
-        <Tab Title="Plain MAUI" Icon="tune">
-            <ShellContent ContentTemplate="{DataTemplate ds:PlainMauiPage}" Route="PlainMauiPage" />
+        <Tab Title="Buttons" Icon="tune_round">
+            <ShellContent ContentTemplate="{DataTemplate ds:DSButtonsPage}" Route="DSButtonsPage" />
         </Tab>
     </TabBar>
 </Shell>
