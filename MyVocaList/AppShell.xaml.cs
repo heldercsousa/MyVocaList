@@ -11,5 +11,6 @@ public partial class AppShell : Shell
 		// Register Design System routes
 		Routing.RegisterRoute("DSTypographyPage", typeof(DSTypographyPage));
 		Routing.RegisterRoute("DSButtonsPage", typeof(DSButtonsPage));
+		Routing.RegisterRoute("DSCardsPage", typeof(DSCardsPage));
 	}
 }

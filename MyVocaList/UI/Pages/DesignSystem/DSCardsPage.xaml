@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<uranium:UraniumContentPage
+    x:Class="MyVocaList.UI.Pages.DesignSystem.DSCardsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    Title="Cards">
+
+    <ScrollView>
+        <VerticalStackLayout Style="{StaticResource PageContainer}">
+
+            <Label Text="Material Design 3 Cards" StyleClass="Headline.Large" />
+            <Label Text="Container surfaces for grouping related content" StyleClass="Body.Medium"
+                   TextColor="{StaticResource OnSurfaceVariant}" />
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="MD3 Card Types" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+                <Frame Style="{StaticResource FilledCard}">
+                    <VerticalStackLayout>
+                        <Label Text="📱 MDC MaterialCard Note" StyleClass="Title.Small"
+                               TextColor="{StaticResource Primary}" />
+                        <Label StyleClass="Body.Small" TextColor="{StaticResource OnSurfaceVariant}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="HorusStudio MDC v2.2.0 is mobile-only (Android/iOS) and does not support Windows." />
+                                    <Span Text="&#x0a;&#x0a;" />
+                                    <Span Text="Solution:" FontAttributes="Bold" />
+                                    <Span Text=" Using MAUI Frame with MD3-compliant StaticResource styles for full cross-platform compatibility (Android, iOS, Windows)." />
+                                    <Span Text="&#x0a;&#x0a;" />
+                                    <Span Text="All cards below follow MD3 specifications with proper semantic colors, corner radius, and elevation." />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Elevated Card" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+                <Frame Style="{StaticResource ElevatedCard}">
+                    <VerticalStackLayout>
+                        <Label Text="Elevated Card Style" StyleClass="Title.Small" />
+                        <Label Text="With shadow and SurfaceContainerLow background. Use for surfaces that need strong separation from the background."
+                               StyleClass="Body.Medium"
+                               TextColor="{StaticResource OnSurfaceVariant}" />
+                        <Label StyleClass="Body.Small" TextColor="{StaticResource OnSurfaceVariant}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="&#x0a;Properties: " FontAttributes="Bold" />
+                                    <Span Text="SurfaceContainerLow background, 1dp elevation, 12dp corner radius, 16dp padding" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Filled Card" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+                <Frame Style="{StaticResource FilledCard}">
+                    <VerticalStackLayout>
+                        <Label Text="Filled Card Style" StyleClass="Title.Small" />
+                        <Label Text="SurfaceContainerHighest background, no shadow. Use for containers that need subtle separation."
+                               StyleClass="Body.Medium"
+                               TextColor="{StaticResource OnSurfaceVariant}" />
+                        <Label StyleClass="Body.Small" TextColor="{StaticResource OnSurfaceVariant}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="&#x0a;Properties: " FontAttributes="Bold" />
+                                    <Span Text="SurfaceContainerHighest background, no elevation, 12dp corner radius, 16dp padding" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Outlined Card" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+                <Frame Style="{StaticResource OutlinedCard}">
+                    <VerticalStackLayout>
+                        <Label Text="Outlined Card Style" StyleClass="Title.Small" />
+                        <Label Text="1dp outline, Surface background. Use for low-emphasis containers."
+                               StyleClass="Body.Medium"
+                               TextColor="{StaticResource OnSurfaceVariant}" />
+                        <Label StyleClass="Body.Small" TextColor="{StaticResource OnSurfaceVariant}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="&#x0a;Properties: " FontAttributes="Bold" />
+                                    <Span Text="Surface background, 1dp Outline border, 12dp corner radius, 16dp padding" />
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+
+            <Frame Style="{StaticResource FilledCard}">
+                <VerticalStackLayout>
+                    <Label Text="Card Usage Guidelines" StyleClass="Title.Medium" />
+                    <Label StyleClass="Body.Medium" TextColor="{StaticResource OnSurfaceVariant}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Elevated: " FontAttributes="Bold" />
+                                <Span Text="Strong visual hierarchy, important content (dashboards, feature highlights)" />
+                                <Span Text="&#x0a;&#x0a;" />
+                                <Span Text="Filled: " FontAttributes="Bold" />
+                                <Span Text="Subtle separation, grouped content (settings sections, list containers)" />
+                                <Span Text="&#x0a;&#x0a;" />
+                                <Span Text="Outlined: " FontAttributes="Bold" />
+                                <Span Text="Low emphasis, secondary content (optional info, less important details)" />
+                                <Span Text="&#x0a;&#x0a;" />
+                                <Span Text="MD3 Specifications:" FontAttributes="Bold" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="• Corner Radius: 12dp standard for all card types" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="• Padding: 16dp internal spacing" />
+                                <Span Text="&#x0a;" />
+                                <Span Text="• Elevation: 1dp for Elevated, 0dp for Filled/Outlined" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</uranium:UraniumContentPage>

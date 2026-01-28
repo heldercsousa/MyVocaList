@@ -35,5 +35,8 @@
         <Tab Title="Buttons" Icon="tune_round">
             <ShellContent ContentTemplate="{DataTemplate ds:DSButtonsPage}" Route="DSButtonsPage" />
         </Tab>
+        <Tab Title="Cards" Icon="home_fill">
+            <ShellContent ContentTemplate="{DataTemplate ds:DSCardsPage}" Route="DSCardsPage" />
+        </Tab>
     </TabBar>
 </Shell>

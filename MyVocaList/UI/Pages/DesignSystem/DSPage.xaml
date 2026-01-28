@@ -28,7 +28,10 @@
                 <Button Text="Buttons (5 Variants)" StyleClass="FilledTonalButton"
                         Clicked="NavigateToButtons" />
 
-                <Label Text="Coming soon: Cards, Inputs, Lists, Feedback"
+                <Button Text="Cards (3 Types + Frame)" StyleClass="FilledTonalButton"
+                        Clicked="NavigateToCards" />
+
+                <Label Text="Coming soon: Inputs, Lists, Feedback"
                        StyleClass="Body.Medium"
                        TextColor="{StaticResource OnSurfaceVariant}" />
             </VerticalStackLayout>
