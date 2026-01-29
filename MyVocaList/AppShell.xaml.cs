@@ -13,5 +13,6 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("DSButtonsPage", typeof(DSButtonsPage));
 		Routing.RegisterRoute("DSCardsPage", typeof(DSCardsPage));
 		Routing.RegisterRoute("DSInputsPage", typeof(DSInputsPage));
+		Routing.RegisterRoute("DSFormsPage", typeof(DSFormsPage));
 	}
 }

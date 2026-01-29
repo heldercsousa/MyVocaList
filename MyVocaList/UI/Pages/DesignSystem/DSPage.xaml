@@ -34,6 +34,9 @@
                 <Button Text="Inputs (TextField + Controls)" StyleClass="FilledTonalButton"
                         Clicked="NavigateToInputs" />
 
+                <Button Text="Forms (ViewModel Binding)" StyleClass="FilledTonalButton"
+                        Clicked="NavigateToForms" />
+
                 <Label Text="Coming soon: Lists, Feedback"
                        StyleClass="Body.Medium"
                        TextColor="{StaticResource OnSurfaceVariant}" />
