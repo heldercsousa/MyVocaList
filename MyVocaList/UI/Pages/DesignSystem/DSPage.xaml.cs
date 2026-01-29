@@ -33,4 +33,7 @@ public partial class DSPage : UraniumContentPage
 
     private async void NavigateToCards(object sender, EventArgs e)
         => await Shell.Current.GoToAsync("DSCardsPage");
+
+    private async void NavigateToInputs(object sender, EventArgs e)
+        => await Shell.Current.GoToAsync("DSInputsPage");
 }
