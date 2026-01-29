@@ -6,7 +6,7 @@
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:material="clr-namespace:UraniumUI.Material.Controls;assembly=UraniumUI.Material"
     xmlns:local="clr-namespace:MyVocaList.UI.Pages.DesignSystem"
-    Title="Auto Forms">
+    Title="Forms">
 
     <uranium:UraniumContentPage.BindingContext>
         <local:DSFormsViewModel />
@@ -15,63 +15,21 @@
     <ScrollView>
         <VerticalStackLayout Style="{StaticResource PageContainer}">
 
-            <Label Text="ViewModel-Based Forms" StyleClass="Headline.Large" />
-            <Label Text="Forms with two-way data binding to ViewModel properties" StyleClass="Body.Medium"
+            <Label Text="ViewModel-Based Form" StyleClass="Headline.Large" />
+            <Label Text="Comprehensive form with two-way data binding" StyleClass="Body.Medium"
                    TextColor="{StaticResource OnSurfaceVariant}" />
 
             <VerticalStackLayout Style="{StaticResource SectionContainer}">
-                <Label Text="How It Works" StyleClass="Title.Medium" />
+                <Label Text="Personal Information" StyleClass="Title.Medium" />
                 <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
 
-                <Frame Style="{StaticResource FilledCard}">
-                    <VerticalStackLayout>
-                        <Label Text="✨ ViewModel Data Binding" StyleClass="Title.Small"
-                               TextColor="{StaticResource Primary}" />
-                        <Label StyleClass="Body.Small" TextColor="{StaticResource OnSurfaceVariant}">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <Span Text="This form demonstrates two-way data binding between XAML controls and ViewModel properties using INotifyPropertyChanged." />
-                                    <Span Text="&#x0a;&#x0a;" />
-                                    <Span Text="Benefits:" FontAttributes="Bold" />
-                                    <Span Text="&#x0a;• Clean separation of UI and business logic" />
-                                    <Span Text="&#x0a;• Automatic UI updates when ViewModel changes" />
-                                    <Span Text="&#x0a;• Testable ViewModels without UI dependencies" />
-                                    <Span Text="&#x0a;• Consistent MD3 styling via UraniumUI TextField" />
-                                    <Span Text="&#x0a;&#x0a;" />
-                                    <Span Text="Compare performance with DSInputsPage (check console logs)." />
-                                </FormattedString>
-                            </Label.FormattedText>
-                        </Label>
-                    </VerticalStackLayout>
-                </Frame>
-            </VerticalStackLayout>
+                <material:TextField Title="First Name" Text="{Binding FirstName}" />
 
-            <VerticalStackLayout Style="{StaticResource SectionContainer}">
-                <Label Text="ViewModel-Bound Form" StyleClass="Title.Medium" />
-                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
-
-                <Label Text="All fields below are bound to DSFormsViewModel properties with two-way data binding"
-                       StyleClass="Body.Small"
-                       TextColor="{StaticResource OnSurfaceVariant}" />
-
-                <material:TextField Title="Full Name" Text="{Binding FullName}" />
+                <material:TextField Title="Last Name" Text="{Binding LastName}" />
 
                 <material:TextField Title="Email Address" Text="{Binding Email}" />
 
-                <HorizontalStackLayout>
-                    <Label Text="Age:" StyleClass="Body.Medium" VerticalOptions="Center" WidthRequest="100" />
-                    <Stepper Value="{Binding Age}" Minimum="0" Maximum="120" Increment="1" />
-                    <Label Text="{Binding Age}" StyleClass="Body.Medium" VerticalOptions="Center" Margin="10,0,0,0" />
-                </HorizontalStackLayout>
-
-                <material:TextField Title="Biography" Text="{Binding Biography}" MaxLength="500" />
-
-                <HorizontalStackLayout>
-                    <CheckBox Style="{StaticResource MD3CheckBox}" IsChecked="{Binding ReceiveNotifications}" />
-                    <Label Text="Receive Notifications" StyleClass="Body.Medium" VerticalOptions="Center" />
-                </HorizontalStackLayout>
-
-                <material:TextField Title="Subscription Plan" Text="{Binding SubscriptionPlan}" />
+                <material:TextField Title="Phone Number" Text="{Binding Phone}" />
 
                 <Label Text="Birth Date:" StyleClass="Label.Medium" />
                 <DatePicker Date="{Binding BirthDate}"
@@ -80,67 +38,57 @@
                             MinimumHeightRequest="48" />
             </VerticalStackLayout>
 
-            <Frame Style="{StaticResource FilledCard}">
-                <VerticalStackLayout>
-                    <Label Text="ViewModel Code Example" StyleClass="Title.Medium" />
-                    <Label StyleClass="Body.Small" FontFamily="Courier New" TextColor="{StaticResource OnSurfaceVariant}">
-                        <Label.FormattedText>
-                            <FormattedString>
-                                <Span Text="// ViewModel Property" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="private string _fullName = string.Empty;" />
-                                <Span Text="&#x0a;&#x0a;" />
-                                <Span Text="public string FullName" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="{} {" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="    get => _fullName;" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="    set => SetProperty(ref _fullName, value);" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="{} }" />
-                                <Span Text="&#x0a;&#x0a;" />
-                                <Span Text="// XAML Binding" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="&lt;material:TextField" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="    Title=&quot;Full Name&quot;" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="    Text=&quot;{Binding FullName}&quot; />" />
-                            </FormattedString>
-                        </Label.FormattedText>
-                    </Label>
-                </VerticalStackLayout>
-            </Frame>
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Address" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
 
-            <Frame Style="{StaticResource FilledCard}">
-                <VerticalStackLayout>
-                    <Label Text="Performance Comparison" StyleClass="Title.Medium" />
-                    <Label StyleClass="Body.Medium" TextColor="{StaticResource OnSurfaceVariant}">
-                        <Label.FormattedText>
-                            <FormattedString>
-                                <Span Text="Compare load times:" FontAttributes="Bold" />
-                                <Span Text="&#x0a;&#x0a;" />
-                                <Span Text="DSInputsPage:" FontAttributes="Bold" />
-                                <Span Text=" Manual XAML layout with explicit controls" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="• Check console logs for constructor time" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="• Check frame skips in debug output" />
-                                <Span Text="&#x0a;&#x0a;" />
-                                <Span Text="DSFormsPage:" FontAttributes="Bold" />
-                                <Span Text=" Auto-generated via FormView" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="• Fewer XAML elements to parse" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="• Runtime form generation overhead" />
-                                <Span Text="&#x0a;" />
-                                <Span Text="• Check console logs for comparison" />
-                            </FormattedString>
-                        </Label.FormattedText>
-                    </Label>
-                </VerticalStackLayout>
-            </Frame>
+                <material:TextField Title="Street Address" Text="{Binding Address}" />
+
+                <material:TextField Title="City" Text="{Binding City}" />
+
+                <material:TextField Title="Country" Text="{Binding Country}" />
+
+                <material:TextField Title="Postal Code" Text="{Binding PostalCode}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Professional Information" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+                <material:TextField Title="Company" Text="{Binding Company}" />
+
+                <material:TextField Title="Job Title" Text="{Binding JobTitle}" />
+
+                <material:TextField Title="Website" Text="{Binding Website}" />
+
+                <Label Text="Join Date:" StyleClass="Label.Medium" />
+                <DatePicker Date="{Binding JoinDate}"
+                            TextColor="{StaticResource OnSurface}"
+                            BackgroundColor="{StaticResource SurfaceContainerHighest}"
+                            MinimumHeightRequest="48" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Style="{StaticResource SectionContainer}">
+                <Label Text="Additional Details" StyleClass="Title.Medium" />
+                <BoxView HeightRequest="1" Color="{StaticResource Outline}" />
+
+                <material:TextField Title="Notes" Text="{Binding Notes}" MaxLength="500" />
+
+                <HorizontalStackLayout>
+                    <CheckBox Style="{StaticResource MD3CheckBox}" IsChecked="{Binding IsActive}" />
+                    <Label Text="Active Status" StyleClass="Body.Medium" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout>
+                    <CheckBox Style="{StaticResource MD3CheckBox}" IsChecked="{Binding EmailNotifications}" />
+                    <Label Text="Email Notifications" StyleClass="Body.Medium" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout>
+                    <CheckBox Style="{StaticResource MD3CheckBox}" IsChecked="{Binding SmsNotifications}" />
+                    <Label Text="SMS Notifications" StyleClass="Body.Medium" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>
