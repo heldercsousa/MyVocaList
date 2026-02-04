@@ -8,7 +8,20 @@
       "WebFetch(domain:github.com)",
       "Bash(dotnet clean:*)",
       "Bash(git rm:*)",
-      "Bash(dotnet restore:*)"
+      "Bash(dotnet restore:*)",
+      "Bash(dir /s /b \"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\*.ttf\")",
+      "Bash(dir \"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\MyVocaList\\\\Resources\\\\Fonts\")",
+      "Bash(dotnet list package:*)",
+      "Bash(dotnet package search:*)",
+      "WebFetch(domain:www.nuget.org)",
+      "Bash(Select-Object -Last 50)",
+      "Bash(git mv:*)",
+      "Bash(dotnet list:*)",
+      "Bash(findstr:*)",
+      "Bash(curl:*)",
+      "Bash(dotnet nuget list source:*)",
+      "Bash(dotnet nuget add source:*)",
+      "Bash(dotnet remove package:*)"
     ]
   }
 }

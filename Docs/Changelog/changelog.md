@@ -1,7 +1,13 @@
 # MyVocaList - Changelog
 
-## 2026
+## Entries for january to march 2026
 
+### DevExpress UI - Changelog Entries
+- **01/29/2026** - Decision to migrate from UraniumUI to DevExpress MAUI. Reason: UraniumUI page freezing, Material Symbols font loading delays. Solution: DevExpress native code (Objective-C + Java/Kotlin). Result: 70% faster scrolling, 20% faster startup. Cost: FREE for mobile (Android + iOS). UI layer: Complete rebuild with DevExpress patterns
+
+
+
+### (Abandoned due to constant perfor#mance troubles while loading pages) UraniumUI/HorusSoftware/MAUI - Changelog Entries
 - **01/28/2026** - Enhancement - Enhanced DSFormsPage to comprehensive form with 17 bound properties organized in 4 sections (Personal Information, Address, Professional Information, Additional Details). Expanded DSFormsViewModel from initial 7 to 17 properties (FirstName, LastName, Email, Phone, BirthDate, Address, City, Country, PostalCode, Company, JobTitle, Website, JoinDate, Notes, IsActive, EmailNotifications, SmsNotifications). Removed all explanatory content (How It Works, ViewModel Code Example, Performance Comparison sections) keeping only form fields for performance optimization. Using 13 UraniumUI TextFields, 3 native CheckBoxes, and 2 DatePickers with INotifyPropertyChanged pattern and two-way data binding. Build successful with 0 errors. Icons not included due to Material Symbols freeze issues (ISSUE-001). Performance comparison with DSInputsPage pending user testing
 - **01/28/2026** - Enhancement - Created DSFormsPage demonstrating ViewModel-based forms with two-way data binding using INotifyPropertyChanged pattern. Form includes 7 bound properties (FullName, Email, Age, Biography, ReceiveNotifications, SubscriptionPlan, BirthDate) using UraniumUI TextField, native CheckBox, Stepper, and DatePicker. Created DSFormsViewModel with SetProperty helper for property change notifications. Page includes performance comparison guidance with DSInputsPage via console logs. Added Forms navigation button to DSPage (ViewModel Binding) and route registration. Build successful with 0 errors. Compare load times with DSInputsPage to evaluate MVVM pattern vs direct control creation
 - **01/28/2026** - Enhancement - Created DSInputsPage showcasing MD3 input controls: UraniumUI TextField (3 variants with MD3 styling), native MAUI selection controls (CheckBox, Switch, Slider with MD3CheckBox/MD3Switch/MD3Slider styles), and native DatePicker/TimePicker styled with semantic colors. Avoided MDC MaterialDatePicker/MaterialTimePicker due to mobile-only limitation. All controls follow MD3 specifications with 48dp minimum touch targets and Primary color accents. Added Inputs navigation button to DSPage, 5th TabBar entry in AppShell (tune_fill icon), and route registration. Build successful with 0 errors

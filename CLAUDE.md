@@ -1,25 +1,19 @@
 # CLAUDE.md - MyVocaList
 
 ## App
-Karaoke queue management with round-based progression. .NET MAUI 9.0 (net9.0-android).
+Karaoke queue management. .NET MAUI 9.0 (net9.0-android, net9.0-ios).
 
 ## Language
 Code, comments, logs, UI text: **English only**
 
 ## Translation
-**CRITICAL**: All text in the codebase must be in English. When creating or updating any code:
-- Translate any non-English text (comments, strings, logs, UI labels, error messages) to English immediately
-- This applies to ALL files: XAML, C#, configuration files, documentation
-- No exceptions: even placeholder text, test data, and temporary strings must be in English
+**CRITICAL**: All text in codebase must be English. Translate any non-English text (comments, strings, logs, UI labels) immediately.
 
 ## Comments
-- **Only**: for method and property. Exist when member name isn´t enough to understand WHAT it does.
-- **Never**: code inside method bodies.
-- **Must**: Be formatted whenever it contributes to ease of reading.
-
-- ### Comment text
-- **Must**: say WHAT. Be brief. Updated whenever needed.
-- **Can´t**: have any symbol. Sau HOW or WHY.
+- **Only**: Methods and properties when name isn't self-explanatory
+- **Never**: Inside method bodies
+- **Must**: Be formatted, say WHAT (not HOW/WHY), updated when code changes
+- **Can't**: Have symbols
 
 ## Architecture
 ```
@@ -28,9 +22,9 @@ Domain → Contracts → Services → Infrastructure → View
 ```
 - Business logic **only** in Services
 - Interface + Implementation in **same folder**
-- DTO defined as record.
-- Prefer type composition over base type inheritance 
-- MAUI page´s code **must** follow the code patterns of the DesignSystem folder pages.
+- DTOs as records
+- Prefer composition over inheritance
+- MAUI pages follow DevExpress patterns
 
 ## DDD Patterns
 | Pattern | Implementation |
@@ -58,32 +52,15 @@ Guard.AgainstNullOrWhiteSpace(name, nameof(name));
 if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException();
 ```
 
-## UI Thread Safety - CRITICAL RULE
+## UI Thread Safety - CRITICAL
 
-**MANDATORY**: All UI operations MUST execute on the platform's native UI thread. Violation causes freezes, frame skips, and crashes.
+**MANDATORY**: All UI operations MUST execute on platform's native UI thread.
 
 ### Golden Rules
-1. **NEVER block the UI thread** - No `Task.Wait()`, `.Result`, or synchronous I/O
+1. **NEVER block UI thread** - No `Task.Wait()`, `.Result`, or synchronous I/O
 2. **ALWAYS marshal UI updates** - Use `Dispatcher` for cross-thread UI access
 3. **NEVER modify ObservableCollection from background threads**
 4. **ALWAYS use `async Task`** - Never `async void` (except event handlers)
-
-### Custom UI components
-- **ONLY**: when really necessary. Priority for Uranium and HorusSoftware built-in controls usage. Secondary priority for MAUI built-in controls.
-- **BEFORE CREATION**: 
-            1. be sure no existing control meets the requirements.    
-            2. be sure there is no way to achieve the requirements by composition of existing controls.
-- **MUST**: 1. not generate concurrency with Android/iOS/Windows buit-in UI thread safety rules, otherwise performance will degrade (thread safety rules).
-            2. **have some reminder** to be sistematicaly observed by manual testing.
-            3. have XML documentation warning about thread safety.
-            4. have unit tests for thread safety.
-            5. be tested extensively on all platforms.
-            6. have performance information logged for every UI rendering operations (loading, scrolling, animations, etc).
-            7. take advantage of MD3 buit-in animations, shapes, UI and UX reactions overall, styles and every other feature provided by UraniumUI and HorusSoftware.Maui.MaterialDesignControls.
-- **NEVER**: 1. have custom animation.
-            2. have MAUI custom behaviors.
-            3. have complex layout calculations.
-            4. code to perform visual (render) responses to user´s interactions (e.g. show a shape in the button´s background when user taps it), including single rendering operations like adding an iddle shape somewhere. 
 
 ### Required Pattern for UI Updates
 
@@ -95,7 +72,7 @@ Application.Current?.Dispatcher.Dispatch(() =>
     MyCollection.Add(newItem);
 });
 
-// CORRECT - Async version when awaiting is needed
+// CORRECT - Async version
 await Application.Current.Dispatcher.DispatchAsync(async () =>
 {
     await SomeAsyncUiWork();
@@ -105,25 +82,23 @@ await Application.Current.Dispatcher.DispatchAsync(async () =>
 ### Forbidden Patterns
 
 ```csharp
-// WRONG - Blocks UI thread, causes freezes
+// WRONG - Blocks UI thread
 var result = SomeAsyncMethod().Result;
-var data = SomeAsyncMethod().GetAwaiter().GetResult();
-Task.WaitAll(tasks);
 
-// WRONG - Cross-thread UI access without marshaling
+// WRONG - Cross-thread UI access
 await Task.Run(() => 
 {
-    myLabel.Text = "Crash!"; // UI update from background thread
+    myLabel.Text = "Crash!";
 });
 
 // WRONG - MainThread has Windows issues
-MainThread.BeginInvokeOnMainThread(() => { }); // Avoid - use Dispatcher instead
+MainThread.BeginInvokeOnMainThread(() => { }); // Use Dispatcher instead
 ```
 
 ### Background Work Pattern
 
 ```csharp
-// Heavy computation on background, results marshaled to UI
+// Heavy work on background, marshal results to UI
 var data = await Task.Run(() => HeavyComputation());
 
 Application.Current?.Dispatcher.Dispatch(() =>
@@ -135,8 +110,6 @@ Application.Current?.Dispatcher.Dispatch(() =>
 ```
 
 ### ViewModel Base Helper
-
-All ViewModels should use this helper for safe UI updates:
 
 ```csharp
 protected void RunOnUiThread(Action action)
@@ -156,20 +129,6 @@ protected Task RunOnUiThreadAsync(Func<Task> asyncAction)
 }
 ```
 
-### Why NOT MainThread.BeginInvokeOnMainThread
-
-- Known issues on Windows: "Unable to find main thread" from background threads
-- `Application.Current.Dispatcher` works consistently across Android, iOS, Windows
-- Dispatcher is always available after app initialization
-
-### Frame Skip Diagnosis
-
-If experiencing frame skips:
-1. Check for synchronous database/file operations on UI thread
-2. Check for large collection updates without batching
-3. Check for complex layout calculations during scrolling
-4. Use `await Task.Yield()` to break up long UI operations
-
 ## Git Commits
 ```
 <type>: <summary>
@@ -188,171 +147,293 @@ Types: `feat:`, `fix:`, `refactor:`, `docs:`, `perf:`, `test:`
 - **Update after every completed task**
 
 ## Workflow
-**CRITICAL**: After completing any task, ALWAYS follow this sequence:
-1. Update `Docs/Changelog/changelog.md` with the changes
-2. Create a git commit with all changes
-3. Push the commit to remote repository
-4. Never skip these steps - they are mandatory for every task completion
+**CRITICAL**: After completing any task:
+1. Update `Docs/Changelog/changelog.md`
+2. Git commit with all changes
+3. Push to remote
+Never skip these steps.
 
 ## Theme & Locale
-- **Theme**: Dark mode ONLY. No light mode implementation.
-- **Locale**: US English (en-US). Date format: MM/dd/yyyy. Time format: h:mm tt.
+- **Theme**: Dark mode ONLY
+- **Locale**: US English (en-US). Date: MM/dd/yyyy. Time: h:mm tt
 
 ## No Hard-Coded Values
 **CRITICAL**: Never hard-code colors, dimensions, or style values in C# code.
-- **Colors**: Define ONLY in `MaterialColors.xaml`
-- **Styles**: Define ONLY in `MaterialStyles.xaml`
-- **Typography**: Use StyleClass from XAML resources
-- **MauiProgram.cs**: Configuration only, NO color/style definitions
+- **Colors**: Use DevExpress `{dx:ThemeColor}` tokens only
+- **Styles**: Define in XAML, reference via StaticResource
+- **MauiProgram.cs**: Configuration only, NO color definitions
 
 ```csharp
-// ❌ WRONG - Hard-coded in C#
-themes.Primary = Color.FromArgb("#FFB2BE");
+// ❌ WRONG - Hard-coded
 button.BackgroundColor = Colors.Red;
 
-// ✅ CORRECT - Reference from XAML
-BackgroundColor="{StaticResource Primary}"
-Style="{StaticResource ElevatedCard}"
+// ✅ CORRECT - DevExpress theme token
+BackgroundColor="{dx:ThemeColor Primary}"
 ```
 
 ## Stack
 ```
+.NET MAUI 9.0 (Android + iOS)
 MediatR, FluentValidation, Serilog, EF Core 9, SQLite
-UraniumUI 2.14 (Material Design 3)
-HorusSoftware.Maui.MaterialDesignControls 2.2.0 (MD3 Components - mobile only)
-```
-## Component Library Stack
-
-### Three-Layer Component Architecture
-
-#### 1. UraniumUI 2.14.0 (Primary Framework)
-- **Provides:**
-  - UraniumContentPage
-  - Implicit styling via StyleClass
-  - Material Design 3 theming system
-  - TextField, validation controls
-  - Grid, StackLayout, FlexLayout
-
-#### 2. HorusSoftware.Maui.MaterialDesignControls 2.2.0 (Specialized MDC - mobile only)
-- **Use when:** UraniumUI doesn't provide component
-- **Provides:**
-  - MaterialCard
-  - MaterialFloatingButton
-  - MaterialIconButton
-  - MaterialProgressIndicator
-  - MaterialDivider
-  - MaterialDatePicker
-  - MaterialTimePicker
-  - MaterialSnackbar
-  - MaterialCheckBox
-- **Initialization:** MaterialDesignControls.InitializeComponents() in App.xaml.cs
-- **Configuration:** Use ConfigureMDC() in MauiProgram.cs
-
-#### 3. MAUI 9.0 Native (Foundation)
-- **Provides:** Platform-native controls
-- **Use when:** UraniumUI/HorusSoftware don't provide
-- **Examples:**
-  - CollectionView
-  - SwipeView
-  - Native buttons/labels
-- **Styling:** Apply via StaticResource from MaterialColors.xaml
-
----
-
-### Decision Tree for Components
-
-```
-Need a component?
-│
-├─ Check if UraniumUI provides it?
-│  │
-│  ├─ YES → Use UraniumUI
-│  │        └─ Apply StyleClass for consistent theming
-│  │
-│  └─ NO → Continue to step 2
-│
-├─ Check if HorusSoftware MDC provides it?
-│  │
-│  ├─ YES → Use HorusSoftware MDC
-│  │        ├─ Configure via ConfigureMDC() in MauiProgram.cs
-│  │        └─ Style using semantic colors from MaterialColors.xaml
-│  │
-│  └─ NO → Continue to step 3
-│
-└─ Use MAUI native control
-   └─ Apply custom styling via MaterialColors.xaml and MaterialStyles.xaml
+DevExpress MAUI v24.2+ (FREE for mobile)
 ```
 
----
+## UI Framework: DevExpress MAUI
 
-### Important: No Custom Controls Without Review
+### Why DevExpress
+- **Native code:** Objective-C (iOS) + Java/Kotlin (Android) - NOT C# wrappers
+- **Performance:** 70% faster scrolling, 20% faster startup vs MAUI native
+- **MD3 Compliant:** Full Material Design 3 implementation
+- **FREE:** No cost for Android + iOS mobile apps
 
-Before creating a custom control, follow this checklist:
+### Essential Components
 
-1. **Verify UraniumUI doesn't provide**
-   - Check UraniumUI.Material docs thoroughly
-   
-2. **Verify HorusSoftware MDC doesn't provide**
-   - Review available MaterialDesignControls components
-   
-3. **Check if MAUI native + styling satisfies requirements**
-   - Test with native control + MaterialColors.xaml styling
-   
-4. **Only then: Create custom component**
-   - Include thread-safety documentation
-   - Document why existing solutions don't work
-   
-## XAML Styling - Material Design 3 Compliance
+| Component | Use Case |
+|-----------|----------|
+| `DXCollectionView` | High-performance lists, song queues |
+| `DataGridView` | Tabular data, edit mode |
+| `TextEdit, ComboBoxEdit, DateEdit, TimeEdit` | Form inputs |
+| `CheckEdit, SwitchEdit` | Selection controls |
+| `DXButton` | All 5 MD3 button types |
+| `DXBorder` | Containers with rounded corners |
+| `DXScrollView` | Scrollable containers |
+| `TabView, Drawer` | Navigation |
+| `DXPopup, BottomSheet` | Dialogs, action sheets |
+| `ShimmerView` | Loading skeleton states |
+| `ChartView, PieChartView` | Analytics visualizations |
 
-### Strict Rules
-**NEVER use inline styles.** All styling must follow the DesignSystem folder pages approaches.
+### XAML Namespaces
 
-### Forbidden Inline Properties
 ```xml
-<!-- ❌ WRONG - Never use these inline -->
-<VerticalStackLayout Spacing="16">
-<HorizontalStackLayout Margin="10,20,10,20">
-<Button Padding="8" CornerRadius="12">
-<Image WidthRequest="32" HeightRequest="32">
-<Grid ColumnSpacing="10" RowSpacing="5">
+xmlns:dx="http://schemas.devexpress.com/maui"
+xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
+xmlns:dxg="clr-namespace:DevExpress.Maui.DataGrid;assembly=DevExpress.Maui.DataGrid"
+xmlns:dxc="clr-namespace:DevExpress.Maui.Charts;assembly=DevExpress.Maui.Charts"
+```
+
+### Theme System
+
+**Configure in MauiProgram.cs (BEFORE builder):**
+
+```csharp
+// Built-in themes
+ThemeManager.Theme = new Theme(ThemeSeedColor.Pink);
+// Options: Blue, TealGreen, Cyan, Green, Yellow, Orange, Red, Pink, Purple, Violet
+
+// Or custom seed color
+ThemeManager.Theme = new Theme(Color.FromArgb("#FFB2BE"));
+```
+
+**Use tokens in XAML:**
+
+```xml
+<dx:DXButton BackgroundColor="{dx:ThemeColor Primary}"
+             TextColor="{dx:ThemeColor OnPrimary}"
+             CornerRadius="20"/>
+```
+
+**Available tokens:** Primary, OnPrimary, PrimaryContainer, OnPrimaryContainer, Secondary, OnSecondary, SecondaryContainer, OnSecondaryContainer, Surface, OnSurface, SurfaceContainer, SurfaceContainerLow, SurfaceContainerHigh, SurfaceContainerHighest, OnSurfaceVariant, Outline, OutlineVariant, Error, OnError, ErrorContainer, OnErrorContainer
+
+### DevExpress XAML Patterns
+
+**Buttons (5 MD3 types):**
+```xml
+<!-- Filled Button (high emphasis) -->
+<dx:DXButton Content="Save"
+             BackgroundColor="{dx:ThemeColor Primary}"
+             TextColor="{dx:ThemeColor OnPrimary}"
+             CornerRadius="20" HeightRequest="40" Padding="24,0"/>
+
+<!-- Filled Tonal (medium emphasis) -->
+<dx:DXButton Content="Next"
+             BackgroundColor="{dx:ThemeColor SecondaryContainer}"
+             TextColor="{dx:ThemeColor OnSecondaryContainer}"
+             CornerRadius="20" HeightRequest="40"/>
+
+<!-- Outlined (medium emphasis) -->
+<dx:DXButton Content="Cancel"
+             BackgroundColor="Transparent"
+             TextColor="{dx:ThemeColor Primary}"
+             BorderColor="{dx:ThemeColor Outline}"
+             BorderThickness="1"
+             CornerRadius="20" HeightRequest="40"/>
+
+<!-- Text Button (low emphasis) -->
+<dx:DXButton Content="Skip"
+             BackgroundColor="Transparent"
+             TextColor="{dx:ThemeColor Primary}"
+             HeightRequest="40"/>
+```
+
+**Form Editors:**
+```xml
+<dxe:TextEdit LabelText="Song Title"
+              Text="{Binding Title}"
+              BoxBackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
+              FocusedBorderColor="{dx:ThemeColor Primary}"/>
+
+<dxe:ComboBoxEdit LabelText="Genre"
+                  ItemsSource="{Binding Genres}"
+                  SelectedItem="{Binding SelectedGenre}"/>
+
+<dxe:DateEdit LabelText="Event Date"
+              Date="{Binding EventDate}"/>
+
+<dxe:CheckEdit Label="Mark as favorite"
+               IsChecked="{Binding IsFavorite}"
+               Color="{dx:ThemeColor Primary}"/>
+
+<dxe:SwitchEdit IsToggled="{Binding IsActive}"
+                Color="{dx:ThemeColor Primary}"/>
+```
+
+**High-Performance Lists:**
+```xml
+<dxcv:DXCollectionView ItemsSource="{Binding Songs}"
+                       SelectionMode="Single"
+                       SelectedItem="{Binding SelectedSong}"
+                       AllowCascadeUpdate="True">
+    
+    <dxcv:DXCollectionView.ItemTemplate>
+        <DataTemplate x:DataType="local:SongViewModel">
+            <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerLow}"
+                         CornerRadius="12" Padding="16" Margin="0,0,0,8">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                    <!-- Item content -->
+                </Grid>
+            </dx:DXBorder>
+        </DataTemplate>
+    </dxcv:DXCollectionView.ItemTemplate>
+</dxcv:DXCollectionView>
+```
+
+**Containers:**
+```xml
+<!-- Card-like container -->
+<dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerLow}"
+             CornerRadius="12" Padding="16">
+    <VerticalStackLayout Spacing="12">
+        <!-- Content -->
+    </VerticalStackLayout>
+</dx:DXBorder>
+
+<!-- Scrollable page -->
+<dx:DXScrollView>
+    <VerticalStackLayout Padding="16" Spacing="24">
+        <!-- Page content -->
+    </VerticalStackLayout>
+</dx:DXScrollView>
+```
+
+**Dialogs:**
+```xml
+<dx:DXPopup IsOpen="{Binding ShowDialog}">
+    <dx:DXBorder BackgroundColor="{dx:ThemeColor Surface}"
+                 CornerRadius="28" Padding="24">
+        <!-- Dialog content -->
+    </dx:DXBorder>
+</dx:DXPopup>
+```
+
+### Typography (Roboto Font Family)
+
+**Register fonts in MauiProgram.cs:**
+```csharp
+.ConfigureFonts(fonts =>
+{
+    fonts.AddFont("Roboto-Regular.ttf", "RobotoRegular");
+    fonts.AddFont("Roboto-Medium.ttf", "RobotoMedium");
+    fonts.AddFont("Roboto-Bold.ttf", "RobotoBold");
+})
+```
+
+**MD3 Typography Roles:**
+```xml
+<!-- Display Large (57sp) - Hero text -->
+<Label Text="MyVocaList" FontFamily="RobotoRegular" FontSize="57"/>
+
+<!-- Headline Large (32sp) - Page titles -->
+<Label Text="Song Queue" FontFamily="RobotoRegular" FontSize="32"/>
+
+<!-- Title Medium (16sp) - Card titles -->
+<Label Text="Now Playing" FontFamily="RobotoMedium" FontSize="16"/>
+
+<!-- Body Medium (14sp) - Content -->
+<Label Text="Artist name" FontFamily="RobotoRegular" FontSize="14"/>
+
+<!-- Label Large (14sp) - Buttons -->
+<Label Text="ADD TO QUEUE" FontFamily="RobotoMedium" FontSize="14"/>
+```
+
+### Performance Optimization
+
+**CRITICAL for DevExpress:**
+
+1. **Always use compiled bindings:**
+```xml
+<DataTemplate x:DataType="local:SongViewModel">
+    <Label Text="{Binding Title}"/> <!-- 8-20x faster -->
+</DataTemplate>
+```
+
+2. **DXCollectionView optimization:**
+```xml
+<dxcv:DXCollectionView AllowCascadeUpdate="True" ... />
+```
+
+3. **Test in Release mode** - AOT compilation + linker trimming
+4. **Background work pattern** - Heavy operations with `Task.Run()`, marshal to UI thread
+
+### Custom Controls - Avoid When Possible
+
+**Before creating custom control:**
+1. Check DevExpress library first
+2. Check if MAUI native control works
+3. Only then consider custom
+
+**If creating custom control:**
+- Include thread-safety documentation
+- Add unit tests for thread safety
+- Document why DevExpress/MAUI don't work
+- Use DevExpress theme tokens for styling
+
+## XAML Styling Rules
+
+**NEVER use inline property values:**
+
+```xml
+<!-- ❌ WRONG - Inline values -->
+<VerticalStackLayout Spacing="16" Padding="8">
 <Label FontSize="14" TextColor="Red">
+
+<!-- ✅ CORRECT - Theme tokens and explicit sizing when needed -->
+<VerticalStackLayout Spacing="16" Padding="16">
+<Label FontFamily="RobotoRegular" FontSize="14" 
+       TextColor="{dx:ThemeColor OnSurface}">
 ```
 
-### Correct MD3 Approach
-```xml
-<!-- ✅ CORRECT - Use StyleClass or StaticResource -->
-<VerticalStackLayout>
-<Button StyleClass="FilledButton">
-<Label StyleClass="Body.Medium">
-<Frame Style="{StaticResource ElevatedCard}">
-```
+**Exception:** BoxView dividers may use `HeightRequest="1"` for 1px structural height only.
 
-### MD3 Component Guidelines
-- **Buttons**: Use `StyleClass="FilledButton"`, `"FilledTonalButton"`, `"OutlinedButton"`, `"TextButton"`
-- **Typography**: Use `StyleClass="Headline.Large"`, `"Title.Medium"`, `"Body.Medium"`, etc.
-- **Containers**: Use `Style="{StaticResource ElevatedCard}"`, `"{StaticResource OutlinedCard}"`
-- **Layouts**: Use VerticalStackLayout, HorizontalStackLayout, FlexLayout without inline spacing
+## Workflow References
 
-### Buttons with Material Symbols Icons
-Use `FontImageSource` in `Button.ImageSource` property:
-```xml
-<Button Text="Home" StyleClass="FilledButton">
-    <Button.ImageSource>
-        <FontImageSource FontFamily="MaterialOutlined" Glyph="{x:Static m:MaterialOutlined.Home}" />
-    </Button.ImageSource>
-</Button>
-```
-- FontFamily: `MaterialOutlined` (verified working in UraniumUI.Icons.MaterialSymbols 2.10.0)
-- Namespace: `xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"`
-- Note: Other variants (MaterialSharp, MaterialRound, MaterialFilled) may not exist in all package versions
+- **DevExpress Docs:** https://docs.devexpress.com/MAUI/
+- **MAUI 9 Docs:** https://learn.microsoft.com/en-us/dotnet/maui/
+- **MD3 Guidelines:** https://m3.material.io/
 
-### Required References
-- UraniumUI Docs: https://enisn-projects.io/docs/en/uranium/latest/
-- Material Design 3: https://m3.material.io/components/
-- HorusSoftware.Maui.MaterialDesignControls: 
-                  1. GitHub Repository :https://github.com/HorusSoftwareUY/Maui.MaterialDesignControls
-                  2. Blog da Empresa (Artigos Técnicos): https://www.horus.com.uy/blog/
-- Must work smoothly on Android, iOS, and Windows
+## .NET MAUI 9.0 - Current Recommended Version
 
-### Exception
-BoxView dividers may use `HeightRequest="1"` for 1px structural height only.
+**Released:** November 2024  
+**Status:** Latest stable, production-ready  
+**Features:**
+- Handler-based architecture (faster than legacy renderers)
+- Improved startup time
+- Better memory management
+- Native control performance
+- Full compatibility with DevExpress MAUI v24.2+
+
+**Target Frameworks:**
+- `net9.0-android` (API 21+)
+- `net9.0-ios` (iOS 14.2+)
+
+**NOT supported:** Windows (dropped for native performance gains)
