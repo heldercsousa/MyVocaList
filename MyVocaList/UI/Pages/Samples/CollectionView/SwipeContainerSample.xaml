@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
+             xmlns:local="clr-namespace:MyVocaList.UI.Pages.Samples.CollectionView"
+             x:Class="MyVocaList.UI.Pages.Samples.CollectionView.SwipeContainerSample"
+             Title="Swipe Actions Sample">
+
+    <ContentPage.BindingContext>
+        <local:SwipeContainerSampleViewModel/>
+    </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+        <Style TargetType="dxcv:SwipeItem">
+            <Setter Property="FontColor" Value="White"/>
+            <Setter Property="FontSize" Value="Medium"/>
+        </Style>
+
+        <Style x:Key="SeparatorStyle" TargetType="BoxView">
+            <Setter Property="Color" Value="{StaticResource Outline}"/>
+            <Setter Property="HeightRequest" Value="1"/>
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid>
+        <dxcv:DXCollectionView ItemsSource="{Binding QueueItems}"
+                               Margin="0">
+            <dxcv:DXCollectionView.ItemTemplate>
+                <DataTemplate>
+                    <dxcv:SwipeContainer>
+                        <!-- Main Item View -->
+                        <dxcv:SwipeContainer.ItemView>
+                            <Grid Padding="16,12" 
+                                  BackgroundColor="{Binding ItemColor}"
+                                  MinimumHeightRequest="72">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Label Text="{Binding SongTitle}" 
+                                       FontFamily="RobotoMedium"
+                                       FontSize="16"
+                                       TextColor="{StaticResource OnSurface}"
+                                       Grid.Row="0"/>
+
+                                <Label Text="{Binding SingerName}" 
+                                       FontFamily="RobotoRegular"
+                                       FontSize="14"
+                                       TextColor="{StaticResource OnSurfaceVariant}"
+                                       Grid.Row="1"/>
+
+                                <BoxView Style="{StaticResource SeparatorStyle}" 
+                                         VerticalOptions="End" 
+                                         Grid.RowSpan="2"/>
+                            </Grid>
+                        </dxcv:SwipeContainer.ItemView>
+
+                        <!-- Start Swipe (Left) - Play Now -->
+                        <dxcv:SwipeContainer.StartSwipeItems>
+                            <dxcv:SwipeContainerItem 
+                                Caption="{Binding ActionText}"
+                                BackgroundColor="#4CAF50"
+                                Image="{Binding ActionIcon}"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:SwipeContainerSampleViewModel}}, Path=ToggleSongStateCommand}"
+                                CommandParameter="{Binding .}"/>
+                        </dxcv:SwipeContainer.StartSwipeItems>
+
+                        <!-- End Swipe (Right) - Remove -->
+                        <dxcv:SwipeContainer.EndSwipeItems>
+                            <dxcv:SwipeContainerItem 
+                                Caption="Remove"
+                                BackgroundColor="#F44336"
+                                Image="delete_icon.png"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:SwipeContainerSampleViewModel}}, Path=RemoveSongCommand}"
+                                CommandParameter="{Binding .}"/>
+                        </dxcv:SwipeContainer.EndSwipeItems>
+                    </dxcv:SwipeContainer>
+                </DataTemplate>
+            </dxcv:DXCollectionView.ItemTemplate>
+        </dxcv:DXCollectionView>
+    </Grid>
+</ContentPage>

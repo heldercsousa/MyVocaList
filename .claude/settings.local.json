@@ -21,7 +21,8 @@
       "Bash(curl:*)",
       "Bash(dotnet nuget list source:*)",
       "Bash(dotnet nuget add source:*)",
-      "Bash(dotnet remove package:*)"
+      "Bash(dotnet remove package:*)",
+      "WebFetch(domain:docs.devexpress.com)"
     ]
   }
 }

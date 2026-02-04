@@ -27,6 +27,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{EF591AD0-F0C5-497A-9841-E26D10E8200A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Design\devexpress_samples_collectionview.md = Docs\Design\devexpress_samples_collectionview.md
+		Docs\Design\DEVEXPRESS_SAMPLES_COMPLETE_GUIDE_Starthere.md = Docs\Design\DEVEXPRESS_SAMPLES_COMPLETE_GUIDE_Starthere.md
+		Docs\Design\devexpress_samples_dataform_editors.md = Docs\Design\devexpress_samples_dataform_editors.md
+		Docs\Design\devexpress_samples_tabview_popup_bottomsheet.md = Docs\Design\devexpress_samples_tabview_popup_bottomsheet.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

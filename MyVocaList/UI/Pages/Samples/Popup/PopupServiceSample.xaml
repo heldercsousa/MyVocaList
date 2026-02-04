@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:dx="http://schemas.devexpress.com/maui"
+             xmlns:local="clr-namespace:MyVocaList.UI.Pages.Samples.Popup"
+             x:Class="MyVocaList.UI.Pages.Samples.Popup.PopupServiceSample"
+             Title="Popup Service Sample">
+
+    <ContentPage.BindingContext>
+        <local:PopupServiceSampleViewModel/>
+    </ContentPage.BindingContext>
+
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="16">
+                <Label Text="Popup Samples"
+                       FontFamily="RobotoMedium"
+                       FontSize="24"
+                       TextColor="{StaticResource OnSurface}"/>
+
+                <!-- Simple Alert -->
+                <Button Text="Show Simple Alert"
+                        StyleClass="FilledButton"
+                        Command="{Binding ShowSimpleAlertCommand}"/>
+
+                <!-- Confirmation Dialog -->
+                <Button Text="Show Confirmation"
+                        StyleClass="FilledTonalButton"
+                        Command="{Binding ShowConfirmationCommand}"/>
+
+                <!-- Custom Content Popup -->
+                <Button Text="Show Custom Popup"
+                        StyleClass="OutlinedButton"
+                        Command="{Binding ShowCustomPopupCommand}"/>
+
+                <!-- Result Display -->
+                <Frame BackgroundColor="{StaticResource SurfaceContainerHighest}"
+                       CornerRadius="12"
+                       Padding="16"
+                       IsVisible="{Binding HasResult}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Last Action:"
+                               FontFamily="RobotoMedium"
+                               FontSize="14"
+                               TextColor="{StaticResource Primary}"/>
+
+                        <Label Text="{Binding LastResult}"
+                               FontFamily="RobotoRegular"
+                               FontSize="14"
+                               TextColor="{StaticResource OnSurface}"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Custom Popup Definition -->
+        <dx:DXPopup x:Name="customPopup"
+                    AllowScrim="True"
+                    CornerRadius="28"
+                    ShadowRadius="8">
+            <dx:DXPopup.Content>
+                <Grid Padding="24"
+                      BackgroundColor="{StaticResource Surface}"
+                      WidthRequest="300"
+                      RowDefinitions="Auto,Auto,Auto,Auto"
+                      RowSpacing="16">
+
+                    <Label Text="Add to Queue?"
+                           FontFamily="RobotoMedium"
+                           FontSize="20"
+                           TextColor="{StaticResource OnSurface}"
+                           Grid.Row="0"/>
+
+                    <Label Text="This will add 'Bohemian Rhapsody' to the end of the queue."
+                           FontFamily="RobotoRegular"
+                           FontSize="14"
+                           TextColor="{StaticResource OnSurfaceVariant}"
+                           Grid.Row="1"/>
+
+                    <HorizontalStackLayout Spacing="12"
+                                          HorizontalOptions="End"
+                                          Grid.Row="2">
+                        <dx:DXButton Content="Cancel"
+                                     StyleClass="TextButton"
+                                     Clicked="OnCustomPopupCancel"/>
+
+                        <dx:DXButton Content="Add"
+                                     StyleClass="FilledButton"
+                                     Clicked="OnCustomPopupConfirm"/>
+                    </HorizontalStackLayout>
+                </Grid>
+            </dx:DXPopup.Content>
+        </dx:DXPopup>
+    </Grid>
+</ContentPage>
