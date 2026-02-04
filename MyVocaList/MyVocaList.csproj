@@ -2,7 +2,8 @@
 
 	<PropertyGroup>
 		<!--<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>-->
-		<TargetFrameworks>net9.0-android</TargetFrameworks>
+		<TargetFrameworks>net9.0-android;net9.0-ios</TargetFrameworks>
+		<OutputType>Exe</OutputType>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
@@ -14,7 +15,6 @@
 		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
 		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
 
-		<OutputType>Exe</OutputType>
 		<RootNamespace>MyVocaList</RootNamespace>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -63,14 +63,19 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
-		<PackageReference Include="UraniumUI.Icons.FontAwesome" Version="2.14.0" />
-		<PackageReference Include="UraniumUI.Icons.MaterialSymbols" Version="2.14.0" />
-		<PackageReference Include="UraniumUI.Material" Version="2.14.0" />
-	</ItemGroup>
 
-	<!-- HorusSoftware MDC only supports mobile platforms -->
-	<ItemGroup Condition="$(TargetFramework.Contains('-android')) OR $(TargetFramework.Contains('-ios')) OR $(TargetFramework.Contains('-maccatalyst'))">
-		<PackageReference Include="HorusStudio.Maui.MaterialDesignControls" Version="2.2.0" />
+		<!-- DevExpress MAUI Packages -->
+		<PackageReference Include="DevExpress.Maui.Core" Version="24.2.3" />
+		<PackageReference Include="DevExpress.Maui.CollectionView" Version="24.2.3" />
+		<PackageReference Include="DevExpress.Maui.Controls" Version="24.2.3" />
+		<PackageReference Include="DevExpress.Maui.Editors" Version="24.2.3" />
+
+		<!-- Serilog Packages -->
+		<PackageReference Include="Serilog" Version="4.2.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+		<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -92,6 +97,14 @@
 	  <MauiXaml Update="UI\Pages\DesignSystem\HomePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="UI\Pages\Samples\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Services\MyVocaList.Services.csproj" />
 	</ItemGroup>
 
 </Project>

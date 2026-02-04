@@ -12,16 +12,16 @@ namespace MyVocaList.Services;
 public class QueueService : IQueueService
 {
     private readonly AppDbContext _dbContext; // Direct for migrations
-    private readonly IEstabelecimentoRepository _venueRepository;
-    private readonly IEventoRepository _eventRepository;
-    private readonly IParticipacaoEventoRepository _participationRepository;
+    private readonly IVenueRepository _venueRepository;
+    private readonly IEventRepository _eventRepository;
+    private readonly IEventParticipationRepository _participationRepository;
     private readonly IPersonService _personService; // New dependency
 
     public QueueService(
         AppDbContext dbContext,
-        IEstabelecimentoRepository venueRepository,
-        IEventoRepository eventRepository,
-        IParticipacaoEventoRepository participationRepository,
+        IVenueRepository venueRepository,
+        IEventRepository eventRepository,
+        IEventParticipationRepository participationRepository,
         IPersonService personService)
     {
         _dbContext = dbContext;
@@ -36,20 +36,20 @@ public class QueueService : IQueueService
     /// <summary>
     /// Adds person to queue - delegates creation to PersonService
     /// </summary>
-    public async Task<(bool success, string message, Pessoa? addedDomainPerson)> AddPersonToQueueAsync(
+    public async Task<(bool success, string message, Person? addedDomainPerson)> AddPersonToQueueAsync(
         string fullName, string birthday = null, string email = null)
     {
         try
         {
             // Check if there is an active event
             var activeEvent = await GetActiveEventAsync();
-            if (activeEvent == null || !activeEvent.FilaAtiva)
+            if (activeEvent == null || !activeEvent.QueueActive)
             {
                 return (false, "There is no active queue at the moment", null);
             }
 
             // Delegate person creation/search to PersonService
-            Pessoa? person = null;
+            Person? person = null;
 
             // First try to find existing person
             person = await _personService.GetPersonByNameAsync(fullName);
@@ -65,7 +65,7 @@ public class QueueService : IQueueService
                 person = createResult.person;
             }
 
-            return (true, $"{person.NomeCompleto} added to queue!", person);
+            return (true, $"{person.FullName} added to queue!", person);
         }
         catch (Exception ex)
         {
@@ -76,7 +76,7 @@ public class QueueService : IQueueService
     /// <summary>
     /// Records participation in active event
     /// </summary>
-    public async Task RecordParticipationAsync(int personId, ParticipacaoStatus status)
+    public async Task RecordParticipationAsync(int personId, ParticipationStatus status)
     {
         if (personId == 0)
         {
@@ -89,10 +89,10 @@ public class QueueService : IQueueService
             activeEvent = await GetOrCreateDefaultEventAsync();
         }
 
-        var participation = new ParticipacaoEvento
+        var participation = new EventParticipation
         {
-            PessoaId = personId,
-            EventoId = activeEvent.Id,
+            PersonId = personId,
+            EventId = activeEvent.Id,
             Timestamp = DateTime.Now,
             Status = status
         };
@@ -103,7 +103,7 @@ public class QueueService : IQueueService
 
     // --- Event Management ---
 
-    public async Task<Evento?> GetActiveEventAsync()
+    public async Task<Event?> GetActiveEventAsync()
     {
         return await _eventRepository.GetActiveEventAsync();
     }
@@ -113,19 +113,19 @@ public class QueueService : IQueueService
         await _eventRepository.SetActiveEventAsync(eventId);
     }
 
-    public async Task<IEnumerable<Estabelecimento>> GetAllEstablishmentsAsync()
+    public async Task<IEnumerable<Venue>> GetAllEstablishmentsAsync()
     {
         return await _venueRepository.GetAllAsync();
     }
 
-    public async Task<IEnumerable<Evento>> GetAllEventsAsync()
+    public async Task<IEnumerable<Event>> GetAllEventsAsync()
     {
         return await _eventRepository.GetAllAsync();
     }
 
     // --- Private methods ---
 
-    private async Task<Evento> GetOrCreateDefaultEventAsync()
+    private async Task<Event> GetOrCreateDefaultEventAsync()
     {
         var activeEvent = await _eventRepository.GetActiveEventAsync();
         if (activeEvent == null)
@@ -133,17 +133,17 @@ public class QueueService : IQueueService
             var defaultVenue = (await _venueRepository.GetAllAsync()).FirstOrDefault();
             if (defaultVenue == null)
             {
-                defaultVenue = new Estabelecimento { Nome = "Default Venue Created Automatically" };
+                defaultVenue = new Venue { Name = "Default Venue Created Automatically" };
                 await _venueRepository.AddAsync(defaultVenue);
                 await _venueRepository.SaveChangesAsync();
             }
 
-            activeEvent = new Evento
+            activeEvent = new Event
             {
-                EstabelecimentoId = defaultVenue.Id,
-                DataEvento = DateTime.Today,
-                NomeEvento = $"Auto Event {DateTime.Today.ToShortDateString()}",
-                FilaAtiva = true
+                VenueId = defaultVenue.Id,
+                EventDate = DateTime.Today,
+                EventName = $"Auto Event {DateTime.Today.ToShortDateString()}",
+                QueueActive = true
             };
             await _eventRepository.AddAsync(activeEvent);
             await _eventRepository.SaveChangesAsync();

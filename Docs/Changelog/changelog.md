@@ -2,6 +2,8 @@
 
 ## Entries for january to march 2026
 
+- **02/04/2026** - Fix - Fixed compilation errors in Services project: Added Serilog packages (Serilog 4.2.0, Serilog.Extensions.Logging 8.0.0, Serilog.Sinks.Debug 3.0.0, Serilog.Sinks.File 6.0.0, Serilog.Enrichers.Thread 4.0.0) and Microsoft.Maui.Essentials 9.0.0 to Services project. Created VenueMapper class in Services/Mappers for mapping Venue entities to VenueListItemDto. Fixed VenueService tuple access (venue/hasEvents lowercase). Fixed VenueService to use GetByNameAsync instead of GetByNomeAsync. Fixed PersonService to use BirthdayDayMonth property instead of DiaMesAniversario. Fixed LanguageService to use SystemConfiguration entity (Key/Value) instead of ConfiguracaoSistema (Chave/Valor). Moved LoggingConfiguration and TranslateExtension from Services to MyVocaList/Extensions (UI layer) to comply with clean architecture. Removed DevExpress.Maui.DataForm package reference (doesn't exist). Commented out BoxCornerRadius property in MaterialStyles.xaml (removed in DevExpress 25.1.3). Upgraded Services project from net8.0 to net9.0. Added Services project reference to MyVocaList project. Build successful with 0 errors
+
 ### DevExpress UI - Changelog Entries
 - **01/29/2026** - Decision to migrate from UraniumUI to DevExpress MAUI. Reason: UraniumUI page freezing, Material Symbols font loading delays. Solution: DevExpress native code (Objective-C + Java/Kotlin). Result: 70% faster scrolling, 20% faster startup. Cost: FREE for mobile (Android + iOS). UI layer: Complete rebuild with DevExpress patterns
 

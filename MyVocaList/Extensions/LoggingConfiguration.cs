@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 
-namespace MyVocaList.Services;
+namespace MyVocaList.Extensions;
 
 /// <summary>
 /// Extension methods for configuring Serilog logging in MAUI applications.

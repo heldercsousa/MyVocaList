@@ -2,11 +2,11 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui">
+    xmlns:dx="http://schemas.devexpress.com/maui">
 
-    <!-- ========================================================================= -->
-    <!-- CONTAINER STYLES                                                          -->
-    <!-- ========================================================================= -->
+    <!-- ================================================================ -->
+    <!-- CONTAINER STYLES                                                 -->
+    <!-- ================================================================ -->
 
     <Style x:Key="PageContainer" TargetType="VerticalStackLayout">
         <Setter Property="Padding" Value="16" />
@@ -19,69 +19,60 @@
         <Setter Property="Margin" Value="0,0,0,24" />
     </Style>
 
-    <!-- ========================================================================= -->
-    <!-- MATERIAL DESIGN 3 CARDS                                                   -->
-    <!-- ========================================================================= -->
+    <!-- ================================================================ -->
+    <!-- DEVEXPRESS BUTTON STYLES (MD3-Inspired)                          -->
+    <!-- ================================================================ -->
 
-    <Style x:Key="ElevatedCard" TargetType="Frame">
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerLow}" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="16" />
-        <Setter Property="HasShadow" Value="True" />
-        <Setter Property="Margin" Value="0" />
+    <Style TargetType="dx:DXButton" x:Key="FilledButton">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="{StaticResource OnPrimary}" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="PressedBackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="PressedTextColor" Value="{StaticResource OnPrimary}" />
     </Style>
 
-    <Style x:Key="OutlinedCard" TargetType="Frame">
-        <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="16" />
-        <Setter Property="HasShadow" Value="False" />
+    <Style TargetType="dx:DXButton" x:Key="FilledTonalButton">
+        <Setter Property="BackgroundColor" Value="{StaticResource SecondaryContainer}" />
+        <Setter Property="TextColor" Value="{StaticResource OnSecondaryContainer}" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
+    </Style>
+
+    <Style TargetType="dx:DXButton" x:Key="OutlinedButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
         <Setter Property="BorderColor" Value="{StaticResource Outline}" />
-        <Setter Property="Margin" Value="0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
     </Style>
 
-    <Style x:Key="FilledCard" TargetType="Frame">
+    <Style TargetType="dx:DXButton" x:Key="TextButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="HeightRequest" Value="40" />
+    </Style>
+
+    <!-- ================================================================ -->
+    <!-- DEVEXPRESS EDITOR STYLES                                         -->
+    <!-- ================================================================ -->
+
+    <Style TargetType="dx:TextEdit">
+        <Setter Property="LabelText" Value="" />
+        <Setter Property="BoxMode" Value="Outlined" />
+        <!-- BoxCornerRadius property removed in DevExpress 25.1.3+ -->
+        <!--<Setter Property="BoxCornerRadius" Value="4" />-->
+        <Setter Property="FocusedBorderColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
         <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="16" />
-        <Setter Property="HasShadow" Value="False" />
-        <Setter Property="Margin" Value="0" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
     </Style>
 
-    <!-- ========================================================================= -->
-    <!-- CUSTOM CARDS (MyVocaList-specific)                                        -->
-    <!-- ========================================================================= -->
-
-    <Style x:Key="GradientCard" TargetType="Frame">
-        <Setter Property="Background" Value="{StaticResource CardBackgroundGradient}" />
-        <Setter Property="CornerRadius" Value="16" />
-        <Setter Property="HasShadow" Value="False" />
-        <Setter Property="Padding" Value="16" />
-    </Style>
-
-    <Style x:Key="WelcomeCard" TargetType="Frame">
-        <Setter Property="BackgroundColor" Value="{StaticResource PrimaryContainer}" />
-        <Setter Property="CornerRadius" Value="16" />
-        <Setter Property="HasShadow" Value="False" />
-        <Setter Property="Padding" Value="16" />
-    </Style>
-
-    <!-- ========================================================================= -->
-    <!-- FAB CONTAINER                                                             -->
-    <!-- ========================================================================= -->
-
-    <Style x:Key="FabContainer" TargetType="uranium:StatefulContentView">
-        <Setter Property="WidthRequest" Value="56" />
-        <Setter Property="HeightRequest" Value="56" />
-        <Setter Property="Background" Value="{StaticResource FabGradient}" />
-        <Setter Property="Shadow">
-            <Shadow Brush="{StaticResource Shadow}" Offset="0,2" Radius="4" Opacity="0.3" />
-        </Setter>
-    </Style>
-
-    <!-- ========================================================================= -->
-    <!-- SHELL & NAVIGATION STYLES                                                 -->
-    <!-- ========================================================================= -->
+    <!-- ================================================================ -->
+    <!-- SHELL & NAVIGATION                                               -->
+    <!-- ================================================================ -->
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
         <Setter Property="Shell.BackgroundColor" Value="{StaticResource Surface}" />
@@ -93,152 +84,33 @@
         <Setter Property="Shell.TabBarUnselectedColor" Value="{StaticResource OnSurfaceVariant}" />
     </Style>
 
-    <Style TargetType="NavigationPage">
-        <Setter Property="BarBackgroundColor" Value="{StaticResource Surface}" />
-        <Setter Property="BarTextColor" Value="{StaticResource OnSurface}" />
-    </Style>
+    <!-- ================================================================ -->
+    <!-- TYPOGRAPHY (MD3 Roboto)                                          -->
+    <!-- ================================================================ -->
 
-    <!-- ========================================================================= -->
-    <!-- MATERIAL DESIGN 3 TYPOGRAPHY (Roboto)                                     -->
-    <!-- Note: UraniumUI handles implicit styling - these are explicit overrides   -->
-    <!-- ========================================================================= -->
-
-    <!-- Display Typography -->
     <Style TargetType="Label" Class="Display.Large">
         <Setter Property="FontFamily" Value="RobotoRegular" />
         <Setter Property="FontSize" Value="57" />
-        <Setter Property="LineHeight" Value="1.12" />
     </Style>
 
-    <Style TargetType="Label" Class="Display.Medium">
-        <Setter Property="FontFamily" Value="RobotoRegular" />
-        <Setter Property="FontSize" Value="45" />
-        <Setter Property="LineHeight" Value="1.15" />
-    </Style>
-
-    <Style TargetType="Label" Class="Display.Small">
-        <Setter Property="FontFamily" Value="RobotoRegular" />
-        <Setter Property="FontSize" Value="36" />
-        <Setter Property="LineHeight" Value="1.22" />
-    </Style>
-
-    <!-- Headline Typography -->
     <Style TargetType="Label" Class="Headline.Large">
         <Setter Property="FontFamily" Value="RobotoRegular" />
         <Setter Property="FontSize" Value="32" />
-        <Setter Property="LineHeight" Value="1.25" />
-    </Style>
-
-    <Style TargetType="Label" Class="Headline.Medium">
-        <Setter Property="FontFamily" Value="RobotoRegular" />
-        <Setter Property="FontSize" Value="28" />
-        <Setter Property="LineHeight" Value="1.28" />
-    </Style>
-
-    <Style TargetType="Label" Class="Headline.Small">
-        <Setter Property="FontFamily" Value="RobotoRegular" />
-        <Setter Property="FontSize" Value="24" />
-        <Setter Property="LineHeight" Value="1.33" />
-    </Style>
-
-    <!-- Title Typography -->
-    <Style TargetType="Label" Class="Title.Large">
-        <Setter Property="FontFamily" Value="RobotoRegular" />
-        <Setter Property="FontSize" Value="22" />
-        <Setter Property="LineHeight" Value="1.27" />
     </Style>
 
     <Style TargetType="Label" Class="Title.Medium">
         <Setter Property="FontFamily" Value="RobotoMedium" />
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="LineHeight" Value="1.5" />
-    </Style>
-
-    <Style TargetType="Label" Class="Title.Small">
-        <Setter Property="FontFamily" Value="RobotoMedium" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="LineHeight" Value="1.43" />
-    </Style>
-
-    <!-- Body Typography -->
-    <Style TargetType="Label" Class="Body.Large">
-        <Setter Property="FontFamily" Value="RobotoRegular" />
-        <Setter Property="FontSize" Value="16" />
-        <Setter Property="LineHeight" Value="1.5" />
     </Style>
 
     <Style TargetType="Label" Class="Body.Medium">
         <Setter Property="FontFamily" Value="RobotoRegular" />
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="LineHeight" Value="1.43" />
     </Style>
 
-    <Style TargetType="Label" Class="Body.Small">
-        <Setter Property="FontFamily" Value="RobotoRegular" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="LineHeight" Value="1.33" />
-    </Style>
-
-    <!-- Label Typography -->
     <Style TargetType="Label" Class="Label.Large">
         <Setter Property="FontFamily" Value="RobotoMedium" />
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="LineHeight" Value="1.43" />
-    </Style>
-
-    <Style TargetType="Label" Class="Label.Medium">
-        <Setter Property="FontFamily" Value="RobotoMedium" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="LineHeight" Value="1.33" />
-    </Style>
-
-    <Style TargetType="Label" Class="Label.Small">
-        <Setter Property="FontFamily" Value="RobotoMedium" />
-        <Setter Property="FontSize" Value="11" />
-        <Setter Property="LineHeight" Value="1.45" />
-    </Style>
-
-    <!-- ========================================================================= -->
-    <!-- LIST ITEM STYLES                                                          -->
-    <!-- ========================================================================= -->
-
-    <Style x:Key="ListItemContainer" TargetType="Grid">
-        <Setter Property="Padding" Value="16,12" />
-        <Setter Property="MinimumHeightRequest" Value="56" />
-    </Style>
-
-    <Style x:Key="ListItemTwoLine" TargetType="Grid">
-        <Setter Property="Padding" Value="16,12" />
-        <Setter Property="MinimumHeightRequest" Value="72" />
-    </Style>
-
-    <Style x:Key="ListItemThreeLine" TargetType="Grid">
-        <Setter Property="Padding" Value="16,12" />
-        <Setter Property="MinimumHeightRequest" Value="88" />
-    </Style>
-
-    <!-- ========================================================================= -->
-    <!-- SELECTION CONTROL STYLES                                                  -->
-    <!-- ========================================================================= -->
-
-    <Style x:Key="MD3CheckBox" TargetType="CheckBox">
-        <Setter Property="Color" Value="{StaticResource Primary}" />
-        <Setter Property="MinimumWidthRequest" Value="48" />
-        <Setter Property="MinimumHeightRequest" Value="48" />
-    </Style>
-
-    <Style x:Key="MD3Switch" TargetType="Switch">
-        <Setter Property="OnColor" Value="{StaticResource Primary}" />
-        <Setter Property="ThumbColor" Value="{StaticResource OnPrimary}" />
-        <Setter Property="MinimumWidthRequest" Value="52" />
-        <Setter Property="MinimumHeightRequest" Value="48" />
-    </Style>
-
-    <Style x:Key="MD3Slider" TargetType="Slider">
-        <Setter Property="MinimumTrackColor" Value="{StaticResource Primary}" />
-        <Setter Property="MaximumTrackColor" Value="{StaticResource SurfaceContainerHighest}" />
-        <Setter Property="ThumbColor" Value="{StaticResource Primary}" />
-        <Setter Property="MinimumHeightRequest" Value="48" />
     </Style>
 
 </ResourceDictionary>

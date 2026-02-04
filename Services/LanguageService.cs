@@ -2,6 +2,7 @@ using MyVocaList.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using MyVocaList.Domain;
+using Microsoft.Maui.Storage;
 
 namespace MyVocaList.Services
 {
@@ -24,10 +25,10 @@ namespace MyVocaList.Services
                 return language;
 
             // If not found, check database
-            var setting = await _dbContext.ConfiguracoesSistema
-                .FirstOrDefaultAsync(c => c.Chave == PreferenceKey);
+            var setting = await _dbContext.SystemConfigurations
+                .FirstOrDefaultAsync(c => c.Key == PreferenceKey);
 
-            return setting?.Valor ?? CultureInfo.CurrentCulture.Name;
+            return setting?.Value ?? CultureInfo.CurrentCulture.Name;
         }
 
         public async Task SetUserLanguageAsync(string languageCode)
@@ -36,21 +37,21 @@ namespace MyVocaList.Services
             Preferences.Set(PreferenceKey, languageCode);
 
             // Save to database for persistence and backup
-            var setting = await _dbContext.ConfiguracoesSistema
-                .FirstOrDefaultAsync(c => c.Chave == PreferenceKey);
+            var setting = await _dbContext.SystemConfigurations
+                .FirstOrDefaultAsync(c => c.Key == PreferenceKey);
 
             if (setting == null)
             {
-                setting = new ConfiguracaoSistema
+                setting = new SystemConfiguration
                 {
-                    Chave = PreferenceKey,
-                    Valor = languageCode
+                    Key = PreferenceKey,
+                    Value = languageCode
                 };
-                _dbContext.ConfiguracoesSistema.Add(setting);
+                _dbContext.SystemConfigurations.Add(setting);
             }
             else
             {
-                setting.Valor = languageCode;
+                setting.Value = languageCode;
             }
 
             await _dbContext.SaveChangesAsync();

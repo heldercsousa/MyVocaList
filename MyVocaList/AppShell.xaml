@@ -3,43 +3,11 @@
     x:Class="MyVocaList.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:ds="clr-namespace:MyVocaList.UI.Pages.DesignSystem"
     Title="MyVocaList">
 
     <TabBar>
-        <!--
-        Icon Implementation: Custom SVG Files
-
-        Using SVG files for TabBar icons (recommended approach):
-        - Icon property accepts file name from Resources/Images folder
-        - SVG files support currentColor for dynamic theming
-        - Multiple variants available: outline, fill, rounded
-        - Minimal bundle size (only icons you use)
-
-        Current icons:
-        - home.svg, home_fill.svg, home_round.svg
-        - tune.svg, tune_fill.svg, tune_round.svg
-
-        Note: Material Symbols (FontImageSource) cannot be used directly
-        in Tab.Icon property. For Material Symbols comparison, see Design System page.
-
-        MD3 Standard: Maximum 5 tabs for bottom navigation
-        -->
-
-        <Tab Title="Design System" Icon="home">
-            <ShellContent ContentTemplate="{DataTemplate ds:DSPage}" Route="DSPage" />
-        </Tab>
-        <Tab Title="Typography" Icon="tune">
-            <ShellContent ContentTemplate="{DataTemplate ds:DSTypographyPage}" Route="DSTypographyPage" />
-        </Tab>
-        <Tab Title="Buttons" Icon="tune_round">
-            <ShellContent ContentTemplate="{DataTemplate ds:DSButtonsPage}" Route="DSButtonsPage" />
-        </Tab>
-        <Tab Title="Cards" Icon="home_fill">
-            <ShellContent ContentTemplate="{DataTemplate ds:DSCardsPage}" Route="DSCardsPage" />
-        </Tab>
-        <Tab Title="Inputs" Icon="tune_fill">
-            <ShellContent ContentTemplate="{DataTemplate ds:DSInputsPage}" Route="DSInputsPage" />
+        <Tab Title="Home" Icon="home.svg">
+            <ShellContent ContentTemplate="{DataTemplate ContentPage}" />
         </Tab>
     </TabBar>
 </Shell>

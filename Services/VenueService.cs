@@ -12,8 +12,8 @@ namespace MyVocaList.Services
     /// </summary>
     public class VenueService : IVenueService
     {
-        private readonly IEstabelecimentoRepository _venueRepository;
-        private readonly IEventoRepository _eventRepository;
+        private readonly IVenueRepository _venueRepository;
+        private readonly IEventRepository _eventRepository;
         private readonly ITextNormalizer _textNormalizer;
         private readonly ILogger<VenueService> _logger;
 
@@ -22,8 +22,8 @@ namespace MyVocaList.Services
         public int ShowCounterAt => 25;   // When to show counter
 
         public VenueService(
-            IEstabelecimentoRepository venueRepository,
-            IEventoRepository eventRepository,
+            IVenueRepository venueRepository,
+            IEventRepository eventRepository,
             ITextNormalizer textNormalizer,
             ILogger<VenueService> logger)
         {
@@ -61,7 +61,7 @@ namespace MyVocaList.Services
 
         #region CRUD Operations
 
-        public async Task<(bool success, string message, Estabelecimento? venue)> CreateVenueAsync(string name)
+        public async Task<(bool success, string message, Venue? venue)> CreateVenueAsync(string name)
         {
             // Validation
             var validation = ValidateNameInput(name);
@@ -73,14 +73,14 @@ namespace MyVocaList.Services
             name = name.Trim();
 
             // Check for duplicates
-            var existing = await _venueRepository.GetByNomeAsync(name);
+            var existing = await _venueRepository.GetByNameAsync(name);
             if (existing != null)
             {
                 return (false, "There is another venue registered with this name", null);
             }
 
             // Create new venue
-            var venue = new Estabelecimento { Nome = name };
+            var venue = new Venue { Name = name };
 
             await _venueRepository.AddAsync(venue);
             await _venueRepository.SaveChangesAsync();
@@ -109,14 +109,14 @@ namespace MyVocaList.Services
             }
 
             // Check for duplicates (except itself)
-            var existing = await _venueRepository.GetByNomeAsync(newName);
+            var existing = await _venueRepository.GetByNameAsync(newName);
             if (existing != null && existing.Id != id)
             {
                 return (false, "There is another venue registered with this name");
             }
 
             // Update
-            venue.Nome = newName;
+            venue.Name = newName;
             await _venueRepository.UpdateAsync(venue);
             await _venueRepository.SaveChangesAsync();
 
@@ -138,7 +138,7 @@ namespace MyVocaList.Services
 
             foreach (var (venue, hasEvents) in venuesWithEvents)
             {
-                validationResults.Add((venue.Id, venue.Nome, !hasEvents,
+                validationResults.Add((venue.Id, venue.Name, !hasEvents,
                     hasEvents ? "has registered events" : ""));
             }
 
@@ -148,8 +148,8 @@ namespace MyVocaList.Services
             if (canDelete.Any())
             {
                 var entitiesToDelete = venuesWithEvents
-                    .Where(x => canDelete.Any(c => c.id == x.estabelecimento.Id))
-                    .Select(x => x.estabelecimento);
+                    .Where(x => canDelete.Any(c => c.id == x.venue.Id))
+                    .Select(x => x.venue);
 
                 await _venueRepository.DeleteRangeAsync(entitiesToDelete);
                 await _venueRepository.SaveChangesAsync();
@@ -191,9 +191,9 @@ namespace MyVocaList.Services
 
         public async Task<(bool success, string message)> DeleteVenueAsync(int id) => await DeleteVenuesAsync(new[] { id });
 
-        public async Task<IEnumerable<Estabelecimento>> GetAllVenuesAsync() => await _venueRepository.GetAllAsync();
+        public async Task<IEnumerable<Venue>> GetAllVenuesAsync() => await _venueRepository.GetAllAsync();
 
-        public async Task<Estabelecimento?> GetVenueByIdAsync(int id)
+        public async Task<Venue?> GetVenueByIdAsync(int id)
         {
             Guard.AgainstNegativeOrZero(id, nameof(id));
             return await _venueRepository.GetByIdAsync(id);
@@ -201,15 +201,15 @@ namespace MyVocaList.Services
 
         #endregion
 
-        public async Task<IEnumerable<EstabelecimentoListItemDto>> GetAllVenuesForListAsync() =>
+        public async Task<IEnumerable<VenueListItemDto>> GetAllVenuesForListAsync() =>
              (await _venueRepository.GetAllWithHasEventsAsync())
-            .Select(x => EstabelecimentoMapper.ToListDto(x.estabelecimento, x.hasEvents));
+            .Select(x => VenueMapper.ToListDto(x.venue, x.hasEvents));
 
-        public async Task<IEnumerable<EstabelecimentoListItemDto>> SearchVenuesForListAsync(string query) =>
+        public async Task<IEnumerable<VenueListItemDto>> SearchVenuesForListAsync(string query) =>
             (await _venueRepository.SearchWithHasEventsAsync(query))
-            .Select(x => EstabelecimentoMapper.ToListDto(x.estabelecimento, x.hasEvents));
+            .Select(x => VenueMapper.ToListDto(x.venue, x.hasEvents));
 
-        public async Task<(IEnumerable<EstabelecimentoListItemDto> items, int totalCount)> GetPagedVenuesForListAsync(
+        public async Task<(IEnumerable<VenueListItemDto> items, int totalCount)> GetPagedVenuesForListAsync(
             int pageNumber,
             int pageSize,
             string? query = null)
@@ -219,7 +219,7 @@ namespace MyVocaList.Services
 
             var (items, totalCount) = await _venueRepository.GetPagedWithEventInfoAsync(pageNumber, pageSize, query);
 
-            var dtos = items.Select(x => EstabelecimentoMapper.ToListDto(x.estabelecimento, x.hasEvents));
+            var dtos = items.Select(x => VenueMapper.ToListDto(x.venue, x.hasEvents));
 
             return (dtos, totalCount);
         }

@@ -9,14 +9,14 @@ namespace MyVocaList.Services
     public interface IQueueService
     {
         // Queue Operations
-        Task<(bool success, string message, Pessoa? addedDomainPerson)> AddPersonToQueueAsync(
+        Task<(bool success, string message, Person? addedDomainPerson)> AddPersonToQueueAsync(
             string fullName, string birthday = null, string email = null);
-        Task RecordParticipationAsync(int personId, ParticipacaoStatus status);
+        Task RecordParticipationAsync(int personId, ParticipationStatus status);
 
         // Event Management
-        Task<Evento?> GetActiveEventAsync();
+        Task<Event?> GetActiveEventAsync();
         Task SetActiveEventAsync(int eventId);
-        Task<IEnumerable<Estabelecimento>> GetAllEstablishmentsAsync();
-        Task<IEnumerable<Evento>> GetAllEventsAsync();
+        Task<IEnumerable<Venue>> GetAllEstablishmentsAsync();
+        Task<IEnumerable<Event>> GetAllEventsAsync();
     }
 }

@@ -16,11 +16,11 @@ namespace MyVocaList.Services
         (bool isValid, string message) ValidateEmail(string email);
 
         // Registration and search operations
-        Task<(bool success, string message, Pessoa? person)> CreatePersonAsync(string fullName, string birthday = null, string email = null);
-        Task<Pessoa?> GetPersonByIdAsync(int id);
-        Task<Pessoa?> GetPersonByNameAsync(string name);
-        Task<IEnumerable<Pessoa>> SearchPersonsAsync(string searchTerm, int maxResults = 5);
-        Task<IEnumerable<Pessoa>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = 3);
+        Task<(bool success, string message, Person? person)> CreatePersonAsync(string fullName, string birthday = null, string email = null);
+        Task<Person?> GetPersonByIdAsync(int id);
+        Task<Person?> GetPersonByNameAsync(string name);
+        Task<IEnumerable<Person>> SearchPersonsAsync(string searchTerm, int maxResults = 5);
+        Task<IEnumerable<Person>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = 3);
 
         // Utilities
         (string text, bool isWarning, bool isError) GetCharacterCounterInfo(int currentLength);

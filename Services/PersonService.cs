@@ -10,7 +10,7 @@ namespace MyVocaList.Services
     /// </summary>
     public class PersonService : IPersonService
     {
-        private readonly IPessoaRepository _personRepository;
+        private readonly IPersonRepository _personRepository;
         private readonly ITextNormalizer _textNormalizer;
 
         // Hybrid validation constants
@@ -19,7 +19,7 @@ namespace MyVocaList.Services
         public int ShowCounterAt => 180;   // When to show counter
 
         public PersonService(
-            IPessoaRepository personRepository,
+            IPersonRepository personRepository,
             ITextNormalizer textNormalizer)
         {
             _personRepository = personRepository;
@@ -151,15 +151,15 @@ namespace MyVocaList.Services
 
         #region Registration and Search Operations
 
-        public async Task<(bool success, string message, Pessoa? person)> CreatePersonAsync(
+        public async Task<(bool success, string message, Person? person)> CreatePersonAsync(
             string fullName, string birthday = null, string email = null)
         {
             try
             {
                 // Create new person
-                var person = new Pessoa(fullName)
+                var person = new Person(fullName)
                 {
-                    DiaMesAniversario = birthday?.Trim(),
+                    BirthdayDayMonth = birthday?.Trim(),
                     Email = email?.Trim()
                 };
 
@@ -179,31 +179,31 @@ namespace MyVocaList.Services
             }
         }
 
-        public async Task<Pessoa?> GetPersonByIdAsync(int id)
+        public async Task<Person?> GetPersonByIdAsync(int id)
         {
             return await _personRepository.GetByIdAsync(id);
         }
 
-        public async Task<Pessoa?> GetPersonByNameAsync(string name)
+        public async Task<Person?> GetPersonByNameAsync(string name)
         {
-            return await _personRepository.GetByNomeCompletoAsync(name);
+            return await _personRepository.GetByFullNameAsync(name);
         }
 
-        public async Task<IEnumerable<Pessoa>> SearchPersonsAsync(string searchTerm, int maxResults = 5)
+        public async Task<IEnumerable<Person>> SearchPersonsAsync(string searchTerm, int maxResults = 5)
         {
             if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 2)
             {
-                return new List<Pessoa>();
+                return new List<Person>();
             }
 
             return await _personRepository.SearchByNameAsync(searchTerm, maxResults);
         }
 
-        public async Task<IEnumerable<Pessoa>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = 3)
+        public async Task<IEnumerable<Person>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = 3)
         {
             if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 2)
             {
-                return new List<Pessoa>();
+                return new List<Person>();
             }
 
             return await _personRepository.SearchByNameStartsWithAsync(searchTerm, maxResults);
