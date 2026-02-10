@@ -84,22 +84,12 @@
 
 	<!-- Exclude DevExpress Samples from Release builds -->
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
-		<Compile Remove="UI\Pages\Samples\**\*.cs" />
-		<MauiXaml Remove="UI\Pages\Samples\**\*.xaml" />
 		<None Include="UI\Pages\Samples\**\*.cs" />
 		<None Include="UI\Pages\Samples\**\*.xaml" />
 	</ItemGroup>
-	<!-- Only include working CollectionView samples in Debug builds -->
 	<ItemGroup>
-	  <MauiXaml Update="UI\Pages\Samples\CollectionView\DragDropSample.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="UI\Pages\Samples\CollectionView\FilterChipsSample.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="UI\Pages\Samples\CollectionView\SwipeContainerSample.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
+	  <Folder Include="UI\Pages\" />
 	</ItemGroup>
+	<!-- Only include working CollectionView samples in Debug builds -->
 	
 </Project>
