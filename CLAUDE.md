@@ -3,6 +3,13 @@
 ## App
 Karaoke queue management. .NET MAUI 9.0 (net9.0-android, net9.0-ios).
 
+## DevExpress / MAUI
+- When working with DevExpress MAUI controls, ALWAYS read the actual API documentation or reference example files in 
+the project before guessing property/class names. Never assume API names - verify them first by searching the codebase or 
+fetching docs. 
+- For XAML/MAUI UI work: validate icon names, resource references, and control properties against actual 
+installed package versions before writing code. If a package version is uncertain, check the .csproj file first.
+
 ## Language
 Code, comments, logs, UI text: **English only**
 
@@ -38,6 +45,38 @@ Domain → Contracts → Services → Infrastructure → View
 ## TDD
 - Test-first: Domain + Services
 - Stack: xUnit, FluentAssertions, NSubstitute
+
+## Debugging 
+When debugging or investigating issues, ALWAYS gather data first (read logs, check actual output) 
+before suggesting fixes or optimizations. Do not speculate or propose changes without evidence.
+
+
+## Build Verification - CRITICAL
+
+**MANDATORY**: After any code change, run `dotnet build` and fix all errors autonomously before presenting work as complete.
+
+### Rules
+1. **NEVER skip the build** - Every code edit must be followed by a build verification
+2. **Fix autonomously** - If the build fails, analyze errors, fix them, and rebuild without asking the user
+3. **Loop until clean** - Repeat build-fix cycles until zero errors. Do NOT ask the user to verify intermediate failures
+4. **API errors (CS1061, CS0246, etc.)** - When a "does not contain" or "type not found" error occurs, search the codebase or NuGet packages for the correct name before attempting a fix. Never guess a replacement
+
+### Workflow
+```
+Edit code → dotnet build → Errors? → Fix → dotnet build → Clean? → Continue
+                                                    ↑                    |
+                                                    └── Still errors ────┘
+```
+
+## Incremental Edits - CRITICAL
+
+**MANDATORY**: For UI/XAML work, make changes ONE file at a time.
+
+### Rules
+1. **Edit one file** → run `dotnet build` → fix errors → **then** move to the next file
+2. **Never batch** multiple XAML/UI file edits before verifying the build
+3. **XAML errors cascade** - A broken namespace in one file can mask the real issue if multiple files are changed at once
+4. **Exception**: Pure C# backend changes (models, services) with no UI impact may be batched if confident
 
 ## Error Handling
 - **Avoid**: try-catch, `Debug.WriteLine`, `Console.WriteLine`
@@ -149,19 +188,21 @@ Types: `feat:`, `fix:`, `refactor:`, `docs:`, `perf:`, `test:`
 ## Workflow
 **CRITICAL**: After completing any task:
 1. Update `Docs/Changelog/changelog.md`
-2. Git commit with all changes
-3. Push to remote
-Never skip these steps.
+2. Git commit with all changes. After completing any set of changes, ALWAYS commit all modified files AND push to remote.
+Do not wait to be asked. Use `git add -A && git commit -m '<message>' && git push` as a single step.
 
 ## Theme & Locale
 - **Theme**: Dark mode ONLY
 - **Locale**: US English (en-US). Date: MM/dd/yyyy. Time: h:mm tt
 
-## No Hard-Coded Values
-**CRITICAL**: Never hard-code colors, dimensions, or style values in C# code.
+## Code Principles
+**CRITICAL**:  Never hard-code values (colors, sizes, strings) directly in C# or XAML code-behind. 
+All theming and design values must come from resource dictionaries or the design system.
+If unsure, ask before implementing.
 - **Colors**: Use DevExpress `{dx:ThemeColor}` tokens only
 - **Styles**: Define in XAML, reference via StaticResource
 - **MauiProgram.cs**: Configuration only, NO color definitions
+
 
 ```csharp
 // ❌ WRONG - Hard-coded

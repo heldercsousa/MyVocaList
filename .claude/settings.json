@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "dotnet build --no-restore 2>&1 | tail -30"
+          }
+        ]
+      }
+    ]
+  }
+}
