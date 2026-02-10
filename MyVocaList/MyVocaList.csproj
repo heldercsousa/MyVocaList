@@ -87,9 +87,6 @@
 		<None Include="UI\Pages\Samples\**\*.cs" />
 		<None Include="UI\Pages\Samples\**\*.xaml" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="UI\Pages\" />
-	</ItemGroup>
 	<!-- Only include working CollectionView samples in Debug builds -->
 	
 </Project>

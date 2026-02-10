@@ -3,17 +3,93 @@
     x:Class="MyVocaList.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:samples="clr-namespace:MyVocaList.UI.Pages.Samples"
-    Title="MyVocaList">
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:models="clr-namespace:MyVocaList.UI.Models"
+    xmlns:queue="clr-namespace:MyVocaList.UI.Pages.Queue"
+    xmlns:events="clr-namespace:MyVocaList.UI.Pages.Events"
+    xmlns:venues="clr-namespace:MyVocaList.UI.Pages.Venues"
+    xmlns:people="clr-namespace:MyVocaList.UI.Pages.People"
+    xmlns:artists="clr-namespace:MyVocaList.UI.Pages.Artists"
+    xmlns:prefs="clr-namespace:MyVocaList.UI.Pages.Preferences"
+    xmlns:backup="clr-namespace:MyVocaList.UI.Pages.BackupRestore"
+    Title="MyVocaList"
+    FlyoutBehavior="Flyout"
+    FlyoutBackgroundColor="{StaticResource Surface}">
 
-    <TabBar>
-        <Tab Title="Home">
-            <ShellContent ContentTemplate="{DataTemplate ContentPage}" />
-        </Tab>
+    <!-- Flyout Header: App branding -->
+    <Shell.FlyoutHeader>
+        <VerticalStackLayout Padding="16,24,16,16" Spacing="4"
+                             BackgroundColor="{StaticResource Surface}">
+            <Label Text="MyVocaList"
+                   FontFamily="RobotoBold" FontSize="24"
+                   TextColor="{StaticResource Primary}" />
+            <Label Text="Karaoke Queue Manager"
+                   FontFamily="RobotoRegular" FontSize="14"
+                   TextColor="{StaticResource OnSurfaceVariant}" />
+            <BoxView HeightRequest="1" Margin="0,12,0,0"
+                     Color="{StaticResource OutlineVariant}" />
+        </VerticalStackLayout>
+    </Shell.FlyoutHeader>
 
-        <!-- DEBUG: Samples Tab -->
-        <Tab Title="Samples">
-            <ShellContent ContentTemplate="{DataTemplate samples:SamplesMenuPage}" />
-        </Tab>
-    </TabBar>
+    <!-- Flyout Content: Grouped navigation menu -->
+    <Shell.FlyoutContentTemplate>
+        <DataTemplate>
+            <dx:DXScrollView BackgroundColor="{StaticResource Surface}">
+                <VerticalStackLayout Padding="12,0" Spacing="16"
+                                     BindableLayout.ItemsSource="{Binding MenuGroups}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:MenuGroup">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding GroupTitle}"
+                                       FontFamily="RobotoMedium" FontSize="14"
+                                       TextColor="{StaticResource OnSurfaceVariant}"
+                                       Padding="16,8,16,4" />
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="models:MenuItemDescription">
+                                            <dx:DXButton Content="{Binding Name}"
+                                                         Icon="{Binding IconSource}"
+                                                         Style="{StaticResource FlyoutMenuButton}"
+                                                         Command="{Binding NavigateCommand}"
+                                                         CommandParameter="{Binding Route}" />
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </dx:DXScrollView>
+        </DataTemplate>
+    </Shell.FlyoutContentTemplate>
+
+    <!-- Page Routes (hidden from default flyout, navigated via ViewModel) -->
+    <FlyoutItem Route="queue" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate queue:QueuePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="events" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate events:EventsPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="venues" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate venues:VenuesPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="people" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate people:PeoplePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="artists" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate artists:ArtistsPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="preferences" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate prefs:PreferencesPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="backup" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate backup:BackupRestorePage}" />
+    </FlyoutItem>
+
 </Shell>

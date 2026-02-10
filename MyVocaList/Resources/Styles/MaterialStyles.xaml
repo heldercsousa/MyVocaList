@@ -71,6 +71,23 @@
     </Style>
 
     <!-- ================================================================ -->
+    <!-- FLYOUT MENU STYLES                                               -->
+    <!-- ================================================================ -->
+
+    <Style TargetType="dx:DXButton" x:Key="FlyoutMenuButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="PressedBackgroundColor" Value="{StaticResource SurfaceContainerHigh}" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="CornerRadius" Value="28" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="HorizontalContentAlignment" Value="Start" />
+        <Setter Property="IconColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <!-- ================================================================ -->
     <!-- SHELL & NAVIGATION                                               -->
     <!-- ================================================================ -->
 
