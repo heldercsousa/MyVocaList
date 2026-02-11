@@ -107,6 +107,7 @@
             <dx:ShimmerView.Content>
                 <dxcv:DXCollectionView x:Name="collectionView"
                                ItemsSource="{Binding Venues}"
+                               SelectedItems="{Binding SelectedVenues}"
                                IsPullToRefreshEnabled="True"
                                IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
                                PullToRefreshCommand="{Binding RefreshCommand}"
@@ -136,6 +137,22 @@
                                          CornerRadius="12"
                                          Padding="16"
                                          Margin="16,4">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup Name="CommonStates">
+                                        <VisualState Name="Normal">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerLow}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="BackgroundColor" Value="{dx:ThemeColor SecondaryContainer}" />
+                                                <Setter Property="BorderColor" Value="{dx:ThemeColor Secondary}" />
+                                                <Setter Property="BorderThickness" Value="2" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                     <Label Grid.Column="0"
                                            Text="{Binding Name}"

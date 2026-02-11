@@ -26,6 +26,8 @@ public class VenuesViewModel : INotifyPropertyChanged
     private Timer? _searchDebounceTimer;
     private Func<Task>? _pendingConfirmAction;
 
+    private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
+
     private bool _isRefreshing;
     private string _searchText = string.Empty;
     private bool _isMultiSelectMode;
@@ -246,30 +248,37 @@ public class VenuesViewModel : INotifyPropertyChanged
     public async Task InitializeAsync()
     {
         IsInitialLoading = true;
-        await Task.Yield();           // let ShimmerView render before DB query starts
-        await LoadFirstPageAsync();
+        await Task.Run(() => LoadFirstPageAsync());
         RunOnUiThread(() => IsInitialLoading = false);
     }
 
     private async Task LoadFirstPageAsync()
     {
-        _currentPage = 1;
-        _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
-
-        RunOnUiThread(() => Venues.Clear());
-
-        var (items, totalCount) = await _venueService.GetPagedVenuesForListAsync(
-            _currentPage, PageSize, _currentSearchQuery);
-
-        _totalCount = totalCount;
-
-        RunOnUiThread(() =>
+        await _loadSemaphore.WaitAsync();
+        try
         {
-            foreach (var item in items)
-                Venues.Add(item);
-            HasMoreItems = (_currentPage * PageSize) < _totalCount;
-            OnPropertyChanged(nameof(IsEmpty));
-        });
+            _currentPage = 1;
+            _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
+
+            RunOnUiThread(() => Venues.Clear());
+
+            var (items, totalCount) = await _venueService.GetPagedVenuesForListAsync(
+                _currentPage, PageSize, _currentSearchQuery);
+
+            _totalCount = totalCount;
+
+            RunOnUiThread(() =>
+            {
+                foreach (var item in items)
+                    Venues.Add(item);
+                HasMoreItems = (_currentPage * PageSize) < _totalCount;
+                OnPropertyChanged(nameof(IsEmpty));
+            });
+        }
+        finally
+        {
+            _loadSemaphore.Release();
+        }
     }
 
     private async Task RefreshAsync()
