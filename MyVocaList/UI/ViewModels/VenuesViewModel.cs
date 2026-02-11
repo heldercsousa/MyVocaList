@@ -197,8 +197,14 @@ public class VenuesViewModel : INotifyPropertyChanged
     public bool IsInitialLoading
     {
         get => _isInitialLoading;
-        set => SetProperty(ref _isInitialLoading, value);
+        set
+        {
+            if (SetProperty(ref _isInitialLoading, value))
+                OnPropertyChanged(nameof(IsEmpty));
+        }
     }
+
+    public bool IsEmpty => !IsInitialLoading && Venues.Count == 0;
 
     public bool VenueNameHasError
     {
@@ -240,14 +246,17 @@ public class VenuesViewModel : INotifyPropertyChanged
     public async Task InitializeAsync()
     {
         IsInitialLoading = true;
+        await Task.Yield();           // let ShimmerView render before DB query starts
         await LoadFirstPageAsync();
-        IsInitialLoading = false;
+        RunOnUiThread(() => IsInitialLoading = false);
     }
 
     private async Task LoadFirstPageAsync()
     {
         _currentPage = 1;
         _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
+
+        RunOnUiThread(() => Venues.Clear());
 
         var (items, totalCount) = await _venueService.GetPagedVenuesForListAsync(
             _currentPage, PageSize, _currentSearchQuery);
@@ -256,19 +265,18 @@ public class VenuesViewModel : INotifyPropertyChanged
 
         RunOnUiThread(() =>
         {
-            Venues.Clear();
             foreach (var item in items)
                 Venues.Add(item);
+            HasMoreItems = (_currentPage * PageSize) < _totalCount;
+            OnPropertyChanged(nameof(IsEmpty));
         });
-
-        HasMoreItems = (_currentPage * PageSize) < _totalCount;
     }
 
     private async Task RefreshAsync()
     {
         IsRefreshing = true;
         await LoadFirstPageAsync();
-        IsRefreshing = false;
+        RunOnUiThread(() => IsRefreshing = false);
     }
 
     private async Task LoadMoreAsync()
@@ -277,6 +285,7 @@ public class VenuesViewModel : INotifyPropertyChanged
             return;
 
         _isLoading = true;
+        HasMoreItems = false;           // dismiss footer immediately
 
         _currentPage++;
         var (items, totalCount) = await _venueService.GetPagedVenuesForListAsync(
@@ -284,13 +293,9 @@ public class VenuesViewModel : INotifyPropertyChanged
 
         _totalCount = totalCount;
 
-        RunOnUiThread(() =>
-        {
-            foreach (var item in items)
-                Venues.Add(item);
-        });
+        RunOnUiThread(() => { foreach (var item in items) Venues.Add(item); });
 
-        HasMoreItems = (_currentPage * PageSize) < _totalCount;
+        HasMoreItems = (_currentPage * PageSize) < _totalCount;     // restore
         _isLoading = false;
     }
 

@@ -164,6 +164,25 @@
             </dx:ShimmerView.Content>
         </dx:ShimmerView>
 
+        <!-- Empty state -->
+        <VerticalStackLayout Grid.Row="1"
+                             IsVisible="{Binding IsEmpty}"
+                             VerticalOptions="Center"
+                             HorizontalOptions="Center"
+                             Spacing="16"
+                             Padding="32">
+            <dx:DXButton Icon="nightlife_outlined"
+                         IconColor="{dx:ThemeColor OnSurfaceVariant}"
+                         BackgroundColor="Transparent"
+                         InputTransparent="True"
+                         WidthRequest="80" HeightRequest="80"
+                         HorizontalOptions="Center" />
+            <Label Text="No venue registered"
+                   FontFamily="RobotoMedium" FontSize="16"
+                   TextColor="{dx:ThemeColor OnSurfaceVariant}"
+                   HorizontalTextAlignment="Center" />
+        </VerticalStackLayout>
+
         <!-- FAB -->
         <dx:DXButton Grid.Row="1"
                      Icon="add_outlined"
