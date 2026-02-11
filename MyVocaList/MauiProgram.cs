@@ -50,6 +50,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ITextNormalizer, TextNormalizer>();
 
         // Services
+        builder.Services.AddScoped<IDatabaseService, DatabaseService>();
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddSingleton<IThreadSafeDialogService, ThreadSafeDialogService>();
         builder.Services.AddSingleton<ISnackbarService, SnackbarService>();
@@ -64,6 +65,15 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        return builder.Build();
+        var mauiApp = builder.Build();
+
+        // Apply database migrations on startup (creates DB if it doesn't exist)
+        using (var scope = mauiApp.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            dbContext.Database.Migrate();
+        }
+
+        return mauiApp;
     }
 }
