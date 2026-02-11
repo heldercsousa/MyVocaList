@@ -3,24 +3,213 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
+    xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     x:Class="MyVocaList.UI.Pages.Venues.VenuesPage"
+    x:Name="page"
+    x:DataType="vm:VenuesViewModel"
     Title="Venues"
     BackgroundColor="{StaticResource Surface}">
 
-    <dx:DXScrollView>
-        <VerticalStackLayout Style="{StaticResource PageContainer}">
-            <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
-                         CornerRadius="12" Padding="24">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Venues"
-                           FontFamily="RobotoMedium" FontSize="32"
-                           TextColor="{StaticResource OnSurface}" />
-                    <Label Text="This page is under construction."
-                           FontFamily="RobotoRegular" FontSize="14"
-                           TextColor="{StaticResource OnSurfaceVariant}" />
-                </VerticalStackLayout>
-            </dx:DXBorder>
-        </VerticalStackLayout>
-    </dx:DXScrollView>
+    <Shell.TitleView>
+        <Grid HeightRequest="48">
+            <!-- Default title -->
+            <Label Text="Venues"
+                   FontFamily="RobotoMedium" FontSize="20"
+                   TextColor="{StaticResource OnSurface}"
+                   VerticalOptions="Center"
+                   IsVisible="{Binding ShowDefaultTitle}" />
+
+            <!-- Multi-select toolbar -->
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                  ColumnSpacing="8"
+                  VerticalOptions="Center"
+                  IsVisible="{Binding ShowMultiSelectToolbar}">
+
+                <dx:DXButton Grid.Column="0"
+                             Icon="close_outlined"
+                             IconColor="{StaticResource OnSurface}"
+                             BackgroundColor="Transparent"
+                             WidthRequest="40" HeightRequest="40"
+                             CornerRadius="20"
+                             Command="{Binding CancelSelectionCommand}" />
+
+                <Label Grid.Column="1"
+                       Text="{Binding SelectedCountText}"
+                       FontFamily="RobotoMedium" FontSize="18"
+                       TextColor="{StaticResource OnSurface}"
+                       VerticalOptions="Center" />
+
+                <dx:DXButton Grid.Column="2"
+                             Icon="edit_outlined"
+                             IconColor="{StaticResource OnSurface}"
+                             BackgroundColor="Transparent"
+                             WidthRequest="40" HeightRequest="40"
+                             CornerRadius="20"
+                             IsVisible="{Binding CanEditSelected}"
+                             Command="{Binding EditSelectedCommand}" />
+
+                <dx:DXButton Grid.Column="3"
+                             Icon="delete_outlined"
+                             IconColor="{StaticResource Error}"
+                             BackgroundColor="Transparent"
+                             WidthRequest="40" HeightRequest="40"
+                             CornerRadius="20"
+                             Command="{Binding DeleteSelectedCommand}" />
+            </Grid>
+        </Grid>
+    </Shell.TitleView>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Search bar -->
+        <dx:DXBorder Grid.Row="0"
+                     BackgroundColor="{StaticResource SurfaceContainer}"
+                     CornerRadius="28"
+                     Padding="4"
+                     Margin="16,8">
+            <dxe:TextEdit Text="{Binding SearchText, Mode=TwoWay}"
+                          PlaceholderText="Search venues..."
+                          StartIcon="search_outlined"
+                          StartIconColor="{StaticResource OnSurfaceVariant}"
+                          BoxMode="Outlined"
+                          BorderColor="Transparent"
+                          FocusedBorderColor="Transparent"
+                          BackgroundColor="Transparent"
+                          TextColor="{StaticResource OnSurface}"
+                          PlaceholderColor="{StaticResource OnSurfaceVariant}"
+                          ClearIconVisibility="Auto"
+                          ClearIconColor="{StaticResource OnSurfaceVariant}" />
+        </dx:DXBorder>
+
+        <!-- Venue list -->
+        <dxcv:DXCollectionView Grid.Row="1"
+                               x:Name="collectionView"
+                               ItemsSource="{Binding Venues}"
+                               IsPullToRefreshEnabled="True"
+                               IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
+                               PullToRefreshCommand="{Binding RefreshCommand}"
+                               IsLoadMoreEnabled="{Binding HasMoreItems}"
+                               LoadMoreCommand="{Binding LoadMoreCommand}"
+                               SelectionMode="{Binding SelectionMode}"
+                               UseRippleEffect="True"
+                               AllowCascadeUpdate="True"
+                               ItemSeparatorThickness="0"
+                               Tap="OnItemTapped"
+                               LongPress="OnItemLongPressed"
+                               SelectionChanged="OnSelectionChanged">
+
+            <dxcv:DXCollectionView.ItemTemplate>
+                <DataTemplate x:DataType="dto:VenueListItemDto">
+                    <dxcv:SwipeContainer>
+                        <dxcv:SwipeContainer.EndSwipeItems>
+                            <dxcv:SwipeContainerItem Caption="Delete"
+                                                     BackgroundColor="{StaticResource Error}"
+                                                     FontColor="{StaticResource OnError}"
+                                                     Image="delete_outlined"
+                                                     Command="{Binding BindingContext.SwipeDeleteCommand, Source={x:Reference page}}"
+                                                     CommandParameter="{Binding}" />
+                        </dxcv:SwipeContainer.EndSwipeItems>
+                        <dxcv:SwipeContainer.ItemView>
+                            <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
+                                         CornerRadius="12"
+                                         Padding="16"
+                                         Margin="16,4">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding Name}"
+                                           FontFamily="RobotoRegular" FontSize="16"
+                                           TextColor="{StaticResource OnSurface}"
+                                           VerticalOptions="Center"
+                                           LineBreakMode="TailTruncation" />
+
+                                    <dx:DXBorder Grid.Column="1"
+                                                 IsVisible="{Binding HasEvents}"
+                                                 BackgroundColor="{StaticResource SecondaryContainer}"
+                                                 CornerRadius="12"
+                                                 Padding="8,4">
+                                        <Label Text="Has Events"
+                                               FontFamily="RobotoMedium" FontSize="11"
+                                               TextColor="{StaticResource OnSecondaryContainer}"
+                                               VerticalOptions="Center" />
+                                    </dx:DXBorder>
+                                </Grid>
+                            </dx:DXBorder>
+                        </dxcv:SwipeContainer.ItemView>
+                    </dxcv:SwipeContainer>
+                </DataTemplate>
+            </dxcv:DXCollectionView.ItemTemplate>
+        </dxcv:DXCollectionView>
+
+        <!-- FAB -->
+        <dx:DXButton Grid.Row="1"
+                     Icon="add_outlined"
+                     IconColor="{StaticResource OnPrimary}"
+                     BackgroundColor="{StaticResource Primary}"
+                     PressedBackgroundColor="{StaticResource PrimaryContainer}"
+                     WidthRequest="56" HeightRequest="56"
+                     CornerRadius="16"
+                     HorizontalOptions="End" VerticalOptions="End"
+                     Margin="0,0,16,16"
+                     Command="{Binding AddVenueCommand}" />
+
+        <!-- BottomSheet -->
+        <dx:BottomSheet x:Name="editBottomSheet"
+                        HalfExpandedRatio="0.4"
+                        AllowedState="HalfExpanded"
+                        IsModal="True"
+                        ShowGrabber="True"
+                        AllowDismiss="True"
+                        BackgroundColor="{StaticResource Surface}"
+                        CornerRadius="28"
+                        StateChanged="OnBottomSheetStateChanged">
+            <VerticalStackLayout Padding="24" Spacing="16">
+                <Label Text="{Binding BottomSheetTitle}"
+                       FontFamily="RobotoMedium" FontSize="24"
+                       TextColor="{StaticResource OnSurface}" />
+
+                <dxe:TextEdit x:Name="venueNameEdit"
+                              Text="{Binding EditingVenueName, Mode=TwoWay}"
+                              LabelText="Venue Name"
+                              PlaceholderText="Enter venue name"
+                              BoxMode="Outlined"
+                              FocusedBorderColor="{StaticResource Primary}"
+                              BorderColor="{StaticResource Outline}"
+                              BackgroundColor="{StaticResource SurfaceContainerHighest}"
+                              TextColor="{StaticResource OnSurface}"
+                              MaxCharacterCount="30" />
+
+                <Label Text="{Binding CharacterCounterText}"
+                       IsVisible="{Binding ShowCharacterCounter}"
+                       FontFamily="RobotoRegular" FontSize="12"
+                       HorizontalOptions="End">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding IsCharacterCounterError}"
+                                     Value="True">
+                            <Setter Property="TextColor" Value="{StaticResource Error}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding IsCharacterCounterWarning}"
+                                     Value="True">
+                            <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+
+                <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
+                    <dx:DXButton Content="Cancel"
+                                 Style="{StaticResource OutlinedButton}"
+                                 Padding="24,0"
+                                 Command="{Binding CancelEditCommand}" />
+                    <dx:DXButton Content="Save"
+                                 Style="{StaticResource FilledButton}"
+                                 Padding="24,0"
+                                 Command="{Binding SaveVenueCommand}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </dx:BottomSheet>
+    </Grid>
 
 </ContentPage>

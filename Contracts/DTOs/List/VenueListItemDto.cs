@@ -10,7 +10,7 @@ namespace MyVocaList.Contracts.DTOs.List
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public bool HasEvents { get; set; }
-        public string StatusText => HasEvents ? "COM EVENTOS" : "";
+        public string StatusText => HasEvents ? "Has Events" : "";
 
         public bool IsSelected
         {
