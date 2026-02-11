@@ -41,6 +41,7 @@ public class VenuesViewModel : INotifyPropertyChanged
     private bool _isCharacterCounterError;
     private bool _hasMoreItems = true;
     private bool _isLoading;
+    private bool _isInitialLoading = true;
     private bool _venueNameHasError;
     private string _venueNameErrorText = string.Empty;
     private string _confirmMessage = string.Empty;
@@ -193,6 +194,12 @@ public class VenuesViewModel : INotifyPropertyChanged
         set => SetProperty(ref _hasMoreItems, value);
     }
 
+    public bool IsInitialLoading
+    {
+        get => _isInitialLoading;
+        set => SetProperty(ref _isInitialLoading, value);
+    }
+
     public bool VenueNameHasError
     {
         get => _venueNameHasError;
@@ -232,7 +239,9 @@ public class VenuesViewModel : INotifyPropertyChanged
 
     public async Task InitializeAsync()
     {
+        IsInitialLoading = true;
         await LoadFirstPageAsync();
+        IsInitialLoading = false;
     }
 
     private async Task LoadFirstPageAsync()

@@ -83,9 +83,29 @@
                           ClearIconColor="{StaticResource OnSurfaceVariant}" />
         </dx:DXBorder>
 
-        <!-- Venue list -->
-        <dxcv:DXCollectionView Grid.Row="1"
-                               x:Name="collectionView"
+        <!-- Venue list with skeleton loading -->
+        <dx:ShimmerView Grid.Row="1"
+                        IsLoading="{Binding IsInitialLoading}"
+                        WaveWidth="0.7"
+                        WaveOpacity="0.8">
+            <dx:ShimmerView.LoadingView>
+                <VerticalStackLayout Spacing="0">
+                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
+                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
+                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
+                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
+                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
+                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
+                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                </VerticalStackLayout>
+            </dx:ShimmerView.LoadingView>
+            <dx:ShimmerView.Content>
+                <dxcv:DXCollectionView x:Name="collectionView"
                                ItemsSource="{Binding Venues}"
                                IsPullToRefreshEnabled="True"
                                IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
@@ -140,7 +160,9 @@
                     </dxcv:SwipeContainer>
                 </DataTemplate>
             </dxcv:DXCollectionView.ItemTemplate>
-        </dxcv:DXCollectionView>
+                </dxcv:DXCollectionView>
+            </dx:ShimmerView.Content>
+        </dx:ShimmerView>
 
         <!-- FAB -->
         <dx:DXButton Grid.Row="1"

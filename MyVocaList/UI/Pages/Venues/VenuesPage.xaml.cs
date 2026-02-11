@@ -19,10 +19,10 @@ public partial class VenuesPage : ContentPage
         _viewModel.PropertyChanged += OnViewModelPropertyChanged;
     }
 
-    protected override async void OnAppearing()
+    protected override void OnAppearing()
     {
         base.OnAppearing();
-        await _viewModel.InitializeAsync();
+        _ = _viewModel.InitializeAsync();
     }
 
     private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
