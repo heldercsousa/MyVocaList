@@ -67,12 +67,15 @@ public static class MauiProgram
 
         var mauiApp = builder.Build();
 
-        // Apply database migrations on startup (creates DB if it doesn't exist)
-        using (var scope = mauiApp.Services.CreateScope())
+        // Apply database migrations on startup - run on thread pool to avoid
+        // blocking the main thread and SQLite write-lock contention between
+        // EF Core's internal lock connection and migration connection.
+        Task.Run(async () =>
         {
+            using var scope = mauiApp.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            dbContext.Database.Migrate();
-        }
+            await dbContext.Database.MigrateAsync();
+        }).GetAwaiter().GetResult();
 
         return mauiApp;
     }
