@@ -4,11 +4,57 @@
 Karaoke queue management. .NET MAUI 9.0 (net9.0-android, net9.0-ios).
 
 ## DevExpress / MAUI
-- When working with DevExpress MAUI controls, ALWAYS read the actual API documentation or reference example files in 
-the project before guessing property/class names. Never assume API names - verify them first by searching the codebase or 
-fetching docs. 
-- For XAML/MAUI UI work: validate icon names, resource references, and control properties against actual 
+- When working with DevExpress MAUI controls, ALWAYS read the actual API documentation or reference example files in
+the project before guessing property/class names. Never assume API names - verify them first by searching the codebase or
+fetching docs.
+- For XAML/MAUI UI work: validate icon names, resource references, and control properties against actual
 installed package versions before writing code. If a package version is uncertain, check the .csproj file first.
+
+## Dialogs & Validation - CRITICAL
+
+**NEVER use OS native dialogs** (`DisplayAlert`, `DisplayActionSheet`, `DisplayPromptAsync`). They break the theme and feel foreign. Use DevExpress components instead.
+
+### Form Validation
+**ALWAYS** show errors inline using `HasError` + `ErrorText` on the editor — never a dialog:
+
+```xml
+<dxe:TextEdit Text="{Binding Name, Mode=TwoWay}"
+              HasError="{Binding NameHasError}"
+              ErrorText="{Binding NameErrorText}" />
+```
+
+```csharp
+// In ViewModel - set on validation failure, clear when user types
+NameHasError = true;
+NameErrorText = "Name is required";
+```
+
+Reference: `devexpress-examples/editors/CS/MainPage.xaml` — `HasError` + `ErrorText` + `HelpText` pattern.
+
+### Confirm / Action Dialogs
+**ALWAYS use `dx:BottomSheet`** for confirmations and action choices (never `DisplayAlert`). Use `AllowedState="HalfExpanded"` with action `DXButton` items and a separator + Cancel button:
+
+```xml
+<dx:BottomSheet x:Name="confirmSheet" HalfExpandedRatio="0.3" AllowedState="HalfExpanded"
+                IsModal="True" ShowGrabber="True" AllowDismiss="True">
+    <dx:DXStackLayout>
+        <Label Text="{Binding ConfirmMessage}" Margin="16" FontSize="16" />
+        <dx:DXBorder HeightRequest="1" BorderThickness="1" BorderColor="{StaticResource OutlineVariant}" />
+        <dx:DXButton Content="{Binding ConfirmActionText}"
+                     TextColor="{StaticResource Error}" BackgroundColor="Transparent"
+                     HorizontalOptions="Fill" Command="{Binding ConfirmActionCommand}" />
+        <dx:DXBorder HeightRequest="1" BorderThickness="1" BorderColor="{StaticResource OutlineVariant}" />
+        <dx:DXButton Content="Cancel" BackgroundColor="Transparent"
+                     TextColor="{StaticResource Primary}" HorizontalOptions="Fill"
+                     Command="{Binding DismissConfirmCommand}" />
+    </dx:DXStackLayout>
+</dx:BottomSheet>
+```
+
+Reference: `devexpress-examples/data-form/CS/EditFormExample/MainPage.xaml` — BottomSheet action sheet pattern.
+
+### IThreadSafeDialogService
+`IThreadSafeDialogService` is **legacy** — do not use it in new pages. Existing code may still reference it but it must be replaced when those pages are worked on.
 
 ## Language
 Code, comments, logs, UI text: **English only**

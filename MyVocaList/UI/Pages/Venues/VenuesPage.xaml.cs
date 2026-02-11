@@ -35,6 +35,14 @@ public partial class VenuesPage : ContentPage
             else
                 editBottomSheet.Show(state, this);
         }
+        else if (e.PropertyName == nameof(VenuesViewModel.ConfirmSheetState))
+        {
+            var state = _viewModel.ConfirmSheetState;
+            if (state == BottomSheetState.Hidden)
+                confirmSheet.Close();
+            else
+                confirmSheet.Show(state, this);
+        }
     }
 
     private void OnItemTapped(object sender, CollectionViewGestureEventArgs e)
@@ -62,5 +70,11 @@ public partial class VenuesPage : ContentPage
     {
         if (e.NewValue == BottomSheetState.Hidden && _viewModel.BottomSheetState != BottomSheetState.Hidden)
             _viewModel.BottomSheetState = BottomSheetState.Hidden;
+    }
+
+    private void OnConfirmSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
+    {
+        if (e.NewValue == BottomSheetState.Hidden && _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
+            _viewModel.ConfirmSheetState = BottomSheetState.Hidden;
     }
 }

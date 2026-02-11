@@ -16,7 +16,6 @@ namespace MyVocaList.UI.ViewModels;
 public class VenuesViewModel : INotifyPropertyChanged
 {
     private readonly IVenueService _venueService;
-    private readonly IThreadSafeDialogService _dialogService;
     private readonly ISnackbarService _snackbarService;
     private readonly ILogger<VenuesViewModel> _logger;
 
@@ -25,12 +24,14 @@ public class VenuesViewModel : INotifyPropertyChanged
     private int _totalCount;
     private string? _currentSearchQuery;
     private Timer? _searchDebounceTimer;
+    private Func<Task>? _pendingConfirmAction;
 
     private bool _isRefreshing;
     private string _searchText = string.Empty;
     private bool _isMultiSelectMode;
     private int _selectedCount;
     private BottomSheetState _bottomSheetState = BottomSheetState.Hidden;
+    private BottomSheetState _confirmSheetState = BottomSheetState.Hidden;
     private string _editingVenueName = string.Empty;
     private int? _editingVenueId;
     private string _bottomSheetTitle = "New Venue";
@@ -40,15 +41,17 @@ public class VenuesViewModel : INotifyPropertyChanged
     private bool _isCharacterCounterError;
     private bool _hasMoreItems = true;
     private bool _isLoading;
+    private bool _venueNameHasError;
+    private string _venueNameErrorText = string.Empty;
+    private string _confirmMessage = string.Empty;
+    private string _confirmActionText = "Delete";
 
     public VenuesViewModel(
         IVenueService venueService,
-        IThreadSafeDialogService dialogService,
         ISnackbarService snackbarService,
         ILogger<VenuesViewModel> logger)
     {
         _venueService = venueService;
-        _dialogService = dialogService;
         _snackbarService = snackbarService;
         _logger = logger;
 
@@ -59,12 +62,14 @@ public class VenuesViewModel : INotifyPropertyChanged
         LoadMoreCommand = new Command(async () => await LoadMoreAsync());
         AddVenueCommand = new Command(OpenCreateBottomSheet);
         SaveVenueCommand = new Command(async () => await SaveVenueAsync());
-        CancelEditCommand = new Command(CloseBottomSheet);
-        SwipeDeleteCommand = new Command<VenueListItemDto>(async item => await SwipeDeleteAsync(item));
-        DeleteSelectedCommand = new Command(async () => await DeleteSelectedAsync());
+        CancelEditCommand = new Command(CloseEditSheet);
+        SwipeDeleteCommand = new Command<VenueListItemDto>(RequestSwipeDelete);
+        DeleteSelectedCommand = new Command(RequestBatchDelete);
         EditSelectedCommand = new Command(EditSelectedVenue);
         CancelSelectionCommand = new Command(ExitMultiSelectMode);
         TapCommand = new Command<VenueListItemDto>(OnItemTapped);
+        ConfirmActionCommand = new Command(async () => await ExecuteConfirmActionAsync());
+        DismissConfirmCommand = new Command(DismissConfirmSheet);
     }
 
     public ObservableCollection<VenueListItemDto> Venues { get; }
@@ -127,13 +132,22 @@ public class VenuesViewModel : INotifyPropertyChanged
         set => SetProperty(ref _bottomSheetState, value);
     }
 
+    public BottomSheetState ConfirmSheetState
+    {
+        get => _confirmSheetState;
+        set => SetProperty(ref _confirmSheetState, value);
+    }
+
     public string EditingVenueName
     {
         get => _editingVenueName;
         set
         {
             if (SetProperty(ref _editingVenueName, value))
+            {
+                ClearVenueNameError();
                 UpdateCharacterCounter(value?.Length ?? 0);
+            }
         }
     }
 
@@ -179,6 +193,30 @@ public class VenuesViewModel : INotifyPropertyChanged
         set => SetProperty(ref _hasMoreItems, value);
     }
 
+    public bool VenueNameHasError
+    {
+        get => _venueNameHasError;
+        set => SetProperty(ref _venueNameHasError, value);
+    }
+
+    public string VenueNameErrorText
+    {
+        get => _venueNameErrorText;
+        set => SetProperty(ref _venueNameErrorText, value);
+    }
+
+    public string ConfirmMessage
+    {
+        get => _confirmMessage;
+        set => SetProperty(ref _confirmMessage, value);
+    }
+
+    public string ConfirmActionText
+    {
+        get => _confirmActionText;
+        set => SetProperty(ref _confirmActionText, value);
+    }
+
     public ICommand RefreshCommand { get; }
     public ICommand LoadMoreCommand { get; }
     public ICommand AddVenueCommand { get; }
@@ -189,6 +227,8 @@ public class VenuesViewModel : INotifyPropertyChanged
     public ICommand EditSelectedCommand { get; }
     public ICommand CancelSelectionCommand { get; }
     public ICommand TapCommand { get; }
+    public ICommand ConfirmActionCommand { get; }
+    public ICommand DismissConfirmCommand { get; }
 
     public async Task InitializeAsync()
     {
@@ -266,6 +306,7 @@ public class VenuesViewModel : INotifyPropertyChanged
     {
         EditingVenueId = null;
         EditingVenueName = string.Empty;
+        ClearVenueNameError();
         BottomSheetTitle = "New Venue";
         BottomSheetState = BottomSheetState.HalfExpanded;
     }
@@ -274,15 +315,23 @@ public class VenuesViewModel : INotifyPropertyChanged
     {
         EditingVenueId = item.Id;
         EditingVenueName = item.Name;
+        ClearVenueNameError();
         BottomSheetTitle = "Edit Venue";
         BottomSheetState = BottomSheetState.HalfExpanded;
     }
 
-    private void CloseBottomSheet()
+    private void CloseEditSheet()
     {
         BottomSheetState = BottomSheetState.Hidden;
         EditingVenueName = string.Empty;
         EditingVenueId = null;
+        ClearVenueNameError();
+    }
+
+    private void ClearVenueNameError()
+    {
+        VenueNameHasError = false;
+        VenueNameErrorText = string.Empty;
     }
 
     private async Task SaveVenueAsync()
@@ -292,7 +341,8 @@ public class VenuesViewModel : INotifyPropertyChanged
         var validation = _venueService.ValidateNameInput(name);
         if (!validation.isValid)
         {
-            await _dialogService.AlertAsync("Validation", validation.message);
+            VenueNameHasError = true;
+            VenueNameErrorText = validation.message;
             return;
         }
 
@@ -301,13 +351,14 @@ public class VenuesViewModel : INotifyPropertyChanged
             var (success, message) = await _venueService.UpdateVenueAsync(EditingVenueId.Value, name);
             if (success)
             {
-                CloseBottomSheet();
+                CloseEditSheet();
                 await RefreshAsync();
                 await _snackbarService.ShowSuccessAsync("Venue updated");
             }
             else
             {
-                await _dialogService.AlertAsync("Error", message);
+                VenueNameHasError = true;
+                VenueNameErrorText = message;
             }
         }
         else
@@ -315,68 +366,79 @@ public class VenuesViewModel : INotifyPropertyChanged
             var (success, message, _) = await _venueService.CreateVenueAsync(name);
             if (success)
             {
-                CloseBottomSheet();
+                CloseEditSheet();
                 await RefreshAsync();
                 await _snackbarService.ShowSuccessAsync("Venue created");
             }
             else
             {
-                await _dialogService.AlertAsync("Error", message);
+                VenueNameHasError = true;
+                VenueNameErrorText = message;
             }
         }
     }
 
-    private async Task SwipeDeleteAsync(VenueListItemDto item)
+    private void RequestSwipeDelete(VenueListItemDto item)
     {
-        var confirmed = await _dialogService.ConfirmAsync(
-            "Delete Venue",
-            $"Are you sure you want to delete \"{item.Name}\"?",
-            "Delete", "Cancel");
-
-        if (!confirmed)
-            return;
-
-        var (success, message) = await _venueService.DeleteVenuesAsync(new[] { item.Id });
-
-        if (success)
+        ConfirmMessage = $"Delete \"{item.Name}\"?";
+        ConfirmActionText = "Delete";
+        _pendingConfirmAction = async () =>
         {
-            await RefreshAsync();
-            await _snackbarService.ShowSuccessAsync(message);
-        }
-        else
-        {
-            await _dialogService.AlertAsync("Cannot Delete", message);
-        }
+            var (success, message) = await _venueService.DeleteVenuesAsync(new[] { item.Id });
+            if (success)
+            {
+                await RefreshAsync();
+                await _snackbarService.ShowSuccessAsync(message);
+            }
+            else
+            {
+                await _snackbarService.ShowErrorAsync(message);
+            }
+        };
+        ConfirmSheetState = BottomSheetState.HalfExpanded;
     }
 
-    private async Task DeleteSelectedAsync()
+    private void RequestBatchDelete()
     {
         var selectedItems = SelectedVenues.OfType<VenueListItemDto>().ToList();
         if (selectedItems.Count == 0)
             return;
 
-        var confirmed = await _dialogService.ConfirmAsync(
-            "Delete Venues",
-            $"Are you sure you want to delete {selectedItems.Count} venue(s)?",
-            "Delete", "Cancel");
-
-        if (!confirmed)
-            return;
-
-        var ids = selectedItems.Select(v => v.Id);
-        var (success, message) = await _venueService.DeleteVenuesAsync(ids);
-
-        ExitMultiSelectMode();
-
-        if (success)
+        ConfirmMessage = $"Delete {selectedItems.Count} venue(s)?";
+        ConfirmActionText = "Delete";
+        _pendingConfirmAction = async () =>
         {
-            await RefreshAsync();
-            await _snackbarService.ShowSuccessAsync(message);
-        }
-        else
+            var ids = selectedItems.Select(v => v.Id);
+            var (success, message) = await _venueService.DeleteVenuesAsync(ids);
+            ExitMultiSelectMode();
+            if (success)
+            {
+                await RefreshAsync();
+                await _snackbarService.ShowSuccessAsync(message);
+            }
+            else
+            {
+                await _snackbarService.ShowErrorAsync(message);
+            }
+        };
+        ConfirmSheetState = BottomSheetState.HalfExpanded;
+    }
+
+    private async Task ExecuteConfirmActionAsync()
+    {
+        DismissConfirmSheet();
+        if (_pendingConfirmAction != null)
         {
-            await _dialogService.AlertAsync("Cannot Delete", message);
+            var action = _pendingConfirmAction;
+            _pendingConfirmAction = null;
+            await action();
         }
+    }
+
+    private void DismissConfirmSheet()
+    {
+        ConfirmSheetState = BottomSheetState.Hidden;
+        _pendingConfirmAction = null;
     }
 
     private void EditSelectedVenue()
