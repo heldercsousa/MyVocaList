@@ -137,22 +137,6 @@
                                          CornerRadius="12"
                                          Padding="16"
                                          Margin="16,4">
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup Name="CommonStates">
-                                        <VisualState Name="Normal">
-                                            <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerLow}" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState Name="Selected">
-                                            <VisualState.Setters>
-                                                <Setter Property="BackgroundColor" Value="{dx:ThemeColor SecondaryContainer}" />
-                                                <Setter Property="BorderColor" Value="{dx:ThemeColor Secondary}" />
-                                                <Setter Property="BorderThickness" Value="2" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                     <Label Grid.Column="0"
                                            Text="{Binding Name}"
@@ -177,6 +161,45 @@
                     </dxcv:SwipeContainer>
                 </DataTemplate>
             </dxcv:DXCollectionView.ItemTemplate>
+
+            <dxcv:DXCollectionView.SelectedItemTemplate>
+                <DataTemplate x:DataType="dto:VenueListItemDto">
+                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SecondaryContainer}"
+                                 BorderColor="{dx:ThemeColor Secondary}"
+                                 BorderThickness="2"
+                                 CornerRadius="12"
+                                 Padding="16"
+                                 Margin="16,4">
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                            <Label Grid.Column="0"
+                                   Text="{Binding Name}"
+                                   FontFamily="RobotoRegular" FontSize="16"
+                                   TextColor="{dx:ThemeColor OnSecondaryContainer}"
+                                   VerticalOptions="Center"
+                                   LineBreakMode="TailTruncation" />
+
+                            <dx:DXBorder Grid.Column="1"
+                                         IsVisible="{Binding HasEvents}"
+                                         BackgroundColor="{dx:ThemeColor Secondary}"
+                                         CornerRadius="12"
+                                         Padding="8,4">
+                                <Label Text="Has Events"
+                                       FontFamily="RobotoMedium" FontSize="11"
+                                       TextColor="{dx:ThemeColor OnSecondary}"
+                                       VerticalOptions="Center" />
+                            </dx:DXBorder>
+
+                            <dx:DXButton Grid.Column="2"
+                                         Icon="check_circle_outlined"
+                                         IconColor="{dx:ThemeColor Secondary}"
+                                         BackgroundColor="Transparent"
+                                         WidthRequest="28" HeightRequest="28"
+                                         InputTransparent="True"
+                                         VerticalOptions="Center" />
+                        </Grid>
+                    </dx:DXBorder>
+                </DataTemplate>
+            </dxcv:DXCollectionView.SelectedItemTemplate>
                 </dxcv:DXCollectionView>
             </dx:ShimmerView.Content>
         </dx:ShimmerView>
