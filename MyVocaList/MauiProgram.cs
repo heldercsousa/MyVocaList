@@ -52,7 +52,6 @@ public static class MauiProgram
         // Services
         builder.Services.AddScoped<IDatabaseService, DatabaseService>();
         builder.Services.AddScoped<IVenueService, VenueService>();
-        builder.Services.AddSingleton<IThreadSafeDialogService, ThreadSafeDialogService>();
         builder.Services.AddSingleton<ISnackbarService, SnackbarService>();
 
         // ViewModels

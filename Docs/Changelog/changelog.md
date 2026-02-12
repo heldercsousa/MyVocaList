@@ -1,7 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
-
+- **02/11/2026** - Remove unused Type
 - **02/11/2026** - Fix - Fixed VenuesPage multi-select selection visual: replaced VisualStateManager approach (which was never triggered because DXCollectionView fires visual states on the DataTemplate root SwipeContainer, not on the nested DXBorder) with DXCollectionView.SelectedItemTemplate — selected items now render with SecondaryContainer background, Secondary border, and a checkmark icon.
 
 - **02/11/2026** - Fix - Fixed 3 VenuesPage issues: (1) Long-press selection visual: bound DXCollectionView.SelectedItems to SelectedVenues so the control tracks selection state; added VisualStateManager "Selected" state to item DXBorder (SecondaryContainer background + Secondary border) for clear visual feedback. (2) Page load freeze: replaced Task.Yield() + await LoadFirstPageAsync() in InitializeAsync with await Task.Run(() => LoadFirstPageAsync()) to move all DB work off the UI thread, freeing the main thread to render the ShimmerView skeleton immediately. (3) Search concurrency (DbContext InvalidOperationException): added SemaphoreSlim(1,1) to VenuesViewModel wrapping LoadFirstPageAsync, serialising the initial load and any search operations that share the same EF Core DbContext instance. Build successful with 0 errors
