@@ -85,6 +85,9 @@ namespace MyVocaList.UI.ViewModels
         public ObservableRangeCollection<VenueListItemDto> Venues { get; }
         public ObservableRangeCollection<VenueListItemDto> SelectedVenues { get; }
 
+        // Propriedade adicional não genérica para ligar ao SelectedItems do DXCollectionView
+        public System.Collections.IList SelectedVenuesRaw => SelectedVenues;
+
         public bool IsRefreshing
         {
             get => _isRefreshing;
@@ -255,6 +258,10 @@ namespace MyVocaList.UI.ViewModels
         public async Task InitializeAsync()
         {
             IsInitialLoading = true;
+
+            // Yield to UI so Shimmer can render before starting the load
+            await Task.Yield();
+
             await LoadFirstPageAsync(CancellationToken.None);
             RunOnUiThread(() => IsInitialLoading = false);
         }
@@ -344,12 +351,16 @@ namespace MyVocaList.UI.ViewModels
         private void OnSearchTextChanged(string text)
         {
             // Cancel previous scheduled search
-            _searchCts?.Cancel();
-            _searchCts?.Dispose();
+            try
+            {
+                _searchCts?.Cancel();
+                _searchCts?.Dispose();
+            }
+            catch { /* ignore */ }
+
             _searchCts = new CancellationTokenSource();
             var token = _searchCts.Token;
 
-            // Start a delayed task that honors cancellation
             _ = Task.Run(async () =>
             {
                 try

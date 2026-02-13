@@ -106,20 +106,20 @@
             </dx:ShimmerView.LoadingView>
             <dx:ShimmerView.Content>
                 <dxcv:DXCollectionView x:Name="collectionView"
-                               ItemsSource="{Binding Venues}"
-                               SelectedItems="{Binding SelectedVenues}"
-                               IsPullToRefreshEnabled="True"
-                               IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
-                               PullToRefreshCommand="{Binding RefreshCommand}"
-                               IsLoadMoreEnabled="{Binding HasMoreItems}"
-                               LoadMoreCommand="{Binding LoadMoreCommand}"
-                               SelectionMode="{Binding SelectionMode}"
-                               UseRippleEffect="True"
-                               AllowCascadeUpdate="True"
-                               ItemSeparatorThickness="0"
-                               Tap="OnItemTapped"
-                               LongPress="OnItemLongPressed"
-                               SelectionChanged="OnSelectionChanged">
+                       ItemsSource="{Binding Venues}"
+                       SelectedItems="{Binding SelectedVenuesRaw}"
+                       IsPullToRefreshEnabled="True"
+                       IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
+                       PullToRefreshCommand="{Binding RefreshCommand}"
+                       IsLoadMoreEnabled="{Binding HasMoreItems}"
+                       LoadMoreCommand="{Binding LoadMoreCommand}"
+                       SelectionMode="{Binding SelectionMode}"
+                       UseRippleEffect="True"
+                       AllowCascadeUpdate="True"
+                       ItemSeparatorThickness="0"
+                       Tap="OnItemTapped"
+                       LongPress="OnItemLongPressed"
+                       SelectionChanged="OnSelectionChanged">
 
             <dxcv:DXCollectionView.ItemTemplate>
                 <DataTemplate x:DataType="dto:VenueListItemDto">
@@ -165,14 +165,14 @@
 
             <dxcv:DXCollectionView.SelectedItemTemplate>
                 <DataTemplate x:DataType="dto:VenueListItemDto">
-                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SecondaryContainer}"
+                            <dx:DXBorder BackgroundColor="{dx:ThemeColor SecondaryContainer}"
                                  BorderColor="{dx:ThemeColor Secondary}"
                                  BorderThickness="2"
                                  CornerRadius="12"
                                  Padding="16"
                                  Margin="16,4"
                                  HeightRequest="64">
-                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
                             <Label Grid.Column="0"
                                    Text="{Binding Name}"
                                    FontFamily="RobotoRegular" FontSize="16"
