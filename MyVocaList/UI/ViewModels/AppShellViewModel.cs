@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls;
 using MyVocaList.Navigation;
@@ -12,7 +9,7 @@ namespace MyVocaList.UI.ViewModels;
 /// <summary>
 /// Provides menu structure and navigation for the AppShell flyout.
 /// </summary>
-public class AppShellViewModel
+public class AppShellViewModel : ViewModelBase
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -22,7 +19,7 @@ public class AppShellViewModel
 
     public List<MenuGroup> MenuGroups { get; }
 
-    public ICommand NavigateCommand { get; }
+    public IAsyncRelayCommand<string> NavigateCommand { get; }
 
     /// <summary>Raised when the user requests to exit the app (menu item or back at root).</summary>
     public event Action? ExitRequested;
@@ -30,7 +27,7 @@ public class AppShellViewModel
     public AppShellViewModel(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        NavigateCommand = new Command<string>(async route => await NavigateAsync(route));
+        NavigateCommand = new AsyncRelayCommand<string>(route => NavigateAsync(route!));
         MenuGroups = NavigationConfig.BuildMenuGroups(NavigateCommand);
     }
 
