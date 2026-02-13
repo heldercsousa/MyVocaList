@@ -1,4 +1,3 @@
-using System.Linq;
 using DevExpress.Maui.CollectionView;
 using DevExpress.Maui.Controls;
 using DevExpress.Maui.Core;
@@ -103,7 +102,7 @@ public partial class VenuesPage : ContentPage
 
     private void OnSelectionChanged(object sender, CollectionViewSelectionChangedEventArgs e)
     {
-        var count = collectionView.SelectedItems?.Cast<object>().Count() ?? 0;
+        var count = (collectionView.SelectedItems as System.Collections.ICollection)?.Count ?? 0;
         _viewModel.OnSelectionChanged(count);
     }
 
