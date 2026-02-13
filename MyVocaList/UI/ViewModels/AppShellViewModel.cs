@@ -39,6 +39,9 @@ public class AppShellViewModel
 
     public ICommand NavigateCommand { get; }
 
+    /// <summary>Raised when the user requests to exit the app (menu item or back at root).</summary>
+    public event Action? ExitRequested;
+
     public AppShellViewModel(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
@@ -61,7 +64,8 @@ public class AppShellViewModel
             ]),
             new MenuGroup("System", [
                 new MenuItemDescription("Preferences", "settings_outlined", "preferences", NavigateCommand),
-                new MenuItemDescription("Backup & Restore", "cloud_sync_outlined", "backup", NavigateCommand)
+                new MenuItemDescription("Backup & Restore", "cloud_sync_outlined", "backup", NavigateCommand),
+                new MenuItemDescription("Exit", "logout_outlined", "exit", NavigateCommand)
             ])
         ];
     }
@@ -74,6 +78,13 @@ public class AppShellViewModel
         if (route == "queue")
         {
             await Shell.Current.Navigation.PopToRootAsync(animated: false);
+            return;
+        }
+
+        if (route == "exit")
+        {
+            await Shell.Current.Navigation.PopToRootAsync(animated: false);
+            ExitRequested?.Invoke();
             return;
         }
 
