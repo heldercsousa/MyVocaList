@@ -34,6 +34,8 @@ namespace MyVocaList.UI.ViewModels
         private Func<Task>? _pendingConfirmAction;
 
         private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
+        private bool _suppressSelectionChangedExit;
+        private bool _suppressNextTap;
 
         private bool _isRefreshing;
         private string _searchText = string.Empty;
@@ -85,7 +87,7 @@ namespace MyVocaList.UI.ViewModels
         public ObservableRangeCollection<VenueListItemDto> Venues { get; }
         public ObservableRangeCollection<VenueListItemDto> SelectedVenues { get; }
 
-        // Propriedade adicional não genérica para ligar ao SelectedItems do DXCollectionView
+        // Propriedade adicional nï¿½o genï¿½rica para ligar ao SelectedItems do DXCollectionView
         public System.Collections.IList SelectedVenuesRaw => SelectedVenues;
 
         public bool IsRefreshing
@@ -280,7 +282,7 @@ namespace MyVocaList.UI.ViewModels
                 // Preserve selected ids before replacing items
                 var selectedIds = SelectedVenues.Select(v => v.Id).ToHashSet();
 
-                // Call service (async) — service doesn't accept token in current signature,
+                // Call service (async) ï¿½ service doesn't accept token in current signature,
                 // so we only honour cancellation around it.
                 var (itemsEnumerable, totalCount) = await _venueService.GetPagedVenuesForListAsync(
                     _currentPage, PageSize, _currentSearchQuery);
@@ -306,7 +308,7 @@ namespace MyVocaList.UI.ViewModels
             }
             catch (OperationCanceledException)
             {
-                // cancellation requested — silently return
+                // cancellation requested ï¿½ silently return
             }
             finally
             {
@@ -377,6 +379,12 @@ namespace MyVocaList.UI.ViewModels
         {
             if (item == null || IsMultiSelectMode)
                 return;
+
+            if (_suppressNextTap)
+            {
+                _suppressNextTap = false;
+                return;
+            }
 
             OpenEditBottomSheet(item);
         }
@@ -533,10 +541,12 @@ namespace MyVocaList.UI.ViewModels
         public void EnterMultiSelectMode(VenueListItemDto initialItem)
         {
             IsMultiSelectMode = true;
+            _suppressSelectionChangedExit = true;
             RunOnUiThread(() =>
             {
                 SelectedVenues.ClearRange();
                 SelectedVenues.AddRange(new[] { initialItem });
+                _suppressSelectionChangedExit = false;
             });
             SelectedCount = 1;
         }
@@ -551,8 +561,11 @@ namespace MyVocaList.UI.ViewModels
         public void OnSelectionChanged(int count)
         {
             SelectedCount = count;
-            if (IsMultiSelectMode && count == 0)
+            if (IsMultiSelectMode && count == 0 && !_suppressSelectionChangedExit)
+            {
+                _suppressNextTap = true;
                 ExitMultiSelectMode();
+            }
         }
 
         private void UpdateCharacterCounter(int length)
