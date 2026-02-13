@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/13/2026** - Enhancement - Centralized navigation configuration into dedicated `Navigation/` folder. Extracted route string constants to `Routes.cs`, menu structure and page type map to `NavigationConfig.cs`. `AppShellViewModel` now uses `AppInfo.Name` for app title and delegates to `NavigationConfig`; no magic strings remain in the view model.
 - **02/13/2026** - Enhancement - Back button at root and Exit menu item now show a DevExpress BottomSheet exit confirmation instead of immediately quitting. Added Exit option to the hamburger menu (System group). QueuePage owns the confirmation sheet; AppShell handles the fallback back-press case and wires the ExitRequested event from AppShellViewModel.
 - **02/13/2026** - Fix - Device back button no longer exits the app when navigating from the flyout drawer. Switched from `GoToAsync("//{route}")` (absolute — clears stack, every page becomes a Shell root) to `Shell.Current.Navigation.PushAsync(page)` (DevExpress pattern — pages are pushed onto the stack so back naturally returns to the previous page). Queue is the persistent Shell root; tapping Queue in the drawer calls `PopToRootAsync`. VenuesPage now intercepts the device back button to close open BottomSheets or exit multi-select mode before popping.
 - **02/11/2026** - Remove unused Type
