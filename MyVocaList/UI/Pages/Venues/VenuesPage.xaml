@@ -206,20 +206,41 @@
             </dx:ShimmerView.Content>
         </dx:ShimmerView>
 
-        <!-- Empty state -->
+        <!-- Empty state: no venues registered at all -->
         <VerticalStackLayout Grid.Row="1"
-                             IsVisible="{Binding IsEmpty}"
-                             VerticalOptions="Start"
+                             IsVisible="{Binding IsEmptyNoVenues}"
+                             VerticalOptions="Center"
                              HorizontalOptions="Center"
                              Spacing="16"
                              Padding="32">
             <dx:DXButton Icon="nightlife_outlined"
                          IconColor="{dx:ThemeColor OnSurfaceVariant}"
+                         IconWidth="160" IconHeight="160"
                          BackgroundColor="Transparent"
                          InputTransparent="True"
-                         WidthRequest="280" HeightRequest="280"
+                         WidthRequest="200" HeightRequest="200"
                          HorizontalOptions="Center" />
             <Label Text="No venue registered"
+                   FontFamily="RobotoMedium" FontSize="16"
+                   TextColor="{dx:ThemeColor OnSurfaceVariant}"
+                   HorizontalTextAlignment="Center" />
+        </VerticalStackLayout>
+
+        <!-- Empty state: search returned no results -->
+        <VerticalStackLayout Grid.Row="1"
+                             IsVisible="{Binding IsEmptyNoResults}"
+                             VerticalOptions="Center"
+                             HorizontalOptions="Center"
+                             Spacing="16"
+                             Padding="32">
+            <dx:DXButton Icon="search_off_outlined"
+                         IconColor="{dx:ThemeColor OnSurfaceVariant}"
+                         IconWidth="160" IconHeight="160"
+                         BackgroundColor="Transparent"
+                         InputTransparent="True"
+                         WidthRequest="200" HeightRequest="200"
+                         HorizontalOptions="Center" />
+            <Label Text="No venue found"
                    FontFamily="RobotoMedium" FontSize="16"
                    TextColor="{dx:ThemeColor OnSurfaceVariant}"
                    HorizontalTextAlignment="Center" />

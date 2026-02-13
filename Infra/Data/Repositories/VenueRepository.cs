@@ -31,11 +31,15 @@ namespace MyVocaList.Infra.Data.Repositories
             if (Guard.IsNullOrWhiteSpace(searchTerm))
                 return new List<Venue>();
 
-            // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides
+            var searchPattern = searchTerm + "%";
+
+            // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides.
+            // Pattern is pre-computed so EF.Functions.Collate applies to the full right-hand
+            // expression, generating: col COLLATE X LIKE @pattern COLLATE X
             return await _context.Venues
                 .Where(v => EF.Functions.Like(
                     EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
-                    EF.Functions.Collate(searchTerm, "NOCASE_NOACCENT") + "%"))
+                    EF.Functions.Collate(searchPattern, "NOCASE_NOACCENT")))
                 .Take(maxResults)
                 .OrderBy(v => v.Name)
                 .ToListAsync();
@@ -52,11 +56,15 @@ namespace MyVocaList.Infra.Data.Repositories
             if (Guard.IsNullOrWhiteSpace(searchTerm))
                 return new List<Venue>();
 
-            // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides
+            var searchPattern = "%" + searchTerm + "%";
+
+            // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides.
+            // Pattern is pre-computed so EF.Functions.Collate applies to the full right-hand
+            // expression, generating: col COLLATE X LIKE @pattern COLLATE X
             return await _context.Venues
                 .Where(v => EF.Functions.Like(
                     EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
-                    "%" + EF.Functions.Collate(searchTerm, "NOCASE_NOACCENT") + "%"))
+                    EF.Functions.Collate(searchPattern, "NOCASE_NOACCENT")))
                 .Take(maxResults)
                 .OrderBy(v => v.Name)
                 .ToListAsync();
@@ -82,10 +90,14 @@ namespace MyVocaList.Infra.Data.Repositories
 
             if (!Guard.IsNullOrWhiteSpace(query))
             {
-                // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides
+                var searchPattern = "%" + query + "%";
+
+                // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides.
+                // Pattern is pre-computed so EF.Functions.Collate applies to the full right-hand
+                // expression, generating: col COLLATE X LIKE @pattern COLLATE X
                 q = q.Where(v => EF.Functions.Like(
                     EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
-                    "%" + EF.Functions.Collate(query, "NOCASE_NOACCENT") + "%"));
+                    EF.Functions.Collate(searchPattern, "NOCASE_NOACCENT")));
             }
 
             return await q
@@ -136,8 +148,14 @@ namespace MyVocaList.Infra.Data.Repositories
 
             if (!Guard.IsNullOrWhiteSpace(query))
             {
-                // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides
-                q = q.Where(v => EF.Functions.Like(EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"), "%" + EF.Functions.Collate(query, "NOCASE_NOACCENT") + "%"));
+                var searchPattern = "%" + query + "%";
+
+                // SQLite workaround: LIKE ignores collation, so we explicitly COLLATE both sides.
+                // Pattern is pre-computed so EF.Functions.Collate applies to the full right-hand
+                // expression, generating: col COLLATE X LIKE @pattern COLLATE X
+                q = q.Where(v => EF.Functions.Like(
+                    EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
+                    EF.Functions.Collate(searchPattern, "NOCASE_NOACCENT")));
             }
 
             var totalCount = await q.CountAsync();

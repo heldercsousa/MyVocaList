@@ -102,7 +102,11 @@ namespace MyVocaList.UI.ViewModels
             set
             {
                 if (SetProperty(ref _searchText, value))
+                {
+                    OnPropertyChanged(nameof(IsEmptyNoVenues));
+                    OnPropertyChanged(nameof(IsEmptyNoResults));
                     OnSearchTextChanged(value);
+                }
             }
         }
 
@@ -214,11 +218,13 @@ namespace MyVocaList.UI.ViewModels
             set
             {
                 if (SetProperty(ref _isInitialLoading, value))
-                    OnPropertyChanged(nameof(IsEmpty));
+                    NotifyEmptyStates();
             }
         }
 
         public bool IsEmpty => !IsInitialLoading && Venues.Count == 0;
+        public bool IsEmptyNoVenues => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
+        public bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
 
         public bool VenueNameHasError
         {
@@ -303,7 +309,7 @@ namespace MyVocaList.UI.ViewModels
 
                     SelectedCount = SelectedVenues.Count;
                     HasMoreItems = (_currentPage * PageSize) < _totalCount;
-                    OnPropertyChanged(nameof(IsEmpty));
+                    NotifyEmptyStates();
                 });
             }
             catch (OperationCanceledException)
@@ -579,6 +585,13 @@ namespace MyVocaList.UI.ViewModels
                 IsCharacterCounterWarning = isWarning;
                 IsCharacterCounterError = isError;
             }
+        }
+
+        private void NotifyEmptyStates()
+        {
+            OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsEmptyNoVenues));
+            OnPropertyChanged(nameof(IsEmptyNoResults));
         }
 
         protected void RunOnUiThread(Action action)
