@@ -62,7 +62,7 @@
         </Grid>
     </Shell.TitleView>
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
         <!-- Search bar -->
         <dx:DXBorder Grid.Row="0"
                      BackgroundColor="{StaticResource SurfaceContainer}"
@@ -83,8 +83,36 @@
                           ClearIconColor="{StaticResource OnSurfaceVariant}" />
         </dx:DXBorder>
 
+        <!-- Select All row -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="12"
+              Padding="32,4,16,4"
+              HeightRequest="44"
+              IsVisible="{Binding IsMultiSelectMode}">
+            <dx:DXButton Grid.Column="0"
+                         Icon="check_box_outline_blank_outlined"
+                         IconColor="{dx:ThemeColor OnSurfaceVariant}"
+                         BackgroundColor="Transparent"
+                         WidthRequest="24" HeightRequest="24"
+                         Command="{Binding SelectAllCommand}">
+                <dx:DXButton.Triggers>
+                    <DataTrigger TargetType="dx:DXButton"
+                                 Binding="{Binding IsAllSelected}" Value="True">
+                        <Setter Property="Icon" Value="check_box_outlined" />
+                        <Setter Property="IconColor" Value="{dx:ThemeColor Primary}" />
+                    </DataTrigger>
+                </dx:DXButton.Triggers>
+            </dx:DXButton>
+            <Label Grid.Column="1"
+                   Text="All"
+                   FontFamily="RobotoMedium" FontSize="14"
+                   TextColor="{dx:ThemeColor OnSurfaceVariant}"
+                   VerticalOptions="Center" />
+        </Grid>
+
         <!-- Venue list with skeleton loading -->
-        <dx:ShimmerView Grid.Row="1"
+        <dx:ShimmerView Grid.Row="2"
                         IsLoading="{Binding IsInitialLoading}"
                         WaveWidth="0.7"
                         WaveOpacity="0.8">
@@ -118,7 +146,6 @@
                        AllowCascadeUpdate="True"
                        ItemSeparatorThickness="0"
                        Tap="OnItemTapped"
-                       LongPress="OnItemLongPressed"
                        SelectionChanged="OnSelectionChanged">
 
             <dxcv:DXCollectionView.ItemTemplate>
@@ -138,15 +165,23 @@
                                          Padding="16"
                                          Margin="16,4"
                                          HeightRequest="64">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                    <Label Grid.Column="0"
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <dx:DXButton Grid.Column="0"
+                                                 Icon="check_box_outline_blank_outlined"
+                                                 IconColor="{dx:ThemeColor OnSurfaceVariant}"
+                                                 BackgroundColor="Transparent"
+                                                 WidthRequest="24" HeightRequest="24"
+                                                 InputTransparent="True"
+                                                 IsVisible="{Binding BindingContext.IsMultiSelectMode, Source={x:Reference page}}" />
+
+                                    <Label Grid.Column="1"
                                            Text="{Binding Name}"
                                            FontFamily="RobotoRegular" FontSize="16"
                                            TextColor="{StaticResource OnSurface}"
                                            VerticalOptions="Center"
                                            LineBreakMode="TailTruncation" />
 
-                                    <dx:DXBorder Grid.Column="1"
+                                    <dx:DXBorder Grid.Column="2"
                                                  IsVisible="{Binding HasEvents}"
                                                  BackgroundColor="{StaticResource SecondaryContainer}"
                                                  CornerRadius="12"
@@ -172,15 +207,22 @@
                                  Padding="16"
                                  Margin="16,4"
                                  HeightRequest="64">
-                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
-                            <Label Grid.Column="0"
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <dx:DXButton Grid.Column="0"
+                                         Icon="check_box_outlined"
+                                         IconColor="{dx:ThemeColor Primary}"
+                                         BackgroundColor="Transparent"
+                                         WidthRequest="24" HeightRequest="24"
+                                         InputTransparent="True" />
+
+                            <Label Grid.Column="1"
                                    Text="{Binding Name}"
                                    FontFamily="RobotoRegular" FontSize="16"
                                    TextColor="{dx:ThemeColor OnSecondaryContainer}"
                                    VerticalOptions="Center"
                                    LineBreakMode="TailTruncation" />
 
-                            <dx:DXBorder Grid.Column="1"
+                            <dx:DXBorder Grid.Column="2"
                                          IsVisible="{Binding HasEvents}"
                                          BackgroundColor="{dx:ThemeColor Secondary}"
                                          CornerRadius="12"
@@ -190,14 +232,6 @@
                                        TextColor="{dx:ThemeColor OnSecondary}"
                                        VerticalOptions="Center" />
                             </dx:DXBorder>
-
-                            <dx:DXButton Grid.Column="2"
-                                         Icon="check_circle_outlined"
-                                         IconColor="{dx:ThemeColor Secondary}"
-                                         BackgroundColor="Transparent"
-                                         WidthRequest="28" HeightRequest="28"
-                                         InputTransparent="True"
-                                         VerticalOptions="Center" />
                         </Grid>
                     </dx:DXBorder>
                 </DataTemplate>
@@ -207,7 +241,7 @@
         </dx:ShimmerView>
 
         <!-- Empty state: no venues registered at all -->
-        <VerticalStackLayout Grid.Row="1"
+        <VerticalStackLayout Grid.Row="2"
                              IsVisible="{Binding IsEmptyNoVenues}"
                              VerticalOptions="Center"
                              HorizontalOptions="Center"
@@ -227,7 +261,7 @@
         </VerticalStackLayout>
 
         <!-- Empty state: search returned no results -->
-        <VerticalStackLayout Grid.Row="1"
+        <VerticalStackLayout Grid.Row="2"
                              IsVisible="{Binding IsEmptyNoResults}"
                              VerticalOptions="Center"
                              HorizontalOptions="Center"
@@ -247,7 +281,7 @@
         </VerticalStackLayout>
 
         <!-- FAB -->
-        <dx:DXButton Grid.Row="1"
+        <dx:DXButton Grid.Row="2"
                      Icon="add_outlined"
                      IconColor="{StaticResource OnPrimary}"
                      BackgroundColor="{StaticResource Primary}"

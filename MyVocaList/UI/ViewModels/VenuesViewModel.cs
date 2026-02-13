@@ -28,7 +28,6 @@ namespace MyVocaList.UI.ViewModels
 
         private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
         private bool _suppressSelectionChangedExit;
-        private bool _suppressNextTap;
         private bool _isLoading;
 
         [ObservableProperty] private bool _isRefreshing;
@@ -73,6 +72,7 @@ namespace MyVocaList.UI.ViewModels
             EditSelectedCommand = new RelayCommand(EditSelectedVenue);
             CancelSelectionCommand = new RelayCommand(ExitMultiSelectMode);
             TapCommand = new RelayCommand<VenueListItemDto>(OnItemTapped);
+            SelectAllCommand = new RelayCommand(ToggleSelectAll);
             ConfirmActionCommand = new AsyncRelayCommand(ExecuteConfirmActionAsync);
             DismissConfirmCommand = new RelayCommand(DismissConfirmSheet);
         }
@@ -91,6 +91,8 @@ namespace MyVocaList.UI.ViewModels
         public SelectionMode SelectionMode =>
             IsMultiSelectMode ? SelectionMode.Multiple : SelectionMode.None;
 
+        public bool IsAllSelected => IsMultiSelectMode && Venues.Count > 0 && SelectedCount == Venues.Count;
+
         public bool IsEmpty => !IsInitialLoading && Venues.Count == 0;
         public bool IsEmptyNoVenues => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
         public bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
@@ -105,6 +107,7 @@ namespace MyVocaList.UI.ViewModels
         public IRelayCommand EditSelectedCommand { get; }
         public IRelayCommand CancelSelectionCommand { get; }
         public IRelayCommand<VenueListItemDto> TapCommand { get; }
+        public IRelayCommand SelectAllCommand { get; }
         public IAsyncRelayCommand ConfirmActionCommand { get; }
         public IRelayCommand DismissConfirmCommand { get; }
 
@@ -119,12 +122,14 @@ namespace MyVocaList.UI.ViewModels
             OnPropertyChanged(nameof(SelectionMode));
             OnPropertyChanged(nameof(ShowDefaultTitle));
             OnPropertyChanged(nameof(ShowMultiSelectToolbar));
+            OnPropertyChanged(nameof(IsAllSelected));
         }
 
         partial void OnSelectedCountChanged(int value)
         {
             OnPropertyChanged(nameof(SelectedCountText));
             OnPropertyChanged(nameof(CanEditSelected));
+            OnPropertyChanged(nameof(IsAllSelected));
         }
 
         partial void OnEditingVenueNameChanged(string value)
@@ -255,13 +260,7 @@ namespace MyVocaList.UI.ViewModels
             if (item == null || IsMultiSelectMode)
                 return;
 
-            if (_suppressNextTap)
-            {
-                _suppressNextTap = false;
-                return;
-            }
-
-            OpenEditBottomSheet(item);
+            EnterMultiSelectMode(item);
         }
 
         private void OpenCreateBottomSheet()
@@ -433,12 +432,28 @@ namespace MyVocaList.UI.ViewModels
             SelectedCount = 0;
         }
 
+        private void ToggleSelectAll()
+        {
+            if (IsAllSelected)
+            {
+                ExitMultiSelectMode();
+                return;
+            }
+            IsMultiSelectMode = true;
+            _suppressSelectionChangedExit = true;
+            RunOnUiThread(() =>
+            {
+                SelectedVenues.ReplaceRange(Venues.ToList());
+                _suppressSelectionChangedExit = false;
+            });
+            SelectedCount = Venues.Count;
+        }
+
         public void OnSelectionChanged(int count)
         {
             SelectedCount = count;
             if (IsMultiSelectMode && count == 0 && !_suppressSelectionChangedExit)
             {
-                _suppressNextTap = true;
                 ExitMultiSelectMode();
             }
         }
@@ -460,6 +475,7 @@ namespace MyVocaList.UI.ViewModels
             OnPropertyChanged(nameof(IsEmpty));
             OnPropertyChanged(nameof(IsEmptyNoVenues));
             OnPropertyChanged(nameof(IsEmptyNoResults));
+            OnPropertyChanged(nameof(IsAllSelected));
         }
     }
 }

@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/13/2026** - Enhancement - VenuesPage: replaced long-press-to-select with tap-to-select UX to eliminate swipe/gesture conflicts on Android. Tap any item to enter selection mode with checkboxes; added Select All row; removed OnItemLongPressed handler; swipe-to-delete unchanged.
 - **02/13/2026** - Enhancement - Migrate to CommunityToolkit.Mvvm: added ViewModelBase (ObservableObject + UI thread helpers), replaced manual INPC in VenuesViewModel with [ObservableProperty] + partial callbacks and RelayCommand/AsyncRelayCommand, updated AppShellViewModel to inherit ViewModelBase.
 - **02/13/2026** - Fix - VenuesPage: search filter was not accent-insensitive even though duplicate name validation was. Root cause: EF.Functions.Collate() embedded inside "%" + ... + "%" C# string concatenation was being evaluated in C# context, losing the SQL COLLATE hint. Fixed by pre-computing the full pattern string ("%" + query + "%") and applying EF.Functions.Collate to the whole pattern expression so SQL generates col COLLATE X LIKE @pattern COLLATE X. Applied to all four LIKE methods in VenueRepository.
 - **02/13/2026** - Fix - VenuesPage: empty state icon was invisible because IconWidth/IconHeight were unset (DXButton WidthRequest controls button size, not icon size). Added IconWidth=160 IconHeight=160 for proper visibility.
