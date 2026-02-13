@@ -43,7 +43,12 @@
       "Bash(New-Item -ItemType Directory -Force \"$env:APPDATA\\\\DevExpress\")",
       "Bash(Out-Null)",
       "Bash(Set-Content -Path \"$env:APPDATA\\\\DevExpress\\\\DevExpress_License.txt\" -Value \"rFeVzjBfcglufmQHIR6Fk4ckHTKjfmTccij2owmRAYPjtsxdqE\" -NoNewline)",
-      "Bash(Write-Host \"Done: $env:APPDATA\\\\DevExpress\\\\DevExpress_License.txt\")"
+      "Bash(Write-Host \"Done: $env:APPDATA\\\\DevExpress\\\\DevExpress_License.txt\")",
+      "Bash(powershell -Command \"New-Item -ItemType Directory -Force \"\"$env:APPDATA\\\\DevExpress\"\" | Out-Null; Set-Content -Path \"\"$env:APPDATA\\\\DevExpress\\\\DevExpress_License.txt\"\" -Value ''rFeVzjBfcglufmQHIR6Fk4ckHTKjfmTccij2owmRAYPjtsxdqE'' -NoNewline; Write-Host \"\"Created: $env:APPDATA\\\\DevExpress\\\\DevExpress_License.txt\"\"\")",
+      "Bash(powershell -Command \"$dir = [System.Environment]::GetFolderPath\\(''ApplicationData''\\) + ''\\\\DevExpress''; New-Item -ItemType Directory -Force $dir | Out-Null; $file = $dir + ''\\\\DevExpress_License.txt''; [System.IO.File]::WriteAllText\\($file, ''rFeVzjBfcglufmQHIR6Fk4ckHTKjfmTccij2owmRAYPjtsxdqE''\\); Write-Host \\(''Created: '' + $file\\)\")",
+      "Bash(powershell:*)",
+      "Bash(Select-String -Pattern \"DX1001|error|warning\")",
+      "Bash(Select-Object -First 30)"
     ]
   }
 }
