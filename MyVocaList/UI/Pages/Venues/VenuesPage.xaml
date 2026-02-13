@@ -209,7 +209,7 @@
         <!-- Empty state -->
         <VerticalStackLayout Grid.Row="1"
                              IsVisible="{Binding IsEmpty}"
-                             VerticalOptions="Center"
+                             VerticalOptions="Start"
                              HorizontalOptions="Center"
                              Spacing="16"
                              Padding="32">
@@ -217,7 +217,7 @@
                          IconColor="{dx:ThemeColor OnSurfaceVariant}"
                          BackgroundColor="Transparent"
                          InputTransparent="True"
-                         WidthRequest="80" HeightRequest="80"
+                         WidthRequest="280" HeightRequest="280"
                          HorizontalOptions="Center" />
             <Label Text="No venue registered"
                    FontFamily="RobotoMedium" FontSize="16"
