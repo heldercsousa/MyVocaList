@@ -136,7 +136,8 @@
                             <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
                                          CornerRadius="12"
                                          Padding="16"
-                                         Margin="16,4">
+                                         Margin="16,4"
+                                         HeightRequest="64">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                     <Label Grid.Column="0"
                                            Text="{Binding Name}"
@@ -169,7 +170,8 @@
                                  BorderThickness="2"
                                  CornerRadius="12"
                                  Padding="16"
-                                 Margin="16,4">
+                                 Margin="16,4"
+                                 HeightRequest="64">
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
                             <Label Grid.Column="0"
                                    Text="{Binding Name}"
