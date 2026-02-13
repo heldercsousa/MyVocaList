@@ -330,24 +330,25 @@ namespace MyVocaList.UI.ViewModels
                 return;
 
             _isLoading = true;
-
-            // dismiss footer immediately
-            RunOnUiThread(() => HasMoreItems = false);
-
-            _currentPage++;
-            var (itemsEnumerable, totalCount) = await _venueService.GetPagedVenuesForListAsync(
-                _currentPage, PageSize, _currentSearchQuery);
-
-            _totalCount = totalCount;
-            var list = itemsEnumerable.ToList();
-
-            RunOnUiThread(() =>
+            try
             {
-                Venues.AddRange(list);
-                HasMoreItems = (_currentPage * PageSize) < _totalCount;
-            });
+                _currentPage++;
+                var (itemsEnumerable, totalCount) = await _venueService.GetPagedVenuesForListAsync(
+                    _currentPage, PageSize, _currentSearchQuery);
 
-            _isLoading = false;
+                _totalCount = totalCount;
+                var list = itemsEnumerable.ToList();
+
+                RunOnUiThread(() =>
+                {
+                    Venues.AddRange(list);
+                    HasMoreItems = (_currentPage * PageSize) < _totalCount;
+                });
+            }
+            finally
+            {
+                _isLoading = false;
+            }
         }
 
         private void OnSearchTextChanged(string text)
