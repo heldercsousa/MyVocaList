@@ -1,16 +1,19 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls;
 
 namespace MyVocaList
 {
     public partial class App : Application
     {
-        public App(AppShell appShell)
+        public App(IServiceProvider serviceProvider)
         {
             InitializeComponent();
 
-            MainPage = appShell;
+            // AppShell is resolved after InitializeComponent() so that Application.Resources
+            // already contains MaterialColors.xaml when AppShell.InitializeComponent() runs.
+            MainPage = serviceProvider.GetRequiredService<AppShell>();
 
             _ = WarmUpDevExpressAsync();
         }
