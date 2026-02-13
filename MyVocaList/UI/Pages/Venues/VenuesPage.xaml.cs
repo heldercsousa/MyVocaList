@@ -62,7 +62,7 @@ public partial class VenuesPage : ContentPage
 
     private void OnSelectionChanged(object sender, CollectionViewSelectionChangedEventArgs e)
     {
-        var count = collectionView.SelectedItems?.Cast<object>().Count() ?? 0;
+        var count = collectionView.SelectedItems?.Cast<VenueListItemDto>().Count() ?? 0;
         _viewModel.OnSelectionChanged(count);
     }
 
