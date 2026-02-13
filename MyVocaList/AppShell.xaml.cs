@@ -4,9 +4,9 @@ namespace MyVocaList;
 
 public partial class AppShell : Shell
 {
-    public AppShell()
+    public AppShell(AppShellViewModel viewModel)
     {
-        BindingContext = new AppShellViewModel();
+        BindingContext = viewModel;
         InitializeComponent();
     }
 }

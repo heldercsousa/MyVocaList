@@ -1,14 +1,54 @@
-﻿namespace MyVocaList;
+using System;
+using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
 
-public partial class App : Application
+namespace MyVocaList
 {
-    public App()
+    public partial class App : Application
     {
-        InitializeComponent();
-    }
+        public App(AppShell appShell)
+        {
+            InitializeComponent();
 
-    protected override Window CreateWindow(IActivationState? activationState)
-    {
-        return new Window(new AppShell());
+            MainPage = appShell;
+
+            _ = WarmUpDevExpressAsync();
+        }
+
+        private async Task WarmUpDevExpressAsync()
+        {
+            try
+            {
+                await Task.Delay(200);
+
+                Application.Current?.Dispatcher?.Dispatch(() =>
+                {
+                    try
+                    {
+                        _ = typeof(DevExpress.Maui.CollectionView.DXCollectionView);
+
+                        var cv = new DevExpress.Maui.CollectionView.DXCollectionView
+                        {
+                            ItemsSource = new[] { string.Empty },
+                            HeightRequest = 1,
+                            WidthRequest = 1,
+                            IsVisible = false
+                        };
+
+                        var grid = new Microsoft.Maui.Controls.Grid { IsVisible = false };
+                        grid.Children.Add(cv);
+                        grid.Children.Clear();
+                    }
+                    catch
+                    {
+                        // Fail silently
+                    }
+                });
+            }
+            catch
+            {
+                // ignore
+            }
+        }
     }
 }
