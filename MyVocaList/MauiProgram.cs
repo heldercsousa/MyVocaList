@@ -8,6 +8,12 @@ using MyVocaList.Infra.Data.Repositories;
 using MyVocaList.Infra.Utils;
 using MyVocaList.Services;
 using MyVocaList.UI.Services;
+using MyVocaList.UI.Pages.Artists;
+using MyVocaList.UI.Pages.BackupRestore;
+using MyVocaList.UI.Pages.Events;
+using MyVocaList.UI.Pages.People;
+using MyVocaList.UI.Pages.Preferences;
+using MyVocaList.UI.Pages.Queue;
 using MyVocaList.UI.Pages.Venues;
 using MyVocaList.UI.ViewModels;
 
@@ -54,11 +60,21 @@ public static class MauiProgram
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddSingleton<ISnackbarService, SnackbarService>();
 
+        // Shell
+        builder.Services.AddSingleton<AppShellViewModel>();
+        builder.Services.AddSingleton<AppShell>();
+
         // ViewModels
         builder.Services.AddTransient<VenuesViewModel>();
 
         // Pages
+        builder.Services.AddTransient<QueuePage>();
+        builder.Services.AddTransient<EventsPage>();
         builder.Services.AddTransient<VenuesPage>();
+        builder.Services.AddTransient<PeoplePage>();
+        builder.Services.AddTransient<ArtistsPage>();
+        builder.Services.AddTransient<PreferencesPage>();
+        builder.Services.AddTransient<BackupRestorePage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

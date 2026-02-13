@@ -1,8 +1,10 @@
+using System.Linq;
 using DevExpress.Maui.CollectionView;
 using DevExpress.Maui.Controls;
 using DevExpress.Maui.Core;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.UI.ViewModels;
+using Microsoft.Maui.Controls;
 
 namespace MyVocaList.UI.Pages.Venues;
 
@@ -22,6 +24,22 @@ public partial class VenuesPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
+
+        // Garante que o SelectedItems do control receba a cole��o exata da ViewModel
+        // (evita BindingDiagnostics / reflection cost / discrep�ncias entre inst�ncias)
+        try
+        {
+            if (collectionView != null && _viewModel != null)
+            {
+                // DXCollectionView.SelectedItems aceita IList � usamos a cole��o da VM
+                collectionView.SelectedItems = _viewModel.SelectedVenues;
+            }
+        }
+        catch
+        {
+            // fail silently � n�o interromper exibi��o da p�gina
+        }
+
         _ = _viewModel.InitializeAsync();
     }
 
@@ -60,9 +78,32 @@ public partial class VenuesPage : ContentPage
         }
     }
 
+    protected override bool OnBackButtonPressed()
+    {
+        if (_viewModel.ConfirmSheetState != DevExpress.Maui.Controls.BottomSheetState.Hidden)
+        {
+            _viewModel.ConfirmSheetState = DevExpress.Maui.Controls.BottomSheetState.Hidden;
+            return true;
+        }
+
+        if (_viewModel.BottomSheetState != DevExpress.Maui.Controls.BottomSheetState.Hidden)
+        {
+            _viewModel.BottomSheetState = DevExpress.Maui.Controls.BottomSheetState.Hidden;
+            return true;
+        }
+
+        if (_viewModel.IsMultiSelectMode)
+        {
+            _viewModel.ExitMultiSelectMode();
+            return true;
+        }
+
+        return false;
+    }
+
     private void OnSelectionChanged(object sender, CollectionViewSelectionChangedEventArgs e)
     {
-        var count = collectionView.SelectedItems?.Cast<VenueListItemDto>().Count() ?? 0;
+        var count = collectionView.SelectedItems?.Cast<object>().Count() ?? 0;
         _viewModel.OnSelectionChanged(count);
     }
 

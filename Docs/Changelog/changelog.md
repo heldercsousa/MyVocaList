@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/13/2026** - Fix - Device back button no longer exits the app when navigating from the flyout drawer. Switched from `GoToAsync("//{route}")` (absolute — clears stack, every page becomes a Shell root) to `Shell.Current.Navigation.PushAsync(page)` (DevExpress pattern — pages are pushed onto the stack so back naturally returns to the previous page). Queue is the persistent Shell root; tapping Queue in the drawer calls `PopToRootAsync`. VenuesPage now intercepts the device back button to close open BottomSheets or exit multi-select mode before popping.
 - **02/11/2026** - Remove unused Type
 - **02/11/2026** - Fix - Fixed VenuesPage multi-select selection visual: replaced VisualStateManager approach (which was never triggered because DXCollectionView fires visual states on the DataTemplate root SwipeContainer, not on the nested DXBorder) with DXCollectionView.SelectedItemTemplate — selected items now render with SecondaryContainer background, Secondary border, and a checkmark icon.
 
