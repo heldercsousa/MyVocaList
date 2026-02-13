@@ -4,9 +4,8 @@
 Karaoke queue management. .NET MAUI 9.0 (net9.0-android, net9.0-ios).
 
 ## DevExpress / MAUI
-- When working with DevExpress MAUI controls, ALWAYS read the actual API documentation or reference example files in
-the project before guessing property/class names. Never assume API names - verify them first by searching the codebase or
-fetching docs.
+- When working with DevExpress MAUI controls, verify property/class names by searching the codebase or fetching web docs. **NEVER** search the local `devexpress-examples` folder unless the user explicitly asks — it wastes tokens on unrelated files.
+- Do NOT proactively open or scan `devexpress-examples` at the start of any task.
 - For XAML/MAUI UI work: validate icon names, resource references, and control properties against actual
 installed package versions before writing code. If a package version is uncertain, check the .csproj file first.
 

@@ -48,7 +48,13 @@
       "Bash(powershell -Command \"$dir = [System.Environment]::GetFolderPath\\(''ApplicationData''\\) + ''\\\\DevExpress''; New-Item -ItemType Directory -Force $dir | Out-Null; $file = $dir + ''\\\\DevExpress_License.txt''; [System.IO.File]::WriteAllText\\($file, ''rFeVzjBfcglufmQHIR6Fk4ckHTKjfmTccij2owmRAYPjtsxdqE''\\); Write-Host \\(''Created: '' + $file\\)\")",
       "Bash(powershell:*)",
       "Bash(Select-String -Pattern \"DX1001|error|warning\")",
-      "Bash(Select-Object -First 30)"
+      "Bash(Select-Object -First 30)",
+      "Bash(cmd /c:*)",
+      "Bash(cmd /c \"type C:\\\\Users\\\\helde\\\\inspect_swipe.ps1\")",
+      "Bash(python:*)",
+      "Bash(py:*)",
+      "Bash(python3:*)",
+      "Bash(printf '%s\\\\n' '$pkgBase = \"\"$env:USERPROFILE\\\\.nuget\\\\packages\\\\devexpress.maui.collectionview\"\"' 'Write-Host \"\"All installed versions:\"\"' 'Get-ChildItem $pkgBase | Sort-Object Name | ForEach-Object { Write-Host \"\"  $\\($_.Name\\)\"\" }' '$pkg = \\(Get-ChildItem $pkgBase | Sort-Object Name | Select-Object -Last 1\\).FullName' '$dll = Get-ChildItem \"\"$pkg\"\" -Recurse -Filter \"\"DevExpress.Maui.CollectionView.dll\"\" | Select-Object -First 1' 'if \\($dll\\) {' '    try { $asm = [System.Reflection.Assembly]::LoadFrom\\($dll.FullName\\) } catch { Write-Host \"\"Load error: $_\"\" }' '    try {' '        $types = $asm.GetTypes\\(\\)' '    } catch [System.Reflection.ReflectionTypeLoadException] {' '        $types = $_.Exception.Types | Where-Object { $_ -ne $null }' '    }' '    Write-Host \"\"Total loadable types: $\\($types.Count\\)\"\"' '    $swipe = $types | Where-Object { $_.Name -like \"\"*Swipe*\"\" }' '    Write-Host \"\"=== Swipe-related types ===\"\"' '    $swipe | ForEach-Object {' '        Write-Host \"\"TYPE: $\\($_.FullName\\) [IsInterface=$\\($_.IsInterface\\)]\"\"' '        $_.GetProperties\\(\\) | ForEach-Object { Write-Host \"\"  PROP: $\\($_.Name\\) : $\\($_.PropertyType.Name\\)\"\" }' '        $_.GetMembers\\(\\) | ForEach-Object { Write-Host \"\"  MEMBER: $\\($_.ToString\\(\\)\\)\"\" }' '    }' '}')"
     ]
   }
 }

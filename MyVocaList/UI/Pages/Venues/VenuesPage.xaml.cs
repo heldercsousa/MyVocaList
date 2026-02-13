@@ -68,16 +68,6 @@ public partial class VenuesPage : ContentPage
             _viewModel.TapCommand.Execute(item);
     }
 
-    private void OnItemLongPressed(object sender, CollectionViewGestureEventArgs e)
-    {
-        if (e.Item is VenueListItemDto item)
-        {
-            HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
-            collectionView.SelectedItems = _viewModel.SelectedVenues;
-            _viewModel.EnterMultiSelectMode(item);
-        }
-    }
-
     protected override bool OnBackButtonPressed()
     {
         if (_viewModel.ConfirmSheetState != DevExpress.Maui.Controls.BottomSheetState.Hidden)
