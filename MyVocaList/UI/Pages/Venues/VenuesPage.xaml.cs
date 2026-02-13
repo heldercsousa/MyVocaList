@@ -73,6 +73,7 @@ public partial class VenuesPage : ContentPage
         if (e.Item is VenueListItemDto item)
         {
             HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
+            collectionView.SelectedItems = _viewModel.SelectedVenues;
             _viewModel.EnterMultiSelectMode(item);
         }
     }
