@@ -29,12 +29,21 @@
                   IsVisible="{Binding ShowMultiSelectToolbar}">
 
                 <dx:DXButton Grid.Column="0"
-                             Icon="close_outlined"
-                             IconColor="{StaticResource OnSurface}"
+                             Icon="check_box_outline_blank_outlined"
+                             IconColor="{dx:ThemeColor OnSurfaceVariant}"
+                             IconWidth="20" IconHeight="20"
                              BackgroundColor="Transparent"
                              WidthRequest="40" HeightRequest="40"
                              CornerRadius="20"
-                             Command="{Binding CancelSelectionCommand}" />
+                             Command="{Binding SelectAllCommand}">
+                    <dx:DXButton.Triggers>
+                        <DataTrigger TargetType="dx:DXButton"
+                                     Binding="{Binding IsAllSelected}" Value="True">
+                            <Setter Property="Icon" Value="check_box_outlined" />
+                            <Setter Property="IconColor" Value="{dx:ThemeColor Primary}" />
+                        </DataTrigger>
+                    </dx:DXButton.Triggers>
+                </dx:DXButton>
 
                 <Label Grid.Column="1"
                        Text="{Binding SelectedCountText}"
@@ -62,7 +71,7 @@
         </Grid>
     </Shell.TitleView>
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,*">
         <!-- Search bar -->
         <dx:DXBorder Grid.Row="0"
                      BackgroundColor="{StaticResource SurfaceContainer}"
@@ -83,37 +92,8 @@
                           ClearIconColor="{StaticResource OnSurfaceVariant}" />
         </dx:DXBorder>
 
-        <!-- Select All row -->
-        <Grid Grid.Row="1"
-              ColumnDefinitions="Auto,*"
-              ColumnSpacing="12"
-              Padding="32,4,16,4"
-              HeightRequest="44"
-              IsVisible="{Binding IsMultiSelectMode}">
-            <dx:DXButton Grid.Column="0"
-                         Icon="check_box_outline_blank_outlined"
-                         IconColor="{dx:ThemeColor OnSurfaceVariant}"
-                         IconWidth="20" IconHeight="20"
-                         BackgroundColor="Transparent"
-                         WidthRequest="24" HeightRequest="24"
-                         Command="{Binding SelectAllCommand}">
-                <dx:DXButton.Triggers>
-                    <DataTrigger TargetType="dx:DXButton"
-                                 Binding="{Binding IsAllSelected}" Value="True">
-                        <Setter Property="Icon" Value="check_box_outlined" />
-                        <Setter Property="IconColor" Value="{dx:ThemeColor Primary}" />
-                    </DataTrigger>
-                </dx:DXButton.Triggers>
-            </dx:DXButton>
-            <Label Grid.Column="1"
-                   Text="All"
-                   FontFamily="RobotoMedium" FontSize="14"
-                   TextColor="{dx:ThemeColor OnSurfaceVariant}"
-                   VerticalOptions="Center" />
-        </Grid>
-
         <!-- Venue list with skeleton loading -->
-        <dx:ShimmerView Grid.Row="2"
+        <dx:ShimmerView Grid.Row="1"
                         IsLoading="{Binding IsInitialLoading}"
                         WaveWidth="0.7"
                         WaveOpacity="0.8">
@@ -244,7 +224,7 @@
         </dx:ShimmerView>
 
         <!-- Empty state: no venues registered at all -->
-        <VerticalStackLayout Grid.Row="2"
+        <VerticalStackLayout Grid.Row="1"
                              IsVisible="{Binding IsEmptyNoVenues}"
                              VerticalOptions="Center"
                              HorizontalOptions="Center"
@@ -264,7 +244,7 @@
         </VerticalStackLayout>
 
         <!-- Empty state: search returned no results -->
-        <VerticalStackLayout Grid.Row="2"
+        <VerticalStackLayout Grid.Row="1"
                              IsVisible="{Binding IsEmptyNoResults}"
                              VerticalOptions="Center"
                              HorizontalOptions="Center"
@@ -284,7 +264,7 @@
         </VerticalStackLayout>
 
         <!-- FAB -->
-        <dx:DXButton Grid.Row="2"
+        <dx:DXButton Grid.Row="1"
                      Icon="add_outlined"
                      IconColor="{StaticResource OnPrimary}"
                      BackgroundColor="{StaticResource Primary}"
