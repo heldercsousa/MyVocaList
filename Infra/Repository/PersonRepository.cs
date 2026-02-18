@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.Entity;
-using MyVocaList.Infra.Utils;
 
 namespace MyVocaList.Infra.Repository
 {
@@ -18,7 +17,7 @@ namespace MyVocaList.Infra.Repository
 
         public async Task<Person> GetByFullNameAsync(string fullName)
         {
-            Guard.AgainstNullOrWhiteSpace(fullName, nameof(fullName));
+            ArgumentException.ThrowIfNullOrWhiteSpace(fullName, nameof(fullName));
             return await _dbSet.FirstOrDefaultAsync(p => p.FullName == fullName);
         }
 
@@ -28,7 +27,7 @@ namespace MyVocaList.Infra.Repository
         public async Task<List<Person>> SearchByNameAsync(string searchTerm, int maxResults = 10)
         {
             // Return empty list for invalid search (no exception for user input)
-            if (Guard.IsNullOrWhiteSpace(searchTerm))
+            if (string.IsNullOrWhiteSpace(searchTerm))
                 return new List<Person>();
 
 

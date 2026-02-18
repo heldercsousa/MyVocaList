@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using MyVocaList.Infra.Utils;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 
@@ -16,7 +15,7 @@ namespace MyVocaList.Infra.Repository
         /// Gets venue by exact name match.
         /// Trimming handled automatically by DatabaseLoadingInterceptor
         /// </summary>
-        public async Task<Venue?> GetByNameAsync(string name) => await ( Guard.IsNullOrWhiteSpace(name) ?
+        public async Task<Venue?> GetByNameAsync(string name) => await ( string.IsNullOrWhiteSpace(name) ?
             Task.FromResult<Venue?>(null) : _context.Venues.FirstOrDefaultAsync(v => v.Name == name));
 
         /// <summary>
@@ -27,7 +26,7 @@ namespace MyVocaList.Infra.Repository
         /// </summary>
         public async Task<IEnumerable<Venue>> SearchByNameStartsWithAsync(string searchTerm, int maxResults = 10)
         {
-            if (Guard.IsNullOrWhiteSpace(searchTerm))
+            if (string.IsNullOrWhiteSpace(searchTerm))
                 return new List<Venue>();
 
             var searchPattern = searchTerm + "%";
@@ -52,7 +51,7 @@ namespace MyVocaList.Infra.Repository
         /// </summary>
         public async Task<IEnumerable<Venue>> SearchByNameContainsAsync(string searchTerm, int maxResults = 10)
         {
-            if (Guard.IsNullOrWhiteSpace(searchTerm))
+            if (string.IsNullOrWhiteSpace(searchTerm))
                 return new List<Venue>();
 
             var searchPattern = "%" + searchTerm + "%";
@@ -87,7 +86,7 @@ namespace MyVocaList.Infra.Repository
         {
             var q = _context.Venues.AsQueryable();
 
-            if (!Guard.IsNullOrWhiteSpace(query))
+            if (!string.IsNullOrWhiteSpace(query))
             {
                 var searchPattern = "%" + query + "%";
 
@@ -145,7 +144,7 @@ namespace MyVocaList.Infra.Repository
         {
             var q = _context.Venues.AsQueryable();
 
-            if (!Guard.IsNullOrWhiteSpace(query))
+            if (!string.IsNullOrWhiteSpace(query))
             {
                 var searchPattern = "%" + query + "%";
 

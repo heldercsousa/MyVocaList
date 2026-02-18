@@ -1,5 +1,4 @@
 using MyVocaList.Infra.EntityEFConfig;
-using MyVocaList.Infra.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
 using System.Globalization;

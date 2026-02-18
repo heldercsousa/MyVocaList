@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/18/2026** - Enhancement - Replaced custom Guard utility class with .NET built-in argument validation APIs (ArgumentNullException.ThrowIfNull, ArgumentException.ThrowIfNullOrWhiteSpace, ArgumentOutOfRangeException.ThrowIfNegativeOrZero). Fixed stale Infra namespace usings in Services (PersonService, QueueService, LanguageService). Deleted Infra/Utils/Guard.cs and the now-empty Utils directory.
 - **02/18/2026** - Enhancement - VenuesPage: merged X (cancel selection) button and Select All checkbox into a single checkbox in the header; removed the separate "Select All" row above the list. Checkbox is unchecked when items are partially/not selected, checked when all are selected; clicking while all are selected exits multi-select mode.
 - **02/18/2026** - Fix - VenuesPage: selection checkbox wasn´t visible while selecting lines. Updated the visual feedback when a line is selected, that became a inked border other than inking the entire line.
 - **02/17/2026** - Fix - VenuesPage: venues list order changed randomly between app launches. Root cause: chained `.Select(x => ValueTuple.Create(...))` on a paged+ordered IQueryable caused EF Core to wrap the query in a subquery without an outer ORDER BY, leaving SQLite free to return rows in undefined storage order. Fixed by materializing the ordered query first (`ToListAsync`), then mapping to ValueTuple in memory. Also removed the misleading `Debug.WriteLine(ToQueryString())` which only logged the intermediate SQL, not the actual executed query.

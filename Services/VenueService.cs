@@ -86,7 +86,7 @@ namespace MyVocaList.Services
 
         public async Task<(bool success, string message)> UpdateVenueAsync(int id, string newName)
         {
-            Guard.AgainstNegativeOrZero(id, nameof(id));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id, nameof(id));
 
             // Validation
             var validation = ValidateNameInput(newName);
@@ -121,7 +121,7 @@ namespace MyVocaList.Services
 
         public async Task<(bool success, string message)> DeleteVenuesAsync(IEnumerable<int> ids)
         {
-            Guard.AgainstNull(ids, nameof(ids));
+            ArgumentNullException.ThrowIfNull(ids, nameof(ids));
 
             if (!ids.Any())
             {
@@ -191,7 +191,7 @@ namespace MyVocaList.Services
 
         public async Task<Venue?> GetVenueByIdAsync(int id)
         {
-            Guard.AgainstNegativeOrZero(id, nameof(id));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id, nameof(id));
             return await _venueRepository.GetByIdAsync(id);
         }
 
@@ -210,8 +210,8 @@ namespace MyVocaList.Services
             int pageSize,
             string? query = null)
         {
-            Guard.AgainstNegativeOrZero(pageNumber, nameof(pageNumber));
-            Guard.AgainstNegativeOrZero(pageSize, nameof(pageSize));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber, nameof(pageNumber));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize, nameof(pageSize));
 
             var (items, totalCount) = await _venueRepository.GetPagedWithEventInfoAsync(pageNumber, pageSize, query);
 

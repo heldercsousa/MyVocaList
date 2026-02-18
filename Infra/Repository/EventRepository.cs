@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using MyVocaList.Infra.Utils;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 
@@ -20,7 +19,7 @@ namespace MyVocaList.Infra.Repository
 
         public async Task SetActiveEventAsync(int eventId)
         {
-            Guard.AgainstNegativeOrZero(eventId, nameof(eventId));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(eventId, nameof(eventId));
 
             var currentActive = await _dbSet.FirstOrDefaultAsync(e => e.QueueActive);
             if (currentActive != null && currentActive.Id != eventId) // Avoid deactivating if already active
@@ -43,7 +42,7 @@ namespace MyVocaList.Infra.Repository
         /// </summary>
         public async Task<bool> HasEventsByVenueAsync(int venueId)
         {
-            Guard.AgainstNegativeOrZero(venueId, nameof(venueId));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(venueId, nameof(venueId));
 
             return await _context.Events
                 .AnyAsync(e => e.VenueId == venueId);
