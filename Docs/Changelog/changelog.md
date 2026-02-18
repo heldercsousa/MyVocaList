@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/18/2026** - Fix - VenuesPage: selection checkbox wasn´t visible while selecting lines. Updated the visual feedback when a line is selected, that became a inked border other than inking the entire line.
 - **02/17/2026** - Fix - VenuesPage: venues list order changed randomly between app launches. Root cause: chained `.Select(x => ValueTuple.Create(...))` on a paged+ordered IQueryable caused EF Core to wrap the query in a subquery without an outer ORDER BY, leaving SQLite free to return rows in undefined storage order. Fixed by materializing the ordered query first (`ToListAsync`), then mapping to ValueTuple in memory. Also removed the misleading `Debug.WriteLine(ToQueryString())` which only logged the intermediate SQL, not the actual executed query.
 - **02/13/2026** - Enhancement - VenuesPage: replaced long-press-to-select with tap-to-select UX to eliminate swipe/gesture conflicts on Android. Tap any item to enter selection mode with checkboxes; added Select All row; removed OnItemLongPressed handler; swipe-to-delete unchanged.
 - **02/13/2026** - Enhancement - Migrate to CommunityToolkit.Mvvm: added ViewModelBase (ObservableObject + UI thread helpers), replaced manual INPC in VenuesViewModel with [ObservableProperty] + partial callbacks and RelayCommand/AsyncRelayCommand, updated AppShellViewModel to inherit ViewModelBase.
