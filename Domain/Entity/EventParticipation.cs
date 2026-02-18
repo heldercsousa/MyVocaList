@@ -1,4 +1,4 @@
-namespace MyVocaList.Domain;
+namespace MyVocaList.Domain.Entity;
 
 public class EventParticipation
 {

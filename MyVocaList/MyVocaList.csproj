@@ -98,6 +98,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Domain\MyVocaList.Domain.csproj" />
+		<ProjectReference Include="..\Infra\MyVocaList.Infra.csproj" />
 		<ProjectReference Include="..\Services\MyVocaList.Services.csproj" />
 	</ItemGroup>
 

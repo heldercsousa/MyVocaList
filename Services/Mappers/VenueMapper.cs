@@ -1,5 +1,5 @@
 using MyVocaList.Contracts.DTOs.List;
-using MyVocaList.Domain;
+using MyVocaList.Domain.Entity;
 
 namespace MyVocaList.Services.Mappers;
 

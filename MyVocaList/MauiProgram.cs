@@ -2,9 +2,11 @@ using CommunityToolkit.Maui;
 using DevExpress.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MyVocaList.Infra.Data;
-using MyVocaList.Infra.Data.Interceptors;
-using MyVocaList.Infra.Data.Repositories;
+using MyVocaList.Domain;
+using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Infra;
+using MyVocaList.Infra.Interceptor;
+using MyVocaList.Infra.Repository;
 using MyVocaList.Infra.Utils;
 using MyVocaList.Services;
 using MyVocaList.UI.Services;
@@ -52,11 +54,8 @@ public static class MauiProgram
         builder.Services.AddScoped<IVenueRepository, VenueRepository>();
         builder.Services.AddScoped<IEventRepository, EventRepository>();
 
-        // Utilities
-        builder.Services.AddSingleton<ITextNormalizer, TextNormalizer>();
-
-        // Services
-        builder.Services.AddScoped<IDatabaseService, DatabaseService>();
+            // Services
+        builder.Services.AddScoped<IDatabaseInit, DatabaseInit>();
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddSingleton<ISnackbarService, SnackbarService>();
 

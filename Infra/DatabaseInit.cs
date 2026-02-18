@@ -1,26 +1,26 @@
 using Microsoft.EntityFrameworkCore;
-using MyVocaList.Infra.Data;
+using MyVocaList.Infra;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Storage;
+using MyVocaList.Domain;
 
-namespace MyVocaList.Services
+namespace MyVocaList.Infra
 {
-    public class DatabaseService : IDatabaseService
+    public class DatabaseInit : IDatabaseInit
     {
         private readonly AppDbContext _context;
-        private readonly ILogger<DatabaseService> _logger;
+        private readonly ILogger<DatabaseInit> _logger;
 
-        public DatabaseService(AppDbContext context, ILogger<DatabaseService> logger)
+        public DatabaseInit(AppDbContext context, ILogger<DatabaseInit> logger)
         {
             _context = context;
             _logger = logger;
         }
 
-        public async Task InitializeDatabaseAsync()
+        public async Task InitializeDatabaseAsync(string appRootPath)
         {
             try
             {
-                var dbPath = Path.Combine(FileSystem.AppDataDirectory, "MyVocaList.db");
+                var dbPath = Path.Combine(appRootPath, "MyVocaList.db");
                 var directory = Path.GetDirectoryName(dbPath);
 
                 // Ensure directory exists

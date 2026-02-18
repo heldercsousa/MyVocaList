@@ -1,7 +1,7 @@
-using MyVocaList.Domain;
 using MyVocaList.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Infra.Data.Repositories;
+using MyVocaList.Domain.Entity;
 
 namespace MyVocaList.Services;
 

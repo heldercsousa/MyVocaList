@@ -1,20 +1,19 @@
 using Microsoft.EntityFrameworkCore;
-using MyVocaList.Domain;
+using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Domain.Entity;
 using MyVocaList.Infra.Utils;
 
-namespace MyVocaList.Infra.Data.Repositories
+namespace MyVocaList.Infra.Repository
 {
     /// <summary>
     /// Repository implementation for Person entity operations
     /// </summary>
     public class PersonRepository : BaseRepository<Person>, IPersonRepository
     {
-        private readonly ITextNormalizer _textNormalizer;
 
-        public PersonRepository(AppDbContext context, ITextNormalizer textNormalizer)
+        public PersonRepository(AppDbContext context)
             : base(context)
         {
-            _textNormalizer = textNormalizer;
         }
 
         public async Task<Person> GetByFullNameAsync(string fullName)
@@ -32,14 +31,10 @@ namespace MyVocaList.Infra.Data.Repositories
             if (Guard.IsNullOrWhiteSpace(searchTerm))
                 return new List<Person>();
 
-            // Normalize search term
-            var normalizedSearch = _textNormalizer.NormalizeName(searchTerm);
-
-            Console.WriteLine($"Searching: '{searchTerm}' → normalized: '{normalizedSearch}'");
 
             // Optimized search using normalized column index
             var results = await _dbSet
-                .Where(p => p.FullNameNormalized.Contains(normalizedSearch))
+                .Where(p => p.FullName.StartsWith(searchTerm))
                 .OrderBy(p => p.FullName)
                 .Take(maxResults)
                 .ToListAsync();
@@ -57,11 +52,9 @@ namespace MyVocaList.Infra.Data.Repositories
             if (string.IsNullOrWhiteSpace(searchTerm))
                 return new List<Person>();
 
-            var normalizedSearch = _textNormalizer.NormalizeName(searchTerm);
-
             // Search that STARTS with the term (more precise for autocomplete)
             return await _dbSet
-                .Where(p => p.FullNameNormalized.StartsWith(normalizedSearch))
+                .Where(p => p.FullName.StartsWith(searchTerm))
                 .OrderBy(p => p.FullName)
                 .Take(maxResults)
                 .ToListAsync();
@@ -72,39 +65,7 @@ namespace MyVocaList.Infra.Data.Repositories
         /// </summary>
         public async Task<List<Person>> SearchByAnyWordAsync(string searchTerm, int maxResults = 10)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-                return new List<Person>();
-
-            string normalizedSearch = _textNormalizer.NormalizeName(searchTerm);
-            var searchWords = normalizedSearch.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            if (searchWords.Length == 0)
-                return new List<Person>();
-
-            var query = _dbSet.AsQueryable();
-
-            // Search people that contain ANY of the words
-            foreach (var word in searchWords)
-            {
-                var currentWord = word; // Capture for lambda
-                query = query.Where(p => p.FullNameNormalized.Contains(currentWord));
-            }
-
-            return await query
-                .OrderBy(p => p.FullName)
-                .Take(maxResults)
-                .ToListAsync();
-        }
-
-        /// <summary>
-        /// Check if person exists with normalized name
-        /// </summary>
-        public async Task<Person> GetByNormalizedNameAsync(string fullName)
-        {
-            var normalizedName = _textNormalizer.NormalizeName(fullName);
-
-            return await _dbSet
-                .FirstOrDefaultAsync(p => p.FullNameNormalized == normalizedName);
+            throw new NotImplementedException("Search by any word is not implemented yet. Consider implementing a full-text search solution for this feature.");
         }
     }
 }

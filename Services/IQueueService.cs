@@ -1,4 +1,4 @@
-using MyVocaList.Domain;
+using MyVocaList.Domain.Entity;
 
 namespace MyVocaList.Services
 {

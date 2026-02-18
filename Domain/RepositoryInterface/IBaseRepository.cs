@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace MyVocaList.Infra.Data.Repositories
+namespace MyVocaList.Domain.RepositoryInterface
 {
     /// <summary>
     /// Base repository interface for common database operations

@@ -1,9 +1,8 @@
-using MyVocaList.Domain;
-using MyVocaList.Infra.Data.Repositories;
-using MyVocaList.Infra.Utils;
+using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Services.Mappers;
 using MyVocaList.Contracts.DTOs.List;
 using Microsoft.Extensions.Logging;
+using MyVocaList.Domain.Entity;
 
 namespace MyVocaList.Services
 {
@@ -14,7 +13,6 @@ namespace MyVocaList.Services
     {
         private readonly IVenueRepository _venueRepository;
         private readonly IEventRepository _eventRepository;
-        private readonly ITextNormalizer _textNormalizer;
         private readonly ILogger<VenueService> _logger;
 
         // Validation constants
@@ -24,12 +22,10 @@ namespace MyVocaList.Services
         public VenueService(
             IVenueRepository venueRepository,
             IEventRepository eventRepository,
-            ITextNormalizer textNormalizer,
             ILogger<VenueService> logger)
         {
             _venueRepository = venueRepository;
             _eventRepository = eventRepository;
-            _textNormalizer = textNormalizer;
             _logger = logger;
         }
 

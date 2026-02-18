@@ -1,8 +1,8 @@
-using MyVocaList.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MyVocaList.Domain.Entity;
 
-namespace MyVocaList.Infra.Data.Config
+namespace MyVocaList.Infra.EntityEFConfig
 {
     /// <summary>
     /// Entity Framework configuration for SystemConfiguration entity

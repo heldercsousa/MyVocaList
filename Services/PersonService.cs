@@ -1,4 +1,4 @@
-using MyVocaList.Domain;
+using MyVocaList.Domain.Entity;
 using MyVocaList.Infra.Data.Repositories;
 using MyVocaList.Infra.Utils;
 using System.Text.RegularExpressions;
