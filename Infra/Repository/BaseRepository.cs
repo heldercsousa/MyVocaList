@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.RepositoryInterface;
-using MyVocaList.Infra.Utils;
 using System.Linq.Expressions;
 
 namespace MyVocaList.Infra.Repository
@@ -16,7 +15,7 @@ namespace MyVocaList.Infra.Repository
 
         public BaseRepository(AppDbContext context)
         {
-            Guard.AgainstNull(context, nameof(context));
+            ArgumentNullException.ThrowIfNull(context, nameof(context));
 
             _context = context;
             _dbSet = _context.Set<T>();
@@ -24,14 +23,14 @@ namespace MyVocaList.Infra.Repository
 
         public virtual async Task<T> GetByIdAsync(int id)
         {
-            Guard.AgainstNegativeOrZero(id, nameof(id));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(id, nameof(id));
 
             return await _dbSet.FindAsync(id);
         }
 
         public virtual async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
         {
-            Guard.AgainstNull(predicate, nameof(predicate));
+            ArgumentNullException.ThrowIfNull(predicate, nameof(predicate));
 
             return await _dbSet.Where(predicate).ToListAsync();
         }
@@ -43,28 +42,29 @@ namespace MyVocaList.Infra.Repository
 
         public virtual async Task AddAsync(T entity)
         {
-            Guard.AgainstNull(entity, nameof(entity));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
             await _dbSet.AddAsync(entity);
         }
 
         public virtual async Task UpdateAsync(T entity)
         {
-            Guard.AgainstNull(entity, nameof(entity));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
             _dbSet.Update(entity);
         }
 
         public virtual async Task DeleteAsync(T entity)
         {
-            Guard.AgainstNull(entity, nameof(entity));
+            ArgumentNullException.ThrowIfNull(entity, nameof(entity));
 
             _dbSet.Remove(entity);
         }
 
         public virtual Task DeleteRangeAsync(IEnumerable<T> entities)
         {
-            Guard.AgainstNullOrEmpty(entities, nameof(entities));
+            ArgumentNullException.ThrowIfNull(entities, nameof(entities));
+            if (!entities.Any()) throw new ArgumentException("'entities' cannot be empty.", nameof(entities));
 
             _dbSet.RemoveRange(entities);
             // RemoveRange is a synchronous in-memory operation on DbContext.

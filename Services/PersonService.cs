@@ -1,6 +1,5 @@
 using MyVocaList.Domain.Entity;
-using MyVocaList.Infra.Data.Repositories;
-using MyVocaList.Infra.Utils;
+using MyVocaList.Domain.RepositoryInterface;
 using System.Text.RegularExpressions;
 
 namespace MyVocaList.Services
@@ -11,7 +10,7 @@ namespace MyVocaList.Services
     public class PersonService : IPersonService
     {
         private readonly IPersonRepository _personRepository;
-        private readonly ITextNormalizer _textNormalizer;
+        private readonly ITextNormalizationService _textNormalizer;
 
         // Hybrid validation constants
         public int MaxInputLength => 200;  // Input limit (UX friendly)
@@ -20,7 +19,7 @@ namespace MyVocaList.Services
 
         public PersonService(
             IPersonRepository personRepository,
-            ITextNormalizer textNormalizer)
+            ITextNormalizationService textNormalizer)
         {
             _personRepository = personRepository;
             _textNormalizer = textNormalizer;

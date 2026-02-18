@@ -1,7 +1,5 @@
-using MyVocaList.Infra.Data;
-using Microsoft.EntityFrameworkCore;
-using MyVocaList.Infra.Data.Repositories;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.RepositoryInterface;
 
 namespace MyVocaList.Services;
 
@@ -11,20 +9,17 @@ namespace MyVocaList.Services;
 /// </summary>
 public class QueueService : IQueueService
 {
-    private readonly AppDbContext _dbContext; // Direct for migrations
     private readonly IVenueRepository _venueRepository;
     private readonly IEventRepository _eventRepository;
     private readonly IEventParticipationRepository _participationRepository;
     private readonly IPersonService _personService; // New dependency
 
     public QueueService(
-        AppDbContext dbContext,
         IVenueRepository venueRepository,
         IEventRepository eventRepository,
         IEventParticipationRepository participationRepository,
         IPersonService personService)
     {
-        _dbContext = dbContext;
         _venueRepository = venueRepository;
         _eventRepository = eventRepository;
         _participationRepository = participationRepository;

@@ -7,7 +7,6 @@ using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
-using MyVocaList.Infra.Utils;
 using MyVocaList.Services;
 using MyVocaList.UI.Services;
 using MyVocaList.UI.Pages.Artists;
