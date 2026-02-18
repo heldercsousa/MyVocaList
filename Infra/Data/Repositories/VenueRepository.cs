@@ -1,8 +1,6 @@
 using MyVocaList.Domain;
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Infra.Utils;
-using System.Diagnostics;
-using System.Linq.Expressions;
 
 namespace MyVocaList.Infra.Data.Repositories
 {
@@ -160,7 +158,7 @@ namespace MyVocaList.Infra.Data.Repositories
 
             var totalCount = await q.CountAsync();
 
-            var itemsQ = q
+            var rawItems = await q
                 .OrderBy(v => v.Name)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -168,14 +166,10 @@ namespace MyVocaList.Infra.Data.Repositories
                 {
                     Venue = v,
                     HasEvents = v.Events.Count > 0
-                });
-
-            Debug.WriteLine(">>>>>>> SQL venue paging and filtering");
-            Debug.WriteLine(itemsQ.ToQueryString());
-
-            var items = await itemsQ
-                .Select(x => ValueTuple.Create(x.Venue, x.HasEvents))
+                })
                 .ToListAsync();
+
+            var items = rawItems.Select(x => (x.Venue, x.HasEvents)).ToList();
 
             return (items, totalCount);
         }
