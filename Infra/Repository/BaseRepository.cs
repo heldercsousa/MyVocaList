@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra.Utils;
 using System.Linq.Expressions;
 
-namespace MyVocaList.Infra.Data.Repositories
+namespace MyVocaList.Infra.Repository
 {
     /// <summary>
     /// Base repository implementation for common database operations

@@ -1,6 +1,6 @@
-using MyVocaList.Domain;
+using MyVocaList.Domain.Entity;
 
-namespace MyVocaList.Infra.Data.Repositories
+namespace MyVocaList.Domain.RepositoryInterface
 {
     /// <summary>
     /// Repository interface for Person entity operations
@@ -14,8 +14,5 @@ namespace MyVocaList.Infra.Data.Repositories
         Task<List<Person>> SearchByNameAsync(string searchTerm, int maxResults = 10);
         Task<List<Person>> SearchByNameStartsWithAsync(string searchTerm, int maxResults = 10);
         Task<List<Person>> SearchByAnyWordAsync(string searchTerm, int maxResults = 10);
-
-        // Method to check for duplicates
-        Task<Person> GetByNormalizedNameAsync(string fullName);
     }
 }

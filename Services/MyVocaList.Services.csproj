@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Infra\MyVocaList.Infra.csproj" />
     <ProjectReference Include="..\Contracts\MyVocaList.Contracts.csproj" />
     <ProjectReference Include="..\Domain\MyVocaList.Domain.csproj" />
   </ItemGroup>

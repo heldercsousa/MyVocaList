@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using MyVocaList.Infra.Data.Interceptors;
+using MyVocaList.Infra.Interceptor;
 
-namespace MyVocaList.Infra.Data
+namespace MyVocaList.Infra
 {
     /// <summary>
     /// Factory for creating AppDbContext at design-time (for migrations)

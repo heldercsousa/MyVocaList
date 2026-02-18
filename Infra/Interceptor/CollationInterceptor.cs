@@ -4,7 +4,7 @@ using System.Data.Common;
 using System.Globalization;
 using System.Text;
 
-namespace MyVocaList.Infra.Data.Interceptors;
+namespace MyVocaList.Infra.Interceptor;
 
 /// <summary>
 /// Automatically registers custom SQLite collation on every database connection.

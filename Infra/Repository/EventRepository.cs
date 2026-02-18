@@ -1,8 +1,9 @@
-using MyVocaList.Domain;
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Infra.Utils;
+using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.RepositoryInterface;
 
-namespace MyVocaList.Infra.Data.Repositories
+namespace MyVocaList.Infra.Repository
 {
     /// <summary>
     /// Repository implementation for Event entity operations

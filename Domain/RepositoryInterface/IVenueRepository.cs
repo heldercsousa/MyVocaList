@@ -1,6 +1,6 @@
-using MyVocaList.Domain;
+using MyVocaList.Domain.Entity;
 
-namespace MyVocaList.Infra.Data.Repositories
+namespace MyVocaList.Domain.RepositoryInterface
 {
     /// <summary>
     /// Repository interface for Venue entity operations

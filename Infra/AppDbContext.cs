@@ -1,12 +1,12 @@
-using MyVocaList.Domain;
-using MyVocaList.Infra.Data.Config;
+using MyVocaList.Infra.EntityEFConfig;
 using MyVocaList.Infra.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
 using System.Globalization;
 using System.Text;
+using MyVocaList.Domain.Entity;
 
-namespace MyVocaList.Infra.Data;
+namespace MyVocaList.Infra;
 
 /// <summary>
 /// Application database context for MyVocaList
