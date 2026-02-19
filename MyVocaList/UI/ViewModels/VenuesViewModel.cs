@@ -210,6 +210,8 @@ namespace MyVocaList.UI.ViewModels
                 return;
 
             _isLoading = true;
+            HasMoreItems = false;
+
             try
             {
                 _currentPage++;
@@ -224,6 +226,12 @@ namespace MyVocaList.UI.ViewModels
                     Venues.AddRange(list);
                     HasMoreItems = (_currentPage * PageSize) < _totalCount;
                 });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load more venues (page {Page})", _currentPage);
+                _currentPage--;
+                RunOnUiThread(() => HasMoreItems = (_currentPage * PageSize) < _totalCount);
             }
             finally
             {
