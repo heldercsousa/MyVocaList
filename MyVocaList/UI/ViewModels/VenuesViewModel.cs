@@ -171,6 +171,10 @@ namespace MyVocaList.UI.ViewModels
                 if (cancellationToken.IsCancellationRequested) return;
 
                 _totalCount = totalCount;
+                if (totalCount < PageSize)
+                {
+                    HasMoreItems = false;
+                }
                 var list = itemsEnumerable.ToList();
 
                 RunOnUiThread(() =>
@@ -182,7 +186,6 @@ namespace MyVocaList.UI.ViewModels
                     SelectedVenues.ReplaceRange(restored);
 
                     SelectedCount = SelectedVenues.Count;
-                    HasMoreItems = (_currentPage * PageSize) < _totalCount;
                     NotifyEmptyStates();
                 });
             }
@@ -210,28 +213,30 @@ namespace MyVocaList.UI.ViewModels
                 return;
 
             _isLoading = true;
-            HasMoreItems = false;
+            RunOnUiThread(() => HasMoreItems = false);
+            var loadingPage = _currentPage + 1;
 
             try
             {
-                _currentPage++;
                 var (itemsEnumerable, totalCount) = await _venueService.GetPagedVenuesForListAsync(
-                    _currentPage, PageSize, _currentSearchQuery);
+                    loadingPage, PageSize, _currentSearchQuery);
 
                 _totalCount = totalCount;
                 var list = itemsEnumerable.ToList();
+                var hasMore = list.Count >= PageSize;
+
+                _currentPage = loadingPage;
 
                 RunOnUiThread(() =>
                 {
                     Venues.AddRange(list);
-                    HasMoreItems = (_currentPage * PageSize) < _totalCount;
+                    HasMoreItems = hasMore;
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to load more venues (page {Page})", _currentPage);
-                _currentPage--;
-                RunOnUiThread(() => HasMoreItems = (_currentPage * PageSize) < _totalCount);
+                _logger.LogError(ex, "Failed to load more venues (page {Page})", loadingPage);
+                RunOnUiThread(() => HasMoreItems = true);
             }
             finally
             {
