@@ -28,22 +28,18 @@
                   VerticalOptions="Center"
                   IsVisible="{Binding ShowMultiSelectToolbar}">
 
-                <dx:DXButton Grid.Column="0"
-                             Icon="check_box_outline_blank_outlined"
-                             IconColor="{dx:ThemeColor OnSurfaceVariant}"
-                             IconWidth="20" IconHeight="20"
-                             BackgroundColor="Transparent"
-                             WidthRequest="40" HeightRequest="40"
-                             CornerRadius="20"
-                             Command="{Binding SelectAllCommand}">
-                    <dx:DXButton.Triggers>
-                        <DataTrigger TargetType="dx:DXButton"
-                                     Binding="{Binding IsAllSelected}" Value="True">
-                            <Setter Property="Icon" Value="check_box_outlined" />
-                            <Setter Property="IconColor" Value="{dx:ThemeColor Primary}" />
-                        </DataTrigger>
-                    </dx:DXButton.Triggers>
-                </dx:DXButton>
+                <Grid Grid.Column="0"
+                      WidthRequest="40" HeightRequest="40"
+                      VerticalOptions="Center">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectAllCommand}" />
+                    </Grid.GestureRecognizers>
+                    <dx:CheckEdit IsChecked="{Binding IsAllSelected, Mode=OneWay}"
+                                  CheckedCheckBoxColor="{dx:ThemeColor Primary}"
+                                  InputTransparent="True"
+                                  HorizontalOptions="Center"
+                                  VerticalOptions="Center" />
+                </Grid>
 
                 <Label Grid.Column="1"
                        Text="{Binding SelectedCountText}"
@@ -147,15 +143,11 @@
                                          Margin="16,4"
                                          HeightRequest="64">
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                    <dx:DXButton Grid.Column="0"
-                                                 Icon="check_box_outline_blank_outlined"
-                                                 IconColor="{dx:ThemeColor OnSurfaceVariant}"
-                                                 IconWidth="20" IconHeight="20"
-                                                 BackgroundColor="Transparent"
-                                                 CornerRadius="18"
-                                                 WidthRequest="36" HeightRequest="36"
-                                                 InputTransparent="True"
-                                                 IsVisible="{Binding BindingContext.IsMultiSelectMode, Source={x:Reference page}}" />
+                                    <dx:CheckEdit Grid.Column="0"
+                                                  IsChecked="False"
+                                                  InputTransparent="True"
+                                                  VerticalOptions="Center"
+                                                  IsVisible="{Binding BindingContext.IsMultiSelectMode, Source={x:Reference page}}" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Name}"
@@ -191,14 +183,11 @@
                                  Margin="16,4"
                                  HeightRequest="64">
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                            <dx:DXButton Grid.Column="0"
-                                         Icon="check_box_outlined"
-                                         IconColor="{dx:ThemeColor Primary}"
-                                         IconWidth="20" IconHeight="20"
-                                         BackgroundColor="Transparent"
-                                         CornerRadius="18"
-                                         WidthRequest="36" HeightRequest="36"
-                                         InputTransparent="True" />
+                            <dx:CheckEdit Grid.Column="0"
+                                          IsChecked="True"
+                                          CheckedCheckBoxColor="{dx:ThemeColor Primary}"
+                                          InputTransparent="True"
+                                          VerticalOptions="Center" />
 
                             <Label Grid.Column="1"
                                    Text="{Binding Name}"
