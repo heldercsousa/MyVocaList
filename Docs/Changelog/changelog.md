@@ -1,7 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
-- **02/20/2026** - Fix - VenuesPage: removed stale Android/Javax using directives accidentally imported by IDE into VenuesViewModel, causing build errors on non-Android targets; removed non-existent IsLoadMoreRunning binding; spinner now controlled via HasMoreItems toggle in LoadMoreAsync.
+- **02/20/2026** - Fix - VenuesPage: load-more only worked once because DXCollectionView.StartLoadMore() sets IsRefreshing=true to show the spinner but nothing ever reset it to false after load-more completed (only RefreshAsync did). Control was permanently stuck in refreshing state, blocking NativeViewUpdateItems and preventing subsequent load-more triggers. Fixed by setting IsRefreshing=false at end of LoadMoreAsync (success, error, and guard paths).
 - **02/20/2026** - Fix - VenuesPage: replaced all DXButton checkbox icons with dx:CheckEdit — icon names check_box_outlined/check_box_outline_blank_outlined do not exist in DevExpress icon font, causing all checkboxes (toolbar select-all, item unchecked, item checked) to render blank. dx:CheckEdit renders natively and correctly in all positions.
 - **02/19/2026** - Fix - VenuesPage: multi-select checkboxes (checked and unchecked) were invisible because DXButton at 24×24 is below DevExpress's minimum icon-render size. Increased both item-template checkbox buttons to 36×36 with CornerRadius=18, matching the pattern used by the working toolbar button.
 - **02/19/2026** - Fix - App crash on startup: EF Core 9 migration lock (__EFMigrationsLock) left stale by a previous crashed session caused an infinite spin-wait and Android process kill. Fixed by clearing the stale lock row before MigrateAsync(); safe because SQLite on mobile is single-user.
