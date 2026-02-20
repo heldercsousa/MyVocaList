@@ -210,7 +210,7 @@ namespace MyVocaList.UI.ViewModels
         {
             if (_isLoading || !HasMoreItems)
             {
-                RunOnUiThread(() => HasMoreItems = false);
+                RunOnUiThread(() => IsRefreshing = false);
                 return;
             }
 
@@ -231,12 +231,13 @@ namespace MyVocaList.UI.ViewModels
                 {
                     Venues.AddRange(list);
                     HasMoreItems = hasMore;
+                    IsRefreshing = false;
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to load more venues (page {Page})", loadingPage);
-                RunOnUiThread(() => HasMoreItems = false);
+                RunOnUiThread(() => IsRefreshing = false);
             }
             finally
             {
