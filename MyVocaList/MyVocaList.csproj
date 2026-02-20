@@ -20,7 +20,8 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<NoWarn>$(NoWarn);CS8618;MVVMTK0045</NoWarn>
+		<NoWarn>$(NoWarn);CS8618;MVVMTK0045;XC0045</NoWarn>
+		<MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 
 		<!-- Display name -->
 		<ApplicationTitle>MyVocaList</ApplicationTitle>

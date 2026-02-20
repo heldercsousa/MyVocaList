@@ -39,7 +39,7 @@ public partial class VenuesPage : ContentPage
             // fail silently � n�o interromper exibi��o da p�gina
         }
 
-        _ = _viewModel.InitializeAsync();
+        _ = _viewModel!.InitializeAsync();
     }
 
     private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
