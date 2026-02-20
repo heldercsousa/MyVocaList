@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -150,7 +149,7 @@ namespace MyVocaList.Infra.Migrations
                 name: "Events");
 
             migrationBuilder.DropTable(
-                name: "People"); 
+                name: "People");
 
             migrationBuilder.DropTable(
                 name: "Venues");

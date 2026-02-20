@@ -1,9 +1,6 @@
-using MyVocaList.Infra.EntityEFConfig;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Data.Sqlite;
-using System.Globalization;
-using System.Text;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Infra.EntityEFConfig;
 
 namespace MyVocaList.Infra;
 

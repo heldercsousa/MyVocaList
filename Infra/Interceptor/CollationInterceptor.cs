@@ -1,8 +1,7 @@
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Data.Common;
 using System.Globalization;
-using System.Text;
 
 namespace MyVocaList.Infra.Interceptor;
 

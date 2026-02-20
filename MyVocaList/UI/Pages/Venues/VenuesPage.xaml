@@ -53,6 +53,7 @@
                              BackgroundColor="Transparent"
                              WidthRequest="40" HeightRequest="40"
                              CornerRadius="20"
+                             HorizontalOptions="Center" VerticalOptions="Center"
                              IsVisible="{Binding CanEditSelected}"
                              Command="{Binding EditSelectedCommand}" />
 
@@ -62,6 +63,7 @@
                              BackgroundColor="Transparent"
                              WidthRequest="40" HeightRequest="40"
                              CornerRadius="20"
+                             HorizontalOptions="Center" VerticalOptions="Center"
                              Command="{Binding DeleteSelectedCommand}" />
             </Grid>
         </Grid>
@@ -217,16 +219,16 @@
         <!-- Empty state: no venues registered at all -->
         <VerticalStackLayout Grid.Row="1"
                              IsVisible="{Binding IsEmptyNoVenues}"
-                             VerticalOptions="Center"
+                             VerticalOptions="Start"
                              HorizontalOptions="Center"
-                             Spacing="16"
-                             Padding="32">
+                             Spacing="8"
+                             Margin="32,48,32,0">
             <dx:DXButton Icon="nightlife_outlined"
                          IconColor="{dx:ThemeColor OnSurfaceVariant}"
-                         IconWidth="160" IconHeight="160"
+                         IconWidth="64" IconHeight="64"
                          BackgroundColor="Transparent"
                          InputTransparent="True"
-                         WidthRequest="200" HeightRequest="200"
+                         WidthRequest="80" HeightRequest="80"
                          HorizontalOptions="Center" />
             <Label Text="No venue registered"
                    FontFamily="RobotoMedium" FontSize="16"
@@ -237,16 +239,16 @@
         <!-- Empty state: search returned no results -->
         <VerticalStackLayout Grid.Row="1"
                              IsVisible="{Binding IsEmptyNoResults}"
-                             VerticalOptions="Center"
+                             VerticalOptions="Start"
                              HorizontalOptions="Center"
-                             Spacing="16"
-                             Padding="32">
+                             Spacing="8"
+                             Margin="32,48,32,0">
             <dx:DXButton Icon="search_off_outlined"
                          IconColor="{dx:ThemeColor OnSurfaceVariant}"
-                         IconWidth="160" IconHeight="160"
+                         IconWidth="64" IconHeight="64"
                          BackgroundColor="Transparent"
                          InputTransparent="True"
-                         WidthRequest="200" HeightRequest="200"
+                         WidthRequest="80" HeightRequest="80"
                          HorizontalOptions="Center" />
             <Label Text="No venue found"
                    FontFamily="RobotoMedium" FontSize="16"

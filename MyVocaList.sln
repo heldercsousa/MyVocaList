@@ -20,6 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		.claudeignore = .claudeignore
 		.gitignore = .gitignore
 		CLAUDE.md = CLAUDE.md
+		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		limparBinObj.bat = limparBinObj.bat
 		README.md = README.md
@@ -55,6 +56,7 @@ Global
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Debug|x86.Build.0 = Debug|Any CPU
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Release|x64.ActiveCfg = Release|Any CPU
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Release|x64.Build.0 = Release|Any CPU
 		{65D3C50C-2074-4BC6-97BC-84AF98FF876F}.Release|x86.ActiveCfg = Release|Any CPU

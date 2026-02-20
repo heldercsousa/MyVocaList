@@ -1,6 +1,3 @@
-using MyVocaList.UI.Pages.Queue;
-using MyVocaList.UI.ViewModels;
-
 namespace MyVocaList;
 
 public partial class AppShell : Shell

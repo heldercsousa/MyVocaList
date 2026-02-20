@@ -1,6 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using MyVocaList.Infra;
-using Microsoft.Extensions.Logging;
 using MyVocaList.Domain;
 
 namespace MyVocaList.Infra

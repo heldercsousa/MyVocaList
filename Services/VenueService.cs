@@ -1,8 +1,7 @@
+using MyVocaList.Contracts.DTOs.List;
+using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Services.Mappers;
-using MyVocaList.Contracts.DTOs.List;
-using Microsoft.Extensions.Logging;
-using MyVocaList.Domain.Entity;
 
 namespace MyVocaList.Services
 {
