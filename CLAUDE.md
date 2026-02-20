@@ -125,11 +125,10 @@ Edit code → dotnet build → Errors? → Fix → dotnet build → Clean? → C
 
 ## Error Handling
 - **Avoid**: try-catch, `Debug.WriteLine`, `Console.WriteLine`
-- **Use**: Serilog via `ILogger<T>`
-- **Use**: Guard pattern for validation
+- **Aways**: 1) Log every message types by using Serilog´s pattern  2) Use built-in .NET 9 Guard pattern for validation
 
 ```csharp
-// ✅ Correct
+// ✅ Correct  ---- CLAUDE CODE, IT NEEDs TO be REPLACEd By.NET 9 Guard pattern
 Guard.AgainstNullOrWhiteSpace(name, nameof(name));
 
 // ❌ Wrong
@@ -242,10 +241,10 @@ Do not wait to be asked. Use `git add -A && git commit -m '<message>' && git pus
 
 ## Code Principles
 **CRITICAL**:  Never hard-code values (colors, sizes, strings) directly in C# or XAML code-behind. 
-All theming and design values must come from resource dictionaries or the design system.
+All theming and design values must come from resource dictionaries.
 If unsure, ask before implementing.
 - **Colors**: Use DevExpress `{dx:ThemeColor}` tokens only
-- **Styles**: Define in XAML, reference via StaticResource
+- **Styles**: Define in XAML inside Resources. Apply by using the DX components way.
 - **MauiProgram.cs**: Configuration only, NO color definitions
 
 

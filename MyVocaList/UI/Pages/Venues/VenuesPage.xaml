@@ -23,31 +23,18 @@
                    IsVisible="{Binding ShowDefaultTitle}" />
 
             <!-- Multi-select toolbar -->
-            <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+            <Grid ColumnDefinitions="*,Auto,Auto"
                   ColumnSpacing="8"
                   VerticalOptions="Center"
                   IsVisible="{Binding ShowMultiSelectToolbar}">
 
-                <Grid Grid.Column="0"
-                      WidthRequest="40" HeightRequest="40"
-                      VerticalOptions="Center">
-                    <Grid.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding SelectAllCommand}" />
-                    </Grid.GestureRecognizers>
-                    <dx:CheckEdit IsChecked="{Binding IsAllSelected, Mode=OneWay}"
-                                  CheckedCheckBoxColor="{dx:ThemeColor Primary}"
-                                  InputTransparent="True"
-                                  HorizontalOptions="Center"
-                                  VerticalOptions="Center" />
-                </Grid>
-
-                <Label Grid.Column="1"
+                <Label Grid.Column="0"
                        Text="{Binding SelectedCountText}"
                        FontFamily="RobotoMedium" FontSize="18"
                        TextColor="{StaticResource OnSurface}"
                        VerticalOptions="Center" />
 
-                <dx:DXButton Grid.Column="2"
+                <dx:DXButton Grid.Column="1"
                              Icon="edit_outlined"
                              IconColor="{StaticResource OnSurface}"
                              BackgroundColor="Transparent"
@@ -57,7 +44,7 @@
                              IsVisible="{Binding CanEditSelected}"
                              Command="{Binding EditSelectedCommand}" />
 
-                <dx:DXButton Grid.Column="3"
+                <dx:DXButton Grid.Column="2"
                              Icon="delete_outlined"
                              IconColor="{StaticResource Error}"
                              BackgroundColor="Transparent"
@@ -69,7 +56,7 @@
         </Grid>
     </Shell.TitleView>
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
         <!-- Search bar -->
         <dx:DXBorder Grid.Row="0"
                      BackgroundColor="{StaticResource SurfaceContainer}"
@@ -90,8 +77,28 @@
                           ClearIconColor="{StaticResource OnSurfaceVariant}" />
         </dx:DXBorder>
 
+        <!-- Select all row (multi-select mode only) -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="Auto,*" ColumnSpacing="12"
+              Margin="32,4,16,4"
+              IsVisible="{Binding IsMultiSelectMode}">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding SelectAllCommand}" />
+            </Grid.GestureRecognizers>
+            <dx:CheckEdit Grid.Column="0"
+                          IsChecked="{Binding IsAllSelected, Mode=OneWay}"
+                          CheckedCheckBoxColor="{dx:ThemeColor Primary}"
+                          InputTransparent="True"
+                          VerticalOptions="Center" />
+            <Label Grid.Column="1"
+                   Text="Select all"
+                   FontFamily="RobotoRegular" FontSize="16"
+                   TextColor="{StaticResource OnSurface}"
+                   VerticalOptions="Center" />
+        </Grid>
+
         <!-- Venue list with skeleton loading -->
-        <dx:ShimmerView Grid.Row="1"
+        <dx:ShimmerView Grid.Row="2"
                         IsLoading="{Binding IsInitialLoading}"
                         WaveWidth="0.7"
                         WaveOpacity="0.8">
@@ -217,7 +224,7 @@
         </dx:ShimmerView>
 
         <!-- Empty state: no venues registered at all -->
-        <VerticalStackLayout Grid.Row="1"
+        <VerticalStackLayout Grid.Row="2"
                              IsVisible="{Binding IsEmptyNoVenues}"
                              VerticalOptions="Start"
                              HorizontalOptions="Center"
@@ -237,7 +244,7 @@
         </VerticalStackLayout>
 
         <!-- Empty state: search returned no results -->
-        <VerticalStackLayout Grid.Row="1"
+        <VerticalStackLayout Grid.Row="2"
                              IsVisible="{Binding IsEmptyNoResults}"
                              VerticalOptions="Start"
                              HorizontalOptions="Center"
@@ -257,7 +264,7 @@
         </VerticalStackLayout>
 
         <!-- FAB -->
-        <dx:DXButton Grid.Row="1"
+        <dx:DXButton Grid.Row="2"
                      Icon="add_outlined"
                      IconColor="{StaticResource OnPrimary}"
                      BackgroundColor="{StaticResource Primary}"
