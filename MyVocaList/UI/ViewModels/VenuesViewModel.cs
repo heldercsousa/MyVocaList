@@ -262,8 +262,17 @@ namespace MyVocaList.UI.ViewModels
 
         private void OnItemTapped(VenueListItemDto? item)
         {
-            if (item == null || IsMultiSelectMode)
+            if (item == null)
                 return;
+
+            if (IsMultiSelectMode)
+            {
+                if (SelectedVenues.Contains(item))
+                    SelectedVenues.Remove(item);
+                else
+                    SelectedVenues.Add(item);
+                return;
+            }
 
             EnterMultiSelectMode(item);
         }
