@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DevExpress.Maui.CollectionView;
 using DevExpress.Maui.Controls;
 using DevExpress.Maui.Core;
 using Microsoft.Extensions.Logging;
@@ -171,12 +172,10 @@ namespace MyVocaList.UI.ViewModels
                 if (cancellationToken.IsCancellationRequested) return;
 
                 _totalCount = totalCount;
-                if (totalCount < PageSize)
-                {
-                    HasMoreItems = false;
-                }
                 var list = itemsEnumerable.ToList();
 
+                HasMoreItems = totalCount > list.Count;
+                
                 RunOnUiThread(() =>
                 {
                     Venues.ReplaceRange(list);
@@ -210,10 +209,12 @@ namespace MyVocaList.UI.ViewModels
         private async Task LoadMoreAsync()
         {
             if (_isLoading || !HasMoreItems)
+            {
+                RunOnUiThread(() => HasMoreItems = false);
                 return;
+            }
 
             _isLoading = true;
-            RunOnUiThread(() => HasMoreItems = false);
             var loadingPage = _currentPage + 1;
 
             try
@@ -223,8 +224,7 @@ namespace MyVocaList.UI.ViewModels
 
                 _totalCount = totalCount;
                 var list = itemsEnumerable.ToList();
-                var hasMore = list.Count >= PageSize;
-
+                var hasMore = (list.Count + Venues.Count) < _totalCount;
                 _currentPage = loadingPage;
 
                 RunOnUiThread(() =>
@@ -236,7 +236,7 @@ namespace MyVocaList.UI.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to load more venues (page {Page})", loadingPage);
-                RunOnUiThread(() => HasMoreItems = true);
+                RunOnUiThread(() => HasMoreItems = false);
             }
             finally
             {
