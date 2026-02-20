@@ -63,7 +63,7 @@ namespace MyVocaList.UI.ViewModels
             SelectedVenues = new ObservableRangeCollection<VenueListItemDto>();
 
             RefreshCommand = new AsyncRelayCommand(RefreshAsync);
-            LoadMoreCommand = new AsyncRelayCommand(LoadMoreAsync);
+            LoadMoreCommand = new RelayCommand(() => _ = LoadMoreAsync());
             AddVenueCommand = new RelayCommand(OpenCreateBottomSheet);
             SaveVenueCommand = new AsyncRelayCommand(SaveVenueAsync);
             CancelEditCommand = new RelayCommand(CloseEditSheet);
@@ -98,7 +98,7 @@ namespace MyVocaList.UI.ViewModels
         public bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
 
         public IAsyncRelayCommand RefreshCommand { get; }
-        public IAsyncRelayCommand LoadMoreCommand { get; }
+        public IRelayCommand LoadMoreCommand { get; }
         public IRelayCommand AddVenueCommand { get; }
         public IAsyncRelayCommand SaveVenueCommand { get; }
         public IRelayCommand CancelEditCommand { get; }
