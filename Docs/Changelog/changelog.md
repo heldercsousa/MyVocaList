@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/20/2026** - Fix - VenuesPage: replaced all DXButton checkbox icons with dx:CheckEdit — icon names check_box_outlined/check_box_outline_blank_outlined do not exist in DevExpress icon font, causing all checkboxes (toolbar select-all, item unchecked, item checked) to render blank. dx:CheckEdit renders natively and correctly in all positions.
 - **02/19/2026** - Fix - VenuesPage: multi-select checkboxes (checked and unchecked) were invisible because DXButton at 24×24 is below DevExpress's minimum icon-render size. Increased both item-template checkbox buttons to 36×36 with CornerRadius=18, matching the pattern used by the working toolbar button.
 - **02/19/2026** - Fix - App crash on startup: EF Core 9 migration lock (__EFMigrationsLock) left stale by a previous crashed session caused an infinite spin-wait and Android process kill. Fixed by clearing the stale lock row before MigrateAsync(); safe because SQLite on mobile is single-user.
 - **02/19/2026** - Fix - VenuesPage: single and multi-record deletion never executed. Root cause: `ExecuteConfirmActionAsync` called `DismissConfirmSheet()` first (which set `_pendingConfirmAction = null`) before checking it, so the action was always null and never ran. Fixed by capturing the action reference before dismissing.
