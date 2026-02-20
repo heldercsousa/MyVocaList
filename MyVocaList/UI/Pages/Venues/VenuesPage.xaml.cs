@@ -1,10 +1,3 @@
-using DevExpress.Maui.CollectionView;
-using DevExpress.Maui.Controls;
-using DevExpress.Maui.Core;
-using MyVocaList.Contracts.DTOs.List;
-using MyVocaList.UI.ViewModels;
-using Microsoft.Maui.Controls;
-
 namespace MyVocaList.UI.Pages.Venues;
 
 public partial class VenuesPage : ContentPage

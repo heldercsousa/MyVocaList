@@ -1,6 +1,3 @@
-using System.Text;
-using System.Text.RegularExpressions;
-
 namespace MyVocaList.Domain.Entity;
 
 public class Person

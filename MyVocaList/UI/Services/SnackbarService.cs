@@ -1,5 +1,4 @@
 using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
 
 namespace MyVocaList.UI.Services;
 

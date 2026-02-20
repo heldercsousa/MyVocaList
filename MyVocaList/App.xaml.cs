@@ -1,8 +1,3 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui.Controls;
-
 namespace MyVocaList
 {
     public partial class App : Application

@@ -15,7 +15,7 @@ namespace MyVocaList.Infra.Repository
         /// Gets venue by exact name match.
         /// Trimming handled automatically by DatabaseLoadingInterceptor
         /// </summary>
-        public async Task<Venue?> GetByNameAsync(string name) => await ( string.IsNullOrWhiteSpace(name) ?
+        public async Task<Venue?> GetByNameAsync(string name) => await (string.IsNullOrWhiteSpace(name) ?
             Task.FromResult<Venue?>(null) : _context.Venues.FirstOrDefaultAsync(v => v.Name == name));
 
         /// <summary>

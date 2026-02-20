@@ -1,13 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using DevExpress.Maui.CollectionView;
-using DevExpress.Maui.Controls;
-using DevExpress.Maui.Core;
-using Microsoft.Extensions.Logging;
-using MyVocaList.Contracts.DTOs.List;
-using MyVocaList.Services;
 using MyVocaList.UI.Collections;
-using MyVocaList.UI.Services;
 
 namespace MyVocaList.UI.ViewModels
 {
@@ -175,7 +166,7 @@ namespace MyVocaList.UI.ViewModels
                 var list = itemsEnumerable.ToList();
 
                 HasMoreItems = totalCount > list.Count;
-                
+
                 RunOnUiThread(() =>
                 {
                     Venues.ReplaceRange(list);

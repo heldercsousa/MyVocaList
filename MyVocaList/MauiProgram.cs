@@ -1,22 +1,10 @@
 using CommunityToolkit.Maui;
-using DevExpress.Maui;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using MyVocaList.Domain;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
-using MyVocaList.Services;
-using MyVocaList.UI.Services;
-using MyVocaList.UI.Pages.Artists;
-using MyVocaList.UI.Pages.BackupRestore;
-using MyVocaList.UI.Pages.Events;
-using MyVocaList.UI.Pages.People;
-using MyVocaList.UI.Pages.Preferences;
-using MyVocaList.UI.Pages.Queue;
-using MyVocaList.UI.Pages.Venues;
-using MyVocaList.UI.ViewModels;
 
 namespace MyVocaList;
 
@@ -53,7 +41,7 @@ public static class MauiProgram
         builder.Services.AddScoped<IVenueRepository, VenueRepository>();
         builder.Services.AddScoped<IEventRepository, EventRepository>();
 
-            // Services
+        // Services
         builder.Services.AddScoped<IDatabaseInit, DatabaseInit>();
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddSingleton<ISnackbarService, SnackbarService>();
