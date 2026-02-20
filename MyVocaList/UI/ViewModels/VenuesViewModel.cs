@@ -395,13 +395,10 @@ namespace MyVocaList.UI.ViewModels
 
         private async Task ExecuteConfirmActionAsync()
         {
+            var action = _pendingConfirmAction;
             DismissConfirmSheet();
-            if (_pendingConfirmAction != null)
-            {
-                var action = _pendingConfirmAction;
-                _pendingConfirmAction = null;
+            if (action != null)
                 await action();
-            }
         }
 
         private void DismissConfirmSheet()
