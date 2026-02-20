@@ -80,13 +80,21 @@ public static class MauiProgram
 
         var mauiApp = builder.Build();
 
-        // Apply database migrations on startup - run on thread pool to avoid
-        // blocking the main thread and SQLite write-lock contention between
-        // EF Core's internal lock connection and migration connection.
+        // Apply database migrations on startup.
+        // Clear any stale __EFMigrationsLock row left by a previous crashed session before
+        // calling MigrateAsync(); otherwise EF Core 9 spins forever trying to acquire the lock.
+        // SQLite on mobile is single-user, so no concurrent migration concern.
         Task.Run(async () =>
         {
             using var scope = mauiApp.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            try
+            {
+                await dbContext.Database.ExecuteSqlRawAsync("DELETE FROM __EFMigrationsLock");
+            }
+            catch { /* Table does not exist on first run — safe to ignore. */ }
+
             await dbContext.Database.MigrateAsync();
         }).GetAwaiter().GetResult();
 
