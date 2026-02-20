@@ -1,4 +1,6 @@
-﻿// CommunityToolkit — used by every ViewModel
+﻿global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Logging;
+// CommunityToolkit — used by every ViewModel
 global using CommunityToolkit.Mvvm.ComponentModel;
 global using CommunityToolkit.Mvvm.Input;
 // DevExpress — used by every Page and ViewModel
