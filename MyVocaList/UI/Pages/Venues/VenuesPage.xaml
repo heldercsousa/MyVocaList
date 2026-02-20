@@ -152,7 +152,8 @@
                                                  IconColor="{dx:ThemeColor OnSurfaceVariant}"
                                                  IconWidth="20" IconHeight="20"
                                                  BackgroundColor="Transparent"
-                                                 WidthRequest="24" HeightRequest="24"
+                                                 CornerRadius="18"
+                                                 WidthRequest="36" HeightRequest="36"
                                                  InputTransparent="True"
                                                  IsVisible="{Binding BindingContext.IsMultiSelectMode, Source={x:Reference page}}" />
 
@@ -195,7 +196,8 @@
                                          IconColor="{dx:ThemeColor Primary}"
                                          IconWidth="20" IconHeight="20"
                                          BackgroundColor="Transparent"
-                                         WidthRequest="24" HeightRequest="24"
+                                         CornerRadius="18"
+                                         WidthRequest="36" HeightRequest="36"
                                          InputTransparent="True" />
 
                             <Label Grid.Column="1"
