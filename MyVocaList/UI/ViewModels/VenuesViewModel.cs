@@ -51,8 +51,8 @@ namespace MyVocaList.UI.ViewModels
             _snackbarService = snackbarService;
             _logger = logger;
 
-            Venues = new ObservableRangeCollection<VenueListItemDto>();
-            SelectedVenues = new ObservableRangeCollection<VenueListItemDto>();
+            Venues = [];
+            SelectedVenues = [];
 
             RefreshCommand = new AsyncRelayCommand(RefreshAsync);
             LoadMoreCommand = new RelayCommand(() => _ = LoadMoreAsync());
@@ -106,7 +106,7 @@ namespace MyVocaList.UI.ViewModels
         partial void OnSearchTextChanged(string value)
         {
             NotifyEmptyStates();
-            TriggerSearchDebounce(value);
+            TriggerSearchDebounce();
         }
 
         partial void OnIsMultiSelectModeChanged(bool value)
@@ -236,7 +236,7 @@ namespace MyVocaList.UI.ViewModels
             }
         }
 
-        private void TriggerSearchDebounce(string text)
+        private void TriggerSearchDebounce()
         {
             try
             {
@@ -267,10 +267,8 @@ namespace MyVocaList.UI.ViewModels
 
             if (IsMultiSelectMode)
             {
-                if (SelectedVenues.Contains(item))
-                    SelectedVenues.Remove(item);
-                else
-                    SelectedVenues.Add(item);
+                SelectedVenues.Remove(item);
+                SelectedVenues.Add(item);
                 return;
             }
 
@@ -359,7 +357,7 @@ namespace MyVocaList.UI.ViewModels
             ConfirmActionText = "Delete";
             _pendingConfirmAction = async () =>
             {
-                var (success, message) = await _venueService.DeleteVenuesAsync(new[] { item.Id });
+                var (success, message) = await _venueService.DeleteVenuesAsync([item.Id]);
                 if (success)
                 {
                     await RefreshAsync();
@@ -430,7 +428,7 @@ namespace MyVocaList.UI.ViewModels
             RunOnUiThread(() =>
             {
                 SelectedVenues.ClearRange();
-                SelectedVenues.AddRange(new[] { initialItem });
+                SelectedVenues.AddRange([initialItem]);
                 _suppressSelectionChangedExit = false;
             });
             SelectedCount = 1;
@@ -454,7 +452,7 @@ namespace MyVocaList.UI.ViewModels
             _suppressSelectionChangedExit = true;
             RunOnUiThread(() =>
             {
-                SelectedVenues.ReplaceRange(Venues.ToList());
+                SelectedVenues.ReplaceRange([.. Venues]);
                 _suppressSelectionChangedExit = false;
             });
             SelectedCount = Venues.Count;
