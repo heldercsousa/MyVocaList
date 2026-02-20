@@ -12,6 +12,7 @@
     xmlns:artists="clr-namespace:MyVocaList.UI.Pages.Artists"
     xmlns:prefs="clr-namespace:MyVocaList.UI.Pages.Preferences"
     xmlns:backup="clr-namespace:MyVocaList.UI.Pages.BackupRestore"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     Title="MyVocaList"
     FlyoutBehavior="Flyout"
     FlyoutBackgroundColor="{StaticResource Surface}">
@@ -33,7 +34,7 @@
 
     <!-- Flyout Content: Grouped navigation menu -->
     <Shell.FlyoutContentTemplate>
-        <DataTemplate>
+        <DataTemplate x:DataType="vm:AppShellViewModel">
             <dx:DXScrollView BackgroundColor="{StaticResource Surface}">
                 <VerticalStackLayout Padding="12,0" Spacing="16"
                                      BindableLayout.ItemsSource="{Binding MenuGroups}">

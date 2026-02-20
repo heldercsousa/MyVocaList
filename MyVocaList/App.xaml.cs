@@ -7,15 +7,20 @@ namespace MyVocaList
 {
     public partial class App : Application
     {
+        private readonly IServiceProvider _serviceProvider;
+
         public App(IServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
             InitializeComponent();
+            _ = WarmUpDevExpressAsync();
+        }
 
+        protected override Window CreateWindow(IActivationState? activationState)
+        {
             // AppShell is resolved after InitializeComponent() so that Application.Resources
             // already contains MaterialColors.xaml when AppShell.InitializeComponent() runs.
-            MainPage = serviceProvider.GetRequiredService<AppShell>();
-
-            _ = WarmUpDevExpressAsync();
+            return new Window(_serviceProvider.GetRequiredService<AppShell>());
         }
 
         private async Task WarmUpDevExpressAsync()
