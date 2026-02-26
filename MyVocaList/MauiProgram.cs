@@ -5,6 +5,9 @@ using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
+#if DEBUG
+using MauiDevFlow.Agent;
+#endif
 
 namespace MyVocaList;
 
@@ -27,6 +30,10 @@ public static class MauiProgram
                 fonts.AddFont("Roboto-Medium.ttf", "RobotoMedium");
                 fonts.AddFont("Roboto-Bold.ttf", "RobotoBold");
             });
+            
+        #if DEBUG
+        builder.AddMauiDevFlowAgent();
+        #endif            
 
         // Database
         builder.Services.AddSingleton<CollationInterceptor>();

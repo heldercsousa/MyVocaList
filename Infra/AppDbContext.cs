@@ -67,7 +67,7 @@ public class AppDbContext : DbContext
     /// - SQL Server: Latin1_General_CI_AI (CI = Case Insensitive, AI = Accent Insensitive)
     /// - PostgreSQL: und-u-ks-level1 (ICU collation, ignores case and accents)
     /// </summary>
-    private void SetDatabaseCollation(ModelBuilder modelBuilder)
+    private static void SetDatabaseCollation(ModelBuilder modelBuilder)
     {
         // For SQLite: Apply custom NOCASE_NOACCENT collation to all string properties
         // The collation is registered automatically by CollationInterceptor on every connection

@@ -1,5 +1,5 @@
 # MyVocaList Dev Environment Setup
-> Windows · .NET MAUI 9 · Claude Code CLI
+> Windows · .NET MAUI 10 · Claude Code CLI
 > Delete from .claude/rules/ and add to .claudeignore after setup is complete.
 
 ---
@@ -38,17 +38,11 @@ Place at `D:\Projects\MyVocaList\.mcp.json`:
       "command": "cmd",
       "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
-    "sqlite": {
-      "command": "cmd",
-      "args": ["/c", "uvx", "mcp-server-sqlite",
-               "--db-path",
-               "C:/Users/Helder/AppData/Local/MyVocaList/myvocalist.db"]
-    },
     "github": {
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
       "headers": {
-        "Authorization": "Bearer YOUR_GITHUB_PAT"
+        "Authorization": "Bearer REDACTED_GITHUB_TOKEN"
       }
     },
     "devexpress-maui": {
@@ -58,13 +52,22 @@ Place at `D:\Projects\MyVocaList\.mcp.json`:
   }
 }
 ```
-
+**In the future:** SQLite MCP will be added. Json:
+```json
+ "sqlite": {
+      "command": "cmd",
+      "args": ["/c", "uvx", "mcp-server-sqlite",
+               "--db-path",
+               "C:/Users/Helder/AppData/Local/MyVocaList/myvocalist.db"]
+    }
+```
 Notes:
-- Find SQLite db path: `dir /s /b *.db 2>nul | findstr MyVocaList`
+- (future only - discard by now) Find SQLite db path: `dir /s /b *.db 2>nul | findstr MyVocaList`
 - If `uvx` not in PATH use full path: `C:/Users/Helder/.local/bin/uvx.exe`
-- SQLite db file must exist before server starts — run app once first
+- (future only - discard by now) SQLite db file must exist before server starts — run app once first
 - If `claude mcp add-json` returns "Invalid input" use `--transport http` flag instead
-- `devexpress-maui` and `github` — keep DISABLED during active coding (`/mcp` inside Claude Code)
+- `devexpress-maui` — keep DISABLED during active coding (`/mcp` inside Claude Code)
+- `github` — keep DISABLED during active coding (`/mcp` inside Claude Code)
 
 ---
 
@@ -108,6 +111,8 @@ All commands run INSIDE Claude Code session (type `claude` first — these are N
 ```
 /plugin marketplace add obra/superpowers
 /plugin install superpowers@obra-superpowers
+# NOTE: TDD enforcement applies to NEW code only — will not delete existing code.
+# Skip enforcement on specific tasks: "add this without TDD enforcement"
 
 /plugin marketplace add nesbo/dotnet-claude-code-skills
 /plugin install ddd-dotnet@nesbo-dotnet-claude-code-skills
@@ -117,8 +122,32 @@ All commands run INSIDE Claude Code session (type `claude` first — these are N
 /plugin marketplace add Aaronontheweb/dotnet-skills
 /plugin install dotnet-skills@Aaronontheweb-dotnet-skills
 
-/plugin marketplace add davidortinau/maui-skills
-# Browse /plugin menu, install relevant skills
+# davidortinau/maui-skills does NOT support /plugin marketplace add
+# Clone into solution root, then run ONE of the commands below from solution root
+# (CMD/PowerShell/Bash) — NOT inside Claude Code
+
+git clone https://github.com/davidortinau/maui-skills.git maui-skills
+
+# ***About maui-current-apis — critical for .NET 10, prevents deprecated API usage** 
+# CMD:
+for %s in (maui-shell-navigation maui-data-binding maui-dependency-injection maui-performance maui-app-lifecycle maui-safe-area maui-unit-testing maui-rest-api maui-geolocation maui-permissions maui-secure-storage maui-authentication maui-localization maui-platform-invoke maui-accessibility maui-animations maui-app-icons-splash maui-local-notifications maui-hot-reload-diagnostics maui-current-apis) do xcopy "maui-skills\plugins\maui-skills\skills\%s" ".claude\skills\%s\" /E /I
+
+# PowerShell:
+@("maui-shell-navigation","maui-data-binding","maui-dependency-injection","maui-performance","maui-app-lifecycle","maui-safe-area","maui-unit-testing","maui-rest-api","maui-geolocation","maui-permissions","maui-secure-storage","maui-authentication","maui-localization","maui-platform-invoke","maui-accessibility","maui-animations","maui-app-icons-splash","maui-local-notifications","maui-hot-reload-diagnostics", "maui-current-apis") | ForEach-Object { xcopy "maui-skills\plugins\maui-skills\skills\$_" ".claude\skills\$_\" /E /I }
+
+# Bash (Git Bash / WSL):
+for s in maui-shell-navigation maui-data-binding maui-dependency-injection maui-performance maui-app-lifecycle maui-safe-area maui-unit-testing maui-rest-api maui-geolocation maui-permissions maui-secure-storage maui-authentication maui-localization maui-platform-invoke maui-accessibility maui-animations maui-app-icons-splash maui-local-notifications maui-hot-reload-diagnostics maui-current-apis; do cp -R "maui-skills/plugins/maui-skills/skills/$s" ".claude/skills/"; done
+
+# Claude Code auto-detects SKILL.md files under .claude/skills/ — no further install needed
+
+# DO NOT copy — DevExpress conflict:
+# maui-collectionview  → use DXCollectionView, not stock CollectionView
+# maui-gestures        → DevExpress has its own gesture handling
+# maui-sqlite-database → teaches sqlite-net-pcl, conflicts with EF Core
+
+# DO NOT copy — not relevant to MyVocaList:
+# maui-maps, maui-speech-to-text, maui-push-notifications, maui-aspire
+# maui-deep-linking, maui-hybridwebview, maui-media-picker, maui-graphics-drawing
 
 # Verify:
 /skills list
@@ -219,6 +248,20 @@ obj/
 bin/
 *.designer.cs
 .vs/
+```
+
+---
+
+## CLAUDE.md — Required Rule Addition
+
+Add this to your `CLAUDE.md` at solution root to prevent skills from overriding DevExpress with stock MAUI controls:
+
+```
+## UI Component Priority
+
+When building UI components, always check devexpress-patterns.md first.
+Use stock MAUI controls only when DevExpress has no equivalent for the
+required functionality.
 ```
 
 ---

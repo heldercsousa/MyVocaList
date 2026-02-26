@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 	ProjectSection(SolutionItems) = preProject
 		.claudeignore = .claudeignore
 		.gitignore = .gitignore
+		.mcp.json = .mcp.json
 		CLAUDE.md = CLAUDE.md
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
@@ -41,6 +42,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C
 	ProjectSection(SolutionItems) = preProject
 		Docs\DevEnv\devenv-setup.md = Docs\DevEnv\devenv-setup.md
 		Docs\DevEnv\DevEnv_Setup_Guide.docx = Docs\DevEnv\DevEnv_Setup_Guide.docx
+		Docs\DevEnv\SETUP_QUICKSTART.md = Docs\DevEnv\SETUP_QUICKSTART.md
 	EndProjectSection
 EndProject
 Global
