@@ -118,7 +118,6 @@ Console/**
 *.bat
 
 # DEV Environment setup documentation - enabled only setting up the development environment - must be ignored after setup to avoid token usage
-# Docs/DevEnv/devenv-setup.md - DON´T REMOVE IGNORE. here only for new developers be able to copy it - it´s actually to be used as rules for the setup process ONLY
-# .claude/rules/devenv-setup.md #IGNORE as soon as setup is done
-# Docs/DevEnv/DevEnv_Setup_Guide.docx #IGNORE as soon as setup is done
-
+# Docs/DevEnv/devenv-setup.md - DON´T REMOVE IGNORE. here only for new developers be able to create the claude rule ONLY
+.claude/rules/devenv-setup.md #IGNORE as soon as setup is done
+Docs/DevEnv/DevEnv_Setup_Guide.docx #IGNORE as soon as setup is done

@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/25/2026** - Upgrade - migration to .NET 10. Added usefull skills and mcp servers to claude. guides to setup the dev environment.
 - **02/20/2026** - Fix - VenuesPage: tapping a selected item in multi-select mode now deselects it; tapping the last selected item exits multi-select mode.
 - **02/20/2026** - Enhancement - VenuesPage: moved select-all checkbox from Shell title bar to a dedicated row below the search bar, aligned with list item checkboxes (32px left offset matching item card margin + padding). Removed checkbox from multi-select toolbar; toolbar now shows count, edit, and delete only.
 - **02/20/2026** - Fix - VenuesPage: delete/edit toolbar buttons now centered in their 40x40 tap targets (added HorizontalOptions/VerticalOptions=Center). Empty states repositioned to start just below the search bar (VerticalOptions=Start, Margin=32,48,32,0) with icon reduced from 160x160 to 64x64 — fixes invisible search_off icon and oversized nightlife icon. Fixed pre-existing build errors: added Microsoft.Extensions.Logging.Abstractions to Infra.csproj, added GlobalUsings.cs to Services and Infra with ILogger and System.Text, added ILogger global using to MAUI project GlobalUsings.cs.

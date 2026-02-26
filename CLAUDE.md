@@ -3,6 +3,12 @@
 ## App
 Karaoke queue management. .NET MAUI 9.0 (net9.0-android, net9.0-ios).
 
+## Auto-trigger rule 
+Always use Context7 MCP when I need library/API documentation,
+code generation for .NET MAUI, DevExpress, EF Core, or MediatR,
+without me having to explicitly ask.
+
+
 ## DevExpress / MAUI
 - When working with DevExpress MAUI controls, verify property/class names by searching the codebase or fetching web docs. **NEVER** search the local `devexpress-examples` folder unless the user explicitly asks — it wastes tokens on unrelated files.
 - Do NOT proactively open or scan `devexpress-examples` at the start of any task.
