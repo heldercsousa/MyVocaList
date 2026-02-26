@@ -62,7 +62,8 @@
       "Bash(git stash:*)",
       "Bash(dotnet:*)",
       "Bash(node:*)",
-      "Bash(powershell.exe:*)"
+      "Bash(powershell.exe:*)",
+      "mcp__devexpress-maui__search_maui_demo_app_docs"
     ]
   },
   "enabledMcpjsonServers": [
