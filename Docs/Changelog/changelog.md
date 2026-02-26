@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/26/2026** - docs - Restructured Claude Code dev environment: lean CLAUDE.md, rules/commands architecture, MCP setup fixed, .NET 10 migration, continuous enhancement model established
 - **02/25/2026** - Upgrade - migration to .NET 10. Added usefull skills and mcp servers to claude. guides to setup the dev environment.
 - **02/20/2026** - Fix - VenuesPage: tapping a selected item in multi-select mode now deselects it; tapping the last selected item exits multi-select mode.
 - **02/20/2026** - Enhancement - VenuesPage: moved select-all checkbox from Shell title bar to a dedicated row below the search bar, aligned with list item checkboxes (32px left offset matching item card margin + padding). Removed checkbox from multi-select toolbar; toolbar now shows count, edit, and delete only.

@@ -67,7 +67,7 @@ Notes:
 - (future only - discard by now) SQLite db file must exist before server starts — run app once first
 - If `claude mcp add-json` returns "Invalid input" use `--transport http` flag instead
 - `devexpress-maui` — keep DISABLED during active coding (`/mcp` inside Claude Code)
-- `github` — keep DISABLED during active coding (`/mcp` inside Claude Code)
+- `github` — keep DISABLED during active coding (`/mcp` inside Claude Code).
 
 ---
 

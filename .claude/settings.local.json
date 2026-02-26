@@ -60,7 +60,15 @@
       "Bash(git pull:*)",
       "Bash(git merge:*)",
       "Bash(git stash:*)",
-      "Bash(dotnet:*)"
+      "Bash(dotnet:*)",
+      "Bash(node:*)",
+      "Bash(powershell.exe:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "sequential-thinking",
+    "github",
+    "devexpress-maui"
+  ]
 }
