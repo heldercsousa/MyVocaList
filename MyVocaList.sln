@@ -25,6 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		LICENSE = LICENSE
 		limparBinObj.bat = limparBinObj.bat
 		README.md = README.md
+		Docs\DevEnv\SETUP_QUICKSTART.md = Docs\DevEnv\SETUP_QUICKSTART.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
@@ -43,7 +44,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C
 		Docs\DevEnv\claude-code-task-create-rules.md = Docs\DevEnv\claude-code-task-create-rules.md
 		Docs\DevEnv\devenv-setup.md = Docs\DevEnv\devenv-setup.md
 		Docs\DevEnv\DevEnv_Setup_Guide.docx = Docs\DevEnv\DevEnv_Setup_Guide.docx
-		Docs\DevEnv\SETUP_QUICKSTART.md = Docs\DevEnv\SETUP_QUICKSTART.md
 	EndProjectSection
 EndProject
 Global

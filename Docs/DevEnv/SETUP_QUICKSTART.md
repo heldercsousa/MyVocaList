@@ -156,7 +156,7 @@ Type `claude` to open a Claude Code session, then run:
 ### 3.3 Add DevExpress priority rule to CLAUDE.md
 Add this to your `CLAUDE.md` at solution root to prevent skills from suggesting stock MAUI controls when a DevExpress equivalent exists:
 ```
-## UI Component Priority
+## UI Component Priority 
 
 When building UI components, always check devexpress-patterns.md first.
 Use stock MAUI controls only when DevExpress has no equivalent for the
@@ -168,6 +168,7 @@ required functionality.
 ## Step 4 — Verify everything works
 
 ### Terminal (outside Claude Code):
+FIX
 ```bash
 claude mcp list
 # Expected: context7 Connected, sequential-thinking Connected, sqlite Connected, github Connected
@@ -195,13 +196,12 @@ maui-devflow list
 ---
 
 ## Step 5 — After setup is complete
-
+**TODO - FIX
 Add these to `.claudeignore` at **solution root** to stop Claude Code scanning them on every session:
 ```
 .claude/rules/devenv-setup.md
 docs/devenv-setup.md
 docs/DevEnv_Setup_Guide.docx
-maui-skills/
 ```
 
 > **Folder structure note:** `.claude/`, `.mcp.json`, `.claudeignore`, and `SETUP_QUICKSTART.md` all live at **solution root** — not inside the MAUI app project folder. Claude Code needs visibility across all projects in the solution.
