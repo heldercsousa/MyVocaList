@@ -1,6 +1,9 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/27/2026** - docs - Add hex format convention to theme-locale.md (always use 6-digit #RRGGBB for opaque colors)
+- **02/27/2026** - docs - Update theme-locale.md with indigo palette approach (Option B), seed color, full token mapping, and legacy tonal palette design debt note
+- **02/27/2026** - feat - Apply indigo MD3 palette from Material Theme Builder export, replacing pink/purple/gold semantic tokens; adds SurfaceContainerLowest token
 - **02/27/2026** - feat - VenuesPage multi-select UX redesign: short tap navigates to edit form, long press enters multi-select with haptic feedback, swipe suppressed during multi-select, Select All checkbox row removed, contextual action bar redesigned to 5-column layout (Select all | Count | Edit | Delete | Cancel); devexpress-patterns.md updated with multi-select pattern
 - **02/27/2026** - docs - Add SQLite MCP server to .mcp.json (uvx mcp-server-sqlite); pull db from Android emulator via adb; document db refresh command in CLAUDE.md; verify LIKE collation approach via MCP + EF Core docs
 - **02/27/2026** - fix - Fix SQLite accent-insensitive search (LIKE ignored NOCASE_NOACCENT collation): override like(pattern,text) function in CollationInterceptor with NormalizeForCollation on both sides; fix VenuesPage "No venue found" empty state icon (search_off_outlined → search_outlined); fix multi-select toolbar button icon alignment (remove ineffective HorizontalContentAlignment) and right margin (Margin="0,0,8,0" on grid)
