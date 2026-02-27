@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/27/2026** - docs - Add SQLite MCP server to .mcp.json (uvx mcp-server-sqlite); pull db from Android emulator via adb; document db refresh command in CLAUDE.md; verify LIKE collation approach via MCP + EF Core docs
 - **02/27/2026** - fix - Fix SQLite accent-insensitive search (LIKE ignored NOCASE_NOACCENT collation): override like(pattern,text) function in CollationInterceptor with NormalizeForCollation on both sides; fix VenuesPage "No venue found" empty state icon (search_off_outlined → search_outlined); fix multi-select toolbar button icon alignment (remove ineffective HorizontalContentAlignment) and right margin (Margin="0,0,8,0" on grid)
 - **02/27/2026** - fix - Fix VenuesPage multi-select: edit crash (QueryProperty int? cast), deselect toggle broken (remove+add), toolbar icons right-aligned (HorizontalContentAlignment)
 - **02/27/2026** - fix - Move EF Core migrations from blocking main-thread call in MauiProgram.cs to async fire-and-forget in App constructor, fixing ANR crash on Android emulator startup

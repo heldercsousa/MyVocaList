@@ -63,7 +63,18 @@
       "Bash(dotnet:*)",
       "Bash(node:*)",
       "Bash(powershell.exe:*)",
-      "mcp__devexpress-maui__search_maui_demo_app_docs"
+      "mcp__devexpress-maui__search_maui_demo_app_docs",
+      "Bash(git:*)",
+      "Bash(adb devices:*)",
+      "Bash(adb logcat:*)",
+      "Bash(adb pull:*)",
+      "Bash(where adb:*)",
+      "Bash(\"/c/Android/platform-tools/adb.exe\" devices:*)",
+      "Bash(\"/c/Android/platform-tools/adb.exe\" shell:*)",
+      "Bash(timeout 15 uvx mcp-server-sqlite:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(uvx sqlite-utils:*)"
     ]
   },
   "enabledMcpjsonServers": [
@@ -71,5 +82,8 @@
     "sequential-thinking",
     "github",
     "devexpress-maui"
+  ],
+  "disabledMcpjsonServers": [
+    "sqlite"
   ]
 }
