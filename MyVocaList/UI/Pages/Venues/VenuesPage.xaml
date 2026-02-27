@@ -26,6 +26,7 @@
             <!-- Multi-select toolbar -->
             <Grid ColumnDefinitions="*,Auto,Auto"
                   ColumnSpacing="8"
+                  Margin="0,0,8,0"
                   VerticalOptions="Center"
                   IsVisible="{Binding ShowMultiSelectToolbar}">
 
@@ -42,7 +43,6 @@
                              WidthRequest="40" HeightRequest="40"
                              CornerRadius="20"
                              HorizontalOptions="Center" VerticalOptions="Center"
-                             HorizontalContentAlignment="Center"
                              IsVisible="{Binding CanEditSelected}"
                              Command="{Binding EditSelectedCommand}" />
 
@@ -53,7 +53,6 @@
                              WidthRequest="40" HeightRequest="40"
                              CornerRadius="20"
                              HorizontalOptions="Center" VerticalOptions="Center"
-                             HorizontalContentAlignment="Center"
                              Command="{Binding DeleteSelectedCommand}" />
             </Grid>
         </Grid>
@@ -253,7 +252,7 @@
                              HorizontalOptions="Center"
                              Spacing="8"
                              Margin="32,48,32,0">
-            <dx:DXButton Icon="search_off_outlined"
+            <dx:DXButton Icon="search_outlined"
                          IconColor="{dx:ThemeColor OnSurfaceVariant}"
                          IconWidth="64" IconHeight="64"
                          BackgroundColor="Transparent"
