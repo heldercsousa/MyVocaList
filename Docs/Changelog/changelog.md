@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for january to march 2026
+- **02/26/2026** - refactor - Venue CRUD review: replaced edit BottomSheet with dedicated VenueFormPage (Shell navigation); removed dead DTO properties (IsSelected, StatusText) and dead service methods; standardized pagination to AppPagination.DefaultPageSize=20; added SafeAreaEdges="Container" to VenuesPage; disabled nullable reference types project-wide via Directory.Build.props. Populated all Claude Code rules and commands files (code-principles, theme-locale, dialogs-validation, devexpress-patterns, mediatr-patterns, build/commit/changelog/review commands).
 - **02/26/2026** - docs - Restructured Claude Code dev environment: lean CLAUDE.md, rules/commands architecture, MCP setup fixed, .NET 10 migration, continuous enhancement model established
 - **02/25/2026** - Upgrade - migration to .NET 10. Added usefull skills and mcp servers to claude. guides to setup the dev environment.
 - **02/20/2026** - Fix - VenuesPage: tapping a selected item in multi-select mode now deselects it; tapping the last selected item exits multi-select mode.

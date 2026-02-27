@@ -1,26 +1,48 @@
+# Commit Command
+
 Perform a full commit and push cycle for the MyVocaList project. Follow these steps exactly:
 
-1. **Build check**: Run `dotnet build` and verify it succeeds. If there are build errors, stop and report them — do not commit broken code.
+## Pre-Commit Checklist
+- [ ] Build is clean: run `/project:build` and confirm 0 errors
+- [ ] No half-finished work (no TODO markers left in modified code unless pre-existing)
+- [ ] No non-English text introduced
+- [ ] No `DisplayAlert`, `DisplayActionSheet`, or `DisplayPromptAsync` in modified files
 
-2. **Changelog**: Update `Docs/Changelog/changelog.md` with a new entry for the changes being committed. Format: `- **MM/dd/yyyy** - Enhancement|Fix - Description`
+## Files to NEVER Commit
+- `.claude/settings.local.json`
+- `bin/`, `obj/`, `.vs/` directories
+- `*.user` files
+- Any file containing secrets or API keys
 
-3. **Stage all changes**: Run `git add -A`
+## Steps
 
-4. **Review staged diff**: Run `git diff --cached --stat` to understand what is being committed.
+1. **Build check**: Run `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`. Stop if errors.
 
-5. **Generate commit message**: Based on the diff, write a message following the project format:
+2. **Stage changes**: Stage specific files — never `git add -A` blindly. Review what is being staged.
+
+3. **Review staged diff**: Run `git diff --cached --stat` to confirm staged files are intentional.
+
+4. **Update changelog**: Update `Docs/Changelog/changelog.md` with a new entry:
+   ```
+   - **MM/dd/yyyy** - <type> - <description>
+   ```
+   Types: `feat` `fix` `refactor` `docs` `perf` `test`
+
+5. **Generate commit message** following this format:
    ```
    <type>: <summary>
 
    - detail 1
    - detail 2
 
-   Co-Authored-By: Claude <noreply@anthropic.com>
+   Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
    ```
-   Types: `feat:`, `fix:`, `refactor:`, `docs:`, `perf:`, `test:`
+   Types: `feat:` `fix:` `refactor:` `docs:` `perf:` `test:`
 
-6. **Commit**: Run `git commit` with the generated message.
+6. **Commit**: `git commit` with the generated message (use HEREDOC).
 
-7. **Push**: Run `git push` to the remote.
+7. **Push**: `git push` to remote.
 
 8. **Confirm**: Report the commit hash and what was pushed.
+
+9. **Run changelog command**: After committing, always run `/project:changelog` to verify the changelog entry.

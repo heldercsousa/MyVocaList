@@ -1,6 +1,9 @@
 # MediatR Patterns
 
-> Stub — expand each section as patterns are confirmed in the codebase.
+> Status: MediatR is listed as a planned dependency in CLAUDE.md but is NOT yet registered in MauiProgram.cs.
+> Current architecture uses direct service interfaces (IVenueService, etc.) injected via constructor DI.
+> These patterns are reference patterns for when MediatR is introduced.
+> Mark patterns as "confirmed" once the first handler is registered.
 
 ## Command Pattern
 
@@ -86,6 +89,28 @@ builder.Services.AddMediatR(cfg =>
 | Query handler | `QueryHandler` | `GetQueueQueryHandler` |
 | Domain event | `Event` | `SongAddedToQueueEvent` |
 | Event handler | `EventHandler` | `SongAddedToQueueEventHandler` |
+
+## Current Architecture (Pre-MediatR)
+
+Services currently use direct interface injection. Pattern confirmed in VenueService:
+
+```csharp
+// Service interface (in Services project)
+public interface IVenueService
+{
+    (bool isValid, string message) ValidateNameInput(string name);
+    Task<(bool success, string message, Venue? venue)> CreateVenueAsync(string name);
+    Task<(bool success, string message)> UpdateVenueAsync(int id, string name);
+    Task<(bool success, string message)> DeleteVenuesAsync(IEnumerable<int> ids);
+    Task<(IEnumerable<VenueListItemDto> items, int totalCount)> GetPagedVenuesForListAsync(
+        int pageNumber, int pageSize, string? query = null);
+}
+
+// ViewModel injects service directly
+public VenuesViewModel(IVenueService venueService, ISnackbarService snackbarService, ...)
+```
+
+When MediatR is introduced, the ViewModel will `Send()` commands/queries instead of calling the service directly.
 
 ## Known Gotchas
 
