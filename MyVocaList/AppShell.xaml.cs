@@ -8,6 +8,8 @@ public partial class AppShell : Shell
         InitializeComponent();
 
         viewModel.ExitRequested += OnExitRequested;
+
+        Routing.RegisterRoute(Routes.VenueForm, typeof(VenueFormPage));
     }
 
     // Fallback: catches back press when Shell is at root and QueuePage.OnBackButtonPressed

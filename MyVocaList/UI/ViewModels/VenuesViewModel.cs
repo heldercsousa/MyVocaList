@@ -3,7 +3,8 @@ using MyVocaList.UI.Collections;
 namespace MyVocaList.UI.ViewModels
 {
     /// <summary>
-    /// ViewModel for Venues CRUD page with paging, search, multi-select, and BottomSheet.
+    /// ViewModel for the Venues list page: paging, search, multi-select, confirm-delete.
+    /// Add/Edit navigates to VenueFormPage.
     /// </summary>
     public partial class VenuesViewModel : ViewModelBase
     {
@@ -11,12 +12,11 @@ namespace MyVocaList.UI.ViewModels
         private readonly ISnackbarService _snackbarService;
         private readonly ILogger<VenuesViewModel> _logger;
 
-        private const int PageSize = 20;
         private int _currentPage;
         private int _totalCount;
-        private string? _currentSearchQuery;
-        private CancellationTokenSource? _searchCts;
-        private Func<Task>? _pendingConfirmAction;
+        private string _currentSearchQuery;
+        private CancellationTokenSource _searchCts;
+        private Func<Task> _pendingConfirmAction;
 
         private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
         private bool _suppressSelectionChangedExit;
@@ -26,19 +26,9 @@ namespace MyVocaList.UI.ViewModels
         [ObservableProperty] private string _searchText = string.Empty;
         [ObservableProperty] private bool _isMultiSelectMode;
         [ObservableProperty] private int _selectedCount;
-        [ObservableProperty] private BottomSheetState _bottomSheetState = BottomSheetState.Hidden;
         [ObservableProperty] private BottomSheetState _confirmSheetState = BottomSheetState.Hidden;
-        [ObservableProperty] private string _editingVenueName = string.Empty;
-        [ObservableProperty] private int? _editingVenueId;
-        [ObservableProperty] private string _bottomSheetTitle = "New Venue";
-        [ObservableProperty] private string _characterCounterText = string.Empty;
-        [ObservableProperty] private bool _showCharacterCounter;
-        [ObservableProperty] private bool _isCharacterCounterWarning;
-        [ObservableProperty] private bool _isCharacterCounterError;
         [ObservableProperty] private bool _hasMoreItems = true;
         [ObservableProperty] private bool _isInitialLoading = true;
-        [ObservableProperty] private bool _venueNameHasError;
-        [ObservableProperty] private string _venueNameErrorText = string.Empty;
         [ObservableProperty] private string _confirmMessage = string.Empty;
         [ObservableProperty] private string _confirmActionText = "Delete";
 
@@ -56,12 +46,10 @@ namespace MyVocaList.UI.ViewModels
 
             RefreshCommand = new AsyncRelayCommand(RefreshAsync);
             LoadMoreCommand = new RelayCommand(() => _ = LoadMoreAsync());
-            AddVenueCommand = new RelayCommand(OpenCreateBottomSheet);
-            SaveVenueCommand = new AsyncRelayCommand(SaveVenueAsync);
-            CancelEditCommand = new RelayCommand(CloseEditSheet);
-            SwipeDeleteCommand = new RelayCommand<VenueListItemDto>(item => RequestSwipeDelete(item!));
+            AddVenueCommand = new AsyncRelayCommand(NavigateToAddAsync);
+            SwipeDeleteCommand = new RelayCommand<VenueListItemDto>(item => RequestSwipeDelete(item));
             DeleteSelectedCommand = new RelayCommand(RequestBatchDelete);
-            EditSelectedCommand = new RelayCommand(EditSelectedVenue);
+            EditSelectedCommand = new AsyncRelayCommand(NavigateToEditAsync);
             CancelSelectionCommand = new RelayCommand(ExitMultiSelectMode);
             TapCommand = new RelayCommand<VenueListItemDto>(OnItemTapped);
             SelectAllCommand = new RelayCommand(ToggleSelectAll);
@@ -72,7 +60,7 @@ namespace MyVocaList.UI.ViewModels
         public ObservableRangeCollection<VenueListItemDto> Venues { get; }
         public ObservableRangeCollection<VenueListItemDto> SelectedVenues { get; }
 
-        /// <summary>Non-generic wrapper for binding to DXCollectionView SelectedItems.</summary>
+        /// <summary>Non-generic wrapper for binding to DXCollectionView SelectedItems (requires IList).</summary>
         public System.Collections.IList SelectedVenuesRaw => SelectedVenues;
 
         public string SelectedCountText => $"{SelectedCount} selected";
@@ -91,12 +79,10 @@ namespace MyVocaList.UI.ViewModels
 
         public IAsyncRelayCommand RefreshCommand { get; }
         public IRelayCommand LoadMoreCommand { get; }
-        public IRelayCommand AddVenueCommand { get; }
-        public IAsyncRelayCommand SaveVenueCommand { get; }
-        public IRelayCommand CancelEditCommand { get; }
+        public IAsyncRelayCommand AddVenueCommand { get; }
         public IRelayCommand<VenueListItemDto> SwipeDeleteCommand { get; }
         public IRelayCommand DeleteSelectedCommand { get; }
-        public IRelayCommand EditSelectedCommand { get; }
+        public IAsyncRelayCommand EditSelectedCommand { get; }
         public IRelayCommand CancelSelectionCommand { get; }
         public IRelayCommand<VenueListItemDto> TapCommand { get; }
         public IRelayCommand SelectAllCommand { get; }
@@ -124,19 +110,13 @@ namespace MyVocaList.UI.ViewModels
             OnPropertyChanged(nameof(IsAllSelected));
         }
 
-        partial void OnEditingVenueNameChanged(string value)
-        {
-            ClearVenueNameError();
-            UpdateCharacterCounter(value?.Length ?? 0);
-        }
-
         partial void OnIsInitialLoadingChanged(bool value) => NotifyEmptyStates();
 
         public async Task InitializeAsync()
         {
             IsInitialLoading = true;
 
-            // Yield to UI so Shimmer can render before starting the load
+            // Yield to UI thread so the ShimmerView renders before data fetch begins
             await Task.Yield();
 
             await LoadFirstPageAsync(CancellationToken.None);
@@ -154,27 +134,24 @@ namespace MyVocaList.UI.ViewModels
                 _currentPage = 1;
                 _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
 
-                // Preserve selected ids before replacing items
                 var selectedIds = SelectedVenues.Select(v => v.Id).ToHashSet();
 
                 var (itemsEnumerable, totalCount) = await _venueService.GetPagedVenuesForListAsync(
-                    _currentPage, PageSize, _currentSearchQuery);
+                    _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery);
 
                 if (cancellationToken.IsCancellationRequested) return;
 
                 _totalCount = totalCount;
                 var list = itemsEnumerable.ToList();
-
                 HasMoreItems = totalCount > list.Count;
 
                 RunOnUiThread(() =>
                 {
                     Venues.ReplaceRange(list);
 
-                    // Restore selection by Id (instances come from Venues)
+                    // Restore selection state by ID after list replacement
                     var restored = Venues.Where(v => selectedIds.Contains(v.Id)).ToList();
                     SelectedVenues.ReplaceRange(restored);
-
                     SelectedCount = SelectedVenues.Count;
                     NotifyEmptyStates();
                 });
@@ -211,7 +188,7 @@ namespace MyVocaList.UI.ViewModels
             try
             {
                 var (itemsEnumerable, totalCount) = await _venueService.GetPagedVenuesForListAsync(
-                    loadingPage, PageSize, _currentSearchQuery);
+                    loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery);
 
                 _totalCount = totalCount;
                 var list = itemsEnumerable.ToList();
@@ -243,7 +220,7 @@ namespace MyVocaList.UI.ViewModels
                 _searchCts?.Cancel();
                 _searchCts?.Dispose();
             }
-            catch { /* ignore disposal races */ }
+            catch { /* ignore disposal races on CancellationTokenSource */ }
 
             _searchCts = new CancellationTokenSource();
             var token = _searchCts.Token;
@@ -260,10 +237,9 @@ namespace MyVocaList.UI.ViewModels
             }, token);
         }
 
-        private void OnItemTapped(VenueListItemDto? item)
+        private void OnItemTapped(VenueListItemDto item)
         {
-            if (item == null)
-                return;
+            if (item == null) return;
 
             if (IsMultiSelectMode)
             {
@@ -275,80 +251,16 @@ namespace MyVocaList.UI.ViewModels
             EnterMultiSelectMode(item);
         }
 
-        private void OpenCreateBottomSheet()
+        private Task NavigateToAddAsync() =>
+            Shell.Current.GoToAsync(Routes.VenueForm);
+
+        private async Task NavigateToEditAsync()
         {
-            EditingVenueId = null;
-            EditingVenueName = string.Empty;
-            ClearVenueNameError();
-            BottomSheetTitle = "New Venue";
-            BottomSheetState = BottomSheetState.HalfExpanded;
-        }
+            var item = SelectedVenues.FirstOrDefault();
+            if (item == null) return;
 
-        private void OpenEditBottomSheet(VenueListItemDto item)
-        {
-            EditingVenueId = item.Id;
-            EditingVenueName = item.Name;
-            ClearVenueNameError();
-            BottomSheetTitle = "Edit Venue";
-            BottomSheetState = BottomSheetState.HalfExpanded;
-        }
-
-        private void CloseEditSheet()
-        {
-            BottomSheetState = BottomSheetState.Hidden;
-            EditingVenueName = string.Empty;
-            EditingVenueId = null;
-            ClearVenueNameError();
-        }
-
-        private void ClearVenueNameError()
-        {
-            VenueNameHasError = false;
-            VenueNameErrorText = string.Empty;
-        }
-
-        private async Task SaveVenueAsync()
-        {
-            var name = EditingVenueName?.Trim() ?? string.Empty;
-
-            var validation = _venueService.ValidateNameInput(name);
-            if (!validation.isValid)
-            {
-                VenueNameHasError = true;
-                VenueNameErrorText = validation.message;
-                return;
-            }
-
-            if (EditingVenueId.HasValue)
-            {
-                var (success, message) = await _venueService.UpdateVenueAsync(EditingVenueId.Value, name);
-                if (success)
-                {
-                    CloseEditSheet();
-                    await RefreshAsync();
-                    await _snackbarService.ShowSuccessAsync("Venue updated");
-                }
-                else
-                {
-                    VenueNameHasError = true;
-                    VenueNameErrorText = message;
-                }
-            }
-            else
-            {
-                var (success, message, _) = await _venueService.CreateVenueAsync(name);
-                if (success)
-                {
-                    CloseEditSheet();
-                    await RefreshAsync();
-                    await _snackbarService.ShowSuccessAsync("Venue created");
-                }
-                else
-                {
-                    VenueNameHasError = true;
-                    VenueNameErrorText = message;
-                }
-            }
+            ExitMultiSelectMode();
+            await Shell.Current.GoToAsync($"{Routes.VenueForm}?venueId={item.Id}&venueName={Uri.EscapeDataString(item.Name)}");
         }
 
         private void RequestSwipeDelete(VenueListItemDto item)
@@ -374,8 +286,7 @@ namespace MyVocaList.UI.ViewModels
         private void RequestBatchDelete()
         {
             var selectedItems = SelectedVenues.ToList();
-            if (selectedItems.Count == 0)
-                return;
+            if (selectedItems.Count == 0) return;
 
             ConfirmMessage = $"Delete {selectedItems.Count} venue(s)?";
             ConfirmActionText = "Delete";
@@ -409,16 +320,6 @@ namespace MyVocaList.UI.ViewModels
         {
             ConfirmSheetState = BottomSheetState.Hidden;
             _pendingConfirmAction = null;
-        }
-
-        private void EditSelectedVenue()
-        {
-            var selectedItem = SelectedVenues.FirstOrDefault();
-            if (selectedItem == null)
-                return;
-
-            ExitMultiSelectMode();
-            OpenEditBottomSheet(selectedItem);
         }
 
         public void EnterMultiSelectMode(VenueListItemDto initialItem)
@@ -462,21 +363,7 @@ namespace MyVocaList.UI.ViewModels
         {
             SelectedCount = count;
             if (IsMultiSelectMode && count == 0 && !_suppressSelectionChangedExit)
-            {
                 ExitMultiSelectMode();
-            }
-        }
-
-        private void UpdateCharacterCounter(int length)
-        {
-            ShowCharacterCounter = _venueService.ShouldShowCharacterCounter(length);
-            if (ShowCharacterCounter)
-            {
-                var (text, isWarning, isError) = _venueService.GetCharacterCounterInfo(length);
-                CharacterCounterText = text;
-                IsCharacterCounterWarning = isWarning;
-                IsCharacterCounterError = isError;
-            }
         }
 
         private void NotifyEmptyStates()

@@ -7,7 +7,8 @@ global using DevExpress.Maui.CollectionView;
 global using DevExpress.Maui.Controls;
 global using DevExpress.Maui.Core;
 global using Microsoft.Extensions.Logging;
-// Contracts — every feature ViewModel + Page will need DTOs
+// Contracts — every feature ViewModel + Page will need DTOs and pagination constants
+global using MyVocaList.Contracts;
 global using MyVocaList.Contracts.DTOs.List;
 // App navigation and models
 global using MyVocaList.Navigation;

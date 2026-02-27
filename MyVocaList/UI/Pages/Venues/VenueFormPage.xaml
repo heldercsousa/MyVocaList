@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    x:Class="MyVocaList.UI.Pages.Venues.VenueFormPage"
+    x:DataType="vm:VenueFormViewModel"
+    Title="{Binding PageTitle}"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="All">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+
+            <dxe:TextEdit x:Name="nameEdit"
+                          Text="{Binding VenueName, Mode=TwoWay}"
+                          LabelText="Venue Name"
+                          PlaceholderText="Enter venue name"
+                          BoxMode="Outlined"
+                          FocusedBorderColor="{StaticResource Primary}"
+                          BorderColor="{StaticResource Outline}"
+                          BackgroundColor="{StaticResource SurfaceContainerHighest}"
+                          TextColor="{StaticResource OnSurface}"
+                          MaxCharacterCount="30"
+                          HasError="{Binding NameHasError}"
+                          ErrorText="{Binding NameErrorText}" />
+
+            <Label Text="{Binding CharacterCounterText}"
+                   IsVisible="{Binding ShowCharacterCounter}"
+                   FontFamily="RobotoRegular" FontSize="12"
+                   HorizontalOptions="End">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding IsCharacterCounterError}"
+                                 Value="True">
+                        <Setter Property="TextColor" Value="{StaticResource Error}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding IsCharacterCounterWarning}"
+                                 Value="True">
+                        <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
+                <dx:DXButton Content="Cancel"
+                             Style="{StaticResource OutlinedButton}"
+                             Padding="24,0"
+                             Command="{Binding CancelCommand}" />
+                <dx:DXButton Content="Save"
+                             Style="{StaticResource FilledButton}"
+                             Padding="24,0"
+                             Command="{Binding SaveCommand}" />
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

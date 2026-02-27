@@ -11,7 +11,8 @@
     x:Name="page"
     x:DataType="vm:VenuesViewModel"
     Title="Venues"
-    BackgroundColor="{StaticResource Surface}">
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="Container">
 
     <Shell.TitleView>
         <Grid HeightRequest="48">
@@ -134,29 +135,69 @@
                        Tap="OnItemTapped"
                        SelectionChanged="OnSelectionChanged">
 
-            <dxcv:DXCollectionView.ItemTemplate>
-                <DataTemplate x:DataType="dto:VenueListItemDto">
-                    <dxcv:SwipeContainer>
-                        <dxcv:SwipeContainer.EndSwipeItems>
-                            <dxcv:SwipeContainerItem Caption="Delete"
-                                                     BackgroundColor="{StaticResource Error}"
-                                                     FontColor="{StaticResource OnError}"
-                                                     Image="delete_outlined"
-                                                     Command="{Binding BindingContext.SwipeDeleteCommand, Source={x:Reference page}}"
-                                                     CommandParameter="{Binding}" />
-                        </dxcv:SwipeContainer.EndSwipeItems>
-                        <dxcv:SwipeContainer.ItemView>
+                    <dxcv:DXCollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="dto:VenueListItemDto">
+                            <dxcv:SwipeContainer>
+                                <dxcv:SwipeContainer.EndSwipeItems>
+                                    <dxcv:SwipeContainerItem Caption="Delete"
+                                                             BackgroundColor="{StaticResource Error}"
+                                                             FontColor="{StaticResource OnError}"
+                                                             Image="delete_outlined"
+                                                             Command="{Binding BindingContext.SwipeDeleteCommand, Source={x:Reference page}}"
+                                                             CommandParameter="{Binding}" />
+                                </dxcv:SwipeContainer.EndSwipeItems>
+                                <dxcv:SwipeContainer.ItemView>
+                                    <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
+                                                 CornerRadius="12"
+                                                 Padding="16"
+                                                 Margin="16,4"
+                                                 HeightRequest="64">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                            <dx:CheckEdit Grid.Column="0"
+                                                          IsChecked="False"
+                                                          InputTransparent="True"
+                                                          VerticalOptions="Center"
+                                                          IsVisible="{Binding BindingContext.IsMultiSelectMode, Source={x:Reference page}}" />
+
+                                            <Label Grid.Column="1"
+                                                   Text="{Binding Name}"
+                                                   FontFamily="RobotoRegular" FontSize="16"
+                                                   TextColor="{StaticResource OnSurface}"
+                                                   VerticalOptions="Center"
+                                                   LineBreakMode="TailTruncation" />
+
+                                            <dx:DXBorder Grid.Column="2"
+                                                         IsVisible="{Binding HasEvents}"
+                                                         BackgroundColor="{StaticResource SecondaryContainer}"
+                                                         CornerRadius="12"
+                                                         Padding="8,4">
+                                                <Label Text="Has Events"
+                                                       FontFamily="RobotoMedium" FontSize="11"
+                                                       TextColor="{StaticResource OnSecondaryContainer}"
+                                                       VerticalOptions="Center" />
+                                            </dx:DXBorder>
+                                        </Grid>
+                                    </dx:DXBorder>
+                                </dxcv:SwipeContainer.ItemView>
+                            </dxcv:SwipeContainer>
+                        </DataTemplate>
+                    </dxcv:DXCollectionView.ItemTemplate>
+
+                    <dxcv:DXCollectionView.SelectedItemTemplate>
+                        <DataTemplate x:DataType="dto:VenueListItemDto">
                             <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
+                                         BorderColor="{dx:ThemeColor Primary}"
+                                         BorderThickness="2"
                                          CornerRadius="12"
                                          Padding="16"
                                          Margin="16,4"
                                          HeightRequest="64">
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <dx:CheckEdit Grid.Column="0"
-                                                  IsChecked="False"
+                                                  IsChecked="True"
+                                                  CheckedCheckBoxColor="{dx:ThemeColor Primary}"
                                                   InputTransparent="True"
-                                                  VerticalOptions="Center"
-                                                  IsVisible="{Binding BindingContext.IsMultiSelectMode, Source={x:Reference page}}" />
+                                                  VerticalOptions="Center" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Name}"
@@ -177,53 +218,13 @@
                                     </dx:DXBorder>
                                 </Grid>
                             </dx:DXBorder>
-                        </dxcv:SwipeContainer.ItemView>
-                    </dxcv:SwipeContainer>
-                </DataTemplate>
-            </dxcv:DXCollectionView.ItemTemplate>
-
-            <dxcv:DXCollectionView.SelectedItemTemplate>
-                <DataTemplate x:DataType="dto:VenueListItemDto">
-                            <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
-                                 BorderColor="{dx:ThemeColor Primary}"
-                                 BorderThickness="2"
-                                 CornerRadius="12"
-                                 Padding="16"
-                                 Margin="16,4"
-                                 HeightRequest="64">
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                            <dx:CheckEdit Grid.Column="0"
-                                          IsChecked="True"
-                                          CheckedCheckBoxColor="{dx:ThemeColor Primary}"
-                                          InputTransparent="True"
-                                          VerticalOptions="Center" />
-
-                            <Label Grid.Column="1"
-                                   Text="{Binding Name}"
-                                   FontFamily="RobotoRegular" FontSize="16"
-                                   TextColor="{StaticResource OnSurface}"
-                                   VerticalOptions="Center"
-                                   LineBreakMode="TailTruncation" />
-
-                            <dx:DXBorder Grid.Column="2"
-                                         IsVisible="{Binding HasEvents}"
-                                         BackgroundColor="{StaticResource SecondaryContainer}"
-                                         CornerRadius="12"
-                                         Padding="8,4">
-                                <Label Text="Has Events"
-                                       FontFamily="RobotoMedium" FontSize="11"
-                                       TextColor="{StaticResource OnSecondaryContainer}"
-                                       VerticalOptions="Center" />
-                            </dx:DXBorder>
-                        </Grid>
-                    </dx:DXBorder>
-                </DataTemplate>
-            </dxcv:DXCollectionView.SelectedItemTemplate>
+                        </DataTemplate>
+                    </dxcv:DXCollectionView.SelectedItemTemplate>
                 </dxcv:DXCollectionView>
             </dx:ShimmerView.Content>
         </dx:ShimmerView>
 
-        <!-- Empty state: no venues registered at all -->
+        <!-- Empty state: no venues registered -->
         <VerticalStackLayout Grid.Row="2"
                              IsVisible="{Binding IsEmptyNoVenues}"
                              VerticalOptions="Start"
@@ -275,66 +276,7 @@
                      Margin="0,0,16,16"
                      Command="{Binding AddVenueCommand}" />
 
-        <!-- Edit BottomSheet -->
-        <dx:BottomSheet x:Name="editBottomSheet"
-                        HalfExpandedRatio="0.4"
-                        AllowedState="HalfExpanded"
-                        IsModal="True"
-                        ShowGrabber="True"
-                        AllowDismiss="True"
-                        BackgroundColor="{StaticResource Surface}"
-                        CornerRadius="28"
-                        StateChanged="OnBottomSheetStateChanged">
-            <VerticalStackLayout Padding="24" Spacing="16">
-                <Label Text="{Binding BottomSheetTitle}"
-                       FontFamily="RobotoMedium" FontSize="24"
-                       TextColor="{StaticResource OnSurface}" />
-
-                <dxe:TextEdit x:Name="venueNameEdit"
-                              Text="{Binding EditingVenueName, Mode=TwoWay}"
-                              LabelText="Venue Name"
-                              PlaceholderText="Enter venue name"
-                              BoxMode="Outlined"
-                              FocusedBorderColor="{StaticResource Primary}"
-                              BorderColor="{StaticResource Outline}"
-                              BackgroundColor="{StaticResource SurfaceContainerHighest}"
-                              TextColor="{StaticResource OnSurface}"
-                              MaxCharacterCount="30"
-                              HasError="{Binding VenueNameHasError}"
-                              ErrorText="{Binding VenueNameErrorText}" />
-
-                <Label Text="{Binding CharacterCounterText}"
-                       IsVisible="{Binding ShowCharacterCounter}"
-                       FontFamily="RobotoRegular" FontSize="12"
-                       HorizontalOptions="End">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label"
-                                     Binding="{Binding IsCharacterCounterError}"
-                                     Value="True">
-                            <Setter Property="TextColor" Value="{StaticResource Error}" />
-                        </DataTrigger>
-                        <DataTrigger TargetType="Label"
-                                     Binding="{Binding IsCharacterCounterWarning}"
-                                     Value="True">
-                            <Setter Property="TextColor" Value="{StaticResource Warning}" />
-                        </DataTrigger>
-                    </Label.Triggers>
-                </Label>
-
-                <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
-                    <dx:DXButton Content="Cancel"
-                                 Style="{StaticResource OutlinedButton}"
-                                 Padding="24,0"
-                                 Command="{Binding CancelEditCommand}" />
-                    <dx:DXButton Content="Save"
-                                 Style="{StaticResource FilledButton}"
-                                 Padding="24,0"
-                                 Command="{Binding SaveVenueCommand}" />
-                </HorizontalStackLayout>
-            </VerticalStackLayout>
-        </dx:BottomSheet>
-
-        <!-- Confirm BottomSheet -->
+        <!-- Confirm delete BottomSheet -->
         <dx:BottomSheet x:Name="confirmSheet"
                         HalfExpandedRatio="0.28"
                         AllowedState="HalfExpanded"

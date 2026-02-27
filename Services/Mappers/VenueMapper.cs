@@ -17,8 +17,7 @@ public static class VenueMapper
         {
             Id = venue.Id,
             Name = venue.Name,
-            HasEvents = hasEvents,
-            IsSelected = false
+            HasEvents = hasEvents
         };
     }
 }

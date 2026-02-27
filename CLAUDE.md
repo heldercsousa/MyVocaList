@@ -3,7 +3,8 @@
 ## App
 Karaoke queue management for live events. Manages one active queue at a time with round-based progression. Admin registers singers, tracks participation/absence, reorders queue, estimates completion time. Two queue modes: Mechanical Karaoke and Bandokê (live instrumental). Future: singer self-registration, song catalog, lyrics via API, social features.
 
-**Stack:** .NET MAUI 10 · net10.0-android · net10.0-ios · C# 13 · MediatR · FluentValidation · Serilog · EF Core 10 · SQLite · DevExpress MAUI v24.2+
+**Stack:** .NET MAUI 10 · net10.0-android · net10.0-ios · C# 13 · CommunityToolkit.Mvvm · Serilog · EF Core 10 · SQLite · DevExpress MAUI v24.2+
+**Planned:** MediatR · FluentValidation (not yet registered in MauiProgram.cs)
 
 ## Architecture
 ```
