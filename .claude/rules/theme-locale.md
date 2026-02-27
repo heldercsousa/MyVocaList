@@ -89,6 +89,8 @@ BorderColor="{dx:ThemeColor Primary}"
 
 **Never use:** raw hex colors, `Color.FromArgb`, or `Colors.X` in XAML.
 
+**Hex format in MaterialColors.xaml:** Always use plain 6-digit hex (`#RRGGBB`) for opaque colors. Never use the 8-digit `#FFRRGGBB` form — MAUI accepts both but mixing them in the same file is a maintenance hazard.
+
 ## Typography
 
 Fonts configured in `MauiProgram.cs`:
