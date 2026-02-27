@@ -25,6 +25,7 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 
 ## MCP & Skills
 - Context7: auto-triggered for all .NET MAUI, DevExpress, EF Core, MediatR documentation
+- SQLite MCP (`sqlite`): db file at `.claude/MyVocaList.db` (pulled from emulator via `adb exec-out run-as com.myvocalist cat /data/data/com.myvocalist/files/MyVocaList.db`). Refresh before use if emulator has new data.
 - Debugging: follow `systematic-debugging` skill (obra/superpowers)
 - Architecture patterns: follow `ddd-dotnet` skill (nesbo)
 - .NET patterns: follow `dotnet-skills` (Aaronontheweb)

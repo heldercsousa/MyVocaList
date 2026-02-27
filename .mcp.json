@@ -22,6 +22,16 @@
     "devexpress-maui": {
       "type": "http",
       "url": "https://gitmcp.io/DevExpress/maui-demo-app"
+    },
+    "sqlite": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "uvx",
+        "mcp-server-sqlite",
+        "--db-path",
+        "C:/Users/helde/source/repos/MyVocaList/.claude/MyVocaList.db"
+      ]
     }
   }
 }
