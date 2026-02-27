@@ -26,7 +26,7 @@
             <!-- Multi-select toolbar -->
             <Grid ColumnDefinitions="*,Auto,Auto"
                   ColumnSpacing="8"
-                  Margin="0,0,8,0"
+                  Margin="0,0,16,0"
                   VerticalOptions="Center"
                   IsVisible="{Binding ShowMultiSelectToolbar}">
 
@@ -43,6 +43,7 @@
                              WidthRequest="40" HeightRequest="40"
                              CornerRadius="20"
                              HorizontalOptions="Center" VerticalOptions="Center"
+                             HorizontalContentAlignment="Center"
                              IsVisible="{Binding CanEditSelected}"
                              Command="{Binding EditSelectedCommand}" />
 
@@ -53,6 +54,7 @@
                              WidthRequest="40" HeightRequest="40"
                              CornerRadius="20"
                              HorizontalOptions="Center" VerticalOptions="Center"
+                             HorizontalContentAlignment="Center"
                              Command="{Binding DeleteSelectedCommand}" />
             </Grid>
         </Grid>
@@ -134,6 +136,8 @@
                        AllowCascadeUpdate="True"
                        ItemSeparatorThickness="0"
                        Tap="OnItemTapped"
+                       LongPress="OnItemLongPressed"
+                       SwipeItemShowing="OnSwipeItemShowing"
                        SelectionChanged="OnSelectionChanged">
 
                     <dxcv:DXCollectionView.ItemTemplate>
@@ -277,8 +281,9 @@
                      Margin="0,0,16,16"
                      Command="{Binding AddVenueCommand}" />
 
-        <!-- Confirm delete BottomSheet -->
+        <!-- Confirm delete BottomSheet — RowSpan=3 so it can overlay the full content area -->
         <dx:BottomSheet x:Name="confirmSheet"
+                        Grid.RowSpan="3"
                         HalfExpandedRatio="0.28"
                         AllowedState="HalfExpanded"
                         IsModal="True"
