@@ -42,6 +42,7 @@
                              WidthRequest="40" HeightRequest="40"
                              CornerRadius="20"
                              HorizontalOptions="Center" VerticalOptions="Center"
+                             HorizontalContentAlignment="Center"
                              IsVisible="{Binding CanEditSelected}"
                              Command="{Binding EditSelectedCommand}" />
 
@@ -52,6 +53,7 @@
                              WidthRequest="40" HeightRequest="40"
                              CornerRadius="20"
                              HorizontalOptions="Center" VerticalOptions="Center"
+                             HorizontalContentAlignment="Center"
                              Command="{Binding DeleteSelectedCommand}" />
             </Grid>
         </Grid>

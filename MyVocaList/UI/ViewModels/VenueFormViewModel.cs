@@ -4,13 +4,16 @@ namespace MyVocaList.UI.ViewModels
     /// ViewModel for the Add / Edit Venue form page.
     /// Receives venue ID via shell query parameter; null = create mode.
     /// </summary>
-    [QueryProperty(nameof(VenueId), "venueId")]
+    [QueryProperty(nameof(VenueIdRaw), "venueId")]
     [QueryProperty(nameof(VenueName), "venueName")]
     public partial class VenueFormViewModel : ViewModelBase
     {
         private readonly IVenueService _venueService;
         private readonly ISnackbarService _snackbarService;
         private readonly ILogger<VenueFormViewModel> _logger;
+
+        // Shell passes all query parameters as strings; parse manually to avoid InvalidCastException.
+        public string VenueIdRaw { set => VenueId = int.TryParse(value, out var id) ? id : null; }
 
         [ObservableProperty] private int? _venueId;
         [ObservableProperty] private string _venueName = string.Empty;
