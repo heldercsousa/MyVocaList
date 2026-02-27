@@ -12,6 +12,14 @@ DevExpress is initialized in `MauiProgram.cs` with:
 
 No `ThemeManager` call is used. The app is **dark mode only** (light mode is planned for v2.0).
 
+## Theme Approach
+
+**Applied palette:** Indigo (exported from Google Material Theme Builder, 2026-02-27)
+**Approach:** Option B — Full token override in `MaterialColors.xaml`. No `ThemeManager.Theme` seed color is set; all colors live in the XAML ResourceDictionary.
+**Approximate seed color:** `#4858AB` (indigo — derived from `InversePrimary` value)
+
+**Tonal palette section note:** `MaterialColors.xaml` still contains a tonal palette section (Primary0–Primary100, etc.) from the previous Pink/Purple/Gold theme. These are only referenced by gradient brushes and represent design debt — they do not affect semantic token usage. Update separately if gradients need to match the new palette.
+
 ## Color System
 
 The app uses a Material Design 3 color system defined in:
@@ -24,29 +32,30 @@ Both are merged in `App.xaml` via `ResourceDictionary.MergedDictionaries`.
 
 | Token | Value | Use |
 |-------|-------|-----|
-| `Primary` | Primary80 `#FFFFB2BE` | Buttons, active states, icons |
-| `OnPrimary` | Primary20 `#FF660025` | Text/icon on primary |
-| `PrimaryContainer` | Primary30 `#FF900038` | Container backgrounds |
-| `OnPrimaryContainer` | Primary90 `#FFFFD9DE` | Text on primary container |
-| `Secondary` | Secondary80 `#FFE2B5FF` | Secondary actions |
-| `OnSecondary` | Secondary20 `#FF4D007A` | Text on secondary |
-| `SecondaryContainer` | Secondary30 `#FF662592` | Chip/badge backgrounds |
-| `OnSecondaryContainer` | Secondary90 `#FFF3DAFF` | Text on secondary container |
-| `Tertiary` | Tertiary80 `#FFE9C400` | Gold accents |
-| `OnTertiary` | Tertiary20 `#FF3A3000` | Text on tertiary |
-| `Error` | Error80 `#FFFFB4A9` | Error states |
-| `OnError` | Error20 `#FF690002` | Text on error |
-| `Background` | Neutral10 `#FF1C1621` | Page backgrounds |
-| `Surface` | Neutral10 `#FF1C1621` | Cards, sheets |
-| `OnSurface` | Neutral90 `#FFE6DDEA` | Primary text |
-| `OnSurfaceVariant` | NeutralVariant80 `#FFD1BFD6` | Secondary text, icons |
-| `SurfaceVariant` | NeutralVariant30 `#FF4E3F53` | Dividers, chips |
-| `SurfaceContainerLow` | `#FF251E2A` | List item backgrounds |
-| `SurfaceContainer` | `#FF312A36` | Tab bar, elevated surfaces |
-| `SurfaceContainerHigh` | `#FF47404D` | Pressed states |
-| `SurfaceContainerHighest` | `#FF5F5765` | Input field backgrounds |
-| `Outline` | NeutralVariant60 `#FF9A899F` | Borders |
-| `OutlineVariant` | NeutralVariant30 `#FF4E3F53` | Subtle dividers |
+| `Primary` | `#BAC3FF` | Buttons, active states, icons |
+| `OnPrimary` | `#15267B` | Text/icon on primary |
+| `PrimaryContainer` | `#5C6BC0` | Container backgrounds |
+| `OnPrimaryContainer` | `#F8F6FF` | Text on primary container |
+| `Secondary` | `#BFC4EC` | Secondary actions |
+| `OnSecondary` | `#292E4E` | Text on secondary |
+| `SecondaryContainer` | `#3F4566` | Chip/badge backgrounds |
+| `OnSecondaryContainer` | `#AEB3DA` | Text on secondary container |
+| `Tertiary` | `#FFABF2` | Accent color |
+| `OnTertiary` | `#551153` | Text on tertiary |
+| `Error` | `#FFB4AB` | Error states |
+| `OnError` | `#690005` | Text on error |
+| `Background` | `#121318` | Page backgrounds |
+| `Surface` | `#121318` | Cards, sheets |
+| `OnSurface` | `#E3E1E9` | Primary text |
+| `OnSurfaceVariant` | `#C6C5D3` | Secondary text, icons |
+| `SurfaceVariant` | `#454651` | Dividers, chips |
+| `SurfaceContainerLowest` | `#0D0E13` | Deepest surface (new in indigo theme) |
+| `SurfaceContainerLow` | `#1B1B21` | List item backgrounds |
+| `SurfaceContainer` | `#1F1F25` | Tab bar, elevated surfaces |
+| `SurfaceContainerHigh` | `#29292F` | Pressed states |
+| `SurfaceContainerHighest` | `#34343A` | Input field backgrounds |
+| `Outline` | `#8F909D` | Borders |
+| `OutlineVariant` | `#454651` | Subtle dividers |
 
 ### Custom Semantic Colors (not MD3 standard)
 | Token | Value | Use |
