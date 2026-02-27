@@ -243,8 +243,10 @@ namespace MyVocaList.UI.ViewModels
 
             if (IsMultiSelectMode)
             {
-                SelectedVenues.Remove(item);
-                SelectedVenues.Add(item);
+                if (SelectedVenues.Contains(item))
+                    SelectedVenues.Remove(item);
+                else
+                    SelectedVenues.Add(item);
                 return;
             }
 
