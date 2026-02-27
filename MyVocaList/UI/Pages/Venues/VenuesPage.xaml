@@ -24,19 +24,31 @@
                    IsVisible="{Binding ShowDefaultTitle}" />
 
             <!-- Multi-select toolbar -->
-            <Grid ColumnDefinitions="*,Auto,Auto"
-                  ColumnSpacing="8"
-                  Margin="0,0,16,0"
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+                  ColumnSpacing="4"
+                  Margin="0,0,8,0"
                   VerticalOptions="Center"
                   IsVisible="{Binding ShowMultiSelectToolbar}">
 
-                <Label Grid.Column="0"
+                <!-- Select all — far left -->
+                <dx:DXButton Grid.Column="0"
+                             Content="Select all"
+                             BackgroundColor="Transparent"
+                             TextColor="{StaticResource OnSurface}"
+                             FontFamily="RobotoMedium"
+                             Padding="4,0"
+                             VerticalOptions="Center"
+                             Command="{Binding SelectAllCommand}" />
+
+                <!-- Selected count — center -->
+                <Label Grid.Column="1"
                        Text="{Binding SelectedCountText}"
                        FontFamily="RobotoMedium" FontSize="18"
                        TextColor="{StaticResource OnSurface}"
                        VerticalOptions="Center" />
 
-                <dx:DXButton Grid.Column="1"
+                <!-- Edit — icon, only when exactly 1 selected -->
+                <dx:DXButton Grid.Column="2"
                              Icon="edit_outlined"
                              IconColor="{StaticResource OnSurface}"
                              BackgroundColor="Transparent"
@@ -47,7 +59,8 @@
                              IsVisible="{Binding CanEditSelected}"
                              Command="{Binding EditSelectedCommand}" />
 
-                <dx:DXButton Grid.Column="2"
+                <!-- Delete — icon -->
+                <dx:DXButton Grid.Column="3"
                              Icon="delete_outlined"
                              IconColor="{StaticResource Error}"
                              BackgroundColor="Transparent"
@@ -56,6 +69,16 @@
                              HorizontalOptions="Center" VerticalOptions="Center"
                              HorizontalContentAlignment="Center"
                              Command="{Binding DeleteSelectedCommand}" />
+
+                <!-- Cancel — far right -->
+                <dx:DXButton Grid.Column="4"
+                             Content="Cancel"
+                             BackgroundColor="Transparent"
+                             TextColor="{StaticResource OnSurface}"
+                             FontFamily="RobotoMedium"
+                             Padding="4,0"
+                             VerticalOptions="Center"
+                             Command="{Binding CancelSelectionCommand}" />
             </Grid>
         </Grid>
     </Shell.TitleView>
