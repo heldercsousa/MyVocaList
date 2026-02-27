@@ -60,7 +60,7 @@
         </Grid>
     </Shell.TitleView>
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,*">
         <!-- Search bar -->
         <dx:DXBorder Grid.Row="0"
                      BackgroundColor="{StaticResource SurfaceContainer}"
@@ -81,28 +81,8 @@
                           ClearIconColor="{StaticResource OnSurfaceVariant}" />
         </dx:DXBorder>
 
-        <!-- Select all row (multi-select mode only) -->
-        <Grid Grid.Row="1"
-              ColumnDefinitions="Auto,*" ColumnSpacing="12"
-              Margin="32,4,16,4"
-              IsVisible="{Binding IsMultiSelectMode}">
-            <Grid.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding SelectAllCommand}" />
-            </Grid.GestureRecognizers>
-            <dx:CheckEdit Grid.Column="0"
-                          IsChecked="{Binding IsAllSelected, Mode=OneWay}"
-                          CheckedCheckBoxColor="{dx:ThemeColor Primary}"
-                          InputTransparent="True"
-                          VerticalOptions="Center" />
-            <Label Grid.Column="1"
-                   Text="Select all"
-                   FontFamily="RobotoRegular" FontSize="16"
-                   TextColor="{StaticResource OnSurface}"
-                   VerticalOptions="Center" />
-        </Grid>
-
         <!-- Venue list with skeleton loading -->
-        <dx:ShimmerView Grid.Row="2"
+        <dx:ShimmerView Grid.Row="1"
                         IsLoading="{Binding IsInitialLoading}"
                         WaveWidth="0.7"
                         WaveOpacity="0.8">
@@ -230,7 +210,7 @@
         </dx:ShimmerView>
 
         <!-- Empty state: no venues registered -->
-        <VerticalStackLayout Grid.Row="2"
+        <VerticalStackLayout Grid.Row="1"
                              IsVisible="{Binding IsEmptyNoVenues}"
                              VerticalOptions="Start"
                              HorizontalOptions="Center"
@@ -250,7 +230,7 @@
         </VerticalStackLayout>
 
         <!-- Empty state: search returned no results -->
-        <VerticalStackLayout Grid.Row="2"
+        <VerticalStackLayout Grid.Row="1"
                              IsVisible="{Binding IsEmptyNoResults}"
                              VerticalOptions="Start"
                              HorizontalOptions="Center"
@@ -270,7 +250,7 @@
         </VerticalStackLayout>
 
         <!-- FAB -->
-        <dx:DXButton Grid.Row="2"
+        <dx:DXButton Grid.Row="1"
                      Icon="add_outlined"
                      IconColor="{StaticResource OnPrimary}"
                      BackgroundColor="{StaticResource Primary}"
@@ -281,9 +261,9 @@
                      Margin="0,0,16,16"
                      Command="{Binding AddVenueCommand}" />
 
-        <!-- Confirm delete BottomSheet — RowSpan=3 so it can overlay the full content area -->
+        <!-- Confirm delete BottomSheet — RowSpan=2 so it can overlay the full content area -->
         <dx:BottomSheet x:Name="confirmSheet"
-                        Grid.RowSpan="3"
+                        Grid.RowSpan="2"
                         HalfExpandedRatio="0.28"
                         AllowedState="HalfExpanded"
                         IsModal="True"
