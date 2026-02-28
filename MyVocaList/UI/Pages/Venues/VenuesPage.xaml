@@ -23,62 +23,68 @@
                    VerticalOptions="Center"
                    IsVisible="{Binding ShowDefaultTitle}" />
 
-            <!-- Multi-select toolbar -->
+            <!-- Multi-select toolbar (MD3 contextual action bar) -->
             <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
                   ColumnSpacing="4"
-                  Margin="0,0,8,0"
+                  Margin="0,0,16,0"
                   VerticalOptions="Center"
                   IsVisible="{Binding ShowMultiSelectToolbar}">
 
-                <!-- Select all — far left -->
+                <!-- Cancel — X icon, far left (MD3 standard) -->
                 <dx:DXButton Grid.Column="0"
-                             Content="Select all"
+                             Icon="close_outlined"
+                             IconColor="{StaticResource OnSurface}"
                              BackgroundColor="Transparent"
-                             TextColor="{StaticResource OnSurface}"
-                             FontFamily="RobotoMedium"
-                             Padding="4,0"
-                             VerticalOptions="Center"
-                             Command="{Binding SelectAllCommand}" />
+                             WidthRequest="48" HeightRequest="48"
+                             CornerRadius="24"
+                             HorizontalOptions="Center" VerticalOptions="Center"
+                             HorizontalContentAlignment="Center"
+                             SemanticProperties.Description="Cancel selection"
+                             Command="{Binding CancelSelectionCommand}" />
 
-                <!-- Selected count — center -->
+                <!-- Selected count — flexible center -->
                 <Label Grid.Column="1"
                        Text="{Binding SelectedCountText}"
                        FontFamily="RobotoMedium" FontSize="18"
                        TextColor="{StaticResource OnSurface}"
                        VerticalOptions="Center" />
 
-                <!-- Edit — icon, only when exactly 1 selected -->
+                <!-- Select All — icon -->
                 <dx:DXButton Grid.Column="2"
+                             Icon="done_all_outlined"
+                             IconColor="{StaticResource OnSurface}"
+                             BackgroundColor="Transparent"
+                             WidthRequest="48" HeightRequest="48"
+                             CornerRadius="24"
+                             HorizontalOptions="Center" VerticalOptions="Center"
+                             HorizontalContentAlignment="Center"
+                             SemanticProperties.Description="Select all"
+                             Command="{Binding SelectAllCommand}" />
+
+                <!-- Edit — icon, only when exactly 1 selected -->
+                <dx:DXButton Grid.Column="3"
                              Icon="edit_outlined"
                              IconColor="{StaticResource OnSurface}"
                              BackgroundColor="Transparent"
-                             WidthRequest="40" HeightRequest="40"
-                             CornerRadius="20"
+                             WidthRequest="48" HeightRequest="48"
+                             CornerRadius="24"
                              HorizontalOptions="Center" VerticalOptions="Center"
                              HorizontalContentAlignment="Center"
                              IsVisible="{Binding CanEditSelected}"
+                             SemanticProperties.Description="Edit selected"
                              Command="{Binding EditSelectedCommand}" />
 
                 <!-- Delete — icon -->
-                <dx:DXButton Grid.Column="3"
+                <dx:DXButton Grid.Column="4"
                              Icon="delete_outlined"
                              IconColor="{StaticResource Error}"
                              BackgroundColor="Transparent"
-                             WidthRequest="40" HeightRequest="40"
-                             CornerRadius="20"
+                             WidthRequest="48" HeightRequest="48"
+                             CornerRadius="24"
                              HorizontalOptions="Center" VerticalOptions="Center"
                              HorizontalContentAlignment="Center"
+                             SemanticProperties.Description="Delete selected"
                              Command="{Binding DeleteSelectedCommand}" />
-
-                <!-- Cancel — far right -->
-                <dx:DXButton Grid.Column="4"
-                             Content="Cancel"
-                             BackgroundColor="Transparent"
-                             TextColor="{StaticResource OnSurface}"
-                             FontFamily="RobotoMedium"
-                             Padding="4,0"
-                             VerticalOptions="Center"
-                             Command="{Binding CancelSelectionCommand}" />
             </Grid>
         </Grid>
     </Shell.TitleView>
@@ -134,6 +140,7 @@
                        PullToRefreshCommand="{Binding RefreshCommand}"
                        IsLoadMoreEnabled="{Binding HasMoreItems}"
                        LoadMoreCommand="{Binding LoadMoreCommand}"
+                       IndicatorColor="{StaticResource Primary}"
                        SelectionMode="{Binding SelectionMode}"
                        UseRippleEffect="True"
                        AllowCascadeUpdate="True"
@@ -145,14 +152,13 @@
 
                     <dxcv:DXCollectionView.ItemTemplate>
                         <DataTemplate x:DataType="dto:VenueListItemDto">
-                            <dxcv:SwipeContainer>
+                            <dxcv:SwipeContainer FullSwipeMode="AllItems">
                                 <dxcv:SwipeContainer.EndSwipeItems>
                                     <dxcv:SwipeContainerItem Caption="Delete"
                                                              BackgroundColor="{StaticResource Error}"
                                                              FontColor="{StaticResource OnError}"
                                                              Image="delete_outlined"
-                                                             Command="{Binding BindingContext.SwipeDeleteCommand, Source={x:Reference page}}"
-                                                             CommandParameter="{Binding}" />
+                                                             Tap="OnSwipeDeleteTapped" />
                                 </dxcv:SwipeContainer.EndSwipeItems>
                                 <dxcv:SwipeContainer.ItemView>
                                     <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
@@ -165,7 +171,7 @@
                                                           IsChecked="False"
                                                           InputTransparent="True"
                                                           VerticalOptions="Center"
-                                                          IsVisible="{Binding BindingContext.IsMultiSelectMode, Source={x:Reference page}}" />
+                                                          IsVisible="{Binding ViewModel.IsMultiSelectMode, Source={x:Reference page}}" />
 
                                             <Label Grid.Column="1"
                                                    Text="{Binding Name}"
@@ -179,7 +185,7 @@
                                                          BackgroundColor="{StaticResource SecondaryContainer}"
                                                          CornerRadius="12"
                                                          Padding="8,4">
-                                                <Label Text="Has Events"
+                                                <Label Text="{Binding EventCount, StringFormat='{0} events'}"
                                                        FontFamily="RobotoMedium" FontSize="11"
                                                        TextColor="{StaticResource OnSecondaryContainer}"
                                                        VerticalOptions="Center" />
@@ -219,7 +225,7 @@
                                                  BackgroundColor="{StaticResource SecondaryContainer}"
                                                  CornerRadius="12"
                                                  Padding="8,4">
-                                        <Label Text="Has Events"
+                                        <Label Text="{Binding EventCount, StringFormat='{0} events'}"
                                                FontFamily="RobotoMedium" FontSize="11"
                                                TextColor="{StaticResource OnSecondaryContainer}"
                                                VerticalOptions="Center" />
@@ -235,10 +241,10 @@
         <!-- Empty state: no venues registered -->
         <VerticalStackLayout Grid.Row="1"
                              IsVisible="{Binding IsEmptyNoVenues}"
-                             VerticalOptions="Start"
+                             VerticalOptions="Center"
                              HorizontalOptions="Center"
                              Spacing="8"
-                             Margin="32,48,32,0">
+                             Margin="32">
             <dx:DXButton Icon="nightlife_outlined"
                          IconColor="{dx:ThemeColor OnSurfaceVariant}"
                          IconWidth="64" IconHeight="64"
@@ -255,10 +261,10 @@
         <!-- Empty state: search returned no results -->
         <VerticalStackLayout Grid.Row="1"
                              IsVisible="{Binding IsEmptyNoResults}"
-                             VerticalOptions="Start"
+                             VerticalOptions="Center"
                              HorizontalOptions="Center"
                              Spacing="8"
-                             Margin="32,48,32,0">
+                             Margin="32">
             <dx:DXButton Icon="search_outlined"
                          IconColor="{dx:ThemeColor OnSurfaceVariant}"
                          IconWidth="64" IconHeight="64"
