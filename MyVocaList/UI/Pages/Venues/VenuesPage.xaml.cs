@@ -4,6 +4,9 @@ public partial class VenuesPage : ContentPage
 {
     private readonly VenuesViewModel _viewModel;
 
+    /// <summary>Exposed for compiled bindings inside DataTemplates that need to resolve IsMultiSelectMode.</summary>
+    public VenuesViewModel ViewModel => _viewModel;
+
     public VenuesPage(VenuesViewModel viewModel)
     {
         InitializeComponent();
@@ -52,6 +55,12 @@ public partial class VenuesPage : ContentPage
         if (e.Item is not VenueListItemDto item) return;
         _viewModel.EnterMultiSelectMode(item);
         HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
+    }
+
+    private void OnSwipeDeleteTapped(object sender, SwipeItemTapEventArgs e)
+    {
+        if (e.Item is VenueListItemDto item)
+            _viewModel.SwipeDeleteCommand.Execute(item);
     }
 
     private void OnSwipeItemShowing(object sender, SwipeItemShowingEventArgs e)

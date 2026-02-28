@@ -104,8 +104,8 @@ namespace MyVocaList.Services
             var venuesWithEvents = await _venueRepository.GetByIdsWithHasEventsAsync(ids);
             var validationResults = new List<(int id, string name, bool canDelete, string reason)>();
 
-            foreach (var (venue, hasEvents) in venuesWithEvents)
-                validationResults.Add((venue.Id, venue.Name, !hasEvents, hasEvents ? "has registered events" : ""));
+            foreach (var (venue, eventCount) in venuesWithEvents)
+                validationResults.Add((venue.Id, venue.Name, eventCount == 0, eventCount > 0 ? "has registered events" : ""));
 
             var cannotDelete = validationResults.Where(v => !v.canDelete).ToList();
             var canDelete = validationResults.Where(v => v.canDelete).ToList();
@@ -163,7 +163,7 @@ namespace MyVocaList.Services
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize, nameof(pageSize));
 
             var (items, totalCount) = await _venueRepository.GetPagedWithEventInfoAsync(pageNumber, pageSize, query);
-            var dtos = items.Select(x => VenueMapper.ToListDto(x.venue, x.hasEvents));
+            var dtos = items.Select(x => VenueMapper.ToListDto(x.venue, x.eventCount));
 
             return (dtos, totalCount);
         }

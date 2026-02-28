@@ -5,7 +5,8 @@
     xmlns:dx="http://schemas.devexpress.com/maui"
     x:Class="MyVocaList.UI.Pages.Events.EventsPage"
     Title="Events"
-    BackgroundColor="{StaticResource Surface}">
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="Container">
 
     <dx:DXScrollView>
         <VerticalStackLayout Style="{StaticResource PageContainer}">

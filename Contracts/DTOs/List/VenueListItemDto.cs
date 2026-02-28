@@ -4,6 +4,7 @@ namespace MyVocaList.Contracts.DTOs.List
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public bool HasEvents { get; set; }
+        public int EventCount { get; set; }
+        public bool HasEvents => EventCount > 0;
     }
 }

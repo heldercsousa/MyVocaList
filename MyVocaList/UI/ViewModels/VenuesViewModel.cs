@@ -339,7 +339,14 @@ namespace MyVocaList.UI.ViewModels
         {
             if (IsAllSelected)
             {
-                ExitMultiSelectMode();
+                // Deselect all but remain in multi-select mode (user stays in selection context)
+                _suppressSelectionChangedExit = true;
+                RunOnUiThread(() =>
+                {
+                    SelectedVenues.ClearRange();
+                    _suppressSelectionChangedExit = false;
+                });
+                SelectedCount = 0;
                 return;
             }
             IsMultiSelectMode = true;
