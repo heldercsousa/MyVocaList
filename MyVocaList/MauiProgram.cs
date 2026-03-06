@@ -1,6 +1,5 @@
 using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
-using MyVocaList.Domain;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
@@ -49,7 +48,6 @@ public static class MauiProgram
         builder.Services.AddScoped<IEventRepository, EventRepository>();
 
         // Services
-        builder.Services.AddScoped<IDatabaseInit, DatabaseInit>();
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddSingleton<ISnackbarService, SnackbarService>();
 
