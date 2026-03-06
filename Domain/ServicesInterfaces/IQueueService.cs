@@ -1,10 +1,10 @@
 using MyVocaList.Domain.Entity;
 
-namespace MyVocaList.Services
+namespace MyVocaList.Domain.ServicesInterfaces
 {
     /// <summary>
-    /// Interface for queue and event operations
-    /// Person operations delegated to IPersonService
+    /// Interface for queue and event operations.
+    /// Person operations are delegated to IPersonService.
     /// </summary>
     public interface IQueueService
     {

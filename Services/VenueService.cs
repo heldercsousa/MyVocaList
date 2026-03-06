@@ -1,6 +1,7 @@
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Services.Mappers;
 
 namespace MyVocaList.Services

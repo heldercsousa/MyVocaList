@@ -1,6 +1,6 @@
 using MyVocaList.Domain.Entity;
 
-namespace MyVocaList.Services
+namespace MyVocaList.Domain.ServicesInterfaces
 {
     public interface IPersonService
     {
