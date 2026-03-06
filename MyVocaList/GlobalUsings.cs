@@ -13,6 +13,7 @@ global using MyVocaList.Contracts.DTOs.List;
 // App navigation and models
 global using MyVocaList.Navigation;
 // Services layer
+global using MyVocaList.Domain.ServicesInterfaces;
 global using MyVocaList.Services;
 global using MyVocaList.UI.Models;
 // Pages — registered in MauiProgram and NavigationConfig

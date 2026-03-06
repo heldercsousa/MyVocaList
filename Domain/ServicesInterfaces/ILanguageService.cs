@@ -1,4 +1,4 @@
-namespace MyVocaList.Services
+namespace MyVocaList.Domain.ServicesInterfaces
 {
     public interface ILanguageService
     {

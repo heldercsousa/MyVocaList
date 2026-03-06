@@ -7,4 +7,8 @@
     <NoWarn>$(NoWarn);CS8618;CS8601;CS8603;CS8625;CS8602</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Contracts\MyVocaList.Contracts.csproj" />
+  </ItemGroup>
+
 </Project>

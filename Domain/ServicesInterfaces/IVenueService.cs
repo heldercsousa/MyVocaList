@@ -1,6 +1,6 @@
 using MyVocaList.Contracts.DTOs.List;
 
-namespace MyVocaList.Services
+namespace MyVocaList.Domain.ServicesInterfaces
 {
     public interface IVenueService
     {
