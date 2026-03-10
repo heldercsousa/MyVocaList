@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    x:Class="MyVocaList.UI.Components.AppBars.SmallAppBar"
+    x:Name="self">
+
+    <!-- Container: color transitions between Surface and SurfaceContainer on IsElevated -->
+    <Grid x:Name="container"
+          ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+          ColumnSpacing="0"
+          BackgroundColor="{StaticResource Surface}"
+          VerticalOptions="Fill"
+          Padding="4,0">
+
+        <!-- Leading: Navigation icon (optional) -->
+        <dx:DXButton Grid.Column="0"
+                     x:Name="navButton"
+                     Icon="{Binding NavigationIcon, Source={x:Reference self}}"
+                     IconColor="{StaticResource OnSurface}"
+                     BackgroundColor="Transparent"
+                     WidthRequest="48" HeightRequest="48"
+                     CornerRadius="24"
+                     HorizontalContentAlignment="Center"
+                     VerticalOptions="Center"
+                     IsVisible="{Binding HasNavigationIcon, Source={x:Reference self}}"
+                     Command="{Binding NavigationCommand, Source={x:Reference self}}" />
+
+        <!-- Title + Subtitle stack (center column, expands) -->
+        <VerticalStackLayout Grid.Column="1"
+                             VerticalOptions="Center"
+                             Spacing="0"
+                             Padding="4,0">
+            <Label x:Name="titleLabel"
+                   Text="{Binding Title, Source={x:Reference self}}"
+                   FontFamily="RobotoRegular"
+                   FontSize="22"
+                   TextColor="{StaticResource OnSurface}"
+                   LineBreakMode="TailTruncation"
+                   MaxLines="1" />
+            <Label x:Name="subtitleLabel"
+                   Text="{Binding Subtitle, Source={x:Reference self}}"
+                   FontFamily="RobotoRegular"
+                   FontSize="14"
+                   TextColor="{StaticResource OnSurfaceVariant}"
+                   LineBreakMode="TailTruncation"
+                   MaxLines="1"
+                   IsVisible="{Binding HasSubtitle, Source={x:Reference self}}" />
+        </VerticalStackLayout>
+
+        <!-- Trailing action 1 -->
+        <dx:DXButton Grid.Column="2"
+                     x:Name="action1Button"
+                     Icon="{Binding Action1Icon, Source={x:Reference self}}"
+                     IconColor="{StaticResource OnSurfaceVariant}"
+                     BackgroundColor="Transparent"
+                     WidthRequest="48" HeightRequest="48"
+                     CornerRadius="24"
+                     HorizontalContentAlignment="Center"
+                     VerticalOptions="Center"
+                     IsVisible="{Binding HasAction1, Source={x:Reference self}}"
+                     Command="{Binding Action1Command, Source={x:Reference self}}" />
+
+        <!-- Trailing action 2 -->
+        <dx:DXButton Grid.Column="3"
+                     x:Name="action2Button"
+                     Icon="{Binding Action2Icon, Source={x:Reference self}}"
+                     IconColor="{StaticResource OnSurfaceVariant}"
+                     BackgroundColor="Transparent"
+                     WidthRequest="48" HeightRequest="48"
+                     CornerRadius="24"
+                     HorizontalContentAlignment="Center"
+                     VerticalOptions="Center"
+                     IsVisible="{Binding HasAction2, Source={x:Reference self}}"
+                     Command="{Binding Action2Command, Source={x:Reference self}}" />
+
+        <!-- Trailing action 3 -->
+        <dx:DXButton Grid.Column="4"
+                     x:Name="action3Button"
+                     Icon="{Binding Action3Icon, Source={x:Reference self}}"
+                     IconColor="{StaticResource OnSurfaceVariant}"
+                     BackgroundColor="Transparent"
+                     WidthRequest="48" HeightRequest="48"
+                     CornerRadius="24"
+                     HorizontalContentAlignment="Center"
+                     VerticalOptions="Center"
+                     IsVisible="{Binding HasAction3, Source={x:Reference self}}"
+                     Command="{Binding Action3Command, Source={x:Reference self}}" />
+    </Grid>
+</ContentView>
