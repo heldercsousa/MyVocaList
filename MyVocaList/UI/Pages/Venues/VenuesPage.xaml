@@ -152,7 +152,7 @@
 
                     <dxcv:DXCollectionView.ItemTemplate>
                         <DataTemplate x:DataType="dto:VenueListItemDto">
-                            <dxcv:SwipeContainer FullSwipeMode="AllItems">
+                            <dxcv:SwipeContainer FullSwipeMode="End">
                                 <dxcv:SwipeContainer.EndSwipeItems>
                                     <dxcv:SwipeContainerItem Caption="Delete"
                                                              BackgroundColor="{StaticResource Error}"
