@@ -18,6 +18,13 @@ Before writing a single file, read ALL of the following:
 - `GlobalExceptionHandler.cs` if it exists in Services
 - All existing files in `.claude/rules/` and `.claude/commands/`
 
+**Plugins (active during this task — consult all):**
+- `obra/superpowers` — TDD, systematic debugging
+- `nesbo/dotnet-claude-code-skills` — ddd-dotnet, data-dotnet, bdd-dotnet
+- `Aaronontheweb/dotnet-skills` — .NET quality patterns
+- `teslasoft-de/claude-skills-marketplace` — ux (UX design, information architecture)
+- `manutej/luxor-claude-marketplace` — mobile-design (touch patterns, gestures, mobile UX)
+
 **Skills — read SKILL.md for each:**
 - `.claude/skills/maui-current-apis/`
 - `.claude/skills/maui-performance/`
@@ -67,6 +74,9 @@ Format: `- **MM/dd/yyyy** - <type> - <description>`
 
 ### 4. `.claude/commands/review.md`  ← NEW
 Post-task review command. Run this after EVERY completed task before committing.
+
+When reviewing UX/interaction patterns, consult `ux@teslasoft-skills` and
+`mobile-design@manutej-luxor-claude-marketplace` plugins in addition to rules files.
 
 The review must check:
 - Build is clean
@@ -213,7 +223,7 @@ After confirming any pattern from an external source (GitMCP, skill), always ask
 **MyVocaList skill (future):** When project-specific patterns accumulate enough that
 a single skill aggregating queue domain logic, karaoke-specific conventions, and
 app navigation flows becomes more efficient than loading multiple rules files,
-propose creating a .
+propose creating a `.claude/skills/myvocalist/SKILL.md`.
 
 ## Critical Notes
 - Never invent XAML or C# patterns — only document what exists or what GitMCP confirms

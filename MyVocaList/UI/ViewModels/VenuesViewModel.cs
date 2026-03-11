@@ -9,7 +9,7 @@ namespace MyVocaList.UI.ViewModels
     public partial class VenuesViewModel : ViewModelBase
     {
         private readonly IVenueService _venueService;
-        private readonly ISnackbarService _snackbarService;
+        private readonly ISnackbarComponent _snackbarService;
         private readonly ILogger<VenuesViewModel> _logger;
 
         private int _currentPage;
@@ -34,7 +34,7 @@ namespace MyVocaList.UI.ViewModels
 
         public VenuesViewModel(
             IVenueService venueService,
-            ISnackbarService snackbarService,
+            ISnackbarComponent snackbarService,
             ILogger<VenuesViewModel> logger)
         {
             _venueService = venueService;

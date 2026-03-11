@@ -1,6 +1,8 @@
 # MyVocaList — Dev Environment Quickstart
 > Windows · .NET MAUI 10 · Claude Code CLI
 > **Start here.** For full technical details see `docs/devenv-setup.md`.
+> **.NET MAUI 10 requires Visual Studio 2026 Insiders** — download from visualstudio.microsoft.com/insiders/
+> VS 2022 17.14 does NOT support .NET 10 targeting.
 
 ---
 
@@ -149,6 +151,13 @@ Type `claude` to open a Claude Code session, then run:
 
 /plugin marketplace add Aaronontheweb/dotnet-skills
 /plugin install dotnet-skills@Aaronontheweb-dotnet-skills
+
+# UX plugins
+/plugin marketplace add teslasoft-de/claude-skills-marketplace
+/plugin install ux@teslasoft-skills
+
+/plugin marketplace add manutej/luxor-claude-marketplace
+/plugin install mobile-design@manutej-luxor-claude-marketplace
 ```
 
 > **Note on obra/superpowers TDD enforcement:** This skill enforces RED-GREEN-REFACTOR on *new* code only. It will not delete or modify existing code. You can ask Claude to skip TDD enforcement on specific tasks when needed.
@@ -168,10 +177,10 @@ required functionality.
 ## Step 4 — Verify everything works
 
 ### Terminal (outside Claude Code):
-FIX
 ```bash
 claude mcp list
-# Expected: context7 Connected, sequential-thinking Connected, sqlite Connected, github Connected
+# Expected: context7 Connected, sequential-thinking Connected, github Connected
+# Note: sqlite MCP is deferred to post-MVP
 ```
 
 ### Inside Claude Code session:
@@ -196,7 +205,6 @@ maui-devflow list
 ---
 
 ## Step 5 — After setup is complete
-**TODO - FIX
 Add these to `.claudeignore` at **solution root** to stop Claude Code scanning them on every session:
 ```
 .claude/rules/devenv-setup.md

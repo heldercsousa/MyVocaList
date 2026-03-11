@@ -9,7 +9,7 @@ namespace MyVocaList.UI.ViewModels
     public partial class VenueFormViewModel : ViewModelBase
     {
         private readonly IVenueService _venueService;
-        private readonly ISnackbarService _snackbarService;
+        private readonly ISnackbarComponent _snackbarService;
         private readonly ILogger<VenueFormViewModel> _logger;
 
         // Shell passes all query parameters as strings; parse manually to avoid InvalidCastException.
@@ -30,7 +30,7 @@ namespace MyVocaList.UI.ViewModels
 
         public VenueFormViewModel(
             IVenueService venueService,
-            ISnackbarService snackbarService,
+            ISnackbarComponent snackbarService,
             ILogger<VenueFormViewModel> logger)
         {
             _venueService = venueService;

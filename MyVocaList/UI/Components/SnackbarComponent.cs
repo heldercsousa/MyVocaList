@@ -1,20 +1,16 @@
 using CommunityToolkit.Maui.Alerts;
 
-namespace MyVocaList.UI.Services;
+namespace MyVocaList.UI.Components;
 
-/// <summary>
-/// Thread-safe snackbar notification service
-/// </summary>
-public interface ISnackbarService
+/// <summary>Thread-safe snackbar notification component.</summary>
+public interface ISnackbarComponent
 {
     Task ShowSuccessAsync(string message);
     Task ShowErrorAsync(string message);
 }
 
-/// <summary>
-/// Snackbar implementation using CommunityToolkit.Maui
-/// </summary>
-public class SnackbarService : ISnackbarService
+/// <summary>Snackbar implementation using CommunityToolkit.Maui.</summary>
+public class SnackbarComponent : ISnackbarComponent
 {
     private static readonly TimeSpan Duration = TimeSpan.FromSeconds(3);
 
