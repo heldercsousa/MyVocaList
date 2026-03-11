@@ -418,9 +418,11 @@ private void OnSwipeDeleteTapped(object sender, SwipeItemTapEventArgs e)
 `SwipeItemTapEventArgs.Item` provides the underlying data object. This fires for both
 partial-tap and full-swipe (when `FullSwipeMode="AllItems"` is set on `SwipeContainer`).
 
-Enable full-swipe to trigger the action automatically:
+Enable full-swipe to trigger the action automatically.
+`FullSwipeMode` is a `[Flags]` enum — valid values: `None`, `Start`, `End`, `Both` (default).
+Use `End` when you only have `EndSwipeItems`, `Start` when only `StartSwipeItems`, `Both` for both sides:
 ```xml
-<dxcv:SwipeContainer FullSwipeMode="AllItems">
+<dxcv:SwipeContainer FullSwipeMode="End">
 ```
 
 ## DXCollectionView — IndicatorColor required for dark themes
@@ -515,6 +517,7 @@ private void OnCollectionViewScrolled(object sender, CollectionViewScrolledEvent
 - `CheckEdit.CheckedCheckBoxColor` requires `{dx:ThemeColor X}` not `{StaticResource X}`
 - `DXCollectionView.SelectedItems` requires `IList` (non-generic) binding — use wrapper property
 - `SwipeContainerItem.Command` binding is unreliable — always use the `Tap` event handler instead
+- `SwipeContainer.FullSwipeMode="AllItems"` does NOT exist — valid values are `None`, `Start`, `End`, `Both`
 - `DXCollectionView.IndicatorColor` defaults to invisible on dark themes — always set explicitly
 - `ShimmerView` needs `await Task.Yield()` before data load so skeleton renders first
 - `.NET MAUI 10`: `ContentPage` defaults to `SafeAreaEdges="None"` — add `SafeAreaEdges="Container"` explicitly
