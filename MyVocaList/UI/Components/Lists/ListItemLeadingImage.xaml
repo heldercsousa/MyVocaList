@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MyVocaList.UI.Components.Lists.ListItemLeadingImage"
+    x:Name="self">
+
+    <Border
+        StrokeShape="RoundRectangle 4"
+        Stroke="Transparent"
+        WidthRequest="56"
+        HeightRequest="56"
+        IsClippedToBounds="True">
+
+        <Image
+            Source="{Binding ImageSource, Source={x:Reference self}}"
+            Aspect="{Binding Aspect, Source={x:Reference self}}"
+            WidthRequest="56"
+            HeightRequest="56" />
+
+    </Border>
+</ContentView>
