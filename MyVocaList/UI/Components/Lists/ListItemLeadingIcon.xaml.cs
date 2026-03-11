@@ -12,12 +12,7 @@ public partial class ListItemLeadingIcon : ContentView
         nameof(IconColor),
         typeof(Color),
         typeof(ListItemLeadingIcon),
-        defaultValueCreator: b =>
-        {
-            if (Application.Current?.Resources.TryGetValue("OnSurfaceVariant", out var c) == true)
-                return (Color)c;
-            return Colors.Gray;
-        });
+        Colors.Transparent);
 
     public string Icon
     {
