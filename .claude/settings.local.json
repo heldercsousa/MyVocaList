@@ -74,7 +74,11 @@
       "Bash(timeout 15 uvx mcp-server-sqlite:*)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
-      "Bash(uvx sqlite-utils:*)"
+      "Bash(uvx sqlite-utils:*)",
+      "mcp__devexpress-maui__search_maui_demo_app_code",
+      "mcp__devexpress-maui__fetch_maui_demo_app_documentation",
+      "mcp__devexpress-maui__fetch_generic_url_content",
+      "WebFetch(domain:benchmarkdotnet.org)"
     ]
   },
   "enabledMcpjsonServers": [

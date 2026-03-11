@@ -49,7 +49,7 @@ public static class MauiProgram
 
         // Services
         builder.Services.AddScoped<IVenueService, VenueService>();
-        builder.Services.AddSingleton<ISnackbarService, SnackbarService>();
+        builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
 
         // Shell
         builder.Services.AddSingleton<AppShellViewModel>();

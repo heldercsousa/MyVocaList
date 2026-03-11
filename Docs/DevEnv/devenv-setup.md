@@ -1,6 +1,8 @@
 # MyVocaList Dev Environment Setup
 > Windows · .NET MAUI 10 · Claude Code CLI
 > Delete from .claude/rules/ and add to .claudeignore after setup is complete.
+> **.NET MAUI 10 requires Visual Studio 2026 Insiders** — VS 2022 17.14 does NOT support .NET 10.
+> Download: visualstudio.microsoft.com/insiders/ → Community edition. Installs alongside VS 2022.
 
 ---
 
@@ -122,6 +124,15 @@ All commands run INSIDE Claude Code session (type `claude` first — these are N
 /plugin marketplace add Aaronontheweb/dotnet-skills
 /plugin install dotnet-skills@Aaronontheweb-dotnet-skills
 
+# UX plugins
+/plugin marketplace add teslasoft-de/claude-skills-marketplace
+/plugin install ux@teslasoft-skills
+# Covers: UX research, information architecture, interaction design, visual design
+
+/plugin marketplace add manutej/luxor-claude-marketplace
+/plugin install mobile-design@manutej-luxor-claude-marketplace
+# Covers: mobile UX patterns, touch interactions, gesture design, thumb zones, app navigation
+
 # davidortinau/maui-skills does NOT support /plugin marketplace add
 # Clone into solution root, then run ONE of the commands below from solution root
 # (CMD/PowerShell/Bash) — NOT inside Claude Code
@@ -162,7 +173,8 @@ nesbo plugin uses Paramore.Brighter (not MediatR) — DDD patterns transfer, bri
 ```bash
 # Terminal (outside Claude Code):
 claude mcp list
-# Expected: context7 Connected, sequential-thinking Connected, sqlite Connected, github Connected
+# Expected: context7 Connected, sequential-thinking Connected, github Connected
+# sqlite MCP deferred to post-MVP
 
 # Inside Claude Code:
 /skills list
@@ -188,6 +200,8 @@ Smoke test (inside Claude Code):
 | SQLite MCP | ~1,500 |
 | GitHub MCP | ~8,000 (80+ tools) |
 | **Total (all 4)** | **~12,000 — acceptable** |
+
+UX plugins (ux@teslasoft, mobile-design@luxor) = 0 base tokens (loaded on demand).
 
 Skill plugins = 0 base tokens (loaded on demand).
 

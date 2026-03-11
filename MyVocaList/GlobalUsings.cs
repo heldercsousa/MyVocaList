@@ -24,5 +24,5 @@ global using MyVocaList.UI.Pages.People;
 global using MyVocaList.UI.Pages.Preferences;
 global using MyVocaList.UI.Pages.Queue;
 global using MyVocaList.UI.Pages.Venues;
-global using MyVocaList.UI.Services;
+global using MyVocaList.UI.Components;
 global using MyVocaList.UI.ViewModels;
