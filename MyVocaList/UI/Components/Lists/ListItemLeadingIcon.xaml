@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    x:Class="MyVocaList.UI.Components.Lists.ListItemLeadingIcon"
+    x:Name="self"
+    WidthRequest="40"
+    HeightRequest="40">
+
+    <dx:DXButton
+        Icon="{Binding Icon, Source={x:Reference self}}"
+        IconColor="{Binding IconColor, Source={x:Reference self}}"
+        IconWidth="24"
+        IconHeight="24"
+        WidthRequest="40"
+        HeightRequest="40"
+        BackgroundColor="Transparent"
+        InputTransparent="True"
+        HorizontalContentAlignment="Center"
+        VerticalOptions="Center" />
+</ContentView>
