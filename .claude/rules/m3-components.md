@@ -196,3 +196,115 @@ Namespace: `xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"`
   ```
 - `IsSelected` drives row bg only — consumer must also update `CheckEdit.IsChecked` separately
 - For multi-action trailing: bind via `Source={x:Reference page}` (compiled binding issue in DataTemplate)
+
+---
+
+## M3 Floating Toolbar
+
+### Spec
+
+| Property | Value |
+|---|---|
+| Height | 48dp |
+| Width | Wrap content (auto-sizes to populated slots) |
+| Padding (H, outside icon slots) | 4dp |
+| Background | SurfaceContainerHigh |
+| Shape | CornerRadius = 24dp (full pill) |
+| Elevation | Level 3 per spec — **omitted in dark mode** (shadow invisible on near-black backgrounds; SurfaceContainerHigh tint conveys elevation instead) |
+| Icon button tap zone | 48×48dp, CornerRadius=24 |
+| Icon size | 24dp (DXButton default) |
+| Icon color (rest) | OnSurfaceVariant |
+| Icon color (selected) | OnSecondaryContainer |
+| Icon bg (selected) | SecondaryContainer |
+| Max slots | 5 |
+| Scroll animation | NOT used — persistent by design (valid per M3; animation adds threading risk) |
+| Position | Overlay, VerticalOptions=End, HorizontalOptions=Center, Margin bottom=16 |
+
+### Color tokens (dark mode)
+| Token | Hex |
+|---|---|
+| SurfaceContainerHigh | `#29292F` |
+| OnSurfaceVariant | `#C6C5D3` |
+| SecondaryContainer | `#3F4566` |
+| OnSecondaryContainer | `#AEB3DA` |
+
+### When to use
+- 2–5 page-specific actions (edit, delete, format, share, select-all)
+- Use SmallAppBar trailing Action1–3 slots when ≤ 3 actions suffice
+- Hide toolbar when contextual action bar (multi-select Shell.TitleView) is active
+
+### When NOT to use
+- Single action → use FAB instead
+- Navigation actions → use Shell flyout
+- ≤ 3 actions already covered by SmallAppBar trailing slots
+
+### Anatomy
+```
+[DXBorder: pill, SurfaceContainerHigh, Shadow Level 3]
+  └── HorizontalStackLayout
+        ├── Slot 1: DXButton 48×48 (hidden if ActionNIcon empty)
+        ├── Slot 2: DXButton 48×48
+        ├── Slot 3: DXButton 48×48
+        ├── Slot 4: DXButton 48×48
+        └── Slot 5: DXButton 48×48
+```
+
+### Component
+File: `MyVocaList/UI/Components/Toolbars/FloatingToolbar.xaml` + `.xaml.cs`
+Namespace: `xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"`
+
+BindableProperties per slot (N = 1–5):
+- `ActionNIcon` (string) — slot hidden when null/empty
+- `ActionNCommand` (ICommand)
+- `ActionNDescription` (string) — SemanticProperties.Description for TalkBack
+- `ActionNIsSelected` (bool) — applies SecondaryContainer bg + OnSecondaryContainer icon via `propertyChanged` callback
+
+### Page integration pattern
+```xml
+<!-- Root: single-cell Grid (toolbar overlays content) -->
+<Grid>
+    <!-- Content list — bottom margin keeps last item visible above toolbar -->
+    <dxcv:DXCollectionView Margin="0,0,0,80" ... />
+
+    <!-- Floating toolbar — centered, 16dp above safe area bottom -->
+    <toolbars:FloatingToolbar
+        VerticalOptions="End"
+        HorizontalOptions="Center"
+        Margin="0,0,0,16"
+        Action1Icon="edit_outlined"
+        Action1Command="{Binding EditCommand}"
+        Action1Description="Edit"
+        Action2Icon="delete_outlined"
+        Action2Command="{Binding DeleteCommand}"
+        Action2Description="Delete" />
+
+    <!-- FAB — independent, bottom-right (not managed by toolbar) -->
+    <dx:DXButton Icon="add_outlined" ... VerticalOptions="End" HorizontalOptions="End"
+                 Margin="0,0,16,16" />
+</Grid>
+```
+
+Content bottom margin formula: toolbar height (48) + toolbar bottom margin (16) + breathing room (16) = **80dp minimum**.
+
+### FAB coexistence
+FAB stays at bottom-right independently. Pages control positioning via Margin.
+FloatingToolbar does not manage FAB placement — keep them decoupled.
+
+### Accessibility
+- Every `ActionNDescription` is mandatory — TalkBack reads it as the button label
+- Touch targets: 48×48dp (DXButton WidthRequest/HeightRequest)
+- Focus order: left-to-right (HorizontalStackLayout natural order)
+
+### Scroll animation — deliberately omitted
+`DXCollectionView.CollectionViewScrolled` fires every frame. Multiple overlapping
+`TranslateTo` calls create animation jitter. Debounce via `CancellationTokenSource` adds
+race condition risk between scroll callbacks and animation state. For a queue management
+admin app the UX benefit is marginal. Persistent toolbar is valid per MD3 spec.
+
+### Global using
+Add `MyVocaList.UI.Components.Toolbars` to `GlobalUsings.cs` **only when 2+ pages use it**.
+Reference the namespace directly per-page until then.
+
+### No DX/MAUI built-in
+DevExpress MAUI has no Toolbar component. .NET MAUI `ToolbarItem` adds to Shell top bar only.
+FloatingToolbar is always a custom `ContentView` — same approach as AppBars.
