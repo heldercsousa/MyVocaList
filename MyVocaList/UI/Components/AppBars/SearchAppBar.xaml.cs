@@ -1,12 +1,15 @@
 namespace MyVocaList.UI.Components.AppBars;
 
-public partial class SearchAppBar : ContentView
+public partial class SearchAppBar : AppBarBase
 {
+    private bool _isSearchFocused;
+
     // ── SearchText ─────────────────────────────────────────────────────────
 
     public static readonly BindableProperty SearchTextProperty =
         BindableProperty.Create(nameof(SearchText), typeof(string), typeof(SearchAppBar), string.Empty,
-            BindingMode.TwoWay);
+            BindingMode.TwoWay,
+            propertyChanged: (b, _, _) => ((SearchAppBar)b).UpdateLeadingIcon());
 
     public string SearchText
     {
@@ -25,62 +28,15 @@ public partial class SearchAppBar : ContentView
         set => SetValue(PlaceholderProperty, value);
     }
 
-    // ── Leading icon ───────────────────────────────────────────────────────
+    // ── BackCommand ────────────────────────────────────────────────────────
 
-    public static readonly BindableProperty LeadingIconProperty =
-        BindableProperty.Create(nameof(LeadingIcon), typeof(string), typeof(SearchAppBar), string.Empty,
-            propertyChanged: (b, _, _) => ((SearchAppBar)b).OnPropertyChanged(nameof(HasLeadingIcon)));
+    public static readonly BindableProperty BackCommandProperty =
+        BindableProperty.Create(nameof(BackCommand), typeof(ICommand), typeof(SearchAppBar));
 
-    public string LeadingIcon
+    public ICommand BackCommand
     {
-        get => (string)GetValue(LeadingIconProperty);
-        set => SetValue(LeadingIconProperty, value);
-    }
-
-    public static readonly BindableProperty LeadingCommandProperty =
-        BindableProperty.Create(nameof(LeadingCommand), typeof(ICommand), typeof(SearchAppBar));
-
-    public ICommand LeadingCommand
-    {
-        get => (ICommand)GetValue(LeadingCommandProperty);
-        set => SetValue(LeadingCommandProperty, value);
-    }
-
-    public bool HasLeadingIcon => !string.IsNullOrEmpty(LeadingIcon);
-
-    // ── Trailing icon ──────────────────────────────────────────────────────
-
-    public static readonly BindableProperty TrailingIconProperty =
-        BindableProperty.Create(nameof(TrailingIcon), typeof(string), typeof(SearchAppBar), string.Empty,
-            propertyChanged: (b, _, _) => ((SearchAppBar)b).OnPropertyChanged(nameof(HasTrailingIcon)));
-
-    public string TrailingIcon
-    {
-        get => (string)GetValue(TrailingIconProperty);
-        set => SetValue(TrailingIconProperty, value);
-    }
-
-    public static readonly BindableProperty TrailingCommandProperty =
-        BindableProperty.Create(nameof(TrailingCommand), typeof(ICommand), typeof(SearchAppBar));
-
-    public ICommand TrailingCommand
-    {
-        get => (ICommand)GetValue(TrailingCommandProperty);
-        set => SetValue(TrailingCommandProperty, value);
-    }
-
-    public bool HasTrailingIcon => !string.IsNullOrEmpty(TrailingIcon);
-
-    // ── IsElevated (scroll lift) ───────────────────────────────────────────
-
-    public static readonly BindableProperty IsElevatedProperty =
-        BindableProperty.Create(nameof(IsElevated), typeof(bool), typeof(SearchAppBar), false,
-            propertyChanged: (b, _, _) => ((SearchAppBar)b).UpdateContainerColor());
-
-    public bool IsElevated
-    {
-        get => (bool)GetValue(IsElevatedProperty);
-        set => SetValue(IsElevatedProperty, value);
+        get => (ICommand)GetValue(BackCommandProperty);
+        set => SetValue(BackCommandProperty, value);
     }
 
     // ── Constructor ────────────────────────────────────────────────────────
@@ -90,12 +46,47 @@ public partial class SearchAppBar : ContentView
         InitializeComponent();
     }
 
-    // ── Private helpers ────────────────────────────────────────────────────
+    // ── AppBarBase implementation ──────────────────────────────────────────
 
-    private void UpdateContainerColor()
+    protected override void UpdateContainerColor()
     {
         var key = IsElevated ? "SurfaceContainer" : "Surface";
         if (Application.Current?.Resources.TryGetValue(key, out var color) == true)
             container.BackgroundColor = (Color)color;
+    }
+
+    // ── Leading icon: auto search ↔ back ──────────────────────────────────
+
+    private void UpdateLeadingIcon()
+    {
+        var showBack = _isSearchFocused || !string.IsNullOrEmpty(SearchText);
+        leadingButton.Icon = showBack ? "arrow_back_outlined" : "search_outlined";
+        SemanticProperties.SetDescription(leadingButton, showBack ? "Back" : "Search");
+    }
+
+    private void OnSearchEditFocused(object sender, FocusEventArgs e)
+    {
+        _isSearchFocused = true;
+        UpdateLeadingIcon();
+    }
+
+    private void OnSearchEditUnfocused(object sender, FocusEventArgs e)
+    {
+        _isSearchFocused = false;
+        UpdateLeadingIcon();
+    }
+
+    private void OnLeadingButtonClicked(object sender, EventArgs e)
+    {
+        if (_isSearchFocused || !string.IsNullOrEmpty(SearchText))
+        {
+            SearchText = string.Empty;
+            searchEdit.Unfocus();
+            BackCommand?.Execute(null);
+        }
+        else
+        {
+            searchEdit.Focus();
+        }
     }
 }
