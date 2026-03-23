@@ -523,3 +523,28 @@ private void OnCollectionViewScrolled(object sender, CollectionViewScrolledEvent
 - `.NET MAUI 10`: `ContentPage` defaults to `SafeAreaEdges="None"` — add `SafeAreaEdges="Container"` explicitly
 - Compiled bindings inside `x:DataType` DataTemplates: use a typed `ViewModel` property on the page, not `BindingContext.X`
 
+## ContentView sub-components — BindableProperty wiring patterns
+
+Two confirmed patterns for wiring BindableProperties to XAML elements in `ContentView` components:
+
+### Pattern A: XAML self-binding (AppBarBase subclasses)
+Use when the BP value maps 1:1 to a single XAML property with no derived logic.
+```xml
+<dx:DXButton Icon="{Binding NavigationIcon, Source={x:Reference self}}" ... />
+```
+
+### Pattern B: propertyChanged callback → direct element set (ListItem)
+Use when derived logic is needed (visibility toggle, alignment update, multi-element change).
+```csharp
+public static readonly BindableProperty OverlineProperty =
+    BindableProperty.Create(nameof(Overline), typeof(string), typeof(ListItem), "",
+        propertyChanged: (b, _, n) =>
+        {
+            var item = (ListItem)b;
+            item.overlineLabel.Text = (string)n;
+            item.overlineLabel.IsVisible = !string.IsNullOrEmpty((string)n);
+        });
+```
+
+**Rule:** Prefer Pattern B when `propertyChanged` has any logic beyond a direct value pass-through. Never duplicate logic in both a XAML binding AND a `propertyChanged` callback — pick one.
+
