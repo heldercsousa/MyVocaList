@@ -514,6 +514,7 @@ private void OnCollectionViewScrolled(object sender, CollectionViewScrolledEvent
 ## Known Gotchas
 
 - `BoxCornerRadius` on `TextEdit` removed in DevExpress 25.1.3+ — do not use
+- `FontFamily`/`FontSize` are NOT valid on `TextEdit` — use `InputFontFamily`/`InputFontSize` instead
 - `CheckEdit.CheckedCheckBoxColor` requires `{dx:ThemeColor X}` not `{StaticResource X}`
 - `DXCollectionView.SelectedItems` requires `IList` (non-generic) binding — use wrapper property
 - `SwipeContainerItem.Command` binding is unreliable — always use the `Tap` event handler instead
