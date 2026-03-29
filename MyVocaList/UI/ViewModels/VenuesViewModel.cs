@@ -3,8 +3,8 @@ using MyVocaList.UI.Collections;
 namespace MyVocaList.UI.ViewModels
 {
     /// <summary>
-    /// ViewModel for the Venues list page: paging, search, multi-select, confirm-delete.
-    /// Add/Edit navigates to VenueFormPage.
+    /// ViewModel for the Venues list page: paging, search, always-on selection, confirm-delete.
+    /// Add navigates to VenueFormPage via FAB. Edit navigates via FloatingToolbar (single select).
     /// </summary>
     public partial class VenuesViewModel : ViewModelBase
     {
@@ -19,12 +19,12 @@ namespace MyVocaList.UI.ViewModels
         private Func<Task> _pendingConfirmAction;
 
         private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
-        private bool _suppressSelectionChangedExit;
-        private bool _isLoading;
+        private volatile bool _isLoading;
 
         [ObservableProperty] private bool _isRefreshing;
         [ObservableProperty] private string _searchText = string.Empty;
-        [ObservableProperty] private bool _isMultiSelectMode;
+        [ObservableProperty] private bool _isSearchMode;
+        [ObservableProperty] private bool _isScrolled;
         [ObservableProperty] private int _selectedCount;
         [ObservableProperty] private BottomSheetState _confirmSheetState = BottomSheetState.Hidden;
         [ObservableProperty] private bool _hasMoreItems = true;
@@ -47,14 +47,13 @@ namespace MyVocaList.UI.ViewModels
             RefreshCommand = new AsyncRelayCommand(RefreshAsync);
             LoadMoreCommand = new RelayCommand(() => _ = LoadMoreAsync());
             AddVenueCommand = new AsyncRelayCommand(NavigateToAddAsync);
-            SwipeDeleteCommand = new RelayCommand<VenueListItemDto>(item => RequestSwipeDelete(item));
-            DeleteSelectedCommand = new RelayCommand(RequestBatchDelete);
-            EditSelectedCommand = new AsyncRelayCommand(NavigateToEditAsync);
-            CancelSelectionCommand = new RelayCommand(ExitMultiSelectMode);
-            TapCommand = new RelayCommand<VenueListItemDto>(OnItemTapped);
+            DeleteSelectedCommand = new RelayCommand(RequestBatchDelete, () => CanDeleteSelected);
+            EditSelectedCommand = new AsyncRelayCommand(NavigateToEditAsync, () => CanEditSelected);
             SelectAllCommand = new RelayCommand(ToggleSelectAll);
             ConfirmActionCommand = new AsyncRelayCommand(ExecuteConfirmActionAsync);
             DismissConfirmCommand = new RelayCommand(DismissConfirmSheet);
+            OpenSearchCommand = new RelayCommand(() => IsSearchMode = true);
+            CloseSearchCommand = new RelayCommand(CloseSearch);
         }
 
         public ObservableRangeCollection<VenueListItemDto> Venues { get; }
@@ -63,15 +62,13 @@ namespace MyVocaList.UI.ViewModels
         /// <summary>Non-generic wrapper for binding to DXCollectionView SelectedItems (requires IList).</summary>
         public System.Collections.IList SelectedVenuesRaw => SelectedVenues;
 
-        public string SelectedCountText => $"{SelectedCount} selected";
+        public string AppBarTitle => SelectedCount == 0 ? "Venues" : $"{SelectedCount} selected";
         public bool CanEditSelected => SelectedCount == 1;
-        public bool ShowDefaultTitle => !IsMultiSelectMode;
-        public bool ShowMultiSelectToolbar => IsMultiSelectMode;
+        public bool CanDeleteSelected => SelectedCount > 0;
+        public bool IsAllSelected => Venues.Count > 0 && SelectedCount == Venues.Count;
 
-        public SelectionMode SelectionMode =>
-            IsMultiSelectMode ? SelectionMode.Multiple : SelectionMode.None;
-
-        public bool IsAllSelected => IsMultiSelectMode && Venues.Count > 0 && SelectedCount == Venues.Count;
+        // SelectionMode.Multiple is always on — tap toggles selection natively in DXCollectionView.
+        public SelectionMode SelectionMode => SelectionMode.Multiple;
 
         public bool IsEmpty => !IsInitialLoading && Venues.Count == 0;
         public bool IsEmptyNoVenues => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
@@ -80,14 +77,13 @@ namespace MyVocaList.UI.ViewModels
         public IAsyncRelayCommand RefreshCommand { get; }
         public IRelayCommand LoadMoreCommand { get; }
         public IAsyncRelayCommand AddVenueCommand { get; }
-        public IRelayCommand<VenueListItemDto> SwipeDeleteCommand { get; }
         public IRelayCommand DeleteSelectedCommand { get; }
         public IAsyncRelayCommand EditSelectedCommand { get; }
-        public IRelayCommand CancelSelectionCommand { get; }
-        public IRelayCommand<VenueListItemDto> TapCommand { get; }
         public IRelayCommand SelectAllCommand { get; }
         public IAsyncRelayCommand ConfirmActionCommand { get; }
         public IRelayCommand DismissConfirmCommand { get; }
+        public IRelayCommand OpenSearchCommand { get; }
+        public IRelayCommand CloseSearchCommand { get; }
 
         partial void OnSearchTextChanged(string value)
         {
@@ -95,19 +91,14 @@ namespace MyVocaList.UI.ViewModels
             TriggerSearchDebounce();
         }
 
-        partial void OnIsMultiSelectModeChanged(bool value)
-        {
-            OnPropertyChanged(nameof(SelectionMode));
-            OnPropertyChanged(nameof(ShowDefaultTitle));
-            OnPropertyChanged(nameof(ShowMultiSelectToolbar));
-            OnPropertyChanged(nameof(IsAllSelected));
-        }
-
         partial void OnSelectedCountChanged(int value)
         {
-            OnPropertyChanged(nameof(SelectedCountText));
+            OnPropertyChanged(nameof(AppBarTitle));
             OnPropertyChanged(nameof(CanEditSelected));
+            OnPropertyChanged(nameof(CanDeleteSelected));
             OnPropertyChanged(nameof(IsAllSelected));
+            DeleteSelectedCommand.NotifyCanExecuteChanged();
+            EditSelectedCommand.NotifyCanExecuteChanged();
         }
 
         partial void OnIsInitialLoadingChanged(bool value) => NotifyEmptyStates();
@@ -237,13 +228,6 @@ namespace MyVocaList.UI.ViewModels
             }, token);
         }
 
-        private void OnItemTapped(VenueListItemDto item)
-        {
-            if (item == null) return;
-            _ = Shell.Current.GoToAsync(
-                $"{Routes.VenueForm}?venueId={item.Id}&venueName={Uri.EscapeDataString(item.Name)}");
-        }
-
         private Task NavigateToAddAsync() =>
             Shell.Current.GoToAsync(Routes.VenueForm);
 
@@ -252,28 +236,12 @@ namespace MyVocaList.UI.ViewModels
             var item = SelectedVenues.FirstOrDefault();
             if (item == null) return;
 
-            ExitMultiSelectMode();
-            await Shell.Current.GoToAsync($"{Routes.VenueForm}?venueId={item.Id}&venueName={Uri.EscapeDataString(item.Name)}");
-        }
-
-        private void RequestSwipeDelete(VenueListItemDto item)
-        {
-            ConfirmMessage = $"Delete \"{item.Name}\"?";
-            ConfirmActionText = "Delete";
-            _pendingConfirmAction = async () =>
+            RunOnUiThread(() =>
             {
-                var (success, message) = await _venueService.DeleteVenuesAsync([item.Id]);
-                if (success)
-                {
-                    await RefreshAsync();
-                    await _snackbarService.ShowSuccessAsync(message);
-                }
-                else
-                {
-                    await _snackbarService.ShowErrorAsync(message);
-                }
-            };
-            ConfirmSheetState = BottomSheetState.HalfExpanded;
+                SelectedVenues.ClearRange();
+                SelectedCount = 0;
+            });
+            await Shell.Current.GoToAsync($"{Routes.VenueForm}?venueId={item.Id}&venueName={Uri.EscapeDataString(item.Name)}");
         }
 
         private void RequestBatchDelete()
@@ -287,7 +255,11 @@ namespace MyVocaList.UI.ViewModels
             {
                 var ids = selectedItems.Select(v => v.Id);
                 var (success, message) = await _venueService.DeleteVenuesAsync(ids);
-                ExitMultiSelectMode();
+                RunOnUiThread(() =>
+                {
+                    SelectedVenues.ClearRange();
+                    SelectedCount = 0;
+                });
                 if (success)
                 {
                     await RefreshAsync();
@@ -315,55 +287,33 @@ namespace MyVocaList.UI.ViewModels
             _pendingConfirmAction = null;
         }
 
-        public void EnterMultiSelectMode(VenueListItemDto initialItem)
-        {
-            IsMultiSelectMode = true;
-            _suppressSelectionChangedExit = true;
-            RunOnUiThread(() =>
-            {
-                SelectedVenues.ClearRange();
-                SelectedVenues.AddRange([initialItem]);
-                _suppressSelectionChangedExit = false;
-            });
-            SelectedCount = 1;
-        }
-
-        public void ExitMultiSelectMode()
-        {
-            IsMultiSelectMode = false;
-            RunOnUiThread(() => SelectedVenues.ClearRange());
-            SelectedCount = 0;
-        }
-
         private void ToggleSelectAll()
         {
             if (IsAllSelected)
             {
-                // Deselect all but remain in multi-select mode (user stays in selection context)
-                _suppressSelectionChangedExit = true;
                 RunOnUiThread(() =>
                 {
                     SelectedVenues.ClearRange();
-                    _suppressSelectionChangedExit = false;
+                    SelectedCount = 0;
                 });
-                SelectedCount = 0;
                 return;
             }
-            IsMultiSelectMode = true;
-            _suppressSelectionChangedExit = true;
             RunOnUiThread(() =>
             {
                 SelectedVenues.ReplaceRange([.. Venues]);
-                _suppressSelectionChangedExit = false;
+                SelectedCount = Venues.Count;
             });
-            SelectedCount = Venues.Count;
         }
 
         public void OnSelectionChanged(int count)
         {
             SelectedCount = count;
-            if (IsMultiSelectMode && count == 0 && !_suppressSelectionChangedExit)
-                ExitMultiSelectMode();
+        }
+
+        private void CloseSearch()
+        {
+            IsSearchMode = false;
+            SearchText = string.Empty;
         }
 
         private void NotifyEmptyStates()
