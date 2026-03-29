@@ -67,9 +67,6 @@ namespace MyVocaList.UI.ViewModels
         public bool CanDeleteSelected => SelectedCount > 0;
         public bool IsAllSelected => Venues.Count > 0 && SelectedCount == Venues.Count;
 
-        // SelectionMode.Multiple is always on — tap toggles selection natively in DXCollectionView.
-        public SelectionMode SelectionMode => SelectionMode.Multiple;
-
         public bool IsEmpty => !IsInitialLoading && Venues.Count == 0;
         public bool IsEmptyNoVenues => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
         public bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);

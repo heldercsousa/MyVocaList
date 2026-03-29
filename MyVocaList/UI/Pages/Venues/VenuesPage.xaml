@@ -3,10 +3,12 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
-    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
     xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
     x:Class="MyVocaList.UI.Pages.Venues.VenuesPage"
     x:Name="page"
     x:DataType="vm:VenuesViewModel"
@@ -15,53 +17,43 @@
     SafeAreaEdges="Container">
 
     <Shell.TitleView>
-        <Label Text="{Binding AppBarTitle}"
-               FontFamily="RobotoMedium" FontSize="20"
-               TextColor="{StaticResource OnSurface}"
-               VerticalOptions="Center"
-               Margin="16,0" />
+        <Grid>
+            <appbars:SmallAppBar
+                x:Name="smallAppBar"
+                Title="{Binding AppBarTitle}"
+                Action1Icon="search_outlined"
+                Action1Command="{Binding OpenSearchCommand}"
+                IsElevated="{Binding IsScrolled}"
+                IsVisible="{Binding IsSearchMode, Converter={StaticResource InverseBoolConverter}}" />
+            <appbars:SearchAppBar
+                x:Name="searchAppBar"
+                SearchText="{Binding SearchText, Mode=TwoWay}"
+                Placeholder="Search venues..."
+                BackCommand="{Binding CloseSearchCommand}"
+                IsElevated="{Binding IsScrolled}"
+                IsVisible="{Binding IsSearchMode}" />
+        </Grid>
     </Shell.TitleView>
 
-    <Grid RowDefinitions="Auto,*">
-        <!-- Search bar -->
-        <dx:DXBorder Grid.Row="0"
-                     BackgroundColor="{StaticResource SurfaceContainer}"
-                     CornerRadius="28"
-                     Padding="4"
-                     Margin="16,8">
-            <dxe:TextEdit Text="{Binding SearchText, Mode=TwoWay}"
-                          PlaceholderText="Search venues..."
-                          StartIcon="search_outlined"
-                          StartIconColor="{StaticResource OnSurfaceVariant}"
-                          BoxMode="Outlined"
-                          BorderColor="Transparent"
-                          FocusedBorderColor="Transparent"
-                          BackgroundColor="Transparent"
-                          TextColor="{StaticResource OnSurface}"
-                          PlaceholderColor="{StaticResource OnSurfaceVariant}"
-                          ClearIconVisibility="Auto"
-                          ClearIconColor="{StaticResource OnSurfaceVariant}" />
-        </dx:DXBorder>
+    <Grid>
 
-        <!-- Venue list with skeleton loading -->
-        <dx:ShimmerView Grid.Row="1"
-                        IsLoading="{Binding IsInitialLoading}"
+        <dx:ShimmerView IsLoading="{Binding IsInitialLoading}"
                         WaveWidth="0.7"
                         WaveOpacity="0.8">
             <dx:ShimmerView.LoadingView>
                 <VerticalStackLayout Spacing="0">
                     <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
                     <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
                     <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
                     <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
                     <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
                     <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="12" HeightRequest="52" Margin="16,4" />
+                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
                 </VerticalStackLayout>
             </dx:ShimmerView.LoadingView>
             <dx:ShimmerView.Content>
@@ -74,82 +66,44 @@
                        IsLoadMoreEnabled="{Binding HasMoreItems}"
                        LoadMoreCommand="{Binding LoadMoreCommand}"
                        IndicatorColor="{StaticResource Primary}"
-                       SelectionMode="{Binding SelectionMode}"
+                       SelectionMode="Multiple"
                        UseRippleEffect="True"
                        AllowCascadeUpdate="True"
                        ItemSeparatorThickness="0"
+                       Margin="0,0,0,80"
+                       Scrolled="OnCollectionViewScrolled"
                        SelectionChanged="OnSelectionChanged">
 
                     <dxcv:DXCollectionView.ItemTemplate>
                         <DataTemplate x:DataType="dto:VenueListItemDto">
-                            <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
-                                         CornerRadius="12"
-                                         Padding="16"
-                                         Margin="16,4"
-                                         HeightRequest="64">
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                    <dx:CheckEdit Grid.Column="0"
-                                                  IsChecked="False"
+                            <lists:ListItem Headline="{Binding Name}"
+                                            IsSelected="False">
+                                <lists:ListItem.LeadingContent>
+                                    <lists:ListItemLeadingIcon Icon="place_outlined" />
+                                </lists:ListItem.LeadingContent>
+                                <lists:ListItem.TrailingContent>
+                                    <dx:CheckEdit IsChecked="False"
                                                   InputTransparent="True"
                                                   VerticalOptions="Center" />
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Name}"
-                                           FontFamily="RobotoRegular" FontSize="16"
-                                           TextColor="{StaticResource OnSurface}"
-                                           VerticalOptions="Center"
-                                           LineBreakMode="TailTruncation" />
-
-                                    <dx:DXBorder Grid.Column="2"
-                                                 IsVisible="{Binding HasEvents}"
-                                                 BackgroundColor="{StaticResource SecondaryContainer}"
-                                                 CornerRadius="12"
-                                                 Padding="8,4">
-                                        <Label Text="{Binding EventCount, StringFormat='{0} events'}"
-                                               FontFamily="RobotoMedium" FontSize="11"
-                                               TextColor="{StaticResource OnSecondaryContainer}"
-                                               VerticalOptions="Center" />
-                                    </dx:DXBorder>
-                                </Grid>
-                            </dx:DXBorder>
+                                </lists:ListItem.TrailingContent>
+                            </lists:ListItem>
                         </DataTemplate>
                     </dxcv:DXCollectionView.ItemTemplate>
 
                     <dxcv:DXCollectionView.SelectedItemTemplate>
                         <DataTemplate x:DataType="dto:VenueListItemDto">
-                            <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
-                                         BorderColor="{dx:ThemeColor Primary}"
-                                         BorderThickness="2"
-                                         CornerRadius="12"
-                                         Padding="16"
-                                         Margin="16,4"
-                                         HeightRequest="64">
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                    <dx:CheckEdit Grid.Column="0"
-                                                  IsChecked="True"
+                            <lists:ListItem Headline="{Binding Name}"
+                                            IsSelected="True">
+                                <lists:ListItem.LeadingContent>
+                                    <lists:ListItemLeadingIcon Icon="place_outlined" />
+                                </lists:ListItem.LeadingContent>
+                                <lists:ListItem.TrailingContent>
+                                    <dx:CheckEdit IsChecked="True"
                                                   CheckedCheckBoxColor="{dx:ThemeColor Primary}"
                                                   InputTransparent="True"
                                                   VerticalOptions="Center" />
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Name}"
-                                           FontFamily="RobotoRegular" FontSize="16"
-                                           TextColor="{StaticResource OnSurface}"
-                                           VerticalOptions="Center"
-                                           LineBreakMode="TailTruncation" />
-
-                                    <dx:DXBorder Grid.Column="2"
-                                                 IsVisible="{Binding HasEvents}"
-                                                 BackgroundColor="{StaticResource SecondaryContainer}"
-                                                 CornerRadius="12"
-                                                 Padding="8,4">
-                                        <Label Text="{Binding EventCount, StringFormat='{0} events'}"
-                                               FontFamily="RobotoMedium" FontSize="11"
-                                               TextColor="{StaticResource OnSecondaryContainer}"
-                                               VerticalOptions="Center" />
-                                    </dx:DXBorder>
-                                </Grid>
-                            </dx:DXBorder>
+                                </lists:ListItem.TrailingContent>
+                            </lists:ListItem>
                         </DataTemplate>
                     </dxcv:DXCollectionView.SelectedItemTemplate>
                 </dxcv:DXCollectionView>
@@ -157,12 +111,11 @@
         </dx:ShimmerView>
 
         <!-- Empty state: no venues registered -->
-        <VerticalStackLayout Grid.Row="1"
-                             IsVisible="{Binding IsEmptyNoVenues}"
+        <VerticalStackLayout IsVisible="{Binding IsEmptyNoVenues}"
                              VerticalOptions="Center"
                              HorizontalOptions="Center"
                              Spacing="8"
-                             Margin="32">
+                             Margin="32,32,32,80">
             <dx:DXButton Icon="nightlife_outlined"
                          IconColor="{dx:ThemeColor OnSurfaceVariant}"
                          IconWidth="64" IconHeight="64"
@@ -177,12 +130,11 @@
         </VerticalStackLayout>
 
         <!-- Empty state: search returned no results -->
-        <VerticalStackLayout Grid.Row="1"
-                             IsVisible="{Binding IsEmptyNoResults}"
+        <VerticalStackLayout IsVisible="{Binding IsEmptyNoResults}"
                              VerticalOptions="Center"
                              HorizontalOptions="Center"
                              Spacing="8"
-                             Margin="32">
+                             Margin="32,32,32,80">
             <dx:DXButton Icon="search_outlined"
                          IconColor="{dx:ThemeColor OnSurfaceVariant}"
                          IconWidth="64" IconHeight="64"
@@ -196,21 +148,36 @@
                    HorizontalTextAlignment="Center" />
         </VerticalStackLayout>
 
-        <!-- FAB -->
-        <dx:DXButton Grid.Row="1"
-                     Icon="add_outlined"
+        <!-- FAB: bottom-right, above FloatingToolbar (88 = toolbar 48 + margin 16 + gap 24) -->
+        <dx:DXButton Icon="add_outlined"
                      IconColor="{StaticResource OnPrimary}"
                      BackgroundColor="{StaticResource Primary}"
                      PressedBackgroundColor="{StaticResource PrimaryContainer}"
                      WidthRequest="56" HeightRequest="56"
                      CornerRadius="16"
                      HorizontalOptions="End" VerticalOptions="End"
-                     Margin="0,0,16,16"
+                     Margin="0,0,16,88"
+                     SemanticProperties.Description="Add venue"
                      Command="{Binding AddVenueCommand}" />
 
-        <!-- Confirm delete BottomSheet — RowSpan=2 so it can overlay the full content area -->
+        <!-- FloatingToolbar: centered, 16dp above safe area bottom -->
+        <toolbars:FloatingToolbar
+            HorizontalOptions="Center"
+            VerticalOptions="End"
+            Margin="0,0,0,16"
+            Action1Icon="done_all_outlined"
+            Action1Command="{Binding SelectAllCommand}"
+            Action1Description="Select all"
+            Action1IsSelected="{Binding IsAllSelected}"
+            Action2Icon="edit_outlined"
+            Action2Command="{Binding EditSelectedCommand}"
+            Action2Description="Edit selected"
+            Action3Icon="delete_outlined"
+            Action3Command="{Binding DeleteSelectedCommand}"
+            Action3Description="Delete selected" />
+
+        <!-- Confirm delete BottomSheet -->
         <dx:BottomSheet x:Name="confirmSheet"
-                        Grid.RowSpan="2"
                         HalfExpandedRatio="0.28"
                         AllowedState="HalfExpanded"
                         IsModal="True"
@@ -241,6 +208,7 @@
                              Command="{Binding DismissConfirmCommand}" />
             </VerticalStackLayout>
         </dx:BottomSheet>
+
     </Grid>
 
 </ContentPage>
