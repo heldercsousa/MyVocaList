@@ -172,9 +172,11 @@
             Action2Icon="edit_outlined"
             Action2Command="{Binding EditSelectedCommand}"
             Action2Description="Edit selected"
+            Action2IsSelected="{Binding CanEditSelected}"
             Action3Icon="delete_outlined"
             Action3Command="{Binding DeleteSelectedCommand}"
-            Action3Description="Delete selected" />
+            Action3Description="Delete selected"
+            Action3IsSelected="{Binding CanDeleteSelected}" />
 
         <!-- Confirm delete BottomSheet -->
         <dx:BottomSheet x:Name="confirmSheet"

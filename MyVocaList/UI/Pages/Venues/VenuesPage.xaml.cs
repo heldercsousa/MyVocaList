@@ -50,6 +50,12 @@ public partial class VenuesPage : ContentPage
             return true;
         }
 
+        if (_viewModel.IsSearchMode)
+        {
+            _viewModel.CloseSearchCommand.Execute(null);
+            return true;
+        }
+
         return false;
     }
 
