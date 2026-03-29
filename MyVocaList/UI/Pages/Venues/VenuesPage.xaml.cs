@@ -1,3 +1,5 @@
+using DevExpress.Maui.CollectionView;
+
 namespace MyVocaList.UI.Pages.Venues;
 
 public partial class VenuesPage : ContentPage
@@ -49,6 +51,11 @@ public partial class VenuesPage : ContentPage
         }
 
         return false;
+    }
+
+    private void OnCollectionViewScrolled(object sender, DXCollectionViewScrolledEventArgs e)
+    {
+        _viewModel.IsScrolled = e.Offset > 0;
     }
 
     private void OnSelectionChanged(object sender, CollectionViewSelectionChangedEventArgs e)
