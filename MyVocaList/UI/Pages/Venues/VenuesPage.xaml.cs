@@ -4,7 +4,7 @@ public partial class VenuesPage : ContentPage
 {
     private readonly VenuesViewModel _viewModel;
 
-    /// <summary>Exposed for compiled bindings inside DataTemplates that need to resolve IsMultiSelectMode.</summary>
+    /// <summary>Exposed for compiled bindings inside DataTemplates.</summary>
     public VenuesViewModel ViewModel => _viewModel;
 
     public VenuesPage(VenuesViewModel viewModel)
@@ -40,46 +40,11 @@ public partial class VenuesPage : ContentPage
         }
     }
 
-    private void OnItemTapped(object sender, CollectionViewGestureEventArgs e)
-    {
-        // When in multi-select mode, DXCollectionView (SelectionMode.Multiple) toggles
-        // selection natively on tap. Calling TapCommand here would double-toggle and undo it.
-        if (_viewModel.IsMultiSelectMode) return;
-
-        if (e.Item is VenueListItemDto item)
-            _viewModel.TapCommand.Execute(item);
-    }
-
-    private void OnItemLongPressed(object sender, CollectionViewGestureEventArgs e)
-    {
-        if (e.Item is not VenueListItemDto item) return;
-        _viewModel.EnterMultiSelectMode(item);
-        HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
-    }
-
-    private void OnSwipeDeleteTapped(object sender, SwipeItemTapEventArgs e)
-    {
-        if (e.Item is VenueListItemDto item)
-            _viewModel.SwipeDeleteCommand.Execute(item);
-    }
-
-    private void OnSwipeItemShowing(object sender, SwipeItemShowingEventArgs e)
-    {
-        if (_viewModel.IsMultiSelectMode)
-            e.Cancel = true;
-    }
-
     protected override bool OnBackButtonPressed()
     {
         if (_viewModel.ConfirmSheetState != BottomSheetState.Hidden)
         {
             _viewModel.ConfirmSheetState = BottomSheetState.Hidden;
-            return true;
-        }
-
-        if (_viewModel.IsMultiSelectMode)
-        {
-            _viewModel.ExitMultiSelectMode();
             return true;
         }
 

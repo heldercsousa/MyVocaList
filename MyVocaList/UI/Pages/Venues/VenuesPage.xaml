@@ -15,78 +15,11 @@
     SafeAreaEdges="Container">
 
     <Shell.TitleView>
-        <Grid HeightRequest="48">
-            <!-- Default title -->
-            <Label Text="Venues"
-                   FontFamily="RobotoMedium" FontSize="20"
-                   TextColor="{StaticResource OnSurface}"
-                   VerticalOptions="Center"
-                   IsVisible="{Binding ShowDefaultTitle}" />
-
-            <!-- Multi-select toolbar (MD3 contextual action bar) -->
-            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
-                  ColumnSpacing="4"
-                  Margin="0,0,16,0"
-                  VerticalOptions="Center"
-                  IsVisible="{Binding ShowMultiSelectToolbar}">
-
-                <!-- Cancel — X icon, far left (MD3 standard) -->
-                <dx:DXButton Grid.Column="0"
-                             Icon="close_outlined"
-                             IconColor="{StaticResource OnSurface}"
-                             BackgroundColor="Transparent"
-                             WidthRequest="48" HeightRequest="48"
-                             CornerRadius="24"
-                             HorizontalOptions="Center" VerticalOptions="Center"
-                             HorizontalContentAlignment="Center"
-                             SemanticProperties.Description="Cancel selection"
-                             Command="{Binding CancelSelectionCommand}" />
-
-                <!-- Selected count — flexible center -->
-                <Label Grid.Column="1"
-                       Text="{Binding SelectedCountText}"
-                       FontFamily="RobotoMedium" FontSize="18"
-                       TextColor="{StaticResource OnSurface}"
-                       VerticalOptions="Center" />
-
-                <!-- Select All — icon -->
-                <dx:DXButton Grid.Column="2"
-                             Icon="done_all_outlined"
-                             IconColor="{StaticResource OnSurface}"
-                             BackgroundColor="Transparent"
-                             WidthRequest="48" HeightRequest="48"
-                             CornerRadius="24"
-                             HorizontalOptions="Center" VerticalOptions="Center"
-                             HorizontalContentAlignment="Center"
-                             SemanticProperties.Description="Select all"
-                             Command="{Binding SelectAllCommand}" />
-
-                <!-- Edit — icon, only when exactly 1 selected -->
-                <dx:DXButton Grid.Column="3"
-                             Icon="edit_outlined"
-                             IconColor="{StaticResource OnSurface}"
-                             BackgroundColor="Transparent"
-                             WidthRequest="48" HeightRequest="48"
-                             CornerRadius="24"
-                             HorizontalOptions="Center" VerticalOptions="Center"
-                             HorizontalContentAlignment="Center"
-                             IsVisible="{Binding CanEditSelected}"
-                             SemanticProperties.Description="Edit selected"
-                             Command="{Binding EditSelectedCommand}" />
-
-                <!-- Delete — icon -->
-                <dx:DXButton Grid.Column="4"
-                             Icon="delete_outlined"
-                             IconColor="{StaticResource Error}"
-                             BackgroundColor="Transparent"
-                             WidthRequest="48" HeightRequest="48"
-                             CornerRadius="24"
-                             HorizontalOptions="Center" VerticalOptions="Center"
-                             HorizontalContentAlignment="Center"
-                             SemanticProperties.Description="Delete selected"
-                             Command="{Binding DeleteSelectedCommand}" />
-            </Grid>
-        </Grid>
+        <Label Text="{Binding AppBarTitle}"
+               FontFamily="RobotoMedium" FontSize="20"
+               TextColor="{StaticResource OnSurface}"
+               VerticalOptions="Center"
+               Margin="16,0" />
     </Shell.TitleView>
 
     <Grid RowDefinitions="Auto,*">
@@ -145,55 +78,40 @@
                        UseRippleEffect="True"
                        AllowCascadeUpdate="True"
                        ItemSeparatorThickness="0"
-                       Tap="OnItemTapped"
-                       LongPress="OnItemLongPressed"
-                       SwipeItemShowing="OnSwipeItemShowing"
                        SelectionChanged="OnSelectionChanged">
 
                     <dxcv:DXCollectionView.ItemTemplate>
                         <DataTemplate x:DataType="dto:VenueListItemDto">
-                            <dxcv:SwipeContainer FullSwipeMode="End">
-                                <dxcv:SwipeContainer.EndSwipeItems>
-                                    <dxcv:SwipeContainerItem Caption="Delete"
-                                                             BackgroundColor="{StaticResource Error}"
-                                                             FontColor="{StaticResource OnError}"
-                                                             Image="delete_outlined"
-                                                             Tap="OnSwipeDeleteTapped" />
-                                </dxcv:SwipeContainer.EndSwipeItems>
-                                <dxcv:SwipeContainer.ItemView>
-                                    <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
+                            <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
+                                         CornerRadius="12"
+                                         Padding="16"
+                                         Margin="16,4"
+                                         HeightRequest="64">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <dx:CheckEdit Grid.Column="0"
+                                                  IsChecked="False"
+                                                  InputTransparent="True"
+                                                  VerticalOptions="Center" />
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Name}"
+                                           FontFamily="RobotoRegular" FontSize="16"
+                                           TextColor="{StaticResource OnSurface}"
+                                           VerticalOptions="Center"
+                                           LineBreakMode="TailTruncation" />
+
+                                    <dx:DXBorder Grid.Column="2"
+                                                 IsVisible="{Binding HasEvents}"
+                                                 BackgroundColor="{StaticResource SecondaryContainer}"
                                                  CornerRadius="12"
-                                                 Padding="16"
-                                                 Margin="16,4"
-                                                 HeightRequest="64">
-                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                                            <dx:CheckEdit Grid.Column="0"
-                                                          IsChecked="False"
-                                                          InputTransparent="True"
-                                                          VerticalOptions="Center"
-                                                          IsVisible="{Binding ViewModel.IsMultiSelectMode, Source={x:Reference page}}" />
-
-                                            <Label Grid.Column="1"
-                                                   Text="{Binding Name}"
-                                                   FontFamily="RobotoRegular" FontSize="16"
-                                                   TextColor="{StaticResource OnSurface}"
-                                                   VerticalOptions="Center"
-                                                   LineBreakMode="TailTruncation" />
-
-                                            <dx:DXBorder Grid.Column="2"
-                                                         IsVisible="{Binding HasEvents}"
-                                                         BackgroundColor="{StaticResource SecondaryContainer}"
-                                                         CornerRadius="12"
-                                                         Padding="8,4">
-                                                <Label Text="{Binding EventCount, StringFormat='{0} events'}"
-                                                       FontFamily="RobotoMedium" FontSize="11"
-                                                       TextColor="{StaticResource OnSecondaryContainer}"
-                                                       VerticalOptions="Center" />
-                                            </dx:DXBorder>
-                                        </Grid>
+                                                 Padding="8,4">
+                                        <Label Text="{Binding EventCount, StringFormat='{0} events'}"
+                                               FontFamily="RobotoMedium" FontSize="11"
+                                               TextColor="{StaticResource OnSecondaryContainer}"
+                                               VerticalOptions="Center" />
                                     </dx:DXBorder>
-                                </dxcv:SwipeContainer.ItemView>
-                            </dxcv:SwipeContainer>
+                                </Grid>
+                            </dx:DXBorder>
                         </DataTemplate>
                     </dxcv:DXCollectionView.ItemTemplate>
 
