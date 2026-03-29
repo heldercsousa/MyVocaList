@@ -33,10 +33,19 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 
 ## Rules Files
 - DevExpress patterns: `.claude/rules/devexpress-patterns.md` — check this FIRST before any UI work
+- **CRUD page laws**: `.claude/rules/crud-pages.md` — read before building any list or form page
 - MediatR patterns: `.claude/rules/mediatr-patterns.md`
 - Theme & locale: `.claude/rules/theme-locale.md`
 - Code principles: `.claude/rules/code-principles.md`
 - Dialogs & validation: `.claude/rules/dialogs-validation.md`
+
+## Spec-First Development
+Every new CRUD feature requires a spec before any code is written. Copy the structure from `Docs/specs/venues/`:
+- `Docs/specs/[feature]/requirements.md` — user stories, acceptance criteria, data model, validation rules
+- `Docs/specs/[feature]/design.md` — architecture, interfaces, page structure, interaction flows, error handling
+- `Docs/specs/[feature]/tasks.md` — ordered, checkboxed tasks; check off as work completes
+
+Reference implementation: `Docs/specs/venues/` (complete, all tasks done).
 
 ## Commands
 - Build: `/project:build`

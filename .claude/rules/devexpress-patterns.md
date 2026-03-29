@@ -523,6 +523,11 @@ private void OnCollectionViewScrolled(object sender, CollectionViewScrolledEvent
 - `ShimmerView` needs `await Task.Yield()` before data load so skeleton renders first
 - `.NET MAUI 10`: `ContentPage` defaults to `SafeAreaEdges="None"` — add `SafeAreaEdges="Container"` explicitly
 - Compiled bindings inside `x:DataType` DataTemplates: use a typed `ViewModel` property on the page, not `BindingContext.X`
+- `DXCollectionView.Scrolled` event args type is `DXCollectionViewScrolledEventArgs` (NOT `CollectionViewScrolledEventArgs`); vertical offset property is `e.Offset` (NOT `e.VerticalOffset`):
+  ```csharp
+  private void OnCollectionViewScrolled(object sender, DXCollectionViewScrolledEventArgs e)
+      => _viewModel.IsScrolled = e.Offset > 0;
+  ```
 
 ## ContentView sub-components — BindableProperty wiring patterns
 
