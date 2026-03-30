@@ -41,8 +41,6 @@
                       BackgroundColor="Transparent"
                       TextColor="{StaticResource OnSurface}"
                       PlaceholderColor="{StaticResource OnSurfaceVariant}"
-                      InputFontFamily="RobotoRegular"
-                      InputFontSize="16"
                       ClearIconVisibility="Auto"
                       ClearIconColor="{StaticResource OnSurfaceVariant}"
                       Keyboard="Text"
