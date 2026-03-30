@@ -492,22 +492,16 @@ BindableProperties: `SearchText` (TwoWay), `Placeholder`, `LeadingIcon`, `Leadin
 `TrailingIcon`, `TrailingCommand`, `IsElevated`
 
 ### IsElevated — scroll detection pattern
-The page is responsible for detecting scroll and setting `IsElevated` via a ViewModel property:
+The page is responsible for detecting scroll and setting `IsElevated` via a ViewModel property.
+**Event args type is `DXCollectionViewScrolledEventArgs`; offset property is `e.Offset` — see Known Gotchas.**
 
 ```csharp
 // In page code-behind — listen to DXCollectionView scroll
-private void OnCollectionViewScrolled(object sender, CollectionViewScrolledEventArgs e)
+private void OnCollectionViewScrolled(object sender, DXCollectionViewScrolledEventArgs e)
 {
-    _viewModel.IsScrolled = e.VerticalOffset > 0;
+    _viewModel.IsScrolled = e.Offset > 0;
 }
 ```
-
-### VenuesPage MD3 non-compliance (tracked — not yet remediated)
-| # | Issue | Current | M3 Spec |
-|---|-------|---------|---------|
-| 1 | Search placement | Below Shell navbar (content Row 0) | Search IS the app bar → use `SearchAppBar` in `Shell.TitleView` |
-| 2 | Title typography | `FontSize="20"`, `RobotoMedium` | 22sp Regular (`textAppearanceTitleLarge`) |
-| 3 | Scroll elevation | None | Surface → SurfaceContainer on scroll (`liftOnScroll`) |
 
 ---
 

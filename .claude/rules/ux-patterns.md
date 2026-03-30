@@ -10,69 +10,14 @@ All interactive controls must be at least **48×48dp** (WCAG 2.5.5 / MD3).
 
 Icon-only FABs use 56×56 with CornerRadius=16 (MD3 standard FAB shape).
 
-## MD3 Contextual Action Bar (Multi-Select Mode)
+## ~~MD3 Contextual Action Bar (Multi-Select Mode)~~ — RETIRED
 
-Canonical layout: **5-column Grid** in `Shell.TitleView`.
-
-| Column | Content | Width |
-|--------|---------|-------|
-| 0 | Cancel (X icon, far left) | Auto |
-| 1 | Selection count label | * (expands) |
-| 2 | Select All icon | Auto |
-| 3 | Edit icon (conditional on single selection) | Auto |
-| 4 | Delete icon | Auto |
-
-```xml
-<Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto"
-      ColumnSpacing="4" Margin="0,0,16,0"
-      VerticalOptions="Center"
-      IsVisible="{Binding ShowMultiSelectToolbar}">
-
-    <!-- Cancel — X icon, far left -->
-    <dx:DXButton Grid.Column="0" Icon="close_outlined"
-                 WidthRequest="48" HeightRequest="48" CornerRadius="24"
-                 BackgroundColor="Transparent"
-                 IconColor="{StaticResource OnSurface}"
-                 HorizontalContentAlignment="Center"
-                 SemanticProperties.Description="Cancel selection"
-                 Command="{Binding CancelSelectionCommand}" />
-
-    <!-- Count -->
-    <Label Grid.Column="1" Text="{Binding SelectedCountText}"
-           FontFamily="RobotoMedium" FontSize="18"
-           TextColor="{StaticResource OnSurface}" VerticalOptions="Center" />
-
-    <!-- Select All -->
-    <dx:DXButton Grid.Column="2" Icon="done_all_outlined"
-                 WidthRequest="48" HeightRequest="48" CornerRadius="24"
-                 BackgroundColor="Transparent"
-                 IconColor="{StaticResource OnSurface}"
-                 HorizontalContentAlignment="Center"
-                 SemanticProperties.Description="Select all"
-                 Command="{Binding SelectAllCommand}" />
-
-    <!-- Edit (single-select only) -->
-    <dx:DXButton Grid.Column="3" Icon="edit_outlined"
-                 WidthRequest="48" HeightRequest="48" CornerRadius="24"
-                 BackgroundColor="Transparent"
-                 IconColor="{StaticResource OnSurface}"
-                 HorizontalContentAlignment="Center"
-                 IsVisible="{Binding CanEditSelected}"
-                 SemanticProperties.Description="Edit selected"
-                 Command="{Binding EditSelectedCommand}" />
-
-    <!-- Delete -->
-    <dx:DXButton Grid.Column="4" Icon="delete_outlined"
-                 WidthRequest="48" HeightRequest="48" CornerRadius="24"
-                 BackgroundColor="Transparent"
-                 IconColor="{StaticResource Error}"
-                 HorizontalContentAlignment="Center"
-                 SemanticProperties.Description="Delete selected"
-                 Command="{Binding DeleteSelectedCommand}" />
-</Grid>
-```
-
-**Toolbar right margin:** `Margin="0,0,16,0"` on the Grid — matches Shell's default title padding.
+> **This pattern is retired as of the Venues MD3 rebuild (2026-03-29).**
+> The 5-column Grid contextual bar in `Shell.TitleView` is replaced by:
+> - `SmallAppBar.Title` binding showing "N selected" (no separate contextual bar needed)
+> - `FloatingToolbar` for page-level actions (Select All / Edit / Delete)
+>
+> See `.claude/rules/crud-pages.md` for the current pattern.
 
 ## Form Action Buttons vs Toolbar Action Icons
 
