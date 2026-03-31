@@ -1,0 +1,135 @@
+<h2>VenuesPage — Current vs MD3 Rebuild</h2>
+<p class="subtitle">Structural comparison. Left = what exists today. Right = proposed MD3 rebuild.</p>
+
+<div class="split">
+
+  <!-- LEFT: CURRENT -->
+  <div class="mockup">
+    <div class="mockup-header">Current VenuesPage</div>
+    <div class="mockup-body" style="padding:0;font-family:monospace;font-size:12px;">
+
+      <!-- Shell Title (default) -->
+      <div style="background:#1F1F25;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #454651;">
+        <span style="color:#E3E1E9;font-size:14px;font-weight:600;">Venues</span>
+        <span style="color:#C6C5D3;font-size:11px;">[Shell default title]</span>
+      </div>
+
+      <!-- Search row (inline in content, NOT app bar) -->
+      <div style="background:#1F1F25;padding:8px 16px;">
+        <div style="background:#1F1F25;border:1px solid #8F909D;border-radius:28px;padding:6px 12px;display:flex;align-items:center;gap:8px;">
+          <span style="color:#8F909D;">🔍</span>
+          <span style="color:#8F909D;font-size:12px;">Search venues...</span>
+        </div>
+      </div>
+
+      <!-- List -->
+      <div style="background:#121318;padding:8px;">
+        <div style="background:#1B1B21;border-radius:12px;padding:14px 16px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#E3E1E9;font-size:14px;">Venue Alpha</span>
+          <span style="color:#8F909D;font-size:11px;">[swipe→delete]</span>
+        </div>
+        <div style="background:#1B1B21;border-radius:12px;padding:14px 16px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#E3E1E9;font-size:14px;">Venue Beta</span>
+          <span style="color:#8F909D;font-size:11px;">[swipe→delete]</span>
+        </div>
+        <div style="background:#1B1B21;border-radius:12px;padding:14px 16px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#E3E1E9;font-size:14px;">Venue Gamma</span>
+          <span style="color:#8F909D;font-size:11px;">[swipe→delete]</span>
+        </div>
+      </div>
+
+      <!-- FAB -->
+      <div style="position:relative;height:60px;">
+        <div style="position:absolute;bottom:8px;right:16px;background:#BAC3FF;border-radius:16px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;">
+          <span style="color:#15267B;font-size:22px;">＋</span>
+        </div>
+      </div>
+
+      <!-- Issues list -->
+      <div style="background:#29292F;margin:8px;border-radius:8px;padding:10px;font-size:11px;color:#C6C5D3;">
+        <div style="color:#FFB4AB;margin-bottom:4px;font-weight:600;">⚠ Non-compliant</div>
+        <div>• Search is inline (not in app bar)</div>
+        <div>• Title via Shell default (not SmallAppBar)</div>
+        <div>• No scroll elevation</div>
+        <div>• Multi-select via custom Shell.TitleView Grid</div>
+        <div>• Delete only via swipe (no persistent actions)</div>
+        <div>• Edit only via tap (requires exiting multi-select)</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT: PROPOSED -->
+  <div class="mockup">
+    <div class="mockup-header">MD3 Rebuild — VenuesPage</div>
+    <div class="mockup-body" style="padding:0;font-family:monospace;font-size:12px;">
+
+      <!-- SmallAppBar -->
+      <div style="background:#1F1F25;padding:0 8px;display:flex;align-items:center;height:56px;border-bottom:1px solid #454651;gap:4px;">
+        <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#E3E1E9;">☰</div>
+        <div style="flex:1;padding:0 4px;">
+          <div style="color:#E3E1E9;font-size:15px;">Venues</div>
+        </div>
+        <!-- Search icon → triggers SearchAppBar -->
+        <div style="width:48px;height:48px;border-radius:24px;background:#29292F;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:16px;">🔍</div>
+        <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:16px;">⋮</div>
+      </div>
+
+      <!-- List (MD3 ListItem components) -->
+      <div style="background:#121318;padding:8px;flex:1;">
+        <div style="background:#1B1B21;border-radius:0;padding:0 24px 0 16px;margin-bottom:1px;display:flex;align-items:center;min-height:56px;">
+          <div style="flex:1;">
+            <div style="color:#E3E1E9;font-size:16px;">Venue Alpha</div>
+          </div>
+          <div style="color:#C6C5D3;font-size:20px;">›</div>
+        </div>
+        <div style="background:#1B1B21;border-radius:0;padding:0 24px 0 16px;margin-bottom:1px;display:flex;align-items:center;min-height:56px;">
+          <div style="flex:1;">
+            <div style="color:#E3E1E9;font-size:16px;">Venue Beta</div>
+          </div>
+          <div style="color:#C6C5D3;font-size:20px;">›</div>
+        </div>
+        <div style="background:#1B1B21;border-radius:0;padding:0 24px 0 16px;margin-bottom:1px;display:flex;align-items:center;min-height:56px;">
+          <div style="flex:1;">
+            <div style="color:#E3E1E9;font-size:16px;">Venue Gamma</div>
+          </div>
+          <div style="color:#C6C5D3;font-size:20px;">›</div>
+        </div>
+      </div>
+
+      <!-- FloatingToolbar (always visible) + FAB -->
+      <div style="position:relative;background:#121318;height:80px;">
+        <!-- Toolbar centered -->
+        <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:#29292F;border-radius:24px;height:48px;display:flex;align-items:center;padding:0 4px;gap:0;">
+          <!-- Select All -->
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:16px;" title="Select All">☑</div>
+          <!-- Edit (disabled initially) -->
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#454651;font-size:16px;" title="Edit (disabled)">✏</div>
+          <!-- Delete (disabled initially) -->
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#454651;font-size:16px;" title="Delete (disabled)">🗑</div>
+        </div>
+        <!-- FAB (bottom-right, independent) -->
+        <div style="position:absolute;bottom:12px;right:16px;background:#BAC3FF;border-radius:16px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;">
+          <span style="color:#15267B;font-size:22px;">＋</span>
+        </div>
+      </div>
+
+      <!-- Gains list -->
+      <div style="background:#1F3520;margin:8px;border-radius:8px;padding:10px;font-size:11px;color:#C6C5D3;">
+        <div style="color:#4CAF50;margin-bottom:4px;font-weight:600;">✓ MD3 Compliant</div>
+        <div>• SmallAppBar ↔ SearchAppBar swap on search icon</div>
+        <div>• M3 ListItem components (proper anatomy)</div>
+        <div>• FloatingToolbar — always visible, Edit+Delete enable on select</div>
+        <div>• FAB independent of toolbar</div>
+        <div>• Scroll elevation via IsElevated</div>
+        <div>• Multi-select: long-press → toolbar enables</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:20px;background:#29292F;border-radius:8px;padding:16px;">
+  <h3 style="margin:0 0 8px 0;color:#BAC3FF;">First question: the FloatingToolbar on VenuesPage</h3>
+  <p class="subtitle" style="margin:0;">You said the toolbar should always be visible with Edit+Delete disabled when nothing is selected, and a minimum of 3 buttons. The natural 3 are: <strong>Select All</strong> · <strong>Edit</strong> · <strong>Delete</strong>. Does this match your intent — or do you want to discuss what the 3rd slot should be when multi-select isn't active?</p>
+</div>

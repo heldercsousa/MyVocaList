@@ -38,6 +38,7 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Theme & locale: `.claude/rules/theme-locale.md`
 - Code principles: `.claude/rules/code-principles.md`
 - Dialogs & validation: `.claude/rules/dialogs-validation.md`
+- Database indexing: `.claude/rules/database-indexing.md` — read before any EF Core configuration or repository search query
 
 ## Spec-First Development
 Every new CRUD feature requires a spec before any code is written. Copy the structure from `Docs/specs/venues/`:
