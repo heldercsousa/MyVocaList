@@ -508,6 +508,9 @@ private void OnCollectionViewScrolled(object sender, DXCollectionViewScrolledEve
 ## Known Gotchas
 
 - `BoxCornerRadius` on `TextEdit` removed in DevExpress 25.1.3+ — do not use
+- **DX ThemeManager provides colors only — not typography scale.** `ThemeManager` generates a tonal palette + semantic color tokens (`Primary`, `OnSurface`, etc.). It does NOT define MD3 type scale styles (`Title.Large`, `Body.Large`, etc.) for MAUI `Label`. All type scale entries must be in the app's own `MaterialStyles.xaml`. Adding them is never redundant with DX. (Confirmed via DX docs 2026-03-30.)
+- **Implicit styles apply by CLR type, not xmlns alias.** `dx:TextEdit` (schema `http://schemas.devexpress.com/maui`) and `dxe:TextEdit` (`clr-namespace:DevExpress.Maui.Editors`) resolve to the same CLR type. The implicit `Style TargetType="dx:TextEdit"` in `MaterialStyles.xaml` applies to `dxe:TextEdit` in pages — explicit property re-declarations in pages that duplicate what the implicit style already sets are redundant and must be removed.
+- **`BoxView.Color` vs `BoxView.BackgroundColor`**: `Color` is the BoxView-specific fill property. `BackgroundColor` (from `VisualElement`) also works visually but is semantically incorrect for BoxView. Always use `Color` on BoxView — especially in the `Divider` named style.
 - `FontFamily`/`FontSize`/`InputFontFamily`/`InputFontSize` are NOT valid on `TextEdit` — font is inherited from the app theme; do not set it explicitly
 - `CheckEdit.CheckedCheckBoxColor` requires `{dx:ThemeColor X}` not `{StaticResource X}`
 - `DXCollectionView.SelectedItems` requires `IList` (non-generic) binding — use wrapper property

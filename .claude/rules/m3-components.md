@@ -1,5 +1,29 @@
 # M3 Components — AppBar Patterns
 
+## MD3 Terminology Conventions
+
+### "Body" means a structural slot — not text content
+In MD3 component anatomy, **"body"** refers to a **structural container or slot**:
+- Bottom sheet: Container → Header → **Body** (entire scrollable content area)
+- Dialog: Container → Header → **Body** (supporting text + actions area)
+
+**Never** name a BindableProperty `Body` for text content — it collides with MD3's container/slot meaning.
+
+**Use `SupportingText` instead** — MD3's cross-component term for secondary descriptive text. Consistent across Lists, Cards, Chips, Dialogs, and Empty state (supporting text slot). Our existing `ListItem.SupportingText` already follows this.
+
+### Anatomy slot terms used in this codebase
+
+| MD3 anatomy term | Used for |
+|---|---|
+| `Headline` | Primary text in list items, empty states, dialogs |
+| `SupportingText` | Secondary/descriptive text (replaces "Body" for text) |
+| `Illustration` | Icon or image in empty states |
+| `LeadingContent` | Left slot in list items |
+| `TrailingContent` | Right slot in list items |
+| `Overline` | Label above headline in list items |
+
+---
+
 ## M3 Small Top App Bar (Shell.TitleView context)
 
 | Spec | Value | Token |

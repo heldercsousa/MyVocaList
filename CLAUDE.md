@@ -68,10 +68,13 @@ After every task, always ask:
 Any area where Claude Code repeatedly makes mistakes or needs repeated guidance
 is a candidate for a new rule, command, or CLAUDE.md update.
 
+**Scope of inspection for complex tasks:** Before proposing anything that touches UI, styles, or components, inspect ALL of: every page, every custom component, every relevant rules file, AND verify what the platform/libraries already provide. Never limit the audit to the files initially mentioned. Cross-file pattern counts (how many times the same inline style appears) must be established before proposing centralization.
+
 ## Non-Negotiables
 - **Language**: Code, comments, logs, UI text — English only. Translate any non-English text immediately.
 - **Native dialogs**: NEVER use `DisplayAlert`, `DisplayActionSheet`, `DisplayPromptAsync`. See `.claude/rules/dialogs-validation.md`.
 - **UI Component Priority**: Always check `.claude/rules/devexpress-patterns.md` first. Use stock MAUI only when DevExpress has no equivalent.
+- **MD3 terminology**: All component names, style keys, BindableProperty names, and rules file documentation must use official MD3 terminology (m3.material.io). Code must be directly cross-referenceable against MD3 docs without mental translation. When unsure, fetch the official docs — never invent names.
 - **SafeAreaEdges**: .NET MAUI 10 breaking change — `ContentPage` defaults to `SafeAreaEdges="None"`. Add `SafeAreaEdges="Container"` to existing pages explicitly.
 - **Incremental edits**: For XAML/UI work, edit ONE file → build → fix → then next file. Never batch UI edits.
 - **Build on every change**: Run `dotnet build` after every code change. Fix all errors autonomously. Never present incomplete work.
