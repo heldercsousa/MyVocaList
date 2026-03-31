@@ -16,6 +16,8 @@ These are bugs in existing code — fix before writing any UI.
 - [ ] T-00e: Update `IPersonRepository` — remove `SearchByNameAsync` (redundant); add `SearchByNameOrEmailAsync`; add `GetPagedAsync`
 - [ ] T-00f: Fix `PersonService.CreatePersonAsync` — remove bare `catch (Exception ex)` message pass-through; let unexpected exceptions bubble to `GlobalExceptionHandler`
 - [ ] T-00g: Build verification after Phase 0 — 0 errors
+- [ ] T-00h: Remove `ITextNormalizationService` — delete `Domain/Services/ITextNormalizationService.cs`; remove `_textNormalizer` field and constructor parameter from `PersonService`; replace any `_textNormalizer.Normalize(x)` calls with `x` directly (DB `NOCASE_NOACCENT` collation handles all case/accent normalization at query time)
+- [ ] T-00i: Fix `PersonService.ValidateBirthday` — return `(true, "")` when birthday is null or whitespace (birthday is optional; the current code incorrectly returns `(false, "Birthday is required")`)
 
 ## Phase 1: Service Additions
 
