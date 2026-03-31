@@ -138,11 +138,7 @@ public async Task<(IEnumerable<Person> items, int totalCount)> GetPagedAsync(
 
 **Note on `SearchByNameAsync`:** The old method is now redundant (identical to `SearchByNameStartsWithAsync`). Remove it from `IPersonRepository` and `PersonRepository`, and remove the call from `PersonService`. The interface is already in Domain — update it.
 
-**Note on normalization in repository:** The repository currently has no access to `ITextNormalizationService`. Two options:
-- Pass the normalized term from the service (preferred — keeps normalization in the service layer)
-- The service normalizes the search term before calling the repository
-
-**Decision:** Service normalizes the term; repository receives an already-normalized string. This keeps the normalization logic in one place.
+**Note on normalization:** `ITextNormalizationService` is removed — the DB `NOCASE_NOACCENT` collation (applied globally via `CollationInterceptor`) handles all case and accent normalization at query time. `FullNameNormalized` is set to the raw `fullName` value before save; the DB handles the rest. The service passes the raw search term to the repository; the repository applies `EF.Functions.Collate` in the `WHERE` clause.
 
 ### PersonService additions
 

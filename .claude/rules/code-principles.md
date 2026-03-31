@@ -27,15 +27,15 @@ public sealed class VenueService : IVenueService
 ```
 
 ## Nullable Reference Types — DISABLED
-Nullable reference types are **disabled** across the entire solution via `Directory.Build.props`:
-```xml
-<Nullable>disable</Nullable>
-```
-- **Never** add `?` to reference types, null-forgiving operators `!`, `[NotNull]`, `[MaybeNull]`, etc.
-- **Never** add `= string.Empty` initializers just to satisfy nullability analysis.
-- **Never** add null guards that exist solely to satisfy the nullable analyzer (real null guards for real nulls are fine).
-- Do not re-enable nullable in any `.csproj` or file-level pragma.
-- This is a deliberate project decision — do not question or work around it.
+`Directory.Build.props` sets `<Nullable>disable</Nullable>` as a baseline, but every individual `.csproj` overrides to `<Nullable>enable</Nullable>` with specific warnings suppressed (CS8618, CS8601, CS8603, CS8604, CS8625, CS8602, etc.).
+
+**Effective behavior:** Nullable analysis is on but lenient — warnings that would require defensive rewrites of existing patterns are suppressed.
+
+- **Do NOT** add `?` to reference types or use null-forgiving operators `!` beyond what already exists
+- **Do NOT** add `= string.Empty` initializers just to satisfy nullability analysis
+- **Do NOT** add null guards that exist solely to satisfy the nullable analyzer (real null guards for real nulls are fine)
+- Do not change suppressed warning sets without discussing it first
+- This is a deliberate project decision — do not "fix" it by enabling stricter checking
 
 ## Architecture Constraints
 - Business logic lives in **Services** only — never in ViewModels or pages
