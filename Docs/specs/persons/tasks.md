@@ -1,7 +1,7 @@
 # Persons — Implementation Tasks
 
 > **Status:** Pending
-> **Last updated:** 2026-03-30
+> **Last updated:** 2026-03-31
 
 ---
 
@@ -48,10 +48,22 @@ These are bugs in existing code — fix before writing any UI.
 ## Phase 4: UI — List Page
 
 - [ ] T-15: Add `PersonsViewModel` — always-on selection; `IsSearchMode`/`IsScrolled`/`AppBarTitle`; paging + 400ms search debounce; `FloatingToolbar` commands (Select All / Edit / Delete); confirm-delete BottomSheet state; `OnSelectionChanged(count)`
-- [ ] T-16: Add `PersonsPage.xaml` — `SmallAppBar`+`SearchAppBar` in `Shell.TitleView`; `ShimmerView`+`DXCollectionView`; `ListItem` rows with `ListItemLeadingAvatar` + `CheckEdit` trailing; two empty-state overlays; `FloatingToolbar` (3 slots); FAB; confirm `BottomSheet`
+- [ ] T-16: Add `PersonsPage.xaml` — `SmallAppBar`+`SearchAppBar` in `Shell.TitleView`; `ShimmerView`+`DXCollectionView`; `ListItem` rows with `ListItemLeadingMonogram` + `CheckEdit` trailing; two `EmptyState` components; `FloatingToolbar` (3 slots); FAB (`Style="{StaticResource Fab}"`); `ConfirmSheet` component
 - [ ] T-17: Add `PersonsPage.xaml.cs` — `OnCollectionViewScrolled`; `OnSelectionChanged`; `OnConfirmSheetStateChanged`; `OnViewModelPropertyChanged` (opens/closes sheet); `OnBackButtonPressed` (sheet → search → default); `SelectedItems` assigned in `OnAppearing`; typed `ViewModel` property
 - [ ] T-18: Register `PersonsPage` + `PersonsViewModel` as `AddTransient` in `MauiProgram.cs`
 - [ ] T-19: Wire `PersonsPage` in `AppShell.xaml` as a navigation target or tab
+
+## Phase 4b: Tests (TDD — write tests before each phase's implementation)
+
+> Tests are written **before** the implementation they cover, following the Red-Green-Refactor cycle defined in `.claude/rules/testing.md`.
+> The `MyVocaList.Tests` project is set up during Styles & Structure (Step 1) — already available here.
+
+- [ ] T-19a: `PersonServiceTests` — name validation rules (all AC-1.3–1.7 cases + birthday + email format); `CreatePersonAsync` success path; `UpdatePersonAsync` email-excludes-self; `DeletePersonsAsync` returns correct message
+- [ ] T-19b: `PersonFormViewModelTests` — `SaveCommand` triggers correct service call; validation errors set `HasError`/`ErrorText` properties; `IsEditMode` derived property; `PageTitle` derived property; `SearchPersonsCommand` maps service results to `AutocompleteSuggestion` collection
+- [ ] T-19c: `PersonsViewModelTests` — `AppBarTitle` derived property ("Singers" / "N selected"); `CanEditSelected` (== 1); `CanDeleteSelected` (> 0); `IsEmptyNoPersons` / `IsEmptyNoResults` state transitions; `SelectAllCommand` stays in selection mode when deselecting all
+- [ ] T-19d: `PersonRepositoryIntegrationTests` — filtered composite unique index allows same name + null birthday; blocks same name + same birthday; nullable email unique index allows multiple NULLs; `SearchByNameOrEmailAsync` returns correct results with NOCASE collation
+
+---
 
 ## Phase 5: Verification
 

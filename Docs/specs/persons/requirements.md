@@ -1,7 +1,7 @@
 # Persons — Requirements
 
 > **Status:** Spec approved — pending implementation
-> **Last updated:** 2026-03-30
+> **Last updated:** 2026-03-31
 
 ## Overview
 
@@ -79,7 +79,7 @@ Persons are the singers registered in the system. The admin registers them befor
 - AC-3.10: When the list reaches the last item, the app shall automatically load the next page (load-more with spinner).
 - AC-3.11: The user shall be able to pull-to-refresh to reload from the first page.
 - AC-3.12: Each list row shall show the singer's `FullName` as headline and their participation/absence counts as supporting text (e.g. "Participations: 5 / Absences: 1").
-- AC-3.13: Each list row shall have a leading avatar icon and a trailing checkbox that reflects selection state.
+- AC-3.13: Each list row shall have a leading monogram (initials circle) and a trailing checkbox that reflects selection state.
 
 ---
 
@@ -141,7 +141,7 @@ Persons are the singers registered in the system. The admin registers them befor
 | `Id` | `int` | PK, auto-increment | EF Core generated |
 | `ExternalId` | `Guid?` | nullable, unique index | Reserved for future self-registration/device identity |
 | `FullName` | `string` | NOT NULL, maxLen=250 (DB) / 200 (input) | Trimmed before save |
-| `FullNameNormalized` | `string` | NOT NULL, maxLen=250 | Set by `ITextNormalizationService`; indexed |
+| `FullNameNormalized` | `string` | NOT NULL, maxLen=250 | Normalized inline in service layer before save; indexed |
 | `BirthdayDayMonth` | `string` | nullable, format DD/MM | For disambiguation; especially for non-tech/elder users |
 | `Email` | `string` | nullable, maxLen=100, unique index | For disambiguation and future marketing/auth |
 | `Participations` | `int` | NOT NULL, default 0 | Managed by event/queue logic |

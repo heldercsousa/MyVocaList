@@ -1,7 +1,7 @@
 # Persons — Technical Design
 
 > **Status:** Spec approved — pending implementation
-> **Last updated:** 2026-03-30
+> **Last updated:** 2026-03-31
 
 ---
 
@@ -191,11 +191,11 @@ These are needed for pre-populating the edit form via query string.
 | Content root | Single-cell `Grid` | Overlay pattern |
 | Loading | `ShimmerView` wrapping `DXCollectionView` | `IsInitialLoading` drives shimmer |
 | List | `DXCollectionView` | `SelectionMode="Multiple"` hardcoded; `Margin="0,0,0,80"` |
-| Item row | `ListItem` | `ListItemLeadingAvatar` + `CheckEdit` trailing; Headline=`FullName`; SupportingText=`ParticipationsAbsencesNumber` |
-| Empty states | Two `VerticalStackLayout` overlays | `IsEmptyNoPersons` / `IsEmptyNoResults` |
-| FAB | `DXButton` | `Margin="0,0,16,88"` |
+| Item row | `ListItem` | `ListItemLeadingMonogram` + `CheckEdit` trailing; Headline=`FullName`; SupportingText=`ParticipationsAbsencesNumber` |
+| Empty states | Two `EmptyState` components | `IsEmptyNoPersons` / `IsEmptyNoResults`; uses `EmptyState` from `UI/Components/States/` |
+| FAB | `DXButton` | `Style="{StaticResource Fab}"` + `Margin="0,0,16,88"` + `Icon` + `Command` inline |
 | Actions | `FloatingToolbar` | Slots: Select All / Edit / Delete |
-| Confirm delete | `BottomSheet` | `HalfExpandedRatio=0.28` |
+| Confirm delete | `ConfirmSheet` | Component from `UI/Components/Sheets/`; `SheetState` TwoWay bound to `ConfirmSheetState` |
 
 **FloatingToolbar slots:**
 | Slot | Icon | Action | CanExecute |
@@ -273,8 +273,7 @@ OpenSearchCommand, CloseSearchCommand
 [ObservableProperty] string _emailErrorText;
 
 [ObservableProperty] bool _isBusy;
-[ObservableProperty] bool _hasSuggestions;
-ObservableRangeCollection<Person> Suggestions { get; }
+[ObservableProperty] IEnumerable<AutocompleteSuggestion> _suggestions;  // set by SearchPersonsCommand; forwarded to AutocompleteField
 
 // Character counter (name)
 bool ShowCharacterCounter
