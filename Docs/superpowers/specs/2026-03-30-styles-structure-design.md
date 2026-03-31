@@ -15,6 +15,8 @@ This spec covers:
 
 **Out of scope:** The 5 placeholder pages (Artists, Events, People, Preferences, BackupRestore, Queue) — these will be built from scratch as real CRUD pages later.
 
+**In scope (added 2026-03-31):** TDD foundation for existing CRUD — `MyVocaList.Tests` project setup + `VenueService` unit tests + `VenuesViewModel` unit tests + `VenueRepository` integration tests (SQLite temp DB). This is the baseline that all future CRUDs (AutocompleteField, Person CRUD) build on.
+
 ---
 
 ## Key Findings from Audit
@@ -366,6 +368,8 @@ private void OnStateChanged(object sender, ValueChangedEventArgs<BottomSheetStat
 6. `EmptyState` component (new)
 7. `ConfirmSheet` component (new — verify DX BottomSheet overlay behavior)
 8. Apply `EmptyState` and `ConfirmSheet` in `VenuesPage`
-9. Rules files updates (m3-components.md, devexpress-patterns.md, crud-pages.md)
+9. Rules files updates (m3-components.md, devexpress-patterns.md, crud-pages.md, dialogs-validation.md)
+10. Update venues spec docs (`Docs/specs/venues/`) to reflect all style and component changes
+11. TDD foundation — `MyVocaList.Tests` project setup; `VenueService` unit tests; `VenuesViewModel` unit tests; `VenueRepository` integration tests (SQLite temp DB)
 
 Build after every step. Fix errors before proceeding.
