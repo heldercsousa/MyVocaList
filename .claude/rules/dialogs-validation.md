@@ -32,9 +32,10 @@ The ViewModel retains the same `ConfirmSheetState`, `ConfirmMessage`, `ConfirmAc
 `ConfirmActionCommand`, `DismissConfirmCommand` properties — no ViewModel changes needed.
 The page code-behind no longer needs to subscribe to `PropertyChanged` for sheet management.
 
-**Note:** If `ConfirmSheet` has z-order issues on a particular page (BottomSheet not overlaying
-correctly when wrapped in ContentView inside Grid), fall back to the inline `dx:BottomSheet`
-template from the "Confirm / Destructive Action Sheet" section below.
+**⚠️ Known limitation (confirmed 2026-04-02):** `dx:BottomSheet` wrapped inside a `ContentView`
+causes an ANR on initialization — `bottomSheet.Close()` hangs when called before the sheet has
+ever been opened. The `ConfirmSheet` component exists in `UI/Components/Sheets/` but **must not
+be used** until DevExpress resolves this. Use the inline `dx:BottomSheet` pattern below instead.
 
 ---
 
