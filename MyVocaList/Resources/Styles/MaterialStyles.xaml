@@ -130,6 +130,7 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <!-- MD3 type scale additions — completes the set beyond the entries above -->
     <Style TargetType="Label" Class="Title.Large">
         <Setter Property="FontFamily" Value="RobotoRegular" />
         <Setter Property="FontSize" Value="22" />
@@ -205,7 +206,7 @@
 
     <!-- Loading skeleton bone — matches ListItem 56dp height -->
     <Style x:Key="SkeletonBone" TargetType="dx:DXBorder">
-        <Setter Property="BackgroundColor" Value="{dx:ThemeColor SurfaceContainerHighest}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
         <Setter Property="CornerRadius" Value="0" />
         <Setter Property="HeightRequest" Value="56" />
         <Setter Property="Margin" Value="0,1" />
