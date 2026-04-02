@@ -1,23 +1,23 @@
 namespace MyVocaList.UI.Components.Lists;
 
-public partial class ListItemLeadingAvatar : ContentView
+public partial class ListItemLeadingMonogram : ContentView
 {
     public static readonly BindableProperty InitialsProperty = BindableProperty.Create(
         nameof(Initials),
         typeof(string),
-        typeof(ListItemLeadingAvatar),
+        typeof(ListItemLeadingMonogram),
         defaultValue: string.Empty);
 
-    public static readonly BindableProperty AvatarColorProperty = BindableProperty.Create(
-        nameof(AvatarColor),
+    public static readonly BindableProperty MonogramColorProperty = BindableProperty.Create(
+        nameof(MonogramColor),
         typeof(Color),
-        typeof(ListItemLeadingAvatar),
+        typeof(ListItemLeadingMonogram),
         defaultValue: Colors.Transparent);
 
     public static readonly BindableProperty InitialsColorProperty = BindableProperty.Create(
         nameof(InitialsColor),
         typeof(Color),
-        typeof(ListItemLeadingAvatar),
+        typeof(ListItemLeadingMonogram),
         defaultValue: Colors.Transparent);
 
     public string Initials
@@ -26,10 +26,10 @@ public partial class ListItemLeadingAvatar : ContentView
         set => SetValue(InitialsProperty, value);
     }
 
-    public Color AvatarColor
+    public Color MonogramColor
     {
-        get => (Color)GetValue(AvatarColorProperty);
-        set => SetValue(AvatarColorProperty, value);
+        get => (Color)GetValue(MonogramColorProperty);
+        set => SetValue(MonogramColorProperty, value);
     }
 
     public Color InitialsColor
@@ -38,7 +38,7 @@ public partial class ListItemLeadingAvatar : ContentView
         set => SetValue(InitialsColorProperty, value);
     }
 
-    public ListItemLeadingAvatar()
+    public ListItemLeadingMonogram()
     {
         InitializeComponent();
     }
