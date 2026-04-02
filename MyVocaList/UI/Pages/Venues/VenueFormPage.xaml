@@ -18,18 +18,13 @@
                           Text="{Binding VenueName, Mode=TwoWay}"
                           LabelText="Venue Name"
                           PlaceholderText="Enter venue name"
-                          BoxMode="Outlined"
-                          FocusedBorderColor="{StaticResource Primary}"
-                          BorderColor="{StaticResource Outline}"
-                          BackgroundColor="{StaticResource SurfaceContainerHighest}"
-                          TextColor="{StaticResource OnSurface}"
                           MaxCharacterCount="30"
                           HasError="{Binding NameHasError}"
                           ErrorText="{Binding NameErrorText}" />
 
             <Label Text="{Binding CharacterCounterText}"
                    IsVisible="{Binding ShowCharacterCounter}"
-                   FontFamily="RobotoRegular" FontSize="12"
+                   StyleClass="Body.Small"
                    HorizontalOptions="End">
                 <Label.Triggers>
                     <DataTrigger TargetType="Label"
