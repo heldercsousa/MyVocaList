@@ -10,7 +10,6 @@
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
     xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
-    xmlns:sheets="clr-namespace:MyVocaList.UI.Components.Sheets"
     x:Class="MyVocaList.UI.Pages.Venues.VenuesPage"
     x:Name="page"
     x:DataType="vm:VenuesViewModel"
@@ -123,6 +122,8 @@
         <!-- FAB: bottom-right, above FloatingToolbar (88 = toolbar 48 + margin 16 + gap 24) -->
         <dx:DXButton Style="{StaticResource Fab}"
                      Icon="add_outlined"
+                     HorizontalOptions="End"
+                     VerticalOptions="End"
                      Margin="0,0,16,88"
                      SemanticProperties.Description="Add venue"
                      Command="{Binding AddVenueCommand}" />
@@ -145,13 +146,32 @@
             Action3Description="Delete selected"
             Action3IsSelected="{Binding CanDeleteSelected}" />
 
-        <!-- Confirm delete sheet -->
-        <sheets:ConfirmSheet x:Name="confirmSheet"
-                             SheetState="{Binding ConfirmSheetState, Mode=TwoWay}"
-                             Message="{Binding ConfirmMessage}"
-                             ActionText="{Binding ConfirmActionText}"
-                             ActionCommand="{Binding ConfirmActionCommand}"
-                             DismissCommand="{Binding DismissConfirmCommand}" />
+        <!-- Confirm delete BottomSheet (inline — ConfirmSheet ContentView wrapper caused ANR on DX init) -->
+        <dx:BottomSheet x:Name="confirmSheet"
+                        HalfExpandedRatio="0.28"
+                        AllowedState="HalfExpanded"
+                        IsModal="True"
+                        ShowGrabber="True"
+                        AllowDismiss="True"
+                        BackgroundColor="{StaticResource Surface}"
+                        CornerRadius="28"
+                        StateChanged="OnConfirmSheetStateChanged">
+            <VerticalStackLayout>
+                <Label Text="{Binding ConfirmMessage}"
+                       StyleClass="Title.Medium"
+                       TextColor="{StaticResource OnSurface}"
+                       HorizontalTextAlignment="Center"
+                       Margin="24,20" />
+                <BoxView Style="{StaticResource Divider}" />
+                <dx:DXButton Content="{Binding ConfirmActionText}"
+                             Style="{StaticResource BottomSheetDestructiveAction}"
+                             Command="{Binding ConfirmActionCommand}" />
+                <BoxView Style="{StaticResource Divider}" />
+                <dx:DXButton Content="Cancel"
+                             Style="{StaticResource BottomSheetCancelAction}"
+                             Command="{Binding DismissConfirmCommand}" />
+            </VerticalStackLayout>
+        </dx:BottomSheet>
 
     </Grid>
 
