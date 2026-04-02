@@ -262,7 +262,7 @@ Every list ViewModel shall have:
 | `string AppBarTitle` | Derived: entity name or "N selected" |
 | `bool CanEditSelected` | `SelectedCount == 1` (if edit is supported) |
 | `bool CanDeleteSelected` | `SelectedCount > 0` (if delete is supported) |
-| `BottomSheetState ConfirmSheetState` | Drives confirm BottomSheet (if destructive action exists) |
+| `BottomSheetState ConfirmSheetState` | Drives `ConfirmSheet` component (if destructive action exists) |
 | `RefreshCommand`, `LoadMoreCommand`, `AddCommand` | Standard list commands |
 | `EditSelectedCommand`, `DeleteSelectedCommand`, `SelectAllCommand` | Action commands (adapt to page needs) |
 | `OpenSearchCommand`, `CloseSearchCommand` | Search commands (omit if no search) |
@@ -326,7 +326,11 @@ See `dialogs-validation.md` for the full XAML snippet.
 
 ## Shimmer Skeleton
 
-Skeleton bones match the `ListItem` height: `HeightRequest="56"`, `CornerRadius="0"`, `Margin="0,1"` (1dp separator gap). Use 6 bones.
+Skeleton bones match the `ListItem` height: `HeightRequest="56"`, `CornerRadius="0"`, `Margin="0,1"` (1dp separator gap). Use 6 bones. Apply the `SkeletonBone` named style — no inline props needed:
+
+```xml
+<dx:DXBorder Style="{StaticResource SkeletonBone}" />
+```
 
 Always `await Task.Yield()` before the first data fetch in `InitializeAsync()` so the shimmer renders before the load begins.
 
@@ -342,3 +346,23 @@ Always `await Task.Yield()` before the first data fetch in `InitializeAsync()` s
 | Form ViewModel | `AddTransient` | Fresh instance per navigation |
 | Service | `AddScoped` | Per-lifetime scope |
 | Repository | `AddScoped` | Per-lifetime scope |
+
+---
+
+## Empty State
+
+Use the `EmptyState` component for all empty/no-results states:
+
+```xml
+<states:EmptyState
+    Illustration="nightlife_outlined"
+    Headline="No items registered"
+    IsVisible="{Binding IsEmptyNoItems}"
+    Margin="32,32,32,80" />
+```
+
+Namespace: `xmlns:states="clr-namespace:MyVocaList.UI.Components.States"`
+
+Two standard ViewModel properties drive visibility:
+- `IsEmptyNoItems` — no records exist at all
+- `IsEmptyNoResults` — search returned no matches

@@ -12,6 +12,32 @@ All user confirmation and input collection must use DevExpress `BottomSheet`.
 
 ## BottomSheet Patterns
 
+## ConfirmSheet component
+
+Use `ConfirmSheet` for destructive action confirmations. It wraps `dx:BottomSheet` with
+standard MD3 styling and handles its own Show/Close based on the `SheetState` BindableProperty.
+
+```xml
+<sheets:ConfirmSheet x:Name="confirmSheet"
+                     SheetState="{Binding ConfirmSheetState, Mode=TwoWay}"
+                     Message="{Binding ConfirmMessage}"
+                     ActionText="{Binding ConfirmActionText}"
+                     ActionCommand="{Binding ConfirmActionCommand}"
+                     DismissCommand="{Binding DismissConfirmCommand}" />
+```
+
+Namespace: `xmlns:sheets="clr-namespace:MyVocaList.UI.Components.Sheets"`
+
+The ViewModel retains the same `ConfirmSheetState`, `ConfirmMessage`, `ConfirmActionText`,
+`ConfirmActionCommand`, `DismissConfirmCommand` properties — no ViewModel changes needed.
+The page code-behind no longer needs to subscribe to `PropertyChanged` for sheet management.
+
+**Note:** If `ConfirmSheet` has z-order issues on a particular page (BottomSheet not overlaying
+correctly when wrapped in ContentView inside Grid), fall back to the inline `dx:BottomSheet`
+template from the "Confirm / Destructive Action Sheet" section below.
+
+---
+
 ## When to Use BottomSheet vs. Shell Navigation Form
 
 | Scenario | Pattern |

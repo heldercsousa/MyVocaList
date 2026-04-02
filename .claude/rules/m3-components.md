@@ -11,6 +11,23 @@ In MD3 component anatomy, **"body"** refers to a **structural container or slot*
 
 **Use `SupportingText` instead** — MD3's cross-component term for secondary descriptive text. Consistent across Lists, Cards, Chips, Dialogs, and Empty state (supporting text slot). Our existing `ListItem.SupportingText` already follows this.
 
+### Complete MD3 type scale — MAUI StyleClass keys
+
+| MD3 role | Style class | Family | sp | Weight |
+|---|---|---|---|---|
+| Display Large | `Display.Large` | RobotoRegular | 57 | Regular |
+| Headline Large | `Headline.Large` | RobotoRegular | 32 | Regular |
+| Title Large | `Title.Large` | RobotoRegular | 22 | Regular |
+| Title Medium | `Title.Medium` | RobotoMedium | 16 | Medium |
+| Body Large | `Body.Large` | RobotoRegular | 16 | Regular |
+| Body Medium | `Body.Medium` | RobotoRegular | 14 | Regular |
+| Body Small | `Body.Small` | RobotoRegular | 12 | Regular |
+| Label Large | `Label.Large` | RobotoMedium | 14 | Medium |
+| Label Medium | `Label.Medium` | RobotoMedium | 12 | Medium |
+| Label Small | `Label.Small` | RobotoMedium | 11 | Medium |
+
+> All 10 entries are defined in `MaterialStyles.xaml` as `StyleClass` entries. `Label.Small` weight is Medium per MD3 spec.
+
 ### Anatomy slot terms used in this codebase
 
 | MD3 anatomy term | Used for |
@@ -332,3 +349,29 @@ Reference the namespace directly per-page until then.
 ### No DX/MAUI built-in
 DevExpress MAUI has no Toolbar component. .NET MAUI `ToolbarItem` adds to Shell top bar only.
 FloatingToolbar is always a custom `ContentView` — same approach as AppBars.
+
+---
+
+## M3 Empty State component
+
+| Slot | BindableProperty | Control | Style |
+|---|---|---|---|
+| Illustration | `Illustration` (string icon name) | `dx:DXButton` (display-only) | `EmptyStateIllustration` |
+| Headline | `Headline` (string) | `Label` | `EmptyStateHeadline` |
+| Supporting text | `SupportingText` (string, optional) | `Label` | `Body.Medium` + `OnSurfaceVariant` |
+
+Usage:
+```xml
+<states:EmptyState
+    Illustration="nightlife_outlined"
+    Headline="No items yet"
+    IsVisible="{Binding IsEmpty}"
+    Margin="32,32,32,80" />
+```
+
+Namespace: `xmlns:states="clr-namespace:MyVocaList.UI.Components.States"`
+
+### NavDrawer section header typography fix
+- **Was:** `RobotoMedium 14sp` (= Label Large)
+- **Correct:** `RobotoMedium 12sp` = Label Medium per MD3 Navigation Drawer spec
+- **In code:** `Style="{StaticResource NavDrawerSectionHeader}"` (sets 12sp Medium)
