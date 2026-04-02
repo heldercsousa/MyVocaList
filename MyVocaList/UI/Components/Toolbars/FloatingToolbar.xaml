@@ -26,12 +26,7 @@
             <!-- Slot 1 -->
             <dx:DXButton x:Name="action1Button"
                          Icon="{Binding Action1Icon, Source={x:Reference self}}"
-                         IconColor="{StaticResource OnSurfaceVariant}"
-                         BackgroundColor="Transparent"
-                         WidthRequest="48" HeightRequest="48"
-                         CornerRadius="24"
-                         HorizontalContentAlignment="Center"
-                         VerticalOptions="Center"
+                         Style="{StaticResource StandardIconButton}"
                          IsVisible="{Binding HasAction1, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action1Description, Source={x:Reference self}}"
                          Command="{Binding Action1Command, Source={x:Reference self}}" />
@@ -39,12 +34,7 @@
             <!-- Slot 2 -->
             <dx:DXButton x:Name="action2Button"
                          Icon="{Binding Action2Icon, Source={x:Reference self}}"
-                         IconColor="{StaticResource OnSurfaceVariant}"
-                         BackgroundColor="Transparent"
-                         WidthRequest="48" HeightRequest="48"
-                         CornerRadius="24"
-                         HorizontalContentAlignment="Center"
-                         VerticalOptions="Center"
+                         Style="{StaticResource StandardIconButton}"
                          IsVisible="{Binding HasAction2, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action2Description, Source={x:Reference self}}"
                          Command="{Binding Action2Command, Source={x:Reference self}}" />
@@ -52,12 +42,7 @@
             <!-- Slot 3 -->
             <dx:DXButton x:Name="action3Button"
                          Icon="{Binding Action3Icon, Source={x:Reference self}}"
-                         IconColor="{StaticResource OnSurfaceVariant}"
-                         BackgroundColor="Transparent"
-                         WidthRequest="48" HeightRequest="48"
-                         CornerRadius="24"
-                         HorizontalContentAlignment="Center"
-                         VerticalOptions="Center"
+                         Style="{StaticResource StandardIconButton}"
                          IsVisible="{Binding HasAction3, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action3Description, Source={x:Reference self}}"
                          Command="{Binding Action3Command, Source={x:Reference self}}" />
@@ -65,12 +50,7 @@
             <!-- Slot 4 -->
             <dx:DXButton x:Name="action4Button"
                          Icon="{Binding Action4Icon, Source={x:Reference self}}"
-                         IconColor="{StaticResource OnSurfaceVariant}"
-                         BackgroundColor="Transparent"
-                         WidthRequest="48" HeightRequest="48"
-                         CornerRadius="24"
-                         HorizontalContentAlignment="Center"
-                         VerticalOptions="Center"
+                         Style="{StaticResource StandardIconButton}"
                          IsVisible="{Binding HasAction4, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action4Description, Source={x:Reference self}}"
                          Command="{Binding Action4Command, Source={x:Reference self}}" />
@@ -78,12 +58,7 @@
             <!-- Slot 5 -->
             <dx:DXButton x:Name="action5Button"
                          Icon="{Binding Action5Icon, Source={x:Reference self}}"
-                         IconColor="{StaticResource OnSurfaceVariant}"
-                         BackgroundColor="Transparent"
-                         WidthRequest="48" HeightRequest="48"
-                         CornerRadius="24"
-                         HorizontalContentAlignment="Center"
-                         VerticalOptions="Center"
+                         Style="{StaticResource StandardIconButton}"
                          IsVisible="{Binding HasAction5, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action5Description, Source={x:Reference self}}"
                          Command="{Binding Action5Command, Source={x:Reference self}}" />

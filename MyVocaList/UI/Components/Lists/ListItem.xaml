@@ -26,23 +26,20 @@
                              VerticalOptions="Center">
 
             <Label x:Name="overlineLabel"
-                   FontFamily="RobotoRegular"
-                   FontSize="11"
+                   StyleClass="Label.Small"
                    TextColor="{StaticResource OnSurfaceVariant}"
                    IsVisible="False"
                    MaxLines="1"
                    LineBreakMode="TailTruncation" />
 
             <Label x:Name="headlineLabel"
-                   FontFamily="RobotoRegular"
-                   FontSize="16"
+                   StyleClass="Body.Large"
                    TextColor="{StaticResource OnSurface}"
                    MaxLines="1"
                    LineBreakMode="TailTruncation" />
 
             <Label x:Name="supportingLabel"
-                   FontFamily="RobotoRegular"
-                   FontSize="14"
+                   StyleClass="Body.Medium"
                    TextColor="{StaticResource OnSurfaceVariant}"
                    IsVisible="False"
                    MaxLines="1"
