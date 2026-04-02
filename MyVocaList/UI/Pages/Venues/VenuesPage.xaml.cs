@@ -14,8 +14,7 @@ public partial class VenuesPage : ContentPage
         InitializeComponent();
         _viewModel = viewModel;
         BindingContext = _viewModel;
-
-        _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+        // No PropertyChanged subscription needed — ConfirmSheet handles itself
     }
 
     protected override void OnAppearing()
@@ -28,18 +27,6 @@ public partial class VenuesPage : ContentPage
             collectionView.SelectedItems = _viewModel.SelectedVenues;
 
         _ = _viewModel.InitializeAsync();
-    }
-
-    private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(VenuesViewModel.ConfirmSheetState))
-        {
-            var state = _viewModel.ConfirmSheetState;
-            if (state == BottomSheetState.Hidden)
-                confirmSheet.Close();
-            else
-                confirmSheet.Show(state, this);
-        }
     }
 
     protected override bool OnBackButtonPressed()
@@ -68,11 +55,5 @@ public partial class VenuesPage : ContentPage
     {
         var count = (collectionView.SelectedItems as System.Collections.ICollection)?.Count ?? 0;
         _viewModel.OnSelectionChanged(count);
-    }
-
-    private void OnConfirmSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
-    {
-        if (e.NewValue == BottomSheetState.Hidden && _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
-            _viewModel.ConfirmSheetState = BottomSheetState.Hidden;
     }
 }

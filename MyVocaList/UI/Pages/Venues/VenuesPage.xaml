@@ -9,6 +9,8 @@
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
+    xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
+    xmlns:sheets="clr-namespace:MyVocaList.UI.Components.Sheets"
     x:Class="MyVocaList.UI.Pages.Venues.VenuesPage"
     x:Name="page"
     x:DataType="vm:VenuesViewModel"
@@ -42,18 +44,12 @@
                         WaveOpacity="0.8">
             <dx:ShimmerView.LoadingView>
                 <VerticalStackLayout Spacing="0">
-                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
-                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
-                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
-                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
-                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
-                    <dx:DXBorder BackgroundColor="{dx:ThemeColor SurfaceContainerHighest}"
-                                 CornerRadius="0" HeightRequest="56" Margin="0,1" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
                 </VerticalStackLayout>
             </dx:ShimmerView.LoadingView>
             <dx:ShimmerView.Content>
@@ -111,51 +107,22 @@
         </dx:ShimmerView>
 
         <!-- Empty state: no venues registered -->
-        <VerticalStackLayout IsVisible="{Binding IsEmptyNoVenues}"
-                             VerticalOptions="Center"
-                             HorizontalOptions="Center"
-                             Spacing="8"
-                             Margin="32,32,32,80">
-            <dx:DXButton Icon="nightlife_outlined"
-                         IconColor="{dx:ThemeColor OnSurfaceVariant}"
-                         IconWidth="64" IconHeight="64"
-                         BackgroundColor="Transparent"
-                         InputTransparent="True"
-                         WidthRequest="80" HeightRequest="80"
-                         HorizontalOptions="Center" />
-            <Label Text="No venue registered"
-                   FontFamily="RobotoMedium" FontSize="16"
-                   TextColor="{dx:ThemeColor OnSurfaceVariant}"
-                   HorizontalTextAlignment="Center" />
-        </VerticalStackLayout>
+        <states:EmptyState
+            Illustration="nightlife_outlined"
+            Headline="No venue registered"
+            IsVisible="{Binding IsEmptyNoVenues}"
+            Margin="32,32,32,80" />
 
         <!-- Empty state: search returned no results -->
-        <VerticalStackLayout IsVisible="{Binding IsEmptyNoResults}"
-                             VerticalOptions="Center"
-                             HorizontalOptions="Center"
-                             Spacing="8"
-                             Margin="32,32,32,80">
-            <dx:DXButton Icon="search_outlined"
-                         IconColor="{dx:ThemeColor OnSurfaceVariant}"
-                         IconWidth="64" IconHeight="64"
-                         BackgroundColor="Transparent"
-                         InputTransparent="True"
-                         WidthRequest="80" HeightRequest="80"
-                         HorizontalOptions="Center" />
-            <Label Text="No venue found"
-                   FontFamily="RobotoMedium" FontSize="16"
-                   TextColor="{dx:ThemeColor OnSurfaceVariant}"
-                   HorizontalTextAlignment="Center" />
-        </VerticalStackLayout>
+        <states:EmptyState
+            Illustration="search_outlined"
+            Headline="No venue found"
+            IsVisible="{Binding IsEmptyNoResults}"
+            Margin="32,32,32,80" />
 
         <!-- FAB: bottom-right, above FloatingToolbar (88 = toolbar 48 + margin 16 + gap 24) -->
-        <dx:DXButton Icon="add_outlined"
-                     IconColor="{StaticResource OnPrimary}"
-                     BackgroundColor="{StaticResource Primary}"
-                     PressedBackgroundColor="{StaticResource PrimaryContainer}"
-                     WidthRequest="56" HeightRequest="56"
-                     CornerRadius="16"
-                     HorizontalOptions="End" VerticalOptions="End"
+        <dx:DXButton Style="{StaticResource Fab}"
+                     Icon="add_outlined"
                      Margin="0,0,16,88"
                      SemanticProperties.Description="Add venue"
                      Command="{Binding AddVenueCommand}" />
@@ -178,38 +145,13 @@
             Action3Description="Delete selected"
             Action3IsSelected="{Binding CanDeleteSelected}" />
 
-        <!-- Confirm delete BottomSheet -->
-        <dx:BottomSheet x:Name="confirmSheet"
-                        HalfExpandedRatio="0.28"
-                        AllowedState="HalfExpanded"
-                        IsModal="True"
-                        ShowGrabber="True"
-                        AllowDismiss="True"
-                        BackgroundColor="{StaticResource Surface}"
-                        CornerRadius="28"
-                        StateChanged="OnConfirmSheetStateChanged">
-            <VerticalStackLayout>
-                <Label Text="{Binding ConfirmMessage}"
-                       FontFamily="RobotoMedium" FontSize="16"
-                       TextColor="{StaticResource OnSurface}"
-                       HorizontalTextAlignment="Center"
-                       Margin="24,20" />
-                <BoxView HeightRequest="1" BackgroundColor="{StaticResource OutlineVariant}" />
-                <dx:DXButton Content="{Binding ConfirmActionText}"
-                             BackgroundColor="Transparent"
-                             TextColor="{StaticResource Error}"
-                             HorizontalOptions="Fill"
-                             HeightRequest="56"
-                             Command="{Binding ConfirmActionCommand}" />
-                <BoxView HeightRequest="1" BackgroundColor="{StaticResource OutlineVariant}" />
-                <dx:DXButton Content="Cancel"
-                             BackgroundColor="Transparent"
-                             TextColor="{StaticResource Primary}"
-                             HorizontalOptions="Fill"
-                             HeightRequest="56"
-                             Command="{Binding DismissConfirmCommand}" />
-            </VerticalStackLayout>
-        </dx:BottomSheet>
+        <!-- Confirm delete sheet -->
+        <sheets:ConfirmSheet x:Name="confirmSheet"
+                             SheetState="{Binding ConfirmSheetState, Mode=TwoWay}"
+                             Message="{Binding ConfirmMessage}"
+                             ActionText="{Binding ConfirmActionText}"
+                             ActionCommand="{Binding ConfirmActionCommand}"
+                             DismissCommand="{Binding DismissConfirmCommand}" />
 
     </Grid>
 
