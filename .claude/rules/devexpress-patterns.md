@@ -551,3 +551,36 @@ public static readonly BindableProperty OverlineProperty =
 
 **Rule:** Prefer Pattern B when `propertyChanged` has any logic beyond a direct value pass-through. Never duplicate logic in both a XAML binding AND a `propertyChanged` callback — pick one.
 
+
+---
+
+## Named Styles — complete list
+
+All defined in `MaterialStyles.xaml`.
+
+| Key | TargetType | Purpose |
+|---|---|---|
+| `StandardIconButton` | `dx:DXButton` | Trailing/action icon buttons (48×48, OnSurfaceVariant) |
+| `NavigationIconButton` | `dx:DXButton` | Leading/nav icon buttons (48×48, OnSurface) |
+| `Fab` | `dx:DXButton` | Floating action button (56×56, CornerRadius=16, Primary) |
+| `Divider` | `BoxView` | 1dp divider line (OutlineVariant). Uses `Color` not `BackgroundColor`. |
+| `SkeletonBone` | `dx:DXBorder` | Shimmer skeleton bone (56dp, CornerRadius=0, SurfaceContainerHighest) |
+| `BottomSheetDestructiveAction` | `dx:DXButton` | Destructive action in BottomSheet (Error text, Fill, 56dp) |
+| `BottomSheetCancelAction` | `dx:DXButton` | Cancel in BottomSheet (Primary text, Fill, 56dp) |
+| `EmptyStateHeadline` | `Label` | Headline in EmptyState (RobotoMedium 16sp, OnSurfaceVariant, centered) |
+| `EmptyStateIllustration` | `dx:DXButton` | Icon in EmptyState (display-only, 80×80, 64dp icon) |
+| `NavDrawerSectionHeader` | `Label` | Nav drawer group title (RobotoMedium 12sp, OnSurfaceVariant) |
+
+## ListItemLeadingMonogram (formerly ListItemLeadingAvatar)
+
+Renamed per MD3 terminology. MD3 distinguishes:
+- **Monogram**: initials text in a circle — `ListItemLeadingMonogram`
+- **Avatar**: photo/image of a person — not yet implemented
+
+BindableProperties: `Initials` (string), `MonogramColor` (Color), `InitialsColor` (Color)
+
+## BoxView.Color vs BackgroundColor
+
+Always use `BoxView.Color` — it is BoxView's own fill property.
+`BackgroundColor` (from `VisualElement`) also renders but is semantically wrong.
+The `Divider` named style uses `Color` canonically.
