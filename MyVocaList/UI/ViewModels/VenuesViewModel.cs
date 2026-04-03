@@ -295,6 +295,7 @@ namespace MyVocaList.UI.ViewModels
                 });
                 return;
             }
+            if (Venues.Count == 0) return;
             RunOnUiThread(() =>
             {
                 SelectedVenues.ReplaceRange([.. Venues]);

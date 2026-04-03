@@ -249,25 +249,25 @@ Namespace: `xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"`
 | Height | 48dp |
 | Width | Wrap content (auto-sizes to populated slots) |
 | Padding (H, outside icon slots) | 4dp |
-| Background | SurfaceContainerHigh |
+| Background | **SecondaryContainer** (vibrant — project standard) |
 | Shape | CornerRadius = 24dp (full pill) |
-| Elevation | Level 3 per spec — **omitted in dark mode** (shadow invisible on near-black backgrounds; SurfaceContainerHigh tint conveys elevation instead) |
+| Elevation | Level 3 per spec — **omitted** (tint conveys elevation in dark mode) |
 | Icon button tap zone | 48×48dp, CornerRadius=24 |
 | Icon size | 24dp (DXButton default) |
-| Icon color (rest) | OnSurfaceVariant |
-| Icon color (selected) | OnSecondaryContainer |
-| Icon bg (selected) | SecondaryContainer |
+| Icon color (rest) | **OnSecondaryContainer** |
+| Icon bg (selected) | **Primary** |
+| Icon color (selected) | **OnPrimary** |
 | Max slots | 5 |
 | Scroll animation | NOT used — persistent by design (valid per M3; animation adds threading risk) |
-| Position | Overlay, VerticalOptions=End, HorizontalOptions=Center, Margin bottom=16 |
+| Position | See FAB Coexistence below |
 
-### Color tokens (dark mode)
+### Color tokens (dark mode — vibrant)
 | Token | Hex |
 |---|---|
-| SurfaceContainerHigh | `#29292F` |
-| OnSurfaceVariant | `#C6C5D3` |
 | SecondaryContainer | `#3F4566` |
 | OnSecondaryContainer | `#AEB3DA` |
+| Primary | `#BAC3FF` |
+| OnPrimary | `#15267B` |
 
 ### When to use
 - 2–5 page-specific actions (edit, delete, format, share, select-all)
@@ -281,7 +281,7 @@ Namespace: `xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"`
 
 ### Anatomy
 ```
-[DXBorder: pill, SurfaceContainerHigh, Shadow Level 3]
+[DXBorder: pill, SecondaryContainer (vibrant), Level 3 elevation via tint]
   └── HorizontalStackLayout
         ├── Slot 1: DXButton 48×48 (hidden if ActionNIcon empty)
         ├── Slot 2: DXButton 48×48
@@ -298,38 +298,48 @@ BindableProperties per slot (N = 1–5):
 - `ActionNIcon` (string) — slot hidden when null/empty
 - `ActionNCommand` (ICommand)
 - `ActionNDescription` (string) — SemanticProperties.Description for TalkBack
-- `ActionNIsSelected` (bool) — applies SecondaryContainer bg + OnSecondaryContainer icon via `propertyChanged` callback
+- `ActionNIsSelected` (bool) — applies `Primary` bg + `OnPrimary` icon when selected (contrasts against vibrant bg)
 
 ### Page integration pattern
+
+Toolbar and FAB are placed in a single `HorizontalStackLayout`, centered at the bottom.
+FAB is to the RIGHT of the toolbar. `VerticalOptions=Center` on both aligns them vertically
+(FAB 56dp > toolbar 48dp — center alignment keeps them visually level).
+
 ```xml
-<!-- Root: single-cell Grid (toolbar overlays content) -->
+<!-- Root: single-cell Grid (toolbar+FAB row overlays content) -->
 <Grid>
-    <!-- Content list — bottom margin keeps last item visible above toolbar -->
+    <!-- Content list — bottom margin clears the combined bar -->
+    <!-- Formula: max(FAB 56dp, toolbar 48dp) + 16dp margin + 8dp breathing = 80dp -->
     <dxcv:DXCollectionView Margin="0,0,0,80" ... />
 
-    <!-- Floating toolbar — centered, 16dp above safe area bottom -->
-    <toolbars:FloatingToolbar
-        VerticalOptions="End"
-        HorizontalOptions="Center"
-        Margin="0,0,0,16"
-        Action1Icon="edit_outlined"
-        Action1Command="{Binding EditCommand}"
-        Action1Description="Edit"
-        Action2Icon="delete_outlined"
-        Action2Command="{Binding DeleteCommand}"
-        Action2Description="Delete" />
-
-    <!-- FAB — independent, bottom-right (not managed by toolbar) -->
-    <dx:DXButton Icon="add_outlined" ... VerticalOptions="End" HorizontalOptions="End"
-                 Margin="0,0,16,16" />
+    <!-- Combined toolbar + FAB row — centered, 16dp above safe area bottom -->
+    <HorizontalStackLayout HorizontalOptions="Center"
+                           VerticalOptions="End"
+                           Margin="0,0,0,16"
+                           Spacing="8">
+        <toolbars:FloatingToolbar
+            VerticalOptions="Center"
+            Action1Icon="edit_outlined"
+            Action1Command="{Binding EditCommand}"
+            Action1Description="Edit"
+            Action2Icon="delete_outlined"
+            Action2Command="{Binding DeleteCommand}"
+            Action2Description="Delete" />
+        <dx:DXButton Style="{StaticResource Fab}"
+                     Icon="add_outlined"
+                     VerticalOptions="Center"
+                     Command="{Binding AddCommand}" />
+    </HorizontalStackLayout>
 </Grid>
 ```
 
-Content bottom margin formula: toolbar height (48) + toolbar bottom margin (16) + breathing room (16) = **80dp minimum**.
+**Never** use independent overlays (FAB at bottom-right with Margin formula, toolbar separately centered). That pattern is retired.
 
 ### FAB coexistence
-FAB stays at bottom-right independently. Pages control positioning via Margin.
-FloatingToolbar does not manage FAB placement — keep them decoupled.
+FAB is placed to the RIGHT of `FloatingToolbar` inside a shared `HorizontalStackLayout`.
+The whole unit is `HorizontalOptions=Center`, not independently positioned.
+`DXCollectionView.Margin="0,0,0,80"` — max(56,48) + 16 + 8 breathing.
 
 ### Accessibility
 - Every `ActionNDescription` is mandatory — TalkBack reads it as the button label

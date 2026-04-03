@@ -111,7 +111,10 @@
       "Bash(SESSION_DIR=\"C:/Users/helde/source/repos/MyVocaList/.superpowers/brainstorm/1099-1774831199\")",
       "Bash(STATE_DIR=\"$SESSION_DIR/state\")",
       "Bash(LOG_FILE=\"$STATE_DIR/server.log\")",
-      "Bash(__NEW_LINE_1bfe84a10a07bf62__ powershell.exe -Command \":*)"
+      "Bash(__NEW_LINE_1bfe84a10a07bf62__ powershell.exe -Command \":*)",
+      "Bash(echo \"---exit: $?\")",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh api:*)"
     ]
   },
   "enabledMcpjsonServers": [

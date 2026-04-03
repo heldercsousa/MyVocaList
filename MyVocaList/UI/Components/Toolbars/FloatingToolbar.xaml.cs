@@ -13,11 +13,14 @@ public partial class FloatingToolbar : ContentView
 {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    /// <summary>Applies the MD3 selected/unselected state colors to a toolbar icon button.</summary>
+    /// <summary>Applies the MD3 selected/unselected state colors to a vibrant toolbar icon button.</summary>
     private void ApplySelectedState(DXButton button, bool isSelected)
     {
-        var bgKey = isSelected ? "SecondaryContainer" : null;
-        var iconKey = isSelected ? "OnSecondaryContainer" : "OnSurfaceVariant";
+        // Vibrant toolbar bg = SecondaryContainer.
+        // Selected: Primary bg + OnPrimary icon (contrasts against SecondaryContainer).
+        // Unselected: transparent bg + OnSecondaryContainer icon (default).
+        var bgKey = isSelected ? "Primary" : null;
+        var iconKey = isSelected ? "OnPrimary" : "OnSecondaryContainer";
 
         button.BackgroundColor = bgKey != null &&
             Application.Current?.Resources.TryGetValue(bgKey, out var bg) == true
@@ -74,8 +77,8 @@ public partial class FloatingToolbar : ContentView
             propertyChanged: (b, _, n) => ((FloatingToolbar)b).ApplySelectedState(((FloatingToolbar)b).action1Button, (bool)n));
 
     /// <summary>
-    /// When true, applies SecondaryContainer background and OnSecondaryContainer icon color
-    /// to indicate an active/toggled state (e.g. filter active, mode enabled).
+    /// When true, applies Primary background and OnPrimary icon color to indicate an
+    /// active/toggled state. Contrasts against the SecondaryContainer toolbar background.
     /// </summary>
     public bool Action1IsSelected
     {
