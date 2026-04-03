@@ -17,6 +17,14 @@
     BackgroundColor="{StaticResource Surface}"
     SafeAreaEdges="Container">
 
+    <!-- Suppress Shell's native back/hamburger icon.
+         IsVisible=False: hides the Shell-rendered nav icon (removes double back arrow in SearchAppBar mode).
+         IsEnabled=False: prevents Shell from intercepting the hardware back event so OnBackButtonPressed fires.
+         OnBackButtonPressed handles all back/dismiss navigation (confirm sheet → search → default). -->
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False" IsEnabled="False" />
+    </Shell.BackButtonBehavior>
+
     <Shell.TitleView>
         <Grid>
             <appbars:SmallAppBar
@@ -119,32 +127,32 @@
             IsVisible="{Binding IsEmptyNoResults}"
             Margin="32,32,32,80" />
 
-        <!-- FAB: bottom-right, above FloatingToolbar (88 = toolbar 48 + margin 16 + gap 24) -->
-        <dx:DXButton Style="{StaticResource Fab}"
-                     Icon="add_outlined"
-                     HorizontalOptions="End"
-                     VerticalOptions="End"
-                     Margin="0,0,16,88"
-                     SemanticProperties.Description="Add venue"
-                     Command="{Binding AddVenueCommand}" />
-
-        <!-- FloatingToolbar: centered, 16dp above safe area bottom -->
-        <toolbars:FloatingToolbar
-            HorizontalOptions="Center"
-            VerticalOptions="End"
-            Margin="0,0,0,16"
-            Action1Icon="done_all_outlined"
-            Action1Command="{Binding SelectAllCommand}"
-            Action1Description="Select all"
-            Action1IsSelected="{Binding IsAllSelected}"
-            Action2Icon="edit_outlined"
-            Action2Command="{Binding EditSelectedCommand}"
-            Action2Description="Edit selected"
-            Action2IsSelected="{Binding CanEditSelected}"
-            Action3Icon="delete_outlined"
-            Action3Command="{Binding DeleteSelectedCommand}"
-            Action3Description="Delete selected"
-            Action3IsSelected="{Binding CanDeleteSelected}" />
+        <!-- Toolbar + FAB: centered row, 16dp from bottom (MD3 vibrant toolbar + FAB coexistence) -->
+        <!-- Combined clearance: max(FAB 56dp, toolbar 48dp) + 16dp margin + 8dp breathing = 80dp -->
+        <HorizontalStackLayout HorizontalOptions="Center"
+                               VerticalOptions="End"
+                               Margin="0,0,0,16"
+                               Spacing="8">
+            <toolbars:FloatingToolbar
+                VerticalOptions="Center"
+                Action1Icon="done_all_outlined"
+                Action1Command="{Binding SelectAllCommand}"
+                Action1Description="Select all"
+                Action1IsSelected="{Binding IsAllSelected}"
+                Action2Icon="edit_outlined"
+                Action2Command="{Binding EditSelectedCommand}"
+                Action2Description="Edit selected"
+                Action2IsSelected="{Binding CanEditSelected}"
+                Action3Icon="delete_outlined"
+                Action3Command="{Binding DeleteSelectedCommand}"
+                Action3Description="Delete selected"
+                Action3IsSelected="{Binding CanDeleteSelected}" />
+            <dx:DXButton Style="{StaticResource Fab}"
+                         Icon="add_outlined"
+                         VerticalOptions="Center"
+                         SemanticProperties.Description="Add venue"
+                         Command="{Binding AddVenueCommand}" />
+        </HorizontalStackLayout>
 
         <!-- Confirm delete BottomSheet (inline — ConfirmSheet ContentView wrapper caused ANR on DX init) -->
         <dx:BottomSheet x:Name="confirmSheet"

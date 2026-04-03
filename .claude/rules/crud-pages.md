@@ -173,11 +173,17 @@ Action3IsSelected="{Binding CanDeleteSelected}"
 ```
 
 ### FAB coexistence
-FAB stays at bottom-right, independent of `FloatingToolbar`:
+FAB is placed to the RIGHT of `FloatingToolbar` inside a shared `HorizontalStackLayout`:
 ```xml
-Margin="0,0,16,88"   <!-- 48 toolbar + 16 toolbar margin + 24 gap -->
+<HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="End"
+                       Margin="0,0,0,16" Spacing="8">
+    <toolbars:FloatingToolbar VerticalOptions="Center" ... />
+    <dx:DXButton Style="{StaticResource Fab}" Icon="add_outlined"
+                 VerticalOptions="Center" Command="{Binding AddCommand}" />
+</HorizontalStackLayout>
 ```
-`DXCollectionView` bottom margin = `80` (`48 + 16 + 16 breathing`).
+`DXCollectionView` bottom margin = `80` (max(FAB 56, toolbar 48) + 16 margin + 8 breathing).
+Do NOT use separate overlays with Margin formulas — that was the old pattern.
 
 ---
 

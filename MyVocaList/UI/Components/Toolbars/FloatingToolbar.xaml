@@ -8,13 +8,13 @@
 
     <!--
         M3 Floating Toolbar — pill container with up to 5 icon-only action slots.
-        Height: 48dp · Shape: CornerRadius=24 (pill) · Background: SurfaceContainerHigh
-        Elevation: Level 3 (Shadow) · Icon buttons: 48×48dp tap zone, 24dp icon
+        Height: 48dp · Shape: CornerRadius=24 (pill) · Background: SecondaryContainer (vibrant)
+        Icon color: OnSecondaryContainer (default) · Selected: Primary bg + OnPrimary icon
         Slots with null/empty ActionNIcon are hidden and collapse automatically.
     -->
     <dx:DXBorder CornerRadius="24"
                  HeightRequest="48"
-                 BackgroundColor="{StaticResource SurfaceContainerHigh}"
+                 BackgroundColor="{StaticResource SecondaryContainer}"
                  Padding="4,0">
 
         <!--
@@ -26,7 +26,7 @@
             <!-- Slot 1 -->
             <dx:DXButton x:Name="action1Button"
                          Icon="{Binding Action1Icon, Source={x:Reference self}}"
-                         Style="{StaticResource StandardIconButton}"
+                         Style="{StaticResource VibrantToolbarIconButton}"
                          IsVisible="{Binding HasAction1, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action1Description, Source={x:Reference self}}"
                          Command="{Binding Action1Command, Source={x:Reference self}}" />
@@ -34,7 +34,7 @@
             <!-- Slot 2 -->
             <dx:DXButton x:Name="action2Button"
                          Icon="{Binding Action2Icon, Source={x:Reference self}}"
-                         Style="{StaticResource StandardIconButton}"
+                         Style="{StaticResource VibrantToolbarIconButton}"
                          IsVisible="{Binding HasAction2, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action2Description, Source={x:Reference self}}"
                          Command="{Binding Action2Command, Source={x:Reference self}}" />
@@ -42,7 +42,7 @@
             <!-- Slot 3 -->
             <dx:DXButton x:Name="action3Button"
                          Icon="{Binding Action3Icon, Source={x:Reference self}}"
-                         Style="{StaticResource StandardIconButton}"
+                         Style="{StaticResource VibrantToolbarIconButton}"
                          IsVisible="{Binding HasAction3, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action3Description, Source={x:Reference self}}"
                          Command="{Binding Action3Command, Source={x:Reference self}}" />
@@ -50,7 +50,7 @@
             <!-- Slot 4 -->
             <dx:DXButton x:Name="action4Button"
                          Icon="{Binding Action4Icon, Source={x:Reference self}}"
-                         Style="{StaticResource StandardIconButton}"
+                         Style="{StaticResource VibrantToolbarIconButton}"
                          IsVisible="{Binding HasAction4, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action4Description, Source={x:Reference self}}"
                          Command="{Binding Action4Command, Source={x:Reference self}}" />
@@ -58,7 +58,7 @@
             <!-- Slot 5 -->
             <dx:DXButton x:Name="action5Button"
                          Icon="{Binding Action5Icon, Source={x:Reference self}}"
-                         Style="{StaticResource StandardIconButton}"
+                         Style="{StaticResource VibrantToolbarIconButton}"
                          IsVisible="{Binding HasAction5, Source={x:Reference self}}"
                          SemanticProperties.Description="{Binding Action5Description, Source={x:Reference self}}"
                          Command="{Binding Action5Command, Source={x:Reference self}}" />

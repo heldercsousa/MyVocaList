@@ -182,11 +182,28 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <!-- MD3: Vibrant toolbar icon button — for use inside SecondaryContainer toolbar.
+         PressedBackgroundColor uses SurfaceContainerHighest (darker) so press is visible
+         against the SecondaryContainer toolbar bg. -->
+    <Style x:Key="VibrantToolbarIconButton" TargetType="dx:DXButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="IconColor" Value="{StaticResource OnSecondaryContainer}" />
+        <Setter Property="PressedBackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
+        <Setter Property="WidthRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <!-- ================================================================ -->
     <!-- UTILITY STYLES                                                    -->
     <!-- ================================================================ -->
 
-    <!-- MD3: FAB (medium, 56×56, CornerRadius=16 = ShapeKeyTokens.CornerLarge) -->
+    <!-- MD3: FAB (medium, 56×56, CornerRadius=16 = ShapeKeyTokens.CornerLarge).
+         Positioning (HorizontalOptions, VerticalOptions, Margin) is the caller's responsibility —
+         FAB is used both inline (beside FloatingToolbar in HorizontalStackLayout) and
+         independently. Never set layout options here. -->
     <Style x:Key="Fab" TargetType="dx:DXButton">
         <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
         <Setter Property="IconColor" Value="{StaticResource OnPrimary}" />
@@ -194,8 +211,6 @@
         <Setter Property="WidthRequest" Value="56" />
         <Setter Property="HeightRequest" Value="56" />
         <Setter Property="CornerRadius" Value="16" />
-        <Setter Property="HorizontalOptions" Value="End" />
-        <Setter Property="VerticalOptions" Value="End" />
     </Style>
 
     <!-- MD3: Divider — use Color (BoxView-specific fill), NOT BackgroundColor -->
