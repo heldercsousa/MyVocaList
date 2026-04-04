@@ -39,6 +39,7 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Code principles: `.claude/rules/code-principles.md`
 - Dialogs & validation: `.claude/rules/dialogs-validation.md`
 - Database indexing: `.claude/rules/database-indexing.md` — read before any EF Core configuration or repository search query
+- **Testing**: `.claude/rules/testing.md` — read before writing any test or setting up the test project. Covers test types, naming, TDD workflow, and prerequisites for Step 3.
 
 ## Spec-First Development
 Every new CRUD feature requires a spec before any code is written. Copy the structure from `Docs/specs/venues/`:

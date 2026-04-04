@@ -5,9 +5,9 @@ namespace MyVocaList.UI.Components.Toolbars;
 /// icon-only action buttons. Floats above page content at the bottom of the screen.
 /// </summary>
 /// <remarks>
-/// Place inside a single-cell Grid as an overlay with VerticalOptions="End" and Margin bottom=16.
-/// Give content below it sufficient Margin.Bottom (≥ 80dp) to prevent overlap.
-/// FAB is positioned independently (bottom-right) — this toolbar does not manage FAB placement.
+/// Place inside a <c>HorizontalStackLayout</c> beside a FAB, both wrapped in a single-cell Grid
+/// overlay with <c>VerticalOptions="End" Margin="0,0,0,16" HorizontalOptions="Center"</c>.
+/// Give the list content below it <c>Margin.Bottom=80</c> to prevent overlap.
 /// </remarks>
 public partial class FloatingToolbar : ContentView
 {

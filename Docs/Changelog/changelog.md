@@ -1,5 +1,8 @@
 # MyVocaList - Changelog
 
+## Entries for april 2026
+- **04/04/2026** - fix - Step 1 review + Step 2 TDD guidelines: fix EmptyState styles (dx:ThemeColor→StaticResource for TextColor/IconColor); fix FloatingToolbar stale remarks doc comment; add .claude/rules/testing.md (xUnit+Moq TDD guidelines, test project structure, naming, anti-patterns); update CLAUDE.md with testing.md entry; update m3-components.md with M3 Expressive vibrant verification; update devexpress-patterns.md VibrantToolbarIconButton terminology
+
 ## Entries for january to march 2026
 - **03/31/2026** - docs - Align Person CRUD + AutocompleteField specs with TDD and Styles & Structure decisions: remove ITextNormalizationService references, rename ListItemLeadingAvatar→Monogram, adopt EmptyState/ConfirmSheet/Fab style in design, update PersonFormViewModel Suggestions type, add TDD Phase 4b tasks; expand Styles & Structure spec to include Venue CRUD test foundation and venues doc update step; add implementation roadmap memory
 - **03/30/2026** - fix - SearchAppBar: remove invalid InputFontFamily and InputFontSize properties from TextEdit (not valid on DX TextEdit; font inherited from app theme per devexpress-patterns.md Known Gotchas)
