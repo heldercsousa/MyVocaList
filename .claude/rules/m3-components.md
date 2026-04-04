@@ -242,26 +242,32 @@ Namespace: `xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"`
 
 ## M3 Floating Toolbar
 
+> **M3 Expressive component.** The floating toolbar (and "vibrant" color scheme) are M3 Expressive features — not in standard M3. "Vibrant" is the official spec term (confirmed via m3.material.io 2026-04-04).
+>
+> **Color design decision.** Official M3 Expressive vibrant uses `PrimaryContainer` bg + `OnPrimaryContainer` icons. This project uses `SecondaryContainer` bg + `OnSecondaryContainer` icons — a deliberate choice for better contrast in the indigo dark theme. The selected-state contrast (Primary bg + OnPrimary icon) applies against SecondaryContainer, not PrimaryContainer.
+>
+> **Height.** The spec states docked toolbars are 64dp. The floating toolbar has separate measurements (not available in text form from m3.material.io). Project uses 48dp — a compact pill appropriate for a floating overlay.
+
 ### Spec
 
 | Property | Value |
 |---|---|
-| Height | 48dp |
+| Height | 48dp (project choice; docked = 64dp per spec) |
 | Width | Wrap content (auto-sizes to populated slots) |
 | Padding (H, outside icon slots) | 4dp |
-| Background | **SecondaryContainer** (vibrant — project standard) |
-| Shape | CornerRadius = 24dp (full pill) |
-| Elevation | Level 3 per spec — **omitted** (tint conveys elevation in dark mode) |
-| Icon button tap zone | 48×48dp, CornerRadius=24 |
+| Background | **SecondaryContainer** (project vibrant — see note above) |
+| Shape | CornerRadius = 24dp (full pill — confirmed: spec prohibits square buttons in floating toolbar) |
+| Elevation | Omitted — tint conveys elevation in dark mode |
+| Icon button tap zone | **48×48dp** (confirmed by spec: "minimum 48×48dp target area") |
 | Icon size | 24dp (DXButton default) |
 | Icon color (rest) | **OnSecondaryContainer** |
 | Icon bg (selected) | **Primary** |
 | Icon color (selected) | **OnPrimary** |
 | Max slots | 5 |
-| Scroll animation | NOT used — persistent by design (valid per M3; animation adds threading risk) |
+| Scroll animation | NOT used — persistent by design (valid per M3 spec; animation adds threading risk) |
 | Position | See FAB Coexistence below |
 
-### Color tokens (dark mode — vibrant)
+### Color tokens (dark mode — project vibrant)
 | Token | Hex |
 |---|---|
 | SecondaryContainer | `#3F4566` |

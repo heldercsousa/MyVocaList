@@ -561,7 +561,7 @@ All defined in `MaterialStyles.xaml`.
 | Key | TargetType | Purpose |
 |---|---|---|
 | `StandardIconButton` | `dx:DXButton` | Trailing/action icon buttons (48×48, OnSurfaceVariant) |
-| `VibrantToolbarIconButton` | `dx:DXButton` | Icon buttons inside vibrant (SecondaryContainer) toolbar (48×48, OnSecondaryContainer) |
+| `VibrantToolbarIconButton` | `dx:DXButton` | Icon buttons inside vibrant toolbar (48×48, OnSecondaryContainer). "Vibrant" is official M3 Expressive terminology. Project uses SecondaryContainer bg by design (official spec uses PrimaryContainer). |
 | `NavigationIconButton` | `dx:DXButton` | Leading/nav icon buttons (48×48, OnSurface) |
 | `Fab` | `dx:DXButton` | Floating action button (56×56, CornerRadius=16, Primary). Place to the RIGHT of FloatingToolbar in a shared `HorizontalStackLayout` — see `m3-components.md`. |
 | `Divider` | `BoxView` | 1dp divider line (OutlineVariant). Uses `Color` not `BackgroundColor`. |
