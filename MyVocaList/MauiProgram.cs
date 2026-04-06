@@ -40,7 +40,8 @@ public static class MauiProgram
         {
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "MyVocaList.db");
             options.UseSqlite($"Data Source={dbPath}")
-                   .AddInterceptors(sp.GetRequiredService<CollationInterceptor>());
+                   .AddInterceptors(sp.GetRequiredService<CollationInterceptor>())
+                   .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         });
 
         // Repositories
