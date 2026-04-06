@@ -34,10 +34,11 @@ public class AppDbContext : DbContext
             // Design-time/migrations only - use temporary path
             var tempPath = Path.Combine(Path.GetTempPath(), "myvocalist_design.db");
 
-            optionsBuilder.UseSqlite($"Data Source={tempPath}");
+            optionsBuilder
+                .UseSqlite($"Data Source={tempPath}")
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
     }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -71,8 +72,6 @@ public class AppDbContext : DbContext
     {
         // For SQLite: Apply custom NOCASE_NOACCENT collation to all string properties
         // The collation is registered automatically by CollationInterceptor on every connection
-
-        // Apply to all string properties in all entities
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             foreach (var property in entityType.GetProperties())
@@ -83,27 +82,5 @@ public class AppDbContext : DbContext
                 }
             }
         }
-
-        Console.WriteLine("✅ Database collation configured: NOCASE_NOACCENT (registered by CollationInterceptor)");
-    }
-
-    /// <summary>
-    /// Debug method to get the actual database file path
-    /// </summary>
-    public string GetDatabasePath()
-    {
-        var connection = Database.GetDbConnection();
-        return connection.DataSource;
-    }
-
-    /// <summary>
-    /// Debug method to log database information
-    /// </summary>
-    public void LogDatabaseInfo()
-    {
-        var connection = Database.GetDbConnection();
-        Console.WriteLine($"🗃️ Database Path: {connection.DataSource}");
-        Console.WriteLine($"🗃️ Connection State: {connection.State}");
-        Console.WriteLine($"🗃️ Database Type: {Database.ProviderName}");
     }
 }

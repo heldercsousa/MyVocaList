@@ -1,0 +1,76 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Allow floating/wildcard versions (e.g. 8.*, 2.*) in PackageVersion entries -->
+    <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>
+    <!-- Suppress NU1507: multiple package sources without source mapping -->
+    <NoWarn>$(NoWarn);NU1507</NoWarn>
+  </PropertyGroup>
+
+  <!-- ================================================================ -->
+  <!-- EF Core & SQLite                                                 -->
+  <!-- ================================================================ -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+  </ItemGroup>
+
+  <!-- ================================================================ -->
+  <!-- Microsoft Extensions                                             -->
+  <!-- ================================================================ -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.3" />
+  </ItemGroup>
+
+  <!-- ================================================================ -->
+  <!-- Serilog (normalized — was 4.2.0/4.3.1 drift between projects)  -->
+  <!-- ================================================================ -->
+  <ItemGroup>
+    <PackageVersion Include="Serilog" Version="4.3.1" />
+    <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
+
+  <!-- ================================================================ -->
+  <!-- .NET MAUI                                                        -->
+  <!-- ================================================================ -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="10.0.41" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.41" />
+    <PackageVersion Include="Microsoft.Maui.Essentials" Version="10.0.0" />
+    <PackageVersion Include="CommunityToolkit.Maui" Version="14.0.0" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.*" />
+  </ItemGroup>
+
+  <!-- ================================================================ -->
+  <!-- DevExpress MAUI                                                  -->
+  <!-- ================================================================ -->
+  <ItemGroup>
+    <PackageVersion Include="DevExpress.Maui.CollectionView" Version="25.2.4" />
+    <PackageVersion Include="DevExpress.Maui.Controls" Version="25.2.4" />
+    <PackageVersion Include="DevExpress.Maui.Core" Version="25.2.4" />
+    <PackageVersion Include="DevExpress.Maui.Editors" Version="25.2.4" />
+  </ItemGroup>
+
+  <!-- ================================================================ -->
+  <!-- Dev Tools                                                        -->
+  <!-- ================================================================ -->
+  <ItemGroup>
+    <PackageVersion Include="Redth.MauiDevFlow.Agent" Version="*" />
+  </ItemGroup>
+
+  <!-- ================================================================ -->
+  <!-- Test project                                                     -->
+  <!-- ================================================================ -->
+  <ItemGroup>
+    <PackageVersion Include="coverlet.collector" Version="6.*" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+    <PackageVersion Include="Moq" Version="4.*" />
+    <PackageVersion Include="xunit" Version="2.*" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.*" />
+  </ItemGroup>
+</Project>

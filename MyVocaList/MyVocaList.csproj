@@ -4,6 +4,15 @@
 		<!--<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>-->
 		<TargetFrameworks>net10.0-android;net10.0-ios</TargetFrameworks>
 		<OutputType>Exe</OutputType>
+	</PropertyGroup>
+
+	<!-- net10.0 (no platform suffix) is used by the test project to reference ViewModels.
+	     OutputType=Library prevents the app from building as an executable for that TFM. -->
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+		<OutputType>Library</OutputType>
+	</PropertyGroup>
+
+	<PropertyGroup>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
@@ -78,27 +87,26 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Maui" Version="14.0.0" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.41" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.41" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.3" />
+		<PackageReference Include="CommunityToolkit.Maui" />
+		<PackageReference Include="CommunityToolkit.Mvvm" />
+		<PackageReference Include="Microsoft.Maui.Controls" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
 
 		<!-- DevExpress MAUI Packages -->
-		<PackageReference Include="DevExpress.Maui.Core" Version="25.2.4" />
-		<PackageReference Include="DevExpress.Maui.CollectionView" Version="25.2.4" />
-		<PackageReference Include="DevExpress.Maui.Controls" Version="25.2.4" />
-		<PackageReference Include="DevExpress.Maui.Editors" Version="25.2.4" />
+		<PackageReference Include="DevExpress.Maui.Core" />
+		<PackageReference Include="DevExpress.Maui.CollectionView" />
+		<PackageReference Include="DevExpress.Maui.Controls" />
+		<PackageReference Include="DevExpress.Maui.Editors" />
 
 		<!-- Serilog Packages -->
-		<PackageReference Include="Serilog" Version="4.3.1" />
-		<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
-		<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
-		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-		<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+		<PackageReference Include="Serilog" />
+		<PackageReference Include="Serilog.Extensions.Logging" />
+		<PackageReference Include="Serilog.Sinks.Debug" />
+		<PackageReference Include="Serilog.Sinks.File" />
+		<PackageReference Include="Serilog.Enrichers.Thread" />
 
-
-		<PackageReference Include="Redth.MauiDevFlow.Agent" Version="*" />
+		<PackageReference Include="Redth.MauiDevFlow.Agent" />
 	</ItemGroup>
 
 	<ItemGroup>
