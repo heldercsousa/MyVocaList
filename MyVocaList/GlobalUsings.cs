@@ -10,6 +10,7 @@ global using Microsoft.Extensions.Logging;
 // Contracts — every feature ViewModel + Page will need DTOs and pagination constants
 global using MyVocaList.Contracts;
 global using MyVocaList.Contracts.DTOs.List;
+global using MyVocaList.Contracts.Models;
 // App navigation and models
 global using MyVocaList.Navigation;
 // Services layer
