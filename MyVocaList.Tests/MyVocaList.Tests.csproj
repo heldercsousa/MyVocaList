@@ -27,7 +27,7 @@
     <ProjectReference Include="..\Contracts\MyVocaList.Contracts.csproj" />
     <ProjectReference Include="..\Infra\MyVocaList.Infra.csproj" />
     <ProjectReference Include="..\Services\MyVocaList.Services.csproj" />
-    <!-- MAUI head project: uncomment when ViewModel tests are needed
-    <ProjectReference Include="..\MyVocaList\MyVocaList.csproj" /> -->
+    <!-- MAUI head project: referenced for ViewModel + Component tests -->
+    <ProjectReference Include="..\MyVocaList\MyVocaList.csproj" />
   </ItemGroup>
 </Project>
