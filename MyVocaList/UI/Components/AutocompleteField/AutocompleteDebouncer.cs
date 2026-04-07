@@ -7,6 +7,16 @@ namespace MyVocaList.UI.Components.AutocompleteField;
 internal sealed class AutocompleteDebouncer
 {
     private CancellationTokenSource _cts;
+    private readonly Action<Action> _dispatcher;
+
+    /// <summary>
+    /// Creates a debouncer. The optional <paramref name="dispatcher"/> overrides the default
+    /// <see cref="MainThread.BeginInvokeOnMainThread"/> — useful for unit tests.
+    /// </summary>
+    internal AutocompleteDebouncer(Action<Action> dispatcher = null)
+    {
+        _dispatcher = dispatcher ?? (a => MainThread.BeginInvokeOnMainThread(a));
+    }
 
     /// <summary>
     /// Cancels any pending debounce and starts a new one.
@@ -31,7 +41,7 @@ internal sealed class AutocompleteDebouncer
             {
                 await Task.Delay(delayMs, token);
                 if (token.IsCancellationRequested) return;
-                MainThread.BeginInvokeOnMainThread(() => onElapsed(text));
+                _dispatcher(() => onElapsed?.Invoke(text));
             }
             catch (OperationCanceledException) { /* ignore */ }
         }, token);
