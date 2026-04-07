@@ -41,8 +41,8 @@ These are bugs in existing code — fix before writing any UI.
 
 ## Phase 3: UI — Form Page
 
-- [ ] T-10: Add `PersonFormViewModel` — `[QueryProperty]` for `personId`/`personName`/`personBirthday`/`personEmail`; `IsEditMode`; `PageTitle`; validation state for all three fields; `Suggestions` (`IEnumerable<AutocompleteSuggestion>`); `SearchPersonsCommand(string term)`; `SuggestionSelectedCommand(AutocompleteSuggestion)`; `SaveCommand`; `CancelCommand`; character counter helpers — no debounce logic (owned by `AutocompleteField`)
-- [ ] T-11: Add `PersonFormPage.xaml` — `SafeAreaEdges="All"`; `ScrollView`; `AutocompleteField` (Full Name, wired to `SearchPersonsCommand` + `SuggestionSelectedCommand`); birthday `TextEdit` (placeholder "DD/MM"); email `TextEdit`; character counter label with DataTriggers; `Cancel` + `Save` buttons `HorizontalOptions=End`
+- [ ] T-10: Add `PersonFormViewModel` — `[QueryProperty]` for `personId`/`personName`/`personBirthday`/`personEmail`; `IsEditMode`; `PageTitle`; validation state for all three fields; `Suggestions` (`IEnumerable<AutocompleteSuggestion>`); `SearchPersonsCommand(string term)` (receives already-debounced text from `AutocompleteField`); `SuggestionSelectedCommand(AutocompleteSuggestion)` (navigates to edit for selected person); `SaveCommand`; `CancelCommand`; character counter helpers — no debounce logic (owned by `AutocompleteField`)
+- [ ] T-11: Add `PersonFormPage.xaml` — `SafeAreaEdges="All"`; `ScrollView`; `AutocompleteField` in Full Name slot (bind `Suggestions`, `SearchRequestedCommand`, `SuggestionSelectedCommand`); birthday `TextEdit` (placeholder "DD/MM"); email `TextEdit`; character counter label with DataTriggers; `Cancel` + `Save` buttons `HorizontalOptions=End`
 - [ ] T-12: Add `PersonFormPage.xaml.cs` — `OnAppearing` focuses name field (create mode only); typed `ViewModel` property for compiled bindings
 - [ ] T-13: Register `PersonFormPage` + `PersonFormViewModel` as `AddTransient` in `MauiProgram.cs`
 - [ ] T-14: Build + smoke test form: create singer → success snackbar → appears in list

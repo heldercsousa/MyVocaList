@@ -210,7 +210,14 @@ These are needed for pre-populating the edit form via query string.
 | Email field | `TextEdit` | Optional |
 | Action buttons | `OutlinedButton("Cancel")` + `FilledButton("Save")` | `HorizontalOptions=End` |
 
-**Suggestion overlay layout:** The form content area is a `Grid` with the name field in row 0. The suggestion card is also in row 0, `VerticalOptions=End` relative to a wrapping container, rendered as an overlay via `Grid.RowSpan` or a second `Grid` layer above the scroll content. It must not shift the birthday/email fields when it appears.
+**Name field uses `AutocompleteField` component** (`MyVocaList/UI/Components/AutocompleteField/`) which handles the `TextEdit`, debounce, and overlay internally.
+
+`PersonFormViewModel` exposes:
+- `Suggestions` — `IEnumerable<AutocompleteSuggestion>` — set by `SearchPersonsCommand` result
+- `SearchPersonsCommand(string term)` — bound to `AutocompleteField.SearchRequestedCommand`; receives already-debounced text
+- `SuggestionSelectedCommand(AutocompleteSuggestion s)` — bound to `AutocompleteField.SuggestionSelectedCommand`; navigates to edit form for the selected person
+
+The ViewModel does NOT contain debounce logic or overlay visibility state — that is owned by the component.
 
 `SafeAreaEdges="All"` + `ScrollView` handles keyboard avoidance.
 
@@ -281,9 +288,9 @@ bool IsEditMode => PersonId.HasValue;
 string PageTitle => IsEditMode ? "Edit Singer" : "New Singer";
 ```
 
-**SearchPersonsCommand(string term):** Fired by `AutocompleteField` after its internal debounce (300ms default). Calls `SearchPersonsStartsWithAsync(term, 5)`. Projects results to `IEnumerable<AutocompleteSuggestion>` and sets `Suggestions` binding. No timer or debounce logic in the ViewModel.
+**SearchPersonsCommand(string term):** Fired by `AutocompleteField` after its internal debounce (300ms default). Receives already-debounced text from the component. Calls `SearchPersonsStartsWithAsync(term, 5)`. Projects results to `IEnumerable<AutocompleteSuggestion>` and sets `Suggestions` binding. No timer or debounce logic in the ViewModel — that is owned by `AutocompleteField`.
 
-**SuggestionSelectedCommand(AutocompleteSuggestion s):** Fired by `AutocompleteField` on row tap. Casts `s.Data` to `Person`. Navigates to `PersonForm?personId=X&personName=Y&personBirthday=Z&personEmail=W`.
+**SuggestionSelectedCommand(AutocompleteSuggestion s):** Fired by `AutocompleteField` on suggestion row tap. Casts `s.Data` to `Person`. Navigates to `PersonForm?personId=X&personName=Y&personBirthday=Z&personEmail=W`.
 
 ---
 
