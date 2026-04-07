@@ -10,8 +10,8 @@ public class Person
     public int Absences { get; set; } = 0; // Absence counter
 
     // Fields for intelligent differentiation
-    public string BirthdayDayMonth { get; set; } // Format: "15/03" (required)
-    public string Email { get; set; } // Optional for marketing/differentiation
+    public string? BirthdayDayMonth { get; set; } // Format: "15/03" (optional)
+    public string? Email { get; set; } // Optional for marketing/differentiation
 
     public Person(string fullName)
     {
