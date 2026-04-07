@@ -2,61 +2,50 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MyVocaList.Domain.Entity;
 
-namespace MyVocaList.Infra.EntityEFConfig
+namespace MyVocaList.Infra.EntityEFConfig;
+
+public class PersonConfiguration : IEntityTypeConfiguration<Person>
 {
-    /// <summary>
-    /// Entity Framework configuration for Person entity
-    /// </summary>
-    public class PersonConfiguration : IEntityTypeConfiguration<Person>
+    public void Configure(EntityTypeBuilder<Person> builder)
     {
-        public void Configure(EntityTypeBuilder<Person> builder)
-        {
-            builder.HasKey(p => p.Id);
+        builder.HasKey(p => p.Id);
+        builder.Property(p => p.Id).ValueGeneratedOnAdd();
 
-            builder.Property(p => p.Id)
-                   .ValueGeneratedOnAdd();
+        builder.Property(p => p.ExternalId)
+               .IsRequired(false);
 
-            // HYBRID APPROACH: Super safe database with TEXT(250)
-            builder.Property(p => p.FullName)
-                   .HasColumnType("TEXT")
-                   .IsRequired()
-                   .HasMaxLength(250); // Super safe for extremely long names
+        builder.Property(p => p.FullName)
+               .HasColumnType("TEXT").IsRequired().HasMaxLength(250);
 
-            // Normalized column also TEXT(250) for maximum safety
-            builder.Property(p => p.FullNameNormalized)
-                   .HasColumnType("TEXT")
-                   .HasMaxLength(250) // Same capacity as original column
-                   .IsRequired(false); // Can be null during migration
+        builder.Property(p => p.FullNameNormalized)
+               .HasColumnType("TEXT").IsRequired().HasMaxLength(250);
 
-            builder.Property(p => p.Participations)
-                   .IsRequired()
-                   .HasDefaultValue(0);
+        builder.Property(p => p.BirthdayDayMonth)
+               .HasColumnType("TEXT").IsRequired(false).HasMaxLength(5);
 
-            builder.Property(p => p.Absences)
-                   .IsRequired()
-                   .HasDefaultValue(0);
+        builder.Property(p => p.Email)
+               .HasColumnType("TEXT").IsRequired(false).HasMaxLength(100);
 
-            // Email for differentiation and marketing (optional)
-            builder.Property(p => p.Email)
-                   .HasColumnType("TEXT")
-                   .IsRequired();
+        builder.Property(p => p.Participations)
+               .IsRequired().HasDefaultValue(0);
 
-            // Birthday for intelligent differentiation (required format: "DD/MM")
-            builder.Property(p => p.BirthdayDayMonth)
-                   .HasColumnType("TEXT")
-                   .IsRequired();
+        builder.Property(p => p.Absences)
+               .IsRequired().HasDefaultValue(0);
 
-            // Optimized index for fast search by normalized name
-            builder.HasIndex(p => p.FullNameNormalized)
-                   .HasDatabaseName("IX_People_FullNameNormalized");
+        builder.HasIndex(p => p.FullNameNormalized)
+               .HasDatabaseName("IX_Persons_FullNameNormalized");
 
-            // Index for email lookup and differentiation
-            builder.HasIndex(p => p.Email)
-                   .HasDatabaseName("IX_People_Email");
+        builder.HasIndex(p => p.Email)
+               .IsUnique()
+               .HasDatabaseName("IX_Persons_Email");
 
-            // Index for birthday lookup (future functionality: birthday notifications)
-            builder.HasIndex(p => p.BirthdayDayMonth)
-                   .HasDatabaseName("IX_People_BirthdayDayMonth");
-        }
+        builder.HasIndex(p => p.ExternalId)
+               .IsUnique()
+               .HasDatabaseName("IX_Persons_ExternalId");
+
+        builder.HasIndex(p => new { p.FullNameNormalized, p.BirthdayDayMonth })
+               .IsUnique()
+               .HasFilter("[BirthdayDayMonth] IS NOT NULL")
+               .HasDatabaseName("IX_Persons_Name_Birthday");
     }
 }
