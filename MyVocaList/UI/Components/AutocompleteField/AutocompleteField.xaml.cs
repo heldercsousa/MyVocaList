@@ -85,6 +85,7 @@ public partial class AutocompleteField : ContentView
     // ── Private state ─────────────────────────────────────────────────────
 
     private readonly AutocompleteDebouncer _debouncer = new();
+    private bool _isTappingSuggestion;
 
     // ── Constructor ───────────────────────────────────────────────────────
 
@@ -128,8 +129,9 @@ public partial class AutocompleteField : ContentView
 
     private async void OnSearchEditUnfocused(object sender, FocusEventArgs e)
     {
-        await Task.Delay(300);
-        overlayCard.IsVisible = false;
+        await Task.Yield();
+        if (!_isTappingSuggestion)
+            overlayCard.IsVisible = false;
     }
 
     // ── Suggestion tap ────────────────────────────────────────────────────
@@ -137,7 +139,9 @@ public partial class AutocompleteField : ContentView
     private void OnSuggestionTapped(object sender, CollectionViewGestureEventArgs e)
     {
         if (e.Item is not AutocompleteSuggestion suggestion) return;
+        _isTappingSuggestion = true;
         overlayCard.IsVisible = false;
         SuggestionSelectedCommand?.Execute(suggestion);
+        _isTappingSuggestion = false;
     }
 }

@@ -31,7 +31,7 @@ internal sealed class AutocompleteDebouncer
             {
                 await Task.Delay(delayMs, token);
                 if (token.IsCancellationRequested) return;
-                onElapsed(text);
+                MainThread.BeginInvokeOnMainThread(() => onElapsed(text));
             }
             catch (OperationCanceledException) { /* ignore */ }
         }, token);
