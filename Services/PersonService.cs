@@ -196,7 +196,7 @@ namespace MyVocaList.Services
                 return new List<Person>();
             }
 
-            return await _personRepository.SearchByNameAsync(searchTerm, maxResults);
+            return await _personRepository.SearchByNameStartsWithAsync(searchTerm, maxResults);
         }
 
         public async Task<IEnumerable<Person>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = 3)
