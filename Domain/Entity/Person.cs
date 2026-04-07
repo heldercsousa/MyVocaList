@@ -3,6 +3,7 @@ namespace MyVocaList.Domain.Entity;
 public class Person
 {
     public int Id { get; set; } // Primary key for the database
+    public Guid? ExternalId { get; set; }   // Reserved for future device/account identity
     public string FullName { get; set; }
     public string FullNameNormalized { get; set; } // For optimized search
     public int Participations { get; set; } = 0; // Participation counter
