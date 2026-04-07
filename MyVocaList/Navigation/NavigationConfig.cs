@@ -1,13 +1,3 @@
-using System.Collections.Generic;
-using System.Windows.Input;
-using MyVocaList.UI.Models;
-using MyVocaList.UI.Pages.Artists;
-using MyVocaList.UI.Pages.BackupRestore;
-using MyVocaList.UI.Pages.Events;
-using MyVocaList.UI.Pages.People;
-using MyVocaList.UI.Pages.Preferences;
-using MyVocaList.UI.Pages.Venues;
-
 namespace MyVocaList.Navigation;
 
 /// <summary>
@@ -17,12 +7,12 @@ public static class NavigationConfig
 {
     public static readonly Dictionary<string, Type> PageTypes = new()
     {
-        [Routes.Events]      = typeof(EventsPage),
-        [Routes.Venues]      = typeof(VenuesPage),
-        [Routes.People]      = typeof(PeoplePage),
-        [Routes.Artists]     = typeof(ArtistsPage),
+        [Routes.Events] = typeof(EventsPage),
+        [Routes.Venues] = typeof(VenuesPage),
+        [Routes.People] = typeof(PeoplePage),
+        [Routes.Artists] = typeof(ArtistsPage),
         [Routes.Preferences] = typeof(PreferencesPage),
-        [Routes.Backup]      = typeof(BackupRestorePage),
+        [Routes.Backup] = typeof(BackupRestorePage),
     };
 
     public static List<MenuGroup> BuildMenuGroups(ICommand navigateCommand) =>

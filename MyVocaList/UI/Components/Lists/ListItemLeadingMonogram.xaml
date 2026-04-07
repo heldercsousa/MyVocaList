@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    x:Class="MyVocaList.UI.Components.Lists.ListItemLeadingMonogram"
+    x:Name="self">
+
+    <dx:DXBorder
+        WidthRequest="40"
+        HeightRequest="40"
+        CornerRadius="20"
+        BackgroundColor="{Binding MonogramColor, Source={x:Reference self}}">
+
+        <Label
+            Text="{Binding Initials, Source={x:Reference self}}"
+            StyleClass="Label.Large"
+            TextColor="{Binding InitialsColor, Source={x:Reference self}}"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            HorizontalTextAlignment="Center" />
+
+    </dx:DXBorder>
+</ContentView>

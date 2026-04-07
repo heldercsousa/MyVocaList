@@ -15,7 +15,7 @@ namespace MyVocaList.Infra.Repository
         /// Gets venue by exact name match.
         /// Trimming handled automatically by DatabaseLoadingInterceptor
         /// </summary>
-        public async Task<Venue?> GetByNameAsync(string name) => await ( string.IsNullOrWhiteSpace(name) ?
+        public async Task<Venue?> GetByNameAsync(string name) => await (string.IsNullOrWhiteSpace(name) ?
             Task.FromResult<Venue?>(null) : _context.Venues.FirstOrDefaultAsync(v => v.Name == name));
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace MyVocaList.Infra.Repository
         /// When migrating to SQL Server: replace with simple Contains() which respects column collation.
         /// Trimming handled automatically by DatabaseLoadingInterceptor
         /// </summary>
-        public async Task<IEnumerable<(Venue venue, bool hasEvents)>> SearchWithHasEventsAsync(string? query)
+        public async Task<IEnumerable<(Venue venue, int eventCount)>> SearchWithHasEventsAsync(string? query)
         {
             var q = _context.Venues.AsQueryable();
 
@@ -102,33 +102,33 @@ namespace MyVocaList.Infra.Repository
                 .Select(v => new
                 {
                     Venue = v,
-                    HasEvents = v.Events.Any()
+                    EventCount = v.Events.Count()
                 })
                 .OrderBy(x => x.Venue.Name)
-                .Select(x => ValueTuple.Create(x.Venue, x.HasEvents))
+                .Select(x => ValueTuple.Create(x.Venue, x.EventCount))
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<(Venue venue, bool hasEvents)>> GetAllWithHasEventsAsync() =>
+        public async Task<IEnumerable<(Venue venue, int eventCount)>> GetAllWithHasEventsAsync() =>
             await _context.Venues
                 .Select(v => new
                 {
                     Venue = v,
-                    HasEvents = v.Events.Count > 0
+                    EventCount = v.Events.Count()
                 })
                 .OrderBy(x => x.Venue.Name)
-                .Select(x => ValueTuple.Create(x.Venue, x.HasEvents))
+                .Select(x => ValueTuple.Create(x.Venue, x.EventCount))
                 .ToListAsync();
 
-        public async Task<IEnumerable<(Venue venue, bool hasEvents)>> GetByIdsWithHasEventsAsync(IEnumerable<int> ids) =>
+        public async Task<IEnumerable<(Venue venue, int eventCount)>> GetByIdsWithHasEventsAsync(IEnumerable<int> ids) =>
             await _context.Venues
                 .Where(v => ids.Contains(v.Id))
                 .Select(v => new
                 {
                     Venue = v,
-                    HasEvents = v.Events.Count > 0
+                    EventCount = v.Events.Count()
                 })
-                .Select(x => ValueTuple.Create(x.Venue, x.HasEvents))
+                .Select(x => ValueTuple.Create(x.Venue, x.EventCount))
                 .ToListAsync();
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace MyVocaList.Infra.Repository
         /// When migrating to SQL Server: replace with simple Contains() which respects column collation.
         /// Trimming handled automatically by DatabaseLoadingInterceptor
         /// </summary>
-        public async Task<(IEnumerable<(Venue venue, bool hasEvents)> items, int totalCount)> GetPagedWithEventInfoAsync(
+        public async Task<(IEnumerable<(Venue venue, int eventCount)> items, int totalCount)> GetPagedWithEventInfoAsync(
             int pageNumber,
             int pageSize,
             string? query = null)
@@ -165,11 +165,11 @@ namespace MyVocaList.Infra.Repository
                 .Select(v => new
                 {
                     Venue = v,
-                    HasEvents = v.Events.Count > 0
+                    EventCount = v.Events.Count()
                 })
                 .ToListAsync();
 
-            var items = rawItems.Select(x => (x.Venue, x.HasEvents)).ToList();
+            var items = rawItems.Select(x => (x.Venue, x.EventCount)).ToList();
 
             return (items, totalCount);
         }

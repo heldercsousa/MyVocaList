@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\Contracts\MyVocaList.Contracts.csproj" />
@@ -6,19 +6,20 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CS8618;CS8601;CS8603;CS8625;CS8602</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="4.2.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
-    <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6" />
-    <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.0" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.Debug" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="Serilog.Enrichers.Thread" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Maui.Essentials" />
   </ItemGroup>
 
 </Project>

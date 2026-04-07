@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
+    x:Class="MyVocaList.UI.Components.AutocompleteField.AutocompleteField"
+    x:Name="self">
+
+    <!-- Single-row Grid: TextEdit and overlay card share row 0 -->
+    <Grid RowDefinitions="Auto">
+
+        <!-- Input field -->
+        <dxe:TextEdit
+            x:Name="searchEdit"
+            Grid.Row="0"
+            LabelText="{Binding LabelText, Source={x:Reference self}}"
+            PlaceholderText="{Binding Placeholder, Source={x:Reference self}}"
+            BoxMode="Outlined"
+            FocusedBorderColor="{StaticResource Primary}"
+            BorderColor="{StaticResource Outline}"
+            BackgroundColor="{StaticResource SurfaceContainerHighest}"
+            TextColor="{StaticResource OnSurface}"
+            TextChanged="OnTextChanged"
+            Focused="OnSearchEditFocused"
+            Unfocused="OnSearchEditUnfocused" />
+
+        <!-- Suggestions overlay card — appears below the field, overlays content -->
+        <dx:DXBorder
+            x:Name="overlayCard"
+            Grid.Row="0"
+            IsVisible="False"
+            ZIndex="10"
+            VerticalOptions="Start"
+            Margin="0,56,0,0"
+            BackgroundColor="{StaticResource SurfaceContainerHigh}"
+            CornerRadius="12">
+            <dx:DXBorder.Shadow>
+                <Shadow Brush="{StaticResource OnSurface}"
+                        Offset="0,4"
+                        Radius="8"
+                        Opacity="0.25" />
+            </dx:DXBorder.Shadow>
+
+            <dxcv:DXCollectionView
+                x:Name="suggestionsView"
+                MaximumHeightRequest="280"
+                ItemSeparatorThickness="0"
+                IndicatorColor="{StaticResource Primary}"
+                Tap="OnSuggestionTapped">
+                <dxcv:DXCollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:AutocompleteSuggestion">
+                        <lists:ListItem
+                            Headline="{Binding Headline}"
+                            SupportingText="{Binding SupportingText}" />
+                    </DataTemplate>
+                </dxcv:DXCollectionView.ItemTemplate>
+            </dxcv:DXCollectionView>
+        </dx:DXBorder>
+
+    </Grid>
+</ContentView>

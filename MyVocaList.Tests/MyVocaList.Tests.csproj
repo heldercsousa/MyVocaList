@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="coverlet.collector">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Moq" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Domain, Contracts, Infra, Services — non-MAUI projects only -->
+    <ProjectReference Include="..\Domain\MyVocaList.Domain.csproj" />
+    <ProjectReference Include="..\Contracts\MyVocaList.Contracts.csproj" />
+    <ProjectReference Include="..\Infra\MyVocaList.Infra.csproj" />
+    <ProjectReference Include="..\Services\MyVocaList.Services.csproj" />
+    <!-- MAUI head project: referenced for ViewModel + Component tests -->
+    <ProjectReference Include="..\MyVocaList\MyVocaList.csproj" />
+  </ItemGroup>
+</Project>

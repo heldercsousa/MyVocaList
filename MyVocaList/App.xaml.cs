@@ -1,21 +1,45 @@
-using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui.Controls;
+using Microsoft.EntityFrameworkCore;
+using MyVocaList.Infra;
 
 namespace MyVocaList
 {
     public partial class App : Application
     {
+        private readonly IServiceProvider _serviceProvider;
+
         public App(IServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
             InitializeComponent();
+            _ = WarmUpDevExpressAsync();
+            _ = MigrateAsync();
+        }
 
+        protected override Window CreateWindow(IActivationState? activationState)
+        {
             // AppShell is resolved after InitializeComponent() so that Application.Resources
             // already contains MaterialColors.xaml when AppShell.InitializeComponent() runs.
-            MainPage = serviceProvider.GetRequiredService<AppShell>();
+            return new Window(_serviceProvider.GetRequiredService<AppShell>());
+        }
 
-            _ = WarmUpDevExpressAsync();
+        private async Task MigrateAsync()
+        {
+            // Run EF Core migrations off the main thread so Android startup is never blocked.
+            // Clear any stale __EFMigrationsLock row first; EF Core 9+ spins forever if it exists.
+            // SQLite on mobile is single-user so no concurrent migration concern.
+            await Task.Run(async () =>
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                try
+                {
+                    await dbContext.Database.ExecuteSqlRawAsync("DELETE FROM __EFMigrationsLock");
+                }
+                catch { /* Table does not exist on first run — safe to ignore. */ }
+
+                await dbContext.Database.MigrateAsync();
+            });
         }
 
         private async Task WarmUpDevExpressAsync()
