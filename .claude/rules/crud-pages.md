@@ -104,7 +104,7 @@ All list rows use the `ListItem` component. No card layouts, no custom `DXBorder
 <dxcv:DXCollectionView
     SelectionMode="Multiple"
     IndicatorColor="{StaticResource Primary}"
-    Margin="0,0,0,80"
+    Margin="0,0,0,88"
     Scrolled="OnCollectionViewScrolled"
     SelectionChanged="OnSelectionChanged"
     ...>
@@ -182,7 +182,7 @@ FAB is placed to the RIGHT of `FloatingToolbar` inside a shared `HorizontalStack
                  VerticalOptions="Center" Command="{Binding AddCommand}" />
 </HorizontalStackLayout>
 ```
-`DXCollectionView` bottom margin = `80` (max(FAB 56, toolbar 48) + 16 margin + 8 breathing).
+`DXCollectionView` bottom margin = `88` (max(toolbar 64, FAB 56) + 16 margin + 8 breathing).
 Do NOT use separate overlays with Margin formulas — that was the old pattern.
 
 ---

@@ -114,7 +114,16 @@
       "Bash(__NEW_LINE_1bfe84a10a07bf62__ powershell.exe -Command \":*)",
       "Bash(echo \"---exit: $?\")",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "mcp__plugin_everything-claude-code_playwright__browser_navigate",
+      "Read(//c/Users/helde/.claude/**)",
+      "Read(//c/Users/helde/.claude/plugins/**)",
+      "mcp__plugin_everything-claude-code_playwright__browser_snapshot",
+      "mcp__plugin_everything-claude-code_playwright__browser_evaluate",
+      "Bash(Select-String -Pattern \"\\(error|Build succeeded|Error\\\\\\(s\\\\\\)\\)\")",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(timeout 180 bash:*)",
+      "Bash(wait_for_background_task bsbepb6gw:*)"
     ]
   },
   "enabledMcpjsonServers": [

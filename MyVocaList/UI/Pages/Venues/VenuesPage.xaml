@@ -73,7 +73,7 @@
                        UseRippleEffect="True"
                        AllowCascadeUpdate="True"
                        ItemSeparatorThickness="0"
-                       Margin="0,0,0,80"
+                       Margin="0,0,0,88"
                        Scrolled="OnCollectionViewScrolled"
                        SelectionChanged="OnSelectionChanged">
 
@@ -118,17 +118,17 @@
             Illustration="nightlife_outlined"
             Headline="No venue registered"
             IsVisible="{Binding IsEmptyNoVenues}"
-            Margin="32,32,32,80" />
+            Margin="32,32,32,88" />
 
         <!-- Empty state: search returned no results -->
         <states:EmptyState
             Illustration="search_outlined"
             Headline="No venue found"
             IsVisible="{Binding IsEmptyNoResults}"
-            Margin="32,32,32,80" />
+            Margin="32,32,32,88" />
 
-        <!-- Toolbar + FAB: centered row, 16dp from bottom (MD3 vibrant toolbar + FAB coexistence) -->
-        <!-- Combined clearance: max(FAB 56dp, toolbar 48dp) + 16dp margin + 8dp breathing = 80dp -->
+        <!-- Toolbar + FAB: centered row, 16dp from safe area bottom (MD3 vibrant toolbar + FAB coexistence) -->
+        <!-- Combined clearance: max(FAB 56dp, toolbar 64dp) + 16dp margin + 8dp breathing = 88dp -->
         <HorizontalStackLayout HorizontalOptions="Center"
                                VerticalOptions="End"
                                Margin="0,0,0,16"

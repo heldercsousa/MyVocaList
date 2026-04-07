@@ -8,20 +8,20 @@
 
     <!--
         M3 Floating Toolbar — pill container with up to 5 icon-only action slots.
-        Height: 48dp · Shape: CornerRadius=24 (pill) · Background: SecondaryContainer (vibrant)
+        Height: 64dp · Shape: CornerRadius=32 (pill) · Background: SecondaryContainer (vibrant)
         Icon color: OnSecondaryContainer (default) · Selected: Primary bg + OnPrimary icon
-        Slots with null/empty ActionNIcon are hidden and collapse automatically.
+        Padding: 8dp left/right · Slot spacing: 4dp · Slots with null/empty ActionNIcon are hidden.
     -->
-    <dx:DXBorder CornerRadius="24"
-                 HeightRequest="48"
+    <dx:DXBorder CornerRadius="32"
+                 HeightRequest="64"
                  BackgroundColor="{StaticResource SecondaryContainer}"
-                 Padding="4,0">
+                 Padding="8,0">
 
         <!--
             Dark mode: elevation is expressed via SurfaceContainerHigh color tint, not shadow.
             Shadow is invisible against near-black backgrounds — intentionally omitted.
         -->
-        <HorizontalStackLayout Spacing="0">
+        <HorizontalStackLayout Spacing="4">
 
             <!-- Slot 1 -->
             <dx:DXButton x:Name="action1Button"
