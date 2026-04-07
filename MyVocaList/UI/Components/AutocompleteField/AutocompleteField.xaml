@@ -19,8 +19,6 @@
             Grid.Row="0"
             LabelText="{Binding LabelText, Source={x:Reference self}}"
             PlaceholderText="{Binding Placeholder, Source={x:Reference self}}"
-            HasError="{Binding HasError, Source={x:Reference self}}"
-            ErrorText="{Binding ErrorText, Source={x:Reference self}}"
             BoxMode="Outlined"
             FocusedBorderColor="{StaticResource Primary}"
             BorderColor="{StaticResource Outline}"
