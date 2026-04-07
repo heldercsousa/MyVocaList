@@ -22,9 +22,9 @@ namespace MyVocaList.Domain.RepositoryInterface
         /// </summary>
         Task<IEnumerable<Venue>> SearchByNameContainsAsync(string searchTerm, int maxResults = 10);
 
-        Task<IEnumerable<(Venue venue, bool hasEvents)>> SearchWithHasEventsAsync(string? query);
-        Task<IEnumerable<(Venue venue, bool hasEvents)>> GetAllWithHasEventsAsync();
-        Task<IEnumerable<(Venue venue, bool hasEvents)>> GetByIdsWithHasEventsAsync(IEnumerable<int> ids);
+        Task<IEnumerable<(Venue venue, int eventCount)>> SearchWithHasEventsAsync(string? query);
+        Task<IEnumerable<(Venue venue, int eventCount)>> GetAllWithHasEventsAsync();
+        Task<IEnumerable<(Venue venue, int eventCount)>> GetByIdsWithHasEventsAsync(IEnumerable<int> ids);
 
         /// <summary>
         /// Gets a paginated list of ALL venues with event information flag
@@ -34,7 +34,7 @@ namespace MyVocaList.Domain.RepositoryInterface
         /// <param name="pageSize">Number of items per page</param>
         /// <param name="query">Optional search query</param>
         /// <returns>Tuple with list of venues (with event flag) and total count</returns>
-        Task<(IEnumerable<(Venue venue, bool hasEvents)> items, int totalCount)> GetPagedWithEventInfoAsync(
+        Task<(IEnumerable<(Venue venue, int eventCount)> items, int totalCount)> GetPagedWithEventInfoAsync(
             int pageNumber,
             int pageSize,
             string? query = null);

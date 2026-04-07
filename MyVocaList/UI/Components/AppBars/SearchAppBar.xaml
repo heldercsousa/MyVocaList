@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<appbars:AppBarBase
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    x:Class="MyVocaList.UI.Components.AppBars.SearchAppBar"
+    x:Name="self">
+
+    <!-- Container: 64dp height, flat (no pill), color transitions on IsElevated -->
+    <Grid x:Name="container"
+          ColumnDefinitions="Auto,*,Auto,Auto,Auto"
+          ColumnSpacing="0"
+          HeightRequest="64"
+          BackgroundColor="{StaticResource Surface}"
+          VerticalOptions="Fill"
+          Padding="4,0">
+
+        <!-- Leading icon: auto-switches search ↔ back in code-behind -->
+        <dx:DXButton Grid.Column="0"
+                     x:Name="leadingButton"
+                     Icon="search_outlined"
+                     Style="{StaticResource NavigationIconButton}"
+                     SemanticProperties.Description="Search"
+                     Clicked="OnLeadingButtonClicked" />
+
+        <!-- Search input: flat TextEdit on app bar bg, bodyLarge 16sp -->
+        <dxe:TextEdit Grid.Column="1"
+                      x:Name="searchEdit"
+                      Text="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
+                      PlaceholderText="{Binding Placeholder, Source={x:Reference self}}"
+                      BoxMode="Outlined"
+                      BorderColor="Transparent"
+                      FocusedBorderColor="Transparent"
+                      BackgroundColor="Transparent"
+                      TextColor="{StaticResource OnSurface}"
+                      PlaceholderColor="{StaticResource OnSurfaceVariant}"
+                      ClearIconVisibility="Auto"
+                      ClearIconColor="{StaticResource OnSurfaceVariant}"
+                      Keyboard="Text"
+                      ReturnType="Search"
+                      VerticalOptions="Center"
+                      SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}"
+                      Focused="OnSearchEditFocused"
+                      Unfocused="OnSearchEditUnfocused" />
+
+        <!-- Trailing action 1 -->
+        <dx:DXButton Grid.Column="2"
+                     x:Name="action1Button"
+                     Icon="{Binding Action1Icon, Source={x:Reference self}}"
+                     Style="{StaticResource StandardIconButton}"
+                     IsVisible="{Binding HasAction1, Source={x:Reference self}}"
+                     SemanticProperties.Description="Action"
+                     Command="{Binding Action1Command, Source={x:Reference self}}" />
+
+        <!-- Trailing action 2 -->
+        <dx:DXButton Grid.Column="3"
+                     x:Name="action2Button"
+                     Icon="{Binding Action2Icon, Source={x:Reference self}}"
+                     Style="{StaticResource StandardIconButton}"
+                     IsVisible="{Binding HasAction2, Source={x:Reference self}}"
+                     SemanticProperties.Description="Action"
+                     Command="{Binding Action2Command, Source={x:Reference self}}" />
+
+        <!-- Trailing action 3 -->
+        <dx:DXButton Grid.Column="4"
+                     x:Name="action3Button"
+                     Icon="{Binding Action3Icon, Source={x:Reference self}}"
+                     Style="{StaticResource StandardIconButton}"
+                     IsVisible="{Binding HasAction3, Source={x:Reference self}}"
+                     SemanticProperties.Description="Action"
+                     Command="{Binding Action3Command, Source={x:Reference self}}" />
+    </Grid>
+</appbars:AppBarBase>

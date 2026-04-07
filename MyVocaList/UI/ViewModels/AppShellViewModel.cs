@@ -1,9 +1,3 @@
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui.Controls;
-using MyVocaList.Navigation;
-using MyVocaList.UI.Models;
-
 namespace MyVocaList.UI.ViewModels;
 
 /// <summary>

@@ -11,14 +11,13 @@ public static class VenueMapper
     /// <summary>
     /// Converts Venue entity to list item DTO
     /// </summary>
-    public static VenueListItemDto ToListDto(Venue venue, bool hasEvents)
+    public static VenueListItemDto ToListDto(Venue venue, int eventCount)
     {
         return new VenueListItemDto
         {
             Id = venue.Id,
             Name = venue.Name,
-            HasEvents = hasEvents,
-            IsSelected = false
+            EventCount = eventCount
         };
     }
 }

@@ -7,7 +7,7 @@
     <!-- MATERIAL DESIGN 3 COLOR SYSTEM - MyVocaList                                -->
     <!-- MyVocaList Brand Theme - Dark Mode (HCT-GENERATED)                         -->
     <!-- Generated using MaterialColorUtilities library                             -->
-    <!-- Your Signature Colors: Pink + Purple + Gold                               -->
+    <!-- Semantic Tokens: Indigo (exported from Material Theme Builder)           -->
     <!-- ============================================================================ -->
 
     <!-- ============================================================================ -->
@@ -134,87 +134,57 @@
     <!-- DARK MODE SEMANTIC TOKENS (Primary Theme)                                  -->
     <!-- ============================================================================ -->
 
-    <!-- Primary Role Colors (DARK MODE - Bright on Dark) -->
-    <Color x:Key="Primary">#FFFFB2BE</Color>
-    <!-- Primary80 -->
-    <Color x:Key="OnPrimary">#FF660025</Color>
-    <!-- Primary20 -->
-    <Color x:Key="PrimaryContainer">#FF900038</Color>
-    <!-- Primary30 -->
-    <Color x:Key="OnPrimaryContainer">#FFFFD9DE</Color>
-    <!-- Primary90 -->
+    <!-- Primary Role Colors (DARK MODE) -->
+    <Color x:Key="Primary">#BAC3FF</Color>
+    <Color x:Key="OnPrimary">#15267B</Color>
+    <Color x:Key="PrimaryContainer">#5C6BC0</Color>
+    <Color x:Key="OnPrimaryContainer">#F8F6FF</Color>
 
     <!-- Secondary Role Colors (DARK MODE) -->
-    <Color x:Key="Secondary">#FFE2B5FF</Color>
-    <!-- Secondary80 -->
-    <Color x:Key="OnSecondary">#FF4D007A</Color>
-    <!-- Secondary20 -->
-    <Color x:Key="SecondaryContainer">#FF662592</Color>
-    <!-- Secondary30 -->
-    <Color x:Key="OnSecondaryContainer">#FFF3DAFF</Color>
-    <!-- Secondary90 -->
+    <Color x:Key="Secondary">#BFC4EC</Color>
+    <Color x:Key="OnSecondary">#292E4E</Color>
+    <Color x:Key="SecondaryContainer">#3F4566</Color>
+    <Color x:Key="OnSecondaryContainer">#AEB3DA</Color>
 
     <!-- Tertiary Role Colors (DARK MODE) -->
-    <Color x:Key="Tertiary">#FFE9C400</Color>
-    <!-- Tertiary80 -->
-    <Color x:Key="OnTertiary">#FF3A3000</Color>
-    <!-- Tertiary20 -->
-    <Color x:Key="TertiaryContainer">#FF544600</Color>
-    <!-- Tertiary30 -->
-    <Color x:Key="OnTertiaryContainer">#FFFFE16D</Color>
-    <!-- Tertiary90 -->
+    <Color x:Key="Tertiary">#FFABF2</Color>
+    <Color x:Key="OnTertiary">#551153</Color>
+    <Color x:Key="TertiaryContainer">#A15699</Color>
+    <Color x:Key="OnTertiaryContainer">#FFF4F9</Color>
 
     <!-- Error Role Colors (DARK MODE) -->
-    <Color x:Key="Error">#FFFFB4A9</Color>
-    <!-- Error80 -->
-    <Color x:Key="OnError">#FF690002</Color>
-    <!-- Error20 -->
-    <Color x:Key="ErrorContainer">#FF930005</Color>
-    <!-- Error30 -->
-    <Color x:Key="OnErrorContainer">#FFFFDAD5</Color>
-    <!-- Error90 -->
+    <Color x:Key="Error">#FFB4AB</Color>
+    <Color x:Key="OnError">#690005</Color>
+    <Color x:Key="ErrorContainer">#93000A</Color>
+    <Color x:Key="OnErrorContainer">#FFDAD6</Color>
 
-    <!-- Background & Surface (DARK MODE - Very Dark) -->
-    <Color x:Key="Background">#FF1C1621</Color>
-    <!-- NEW Neutral10 - Deep purple-black -->
-    <Color x:Key="OnBackground">#FFE6DDEA</Color>
-    <!-- NEW Neutral90 - Soft purple-white -->
-    <Color x:Key="Surface">#FF1C1621</Color>
-    <!-- NEW Neutral10 -->
-    <Color x:Key="OnSurface">#FFE6DDEA</Color>
-    <!-- NEW Neutral90 -->
-    <Color x:Key="SurfaceVariant">#FF4E3F53</Color>
-    <!-- NEW NeutralVariant30 - Deep purple-gray -->
-    <Color x:Key="OnSurfaceVariant">#FFD1BFD6</Color>
-    <!-- NEW NeutralVariant80 - Light purple-gray -->
-    
-    <Color x:Key="SurfaceContainerLow">#FF251E2A</Color>
-    <Color x:Key="SurfaceContainer">#FF312A36</Color>
-    <Color x:Key="SurfaceContainerHigh">#FF47404D</Color>
-    <Color x:Key="SurfaceContainerHighest">#FF5F5765</Color>
-    <Color x:Key="SurfaceDim">#FF000000</Color>
-    <!-- Neutral0 - unchanged -->
-    <Color x:Key="SurfaceBright">#FF312A36</Color>
-    <!-- Neutral30 -->
+    <!-- Background & Surface (DARK MODE) -->
+    <Color x:Key="Background">#121318</Color>
+    <Color x:Key="OnBackground">#E3E1E9</Color>
+    <Color x:Key="Surface">#121318</Color>
+    <Color x:Key="OnSurface">#E3E1E9</Color>
+    <Color x:Key="SurfaceVariant">#454651</Color>
+    <Color x:Key="OnSurfaceVariant">#C6C5D3</Color>
 
-    <Color x:Key="Outline">#FF9A899F</Color>
-    <!-- NeutralVariant60 -->
-    <Color x:Key="OutlineVariant">#FF4E3F53</Color>
-    <!-- NeutralVariant30 -->
+    <Color x:Key="SurfaceContainerLowest">#0D0E13</Color>
+    <Color x:Key="SurfaceContainerLow">#1B1B21</Color>
+    <Color x:Key="SurfaceContainer">#1F1F25</Color>
+    <Color x:Key="SurfaceContainerHigh">#29292F</Color>
+    <Color x:Key="SurfaceContainerHighest">#34343A</Color>
+    <Color x:Key="SurfaceDim">#121318</Color>
+    <Color x:Key="SurfaceBright">#39393F</Color>
+
+    <Color x:Key="Outline">#8F909D</Color>
+    <Color x:Key="OutlineVariant">#454651</Color>
 
     <!-- Inverse Colors (DARK MODE) -->
-    <Color x:Key="InverseSurface">#FFE6DDEA</Color>
-    <!-- NEW Neutral90 -->
-    <Color x:Key="InverseOnSurface">#FF312A36</Color>
-    <!-- NEW Neutral20 -->
-    <Color x:Key="InversePrimary">#FFBC004B</Color>
-    <!-- Primary40 - unchanged -->
+    <Color x:Key="InverseSurface">#E3E1E9</Color>
+    <Color x:Key="InverseOnSurface">#303036</Color>
+    <Color x:Key="InversePrimary">#4858AB</Color>
 
     <!-- Scrim & Shadow -->
-    <Color x:Key="Scrim">#FF000000</Color>
-    <!-- Neutral0 -->
-    <Color x:Key="Shadow">#FF000000</Color>
-    <!-- Neutral0 -->
+    <Color x:Key="Scrim">#000000</Color>
+    <Color x:Key="Shadow">#000000</Color>
 
     <!-- ============================================================================ -->
     <!-- LIGHT MODE SEMANTIC TOKENS (Future v2.0)                                   -->

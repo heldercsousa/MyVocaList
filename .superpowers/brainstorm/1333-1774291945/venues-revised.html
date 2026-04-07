@@ -1,0 +1,199 @@
+<h2>VenuesPage — MD3 Revised Layout</h2>
+<p class="subtitle">All corrections applied. Tap row = select. Toolbar = actions. FAB adjacent to toolbar.</p>
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;">
+
+  <!-- NORMAL STATE -->
+  <div class="mockup" style="min-width:280px;max-width:320px;">
+    <div class="mockup-header">Normal state (nothing selected)</div>
+    <div class="mockup-body" style="padding:0;font-family:monospace;font-size:12px;background:#121318;">
+
+      <!-- SmallAppBar (no ⋮) -->
+      <div style="background:#1F1F25;padding:0 8px;display:flex;align-items:center;height:56px;border-bottom:1px solid #454651;gap:4px;">
+        <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#E3E1E9;font-size:18px;">☰</div>
+        <div style="flex:1;padding:0 8px;color:#E3E1E9;font-size:16px;font-weight:500;">Venues</div>
+        <div style="width:48px;height:48px;border-radius:24px;background:#29292F;display:flex;align-items:center;justify-content:center;color:#BAC3FF;font-size:16px;" title="Tap → switches to SearchAppBar">🔍</div>
+      </div>
+
+      <!-- List items: leading logo + headline + trailing checkbox -->
+      <!-- Item 1 -->
+      <div style="background:#1B1B21;padding:0 24px 0 16px;display:flex;align-items:center;min-height:56px;gap:16px;border-bottom:1px solid #0D0E13;">
+        <!-- Leading: logo placeholder -->
+        <div style="width:40px;height:40px;border-radius:4px;background:#29292F;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="color:#454651;font-size:16px;">🏠</span>
+        </div>
+        <!-- Headline -->
+        <div style="flex:1;color:#E3E1E9;font-size:16px;">Venue Alpha</div>
+        <!-- Trailing: checkbox (unchecked) -->
+        <div style="width:20px;height:20px;border-radius:2px;border:2px solid #8F909D;background:transparent;flex-shrink:0;"></div>
+      </div>
+      <!-- Item 2 -->
+      <div style="background:#1B1B21;padding:0 24px 0 16px;display:flex;align-items:center;min-height:56px;gap:16px;border-bottom:1px solid #0D0E13;">
+        <div style="width:40px;height:40px;border-radius:4px;background:#29292F;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="color:#454651;font-size:16px;">🏠</span>
+        </div>
+        <div style="flex:1;color:#E3E1E9;font-size:16px;">Venue Beta</div>
+        <div style="width:20px;height:20px;border-radius:2px;border:2px solid #8F909D;background:transparent;flex-shrink:0;"></div>
+      </div>
+      <!-- Item 3 -->
+      <div style="background:#1B1B21;padding:0 24px 0 16px;display:flex;align-items:center;min-height:56px;gap:16px;border-bottom:1px solid #0D0E13;">
+        <div style="width:40px;height:40px;border-radius:4px;background:#29292F;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="color:#454651;font-size:16px;">🏠</span>
+        </div>
+        <div style="flex:1;color:#E3E1E9;font-size:16px;">Venue Gamma</div>
+        <div style="width:20px;height:20px;border-radius:2px;border:2px solid #8F909D;background:transparent;flex-shrink:0;"></div>
+      </div>
+
+      <!-- Spacer -->
+      <div style="flex:1;background:#121318;height:40px;"></div>
+
+      <!-- Bottom strip: FloatingToolbar + FAB side by side -->
+      <div style="background:#121318;padding:12px 16px;display:flex;align-items:center;justify-content:center;gap:12px;">
+        <!-- FloatingToolbar pill -->
+        <div style="background:#29292F;border-radius:24px;height:48px;display:flex;align-items:center;padding:0 4px;">
+          <!-- Select All: always enabled -->
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:16px;" title="Select All">☑</div>
+          <!-- Edit: disabled -->
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#454651;font-size:16px;" title="Edit (disabled — no selection)">✏</div>
+          <!-- Delete: disabled -->
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#454651;font-size:16px;" title="Delete (disabled — no selection)">🗑</div>
+        </div>
+        <!-- FAB: adjacent, independent -->
+        <div style="background:#BAC3FF;border-radius:16px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="color:#15267B;font-size:24px;font-weight:300;">＋</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SELECTION STATE -->
+  <div class="mockup" style="min-width:280px;max-width:320px;">
+    <div class="mockup-header">Selection state (2 selected)</div>
+    <div class="mockup-body" style="padding:0;font-family:monospace;font-size:12px;background:#121318;">
+
+      <!-- SmallAppBar — title updates to count -->
+      <div style="background:#1F1F25;padding:0 8px;display:flex;align-items:center;height:56px;border-bottom:1px solid #454651;gap:4px;">
+        <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#E3E1E9;font-size:18px;">☰</div>
+        <div style="flex:1;padding:0 8px;color:#BAC3FF;font-size:16px;font-weight:500;">2 selected</div>
+        <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:16px;">🔍</div>
+      </div>
+
+      <!-- Item 1: SELECTED -->
+      <div style="background:#3F4566;padding:0 24px 0 16px;display:flex;align-items:center;min-height:56px;gap:16px;border-bottom:1px solid #0D0E13;">
+        <div style="width:40px;height:40px;border-radius:4px;background:#29292F;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="color:#454651;font-size:16px;">🏠</span>
+        </div>
+        <div style="flex:1;color:#E3E1E9;font-size:16px;">Venue Alpha</div>
+        <!-- Checked checkbox -->
+        <div style="width:20px;height:20px;border-radius:2px;border:2px solid #BAC3FF;background:#BAC3FF;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+          <span style="color:#15267B;font-size:13px;font-weight:700;">✓</span>
+        </div>
+      </div>
+      <!-- Item 2: UNSELECTED -->
+      <div style="background:#1B1B21;padding:0 24px 0 16px;display:flex;align-items:center;min-height:56px;gap:16px;border-bottom:1px solid #0D0E13;">
+        <div style="width:40px;height:40px;border-radius:4px;background:#29292F;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="color:#454651;font-size:16px;">🏠</span>
+        </div>
+        <div style="flex:1;color:#E3E1E9;font-size:16px;">Venue Beta</div>
+        <div style="width:20px;height:20px;border-radius:2px;border:2px solid #8F909D;background:transparent;flex-shrink:0;"></div>
+      </div>
+      <!-- Item 3: SELECTED -->
+      <div style="background:#3F4566;padding:0 24px 0 16px;display:flex;align-items:center;min-height:56px;gap:16px;border-bottom:1px solid #0D0E13;">
+        <div style="width:40px;height:40px;border-radius:4px;background:#29292F;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="color:#454651;font-size:16px;">🏠</span>
+        </div>
+        <div style="flex:1;color:#E3E1E9;font-size:16px;">Venue Gamma</div>
+        <div style="width:20px;height:20px;border-radius:2px;border:2px solid #BAC3FF;background:#BAC3FF;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+          <span style="color:#15267B;font-size:13px;font-weight:700;">✓</span>
+        </div>
+      </div>
+
+      <div style="flex:1;background:#121318;height:40px;"></div>
+
+      <!-- Bottom strip: toolbar with Edit ENABLED (only 1?) + Delete ENABLED, FAB -->
+      <div style="background:#121318;padding:12px 16px;display:flex;align-items:center;justify-content:center;gap:12px;">
+        <div style="background:#29292F;border-radius:24px;height:48px;display:flex;align-items:center;padding:0 4px;">
+          <!-- Select All: enabled -->
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:16px;" title="Select All">☑</div>
+          <!-- Edit: disabled (2 selected, edit needs exactly 1) -->
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#454651;font-size:16px;" title="Edit (disabled — need exactly 1)">✏</div>
+          <!-- Delete: ENABLED -->
+          <div style="width:48px;height:48px;border-radius:24px;background:#3F4566;display:flex;align-items:center;justify-content:center;color:#AEB3DA;font-size:16px;" title="Delete selected">🗑</div>
+        </div>
+        <div style="background:#BAC3FF;border-radius:16px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="color:#15267B;font-size:24px;font-weight:300;">＋</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SEARCH STATE -->
+  <div class="mockup" style="min-width:280px;max-width:320px;">
+    <div class="mockup-header">Search state (SearchAppBar active)</div>
+    <div class="mockup-body" style="padding:0;font-family:monospace;font-size:12px;background:#121318;">
+
+      <!-- SearchAppBar replaces SmallAppBar -->
+      <div style="background:#1F1F25;padding:0 8px;display:flex;align-items:center;height:56px;border-bottom:1px solid #454651;gap:4px;">
+        <!-- Leading: back arrow (auto-switches when focused/has text) -->
+        <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#E3E1E9;font-size:18px;" title="Tap → clears search + returns to SmallAppBar">←</div>
+        <!-- Search TextEdit -->
+        <div style="flex:1;background:transparent;border:none;color:#E3E1E9;font-size:16px;padding:0 4px;">
+          <span style="color:#E3E1E9;">rock</span><span style="color:#BAC3FF;">|</span>
+        </div>
+        <!-- Clear icon (auto when text present) -->
+        <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:16px;" title="Clear search text">✕</div>
+      </div>
+
+      <!-- Filtered results -->
+      <div style="background:#1B1B21;padding:0 24px 0 16px;display:flex;align-items:center;min-height:56px;gap:16px;border-bottom:1px solid #0D0E13;">
+        <div style="width:40px;height:40px;border-radius:4px;background:#29292F;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="color:#454651;font-size:16px;">🏠</span>
+        </div>
+        <div style="flex:1;color:#E3E1E9;font-size:16px;">Rock Venue</div>
+        <div style="width:20px;height:20px;border-radius:2px;border:2px solid #8F909D;background:transparent;flex-shrink:0;"></div>
+      </div>
+
+      <!-- No more results -->
+      <div style="padding:24px;text-align:center;color:#454651;font-size:12px;">— 1 result —</div>
+
+      <div style="flex:1;background:#121318;height:80px;"></div>
+
+      <!-- Toolbar + FAB still present during search -->
+      <div style="background:#121318;padding:12px 16px;display:flex;align-items:center;justify-content:center;gap:12px;">
+        <div style="background:#29292F;border-radius:24px;height:48px;display:flex;align-items:center;padding:0 4px;">
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:16px;">☑</div>
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#454651;font-size:16px;">✏</div>
+          <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#454651;font-size:16px;">🗑</div>
+        </div>
+        <div style="background:#BAC3FF;border-radius:16px;width:56px;height:56px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span style="color:#15267B;font-size:24px;font-weight:300;">＋</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:20px;background:#29292F;border-radius:8px;padding:16px;">
+  <h3 style="margin:0 0 10px 0;color:#BAC3FF;">One open question: SmallAppBar title during selection</h3>
+  <p style="margin:0 0 8px 0;color:#C6C5D3;font-size:13px;">In the selection state mockup above, the app bar title changes to <strong>"2 selected"</strong>. Two options:</p>
+  <div class="options">
+    <div class="option" data-choice="a" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Title updates to "N selected"</h3>
+        <p>SmallAppBar Title binding updates dynamically. Search icon hidden during selection. Clean feedback, no separate contextual bar needed.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="b" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Title stays "Venues" always</h3>
+        <p>Selection count is implied by the checked checkboxes. Simpler ViewModel — no title-switching logic. Toolbar Delete button label could show count instead.</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    x:Class="MyVocaList.UI.Components.Toolbars.FloatingToolbar"
+    x:Name="self">
+
+    <!--
+        M3 Floating Toolbar — pill container with up to 5 icon-only action slots.
+        Height: 64dp · Shape: CornerRadius=32 (pill) · Background: SecondaryContainer (vibrant)
+        Icon color: OnSecondaryContainer (default) · Selected: Primary bg + OnPrimary icon
+        Padding: 8dp left/right · Slot spacing: 4dp · Slots with null/empty ActionNIcon are hidden.
+    -->
+    <dx:DXBorder CornerRadius="32"
+                 HeightRequest="64"
+                 BackgroundColor="{StaticResource SecondaryContainer}"
+                 Padding="8,0">
+
+        <!--
+            Dark mode: elevation is expressed via SurfaceContainerHigh color tint, not shadow.
+            Shadow is invisible against near-black backgrounds — intentionally omitted.
+        -->
+        <HorizontalStackLayout Spacing="4">
+
+            <!-- Slot 1 -->
+            <dx:DXButton x:Name="action1Button"
+                         Icon="{Binding Action1Icon, Source={x:Reference self}}"
+                         Style="{StaticResource VibrantToolbarIconButton}"
+                         IsVisible="{Binding HasAction1, Source={x:Reference self}}"
+                         SemanticProperties.Description="{Binding Action1Description, Source={x:Reference self}}"
+                         Command="{Binding Action1Command, Source={x:Reference self}}" />
+
+            <!-- Slot 2 -->
+            <dx:DXButton x:Name="action2Button"
+                         Icon="{Binding Action2Icon, Source={x:Reference self}}"
+                         Style="{StaticResource VibrantToolbarIconButton}"
+                         IsVisible="{Binding HasAction2, Source={x:Reference self}}"
+                         SemanticProperties.Description="{Binding Action2Description, Source={x:Reference self}}"
+                         Command="{Binding Action2Command, Source={x:Reference self}}" />
+
+            <!-- Slot 3 -->
+            <dx:DXButton x:Name="action3Button"
+                         Icon="{Binding Action3Icon, Source={x:Reference self}}"
+                         Style="{StaticResource VibrantToolbarIconButton}"
+                         IsVisible="{Binding HasAction3, Source={x:Reference self}}"
+                         SemanticProperties.Description="{Binding Action3Description, Source={x:Reference self}}"
+                         Command="{Binding Action3Command, Source={x:Reference self}}" />
+
+            <!-- Slot 4 -->
+            <dx:DXButton x:Name="action4Button"
+                         Icon="{Binding Action4Icon, Source={x:Reference self}}"
+                         Style="{StaticResource VibrantToolbarIconButton}"
+                         IsVisible="{Binding HasAction4, Source={x:Reference self}}"
+                         SemanticProperties.Description="{Binding Action4Description, Source={x:Reference self}}"
+                         Command="{Binding Action4Command, Source={x:Reference self}}" />
+
+            <!-- Slot 5 -->
+            <dx:DXButton x:Name="action5Button"
+                         Icon="{Binding Action5Icon, Source={x:Reference self}}"
+                         Style="{StaticResource VibrantToolbarIconButton}"
+                         IsVisible="{Binding HasAction5, Source={x:Reference self}}"
+                         SemanticProperties.Description="{Binding Action5Description, Source={x:Reference self}}"
+                         Command="{Binding Action5Command, Source={x:Reference self}}" />
+
+        </HorizontalStackLayout>
+    </dx:DXBorder>
+</ContentView>

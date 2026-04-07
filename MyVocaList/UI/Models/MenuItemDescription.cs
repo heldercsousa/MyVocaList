@@ -1,5 +1,3 @@
-using System.Windows.Input;
-
 namespace MyVocaList.UI.Models;
 
 /// <summary>

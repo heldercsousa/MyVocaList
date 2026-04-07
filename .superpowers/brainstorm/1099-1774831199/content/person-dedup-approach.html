@@ -1,0 +1,70 @@
+<h2>Person CRUD — Duplicate Detection Strategy</h2>
+<p class="subtitle">A person has a <strong>FullName</strong> (required) + optional <strong>BirthdayDayMonth</strong> (DD/MM) + optional <strong>Email</strong>. Two people with the same name but different birthdays are different people. How should the system tell them apart?</p>
+
+<div class="section">
+  <div class="label">The core problem</div>
+  <p>When the admin types "João Silva" to register a new singer — is this a new person, or one already in the database? The system needs a strategy to detect and surface existing matches <em>before</em> the admin finishes typing.</p>
+</div>
+
+<div class="options">
+
+  <div class="option" data-choice="A" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Name-only suggestion list (no mandatory disambiguator)</h3>
+      <p>As the admin types, a live suggestion list appears showing all existing persons whose name matches. Each suggestion shows <strong>Name + birthday (if set)</strong>. Tapping a suggestion loads edit mode for that person. If the admin ignores all suggestions and taps Save, a new person is created — no blocking.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Fastest registration — no mandatory fields beyond name</li>
+          <li>Works even when admin doesn't know birthday</li>
+          <li>Non-blocking — never stops the admin cold</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Duplicates can still be created if admin ignores suggestions</li>
+          <li>Birthday only helps <em>after</em> a match is found — not enforced</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="B" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Name suggestion + Birthday required when match found</h3>
+      <p>Same live suggestion list as A. But when the admin's typed name matches an existing person exactly (or very closely), the form <strong>requires birthday</strong> before saving — to confirm it's a different person. If birthday matches an existing record too, the system blocks save and highlights the existing person.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Strong duplicate prevention when names collide</li>
+          <li>Birthday only required when it matters</li>
+          <li>Clear signal to admin: "we found someone with this name"</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Admin may not know the birthday on the spot</li>
+          <li>More complex form state (field appears conditionally)</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="C" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Name suggestion + Birthday always optional, Email always optional</h3>
+      <p>Live suggestions as in A. Birthday and Email are <em>always visible</em> on the form as optional fields — admin can fill them or not. The system uses Name + Birthday as a composite uniqueness check: same name + same birthday = duplicate (blocked). Same name + no birthday = allowed (creates a new record, warns admin).</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Full flexibility — admin enriches data when they have it</li>
+          <li>Composite key prevents exact-match duplicates</li>
+          <li>Email is optional differentiator (useful for marketing later)</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Two people named "João Silva" with no birthday = two valid records (admin must manage)</li>
+          <li>Form has more fields — slightly heavier for simple cases</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:24px">💡 The existing <code>Person</code> entity already has <code>BirthdayDayMonth</code> (DD/MM format, optional) and <code>Email</code> (optional). The domain already has <code>GetDisplayIdentifier()</code> that prioritises Email → Birthday → ID for display in suggestions.</p>

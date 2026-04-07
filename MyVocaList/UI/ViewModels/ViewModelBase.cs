@@ -1,5 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-
 namespace MyVocaList.UI.ViewModels;
 
 /// <summary>Base class for all ViewModels: INPC + UI thread helpers.</summary>

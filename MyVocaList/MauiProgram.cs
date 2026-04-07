@@ -1,22 +1,12 @@
 using CommunityToolkit.Maui;
-using DevExpress.Maui;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using MyVocaList.Domain;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
-using MyVocaList.Services;
-using MyVocaList.UI.Services;
-using MyVocaList.UI.Pages.Artists;
-using MyVocaList.UI.Pages.BackupRestore;
-using MyVocaList.UI.Pages.Events;
-using MyVocaList.UI.Pages.People;
-using MyVocaList.UI.Pages.Preferences;
-using MyVocaList.UI.Pages.Queue;
-using MyVocaList.UI.Pages.Venues;
-using MyVocaList.UI.ViewModels;
+#if DEBUG
+using MauiDevFlow.Agent;
+#endif
 
 namespace MyVocaList;
 
@@ -39,6 +29,10 @@ public static class MauiProgram
                 fonts.AddFont("Roboto-Medium.ttf", "RobotoMedium");
                 fonts.AddFont("Roboto-Bold.ttf", "RobotoBold");
             });
+            
+        #if DEBUG
+        builder.AddMauiDevFlowAgent();
+        #endif            
 
         // Database
         builder.Services.AddSingleton<CollationInterceptor>();
@@ -46,17 +40,17 @@ public static class MauiProgram
         {
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "MyVocaList.db");
             options.UseSqlite($"Data Source={dbPath}")
-                   .AddInterceptors(sp.GetRequiredService<CollationInterceptor>());
+                   .AddInterceptors(sp.GetRequiredService<CollationInterceptor>())
+                   .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         });
 
         // Repositories
         builder.Services.AddScoped<IVenueRepository, VenueRepository>();
         builder.Services.AddScoped<IEventRepository, EventRepository>();
 
-            // Services
-        builder.Services.AddScoped<IDatabaseInit, DatabaseInit>();
+        // Services
         builder.Services.AddScoped<IVenueService, VenueService>();
-        builder.Services.AddSingleton<ISnackbarService, SnackbarService>();
+        builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
 
         // Shell
         builder.Services.AddSingleton<AppShellViewModel>();
@@ -64,8 +58,10 @@ public static class MauiProgram
 
         // ViewModels
         builder.Services.AddTransient<VenuesViewModel>();
+        builder.Services.AddTransient<VenueFormViewModel>();
 
         // Pages
+        builder.Services.AddTransient<VenueFormPage>();
         builder.Services.AddTransient<QueuePage>();
         builder.Services.AddTransient<EventsPage>();
         builder.Services.AddTransient<VenuesPage>();
@@ -78,18 +74,6 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        var mauiApp = builder.Build();
-
-        // Apply database migrations on startup - run on thread pool to avoid
-        // blocking the main thread and SQLite write-lock contention between
-        // EF Core's internal lock connection and migration connection.
-        Task.Run(async () =>
-        {
-            using var scope = mauiApp.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            await dbContext.Database.MigrateAsync();
-        }).GetAwaiter().GetResult();
-
-        return mauiApp;
+        return builder.Build();
     }
 }

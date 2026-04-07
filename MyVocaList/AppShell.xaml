@@ -12,6 +12,7 @@
     xmlns:artists="clr-namespace:MyVocaList.UI.Pages.Artists"
     xmlns:prefs="clr-namespace:MyVocaList.UI.Pages.Preferences"
     xmlns:backup="clr-namespace:MyVocaList.UI.Pages.BackupRestore"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     Title="MyVocaList"
     FlyoutBehavior="Flyout"
     FlyoutBackgroundColor="{StaticResource Surface}">
@@ -21,19 +22,19 @@
         <VerticalStackLayout Padding="16,24,16,16" Spacing="4"
                              BackgroundColor="{StaticResource Surface}">
             <Label Text="MyVocaList"
-                   FontFamily="RobotoBold" FontSize="24"
+                   StyleClass="Title.Large"
+                   FontFamily="RobotoBold"
                    TextColor="{StaticResource Primary}" />
             <Label Text="Karaoke Queue Manager"
-                   FontFamily="RobotoRegular" FontSize="14"
+                   StyleClass="Body.Medium"
                    TextColor="{StaticResource OnSurfaceVariant}" />
-            <BoxView HeightRequest="1" Margin="0,12,0,0"
-                     Color="{StaticResource OutlineVariant}" />
+            <BoxView Style="{StaticResource Divider}" Margin="0,12,0,0" />
         </VerticalStackLayout>
     </Shell.FlyoutHeader>
 
     <!-- Flyout Content: Grouped navigation menu -->
     <Shell.FlyoutContentTemplate>
-        <DataTemplate>
+        <DataTemplate x:DataType="vm:AppShellViewModel">
             <dx:DXScrollView BackgroundColor="{StaticResource Surface}">
                 <VerticalStackLayout Padding="12,0" Spacing="16"
                                      BindableLayout.ItemsSource="{Binding MenuGroups}">
@@ -41,9 +42,7 @@
                         <DataTemplate x:DataType="models:MenuGroup">
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="{Binding GroupTitle}"
-                                       FontFamily="RobotoMedium" FontSize="14"
-                                       TextColor="{StaticResource OnSurfaceVariant}"
-                                       Padding="16,8,16,4" />
+                                       Style="{StaticResource NavDrawerSectionHeader}" />
                                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="models:MenuItemDescription">

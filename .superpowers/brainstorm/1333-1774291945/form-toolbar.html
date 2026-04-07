@@ -1,0 +1,92 @@
+<h2>VenueFormPage — FloatingToolbar Options</h2>
+<p class="subtitle">The form has one input field (venue name). Toolbar minimum is 3 slots. Three approaches — pick one or discuss.</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>No FloatingToolbar — keep inline buttons</h3>
+      <p><strong>Save</strong> + <strong>Cancel</strong> as labeled buttons inside the ScrollView, above the keyboard. This is the existing pattern, and it's actually the correct MD3 recommendation for forms with keyboard input. The keyboard pushes content up naturally. FloatingToolbar at the bottom would be hidden behind the soft keyboard on Android — a confirmed conflict per the project's own rules.</p>
+      <div style="margin-top:8px;background:#1F1F25;border-radius:8px;padding:10px;font-size:12px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <div style="width:40px;height:40px;border-radius:4px;background:#454651;"></div>
+          <div style="flex:1;height:40px;background:#34343A;border-radius:4px;border:1px solid #8F909D;"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;">
+          <div style="border:1px solid #8F909D;border-radius:20px;padding:6px 20px;color:#C6C5D3;font-size:12px;">Cancel</div>
+          <div style="background:#BAC3FF;border-radius:20px;padding:6px 20px;color:#15267B;font-size:12px;font-weight:600;">Save</div>
+        </div>
+        <div style="color:#454651;font-size:11px;margin-top:8px;text-align:center;">No toolbar — SmallAppBar has Back + title only</div>
+      </div>
+      <div style="margin-top:8px;">
+        <span style="color:#4CAF50;font-size:12px;">✓ No keyboard conflict</span><br/>
+        <span style="color:#4CAF50;font-size:12px;">✓ Labeled buttons = clarity during data entry</span><br/>
+        <span style="color:#4CAF50;font-size:12px;">✓ Consistent with existing dialogs-validation.md rule</span><br/>
+        <span style="color:#FFB4AB;font-size:12px;">✗ No FloatingToolbar on this page</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>FloatingToolbar: Save · Cancel · Clear</h3>
+      <p>3-slot toolbar with icon-only buttons. <strong>Save</strong> (checkmark), <strong>Cancel</strong> (close), <strong>Clear</strong> (eraser — resets the name field). Toolbar is positioned above the keyboard using <code>KeyboardAvoidingBehavior</code> or the form's ScrollView handles avoidance. Save button IsSelected=true when form is valid (uses SecondaryContainer highlight).</p>
+      <div style="margin-top:8px;background:#1F1F25;border-radius:8px;padding:10px;font-size:12px;">
+        <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+          <div style="width:40px;height:40px;border-radius:4px;background:#454651;flex-shrink:0;"></div>
+          <div style="flex:1;height:40px;background:#34343A;border-radius:4px;border:1px solid #8F909D;"></div>
+        </div>
+        <div style="display:flex;justify-content:center;gap:12px;align-items:center;">
+          <div style="background:#29292F;border-radius:24px;height:48px;display:flex;align-items:center;padding:0 4px;gap:0;">
+            <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:16px;" title="Clear">⌫</div>
+            <div style="width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:16px;" title="Cancel">✕</div>
+            <div style="width:48px;height:48px;border-radius:24px;background:#3F4566;display:flex;align-items:center;justify-content:center;color:#AEB3DA;font-size:16px;" title="Save (highlighted = valid)">✓</div>
+          </div>
+        </div>
+        <div style="color:#454651;font-size:11px;margin-top:8px;text-align:center;">No FAB. Save highlights when form is valid.</div>
+      </div>
+      <div style="margin-top:8px;">
+        <span style="color:#4CAF50;font-size:12px;">✓ Consistent toolbar pattern across pages</span><br/>
+        <span style="color:#4CAF50;font-size:12px;">✓ Clear action is genuinely useful (reset field)</span><br/>
+        <span style="color:#FFB4AB;font-size:12px;">✗ Icon-only buttons less obvious for Save/Cancel</span><br/>
+        <span style="color:#FFB4AB;font-size:12px;">✗ Keyboard avoidance needs explicit handling</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>FloatingToolbar in SmallAppBar trailing slots (no bottom toolbar)</h3>
+      <p>Put Save and Cancel as trailing icon buttons in SmallAppBar (Action1 + Action2). Third action could be Clear (Action3). No bottom toolbar at all — the app bar IS the action surface. This is a valid M3 pattern for simple forms: "top app bar provides the form controls."</p>
+      <div style="margin-top:8px;background:#1F1F25;border-radius:8px;padding:10px;font-size:12px;">
+        <div style="background:#1F1F25;border:1px solid #454651;padding:0 8px;display:flex;align-items:center;height:48px;gap:4px;border-radius:4px;margin-bottom:8px;">
+          <div style="width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;color:#E3E1E9;font-size:16px;">←</div>
+          <div style="flex:1;color:#E3E1E9;font-size:14px;">New Venue</div>
+          <div style="width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;color:#C6C5D3;font-size:14px;" title="Clear">⌫</div>
+          <div style="width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;color:#FFB4AB;font-size:14px;" title="Cancel">✕</div>
+          <div style="width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;color:#BAC3FF;font-size:14px;" title="Save">✓</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="width:40px;height:40px;border-radius:4px;background:#454651;flex-shrink:0;"></div>
+          <div style="flex:1;height:40px;background:#34343A;border-radius:4px;border:1px solid #8F909D;"></div>
+        </div>
+        <div style="color:#454651;font-size:11px;margin-top:8px;text-align:center;">No bottom toolbar. No FAB. Actions in app bar.</div>
+      </div>
+      <div style="margin-top:8px;">
+        <span style="color:#4CAF50;font-size:12px;">✓ Zero keyboard conflict (actions at top)</span><br/>
+        <span style="color:#4CAF50;font-size:12px;">✓ Uses SmallAppBar trailing slots as designed</span><br/>
+        <span style="color:#4CAF50;font-size:12px;">✓ Minimal — no extra component needed</span><br/>
+        <span style="color:#FFB4AB;font-size:12px;">✗ Icon-only — Save/Cancel less obvious at top</span><br/>
+        <span style="color:#FFB4AB;font-size:12px;">✗ FloatingToolbar not used on form page</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:16px;background:#29292F;border-radius:8px;padding:12px;font-size:12px;color:#C6C5D3;">
+  <strong style="color:#BAC3FF;">My recommendation: Option A</strong> — keep inline labeled buttons on the form. The project's own <code>dialogs-validation.md</code> rule explicitly says forms with keyboard input use Shell nav pages with <code>SafeAreaEdges="All"</code> + <code>ScrollView</code> — not bottom sheets or bottom toolbars — because of the keyboard conflict. FloatingToolbar at the bottom is architecturally the same problem. Option A is the right call unless there's a strong reason to override that rule.
+</div>

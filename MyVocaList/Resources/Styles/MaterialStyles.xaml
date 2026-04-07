@@ -130,4 +130,153 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <!-- MD3 type scale additions — completes the set beyond the entries above -->
+    <Style TargetType="Label" Class="Title.Large">
+        <Setter Property="FontFamily" Value="RobotoRegular" />
+        <Setter Property="FontSize" Value="22" />
+    </Style>
+
+    <Style TargetType="Label" Class="Body.Large">
+        <Setter Property="FontFamily" Value="RobotoRegular" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <Style TargetType="Label" Class="Body.Small">
+        <Setter Property="FontFamily" Value="RobotoRegular" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style TargetType="Label" Class="Label.Medium">
+        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style TargetType="Label" Class="Label.Small">
+        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+
+    <!-- ================================================================ -->
+    <!-- ICON BUTTON STYLES (MD3 Standard Icon Button)                    -->
+    <!-- ================================================================ -->
+
+    <!-- MD3: Standard icon button — action/trailing role (OnSurfaceVariant) -->
+    <Style x:Key="StandardIconButton" TargetType="dx:DXButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="IconColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="WidthRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <!-- MD3: Standard icon button — navigation/leading role (OnSurface, higher prominence) -->
+    <Style x:Key="NavigationIconButton" TargetType="dx:DXButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="IconColor" Value="{StaticResource OnSurface}" />
+        <Setter Property="WidthRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <!-- MD3: Vibrant toolbar icon button — for use inside SecondaryContainer toolbar.
+         PressedBackgroundColor uses SurfaceContainerHighest (darker) so press is visible
+         against the SecondaryContainer toolbar bg. -->
+    <Style x:Key="VibrantToolbarIconButton" TargetType="dx:DXButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="IconColor" Value="{StaticResource OnSecondaryContainer}" />
+        <Setter Property="PressedBackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
+        <Setter Property="WidthRequest" Value="48" />
+        <Setter Property="HeightRequest" Value="48" />
+        <Setter Property="CornerRadius" Value="24" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <!-- ================================================================ -->
+    <!-- UTILITY STYLES                                                    -->
+    <!-- ================================================================ -->
+
+    <!-- MD3: FAB (medium, 56×56, CornerRadius=16 = ShapeKeyTokens.CornerLarge).
+         Positioning (HorizontalOptions, VerticalOptions, Margin) is the caller's responsibility —
+         FAB is used both inline (beside FloatingToolbar in HorizontalStackLayout) and
+         independently. Never set layout options here. -->
+    <Style x:Key="Fab" TargetType="dx:DXButton">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="IconColor" Value="{StaticResource OnPrimary}" />
+        <Setter Property="PressedBackgroundColor" Value="{StaticResource PrimaryContainer}" />
+        <Setter Property="WidthRequest" Value="56" />
+        <Setter Property="HeightRequest" Value="56" />
+        <Setter Property="CornerRadius" Value="16" />
+    </Style>
+
+    <!-- MD3: Divider — use Color (BoxView-specific fill), NOT BackgroundColor -->
+    <Style x:Key="Divider" TargetType="BoxView">
+        <Setter Property="HeightRequest" Value="1" />
+        <Setter Property="Color" Value="{StaticResource OutlineVariant}" />
+    </Style>
+
+    <!-- Loading skeleton bone — matches ListItem 56dp height -->
+    <Style x:Key="SkeletonBone" TargetType="dx:DXBorder">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="HeightRequest" Value="56" />
+        <Setter Property="Margin" Value="0,1" />
+    </Style>
+
+    <!-- MD3: Bottom sheet — destructive action button -->
+    <Style x:Key="BottomSheetDestructiveAction" TargetType="dx:DXButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Error}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="HeightRequest" Value="56" />
+    </Style>
+
+    <!-- MD3: Bottom sheet — cancel/dismiss action button -->
+    <Style x:Key="BottomSheetCancelAction" TargetType="dx:DXButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Primary}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="HeightRequest" Value="56" />
+    </Style>
+
+    <!-- ================================================================ -->
+    <!-- EMPTY STATE STYLES                                               -->
+    <!-- ================================================================ -->
+
+    <!-- MD3: Empty state — Headline slot -->
+    <Style x:Key="EmptyStateHeadline" TargetType="Label">
+        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="HorizontalTextAlignment" Value="Center" />
+    </Style>
+
+    <!-- MD3: Empty state — Illustration slot (icon-only display button) -->
+    <Style x:Key="EmptyStateIllustration" TargetType="dx:DXButton">
+        <Setter Property="IconColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="IconWidth" Value="64" />
+        <Setter Property="IconHeight" Value="64" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="InputTransparent" Value="True" />
+        <Setter Property="WidthRequest" Value="80" />
+        <Setter Property="HeightRequest" Value="80" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+    </Style>
+
+    <!-- ================================================================ -->
+    <!-- NAVIGATION DRAWER STYLES                                         -->
+    <!-- ================================================================ -->
+
+    <!-- MD3: Navigation drawer — Section header label (Label Medium: 12sp Medium) -->
+    <Style x:Key="NavDrawerSectionHeader" TargetType="Label">
+        <Setter Property="FontFamily" Value="RobotoMedium" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="Padding" Value="16,8,16,4" />
+    </Style>
+
 </ResourceDictionary>
