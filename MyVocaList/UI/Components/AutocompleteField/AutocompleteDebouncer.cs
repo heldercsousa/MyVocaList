@@ -46,4 +46,16 @@ internal sealed class AutocompleteDebouncer
             catch (OperationCanceledException) { /* ignore */ }
         }, token);
     }
+
+    /// <summary>Cancels any pending debounce without starting a new one.</summary>
+    internal void Cancel()
+    {
+        try
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+        }
+        catch { /* ignore disposal races on CancellationTokenSource */ }
+        _cts = null;
+    }
 }

@@ -111,6 +111,7 @@ public partial class AutocompleteField : ContentView
 
         if (text.Length < 2)
         {
+            _debouncer.Cancel();
             Suggestions = null;
             return;
         }
