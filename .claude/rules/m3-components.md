@@ -246,17 +246,22 @@ Namespace: `xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"`
 >
 > **Color design decision.** Official M3 Expressive vibrant uses `PrimaryContainer` bg + `OnPrimaryContainer` icons. This project uses `SecondaryContainer` bg + `OnSecondaryContainer` icons — a deliberate choice for better contrast in the indigo dark theme. The selected-state contrast (Primary bg + OnPrimary icon) applies against SecondaryContainer, not PrimaryContainer.
 >
-> **Height.** The spec states docked toolbars are 64dp. The floating toolbar has separate measurements (not available in text form from m3.material.io). Project uses 48dp — a compact pill appropriate for a floating overlay.
+> **Height.** Confirmed from official MD3 measurements: floating toolbar = **64dp**. FAB = 56dp. Default padding = 8dp. Slot spacing = 4dp. FAB gap = 8dp. Screen margins: 16dp minimum left/right, 16dp above OS bottom bar (40dp total including OS bar). Confirmed via official spec images 2026-04-06.
 
 ### Spec
 
 | Property | Value |
 |---|---|
-| Height | 48dp (project choice; docked = 64dp per spec) |
+| Height | **64dp** (per official MD3 Expressive spec) |
+| FAB height | 56dp |
 | Width | Wrap content (auto-sizes to populated slots) |
-| Padding (H, outside icon slots) | 4dp |
+| Padding (H, outside icon slots) | **8dp** |
+| Slot spacing (between buttons) | **4dp** |
+| FAB gap (toolbar ↔ FAB) | **8dp** (HorizontalStackLayout Spacing) |
 | Background | **SecondaryContainer** (project vibrant — see note above) |
-| Shape | CornerRadius = 24dp (full pill — confirmed: spec prohibits square buttons in floating toolbar) |
+| Shape | CornerRadius = **32dp** (half of 64dp for full pill) |
+| Screen margin left/right | **16dp minimum** |
+| Screen margin bottom | **16dp** above OS bottom bar (40dp total including ~24dp OS nav bar) |
 | Elevation | Omitted — tint conveys elevation in dark mode |
 | Icon button tap zone | **48×48dp** (confirmed by spec: "minimum 48×48dp target area") |
 | Icon size | 24dp (DXButton default) |
@@ -287,8 +292,8 @@ Namespace: `xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"`
 
 ### Anatomy
 ```
-[DXBorder: pill, SecondaryContainer (vibrant), Level 3 elevation via tint]
-  └── HorizontalStackLayout
+[DXBorder: pill, 64dp tall, CornerRadius=32, SecondaryContainer (vibrant), Padding="8,0"]
+  └── HorizontalStackLayout (Spacing="4")
         ├── Slot 1: DXButton 48×48 (hidden if ActionNIcon empty)
         ├── Slot 2: DXButton 48×48
         ├── Slot 3: DXButton 48×48
@@ -310,14 +315,14 @@ BindableProperties per slot (N = 1–5):
 
 Toolbar and FAB are placed in a single `HorizontalStackLayout`, centered at the bottom.
 FAB is to the RIGHT of the toolbar. `VerticalOptions=Center` on both aligns them vertically
-(FAB 56dp > toolbar 48dp — center alignment keeps them visually level).
+(toolbar 64dp > FAB 56dp — center alignment keeps them visually level).
 
 ```xml
 <!-- Root: single-cell Grid (toolbar+FAB row overlays content) -->
 <Grid>
     <!-- Content list — bottom margin clears the combined bar -->
-    <!-- Formula: max(FAB 56dp, toolbar 48dp) + 16dp margin + 8dp breathing = 80dp -->
-    <dxcv:DXCollectionView Margin="0,0,0,80" ... />
+    <!-- Formula: max(toolbar 64dp, FAB 56dp) + 16dp margin + 8dp breathing = 88dp -->
+    <dxcv:DXCollectionView Margin="0,0,0,88" ... />
 
     <!-- Combined toolbar + FAB row — centered, 16dp above safe area bottom -->
     <HorizontalStackLayout HorizontalOptions="Center"
@@ -345,7 +350,7 @@ FAB is to the RIGHT of the toolbar. `VerticalOptions=Center` on both aligns them
 ### FAB coexistence
 FAB is placed to the RIGHT of `FloatingToolbar` inside a shared `HorizontalStackLayout`.
 The whole unit is `HorizontalOptions=Center`, not independently positioned.
-`DXCollectionView.Margin="0,0,0,80"` — max(56,48) + 16 + 8 breathing.
+`DXCollectionView.Margin="0,0,0,88"` — max(toolbar 64dp, FAB 56dp) + 16dp margin + 8dp breathing.
 
 ### Accessibility
 - Every `ActionNDescription` is mandatory — TalkBack reads it as the button label
