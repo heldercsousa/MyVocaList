@@ -102,10 +102,12 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
         if (string.IsNullOrWhiteSpace(email))
             return false;
 
-        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var emailPattern = email.Trim();
         return await _dbSet.AnyAsync(p =>
             p.Email != null &&
-            p.Email.ToLower() == normalizedEmail &&
+            EF.Functions.Like(
+                EF.Functions.Collate(p.Email, "NOCASE"),
+                EF.Functions.Collate(emailPattern, "NOCASE")) &&
             (excludePersonId == null || p.Id != excludePersonId.Value),
             cancellationToken);
     }
