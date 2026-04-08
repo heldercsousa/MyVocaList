@@ -18,7 +18,7 @@ public interface IPersonRepository : IBaseRepository<Person>
     Task<(IEnumerable<Person> items, int totalCount)> GetPagedAsync(int pageNumber, int pageSize, string query = null, CancellationToken cancellationToken = default);
 
     /// <summary>Search by any word in name (not implemented in v1).</summary>
-    Task<List<Person>> SearchByAnyWordAsync(string searchTerm, int maxResults = 10);
+    Task<List<Person>> SearchByAnyWordAsync(string searchTerm, int maxResults = 10, CancellationToken cancellationToken = default);
 
     /// <summary>Returns true if any person (other than excludeId) has this email.</summary>
     Task<bool> IsEmailTakenAsync(string email, int? excludePersonId = null, CancellationToken cancellationToken = default);
