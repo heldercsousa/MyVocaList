@@ -13,10 +13,9 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
     public async Task<Person> GetByFullNameAsync(string fullName, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fullName, nameof(fullName));
+        var trimmedName = fullName.Trim();
         return await _dbSet.FirstOrDefaultAsync(p =>
-            EF.Functions.Like(
-                EF.Functions.Collate(p.FullNameNormalized, "NOCASE"),
-                EF.Functions.Collate(fullName.Trim(), "NOCASE")),
+            EF.Functions.Collate(p.FullNameNormalized, "NOCASE") == EF.Functions.Collate(trimmedName, "NOCASE"),
             cancellationToken);
     }
 
@@ -93,7 +92,7 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
     }
 
     /// <inheritdoc />
-    public Task<List<Person>> SearchByAnyWordAsync(string searchTerm, int maxResults = 10)
+    public Task<List<Person>> SearchByAnyWordAsync(string searchTerm, int maxResults = 10, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Full-text word search is not implemented in v1.");
 
     /// <inheritdoc />
@@ -102,12 +101,10 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
         if (string.IsNullOrWhiteSpace(email))
             return false;
 
-        var emailPattern = email.Trim();
+        var trimmedEmail = email.Trim();
         return await _dbSet.AnyAsync(p =>
             p.Email != null &&
-            EF.Functions.Like(
-                EF.Functions.Collate(p.Email, "NOCASE"),
-                EF.Functions.Collate(emailPattern, "NOCASE")) &&
+            EF.Functions.Collate(p.Email, "NOCASE") == EF.Functions.Collate(trimmedEmail, "NOCASE") &&
             (excludePersonId == null || p.Id != excludePersonId.Value),
             cancellationToken);
     }
