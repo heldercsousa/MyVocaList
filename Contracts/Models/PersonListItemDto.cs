@@ -7,6 +7,8 @@ namespace MyVocaList.Contracts.Models
     public class PersonListItemDto : INotifyPropertyChanged
     {
         public int Id { get; set; } // The ID of the Person from the domain
+        public string BirthdayDayMonth { get; set; }
+        public string Email { get; set; }
         private string _fullName;
         private int _participations;
         private int _absences;
