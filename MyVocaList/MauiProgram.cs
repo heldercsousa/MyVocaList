@@ -47,9 +47,11 @@ public static class MauiProgram
         // Repositories
         builder.Services.AddScoped<IVenueRepository, VenueRepository>();
         builder.Services.AddScoped<IEventRepository, EventRepository>();
+        builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 
         // Services
         builder.Services.AddScoped<IVenueService, VenueService>();
+        builder.Services.AddScoped<IPersonService, PersonService>();
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
 
         // Shell
