@@ -1,3 +1,4 @@
+using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
@@ -177,6 +178,26 @@ public class PersonService : IPersonService
             return [];
         return await _personRepository.SearchByNameStartsWithAsync(searchTerm, maxResults, cancellationToken);
     }
+
+    #endregion
+
+    #region List and Mutation Operations (stubs — implemented after tests are written)
+
+    /// <inheritdoc />
+    public Task<(IEnumerable<PersonListItemDto> items, int totalCount)> GetPagedPersonsForListAsync(
+        int pageNumber, int pageSize, string query = null, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException();
+
+    /// <inheritdoc />
+    public Task<(bool success, string message)> UpdatePersonAsync(
+        int id, string fullName, string birthday = null, string email = null,
+        CancellationToken cancellationToken = default)
+        => throw new NotImplementedException();
+
+    /// <inheritdoc />
+    public Task<(bool success, string message)> DeletePersonsAsync(
+        IEnumerable<int> ids, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException();
 
     #endregion
 
