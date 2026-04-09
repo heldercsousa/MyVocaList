@@ -1,3 +1,4 @@
+using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Entity;
 
 namespace MyVocaList.Domain.ServicesInterfaces;
@@ -23,4 +24,16 @@ public interface IPersonService
 
     bool ShouldShowCharacterCounter(int currentLength);
     (string text, bool isWarning, bool isError) GetCharacterCounterInfo(int currentLength);
+
+    // --- New methods added in Person CRUD plan ---
+
+    Task<(IEnumerable<PersonListItemDto> items, int totalCount)> GetPagedPersonsForListAsync(
+        int pageNumber, int pageSize, string query = null, CancellationToken cancellationToken = default);
+
+    Task<(bool success, string message)> UpdatePersonAsync(
+        int id, string fullName, string birthday = null, string email = null,
+        CancellationToken cancellationToken = default);
+
+    Task<(bool success, string message)> DeletePersonsAsync(
+        IEnumerable<int> ids, CancellationToken cancellationToken = default);
 }
