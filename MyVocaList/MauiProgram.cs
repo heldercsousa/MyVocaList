@@ -61,6 +61,7 @@ public static class MauiProgram
         // ViewModels
         builder.Services.AddTransient<VenuesViewModel>();
         builder.Services.AddTransient<VenueFormViewModel>();
+        builder.Services.AddTransient<PersonsViewModel>();
         builder.Services.AddTransient<PersonFormViewModel>();
 
         // Pages
