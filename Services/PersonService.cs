@@ -181,23 +181,85 @@ public class PersonService : IPersonService
 
     #endregion
 
-    #region List and Mutation Operations (stubs — implemented after tests are written)
+    #region List and Mutation Operations
 
     /// <inheritdoc />
-    public Task<(IEnumerable<PersonListItemDto> items, int totalCount)> GetPagedPersonsForListAsync(
+    public async Task<(IEnumerable<PersonListItemDto> items, int totalCount)> GetPagedPersonsForListAsync(
         int pageNumber, int pageSize, string query = null, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
+    {
+        var (persons, totalCount) = await _personRepository.GetPagedAsync(
+            pageNumber, pageSize, query, cancellationToken);
+
+        var dtos = persons.Select(p => new PersonListItemDto
+        {
+            Id = p.Id,
+            FullName = p.FullName,
+            BirthdayDayMonth = p.BirthdayDayMonth,
+            Email = p.Email,
+            Participations = p.Participations,
+            Absences = p.Absences
+        });
+
+        return (dtos, totalCount);
+    }
 
     /// <inheritdoc />
-    public Task<(bool success, string message)> UpdatePersonAsync(
+    public async Task<(bool success, string message)> UpdatePersonAsync(
         int id, string fullName, string birthday = null, string email = null,
         CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
+    {
+        var person = await _personRepository.GetByIdAsync(id);
+        if (person == null)
+            return (false, "Singer not found.");
+
+        var nameValidation = ValidateNameInput(fullName);
+        if (!nameValidation.isValid)
+            return (false, nameValidation.message);
+
+        var birthdayValidation = ValidateBirthday(birthday);
+        if (!birthdayValidation.isValid)
+            return (false, birthdayValidation.message);
+
+        var emailValidation = ValidateEmail(email);
+        if (!emailValidation.isValid)
+            return (false, emailValidation.message);
+
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            var emailTaken = await _personRepository.IsEmailTakenAsync(email.Trim(), id, cancellationToken);
+            if (emailTaken)
+                return (false, "Email already registered to another singer.");
+        }
+
+        var trimmedName = fullName.Trim();
+        person.FullName = trimmedName;
+        person.SetNormalizedName(trimmedName);
+        person.BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim();
+        person.Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
+
+        await _personRepository.SaveChangesAsync();
+
+        return (true, $"{trimmedName} updated successfully!");
+    }
 
     /// <inheritdoc />
-    public Task<(bool success, string message)> DeletePersonsAsync(
+    public async Task<(bool success, string message)> DeletePersonsAsync(
         IEnumerable<int> ids, CancellationToken cancellationToken = default)
-        => throw new NotImplementedException();
+    {
+        var idList = ids.ToList();
+        if (idList.Count == 0)
+            return (true, "0 singer(s) successfully removed!");
+
+        foreach (var id in idList)
+        {
+            var person = await _personRepository.GetByIdAsync(id);
+            if (person != null)
+                await _personRepository.DeleteAsync(person);
+        }
+
+        await _personRepository.SaveChangesAsync();
+        return (true, $"{idList.Count} singer(s) successfully removed!");
+    }
 
     #endregion
 
