@@ -42,7 +42,7 @@ public partial class VenuesPage : ContentPage
         // Assign the ViewModel's SelectedVenues directly to avoid reflection-based binding
         // DXCollectionView.SelectedItems requires IList; use the collection from ViewModel
         if (collectionView != null)
-            collectionView.SelectedItems = _viewModel.SelectedVenues;
+            collectionView.SelectedItems = _viewModel.SelectedVenuesRaw;
 
         _ = _viewModel.InitializeAsync();
     }
