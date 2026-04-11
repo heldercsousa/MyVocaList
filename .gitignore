@@ -493,3 +493,13 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Local Claude Code settings (machine-specific)
+.claude/settings.local.json
+
+# Playwright MCP cache and session logs
+.playwright-mcp/
+
+# Local debug/temp artifacts
+temp/
+nul
