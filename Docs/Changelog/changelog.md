@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for april 2026
+- **04/10/2026** - perf - Fix ANR on Venues and People list pages: remove AllowCascadeUpdate="True" from DXCollectionView (caused full list re-render on every Reset notification); eliminate double ReplaceRange in LoadFirstPageAsync (two Resets = two full render passes = 8,651 ms UI block); remove redundant XAML SelectedItems binding overridden by OnAppearing code-behind assignment; document patterns in devexpress-patterns.md and code-principles.md
 - **04/04/2026** - test - Step 3: set up MyVocaList.Tests project (xUnit + Moq + real SQLite); fix AppDbContext prerequisites (remove Console.WriteLine, add QueryTrackingBehavior.NoTracking); introduce CPM via Directory.Packages.props normalizing Serilog version drift (4.2.0→4.3.1); 22 passing tests: VenueServiceTests (13 unit), VenueRepositoryTests (9 integration) with CollationInterceptor for NOCASE_NOACCENT; add conditional OutputType=Library for net10.0 TFM in MAUI csproj
 - **04/04/2026** - fix - Step 1 review + Step 2 TDD guidelines: fix EmptyState styles (dx:ThemeColor→StaticResource for TextColor/IconColor); fix FloatingToolbar stale remarks doc comment; add .claude/rules/testing.md (xUnit+Moq TDD guidelines, test project structure, naming, anti-patterns); update CLAUDE.md with testing.md entry; update m3-components.md with M3 Expressive vibrant verification; update devexpress-patterns.md VibrantToolbarIconButton terminology
 

@@ -66,7 +66,6 @@
                        IndicatorColor="{StaticResource Primary}"
                        SelectionMode="Multiple"
                        UseRippleEffect="True"
-                       AllowCascadeUpdate="True"
                        ItemSeparatorThickness="0"
                        Margin="0,0,0,88"
                        Scrolled="OnCollectionViewScrolled"

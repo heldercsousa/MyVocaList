@@ -514,6 +514,8 @@ private void OnCollectionViewScrolled(object sender, DXCollectionViewScrolledEve
 - `FontFamily`/`FontSize`/`InputFontFamily`/`InputFontSize` are NOT valid on `TextEdit` — font is inherited from the app theme; do not set it explicitly
 - `CheckEdit.CheckedCheckBoxColor` requires `{dx:ThemeColor X}` not `{StaticResource X}`
 - `DXCollectionView.SelectedItems` requires `IList` (non-generic) binding — use wrapper property
+- **`AllowCascadeUpdate="True"` causes full list re-render on every `Reset` notification — confirmed ANR root cause (8,651 ms UI block).** `AllowCascadeUpdate` cascades item-level `INotifyPropertyChanged` events; our DTOs are `record` types (immutable), so it has zero benefit. `ObservableRangeCollection.ReplaceRange/ClearRange` fires `CollectionChanged(Reset)`, and with `AllowCascadeUpdate="True"` DX re-measures and re-renders every item. **Never set `AllowCascadeUpdate="True"` — omit it (default is `False`).**
+- **`SelectedItems` — assign in code-behind only, no XAML binding.** `SelectedItems="{Binding ...}"` in XAML runs during `InitializeComponent` then is immediately overridden by the `OnAppearing` code-behind assignment, leaving a dangling MAUI binding listener. Remove the XAML attribute; assign only in `OnAppearing` using the `IList` wrapper property (e.g. `SelectedVenuesRaw`).
 - `SwipeContainerItem.Command` binding is unreliable — always use the `Tap` event handler instead
 - `SwipeContainer.FullSwipeMode="AllItems"` does NOT exist — valid values are `None`, `Start`, `End`, `Both`
 - `DXCollectionView.IndicatorColor` defaults to invisible on dark themes — always set explicitly

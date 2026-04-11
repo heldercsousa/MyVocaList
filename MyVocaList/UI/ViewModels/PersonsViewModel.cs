@@ -120,8 +120,6 @@ public partial class PersonsViewModel : ViewModelBase
             _currentPage = 1;
             _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
 
-            var selectedIds = SelectedPersons.Select(p => p.Id).ToHashSet();
-
             var (itemsEnumerable, totalCount) = await _personService.GetPagedPersonsForListAsync(
                 _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, cancellationToken);
 
@@ -134,9 +132,11 @@ public partial class PersonsViewModel : ViewModelBase
             RunOnUiThread(() =>
             {
                 Persons.ReplaceRange(list);
-                var restored = Persons.Where(p => selectedIds.Contains(p.Id)).ToList();
-                SelectedPersons.ReplaceRange(restored);
-                SelectedCount = SelectedPersons.Count;
+                if (SelectedPersons.Count > 0)
+                {
+                    SelectedPersons.ClearRange();
+                    SelectedCount = 0;
+                }
                 NotifyEmptyStates();
             });
         }
