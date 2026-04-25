@@ -407,7 +407,8 @@ SelectSuggestionCommand(ArtistListItemDto)  // navigate to edit that artist
 
 Same structure as ArtistsViewModel. Additional:
 - `ArtistId` and `ArtistName` received via query parameter
-- `AppBarTitle` always = artist name (no selection-count variant — the SmallAppBar Subtitle shows selection count instead, or title stays fixed; pick in implementation)
+- `AppBarTitle` always = artist name (never switches to "N selected" — artist context must remain visible)
+- `AppBarSubtitle` = `""` when nothing selected; `"N selected"` when N ≥ 1 (bound to `SmallAppBar.Subtitle`)
 
 ### SongFormViewModel
 

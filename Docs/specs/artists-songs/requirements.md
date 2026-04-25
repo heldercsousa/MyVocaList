@@ -146,7 +146,7 @@ Registration can be done manually or assisted by a free music metadata API (Musi
 - AC-7.1: Selection is always active (`SelectionMode.Multiple` hardcoded in XAML — no mode toggle).
 - AC-7.2: Tapping a row shall toggle its selection state natively via `DXCollectionView`.
 - AC-7.3: The app bar title shall show "Artists" when nothing is selected and "N selected" when N ≥ 1.
-- AC-7.4: When a row is selected, tapping it again shall deselect it and, if `SelectedCount` drops to zero, navigate to the Songs page for that artist.
+- AC-7.4: When a row is selected, tapping it again shall deselect it. Navigation to the Songs page only happens via a tap when `SelectedCount` is already zero before the tap.
 - AC-7.5: The FloatingToolbar `Select All` button shall select all loaded items when not all are selected, and deselect all when all are selected.
 
 ---

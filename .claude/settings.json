@@ -6,7 +6,27 @@
         "hooks": [
           {
             "type": "command",
-            "command": "dotnet build --no-restore 2>&1 | tail -30"
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && dotnet build MyVocaList.sln --no-restore -v q 2>&1 | tail -40"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Spec → Plan → Implement → Review — never skip to implementation. (6) English only in code, comments, logs, UI text. (7) After every completed task: /project:review → /project:commit (stage, commit, push).'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && STATUS=$(git status --porcelain 2>/dev/null) && if [ -n \"$STATUS\" ]; then printf '{\"systemMessage\": \"⚠️ Uncommitted changes detected — run /project:commit to complete the task.\"}'; fi"
           }
         ]
       }
