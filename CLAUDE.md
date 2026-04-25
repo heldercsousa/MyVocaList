@@ -53,7 +53,16 @@ Reference implementation: `Docs/specs/venues/` (complete, all tasks done).
 - Build: `/project:build`
 - Commit: `/project:commit`
 - Changelog: `/project:changelog`
-- Review: `/project:review` — run after EVERY completed task before committing
+- Review: `/project:review` — run after every completed task and after creating or updating any spec or plan file
+
+## Skill & MCP Lookup (mandatory per task step)
+Before starting each implementation task, scan available skills/MCPs for relevant guidance — this is not optional:
+- Domain/Contracts/Infra: `dotnet-skills:efcore-patterns`, `dotnet-skills:modern-csharp-coding-standards`, `dotnet-skills:dotnet-project-structure`
+- Tests: `superpowers:test-driven-development`, `dotnet-skills:testcontainers-integration-tests`
+- Services with HTTP: `maui-rest-api`, context7 for library docs
+- DI: `dotnet-skills:dependency-injection-patterns`
+- MAUI UI: `maui-current-apis` (always), `maui-data-binding`, `maui-shell-navigation`, `maui-performance`
+- DevExpress: `.claude/rules/devexpress-patterns.md` first (non-negotiable)
 
 ## Continuous Enhancement
 CLAUDE.md, rules, and commands are a living system — not a fixed set.

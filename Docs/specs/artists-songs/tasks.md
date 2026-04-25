@@ -1,7 +1,7 @@
 # Artists & Songs — Implementation Tasks
 
 > **Status:** Ready for implementation
-> **Last updated:** 2026-04-12
+> **Last updated:** 2026-04-25
 > **Spec:** `Docs/specs/artists-songs/requirements.md` + `design.md`
 
 Check off each task as it completes. Run `/project:build` after every task. Run `/project:review` after every major task before committing.
@@ -15,44 +15,46 @@ Check off each task as it completes. Run `/project:build` after every task. Run 
 - [ ] **1.3** Add `IArtistRepository` to `Domain/RepositoryInterface/IArtistRepository.cs`
 - [ ] **1.4** Add `ISongRepository` to `Domain/RepositoryInterface/ISongRepository.cs`
 - [ ] **1.5** Add `ArtistListItemDto`, `SongListItemDto`, `MusicSearchResultDto` to `MyVocaList.Contracts`
-- [ ] **1.6** Build — 0 errors
+- [ ] **1.6** Add `IArtistService` interface to `Domain/ServicesInterfaces/IArtistService.cs`
+- [ ] **1.7** Add `ISongService` interface to `Domain/ServicesInterfaces/ISongService.cs`
+- [ ] **1.8** Build — 0 errors
 
 ---
 
-## Phase 2 — Infrastructure
+## Phase 2 — Tests (write before implementation — TDD)
 
-- [ ] **2.1** Add `ArtistConfiguration` (`IEntityTypeConfiguration<Artist>`) in `MyVocaList.Infra`
-- [ ] **2.2** Add `SongConfiguration` (`IEntityTypeConfiguration<Song>`) in `MyVocaList.Infra`
-- [ ] **2.3** Register `Artist` and `Song` `DbSet`s in `AppDbContext`; register configurations
-- [ ] **2.4** Add EF Core migration: `AddArtistAndSongCatalog`
-- [ ] **2.5** Implement `ArtistRepository` — CRUD + paged search + name suggestions + `GetByExternalIdAsync`
-- [ ] **2.6** Implement `SongRepository` — CRUD + paged search by artist + title suggestions + `GetByExternalIdAsync` + `CountByArtistAsync`
-- [ ] **2.7** Build — 0 errors
+- [ ] **2.1** `ArtistRepositoryTests` — CRUD, paged search, case-insensitive search, unique name constraint, external ID lookup
+- [ ] **2.2** `SongRepositoryTests` — CRUD, paged search by artist, case-insensitive title search, composite unique constraint (artistId + title), external ID lookup
+- [ ] **2.3** `ArtistServiceTests` — name validation, create (valid / duplicate / too long), update, delete (with songs / without)
+- [ ] **2.4** `SongServiceTests` — title validation, create (valid / duplicate title for artist / missing artist), update, delete
+- [ ] **2.5** `dotnet test` — all fail (Red — expected at this stage)
 
 ---
 
-## Phase 3 — Services
+## Phase 3 — Infrastructure
 
-- [ ] **3.1** Add `IMusicMetadataProvider` interface to `MyVocaList.Services`
-- [ ] **3.2** Implement `MusicBrainzProvider` — `SearchArtistsAsync`, `SearchSongsAsync`; respect 1 req/sec; set `User-Agent`
-- [ ] **3.3** Implement `DeezerProvider` — `SearchArtistsAsync`, `SearchSongsAsync`
-- [ ] **3.4** Add `IMusicMetadataService` interface
-- [ ] **3.5** Implement `MusicMetadataService` — provider chain orchestration; MusicBrainz first, Deezer fallback
-- [ ] **3.6** Add `IArtistService` interface to `Domain/ServicesInterfaces/IArtistService.cs`
-- [ ] **3.7** Implement `ArtistService` — validate, create, update, delete, paged list, name suggestions, delete confirmation message
-- [ ] **3.8** Add `ISongService` interface to `Domain/ServicesInterfaces/ISongService.cs`
-- [ ] **3.9** Implement `SongService` — validate, create, update, delete, paged list by artist, title suggestions
-- [ ] **3.10** Build — 0 errors
+- [ ] **3.1** Add `ArtistConfiguration` (`IEntityTypeConfiguration<Artist>`) in `MyVocaList.Infra`
+- [ ] **3.2** Add `SongConfiguration` (`IEntityTypeConfiguration<Song>`) in `MyVocaList.Infra`
+- [ ] **3.3** Register `Artist` and `Song` `DbSet`s in `AppDbContext`; register configurations
+- [ ] **3.4** Add EF Core migration: `AddArtistAndSongCatalog`
+- [ ] **3.5** Implement `ArtistRepository` — CRUD + paged search + name suggestions + `GetByExternalIdAsync`
+- [ ] **3.6** Implement `SongRepository` — CRUD + paged search by artist + title suggestions + `GetByExternalIdAsync` + `CountByArtistAsync`
+- [ ] **3.7** Build — 0 errors
+- [ ] **3.8** `dotnet test` — repository tests pass (Green)
 
 ---
 
-## Phase 4 — Tests
+## Phase 4 — Services
 
-- [ ] **4.1** `ArtistServiceTests` — name validation, create (valid / duplicate / too long), update, delete (with songs / without)
-- [ ] **4.2** `SongServiceTests` — title validation, create (valid / duplicate title for artist / missing artist), update, delete
-- [ ] **4.3** `ArtistRepositoryTests` — CRUD, paged search, case-insensitive search, unique name constraint, external ID lookup
-- [ ] **4.4** `SongRepositoryTests` — CRUD, paged search by artist, case-insensitive title search, composite unique constraint (artistId + title), external ID lookup
-- [ ] **4.5** `dotnet test` — all pass
+- [ ] **4.1** Add `IMusicMetadataProvider` interface to `MyVocaList.Services`
+- [ ] **4.2** Implement `MusicBrainzProvider` — `SearchArtistsAsync`, `SearchSongsAsync`; respect 1 req/sec; set `User-Agent`
+- [ ] **4.3** Implement `DeezerProvider` — `SearchArtistsAsync`, `SearchSongsAsync`
+- [ ] **4.4** Add `IMusicMetadataService` interface
+- [ ] **4.5** Implement `MusicMetadataService` — provider chain orchestration; MusicBrainz first, Deezer fallback
+- [ ] **4.6** Implement `ArtistService` — validate, create, update, delete, paged list, name suggestions, delete confirmation message
+- [ ] **4.7** Implement `SongService` — validate, create, update, delete, paged list by artist, title suggestions
+- [ ] **4.8** Build — 0 errors
+- [ ] **4.9** `dotnet test` — all tests pass (Green)
 
 ---
 
@@ -85,7 +87,7 @@ Check off each task as it completes. Run `/project:build` after every task. Run 
 
 - [ ] **7.1** Implement `SongsPage.xaml` — mirrors Artists page; artist name in `SmallAppBar` title; song rows with `FeaturedArtists` supporting text; build after
 - [ ] **7.2** Implement `SongsPage.xaml.cs`; build after
-- [ ] **7.3** Implement `SongsViewModel` — receives `ArtistId` + `ArtistName` via query; same structure as `ArtistsViewModel`; build after
+- [ ] **7.3** Implement `SongsViewModel` — receives `ArtistId` + `ArtistName` via query; same structure as `ArtistsViewModel` except `AppBarTitle` always = artist name and `AppBarSubtitle` shows "N selected" (not the title); build after
 - [ ] **7.4** Implement `SongFormPage.xaml` — artist read-only label + Title field + FeaturedArtists field + API search strip + action buttons; build after
 - [ ] **7.5** Implement `SongFormPage.xaml.cs`; build after
 - [ ] **7.6** Implement `SongFormViewModel` — same structure as `ArtistFormViewModel`; API search scoped to artist hint; build after
