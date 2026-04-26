@@ -503,3 +503,4 @@ $RECYCLE.BIN/
 # Local debug/temp artifacts
 temp/
 nul
+.worktrees/
