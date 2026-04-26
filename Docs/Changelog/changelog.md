@@ -1,6 +1,8 @@
 # MyVocaList - Changelog
 
 ## Entries for april 2026
+- **04/26/2026** - test - Artists & Songs Phase 2.3+2.4: ArtistServiceTests (8 unit tests — RED) and SongServiceTests (7 unit tests — RED); tests cover ValidateNameInput/ValidateTitleInput, CreateArtistAsync/CreateSongAsync (duplicate, valid, too-long paths), GetDeleteConfirmationAsync (with/without songs), DeleteSongsAsync
+
 - **04/25/2026** - feat - Artists & Songs Phase 1+2: domain entities (Artist, Song with normalized fields), repository interfaces (IArtistRepository, ISongRepository), service interfaces (IArtistService, ISongService), Contracts DTOs (ArtistListItemDto, SongListItemDto, MusicSearchResultDto), spec (requirements + design + tasks), implementation plan; TDD Phase 2.1: ArtistRepositoryTests (17 failing tests — RED confirmed); add Stop hook enforcing commit reminder on uncommitted changes; update PostCompact non-negotiables sequence; trim CLAUDE.md commit reminder (hook owns it)
 
 - **04/10/2026** - perf - Fix ANR on Venues and People list pages: remove AllowCascadeUpdate="True" from DXCollectionView (caused full list re-render on every Reset notification); eliminate double ReplaceRange in LoadFirstPageAsync (two Resets = two full render passes = 8,651 ms UI block); remove redundant XAML SelectedItems binding overridden by OnAppearing code-behind assignment; document patterns in devexpress-patterns.md and code-principles.md
