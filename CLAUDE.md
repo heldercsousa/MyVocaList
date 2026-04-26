@@ -41,19 +41,12 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Database indexing: `.claude/rules/database-indexing.md` — read before any EF Core configuration or repository search query
 - **Testing**: `.claude/rules/testing.md` — read before writing any test or setting up the test project. Covers test types, naming, TDD workflow, and prerequisites for Step 3.
 
-## Spec-First Development
-Every new CRUD feature requires a spec before any code is written. Copy the structure from `Docs/specs/venues/`:
-- `Docs/specs/[feature]/requirements.md` — user stories, acceptance criteria, data model, validation rules
-- `Docs/specs/[feature]/design.md` — architecture, interfaces, page structure, interaction flows, error handling
-- `Docs/specs/[feature]/tasks.md` — ordered, checkboxed tasks; check off as work completes
-
-Reference implementation: `Docs/specs/venues/` (complete, all tasks done).
-
 ## Commands
 - Build: `/project:build`
 - Commit: `/project:commit`
 - Changelog: `/project:changelog`
 - Review: `/project:review` — run after every completed task and after creating or updating any spec or plan file
+- **Development workflow** (spec-first, subagent delegation, commit discipline): `.claude/rules/workflow.md`
 
 ## Skill & MCP Lookup (mandatory per task step)
 Before starting each implementation task, scan available skills/MCPs for relevant guidance — this is not optional:
