@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for april 2026
+- **04/26/2026** - chore - Add PreToolUse hook blocking direct .cs/.xaml writes to enforce subagent delegation (workflow.md Rule 2); remove redundant "Build on every change" from CLAUDE.md Non-Negotiables (already enforced by PostToolUse hook)
 - **04/26/2026** - test - Artists & Songs Phase 2.3+2.4: ArtistServiceTests (8 unit tests — RED) and SongServiceTests (7 unit tests — RED); tests cover ValidateNameInput/ValidateTitleInput, CreateArtistAsync/CreateSongAsync (duplicate, valid, too-long paths), GetDeleteConfirmationAsync (with/without songs), DeleteSongsAsync
 
 - **04/25/2026** - feat - Artists & Songs Phase 1+2: domain entities (Artist, Song with normalized fields), repository interfaces (IArtistRepository, ISongRepository), service interfaces (IArtistService, ISongService), Contracts DTOs (ArtistListItemDto, SongListItemDto, MusicSearchResultDto), spec (requirements + design + tasks), implementation plan; TDD Phase 2.1: ArtistRepositoryTests (17 failing tests — RED confirmed); add Stop hook enforcing commit reminder on uncommitted changes; update PostCompact non-negotiables sequence; trim CLAUDE.md commit reminder (hook owns it)

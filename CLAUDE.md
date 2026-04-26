@@ -80,7 +80,6 @@ is a candidate for a new rule, command, or CLAUDE.md update.
 - **MD3 terminology**: All component names, style keys, BindableProperty names, and rules file documentation must use official MD3 terminology (m3.material.io). Code must be directly cross-referenceable against MD3 docs without mental translation. When unsure, fetch the official docs — never invent names.
 - **SafeAreaEdges**: .NET MAUI 10 breaking change — `ContentPage` defaults to `SafeAreaEdges="None"`. Add `SafeAreaEdges="Container"` to existing pages explicitly.
 - **Incremental edits**: For XAML/UI work, edit ONE file → build → fix → then next file. Never batch UI edits.
-- **Build on every change**: Run `dotnet build` after every code change. Fix all errors autonomously. Never present incomplete work.
 
 ## Roles
 - **Helder**: Architect and Technical Auditor. Defines approaches, reviews code, makes trade-off decisions.
