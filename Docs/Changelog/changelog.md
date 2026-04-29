@@ -1,6 +1,9 @@
 # MyVocaList - Changelog
 
 ## Entries for april 2026
+- **04/29/2026** - docs - Expand DevEnv specs (S1.1, S1.2, S2.3) with detailed content; add task-log.md for agent task outcome tracking; add Rule 5 (task status registration) and subagent exit checklist to workflow.md; add TaskCompleted async hook to settings.json
+
+
 - **04/26/2026** - chore - Add PreToolUse hook blocking direct .cs/.xaml writes to enforce subagent delegation (workflow.md Rule 2); remove redundant "Build on every change" from CLAUDE.md Non-Negotiables (already enforced by PostToolUse hook)
 - **04/26/2026** - test - Artists & Songs Phase 2.3+2.4: ArtistServiceTests (8 unit tests — RED) and SongServiceTests (7 unit tests — RED); tests cover ValidateNameInput/ValidateTitleInput, CreateArtistAsync/CreateSongAsync (duplicate, valid, too-long paths), GetDeleteConfirmationAsync (with/without songs), DeleteSongsAsync
 

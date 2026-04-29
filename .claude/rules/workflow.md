@@ -47,6 +47,10 @@ pre-read the spec and hand the subagent concrete instructions.
 - After the subagent returns: run `dotnet build` and `dotnet test` as main agent
 - If a shell command is needed mid-way (migrations, file moves): do it inline, then re-delegate
 
+### Subagent exit checklist (mandatory before returning)
+Every subagent must, in this order: build (0 errors) → commit changed files → push (`git push origin HEAD`).
+The `Stop` hook warns if uncommitted changes remain.
+
 ---
 
 ## Rule 3 — Commit After Every Task
@@ -68,3 +72,11 @@ The `Stop` hook warns you — treat it as a hard gate, not a suggestion.
 Check off each task in `Docs/specs/[feature]/tasks.md` as it completes.
 Never start a new task before the previous one is committed.
 The task list is the audit trail for the feature — keep it accurate.
+
+---
+
+## Rule 5 — Task Status Registration (Placeholder)
+
+All agent task outcomes — regardless of status — must be recorded.
+Current location: `Docs/task-log.md` (enforced by the `TaskCompleted` hook).
+This will be replaced by the SDD-defined tracking mechanism once those specs are finalized (see S3.1, S8.1).
