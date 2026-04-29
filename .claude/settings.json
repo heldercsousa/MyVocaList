@@ -18,6 +18,12 @@
           {
             "type": "command",
             "command": "cd \"$CLAUDE_PROJECT_DIR\" && dotnet build MyVocaList.sln --no-restore -v q 2>&1 | tail -40"
+          },
+          {
+            "type": "command",
+            "async": true,
+            "command": "FILE=$(python -c \"import json,sys; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))\" 2>/dev/null); if [ -n \"$FILE\" ]; then cd \"$CLAUDE_PROJECT_DIR\" && git add \"$FILE\" 2>/dev/null && if ! git diff --cached --quiet 2>/dev/null; then git commit -m \"wip: $(basename \\\"$FILE\\\")\" --quiet 2>/dev/null && git push origin HEAD --quiet 2>/dev/null; fi; fi 2>/dev/null || true",
+            "statusMessage": "Securing changes to remote..."
           }
         ]
       }
@@ -38,6 +44,18 @@
           {
             "type": "command",
             "command": "cd \"$CLAUDE_PROJECT_DIR\" && STATUS=$(git status --porcelain 2>/dev/null) && if [ -n \"$STATUS\" ]; then printf '{\"systemMessage\": \"⚠️ Uncommitted changes detected — run /project:commit to complete the task.\"}'; fi"
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "A task just reached a terminal state. Full task context (JSON): $ARGUMENTS\n\nStep 1 — ALWAYS (any status): append one row to Docs/task-log.md under the existing table:\n`| MM/DD/YYYY | <task name/title from JSON> | <status from JSON> | <one-line outcome or reason, under 100 chars> |`\nExtract status verbatim from the JSON (completed / failed / blocked / cancelled / skipped).\n\nStep 2 — ONLY if status is 'completed' or 'done': also append ONE line to Docs/Changelog/changelog.md.\nChangelog format (match existing entries exactly): `- **MM/DD/YYYY** - type - Brief description`\n- Type: feat / fix / test / docs / chore / refactor / perf\n- Description: under 120 chars, past tense, describes the deliverable\n- Insert at the TOP of the current month's entries section (right after the `## Entries for ...` header)\n- Never modify or reorder existing changelog entries\n- Skip trivial completions: status-only updates or bookkeeping with no file deliverable\n\nWrite only to these two files — no other changes.",
+            "timeout": 90,
+            "statusMessage": "Recording task status..."
           }
         ]
       }
