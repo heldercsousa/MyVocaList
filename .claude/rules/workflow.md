@@ -95,14 +95,16 @@ The task list is the audit trail for the feature — keep it accurate.
 
 ---
 
-## Rule 6 — Context7 Gate Before Any Web Search
+## Rule 6 — Research Tool Gate (Context7 → Exa → WebSearch)
 
-Before calling `WebSearch` or `WebFetch` for any library, framework, SDK, or API question:
-1. Check Context7 first (`mcp__context7__resolve-library-id` → `mcp__context7__query-docs`)
-2. Only proceed to `WebSearch` / `WebFetch` if Context7 has no index entry for that library
+Before any web research query, follow this three-tier hierarchy:
+
+1. **Library / framework / SDK / API docs** → Context7 (`mcp__context7__resolve-library-id` → `mcp__context7__query-docs`)
+2. **General web research** (comparisons, news, tool evaluations, articles, anything non-library) → Exa MCP (`exa_search`)
+3. **Raw `WebSearch` / `WebFetch`** → last-resort fallback only when both Context7 and Exa return no useful result
 
 This applies to **both the main agent and all subagents.**
-Reason: `WebFetch` pulls 5,000–15,000 tokens of raw HTML per page; Context7 returns structured docs at a fraction of the cost.
+Reason: `WebFetch` pulls 5,000–15,000 tokens of raw HTML per page; Context7 and Exa return structured results at a fraction of that cost. Exa's query-dependent highlights reduce output tokens by 50–75% vs raw web search.
 
 ---
 
