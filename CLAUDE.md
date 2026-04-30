@@ -30,15 +30,11 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Architecture patterns: follow `ddd-dotnet` skill (nesbo)
 - .NET patterns: follow `dotnet-skills` (Aaronontheweb)
 - MAUI patterns: follow installed maui-skills, always filtered by `maui-current-apis`
+- **MyVocaList coding rules** (UI, DevExpress, dialogs, EF Core, themes): invoke `myvocalist-coding` skill before any implementation task
 
 ## Rules Files
-- DevExpress patterns: `.claude/rules/devexpress-patterns.md` — check this FIRST before any UI work
-- **CRUD page laws**: `.claude/rules/crud-pages.md` — read before building any list or form page
 - MediatR patterns: `.claude/rules/mediatr-patterns.md`
-- Theme & locale: `.claude/rules/theme-locale.md`
 - Code principles: `.claude/rules/code-principles.md`
-- Dialogs & validation: `.claude/rules/dialogs-validation.md`
-- Database indexing: `.claude/rules/database-indexing.md` — read before any EF Core configuration or repository search query
 - **Testing**: `.claude/rules/testing.md` — read before writing any test or setting up the test project. Covers test types, naming, TDD workflow, and prerequisites for Step 3.
 
 ## Commands
