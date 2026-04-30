@@ -15,9 +15,9 @@ namespace MyVocaList.Infra.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
 
-            modelBuilder.Entity("MyVocaList.Domain.Event", b =>
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Event", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -47,7 +47,7 @@ namespace MyVocaList.Infra.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("MyVocaList.Domain.EventParticipation", b =>
+            modelBuilder.Entity("MyVocaList.Domain.Entity.EventParticipation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -74,7 +74,7 @@ namespace MyVocaList.Infra.Migrations
                     b.ToTable("EventParticipations");
                 });
 
-            modelBuilder.Entity("MyVocaList.Domain.Person", b =>
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Person", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -86,14 +86,17 @@ namespace MyVocaList.Infra.Migrations
                         .HasDefaultValue(0);
 
                     b.Property<string>("BirthdayDayMonth")
-                        .IsRequired()
+                        .HasMaxLength(5)
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
                     b.Property<string>("Email")
-                        .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<Guid?>("ExternalId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -102,6 +105,7 @@ namespace MyVocaList.Infra.Migrations
                         .UseCollation("NOCASE_NOACCENT");
 
                     b.Property<string>("FullNameNormalized")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
@@ -113,19 +117,26 @@ namespace MyVocaList.Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BirthdayDayMonth")
-                        .HasDatabaseName("IX_People_BirthdayDayMonth");
-
                     b.HasIndex("Email")
-                        .HasDatabaseName("IX_People_Email");
+                        .IsUnique()
+                        .HasDatabaseName("IX_Persons_Email");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Persons_ExternalId");
 
                     b.HasIndex("FullNameNormalized")
-                        .HasDatabaseName("IX_People_FullNameNormalized");
+                        .HasDatabaseName("IX_Persons_FullNameNormalized");
+
+                    b.HasIndex("FullNameNormalized", "BirthdayDayMonth")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Persons_Name_Birthday")
+                        .HasFilter("[BirthdayDayMonth] IS NOT NULL");
 
                     b.ToTable("People");
                 });
 
-            modelBuilder.Entity("MyVocaList.Domain.SystemConfiguration", b =>
+            modelBuilder.Entity("MyVocaList.Domain.Entity.SystemConfiguration", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -148,7 +159,7 @@ namespace MyVocaList.Infra.Migrations
                     b.ToTable("SystemConfigurations");
                 });
 
-            modelBuilder.Entity("MyVocaList.Domain.Venue", b =>
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Venue", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -165,9 +176,9 @@ namespace MyVocaList.Infra.Migrations
                     b.ToTable("Venues");
                 });
 
-            modelBuilder.Entity("MyVocaList.Domain.Event", b =>
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Event", b =>
                 {
-                    b.HasOne("MyVocaList.Domain.Venue", "Venue")
+                    b.HasOne("MyVocaList.Domain.Entity.Venue", "Venue")
                         .WithMany("Events")
                         .HasForeignKey("VenueId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -176,15 +187,15 @@ namespace MyVocaList.Infra.Migrations
                     b.Navigation("Venue");
                 });
 
-            modelBuilder.Entity("MyVocaList.Domain.EventParticipation", b =>
+            modelBuilder.Entity("MyVocaList.Domain.Entity.EventParticipation", b =>
                 {
-                    b.HasOne("MyVocaList.Domain.Event", "Event")
+                    b.HasOne("MyVocaList.Domain.Entity.Event", "Event")
                         .WithMany("Participations")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MyVocaList.Domain.Person", "Person")
+                    b.HasOne("MyVocaList.Domain.Entity.Person", "Person")
                         .WithMany()
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -195,12 +206,12 @@ namespace MyVocaList.Infra.Migrations
                     b.Navigation("Person");
                 });
 
-            modelBuilder.Entity("MyVocaList.Domain.Event", b =>
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Event", b =>
                 {
                     b.Navigation("Participations");
                 });
 
-            modelBuilder.Entity("MyVocaList.Domain.Venue", b =>
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Venue", b =>
                 {
                     b.Navigation("Events");
                 });

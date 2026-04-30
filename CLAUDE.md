@@ -41,19 +41,21 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Database indexing: `.claude/rules/database-indexing.md` — read before any EF Core configuration or repository search query
 - **Testing**: `.claude/rules/testing.md` — read before writing any test or setting up the test project. Covers test types, naming, TDD workflow, and prerequisites for Step 3.
 
-## Spec-First Development
-Every new CRUD feature requires a spec before any code is written. Copy the structure from `Docs/specs/venues/`:
-- `Docs/specs/[feature]/requirements.md` — user stories, acceptance criteria, data model, validation rules
-- `Docs/specs/[feature]/design.md` — architecture, interfaces, page structure, interaction flows, error handling
-- `Docs/specs/[feature]/tasks.md` — ordered, checkboxed tasks; check off as work completes
-
-Reference implementation: `Docs/specs/venues/` (complete, all tasks done).
-
 ## Commands
 - Build: `/project:build`
 - Commit: `/project:commit`
 - Changelog: `/project:changelog`
-- Review: `/project:review` — run after EVERY completed task before committing
+- Review: `/project:review` — run after every completed task and after creating or updating any spec or plan file
+- **Development workflow** (spec-first, subagent delegation, commit discipline): `.claude/rules/workflow.md`
+
+## Skill & MCP Lookup (mandatory per task step)
+Before starting each implementation task, scan available skills/MCPs for relevant guidance — this is not optional:
+- Domain/Contracts/Infra: `dotnet-skills:efcore-patterns`, `dotnet-skills:modern-csharp-coding-standards`, `dotnet-skills:dotnet-project-structure`
+- Tests: `superpowers:test-driven-development`, `dotnet-skills:testcontainers-integration-tests`
+- Services with HTTP: `maui-rest-api`, context7 for library docs
+- DI: `dotnet-skills:dependency-injection-patterns`
+- MAUI UI: `maui-current-apis` (always), `maui-data-binding`, `maui-shell-navigation`, `maui-performance`
+- DevExpress: `.claude/rules/devexpress-patterns.md` first (non-negotiable)
 
 ## Continuous Enhancement
 CLAUDE.md, rules, and commands are a living system — not a fixed set.
@@ -78,7 +80,6 @@ is a candidate for a new rule, command, or CLAUDE.md update.
 - **MD3 terminology**: All component names, style keys, BindableProperty names, and rules file documentation must use official MD3 terminology (m3.material.io). Code must be directly cross-referenceable against MD3 docs without mental translation. When unsure, fetch the official docs — never invent names.
 - **SafeAreaEdges**: .NET MAUI 10 breaking change — `ContentPage` defaults to `SafeAreaEdges="None"`. Add `SafeAreaEdges="Container"` to existing pages explicitly.
 - **Incremental edits**: For XAML/UI work, edit ONE file → build → fix → then next file. Never batch UI edits.
-- **Build on every change**: Run `dotnet build` after every code change. Fix all errors autonomously. Never present incomplete work.
 
 ## Roles
 - **Helder**: Architect and Technical Auditor. Defines approaches, reviews code, makes trade-off decisions.

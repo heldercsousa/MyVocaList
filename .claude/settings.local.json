@@ -123,8 +123,30 @@
       "Bash(Select-String -Pattern \"\\(error|Build succeeded|Error\\\\\\(s\\\\\\)\\)\")",
       "Bash(echo \"EXIT:$?\")",
       "Bash(timeout 180 bash:*)",
-      "Bash(wait_for_background_task bsbepb6gw:*)"
-    ]
+      "Bash(wait_for_background_task bsbepb6gw:*)",
+      "Bash(tee /tmp/build_out.txt)",
+      "Bash(netstat -ano)",
+      "PowerShell(taskkill *)",
+      "Bash(rtk --version)",
+      "Bash(cargo --version)",
+      "Bash(rtk init *)",
+      "Bash(rtk hook *)",
+      "PowerShell($s = Get-Content \"C:\\\\Users\\\\helde\\\\.claude\\\\settings.json\" | ConvertFrom-Json; $s.hooks.PreToolUse[0].hooks[0].command)",
+      "Bash(rtk dotnet *)",
+      "Bash(rtk git *)",
+      "Bash(bash -c 'cd \"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\" && STATUS=$\\(git status --porcelain 2>/dev/null\\) && if [ -n \"$STATUS\" ]; then printf \"{\\\\\"systemMessage\\\\\": \\\\\"⚠️ Uncommitted changes detected — run /project:commit to complete the task.\\\\\"}\"; fi')",
+      "Bash(rtk read *)",
+      "Bash(rtk find *)",
+      "Bash(rtk ls *)",
+      "Bash(cmd.exe /c \"dir C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\.worktrees\\\\feature\\\\artists-songs\")",
+      "Bash(rtk grep *)",
+      "Bash(bash -c 'PROMPT=$\\(cat | jq -r \".prompt // \\\\\"\\\\\"\" 2>/dev/null\\); if echo \"$PROMPT\" | grep -qiE \"\\\\\\\\b\\(implement|build|write|create|code|add|fix|update|resume|continue|go ahead|start|finish|complete\\)\\\\\\\\b\"; then echo \"{\\\\\"hookSpecificOutput\\\\\":{\\\\\"hookEventName\\\\\":\\\\\"UserPromptSubmit\\\\\",\\\\\"additionalContext\\\\\":\\\\\"WORKFLOW GATE: \\(1\\) Read Docs/specs/[feature]/design.md BEFORE writing any code. \\(2\\) Delegate all coding to a subagent — main agent does shell only \\(build/test/migrate/commit\\). \\(3\\) Run /project:commit after every completed task.\\\\\"}}\"; fi')",
+      "Bash(where jq *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(echo '{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"C:/test/Foo.cs\",\"content\":\"x\"}}' | python -c \"import json,sys; d=json.load\\(sys.stdin\\); fp=d.get\\('tool_input',{}\\).get\\('file_path',''\\); r=json.dumps\\({'continue':False,'stopReason':'WORKFLOW GATE: delegate coding to a subagent \\(workflow.md Rule 2\\). Use the Agent tool instead of writing this file directly.'}\\) if any\\(fp.endswith\\(e\\) for e in \\('.cs','.xaml','.xaml.cs'\\)\\) else ''; print\\(r\\) if r else None\")",
+      "PowerShell(echo '{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"C:/test/CLAUDE.md\",\"content\":\"x\"}}' | python -c \"import json,sys; d=json.load\\(sys.stdin\\); fp=d.get\\('tool_input',{}\\).get\\('file_path',''\\); r=json.dumps\\({'continue':False,'stopReason':'WORKFLOW GATE: delegate coding to a subagent \\(workflow.md Rule 2\\). Use the Agent tool instead of writing this file directly.'}\\) if any\\(fp.endswith\\(e\\) for e in \\('.cs','.xaml','.xaml.cs'\\)\\) else ''; print\\(r\\) if r else None\")"
+    ],
+    "defaultMode": "bypassPermissions"
   },
   "enabledMcpjsonServers": [
     "context7",
@@ -134,5 +156,27 @@
   ],
   "disabledMcpjsonServers": [
     "sqlite"
-  ]
+  ],
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import json,sys,re; d=json.load(sys.stdin); p=d.get('prompt',''); matched=re.search(r'\\\\b(implement|build|write|create|code|add|fix|update|resume|continue|start|finish|complete|go ahead)\\\\b', p, re.I); matched and print('{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"WORKFLOW GATE: (1) Read Docs/specs/[feature]/design.md BEFORE writing any code. (2) Delegate all coding to a subagent (main agent: shell only). (3) Run /project:commit after every completed task.\\\"}}')\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cd \"C:/Users/helde/source/repos/MyVocaList\" && STATUS=$(git status --porcelain 2>/dev/null) && if [ -n \"$STATUS\" ]; then printf \"{\\\"systemMessage\\\": \\\"\\u26a0\\ufe0f Uncommitted changes detected — run /project:commit before closing.\\\"}\"; fi' 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
 }

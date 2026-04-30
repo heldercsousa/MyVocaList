@@ -5,4 +5,7 @@ global using MyVocaList.Domain.Entity;
 global using MyVocaList.Domain.RepositoryInterface;
 global using MyVocaList.Domain.ServicesInterfaces;
 global using MyVocaList.Contracts.DTOs.List;
+global using MyVocaList.Contracts.Models;
 global using MyVocaList.Services;
+global using MyVocaList.UI.Components;
+global using MyVocaList.UI.ViewModels;
