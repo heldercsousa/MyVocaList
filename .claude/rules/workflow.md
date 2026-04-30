@@ -38,10 +38,30 @@ No exceptions. Code written without reading the spec is code that may contradict
 | `git status`, `git add`, `git commit` | Route additions, AppShell registration |
 | Reading spec before briefing subagent | Everything in `crud-pages.md` |
 
+### Wave-based parallelism — hard cap
+- **Maximum 4 subagents may run in parallel at any one time.**
+- Work is dispatched in waves: spawn up to 4 subagents, wait for all to complete, then start the next wave.
+- Never spawn a 5th concurrent subagent — stagger instead.
+- After a subagent completes, its context is discarded. Do not reuse the same subagent instance for a second task.
+
+### Briefing protocol — paths only, never paste content
+- Subagent briefings must reference **file paths**, not paste file content inline.
+- Tell the subagent which files to read; let its own `Read` calls bring the content into its context.
+- Pasting rule file content into a briefing multiplies token cost by the number of subagents — never do it.
+- Pre-read the spec yourself and hand the subagent concrete, scoped instructions (not "based on what you find").
+
+### Subagent return protocol — status signal only
+Subagents communicate completion **only** by:
+1. Updating `Docs/task-log.md` with the task status (`done` / `fail` + one-line reason)
+2. Committing and pushing all changes (`git push origin HEAD`)
+3. Stopping (exiting their session)
+
+Subagents must **not** return summaries, explanations, or diffs to the caller.
+The caller reads `task-log.md` if it needs outcome details — never the subagent's session context.
+
 ### How to brief a subagent
-Give it: the spec file paths, the tasks to complete, the patterns to follow (rules files), and the
-constraint that it must build and fix errors before returning. Never say "based on what you find" —
-pre-read the spec and hand the subagent concrete instructions.
+Give it: the spec file paths, the tasks to complete, the rules files to read (paths only), and the
+constraint that it must build and fix errors before returning.
 
 ### When to take back control
 - After the subagent returns: run `dotnet build` and `dotnet test` as main agent
