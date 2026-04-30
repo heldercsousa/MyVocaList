@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for april 2026
+- **04/30/2026** - refactor - Move 7 coding rule files from .claude/rules/ (auto-loaded) to .claude/library/ (on-demand); create myvocalist-coding personal skill to gate DevExpress, CRUD, dialogs, EF Core, theme, and UX rules; update CLAUDE.md to reference skill instead of individual file paths
 - **04/29/2026** - docs - Expand DevEnv specs (S1.1, S1.2, S2.3) with detailed content; add task-log.md for agent task outcome tracking; add Rule 5 (task status registration) and subagent exit checklist to workflow.md; add TaskCompleted async hook to settings.json
 
 
