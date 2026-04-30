@@ -16,6 +16,7 @@
 | 2026-04-30 | S1_Core_Concepts | done | Research completed |
 | 2026-04-30 | S2_Specification_Design | done | Research completed |
 | 2026-04-30 | S3_Workflow_Phases | done | Research completed |
+| 2026-04-30 | S4_Context_and_Memory | done | Research completed |
 
 ---
 
