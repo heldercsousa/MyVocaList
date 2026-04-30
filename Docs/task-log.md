@@ -10,5 +10,9 @@
 |------|------|--------|---------|
 | MM/DD/YYYY | Task name or description | completed / failed / blocked / cancelled / skipped | Brief one-line outcome or reason |
 
+| Date | Task | Status | Notes |
+|------|------|--------|-------|
+| 2026-04-30 | Phase0-sources | done | Authoritative sources section added to SDD index |
+
 ---
 
