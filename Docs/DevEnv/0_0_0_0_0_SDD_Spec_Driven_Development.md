@@ -118,3 +118,57 @@ This index is the entry point; individual files are the authoritative source per
 | S10.2 | S10_2_Tradeoffs_and_Limitations.md | Trade-offs & limitations | Overhead on small/exploratory tasks; spec maintenance cost |
 | S10.2.1 | S10_2_1_Adoption_ROI_Timeline.md | Adoption ROI timeline | Productivity dip before benefits accrue; breakeven threshold undocumented |
 | S10.2.2 | S10_2_2_Cultural_Resistance.md | Cultural resistance | Developers prefer exploratory coding; implicit knowledge resists codification |
+
+---
+
+## Authoritative Sources for Topic Research
+
+This section defines which sources are authoritative for SDD topic research in this project. All research agents must use these tiers when selecting and citing sources. The tier ranking reflects source quality, currency (2025–2026), and relevance to the SDD practice landscape.
+
+### Tier 1 — Primary Sources
+
+These sources are cited by name in the existing research files and have been validated as active, reputable, and publishing current SDD content in 2025–2026.
+
+| Domain | Source | Why Primary |
+|--------|--------|-------------|
+| Academic | **arXiv** (arxiv.org) | Peer-reviewed preprints including arXiv:2602.00180 (the canonical SDD paper), 2601.03878, 2603.17399, 2603.25773, 2603.25697. Active SDD corpus as of Q1 2026. |
+| Industry analysis | **Thoughtworks** (thoughtworks.com) | Named SDD as a key 2025 practice. Technology Radar entries (Nov 2025, Apr 2026). Blog post Dec 2025. Ongoing SDD commentary through 2026. |
+| Practitioner synthesis | **Martin Fowler** (martinfowler.com) | Published multi-part SDD series covering Kiro, spec-kit, Tessl, and ubiquitous language. Authoritative voice for architecture and AI-assisted development. |
+| Tooling / product | **Kiro** (kiro.dev) | The dedicated SDD IDE. Primary source for spec-as-source and requirements/design/tasks workflow. Official documentation and blog. |
+| Open source tooling | **GitHub Blog** (github.blog) | Published the spec-kit announcement and SDD toolkit guide. Primary source for GitHub Spec Kit. |
+
+### Tier 2 — Secondary Sources
+
+Strong secondary sources: reputable, current, and used in the existing research files but with narrower or more derivative coverage than Tier 1.
+
+| Domain | Source | Notes |
+|--------|--------|-------|
+| Developer news | **InfoQ** (infoq.com) | Published the Kiro launch article (Aug 2025). Good for tooling announcements and practitioner interviews. |
+| AI tooling vendor | **Augment Code** (augmentcode.com) | Published a comprehensive SDD guide cited in S1.1 and S1.2. Vendor perspective; validate claims against Tier 1. |
+| Learning platform | **O'Reilly** (oreilly.com) | Ran a dedicated live event on SDD with Claude Code (2025). Signals practitioner adoption and learning demand. |
+| Critical analysis | **Marmelab** (marmelab.com) | Published a critical "Waterfall Strikes Back" analysis of SDD (Nov 2025). Useful for trade-offs and limitations topics. |
+
+### Tier 3 — Tertiary Sources
+
+Use for corroboration, practitioner anecdotes, or emerging tool coverage. Do not cite as primary authority. Validate against Tier 1 before including claims.
+
+| Domain | Source | Notes |
+|--------|--------|-------|
+| Developer community | Medium, DEV Community, personal blogs | Used in existing research for practitioner anecdotes. High variability in quality. Always corroborate. |
+| Vendor guides | SoftwareSeni, dplooy, XB Software, AltexSoft | Used in existing research. Marketing-adjacent; useful for basic definitions but not for authoritative claims. |
+| JetBrains blog | blog.jetbrains.com | Junie team perspective on spec-driven approach. Useful for IDE integration topics. |
+| GitHub repositories | github.com/github/spec-kit, github.com/gotalab/cc-sdd | Primary for understanding tool internals; not authoritative for SDD theory. |
+
+### Search Protocol
+
+When researching any SDD topic, apply the following sequence:
+
+1. **arXiv first** — search `arxiv.org` for papers on the specific topic. Use search terms like `"spec-driven development"`, `"specification-driven"`, `"AI coding agent specifications"`. Prioritize papers from 2025–2026.
+2. **Thoughtworks + Martin Fowler** — check for Technology Radar entries or blog posts. These provide practitioner-validated assessments.
+3. **Kiro / GitHub Blog** — for tooling topics (S7.x), check the tool's own documentation and the GitHub Blog announcement.
+4. **Tier 2 sources** — for context, announcements, and practitioner perspectives.
+5. **Tier 3 sources** — only for corroboration or anecdote. Never as sole citation.
+
+**Tool to use:** All web research must use Exa MCP (`mcp__exa__web_search_exa`) before falling back to raw `WebFetch`. Context7 applies only for library/SDK documentation, not for SDD topic research.
+
+**Currency requirement:** Prefer sources dated 2025 or 2026. Sources older than 2024 are acceptable only for foundational concepts (BDD, TDD, OpenAPI) that predate the AI-assisted SDD wave.
