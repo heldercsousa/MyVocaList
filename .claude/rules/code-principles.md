@@ -193,6 +193,40 @@ Never declare a local `const int PageSize` or hardcode `20` — always reference
 - `AddScoped` — Repositories, Services, IDatabaseInit (per-lifetime scope)
 - `AddTransient` — Pages, ViewModels (new instance per navigation)
 
+## UI Thread Performance — ObservableRangeCollection
+
+`ObservableRangeCollection.ReplaceRange` and `ClearRange` fire `CollectionChanged(Reset)`.
+Each `Reset` inside a `RunOnUiThread` block triggers a full DXCollectionView re-render of all items.
+
+**Rules:**
+- Never call `ReplaceRange` more than once per `RunOnUiThread` block. Two calls = two full render passes = ANR risk.
+- After a list refresh or search, **clear selection** (`ClearRange` + `SelectedCount = 0`) — never restore selection via `ReplaceRange`. Restoring selection fires a second `Reset` and is confusing UX (selection crossing a data reload boundary).
+- All collection mutations that must happen together belong in a single `RunOnUiThread(() => { ... })` call — but keep the work inside minimal: no LINQ queries, no service calls, only collection operations and property assignments.
+
+```csharp
+// Correct — single Reset, selection cleared
+RunOnUiThread(() =>
+{
+    Venues.ReplaceRange(list);
+    if (SelectedVenues.Count > 0)
+    {
+        SelectedVenues.ClearRange();
+        SelectedCount = 0;
+    }
+    NotifyEmptyStates();
+});
+
+// Wrong — two Resets, two full re-renders, ANR risk
+RunOnUiThread(() =>
+{
+    Venues.ReplaceRange(list);
+    var restored = Venues.Where(v => selectedIds.Contains(v.Id)).ToList(); // LINQ on UI thread
+    SelectedVenues.ReplaceRange(restored); // second Reset
+    SelectedCount = SelectedVenues.Count;
+    NotifyEmptyStates();
+});
+```
+
 ## EF Core / SQLite
 - Migrations applied on startup via `MigrateAsync()` — blocking call via `Task.Run(...).GetAwaiter().GetResult()`
 - `__EFMigrationsLock` row is cleared before each `MigrateAsync()` call (SQLite single-user workaround)

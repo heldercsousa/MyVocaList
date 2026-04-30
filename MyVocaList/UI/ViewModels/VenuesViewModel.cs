@@ -122,8 +122,6 @@ namespace MyVocaList.UI.ViewModels
                 _currentPage = 1;
                 _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
 
-                var selectedIds = SelectedVenues.Select(v => v.Id).ToHashSet();
-
                 var (itemsEnumerable, totalCount) = await _venueService.GetPagedVenuesForListAsync(
                     _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery);
 
@@ -136,11 +134,11 @@ namespace MyVocaList.UI.ViewModels
                 RunOnUiThread(() =>
                 {
                     Venues.ReplaceRange(list);
-
-                    // Restore selection state by ID after list replacement
-                    var restored = Venues.Where(v => selectedIds.Contains(v.Id)).ToList();
-                    SelectedVenues.ReplaceRange(restored);
-                    SelectedCount = SelectedVenues.Count;
+                    if (SelectedVenues.Count > 0)
+                    {
+                        SelectedVenues.ClearRange();
+                        SelectedCount = 0;
+                    }
                     NotifyEmptyStates();
                 });
             }

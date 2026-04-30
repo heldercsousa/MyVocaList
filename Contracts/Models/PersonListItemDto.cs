@@ -7,6 +7,8 @@ namespace MyVocaList.Contracts.Models
     public class PersonListItemDto : INotifyPropertyChanged
     {
         public int Id { get; set; } // The ID of the Person from the domain
+        public string BirthdayDayMonth { get; set; }
+        public string Email { get; set; }
         private string _fullName;
         private int _participations;
         private int _absences;
@@ -59,6 +61,20 @@ namespace MyVocaList.Contracts.Models
 
         [JsonIgnore] // This is a calculated property for the UI, it doesn't need to be serialized.
         public string ParticipationsAbsencesNumber => $"Participations: {Participations} / Absences: {Absences}";
+
+        /// <summary>Initials for the leading monogram (e.g. "JD" for "John Doe").</summary>
+        [JsonIgnore]
+        public string Initials
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(FullName)) return "?";
+                var parts = FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                return parts.Length >= 2
+                    ? $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant()
+                    : parts[0][0].ToString().ToUpperInvariant();
+            }
+        }
 
         // Increment methods that the UI will call, updating the DTO
         public void IncrementParticipations()

@@ -1,6 +1,15 @@
 # MyVocaList - Changelog
 
 ## Entries for april 2026
+- **04/29/2026** - docs - Expand DevEnv specs (S1.1, S1.2, S2.3) with detailed content; add task-log.md for agent task outcome tracking; add Rule 5 (task status registration) and subagent exit checklist to workflow.md; add TaskCompleted async hook to settings.json
+
+
+- **04/26/2026** - chore - Add PreToolUse hook blocking direct .cs/.xaml writes to enforce subagent delegation (workflow.md Rule 2); remove redundant "Build on every change" from CLAUDE.md Non-Negotiables (already enforced by PostToolUse hook)
+- **04/26/2026** - test - Artists & Songs Phase 2.3+2.4: ArtistServiceTests (8 unit tests — RED) and SongServiceTests (7 unit tests — RED); tests cover ValidateNameInput/ValidateTitleInput, CreateArtistAsync/CreateSongAsync (duplicate, valid, too-long paths), GetDeleteConfirmationAsync (with/without songs), DeleteSongsAsync
+
+- **04/25/2026** - feat - Artists & Songs Phase 1+2: domain entities (Artist, Song with normalized fields), repository interfaces (IArtistRepository, ISongRepository), service interfaces (IArtistService, ISongService), Contracts DTOs (ArtistListItemDto, SongListItemDto, MusicSearchResultDto), spec (requirements + design + tasks), implementation plan; TDD Phase 2.1: ArtistRepositoryTests (17 failing tests — RED confirmed); add Stop hook enforcing commit reminder on uncommitted changes; update PostCompact non-negotiables sequence; trim CLAUDE.md commit reminder (hook owns it)
+
+- **04/10/2026** - perf - Fix ANR on Venues and People list pages: remove AllowCascadeUpdate="True" from DXCollectionView (caused full list re-render on every Reset notification); eliminate double ReplaceRange in LoadFirstPageAsync (two Resets = two full render passes = 8,651 ms UI block); remove redundant XAML SelectedItems binding overridden by OnAppearing code-behind assignment; document patterns in devexpress-patterns.md and code-principles.md
 - **04/04/2026** - test - Step 3: set up MyVocaList.Tests project (xUnit + Moq + real SQLite); fix AppDbContext prerequisites (remove Console.WriteLine, add QueryTrackingBehavior.NoTracking); introduce CPM via Directory.Packages.props normalizing Serilog version drift (4.2.0→4.3.1); 22 passing tests: VenueServiceTests (13 unit), VenueRepositoryTests (9 integration) with CollationInterceptor for NOCASE_NOACCENT; add conditional OutputType=Library for net10.0 TFM in MAUI csproj
 - **04/04/2026** - fix - Step 1 review + Step 2 TDD guidelines: fix EmptyState styles (dx:ThemeColor→StaticResource for TextColor/IconColor); fix FloatingToolbar stale remarks doc comment; add .claude/rules/testing.md (xUnit+Moq TDD guidelines, test project structure, naming, anti-patterns); update CLAUDE.md with testing.md entry; update m3-components.md with M3 Expressive vibrant verification; update devexpress-patterns.md VibrantToolbarIconButton terminology
 

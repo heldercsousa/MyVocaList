@@ -3,14 +3,15 @@ namespace MyVocaList.Domain.Entity;
 public class Person
 {
     public int Id { get; set; } // Primary key for the database
+    public Guid? ExternalId { get; set; }   // Reserved for future device/account identity
     public string FullName { get; set; }
     public string FullNameNormalized { get; set; } // For optimized search
     public int Participations { get; set; } = 0; // Participation counter
     public int Absences { get; set; } = 0; // Absence counter
 
     // Fields for intelligent differentiation
-    public string BirthdayDayMonth { get; set; } // Format: "15/03" (required)
-    public string Email { get; set; } // Optional for marketing/differentiation
+    public string? BirthdayDayMonth { get; set; } // Format: "15/03" (optional)
+    public string? Email { get; set; } // Optional for marketing/differentiation
 
     public Person(string fullName)
     {
