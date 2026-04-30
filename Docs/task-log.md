@@ -13,6 +13,7 @@
 | Date | Task | Status | Notes |
 |------|------|--------|-------|
 | 2026-04-30 | Phase0-sources | done | Authoritative sources section added to SDD index |
+| 2026-04-30 | S1_Core_Concepts | done | Research completed |
 
 ---
 
