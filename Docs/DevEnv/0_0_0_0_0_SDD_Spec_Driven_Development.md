@@ -7,6 +7,7 @@
 | Date/Time | Type | Description |
 |-----------|------|-------------|
 | 2026-04-26 | Created | Initial main index file created with full 56-topic map |
+| 2026-04-30 | Updated | Added Authoritative Sources section |
 
 ---
 
