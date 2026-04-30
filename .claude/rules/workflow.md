@@ -95,6 +95,17 @@ The task list is the audit trail for the feature — keep it accurate.
 
 ---
 
+## Rule 6 — Context7 Gate Before Any Web Search
+
+Before calling `WebSearch` or `WebFetch` for any library, framework, SDK, or API question:
+1. Check Context7 first (`mcp__context7__resolve-library-id` → `mcp__context7__query-docs`)
+2. Only proceed to `WebSearch` / `WebFetch` if Context7 has no index entry for that library
+
+This applies to **both the main agent and all subagents.**
+Reason: `WebFetch` pulls 5,000–15,000 tokens of raw HTML per page; Context7 returns structured docs at a fraction of the cost.
+
+---
+
 ## Rule 5 — Task Status Registration (Placeholder)
 
 All agent task outcomes — regardless of status — must be recorded.
