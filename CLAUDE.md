@@ -44,6 +44,16 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Review: `/project:review` — run after every completed task and after creating or updating any spec or plan file
 - **Development workflow** (spec-first, subagent delegation, commit discipline): `.claude/rules/workflow.md`
 
+## Coding Rules (on-demand via skill)
+Invoke `myvocalist-coding` skill before any implementation task. It maps tasks to the relevant rule files in `.claude/library/`:
+- UI / CRUD pages → `crud-pages.md`
+- DevExpress components → `devexpress-patterns.md` (always first)
+- Dialogs, BottomSheet, validation → `dialogs-validation.md`
+- MD3 AppBars, Lists, FloatingToolbar → `m3-components.md`
+- Colors, typography → `theme-locale.md`
+- Touch targets, UX patterns → `ux-patterns.md`
+- EF Core config, repository queries → `database-indexing.md`
+
 ## Skill & MCP Lookup (mandatory per task step)
 Before starting each implementation task, scan available skills/MCPs for relevant guidance — this is not optional:
 - Domain/Contracts/Infra: `dotnet-skills:efcore-patterns`, `dotnet-skills:modern-csharp-coding-standards`, `dotnet-skills:dotnet-project-structure`
