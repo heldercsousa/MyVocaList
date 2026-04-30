@@ -81,8 +81,8 @@ is a candidate for a new rule, command, or CLAUDE.md update.
 
 ## Non-Negotiables
 - **Language**: Code, comments, logs, UI text — English only. Translate any non-English text immediately.
-- **Native dialogs**: NEVER use `DisplayAlert`, `DisplayActionSheet`, `DisplayPromptAsync`. See `.claude/rules/dialogs-validation.md`.
-- **UI Component Priority**: Always check `.claude/rules/devexpress-patterns.md` first. Use stock MAUI only when DevExpress has no equivalent.
+- **Native dialogs**: NEVER use `DisplayAlert`, `DisplayActionSheet`, `DisplayPromptAsync`. Use `dx:BottomSheet` — see `myvocalist-coding` skill.
+- **UI Component Priority**: DevExpress first, always. Use stock MAUI only when DevExpress has no equivalent — see `myvocalist-coding` skill.
 - **MD3 terminology**: All component names, style keys, BindableProperty names, and rules file documentation must use official MD3 terminology (m3.material.io). Code must be directly cross-referenceable against MD3 docs without mental translation. When unsure, fetch the official docs — never invent names.
 - **SafeAreaEdges**: .NET MAUI 10 breaking change — `ContentPage` defaults to `SafeAreaEdges="None"`. Add `SafeAreaEdges="Container"` to existing pages explicitly.
 - **Incremental edits**: For XAML/UI work, edit ONE file → build → fix → then next file. Never batch UI edits.
