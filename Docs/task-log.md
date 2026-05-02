@@ -21,6 +21,7 @@
 | 2026-04-30 | S8_Project_Management | done | Research completed |
 | 2026-04-30 | S7_Tooling | done | Research completed |
 | 2026-04-30 | S6_Governance_and_Enforcement | done | Research completed |
+| 2026-04-30 | S10_Applicability | done | Research completed |
 
 ---
 
