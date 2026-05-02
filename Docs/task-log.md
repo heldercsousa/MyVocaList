@@ -35,4 +35,5 @@
 
 | 2026-04-30 | S4_1_Memory_Bank_Context_Files | done | Research completed; CLAUDE.md, AGENTS.md, rules files, Memory Bank, auto memory, agent memory, cross-tool considerations documented with 12 authoritative sources |
 | 2026-04-30 | S4_3_External_Integrations | done | Research completed; MCP protocol, Context7, Jira/Confluence integration, tool discovery, security considerations, protocol evolution documented with 12 authoritative sources |
+| 2026-05-02 | S4_2_Context_Engineering | done | Research completed; 14 peer-reviewed sources (Anthropic, Design.dev, ETH Zurich, Cloudflare, arXiv); four canonical strategies (write, select, compress, isolate), AGENTS.md standard, Structured Context patterns, LLM attention budget, context stack layers, CLAUDE.md bloat failure modes documented |
 | 2026-04-30 | S5_1_Adversarial_Agent_Pattern | done | Research completed; CIV architecture, context isolation, builder–adversary pattern, critic lanes, actor–critic loops, self-validation trap, coordination failure modes documented with 12 authoritative sources |
