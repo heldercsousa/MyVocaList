@@ -23,6 +23,7 @@
 | 2026-04-30 | S6_Governance_and_Enforcement | done | Research completed |
 | 2026-04-30 | S10_Applicability | done | Research completed |
 | 2026-04-30 | S9_Quality_Assurance | done | Research completed |
+| 2026-04-30 | S1_3_SDD_vs_TDD_BDD_Waterfall | done | Research completed; 13 authoritative sources analyzed |
 
 ---
 
