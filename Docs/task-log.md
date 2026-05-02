@@ -24,6 +24,7 @@
 | 2026-04-30 | S10_Applicability | done | Research completed |
 | 2026-04-30 | S9_Quality_Assurance | done | Research completed |
 | 2026-04-30 | S1_3_SDD_vs_TDD_BDD_Waterfall | done | Research completed; 13 authoritative sources analyzed |
+| 2026-04-30 | S2_2_Quality_Characteristics | done | Research completed; 4 quality properties (ubiquitous language, Given/When/Then, completeness, determinism) documented |
 
 ---
 
