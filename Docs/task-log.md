@@ -25,6 +25,7 @@
 | 2026-04-30 | S9_Quality_Assurance | done | Research completed |
 | 2026-04-30 | S1_3_SDD_vs_TDD_BDD_Waterfall | done | Research completed; 13 authoritative sources analyzed |
 | 2026-04-30 | S2_2_Quality_Characteristics | done | Research completed; 4 quality properties (ubiquitous language, Given/When/Then, completeness, determinism) documented |
+| 2026-05-02 | S2_1_Spec_Structure_and_Content | done | Research completed; 7 structural elements (inputs, outputs, preconditions, postconditions, invariants, integration contracts, state machines, edge cases) documented with examples and pitfalls |
 
 ---
 
