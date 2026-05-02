@@ -19,6 +19,7 @@
 | 2026-04-30 | S4_Context_and_Memory | done | Research completed |
 | 2026-04-30 | S5_Agent_Patterns | done | Research completed |
 | 2026-04-30 | S8_Project_Management | done | Research completed |
+| 2026-04-30 | S7_Tooling | done | Research completed |
 
 ---
 
