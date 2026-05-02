@@ -26,6 +26,7 @@
 | 2026-04-30 | S1_3_SDD_vs_TDD_BDD_Waterfall | done | Research completed; 13 authoritative sources analyzed |
 | 2026-04-30 | S2_2_Quality_Characteristics | done | Research completed; 4 quality properties (ubiquitous language, Given/When/Then, completeness, determinism) documented |
 | 2026-05-02 | S2_1_Spec_Structure_and_Content | done | Research completed; 7 structural elements (inputs, outputs, preconditions, postconditions, invariants, integration contracts, state machines, edge cases) documented with examples and pitfalls |
+| 2026-05-02 | S2_3_1_Spec_Format_Selection | done | Research completed; 5 format families analyzed (Narrative Markdown, EARS, OpenAPI, Structured Agents, Hybrid); decision tree + anti-patterns documented |
 
 ---
 
