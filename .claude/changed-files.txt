@@ -1,0 +1,11 @@
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_hooks_redesign.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
+Docs/DevEnv/plans/_current_state_summary.md
+Docs/DevEnv/plans/S1_opportunities.md
+Docs/DevEnv/plans/status.md
+Docs/DevEnv/plans/S4_opportunities.md
+Docs/DevEnv/plans/S2_opportunities.md
+Docs/DevEnv/plans/status.md
+Docs/DevEnv/plans/status.md
+Docs/DevEnv/plans/S3_opportunities.md
+Docs/DevEnv/plans/status.md

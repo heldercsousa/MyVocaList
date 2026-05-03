@@ -4,10 +4,10 @@
 
 | Section | Title | Status | Output file |
 |---------|-------|--------|-------------|
-| S1 | Core Concepts | pending | S1_opportunities.md |
-| S2 | Specification Design | pending | S2_opportunities.md |
-| S3 | Workflow Phases | pending | S3_opportunities.md |
-| S4 | Context & Memory | pending | S4_opportunities.md |
+| S1 | Core Concepts | done | S1_opportunities.md |
+| S2 | Specification Design | done | S2_opportunities.md |
+| S3 | Workflow Phases | done | S3_opportunities.md |
+| S4 | Context & Memory | done | S4_opportunities.md |
 | S5 | Agent Patterns | pending | S5_opportunities.md |
 | S6 | Governance & Enforcement | pending | S6_opportunities.md |
 | S7 | Tooling | pending | S7_opportunities.md |
