@@ -1,6 +1,6 @@
 # 0_0_0_0_0 — SDD: Spec-Driven Development
 
-**Status:** Created  
+**Status:** Researched  
 **Predecessor(s) ID:** —
 
 ## Changelog
