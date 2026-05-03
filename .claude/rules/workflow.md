@@ -108,8 +108,37 @@ Reason: `WebFetch` pulls 5,000–15,000 tokens of raw HTML per page; Context7 an
 
 ---
 
-## Rule 5 — Task Status Registration (Placeholder)
+## Rule 5 — Task Status Registration
 
-All agent task outcomes — regardless of status — must be recorded.
-Current location: `Docs/task-log.md` (enforced by the `TaskCompleted` hook).
-This will be replaced by the SDD-defined tracking mechanism once those specs are finalized (see S3.1, S8.1).
+All task outcomes are automatically recorded by the `TaskCreated` and `TaskCompleted` hooks.
+
+### Task-log file location
+Task-log files live **beside the plan file**, named `<plan-name>-task-log.md`.
+Example: plan at `Docs/DevEnv/plans/artists-songs.md` → log at `Docs/DevEnv/plans/artists-songs-task-log.md`.
+Tasks without a plan association are logged to `Docs/DevEnv/plans/unassigned-task-log.md`.
+
+### Task-log format (per task entry)
+```
+---
+## Task: <title>
+**Plan:** <plan file relative path>
+**Status:** in progress | Check build | To Review | Build failure | Early task done | Review task done
+**Started:** MM/DD/YYYY
+**Completed:** MM/DD/YYYY
+
+### Changed files:
+- `relative/path/to/file.cs` [— optional business reason if non-obvious]
+
+### Build notes
+[Only present if build was checked — records error summary and diagnosis]
+```
+
+### Task statuses
+| Status | Meaning |
+|--------|---------|
+| `in progress` | Task started, work underway |
+| `Check build` | Code changed — build verification pending (set on task completion if code files were modified) |
+| `To Review` | Build passed — task ready for code review |
+| `Build failure` | Build failed after 3 attempts — needs investigation |
+| `Early task done` | New asset/enhancement completed and committed |
+| `Review task done` | Review task completed |

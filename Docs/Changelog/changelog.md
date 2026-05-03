@@ -1,5 +1,8 @@
 # MyVocaList - Changelog
 
+## Entries for may 2026
+- **05/03/2026** - chore - Redesign hooks system: TaskCreated (init task-log + build resume), PostToolUse (file-path buffer only, no build/commit), TaskCompleted (classify new vs review, changelog, commit, 3-attempt build check with To Review/Build failure), Stop asyncRewake (scan for To Review tasks); task-log files now beside plan file as <plan>-task-log.md; update workflow.md Rule 5 with format and status table
+
 ## Entries for april 2026
 - **04/30/2026** - refactor - Move 7 coding rule files from .claude/rules/ (auto-loaded) to .claude/library/ (on-demand); create myvocalist-coding personal skill to gate DevExpress, CRUD, dialogs, EF Core, theme, and UX rules; update CLAUDE.md to reference skill instead of individual file paths
 - **04/29/2026** - docs - Expand DevEnv specs (S1.1, S1.2, S2.3) with detailed content; add task-log.md for agent task outcome tracking; add Rule 5 (task status registration) and subagent exit checklist to workflow.md; add TaskCompleted async hook to settings.json
