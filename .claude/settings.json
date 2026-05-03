@@ -1,5 +1,18 @@
 {
+  "plansDirectory": "Docs/DevEnv/plans",
   "hooks": {
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "timeout": 300,
+            "statusMessage": "Initializing task tracking...",
+            "prompt": "Task JSON: $ARGUMENTS\n\nYou are the task initialization agent. Complete each step fully before starting the next.\n\n## STEP 1 — PARSE\nFrom the task JSON, extract: id, title, and planFile (the path to the associated plan file; the field may be named planFile, plan_file, plan, or similar — use whatever field is present).\n\n## STEP 2 — DERIVE TASK-LOG PATH\nIf planFile is present:\n  task-log = <planFile directory> + \"/\" + <planFile basename without extension> + \"-task-log.md\"\n  Example: \"Docs/DevEnv/plans/artists-songs.md\" → \"Docs/DevEnv/plans/artists-songs-task-log.md\"\nIf planFile is absent:\n  task-log = \"Docs/DevEnv/plans/unassigned-task-log.md\"\nAll paths are relative to CLAUDE_PROJECT_DIR.\n\n## STEP 3 — SAVE ACTIVE TASK STATE\nWrite to \".claude/active-task.json\" (in CLAUDE_PROJECT_DIR):\n{\"taskId\":\"<id>\",\"taskTitle\":\"<title>\",\"planFile\":\"<planFile path or empty string>\",\"taskLogFile\":\"<task-log path>\"}\n\n## STEP 4 — CLEAR CHANGED-FILES BUFFER\nOverwrite \".claude/changed-files.txt\" with an empty file (clear any previous content — do not append).\n\n## STEP 5 — CHECK FOR INTERRUPTED BUILD\nRead the task-log file if it exists. Search for a section \"## Task: <title>\".\nIf that section has \"**Status:** Check build\" → run the CHECK BUILD SEQUENCE below, then stop.\nOtherwise proceed to STEP 6.\n\n## STEP 6 — APPEND IN-PROGRESS ENTRY\nAppend this block to the task-log file (create the file if it does not exist):\n\n---\n## Task: <title>\n**Plan:** <planFile relative path, or \"unassigned\">\n**Status:** in progress\n**Started:** <today MM/DD/YYYY>\n\n---\n## CHECK BUILD SEQUENCE — max 3 attempts\n\nFor each attempt N (1, 2, 3):\n1. Run from CLAUDE_PROJECT_DIR: dotnet build MyVocaList.sln --no-restore -v q 2>&1 | tail -60\n2. If output contains \"Build succeeded\":\n   - In the task-log, update this task's **Status** line to \"To Review\"\n   - Run: git add -A && git commit -m \"chore: build OK — <title>\" && git push origin HEAD\n   - STOP.\n3. If build failed AND N < 3: fix the errors in source files, then run attempt N+1.\n4. If build failed AND N = 3:\n   - Update **Status** to \"Build failure\"\n   - Append under the task entry: \"### Build notes\\nRecurring build failure (3 attempts). Errors: <summary>. Root cause (business view): <diagnosis>\"\n   - Run: git add -A && git commit -m \"chore: build failure — <title>\" && git push origin HEAD\n   - STOP."
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Write|Edit",
@@ -17,13 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && dotnet build MyVocaList.sln --no-restore -v q 2>&1 | tail -40"
-          },
-          {
-            "type": "command",
-            "async": true,
-            "command": "FILE=$(python -c \"import json,sys; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))\" 2>/dev/null); if [ -n \"$FILE\" ]; then cd \"$CLAUDE_PROJECT_DIR\" && git add \"$FILE\" 2>/dev/null && if ! git diff --cached --quiet 2>/dev/null; then git commit -m \"wip: $(basename \\\"$FILE\\\")\" --quiet 2>/dev/null && git push origin HEAD --quiet 2>/dev/null; fi; fi 2>/dev/null || true",
-            "statusMessage": "Securing changes to remote..."
+            "command": "python3 -c \"import json,sys,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); rel=os.path.relpath(fp,proj).replace(os.sep,'/') if fp else ''; open(os.path.join(proj,'.claude','changed-files.txt'),'a',encoding='utf-8').write(rel+'\\n') if fp else None\" 2>/dev/null || true"
           }
         ]
       }
@@ -38,6 +45,18 @@
         ]
       }
     ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "timeout": 600,
+            "statusMessage": "Processing task completion...",
+            "prompt": "Task JSON: $ARGUMENTS\n\nYou are the task completion agent. Complete each step fully before starting the next.\n\n## STEP 1 — SETUP\na. Parse task JSON: id, title, description, planFile.\nb. Read \".claude/active-task.json\" for taskLogFile. If missing, derive it: same directory as planFile + <planFile-basename-without-ext>-task-log.md. If no planFile: \"Docs/DevEnv/plans/unassigned-task-log.md\".\nc. Read \".claude/changed-files.txt\" — list of changed files (relative paths, one per line). Identify CODE FILES: those ending in .cs, .xaml, or .xaml.cs.\nd. CLASSIFY: if task title or description contains any of [review, audit, QA, code review, check pass] → REVIEW TASK. Otherwise → NEW ASSET/ENHANCEMENT TASK.\n\n## STEP 2 — ASSESS CHANGE DESCRIPTIONS\nFor each file in the changed-files list, briefly read it.\n- If the change involves non-obvious logic, a business rule, architectural decision, or a workaround: write a 1-sentence business-perspective WHY (not what the code does). Max 100 chars.\n- If the change is self-evident from the file name and context: no description needed.\n\n---\n## NEW ASSET/ENHANCEMENT TASK STEPS:\n\n### STEP 3A — UPDATE TASK-LOG\nFind \"## Task: <title>\" in the task-log file. Update that section:\n  **Status:** Early task done (Check build)    ← omit \"(Check build)\" if NO code files changed\n  **Completed:** <today MM/DD/YYYY>\n  ### Changed files:\n  - `<relative path>`[ — <description if non-obvious>]\n  (one line per changed file)\n\n### STEP 4A — UPDATE CHANGELOG\nIn Docs/Changelog/changelog.md, find \"## Entries for <current month MMMM YYYY>\" and insert immediately after that header line:\n- **MM/DD/YYYY** - Early task done. Plan: [<plan basename>](<planFile>), Tasks: <task title>. Details: [task-log](<taskLogFile>)\n\n### STEP 5A — COMMIT AND PUSH\nRun and wait for completion: git add -A && git commit -m \"task: <title>\" && git push origin HEAD\n\n### STEP 6A — CHECK BUILD\nIf code files changed → run CHECK BUILD SEQUENCE (see below). Otherwise stop.\n\n---\n## REVIEW TASK STEPS:\n\n### STEP 3B — UPDATE TASK-LOG\nFind \"## Task: <title>\" in the task-log file. Update that section:\n  **Status:** Review task done\n  **Completed:** <today MM/DD/YYYY>\n  ### Changed files:\n  - `<relative path>`[ — <description if non-obvious>]\n\n### STEP 4B — UPDATE CHANGELOG\nIn Docs/Changelog/changelog.md, insert after current month header:\n- **MM/DD/YYYY** - Review task done. Plan: [<plan basename>](<planFile>), Tasks: <task title>. Details: [task-log](<taskLogFile>)\n\n### STEP 5B — COMMIT AND PUSH\nRun and wait: git add -A && git commit -m \"review: <title>\" && git push origin HEAD\n\n### STEP 6B — CHECK BUILD\nIf code files changed → run CHECK BUILD SEQUENCE (see below). Otherwise stop.\n\n---\n## CHECK BUILD SEQUENCE — max 3 attempts\n\nFor each attempt N (1, 2, 3):\n1. Run from CLAUDE_PROJECT_DIR: dotnet build MyVocaList.sln --no-restore -v q 2>&1 | tail -60\n2. If \"Build succeeded\" in output:\n   - Update this task's **Status** in task-log to \"To Review\"\n   - Insert in changelog after current month header: \"- **MM/DD/YYYY** - Check build succeeded, task marked 'To Review'. Plan: [<basename>](<planFile>), Tasks: <title>. Details: [task-log](<taskLogFile>)\"\n   - Run: git add -A && git commit -m \"chore: build OK — <title>\" && git push origin HEAD\n   - STOP.\n3. If build failed AND N < 3: fix the errors in source files, proceed to attempt N+1.\n4. If build failed AND N = 3:\n   - Update **Status** to \"Build failure\"\n   - Append under the task entry in task-log: \"### Build notes\\nBuild failed after 3 attempts. Errors: <brief summary>. Root cause (business view): <diagnosis>\"\n   - Insert in changelog: \"- **MM/DD/YYYY** - Check build failure. Plan: [<basename>](<planFile>), Tasks: <title>. Details: [task-log](<taskLogFile>)\"\n   - Run: git add -A && git commit -m \"chore: build failure — <title>\" && git push origin HEAD\n   - STOP."
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
@@ -46,16 +65,15 @@
             "command": "cd \"$CLAUDE_PROJECT_DIR\" && STATUS=$(git status --porcelain 2>/dev/null) && if [ -n \"$STATUS\" ]; then printf '{\"systemMessage\": \"⚠️ Uncommitted changes detected — run /project:commit to complete the task.\"}'; fi"
           }
         ]
-      }
-    ],
-    "TaskCompleted": [
+      },
       {
         "hooks": [
           {
-            "type": "agent",
-            "prompt": "A task just reached a terminal state. Full task context (JSON): $ARGUMENTS\n\nStep 1 — ALWAYS (any status): append one row to Docs/task-log.md under the existing table:\n`| MM/DD/YYYY | <task name/title from JSON> | <status from JSON> | <one-line outcome or reason, under 100 chars> |`\nExtract status verbatim from the JSON (completed / failed / blocked / cancelled / skipped).\n\nStep 2 — ONLY if status is 'completed' or 'done': also append ONE line to Docs/Changelog/changelog.md.\nChangelog format (match existing entries exactly): `- **MM/DD/YYYY** - type - Brief description`\n- Type: feat / fix / test / docs / chore / refactor / perf\n- Description: under 120 chars, past tense, describes the deliverable\n- Insert at the TOP of the current month's entries section (right after the `## Entries for ...` header)\n- Never modify or reorder existing changelog entries\n- Skip trivial completions: status-only updates or bookkeeping with no file deliverable\n\nWrite only to these two files — no other changes.",
-            "timeout": 90,
-            "statusMessage": "Recording task status..."
+            "type": "command",
+            "asyncRewake": true,
+            "rewakeMessage": "Tasks marked 'To Review' are waiting for a review subagent:",
+            "rewakeSummary": "To Review tasks need attention",
+            "command": "python3 -c \"import os,glob,sys; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); plans=os.path.join(proj,'Docs','DevEnv','plans'); r=[]; [r.append(os.path.basename(f).replace('-task-log.md','')+': '+b.split('\\n')[0].strip()) for f in (glob.glob(os.path.join(plans,'*-task-log.md')) if os.path.isdir(plans) else []) for c in [open(f,encoding='utf-8').read()] for b in c.split('\\n## Task:')[1:] if '**Status:** To Review' in b]; r and (print('\\n'.join('- '+x for x in r)+'\\n\\nSpawn one fresh review subagent per plan that has pending To Review tasks. Each subagent should review the changed files listed in the task-log against the plan acceptance criteria.') or sys.exit(2))\" 2>/dev/null"
           }
         ]
       }
