@@ -52,12 +52,15 @@ No exceptions. Code written without reading the spec is code that may contradict
 
 ### Subagent return protocol — status signal only
 Subagents communicate completion **only** by:
-1. Updating `Docs/task-log.md` with the task status (`done` / `fail` + one-line reason)
+1. Updating the task-log beside the plan file (see Rule 5) with the task status:
+   - `To Review` — build passed; task ready for review
+   - `Build failure` — build failed after 3 attempts; one-line reason appended
+   - `blocked: spec gap` — spec ambiguity found; question + options + recommendation documented; agent stops and does NOT choose unilaterally
 2. Committing and pushing all changes (`git push origin HEAD`)
 3. Stopping (exiting their session)
 
 Subagents must **not** return summaries, explanations, or diffs to the caller.
-The caller reads `task-log.md` if it needs outcome details — never the subagent's session context.
+The caller reads the task-log if it needs outcome details — never the subagent's session context.
 
 ### How to brief a subagent
 Give it: the spec file paths, the tasks to complete, the rules files to read (paths only), and the
@@ -68,7 +71,12 @@ constraint that it must build and fix errors before returning.
 - If a shell command is needed mid-way (migrations, file moves): do it inline, then re-delegate
 
 ### Subagent exit checklist (mandatory before returning)
-Every subagent must, in this order: build (0 errors) → commit changed files → push (`git push origin HEAD`).
+Every subagent must, in this order:
+1. Invoke `superpowers:verification-before-completion` — catches non-negotiable violations
+2. Build (0 errors)
+3. Commit changed files
+4. Push (`git push origin HEAD`)
+
 The `Stop` hook warns if uncommitted changes remain.
 
 ---
@@ -90,8 +98,11 @@ The `Stop` hook warns you — treat it as a hard gate, not a suggestion.
 ## Rule 4 — Tasks.md Is the Source of Truth
 
 Check off each task in `Docs/specs/[feature]/tasks.md` as it completes.
-Never start a new task before the previous one is committed.
 The task list is the audit trail for the feature — keep it accurate.
+
+**Sequential constraint:** Never start a task that depends on the output of an incomplete task. Tasks marked `[SEQUENTIAL]` in tasks.md must wait for their predecessor to be committed before starting.
+
+**Parallel exception:** Tasks marked `[P]` (independent, different files/layers) may be dispatched simultaneously as a wave per Rule 2. All tasks in a wave must complete and commit before the next wave begins.
 
 ---
 
@@ -110,19 +121,21 @@ Reason: `WebFetch` pulls 5,000–15,000 tokens of raw HTML per page; Context7 an
 
 ## Rule 5 — Task Status Registration
 
-All task outcomes are automatically recorded by the `TaskCreated` and `TaskCompleted` hooks.
+Agents record task outcomes manually in the task-log file. The `Stop` hook warns if uncommitted changes remain when a session ends.
 
 ### Task-log file location
-Task-log files live **beside the plan file**, named `<plan-name>-task-log.md`.
-Example: plan at `Docs/DevEnv/plans/artists-songs.md` → log at `Docs/DevEnv/plans/artists-songs-task-log.md`.
-Tasks without a plan association are logged to `Docs/DevEnv/plans/unassigned-task-log.md`.
+Task-log files live **beside the plan file** in `Docs/superpowers/plans/`, named `<plan-name>-task-log.md`.
+Example: plan at `Docs/superpowers/plans/2026-04-23-artists-songs-catalog.md` → log at `Docs/superpowers/plans/2026-04-23-artists-songs-catalog-task-log.md`.
+Tasks without a plan association are logged to `Docs/superpowers/plans/unassigned-task-log.md`.
+
+> `Docs/DevEnv/plans/` is for SDD research files only — do not place task-logs there.
 
 ### Task-log format (per task entry)
 ```
 ---
 ## Task: <title>
 **Plan:** <plan file relative path>
-**Status:** in progress | Check build | To Review | Build failure | Early task done | Review task done
+**Status:** in progress | Check build | To Review | Build failure | blocked: spec gap | Spec updated — re-planning required | Early task done | Review task done
 **Started:** MM/DD/YYYY
 **Completed:** MM/DD/YYYY
 
@@ -138,7 +151,9 @@ Tasks without a plan association are logged to `Docs/DevEnv/plans/unassigned-tas
 |--------|---------|
 | `in progress` | Task started, work underway |
 | `Check build` | Code changed — build verification pending (set on task completion if code files were modified) |
-| `To Review` | Build passed — task ready for code review |
-| `Build failure` | Build failed after 3 attempts — needs investigation |
+| `To Review` | Build passed — task ready for code review (subagent writes this on successful exit) |
+| `Build failure` | Build failed after 3 attempts — needs investigation (subagent writes this on exit) |
+| `blocked: spec gap` | Spec ambiguity found — question + options + recommendation documented; waiting for clarification |
+| `Spec updated — re-planning required` | Implementation revealed a spec gap; spec updated; tasks.md may need re-ordering |
 | `Early task done` | New asset/enhancement completed and committed |
 | `Review task done` | Review task completed |
