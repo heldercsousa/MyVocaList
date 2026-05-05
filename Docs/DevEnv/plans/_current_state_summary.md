@@ -37,10 +37,15 @@
 ### .claude/rules/workflow.md
 - Rule 1: Spec-first (read design.md before any code)
 - Rule 2: Subagent delegation (max 4 parallel, wave-based, paths-only briefings, status signal via task-log)
+  - Subagent return statuses: `To Review` (build passed), `Build failure`, `blocked: spec gap`
+  - Subagent exit checklist: verification-before-completion → build → commit → push
 - Rule 3: Commit after every task
 - Rule 4: tasks.md is source of truth
-- Rule 5: Task status in task-log beside plan file; statuses: in progress, Check build, To Review, etc.
+- Rule 5: Task status in task-log beside plan file at `Docs/superpowers/plans/` (manually recorded — no auto hooks for this)
+  - `Docs/DevEnv/plans/` is SDD research only — task-logs do NOT go there
+  - Statuses: `in progress`, `Check build`, `To Review`, `Build failure`, `blocked: spec gap`, `Spec updated — re-planning required`, `Early task done`, `Review task done`
 - Rule 6: Research tool gate (Context7 → Exa → WebSearch)
+- Hooks active: `UserPromptSubmit` (workflow gate on action keywords), `Stop` (uncommitted changes warning), `PreToolUse` (rtk token filtering via global settings)
 
 ### .claude/rules/mediatr-patterns.md
 - Status: MediatR planned but NOT yet registered. Reference patterns only.
