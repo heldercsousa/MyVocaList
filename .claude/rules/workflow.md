@@ -53,6 +53,21 @@ When a subagent's work reveals a discrepancy between the spec and the delivered 
    - After each implementation wave: review output before dispatching the next wave
    - At feature close-out: final review to confirm spec matches delivered behavior
 
+### SDD decision table for medium-complexity tasks
+
+For tasks that don't fit cleanly into "small isolated" or "new feature," use this decision table:
+
+| Signal | SDD action |
+|--------|-----------|
+| Change touches ≥ 2 layers (e.g. Domain + UI) | Write `design.md` before starting |
+| Change introduces a new repository interface | Write `design.md` + update `requirements.md` |
+| Change affects an existing public contract (DTO, interface signature) | Write `design.md`; flag downstream consumers in `tasks.md` |
+| Change is reversible and affects only one file | Commit message spec is sufficient |
+| You find yourself asking "where should this logic live?" | Stop — write a `design.md` |
+| Estimated time > 2 hours | Full three-file spec required |
+
+When uncertain: start with a two-sentence design note in the task-log. If it grows beyond 5 lines, promote it to `design.md`.
+
 ### When to skip SDD (spec bypass rule)
 
 Not every change requires a full three-file spec. Use this table:
