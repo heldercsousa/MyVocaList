@@ -989,6 +989,45 @@ When a complex task requires multiple iterations (e.g., a subagent produces part
 - The subagent ignored a constraint it was given
 - You are on the second or third correction loop
 
+### ACTIVE-CONSIDERATIONS.md — session priority stack
+
+For long or complex sessions involving multiple waves and evolving context, maintain an `ACTIVE-CONSIDERATIONS.md` file as a **session priority stack** — a short, always-current list of the most important things to keep in mind.
+
+**File location:** `Docs/DevEnv/ACTIVE-CONSIDERATIONS.md` (single file, overwritten each session)
+
+**Format:**
+```markdown
+# Active Considerations — [YYYY-MM-DD]
+
+## Current priority
+[One sentence: what is the single most important thing right now?]
+
+## Open items (ordered by urgency)
+1. [Highest urgency: blocking something — must resolve before next wave]
+2. [Spec gap to resolve — needs Helder input]
+3. [Known risk to watch — may affect Wave N+1]
+
+## Do not forget
+- [Constraint discovered this session that is not yet in constraints-registry.md]
+- [Decision made this session that is not yet in design.md]
+- [Task that was deferred and must not be forgotten]
+
+## Wave status
+Current wave: N
+Next wave: N+1 — [brief description of what it contains]
+Checkpoint due: [after Wave N+1 | already done]
+```
+
+**When to update it:**
+- At the start of a session: initialize with current state from task-log + MASTER_PLAN.md
+- After each wave completes: update wave status and open items
+- When a new constraint or decision arises: add to "Do not forget"
+- At the end of a session: commit the final state (it is the handoff artifact for the next session)
+
+**Rule:** This file replaces "held in context" items that are likely to be dropped during compaction. If something is important enough to remember across waves, it must be in `ACTIVE-CONSIDERATIONS.md` — not in the orchestrator's working memory.
+
+**Relationship to handoff artifact:** `ACTIVE-CONSIDERATIONS.md` is the lightweight version for same-day use. The full `session-handoff.md` (see Multi-session state handoff protocol) is written at session end for cross-session continuity. Both serve complementary roles.
+
 ### findings.md — session artifact for exploratory work
 
 When a session involves significant exploration, debugging, or spike work, the findings must be captured in a `findings.md` file before the session ends. This prevents the work from being lost when the context window is discarded.
