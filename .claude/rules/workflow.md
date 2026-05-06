@@ -192,6 +192,30 @@ Specs only capture what people consciously describe. Tacit knowledge — "of cou
 
 Review Claude's output and add any valid tacit knowledge to the spec before implementation starts. This technique surfaces hidden constraints before they become bugs.
 
+### Spec format portability rule
+
+Spec files must be written in **plain Markdown** with no tool-specific formatting, no embedded code that requires execution, and no links to external services that may become unavailable.
+
+**Portability requirements:**
+- All spec files must be readable by any Markdown viewer (GitHub, VS Code, plain text editor)
+- No embedded Mermaid diagrams that require a specific renderer to be meaningful — if you use Mermaid, also include a plain-text description of the diagram's content
+- No links to Confluence, Notion, Jira, Linear, or other external tools — if a decision is important, it must be in the spec file itself
+- No placeholders that require another tool to fill in (e.g., `{JIRA-123}`, `{{TICKET}}`)
+- No relative path assumptions — all file references should be absolute from the repository root
+
+**Why portability matters:** Specs are the long-term memory of this project. A spec that only works in one specific tool is a spec that will become unreadable when the tool changes. Claude Code reads specs from the filesystem — it cannot authenticate to external services or render tool-specific formats.
+
+**For diagrams:** Prefer ASCII state machines and ASCII tables over Mermaid when the diagram is simple. For complex diagrams where Mermaid adds real value, include both the Mermaid block AND a prose description below it that captures the same information in plain text.
+
+**Example — portable state machine:**
+```
+QueueEntry states:
+  Waiting → Singing  (triggered by: admin taps "Start singing")
+  Singing → Done     (triggered by: admin taps "Done")
+  Singing → Absent   (triggered by: admin taps "Mark absent")
+  Absent  → Waiting  (triggered by: admin taps "Return to queue")
+```
+
 ### Spec size calibration
 
 Spec size should match task complexity. Over-speccing small tasks wastes time; under-speccing large tasks causes rework.
