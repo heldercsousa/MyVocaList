@@ -49,7 +49,7 @@ These files are net-new and do not affect existing code.
 
 | Step | Description | OPPs | Status | Notes |
 |------|-------------|------|--------|-------|
-| P2-A | Create `.claude/rules/constraints-registry.md` | OPP-4-9 | In Progress | |
+| P2-A | Create `.claude/rules/constraints-registry.md` | OPP-4-9 | Done | |
 | P2-B | Create `.claude/exception-registry.md` | OPP-6-12 | Pending | |
 | P2-C | Create `.claude/agents/implementor.md` | OPP-5-11 | Pending | |
 | P2-D | Create `.claude/agents/verifier.md` | OPP-5-11 | Pending | |
