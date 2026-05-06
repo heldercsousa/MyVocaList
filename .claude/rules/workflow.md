@@ -600,6 +600,37 @@ This eliminates the "I assumed the interface looked like X" class of integration
 Give it: the spec file paths, the tasks to complete, the rules files to read (paths only), and the
 constraint that it must build and fix errors before returning.
 
+### Verifier subagent
+
+After a wave completes and before the main agent proceeds to the next wave, a **Verifier subagent** may be dispatched to independently validate the wave's output.
+
+**When to use a Verifier:**
+- After any wave that touched more than 3 files
+- After any wave that implemented a new public interface or DTO
+- After any wave where a subagent reported `Build failure` or `blocked: spec gap`
+- Before a wave that depends on correctness of the previous wave's output
+
+**Verifier briefing template:**
+```
+Role: Verifier
+Scope: Verify wave N output against spec and build
+Spec source: [path to design.md + requirements.md]
+Wave output files: [list of files committed in wave N]
+
+Your tasks:
+1. Read each committed file and confirm it matches the spec (interfaces, signatures, business rules)
+2. Run dotnet build — confirm 0 errors
+3. Run dotnet test — confirm 0 failures
+4. Check that task-log entries for wave N are complete (status, changed files, build notes)
+5. Write your findings to the task-log:
+   - If all clear: status = "Verifier: wave N OK"
+   - If issues found: status = "Verifier: wave N FAILED — [one-line summary]"
+```
+
+**The Verifier must not fix anything.** It reports findings only. The main agent decides whether to dispatch a fix subagent or escalate to Helder.
+
+See `.claude/agents/verifier.md` for the full Verifier agent definition.
+
 ### When to take back control
 - After the subagent returns: run `dotnet build` and `dotnet test` as main agent
 - If a shell command is needed mid-way (migrations, file moves): do it inline, then re-delegate
