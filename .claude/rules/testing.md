@@ -406,6 +406,35 @@ For every repository method that takes a filter/sort/page parameter, write one t
 
 ---
 
+## Tester/Builder Role Separation
+
+In a TDD cycle, the agent that writes tests (Tester) and the agent that writes implementation (Builder) must be kept conceptually separate. In practice with subagents, enforce this by dispatching test-writing and implementation-writing as distinct tasks.
+
+### Why it matters
+When a single agent writes both tests and implementation simultaneously, it naturally writes tests that match the implementation rather than tests that verify the spec. The result is tests that pass but prove nothing.
+
+### Rules
+
+1. **Tester writes tests first, then stops.** The Tester subagent writes all tests for a task, confirms they compile and fail (Red), commits, and exits. It does NOT write any implementation.
+2. **Builder receives failing tests, makes them pass.** The Builder subagent reads the committed failing tests, writes only enough implementation to make them pass (Green), and exits. It does NOT modify tests.
+3. **Refactor is a third, optional pass.** After Green, a separate refactor pass may clean up implementation without changing test or behavior.
+4. **In a single-agent session:** apply the same discipline mentally — write all tests, run them to confirm failure, then switch to implementation mode.
+
+### Dispatch pattern (from workflow.md)
+
+```
+Wave A: Tester subagent
+  Input: spec (requirements.md, design.md), task description
+  Output: committed failing tests, task-log status = "Red — tests written"
+
+Wave B: Builder subagent
+  Input: failing tests from Wave A, spec files
+  Output: committed passing implementation, task-log status = "To Review"
+```
+
+---
+---
+
 ## TDD Workflow (Red → Green → Refactor)
 
 Starting from AutocompleteField + Person CRUD (Step 4+):
