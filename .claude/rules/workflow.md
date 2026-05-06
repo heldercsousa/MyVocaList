@@ -1591,6 +1591,36 @@ Each task entry in `tasks.md` should use the following format for any task that 
 
 ---
 
+## Rule 7 — Session Start Protocol
+
+Every session that involves implementation or planning must begin with a structured **session start protocol** before any code is written or any subagent is dispatched.
+
+### Session start reading order
+
+Read in this order — do not skip items, do not resume from memory alone:
+
+1. **`Docs/DevEnv/plans/impl/MASTER_PLAN.md`** — find the first non-Done step; that is the current position
+2. **Active session handoff file** (if one exists): `Docs/superpowers/plans/<plan-name>-handoff.md` — overrides MASTER_PLAN for exact continuation point
+3. **`ACTIVE-CONSIDERATIONS.md`** (if it exists) — read the priority stack and open items
+4. **`Docs/specs/[feature]/tasks.md`** — confirm which tasks are done, in-progress (`[~]`), and pending
+5. **`Docs/specs/[feature]/requirements.md`** — refresh acceptance criteria (do not rely on previous-session memory)
+6. **`Docs/specs/[feature]/design.md`** — refresh architecture and interface signatures
+7. **`Docs/superpowers/plans/<plan-name>-task-log.md`** — check for unresolved `blocked:` statuses or `Spec updated — re-planning required` entries
+
+**Rule:** Steps 1–7 are mandatory. Skipping any step means the session starts with an incomplete picture of the current state. Steps 4–7 may be scoped to the specific feature being worked on if multiple features are in flight.
+
+### Session start constraint capture
+
+After reading steps 1–7, before dispatching the first wave, record any newly discovered constraints or decisions from the previous session that have NOT yet been committed to their permanent home:
+
+- New constraint → add to `.claude/rules/constraints-registry.md`
+- New design decision → add to `design.md` Key Decisions
+- Open question → add to `ACTIVE-CONSIDERATIONS.md` Open items
+
+**Why session start is not optional:** Context windows reset between sessions. An orchestrator that resumes from memory is operating on a lossy reconstruction of the previous session's state. The session start reading order replaces that lossy reconstruction with a direct read from the authoritative files.
+
+---
+
 ## Rule 6 — Research Tool Gate (Context7 → Exa → WebSearch)
 
 Before any web research query, follow this three-tier hierarchy:
