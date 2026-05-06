@@ -692,6 +692,41 @@ Your tasks:
 
 See `.claude/agents/verifier.md` for the full Verifier agent definition.
 
+### Multi-session state handoff protocol
+
+When a feature spans multiple sessions, the state at session end must be captured so the next session can resume without loss.
+
+**Session-end handoff artifact (write to `Docs/superpowers/plans/<plan-name>-handoff.md`):**
+```markdown
+# Session Handoff — [Feature Name] — [YYYY-MM-DD]
+
+## Last completed wave
+Wave N — [brief description] — all tasks committed
+
+## Current state
+- Build: PASS / FAIL
+- Tests: N passing, N failing
+- Last committed task: [task title]
+
+## Next wave
+Wave N+1 — [tasks to dispatch]
+- Task A: [scope, files owned]
+- Task B: [scope, files owned]
+
+## Open items
+- [spec gaps, pending decisions, deferred concerns]
+
+## Contracts in play
+- [current interface signatures that the next wave will consume]
+
+## Files modified this session
+- [list of all files touched since session start]
+```
+
+**Rule:** The session-end handoff artifact must be committed before the session ends. It is the only reliable state source for the next session — in-context memory does not persist.
+
+**Session resume rule:** At the start of a new session, read the handoff artifact first — before reading MASTER_PLAN.md or the spec. It tells you exactly where to resume.
+
 ### Context exhaustion warning signs
 
 Context window exhaustion degrades output quality before the window is fully used. Recognize the early signs and act before the damage compounds.
