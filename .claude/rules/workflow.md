@@ -670,6 +670,20 @@ Your tasks:
 
 See `.claude/agents/verifier.md` for the full Verifier agent definition.
 
+### Post-wave verification — main agent runs build independently
+
+After every wave completes, the main agent must run the build and tests independently — not rely on the subagent's self-reported verification.
+
+**Protocol (main agent, after each wave):**
+1. Run `dotnet build` — confirm 0 errors. Do not proceed to the next wave if there are errors.
+2. Run `dotnet test` — confirm 0 failures. Investigate any new failures before proceeding.
+3. Review the task-log entries from the wave — confirm all entries have Verification evidence and Changed files.
+4. If a subagent reported `Build failure` or `blocked: spec gap`, resolve before dispatching the next wave.
+
+**Why independent verification?** Subagents report their own build results in the task-log. A subagent that hit context exhaustion may report `PASS` based on an earlier run that no longer reflects the committed state. The main agent's independent build is the authoritative gate.
+
+**Rule:** The main agent never skips post-wave verification to "save time." A wave that passes post-wave verification is a stable foundation. A wave that is not verified is technical debt that compounds into the next wave.
+
 ### When to take back control
 - After the subagent returns: run `dotnet build` and `dotnet test` as main agent
 - If a shell command is needed mid-way (migrations, file moves): do it inline, then re-delegate
