@@ -1,9 +1,25 @@
 # S7 — Tooling: Enhancement Opportunities
 > Analyzed against current .claude state (see _current_state_summary.md)
+> Last reviewed: 2026-05-05
 
 ---
 
-### OPP-7-1: Spec format portability rule — write specs in tool-agnostic markdown
+## Summary
+
+| Category | Count |
+|----------|-------|
+| Validated (previously captured, confirmed correct) | 8 |
+| Refined (previously captured, updated or extended) | 0 |
+| New (not previously captured) | 7 |
+| **Total** | **15** |
+
+Previously captured opportunities OPP-7-1 through OPP-7-8 are all validated. Seven new opportunities were identified from a complete re-read of all S7.x files, covering: Tessl Registry as a versioned skill source, Cursor as a complementary UI tool, GitHub MCP for subagent coordination, Context7 version-pinning discipline, MCP configuration portability, sdd-mcp as a workflow server, and spec ceremony calibration by task type.
+
+---
+
+## Validated Opportunities
+
+### ✅ OPP-7-1: Spec format portability rule — write specs in tool-agnostic markdown
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S7.1.2 — Tool-Switching Friction
@@ -25,7 +41,7 @@ Reason: specs are long-lived codebase artifacts. If the project moves to a diffe
 
 ---
 
-### OPP-7-2: MCP tool availability validation — fail loudly, never skip
+### ✅ OPP-7-2: MCP tool availability validation — fail loudly, never skip
 **Target:** `CLAUDE.md`
 **Action:** Add
 **Source topic:** S7.3.1 — MCP Protocol Immaturity (Risk 1: Silent Tool Unavailability)
@@ -43,7 +59,7 @@ Never assume a missing tool response means the tool found nothing — distinguis
 
 ---
 
-### OPP-7-3: MCP server allowlist — approved servers only, pinned, no auto-update
+### ✅ OPP-7-3: MCP server allowlist — approved servers only, pinned, no auto-update
 **Target:** `CLAUDE.md`
 **Action:** Add
 **Source topic:** S7.3 — MCP Servers (Security), S7.3.1 — MCP Protocol Immaturity
@@ -65,7 +81,7 @@ Rules:
 
 ---
 
-### OPP-7-4: Context window protection — limit MCP server count per agent session
+### ✅ OPP-7-4: Context window protection — limit MCP server count per agent session
 **Target:** `CLAUDE.md`
 **Action:** Add
 **Source topic:** S7.3 — Anti-Pattern 1: Too Many Servers, S7.3.1 — Context Explosion
@@ -84,7 +100,7 @@ If tool definitions from all active MCPs exceed ~5,000 tokens combined, deactiva
 
 ---
 
-### OPP-7-5: Spec-drift detection in review checklist
+### ✅ OPP-7-5: Spec-drift detection in review checklist
 **Target:** `.claude/commands/review.md`
 **Action:** Update
 **Source topic:** S7.1 — Kiro: "Specs as Living Artifacts", S7.2 — SDD Workflow Integration Patterns
@@ -103,7 +119,7 @@ After every task completion review:
 
 ---
 
-### OPP-7-6: Conscious tool lock-in — document ADR for Claude Code selection
+### ✅ OPP-7-6: Conscious tool lock-in — document ADR for Claude Code selection
 **Target:** `CLAUDE.md`
 **Action:** Add
 **Source topic:** S7.1.1 — Vendor Lock-In (Accept Lock-In Consciously, Mitigation Strategy 1)
@@ -121,7 +137,7 @@ After every task completion review:
 
 ---
 
-### OPP-7-7: Context7 invocation discipline — explicit trigger conditions
+### ✅ OPP-7-7: Context7 invocation discipline — explicit trigger conditions
 **Target:** `CLAUDE.md`
 **Action:** Update
 **Source topic:** S7.3 — Pattern 1: Context7 for Documentation, S7.2 — Reference Stack
@@ -134,7 +150,7 @@ After every task completion review:
 
 ---
 
-### OPP-7-8: Subagent MCP isolation — each subagent uses only task-relevant servers
+### ✅ OPP-7-8: Subagent MCP isolation — each subagent uses only task-relevant servers
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S7.3 — Anti-Pattern 1, S7.3.1 — Immaturity, S7.2 — Subagent Delegation
@@ -148,4 +164,149 @@ Include in every subagent briefing which MCP servers the subagent should activat
 - UI task (XAML/pages): Context7 for MAUI/DevExpress + DevExpress MCP — no SQLite MCP
 - Database/migration task: SQLite MCP only — no DevExpress MCP
 - Explicitly state: "Activate only [list] MCP servers for this task"
+```
+
+---
+
+## New Opportunities
+
+### 🆕 OPP-7-9: Tessl Registry as a versioned skill source for DevExpress and EF Core
+**Target:** `CLAUDE.md` (MCP & Skills section)
+**Action:** Add
+**Source topic:** S7.1 — Tessl (Architectural Fit for MyVocaList), S7.3 — Pattern 2: Tessl Registry
+**Gap in current setup:** CLAUDE.md lists Context7 for library docs and `maui-skills` for MAUI patterns, but neither provides version-matched skills for DevExpress MAUI or EF Core 10 at the depth Tessl's registry offers. Context7 fetches current docs; Tessl provides curated, agent-optimized skill packages. S7.1 explicitly identifies Tessl Registry as adding "immediate value" for this project because it offers versioned skills for DevExpress, EF Core, and MediatR — the exact stack used. The 3.3× improvement in correct API usage across OSS libraries is the compelling evidence.
+**Suggested content/change:** Add an evaluation note to the MCP & Skills section of CLAUDE.md and a task to SETUP_QUICKSTART.md:
+
+```
+## Tessl Registry (Evaluation)
+Tessl Spec Registry (tessl.io/registry) provides version-matched library skills for DevExpress, EF Core,
+and MediatR — complementing Context7 with higher-level usage patterns and project skill packages.
+Evaluate for adoption when:
+- Context7 returns incomplete or hallucinated DevExpress MAUI API results
+- Project reaches Spec-Anchored maturity (specs link to tests via [@test] syntax)
+- Team publishes internal skills (DX patterns, domain rules) for multi-agent reuse
+
+To trial: `tessl install devexpress-maui` and compare generated code quality against Context7-only sessions.
+```
+
+---
+
+### 🆕 OPP-7-10: Cursor as a designated complementary tool for XAML/UI editing
+**Target:** `CLAUDE.md`
+**Action:** Add
+**Source topic:** S7.2 — Integration with MyVocaList Workflow ("When to use Cursor in MyVocaList workflow")
+**Gap in current setup:** CLAUDE.md defines Claude Code as the primary tool but gives no guidance on when to use a complementary tool. S7.2 explicitly documents that Cursor excels for "rapid iteration on UI code (XAML, page structure) where inline editing is faster" and provides visual diffing. The MyVocaList workflow delegates UI work to subagents who receive no guidance on what tool to use. The current CLAUDE.md Non-Negotiables rule for "Incremental edits: edit ONE file → build → fix → then next file" would benefit from a companion tool reference for the human reviewer who wants visual diffs.
+**Suggested content/change:** Add to the Tool Selection section (OPP-7-6) or as a standalone note:
+
+```
+## Complementary Tooling
+
+**Cursor** (optional, for human review sessions):
+- When to use: visual diffing of large XAML changes before accepting; rapid UI iteration
+- Setup: install `.cursor/rules/` mirroring the key rules from CLAUDE.md and `.claude/rules/`
+- Do NOT use Cursor for autonomous task execution — Claude Code's subagent model is the only delegation mechanism
+- Do NOT create `.cursorrules` with content that contradicts CLAUDE.md rules
+```
+
+---
+
+### 🆕 OPP-7-11: GitHub MCP integration for subagent coordination via live PR/issue state
+**Target:** `CLAUDE.md` and `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S7.3 — Pattern 3: GitHub MCP for Live Project State, S7.3 — MCP in SDD Workflows §2
+**Gap in current setup:** The current workflow.md Rule 2 (Subagent Delegation) describes how subagents coordinate by updating task-log files and committing. It does not leverage GitHub MCP's ability to check live PR and issue state. S7.3 documents a concrete pattern: agents query GitHub MCP to verify "Is there an open PR for feature X?" before starting duplicate work. This is directly relevant to the wave-based parallelism model in Rule 2, where multiple subagents could unknowingly touch overlapping files. GitHub MCP (already listed in SETUP_QUICKSTART.md Step 2, though "disabled by default") would enable pre-task collision detection.
+**Suggested content/change:** Add to workflow.md Rule 2 and enable GitHub MCP with read-only scopes:
+
+```
+### Pre-task collision check (when GitHub MCP is active)
+Before a subagent starts a task that touches shared files (e.g., MauiProgram.cs, AppDbContext.cs):
+1. Query GitHub MCP: list open PRs touching those files
+2. If a draft PR already modifies the target file, coordinate with the main agent — do not duplicate
+3. After task commit, create a draft PR referencing the task-log entry
+
+Note: GitHub MCP is enabled read-only. Write operations (create_pull_request) require explicit user approval.
+```
+
+---
+
+### 🆕 OPP-7-12: Context7 version-pinning discipline — query with specific version, not latest
+**Target:** `CLAUDE.md`
+**Action:** Update (extends OPP-7-7)
+**Source topic:** S7.3.1 — Tool Versioning Collisions, Risk 2: Version Collisions During Updates
+**Gap in current setup:** The current CLAUDE.md instructs Context7 to be invoked for specific libraries but does not specify which version to query. S7.3.1 documents a concrete failure mode: an agent queries Context7 for FluentValidation docs, writes code for v14.2, then the project upgrades to v15.0 (breaking change), and a later agent still has v14.2 cached in session context. The fix is explicit version matching: query Context7 with the exact version from the project's `.csproj`, not "latest." MyVocaList uses EF Core 10, DevExpress v25.2.4, and .NET MAUI 10 — all version-specific.
+**Suggested content/change:** Extend the Context7 trigger rule in CLAUDE.md:
+
+```
+- Context7: when querying library docs, always specify the exact version from the .csproj (EF Core 10.x,
+  DevExpress 25.2.x, MAUI 10.x). Never query "latest" — the installed version is the target version.
+  If a version mismatch is detected between Context7's returned spec and the .csproj reference, report
+  it to the user before generating code.
+```
+
+---
+
+### 🆕 OPP-7-13: MCP configuration portability — shared .mcp.json as onboarding source of truth
+**Target:** `SETUP_QUICKSTART.md` (note: this file lives in Docs/DevEnv/, not modifiable per task scope — capture as action item for CLAUDE.md or a new dev-env rule)
+**Action:** Add note to `CLAUDE.md` or a new `.claude/rules/dev-environment.md`
+**Source topic:** S7.3.1 — Cross-Client Configuration Portability (Gap 6)
+**Gap in current setup:** S7.3.1 documents that MCP server lists, OAuth credentials, and tool allowlists are client-specific. SETUP_QUICKSTART.md instructs Claude Code to create `.mcp.json` (Step 2), but this file is not committed to version control (it contains API keys). There is no standard for a committed, sanitized `.mcp.json.template` that documents the required server configuration without secrets. New contributors onboarding must reverse-engineer the configuration. This creates reproducibility risk as the project's MCP server list grows.
+**Suggested content/change:** Add a committed template file at `.mcp.json.template` and reference it in CLAUDE.md:
+
+```
+## MCP Configuration Template
+`.mcp.json.template` at the project root documents the expected MCP server configuration
+(without secrets). Onboarding: copy to `.mcp.json`, fill in API keys.
+The template is committed; `.mcp.json` (with secrets) is gitignored.
+
+When adding a new MCP server:
+1. Add it to `.mcp.json` (local, with key)
+2. Add the sanitized entry to `.mcp.json.template` (committed, key replaced with placeholder)
+3. Update SETUP_QUICKSTART.md Step 2 prompt with any new manual action required
+```
+
+---
+
+### 🆕 OPP-7-14: sdd-mcp server — evaluate as a workflow-native MCP for spec execution
+**Target:** `CLAUDE.md` (MCP & Skills section, evaluation note)
+**Action:** Add
+**Source topic:** S7.3 — Sources Tier 3: `yi-john-huang/sdd-mcp` (MCP server implementing SDD workflows; agent skills, steering, rules, hooks — v3.3, March 2026)
+**Gap in current setup:** MyVocaList's SDD workflow (spec → tasks → subagent delegation → review) is implemented entirely through CLAUDE.md rules and workflow.md. The `sdd-mcp` server (GitHub: yi-john-huang/sdd-mcp) is a purpose-built MCP server that exposes SDD workflow primitives as MCP tools: agent skills, steering rules, spec hooks, task state. This would allow the main agent to query current spec state, check task completion, and invoke SDD-specific skills via the MCP protocol — making the workflow programmatic rather than prompt-driven. Not yet adopted; evaluation opportunity.
+**Suggested content/change:** Add evaluation note to CLAUDE.md:
+
+```
+## sdd-mcp (Evaluation)
+`yi-john-huang/sdd-mcp` (v3.3, March 2026) is an MCP server that exposes SDD workflow primitives
+as callable tools: spec state queries, agent skills, steering rules, task hooks.
+Evaluate when:
+- The main agent repeatedly needs to query "which tasks are complete?" across sessions
+- Spec-anchored maturity requires programmatic spec-to-test linkage
+- The current prompt-driven task-log workflow shows reproducibility gaps
+
+Trial: install as local stdio server, expose to Claude Code, replace manual task-log queries
+with `sdd_mcp.get_task_status()` calls.
+```
+
+---
+
+### 🆕 OPP-7-15: Spec ceremony calibration — lightweight tasks should skip full spec ritual
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S7.1 — Amazon Kiro Known Limitations: "Spec Overhead at Small Scale"; S7.1.1 — When to Accept Lock-In
+**Gap in current setup:** workflow.md Rule 1 (Spec-First) requires reading `design.md` before any implementation, with no exception for lightweight tasks. S7.1 documents that Kiro's spec ritual (requirements + design + tasks) generated 16 acceptance criteria for a simple bug fix — illustrating overhead at the lightweight end. MyVocaList's workflow.md has no calibration guidance: a 2-line bug fix and a new feature both require the same full spec review. The SDD literature recommends right-sizing ceremony to task scope. A lightweight path for bug fixes and minor enhancements would reduce friction without sacrificing spec discipline for complex features.
+**Suggested content/change:** Add a task-scope gate to Rule 1 in workflow.md:
+
+```
+### Spec Ceremony Calibration
+
+Not all tasks require the full spec-first ritual. Apply the right level of ceremony:
+
+| Task type | Ceremony required |
+|-----------|------------------|
+| New feature (new page, new service, new entity) | Full spec: requirements.md + design.md + tasks.md |
+| Enhancement to existing feature (new field, new filter) | design.md update + tasks.md entry — no new requirements.md |
+| Bug fix (code change ≤ 5 lines, no new behavior) | Task-log entry only — no spec files required |
+| Refactor (no behavior change) | Task-log entry + update design.md if architecture changes |
+
+For bug fixes: create a task-log entry with "root cause" and "regression prevention" fields instead
+of a full spec. This mirrors Kiro's Bugfix Spec pattern without the overhead of a full feature spec.
 ```

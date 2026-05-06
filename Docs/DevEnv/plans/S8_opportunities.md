@@ -1,7 +1,20 @@
 # S8 — Project Management: Enhancement Opportunities
 > Analyzed against current .claude state (see _current_state_summary.md)
+> Last updated: 2026-05-05
 
 ---
+
+## Summary
+
+| Category | Count |
+|----------|-------|
+| ✅ Validated (previously captured, confirmed by re-read) | 9 |
+| 🆕 New (not yet captured) | 6 |
+| **Total** | **15** |
+
+---
+
+## ✅ Validated Opportunities
 
 ### OPP-8-01: Task atomization guidance in tasks.md authoring
 **Target:** `.claude/rules/workflow.md`
@@ -140,3 +153,113 @@ Add: Tasks in Phase N may not start until all tasks in Phase N-1 are committed t
 **Source topic:** S8.3 — Progress Visibility (external state files — findings.md)
 **Rationale:** The workflow currently uses task-log.md for outcome recording and MEMORY.md for persistent facts. Neither is designed to capture technical findings discovered during implementation (e.g., "DevExpress BottomSheet HalfExpandedRatio behavior changed in v25.2.x", "EF Core migration lock workaround still needed"). These findings are currently lost between sessions unless manually promoted to CLAUDE.md. A lightweight findings.md pattern fills this gap with minimal overhead.
 **Suggested content/change:** Add to Rule 5 (Task Status Registration): "When a task uncovers a non-obvious technical finding — a library behavior, a constraint discovered during implementation, a dead-end that should not be re-explored — add a one-line entry to `Docs/superpowers/plans/findings.md` (create if absent). Format: `| Date | Area | Finding | Source task |`. Findings that are confirmed across 2+ tasks should be promoted to the relevant `.claude/library/` file or CLAUDE.md via the continuous enhancement rule."
+
+---
+
+## 🆕 New Opportunities
+
+### OPP-8-10: Git worktrees as the isolation primitive for parallel subagents
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S8.2 — Parallel Work Coordination (S8.2.1 — Git Worktrees as Isolation Primitive)
+**Gap in current setup:** workflow.md Rule 2 defines the 4-agent wave cap and briefing protocol but has no mention of git worktrees. All parallel subagents currently run in the same working directory on the same branch. This means parallel subagents can overwrite each other's file changes silently during execution — not just at merge time. The SDD research is unambiguous: parallel agents in the same directory produce data loss; worktrees solve this.
+**Concrete enhancement action:** Add a "Isolation: git worktrees" subsection to Rule 2 (Subagent Delegation):
+
+> **Each parallel subagent must run in its own git worktree.**
+> Before dispatching a wave of parallel subagents, create one worktree per agent:
+> ```bash
+> git worktree add ../myvocalist-agent-1 -b feat/[task-name-1]
+> git worktree add ../myvocalist-agent-2 -b feat/[task-name-2]
+> ```
+> Brief each subagent with the path to its worktree directory (not the main repo directory). When the subagent completes and pushes its branch, remove the worktree:
+> ```bash
+> git worktree remove ../myvocalist-agent-1
+> ```
+> Subagents running sequentially (not in parallel) do not require separate worktrees.
+
+Note: Claude Code supports `isolation: worktree` in subagent configuration, which automates worktree creation. If the superpowers subagent skill supports this, prefer it over manual setup.
+
+---
+
+### OPP-8-11: Dependency-first merge sequencing after a parallel wave
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S8.2.3 — Merge Sequencing and Conflict Resolution
+**Gap in current setup:** workflow.md Rule 2 says "wait for all subagents to complete, then start the next wave" but gives no guidance on merge order after a wave completes. Two agents working on interdependent branches can produce branches that merge cleanly at file level but break at runtime if merged in the wrong order. The dependency-first merge strategy eliminates this class of failure.
+**Concrete enhancement action:** Add a "Post-wave merge protocol" to Rule 2:
+
+> After a parallel wave completes, merge branches in dependency order — not alphabetical or completion order:
+> 1. Identify which branches have no downstream dependencies → merge those first.
+> 2. After each merge, rebase remaining branches on the updated `develop` branch before merging them.
+> 3. Run `dotnet build` and `dotnet test` after each merge, not only after all merges.
+> 4. If a branch touches a hotspot file that another branch also touched, resolve at merge time using the hotspot single-writer rule (OPP-8-05) as the tiebreaker — the branch that should have run first wins.
+
+---
+
+### OPP-8-12: Pre-parallel interface contracts for shared types
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S8.2.1 — Cross-Team Spec Consistency (Strategy 1: Upfront Interface Contracts); S8.2 — "Write contracts before parallelizing"
+**Gap in current setup:** When multiple subagents implement interdependent features (e.g., a service interface that one agent defines and another agent consumes), they may encode incompatible assumptions. The workflow has no rule requiring shared interfaces to be defined and committed on the main branch before agents branch off. This is the highest-value conflict prevention available — it eliminates contradictory-intent conflicts before they occur.
+**Concrete enhancement action:** Add to Rule 2 (before dispatching parallel agents):
+
+> **Before parallelizing, lock shared contracts on the branch.**
+> If agents in a parallel wave will share interfaces (service interfaces, repository interfaces, DTO records, entity shapes), define those contracts first in a sequential pre-wave task:
+> - Write and commit the interface/DTO/entity definitions to the working branch
+> - All parallel agents then branch off from that commit
+> - No agent may modify a shared interface during its parallel task — only implement against it
+>
+> If a parallel agent discovers that a shared interface is incomplete or incorrect, it must stop and write `blocked: spec gap` to the task-log rather than unilaterally changing the shared contract.
+
+---
+
+### OPP-8-13: DGI-informed complexity assessment before task decomposition
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S8.1.1 — Task Atomization (Decomposition Granularity Index)
+**Gap in current setup:** OPP-8-01 captures the 15–45 minute heuristic and the additive/edit distinction. However, the SDD research adds a more actionable framework: classify the feature as simple/moderate/complex first, then target the number of tasks accordingly. Without this upfront classification step, task decomposition tends to be inconsistent across features — sometimes over-atomized (simple features split into 10 tasks), sometimes under-atomized (complex features crammed into 3 tasks). The DGI research shows the optimal window narrows as complexity increases, making calibration more critical for complex features.
+**Concrete enhancement action:** Add a complexity classification step to the tasks.md authoring guidance (builds on OPP-8-01):
+
+> Before writing tasks, classify the feature:
+> - **Simple** (< 5 sequential steps, touches 1–2 files, clear I/O): target 1–3 tasks
+> - **Moderate** (5–15 steps, touches 2–4 modules, multiple decisions): target 4–8 tasks
+> - **Complex** (15+ steps, touches 4+ modules, state machines, cascading updates): target 8–15 tasks; consider breaking into sub-features
+>
+> If you write more tasks than the upper bound for the classified complexity, consolidate. If you write fewer than the lower bound, split. Mismatched granularity is the most common cause of agent context rot or over-coordination.
+
+---
+
+### OPP-8-14: 3-strike error recovery protocol for subagents
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add (refines OPP-8-06 with a structured recovery sequence)
+**Source topic:** S8.3 — Progress Visibility (OpenSpec tracking files — 3-strike protocol)
+**Gap in current setup:** OPP-8-06 captures kill criteria (abort after 3 failed attempts). The SDD research adds a complementary pattern: the three attempts should use escalating strategies, not repetitions of the same fix. The 3-strike protocol defines what each attempt should do differently, preventing agents from wasting all three cycles on the same failed approach.
+**Concrete enhancement action:** Add as a sub-section of the kill criteria rule (OPP-8-06):
+
+> **3-strike recovery sequence (apply within the 3-attempt limit):**
+> 1. **Strike 1:** Diagnose the error. Apply the most direct fix. Update task-log with diagnosis.
+> 2. **Strike 2:** If strike 1 failed, try an alternative approach. Document the alternative in the task-log with the reasoning.
+> 3. **Strike 3:** If strike 2 failed, the problem likely requires architectural input. Write the error, both attempted approaches, and a concrete recommendation to the task-log. Mark status `Build failure`. Push and exit. Do NOT attempt a fourth approach.
+
+---
+
+### OPP-8-15: ACTIVE-CONSIDERATIONS.md as the session priority stack
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S8.3 — Progress Visibility (external state files — ACTIVE-CONSIDERATIONS.md)
+**Gap in current setup:** The session resumption checklist (OPP-8-07) reads tasks.md, task-log, and MEMORY.md. However, MEMORY.md is append-only and persistent — it does not model ephemeral, session-scoped state like "currently blocked on X", "waiting for Helder's decision on Y", or "next three priorities in order". The auto-sdd learnings system uses an `ACTIVE-CONSIDERATIONS.md` file specifically for this: a mutable priority stack that is updated at session end and read at session start, capturing what is actively in flight rather than what has been permanently decided.
+**Concrete enhancement action:** Add to the session start protocol (OPP-8-07) and to Rule 5 (Task Status Registration):
+
+> `Docs/superpowers/plans/ACTIVE-CONSIDERATIONS.md` is the session priority stack. It is mutable (unlike task-log which is append-only). Format:
+> ```
+> ## Current blockers
+> - [Description of blocker — waiting for X]
+>
+> ## Next priorities (in order)
+> 1. [Next task or decision needed]
+> 2. [Second priority]
+>
+> ## Open questions for Helder
+> - [Question + context + recommendation]
+> ```
+> Update this file at the end of every session. Read it at the start. It captures what is actively in flight that does not yet have a permanent home in task-log or MEMORY.md.

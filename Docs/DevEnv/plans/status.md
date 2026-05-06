@@ -4,14 +4,14 @@
 
 | Section | Title | Status | Output file |
 |---------|-------|--------|-------------|
-| S1 | Core Concepts | To Review | S1_opportunities.md |
+| S1 | Core Concepts | Reviewed | S1_opportunities.md |
 | S2 | Specification Design | To Review | S2_opportunities.md |
 | S3 | Workflow Phases | To Review | S3_opportunities.md |
-| S4 | Context & Memory | To Review | S4_opportunities.md |
-| S5 | Agent Patterns | To Review | S5_opportunities.md |
-| S6 | Governance & Enforcement | To Review | S6_opportunities.md |
+| S4 | Context & Memory | Reviewed | S4_opportunities.md |
+| S5 | Agent Patterns | Reviewed | S5_opportunities.md |
+| S6 | Governance & Enforcement | Reviewed | S6_opportunities.md |
 | S7 | Tooling | To Review | S7_opportunities.md |
-| S8 | Project Management | To Review | S8_opportunities.md |
+| S8 | Project & Management | Reviewed | S8_opportunities.md |
 | S9 | Quality Assurance | To Review | S9_opportunities.md |
 | S10 | Applicability | To Review | S10_opportunities.md |
 
