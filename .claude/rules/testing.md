@@ -449,6 +449,20 @@ Starting from AutocompleteField + Person CRUD (Step 4+):
 
 ### Regression tests
 When fixing a bug, write the failing test FIRST, confirm it fails, then fix, then confirm it passes. The regression test proves the bug existed and the fix works.
+### One test at a time
+
+Write and run **one test** before proceeding to the next. Do not write all tests for a service method in one batch, then run them together.
+
+**Rationale:** Batching test writes delays the Red confirmation. A test that was never seen failing may have been written incorrectly (wrong assertion, wrong setup). Each test must be seen to fail before the implementation that makes it pass is written.
+
+**Incremental TDD cycle per test:**
+1. Write one test → run → confirm Red
+2. Write minimal implementation → run → confirm Green
+3. Write next test → run → confirm Red (existing tests still Green)
+4. Extend implementation → run → confirm all Green
+5. Repeat
+
+**Exception:** When the Tester/Builder split is used (separate subagents), the Tester writes all tests for a task together and confirms all fail, because the Builder has not yet run. The one-at-a-time discipline applies within a single-agent session.
 
 ---
 
