@@ -227,6 +227,28 @@ Before marking a spec as ready for implementation, it must pass all four gates:
 
 A spec that fails any gate must be revised before implementation proceeds.
 
+### Decision log — fourth optional spec file
+
+For features with many architectural trade-offs, a fourth spec file `decisions.md` may be created alongside the three standard files. This file is a chronological log of decisions made during the feature's lifetime.
+
+**Format: `Docs/specs/[feature]/decisions.md`**
+
+```markdown
+# Decision Log — [Feature Name]
+
+## [YYYY-MM-DD] [Short title]
+**Context:** [what situation required a decision]
+**Decision:** [what was decided]
+**Consequences:** [what this enables or constrains going forward]
+```
+
+**When to use it:** Create `decisions.md` when:
+- A feature has more than 3 Key Decisions in `design.md`
+- Decisions evolve over multiple sessions
+- The feature is a long-lived component likely to be revisited
+
+**When not to use it:** Do not create `decisions.md` for simple CRUD features. Architectural overhead must be proportional to complexity.
+
 ### Spec versioning discipline
 
 When a spec is updated after implementation has started:
