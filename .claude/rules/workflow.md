@@ -692,6 +692,28 @@ Your tasks:
 
 See `.claude/agents/verifier.md` for the full Verifier agent definition.
 
+### Bounded autonomy rule — irreversible actions need confirmation
+
+Subagents have autonomy within the scope of their task. But some actions are irreversible — they cannot be undone without data loss, breaking changes, or significant manual recovery effort. These actions require explicit confirmation from the main agent before execution.
+
+**Irreversible actions that require confirmation:**
+- Dropping a database table or column (via migration)
+- Removing a public interface method that has existing consumers
+- Deleting a file that was not listed in the role scope block's "files owned"
+- Changing a primary key type or structure
+- Removing or renaming a navigation route
+- Downgrading a package version
+- Running `git reset --hard` or any destructive git operation
+
+**Protocol:**
+1. If an irreversible action is required as part of the task: stop before executing it.
+2. Document the action in the task-log: what it is, why it is needed, and what the consequence of NOT doing it would be.
+3. Set task status to `blocked: confirmation required`.
+4. The main agent (or Helder, for architecture-level decisions) reviews and authorizes.
+5. Only after explicit authorization: proceed.
+
+**Why:** A subagent that drops a column "because the spec said to remove the field" has made a data-loss decision unilaterally. The spec authorizes behavior — it does not authorize irreversible infrastructure changes without review.
+
 ### Pre-task context gate — verify spec + test exist
 
 Before a subagent starts implementation, it must verify that the preconditions for the task are in place. This is the **pre-task context gate**.
