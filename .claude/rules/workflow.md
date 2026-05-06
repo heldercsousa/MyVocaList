@@ -463,6 +463,22 @@ Some files must never be edited by more than one agent at a time. These are **ho
 
 **How to add entries:** If a session discovers a new hotspot file (a file where parallel edits caused a conflict or incoherent output), add it to this registry before ending the session.
 
+### Cross-spec review gate before multi-spec wave
+
+When a wave will implement tasks that touch two or more features simultaneously (i.e., tasks from different spec directories), a cross-spec review gate is required before dispatching.
+
+**Gate checklist (main agent must confirm before dispatch):**
+
+- [ ] All specs involved have passed the spec quality gate (see Rule 1)
+- [ ] Shared domain types used by both features are defined in one canonical spec (no duplication)
+- [ ] No acceptance criterion in Spec A contradicts an acceptance criterion in Spec B
+- [ ] Invariants from both specs are compatible (e.g., both define "Queue" consistently)
+- [ ] The Domain Vocabulary across both specs uses the same terms for the same concepts
+
+**Why this matters:** Two specs written independently can define the same domain concept differently. When parallel subagents implement against conflicting specs, they produce incoherent domain logic that is expensive to reconcile after the fact.
+
+**If a conflict is found:** Resolve it in the specs before dispatching. Do not dispatch the wave with the conflict unresolved and "let the subagents figure it out."
+
 ### Pre-wave dependency check + scope isolation
 
 Before dispatching a wave, the main agent must perform a dependency check:
