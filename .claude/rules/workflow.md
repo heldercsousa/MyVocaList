@@ -183,6 +183,20 @@ Before marking a spec as ready for implementation, it must pass all four gates:
 
 A spec that fails any gate must be revised before implementation proceeds.
 
+### Spec versioning discipline
+
+When a spec is updated after implementation has started:
+
+1. **Add a change note at the top of the updated file** using this format:
+   ```
+   > **Spec updated [YYYY-MM-DD]:** [one sentence describing what changed and why]
+   ```
+2. **Do not delete old content** — mark superseded sections with `~~strikethrough~~` and add a note explaining what replaced them.
+3. **Update `tasks.md`** to reflect the change: add new tasks, mark any tasks that are now irrelevant as `[CANCELLED: reason]`.
+4. **Notify the main agent** by setting the task-log status to `Spec updated — re-planning required` before stopping.
+
+Rationale: Versioned specs allow the main agent to understand what changed mid-flight and assess the impact on in-progress or pending tasks.
+
 ### Spec-update gate — after implementation
 
 When a subagent's work reveals a discrepancy between the spec and the delivered code (even a "minor" one), the following must happen before the task is marked `To Review`:
