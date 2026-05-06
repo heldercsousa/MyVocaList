@@ -1085,6 +1085,23 @@ The task list is the audit trail for the feature — keep it accurate.
 
 **Parallel exception:** Tasks marked `[P]` (independent, different files/layers) may be dispatched simultaneously as a wave per Rule 2. All tasks in a wave must complete and commit before the next wave begins.
 
+### DRY Onion task ordering rule
+
+Tasks must be ordered from the inside of the architecture outward — Domain first, then Infra, then Services, then UI. This is the **DRY Onion order**.
+
+```
+Wave 1 (innermost):  Domain entities + repository interfaces
+Wave 2:              EF Core migrations + repository implementations
+Wave 3:              Service methods
+Wave 4 (outermost):  ViewModels + pages
+```
+
+**Why:** Each layer depends on the one inside it. If a UI task starts before the service method it calls is committed, the UI subagent must invent the service interface — and will likely get it wrong. Onion ordering eliminates the most common cause of integration build failures between waves.
+
+**Rule:** Do NOT dispatch a task in Wave N+1 until all tasks in Wave N that produce types consumed by Wave N+1 have been committed. Check the `Produces` / `Consumes` fields (see task entry format) before dispatching.
+
+**Exception:** Tasks that operate entirely within one layer and share no types with tasks in the next wave may be parallelized across layers — but only if the `Consumes` field confirms no dependency exists.
+
 ### Task entry format — structured fields
 
 Each task entry in `tasks.md` should use the following format for any task that will be dispatched to a subagent:
