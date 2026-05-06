@@ -23,6 +23,46 @@ TDD and SDD are complementary, not competing disciplines. Each operates at a dif
 
 ---
 
+## Acceptance Criteria Traceability
+
+Every test that covers a user-facing behavior must be traceable to an acceptance criterion (AC) in `requirements.md`.
+
+### Format
+
+Add an `[AC]` tag as the first line of each test method's doc comment (or inline comment) citing the AC ID:
+
+```csharp
+[Fact]
+// [AC] REQ-VENUE-03: Name must be unique across all venues (case-insensitive)
+public async Task CreateVenueAsync_DuplicateName_ReturnsFalse()
+{
+    ...
+}
+`````r
+
+### Rules
+
+1. **Every AC → at least one test.** If an AC has no corresponding test, it is unverified. Treat missing coverage as a spec gap.
+2. **One test → one AC.** A test that covers multiple ACs is testing too much. Split it.
+3. **AC IDs come from the spec.** Do not invent IDs. If the spec has no ID scheme, add one before writing tests.
+4. **Infrastructure tests are exempt.** Tests for `TestDbContextFactory`, builder helpers, or test-only utilities do not require an AC tag.
+
+### Traceability matrix (per feature)
+
+When a feature reaches code review, produce a traceability table in the task-log:
+
+```r
+| AC ID | Description | Test method |
+|-------|-------------|-------------|
+| REQ-VENUE-01 | Venue name ≤ 30 chars | CreateVenueAsync_NameTooLong_ReturnsFalse |
+| REQ-VENUE-02 | Name required | CreateVenueAsync_EmptyName_ReturnsFalse |
+| REQ-VENUE-03 | Name unique (case-insensitive) | CreateVenueAsync_DuplicateName_ReturnsFalse |
+`````r
+
+Missing rows = missing tests = incomplete feature.
+
+---
+
 ## Test Project Structure
 
 ### Project: `MyVocaList.Tests`
