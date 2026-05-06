@@ -71,6 +71,24 @@ Use Given/When/Then for user-facing flows. Use EARS for background rules, constr
 - **Invariants & Postconditions** — system invariants that must hold after every operation (e.g. "Queue always has at least one active singer", "Round number is monotonically increasing")
 - **Key Decisions** — see Key Decisions section below
 
+### Functional vs technical separation
+
+`requirements.md` and `design.md` serve different audiences and must not be mixed.
+
+| Belongs in `requirements.md` | Belongs in `design.md` |
+|------------------------------|------------------------|
+| User goals and intent | Interface signatures |
+| What the system must do | How the system does it |
+| Acceptance criteria (Given/When/Then) | Layer responsibilities |
+| Validation rules from user perspective | EF Core entity configuration |
+| Business invariants | Navigation stack design |
+| Out of scope statements | Repository method signatures |
+| Domain vocabulary | ViewModel state machine |
+
+**Anti-pattern to avoid:** Writing `design.md`-style content in `requirements.md` (e.g. "the VenueRepository will use a parameterized query") or `requirements.md` content in `design.md` (e.g. "users need to see an error message").
+
+**Rule:** If you cannot decide which file a piece of information belongs in, ask: "Is this about what the user needs, or how the system is built?" User need → `requirements.md`. System construction → `design.md`.
+
 ### Tacit knowledge capture
 
 Specs only capture what people consciously describe. Tacit knowledge — "of course it works that way" assumptions — is the primary source of spec gaps.
