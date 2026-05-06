@@ -37,7 +37,11 @@ No exceptions. Code written without reading the spec is code that may contradict
 2. **Write spec** — write all three files; user reviews and approves
 3. **Write plan** — invoke `superpowers:writing-plans`
 4. **Implement** — delegate to a subagent (see Rule 2)
-5. **Review** — invoke `/project:review` after each phase
+5. **Phase-gate review** — invoke `/project:review` after each phase before starting the next
+   - After spec writing: review spec for completeness before writing the plan
+   - After plan writing: review plan for coherence before dispatching subagents
+   - After each implementation wave: review output before dispatching the next wave
+   - At feature close-out: final review to confirm spec matches delivered behavior
 
 ---
 
