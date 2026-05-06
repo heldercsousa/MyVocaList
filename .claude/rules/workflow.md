@@ -73,6 +73,19 @@ Use Given/When/Then for user-facing flows. Use EARS for background rules, constr
 - **Out of Scope** — explicit list of what this feature does NOT do; prevents scope creep during implementation
 - **Domain Vocabulary** — define every domain term used in the spec (e.g. "Round", "Queue Entry", "Absence"). All stakeholders and agents must use these exact terms — no synonyms.
 
+### Architecture reversibility documentation
+
+For every significant architectural decision in `design.md`, document its **reversibility**:
+
+| Reversibility level | Description | Example |
+|--------------------|-------------|---------|
+| **Easily reversible** | Change with no data migration, no interface change | Switching a sort algorithm |
+| **Reversible with effort** | Requires migration or interface update | Adding a required column to an existing table |
+| **Hard to reverse** | Requires data migration + downstream consumers to change | Changing an entity's primary key type |
+| **Irreversible** | Cannot be undone without data loss or breaking changes | Removing a feature that users rely on |
+
+**Rule:** Any decision rated "Hard to reverse" or "Irreversible" must be explicitly flagged in `design.md` under Key Decisions, and must be approved by Helder before implementation begins. Subagents must not make hard-to-reverse decisions unilaterally — they must escalate to the main agent.
+
 ### Capture architectural decisions in design.md
 
 **Architectural decisions belong in `design.md`, not in code comments.**
