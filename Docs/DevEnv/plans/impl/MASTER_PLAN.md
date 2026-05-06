@@ -136,36 +136,36 @@ One opportunity or small group per step. Sequential — same file.
 
 | Step | Description | OPPs | Status | Notes |
 |------|-------------|------|--------|-------|
-| P5-01 | Add task completion verification (demo statement + DI check) | OPP-2-5 | Pending | |
-| P5-02 | Add E2E emulator gate before To Review | OPP-9-13 | Pending | |
-| P5-03 | Add session-end spec update ritual | OPP-9-09 | Pending | |
-| P5-04 | Add task entry format (produces/consumes/risk/files fields) | OPP-3-03, OPP-3-13, OPP-3-18 | Pending | |
-| P5-05 | Add DRY Onion task ordering rule | OPP-3-04 | Pending | |
-| P5-06 | Add task atomization checklist + DGI complexity classification | OPP-1-5, OPP-8-01, OPP-8-13 | Pending | |
-| P5-07 | Add thick-slice task format for briefings | OPP-8-02 | Pending | |
-| P5-08 | Add dependency ordering example (phases template) | OPP-8-03 | Pending | |
-| P5-09 | Add in-progress marker [~] for claimed tasks | OPP-8-04 | Pending | |
-| P5-10 | Add single-writer rule for hotspot files | OPP-8-05 | Pending | |
-| P5-11 | Add pre-dispatch validation checklist | OPP-3-11 | Pending | |
-| P5-12 | Add spike validation task pattern | OPP-3-12 | Pending | |
-| P5-13 | Add review SLA + risk-tiered review lanes | OPP-3-13, OPP-3-15 | Pending | |
-| P5-14 | Add approval authority matrix | OPP-3-16 | Pending | |
-| P5-15 | Add multi-wave checkpoint pattern | OPP-3-10 | Pending | |
-| P5-16 | Add git worktrees as isolation primitive | OPP-8-10 | Pending | |
-| P5-17 | Add dependency-first merge sequencing | OPP-8-11 | Pending | |
-| P5-18 | Add pre-parallel interface contracts rule | OPP-8-12 | Pending | |
-| P5-19 | Add findings.md as session artifact | OPP-8-09 | Pending | |
-| P5-20 | Add ACTIVE-CONSIDERATIONS.md as session priority stack | OPP-8-15 | Pending | |
-| P5-21 | Add session start protocol (what to read at session start) | OPP-4-1, OPP-8-07 | Pending | |
-| P5-22 | Add tiered memory governance rule | OPP-4-17 | Pending | |
-| P5-23 | Add hook enforcement notes sub-section | OPP-6-04 | Pending | |
-| P5-24 | Add spec ceremony calibration table | OPP-7-15 | Pending | |
-| P5-25 | Add spec format portability rule | OPP-7-1 | Pending | |
-| P5-26 | Add ROI J-Curve awareness note | OPP-10-09 | Pending | |
-| P5-27 | Add intent verification before To Review | OPP-10-13 | Pending | |
-| P5-28 | Add spec rot multiplier warning | OPP-9-17 | Pending | |
-| P5-29 | Add rebuild test as spec quality check (feature close-out) | OPP-3-17 | Pending | |
-| P5-30 | Add GitHub MCP pre-task collision check | OPP-7-11 | Pending | |
+| P5-01 | Add task completion verification (demo statement + DI check) | OPP-2-5 | Done | |
+| P5-02 | Add E2E emulator gate before To Review | OPP-9-13 | Done | |
+| P5-03 | Add session-end spec update ritual | OPP-9-09 | Done | |
+| P5-04 | Add task entry format (produces/consumes/risk/files fields) | OPP-3-03, OPP-3-13, OPP-3-18 | Done | |
+| P5-05 | Add DRY Onion task ordering rule | OPP-3-04 | Done | |
+| P5-06 | Add task atomization checklist + DGI complexity classification | OPP-1-5, OPP-8-01, OPP-8-13 | Done | |
+| P5-07 | Add thick-slice task format for briefings | OPP-8-02 | Done | |
+| P5-08 | Add dependency ordering example (phases template) | OPP-8-03 | Done | |
+| P5-09 | Add in-progress marker [~] for claimed tasks | OPP-8-04 | Done | |
+| P5-10 | Add single-writer rule for hotspot files | OPP-8-05 | Done | |
+| P5-11 | Add pre-dispatch validation checklist | OPP-3-11 | Done | |
+| P5-12 | Add spike validation task pattern | OPP-3-12 | Done | |
+| P5-13 | Add review SLA + risk-tiered review lanes | OPP-3-13, OPP-3-15 | Done | |
+| P5-14 | Add approval authority matrix | OPP-3-16 | Done | |
+| P5-15 | Add multi-wave checkpoint pattern | OPP-3-10 | Done | |
+| P5-16 | Add git worktrees as isolation primitive | OPP-8-10 | Done | |
+| P5-17 | Add dependency-first merge sequencing | OPP-8-11 | Done | |
+| P5-18 | Add pre-parallel interface contracts rule | OPP-8-12 | Done | |
+| P5-19 | Add findings.md as session artifact | OPP-8-09 | Done | |
+| P5-20 | Add ACTIVE-CONSIDERATIONS.md as session priority stack | OPP-8-15 | Done | |
+| P5-21 | Add session start protocol (what to read at session start) | OPP-4-1, OPP-8-07 | Done | |
+| P5-22 | Add tiered memory governance rule | OPP-4-17 | Done | |
+| P5-23 | Add hook enforcement notes sub-section | OPP-6-04 | Done | |
+| P5-24 | Add spec ceremony calibration table | OPP-7-15 | Done | |
+| P5-25 | Add spec format portability rule | OPP-7-1 | Done | |
+| P5-26 | Add ROI J-Curve awareness note | OPP-10-09 | Done | |
+| P5-27 | Add intent verification before To Review | OPP-10-13 | Done | |
+| P5-28 | Add spec rot multiplier warning | OPP-9-17 | Done | |
+| P5-29 | Add rebuild test as spec quality check (feature close-out) | OPP-3-17 | Done | |
+| P5-30 | Add GitHub MCP pre-task collision check | OPP-7-11 | Done | |
 
 ---
 
@@ -280,7 +280,7 @@ One opportunity or small group per step. Sequential — same file.
 | Phase 2 — New support files | 5 | 5 | 0 | 0 |
 | Phase 3 — workflow.md Rule 1 | 27 | 27 | 0 | 0 |
 | Phase 4 — workflow.md Rule 2 | 30 | 30 | 0 | 0 |
-| Phase 5 — workflow.md Rules 3–6 | 30 | 0 | 0 | 30 |
+| Phase 5 — workflow.md Rules 3–6 | 30 | 30 | 0 | 0 |
 | Phase 6 — settings.json | 4 | 0 | 0 | 4 |
 | Phase 7 — testing.md | 9 | 0 | 0 | 9 |
 | Phase 8 — code-principles.md | 2 | 0 | 0 | 2 |
