@@ -989,6 +989,46 @@ When a complex task requires multiple iterations (e.g., a subagent produces part
 - The subagent ignored a constraint it was given
 - You are on the second or third correction loop
 
+### findings.md — session artifact for exploratory work
+
+When a session involves significant exploration, debugging, or spike work, the findings must be captured in a `findings.md` file before the session ends. This prevents the work from being lost when the context window is discarded.
+
+**When to create `findings.md`:**
+- Any `[SPIKE]` task (mandatory — see Spike validation task pattern)
+- Any session where the cause of a bug was non-obvious and required investigation
+- Any session where an architectural option was explored and rejected
+- Any session where a library or API was evaluated for the first time
+
+**File location:** `Docs/specs/[feature]/findings.md` for feature spikes, or `Docs/DevEnv/findings/[YYYY-MM-DD]-[topic].md` for general technical findings not tied to a feature.
+
+**findings.md format:**
+```markdown
+# Findings — [Topic] — [YYYY-MM-DD]
+
+## Context
+[One paragraph: why this investigation was needed]
+
+## What was tried
+- **Approach A:** [description] → [result: worked / failed / partial]
+- **Approach B:** [description] → [result: worked / failed / partial]
+
+## What was learned
+[Key discoveries — platform behaviors, library quirks, performance data, etc.]
+
+## Constraints discovered
+[Any new constraints that should be added to constraints-registry.md]
+
+## Recommendation
+[One sentence: what to do next, with rationale]
+
+## Open questions
+[Questions that were not resolved — must be resolved before implementation proceeds]
+```
+
+**Rule:** A spike or investigation that does not produce a `findings.md` has produced nothing — its output exists only in the subagent's expiring context. The findings artifact is the only durable output of exploratory work.
+
+**After `findings.md` is created:** The main agent reads it before writing the spec. Key constraints in `findings.md` must be propagated to `constraints-registry.md` before any implementation begins.
+
 ### Multi-session state handoff protocol
 
 When a feature spans multiple sessions, the state at session end must be captured so the next session can resume without loss.
