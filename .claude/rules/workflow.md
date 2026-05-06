@@ -472,6 +472,21 @@ For tasks that don't fit cleanly into "small isolated" or "new feature," use thi
 
 When uncertain: start with a two-sentence design note in the task-log. If it grows beyond 5 lines, promote it to `design.md`.
 
+### ROI J-Curve awareness
+
+The SDD workflow has a **J-Curve ROI profile**: it costs more time upfront (spec writing, quality gates, ceremony) and returns that investment later (fewer rewrites, faster subagent execution, less debugging).
+
+**What this means in practice:**
+- The first 1–2 features using SDD will feel slower than coding without it
+- The return starts showing on the 3rd–4th feature, when spec-based briefings produce first-time-correct subagent output
+- By the 5th+ feature, SDD overhead is approximately break-even with ad-hoc coding, and correctness quality is substantially higher
+
+**J-Curve trap:** Abandoning SDD during the "this takes longer" phase (features 1–2) before reaching the return phase (features 3+). This maximizes cost and minimizes benefit.
+
+**Counter-measure:** Commit to SDD for a minimum of 3 complete features before evaluating its ROI. A sample size of 1–2 features systematically underestimates the return.
+
+**Note for calibration:** The ceremony calibration table (above) exists precisely to reduce the overhead of SDD for small tasks. Applying Full ceremony to every change, including trivial ones, extends the J-Curve trough unnecessarily. Right-size the ceremony; don't skip SDD entirely.
+
 ### Over-specification guard
 
 A spec that is too long is as harmful as one that is too short. Over-specified specs:
