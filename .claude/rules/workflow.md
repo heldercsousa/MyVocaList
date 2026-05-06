@@ -836,10 +836,17 @@ Tasks without a plan association are logged to `Docs/superpowers/plans/unassigne
 **Completed:** MM/DD/YYYY
 
 ### Changed files:
-- `relative/path/to/file.cs` [— optional business reason if non-obvious]
+- `relative/path/to/file.cs` — reason (e.g. "added GetPagedAsync method")
+- `relative/path/to/test.cs` — reason (e.g. "added 3 test cases")
 
 ### Build notes
 [Only present if build was checked — records error summary and diagnosis]
+
+### Verification evidence
+- Build: [PASS / FAIL — error summary if FAIL]
+- Tests: [PASS (N tests) / FAIL (N failures) / SKIPPED (no test files changed)]
+- Post-edit re-read: [confirmed / N/A — no code files changed]
+- Spec compliance: [confirmed — [spec file] section checked / divergence noted: [one line]]
 ```
 
 ### Task statuses
