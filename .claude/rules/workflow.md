@@ -1384,6 +1384,22 @@ If a build fails, the subagent may attempt to fix it. The retry cap is **3 attem
 
 **Why a cap?** A subagent that loops on build errors without a cap will exhaust its context window making increasingly desperate patches. After 3 attempts, the problem likely requires architectural guidance — not more patching.
 
+### Intent verification before To Review
+
+Before setting any task status to `To Review`, a subagent must perform an **intent verification** — a brief check that what was built matches what was intended, not just what compiles.
+
+**Intent verification checklist:**
+
+- [ ] **Spec re-read:** Re-read the task's acceptance criteria from `requirements.md`. For each criterion, confirm the implementation satisfies it — not just that it doesn't break it.
+- [ ] **Demo statement executable:** The task's demo statement can be stated as a passing test or an emulator observation. If the demo statement cannot be demonstrated, the task is not `To Review`.
+- [ ] **No silent scope bleed:** Confirm the `Changed files` list contains ONLY files in the task's `Files owned` declaration. Any file changed outside `Files owned` is a scope violation — document it explicitly.
+- [ ] **No hardcoded values:** No magic numbers, no hardcoded strings, no `TODO` comments left in production code without a corresponding task in `tasks.md`.
+- [ ] **Markdown fidelity:** If the task included changes to spec files or documentation: re-read the changed sections and confirm Markdown formatting is correct (tables render correctly, code fences are closed, headers are at the right level).
+
+**Why intent verification matters:** A subagent that implements a feature that compiles but does the wrong thing — slightly wrong, subtly wrong, or wrong only in edge cases — is producing a `Build failure` in a different form. The build passed, but the intent failed. Intent verification is the gate that catches this before review.
+
+**Rule:** A task-log entry that claims `To Review` without confirming the demo statement is verifiable will be downgraded to `Check build` during review. The demo statement is the minimum evidence of correctness.
+
 ### E2E emulator gate — mandatory before To Review
 
 For any task that introduces or modifies user-facing behavior (UI changes, navigation, data operations visible in the UI), the subagent must run an E2E emulator check before setting status to `To Review`.
