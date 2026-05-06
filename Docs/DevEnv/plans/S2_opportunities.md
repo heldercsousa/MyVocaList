@@ -1,7 +1,8 @@
 # S2 — Specification Design: Enhancement Opportunities
 
-> Analysis against `.claude` current state. Only opportunities with genuine value for MyVocaList are included.
-> Last reviewed: 2026-05-05
+> Source files analyzed: S2_Specification_Design.md, S2_1_Spec_Structure_and_Content.md, S2_1_1_Tacit_Knowledge_Capture.md, S2_1_2_Over_Specification_Risk.md, S2_2_Quality_Characteristics.md, S2_2_1_Acceptance_Criteria_Subjectivity.md, S2_2_2_Verbosity_vs_Precision_Tension.md, S2_3_Functional_vs_Technical_Separation.md, S2_3_1_Spec_Format_Selection.md
+> Compared against: CLAUDE.md, .claude/rules/workflow.md, .claude/rules/testing.md, .claude/rules/code-principles.md, .claude/settings.json
+> Last reviewed: 2026-05-06
 
 ---
 
@@ -9,16 +10,15 @@
 
 | Category | Count |
 |----------|-------|
-| ✅ Validated (captured before, confirmed correct) | 10 |
-| ♻️ Refined (captured before, updated with additional detail) | 3 |
-| 🆕 New (not previously captured) | 8 |
-| **Total** | **21** |
+| ✅ Validated (previously captured, still unimplemented) | 18 |
+| 🆕 New (not previously captured) | 4 |
+| **Total** | **22** |
 
-Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. Three of them have been refined with additional specifics from the full spec review. Eight new opportunities were identified from deep reading of S2.1, S2.1.1, S2.1.2, S2.2, S2.2.1, S2.2.2, S2.3, and S2.3.1.
+All 18 previously captured opportunities (OPP-2-1 through OPP-2-18) remain unimplemented — confirmed by inspecting workflow.md and review.md as of 2026-05-06. None have been superseded. Four new opportunities were identified from a full reading of all nine S2 source files.
 
 ---
 
-## Validated & Refined Opportunities
+## Previously Captured Opportunities
 
 ---
 
@@ -40,7 +40,7 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-### ♻️ OPP-2-3: Add domain glossary requirement to spec structure
+### ✅ OPP-2-3: Add domain glossary requirement to spec structure
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S2.3 — Functional vs Technical Separation; S2.2 — Ubiquitous Language
@@ -58,7 +58,7 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-### ♻️ OPP-2-5: Add verification gates concept to workflow.md task completion
+### ✅ OPP-2-5: Add verification gates concept to workflow.md task completion
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S2.2.1 — Acceptance Criteria Subjectivity
@@ -103,7 +103,7 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-### ♻️ OPP-2-10: Document the functional/technical separation rule in workflow.md with MyVocaList examples
+### ✅ OPP-2-10: Document the functional/technical separation rule in workflow.md with MyVocaList examples
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S2.3 — Functional vs Technical Separation
@@ -120,10 +120,6 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-## New Opportunities
-
----
-
 ### 🆕 OPP-2-11: Add invariants and postconditions section to design.md template
 **Target:** `.claude/rules/workflow.md` (spec structure table); reference implementation `Docs/specs/venues/design.md`
 **Action:** Update spec template
@@ -133,7 +129,7 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-### 🆕 OPP-2-12: Add state machine documentation requirement for multi-step entities
+### ✅ OPP-2-12: Add state machine documentation requirement for multi-step entities
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S2.1 — Spec Structure & Content (state machines element)
@@ -142,7 +138,7 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-### 🆕 OPP-2-13: Establish a regeneration test practice for spec validation
+### ✅ OPP-2-13: Establish a regeneration test practice for spec validation
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S2.1.2 — Over-Specification Risk (regeneration tests for spec quality measurement)
@@ -151,7 +147,7 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-### 🆕 OPP-2-14: Add demo statement requirement to tasks.md items for user-facing features
+### ✅ OPP-2-14: Add demo statement requirement to tasks.md items for user-facing features
 **Target:** `.claude/rules/workflow.md`; `Docs/specs/venues/tasks.md` as reference
 **Action:** Update
 **Source topic:** S2.2.1 — Acceptance Criteria Subjectivity (demo statements)
@@ -160,7 +156,7 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-### 🆕 OPP-2-15: Add failure-mode analysis as a spec quality improvement step to workflow.md
+### ✅ OPP-2-15: Add failure-mode analysis as a spec quality improvement step to workflow.md
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S2.1.1 — Tacit Knowledge Capture (failure-mode analysis as tacit knowledge extraction)
@@ -169,7 +165,7 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-### 🆕 OPP-2-16: Add EARS format as the target acceptance criteria format for requirements.md
+### ✅ OPP-2-16: Add EARS format as the target acceptance criteria format for requirements.md
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update (evolves OPP-2-2, adds format specificity)
 **Source topic:** S2.3.1 — Spec Format Selection (EARS as the recommended structured format)
@@ -178,7 +174,7 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-### 🆕 OPP-2-17: Add two-tier spec architecture trigger to workflow.md
+### ✅ OPP-2-17: Add two-tier spec architecture trigger to workflow.md
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S2.2.2 — Verbosity vs. Precision Tension (two-tier spec architecture)
@@ -187,9 +183,56 @@ Previously captured opportunities (OPP-2-1 through OPP-2-10) are all validated. 
 
 ---
 
-### 🆕 OPP-2-18: Add integration contract section to design.md template for features with external dependencies
+### ✅ OPP-2-18: Add integration contract section to design.md template for features with external dependencies
 **Target:** `.claude/rules/workflow.md`; spec template
 **Action:** Update
 **Source topic:** S2.1 — Spec Structure & Content (integration contracts element)
 **Gap in current setup:** MyVocaList currently has no external service integrations, but planned features include lyrics API, song catalog, and potentially social features. The design.md template has no slot for integration contracts (external service calls, failure modes, retry semantics, idempotency). S2.1 identifies integration contracts as one of the seven required structural elements: "without them, agents may make unsafe assumptions (assuming all calls succeed, or not handling eventual consistency)." Adding this section to the template now costs nothing; omitting it when the first HTTP-dependent feature is specced will produce a subagent that silently swallows network failures.
 **Concrete enhancement action:** Add an "Integration Contracts" section to the design.md template, marked as "N/A — no external dependencies" for features without them. For features with HTTP calls or event-driven dependencies, require: external service name, input/output schema, failure behavior (4xx vs 5xx handling), retry strategy, idempotency key (if applicable). This section becomes mandatory when any feature in CLAUDE.md's "Planned" column (MediatR, FluentValidation, lyrics API) is specced.
+
+---
+
+## New Opportunities
+
+---
+
+### 🆕 OPP-2-19: Add spec quality four-gate review to the spec authoring phase
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S2.2 — Quality Characteristics (Quality Gates section)
+**Gap in current setup:** S2.2 defines four quality checks that should be applied to a spec before handing it to any agent: (1) domain language check — every business term maps to a code-level identifier with no synonyms; (2) Given/When/Then audit — every acceptance criterion follows the structure with no vague Then assertions; (3) completeness audit — for each design decision, ask "Is the critical path covered? Are error cases explicit?"; (4) determinism audit — scan for "should," "might," "typically," "reasonable," and replace with measurable properties. Currently workflow.md has no checklist at spec-review time. OPP-2-1 adds a readiness gate before dispatching, but that is later in the workflow. This opportunity adds an earlier gate — during spec writing/review — that prevents a spec from reaching the dispatch stage incomplete.
+**Concrete enhancement action:** Add a "Spec Quality Gate" subsection to Rule 1 (after the spec structure table), structured as four checkboxes that Helder applies when reviewing a spec before approving it for planning:
+```
+- [ ] Domain language: every business term in requirements.md maps to a C# type name — no synonyms introduced
+- [ ] Given/When/Then: every acceptance criterion uses the structure — no vague Then assertions ("handles gracefully", "works correctly")
+- [ ] Completeness: every branch with a different outcome has a scenario — critical path, duplicate, permission, and null/empty cases are explicit
+- [ ] Determinism: all quality attributes are measurable — no "fast", "robust", "user-friendly" without a concrete threshold
+```
+A spec that fails any of the four checks is revised before the plan is written.
+
+---
+
+### 🆕 OPP-2-20: Add acceptance criteria traceability to testing.md
+**Target:** `.claude/rules/testing.md`
+**Action:** Update
+**Source topic:** S2.2 — Quality Characteristics ("Link each scenario to a test before implementation begins. Traceability established upfront prevents spec/test drift.")
+**Gap in current setup:** testing.md defines test naming (`{Method}_{Context}_{Expected}`) and test categories (unit/integration/ViewModel) but has no requirement to link each acceptance criterion in requirements.md to a corresponding test before implementation begins. S2.2 is explicit that traceability must be established before implementation, not after. Without it, there is no way to know at review time whether all acceptance criteria have test coverage, and test names invented during implementation may not map back to any spec scenario. This gap is especially acute because testing.md and workflow.md are maintained separately — neither currently requires the cross-file link.
+**Concrete enhancement action:** Add a "Traceability" rule to testing.md: "Before implementation begins, each Given/When/Then scenario in requirements.md must have a corresponding test method stub in the test file. The test method name (`{Method}_{Context}_{Expected}`) must be derivable from the scenario. Example: scenario 'Given a duplicate venue name, When the user submits, Then an error is returned' maps to `CreateVenueAsync_DuplicateName_ReturnsFalseWithMessage`. This pre-declaration prevents both missed coverage and test-naming drift." Also add to the pre-implementation checklist in testing.md: "Confirm all spec scenarios have a named test stub before writing any implementation code."
+
+---
+
+### 🆕 OPP-2-21: Add determinism rule for quality attributes to code-principles.md
+**Target:** `.claude/rules/code-principles.md`
+**Action:** Add
+**Source topic:** S2.2 — Quality Characteristics (Clarity and Determinism); S2.2.1 — Acceptance Criteria Subjectivity
+**Gap in current setup:** S2.2 identifies vague language as the primary driver of non-deterministic agent behavior. The terms "fast," "robust," "handles gracefully," "user-friendly," and "should be secure" appear nowhere in current code-principles.md, testing.md, or workflow.md as prohibited language. An agent generating a spec, or a human writing acceptance criteria, has no rule prohibiting these terms. S2.2 and S2.2.1 both show that these terms force agents to invent their own thresholds, producing code that is technically compliant but misaligned with intent. code-principles.md is the right home for a general language rule; it already enforces English-only, nullable discipline, and naming standards — determinism belongs alongside those.
+**Concrete enhancement action:** Add a "Spec Language — Determinism" section to code-principles.md: "In spec files (requirements.md, design.md) and in task descriptions, vague quality adjectives are prohibited. Prohibited terms: fast, slow, quick, responsive, robust, secure, user-friendly, intuitive, handles gracefully, works correctly, performs well, reasonable. Replace with measurable thresholds: 'list renders within 300ms on mid-range Android', 'returns HTTP 400 with a JSON body `{error, message}`', 'password hashed with bcrypt 12 rounds'. If the threshold is not yet known, write: `[threshold TBD — establish before implementation starts]`."
+
+---
+
+### 🆕 OPP-2-22: Add LLM-assisted tacit knowledge extraction technique to spec authoring guidance
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S2.1.1 — Tacit Knowledge Capture (LLM-Assisted Extraction with Validation strategy)
+**Gap in current setup:** OPP-2-7 adds a "Known Gaps" annotation pattern to mark where tacit knowledge is incomplete. But it does not provide a technique for *extracting* that knowledge before the gap causes a failure. S2.1.1 documents LLM-Assisted Extraction as a practical approach: use Claude to draft structured rules from existing code, comments, commit messages, and prior task-logs; then have Helder validate and refine. S2.1.1 notes this yields 70–80% accuracy for straightforward rules, reduces extraction effort from 40–200 hours (expert-only) to 6–16 hours (LLM draft + expert review), and is particularly effective when the LLM can review both the existing spec and the implemented code to surface what the code does that the spec does not say. MyVocaList already has Claude Code in-session — this technique requires no tooling investment.
+**Concrete enhancement action:** Add a note under Rule 1 spec authoring guidance: "Before writing requirements.md for a domain-heavy feature (queue management, round progression, singer absence handling), run a tacit knowledge extraction pass: ask Claude Code to read the existing codebase for related patterns and propose a list of implicit rules it observes (e.g., 'The code checks X before doing Y — is that a business rule?'). Helder reviews each proposed rule as correct, incorrect, or incomplete. Validated rules are added to requirements.md explicitly. Rejected rules are noted as 'Not a rule — [correct behavior].' This surfaces assumptions that would otherwise only appear as bugs."

@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/06/2026** - docs - SDD usage plane review: S2, S3, S7, S9, S10 opportunities files reviewed and updated (19 new opportunities across 5 sections); status.md marked all sections Reviewed
 - **05/03/2026** - chore - Redesign hooks system: TaskCreated (init task-log + build resume), PostToolUse (file-path buffer only, no build/commit), TaskCompleted (classify new vs review, changelog, commit, 3-attempt build check with To Review/Build failure), Stop asyncRewake (scan for To Review tasks); task-log files now beside plan file as <plan>-task-log.md; update workflow.md Rule 5 with format and status table
 
 ## Entries for april 2026

@@ -5,15 +5,15 @@
 | Section | Title | Status | Output file |
 |---------|-------|--------|-------------|
 | S1 | Core Concepts | Reviewed | S1_opportunities.md |
-| S2 | Specification Design | To Review | S2_opportunities.md |
-| S3 | Workflow Phases | To Review | S3_opportunities.md |
+| S2 | Specification Design | Reviewed | S2_opportunities.md |
+| S3 | Workflow Phases | Reviewed | S3_opportunities.md |
 | S4 | Context & Memory | Reviewed | S4_opportunities.md |
 | S5 | Agent Patterns | Reviewed | S5_opportunities.md |
 | S6 | Governance & Enforcement | Reviewed | S6_opportunities.md |
-| S7 | Tooling | To Review | S7_opportunities.md |
+| S7 | Tooling | Reviewed | S7_opportunities.md |
 | S8 | Project & Management | Reviewed | S8_opportunities.md |
-| S9 | Quality Assurance | To Review | S9_opportunities.md |
-| S10 | Applicability | To Review | S10_opportunities.md |
+| S9 | Quality Assurance | Reviewed | S9_opportunities.md |
+| S10 | Applicability | Reviewed | S10_opportunities.md |
 
 ## Next Action
-Resume by dispatching agents for all `pending` sections (max 4 in parallel per wave).
+All sections reviewed. Proceed to implementation planning: prioritize opportunities across all S1–S10 files and group into implementation waves.

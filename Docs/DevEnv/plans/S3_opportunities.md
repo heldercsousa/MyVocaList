@@ -1,8 +1,8 @@
 # S3 — Workflow Phases: Enhancement Opportunities
 
-> Generated from analysis of S3, S3.1, S3.2, S3.3, S3.1.1, S3.1.2, S3.2.1, S3.2.2, S3.3.1, S3.3.2
-> against `.claude` current state (CLAUDE.md, workflow.md, code-principles.md, testing.md).
-> Last reviewed: 2026-05-05
+> Source files analyzed: S3_Workflow_Phases.md, S3_1_Planning_Phase.md, S3_1_1_Architecture_Debt_from_Early_Decisions.md, S3_1_2_Dependency_Analysis_Incompleteness.md, S3_2_Implementation_Phase.md, S3_2_1_Task_Granularity_Calibration.md, S3_2_2_Context_Window_Exhaustion.md, S3_3_Verification_Review_Gates.md, S3_3_1_Approval_Bottleneck.md, S3_3_2_Authority_Ambiguity.md
+> Compared against: CLAUDE.md, .claude/rules/workflow.md, .claude/rules/testing.md, .claude/rules/code-principles.md, .claude/settings.json
+> Last reviewed: 2026-05-06
 
 ---
 
@@ -10,27 +10,17 @@
 
 | Category | Count |
 |----------|-------|
-| ✅ Validated (captured and already partially implemented) | 3 |
-| ♻️ Refined (captured, needs update to match current workflow.md state) | 3 |
-| 🆕 New (not yet captured) | 10 |
-| Total | 16 |
+| ✅ Validated (previously captured, still unimplemented) | 16 |
+| 🆕 New (not previously captured) | 4 |
+| **Total** | **20** |
 
-### Validated (already in workflow.md or closely aligned)
-- OPP-3-07: `blocked: spec gap` status — already in workflow.md Rule 2 and Rule 5 task statuses
-- OPP-3-04: `[P]` / `[SEQUENTIAL]` markers — already in workflow.md Rule 4
-- OPP-3-01: Spec-First (Rule 1) — partially present; the "spec changes before code" invariant is implied but not stated as a rule
-
-### Needs refinement
-- OPP-3-01: Rule 1 states "read design.md before code" but does not state the invariant explicitly ("when implementation reveals a gap, stop — update spec first, then re-implement")
-- OPP-3-07: `blocked: spec gap` status exists but the protocol for *what to document* (question + options + recommendation) is in Rule 2 text but not in testing.md or review.md
-- OPP-3-03: `[P]`/`[SEQUENTIAL]` markers exist in Rule 4, but the `produces/consumes` dependency template is absent from tasks.md format guidance
+All 16 previously captured opportunities remain unimplemented — confirmed by inspecting workflow.md as of 2026-05-06. None have been superseded or made irrelevant by recent changes.
 
 ---
 
-## Opportunities
+## Previously Captured Opportunities
 
-### OPP-3-01: Spec update rule — code never changes before spec does
-**Status:** ♻️ Refined
+### ✅ OPP-3-01: Spec update rule — code never changes before spec does
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update Rule 1 to add explicit invariant statement
 **Source topic:** S3 — Workflow Phases (core invariant), S3.1 — Planning Phase
@@ -50,8 +40,7 @@ A code patch without a spec update is invisible drift. Never do it.
 
 ---
 
-### OPP-3-02: Planning gate checklist — constitution/governance check step
-**Status:** ✅ Validated
+### ✅ OPP-3-02: Planning gate checklist — constitution/governance check step
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add step 2a to "New feature workflow" in Rule 1
 **Source topic:** S3.1 — Planning Phase (planning gate step 5: Constitution/Governance Check)
@@ -69,8 +58,7 @@ A code patch without a spec update is invisible drift. Never do it.
 
 ---
 
-### OPP-3-03: Task spec template — produces/consumes/dependency markers
-**Status:** ♻️ Refined
+### ✅ OPP-3-03: Task spec template — produces/consumes/dependency markers
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add task entry format with produces/consumes fields to Rule 4
 **Source topic:** S3.1.2 — Dependency Analysis Incompleteness, S3.2.1 — Task Granularity Calibration
@@ -97,8 +85,7 @@ Also add: "Use [P] only when tasks touch completely different files and modules 
 
 ---
 
-### OPP-3-04: DRY Onion ordering rule for tasks.md
-**Status:** ✅ Validated (partial — [P]/[SEQUENTIAL] exist; the explicit layer ordering is absent)
+### ✅ OPP-3-04: DRY Onion ordering rule for tasks.md
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add layer ordering guidance to Rule 4
 **Source topic:** S3.2 — Implementation Phase (DRY Onion pattern), S3.1.2 — Dependency Analysis Incompleteness
@@ -121,8 +108,7 @@ If a task touches multiple layers, split it.
 
 ---
 
-### OPP-3-05: Context window budget rule — task sizing and subagent scope
-**Status:** ✅ Validated
+### ✅ OPP-3-05: Context window budget rule — task sizing and subagent scope
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add task sizing limits sub-section to Rule 2
 **Source topic:** S3.2.2 — Context Window Exhaustion, S3.2.1 — Task Granularity Calibration
@@ -142,8 +128,7 @@ One acceptance criterion + one commit = one task.
 
 ---
 
-### OPP-3-06: Subagent must re-read spec on every session start
-**Status:** ✅ Validated
+### ✅ OPP-3-06: Subagent must re-read spec on every session start
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add mandatory spec reads to "Briefing protocol" in Rule 2
 **Source topic:** S3.2.2 — Context Window Exhaustion (spec drift risk), S3.2 — Implementation Phase
@@ -162,8 +147,7 @@ The spec is the oracle. If the briefing conflicts with the spec, the spec wins.
 
 ---
 
-### OPP-3-07: Spec gap escalation — subagent blocking protocol
-**Status:** ♻️ Refined
+### ✅ OPP-3-07: Spec gap escalation — subagent blocking protocol
 **Target:** `.claude/rules/workflow.md`
 **Action:** Make the `blocked: spec gap` documentation requirement explicit in the subagent exit checklist
 **Source topic:** S3.2 — Implementation Phase (spec ambiguity handling)
@@ -180,8 +164,7 @@ The agent does NOT choose and implement — it stops after documenting.
 
 ---
 
-### OPP-3-08: review.md — spec drift and scope gate checks
-**Status:** ✅ Validated
+### ✅ OPP-3-08: review.md — spec drift and scope gate checks
 **Target:** `.claude/commands/review.md`
 **Action:** Add "Spec Conformance" section to the review checklist
 **Source topic:** S3.3 — Verification / Review Gates (scope gate, intent drift), S3.2.2 — Context Window Exhaustion
@@ -201,8 +184,7 @@ The agent does NOT choose and implement — it stops after documenting.
 
 ---
 
-### OPP-3-09: Architecture reversibility documentation in design.md
-**Status:** ✅ Validated
+### ✅ OPP-3-09: Architecture reversibility documentation in design.md
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add "Key decisions" format requirement for design.md in Rule 1
 **Source topic:** S3.1.1 — Architecture Debt from Early Decisions
@@ -224,8 +206,7 @@ Skip classification only for trivially reversible UI choices (component variants
 
 ---
 
-### OPP-3-10: Checkpoint file pattern for multi-wave features
-**Status:** ✅ Validated
+### ✅ OPP-3-10: Checkpoint file pattern for multi-wave features
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add multi-wave checkpoint paragraph to Rule 2
 **Source topic:** S3.2.2 — Context Window Exhaustion (checkpoint pattern), S3.2.1 — Task Granularity (Ralph Loop)
@@ -248,8 +229,7 @@ The full spec files are still mandatory reads — the checkpoint supplements, ne
 
 ---
 
-### OPP-3-11: Pre-dispatch task list validation checklist
-**Status:** 🆕 New
+### ✅ OPP-3-11: Pre-dispatch task list validation checklist
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add task list audit checklist to Rule 4 (before dispatching any wave)
 **Source topic:** S3.1.2 — Dependency Analysis Incompleteness (Spec Kit Agents validation hooks)
@@ -270,8 +250,7 @@ If any check fails, update tasks.md before dispatching. Discovery during impleme
 
 ---
 
-### OPP-3-12: Spike validation task for high-risk one-way-door decisions
-**Status:** 🆕 New
+### ✅ OPP-3-12: Spike validation task for high-risk one-way-door decisions
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add spike task pattern to Rule 1 planning workflow
 **Source topic:** S3.1.1 — Architecture Debt from Early Decisions (spike validation strategy)
@@ -298,8 +277,7 @@ When to insert a spike:
 
 ---
 
-### OPP-3-13: Risk-tiered task review lanes
-**Status:** 🆕 New
+### ✅ OPP-3-13: Risk-tiered task review lanes
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add risk classification to task entry format and review protocol
 **Source topic:** S3.3.1 — Approval Bottleneck (risk-tiered approval lanes), S3.3.2 — Authority Ambiguity
@@ -321,8 +299,7 @@ Review routing:
 
 ---
 
-### OPP-3-14: Acceptance criteria traceability gate in review checklist
-**Status:** 🆕 New
+### ✅ OPP-3-14: Acceptance criteria traceability gate in review checklist
 **Target:** `.claude/commands/review.md`
 **Action:** Add explicit AC traceability check (not just "tests pass" but "each AC has a named test")
 **Source topic:** S3.3 — Verification / Review Gates (acceptance criteria traceability gate)
@@ -342,8 +319,7 @@ A passing test suite with unmapped ACs is not verified; it is untested.
 
 ---
 
-### OPP-3-15: Async review windows — explicit schedule in workflow.md
-**Status:** 🆕 New
+### ✅ OPP-3-15: Async review windows — explicit schedule in workflow.md
 **Target:** `.claude/rules/workflow.md`
 **Action:** Document Helder's review SLA and escalation policy in Rule 2 or a new Rule 7
 **Source topic:** S3.3.1 — Approval Bottleneck (async review windows, SLA-based review routing)
@@ -364,8 +340,7 @@ context-switching cost and keeps the pipeline moving.
 
 ---
 
-### OPP-3-16: Authority matrix for MyVocaList approval decisions
-**Status:** 🆕 New
+### ✅ OPP-3-16: Authority matrix for MyVocaList approval decisions
 **Target:** `.claude/rules/workflow.md` (or a new `.claude/rules/approval-authority.md`)
 **Action:** Add explicit approval authority table covering all phase types and change types
 **Source topic:** S3.3.2 — Authority Ambiguity (Approval Authority Matrix, RACI for SDD)
@@ -391,3 +366,81 @@ Rules:
 - Approval is logged in the task-log ("Approved by Helder on MM/DD")
 ```
 
+---
+
+## New Opportunities
+
+### 🆕 OPP-3-17: Spec quality check (rebuild test) in feature close-out
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add spec quality diagnostic to Rule 1 or Rule 5
+**Source topic:** S3.1 — Planning Phase ("spec as living document"), S3.2 — Implementation Phase ("spec is the contract")
+**Rationale:** The project has no mechanism to assess whether a feature's spec is generation-grade — complete enough that a fresh agent could regenerate the feature from spec + tests alone, without reading existing implementation code. This is the critical quality bar for spec-anchored SDD. Without this check, specs accumulate implicit knowledge that lives only in the code, making them progressively less useful as AI context anchors over time.
+**Suggested content/change:** Add to Rule 1 (or as a close-out checklist in Rule 5):
+```
+### Spec quality check (rebuild test) — run when closing a feature
+When marking a feature's final task complete, ask:
+"Could a fresh agent regenerate this feature from spec files + test suite alone,
+without reading any existing implementation code?"
+
+If no, identify and fill the gaps. Common missing items:
+- Architectural decisions (why X was chosen over Y) — these belong in design.md
+- Business rule tradeoffs (why the limit is 30 chars, not 50) — belong in requirements.md
+- Integration contract details (what upstream entities return, what error shapes are expected) — design.md
+- Edge cases that exist in code but are absent from requirements.md
+
+A spec that passes the rebuild test is a spec that survives session restarts, new team members,
+and codebase deletion. Specs that fail are documentation, not specifications.
+```
+
+---
+
+### 🆕 OPP-3-18: Scope gate — file ownership declaration per task
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add file ownership rule to Rule 4 task entry format
+**Source topic:** S3.3 — Verification / Review Gates (scope gate), S3.2 — Implementation Phase ("no side effects: task only modifies files and layers it is scoped to")
+**Rationale:** The current task format has no explicit file ownership. A subagent working on Task C may modify files that belong to Task B's domain, creating silent coupling and complicating review. S3.2 mandates "no side effects: the task only modifies files and layers it is scoped to." Encoding this as an explicit `Files` field in the task format makes scope violations detectable in review without reading the full diff.
+**Suggested content/change:** Add a `Files` field to the task entry format in Rule 4:
+```
+**Files:** [list of files this task is permitted to create or modify]
+Example:
+  **Files:**
+  - MyVocaList.Services/VenueService.cs (create)
+  - MyVocaList.Domain/Interfaces/IVenueService.cs (create)
+  - MyVocaList/MauiProgram.cs (modify — DI registration only)
+
+Review gate: if the diff includes a file not in this list, it is scope creep.
+Either the file belongs here (update the task format) or it does not (request changes).
+```
+
+---
+
+### 🆕 OPP-3-19: Continuous spec drift detection — spec-vs-code consistency check
+**Target:** `.claude/commands/review.md`
+**Action:** Add spec drift detection step to the review command
+**Source topic:** S3.3 — Verification / Review Gates (spec drift detection, continuous conformance)
+**Rationale:** S3.3 identifies spec drift as the silent killer: code that passes all tests but violates the original specification. The review command currently does not include a step to check if the spec version the code was implemented against still matches the current spec. In MyVocaList, when design.md is updated (e.g., a new validation rule added after early tasks completed), previously-reviewed tasks may now be non-conformant. Without a drift detection step in the review loop, this is never caught.
+**Suggested content/change:** Add to review.md:
+```
+## Spec Drift Detection (run on every feature review pass)
+- [ ] Check if requirements.md or design.md was updated since the last task was reviewed.
+      If yes, verify tasks completed before the spec update still conform to the new spec.
+- [ ] For each spec update in git log since last review, identify which tasks it affects.
+      If an affected task is already marked "To Review" or "Review task done", it may need re-review.
+- [ ] If a task was completed before a spec change that affects its behavior:
+      Mark it as needing re-verification. Do not silently accept it.
+
+Spec drift pattern: code is correct per the old spec; spec has since changed; code has not.
+This is invisible to automated tests (which test the code, not the spec history).
+```
+
+---
+
+### 🆕 OPP-3-20: PostCompact hook — spec re-anchor after context compaction
+**Target:** `.claude/settings.json`
+**Action:** Enhance the PostCompact hook to include spec file re-reads as a reminder
+**Source topic:** S3.2.2 — Context Window Exhaustion (spec drift risk after compaction), S3.2 — Implementation Phase ("spec is the oracle")
+**Rationale:** The current PostCompact hook in settings.json echoes non-negotiables (build, no DisplayAlert, DevExpress-first, etc.), but does not remind the agent to re-read spec files after context compaction. S3.2.2 documents that after compaction, spec details are summarized and pruned, making spec drift the primary risk. The hook is the only system-level trigger available to enforce spec re-reads after a compaction event. Adding a reminder to re-read the current feature's spec files would significantly reduce post-compaction drift.
+**Suggested content/change:** Update the PostCompact hook in `.claude/settings.json`:
+```
+"command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Spec → Plan → Implement → Review — never skip to implementation. (6) English only in code, comments, logs, UI text. (7) After every completed task: /project:review → /project:commit. (8) CONTEXT WAS COMPACTED — re-read the active feature spec files (requirements.md, design.md, tasks.md) before continuing. The spec is the oracle; do not rely on the compaction summary for spec details.'"
+```
