@@ -219,6 +219,26 @@ When a subagent's work reveals a discrepancy between the spec and the delivered 
    - After each implementation wave: review output before dispatching the next wave
    - At feature close-out: final review to confirm spec matches delivered behavior
 
+### Brownfield rule — spec new code only
+
+Existing code that predates the SDD workflow does not require retroactive spec creation. Writing specs for already-working code is waste.
+
+**Rule:** Write specs only for code you are about to write or significantly change. Do not spec code that is already in production and not being touched.
+
+### When to update specs (Spec-Anchored maintenance)
+
+Update a spec when:
+- A new requirement is added to an existing feature
+- A bug fix reveals a gap in the spec's error path coverage
+- A design decision changes during implementation (update before committing the code)
+- A review reveals spec/code divergence
+- A new constraint is discovered that affects behavior (add to Invariants section)
+
+Do NOT update a spec when:
+- Refactoring internal implementation details with no observable behavior change
+- Renaming variables or moving code within the same layer
+- Adding test coverage for already-specified behavior
+
 ### SDD decision table for medium-complexity tasks
 
 For tasks that don't fit cleanly into "small isolated" or "new feature," use this decision table:
