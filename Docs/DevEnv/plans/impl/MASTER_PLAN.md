@@ -65,33 +65,33 @@ One opportunity or small group per step. Sequential — same file.
 
 | Step | Description | OPPs | Status | Notes |
 |------|-------------|------|--------|-------|
-| P3-01 | Add SDD Invariant block (spec changes before code changes) | OPP-3-01, OPP-1-12 | Pending | |
-| P3-02 | Add phase-gate reviews to New Feature Workflow | OPP-1-13 | Pending | |
-| P3-03 | Add spec-update gate (after implementation, update spec) | OPP-1-2, OPP-2-6 | Pending | |
-| P3-04 | Add When-to-Skip-SDD guidance + spec bypass rule | OPP-1-6, OPP-10-01, OPP-10-02 | Pending | |
-| P3-05 | Add SDD decision table for medium-complexity tasks | OPP-10-10 | Pending | |
-| P3-06 | Add spec structure enhancements (Out of Scope, Domain Vocab, Invariants sections) | OPP-2-3, OPP-2-4, OPP-2-11 | Pending | |
-| P3-07 | Add Given/When/Then + EARS format guidance | OPP-1-8, OPP-2-2, OPP-2-16 | Pending | |
-| P3-08 | Add spec completeness checklist + quality four-gate | OPP-2-1, OPP-2-19, OPP-10-11 | Pending | |
-| P3-09 | Add spec size calibration + two-tier spec trigger | OPP-2-8, OPP-2-17 | Pending | |
-| P3-10 | Add tacit knowledge capture + LLM extraction technique | OPP-2-7, OPP-2-22 | Pending | |
-| P3-11 | Add functional/technical separation table with examples | OPP-2-10 | Pending | |
-| P3-12 | Add state machine + integration contract sections to design.md template | OPP-2-12, OPP-2-18 | Pending | |
-| P3-13 | Add demo statement requirement | OPP-2-14 | Pending | |
-| P3-14 | Add failure-mode analysis + regeneration test practice | OPP-2-13, OPP-2-15 | Pending | |
-| P3-15 | Add constitution check (step 2a) to New Feature Workflow | OPP-3-02 | Pending | |
-| P3-16 | Add spec quality gate (mandatory before implementation) | OPP-9-06 | Pending | |
-| P3-17 | Add spec versioning discipline | OPP-9-08 | Pending | |
-| P3-18 | Add brownfield rule + When to update specs | OPP-10-06, OPP-10-05 | Pending | |
-| P3-19 | Add bug fix pattern (commit message as spec) | OPP-10-07 | Pending | |
-| P3-20 | Add over-specification guard + spec length guideline | OPP-10-04 | Pending | |
-| P3-21 | Add capture architectural decisions rule | OPP-10-15 | Pending | |
-| P3-22 | Add discovery mode section | OPP-10-02 | Pending | |
-| P3-23 | Add spec-as-source-of-truth rule | OPP-6-07 | Pending | |
-| P3-24 | Add architecture reversibility documentation | OPP-3-09 | Pending | |
-| P3-25 | Add Key Decisions section to design.md template | OPP-4-4 | Pending | |
-| P3-26 | Add decision log as fourth optional spec file | OPP-9-19 | Pending | |
-| P3-27 | Add spec ownership constraint (subagents don't write specs) | OPP-10-08 | Pending | |
+| P3-01 | Add SDD Invariant block (spec changes before code changes) | OPP-3-01, OPP-1-12 | Done | |
+| P3-02 | Add phase-gate reviews to New Feature Workflow | OPP-1-13 | Done | |
+| P3-03 | Add spec-update gate (after implementation, update spec) | OPP-1-2, OPP-2-6 | Done | |
+| P3-04 | Add When-to-Skip-SDD guidance + spec bypass rule | OPP-1-6, OPP-10-01, OPP-10-02 | Done | |
+| P3-05 | Add SDD decision table for medium-complexity tasks | OPP-10-10 | Done | |
+| P3-06 | Add spec structure enhancements (Out of Scope, Domain Vocab, Invariants sections) | OPP-2-3, OPP-2-4, OPP-2-11 | Done | |
+| P3-07 | Add Given/When/Then + EARS format guidance | OPP-1-8, OPP-2-2, OPP-2-16 | Done | |
+| P3-08 | Add spec completeness checklist + quality four-gate | OPP-2-1, OPP-2-19, OPP-10-11 | Done | |
+| P3-09 | Add spec size calibration + two-tier spec trigger | OPP-2-8, OPP-2-17 | Done | |
+| P3-10 | Add tacit knowledge capture + LLM extraction technique | OPP-2-7, OPP-2-22 | Done | |
+| P3-11 | Add functional/technical separation table with examples | OPP-2-10 | Done | |
+| P3-12 | Add state machine + integration contract sections to design.md template | OPP-2-12, OPP-2-18 | Done | |
+| P3-13 | Add demo statement requirement | OPP-2-14 | Done | |
+| P3-14 | Add failure-mode analysis + regeneration test practice | OPP-2-13, OPP-2-15 | Done | |
+| P3-15 | Add constitution check (step 2a) to New Feature Workflow | OPP-3-02 | Done | |
+| P3-16 | Add spec quality gate (mandatory before implementation) | OPP-9-06 | Done | |
+| P3-17 | Add spec versioning discipline | OPP-9-08 | Done | |
+| P3-18 | Add brownfield rule + When to update specs | OPP-10-06, OPP-10-05 | Done | |
+| P3-19 | Add bug fix pattern (commit message as spec) | OPP-10-07 | Done | |
+| P3-20 | Add over-specification guard + spec length guideline | OPP-10-04 | Done | |
+| P3-21 | Add capture architectural decisions rule | OPP-10-15 | Done | |
+| P3-22 | Add discovery mode section | OPP-10-02 | Done | |
+| P3-23 | Add spec-as-source-of-truth rule | OPP-6-07 | Done | |
+| P3-24 | Add architecture reversibility documentation | OPP-3-09 | Done | |
+| P3-25 | Add Key Decisions section to design.md template | OPP-4-4 | Done | |
+| P3-26 | Add decision log as fourth optional spec file | OPP-9-19 | Done | |
+| P3-27 | Add spec ownership constraint (subagents don't write specs) | OPP-10-08 | Done | |
 
 ---
 
@@ -277,8 +277,8 @@ One opportunity or small group per step. Sequential — same file.
 | Phase | Steps | Done | In Progress | Pending |
 |-------|-------|------|-------------|---------|
 | Phase 1 — Status log files | 11 | 11 | 0 | 0 |
-| Phase 2 — New support files | 5 | 0 | 0 | 5 |
-| Phase 3 — workflow.md Rule 1 | 27 | 0 | 0 | 27 |
+| Phase 2 — New support files | 5 | 5 | 0 | 0 |
+| Phase 3 — workflow.md Rule 1 | 27 | 27 | 0 | 0 |
 | Phase 4 — workflow.md Rule 2 | 30 | 0 | 0 | 30 |
 | Phase 5 — workflow.md Rules 3–6 | 30 | 0 | 0 | 30 |
 | Phase 6 — settings.json | 4 | 0 | 0 | 4 |
