@@ -71,6 +71,21 @@ Use Given/When/Then for user-facing flows. Use EARS for background rules, constr
 - **Invariants & Postconditions** — system invariants that must hold after every operation (e.g. "Queue always has at least one active singer", "Round number is monotonically increasing")
 - **Key Decisions** — see Key Decisions section below
 
+### Tacit knowledge capture
+
+Specs only capture what people consciously describe. Tacit knowledge — "of course it works that way" assumptions — is the primary source of spec gaps.
+
+**Protocol:** When writing a spec, explicitly ask these questions before finalizing:
+1. What would break if a new developer implemented this from scratch using only the spec?
+2. What do I know about this feature that isn't written down yet?
+3. What edge cases have I seen in similar features in this codebase?
+4. What integrations or dependencies are assumed but not stated?
+
+**LLM-assisted extraction technique:** After drafting a spec, prompt Claude with:
+> "What assumptions are implicit in this spec that a developer would need to know but aren't written here? What edge cases are unaddressed?"
+
+Review Claude's output and add any valid tacit knowledge to the spec before implementation starts. This technique surfaces hidden constraints before they become bugs.
+
 ### Spec size calibration
 
 Spec size should match task complexity. Over-speccing small tasks wastes time; under-speccing large tasks causes rework.
