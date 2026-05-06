@@ -183,3 +183,5 @@ Docs/DevEnv/plans/impl/MASTER_PLAN.md
 Docs/DevEnv/plans/impl/MASTER_PLAN.md
 Docs/DevEnv/plans/impl/MASTER_PLAN.md
 Docs/DevEnv/plans/impl/MASTER_PLAN.md
+Docs/DevEnv/.claude-temp/rules/code-principles.md
+Docs/DevEnv/plans/impl/MASTER_PLAN.md
