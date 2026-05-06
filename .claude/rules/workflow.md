@@ -71,6 +71,10 @@ Use Given/When/Then for user-facing flows. Use EARS for background rules, constr
 - **Invariants & Postconditions** — system invariants that must hold after every operation (e.g. "Queue always has at least one active singer", "Round number is monotonically increasing")
 - **Key Decisions** — see Key Decisions section below
 
+#### design.md — optional but recommended sections (for complex features)
+- **State machine** — if the feature introduces entity state transitions, document the full state diagram: states, transitions, triggering events, guards. Example: `QueueEntry` states: `Waiting → Singing → Done | Absent`. Without this, subagents invent their own state models.
+- **Integration contracts** — if the feature calls external systems (APIs, MCPs, platform services), document the request/response contracts, error modes, and retry behavior. Never leave integration assumptions implicit.
+
 ### Functional vs technical separation
 
 `requirements.md` and `design.md` serve different audiences and must not be mixed.
