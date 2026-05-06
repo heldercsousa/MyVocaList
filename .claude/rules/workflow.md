@@ -849,6 +849,28 @@ Tasks without a plan association are logged to `Docs/superpowers/plans/unassigne
 - Spec compliance: [confirmed — [spec file] section checked / divergence noted: [one line]]
 ```
 
+### Acceptance criteria traceability matrix
+
+For tasks that implement user-facing behavior, the task-log entry must include an **AC traceability matrix** — a table linking each acceptance criterion from `requirements.md` to the implementation evidence.
+
+**Format (add to task-log entry when status is `To Review`):**
+```
+### AC traceability
+| AC ref | Criterion (short) | Implementation evidence |
+|--------|-------------------|------------------------|
+| AC-1 | Singer added appears in queue | VenueService.AddSingerAsync returns (true, ...) |
+| AC-2 | Duplicate name rejected | ValidateNameInput returns (false, "already exists") |
+| AC-3 | Queue order preserved after add | GetQueueOrderedAsync tested in QueueRepositoryTests |
+```
+
+**Rules:**
+- Every AC in the spec that is addressed by this task must appear in the matrix.
+- "Implementation evidence" must be a specific code location, not a vague claim ("it works").
+- If an AC was not implemented (out of scope for this task), mark it `deferred — task [X]`.
+- ACs with no evidence entry will be flagged during review as unverified.
+
+**When to skip:** Tasks with no user-facing acceptance criteria (e.g., pure refactors, config changes, documentation updates) do not require a traceability matrix.
+
 ### Task statuses
 | Status | Meaning |
 |--------|---------|
