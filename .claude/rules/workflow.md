@@ -71,6 +71,20 @@ Use Given/When/Then for user-facing flows. Use EARS for background rules, constr
 - **Invariants & Postconditions** — system invariants that must hold after every operation (e.g. "Queue always has at least one active singer", "Round number is monotonically increasing")
 - **Key Decisions** — see Key Decisions section below
 
+### Spec size calibration
+
+Spec size should match task complexity. Over-speccing small tasks wastes time; under-speccing large tasks causes rework.
+
+| Task size | Estimated effort | Spec size target |
+|-----------|-----------------|-----------------|
+| Tiny | < 30 min | Commit message only |
+| Small | 30 min – 2 hours | `tasks.md` + inline notes |
+| Medium | 2 – 8 hours | All three files, concise |
+| Large | 1 – 3 days | All three files, full detail |
+| Epic | > 3 days | Split into sub-features; spec each separately |
+
+**Two-tier spec trigger:** Any task estimated at > 2 hours OR touching ≥ 2 layers automatically requires a full three-file spec. No exceptions.
+
 ### Spec completeness checklist (run before implementation starts)
 
 Before dispatching any subagent to implement a spec, verify:
