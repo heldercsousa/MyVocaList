@@ -1130,6 +1130,28 @@ The task list is the audit trail for the feature — keep it accurate.
 
 **Parallel exception:** Tasks marked `[P]` (independent, different files/layers) may be dispatched simultaneously as a wave per Rule 2. All tasks in a wave must complete and commit before the next wave begins.
 
+### In-progress marker — [~] for claimed tasks
+
+When a subagent is dispatched to work on a task, the main agent must update that task's checkbox to `[~]` to signal it is claimed:
+
+```markdown
+- [~] **Implement ISingerService** [SEQUENTIAL]  ← claimed — do not reassign
+- [ ] **Implement SingersViewModel** [P]          ← available
+- [x] **Define SingerEntry entity**               ← done
+```
+
+**Marker meanings:**
+| Marker | Meaning |
+|--------|---------|
+| `[ ]` | Available — not started |
+| `[~]` | In progress — claimed by a dispatched subagent |
+| `[x]` | Done — committed |
+| `[CANCELLED: reason]` | Removed from scope |
+
+**Rule:** The `[~]` marker prevents two subagents from being accidentally dispatched to the same task in parallel. The main agent must set it before dispatching and clear it (to `[x]`) when the subagent commits.
+
+**Rule:** Never dispatch a task marked `[~]`. If a subagent was killed without completing a `[~]` task, reset it to `[ ]` before re-dispatching.
+
 ### Task atomization checklist
 
 A task is **atomic** if it can be completed by a single subagent within one context window without requiring the subagent to hold pending decisions about other in-flight tasks.
