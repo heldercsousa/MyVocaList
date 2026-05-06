@@ -499,6 +499,34 @@ These must be fixed when the test project is created. Do NOT create tests until 
 
 ---
 
+## Test Quality Audit Checklist
+
+Run this checklist during code review for any test file. A test that fails one or more items must be fixed before the feature is marked `To Review`.
+
+### For each test method
+
+- [ ] **Name follows convention** — `{Method}_{Context}_{Expected}` with all three parts present
+- [ ] **Has a Red phase** — the test was seen failing before the implementation that makes it pass was written (or Tester/Builder split was used)
+- [ ] **Single behavioral assertion** — the test asserts one outcome; related asserts for the same outcome are permitted, but unrelated behaviors must be in separate tests
+- [ ] **AC tag present** — user-facing behavior tests carry an `// [AC] REQ-XXX-YY` comment
+- [ ] **AC exists in spec** — the referenced AC ID is present in `requirements.md`
+- [ ] **No `Thread.Sleep`** — async timing uses `await Task.Delay` or `TaskCompletionSource`
+- [ ] **No private-state assertions** — only public interface is tested
+- [ ] **Arrange/Act/Assert** structure is visible — blank lines separate the three phases
+
+### For each test class
+
+- [ ] **No shared mutable state** between tests — each `[Fact]` is independent
+- [ ] **Repository tests use real SQLite** — no in-memory EF provider
+- [ ] **Service tests use Moq** — no real repositories, no real DB
+- [ ] **Traceability matrix exists** in task-log for user-facing feature tests
+
+### Audit frequency
+
+- Before setting a task to `To Review` in the task-log
+- During `/project:review` if test files were changed
+
+---
 ## Builder Must Not Modify Tests
 
 During the Green phase, the Builder's only permitted action is writing or modifying **production code** in `MyVocaList.Domain`, `MyVocaList.Services`, `MyVocaList.Infra`, or `MyVocaList` (MAUI).
