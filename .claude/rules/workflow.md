@@ -302,6 +302,37 @@ When a subagent's work reveals a discrepancy between the spec and the delivered 
    - After each implementation wave: review output before dispatching the next wave
    - At feature close-out: final review to confirm spec matches delivered behavior
 
+### Spike validation task pattern
+
+A **spike** is a time-boxed exploration task used when the right implementation approach is genuinely unknown. Spikes produce a findings artifact, not production code.
+
+**When to use a spike:**
+- A library integration has never been used in this codebase and its behavior is uncertain
+- Two valid approaches exist and the trade-offs cannot be evaluated without trying both
+- An external API or MCP must be called and the response shape is unknown
+- A performance concern exists but its magnitude is unquantified
+
+**Spike task format in `tasks.md`:**
+```markdown
+- [ ] **[SPIKE] Validate [approach/library/integration]**
+  - Time-box: [30 min | 60 min | 2 hours — hard stop]
+  - Question: [one sentence: what must the spike answer?]
+  - Success criterion: [what finding would confirm the approach is viable?]
+  - Failure criterion: [what finding would reject the approach?]
+  - Artifact: `Docs/specs/[feature]/findings.md` (see findings.md section)
+  - Files owned: throwaway only — no production code created or modified
+  - Demo: N/A (spike produces findings, not user-facing behavior)
+```
+
+**Spike rules:**
+1. Spike code is throwaway — no production files may be edited
+2. The time-box is a hard stop — results are what they are; the spike does not extend
+3. If the spike's success criterion is met: proceed to spec writing using findings
+4. If the spike's failure criterion is met: escalate to Helder for approach decision; do not unilaterally choose an alternative
+5. A spike that ends without clear findings (neither success nor failure) must be documented as `inconclusive` with a recommendation for next steps
+
+**After the spike:** The main agent reads `findings.md` and updates the spec before any implementation tasks are dispatched. Spike findings must not be held in subagent context — they must be in the spec.
+
 ### Discovery mode
 
 When the right solution is unknown and exploration is needed before committing to a spec, use **discovery mode**:
