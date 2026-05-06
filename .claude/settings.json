@@ -35,6 +35,16 @@
         ]
       }
     ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import os,json; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); settings=os.path.join(proj,'.claude','settings.json'); data=json.load(open(settings,encoding='utf-8')); hooks=data.get('hooks',{}); expected=['TaskCreated','PreToolUse','PostToolUse','PostCompact','TaskCompleted','Stop','SessionStart']; missing=[h for h in expected if h not in hooks]; print('HOOK HEALTH OK — all expected hooks present.') if not missing else print('HOOK HEALTH WARNING — missing hooks: '+', '.join(missing)+'. Review .claude/settings.json before proceeding.')\" 2>/dev/null || echo 'HOOK HEALTH CHECK — could not verify hooks (settings.json unreadable or Python unavailable).'"
+          }
+        ]
+      }
+    ],
     "PostCompact": [
       {
         "hooks": [
