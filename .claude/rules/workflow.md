@@ -652,6 +652,51 @@ public record VenueListItemDto(int Id, string Name, int SingerCount);
 
 This eliminates the "I assumed the interface looked like X" class of integration bugs between waves.
 
+### Thick-slice task format for briefings
+
+A **thick-slice task** is a briefing structure that gives the subagent a vertical slice through all layers needed to deliver one complete user-observable outcome. Use this format when a task spans multiple layers but must be handled by a single subagent (because the layers are tightly coupled and cannot be safely parallelized).
+
+**Thick-slice briefing template:**
+```markdown
+## Task: [title]
+
+### Outcome
+[One sentence: what the user can do when this is complete]
+
+### Demo statement
+[Exact demo statement from tasks.md]
+
+### Layers to implement (in this order)
+1. Domain: [entity or interface change — file path]
+2. Infra: [migration or repository change — file path]
+3. Services: [service method — file path]
+4. ViewModel: [ViewModel change — file path]
+5. UI: [XAML change — file path]
+
+### Acceptance criteria to satisfy
+- AC-1: [criterion from requirements.md]
+- AC-2: [criterion from requirements.md]
+
+### Spec source
+- requirements.md: [path]
+- design.md: [path]
+
+### Files owned (exhaustive list)
+[Every file the subagent may create or edit]
+
+### Files off-limits
+[Every file the subagent must NOT touch]
+```
+
+**When to use thick-slice format:**
+- The task delivers one user story end-to-end (e.g., "Add singer to queue" — requires Domain + Infra + Service + ViewModel + UI)
+- The layers are so tightly coupled that parallelizing them would require more coordination than implementing sequentially
+- The total scope fits within sizing limits (≤ 5 files, ≤ 2 hours)
+
+**When NOT to use thick-slice format:**
+- The task is pure back-end (no UI) → thin slice with onion ordering is more appropriate
+- The task spans more than 5 files → decompose further; thick-slice does not override sizing limits
+
 ### How to brief a subagent
 Give it: the spec file paths, the tasks to complete, the rules files to read (paths only), and the
 constraint that it must build and fix errors before returning.
