@@ -1006,6 +1006,32 @@ After a wave completes and post-wave verification passes, the main agent must pr
 
 **Why:** The gap between "what was planned" and "what was built" grows with every wave. A discovery brief closes that gap before it propagates into the next briefing. Without it, the main agent briefs Wave 2 as if Wave 1 produced exactly what was designed — which it rarely does.
 
+### Multi-wave checkpoint pattern
+
+For features that span 3 or more waves, the main agent must perform a **multi-wave checkpoint** after every second wave. This prevents progressive spec drift from compounding undetected.
+
+**Multi-wave checkpoint protocol:**
+
+1. **Read the spec fresh** — re-read `requirements.md` and `design.md` as if for the first time
+2. **Compare against committed code** — for each acceptance criterion, confirm the current implementation satisfies it (even partially)
+3. **Check for drift indicators:**
+   - Are there committed changes that do not map to any acceptance criterion?
+   - Are there acceptance criteria with no committed implementation yet that should be done?
+   - Do interface signatures in the code match the signatures in `design.md`?
+4. **Produce a checkpoint note** in the task-log:
+   ```
+   ## Wave N/N+1 Checkpoint
+   - Criteria satisfied: AC-1 ✓, AC-2 ✓, AC-3 partial
+   - Drift detected: [none | description]
+   - Spec update needed: [yes — file + section | no]
+   - Next wave: proceed | pause for spec fix
+   ```
+5. If drift is detected: fix the spec before dispatching the next wave
+
+**Why every second wave?** After one wave, drift is localized and easy to fix. After three waves without a checkpoint, drift accumulates across multiple subagents and is expensive to reconcile. Every second wave is the practical breakpoint — frequent enough to catch problems early, infrequent enough to not create overhead.
+
+**Special case — large parallel waves:** If a single wave has 4 subagents, treat the completion of that wave as a mandatory checkpoint regardless of wave number.
+
 ### Post-wave verification — main agent runs build independently
 
 After every wave completes, the main agent must run the build and tests independently — not rely on the subagent's self-reported verification.
