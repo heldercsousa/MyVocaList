@@ -32,6 +32,16 @@ No exceptions. Code written without reading the spec is code that may contradict
 | `design.md` | Architecture, interfaces, page structure, interaction flows, key decisions |
 | `tasks.md` | Ordered checkboxed tasks — check off as each completes |
 
+### Spec-update gate — after implementation
+
+When a subagent's work reveals a discrepancy between the spec and the delivered code (even a "minor" one), the following must happen before the task is marked `To Review`:
+
+1. Update `requirements.md` or `design.md` to reflect what was actually built.
+2. Note the change in the task-log as `Spec updated — re-planning required` if it affects subsequent tasks.
+3. Never leave the spec stale at the end of a task. A stale spec is technical debt that compounds with every subsequent wave.
+
+> **Staleness prevention:** Every implementation task must end with a brief spec-review question: "Does the spec still accurately describe what was built?" If the answer is no, fix the spec before committing.
+
 ### New feature workflow
 1. **Brainstorm** — invoke `superpowers:brainstorming`
 2. **Write spec** — write all three files; user reviews and approves
