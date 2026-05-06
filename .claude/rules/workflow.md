@@ -542,6 +542,28 @@ Before briefing ANY subagent, the main agent must read (in its own context):
 
 This prevents the most common drift source: a subagent receiving a stale or incomplete briefing because the orchestrator relied on earlier-session memory that was compacted or lost.
 
+### Spec gap escalation — documentation requirement
+
+When a subagent encounters a spec gap (an ambiguity, missing acceptance criterion, or contradictory requirement), it must document the gap with enough detail for Helder to make a decision.
+
+**Required documentation format (in the task-log):**
+```
+### Spec gap: [short title]
+**Location:** [spec file + section where the gap was found]
+**Gap description:** [one sentence: what is missing or ambiguous]
+**Options:**
+- Option A: [description] — [consequence]
+- Option B: [description] — [consequence]
+**Recommendation:** Option [A/B] because [one sentence rationale]
+**Blocking:** [Yes — cannot proceed without resolution / No — proceeding with Option A as documented assumption]
+```
+
+**Rules:**
+- The subagent must NOT choose between options unilaterally (unless marking it as an assumption with `Blocking: No`).
+- If `Blocking: Yes`, set task-log status to `blocked: spec gap` and stop.
+- If `Blocking: No`, proceed with the documented assumption and flag it clearly. The assumption will be reviewed at the `To Review` stage.
+- Never silently resolve a spec gap. Silence is not consensus.
+
 ### Subagent scope constraint — no unilateral redesign
 
 Subagents implement what the spec says. They do not redesign, refactor beyond task scope, or make architectural decisions.
