@@ -1174,6 +1174,41 @@ For every acceptance criterion the task was supposed to satisfy: confirm it is s
 
 ---
 
+## Rule 2b — Review SLA and Risk-Tiered Review Lanes
+
+Not all tasks require the same depth of review. Use the risk-tiered review lanes to focus attention on tasks where errors are most costly.
+
+### Review lanes
+
+| Lane | Trigger | Review depth | SLA |
+|------|---------|--------------|-----|
+| **Standard** | Single-layer change, no shared interfaces, no schema changes | Spot-check AC traceability + build pass | Same session |
+| **Elevated** | Multi-layer change, new service/repository method, UI change affecting navigation | Full AC review + E2E emulator check + spec drift check | Within 2 sessions |
+| **Architectural** | New public interface, schema migration, changes to MauiProgram.cs, changes to shared contracts | Full review by Helder + Adversarial Critic pass + Verifier subagent | Must be reviewed before next wave starts |
+
+### How to classify a task's review lane
+
+Default is **Standard**. Escalate to **Elevated** if ANY of these are true:
+- Task touches ≥ 2 architectural layers
+- Task adds or modifies a ViewModel command
+- Task adds or modifies a navigation route
+- Task modifies a page's data loading behavior
+
+Escalate to **Architectural** if ANY of these are true:
+- Task creates or modifies a domain interface or DTO record
+- Task adds an EF Core migration
+- Task changes DI registrations in `MauiProgram.cs`
+- Task modifies `AppShell.xaml` or `AppShell.xaml.cs`
+- Task changes a method signature that has existing consumers
+
+**Rule:** Architectural-lane tasks must not be merged into the main work queue as if they are Standard. They require explicit acknowledgment by the main agent before the next wave is dispatched.
+
+### Review SLA enforcement
+
+- **Standard tasks** can be committed and the next task dispatched immediately
+- **Elevated tasks** require the main agent to run `dotnet build` + `dotnet test` + E2E check before the next wave
+- **Architectural tasks** require Helder review before the next wave — set a `blocked: awaiting Helder review` status in the task-log until approved
+
 ## Rule 3a — Session-End Spec Update Ritual
 
 Before ending any session in which implementation occurred, perform the **session-end spec update ritual**:
