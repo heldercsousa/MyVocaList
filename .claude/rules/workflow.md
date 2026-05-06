@@ -278,6 +278,23 @@ For tasks that don't fit cleanly into "small isolated" or "new feature," use thi
 
 When uncertain: start with a two-sentence design note in the task-log. If it grows beyond 5 lines, promote it to `design.md`.
 
+### Over-specification guard
+
+A spec that is too long is as harmful as one that is too short. Over-specified specs:
+- Take longer to maintain than to implement
+- Constrain implementation details that should be left to the developer's judgment
+- Become stale faster because they describe the how, not the what
+
+**Thin spec standard:** A good spec specifies outcomes, not implementations.
+
+| Over-specified (avoid) | Thin (prefer) |
+|------------------------|---------------|
+| "The VenueRepository will use a LEFT JOIN with parameterized WHERE clause" | "Venues are searchable by name (case-insensitive)" |
+| "The ViewModel will call `ReplaceRange` in a `RunOnUiThread` block" | "The list updates immediately after a venue is added" |
+| "The button will have a 48dp minimum touch target" | "All touch targets meet platform UX standards" |
+
+**Spec length guideline:** `requirements.md` should not exceed 2 pages. `design.md` should not exceed 3 pages. If you find yourself writing more, split the feature into sub-features.
+
 ### When to skip SDD (spec bypass rule)
 
 Not every change requires a full three-file spec. Use this table:
