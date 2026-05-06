@@ -4,6 +4,46 @@
 
 ---
 
+## Hook Enforcement Notes
+
+The hooks in `.claude/settings.json` enforce specific rules from this document. Understanding which rules are hook-enforced and which are self-enforced helps prioritize compliance.
+
+### Hook-enforced rules (automatic warnings or blocks)
+
+| Hook | Trigger | Rule enforced |
+|------|---------|---------------|
+| `Stop` hook | Session ends with uncommitted changes | Rule 3 — Commit After Every Task |
+| `PostCompact` hook | Context compaction event | Session resume — re-read spec reminder |
+| `PostToolUse` hook (Services files) | Edit to a Services/*.cs file | testing.md — TDD reminder for service changes |
+| `SessionStart` hook | New session begins | Hook health verification |
+
+### Self-enforced rules (no hook — agent must apply consciously)
+
+The following rules have no hook enforcement and rely on agent discipline:
+
+- Pre-dispatch validation checklist (P5-11)
+- DRY Onion task ordering (P5-05)
+- Single-writer rule for hotspot files (P5-10)
+- Spec freshness gate before dispatching a wave
+- Multi-wave checkpoint every second wave (P5-15)
+- Session-end spec update ritual (Rule 3a)
+- AC traceability matrix in task-log (Rule 5)
+- E2E emulator gate before To Review (P5-02)
+
+**Why this distinction matters:** Hook-enforced rules are guaranteed to fire. Self-enforced rules depend on the agent's attention. For high-risk workflows, treat self-enforced rules as if they were hooks — apply them every time, not "when you remember."
+
+### Hook health verification
+
+At the start of each session, verify that hooks are operational:
+
+1. Check that `.claude/settings.json` exists and is valid JSON
+2. Confirm the `Stop` hook is present and references the correct script
+3. If a hook is misconfigured: fix it before dispatching any subagent
+
+**Rule:** A session run without functioning hooks is a session where the guardrails are down. Fix hooks before coding — do not defer hook repairs to "later."
+
+---
+
 ## SDD Invariant
 
 > **Spec changes before code changes.**
