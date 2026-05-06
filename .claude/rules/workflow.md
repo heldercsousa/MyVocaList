@@ -122,6 +122,24 @@ Spec size should match task complexity. Over-speccing small tasks wastes time; u
 
 **Two-tier spec trigger:** Any task estimated at > 2 hours OR touching ≥ 2 layers automatically requires a full three-file spec. No exceptions.
 
+### Failure-mode analysis
+
+Before finalizing a spec, perform a brief failure-mode analysis:
+
+1. **For each acceptance criterion:** What happens if the operation fails? Is the failure mode documented in the spec?
+2. **For each integration point:** What happens if the external system is unavailable or returns an error?
+3. **For each state transition:** What happens if the transition is attempted from an invalid state?
+
+Failure modes that are not in the spec will be handled inconsistently by subagents. Document them explicitly.
+
+### Regeneration test practice
+
+After a feature spec is complete, validate it using the **regeneration test**:
+
+> Give the spec (without the existing implementation) to a fresh Claude session and ask it to implement the feature. If the output contradicts your intended design in more than 2 places, the spec has gaps. Fix the spec — do not patch the implementation.
+
+This is a lightweight quality diagnostic, not a required step for every feature. Apply it when a spec feels ambiguous or when a previous implementation diverged from intent.
+
 ### Demo statement requirement
 
 Every task in `tasks.md` that touches user-facing behavior must include a **demo statement**: a one-sentence description of what a human observer would see when the task is complete.
