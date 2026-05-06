@@ -600,6 +600,26 @@ This eliminates the "I assumed the interface looked like X" class of integration
 Give it: the spec file paths, the tasks to complete, the rules files to read (paths only), and the
 constraint that it must build and fix errors before returning.
 
+### Adversarial Critic pattern
+
+For high-risk waves (new public interfaces, schema changes, significant business logic), the main agent should apply the **Adversarial Critic** pattern before dispatching:
+
+**Protocol:**
+1. After reading the spec and drafting the briefing, the main agent internally challenges its own plan by asking:
+   - "What is the most likely way a subagent will misinterpret this briefing?"
+   - "What spec ambiguity could cause the subagent to make a wrong choice?"
+   - "Which acceptance criterion is vaguest and most likely to be implemented incorrectly?"
+   - "What would break if the subagent implements the happy path only and ignores error handling?"
+
+2. For each identified risk, the main agent either:
+   - **Tightens the briefing** — add explicit instruction to address the ambiguity
+   - **Tightens the spec** — update the spec with the missing detail before dispatching
+   - **Flags it to Helder** — if the risk requires an architectural decision
+
+3. A briefing that passes Adversarial Critic review should have no ambiguities that a subagent could resolve incorrectly without violating the spec.
+
+**Why:** Subagents implement what they are told, not what was meant. The Adversarial Critic forces the orchestrator to find the gap between intent and instruction before it becomes a bug.
+
 ### Verifier subagent
 
 After a wave completes and before the main agent proceeds to the next wave, a **Verifier subagent** may be dispatched to independently validate the wave's output.
