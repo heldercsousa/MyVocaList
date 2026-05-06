@@ -202,7 +202,7 @@ One opportunity or small group per step. Sequential — same file.
 
 | Step | Description | OPPs | Status | Notes |
 |------|-------------|------|--------|-------|
-| P8-01 | Add determinism rule for quality attributes | OPP-2-21 | Pending | |
+| P8-01 | Add determinism rule for quality attributes | OPP-2-21 | In Progress | |
 | P8-02 | Add suppression justification policy | OPP-6-16 | Pending | |
 
 ---
