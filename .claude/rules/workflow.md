@@ -63,6 +63,19 @@ Use Given/When/Then for user-facing flows. Use EARS for background rules, constr
 - **Out of Scope** — explicit list of what this feature does NOT do; prevents scope creep during implementation
 - **Domain Vocabulary** — define every domain term used in the spec (e.g. "Round", "Queue Entry", "Absence"). All stakeholders and agents must use these exact terms — no synonyms.
 
+### Capture architectural decisions in design.md
+
+**Architectural decisions belong in `design.md`, not in code comments.**
+
+When a significant design choice is made — "why did we pick approach A over B?" — document it in the **Key Decisions** section of `design.md`. Code comments are for explaining what code does; `design.md` is for explaining why the design is structured the way it is.
+
+**What counts as an architectural decision:**
+- Choosing between two valid approaches (e.g., "we store queue position as an integer ordinal rather than a linked list because...")
+- Accepting a known limitation (e.g., "we do not support concurrent queue edits because the MVP scope is single-admin")
+- A trade-off that affects future extensibility (e.g., "this schema does not support multi-venue queues yet")
+
+If an architectural decision is only in a developer's head or in a Slack message, it will be reinvented — incorrectly — the next time someone touches that area.
+
 #### design.md — mandatory sections
 - **Architecture** — which layers are affected, how they interact
 - **Interfaces** — new or modified service/repository interfaces with signatures
