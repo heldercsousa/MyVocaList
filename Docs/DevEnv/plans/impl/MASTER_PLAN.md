@@ -173,10 +173,10 @@ One opportunity or small group per step. Sequential — same file.
 
 | Step | Description | OPPs | Status | Notes |
 |------|-------------|------|--------|-------|
-| P6-01 | Update PostCompact hook — add spec re-read reminder | OPP-3-20 | Pending | |
-| P6-02 | Add SessionStart hook for hook health verification | OPP-6-13 | Pending | |
-| P6-03 | Add PostToolUse hook for Services file TDD reminder | OPP-7-18 | Pending | |
-| P6-04 | Add deny rules for CLAUDE.md and rules files | OPP-4-10 | Pending | |
+| P6-01 | Update PostCompact hook — add spec re-read reminder | OPP-3-20 | Done | |
+| P6-02 | Add SessionStart hook for hook health verification | OPP-6-13 | Done | |
+| P6-03 | Add PostToolUse hook for Services file TDD reminder | OPP-7-18 | Done | |
+| P6-04 | Add deny rules for CLAUDE.md and rules files | OPP-4-10 | Done | |
 
 > Note: OPP-6-14 (phase-gate hook for spec approval flag) deferred — requires `.claude/approvals/` infrastructure that adds complexity beyond current scope.
 
@@ -281,7 +281,7 @@ One opportunity or small group per step. Sequential — same file.
 | Phase 3 — workflow.md Rule 1 | 27 | 27 | 0 | 0 |
 | Phase 4 — workflow.md Rule 2 | 30 | 30 | 0 | 0 |
 | Phase 5 — workflow.md Rules 3–6 | 30 | 30 | 0 | 0 |
-| Phase 6 — settings.json | 4 | 0 | 0 | 4 |
+| Phase 6 — settings.json | 4 | 4 | 0 | 0 |
 | Phase 7 — testing.md | 9 | 0 | 0 | 9 |
 | Phase 8 — code-principles.md | 2 | 0 | 0 | 2 |
 | Phase 9 — CLAUDE.md | 28 | 0 | 0 | 28 |
