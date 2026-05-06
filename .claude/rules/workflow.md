@@ -232,6 +232,22 @@ When a subagent's work reveals a discrepancy between the spec and the delivered 
    - After each implementation wave: review output before dispatching the next wave
    - At feature close-out: final review to confirm spec matches delivered behavior
 
+### Discovery mode
+
+When the right solution is unknown and exploration is needed before committing to a spec, use **discovery mode**:
+
+1. **Create a spike task** in `tasks.md` with the prefix `[SPIKE]`.
+2. Work freely — write throwaway code, try approaches, read docs.
+3. At the end of the spike, create `Docs/specs/[feature]/findings.md` documenting:
+   - What was tried
+   - What worked and what didn't
+   - Recommended approach with rationale
+   - Known constraints or risks discovered
+4. Delete all throwaway code before transitioning to spec-first implementation.
+5. Write the spec based on findings — do not skip spec-writing because "we already know the solution."
+
+**Discovery mode is not an excuse to skip the spec.** It is a structured path to a better spec.
+
 ### Bug fix pattern — commit message as spec
 
 Bug fixes do not require a three-file spec. The commit message IS the specification.
