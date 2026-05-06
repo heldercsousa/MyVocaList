@@ -1609,6 +1609,31 @@ Read in this order — do not skip items, do not resume from memory alone:
 
 **Rule:** Steps 1–7 are mandatory. Skipping any step means the session starts with an incomplete picture of the current state. Steps 4–7 may be scoped to the specific feature being worked on if multiple features are in flight.
 
+### Tiered memory governance
+
+Memory in this workflow is tiered by durability and scope. Each tier has a different owner, a different lifecycle, and a different read obligation.
+
+| Tier | File | Owner | Lifecycle | Read obligation |
+|------|------|-------|-----------|-----------------|
+| **Constitutional** | `CLAUDE.md`, `.claude/rules/*.md` | Helder | Permanent — amended only by Helder | Read on setup and after any amendment |
+| **Architectural** | `Docs/specs/[feature]/design.md`, `Key Decisions` | Helder | Feature lifetime | Read at session start for features being worked on |
+| **Operational** | `Docs/specs/[feature]/tasks.md`, task-log | Main agent | Feature lifetime | Read at every session start |
+| **Session** | `ACTIVE-CONSIDERATIONS.md`, `session-handoff.md` | Main agent | Single session or single handoff | Read at session start; update continuously |
+| **Ephemeral** | In-context notes, subagent briefing state | Subagent | Context window only | Not persisted — must be written to a durable tier before session ends |
+
+**Governance rules:**
+1. **Constitutional tier** — never modify without explicit approval from Helder. Any agent that edits `CLAUDE.md` or a rules file without authorization has violated the governance model.
+2. **Architectural tier** — subagents may add a `> **Spec updated:**` note but cannot rewrite or delete content.
+3. **Operational tier** — main agent maintains. Subagents update task-log status and Changed files entries only.
+4. **Session tier** — main agent creates and maintains. Written to disk before session ends (never left as ephemeral).
+5. **Ephemeral tier** — no item should remain ephemeral if it needs to survive past the current session. If it matters, write it to the Operational or Session tier before stopping.
+
+**Promotion rule:** When a constraint, decision, or discovery is discovered during implementation and needs to be remembered:
+- Temporary reminder → `ACTIVE-CONSIDERATIONS.md` (Session tier)
+- Recurring constraint → `constraints-registry.md` (Constitutional tier)
+- Design decision → `design.md` Key Decisions (Architectural tier)
+- Task outcome → task-log (Operational tier)
+
 ### Session start constraint capture
 
 After reading steps 1–7, before dispatching the first wave, record any newly discovered constraints or decisions from the previous session that have NOT yet been committed to their permanent home:
