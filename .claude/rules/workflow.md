@@ -542,6 +542,25 @@ Before briefing ANY subagent, the main agent must read (in its own context):
 
 This prevents the most common drift source: a subagent receiving a stale or incomplete briefing because the orchestrator relied on earlier-session memory that was compacted or lost.
 
+### Subagent scope constraint — no unilateral redesign
+
+Subagents implement what the spec says. They do not redesign, refactor beyond task scope, or make architectural decisions.
+
+**Specifically, subagents must NOT:**
+- Change an interface signature that is not part of their assigned task
+- Introduce a new abstraction layer not described in `design.md`
+- Move logic between layers (e.g., from Service to ViewModel) without spec authorization
+- Add new repository methods beyond what the spec's interface section defines
+- Rename entities, DTOs, or methods to names that differ from the spec
+- "Improve" a design they disagree with — they must implement it and note the concern in the task-log
+
+**If a subagent believes the spec is wrong or suboptimal:**
+1. Note the concern in the task-log under a `### Design concern` section
+2. Implement exactly what the spec says
+3. Set status to `To Review` and let Helder evaluate the concern during review
+
+**Why:** A subagent that redesigns while implementing introduces changes that were not reviewed, not approved, and not traced to any acceptance criterion. These changes are invisible until something breaks.
+
 ### Subagent return protocol — status signal only
 Subagents communicate completion **only** by:
 1. Updating the task-log beside the plan file (see Rule 5) with the task status:
