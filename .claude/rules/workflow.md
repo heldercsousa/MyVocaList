@@ -670,6 +670,21 @@ Your tasks:
 
 See `.claude/agents/verifier.md` for the full Verifier agent definition.
 
+### Context reset discipline for orchestrator
+
+The orchestrator (main agent) accumulates context across waves. After many waves, earlier decisions may be compacted or lost. Treat each wave boundary as a potential context reset point.
+
+**Context reset discipline:**
+
+1. **Before dispatching each wave:** Re-read the spec (requirements.md + design.md) fresh — do not rely on in-context memory of earlier reads.
+2. **Before briefing:** Confirm the spec paths in the briefing are current (not pointing to a stale version).
+3. **After context compaction** (when Claude signals the context is being compressed): re-read MASTER_PLAN.md and the current tasks.md to re-establish ground truth. Do not continue from memory.
+4. **Session resume:** Always start a new session by reading MASTER_PLAN.md → the current spec → the task-log. Never resume from memory alone.
+
+**Warning sign:** If you find yourself writing a briefing without having just read the spec, stop. The spec drift you introduce in the briefing will become implementation drift.
+
+**Rule:** The orchestrator's job is to hold the spec as the source of truth and inject it correctly into every wave. That job cannot be done from cached memory — it requires fresh reads at each wave boundary.
+
 ### Wave completion discovery briefs
 
 After a wave completes and post-wave verification passes, the main agent must produce a **discovery brief** before dispatching the next wave. This brief documents what was actually built versus what was planned, so the next wave's briefing is grounded in reality.
