@@ -437,6 +437,24 @@ Not every change requires a full three-file spec. Use this table:
 - Pasting rule file content into a briefing multiplies token cost by the number of subagents — never do it.
 - Pre-read the spec yourself and hand the subagent concrete, scoped instructions (not "based on what you find").
 
+#### Role scope declaration
+
+Every subagent briefing must begin with a **role scope block** that declares:
+
+```
+Role: Implementor
+Scope: [one sentence describing the exact task — e.g. "implement VenueRepository.GetPagedAsync"]
+Files owned: [list of files this subagent may create or edit]
+Files off-limits: [list of files this subagent must NOT modify]
+Spec source: [path to design.md and requirements.md]
+```
+
+**Purpose:** Role scope blocks prevent scope bleed — a subagent that is not told what it owns will make assumptions about what it is allowed to change. Ambiguous ownership leads to file conflicts in parallel waves.
+
+**Rule:** A subagent that receives a briefing without a role scope block must stop and request one from the main agent before proceeding.
+
+---
+
 #### Mandatory spec reads at session start
 
 Before briefing ANY subagent, the main agent must read (in its own context):
