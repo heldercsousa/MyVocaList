@@ -692,6 +692,24 @@ Your tasks:
 
 See `.claude/agents/verifier.md` for the full Verifier agent definition.
 
+### Subagent MCP isolation per task
+
+Each subagent should use only the MCPs relevant to its assigned task. Unnecessary MCP invocations waste tokens and can introduce irrelevant context.
+
+**MCP assignment by task type:**
+
+| Task type | Recommended MCPs | Discouraged MCPs |
+|-----------|-----------------|------------------|
+| Domain / Services / Infra code | `dotnet-skills`, Context7 (EF Core, MediatR) | DevExpress MCPs |
+| MAUI UI / XAML | `maui-current-apis`, `myvocalist-coding`, DevExpress MCP | EF Core MCPs |
+| Test writing | `superpowers:test-driven-development`, `dotnet-skills:testcontainers-integration-tests` | UI MCPs |
+| Navigation / Shell | `maui-shell-navigation`, `maui-current-apis` | EF Core MCPs |
+| Database / Migration | `dotnet-skills:efcore-patterns`, Context7 (EF Core) | UI MCPs |
+
+**Rule:** A subagent briefing must include a `Permitted MCPs` line in the role scope block that lists only the MCPs needed for the task. Subagents must not invoke MCPs outside that list without justification.
+
+**Why:** An MCP that is invoked for the wrong task type (e.g., DevExpress MCP during a pure domain logic task) adds thousands of tokens of irrelevant documentation to the context, crowding out relevant information.
+
 ### Fresh-context iteration pattern
 
 When a complex task requires multiple iterations (e.g., a subagent produces partial output, needs correction, and re-runs), prefer **fresh-context iteration** over in-session correction loops.
