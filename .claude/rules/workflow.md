@@ -1085,6 +1085,41 @@ The task list is the audit trail for the feature — keep it accurate.
 
 **Parallel exception:** Tasks marked `[P]` (independent, different files/layers) may be dispatched simultaneously as a wave per Rule 2. All tasks in a wave must complete and commit before the next wave begins.
 
+### Task atomization checklist
+
+A task is **atomic** if it can be completed by a single subagent within one context window without requiring the subagent to hold pending decisions about other in-flight tasks.
+
+Before adding a task to `tasks.md`, confirm it passes this checklist:
+
+- [ ] The task produces a single, clearly named artifact (one method, one ViewModel, one page, one migration)
+- [ ] The task does not require knowledge of the output of another in-progress task
+- [ ] The task can be described in one sentence without using "and" more than once
+- [ ] The task fits within the sizing limits (see Subagent Delegation — Task sizing limits)
+- [ ] The task has a `Demo:` statement or a clear acceptance criterion it satisfies
+- [ ] A new developer could implement this task correctly using only the spec + this task's `Files owned` declaration
+
+**If any box is unchecked:** decompose the task before adding it to `tasks.md`. A non-atomic task is a subagent reliability risk.
+
+**Atomicity definition for Rule 3:** A task is complete when its single artifact is built, tested, and committed — not when "most of it" is done.
+
+### DGI complexity classification
+
+Before decomposing a large feature into tasks, classify the feature using the **DGI scale** (Dependency, Generativity, Integration):
+
+| DGI score | Meaning | Task strategy |
+|-----------|---------|---------------|
+| D=Low, G=Low, I=Low | Simple CRUD, no shared types | Single wave, 1–2 subagents |
+| D=Low, G=Low, I=High | Simple logic, many consumers | Commit interfaces first; then parallel impl |
+| D=High, G=Low, I=Low | Long dependency chain | Strict onion ordering, no parallelism |
+| D=High, G=High, I=High | Cross-cutting, generative | Decompose into sub-features; spec each separately |
+
+**Definitions:**
+- **D (Dependency):** How many other tasks must complete before this one can start?
+- **G (Generativity):** How many new shared types / interfaces does this task create?
+- **I (Integration):** How many other existing components does this task touch or change?
+
+**Rule:** Any task with D=High + I=High must not be dispatched in parallel with any other task that shares its integration surface. Use the DGI score as a pre-dispatch sanity check before building the wave.
+
 ### DRY Onion task ordering rule
 
 Tasks must be ordered from the inside of the architecture outward — Domain first, then Infra, then Services, then UI. This is the **DRY Onion order**.
