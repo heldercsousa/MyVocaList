@@ -37,6 +37,9 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Code principles: `.claude/rules/code-principles.md`
 - **Testing**: `.claude/rules/testing.md` — read before writing any test or setting up the test project. Covers test types, naming, TDD workflow, and prerequisites for Step 3.
 
+## Development Methodology
+MyVocaList operates at **Spec-Anchored** (Level 2) SDD: specs in `Docs/specs/` are updated whenever behavior changes and serve as authoritative context for every AI session. Code changes without a corresponding spec update are out of scope unless the change is a bug fix affecting no spec-described behavior.
+
 ## Commands
 - Build: `/project:build`
 - Commit: `/project:commit`
