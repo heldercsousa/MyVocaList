@@ -691,6 +691,28 @@ When a subagent makes an implementation choice that is not fully specified (e.g.
 
 **Rule:** A subagent that makes undocumented decisions is leaving hidden state in the codebase. The next agent to touch that area will not know about those decisions and may override them.
 
+### Kill criteria for stuck subagents
+
+A stuck subagent is one that is looping, making no progress, or producing degrading output. The main agent must recognize the signs and terminate the subagent.
+
+**Kill criteria — terminate and restart if ANY of these are true:**
+
+| Signal | Action |
+|--------|--------|
+| 3 build failures with no diagnostic improvement | Kill — dispatch fresh subagent with tighter briefing |
+| Subagent modifies the same file 4+ times in a row | Kill — context is exhausted; decompose the task |
+| Subagent asks an open-ended "how should I approach this?" question | Kill — the briefing was insufficient; rewrite it |
+| Subagent output contradicts the spec in a way it was already corrected on | Kill — context compaction has erased the correction |
+| No commit after 45+ minutes of apparent work | Kill — something is wrong; investigate before re-dispatching |
+| Subagent produces code that references files or types that don't exist | Kill — hallucination; context is stale |
+
+**3-strike error recovery protocol (OPP-8-14):**
+1. First strike: identify root cause, tighten briefing, re-dispatch
+2. Second strike: decompose the task into smaller sub-tasks; re-dispatch the smallest unit
+3. Third strike: escalate to Helder — do not dispatch a fourth attempt without human review
+
+**Rule:** A stuck subagent consumes tokens without producing value. Killing and re-dispatching with a better briefing is always cheaper than letting a stuck agent continue.
+
 ### Build retry cap
 
 If a build fails, the subagent may attempt to fix it. The retry cap is **3 attempts**.
