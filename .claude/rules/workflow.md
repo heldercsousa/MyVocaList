@@ -1764,6 +1764,36 @@ Each task entry in `tasks.md` should use the following format for any task that 
 
 ---
 
+## Rule 8 — GitHub MCP Pre-Task Collision Check
+
+Before dispatching any wave that modifies files in the repository, the main agent must perform a **collision check** to confirm that no other agent or branch is currently modifying the same files.
+
+### Pre-task collision check protocol
+
+If the GitHub MCP is available (`mcp__github` or equivalent):
+
+1. **Check open PRs:** Query open pull requests on the current branch's base. If any open PR touches a file in the current wave's `Files owned` list, a collision risk exists.
+2. **Check recent commits:** Review the last 10 commits on the branch. If another agent committed to the same files in the last session, confirm the current spec reflects those changes.
+3. **Check in-progress `[~]` tasks:** Re-read `tasks.md` and confirm no task marked `[~]` is being worked on by another agent in a different session.
+
+**If the GitHub MCP is NOT available:**
+- Run `git log --oneline -10` to check recent commits
+- Run `git status` to confirm no uncommitted changes exist from a previous interrupted session
+- Check `tasks.md` for any tasks marked `[~]` that should not be in-progress
+
+**Collision types and responses:**
+
+| Collision type | Response |
+|----------------|----------|
+| Another open PR modifies a file in `Files owned` | Do NOT start the wave. Resolve the PR first, or coordinate the order of changes. |
+| Recent commit from another agent changed an interface the current wave consumes | Re-read the changed interface before briefing. Update briefings if signatures changed. |
+| `[~]` task exists but no agent is known to be running it | Reset to `[ ]` and re-dispatch. The previous agent was likely killed without completing. |
+| No collision detected | Proceed with wave dispatch |
+
+**Why a collision check?** In a multi-session workflow, two sessions can be started independently (e.g., manually and from a scheduled task) and both dispatch subagents to the same files. The collision check prevents silent overwrite conflicts before they occur rather than after.
+
+---
+
 ## Rule 7 — Session Start Protocol
 
 Every session that involves implementation or planning must begin with a structured **session start protocol** before any code is written or any subagent is dispatched.
