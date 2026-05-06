@@ -4,6 +4,21 @@
 
 ---
 
+## SDD Invariant
+
+> **Spec changes before code changes.**
+
+This is the single invariant that governs all development in MyVocaList. It cannot be overridden by time pressure, perceived simplicity, or subagent autonomy.
+
+- If a new requirement arises during implementation, update the spec first — then update the code.
+- If code contradicts the spec, the code is wrong — the spec is not wrong.
+- If the spec is incomplete, stop and clarify with Helder — do not improvise.
+- A subagent that modifies behavior not described in the spec has violated this invariant, regardless of whether the change "makes sense."
+
+This invariant applies to all agents (main and sub) at all times.
+
+---
+
 ## Rule 1 — Spec-First
 
 **Before writing any implementation code for a feature, read `Docs/specs/[feature]/design.md`.**
