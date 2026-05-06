@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Spec → Plan → Implement → Review — never skip to implementation. (6) English only in code, comments, logs, UI text. (7) After every completed task: /project:review → /project:commit (stage, commit, push).'"
+            "command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Spec → Plan → Implement → Review — never skip to implementation. (6) English only in code, comments, logs, UI text. (7) After every completed task: /project:review → /project:commit (stage, commit, push). SPEC RE-READ REMINDER: After context compaction, re-read the active feature spec (Docs/specs/<feature>/design.md and requirements.md) before continuing implementation — compaction discards loaded spec context and continuing without re-reading risks spec drift.'"
           }
         ]
       }
