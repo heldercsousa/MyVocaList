@@ -692,6 +692,28 @@ Your tasks:
 
 See `.claude/agents/verifier.md` for the full Verifier agent definition.
 
+### Context exhaustion warning signs
+
+Context window exhaustion degrades output quality before the window is fully used. Recognize the early signs and act before the damage compounds.
+
+**Warning signs in subagent output:**
+- Subagent contradicts a decision it made earlier in the same session
+- Subagent asks about information it was given in the briefing
+- Subagent produces code that duplicates something it already wrote
+- Subagent forgets a constraint it acknowledged earlier (e.g., uses `DisplayAlert` after being told not to)
+- Build errors reference types or namespaces the subagent invented rather than read from the spec
+- Subagent output becomes shorter and less specific with each iteration
+- Subagent claims work is done but Changed files list is sparse relative to the task scope
+
+**Warning signs in orchestrator context:**
+- You are writing a briefing from memory without re-reading the spec
+- You cannot recall what the previous wave committed without checking the task-log
+- You are reasoning about code structure from cached impressions rather than reading the current file
+
+**Response protocol:**
+1. If the subagent shows warning signs: kill it (see Kill criteria), re-read the spec, produce a tighter briefing, dispatch a fresh subagent.
+2. If the orchestrator shows warning signs: stop. Re-read MASTER_PLAN.md, the spec, and the task-log. Resume from verified ground truth.
+
 ### Context reset discipline for orchestrator
 
 The orchestrator (main agent) accumulates context across waves. After many waves, earlier decisions may be compacted or lost. Treat each wave boundary as a potential context reset point.
