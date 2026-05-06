@@ -46,3 +46,10 @@ Docs/DevEnv/plans/S7_opportunities.md
 Docs/DevEnv/plans/S6_opportunities.md
 Docs/DevEnv/plans/status.md
 Docs/DevEnv/plans/status.md
+Docs/DevEnv/plans/S9_opportunities.md
+Docs/DevEnv/plans/S3_opportunities.md
+Docs/DevEnv/plans/S2_opportunities.md
+Docs/DevEnv/plans/S7_opportunities.md
+Docs/DevEnv/plans/S10_opportunities.md
+Docs/DevEnv/plans/status.md
+Docs/Changelog/changelog.md
