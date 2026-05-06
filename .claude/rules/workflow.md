@@ -474,6 +474,30 @@ Each subagent task must fit within one context window without compaction. A task
 
 **Warning sign:** A subagent briefing that lists > 5 files or > 2 hours of estimated work is a sizing violation. Decompose before dispatching.
 
+### Dependency-first merge sequencing
+
+After a parallel wave completes, subagent commits must be merged (pulled by the main agent) in dependency order — not in the order they finished.
+
+**Dependency-first merge protocol:**
+
+1. After all subagents in the wave stop, list their commits in the order the tasks were declared in `tasks.md` — innermost layer first (Domain → Infra → Services → UI).
+2. Pull / merge commits in that order.
+3. After each merge, run `dotnet build` to confirm the integration is clean before pulling the next commit.
+4. If a later commit breaks the build after a clean earlier commit: the later subagent introduced an incompatibility. Fix it before continuing.
+
+**Why order matters:** Two commits that each pass `dotnet build` independently can break the build when combined — if Subagent B implemented against an interface that Subagent A changed. Merging A first and verifying it, then merging B and verifying again, catches this at the earliest possible moment.
+
+**Example merge sequence for a standard CRUD wave:**
+```
+1. Pull: Domain entity + repository interface  → build ✓
+2. Pull: EF migration + repository impl        → build ✓
+3. Pull: Service method                        → build ✓
+4. Pull: ViewModel                             → build ✓
+5. Pull: Page + XAML                           → build ✓
+```
+
+**Conflict resolution:** If two commits conflict at the merge step: do NOT merge manually without understanding both changes. Read both commits, identify which subagent deviated from the spec, and apply the correction as a new commit — never silently favor one subagent's version over the other.
+
 ### Git worktrees as isolation primitive
 
 When two or more parallel subagents must work on the same branch but in different feature areas, use **git worktrees** to give each subagent a physically isolated working directory. This eliminates file-system collisions without requiring separate branches.
