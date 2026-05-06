@@ -32,6 +32,21 @@ No exceptions. Code written without reading the spec is code that may contradict
 | `design.md` | Architecture, interfaces, page structure, interaction flows, key decisions |
 | `tasks.md` | Ordered checkboxed tasks — check off as each completes |
 
+#### requirements.md — mandatory sections
+- **User stories** — "As a [role], I want [action] so that [value]"
+- **Acceptance criteria** — one per user story (see Given/When/Then format below)
+- **Validation rules** — field constraints, business invariants
+- **Out of Scope** — explicit list of what this feature does NOT do; prevents scope creep during implementation
+- **Domain Vocabulary** — define every domain term used in the spec (e.g. "Round", "Queue Entry", "Absence"). All stakeholders and agents must use these exact terms — no synonyms.
+
+#### design.md — mandatory sections
+- **Architecture** — which layers are affected, how they interact
+- **Interfaces** — new or modified service/repository interfaces with signatures
+- **Page structure** — screens, navigation flows
+- **Interaction flows** — sequence of user actions and system responses
+- **Invariants & Postconditions** — system invariants that must hold after every operation (e.g. "Queue always has at least one active singer", "Round number is monotonically increasing")
+- **Key Decisions** — see Key Decisions section below
+
 ### Spec-update gate — after implementation
 
 When a subagent's work reveals a discrepancy between the spec and the delivered code (even a "minor" one), the following must happen before the task is marked `To Review`:
