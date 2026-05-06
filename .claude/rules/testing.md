@@ -499,6 +499,45 @@ These must be fixed when the test project is created. Do NOT create tests until 
 
 ---
 
+## TDD Level Guidance by Risk
+
+Not all code warrants the same test investment. Use risk classification to calibrate test coverage without over-testing low-risk code.
+
+### Risk levels
+
+| Level | Label | Definition | Test requirement |
+|-------|-------|-----------|-----------------|
+| A | **High risk** | Business logic with validation, state mutation, or user-facing failure modes | Full TDD: Red → Green → Refactor. Unit + property-based tests. All branches covered. |
+| B | **Medium risk** | Query logic, mapping, pagination, EF configuration | Example-based tests for happy path + key edge cases. Integration tests for query behavior. |
+| C | **Low risk** | Pure plumbing, DI registration, DTO mapping with no logic, trivial getters | No mandatory test. Optional smoke test if needed for confidence. |
+
+### Classification guide
+
+| Code | Risk level |
+|------|-----------|
+| Service validation methods (`ValidateNameInput`, `CreateVenueAsync` guards) | A |
+| Service methods that mutate state (create, update, delete) | A |
+| ViewModel command state transitions, `CanExecute` logic | A |
+| Repository query methods (search, filter, sort, paginate) | B |
+| EF entity configurations (index, collation, cascade) | B |
+| DTO mapping in services | B |
+| Repository CRUD without custom logic (`AddAsync`, `GetByIdAsync`) | B |
+| DI registration in `MauiProgram.cs` | C |
+| DTO record definitions | C |
+| `ObservableProperty` with no derived logic | C |
+
+### Applying the classification
+
+When the Tester subagent receives a task, it must classify each method:
+- Level A → write all tests before Builder starts
+- Level B → write tests for non-trivial paths; mark trivial CRUD as C
+- Level C → document as "no test required" in the task-log; do not write empty test stubs
+
+### Escalation
+
+If a method is initially classified C but a bug is found in production, reclassify to A or B and add regression tests before fixing.
+
+---
 ## Property-Based Testing with FsCheck
 
 Use property-based testing (PBT) for service methods whose correctness must hold across a wide range of inputs — not just the specific examples in example-based tests.
