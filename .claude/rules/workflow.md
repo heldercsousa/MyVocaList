@@ -425,6 +425,24 @@ Not every change requires a full three-file spec. Use this table:
 | `git status`, `git add`, `git commit` | Route additions, AppShell registration |
 | Reading spec before briefing subagent | Everything in `crud-pages.md` |
 
+### Task sizing limits — context window budget
+
+Each subagent task must fit within one context window without compaction. A task that exhausts the context window produces unreliable output: the agent forgets earlier decisions, contradicts itself, or silently drops requirements.
+
+**Sizing limits per subagent task:**
+
+| Task type | Max files touched | Max estimated effort |
+|-----------|-------------------|----------------------|
+| New service method + tests | 4 files | 90 min |
+| New ViewModel + page + tests | 5 files | 2 hours |
+| Migration + repository + tests | 4 files | 90 min |
+| UI page only (XAML + code-behind) | 3 files | 60 min |
+| Full CRUD feature (all layers) | Split into 2+ tasks | — |
+
+**Rule:** If a proposed task exceeds these limits, split it into independent sub-tasks before dispatching. Do not attempt to complete a full CRUD feature in a single subagent.
+
+**Warning sign:** A subagent briefing that lists > 5 files or > 2 hours of estimated work is a sizing violation. Decompose before dispatching.
+
 ### Wave-based parallelism — hard cap
 - **Maximum 4 subagents may run in parallel at any one time.**
 - Work is dispatched in waves: spawn up to 4 subagents, wait for all to complete, then start the next wave.
