@@ -1,9 +1,26 @@
 # S9 — Quality Assurance: Enhancement Opportunities
-> Analyzed against current .claude state (see _current_state_summary.md)
+
+> Source files analyzed: S9_Quality_Assurance.md, S9_1_TDD_Integration.md, S9_1_1_Property_Based_Testing.md, S9_2_Spec_Drift_Prevention.md, S9_2_1_Spec_Versioning_n_Rollback.md, S9_2_2_Spec_Rot_Under_Evolution.md, S9_3_Hallucination_Safeguards.md, S9_3_1_False_Confidence_Trap.md, S9_3_2_Agent_Autonomy_Without_Reliability.md
+> Compared against: CLAUDE.md, .claude/rules/workflow.md, .claude/rules/testing.md, .claude/rules/code-principles.md, .claude/settings.json
+> Last reviewed: 2026-05-06
 
 ---
 
-### OPP-9-01: Tester/Builder role separation rule
+## Summary
+
+| Category | Count |
+|----------|-------|
+| ✅ Validated (previously captured, still unimplemented) | 13 |
+| 🆕 New (not previously captured) | 6 |
+| **Total** | **19** |
+
+All 13 previously captured opportunities remain unimplemented — confirmed by searching testing.md, workflow.md, and review.md for their key terms.
+
+---
+
+## Previously Captured Opportunities
+
+### ✅ OPP-9-01: Tester/Builder role separation rule
 **Target:** `.claude/rules/testing.md`
 **Action:** Update
 **Source topic:** S9.1 — TDD Integration
@@ -16,7 +33,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-02: One-test-at-a-time incremental TDD discipline
+### ✅ OPP-9-02: One-test-at-a-time incremental TDD discipline
 **Target:** `.claude/rules/testing.md`
 **Action:** Update
 **Source topic:** S9.1 — TDD Integration
@@ -27,7 +44,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-03: Builder must not modify tests during Green phase
+### ✅ OPP-9-03: Builder must not modify tests during Green phase
 **Target:** `.claude/rules/testing.md`
 **Action:** Update
 **Source topic:** S9.1 — TDD Integration
@@ -38,7 +55,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-04: Test quality audit checklist before implementation
+### ✅ OPP-9-04: Test quality audit checklist before implementation
 **Target:** `.claude/rules/testing.md`
 **Action:** Update
 **Source topic:** S9.1 — TDD Integration (Test Quality Audit section)
@@ -58,7 +75,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-05: Property-based testing for collections and pagination
+### ✅ OPP-9-05: Property-based testing for collections and pagination
 **Target:** `.claude/rules/testing.md`
 **Action:** Update
 **Source topic:** S9.1.1 — Property-Based Testing for Non-Determinism
@@ -81,7 +98,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-06: Spec quality gate before any verification or implementation
+### ✅ OPP-9-06: Spec quality gate before any verification or implementation
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S9.3 — Hallucination Safeguards (Entry Criteria section)
@@ -99,7 +116,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-07: Adversarial Critic pattern for subagent code review
+### ✅ OPP-9-07: Adversarial Critic pattern for subagent code review
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S9.3 — Hallucination Safeguards (Adversarial Verification Pattern)
@@ -116,7 +133,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-08: Spec versioning discipline for spec files
+### ✅ OPP-9-08: Spec versioning discipline for spec files
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S9.2.1 — Spec Versioning & Rollback
@@ -141,7 +158,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-09: Session-end spec update ritual
+### ✅ OPP-9-09: Session-end spec update ritual
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S9.2.2 — Spec Rot Under Evolution
@@ -161,7 +178,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-10: Spec alignment checklist in review.md
+### ✅ OPP-9-10: Spec alignment checklist in review.md
 **Target:** `.claude/commands/review.md`
 **Action:** Update
 **Source topic:** S9.2 — Spec Drift Prevention (Spec Rot section) and S9.3 — Hallucination Safeguards
@@ -181,7 +198,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-11: Subagent false-completion prevention — proof of action
+### ✅ OPP-9-11: Subagent false-completion prevention — proof of action
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S9.3.2 — Agent Autonomy Without Reliability (Mandatory Proof of Action Protocol)
@@ -194,7 +211,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-12: TDD level guidance for high-risk vs standard features
+### ✅ OPP-9-12: TDD level guidance for high-risk vs standard features
 **Target:** `.claude/rules/testing.md`
 **Action:** Update
 **Source topic:** S9.1 — TDD Integration (Four Tuning Levels section)
@@ -211,7 +228,7 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 ---
 
-### OPP-9-13: E2E emulator run is a mandatory gate before marking task complete
+### ✅ OPP-9-13: E2E emulator run is a mandatory gate before marking task complete
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S9.3 — Hallucination Safeguards (Integration and E2E Testing section) and S9.1 — TDD Integration
@@ -220,3 +237,126 @@ Add anti-pattern example: same-agent test-then-implement produces `Assert.NotNul
 
 > **E2E verification (required before `To Review`):**
 > For tasks that add or change UI pages, navigation, or queue state transitions: run the app on the emulator and manually execute the critical user journey for that feature. Unit tests pass before this; E2E confirms the integration boundary is correct. Only after a successful emulator run may the task be marked `To Review`. If the emulator is unavailable, mark the task `Check build` and note "E2E pending" in the task-log.
+
+---
+
+## New Opportunities
+
+### 🆕 OPP-9-14: Mutation testing as a CI gate for test suite quality
+**Target:** `.claude/rules/testing.md`
+**Action:** Add
+**Source topic:** S9.3.1 — False Confidence Trap (Mutation Testing section)
+**Rationale:** testing.md has no mechanism to catch tautological test suites beyond human review. S9.3.1 documents that AI-generated test suites commonly achieve 85–91% line coverage while scoring only 20–45% on mutation testing — a 46–57% gap that reveals the tests are not asserting the right things. Line coverage is already the default CI metric; mutation score is not tracked at all.
+**Suggested content/change:** Add a "Mutation Testing" subsection after the Running Tests section:
+
+> **Mutation testing (Stryker.NET):**
+> Add `Stryker.NET` to the test project to verify that the test suite actually catches bugs, not just executes lines.
+>
+> ```bash
+> dotnet tool install -g dotnet-stryker
+> dotnet stryker --project MyVocaList.Services/MyVocaList.Services.csproj
+> ```
+>
+> Target mutation scores:
+> - Services (business logic): ≥ 60% (blocking gate)
+> - Repositories (query logic): ≥ 50% (warning gate)
+>
+> If mutation score is ≥ 85% line coverage but ≤ 40% mutation score, the test suite is predominantly tautological. Audit and rewrite before proceeding.
+>
+> Run mutation testing before marking a feature's test suite complete, not in every CI build (mutation runs are slow — run on feature branches, not every commit).
+
+---
+
+### 🆕 OPP-9-15: Acceptance criteria traceability matrix in task-log
+**Target:** `.claude/rules/workflow.md`
+**Action:** Update
+**Source topic:** S9.3 — Hallucination Safeguards (Verifier Agents and Evidence-Based Gates)
+**Rationale:** The task-log format currently records `Changed files` but has no field for acceptance criteria coverage. S9.3 defines the Verifier's traceability matrix — every acceptance criterion must map to an implementation file+line and a test name+file. Without this artifact, review consists of "the subagent said it's done" rather than verifiable evidence. This is the core evidence-based gate that prevents hallucinated completions.
+**Suggested content/change:** Add a `Traceability` section to the task-log format in Rule 5 of workflow.md:
+
+> ```
+> ### Traceability
+> | Acceptance Criterion | Implementation | Test |
+> |----------------------|----------------|------|
+> | <criterion from requirements.md> | <file:line> | <TestClass.MethodName> |
+> | ... | ... | ... |
+> ```
+>
+> Every acceptance criterion from the feature's `requirements.md` must appear in this table with both implementation and test evidence. A criterion with either field missing is a blocker for `To Review` status.
+>
+> For tasks that are purely refactoring (no new acceptance criteria): note "Refactor only — no new criteria" in place of the table.
+
+---
+
+### 🆕 OPP-9-16: Pre-task context gate — check spec and test files exist before implementation
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S9.3 — Hallucination Safeguards (Context Gates / Aperture pattern)
+**Rationale:** S9.3 documents the Aperture pattern: before an agent receives any code, a deterministic gate checks that the required spec file, test file, and configuration context exist. One of the nine rule-based checks is `missing_spec` — "task is a feature, but no design document exists." Currently no such gate exists in the workflow; subagents frequently proceed without reading the spec, producing architecturally inconsistent output. A lightweight pre-task checklist prevents the most common context collapse.
+**Suggested content/change:** Add a pre-task checklist requirement to Rule 2 (Subagent Delegation):
+
+> **Pre-task context gate (subagent must verify before writing any code):**
+> Before writing a single line of implementation, verify:
+> 1. `Docs/specs/[feature]/design.md` exists and has been read
+> 2. `Docs/specs/[feature]/requirements.md` exists and acceptance criteria are unambiguous
+> 3. A test file exists (or will be created as the first deliverable)
+> 4. Any external contracts the task touches (e.g., domain interfaces, DTO shapes) are loaded into context
+>
+> If any item is missing, stop and report `blocked: spec gap` — do not proceed with guessed implementations. The main agent fills the gap, then re-delegates.
+
+---
+
+### 🆕 OPP-9-17: Spec rot multiplier warning for parallel multi-agent waves
+**Target:** `.claude/rules/workflow.md`
+**Action:** Update
+**Source topic:** S9.2.2 — Spec Rot Under Evolution (Multiplier Effect section)
+**Rationale:** Rule 2 allows up to 4 parallel subagents per wave. S9.2.2 documents that when N agents read the same stale spec, each additional agent increases spec-based failure probability by 20–30% multiplicatively. By the 5th agent operating on the same stale spec, the failure rate reaches 80%+. This makes spec freshness a critical prerequisite for any multi-agent wave — not just a nice-to-have. The current Rule 2 has no check that the spec is fresh before dispatching a wave.
+**Suggested content/change:** Add to Rule 2 (Subagent Delegation), before the wave-based parallelism section:
+
+> **Spec freshness gate before dispatching a wave:**
+> Before starting a multi-agent wave, verify the feature spec was updated for any code shipped in the previous wave. If the spec is more than one session old and implementation has shipped since the last spec update, update the spec now before dispatching. A stale spec read by 4 parallel agents produces 4 divergent hallucinated implementations. The time cost of updating the spec is lower than the rework cost of a contaminated wave.
+
+---
+
+### 🆕 OPP-9-18: Bounded autonomy rule — irreversible actions require explicit human confirmation
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S9.3.2 — Agent Autonomy Without Reliability (Bounded Autonomy with Escalation)
+**Rationale:** S9.3.2 documents that the production reliability standard is L3–L4 (conditional autonomy with escalation), not L5 (full autonomy). MyVocaList's workflow currently has no explicit category of "actions that require human confirmation before execution." Documented failure cases (AWS Kiro, Perplexity Computer) all involved agents executing irreversible actions (database deletions, EF Core migrations, file overwrites) without confirmation. The project uses SQLite with EF Core migrations — a dropped migration or destructive schema change is hard to recover from without git.
+**Suggested content/change:** Add a new rule or sub-rule to workflow.md:
+
+> **Rule: Irreversible actions require explicit human confirmation**
+> Before executing any of the following, a subagent must stop and request explicit approval — it must NOT proceed autonomously:
+> - EF Core migration additions or changes (`dotnet ef migrations add`)
+> - Any `git push --force` or history-rewriting operation
+> - Deleting spec files, plan files, or task-log files
+> - Changes to `MauiProgram.cs` DI registration that add or remove service lifetimes
+> - Any change that removes an existing database index or unique constraint
+>
+> The subagent describes the action and its impact, then waits for "yes, proceed" before continuing. This is the difference between L3 (supervised autonomy) and L5 (unguided autonomy). For MyVocaList, L3 is the default for all data-persistent operations.
+
+---
+
+### 🆕 OPP-9-19: Decision log alongside spec files for architectural choices
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S9.2.1 — Spec Versioning & Rollback (Decision Logs Paired with Specs)
+**Rationale:** workflow.md specifies the three spec file structure (requirements.md, design.md, tasks.md) but has no concept of a decision log. S9.2.1 documents that without a decision log, rollback decisions are guesswork — when a regeneration fails, the team doesn't know if a constraint was essential or legacy. As MyVocaList grows (queue modes, singer management, song catalog), architectural decisions about round-based queue progression, data shapes, and mode behavior will accumulate and be lost between sessions unless recorded.
+**Suggested content/change:** Add a fourth optional file to the spec structure table in Rule 1:
+
+> | File | What it answers |
+> |------|----------------|
+> | `requirements.md` | User stories, acceptance criteria, validation rules, out-of-scope |
+> | `design.md` | Architecture, interfaces, page structure, interaction flows, key decisions |
+> | `tasks.md` | Ordered checkboxed tasks — check off as each completes |
+> | `decision-log.md` | **(optional, required for MAJOR spec changes)** Why constraints exist, options considered, reversal conditions |
+>
+> A decision log entry is required when a spec receives a MAJOR version bump. Format:
+> ```markdown
+> ## DEC-YYYY-MM-DD: <title> (Spec vX.0.0)
+> **Condition:** <what problem triggered this decision>
+> **Options considered:** <A, B, C with brief pros/cons>
+> **Decision:** <chosen option and why>
+> **Trade-offs:** <what was given up>
+> **Reversal condition:** <under what circumstances to revisit>
+> ```
