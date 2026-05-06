@@ -690,6 +690,33 @@ Before dispatching any wave, the main agent must verify that the spec being impl
 
 **Rule:** A stale spec discovered before a wave is a 5-minute fix. A stale spec discovered after 4 subagents have committed is a multi-hour reconciliation. Check freshness before dispatching.
 
+### Spec rot — detection and prevention
+
+**Spec rot** is the progressive divergence between a spec and the code it describes. It is not a single event — it is an accumulation of small deviations, each individually tolerable, that collectively make the spec misleading.
+
+**Sources of spec rot:**
+- A subagent implemented "close to" the spec but not exactly — spec not updated
+- An in-flight design decision changed the approach mid-session — spec not updated
+- A new constraint was discovered that invalidates an acceptance criterion — AC not revised
+- A task was cancelled but the spec still describes the removed feature
+- An interface signature changed during refactoring — `design.md` still shows the old signature
+
+**Spec rot indicators (check these regularly):**
+- Interface signatures in `design.md` do not match the current code
+- Acceptance criteria reference fields or behaviors that no longer exist
+- `Out of Scope` section still lists something that was actually built
+- `Domain Vocabulary` defines a term differently from how the code uses it
+- A `Key Decision` was reversed but the old decision is still in `design.md`
+
+**Spec rot multiplier in parallel waves:**
+Each subagent in a parallel wave implements against the spec. If the spec has 10% rot, each subagent independently interprets that 10% — producing 4 different interpretations in a 4-agent wave. The divergence is not 10%; it is 4 independent instances of 10%, which compound into a reconciliation problem that can take longer to fix than the original implementation.
+
+**Prevention protocol:**
+1. After every wave: run the spec rot check (re-read spec + compare against committed code)
+2. Fix rot immediately — do not defer spec updates to "later" or to "the next session"
+3. If spec rot is found before a parallel wave: fix the spec FIRST, then dispatch the wave
+4. Track spec update frequency as a quality metric — frequent updates indicate active development; zero updates over multiple sessions indicates either perfect implementation (unlikely) or ignored drift (likely)
+
 ### Cross-spec review gate before multi-spec wave
 
 When a wave will implement tasks that touch two or more features simultaneously (i.e., tasks from different spec directories), a cross-spec review gate is required before dispatching.
