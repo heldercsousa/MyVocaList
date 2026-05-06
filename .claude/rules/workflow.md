@@ -1085,6 +1085,26 @@ The task list is the audit trail for the feature — keep it accurate.
 
 **Parallel exception:** Tasks marked `[P]` (independent, different files/layers) may be dispatched simultaneously as a wave per Rule 2. All tasks in a wave must complete and commit before the next wave begins.
 
+### Task entry format — structured fields
+
+Each task entry in `tasks.md` should use the following format for any task that will be dispatched to a subagent:
+
+```markdown
+- [ ] **Task title** [P | SEQUENTIAL]
+  - **Produces:** [list of new files, interfaces, or types this task creates]
+  - **Consumes:** [list of files, interfaces, or types this task depends on being committed first]
+  - **Risk:** [Low | Medium | High — one-line reason]
+  - **Files owned:** [exact file paths this subagent may create or edit]
+  - **Demo:** [one sentence — what a human observer sees when this is done]
+  - **Review lane:** [Standard | Elevated | Architectural — see review SLA section]
+```
+
+**Minimum for parallel tasks:** All parallel tasks (`[P]`) must declare `Files owned` and `Consumes`. Without these, the pre-wave dependency check cannot be performed.
+
+**Minimum for sequential tasks:** All sequential tasks (`[SEQUENTIAL]`) must declare `Consumes` so the main agent knows which predecessor must commit first.
+
+**File ownership declaration rule:** The `Files owned` field in the task entry is the authoritative source for the pre-wave file overlap check. If two tasks in the same wave declare the same file, they cannot be parallelized — serialize them.
+
 ---
 
 ## Rule 6 — Research Tool Gate (Context7 → Exa → WebSearch)
