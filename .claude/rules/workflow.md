@@ -463,6 +463,21 @@ Some files must never be edited by more than one agent at a time. These are **ho
 
 **How to add entries:** If a session discovers a new hotspot file (a file where parallel edits caused a conflict or incoherent output), add it to this registry before ending the session.
 
+### Spec freshness gate before dispatching a wave
+
+Before dispatching any wave, the main agent must verify that the spec being implemented is still current. Specs that were written in an earlier session may be stale relative to decisions made since.
+
+**Spec freshness check (main agent, before each wave):**
+
+1. Check the `Last modified` date on `requirements.md` and `design.md`.
+2. Check the task-log for any entries with status `Spec updated — re-planning required` that have not been resolved.
+3. Check `tasks.md` for any `[CANCELLED]` tasks — if cancelled tasks exist, the spec may have changed scope.
+4. If the spec was last modified more than 2 sessions ago and significant implementation has occurred since: re-read the spec and compare against the current codebase. A spec that is 2+ sessions behind the code is a spec drift risk.
+
+**Spec rot multiplier for parallel waves:** In a parallel wave, spec drift is multiplied by the number of subagents. If the spec is stale when a 4-subagent wave starts, all 4 subagents will implement against the stale spec simultaneously — producing 4x the rework when the drift is discovered.
+
+**Rule:** A stale spec discovered before a wave is a 5-minute fix. A stale spec discovered after 4 subagents have committed is a multi-hour reconciliation. Check freshness before dispatching.
+
 ### Cross-spec review gate before multi-spec wave
 
 When a wave will implement tasks that touch two or more features simultaneously (i.e., tasks from different spec directories), a cross-spec review gate is required before dispatching.
