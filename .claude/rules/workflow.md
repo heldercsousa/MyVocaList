@@ -122,6 +122,19 @@ Spec size should match task complexity. Over-speccing small tasks wastes time; u
 
 **Two-tier spec trigger:** Any task estimated at > 2 hours OR touching ≥ 2 layers automatically requires a full three-file spec. No exceptions.
 
+### Demo statement requirement
+
+Every task in `tasks.md` that touches user-facing behavior must include a **demo statement**: a one-sentence description of what a human observer would see when the task is complete.
+
+Format: `Demo: [actor] can [observable action] and sees [observable result].`
+
+Examples:
+- `Demo: Admin taps "Add Singer" and sees the new singer appear at the bottom of the queue list immediately.`
+- `Demo: The queue page loads within 500ms with all singers in their correct round-based order.`
+- `Demo: Tapping an absent singer shows a bottom sheet with "Mark as Returned" and "Remove" options.`
+
+**Purpose:** Demo statements prevent tasks from being marked "done" when the code compiles but the feature doesn't work as intended. A subagent that cannot write a demo statement does not understand the task.
+
 ### Spec completeness checklist (run before implementation starts)
 
 Before dispatching any subagent to implement a spec, verify:
