@@ -250,3 +250,14 @@ RunOnUiThread(() =>
 - Migrations applied on startup via `MigrateAsync()` — blocking call via `Task.Run(...).GetAwaiter().GetResult()`
 - `__EFMigrationsLock` row is cleared before each `MigrateAsync()` call (SQLite single-user workaround)
 - `CollationInterceptor` applied globally for case-insensitive search
+
+## Static Analysis Suppressions
+
+**Never add a new suppression** (`#pragma warning disable`, `[SuppressMessage]`, `// ReSharper disable`) without:
+1. A comment explaining why the suppression is necessary (one sentence minimum)
+2. An expiry comment if the suppression is temporary: `// TODO: Remove after [condition]`
+3. Logging the suppression in `.claude/exception-registry.md` if it suppresses a constitutional rule
+
+Existing suppressions in `Directory.Build.props` for nullable analysis (CS8618, CS8601, CS8603, CS8604, CS8625, CS8602, etc.) are pre-approved project decisions — do not add to that list without architecture review.
+
+If you cannot fix a warning without suppressing it, log a `blocked: spec gap` status and stop.
