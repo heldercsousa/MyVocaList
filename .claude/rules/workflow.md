@@ -802,6 +802,23 @@ Reason: `WebFetch` pulls 5,000–15,000 tokens of raw HTML per page; Context7 an
 
 Agents record task outcomes manually in the task-log file. The `Stop` hook warns if uncommitted changes remain when a session ends.
 
+### Proof of action — Changed files is mandatory
+
+A task-log entry that claims `To Review` without a `### Changed files` section is **invalid**. The main agent must reject it and request a corrected entry.
+
+**Rule:** Every task-log entry that represents completed implementation work must include an explicit list of every file that was created or modified. This is not optional documentation — it is the proof that the task was actually done.
+
+**Format (mandatory):**
+```
+### Changed files:
+- `relative/path/to/file.cs` — reason (e.g. "added GetPagedAsync method")
+- `relative/path/to/test.cs` — reason (e.g. "added 3 test cases for GetPagedAsync")
+```
+
+**If no files were changed:** The task was not implemented. Do not set status to `To Review`. Either document why the task was a no-op (with spec reference) or complete the task.
+
+**Why:** Subagents can falsely claim completion without having made any changes. The Changed files list is the minimum verifiable evidence that work was done. A `git diff` can independently confirm it.
+
 ### Task-log file location
 Task-log files live **beside the plan file** in `Docs/superpowers/plans/`, named `<plan-name>-task-log.md`.
 Example: plan at `Docs/superpowers/plans/2026-04-23-artists-songs-catalog.md` → log at `Docs/superpowers/plans/2026-04-23-artists-songs-catalog-task-log.md`.
