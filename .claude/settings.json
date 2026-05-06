@@ -1,5 +1,13 @@
 {
   "plansDirectory": "Docs/DevEnv/plans",
+  "permissions": {
+    "deny": [
+      "Edit(CLAUDE.md)",
+      "Write(CLAUDE.md)",
+      "Edit(.claude/rules/*.md)",
+      "Write(.claude/rules/*.md)"
+    ]
+  },
   "hooks": {
     "TaskCreated": [
       {
