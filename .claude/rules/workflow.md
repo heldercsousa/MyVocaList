@@ -71,6 +71,30 @@ Use Given/When/Then for user-facing flows. Use EARS for background rules, constr
 - **Invariants & Postconditions** — system invariants that must hold after every operation (e.g. "Queue always has at least one active singer", "Round number is monotonically increasing")
 - **Key Decisions** — see Key Decisions section below
 
+### Spec completeness checklist (run before implementation starts)
+
+Before dispatching any subagent to implement a spec, verify:
+
+- [ ] All user stories have at least one acceptance criterion in Given/When/Then or EARS format
+- [ ] "Out of Scope" section is present and non-empty
+- [ ] Domain Vocabulary defines every domain term used in the spec
+- [ ] Validation rules cover all input fields and business constraints
+- [ ] `design.md` includes all interface signatures (not just names)
+- [ ] `design.md` lists all layers affected
+- [ ] Invariants & Postconditions are documented
+- [ ] No acceptance criterion is vague or untestable
+
+### Spec quality four-gate review
+
+Before marking a spec as ready for implementation, it must pass all four gates:
+
+1. **Correctness gate** — does the spec match what Helder described? (no hallucinated requirements)
+2. **Completeness gate** — does every story have a criterion? Are error paths covered?
+3. **Consistency gate** — do the requirements and design agree with each other? No contradictions?
+4. **Testability gate** — can a developer write a test from every acceptance criterion without asking questions?
+
+A spec that fails any gate must be revised before implementation proceeds.
+
 ### Spec-update gate — after implementation
 
 When a subagent's work reveals a discrepancy between the spec and the delivered code (even a "minor" one), the following must happen before the task is marked `To Review`:
