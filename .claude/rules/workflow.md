@@ -511,6 +511,34 @@ When a wave will implement tasks that touch two or more features simultaneously 
 
 **If a conflict is found:** Resolve it in the specs before dispatching. Do not dispatch the wave with the conflict unresolved and "let the subagents figure it out."
 
+### Pre-dispatch validation checklist
+
+Before dispatching any subagent (for any task), the main agent must run through this checklist. A wave must not start until all items are checked.
+
+**Spec readiness:**
+- [ ] The spec being implemented has passed the spec quality gate (see Rule 1)
+- [ ] All acceptance criteria in scope for this wave are in Given/When/Then or EARS format
+- [ ] No acceptance criterion is vague or untestable
+- [ ] The spec was last modified within 2 sessions of today (or freshness check was performed)
+
+**Task readiness:**
+- [ ] Every task in this wave has a `Files owned` declaration
+- [ ] Every task in this wave has a `Demo:` statement or maps to at least one AC
+- [ ] Every task in this wave has been classified (atomization checklist passed)
+- [ ] The `[~]` marker will be set for each task before its subagent is dispatched
+
+**Dependency readiness:**
+- [ ] `Consumes` fields for all tasks in this wave reference only committed artifacts
+- [ ] No two tasks in this wave list the same file in `Files owned`
+- [ ] All sequential-only files in this wave are owned by exactly one subagent
+
+**Briefing readiness:**
+- [ ] Each subagent briefing includes a role scope block (Role, Scope, Files owned, Files off-limits, Spec source)
+- [ ] Each briefing references file paths only — no pasted rule file content
+- [ ] Contracts from the previous wave (if any) are included verbatim in briefings that depend on them
+
+**Failing any item:** Fix the blocker before dispatching. A "we'll sort it out" wave produces proportionally more rework than a well-prepared wave.
+
 ### Pre-wave dependency check + scope isolation
 
 Before dispatching a wave, the main agent must perform a dependency check:
