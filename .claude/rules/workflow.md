@@ -691,12 +691,30 @@ When a subagent makes an implementation choice that is not fully specified (e.g.
 
 **Rule:** A subagent that makes undocumented decisions is leaving hidden state in the codebase. The next agent to touch that area will not know about those decisions and may override them.
 
+### Build retry cap
+
+If a build fails, the subagent may attempt to fix it. The retry cap is **3 attempts**.
+
+**Protocol:**
+- Attempt 1: Diagnose the error, apply a fix, rebuild.
+- Attempt 2: If still failing, re-read the spec and the failing file from scratch — do not patch the previous patch.
+- Attempt 3: If still failing, stop. Do NOT make a fourth attempt.
+
+**On the third failure:**
+1. Set task-log status to `Build failure`
+2. Append a one-line diagnosis: what the error is and what was tried
+3. Commit whatever state exists (even if broken — use a `wip:` prefix on the commit message)
+4. Push and stop
+
+**Why a cap?** A subagent that loops on build errors without a cap will exhaust its context window making increasingly desperate patches. After 3 attempts, the problem likely requires architectural guidance — not more patching.
+
 ### Subagent exit checklist (mandatory before returning)
 Every subagent must, in this order:
 1. Invoke `superpowers:verification-before-completion` — catches non-negotiable violations
-2. Build (0 errors)
-3. Commit changed files
-4. Push (`git push origin HEAD`)
+2. Build (0 errors, or document as Build failure after 3 attempts)
+3. Run tests if code changes touched tested files — confirm 0 failures
+4. Commit changed files
+5. Push (`git push origin HEAD`)
 
 The `Stop` hook warns if uncommitted changes remain.
 
