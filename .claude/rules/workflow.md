@@ -692,6 +692,28 @@ Your tasks:
 
 See `.claude/agents/verifier.md` for the full Verifier agent definition.
 
+### Fresh-context iteration pattern
+
+When a complex task requires multiple iterations (e.g., a subagent produces partial output, needs correction, and re-runs), prefer **fresh-context iteration** over in-session correction loops.
+
+**Pattern:**
+1. Subagent produces first attempt. Review the output.
+2. If the output requires significant correction (not just a small fix), do NOT ask the same subagent to fix it in the same session.
+3. Instead: terminate the subagent, extract the useful output (e.g., the parts that are correct), write a new tighter briefing incorporating what was learned, and dispatch a fresh subagent.
+
+**Why fresh context?** An in-session correction loop accumulates: the subagent holds the original wrong interpretation, the correction, and possibly multiple conflicting instructions in context simultaneously. A fresh subagent starts with only the tightened briefing — no conflicting context.
+
+**When in-session correction is acceptable:**
+- The error is a single isolated mistake (e.g., wrong method name, missing using statement)
+- The fix requires one targeted edit and no structural rethinking
+- The subagent demonstrates it understood the correction (re-read and confirmed)
+
+**When to use fresh context:**
+- The subagent misunderstood the task scope
+- The subagent produced structurally wrong code that requires more than 3 edits
+- The subagent ignored a constraint it was given
+- You are on the second or third correction loop
+
 ### Multi-session state handoff protocol
 
 When a feature spans multiple sessions, the state at session end must be captured so the next session can resume without loss.
