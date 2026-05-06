@@ -53,6 +53,23 @@ When a subagent's work reveals a discrepancy between the spec and the delivered 
    - After each implementation wave: review output before dispatching the next wave
    - At feature close-out: final review to confirm spec matches delivered behavior
 
+### When to skip SDD (spec bypass rule)
+
+Not every change requires a full three-file spec. Use this table:
+
+| Task type | Spec required? | Minimum artifact |
+|-----------|---------------|-----------------|
+| New feature (any complexity) | Yes | All three files: `requirements.md`, `design.md`, `tasks.md` |
+| Non-trivial refactor (cross-layer, affects interfaces) | Yes | `design.md` + `tasks.md` |
+| Small isolated change (< 1 hour, single file, no interface change) | No | Descriptive commit message |
+| Bug fix | No | Commit message as spec (see Bug Fix Pattern) |
+| Docs/rules/config update | No | Commit message |
+| Spike / discovery work | No | `findings.md` artifact (see Discovery Mode) |
+
+**Rule:** When in doubt, write a spec. A 10-minute spec prevents a 2-hour rewrite.
+
+**Spec bypass guard:** Even when skipping a full spec, the SDD Invariant still applies. "No spec" does not mean "no constraints" — it means the commit message, the task description, or a brief inline note serves as the specification.
+
 ---
 
 ## Rule 2 — Subagent Delegation
