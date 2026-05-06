@@ -153,9 +153,11 @@ Examples:
 
 **Purpose:** Demo statements prevent tasks from being marked "done" when the code compiles but the feature doesn't work as intended. A subagent that cannot write a demo statement does not understand the task.
 
-### Spec completeness checklist (run before implementation starts)
+### Spec quality gate (mandatory before implementation)
 
-Before dispatching any subagent to implement a spec, verify:
+**No subagent may be dispatched to implement a feature until this gate is passed.**
+
+The main agent (Helder or orchestrator) must confirm all of the following before dispatching:
 
 - [ ] All user stories have at least one acceptance criterion in Given/When/Then or EARS format
 - [ ] "Out of Scope" section is present and non-empty
@@ -165,6 +167,10 @@ Before dispatching any subagent to implement a spec, verify:
 - [ ] `design.md` lists all layers affected
 - [ ] Invariants & Postconditions are documented
 - [ ] No acceptance criterion is vague or untestable
+- [ ] Spec quality four-gate has been applied (Correctness, Completeness, Consistency, Testability)
+- [ ] Helder has reviewed and approved the spec
+
+Dispatching a subagent before this gate is passed transfers the spec's ambiguity into the implementation — it will manifest as rework.
 
 ### Spec quality four-gate review
 
