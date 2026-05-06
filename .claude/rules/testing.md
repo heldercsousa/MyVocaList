@@ -3,6 +3,23 @@
 > **Status:** Active from Step 3 (Venue CRUD Tests) onward.
 > TDD applies to all new Services, ViewModels, and Repositories from AutocompleteField + Person CRUD forward.
 > Venue CRUD tests (Step 3) establish the test infrastructure baseline; TDD workflow kicks in from Step 4+.
+## TDD within SDD
+
+TDD and SDD are complementary, not competing disciplines. Each operates at a different level:
+
+| Level | Discipline | Output |
+|-------|-----------|--------|
+| Feature intent | SDD (Spec-Driven Development) | `requirements.md`, `design.md`, `tasks.md` |
+| Behavior contract | TDD (Test-Driven Development) | Failing test that encodes a single acceptance criterion |
+| Implementation | Code | Minimal code to make the test pass |
+
+**How they connect:**
+- Every acceptance criterion in `requirements.md` must map to at least one test (see Acceptance Criteria Traceability below).
+- The spec defines *what* must be true; the failing test is the machine-checkable encoding of that truth.
+- Do not write a test that has no corresponding acceptance criterion — if the behavior matters, add the AC to the spec first.
+- Do not write implementation code that has no corresponding test — if the code matters, write the test first.
+
+> Skipping either discipline degrades both. SDD without TDD produces specs that drift from the implementation. TDD without SDD produces tests that encode assumptions never reviewed by the architect.
 
 ---
 
