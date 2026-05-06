@@ -1053,6 +1053,29 @@ For every acceptance criterion the task was supposed to satisfy: confirm it is s
 
 ---
 
+## Rule 3a — Session-End Spec Update Ritual
+
+Before ending any session in which implementation occurred, perform the **session-end spec update ritual**:
+
+1. **Review every spec file touched this session** (`requirements.md`, `design.md`, `tasks.md`)
+2. For each spec file, ask: "Does this file still accurately describe what was built?"
+3. If the answer is "no" or "partially":
+   - Add a `> **Spec updated [YYYY-MM-DD]:**` note at the top of the affected section
+   - Update acceptance criteria, interface signatures, or invariants to reflect the actual delivered behavior
+   - If the change is significant enough to affect subsequent tasks, set the task-log status to `Spec updated — re-planning required`
+4. **Update `tasks.md`**: check off all completed tasks; add `[CANCELLED: reason]` to any tasks that are no longer needed
+5. Commit all spec updates in the session's final commit (or as a separate spec-only commit immediately before stopping)
+
+**Trigger questions (ask before ending any session):**
+- "Did I implement something that the spec doesn't describe?"
+- "Did I discover a constraint that isn't in the spec?"
+- "Did I make a decision that future agents will need to know?"
+- "Is the spec now more ambiguous than before my session?"
+
+**Rule:** A session that ends without this ritual leaves the spec one step further from reality. Over multiple sessions, spec drift accumulates into a spec that describes a system that no longer exists.
+
+---
+
 ## Rule 4 — Tasks.md Is the Source of Truth
 
 Check off each task in `Docs/specs/[feature]/tasks.md` as it completes.
