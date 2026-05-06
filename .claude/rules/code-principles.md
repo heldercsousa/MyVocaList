@@ -3,6 +3,25 @@
 ## Language
 All code, comments, logs, and UI text must be English only.
 
+## Spec Language — Determinism
+
+In spec files (`requirements.md`, `design.md`) and in task descriptions, vague quality adjectives are **prohibited**. They force agents to invent their own thresholds, producing code that is technically compliant but misaligned with intent.
+
+**Prohibited terms:** fast, slow, quick, responsive, robust, secure, user-friendly, intuitive, handles gracefully, works correctly, performs well, reasonable, appropriate, suitable, adequate.
+
+**Replace with measurable thresholds:**
+
+| Instead of | Write |
+|------------|-------|
+| "the list loads quickly" | "the list renders within 300 ms on a mid-range Android device" |
+| "handles errors gracefully" | "returns `(false, \"message\")` on failure; no exception escapes the service boundary" |
+| "the form validates correctly" | "name ≤ 30 chars; empty name returns `(false, \"Name is required\")`" |
+| "secure storage" | "stored via `SecureStorage.SetAsync`; never in `Preferences` or plain SQLite" |
+
+If the threshold is not yet known, write: `[threshold TBD — establish before implementation starts]`. This is valid in a draft spec; it is **not** valid when a task is dispatched to a subagent.
+
+**Rule:** Any acceptance criterion containing a prohibited term is not ready for implementation. The Tester cannot write a deterministic test from it; the Builder cannot implement it without guessing.
+
 ## XML Documentation Comments
 - **Interfaces are the source of truth for method documentation.** Write `<summary>`, `<param>`, and `<returns>` on the interface method.
 - **Implementing types must use `<inheritdoc />`** — never duplicate or rephrase the interface comment.
