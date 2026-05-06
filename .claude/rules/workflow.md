@@ -474,6 +474,44 @@ Each subagent task must fit within one context window without compaction. A task
 
 **Warning sign:** A subagent briefing that lists > 5 files or > 2 hours of estimated work is a sizing violation. Decompose before dispatching.
 
+### Git worktrees as isolation primitive
+
+When two or more parallel subagents must work on the same branch but in different feature areas, use **git worktrees** to give each subagent a physically isolated working directory. This eliminates file-system collisions without requiring separate branches.
+
+**When to use worktrees:**
+- 3+ subagents are working in parallel and at least two of them will build the project
+- A subagent needs to run `dotnet build` without being affected by another in-progress subagent's uncommitted changes
+- A subagent's work involves generated files (e.g., EF migrations) that would appear in another subagent's uncommitted file list
+
+**Setup (main agent, before wave dispatch):**
+```bash
+# Create a worktree for each parallel subagent
+git worktree add ../MyVocaList-agent1 develop
+git worktree add ../MyVocaList-agent2 develop
+
+# Brief each subagent with its assigned working directory
+# Subagent 1: working directory = ../MyVocaList-agent1
+# Subagent 2: working directory = ../MyVocaList-agent2
+```
+
+**Cleanup (main agent, after wave completes and all worktrees are committed):**
+```bash
+git worktree remove ../MyVocaList-agent1
+git worktree remove ../MyVocaList-agent2
+```
+
+**Worktree rules:**
+- Each subagent commits to its worktree and pushes before stopping
+- The main agent pulls all commits after the wave before starting the next wave
+- Worktree directories must be outside the main repository directory to avoid confusing build tools
+- Do NOT create worktrees for sequential tasks — they share state intentionally
+
+**When NOT to use worktrees:**
+- All parallel subagents work on completely disjoint files with no build overlap → standard parallel dispatch is sufficient
+- The wave has only 2 subagents and neither runs a build → worktree overhead is not worth it
+
+See `superpowers:using-git-worktrees` skill for detailed setup and teardown instructions.
+
 ### Single-writer rule for hotspot files
 
 **At any given moment, each file in the repository must have at most one active writer.**
