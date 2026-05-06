@@ -465,6 +465,29 @@ A spec that is too long is as harmful as one that is too short. Over-specified s
 
 **Spec length guideline:** `requirements.md` should not exceed 2 pages. `design.md` should not exceed 3 pages. If you find yourself writing more, split the feature into sub-features.
 
+### Spec ceremony calibration table
+
+The full SDD ceremony (brainstorm → spec → plan → implement → review) has a fixed overhead cost. This cost is worth paying for features that will be touched multiple times, but it may exceed the value for very small or trivial changes.
+
+Use this table to calibrate how much spec ceremony is appropriate for a given task:
+
+| Task type | Estimated effort | Ceremony level | Required artifacts |
+|-----------|-----------------|----------------|-------------------|
+| Typo fix, comment update | < 5 min | None | Descriptive commit message |
+| Single-file cosmetic change (color, padding, label text) | < 15 min | None | Descriptive commit message |
+| Single-file logic fix (bug with known cause) | < 30 min | Minimal | Commit message as spec (Bug Fix Pattern) |
+| Small isolated change (1 file, no interface change, < 1 hour) | 30–60 min | Light | `tasks.md` entry + commit message |
+| Multi-file change within one layer | 1–2 hours | Standard | `tasks.md` + inline design notes in commit |
+| Cross-layer feature (any two of: Domain, Infra, Services, UI) | 2–8 hours | Full | All three spec files |
+| Multi-session feature | > 8 hours | Full + Decision log | All three spec files + `decisions.md` |
+| Architectural change (new pattern, new dependency, schema change) | Any | Full + Helder review | All three spec files + Helder sign-off |
+
+**Calibration principle:** Ceremony level must be proportional to the blast radius — how widely the change's consequences spread if it turns out to be wrong. A typo fix has zero blast radius. A new EF migration has blast radius that reaches every developer and every database.
+
+**Anti-pattern:** Applying Full ceremony to every change, including trivial ones. This is ceremony theater — it trains agents to treat spec steps as bureaucratic boxes to check rather than valuable gates.
+
+**Anti-pattern:** Applying Minimal ceremony to an architectural change because "it seemed small." Architectural changes are never small — their consequences are large and often irreversible.
+
 ### When to skip SDD (spec bypass rule)
 
 Not every change requires a full three-file spec. Use this table:
