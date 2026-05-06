@@ -1165,6 +1165,53 @@ Before decomposing a large feature into tasks, classify the feature using the **
 
 **Rule:** Any task with D=High + I=High must not be dispatched in parallel with any other task that shares its integration surface. Use the DGI score as a pre-dispatch sanity check before building the wave.
 
+### Dependency ordering example — phases template
+
+When writing `tasks.md` for a multi-layer feature, use this template as a starting structure. Adjust phases based on the actual dependency graph; do not parallelize tasks whose `Consumes` entries are not yet committed.
+
+```markdown
+## Phase 1 — Domain (no dependencies)
+- [ ] **Define entity** [P]
+  - Produces: `MyVocaList.Domain/Entities/SingerEntry.cs`
+  - Consumes: nothing
+  - Files owned: `MyVocaList.Domain/Entities/SingerEntry.cs`
+
+- [ ] **Define repository interface** [P]
+  - Produces: `MyVocaList.Domain/Interfaces/ISingerRepository.cs`
+  - Consumes: `SingerEntry.cs` (entity definition)
+  - Files owned: `MyVocaList.Domain/Interfaces/ISingerRepository.cs`
+
+## Phase 2 — Infra [SEQUENTIAL — waits for Phase 1]
+- [ ] **Add EF Core migration** [SEQUENTIAL]
+  - Produces: `*_AddSingerEntry.cs` migration
+  - Consumes: `SingerEntry.cs` (entity definition)
+  - Files owned: `MyVocaList.Infra/Migrations/*.cs`, `AppDbContext.cs`
+
+- [ ] **Implement repository** [SEQUENTIAL — waits for interface]
+  - Produces: `MyVocaList.Infra/Repositories/SingerRepository.cs`
+  - Consumes: `ISingerRepository.cs`
+  - Files owned: `SingerRepository.cs`
+
+## Phase 3 — Services [SEQUENTIAL — waits for Phase 2]
+- [ ] **Implement ISingerService + SingerService** [SEQUENTIAL]
+  - Produces: `ISingerService.cs`, `SingerService.cs`
+  - Consumes: `ISingerRepository.cs`
+  - Files owned: both service files
+
+## Phase 4 — UI [SEQUENTIAL — waits for Phase 3]
+- [ ] **ViewModel** [P]
+  - Produces: `SingersViewModel.cs`
+  - Consumes: `ISingerService.cs`
+  - Files owned: `SingersViewModel.cs`
+
+- [ ] **Page + XAML** [P — parallel with ViewModel if no shared state]
+  - Produces: `SingersPage.xaml`, `SingersPage.xaml.cs`
+  - Consumes: `SingersViewModel.cs` (BindingContext)
+  - Files owned: both page files
+```
+
+**Why this structure matters:** Without explicit `Produces` / `Consumes` annotations, the main agent must reason about dependencies from scratch for every wave. This template makes dependencies machine-readable and reviewable before dispatch.
+
 ### DRY Onion task ordering rule
 
 Tasks must be ordered from the inside of the architecture outward — Domain first, then Infra, then Services, then UI. This is the **DRY Onion order**.
