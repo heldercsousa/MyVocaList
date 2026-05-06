@@ -977,6 +977,29 @@ If a build fails, the subagent may attempt to fix it. The retry cap is **3 attem
 
 **Why a cap?** A subagent that loops on build errors without a cap will exhaust its context window making increasingly desperate patches. After 3 attempts, the problem likely requires architectural guidance — not more patching.
 
+### E2E emulator gate — mandatory before To Review
+
+For any task that introduces or modifies user-facing behavior (UI changes, navigation, data operations visible in the UI), the subagent must run an E2E emulator check before setting status to `To Review`.
+
+**Gate protocol:**
+1. Deploy to the Android emulator: `dotnet build -t:Run -f net10.0-android` (or equivalent)
+2. Navigate to the affected screen
+3. Execute the scenario described in the task's demo statement
+4. Confirm the expected result is observable (no crashes, no blank screens, correct data displayed)
+
+**If emulator is unavailable** (CI-only environment, no emulator configured):
+- Set status to `Check build` instead of `To Review`
+- Add a note: `E2E: emulator not available — requires manual verification`
+- The main agent must run the emulator check before approving the task
+
+**Rule:** A task that passes `dotnet build` and `dotnet test` but crashes on the emulator is not `To Review`. The emulator is the final arbiter of user-facing correctness.
+
+**What counts as "user-facing behavior":**
+- Any `.xaml` file change
+- Any ViewModel change that drives UI state (ObservableProperty, Command)
+- Any navigation change
+- Any data operation whose result is shown in the UI (list refresh, CRUD confirmation)
+
 ### Subagent exit checklist (mandatory before returning)
 Every subagent must complete ALL of these steps in order before stopping:
 
