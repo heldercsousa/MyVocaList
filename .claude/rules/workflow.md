@@ -764,6 +764,23 @@ Before dispatching a wave where two or more subagents will implement components 
 
 **Rule:** Parallel subagents that share a contract but implement against different assumptions will produce build failures or silent behavioral divergence. Commit the contract first — then parallelize.
 
+### Pre-parallel interface contracts — commit before dispatch
+
+**Before any parallel wave that involves two or more subagents implementing components that share a type, interface, or DTO:** those shared types must already exist as committed code in the repository. They must NOT be defined inside one subagent's task and consumed by another subagent's task in the same wave.
+
+**Pre-parallel contracts checklist (main agent, before wave dispatch):**
+
+- [ ] All `interface` types consumed by this wave are committed in `MyVocaList.Domain` or `MyVocaList.Services`
+- [ ] All `record` DTO types consumed by this wave are committed in `MyVocaList.Contracts`
+- [ ] All navigation route names used by this wave are committed in `AppShell.xaml`
+- [ ] All DI registrations that any subagent in this wave will inject are committed in `MauiProgram.cs`
+
+**If any item is not committed:** create a separate "contracts commit" task, dispatch it as a single sequential subagent, and do not start the parallel wave until that task's commit is pulled.
+
+**Why not just pass the interface in the briefing?** An interface in a briefing is a copy of the spec. If the spec changes between briefing time and implementation time, the briefing copy is stale. An interface in the repository is the committed contract — it cannot be stale because it IS the current state of the code.
+
+**Addendum to Shared contracts section:** This rule extends the Shared contracts section above with an explicit gate: the shared contracts must be committed BEFORE the wave starts, not just "written somewhere."
+
 ### Wave handoff — inject actual contracts for new artifacts
 
 When a wave produces a new type, interface, or DTO that a subsequent wave will consume, the main agent must extract and inject the actual contract into the next wave's briefing — not a file path alone.
