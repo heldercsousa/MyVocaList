@@ -674,6 +674,24 @@ See `.claude/agents/verifier.md` for the full Verifier agent definition.
 - After the subagent returns: run `dotnet build` and `dotnet test` as main agent
 - If a shell command is needed mid-way (migrations, file moves): do it inline, then re-delegate
 
+### Silent task completion — post-edit re-read requirement
+
+A subagent that edits a file and immediately marks the task done without re-reading the result is practicing **silent completion** — it has not verified that the edit was applied correctly.
+
+**Rule:** After every file edit, the subagent must re-read the affected section of the file and confirm:
+1. The edit was applied at the correct location
+2. The edit did not introduce a syntax error or structural inconsistency visible in the surrounding context
+3. The edit matches what the spec required (not just "an edit was made")
+
+**Specifically:**
+- After editing a `.cs` file: re-read the method signature and its surrounding class context
+- After editing a `.xaml` file: re-read the modified element and its parent container
+- After editing a spec file: re-read the section updated to confirm the note was added cleanly
+
+**Why:** LLM-based agents can produce edits that are syntactically correct in isolation but contextually wrong (e.g., wrong indentation level, mismatched braces, applied to the wrong overload). The re-read catches these before they become build errors.
+
+**This is not optional.** A task-log entry that lacks a post-edit verification step is incomplete.
+
 ### Living spec protocol — write decisions back before stopping
 
 When a subagent makes an implementation choice that is not fully specified (e.g., chose one of two valid approaches, discovered a constraint, resolved an ambiguity), it must write that decision back to the spec before stopping.
