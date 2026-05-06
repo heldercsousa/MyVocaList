@@ -437,6 +437,18 @@ Not every change requires a full three-file spec. Use this table:
 - Pasting rule file content into a briefing multiplies token cost by the number of subagents — never do it.
 - Pre-read the spec yourself and hand the subagent concrete, scoped instructions (not "based on what you find").
 
+#### Mandatory spec reads at session start
+
+Before briefing ANY subagent, the main agent must read (in its own context):
+
+1. `Docs/specs/[feature]/requirements.md` — acceptance criteria, validation rules, out-of-scope
+2. `Docs/specs/[feature]/design.md` — interfaces, layers affected, key decisions
+3. `Docs/specs/[feature]/tasks.md` — task list and current checkpoint
+
+**Rule:** The main agent must not brief a subagent based on memory from a previous session. Re-read the spec fresh at the start of each session. Context windows reset — assume nothing was retained.
+
+This prevents the most common drift source: a subagent receiving a stale or incomplete briefing because the orchestrator relied on earlier-session memory that was compacted or lost.
+
 ### Subagent return protocol — status signal only
 Subagents communicate completion **only** by:
 1. Updating the task-log beside the plan file (see Rule 5) with the task status:
