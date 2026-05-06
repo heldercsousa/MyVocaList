@@ -105,7 +105,15 @@ If an architectural decision is only in a developer's head or in a Slack message
 - **Page structure** — screens, navigation flows
 - **Interaction flows** — sequence of user actions and system responses
 - **Invariants & Postconditions** — system invariants that must hold after every operation (e.g. "Queue always has at least one active singer", "Round number is monotonically increasing")
-- **Key Decisions** — see Key Decisions section below
+- **Key Decisions** — one entry per significant design choice, using this format:
+
+  ```
+  ### Decision: [short title]
+  **Chosen approach:** [what was decided]
+  **Alternatives considered:** [what was rejected and why]
+  **Reversibility:** [Easily reversible | Reversible with effort | Hard to reverse | Irreversible]
+  **Rationale:** [why this approach was chosen]
+  ```
 
 #### design.md — optional but recommended sections (for complex features)
 - **State machine** — if the feature introduces entity state transitions, document the full state diagram: states, transitions, triggering events, guards. Example: `QueueEntry` states: `Waiting → Singing → Done | Absent`. Without this, subagents invent their own state models.
