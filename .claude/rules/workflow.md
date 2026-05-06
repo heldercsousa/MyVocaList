@@ -190,6 +190,7 @@ When a subagent's work reveals a discrepancy between the spec and the delivered 
 ### New feature workflow
 1. **Brainstorm** — invoke `superpowers:brainstorming`
 2. **Write spec** — write all three files; user reviews and approves
+   - **2a. Constitution check** — before writing the spec, verify the feature does not violate any Non-Negotiable rule in CLAUDE.md (e.g., no `DisplayAlert`, DevExpress-first, English-only). If a conflict exists, flag it to Helder before proceeding — do not silently design around it.
 3. **Write plan** — invoke `superpowers:writing-plans`
 4. **Implement** — delegate to a subagent (see Rule 2)
 5. **Phase-gate review** — invoke `/project:review` after each phase before starting the next
