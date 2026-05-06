@@ -538,6 +538,32 @@ Subagents communicate completion **only** by:
 Subagents must **not** return summaries, explanations, or diffs to the caller.
 The caller reads the task-log if it needs outcome details — never the subagent's session context.
 
+### Wave handoff — inject actual contracts for new artifacts
+
+When a wave produces a new type, interface, or DTO that a subsequent wave will consume, the main agent must extract and inject the actual contract into the next wave's briefing — not a file path alone.
+
+**Why:** The next wave's subagents start with empty context. If they are only given a file path, they will read the file and infer the contract. But inference is lossy — they may miss nuances, misread a signature, or use a stale cached version.
+
+**Protocol:**
+1. After a wave completes, the main agent reads the output files for new public interfaces, DTOs, and service contracts.
+2. For each new artifact that a subsequent wave depends on, extract the **exact signature** (interface definition, record declaration, or method signature).
+3. Include these extracted signatures verbatim in the next wave's briefing under a `## Contracts from previous wave` section.
+
+**Example briefing addendum:**
+```markdown
+## Contracts from previous wave
+
+### IVenueRepository (new — committed in Wave 1)
+Task<(IEnumerable<VenueListItemDto> items, int totalCount)> GetPagedAsync(
+    int pageNumber, int pageSize, string? query, CancellationToken ct);
+Task<bool> ExistsByNameAsync(string name, CancellationToken ct);
+
+### VenueListItemDto (new — committed in Wave 1)
+public record VenueListItemDto(int Id, string Name, int SingerCount);
+```
+
+This eliminates the "I assumed the interface looked like X" class of integration bugs between waves.
+
 ### How to brief a subagent
 Give it: the spec file paths, the tasks to complete, the rules files to read (paths only), and the
 constraint that it must build and fix errors before returning.
