@@ -1174,6 +1174,29 @@ For every acceptance criterion the task was supposed to satisfy: confirm it is s
 
 ---
 
+## Rule 2a — Approval Authority Matrix
+
+Not every decision requires the same authority to approve. Use this matrix to determine who must sign off before proceeding.
+
+| Decision type | Approver | How to get approval |
+|---------------|----------|---------------------|
+| Task implementation approach (within spec) | Subagent (autonomous) | No approval needed — spec authorizes |
+| Spec gap resolution (non-blocking assumption) | Main agent | Document assumption in task-log; proceed |
+| Spec gap resolution (blocking) | Helder | Set status `blocked: spec gap`; stop and wait |
+| New interface or DTO signature | Main agent + Helder | Commit spec with signature; Helder reviews before wave dispatches |
+| EF Core migration | Main agent | Post-wave verification includes migration review |
+| DI registration change in `MauiProgram.cs` | Main agent | Single-writer serialized; main agent verifies after commit |
+| Architecture-level decision (new layer, new pattern) | Helder | Cannot proceed without explicit approval; set `blocked: awaiting Helder review` |
+| Irreversible action (drop column, remove interface method) | Helder | Bounded autonomy rule applies; stop and document |
+| Spec content (requirements.md, design.md) | Helder | Subagents may not write or rewrite specs |
+| Rule or CLAUDE.md change | Helder | These documents are constitutional; amendments require human approval |
+
+**Addendum — implicit approval:**
+A task that is in `tasks.md` and has been reviewed by Helder carries implicit approval for its implementation approach. Subagents do not need per-action approval for work that is within the scope of an approved task.
+
+**Addendum — escalation default:**
+When in doubt about authority level, escalate. The cost of a 2-minute pause to confirm is always lower than the cost of an unauthorized irreversible action.
+
 ## Rule 2b — Review SLA and Risk-Tiered Review Lanes
 
 Not all tasks require the same depth of review. Use the risk-tiered review lanes to focus attention on tasks where errors are most costly.
