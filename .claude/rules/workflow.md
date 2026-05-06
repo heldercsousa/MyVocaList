@@ -32,6 +32,30 @@ No exceptions. Code written without reading the spec is code that may contradict
 | `design.md` | Architecture, interfaces, page structure, interaction flows, key decisions |
 | `tasks.md` | Ordered checkboxed tasks — check off as each completes |
 
+### Acceptance criteria format
+
+All acceptance criteria in `requirements.md` must use one of these two formats:
+
+**Given/When/Then (for behavior-driven scenarios):**
+```
+Given [precondition]
+When [action]
+Then [expected outcome]
+And [additional outcome if needed]
+```
+
+**EARS (Easy Approach to Requirements Syntax — for system-level rules):**
+```
+WHEN [trigger], the system SHALL [response]
+WHILE [state], the system SHALL [behavior]
+IF [condition], THEN the system SHALL [action]
+The system SHALL [always-on constraint]
+```
+
+Use Given/When/Then for user-facing flows. Use EARS for background rules, constraints, and invariants.
+
+**Never write vague acceptance criteria** such as "the system should work correctly" or "users can manage X." Every criterion must be falsifiable — a test must be writable from it.
+
 #### requirements.md — mandatory sections
 - **User stories** — "As a [role], I want [action] so that [value]"
 - **Acceptance criteria** — one per user story (see Given/When/Then format below)
