@@ -538,6 +538,22 @@ Subagents communicate completion **only** by:
 Subagents must **not** return summaries, explanations, or diffs to the caller.
 The caller reads the task-log if it needs outcome details — never the subagent's session context.
 
+### Shared contracts — required before parallel implementation
+
+Before dispatching a wave where two or more subagents will implement components that communicate (e.g., a service and its consumer, a repository and its interface, a ViewModel and its service), the main agent must:
+
+1. **Write or verify the shared contracts** — the interfaces, DTOs, and method signatures that both sides depend on.
+2. **Commit the contracts to the repository** before the wave starts. Subagents must implement against committed contracts, not against definitions that exist only in the briefing.
+3. **Include the contract file paths** in every affected subagent's briefing so they read the same source.
+
+**What counts as a shared contract:**
+- Any `interface` in the Domain or Services project
+- Any `record` DTO in the Contracts project
+- Any navigation route name used by multiple pages
+- Any DI registration key (`AddScoped<IFoo, Foo>`) depended on by two or more components
+
+**Rule:** Parallel subagents that share a contract but implement against different assumptions will produce build failures or silent behavioral divergence. Commit the contract first — then parallelize.
+
 ### Wave handoff — inject actual contracts for new artifacts
 
 When a wave produces a new type, interface, or DTO that a subsequent wave will consume, the main agent must extract and inject the actual contract into the next wave's briefing — not a file path alone.
