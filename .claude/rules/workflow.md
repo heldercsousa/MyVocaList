@@ -219,6 +219,30 @@ When a subagent's work reveals a discrepancy between the spec and the delivered 
    - After each implementation wave: review output before dispatching the next wave
    - At feature close-out: final review to confirm spec matches delivered behavior
 
+### Bug fix pattern — commit message as spec
+
+Bug fixes do not require a three-file spec. The commit message IS the specification.
+
+**Required commit message format for bug fixes:**
+```
+fix: [component] — [symptom]
+
+Root cause: [one sentence]
+Fix: [one sentence]
+Regression risk: [None | Low | Medium — reason]
+```
+
+Example:
+```
+fix: VenueRepository.ExistsByNameAsync — returns false for mixed-case duplicates
+
+Root cause: CollationInterceptor not applied to this query path.
+Fix: Added COLLATE NOCASE to the LIKE clause via EF.Functions.Collate.
+Regression risk: Low — affects search queries; covered by new integration test.
+```
+
+If the bug reveals a missing acceptance criterion, add it to `requirements.md` as part of the fix commit.
+
 ### Brownfield rule — spec new code only
 
 Existing code that predates the SDD workflow does not require retroactive spec creation. Writing specs for already-working code is waste.
