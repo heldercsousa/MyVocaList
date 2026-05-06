@@ -674,6 +674,23 @@ See `.claude/agents/verifier.md` for the full Verifier agent definition.
 - After the subagent returns: run `dotnet build` and `dotnet test` as main agent
 - If a shell command is needed mid-way (migrations, file moves): do it inline, then re-delegate
 
+### Living spec protocol — write decisions back before stopping
+
+When a subagent makes an implementation choice that is not fully specified (e.g., chose one of two valid approaches, discovered a constraint, resolved an ambiguity), it must write that decision back to the spec before stopping.
+
+**Protocol:**
+1. At the end of the task, review all decisions made that were not explicitly specified.
+2. For each such decision, add a `> **Spec updated [YYYY-MM-DD]:** [decision summary]` note to the relevant spec file (`design.md` or `requirements.md`).
+3. If the decision is a Key Decision (architecture-level), add it to the `Key Decisions` section of `design.md` using the standard format.
+4. Commit the spec update as part of the same commit as the implementation (or as a separate commit immediately before stopping).
+
+**Examples of decisions to write back:**
+- "I added a `CreatedAt` timestamp to the entity because the spec didn't say not to"
+- "I used `Task.WhenAll` for parallel validation — the spec didn't specify sync or async"
+- "I discovered that SQLite requires the collation to be set per-query, not per-column — added to constraints-registry.md"
+
+**Rule:** A subagent that makes undocumented decisions is leaving hidden state in the codebase. The next agent to touch that area will not know about those decisions and may override them.
+
 ### Subagent exit checklist (mandatory before returning)
 Every subagent must, in this order:
 1. Invoke `superpowers:verification-before-completion` — catches non-negotiable violations
