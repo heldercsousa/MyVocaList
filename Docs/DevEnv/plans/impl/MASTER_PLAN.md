@@ -186,15 +186,15 @@ One opportunity or small group per step. Sequential — same file.
 
 | Step | Description | OPPs | Status | Notes |
 |------|-------------|------|--------|-------|
-| P7-01 | Add TDD-within-SDD framing note | OPP-1-7 | Pending | |
-| P7-02 | Add acceptance criteria traceability rule | OPP-2-20 | Pending | |
-| P7-03 | Add Tester/Builder role separation rule | OPP-9-01 | Pending | |
-| P7-04 | Add one-test-at-a-time discipline | OPP-9-02 | Pending | |
-| P7-05 | Add Builder must not modify tests rule | OPP-9-03 | Pending | |
-| P7-06 | Add test quality audit checklist | OPP-9-04 | Pending | |
-| P7-07 | Add property-based testing with FsCheck | OPP-9-05 | Pending | |
-| P7-08 | Add TDD level guidance by risk (A/B/C) | OPP-9-12 | Pending | |
-| P7-09 | Add mutation testing with Stryker.NET | OPP-9-14 | Pending | |
+| P7-01 | Add TDD-within-SDD framing note | OPP-1-7 | Done | |
+| P7-02 | Add acceptance criteria traceability rule | OPP-2-20 | Done | |
+| P7-03 | Add Tester/Builder role separation rule | OPP-9-01 | Done | |
+| P7-04 | Add one-test-at-a-time discipline | OPP-9-02 | Done | |
+| P7-05 | Add Builder must not modify tests rule | OPP-9-03 | Done | |
+| P7-06 | Add test quality audit checklist | OPP-9-04 | Done | |
+| P7-07 | Add property-based testing with FsCheck | OPP-9-05 | Done | |
+| P7-08 | Add TDD level guidance by risk (A/B/C) | OPP-9-12 | Done | |
+| P7-09 | Add mutation testing with Stryker.NET | OPP-9-14 | Done | |
 
 ---
 
@@ -282,7 +282,7 @@ One opportunity or small group per step. Sequential — same file.
 | Phase 4 — workflow.md Rule 2 | 30 | 30 | 0 | 0 |
 | Phase 5 — workflow.md Rules 3–6 | 30 | 30 | 0 | 0 |
 | Phase 6 — settings.json | 4 | 4 | 0 | 0 |
-| Phase 7 — testing.md | 9 | 0 | 0 | 9 |
+| Phase 7 — testing.md | 9 | 9 | 0 | 0 |
 | Phase 8 — code-principles.md | 2 | 0 | 0 | 2 |
 | Phase 9 — CLAUDE.md | 28 | 0 | 0 | 28 |
 | Phase 10 — review.md | 12 | 0 | 0 | 12 |
