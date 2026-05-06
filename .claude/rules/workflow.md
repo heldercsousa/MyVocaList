@@ -443,6 +443,23 @@ Each subagent task must fit within one context window without compaction. A task
 
 **Warning sign:** A subagent briefing that lists > 5 files or > 2 hours of estimated work is a sizing violation. Decompose before dispatching.
 
+### Single-writer rule for hotspot files
+
+**At any given moment, each file in the repository must have at most one active writer.**
+
+This is the **single-writer rule**. It applies to all files, not just the sequential-only registry below. The registry enumerates the most common hotspot files, but the principle is universal.
+
+**What "active writer" means:** A subagent that has been dispatched with the file in its `Files owned` list is the active writer for that file until it commits and stops.
+
+**Enforcement:**
+1. Before dispatching any wave, the main agent performs the file overlap check (see Pre-wave dependency check).
+2. If two tasks in the wave list the same file in `Files owned`, they cannot run in parallel — serialize them.
+3. If a file is not listed in any task's `Files owned` but a subagent edits it anyway, that is a scope violation. The edit may be reverted during review.
+
+**Why the rule exists:** Git merge conflicts are a symptom, not the real problem. The real problem is that two agents with different contexts will make semantically incompatible changes to the same file — changes that do not conflict syntactically but produce incoherent behavior when combined.
+
+**Common single-writer violation pattern:** Two UI subagents each add a route to `AppShell.xaml`. Both commits succeed individually. The second commit overwrites the first agent's route with no merge conflict — but the first route is silently lost.
+
 ### Sequential-only file registry
 
 Some files must never be edited by more than one agent at a time. These are **hotspot files** — editing them concurrently causes merge conflicts or produces incoherent results.
