@@ -749,14 +749,20 @@ If a build fails, the subagent may attempt to fix it. The retry cap is **3 attem
 **Why a cap?** A subagent that loops on build errors without a cap will exhaust its context window making increasingly desperate patches. After 3 attempts, the problem likely requires architectural guidance — not more patching.
 
 ### Subagent exit checklist (mandatory before returning)
-Every subagent must, in this order:
-1. Invoke `superpowers:verification-before-completion` — catches non-negotiable violations
-2. Build (0 errors, or document as Build failure after 3 attempts)
-3. Run tests if code changes touched tested files — confirm 0 failures
-4. Commit changed files
-5. Push (`git push origin HEAD`)
+Every subagent must complete ALL of these steps in order before stopping:
 
-The `Stop` hook warns if uncommitted changes remain.
+1. **Invoke `superpowers:verification-before-completion`** — catches non-negotiable violations (DevExpress-first, SafeAreaEdges, English-only, no DisplayAlert, etc.)
+2. **Build:** Run `dotnet build` and confirm 0 errors. If build fails, apply the build retry cap (max 3 attempts). Document result in Verification evidence.
+3. **Test:** If any `.cs` implementation file was changed, run `dotnet test` and confirm 0 failures. Document result in Verification evidence. Skip only if no code files were modified.
+4. **Post-edit re-read:** Re-read the affected section of every edited file and confirm correctness (see Silent task completion rule).
+5. **Living spec check:** Review decisions made during implementation — write back any undocumented decisions to the spec.
+6. **Task-log:** Complete the task-log entry including Changed files, Verification evidence, and AC traceability matrix (if applicable).
+7. **Commit:** Commit all changed files including any spec updates.
+8. **Push:** `git push origin HEAD`
+
+**The `Stop` hook warns if uncommitted changes remain. Treat it as a hard gate.**
+
+A subagent that stops without completing all 8 steps has not finished the task.
 
 ---
 
