@@ -33,6 +33,15 @@
             "command": "python -c \"import json,sys,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); rel=os.path.relpath(fp,proj).replace(os.sep,'/') if fp else ''; open(os.path.join(proj,'.claude','changed-files.txt'),'a',encoding='utf-8').write(rel+'\\n') if fp else None\" 2>/dev/null || true"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import json,sys,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); services=os.path.join(proj,'MyVocaList.Services'); is_service=fp and fp.startswith(services) and fp.endswith('.cs') and not fp.endswith('Tests.cs'); print('TDD REMINDER: You just edited a Services file. Per testing.md, a failing test must exist before implementation code is written. If this is a new method or branch, ensure MyVocaList.Tests has a corresponding test that was red before this edit.') if is_service else None\" 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "SessionStart": [
