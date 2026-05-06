@@ -670,6 +670,30 @@ Your tasks:
 
 See `.claude/agents/verifier.md` for the full Verifier agent definition.
 
+### Wave completion discovery briefs
+
+After a wave completes and post-wave verification passes, the main agent must produce a **discovery brief** before dispatching the next wave. This brief documents what was actually built versus what was planned, so the next wave's briefing is grounded in reality.
+
+**Discovery brief format (write to task-log or a `wave-N-discovery.md` note):**
+```
+## Wave N Discovery Brief
+
+### What was built
+- [Actual interfaces/types committed, with signatures]
+- [Actual files created/modified]
+- [Any deviations from the spec, with spec update references]
+
+### Contracts for Wave N+1
+- [Verbatim signatures of new interfaces/DTOs the next wave will consume]
+
+### Open items
+- [Any spec gaps found, with status (resolved/escalated/deferred)]
+- [Any build warnings to watch]
+- [Any test coverage gaps identified]
+```
+
+**Why:** The gap between "what was planned" and "what was built" grows with every wave. A discovery brief closes that gap before it propagates into the next briefing. Without it, the main agent briefs Wave 2 as if Wave 1 produced exactly what was designed — which it rarely does.
+
 ### Post-wave verification — main agent runs build independently
 
 After every wave completes, the main agent must run the build and tests independently — not rely on the subagent's self-reported verification.
