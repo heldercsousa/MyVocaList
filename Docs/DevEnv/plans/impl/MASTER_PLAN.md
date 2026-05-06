@@ -99,36 +99,36 @@ One opportunity or small group per step. Sequential — same file.
 
 | Step | Description | OPPs | Status | Notes |
 |------|-------------|------|--------|-------|
-| P4-01 | Add mandatory spec reads at session start (briefing protocol) | OPP-3-06, OPP-1-9 | Pending | |
-| P4-02 | Add role scope declaration block to briefing template | OPP-5-9 | Pending | |
-| P4-03 | Add task sizing limits (prevent context window exhaustion) | OPP-3-05 | Pending | |
-| P4-04 | Add sequential-only file registry | OPP-5-13 | Pending | |
-| P4-05 | Add pre-wave dependency check + scope isolation | OPP-5-3, OPP-6-08 | Pending | |
-| P4-06 | Add wave handoff: inject actual contracts for new artifacts | OPP-5-4 | Pending | |
-| P4-07 | Add shared contracts section requirement before parallel impl | OPP-5-5 | Pending | |
-| P4-08 | Add cross-spec review gate before multi-spec wave | OPP-6-15 | Pending | |
-| P4-09 | Add verifier subagent guidance | OPP-5-1 | Pending | |
-| P4-10 | Add Adversarial Critic pattern | OPP-9-07 | Pending | |
-| P4-11 | Add subagent scope constraint (no unilateral redesign) | OPP-5-2 | Pending | |
-| P4-12 | Add living spec protocol (write decisions back before stopping) | OPP-5-12 | Pending | |
-| P4-13 | Add build retry cap (3 attempts → stop) | OPP-5-16 | Pending | |
-| P4-14 | Add kill criteria for stuck subagents | OPP-8-06, OPP-8-14 | Pending | |
-| P4-15 | Add silent task completion: post-edit re-read requirement | OPP-5-6 | Pending | |
-| P4-16 | Add proof-of-action: Changed files mandatory in task-log | OPP-9-11 | Pending | |
-| P4-17 | Update task-log format: add Verification evidence block | OPP-5-7 | Pending | |
-| P4-18 | Add acceptance criteria traceability matrix to task-log | OPP-9-15 | Pending | |
-| P4-19 | Update exit checklist: make build + test explicit steps | OPP-6-17 | Pending | |
-| P4-20 | Add post-wave verification (main agent runs build independently) | OPP-5-8 | Pending | |
-| P4-21 | Add wave completion discovery briefs | OPP-5-14 | Pending | |
-| P4-22 | Add context reset discipline for orchestrator | OPP-5-15 | Pending | |
-| P4-23 | Add spec gap escalation documentation requirement | OPP-3-07 | Pending | |
-| P4-24 | Add context exhaustion warning signs | OPP-4-3 | Pending | |
-| P4-25 | Add multi-session state handoff protocol | OPP-4-6 | Pending | |
-| P4-26 | Add fresh-context iteration pattern | OPP-4-13 | Pending | |
-| P4-27 | Add subagent MCP isolation per task | OPP-7-8 | Pending | |
-| P4-28 | Add pre-task context gate (verify spec + test exist) | OPP-9-16 | Pending | |
-| P4-29 | Add bounded autonomy rule (irreversible actions need confirmation) | OPP-9-18 | Pending | |
-| P4-30 | Add spec freshness gate before dispatching a wave | OPP-9-17 | Pending | |
+| P4-01 | Add mandatory spec reads at session start (briefing protocol) | OPP-3-06, OPP-1-9 | Done | |
+| P4-02 | Add role scope declaration block to briefing template | OPP-5-9 | Done | |
+| P4-03 | Add task sizing limits (prevent context window exhaustion) | OPP-3-05 | Done | |
+| P4-04 | Add sequential-only file registry | OPP-5-13 | Done | |
+| P4-05 | Add pre-wave dependency check + scope isolation | OPP-5-3, OPP-6-08 | Done | |
+| P4-06 | Add wave handoff: inject actual contracts for new artifacts | OPP-5-4 | Done | |
+| P4-07 | Add shared contracts section requirement before parallel impl | OPP-5-5 | Done | |
+| P4-08 | Add cross-spec review gate before multi-spec wave | OPP-6-15 | Done | |
+| P4-09 | Add verifier subagent guidance | OPP-5-1 | Done | |
+| P4-10 | Add Adversarial Critic pattern | OPP-9-07 | Done | |
+| P4-11 | Add subagent scope constraint (no unilateral redesign) | OPP-5-2 | Done | |
+| P4-12 | Add living spec protocol (write decisions back before stopping) | OPP-5-12 | Done | |
+| P4-13 | Add build retry cap (3 attempts → stop) | OPP-5-16 | Done | |
+| P4-14 | Add kill criteria for stuck subagents | OPP-8-06, OPP-8-14 | Done | |
+| P4-15 | Add silent task completion: post-edit re-read requirement | OPP-5-6 | Done | |
+| P4-16 | Add proof-of-action: Changed files mandatory in task-log | OPP-9-11 | Done | |
+| P4-17 | Update task-log format: add Verification evidence block | OPP-5-7 | Done | |
+| P4-18 | Add acceptance criteria traceability matrix to task-log | OPP-9-15 | Done | |
+| P4-19 | Update exit checklist: make build + test explicit steps | OPP-6-17 | Done | |
+| P4-20 | Add post-wave verification (main agent runs build independently) | OPP-5-8 | Done | |
+| P4-21 | Add wave completion discovery briefs | OPP-5-14 | Done | |
+| P4-22 | Add context reset discipline for orchestrator | OPP-5-15 | Done | |
+| P4-23 | Add spec gap escalation documentation requirement | OPP-3-07 | Done | |
+| P4-24 | Add context exhaustion warning signs | OPP-4-3 | Done | |
+| P4-25 | Add multi-session state handoff protocol | OPP-4-6 | Done | |
+| P4-26 | Add fresh-context iteration pattern | OPP-4-13 | Done | |
+| P4-27 | Add subagent MCP isolation per task | OPP-7-8 | Done | |
+| P4-28 | Add pre-task context gate (verify spec + test exist) | OPP-9-16 | Done | |
+| P4-29 | Add bounded autonomy rule (irreversible actions need confirmation) | OPP-9-18 | Done | |
+| P4-30 | Add spec freshness gate before dispatching a wave | OPP-9-17 | Done | |
 
 ---
 
@@ -279,7 +279,7 @@ One opportunity or small group per step. Sequential — same file.
 | Phase 1 — Status log files | 11 | 11 | 0 | 0 |
 | Phase 2 — New support files | 5 | 5 | 0 | 0 |
 | Phase 3 — workflow.md Rule 1 | 27 | 27 | 0 | 0 |
-| Phase 4 — workflow.md Rule 2 | 30 | 0 | 0 | 30 |
+| Phase 4 — workflow.md Rule 2 | 30 | 30 | 0 | 0 |
 | Phase 5 — workflow.md Rules 3–6 | 30 | 0 | 0 | 30 |
 | Phase 6 — settings.json | 4 | 0 | 0 | 4 |
 | Phase 7 — testing.md | 9 | 0 | 0 | 9 |
