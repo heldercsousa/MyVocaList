@@ -25,6 +25,16 @@ This invariant applies to all agents (main and sub) at all times.
 
 No exceptions. Code written without reading the spec is code that may contradict it.
 
+### Spec as source of truth
+
+The spec is the authoritative description of intended behavior. When spec and code disagree:
+
+- **If the spec is complete and was approved:** the code is wrong. Fix the code.
+- **If the spec has a gap or is ambiguous:** stop, clarify with Helder, update the spec, then fix the code.
+- **Never:** silently fix the code and leave the spec describing something that no longer exists.
+
+This rule prevents the spec from becoming a historical artifact. A spec that no longer matches the code is worse than no spec — it actively misleads future agents and reviewers.
+
 ### Spec structure (copy from `Docs/specs/venues/`)
 | File | What it answers |
 |------|----------------|
