@@ -354,6 +354,34 @@ When a subagent's work reveals a discrepancy between the spec and the delivered 
 
 > **Staleness prevention:** Every implementation task must end with a brief spec-review question: "Does the spec still accurately describe what was built?" If the answer is no, fix the spec before committing.
 
+### Rebuild test — feature close-out spec quality check
+
+When a feature is considered complete (all tasks checked in `tasks.md`, final review passed), perform the **rebuild test** as a spec quality diagnostic before closing the feature.
+
+**Rebuild test protocol:**
+1. Take the completed feature's spec (`requirements.md` + `design.md`) — without the existing implementation
+2. In a fresh Claude session (empty context), provide only the spec and ask: "Implement this feature"
+3. Compare the generated output against the actual implementation
+4. Count the number of places where the generated output contradicts the delivered implementation
+
+**Interpretation:**
+| Divergences | Meaning | Action |
+|-------------|---------|--------|
+| 0–1 | Spec accurately describes the implementation | Close the feature |
+| 2–3 | Spec has minor gaps or imprecisions | Update the spec before closing |
+| 4+ | Spec has significant gaps — a new developer would implement it differently | Revise the spec substantially; consider whether the implementation itself is correct |
+
+**This is a diagnostic, not a requirement.** The rebuild test is not a mandatory gate for every feature. Apply it:
+- For complex features (Large or Epic on the spec size calibration table)
+- When the implementation diverged significantly from the original spec
+- When Helder suspects the spec does not reflect the delivered behavior
+- As a periodic quality audit (e.g., once per quarter for active features)
+
+**What the rebuild test reveals:**
+- Missing acceptance criteria (the generator produces different behavior because there was no criterion forbidding it)
+- Over-constrained specs (the generator ignores constraints that are too detailed to be meaningful)
+- Tacit knowledge gaps (the generator makes a "reasonable" choice that contradicts the actual behavior because the constraint was never written)
+
 ### New feature workflow
 1. **Brainstorm** — invoke `superpowers:brainstorming`
 2. **Write spec** — write all three files; user reviews and approves
