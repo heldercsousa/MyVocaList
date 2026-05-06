@@ -1007,6 +1007,27 @@ The `Stop` hook warns you — treat it as a hard gate, not a suggestion.
 - Tests pass (if the task touched tested code)
 - The checkbox in `tasks.md` is checked
 
+### Task completion verification gates
+
+Before checking the box and committing, a subagent must pass all of the following gates:
+
+**1. Demo statement verification**
+If the task has a demo statement (see Rule 1 — Demo statement requirement), the subagent must confirm it can be executed:
+- If UI is involved: the feature is observable on the emulator or simulator
+- If logic only: the demo statement maps to a passing test or a verifiable log output
+- A task whose demo statement cannot be verified is NOT complete — it may compile, but it does not work
+
+**2. DI registration check**
+If the task introduces a new service, repository, ViewModel, or page, confirm that it is registered in `MauiProgram.cs`:
+- New `IFoo` / `FooService` pair → `AddScoped<IFoo, FooService>()`
+- New page + ViewModel → `AddTransient<FooPage>()` + `AddTransient<FooViewModel>()`
+- New singleton → `AddSingleton<IFooService, FooService>()`
+
+**Rule:** An unregistered type will compile but fail at runtime. DI registration is a task completion requirement, not an afterthought.
+
+**3. Acceptance criteria check**
+For every acceptance criterion the task was supposed to satisfy: confirm it is satisfied. If an AC cannot be confirmed without running the app, record the evidence in the task-log's AC traceability matrix (see Rule 5).
+
 ---
 
 ## Rule 4 — Tasks.md Is the Source of Truth
