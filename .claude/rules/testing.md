@@ -499,6 +499,22 @@ These must be fixed when the test project is created. Do NOT create tests until 
 
 ---
 
+## Builder Must Not Modify Tests
+
+During the Green phase, the Builder's only permitted action is writing or modifying **production code** in `MyVocaList.Domain`, `MyVocaList.Services`, `MyVocaList.Infra`, or `MyVocaList` (MAUI).
+
+**The Builder must never:**
+- Edit a test file to make a test pass
+- Comment out an assertion
+- Change a test's setup to avoid triggering a failure
+- Delete a test that cannot be made to pass
+
+**If a test appears wrong:**
+The Builder must stop, document the suspected spec gap in the task-log (`blocked: spec gap`), and wait for the architect (Helder) to resolve it. The Builder does not unilaterally decide a test is wrong.
+
+**Rationale:** A test represents an encoded acceptance criterion. Changing the test without changing the spec is silent spec deletion — the behavior remains unverified but appears tested.
+---
+
 ## Anti-Patterns — Never Do These
 
 | Anti-pattern | Why |
@@ -510,3 +526,5 @@ These must be fixed when the test project is created. Do NOT create tests until 
 | Write multiple `Assert.*` for unrelated behaviors | One test, one behavioral assertion (related asserts for a single behavior are fine) |
 | Use `Thread.Sleep` for async timing | Use `await Task.Delay` or `TaskCompletionSource` |
 | Skip writing the failing test first (Step 4+) | This is TDD — the failing test is not optional |
+| Modify a test to make it pass during Green phase | Tests define the contract. Changing a test to pass is not Green — it is spec deletion. If a test is wrong, escalate to the architect; do not silently fix it. |
+| Delete a failing test instead of implementing the behavior | Same as above — spec deletion. Failing tests are blockers, not noise. |
