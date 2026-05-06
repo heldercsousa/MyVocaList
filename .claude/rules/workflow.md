@@ -692,6 +692,26 @@ Your tasks:
 
 See `.claude/agents/verifier.md` for the full Verifier agent definition.
 
+### Pre-task context gate — verify spec + test exist
+
+Before a subagent starts implementation, it must verify that the preconditions for the task are in place. This is the **pre-task context gate**.
+
+**Gate checklist (subagent checks before writing any code):**
+
+- [ ] `Docs/specs/[feature]/requirements.md` exists and has been read
+- [ ] `Docs/specs/[feature]/design.md` exists and has been read
+- [ ] The interface or service method being implemented is defined in `design.md`
+- [ ] If TDD applies (see testing.md): a failing test file exists for the method being implemented, OR writing the test is the first step of this task
+- [ ] The acceptance criteria that this task addresses have been identified (for AC traceability matrix)
+- [ ] The role scope block has been confirmed (files owned, files off-limits)
+
+**If any gate item fails:**
+- Spec files missing → set task status to `blocked: spec gap`, stop
+- Interface not in design.md → do not infer the interface; stop and request clarification
+- Test file missing when TDD applies → write the test first before implementation
+
+**Why:** A subagent that starts coding without verifying these preconditions will implement against assumptions, not against the spec. The gate takes 2 minutes and prevents hours of rework.
+
 ### Subagent MCP isolation per task
 
 Each subagent should use only the MCPs relevant to its assigned task. Unnecessary MCP invocations waste tokens and can introduce irrelevant context.
