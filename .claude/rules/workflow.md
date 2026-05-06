@@ -443,6 +443,26 @@ Each subagent task must fit within one context window without compaction. A task
 
 **Warning sign:** A subagent briefing that lists > 5 files or > 2 hours of estimated work is a sizing violation. Decompose before dispatching.
 
+### Sequential-only file registry
+
+Some files must never be edited by more than one agent at a time. These are **hotspot files** — editing them concurrently causes merge conflicts or produces incoherent results.
+
+**Sequential-only files (one writer at a time, always):**
+
+| File | Reason |
+|------|--------|
+| `MauiProgram.cs` | DI registration — ordering matters; parallel edits produce conflicts |
+| `AppShell.xaml` / `AppShell.xaml.cs` | Route registration — one canonical route table |
+| `AppDbContext.cs` | EF Core model config — entity set definitions must be coherent |
+| Any `*Migration.cs` files | EF migrations are sequential by design |
+| `GlobalUsings.cs` (any project) | Global using declarations — merge conflicts produce duplicate errors |
+| `Directory.Build.props` | Shared MSBuild properties — parallel edits produce conflicts |
+| `tasks.md` (any spec) | Task status tracking — parallel checkbox edits produce divergent state |
+
+**Rule:** If a wave requires two or more subagents to touch the same sequential-only file, serialize those tasks — do not parallelize them. Complete one task, commit, then dispatch the next.
+
+**How to add entries:** If a session discovers a new hotspot file (a file where parallel edits caused a conflict or incoherent output), add it to this registry before ending the session.
+
 ### Wave-based parallelism — hard cap
 - **Maximum 4 subagents may run in parallel at any one time.**
 - Work is dispatched in waves: spawn up to 4 subagents, wait for all to complete, then start the next wave.
