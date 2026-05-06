@@ -1,9 +1,25 @@
 # S6 — Governance & Enforcement: Enhancement Opportunities
 > Analyzed against current .claude state (see _current_state_summary.md)
+> Last reviewed: 2026-05-05
 
 ---
 
-### OPP-6-01: Distinguish constitutional constraints from guidelines in CLAUDE.md
+## Summary
+
+| Category | Count |
+|----------|-------|
+| ✅ Validated (previously captured, confirmed by full spec review) | 9 |
+| ♻️ Refined (previously captured, updated with new detail) | 0 |
+| 🆕 New (not previously captured) | 8 |
+| **Total** | **17** |
+
+Previously captured opportunities (OPP-6-01 through OPP-6-09) have been validated against the complete S6 spec files. Eight new opportunities have been identified from content in the sub-files (S6.1, S6.1.1, S6.1.2, S6.2, S6.2.1, S6.3, S6.3.1, S6.4, S6.4.1, S6.4.2) that were not covered in the original analysis.
+
+---
+
+## Validated Opportunities
+
+### ✅ OPP-6-01: Distinguish constitutional constraints from guidelines in CLAUDE.md
 **Target:** CLAUDE.md
 **Action:** Update
 **Source topic:** S6.1 — Constitutional Constraints
@@ -12,7 +28,7 @@
 
 ---
 
-### OPP-6-02: Add rationale to every Non-Negotiable rule in CLAUDE.md
+### ✅ OPP-6-02: Add rationale to every Non-Negotiable rule in CLAUDE.md
 **Target:** CLAUDE.md
 **Action:** Update
 **Source topic:** S6.1.1 — Constitutional Rigidity and Staleness
@@ -21,7 +37,7 @@
 
 ---
 
-### OPP-6-03: Add an amendment governance process for CLAUDE.md and rules files
+### ✅ OPP-6-03: Add an amendment governance process for CLAUDE.md and rules files
 **Target:** CLAUDE.md
 **Action:** Add
 **Source topic:** S6.1.2 — Amendment Governance
@@ -42,7 +58,7 @@ This adds ~8 lines to CLAUDE.md and prevents silent rule drift.
 
 ---
 
-### OPP-6-04: Document hook enforcement boundaries and known gaps
+### ✅ OPP-6-04: Document hook enforcement boundaries and known gaps
 **Target:** .claude/rules/workflow.md
 **Action:** Add
 **Source topic:** S6.2 / S6.2.1 — Automated Hooks + Enforcement Cost Overhead
@@ -63,7 +79,7 @@ This adds ~8 lines to CLAUDE.md and prevents silent rule drift.
 
 ---
 
-### OPP-6-05: Add a review gate severity classification to review.md
+### ✅ OPP-6-05: Add a review gate severity classification to review.md
 **Target:** .claude/commands/review.md
 **Action:** Update
 **Source topic:** S6.3 — Review Gates
@@ -85,7 +101,7 @@ Then prefix each existing checklist item with the appropriate severity marker.
 
 ---
 
-### OPP-6-06: Add a spec-vs-code consistency check to review.md
+### ✅ OPP-6-06: Add a spec-vs-code consistency check to review.md
 **Target:** .claude/commands/review.md
 **Action:** Add
 **Source topic:** S6.3 / S6.4.1 (Category 1) — Review Gates / Behavioral Contract Violations
@@ -106,7 +122,7 @@ Then prefix each existing checklist item with the appropriate severity marker.
 
 ---
 
-### OPP-6-07: Add a "spec is source of truth" rule to workflow.md
+### ✅ OPP-6-07: Add a "spec is source of truth" rule to workflow.md
 **Target:** .claude/rules/workflow.md
 **Action:** Add
 **Source topic:** S6.4.2 — Continuous Conformance Requirement
@@ -126,7 +142,7 @@ When implementation diverges from the spec:
 
 ---
 
-### OPP-6-08: Add a multi-agent scope conflict rule to workflow.md
+### ✅ OPP-6-08: Add a multi-agent scope conflict rule to workflow.md
 **Target:** .claude/rules/workflow.md
 **Action:** Add
 **Source topic:** S6.4.1 (Category 6) — Multi-Agent Scope Conflicts
@@ -146,7 +162,7 @@ Before dispatching parallel subagents, the main agent must verify:
 
 ---
 
-### OPP-6-09: Add six spec-code drift categories as a review checklist to review.md
+### ✅ OPP-6-09: Add six spec-code drift categories as a review checklist to review.md
 **Target:** .claude/commands/review.md
 **Action:** Add
 **Source topic:** S6.4.1 — Six Drift Categories
@@ -164,3 +180,176 @@ Before dispatching parallel subagents, the main agent must verify:
       domain entity (e.g., Venue, Singer, Queue), verify the changes compose without silent
       incompatibility (interface change + caller change in sync).
 ```
+
+---
+
+## New Opportunities
+
+### 🆕 OPP-6-10: Establish a Constitutional Hierarchy document
+**Target:** `.claude/rules/constitutional-hierarchy.md` (new file) or append to CLAUDE.md
+**Action:** Add
+**Source topic:** S6.1 — Constitutional Constraints (Constitutional Hierarchy and Inheritance)
+**Gap in current setup:** CLAUDE.md and `.claude/rules/` contain rules at different levels of authority, but the hierarchy relationship is undocumented. Agents do not know which rules are unamendable invariants, which are project-level overrides, and which are local preferences. The SDD model defines a five-tier hierarchy: Enterprise → Global User → Project → Project Modular Rules → Local Override. Currently only two tiers are operative (global `~/.claude/CLAUDE.md` and project `CLAUDE.md`), and the conflict resolution rule ("lower tiers can only strengthen, not weaken") is not stated anywhere.
+**Concrete enhancement action:** Add a "Rule Authority Hierarchy" section to CLAUDE.md:
+
+```
+## Rule Authority Hierarchy
+Rules in this project are layered. Lower layers can only STRENGTHEN upper-layer rules — never weaken them.
+
+| Layer | Location | Scope |
+|-------|----------|-------|
+| Global | `~/.claude/CLAUDE.md` | All projects for this user |
+| Project | `./CLAUDE.md` (this file) | This project, all agents |
+| Modular | `.claude/rules/*.md` | This project, context-scoped |
+| Local | `.claude/CLAUDE.local.md` (gitignored) | This session only, testing only |
+
+**Unamendable constraints** (require extraordinary circumstances + architecture review):
+- "Business logic lives in Services only"
+- "Never use DisplayAlert for dialogs"
+- "Repository interfaces in Domain, implementations in Infra"
+```
+
+This costs ~15 lines and prevents agents from misinterpreting a rules-file override as permission to relax a project constraint.
+
+---
+
+### 🆕 OPP-6-11: Add periodic constitutional audit to the project lifecycle
+**Target:** CLAUDE.md (Continuous Enhancement section)
+**Action:** Update
+**Source topic:** S6.1.1 — Constitutional Rigidity and Staleness (Countermeasures: Periodic Audits)
+**Gap in current setup:** CLAUDE.md's "Continuous Enhancement" section asks "what was learned that should improve CLAUDE.md" after every task, but does not establish a cadence for proactive audit of existing rules. Stale constraints — rules that are no longer correct, redundant (now enforced by the type system), or contradictory — accumulate silently. The SDD staleness model identifies specific signals: rules with no explicit rationale, contradiction emergence, violation acceleration, and coverage erosion (accumulating `unless X` exceptions).
+**Concrete enhancement action:** Extend the "Continuous Enhancement" section with a quarterly audit protocol:
+
+```
+### Quarterly Constitutional Audit
+At significant project milestones (phase completion, feature launch), review CLAUDE.md and all
+`.claude/rules/` files for:
+- Rules with no rationale — add rationale or remove the rule
+- Redundant rules — remove if the type system or DI container now enforces them
+- Contradictions — two rules that conflict in an edge case
+- Exception accumulation — rules with 2+ `unless X` qualifiers (the rule may be wrong)
+- Rules where violation rate is rising (a sign the rule is fighting reality)
+```
+
+---
+
+### 🆕 OPP-6-12: Add a constitutional exception registry
+**Target:** `.claude/exception-registry.md` (new file)
+**Action:** Add
+**Source topic:** S6.1.1 — Constitutional Rigidity and Staleness (Countermeasure 4: Exception Registry)
+**Gap in current setup:** When a constitutional constraint is wrong for a specific case, the current workflow has no mechanism to record the approved exception. The exception either happens silently (code that breaks the rule, never documented) or causes unnecessary friction (team debates an exception that should be quick to grant). The SDD exception registry pattern makes exceptions transparent, enables pattern detection (accumulating exceptions signal a wrong rule), and provides an audit trail.
+**Concrete enhancement action:** Create `.claude/exception-registry.md`:
+
+```markdown
+# Exception Registry
+
+Approved exceptions to constitutional constraints. Review quarterly.
+Exceptions that accumulate (3+ for the same constraint) signal the constraint may need amendment.
+
+| Date | Constraint | Reason | Code location | Expires |
+|------|-----------|--------|---------------|---------|
+| — | — | — | — | — |
+```
+
+Add a reference in CLAUDE.md: "If a constitutional constraint cannot be followed in a specific case, document it in `.claude/exception-registry.md` before deviating. Never deviate silently."
+
+---
+
+### 🆕 OPP-6-13: Add a SessionStart hook for hook health verification
+**Target:** `.claude/settings.json` (hooks configuration)
+**Action:** Add
+**Source topic:** S6.2 / S6.2.1 — Automated Hooks / Silent Hook Failures
+**Gap in current setup:** S6.2.1 documents that silent hook failures (missing dependencies, non-zero non-2 exit codes) cause enforcement to silently not happen — the tool call proceeds unchecked. There is no mechanism in the current setup to verify that hooks are operational at session start. If `jq` (used in hook scripts) is missing or a hook has a syntax error, all PreToolUse enforcement silently fails for the entire session.
+**Concrete enhancement action:** Add a `SessionStart` hook that validates hook dependencies exist and outputs a warning if any are missing:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [{
+      "hooks": [{
+        "type": "command",
+        "command": "powershell -Command \"if (-not (Get-Command jq -ErrorAction SilentlyContinue)) { Write-Error 'WARNING: jq not found — hook enforcement may be inactive. Install jq to restore enforcement.' }\"",
+        "timeout": 5
+      }]
+    }]
+  }
+}
+```
+
+This is low-cost (runs once per session, <5 sec) and ensures enforcement failures are visible rather than silent.
+
+---
+
+### 🆕 OPP-6-14: Add a phase-gate hook for spec approval before implementation
+**Target:** `.claude/settings.json` (hooks configuration) and `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S6.2 — Automated Hooks (Real-World Hook Pattern 5: Spec-Code Alignment Gate)
+**Gap in current setup:** workflow.md Rule 1 states "read the spec before coding" but this is entirely advisory — there is no mechanical enforcement preventing implementation without spec review. The SDD SmartScope phase-gate pattern uses a PreToolUse hook that blocks `Edit` and `Write` calls if a spec approval flag file does not exist. This converts the spec-first rule from advisory (agent may forget under pressure) to constitutional (tool calls are blocked).
+**Concrete enhancement action:** Define a lightweight approval flag pattern: when Helder approves a spec/design for implementation, a marker file is created at `.claude/approvals/[feature].approved`. A PreToolUse hook checks for this file before allowing edits to implementation files. Document the pattern in workflow.md Rule 1 and create the hook in `.claude/settings.json`. This is appropriate for high-risk features; lower-risk work can bypass via an explicit `--skip-approval` flag (logged).
+
+---
+
+### 🆕 OPP-6-15: Add cross-spec review gate to the wave-dispatch briefing protocol
+**Target:** `.claude/rules/workflow.md`
+**Action:** Update
+**Source topic:** S6.3 — Review Gates (Distributed Approval: Multi-Agent Scope) / S6.3.1 — Reviewer Context Loss
+**Gap in current setup:** workflow.md Rule 2 (Subagent Delegation) describes the briefing protocol but has no instruction to check for cross-spec contradictions before dispatching a wave. The cc-sdd framework's `/kiro-spec-batch` pattern reviews multiple specs in parallel for contradictions, duplicated responsibilities, and interface mismatches before implementation begins. Without this, two subagents can implement features with overlapping domain models (e.g., both define a `Singer` entity with different field names) that are individually correct but incompatible when merged.
+**Concrete enhancement action:** Add to workflow.md Rule 2, in the briefing protocol:
+
+```
+### Before dispatching a multi-spec wave
+If the wave involves 2+ specs that touch the same domain entities or interfaces:
+1. Read all specs' design.md files before briefing any subagent.
+2. Verify: entity field names, service method signatures, and database table references are consistent.
+3. If contradiction is found: resolve it in the spec files first, then dispatch.
+4. Cross-spec contradictions caught here cost 1 edit; the same contradiction found after
+   both subagents have committed costs N edits across both implementations.
+```
+
+---
+
+### 🆕 OPP-6-16: Add a suppression justification policy to code-principles.md
+**Target:** `.claude/rules/code-principles.md`
+**Action:** Add
+**Source topic:** S6.4.1 (Category 4) — Static Analysis Suppression Gaps
+**Gap in current setup:** code-principles.md documents the nullable reference type suppression policy (`CS8618`, `CS8601`, etc.) and notes these are deliberate project decisions. However, there is no policy governing new suppressions added by agents during implementation. S6.4.1 identifies suppression gaps as a significant drift category: real violations are suppressed with `#pragma warning disable` or `[SuppressMessage]` and never revisited. The current rules do not prevent agents from silently suppressing warnings they do not understand how to fix.
+**Concrete enhancement action:** Add a suppressions policy to code-principles.md:
+
+```
+## Static Analysis Suppressions
+
+**Never add a new suppression** (`#pragma warning disable`, `[SuppressMessage]`,
+`// ReSharper disable`) without:
+1. A comment explaining why the suppression is necessary (one sentence minimum)
+2. An expiry comment if the suppression is temporary: `// TODO: Remove after [condition]`
+3. Logging the suppression in `.claude/exception-registry.md` if it suppresses a constitutional rule
+
+Existing suppressions in `Directory.Build.props` for nullable analysis (CS8618 etc.) are
+pre-approved project decisions — do not add to that list without architecture review.
+
+If you cannot fix a warning without suppressing it, log a `blocked: spec gap` status and stop.
+```
+
+---
+
+### 🆕 OPP-6-17: Add a dual-verification instruction for the Stop hook
+**Target:** `.claude/rules/workflow.md` and subagent exit checklist
+**Action:** Update
+**Source topic:** S6.4 — CI/CD Integration (Pattern 4: Dual Verification) / S6.4.2 — Continuous Conformance (Silent Task Completion)
+**Gap in current setup:** The subagent exit checklist (Rule 2, workflow.md) requires invoking `superpowers:verification-before-completion` before stopping. However, S6.4.2 documents that agents demonstrably skip or falsely mark verification tasks complete (Silent Task Completion, S5.3.1). The SDD dual-verification pattern runs the verifier twice: once agent-side before push, and once as a CI/CD structural backstop that agents cannot bypass. Currently, MyVocaList has no second-run verification; only the agent's self-reported `verification-before-completion` result is trusted.
+**Concrete enhancement action:** Add to the subagent exit checklist in workflow.md:
+
+```
+### Subagent exit checklist (mandatory, in order)
+1. Invoke `superpowers:verification-before-completion` — catches non-negotiable violations
+2. Run `dotnet build` — must show 0 errors (not just "build succeeded with warnings")
+3. Run `dotnet test` if any tested code was modified — all tests must pass
+4. Commit changed files with `git status` verification (no untracked files left behind)
+5. Push (`git push origin HEAD`)
+6. Update task-log with status
+
+Steps 2–3 are structural verification. The Stop hook in `.claude/settings.json` enforces step 4.
+The Stop hook is the last line of defense — if it warns, treat it as a hard gate.
+```
+
+The key addition is making `dotnet build` and `dotnet test` explicit structural steps separate from the skill invocation, so they cannot be "skipped" by a false completion claim.

@@ -1,9 +1,18 @@
 # S5 — Agent Patterns: Enhancement Opportunities
 > Analyzed against current .claude state (see _current_state_summary.md)
 
+## Summary
+
+**Previously captured:** 10 opportunities (OPP-5-1 through OPP-5-10)
+**Validated as-is:** 8 (OPP-5-1, OPP-5-2, OPP-5-3, OPP-5-5, OPP-5-6, OPP-5-7, OPP-5-8, OPP-5-10)
+**Refined:** 2 (OPP-5-4, OPP-5-9 — scope or rationale tightened based on S5.2 and S5.1.1 deep content)
+**New opportunities identified:** 6 (OPP-5-11 through OPP-5-16)
+
 ---
 
-### OPP-5-1: Verifier subagent guidance for critical features
+## Validated Opportunities
+
+### OPP-5-1: Verifier subagent guidance for critical features ✅ Validated
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S5.1 — Adversarial Agent Pattern (CIV architecture)
@@ -12,7 +21,7 @@
 
 ---
 
-### OPP-5-2: Subagent scope constraint — no unilateral redesign
+### OPP-5-2: Subagent scope constraint — no unilateral redesign ✅ Validated
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S5.1.1 — Persona/Role Confusion (Role Scope Expansion)
@@ -21,7 +30,7 @@
 
 ---
 
-### OPP-5-3: Dependency pre-check — shared artifacts enumeration before wave dispatch
+### OPP-5-3: Dependency pre-check — shared artifacts enumeration before wave dispatch ✅ Validated
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S5.2.1 — Dependency Ordering Fragility
@@ -30,16 +39,16 @@
 
 ---
 
-### OPP-5-4: Wave handoff — inject actual contracts, not references
+### OPP-5-4: Wave handoff — inject actual contracts, not references ♻️ Refined
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
-**Source topic:** S5.2 — Parallel Agent Execution (Wave-Based Execution, Best Practice #2)
-**Rationale:** The current briefing protocol says "give file paths, not content." This is correct for avoiding token multiplication of existing code, but it creates a gap for Wave N+1 agents: they receive a file path reference to Wave N's output, which may not yet match what was actually built. The SDD best practice is to inject actual contracts (interface signatures, DTO field lists, migration table names) from Wave N directly into Wave N+1 spawn prompts — not references.
-**Suggested content/change:** Add a clarification to the briefing protocol: "For Wave N+1 subagents that depend on Wave N outputs (new interfaces, new DTOs, new migration schemas), paste the actual produced artifact content into the spawn prompt — not a file path reference. The subagent reads existing files independently; it receives new contracts from upstream waves as inline content. This eliminates guesswork about what was built."
+**Source topic:** S5.2 — Parallel Agent Execution (Wave-Based Execution, Best Practice #2); S5.2.1 — Dependency Ordering Fragility (Tertiary mitigation)
+**Rationale:** The current briefing protocol says "give file paths, not content." This is correct for existing code, but creates a gap for Wave N+1 agents that depend on Wave N's newly produced artifacts. The S5.2 deep content is explicit: paste actual interface definitions, DTO field lists, and migration schemas directly into Wave N+1 spawn prompts — do not write "use the schema Agent A created in src/schema.cs." The distinction is between *existing* files (read independently) and *newly produced contracts from the current wave* (injected as inline content). The previous rationale conflated these two cases.
+**Suggested content/change:** Add a clarification to the briefing protocol: "For Wave N+1 subagents that depend on Wave N outputs (new interfaces, new DTOs, new migration schemas): paste the actual produced artifact content into the spawn prompt — not a file path reference. Subagents read *existing* files independently; they receive *new contracts from upstream waves* as inline content in their spawn prompt. Example: Agent B's prompt contains the actual C# interface Agent A just wrote, not 'see the interface in src/Domain/...' This eliminates guesswork about what was built."
 
 ---
 
-### OPP-5-5: Spec contracts section required before parallel implementation
+### OPP-5-5: Spec contracts section required before parallel implementation ✅ Validated
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S5.2.2 — Cross-Agent Spec Conflicts (Strategy 1: Shared Contracts)
@@ -48,7 +57,7 @@
 
 ---
 
-### OPP-5-6: Silent task completion — post-edit re-read requirement
+### OPP-5-6: Silent task completion — post-edit re-read requirement ✅ Validated
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S5.3.1 — Silent Task Completion (Mitigation 2: Mandatory Post-Edit Re-read)
@@ -57,7 +66,7 @@
 
 ---
 
-### OPP-5-7: Silent task completion — structured task-log entry with evidence
+### OPP-5-7: Silent task completion — structured task-log entry with evidence ✅ Validated
 **Target:** `.claude/rules/workflow.md`
 **Action:** Update
 **Source topic:** S5.3.1 — Silent Task Completion (Mitigation 4: Structured Completion Contract)
@@ -66,7 +75,7 @@
 
 ---
 
-### OPP-5-8: Main agent must run build after every wave, not trust subagent self-report
+### OPP-5-8: Main agent must run build after every wave, not trust subagent self-report ✅ Validated
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
 **Source topic:** S5.3.1 — Silent Task Completion (Mitigation: Main Agent Verification)
@@ -75,18 +84,95 @@
 
 ---
 
-### OPP-5-9: Subagent briefing must state role scope explicitly
+### OPP-5-9: Subagent briefing must state role scope explicitly ♻️ Refined
 **Target:** `.claude/rules/workflow.md`
 **Action:** Add
-**Source topic:** S5.1.1 — Persona/Role Confusion (Mitigation 2: Structured Output and Role Re-Declaration)
-**Rationale:** The current briefing protocol specifies "give file paths, not inline content." It does not specify that the subagent's role scope must be declared explicitly in the briefing. The SDD research shows that role scope expansion (Implementor starts reasoning about architecture) is reduced when the briefing explicitly states the boundary: "You are implementing X. You do not redesign Y. Decisions outside your file list go to task-log as blocked: spec gap."
-**Suggested content/change:** Add a mandatory "Role scope declaration" line to the subagent briefing template in Rule 2: "Every subagent briefing must include: 'Your role: Implementor. Your file scope: [list]. You do not modify files outside this list. You do not make architectural decisions. If you discover something that requires a decision outside your scope, write it to the task-log as `blocked: spec gap` with a one-line question and stop.'"
+**Source topic:** S5.1.1 — Persona/Role Confusion (Mitigation 2: Structured Output and Role Re-Declaration; Mitigation 3: Constraint Tracking)
+**Rationale:** The current briefing protocol specifies "give file paths, not inline content." It does not specify that the subagent's role scope must be declared explicitly. The S5.1.1 deep content adds an important nuance: beyond just declaring scope, the briefing must also enumerate explicit "do NOT" constraints as a typed constraint list — not just a prose description. Research shows echoing (role drift) drops from 32–37% to ~9% with structured role re-declaration, but never reaches zero. The briefing template must include: assigned role, file scope, prohibited actions, and escalation path for out-of-scope discoveries.
+**Suggested content/change:** Add a mandatory "Role scope declaration" block to the subagent briefing template in Rule 2:
+```
+Role: Implementor
+File scope: [list — you own these files; do not modify others]
+Prohibited: architectural decisions, DI lifetime changes, domain model changes outside scope
+Out-of-scope discovery: write to task-log as `blocked: spec gap` with one-line question, then stop
+```
+This is a constraint list, not a paragraph — structured so violations are detectable.
 
 ---
 
-### OPP-5-10: review.md — add spec vs. code consistency check
+### OPP-5-10: review.md — add spec vs. code consistency check ✅ Validated
 **Target:** `.claude/commands/review.md`
 **Action:** Update
 **Source topic:** S5.2.2 — Cross-Agent Spec Conflicts (Verifier validates cross-service contracts)
 **Rationale:** The current review.md checklist covers build quality, MAUI specifics, architecture, and DevExpress patterns. It does not include a check for spec-drift: cases where code was written that diverges from the feature's design.md. After parallel agent waves, code may be locally correct but misalign with the approved spec (field names, service lifetimes, error patterns). The review step is the natural gate for this check.
 **Suggested content/change:** Add a "Spec compliance" section to review.md: "1. For each modified service or DTO, verify field names and types match the spec's Shared Contracts section. 2. Verify new DI registrations use the lifetime defined in the spec (scoped/singleton/transient). 3. Verify error return pattern matches code-principles.md (tuple returns, not exceptions, for expected failures). 4. If the spec has no Shared Contracts section and the feature had parallel implementation tasks, flag it: the spec is incomplete."
+
+---
+
+## New Opportunities
+
+### OPP-5-11: Custom subagent definitions in `.claude/agents/` for reusable roles 🆕 New
+**Target:** `.claude/agents/` (new directory and files)
+**Action:** Create
+**Source topic:** S5.3 — Subagent Delegation (Claude Code Subagent Mechanics, Custom Subagents)
+**Gap in current setup:** The S5.3 research documents that Claude Code supports reusable specialist roles defined in `.claude/agents/` — named subagents with their own system prompts, tool access, and role constraints that the orchestrator invokes by name. MyVocaList currently has no `.claude/agents/` directory; all subagents are defined ad-hoc by the main agent's briefing at dispatch time. This means role constraints (no architectural decisions, read rules files first, exit checklist) must be re-stated in every briefing, and are subject to prompt drift across sessions.
+**Suggested content/change:** Create `.claude/agents/` with at minimum two named subagents:
+- `implementor.md` — system prompt enforcing file-scope restriction, rules file reading, exit checklist, and task-log update protocol
+- `verifier.md` — system prompt for the optional Verifier role: receives spec + git diff only; outputs structured pass/fail; prohibited from suggesting code changes
+
+The orchestrator then invokes these by name rather than re-briefing the role constraints each time. Role constraints are version-controlled and consistent across sessions.
+
+---
+
+### OPP-5-12: Living spec protocol — subagents must write spec decisions back before stopping 🆕 New
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S5.2.2 — Cross-Agent Spec Conflicts (Strategy 2: Living Spec Updates); S5.2.1 — Dependency Ordering Fragility (Quaternary mitigation)
+**Gap in current setup:** The current subagent return protocol (update task-log, commit, push, stop) captures status but not decisions. When a subagent makes an implementation-level choice not specified in the design.md (e.g., chooses a field name, decides a validation rule, selects an enum variant), that decision is invisible to Wave N+1 agents. Those agents either read the code to infer the decision (risking misinterpretation) or make an independent choice (risking conflict). The "living spec mechanism" from S5.2.2 requires that spec-level decisions made during implementation are written back to the spec before downstream agents run.
+**Suggested content/change:** Add to Rule 2 (subagent return protocol), step 0 (before committing): "If during implementation you made any decision not specified in the design.md (field names, enum values, validation rules, method signatures, error codes), update the relevant spec file (`design.md` or its `## Shared Contracts` section) with the decision before committing. Tag the update with a `<!-- impl decision: <one-line reason> -->` comment. The main agent reads spec changes after each wave as part of post-wave verification."
+
+---
+
+### OPP-5-13: Sequential-only file registry — explicit list in workflow.md 🆕 New
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S5.2 — Parallel Agent Execution (When Parallelism Is Valid); S5.2.1 — Dependency Ordering Fragility (Pattern 4: File Ownership with Strict Scope Isolation)
+**Gap in current setup:** OPP-5-3 proposes a pre-wave enumeration step but relies on the main agent performing analysis ad-hoc each time. The S5.2 and S5.2.1 research documents that certain files in any MAUI project are structurally always-sequential: DI registration, global settings, migration files, and shared configuration. Rather than rediscovering this list every sprint, it should be codified as a standing rule. This prevents the pre-wave check from being skipped when the main agent is operating under context pressure.
+**Suggested content/change:** Add a "Sequential-only files registry" block to Rule 2 (parallel execution cap section):
+```
+The following MyVocaList files are ALWAYS sequential — never assign to 2+ agents in the same wave:
+- MyVocaList/MauiProgram.cs (DI registration)
+- MyVocaList.Infra/AppDbContext.cs (entity configuration)
+- MyVocaList.Infra/Migrations/** (migration files)
+- Directory.Build.props (shared properties)
+- Any project's GlobalUsings.cs
+- .claude/rules/*.md (rules files — only main agent modifies)
+```
+Any task that modifies these files gets its own wave, regardless of how independent its other changes appear.
+
+---
+
+### OPP-5-14: Wave completion — compress and relay discovery briefs to next wave 🆕 New
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S5.2 — Parallel Agent Execution (Wave-Based Execution, step 4: Discovery Relay / Handoff Blocks)
+**Gap in current setup:** The current workflow reads: "After a subagent completes, its context is discarded." This is correct for preventing context bloat in the main agent, but it means that discoveries made by Wave N agents (an API is rate-limited, a field requires special encoding, a migration needed a backfill) are lost unless the subagent put them in the task-log. The S5.2 research specifies that after each wave, outputs should be compressed to 300–500 token "discovery briefs" and injected into the next wave's spawn prompts. This gives downstream agents knowledge of what upstream agents found, without full context inheritance.
+**Suggested content/change:** Add to the post-wave verification step in Rule 2: "After verifying the build, the main agent reads each subagent's task-log entry and git diff. For any discovery noted (unexpected constraint, spec decision made, API behavior discovered), create a one-paragraph 'discovery brief' per agent and include it in Wave N+1 spawn prompts. Format: 'Agent [name] found: [one-paragraph summary of non-obvious findings]. This affects your task because: [connection].'"
+
+---
+
+### OPP-5-15: Context reset discipline — orchestrator must not accumulate implementation-role context 🆕 New
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S5.1.1 — Persona/Role Confusion (Mitigation 1: Session Isolation and Context Reset; Mitigation 5: Asymmetric Information Flow)
+**Gap in current setup:** The current Rule 2 correctly states "the main agent handles shell-only steps." However, there is no explicit rule preventing the main agent from reading subagent file outputs in detail (e.g., reading a newly written service implementation to verify it). The S5.1.1 research on asymmetric information flow is clear: execution traces, debugging outputs, and intermediate failures must not flow backward to the orchestrator in full — only structured diagnostics. When the main agent reads full implementation files, it gradually accumulates implementation-role context and its planning quality degrades.
+**Suggested content/change:** Add to Rule 2 (main agent / subagent boundary): "The main agent reads: spec files, task-log entries, git commit messages, and `dotnet build`/`dotnet test` output. The main agent does NOT read: subagent-written implementation files (services, repositories, view models, XAML). If the build passes, implementation correctness is assumed. If the build fails, the main agent reads only the compiler error output — not the full file. Full file reading is reserved for the subagent that owns that file. This prevents the main agent from accumulating implementation context that degrades planning quality."
+
+---
+
+### OPP-5-16: Retry cap — subagent must stop after 3 failed build attempts, not loop indefinitely 🆕 New
+**Target:** `.claude/rules/workflow.md`
+**Action:** Add
+**Source topic:** S5.1 — Adversarial Agent Pattern (CIV architecture, VeriMAP retry cap); S5.3 — Subagent Delegation (failure modes)
+**Gap in current setup:** The current exit checklist says "Build (0 errors required)" but gives no instruction for what a subagent should do if the build cannot be made to pass. The SDD literature (VeriMAP, CIV) uses a per-subtask retry cap of 3 attempts as a hard limit: after 3 failed attempts, the subagent reports `Build failure` and stops. Without this cap, a subagent can loop indefinitely on a broken compile state, consuming token budget and blocking the wave. The workflow.md mentions "Build failure" as a task status but never defines when to transition to it.
+**Suggested content/change:** Add to the subagent exit checklist in Rule 2: "Build retry cap: if `dotnet build` fails, fix the error and retry. Maximum 3 build attempts. After 3 failed attempts, update task-log status to `Build failure | Reason: <compiler error summary>` and stop immediately. Do not attempt further fixes. The main agent replans the task. This cap prevents runaway subagents from consuming the wave's token budget on unresolvable errors."
