@@ -197,6 +197,23 @@ Examples:
 
 **Purpose:** Demo statements prevent tasks from being marked "done" when the code compiles but the feature doesn't work as intended. A subagent that cannot write a demo statement does not understand the task.
 
+### Spec ownership constraint
+
+**Specs are written by Helder (Architect) — not by subagents.**
+
+Subagents implement what the spec says. They do not write, rewrite, or significantly alter specs.
+
+| Allowed for subagents | Not allowed for subagents |
+|-----------------------|--------------------------|
+| Read the spec | Create `requirements.md` or `design.md` from scratch |
+| Note a spec gap in the task-log (status: `blocked: spec gap`) | Fill in the spec gap unilaterally |
+| Add a change note to a spec when implementation reveals a discrepancy | Rewrite acceptance criteria to match their implementation |
+| Flag an ambiguous requirement with options + recommendation | Choose between ambiguous interpretations without escalating |
+
+**Why:** Specs written by subagents reflect what the subagent found convenient to implement, not what the user actually needs. The spec is Helder's voice — it must come from Helder.
+
+**Exception:** A subagent may add a `> **Spec updated [date]:** one-line note` to an existing spec file when updating it per the spec versioning discipline — but only to reflect a decision that was explicitly authorized by the main agent.
+
 ### Spec quality gate (mandatory before implementation)
 
 **No subagent may be dispatched to implement a feature until this gate is passed.**
