@@ -463,6 +463,27 @@ Some files must never be edited by more than one agent at a time. These are **ho
 
 **How to add entries:** If a session discovers a new hotspot file (a file where parallel edits caused a conflict or incoherent output), add it to this registry before ending the session.
 
+### Pre-wave dependency check + scope isolation
+
+Before dispatching a wave, the main agent must perform a dependency check:
+
+1. **List all files each proposed subagent will touch** (based on the role scope block).
+2. **Check for overlaps** — if two subagents in the wave touch the same file, the wave is unsafe:
+   - If the file is in the sequential-only registry → serialize those tasks.
+   - If the file is not in the registry but shared → evaluate whether the overlap is additive (different sections) or conflicting (same section). If conflicting, serialize.
+3. **Check for output/input dependencies** — if Subagent B depends on a type or interface that Subagent A will create, B must not start until A has committed.
+4. **Confirm scope isolation** — each subagent in the wave must operate on a disjoint set of files. If disjoint sets cannot be established, reduce the wave size.
+
+**Multi-agent scope conflict rule:** Two subagents must never be dispatched to modify the same file in the same wave. The one that commits second will overwrite or conflict with the first. There is no safe concurrent file write in this workflow.
+
+**Document the check:** Record the file ownership map in the task-log before dispatching:
+```
+Wave N file ownership:
+- Subagent A: [file1.cs, file2.cs]
+- Subagent B: [file3.cs, file4.xaml]
+- Overlap: none ✓
+```
+
 ### Wave-based parallelism — hard cap
 - **Maximum 4 subagents may run in parallel at any one time.**
 - Work is dispatched in waves: spawn up to 4 subagents, wait for all to complete, then start the next wave.
