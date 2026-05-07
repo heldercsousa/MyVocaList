@@ -7,19 +7,8 @@ Karaoke queue management for live events. Manages one active queue at a time wit
 **Planned:** MediatR · FluentValidation (not yet registered in MauiProgram.cs)
 
 ## Architecture
-```
-MyVocaList.Domain        — Entities, repository interfaces, domain events. No dependencies.
-MyVocaList.Contracts     — DTOs, Models. No dependencies.
-MyVocaList.Infra         — EF Core + SQLite. Depends on Domain only. Replaceable.
-MyVocaList.Services      — Business logic. Depends on Domain + Contracts.
-MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Domain + Contracts + Services + Infra.
-```
-- Business logic **only** in Services
-- Repository interfaces in **Domain** — implementations in **Infra**
-- Only MAUI depends on Infra — for repository DI, AppDbContext, CollationInterceptor, migration execution
-- Services depends only on Domain interfaces — never on Infra directly
-- DTOs as records in Contracts
-- Prefer composition over inheritance
+Architecture layer constraints are defined in `code-principles.md § Architecture Constraints`. The "business logic in Services" constraint is unamendable — see Constitutional Constraints.
+
 - `Directory.Build.props` (solution root): usings shared across 2+ projects
 - Each project's `GlobalUsings.cs`: usings shared across 2+ types within that project only
 
@@ -78,7 +67,7 @@ Never assume a missing tool response means the tool found nothing — distinguis
 ## Rules Files
 - MediatR patterns: `.claude/rules/mediatr-patterns.md`
 - Code principles: `.claude/rules/code-principles.md`
-- **Testing**: `.claude/rules/testing.md` — read before writing any test or setting up the test project. Covers test types, naming, TDD workflow, and prerequisites for Step 3.
+- **Testing**: `.claude/rules/testing.md` — read before writing any test. Covers test types, naming, TDD workflow, and test project setup.
 
 ## SDD Applicability for MyVocaList
 MyVocaList is past the 10–20 interdependent file threshold where SDD becomes strictly beneficial:
@@ -123,7 +112,7 @@ Before starting each implementation task, scan available skills/MCPs for relevan
 - MAUI UI: `maui-current-apis` (always), `maui-data-binding`, `maui-shell-navigation`, `maui-performance`
 
 ## Spec Quality Check (Rebuild Test)
-When closing out a feature, ask: "Could a fresh agent regenerate this feature from the spec files + test suite alone, without reading any existing implementation code?" If the answer is no, identify what is missing and fill the gaps. Common missing items: architectural decisions (why X was chosen over Y), business rule tradeoffs, integration contract details. See `workflow.md` for the full rebuild test protocol.
+When closing out a feature, run the Rebuild Test (see `workflow.md § Rebuild test`). Include the test suite alongside the spec files.
 
 ## Continuous Enhancement
 CLAUDE.md, rules, hooks and commands are a living system — not a fixed set.
@@ -134,7 +123,9 @@ After every task, always ask:
 - **Update** existing files with confirmed patterns
 - **Replace** outdated patterns with working ones
 - **Delete** guidelines that proved wrong or are superseded by skills
-- **Update** CLAUDE.md when architecture, stack, or fundamental decisions change only when no specialized and dedicated file is in place in solution's .claude folder. Otherwise such specialized file must be the one to be updated. 
+- **Update** CLAUDE.md when architecture, stack, or fundamental decisions change only when no specialized and dedicated file is in place in solution's .claude folder. Otherwise such specialized file must be the one to be updated.
+
+> **Note:** Changes to CLAUDE.md or `.claude/rules/*.md` must follow the Amending These Rules process (see § Amending These Rules below) — including `amend:` commit prefix and changelog entry.
 
 **Quarterly Constitutional Audit:** At significant project milestones (phase completion, feature launch), review `CLAUDE.md` and all `.claude/rules/` files for:
 - Rules with no rationale — add rationale or remove the rule
@@ -159,11 +150,15 @@ is a candidate for a new rule, command, or CLAUDE.md update.
 ## Constitutional Constraints (Mechanically Enforced)
 *(Enforced via `review.md` checklist + hooks — these are not advisory)*
 
+The three items marked `[Unamendable]` require architecture review to change — they cannot be relaxed by any agent or session-level decision.
+
+- **Business logic in Services** `[Unamendable — requires architecture review]`: Business logic lives in Services only — never in ViewModels or pages. See `code-principles.md § Architecture Constraints`.
+  *Reason: layer discipline prevents business rules from scattering across the UI and becoming untestable.*
 - **Language**: Code, comments, logs, UI text — English only. Translate any non-English text immediately.
   *Reason: multilingual identifiers make search, grep, and onboarding unreliable.*
-- **Native dialogs**: NEVER use `DisplayAlert`, `DisplayActionSheet`, `DisplayPromptAsync`. Use `dx:BottomSheet` — see `myvocalist-coding` skill.
+- **Native dialogs** `[Unamendable — requires architecture review]`: NEVER use `DisplayAlert`, `DisplayActionSheet`, `DisplayPromptAsync`. Use `dx:BottomSheet` — see `myvocalist-coding` skill.
   *Reason: these dialogs bypass the app's theme, violate MD3 interaction patterns, and on Android are not dismissible via back gesture.*
-- **UI Component Priority**: DevExpress first, always. Use stock MAUI only when DevExpress has no equivalent — see `myvocalist-coding` skill.
+- **UI Component Priority** `[Unamendable — requires architecture review]`: DevExpress first, always. Use stock MAUI only when DevExpress has no equivalent — see `myvocalist-coding` skill.
   *Reason: mixing component libraries produces visual inconsistency and theming conflicts.*
 - **MD3 terminology**: All component names, style keys, BindableProperty names, and rules file documentation must use official MD3 terminology (m3.material.io). Code must be directly cross-referenceable against MD3 docs without mental translation. When unsure, fetch the official docs — never invent names.
   *Reason: invented names require mental translation and break cross-reference with Material Design documentation.*
@@ -174,10 +169,10 @@ is a candidate for a new rule, command, or CLAUDE.md update.
 
 ## Constitutional Role
 `CLAUDE.md` is this project's constitutional document for SDD purposes. Before writing any spec, verify that the proposed design is consistent with the conventions documented here:
-- Architecture constraints (layer dependencies)
-- Naming conventions (entities, services, ViewModels, commands)
-- DI registration rules (Singleton / Scoped / Transient)
-- Error handling idioms (tuple returns, no exceptions for business failures)
+- Architecture constraints (layer dependencies) — see `code-principles.md § Architecture Constraints`
+- Naming conventions (entities, services, ViewModels, commands) — see `code-principles.md § C# Style / Naming`
+- DI registration rules (Singleton / Scoped / Transient) — see `code-principles.md § DI Registration Conventions`
+- Error handling idioms (tuple returns, no exceptions for business failures) — see `code-principles.md § Exception Handling`
 - UI component priority (DevExpress first)
 
 A spec that conflicts with CLAUDE.md conventions is invalid regardless of how correct it appears in isolation. Resolve the conflict with Helder before proceeding.
@@ -191,11 +186,6 @@ Rules in this project are layered. Lower layers can only STRENGTHEN upper-layer 
 | Project | `./CLAUDE.md` (this file) | This project, all agents |
 | Modular | `.claude/rules/*.md` | This project, context-scoped |
 | Local | `.claude/CLAUDE.local.md` (gitignored) | This session only, testing only |
-
-**Unamendable constraints** (require architecture review to change):
-- "Business logic lives in Services only"
-- "Never use `DisplayAlert` for dialogs"
-- "DevExpress components before stock MAUI"
 
 ## Methodology Layering
 **(1) DDD** defines what to build — bounded contexts, aggregate boundaries, ubiquitous language. Invoke `ddd-dotnet` skill at this layer.
