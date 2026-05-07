@@ -175,6 +175,21 @@ Security requirements and the "Business logic only in Services" constraint are n
 
 If a constitutional constraint cannot be followed in a specific case, document it in `.claude/exception-registry.md` before deviating. Never deviate silently.
 
+## Tool Selection
+**Primary AI assistant:** Claude Code (Anthropic CLI)
+**Decision rationale:** Spec-first discipline (CLAUDE.md + rules files), subagent delegation support, 1M-token context window, terminal-native workflow, MCP client built-in.
+**Lock-in accepted:** Spec format and rules files are Claude Code-specific; migrating to Cursor or Copilot would require translating CLAUDE.md to `.cursorrules` or `copilot-instructions.md`.
+**Re-evaluation trigger:** If Anthropic discontinues Claude Code, pricing exceeds $200/month, or a competing tool delivers >2x productivity improvement on SDD tasks.
+
+### Migration Path (if Spec Kit adoption becomes warranted)
+The current spec format (`requirements.md`, `design.md`, `tasks.md` in `Docs/specs/`) maps directly to GitHub Spec Kit's artifact set. Adopting Spec Kit would require:
+1. `speckit init` — creates `.specify/` directory with templates
+2. Moving specs from `Docs/specs/[feature]/` to `.specify/specs/[feature]/`
+3. Merging `CLAUDE.md` + `rules/*.md` into `.specify/constitution.md`
+4. Replacing workflow.md Rule 1-4 trigger patterns with `/specify`, `/plan`, `/tasks` slash commands
+
+Estimated migration effort: 1–2 weeks (per S7.1.2 research). Claude Code is explicitly supported by Spec Kit — no agent switch required.
+
 ## Roles
 - **Helder**: Architect and Technical Auditor. Defines approaches, reviews code, makes trade-off decisions.
 - **Claude Code**: Implementation Specialist. Codes, debugs, documents. Never makes architectural decisions unilaterally.
