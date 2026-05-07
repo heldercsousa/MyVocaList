@@ -1,8 +1,6 @@
-# Testing Rules — MyVocaList
+﻿# Testing Rules — MyVocaList
 
-> **Status:** Active from Step 3 (Venue CRUD Tests) onward.
-> TDD applies to all new Services, ViewModels, and Repositories from AutocompleteField + Person CRUD forward.
-> Venue CRUD tests (Step 3) establish the test infrastructure baseline; TDD workflow kicks in from Step 4+.
+> TDD applies to all new and modified Services, ViewModels, and Repositories.
 ## TDD within SDD
 
 TDD and SDD are complementary, not competing disciplines. Each operates at a different level:
@@ -52,11 +50,11 @@ public async Task CreateVenueAsync_DuplicateName_ReturnsFalse()
 When a feature reaches code review, produce a traceability table in the task-log:
 
 ```r
-| AC ID | Description | Test method |
-|-------|-------------|-------------|
-| REQ-VENUE-01 | Venue name ≤ 30 chars | CreateVenueAsync_NameTooLong_ReturnsFalse |
-| REQ-VENUE-02 | Name required | CreateVenueAsync_EmptyName_ReturnsFalse |
-| REQ-VENUE-03 | Name unique (case-insensitive) | CreateVenueAsync_DuplicateName_ReturnsFalse |
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| REQ-VENUE-01 | Name ≤ 30 chars | VenueService.ValidateNameInput | CreateVenueAsync_NameTooLong_ReturnsFalse |
+| REQ-VENUE-02 | Name required | VenueService.ValidateNameInput | CreateVenueAsync_EmptyName_ReturnsFalse |
+| REQ-VENUE-03 | Name unique (case-insensitive) | VenueService.CreateVenueAsync | CreateVenueAsync_DuplicateName_ReturnsFalse |
 `````r
 
 Missing rows = missing tests = incomplete feature.
@@ -415,7 +413,7 @@ When a single agent writes both tests and implementation simultaneously, it natu
 
 ### Rules
 
-1. **Tester writes tests first, then stops.** The Tester subagent writes all tests for a task, confirms they compile and fail (Red), commits, and exits. It does NOT write any implementation.
+1. **Tester writes tests first, then stops.** The Tester subagent writes all tests for a task, confirms they compile and fail (Red), commits, and exits. It does NOT write any implementation. (Note: in a single-agent session, apply one-at-a-time discipline per "One test at a time — Exception.")
 2. **Builder receives failing tests, makes them pass.** The Builder subagent reads the committed failing tests, writes only enough implementation to make them pass (Green), and exits. It does NOT modify tests.
 3. **Refactor is a third, optional pass.** After Green, a separate refactor pass may clean up implementation without changing test or behavior.
 4. **In a single-agent session:** apply the same discipline mentally — write all tests, run them to confirm failure, then switch to implementation mode.
@@ -432,7 +430,6 @@ Wave B: Builder subagent
   Output: committed passing implementation, task-log status = "To Review"
 ```
 
----
 ---
 
 ## TDD Workflow (Red → Green → Refactor)
@@ -486,16 +483,43 @@ dotnet test --collect:"XPlat Code Coverage"
 ```
 
 ---
+## TDD Level Guidance by Risk
 
-## Prerequisites Before Step 3 (Test Project Setup)
+Not all code warrants the same test investment. Use risk classification to calibrate test coverage without over-testing low-risk code.
 
-These must be fixed when the test project is created. Do NOT create tests until they are resolved:
+### Risk levels
 
-1. **`AppDbContext` missing `QueryTrackingBehavior.NoTracking`** — add to the `OnConfiguring` or options builder. Without it, repository integration tests may have unexpected tracking side effects.
+| Level | Label | Definition | Test requirement |
+|-------|-------|-----------|-----------------|
+| A | **High risk** | Business logic with validation, state mutation, or user-facing failure modes | Full TDD: Red → Green → Refactor. Unit + property-based tests. All branches covered. |
+| B | **Medium risk** | Query logic, mapping, pagination, EF configuration | Example-based tests for happy path + key edge cases. Integration tests for query behavior. |
+| C | **Low risk** | Pure plumbing, DI registration, DTO mapping with no logic, trivial getters | No mandatory test. Optional smoke test if needed for confidence. |
 
-2. **`AppDbContext` has `Console.WriteLine` calls** — remove. Violates code-principles.md (no debug output in production code). Test runs will pollute output.
+### Classification guide
 
-3. **Serilog version drift** — `MyVocaList.Services` uses Serilog 4.2.0, `MyVocaList.Infra` uses 4.3.1. Normalize via `Directory.Packages.props` (CPM) when setting up the test project. CPM is a prerequisite to adding a 5th project cleanly.
+| Code | Risk level |
+|------|-----------|
+| Service validation methods (`ValidateNameInput`, `CreateVenueAsync` guards) | A |
+| Service methods that mutate state (create, update, delete) | A |
+| ViewModel command state transitions, `CanExecute` logic | A |
+| Repository query methods (search, filter, sort, paginate) | B |
+| EF entity configurations (index, collation, cascade) | B |
+| DTO mapping in services | B |
+| Repository CRUD without custom logic (`AddAsync`, `GetByIdAsync`) | B |
+| DI registration in `MauiProgram.cs` | C |
+| DTO record definitions | C |
+| `ObservableProperty` with no derived logic | C |
+
+### Applying the classification
+
+When the Tester subagent receives a task, it must classify each method:
+- Level A → write all tests before Builder starts
+- Level B → write tests for non-trivial paths; mark trivial CRUD as C
+- Level C → document as "no test required" in the task-log; do not write empty test stubs. If a Level C task has ACs, document the no-test decision in the task-log — it will be scrutinized at review.
+
+### Escalation
+
+If a method is initially classified C but a bug is found in production, reclassify to A or B and add regression tests before fixing.
 
 ---
 
@@ -570,45 +594,6 @@ Create .stryker-config.json at solution root when exclusions are needed:
   }
 }
 `
-
----
-## TDD Level Guidance by Risk
-
-Not all code warrants the same test investment. Use risk classification to calibrate test coverage without over-testing low-risk code.
-
-### Risk levels
-
-| Level | Label | Definition | Test requirement |
-|-------|-------|-----------|-----------------|
-| A | **High risk** | Business logic with validation, state mutation, or user-facing failure modes | Full TDD: Red → Green → Refactor. Unit + property-based tests. All branches covered. |
-| B | **Medium risk** | Query logic, mapping, pagination, EF configuration | Example-based tests for happy path + key edge cases. Integration tests for query behavior. |
-| C | **Low risk** | Pure plumbing, DI registration, DTO mapping with no logic, trivial getters | No mandatory test. Optional smoke test if needed for confidence. |
-
-### Classification guide
-
-| Code | Risk level |
-|------|-----------|
-| Service validation methods (`ValidateNameInput`, `CreateVenueAsync` guards) | A |
-| Service methods that mutate state (create, update, delete) | A |
-| ViewModel command state transitions, `CanExecute` logic | A |
-| Repository query methods (search, filter, sort, paginate) | B |
-| EF entity configurations (index, collation, cascade) | B |
-| DTO mapping in services | B |
-| Repository CRUD without custom logic (`AddAsync`, `GetByIdAsync`) | B |
-| DI registration in `MauiProgram.cs` | C |
-| DTO record definitions | C |
-| `ObservableProperty` with no derived logic | C |
-
-### Applying the classification
-
-When the Tester subagent receives a task, it must classify each method:
-- Level A → write all tests before Builder starts
-- Level B → write tests for non-trivial paths; mark trivial CRUD as C
-- Level C → document as "no test required" in the task-log; do not write empty test stubs
-
-### Escalation
-
-If a method is initially classified C but a bug is found in production, reclassify to A or B and add regression tests before fixing.
 
 ---
 ## Property-Based Testing with FsCheck
@@ -705,7 +690,7 @@ Run this checklist during code review for any test file. A test that fails one o
 ### Audit frequency
 
 - Before setting a task to `To Review` in the task-log
-- During `/project:review` if test files were changed
+- During `/project:review` (run after every task)
 
 ---
 ## Builder Must Not Modify Tests
@@ -735,5 +720,5 @@ The Builder must stop, document the suspected spec gap in the task-log (`blocked
 | Write multiple `Assert.*` for unrelated behaviors | One test, one behavioral assertion (related asserts for a single behavior are fine) |
 | Use `Thread.Sleep` for async timing | Use `await Task.Delay` or `TaskCompletionSource` |
 | Skip writing the failing test first (Step 4+) | This is TDD — the failing test is not optional |
-| Modify a test to make it pass during Green phase | Tests define the contract. Changing a test to pass is not Green — it is spec deletion. If a test is wrong, escalate to the architect; do not silently fix it. |
+| Modify a test to make it pass during Green phase | Tests define the contract. Changing a test to pass is not Green — it is spec deletion. If a test is wrong, escalate to the architect; do not silently fix it. See "Builder Must Not Modify Tests" for full escalation protocol. |
 | Delete a failing test instead of implementing the behavior | Same as above — spec deletion. Failing tests are blockers, not noise. |
