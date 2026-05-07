@@ -236,8 +236,8 @@ One opportunity or small group per step. Sequential — same file.
 | P9-23 | Add MCP response token discipline | OPP-7-19 | Done | |
 | P9-24 | Add MCP tool batching readiness note | OPP-7-16 | Done | Combined into P9-23 MCP block |
 | P9-25 | Add Playwright MCP evaluation note | OPP-7-17 | Done | Combined into P9-23 MCP block |
-| P9-26 | Add Spec Kit migration path note | OPP-7-20 | Pending | |
-| P9-27 | Declare CLAUDE.md as constitutional document | OPP-10-12 | Pending | |
+| P9-26 | Add Spec Kit migration path note | OPP-7-20 | Done | Combined into P9-18 Tool Selection section |
+| P9-27 | Declare CLAUDE.md as constitutional document | OPP-10-12 | Done | |
 | P9-28 | Add SDD applicability statement for MyVocaList | OPP-10-14 | Pending | |
 
 ---

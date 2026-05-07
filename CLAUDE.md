@@ -159,6 +159,16 @@ is a candidate for a new rule, command, or CLAUDE.md update.
 - **Incremental edits**: For XAML/UI work, edit ONE file → build → fix → then next file. Never batch UI edits.
   *Reason: XAML errors cascade — batching edits hides which change introduced the error.*
 
+## Constitutional Role
+`CLAUDE.md` is this project's constitutional document for SDD purposes. Before writing any spec, verify that the proposed design is consistent with the conventions documented here:
+- Architecture constraints (layer dependencies)
+- Naming conventions (entities, services, ViewModels, commands)
+- DI registration rules (Singleton / Scoped / Transient)
+- Error handling idioms (tuple returns, no exceptions for business failures)
+- UI component priority (DevExpress first)
+
+A spec that conflicts with CLAUDE.md conventions is invalid regardless of how correct it appears in isolation. Resolve the conflict with Helder before proceeding.
+
 ## Rule Authority Hierarchy
 Rules in this project are layered. Lower layers can only STRENGTHEN upper-layer rules — never weaken them.
 
