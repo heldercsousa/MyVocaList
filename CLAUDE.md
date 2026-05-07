@@ -131,6 +131,17 @@ Rules in this project are layered. Lower layers can only STRENGTHEN upper-layer 
 **(3) TDD** verifies it is correct — Red/Green/Refactor within each SDD task.
 These layers are sequential, not interchangeable. Do not apply TDD before the SDD spec exists; do not write an SDD spec without first confirming DDD boundaries.
 
+## Amending These Rules
+Before changing `CLAUDE.md` or any `.claude/rules/` file:
+1. Document what is wrong with the current rule and why (one sentence minimum).
+2. Note whether existing code needs to be updated (backward compatibility).
+3. Commit the change with message prefix `amend:` and rationale in the commit body.
+4. Update `Docs/Changelog/changelog.md` with the old rule, new rule, and effective date.
+
+Security requirements and the "Business logic only in Services" constraint are not relaxable without explicit architecture review.
+
+If a constitutional constraint cannot be followed in a specific case, document it in `.claude/exception-registry.md` before deviating. Never deviate silently.
+
 ## Roles
 - **Helder**: Architect and Technical Auditor. Defines approaches, reviews code, makes trade-off decisions.
 - **Claude Code**: Implementation Specialist. Codes, debugs, documents. Never makes architectural decisions unilaterally.
