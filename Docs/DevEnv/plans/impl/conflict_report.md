@@ -6,6 +6,89 @@
 
 ---
 
+## Decision Registry
+
+> **How to use:** Review findings below (§ Findings by Target File). Record each decision here.
+> **Decision values:** `Approved` · `Deferred` · `Rejected`
+> **Status values:** `Pending` · `In Progress` · `Done`
+> P11-04 subagents read this table to know what to apply. Only `Approved` + `Pending/In Progress` rows are acted on.
+
+| ID | Sev | Target file | Decision | Rationale | Status |
+|----|-----|-------------|----------|-----------|--------|
+| B-01 | 🔴 | workflow.md | Pending | | Pending |
+| B-02 | 🔴 | workflow.md | Pending | | Pending |
+| B-03 | 🔴 | workflow.md | Pending | | Pending |
+| B-04 | 🔴 | review.md + testing.md + workflow.md | Pending | | Pending |
+| B-05 | 🔴 | review.md + workflow.md | Pending | | Pending |
+| B-06 | 🔴 | testing.md + review.md | Pending | | Pending |
+| B-07 | 🔴 | workflow.md + testing.md | Pending | | Pending |
+| B-08 | 🔴 | CLAUDE.md | Pending | | Pending |
+| B-09 | 🔴 | CLAUDE.md + code-principles.md | Pending | | Pending |
+| W-01 | 🟡 | workflow.md | Pending | | Pending |
+| W-02 | 🟡 | workflow.md | Pending | | Pending |
+| W-03 | 🟡 | workflow.md | Pending | | Pending |
+| W-04 | 🟡 | workflow.md | Pending | | Pending |
+| W-05 | 🟡 | workflow.md | Pending | | Pending |
+| W-06 | 🟡 | workflow.md | Pending | | Pending |
+| W-07 | 🟡 | workflow.md | Pending | | Pending |
+| W-08 | 🟡 | workflow.md | Pending | | Pending |
+| W-09 | 🟡 | workflow.md | Pending | | Pending |
+| W-10 | 🟡 | workflow.md | Pending | | Pending |
+| W-11 | 🟡 | workflow.md + CLAUDE.md | Pending | | Pending |
+| W-12 | 🟡 | workflow.md | Pending | | Pending |
+| W-13 | 🟡 | review.md | Pending | | Pending |
+| W-14 | 🟡 | review.md | Pending | | Pending |
+| W-15 | 🟡 | workflow.md | Pending | | Pending |
+| W-16 | 🟡 | review.md | Pending | | Pending |
+| W-17 | 🟡 | review.md | Pending | | Pending |
+| W-18 | 🟡 | review.md + workflow.md | Pending | | Pending |
+| W-19 | 🟡 | review.md | Pending | | Pending |
+| W-20 | 🟡 | testing.md | Pending | | Pending |
+| W-21 | 🟡 | testing.md | Pending | | Pending |
+| W-22 | 🟡 | code-principles.md + workflow.md | Pending | | Pending |
+| W-23 | 🟡 | CLAUDE.md | Pending | | Pending |
+| W-24 | 🟡 | CLAUDE.md + workflow.md | Pending | | Pending |
+| W-25 | 🟡 | code-principles.md + constraints-registry.md | Pending | | Pending |
+| W-26 | 🟡 | code-principles.md | Pending | | Pending |
+| XF-01 | 🟡 | workflow.md | Pending | | Pending |
+| XF-02 | 🟡 | workflow.md | Pending | | Pending |
+| S-01 | 🟢 | workflow.md | Pending | | Pending |
+| S-02 | 🟢 | workflow.md | Pending | | Pending |
+| S-03 | 🟢 | workflow.md | Pending | | Pending |
+| S-04 | 🟢 | workflow.md | Pending | | Pending |
+| S-05 | 🟢 | workflow.md | Pending | | Pending |
+| S-06 | 🟢 | workflow.md | Pending | | Pending |
+| S-07 | 🟢 | workflow.md | Pending | | Pending |
+| S-08 | 🟢 | workflow.md + review.md | Pending | | Pending |
+| S-09 | 🟢 | workflow.md | Pending | | Pending |
+| S-10 | 🟢 | workflow.md | Pending | | Pending |
+| S-11 | 🟢 | workflow.md | Pending | | Pending |
+| S-12 | 🟢 | workflow.md | Pending | | Pending |
+| S-13 | 🟢 | workflow.md | Pending | | Pending |
+| S-14 | 🟢 | review.md | Pending | | Pending |
+| S-15 | 🟢 | review.md | Pending | | Pending |
+| S-16 | 🟢 | testing.md + review.md | Pending | | Pending |
+| S-17 | 🟢 | testing.md | Pending | | Pending |
+| S-18 | 🟢 | testing.md + CLAUDE.md | Pending | | Pending |
+| S-19 | 🟢 | testing.md | Pending | | Pending |
+| S-20 | 🟢 | testing.md | Pending | | Pending |
+| S-21 | 🟢 | testing.md | Pending | | Pending |
+| S-22 | 🟢 | testing.md | Pending | | Pending |
+| S-23 | 🟢 | CLAUDE.md | Pending | | Pending |
+| S-24 | 🟢 | CLAUDE.md + code-principles.md | Pending | | Pending |
+| S-25 | 🟢 | CLAUDE.md + code-principles.md | Pending | | Pending |
+| S-26 | 🟢 | CLAUDE.md + code-principles.md | Pending | | Pending |
+| S-27 | 🟢 | CLAUDE.md | Pending | | Pending |
+| S-28 | 🟢 | code-principles.md + constraints-registry.md | Pending | | Pending |
+| S-29 | 🟢 | code-principles.md | Pending | | Pending |
+| S-30 | 🟢 | code-principles.md + constraints-registry.md | Pending | | Pending |
+| S-31 | 🟢 | code-principles.md | Pending | | Pending |
+| S-32 | 🟢 | constraints-registry.md | Pending | | Pending |
+| S-33 | 🟢 | constraints-registry.md | Pending | | Pending |
+| XF-03 | 🟢 | workflow.md | Pending | | Pending |
+
+---
+
 ## Summary
 
 | Severity | Count |
