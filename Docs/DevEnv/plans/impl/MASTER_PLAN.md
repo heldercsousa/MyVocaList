@@ -263,10 +263,14 @@ One opportunity or small group per step. Sequential — same file.
 
 ## Phase 11 — Conflict Analysis
 
+Execution approach (agreed with Helder 2026-05-06): sequential agents, one file-group per session, /clear between each, commit each partial report before proceeding.
+
 | Step | Description | Status | Notes |
 |------|-------------|--------|-------|
-| P11-01 | Read all modified target files in post-implementation state | Pending | |
-| P11-02 | Produce conflict report at `Docs/DevEnv/plans/impl/conflict_report.md` | Pending | |
+| P11-01-A | Agent A — `workflow.md` internal analysis → `conflict_report_workflow.md` | Done | 33 findings: 14 dup, 5 contradiction, 6 inconsistency, 8 structural |
+| P11-01-B | Agent B — `review.md` + `testing.md` analysis → `conflict_report_review_testing.md` | Pending | Run after /clear |
+| P11-01-C | Agent C — `CLAUDE.md` + `code-principles.md` analysis → `conflict_report_claude_principles.md` | Pending | Run after /clear |
+| P11-02 | Synthesizer — merge all three partial reports → `conflict_report.md` | Pending | Run after /clear, after A+B+C done |
 | P11-03 | Present conflict report to Helder for approval | Pending | |
 | P11-04 | Apply approved resolutions (one subagent per affected file) | Pending | |
 
