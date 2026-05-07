@@ -95,12 +95,20 @@ is a candidate for a new rule, command, or CLAUDE.md update.
 **Scope of inspection for complex tasks:** Before proposing anything that touches UI, styles, or components, inspect ALL of: every page, every custom component, every relevant rules file, AND verify what the platform/libraries already provide. Never limit the audit to the files initially mentioned. Cross-file pattern counts (how many times the same inline style appears) must be established before proposing centralization.
 
 ## Non-Negotiables
+*(Mechanically enforced via `review.md` checklist + hooks unless noted)*
+
 - **Language**: Code, comments, logs, UI text — English only. Translate any non-English text immediately.
+  *Reason: multilingual identifiers make search, grep, and onboarding unreliable.*
 - **Native dialogs**: NEVER use `DisplayAlert`, `DisplayActionSheet`, `DisplayPromptAsync`. Use `dx:BottomSheet` — see `myvocalist-coding` skill.
+  *Reason: these dialogs bypass the app's theme, violate MD3 interaction patterns, and on Android are not dismissible via back gesture.*
 - **UI Component Priority**: DevExpress first, always. Use stock MAUI only when DevExpress has no equivalent — see `myvocalist-coding` skill.
+  *Reason: mixing component libraries produces visual inconsistency and theming conflicts.*
 - **MD3 terminology**: All component names, style keys, BindableProperty names, and rules file documentation must use official MD3 terminology (m3.material.io). Code must be directly cross-referenceable against MD3 docs without mental translation. When unsure, fetch the official docs — never invent names.
+  *Reason: invented names require mental translation and break cross-reference with Material Design documentation.*
 - **SafeAreaEdges**: .NET MAUI 10 breaking change — `ContentPage` defaults to `SafeAreaEdges="None"`. Add `SafeAreaEdges="Container"` to existing pages explicitly.
+  *Reason: content renders behind the status bar/notch without this — visual breakage on iOS and Android.*
 - **Incremental edits**: For XAML/UI work, edit ONE file → build → fix → then next file. Never batch UI edits.
+  *Reason: XAML errors cascade — batching edits hides which change introduced the error.*
 
 ## Rule Authority Hierarchy
 Rules in this project are layered. Lower layers can only STRENGTHEN upper-layer rules — never weaken them.
