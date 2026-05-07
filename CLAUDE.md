@@ -181,6 +181,24 @@ If a constitutional constraint cannot be followed in a specific case, document i
 **Lock-in accepted:** Spec format and rules files are Claude Code-specific; migrating to Cursor or Copilot would require translating CLAUDE.md to `.cursorrules` or `copilot-instructions.md`.
 **Re-evaluation trigger:** If Anthropic discontinues Claude Code, pricing exceeds $200/month, or a competing tool delivers >2x productivity improvement on SDD tasks.
 
+### Tessl Registry (Evaluation)
+Tessl Spec Registry provides version-matched library skills for DevExpress, EF Core, and MediatR — complementing Context7 with higher-level usage patterns and project skill packages.
+Evaluate for adoption when: Context7 returns incomplete or hallucinated DevExpress MAUI API results; project reaches Spec-Anchored maturity with spec-to-test linkage; or internal skills (DX patterns, domain rules) are published for multi-agent reuse.
+To trial: `tessl install devexpress-maui` and compare generated code quality against Context7-only sessions.
+
+### Complementary Tooling — Cursor (optional, for human review sessions)
+When to use: visual diffing of large XAML changes before accepting; rapid UI iteration.
+Setup: install `.cursor/rules/` mirroring the key rules from CLAUDE.md and `.claude/rules/`.
+**Do NOT** use Cursor for autonomous task execution — Claude Code's subagent model is the only delegation mechanism. **Do NOT** create `.cursorrules` with content that contradicts CLAUDE.md rules.
+
+### MCP Configuration Template
+`.mcp.json.template` at the project root documents the expected MCP server configuration (without secrets). Onboarding: copy to `.mcp.json`, fill in API keys. The template is committed; `.mcp.json` (with secrets) is gitignored.
+When adding a new MCP server: (1) add it to `.mcp.json` (local, with key); (2) add sanitized entry to `.mcp.json.template` (committed, key as placeholder); (3) update `SETUP_QUICKSTART.md` Step 2 prompt.
+
+### sdd-mcp (Evaluation)
+`yi-john-huang/sdd-mcp` (v3.3, March 2026) is an MCP server that exposes SDD workflow primitives as callable tools: spec state queries, agent skills, steering rules, task hooks.
+Evaluate when: the main agent repeatedly needs to query "which tasks are complete?" across sessions; spec-anchored maturity requires programmatic spec-to-test linkage; or the current prompt-driven task-log workflow shows reproducibility gaps.
+
 ### Migration Path (if Spec Kit adoption becomes warranted)
 The current spec format (`requirements.md`, `design.md`, `tasks.md` in `Docs/specs/`) maps directly to GitHub Spec Kit's artifact set. Adopting Spec Kit would require:
 1. `speckit init` — creates `.specify/` directory with templates

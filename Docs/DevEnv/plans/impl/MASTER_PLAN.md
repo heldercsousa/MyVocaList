@@ -229,10 +229,10 @@ One opportunity or small group per step. Sequential — same file.
 | P9-16 | Update Context7 invocation discipline | OPP-7-7 | Done | |
 | P9-17 | Add Context7 version-pinning discipline | OPP-7-12 | Done | |
 | P9-18 | Add Tool Selection ADR section | OPP-7-6 | Done | |
-| P9-19 | Add Tessl Registry evaluation note | OPP-7-9 | Pending | |
-| P9-20 | Add Cursor as complementary tooling note | OPP-7-10 | Pending | |
-| P9-21 | Add .mcp.json.template reference | OPP-7-13 | Pending | |
-| P9-22 | Add sdd-mcp evaluation note | OPP-7-14 | Pending | |
+| P9-19 | Add Tessl Registry evaluation note | OPP-7-9 | Done | |
+| P9-20 | Add Cursor as complementary tooling note | OPP-7-10 | Done | Combined into P9-19 Tool Selection block |
+| P9-21 | Add .mcp.json.template reference | OPP-7-13 | Done | Combined into P9-19 Tool Selection block |
+| P9-22 | Add sdd-mcp evaluation note | OPP-7-14 | Done | Combined into P9-19 Tool Selection block |
 | P9-23 | Add MCP response token discipline | OPP-7-19 | Pending | |
 | P9-24 | Add MCP tool batching readiness note | OPP-7-16 | Pending | |
 | P9-25 | Add Playwright MCP evaluation note | OPP-7-17 | Pending | |
