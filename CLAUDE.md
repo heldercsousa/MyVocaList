@@ -80,6 +80,19 @@ Never assume a missing tool response means the tool found nothing — distinguis
 - Code principles: `.claude/rules/code-principles.md`
 - **Testing**: `.claude/rules/testing.md` — read before writing any test or setting up the test project. Covers test types, naming, TDD workflow, and prerequisites for Step 3.
 
+## SDD Applicability for MyVocaList
+MyVocaList is past the 10–20 interdependent file threshold where SDD becomes strictly beneficial:
+- Multiple layers (Domain, Infra, Services, MAUI) interact on every feature
+- Features span multiple sessions and require context persistence across resets
+- Queue management logic has business rule complexity where hallucination cost is high
+
+This means:
+- Spec-first is not optional overhead — it is the mechanism that prevents compounding technical debt
+- Vibe coding on new features increases total delivery time beyond 3 months due to rework
+- The ROI on specs for MyVocaList is currently positive; skipping specs costs more than writing them
+
+Exception: Bug fixes, cosmetic changes, and one-off scripts remain spec-exempt (see `workflow.md` bypass rule).
+
 ## Development Methodology
 MyVocaList operates at **Spec-Anchored** (Level 2) SDD: specs in `Docs/specs/` are updated whenever behavior changes and serve as authoritative context for every AI session. Code changes without a corresponding spec update are out of scope unless the change is a bug fix affecting no spec-described behavior.
 
