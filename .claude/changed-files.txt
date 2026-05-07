@@ -271,3 +271,6 @@ Docs/DevEnv/plans/impl/MASTER_PLAN.md
 Docs/DevEnv/plans/impl/MASTER_PLAN.md
 Docs/DevEnv/plans/impl/MASTER_PLAN.md
 Docs/DevEnv/plans/impl/conflict_report.md
+Docs/Changelog/changelog.md
+.claude/memory-bank/MEMORY.md
+.claude/settings.json
