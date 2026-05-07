@@ -276,7 +276,7 @@ Execution approach (agreed with Helder 2026-05-06): sequential agents, one file-
 | P11-04-B | Apply approved resolutions → `review.md` (13 findings) | Done | One subagent |
 | P11-04-C | Apply approved resolutions → `testing.md` (9 findings) | Done | One subagent |
 | P11-04-D | Apply approved resolutions → `CLAUDE.md` (10 findings) | Done | One subagent |
-| P11-04-E | Apply approved resolutions → `code-principles.md` + `constraints-registry.md` (8 findings) | Pending | One subagent |
+| P11-04-E | Apply approved resolutions → `code-principles.md` + `constraints-registry.md` (8 findings) | Done | One subagent |
 
 ---
 
@@ -291,8 +291,8 @@ Execution approach (agreed with Helder 2026-05-06): sequential agents, one file-
 | Phase 5 — workflow.md Rules 3–6 | 30 | 30 | 0 | 0 |
 | Phase 6 — settings.json | 4 | 4 | 0 | 0 |
 | Phase 7 — testing.md | 9 | 9 | 0 | 0 |
-| Phase 8 — code-principles.md | 2 | 0 | 0 | 2 |
-| Phase 9 — CLAUDE.md | 28 | 0 | 0 | 28 |
-| Phase 10 — review.md | 12 | 0 | 0 | 12 |
-| Phase 11 — Conflict Analysis | 10 | 1 | 0 | 9 |
-| **Total** | **162** | **11** | **0** | **151** |
+| Phase 8 — code-principles.md | 2 | 2 | 0 | 0 |
+| Phase 9 — CLAUDE.md | 28 | 28 | 0 | 0 |
+| Phase 10 — review.md | 12 | 12 | 0 | 0 |
+| Phase 11 — Conflict Analysis | 10 | 10 | 0 | 0 |
+| **Total** | **162** | **162** | **0** | **0** |
