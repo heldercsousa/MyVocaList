@@ -246,18 +246,18 @@ One opportunity or small group per step. Sequential — same file.
 
 | Step | Description | OPPs | Status | Notes |
 |------|-------------|------|--------|-------|
-| P10-01 | Add spec-drift detection checklist item | OPP-1-3 | Pending | |
-| P10-02 | Add spec-vs-code consistency section | OPP-2-9 | Pending | |
-| P10-03 | Add Spec Conformance section | OPP-3-08 | Pending | |
-| P10-04 | Add AC traceability format | OPP-3-14 | Pending | |
-| P10-05 | Add spec drift detection step | OPP-3-19, OPP-4-5 | Pending | |
-| P10-06 | Add spec compliance section (cross-service contracts) | OPP-5-10 | Pending | |
-| P10-07 | Add severity classification (Blocker/Warning/Suggestion) | OPP-6-05 | Pending | |
-| P10-08 | Add Spec Alignment section | OPP-6-06, OPP-9-10 | Pending | |
-| P10-09 | Add six spec-code drift categories checklist | OPP-6-09 | Pending | |
-| P10-10 | Add spec drift check section | OPP-7-5 | Pending | |
-| P10-11 | Add spec-code alignment check | OPP-8-08 | Pending | |
-| P10-12 | Add spec-code consistency check | OPP-10-03 | Pending | |
+| P10-01 | Add spec-drift detection checklist item | OPP-1-3 | Done | |
+| P10-02 | Add spec-vs-code consistency section | OPP-2-9 | Done | |
+| P10-03 | Add Spec Conformance section | OPP-3-08 | Done | |
+| P10-04 | Add AC traceability format | OPP-3-14 | Done | |
+| P10-05 | Add spec drift detection step | OPP-3-19, OPP-4-5 | Done | |
+| P10-06 | Add spec compliance section (cross-service contracts) | OPP-5-10 | Done | |
+| P10-07 | Add severity classification (Blocker/Warning/Suggestion) | OPP-6-05 | Done | |
+| P10-08 | Add Spec Alignment section | OPP-6-06, OPP-9-10 | Done | |
+| P10-09 | Add six spec-code drift categories checklist | OPP-6-09 | Done | |
+| P10-10 | Add spec drift check section | OPP-7-5 | Done | |
+| P10-11 | Add spec-code alignment check | OPP-8-08 | Done | |
+| P10-12 | Add spec-code consistency check | OPP-10-03 | Done | |
 
 ---
 
