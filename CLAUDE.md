@@ -49,6 +49,22 @@ Rules:
 - Pinned versions in `.claude/settings.json` — no auto-update from registries
 - If a new MCP server is needed, add it to this list first with justification
 
+### MCP Response Token Discipline
+MCP tool responses are not filtered by RTK (which only applies to Bash commands). To control response size:
+- Context7 `query-docs`: use targeted topic queries ("EF Core DbContext configuration") rather than broad library queries ("EF Core"). Broad queries return 5,000–20,000 tokens of irrelevant docs.
+- SQLite MCP: use WHERE clauses and LIMIT; never `SELECT *` on large tables.
+- DevExpress MCP: query for specific component names, not full component libraries.
+Treat MCP response tokens as session budget — each large MCP response reduces available context for reasoning and code generation.
+
+### MCP Emerging Patterns (adopt when available in Claude Code)
+- **Tool batching:** When Claude Code supports sending multiple MCP tool calls in a single request, batch related Context7 lookups to reduce per-task latency.
+- **Streaming tool outputs:** When available, prefer them for long-running build-equivalent MCP tools — avoids timeout risk on first-run builds (>30s).
+
+### Playwright MCP (Evaluation)
+Playwright MCP provides accessibility-snapshot-based UI testing — deterministic DOM queries without full browser rendering overhead.
+Relevant evaluation triggers: project adopts Blazor Hybrid pages; DevExpress web component previews need regression testing; acceptance criteria need automated verification against a rendered UI.
+Not applicable to pure MAUI native pages. Evaluate at Blazor Hybrid adoption milestone.
+
 ### MCP Availability Gate
 If a required MCP server (Context7, SQLite) is unavailable at task start:
 - Do NOT silently skip the lookup and proceed
