@@ -90,6 +90,12 @@ is a candidate for a new rule, command, or CLAUDE.md update.
 - **SafeAreaEdges**: .NET MAUI 10 breaking change — `ContentPage` defaults to `SafeAreaEdges="None"`. Add `SafeAreaEdges="Container"` to existing pages explicitly.
 - **Incremental edits**: For XAML/UI work, edit ONE file → build → fix → then next file. Never batch UI edits.
 
+## Methodology Layering
+**(1) DDD** defines what to build — bounded contexts, aggregate boundaries, ubiquitous language. Invoke `ddd-dotnet` skill at this layer.
+**(2) SDD** defines how it works — spec (`requirements.md` + `design.md` + `tasks.md`) within the DDD boundaries.
+**(3) TDD** verifies it is correct — Red/Green/Refactor within each SDD task.
+These layers are sequential, not interchangeable. Do not apply TDD before the SDD spec exists; do not write an SDD spec without first confirming DDD boundaries.
+
 ## Roles
 - **Helder**: Architect and Technical Auditor. Defines approaches, reviews code, makes trade-off decisions.
 - **Claude Code**: Implementation Specialist. Codes, debugs, documents. Never makes architectural decisions unilaterally.
