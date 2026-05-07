@@ -1,26 +1,24 @@
 # Code Principles
 
-## Language
-All code, comments, logs, and UI text must be English only.
+> Language rule: English only — see `CLAUDE.md § Constitutional Constraints`.
 
-## Spec Language — Determinism
+## Contents
 
-In spec files (`requirements.md`, `design.md`) and in task descriptions, vague quality adjectives are **prohibited**. They force agents to invent their own thresholds, producing code that is technically compliant but misaligned with intent.
+- [XML Documentation Comments](#xml-documentation-comments)
+- [Nullable Reference Types — DISABLED](#nullable-reference-types--disabled)
+- [Architecture Constraints](#architecture-constraints)
+- [C# Style](#c-style)
+- [Exception Handling](#exception-handling)
+- [Global Usings](#global-usings)
+- [Pagination](#pagination)
+- [DI Registration Conventions](#di-registration-conventions-mauiprogramcs)
+- [UI Thread Performance — ObservableRangeCollection](#ui-thread-performance--observablerangecollection)
+- [EF Core / SQLite](#ef-core--sqlite)
+- [Static Analysis Suppressions](#static-analysis-suppressions)
 
-**Prohibited terms:** fast, slow, quick, responsive, robust, secure, user-friendly, intuitive, handles gracefully, works correctly, performs well, reasonable, appropriate, suitable, adequate.
+---
 
-**Replace with measurable thresholds:**
-
-| Instead of | Write |
-|------------|-------|
-| "the list loads quickly" | "the list renders within 300 ms on a mid-range Android device" |
-| "handles errors gracefully" | "returns `(false, \"message\")` on failure; no exception escapes the service boundary" |
-| "the form validates correctly" | "name ≤ 30 chars; empty name returns `(false, \"Name is required\")`" |
-| "secure storage" | "stored via `SecureStorage.SetAsync`; never in `Preferences` or plain SQLite" |
-
-If the threshold is not yet known, write: `[threshold TBD — establish before implementation starts]`. This is valid in a draft spec; it is **not** valid when a task is dispatched to a subagent.
-
-**Rule:** Any acceptance criterion containing a prohibited term is not ready for implementation. The Tester cannot write a deterministic test from it; the Builder cannot implement it without guessing.
+> Spec language determinism (prohibited vague terms): see `workflow.md § Spec quality four-gate review`.
 
 ## XML Documentation Comments
 - **Interfaces are the source of truth for method documentation.** Write `<summary>`, `<param>`, and `<returns>` on the interface method.
@@ -57,13 +55,13 @@ public sealed class VenueService : IVenueService
 - This is a deliberate project decision — do not "fix" it by enabling stricter checking
 
 ## Architecture Constraints
-- Business logic lives in **Services** only — never in ViewModels or pages
-- Repository interfaces in **Domain** — implementations in **Infra**
-- Only the **MAUI** project references Infra (for DI wiring, AppDbContext, migrations)
-- Services depend only on Domain interfaces — never on Infra types directly
-- DTOs are records in the **Contracts** project
+
+Architecture layer constraints are defined in `CLAUDE.md § Architecture` — they apply equally to code.
 
 ## C# Style
+
+### Design Principles
+- Prefer composition over inheritance
 
 ### Modern C# (13+)
 - Use `record` for DTOs and value objects
@@ -170,6 +168,8 @@ System.Threading.Tasks
 System.Windows.Input
 ```
 
+> *Verify against the project's `Directory.Build.props` — this list is a snapshot, not the authoritative source.*
+
 ### MyVocaList (MAUI) — GlobalUsings.cs
 ```csharp
 CommunityToolkit.Mvvm.ComponentModel
@@ -188,16 +188,22 @@ MyVocaList.UI.Services
 MyVocaList.UI.ViewModels
 ```
 
+> *Verify against the project's `GlobalUsings.cs` — this list is a snapshot, not the authoritative source.*
+
 ### Services — GlobalUsings.cs
 ```csharp
 Microsoft.Extensions.Logging
 ```
+
+> *Verify against the project's `GlobalUsings.cs` — this list is a snapshot, not the authoritative source.*
 
 ### Infra — GlobalUsings.cs
 ```csharp
 Microsoft.Extensions.Logging
 System.Text
 ```
+
+> *Verify against the project's `GlobalUsings.cs` — this list is a snapshot, not the authoritative source.*
 
 ### Rule for new usings
 - Applies to 2+ types in one project → add to that project's `GlobalUsings.cs`
@@ -247,9 +253,8 @@ RunOnUiThread(() =>
 ```
 
 ## EF Core / SQLite
-- Migrations applied on startup via `MigrateAsync()` — blocking call via `Task.Run(...).GetAwaiter().GetResult()`
-- `__EFMigrationsLock` row is cleared before each `MigrateAsync()` call (SQLite single-user workaround)
-- `CollationInterceptor` applied globally for case-insensitive search
+
+EF Core / SQLite constraints: see `.claude/rules/constraints-registry.md § EF Core / SQLite`.
 
 ## Static Analysis Suppressions
 

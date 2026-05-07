@@ -7,7 +7,7 @@ Review before implementing features in the indicated area.
 
 ## DevExpress / UI
 
-- **DXCollectionView reset events:** `ReplaceRange` and `ClearRange` each fire `CollectionChanged(Reset)`, triggering a full re-render of all visible items. Never call both in the same `RunOnUiThread` block — two calls = two full render passes = ANR risk. (code-principles.md)
+- **ObservableRangeCollection / DXCollectionView reset events:** see `code-principles.md § UI Thread Performance — ObservableRangeCollection`.
 - **Native dialogs:** Do NOT use `DisplayAlert`, `DisplayActionSheet`, or `DisplayPromptAsync`. Use `dx:BottomSheet` only. (CLAUDE.md)
 - **Selection after reload:** After a list refresh or search, clear selection (`ClearRange` + `SelectedCount = 0`). Never restore prior selection via `ReplaceRange` — it fires a second Reset and crosses a data-reload boundary. (code-principles.md)
 
@@ -16,6 +16,7 @@ Review before implementing features in the indicated area.
 ## .NET MAUI
 
 - **SafeAreaEdges default:** `.NET MAUI 10` breaking change — `ContentPage` defaults to `SafeAreaEdges="None"`. Every `ContentPage` must declare `SafeAreaEdges="Container"` explicitly or content will render behind the status bar / notch. (CLAUDE.md)
+- **Incremental XAML edits:** Edit one XAML file → build → fix before editing the next. Rationale: XAML parser errors cascade across files, making the error source ambiguous when batching changes. (CLAUDE.md Constitutional Constraints)
 
 ---
 
