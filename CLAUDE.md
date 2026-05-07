@@ -30,6 +30,13 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Architecture patterns: follow `ddd-dotnet` skill (nesbo)
 - .NET patterns: follow `dotnet-skills` (Aaronontheweb)
 - MAUI patterns: follow installed maui-skills, always filtered by `maui-current-apis`
+### MCP Availability Gate
+If a required MCP server (Context7, SQLite) is unavailable at task start:
+- Do NOT silently skip the lookup and proceed
+- Fail with an explicit message: "Context7 MCP unavailable — cannot proceed without library documentation"
+- Wait for user to restore the connection or explicitly authorize proceeding without docs
+Never assume a missing tool response means the tool found nothing — distinguish "tool returned empty" from "tool unavailable".
+
 - **GitHub MCP** *(evaluation)*: use for reading issues, PR status, CI results — not for git operations (use Bash). Re-evaluate with Tool Search enabled (v2.1.7+) to confirm startup context cost is acceptable before enabling.
 - **MyVocaList coding rules** (UI, DevExpress, dialogs, EF Core, themes): invoke `myvocalist-coding` skill before any implementation task
 

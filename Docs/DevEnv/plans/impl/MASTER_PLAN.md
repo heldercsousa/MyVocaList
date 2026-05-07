@@ -223,7 +223,7 @@ One opportunity or small group per step. Sequential — same file.
 | P9-10 | Distinguish constitutional constraints from guidelines | OPP-6-01 | Done | |
 | P9-11 | Add amendment governance process | OPP-6-03 | Done | |
 | P9-12 | Add periodic constitutional audit | OPP-6-11 | Done | |
-| P9-13 | Add MCP availability gate | OPP-7-2 | Pending | |
+| P9-13 | Add MCP availability gate | OPP-7-2 | Done | |
 | P9-14 | Add MCP security stance / allowlist | OPP-7-3 | Pending | |
 | P9-15 | Add MCP context budget guidance | OPP-7-4 | Pending | |
 | P9-16 | Update Context7 invocation discipline | OPP-7-7 | Pending | |
