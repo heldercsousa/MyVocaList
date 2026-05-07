@@ -272,7 +272,7 @@ Execution approach (agreed with Helder 2026-05-06): sequential agents, one file-
 | P11-01-C | Agent C — `CLAUDE.md` + `code-principles.md` analysis → `conflict_report_claude_principles.md` | Done | 20 findings |
 | P11-02 | Synthesizer — merge all three partial reports → `conflict_report.md` | Done | 61 findings: 9 Blocker / 24 Warning / 28 Suggestion |
 | P11-03 | Review conflict_report.md with Helder — record decisions in Decision Registry | Done | All 61 findings decided: 8 Approved Blockers, 1 Rejected Blocker (B-03), 24 Approved Warnings, 27 Approved Suggestions, 1 Rejected Suggestion (S-13) |
-| P11-04-A | Apply approved resolutions → `workflow.md` (28 findings) | Pending | One subagent; reads conflict_report.md Decision Registry |
+| P11-04-A | Apply approved resolutions → `workflow.md` (28 findings) | Done | One subagent; reads conflict_report.md Decision Registry |
 | P11-04-B | Apply approved resolutions → `review.md` (13 findings) | Pending | One subagent |
 | P11-04-C | Apply approved resolutions → `testing.md` (9 findings) | Pending | One subagent |
 | P11-04-D | Apply approved resolutions → `CLAUDE.md` (10 findings) | Pending | One subagent |
