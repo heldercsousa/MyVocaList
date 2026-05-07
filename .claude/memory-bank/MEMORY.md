@@ -8,8 +8,8 @@
 
 ## Current Phase
 
-**SDD Implementation** — applying SDD (Spec-Driven Development) enhancements to `.claude/` config files.
-See `Docs/DevEnv/plans/impl/MASTER_PLAN.md` for the full step list and progress.
+**Artists & Songs** — next feature in the roadmap. Spec drafted; repository + service tests written (RED).
+See `Docs/specs/artists-songs/` for spec and `Docs/superpowers/plans/` for the active plan.
 
 Active branch: `develop`
 
@@ -17,29 +17,15 @@ Active branch: `develop`
 
 ## Recently Completed
 
-- Phase 1 (P1): All status log files created (`S1_impl_status.md` through `S10_impl_status.md`)
-- Phase 2 (P2): New support files — `constraints-registry.md`, `exception-registry.md`,
-  `agents/implementor.md`, `agents/verifier.md`, `memory-bank/MEMORY.md` (this file)
+- **SDD Implementation (Phases 1–11, 162 steps)** — all `.claude/` config files enhanced with
+  Spec-Driven Development patterns. Conflict analysis (Phase 11) identified 61 findings; 60/61
+  applied. Implementation complete as of 2026-05-07.
 
 ---
 
 ## Active Work
 
-- Phase 3 (P3): `.claude/rules/workflow.md` — Rule 1 (Spec-First) enhancements — **not started**
-- 27 steps pending in P3 alone; see MASTER_PLAN.md for the full queue
-
----
-
-## Upcoming
-
-- Phase 4 — workflow.md Rule 2 (Subagent Delegation enhancements)
-- Phase 5 — workflow.md Rules 3–6 + new rules
-- Phase 6 — `.claude/settings.json` hooks
-- Phase 7 — `.claude/rules/testing.md`
-- Phase 8 — `.claude/rules/code-principles.md`
-- Phase 9 — `CLAUDE.md`
-- Phase 10 — `.claude/commands/review.md`
-- Phase 11 — Conflict Analysis
+- Artists & Songs: ArtistRepositoryTests (17 failing — RED), pending Builder phase
 
 ---
 
@@ -58,7 +44,7 @@ Active branch: `develop`
 | Feature | Spec location | Status |
 |---------|---------------|--------|
 | Venues | `Docs/specs/venues/` | Implemented |
-| Artists & Songs | `Docs/specs/artists-songs/` | Planned (see roadmap) |
+| Artists & Songs | `Docs/specs/artists-songs/` | In progress |
 
 See `memory/project_artists_songs_roadmap.md` for the Artists & Songs phase tracker.
 

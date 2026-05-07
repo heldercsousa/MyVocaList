@@ -1,6 +1,9 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/07/2026** - chore - SDD Phase 11 complete — conflict analysis and resolution across all rules files: 61 findings (9 Blockers / 24 Warnings / 28 Suggestions) identified across workflow.md, review.md, testing.md, CLAUDE.md, code-principles.md + constraints-registry.md; all findings reviewed with Helder; 60/61 approved resolutions applied (B-03 and S-13 rejected); SDD implementation finalized — all 162 steps across Phases 1–11 Done; spot-check verification of Decision Registry completed
+- **05/07/2026** - docs - Add BACKLOG.md project board for feature roadmap tracking; wired into CLAUDE.md
+- **05/07/2026** - chore - Reorganize Docs/DevEnv/ into Docs/DevEnv/SDD/ subfolder; remove redundant S1–S10 impl_status.md files (superseded by MASTER_PLAN.md single-file tracking)
 - **05/06/2026** - docs - SDD usage plane review: S2, S3, S7, S9, S10 opportunities files reviewed and updated (19 new opportunities across 5 sections); status.md marked all sections Reviewed
 - **05/03/2026** - chore - Redesign hooks system: TaskCreated (init task-log + build resume), PostToolUse (file-path buffer only, no build/commit), TaskCompleted (classify new vs review, changelog, commit, 3-attempt build check with To Review/Build failure), Stop asyncRewake (scan for To Review tasks); task-log files now beside plan file as <plan>-task-log.md; update workflow.md Rule 5 with format and status table
 

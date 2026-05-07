@@ -1,5 +1,5 @@
 {
-  "plansDirectory": "Docs/DevEnv/plans",
+  "plansDirectory": "Docs/superpowers/plans",
   "permissions": {
     "deny": [
       "Edit(CLAUDE.md)",
