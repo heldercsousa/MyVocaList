@@ -1,4 +1,4 @@
-﻿# SDD Implementation Master Plan
+# SDD Implementation Master Plan
 
 > **Resume guide:** Read this file first in any new session. Find the first step that is NOT `Done` and continue from there.
 > **Progress discipline:** Update status to `In Progress` when starting a step, `Done` when committed. Never batch steps.
@@ -275,7 +275,7 @@ Execution approach (agreed with Helder 2026-05-06): sequential agents, one file-
 | P11-04-A | Apply approved resolutions → `workflow.md` (28 findings) | Done | One subagent; reads conflict_report.md Decision Registry |
 | P11-04-B | Apply approved resolutions → `review.md` (13 findings) | Done | One subagent |
 | P11-04-C | Apply approved resolutions → `testing.md` (9 findings) | Done | One subagent |
-| P11-04-D | Apply approved resolutions → `CLAUDE.md` (10 findings) | Pending | One subagent |
+| P11-04-D | Apply approved resolutions → `CLAUDE.md` (10 findings) | Done | One subagent |
 | P11-04-E | Apply approved resolutions → `code-principles.md` + `constraints-registry.md` (8 findings) | Pending | One subagent |
 
 ---
