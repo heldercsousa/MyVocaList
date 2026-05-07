@@ -80,6 +80,12 @@ After every task, always ask:
 - **Delete** rules that proved wrong or are superseded by skills
 - **Update CLAUDE.md** when architecture, stack, or fundamental decisions change
 
+**Context size governance:** CLAUDE.md must stay under 600 lines. When it approaches this limit:
+- Move stable, detailed patterns to `.claude/library/` or `.claude/rules/` files
+- Replace inline examples with "See `.claude/rules/X.md`" references
+- Keep only routing tables, non-negotiables, and architectural constraints inline
+Do not add rules that a linter or type-checker already enforces.
+
 Any area where Claude Code repeatedly makes mistakes or needs repeated guidance
 is a candidate for a new rule, command, or CLAUDE.md update.
 
