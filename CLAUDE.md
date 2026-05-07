@@ -102,6 +102,21 @@ is a candidate for a new rule, command, or CLAUDE.md update.
 - **SafeAreaEdges**: .NET MAUI 10 breaking change — `ContentPage` defaults to `SafeAreaEdges="None"`. Add `SafeAreaEdges="Container"` to existing pages explicitly.
 - **Incremental edits**: For XAML/UI work, edit ONE file → build → fix → then next file. Never batch UI edits.
 
+## Rule Authority Hierarchy
+Rules in this project are layered. Lower layers can only STRENGTHEN upper-layer rules — never weaken them.
+
+| Layer | Location | Scope |
+|-------|----------|-------|
+| Global | `~/.claude/CLAUDE.md` | All projects for this user |
+| Project | `./CLAUDE.md` (this file) | This project, all agents |
+| Modular | `.claude/rules/*.md` | This project, context-scoped |
+| Local | `.claude/CLAUDE.local.md` (gitignored) | This session only, testing only |
+
+**Unamendable constraints** (require architecture review to change):
+- "Business logic lives in Services only"
+- "Never use `DisplayAlert` for dialogs"
+- "DevExpress components before stock MAUI"
+
 ## Methodology Layering
 **(1) DDD** defines what to build — bounded contexts, aggregate boundaries, ubiquitous language. Invoke `ddd-dotnet` skill at this layer.
 **(2) SDD** defines how it works — spec (`requirements.md` + `design.md` + `tasks.md`) within the DDD boundaries.
