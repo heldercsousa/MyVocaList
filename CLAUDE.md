@@ -30,6 +30,7 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Architecture patterns: follow `ddd-dotnet` skill (nesbo)
 - .NET patterns: follow `dotnet-skills` (Aaronontheweb)
 - MAUI patterns: follow installed maui-skills, always filtered by `maui-current-apis`
+- **GitHub MCP** *(evaluation)*: use for reading issues, PR status, CI results — not for git operations (use Bash). Re-evaluate with Tool Search enabled (v2.1.7+) to confirm startup context cost is acceptable before enabling.
 - **MyVocaList coding rules** (UI, DevExpress, dialogs, EF Core, themes): invoke `myvocalist-coding` skill before any implementation task
 
 ## Rules Files
