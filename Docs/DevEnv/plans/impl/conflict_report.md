@@ -15,9 +15,9 @@
 
 | ID | Sev | Target file | Decision | Rationale | Status |
 |----|-----|-------------|----------|-----------|--------|
-| B-01 | 🔴 | workflow.md | Pending | | Pending |
-| B-02 | 🔴 | workflow.md | Pending | | Pending |
-| B-03 | 🔴 | workflow.md | Pending | | Pending |
+| B-01 | 🔴 | workflow.md | Approved | Add qualifier to Wave handoff: inject verbatim signatures only when new wave has explicit dependency on prior wave's output AND artifact is not already in a file the subagent will naturally read. Rule A (paths only) unchanged. | Pending |
+| B-02 | 🔴 | workflow.md | Approved | Calibration table (Rule B) is canonical. Update "When to skip SDD" — small isolated change minimum artifact changes from "Descriptive commit message" to "tasks.md entry + commit message". Only true exemptions (typos, comment fixes, pure docs) keep commit-message-only. | Pending |
+| B-03 | 🔴 | workflow.md | Rejected | Both spec rot frequency prescriptions removed. /project:review after every task + Rule 3a session-end ritual are the spec-drift detection mechanism. Spec rot indicators list may be kept as reference within Rule 3a but prescribed frequency rules are deleted. | Pending |
 | B-04 | 🔴 | review.md + testing.md + workflow.md | Pending | | Pending |
 | B-05 | 🔴 | review.md + workflow.md | Pending | | Pending |
 | B-06 | 🔴 | testing.md + review.md | Pending | | Pending |
