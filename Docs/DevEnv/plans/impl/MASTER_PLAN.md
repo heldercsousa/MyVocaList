@@ -268,11 +268,15 @@ Execution approach (agreed with Helder 2026-05-06): sequential agents, one file-
 | Step | Description | Status | Notes |
 |------|-------------|--------|-------|
 | P11-01-A | Agent A — `workflow.md` internal analysis → `conflict_report_workflow.md` | Done | 33 findings: 14 dup, 5 contradiction, 6 inconsistency, 8 structural |
-| P11-01-B | Agent B — `review.md` + `testing.md` analysis → `conflict_report_review_testing.md` | Pending | Run after /clear |
-| P11-01-C | Agent C — `CLAUDE.md` + `code-principles.md` analysis → `conflict_report_claude_principles.md` | Pending | Run after /clear |
-| P11-02 | Synthesizer — merge all three partial reports → `conflict_report.md` | Pending | Run after /clear, after A+B+C done |
-| P11-03 | Present conflict report to Helder for approval | Pending | |
-| P11-04 | Apply approved resolutions (one subagent per affected file) | Pending | |
+| P11-01-B | Agent B — `review.md` + `testing.md` analysis → `conflict_report_review_testing.md` | Done | 23 findings |
+| P11-01-C | Agent C — `CLAUDE.md` + `code-principles.md` analysis → `conflict_report_claude_principles.md` | Done | 20 findings |
+| P11-02 | Synthesizer — merge all three partial reports → `conflict_report.md` | Done | 61 findings: 9 Blocker / 24 Warning / 28 Suggestion |
+| P11-03 | Review conflict_report.md with Helder — record decisions in Decision Registry | In Progress | Each finding gets Approved / Deferred / Rejected |
+| P11-04-A | Apply approved resolutions → `workflow.md` (28 findings) | Pending | One subagent; reads conflict_report.md Decision Registry |
+| P11-04-B | Apply approved resolutions → `review.md` (13 findings) | Pending | One subagent |
+| P11-04-C | Apply approved resolutions → `testing.md` (9 findings) | Pending | One subagent |
+| P11-04-D | Apply approved resolutions → `CLAUDE.md` (10 findings) | Pending | One subagent |
+| P11-04-E | Apply approved resolutions → `code-principles.md` + `constraints-registry.md` (8 findings) | Pending | One subagent |
 
 ---
 
