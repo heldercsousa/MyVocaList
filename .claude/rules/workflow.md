@@ -12,7 +12,7 @@ The hooks in `.claude/settings.json` enforce specific rules from this document. 
 
 | Hook | Trigger | Rule enforced |
 |------|---------|---------------|
-| `Stop` hook | Session ends with uncommitted changes | Rule 3 — Commit After Every Task |
+| `Stop` hook | Session ends with uncommitted changes | Rule 3 — Commit After Every Task; also triggers Verifier dispatch reminder |
 | `PostCompact` hook | Context compaction event | Session resume — re-read spec reminder |
 | `PostToolUse` hook (Services files) | Edit to a Services/*.cs file | testing.md — TDD reminder for service changes |
 | `SessionStart` hook | New session begins | Hook health verification |
@@ -21,14 +21,14 @@ The hooks in `.claude/settings.json` enforce specific rules from this document. 
 
 The following rules have no hook enforcement and rely on agent discipline:
 
-- Pre-dispatch validation checklist (P5-11)
-- DRY Onion task ordering (P5-05)
-- Single-writer rule for hotspot files (P5-10)
-- Spec freshness gate before dispatching a wave
-- Multi-wave checkpoint every second wave (P5-15)
-- Session-end spec update ritual (Rule 3a)
+- Pre-dispatch validation checklist (Rule 2)
+- DRY Onion task ordering (Rule 4)
+- Single-writer rule for hotspot files (Rule 2)
+- Spec freshness gate before dispatching a wave (Rule 2)
+- Multi-wave checkpoint every second wave (Rule 7)
+- Session-end spec update ritual (Rule 3 — Session-End Spec Update Ritual subsection)
 - AC traceability matrix in task-log (Rule 5)
-- E2E emulator gate before To Review (P5-02)
+- E2E emulator gate before To Review (Rule 2)
 
 **Why this distinction matters:** Hook-enforced rules are guaranteed to fire. Self-enforced rules depend on the agent's attention. For high-risk workflows, treat self-enforced rules as if they were hooks — apply them every time, not "when you remember."
 
@@ -81,6 +81,56 @@ This rule prevents the spec from becoming a historical artifact. A spec that no 
 | `requirements.md` | User stories, acceptance criteria, validation rules, out-of-scope |
 | `design.md` | Architecture, interfaces, page structure, interaction flows, key decisions |
 | `tasks.md` | Ordered checkboxed tasks — check off as each completes |
+
+### Spec decision table — ceremony, scope, and required artifacts
+
+Use this single table to determine how much spec work a task requires. It supersedes the individual "Spec size calibration," "Spec ceremony calibration," and "When to skip SDD" sections (those are removed; this table is the authoritative source).
+
+| Task type | Estimated effort | Spec required? | Ceremony level | Required artifacts |
+|-----------|-----------------|----------------|----------------|-------------------|
+| Typo fix, comment update | < 5 min | No | None | Descriptive commit message |
+| Single-file cosmetic change (color, padding, label) | < 15 min | No | None | Descriptive commit message |
+| Single-file logic fix (bug with known cause) | < 30 min | No | Minimal | Commit message as spec (Bug Fix Pattern) |
+| Docs/rules/config update | < 30 min | No | Minimal | Commit message |
+| Small isolated change (1 file, no interface change, < 1 hour) | 30–60 min | No | Light | `tasks.md` entry + commit message (only if task is tracked in an active feature plan) |
+| Multi-file change within one layer | 1–2 hours | No | Standard | `tasks.md` + inline design notes in commit |
+| Cross-layer feature (any two of: Domain, Infra, Services, UI) | 2–8 hours | **Yes** | Full | All three spec files |
+| Multi-session feature | > 8 hours | **Yes** | Full + Decision log | All three spec files + `decisions.md` |
+| New feature (any complexity) | Any | **Yes** | Full | All three spec files |
+| Non-trivial refactor (cross-layer, affects interfaces) | Any | **Yes** | Full | `design.md` + `tasks.md` |
+| Bug fix | Any | No | Minimal | Commit message as spec (Bug Fix Pattern) |
+| Spike / discovery work | Any | No | Minimal | `findings.md` artifact |
+| Architectural change (new pattern, new dependency, schema change) | Any | **Yes** | Full + Helder review | All three spec files + Helder sign-off |
+
+**Key thresholds:**
+- **≥ 2 layers OR > 2 hours** → Full ceremony with all three spec files. No exceptions.
+- **Single file, < 1 hour** → Light ceremony; `tasks.md` entry only if tracked in an active plan.
+- **Typo / cosmetic / bug fix** → No spec required; commit message is the artifact.
+
+**Blast radius principle:** Ceremony level must be proportional to the blast radius — how widely the change's consequences spread if it turns out to be wrong. A typo fix has zero blast radius. A new EF migration has blast radius that reaches every developer and every database.
+
+**Spec bypass guard:** Even when skipping a full spec, the SDD Invariant still applies. "No spec" does not mean "no constraints" — it means the commit message, the task description, or a brief inline note serves as the specification.
+
+**When in doubt:** Write a spec. A 10-minute spec prevents a 2-hour rewrite.
+
+### Spec language — determinism
+
+In spec files (`requirements.md`, `design.md`) and in task descriptions, vague quality adjectives are **prohibited**. They force agents to invent their own thresholds, producing code that is technically compliant but misaligned with intent.
+
+**Prohibited terms:** fast, slow, quick, responsive, robust, secure, user-friendly, intuitive, handles gracefully, works correctly, performs well, reasonable, appropriate, suitable, adequate.
+
+**Replace with measurable thresholds:**
+
+| Instead of | Write |
+|------------|-------|
+| "the list loads quickly" | "the list renders within 300 ms on a mid-range Android device" |
+| "handles errors gracefully" | "returns `(false, "message")` on failure; no exception escapes the service boundary" |
+| "the form validates correctly" | "name ≤ 30 chars; empty name returns `(false, "Name is required")`" |
+| "secure storage" | "stored via `SecureStorage.SetAsync`; never in `Preferences` or plain SQLite" |
+
+If the threshold is not yet known, write: `[threshold TBD — establish before implementation starts]`. This is valid in a draft spec; it is **not** valid when a task is dispatched to a subagent.
+
+**Rule:** Any acceptance criterion containing a prohibited term is not ready for implementation. The Tester cannot write a deterministic test from it; the Builder cannot implement it without guessing.
 
 ### Acceptance criteria format
 
@@ -216,19 +266,6 @@ QueueEntry states:
   Absent  → Waiting  (triggered by: admin taps "Return to queue")
 ```
 
-### Spec size calibration
-
-Spec size should match task complexity. Over-speccing small tasks wastes time; under-speccing large tasks causes rework.
-
-| Task size | Estimated effort | Spec size target |
-|-----------|-----------------|-----------------|
-| Tiny | < 30 min | Commit message only |
-| Small | 30 min – 2 hours | `tasks.md` + inline notes |
-| Medium | 2 – 8 hours | All three files, concise |
-| Large | 1 – 3 days | All three files, full detail |
-| Epic | > 3 days | Split into sub-features; spec each separately |
-
-**Two-tier spec trigger:** Any task estimated at > 2 hours OR touching ≥ 2 layers automatically requires a full three-file spec. No exceptions.
 
 ### Failure-mode analysis
 
@@ -239,14 +276,6 @@ Before finalizing a spec, perform a brief failure-mode analysis:
 3. **For each state transition:** What happens if the transition is attempted from an invalid state?
 
 Failure modes that are not in the spec will be handled inconsistently by subagents. Document them explicitly.
-
-### Regeneration test practice
-
-After a feature spec is complete, validate it using the **regeneration test**:
-
-> Give the spec (without the existing implementation) to a fresh Claude session and ask it to implement the feature. If the output contradicts your intended design in more than 2 places, the spec has gaps. Fix the spec — do not patch the implementation.
-
-This is a lightweight quality diagnostic, not a required step for every feature. Apply it when a spec feels ambiguous or when a previous implementation diverged from intent.
 
 ### Demo statement requirement
 
@@ -276,7 +305,7 @@ Subagents implement what the spec says. They do not write, rewrite, or significa
 
 **Why:** Specs written by subagents reflect what the subagent found convenient to implement, not what the user actually needs. The spec is Helder's voice — it must come from Helder.
 
-**Exception:** A subagent may add a `> **Spec updated [date]:** one-line note` to an existing spec file when updating it per the spec versioning discipline — but only to reflect a decision that was explicitly authorized by the main agent.
+**Exception:** A subagent may add a `> **Spec updated [YYYY-MM-DD]:** one-line note` to an existing spec file when updating it per the spec versioning discipline — but only to reflect a decision that was explicitly authorized by the main agent.
 
 ### Spec quality gate (mandatory before implementation)
 
@@ -359,8 +388,8 @@ When a subagent's work reveals a discrepancy between the spec and the delivered 
 When a feature is considered complete (all tasks checked in `tasks.md`, final review passed), perform the **rebuild test** as a spec quality diagnostic before closing the feature.
 
 **Rebuild test protocol:**
-1. Take the completed feature's spec (`requirements.md` + `design.md`) — without the existing implementation
-2. In a fresh Claude session (empty context), provide only the spec and ask: "Implement this feature"
+1. Take the completed feature's spec (`requirements.md` + `design.md`) and the test suite — without the existing implementation
+2. In a fresh Claude session (empty context), provide only the spec and the test suite and ask: "Implement this feature"
 3. Compare the generated output against the actual implementation
 4. Count the number of places where the generated output contradicts the delivered implementation
 
@@ -423,7 +452,7 @@ A **spike** is a time-boxed exploration task used when the right implementation 
 4. If the spike's failure criterion is met: escalate to Helder for approach decision; do not unilaterally choose an alternative
 5. A spike that ends without clear findings (neither success nor failure) must be documented as `inconclusive` with a recommendation for next steps
 
-**After the spike:** The main agent reads `findings.md` and updates the spec before any implementation tasks are dispatched. Spike findings must not be held in subagent context — they must be in the spec.
+**After the spike:** The main agent reads `findings.md` and updates the spec before any implementation tasks are dispatched. Spike findings must not be held in subagent context — they must be in the spec. See the `findings.md — session artifact` section for the full format.
 
 ### Discovery mode
 
@@ -431,11 +460,7 @@ When the right solution is unknown and exploration is needed before committing t
 
 1. **Create a spike task** in `tasks.md` with the prefix `[SPIKE]`.
 2. Work freely — write throwaway code, try approaches, read docs.
-3. At the end of the spike, create `Docs/specs/[feature]/findings.md` documenting:
-   - What was tried
-   - What worked and what didn't
-   - Recommended approach with rationale
-   - Known constraints or risks discovered
+3. At the end of the spike, create `Docs/specs/[feature]/findings.md` (see `findings.md — session artifact` section for the full format).
 4. Delete all throwaway code before transitioning to spec-first implementation.
 5. Write the spec based on findings — do not skip spec-writing because "we already know the solution."
 
@@ -491,7 +516,7 @@ For tasks that don't fit cleanly into "small isolated" or "new feature," use thi
 
 | Signal | SDD action |
 |--------|-----------|
-| Change touches ≥ 2 layers (e.g. Domain + UI) | Write `design.md` before starting |
+| Change touches ≥ 2 layers (e.g. Domain + UI) | All three spec files (`requirements.md`, `design.md`, `tasks.md`) |
 | Change introduces a new repository interface | Write `design.md` + update `requirements.md` |
 | Change affects an existing public contract (DTO, interface signature) | Write `design.md`; flag downstream consumers in `tasks.md` |
 | Change is reversible and affects only one file | Commit message spec is sufficient |
@@ -513,7 +538,6 @@ The SDD workflow has a **J-Curve ROI profile**: it costs more time upfront (spec
 
 **Counter-measure:** Commit to SDD for a minimum of 3 complete features before evaluating its ROI. A sample size of 1–2 features systematically underestimates the return.
 
-**Note for calibration:** The ceremony calibration table (above) exists precisely to reduce the overhead of SDD for small tasks. Applying Full ceremony to every change, including trivial ones, extends the J-Curve trough unnecessarily. Right-size the ceremony; don't skip SDD entirely.
 
 ### Over-specification guard
 
@@ -532,45 +556,7 @@ A spec that is too long is as harmful as one that is too short. Over-specified s
 
 **Spec length guideline:** `requirements.md` should not exceed 2 pages. `design.md` should not exceed 3 pages. If you find yourself writing more, split the feature into sub-features.
 
-### Spec ceremony calibration table
 
-The full SDD ceremony (brainstorm → spec → plan → implement → review) has a fixed overhead cost. This cost is worth paying for features that will be touched multiple times, but it may exceed the value for very small or trivial changes.
-
-Use this table to calibrate how much spec ceremony is appropriate for a given task:
-
-| Task type | Estimated effort | Ceremony level | Required artifacts |
-|-----------|-----------------|----------------|-------------------|
-| Typo fix, comment update | < 5 min | None | Descriptive commit message |
-| Single-file cosmetic change (color, padding, label text) | < 15 min | None | Descriptive commit message |
-| Single-file logic fix (bug with known cause) | < 30 min | Minimal | Commit message as spec (Bug Fix Pattern) |
-| Small isolated change (1 file, no interface change, < 1 hour) | 30–60 min | Light | `tasks.md` entry + commit message |
-| Multi-file change within one layer | 1–2 hours | Standard | `tasks.md` + inline design notes in commit |
-| Cross-layer feature (any two of: Domain, Infra, Services, UI) | 2–8 hours | Full | All three spec files |
-| Multi-session feature | > 8 hours | Full + Decision log | All three spec files + `decisions.md` |
-| Architectural change (new pattern, new dependency, schema change) | Any | Full + Helder review | All three spec files + Helder sign-off |
-
-**Calibration principle:** Ceremony level must be proportional to the blast radius — how widely the change's consequences spread if it turns out to be wrong. A typo fix has zero blast radius. A new EF migration has blast radius that reaches every developer and every database.
-
-**Anti-pattern:** Applying Full ceremony to every change, including trivial ones. This is ceremony theater — it trains agents to treat spec steps as bureaucratic boxes to check rather than valuable gates.
-
-**Anti-pattern:** Applying Minimal ceremony to an architectural change because "it seemed small." Architectural changes are never small — their consequences are large and often irreversible.
-
-### When to skip SDD (spec bypass rule)
-
-Not every change requires a full three-file spec. Use this table:
-
-| Task type | Spec required? | Minimum artifact |
-|-----------|---------------|-----------------|
-| New feature (any complexity) | Yes | All three files: `requirements.md`, `design.md`, `tasks.md` |
-| Non-trivial refactor (cross-layer, affects interfaces) | Yes | `design.md` + `tasks.md` |
-| Small isolated change (< 1 hour, single file, no interface change) | No | Descriptive commit message |
-| Bug fix | No | Commit message as spec (see Bug Fix Pattern) |
-| Docs/rules/config update | No | Commit message |
-| Spike / discovery work | No | `findings.md` artifact (see Discovery Mode) |
-
-**Rule:** When in doubt, write a spec. A 10-minute spec prevents a 2-hour rewrite.
-
-**Spec bypass guard:** Even when skipping a full spec, the SDD Invariant still applies. "No spec" does not mean "no constraints" — it means the commit message, the task description, or a brief inline note serves as the specification.
 
 ---
 
@@ -582,9 +568,11 @@ Not every change requires a full three-file spec. Use this table:
 |----------------|---------------|
 | `dotnet build` | Any file creation or edit |
 | `dotnet test` | ViewModels, pages, services, repositories |
-| `dotnet ef migrations add` | XAML, code-behind, DI registration |
+| `dotnet ef migrations add`¹ | XAML, code-behind, DI registration |
 | `git status`, `git add`, `git commit` | Route additions, AppShell registration |
 | Reading spec before briefing subagent | Everything in `crud-pages.md` |
+
+> ¹ `dotnet ef migrations add` generates the scaffold via CLI (main agent shell); the subagent then edits the migration file.
 
 ### Task sizing limits — context window budget
 
@@ -739,11 +727,7 @@ Before dispatching any wave, the main agent must verify that the spec being impl
 **Spec rot multiplier in parallel waves:**
 Each subagent in a parallel wave implements against the spec. If the spec has 10% rot, each subagent independently interprets that 10% — producing 4 different interpretations in a 4-agent wave. The divergence is not 10%; it is 4 independent instances of 10%, which compound into a reconciliation problem that can take longer to fix than the original implementation.
 
-**Prevention protocol:**
-1. After every wave: run the spec rot check (re-read spec + compare against committed code)
-2. Fix rot immediately — do not defer spec updates to "later" or to "the next session"
-3. If spec rot is found before a parallel wave: fix the spec FIRST, then dispatch the wave
-4. Track spec update frequency as a quality metric — frequent updates indicate active development; zero updates over multiple sessions indicates either perfect implementation (unlikely) or ignored drift (likely)
+**Prevention:** Fix spec rot immediately when detected — do not defer spec updates to "later." If spec rot is found before a parallel wave: fix the spec FIRST, then dispatch the wave. Use the indicators list above as a regular reference — check them as part of the session-end spec update ritual (Rule 3 subsection).
 
 ### Cross-spec review gate before multi-spec wave
 
@@ -786,6 +770,7 @@ Before dispatching any subagent (for any task), the main agent must run through 
 - [ ] Each subagent briefing includes a role scope block (Role, Scope, Files owned, Files off-limits, Spec source)
 - [ ] Each briefing references file paths only — no pasted rule file content
 - [ ] Contracts from the previous wave (if any) are included verbatim in briefings that depend on them
+- [ ] For UI/coding tasks: confirm subagent briefing includes instruction to invoke `myvocalist-coding` skill per CLAUDE.md § Skill & MCP Lookup
 
 **Failing any item:** Fix the blocker before dispatching. A "we'll sort it out" wave produces proportionally more rework than a well-prepared wave.
 
@@ -822,6 +807,8 @@ Wave N file ownership:
 - Pasting rule file content into a briefing multiplies token cost by the number of subagents — never do it.
 - Pre-read the spec yourself and hand the subagent concrete, scoped instructions (not "based on what you find").
 
+**Exception:** Committed interface/DTO signatures produced in the previous wave may be included verbatim under a `## Contracts from previous wave` block — these are bounded committed code, not rule file content. See Wave handoff section for the protocol.
+
 #### Role scope declaration
 
 Every subagent briefing must begin with a **role scope block** that declares:
@@ -840,17 +827,6 @@ Spec source: [path to design.md and requirements.md]
 
 ---
 
-#### Mandatory spec reads at session start
-
-Before briefing ANY subagent, the main agent must read (in its own context):
-
-1. `Docs/specs/[feature]/requirements.md` — acceptance criteria, validation rules, out-of-scope
-2. `Docs/specs/[feature]/design.md` — interfaces, layers affected, key decisions
-3. `Docs/specs/[feature]/tasks.md` — task list and current checkpoint
-
-**Rule:** The main agent must not brief a subagent based on memory from a previous session. Re-read the spec fresh at the start of each session. Context windows reset — assume nothing was retained.
-
-This prevents the most common drift source: a subagent receiving a stale or incomplete briefing because the orchestrator relied on earlier-session memory that was compacted or lost.
 
 ### Spec gap escalation — documentation requirement
 
@@ -893,13 +869,15 @@ Subagents implement what the spec says. They do not redesign, refactor beyond ta
 
 **Why:** A subagent that redesigns while implementing introduces changes that were not reviewed, not approved, and not traced to any acceptance criterion. These changes are invisible until something breaks.
 
+> See also: Spec ownership constraint (Rule 1) for the authoritative table of what subagents may and may not write in spec files.
+
 ### Subagent return protocol — status signal only
 Subagents communicate completion **only** by:
 1. Updating the task-log beside the plan file (see Rule 5) with the task status:
    - `To Review` — build passed; task ready for review
    - `Build failure` — build failed after 3 attempts; one-line reason appended
    - `blocked: spec gap` — spec ambiguity found; question + options + recommendation documented; agent stops and does NOT choose unilaterally
-2. Committing and pushing all changes (`git push origin HEAD`)
+2. Following Subagent exit checklist steps 7–8 (commit and push).
 3. Stopping (exiting their session)
 
 Subagents must **not** return summaries, explanations, or diffs to the caller.
@@ -1035,13 +1013,16 @@ For high-risk waves (new public interfaces, schema changes, significant business
 
 ### Verifier subagent
 
-After a wave completes and before the main agent proceeds to the next wave, a **Verifier subagent** may be dispatched to independently validate the wave's output.
+After a wave completes and before the main agent proceeds to the next wave, a **Verifier subagent** may be dispatched to independently validate the wave's output. The Verifier is optional except for Architectural review-lane tasks, where it is mandatory (see Review SLA and Risk-Tiered Review Lanes).
 
-**When to use a Verifier:**
+**When to use a Verifier (optional cases):**
 - After any wave that touched more than 3 files
 - After any wave that implemented a new public interface or DTO
 - After any wave where a subagent reported `Build failure` or `blocked: spec gap`
 - Before a wave that depends on correctness of the previous wave's output
+
+**When the Verifier is mandatory:**
+- Any task classified as Architectural review lane (see Review SLA and Risk-Tiered Review Lanes)
 
 **Verifier briefing template:**
 ```
@@ -1098,10 +1079,11 @@ Before a subagent starts implementation, it must verify that the preconditions f
 - [ ] If TDD applies (see testing.md): a failing test file exists for the method being implemented, OR writing the test is the first step of this task
 - [ ] The acceptance criteria that this task addresses have been identified (for AC traceability matrix)
 - [ ] The role scope block has been confirmed (files owned, files off-limits)
+- [ ] Required MCPs for this task are available (per CLAUDE.md § MCP Availability Gate). If unavailable: set status `blocked: MCP unavailable`, stop.
 
 **If any gate item fails:**
-- Spec files missing → set task status to `blocked: spec gap`, stop
-- Interface not in design.md → do not infer the interface; stop and request clarification
+- Spec files missing → set task status to `blocked: spec gap`, stop (per Spec gap escalation protocol)
+- Interface not in design.md → do not infer the interface; stop and request clarification (per Spec gap escalation protocol)
 - Test file missing when TDD applies → write the test first before implementation
 
 **Why:** A subagent that starts coding without verifying these preconditions will implement against assumptions, not against the spec. The gate takes 2 minutes and prevents hours of rework.
@@ -1146,206 +1128,12 @@ When a complex task requires multiple iterations (e.g., a subagent produces part
 - The subagent ignored a constraint it was given
 - You are on the second or third correction loop
 
-### ACTIVE-CONSIDERATIONS.md — session priority stack
 
-For long or complex sessions involving multiple waves and evolving context, maintain an `ACTIVE-CONSIDERATIONS.md` file as a **session priority stack** — a short, always-current list of the most important things to keep in mind.
 
-**File location:** `Docs/DevEnv/ACTIVE-CONSIDERATIONS.md` (single file, overwritten each session)
 
-**Format:**
-```markdown
-# Active Considerations — [YYYY-MM-DD]
 
-## Current priority
-[One sentence: what is the single most important thing right now?]
 
-## Open items (ordered by urgency)
-1. [Highest urgency: blocking something — must resolve before next wave]
-2. [Spec gap to resolve — needs Helder input]
-3. [Known risk to watch — may affect Wave N+1]
 
-## Do not forget
-- [Constraint discovered this session that is not yet in constraints-registry.md]
-- [Decision made this session that is not yet in design.md]
-- [Task that was deferred and must not be forgotten]
-
-## Wave status
-Current wave: N
-Next wave: N+1 — [brief description of what it contains]
-Checkpoint due: [after Wave N+1 | already done]
-```
-
-**When to update it:**
-- At the start of a session: initialize with current state from task-log + MASTER_PLAN.md
-- After each wave completes: update wave status and open items
-- When a new constraint or decision arises: add to "Do not forget"
-- At the end of a session: commit the final state (it is the handoff artifact for the next session)
-
-**Rule:** This file replaces "held in context" items that are likely to be dropped during compaction. If something is important enough to remember across waves, it must be in `ACTIVE-CONSIDERATIONS.md` — not in the orchestrator's working memory.
-
-**Relationship to handoff artifact:** `ACTIVE-CONSIDERATIONS.md` is the lightweight version for same-day use. The full `session-handoff.md` (see Multi-session state handoff protocol) is written at session end for cross-session continuity. Both serve complementary roles.
-
-### findings.md — session artifact for exploratory work
-
-When a session involves significant exploration, debugging, or spike work, the findings must be captured in a `findings.md` file before the session ends. This prevents the work from being lost when the context window is discarded.
-
-**When to create `findings.md`:**
-- Any `[SPIKE]` task (mandatory — see Spike validation task pattern)
-- Any session where the cause of a bug was non-obvious and required investigation
-- Any session where an architectural option was explored and rejected
-- Any session where a library or API was evaluated for the first time
-
-**File location:** `Docs/specs/[feature]/findings.md` for feature spikes, or `Docs/DevEnv/findings/[YYYY-MM-DD]-[topic].md` for general technical findings not tied to a feature.
-
-**findings.md format:**
-```markdown
-# Findings — [Topic] — [YYYY-MM-DD]
-
-## Context
-[One paragraph: why this investigation was needed]
-
-## What was tried
-- **Approach A:** [description] → [result: worked / failed / partial]
-- **Approach B:** [description] → [result: worked / failed / partial]
-
-## What was learned
-[Key discoveries — platform behaviors, library quirks, performance data, etc.]
-
-## Constraints discovered
-[Any new constraints that should be added to constraints-registry.md]
-
-## Recommendation
-[One sentence: what to do next, with rationale]
-
-## Open questions
-[Questions that were not resolved — must be resolved before implementation proceeds]
-```
-
-**Rule:** A spike or investigation that does not produce a `findings.md` has produced nothing — its output exists only in the subagent's expiring context. The findings artifact is the only durable output of exploratory work.
-
-**After `findings.md` is created:** The main agent reads it before writing the spec. Key constraints in `findings.md` must be propagated to `constraints-registry.md` before any implementation begins.
-
-### Multi-session state handoff protocol
-
-When a feature spans multiple sessions, the state at session end must be captured so the next session can resume without loss.
-
-**Session-end handoff artifact (write to `Docs/superpowers/plans/<plan-name>-handoff.md`):**
-```markdown
-# Session Handoff — [Feature Name] — [YYYY-MM-DD]
-
-## Last completed wave
-Wave N — [brief description] — all tasks committed
-
-## Current state
-- Build: PASS / FAIL
-- Tests: N passing, N failing
-- Last committed task: [task title]
-
-## Next wave
-Wave N+1 — [tasks to dispatch]
-- Task A: [scope, files owned]
-- Task B: [scope, files owned]
-
-## Open items
-- [spec gaps, pending decisions, deferred concerns]
-
-## Contracts in play
-- [current interface signatures that the next wave will consume]
-
-## Files modified this session
-- [list of all files touched since session start]
-```
-
-**Rule:** The session-end handoff artifact must be committed before the session ends. It is the only reliable state source for the next session — in-context memory does not persist.
-
-**Session resume rule:** At the start of a new session, read the handoff artifact first — before reading MASTER_PLAN.md or the spec. It tells you exactly where to resume.
-
-### Context exhaustion warning signs
-
-Context window exhaustion degrades output quality before the window is fully used. Recognize the early signs and act before the damage compounds.
-
-**Warning signs in subagent output:**
-- Subagent contradicts a decision it made earlier in the same session
-- Subagent asks about information it was given in the briefing
-- Subagent produces code that duplicates something it already wrote
-- Subagent forgets a constraint it acknowledged earlier (e.g., uses `DisplayAlert` after being told not to)
-- Build errors reference types or namespaces the subagent invented rather than read from the spec
-- Subagent output becomes shorter and less specific with each iteration
-- Subagent claims work is done but Changed files list is sparse relative to the task scope
-
-**Warning signs in orchestrator context:**
-- You are writing a briefing from memory without re-reading the spec
-- You cannot recall what the previous wave committed without checking the task-log
-- You are reasoning about code structure from cached impressions rather than reading the current file
-
-**Response protocol:**
-1. If the subagent shows warning signs: kill it (see Kill criteria), re-read the spec, produce a tighter briefing, dispatch a fresh subagent.
-2. If the orchestrator shows warning signs: stop. Re-read MASTER_PLAN.md, the spec, and the task-log. Resume from verified ground truth.
-
-### Context reset discipline for orchestrator
-
-The orchestrator (main agent) accumulates context across waves. After many waves, earlier decisions may be compacted or lost. Treat each wave boundary as a potential context reset point.
-
-**Context reset discipline:**
-
-1. **Before dispatching each wave:** Re-read the spec (requirements.md + design.md) fresh — do not rely on in-context memory of earlier reads.
-2. **Before briefing:** Confirm the spec paths in the briefing are current (not pointing to a stale version).
-3. **After context compaction** (when Claude signals the context is being compressed): re-read MASTER_PLAN.md and the current tasks.md to re-establish ground truth. Do not continue from memory.
-4. **Session resume:** Always start a new session by reading MASTER_PLAN.md → the current spec → the task-log. Never resume from memory alone.
-
-**Warning sign:** If you find yourself writing a briefing without having just read the spec, stop. The spec drift you introduce in the briefing will become implementation drift.
-
-**Rule:** The orchestrator's job is to hold the spec as the source of truth and inject it correctly into every wave. That job cannot be done from cached memory — it requires fresh reads at each wave boundary.
-
-### Wave completion discovery briefs
-
-After a wave completes and post-wave verification passes, the main agent must produce a **discovery brief** before dispatching the next wave. This brief documents what was actually built versus what was planned, so the next wave's briefing is grounded in reality.
-
-**Discovery brief format (write to task-log or a `wave-N-discovery.md` note):**
-```
-## Wave N Discovery Brief
-
-### What was built
-- [Actual interfaces/types committed, with signatures]
-- [Actual files created/modified]
-- [Any deviations from the spec, with spec update references]
-
-### Contracts for Wave N+1
-- [Verbatim signatures of new interfaces/DTOs the next wave will consume]
-
-### Open items
-- [Any spec gaps found, with status (resolved/escalated/deferred)]
-- [Any build warnings to watch]
-- [Any test coverage gaps identified]
-```
-
-**Why:** The gap between "what was planned" and "what was built" grows with every wave. A discovery brief closes that gap before it propagates into the next briefing. Without it, the main agent briefs Wave 2 as if Wave 1 produced exactly what was designed — which it rarely does.
-
-### Multi-wave checkpoint pattern
-
-For features that span 3 or more waves, the main agent must perform a **multi-wave checkpoint** after every second wave. This prevents progressive spec drift from compounding undetected.
-
-**Multi-wave checkpoint protocol:**
-
-1. **Read the spec fresh** — re-read `requirements.md` and `design.md` as if for the first time
-2. **Compare against committed code** — for each acceptance criterion, confirm the current implementation satisfies it (even partially)
-3. **Check for drift indicators:**
-   - Are there committed changes that do not map to any acceptance criterion?
-   - Are there acceptance criteria with no committed implementation yet that should be done?
-   - Do interface signatures in the code match the signatures in `design.md`?
-4. **Produce a checkpoint note** in the task-log:
-   ```
-   ## Wave N/N+1 Checkpoint
-   - Criteria satisfied: AC-1 ✓, AC-2 ✓, AC-3 partial
-   - Drift detected: [none | description]
-   - Spec update needed: [yes — file + section | no]
-   - Next wave: proceed | pause for spec fix
-   ```
-5. If drift is detected: fix the spec before dispatching the next wave
-
-**Why every second wave?** After one wave, drift is localized and easy to fix. After three waves without a checkpoint, drift accumulates across multiple subagents and is expensive to reconcile. Every second wave is the practical breakpoint — frequent enough to catch problems early, infrequent enough to not create overhead.
-
-**Special case — large parallel waves:** If a single wave has 4 subagents, treat the completion of that wave as a mandatory checkpoint regardless of wave number.
 
 ### Post-wave verification — main agent runs build independently
 
@@ -1361,9 +1149,9 @@ After every wave completes, the main agent must run the build and tests independ
 
 **Rule:** The main agent never skips post-wave verification to "save time." A wave that passes post-wave verification is a stable foundation. A wave that is not verified is technical debt that compounds into the next wave.
 
-### When to take back control
-- After the subagent returns: run `dotnet build` and `dotnet test` as main agent
-- If a shell command is needed mid-way (migrations, file moves): do it inline, then re-delegate
+> If a shell command is needed mid-wave (migrations, file moves): the main agent handles it inline, then re-delegates to the subagent.
+
+
 
 ### Silent task completion — post-edit re-read requirement
 
@@ -1385,13 +1173,15 @@ A subagent that edits a file and immediately marks the task done without re-read
 
 ### Living spec protocol — write decisions back before stopping
 
-When a subagent makes an implementation choice that is not fully specified (e.g., chose one of two valid approaches, discovered a constraint, resolved an ambiguity), it must write that decision back to the spec before stopping.
+When a subagent makes an implementation choice that is not fully specified (e.g., chose one of two valid approaches, discovered a constraint, resolved an ambiguity), it must write that decision back to the spec before stopping — but only for decisions within the task's authorized scope (per Spec ownership constraint).
 
 **Protocol:**
-1. At the end of the task, review all decisions made that were not explicitly specified.
+1. At the end of the task, review all decisions made that were not explicitly specified but are within the authorized task scope.
 2. For each such decision, add a `> **Spec updated [YYYY-MM-DD]:** [decision summary]` note to the relevant spec file (`design.md` or `requirements.md`).
 3. If the decision is a Key Decision (architecture-level), add it to the `Key Decisions` section of `design.md` using the standard format.
 4. Commit the spec update as part of the same commit as the implementation (or as a separate commit immediately before stopping).
+
+> The one-line `> **Spec updated [YYYY-MM-DD]:**` note pattern is the only spec write-back permitted to subagents. See Spec ownership constraint for the full allowed/not-allowed table.
 
 **Examples of decisions to write back:**
 - "I added a `CreatedAt` timestamp to the entity because the spec didn't say not to"
@@ -1415,7 +1205,7 @@ A stuck subagent is one that is looping, making no progress, or producing degrad
 | No commit after 45+ minutes of apparent work | Kill — something is wrong; investigate before re-dispatching |
 | Subagent produces code that references files or types that don't exist | Kill — hallucination; context is stale |
 
-**3-strike error recovery protocol (OPP-8-14):**
+**3-dispatch escalation protocol (OPP-8-14):**
 1. First strike: identify root cause, tighten briefing, re-dispatch
 2. Second strike: decompose the task into smaller sub-tasks; re-dispatch the smallest unit
 3. Third strike: escalate to Helder — do not dispatch a fourth attempt without human review
@@ -1424,7 +1214,7 @@ A stuck subagent is one that is looping, making no progress, or producing degrad
 
 ### Build retry cap
 
-If a build fails, the subagent may attempt to fix it. The retry cap is **3 attempts**.
+If a build fails, the subagent may attempt to fix it. The retry cap is **3 attempts with no diagnostic improvement**.
 
 **Protocol:**
 - Attempt 1: Diagnose the error, apply a fix, rebuild.
@@ -1478,60 +1268,7 @@ For any task that introduces or modifies user-facing behavior (UI changes, navig
 - Any navigation change
 - Any data operation whose result is shown in the UI (list refresh, CRUD confirmation)
 
-### Subagent exit checklist (mandatory before returning)
-Every subagent must complete ALL of these steps in order before stopping:
-
-1. **Invoke `superpowers:verification-before-completion`** — catches non-negotiable violations (DevExpress-first, SafeAreaEdges, English-only, no DisplayAlert, etc.)
-2. **Build:** Run `dotnet build` and confirm 0 errors. If build fails, apply the build retry cap (max 3 attempts). Document result in Verification evidence.
-3. **Test:** If any `.cs` implementation file was changed, run `dotnet test` and confirm 0 failures. Document result in Verification evidence. Skip only if no code files were modified.
-4. **Post-edit re-read:** Re-read the affected section of every edited file and confirm correctness (see Silent task completion rule).
-5. **Living spec check:** Review decisions made during implementation — write back any undocumented decisions to the spec.
-6. **Task-log:** Complete the task-log entry including Changed files, Verification evidence, and AC traceability matrix (if applicable).
-7. **Commit:** Commit all changed files including any spec updates.
-8. **Push:** `git push origin HEAD`
-
-**The `Stop` hook warns if uncommitted changes remain. Treat it as a hard gate.**
-
-A subagent that stops without completing all 8 steps has not finished the task.
-
----
-
-## Rule 3 — Commit After Every Task
-
-**Run `/project:commit` after every task from `tasks.md` is complete.**
-
-A session that ends with uncommitted changes is a session where progress is at risk.
-The `Stop` hook warns you — treat it as a hard gate, not a suggestion.
-
-### What counts as "task complete"
-- The code builds with no errors
-- Tests pass (if the task touched tested code)
-- The checkbox in `tasks.md` is checked
-
-### Task completion verification gates
-
-Before checking the box and committing, a subagent must pass all of the following gates:
-
-**1. Demo statement verification**
-If the task has a demo statement (see Rule 1 — Demo statement requirement), the subagent must confirm it can be executed:
-- If UI is involved: the feature is observable on the emulator or simulator
-- If logic only: the demo statement maps to a passing test or a verifiable log output
-- A task whose demo statement cannot be verified is NOT complete — it may compile, but it does not work
-
-**2. DI registration check**
-If the task introduces a new service, repository, ViewModel, or page, confirm that it is registered in `MauiProgram.cs`:
-- New `IFoo` / `FooService` pair → `AddScoped<IFoo, FooService>()`
-- New page + ViewModel → `AddTransient<FooPage>()` + `AddTransient<FooViewModel>()`
-- New singleton → `AddSingleton<IFooService, FooService>()`
-
-**Rule:** An unregistered type will compile but fail at runtime. DI registration is a task completion requirement, not an afterthought.
-
-**3. Acceptance criteria check**
-For every acceptance criterion the task was supposed to satisfy: confirm it is satisfied. If an AC cannot be confirmed without running the app, record the evidence in the task-log's AC traceability matrix (see Rule 5).
-
----
-
-## Rule 2a — Approval Authority Matrix
+### Approval Authority Matrix
 
 Not every decision requires the same authority to approve. Use this matrix to determine who must sign off before proceeding.
 
@@ -1551,10 +1288,13 @@ Not every decision requires the same authority to approve. Use this matrix to de
 **Addendum — implicit approval:**
 A task that is in `tasks.md` and has been reviewed by Helder carries implicit approval for its implementation approach. Subagents do not need per-action approval for work that is within the scope of an approved task.
 
+**Addendum — one-line spec note exception:**
+A subagent may add a `> **Spec updated [YYYY-MM-DD]:** [one-line note]` to an existing spec file to document an implementation decision made within the task's authorized scope. This is the only form of spec write permitted to subagents. See Spec ownership constraint for the full table.
+
 **Addendum — escalation default:**
 When in doubt about authority level, escalate. The cost of a 2-minute pause to confirm is always lower than the cost of an unauthorized irreversible action.
 
-## Rule 2b — Review SLA and Risk-Tiered Review Lanes
+### Review SLA and Risk-Tiered Review Lanes
 
 Not all tasks require the same depth of review. Use the risk-tiered review lanes to focus attention on tasks where errors are most costly.
 
@@ -1589,7 +1329,68 @@ Escalate to **Architectural** if ANY of these are true:
 - **Elevated tasks** require the main agent to run `dotnet build` + `dotnet test` + E2E check before the next wave
 - **Architectural tasks** require Helder review before the next wave — set a `blocked: awaiting Helder review` status in the task-log until approved
 
-## Rule 3a — Session-End Spec Update Ritual
+### Subagent exit checklist (mandatory before returning)
+Every subagent must complete ALL of these steps in order before stopping:
+
+1. **Invoke `superpowers:verification-before-completion`** — catches non-negotiable violations (DevExpress-first, SafeAreaEdges, English-only, no DisplayAlert, etc.). A task with zero Blocker findings (🔴) per `/project:review` may be set `To Review`. Warning findings (🟡) must be documented in the task-log.
+2. **Build:** Run `dotnet build` and confirm 0 errors. If build fails, apply the build retry cap (max 3 attempts). Document result in Verification evidence.
+3. **Test:** If any `.cs` implementation file was changed, run `dotnet test` and confirm 0 failures. Document result in Verification evidence. Skip only if no code files were modified.
+4. **Post-edit re-read:** Re-read the affected section of every edited file and confirm correctness (see Silent task completion rule).
+5. **Living spec check:** Review decisions made during implementation — write back any undocumented decisions to the spec.
+6. **Task-log:** Complete the task-log entry including Changed files, Verification evidence, and AC traceability matrix (if applicable).
+7. **Commit:** Commit all changed files including any spec updates.
+8. **Push:** `git push origin HEAD`
+
+**The `Stop` hook warns if uncommitted changes remain. Treat it as a hard gate.**
+
+A subagent that stops without completing all 8 steps has not finished the task.
+
+> **After Review — Enhancement Check:** This step is performed by the **main agent** after the subagent commits and stops. The main agent reviews the session output for patterns that should improve CLAUDE.md, rules files, or commands. This is NOT part of the subagent exit checklist. See `review.md` After Review section.
+
+---
+
+
+---
+
+## Rule 3 — Commit After Every Task
+
+**Run `/project:commit` after every task from `tasks.md` is complete.**
+
+A session that ends with uncommitted changes is a session where progress is at risk.
+The `Stop` hook warns you — treat it as a hard gate, not a suggestion.
+
+> `/project:review` is a main-agent command (human reference) invoked after each completed task and after creating or updating any spec or plan file. The Stop hook is the authoritative trigger for Verifier subagent dispatch after a wave (see Verifier subagent in Rule 2). Subagents do not invoke `/project:review` — it is the main agent's responsibility.
+
+### What counts as "task complete"
+- The code builds with no errors
+- Tests pass (if the task touched tested code)
+- The checkbox in `tasks.md` is checked
+
+### Task completion verification gates
+
+Before checking the box and committing, a subagent must pass all of the following gates:
+
+**1. Demo statement verification**
+If the task has a demo statement (see Rule 1 — Demo statement requirement), the subagent must confirm it can be executed:
+- If UI is involved: the feature is observable on the emulator or simulator
+- If logic only: the demo statement maps to a passing test or a verifiable log output
+- A task whose demo statement cannot be verified is NOT complete — it may compile, but it does not work
+
+**2. DI registration check**
+If the task introduces a new service, repository, ViewModel, or page, confirm that it is registered in `MauiProgram.cs`:
+- New `IFoo` / `FooService` pair → `AddScoped<IFoo, FooService>()`
+- New page + ViewModel → `AddTransient<FooPage>()` + `AddTransient<FooViewModel>()`
+- New singleton → `AddSingleton<IFooService, FooService>()`
+
+**Rule:** An unregistered type will compile but fail at runtime. DI registration is a task completion requirement, not an afterthought.
+
+**3. Acceptance criteria check**
+For every acceptance criterion the task was supposed to satisfy: confirm it is satisfied. If an AC cannot be confirmed without running the app, record the evidence in the task-log's AC traceability matrix (see Rule 5).
+
+---
+
+
+### Session-End Spec Update Ritual
 
 Before ending any session in which implementation occurred, perform the **session-end spec update ritual**:
 
@@ -1609,6 +1410,10 @@ Before ending any session in which implementation occurred, perform the **sessio
 - "Is the spec now more ambiguous than before my session?"
 
 **Rule:** A session that ends without this ritual leaves the spec one step further from reality. Over multiple sessions, spec drift accumulates into a spec that describes a system that no longer exists.
+
+> Also run the After Review enhancement check (`review.md`) to update rules and commands files, if applicable.
+
+---
 
 ---
 
@@ -1653,7 +1458,7 @@ Before adding a task to `tasks.md`, confirm it passes this checklist:
 - [ ] The task does not require knowledge of the output of another in-progress task
 - [ ] The task can be described in one sentence without using "and" more than once
 - [ ] The task fits within the sizing limits (see Subagent Delegation — Task sizing limits)
-- [ ] The task has a `Demo:` statement or a clear acceptance criterion it satisfies
+- [ ] The task has a `Demo:` statement or a clear acceptance criterion it satisfies (see Demo statement requirement in Rule 1)
 - [ ] A new developer could implement this task correctly using only the spec + this task's `Files owned` declaration
 
 **If any box is unchecked:** decompose the task before adding it to `tasks.md`. A non-atomic task is a subagent reliability risk.
@@ -1752,7 +1557,7 @@ Each task entry in `tasks.md` should use the following format for any task that 
   - **Consumes:** [list of files, interfaces, or types this task depends on being committed first]
   - **Risk:** [Low | Medium | High — one-line reason]
   - **Files owned:** [exact file paths this subagent may create or edit]
-  - **Demo:** [one sentence — what a human observer sees when this is done]
+  - **Demo:** [one sentence — what a human observer sees when this is done] (see Demo statement requirement in Rule 1)
   - **Review lane:** [Standard | Elevated | Architectural — see review SLA section]
 ```
 
@@ -1764,33 +1569,104 @@ Each task entry in `tasks.md` should use the following format for any task that 
 
 ---
 
-## Rule 8 — GitHub MCP Pre-Task Collision Check
+## Rule 5 — Task Status Registration
 
-Before dispatching any wave that modifies files in the repository, the main agent must perform a **collision check** to confirm that no other agent or branch is currently modifying the same files.
+Agents record task outcomes manually in the task-log file. The `Stop` hook warns if uncommitted changes remain when a session ends.
 
-### Pre-task collision check protocol
+### Proof of action — Changed files is mandatory
 
-If the GitHub MCP is available (`mcp__github` or equivalent):
+A task-log entry that claims `To Review` without a `### Changed files` section is **invalid**. The main agent must reject it and request a corrected entry.
 
-1. **Check open PRs:** Query open pull requests on the current branch's base. If any open PR touches a file in the current wave's `Files owned` list, a collision risk exists.
-2. **Check recent commits:** Review the last 10 commits on the branch. If another agent committed to the same files in the last session, confirm the current spec reflects those changes.
-3. **Check in-progress `[~]` tasks:** Re-read `tasks.md` and confirm no task marked `[~]` is being worked on by another agent in a different session.
+**Rule:** Every task-log entry that represents completed implementation work must include an explicit list of every file that was created or modified. This is not optional documentation — it is the proof that the task was actually done.
 
-**If the GitHub MCP is NOT available:**
-- Run `git log --oneline -10` to check recent commits
-- Run `git status` to confirm no uncommitted changes exist from a previous interrupted session
-- Check `tasks.md` for any tasks marked `[~]` that should not be in-progress
+**Format (mandatory):**
+```
+### Changed files:
+- `relative/path/to/file.cs` — reason (e.g. "added GetPagedAsync method")
+- `relative/path/to/test.cs` — reason (e.g. "added 3 test cases for GetPagedAsync")
+```
 
-**Collision types and responses:**
+**If no files were changed:** The task was not implemented. Do not set status to `To Review`. Either document why the task was a no-op (with spec reference) or complete the task.
 
-| Collision type | Response |
-|----------------|----------|
-| Another open PR modifies a file in `Files owned` | Do NOT start the wave. Resolve the PR first, or coordinate the order of changes. |
-| Recent commit from another agent changed an interface the current wave consumes | Re-read the changed interface before briefing. Update briefings if signatures changed. |
-| `[~]` task exists but no agent is known to be running it | Reset to `[ ]` and re-dispatch. The previous agent was likely killed without completing. |
-| No collision detected | Proceed with wave dispatch |
+**Why:** Subagents can falsely claim completion without having made any changes. The Changed files list is the minimum verifiable evidence that work was done. A `git diff` can independently confirm it.
 
-**Why a collision check?** In a multi-session workflow, two sessions can be started independently (e.g., manually and from a scheduled task) and both dispatch subagents to the same files. The collision check prevents silent overwrite conflicts before they occur rather than after.
+### Task-log file location
+
+> **Artifact placement:** `Docs/DevEnv/` is for environment and session state files (MASTER_PLAN.md, ACTIVE-CONSIDERATIONS.md, findings/ for non-feature explorations). `Docs/superpowers/plans/` is for plan-execution artifacts (plan files, task-logs, handoff files). Do not mix these two roots.
+
+Task-log files live **beside the plan file** in `Docs/superpowers/plans/`, named `<plan-name>-task-log.md`.
+Example: plan at `Docs/superpowers/plans/2026-04-23-artists-songs-catalog.md` → log at `Docs/superpowers/plans/2026-04-23-artists-songs-catalog-task-log.md`.
+Tasks without a plan association are logged to `Docs/superpowers/plans/unassigned-task-log.md`.
+
+> `Docs/DevEnv/plans/` is for SDD research files only — do not place task-logs there.
+
+### Task-log format (per task entry)
+```
+---
+## Task: <title>
+**Plan:** <plan file relative path>
+**Status:** in progress | Check build | To Review | Build failure | blocked: spec gap | Spec updated — re-planning required | Early task done | Review task done
+**Started:** MM/DD/YYYY
+**Completed:** MM/DD/YYYY
+
+### Changed files:
+- `relative/path/to/file.cs` — reason (e.g. "added GetPagedAsync method")
+- `relative/path/to/test.cs` — reason (e.g. "added 3 test cases")
+
+### Build notes
+[Only present if build was checked — records error summary and diagnosis]
+
+### Verification evidence
+- Build: [PASS / FAIL — error summary if FAIL]
+- Tests: [PASS (N tests) / FAIL (N failures) / SKIPPED (no test files changed)]
+- Post-edit re-read: [confirmed / N/A — no code files changed]
+- Spec compliance: [confirmed — [spec file] section checked / divergence noted: [one line]]
+```
+
+### Acceptance criteria traceability matrix
+
+For tasks that implement user-facing behavior, the task-log entry must include an **AC traceability matrix** — a table linking each acceptance criterion from `requirements.md` to the implementation evidence.
+
+**Format (add to task-log entry when status is `To Review`):**
+```
+### AC traceability
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| AC-1 | Singer added appears in queue | VenueService.AddSingerAsync | AddSingerAsync_ValidInput_ReturnsSuccess |
+| AC-2 | Duplicate name rejected | VenueService.ValidateNameInput | ValidateNameInput_DuplicateName_ReturnsFalse |
+| AC-3 | Queue order preserved after add | QueueRepository.GetQueueOrderedAsync | GetQueueOrderedAsync_AfterAdd_PreservesOrder |
+```
+
+**Rules:**
+- Every AC in the spec that is addressed by this task must appear in the matrix.
+- "Implementation evidence" must be a specific code location, not a vague claim ("it works").
+- If an AC was not implemented (out of scope for this task), mark it `deferred — task [X]`.
+- ACs with no evidence entry will be flagged during review as unverified.
+
+**When to skip:** Tasks with no user-facing acceptance criteria (e.g., pure refactors, config changes, documentation updates) do not require a traceability matrix.
+
+### Task statuses
+| Status | Meaning |
+|--------|---------|
+| `in progress` | Task started, work underway |
+| `Check build` | Code changed — build verification pending (set on task completion if code files were modified) |
+| `To Review` | Build passed — task ready for code review (subagent writes this on successful exit) |
+| `Build failure` | Build failed after 3 attempts — needs investigation (subagent writes this on exit) |
+| `blocked: spec gap` | Spec ambiguity found — question + options + recommendation documented; waiting for clarification |
+| `Spec updated — re-planning required` | Implementation revealed a spec gap; spec updated; tasks.md may need re-ordering |
+| `Early task done` | New asset/enhancement completed and committed |
+| `Review task done` | Review task completed |
+
+## Rule 6 — Research Tool Gate (Context7 → Exa → WebSearch)
+
+Before any web research query, follow this three-tier hierarchy:
+
+1. **Library / framework / SDK / API docs** → Context7 (`mcp__context7__resolve-library-id` → `mcp__context7__query-docs`)
+2. **General web research** (comparisons, news, tool evaluations, articles, anything non-library) → Exa MCP (`exa_search`)
+3. **Raw `WebSearch` / `WebFetch`** → last-resort fallback only when both Context7 and Exa return no useful result
+
+This applies to **both the main agent and all subagents.**
+Reason: `WebFetch` pulls 5,000–15,000 tokens of raw HTML per page; Context7 and Exa return structured results at a fraction of that cost. Exa's query-dependent highlights reduce output tokens by 50–75% vs raw web search.
 
 ---
 
@@ -1802,6 +1678,7 @@ Every session that involves implementation or planning must begin with a structu
 
 Read in this order — do not skip items, do not resume from memory alone:
 
+0. **Hook health verification** — confirm hooks are operational (see Hook Enforcement Notes at the top of this file). Fix any misconfigured hooks before proceeding.
 1. **`Docs/DevEnv/plans/impl/MASTER_PLAN.md`** — find the first non-Done step; that is the current position
 2. **Active session handoff file** (if one exists): `Docs/superpowers/plans/<plan-name>-handoff.md` — overrides MASTER_PLAN for exact continuation point
 3. **`ACTIVE-CONSIDERATIONS.md`** (if it exists) — read the priority stack and open items
@@ -1847,102 +1724,226 @@ After reading steps 1–7, before dispatching the first wave, record any newly d
 
 **Why session start is not optional:** Context windows reset between sessions. An orchestrator that resumes from memory is operating on a lossy reconstruction of the previous session's state. The session start reading order replaces that lossy reconstruction with a direct read from the authoritative files.
 
+
+### ACTIVE-CONSIDERATIONS.md — session priority stack
+
+For long or complex sessions involving multiple waves and evolving context, maintain an `ACTIVE-CONSIDERATIONS.md` file as a **session priority stack** — a short, always-current list of the most important things to keep in mind.
+
+**File location:** `Docs/DevEnv/ACTIVE-CONSIDERATIONS.md` (single file, overwritten each session)
+
+**Format:**
+```markdown
+# Active Considerations — [YYYY-MM-DD]
+
+## Current priority
+[One sentence: what is the single most important thing right now?]
+
+## Open items (ordered by urgency)
+1. [Highest urgency: blocking something — must resolve before next wave]
+2. [Spec gap to resolve — needs Helder input]
+3. [Known risk to watch — may affect Wave N+1]
+
+## Do not forget
+- [Constraint discovered this session that is not yet in constraints-registry.md]
+- [Decision made this session that is not yet in design.md]
+- [Task that was deferred and must not be forgotten]
+
+## Wave status
+Current wave: N
+Next wave: N+1 — [brief description of what it contains]
+Checkpoint due: [after Wave N+1 | already done]
+```
+
+**When to update it:**
+- At the start of a session: initialize with current state from task-log + MASTER_PLAN.md
+- After each wave completes: update wave status and open items
+- When a new constraint or decision arises: add to "Do not forget"
+- At the end of a session: commit the final state (it is the handoff artifact for the next session)
+
+**Rule:** This file replaces "held in context" items that are likely to be dropped during compaction. If something is important enough to remember across waves, it must be in `ACTIVE-CONSIDERATIONS.md` — not in the orchestrator's working memory.
+
+**Relationship to handoff artifact:** `ACTIVE-CONSIDERATIONS.md` is the lightweight version for same-day use. The full `session-handoff.md` (see Multi-session state handoff protocol) is written at session end for cross-session continuity. Both serve complementary roles.
+
+
+### findings.md — session artifact for exploratory work
+
+When a session involves significant exploration, debugging, or spike work, the findings must be captured in a `findings.md` file before the session ends. This prevents the work from being lost when the context window is discarded.
+
+**When to create `findings.md`:**
+- Any `[SPIKE]` task (mandatory — see Spike validation task pattern)
+- Any session where the cause of a bug was non-obvious and required investigation
+- Any session where an architectural option was explored and rejected
+- Any session where a library or API was evaluated for the first time
+
+**File location:** `Docs/specs/[feature]/findings.md` for feature spikes, or `Docs/DevEnv/findings/[YYYY-MM-DD]-[topic].md` for general technical findings not tied to a feature.
+
+**findings.md format:**
+```markdown
+# Findings — [Topic] — [YYYY-MM-DD]
+
+## Context
+[One paragraph: why this investigation was needed]
+
+## What was tried
+- **Approach A:** [description] → [result: worked / failed / partial]
+- **Approach B:** [description] → [result: worked / failed / partial]
+
+## What was learned
+[Key discoveries — platform behaviors, library quirks, performance data, etc.]
+
+## Constraints discovered
+[Any new constraints that should be added to constraints-registry.md]
+
+## Recommendation
+[One sentence: what to do next, with rationale]
+
+## Open questions
+[Questions that were not resolved — must be resolved before implementation proceeds]
+```
+
+**Rule:** A spike or investigation that does not produce a `findings.md` has produced nothing — its output exists only in the subagent's expiring context. The findings artifact is the only durable output of exploratory work.
+
+**After `findings.md` is created:** The main agent reads it before writing the spec. Key constraints in `findings.md` must be propagated to `constraints-registry.md` before any implementation begins.
+
+
+### Multi-session state handoff protocol
+
+When a feature spans multiple sessions, the state at session end must be captured so the next session can resume without loss.
+
+**Session-end handoff artifact (write to `Docs/superpowers/plans/<plan-name>-handoff.md`):**
+```markdown
+# Session Handoff — [Feature Name] — [YYYY-MM-DD]
+
+## Last completed wave
+Wave N — [brief description] — all tasks committed
+
+## Current state
+- Build: PASS / FAIL
+- Tests: N passing, N failing
+- Last committed task: [task title]
+
+## Next wave
+Wave N+1 — [tasks to dispatch]
+- Task A: [scope, files owned]
+- Task B: [scope, files owned]
+
+## Open items
+- [spec gaps, pending decisions, deferred concerns]
+
+## Contracts in play
+- [current interface signatures that the next wave will consume]
+
+## Files modified this session
+- [list of all files touched since session start]
+```
+
+**Rule:** The session-end handoff artifact must be committed before the session ends. It is the only reliable state source for the next session — in-context memory does not persist.
+
+> See Rule 7 — Session Start Protocol for the full session resume reading order.
+
+
+### Context exhaustion warning signs
+
+Context window exhaustion degrades output quality before the window is fully used. Recognize the early signs and act before the damage compounds.
+
+**Warning signs in subagent output:**
+- Subagent contradicts a decision it made earlier in the same session
+- Subagent asks about information it was given in the briefing
+- Subagent produces code that duplicates something it already wrote
+- Subagent forgets a constraint it acknowledged earlier (e.g., uses `DisplayAlert` after being told not to)
+- Build errors reference types or namespaces the subagent invented rather than read from the spec
+- Subagent output becomes shorter and less specific with each iteration
+- Subagent claims work is done but Changed files list is sparse relative to the task scope
+
+**Warning signs in orchestrator context:**
+- You are writing a briefing from memory without re-reading the spec
+- You cannot recall what the previous wave committed without checking the task-log
+- You are reasoning about code structure from cached impressions rather than reading the current file
+
+**Response protocol:**
+1. If the subagent shows warning signs: kill it (see Kill criteria), re-read the spec, produce a tighter briefing, dispatch a fresh subagent.
+2. If the orchestrator shows warning signs: stop. Re-read MASTER_PLAN.md, the spec, and the task-log. Resume from verified ground truth.
+
+
+### Wave completion discovery briefs
+
+After a wave completes and post-wave verification passes, the main agent must produce a **discovery brief** before dispatching the next wave. This brief documents what was actually built versus what was planned, so the next wave's briefing is grounded in reality.
+
+**Discovery brief format (write to task-log or a `wave-N-discovery.md` note):**
+```
+## Wave N Discovery Brief
+
+### What was built
+- [Actual interfaces/types committed, with signatures]
+- [Actual files created/modified]
+- [Any deviations from the spec, with spec update references]
+
+### Contracts for Wave N+1
+- [Verbatim signatures of new interfaces/DTOs the next wave will consume]
+
+### Open items
+- [Any spec gaps found, with status (resolved/escalated/deferred)]
+- [Any build warnings to watch]
+- [Any test coverage gaps identified]
+```
+
+**Why:** The gap between "what was planned" and "what was built" grows with every wave. A discovery brief closes that gap before it propagates into the next briefing. Without it, the main agent briefs Wave 2 as if Wave 1 produced exactly what was designed — which it rarely does.
+
+
+### Multi-wave checkpoint pattern
+
+For features that span 3 or more waves, the main agent must perform a **multi-wave checkpoint** after every second wave. This prevents progressive spec drift from compounding undetected.
+
+**Multi-wave checkpoint protocol:**
+
+1. **Read the spec fresh** — re-read `requirements.md` and `design.md` as if for the first time
+2. **Compare against committed code** — for each acceptance criterion, confirm the current implementation satisfies it (even partially)
+3. **Check for drift indicators:**
+   - Are there committed changes that do not map to any acceptance criterion?
+   - Are there acceptance criteria with no committed implementation yet that should be done?
+   - Do interface signatures in the code match the signatures in `design.md`?
+4. **Produce a checkpoint note** in the task-log:
+   ```
+   ## Wave N/N+1 Checkpoint
+   - Criteria satisfied: AC-1 ✓, AC-2 ✓, AC-3 partial
+   - Drift detected: [none | description]
+   - Spec update needed: [yes — file + section | no]
+   - Next wave: proceed | pause for spec fix
+   ```
+5. If drift is detected: fix the spec before dispatching the next wave
+
+**Why every second wave?** After one wave, drift is localized and easy to fix. After three waves without a checkpoint, drift accumulates across multiple subagents and is expensive to reconcile. Every second wave is the practical breakpoint — frequent enough to catch problems early, infrequent enough to not create overhead.
+
+**Special case — large parallel waves:** If a single wave has 4 subagents, treat the completion of that wave as a mandatory checkpoint regardless of wave number.
+
 ---
 
-## Rule 6 — Research Tool Gate (Context7 → Exa → WebSearch)
+## Rule 8 — GitHub MCP Pre-Task Collision Check
 
-Before any web research query, follow this three-tier hierarchy:
+Before dispatching any wave that modifies files in the repository, the main agent must perform a **collision check** to confirm that no other agent or branch is currently modifying the same files.
 
-1. **Library / framework / SDK / API docs** → Context7 (`mcp__context7__resolve-library-id` → `mcp__context7__query-docs`)
-2. **General web research** (comparisons, news, tool evaluations, articles, anything non-library) → Exa MCP (`exa_search`)
-3. **Raw `WebSearch` / `WebFetch`** → last-resort fallback only when both Context7 and Exa return no useful result
+### Pre-task collision check protocol
 
-This applies to **both the main agent and all subagents.**
-Reason: `WebFetch` pulls 5,000–15,000 tokens of raw HTML per page; Context7 and Exa return structured results at a fraction of that cost. Exa's query-dependent highlights reduce output tokens by 50–75% vs raw web search.
+If the GitHub MCP is available (`mcp__github` or equivalent):
+
+1. **Check open PRs:** Query open pull requests on the current branch's base. If any open PR touches a file in the current wave's `Files owned` list, a collision risk exists.
+2. **Check recent commits:** Review the last 10 commits on the branch. If another agent committed to the same files in the last session, confirm the current spec reflects those changes.
+3. **Check in-progress `[~]` tasks:** Re-read `tasks.md` and confirm no task marked `[~]` is being worked on by another agent in a different session.
+
+**If the GitHub MCP is NOT available:**
+- Run `git log --oneline -10` to check recent commits
+- Run `git status` to confirm no uncommitted changes exist from a previous interrupted session
+- Check `tasks.md` for any tasks marked `[~]` that should not be in-progress
+
+**Collision types and responses:**
+
+| Collision type | Response |
+|----------------|----------|
+| Another open PR modifies a file in `Files owned` | Do NOT start the wave. Resolve the PR first, or coordinate the order of changes. |
+| Recent commit from another agent changed an interface the current wave consumes | Re-read the changed interface before briefing. Update briefings if signatures changed. |
+| `[~]` task exists but no agent is known to be running it | Reset to `[ ]` and re-dispatch. The previous agent was likely killed without completing. |
+| No collision detected | Proceed with wave dispatch |
+
+**Why a collision check?** In a multi-session workflow, two sessions can be started independently (e.g., manually and from a scheduled task) and both dispatch subagents to the same files. The collision check prevents silent overwrite conflicts before they occur rather than after.
 
 ---
-
-## Rule 5 — Task Status Registration
-
-Agents record task outcomes manually in the task-log file. The `Stop` hook warns if uncommitted changes remain when a session ends.
-
-### Proof of action — Changed files is mandatory
-
-A task-log entry that claims `To Review` without a `### Changed files` section is **invalid**. The main agent must reject it and request a corrected entry.
-
-**Rule:** Every task-log entry that represents completed implementation work must include an explicit list of every file that was created or modified. This is not optional documentation — it is the proof that the task was actually done.
-
-**Format (mandatory):**
-```
-### Changed files:
-- `relative/path/to/file.cs` — reason (e.g. "added GetPagedAsync method")
-- `relative/path/to/test.cs` — reason (e.g. "added 3 test cases for GetPagedAsync")
-```
-
-**If no files were changed:** The task was not implemented. Do not set status to `To Review`. Either document why the task was a no-op (with spec reference) or complete the task.
-
-**Why:** Subagents can falsely claim completion without having made any changes. The Changed files list is the minimum verifiable evidence that work was done. A `git diff` can independently confirm it.
-
-### Task-log file location
-Task-log files live **beside the plan file** in `Docs/superpowers/plans/`, named `<plan-name>-task-log.md`.
-Example: plan at `Docs/superpowers/plans/2026-04-23-artists-songs-catalog.md` → log at `Docs/superpowers/plans/2026-04-23-artists-songs-catalog-task-log.md`.
-Tasks without a plan association are logged to `Docs/superpowers/plans/unassigned-task-log.md`.
-
-> `Docs/DevEnv/plans/` is for SDD research files only — do not place task-logs there.
-
-### Task-log format (per task entry)
-```
----
-## Task: <title>
-**Plan:** <plan file relative path>
-**Status:** in progress | Check build | To Review | Build failure | blocked: spec gap | Spec updated — re-planning required | Early task done | Review task done
-**Started:** MM/DD/YYYY
-**Completed:** MM/DD/YYYY
-
-### Changed files:
-- `relative/path/to/file.cs` — reason (e.g. "added GetPagedAsync method")
-- `relative/path/to/test.cs` — reason (e.g. "added 3 test cases")
-
-### Build notes
-[Only present if build was checked — records error summary and diagnosis]
-
-### Verification evidence
-- Build: [PASS / FAIL — error summary if FAIL]
-- Tests: [PASS (N tests) / FAIL (N failures) / SKIPPED (no test files changed)]
-- Post-edit re-read: [confirmed / N/A — no code files changed]
-- Spec compliance: [confirmed — [spec file] section checked / divergence noted: [one line]]
-```
-
-### Acceptance criteria traceability matrix
-
-For tasks that implement user-facing behavior, the task-log entry must include an **AC traceability matrix** — a table linking each acceptance criterion from `requirements.md` to the implementation evidence.
-
-**Format (add to task-log entry when status is `To Review`):**
-```
-### AC traceability
-| AC ref | Criterion (short) | Implementation evidence |
-|--------|-------------------|------------------------|
-| AC-1 | Singer added appears in queue | VenueService.AddSingerAsync returns (true, ...) |
-| AC-2 | Duplicate name rejected | ValidateNameInput returns (false, "already exists") |
-| AC-3 | Queue order preserved after add | GetQueueOrderedAsync tested in QueueRepositoryTests |
-```
-
-**Rules:**
-- Every AC in the spec that is addressed by this task must appear in the matrix.
-- "Implementation evidence" must be a specific code location, not a vague claim ("it works").
-- If an AC was not implemented (out of scope for this task), mark it `deferred — task [X]`.
-- ACs with no evidence entry will be flagged during review as unverified.
-
-**When to skip:** Tasks with no user-facing acceptance criteria (e.g., pure refactors, config changes, documentation updates) do not require a traceability matrix.
-
-### Task statuses
-| Status | Meaning |
-|--------|---------|
-| `in progress` | Task started, work underway |
-| `Check build` | Code changed — build verification pending (set on task completion if code files were modified) |
-| `To Review` | Build passed — task ready for code review (subagent writes this on successful exit) |
-| `Build failure` | Build failed after 3 attempts — needs investigation (subagent writes this on exit) |
-| `blocked: spec gap` | Spec ambiguity found — question + options + recommendation documented; waiting for clarification |
-| `Spec updated — re-planning required` | Implementation revealed a spec gap; spec updated; tasks.md may need re-ordering |
-| `Early task done` | New asset/enhancement completed and committed |
-| `Review task done` | Review task completed |
