@@ -66,6 +66,9 @@ Before starting each implementation task, scan available skills/MCPs for relevan
 - DI: `dotnet-skills:dependency-injection-patterns`
 - MAUI UI: `maui-current-apis` (always), `maui-data-binding`, `maui-shell-navigation`, `maui-performance`
 
+## Spec Quality Check (Rebuild Test)
+When closing out a feature, ask: "Could a fresh agent regenerate this feature from the spec files + test suite alone, without reading any existing implementation code?" If the answer is no, identify what is missing and fill the gaps. Common missing items: architectural decisions (why X was chosen over Y), business rule tradeoffs, integration contract details. See `workflow.md` for the full rebuild test protocol.
+
 ## Continuous Enhancement
 CLAUDE.md, rules, and commands are a living system — not a fixed set.
 After every task, always ask:

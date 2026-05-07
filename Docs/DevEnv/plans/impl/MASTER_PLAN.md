@@ -213,7 +213,7 @@ One opportunity or small group per step. Sequential — same file.
 |------|-------------|------|--------|-------|
 | P9-01 | Declare SDD Level 2 (Spec-Anchored) | OPP-1-1 | Done | |
 | P9-02 | Add DDD+SDD+TDD layering guidance | OPP-1-11 | Done | |
-| P9-03 | Add rebuild test as spec quality diagnostic | OPP-1-10 | Pending | |
+| P9-03 | Add rebuild test as spec quality diagnostic | OPP-1-10 | Done | |
 | P9-04 | Add CLAUDE.md size monitoring guidance | OPP-4-2 | Pending | |
 | P9-05 | Add anti-pattern guard (no LLM-generated context files) | OPP-4-15 | Pending | |
 | P9-06 | Add MCP security guidance for untrusted content | OPP-4-16 | Pending | |
