@@ -30,6 +30,14 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Architecture patterns: follow `ddd-dotnet` skill (nesbo)
 - .NET patterns: follow `dotnet-skills` (Aaronontheweb)
 - MAUI patterns: follow installed maui-skills, always filtered by `maui-current-apis`
+### MCP Context Budget
+Do not activate all MCP servers in every session. Load only what the current task requires:
+- MAUI/DevExpress implementation: Context7 + DevExpress MCP only
+- Database schema work: SQLite MCP only
+- Tasks that don't touch MAUI APIs: disable Context7 to reduce context overhead
+
+If tool definitions from all active MCPs exceed ~5,000 tokens combined, deactivate the least-relevant server for that session.
+
 ### MCP Security Stance
 Approved MCP servers for this project (local-first only):
 - Context7 (library docs) — official server only; never install `context7-docs` or similarly named variants
