@@ -203,7 +203,7 @@ One opportunity or small group per step. Sequential — same file.
 | Step | Description | OPPs | Status | Notes |
 |------|-------------|------|--------|-------|
 | P8-01 | Add determinism rule for quality attributes | OPP-2-21 | Done | |
-| P8-02 | Add suppression justification policy | OPP-6-16 | Pending | |
+| P8-02 | Add suppression justification policy | OPP-6-16 | Done | |
 
 ---
 
@@ -211,7 +211,7 @@ One opportunity or small group per step. Sequential — same file.
 
 | Step | Description | OPPs | Status | Notes |
 |------|-------------|------|--------|-------|
-| P9-01 | Declare SDD Level 2 (Spec-Anchored) | OPP-1-1 | Pending | |
+| P9-01 | Declare SDD Level 2 (Spec-Anchored) | OPP-1-1 | Done | |
 | P9-02 | Add DDD+SDD+TDD layering guidance | OPP-1-11 | Pending | |
 | P9-03 | Add rebuild test as spec quality diagnostic | OPP-1-10 | Pending | |
 | P9-04 | Add CLAUDE.md size monitoring guidance | OPP-4-2 | Pending | |
