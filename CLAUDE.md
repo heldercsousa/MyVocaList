@@ -94,8 +94,8 @@ is a candidate for a new rule, command, or CLAUDE.md update.
 
 **Scope of inspection for complex tasks:** Before proposing anything that touches UI, styles, or components, inspect ALL of: every page, every custom component, every relevant rules file, AND verify what the platform/libraries already provide. Never limit the audit to the files initially mentioned. Cross-file pattern counts (how many times the same inline style appears) must be established before proposing centralization.
 
-## Non-Negotiables
-*(Mechanically enforced via `review.md` checklist + hooks unless noted)*
+## Constitutional Constraints (Mechanically Enforced)
+*(Enforced via `review.md` checklist + hooks — these are not advisory)*
 
 - **Language**: Code, comments, logs, UI text — English only. Translate any non-English text immediately.
   *Reason: multilingual identifiers make search, grep, and onboarding unreliable.*
