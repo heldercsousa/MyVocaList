@@ -227,7 +227,7 @@ One opportunity or small group per step. Sequential — same file.
 | P9-14 | Add MCP security stance / allowlist | OPP-7-3 | Done | |
 | P9-15 | Add MCP context budget guidance | OPP-7-4 | Done | |
 | P9-16 | Update Context7 invocation discipline | OPP-7-7 | Done | |
-| P9-17 | Add Context7 version-pinning discipline | OPP-7-12 | Pending | |
+| P9-17 | Add Context7 version-pinning discipline | OPP-7-12 | Done | |
 | P9-18 | Add Tool Selection ADR section | OPP-7-6 | Pending | |
 | P9-19 | Add Tessl Registry evaluation note | OPP-7-9 | Pending | |
 | P9-20 | Add Cursor as complementary tooling note | OPP-7-10 | Pending | |
