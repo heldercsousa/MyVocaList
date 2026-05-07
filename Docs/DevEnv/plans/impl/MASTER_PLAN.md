@@ -221,7 +221,7 @@ One opportunity or small group per step. Sequential — same file.
 | P9-08 | Add Rule Authority Hierarchy section | OPP-6-10 | Done | |
 | P9-09 | Add rationale to Non-Negotiable rules | OPP-6-02 | Done | |
 | P9-10 | Distinguish constitutional constraints from guidelines | OPP-6-01 | Done | |
-| P9-11 | Add amendment governance process | OPP-6-03 | Pending | |
+| P9-11 | Add amendment governance process | OPP-6-03 | Done | |
 | P9-12 | Add periodic constitutional audit | OPP-6-11 | Pending | |
 | P9-13 | Add MCP availability gate | OPP-7-2 | Pending | |
 | P9-14 | Add MCP security stance / allowlist | OPP-7-3 | Pending | |
