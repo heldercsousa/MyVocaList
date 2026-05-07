@@ -126,15 +126,15 @@ Before starting each implementation task, scan available skills/MCPs for relevan
 When closing out a feature, ask: "Could a fresh agent regenerate this feature from the spec files + test suite alone, without reading any existing implementation code?" If the answer is no, identify what is missing and fill the gaps. Common missing items: architectural decisions (why X was chosen over Y), business rule tradeoffs, integration contract details. See `workflow.md` for the full rebuild test protocol.
 
 ## Continuous Enhancement
-CLAUDE.md, rules, and commands are a living system — not a fixed set.
+CLAUDE.md, rules, hooks and commands are a living system — not a fixed set.
 After every task, always ask:
 > "What was learned that should improve CLAUDE.md, any rules file, or any command file?"
 
 - **Add** new files for any area not yet covered
 - **Update** existing files with confirmed patterns
 - **Replace** outdated patterns with working ones
-- **Delete** rules that proved wrong or are superseded by skills
-- **Update CLAUDE.md** when architecture, stack, or fundamental decisions change
+- **Delete** guidelines that proved wrong or are superseded by skills
+- **Update** CLAUDE.md when architecture, stack, or fundamental decisions change only when no specialized and dedicated file is in place in solution's .claude folder. Otherwise such specialized file must be the one to be updated. 
 
 **Quarterly Constitutional Audit:** At significant project milestones (phase completion, feature launch), review `CLAUDE.md` and all `.claude/rules/` files for:
 - Rules with no rationale — add rationale or remove the rule
