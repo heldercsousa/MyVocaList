@@ -18,9 +18,9 @@
 | B-01 | 🔴 | workflow.md | Approved | Add qualifier to Wave handoff: inject verbatim signatures only when new wave has explicit dependency on prior wave's output AND artifact is not already in a file the subagent will naturally read. Rule A (paths only) unchanged. | Pending |
 | B-02 | 🔴 | workflow.md | Approved | Calibration table (Rule B) is canonical. Update "When to skip SDD" — small isolated change minimum artifact changes from "Descriptive commit message" to "tasks.md entry + commit message". Only true exemptions (typos, comment fixes, pure docs) keep commit-message-only. | Pending |
 | B-03 | 🔴 | workflow.md | Rejected | Both spec rot frequency prescriptions removed. /project:review after every task + Rule 3a session-end ritual are the spec-drift detection mechanism. Spec rot indicators list may be kept as reference within Rule 3a but prescribed frequency rules are deleted. | Pending |
-| B-04 | 🔴 | review.md + testing.md + workflow.md | Pending | | Pending |
-| B-05 | 🔴 | review.md + workflow.md | Pending | | Pending |
-| B-06 | 🔴 | testing.md + review.md | Pending | | Pending |
+| B-04 | 🔴 | review.md + testing.md + workflow.md | Approved | Standardize AC traceability matrix to: AC ID | Criterion (short) | Implementation location | Test method — across review.md §9, testing.md "Traceability matrix," and workflow.md Rule 5. | Pending |
+| B-05 | 🔴 | review.md + workflow.md | Approved | Verifier subagent owns the enhancement check. verifier.md: add plans (tasks.md entry, MASTER_PLAN step) as primary verification source; specs as secondary. Slim review.md to a dispatch instruction pointing to verifier.md as authoritative checklist; remove checklist duplication; preserve severity model and verdict format. Enhancement check items added to verifier.md checklist only — not to Implementor exit checklist. | Pending |
+| B-06 | 🔴 | testing.md + review.md | Approved | review.md §9: add Level C exemption — document no-test decision in task-log. testing.md Level C: add "if a Level C task has ACs, document the no-test decision in the task-log — it will be scrutinized at review." Both files converge: Level C + AC = allowed but must be explicitly task-log documented. | Pending |
 | B-07 | 🔴 | workflow.md + testing.md | Pending | | Pending |
 | B-08 | 🔴 | CLAUDE.md | Pending | | Pending |
 | B-09 | 🔴 | CLAUDE.md + code-principles.md | Pending | | Pending |
