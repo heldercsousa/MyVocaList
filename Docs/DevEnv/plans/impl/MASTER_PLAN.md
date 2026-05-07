@@ -216,7 +216,7 @@ One opportunity or small group per step. Sequential — same file.
 | P9-03 | Add rebuild test as spec quality diagnostic | OPP-1-10 | Done | |
 | P9-04 | Add CLAUDE.md size monitoring guidance | OPP-4-2 | Done | |
 | P9-05 | Add anti-pattern guard (no LLM-generated context files) | OPP-4-15 | Done | |
-| P9-06 | Add MCP security guidance for untrusted content | OPP-4-16 | Pending | |
+| P9-06 | Add MCP security guidance for untrusted content | OPP-4-16 | Done | |
 | P9-07 | Add GitHub MCP evaluation note | OPP-4-14 | Pending | |
 | P9-08 | Add Rule Authority Hierarchy section | OPP-6-10 | Pending | |
 | P9-09 | Add rationale to Non-Negotiable rules | OPP-6-02 | Pending | |
