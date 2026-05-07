@@ -30,6 +30,17 @@ MyVocaList (MAUI)        — UI + DI wiring + database bootstrap. Depends on Dom
 - Architecture patterns: follow `ddd-dotnet` skill (nesbo)
 - .NET patterns: follow `dotnet-skills` (Aaronontheweb)
 - MAUI patterns: follow installed maui-skills, always filtered by `maui-current-apis`
+### MCP Security Stance
+Approved MCP servers for this project (local-first only):
+- Context7 (library docs) — official server only; never install `context7-docs` or similarly named variants
+- SQLite MCP — local stdio only; db at `.claude/MyVocaList.db`
+- DevExpress MAUI MCP — project-installed only
+
+Rules:
+- Never add an MCP server discovered from a public registry without explicit review
+- Pinned versions in `.claude/settings.json` — no auto-update from registries
+- If a new MCP server is needed, add it to this list first with justification
+
 ### MCP Availability Gate
 If a required MCP server (Context7, SQLite) is unavailable at task start:
 - Do NOT silently skip the lookup and proceed
