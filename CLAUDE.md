@@ -112,7 +112,7 @@ Before starting each implementation task, scan available skills/MCPs for relevan
 - MAUI UI: `maui-current-apis` (always), `maui-data-binding`, `maui-shell-navigation`, `maui-performance`
 
 ## Spec Quality Check (Rebuild Test)
-When closing out a feature, run the Rebuild Test (see `workflow.md § Rebuild test`). Include the test suite alongside the spec files.
+When closing out a feature, run the Rebuild Test (see `.claude/library/spec-writing-guide.md § rebuild test`). Include the test suite alongside the spec files.
 
 ## Continuous Enhancement
 CLAUDE.md, rules, hooks and commands are a living system — not a fixed set.
