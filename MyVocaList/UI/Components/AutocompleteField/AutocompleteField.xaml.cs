@@ -26,6 +26,18 @@ public partial class AutocompleteField : ContentView
     public static readonly BindableProperty DebounceDelayProperty =
         BindableProperty.Create(nameof(DebounceDelay), typeof(int), typeof(AutocompleteField), 300);
 
+    public static readonly BindableProperty TextProperty =
+        BindableProperty.Create(nameof(Text), typeof(string), typeof(AutocompleteField), "",
+            defaultBindingMode: BindingMode.TwoWay,
+            propertyChanged: (b, _, n) =>
+            {
+                var ctrl = (AutocompleteField)b;
+                var newVal = (string)n ?? "";
+                // Guard against feedback loop when OnTextChanged drives this property
+                if (ctrl.searchEdit.Text != newVal)
+                    ctrl.searchEdit.Text = newVal;
+            });
+
     public static readonly BindableProperty SearchRequestedCommandProperty =
         BindableProperty.Create(nameof(SearchRequestedCommand), typeof(ICommand), typeof(AutocompleteField), null);
 
@@ -70,6 +82,12 @@ public partial class AutocompleteField : ContentView
         set => SetValue(DebounceDelayProperty, value);
     }
 
+    public string Text
+    {
+        get => (string)GetValue(TextProperty);
+        set => SetValue(TextProperty, value);
+    }
+
     public ICommand SearchRequestedCommand
     {
         get => (ICommand)GetValue(SearchRequestedCommandProperty);
@@ -108,6 +126,7 @@ public partial class AutocompleteField : ContentView
     private void OnTextChanged(object sender, EventArgs e)
     {
         var text = searchEdit.Text ?? "";
+        Text = text;
 
         if (text.Length < 2)
         {
