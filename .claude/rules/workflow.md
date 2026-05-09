@@ -1689,6 +1689,9 @@ Read in this order — do not skip items, do not resume from memory alone:
 
 **Rule:** Steps 1–7 are mandatory. Skipping any step means the session starts with an incomplete picture of the current state. Steps 4–7 may be scoped to the specific feature being worked on if multiple features are in flight.
 
+**Anti-glob rule:** Never call `Glob("Docs/**")` or equivalent open-ended scans during session start or briefing. Read only the 7 files listed above plus the active feature's spec files. `Docs/DevEnv/SDD/`, `Docs/superpowers/plans/`, `Docs/Changelog/`, and
+`Docs/Plans/` are `.claudeignore`-excluded for glob scans — access them by explicit absolute path only if genuinely needed.
+
 ### Tiered memory governance
 
 Memory in this workflow is tiered by durability and scope. Each tier has a different owner, a different lifecycle, and a different read obligation.

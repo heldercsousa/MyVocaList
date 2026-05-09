@@ -142,6 +142,18 @@ After every task, always ask:
 - Keep only routing tables, non-negotiables, and architectural constraints inline
 Do not add rules that a linter or type-checker already enforces.
 
+### Docs/ Context Scope
+  `Docs/` grows quickly — never glob-scan it. `.claudeignore` excludes the high-volume subtrees from glob scans; direct `Read()` by explicit path still works.
+
+  **Excluded from glob scans (access by explicit path only):**
+  - `Docs/DevEnv/SDD/**` — SDD theory, 77 files, reference material only
+  - `Docs/superpowers/plans/**` — completed plan/task-log files; inject path in briefing when needed
+  - `Docs/Changelog/**` — historical changelog
+  - `Docs/Plans/**` — legacy plans folder
+
+  **Per-session reads (Rule 7 session start):** scope to `Docs/specs/[feature]/` for the active feature only. No open-ended `Glob("Docs/**")` calls.
+
+
 Any area where Claude Code repeatedly makes mistakes or needs repeated guidance
 is a candidate for a new rule, command, or CLAUDE.md update.
 
