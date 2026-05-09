@@ -100,7 +100,7 @@
             "asyncRewake": true,
             "rewakeMessage": "Tasks marked 'To Review' are waiting for a review subagent:",
             "rewakeSummary": "To Review tasks need attention",
-            "command": "python -c \"import os,glob,sys; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); plans=os.path.join(proj,'Docs','DevEnv','plans'); r=[]; [r.append(os.path.basename(f).replace('-task-log.md','')+': '+b.split('\\n')[0].strip()) for f in (glob.glob(os.path.join(plans,'*-task-log.md')) if os.path.isdir(plans) else []) for c in [open(f,encoding='utf-8').read()] for b in ('\\n'+c).split('\\n## Task:')[1:] if '**Status:** To Review' in b]; r and (print('\\n'.join('- '+x for x in r)+'\\n\\nSpawn one fresh review subagent per plan that has pending To Review tasks. Each subagent should review the changed files listed in the task-log against the plan acceptance criteria.') or sys.exit(2))\" 2>/dev/null"
+            "command": "python -c \"import os,glob,sys; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); plans=os.path.join(proj,'Docs','superpowers','plans'); r=[]; [r.append(os.path.basename(f).replace('-task-log.md','')+': '+b.split('\\n')[0].strip()) for f in (glob.glob(os.path.join(plans,'*-task-log.md')) if os.path.isdir(plans) else []) for c in [open(f,encoding='utf-8').read()] for b in ('\\n'+c).split('\\n## Task:')[1:] if '**Status:** To Review' in b]; r and (print('\\n'.join('- '+x for x in r)+'\\n\\nSpawn one fresh review subagent per plan that has pending To Review tasks. Each subagent should review the changed files listed in the task-log against the plan acceptance criteria.') or sys.exit(2))\" 2>/dev/null"
           }
         ]
       }

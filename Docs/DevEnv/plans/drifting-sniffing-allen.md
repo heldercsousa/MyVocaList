@@ -132,6 +132,6 @@ In each agent definition's **Context reading protocol** section, add:
 After implementing:
 1. Run `! cat .claudeignore` — confirm new Docs/ sections appear
 2. In a fresh session, ask Claude: "List all files in Docs/" — it should return only the
-   non-excluded subtrees (specs/, Design/, task-log.md, BACKLOG.md, CLAUDE.md)
+   non-excluded subtrees (specs/, Design/, BACKLOG.md, CLAUDE.md)
 3. Confirm an explicit `Read("Docs/DevEnv/SDD/S4_Context_and_Memory.md")` still works — 
    `.claudeignore` must not block direct reads, only glob scans
