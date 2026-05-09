@@ -8,7 +8,7 @@ For full Rule 2 guidance (subagent delegation, briefing protocol, wave paralleli
 
 ## Role
 
-- Reads spec files (`requirements.md`, `design.md`, `tasks.md`) before each wave
+- Reads spec files (`requirements.md`, `design.md`, `tasks.md`) before each wave — scoped to `Docs/specs/[feature]/` only; never glob-scans `Docs/`
 - Dispatches subagents within sizing and parallelism limits
 - Merges wave output in dependency order
 - Runs post-wave verification independently
