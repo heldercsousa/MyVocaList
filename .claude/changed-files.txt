@@ -274,3 +274,9 @@ Docs/DevEnv/plans/impl/conflict_report.md
 Docs/Changelog/changelog.md
 .claude/memory-bank/MEMORY.md
 .claude/settings.json
+Docs/BACKLOG.md
+Docs/DevEnv/plans/drifting-sniffing-allen.md
+.claudeignore
+.claude/agents/implementor.md
+.claude/agents/orchestrator.md
+Docs/Changelog/changelog.md
