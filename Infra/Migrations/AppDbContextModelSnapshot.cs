@@ -17,6 +17,56 @@ namespace MyVocaList.Infra.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
 
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Artist", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("ExternalProvider")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<bool>("HasManualEdits")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("NameNormalized")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Artists_ExternalId");
+
+                    b.HasIndex("NameNormalized")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Artists_NameNormalized");
+
+                    b.ToTable("Artists", (string)null);
+                });
+
             modelBuilder.Entity("MyVocaList.Domain.Entity.Event", b =>
                 {
                     b.Property<int>("Id")
@@ -136,6 +186,62 @@ namespace MyVocaList.Infra.Migrations
                     b.ToTable("People");
                 });
 
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Song", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ArtistId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("ExternalProvider")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("FeaturedArtists")
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<bool>("HasManualEdits")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("TitleNormalized")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExternalId")
+                        .HasDatabaseName("IX_Songs_ExternalId");
+
+                    b.HasIndex("ArtistId", "TitleNormalized")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Songs_ArtistId_TitleNormalized");
+
+                    b.ToTable("Songs", (string)null);
+                });
+
             modelBuilder.Entity("MyVocaList.Domain.Entity.SystemConfiguration", b =>
                 {
                     b.Property<int>("Id")
@@ -204,6 +310,22 @@ namespace MyVocaList.Infra.Migrations
                     b.Navigation("Event");
 
                     b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Song", b =>
+                {
+                    b.HasOne("MyVocaList.Domain.Entity.Artist", "Artist")
+                        .WithMany("Songs")
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Artist");
+                });
+
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Artist", b =>
+                {
+                    b.Navigation("Songs");
                 });
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.Event", b =>

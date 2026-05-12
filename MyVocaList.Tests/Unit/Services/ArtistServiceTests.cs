@@ -11,7 +11,7 @@ public class ArtistServiceTests
     // ── ValidateNameInput ─────────────────────────────────────────────────
 
     [Fact]
-    public void ValidateNameInput_EmptyName_ReturnsInvalid()
+    public void ValidateNameInput_EmptyName_ReturnsFalse()
     {
         var sut = CreateSut();
         var (isValid, message) = sut.ValidateNameInput(string.Empty);
@@ -20,7 +20,7 @@ public class ArtistServiceTests
     }
 
     [Fact]
-    public void ValidateNameInput_WhitespaceName_ReturnsInvalid()
+    public void ValidateNameInput_WhitespaceName_ReturnsFalse()
     {
         var sut = CreateSut();
         var (isValid, message) = sut.ValidateNameInput("   ");
@@ -29,43 +29,41 @@ public class ArtistServiceTests
     }
 
     [Fact]
-    public void ValidateNameInput_NameTooLong_ReturnsInvalid()
+    public void ValidateNameInput_NameTooLong_ReturnsFalse()
     {
         var sut = CreateSut();
-        var (isValid, message) = sut.ValidateNameInput(new string('x', 101));
+        var name = new string('x', 61); // exceeds 60-char limit
+        var (isValid, message) = sut.ValidateNameInput(name);
         Assert.False(isValid);
         Assert.NotEmpty(message);
     }
 
     [Fact]
-    public void ValidateNameInput_ValidName_ReturnsValid()
+    public void ValidateNameInput_ValidName_ReturnsTrue()
     {
         var sut = CreateSut();
-        var (isValid, _) = sut.ValidateNameInput("The Beatles");
+        var (isValid, message) = sut.ValidateNameInput("The Beatles");
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    public void ValidateNameInput_MaxLength60_ReturnsTrue()
+    {
+        var sut = CreateSut();
+        var name = new string('x', 60);
+        var (isValid, _) = sut.ValidateNameInput(name);
         Assert.True(isValid);
     }
 
     // ── CreateArtistAsync ─────────────────────────────────────────────────
 
     [Fact]
-    public async Task CreateArtistAsync_DuplicateName_ReturnsFalse()
-    {
-        _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                       .ReturnsAsync(true);
-        var sut = CreateSut();
-
-        var (success, message, artist) = await sut.CreateArtistAsync("Queen");
-
-        Assert.False(success);
-        Assert.Null(artist);
-        _artistRepoMock.Verify(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
     public async Task CreateArtistAsync_ValidName_ReturnsSuccessAndEntity()
     {
         _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                        .ReturnsAsync(false);
+        _artistRepoMock.Setup(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()))
+                       .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
         var (success, message, artist) = await sut.CreateArtistAsync("Queen");
@@ -76,52 +74,115 @@ public class ArtistServiceTests
     }
 
     [Fact]
-    public async Task CreateArtistAsync_ValidName_AddsToRepository()
-    {
-        _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                       .ReturnsAsync(false);
-        var sut = CreateSut();
-
-        await sut.CreateArtistAsync("Queen");
-
-        _artistRepoMock.Verify(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task CreateArtistAsync_TooLongName_ReturnsFalseWithoutCallingRepo()
+    public async Task CreateArtistAsync_NameTooLong_ReturnsFalse()
     {
         var sut = CreateSut();
+        var name = new string('x', 61);
 
-        var (success, _, artist) = await sut.CreateArtistAsync(new string('x', 101));
+        var (success, message, artist) = await sut.CreateArtistAsync(name);
 
         Assert.False(success);
+        Assert.NotEmpty(message);
         Assert.Null(artist);
-        _artistRepoMock.Verify(r => r.ExistsByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _artistRepoMock.Verify(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
-    // ── GetDeleteConfirmationAsync ────────────────────────────────────────
-
     [Fact]
-    public async Task GetDeleteConfirmationAsync_WithSongs_MessageIncludesSongCount()
+    public async Task CreateArtistAsync_DuplicateName_ReturnsFalse()
     {
-        _songRepoMock.Setup(r => r.CountByArtistsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(5);
+        _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(true);
         var sut = CreateSut();
 
-        var message = await sut.GetDeleteConfirmationAsync([1, 2]);
+        var (success, message, artist) = await sut.CreateArtistAsync("Nirvana");
 
-        Assert.Contains("5", message);
+        Assert.False(success);
+        Assert.NotEmpty(message);
+        Assert.Null(artist);
+        _artistRepoMock.Verify(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // ── UpdateArtistAsync ─────────────────────────────────────────────────
+
+    [Fact]
+    public async Task UpdateArtistAsync_ValidName_ReturnsSuccess()
+    {
+        var existing = new Artist { Id = 1, Name = "Old Name", NameNormalized = "old name" };
+        _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(existing);
+        _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(false);
+        _artistRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()))
+                       .Returns(Task.CompletedTask);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateArtistAsync(1, "New Name");
+
+        Assert.True(success);
     }
 
     [Fact]
-    public async Task GetDeleteConfirmationAsync_NoSongs_MessageDoesNotMentionSongs()
+    public async Task UpdateArtistAsync_ArtistNotFound_ReturnsFalse()
     {
-        _songRepoMock.Setup(r => r.CountByArtistsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
+        _artistRepoMock.Setup(r => r.GetByIdAsync(99, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync((Artist)null);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateArtistAsync(99, "New Name");
+
+        Assert.False(success);
+        Assert.NotEmpty(message);
+    }
+
+    [Fact]
+    public async Task UpdateArtistAsync_DuplicateNameExcludingSelf_ReturnsFalse()
+    {
+        var existing = new Artist { Id = 1, Name = "Artist", NameNormalized = "artist" };
+        _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(existing);
+        _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(true);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateArtistAsync(1, "Existing Other Artist");
+
+        Assert.False(success);
+        Assert.NotEmpty(message);
+    }
+
+    // ── DeleteArtistsAsync ────────────────────────────────────────────────
+
+    [Fact]
+    public async Task DeleteArtistsAsync_ArtistWithSongs_ReturnsFalse()
+    {
+        var artist = new Artist { Id = 1, Name = "Artist With Songs", NameNormalized = "artist with songs" };
+        _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(artist);
+        _songRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(3);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.DeleteArtistsAsync([1]);
+
+        Assert.False(success);
+        Assert.NotEmpty(message);
+        _artistRepoMock.Verify(r => r.DeleteAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteArtistsAsync_ArtistWithNoSongs_ReturnsSuccess()
+    {
+        var artist = new Artist { Id = 1, Name = "Solo Artist", NameNormalized = "solo artist" };
+        _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(artist);
+        _songRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
                      .ReturnsAsync(0);
+        _artistRepoMock.Setup(r => r.DeleteAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
+                       .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
-        var message = await sut.GetDeleteConfirmationAsync([1]);
+        var (success, message) = await sut.DeleteArtistsAsync([1]);
 
-        Assert.DoesNotContain("song", message, StringComparison.OrdinalIgnoreCase);
+        Assert.True(success);
     }
 }
