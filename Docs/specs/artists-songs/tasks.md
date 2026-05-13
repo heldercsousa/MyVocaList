@@ -1,7 +1,7 @@
 # Artists & Songs — Implementation Tasks
 
-> **Status:** Ready for implementation
-> **Last updated:** 2026-04-25
+> **Status:** Phase 4 partial — metadata providers next
+> **Last updated:** 2026-05-12
 > **Spec:** `Docs/specs/artists-songs/requirements.md` + `design.md`
 
 Check off each task as it completes. Run `/project:build` after every task. Run `/project:review` after every major task before committing.
@@ -10,37 +10,37 @@ Check off each task as it completes. Run `/project:build` after every task. Run 
 
 ## Phase 1 — Domain & Contracts
 
-- [ ] **1.1** Add `Artist` entity to `Domain/Entity/Artist.cs`
-- [ ] **1.2** Add `Song` entity to `Domain/Entity/Song.cs`
-- [ ] **1.3** Add `IArtistRepository` to `Domain/RepositoryInterface/IArtistRepository.cs`
-- [ ] **1.4** Add `ISongRepository` to `Domain/RepositoryInterface/ISongRepository.cs`
-- [ ] **1.5** Add `ArtistListItemDto`, `SongListItemDto`, `MusicSearchResultDto` to `MyVocaList.Contracts`
-- [ ] **1.6** Add `IArtistService` interface to `Domain/ServicesInterfaces/IArtistService.cs`
-- [ ] **1.7** Add `ISongService` interface to `Domain/ServicesInterfaces/ISongService.cs`
-- [ ] **1.8** Build — 0 errors
+- [x] **1.1** Add `Artist` entity to `Domain/Entity/Artist.cs`
+- [x] **1.2** Add `Song` entity to `Domain/Entity/Song.cs`
+- [x] **1.3** Add `IArtistRepository` to `Domain/RepositoryInterface/IArtistRepository.cs`
+- [x] **1.4** Add `ISongRepository` to `Domain/RepositoryInterface/ISongRepository.cs`
+- [x] **1.5** Add `ArtistListItemDto`, `SongListItemDto`, `MusicSearchResultDto` to `MyVocaList.Contracts`
+- [x] **1.6** Add `IArtistService` interface to `Domain/ServicesInterfaces/IArtistService.cs`
+- [x] **1.7** Add `ISongService` interface to `Domain/ServicesInterfaces/ISongService.cs`
+- [x] **1.8** Build — 0 errors
 
 ---
 
 ## Phase 2 — Tests (write before implementation — TDD)
 
-- [ ] **2.1** `ArtistRepositoryTests` — CRUD, paged search, case-insensitive search, unique name constraint, external ID lookup
-- [ ] **2.2** `SongRepositoryTests` — CRUD, paged search by artist, case-insensitive title search, composite unique constraint (artistId + title), external ID lookup
-- [ ] **2.3** `ArtistServiceTests` — name validation, create (valid / duplicate / too long), update, delete (with songs / without)
-- [ ] **2.4** `SongServiceTests` — title validation, create (valid / duplicate title for artist / missing artist), update, delete
-- [ ] **2.5** `dotnet test` — all fail (Red — expected at this stage)
+- [x] **2.1** `ArtistRepositoryTests` — CRUD, paged search, case-insensitive search, unique name constraint, external ID lookup
+- [x] **2.2** `SongRepositoryTests` — CRUD, paged search by artist, case-insensitive title search, composite unique constraint (artistId + title), external ID lookup
+- [x] **2.3** `ArtistServiceTests` — name validation, create (valid / duplicate / too long), update, delete (with songs / without)
+- [x] **2.4** `SongServiceTests` — title validation, create (valid / duplicate title for artist / missing artist), update, delete
+- [x] **2.5** `dotnet test` — all pass (Green — 148 tests)
 
 ---
 
 ## Phase 3 — Infrastructure
 
-- [ ] **3.1** Add `ArtistConfiguration` (`IEntityTypeConfiguration<Artist>`) in `MyVocaList.Infra`
-- [ ] **3.2** Add `SongConfiguration` (`IEntityTypeConfiguration<Song>`) in `MyVocaList.Infra`
-- [ ] **3.3** Register `Artist` and `Song` `DbSet`s in `AppDbContext`; register configurations
-- [ ] **3.4** Add EF Core migration: `AddArtistAndSongCatalog`
-- [ ] **3.5** Implement `ArtistRepository` — CRUD + paged search + name suggestions + `GetByExternalIdAsync`
-- [ ] **3.6** Implement `SongRepository` — CRUD + paged search by artist + title suggestions + `GetByExternalIdAsync` + `CountByArtistAsync`
-- [ ] **3.7** Build — 0 errors
-- [ ] **3.8** `dotnet test` — repository tests pass (Green)
+- [x] **3.1** Add `ArtistConfiguration` (`IEntityTypeConfiguration<Artist>`) in `MyVocaList.Infra`
+- [x] **3.2** Add `SongConfiguration` (`IEntityTypeConfiguration<Song>`) in `MyVocaList.Infra`
+- [x] **3.3** Register `Artist` and `Song` `DbSet`s in `AppDbContext`; register configurations
+- [x] **3.4** Add EF Core migration: `AddArtistAndSongCatalog`
+- [x] **3.5** Implement `ArtistRepository` — CRUD + paged search + name suggestions + `GetByExternalIdAsync`
+- [x] **3.6** Implement `SongRepository` — CRUD + paged search by artist + title suggestions + `GetByExternalIdAsync` + `CountByArtistAsync`
+- [x] **3.7** Build — 0 errors
+- [x] **3.8** `dotnet test` — repository tests pass (Green)
 
 ---
 
@@ -51,8 +51,8 @@ Check off each task as it completes. Run `/project:build` after every task. Run 
 - [ ] **4.3** Implement `DeezerProvider` — `SearchArtistsAsync`, `SearchSongsAsync`
 - [ ] **4.4** Add `IMusicMetadataService` interface
 - [ ] **4.5** Implement `MusicMetadataService` — provider chain orchestration; MusicBrainz first, Deezer fallback
-- [ ] **4.6** Implement `ArtistService` — validate, create, update, delete, paged list, name suggestions, delete confirmation message
-- [ ] **4.7** Implement `SongService` — validate, create, update, delete, paged list by artist, title suggestions
+- [x] **4.6** Implement `ArtistService` — validate, create, update, delete, paged list, name suggestions, delete confirmation message
+- [x] **4.7** Implement `SongService` — validate, create, update, delete, paged list by artist, title suggestions
 - [ ] **4.8** Build — 0 errors
 - [ ] **4.9** `dotnet test` — all tests pass (Green)
 
@@ -65,7 +65,7 @@ Check off each task as it completes. Run `/project:build` after every task. Run 
 - [ ] **5.3** Register `HttpClient` for each provider via `AddHttpClient<T>` with base address and `User-Agent`
 - [ ] **5.4** Register `ArtistRepository`, `SongRepository` as `AddScoped`
 - [ ] **5.5** Register all pages and ViewModels as `AddTransient`
-- [ ] **5.6** Add routes `ArtistForm`, `Songs`, `SongForm` to `Routes.cs`
+- [x] **5.6** Add routes `ArtistForm`, `Songs`, `SongForm` to `Routes.cs`
 - [ ] **5.7** Register routes in `AppShell.xaml.cs`
 - [ ] **5.8** Build — 0 errors
 
@@ -73,12 +73,12 @@ Check off each task as it completes. Run `/project:build` after every task. Run 
 
 ## Phase 6 — Artists UI
 
-- [ ] **6.1** Complete `ArtistsPage.xaml` — `Shell.TitleView`, `DXCollectionView`, `ListItem` rows, `FloatingToolbar` + FAB, two `EmptyState` components, confirm `dx:BottomSheet`; build after
+- [x] **6.1** Complete `ArtistsPage.xaml` — `Shell.TitleView`, `DXCollectionView`, `ListItem` rows, `FloatingToolbar` + FAB, two `EmptyState` components, confirm `dx:BottomSheet`; build after
 - [ ] **6.2** Complete `ArtistsPage.xaml.cs` — all code-behind event handlers per design; build after
-- [ ] **6.3** Implement `ArtistsViewModel` — all properties, commands, selection logic, confirm sheet state; build after
+- [x] **6.3** Implement `ArtistsViewModel` — all properties, commands, selection logic, confirm sheet state; build after
 - [ ] **6.4** Implement `ArtistFormPage.xaml` — Name field + character counter + suggestion list + API search strip + API results + overwrite warning `dx:BottomSheet` + action buttons; build after
 - [ ] **6.5** Implement `ArtistFormPage.xaml.cs` — `OnAppearing` focus, `OnBackButtonPressed`, overwrite sheet state sync; build after
-- [ ] **6.6** Implement `ArtistFormViewModel` — all properties, commands, `HasManualEdits` tracking, API search + import flow, local dedup suggestions; build after
+- [x] **6.6** Implement `ArtistFormViewModel` — all properties, commands, `HasManualEdits` tracking, API search + import flow, local dedup suggestions; build after
 - [ ] **6.7** Run `/project:review` — 0 issues before proceeding
 
 ---
