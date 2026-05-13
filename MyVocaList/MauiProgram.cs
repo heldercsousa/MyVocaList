@@ -4,6 +4,7 @@ using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
+using MyVocaList.Services.Providers;
 #if DEBUG
 using MauiDevFlow.Agent;
 #endif
