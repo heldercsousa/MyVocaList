@@ -355,3 +355,7 @@ MyVocaList/MauiProgram.cs
 MyVocaList/MauiProgram.cs
 Docs/specs/artists-songs/tasks.md
 Docs/specs/artists-songs/tasks.md
+Docs/superpowers/plans/hashed-sprouting-pebble.md
+Docs/BACKLOG.md
+Docs/BACKLOG.md
+Docs/Changelog/changelog.md
