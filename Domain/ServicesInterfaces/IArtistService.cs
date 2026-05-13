@@ -9,7 +9,7 @@ public interface IArtistService
     (bool isValid, string message) ValidateNameInput(string name);
 
     /// <summary>Creates an artist with the given name. Returns the created entity on success.</summary>
-    Task<(bool success, string message, Artist artist)> CreateArtistAsync(string name, CancellationToken ct = default);
+    Task<(bool success, string message, Artist? artist)> CreateArtistAsync(string name, CancellationToken ct = default);
 
     /// <summary>Updates the name of an existing artist.</summary>
     Task<(bool success, string message)> UpdateArtistAsync(int id, string name, CancellationToken ct = default);

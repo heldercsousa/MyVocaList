@@ -141,7 +141,7 @@ public class SongRepositoryTests : IAsyncLifetime
             MakeSong(artist.Id, "Starman"));
         await _db.SaveChangesAsync();
 
-        var results = await _repo.SearchByTitleAsync(artist.Id, "sta", 5, CancellationToken.None);
+        var results = await _repo.SearchByTitleAsync(artist.Id, "s", 5, CancellationToken.None);
 
         var titles = results.Select(s => s.Title).ToList();
         Assert.Equal(2, titles.Count);

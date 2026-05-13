@@ -14,6 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<Event> Events { get; set; }
     public DbSet<EventParticipation> EventParticipations { get; set; }
     public DbSet<SystemConfiguration> SystemConfigurations { get; set; }
+    public DbSet<Artist> Artists { get; set; }
+    public DbSet<Song> Songs { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -55,6 +57,8 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new EventConfiguration());
         modelBuilder.ApplyConfiguration(new EventParticipationConfiguration());
         modelBuilder.ApplyConfiguration(new SystemConfigurationConfiguration());
+        modelBuilder.ApplyConfiguration(new ArtistConfiguration());
+        modelBuilder.ApplyConfiguration(new SongConfiguration());
     }
 
     /// <summary>
