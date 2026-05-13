@@ -7,7 +7,7 @@ public interface ISongRepository
 {
     /// <summary>Returns a paged list of songs for a given artist.</summary>
     Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedByArtistAsync(
-        int artistId, int pageNumber, int pageSize, string normalizedQuery, CancellationToken ct);
+        int artistId, int pageNumber, int pageSize, string? normalizedQuery, CancellationToken ct);
 
     /// <summary>Returns songs whose normalized title starts with the query, scoped to an artist (max results).</summary>
     Task<IEnumerable<Song>> SearchByTitleAsync(int artistId, string normalizedQuery, int maxResults, CancellationToken ct);

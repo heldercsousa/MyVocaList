@@ -68,7 +68,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         {
             if (IsEditMode)
             {
-                var (success, message) = await _artistService.UpdateArtistAsync(ArtistId.Value, name);
+                var (success, message) = await _artistService.UpdateArtistAsync(ArtistId!.Value, name);
                 if (success)
                 {
                     await _snackbarService.ShowSuccessAsync("Artist updated");

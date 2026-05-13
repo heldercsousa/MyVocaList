@@ -39,7 +39,7 @@ public class ArtistService : IArtistService
     }
 
     /// <inheritdoc />
-    public async Task<(bool success, string message, Artist artist)> CreateArtistAsync(
+    public async Task<(bool success, string message, Artist? artist)> CreateArtistAsync(
         string name, CancellationToken ct = default)
     {
         var (isValid, message) = ValidateNameInput(name);

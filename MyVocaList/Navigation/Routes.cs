@@ -12,4 +12,7 @@ public static class Routes
     public const string Exit = "exit";
     public const string VenueForm = "venue-form";
     public const string PersonForm = "person-form";
+    public const string ArtistForm = "artist-form";
+    public const string Songs      = "songs";
+    public const string SongForm   = "song-form";
 }
