@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/13/2026** - amend - Integrate BACKLOG.md as first-class SCRUM backlog: rewrite header preamble (priority-ordered, MVP cut-line, update responsibility); rename "Ideas/Planned" → "💡 Backlog"; add Queue management MVP cut-line marker. workflow.md Rule 1 now includes step 0 (Identify from BACKLOG.md) and BACKLOG.md status-update callouts at each milestone (📋→🗺️→🟢→🟡→✅). Rule 7 removes stale MASTER_PLAN.md reference; adds BACKLOG.md as session-start context source when no handoff file exists
 - **05/13/2026** - fix - Align MAUI project NoWarn with Services/Contracts pattern (CS8601/03/04/12/13/19/22/25/29/67) — pre-existing nullable warnings now suppressed consistently; fixes android build after wasm-tools workload restore
 - **05/13/2026** - feat - Phase 5 partial — ArtistFormPage stub (XAML + code-behind) created; task 5.7 route registration pending Songs page stubs
 - **05/09/2026** - docs - README.md rewritten with app overview, feature list, tech stack table, project structure, and getting-started instructions; corrected MAUI version from 8.0 to 10
