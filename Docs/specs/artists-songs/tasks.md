@@ -1,7 +1,7 @@
 # Artists & Songs — Implementation Tasks
 
-> **Status:** Ready for implementation
-> **Last updated:** 2026-04-25
+> **Status:** Phase 3 — Infrastructure (next)
+> **Last updated:** 2026-05-09
 > **Spec:** `Docs/specs/artists-songs/requirements.md` + `design.md`
 
 Check off each task as it completes. Run `/project:build` after every task. Run `/project:review` after every major task before committing.
@@ -10,24 +10,24 @@ Check off each task as it completes. Run `/project:build` after every task. Run 
 
 ## Phase 1 — Domain & Contracts
 
-- [ ] **1.1** Add `Artist` entity to `Domain/Entity/Artist.cs`
-- [ ] **1.2** Add `Song` entity to `Domain/Entity/Song.cs`
-- [ ] **1.3** Add `IArtistRepository` to `Domain/RepositoryInterface/IArtistRepository.cs`
-- [ ] **1.4** Add `ISongRepository` to `Domain/RepositoryInterface/ISongRepository.cs`
-- [ ] **1.5** Add `ArtistListItemDto`, `SongListItemDto`, `MusicSearchResultDto` to `MyVocaList.Contracts`
-- [ ] **1.6** Add `IArtistService` interface to `Domain/ServicesInterfaces/IArtistService.cs`
-- [ ] **1.7** Add `ISongService` interface to `Domain/ServicesInterfaces/ISongService.cs`
-- [ ] **1.8** Build — 0 errors
+- [x] **1.1** Add `Artist` entity to `Domain/Entity/Artist.cs`
+- [x] **1.2** Add `Song` entity to `Domain/Entity/Song.cs`
+- [x] **1.3** Add `IArtistRepository` to `Domain/RepositoryInterface/IArtistRepository.cs`
+- [x] **1.4** Add `ISongRepository` to `Domain/RepositoryInterface/ISongRepository.cs`
+- [x] **1.5** Add `ArtistListItemDto`, `SongListItemDto`, `MusicSearchResultDto` to `MyVocaList.Contracts`
+- [x] **1.6** Add `IArtistService` interface to `Domain/ServicesInterfaces/IArtistService.cs`
+- [x] **1.7** Add `ISongService` interface to `Domain/ServicesInterfaces/ISongService.cs`
+- [x] **1.8** Build — 0 errors
 
 ---
 
 ## Phase 2 — Tests (write before implementation — TDD)
 
-- [ ] **2.1** `ArtistRepositoryTests` — CRUD, paged search, case-insensitive search, unique name constraint, external ID lookup
-- [ ] **2.2** `SongRepositoryTests` — CRUD, paged search by artist, case-insensitive title search, composite unique constraint (artistId + title), external ID lookup
-- [ ] **2.3** `ArtistServiceTests` — name validation, create (valid / duplicate / too long), update, delete (with songs / without)
-- [ ] **2.4** `SongServiceTests` — title validation, create (valid / duplicate title for artist / missing artist), update, delete
-- [ ] **2.5** `dotnet test` — all fail (Red — expected at this stage)
+- [x] **2.1** `ArtistRepositoryTests` — CRUD, paged search, case-insensitive search, unique name constraint, external ID lookup
+- [x] **2.2** `SongRepositoryTests` — CRUD, paged search by artist, case-insensitive title search, composite unique constraint (artistId + title), external ID lookup
+- [x] **2.3** `ArtistServiceTests` — name validation, create (valid / duplicate / too long), update, delete (with songs / without)
+- [x] **2.4** `SongServiceTests` — title validation, create (valid / duplicate title for artist / missing artist), update, delete
+- [x] **2.5** `dotnet test` — all fail (Red — expected at this stage)
 
 ---
 
