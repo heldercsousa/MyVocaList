@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import json,sys; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); r=json.dumps({'continue':False,'stopReason':'WORKFLOW GATE: delegate coding to a subagent (workflow.md Rule 2). Use the Agent tool.'}) if any(fp.endswith(e) for e in ('.cs','.xaml','.xaml.cs')) else ''; print(r) if r else None\" 2>/dev/null || true"
+            "command": "python -c \"import json,sys; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); any(fp.endswith(e) for e in ('.cs','.xaml','.xaml.cs')) and print('WORKFLOW REMINDER: Main agent is editing a code file directly. Prefer delegating to a subagent (workflow.md Rule 2).') \" 2>/dev/null || true"
           }
         ]
       }
