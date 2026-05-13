@@ -19,6 +19,7 @@ global using MyVocaList.Services;
 global using MyVocaList.UI.Models;
 // Pages — registered in MauiProgram and NavigationConfig
 global using MyVocaList.UI.Pages.Artists;
+global using MyVocaList.UI.Pages.Songs;
 global using MyVocaList.UI.Pages.BackupRestore;
 global using MyVocaList.UI.Pages.Events;
 global using MyVocaList.UI.Pages.People;
