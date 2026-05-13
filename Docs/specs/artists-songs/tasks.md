@@ -46,15 +46,15 @@ Check off each task as it completes. Run `/project:build` after every task. Run 
 
 ## Phase 4 — Services
 
-- [ ] **4.1** Add `IMusicMetadataProvider` interface to `MyVocaList.Services`
-- [ ] **4.2** Implement `MusicBrainzProvider` — `SearchArtistsAsync`, `SearchSongsAsync`; respect 1 req/sec; set `User-Agent`
-- [ ] **4.3** Implement `DeezerProvider` — `SearchArtistsAsync`, `SearchSongsAsync`
-- [ ] **4.4** Add `IMusicMetadataService` interface
-- [ ] **4.5** Implement `MusicMetadataService` — provider chain orchestration; MusicBrainz first, Deezer fallback
+- [x] **4.1** Add `IMusicMetadataProvider` interface to `MyVocaList.Services`
+- [x] **4.2** Implement `MusicBrainzProvider` — `SearchArtistsAsync`, `SearchSongsAsync`; respect 1 req/sec; set `User-Agent`
+- [x] **4.3** Implement `DeezerProvider` — `SearchArtistsAsync`, `SearchSongsAsync`
+- [x] **4.4** Add `IMusicMetadataService` interface
+- [x] **4.5** Implement `MusicMetadataService` — provider chain orchestration; MusicBrainz first, Deezer fallback
 - [x] **4.6** Implement `ArtistService` — validate, create, update, delete, paged list, name suggestions, delete confirmation message
 - [x] **4.7** Implement `SongService` — validate, create, update, delete, paged list by artist, title suggestions
-- [ ] **4.8** Build — 0 errors
-- [ ] **4.9** `dotnet test` — all tests pass (Green)
+- [x] **4.8** Build — 0 errors
+- [x] **4.9** `dotnet test` — 148 tests pass (Green)
 
 ---
 
