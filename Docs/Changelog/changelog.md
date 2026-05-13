@@ -1,6 +1,8 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/13/2026** - fix - Align MAUI project NoWarn with Services/Contracts pattern (CS8601/03/04/12/13/19/22/25/29/67) — pre-existing nullable warnings now suppressed consistently; fixes android build after wasm-tools workload restore
+- **05/13/2026** - feat - Phase 5 partial — ArtistFormPage stub (XAML + code-behind) created; task 5.7 route registration pending Songs page stubs
 - **05/09/2026** - docs - README.md rewritten with app overview, feature list, tech stack table, project structure, and getting-started instructions; corrected MAUI version from 8.0 to 10
 - **05/08/2026** - amend - Docs/ context scope gates: extend .claudeignore to exclude SDD/, superpowers/plans/, Changelog/, Plans/ from glob scans; add anti-glob rule to workflow.md Rule 7; add Docs/ scope note to implementor.md + orchestrator.md; add Docs/ Context Scope section to CLAUDE.md
 - **05/07/2026** - chore - SDD Phase 11 complete — conflict analysis and resolution across all rules files: 61 findings (9 Blockers / 24 Warnings / 28 Suggestions) identified across workflow.md, review.md, testing.md, CLAUDE.md, code-principles.md + constraints-registry.md; all findings reviewed with Helder; 60/61 approved resolutions applied (B-03 and S-13 rejected); SDD implementation finalized — all 162 steps across Phases 1–11 Done; spot-check verification of Decision Registry completed
