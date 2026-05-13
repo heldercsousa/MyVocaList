@@ -14,6 +14,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Infra", "Infra\MyVocaList.Infra.csproj", "{9F6E0A44-58C4-440A-A741-00CC0DA3178D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\BACKLOG.md = Docs\BACKLOG.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens de Solução", "{380A7511-A354-6D7A-0CC0-8FA1F1BA7B6C}"
 	ProjectSection(SolutionItems) = preProject
@@ -55,6 +58,123 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infra", "Infra", "{30258541-D0D8-F3FD-D559-E63D6BF074C2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{5854FF58-B8C5-05C6-5BF2-ACE42193F22B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Specs", "Specs", "{4CA06FF1-8789-445B-8AF3-32D4643CDBB3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SDD", "SDD", "{C9A5A169-C424-4871-AEC8-6E3E2F56F917}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\DevEnv\SDD\0_0_0_0_0_SDD_Spec_Driven_Development.md = Docs\DevEnv\SDD\0_0_0_0_0_SDD_Spec_Driven_Development.md
+		Docs\DevEnv\SDD\S10_1_1_Brownfield_Retrofit_Difficulty.md = Docs\DevEnv\SDD\S10_1_1_Brownfield_Retrofit_Difficulty.md
+		Docs\DevEnv\SDD\S10_1_Problem_Size_Suitability.md = Docs\DevEnv\SDD\S10_1_Problem_Size_Suitability.md
+		Docs\DevEnv\SDD\S10_2_1_Adoption_ROI_Timeline.md = Docs\DevEnv\SDD\S10_2_1_Adoption_ROI_Timeline.md
+		Docs\DevEnv\SDD\S10_2_2_Cultural_Resistance.md = Docs\DevEnv\SDD\S10_2_2_Cultural_Resistance.md
+		Docs\DevEnv\SDD\S10_2_Tradeoffs_and_Limitations.md = Docs\DevEnv\SDD\S10_2_Tradeoffs_and_Limitations.md
+		Docs\DevEnv\SDD\S10_Applicability.md = Docs\DevEnv\SDD\S10_Applicability.md
+		Docs\DevEnv\SDD\S1_1_Definition.md = Docs\DevEnv\SDD\S1_1_Definition.md
+		Docs\DevEnv\SDD\S1_2_1_Level_Gap_Anchored_to_Source.md = Docs\DevEnv\SDD\S1_2_1_Level_Gap_Anchored_to_Source.md
+		Docs\DevEnv\SDD\S1_2_Implementation_Levels.md = Docs\DevEnv\SDD\S1_2_Implementation_Levels.md
+		Docs\DevEnv\SDD\S1_3_SDD_vs_TDD_BDD_Waterfall.md = Docs\DevEnv\SDD\S1_3_SDD_vs_TDD_BDD_Waterfall.md
+		Docs\DevEnv\SDD\S1_Core_Concepts.md = Docs\DevEnv\SDD\S1_Core_Concepts.md
+		Docs\DevEnv\SDD\S2_1_1_Tacit_Knowledge_Capture.md = Docs\DevEnv\SDD\S2_1_1_Tacit_Knowledge_Capture.md
+		Docs\DevEnv\SDD\S2_1_2_Over_Specification_Risk.md = Docs\DevEnv\SDD\S2_1_2_Over_Specification_Risk.md
+		Docs\DevEnv\SDD\S2_1_Spec_Structure_and_Content.md = Docs\DevEnv\SDD\S2_1_Spec_Structure_and_Content.md
+		Docs\DevEnv\SDD\S2_2_1_Acceptance_Criteria_Subjectivity.md = Docs\DevEnv\SDD\S2_2_1_Acceptance_Criteria_Subjectivity.md
+		Docs\DevEnv\SDD\S2_2_2_Verbosity_vs_Precision_Tension.md = Docs\DevEnv\SDD\S2_2_2_Verbosity_vs_Precision_Tension.md
+		Docs\DevEnv\SDD\S2_2_Quality_Characteristics.md = Docs\DevEnv\SDD\S2_2_Quality_Characteristics.md
+		Docs\DevEnv\SDD\S2_3_1_Spec_Format_Selection.md = Docs\DevEnv\SDD\S2_3_1_Spec_Format_Selection.md
+		Docs\DevEnv\SDD\S2_3_Functional_vs_Technical_Separation.md = Docs\DevEnv\SDD\S2_3_Functional_vs_Technical_Separation.md
+		Docs\DevEnv\SDD\S2_Specification_Design.md = Docs\DevEnv\SDD\S2_Specification_Design.md
+		Docs\DevEnv\SDD\S3_1_1_Architecture_Debt_from_Early_Decisions.md = Docs\DevEnv\SDD\S3_1_1_Architecture_Debt_from_Early_Decisions.md
+		Docs\DevEnv\SDD\S3_1_2_Dependency_Analysis_Incompleteness.md = Docs\DevEnv\SDD\S3_1_2_Dependency_Analysis_Incompleteness.md
+		Docs\DevEnv\SDD\S3_1_Planning_Phase.md = Docs\DevEnv\SDD\S3_1_Planning_Phase.md
+		Docs\DevEnv\SDD\S3_2_1_Task_Granularity_Calibration.md = Docs\DevEnv\SDD\S3_2_1_Task_Granularity_Calibration.md
+		Docs\DevEnv\SDD\S3_2_2_Context_Window_Exhaustion.md = Docs\DevEnv\SDD\S3_2_2_Context_Window_Exhaustion.md
+		Docs\DevEnv\SDD\S3_2_Implementation_Phase.md = Docs\DevEnv\SDD\S3_2_Implementation_Phase.md
+		Docs\DevEnv\SDD\S3_3_1_Approval_Bottleneck.md = Docs\DevEnv\SDD\S3_3_1_Approval_Bottleneck.md
+		Docs\DevEnv\SDD\S3_3_2_Authority_Ambiguity.md = Docs\DevEnv\SDD\S3_3_2_Authority_Ambiguity.md
+		Docs\DevEnv\SDD\S3_3_Verification_Review_Gates.md = Docs\DevEnv\SDD\S3_3_Verification_Review_Gates.md
+		Docs\DevEnv\SDD\S3_Workflow_Phases.md = Docs\DevEnv\SDD\S3_Workflow_Phases.md
+		Docs\DevEnv\SDD\S4_1_1_Cross_Session_Context_Loss.md = Docs\DevEnv\SDD\S4_1_1_Cross_Session_Context_Loss.md
+		Docs\DevEnv\SDD\S4_1_Memory_Bank_Context_Files.md = Docs\DevEnv\SDD\S4_1_Memory_Bank_Context_Files.md
+		Docs\DevEnv\SDD\S4_2_Context_Engineering.md = Docs\DevEnv\SDD\S4_2_Context_Engineering.md
+		Docs\DevEnv\SDD\S4_3_External_Integrations.md = Docs\DevEnv\SDD\S4_3_External_Integrations.md
+		Docs\DevEnv\SDD\S4_Context_and_Memory.md = Docs\DevEnv\SDD\S4_Context_and_Memory.md
+		Docs\DevEnv\SDD\S5_1_1_Persona_Role_Confusion.md = Docs\DevEnv\SDD\S5_1_1_Persona_Role_Confusion.md
+		Docs\DevEnv\SDD\S5_1_Adversarial_Agent_Pattern.md = Docs\DevEnv\SDD\S5_1_Adversarial_Agent_Pattern.md
+		Docs\DevEnv\SDD\S5_2_1_Dependency_Ordering_Fragility.md = Docs\DevEnv\SDD\S5_2_1_Dependency_Ordering_Fragility.md
+		Docs\DevEnv\SDD\S5_2_2_Cross_Agent_Spec_Conflicts.md = Docs\DevEnv\SDD\S5_2_2_Cross_Agent_Spec_Conflicts.md
+		Docs\DevEnv\SDD\S5_2_Parallel_Agent_Execution.md = Docs\DevEnv\SDD\S5_2_Parallel_Agent_Execution.md
+		Docs\DevEnv\SDD\S5_3_1_Silent_Task_Completion.md = Docs\DevEnv\SDD\S5_3_1_Silent_Task_Completion.md
+		Docs\DevEnv\SDD\S5_3_Subagent_Delegation.md = Docs\DevEnv\SDD\S5_3_Subagent_Delegation.md
+		Docs\DevEnv\SDD\S5_Agent_Patterns.md = Docs\DevEnv\SDD\S5_Agent_Patterns.md
+		Docs\DevEnv\SDD\S6_1_1_Constitutional_Rigidity_and_Staleness.md = Docs\DevEnv\SDD\S6_1_1_Constitutional_Rigidity_and_Staleness.md
+		Docs\DevEnv\SDD\S6_1_2_Amendment_Governance.md = Docs\DevEnv\SDD\S6_1_2_Amendment_Governance.md
+		Docs\DevEnv\SDD\S6_1_Constitutional_Constraints.md = Docs\DevEnv\SDD\S6_1_Constitutional_Constraints.md
+		Docs\DevEnv\SDD\S6_2_1_Enforcement_Cost_Overhead.md = Docs\DevEnv\SDD\S6_2_1_Enforcement_Cost_Overhead.md
+		Docs\DevEnv\SDD\S6_2_Automated_Hooks.md = Docs\DevEnv\SDD\S6_2_Automated_Hooks.md
+		Docs\DevEnv\SDD\S6_3_1_Reviewer_Context_Loss.md = Docs\DevEnv\SDD\S6_3_1_Reviewer_Context_Loss.md
+		Docs\DevEnv\SDD\S6_3_Review_Gates.md = Docs\DevEnv\SDD\S6_3_Review_Gates.md
+		Docs\DevEnv\SDD\S6_4_1_Six_Drift_Categories.md = Docs\DevEnv\SDD\S6_4_1_Six_Drift_Categories.md
+		Docs\DevEnv\SDD\S6_4_2_Continuous_Conformance_Requirement.md = Docs\DevEnv\SDD\S6_4_2_Continuous_Conformance_Requirement.md
+		Docs\DevEnv\SDD\S6_4_CICD_Integration.md = Docs\DevEnv\SDD\S6_4_CICD_Integration.md
+		Docs\DevEnv\SDD\S6_Governance_and_Enforcement.md = Docs\DevEnv\SDD\S6_Governance_and_Enforcement.md
+		Docs\DevEnv\SDD\S7_1_1_Vendor_Lock_In.md = Docs\DevEnv\SDD\S7_1_1_Vendor_Lock_In.md
+		Docs\DevEnv\SDD\S7_1_2_Tool_Switching_Friction.md = Docs\DevEnv\SDD\S7_1_2_Tool_Switching_Friction.md
+		Docs\DevEnv\SDD\S7_1_Spec_First_Tools.md = Docs\DevEnv\SDD\S7_1_Spec_First_Tools.md
+		Docs\DevEnv\SDD\S7_2_AI_Coding_Assistants.md = Docs\DevEnv\SDD\S7_2_AI_Coding_Assistants.md
+		Docs\DevEnv\SDD\S7_3_1_MCP_Protocol_Immaturity.md = Docs\DevEnv\SDD\S7_3_1_MCP_Protocol_Immaturity.md
+		Docs\DevEnv\SDD\S7_3_MCP_Servers.md = Docs\DevEnv\SDD\S7_3_MCP_Servers.md
+		Docs\DevEnv\SDD\S7_Tooling.md = Docs\DevEnv\SDD\S7_Tooling.md
+		Docs\DevEnv\SDD\S8_1_1_Task_Atomization.md = Docs\DevEnv\SDD\S8_1_1_Task_Atomization.md
+		Docs\DevEnv\SDD\S8_1_Task_Tracking.md = Docs\DevEnv\SDD\S8_1_Task_Tracking.md
+		Docs\DevEnv\SDD\S8_2_1_Cross_Team_Spec_Consistency.md = Docs\DevEnv\SDD\S8_2_1_Cross_Team_Spec_Consistency.md
+		Docs\DevEnv\SDD\S8_2_Parallel_Work_Coordination.md = Docs\DevEnv\SDD\S8_2_Parallel_Work_Coordination.md
+		Docs\DevEnv\SDD\S8_3_Progress_Visibility.md = Docs\DevEnv\SDD\S8_3_Progress_Visibility.md
+		Docs\DevEnv\SDD\S8_Project_Management.md = Docs\DevEnv\SDD\S8_Project_Management.md
+		Docs\DevEnv\SDD\S9_1_1_Property_Based_Testing.md = Docs\DevEnv\SDD\S9_1_1_Property_Based_Testing.md
+		Docs\DevEnv\SDD\S9_1_TDD_Integration.md = Docs\DevEnv\SDD\S9_1_TDD_Integration.md
+		Docs\DevEnv\SDD\S9_2_1_Spec_Versioning_n_Rollback.md = Docs\DevEnv\SDD\S9_2_1_Spec_Versioning_n_Rollback.md
+		Docs\DevEnv\SDD\S9_2_2_Spec_Rot_Under_Evolution.md = Docs\DevEnv\SDD\S9_2_2_Spec_Rot_Under_Evolution.md
+		Docs\DevEnv\SDD\S9_2_Spec_Drift_Prevention.md = Docs\DevEnv\SDD\S9_2_Spec_Drift_Prevention.md
+		Docs\DevEnv\SDD\S9_3_1_False_Confidence_Trap.md = Docs\DevEnv\SDD\S9_3_1_False_Confidence_Trap.md
+		Docs\DevEnv\SDD\S9_3_2_Agent_Autonomy_Without_Reliability.md = Docs\DevEnv\SDD\S9_3_2_Agent_Autonomy_Without_Reliability.md
+		Docs\DevEnv\SDD\S9_3_Hallucination_Safeguards.md = Docs\DevEnv\SDD\S9_3_Hallucination_Safeguards.md
+		Docs\DevEnv\SDD\S9_Quality_Assurance.md = Docs\DevEnv\SDD\S9_Quality_Assurance.md
+		Docs\DevEnv\SDD\task-log.md = Docs\DevEnv\SDD\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plans", "Plans", "{0D9EA0EB-5958-4F68-962E-398A2051CC33}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\DevEnv\SDD\plans\S10_opportunities.md = Docs\DevEnv\SDD\plans\S10_opportunities.md
+		Docs\DevEnv\SDD\plans\S1_opportunities.md = Docs\DevEnv\SDD\plans\S1_opportunities.md
+		Docs\DevEnv\SDD\plans\S2_opportunities.md = Docs\DevEnv\SDD\plans\S2_opportunities.md
+		Docs\DevEnv\SDD\plans\S3_opportunities.md = Docs\DevEnv\SDD\plans\S3_opportunities.md
+		Docs\DevEnv\SDD\plans\S4_opportunities.md = Docs\DevEnv\SDD\plans\S4_opportunities.md
+		Docs\DevEnv\SDD\plans\S5_opportunities.md = Docs\DevEnv\SDD\plans\S5_opportunities.md
+		Docs\DevEnv\SDD\plans\S6_opportunities.md = Docs\DevEnv\SDD\plans\S6_opportunities.md
+		Docs\DevEnv\SDD\plans\S7_opportunities.md = Docs\DevEnv\SDD\plans\S7_opportunities.md
+		Docs\DevEnv\SDD\plans\S8_opportunities.md = Docs\DevEnv\SDD\plans\S8_opportunities.md
+		Docs\DevEnv\SDD\plans\S9_opportunities.md = Docs\DevEnv\SDD\plans\S9_opportunities.md
+		Docs\DevEnv\SDD\plans\status.md = Docs\DevEnv\SDD\plans\status.md
+		Docs\DevEnv\SDD\plans\_current_state_summary.md = Docs\DevEnv\SDD\plans\_current_state_summary.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "impl", "impl", "{C32F2513-DA30-4ED9-BD64-50597B18E2D8}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\DevEnv\SDD\plans\impl\conflict_report.md = Docs\DevEnv\SDD\plans\impl\conflict_report.md
+		Docs\DevEnv\SDD\plans\impl\conflict_report_claude_principles.md = Docs\DevEnv\SDD\plans\impl\conflict_report_claude_principles.md
+		Docs\DevEnv\SDD\plans\impl\conflict_report_review_testing.md = Docs\DevEnv\SDD\plans\impl\conflict_report_review_testing.md
+		Docs\DevEnv\SDD\plans\impl\conflict_report_workflow.md = Docs\DevEnv\SDD\plans\impl\conflict_report_workflow.md
+		Docs\DevEnv\SDD\plans\impl\MASTER_PLAN.md = Docs\DevEnv\SDD\plans\impl\MASTER_PLAN.md
+		Docs\DevEnv\SDD\plans\impl\RESUME_GUIDE.md = Docs\DevEnv\SDD\plans\impl\RESUME_GUIDE.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-songs", "{C141C5C9-833C-4A26-96BF-3745A2DA1AD4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\specs\artists-songs\design.md = Docs\specs\artists-songs\design.md
+		Docs\specs\artists-songs\requirements.md = Docs\specs\artists-songs\requirements.md
+		Docs\specs\artists-songs\tasks.md = Docs\specs\artists-songs\tasks.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -148,6 +268,11 @@ Global
 		{E9A5FC59-0C8C-49B6-9845-7870FA3CD098} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{300D3C1B-4E22-4CEE-85FF-453BD80607BD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{4CA06FF1-8789-445B-8AF3-32D4643CDBB3} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{C9A5A169-C424-4871-AEC8-6E3E2F56F917} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{0D9EA0EB-5958-4F68-962E-398A2051CC33} = {C9A5A169-C424-4871-AEC8-6E3E2F56F917}
+		{C32F2513-DA30-4ED9-BD64-50597B18E2D8} = {0D9EA0EB-5958-4F68-962E-398A2051CC33}
+		{C141C5C9-833C-4A26-96BF-3745A2DA1AD4} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
