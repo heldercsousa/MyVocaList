@@ -17,7 +17,7 @@ public class SongRepository : ISongRepository
 
     /// <inheritdoc />
     public async Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedByArtistAsync(
-        int artistId, int pageNumber, int pageSize, string normalizedQuery, CancellationToken ct)
+        int artistId, int pageNumber, int pageSize, string? normalizedQuery, CancellationToken ct)
     {
         var q = _db.Songs.Where(s => s.ArtistId == artistId);
 
