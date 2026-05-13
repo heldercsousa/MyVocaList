@@ -4,7 +4,6 @@ using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
-using MyVocaList.Services.Providers;
 #if DEBUG
 using MauiDevFlow.Agent;
 #endif
@@ -30,10 +29,10 @@ public static class MauiProgram
                 fonts.AddFont("Roboto-Medium.ttf", "RobotoMedium");
                 fonts.AddFont("Roboto-Bold.ttf", "RobotoBold");
             });
-            
+
         #if DEBUG
         builder.AddMauiDevFlowAgent();
-        #endif            
+        #endif
 
         // Database
         builder.Services.AddSingleton<CollationInterceptor>();
@@ -49,11 +48,30 @@ public static class MauiProgram
         builder.Services.AddScoped<IVenueRepository, VenueRepository>();
         builder.Services.AddScoped<IEventRepository, EventRepository>();
         builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+        builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
+        builder.Services.AddScoped<ISongRepository, SongRepository>();
+
+        // HTTP Clients — music metadata providers
+        builder.Services.AddHttpClient<MusicBrainzProvider>(client =>
+        {
+            client.BaseAddress = new Uri("https://musicbrainz.org/ws/2/");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (heldercsousa@gmail.com)");
+        });
+        builder.Services.AddHttpClient<DeezerProvider>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.deezer.com/");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (heldercsousa@gmail.com)");
+        });
+        builder.Services.AddScoped<IMusicMetadataProvider, MusicBrainzProvider>();
+        builder.Services.AddScoped<IMusicMetadataProvider, DeezerProvider>();
 
         // Services
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddScoped<IPersonService, PersonService>();
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
+        builder.Services.AddScoped<IArtistService, ArtistService>();
+        builder.Services.AddScoped<ISongService, SongService>();
+        builder.Services.AddScoped<IMusicMetadataService, MusicMetadataService>();
 
         // Shell
         builder.Services.AddSingleton<AppShellViewModel>();
@@ -64,6 +82,8 @@ public static class MauiProgram
         builder.Services.AddTransient<VenueFormViewModel>();
         builder.Services.AddTransient<PersonsViewModel>();
         builder.Services.AddTransient<PersonFormViewModel>();
+        builder.Services.AddTransient<ArtistsViewModel>();
+        builder.Services.AddTransient<ArtistFormViewModel>();
 
         // Pages
         builder.Services.AddTransient<VenueFormPage>();

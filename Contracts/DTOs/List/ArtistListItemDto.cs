@@ -3,7 +3,7 @@ namespace MyVocaList.Contracts.DTOs.List;
 public record ArtistListItemDto(
     int Id,
     string Name,
-    string ExternalProvider,
+    string? ExternalProvider,
     bool HasManualEdits,
     int SongCount)
 {

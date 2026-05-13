@@ -9,7 +9,7 @@ public interface ISongService
     (bool isValid, string message) ValidateTitleInput(string title);
 
     /// <summary>Creates a song under the given artist. Returns the created entity on success.</summary>
-    Task<(bool success, string message, Song song)> CreateSongAsync(int artistId, string title, string featuredArtists = null, CancellationToken ct = default);
+    Task<(bool success, string message, Song? song)> CreateSongAsync(int artistId, string title, string featuredArtists = null, CancellationToken ct = default);
 
     /// <summary>Updates the title and featured artists of an existing song.</summary>
     Task<(bool success, string message)> UpdateSongAsync(int id, string title, string featuredArtists = null, CancellationToken ct = default);
