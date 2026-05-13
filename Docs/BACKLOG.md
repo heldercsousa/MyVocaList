@@ -1,8 +1,12 @@
-# MyVocaList — Project Backlog
+# MyVocaList — Product Backlog
 
-> A simple list of desired app functionality and infrastructure initiatives, each with a status.
-> Agents preparing to write a new spec should check this file to identify the relevant backlog item
-> and reference it in `requirements.md`. Not a session-start read for all agents.
+> **SCRUM product backlog.** Items are priority-ordered — top = most important. Every feature begins here as a brief idea and is promoted through the lifecycle below before any code is written.
+>
+> **When to read:** At the start of any new feature cycle (workflow.md Rule 1 step 0) and when resuming a session with no active handoff file (Rule 7).
+>
+> **Who updates statuses:** The main agent updates this file at each workflow milestone. Subagents do not touch BACKLOG.md.
+>
+> **MVP scope:** All items above the `── MVP scope ends here ──` marker are in-scope for the MVP release. Items below are post-MVP.
 
 ---
 
@@ -34,9 +38,14 @@
 
 ---
 
-## 💡 Ideas / Planned
+## 💡 Backlog
 
-- **Queue management MVP** `⚪ Planned` — core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate
+- **Queue management MVP** `💡 Idea` — core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate
+
+---
+> ── MVP scope ends here ──
+---
+
 - **Singer self-registration** `💡 Idea` — singers register via public link
 - **Song catalog** `💡 Idea` — song library with lyrics API integration
 - **Social features** `💡 Idea` — post-event sharing, singer stats

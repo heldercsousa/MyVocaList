@@ -101,12 +101,17 @@ The spec is the authoritative description of intended behavior. When spec and co
 **When in doubt:** Write a spec. A 10-minute spec prevents a 2-hour rewrite.
 
 ### New feature workflow
-1. **Brainstorm** — invoke `superpowers:brainstorming`
-2. **Write spec** — write all three files; user reviews and approves
+
+**BACKLOG.md is the source of truth for feature sequencing.** The main agent (not subagents) is responsible for updating `Docs/BACKLOG.md` status at each milestone below.
+
+0. **Identify** — read `Docs/BACKLOG.md`; pick the highest-priority `🟢 Ready` item, or the next `💡 Idea` if none are Ready
+1. **Brainstorm** — invoke `superpowers:brainstorming`; update BACKLOG.md status → `📋 Spec`
+2. **Write spec** — write all three files; user reviews and approves; update status → `🗺️ Plan`
    - **2a. Constitution check** — verify the feature does not violate any Non-Negotiable rule in CLAUDE.md before writing the spec
-3. **Write plan** — invoke `superpowers:writing-plans`
-4. **Implement** — delegate to a subagent (see Rule 2)
+3. **Write plan** — invoke `superpowers:writing-plans`; user approves; update status → `🟢 Ready`
+4. **Implement** — delegate to a subagent (see Rule 2); update status → `🟡 In Progress`
 5. **Phase-gate review** — invoke `/project:review` after each phase before starting the next
+   - On ship: update status → `✅ Done`; move item to the `Recently Done` table in BACKLOG.md
 
 ### Spec quality gate (mandatory before implementation)
 
@@ -552,17 +557,17 @@ Every session that involves implementation or planning must begin with this read
 Read in this order — do not skip items, do not resume from memory alone:
 
 0. **Hook health verification** — confirm hooks are operational (see Hook Enforcement Notes at the top of this file). Fix any misconfigured hooks before proceeding.
-1. **`Docs/DevEnv/plans/impl/MASTER_PLAN.md`** — find the first non-Done step; that is the current position
-2. **Active session handoff file** (if one exists): `Docs/superpowers/plans/<plan-name>-handoff.md` — overrides MASTER_PLAN for exact continuation point
-3. **`ACTIVE-CONSIDERATIONS.md`** (if it exists) — read the priority stack and open items
-4. **`Docs/specs/[feature]/tasks.md`** — confirm which tasks are done, in-progress (`[~]`), and pending
-5. **`Docs/specs/[feature]/requirements.md`** — refresh acceptance criteria (do not rely on previous-session memory)
-6. **`Docs/specs/[feature]/design.md`** — refresh architecture and interface signatures
-7. **`Docs/superpowers/plans/<plan-name>-task-log.md`** — check for unresolved `blocked:` statuses or `Spec updated — re-planning required` entries
+1. **Active session handoff file** (if one exists): `Docs/superpowers/plans/<plan-name>-handoff.md` — use this as the exact continuation point
+   - **If no handoff file exists:** read `Docs/BACKLOG.md` to identify the current `🟡 In Progress` item or the highest-priority `🟢 Ready` item — that is the current work context
+2. **`ACTIVE-CONSIDERATIONS.md`** (if it exists) — read the priority stack and open items
+3. **`Docs/specs/[feature]/tasks.md`** — confirm which tasks are done, in-progress (`[~]`), and pending
+4. **`Docs/specs/[feature]/requirements.md`** — refresh acceptance criteria (do not rely on previous-session memory)
+5. **`Docs/specs/[feature]/design.md`** — refresh architecture and interface signatures
+6. **`Docs/superpowers/plans/<plan-name>-task-log.md`** — check for unresolved `blocked:` statuses or `Spec updated — re-planning required` entries
 
-**Rule:** Steps 1–7 are mandatory. Steps 4–7 may be scoped to the specific feature being worked on if multiple features are in flight.
+**Rule:** Steps 1–6 are mandatory. Steps 3–6 may be scoped to the specific feature being worked on if multiple features are in flight.
 
-**Anti-glob rule:** Never call `Glob("Docs/**")` or equivalent open-ended scans during session start or briefing. Read only the 7 files listed above plus the active feature spec files.
+**Anti-glob rule:** Never call `Glob("Docs/**")` or equivalent open-ended scans during session start or briefing. Read only the 6 files listed above plus the active feature spec files.
 
 > **Session operations detail** (ACTIVE-CONSIDERATIONS.md format, findings.md format, handoff artifact format, context exhaustion warning signs, tiered memory governance, session start constraint capture): see `.claude/library/session-ops.md`.
 
