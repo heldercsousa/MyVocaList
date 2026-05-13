@@ -314,3 +314,5 @@ Docs/superpowers/plans/cheeky-popping-whale.md
 .worktrees/feature/artists-songs/Services/IMusicMetadataService.cs
 .worktrees/feature/artists-songs/Docs/specs/artists-songs/tasks.md
 .worktrees/feature/artists-songs/MyVocaList/MauiProgram.cs
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_artists_songs_roadmap.md
+MyVocaList/MauiProgram.cs
