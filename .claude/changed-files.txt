@@ -316,3 +316,14 @@ Docs/superpowers/plans/cheeky-popping-whale.md
 .worktrees/feature/artists-songs/MyVocaList/MauiProgram.cs
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_artists_songs_roadmap.md
 MyVocaList/MauiProgram.cs
+MyVocaList/MauiProgram.cs
+Contracts/DTOs/List/ArtistListItemDto.cs
+Domain/ServicesInterfaces/ISongService.cs
+.claude/worktrees/agent-a60c4b3e817299140/Domain/ServicesInterfaces/ISongService.cs
+MyVocaList/MauiProgram.cs
+MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml
+Docs/superpowers/plans/curious-sniffing-grove.md
+MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml.cs
+.claude/settings.json
+MyVocaList/MyVocaList.csproj
+Docs/Changelog/changelog.md
