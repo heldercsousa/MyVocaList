@@ -320,22 +320,23 @@ public interface ICatalogService
 | Content root | Single-cell `Grid` | Overlay pattern |
 | Loading | `ShimmerView` wrapping `DXCollectionView` | `IsInitialLoading` drives shimmer |
 | List | `DXCollectionView` | `SelectionMode="Multiple"` hardcoded; row tap = selection toggle only |
-| Item row | `ListItem` | Headline=`Name`; SupportingText=`CatalogCountText`; LeadingContent=`ListItemLeadingIcon`; TrailingContent=`HorizontalStackLayout(catalog icon button + CheckEdit)` |
+| Item row | `ListItem` | Headline=`Name`; SupportingText=`CatalogCountText`; LeadingContent=`CheckEdit` (MD3 multi-action rule — trailing button present, so checkbox moves LEFT; person icon dropped); TrailingContent=`DXButton` (catalog navigation, own touch target) |
 | Empty states | Two `EmptyState` components | `IsEmptyNoArtists` / `IsEmptyNoResults` |
 | Actions | `FloatingToolbar` + FAB in `HorizontalStackLayout` | |
 | Confirm delete | Inline `dx:BottomSheet` | |
 
-**TrailingContent layout for artist row:**
+**MD3 multi-action artist row layout (checkbox LEFT, catalog button RIGHT):**
 ```xml
+<lists:ListItem.LeadingContent>
+    <dx:CheckEdit IsChecked="False" InputTransparent="True" VerticalOptions="Center" />
+</lists:ListItem.LeadingContent>
 <lists:ListItem.TrailingContent>
-    <HorizontalStackLayout Spacing="4">
-        <dx:DXButton Style="{StaticResource IconButton}"
-                     Icon="queue_music_outlined"
-                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ArtistsViewModel}},
-                                       Path=ViewCatalogCommand}"
-                     CommandParameter="{Binding .}" />
-        <dx:CheckEdit IsChecked="False" InputTransparent="True" VerticalOptions="Center" />
-    </HorizontalStackLayout>
+    <dx:DXButton Style="{StaticResource IconButton}"
+                 Icon="queue_music_outlined"
+                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ArtistsViewModel}},
+                                   Path=ViewCatalogCommand}"
+                 CommandParameter="{Binding .}"
+                 InputTransparent="False" />
 </lists:ListItem.TrailingContent>
 ```
 
@@ -369,7 +370,7 @@ In Global mode, the FAB opens `SongFormPage` to create a new song.
 | Slot | Component | Notes |
 |------|-----------|-------|
 | Shell title | `PageTitle` binding | "New Song" / "Edit Song" |
-| Artist autocomplete field | `TextEdit` + dropdown results | Required; searches registered artists by name (≥ 2 chars debounce); disabled + pre-filled when set from API |
+| Artist autocomplete field | `AutocompleteField` component (`MyVocaList/UI/Components/AutocompleteField/`) | Required; `Text` two-way bound to `ArtistSearchText`; `Suggestions` bound to `ArtistSuggestions` (mapped to `AutocompleteSuggestion` with `Headline=Name`); `SearchRequestedCommand`→`SearchArtistsCommand`; `SuggestionSelectedCommand`→`SelectArtistCommand`; `IsEnabled` = `!IsArtistLocked`; `HasError`/`ErrorText` bound to `ArtistHasError`/`ArtistErrorText` |
 | Title field | `TextEdit` | `HasError` / `ErrorText` binding |
 | Character counter | `Label` | Visible when title > 180 chars |
 | FeaturedArtists field | `TextEdit` | Optional |
@@ -495,6 +496,8 @@ string PageTitle => IsEditMode ? "Edit Song" : "New Song";
 
 // Commands
 SaveCommand, CancelCommand
+SearchArtistsCommand      // triggered by AutocompleteField.SearchRequestedCommand; queries IArtistService.SearchArtistsByNameAsync
+SelectArtistCommand       // triggered by AutocompleteField.SuggestionSelectedCommand; sets SelectedArtistId + SelectedArtistName
 SearchApiCommand
 ImportFromApiCommand(MusicSearchResultDto)
 ConfirmOverwriteCommand, DismissOverwriteCommand
@@ -510,7 +513,7 @@ ConfirmOverwriteCommand, DismissOverwriteCommand
 2. Admin taps FAB → `SongFormPage` (add mode)
 3. Admin types title; optionally fills FeaturedArtists and Lyrics
 4. Admin optionally uses API strip to enrich data
-5. Admin saves → song created (ArtistId = null unless set by API context)
+5. Admin saves → song created (ArtistId = selected artist's Id — mandatory)
 
 ### Artist Catalog management
 

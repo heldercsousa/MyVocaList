@@ -68,8 +68,6 @@ public partial class ArtistsPage : ContentPage
 
     private void OnItemTapped(object sender, CollectionViewGestureEventArgs e)
     {
-        if (_viewModel.SelectedCount > 0) return;
-        if (e.Item is not ArtistListItemDto item) return;
-        _ = Shell.Current.GoToAsync($"{Routes.Songs}?artistId={item.Id}&artistName={Uri.EscapeDataString(item.Name)}");
+        // Row tap = selection toggle only. Catalog navigation is handled by ViewCatalogCommand via the trailing DXButton.
     }
 }
