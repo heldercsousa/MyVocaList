@@ -49,10 +49,29 @@ Treat MCP response tokens as session budget — each large MCP response reduces 
 - **Tool batching:** When Claude Code supports sending multiple MCP tool calls in a single request, batch related Context7 lookups to reduce per-task latency.
 - **Streaming tool outputs:** When available, prefer them for long-running build-equivalent MCP tools — avoids timeout risk on first-run builds (>30s).
 
-### Playwright MCP (Evaluation)
-Playwright MCP provides accessibility-snapshot-based UI testing — deterministic DOM queries without full browser rendering overhead.
-Relevant evaluation triggers: project adopts Blazor Hybrid pages; DevExpress web component previews need regression testing; acceptance criteria need automated verification against a rendered UI.
-Not applicable to pure MAUI native pages. Evaluate at Blazor Hybrid adoption milestone.
+ ### Playwright MCP
+  **Installed.** Server key: `playwright`. Package: `@playwright/mcp@latest` (stdio via npx).
+
+  **When to use:**
+  - Fetching JavaScript-rendered web pages whose content is not available via plain HTTP (SPAs, documentation sites with
+   client-side rendering, DevExpress/Material Design component galleries)
+  - Verifying that a public web page matches an expected structure before extracting spec data from it
+  - Navigating multi-step web forms or paginated JS-rendered content during research tasks
+
+  **When NOT to use:**
+  - Pure MAUI native page testing — Playwright has no access to the device/emulator UI
+  - Any task that Context7 or a direct `WebFetch` can answer — Playwright is slower and uses more context budget; prefer
+   lighter tools first
+  - Production automation or form submission on behalf of the user without explicit approval
+
+  **Tool selection order for web content:**
+  1. `WebFetch` — static HTML / REST APIs
+  2. Context7 — library/framework documentation
+  3. Playwright — JavaScript-rendered pages where the above return empty or incomplete content
+
+  **Token discipline:** Playwright snapshots can be large. Use targeted selectors (`browser_click`, `browser_type`, then
+   `browser_snapshot`) rather than full-page snapshots when only a subsection is needed.
+
 
 ### MCP Availability Gate
 If a required MCP server (Context7, SQLite) is unavailable at task start:
