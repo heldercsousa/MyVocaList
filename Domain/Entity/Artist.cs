@@ -11,5 +11,6 @@ public class Artist
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    public ICollection<Song> Songs { get; set; } = [];
+    public ICollection<Song> OriginalSongs { get; set; } = [];
+    public ICollection<Catalog> CatalogEntries { get; set; } = [];
 }
