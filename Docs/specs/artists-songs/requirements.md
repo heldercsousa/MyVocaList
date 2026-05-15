@@ -65,7 +65,7 @@ empty states.
 - AC-1.10: When the list reaches the last item, the app shall automatically load the next page.
 - AC-1.11: The user shall be able to pull-to-refresh to reload from the first page.
 - AC-1.12: Each list row shall show the artist `Name` as headline and the Catalog size as supporting text (e.g. "12 songs in catalog" / "No catalog").
-- AC-1.13: Each list row shall have a leading person icon, a trailing checkbox for selection, and a trailing catalog-navigation icon button.
+- AC-1.13: Each list row shall have a leading checkbox (MD3 multi-action rule — trailing slot occupied by catalog button, so checkbox moves left; person icon dropped) and a trailing catalog-navigation icon button.
 - AC-1.14: Tapping a row shall toggle its selection state (selection is always on — no tap-to-navigate on the row itself).
 - AC-1.15: Tapping the catalog-navigation icon button on an artist row shall navigate to that artist's Catalog page.
 

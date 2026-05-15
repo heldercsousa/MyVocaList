@@ -134,7 +134,7 @@ public record ArtistListItemDto(int Id, string Name, string? ExternalProvider, b
 public record SongListItemDto(
     int Id,
     string Title,
-    int? OriginalArtistId,
+    int OriginalArtistId,        // NOT nullable — Song.ArtistId is mandatory (int NOT NULL)
     string? OriginalArtistName,
     string? FeaturedArtists,
     string? ExternalProvider,
