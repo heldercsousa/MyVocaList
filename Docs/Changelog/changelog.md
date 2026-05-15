@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/15/2026** - feat - Playwright MCP installed: added @playwright/mcp@latest in Chrome extension mode (--extension flag + token) to .mcp.json; CLAUDE.md updated with active usage guidelines replacing evaluation stub (tool selection order, when to use/not use, token discipline)
 - **05/15/2026** - docs - MD3 multi-action list rule: m3-components.md updated with checkbox-leading / trailing-button rule for multi-action rows; design.md fixed (ArtistsPage row layout corrected, SongFormPage references existing AutocompleteField component, interaction flow ArtistId null note corrected, SearchArtistsCommand/SelectArtistCommand added); ArtistsPage.xaml.cs OnItemTapped navigation removed (row tap = selection only per spec)
 - **05/15/2026** - docs - Artists & Songs spec revised: Song.ArtistId remains mandatory (original/copyright artist); Catalog join table added (many-to-many artist↔song performance repertoire); Songs promoted to top-level menu; navigation revised (row tap = selection only, trailing button = Catalog); Lyrics field added; ILyricsProvider placeholder added; SongFormPage gains artist autocomplete; artist deletion blocked when songs owned; phases 9–16 added to tasks.md
 - **05/15/2026** - fix - Songs and Artists CRUD not persisting to DB: AddAsync/UpdateAsync in SongRepository and ArtistRepository were not calling SaveChangesAsync; added SaveChangesAsync to ISongRepository + IArtistRepository interfaces, implementations, and service call sites in SongService + ArtistService
