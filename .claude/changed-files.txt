@@ -398,3 +398,15 @@ Docs/specs/artists-songs/tasks.md
 Docs/specs/artists-songs/design.md
 Docs/specs/artists-songs/requirements.md
 Docs/Changelog/changelog.md
+.claude/library/m3-components.md
+Docs/specs/artists-songs/design.md
+Docs/specs/artists-songs/design.md
+Docs/specs/artists-songs/design.md
+Docs/specs/artists-songs/design.md
+Docs/specs/artists-songs/design.md
+MyVocaList/UI/Pages/Artists/ArtistsPage.xaml.cs
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_artists_songs_roadmap.md
+.mcp.json
+Docs/Changelog/changelog.md
+.mcp.json
+Docs/Changelog/changelog.md
