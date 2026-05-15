@@ -429,3 +429,15 @@ Contracts/DTOs/List/ArtistListItemDto.cs
 Docs/specs/artists-songs/tasks.md
 Docs/superpowers/plans/validated-noodling-island-task-log.md
 Docs/superpowers/plans/validated-noodling-island-task-log.md
+Infra/EntityEFConfig/CatalogConfiguration.cs
+Infra/EntityEFConfig/SongConfiguration.cs
+Infra/EntityEFConfig/ArtistConfiguration.cs
+Infra/AppDbContext.cs
+Infra/AppDbContext.cs
+Infra/Repository/SongRepository.cs
+Infra/Repository/CatalogRepository.cs
+Infra/Repository/SongRepository.cs
+Infra/Repository/CatalogRepository.cs
+Infra/Repository/ArtistRepository.cs
+Infra/Migrations/20260515132000_RefactorCatalogAndAddLyrics.cs
+Docs/Changelog/changelog.md
