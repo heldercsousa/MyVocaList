@@ -203,9 +203,9 @@ xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
 
 | Item type | Selection control slot | Reason |
 |---|---|---|
-| Text-only (no leading/trailing) | `LeadingContent` (LEFT) | Selection is primary action |
-| With leading element only (icon/avatar/image) | `TrailingContent` (RIGHT) | Leading slot occupied; don't stack |
-| With trailing action button (multi-action row) | `LeadingContent` (LEFT) | Trailing slot is taken by independent action; checkbox moves left — MD3 multi-action pattern. The leading icon is dropped or merged. |
+| Text-only (no leading/trailing) | `TrailingContent` (RIGHT) | MD3 baseline spec: "With text and trailing checkbox" — trailing is the default selection control slot |
+| With leading element (icon/avatar/image), no trailing action | `TrailingContent` (RIGHT) | Leading slot occupied by element; checkbox stays trailing — MD3 spec: "With leading icon and trailing checkbox" |
+| With trailing action button (multi-action row) | `LeadingContent` (LEFT) | Trailing slot is taken by the independent action button; checkbox moves left — MD3 multi-action pattern. The leading icon is dropped to avoid crowding. |
 
 **Multi-action row layout (e.g. Artist row with Catalog button):**
 ```xml
