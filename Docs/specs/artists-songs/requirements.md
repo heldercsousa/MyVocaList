@@ -2,10 +2,41 @@
 
 > **Status:** Spec approved — implementation in progress (phases 1–7 complete)
 > **Last updated:** 2026-04-12
-> **Spec updated 2026-05-15:** Songs are now independent entities (ArtistId nullable); Catalog join
-> table replaces mandatory artist-song ownership link; Songs added to top-level menu; navigation
-> model revised (tap = selection, trailing button = Catalog); Lyrics field added; ILyricsProvider
-> placeholder introduced.
+> **Spec updated 2026-05-15:** Unified Artist model clarified: Artist serves dual roles (copyright
+> owner + performer); Catalog join table introduced; Lyrics field added; navigation model revised.
+> **Spec updated 2026-05-15b:** Role filtering added to US-1 (AC-1.16, AC-1.17); Artist Roles section
+> updated to note list supports All/Authors/Performers filter.
+> **Spec updated 2026-05-15c:** Role filter control changed from segmented/chip group to top tab bar
+> (three tabs: All | Authors | Performers). AC-1.16 updated accordingly.
+
+## Artist Roles
+
+An Artist is any musical entity — a solo person or a band.
+
+The Artist entity is **unified**: there is one Artist table and one set of fields. The role an
+Artist plays is determined by usage context, not by a type column or flag.
+
+- **Author role:** `Song.ArtistId` points to an Artist who is the copyright/original creator of
+  that song. Every registered song must have exactly one Author Artist (`ArtistId int NOT NULL`).
+- **Performer role:** An Artist who has `Catalog` entries performs songs live at events. The
+  Catalog is the artist's performance repertoire and is entirely optional.
+- **Both roles simultaneously:** An Artist can be both an Author (owns original songs) and a
+  Performer (has a live catalog) at the same time — e.g., a band that wrote their own songs and
+  performs them live.
+
+The admin UI exposes both roles via two menu entries:
+
+| Menu entry | Route | What it emphasizes |
+|------------|-------|--------------------|
+| "Authors" | `ArtistsPage?mode=author` | Artists who own/created songs |
+| "Performers" | `ArtistsPage?mode=performer` | Artists who have Catalog entries |
+
+Both entries navigate to the same `ArtistsPage` with a `mode` query parameter. All Artist CRUD
+features (browse, register, edit, delete, Catalog management) are available regardless of which
+menu entry was used. The list supports top tabs (All / Authors / Performers) so the admin
+can quickly browse only the relevant subset.
+
+---
 
 ## Overview
 
@@ -68,6 +99,8 @@ empty states.
 - AC-1.13: Each list row shall have a leading checkbox (MD3 multi-action rule — trailing slot occupied by catalog button, so checkbox moves left; person icon dropped) and a trailing catalog-navigation icon button.
 - AC-1.14: Tapping a row shall toggle its selection state (selection is always on — no tap-to-navigate on the row itself).
 - AC-1.15: Tapping the catalog-navigation icon button on an artist row shall navigate to that artist's Catalog page.
+- AC-1.16: The page shall show a top tab bar with three tabs: "All", "Authors" (artists who have at least one song), "Performers" (artists who have at least one Catalog entry). Default tab is "All". Artists in both roles appear in both the Authors and Performers tabs.
+- AC-1.17: When a role filter is active, the search and pagination shall apply within the filtered set.
 
 ---
 
@@ -332,7 +365,7 @@ empty states.
 |-------|------|-------------|-------|
 | `Id` | `int` | PK, auto-increment | |
 | `Title` | `string` | NOT NULL, maxLen=250 (DB) / 200 (input) | Trimmed before save |
-| `ArtistId` | `int` | NOT NULL, FK → `Artist.Id` | Original/copyright artist — mandatory |
+| `ArtistId` | `int` | **NOT NULL**, FK → `Artist.Id` | Original/copyright artist — mandatory. Never nullable. |
 | `FeaturedArtists` | `string?` | nullable, maxLen=200 | Free text: "feat. Ivete Sangalo" |
 | `Lyrics` | `string?` | nullable, maxLen=10 000 | Plain text |
 | `ExternalId` | `string?` | nullable, maxLen=100 | Provider's own ID |
@@ -408,3 +441,45 @@ Join table between Artist and Song representing the artist's performance reperto
 - Soft delete / archive
 - Year of formation / genre / biography — outside karaoke queue management scope
 - Cross-artist song deduplication — songs are uniquely identified by Title globally
+- `ArtistMember` join table (linking Artist to Person records) — future spec
+- Queue ↔ Catalog integration (singer picks from Performer's catalog when queued) — future spec
+- YouTube / Mechanical mode integration (synced karaoke video as an alternative to live
+  performance) — future spec
+- AI-powered catalog import from file (TXT, XLS, PDF parsed by embedded AI agent) — future spec
+- Author CRUD page (Authors are seeded for MVP dev/testing; full CRUD page deferred) — future spec
+
+---
+
+## Future Specs
+
+These items are out of scope for this spec but have enough context to guide future spec writing.
+Future sessions should use these stubs as a starting point rather than re-deriving decisions.
+
+### ArtistMember
+
+An Artist (solo or band) can be linked to one or more `Person` records via an `ArtistMember` join
+table (`artistId`, `personId`). This allows a Performer who is also a registered singer to share
+one identity record across both contexts. It also enables future peer-to-peer catalog sharing
+between devices, keyed on Person identity rather than Artist name.
+
+### Queue ↔ Catalog
+
+When a singer is enqueued, the app will optionally filter available songs to the songs in the
+active Performer's Catalog. The singer may still pick any registered song outside the Catalog
+(flexibility for trial songs not yet added to the Performer's repertoire). The queue flow spec
+will define how a "mode" (Bandokê / Mechanical) maps to a specific Performer.
+
+### YouTube / Mechanical Mode
+
+Songs can be performed via a YouTube karaoke video (lyrics synced in the video). The app needs an
+integration to store a `YouTubeUrl` reference per song and project the video to an external
+display. In this mode, no app-side `Lyrics` field is needed because the video includes them. The
+existing `Lyrics` field on `Song` is for Bandokê (live instrumental) mode only.
+
+### AI Catalog Import
+
+A Performer can upload a file (TXT, XLS, DOC, or PDF) containing their song list. An embedded AI
+agent parses the file, identifies Artist names and song titles, auto-creates any missing Author /
+Song records, and adds them to the Performer's Catalog in batch. The admin reviews and confirms
+before records are committed. This requires a file upload service, an AI parsing pipeline, and a
+review/confirmation UI step.
