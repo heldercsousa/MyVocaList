@@ -16,10 +16,10 @@ public class SongRepository : ISongRepository
     }
 
     /// <inheritdoc />
-    public async Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedByArtistAsync(
-        int artistId, int pageNumber, int pageSize, string? normalizedQuery, CancellationToken ct)
+    public async Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedAsync(
+        int pageNumber, int pageSize, string? normalizedQuery, CancellationToken ct)
     {
-        var q = _db.Songs.Where(s => s.ArtistId == artistId);
+        var q = _db.Songs.AsQueryable();
 
         if (!string.IsNullOrEmpty(normalizedQuery))
         {
@@ -37,9 +37,9 @@ public class SongRepository : ISongRepository
             .Take(pageSize)
             .Select(s => new SongListItemDto(
                 s.Id,
-                s.ArtistId,
                 s.Title,
-                s.Artist.Name,
+                s.ArtistId,
+                s.OriginalArtist.Name,
                 s.FeaturedArtists,
                 s.ExternalProvider,
                 s.HasManualEdits))
@@ -49,31 +49,11 @@ public class SongRepository : ISongRepository
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Song>> SearchByTitleAsync(
-        int artistId, string normalizedQuery, int maxResults, CancellationToken ct)
-    {
-        var q = _db.Songs.Where(s => s.ArtistId == artistId);
-
-        if (!string.IsNullOrEmpty(normalizedQuery))
-        {
-            var pattern = normalizedQuery + "%";
-            q = q.Where(s => EF.Functions.Like(
-                EF.Functions.Collate(s.TitleNormalized, "NOCASE"),
-                EF.Functions.Collate(pattern, "NOCASE")));
-        }
-
-        return await q
-            .OrderBy(s => s.TitleNormalized)
-            .Take(maxResults)
-            .ToListAsync(ct);
-    }
-
-    /// <inheritdoc />
     public async Task<Song> GetByIdAsync(int id, CancellationToken ct)
         => await _db.Songs.FirstOrDefaultAsync(s => s.Id == id, ct);
 
     /// <inheritdoc />
-    public async Task<Song> GetByExternalIdAsync(string externalId, string provider, CancellationToken ct)
+    public async Task<Song?> GetByExternalIdAsync(string externalId, string provider, CancellationToken ct)
         => await _db.Songs.FirstOrDefaultAsync(
             s => s.ExternalId == externalId && s.ExternalProvider == provider, ct);
 
@@ -91,17 +71,6 @@ public class SongRepository : ISongRepository
             s => s.Id != excludeId && s.ArtistId == artistId && EF.Functions.Like(
                 EF.Functions.Collate(s.TitleNormalized, "NOCASE"),
                 EF.Functions.Collate(normalizedTitle, "NOCASE")), ct);
-
-    /// <inheritdoc />
-    public async Task<int> CountByArtistAsync(int artistId, CancellationToken ct)
-        => await _db.Songs.CountAsync(s => s.ArtistId == artistId, ct);
-
-    /// <inheritdoc />
-    public async Task<int> CountByArtistsAsync(IEnumerable<int> artistIds, CancellationToken ct)
-    {
-        var idList = artistIds.ToList();
-        return await _db.Songs.CountAsync(s => idList.Contains(s.ArtistId), ct);
-    }
 
     /// <inheritdoc />
     public Task AddAsync(Song song, CancellationToken ct)

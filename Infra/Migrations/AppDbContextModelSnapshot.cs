@@ -67,6 +67,21 @@ namespace MyVocaList.Infra.Migrations
                     b.ToTable("Artists", (string)null);
                 });
 
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Catalog", b =>
+                {
+                    b.Property<int>("ArtistId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SongId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ArtistId", "SongId");
+
+                    b.HasIndex("SongId");
+
+                    b.ToTable("Catalog", (string)null);
+                });
+
             modelBuilder.Entity("MyVocaList.Domain.Entity.Event", b =>
                 {
                     b.Property<int>("Id")
@@ -215,6 +230,11 @@ namespace MyVocaList.Infra.Migrations
                     b.Property<bool>("HasManualEdits")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Lyrics")
+                        .HasMaxLength(10000)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -282,6 +302,25 @@ namespace MyVocaList.Infra.Migrations
                     b.ToTable("Venues");
                 });
 
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Catalog", b =>
+                {
+                    b.HasOne("MyVocaList.Domain.Entity.Artist", "Artist")
+                        .WithMany("CatalogEntries")
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyVocaList.Domain.Entity.Song", "Song")
+                        .WithMany("CatalogEntries")
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Artist");
+
+                    b.Navigation("Song");
+                });
+
             modelBuilder.Entity("MyVocaList.Domain.Entity.Event", b =>
                 {
                     b.HasOne("MyVocaList.Domain.Entity.Venue", "Venue")
@@ -314,23 +353,30 @@ namespace MyVocaList.Infra.Migrations
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.Song", b =>
                 {
-                    b.HasOne("MyVocaList.Domain.Entity.Artist", "Artist")
-                        .WithMany("Songs")
+                    b.HasOne("MyVocaList.Domain.Entity.Artist", "OriginalArtist")
+                        .WithMany("OriginalSongs")
                         .HasForeignKey("ArtistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Artist");
+                    b.Navigation("OriginalArtist");
                 });
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.Artist", b =>
                 {
-                    b.Navigation("Songs");
+                    b.Navigation("CatalogEntries");
+
+                    b.Navigation("OriginalSongs");
                 });
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.Event", b =>
                 {
                     b.Navigation("Participations");
+                });
+
+            modelBuilder.Entity("MyVocaList.Domain.Entity.Song", b =>
+                {
+                    b.Navigation("CatalogEntries");
                 });
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.Venue", b =>

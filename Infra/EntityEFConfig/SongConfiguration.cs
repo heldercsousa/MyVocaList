@@ -37,6 +37,11 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
         builder.Property(s => s.CreatedAt).IsRequired();
         builder.Property(s => s.UpdatedAt).IsRequired();
 
+        builder.Property(s => s.Lyrics)
+               .IsRequired(false)
+               .HasColumnType("TEXT")
+               .HasMaxLength(10000);
+
         builder.HasIndex(s => new { s.ArtistId, s.TitleNormalized })
                .IsUnique()
                .HasDatabaseName("IX_Songs_ArtistId_TitleNormalized");

@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<SystemConfiguration> SystemConfigurations { get; set; }
     public DbSet<Artist> Artists { get; set; }
     public DbSet<Song> Songs { get; set; }
+    public DbSet<Catalog> Catalog { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -59,6 +60,7 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new SystemConfigurationConfiguration());
         modelBuilder.ApplyConfiguration(new ArtistConfiguration());
         modelBuilder.ApplyConfiguration(new SongConfiguration());
+        modelBuilder.ApplyConfiguration(new CatalogConfiguration());
     }
 
     /// <summary>
