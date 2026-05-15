@@ -410,3 +410,4 @@ MyVocaList/UI/Pages/Artists/ArtistsPage.xaml.cs
 Docs/Changelog/changelog.md
 .mcp.json
 Docs/Changelog/changelog.md
+.claude/settings.json
