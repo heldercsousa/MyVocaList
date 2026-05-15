@@ -125,4 +125,8 @@ public class SongRepository : ISongRepository
             .Where(s => idList.Contains(s.Id))
             .ExecuteDeleteAsync(ct);
     }
+
+    /// <inheritdoc />
+    public Task SaveChangesAsync(CancellationToken ct = default)
+        => _db.SaveChangesAsync(ct);
 }

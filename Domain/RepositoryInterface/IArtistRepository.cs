@@ -18,4 +18,5 @@ public interface IArtistRepository
     Task AddAsync(Artist artist, CancellationToken ct);
     Task UpdateAsync(Artist artist, CancellationToken ct);
     Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct);
+    Task SaveChangesAsync(CancellationToken ct = default);
 }
