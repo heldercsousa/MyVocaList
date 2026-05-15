@@ -359,3 +359,13 @@ Docs/superpowers/plans/hashed-sprouting-pebble.md
 Docs/BACKLOG.md
 Docs/BACKLOG.md
 Docs/Changelog/changelog.md
+Docs/superpowers/plans/jolly-conjuring-coral.md
+Domain/RepositoryInterface/ISongRepository.cs
+Infra/Repository/SongRepository.cs
+Services/SongService.cs
+Services/SongService.cs
+Domain/RepositoryInterface/IArtistRepository.cs
+Infra/Repository/ArtistRepository.cs
+Services/ArtistService.cs
+Services/ArtistService.cs
+Docs/Changelog/changelog.md
