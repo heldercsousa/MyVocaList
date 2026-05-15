@@ -6,7 +6,6 @@
     <!-- Suppress NU1507: multiple package sources without source mapping -->
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
-
   <!-- ================================================================ -->
   <!-- EF Core & SQLite                                                 -->
   <!-- ================================================================ -->
@@ -14,8 +13,8 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.8" />
   </ItemGroup>
-
   <!-- ================================================================ -->
   <!-- Microsoft Extensions                                             -->
   <!-- ================================================================ -->
@@ -24,7 +23,6 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.3" />
     <PackageVersion Include="Scrutor" Version="7.0.0" />
   </ItemGroup>
-
   <!-- ================================================================ -->
   <!-- Serilog (normalized — was 4.2.0/4.3.1 drift between projects)  -->
   <!-- ================================================================ -->
@@ -35,7 +33,6 @@
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
-
   <!-- ================================================================ -->
   <!-- .NET MAUI                                                        -->
   <!-- ================================================================ -->
@@ -46,7 +43,6 @@
     <PackageVersion Include="CommunityToolkit.Maui" Version="14.0.0" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.*" />
   </ItemGroup>
-
   <!-- ================================================================ -->
   <!-- DevExpress MAUI                                                  -->
   <!-- ================================================================ -->
@@ -56,14 +52,12 @@
     <PackageVersion Include="DevExpress.Maui.Core" Version="25.2.4" />
     <PackageVersion Include="DevExpress.Maui.Editors" Version="25.2.4" />
   </ItemGroup>
-
   <!-- ================================================================ -->
   <!-- Dev Tools                                                        -->
   <!-- ================================================================ -->
   <ItemGroup>
     <PackageVersion Include="Redth.MauiDevFlow.Agent" Version="*" />
   </ItemGroup>
-
   <!-- ================================================================ -->
   <!-- Test project                                                     -->
   <!-- ================================================================ -->
