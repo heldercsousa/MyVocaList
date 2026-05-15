@@ -4,7 +4,7 @@
 
 ## Task: Phase 10 — Domain Refactor
 **Plan:** `Docs/superpowers/plans/validated-noodling-island.md`
-**Status:** To Review
+**Status:** Review task done
 **Started:** 2026-05-15
 **Completed:** 2026-05-15
 
