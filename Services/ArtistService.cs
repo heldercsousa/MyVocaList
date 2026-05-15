@@ -61,6 +61,7 @@ public class ArtistService : IArtistService
         };
 
         await _artistRepository.AddAsync(artist, ct);
+        await _artistRepository.SaveChangesAsync(ct);
         return (true, $"Artist '{name}' created successfully", artist);
     }
 
@@ -88,6 +89,7 @@ public class ArtistService : IArtistService
         artist.HasManualEdits = true;
 
         await _artistRepository.UpdateAsync(artist, ct);
+        await _artistRepository.SaveChangesAsync(ct);
         return (true, $"Artist updated to '{name}'");
     }
 

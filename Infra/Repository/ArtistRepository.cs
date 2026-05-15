@@ -105,4 +105,8 @@ public class ArtistRepository : IArtistRepository
             .Where(a => idList.Contains(a.Id))
             .ExecuteDeleteAsync(ct);
     }
+
+    /// <inheritdoc />
+    public Task SaveChangesAsync(CancellationToken ct = default)
+        => _db.SaveChangesAsync(ct);
 }

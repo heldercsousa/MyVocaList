@@ -21,4 +21,5 @@ public interface ISongRepository
     Task AddAsync(Song song, CancellationToken ct);
     Task UpdateAsync(Song song, CancellationToken ct);
     Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct);
+    Task SaveChangesAsync(CancellationToken ct = default);
 }

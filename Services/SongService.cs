@@ -67,6 +67,7 @@ public class SongService : ISongService
         };
 
         await _songRepository.AddAsync(song, ct);
+        await _songRepository.SaveChangesAsync(ct);
         return (true, $"Song '{title}' created successfully", song);
     }
 
@@ -95,6 +96,7 @@ public class SongService : ISongService
         song.HasManualEdits = true;
 
         await _songRepository.UpdateAsync(song, ct);
+        await _songRepository.SaveChangesAsync(ct);
         return (true, $"Song updated to '{title}'");
     }
 
