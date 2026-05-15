@@ -34,7 +34,7 @@ public class ArtistRepository : IArtistRepository
             .OrderBy(a => a.NameNormalized)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .Select(a => new { Artist = a, SongCount = a.Songs.Count() })
+            .Select(a => new { Artist = a, SongCount = a.OriginalSongs.Count() })
             .ToListAsync(ct);
 
         var items = rawItems.Select(x => (x.Artist, x.SongCount)).ToList();

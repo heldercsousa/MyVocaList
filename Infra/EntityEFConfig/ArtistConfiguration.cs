@@ -42,8 +42,8 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
                .IsUnique()
                .HasDatabaseName("IX_Artists_ExternalId");
 
-        builder.HasMany(a => a.Songs)
-               .WithOne(s => s.Artist)
+        builder.HasMany(a => a.OriginalSongs)
+               .WithOne(s => s.OriginalArtist)
                .HasForeignKey(s => s.ArtistId)
                .OnDelete(DeleteBehavior.Cascade);
     }
