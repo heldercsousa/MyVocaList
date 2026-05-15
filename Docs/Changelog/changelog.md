@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/15/2026** - docs - Artists & Songs spec revised: Song.ArtistId remains mandatory (original/copyright artist); Catalog join table added (many-to-many artist↔song performance repertoire); Songs promoted to top-level menu; navigation revised (row tap = selection only, trailing button = Catalog); Lyrics field added; ILyricsProvider placeholder added; SongFormPage gains artist autocomplete; artist deletion blocked when songs owned; phases 9–16 added to tasks.md
 - **05/15/2026** - fix - Songs and Artists CRUD not persisting to DB: AddAsync/UpdateAsync in SongRepository and ArtistRepository were not calling SaveChangesAsync; added SaveChangesAsync to ISongRepository + IArtistRepository interfaces, implementations, and service call sites in SongService + ArtistService
 - **05/13/2026** - amend - Integrate BACKLOG.md as first-class SCRUM backlog: rewrite header preamble (priority-ordered, MVP cut-line, update responsibility); rename "Ideas/Planned" → "💡 Backlog"; add Queue management MVP cut-line marker. workflow.md Rule 1 now includes step 0 (Identify from BACKLOG.md) and BACKLOG.md status-update callouts at each milestone (📋→🗺️→🟢→🟡→✅). Rule 7 removes stale MASTER_PLAN.md reference; adds BACKLOG.md as session-start context source when no handoff file exists
 - **05/13/2026** - fix - Align MAUI project NoWarn with Services/Contracts pattern (CS8601/03/04/12/13/19/22/25/29/67) — pre-existing nullable warnings now suppressed consistently; fixes android build after wasm-tools workload restore

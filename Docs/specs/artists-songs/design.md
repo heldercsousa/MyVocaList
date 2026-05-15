@@ -1,7 +1,10 @@
 # Artists & Songs — Technical Design
 
-> **Status:** Spec approved — pending implementation
+> **Status:** Spec approved — implementation in progress (phases 1–7 complete)
 > **Last updated:** 2026-04-12
+> **Spec updated 2026-05-15:** Song.ArtistId made nullable; Catalog join entity added; Songs added
+> as top-level menu item; navigation model revised; Lyrics field added; ILyricsProvider placeholder
+> added. Phases 9–14 added to tasks.md.
 
 ---
 
@@ -9,11 +12,11 @@
 
 | Layer | Artefacts |
 |-------|-----------|
-| Domain | `Artist` entity · `Song` entity · `IArtistRepository` · `ISongRepository` — **all new** |
-| Contracts | `ArtistListItemDto` · `SongListItemDto` · `MusicSearchResultDto` — **all new** |
-| Infra | `ArtistRepository` · `SongRepository` · `ArtistConfiguration` · `SongConfiguration` — **all new** |
-| Services | `ArtistService` · `SongService` · `MusicMetadataService` · `MusicBrainzProvider` · `DeezerProvider` — **all new** |
-| MAUI | `ArtistsPage` · `ArtistsViewModel` · `ArtistFormPage` · `ArtistFormViewModel` · `SongsPage` · `SongsViewModel` · `SongFormPage` · `SongFormViewModel` — **all new** (`ArtistsPage` stub exists) |
+| Domain | `Artist` · `Song` · `Catalog` · `IArtistRepository` · `ISongRepository` · `ICatalogRepository` |
+| Contracts | `ArtistListItemDto` · `SongListItemDto` · `MusicSearchResultDto` |
+| Infra | `ArtistRepository` · `SongRepository` · `CatalogRepository` · `ArtistConfiguration` · `SongConfiguration` · `CatalogConfiguration` |
+| Services | `ArtistService` · `SongService` · `CatalogService` · `MusicMetadataService` · `MusicBrainzProvider` · `DeezerProvider` · `ILyricsProvider` (placeholder) |
+| MAUI | `ArtistsPage` · `ArtistsViewModel` · `ArtistFormPage` · `ArtistFormViewModel` · `SongsPage` · `SongsViewModel` · `SongFormPage` · `SongFormViewModel` |
 
 ---
 
@@ -26,11 +29,12 @@ public class Artist
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public string? ExternalId { get; set; }       // Provider's own ID (e.g. MusicBrainz MBID)
-    public string? ExternalProvider { get; set; } // "MusicBrainz", "Deezer", or null (manual)
-    public bool HasManualEdits { get; set; }      // True if any field changed after API import
+    public string? ExternalId { get; set; }
+    public string? ExternalProvider { get; set; }
+    public bool HasManualEdits { get; set; }
 
-    public ICollection<Song> Songs { get; set; }  // Navigation property
+    public ICollection<Catalog> CatalogEntries { get; set; }  // performance repertoire (many-to-many via Catalog)
+    public ICollection<Song> OriginalSongs { get; set; }      // songs where this artist is the copyright owner
 
     public Artist() { }
 }
@@ -43,15 +47,34 @@ public class Song
 {
     public int Id { get; set; }
     public string Title { get; set; }
-    public int ArtistId { get; set; }
-    public string? FeaturedArtists { get; set; }  // Free text: "feat. Ivete Sangalo"
+    public int ArtistId { get; set; }              // original/copyright artist — mandatory
+    public string? FeaturedArtists { get; set; }   // Free text: "feat. Ivete Sangalo"
+    public string? Lyrics { get; set; }            // plain text, max 10 000 chars
     public string? ExternalId { get; set; }
     public string? ExternalProvider { get; set; }
     public bool HasManualEdits { get; set; }
 
-    public Artist Artist { get; set; }            // Navigation property
+    public Artist OriginalArtist { get; set; }     // required nav property
+    public ICollection<Catalog> CatalogEntries { get; set; }  // artists who include this song in their repertoire
 
     public Song() { }
+}
+```
+
+### Catalog entity (join table)
+
+```csharp
+/// <summary>
+/// Represents an artist's performance repertoire entry — a song the artist performs (may be a cover).
+/// "Catálogo" in Portuguese.
+/// </summary>
+public class Catalog
+{
+    public int ArtistId { get; set; }
+    public int SongId { get; set; }
+
+    public Artist Artist { get; set; }
+    public Song Song { get; set; }
 }
 ```
 
@@ -72,16 +95,30 @@ public interface IArtistRepository : IBaseRepository<Artist>
 
 public interface ISongRepository : IBaseRepository<Song>
 {
-    Task<(IEnumerable<Song> items, int totalCount)> GetPagedByArtistAsync(
-        int artistId, int pageNumber, int pageSize, string? query = null, CancellationToken ct = default);
+    /// <summary>All songs — global, not scoped to any artist.</summary>
+    Task<(IEnumerable<Song> items, int totalCount)> GetPagedAsync(
+        int pageNumber, int pageSize, string? query = null, CancellationToken ct = default);
 
     Task<bool> ExistsByTitleForArtistAsync(string title, int artistId, int? excludeId = null, CancellationToken ct = default);
 
-    Task<List<Song>> SearchByTitleForArtistAsync(string term, int artistId, int maxResults = 5, CancellationToken ct = default);
-
     Task<Song?> GetByExternalIdAsync(string externalId, CancellationToken ct = default);
+}
+
+public interface ICatalogRepository
+{
+    /// <summary>Songs in a specific artist's Catalog (their performance repertoire).</summary>
+    Task<(IEnumerable<Song> items, int totalCount)> GetPagedByArtistAsync(
+        int artistId, int pageNumber, int pageSize, string? query = null, CancellationToken ct = default);
 
     Task<int> CountByArtistAsync(int artistId, CancellationToken ct = default);
+
+    Task<bool> ExistsAsync(int artistId, int songId, CancellationToken ct = default);
+
+    Task AddAsync(Catalog entry, CancellationToken ct = default);
+
+    Task RemoveAsync(int artistId, int songId, CancellationToken ct = default);
+
+    Task SaveChangesAsync(CancellationToken ct = default);
 }
 ```
 
@@ -90,19 +127,26 @@ public interface ISongRepository : IBaseRepository<Song>
 ## Contracts Layer
 
 ```csharp
-// List page row
-public record ArtistListItemDto(int Id, string Name, string? ExternalProvider, bool HasManualEdits, int SongCount);
+// Artists list page row
+public record ArtistListItemDto(int Id, string Name, string? ExternalProvider, bool HasManualEdits, int CatalogCount);
 
-// List page row (scoped to artist)
-public record SongListItemDto(int Id, string Title, int ArtistId, string ArtistName, string? FeaturedArtists, string? ExternalProvider, bool HasManualEdits);
+// Songs list page row (global + catalog mode)
+public record SongListItemDto(
+    int Id,
+    string Title,
+    int? OriginalArtistId,
+    string? OriginalArtistName,
+    string? FeaturedArtists,
+    string? ExternalProvider,
+    bool HasManualEdits);
 
 // Returned by IMusicMetadataService to the ViewModel
 public record MusicSearchResultDto(
     string ExternalId,
     string Provider,
     string ArtistName,
-    string? SongTitle,           // null when searching artists only
-    string? FeaturedArtists);    // null when searching artists only
+    string? SongTitle,
+    string? FeaturedArtists);
 ```
 
 ---
@@ -117,31 +161,18 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
     public void Configure(EntityTypeBuilder<Artist> builder)
     {
         builder.HasKey(a => a.Id);
+        builder.Property(a => a.Name).HasColumnType("TEXT").IsRequired().HasMaxLength(250);
+        builder.Property(a => a.ExternalId).HasColumnType("TEXT").IsRequired(false).HasMaxLength(100);
+        builder.Property(a => a.ExternalProvider).HasColumnType("TEXT").IsRequired(false).HasMaxLength(50);
+        builder.Property(a => a.HasManualEdits).IsRequired().HasDefaultValue(false);
+        builder.HasIndex(a => a.Name).IsUnique().HasDatabaseName("IX_Artists_Name");
+        builder.HasIndex(a => a.ExternalId).IsUnique().HasDatabaseName("IX_Artists_ExternalId");
 
-        builder.Property(a => a.Name)
-               .HasColumnType("TEXT").IsRequired().HasMaxLength(250);
-
-        builder.Property(a => a.ExternalId)
-               .HasColumnType("TEXT").IsRequired(false).HasMaxLength(100);
-
-        builder.Property(a => a.ExternalProvider)
-               .HasColumnType("TEXT").IsRequired(false).HasMaxLength(50);
-
-        builder.Property(a => a.HasManualEdits)
-               .IsRequired().HasDefaultValue(false);
-
-        builder.HasIndex(a => a.Name)
-               .IsUnique()
-               .HasDatabaseName("IX_Artists_Name");
-
-        builder.HasIndex(a => a.ExternalId)
-               .IsUnique()
-               .HasDatabaseName("IX_Artists_ExternalId");
-
-        builder.HasMany(a => a.Songs)
-               .WithOne(s => s.Artist)
+        // Songs where this artist is the copyright owner
+        builder.HasMany(a => a.OriginalSongs)
+               .WithOne(s => s.OriginalArtist)
                .HasForeignKey(s => s.ArtistId)
-               .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.Restrict);  // cannot delete artist if they have songs — user must reassign or delete songs first
     }
 }
 ```
@@ -154,43 +185,51 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
     public void Configure(EntityTypeBuilder<Song> builder)
     {
         builder.HasKey(s => s.Id);
-
-        builder.Property(s => s.Title)
-               .HasColumnType("TEXT").IsRequired().HasMaxLength(250);
-
-        builder.Property(s => s.FeaturedArtists)
-               .HasColumnType("TEXT").IsRequired(false).HasMaxLength(200);
-
-        builder.Property(s => s.ExternalId)
-               .HasColumnType("TEXT").IsRequired(false).HasMaxLength(100);
-
-        builder.Property(s => s.ExternalProvider)
-               .HasColumnType("TEXT").IsRequired(false).HasMaxLength(50);
-
-        builder.Property(s => s.HasManualEdits)
-               .IsRequired().HasDefaultValue(false);
-
-        builder.HasIndex(s => s.ArtistId)
-               .HasDatabaseName("IX_Songs_ArtistId");
-
-        builder.HasIndex(s => new { s.ArtistId, s.Title })
-               .IsUnique()
-               .HasDatabaseName("IX_Songs_ArtistId_Title");
-
-        builder.HasIndex(s => s.ExternalId)
-               .IsUnique()
-               .HasDatabaseName("IX_Songs_ExternalId");
+        builder.Property(s => s.Title).HasColumnType("TEXT").IsRequired().HasMaxLength(250);
+        builder.Property(s => s.FeaturedArtists).HasColumnType("TEXT").IsRequired(false).HasMaxLength(200);
+        builder.Property(s => s.Lyrics).HasColumnType("TEXT").IsRequired(false).HasMaxLength(10000);
+        builder.Property(s => s.ExternalId).HasColumnType("TEXT").IsRequired(false).HasMaxLength(100);
+        builder.Property(s => s.ExternalProvider).HasColumnType("TEXT").IsRequired(false).HasMaxLength(50);
+        builder.Property(s => s.HasManualEdits).IsRequired().HasDefaultValue(false);
+        builder.HasIndex(s => new { s.ArtistId, s.Title }).IsUnique().HasDatabaseName("IX_Songs_ArtistId_Title");
+        builder.HasIndex(s => s.ArtistId).HasDatabaseName("IX_Songs_ArtistId");
+        builder.HasIndex(s => s.ExternalId).IsUnique().HasDatabaseName("IX_Songs_ExternalId");
     }
 }
 ```
 
-**Note on collation:** No normalized columns. All text searches use `EF.Functions.Like` + `EF.Functions.Collate` on both operands in the repository `WHERE` clauses, relying on the globally applied `CollationInterceptor`. This pattern is portable: for MSSQL, remove the explicit `Collate` calls and rely on DB-level collation cascade.
+### CatalogConfiguration
+
+```csharp
+public class CatalogConfiguration : IEntityTypeConfiguration<Catalog>
+{
+    public void Configure(EntityTypeBuilder<Catalog> builder)
+    {
+        builder.HasKey(c => new { c.ArtistId, c.SongId });
+
+        builder.HasOne(c => c.Artist)
+               .WithMany(a => a.CatalogEntries)
+               .HasForeignKey(c => c.ArtistId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(c => c.Song)
+               .WithMany(s => s.CatalogEntries)
+               .HasForeignKey(c => c.SongId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.ToTable("Catalog");
+    }
+}
+```
+
+**Note on collation:** No normalized columns. All text searches use `EF.Functions.Like` +
+`EF.Functions.Collate` on both operands relying on the globally applied `CollationInterceptor`.
 
 ---
 
 ## Services Layer
 
-### IMusicMetadataProvider (provider abstraction)
+### IMusicMetadataProvider
 
 ```csharp
 public interface IMusicMetadataProvider
@@ -201,18 +240,10 @@ public interface IMusicMetadataProvider
 }
 ```
 
-**MusicBrainzProvider:**
-- Base URL: `https://musicbrainz.org/ws/2/`
-- Endpoints: `artist?query={term}&fmt=json`, `recording?query=recording:{term} AND artist:{artistHint}&fmt=json`
-- Required header: `User-Agent: MyVocaList/1.0 (contact@myvocalist.app)` (MusicBrainz policy)
-- Rate limit: 1 req/sec — respected via `Polly` delay policy or `Task.Delay(1100)` between calls
-- Returns: mapped to `MusicSearchResultDto`; max 5 results
+**MusicBrainzProvider:** Base URL `https://musicbrainz.org/ws/2/` · Rate limit 1 req/sec ·
+Required `User-Agent` header.
 
-**DeezerProvider:**
-- Base URL: `https://api.deezer.com/`
-- Endpoints: `search/artist?q={term}`, `search/track?q=track:"{term}" artist:"{artistHint}"`
-- No API key required
-- Returns: mapped to `MusicSearchResultDto`; max 5 results
+**DeezerProvider:** Base URL `https://api.deezer.com/` · No API key required.
 
 ### IMusicMetadataService
 
@@ -224,7 +255,18 @@ public interface IMusicMetadataService
 }
 ```
 
-`MusicMetadataService` receives `IEnumerable<IMusicMetadataProvider>` ordered by registration (MusicBrainz first). It tries each provider in turn: on empty result or transient network error, it falls through to the next. If all providers fail, it returns an empty collection (ViewModel surfaces the error message).
+### ILyricsProvider (placeholder — not yet implemented)
+
+```csharp
+/// <summary>
+/// Placeholder interface for future lyrics API integration.
+/// No implementation is registered in DI until a provider is selected via spike task.
+/// </summary>
+public interface ILyricsProvider
+{
+    Task<string?> FetchLyricsAsync(string title, string? artistName, CancellationToken ct = default);
+}
+```
 
 ### IArtistService
 
@@ -237,7 +279,7 @@ public interface IArtistService
     Task<(bool success, string message)> DeleteArtistsAsync(IEnumerable<int> ids, CancellationToken ct = default);
     Task<(IEnumerable<ArtistListItemDto> items, int totalCount)> GetPagedArtistsForListAsync(int pageNumber, int pageSize, string? query = null, CancellationToken ct = default);
     Task<List<ArtistListItemDto>> SearchArtistsByNameAsync(string term, int maxResults = 5, CancellationToken ct = default);
-    Task<(int songCount, string confirmMessage)> GetDeleteConfirmationAsync(IEnumerable<int> artistIds, CancellationToken ct = default);
+    Task<(int catalogCount, string confirmMessage)> GetDeleteConfirmationAsync(IEnumerable<int> artistIds, CancellationToken ct = default);
 }
 ```
 
@@ -247,11 +289,22 @@ public interface IArtistService
 public interface ISongService
 {
     (bool isValid, string message) ValidateTitleInput(string title);
-    Task<(bool success, string message, Song? song)> CreateSongAsync(int artistId, string title, string? featuredArtists = null, string? externalId = null, string? externalProvider = null, CancellationToken ct = default);
-    Task<(bool success, string message)> UpdateSongAsync(int id, string title, string? featuredArtists, bool hasManualEdits, CancellationToken ct = default);
+    Task<(bool success, string message, Song? song)> CreateSongAsync(int artistId, string title, string? featuredArtists = null, string? lyrics = null, string? externalId = null, string? externalProvider = null, CancellationToken ct = default);
+    Task<(bool success, string message)> UpdateSongAsync(int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits, CancellationToken ct = default);
+    Task<bool> ExistsByTitleForArtistAsync(string title, int artistId, int? excludeId = null, CancellationToken ct = default);
     Task<(bool success, string message)> DeleteSongsAsync(IEnumerable<int> ids, CancellationToken ct = default);
-    Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedSongsForListAsync(int artistId, int pageNumber, int pageSize, string? query = null, CancellationToken ct = default);
-    Task<List<SongListItemDto>> SearchSongsByTitleAsync(string term, int artistId, int maxResults = 5, CancellationToken ct = default);
+    Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedSongsForListAsync(int pageNumber, int pageSize, string? query = null, CancellationToken ct = default);
+}
+```
+
+### ICatalogService
+
+```csharp
+public interface ICatalogService
+{
+    Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedCatalogForArtistAsync(int artistId, int pageNumber, int pageSize, string? query = null, CancellationToken ct = default);
+    Task<(bool success, string message)> AddSongToCatalogAsync(int artistId, int songId, CancellationToken ct = default);
+    Task<(bool success, string message)> RemoveSongFromCatalogAsync(int artistId, int songId, CancellationToken ct = default);
 }
 ```
 
@@ -266,54 +319,93 @@ public interface ISongService
 | `Shell.TitleView` | `SmallAppBar` + `SearchAppBar` | Swapped via `InverseBoolConverter` on `IsSearchMode` |
 | Content root | Single-cell `Grid` | Overlay pattern |
 | Loading | `ShimmerView` wrapping `DXCollectionView` | `IsInitialLoading` drives shimmer |
-| List | `DXCollectionView` | `SelectionMode="Multiple"` hardcoded; `Margin="0,0,0,88"` |
-| Item row | `ListItem` | Headline=`Name`; SupportingText=`SongCountText`; LeadingContent=`ListItemLeadingIcon` (music icon); TrailingContent=`CheckEdit` |
+| List | `DXCollectionView` | `SelectionMode="Multiple"` hardcoded; row tap = selection toggle only |
+| Item row | `ListItem` | Headline=`Name`; SupportingText=`CatalogCountText`; LeadingContent=`ListItemLeadingIcon`; TrailingContent=`HorizontalStackLayout(catalog icon button + CheckEdit)` |
 | Empty states | Two `EmptyState` components | `IsEmptyNoArtists` / `IsEmptyNoResults` |
-| Actions | `FloatingToolbar` + FAB in shared `HorizontalStackLayout` | |
-| Confirm delete | Inline `dx:BottomSheet` | `ConfirmSheet` component not used (known ANR limitation) |
+| Actions | `FloatingToolbar` + FAB in `HorizontalStackLayout` | |
+| Confirm delete | Inline `dx:BottomSheet` | |
 
-**FloatingToolbar slots:**
+**TrailingContent layout for artist row:**
+```xml
+<lists:ListItem.TrailingContent>
+    <HorizontalStackLayout Spacing="4">
+        <dx:DXButton Style="{StaticResource IconButton}"
+                     Icon="queue_music_outlined"
+                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ArtistsViewModel}},
+                                       Path=ViewCatalogCommand}"
+                     CommandParameter="{Binding .}" />
+        <dx:CheckEdit IsChecked="False" InputTransparent="True" VerticalOptions="Center" />
+    </HorizontalStackLayout>
+</lists:ListItem.TrailingContent>
+```
 
-| Slot | Icon | Action | CanExecute |
-|------|------|--------|-----------|
-| Action1 | `checklist_outlined` | Select All toggle | Always |
-| Action2 | `edit_outlined` | Edit selected | `SelectedCount == 1` |
-| Action3 | `delete_outlined` | Delete selected | `SelectedCount > 0` |
+**Row tap behavior:** Row tap always toggles selection via `DXCollectionView` native behavior. The
+`OnItemTapped` code-behind is removed (or made a no-op). Navigation to Catalog happens only via
+`ViewCatalogCommand` triggered by the icon button.
 
-**Row tap behavior:** When `SelectedCount == 0`, a row tap navigates to `SongsPage` for that artist. When `SelectedCount > 0`, row tap toggles selection (DXCollectionView native behavior). This is handled in `OnItemTapped` code-behind.
+### Page Structure — SongsPage (dual-mode)
 
-### Page Structure — ArtistFormPage (add / edit)
+SongsPage operates in two modes determined by the `ArtistId` query parameter:
 
-Shell navigation page, `SafeAreaEdges="All"` + `ScrollView`.
+| Mode | Entry point | ArtistId | AppBar title | Data source |
+|------|-------------|----------|--------------|-------------|
+| Global | Main menu | `null` / absent | "Songs" | All songs via `ISongService.GetPagedSongsForListAsync` |
+| Catalog | Artist trailing button | artist's Id | Artist name | `ICatalogService.GetPagedCatalogForArtistAsync` |
 
-| Slot | Component | Notes |
-|------|-----------|-------|
-| Shell title | `PageTitle` binding | "New Artist" / "Edit Artist" |
-| Name field | `TextEdit` | `HasError` / `ErrorText` binding |
-| Character counter | `Label` | Visible when name > 180 chars |
-| Suggestion list | `DXCollectionView` (compact) | Max 5 rows; hidden when empty |
-| API search strip | `DXBorder` row | `TextEdit` (search term) + "Search" `DXButton` |
-| API results list | `DXCollectionView` (compact) | Max 5 rows; hidden when empty |
-| API status label | `Label` | Error / no-results messages; hidden otherwise |
-| Overwrite warning | Inline `dx:BottomSheet` | Shown when `HasManualEdits = true` and API import triggered |
-| Action buttons | `OutlinedButton("Cancel")` + `FilledButton("Save")` | `HorizontalOptions=End` |
+```csharp
+// SongsViewModel: ArtistId is optional
+[QueryProperty(nameof(ArtistIdRaw), "artistId")]
+[QueryProperty(nameof(ArtistNameRaw), "artistName")]
 
-### Page Structure — SongsPage (list, scoped to artist)
+public string AppBarTitle => string.IsNullOrEmpty(_artistName) ? "Songs" : _artistName;
+public bool IsCatalogMode => _artistId > 0;
+```
 
-Mirrors ArtistsPage structure. Differences:
-
-- `SmallAppBar` title = artist name; `NavigationIcon="arrow_back_outlined"`
-- Row tap always navigates to Edit Song form (no artist-level sub-navigation)
-- `ListItem` SupportingText = `FeaturedArtists` (if present, else empty)
-- `ArtistId` is passed via Shell query parameter on navigation
+In Catalog mode, the FAB opens a song picker (search from global songs) to add to the Catalog.
+In Global mode, the FAB opens `SongFormPage` to create a new song.
 
 ### Page Structure — SongFormPage (add / edit)
 
-Mirrors ArtistFormPage structure. Differences:
+| Slot | Component | Notes |
+|------|-----------|-------|
+| Shell title | `PageTitle` binding | "New Song" / "Edit Song" |
+| Artist autocomplete field | `TextEdit` + dropdown results | Required; searches registered artists by name (≥ 2 chars debounce); disabled + pre-filled when set from API |
+| Title field | `TextEdit` | `HasError` / `ErrorText` binding |
+| Character counter | `Label` | Visible when title > 180 chars |
+| FeaturedArtists field | `TextEdit` | Optional |
+| Lyrics field | `Editor` (multi-line) | Optional, max 10 000 chars |
+| API search strip | `DXBorder` row | Search term + "Search" button; uses artist name as hint when artist is selected |
+| API results list | `DXCollectionView` (compact) | Max 5 rows |
+| API status label | `Label` | Error / no-results |
+| Overwrite warning | Inline `dx:BottomSheet` | `HasManualEdits` guard |
+| Action buttons | Cancel + Save | |
 
-- Artist shown as read-only `Label` (not editable — always inherited from parent Songs page)
-- Additional `FeaturedArtists` field (`TextEdit`, optional)
-- API search uses `SearchSongsAsync(term, artistHint: artistName)`
+**Artist field behavior:**
+- Manual entry: user types ≥ 2 chars → autocomplete dropdown shows matching artists → user taps to select → field shows artist name (editable until saved)
+- API import: artist is resolved from the API result → field pre-filled with matched artist name → field disabled (read-only, locked to preserve external attribution)
+
+### AppShell additions
+
+```xml
+<!-- AppShell.xaml -->
+<FlyoutItem Route="songs" FlyoutItemIsVisible="False">
+    <ShellContent ContentTemplate="{DataTemplate songs:SongsPage}" />
+</FlyoutItem>
+```
+
+```csharp
+// AppShell.xaml.cs — Songs is now a FlyoutItem root route, not a pushed route
+// Remove: Routing.RegisterRoute(Routes.Songs, typeof(SongsPage));
+// Keep SongForm and ArtistForm as pushed routes
+```
+
+```csharp
+// AppShellViewModel — Catalog group
+new MenuGroup("Catalog", [
+    new MenuItemDescription("Artists", "person_outlined", Routes.Artists),
+    new MenuItemDescription("Songs",   "music_note_outlined", Routes.Songs),
+])
+```
 
 ---
 
@@ -338,136 +430,105 @@ string AppBarTitle           // "Artists" | "N selected"
 bool CanEditSelected         // SelectedCount == 1
 bool CanDeleteSelected       // SelectedCount > 0
 bool IsAllSelected
-bool IsEmptyNoArtists        // no items, no active search
-bool IsEmptyNoResults        // no items, active search
+bool IsEmptyNoArtists
+bool IsEmptyNoResults
 
 // Commands
 RefreshCommand, LoadMoreCommand, AddArtistCommand
 EditSelectedCommand, DeleteSelectedCommand, SelectAllCommand
 ConfirmActionCommand, DismissConfirmCommand
 OpenSearchCommand, CloseSearchCommand
-TapArtistCommand(ArtistListItemDto)  // navigates to Songs page when nothing selected
+ViewCatalogCommand(ArtistListItemDto)  // navigates to Songs page in Catalog mode
 ```
 
-### ArtistFormViewModel
+### SongsViewModel
 
 ```csharp
-[QueryProperty(nameof(ArtistIdRaw), "artistId")]
-[QueryProperty(nameof(ArtistName), "artistName")]
-[QueryProperty(nameof(ArtistExternalId), "artistExternalId")]
-[QueryProperty(nameof(ArtistExternalProvider), "artistExternalProvider")]
-[QueryProperty(nameof(ArtistHasManualEdits), "artistHasManualEdits")]
+[QueryProperty(nameof(ArtistIdRaw), "artistId")]   // optional — absent = global mode
+[QueryProperty(nameof(ArtistNameRaw), "artistName")]
 
-[ObservableProperty] int? _artistId;
-[ObservableProperty] string _artistName;
-[ObservableProperty] string? _artistExternalId;
-[ObservableProperty] string? _artistExternalProvider;
-[ObservableProperty] bool _artistHasManualEdits;
+[ObservableProperty] int _artistId;               // 0 = global mode
+[ObservableProperty] string _artistName;           // empty = global mode
+
+// Derived
+bool IsCatalogMode => _artistId > 0;
+string AppBarTitle => IsCatalogMode ? _artistName : "Songs";
+string AppBarSubtitle => _selectedCount > 0 ? $"{_selectedCount} selected" : "";
+
+// Commands (same as ArtistsViewModel pattern, plus:)
+AddToCatalogCommand   // Catalog mode only — opens song picker
+RemoveFromCatalogCommand(SongListItemDto)  // Catalog mode only
+```
+
+### SongFormViewModel
+
+```csharp
+// Artist autocomplete
+[ObservableProperty] string _artistSearchText;     // user types here
+[ObservableProperty] int? _selectedArtistId;       // set when user picks from list or API resolves
+[ObservableProperty] string? _selectedArtistName;  // display label
+[ObservableProperty] bool _isArtistLocked;         // true when set from API — disables the field
+[ObservableProperty] IEnumerable<ArtistListItemDto> _artistSuggestions;
+[ObservableProperty] bool _artistHasError;
+[ObservableProperty] string _artistErrorText;
+
+[ObservableProperty] string _title;
+[ObservableProperty] string? _featuredArtists;
+[ObservableProperty] string? _lyrics;
 
 // Validation
-[ObservableProperty] bool _nameHasError;
-[ObservableProperty] string _nameErrorText;
+[ObservableProperty] bool _titleHasError;
+[ObservableProperty] string _titleErrorText;
 
 // API search
 [ObservableProperty] string _apiSearchTerm;
 [ObservableProperty] IEnumerable<MusicSearchResultDto> _apiResults;
 [ObservableProperty] bool _isApiSearching;
-[ObservableProperty] string _apiStatusMessage;  // error or no-results text
-
-// Duplicate suggestions (local DB)
-[ObservableProperty] IEnumerable<ArtistListItemDto> _suggestions;
+[ObservableProperty] string _apiStatusMessage;
 
 // Overwrite warning sheet
 [ObservableProperty] BottomSheetState _overwriteWarningState;
-[ObservableProperty] MusicSearchResultDto _pendingImport;  // held until admin confirms
+[ObservableProperty] MusicSearchResultDto _pendingImport;
 
-// Character counter
-bool ShowCharacterCounter
-string CharacterCounterText
-bool IsCharacterCounterWarning
-bool IsCharacterCounterError
-
-bool IsEditMode => ArtistId.HasValue;
-string PageTitle => IsEditMode ? "Edit Artist" : "New Artist";
-
-// HasManualEdits tracking
-private bool _importedFromApi;  // set true after ImportFromApiCommand populates fields
-// Any subsequent OnArtistNameChanged (when _importedFromApi is true) marks _pendingHasManualEdits = true
+bool IsEditMode => _songId.HasValue;
+string PageTitle => IsEditMode ? "Edit Song" : "New Song";
 
 // Commands
 SaveCommand, CancelCommand
-SearchApiCommand        // fires MusicMetadataService.SearchArtistsAsync
-ImportFromApiCommand(MusicSearchResultDto)  // populates form; checks HasManualEdits first
+SearchApiCommand
+ImportFromApiCommand(MusicSearchResultDto)
 ConfirmOverwriteCommand, DismissOverwriteCommand
-SearchSuggestionsCommand(string term)  // local DB dedup
-SelectSuggestionCommand(ArtistListItemDto)  // navigate to edit that artist
 ```
-
-### SongsViewModel
-
-Same structure as ArtistsViewModel. Additional:
-- `ArtistId` and `ArtistName` received via query parameter
-- `AppBarTitle` always = artist name (never switches to "N selected" — artist context must remain visible)
-- `AppBarSubtitle` = `""` when nothing selected; `"N selected"` when N ≥ 1 (bound to `SmallAppBar.Subtitle`)
-
-### SongFormViewModel
-
-Same structure as ArtistFormViewModel. Additional:
-- `ArtistId` and `ArtistName` received via query parameter (read-only — not editable)
-- `FeaturedArtists` field with its own `[ObservableProperty]`
-- API search uses `SearchSongsAsync(term, artistHint: ArtistName)`
-
----
-
-## Code-Behind Responsibilities
-
-### ArtistsPage.xaml.cs
-
-| Event | Handler | Purpose |
-|-------|---------|---------|
-| `OnAppearing` | Assigns `SelectedItems`; calls `InitializeAsync` | DXCollectionView `IList` requirement |
-| `SelectionChanged` | `OnSelectionChanged` → `_viewModel.OnSelectionChanged(count)` | `SelectedCount` sync |
-| `Scrolled` | `OnCollectionViewScrolled` → `_viewModel.IsScrolled = e.Offset > 0` | App bar elevation |
-| `Tap` | `OnItemTapped` | Navigate to Songs if `SelectedCount == 0`; else let DX handle selection |
-| `StateChanged` (BottomSheet) | `OnConfirmSheetStateChanged` | User-dismiss → VM sync |
-| `PropertyChanged` (VM) | `OnViewModelPropertyChanged` | Opens/closes confirm sheet |
-| `OnBackButtonPressed` | Sheet → search → default | Android back priority |
 
 ---
 
 ## Interaction Flows
 
-### Artist-first registration with API enrichment
+### Song registration (global mode)
 
-1. Admin taps FAB → `ArtistFormPage` (add mode)
-2. Admin types artist name → local suggestions appear (≥ 2 chars, 400ms debounce)
-3. Admin taps "Search" in API strip → `SearchArtistsAsync(term)` → results appear
-4. Admin taps an API result → form populated; `_importedFromApi = true`
-5. Admin adjusts name → `HasManualEdits` flag set for save
-6. Admin taps Save → artist created with `ExternalId`, `ExternalProvider`, `HasManualEdits`
+1. Admin opens Songs page from menu
+2. Admin taps FAB → `SongFormPage` (add mode)
+3. Admin types title; optionally fills FeaturedArtists and Lyrics
+4. Admin optionally uses API strip to enrich data
+5. Admin saves → song created (ArtistId = null unless set by API context)
 
-### Song-first registration with API enrichment
+### Artist Catalog management
 
-1. Admin navigates to any artist's Songs page
-2. Admin taps FAB → `SongFormPage` (add mode, artist pre-set)
-3. Admin types song title → local suggestions for this artist appear
-4. Admin taps "Search" → `SearchSongsAsync(term, artistHint)` → results
-5. Admin selects result → `Title` and `FeaturedArtists` populated
-6. Admin saves → song created under that artist
+1. Admin opens Artists page
+2. Admin taps catalog icon button on an artist row → `Songs?artistId={id}&artistName={name}`
+3. SongsPage opens in Catalog mode showing that artist's repertoire
+4. Admin taps FAB → song picker opens (search from global songs)
+5. Admin selects a song → `CatalogService.AddSongToCatalogAsync(artistId, songId)`
+6. Song appears in the Catalog list
 
-### Overwrite warning flow (edit mode, HasManualEdits = true)
+### Artist deletion (revised)
 
-1. Admin opens Edit Artist form for an artist with `HasManualEdits = true`
-2. Admin taps "Search" in API strip and selects a result
-3. Warning BottomSheet appears: "This artist has been manually edited. Importing will overwrite your changes."
-4. Admin confirms → fields populated; `HasManualEdits` remains `true` (admin just accepted the overwrite)
-5. Admin cancels → form unchanged; `pendingImport` discarded
-
-### Artist row tap (no selection active)
-
-1. `SelectedCount == 0` and admin taps an artist row
-2. `OnItemTapped` in code-behind → `_viewModel.TapArtistCommand.Execute(item)`
-3. Navigate to `Songs?artistId={id}&artistName={name}`
+1. Admin selects artist(s) and taps Delete
+2. Service checks: does any selected artist own songs (`Song.ArtistId` references)?
+   - If yes → deletion blocked with message: "Cannot delete — this artist owns N song(s). Delete their songs first."
+   - If no → proceed to confirmation
+3. Confirmation message: "Delete N artist(s)? Their Catalog entries will also be removed." (Catalog links gone; no songs affected since check above ensures none)
+4. Admin confirms → Catalog rows cascade-deleted; Artist rows deleted
 
 ---
 
@@ -475,16 +536,14 @@ Same structure as ArtistFormViewModel. Additional:
 
 | Scenario | Behavior |
 |----------|----------|
-| Artist name empty / too short / too long | Inline `HasError` / `ErrorText` — no navigation |
-| Artist name duplicate (local) | Suggestion list appears — non-blocking |
-| Artist name unique violation on save | Inline error: "An artist with this name is already registered." |
-| Artist delete with songs | Confirmation message includes song count; cascade handled at DB level |
-| Song title duplicate for same artist | Inline error: "This artist already has a song with this title." |
-| API search — all providers fail | Inline label below search strip: "Could not reach music catalog. Check your connection." |
-| API search — no results | Inline label: "No results found. You can register manually." |
-| API import on `HasManualEdits = true` record | Warning BottomSheet before overwrite |
+| Song title empty / too short / too long | Inline `HasError` / `ErrorText` |
+| Song title duplicate globally | Inline error: "A song with this title is already registered." |
+| Song already in artist's Catalog | `AddSongToCatalogAsync` returns `(false, "This song is already in the catalog.")` |
+| API search — all providers fail | Inline: "Could not reach music catalog. Check your connection." |
+| API search — no results | Inline: "No results found. You can register manually." |
+| API import on `HasManualEdits = true` | Warning BottomSheet before overwrite |
 | Load failure (list page) | Logged; `IsRefreshing = false`; list stays as-is |
-| Delete failure (unexpected) | Snackbar: "Could not delete. Try again." |
+| Delete failure | Snackbar: "Could not delete. Try again." |
 | Unexpected exceptions | Bubble to `GlobalExceptionHandler` |
 
 ---
@@ -494,55 +553,30 @@ Same structure as ArtistFormViewModel. Additional:
 ### Routes additions (`Navigation/Routes.cs`)
 
 ```csharp
+public const string Artists    = "artists";  // top-level FlyoutItem
+public const string Songs      = "songs";    // top-level FlyoutItem (was pushed route — now promoted)
 public const string ArtistForm = "artist-form";
-public const string Songs      = "songs";
 public const string SongForm   = "song-form";
 ```
 
 ### AppShell registration
 
 ```csharp
+// Songs is now a FlyoutItem root, not a pushed route
+// Keep as pushed route only if Shell navigation requires it for Catalog mode deep-link
 Routing.RegisterRoute(Routes.ArtistForm, typeof(ArtistFormPage));
-Routing.RegisterRoute(Routes.Songs,      typeof(SongsPage));
 Routing.RegisterRoute(Routes.SongForm,   typeof(SongFormPage));
 ```
 
-### MauiProgram.cs
+### MauiProgram.cs additions
 
 ```csharp
-// Pages + ViewModels
-builder.Services.AddTransient<ArtistsPage>();
-builder.Services.AddTransient<ArtistsViewModel>();
-builder.Services.AddTransient<ArtistFormPage>();
-builder.Services.AddTransient<ArtistFormViewModel>();
-builder.Services.AddTransient<SongsPage>();
-builder.Services.AddTransient<SongsViewModel>();
-builder.Services.AddTransient<SongFormPage>();
-builder.Services.AddTransient<SongFormViewModel>();
+// New: Catalog service + repository
+builder.Services.AddScoped<ICatalogService, CatalogService>();
+builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
 
-// Services
-builder.Services.AddScoped<IArtistService, ArtistService>();
-builder.Services.AddScoped<ISongService, SongService>();
-builder.Services.AddScoped<IMusicMetadataService, MusicMetadataService>();
-
-// Providers (order determines chain: MusicBrainz first, Deezer fallback)
-builder.Services.AddScoped<IMusicMetadataProvider, MusicBrainzProvider>();
-builder.Services.AddScoped<IMusicMetadataProvider, DeezerProvider>();
-
-// HttpClient — MusicBrainz requires User-Agent header
-builder.Services.AddHttpClient<MusicBrainzProvider>(client =>
-{
-    client.BaseAddress = new Uri("https://musicbrainz.org/ws/2/");
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (contact@myvocalist.app)");
-});
-builder.Services.AddHttpClient<DeezerProvider>(client =>
-{
-    client.BaseAddress = new Uri("https://api.deezer.com/");
-});
-
-// Repositories
-builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
-builder.Services.AddScoped<ISongRepository, SongRepository>();
+// Updated: ISongService no longer takes artistId parameter on create
+// ILyricsProvider: NOT registered — deferred until spike selects provider
 ```
 
 ---
@@ -551,14 +585,14 @@ builder.Services.AddScoped<ISongRepository, SongRepository>();
 
 | Decision | Choice | Reason |
 |----------|--------|--------|
-| No normalized columns | Rely on DB collation + `EF.Functions.Collate` | Portable; `Person.FullNameNormalized` is acknowledged technical debt |
-| API abstraction | `IMusicMetadataProvider` chain | Pluggable without over-engineering; MusicBrainz + Deezer as first two adapters |
-| Provider fallback | Silent; ViewModel surfaces only final outcome | Admin doesn't need to know which provider responded |
-| `HasManualEdits` tracking | Private `_importedFromApi` flag in ViewModel; any post-import field change sets flag on save | Lightweight; coarse-grained is sufficient for v1 |
-| Artist-scoped song list | `SongsPage` always scoped to one artist | Simpler paging and search; cross-artist song search deferred |
-| Row tap = navigate (when no selection) | `OnItemTapped` code-behind checks `SelectedCount` | Follows MD3 single-action list pattern |
-| Featured artists | Free text `string?` on Song | No join table; display reality captured without relational complexity |
-| Cascade delete | DB-level via `OnDelete(DeleteBehavior.Cascade)` | Consistent with EF Core patterns; service surfaces count in confirmation |
-| Form page (not BottomSheet) | Shell navigation page | Keyboard safety on Android |
-| `ConfirmSheet` component | Not used — inline `dx:BottomSheet` | Known ANR limitation when `BottomSheet` is inside `ContentView` |
-| `HttpClient` via `AddHttpClient<T>` | Typed client per provider | Manages socket lifetime; avoids `HttpClient` instantiation anti-pattern |
+| Song.ArtistId mandatory | `int` NOT NULL | Every song has one original/copyright artist; ownership is non-optional |
+| OnDelete for Song.ArtistId | `Restrict` | Cannot delete an artist who owns songs — user must delete their songs first or reassign them |
+| Catalog join table | Separate entity named `Catalog` | Reflects ubiquitous language ("catálogo" in Portuguese); clear domain concept |
+| OnDelete for Catalog | `Cascade` on both sides | Removing artist or song removes the link only, not the other entity |
+| Song title uniqueness | Global unique index on `Title` | Simplest deduplication; avoids cross-artist duplicate management |
+| SongsPage dual-mode | Single page, `IsCatalogMode` flag | Avoids a separate CatalogPage; reuses all list/search/selection infrastructure |
+| TrailingContent in artist row | `HorizontalStackLayout` inside existing `TrailingContent` slot | ListItem's `TrailingContent` accepts any `View` — no component change needed |
+| Artist autocomplete in SongFormPage | Searchable dropdown from registered artists | Song.ArtistId is mandatory; user must select or confirm the original artist before saving |
+| Artist field locked after API import | `IsArtistLocked = true` when set from API | Preserves external attribution; prevents accidental mis-attribution after API enrichment |
+| ILyricsProvider | Placeholder interface, no DI registration | Provider selection deferred to spike task; interface defines contract now |
+| Row tap = selection only | Remove `OnItemTapped` navigation logic | Navigation via dedicated catalog icon button; consistent with MD3 list selection pattern |
