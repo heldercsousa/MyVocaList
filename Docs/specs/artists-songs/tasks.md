@@ -89,25 +89,25 @@ after every major task before committing.
 
 ## Phase 10 — Domain Refactor [SEQUENTIAL]
 
-- [ ] **10.1** Update `Song` entity — make `ArtistId` nullable (`int?`); rename nav prop to `OriginalArtist`; add `Lyrics string?`; add `CatalogEntries` nav
-  - **Files owned:** `MyVocaList.Domain/Entity/Song.cs`
-- [ ] **10.2** Add `Catalog` join entity
-  - **Files owned:** `MyVocaList.Domain/Entity/Catalog.cs`
-- [ ] **10.3** Update `Artist` entity — rename nav prop to `OriginalSongs`; add `CatalogEntries` nav
-  - **Files owned:** `MyVocaList.Domain/Entity/Artist.cs`
-- [ ] **10.4** Update `ISongRepository` — replace `GetPagedByArtistAsync` with `GetPagedAsync` (global, no artist filter); keep `ExistsByTitleForArtistAsync` (per-artist uniqueness)
-  - **Files owned:** `MyVocaList.Domain/RepositoryInterface/ISongRepository.cs`
-- [ ] **10.5** Add `ICatalogRepository` interface
-  - **Files owned:** `MyVocaList.Domain/RepositoryInterface/ICatalogRepository.cs`
-- [ ] **10.6** Update `ISongService` — remove `artistId` from `CreateSongAsync`; add `lyrics` param; update `GetPagedSongsForListAsync` to global
-  - **Files owned:** `MyVocaList.Domain/ServicesInterfaces/ISongService.cs`
-- [ ] **10.7** Add `ICatalogService` interface
-  - **Files owned:** `MyVocaList.Domain/ServicesInterfaces/ICatalogService.cs`
-- [ ] **10.8** Update `SongListItemDto` — replace `ArtistId`/`ArtistName` with `OriginalArtistId?`/`OriginalArtistName?`; add `Lyrics?`
-  - **Files owned:** `MyVocaList.Contracts/DTOs/List/SongListItemDto.cs`
-- [ ] **10.9** Update `ArtistListItemDto` — rename `SongCount` → `CatalogCount`
-  - **Files owned:** `MyVocaList.Contracts/DTOs/List/ArtistListItemDto.cs`
-- [ ] **10.10** Build — 0 errors (expect failures in Infra/Services/MAUI — that is expected at this stage)
+- [x] **10.1** Update `Song` entity — keep `ArtistId` as `int` NOT NULL (mandatory); rename nav prop `Artist` → `OriginalArtist`; add `Lyrics string?`; add `CatalogEntries` nav
+  - **Files owned:** `Domain/Entity/Song.cs`
+- [x] **10.2** Add `Catalog` join entity
+  - **Files owned:** `Domain/Entity/Catalog.cs`
+- [x] **10.3** Update `Artist` entity — rename nav prop `Songs` → `OriginalSongs`; add `CatalogEntries` nav
+  - **Files owned:** `Domain/Entity/Artist.cs`
+- [x] **10.4** Update `ISongRepository` — replace `GetPagedByArtistAsync` with `GetPagedAsync` (global, no artist filter); keep `ExistsByTitleForArtistAsync` (per-artist uniqueness); remove artist-scoped methods (`CountByArtistAsync`, `CountByArtistsAsync`, `SearchByTitleAsync`)
+  - **Files owned:** `Domain/RepositoryInterface/ISongRepository.cs`
+- [x] **10.5** Add `ICatalogRepository` interface
+  - **Files owned:** `Domain/RepositoryInterface/ICatalogRepository.cs`
+- [x] **10.6** Update `ISongService` — KEEP `artistId` in `CreateSongAsync` (mandatory); add `lyrics` param to Create and Update; make `GetPagedSongsForListAsync` global (remove `artistId` param)
+  - **Files owned:** `Domain/ServicesInterfaces/ISongService.cs`
+- [x] **10.7** Add `ICatalogService` interface
+  - **Files owned:** `Domain/ServicesInterfaces/ICatalogService.cs`
+- [x] **10.8** Update `SongListItemDto` — replace `ArtistId`/`ArtistName` with `OriginalArtistId` (int, NOT nullable — ArtistId is mandatory) / `OriginalArtistName?`; remove `Lyrics` from DTO (belongs in form only)
+  - **Files owned:** `Contracts/DTOs/List/SongListItemDto.cs`
+- [x] **10.9** Update `ArtistListItemDto` — rename `SongCount` → `CatalogCount`; update `SongCountText` → `CatalogCountText`
+  - **Files owned:** `Contracts/DTOs/List/ArtistListItemDto.cs`
+- [x] **10.10** Build — 0 errors (expect failures in Infra/Services/MAUI — that is expected at this stage)
 
 ---
 
