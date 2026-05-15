@@ -2,9 +2,15 @@
 
 > **Status:** Spec approved — implementation in progress (phases 1–7 complete)
 > **Last updated:** 2026-04-12
-> **Spec updated 2026-05-15:** Song.ArtistId made nullable; Catalog join entity added; Songs added
-> as top-level menu item; navigation model revised; Lyrics field added; ILyricsProvider placeholder
-> added. Phases 9–14 added to tasks.md.
+> **Spec updated 2026-05-15:** Unified Artist model clarified: Artist serves dual roles (copyright
+> owner + performer); Song.ArtistId is and must remain int NOT NULL; Catalog join entity added;
+> Songs added as top-level menu item; navigation model revised; Lyrics field added; ILyricsProvider
+> placeholder added. Phases 9–14 added to tasks.md.
+> **Spec updated 2026-05-15b:** Role filter added: `ArtistRoleFilter` enum; `_roleFilter` observable
+> on ArtistsViewModel; `IArtistRepository.GetPagedAsync` updated with `roleFilter` parameter; Role
+> filter row added to ArtistsPage Page Structure table.
+> **Spec updated 2026-05-15c:** Role filter control changed from Chip/SegmentedControl to top tab bar
+> (DXTabView or equivalent DevExpress tab component). ArtistsViewModel note updated.
 
 ---
 
@@ -17,6 +23,22 @@
 | Infra | `ArtistRepository` · `SongRepository` · `CatalogRepository` · `ArtistConfiguration` · `SongConfiguration` · `CatalogConfiguration` |
 | Services | `ArtistService` · `SongService` · `CatalogService` · `MusicMetadataService` · `MusicBrainzProvider` · `DeezerProvider` · `ILyricsProvider` (placeholder) |
 | MAUI | `ArtistsPage` · `ArtistsViewModel` · `ArtistFormPage` · `ArtistFormViewModel` · `SongsPage` · `SongsViewModel` · `SongFormPage` · `SongFormViewModel` |
+
+---
+
+## Artist Roles
+
+The Artist entity is **unified** — one table, one set of fields. Role is determined by usage
+context, not a flag or type column.
+
+| Role | How it is expressed | Constraint |
+|------|---------------------|------------|
+| **Author** | `Song.ArtistId` references an Artist | `int NOT NULL` — every song has exactly one Author Artist |
+| **Performer** | Artist has one or more `Catalog` entries | Optional — Catalog is empty by default |
+| **Both** | Artist has songs AND Catalog entries | Fully supported — same Artist record serves both roles |
+
+A future `ArtistMember` join table will link Artist records to `Person` records, but the core
+Artist entity is not split into sub-types regardless of that addition.
 
 ---
 
@@ -33,8 +55,8 @@ public class Artist
     public string? ExternalProvider { get; set; }
     public bool HasManualEdits { get; set; }
 
-    public ICollection<Catalog> CatalogEntries { get; set; }  // performance repertoire (many-to-many via Catalog)
-    public ICollection<Song> OriginalSongs { get; set; }      // songs where this artist is the copyright owner
+    public ICollection<Catalog> CatalogEntries { get; set; }  // Performer role: songs this artist can perform live
+    public ICollection<Song> OriginalSongs { get; set; }      // Author role: songs this artist created/owns
 
     public Artist() { }
 }
@@ -81,10 +103,13 @@ public class Catalog
 ### Repository interfaces
 
 ```csharp
+public enum ArtistRoleFilter { All, AuthorsOnly, PerformersOnly }
+
 public interface IArtistRepository : IBaseRepository<Artist>
 {
     Task<(IEnumerable<Artist> items, int totalCount)> GetPagedAsync(
-        int pageNumber, int pageSize, string? query = null, CancellationToken ct = default);
+        int pageNumber, int pageSize, string? query = null,
+        ArtistRoleFilter roleFilter = ArtistRoleFilter.All, CancellationToken ct = default);
 
     Task<bool> ExistsByNameAsync(string name, int? excludeId = null, CancellationToken ct = default);
 
@@ -172,7 +197,7 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
         builder.HasMany(a => a.OriginalSongs)
                .WithOne(s => s.OriginalArtist)
                .HasForeignKey(s => s.ArtistId)
-               .OnDelete(DeleteBehavior.Restrict);  // cannot delete artist if they have songs — user must reassign or delete songs first
+               .OnDelete(DeleteBehavior.Restrict);  // Cannot delete an Artist who owns songs — user must delete their songs first.
     }
 }
 ```
@@ -322,6 +347,7 @@ public interface ICatalogService
 | List | `DXCollectionView` | `SelectionMode="Multiple"` hardcoded; row tap = selection toggle only |
 | Item row | `ListItem` | Headline=`Name`; SupportingText=`CatalogCountText`; LeadingContent=`CheckEdit` (MD3 multi-action rule — trailing button present, so checkbox moves LEFT; person icon dropped); TrailingContent=`DXButton` (catalog navigation, own touch target) |
 | Empty states | Two `EmptyState` components | `IsEmptyNoArtists` / `IsEmptyNoResults` |
+| Role filter | Top tab bar (DXTabView or equivalent DevExpress tab component) | "All" / "Authors" / "Performers"; pre-selected from `mode` query param; drives `ArtistRoleFilter` observable on ViewModel |
 | Actions | `FloatingToolbar` + FAB in `HorizontalStackLayout` | |
 | Confirm delete | Inline `dx:BottomSheet` | |
 
@@ -402,11 +428,27 @@ In Global mode, the FAB opens `SongFormPage` to create a new song.
 
 ```csharp
 // AppShellViewModel — Catalog group
+// Artists is exposed via two menu entries pointing to the same ArtistsPage with a mode parameter.
+// "Authors"    → emphasizes artists who own/created songs
+// "Performers" → emphasizes artists who have Catalog entries
+// Both entries navigate to ArtistsPage; the mode parameter controls the title and list filter hints.
 new MenuGroup("Catalog", [
-    new MenuItemDescription("Artists", "person_outlined", Routes.Artists),
-    new MenuItemDescription("Songs",   "music_note_outlined", Routes.Songs),
+    new MenuItemDescription("Authors",    "person_outlined",       Routes.Artists + "?mode=author"),
+    new MenuItemDescription("Performers", "mic_outlined",          Routes.Artists + "?mode=performer"),
+    new MenuItemDescription("Songs",      "music_note_outlined",   Routes.Songs),
 ])
 ```
+
+**ArtistsPage mode parameter behavior:**
+
+| `mode` value | AppBar title | Default list emphasis |
+|---|---|---|
+| `author` | "Authors" | Artists who have OriginalSongs |
+| `performer` | "Performers" | Artists who have CatalogEntries |
+| absent / other | "Artists" | All artists |
+
+All CRUD operations (register, edit, delete, catalog navigation) are available in both modes.
+The mode parameter affects presentation only — it does not restrict data access.
 
 ---
 
@@ -425,6 +467,7 @@ new MenuGroup("Catalog", [
 [ObservableProperty] BottomSheetState _confirmSheetState;
 [ObservableProperty] string _confirmMessage;
 [ObservableProperty] string _confirmActionText;
+[ObservableProperty] ArtistRoleFilter _roleFilter; // All | AuthorsOnly | PerformersOnly
 
 // Derived
 string AppBarTitle           // "Artists" | "N selected"
@@ -441,6 +484,12 @@ ConfirmActionCommand, DismissConfirmCommand
 OpenSearchCommand, CloseSearchCommand
 ViewCatalogCommand(ArtistListItemDto)  // navigates to Songs page in Catalog mode
 ```
+
+The `_roleFilter` is pre-selected from the `mode` query parameter on page arrival (`author` → `AuthorsOnly`,
+`performer` → `PerformersOnly`, absent → `All`). The three tabs — All (default), Authors, Performers — are
+rendered as a top tab bar; the active tab drives `_roleFilter`. The admin can change the tab after arrival.
+The filter is applied server-side in `IArtistRepository.GetPagedAsync` via an optional `roleFilter`
+parameter; search and pagination operate within the filtered set.
 
 ### SongsViewModel
 
@@ -599,3 +648,31 @@ builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
 | Artist field locked after API import | `IsArtistLocked = true` when set from API | Preserves external attribution; prevents accidental mis-attribution after API enrichment |
 | ILyricsProvider | Placeholder interface, no DI registration | Provider selection deferred to spike task; interface defines contract now |
 | Row tap = selection only | Remove `OnItemTapped` navigation logic | Navigation via dedicated catalog icon button; consistent with MD3 list selection pattern |
+
+---
+
+## Future Architecture
+
+Brief notes for future specs. Do not implement any of these in this spec.
+
+### ArtistMember join table
+
+`ArtistMember(artistId int FK, personId int FK, composite PK)` — links an Artist to one or more
+`Person` records. Enables singer-as-performer identity sharing and future device P2P catalog sync
+keyed on Person identity. Will require a new migration and updates to `AppDbContext`,
+`ArtistConfiguration`, and `IArtistRepository`.
+
+### YouTube integration
+
+`Song` will need a `YouTubeUrl string?` column (or a separate `SongMedia` entity if multiple media
+sources per song are required). The app will reference the URL to launch or project the karaoke
+video. The existing `Lyrics` field is Bandokê-mode-specific; YouTube mode does not use app-side
+lyrics.
+
+### AI catalog import pipeline
+
+Requires: (1) a file upload service accepting TXT/XLS/DOC/PDF; (2) an AI parsing agent that
+extracts artist names and song titles from the file content; (3) a batch-create service method
+that resolves or creates Author and Song records and adds them to the Performer's Catalog;
+(4) a review/confirmation UI step before records are committed. The AI agent is embedded — no
+external SaaS dependency at this stage.
