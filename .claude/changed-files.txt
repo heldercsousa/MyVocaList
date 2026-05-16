@@ -488,3 +488,11 @@ Services/CatalogService.cs
 Services/ILyricsProvider.cs
 Docs/specs/artists-songs/tasks.md
 Docs/specs/artists-songs/tasks.md
+MyVocaList/MauiProgram.cs
+MyVocaList/MauiProgram.cs
+MyVocaList/AppShell.xaml
+MyVocaList/AppShell.xaml
+MyVocaList/AppShell.xaml.cs
+MyVocaList/Navigation/NavigationConfig.cs
+MyVocaList/Navigation/NavigationConfig.cs
+Docs/specs/artists-songs/tasks.md
