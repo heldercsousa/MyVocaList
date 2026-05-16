@@ -123,7 +123,7 @@ public partial class SongsViewModel : ViewModelBase
             _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
 
             var (itemsEnumerable, totalCount) = await _songService.GetPagedSongsForListAsync(
-                ArtistId, _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, cancellationToken);
+                _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, cancellationToken);
 
             if (cancellationToken.IsCancellationRequested) return;
 
@@ -170,7 +170,7 @@ public partial class SongsViewModel : ViewModelBase
         try
         {
             var (itemsEnumerable, totalCount) = await _songService.GetPagedSongsForListAsync(
-                ArtistId, loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery);
+                loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery);
 
             _totalCount = totalCount;
             var list = itemsEnumerable.ToList();

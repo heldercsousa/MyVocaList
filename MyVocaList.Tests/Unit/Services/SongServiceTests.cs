@@ -136,7 +136,7 @@ public class SongServiceTests
                      .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(1, "New Title");
+        var (success, message) = await sut.UpdateSongAsync(1, "New Title", null, null, true);
 
         Assert.True(success);
     }
@@ -148,7 +148,7 @@ public class SongServiceTests
                      .ReturnsAsync((Song)null);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(99, "New Title");
+        var (success, message) = await sut.UpdateSongAsync(99, "New Title", null, null, true);
 
         Assert.False(success);
         Assert.NotEmpty(message);
@@ -164,7 +164,7 @@ public class SongServiceTests
                      .ReturnsAsync(true);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(1, "Existing Other Title");
+        var (success, message) = await sut.UpdateSongAsync(1, "Existing Other Title", null, null, true);
 
         Assert.False(success);
         Assert.NotEmpty(message);

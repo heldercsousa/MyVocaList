@@ -75,7 +75,7 @@ public partial class SongFormViewModel : ViewModelBase
             if (IsEditMode)
             {
                 var (success, message) = await _songService.UpdateSongAsync(
-                    SongId!.Value, title, FeaturedArtists?.Trim());
+                    SongId!.Value, title, FeaturedArtists?.Trim(), null, true);
                 if (success)
                 {
                     await _snackbarService.ShowSuccessAsync("Song updated");

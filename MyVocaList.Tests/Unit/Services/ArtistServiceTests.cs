@@ -4,9 +4,11 @@ public class ArtistServiceTests
 {
     private readonly Mock<IArtistRepository> _artistRepoMock = new();
     private readonly Mock<ISongRepository> _songRepoMock = new();
+    private readonly Mock<ICatalogRepository> _catalogRepoMock = new();
     private readonly Mock<ILogger<ArtistService>> _loggerMock = new();
 
-    private ArtistService CreateSut() => new(_artistRepoMock.Object, _songRepoMock.Object, _loggerMock.Object);
+    private ArtistService CreateSut() => new(
+        _artistRepoMock.Object, _songRepoMock.Object, _catalogRepoMock.Object, _loggerMock.Object);
 
     // ── ValidateNameInput ─────────────────────────────────────────────────
 
@@ -158,8 +160,8 @@ public class ArtistServiceTests
         var artist = new Artist { Id = 1, Name = "Artist With Songs", NameNormalized = "artist with songs" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(artist);
-        _songRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(3);
+        _catalogRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
+                        .ReturnsAsync(3);
         var sut = CreateSut();
 
         var (success, message) = await sut.DeleteArtistsAsync([1]);
@@ -175,8 +177,8 @@ public class ArtistServiceTests
         var artist = new Artist { Id = 1, Name = "Solo Artist", NameNormalized = "solo artist" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(artist);
-        _songRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(0);
+        _catalogRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
+                        .ReturnsAsync(0);
         _artistRepoMock.Setup(r => r.DeleteAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
                        .Returns(Task.CompletedTask);
         var sut = CreateSut();

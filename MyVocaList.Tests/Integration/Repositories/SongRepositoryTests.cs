@@ -42,10 +42,10 @@ public class SongRepositoryTests : IAsyncLifetime
         Assert.Equal(artist.Id, found.ArtistId);
     }
 
-    // ── GetPagedByArtistAsync ─────────────────────────────────────────────
+    // ── GetPagedAsync ─────────────────────────────────────────────────────
 
     [Fact]
-    public async Task GetPagedByArtistAsync_NoQuery_ReturnsSongsForArtistSortedByTitle()
+    public async Task GetPagedAsync_NoQuery_ReturnsSongsSortedByTitle()
     {
         var artist = await SeedArtistAsync("The Beatles");
         _db.Set<Song>().AddRange(
@@ -54,8 +54,8 @@ public class SongRepositoryTests : IAsyncLifetime
             MakeSong(artist.Id, "Hey Jude"));
         await _db.SaveChangesAsync();
 
-        var (items, totalCount) = await _repo.GetPagedByArtistAsync(
-            artist.Id, 1, 20, string.Empty, CancellationToken.None);
+        var (items, totalCount) = await _repo.GetPagedAsync(
+            1, 20, null, CancellationToken.None);
 
         Assert.Equal(3, totalCount);
         var titles = items.Select(s => s.Title).ToList();
@@ -65,7 +65,7 @@ public class SongRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GetPagedByArtistAsync_WithQuery_FiltersResults()
+    public async Task GetPagedAsync_WithQuery_FiltersResults()
     {
         var artist = await SeedArtistAsync("Led Zeppelin");
         _db.Set<Song>().AddRange(
@@ -73,32 +73,15 @@ public class SongRepositoryTests : IAsyncLifetime
             MakeSong(artist.Id, "Black Dog"));
         await _db.SaveChangesAsync();
 
-        var (items, totalCount) = await _repo.GetPagedByArtistAsync(
-            artist.Id, 1, 20, "stair", CancellationToken.None);
+        var (items, totalCount) = await _repo.GetPagedAsync(
+            1, 20, "stair", CancellationToken.None);
 
         Assert.Equal(1, totalCount);
         Assert.Equal("Stairway to Heaven", items.Single().Title);
     }
 
     [Fact]
-    public async Task GetPagedByArtistAsync_OnlyReturnsSongsForRequestedArtist()
-    {
-        var artist1 = await SeedArtistAsync("Artist One");
-        var artist2 = await SeedArtistAsync("Artist Two");
-        _db.Set<Song>().AddRange(
-            MakeSong(artist1.Id, "Song A"),
-            MakeSong(artist2.Id, "Song B"));
-        await _db.SaveChangesAsync();
-
-        var (items, totalCount) = await _repo.GetPagedByArtistAsync(
-            artist1.Id, 1, 20, string.Empty, CancellationToken.None);
-
-        Assert.Equal(1, totalCount);
-        Assert.Equal("Song A", items.Single().Title);
-    }
-
-    [Fact]
-    public async Task GetPagedByArtistAsync_Page2_SkipsFirstPage()
+    public async Task GetPagedAsync_Page2_SkipsFirstPage()
     {
         var artist = await SeedArtistAsync("Pink Floyd");
         _db.Set<Song>().AddRange(
@@ -107,8 +90,8 @@ public class SongRepositoryTests : IAsyncLifetime
             MakeSong(artist.Id, "Wish You Were Here"));
         await _db.SaveChangesAsync();
 
-        var (items, totalCount) = await _repo.GetPagedByArtistAsync(
-            artist.Id, 2, 2, string.Empty, CancellationToken.None);
+        var (items, totalCount) = await _repo.GetPagedAsync(
+            2, 2, null, CancellationToken.None);
 
         Assert.Equal(3, totalCount);
         Assert.Single(items);
@@ -116,67 +99,17 @@ public class SongRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GetPagedByArtistAsync_CaseInsensitive_FindsMatch()
+    public async Task GetPagedAsync_CaseInsensitive_FindsMatch()
     {
         var artist = await SeedArtistAsync("Metallica");
         _db.Set<Song>().Add(MakeSong(artist.Id, "Enter Sandman"));
         await _db.SaveChangesAsync();
 
-        var (items, totalCount) = await _repo.GetPagedByArtistAsync(
-            artist.Id, 1, 20, "ENTER", CancellationToken.None);
+        var (items, totalCount) = await _repo.GetPagedAsync(
+            1, 20, "enter", CancellationToken.None);
 
         Assert.Equal(1, totalCount);
         Assert.Equal("Enter Sandman", items.Single().Title);
-    }
-
-    // ── SearchByTitleAsync ────────────────────────────────────────────────
-
-    [Fact]
-    public async Task SearchByTitleAsync_PrefixMatch_ReturnsMatchingSongs()
-    {
-        var artist = await SeedArtistAsync("David Bowie");
-        _db.Set<Song>().AddRange(
-            MakeSong(artist.Id, "Heroes"),
-            MakeSong(artist.Id, "Space Oddity"),
-            MakeSong(artist.Id, "Starman"));
-        await _db.SaveChangesAsync();
-
-        var results = await _repo.SearchByTitleAsync(artist.Id, "s", 5, CancellationToken.None);
-
-        var titles = results.Select(s => s.Title).ToList();
-        Assert.Equal(2, titles.Count);
-        Assert.Contains("Starman", titles);
-        Assert.Contains("Space Oddity", titles);
-    }
-
-    [Fact]
-    public async Task SearchByTitleAsync_RespectsMaxResults()
-    {
-        var artist = await SeedArtistAsync("ABBA");
-        _db.Set<Song>().AddRange(
-            MakeSong(artist.Id, "Dancing Queen"),
-            MakeSong(artist.Id, "Mamma Mia"),
-            MakeSong(artist.Id, "Waterloo"));
-        await _db.SaveChangesAsync();
-
-        var results = await _repo.SearchByTitleAsync(artist.Id, string.Empty, 2, CancellationToken.None);
-
-        Assert.Equal(2, results.Count());
-    }
-
-    [Fact]
-    public async Task SearchByTitleAsync_ScopedToArtist_DoesNotReturnOtherArtistSongs()
-    {
-        var artist1 = await SeedArtistAsync("Artist One");
-        var artist2 = await SeedArtistAsync("Artist Two");
-        _db.Set<Song>().AddRange(
-            MakeSong(artist1.Id, "Common Title"),
-            MakeSong(artist2.Id, "Common Title"));
-        await _db.SaveChangesAsync();
-
-        var results = await _repo.SearchByTitleAsync(artist1.Id, "common", 10, CancellationToken.None);
-
-        Assert.Single(results);
     }
 
     // ── ExistsByTitleForArtistAsync ───────────────────────────────────────
@@ -283,51 +216,6 @@ public class SongRepositoryTests : IAsyncLifetime
     {
         var found = await _repo.GetByExternalIdAsync("unknown-id", "musicbrainz", CancellationToken.None);
         Assert.Null(found);
-    }
-
-    // ── CountByArtistAsync ────────────────────────────────────────────────
-
-    [Fact]
-    public async Task CountByArtistAsync_NoSongs_ReturnsZero()
-    {
-        var artist = await SeedArtistAsync("Empty Artist");
-
-        var count = await _repo.CountByArtistAsync(artist.Id, CancellationToken.None);
-
-        Assert.Equal(0, count);
-    }
-
-    [Fact]
-    public async Task CountByArtistAsync_WithSongs_ReturnsCorrectCount()
-    {
-        var artist = await SeedArtistAsync("Counting Artist");
-        _db.Set<Song>().AddRange(
-            MakeSong(artist.Id, "Song One"),
-            MakeSong(artist.Id, "Song Two"),
-            MakeSong(artist.Id, "Song Three"));
-        await _db.SaveChangesAsync();
-
-        var count = await _repo.CountByArtistAsync(artist.Id, CancellationToken.None);
-
-        Assert.Equal(3, count);
-    }
-
-    // ── CountByArtistsAsync ───────────────────────────────────────────────
-
-    [Fact]
-    public async Task CountByArtistsAsync_MultipleArtists_ReturnsCombinedCount()
-    {
-        var artist1 = await SeedArtistAsync("Multi Artist One");
-        var artist2 = await SeedArtistAsync("Multi Artist Two");
-        _db.Set<Song>().AddRange(
-            MakeSong(artist1.Id, "A Song"),
-            MakeSong(artist2.Id, "B Song"),
-            MakeSong(artist2.Id, "C Song"));
-        await _db.SaveChangesAsync();
-
-        var count = await _repo.CountByArtistsAsync([artist1.Id, artist2.Id], CancellationToken.None);
-
-        Assert.Equal(3, count);
     }
 
     // ── UpdateAsync ───────────────────────────────────────────────────────

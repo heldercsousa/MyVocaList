@@ -39,8 +39,9 @@ public class SongService : ISongService
     }
 
     /// <inheritdoc />
-    public async Task<(bool success, string message, Song song)> CreateSongAsync(
-        int artistId, string title, string featuredArtists = null, CancellationToken ct = default)
+    public async Task<(bool success, string message, Song? song)> CreateSongAsync(
+        int artistId, string title, string? featuredArtists = null, string? lyrics = null,
+        string? externalId = null, string? externalProvider = null, CancellationToken ct = default)
     {
         var (isValid, message) = ValidateTitleInput(title);
         if (!isValid)
@@ -62,6 +63,9 @@ public class SongService : ISongService
             Title = title,
             TitleNormalized = normalized,
             FeaturedArtists = featuredArtists?.Trim(),
+            Lyrics = lyrics,
+            ExternalId = externalId,
+            ExternalProvider = externalProvider,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -73,7 +77,8 @@ public class SongService : ISongService
 
     /// <inheritdoc />
     public async Task<(bool success, string message)> UpdateSongAsync(
-        int id, string title, string featuredArtists = null, CancellationToken ct = default)
+        int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
+        CancellationToken ct = default)
     {
         var (isValid, message) = ValidateTitleInput(title);
         if (!isValid)
@@ -92,12 +97,23 @@ public class SongService : ISongService
         song.Title = title;
         song.TitleNormalized = normalized;
         song.FeaturedArtists = featuredArtists?.Trim();
+        song.Lyrics = lyrics;
         song.UpdatedAt = DateTime.UtcNow;
-        song.HasManualEdits = true;
+        song.HasManualEdits = hasManualEdits;
 
         await _songRepository.UpdateAsync(song, ct);
         await _songRepository.SaveChangesAsync(ct);
         return (true, $"Song updated to '{title}'");
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ExistsByTitleForArtistAsync(
+        string title, int artistId, int? excludeId = null, CancellationToken ct = default)
+    {
+        var normalized = title.Trim().ToLowerInvariant();
+        return excludeId == null
+            ? await _songRepository.ExistsByTitleForArtistAsync(artistId, normalized, ct)
+            : await _songRepository.ExistsByTitleForArtistAsync(artistId, normalized, excludeId.Value, ct);
     }
 
     /// <inheritdoc />
@@ -116,13 +132,13 @@ public class SongService : ISongService
 
     /// <inheritdoc />
     public async Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedSongsForListAsync(
-        int artistId, int pageNumber, int pageSize, string query = null, CancellationToken ct = default)
+        int pageNumber, int pageSize, string? query = null, CancellationToken ct = default)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
         var normalized = string.IsNullOrWhiteSpace(query) ? null : query.Trim().ToLowerInvariant();
-        var (items, totalCount) = await _songRepository.GetPagedByArtistAsync(artistId, pageNumber, pageSize, normalized, ct);
+        var (items, totalCount) = await _songRepository.GetPagedAsync(pageNumber, pageSize, normalized, ct);
 
         return (items, totalCount);
     }
