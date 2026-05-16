@@ -155,14 +155,13 @@ after every major task before committing.
 
 ## Phase 13 — DI Registration [SEQUENTIAL — after Phase 12]
 
-- [ ] **13.1** Register `CatalogService` as `AddScoped<ICatalogService, CatalogService>` in `MauiProgram.cs`
-- [ ] **13.2** Register `CatalogRepository` as `AddScoped<ICatalogRepository, CatalogRepository>`
-- [ ] **13.3** Add `Songs` as top-level `FlyoutItem` in `AppShell.xaml`; add `songs` namespace import
-- [ ] **13.4** Update `AppShell.xaml.cs` — remove `Routes.Songs` from `Routing.RegisterRoute` (now a FlyoutItem root)
-- [ ] **13.5** Update `AppShellViewModel` — add Songs entry to Catalog menu group
-- [ ] **13.6** Add `Routes.Artists` constant (for symmetry); verify all route constants are consistent
-  - **Files owned:** `MyVocaList/Navigation/Routes.cs`
-- [ ] **13.7** Build — 0 errors
+- [x] **13.1** Register `CatalogService` as `AddScoped<ICatalogService, CatalogService>` in `MauiProgram.cs`
+- [x] **13.2** Register `CatalogRepository` as `AddScoped<ICatalogRepository, CatalogRepository>`
+- [x] **13.3** Add `Songs` as top-level `FlyoutItem` in `AppShell.xaml`; add `songs` namespace import
+- [x] **13.4** Update `AppShell.xaml.cs` — remove `Routes.Songs` from `Routing.RegisterRoute` (now a FlyoutItem root)
+- [x] **13.5** Update `NavigationConfig.cs` — add Catalog menu group; add `Routes.Songs` to PageTypes
+- [x] **13.6** `Routes.Songs` already exists — verified consistent
+- [x] **13.7** Build — 0 errors; 141 tests passing
 
 ---
 
