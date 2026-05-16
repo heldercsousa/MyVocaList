@@ -50,6 +50,7 @@ public static class MauiProgram
         builder.Services.AddScoped<IPersonRepository, PersonRepository>();
         builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
         builder.Services.AddScoped<ISongRepository, SongRepository>();
+        builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
 
         // HTTP Clients — music metadata providers
         builder.Services.AddHttpClient<MusicBrainzProvider>(client =>
@@ -71,6 +72,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
         builder.Services.AddScoped<IArtistService, ArtistService>();
         builder.Services.AddScoped<ISongService, SongService>();
+        builder.Services.AddScoped<ICatalogService, CatalogService>();
         builder.Services.AddScoped<IMusicMetadataService, MusicMetadataService>();
 
         // Shell

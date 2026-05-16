@@ -10,6 +10,7 @@
     xmlns:venues="clr-namespace:MyVocaList.UI.Pages.Venues"
     xmlns:people="clr-namespace:MyVocaList.UI.Pages.People"
     xmlns:artists="clr-namespace:MyVocaList.UI.Pages.Artists"
+    xmlns:songs="clr-namespace:MyVocaList.UI.Pages.Songs"
     xmlns:prefs="clr-namespace:MyVocaList.UI.Pages.Preferences"
     xmlns:backup="clr-namespace:MyVocaList.UI.Pages.BackupRestore"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
@@ -81,6 +82,10 @@
 
     <FlyoutItem Route="artists" FlyoutItemIsVisible="False">
         <ShellContent ContentTemplate="{DataTemplate artists:ArtistsPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="songs" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate songs:SongsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="preferences" FlyoutItemIsVisible="False">
