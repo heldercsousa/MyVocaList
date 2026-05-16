@@ -167,24 +167,24 @@ after every major task before committing.
 
 ## Phase 14 — UI Refactor [SEQUENTIAL — after Phase 13]
 
-- [ ] **14.1** Update `ArtistsPage.xaml` — revise `TrailingContent` to `HorizontalStackLayout` with catalog icon button (`queue_music_outlined`) + `CheckEdit`; remove any tap-to-navigate logic from template
+- [x] **14.1** Update `ArtistsPage.xaml` — revise `TrailingContent` to `HorizontalStackLayout` with catalog icon button (`queue_music_outlined`) + `CheckEdit`; remove any tap-to-navigate logic from template
   - **Files owned:** `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml`
-- [ ] **14.2** Update `ArtistsPage.xaml.cs` — remove or empty `OnItemTapped` navigation logic; add `ViewCatalogCommand` binding wiring if needed
+- [x] **14.2** Update `ArtistsPage.xaml.cs` — remove or empty `OnItemTapped` navigation logic; add `ViewCatalogCommand` binding wiring if needed
   - **Files owned:** `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml.cs`
-- [ ] **14.3** Update `ArtistsViewModel` — add `ViewCatalogCommand(ArtistListItemDto)` → navigate to `Routes.Songs?artistId=…&artistName=…`; remove `TapArtistCommand`
+- [x] **14.3** Update `ArtistsViewModel` — add `ViewCatalogCommand(ArtistListItemDto)` → navigate to `Routes.Songs?artistId=…&artistName=…`; add `ArtistRoleFilter` + `Mode` query param; remove `TapArtistCommand`
   - **Files owned:** `MyVocaList/UI/ViewModels/ArtistsViewModel.cs`
-- [ ] **14.4** Update `SongsViewModel` — make `ArtistId` optional (0 = global mode); add `IsCatalogMode`; route data loading through `ICatalogService` (catalog mode) or `ISongService` (global mode); add `AddToCatalogCommand`, `RemoveFromCatalogCommand`
+- [x] **14.4** Update `SongsViewModel` — make `ArtistId` optional (0 = global mode); add `IsCatalogMode`; route data loading through `ICatalogService` (catalog mode) or `ISongService` (global mode); add `AddToCatalogCommand`, `RemoveFromCatalogCommand`
   - **Files owned:** `MyVocaList/UI/ViewModels/SongsViewModel.cs`
-- [ ] **14.5** Update `SongsPage.xaml` — update `AppBarTitle` binding to support dual-mode title; update FAB command binding to `IsCatalogMode ? AddToCatalogCommand : AddSongCommand`
+- [x] **14.5** Update `SongsPage.xaml` — update `AppBarTitle` binding to support dual-mode title; update FAB command binding to `IsCatalogMode ? AddToCatalogCommand : AddSongCommand`
   - **Files owned:** `MyVocaList/UI/Pages/Songs/SongsPage.xaml`
-- [ ] **14.6** Update `SongsPage.xaml.cs` — remove artist-required guard (`if (ArtistId == 0) return`)
+- [x] **14.6** Update `SongsPage.xaml.cs` — remove artist-required guard (`if (ArtistId == 0) return`)
   - **Files owned:** `MyVocaList/UI/Pages/Songs/SongsPage.xaml.cs`
-- [ ] **14.7** Update `SongFormPage.xaml` — replace read-only artist label with artist autocomplete field (TextEdit + suggestion dropdown); add `Lyrics` multi-line editor field; autocomplete disabled when `IsArtistLocked`
+- [x] **14.7** Update `SongFormPage.xaml` — replace read-only artist label with artist autocomplete field (TextEdit + suggestion dropdown); add `Lyrics` multi-line editor field; autocomplete disabled when `IsArtistLocked`
   - **Files owned:** `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`
-- [ ] **14.8** Update `SongFormViewModel` — add artist autocomplete state (`ArtistSearchText`, `SelectedArtistId`, `ArtistSuggestions`, `IsArtistLocked`); add `Lyrics` observable property; update `SaveCommand` to pass `artistId` (mandatory)
+- [x] **14.8** Update `SongFormViewModel` — add artist autocomplete state (`ArtistSearchText`, `SelectedArtistId`, `ArtistSuggestions`, `IsArtistLocked`); add `Lyrics` observable property; update `SaveCommand` to pass `artistId` (mandatory)
   - **Files owned:** `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
-- [ ] **14.9** Build — 0 errors
-- [ ] **14.10** `dotnet test` — all pass
+- [x] **14.9** Build — 0 errors
+- [x] **14.10** `dotnet test` — 141 passing
 
 ---
 

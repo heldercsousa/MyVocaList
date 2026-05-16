@@ -6,6 +6,7 @@ namespace MyVocaList.UI.ViewModels;
 [QueryProperty(nameof(ArtistName), "artistName")]
 public partial class SongsViewModel : ViewModelBase
 {
+    private readonly ICatalogService _catalogService;
     private readonly ISongService _songService;
     private readonly ISnackbarComponent _snackbarService;
     private readonly ILogger<SongsViewModel> _logger;
@@ -35,10 +36,12 @@ public partial class SongsViewModel : ViewModelBase
     public string ArtistIdRaw { set => ArtistId = int.TryParse(value, out var id) ? id : 0; }
 
     public SongsViewModel(
+        ICatalogService catalogService,
         ISongService songService,
         ISnackbarComponent snackbarService,
         ILogger<SongsViewModel> logger)
     {
+        _catalogService = catalogService;
         _songService = songService;
         _snackbarService = snackbarService;
         _logger = logger;
@@ -56,6 +59,8 @@ public partial class SongsViewModel : ViewModelBase
         DismissConfirmCommand = new RelayCommand(DismissConfirmSheet);
         OpenSearchCommand = new RelayCommand(() => IsSearchMode = true);
         CloseSearchCommand = new RelayCommand(CloseSearch);
+        AddToCatalogCommand = new AsyncRelayCommand(AddToCatalogAsync, () => IsCatalogMode);
+        RemoveFromCatalogCommand = new AsyncRelayCommand<SongListItemDto>(RemoveFromCatalogAsync, _ => IsCatalogMode);
     }
 
     public ObservableRangeCollection<SongListItemDto> Songs { get; }
@@ -63,7 +68,13 @@ public partial class SongsViewModel : ViewModelBase
 
     public System.Collections.IList SelectedSongsRaw => SelectedSongs;
 
-    /// <summary>Title bar always shows the artist name; subtitle shows selection count when > 0.</summary>
+    public bool IsCatalogMode => ArtistId > 0;
+    public string AppBarTitle => IsCatalogMode ? ArtistName : "Songs";
+
+    /// <summary>Routes FAB to the correct command based on current mode.</summary>
+    public IAsyncRelayCommand PrimaryFabCommand => IsCatalogMode ? AddToCatalogCommand : AddSongCommand;
+
+    /// <summary>Subtitle shows selection count when > 0.</summary>
     public string AppBarSubtitle => SelectedCount > 0 ? $"{SelectedCount} selected" : string.Empty;
 
     public bool CanEditSelected => SelectedCount == 1;
@@ -84,6 +95,8 @@ public partial class SongsViewModel : ViewModelBase
     public IRelayCommand DismissConfirmCommand { get; }
     public IRelayCommand OpenSearchCommand { get; }
     public IRelayCommand CloseSearchCommand { get; }
+    public IAsyncRelayCommand AddToCatalogCommand { get; }
+    public IAsyncRelayCommand<SongListItemDto> RemoveFromCatalogCommand { get; }
 
     partial void OnSearchTextChanged(string value)
     {
@@ -102,6 +115,14 @@ public partial class SongsViewModel : ViewModelBase
     }
 
     partial void OnIsInitialLoadingChanged(bool value) => NotifyEmptyStates();
+
+    partial void OnArtistIdChanged(int value)
+    {
+        OnPropertyChanged(nameof(IsCatalogMode));
+        OnPropertyChanged(nameof(AppBarTitle));
+        OnPropertyChanged(nameof(PrimaryFabCommand));
+        AddToCatalogCommand.NotifyCanExecuteChanged();
+    }
 
     public async Task InitializeAsync()
     {
@@ -122,8 +143,9 @@ public partial class SongsViewModel : ViewModelBase
             _currentPage = 1;
             _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
 
-            var (itemsEnumerable, totalCount) = await _songService.GetPagedSongsForListAsync(
-                _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, cancellationToken);
+            var (itemsEnumerable, totalCount) = IsCatalogMode
+                ? await _catalogService.GetPagedCatalogForArtistAsync(ArtistId, _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, cancellationToken)
+                : await _songService.GetPagedSongsForListAsync(_currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, cancellationToken);
 
             if (cancellationToken.IsCancellationRequested) return;
 
@@ -169,8 +191,9 @@ public partial class SongsViewModel : ViewModelBase
 
         try
         {
-            var (itemsEnumerable, totalCount) = await _songService.GetPagedSongsForListAsync(
-                loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery);
+            var (itemsEnumerable, totalCount) = IsCatalogMode
+                ? await _catalogService.GetPagedCatalogForArtistAsync(ArtistId, loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery)
+                : await _songService.GetPagedSongsForListAsync(loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery);
 
             _totalCount = totalCount;
             var list = itemsEnumerable.ToList();
@@ -220,7 +243,7 @@ public partial class SongsViewModel : ViewModelBase
     }
 
     private Task NavigateToAddAsync() =>
-        Shell.Current.GoToAsync($"{Routes.SongForm}?artistId={ArtistId}&artistName={Uri.EscapeDataString(ArtistName)}");
+        Shell.Current.GoToAsync(Routes.SongForm);
 
     private async Task NavigateToEditAsync()
     {
@@ -309,6 +332,27 @@ public partial class SongsViewModel : ViewModelBase
     {
         IsSearchMode = false;
         SearchText = string.Empty;
+    }
+
+    private Task AddToCatalogAsync()
+    {
+        // TODO Phase 15: open song picker to add to catalog
+        return Task.CompletedTask;
+    }
+
+    private async Task RemoveFromCatalogAsync(SongListItemDto song)
+    {
+        if (song == null) return;
+        var (success, message) = await _catalogService.RemoveSongFromCatalogAsync(ArtistId, song.Id);
+        if (success)
+        {
+            await RefreshAsync();
+            await _snackbarService.ShowSuccessAsync(message);
+        }
+        else
+        {
+            await _snackbarService.ShowErrorAsync(message);
+        }
     }
 
     private void NotifyEmptyStates()

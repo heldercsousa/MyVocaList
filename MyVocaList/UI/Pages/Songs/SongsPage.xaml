@@ -13,7 +13,7 @@
     x:Class="MyVocaList.UI.Pages.Songs.SongsPage"
     x:Name="page"
     x:DataType="vm:SongsViewModel"
-    Title="{Binding ArtistName}"
+    Title="{Binding AppBarTitle}"
     BackgroundColor="{StaticResource Surface}"
     SafeAreaEdges="Container">
 
@@ -21,7 +21,7 @@
         <Grid>
             <appbars:SmallAppBar
                 x:Name="smallAppBar"
-                Title="{Binding ArtistName}"
+                Title="{Binding AppBarTitle}"
                 Subtitle="{Binding AppBarSubtitle}"
                 NavigationIcon="arrow_back_outlined"
                 Action1Icon="search_outlined"
@@ -144,7 +144,7 @@
                          Icon="add_outlined"
                          VerticalOptions="Center"
                          SemanticProperties.Description="Add song"
-                         Command="{Binding AddSongCommand}" />
+                         Command="{Binding PrimaryFabCommand}" />
         </HorizontalStackLayout>
 
         <!-- Confirm delete BottomSheet -->

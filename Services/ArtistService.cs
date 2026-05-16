@@ -123,20 +123,21 @@ public class ArtistService : IArtistService
 
     /// <inheritdoc />
     public async Task<(IEnumerable<ArtistListItemDto> items, int totalCount)> GetPagedArtistsForListAsync(
-        int pageNumber, int pageSize, string query = null, CancellationToken ct = default)
+        int pageNumber, int pageSize, string query = null,
+        ArtistRoleFilter roleFilter = ArtistRoleFilter.All, CancellationToken ct = default)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
         var normalized = string.IsNullOrWhiteSpace(query) ? null : query.Trim().ToLowerInvariant();
-        var (items, totalCount) = await _artistRepository.GetPagedAsync(pageNumber, pageSize, normalized, ct);
+        var (items, totalCount) = await _artistRepository.GetPagedAsync(pageNumber, pageSize, normalized, roleFilter, ct);
 
         var dtos = items.Select(x => new ArtistListItemDto(
             x.artist.Id,
             x.artist.Name,
             x.artist.ExternalProvider,
             x.artist.HasManualEdits,
-            x.songCount));
+            x.catalogCount));
 
         return (dtos, totalCount);
     }

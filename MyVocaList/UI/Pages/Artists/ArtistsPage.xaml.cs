@@ -66,8 +66,4 @@ public partial class ArtistsPage : ContentPage
         _viewModel.OnSelectionChanged(count);
     }
 
-    private void OnItemTapped(object sender, CollectionViewGestureEventArgs e)
-    {
-        // Row tap = selection toggle only. Catalog navigation is handled by ViewCatalogCommand via the trailing DXButton.
-    }
 }
