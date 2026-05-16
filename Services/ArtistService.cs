@@ -9,6 +9,7 @@ public class ArtistService : IArtistService
 {
     private readonly IArtistRepository _artistRepository;
     private readonly ISongRepository _songRepository;
+    private readonly ICatalogRepository _catalogRepository;
     private readonly ILogger<ArtistService> _logger;
 
     public int MaxInputLength => 60;
@@ -17,10 +18,12 @@ public class ArtistService : IArtistService
     public ArtistService(
         IArtistRepository artistRepository,
         ISongRepository songRepository,
+        ICatalogRepository catalogRepository,
         ILogger<ArtistService> logger)
     {
         _artistRepository = artistRepository;
         _songRepository = songRepository;
+        _catalogRepository = catalogRepository;
         _logger = logger;
     }
 
@@ -109,7 +112,7 @@ public class ArtistService : IArtistService
             if (artist == null)
                 continue;
 
-            var songCount = await _songRepository.CountByArtistAsync(id, ct);
+            var songCount = await _catalogRepository.CountByArtistAsync(id, ct);
             if (songCount > 0)
                 return (false, $"'{artist.Name}' has {songCount} song(s) and cannot be deleted");
         }
