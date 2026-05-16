@@ -113,15 +113,15 @@ after every major task before committing.
 
 ## Phase 11 — Infrastructure [SEQUENTIAL — after Phase 10]
 
-- [ ] **11.1** Add `CatalogConfiguration` (`IEntityTypeConfiguration<Catalog>`)
+- [x] **11.1** Add `CatalogConfiguration` (`IEntityTypeConfiguration<Catalog>`)
   - **Files owned:** `MyVocaList.Infra/EntityEFConfig/CatalogConfiguration.cs`
-- [ ] **11.2** Update `SongConfiguration` — ArtistId nullable FK with `SetNull`; add Lyrics column; remove old unique index on (ArtistId, Title); add global unique index on Title
+- [x] **11.2** Update `SongConfiguration` — ArtistId nullable FK with `SetNull`; add Lyrics column; remove old unique index on (ArtistId, Title); add global unique index on Title
   - **Files owned:** `MyVocaList.Infra/EntityEFConfig/SongConfiguration.cs`
-- [ ] **11.3** Update `ArtistConfiguration` — update nav property names
+- [x] **11.3** Update `ArtistConfiguration` — update nav property names
   - **Files owned:** `MyVocaList.Infra/EntityEFConfig/ArtistConfiguration.cs`
-- [ ] **11.4** Register `Catalog` DbSet and `CatalogConfiguration` in `AppDbContext`
+- [x] **11.4** Register `Catalog` DbSet and `CatalogConfiguration` in `AppDbContext`
   - **Files owned:** `MyVocaList.Infra/AppDbContext.cs`
-- [ ] **11.5** Add EF Core migration `RefactorCatalogAndAddLyrics`:
+- [x] **11.5** Add EF Core migration `RefactorCatalogAndAddLyrics`:
   - `Up()`: `DELETE FROM Songs; DELETE FROM Artists;` (raw SQL — app not in production)
   - Keep `Songs.ArtistId` NOT NULL (mandatory)
   - Add `Songs.Lyrics TEXT NULL`
@@ -129,12 +129,12 @@ after every major task before committing.
   - Create `Catalog` table with composite PK `(ArtistId, SongId)`, cascading FKs
   - `Down()`: inverse steps
   - **Files owned:** new migration file + `AppDbContext` snapshot
-- [ ] **11.6** Update `SongRepository` — implement updated `ISongRepository` (global paged, global title uniqueness)
+- [x] **11.6** Update `SongRepository` — implement updated `ISongRepository` (global paged, global title uniqueness)
   - **Files owned:** `MyVocaList.Infra/Repository/SongRepository.cs`
-- [ ] **11.7** Implement `CatalogRepository`
+- [x] **11.7** Implement `CatalogRepository`
   - **Files owned:** `MyVocaList.Infra/Repository/CatalogRepository.cs`
-- [ ] **11.8** Build — 0 errors
-- [ ] **11.9** `dotnet test` — fix any broken repository tests
+- [x] **11.8** Build — 0 errors
+- [x] **11.9** `dotnet test` — fix any broken repository tests
 
 ---
 
@@ -142,9 +142,9 @@ after every major task before committing.
 
 - [x] **12.1** Update `SongService` — keep `artistId` in `CreateSongAsync` (mandatory); add `lyrics` param; update paged list to global (no artist filter)
   - **Files owned:** `MyVocaList.Services/SongService.cs`
-- [ ] **12.2** Implement `CatalogService`
+- [x] **12.2** Implement `CatalogService`
   - **Files owned:** `MyVocaList.Services/CatalogService.cs`
-- [ ] **12.3** Add `ILyricsProvider` placeholder interface (no implementation class)
+- [x] **12.3** Add `ILyricsProvider` placeholder interface (no implementation class)
   - **Files owned:** `MyVocaList.Services/ILyricsProvider.cs`
 - [x] **12.4** Update `ArtistService.GetDeleteConfirmationAsync` — use `ICatalogRepository.CountByArtistAsync` instead of `ISongRepository.CountByArtistAsync`
   - **Files owned:** `MyVocaList.Services/ArtistService.cs`
