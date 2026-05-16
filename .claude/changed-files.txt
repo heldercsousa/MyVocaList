@@ -484,3 +484,7 @@ MyVocaList.Tests/Unit/Services/SongServiceTests.cs
 MyVocaList.Tests/Unit/Services/SongServiceTests.cs
 Docs/Changelog/changelog.md
 Docs/specs/artists-songs/tasks.md
+Services/CatalogService.cs
+Services/ILyricsProvider.cs
+Docs/specs/artists-songs/tasks.md
+Docs/specs/artists-songs/tasks.md
