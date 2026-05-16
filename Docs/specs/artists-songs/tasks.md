@@ -140,16 +140,16 @@ after every major task before committing.
 
 ## Phase 12 — Services [SEQUENTIAL — after Phase 11]
 
-- [ ] **12.1** Update `SongService` — keep `artistId` in `CreateSongAsync` (mandatory); add `lyrics` param; update paged list to global (no artist filter)
+- [x] **12.1** Update `SongService` — keep `artistId` in `CreateSongAsync` (mandatory); add `lyrics` param; update paged list to global (no artist filter)
   - **Files owned:** `MyVocaList.Services/SongService.cs`
 - [ ] **12.2** Implement `CatalogService`
   - **Files owned:** `MyVocaList.Services/CatalogService.cs`
 - [ ] **12.3** Add `ILyricsProvider` placeholder interface (no implementation class)
   - **Files owned:** `MyVocaList.Services/ILyricsProvider.cs`
-- [ ] **12.4** Update `ArtistService.GetDeleteConfirmationAsync` — use `ICatalogRepository.CountByArtistAsync` instead of `ISongRepository.CountByArtistAsync`
+- [x] **12.4** Update `ArtistService.GetDeleteConfirmationAsync` — use `ICatalogRepository.CountByArtistAsync` instead of `ISongRepository.CountByArtistAsync`
   - **Files owned:** `MyVocaList.Services/ArtistService.cs`
-- [ ] **12.5** Build — 0 errors
-- [ ] **12.6** `dotnet test` — fix any broken service tests
+- [x] **12.5** Build — 0 errors
+- [x] **12.6** `dotnet test` — fix any broken service tests (141 passing)
 
 ---
 
