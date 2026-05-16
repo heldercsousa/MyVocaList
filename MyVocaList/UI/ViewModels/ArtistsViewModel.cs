@@ -1,7 +1,9 @@
+using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.UI.Collections;
 
 namespace MyVocaList.UI.ViewModels;
 
+[QueryProperty(nameof(Mode), "mode")]
 public partial class ArtistsViewModel : ViewModelBase
 {
     private readonly IArtistService _artistService;
@@ -17,6 +19,7 @@ public partial class ArtistsViewModel : ViewModelBase
     private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
     private volatile bool _isLoading;
 
+    [ObservableProperty] private ArtistRoleFilter _roleFilter = ArtistRoleFilter.All;
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private bool _isSearchMode;
@@ -50,6 +53,7 @@ public partial class ArtistsViewModel : ViewModelBase
         DismissConfirmCommand = new RelayCommand(DismissConfirmSheet);
         OpenSearchCommand = new RelayCommand(() => IsSearchMode = true);
         CloseSearchCommand = new RelayCommand(CloseSearch);
+        ViewCatalogCommand = new RelayCommand<ArtistListItemDto>(NavigateToCatalog);
     }
 
     public ObservableRangeCollection<ArtistListItemDto> Artists { get; }
@@ -57,7 +61,22 @@ public partial class ArtistsViewModel : ViewModelBase
 
     public System.Collections.IList SelectedArtistsRaw => SelectedArtists;
 
-    public string AppBarTitle => SelectedCount == 0 ? "Artists" : $"{SelectedCount} selected";
+    public string Mode
+    {
+        set => RoleFilter = value switch
+        {
+            "author"    => ArtistRoleFilter.AuthorsOnly,
+            "performer" => ArtistRoleFilter.PerformersOnly,
+            _           => ArtistRoleFilter.All
+        };
+    }
+
+    public string AppBarTitle => SelectedCount > 0 ? $"{SelectedCount} selected" : RoleFilter switch
+    {
+        ArtistRoleFilter.AuthorsOnly    => "Authors",
+        ArtistRoleFilter.PerformersOnly => "Performers",
+        _                               => "Artists"
+    };
     public bool CanEditSelected => SelectedCount == 1;
     public bool CanDeleteSelected => SelectedCount > 0;
     public bool IsAllSelected => Artists.Count > 0 && SelectedCount == Artists.Count;
@@ -76,6 +95,7 @@ public partial class ArtistsViewModel : ViewModelBase
     public IRelayCommand DismissConfirmCommand { get; }
     public IRelayCommand OpenSearchCommand { get; }
     public IRelayCommand CloseSearchCommand { get; }
+    public IRelayCommand<ArtistListItemDto> ViewCatalogCommand { get; }
 
     partial void OnSearchTextChanged(string value)
     {
@@ -94,6 +114,12 @@ public partial class ArtistsViewModel : ViewModelBase
     }
 
     partial void OnIsInitialLoadingChanged(bool value) => NotifyEmptyStates();
+
+    partial void OnRoleFilterChanged(ArtistRoleFilter value)
+    {
+        OnPropertyChanged(nameof(AppBarTitle));
+        _ = LoadFirstPageAsync(CancellationToken.None);
+    }
 
     public async Task InitializeAsync()
     {
@@ -115,7 +141,7 @@ public partial class ArtistsViewModel : ViewModelBase
             _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
 
             var (itemsEnumerable, totalCount) = await _artistService.GetPagedArtistsForListAsync(
-                _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, cancellationToken);
+                _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, RoleFilter, cancellationToken);
 
             if (cancellationToken.IsCancellationRequested) return;
 
@@ -162,7 +188,7 @@ public partial class ArtistsViewModel : ViewModelBase
         try
         {
             var (itemsEnumerable, totalCount) = await _artistService.GetPagedArtistsForListAsync(
-                loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery);
+                loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery, RoleFilter);
 
             _totalCount = totalCount;
             var list = itemsEnumerable.ToList();
@@ -295,6 +321,13 @@ public partial class ArtistsViewModel : ViewModelBase
     public void OnSelectionChanged(int count)
     {
         SelectedCount = count;
+    }
+
+    private void NavigateToCatalog(ArtistListItemDto artist)
+    {
+        if (artist == null) return;
+        _ = Shell.Current.GoToAsync(
+            $"{Routes.Songs}?artistId={artist.Id}&artistName={Uri.EscapeDataString(artist.Name)}");
     }
 
     private void CloseSearch()

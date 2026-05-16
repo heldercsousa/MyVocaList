@@ -68,9 +68,6 @@ public partial class SongsPage : ContentPage
 
     private void OnItemTapped(object sender, CollectionViewGestureEventArgs e)
     {
-        if (_viewModel.SelectedCount > 0) return;
-        if (e.Item is not SongListItemDto item) return;
-        _ = Shell.Current.GoToAsync(
-            $"{Routes.SongForm}?songId={item.Id}&artistId={_viewModel.ArtistId}&artistName={Uri.EscapeDataString(_viewModel.ArtistName)}&songTitle={Uri.EscapeDataString(item.Title)}");
+        // Row tap = selection toggle only. Edit via FloatingToolbar edit button.
     }
 }

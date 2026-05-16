@@ -1,5 +1,6 @@
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.RepositoryInterface;
 
 namespace MyVocaList.Domain.ServicesInterfaces;
 
@@ -19,7 +20,8 @@ public interface IArtistService
 
     /// <summary>Returns a paged list of artists for the list page, optionally filtered by a search query.</summary>
     Task<(IEnumerable<ArtistListItemDto> items, int totalCount)> GetPagedArtistsForListAsync(
-        int pageNumber, int pageSize, string query = null, CancellationToken ct = default);
+        int pageNumber, int pageSize, string query = null,
+        ArtistRoleFilter roleFilter = ArtistRoleFilter.All, CancellationToken ct = default);
 
     /// <summary>Returns up to maxResults artists whose name starts with the query (autocomplete).</summary>
     Task<IEnumerable<ArtistListItemDto>> SearchArtistsByNameAsync(string query, int maxResults = 5, CancellationToken ct = default);

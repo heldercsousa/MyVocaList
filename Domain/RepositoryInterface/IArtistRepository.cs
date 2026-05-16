@@ -2,11 +2,14 @@ using MyVocaList.Domain.Entity;
 
 namespace MyVocaList.Domain.RepositoryInterface;
 
+public enum ArtistRoleFilter { All, AuthorsOnly, PerformersOnly }
+
 public interface IArtistRepository
 {
-    /// <summary>Returns a paged list of artists with their song counts.</summary>
-    Task<(IEnumerable<(Artist artist, int songCount)> items, int totalCount)> GetPagedAsync(
-        int pageNumber, int pageSize, string normalizedQuery, CancellationToken ct);
+    /// <summary>Returns a paged list of artists with their catalog counts.</summary>
+    Task<(IEnumerable<(Artist artist, int catalogCount)> items, int totalCount)> GetPagedAsync(
+        int pageNumber, int pageSize, string normalizedQuery,
+        ArtistRoleFilter roleFilter = ArtistRoleFilter.All, CancellationToken ct = default);
 
     /// <summary>Returns artists whose normalized name starts with the normalized query (max results).</summary>
     Task<IEnumerable<Artist>> SearchByNameAsync(string normalizedQuery, int maxResults, CancellationToken ct);

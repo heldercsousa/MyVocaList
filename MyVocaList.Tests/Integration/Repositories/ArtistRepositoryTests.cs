@@ -50,7 +50,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
             MakeArtist("Metallica"));
         await _db.SaveChangesAsync();
 
-        var (items, totalCount) = await _repo.GetPagedAsync(1, 20, string.Empty, CancellationToken.None);
+        var (items, totalCount) = await _repo.GetPagedAsync(1, 20, string.Empty, ct: CancellationToken.None);
 
         Assert.Equal(3, totalCount);
         var names = items.Select(x => x.artist.Name).ToList();
@@ -67,7 +67,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
             MakeArtist("ABBA"));
         await _db.SaveChangesAsync();
 
-        var (items, totalCount) = await _repo.GetPagedAsync(1, 20, "beatl", CancellationToken.None);
+        var (items, totalCount) = await _repo.GetPagedAsync(1, 20, "beatl", ct: CancellationToken.None);
 
         Assert.Equal(1, totalCount);
         Assert.Equal("The Beatles", items.Single().artist.Name);
@@ -82,7 +82,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
             MakeArtist("Artist C"));
         await _db.SaveChangesAsync();
 
-        var (items, totalCount) = await _repo.GetPagedAsync(2, 2, string.Empty, CancellationToken.None);
+        var (items, totalCount) = await _repo.GetPagedAsync(2, 2, string.Empty, ct: CancellationToken.None);
 
         Assert.Equal(3, totalCount);
         Assert.Single(items);
@@ -90,20 +90,25 @@ public class ArtistRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GetPagedAsync_ReturnsSongCount()
+    public async Task GetPagedAsync_ReturnsCatalogCount()
     {
         var artist = MakeArtist("Queen");
         _db.Set<Artist>().Add(artist);
         await _db.SaveChangesAsync();
 
-        _db.Set<Song>().AddRange(
-            MakeSong(artist.Id, "Bohemian Rhapsody"),
-            MakeSong(artist.Id, "We Will Rock You"));
+        var song1 = MakeSong(artist.Id, "Bohemian Rhapsody");
+        var song2 = MakeSong(artist.Id, "We Will Rock You");
+        _db.Set<Song>().AddRange(song1, song2);
         await _db.SaveChangesAsync();
 
-        var (items, _) = await _repo.GetPagedAsync(1, 20, string.Empty, CancellationToken.None);
+        _db.Set<Catalog>().AddRange(
+            new Catalog { ArtistId = artist.Id, SongId = song1.Id },
+            new Catalog { ArtistId = artist.Id, SongId = song2.Id });
+        await _db.SaveChangesAsync();
 
-        Assert.Equal(2, items.Single().songCount);
+        var (items, _) = await _repo.GetPagedAsync(1, 20, string.Empty, ct: CancellationToken.None);
+
+        Assert.Equal(2, items.Single().catalogCount);
     }
 
     // ── Case-insensitive search ───────────────────────────────────────────
@@ -114,7 +119,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
         _db.Set<Artist>().Add(MakeArtist("Queen"));
         await _db.SaveChangesAsync();
 
-        var (items, totalCount) = await _repo.GetPagedAsync(1, 20, "QUEEN", CancellationToken.None);
+        var (items, totalCount) = await _repo.GetPagedAsync(1, 20, "QUEEN", ct: CancellationToken.None);
 
         Assert.Equal(1, totalCount);
         Assert.Equal("Queen", items.Single().artist.Name);

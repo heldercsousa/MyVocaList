@@ -69,21 +69,24 @@
                        ItemSeparatorThickness="0"
                        Margin="0,0,0,88"
                        Scrolled="OnCollectionViewScrolled"
-                       SelectionChanged="OnSelectionChanged"
-                       Tap="OnItemTapped">
+                       SelectionChanged="OnSelectionChanged">
 
                     <dxcv:DXCollectionView.ItemTemplate>
                         <DataTemplate x:DataType="dto:ArtistListItemDto">
                             <lists:ListItem Headline="{Binding Name}"
-                                            SupportingText="{Binding SongCountText}"
+                                            SupportingText="{Binding CatalogCountText}"
                                             IsSelected="False">
                                 <lists:ListItem.LeadingContent>
-                                    <lists:ListItemLeadingIcon Icon="person_outlined" />
-                                </lists:ListItem.LeadingContent>
-                                <lists:ListItem.TrailingContent>
                                     <dx:CheckEdit IsChecked="False"
                                                   InputTransparent="True"
                                                   VerticalOptions="Center" />
+                                </lists:ListItem.LeadingContent>
+                                <lists:ListItem.TrailingContent>
+                                    <dx:DXButton Style="{StaticResource IconButton}"
+                                                 Icon="queue_music_outlined"
+                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ArtistsViewModel}}, Path=ViewCatalogCommand}"
+                                                 CommandParameter="{Binding .}"
+                                                 InputTransparent="False" />
                                 </lists:ListItem.TrailingContent>
                             </lists:ListItem>
                         </DataTemplate>
@@ -92,16 +95,20 @@
                     <dxcv:DXCollectionView.SelectedItemTemplate>
                         <DataTemplate x:DataType="dto:ArtistListItemDto">
                             <lists:ListItem Headline="{Binding Name}"
-                                            SupportingText="{Binding SongCountText}"
+                                            SupportingText="{Binding CatalogCountText}"
                                             IsSelected="True">
                                 <lists:ListItem.LeadingContent>
-                                    <lists:ListItemLeadingIcon Icon="person_outlined" />
-                                </lists:ListItem.LeadingContent>
-                                <lists:ListItem.TrailingContent>
                                     <dx:CheckEdit IsChecked="True"
                                                   CheckedCheckBoxColor="{dx:ThemeColor Primary}"
                                                   InputTransparent="True"
                                                   VerticalOptions="Center" />
+                                </lists:ListItem.LeadingContent>
+                                <lists:ListItem.TrailingContent>
+                                    <dx:DXButton Style="{StaticResource IconButton}"
+                                                 Icon="queue_music_outlined"
+                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ArtistsViewModel}}, Path=ViewCatalogCommand}"
+                                                 CommandParameter="{Binding .}"
+                                                 InputTransparent="False" />
                                 </lists:ListItem.TrailingContent>
                             </lists:ListItem>
                         </DataTemplate>

@@ -5,6 +5,7 @@
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:autocomplete="clr-namespace:MyVocaList.UI.Components.AutocompleteField"
     x:Class="MyVocaList.UI.Pages.Songs.SongFormPage"
     x:DataType="vm:SongFormViewModel"
     Title="{Binding PageTitle}"
@@ -14,9 +15,16 @@
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="16">
 
-            <Label Text="{Binding ArtistName}"
-                   StyleClass="Label.Large"
-                   TextColor="{StaticResource OnSurfaceVariant}" />
+            <autocomplete:AutocompleteField
+                LabelText="Artist"
+                Placeholder="Search artists..."
+                Text="{Binding ArtistSearchText, Mode=TwoWay}"
+                Suggestions="{Binding ArtistSuggestions}"
+                SearchRequestedCommand="{Binding SearchArtistsCommand}"
+                SuggestionSelectedCommand="{Binding SelectArtistCommand}"
+                HasError="{Binding ArtistHasError}"
+                ErrorText="{Binding ArtistErrorText}"
+                IsEnabled="{Binding IsArtistLocked, Converter={StaticResource InverseBoolConverter}}" />
 
             <dxe:TextEdit x:Name="titleEdit"
                           Text="{Binding SongTitle, Mode=TwoWay}"
@@ -47,6 +55,15 @@
             <dxe:TextEdit Text="{Binding FeaturedArtists, Mode=TwoWay}"
                           LabelText="Featured Artists"
                           PlaceholderText="e.g. feat. Ivete Sangalo" />
+
+            <Editor Placeholder="Song lyrics (optional)"
+                    Text="{Binding Lyrics, Mode=TwoWay}"
+                    MaxLength="10000"
+                    AutoSize="TextChanges"
+                    MinimumHeightRequest="120"
+                    BackgroundColor="{StaticResource SurfaceContainerHighest}"
+                    TextColor="{StaticResource OnSurface}"
+                    PlaceholderColor="{StaticResource OnSurfaceVariant}" />
 
             <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
                 <dx:DXButton Content="Cancel"

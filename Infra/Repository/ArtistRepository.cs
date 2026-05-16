@@ -15,8 +15,9 @@ public class ArtistRepository : IArtistRepository
     }
 
     /// <inheritdoc />
-    public async Task<(IEnumerable<(Artist artist, int songCount)> items, int totalCount)> GetPagedAsync(
-        int pageNumber, int pageSize, string normalizedQuery, CancellationToken ct)
+    public async Task<(IEnumerable<(Artist artist, int catalogCount)> items, int totalCount)> GetPagedAsync(
+        int pageNumber, int pageSize, string normalizedQuery,
+        ArtistRoleFilter roleFilter = ArtistRoleFilter.All, CancellationToken ct = default)
     {
         var q = _db.Artists.AsQueryable();
 
@@ -28,16 +29,23 @@ public class ArtistRepository : IArtistRepository
                 EF.Functions.Collate(pattern, "NOCASE")));
         }
 
+        q = roleFilter switch
+        {
+            ArtistRoleFilter.AuthorsOnly    => q.Where(a => a.OriginalSongs.Any()),
+            ArtistRoleFilter.PerformersOnly => q.Where(a => a.CatalogEntries.Any()),
+            _                               => q
+        };
+
         var totalCount = await q.CountAsync(ct);
 
         var rawItems = await q
             .OrderBy(a => a.NameNormalized)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .Select(a => new { Artist = a, SongCount = a.OriginalSongs.Count() })
+            .Select(a => new { Artist = a, CatalogCount = a.CatalogEntries.Count() })
             .ToListAsync(ct);
 
-        var items = rawItems.Select(x => (x.Artist, x.SongCount)).ToList();
+        var items = rawItems.Select(x => (x.Artist, x.CatalogCount)).ToList();
         return (items, totalCount);
     }
 
