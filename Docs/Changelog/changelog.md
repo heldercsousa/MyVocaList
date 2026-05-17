@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/17/2026** - docs - Phase 16A Wave 3: devexpress-patterns.md gains FilterChipGroup section (namespace, inline items, ViewModel IList binding, Auto/∗ row layout rule); m3-components.md gains Filter Chip section (when to use, layout pattern, chip→enum mapping, MD3 terminology table)
 - **05/17/2026** - feat - Phase 16A Wave 2: ArtistsViewModel gains SelectedRoleFilters (IList) with chip→RoleFilter mapping (Authors→AuthorsOnly, Performers→PerformersOnly, both/neither→All); ArtistsPage.xaml adds dxe:FilterChipGroup row (Authors/Performers chips, TwoWay binding), fixes empty state icon person_outlined→group_outlined; SongsPage.xaml adds Shell.BackButtonBehavior IsVisible=False
 - **05/17/2026** - fix - Phase 16A Wave 1: AppShellViewModel.NavigateAsync now splits route at `?`, looks up base route in PageTypes, then calls IQueryAttributable.ApplyQueryAttributes with parsed query params; NavigationConfig Catalog group simplified to single "Artists" entry (group_outlined icon, no query param) replacing Authors/Performers split entries
 - **05/16/2026** - test - Phase 15 tests update: SongServiceTests extended (lyrics param on Create/Update, GetPagedSongsForListAsync delegation); CatalogServiceTests added (AddSongToCatalog happy/duplicate, RemoveFromCatalog, GetPagedCatalog); SongRepositoryTests extended (Lyrics field persistence, Catalog join smoke test); CatalogRepositoryTests added (Exists/Add/Duplicate/Remove/Count/GetPaged/GetPagedFiltered) — 157 tests green, 0 failures
