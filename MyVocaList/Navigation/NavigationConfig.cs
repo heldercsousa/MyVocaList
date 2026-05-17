@@ -27,9 +27,8 @@ public static class NavigationConfig
             new MenuItemDescription("People",         "group_outlined",                Routes.People,      navigateCommand),
         ]),
         new MenuGroup("Catalog", [
-            new MenuItemDescription("Authors",    "person_outlined",    Routes.Artists + "?mode=author",    navigateCommand),
-            new MenuItemDescription("Performers", "mic_outlined",        Routes.Artists + "?mode=performer", navigateCommand),
-            new MenuItemDescription("Songs",      "music_note_outlined", Routes.Songs,                       navigateCommand),
+            new MenuItemDescription("Artists", "group_outlined",      Routes.Artists, navigateCommand),
+            new MenuItemDescription("Songs",   "music_note_outlined", Routes.Songs,   navigateCommand),
         ]),
         new MenuGroup("System", [
             new MenuItemDescription("Preferences",    "settings_outlined",             Routes.Preferences, navigateCommand),
