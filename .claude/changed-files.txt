@@ -539,3 +539,6 @@ MyVocaList.Tests/Integration/Repositories/CatalogRepositoryTests.cs
 Docs/Changelog/changelog.md
 Docs/specs/artists-songs/tasks.md
 Docs/superpowers/plans/zippy-cuddling-penguin.md
+Docs/superpowers/plans/zippy-cuddling-penguin.md
+Docs/specs/artists-songs/tasks.md
+Docs/superpowers/plans/zippy-cuddling-penguin-handoff.md

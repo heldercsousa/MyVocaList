@@ -198,18 +198,52 @@ after every major task before committing.
 
 ---
 
-## Phase 16 — Final Gate [after Phase 15]
+## Phase 16A — Navigation + Filter UI + Quick Fixes [SEQUENTIAL]
 
-- [ ] **16.1** End-to-end smoke test on emulator:
+- [ ] **16A.1** Fix `AppShellViewModel.NavigateAsync` — split route at `?`, look up base route in `PageTypes`, set query params on ViewModel after `PushAsync`
+  - **Files owned:** `MyVocaList/UI/ViewModels/AppShellViewModel.cs`
+- [ ] **16A.2** Simplify menu — replace "Authors"/"Performers" entries with single "Artists" entry (no query param)
+  - **Files owned:** `MyVocaList/Navigation/NavigationConfig.cs`
+- [ ] **16A.3** Add `dxe:FilterChipGroup` to ArtistsPage — Items: "Authors", "Performers"; `SelectedItems` bound to ViewModel; mapping logic: both/neither → All, one → respective filter
+  - **Files owned:** `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml`, `MyVocaList/UI/ViewModels/ArtistsViewModel.cs`
+- [ ] **16A.4** Fix broken empty state icon `person_outlined` → `group_outlined` (same file as 16A.3)
+- [ ] **16A.5** Add `Shell.BackButtonBehavior IsVisible="False" IsEnabled="False"` to SongsPage (same fix as VenuesPage/ArtistsPage)
+  - **Files owned:** `MyVocaList/UI/Pages/Songs/SongsPage.xaml`
+- [ ] **16A.6** `dotnet build` — 0 errors; `dotnet test` — all passing
+- [ ] **16A.7** Update `.claude/library/devexpress-patterns.md` and `.claude/library/m3-components.md` with FilterChipGroup + MD3 Filter Chip patterns
+
+---
+
+## Phase 16B — API Search Strip on Forms [SEQUENTIAL — after 16A]
+
+> Services already exist and are DI-registered: `IMusicMetadataService`, `MusicBrainzProvider`, `DeezerProvider` (Phase 4, commit 53fcfb7). Only UI wiring is missing.
+
+- [ ] **16B.1** Update `ArtistFormViewModel` — inject `IMusicMetadataService`; add `ApiSearchText`, `ApiResults`, `IsApiSearching`, `ApiStatusMessage`; add `SearchApiCommand`, `SelectApiResultCommand`; add duplicate detection state (`DuplicateSuggestions`, `SelectDuplicateCommand`)
+  - **Files owned:** `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`
+- [ ] **16B.2** Update `ArtistFormPage.xaml` — add duplicate suggestions field + API search strip (TextEdit + "Search" button + status label + results list) below Name field
+  - **Files owned:** `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml`
+- [ ] **16B.3** Update `SongFormViewModel` — inject `IMusicMetadataService`; add API state + `SearchApiCommand`; `SelectApiResultCommand` populates Title/FeaturedArtists and locks Artist field on match
+  - **Files owned:** `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
+- [ ] **16B.4** Update `SongFormPage.xaml` — add API search strip below Title field
+  - **Files owned:** `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`
+- [ ] **16B.5** `dotnet build` — 0 errors; `dotnet test` — all passing
+
+---
+
+## Phase 16C — Final Gate [after Phase 16B]
+
+- [ ] **16C.1** End-to-end smoke test on emulator:
+  - Single Artists menu item navigates to ArtistsPage; filter chips work
   - Register artist; verify no songs required
   - Register song from global Songs page; verify title uniqueness
+  - API search strip works on ArtistFormPage and SongFormPage
   - Add song to artist's Catalog via trailing button → Catalog page → FAB picker
   - Remove song from Catalog; verify song still exists in global list
   - Delete artist; verify songs not deleted; Catalog entries gone
   - Delete song; verify it disappears from all Catalogs
   - Edit song; verify Lyrics field visible and saveable
-  - Verify Songs menu item in flyout
-- [ ] **16.2** Build — 0 errors
-- [ ] **16.3** Run `/project:review`
-- [ ] **16.4** Update `Docs/Changelog/changelog.md`
-- [ ] **16.5** Run `/project:commit`
+  - Verify Songs menu item in flyout; search back arrow shows correctly
+- [ ] **16C.2** Build — 0 errors
+- [ ] **16C.3** Run `/project:review`
+- [ ] **16C.4** Update `Docs/Changelog/changelog.md`
+- [ ] **16C.5** Run `/project:commit`

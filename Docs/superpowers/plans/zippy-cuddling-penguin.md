@@ -8,109 +8,162 @@
 
 ## Context
 
-Six issues were identified after Phases 10–15:
+Six issues found after Phases 10–15:
 
-1. **Authors/Performers menu items don't navigate** — `AppShellViewModel.NavigateAsync` does a `PageTypes.TryGetValue(route)` lookup, but the route passed is `"artists?mode=author"` (with query params). The dictionary key is just `"artists"`, so the lookup fails silently.
-2. **Menu structure mismatch** — Spec / user expectation: single "Artists" entry in menu, with an in-page filter (2 tabs or 2 checkboxes). Current code: two broken separate menu entries.
-3. **Missing filter UI** — `ArtistsPage.xaml` has no tab bar or filter control. `ArtistRoleFilter` enum and ViewModel support exist but nothing drives it from the UI.
-4. **`person_outlined` icon broken** — Used in `ArtistsPage.xaml` empty state illustration. Not valid in this DevExpress version.
-5. **API integration absent from forms** — `IMusicMetadataService`, `MusicBrainzProvider`, `DeezerProvider`, and `MusicMetadataService` were implemented and registered in DI at Phase 4 (`53fcfb7`). However, Phases 6/7 (UI) and Phase 14 (UI refactor) never wired them to `ArtistFormPage` (US-4) or `SongFormPage` (US-11). The API search strip is completely absent from both form pages.
-6. **Double back arrow in SongsPage search mode** — `SongsPage.xaml` is missing `<Shell.BackButtonBehavior IsVisible="False" IsEnabled="False" />`. VenuesPage and ArtistsPage already have this fix. Without it, Shell renders its native back arrow alongside the `SearchAppBar`'s leading icon.
+1. **Authors/Performers menu items don't navigate** — `AppShellViewModel.NavigateAsync` looks up routes in `PageTypes` via exact string match; `"artists?mode=author"` fails because the key is `"artists"`.
+2. **Menu structure mismatch** — User expectation: single "Artists" entry, with in-page filter. Current: two broken separate entries.
+3. **No filter UI on ArtistsPage** — `ArtistRoleFilter` enum + ViewModel support exist but no UI widget drives it.
+4. **`person_outlined` icon broken** in ArtistsPage empty state.
+5. **API form integration absent** — `IMusicMetadataService`, `MusicBrainzProvider`, `DeezerProvider`, `MusicMetadataService` were fully implemented and DI-registered at Phase 4 (`53fcfb7`). Phases 6/7 (UI) and 14 (UI refactor) never wired them to `ArtistFormPage` (US-4) or `SongFormPage` (US-11). No API search strip exists on either form.
+6. **Double back arrow in SongsPage search mode** — `SongsPage.xaml` is missing `<Shell.BackButtonBehavior IsVisible="False" IsEnabled="False" />`. VenuesPage and ArtistsPage already have this fix.
 
 ---
 
-## Approach
+## MD3 Decision: Filter chips (not tabs, not checkboxes)
 
-Split into three sequential sub-phases:
+From `m3.material.io/components/chips/guidelines#filter-chips`:
 
-### Sub-phase A — Navigation + Filter UI + Quick Fixes (Issues 1, 2, 3, 4, 6)
+> "Filter chips use tags or descriptive words to filter content. They can be a good alternative to segmented buttons or checkboxes when viewing a list or search results."
 
-**A.1 — Fix `AppShellViewModel.NavigateAsync` (Issue 1)**  
-Extract base route before `?` for the `PageTypes` lookup. Pass the full route string (including query) to `GoToAsync` instead of `PushAsync`. This also future-proofs any other query-param menu routes.  
+- **Correct MD3 pattern for list filtering** = **Filter chip** (variant of Chips)
+- When activated: leading checkmark icon appears automatically
+- Multi-select: ✓ (multiple chips active = AND logic; user can filter to Authors only, Performers only, or both = All)
+- Labels must be **nouns** describing categories to **include** ("Authors", "Performers" — both correct)
+- Placement: horizontal row, below the app bar, above the list
+
+**DevExpress implementation**: `dxe:FilterChipGroup` — built-in, no custom component needed.
+- `ItemsSource` = list of role strings `["Authors", "Performers"]`
+- `SelectedItems` = bindable collection (bound to ViewModel)
+- Namespace: `dxe` (`DevExpress.Maui.Editors`) — already used in `SongFormPage.xaml`, `ArtistFormPage.xaml`
+
+**Library files to update after implementation:**
+- `.claude/library/devexpress-patterns.md` — add `FilterChipGroup` usage pattern
+- `.claude/library/m3-components.md` — add Filter Chip section with MD3 terminology and guidelines
+
+---
+
+## Sub-phase A — Navigation + Filter UI + Quick Fixes
+
+### A.1 — Fix `AppShellViewModel.NavigateAsync`
+- Split route at `?` to extract `baseRoute` and `queryString`
+- Look up `PageTypes[baseRoute]` (not the full route string)
+- Create page via DI as before, then push with query: use `Shell.Current.GoToAsync($"///{baseRoute}?{queryString}")` OR apply query params manually to the page's BindingContext
+- **Simpler approach**: Since `artists` is a `FlyoutItem` and routes WITH query params need Shell's query mechanism, the cleanest fix is: extract base route for PageTypes lookup, then use `Shell.Current.GoToAsync` for the full route. Requires registering Artists+Songs as `Routing.RegisterRoute` so GoToAsync can push them. Alternatively, create the page via DI and set query props on the ViewModel manually.
+- **Recommended**: Parse query params and set them on the ViewModel after `PushAsync` — minimal disruption.
 - **File:** `MyVocaList/UI/ViewModels/AppShellViewModel.cs`
 
-**A.2 — Simplify menu to single "Artists" entry (Issue 2)**  
-Replace the two "Authors"/"Performers" entries with a single "Artists" entry (no query param). Route: `Routes.Artists`.  
+### A.2 — Simplify menu: single "Artists" entry
+- Replace two "Authors"/"Performers" entries with one "Artists" entry, route = `Routes.Artists` (no query param)
+- The in-page `FilterChipGroup` handles role filtering
 - **File:** `MyVocaList/Navigation/NavigationConfig.cs`
 
-**A.3 — Add filter UI on ArtistsPage (Issue 2/3)**  
-Add a filter row below the app bar. Two options (user to confirm):
-- **Option A: 2 tabs (Authors | Performers)** — uses `DXTabView` or a segmented chip group. No "All" tab; default state = all.  
-- **Option B: 2 checkboxes (Authors ☑ | Performers ☑)** — both checked = all; uncheck one = filter. Allows "both" (artists in both roles).
+### A.3 — Add `FilterChipGroup` filter row to ArtistsPage
+- Add `dxe` namespace import to `ArtistsPage.xaml` (already present in other pages)
+- Add a horizontal `FilterChipGroup` below the `Shell.TitleView` Grid, above the `ShimmerView`
+- `ItemsSource` = inline `x:Array` of strings: `["Authors", "Performers"]`
+- `SelectedItems` bound two-way to new `SelectedRoleFilters` observable property on ViewModel
+- In ViewModel: `partial void OnSelectedRoleFiltersChanged(IList value)` → map to `ArtistRoleFilter` → triggers `OnRoleFilterChanged` → reloads list
+- Mapping logic: both or neither selected → `All`; only "Authors" → `AuthorsOnly`; only "Performers" → `PerformersOnly`
+- **Files:** `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml`, `MyVocaList/UI/ViewModels/ArtistsViewModel.cs`
 
-`ArtistsViewModel` already has `ArtistRoleFilter` (All/AuthorsOnly/PerformersOnly) and `OnRoleFilterChanged` wired. Only the XAML binding is missing.
+### A.4 — Fix broken empty state icon
+- Replace `Illustration="person_outlined"` → `Illustration="group_outlined"` (confirmed working, used in People menu)
+- **File:** `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml` line ~122
 
-- **Files:** `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml`  
-- **ViewModel already ready** — no C# changes needed for tabs; for checkboxes, add `ShowAuthors`/`ShowPerformers` bool properties that map to `RoleFilter`.
-
-**A.4 — Fix `person_outlined` empty state icon (Issue 4)**  
-Replace `Illustration="person_outlined"` with `group_outlined` (known-working icon used in the People menu item).  
-- **File:** `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml` line 122
-
-**A.5 — Fix double back arrow on SongsPage search (Issue 6)**  
-Add `<Shell.BackButtonBehavior IsVisible="False" IsEnabled="False" />` to `SongsPage.xaml`. The code-behind already has `OnBackButtonPressed` handling search close and confirm sheet dismiss.  
-- **File:** `MyVocaList/UI/Pages/Songs/SongsPage.xaml`  
+### A.5 — Fix double back arrow on SongsPage
+- Add `<Shell.BackButtonBehavior IsVisible="False" IsEnabled="False" />` before `<Shell.TitleView>` in `SongsPage.xaml`
+- The code-behind `OnBackButtonPressed()` already handles: confirm sheet dismiss → search close → default back
 - **Pattern from:** `VenuesPage.xaml` lines 20–26
+- **File:** `MyVocaList/UI/Pages/Songs/SongsPage.xaml`
+
+### A.6 — Build + test
+- `dotnet build` — 0 errors
+- `dotnet test` — all passing
+
+### A.7 — Update library pattern files
+- `.claude/library/devexpress-patterns.md`: add `FilterChipGroup` section with full XAML example, SelectedItems binding pattern, namespace reference
+- `.claude/library/m3-components.md`: add **Filter Chip** section — MD3 terminology, usage rules (nouns, multi-select, leading checkmark on select, horizontal row placement, "don't use single chip alone")
 
 ---
 
-### Sub-phase B — API Search Strip on Forms (Issue 5)
+## Sub-phase B — API Search Strip on Forms
 
-**Services already exist and are DI-registered** (confirmed in `MauiProgram.cs`):
-- `IMusicMetadataService` / `MusicMetadataService` — provider-chain orchestrator
-- `MusicBrainzProvider` (primary) + `DeezerProvider` (fallback)
-- `MusicSearchResultDto(ExternalId, Provider, ArtistName, SongTitle?, FeaturedArtists?)`
+### Context
+- `IMusicMetadataService`, `MusicMetadataService`, `MusicBrainzProvider`, `DeezerProvider` — fully implemented at Phase 4, registered in DI (`MauiProgram.cs` lines 56–76)
+- `MusicSearchResultDto(ExternalId, Provider, ArtistName, SongTitle?, FeaturedArtists?)` — exists
+- US-4 (artist form) and US-11 (song form) are the spec stories
 
-**B.1 — ArtistFormPage API strip (US-4, US-3 duplicate detection)**
+### B.1 — ArtistFormViewModel: API + duplicate detection state
+- Inject `IMusicMetadataService`
+- Add observable properties: `ApiSearchText`, `ApiResults` (`IEnumerable<MusicSearchResultDto>`), `IsApiSearching`, `ApiStatusMessage` (error/no-results inline message)
+- Add `SearchApiCommand` (AsyncRelayCommand) — calls `_metadataService.SearchArtistsAsync(ApiSearchText)`, populates `ApiResults`, handles empty/error per AC-4.3–4.4
+- Add `SelectApiResultCommand` (RelayCommand<MusicSearchResultDto>) — populates `ArtistName`, stores `ExternalId`/`ExternalProvider` for save, sets `HasManualEdits = false`
+- Add duplicate detection: debounced `SearchArtistsByNameAsync` (already on `IArtistService`) → `DuplicateSuggestions` list; `SelectDuplicateCommand` navigates to edit form for that artist
+- `SaveAsync`: include `ExternalId`, `ExternalProvider`, `HasManualEdits` in create/update call (check if `IArtistService.CreateArtistAsync` accepts these — if not, service update needed)
+- **File:** `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`
 
-What to add:
-- `ArtistFormViewModel`: inject `IMusicMetadataService`; add `ApiSearchText`, `ApiResults` (list of `MusicSearchResultDto`), `IsApiSearching`, `ApiStatusMessage`, `SearchApiCommand`; add `ArtistSuggestions` (duplicate detection using `IArtistService.SearchArtistsByNameAsync`), `SuggestionSelectedCommand`; add `HasManualEdits` tracking.
-- `ArtistFormPage.xaml`: add API search strip below Name field (search input + "Search" button, result list, error/status message); add duplicate detection suggestions below Name field.
+### B.2 — ArtistFormPage.xaml: API strip + duplicate suggestions UI
+- Below the Name field: duplicate suggestions `AutocompleteField` (reuse existing component with `DuplicateSuggestions` binding) — shown as "Did you mean?" style list
+- Below duplicate suggestions: API search strip — `dxe:TextEdit` (pre-filled with Name) + `DXButton "Search"` — triggers `SearchApiCommand`
+- API status label (bound to `ApiStatusMessage`, hidden when empty)
+- API results list (DXCollectionView or VerticalStackLayout with BindableLayout, up to 5 items, each row shows `ArtistName` + `Provider`, tapping fires `SelectApiResultCommand`)
+- **File:** `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml`
 
-**B.2 — SongFormPage API strip (US-11)**
+### B.3 — SongFormViewModel: API state
+- Inject `IMusicMetadataService`
+- Add `ApiSearchText`, `ApiResults`, `IsApiSearching`, `ApiStatusMessage`
+- Add `SearchApiCommand` — calls `_metadataService.SearchSongsAsync(ApiSearchText, artistHint: SelectedArtistName)` 
+- Add `SelectApiResultCommand(MusicSearchResultDto)` — populates `SongTitle`, `FeaturedArtists`; if `ArtistName` matches a registered artist (via `IArtistService.SearchArtistsByNameAsync`), pre-fills artist and locks it (`IsArtistLocked = true`); stores `ExternalId`/`ExternalProvider`
+- **File:** `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
 
-What to add:
-- `SongFormViewModel`: inject `IMusicMetadataService`; add `ApiSearchText`, `ApiResults`, `IsApiSearching`, `ApiStatusMessage`, `SearchApiCommand`; add `SelectApiResultCommand` that populates Title, FeaturedArtists, and locks the Artist field if a match is found in registered artists.
-- `SongFormPage.xaml`: add API search strip below Title field.
+### B.4 — SongFormPage.xaml: API strip
+- Below Title field: API strip (`dxe:TextEdit` pre-filled with `SongTitle` + `DXButton "Search"`)
+- API status label, API results list (same pattern as B.2)
+- **File:** `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`
 
-**B.3 — Build + tests green**
+### B.5 — Build + test
+- `dotnet build` — 0 errors
+- `dotnet test` — all passing (no new service tests required; form VM logic is UI-layer only)
 
 ---
 
-### Sub-phase C — Final Gate (was Phase 16)
+## Sub-phase C — Final Gate
 
-**C.1** End-to-end smoke test on emulator (Phase 16.1 checklist from tasks.md)  
-**C.2** Build — 0 errors  
-**C.3** `/project:review`  
-**C.4** Update `Docs/Changelog/changelog.md`  
-**C.5** `/project:commit`
+- **C.1** End-to-end smoke test on emulator (Phase 16.1 checklist from tasks.md)
+- **C.2** `dotnet build` — 0 errors
+- **C.3** `/project:review`
+- **C.4** Update `Docs/Changelog/changelog.md`
+- **C.5** `/project:commit`
 
 ---
 
 ## Key files
 
-| File | Change |
-|------|--------|
-| `MyVocaList/UI/ViewModels/AppShellViewModel.cs` | Fix NavigateAsync for query-param routes |
-| `MyVocaList/Navigation/NavigationConfig.cs` | Single "Artists" entry |
-| `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml` | Add filter UI + fix icon |
-| `MyVocaList/UI/Pages/Songs/SongsPage.xaml` | Add Shell.BackButtonBehavior |
-| `MyVocaList/UI/ViewModels/ArtistsViewModel.cs` | Bind filter control (if checkboxes: add helpers) |
-| `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml` | Add API strip + duplicate suggestions |
-| `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` | API + duplicate state + commands |
-| `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` | Add API strip |
-| `MyVocaList/UI/ViewModels/SongFormViewModel.cs` | API state + SearchApiCommand |
-| `Docs/specs/artists-songs/tasks.md` | Add sub-phases A/B/C tasks |
+| File | Sub-phase | Change |
+|------|-----------|--------|
+| `MyVocaList/UI/ViewModels/AppShellViewModel.cs` | A.1 | Fix NavigateAsync query-param routing |
+| `MyVocaList/Navigation/NavigationConfig.cs` | A.2 | Single "Artists" menu entry |
+| `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml` | A.3, A.4 | FilterChipGroup + icon fix |
+| `MyVocaList/UI/ViewModels/ArtistsViewModel.cs` | A.3 | `SelectedRoleFilters` + mapping |
+| `MyVocaList/UI/Pages/Songs/SongsPage.xaml` | A.5 | BackButtonBehavior |
+| `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` | B.1 | API + duplicate state |
+| `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml` | B.2 | API strip + duplicate suggestions |
+| `MyVocaList/UI/ViewModels/SongFormViewModel.cs` | B.3 | API state |
+| `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` | B.4 | API strip |
+| `.claude/library/devexpress-patterns.md` | A.7 | FilterChipGroup pattern |
+| `.claude/library/m3-components.md` | A.7 | Filter Chip MD3 section |
+| `Docs/specs/artists-songs/tasks.md` | — | Add sub-phases A/B/C tasks |
 
-## Reuse
+## Reused without change
 
-- `AutocompleteField` component — already used in `SongFormPage` for artist autocomplete; the API results list can follow the same overlay pattern.
-- `MusicMetadataService` + `MusicBrainzProvider` + `DeezerProvider` — fully implemented, just needs ViewModel injection.
-- `MusicSearchResultDto` — DTO for API results already defined.
-- `OnBackButtonPressed` in SongsPage.xaml.cs — already handles search close.
+- `AutocompleteField` component — duplicate detection suggestions on ArtistFormPage
+- `IMusicMetadataService.SearchArtistsAsync` / `SearchSongsAsync` — already DI-registered
+- `MusicSearchResultDto` — DTO for API results
+- `ArtistRoleFilter` enum (`All`/`AuthorsOnly`/`PerformersOnly`) — no change needed
+- `OnRoleFilterChanged` in `ArtistsViewModel` — already triggers list reload
+- `OnBackButtonPressed` in `SongsPage.xaml.cs` — already handles search close + confirm sheet
 
-## Pending user decision
+## Incremental edit order (per XAML safety rule)
 
-**Filter UI on ArtistsPage (A.3):** Tabs or checkboxes?  
-- 2 tabs (Authors | Performers) — mutually exclusive, matches DXTabView spec direction  
-- 2 checkboxes (Authors ☑ | Performers ☑) — combinable, allows "show both" = All
+Sub-phase A: ArtistsPage.xaml → build → SongsPage.xaml → build  
+Sub-phase B: ArtistFormPage.xaml → build → SongFormPage.xaml → build
