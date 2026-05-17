@@ -42,10 +42,24 @@ public class AppShellViewModel : ViewModelBase
             return;
         }
 
-        if (!NavigationConfig.PageTypes.TryGetValue(route, out var pageType))
+        var queryIndex = route.IndexOf('?');
+        var baseRoute = queryIndex >= 0 ? route[..queryIndex] : route;
+        var queryString = queryIndex >= 0 ? route[(queryIndex + 1)..] : null;
+
+        if (!NavigationConfig.PageTypes.TryGetValue(baseRoute, out var pageType))
             return;
 
         var page = (Page)_serviceProvider.GetRequiredService(pageType);
         await Shell.Current.Navigation.PushAsync(page);
+
+        if (queryString is not null && page.BindingContext is IQueryAttributable attributable)
+        {
+            var queryParams = queryString
+                .Split('&', StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p.Split('=', 2))
+                .Where(p => p.Length == 2)
+                .ToDictionary(p => p[0], p => (object)p[1]);
+            attributable.ApplyQueryAttributes(queryParams);
+        }
     }
 }
