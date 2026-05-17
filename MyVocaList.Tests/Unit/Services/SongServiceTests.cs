@@ -170,6 +170,65 @@ public class SongServiceTests
         Assert.NotEmpty(message);
     }
 
+    // ── CreateSongAsync — lyrics ──────────────────────────────────────────
+
+    [Fact]
+    public async Task CreateSongAsync_WithLyrics_PersistsLyrics()
+    {
+        var artist = new Artist { Id = 1, Name = "Queen", NameNormalized = "queen" };
+        _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(artist);
+        _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(false);
+        _songRepoMock.Setup(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()))
+                     .Returns(Task.CompletedTask);
+        var sut = CreateSut();
+
+        var (success, _, song) = await sut.CreateSongAsync(1, "Bohemian Rhapsody", lyrics: "Some lyrics");
+
+        Assert.True(success);
+        Assert.NotNull(song);
+        Assert.Equal("Some lyrics", song.Lyrics);
+    }
+
+    // ── UpdateSongAsync — lyrics ──────────────────────────────────────────
+
+    [Fact]
+    public async Task UpdateSongAsync_WithLyrics_ReturnsSuccess()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Old Title", TitleNormalized = "old title" };
+        _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(song);
+        _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(false);
+        _songRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()))
+                     .Returns(Task.CompletedTask);
+        var sut = CreateSut();
+
+        var (success, _) = await sut.UpdateSongAsync(1, "New Title", null, "Updated lyrics", true);
+
+        Assert.True(success);
+    }
+
+    // ── GetPagedSongsForListAsync ─────────────────────────────────────────
+
+    [Fact]
+    public async Task GetPagedSongsForListAsync_ReturnsFromRepository()
+    {
+        var items = new List<SongListItemDto>
+        {
+            new(1, "Bohemian Rhapsody", 1, "Queen", null, null, false)
+        };
+        _songRepoMock.Setup(r => r.GetPagedAsync(1, 20, null, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((items.AsEnumerable(), 1));
+        var sut = CreateSut();
+
+        var (result, totalCount) = await sut.GetPagedSongsForListAsync(1, 20);
+
+        Assert.Single(result);
+        Assert.Equal(1, totalCount);
+    }
+
     // ── DeleteSongsAsync ──────────────────────────────────────────────────
 
     [Fact]
