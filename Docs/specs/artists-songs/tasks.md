@@ -204,13 +204,13 @@ after every major task before committing.
   - **Files owned:** `MyVocaList/UI/ViewModels/AppShellViewModel.cs`
 - [x] **16A.2** Simplify menu — replace "Authors"/"Performers" entries with single "Artists" entry (no query param)
   - **Files owned:** `MyVocaList/Navigation/NavigationConfig.cs`
-- [ ] **16A.3** Add `dxe:FilterChipGroup` to ArtistsPage — Items: "Authors", "Performers"; `SelectedItems` bound to ViewModel; mapping logic: both/neither → All, one → respective filter
+- [x] **16A.3** Add `dxe:FilterChipGroup` to ArtistsPage — Items: "Authors", "Performers"; `SelectedItems` bound to ViewModel; mapping logic: both/neither → All, one → respective filter
   - **Files owned:** `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml`, `MyVocaList/UI/ViewModels/ArtistsViewModel.cs`
-- [ ] **16A.4** Fix broken empty state icon `person_outlined` → `group_outlined` (same file as 16A.3)
-- [ ] **16A.5** Add `Shell.BackButtonBehavior IsVisible="False" IsEnabled="False"` to SongsPage (same fix as VenuesPage/ArtistsPage)
+- [x] **16A.4** Fix broken empty state icon `person_outlined` → `group_outlined` (same file as 16A.3)
+- [x] **16A.5** Add `Shell.BackButtonBehavior IsVisible="False" IsEnabled="False"` to SongsPage (same fix as VenuesPage/ArtistsPage)
   - **Files owned:** `MyVocaList/UI/Pages/Songs/SongsPage.xaml`
-- [ ] **16A.6** `dotnet build` — 0 errors; `dotnet test` — all passing
-- [ ] **16A.7** Update `.claude/library/devexpress-patterns.md` and `.claude/library/m3-components.md` with FilterChipGroup + MD3 Filter Chip patterns
+- [x] **16A.6** `dotnet build` — 0 errors; `dotnet test` — all passing (157 tests)
+- [x] **16A.7** Update `.claude/library/devexpress-patterns.md` and `.claude/library/m3-components.md` with FilterChipGroup + MD3 Filter Chip patterns
 
 ---
 
