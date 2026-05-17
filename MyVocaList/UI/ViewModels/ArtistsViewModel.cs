@@ -20,6 +20,7 @@ public partial class ArtistsViewModel : ViewModelBase
     private volatile bool _isLoading;
 
     [ObservableProperty] private ArtistRoleFilter _roleFilter = ArtistRoleFilter.All;
+    [ObservableProperty] private System.Collections.IList _selectedRoleFilters = new List<object>();
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private bool _isSearchMode;
@@ -119,6 +120,17 @@ public partial class ArtistsViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(AppBarTitle));
         _ = LoadFirstPageAsync(CancellationToken.None);
+    }
+
+    partial void OnSelectedRoleFiltersChanged(System.Collections.IList value)
+    {
+        var selected = value?.Cast<string>().ToHashSet(StringComparer.Ordinal) ?? [];
+        RoleFilter = (selected.Contains("Authors"), selected.Contains("Performers")) switch
+        {
+            (true, false) => ArtistRoleFilter.AuthorsOnly,
+            (false, true) => ArtistRoleFilter.PerformersOnly,
+            _ => ArtistRoleFilter.All
+        };
     }
 
     public async Task InitializeAsync()

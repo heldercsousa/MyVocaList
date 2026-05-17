@@ -17,6 +17,10 @@
     BackgroundColor="{StaticResource Surface}"
     SafeAreaEdges="Container">
 
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False" IsEnabled="False" />
+    </Shell.BackButtonBehavior>
+
     <Shell.TitleView>
         <Grid>
             <appbars:SmallAppBar
