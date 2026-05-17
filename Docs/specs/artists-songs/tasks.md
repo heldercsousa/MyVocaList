@@ -190,11 +190,11 @@ after every major task before committing.
 
 ## Phase 15 — Tests Update [after Phase 14]
 
-- [ ] **15.1** Update `SongServiceTests` — remove `artistId` from create calls; update title uniqueness tests (global, not per-artist)
-- [ ] **15.2** Update `SongRepositoryTests` — replace artist-scoped paged tests with global paged tests; add Catalog join tests
-- [ ] **15.3** Add `CatalogRepositoryTests` — add/remove/exists/paged-by-artist
-- [ ] **15.4** Add `CatalogServiceTests` — add duplicate, remove not-found, paged list
-- [ ] **15.5** `dotnet test` — all pass (Green)
+- [x] **15.1** Update `SongServiceTests` — remove `artistId` from create calls; update title uniqueness tests (global, not per-artist)
+- [x] **15.2** Update `SongRepositoryTests` — replace artist-scoped paged tests with global paged tests; add Catalog join tests
+- [x] **15.3** Add `CatalogRepositoryTests` — add/remove/exists/paged-by-artist
+- [x] **15.4** Add `CatalogServiceTests` — add duplicate, remove not-found, paged list
+- [x] **15.5** `dotnet test` — all pass (Green) — 157 tests, 0 failures
 
 ---
 
