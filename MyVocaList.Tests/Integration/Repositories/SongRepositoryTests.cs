@@ -270,6 +270,43 @@ public class SongRepositoryTests : IAsyncLifetime
         Assert.Equal(0, remaining);
     }
 
+    // ── Lyrics field ─────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task AddAsync_ValidSong_HasLyricsField()
+    {
+        var artist = await SeedArtistAsync("Bob Dylan");
+        var song = MakeSong(artist.Id, "Blowin in the Wind");
+        song.Lyrics = "Test lyrics";
+
+        await _repo.AddAsync(song, CancellationToken.None);
+        await _db.SaveChangesAsync();
+
+        var found = await _repo.GetByIdAsync(song.Id, CancellationToken.None);
+
+        Assert.NotNull(found);
+        Assert.Equal("Test lyrics", found.Lyrics);
+    }
+
+    // ── Catalog join table ────────────────────────────────────────────────
+
+    [Fact]
+    public async Task AddAsync_CatalogEntry_LinksArtistAndSong()
+    {
+        var originalArtist = await SeedArtistAsync("Original Artist");
+        var performer = await SeedArtistAsync("Performer Artist");
+        var song = MakeSong(originalArtist.Id, "Cover Song");
+        _db.Set<Song>().Add(song);
+        await _db.SaveChangesAsync();
+
+        _db.Catalog.Add(new Catalog { ArtistId = performer.Id, SongId = song.Id });
+        await _db.SaveChangesAsync();
+
+        var exists = await _db.Catalog.AnyAsync(c => c.ArtistId == performer.Id && c.SongId == song.Id);
+
+        Assert.True(exists);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────
 
     private async Task<Artist> SeedArtistAsync(string name)
