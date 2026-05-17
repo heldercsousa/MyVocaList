@@ -200,9 +200,9 @@ after every major task before committing.
 
 ## Phase 16A — Navigation + Filter UI + Quick Fixes [SEQUENTIAL]
 
-- [ ] **16A.1** Fix `AppShellViewModel.NavigateAsync` — split route at `?`, look up base route in `PageTypes`, set query params on ViewModel after `PushAsync`
+- [x] **16A.1** Fix `AppShellViewModel.NavigateAsync` — split route at `?`, look up base route in `PageTypes`, set query params on ViewModel after `PushAsync`
   - **Files owned:** `MyVocaList/UI/ViewModels/AppShellViewModel.cs`
-- [ ] **16A.2** Simplify menu — replace "Authors"/"Performers" entries with single "Artists" entry (no query param)
+- [x] **16A.2** Simplify menu — replace "Authors"/"Performers" entries with single "Artists" entry (no query param)
   - **Files owned:** `MyVocaList/Navigation/NavigationConfig.cs`
 - [ ] **16A.3** Add `dxe:FilterChipGroup` to ArtistsPage — Items: "Authors", "Performers"; `SelectedItems` bound to ViewModel; mapping logic: both/neither → All, one → respective filter
   - **Files owned:** `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml`, `MyVocaList/UI/ViewModels/ArtistsViewModel.cs`

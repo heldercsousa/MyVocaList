@@ -9,6 +9,7 @@
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
     x:Class="MyVocaList.UI.Pages.Artists.ArtistsPage"
     x:Name="page"
@@ -41,8 +42,24 @@
     </Shell.TitleView>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <dx:ShimmerView IsLoading="{Binding IsInitialLoading}"
+        <dxe:FilterChipGroup Grid.Row="0"
+                             SelectedItems="{Binding SelectedRoleFilters, Mode=TwoWay}"
+                             Margin="16,4,16,4">
+            <dxe:FilterChipGroup.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Authors</x:String>
+                    <x:String>Performers</x:String>
+                </x:Array>
+            </dxe:FilterChipGroup.ItemsSource>
+        </dxe:FilterChipGroup>
+
+        <dx:ShimmerView Grid.Row="1"
+                        IsLoading="{Binding IsInitialLoading}"
                         WaveWidth="0.7"
                         WaveOpacity="0.8">
             <dx:ShimmerView.LoadingView>
@@ -119,19 +136,22 @@
 
         <!-- Empty state: no artists registered -->
         <states:EmptyState
-            Illustration="person_outlined"
+            Grid.Row="1"
+            Illustration="group_outlined"
             Headline="No artist registered"
             IsVisible="{Binding IsEmptyNoArtists}"
             Margin="32,32,32,88" />
 
         <!-- Empty state: search returned no results -->
         <states:EmptyState
+            Grid.Row="1"
             Illustration="search_outlined"
             Headline="No artist found"
             IsVisible="{Binding IsEmptyNoResults}"
             Margin="32,32,32,88" />
 
-        <HorizontalStackLayout HorizontalOptions="Center"
+        <HorizontalStackLayout Grid.Row="1"
+                               HorizontalOptions="Center"
                                VerticalOptions="End"
                                Margin="0,0,0,16"
                                Spacing="8">
@@ -157,7 +177,8 @@
         </HorizontalStackLayout>
 
         <!-- Confirm delete BottomSheet -->
-        <dx:BottomSheet x:Name="confirmSheet"
+        <dx:BottomSheet Grid.Row="1"
+                        x:Name="confirmSheet"
                         HalfExpandedRatio="0.28"
                         AllowedState="HalfExpanded"
                         IsModal="True"
