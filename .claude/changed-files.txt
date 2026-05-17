@@ -528,3 +528,13 @@ MyVocaList.Tests/Integration/Repositories/ArtistRepositoryTests.cs
 MyVocaList.Tests/Integration/Repositories/ArtistRepositoryTests.cs
 MyVocaList.Tests/Integration/Repositories/ArtistRepositoryTests.cs
 Docs/specs/artists-songs/tasks.md
+MyVocaList.Tests/Unit/Services/SongServiceTests.cs
+MyVocaList.Tests/Unit/Services/SongServiceTests.cs
+MyVocaList.Tests/Integration/Repositories/SongRepositoryTests.cs
+MyVocaList.Tests/Unit/Services/CatalogServiceTests.cs
+MyVocaList.Tests/Unit/Services/CatalogServiceTests.cs
+MyVocaList.Tests/Integration/Repositories/CatalogRepositoryTests.cs
+MyVocaList.Tests/Unit/Services/CatalogServiceTests.cs
+MyVocaList.Tests/Integration/Repositories/CatalogRepositoryTests.cs
+Docs/Changelog/changelog.md
+Docs/specs/artists-songs/tasks.md
