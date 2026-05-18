@@ -14,7 +14,7 @@
 
 | Status | Meaning |
 |--------|---------|
-| `💡 Idea` | Captured, not yet evaluated |
+| `💡 Pending` | Captured, not yet evaluated |
 | `📋 Spec` | Approved — spec being written |
 | `🗺️ Plan` | Spec approved — plan being written |
 | `🟢 Ready` | Plan approved — dispatchable |
@@ -25,40 +25,32 @@
 
 ---
 
-## 🟡 In Progress
+## MVP Features
 
-- **Artists & Songs Catalog** `🟡 In Progress` — artist and song management with search; feeds singer song selection; includes catalog (many-to-many artist↔song repertoire)
-  → Spec: `Docs/specs/artists-songs/` · Plan: `Docs/superpowers/plans/2026-04-23-artists-songs-catalog.md`
-
-  - **Song Karaoke URLs** `🟡 In Progress` *(nested)* — YouTube URL management per song; in-app search; next-singer 2-stage alert (notification + Android overlay); play-count-based URL suggestion. Note: "Karaoke" refers to the URL database, not a queue participation mode — queue modes will be addressed in the Queue feature.
-    → Spec: `Docs/specs/youtube-karaoke/` · Plan: `Docs/superpowers/plans/2026-05-17-youtube-karaoke.md`
+| Feature | Status | Notes |
+|---------|--------|-------|
+| **Venues CRUD** | ✅ Done | Full MD3 list, search, multi-select, swipe-delete |
+| **Person CRUD** | ✅ Done | Autocomplete field, duplicate detection |
+| **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/specs/artists-songs/` · Plan: `Docs/superpowers/plans/2026-04-23-artists-songs-catalog.md` |
+| ↳ Song Karaoke URLs | 🟡 In Progress | YouTube URL management per song; next-singer alert; nested feature. Spec: `Docs/specs/youtube-karaoke/` |
+| **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
+| **Visual Theme Refresh** | 💡 Pending | App UI is too dark and monochromatic; spike for richer accent colors, gradient surfaces, warmer tones |
 
 ---
+> ── MVP scope ends here ──
+---
 
-## 🗺️ Plan
+## 🗺️ Plan — Infrastructure
 
 - **App Versioning Strategy** `🗺️ Plan` — git-tag-driven semver via MinVer NuGet; `ApplicationDisplayVersion` and `ApplicationVersion` bound to MSBuild properties; `/project:release` command; version-bump prompt in `/project:commit`
   → Spec: `Docs/superpowers/specs/2026-05-18-app-versioning-design.md` · Plan: `Docs/superpowers/plans/2026-05-18-app-versioning.md`
 
 ---
 
-## 🟢 Ready
+## 💡 Pending — Post-MVP
 
-*(none — Artists & Songs must complete first)*
-
----
-
-## 💡 Backlog
-
-- **Queue management MVP** `💡 Idea` — core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate
-- **Visual Theme Refresh** `💡 Idea` — app UI is too dark and monochromatic; spike to introduce richer accent colors, gradient surfaces, warmer tones, and more contrast between states
-
----
-> ── MVP scope ends here ──
----
-
-- **Singer self-registration** `💡 Idea` — singers register via public link
-- **Social features** `💡 Idea` — post-event sharing, singer stats
+- **Singer self-registration** — singers register via public link
+- **Social features** — post-event sharing, singer stats
 
 ---
 
