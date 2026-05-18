@@ -76,6 +76,40 @@ Agent role files (`implementor.md`, `verifier.md`) should absorb responsibilitie
 → Reference: `memory/project_workflow_cleanup.md`
 → Process: spec → spec review → plan → plan review → Helder approval → apply
 
+### App Versioning Strategy
+Establish a formal, automated version scheme for the app build cycle. Currently hardcoded (`ApplicationDisplayVersion=1.0.0`, `ApplicationVersion=1`) with no tooling enforcing consistency.
+
+**Target pattern:** `MAJOR.MINOR.BUILD` — e.g. `0.1.42`
+- `MAJOR` (AA): release milestone — currently `0` (pre-release). Bumped manually on milestone ship.
+- `MINOR` (BBB): stable feature count — bumped per merged feature (conventional commits + git tag trigger).
+- `BUILD` (CCC): monotonically increasing integer — derived from commit height since last tag; maps to Android `versionCode` / iOS `CFBundleVersion`.
+
+**MAUI property mapping (set in `.csproj`):**
+```xml
+<ApplicationDisplayVersion>0.MINOR.BUILD</ApplicationDisplayVersion>  <!-- → versionName / CFBundleShortVersionString -->
+<ApplicationVersion>BUILD</ApplicationVersion>                         <!-- → versionCode / CFBundleVersion — must be integer -->
+```
+
+**Recommended tooling (research complete — ranked):**
+
+1. **MinVer** *(recommended)* — NuGet package, zero config, git-tag-driven. Sets MSBuild properties `$(MinVerVersion)`, `$(MinVerMajor)`, `$(MinVerMinor)`, `$(MinVerPatch)`, `$(MinVerBuildMetadata)`. Bind directly to `ApplicationDisplayVersion` and `ApplicationVersion` in a `<PropertyGroup>` target. Compatible with the conventional-commits workflow already in use. Lightweight, no YAML config required. Tag `v0.1.0` → version `0.1.0`; each additional commit adds `.{height}` pre-release suffix automatically.
+
+2. **GitVersion** *(alternative for complex branching)* — enterprise-grade, configurable via `.gitversion.yml`. Heavier, but supports release channels (alpha/beta/rc) mapped to git branches. Worth evaluating if the release process ever involves feature branches with independent versioning.
+
+3. **Nerdbank.GitVersioning (nbgv)** *(skip for now)* — requires `version.json` per-project; adds MSBuild complexity without meaningful benefit over MinVer for a single-app repo.
+
+**Skills/MCP that touch this domain:**
+- `changelog` skill — generates `CHANGELOG.md` from conventional commits; pair with MinVer tags for release notes
+- `commit` skill — enforces conventional commit format that feeds SemVer bump decisions
+- No dedicated versioning MCP server in the current stack; MinVer + skills covers the workflow without one
+
+**Open decisions before spec:**
+- What triggers a `MINOR` bump — every feature tag, or only milestone-shipped features?
+- CI/CD pipeline: is there one, and should it validate that `versionCode` never decreases between builds?
+- Should pre-release builds carry a suffix (e.g. `0.2.0-alpha.3`)? Yes/No affects how MinVer floor is configured.
+
+→ Process: Helder decides open questions above → spec → plan → apply
+
 ---
 
 ## ✅ Recently Done
