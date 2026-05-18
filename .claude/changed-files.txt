@@ -593,3 +593,5 @@ MyVocaList/UI/ViewModels/SongFormViewModel.cs
 MyVocaList/UI/Pages/Songs/SongFormPage.xaml
 MyVocaList/UI/Pages/Songs/SongFormPage.xaml
 Docs/Changelog/changelog.md
+Docs/specs/artists-songs/tasks.md
+Docs/specs/artists-songs/tasks.md
