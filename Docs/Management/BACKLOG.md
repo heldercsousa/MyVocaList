@@ -1,4 +1,4 @@
-# MyVocaList — Product Backlog
+﻿# MyVocaList — Product Backlog
 
 > **Product backlog.** Business features are ordered by target delivery date. Every feature begins as `💡 Pending` and is promoted through the lifecycle below before any code is written.
 >
@@ -58,5 +58,5 @@
 | 2026-05-07 | workflow.md Reduction | ✅ Done | Agent role files (`implementor.md`, `orchestrator.md`) absorb scattered responsibilities; 61 findings resolved |
 | 2026-05-08 | CLAUDE.md Deep Restructure | ✅ Done | 7 coding rule files → `.claude/library/`; `.claudeignore` Docs/ scope gates |
 | 2026-05-13 | Day-to-day task management workflow review | ✅ Done | BACKLOG.md first-class SCRUM board; workflow.md Rule 1/7 updated |
-| 2026-05 | **App Versioning Strategy** | 🗺️ Plan | MinVer NuGet; git-tag-driven semver; `/project:release` command. Spec: `Docs/specs/app-versioning/design.md` · Plan: `Docs/specs/app-versioning/plan.md` |
+| 2026-05 | **App Versioning Strategy** | 🗺️ Plan | MinVer NuGet; git-tag-driven semver; `/project:release` command. Spec: `Docs/Management/DevCycleCraft/app-versioning/design.md` · Plan: `Docs/Management/DevCycleCraft/app-versioning/plan.md` |
 | 2026-05 | **Workflow & Folder Layout Alignment** | ✅ Done | Resolve conflicts between SDD, superpowers skills, and custom rules; canonicalize Docs/ layout; spec evolution tracking; review enforcement. Findings: `Docs/DevEnv/workflow-layout-findings.md` |
