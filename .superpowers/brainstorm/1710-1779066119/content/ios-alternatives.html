@@ -1,0 +1,116 @@
+<h2>iOS — Overlay Not Available. What instead?</h2>
+<p class="subtitle">iOS sandboxes every app strictly. No window can draw over another app. But iOS has three alternatives that fit a live karaoke event well.</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:20px">
+
+  <!-- Option A: AirPlay workflow -->
+  <div class="card" data-choice="airplay" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="card-image" style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:20px;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+      <!-- Phone showing app -->
+      <div style="width:70px;height:120px;background:#1c1c1e;border-radius:12px;border:2px solid rgba(255,255,255,0.2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px">
+        <div style="font-size:0.5em;color:rgba(255,255,255,0.5);margin-bottom:4px">MyVocaList</div>
+        <div style="width:50px;height:60px;background:rgba(124,58,237,0.3);border-radius:6px;display:flex;align-items:center;justify-content:center">
+          <div style="font-size:0.55em;color:#a78bfa;text-align:center;line-height:1.4">Queue<br>UI</div>
+        </div>
+      </div>
+      <!-- Arrow + TV -->
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:0.7em;color:rgba(255,255,255,0.4)">AirPlay →</div>
+        <div style="width:56px;height:36px;background:#1c1c1e;border-radius:4px;border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center">
+          <div style="font-size:0.45em;color:rgba(255,100,100,0.8)">YouTube</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — AirPlay Workflow</h3>
+      <p>YouTube plays on TV via AirPlay. App stays in foreground on the admin's phone/tablet. No overlay needed — the queue IS the screen.</p>
+      <div style="margin-top:10px;font-size:0.75em">
+        <div style="color:#34d399">✅ Zero extra code</div>
+        <div style="color:#34d399">✅ Admin sees full queue UI</div>
+        <div style="color:#34d399">✅ Already how karaoke events work</div>
+        <div style="color:rgba(255,255,255,0.4);margin-top:4px">⚠️ Requires AirPlay-capable display</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Live Activity / Dynamic Island -->
+  <div class="card" data-choice="liveactivity" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="card-image" style="background:linear-gradient(135deg,#0a0a1a,#1a0a2e);padding:20px;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <!-- Dynamic Island mockup -->
+      <div style="width:140px">
+        <!-- Dynamic Island pill -->
+        <div style="background:#000;border-radius:20px;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,0.1);margin-bottom:8px">
+          <div>
+            <div style="font-size:0.55em;color:rgba(255,255,255,0.5)">Next up</div>
+            <div style="font-size:0.7em;color:white;font-weight:600">Maria S.</div>
+          </div>
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#db2777);display:flex;align-items:center;justify-content:center;font-size:0.75em;font-weight:700;color:white">M</div>
+        </div>
+        <!-- Lock screen Live Activity -->
+        <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:10px;border:1px solid rgba(255,255,255,0.08)">
+          <div style="font-size:0.55em;color:rgba(255,255,255,0.4);margin-bottom:4px">MyVocaList · Live</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:0.65em;color:white;font-weight:600">Maria Souza</div>
+              <div style="font-size:0.55em;color:rgba(255,255,255,0.5)">Shallow · ~45s</div>
+            </div>
+            <div style="font-size:0.7em">⏱</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Live Activity</h3>
+      <p>iOS 16.1+ Live Activity shows next-singer info in the Dynamic Island and on the Lock Screen. Visible while YouTube plays fullscreen — admin glances at top of phone.</p>
+      <div style="margin-top:10px;font-size:0.75em">
+        <div style="color:#34d399">✅ Non-intrusive, native iOS</div>
+        <div style="color:#34d399">✅ Works while any app is in front</div>
+        <div style="color:rgba(255,255,255,0.4);margin-top:4px">⚠️ iOS 16.1+ only</div>
+        <div style="color:rgba(255,255,255,0.4)">⚠️ Dynamic Island: iPhone 14 Pro+ only</div>
+        <div style="color:rgba(255,100,100,0.6)">❌ Significant extra implementation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C: Notification banner -->
+  <div class="card" data-choice="notification" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="card-image" style="background:linear-gradient(135deg,#0f2027,#203a43);padding:20px;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <!-- Notification mockup -->
+      <div style="width:140px">
+        <div style="background:rgba(30,30,30,0.95);border-radius:14px;padding:10px 12px;border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(10px)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#7c3aed,#db2777)"></div>
+            <div style="font-size:0.6em;color:rgba(255,255,255,0.5)">MyVocaList · now</div>
+          </div>
+          <div style="font-size:0.7em;color:white;font-weight:600">Maria Souza — get ready!</div>
+          <div style="font-size:0.6em;color:rgba(255,255,255,0.5);margin-top:2px">Shallow · your turn in ~45s</div>
+        </div>
+        <div style="background:rgba(30,30,30,0.7);border-radius:10px;padding:8px 12px;border:1px solid rgba(255,255,255,0.05);margin-top:6px">
+          <div style="font-size:0.6em;color:rgba(255,255,255,0.4)">then again at ~15s...</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Local Notifications</h3>
+      <p>App fires a local notification ~45s before the current song ends, then again at ~15s. Shows as a banner over YouTube. Simple, works on all iOS versions.</p>
+      <div style="margin-top:10px;font-size:0.75em">
+        <div style="color:#34d399">✅ Works on all iOS versions</div>
+        <div style="color:#34d399">✅ Also works on Android</div>
+        <div style="color:#34d399">✅ Low implementation complexity</div>
+        <div style="color:rgba(255,255,255,0.4);margin-top:4px">⚠️ Requires notification permission</div>
+        <div style="color:rgba(255,255,255,0.4)">⚠️ Less precise than overlay</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:24px;background:rgba(255,255,255,0.04);border-radius:10px;padding:16px">
+  <p class="label">Recommended combination</p>
+  <p style="font-size:0.82em;margin-top:10px;line-height:1.8;opacity:0.85">
+    <strong>Android:</strong> Blinking overlay label via <code>SYSTEM_ALERT_WINDOW</code> — as designed.<br>
+    <strong>iOS (primary):</strong> A — AirPlay to TV, app stays in foreground. No extra code, works today.<br>
+    <strong>iOS (enhancement):</strong> C — Local notifications as a fallback for when AirPlay isn't available.<br>
+    <strong>iOS (future):</strong> B — Live Activity when there's capacity to implement ActivityKit.
+  </p>
+</div>
