@@ -188,14 +188,20 @@ Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/
 
 ```
 
-**Folder routing rule (check BACKLOG.md table to determine category):**
+**Folder routing rule — check BACKLOG.md table before creating any spec folder:**
 - Feature listed in **Business Features** table → `Docs/Management/BusinessFeatures/[feature]/`
-- Feature listed in **Dev Cycle Craft** table → `Docs/Management/DevCycleCraft/[feature]/`
+- Sub-feature nested under a business feature → `Docs/Management/BusinessFeatures/[parent]/[feature]/`
+- Activity listed in **Dev Cycle Craft** table → `Docs/Management/DevCycleCraft/[feature]/`
 
-**User-preference overrides declared here (superpowers skills respect these):**
-- `brainstorming` skill: write design docs to `Docs/Management/BusinessFeatures/[feature]/design.md` or `Docs/Management/DevCycleCraft/[feature]/design.md` (check BACKLOG.md — not `docs/superpowers/specs/`)
-- `writing-plans` skill: write plan to the same folder as the spec (`plan.md` beside `design.md`)
-- Task-log: write to the same folder as the spec (`task-log.md` beside `design.md`)
+**User-preference overrides (superpowers skills honour these — they override skill defaults):**
+- `brainstorming` skill default `docs/superpowers/specs/` → **OVERRIDE:** write design doc to the folder determined by the routing rule above
+- `writing-plans` skill default `docs/superpowers/plans/YYYY-MM-DD-<name>.md` → **OVERRIDE:** write plan to `plan.md` in the same folder as the spec (beside `design.md`)
+- Task-log default → **OVERRIDE:** write to `task-log.md` in the same folder as the spec
+
+**Example resolutions:**
+- New business feature `Queue Management` → `Docs/Management/BusinessFeatures/queue-management/`
+- New dev-cycle activity → `Docs/Management/DevCycleCraft/[name]/`
+- Sub-feature nested under Artists & Songs → `Docs/Management/BusinessFeatures/artists-songs/[sub-feature]/`
 
 ### Docs/ Context Scope
   `Docs/` grows quickly — never glob-scan it. `.claudeignore` excludes the high-volume subtrees from glob scans; direct `Read()` by explicit path still works.
