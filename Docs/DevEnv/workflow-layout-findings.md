@@ -171,14 +171,102 @@ Either way, `Docs/superpowers/specs/` gets deleted.
 
 ---
 
+---
+
+## Finding 6 — Review Is Already Hooked but Conflicts with the Skill
+
+### What the hooks do
+The `TaskCompleted` hook (settings.json) already does a review step — but **inline** (same completion agent, not a fresh subagent):
+> "SPAWN INLINE REVIEW: Read changed files... verify against ACs... Append ### Review notes..."
+
+The `Stop` hook has an `asyncRewake` that detects tasks marked "To Review" and tells the main agent to spawn fresh review subagents.
+
+### What the skill says
+`superpowers:subagent-driven-development` mandates **two fresh subagents** after every task:
+1. **Spec compliance reviewer** — verifies code matches spec ACs (nothing missing, nothing extra)
+2. **Code quality reviewer** — verifies implementation quality
+
+The skill explicitly says: *"Never skip reviews (spec compliance OR code quality)"* and *"Start code quality review before spec compliance is ✅ — wrong order."*
+
+### The conflict
+| | Hook (TaskCompleted) | Skill (subagent-driven-development) |
+|--|---------------------|--------------------------------------|
+| Who reviews | Same completion agent (inline) | Fresh subagent per review type |
+| How many review passes | 1 (inline) | 2 (spec compliance → code quality) |
+| When triggered | After every task completion | After every task, before marking done |
+| Order of concern | Build → test → review | Spec compliance → code quality |
+
+The hook's inline review is conceptually correct but violates the "fresh subagent" principle — it uses the same agent that processed the completion, which inherits its context bias.
+
+### Resolution options
+**Option R1 — Remove inline review from hook, trust the skill:** The `subagent-driven-development` skill handles both review stages. The `TaskCompleted` hook keeps build+test verification only. The Stop hook's asyncRewake for "To Review" items becomes the safety net.
+
+**Option R2 — Upgrade the hook to dispatch a fresh review subagent:** Replace the inline review block in `TaskCompleted` with a `type: agent` dispatch using the spec-reviewer and code-quality-reviewer prompts from the skill.
+
+**Option R3 — Keep hook as lightweight, skill as full review:** Hook does build+test only (infrastructure verification). Skill does spec+quality review (behavioral verification). These are complementary, not redundant.
+
+### Recommendation
+**Option R3** — clearest separation of concerns. Hooks verify the build artifact; the skill verifies behavioral correctness. The hook's inline review text should be removed from `TaskCompleted` (it's redundant with the skill and uses wrong agent context).
+
+---
+
+## Finding 7 — workflow.md `/project:review` Duplicates the Skill's Review Loop
+
+### What workflow.md says
+Rule 3: *"Run `/project:review` after every completed task."*
+
+### What the skill says
+`subagent-driven-development` dispatches spec-reviewer and code-quality-reviewer subagents after every task — this IS the review loop.
+
+### The conflict
+`/project:review` is a custom command that presumably runs its own review logic. The skill already defines a complete two-stage review protocol with dedicated subagents. If both are run, review happens twice — with different scope, different agents, different criteria.
+
+### Resolution
+After checking what `/project:review` actually does: if it overlaps with the skill's review stages, remove the "run `/project:review` after every task" rule from workflow.md and replace it with "use `superpowers:subagent-driven-development` which includes the two-stage review loop." Keep `/project:review` for manual/spot-check use, not as a mandatory per-task step.
+
+---
+
+## Finding 8 — Custom orchestrator.md/implementor.md Partially Duplicates the Skill
+
+### What workflow.md/orchestrator.md does
+Defines elaborate orchestrator protocols: pre-dispatch checklist, pre-wave dependency check, wave-based parallelism, single-writer rule, adversarial critic, kill criteria, etc.
+
+### What the skill does
+`subagent-driven-development` defines: implementer → spec-reviewer → code-quality-reviewer per task, with re-review loops. No explicit wave management.
+
+### The overlap
+- Both define how to dispatch subagents
+- Both define review protocols (skill more rigorously)
+- The skill doesn't cover: wave parallelism cap (4 max), single-writer rule, DRY Onion ordering, hotspot file registry — these are project-specific addenda with no skill equivalent
+
+### Resolution
+Keep orchestrator.md/implementor.md for **project-specific addenda only**. Add explicit header: "These rules extend `superpowers:subagent-driven-development`. For the base execution loop, use that skill. Rules here apply only where the skill is silent." Delete any section that duplicates what the skill already covers.
+
+---
+
+## Finding 9 — `superpowers:verification-before-completion` Is Underused
+
+### What it does
+Mandates: run verification command → read full output → only then claim completion. No "should pass", no "probably works", no trusting agent reports.
+
+### Current state
+Workflow.md's subagent exit checklist mentions verification evidence, and the `TaskCompleted` hook runs build+test. But neither explicitly requires this skill to be invoked.
+
+### Resolution
+Add to CLAUDE.md skills reference: "Before any task completion claim: invoke `superpowers:verification-before-completion`." This is already in the subagent exit checklist (step 1) but is not connected to the skill by name.
+
+---
+
 ## Open Decisions (needs Helder input)
 
 | # | Decision | Options |
 |---|----------|---------|
 | D1 | Plan + task-log colocation vs separated? | Option A (beside spec) / Option B (Docs/superpowers/plans/) |
 | D2 | Spec evolution changelog format? | Inline per file / Separate file / Git commits only |
-| D3 | Review step enforcement? | Hook / Bake into plan steps / Phase-level only |
+| D3 | Review: remove inline review from TaskCompleted hook? | Option R1 / R2 / R3 |
 | D4 | Apply fixes now? | Move misplaced files, update BACKLOG.md paths, add hierarchy to CLAUDE.md |
+| D5 | Remove "run /project:review after every task" rule from workflow.md? | Yes (trust the skill) / No (keep as manual gate) |
+| D6 | Slim orchestrator.md — remove sections duplicated by subagent-driven-development? | Yes / Partial |
 
 ---
 
@@ -187,5 +275,7 @@ Either way, `Docs/superpowers/specs/` gets deleted.
 1. Apply folder layout decision (move files, update BACKLOG.md references)
 2. Add authority hierarchy paragraph to CLAUDE.md
 3. Add changelog section to spec file template (`.claude/library/spec-writing-guide.md`)
-4. Update `writing-plans` user preference for spec location
-5. Resume App Versioning implementation (was the original session goal)
+4. Remove inline review from `TaskCompleted` hook (per D3 decision)
+5. Slim orchestrator.md to project-specific addenda only (per D6 decision)
+6. Add `verification-before-completion` skill reference to CLAUDE.md
+7. Resume App Versioning implementation (was the original session goal)
