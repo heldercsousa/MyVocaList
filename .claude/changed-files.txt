@@ -603,3 +603,4 @@ Docs/specs/artists-songs/tasks.md
 .superpowers/brainstorm/1710-1779066119/content/data-model.html
 .superpowers/brainstorm/1710-1779066119/content/ios-alternatives.html
 .superpowers/brainstorm/1710-1779066119/content/cross-platform-model.html
+.superpowers/brainstorm/1710-1779066119/content/song-form-urls.html
