@@ -104,14 +104,14 @@ The spec is the authoritative description of intended behavior. When spec and co
 
 **BACKLOG.md is the source of truth for feature sequencing.** The main agent (not subagents) is responsible for updating `Docs/BACKLOG.md` status at each milestone below.
 
-0. **Identify** — read `Docs/BACKLOG.md`; pick the highest-priority `🟢 Ready` item, or the next `💡 Idea` if none are Ready
+0. **Identify** — read `Docs/BACKLOG.md`; pick the highest-priority `🟢 Ready` item in the **Business Features** table, or the next `💡 Pending` item if none are Ready
 1. **Brainstorm** — invoke `superpowers:brainstorming`; update BACKLOG.md status → `📋 Spec`
 2. **Write spec** — write all three files; user reviews and approves; update status → `🗺️ Plan`
    - **2a. Constitution check** — verify the feature does not violate any Non-Negotiable rule in CLAUDE.md before writing the spec
 3. **Write plan** — invoke `superpowers:writing-plans`; user approves; update status → `🟢 Ready`
 4. **Implement** — delegate to a subagent (see Rule 2); update status → `🟡 In Progress`
 5. **Phase-gate review** — invoke `/project:review` after each phase before starting the next
-   - On ship: update status → `✅ Done`; move item to the `Recently Done` table in BACKLOG.md
+   - On ship: update status → `✅ Done` in the **Business Features** table (or **Dev Cycle Craft** table for infrastructure/tooling items)
 
 ### Spec quality gate (mandatory before implementation)
 
