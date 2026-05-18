@@ -25,48 +25,43 @@
 
 ---
 
-## MVP Features
+## Business Features
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| **Venues CRUD** | ✅ Done | Full MD3 list, search, multi-select, swipe-delete |
-| **Person CRUD** | ✅ Done | Autocomplete field, duplicate detection |
-| **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/specs/artists-songs/` · Plan: `Docs/superpowers/plans/2026-04-23-artists-songs-catalog.md` |
-| ↳ Song Karaoke URLs | 🟡 In Progress | YouTube URL management per song; next-singer alert; nested feature. Spec: `Docs/specs/youtube-karaoke/` |
-| **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
-| **Visual Theme Refresh** | 💡 Pending | App UI is too dark and monochromatic; spike for richer accent colors, gradient surfaces, warmer tones |
+| Target | Feature | Status | Notes |
+|--------|---------|--------|-------|
+| 2026-03 | **Venues CRUD** | ✅ Done | Full MD3 list, search, multi-select, swipe-delete |
+| 2026-04 | **Person CRUD** | ✅ Done | Autocomplete field, duplicate detection |
+| 2026-05 | **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/specs/artists-songs/` · Plan: `Docs/superpowers/plans/2026-04-23-artists-songs-catalog.md` |
+| 2026-05 | ↳ Song Karaoke URLs | 🟡 In Progress | YouTube URL management per song; next-singer alert; nested feature. Spec: `Docs/specs/youtube-karaoke/` |
+| 2026-06 | **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
+| 2026-06 | **Visual Theme Refresh** | 💡 Pending | App UI is too dark and monochromatic; spike for richer accent colors, gradient surfaces, warmer tones |
+| 2026-06 | | 🏁 **MVP release** | |
 
 ---
 > ── MVP scope ends here ──
 ---
 
-## 🗺️ Plan — Infrastructure
-
-- **App Versioning Strategy** `🗺️ Plan` — git-tag-driven semver via MinVer NuGet; `ApplicationDisplayVersion` and `ApplicationVersion` bound to MSBuild properties; `/project:release` command; version-bump prompt in `/project:commit`
-  → Spec: `Docs/superpowers/specs/2026-05-18-app-versioning-design.md` · Plan: `Docs/superpowers/plans/2026-05-18-app-versioning.md`
-
----
-
-## 💡 Pending — Post-MVP
-
-- **Singer self-registration** — singers register via public link
-- **Social features** — post-event sharing, singer stats
+| Target | Feature | Status | Notes |
+|--------|---------|--------|-------|
+| — | **Singer self-registration** | 💡 Pending | Singers register via public link |
+| — | **Social features** | 💡 Pending | Post-event sharing, singer stats |
 
 ---
 
-## ✅ Recently Done
+## Dev Cycle Craft
 
-| Feature | Completed | Plan / Reference |
-|---------|-----------|------|
-| SDD Master Plan (Phases 1–11, 162 steps) | 2026-05-07 | `Docs/DevEnv/SDD/plans/impl/MASTER_PLAN.md` |
-| Day-to-day task management workflow review | 2026-05-13 | BACKLOG.md promoted to first-class SCRUM board; workflow.md Rule 1 step 0 + Rule 7 updated; MASTER_PLAN.md reference removed |
-| CLAUDE.md Deep Restructure | 2026-05-08 | 7 coding rule files moved to `.claude/library/` (on-demand via skill); `.claudeignore` Docs/ scope gates; context size governance section added |
-| workflow.md Reduction | 2026-05-07 | Agent role files (`implementor.md`, `orchestrator.md`) absorb scattered responsibilities; Phase 11 conflict resolution across all rules files (61 findings resolved) |
-| Hooks redesign | 2026-05-03 | *(infrastructure only)* |
-| Artists & Songs — Domain + TDD RED | 2026-04 | `Docs/superpowers/plans/2026-04-23-artists-songs-catalog.md` |
-| Autocomplete field | 2026-04 | `Docs/superpowers/plans/2026-04-06-autocomplete-field.md` |
-| Person CRUD | 2026-04 | `Docs/superpowers/plans/2026-04-07-person-crud.md` |
-| Toolbar/FAB vibrant | 2026-04 | `Docs/superpowers/plans/2026-04-02-toolbar-fab-vibrant.md` |
-| Styles & Structure | 2026-03 | `Docs/superpowers/plans/2026-03-31-styles-structure.md` |
-| Venues MD3 rebuild | 2026-03 | `Docs/superpowers/plans/2026-03-29-venues-md3-rebuild.md` |
-| M3 Lists | 2026-03 | `Docs/superpowers/plans/2026-03-11-m3-lists.md` |
+> Infrastructure, tooling, architecture, and process improvements that support business feature delivery.
+
+| Completed | Activity | Status | Plan / Reference |
+|-----------|----------|--------|-----------------|
+| 2026-03 | M3 Lists | ✅ Done | `Docs/superpowers/plans/2026-03-11-m3-lists.md` |
+| 2026-03 | Venues MD3 rebuild | ✅ Done | `Docs/superpowers/plans/2026-03-29-venues-md3-rebuild.md` |
+| 2026-03 | Styles & Structure | ✅ Done | `Docs/superpowers/plans/2026-03-31-styles-structure.md` |
+| 2026-04 | Toolbar/FAB vibrant | ✅ Done | `Docs/superpowers/plans/2026-04-02-toolbar-fab-vibrant.md` |
+| 2026-04 | Autocomplete field | ✅ Done | `Docs/superpowers/plans/2026-04-06-autocomplete-field.md` |
+| 2026-04 | Hooks redesign | ✅ Done | Stop/TaskCreated/TaskCompleted hooks; session-end auto-commit |
+| 2026-05-07 | SDD Master Plan (Phases 1–11, 162 steps) | ✅ Done | `Docs/DevEnv/SDD/plans/impl/MASTER_PLAN.md` |
+| 2026-05-07 | workflow.md Reduction | ✅ Done | Agent role files (`implementor.md`, `orchestrator.md`) absorb scattered responsibilities; 61 findings resolved |
+| 2026-05-08 | CLAUDE.md Deep Restructure | ✅ Done | 7 coding rule files → `.claude/library/`; `.claudeignore` Docs/ scope gates |
+| 2026-05-13 | Day-to-day task management workflow review | ✅ Done | BACKLOG.md first-class SCRUM board; workflow.md Rule 1/7 updated |
+| 2026-05 | **App Versioning Strategy** | 🗺️ Plan | MinVer NuGet; git-tag-driven semver; `/project:release` command. Spec: `Docs/superpowers/specs/2026-05-18-app-versioning-design.md` · Plan: `Docs/superpowers/plans/2026-05-18-app-versioning.md` |
