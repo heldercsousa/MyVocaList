@@ -638,3 +638,5 @@ Docs/superpowers/plans/2026-05-18-app-versioning.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
 Docs/BACKLOG.md
 Docs/superpowers/specs/2026-05-18-app-versioning-design.md
+.claude/settings.local.json
+.claude/settings.json

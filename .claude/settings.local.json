@@ -165,7 +165,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import json,sys,re; d=json.load(sys.stdin); p=d.get('prompt',''); matched=re.search(r'\\\\b(implement|build|write|create|code|add|fix|update|resume|continue|start|finish|complete|go ahead)\\\\b', p, re.I); matched and print('{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"WORKFLOW GATE: (1) Read Docs/specs/[feature]/design.md BEFORE writing any code. (2) Delegate all coding to a subagent (main agent: shell only). (3) Run /project:commit after every completed task.\\\"}}')\" 2>/dev/null || true"
+            "command": "python -c \"import json,sys,re; d=json.load(sys.stdin); p=d.get('prompt',''); matched=re.search(r'\\\\b(implement|build|write|create|code|add|fix|update|resume|continue|start|finish|complete|go ahead)\\\\b', p, re.I); matched and print('{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"WORKFLOW GATE: (1) Read Docs/specs/[feature]/design.md BEFORE writing any code. (2) Delegate all coding to a subagent (main agent: shell only). (3) Run /project:commit after every completed task. (4) Before ending any session where a feature phase completed: update Docs/BACKLOG.md status.\\\"}}')\" 2>/dev/null || true"
           }
         ]
       }
