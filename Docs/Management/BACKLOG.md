@@ -55,8 +55,10 @@
 | 2026-04 | Autocomplete field | ✅ Done | `Docs/Management/BusinessFeatures/persons/plan-autocomplete.md` |
 | 2026-04 | Hooks redesign | ✅ Done | Stop/TaskCreated/TaskCompleted hooks; session-end auto-commit. Plan: `Docs/Management/DevCycleCraft/hooks-redesign/plan.md` |
 | 2026-05-07 | SDD Master Plan (Phases 1–11, 162 steps) | ✅ Done | `Docs/DevEnv/SDD/plans/impl/MASTER_PLAN.md` |
-| 2026-05-07 | workflow.md Reduction | ✅ Done | Agent role files (`implementor.md`, `orchestrator.md`) absorb scattered responsibilities; 61 findings resolved |
-| 2026-05-08 | CLAUDE.md Deep Restructure | ✅ Done | 7 coding rule files → `.claude/library/`; `.claudeignore` Docs/ scope gates |
+| 2026-05-07 | workflow.md Reduction | ✅ Done | Agent role files (`implementor.md`, `orchestrator.md`) absorb scattered responsibilities; 61 findings resolved. Plan: `Docs/Management/DevCycleCraft/workflow-compression/plan.md` |
+| 2026-05-08 | CLAUDE.md Deep Restructure | ✅ Done | 7 coding rule files → `.claude/library/`; `.claudeignore` Docs/ scope gates. Plan: `Docs/Management/DevCycleCraft/docs-context-scope-control/plan.md` |
+| 2026-05-12 | Architecture Tests Evaluation | ✅ Done | Research: NetArchTest.Rules vs ArchUnitNET adoption decision — evaluated, no changes produced. Plan: `Docs/Management/DevCycleCraft/architecture-tests-evaluation/plan.md` |
+| 2026-05-15 | Claude Managed Agents Evaluation | ✅ Done | Research: Anthropic hosted agents for dev cycle — discarded; duplicates existing workflow and lacks community maturity. Plan: `Docs/Management/DevCycleCraft/claude-managed-agents-evaluation/plan.md` |
 | 2026-05-13 | Day-to-day task management workflow review | ✅ Done | BACKLOG.md first-class SCRUM board; workflow.md Rule 1/7 updated. Plan: `Docs/Management/DevCycleCraft/backlog-workflow-integration/plan.md` |
 | 2026-05 | **App Versioning Strategy** | 🗺️ Plan | MinVer NuGet; git-tag-driven semver; `/project:release` command. Spec: `Docs/Management/DevCycleCraft/app-versioning/design.md` · Plan: `Docs/Management/DevCycleCraft/app-versioning/plan.md` |
 | 2026-05 | **Workflow & Folder Layout Alignment** | 🟡 In Progress | Resolve conflicts between SDD, superpowers skills, and custom rules; canonicalize Docs/ layout; spec evolution tracking; review enforcement. Findings: `Docs/DevEnv/workflow-layout-findings.md` · Plan: `Docs/Management/DevCycleCraft/workflow-folder-layout-alignment/plan.md` |
