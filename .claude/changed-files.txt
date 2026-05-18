@@ -633,3 +633,4 @@ MyVocaList.Tests/Integration/Repositories/SongKaraokeUrlRepositoryTests.cs
 Infra/Repository/SongKaraokeUrlRepository.cs
 MyVocaList.Tests/Integration/Repositories/SongKaraokeUrlRepositoryTests.cs
 MyVocaList.Tests/Integration/Repositories/SongKaraokeUrlRepositoryTests.cs
+Docs/superpowers/plans/2026-05-18-app-versioning.md
