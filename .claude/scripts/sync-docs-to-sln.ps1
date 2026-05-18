@@ -55,6 +55,7 @@ $folderMap = [ordered]@{
     'Docs\specs\youtube-karaoke\'  = '{6851C0F2-5877-4E2F-89C0-9B82A6770BE0}'
     'Docs\Changelog\'              = '{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}'
     'Docs\Design\'                 = '{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4}'
+    'Docs\Management\'             = '{15F1DA03-2180-47BF-BC40-1BB457C97F9E}'
     'Docs\'                        = '{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}'
 }
 

@@ -102,9 +102,9 @@ The spec is the authoritative description of intended behavior. When spec and co
 
 ### New feature workflow
 
-**BACKLOG.md is the source of truth for feature sequencing.** The main agent (not subagents) is responsible for updating `Docs/BACKLOG.md` status at each milestone below.
+**BACKLOG.md is the source of truth for feature sequencing.** The main agent (not subagents) is responsible for updating `Docs/Management/BACKLOG.md` status at each milestone below.
 
-0. **Identify** — read `Docs/BACKLOG.md`; pick the highest-priority `🟢 Ready` item in the **Business Features** table, or the next `💡 Pending` item if none are Ready
+0. **Identify** — read `Docs/Management/BACKLOG.md`; pick the highest-priority `🟢 Ready` item in the **Business Features** table, or the next `💡 Pending` item if none are Ready
 1. **Brainstorm** — invoke `superpowers:brainstorming`; update BACKLOG.md status → `📋 Spec`
 2. **Write spec** — write all three files; user reviews and approves; update status → `🗺️ Plan`
    - **2a. Constitution check** — verify the feature does not violate any Non-Negotiable rule in CLAUDE.md before writing the spec
@@ -561,7 +561,7 @@ Read in this order — do not skip items, do not resume from memory alone:
 
 0. **Hook health verification** — confirm hooks are operational (see Hook Enforcement Notes at the top of this file). Fix any misconfigured hooks before proceeding.
 1. **Active session handoff file** (if one exists): `Docs/specs/[feature]/handoff.md` — use this as the exact continuation point
-   - **If no handoff file exists:** read `Docs/BACKLOG.md` to identify the current `🟡 In Progress` item or the highest-priority `🟢 Ready` item — that is the current work context
+   - **If no handoff file exists:** read `Docs/Management/BACKLOG.md` to identify the current `🟡 In Progress` item or the highest-priority `🟢 Ready` item — that is the current work context
 2. **`ACTIVE-CONSIDERATIONS.md`** (if it exists) — read the priority stack and open items
 3. **`Docs/specs/[feature]/tasks.md`** — confirm which tasks are done, in-progress (`[~]`), and pending
 4. **`Docs/specs/[feature]/requirements.md`** — refresh acceptance criteria (do not rely on previous-session memory)
