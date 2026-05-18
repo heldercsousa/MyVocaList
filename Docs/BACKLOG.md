@@ -6,7 +6,6 @@
 >
 > **Who updates statuses:** The main agent updates this file at each workflow milestone. Subagents do not touch BACKLOG.md.
 >
-> **MVP scope:** All items above the `── MVP scope ends here ──` marker are in-scope for the MVP release. Items below are post-MVP.
 
 ---
 
@@ -36,13 +35,6 @@
 | 2026-06 | **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
 | 2026-06 | **Visual Theme Refresh** | 💡 Pending | App UI is too dark and monochromatic; spike for richer accent colors, gradient surfaces, warmer tones |
 | 2026-06 | | 🏁 **MVP release** | |
-
----
-> ── MVP scope ends here ──
----
-
-| Target | Feature | Status | Notes |
-|--------|---------|--------|-------|
 | — | **Singer self-registration** | 💡 Pending | Singers register via public link |
 | — | **Social features** | 💡 Pending | Post-event sharing, singer stats |
 
