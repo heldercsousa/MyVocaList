@@ -1,6 +1,6 @@
 # MyVocaList — Product Backlog
 
-> **SCRUM product backlog.** Items are priority-ordered — top = most important. Every feature begins here as a brief idea and is promoted through the lifecycle below before any code is written.
+> **Product backlog.** Business features are ordered by target delivery date. Every feature begins as `💡 Pending` and is promoted through the lifecycle below before any code is written.
 >
 > **When to read:** At the start of any new feature cycle (workflow.md Rule 1 step 0) and when resuming a session with no active handoff file (Rule 7).
 >
