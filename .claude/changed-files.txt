@@ -613,3 +613,4 @@ Docs/BACKLOG.md
 Docs/Changelog/changelog.md
 Docs/superpowers/plans/2026-05-17-youtube-karaoke.md
 Docs/Changelog/changelog.md
+Docs/BACKLOG.md
