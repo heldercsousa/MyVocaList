@@ -180,7 +180,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plans", "plans", "{DD8EAF78
 	ProjectSection(SolutionItems) = preProject
 		Docs\DevEnv\plans\compressed-plotting-rocket.md = Docs\DevEnv\plans\compressed-plotting-rocket.md
 		Docs\DevEnv\plans\drifting-sniffing-allen.md = Docs\DevEnv\plans\drifting-sniffing-allen.md
-			Docs\DevEnv\plans\2026-04-02-toolbar-fab-vibrant.md = Docs\DevEnv\plans\2026-04-02-toolbar-fab-vibrant.md
 		Docs\DevEnv\plans\cheeky-popping-whale.md = Docs\DevEnv\plans\cheeky-popping-whale.md
 		Docs\DevEnv\plans\curious-sniffing-grove.md = Docs\DevEnv\plans\curious-sniffing-grove.md
 		Docs\DevEnv\plans\hashed-sprouting-pebble.md = Docs\DevEnv\plans\hashed-sprouting-pebble.md
@@ -188,10 +187,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plans", "plans", "{DD8EAF78
 		Docs\DevEnv\plans\steady-drifting-valley.md = Docs\DevEnv\plans\steady-drifting-valley.md
 EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plans", "Plans", "{D1C7C335-1E7C-4804-9A55-A5D160232353}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution-structure-refactor", "solution-structure-refactor", "{D1C7C335-1E7C-4804-9A55-A5D160232353}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Plans\2026-03-06-solution-structure-refactor.md = Docs\Plans\2026-03-06-solution-structure-refactor.md
-		Docs\Plans\2026-03-10-md3-appbar-components.md = Docs\Plans\2026-03-10-md3-appbar-components.md
+		Docs\Management\DevCycleCraft\solution-structure-refactor\plan.md = Docs\Management\DevCycleCraft\solution-structure-refactor\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "md3-appbar-components", "md3-appbar-components", "{A1B2C3D4-0001-4000-8000-000000000002}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\md3-appbar-components\plan.md = Docs\Management\DevCycleCraft\md3-appbar-components\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "toolbar-fab-vibrant", "toolbar-fab-vibrant", "{A1B2C3D4-0001-4000-8000-000000000003}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\toolbar-fab-vibrant\plan.md = Docs\Management\DevCycleCraft\toolbar-fab-vibrant\plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versioning", "{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B}"
@@ -345,7 +353,9 @@ Global
 		{C32F2513-DA30-4ED9-BD64-50597B18E2D8} = {0D9EA0EB-5958-4F68-962E-398A2051CC33}
 		{C141C5C9-833C-4A26-96BF-3745A2DA1AD4} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 			{DD8EAF78-54CC-46D7-A9D6-A37F3C5CA9EB} = {300D3C1B-4E22-4CEE-85FF-453BD80607BD}
-		{D1C7C335-1E7C-4804-9A55-A5D160232353} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{D1C7C335-1E7C-4804-9A55-A5D160232353} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000002} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000003} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{0C4BA720-519E-4818-BD9B-34AC19E4FCD7} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
