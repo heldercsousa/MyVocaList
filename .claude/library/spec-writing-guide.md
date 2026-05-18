@@ -82,6 +82,31 @@ Use Given/When/Then for user-facing flows. Use EARS for background rules, constr
 ### design.md — optional but recommended sections (for complex features)
 
 - **State machine** — if the feature introduces entity state transitions, document the full state diagram: states, transitions, triggering events, guards. Example: `QueueEntry` states: `Waiting → Singing → Done | Absent`. Without this, subagents invent their own state models.
+
+---
+
+## spec-changelog.md — required when a spec is revised after approval
+
+Create `Docs/specs/[feature]/spec-changelog.md` the first time an approved spec is modified. Every subsequent revision adds a row.
+
+### Format
+
+```markdown
+# Spec Changelog — [Feature Name]
+
+| Date | Changed file | What changed | Why |
+|------|-------------|--------------|-----|
+| 2026-05-18 | requirements.md | Added AC for empty queue edge case (AC-07) | Found during testing: app crashes on empty queue |
+| 2026-05-20 | design.md | Updated ISingerService.GetPagedAsync signature — added `includeAbsent` param | Discovered during Wave 3: absence filter needed at repo level |
+```
+
+### Rules
+
+- **One row per spec revision** — not one row per changed line. Summarize the change.
+- **Why column is mandatory** — "found during testing", "bug discovered in production", "Helder changed direction" — not "updated for clarity".
+- The `amend:` commit prefix (CLAUDE.md § Amending These Rules) provides the git-level record; `spec-changelog.md` provides the human-readable summary.
+- `spec-changelog.md` is a separate file — never embed it inside `requirements.md` or `design.md`.
+- Not required for pre-approval changes — only after Helder has approved and implementation has begun.
 - **Integration contracts** — if the feature calls external systems (APIs, MCPs, platform services), document the request/response contracts, error modes, and retry behavior. Never leave integration assumptions implicit.
 
 ---

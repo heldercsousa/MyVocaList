@@ -327,7 +327,7 @@ After every wave completes, the main agent must run the build and tests independ
 
 A session that ends with uncommitted changes is a session where progress is at risk. The `Stop` hook warns you — treat it as a hard gate, not a suggestion.
 
-> `/project:review` is a main-agent command invoked after each completed task and after creating or updating any spec or plan file. Subagents do not invoke `/project:review`.
+> `/project:review` — when using `superpowers:subagent-driven-development`, review is automatic via fresh spec-compliance and code-quality subagents (the skill handles this). When executing manually (not via the skill), `/project:review` is the trigger. Subagents do not invoke `/project:review`.
 
 ### What counts as "task complete"
 - The code builds with no errors
@@ -483,8 +483,11 @@ A task-log entry that claims `To Review` without a `### Changed files` section i
 
 ### Task-log file location
 
-Task-log files live **beside the plan file** in `Docs/superpowers/plans/`, named `<plan-name>-task-log.md`.
-Tasks without a plan association are logged to `Docs/superpowers/plans/unassigned-task-log.md`.
+Task-log files live **beside the spec** at `Docs/specs/[feature]/task-log.md`.
+Plan files live at `Docs/specs/[feature]/plan.md`.
+Tasks without a feature association are logged to `Docs/superpowers/plans/unassigned-task-log.md` (legacy location).
+
+Legacy files in `Docs/superpowers/plans/` remain in place; new work uses `Docs/specs/[feature]/`.
 
 ### Task-log format (per task entry)
 ```
@@ -557,13 +560,13 @@ Every session that involves implementation or planning must begin with this read
 Read in this order — do not skip items, do not resume from memory alone:
 
 0. **Hook health verification** — confirm hooks are operational (see Hook Enforcement Notes at the top of this file). Fix any misconfigured hooks before proceeding.
-1. **Active session handoff file** (if one exists): `Docs/superpowers/plans/<plan-name>-handoff.md` — use this as the exact continuation point
+1. **Active session handoff file** (if one exists): `Docs/specs/[feature]/handoff.md` (new location) or `Docs/superpowers/plans/<plan-name>-handoff.md` (legacy) — use this as the exact continuation point
    - **If no handoff file exists:** read `Docs/BACKLOG.md` to identify the current `🟡 In Progress` item or the highest-priority `🟢 Ready` item — that is the current work context
 2. **`ACTIVE-CONSIDERATIONS.md`** (if it exists) — read the priority stack and open items
 3. **`Docs/specs/[feature]/tasks.md`** — confirm which tasks are done, in-progress (`[~]`), and pending
 4. **`Docs/specs/[feature]/requirements.md`** — refresh acceptance criteria (do not rely on previous-session memory)
 5. **`Docs/specs/[feature]/design.md`** — refresh architecture and interface signatures
-6. **`Docs/superpowers/plans/<plan-name>-task-log.md`** — check for unresolved `blocked:` statuses or `Spec updated — re-planning required` entries
+6. **`Docs/specs/[feature]/task-log.md`** (new) or **`Docs/superpowers/plans/<plan-name>-task-log.md`** (legacy) — check for unresolved `blocked:` statuses or `Spec updated — re-planning required` entries
 
 **Rule:** Steps 1–6 are mandatory. Steps 3–6 may be scoped to the specific feature being worked on if multiple features are in flight.
 
