@@ -165,15 +165,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "impl", "impl", "{C32F2513-D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-songs", "{C141C5C9-833C-4A26-96BF-3745A2DA1AD4}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\specs\artists-songs\design.md = Docs\specs\artists-songs\design.md
-		Docs\specs\artists-songs\requirements.md = Docs\specs\artists-songs\requirements.md
-		Docs\specs\artists-songs\tasks.md = Docs\specs\artists-songs\tasks.md
-			Docs\specs\artists-songs\handoff.md = Docs\specs\artists-songs\handoff.md
-		Docs\specs\artists-songs\plan-arch-revision.md = Docs\specs\artists-songs\plan-arch-revision.md
-		Docs\specs\artists-songs\plan-phase16.md = Docs\specs\artists-songs\plan-phase16.md
-		Docs\specs\artists-songs\plan-spec-revision.md = Docs\specs\artists-songs\plan-spec-revision.md
-		Docs\specs\artists-songs\plan.md = Docs\specs\artists-songs\plan.md
-		Docs\specs\artists-songs\task-log.md = Docs\specs\artists-songs\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\design.md = Docs\Management\BusinessFeatures\artists-songs\design.md
+		Docs\Management\BusinessFeatures\artists-songs\requirements.md = Docs\Management\BusinessFeatures\artists-songs\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
+			Docs\Management\BusinessFeatures\artists-songs\handoff.md = Docs\Management\BusinessFeatures\artists-songs\handoff.md
+		Docs\Management\BusinessFeatures\artists-songs\plan-arch-revision.md = Docs\Management\BusinessFeatures\artists-songs\plan-arch-revision.md
+		Docs\Management\BusinessFeatures\artists-songs\plan-phase16.md = Docs\Management\BusinessFeatures\artists-songs\plan-phase16.md
+		Docs\Management\BusinessFeatures\artists-songs\plan-spec-revision.md = Docs\Management\BusinessFeatures\artists-songs\plan-spec-revision.md
+		Docs\Management\BusinessFeatures\artists-songs\plan.md = Docs\Management\BusinessFeatures\artists-songs\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plans", "plans", "{DD8EAF78-54CC-46D7-A9D6-A37F3C5CA9EB}"
@@ -202,40 +202,40 @@ EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "m3-lists", "m3-lists", "{F58ED7A0-0186-4187-9FCF-78A464FB01C5}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\specs\m3-lists\design.md = Docs\specs\m3-lists\design.md
-			Docs\specs\m3-lists\plan.md = Docs\specs\m3-lists\plan.md
+		Docs\Management\DevCycleCraft\m3-lists\design.md = Docs\Management\DevCycleCraft\m3-lists\design.md
+			Docs\Management\DevCycleCraft\m3-lists\plan.md = Docs\Management\DevCycleCraft\m3-lists\plan.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\specs\persons\autocomplete-design.md = Docs\specs\persons\autocomplete-design.md
-		Docs\specs\persons\design.md = Docs\specs\persons\design.md
-		Docs\specs\persons\requirements.md = Docs\specs\persons\requirements.md
-		Docs\specs\persons\tasks.md = Docs\specs\persons\tasks.md
-			Docs\specs\persons\plan-autocomplete.md = Docs\specs\persons\plan-autocomplete.md
-		Docs\specs\persons\plan.md = Docs\specs\persons\plan.md
+		Docs\Management\BusinessFeatures\persons\autocomplete-design.md = Docs\Management\BusinessFeatures\persons\autocomplete-design.md
+		Docs\Management\BusinessFeatures\persons\design.md = Docs\Management\BusinessFeatures\persons\design.md
+		Docs\Management\BusinessFeatures\persons\requirements.md = Docs\Management\BusinessFeatures\persons\requirements.md
+		Docs\Management\BusinessFeatures\persons\tasks.md = Docs\Management\BusinessFeatures\persons\tasks.md
+			Docs\Management\BusinessFeatures\persons\plan-autocomplete.md = Docs\Management\BusinessFeatures\persons\plan-autocomplete.md
+		Docs\Management\BusinessFeatures\persons\plan.md = Docs\Management\BusinessFeatures\persons\plan.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\specs\styles-structure\design.md = Docs\specs\styles-structure\design.md
-			Docs\specs\styles-structure\plan.md = Docs\specs\styles-structure\plan.md
+		Docs\Management\DevCycleCraft\styles-structure\design.md = Docs\Management\DevCycleCraft\styles-structure\design.md
+			Docs\Management\DevCycleCraft\styles-structure\plan.md = Docs\Management\DevCycleCraft\styles-structure\plan.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "venues", "venues", "{9EA47D78-293E-41B7-872D-3B2B85E82710}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\specs\venues\design.md = Docs\specs\venues\design.md
-		Docs\specs\venues\requirements.md = Docs\specs\venues\requirements.md
-		Docs\specs\venues\tasks.md = Docs\specs\venues\tasks.md
-			Docs\specs\venues\plan.md = Docs\specs\venues\plan.md
+		Docs\Management\BusinessFeatures\venues\design.md = Docs\Management\BusinessFeatures\venues\design.md
+		Docs\Management\BusinessFeatures\venues\requirements.md = Docs\Management\BusinessFeatures\venues\requirements.md
+		Docs\Management\BusinessFeatures\venues\tasks.md = Docs\Management\BusinessFeatures\venues\tasks.md
+			Docs\Management\BusinessFeatures\venues\plan.md = Docs\Management\BusinessFeatures\venues\plan.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-karaoke", "youtube-karaoke", "{6851C0F2-5877-4E2F-89C0-9B82A6770BE0}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\specs\youtube-karaoke\design.md = Docs\specs\youtube-karaoke\design.md
-		Docs\specs\youtube-karaoke\requirements.md = Docs\specs\youtube-karaoke\requirements.md
-		Docs\specs\youtube-karaoke\tasks.md = Docs\specs\youtube-karaoke\tasks.md
-			Docs\specs\youtube-karaoke\plan.md = Docs\specs\youtube-karaoke\plan.md
+		Docs\Management\BusinessFeatures\youtube-karaoke\design.md = Docs\Management\BusinessFeatures\youtube-karaoke\design.md
+		Docs\Management\BusinessFeatures\youtube-karaoke\requirements.md = Docs\Management\BusinessFeatures\youtube-karaoke\requirements.md
+		Docs\Management\BusinessFeatures\youtube-karaoke\tasks.md = Docs\Management\BusinessFeatures\youtube-karaoke\tasks.md
+			Docs\Management\BusinessFeatures\youtube-karaoke\plan.md = Docs\Management\BusinessFeatures\youtube-karaoke\plan.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BusinessFeatures", "BusinessFeatures", "{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}"
@@ -343,17 +343,17 @@ Global
 		{C9A5A169-C424-4871-AEC8-6E3E2F56F917} = {300D3C1B-4E22-4CEE-85FF-453BD80607BD}
 		{0D9EA0EB-5958-4F68-962E-398A2051CC33} = {C9A5A169-C424-4871-AEC8-6E3E2F56F917}
 		{C32F2513-DA30-4ED9-BD64-50597B18E2D8} = {0D9EA0EB-5958-4F68-962E-398A2051CC33}
-		{C141C5C9-833C-4A26-96BF-3745A2DA1AD4} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
+		{C141C5C9-833C-4A26-96BF-3745A2DA1AD4} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 			{DD8EAF78-54CC-46D7-A9D6-A37F3C5CA9EB} = {300D3C1B-4E22-4CEE-85FF-453BD80607BD}
 		{D1C7C335-1E7C-4804-9A55-A5D160232353} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{0C4BA720-519E-4818-BD9B-34AC19E4FCD7} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
-		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
-		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
-		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
-		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
-		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
+		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{15F1DA03-2180-47BF-BC40-1BB457C97F9E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

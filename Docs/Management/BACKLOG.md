@@ -29,9 +29,9 @@
 | Target | Feature | Status | Notes |
 |--------|---------|--------|-------|
 | 2026-03 | **Venues CRUD** | ✅ Done | Full MD3 list, search, multi-select, swipe-delete |
-| 2026-04 | **Person CRUD** | ✅ Done | Autocomplete field, duplicate detection. Plan: `Docs/specs/persons/plan.md` |
-| 2026-05 | **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/specs/artists-songs/` · Plan: `Docs/specs/artists-songs/plan.md` |
-| 2026-05 | ↳ Song Karaoke URLs | 🟡 In Progress | YouTube URL management per song; next-singer alert; nested feature. Spec: `Docs/specs/youtube-karaoke/` |
+| 2026-04 | **Person CRUD** | ✅ Done | Autocomplete field, duplicate detection. Plan: `Docs/Management/BusinessFeatures/persons/plan.md` |
+| 2026-05 | **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/Management/BusinessFeatures/artists-songs/` · Plan: `Docs/Management/BusinessFeatures/artists-songs/plan.md` |
+| 2026-05 | ↳ Song Karaoke URLs | 🟡 In Progress | YouTube URL management per song; next-singer alert; nested feature. Spec: `Docs/Management/BusinessFeatures/youtube-karaoke/` |
 | 2026-06 | **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
 | 2026-06 | **Visual Theme Refresh** | 💡 Pending | App UI is too dark and monochromatic; spike for richer accent colors, gradient surfaces, warmer tones |
 | 2026-06 | | 🏁 **MVP release** | |
@@ -48,11 +48,11 @@
 |-----------|----------|--------|-----------------|
 | 2026-03 | Solution Structure Refactor | ✅ Done | Move service interfaces to Domain, delete IDatabaseInit, reorganize MAUI project. Plan: `Docs/Plans/2026-03-06-solution-structure-refactor.md` |
 | 2026-03 | MD3 App Bar Components | ✅ Done | SmallAppBar + SearchAppBar ContentView components. Plan: `Docs/Plans/2026-03-10-md3-appbar-components.md` |
-| 2026-03 | M3 Lists | ✅ Done | `Docs/specs/m3-lists/plan.md` |
-| 2026-03 | Venues MD3 rebuild | ✅ Done | `Docs/specs/venues/plan.md` |
-| 2026-03 | Styles & Structure | ✅ Done | `Docs/specs/styles-structure/plan.md` |
+| 2026-03 | M3 Lists | ✅ Done | `Docs/Management/DevCycleCraft/m3-lists/plan.md` |
+| 2026-03 | Venues MD3 rebuild | ✅ Done | `Docs/Management/BusinessFeatures/venues/plan.md` |
+| 2026-03 | Styles & Structure | ✅ Done | `Docs/Management/DevCycleCraft/styles-structure/plan.md` |
 | 2026-04 | Toolbar/FAB vibrant | ✅ Done | `Docs/DevEnv/plans/2026-04-02-toolbar-fab-vibrant.md` |
-| 2026-04 | Autocomplete field | ✅ Done | `Docs/specs/persons/plan-autocomplete.md` |
+| 2026-04 | Autocomplete field | ✅ Done | `Docs/Management/BusinessFeatures/persons/plan-autocomplete.md` |
 | 2026-04 | Hooks redesign | ✅ Done | Stop/TaskCreated/TaskCompleted hooks; session-end auto-commit |
 | 2026-05-07 | SDD Master Plan (Phases 1–11, 162 steps) | ✅ Done | `Docs/DevEnv/SDD/plans/impl/MASTER_PLAN.md` |
 | 2026-05-07 | workflow.md Reduction | ✅ Done | Agent role files (`implementor.md`, `orchestrator.md`) absorb scattered responsibilities; 61 findings resolved |
