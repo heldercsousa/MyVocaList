@@ -596,3 +596,4 @@ Docs/Changelog/changelog.md
 Docs/specs/artists-songs/tasks.md
 Docs/specs/artists-songs/tasks.md
 .superpowers/brainstorm/1710-1779066119/content/playback-approach.html
+.superpowers/brainstorm/1710-1779066119/content/floating-overlay.html
