@@ -1,0 +1,118 @@
+<h2>SongKaraokeUrls — Data Model Design</h2>
+<p class="subtitle">One song can have multiple YouTube URLs (different uploads, different quality). The table tracks which URL gets used most so the app can suggest the best one next time.</p>
+
+<div class="section">
+  <p class="label">Entity relationship</p>
+  <div style="margin-top:14px;font-family:monospace;font-size:0.82em;background:rgba(0,0,0,0.3);border-radius:10px;padding:16px;line-height:2">
+    <span style="color:#a78bfa">Song</span> (1) ──────────────── (0..N) <span style="color:#34d399">SongKaraokeUrl</span>
+    <br>
+    <span style="opacity:0.4;font-size:0.9em">// A song has zero or many YouTube URLs</span>
+    <br>
+    <span style="opacity:0.4;font-size:0.9em">// A URL belongs to exactly one song</span>
+    <br>
+    <span style="opacity:0.4;font-size:0.9em">// No URL is mandatory — song can exist without any</span>
+  </div>
+</div>
+
+<div class="section" style="margin-top:22px">
+  <p class="label">Proposed table fields — select any you want to remove or question</p>
+  <div class="options" data-multiselect style="margin-top:12px">
+
+    <div class="option" data-choice="songid" onclick="toggleSelect(this)">
+      <div class="letter" style="background:#7c3aed">FK</div>
+      <div class="content">
+        <h3>SongId — int NOT NULL</h3>
+        <p>Foreign key → Song.Id. CASCADE DELETE — if song is deleted, all its URLs go too.</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="url" onclick="toggleSelect(this)">
+      <div class="letter" style="background:#059669">PK</div>
+      <div class="content">
+        <h3>Url — string NOT NULL (PK)</h3>
+        <p>Stored as the canonical short form: <code>youtu.be/dQw4w9WgXcQ</code>. Unique — same URL cannot be added twice to the same song. Serves as natural PK (no surrogate needed).</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="label" onclick="toggleSelect(this)">
+      <div class="letter">?</div>
+      <div class="content">
+        <h3>Label — string nullable</h3>
+        <p>Admin-assigned nickname: "HD version", "original 1975", "best karaoke". Optional — most URLs won't need one. Max 100 chars.</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="playcount" onclick="toggleSelect(this)">
+      <div class="letter">📊</div>
+      <div class="content">
+        <h3>PlayCount — int NOT NULL default 0</h3>
+        <p>Incremented each time this specific URL is used in a performance. The URL with the highest PlayCount is the "suggested" one next time the song is queued.</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="lastused" onclick="toggleSelect(this)">
+      <div class="letter">🕐</div>
+      <div class="content">
+        <h3>LastUsedAt — datetime nullable</h3>
+        <p>When this URL was last played. Useful as tiebreaker when PlayCount is equal. Also lets the admin see stale URLs ("hasn't been used in 8 months").</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="duration" onclick="toggleSelect(this)">
+      <div class="letter">⏱</div>
+      <div class="content">
+        <h3>DurationSeconds — int nullable</h3>
+        <p>Video length in seconds. Enables the overlay countdown ("Maria in ~45s"). Admin fills this once, or it gets populated automatically via YouTube oEmbed API (free, no key needed).</p>
+      </div>
+    </div>
+
+    <div class="option" data-choice="addedAt" onclick="toggleSelect(this)">
+      <div class="letter">📅</div>
+      <div class="content">
+        <h3>AddedAt — datetime NOT NULL</h3>
+        <p>When the URL was registered. Default = now. Used to sort URLs when PlayCount is 0 (newest first).</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <p class="label">URL format — short vs full</p>
+  <div class="options" style="margin-top:12px">
+    <div class="option" data-choice="short" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Store short URL — <code>youtu.be/dQw4w9WgXcQ</code></h3>
+        <p>11-char video ID is the canonical identifier. App normalises any pasted URL (full, short, embed, playlist) to this form on save. Compact in DB, unique, works forever.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="id-only" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Store video ID only — <code>dQw4w9WgXcQ</code></h3>
+        <p>Just the 11-char ID. App reconstructs the URL at launch time. Slightly more flexible (could target YouTube or an alternative player). DB column is shorter.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:22px">
+  <p class="label">Suggested-URL logic</p>
+  <div style="background:rgba(0,0,0,0.3);border-radius:10px;padding:14px;font-family:monospace;font-size:0.8em;line-height:1.8">
+    <span style="color:#a78bfa">SELECT</span> * <span style="color:#a78bfa">FROM</span> SongKaraokeUrls<br>
+    <span style="color:#a78bfa">WHERE</span> SongId = @id<br>
+    <span style="color:#a78bfa">ORDER BY</span> PlayCount <span style="color:#34d399">DESC</span>, LastUsedAt <span style="color:#34d399">DESC</span>, AddedAt <span style="color:#34d399">DESC</span><br>
+    <span style="color:#a78bfa">LIMIT</span> 1<br>
+    <span style="opacity:0.4">-- First result = suggested URL for next performance</span>
+  </div>
+</div>
+
+<div class="section" style="margin-top:22px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:14px">
+  <p class="label" style="color:#fbbf24">One open question: thumbnail</p>
+  <p style="font-size:0.82em;margin-top:8px;opacity:0.85">
+    YouTube exposes free thumbnail images at <code>img.youtube.com/vi/{videoId}/mqdefault.jpg</code> — no API key.
+    Should the Songs page show a thumbnail chip next to each URL in the list?
+    It enriches the UI but adds an image cache concern.
+  </p>
+</div>
