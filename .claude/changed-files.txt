@@ -626,3 +626,10 @@ Domain/ServicesInterfaces/INextSingerAlertService.cs
 Domain/ServicesInterfaces/IOverlayService.cs
 Domain/ServicesInterfaces/IYouTubeSearchService.cs
 Domain/ServicesInterfaces/ISecureStorageWrapper.cs
+Infra/EntityEFConfig/SongKaraokeUrlConfiguration.cs
+Infra/AppDbContext.cs
+Infra/AppDbContext.cs
+MyVocaList.Tests/Integration/Repositories/SongKaraokeUrlRepositoryTests.cs
+Infra/Repository/SongKaraokeUrlRepository.cs
+MyVocaList.Tests/Integration/Repositories/SongKaraokeUrlRepositoryTests.cs
+MyVocaList.Tests/Integration/Repositories/SongKaraokeUrlRepositoryTests.cs
