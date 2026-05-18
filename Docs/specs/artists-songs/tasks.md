@@ -1,7 +1,7 @@
 # Artists & Songs — Implementation Tasks
 
-> **Status:** Phase 9 — spec revision complete; Phase 10 ready to start
-> **Last updated:** 2026-05-15
+> **Status:** Phase 16B complete; Phase 16C (emulator smoke test) pending
+> **Last updated:** 2026-05-17
 > **Spec:** `Docs/specs/artists-songs/requirements.md` + `design.md`
 
 Check off each task as it completes. Run `/project:build` after every task. Run `/project:review`
@@ -218,15 +218,15 @@ after every major task before committing.
 
 > Services already exist and are DI-registered: `IMusicMetadataService`, `MusicBrainzProvider`, `DeezerProvider` (Phase 4, commit 53fcfb7). Only UI wiring is missing.
 
-- [ ] **16B.1** Update `ArtistFormViewModel` — inject `IMusicMetadataService`; add `ApiSearchText`, `ApiResults`, `IsApiSearching`, `ApiStatusMessage`; add `SearchApiCommand`, `SelectApiResultCommand`; add duplicate detection state (`DuplicateSuggestions`, `SelectDuplicateCommand`)
+- [x] **16B.1** Update `ArtistFormViewModel` — inject `IMusicMetadataService`; add `ApiSearchText`, `ApiResults`, `IsApiSearching`, `ApiStatusMessage`; add `SearchApiCommand`, `SelectApiResultCommand`; add duplicate detection state (`DuplicateSuggestions`, `SelectDuplicateCommand`)
   - **Files owned:** `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`
-- [ ] **16B.2** Update `ArtistFormPage.xaml` — add duplicate suggestions field + API search strip (TextEdit + "Search" button + status label + results list) below Name field
+- [x] **16B.2** Update `ArtistFormPage.xaml` — add duplicate suggestions field + API search strip (TextEdit + "Search" button + status label + results list) below Name field
   - **Files owned:** `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml`
-- [ ] **16B.3** Update `SongFormViewModel` — inject `IMusicMetadataService`; add API state + `SearchApiCommand`; `SelectApiResultCommand` populates Title/FeaturedArtists and locks Artist field on match
+- [x] **16B.3** Update `SongFormViewModel` — inject `IMusicMetadataService`; add API state + `SearchApiCommand`; `SelectApiResultCommand` populates Title/FeaturedArtists and locks Artist field on match
   - **Files owned:** `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
-- [ ] **16B.4** Update `SongFormPage.xaml` — add API search strip below Title field
+- [x] **16B.4** Update `SongFormPage.xaml` — add API search strip below Title field
   - **Files owned:** `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`
-- [ ] **16B.5** `dotnet build` — 0 errors; `dotnet test` — all passing
+- [x] **16B.5** `dotnet build` — 0 errors; `dotnet test` — all passing
 
 ---
 
