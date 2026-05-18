@@ -38,9 +38,17 @@
 
 ---
 
+## 📋 Spec
+
+- **YouTube Karaoke Mode** `📋 Spec` — YouTube URL management per song, in-app search (optional API key), next-singer 2-stage alert (notifications + Android blinking overlay), play-count-based URL suggestion
+  → Spec: `Docs/specs/youtube-karaoke/` · Brainstorm: 2026-05-17
+
+---
+
 ## 💡 Backlog
 
 - **Queue management MVP** `💡 Idea` — core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate
+- **Visual Theme Refresh** `💡 Idea` — app UI is too dark and monochromatic; spike to introduce richer accent colors, gradient surfaces, warmer tones, and more contrast between states
 
 ---
 > ── MVP scope ends here ──
