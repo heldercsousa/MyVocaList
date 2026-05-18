@@ -174,13 +174,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-so
 		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
 EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plans", "plans", "{DD8EAF78-54CC-46D7-A9D6-A37F3C5CA9EB}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\DevEnv\plans\compressed-plotting-rocket.md = Docs\DevEnv\plans\compressed-plotting-rocket.md
-		Docs\DevEnv\plans\drifting-sniffing-allen.md = Docs\DevEnv\plans\drifting-sniffing-allen.md
-		Docs\DevEnv\plans\cheeky-popping-whale.md = Docs\DevEnv\plans\cheeky-popping-whale.md
-		Docs\DevEnv\plans\jolly-conjuring-coral.md = Docs\DevEnv\plans\jolly-conjuring-coral.md
-EndProjectSection
+		Docs\Management\DevCycleCraft\workflow-compression\plan.md = Docs\Management\DevCycleCraft\workflow-compression\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs-context-scope-control", "docs-context-scope-control", "{A1B2C3D4-0001-4000-8000-000000000008}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\docs-context-scope-control\plan.md = Docs\Management\DevCycleCraft\docs-context-scope-control\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "architecture-tests-evaluation", "architecture-tests-evaluation", "{A1B2C3D4-0001-4000-8000-000000000009}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\architecture-tests-evaluation\plan.md = Docs\Management\DevCycleCraft\architecture-tests-evaluation\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "claude-managed-agents-evaluation", "claude-managed-agents-evaluation", "{A1B2C3D4-0001-4000-8000-00000000000A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\plan.md = Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\plan.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution-structure-refactor", "solution-structure-refactor", "{D1C7C335-1E7C-4804-9A55-A5D160232353}"
 	ProjectSection(SolutionItems) = preProject
@@ -362,7 +374,10 @@ Global
 		{0D9EA0EB-5958-4F68-962E-398A2051CC33} = {C9A5A169-C424-4871-AEC8-6E3E2F56F917}
 		{C32F2513-DA30-4ED9-BD64-50597B18E2D8} = {0D9EA0EB-5958-4F68-962E-398A2051CC33}
 		{C141C5C9-833C-4A26-96BF-3745A2DA1AD4} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-			{DD8EAF78-54CC-46D7-A9D6-A37F3C5CA9EB} = {300D3C1B-4E22-4CEE-85FF-453BD80607BD}
+		{A1B2C3D4-0001-4000-8000-000000000007} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000008} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000009} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-00000000000A} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D1C7C335-1E7C-4804-9A55-A5D160232353} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000002} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000003} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}

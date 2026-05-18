@@ -699,3 +699,6 @@ MyVocaList.sln
 MyVocaList.sln
 MyVocaList.sln
 MyVocaList.sln
+Docs/Management/BACKLOG.md
+MyVocaList.sln
+MyVocaList.sln
