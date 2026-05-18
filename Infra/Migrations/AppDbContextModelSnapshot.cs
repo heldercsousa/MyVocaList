@@ -262,6 +262,42 @@ namespace MyVocaList.Infra.Migrations
                     b.ToTable("Songs", (string)null);
                 });
 
+            modelBuilder.Entity("MyVocaList.Domain.Entity.SongKaraokeUrl", b =>
+                {
+                    b.Property<int>("SongId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("VideoId")
+                        .HasMaxLength(11)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<DateTime>("AddedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int?>("DurationSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Label")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<DateTime?>("LastUsedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PlayCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("SongId", "VideoId");
+
+                    b.ToTable("SongKaraokeUrls", (string)null);
+                });
+
             modelBuilder.Entity("MyVocaList.Domain.Entity.SystemConfiguration", b =>
                 {
                     b.Property<int>("Id")
@@ -360,6 +396,17 @@ namespace MyVocaList.Infra.Migrations
                         .IsRequired();
 
                     b.Navigation("OriginalArtist");
+                });
+
+            modelBuilder.Entity("MyVocaList.Domain.Entity.SongKaraokeUrl", b =>
+                {
+                    b.HasOne("MyVocaList.Domain.Entity.Song", "Song")
+                        .WithMany()
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Song");
                 });
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.Artist", b =>
