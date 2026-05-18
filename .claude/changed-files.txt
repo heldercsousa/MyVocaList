@@ -650,3 +650,5 @@ Docs/BACKLOG.md
 .claude/rules/workflow.md
 .claude/settings.json
 Docs/BACKLOG.md
+Docs/BACKLOG.md
+Docs/DevEnv/workflow-layout-findings.md
