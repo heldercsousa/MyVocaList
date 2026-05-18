@@ -9,7 +9,7 @@
 ## Current Phase
 
 **Artists & Songs** — next feature in the roadmap. Spec drafted; repository + service tests written (RED).
-See `Docs/specs/artists-songs/` for spec and `Docs/specs/artists-songs/plan.md` for the active plan.
+See `Docs/Management/BusinessFeatures/artists-songs/` for spec and `Docs/Management/BusinessFeatures/artists-songs/plan.md` for the active plan.
 
 Active branch: `develop`
 
@@ -44,7 +44,7 @@ Active branch: `develop`
 | Feature | Spec location | Status |
 |---------|---------------|--------|
 | Venues | `Docs/specs/venues/` | Implemented |
-| Artists & Songs | `Docs/specs/artists-songs/` | In progress |
+| Artists & Songs | `Docs/Management/BusinessFeatures/artists-songs/` | In progress |
 
 See `memory/project_artists_songs_roadmap.md` for the Artists & Songs phase tracker.
 
