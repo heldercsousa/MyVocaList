@@ -52,7 +52,7 @@ This invariant applies to all agents (main and sub) at all times.
 
 ## Rule 1 — Spec-First
 
-**Before writing any implementation code for a feature, read `Docs/specs/[feature]/design.md`.**
+**Before writing any implementation code for a feature, read `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md`.**
 
 No exceptions. Code written without reading the spec is code that may contradict it.
 
@@ -165,7 +165,7 @@ A **spike** is a time-boxed exploration task used when the right implementation 
   - Question: [one sentence: what must the spike answer?]
   - Success criterion: [what finding would confirm the approach is viable?]
   - Failure criterion: [what finding would reject the approach?]
-  - Artifact: `Docs/specs/[feature]/findings.md`
+  - Artifact: `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/findings.md`
   - Files owned: throwaway only — no production code created or modified
   - Demo: N/A (spike produces findings, not user-facing behavior)
 ```
@@ -185,7 +185,7 @@ When the right solution is unknown and exploration is needed before committing t
 
 1. **Create a spike task** in `tasks.md` with the prefix `[SPIKE]`.
 2. Work freely — write throwaway code, try approaches, read docs.
-3. At the end of the spike, create `Docs/specs/[feature]/findings.md` (see `session-ops.md`).
+3. At the end of the spike, create `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/findings.md` (see `session-ops.md`).
 4. Delete all throwaway code before transitioning to spec-first implementation.
 5. Write the spec based on findings — do not skip spec-writing because "we already know the solution."
 
@@ -367,7 +367,7 @@ Before ending any session in which implementation occurred:
 
 ## Rule 4 — Tasks.md Is the Source of Truth
 
-Check off each task in `Docs/specs/[feature]/tasks.md` as it completes.
+Check off each task in `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md` as it completes.
 
 **Sequential constraint:** Never start a task that depends on the output of an incomplete task.
 
@@ -483,8 +483,8 @@ A task-log entry that claims `To Review` without a `### Changed files` section i
 
 ### Task-log file location
 
-Task-log files live **beside the spec** at `Docs/specs/[feature]/task-log.md`.
-Plan files live at `Docs/specs/[feature]/plan.md`.
+Task-log files live **beside the spec** at `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/task-log.md`.
+Plan files live at `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/plan.md`.
 Tasks without a feature association are logged to `Docs/DevEnv/plans/unassigned-task-log.md`.
 
 
@@ -560,13 +560,13 @@ Every session that involves implementation or planning must begin with this read
 Read in this order — do not skip items, do not resume from memory alone:
 
 0. **Hook health verification** — confirm hooks are operational (see Hook Enforcement Notes at the top of this file). Fix any misconfigured hooks before proceeding.
-1. **Active session handoff file** (if one exists): `Docs/specs/[feature]/handoff.md` — use this as the exact continuation point
+1. **Active session handoff file** (if one exists): `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/handoff.md` — use this as the exact continuation point
    - **If no handoff file exists:** read `Docs/Management/BACKLOG.md` to identify the current `🟡 In Progress` item or the highest-priority `🟢 Ready` item — that is the current work context
 2. **`ACTIVE-CONSIDERATIONS.md`** (if it exists) — read the priority stack and open items
-3. **`Docs/specs/[feature]/tasks.md`** — confirm which tasks are done, in-progress (`[~]`), and pending
-4. **`Docs/specs/[feature]/requirements.md`** — refresh acceptance criteria (do not rely on previous-session memory)
-5. **`Docs/specs/[feature]/design.md`** — refresh architecture and interface signatures
-6. **`Docs/specs/[feature]/task-log.md`** — check for unresolved `blocked:` statuses or `Spec updated — re-planning required` entries
+3. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md`** — confirm which tasks are done, in-progress (`[~]`), and pending
+4. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/requirements.md`** — refresh acceptance criteria (do not rely on previous-session memory)
+5. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md`** — refresh architecture and interface signatures
+6. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/task-log.md`** — check for unresolved `blocked:` statuses or `Spec updated — re-planning required` entries
 
 **Rule:** Steps 1–6 are mandatory. Steps 3–6 may be scoped to the specific feature being worked on if multiple features are in flight.
 

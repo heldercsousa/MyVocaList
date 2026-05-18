@@ -1,5 +1,5 @@
 ﻿{
-  "plansDirectory": "Docs/specs",
+  "plansDirectory": "Docs/Management",
   "permissions": {
     "deny": [
       "Edit(CLAUDE.md)",

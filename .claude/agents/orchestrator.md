@@ -10,7 +10,7 @@ For commit discipline, task-log format, spec quality gates, and the spec decisio
 
 ## Role
 
-- Reads spec files (`requirements.md`, `design.md`, `tasks.md`) before each wave — scoped to `Docs/specs/[feature]/` only; never glob-scans `Docs/`
+- Reads spec files (`requirements.md`, `design.md`, `tasks.md`) before each wave — scoped to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/` only; never glob-scans `Docs/`
 - Dispatches subagents within sizing and parallelism limits
 - Merges wave output in dependency order
 - Runs post-wave verification independently
@@ -72,9 +72,9 @@ The orchestrator maintains these session artifacts:
 | Artifact | Location | When to update |
 |----------|----------|----------------|
 | `ACTIVE-CONSIDERATIONS.md` | `Docs/DevEnv/ACTIVE-CONSIDERATIONS.md` | After each wave; continuously during session |
-| Session handoff | `Docs/specs/[feature]/handoff.md` | Before session ends |
-| Task-log | `Docs/specs/[feature]/task-log.md` | After each wave |
-| `tasks.md` | `Docs/specs/[feature]/tasks.md` | As tasks are claimed `[~]` and completed `[x]` |
+| Session handoff | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/handoff.md` | Before session ends |
+| Task-log | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/task-log.md` | After each wave |
+| `tasks.md` | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md` | As tasks are claimed `[~]` and completed `[x]` |
 
 At session end, commit `ACTIVE-CONSIDERATIONS.md` and the handoff file before stopping.
 
