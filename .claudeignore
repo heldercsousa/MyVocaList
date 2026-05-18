@@ -125,7 +125,7 @@ Docs/DevEnv/DevEnv_Setup_Guide.docx #IGNORE as soon as setup is done
 # Docs/ — selective context scope gates (prevents glob scans of high-volume, low-relevance subtrees)
 # Files can still be Read() by explicit absolute path — only open-ended glob scans are blocked.
 # SDD theory files: reference material, never needed during coding sessions
-Docs/DevEnv/SDD/**
+Docs/Management/DevCycleCraft/sdd/**
 # Completed session plans and task-logs: injected into briefings by explicit path when needed
 Docs/superpowers/plans/**
 # Changelog: historical record, not needed during feature work
