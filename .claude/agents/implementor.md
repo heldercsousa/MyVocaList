@@ -28,14 +28,14 @@ one-line question and your recommendation, then stop. **Do not unilaterally fix 
 
 Read these files (paths only — your `Read` tool fetches the content):
 
-1. `Docs/specs/[feature]/design.md` — spec for the feature you are implementing
-2. `Docs/specs/[feature]/requirements.md` — acceptance criteria and validation rules
+1. `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md` — spec for the feature you are implementing
+2. `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/requirements.md` — acceptance criteria and validation rules
 3. `.claude/rules/workflow.md` — commit discipline, exit checklist
 4. `.claude/rules/code-principles.md` — naming, async patterns, exception handling, DI conventions
 5. `CLAUDE.md` — non-negotiables, architecture constraints
 6. Any rules files referenced in your briefing
 
-**Docs/ scope rule:** Read only `Docs/specs/[feature]/` and the explicit plan path from your briefing. Never glob-scan `Docs/`. `Docs/DevEnv/SDD/`, `Docs/Changelog/`, and `Docs/Plans/` are `.claudeignore`-excluded — access by explicit absolute path only if the briefing authorises it.
+**Docs/ scope rule:** Read only `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/` and the explicit plan path from your briefing. Never glob-scan `Docs/`. `Docs/DevEnv/SDD/`, `Docs/Changelog/`, and `Docs/Plans/` are `.claudeignore`-excluded — access by explicit absolute path only if the briefing authorises it.
 
 Invoke the `myvocalist-coding` skill before any UI, DevExpress, or CRUD implementation work.
 
@@ -112,8 +112,8 @@ Failed after 3 attempts. Last error: <compiler error summary>
 
 Before writing any code, confirm these preconditions are in place:
 
-- [ ] `Docs/specs/[feature]/requirements.md` exists and has been read
-- [ ] `Docs/specs/[feature]/design.md` exists and has been read
+- [ ] `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/requirements.md` exists and has been read
+- [ ] `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md` exists and has been read
 - [ ] The interface or service method being implemented is defined in `design.md`
 - [ ] If TDD applies (see `testing.md`): a failing test file exists, OR writing the test is the first step of this task
 - [ ] The acceptance criteria that this task addresses have been identified (for AC traceability matrix)

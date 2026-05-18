@@ -26,9 +26,9 @@ Every new CRUD feature gets a spec before any code is written. Copy the structur
 
 | File | What it answers |
 |------|----------------|
-| `Docs/specs/[feature]/requirements.md` | What the feature must do. User stories, acceptance criteria, data model, validation rules, out-of-scope. |
-| `Docs/specs/[feature]/design.md` | How it works technically. Architecture layers, interfaces, page structure, interaction flows, error handling, key decisions. |
-| `Docs/specs/[feature]/tasks.md` | Ordered, checkboxed implementation steps. Checked off as work completes. |
+| `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/requirements.md` | What the feature must do. User stories, acceptance criteria, data model, validation rules, out-of-scope. |
+| `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md` | How it works technically. Architecture layers, interfaces, page structure, interaction flows, error handling, key decisions. |
+| `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md` | Ordered, checkboxed implementation steps. Checked off as work completes. |
 
 The spec is the contract. Code that contradicts the spec is a bug or a spec update — one of the two must change.
 
@@ -43,8 +43,8 @@ One behavior per sentence. One sentence per line.
 ### Collaborative workflow — how to start a new CRUD with Claude
 
 1. **Brainstorm** — invoke `superpowers:brainstorming`. Discuss the feature together: data model, UX flows, edge cases, approaches. Reach agreement on the design before any writing.
-2. **Write spec** — Claude writes `Docs/specs/[feature]/requirements.md`, `design.md`, `tasks.md` based on the agreed design. User reviews and approves.
-3. **Write plan** — invoke `superpowers:writing-plans`. Claude produces `Docs/specs/[feature]/plan.md` — the step-by-step implementation plan with code templates.
+2. **Write spec** — Claude writes `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/requirements.md`, `design.md`, `tasks.md` based on the agreed design. User reviews and approves.
+3. **Write plan** — invoke `superpowers:writing-plans`. Claude produces `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/plan.md` — the step-by-step implementation plan with code templates.
 4. **Implement** — invoke `superpowers:executing-plans` (or `superpowers:subagent-driven-development`). Follow the plan task by task, building against the spec.
 5. **Review** — invoke `superpowers:requesting-code-review` after each major task or phase.
 

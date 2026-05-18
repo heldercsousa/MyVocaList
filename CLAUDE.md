@@ -1,4 +1,4 @@
-# CLAUDE.md - MyVocaList
+﻿# CLAUDE.md - MyVocaList
 
 ## App
 Karaoke queue management for live events. Manages one active queue at a time with round-based progression. Admin registers singers, tracks participation/absence, reorders queue, estimates completion time. Two queue modes: Mechanical Karaoke and Bandokê (live instrumental). Future: singer self-registration, song catalog, lyrics via API, social features.
@@ -102,7 +102,7 @@ This means:
 Exception: Bug fixes, cosmetic changes, and one-off scripts remain spec-exempt (see `workflow.md` bypass rule).
 
 ## Development Methodology
-MyVocaList operates at **Spec-Anchored** (Level 2) SDD: specs in `Docs/specs/` are updated whenever behavior changes and serve as authoritative context for every AI session. Code changes without a corresponding spec update are out of scope unless the change is a bug fix affecting no spec-described behavior.
+MyVocaList operates at **Spec-Anchored** (Level 2) SDD: specs in `Docs/Management/` are updated whenever behavior changes and serve as authoritative context for every AI session. Code changes without a corresponding spec update are out of scope unless the change is a bug fix affecting no spec-described behavior.
 
 ## Commands
 - Build: `/project:build`
@@ -177,7 +177,7 @@ User-preference overrides apply to superpowers skill *defaults* (e.g. folder loc
 ## Docs/ Folder Layout (canonical)
 
 ```
-Docs/specs/[feature]/
+Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/
   requirements.md       ← acceptance criteria, user stories, validation rules
   design.md             ← architecture, interfaces, interaction flows (user-preference override for brainstorming skill default)
   tasks.md              ← ordered checkboxed implementation tasks
@@ -188,10 +188,14 @@ Docs/specs/[feature]/
 
 ```
 
+**Folder routing rule (check BACKLOG.md table to determine category):**
+- Feature listed in **Business Features** table → `Docs/Management/BusinessFeatures/[feature]/`
+- Feature listed in **Dev Cycle Craft** table → `Docs/Management/DevCycleCraft/[feature]/`
+
 **User-preference overrides declared here (superpowers skills respect these):**
-- `brainstorming` skill: write design docs to `Docs/specs/[feature]/design.md` (not `docs/superpowers/specs/`)
-- `writing-plans` skill: write plan to `Docs/specs/[feature]/plan.md`
-- Task-log: write to `Docs/specs/[feature]/task-log.md`
+- `brainstorming` skill: write design docs to `Docs/Management/BusinessFeatures/[feature]/design.md` or `Docs/Management/DevCycleCraft/[feature]/design.md` (check BACKLOG.md — not `docs/superpowers/specs/`)
+- `writing-plans` skill: write plan to the same folder as the spec (`plan.md` beside `design.md`)
+- Task-log: write to the same folder as the spec (`task-log.md` beside `design.md`)
 
 ### Docs/ Context Scope
   `Docs/` grows quickly — never glob-scan it. `.claudeignore` excludes the high-volume subtrees from glob scans; direct `Read()` by explicit path still works.
@@ -201,7 +205,7 @@ Docs/specs/[feature]/
   - `Docs/Changelog/**` — historical changelog
   - `Docs/Plans/**` — legacy plans folder
 
-  **Per-session reads (Rule 7 session start):** scope to `Docs/specs/[feature]/` for the active feature only. No open-ended `Glob("Docs/**")` calls.
+  **Per-session reads (Rule 7 session start):** scope to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/` for the active feature only. No open-ended `Glob("Docs/**")` calls.
 
 
 Any area where Claude Code repeatedly makes mistakes or needs repeated guidance
@@ -293,7 +297,7 @@ Evaluate when: the main agent repeatedly needs to query "which tasks are complet
 ### Migration Path (if Spec Kit adoption becomes warranted)
 The current spec format (`requirements.md`, `design.md`, `tasks.md` in `Docs/specs/`) maps directly to GitHub Spec Kit's artifact set. Adopting Spec Kit would require:
 1. `speckit init` — creates `.specify/` directory with templates
-2. Moving specs from `Docs/specs/[feature]/` to `.specify/specs/[feature]/`
+2. Moving specs from `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/` to `.specify/specs/[feature]/`
 3. Merging `CLAUDE.md` + `rules/*.md` into `.specify/constitution.md`
 4. Replacing workflow.md Rule 1-4 trigger patterns with `/specify`, `/plan`, `/tasks` slash commands
 

@@ -1,4 +1,4 @@
-# Review Command
+﻿# Review Command
 
 Post-task review. Run after EVERY completed task before committing.
 
@@ -46,7 +46,7 @@ Test quality criteria per `testing.md` must also pass (see Test Quality Audit Ch
 ## Spec and AC Verification
 
 ### 6. Spec Consistency *(primary spec check — canonical for all spec-vs-code verification)*
-- [ ] 🔴 If the task changed any behavior defined in `Docs/specs/[feature]/`, confirm the corresponding `requirements.md` and/or `design.md` were updated
+- [ ] 🔴 If the task changed any behavior defined in `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/`, confirm the corresponding `requirements.md` and/or `design.md` were updated
 - [ ] 🔴 Flag any spec file that describes behavior that no longer matches the implementation
 - [ ] 🔴 If code deviated from `design.md`, was `design.md` updated?
 - [ ] 🔴 **Interface signatures:** Open `design.md` for the feature — do all interface signatures in the code match `design.md`? *(Consolidates checks from former §8 and §12)*

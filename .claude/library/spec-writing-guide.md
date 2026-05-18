@@ -1,4 +1,4 @@
-# Spec-Writing Guide — MyVocaList
+﻿# Spec-Writing Guide — MyVocaList
 
 > Loaded on-demand. Reference when writing `requirements.md`, `design.md`, or `tasks.md`.
 > For the spec decision table (when to write a spec at all), see `.claude/rules/workflow.md § Rule 1`.
@@ -87,7 +87,7 @@ Use Given/When/Then for user-facing flows. Use EARS for background rules, constr
 
 ## spec-changelog.md — required when a spec is revised after approval
 
-Create `Docs/specs/[feature]/spec-changelog.md` the first time an approved spec is modified. Every subsequent revision adds a row.
+Create `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/spec-changelog.md` the first time an approved spec is modified. Every subsequent revision adds a row.
 
 ### Format
 
@@ -256,7 +256,7 @@ A spec that is too long is as harmful as one that is too short. Over-specified s
 
 For features with many architectural trade-offs, a fourth spec file `decisions.md` may be created alongside the three standard files. This file is a chronological log of decisions made during the feature's lifetime.
 
-**Format: `Docs/specs/[feature]/decisions.md`**
+**Format: `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/decisions.md`**
 
 ```markdown
 # Decision Log — [Feature Name]

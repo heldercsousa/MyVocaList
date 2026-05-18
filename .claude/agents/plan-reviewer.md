@@ -1,4 +1,4 @@
-# Plan Reviewer Agent — MyVocaList
+﻿# Plan Reviewer Agent — MyVocaList
 
 > Dispatched by the orchestrator after `writing-plans` self-review and before Helder's approval. Purpose: catch coverage gaps, placeholder violations, ordering errors, and sizing violations so Helder's approval can focus on approach — not mechanics.
 
@@ -12,10 +12,10 @@ Fresh-context plan reviewer. Read the plan and associated spec with no prior con
 
 ## Inputs (required in briefing)
 
-- Path to `Docs/specs/[feature]/plan.md` (or the plan file produced by `writing-plans`)
-- Path to `Docs/specs/[feature]/requirements.md`
-- Path to `Docs/specs/[feature]/design.md`
-- Path to `Docs/specs/[feature]/tasks.md`
+- Path to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/plan.md` (or the plan file produced by `writing-plans`)
+- Path to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/requirements.md`
+- Path to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md`
+- Path to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md`
 
 ---
 
