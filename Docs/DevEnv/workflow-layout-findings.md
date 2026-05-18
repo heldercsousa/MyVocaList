@@ -257,6 +257,94 @@ Add to CLAUDE.md skills reference: "Before any task completion claim: invoke `su
 
 ---
 
+---
+
+## Finding 10 — Root Cause of Misplaced Spec Files
+
+The `brainstorming` skill (step 6) explicitly writes design docs to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`. It says "(User preferences for spec location override this default)" — but no override was ever declared in CLAUDE.md or settings.json. Every time `brainstorming` was used to produce a spec, it wrote to `Docs/superpowers/specs/` correctly per its own rules. The fix is the user-preference override — not a skill bug.
+
+Same situation with `writing-plans`: defaults to `docs/superpowers/plans/` for the plan file, which is fine. But the design artifact that `brainstorming` produces lands in the wrong place unless the override is declared.
+
+**Fix:** CLAUDE.md must declare, before the `### Docs/ Context Scope` section:
+- Spec/design docs → `Docs/specs/[feature]/design.md` (not `Docs/superpowers/specs/`)
+- Plans → `Docs/superpowers/plans/YYYY-MM-DD-<feature>.md` (already correct)
+
+---
+
+## Finding 11 — Spec and Plan Reviews Are a Gap in the Cycle
+
+### What exists for spec/plan review today
+
+| Stage | What reviews it | Type |
+|-------|----------------|------|
+| After `brainstorming` writes spec | Spec self-review (same agent, step 7) | Inline, same-context |
+| After self-review | User Review Gate — Helder reads and approves | Human |
+| After `writing-plans` writes plan | Plan self-review (same agent) | Inline, same-context |
+| SDD Planning Gate (S3.1) | Helder reviews 5 areas | Human |
+
+No fresh-subagent review exists for specs or plans. Self-review by the same agent that wrote the artifact has the same bias problem as the hook's inline code review (Finding 6): the agent confirms what it expects, not what is actually correct or complete.
+
+### Should spec/plan reviews follow the same pattern as code reviews?
+
+**Yes — for identical reasons.** The `subagent-driven-development` skill uses fresh subagents for code review precisely because the implementer has context bias. The same bias applies to the agent that wrote the spec.
+
+A fresh spec-reviewer subagent, given only the spec + review criteria, can catch:
+- Missing structural elements (SDD S2.1 — 7 elements checklist)
+- Vague or untestable acceptance criteria
+- Constitutional constraint violations (CLAUDE.md non-negotiables)
+- Conflicts with existing specs in `Docs/specs/[feature]/`
+- Spec quality four-gate failures (Correctness, Completeness, Consistency, Testability)
+
+A fresh plan-reviewer subagent can catch:
+- Tasks with no corresponding spec requirement (over-building)
+- Spec requirements with no task (missing coverage)
+- Placeholder violations (TBD, TODO, "add validation" without showing how)
+- Wrong task ordering (DRY Onion violated)
+- File ownership conflicts (same file in two tasks)
+
+### Where these reviews slot in the workflow
+
+```
+brainstorming skill
+  └─ writes spec (design.md)
+  └─ spec self-review (inline — keep, catches trivial issues fast)
+  └─ [NEW] fresh spec-reviewer subagent (before human review gate)
+  └─ Helder reviews (human gate — now focused on intent, not completeness)
+
+writing-plans skill
+  └─ writes plan file
+  └─ plan self-review (inline — keep)
+  └─ [NEW] fresh plan-reviewer subagent (before Helder approves)
+  └─ Helder approves (now focused on approach, not gaps)
+```
+
+The fresh reviews are a **pre-filter before Helder's time is spent** — not a replacement for human review. Helder should review intent and approach; the agent reviewer catches structural gaps and mechanical violations.
+
+### Review criteria (per artifact type)
+
+**Spec reviewer checklist:**
+- All 7 SDD structural elements present (Inputs, Outputs, Preconditions, Postconditions/Invariants, Integration Contracts, State Machines, Edge Cases)
+- Every user story has ≥1 AC in Given/When/Then or EARS/GEARS format
+- No vague ACs ("fast", "validates input", "handles errors")
+- Out-of-scope section present and non-empty
+- Domain vocabulary defined
+- No constitutional violations (no DisplayAlert, DevExpress-first, English-only, business logic in Services)
+- No conflict with existing specs in `Docs/specs/`
+
+**Plan reviewer checklist:**
+- Every spec AC maps to ≥1 task (traceability)
+- Every task maps to ≥1 spec AC (no gold-plating)
+- No placeholders (TBD, TODO, "add appropriate validation")
+- All task steps include actual code, not descriptions of code
+- DRY Onion order: Domain → Infra → Services → UI
+- No file listed in two parallel tasks (single-writer rule)
+- Each task fits sizing limits (≤5 files, ≤2 hours)
+
+### Implementation path
+Since no superpowers skill covers spec/plan review, the criteria above should be codified as review prompts (similar to `code-reviewer.md`) in `.claude/agents/`. The orchestrator.md can then reference them: "After brainstorming produces a spec, dispatch spec-reviewer subagent before handing to Helder."
+
+---
+
 ## Open Decisions (needs Helder input)
 
 | # | Decision | Options |
@@ -267,15 +355,20 @@ Add to CLAUDE.md skills reference: "Before any task completion claim: invoke `su
 | D4 | Apply fixes now? | Move misplaced files, update BACKLOG.md paths, add hierarchy to CLAUDE.md |
 | D5 | Remove "run /project:review after every task" rule from workflow.md? | Yes (trust the skill) / No (keep as manual gate) |
 | D6 | Slim orchestrator.md — remove sections duplicated by subagent-driven-development? | Yes / Partial |
+| D7 | Add fresh-subagent spec review (brainstorming self-review → agent review → Helder gate)? | Yes |
+| D8 | Add fresh-subagent plan review (writing-plans self-review → agent review → Helder approval)? | Yes |
+| D9 | Codify spec-reviewer and plan-reviewer prompts in `.claude/agents/`? | Yes — mirrors code-reviewer.md pattern |
 
 ---
 
 ## Next Steps (after decisions)
 
 1. Apply folder layout decision (move files, update BACKLOG.md references)
-2. Add authority hierarchy paragraph to CLAUDE.md
+2. Add authority hierarchy + user-preference override to CLAUDE.md
 3. Add changelog section to spec file template (`.claude/library/spec-writing-guide.md`)
-4. Remove inline review from `TaskCompleted` hook (per D3 decision)
-5. Slim orchestrator.md to project-specific addenda only (per D6 decision)
+4. Remove inline review from `TaskCompleted` hook; keep build+test only (per D3)
+5. Slim orchestrator.md to project-specific addenda only (per D6)
 6. Add `verification-before-completion` skill reference to CLAUDE.md
-7. Resume App Versioning implementation (was the original session goal)
+7. Create `spec-reviewer.md` and `plan-reviewer.md` in `.claude/agents/` (per D9)
+8. Wire spec/plan review into brainstorming and writing-plans workflow notes in CLAUDE.md (per D7/D8)
+9. Resume App Versioning implementation (was the original session goal)
