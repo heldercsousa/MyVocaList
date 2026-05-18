@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Auto-registers a new Docs/ file into MyVocaList.sln.
     Called by the Claude Code PostToolUse hook on Write operations.
@@ -46,7 +46,9 @@ $folderMap = [ordered]@{
     'Docs\DevEnv\plans\'           = '{DD8EAF78-54CC-46D7-A9D6-A37F3C5CA9EB}'
     'Docs\DevEnv\'                 = '{300D3C1B-4E22-4CEE-85FF-453BD80607BD}'
     'Docs\Plans\'                  = '{D1C7C335-1E7C-4804-9A55-A5D160232353}'
-    'Docs\specs\app-versioning\'   = '{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B}'
+    'Docs\Management\DevCycleCraft\app-versioning\'   = '{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B}'
+    'Docs\Management\BusinessFeatures\' = '{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}'
+    'Docs\Management\DevCycleCraft\'     = '{0C4BA720-519E-4818-BD9B-34AC19E4FCD7}'
     'Docs\specs\artists-songs\'    = '{C141C5C9-833C-4A26-96BF-3745A2DA1AD4}'
     'Docs\specs\m3-lists\'         = '{F58ED7A0-0186-4187-9FCF-78A464FB01C5}'
     'Docs\specs\persons\'          = '{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}'

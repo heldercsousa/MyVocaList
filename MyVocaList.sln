@@ -196,8 +196,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plans", "Plans", "{D1C7C335
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versioning", "{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\specs\app-versioning\design.md = Docs\specs\app-versioning\design.md
-			Docs\specs\app-versioning\plan.md = Docs\specs\app-versioning\plan.md
+		Docs\Management\DevCycleCraft\app-versioning\design.md = Docs\Management\DevCycleCraft\app-versioning\design.md
+			Docs\Management\DevCycleCraft\app-versioning\plan.md = Docs\Management\DevCycleCraft\app-versioning\plan.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "m3-lists", "m3-lists", "{F58ED7A0-0186-4187-9FCF-78A464FB01C5}"
@@ -237,6 +237,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-karaoke", "youtube-
 		Docs\specs\youtube-karaoke\tasks.md = Docs\specs\youtube-karaoke\tasks.md
 			Docs\specs\youtube-karaoke\plan.md = Docs\specs\youtube-karaoke\plan.md
 EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BusinessFeatures", "BusinessFeatures", "{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevCycleCraft", "DevCycleCraft", "{0C4BA720-519E-4818-BD9B-34AC19E4FCD7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{15F1DA03-2180-47BF-BC40-1BB457C97F9E}"
 	ProjectSection(SolutionItems) = preProject
@@ -342,7 +346,9 @@ Global
 		{C141C5C9-833C-4A26-96BF-3745A2DA1AD4} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
 			{DD8EAF78-54CC-46D7-A9D6-A37F3C5CA9EB} = {300D3C1B-4E22-4CEE-85FF-453BD80607BD}
 		{D1C7C335-1E7C-4804-9A55-A5D160232353} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
+		{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{0C4BA720-519E-4818-BD9B-34AC19E4FCD7} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
