@@ -642,3 +642,4 @@ Docs/superpowers/specs/2026-05-18-app-versioning-design.md
 .claude/settings.json
 Docs/BACKLOG.md
 Docs/BACKLOG.md
+Docs/BACKLOG.md
