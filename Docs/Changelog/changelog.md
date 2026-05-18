@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/17/2026** - docs - YouTube Karaoke Mode implementation plan: 15 tasks across 7 phases (Domain → Infra → Services → Android Overlay → DI → Settings → SongFormPage UI)
 - **05/17/2026** - docs - YouTube Karaoke Mode spec: requirements (6 user stories, SongKaraokeUrl data model, URL normalisation, cross-platform alert model), design (domain/infra/services/MAUI layers, OverlayService Android-only, NoOpOverlayService iOS, alert timing logic), tasks (5 phases); BACKLOG updated with YouTube Karaoke 📋 Spec and Visual Theme Refresh 💡 Idea
 - **05/17/2026** - feat - Phase 16B: ArtistFormViewModel gains IMusicMetadataService injection, ApiSearchText/ApiResults/IsApiSearching/ApiStatusMessage/HasApiResults/HasApiStatusMessage/DuplicateSuggestions/HasDuplicateSuggestions properties, SearchApiCommand/SelectApiResultCommand/SelectDuplicateCommand; SongFormViewModel gains same API strip properties + SelectApiResultCommand auto-populates artist on name match; ArtistFormPage.xaml adds duplicate suggestions list and API search strip (TextEdit + Search button + activity indicator + results list); SongFormPage.xaml adds API search strip below title field with two-line result items (song title + artist name)
 - **05/17/2026** - docs - Phase 16A Wave 3: devexpress-patterns.md gains FilterChipGroup section (namespace, inline items, ViewModel IList binding, Auto/∗ row layout rule); m3-components.md gains Filter Chip section (when to use, layout pattern, chip→enum mapping, MD3 terminology table)
