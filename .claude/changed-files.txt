@@ -681,3 +681,8 @@ CLAUDE.md
 .claude/library/spec-writing-guide.md
 .claude/settings.json
 Docs/BACKLOG.md
+Docs/superpowers/plans/steady-drifting-valley.md
+Docs/BACKLOG.md
+Docs/BACKLOG.md
+.claude/scripts/sync-docs-to-sln.ps1
+.claude/settings.json

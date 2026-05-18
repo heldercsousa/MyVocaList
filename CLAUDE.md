@@ -181,25 +181,23 @@ Docs/specs/[feature]/
   requirements.md       ← acceptance criteria, user stories, validation rules
   design.md             ← architecture, interfaces, interaction flows (user-preference override for brainstorming skill default)
   tasks.md              ← ordered checkboxed implementation tasks
-  plan.md               ← execution plan (user-preference override: replaces Docs/superpowers/plans/YYYY-MM-DD-<feature>.md)
-  task-log.md           ← activity log (user-preference override: replaces Docs/superpowers/plans/<feature>-task-log.md)
+  plan.md               ← execution plan
+  task-log.md           ← activity log
   findings.md           ← spike results (optional)
   spec-changelog.md     ← spec revision history (required for features with ≥1 post-approval change)
 
-Docs/superpowers/plans/ ← legacy location; existing plan/task-log files remain here until migrated
 ```
 
 **User-preference overrides declared here (superpowers skills respect these):**
 - `brainstorming` skill: write design docs to `Docs/specs/[feature]/design.md` (not `docs/superpowers/specs/`)
-- `writing-plans` skill: write plan to `Docs/specs/[feature]/plan.md` (not `docs/superpowers/plans/`)
-- Task-log: write to `Docs/specs/[feature]/task-log.md` (not `docs/superpowers/plans/<feature>-task-log.md`)
+- `writing-plans` skill: write plan to `Docs/specs/[feature]/plan.md`
+- Task-log: write to `Docs/specs/[feature]/task-log.md`
 
 ### Docs/ Context Scope
   `Docs/` grows quickly — never glob-scan it. `.claudeignore` excludes the high-volume subtrees from glob scans; direct `Read()` by explicit path still works.
 
   **Excluded from glob scans (access by explicit path only):**
   - `Docs/DevEnv/SDD/**` — SDD theory, 77 files, reference material only
-  - `Docs/superpowers/plans/**` — legacy plan/task-log files; inject path in briefing when needed
   - `Docs/Changelog/**` — historical changelog
   - `Docs/Plans/**` — legacy plans folder
 

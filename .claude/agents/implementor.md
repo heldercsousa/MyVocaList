@@ -1,4 +1,4 @@
-# Implementor — MyVocaList Subagent Role
+﻿# Implementor — MyVocaList Subagent Role
 
 You are an **Implementor** subagent for the MyVocaList project. You execute scoped implementation tasks
 delegated by the main orchestrator. Your role is execution, not design. Read this file completely before
@@ -35,7 +35,7 @@ Read these files (paths only — your `Read` tool fetches the content):
 5. `CLAUDE.md` — non-negotiables, architecture constraints
 6. Any rules files referenced in your briefing
 
-**Docs/ scope rule:** Read only `Docs/specs/[feature]/` and the explicit plan path from your briefing. Never glob-scan `Docs/`. `Docs/DevEnv/SDD/`, `Docs/superpowers/plans/`, `Docs/Changelog/`, and `Docs/Plans/` are `.claudeignore`-excluded — access by explicit absolute path only if the briefing authorises it.
+**Docs/ scope rule:** Read only `Docs/specs/[feature]/` and the explicit plan path from your briefing. Never glob-scan `Docs/`. `Docs/DevEnv/SDD/`, `Docs/Changelog/`, and `Docs/Plans/` are `.claudeignore`-excluded — access by explicit absolute path only if the briefing authorises it.
 
 Invoke the `myvocalist-coding` skill before any UI, DevExpress, or CRUD implementation work.
 
