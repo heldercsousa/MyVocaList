@@ -1,6 +1,6 @@
 # App Versioning Strategy — Design Spec
 **Date:** 2026-05-18  
-**Status:** Approved — pending implementation plan
+**Status:** Approved — plan written, pending execution
 
 ---
 
