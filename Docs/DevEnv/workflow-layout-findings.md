@@ -1,7 +1,7 @@
 # Workflow & Folder Layout Alignment — Findings
 
 **Created:** 2026-05-18
-**Status:** Open — decisions pending from Helder
+**Status:** Decisions recorded 2026-05-18 — ready for implementation
 **BACKLOG entry:** Dev Cycle Craft — Workflow & Folder Layout Alignment
 
 ---
@@ -345,30 +345,68 @@ Since no superpowers skill covers spec/plan review, the criteria above should be
 
 ---
 
-## Open Decisions (needs Helder input)
+## Decisions (recorded 2026-05-18)
 
-| # | Decision | Options |
-|---|----------|---------|
-| D1 | Plan + task-log colocation vs separated? | Option A (beside spec) / Option B (Docs/superpowers/plans/) |
-| D2 | Spec evolution changelog format? | Inline per file / Separate file / Git commits only |
-| D3 | Review: remove inline review from TaskCompleted hook? | Option R1 / R2 / R3 |
-| D4 | Apply fixes now? | Move misplaced files, update BACKLOG.md paths, add hierarchy to CLAUDE.md |
-| D5 | Remove "run /project:review after every task" rule from workflow.md? | Yes (trust the skill) / No (keep as manual gate) |
-| D6 | Slim orchestrator.md — remove sections duplicated by subagent-driven-development? | Yes / Partial |
-| D7 | Add fresh-subagent spec review (brainstorming self-review → agent review → Helder gate)? | Yes |
-| D8 | Add fresh-subagent plan review (writing-plans self-review → agent review → Helder approval)? | Yes |
-| D9 | Codify spec-reviewer and plan-reviewer prompts in `.claude/agents/`? | Yes — mirrors code-reviewer.md pattern |
+| # | Decision | Resolution |
+|---|----------|-----------|
+| D1 | Plan + task-log location | **Beside spec** — `Docs/specs/[feature]/plan.md` and `task-log.md` |
+| D2 | Spec evolution changelog | **Separate file** — `Docs/specs/[feature]/spec-changelog.md`. Must support release notes for app store and in-app display. Check superpowers skills (e.g. `finishing-a-development-branch`) before designing format — skill is authoritative. Connects to App Versioning strategy already planned. |
+| D3 | Review — fresh subagent | **Agreed**: remove inline review from `TaskCompleted` hook. All reviews must be fresh subagents — never the implementer, never the main agent. |
+| D4 | Apply fixes | **Yes** — move misplaced files, update BACKLOG.md references, update all affected guidelines. |
+| D5 | `/project:review` rule | **Conditional, not removed**: when using `subagent-driven-development` skill, review is automatic. When executing manually (not via the skill), `/project:review` is still the trigger. Workflow.md rule becomes conditional. |
+| D6 | Slim orchestrator.md | **Agreed** — remove sections the `subagent-driven-development` skill already covers. Retain only project-specific addenda. Add explicit header declaring extension relationship. |
+| D7 | Fresh spec-reviewer subagent | **Yes** — between brainstorming self-review and Helder's human gate. |
+| D8 | Fresh plan-reviewer subagent | **Yes** — between writing-plans self-review and Helder's approval. |
+| D9 | Spec/plan reviewer prompts | **Yes** — create in `.claude/agents/` following `code-reviewer.md` pattern. |
 
 ---
 
-## Next Steps (after decisions)
+## Implementation Tasks (execute in this order)
 
-1. Apply folder layout decision (move files, update BACKLOG.md references)
-2. Add authority hierarchy + user-preference override to CLAUDE.md
-3. Add changelog section to spec file template (`.claude/library/spec-writing-guide.md`)
-4. Remove inline review from `TaskCompleted` hook; keep build+test only (per D3)
-5. Slim orchestrator.md to project-specific addenda only (per D6)
-6. Add `verification-before-completion` skill reference to CLAUDE.md
-7. Create `spec-reviewer.md` and `plan-reviewer.md` in `.claude/agents/` (per D9)
-8. Wire spec/plan review into brainstorming and writing-plans workflow notes in CLAUDE.md (per D7/D8)
-9. Resume App Versioning implementation (was the original session goal)
+### Phase 1 — Folder Layout (no dependencies)
+- [ ] Move `Docs/superpowers/specs/2026-05-18-app-versioning-design.md` → `Docs/specs/app-versioning/design.md` (create folder)
+- [ ] Move `Docs/superpowers/specs/2026-03-30-autocomplete-field-design.md` → `Docs/specs/persons/autocomplete-design.md`
+- [ ] Move `Docs/superpowers/specs/2026-03-30-styles-structure-design.md` → `Docs/specs/styles-structure/design.md` (create folder)
+- [ ] Move `Docs/superpowers/specs/2026-03-11-m3-lists-design.md` → `Docs/specs/m3-lists/design.md` (create folder)
+- [ ] Delete `Docs/superpowers/specs/` folder (now empty)
+- [ ] Update BACKLOG.md App Versioning row to reference new spec path
+- [ ] Update any other BACKLOG.md rows referencing `Docs/superpowers/specs/`
+
+### Phase 2 — CLAUDE.md (requires CLAUDE.md write permission — currently denied)
+- [ ] Add authority hierarchy section (SDD > superpowers > custom rules)
+- [ ] Add Docs/ Folder Layout canonical table with user-preference override declaration
+- [ ] Add `verification-before-completion` skill reference to per-task completion
+- [ ] Add spec/plan reviewer subagent requirement (D7/D8)
+- [ ] Update `plansDirectory` note — plans now beside specs at `Docs/specs/[feature]/`
+- [ ] Update `Docs/ Context Scope` exclusion list (remove `Docs/superpowers/plans/**` if plans move)
+
+### Phase 3 — settings.json (TaskCompleted hook)
+- [ ] Remove "SPAWN INLINE REVIEW" block from `TaskCompleted` hook prompt
+- [ ] Keep build+test verification sequence intact
+- [ ] Update `plansDirectory` value from `Docs/superpowers/plans` to `Docs/specs` (or make dynamic)
+- [ ] Update Stop hook asyncRewake — task-log glob pattern needs to match new path `Docs/specs/**/*task-log.md`
+
+### Phase 4 — Agent prompts (new files)
+- [ ] Check `superpowers:finishing-a-development-branch` skill for changelog/release notes format (D2)
+- [ ] Create `.claude/agents/spec-reviewer.md` with SDD 7-element checklist + constitutional check
+- [ ] Create `.claude/agents/plan-reviewer.md` with spec-coverage + placeholder + ordering checks
+- [ ] Update `.claude/agents/orchestrator.md` — remove sections duplicated by `subagent-driven-development`; add extension header
+
+### Phase 5 — workflow.md (requires .claude/rules write permission — currently denied)
+- [ ] Make `/project:review` rule conditional (automatic via skill / manual otherwise)
+- [ ] Update task-log file location references (now `Docs/specs/[feature]/task-log.md`)
+- [ ] Update plan file location references (now `Docs/specs/[feature]/plan.md`)
+
+### Phase 6 — Spec template
+- [ ] Update `.claude/library/spec-writing-guide.md` — add `spec-changelog.md` as required artifact
+- [ ] Document `spec-changelog.md` format (after checking D2 skills)
+
+---
+
+## Permissions Note
+
+`CLAUDE.md` and `.claude/rules/*.md` are write-protected in `settings.json`. Helder must either:
+- Temporarily grant write permission (`permissions.deny` list in settings.json), OR
+- Apply Phase 2 and Phase 5 changes manually after reviewing the agent's diff output
+
+All other phases (1, 3, 4, 6) are not write-protected and can be applied by a subagent directly.
