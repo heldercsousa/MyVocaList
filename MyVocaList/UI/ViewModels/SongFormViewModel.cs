@@ -1,3 +1,5 @@
+using MyVocaList.Contracts.DTOs;
+
 namespace MyVocaList.UI.ViewModels;
 
 [QueryProperty(nameof(SongIdRaw), "songId")]
@@ -10,6 +12,7 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ISongService _songService;
     private readonly ISnackbarComponent _snackbarService;
     private readonly ILogger<SongFormViewModel> _logger;
+    private readonly IMusicMetadataService _musicMetadataService;
 
     public string SongIdRaw { set => SongId = int.TryParse(value, out var id) ? id : null; }
     public string ArtistIdRaw { set => ArtistId = int.TryParse(value, out var id) ? id : 0; }
@@ -39,6 +42,17 @@ public partial class SongFormViewModel : ViewModelBase
     // Lyrics
     [ObservableProperty] private string? _lyrics;
 
+    // API search strip
+    [ObservableProperty] private string _apiSearchText = string.Empty;
+    [ObservableProperty] private IEnumerable<MusicSearchResultDto> _apiResults = [];
+    [ObservableProperty] private bool _isApiSearching;
+    [ObservableProperty] private string _apiStatusMessage = string.Empty;
+    [ObservableProperty] private bool _hasApiResults;
+    [ObservableProperty] private bool _hasApiStatusMessage;
+
+    public string SelectedExternalId { get; private set; } = string.Empty;
+    public string SelectedProvider { get; private set; } = string.Empty;
+
     public bool IsEditMode => SongId.HasValue;
     public string PageTitle => IsEditMode ? "Edit Song" : "New Song";
 
@@ -46,23 +60,29 @@ public partial class SongFormViewModel : ViewModelBase
         IArtistService artistService,
         ISongService songService,
         ISnackbarComponent snackbarService,
-        ILogger<SongFormViewModel> logger)
+        ILogger<SongFormViewModel> logger,
+        IMusicMetadataService musicMetadataService)
     {
         _artistService = artistService;
         _songService = songService;
         _snackbarService = snackbarService;
         _logger = logger;
+        _musicMetadataService = musicMetadataService;
 
         SaveCommand = new AsyncRelayCommand(SaveAsync);
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         SearchArtistsCommand = new AsyncRelayCommand<string>(SearchArtistsAsync);
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
+        SearchApiCommand = new AsyncRelayCommand(SearchApiAsync);
+        SelectApiResultCommand = new AsyncRelayCommand<MusicSearchResultDto>(SelectApiResultAsync);
     }
 
     public IAsyncRelayCommand SaveCommand { get; }
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand<string> SearchArtistsCommand { get; }
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
+    public IAsyncRelayCommand SearchApiCommand { get; }
+    public IAsyncRelayCommand<MusicSearchResultDto> SelectApiResultCommand { get; }
 
     partial void OnSongIdChanged(int? value)
     {
@@ -170,6 +190,69 @@ public partial class SongFormViewModel : ViewModelBase
     }
 
     private Task CancelAsync() => Shell.Current.GoToAsync("..");
+
+    private async Task SearchApiAsync()
+    {
+        var term = ApiSearchText?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(term)) { ApiResults = []; HasApiResults = false; ApiStatusMessage = string.Empty; HasApiStatusMessage = false; return; }
+
+        IsApiSearching = true;
+        ApiStatusMessage = string.Empty;
+        try
+        {
+            var artistHint = SelectedArtistName;
+            var results = await _musicMetadataService.SearchSongsAsync(term, artistHint);
+            var list = results.Take(5).ToList();
+            ApiResults = list;
+            HasApiResults = list.Count > 0;
+            ApiStatusMessage = HasApiResults ? string.Empty : "No results found";
+            HasApiStatusMessage = !HasApiResults;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "API song search failed for term {Term}", term);
+            ApiStatusMessage = "Search failed";
+            HasApiStatusMessage = true;
+            ApiResults = [];
+            HasApiResults = false;
+        }
+        finally
+        {
+            IsApiSearching = false;
+        }
+    }
+
+    private async Task SelectApiResultAsync(MusicSearchResultDto result)
+    {
+        if (result is null) return;
+        SongTitle = result.SongTitle ?? string.Empty;
+        FeaturedArtists = result.FeaturedArtists ?? string.Empty;
+        SelectedExternalId = result.ExternalId;
+        SelectedProvider = result.Provider;
+        ApiResults = [];
+        ApiStatusMessage = string.Empty;
+
+        if (!string.IsNullOrEmpty(result.ArtistName) && SelectedArtistId.HasValue && SelectedArtistId.Value > 0)
+        {
+            if (string.Equals(result.ArtistName, SelectedArtistName, StringComparison.OrdinalIgnoreCase))
+                IsArtistLocked = true;
+        }
+        else if (!string.IsNullOrEmpty(result.ArtistName) && (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0))
+        {
+            var matches = await _artistService.SearchArtistsByNameAsync(result.ArtistName, maxResults: 1);
+            var match = matches.FirstOrDefault();
+            if (match is not null)
+            {
+                SelectedArtistId = match.Id;
+                SelectedArtistName = match.Name;
+                ArtistSearchText = match.Name;
+                ArtistSuggestions = [];
+                ArtistHasError = false;
+                ArtistErrorText = string.Empty;
+                IsArtistLocked = true;
+            }
+        }
+    }
 
     private void ClearError()
     {
