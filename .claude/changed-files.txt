@@ -599,3 +599,4 @@ Docs/specs/artists-songs/tasks.md
 .superpowers/brainstorm/1710-1779066119/content/floating-overlay.html
 .superpowers/brainstorm/1710-1779066119/content/ai-overlay-positioning.html
 .superpowers/brainstorm/1710-1779066119/content/blink-label.html
+.superpowers/brainstorm/1710-1779066119/content/waiting-1.html
