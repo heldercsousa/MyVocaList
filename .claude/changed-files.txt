@@ -645,3 +645,7 @@ Docs/BACKLOG.md
 Docs/BACKLOG.md
 Docs/BACKLOG.md
 Docs/BACKLOG.md
+.claude/settings.json
+.claude/rules/workflow.md
+.claude/rules/workflow.md
+.claude/settings.json
