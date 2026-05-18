@@ -29,7 +29,7 @@
 | Target | Feature | Status | Notes |
 |--------|---------|--------|-------|
 | 2026-03 | **Venues CRUD** | ✅ Done | Full MD3 list, search, multi-select, swipe-delete |
-| 2026-04 | **Person CRUD** | ✅ Done | Autocomplete field, duplicate detection |
+| 2026-04 | **Person CRUD** | ✅ Done | Autocomplete field, duplicate detection. Plan: `Docs/superpowers/plans/2026-04-07-person-crud.md` |
 | 2026-05 | **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/specs/artists-songs/` · Plan: `Docs/superpowers/plans/2026-04-23-artists-songs-catalog.md` |
 | 2026-05 | ↳ Song Karaoke URLs | 🟡 In Progress | YouTube URL management per song; next-singer alert; nested feature. Spec: `Docs/specs/youtube-karaoke/` |
 | 2026-06 | **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
@@ -46,6 +46,8 @@
 
 | Completed | Activity | Status | Plan / Reference |
 |-----------|----------|--------|-----------------|
+| 2026-03 | Solution Structure Refactor | ✅ Done | Move service interfaces to Domain, delete IDatabaseInit, reorganize MAUI project. Plan: `Docs/Plans/2026-03-06-solution-structure-refactor.md` |
+| 2026-03 | MD3 App Bar Components | ✅ Done | SmallAppBar + SearchAppBar ContentView components. Plan: `Docs/Plans/2026-03-10-md3-appbar-components.md` |
 | 2026-03 | M3 Lists | ✅ Done | `Docs/superpowers/plans/2026-03-11-m3-lists.md` |
 | 2026-03 | Venues MD3 rebuild | ✅ Done | `Docs/superpowers/plans/2026-03-29-venues-md3-rebuild.md` |
 | 2026-03 | Styles & Structure | ✅ Done | `Docs/superpowers/plans/2026-03-31-styles-structure.md` |

@@ -59,6 +59,15 @@
             "command": "python -c \"import os,subprocess; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); result=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); result.stdout.strip() and print('\\u26a0\\ufe0f Subagent returned with uncommitted changes — run /project:commit or the Stop hook will auto-commit at session end.')\" 2>/dev/null || true"
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -NonInteractive -File .claude/scripts/sync-docs-to-sln.ps1 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "SessionStart": [
