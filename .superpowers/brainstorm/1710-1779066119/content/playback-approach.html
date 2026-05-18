@@ -1,0 +1,76 @@
+<h2>YouTube Playback — How should the app launch karaoke videos?</h2>
+<p class="subtitle">This is the biggest architectural decision for the YouTube integration. Each approach has real trade-offs for a live karaoke event setting.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Launch YouTube App (External)</h3>
+      <p>App stores the URL. When a performance starts, the app opens the YouTube app (or browser) with the video. The screen is then handed over to YouTube.</p>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Zero implementation complexity</li>
+          <li>Full YouTube controls (quality, captions, seek)</li>
+          <li>Works on all devices without restrictions</li>
+          <li>No YouTube API key or quota needed</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>User leaves the app — queue management paused</li>
+          <li>No way to auto-detect when song finishes</li>
+          <li>Admin must manually return to app after each song</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Embedded WebView (In-App Player)</h3>
+      <p>App opens a full-screen WebView with the YouTube IFrame Player. Video plays inside the app. Admin stays in control of the queue.</p>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>App stays active — queue visible while video plays</li>
+          <li>Can detect video end event (IFrame Player API)</li>
+          <li>Professional, integrated UX</li>
+          <li>Can auto-advance queue on song end (future)</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>YouTube ToS restricts IFrame embedding in native apps</li>
+          <li>iOS WebView cannot autoplay YouTube (requires user tap)</li>
+          <li>Requires internet connection (no offline)</li>
+          <li>More complex to implement and test</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Hybrid — External Now, Embedded Later</h3>
+      <p>Start with Option A (launch YouTube app) for this spec. The data model is designed to support embedded playback in a future iteration.</p>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Ships fast — zero playback complexity now</li>
+          <li>Data model (SongKaraokeUrls table) is future-proof</li>
+          <li>ToS issues resolved at the right time (not now)</li>
+          <li>Real-world usage will inform the UX before building embedded</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Admin still leaves the app per performance</li>
+          <li>Two-phase delivery — embedded comes in a later spec</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;padding:16px;background:rgba(255,255,255,0.05);border-radius:8px">
+  <p class="label">Context for live karaoke events</p>
+  <p style="margin-top:8px;font-size:0.9em;opacity:0.8">
+    At a live event, the admin typically connects a second screen (TV/projector) to the phone/tablet.
+    Option A works fine if the YouTube app fullscreens to the second display.
+    Option B would allow the queue UI to stay on the admin device while the video plays on the external display.
+  </p>
+</div>
