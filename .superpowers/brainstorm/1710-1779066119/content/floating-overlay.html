@@ -1,0 +1,96 @@
+<h2>Floating Queue Overlay — What it looks like during YouTube playback</h2>
+<p class="subtitle">On Android, MyVocaList can draw a small panel <em>on top of</em> the YouTube app using the system overlay permission. The admin never leaves the queue — they see the next singer without switching apps.</p>
+
+<div class="section">
+  <p class="label">Simulated Android screen during a performance</p>
+  <p style="font-size:0.85em;opacity:0.7;margin-bottom:16px">YouTube is playing behind. The overlay panel floats on top — draggable by the admin.</p>
+
+  <div style="position:relative;width:360px;margin:0 auto;border-radius:16px;overflow:hidden;border:2px solid rgba(255,255,255,0.15)">
+    <!-- YouTube background simulation -->
+    <div style="background:#000;height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="width:48px;height:34px;background:#FF0000;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px">
+        <div style="width:0;height:0;border-left:16px solid white;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:3px"></div>
+      </div>
+      <p style="color:rgba(255,255,255,0.5);font-size:0.85em">Bohemian Rhapsody — Queen (karaoke)</p>
+      <p style="color:rgba(255,255,255,0.3);font-size:0.75em;margin-top:4px">Singer: João Silva &nbsp;·&nbsp; 2:14 / 5:55</p>
+      <!-- Progress bar -->
+      <div style="width:280px;height:3px;background:rgba(255,255,255,0.2);border-radius:2px;margin-top:20px">
+        <div style="width:38%;height:100%;background:#FF0000;border-radius:2px"></div>
+      </div>
+    </div>
+
+    <!-- Floating overlay panel — positioned bottom-right -->
+    <div style="position:absolute;bottom:24px;right:12px;width:200px;background:rgba(20,20,30,0.92);backdrop-filter:blur(12px);border-radius:14px;border:1px solid rgba(255,255,255,0.12);padding:14px;box-shadow:0 8px 32px rgba(0,0,0,0.6)">
+      <!-- Drag handle -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:0.65em;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px">Next up</span>
+        <div style="display:flex;gap:2px">
+          <div style="width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.25)"></div>
+          <div style="width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.25)"></div>
+          <div style="width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.25)"></div>
+        </div>
+      </div>
+
+      <!-- Next singer -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#db2777);display:flex;align-items:center;justify-content:center;font-size:1em;font-weight:700;color:white;flex-shrink:0">M</div>
+        <div>
+          <div style="color:white;font-size:0.9em;font-weight:600;line-height:1.2">Maria Souza</div>
+          <div style="color:rgba(255,255,255,0.5);font-size:0.75em">Shallow — Lady Gaga</div>
+        </div>
+      </div>
+
+      <!-- Countdown alert -->
+      <div style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);border-radius:8px;padding:8px 10px;text-align:center">
+        <div style="color:#fca5a5;font-size:0.75em;font-weight:600">⏱ Get ready in ~45s</div>
+      </div>
+
+      <!-- Queue position indicator -->
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08)">
+        <div style="display:flex;justify-content:space-between;font-size:0.7em;color:rgba(255,255,255,0.4)">
+          <span>Queue: 8 singers</span>
+          <span>Round 2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Small minimize button top-right -->
+    <div style="position:absolute;top:12px;right:12px;width:28px;height:28px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.15)">
+      <span style="color:white;font-size:0.7em">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <p class="label">How it works technically</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+    <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:14px">
+      <h4 style="font-size:0.85em;margin-bottom:6px">✅ Android</h4>
+      <p style="font-size:0.78em;opacity:0.7"><code>SYSTEM_ALERT_WINDOW</code> permission — user grants once. App draws an overlay <em>over any other app</em>, including YouTube.</p>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:14px">
+      <h4 style="font-size:0.85em;margin-bottom:6px">⚠️ iOS</h4>
+      <p style="font-size:0.78em;opacity:0.7">iOS does <em>not</em> allow overlay windows over other apps. On iOS, this feature would not be available in Option C.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px">
+  <p class="label">What the overlay shows</p>
+  <div class="options" style="margin-top:12px">
+    <div class="option" data-choice="minimal" onclick="toggleSelect(this)">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>Minimal — next singer + countdown</h3>
+        <p>Just the next singer's name and a "prepare" countdown. Small, unobtrusive.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="full" onclick="toggleSelect(this)">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>Full — queue panel</h3>
+        <p>Next 2–3 singers visible, round info, queue position. Admin has full context without switching apps.</p>
+      </div>
+    </div>
+  </div>
+</div>
