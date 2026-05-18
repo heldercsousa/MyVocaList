@@ -54,7 +54,7 @@
 | 2026-04 | Toolbar/FAB vibrant | ✅ Done | `Docs/Management/DevCycleCraft/toolbar-fab-vibrant/plan.md` |
 | 2026-04 | Autocomplete field | ✅ Done | `Docs/Management/BusinessFeatures/persons/plan-autocomplete.md` |
 | 2026-04 | Hooks redesign | ✅ Done | Stop/TaskCreated/TaskCompleted hooks; session-end auto-commit. Plan: `Docs/Management/DevCycleCraft/hooks-redesign/plan.md` |
-| 2026-05-07 | SDD Master Plan (Phases 1–11, 162 steps) | ✅ Done | `Docs/DevEnv/SDD/plans/impl/MASTER_PLAN.md` |
+| 2026-05-07 | SDD Master Plan (Phases 1–11, 162 steps) | ✅ Done | `Docs/Management/DevCycleCraft/sdd/impl-master-plan.md` |
 | 2026-05-07 | workflow.md Reduction | ✅ Done | Agent role files (`implementor.md`, `orchestrator.md`) absorb scattered responsibilities; 61 findings resolved. Plan: `Docs/Management/DevCycleCraft/workflow-compression/plan.md` |
 | 2026-05-08 | CLAUDE.md Deep Restructure | ✅ Done | 7 coding rule files → `.claude/library/`; `.claudeignore` Docs/ scope gates. Plan: `Docs/Management/DevCycleCraft/docs-context-scope-control/plan.md` |
 | 2026-05-12 | Architecture Tests Evaluation | ✅ Done | Research: NetArchTest.Rules vs ArchUnitNET adoption decision — evaluated, no changes produced. Plan: `Docs/Management/DevCycleCraft/architecture-tests-evaluation/plan.md` |

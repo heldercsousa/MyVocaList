@@ -168,7 +168,7 @@ Do not add rules that a linter or type-checker already enforces.
 ## Methodology Authority Hierarchy
 
 Priority order when skills, SDD principles, and custom rules conflict:
-1. **SDD principles** (`Docs/DevEnv/SDD/`) — the methodology; defines what disciplines apply and when
+1. **SDD principles** (`Docs/Management/DevCycleCraft/sdd/`) — the methodology; defines what disciplines apply and when
 2. **Superpowers skills** — authoritative for process execution (brainstorming, planning, subagent-driven-development, verification)
 3. **Custom workflow/rules files** — project-specific addenda only (hotspot files, DRY Onion order, stack-specific patterns)
 
@@ -207,7 +207,7 @@ Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/
   `Docs/` grows quickly — never glob-scan it. `.claudeignore` excludes the high-volume subtrees from glob scans; direct `Read()` by explicit path still works.
 
   **Excluded from glob scans (access by explicit path only):**
-  - `Docs/DevEnv/SDD/**` — SDD theory, 77 files, reference material only
+  - `Docs/Management/DevCycleCraft/sdd/**` — SDD theory, 96 files (spec-, plan-, impl- prefixes), reference material only
   - `Docs/Changelog/**` — historical changelog
   - `Docs/Plans/**` — legacy plans folder
 
