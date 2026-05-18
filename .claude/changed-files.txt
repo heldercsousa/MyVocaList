@@ -605,3 +605,9 @@ Docs/specs/artists-songs/tasks.md
 .superpowers/brainstorm/1710-1779066119/content/cross-platform-model.html
 .superpowers/brainstorm/1710-1779066119/content/song-form-urls.html
 .superpowers/brainstorm/1710-1779066119/content/song-form-urls-v2.html
+Docs/specs/youtube-karaoke/requirements.md
+Docs/specs/youtube-karaoke/design.md
+Docs/specs/youtube-karaoke/tasks.md
+Docs/specs/youtube-karaoke/requirements.md
+Docs/BACKLOG.md
+Docs/Changelog/changelog.md
