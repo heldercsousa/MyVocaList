@@ -1,4 +1,4 @@
-# CRUD Page Design Laws
+﻿# CRUD Page Design Laws
 
 > This document defines the **laws and decision guidance** for building list/form page pairs in MyVocaList.
 > It is NOT a copy-paste template. It tells you **what is non-negotiable**, **what varies**, and **how to decide**.
@@ -44,7 +44,7 @@ One behavior per sentence. One sentence per line.
 
 1. **Brainstorm** — invoke `superpowers:brainstorming`. Discuss the feature together: data model, UX flows, edge cases, approaches. Reach agreement on the design before any writing.
 2. **Write spec** — Claude writes `Docs/specs/[feature]/requirements.md`, `design.md`, `tasks.md` based on the agreed design. User reviews and approves.
-3. **Write plan** — invoke `superpowers:writing-plans`. Claude produces `Docs/superpowers/plans/YYYY-MM-DD-[feature].md` — the step-by-step implementation plan with code templates.
+3. **Write plan** — invoke `superpowers:writing-plans`. Claude produces `Docs/specs/[feature]/plan.md` — the step-by-step implementation plan with code templates.
 4. **Implement** — invoke `superpowers:executing-plans` (or `superpowers:subagent-driven-development`). Follow the plan task by task, building against the spec.
 5. **Review** — invoke `superpowers:requesting-code-review` after each major task or phase.
 

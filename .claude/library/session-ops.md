@@ -1,4 +1,4 @@
-# Session Operations Guide — MyVocaList
+﻿# Session Operations Guide — MyVocaList
 
 > Loaded on-demand. Reference when starting sessions, managing multi-wave state, or writing handoff artifacts.
 > For the session start reading order (7 steps), see `.claude/rules/workflow.md § Rule 7`.
@@ -131,7 +131,7 @@ When a session involves significant exploration, debugging, or spike work, the f
 
 When a feature spans multiple sessions, the state at session end must be captured so the next session can resume without loss.
 
-**Session-end handoff artifact (write to `Docs/superpowers/plans/<plan-name>-handoff.md`):**
+**Session-end handoff artifact (write to `Docs/specs/[feature]/handoff.md`):**
 ```markdown
 # Session Handoff — [Feature Name] — [YYYY-MM-DD]
 

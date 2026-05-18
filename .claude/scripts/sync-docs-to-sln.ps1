@@ -53,7 +53,6 @@ $folderMap = [ordered]@{
     'Docs\specs\styles-structure\' = '{1093A402-3B6A-487E-B4AD-76087EDAC809}'
     'Docs\specs\venues\'           = '{9EA47D78-293E-41B7-872D-3B2B85E82710}'
     'Docs\specs\youtube-karaoke\'  = '{6851C0F2-5877-4E2F-89C0-9B82A6770BE0}'
-    'Docs\superpowers\plans\'      = '{DC7EEB8F-5F29-4EB4-91EA-850F815C7455}'
     'Docs\Changelog\'              = '{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}'
     'Docs\Design\'                 = '{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4}'
     'Docs\'                        = '{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}'

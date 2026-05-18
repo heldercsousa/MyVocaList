@@ -168,13 +168,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-so
 		Docs\specs\artists-songs\design.md = Docs\specs\artists-songs\design.md
 		Docs\specs\artists-songs\requirements.md = Docs\specs\artists-songs\requirements.md
 		Docs\specs\artists-songs\tasks.md = Docs\specs\artists-songs\tasks.md
-	EndProjectSection
+			Docs\specs\artists-songs\handoff.md = Docs\specs\artists-songs\handoff.md
+		Docs\specs\artists-songs\plan-arch-revision.md = Docs\specs\artists-songs\plan-arch-revision.md
+		Docs\specs\artists-songs\plan-phase16.md = Docs\specs\artists-songs\plan-phase16.md
+		Docs\specs\artists-songs\plan-spec-revision.md = Docs\specs\artists-songs\plan-spec-revision.md
+		Docs\specs\artists-songs\plan.md = Docs\specs\artists-songs\plan.md
+		Docs\specs\artists-songs\task-log.md = Docs\specs\artists-songs\task-log.md
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plans", "plans", "{DD8EAF78-54CC-46D7-A9D6-A37F3C5CA9EB}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\DevEnv\plans\compressed-plotting-rocket.md = Docs\DevEnv\plans\compressed-plotting-rocket.md
 		Docs\DevEnv\plans\drifting-sniffing-allen.md = Docs\DevEnv\plans\drifting-sniffing-allen.md
-	EndProjectSection
+			Docs\DevEnv\plans\2026-04-02-toolbar-fab-vibrant.md = Docs\DevEnv\plans\2026-04-02-toolbar-fab-vibrant.md
+		Docs\DevEnv\plans\cheeky-popping-whale.md = Docs\DevEnv\plans\cheeky-popping-whale.md
+		Docs\DevEnv\plans\curious-sniffing-grove.md = Docs\DevEnv\plans\curious-sniffing-grove.md
+		Docs\DevEnv\plans\hashed-sprouting-pebble.md = Docs\DevEnv\plans\hashed-sprouting-pebble.md
+		Docs\DevEnv\plans\jolly-conjuring-coral.md = Docs\DevEnv\plans\jolly-conjuring-coral.md
+		Docs\DevEnv\plans\steady-drifting-valley.md = Docs\DevEnv\plans\steady-drifting-valley.md
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plans", "Plans", "{D1C7C335-1E7C-4804-9A55-A5D160232353}"
 	ProjectSection(SolutionItems) = preProject
@@ -185,12 +197,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versioning", "{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\specs\app-versioning\design.md = Docs\specs\app-versioning\design.md
-	EndProjectSection
+			Docs\specs\app-versioning\plan.md = Docs\specs\app-versioning\plan.md
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "m3-lists", "m3-lists", "{F58ED7A0-0186-4187-9FCF-78A464FB01C5}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\specs\m3-lists\design.md = Docs\specs\m3-lists\design.md
-	EndProjectSection
+			Docs\specs\m3-lists\plan.md = Docs\specs\m3-lists\plan.md
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}"
 	ProjectSection(SolutionItems) = preProject
@@ -198,51 +212,33 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D
 		Docs\specs\persons\design.md = Docs\specs\persons\design.md
 		Docs\specs\persons\requirements.md = Docs\specs\persons\requirements.md
 		Docs\specs\persons\tasks.md = Docs\specs\persons\tasks.md
-	EndProjectSection
+			Docs\specs\persons\plan-autocomplete.md = Docs\specs\persons\plan-autocomplete.md
+		Docs\specs\persons\plan.md = Docs\specs\persons\plan.md
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\specs\styles-structure\design.md = Docs\specs\styles-structure\design.md
-	EndProjectSection
+			Docs\specs\styles-structure\plan.md = Docs\specs\styles-structure\plan.md
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "venues", "venues", "{9EA47D78-293E-41B7-872D-3B2B85E82710}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\specs\venues\design.md = Docs\specs\venues\design.md
 		Docs\specs\venues\requirements.md = Docs\specs\venues\requirements.md
 		Docs\specs\venues\tasks.md = Docs\specs\venues\tasks.md
-	EndProjectSection
+			Docs\specs\venues\plan.md = Docs\specs\venues\plan.md
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-karaoke", "youtube-karaoke", "{6851C0F2-5877-4E2F-89C0-9B82A6770BE0}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\specs\youtube-karaoke\design.md = Docs\specs\youtube-karaoke\design.md
 		Docs\specs\youtube-karaoke\requirements.md = Docs\specs\youtube-karaoke\requirements.md
 		Docs\specs\youtube-karaoke\tasks.md = Docs\specs\youtube-karaoke\tasks.md
-	EndProjectSection
+			Docs\specs\youtube-karaoke\plan.md = Docs\specs\youtube-karaoke\plan.md
+EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "superpowers", "superpowers", "{544D4943-B6E5-4400-9BFC-621558482A4E}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "plans", "plans", "{DC7EEB8F-5F29-4EB4-91EA-850F815C7455}"
-	ProjectSection(SolutionItems) = preProject
-		Docs\superpowers\plans\2026-03-11-m3-lists.md = Docs\superpowers\plans\2026-03-11-m3-lists.md
-		Docs\superpowers\plans\2026-03-29-venues-md3-rebuild.md = Docs\superpowers\plans\2026-03-29-venues-md3-rebuild.md
-		Docs\superpowers\plans\2026-03-31-styles-structure.md = Docs\superpowers\plans\2026-03-31-styles-structure.md
-		Docs\superpowers\plans\2026-04-02-toolbar-fab-vibrant.md = Docs\superpowers\plans\2026-04-02-toolbar-fab-vibrant.md
-		Docs\superpowers\plans\2026-04-06-autocomplete-field.md = Docs\superpowers\plans\2026-04-06-autocomplete-field.md
-		Docs\superpowers\plans\2026-04-07-person-crud.md = Docs\superpowers\plans\2026-04-07-person-crud.md
-		Docs\superpowers\plans\2026-04-23-artists-songs-catalog.md = Docs\superpowers\plans\2026-04-23-artists-songs-catalog.md
-		Docs\superpowers\plans\2026-05-17-youtube-karaoke.md = Docs\superpowers\plans\2026-05-17-youtube-karaoke.md
-		Docs\superpowers\plans\2026-05-18-app-versioning.md = Docs\superpowers\plans\2026-05-18-app-versioning.md
-		Docs\superpowers\plans\cheeky-popping-whale.md = Docs\superpowers\plans\cheeky-popping-whale.md
-		Docs\superpowers\plans\curious-sniffing-grove.md = Docs\superpowers\plans\curious-sniffing-grove.md
-		Docs\superpowers\plans\hashed-sprouting-pebble.md = Docs\superpowers\plans\hashed-sprouting-pebble.md
-		Docs\superpowers\plans\jolly-conjuring-coral.md = Docs\superpowers\plans\jolly-conjuring-coral.md
-		Docs\superpowers\plans\recursive-painting-melody.md = Docs\superpowers\plans\recursive-painting-melody.md
-		Docs\superpowers\plans\steady-drifting-valley.md = Docs\superpowers\plans\steady-drifting-valley.md
-		Docs\superpowers\plans\validated-noodling-island-task-log.md = Docs\superpowers\plans\validated-noodling-island-task-log.md
-		Docs\superpowers\plans\validated-noodling-island.md = Docs\superpowers\plans\validated-noodling-island.md
-		Docs\superpowers\plans\zippy-cuddling-penguin-handoff.md = Docs\superpowers\plans\zippy-cuddling-penguin-handoff.md
-		Docs\superpowers\plans\zippy-cuddling-penguin.md = Docs\superpowers\plans\zippy-cuddling-penguin.md
-	EndProjectSection
+Section
 EndProjectGlobal
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -348,8 +344,6 @@ EndProjectGlobal
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
 		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
 		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
-		{544D4943-B6E5-4400-9BFC-621558482A4E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{DC7EEB8F-5F29-4EB4-91EA-850F815C7455} = {544D4943-B6E5-4400-9BFC-621558482A4E}		EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
 	EndGlobalSection

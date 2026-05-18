@@ -1,4 +1,4 @@
-# MyVocaList — Project Memory Index
+﻿# MyVocaList — Project Memory Index
 
 > **Purpose:** On-ramp for new sessions. Read this file first to orient quickly.
 > **Granularity:** Update at feature milestones — not after every task. Staleness from over-updating
@@ -9,7 +9,7 @@
 ## Current Phase
 
 **Artists & Songs** — next feature in the roadmap. Spec drafted; repository + service tests written (RED).
-See `Docs/specs/artists-songs/` for spec and `Docs/superpowers/plans/` for the active plan.
+See `Docs/specs/artists-songs/` for spec and `Docs/specs/artists-songs/plan.md` for the active plan.
 
 Active branch: `develop`
 

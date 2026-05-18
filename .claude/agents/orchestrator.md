@@ -1,4 +1,4 @@
-# Orchestrator Agent — MyVocaList
+﻿# Orchestrator Agent — MyVocaList
 
 > **Extension of `superpowers:subagent-driven-development`.** That skill is authoritative for the base execution loop (implementer → spec-reviewer → code-quality-reviewer per task, review ordering, re-review loops). Rules in this file apply only where the skill is silent — wave parallelism cap, single-writer rule, DRY Onion ordering, hotspot file registry, project-specific verification gates, and MyVocaList stack constraints. Do not duplicate what the skill already covers.
 
@@ -72,8 +72,8 @@ The orchestrator maintains these session artifacts:
 | Artifact | Location | When to update |
 |----------|----------|----------------|
 | `ACTIVE-CONSIDERATIONS.md` | `Docs/DevEnv/ACTIVE-CONSIDERATIONS.md` | After each wave; continuously during session |
-| Session handoff | `Docs/specs/[feature]/handoff.md` (new) · legacy: `Docs/superpowers/plans/<plan-name>-handoff.md` | Before session ends |
-| Task-log | `Docs/specs/[feature]/task-log.md` (new) · legacy: `Docs/superpowers/plans/<plan-name>-task-log.md` | After each wave |
+| Session handoff | `Docs/specs/[feature]/handoff.md` | Before session ends |
+| Task-log | `Docs/specs/[feature]/task-log.md` | After each wave |
 | `tasks.md` | `Docs/specs/[feature]/tasks.md` | As tasks are claimed `[~]` and completed `[x]` |
 
 At session end, commit `ACTIVE-CONSIDERATIONS.md` and the handoff file before stopping.
