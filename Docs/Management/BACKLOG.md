@@ -46,12 +46,12 @@
 
 | Completed | Activity | Status | Plan / Reference |
 |-----------|----------|--------|-----------------|
-| 2026-03 | Solution Structure Refactor | ✅ Done | Move service interfaces to Domain, delete IDatabaseInit, reorganize MAUI project. Plan: `Docs/Plans/2026-03-06-solution-structure-refactor.md` |
-| 2026-03 | MD3 App Bar Components | ✅ Done | SmallAppBar + SearchAppBar ContentView components. Plan: `Docs/Plans/2026-03-10-md3-appbar-components.md` |
+| 2026-03 | Solution Structure Refactor | ✅ Done | Move service interfaces to Domain, delete IDatabaseInit, reorganize MAUI project. Plan: `Docs/Management/DevCycleCraft/solution-structure-refactor/plan.md` |
+| 2026-03 | MD3 App Bar Components | ✅ Done | SmallAppBar + SearchAppBar ContentView components. Plan: `Docs/Management/DevCycleCraft/md3-appbar-components/plan.md` |
 | 2026-03 | M3 Lists | ✅ Done | `Docs/Management/DevCycleCraft/m3-lists/plan.md` |
 | 2026-03 | Venues MD3 rebuild | ✅ Done | `Docs/Management/BusinessFeatures/venues/plan.md` |
 | 2026-03 | Styles & Structure | ✅ Done | `Docs/Management/DevCycleCraft/styles-structure/plan.md` |
-| 2026-04 | Toolbar/FAB vibrant | ✅ Done | `Docs/DevEnv/plans/2026-04-02-toolbar-fab-vibrant.md` |
+| 2026-04 | Toolbar/FAB vibrant | ✅ Done | `Docs/Management/DevCycleCraft/toolbar-fab-vibrant/plan.md` |
 | 2026-04 | Autocomplete field | ✅ Done | `Docs/Management/BusinessFeatures/persons/plan-autocomplete.md` |
 | 2026-04 | Hooks redesign | ✅ Done | Stop/TaskCreated/TaskCompleted hooks; session-end auto-commit |
 | 2026-05-07 | SDD Master Plan (Phases 1–11, 162 steps) | ✅ Done | `Docs/DevEnv/SDD/plans/impl/MASTER_PLAN.md` |
@@ -59,4 +59,4 @@
 | 2026-05-08 | CLAUDE.md Deep Restructure | ✅ Done | 7 coding rule files → `.claude/library/`; `.claudeignore` Docs/ scope gates |
 | 2026-05-13 | Day-to-day task management workflow review | ✅ Done | BACKLOG.md first-class SCRUM board; workflow.md Rule 1/7 updated |
 | 2026-05 | **App Versioning Strategy** | 🗺️ Plan | MinVer NuGet; git-tag-driven semver; `/project:release` command. Spec: `Docs/Management/DevCycleCraft/app-versioning/design.md` · Plan: `Docs/Management/DevCycleCraft/app-versioning/plan.md` |
-| 2026-05 | **Workflow & Folder Layout Alignment** | ✅ Done | Resolve conflicts between SDD, superpowers skills, and custom rules; canonicalize Docs/ layout; spec evolution tracking; review enforcement. Findings: `Docs/DevEnv/workflow-layout-findings.md` |
+| 2026-05 | **Workflow & Folder Layout Alignment** | 🟡 In Progress | Resolve conflicts between SDD, superpowers skills, and custom rules; canonicalize Docs/ layout; spec evolution tracking; review enforcement. Findings: `Docs/DevEnv/workflow-layout-findings.md` |
