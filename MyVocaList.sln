@@ -232,10 +232,10 @@ EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-karaoke", "youtube-karaoke", "{6851C0F2-5877-4E2F-89C0-9B82A6770BE0}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\youtube-karaoke\design.md = Docs\Management\BusinessFeatures\youtube-karaoke\design.md
-		Docs\Management\BusinessFeatures\youtube-karaoke\requirements.md = Docs\Management\BusinessFeatures\youtube-karaoke\requirements.md
-		Docs\Management\BusinessFeatures\youtube-karaoke\tasks.md = Docs\Management\BusinessFeatures\youtube-karaoke\tasks.md
-			Docs\Management\BusinessFeatures\youtube-karaoke\plan.md = Docs\Management\BusinessFeatures\youtube-karaoke\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\design.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\design.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md
+			Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\plan.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\plan.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BusinessFeatures", "BusinessFeatures", "{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}"
@@ -353,7 +353,7 @@ Global
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{15F1DA03-2180-47BF-BC40-1BB457C97F9E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
