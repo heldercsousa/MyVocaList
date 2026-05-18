@@ -680,3 +680,4 @@ CLAUDE.md
 .claude/rules/workflow.md
 .claude/library/spec-writing-guide.md
 .claude/settings.json
+Docs/BACKLOG.md
