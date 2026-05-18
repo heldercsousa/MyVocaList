@@ -636,3 +636,5 @@ MyVocaList.Tests/Integration/Repositories/SongKaraokeUrlRepositoryTests.cs
 Docs/superpowers/plans/2026-05-18-app-versioning.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_app_versioning.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
+Docs/BACKLOG.md
+Docs/superpowers/specs/2026-05-18-app-versioning-design.md
