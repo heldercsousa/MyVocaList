@@ -1,0 +1,121 @@
+<h2>Minimal Blinking Label — Zero intrusion overlay</h2>
+<p class="subtitle">No background card. Just text, blinking or pulsing over the video. Covers any pixel only for a fraction of a second — singer can still read lyrics through the cycle.</p>
+
+<div class="section">
+  <p class="label">Live preview — all styles animate in real time</p>
+  <p style="font-size:0.82em;opacity:0.6;margin-bottom:16px">Scroll down to compare. Background simulates a dark karaoke video.</p>
+
+  <!-- Video background simulation -->
+  <div style="position:relative;width:360px;margin:0 auto;border-radius:16px;overflow:hidden;border:2px solid rgba(255,255,255,0.1);background:#111">
+
+    <!-- Fake video content -->
+    <div style="height:480px;background:linear-gradient(180deg,#0a0a1a 0%,#1a1a2e 50%,#0d0d1a 100%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:60px;position:relative">
+
+      <!-- Fake karaoke lyrics at bottom center (typical position) -->
+      <div style="text-align:center;padding:0 20px">
+        <p style="color:white;font-size:1.05em;font-weight:600;text-shadow:0 0 20px rgba(255,200,0,0.8),0 2px 4px rgba(0,0,0,0.9);letter-spacing:1px">Is this the real life?</p>
+        <p style="color:rgba(255,255,200,0.5);font-size:0.9em;margin-top:4px;text-shadow:0 2px 4px rgba(0,0,0,0.9)">Is this just fantasy?</p>
+      </div>
+
+      <!-- Style 1: Slow pulse, top-right, white text + shadow only -->
+      <div id="style1" style="position:absolute;top:18px;right:16px;text-align:right;animation:pulse-slow 2.5s ease-in-out infinite">
+        <div style="font-size:0.7em;color:rgba(255,255,255,0.9);text-shadow:0 1px 6px rgba(0,0,0,1),0 0 12px rgba(0,0,0,0.8);font-weight:700;letter-spacing:0.5px;line-height:1.5">NEXT</div>
+        <div style="font-size:0.85em;color:white;text-shadow:0 1px 8px rgba(0,0,0,1),0 0 16px rgba(0,0,0,0.9);font-weight:700">Maria Souza</div>
+      </div>
+
+      <!-- Style 2: Quick blink, bottom-left, ultra minimal -->
+      <div id="style2" style="position:absolute;bottom:90px;left:16px;animation:blink-fast 1.2s step-end infinite">
+        <div style="font-size:0.75em;color:rgba(255,220,100,0.95);text-shadow:0 0 8px rgba(0,0,0,1),0 2px 4px rgba(0,0,0,1);font-weight:800;letter-spacing:1px">▶ Maria S.</div>
+      </div>
+
+      <!-- Style 3: Fade in/out, top-left, with very light outline -->
+      <div id="style3" style="position:absolute;top:18px;left:16px;animation:fade-medium 3s ease-in-out infinite">
+        <div style="font-size:0.72em;color:white;font-weight:700;
+          -webkit-text-stroke:0.5px rgba(0,0,0,0.8);
+          text-shadow:0 0 10px rgba(0,0,0,1),0 1px 3px rgba(0,0,0,1);
+          letter-spacing:0.5px;line-height:1.6">
+          NEXT · Maria Souza<br>
+          <span style="opacity:0.7;font-size:0.9em;font-weight:400">Shallow</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <style>
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.15; }
+    }
+    @keyframes blink-fast {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    @keyframes fade-medium {
+      0% { opacity: 0; }
+      15% { opacity: 1; }
+      70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</div>
+
+<div class="section" style="margin-top:24px">
+  <p class="label">Three styles — which feels right?</p>
+  <div class="options" style="margin-top:12px">
+    <div class="option" data-choice="pulse" onclick="toggleSelect(this)">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>Slow pulse (top-right)</h3>
+        <p>Fades in and out every ~2.5s. Calm, not distracting. Admin always knows the next singer. Text shadow only — no background.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="blink" onclick="toggleSelect(this)">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>Quick blink (bottom-left)</h3>
+        <p>Hard on/off every ~1.2s. Grabs attention fast — useful when the singer needs to get up <em>now</em>. Ultra-minimal: just a name.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="fade" onclick="toggleSelect(this)">
+      <div class="letter">3</div>
+      <div class="content">
+        <h3>Fade in → hold → fade out (top-left)</h3>
+        <p>Appears fully, stays readable for ~2s, then disappears for ~1s. Best balance: readable enough for the admin, gone most of the time for the singer.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;background:rgba(255,255,255,0.04);border-radius:10px;padding:16px">
+  <p class="label">Why this is better than the floating card</p>
+  <ul style="margin-top:10px;font-size:0.82em;opacity:0.8;line-height:2">
+    <li>No positioning problem — even if it overlaps lyrics, it's gone in &lt;1s</li>
+    <li>No AI needed — problem is solved by the blinking itself</li>
+    <li>Works on iOS too — it's just an animated <code>Label</code> in the overlay window</li>
+    <li>Readable on any background via text-shadow (dark halo around white text)</li>
+    <li>Implementation: one <code>Label</code> + one CSS-equivalent animation in MAUI</li>
+  </ul>
+</div>
+
+<div class="section" style="margin-top:16px">
+  <p class="label">Content: what should the label say?</p>
+  <div class="options" data-multiselect style="margin-top:12px">
+    <div class="option" data-choice="name" onclick="toggleSelect(this)">
+      <div class="letter">a</div>
+      <div class="content"><h3>Singer name</h3><p>"Maria Souza"</p></div>
+    </div>
+    <div class="option" data-choice="song" onclick="toggleSelect(this)">
+      <div class="letter">b</div>
+      <div class="content"><h3>Song title</h3><p>"Shallow"</p></div>
+    </div>
+    <div class="option" data-choice="next-label" onclick="toggleSelect(this)">
+      <div class="letter">c</div>
+      <div class="content"><h3>"NEXT" prefix</h3><p>Makes context instantly clear — "NEXT · Maria"</p></div>
+    </div>
+    <div class="option" data-choice="countdown" onclick="toggleSelect(this)">
+      <div class="letter">d</div>
+      <div class="content"><h3>Countdown</h3><p>"Maria — 30s" — based on remaining song time</p></div>
+    </div>
+  </div>
+</div>
