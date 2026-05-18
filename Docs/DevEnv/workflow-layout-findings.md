@@ -403,10 +403,31 @@ Since no superpowers skill covers spec/plan review, the criteria above should be
 
 ---
 
-## Permissions Note
+## Permissions Note & Session Startup Protocol
 
-`CLAUDE.md` and `.claude/rules/*.md` are write-protected in `settings.json`. Helder must either:
-- Temporarily grant write permission (`permissions.deny` list in settings.json), OR
-- Apply Phase 2 and Phase 5 changes manually after reviewing the agent's diff output
+`CLAUDE.md` and `.claude/rules/*.md` are write-protected via the `permissions.deny` list in `.claude/settings.json`.
 
-All other phases (1, 3, 4, 6) are not write-protected and can be applied by a subagent directly.
+**The implementing agent must follow this sequence:**
+
+### Step A — Remove write protection (first action, before any phase)
+Edit `.claude/settings.json` and remove these two entries from `permissions.deny`:
+```json
+"Edit(CLAUDE.md)",
+"Write(CLAUDE.md)",
+"Edit(.claude/rules/*.md)",
+"Write(.claude/rules/*.md)"
+```
+
+### Step B — Execute all phases (1 through 6)
+
+### Step C — Re-apply write protection (final action, after all phases)
+Edit `.claude/settings.json` and restore the four entries to `permissions.deny`:
+```json
+"Edit(CLAUDE.md)",
+"Write(CLAUDE.md)",
+"Edit(.claude/rules/*.md)",
+"Write(.claude/rules/*.md)"
+```
+Commit with message: `amend: re-apply write protection to CLAUDE.md and rules files`
+
+**Important:** Step C is mandatory even if any phase fails partway. The protection must be restored before the session ends regardless of completion status.
