@@ -56,5 +56,5 @@
 | 2026-05-07 | workflow.md Reduction | ✅ Done | Agent role files (`implementor.md`, `orchestrator.md`) absorb scattered responsibilities; 61 findings resolved |
 | 2026-05-08 | CLAUDE.md Deep Restructure | ✅ Done | 7 coding rule files → `.claude/library/`; `.claudeignore` Docs/ scope gates |
 | 2026-05-13 | Day-to-day task management workflow review | ✅ Done | BACKLOG.md first-class SCRUM board; workflow.md Rule 1/7 updated |
-| 2026-05 | **App Versioning Strategy** | 🗺️ Plan | MinVer NuGet; git-tag-driven semver; `/project:release` command. Spec: `Docs/superpowers/specs/2026-05-18-app-versioning-design.md` · Plan: `Docs/superpowers/plans/2026-05-18-app-versioning.md` |
-| 2026-05 | **Workflow & Folder Layout Alignment** | 📋 Spec | Resolve conflicts between SDD, superpowers skills, and custom rules; canonicalize Docs/ layout; spec evolution tracking; review enforcement. Findings: `Docs/DevEnv/workflow-layout-findings.md` |
+| 2026-05 | **App Versioning Strategy** | 🗺️ Plan | MinVer NuGet; git-tag-driven semver; `/project:release` command. Spec: `Docs/specs/app-versioning/design.md` · Plan: `Docs/superpowers/plans/2026-05-18-app-versioning.md` |
+| 2026-05 | **Workflow & Folder Layout Alignment** | 🟡 In Progress | Resolve conflicts between SDD, superpowers skills, and custom rules; canonicalize Docs/ layout; spec evolution tracking; review enforcement. Findings: `Docs/DevEnv/workflow-layout-findings.md` |

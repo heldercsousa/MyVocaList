@@ -108,7 +108,9 @@ MyVocaList operates at **Spec-Anchored** (Level 2) SDD: specs in `Docs/specs/` a
 - Build: `/project:build`
 - Commit: `/project:commit`
 - Changelog: `/project:changelog`
-- Review: `/project:review` — run after every completed task and after creating or updating any spec or plan file
+- Review: `/project:review` — when using `subagent-driven-development` skill, review is automatic via fresh subagents. When executing manually (not via the skill), `/project:review` is the trigger.
+- **Before any task completion claim:** invoke `superpowers:verification-before-completion` — evidence before assertions always.
+- **Before spec/plan hand-off to Helder:** dispatch fresh spec-reviewer or plan-reviewer subagent (see `.claude/agents/spec-reviewer.md` and `.claude/agents/plan-reviewer.md`).
 - **Development workflow** (spec-first, subagent delegation, commit discipline): `.claude/rules/workflow.md`
 
 ## Coding Rules (on-demand via skill)
@@ -129,6 +131,8 @@ Before starting each implementation task, scan available skills/MCPs for relevan
 - Services with HTTP: `maui-rest-api`, context7 for library docs
 - DI: `dotnet-skills:dependency-injection-patterns`
 - MAUI UI: `maui-current-apis` (always), `maui-data-binding`, `maui-shell-navigation`, `maui-performance`
+- **After brainstorming produces a spec:** dispatch fresh spec-reviewer subagent (`.claude/agents/spec-reviewer.md`) before Helder's human review gate
+- **After writing-plans produces a plan:** dispatch fresh plan-reviewer subagent (`.claude/agents/plan-reviewer.md`) before Helder's approval
 
 ## Spec Quality Check (Rebuild Test)
 When closing out a feature, run the Rebuild Test (see `.claude/library/spec-writing-guide.md § rebuild test`). Include the test suite alongside the spec files.
@@ -161,12 +165,41 @@ After every task, always ask:
 - Keep only routing tables, non-negotiables, and architectural constraints inline
 Do not add rules that a linter or type-checker already enforces.
 
+## Methodology Authority Hierarchy
+
+Priority order when skills, SDD principles, and custom rules conflict:
+1. **SDD principles** (`Docs/DevEnv/SDD/`) — the methodology; defines what disciplines apply and when
+2. **Superpowers skills** — authoritative for process execution (brainstorming, planning, subagent-driven-development, verification)
+3. **Custom workflow/rules files** — project-specific addenda only (hotspot files, DRY Onion order, stack-specific patterns)
+
+User-preference overrides apply to superpowers skill *defaults* (e.g. folder locations) — not to skill *disciplines* (e.g. TDD red/green/refactor).
+
+## Docs/ Folder Layout (canonical)
+
+```
+Docs/specs/[feature]/
+  requirements.md       ← acceptance criteria, user stories, validation rules
+  design.md             ← architecture, interfaces, interaction flows (user-preference override for brainstorming skill default)
+  tasks.md              ← ordered checkboxed implementation tasks
+  plan.md               ← execution plan (user-preference override: replaces Docs/superpowers/plans/YYYY-MM-DD-<feature>.md)
+  task-log.md           ← activity log (user-preference override: replaces Docs/superpowers/plans/<feature>-task-log.md)
+  findings.md           ← spike results (optional)
+  spec-changelog.md     ← spec revision history (required for features with ≥1 post-approval change)
+
+Docs/superpowers/plans/ ← legacy location; existing plan/task-log files remain here until migrated
+```
+
+**User-preference overrides declared here (superpowers skills respect these):**
+- `brainstorming` skill: write design docs to `Docs/specs/[feature]/design.md` (not `docs/superpowers/specs/`)
+- `writing-plans` skill: write plan to `Docs/specs/[feature]/plan.md` (not `docs/superpowers/plans/`)
+- Task-log: write to `Docs/specs/[feature]/task-log.md` (not `docs/superpowers/plans/<feature>-task-log.md`)
+
 ### Docs/ Context Scope
   `Docs/` grows quickly — never glob-scan it. `.claudeignore` excludes the high-volume subtrees from glob scans; direct `Read()` by explicit path still works.
 
   **Excluded from glob scans (access by explicit path only):**
   - `Docs/DevEnv/SDD/**` — SDD theory, 77 files, reference material only
-  - `Docs/superpowers/plans/**` — completed plan/task-log files; inject path in briefing when needed
+  - `Docs/superpowers/plans/**` — legacy plan/task-log files; inject path in briefing when needed
   - `Docs/Changelog/**` — historical changelog
   - `Docs/Plans/**` — legacy plans folder
 
