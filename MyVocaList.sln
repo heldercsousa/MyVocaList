@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11519.219
@@ -238,8 +238,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-karaoke", "youtube-
 			Docs\specs\youtube-karaoke\plan.md = Docs\specs\youtube-karaoke\plan.md
 EndProjectSection
 EndProject
-Section
-EndProjectGlobal
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{15F1DA03-2180-47BF-BC40-1BB457C97F9E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
+	EndProjectSection
+EndProject
+Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
@@ -344,7 +348,8 @@ EndProjectGlobal
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
 		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
 		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {4CA06FF1-8789-445B-8AF3-32D4643CDBB3}
+		{15F1DA03-2180-47BF-BC40-1BB457C97F9E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
 	EndGlobalSection
-EndGlobal
