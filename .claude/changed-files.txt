@@ -703,3 +703,6 @@ Docs/Management/BACKLOG.md
 MyVocaList.sln
 MyVocaList.sln
 Docs/Management/BACKLOG.md
+Docs/Management/wondrous-riding-badger.md
+MyVocaList.sln
+Docs/Management/BACKLOG.md

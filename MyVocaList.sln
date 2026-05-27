@@ -203,6 +203,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-folder-layout-alignment", "workflow-folder-layout-alignment", "{A1B2C3D4-0001-4000-8000-000000000004}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md
+		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\findings.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\findings.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hooks-redesign", "hooks-redesign", "{A1B2C3D4-0001-4000-8000-000000000005}"
