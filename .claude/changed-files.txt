@@ -707,3 +707,8 @@ Docs/Management/wondrous-riding-badger.md
 MyVocaList.sln
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
+.claude/rules/constraints-registry.md
+.claude/rules/workflow.md
+.claude/rules/workflow.md
+Docs/Management/BACKLOG.md
+.claude/settings.json
