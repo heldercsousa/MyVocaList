@@ -28,6 +28,12 @@ Review before implementing features in the indicated area.
 
 ---
 
+## Visual Studio Solution (.sln)
+
+- **Solution item registration:** Any file that should be visible in VS Solution Explorer must be listed in `MyVocaList.sln` under the appropriate Solution Folder (`ProjectSection(SolutionItems) = preProject`). Pattern: `RelativePath\file.md = RelativePath\file.md`. Missing entries do not cause build failures but make files invisible in VS. Add as part of the task that creates the file — not as a follow-up.
+
+---
+
 ## How to add entries
 
 When a session discovers a new constraint — a DevExpress behavior, an EF Core migration limit, a MAUI platform quirk, a SQLite performance requirement — add an entry here before ending the session:
