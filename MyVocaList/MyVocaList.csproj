@@ -86,11 +86,17 @@
 
 	<ItemGroup>
 	  <AndroidResource Remove="NovaPasta\**" />
+	  <AndroidResource Remove="Tmp\**" />
 	  <Compile Remove="NovaPasta\**" />
+	  <Compile Remove="Tmp\**" />
 	  <EmbeddedResource Remove="NovaPasta\**" />
+	  <EmbeddedResource Remove="Tmp\**" />
 	  <MauiCss Remove="NovaPasta\**" />
+	  <MauiCss Remove="Tmp\**" />
 	  <MauiXaml Remove="NovaPasta\**" />
+	  <MauiXaml Remove="Tmp\**" />
 	  <None Remove="NovaPasta\**" />
+	  <None Remove="Tmp\**" />
 	</ItemGroup>
 
 	<!-- Exclude MAUI app entry point from plain net10.0 TFM (used by test project) -->
