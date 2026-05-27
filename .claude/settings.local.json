@@ -147,7 +147,9 @@
       "PowerShell(echo '{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"C:/test/CLAUDE.md\",\"content\":\"x\"}}' | python -c \"import json,sys; d=json.load\\(sys.stdin\\); fp=d.get\\('tool_input',{}\\).get\\('file_path',''\\); r=json.dumps\\({'continue':False,'stopReason':'WORKFLOW GATE: delegate coding to a subagent \\(workflow.md Rule 2\\). Use the Agent tool instead of writing this file directly.'}\\) if any\\(fp.endswith\\(e\\) for e in \\('.cs','.xaml','.xaml.cs'\\)\\) else ''; print\\(r\\) if r else None\")",
       "Bash(mkdir -p .claude/library)",
       "Bash(cp .claude/rules/__TRACKED_VAR__.md .claude/library/__TRACKED_VAR__.md)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\Docs\\\\Management\" -Recurse -Directory | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace\\(\"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\\", \"\"\\) })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\Docs\\\\Management\" -Recurse -Directory | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace\\(\"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\\", \"\"\\) })",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\Docs\\\\Management\\\\DevCycleCraft\\\\workflow-folder-layout-alignment\" -File)",
+      "Bash(Select-Object -ExpandProperty Name)"
     ],
     "defaultMode": "bypassPermissions"
   },
