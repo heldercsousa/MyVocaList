@@ -113,6 +113,30 @@ The spec is the authoritative description of intended behavior. When spec and co
 5. **Phase-gate review** — invoke `/project:review` after each phase before starting the next
    - On ship: update status → `✅ Done` in the **Business Features** table (or **Dev Cycle Craft** table for infrastructure/tooling items)
 
+### Proactive BACKLOG triage — Untracked work
+
+**Any work identified during a session that is not already in BACKLOG.md must get a brief entry before proceeding.**
+
+This applies to:
+- A new DevCycleCraft activity (tooling change, process rule, infrastructure work)
+- A business feature idea mentioned in conversation (even informally)
+- A significant constraint, investigation, or one-off fix that took material effort
+
+**Format — add a row to the appropriate BACKLOG.md table:**
+
+| Date | Activity/Feature | `💡 Pending` | One-line description |
+
+- Use `💡 Pending` for ideas that arrived but aren't being acted on immediately
+- Use `🟡 In Progress` if work is starting now
+- Keep descriptions to one sentence — BACKLOG is a dashboard, not a spec
+
+**Trigger questions** (ask at any point in a session):
+- "Is what I'm about to do tracked in BACKLOG.md?"
+- "Did Helder mention a feature or idea that has no BACKLOG row?"
+- "Did I discover a process gap that warrants a DevCycleCraft entry?"
+
+If the answer is "no" to the first, or "yes" to the others → add the entry, then proceed.
+
 ### Spec quality gate (mandatory before implementation)
 
 **No subagent may be dispatched to implement a feature until this gate is passed:**
@@ -346,6 +370,9 @@ If the task introduces a new service, repository, ViewModel, or page, confirm th
 
 **3. Acceptance criteria check**
 For every acceptance criterion the task was supposed to satisfy: confirm it is satisfied. Record evidence in the task-log's AC traceability matrix.
+
+**4. Solution item registration check**
+If the task created any new file that should be visible in VS Solution Explorer (markdown docs under `Docs/`, config files at solution root, scripts, `.claude/` files referenced in BACKLOG), confirm it is registered in `MyVocaList.sln` under the appropriate Solution Folder. An unregistered file compiles and works but is invisible in VS IDE — Helder cannot see or navigate to it.
 
 ### Session-End Spec Update Ritual
 
