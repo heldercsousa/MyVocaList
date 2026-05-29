@@ -1,4 +1,5 @@
 using MyVocaList.Contracts.DTOs;
+using MyVocaList.UI.Collections;
 
 namespace MyVocaList.UI.ViewModels;
 
@@ -13,6 +14,8 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ISnackbarComponent _snackbarService;
     private readonly ILogger<SongFormViewModel> _logger;
     private readonly IMusicMetadataService _musicMetadataService;
+    private readonly ISongKaraokeUrlService _karaokeUrlService;
+    private readonly IYouTubeSearchService _youtubeSearch;
 
     public string SongIdRaw { set => SongId = int.TryParse(value, out var id) ? id : null; }
     public string ArtistIdRaw { set => ArtistId = int.TryParse(value, out var id) ? id : 0; }
@@ -42,6 +45,18 @@ public partial class SongFormViewModel : ViewModelBase
     // Lyrics
     [ObservableProperty] private string? _lyrics;
 
+    // YouTube URLs section
+    [ObservableProperty] private ObservableRangeCollection<SongKaraokeUrlDto> _karaokeUrls = [];
+    [ObservableProperty] private string _youtubeSearchQuery = string.Empty;
+    [ObservableProperty] private ObservableRangeCollection<YouTubeSearchResultDto> _searchResults = [];
+    [ObservableProperty] private bool _isYouTubeSearching;
+    [ObservableProperty] private string _youtubeSearchStatus = string.Empty;
+    [ObservableProperty] private bool _hasYouTubeSearchStatus;
+    [ObservableProperty] private bool _hasYouTubeApiKey;
+    [ObservableProperty] private string _pasteUrlInput = string.Empty;
+    [ObservableProperty] private string _pasteUrlError = string.Empty;
+    [ObservableProperty] private bool _hasPasteUrlError;
+
     // API search strip
     [ObservableProperty] private string _apiSearchText = string.Empty;
     [ObservableProperty] private IEnumerable<MusicSearchResultDto> _apiResults = [];
@@ -61,13 +76,17 @@ public partial class SongFormViewModel : ViewModelBase
         ISongService songService,
         ISnackbarComponent snackbarService,
         ILogger<SongFormViewModel> logger,
-        IMusicMetadataService musicMetadataService)
+        IMusicMetadataService musicMetadataService,
+        ISongKaraokeUrlService karaokeUrlService,
+        IYouTubeSearchService youtubeSearch)
     {
         _artistService = artistService;
         _songService = songService;
         _snackbarService = snackbarService;
         _logger = logger;
         _musicMetadataService = musicMetadataService;
+        _karaokeUrlService = karaokeUrlService;
+        _youtubeSearch = youtubeSearch;
 
         SaveCommand = new AsyncRelayCommand(SaveAsync);
         CancelCommand = new AsyncRelayCommand(CancelAsync);
@@ -75,6 +94,11 @@ public partial class SongFormViewModel : ViewModelBase
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
         SearchApiCommand = new AsyncRelayCommand(SearchApiAsync);
         SelectApiResultCommand = new AsyncRelayCommand<MusicSearchResultDto>(SelectApiResultAsync);
+        SearchYouTubeCommand = new AsyncRelayCommand(SearchYouTubeAsync);
+        AddFromSearchCommand = new AsyncRelayCommand<YouTubeSearchResultDto>(AddFromSearchAsync);
+        AddFromPasteCommand = new AsyncRelayCommand(AddFromPasteAsync);
+        RemoveUrlCommand = new AsyncRelayCommand<SongKaraokeUrlDto>(RemoveUrlAsync);
+        GoToSettingsCommand = new AsyncRelayCommand(async () => await Shell.Current.GoToAsync("settings"));
     }
 
     public IAsyncRelayCommand SaveCommand { get; }
@@ -83,11 +107,18 @@ public partial class SongFormViewModel : ViewModelBase
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
     public IAsyncRelayCommand SearchApiCommand { get; }
     public IAsyncRelayCommand<MusicSearchResultDto> SelectApiResultCommand { get; }
+    public IAsyncRelayCommand SearchYouTubeCommand { get; }
+    public IAsyncRelayCommand<YouTubeSearchResultDto> AddFromSearchCommand { get; }
+    public IAsyncRelayCommand AddFromPasteCommand { get; }
+    public IAsyncRelayCommand<SongKaraokeUrlDto> RemoveUrlCommand { get; }
+    public IAsyncRelayCommand GoToSettingsCommand { get; }
 
     partial void OnSongIdChanged(int? value)
     {
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(PageTitle));
+        if (value.HasValue)
+            _ = LoadKaraokeUrlsAsync();
     }
 
     partial void OnSongTitleChanged(string value)
@@ -269,6 +300,102 @@ public partial class SongFormViewModel : ViewModelBase
             CharacterCounterText = text;
             IsCharacterCounterWarning = isWarning;
             IsCharacterCounterError = isError;
+        }
+    }
+
+    private async Task LoadKaraokeUrlsAsync(CancellationToken ct = default)
+    {
+        if (!SongId.HasValue) return;
+        var urls = await _karaokeUrlService.GetUrlsForSongAsync(SongId.Value, ct);
+        RunOnUiThread(() => KaraokeUrls.ReplaceRange(urls));
+    }
+
+    private async Task SearchYouTubeAsync(CancellationToken ct = default)
+    {
+        var query = YoutubeSearchQuery?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(query)) return;
+
+        IsYouTubeSearching = true;
+        YoutubeSearchStatus = string.Empty;
+        HasYouTubeSearchStatus = false;
+        try
+        {
+            var results = (await _youtubeSearch.SearchAsync(query, ct)).ToList();
+            RunOnUiThread(() =>
+            {
+                SearchResults.ReplaceRange(results);
+                YoutubeSearchStatus = results.Count == 0 ? "No results found" : string.Empty;
+                HasYouTubeSearchStatus = results.Count == 0;
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "YouTube search failed");
+            YoutubeSearchStatus = "Search failed";
+            HasYouTubeSearchStatus = true;
+        }
+        finally
+        {
+            IsYouTubeSearching = false;
+        }
+    }
+
+    private async Task AddFromSearchAsync(YouTubeSearchResultDto result, CancellationToken ct = default)
+    {
+        if (result is null || !SongId.HasValue) return;
+
+        var rawUrl = $"https://youtu.be/{result.VideoId}";
+        var (success, message, dto) = await _karaokeUrlService.AddUrlAsync(SongId.Value, rawUrl, ct: ct);
+        if (success && dto is not null)
+        {
+            RunOnUiThread(() => KaraokeUrls.Add(dto));
+            await _snackbarService.ShowSuccessAsync("URL added");
+        }
+        else
+        {
+            await _snackbarService.ShowErrorAsync(message);
+        }
+    }
+
+    private async Task AddFromPasteAsync(CancellationToken ct = default)
+    {
+        var raw = PasteUrlInput?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(raw)) return;
+
+        if (!SongId.HasValue)
+        {
+            PasteUrlError = "Save the song first before adding URLs";
+            HasPasteUrlError = true;
+            return;
+        }
+
+        var (success, message, dto) = await _karaokeUrlService.AddUrlAsync(SongId.Value, raw, ct: ct);
+        if (success && dto is not null)
+        {
+            RunOnUiThread(() =>
+            {
+                KaraokeUrls.Add(dto);
+                PasteUrlInput = string.Empty;
+                PasteUrlError = string.Empty;
+                HasPasteUrlError = false;
+            });
+        }
+        else
+        {
+            PasteUrlError = message;
+            HasPasteUrlError = true;
+        }
+    }
+
+    private async Task RemoveUrlAsync(SongKaraokeUrlDto dto, CancellationToken ct = default)
+    {
+        if (dto is null || !SongId.HasValue) return;
+
+        var (success, _) = await _karaokeUrlService.RemoveUrlAsync(SongId.Value, dto.VideoId, ct);
+        if (success)
+        {
+            RunOnUiThread(() => KaraokeUrls.Remove(dto));
+            await _snackbarService.ShowSuccessAsync("URL removed");
         }
     }
 }
