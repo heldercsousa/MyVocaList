@@ -16,6 +16,7 @@ public class OverlayService : IOverlayService
     private readonly Context _context;
     private IWindowManager? _windowManager;
     private TextView? _overlayView;
+    private global::Android.Animation.AnimatorSet? _activeAnimation;
 
     public OverlayService(Context context)
     {
@@ -86,6 +87,8 @@ public class OverlayService : IOverlayService
     public void Dismiss()
     {
         if (_overlayView == null || _windowManager == null) return;
+        _activeAnimation?.Cancel();
+        _activeAnimation = null;
         try
         {
             _windowManager.RemoveView(_overlayView);
@@ -108,6 +111,7 @@ public class OverlayService : IOverlayService
         var set = new global::Android.Animation.AnimatorSet();
         set.PlaySequentially(fadeOut, fadeIn);
         set.AnimationEnd += (_, _) => { if (_overlayView != null) set.Start(); };
+        _activeAnimation = set;
         set.Start();
     }
 
