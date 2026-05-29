@@ -4,6 +4,7 @@ using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
+using MyVocaList.UI.Services;
 #if DEBUG
 using MauiDevFlow.Agent;
 #endif
@@ -74,6 +75,19 @@ public static class MauiProgram
         builder.Services.AddScoped<ISongService, SongService>();
         builder.Services.AddScoped<ICatalogService, CatalogService>();
         builder.Services.AddScoped<IMusicMetadataService, MusicMetadataService>();
+
+        // YouTube Karaoke
+        builder.Services.AddScoped<ISongKaraokeUrlRepository, SongKaraokeUrlRepository>();
+        builder.Services.AddScoped<ISongKaraokeUrlService, SongKaraokeUrlService>();
+        builder.Services.AddScoped<IYouTubeSearchService, YouTubeSearchService>();
+        builder.Services.AddScoped<INextSingerAlertService, NextSingerAlertService>();
+        builder.Services.AddSingleton<ISecureStorageWrapper, SecureStorageWrapper>();
+        builder.Services.AddHttpClient();
+#if ANDROID
+        builder.Services.AddSingleton<IOverlayService, MyVocaList.Platforms.Android.Services.OverlayService>();
+#else
+        builder.Services.AddSingleton<IOverlayService, NoOpOverlayService>();
+#endif
 
         // Shell
         builder.Services.AddSingleton<AppShellViewModel>();
