@@ -56,7 +56,7 @@ public class NextSingerAlertService : INextSingerAlertService
         var stage2 = new NotificationRequest
         {
             NotificationId = Stage2NotificationId,
-            Title = $"Next up — {singerName} — mic now!",
+            Title = $"⚡ {singerName} — mic now!",
             Description = $"{songTitle} · ~15s remaining",
             Schedule = new NotificationRequestSchedule
             {
