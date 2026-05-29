@@ -95,7 +95,6 @@ public class SongKaraokeUrlRepositoryTests : IAsyncLifetime
         await _db.SaveChangesAsync();
 
         await _repo.RemoveAsync(SongId, "dQw4w9WgXcQ");
-        await _repo.SaveChangesAsync();
 
         var list = await _repo.GetBySongIdAsync(SongId);
         Assert.Empty(list);
