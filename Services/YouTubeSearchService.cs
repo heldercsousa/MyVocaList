@@ -76,8 +76,9 @@ public class YouTubeSearchService : IYouTubeSearchService
             var response = await client.GetAsync(url, ct);
             return response.IsSuccessStatusCode;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "YouTube API key validation failed");
             return false;
         }
     }
