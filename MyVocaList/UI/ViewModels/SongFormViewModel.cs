@@ -1,4 +1,5 @@
 using MyVocaList.Contracts.DTOs;
+using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.UI.Collections;
 
 namespace MyVocaList.UI.ViewModels;
@@ -16,6 +17,7 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly IMusicMetadataService _musicMetadataService;
     private readonly ISongKaraokeUrlService _karaokeUrlService;
     private readonly IYouTubeSearchService _youtubeSearch;
+    private readonly ISecureStorageWrapper _secureStorage;
 
     public string SongIdRaw { set => SongId = int.TryParse(value, out var id) ? id : null; }
     public string ArtistIdRaw { set => ArtistId = int.TryParse(value, out var id) ? id : 0; }
@@ -78,7 +80,8 @@ public partial class SongFormViewModel : ViewModelBase
         ILogger<SongFormViewModel> logger,
         IMusicMetadataService musicMetadataService,
         ISongKaraokeUrlService karaokeUrlService,
-        IYouTubeSearchService youtubeSearch)
+        IYouTubeSearchService youtubeSearch,
+        ISecureStorageWrapper secureStorage)
     {
         _artistService = artistService;
         _songService = songService;
@@ -87,6 +90,7 @@ public partial class SongFormViewModel : ViewModelBase
         _musicMetadataService = musicMetadataService;
         _karaokeUrlService = karaokeUrlService;
         _youtubeSearch = youtubeSearch;
+        _secureStorage = secureStorage;
 
         SaveCommand = new AsyncRelayCommand(SaveAsync);
         CancelCommand = new AsyncRelayCommand(CancelAsync);
@@ -306,6 +310,8 @@ public partial class SongFormViewModel : ViewModelBase
     private async Task LoadKaraokeUrlsAsync(CancellationToken ct = default)
     {
         if (!SongId.HasValue) return;
+        var apiKey = await _secureStorage.GetAsync("youtube_api_key");
+        HasYouTubeApiKey = !string.IsNullOrWhiteSpace(apiKey);
         var urls = await _karaokeUrlService.GetUrlsForSongAsync(SongId.Value, ct);
         RunOnUiThread(() => KaraokeUrls.ReplaceRange(urls));
     }
