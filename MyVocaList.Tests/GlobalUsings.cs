@@ -1,3 +1,5 @@
+global using FsCheck;
+global using FsCheck.Xunit;
 global using Xunit;
 global using Moq;
 global using Microsoft.Extensions.Logging;

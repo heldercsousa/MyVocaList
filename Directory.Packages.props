@@ -66,6 +66,7 @@
   <ItemGroup>
     <PackageVersion Include="coverlet.collector" Version="6.*" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+    <PackageVersion Include="FsCheck.Xunit" Version="2.*" />
     <PackageVersion Include="Moq" Version="4.*" />
     <PackageVersion Include="xunit" Version="2.*" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.*" />
