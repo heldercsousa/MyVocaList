@@ -107,3 +107,4 @@ Docs/Management/BACKLOG.md
 Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/requirements.md
 Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/requirements.md
 Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/task-log.md
+Docs/Management/BACKLOG.md

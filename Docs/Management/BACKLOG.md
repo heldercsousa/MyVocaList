@@ -34,8 +34,8 @@
 | 2026-05 | ↳ Song Karaoke URLs | ✅ Done | YouTube URL management per song; SongFormPage section, settings, converters, tests. Spec: `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/` |
 | 2026-06 | **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
 | 2026-06 | **Visual Theme Refresh** | 💡 Pending | App UI is too dark and monochromatic; spike for richer accent colors, gradient surfaces, warmer tones |
+| 2026-06 | **Data Backup & Restore** | 💡 Pending | MVP scope: local file export/import via Android share sheet (no auth, no cloud). User exports a backup file and stores it wherever they choose (Drive, email, USB). Cloud/Google Drive integration is a post-MVP enhancement. No `UserProfile` entity needed for MVP phase. |
 | 2026-06 | | 🏁 **MVP release** | |
-| post-MVP | **Data Backup & Restore** | 💡 Pending | Cloud backup/restore via Google Drive (or other common cloud storage) to prevent data loss. Requires user identity (OAuth). Auth layer decision: no auth server at MVP — introduce a local `UserProfile` entity (GUID anchor) that maps to a Google account when this feature ships. Spec deferred to post-MVP session. |
 | — | **Singer self-registration** | 💡 Pending | Singers register via public link |
 | — | **Social features** | 💡 Pending | Post-event sharing, singer stats |
 | — | **Windows version** | 🔴 Blocked | Blocked on DevExpress MAUI Windows support (no Windows renderer exists). Re-evaluate when DX announces Windows support. Spec: `Docs/Management/BusinessFeatures/windows-version/design.md` |
