@@ -6,6 +6,9 @@
     <Application.Resources>
         <ResourceDictionary>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+            <converters:IsNotZeroConverter x:Key="IsNotZeroConverter" />
+            <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <converters:SecondsToMinutesConverter x:Key="SecondsToMinutesConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/MaterialColors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/MaterialStyles.xaml" />
