@@ -35,6 +35,7 @@
 | 2026-06 | **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
 | 2026-06 | **Visual Theme Refresh** | 💡 Pending | App UI is too dark and monochromatic; spike for richer accent colors, gradient surfaces, warmer tones |
 | 2026-06 | | 🏁 **MVP release** | |
+| post-MVP | **Data Backup & Restore** | 💡 Pending | Cloud backup/restore via Google Drive (or other common cloud storage) to prevent data loss. Requires user identity (OAuth). Auth layer decision: no auth server at MVP — introduce a local `UserProfile` entity (GUID anchor) that maps to a Google account when this feature ships. Spec deferred to post-MVP session. |
 | — | **Singer self-registration** | 💡 Pending | Singers register via public link |
 | — | **Social features** | 💡 Pending | Post-event sharing, singer stats |
 | — | **Windows version** | 🔴 Blocked | Blocked on DevExpress MAUI Windows support (no Windows renderer exists). Re-evaluate when DX announces Windows support. Spec: `Docs/Management/BusinessFeatures/windows-version/design.md` |
@@ -65,3 +66,4 @@
 | 2026-05 | **Workflow & Folder Layout Alignment** | 🟡 In Progress | Resolve conflicts between SDD, superpowers skills, and custom rules; canonicalize Docs/ layout; spec evolution tracking; review enforcement. Findings: `Docs/Management/DevCycleCraft/workflow-folder-layout-alignment/findings.md` · Plan: `Docs/Management/DevCycleCraft/workflow-folder-layout-alignment/plan.md` |
 | 2026-05 | **VS Solution File Registration Rule** | ✅ Done | Mandatory rule: any doc file visible in VS must be registered in .sln before commit. See `workflow.md` and `constraints-registry.md`. |
 | 2026-05 | **Proactive BACKLOG Entry Rule** | ✅ Done | Agents must add brief BACKLOG entries for untracked work identified during sessions. See `workflow.md` Rule 1. |
+| 2026-05 | **Inline Undo Pattern — UX Standard** | 💡 Pending | All inline destructive actions (sub-item removals within a form page, where the user never navigates away) must offer snackbar Undo using the commit-first pattern: delete immediately, undo re-inserts. Discovered fixing broken undo in SongFormPage URL removal. Applies to any future inline remove within a form context. Does NOT apply to list-page batch deletes (different interaction model). |

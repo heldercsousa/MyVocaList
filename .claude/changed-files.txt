@@ -95,3 +95,15 @@ MyVocaList/UI/Pages/Songs/SongFormPage.xaml
 MyVocaList/UI/Pages/Songs/SongFormPage.xaml
 MyVocaList/UI/Pages/Songs/SongFormPage.xaml
 Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
+Docs/Management/BusinessFeatures/windows-version/design.md
+Docs/Management/BACKLOG.md
+Docs/Changelog/changelog.md
+Docs/Management/adaptive-doodling-knuth.md
+Docs/Management/BACKLOG.md
+MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs
+MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/requirements.md
+Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/requirements.md
+Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/task-log.md
