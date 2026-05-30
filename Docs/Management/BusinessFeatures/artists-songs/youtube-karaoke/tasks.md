@@ -1,6 +1,6 @@
 # YouTube Karaoke — Tasks
 
-> **Status:** Implementation ~90% complete — remaining UI tasks tracked below
+> **Status:** Implementation complete — all Phase 1–4 UI tasks done; Phase 5 partial (SongKaraokeUrlService tests done; NextSingerAlertService + Repository tests deferred)
 > **Plan:** `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/plan.md`
 
 ---
@@ -75,28 +75,28 @@
   - Demo: Commands for add/remove/search update observable collections correctly
   - Committed: 9748de3
 
-- [ ] **Create SettingsViewModel + SettingsPage** [SEQUENTIAL — fixes broken build] ⚠️ BUILD BROKEN
+- [x] **Create SettingsViewModel + SettingsPage** [SEQUENTIAL — fixes broken build]
   - Produces: `MyVocaList/UI/ViewModels/SettingsViewModel.cs`, `MyVocaList/UI/Pages/Settings/SettingsPage.xaml`, `MyVocaList/UI/Pages/Settings/SettingsPage.xaml.cs`
   - Consumes: `IYouTubeSearchService`, `ISecureStorageWrapper`, `ISnackbarComponent`
   - Risk: Low — new files only; MauiProgram.cs already registers SettingsViewModel + SettingsPage
   - Files owned: three new files above
   - Demo: Settings page renders; API key field saves to SecureStorage; Test and Clear work
 
-- [ ] **Create 3 value converters** [P — prerequisite for SongFormPage XAML]
+- [x] **Create 3 value converters** [P — prerequisite for SongFormPage XAML]
   - Produces: `MyVocaList/UI/Converters/IsNotZeroConverter.cs`, `IsNotNullConverter.cs`, `SecondsToMinutesConverter.cs`
   - Consumes: nothing
   - Risk: Low — new files + 3-line addition in App.xaml ResourceDictionary
   - Files owned: three new converter files, `App.xaml`
   - Demo: Converters registered in App.xaml; SongFormPage XAML builds without StaticResource errors
 
-- [ ] **Fix HasYouTubeApiKey gap in SongFormViewModel** [P — independent]
+- [x] **Fix HasYouTubeApiKey gap in SongFormViewModel** [P — independent]
   - Produces: updated `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
   - Consumes: `ISecureStorageWrapper` (already in DI)
   - Risk: Low — adds constructor parameter + 2 lines in `LoadKaraokeUrlsAsync`
   - Files owned: `SongFormViewModel.cs`
   - Demo: `HasYouTubeApiKey` is `true` when a key is stored; search strip shows
 
-- [ ] **Extend SongFormPage XAML with YouTube URLs section** [SEQUENTIAL — after converters + VM fix]
+- [x] **Extend SongFormPage XAML with YouTube URLs section** [SEQUENTIAL — after converters + VM fix]
   - Produces: updated `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`
   - Consumes: value converters, updated SongFormViewModel
   - Risk: Medium — new DXCollectionView section, search strip, paste field
@@ -107,8 +107,8 @@
 
 ## Phase 5 — Tests
 
-- [ ] **Unit tests: SongKaraokeUrlService** [P]
-  - Covers: ExtractVideoId (all 4 formats + invalid), AddUrlAsync duplicate detection, GetSuggestedUrlAsync ordering
+- [x] **Unit tests: SongKaraokeUrlService** [P]
+  - Covers: ExtractVideoId (all 4 formats + invalid + FsCheck property tests), AddUrlAsync duplicate detection, RemoveUrlAsync, GetUrlsForSongAsync
   - Risk: Level A
 
 - [ ] **Unit tests: NextSingerAlertService** [P]
