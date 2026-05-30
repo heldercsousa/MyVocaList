@@ -120,7 +120,9 @@
                     PlaceholderColor="{StaticResource OnSurfaceVariant}" />
 
             <!-- YouTube URLs section header -->
+            <!-- TODO: Replace ▶ label with youtube_icon.svg image asset when added to Resources/Images/ -->
             <HorizontalStackLayout Spacing="8" Margin="0,8,0,0">
+                <Label Text="▶" TextColor="Red" FontAttributes="Bold" VerticalOptions="Center" />
                 <Label Text="YouTube URLs" StyleClass="Title.Small" VerticalOptions="Center" />
                 <Label Text="optional" Opacity="0.5" StyleClass="Body.Small" VerticalOptions="Center" />
             </HorizontalStackLayout>
@@ -148,7 +150,7 @@
                                             StrokeShape="RoundRectangle 4"
                                             Padding="4,2"
                                             IsVisible="{Binding IsSuggested}">
-                                        <Label Text="★" StyleClass="Body.Small" TextColor="{StaticResource OnPrimary}" />
+                                        <Label Text="★ SUGGESTED" StyleClass="Body.Small" TextColor="{StaticResource OnPrimary}" />
                                     </Border>
                                 </HorizontalStackLayout>
                                 <Label Text="{Binding Label}"
@@ -217,8 +219,14 @@
                                          BindableLayout.ItemsSource="{Binding SearchResults}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="dtoList:YouTubeSearchResultDto">
-                                <Grid ColumnDefinitions="*,Auto" Padding="0,4">
-                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Grid ColumnDefinitions="48,*,Auto" ColumnSpacing="8" Padding="0,4">
+                                    <Image Grid.Column="0"
+                                           Source="{Binding ThumbnailUrl}"
+                                           WidthRequest="48"
+                                           HeightRequest="48"
+                                           Aspect="AspectFill"
+                                           VerticalOptions="Center" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
                                         <Label Text="{Binding Title}"
                                                StyleClass="Body.Medium"
                                                LineBreakMode="TailTruncation" />
@@ -232,7 +240,7 @@
                                                    IsVisible="{Binding DurationSeconds, Converter={StaticResource IsNotNullConverter}}" />
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
-                                    <dx:DXButton Grid.Column="1"
+                                    <dx:DXButton Grid.Column="2"
                                                  Content="+"
                                                  Style="{StaticResource FilledButton}"
                                                  VerticalOptions="Center"

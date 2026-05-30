@@ -49,6 +49,7 @@ public partial class SongFormViewModel : ViewModelBase
 
     // YouTube URLs section
     [ObservableProperty] private ObservableRangeCollection<SongKaraokeUrlDto> _karaokeUrls = [];
+    private readonly HashSet<string> _addedVideoIds = [];
     [ObservableProperty] private string _youtubeSearchQuery = string.Empty;
     [ObservableProperty] private ObservableRangeCollection<YouTubeSearchResultDto> _searchResults = [];
     [ObservableProperty] private bool _isYouTubeSearching;
@@ -99,7 +100,9 @@ public partial class SongFormViewModel : ViewModelBase
         SearchApiCommand = new AsyncRelayCommand(SearchApiAsync);
         SelectApiResultCommand = new AsyncRelayCommand<MusicSearchResultDto>(SelectApiResultAsync);
         SearchYouTubeCommand = new AsyncRelayCommand(SearchYouTubeAsync);
-        AddFromSearchCommand = new AsyncRelayCommand<YouTubeSearchResultDto>(AddFromSearchAsync);
+        AddFromSearchCommand = new AsyncRelayCommand<YouTubeSearchResultDto>(
+            AddFromSearchAsync,
+            result => result is not null && !IsVideoIdAdded(result.VideoId));
         AddFromPasteCommand = new AsyncRelayCommand(AddFromPasteAsync);
         RemoveUrlCommand = new AsyncRelayCommand<SongKaraokeUrlDto>(RemoveUrlAsync);
         GoToSettingsCommand = new AsyncRelayCommand(async () => await Shell.Current.GoToAsync("settings"));
@@ -313,7 +316,11 @@ public partial class SongFormViewModel : ViewModelBase
         var apiKey = await _secureStorage.GetAsync("youtube_api_key");
         HasYouTubeApiKey = !string.IsNullOrWhiteSpace(apiKey);
         var urls = await _karaokeUrlService.GetUrlsForSongAsync(SongId.Value, ct);
+        foreach (var u in urls) _addedVideoIds.Add(u.VideoId);
         RunOnUiThread(() => KaraokeUrls.ReplaceRange(urls));
+
+        if (string.IsNullOrWhiteSpace(YoutubeSearchQuery))
+            YoutubeSearchQuery = $"{ArtistName} {SongTitle} karaoke".Trim();
     }
 
     private async Task SearchYouTubeAsync(CancellationToken ct = default)
@@ -346,15 +353,21 @@ public partial class SongFormViewModel : ViewModelBase
         }
     }
 
+    public bool IsVideoIdAdded(string videoId) => _addedVideoIds.Contains(videoId)
+        || KaraokeUrls.Any(u => u.VideoId == videoId);
+
     private async Task AddFromSearchAsync(YouTubeSearchResultDto result, CancellationToken ct = default)
     {
         if (result is null || !SongId.HasValue) return;
+        if (IsVideoIdAdded(result.VideoId)) return;
 
         var rawUrl = $"https://youtu.be/{result.VideoId}";
         var (success, message, dto) = await _karaokeUrlService.AddUrlAsync(SongId.Value, rawUrl, ct: ct);
         if (success && dto is not null)
         {
+            _addedVideoIds.Add(result.VideoId);
             RunOnUiThread(() => KaraokeUrls.Add(dto));
+            AddFromSearchCommand.NotifyCanExecuteChanged();
             await _snackbarService.ShowSuccessAsync("URL added");
         }
         else
@@ -397,11 +410,24 @@ public partial class SongFormViewModel : ViewModelBase
     {
         if (dto is null || !SongId.HasValue) return;
 
-        var (success, _) = await _karaokeUrlService.RemoveUrlAsync(SongId.Value, dto.VideoId, ct);
-        if (success)
+        var songId = SongId.Value;
+        var undone = false;
+
+        // Optimistic remove — immediately hide from the list
+        RunOnUiThread(() => KaraokeUrls.Remove(dto));
+
+        // ShowWithUndoAsync awaits the snackbar duration; action fires synchronously when tapped
+        await _snackbarService.ShowWithUndoAsync("URL removed", "UNDO", async () =>
         {
-            RunOnUiThread(() => KaraokeUrls.Remove(dto));
-            await _snackbarService.ShowSuccessAsync("URL removed");
-        }
+            undone = true;
+            var (reAddSuccess, _, reAdded) = await _karaokeUrlService.AddUrlAsync(
+                songId, $"https://youtu.be/{dto.VideoId}");
+            if (reAddSuccess && reAdded is not null)
+                RunOnUiThread(() => KaraokeUrls.Add(reAdded));
+        });
+
+        // Only commit the deletion if the user did not press UNDO
+        if (!undone)
+            await _karaokeUrlService.RemoveUrlAsync(songId, dto.VideoId, ct);
     }
 }
