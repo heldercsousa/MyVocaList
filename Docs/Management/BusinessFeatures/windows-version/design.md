@@ -1,7 +1,8 @@
 # Windows Version — Design
 
-> **Status:** 💡 Pending — post-MVP
+> **Status:** 🔴 Blocked — DevExpress MAUI has no Windows support
 > **Decision date:** 2026-05-29
+> **Updated:** 2026-05-30
 
 ## Context
 
@@ -11,42 +12,69 @@ MyVocaList targets karaoke event admins. The goal is to make the app available t
 **Critical baseline discovery:** `MyVocaList.csproj` already conditionally includes
 `net10.0-windows10.0.19041.0` when building on Windows, and `Platforms/Windows/` already has
 scaffolded files (App.xaml, App.xaml.cs, app.manifest, Package.appxmanifest).
-Windows support exists at the skeleton level — no new project is required.
+Windows support exists at the skeleton level — the project compiles.
 
 ---
 
-## Decision
+## Blocker — DevExpress MAUI Does Not Support Windows
 
-**Polish the existing MAUI Windows target. No new project.**
+**DevExpress MAUI controls have no Windows renderer.** This applies to every control the app uses:
+DXCollectionView, BottomSheet, TextEdit, FilterChipGroup, AppBar, and all others.
 
-Rationale confirmed with Helder:
-- "Mobile app on Windows" UX is acceptable (admin tool, not consumer product)
-- Post-MVP timeline — Windows ships after the 2026-06 mobile MVP
-- Venue display mode and kiosk self-registration are post-MVP backlog items
+The MAUI project compiles for `net10.0-windows10.0.19041.0`, but at runtime every DevExpress control
+either throws or renders nothing. The app is not functional on Windows in its current form.
 
----
+Because DevExpress is a **constitutional constraint** in this project (UI Component Priority rule —
+unamendable), replacing DX controls is not an option without an architecture review.
 
-## Feature Extension Impact
-
-Because there is no second UI project, every feature added to the MAUI codebase is
-**automatically available on Windows** with at most 0.1x additional effort for Windows-specific
-testing and any platform-conditional tweaks. Services, Domain, and Infra are unchanged.
+**This feature is blocked until DevExpress announces Windows support for their MAUI controls.**
+No implementation work should begin before that announcement.
 
 ---
 
-## Architecture Constraints (no changes needed to non-MAUI layers)
+## Effort Analysis — Alternative Paths
 
-| Layer | Change required for Windows? |
-|-------|------------------------------|
-| Domain | None — net10.0, platform-agnostic |
-| Contracts | None |
-| Services | INextSingerAlertService may need a Windows no-op (check Plugin.LocalNotification Windows support) |
-| Infra | SQLite path check only |
-| MyVocaList (MAUI) | Windows-specific styles and layout tweaks in Platforms/Windows/ |
+All three paths below were evaluated and rejected for now.
+
+### Option A — Wait for DevExpress MAUI Windows support (preferred path)
+- **Effort:** Near-zero — existing skeleton + phases below remain valid
+- **Risk:** Timeline unknown; DevExpress has not committed to a Windows target date
+- **Outcome:** Once DX ships Windows renderers, Phase 1 becomes a real 1–2 day effort
+
+### Option B — Replace DevExpress with stock MAUI controls for Windows
+- **Effort:** Extremely high — every page, every dialog, every list must be duplicated or conditionally compiled
+- **Risk:** Violates the DevExpress-first constitutional constraint; creates a parallel UI codebase to maintain indefinitely
+- **Outcome:** Rejected
+
+### Option C — Add a separate Windows WinUI/WPF project
+- **Effort:** Very high — entirely new UI layer; all pages rebuilt from scratch in a different framework
+- **Risk:** No code sharing at the UI layer; Services/Domain/Infra are reusable but the UI is the majority of the work
+- **Outcome:** Rejected
+
+### Option D — Add a web front-end (Blazor or minimal API + SPA)
+- **Effort:** Very high — new frontend project + Web API project + middleware layer (auth, routing, error handling) to follow modern .NET patterns; no MAUI code reused at the UI layer
+- **Risk:** Introduces a separate tech stack, deployment model, and security surface; Services/Domain/Infra are reusable but the scaffolding cost is high
+- **Outcome:** Rejected for now; could be revisited if the app expands to a multi-user web product
 
 ---
 
-## Implementation Phases
+## Decision (updated 2026-05-30)
+
+**No implementation work until DevExpress MAUI announces Windows support.**
+
+The lowest-effort path to a real Windows version is Option A. All other options introduce
+more effort than the Windows target justifies for an admin-only tool.
+
+Re-evaluate when:
+- DevExpress publishes a Windows-compatible MAUI release (monitor devexpress.com/maui release notes)
+- Or the product scope changes to require a web interface for multi-user access
+
+---
+
+## Original Plan (valid once blocker is resolved)
+
+The phases below were designed for polishing the existing MAUI Windows target. They remain
+the implementation plan once DevExpress Windows support ships.
 
 ### Phase 1 — Baseline (make it run without crashes)
 
