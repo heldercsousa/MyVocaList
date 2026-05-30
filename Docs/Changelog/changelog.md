@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/30/2026** - docs - Windows version tasks.md: created Phase 1/2/3 task entries from design.md; registered design.md + tasks.md in MyVocaList.sln under windows-version Solution Folder
 - **05/29/2026** - docs - Windows version: registered as post-MVP business feature in BACKLOG.md; design.md created at `Docs/Management/BusinessFeatures/windows-version/design.md` (MAUI Windows target, no separate project); YouTube Karaoke tasks.md updated with completed phases marked and remaining UI tasks added with status tracking
 - **05/29/2026** - feat - Task 12 YouTube Karaoke: SettingsPage (XAML + code-behind) + SettingsViewModel — API key save/test/clear/toggle-mask via ISecureStorageWrapper + IYouTubeSearchService; route `settings` in AppShell; Transient DI in MauiProgram.cs; Routes.Settings constant
 - **05/17/2026** - docs - YouTube Karaoke Mode implementation plan: 15 tasks across 7 phases (Domain → Infra → Services → Android Overlay → DI → Settings → SongFormPage UI)
