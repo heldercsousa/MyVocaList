@@ -78,3 +78,6 @@ Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
 Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
 Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
 Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/handoff.md
+Docs/Management/BusinessFeatures/windows-version/tasks.md
+MyVocaList.sln
+MyVocaList.sln
