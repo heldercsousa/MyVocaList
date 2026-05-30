@@ -48,11 +48,13 @@ This spec covers:
 - AC-1.2: The section header shall show a YouTube icon, the label "YouTube URLs", and the word "optional" — no add button in the header.
 - AC-1.3: Each saved URL shall appear as a row showing: video ID (short form), play count, duration (if known), and an optional label.
 - AC-1.4: The URL with the highest play count shall be marked "★ SUGGESTED" with a visually distinct tint. When play counts are equal, recency (`LastUsedAt` then `AddedAt`) breaks the tie.
-- AC-1.5: Each saved URL row shall have a trailing remove button (✕). Tapping it removes the URL after a confirmation snackbar with Undo.
+- AC-1.5: Each saved URL row shall have a trailing remove button (✕). Tapping it immediately removes the URL from the database; a 4-second snackbar with Undo action allows recovery. Tapping Undo re-inserts the URL and restores the row.
 - AC-1.6: The section shall always show a search strip below the saved URLs (see US-2).
 - AC-1.7: A song may have zero saved URLs — the section is always visible but empty is valid.
 - AC-1.8: There is no maximum number of URLs per song.
 - AC-1.9: The same video ID cannot be added twice to the same song — attempting to do so shows an inline message "This URL is already saved for this song."
+
+> **Design decision — Undo scope:** Snackbar Undo is provided for URL removal because it is an inline action within the song form where the user never navigates away, and re-adding a URL requires effort (YouTube search or paste). This pattern does NOT apply to list-page batch deletes (Venues, Artists, Songs) where navigation makes snackbar undo infeasible. See BACKLOG.md Inline Undo Pattern entry.
 
 ---
 
