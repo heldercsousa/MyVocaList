@@ -1,4 +1,4 @@
-﻿# Development Workflow
+# Development Workflow
 
 > These rules are enforced by hooks. Violating them costs rework. Follow them exactly.
 
@@ -325,10 +325,11 @@ Every subagent must complete ALL of these steps in order before stopping:
 2. **Build:** Run `dotnet build` and confirm 0 errors. If build fails, apply the build retry cap (max 3 attempts). Document result in Verification evidence.
 3. **Test:** If any `.cs` implementation file was changed, run `dotnet test` and confirm 0 failures. Document result. Skip only if no code files were modified.
 4. **Post-edit re-read:** Re-read the affected section of every edited file and confirm correctness.
-5. **Living spec check:** Review decisions made during implementation — write back any undocumented decisions to the spec.
-6. **Task-log:** Complete the task-log entry including Changed files, Verification evidence, and AC traceability matrix (if applicable).
-7. **Commit:** Commit all changed files including any spec updates.
-8. **Push:** `git push origin HEAD`
+5. **.sln registration — BLOCKING:** For every file created, moved, or deleted in `Docs/` or `.claude/`: update `MyVocaList.sln` now (same commit). See `constraints-registry.md § Visual Studio Solution (.sln)` for exact pattern. Do NOT skip even if only docs changed.
+6. **Living spec check:** Review decisions made during implementation — write back any undocumented decisions to the spec.
+7. **Task-log:** Complete the task-log entry including Changed files, Verification evidence, and AC traceability matrix (if applicable).
+8. **Commit:** Commit all changed files including any spec updates.
+9. **Push:** `git push origin HEAD`
 
 **The `Stop` hook warns if uncommitted changes remain. Treat it as a hard gate.**
 
@@ -371,8 +372,8 @@ If the task introduces a new service, repository, ViewModel, or page, confirm th
 **3. Acceptance criteria check**
 For every acceptance criterion the task was supposed to satisfy: confirm it is satisfied. Record evidence in the task-log's AC traceability matrix.
 
-**4. Solution item registration check**
-If the task created any new file that should be visible in VS Solution Explorer (markdown docs under `Docs/`, config files at solution root, scripts, `.claude/` files referenced in BACKLOG), confirm it is registered in `MyVocaList.sln` under the appropriate Solution Folder. An unregistered file compiles and works but is invisible in VS IDE — Helder cannot see or navigate to it.
+**4. Solution item registration check — BLOCKING**
+For **every file created, moved, or deleted** in `Docs/` or `.claude/`: confirm the change is reflected in `MyVocaList.sln`. Do not skip this even if no other file was changed. An unregistered file is invisible in VS IDE — Helder cannot see or navigate to it. See `constraints-registry.md § Visual Studio Solution (.sln)` for the exact edit pattern (new folder, NestedProjects entry, GUID sequence).
 
 ### Session-End Spec Update Ritual
 

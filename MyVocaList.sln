@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11519.219
@@ -257,7 +257,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-karaoke", "youtube-
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\design.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\design.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md
-			Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\plan.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\plan.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\task-log.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\task-log.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
@@ -273,6 +274,37 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{15F1DA03-2180-47BF-BC40-1BB457C97F9E}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
+		Docs\Management\adaptive-doodling-knuth.md = Docs\Management\adaptive-doodling-knuth.md
+		Docs\Management\happy-knitting-storm.md = Docs\Management\happy-knitting-storm.md
+		Docs\Management\adaptive-doodling-knuth.md = Docs\Management\adaptive-doodling-knuth.md
+		Docs\Management\happy-knitting-storm.md = Docs\Management\happy-knitting-storm.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-restore", "{FA1234BC-0001-4000-8000-000000000011}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\backup-restore\design.md = Docs\Management\BusinessFeatures\backup-restore\design.md
+		Docs\Management\BusinessFeatures\backup-restore\plan.md = Docs\Management\BusinessFeatures\backup-restore\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-reporting", "{FA1234BC-0001-4000-8000-000000000012}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\crash-reporting\design.md = Docs\Management\BusinessFeatures\crash-reporting\design.md
+		Docs\Management\BusinessFeatures\crash-reporting\requirements.md = Docs\Management\BusinessFeatures\crash-reporting\requirements.md
+		Docs\Management\BusinessFeatures\crash-reporting\tasks.md = Docs\Management\BusinessFeatures\crash-reporting\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "user-suggestions", "user-suggestions", "{FA1234BC-0001-4000-8000-000000000013}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\user-suggestions\design.md = Docs\Management\BusinessFeatures\user-suggestions\design.md
+		Docs\Management\BusinessFeatures\user-suggestions\requirements.md = Docs\Management\BusinessFeatures\user-suggestions\requirements.md
+		Docs\Management\BusinessFeatures\user-suggestions\tasks.md = Docs\Management\BusinessFeatures\user-suggestions\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "whats-new", "whats-new", "{FA1234BC-0001-4000-8000-000000000014}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\whats-new\design.md = Docs\Management\BusinessFeatures\whats-new\design.md
+		Docs\Management\BusinessFeatures\whats-new\requirements.md = Docs\Management\BusinessFeatures\whats-new\requirements.md
+		Docs\Management\BusinessFeatures\whats-new\tasks.md = Docs\Management\BusinessFeatures\whats-new\tasks.md
 	EndProjectSection
 EndProject
 Global
@@ -369,6 +401,14 @@ Global
 		{300D3C1B-4E22-4CEE-85FF-453BD80607BD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 
 		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000011} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000012} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000013} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000014} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000011} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000012} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000013} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000014} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{C141C5C9-833C-4A26-96BF-3745A2DA1AD4} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{A1B2C3D4-0001-4000-8000-000000000007} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000008} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
