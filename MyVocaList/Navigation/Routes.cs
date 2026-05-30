@@ -15,4 +15,5 @@ public static class Routes
     public const string ArtistForm = "artist-form";
     public const string Songs      = "songs";
     public const string SongForm   = "song-form";
+    public const string Settings   = "settings";
 }

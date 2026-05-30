@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    x:Class="MyVocaList.UI.Pages.Settings.SettingsPage"
+    x:DataType="vm:SettingsViewModel"
+    Title="Settings"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="Container">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="24">
+
+            <!-- YouTube Integration section -->
+            <Label Text="YouTube Integration"
+                   StyleClass="Title.Medium"
+                   TextColor="{StaticResource OnSurface}" />
+
+            <VerticalStackLayout Spacing="12">
+                <dxe:TextEdit
+                    Text="{Binding ApiKeyInput, Mode=TwoWay}"
+                    LabelText="YouTube Data API v3 Key"
+                    PlaceholderText="Paste your API key here"
+                    IsPassword="{Binding IsApiKeyMasked}" />
+
+                <HorizontalStackLayout Spacing="8">
+                    <dx:DXButton
+                        Style="{StaticResource OutlinedButton}"
+                        Command="{Binding ToggleMaskCommand}">
+                        <dx:DXButton.Content>
+                            <Label StyleClass="Body.Small">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding IsApiKeyMasked}"
+                                                 Value="True">
+                                        <Setter Property="Text" Value="Show" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding IsApiKeyMasked}"
+                                                 Value="False">
+                                        <Setter Property="Text" Value="Hide" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </dx:DXButton.Content>
+                    </dx:DXButton>
+                    <dx:DXButton
+                        Content="Test"
+                        Style="{StaticResource OutlinedButton}"
+                        Command="{Binding TestApiKeyCommand}"
+                        IsEnabled="{Binding IsTestingKey, Converter={StaticResource InverseBoolConverter}}" />
+                    <dx:DXButton
+                        Content="Save"
+                        Style="{StaticResource FilledButton}"
+                        Command="{Binding SaveApiKeyCommand}" />
+                    <dx:DXButton
+                        Content="Clear"
+                        Style="{StaticResource TextButton}"
+                        Command="{Binding ClearApiKeyCommand}" />
+                </HorizontalStackLayout>
+
+                <ActivityIndicator
+                    IsRunning="{Binding IsTestingKey}"
+                    IsVisible="{Binding IsTestingKey}"
+                    Color="{StaticResource Primary}"
+                    HorizontalOptions="Start" />
+
+                <Label
+                    Text="{Binding ApiKeyStatus}"
+                    IsVisible="{Binding HasApiKeyStatus}"
+                    StyleClass="Body.Small"
+                    TextColor="{StaticResource OnSurfaceVariant}" />
+            </VerticalStackLayout>
+
+            <Label
+                StyleClass="Body.Small"
+                Opacity="0.6"
+                TextColor="{StaticResource OnSurfaceVariant}"
+                Text="Free quota: ~100 searches/day. Without a key, paste YouTube URLs directly." />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
