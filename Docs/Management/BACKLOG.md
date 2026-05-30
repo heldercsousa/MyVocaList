@@ -37,6 +37,7 @@
 | 2026-06 | | 🏁 **MVP release** | |
 | — | **Singer self-registration** | 💡 Pending | Singers register via public link |
 | — | **Social features** | 💡 Pending | Post-event sharing, singer stats |
+| — | **Windows version** | 💡 Pending | Polish existing MAUI Windows target (net10.0-windows10.0.19041.0); post-MVP. Spec: `Docs/Management/BusinessFeatures/windows-version/design.md` |
 
 ---
 
