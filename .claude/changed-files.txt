@@ -74,3 +74,6 @@ Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
 Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
 Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
 Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
+Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
+Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
