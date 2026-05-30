@@ -31,7 +31,25 @@ Review before implementing features in the indicated area.
 
 ## Visual Studio Solution (.sln)
 
-- **Solution item registration:** Any file that should be visible in VS Solution Explorer must be listed in `MyVocaList.sln` under the appropriate Solution Folder (`ProjectSection(SolutionItems) = preProject`). Pattern: `RelativePath\file.md = RelativePath\file.md`. Missing entries do not cause build failures but make files invisible in VS. Add as part of the task that creates the file — not as a follow-up.
+- **Solution item registration — HARD GATE:** Any file created, moved, or deleted in `Docs/` or `.claude/` **must** be reflected in `MyVocaList.sln` in the same commit. Missing entries make files invisible in VS Solution Explorer. This is not optional and is checked in the subagent exit checklist.
+
+  **When to act:**
+  - **Create** a file → add `RelativePath\file = RelativePath\file` to the matching Solution Folder's `ProjectSection(SolutionItems)`. If no folder exists for the feature yet, create one with a new GUID.
+  - **Move** a file → remove the old path entry, add the new path entry.
+  - **Delete** a file → remove its entry from the `.sln`.
+
+  **New Solution Folder pattern** (copy when adding a folder for a new feature):
+  \\\${nl}  Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "feature-name", "feature-name", "{NEW-GUID}"
+  	ProjectSection(SolutionItems) = preProject
+  		Docs\Management\[Path]\file.md = Docs\Management\[Path]\file.md
+  	EndProjectSection
+  EndProject
+  \\\${nl}  Then add a `NestedProjects` entry in `GlobalSection(NestedProjects)`:
+  - Under `BusinessFeatures` → parent `{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}`
+  - Under `DevCycleCraft` → parent `{0C4BA720-519E-4818-BD9B-34AC19E4FCD7}`
+  - Under `Management` root → parent `{15F1DA03-2180-47BF-BC40-1BB457C97F9E}`
+
+  **GUIDs:** Use sequential pattern `{FA1234BC-0001-4000-8000-00000000XXXX}` incrementing from the last used value (currently `0014`). Check the `.sln` before picking the next number.
 
 ---
 
