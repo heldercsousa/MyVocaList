@@ -411,23 +411,32 @@ public partial class SongFormViewModel : ViewModelBase
         if (dto is null || !SongId.HasValue) return;
 
         var songId = SongId.Value;
-        var undone = false;
 
-        // Optimistic remove — immediately hide from the list
+        // Commit-first: delete from DB immediately so undo can re-insert cleanly
+        var (success, message) = await _karaokeUrlService.RemoveUrlAsync(songId, dto.VideoId, ct);
+        if (!success)
+        {
+            await _snackbarService.ShowErrorAsync(message);
+            return;
+        }
+
+        _addedVideoIds.Remove(dto.VideoId);
         RunOnUiThread(() => KaraokeUrls.Remove(dto));
 
-        // ShowWithUndoAsync awaits the snackbar duration; action fires synchronously when tapped
+        // Show snackbar; if UNDO tapped, re-insert via AddUrlAsync
         await _snackbarService.ShowWithUndoAsync("URL removed", "UNDO", async () =>
         {
-            undone = true;
-            var (reAddSuccess, _, reAdded) = await _karaokeUrlService.AddUrlAsync(
-                songId, $"https://youtu.be/{dto.VideoId}");
+            var rawUrl = $"https://youtu.be/{dto.VideoId}";
+            var (reAddSuccess, _, reAdded) = await _karaokeUrlService.AddUrlAsync(songId, rawUrl);
             if (reAddSuccess && reAdded is not null)
-                RunOnUiThread(() => KaraokeUrls.Add(reAdded));
+            {
+                _addedVideoIds.Add(dto.VideoId);
+                RunOnUiThread(() =>
+                {
+                    KaraokeUrls.Add(reAdded);
+                    AddFromSearchCommand.NotifyCanExecuteChanged();
+                });
+            }
         });
-
-        // Only commit the deletion if the user did not press UNDO
-        if (!undone)
-            await _karaokeUrlService.RemoveUrlAsync(songId, dto.VideoId, ct);
     }
 }
