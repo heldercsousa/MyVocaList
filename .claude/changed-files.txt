@@ -81,3 +81,17 @@ Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/handoff.md
 Docs/Management/BusinessFeatures/windows-version/tasks.md
 MyVocaList.sln
 MyVocaList.sln
+MyVocaList/UI/Components/SnackbarComponent.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+Docs/Changelog/changelog.md
+MyVocaList/UI/Pages/Songs/SongFormPage.xaml
+MyVocaList/UI/Pages/Songs/SongFormPage.xaml
+MyVocaList/UI/Pages/Songs/SongFormPage.xaml
+Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/tasks.md
