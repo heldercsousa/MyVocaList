@@ -116,6 +116,8 @@ public static class MauiProgram
         builder.Services.AddTransient<SongFormPage>();
         builder.Services.AddTransient<PreferencesPage>();
         builder.Services.AddTransient<BackupRestorePage>();
+        builder.Services.AddTransient<SettingsViewModel>();
+        builder.Services.AddTransient<SettingsPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();
