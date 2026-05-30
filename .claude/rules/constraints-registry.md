@@ -7,6 +7,7 @@ Review before implementing features in the indicated area.
 
 ## DevExpress / UI
 
+- **BindableLayout vs DXCollectionView in ScrollView forms:** For small inline lists embedded in a `ScrollView`-based form page, use `BindableLayout.ItemsSource` on a `VerticalStackLayout` — not `DXCollectionView`. `DXCollectionView` inside a `ScrollView` requires workarounds (`IsScrollable="False"` + fixed height). Established by `SongFormPage.xaml` (ApiResults section pre-existing, YouTube URLs section 2026-05-30).
 - **ObservableRangeCollection / DXCollectionView reset events:** see `code-principles.md § UI Thread Performance — ObservableRangeCollection`.
 - **Native dialogs:** Do NOT use `DisplayAlert`, `DisplayActionSheet`, or `DisplayPromptAsync`. Use `dx:BottomSheet` only. (CLAUDE.md)
 - **Selection after reload:** After a list refresh or search, clear selection (`ClearRange` + `SelectedCount = 0`). Never restore prior selection via `ReplaceRange` — it fires a second Reset and crosses a data-reload boundary. (code-principles.md)
