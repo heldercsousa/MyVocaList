@@ -1,6 +1,6 @@
 # YouTube Karaoke — Tasks
 
-> **Status:** ✅ Complete — all phases done, all tests passing (192)
+> **Status:** ✅ Complete — all phases done + review findings fixed (B-1, W-1..W-5), 192 tests passing
 > **Plan:** `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/plan.md`
 
 ---
