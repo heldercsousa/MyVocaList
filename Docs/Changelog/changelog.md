@@ -1,6 +1,8 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/30/2026** - fix - Correct URL remove undo in SongFormPage: commit DB delete immediately, undo re-inserts (was: deferred delete caused undo to silently fail and leave data inconsistent)
+- **05/30/2026** - docs - Add Inline Undo Pattern UX standard to BACKLOG.md (commit-first snackbar undo for all future inline form-page removals)
 - **05/30/2026** - docs - Windows version: marked 🔴 Blocked in BACKLOG.md; design.md updated with DevExpress MAUI no-Windows-renderer blocker, effort analysis for all four alternative paths (wait/replace-DX/WinUI/web), and decision to hold until DX announces Windows support
 - **05/30/2026** - docs - Windows version tasks.md: created Phase 1/2/3 task entries from design.md; registered design.md + tasks.md in MyVocaList.sln under windows-version Solution Folder
 - **05/29/2026** - docs - Windows version: registered as post-MVP business feature in BACKLOG.md; design.md created at `Docs/Management/BusinessFeatures/windows-version/design.md` (MAUI Windows target, no separate project); YouTube Karaoke tasks.md updated with completed phases marked and remaining UI tasks added with status tracking
