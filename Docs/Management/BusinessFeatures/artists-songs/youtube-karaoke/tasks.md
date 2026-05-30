@@ -1,6 +1,6 @@
 # YouTube Karaoke — Tasks
 
-> **Status:** Implementation complete — all Phase 1–4 UI tasks done; Phase 5 partial (SongKaraokeUrlService tests done; NextSingerAlertService + Repository tests deferred)
+> **Status:** ✅ Complete — all phases done, all tests passing (192)
 > **Plan:** `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/plan.md`
 
 ---
@@ -111,10 +111,10 @@
   - Covers: ExtractVideoId (all 4 formats + invalid + FsCheck property tests), AddUrlAsync duplicate detection, RemoveUrlAsync, GetUrlsForSongAsync
   - Risk: Level A
 
-- [ ] **Unit tests: NextSingerAlertService** [P]
+- [x] **Unit tests: NextSingerAlertService** [P]
   - Covers: scheduling at correct offsets, edge cases (duration ≤ 45s, ≤ 15s, null)
   - Risk: Level A
 
-- [ ] **Integration tests: SongKaraokeUrlRepository** [P]
+- [x] **Integration tests: SongKaraokeUrlRepository** [P]
   - Covers: add, remove, composite PK uniqueness, cascade delete with Song
   - Risk: Level B
