@@ -137,6 +137,15 @@ When the admin navigates to Settings, saves a valid API key, and returns to the 
 Then the YouTube search strip is visible without closing and reopening the song
 ```
 
+### AC-SETTINGS-14 — Test with empty input is a no-op
+```
+WHEN the API key input is empty or whitespace only,
+the system SHALL ignore a Test tap:
+  no network call is made,
+  the status label is not updated,
+  no error or snackbar is shown.
+```
+
 ---
 
 ## Validation Rules

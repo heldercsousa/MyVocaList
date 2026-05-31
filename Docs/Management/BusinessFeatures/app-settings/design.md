@@ -13,7 +13,7 @@
 - `MyVocaList/Navigation/NavigationConfig.cs` — routes `Routes.Preferences` to `SettingsPage` (fix required)
 - `MyVocaList/AppShell.xaml` — `preferences` FlyoutItem target changes from `PreferencesPage` to `SettingsPage` (fix required)
 - `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — `OnAppearing` must refresh `HasYouTubeApiKey` (fix required)
-- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — may need a new `RefreshApiKeyFlagAsync()` method (fix required)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — add new `RefreshApiKeyFlagAsync()` method (fix required)
 - `MyVocaList/UI/Pages/Preferences/PreferencesPage.xaml` + `.xaml.cs` — deleted (fix required)
 
 No Domain, Infra, or Services changes. No new EF Core migrations. No new interfaces.
@@ -65,7 +65,7 @@ ScrollView
 5. On success (valid=true): `ApiKeyStatus = "Key valid — YouTube search is ready."`, `HasApiKeyStatus = true`.
 6. On success (valid=false): `ApiKeyStatus = "Invalid key — check and retry."`, `HasApiKeyStatus = true`.
 7. On exception: `ApiKeyStatus = "Test failed. Check your connection."`, `HasApiKeyStatus = true`.
-8. `IsTestingKey = false` → activity indicator hidden, Test button re-enabled.
+8. `IsTestingKey = false` in a `finally` block → activity indicator hidden, Test button re-enabled regardless of outcome.
 
 ### Flow 3 — Clear Key
 
@@ -164,6 +164,29 @@ public async Task RefreshApiKeyFlagAsync()
 ```
 
 No interface changes required. `SettingsViewModel` and `IYouTubeSearchService` are unchanged.
+
+### Existing interfaces used by `SettingsViewModel` (reference — unchanged)
+
+```csharp
+// Domain/ServicesInterfaces/IYouTubeSearchService.cs
+public interface IYouTubeSearchService
+{
+    /// <summary>Returns up to 5 results. Returns empty list when no API key is configured.</summary>
+    Task<IEnumerable<YouTubeSearchResultDto>> SearchAsync(string query, CancellationToken ct = default);
+
+    /// <summary>Makes a minimal API call to verify the key is valid.</summary>
+    Task<bool> ValidateApiKeyAsync(string apiKey, CancellationToken ct = default);
+}
+
+// Domain/ServicesInterfaces/ISecureStorageWrapper.cs
+/// <summary>Thin wrapper around SecureStorage to allow unit testing without platform binding.</summary>
+public interface ISecureStorageWrapper
+{
+    Task<string?> GetAsync(string key);
+    Task SetAsync(string key, string value);
+    bool Remove(string key);
+}
+```
 
 ---
 
