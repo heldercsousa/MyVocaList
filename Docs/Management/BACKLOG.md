@@ -36,6 +36,7 @@
 | 2026-06 | **Crash & Error Reporting** | 📋 Spec | Sentry MAUI SDK + Serilog sink; fixes orphaned Serilog config + uninitialized GlobalExceptionHandler. Spec: `Docs/Management/BusinessFeatures/crash-reporting/` |
 | 2026-06 | **What's New / Release Notes** | 📋 Spec | Bundled `releases.json`; one-time modal on version upgrade; depends on App Versioning. Spec: `Docs/Management/BusinessFeatures/whats-new/` |
 | 2026-06 | **User Suggestions** | 📋 Spec | In-app form → GitHub Issues API (MyVocaList repo); auto-captures version + OS + timestamp. Spec: `Docs/Management/BusinessFeatures/user-suggestions/` |
+| 2026-06 | **App Update Check** | 📋 Spec | Remote version manifest (GitHub raw); soft nudge + hard block bottom sheets; fail-open on network error. Spec: `Docs/Management/BusinessFeatures/app-update-check/` |
 | 2026-06 | **App Settings** | ✅ Done | YouTube API key management (PasswordEdit, save/test/clear); flyout "Preferences" now navigates to SettingsPage; stale `HasYouTubeApiKey` refreshed on `OnAppearing`. Spec: `Docs/Management/BusinessFeatures/app-settings/` |
 | 2026-06 | **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
 | 2026-06 | **Visual Theme Refresh** | 💡 Pending | App UI is too dark and monochromatic; spike for richer accent colors, gradient surfaces, warmer tones |

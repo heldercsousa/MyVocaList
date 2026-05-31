@@ -8,7 +8,7 @@
 
 ## Problem Statement
 
-The app has no mechanism to inform users that a newer version is available or to block critically outdated versions from running. Users may unknowingly operate on an old build, missing bug fixes or behaviorally incompatible versions at live events.
+The app has no mechanism to inform users that a newer version is available or to block critically outdated versions from running. Users may unknowingly operate on an old build, missing bug fixes or running a version that is behaviorally incompatible with updated server-side data.
 
 ---
 
@@ -21,7 +21,7 @@ The app has no mechanism to inform users that a newer version is available or to
 | **Hard block** | A non-dismissible bottom sheet requiring the user to update before continuing |
 | **`latestVersion`** | The most recent published version string in the manifest |
 | **`minRequiredVersion`** | The oldest version string still permitted to run the app |
-| **Fail-open** | When the manifest cannot be fetched, the app proceeds normally (no block) |
+| **Fail-open** | When the manifest cannot be fetched, the app proceeds normally — no block |
 
 ---
 
@@ -48,7 +48,7 @@ The app has no mechanism to inform users that a newer version is available or to
 **so that** a connectivity issue never blocks the app at an event.
 
 ### US-UC-05 — Soft nudge is dismissible
-**As** a user who knows about the update but wants to finish what they are doing,  
+**As** a user who knows about the update but wants to finish their current task,  
 **I want** to dismiss the update prompt and continue using the app,  
 **so that** the update is my choice, not forced on minor releases.
 
@@ -85,14 +85,14 @@ The app has no mechanism to inform users that a newer version is available or to
 
 ### AC-UC-06 — Version comparison is SemVer-aware
 **Given** version strings follow SemVer (e.g. `"0.3.0-alpha.5"`),  
-**Then** comparison uses `System.Version` or `NuGet.Versioning.NuGetVersion` semantics — not lexicographic string comparison.
+**Then** comparison uses `NuGet.Versioning.NuGetVersion` semantics — not lexicographic string comparison.
 
 ---
 
 ## Validation Rules
 
 - If `version-manifest.json` is malformed JSON, treat as fetch failure (fail-open).
-- If `storeUrls` is missing the current platform's key, log a warning and skip opening the store (do not crash).
+- If `storeUrls` is missing the current platform's key, log a warning and skip opening the store — do not crash.
 - Version comparison must handle pre-release labels (`-alpha.N`) correctly: `0.3.0-alpha.5 < 0.3.0`.
 
 ---
