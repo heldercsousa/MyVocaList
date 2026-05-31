@@ -42,6 +42,9 @@
     <PackageVersion Include="Sentry.Maui" Version="5.*" />
     <PackageVersion Include="Sentry.Serilog" Version="5.*" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
+    <!-- Pin to match Sentry.Maui's transitive Xamarin.AndroidX.Lifecycle.Common version,
+         resolving NU1608 range conflict (Java8 accepts up to < 2.8.8 by default). -->
+    <PackageVersion Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.9.2.1" />
   </ItemGroup>
   <!-- ================================================================ -->
   <!-- .NET MAUI                                                        -->
