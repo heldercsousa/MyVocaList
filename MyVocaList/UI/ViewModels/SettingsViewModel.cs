@@ -10,7 +10,6 @@ public partial class SettingsViewModel : ViewModelBase
     private readonly ILogger<SettingsViewModel> _logger;
 
     [ObservableProperty] private string _apiKeyInput = string.Empty;
-    [ObservableProperty] private bool _isApiKeyMasked = true;
     [ObservableProperty] private bool _isTestingKey;
     [ObservableProperty] private string _apiKeyStatus = string.Empty;
     [ObservableProperty] private bool _hasApiKeyStatus;
@@ -29,13 +28,11 @@ public partial class SettingsViewModel : ViewModelBase
         SaveApiKeyCommand = new AsyncRelayCommand(SaveApiKeyAsync);
         TestApiKeyCommand = new AsyncRelayCommand(TestApiKeyAsync);
         ClearApiKeyCommand = new AsyncRelayCommand(ClearApiKeyAsync);
-        ToggleMaskCommand = new RelayCommand(ToggleMask);
     }
 
     public IAsyncRelayCommand SaveApiKeyCommand { get; }
     public IAsyncRelayCommand TestApiKeyCommand { get; }
     public IAsyncRelayCommand ClearApiKeyCommand { get; }
-    public IRelayCommand ToggleMaskCommand { get; }
 
     public async Task InitializeAsync()
     {
@@ -91,5 +88,4 @@ public partial class SettingsViewModel : ViewModelBase
         await _snackbar.ShowSuccessAsync("API key removed");
     }
 
-    private void ToggleMask() => IsApiKeyMasked = !IsApiKeyMasked;
 }
