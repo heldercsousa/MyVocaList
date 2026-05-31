@@ -3,25 +3,63 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     x:Class="MyVocaList.UI.Pages.BackupRestore.BackupRestorePage"
+    x:DataType="vm:BackupRestoreViewModel"
     Title="Backup &amp; Restore"
     BackgroundColor="{StaticResource Surface}"
     SafeAreaEdges="Container">
 
-    <dx:DXScrollView>
-        <VerticalStackLayout Style="{StaticResource PageContainer}">
-            <dx:DXBorder BackgroundColor="{StaticResource SurfaceContainerLow}"
-                         CornerRadius="12" Padding="24">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Backup &amp; Restore"
-                           FontFamily="RobotoMedium" FontSize="32"
-                           TextColor="{StaticResource OnSurface}" />
-                    <Label Text="This page is under construction."
-                           FontFamily="RobotoRegular" FontSize="14"
-                           TextColor="{StaticResource OnSurfaceVariant}" />
-                </VerticalStackLayout>
-            </dx:DXBorder>
-        </VerticalStackLayout>
-    </dx:DXScrollView>
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="24">
 
+            <!-- Status -->
+            <Label Text="{Binding LastBackupLabel}"
+                   StyleClass="Body.Medium"
+                   TextColor="{StaticResource OnSurfaceVariant}" />
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}"
+                               Color="{StaticResource Primary}"
+                               HorizontalOptions="Start" />
+
+            <!-- Actions -->
+            <Label Text="Backup" StyleClass="Title.Medium" TextColor="{StaticResource OnSurface}" />
+
+            <dx:DXButton Content="Back Up Now"
+                         Style="{StaticResource FilledButton}"
+                         Command="{Binding BackupNowCommand}" />
+
+            <dx:DXButton Content="Export Backup"
+                         Style="{StaticResource OutlinedButton}"
+                         Command="{Binding ExportCommand}" />
+
+            <!-- Restore -->
+            <Label Text="Restore" StyleClass="Title.Medium" TextColor="{StaticResource OnSurface}" />
+
+            <dx:DXButton Content="Restore from File"
+                         Style="{StaticResource OutlinedButton}"
+                         Command="{Binding RestoreCommand}" />
+
+            <!-- History -->
+            <Label Text="Backup History" StyleClass="Title.Medium" TextColor="{StaticResource OnSurface}" />
+
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding History}" Spacing="8">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="entity:BackupHistory"
+                                  xmlns:entity="clr-namespace:MyVocaList.Domain.Entity;assembly=MyVocaList.Domain">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding CreatedAt, StringFormat='{0:g}'}"
+                                   StyleClass="Body.Small"
+                                   TextColor="{StaticResource OnSurface}" />
+                            <Label Text="{Binding TriggerType}"
+                                   StyleClass="Body.Small"
+                                   TextColor="{StaticResource OnSurfaceVariant}" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
