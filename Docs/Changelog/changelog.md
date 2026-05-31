@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/30/2026** - docs - Enforce git worktrees for parallel subagents (mandatory at 2+, not opt-in at 3+; staging-collision rationale added) and Haiku model classification table in orchestrator.md; both BACKLOG items marked Done
 - **05/30/2026** - fix - Correct URL remove undo in SongFormPage: commit DB delete immediately, undo re-inserts (was: deferred delete caused undo to silently fail and leave data inconsistent)
 - **05/30/2026** - docs - Add Inline Undo Pattern UX standard to BACKLOG.md (commit-first snackbar undo for all future inline form-page removals)
 - **05/30/2026** - docs - Windows version: marked 🔴 Blocked in BACKLOG.md; design.md updated with DevExpress MAUI no-Windows-renderer blocker, effort analysis for all four alternative paths (wait/replace-DX/WinUI/web), and decision to hold until DX announces Windows support
