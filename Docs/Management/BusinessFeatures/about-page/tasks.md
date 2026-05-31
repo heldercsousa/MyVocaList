@@ -1,58 +1,58 @@
 # Tasks — About Page
 
-> **Prerequisite:** All What's New tasks must be committed before Phase 1 begins.
-> `IWhatsNewService`, `ReleaseEntry`, and `WhatsNewService` are consumed here but owned by that feature.
+> **No prerequisite on What's New.** The About page ships with a `NullWhatsNewService` stub.
+> The What's New section is hidden until that feature is implemented separately.
 
 ---
 
-## Phase 1 — Service extension (depends on: What's New ✅)
+## Phase 1 — Contracts & Domain (no dependencies)
 
-- [ ] **Add `GetCurrentReleaseAsync` to `IWhatsNewService` + implement in `WhatsNewService`** [SEQUENTIAL]
-  - **Produces:** new method on `IWhatsNewService`; implementation in `WhatsNewService`; unit tests for the new method
-  - **Consumes:** `IWhatsNewService.cs`, `WhatsNewService.cs`, `ReleaseEntry` DTO
-  - **Risk:** Low — additive change; no existing method is modified
-  - **Files owned:** `MyVocaList.Domain/ServicesInterfaces/IWhatsNewService.cs`, `MyVocaList.Services/WhatsNewService.cs`, `MyVocaList.Tests/Unit/Services/WhatsNewServiceTests.cs`
-  - **Demo:** `dotnet test` passes including new tests for `GetCurrentReleaseAsync` (returns entry for matching version, returns null for unmatched version, returns null on malformed JSON)
-
----
-
-## Phase 2 — Contracts constant (no dependencies)
+- [ ] **Define `ReleaseEntry` DTO and `IWhatsNewService` interface** [P]
+  - **Produces:** `ReleaseEntry` record in `MyVocaList.Contracts/DTOs/`; `IWhatsNewService` interface in `MyVocaList.Domain/ServicesInterfaces/`
+  - **Consumes:** nothing
+  - **Risk:** Low — new types only, no existing code touched
+  - **Files owned:** `MyVocaList.Contracts/DTOs/ReleaseEntry.cs`, `MyVocaList.Domain/ServicesInterfaces/IWhatsNewService.cs`
+  - **Demo:** Both types compile; `ReleaseEntry` has Version, Date, Highlights, Fixes properties
 
 - [ ] **Add `AppConstants.FoundedYear = 2025`** [P]
   - **Produces:** `FoundedYear` constant in `MyVocaList.Contracts`
   - **Consumes:** nothing
   - **Risk:** Low
   - **Files owned:** `MyVocaList.Contracts/AppConstants.cs`
-  - **Demo:** Constant compiles and is accessible from the MAUI project
+  - **Demo:** Constant compiles and is accessible from MAUI project
+
+---
+
+## Phase 2 — Stub service + ViewModel (depends on: Phase 1 ✅)
+
+- [ ] **Implement `NullWhatsNewService` stub and `AboutViewModel`** [SEQUENTIAL]
+  - **Produces:** `NullWhatsNewService` (internal, in Services project); `AboutViewModel.cs`
+  - **Consumes:** `IWhatsNewService`, `ReleaseEntry`, `AppConstants.FoundedYear`, `AppInfo`
+  - **Risk:** Low
+  - **Files owned:** `MyVocaList.Services/NullWhatsNewService.cs`, `MyVocaList/UI/ViewModels/AboutViewModel.cs`
+  - **Demo:** `AboutViewModel.InitializeAsync()` returns with `CurrentRelease = null`, `Version = "v1.0.0"`, `Since = "Since 2025"`, `HasReleaseNotes = false`
 
 ---
 
 ## Phase 3 — Navigation wiring (depends on: Phase 1 ✅)
 
 - [ ] **Add About route to navigation config** [SEQUENTIAL]
-  - **Produces:** `Routes.About`, menu entry in System group, Shell route registration
+  - **Produces:** `Routes.About` constant; "About" menu entry in System group (before Exit); Shell route registration
   - **Consumes:** `Routes.cs`, `NavigationConfig.cs`, `AppShell.xaml`
-  - **Risk:** Low — additive; System group order must place About before Exit
+  - **Risk:** Low — additive; order in System group must be: Preferences → Backup & Restore → About → Exit
   - **Files owned:** `MyVocaList/Navigation/Routes.cs`, `MyVocaList/Navigation/NavigationConfig.cs`, `MyVocaList/AppShell.xaml`
-  - **Demo:** "About" item appears in the flyout System group; tapping it does not crash (page may be empty at this stage)
+  - **Demo:** "About" item appears in flyout System group in correct position
 
 ---
 
-## Phase 4 — ViewModel + Page (depends on: Phase 1 ✅, Phase 2 ✅, Phase 3 ✅)
+## Phase 4 — Page XAML + DI (depends on: Phase 2 ✅, Phase 3 ✅)
 
-- [ ] **Implement `AboutViewModel`** [SEQUENTIAL]
-  - **Produces:** `AboutViewModel.cs`
-  - **Consumes:** `IWhatsNewService`, `AppInfo`, `AppConstants.FoundedYear`
-  - **Risk:** Low
-  - **Files owned:** `MyVocaList/UI/ViewModels/AboutViewModel.cs`
-  - **Demo:** `AboutViewModel.InitializeAsync()` populates `Version` and `CurrentRelease` (or null)
-
-- [ ] **Implement `AboutPage` XAML + code-behind + DI** [SEQUENTIAL — after ViewModel]
-  - **Produces:** `AboutPage.xaml`, `AboutPage.xaml.cs`; DI registration in `MauiProgram.cs`
-  - **Consumes:** `AboutViewModel`, all decisions in `design.md § Page Structure`
-  - **Risk:** Medium — XAML layout correctness; `SafeAreaEdges="Container"` must be present
+- [ ] **Implement `AboutPage` XAML, code-behind, and DI registration** [SEQUENTIAL]
+  - **Produces:** `AboutPage.xaml`, `AboutPage.xaml.cs`; DI entries in `MauiProgram.cs`
+  - **Consumes:** `AboutViewModel`, design.md § Page Structure
+  - **Risk:** Medium — XAML layout; `SafeAreaEdges="Container"` required; What's New section must be hidden when `HasReleaseNotes = false`
   - **Files owned:** `MyVocaList/UI/Pages/About/AboutPage.xaml`, `MyVocaList/UI/Pages/About/AboutPage.xaml.cs`, `MyVocaList/MauiProgram.cs`
-  - **Demo:** About page opens from flyout, shows version in AppBar, logo, name, "Since 2025", license section, and (if `releases.json` has current version entry) What's New section. If no entry: What's New section is hidden.
+  - **Demo:** About page opens from flyout; shows version in AppBar (`v1.0.0`), app logo, "MyVocaList", goal sentence, "Since 2025", License section with CC BY-NC-ND 4.0 and copyright; What's New section is absent (stub returns null)
 
 ---
 
@@ -60,4 +60,13 @@
 
 - [ ] **Register all new files in `MyVocaList.sln`** [SEQUENTIAL]
   - **Files owned:** `MyVocaList.sln`
-  - **Demo:** All new files visible in Visual Studio Solution Explorer under the appropriate solution folders
+  - **Demo:** All new files visible in Visual Studio Solution Explorer under the correct solution folders
+
+---
+
+## Future (when What's New is implemented)
+
+- Replace `NullWhatsNewService` registration with `WhatsNewService` in `MauiProgram.cs`
+- Add `GetPendingReleaseAsync` to `IWhatsNewService` at that point
+- `GetCurrentReleaseAsync` implementation moves to the real service
+- About page: no changes required

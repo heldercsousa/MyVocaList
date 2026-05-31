@@ -6,7 +6,7 @@ A single read-only Shell page with a lightweight ViewModel. No repository, no da
 
 **Layers affected:** MAUI (UI only) + minimal constant addition to Contracts.
 
-**Prerequisite:** The What's New feature (`Docs/Management/BusinessFeatures/whats-new/`) must be implemented first — `IWhatsNewService` and `ReleaseEntry` DTO are consumed here but owned there.
+**No prerequisite on What's New.** About ships with a stub implementation of `IWhatsNewService` that always returns `null`. The What's New section is hidden (AC-AB-07). When What's New is implemented later, the stub is replaced with the real service — About page code changes: zero.
 
 ---
 
@@ -75,20 +75,50 @@ public sealed partial class AboutViewModel : ViewModelBase
 }
 ```
 
-**Note on `GetCurrentReleaseAsync`:** This is a **new method** added to `IWhatsNewService` that returns the current version's `ReleaseEntry` unconditionally (no seen-check). The existing `GetPendingReleaseAsync` (which gates on seen-status) is unchanged. The About page always shows the notes regardless of modal dismissal history.
+**Stub strategy:** `IWhatsNewService` and `ReleaseEntry` are defined here as a minimal interface + DTO, owned by the About page feature for now. The stub implementation (`NullWhatsNewService`) always returns `null` — the What's New section stays hidden. When the What's New feature is implemented, it replaces `NullWhatsNewService` with the real service and adds `GetPendingReleaseAsync` to the interface. About page is untouched.
+
+**Note on `GetCurrentReleaseAsync`:** Returns the `ReleaseEntry` for the current app version unconditionally (no seen-check). The About page always shows the notes regardless of modal dismissal history.
 
 ---
 
-## Interface Change — `IWhatsNewService`
+## Interface & Stub — `IWhatsNewService`
 
-Add one method to the existing interface in `MyVocaList.Domain`:
+**New interface** in `MyVocaList.Domain/ServicesInterfaces/`:
 
 ```csharp
-/// Returns the ReleaseEntry for the current app version, or null if no entry exists in releases.json.
-Task<ReleaseEntry?> GetCurrentReleaseAsync(CancellationToken ct = default);
+public interface IWhatsNewService
+{
+    /// Returns the ReleaseEntry for the current app version, or null if no entry exists.
+    Task<ReleaseEntry?> GetCurrentReleaseAsync(CancellationToken ct = default);
+}
 ```
 
-`WhatsNewService` implements this by loading `releases.json` and finding the entry matching `AppInfo.VersionString`. No Preferences access, no side effects.
+**Stub** registered for About page (in `MauiProgram.cs`):
+
+```csharp
+// Temporary stub — replaced when What's New feature is implemented
+builder.Services.AddSingleton<IWhatsNewService, NullWhatsNewService>();
+```
+
+```csharp
+internal sealed class NullWhatsNewService : IWhatsNewService
+{
+    public Task<ReleaseEntry?> GetCurrentReleaseAsync(CancellationToken ct = default)
+        => Task.FromResult<ReleaseEntry?>(null);
+}
+```
+
+**`ReleaseEntry` DTO** (new, in `MyVocaList.Contracts/DTOs/`):
+
+```csharp
+public record ReleaseEntry(
+    string Version,
+    string Date,
+    IReadOnlyList<string> Highlights,
+    IReadOnlyList<string> Fixes);
+```
+
+When What's New is implemented, it: adds `GetPendingReleaseAsync` to the interface, replaces `NullWhatsNewService` registration with the real `WhatsNewService`, and owns the JSON loading logic. `GetCurrentReleaseAsync` moves to the real service at that point.
 
 ---
 

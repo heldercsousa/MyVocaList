@@ -277,3 +277,14 @@ Docs/Management/BusinessFeatures/about-page/design.md
 Docs/Management/BusinessFeatures/about-page/tasks.md
 Docs/Management/BusinessFeatures/about-page/design.md
 Docs/Management/BusinessFeatures/about-page/design.md
+Docs/Management/BusinessFeatures/about-page/design.md
+Docs/Management/BusinessFeatures/about-page/design.md
+Docs/Management/BusinessFeatures/about-page/design.md
+Docs/Management/BusinessFeatures/about-page/tasks.md
+.worktrees/crash-reporting/Directory.Packages.props
+.worktrees/crash-reporting/MyVocaList/MyVocaList.csproj
+.worktrees/crash-reporting/MyVocaList/MyVocaList.csproj
+.worktrees/crash-reporting/MyVocaList/appsettings.template.json
+.worktrees/crash-reporting/MyVocaList/appsettings.json
+.worktrees/crash-reporting/.gitignore
+Docs/Management/BusinessFeatures/about-page/plan.md
