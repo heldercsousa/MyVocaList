@@ -1,9 +1,11 @@
 using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
+using MyVocaList.Services;
 using MyVocaList.UI.Services;
 #if DEBUG
 using MauiDevFlow.Agent;
@@ -36,14 +38,31 @@ public static class MauiProgram
         #endif
 
         // Database
+        var dbPath = Path.Combine(FileSystem.AppDataDirectory, "MyVocaList.db");
+        var backupDir = Path.Combine(FileSystem.AppDataDirectory, "backups");
+        var logDir = Path.Combine(FileSystem.AppDataDirectory, "logs");
+
         builder.Services.AddSingleton<CollationInterceptor>();
+        builder.Services.AddSingleton<ITransactionLogWriter>(_ => new TransactionLogWriter(logDir));
+        builder.Services.AddSingleton<TransactionLogInterceptor>();
         builder.Services.AddDbContext<AppDbContext>((sp, options) =>
         {
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "MyVocaList.db");
             options.UseSqlite($"Data Source={dbPath}")
-                   .AddInterceptors(sp.GetRequiredService<CollationInterceptor>())
+                   .AddInterceptors(
+                       sp.GetRequiredService<CollationInterceptor>(),
+                       sp.GetRequiredService<TransactionLogInterceptor>())
                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         });
+
+        // Backup & Restore
+        builder.Services.AddScoped<IBackupRepository, BackupRepository>();
+        builder.Services.AddScoped<IBackupService>(sp => new BackupService(
+            sp.GetRequiredService<IBackupRepository>(),
+            sp.GetRequiredService<ITransactionLogWriter>(),
+            sp.GetRequiredService<ILogger<BackupService>>(),
+            dbPath,
+            backupDir));
+        builder.Services.AddTransient<BackupRestoreViewModel>();
 
         // Repositories
         builder.Services.AddScoped<IVenueRepository, VenueRepository>();

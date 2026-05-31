@@ -288,6 +288,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-re
 		Services\TransactionLogWriter.cs = Services\TransactionLogWriter.cs
 		Services\BackupService.cs = Services\BackupService.cs
 		MyVocaList.Tests\Unit\Services\BackupServiceTests.cs = MyVocaList.Tests\Unit\Services\BackupServiceTests.cs
+		MyVocaList\UI\ViewModels\BackupRestoreViewModel.cs = MyVocaList\UI\ViewModels\BackupRestoreViewModel.cs
+		MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml = MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml
+		MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml.cs = MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml.cs
+		MyVocaList\Platforms\Android\Resources\xml\file_provider_paths.xml = MyVocaList\Platforms\Android\Resources\xml\file_provider_paths.xml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-reporting", "{FA1234BC-0001-4000-8000-000000000012}"
