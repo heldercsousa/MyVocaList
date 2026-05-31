@@ -8,9 +8,11 @@ public partial class SongFormPage : ContentPage
         BindingContext = viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
         titleEdit.Focus();
+        if (BindingContext is SongFormViewModel vm)
+            await vm.RefreshApiKeyFlagAsync();
     }
 }

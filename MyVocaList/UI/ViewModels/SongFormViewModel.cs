@@ -310,6 +310,12 @@ public partial class SongFormViewModel : ViewModelBase
         }
     }
 
+    public async Task RefreshApiKeyFlagAsync()
+    {
+        var key = await _secureStorage.GetAsync("youtube_api_key");
+        HasYouTubeApiKey = !string.IsNullOrWhiteSpace(key);
+    }
+
     private async Task LoadKaraokeUrlsAsync(CancellationToken ct = default)
     {
         if (!SongId.HasValue) return;
