@@ -33,6 +33,7 @@ public static class NavigationConfig
         new MenuGroup("System", [
             new MenuItemDescription("Preferences",    "settings_outlined",             Routes.Preferences, navigateCommand),
             new MenuItemDescription("Backup & Restore","cloud_sync_outlined",          Routes.Backup,      navigateCommand),
+            new MenuItemDescription("About",          "info_outlined",                 Routes.About,       navigateCommand),
             new MenuItemDescription("Exit",           "logout_outlined",               Routes.Exit,        navigateCommand)
         ])
     ];
