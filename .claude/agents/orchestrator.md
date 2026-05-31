@@ -158,6 +158,27 @@ Before dispatching any wave, verify that the spec being implemented is still cur
 
 ---
 
+## Shared-Append Files — Main Agent Owns at Merge Time
+
+**Never instruct a parallel subagent to write to these files:**
+
+| File | Reason |
+|------|--------|
+| `Docs/Changelog/changelog.md` | Every parallel agent appends to the same section — causes a merge conflict on every wave |
+| `MyVocaList.sln` | Parallel agents create duplicate solution folders with colliding GUIDs when each tries to register its own new files |
+
+**Rule:** Parallel subagents must include these two files in their `Files off-limits` list. The main agent adds the changelog entry and `.sln` registrations manually after merging each worktree branch.
+
+**Post-merge checklist (main agent, after every parallel wave merge):**
+1. Read each subagent's task-log to find newly created files
+2. Add one `changelog.md` entry per feature/phase merged
+3. Add each new file to the correct `.sln` solution folder (see `constraints-registry.md § Visual Studio Solution`)
+4. Commit these two files together: `git commit -m "chore: post-merge changelog + sln registration — [wave description]"`
+
+**For sequential subagents** (single writer, no parallel risk): changelog and .sln updates are permitted in the subagent's own commit as usual.
+
+---
+
 ## Briefing Protocol — Paths Only, Never Paste Content
 
 - Subagent briefings must reference **file paths**, not paste file content inline.
