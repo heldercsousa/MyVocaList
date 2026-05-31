@@ -1,7 +1,10 @@
 using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Serilog;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Extensions;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
@@ -17,7 +20,48 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
+        // Load appsettings.json from embedded resource (optional — missing file or empty DSN is fine)
+        var assembly = typeof(MauiProgram).Assembly;
+        IConfiguration config = new ConfigurationBuilder().Build(); // empty fallback
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("appsettings.json", StringComparison.OrdinalIgnoreCase));
+        if (resourceName != null)
+        {
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream != null)
+                config = new ConfigurationBuilder().AddJsonStream(stream).Build();
+        }
+
         var builder = MauiApp.CreateBuilder();
+#if !DEBUG
+        builder
+            .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()
+            .UseDevExpress(useLocalization: false)
+            .UseDevExpressCollectionView()
+            .UseDevExpressControls()
+            .UseDevExpressEditors()
+            .UseSentry(options =>
+            {
+                options.Dsn = config["Sentry:Dsn"] ?? string.Empty;
+                options.Release = AppInfo.VersionString;
+                options.Environment = "production";
+                options.AttachScreenshot = false;
+                options.ConfigureScope(scope =>
+                {
+                    scope.SetTag("device.model", DeviceInfo.Model);
+                    scope.SetTag("os.version", DeviceInfo.VersionString);
+                    scope.SetExtra("session_id", GetOrCreateSessionId());
+                });
+            })
+            .ConfigureFonts(fonts =>
+            {
+                // Roboto for Material Design 3
+                fonts.AddFont("Roboto-Regular.ttf", "RobotoRegular");
+                fonts.AddFont("Roboto-Medium.ttf", "RobotoMedium");
+                fonts.AddFont("Roboto-Bold.ttf", "RobotoBold");
+            });
+#else
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
@@ -33,9 +77,8 @@ public static class MauiProgram
                 fonts.AddFont("Roboto-Bold.ttf", "RobotoBold");
             });
 
-        #if DEBUG
         builder.AddMauiDevFlowAgent();
-        #endif
+#endif
 
         // Database
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "MyVocaList.db");
@@ -87,6 +130,8 @@ public static class MauiProgram
         builder.Services.AddScoped<IMusicMetadataProvider, DeezerProvider>();
 
         // Services
+        // Temporary stub — replace with WhatsNewService when What's New feature is implemented
+        builder.Services.AddSingleton<IWhatsNewService, NullWhatsNewService>();
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddScoped<IPersonService, PersonService>();
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
@@ -136,11 +181,24 @@ public static class MauiProgram
         builder.Services.AddTransient<BackupRestorePage>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<AboutViewModel>();
+        builder.Services.AddTransient<AboutPage>();
 
-#if DEBUG
-        builder.Logging.AddDebug();
-#endif
+        // Register Serilog (file + debug sinks always; Sentry sink in release builds when DSN is set)
+        builder.Logging.AddSerilog(LoggingConfiguration.Build(config), dispose: true);
 
         return builder.Build();
+    }
+
+    private static string GetOrCreateSessionId()
+    {
+        const string key = "session_id";
+        var id = Preferences.Get(key, null);
+        if (id == null)
+        {
+            id = Guid.NewGuid().ToString("N");
+            Preferences.Set(key, id);
+        }
+        return id;
     }
 }
