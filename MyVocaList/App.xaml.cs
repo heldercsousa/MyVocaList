@@ -11,6 +11,7 @@ namespace MyVocaList
 
         public App(IServiceProvider serviceProvider)
         {
+            GlobalExceptionHandler.Initialize();
             _serviceProvider = serviceProvider;
             InitializeComponent();
             _ = WarmUpDevExpressAsync();
