@@ -105,7 +105,7 @@ public partial class SongFormViewModel : ViewModelBase
             result => result is not null && !IsVideoIdAdded(result.VideoId));
         AddFromPasteCommand = new AsyncRelayCommand(AddFromPasteAsync);
         RemoveUrlCommand = new AsyncRelayCommand<SongKaraokeUrlDto>(RemoveUrlAsync);
-        GoToSettingsCommand = new AsyncRelayCommand(async () => await Shell.Current.GoToAsync("settings"));
+        GoToSettingsCommand = new AsyncRelayCommand(async () => await Shell.Current.GoToAsync("//settings"));
     }
 
     public IAsyncRelayCommand SaveCommand { get; }
