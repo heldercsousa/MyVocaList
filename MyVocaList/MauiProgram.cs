@@ -114,7 +114,6 @@ public static class MauiProgram
         builder.Services.AddTransient<ArtistFormPage>();
         builder.Services.AddTransient<SongsPage>();
         builder.Services.AddTransient<SongFormPage>();
-        builder.Services.AddTransient<PreferencesPage>();
         builder.Services.AddTransient<BackupRestorePage>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<SettingsPage>();
