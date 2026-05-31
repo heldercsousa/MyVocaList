@@ -285,6 +285,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-re
 		Docs\Management\BusinessFeatures\backup-restore\design.md = Docs\Management\BusinessFeatures\backup-restore\design.md
 		Docs\Management\BusinessFeatures\backup-restore\plan.md = Docs\Management\BusinessFeatures\backup-restore\plan.md
 		Docs\Management\BusinessFeatures\backup-restore\task-log.md = Docs\Management\BusinessFeatures\backup-restore\task-log.md
+		Services\TransactionLogWriter.cs = Services\TransactionLogWriter.cs
+		Services\BackupService.cs = Services\BackupService.cs
+		MyVocaList.Tests\Unit\Services\BackupServiceTests.cs = MyVocaList.Tests\Unit\Services\BackupServiceTests.cs
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-reporting", "{FA1234BC-0001-4000-8000-000000000012}"
