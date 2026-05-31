@@ -13,7 +13,7 @@
     xmlns:songs="clr-namespace:MyVocaList.UI.Pages.Songs"
     xmlns:backup="clr-namespace:MyVocaList.UI.Pages.BackupRestore"
     xmlns:settings="clr-namespace:MyVocaList.UI.Pages.Settings"
-    xmlns:pages="clr-namespace:MyVocaList.UI.Pages.About"
+    xmlns:about="clr-namespace:MyVocaList.UI.Pages.About"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     Title="MyVocaList"
     FlyoutBehavior="Flyout"
@@ -101,6 +101,8 @@
         <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" />
     </FlyoutItem>
 
-    <ShellContent Route="about" ContentTemplate="{DataTemplate pages:AboutPage}" />
+    <FlyoutItem Route="about" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate about:AboutPage}" />
+    </FlyoutItem>
 
 </Shell>
