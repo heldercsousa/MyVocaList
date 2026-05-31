@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<Song> Songs { get; set; }
     public DbSet<Catalog> Catalog { get; set; }
     public DbSet<SongKaraokeUrl> SongKaraokeUrls { get; set; }
+    public DbSet<BackupHistory> BackupHistories { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -63,6 +64,7 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new SongConfiguration());
         modelBuilder.ApplyConfiguration(new CatalogConfiguration());
         modelBuilder.ApplyConfiguration(new SongKaraokeUrlConfiguration());
+        modelBuilder.ApplyConfiguration(new BackupHistoryConfiguration());
     }
 
     /// <summary>
