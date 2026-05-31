@@ -297,6 +297,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-reporting", "{FA1234BC-0001-4000-8000-000000000012}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\crash-reporting\design.md = Docs\Management\BusinessFeatures\crash-reporting\design.md
+		Docs\Management\BusinessFeatures\crash-reporting\plan.md = Docs\Management\BusinessFeatures\crash-reporting\plan.md
 		Docs\Management\BusinessFeatures\crash-reporting\requirements.md = Docs\Management\BusinessFeatures\crash-reporting\requirements.md
 		Docs\Management\BusinessFeatures\crash-reporting\tasks.md = Docs\Management\BusinessFeatures\crash-reporting\tasks.md
 	EndProjectSection
