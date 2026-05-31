@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/30/2026** - feat - App Versioning: MinVer wired to MAUI .csproj, initial tag v0.1.0-alpha.0 placed, /project:release command created, version-bump prompt added to /project:commit
 - **05/30/2026** - feat - Backup/Restore Phase 1: BackupHistory entity, 3 enums (BackupTrigger, BackupType, MirrorStatus), IBackupRepository, ITransactionLogWriter, IBackupService interfaces committed to Domain layer
 - **05/30/2026** - docs - Enforce git worktrees for parallel subagents (mandatory at 2+, not opt-in at 3+; staging-collision rationale added) and Haiku model classification table in orchestrator.md; both BACKLOG items marked Done
 - **05/30/2026** - fix - Correct URL remove undo in SongFormPage: commit DB delete immediately, undo re-inserts (was: deferred delete caused undo to silently fail and leave data inconsistent)

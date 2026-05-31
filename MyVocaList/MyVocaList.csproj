@@ -46,9 +46,12 @@
 		<!-- App Identifier -->
 		<ApplicationId>com.myvocalist</ApplicationId>
 
-		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<!-- Versions — driven by MinVer git tags (vX.Y.Z[-label[.height]])
+		     MinVerTagPrefix=v ensures tags like v0.1.0 and v0.2.0-alpha.3 are recognized.
+		     ApplicationVersion: zero-padded MAJOR+MINOR+PATCH integer (e.g. 0.1.0 → 00100, monotonically increasing) -->
+		<MinVerTagPrefix>v</MinVerTagPrefix>
+		<ApplicationDisplayVersion>$(MinVerVersion)</ApplicationDisplayVersion>
+		<ApplicationVersion>$(MinVerMajor)$([System.String]::Format('{0:D2}', $(MinVerMinor)))$([System.String]::Format('{0:D2}', $(MinVerPatch)))</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
@@ -128,6 +131,7 @@
 		<PackageReference Include="Serilog.Enrichers.Thread" />
 
 		<PackageReference Include="Redth.MauiDevFlow.Agent" Condition="'$(TargetFramework)' != 'net10.0'" />
+		<PackageReference Include="MinVer" PrivateAssets="All" />
 	</ItemGroup>
 
 	<ItemGroup>
