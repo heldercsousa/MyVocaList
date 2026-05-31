@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for may 2026
+- **05/31/2026** - feat - Backup/Restore Phases 2–4 complete: EF config + AddBackupHistory migration, BackupRepository (4 integration tests), TransactionLogInterceptor, TransactionLogWriter + BackupService (6 unit tests, 205 total passing), Android FileProvider, DI wiring, BackupRestoreViewModel, BackupRestorePage — Tier 1+3 shipped
 - **05/30/2026** - feat - App Versioning: MinVer wired to MAUI .csproj, initial tag v0.1.0-alpha.0 placed, /project:release command created, version-bump prompt added to /project:commit
 - **05/30/2026** - feat - Backup/Restore Phase 1: BackupHistory entity, 3 enums (BackupTrigger, BackupType, MirrorStatus), IBackupRepository, ITransactionLogWriter, IBackupService interfaces committed to Domain layer
 - **05/30/2026** - docs - Enforce git worktrees for parallel subagents (mandatory at 2+, not opt-in at 3+; staging-collision rationale added) and Haiku model classification table in orchestrator.md; both BACKLOG items marked Done
