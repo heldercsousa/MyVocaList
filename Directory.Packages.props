@@ -60,6 +60,7 @@
   <!-- Dev Tools                                                        -->
   <!-- ================================================================ -->
   <ItemGroup>
+    <PackageVersion Include="MinVer" Version="6.*" />
     <PackageVersion Include="Redth.MauiDevFlow.Agent" Version="*" />
   </ItemGroup>
 
