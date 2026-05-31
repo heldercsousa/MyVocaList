@@ -315,6 +315,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "whats-new", "whats-new", "{
 		Docs\Management\BusinessFeatures\whats-new\tasks.md = Docs\Management\BusinessFeatures\whats-new\tasks.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-update-check", "app-update-check", "{FA1234BC-0001-4000-8000-000000000016}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\app-update-check\requirements.md = Docs\Management\BusinessFeatures\app-update-check\requirements.md
+		Docs\Management\BusinessFeatures\app-update-check\design.md = Docs\Management\BusinessFeatures\app-update-check\design.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-settings", "app-settings", "{FA1234BC-0001-4000-8000-000000000015}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\app-settings\requirements.md = Docs\Management\BusinessFeatures\app-settings\requirements.md
@@ -422,6 +428,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000013} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000014} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000015} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000016} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{C141C5C9-833C-4A26-96BF-3745A2DA1AD4} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{A1B2C3D4-0001-4000-8000-000000000007} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000008} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
