@@ -318,29 +318,36 @@ After a parallel wave completes, merge commits in dependency order — Domain �
 
 ---
 
-## Git Worktrees as Isolation Primitive
+## Git Worktrees as Isolation Primitive — MANDATORY for Parallel Waves
 
-When 3+ subagents work in parallel and at least two will build the project, use **git worktrees** to give each subagent a physically isolated working directory.
+**This rule is not opt-in. Any wave with 2 or more concurrent subagents MUST use git worktrees.**
 
-**Setup (before wave dispatch):**
+**Why mandatory:** Parallel subagents sharing the same working tree collide on `git add`/`git commit`. One session unstages the other's files between `git add` and `git commit`, making both commits incomplete or missing files. This is not recoverable without re-running the task — use worktrees instead.
+
+**Native tool first (Step 1a of `superpowers:using-git-worktrees` skill):** The harness exposes an `EnterWorktree` tool. Always check for it first. If available, use it — do not fall back to manual `git worktree add` when the native tool is present.
+
+**Manual fallback (only when EnterWorktree is unavailable):**
 ```bash
-git worktree add ../MyVocaList-agent1 develop
-git worktree add ../MyVocaList-agent2 develop
+git worktree add .worktrees/agent-1 develop
+git worktree add .worktrees/agent-2 develop
 ```
 
-**Cleanup (after all worktrees are committed):**
+> Verify `.worktrees/` is in `.gitignore` before creating. Add it if missing — unignored worktree directories pollute `git status`.
+
+**Cleanup (after all subagent commits are merged):**
 ```bash
-git worktree remove ../MyVocaList-agent1
-git worktree remove ../MyVocaList-agent2
+git worktree remove .worktrees/agent-1
+git worktree remove .worktrees/agent-2
 ```
 
 **Rules:**
-- Each subagent commits to its worktree and pushes before stopping
-- The main agent pulls all commits after the wave before starting the next wave
-- Worktree directories must be outside the main repository directory
-- Do NOT create worktrees for sequential tasks — they share state intentionally
+- Each subagent commits only within its own worktree — never touches the main working tree
+- Each subagent pushes before stopping so the main agent can pull
+- Worktree directories live at `.worktrees/<name>` (project-local, gitignored) — not outside the repo
+- Sequential tasks share state intentionally — do NOT create worktrees for sequential tasks
+- Before dispatching any parallel wave, verify `.worktrees/` is gitignored: `git check-ignore -q .worktrees`
 
-See `superpowers:using-git-worktrees` skill for detailed setup instructions.
+See `superpowers:using-git-worktrees` skill for full setup protocol (Step 0 detection, native vs. manual decision, baseline verification).
 
 ---
 
@@ -469,6 +476,53 @@ Escalate to **Architectural** if ANY of these are true:
 - **Standard tasks** can be committed and the next task dispatched immediately
 - **Elevated tasks** require the main agent to run `dotnet build` + `dotnet test` + E2E check before the next wave
 - **Architectural tasks** require Helder review before the next wave — set `blocked: awaiting Helder review` until approved
+
+---
+
+## Model Selection for Subagent Tasks
+
+Not all subagent tasks require Sonnet. Assigning `claude-haiku-4-5` to eligible tasks cuts token cost roughly 5× without quality loss — but only when the task genuinely fits Haiku's capability profile.
+
+**Decision rule:** Default to Sonnet. Downgrade to Haiku only when ALL three conditions hold:
+1. The task type is in the Haiku-eligible list below
+2. No complex reasoning, cross-layer inference, or spec interpretation is required
+3. The task has been done at least once by Sonnet in this project (established pattern)
+
+### Haiku-eligible task types
+
+| Task type | Eligible? | Condition |
+|-----------|-----------|-----------|
+| Docs-only updates (task-log, handoff, BACKLOG entry) | ✅ Yes | Always — no code |
+| `.sln` registration of new files | ✅ Yes | Mechanical pattern, no logic |
+| EF Core migration-only (no entity change, no repo change) | ✅ Yes | Generated output, well-defined pattern |
+| Boilerplate file scaffolding (empty ViewModel shell, empty page XAML) | ✅ Yes | Template-driven, no business logic |
+| Test scaffolding (empty test class, AC tag stubs, no assertions) | ✅ Yes | Mechanical structure only |
+| XAML-only cosmetic change (color, padding, label text — no binding change) | ✅ Yes | Single-file, no logic |
+| Single-file rename / string replacement | ✅ Yes | Mechanical, deterministic |
+| Service method with pure validation logic (no EF, no DI, no navigation) | ⚠️ Evaluate | Only if spec is complete and unambiguous |
+| Any task touching ≥ 2 architectural layers | ❌ No | Requires cross-layer reasoning |
+| Any task that creates or modifies a public interface or DTO | ❌ No | Signature decisions require Sonnet |
+| Any task classified Elevated or Architectural review lane | ❌ No | Risk requires Sonnet |
+| Any debugging or investigation task | ❌ No | Reasoning-intensive |
+| Any task where the previous Sonnet attempt produced errors | ❌ No | Haiku won't do better |
+
+### How to specify the model in a briefing
+
+Add `Model: haiku` to the role scope block for eligible tasks:
+
+```
+Role: Implementor
+Scope: Register new spec files in MyVocaList.sln
+Model: claude-haiku-4-5-20251001
+Files owned: MyVocaList.sln
+Files off-limits: all others
+```
+
+When `Model:` is omitted, Sonnet is assumed. Never set `Model: haiku` without checking the eligibility table.
+
+### Gate: first use in each task type
+
+Before encoding Haiku for a new task type in this project, run the task once with Sonnet and once with Haiku and compare outputs. If Haiku output is correct and complete, the type is confirmed eligible. Record confirmed types in `.claude/library/haiku-confirmed-task-types.md` (create on first confirmation).
 
 ---
 
