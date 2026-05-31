@@ -343,3 +343,14 @@ MyVocaList.sln
 MyVocaList.sln
 Docs/Management/BusinessFeatures/crash-reporting/tasks.md
 Docs/Management/BACKLOG.md
+MyVocaList/MauiProgram.cs
+MyVocaList/MauiProgram.cs
+MyVocaList/MauiProgram.cs
+MyVocaList/Extensions/LoggingConfiguration.cs
+MyVocaList/MauiProgram.cs
+MyVocaList/MauiProgram.cs
+MyVocaList/Extensions/LoggingConfiguration.cs
+Directory.Packages.props
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/feedback_review_loop_discipline.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
+Docs/Management/BACKLOG.md
