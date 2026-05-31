@@ -33,35 +33,6 @@ public static class MauiProgram
         }
 
         var builder = MauiApp.CreateBuilder();
-#if !DEBUG
-        builder
-            .UseMauiApp<App>()
-            .UseMauiCommunityToolkit()
-            .UseDevExpress(useLocalization: false)
-            .UseDevExpressCollectionView()
-            .UseDevExpressControls()
-            .UseDevExpressEditors()
-            .UseSentry(options =>
-            {
-                options.Dsn = config["Sentry:Dsn"] ?? string.Empty;
-                options.Release = AppInfo.VersionString;
-                options.Environment = "production";
-                options.AttachScreenshot = false;
-                options.ConfigureScope(scope =>
-                {
-                    scope.SetTag("device.model", DeviceInfo.Model);
-                    scope.SetTag("os.version", DeviceInfo.VersionString);
-                    scope.SetExtra("session_id", GetOrCreateSessionId());
-                });
-            })
-            .ConfigureFonts(fonts =>
-            {
-                // Roboto for Material Design 3
-                fonts.AddFont("Roboto-Regular.ttf", "RobotoRegular");
-                fonts.AddFont("Roboto-Medium.ttf", "RobotoMedium");
-                fonts.AddFont("Roboto-Bold.ttf", "RobotoBold");
-            });
-#else
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
@@ -77,6 +48,7 @@ public static class MauiProgram
                 fonts.AddFont("Roboto-Bold.ttf", "RobotoBold");
             });
 
+#if DEBUG
         builder.AddMauiDevFlowAgent();
 #endif
 
@@ -119,12 +91,12 @@ public static class MauiProgram
         builder.Services.AddHttpClient<MusicBrainzProvider>(client =>
         {
             client.BaseAddress = new Uri("https://musicbrainz.org/ws/2/");
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (heldercsousa@gmail.com)");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)");
         });
         builder.Services.AddHttpClient<DeezerProvider>(client =>
         {
             client.BaseAddress = new Uri("https://api.deezer.com/");
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (heldercsousa@gmail.com)");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)");
         });
         builder.Services.AddScoped<IMusicMetadataProvider, MusicBrainzProvider>();
         builder.Services.AddScoped<IMusicMetadataProvider, DeezerProvider>();
@@ -185,20 +157,26 @@ public static class MauiProgram
         builder.Services.AddTransient<AboutPage>();
 
         // Register Serilog (file + debug sinks always; Sentry sink in release builds when DSN is set)
-        builder.Logging.AddSerilog(LoggingConfiguration.Build(config), dispose: true);
+        // Assign Log.Logger so GlobalExceptionHandler's static Log.Fatal/Error calls are captured.
+        var serilogLogger = LoggingConfiguration.Build(config);
+        Log.Logger = serilogLogger;
+        builder.Logging.AddSerilog(serilogLogger, dispose: true);
+
+#if !DEBUG
+        var sentryDsn = config["Sentry:Dsn"];
+        if (!string.IsNullOrWhiteSpace(sentryDsn))
+        {
+            builder.UseSentry(options =>
+            {
+                options.Dsn = sentryDsn;
+                options.Release = AppInfo.VersionString;
+                options.Environment = "production";
+                options.AttachScreenshot = false;
+            });
+        }
+#endif
 
         return builder.Build();
     }
 
-    private static string GetOrCreateSessionId()
-    {
-        const string key = "session_id";
-        var id = Preferences.Get(key, null);
-        if (id == null)
-        {
-            id = Guid.NewGuid().ToString("N");
-            Preferences.Set(key, id);
-        }
-        return id;
-    }
 }

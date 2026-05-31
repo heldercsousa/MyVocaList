@@ -44,15 +44,40 @@ public static class LoggingConfiguration
         var dsn = config["Sentry:Dsn"];
         if (!string.IsNullOrWhiteSpace(dsn))
         {
+            // Compute session ID before ConfigureScope so Preferences.Get runs before
+            // Sentry SDK init, when the Android Application context is guaranteed ready.
+            var sessionId = GetOrCreateSessionId();
             loggerConfig.WriteTo.Sentry(o =>
             {
                 o.Dsn = dsn;
+                o.Release = AppInfo.VersionString;
+                o.Environment = "production";
+                o.AttachScreenshot = false;
                 o.MinimumBreadcrumbLevel = LogEventLevel.Information;
                 o.MinimumEventLevel = LogEventLevel.Error;
+                o.ConfigureScope(scope =>
+                {
+                    scope.SetTag("device.model", DeviceInfo.Model);
+                    scope.SetTag("os.name", DeviceInfo.Platform.ToString());
+                    scope.SetTag("os.version", DeviceInfo.VersionString);
+                    scope.SetExtra("session_id", sessionId);
+                });
             });
         }
 #endif
 
         return loggerConfig.CreateLogger();
+    }
+
+    private static string GetOrCreateSessionId()
+    {
+        const string key = "session_id";
+        var id = Preferences.Get(key, null);
+        if (id == null)
+        {
+            id = Guid.NewGuid().ToString("N");
+            Preferences.Set(key, id);
+        }
+        return id;
     }
 }
