@@ -341,3 +341,5 @@ MyVocaList/UI/Pages/About/AboutPage.xaml
 MyVocaList/UI/Pages/About/AboutPage.xaml
 MyVocaList.sln
 MyVocaList.sln
+Docs/Management/BusinessFeatures/crash-reporting/tasks.md
+Docs/Management/BACKLOG.md
