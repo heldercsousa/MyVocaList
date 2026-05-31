@@ -294,6 +294,7 @@ The SDD workflow has a **J-Curve ROI profile**: it costs more time upfront and r
 - Work is dispatched in waves: spawn up to 4 subagents, wait for all to complete, then start the next wave.
 - Never spawn a 5th concurrent subagent — stagger instead.
 - After a subagent completes, its context is discarded. Do not reuse the same subagent instance for a second task.
+- **Git worktrees are mandatory for every parallel wave (2+ concurrent subagents).** See `orchestrator.md § Git Worktrees as Isolation Primitive`. Check for the native `EnterWorktree` tool first; fall back to `git worktree add .worktrees/<name>` only if unavailable.
 
 ### Single-writer rule for hotspot files
 
