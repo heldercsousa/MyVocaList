@@ -300,6 +300,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-re
 		Docs\Management\BusinessFeatures\crash-reporting\plan.md = Docs\Management\BusinessFeatures\crash-reporting\plan.md
 		Docs\Management\BusinessFeatures\crash-reporting\requirements.md = Docs\Management\BusinessFeatures\crash-reporting\requirements.md
 		Docs\Management\BusinessFeatures\crash-reporting\tasks.md = Docs\Management\BusinessFeatures\crash-reporting\tasks.md
+		MyVocaList\appsettings.template.json = MyVocaList\appsettings.template.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "user-suggestions", "user-suggestions", "{FA1234BC-0001-4000-8000-000000000013}"

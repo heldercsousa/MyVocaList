@@ -150,5 +150,11 @@
 		<None Include="UI\Pages\Samples\**\*.xaml" />
 	</ItemGroup>
 	<!-- Only include working CollectionView samples in Debug builds -->
-	
+
+	<ItemGroup>
+		<!-- Embedded config — appsettings.json is gitignored (local DSN); template is committed -->
+		<EmbeddedResource Include="appsettings.json" Condition="Exists('appsettings.json')" />
+		<EmbeddedResource Include="appsettings.template.json" />
+	</ItemGroup>
+
 </Project>
