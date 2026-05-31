@@ -1,66 +1,58 @@
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Events;
 
 namespace MyVocaList.Extensions;
 
 /// <summary>
-/// Extension methods for configuring Serilog logging in MAUI applications.
+/// Builds the application Serilog logger. Call <see cref="Build"/> once at startup
+/// and pass the result to <c>builder.Services.AddSerilog()</c>.
 /// </summary>
 public static class LoggingConfiguration
 {
     /// <summary>
-    /// Configure Serilog logging with appropriate sinks and log levels.
+    /// Builds and returns the configured Serilog logger.
+    /// In release builds, also attaches the Sentry sink for Error/Fatal events.
     /// </summary>
-    /// <param name="builder">The MAUI app builder.</param>
-    /// <returns>The builder for method chaining.</returns>
-    public static MauiAppBuilder ConfigureSerilog(this MauiAppBuilder builder)
+    public static Serilog.Core.Logger Build(IConfiguration config)
     {
-        // Determine log level based on build configuration
 #if DEBUG
         var minimumLevel = LogEventLevel.Debug;
 #else
         var minimumLevel = LogEventLevel.Warning;
 #endif
 
-        // Configure log file path (rolling daily)
         var logDirectory = Path.Combine(FileSystem.AppDataDirectory, "logs");
-
-        // Ensure log directory exists
         Directory.CreateDirectory(logDirectory);
-
         var logFilePath = Path.Combine(logDirectory, "myvocalist-.log");
 
-        // Configure Serilog
-        Log.Logger = new LoggerConfiguration()
+        var loggerConfig = new LoggerConfiguration()
             .MinimumLevel.Is(minimumLevel)
-
-            // Override verbose frameworks to Warning level
             .MinimumLevel.Override("Microsoft.Maui", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
-
-            // Enrich logs with context
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
-
-            // Debug sink (visible in IDE output)
             .WriteTo.Debug(
                 outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}")
-
-            // File sink (rolling daily, 7 days retention)
             .WriteTo.File(
                 path: logFilePath,
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: 7,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}")
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}");
 
-            .CreateLogger();
+#if !DEBUG
+        var dsn = config["Sentry:Dsn"];
+        if (!string.IsNullOrWhiteSpace(dsn))
+        {
+            loggerConfig.WriteTo.Sentry(o =>
+            {
+                o.Dsn = dsn;
+                o.MinimumBreadcrumbLevel = LogEventLevel.Information;
+                o.MinimumEventLevel = LogEventLevel.Error;
+            });
+        }
+#endif
 
-        // Integrate Serilog with Microsoft.Extensions.Logging
-        builder.Logging.ClearProviders();
-        builder.Logging.AddSerilog(dispose: true);
-
-        Log.Information("Serilog configured. Log file: {LogFilePath}", logFilePath);
-
-        return builder;
+        return loggerConfig.CreateLogger();
     }
 }
