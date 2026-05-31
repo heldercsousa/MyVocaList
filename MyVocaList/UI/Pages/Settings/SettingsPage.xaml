@@ -20,33 +20,13 @@
                    TextColor="{StaticResource OnSurface}" />
 
             <VerticalStackLayout Spacing="12">
-                <dxe:TextEdit
+                <dxe:PasswordEdit
                     Text="{Binding ApiKeyInput, Mode=TwoWay}"
                     LabelText="YouTube Data API v3 Key"
                     PlaceholderText="Paste your API key here"
-                    IsPassword="{Binding IsApiKeyMasked}" />
+                    PasswordIconVisibility="Always" />
 
                 <HorizontalStackLayout Spacing="8">
-                    <dx:DXButton
-                        Style="{StaticResource OutlinedButton}"
-                        Command="{Binding ToggleMaskCommand}">
-                        <dx:DXButton.Content>
-                            <Label StyleClass="Body.Small">
-                                <Label.Triggers>
-                                    <DataTrigger TargetType="Label"
-                                                 Binding="{Binding IsApiKeyMasked}"
-                                                 Value="True">
-                                        <Setter Property="Text" Value="Show" />
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Label"
-                                                 Binding="{Binding IsApiKeyMasked}"
-                                                 Value="False">
-                                        <Setter Property="Text" Value="Hide" />
-                                    </DataTrigger>
-                                </Label.Triggers>
-                            </Label>
-                        </dx:DXButton.Content>
-                    </dx:DXButton>
                     <dx:DXButton
                         Content="Test"
                         Style="{StaticResource OutlinedButton}"
