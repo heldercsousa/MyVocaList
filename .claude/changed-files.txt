@@ -238,3 +238,12 @@ Docs/Management/BACKLOG.md
 .claude/worktrees/agent-a1aa8462a76d2ee74/Infra/Interceptor/TransactionLogInterceptor.cs
 .claude/worktrees/agent-a1aa8462a76d2ee74/Docs/Management/BusinessFeatures/backup-restore/task-log.md
 Docs/Management/BusinessFeatures/app-settings/task-log.md
+MyVocaList/UI/Pages/Settings/SettingsPage.xaml
+MyVocaList/UI/Pages/Settings/SettingsPage.xaml
+.claude/worktrees/agent-a3ceeac46b209f97f/MyVocaList.Tests/Unit/Services/BackupServiceTests.cs
+.claude/worktrees/agent-a3ceeac46b209f97f/Services/TransactionLogWriter.cs
+.claude/worktrees/agent-a3ceeac46b209f97f/Services/BackupService.cs
+.claude/worktrees/agent-a3ceeac46b209f97f/MyVocaList.sln
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+.claude/worktrees/agent-a3ceeac46b209f97f/Docs/Management/BusinessFeatures/backup-restore/task-log.md
