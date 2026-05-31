@@ -32,11 +32,11 @@
 | 2026-04 | **Person CRUD** | ✅ Done | Autocomplete field, duplicate detection. Plan: `Docs/Management/BusinessFeatures/persons/plan.md` |
 | 2026-05 | **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/Management/BusinessFeatures/artists-songs/` · Plan: `Docs/Management/BusinessFeatures/artists-songs/plan.md` |
 | 2026-05 | ↳ Song Karaoke URLs | ✅ Done | YouTube URL management per song; SongFormPage section, settings, converters, tests. Spec: `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/` |
-| 2026-05 | ↳ Bug: GoToSettings navigation exception | 🟡 In Progress | `GoToAsync("settings")` called from pushed-page context (SongFormPage); FlyoutItem requires absolute route `//settings`. Single-line fix in `SongFormViewModel.cs`. |
+| 2026-05 | ↳ Bug: GoToSettings navigation exception | ✅ Fixed | `GoToAsync("settings")` called from pushed-page context (SongFormPage); FlyoutItem requires absolute route `//settings`. Single-line fix in `SongFormViewModel.cs`. |
 | 2026-06 | **Crash & Error Reporting** | 📋 Spec | Sentry MAUI SDK + Serilog sink; fixes orphaned Serilog config + uninitialized GlobalExceptionHandler. Spec: `Docs/Management/BusinessFeatures/crash-reporting/` |
 | 2026-06 | **What's New / Release Notes** | 📋 Spec | Bundled `releases.json`; one-time modal on version upgrade; depends on App Versioning. Spec: `Docs/Management/BusinessFeatures/whats-new/` |
 | 2026-06 | **User Suggestions** | 📋 Spec | In-app form → GitHub Issues API (MyVocaList repo); auto-captures version + OS + timestamp. Spec: `Docs/Management/BusinessFeatures/user-suggestions/` |
-| 2026-06 | **App Settings** | 🟡 In Progress | In-app settings page; initial required setting: YouTube Data API v3 key (enables YouTube search in SongFormPage — the page already renders a nudge pointing users here when the key is absent; `HasYouTubeApiKey` binding already wired) |
+| 2026-06 | **App Settings** | ✅ Done | YouTube API key management (PasswordEdit, save/test/clear); flyout "Preferences" now navigates to SettingsPage; stale `HasYouTubeApiKey` refreshed on `OnAppearing`. Spec: `Docs/Management/BusinessFeatures/app-settings/` |
 | 2026-06 | **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
 | 2026-06 | **Visual Theme Refresh** | 💡 Pending | App UI is too dark and monochromatic; spike for richer accent colors, gradient surfaces, warmer tones |
 | 2026-06 | **Data Backup & Restore — Tier 1 + 3** | 🟡 In Progress | Local auto-backup (SQLite snapshot + transaction log) + manual share sheet export/restore. Plan: `Docs/Management/BusinessFeatures/backup-restore/plan.md`. Spec: `Docs/Management/BusinessFeatures/backup-restore/design.md` |
