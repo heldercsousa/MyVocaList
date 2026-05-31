@@ -336,3 +336,8 @@ MyVocaList/UI/Pages/About/AboutPage.xaml
 MyVocaList/GlobalUsings.cs
 MyVocaList/MauiProgram.cs
 MyVocaList/MauiProgram.cs
+MyVocaList/App.xaml.cs
+MyVocaList/UI/Pages/About/AboutPage.xaml
+MyVocaList/UI/Pages/About/AboutPage.xaml
+MyVocaList.sln
+MyVocaList.sln
