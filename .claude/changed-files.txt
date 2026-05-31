@@ -272,3 +272,8 @@ MyVocaList.sln
 MyVocaList.sln
 Docs/Management/tidy-discovering-summit.md
 Docs/Management/BusinessFeatures/app-update-check/requirements.md
+Docs/Management/BusinessFeatures/about-page/requirements.md
+Docs/Management/BusinessFeatures/about-page/design.md
+Docs/Management/BusinessFeatures/about-page/tasks.md
+Docs/Management/BusinessFeatures/about-page/design.md
+Docs/Management/BusinessFeatures/about-page/design.md
