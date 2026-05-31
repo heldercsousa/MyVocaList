@@ -9,6 +9,7 @@ public static class Routes
     public const string Artists = "artists";
     public const string Preferences = "preferences";
     public const string Backup = "backup";
+    public const string About = "about";
     public const string Exit = "exit";
     public const string VenueForm = "venue-form";
     public const string PersonForm = "person-form";
