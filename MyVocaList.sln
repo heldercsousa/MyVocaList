@@ -313,6 +313,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-settings", "app-setting
 		Docs\Management\BusinessFeatures\app-settings\requirements.md = Docs\Management\BusinessFeatures\app-settings\requirements.md
 		Docs\Management\BusinessFeatures\app-settings\design.md = Docs\Management\BusinessFeatures\app-settings\design.md
 		Docs\Management\BusinessFeatures\app-settings\tasks.md = Docs\Management\BusinessFeatures\app-settings\tasks.md
+		Docs\Management\BusinessFeatures\app-settings\task-log.md = Docs\Management\BusinessFeatures\app-settings\task-log.md
 	EndProjectSection
 EndProject
 Global
