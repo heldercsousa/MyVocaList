@@ -38,8 +38,10 @@
 		<!-- App Identifier -->
 		<ApplicationId>com.myvocalist</ApplicationId>
 
-		<!-- Versions — driven by MinVer git tags (vX.Y.Z-label.height)
+		<!-- Versions — driven by MinVer git tags (vX.Y.Z[-label[.height]])
+		     MinVerTagPrefix=v ensures tags like v0.1.0 and v0.2.0-alpha.3 are recognized.
 		     ApplicationVersion: zero-padded MAJOR+MINOR+PATCH integer (e.g. 0.1.0 → 00100, monotonically increasing) -->
+		<MinVerTagPrefix>v</MinVerTagPrefix>
 		<ApplicationDisplayVersion>$(MinVerVersion)</ApplicationDisplayVersion>
 		<ApplicationVersion>$(MinVerMajor)$([System.String]::Format('{0:D2}', $(MinVerMinor)))$([System.String]::Format('{0:D2}', $(MinVerPatch)))</ApplicationVersion>
 
