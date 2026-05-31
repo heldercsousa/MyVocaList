@@ -96,3 +96,39 @@ N/A — Domain entities are Level C; no user-facing ACs assigned to this task.
 | (GetHistoryAsync delegates) | Returns repo results with limit | BackupService.GetHistoryAsync | GetHistoryAsync_ReturnsRepositoryResult |
 | (HasRecentBackup true) | Returns true within 24h | BackupService.HasRecentBackupAsync | HasRecentBackupAsync_RecentSnapshot_ReturnsTrue |
 | (HasRecentBackup false) | Returns false when no snapshot | BackupService.HasRecentBackupAsync | HasRecentBackupAsync_NoSnapshot_ReturnsFalse |
+
+---
+
+## Task: Phase 4, Tasks 7–9 — Android FileProvider, DI registration, BackupRestoreViewModel, BackupRestorePage
+**Plan:** Docs/Management/BusinessFeatures/backup-restore/plan.md
+**Status:** To Review
+**Started:** 05/31/2026
+**Completed:** 05/31/2026
+
+### Changed files:
+- `MyVocaList/Platforms/Android/Resources/xml/file_provider_paths.xml` — created FileProvider paths config (files-path backups/, external-path, cache-path)
+- `MyVocaList/Platforms/Android/AndroidManifest.xml` — added `androidx.core.content.FileProvider` provider declaration with `@xml/file_provider_paths` meta-data
+- `MyVocaList/MauiProgram.cs` — extracted dbPath/backupDir/logDir as local variables; registered ITransactionLogWriter (Singleton factory), TransactionLogInterceptor (Singleton); updated AddInterceptors to include both CollationInterceptor and TransactionLogInterceptor; registered IBackupRepository (Scoped), IBackupService (Scoped factory lambda), BackupRestoreViewModel (Transient)
+- `MyVocaList/App.xaml.cs` — updated CreateWindow to attach Window.Stopped handler; added OnWindowStopped that fires IBackupService.CreateFullBackupAsync(BackupTrigger.AppStop) in a background Task via scoped DI
+- `MyVocaList/UI/ViewModels/BackupRestoreViewModel.cs` — created ViewModel with InitializeAsync, BackupNowCommand, ExportCommand, RestoreCommand using IBackupService and ISnackbarComponent
+- `MyVocaList/UI/Pages/BackupRestore/BackupRestorePage.xaml` — replaced stub with full UI: Status label, ActivityIndicator, Back Up Now / Export Backup / Restore from File DXButtons, BindableLayout history list
+- `MyVocaList/UI/Pages/BackupRestore/BackupRestorePage.xaml.cs` — wired BackupRestoreViewModel constructor injection and OnAppearing InitializeAsync call
+- `MyVocaList.sln` — added 4 new Phase 4 files to backup-restore solution folder {FA1234BC-0001-4000-8000-000000000011}
+
+### Build notes
+- Android target build (Task 7): PASS — `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 0 errors
+- Full solution build (Tasks 8 + 9): PASS — `dotnet build MyVocaList.sln` → 0 errors (7 pre-existing warnings: DevExpress license, CA2024, CS8612)
+
+### Verification evidence
+- Build: PASS — `dotnet build MyVocaList.sln` → 0 Erro(s), exit code 0
+- Tests: PASS — 205 tests passing (all pre-existing; Phase 4 is Level C DI plumbing + UI — no new test files added per testing.md)
+- Post-edit re-read: confirmed — all 8 changed files match plan spec
+- Spec compliance: confirmed — plan.md Phase 4 Tasks 7, 8, 9 implemented in full; SafeAreaEdges="Container" present; DevExpress DXButton used; no native dialogs; BindableLayout used (not DXCollectionView) per constraints-registry.md
+
+### AC traceability
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| (FileProvider) | Android FileProvider declared for share sheet | AndroidManifest.xml + file_provider_paths.xml | N/A — platform config, no unit test |
+| (DI Backup services) | All backup services resolvable at runtime | MauiProgram.cs | N/A — Level C DI plumbing |
+| (Auto-backup on stop) | App stop triggers CreateFullBackupAsync | App.xaml.cs OnWindowStopped | N/A — manual E2E verification |
+| (BackupRestorePage UI) | Page shows status, history, buttons | BackupRestorePage.xaml + BackupRestoreViewModel | N/A — XAML binding, emulator-tested |
