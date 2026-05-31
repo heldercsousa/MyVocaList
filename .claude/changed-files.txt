@@ -138,3 +138,4 @@ Docs/Management/BACKLOG.md
 .claude/agents/orchestrator.md
 Docs/Management/BACKLOG.md
 Docs/Changelog/changelog.md
+Docs/Management/BACKLOG.md
