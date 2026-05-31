@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11519.219
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Infra", "Infra\MyVocaList.Infra.csproj", "{9F6E0A44-58C4-440A-A741-00CC0DA3178D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens de Solução", "{380A7511-A354-6D7A-0CC0-8FA1F1BA7B6C}"
 	ProjectSection(SolutionItems) = preProject
@@ -25,8 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		LICENSE = LICENSE
 		limparBinObj.bat = limparBinObj.bat
 		README.md = README.md
-		Docs\DevEnv\SETUP_QUICKSTART.md = Docs\DevEnv\SETUP_QUICKSTART.md
-	EndProjectSection
+				Docs\DevEnv\workflow-layout-findings.md = Docs\DevEnv\workflow-layout-findings.md
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
 	ProjectSection(SolutionItems) = preProject
@@ -48,13 +50,272 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Tests", "MyVocaList.Tests\MyVocaList.Tests.csproj", "{C3E8D7AF-F4B4-42B9-8355-EACE1EA31762}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{996CEBED-A05B-5D42-3FF0-982E087A2599}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{A73F2606-6D4C-3EEE-1759-0E59DCFEF523}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infra", "Infra", "{30258541-D0D8-F3FD-D559-E63D6BF074C2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdd", "sdd", "{B1A2C3D4-0001-4000-8000-000000000001}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\sdd\impl-conflict-report-claude-principles.md = Docs\Management\DevCycleCraft\sdd\impl-conflict-report-claude-principles.md
+		Docs\Management\DevCycleCraft\sdd\impl-conflict-report-review-testing.md = Docs\Management\DevCycleCraft\sdd\impl-conflict-report-review-testing.md
+		Docs\Management\DevCycleCraft\sdd\impl-conflict-report-workflow.md = Docs\Management\DevCycleCraft\sdd\impl-conflict-report-workflow.md
+		Docs\Management\DevCycleCraft\sdd\impl-conflict-report.md = Docs\Management\DevCycleCraft\sdd\impl-conflict-report.md
+		Docs\Management\DevCycleCraft\sdd\impl-master-plan.md = Docs\Management\DevCycleCraft\sdd\impl-master-plan.md
+		Docs\Management\DevCycleCraft\sdd\impl-resume-guide.md = Docs\Management\DevCycleCraft\sdd\impl-resume-guide.md
+		Docs\Management\DevCycleCraft\sdd\plan-adoption-status.md = Docs\Management\DevCycleCraft\sdd\plan-adoption-status.md
+		Docs\Management\DevCycleCraft\sdd\plan-current-state-summary.md = Docs\Management\DevCycleCraft\sdd\plan-current-state-summary.md
+		Docs\Management\DevCycleCraft\sdd\plan-s1-core-concepts.md = Docs\Management\DevCycleCraft\sdd\plan-s1-core-concepts.md
+		Docs\Management\DevCycleCraft\sdd\plan-s10-applicability.md = Docs\Management\DevCycleCraft\sdd\plan-s10-applicability.md
+		Docs\Management\DevCycleCraft\sdd\plan-s2-specification-design.md = Docs\Management\DevCycleCraft\sdd\plan-s2-specification-design.md
+		Docs\Management\DevCycleCraft\sdd\plan-s3-workflow-phases.md = Docs\Management\DevCycleCraft\sdd\plan-s3-workflow-phases.md
+		Docs\Management\DevCycleCraft\sdd\plan-s4-context-and-memory.md = Docs\Management\DevCycleCraft\sdd\plan-s4-context-and-memory.md
+		Docs\Management\DevCycleCraft\sdd\plan-s5-agent-patterns.md = Docs\Management\DevCycleCraft\sdd\plan-s5-agent-patterns.md
+		Docs\Management\DevCycleCraft\sdd\plan-s6-governance-and-enforcement.md = Docs\Management\DevCycleCraft\sdd\plan-s6-governance-and-enforcement.md
+		Docs\Management\DevCycleCraft\sdd\plan-s7-tooling.md = Docs\Management\DevCycleCraft\sdd\plan-s7-tooling.md
+		Docs\Management\DevCycleCraft\sdd\plan-s8-project-management.md = Docs\Management\DevCycleCraft\sdd\plan-s8-project-management.md
+		Docs\Management\DevCycleCraft\sdd\plan-s9-quality-assurance.md = Docs\Management\DevCycleCraft\sdd\plan-s9-quality-assurance.md
+		Docs\Management\DevCycleCraft\sdd\spec-overview.md = Docs\Management\DevCycleCraft\sdd\spec-overview.md
+		Docs\Management\DevCycleCraft\sdd\spec-s1-1-definition.md = Docs\Management\DevCycleCraft\sdd\spec-s1-1-definition.md
+		Docs\Management\DevCycleCraft\sdd\spec-s1-2-1-level-gap-anchored-to-source.md = Docs\Management\DevCycleCraft\sdd\spec-s1-2-1-level-gap-anchored-to-source.md
+		Docs\Management\DevCycleCraft\sdd\spec-s1-2-implementation-levels.md = Docs\Management\DevCycleCraft\sdd\spec-s1-2-implementation-levels.md
+		Docs\Management\DevCycleCraft\sdd\spec-s1-3-sdd-vs-tdd-bdd-waterfall.md = Docs\Management\DevCycleCraft\sdd\spec-s1-3-sdd-vs-tdd-bdd-waterfall.md
+		Docs\Management\DevCycleCraft\sdd\spec-s1-core-concepts.md = Docs\Management\DevCycleCraft\sdd\spec-s1-core-concepts.md
+		Docs\Management\DevCycleCraft\sdd\spec-s10-1-1-brownfield-retrofit-difficulty.md = Docs\Management\DevCycleCraft\sdd\spec-s10-1-1-brownfield-retrofit-difficulty.md
+		Docs\Management\DevCycleCraft\sdd\spec-s10-1-problem-size-suitability.md = Docs\Management\DevCycleCraft\sdd\spec-s10-1-problem-size-suitability.md
+		Docs\Management\DevCycleCraft\sdd\spec-s10-2-1-adoption-roi-timeline.md = Docs\Management\DevCycleCraft\sdd\spec-s10-2-1-adoption-roi-timeline.md
+		Docs\Management\DevCycleCraft\sdd\spec-s10-2-2-cultural-resistance.md = Docs\Management\DevCycleCraft\sdd\spec-s10-2-2-cultural-resistance.md
+		Docs\Management\DevCycleCraft\sdd\spec-s10-2-tradeoffs-and-limitations.md = Docs\Management\DevCycleCraft\sdd\spec-s10-2-tradeoffs-and-limitations.md
+		Docs\Management\DevCycleCraft\sdd\spec-s10-applicability.md = Docs\Management\DevCycleCraft\sdd\spec-s10-applicability.md
+		Docs\Management\DevCycleCraft\sdd\spec-s2-1-1-tacit-knowledge-capture.md = Docs\Management\DevCycleCraft\sdd\spec-s2-1-1-tacit-knowledge-capture.md
+		Docs\Management\DevCycleCraft\sdd\spec-s2-1-2-over-specification-risk.md = Docs\Management\DevCycleCraft\sdd\spec-s2-1-2-over-specification-risk.md
+		Docs\Management\DevCycleCraft\sdd\spec-s2-1-spec-structure-and-content.md = Docs\Management\DevCycleCraft\sdd\spec-s2-1-spec-structure-and-content.md
+		Docs\Management\DevCycleCraft\sdd\spec-s2-2-1-acceptance-criteria-subjectivity.md = Docs\Management\DevCycleCraft\sdd\spec-s2-2-1-acceptance-criteria-subjectivity.md
+		Docs\Management\DevCycleCraft\sdd\spec-s2-2-2-verbosity-vs-precision-tension.md = Docs\Management\DevCycleCraft\sdd\spec-s2-2-2-verbosity-vs-precision-tension.md
+		Docs\Management\DevCycleCraft\sdd\spec-s2-2-quality-characteristics.md = Docs\Management\DevCycleCraft\sdd\spec-s2-2-quality-characteristics.md
+		Docs\Management\DevCycleCraft\sdd\spec-s2-3-1-spec-format-selection.md = Docs\Management\DevCycleCraft\sdd\spec-s2-3-1-spec-format-selection.md
+		Docs\Management\DevCycleCraft\sdd\spec-s2-3-functional-vs-technical-separation.md = Docs\Management\DevCycleCraft\sdd\spec-s2-3-functional-vs-technical-separation.md
+		Docs\Management\DevCycleCraft\sdd\spec-s2-specification-design.md = Docs\Management\DevCycleCraft\sdd\spec-s2-specification-design.md
+		Docs\Management\DevCycleCraft\sdd\spec-s3-1-1-architecture-debt-from-early-decisions.md = Docs\Management\DevCycleCraft\sdd\spec-s3-1-1-architecture-debt-from-early-decisions.md
+		Docs\Management\DevCycleCraft\sdd\spec-s3-1-2-dependency-analysis-incompleteness.md = Docs\Management\DevCycleCraft\sdd\spec-s3-1-2-dependency-analysis-incompleteness.md
+		Docs\Management\DevCycleCraft\sdd\spec-s3-1-planning-phase.md = Docs\Management\DevCycleCraft\sdd\spec-s3-1-planning-phase.md
+		Docs\Management\DevCycleCraft\sdd\spec-s3-2-1-task-granularity-calibration.md = Docs\Management\DevCycleCraft\sdd\spec-s3-2-1-task-granularity-calibration.md
+		Docs\Management\DevCycleCraft\sdd\spec-s3-2-2-context-window-exhaustion.md = Docs\Management\DevCycleCraft\sdd\spec-s3-2-2-context-window-exhaustion.md
+		Docs\Management\DevCycleCraft\sdd\spec-s3-2-implementation-phase.md = Docs\Management\DevCycleCraft\sdd\spec-s3-2-implementation-phase.md
+		Docs\Management\DevCycleCraft\sdd\spec-s3-3-1-approval-bottleneck.md = Docs\Management\DevCycleCraft\sdd\spec-s3-3-1-approval-bottleneck.md
+		Docs\Management\DevCycleCraft\sdd\spec-s3-3-2-authority-ambiguity.md = Docs\Management\DevCycleCraft\sdd\spec-s3-3-2-authority-ambiguity.md
+		Docs\Management\DevCycleCraft\sdd\spec-s3-3-verification-review-gates.md = Docs\Management\DevCycleCraft\sdd\spec-s3-3-verification-review-gates.md
+		Docs\Management\DevCycleCraft\sdd\spec-s3-workflow-phases.md = Docs\Management\DevCycleCraft\sdd\spec-s3-workflow-phases.md
+		Docs\Management\DevCycleCraft\sdd\spec-s4-1-1-cross-session-context-loss.md = Docs\Management\DevCycleCraft\sdd\spec-s4-1-1-cross-session-context-loss.md
+		Docs\Management\DevCycleCraft\sdd\spec-s4-1-memory-bank-context-files.md = Docs\Management\DevCycleCraft\sdd\spec-s4-1-memory-bank-context-files.md
+		Docs\Management\DevCycleCraft\sdd\spec-s4-2-context-engineering.md = Docs\Management\DevCycleCraft\sdd\spec-s4-2-context-engineering.md
+		Docs\Management\DevCycleCraft\sdd\spec-s4-3-external-integrations.md = Docs\Management\DevCycleCraft\sdd\spec-s4-3-external-integrations.md
+		Docs\Management\DevCycleCraft\sdd\spec-s4-context-and-memory.md = Docs\Management\DevCycleCraft\sdd\spec-s4-context-and-memory.md
+		Docs\Management\DevCycleCraft\sdd\spec-s5-1-1-persona-role-confusion.md = Docs\Management\DevCycleCraft\sdd\spec-s5-1-1-persona-role-confusion.md
+		Docs\Management\DevCycleCraft\sdd\spec-s5-1-adversarial-agent-pattern.md = Docs\Management\DevCycleCraft\sdd\spec-s5-1-adversarial-agent-pattern.md
+		Docs\Management\DevCycleCraft\sdd\spec-s5-2-1-dependency-ordering-fragility.md = Docs\Management\DevCycleCraft\sdd\spec-s5-2-1-dependency-ordering-fragility.md
+		Docs\Management\DevCycleCraft\sdd\spec-s5-2-2-cross-agent-spec-conflicts.md = Docs\Management\DevCycleCraft\sdd\spec-s5-2-2-cross-agent-spec-conflicts.md
+		Docs\Management\DevCycleCraft\sdd\spec-s5-2-parallel-agent-execution.md = Docs\Management\DevCycleCraft\sdd\spec-s5-2-parallel-agent-execution.md
+		Docs\Management\DevCycleCraft\sdd\spec-s5-3-1-silent-task-completion.md = Docs\Management\DevCycleCraft\sdd\spec-s5-3-1-silent-task-completion.md
+		Docs\Management\DevCycleCraft\sdd\spec-s5-3-subagent-delegation.md = Docs\Management\DevCycleCraft\sdd\spec-s5-3-subagent-delegation.md
+		Docs\Management\DevCycleCraft\sdd\spec-s5-agent-patterns.md = Docs\Management\DevCycleCraft\sdd\spec-s5-agent-patterns.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-1-1-constitutional-rigidity-and-staleness.md = Docs\Management\DevCycleCraft\sdd\spec-s6-1-1-constitutional-rigidity-and-staleness.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-1-2-amendment-governance.md = Docs\Management\DevCycleCraft\sdd\spec-s6-1-2-amendment-governance.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-1-constitutional-constraints.md = Docs\Management\DevCycleCraft\sdd\spec-s6-1-constitutional-constraints.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-2-1-enforcement-cost-overhead.md = Docs\Management\DevCycleCraft\sdd\spec-s6-2-1-enforcement-cost-overhead.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-2-automated-hooks.md = Docs\Management\DevCycleCraft\sdd\spec-s6-2-automated-hooks.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-3-1-reviewer-context-loss.md = Docs\Management\DevCycleCraft\sdd\spec-s6-3-1-reviewer-context-loss.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-3-review-gates.md = Docs\Management\DevCycleCraft\sdd\spec-s6-3-review-gates.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-4-1-six-drift-categories.md = Docs\Management\DevCycleCraft\sdd\spec-s6-4-1-six-drift-categories.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-4-2-continuous-conformance-requirement.md = Docs\Management\DevCycleCraft\sdd\spec-s6-4-2-continuous-conformance-requirement.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-4-cicd-integration.md = Docs\Management\DevCycleCraft\sdd\spec-s6-4-cicd-integration.md
+		Docs\Management\DevCycleCraft\sdd\spec-s6-governance-and-enforcement.md = Docs\Management\DevCycleCraft\sdd\spec-s6-governance-and-enforcement.md
+		Docs\Management\DevCycleCraft\sdd\spec-s7-1-1-vendor-lock-in.md = Docs\Management\DevCycleCraft\sdd\spec-s7-1-1-vendor-lock-in.md
+		Docs\Management\DevCycleCraft\sdd\spec-s7-1-2-tool-switching-friction.md = Docs\Management\DevCycleCraft\sdd\spec-s7-1-2-tool-switching-friction.md
+		Docs\Management\DevCycleCraft\sdd\spec-s7-1-spec-first-tools.md = Docs\Management\DevCycleCraft\sdd\spec-s7-1-spec-first-tools.md
+		Docs\Management\DevCycleCraft\sdd\spec-s7-2-ai-coding-assistants.md = Docs\Management\DevCycleCraft\sdd\spec-s7-2-ai-coding-assistants.md
+		Docs\Management\DevCycleCraft\sdd\spec-s7-3-1-mcp-protocol-immaturity.md = Docs\Management\DevCycleCraft\sdd\spec-s7-3-1-mcp-protocol-immaturity.md
+		Docs\Management\DevCycleCraft\sdd\spec-s7-3-mcp-servers.md = Docs\Management\DevCycleCraft\sdd\spec-s7-3-mcp-servers.md
+		Docs\Management\DevCycleCraft\sdd\spec-s7-tooling.md = Docs\Management\DevCycleCraft\sdd\spec-s7-tooling.md
+		Docs\Management\DevCycleCraft\sdd\spec-s8-1-1-task-atomization.md = Docs\Management\DevCycleCraft\sdd\spec-s8-1-1-task-atomization.md
+		Docs\Management\DevCycleCraft\sdd\spec-s8-1-task-tracking.md = Docs\Management\DevCycleCraft\sdd\spec-s8-1-task-tracking.md
+		Docs\Management\DevCycleCraft\sdd\spec-s8-2-1-cross-team-spec-consistency.md = Docs\Management\DevCycleCraft\sdd\spec-s8-2-1-cross-team-spec-consistency.md
+		Docs\Management\DevCycleCraft\sdd\spec-s8-2-parallel-work-coordination.md = Docs\Management\DevCycleCraft\sdd\spec-s8-2-parallel-work-coordination.md
+		Docs\Management\DevCycleCraft\sdd\spec-s8-3-progress-visibility.md = Docs\Management\DevCycleCraft\sdd\spec-s8-3-progress-visibility.md
+		Docs\Management\DevCycleCraft\sdd\spec-s8-project-management.md = Docs\Management\DevCycleCraft\sdd\spec-s8-project-management.md
+		Docs\Management\DevCycleCraft\sdd\spec-s9-1-1-property-based-testing.md = Docs\Management\DevCycleCraft\sdd\spec-s9-1-1-property-based-testing.md
+		Docs\Management\DevCycleCraft\sdd\spec-s9-1-tdd-integration.md = Docs\Management\DevCycleCraft\sdd\spec-s9-1-tdd-integration.md
+		Docs\Management\DevCycleCraft\sdd\spec-s9-2-1-spec-versioning-n-rollback.md = Docs\Management\DevCycleCraft\sdd\spec-s9-2-1-spec-versioning-n-rollback.md
+		Docs\Management\DevCycleCraft\sdd\spec-s9-2-2-spec-rot-under-evolution.md = Docs\Management\DevCycleCraft\sdd\spec-s9-2-2-spec-rot-under-evolution.md
+		Docs\Management\DevCycleCraft\sdd\spec-s9-2-spec-drift-prevention.md = Docs\Management\DevCycleCraft\sdd\spec-s9-2-spec-drift-prevention.md
+		Docs\Management\DevCycleCraft\sdd\spec-s9-3-1-false-confidence-trap.md = Docs\Management\DevCycleCraft\sdd\spec-s9-3-1-false-confidence-trap.md
+		Docs\Management\DevCycleCraft\sdd\spec-s9-3-2-agent-autonomy-without-reliability.md = Docs\Management\DevCycleCraft\sdd\spec-s9-3-2-agent-autonomy-without-reliability.md
+		Docs\Management\DevCycleCraft\sdd\spec-s9-3-hallucination-safeguards.md = Docs\Management\DevCycleCraft\sdd\spec-s9-3-hallucination-safeguards.md
+		Docs\Management\DevCycleCraft\sdd\spec-s9-quality-assurance.md = Docs\Management\DevCycleCraft\sdd\spec-s9-quality-assurance.md
+		Docs\Management\DevCycleCraft\sdd\task-log-sdd-adoption.md = Docs\Management\DevCycleCraft\sdd\task-log-sdd-adoption.md
+	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{5854FF58-B8C5-05C6-5BF2-ACE42193F22B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-songs", "{C141C5C9-833C-4A26-96BF-3745A2DA1AD4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\design.md = Docs\Management\BusinessFeatures\artists-songs\design.md
+		Docs\Management\BusinessFeatures\artists-songs\requirements.md = Docs\Management\BusinessFeatures\artists-songs\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
+			Docs\Management\BusinessFeatures\artists-songs\handoff.md = Docs\Management\BusinessFeatures\artists-songs\handoff.md
+		Docs\Management\BusinessFeatures\artists-songs\plan-arch-revision.md = Docs\Management\BusinessFeatures\artists-songs\plan-arch-revision.md
+		Docs\Management\BusinessFeatures\artists-songs\plan-phase16.md = Docs\Management\BusinessFeatures\artists-songs\plan-phase16.md
+		Docs\Management\BusinessFeatures\artists-songs\plan-spec-revision.md = Docs\Management\BusinessFeatures\artists-songs\plan-spec-revision.md
+		Docs\Management\BusinessFeatures\artists-songs\plan.md = Docs\Management\BusinessFeatures\artists-songs\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\workflow-compression\plan.md = Docs\Management\DevCycleCraft\workflow-compression\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs-context-scope-control", "docs-context-scope-control", "{A1B2C3D4-0001-4000-8000-000000000008}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\docs-context-scope-control\plan.md = Docs\Management\DevCycleCraft\docs-context-scope-control\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "architecture-tests-evaluation", "architecture-tests-evaluation", "{A1B2C3D4-0001-4000-8000-000000000009}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\architecture-tests-evaluation\plan.md = Docs\Management\DevCycleCraft\architecture-tests-evaluation\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "claude-managed-agents-evaluation", "claude-managed-agents-evaluation", "{A1B2C3D4-0001-4000-8000-00000000000A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\plan.md = Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution-structure-refactor", "solution-structure-refactor", "{D1C7C335-1E7C-4804-9A55-A5D160232353}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\solution-structure-refactor\plan.md = Docs\Management\DevCycleCraft\solution-structure-refactor\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "md3-appbar-components", "md3-appbar-components", "{A1B2C3D4-0001-4000-8000-000000000002}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\md3-appbar-components\plan.md = Docs\Management\DevCycleCraft\md3-appbar-components\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "toolbar-fab-vibrant", "toolbar-fab-vibrant", "{A1B2C3D4-0001-4000-8000-000000000003}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\toolbar-fab-vibrant\plan.md = Docs\Management\DevCycleCraft\toolbar-fab-vibrant\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-folder-layout-alignment", "workflow-folder-layout-alignment", "{A1B2C3D4-0001-4000-8000-000000000004}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md
+		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\findings.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\findings.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hooks-redesign", "hooks-redesign", "{A1B2C3D4-0001-4000-8000-000000000005}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\hooks-redesign\plan.md = Docs\Management\DevCycleCraft\hooks-redesign\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-workflow-integration", "backlog-workflow-integration", "{A1B2C3D4-0001-4000-8000-000000000006}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\backlog-workflow-integration\plan.md = Docs\Management\DevCycleCraft\backlog-workflow-integration\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versioning", "{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\app-versioning\design.md = Docs\Management\DevCycleCraft\app-versioning\design.md
+			Docs\Management\DevCycleCraft\app-versioning\plan.md = Docs\Management\DevCycleCraft\app-versioning\plan.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "m3-lists", "m3-lists", "{F58ED7A0-0186-4187-9FCF-78A464FB01C5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\m3-lists\design.md = Docs\Management\DevCycleCraft\m3-lists\design.md
+			Docs\Management\DevCycleCraft\m3-lists\plan.md = Docs\Management\DevCycleCraft\m3-lists\plan.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\autocomplete-design.md = Docs\Management\BusinessFeatures\persons\autocomplete-design.md
+		Docs\Management\BusinessFeatures\persons\design.md = Docs\Management\BusinessFeatures\persons\design.md
+		Docs\Management\BusinessFeatures\persons\requirements.md = Docs\Management\BusinessFeatures\persons\requirements.md
+		Docs\Management\BusinessFeatures\persons\tasks.md = Docs\Management\BusinessFeatures\persons\tasks.md
+			Docs\Management\BusinessFeatures\persons\plan-autocomplete.md = Docs\Management\BusinessFeatures\persons\plan-autocomplete.md
+		Docs\Management\BusinessFeatures\persons\plan.md = Docs\Management\BusinessFeatures\persons\plan.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\styles-structure\design.md = Docs\Management\DevCycleCraft\styles-structure\design.md
+			Docs\Management\DevCycleCraft\styles-structure\plan.md = Docs\Management\DevCycleCraft\styles-structure\plan.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "venues", "venues", "{9EA47D78-293E-41B7-872D-3B2B85E82710}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\design.md = Docs\Management\BusinessFeatures\venues\design.md
+		Docs\Management\BusinessFeatures\venues\requirements.md = Docs\Management\BusinessFeatures\venues\requirements.md
+		Docs\Management\BusinessFeatures\venues\tasks.md = Docs\Management\BusinessFeatures\venues\tasks.md
+			Docs\Management\BusinessFeatures\venues\plan.md = Docs\Management\BusinessFeatures\venues\plan.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-karaoke", "youtube-karaoke", "{6851C0F2-5877-4E2F-89C0-9B82A6770BE0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\design.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\design.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\plan.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\task-log.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\task-log.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\windows-version\design.md = Docs\Management\BusinessFeatures\windows-version\design.md
+		Docs\Management\BusinessFeatures\windows-version\tasks.md = Docs\Management\BusinessFeatures\windows-version\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BusinessFeatures", "BusinessFeatures", "{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevCycleCraft", "DevCycleCraft", "{0C4BA720-519E-4818-BD9B-34AC19E4FCD7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{15F1DA03-2180-47BF-BC40-1BB457C97F9E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
+		Docs\Management\adaptive-doodling-knuth.md = Docs\Management\adaptive-doodling-knuth.md
+		Docs\Management\happy-knitting-storm.md = Docs\Management\happy-knitting-storm.md
+		Docs\Management\adaptive-doodling-knuth.md = Docs\Management\adaptive-doodling-knuth.md
+		Docs\Management\happy-knitting-storm.md = Docs\Management\happy-knitting-storm.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-restore", "{FA1234BC-0001-4000-8000-000000000011}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\backup-restore\design.md = Docs\Management\BusinessFeatures\backup-restore\design.md
+		Docs\Management\BusinessFeatures\backup-restore\plan.md = Docs\Management\BusinessFeatures\backup-restore\plan.md
+		Docs\Management\BusinessFeatures\backup-restore\task-log.md = Docs\Management\BusinessFeatures\backup-restore\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-reporting", "{FA1234BC-0001-4000-8000-000000000012}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\crash-reporting\design.md = Docs\Management\BusinessFeatures\crash-reporting\design.md
+		Docs\Management\BusinessFeatures\crash-reporting\requirements.md = Docs\Management\BusinessFeatures\crash-reporting\requirements.md
+		Docs\Management\BusinessFeatures\crash-reporting\tasks.md = Docs\Management\BusinessFeatures\crash-reporting\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "user-suggestions", "user-suggestions", "{FA1234BC-0001-4000-8000-000000000013}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\user-suggestions\design.md = Docs\Management\BusinessFeatures\user-suggestions\design.md
+		Docs\Management\BusinessFeatures\user-suggestions\requirements.md = Docs\Management\BusinessFeatures\user-suggestions\requirements.md
+		Docs\Management\BusinessFeatures\user-suggestions\tasks.md = Docs\Management\BusinessFeatures\user-suggestions\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "whats-new", "whats-new", "{FA1234BC-0001-4000-8000-000000000014}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\whats-new\design.md = Docs\Management\BusinessFeatures\whats-new\design.md
+		Docs\Management\BusinessFeatures\whats-new\requirements.md = Docs\Management\BusinessFeatures\whats-new\requirements.md
+		Docs\Management\BusinessFeatures\whats-new\tasks.md = Docs\Management\BusinessFeatures\whats-new\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-settings", "app-settings", "{FA1234BC-0001-4000-8000-000000000015}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\app-settings\requirements.md = Docs\Management\BusinessFeatures\app-settings\requirements.md
+		Docs\Management\BusinessFeatures\app-settings\design.md = Docs\Management\BusinessFeatures\app-settings\design.md
+		Docs\Management\BusinessFeatures\app-settings\tasks.md = Docs\Management\BusinessFeatures\app-settings\tasks.md
+		Docs\Management\BusinessFeatures\app-settings\plan.md = Docs\Management\BusinessFeatures\app-settings\plan.md
+		Docs\Management\BusinessFeatures\app-settings\task-log.md = Docs\Management\BusinessFeatures\app-settings\task-log.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -148,8 +409,35 @@ Global
 		{E9A5FC59-0C8C-49B6-9845-7870FA3CD098} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{300D3C1B-4E22-4CEE-85FF-453BD80607BD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+
+		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000011} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000012} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000013} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000014} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000015} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{C141C5C9-833C-4A26-96BF-3745A2DA1AD4} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{A1B2C3D4-0001-4000-8000-000000000007} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000008} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000009} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-00000000000A} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{B1A2C3D4-0001-4000-8000-000000000001} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{D1C7C335-1E7C-4804-9A55-A5D160232353} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000002} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000003} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000004} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000005} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{A1B2C3D4-0001-4000-8000-000000000006} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{0C4BA720-519E-4818-BD9B-34AC19E4FCD7} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{15F1DA03-2180-47BF-BC40-1BB457C97F9E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
 	EndGlobalSection
-EndGlobal
