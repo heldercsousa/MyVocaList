@@ -33,8 +33,8 @@
 | 2026-05 | **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/Management/BusinessFeatures/artists-songs/` · Plan: `Docs/Management/BusinessFeatures/artists-songs/plan.md` |
 | 2026-05 | ↳ Song Karaoke URLs | ✅ Done | YouTube URL management per song; SongFormPage section, settings, converters, tests. Spec: `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/` |
 | 2026-05 | ↳ Bug: GoToSettings navigation exception | ✅ Fixed | `GoToAsync("settings")` called from pushed-page context (SongFormPage); FlyoutItem requires absolute route `//settings`. Single-line fix in `SongFormViewModel.cs`. |
-| 2026-06 | ↳ Crash Reporting — pre-release checklist | 💡 Pending | 3 items before store release: fill Sentry DSN, run smoke test, add multi-env DSN if needed. Details: `tasks.md`. |
 | 2026-06 | **Crash & Error Reporting** | ✅ Done | 2 bugs found in review (fixed). Spec: `Docs/Management/BusinessFeatures/crash-reporting/` |
+| 2026-06 | ↳ Pre-release checklist | 💡 Pending | App-wide: fill Sentry DSN, run smoke test, add multi-env DSN if needed. Details: `tasks.md`. |
 | 2026-06 | **What's New / Release Notes** | 📋 Spec | Bundled `releases.json`; one-time modal on version upgrade; depends on App Versioning. Spec: `Docs/Management/BusinessFeatures/whats-new/` |
 | 2026-06 | **User Suggestions** | 📋 Spec | In-app form → GitHub Issues API (MyVocaList repo); auto-captures version + OS + timestamp. Spec: `Docs/Management/BusinessFeatures/user-suggestions/` |
 | 2026-06 | **App Update Check** | 📋 Spec | Remote version manifest (GitHub raw); soft nudge + hard block bottom sheets; fail-open on network error. Spec: `Docs/Management/BusinessFeatures/app-update-check/` |

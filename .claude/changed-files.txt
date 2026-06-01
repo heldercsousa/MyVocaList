@@ -365,3 +365,4 @@ Docs/Management/BACKLOG.md
 Docs/Management/BusinessFeatures/about-page/task-log.md
 MyVocaList.sln
 Docs/Changelog/changelog.md
+Docs/Management/BACKLOG.md
