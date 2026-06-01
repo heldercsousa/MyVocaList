@@ -355,3 +355,13 @@ Directory.Packages.props
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/about-page/tasks.md
+Docs/Management/BusinessFeatures/about-page/tasks.md
+Docs/Management/BusinessFeatures/about-page/tasks.md
+Docs/Management/BusinessFeatures/about-page/tasks.md
+Docs/Management/BusinessFeatures/about-page/tasks.md
+Docs/Management/BusinessFeatures/about-page/tasks.md
+Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/about-page/task-log.md
+MyVocaList.sln
+Docs/Changelog/changelog.md
