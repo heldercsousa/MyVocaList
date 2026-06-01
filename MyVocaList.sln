@@ -337,6 +337,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "about-page", "about-page", 
 		Docs\Management\BusinessFeatures\about-page\design.md = Docs\Management\BusinessFeatures\about-page\design.md
 		Docs\Management\BusinessFeatures\about-page\tasks.md = Docs\Management\BusinessFeatures\about-page\tasks.md
 		Docs\Management\BusinessFeatures\about-page\plan.md = Docs\Management\BusinessFeatures\about-page\plan.md
+		Docs\Management\BusinessFeatures\about-page\task-log.md = Docs\Management\BusinessFeatures\about-page\task-log.md
 	EndProjectSection
 EndProject
 Global
