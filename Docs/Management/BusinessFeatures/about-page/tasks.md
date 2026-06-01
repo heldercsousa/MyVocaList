@@ -7,14 +7,14 @@
 
 ## Phase 1 — Contracts & Domain (no dependencies)
 
-- [ ] **Define `ReleaseEntry` DTO and `IWhatsNewService` interface** [P]
+- [x] **Define `ReleaseEntry` DTO and `IWhatsNewService` interface** [P]
   - **Produces:** `ReleaseEntry` record in `MyVocaList.Contracts/DTOs/`; `IWhatsNewService` interface in `MyVocaList.Domain/ServicesInterfaces/`
   - **Consumes:** nothing
   - **Risk:** Low — new types only, no existing code touched
   - **Files owned:** `MyVocaList.Contracts/DTOs/ReleaseEntry.cs`, `MyVocaList.Domain/ServicesInterfaces/IWhatsNewService.cs`
   - **Demo:** Both types compile; `ReleaseEntry` has Version, Date, Highlights, Fixes properties
 
-- [ ] **Add `AppConstants.FoundedYear = 2025`** [P]
+- [x] **Add `AppConstants.FoundedYear = 2025`** [P]
   - **Produces:** `FoundedYear` constant in `MyVocaList.Contracts`
   - **Consumes:** nothing
   - **Risk:** Low
@@ -25,7 +25,7 @@
 
 ## Phase 2 — Stub service + ViewModel (depends on: Phase 1 ✅)
 
-- [ ] **Implement `NullWhatsNewService` stub and `AboutViewModel`** [SEQUENTIAL]
+- [x] **Implement `NullWhatsNewService` stub and `AboutViewModel`** [SEQUENTIAL]
   - **Produces:** `NullWhatsNewService` (internal, in Services project); `AboutViewModel.cs`
   - **Consumes:** `IWhatsNewService`, `ReleaseEntry`, `AppConstants.FoundedYear`, `AppInfo`
   - **Risk:** Low
@@ -36,7 +36,7 @@
 
 ## Phase 3 — Navigation wiring (depends on: Phase 1 ✅)
 
-- [ ] **Add About route to navigation config** [SEQUENTIAL]
+- [x] **Add About route to navigation config** [SEQUENTIAL]
   - **Produces:** `Routes.About` constant; "About" menu entry in System group (before Exit); Shell route registration
   - **Consumes:** `Routes.cs`, `NavigationConfig.cs`, `AppShell.xaml`
   - **Risk:** Low — additive; order in System group must be: Preferences → Backup & Restore → About → Exit
@@ -47,7 +47,7 @@
 
 ## Phase 4 — Page XAML + DI (depends on: Phase 2 ✅, Phase 3 ✅)
 
-- [ ] **Implement `AboutPage` XAML, code-behind, and DI registration** [SEQUENTIAL]
+- [x] **Implement `AboutPage` XAML, code-behind, and DI registration** [SEQUENTIAL]
   - **Produces:** `AboutPage.xaml`, `AboutPage.xaml.cs`; DI entries in `MauiProgram.cs`
   - **Consumes:** `AboutViewModel`, design.md § Page Structure
   - **Risk:** Medium — XAML layout; `SafeAreaEdges="Container"` required; What's New section must be hidden when `HasReleaseNotes = false`
@@ -58,7 +58,7 @@
 
 ## Phase 5 — .sln registration (after all files created)
 
-- [ ] **Register all new files in `MyVocaList.sln`** [SEQUENTIAL]
+- [x] **Register all new files in `MyVocaList.sln`** [SEQUENTIAL]
   - **Files owned:** `MyVocaList.sln`
   - **Demo:** All new files visible in Visual Studio Solution Explorer under the correct solution folders
 
