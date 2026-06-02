@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Infra.Collation;
 
 namespace MyVocaList.Infra.Repository
 {
@@ -36,8 +37,8 @@ namespace MyVocaList.Infra.Repository
             // expression, generating: col COLLATE X LIKE @pattern COLLATE X
             return await _context.Venues
                 .Where(v => EF.Functions.Like(
-                    EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
-                    EF.Functions.Collate(searchPattern, "NOCASE_NOACCENT")))
+                    EF.Functions.Collate(v.Name, CollationConstants.Default),
+                    EF.Functions.Collate(searchPattern, CollationConstants.Default)))
                 .Take(maxResults)
                 .OrderBy(v => v.Name)
                 .ToListAsync();
@@ -61,8 +62,8 @@ namespace MyVocaList.Infra.Repository
             // expression, generating: col COLLATE X LIKE @pattern COLLATE X
             return await _context.Venues
                 .Where(v => EF.Functions.Like(
-                    EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
-                    EF.Functions.Collate(searchPattern, "NOCASE_NOACCENT")))
+                    EF.Functions.Collate(v.Name, CollationConstants.Default),
+                    EF.Functions.Collate(searchPattern, CollationConstants.Default)))
                 .Take(maxResults)
                 .OrderBy(v => v.Name)
                 .ToListAsync();
@@ -94,8 +95,8 @@ namespace MyVocaList.Infra.Repository
                 // Pattern is pre-computed so EF.Functions.Collate applies to the full right-hand
                 // expression, generating: col COLLATE X LIKE @pattern COLLATE X
                 q = q.Where(v => EF.Functions.Like(
-                    EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
-                    EF.Functions.Collate(searchPattern, "NOCASE_NOACCENT")));
+                    EF.Functions.Collate(v.Name, CollationConstants.Default),
+                    EF.Functions.Collate(searchPattern, CollationConstants.Default)));
             }
 
             return await q
@@ -152,8 +153,8 @@ namespace MyVocaList.Infra.Repository
                 // Pattern is pre-computed so EF.Functions.Collate applies to the full right-hand
                 // expression, generating: col COLLATE X LIKE @pattern COLLATE X
                 q = q.Where(v => EF.Functions.Like(
-                    EF.Functions.Collate(v.Name, "NOCASE_NOACCENT"),
-                    EF.Functions.Collate(searchPattern, "NOCASE_NOACCENT")));
+                    EF.Functions.Collate(v.Name, CollationConstants.Default),
+                    EF.Functions.Collate(searchPattern, CollationConstants.Default)));
             }
 
             var totalCount = await q.CountAsync();

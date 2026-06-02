@@ -1,8 +1,63 @@
-# Testing Rules — MyVocaList
+﻿# Testing Rules — MyVocaList
 
-> **Status:** Active from Step 3 (Venue CRUD Tests) onward.
-> TDD applies to all new Services, ViewModels, and Repositories from AutocompleteField + Person CRUD forward.
-> Venue CRUD tests (Step 3) establish the test infrastructure baseline; TDD workflow kicks in from Step 4+.
+> TDD applies to all new and modified Services, ViewModels, and Repositories.
+## TDD within SDD
+
+TDD and SDD are complementary, not competing disciplines. Each operates at a different level:
+
+| Level | Discipline | Output |
+|-------|-----------|--------|
+| Feature intent | SDD (Spec-Driven Development) | `requirements.md`, `design.md`, `tasks.md` |
+| Behavior contract | TDD (Test-Driven Development) | Failing test that encodes a single acceptance criterion |
+| Implementation | Code | Minimal code to make the test pass |
+
+**How they connect:**
+- Every acceptance criterion in `requirements.md` must map to at least one test (see Acceptance Criteria Traceability below).
+- The spec defines *what* must be true; the failing test is the machine-checkable encoding of that truth.
+- Do not write a test that has no corresponding acceptance criterion — if the behavior matters, add the AC to the spec first.
+- Do not write implementation code that has no corresponding test — if the code matters, write the test first.
+
+> Skipping either discipline degrades both. SDD without TDD produces specs that drift from the implementation. TDD without SDD produces tests that encode assumptions never reviewed by the architect.
+
+---
+
+## Acceptance Criteria Traceability
+
+Every test that covers a user-facing behavior must be traceable to an acceptance criterion (AC) in `requirements.md`.
+
+### Format
+
+Add an `[AC]` tag as the first line of each test method's doc comment (or inline comment) citing the AC ID:
+
+```csharp
+[Fact]
+// [AC] REQ-VENUE-03: Name must be unique across all venues (case-insensitive)
+public async Task CreateVenueAsync_DuplicateName_ReturnsFalse()
+{
+    ...
+}
+`````r
+
+### Rules
+
+1. **Every AC → at least one test.** If an AC has no corresponding test, it is unverified. Treat missing coverage as a spec gap.
+2. **One test → one AC.** A test that covers multiple ACs is testing too much. Split it.
+3. **AC IDs come from the spec.** Do not invent IDs. If the spec has no ID scheme, add one before writing tests.
+4. **Infrastructure tests are exempt.** Tests for `TestDbContextFactory`, builder helpers, or test-only utilities do not require an AC tag.
+
+### Traceability matrix (per feature)
+
+When a feature reaches code review, produce a traceability table in the task-log:
+
+```r
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| REQ-VENUE-01 | Name ≤ 30 chars | VenueService.ValidateNameInput | CreateVenueAsync_NameTooLong_ReturnsFalse |
+| REQ-VENUE-02 | Name required | VenueService.ValidateNameInput | CreateVenueAsync_EmptyName_ReturnsFalse |
+| REQ-VENUE-03 | Name unique (case-insensitive) | VenueService.CreateVenueAsync | CreateVenueAsync_DuplicateName_ReturnsFalse |
+`````r
+
+Missing rows = missing tests = incomplete feature.
 
 ---
 
@@ -349,6 +404,34 @@ For every repository method that takes a filter/sort/page parameter, write one t
 
 ---
 
+## Tester/Builder Role Separation
+
+In a TDD cycle, the agent that writes tests (Tester) and the agent that writes implementation (Builder) must be kept conceptually separate. In practice with subagents, enforce this by dispatching test-writing and implementation-writing as distinct tasks.
+
+### Why it matters
+When a single agent writes both tests and implementation simultaneously, it naturally writes tests that match the implementation rather than tests that verify the spec. The result is tests that pass but prove nothing.
+
+### Rules
+
+1. **Tester writes tests first, then stops.** The Tester subagent writes all tests for a task, confirms they compile and fail (Red), commits, and exits. It does NOT write any implementation. (Note: in a single-agent session, apply one-at-a-time discipline per "One test at a time — Exception.")
+2. **Builder receives failing tests, makes them pass.** The Builder subagent reads the committed failing tests, writes only enough implementation to make them pass (Green), and exits. It does NOT modify tests.
+3. **Refactor is a third, optional pass.** After Green, a separate refactor pass may clean up implementation without changing test or behavior.
+4. **In a single-agent session:** apply the same discipline mentally — write all tests, run them to confirm failure, then switch to implementation mode.
+
+### Dispatch pattern (from workflow.md)
+
+```
+Wave A: Tester subagent
+  Input: spec (requirements.md, design.md), task description
+  Output: committed failing tests, task-log status = "Red — tests written"
+
+Wave B: Builder subagent
+  Input: failing tests from Wave A, spec files
+  Output: committed passing implementation, task-log status = "To Review"
+```
+
+---
+
 ## TDD Workflow (Red → Green → Refactor)
 
 Starting from AutocompleteField + Person CRUD (Step 4+):
@@ -363,6 +446,20 @@ Starting from AutocompleteField + Person CRUD (Step 4+):
 
 ### Regression tests
 When fixing a bug, write the failing test FIRST, confirm it fails, then fix, then confirm it passes. The regression test proves the bug existed and the fix works.
+### One test at a time
+
+Write and run **one test** before proceeding to the next. Do not write all tests for a service method in one batch, then run them together.
+
+**Rationale:** Batching test writes delays the Red confirmation. A test that was never seen failing may have been written incorrectly (wrong assertion, wrong setup). Each test must be seen to fail before the implementation that makes it pass is written.
+
+**Incremental TDD cycle per test:**
+1. Write one test → run → confirm Red
+2. Write minimal implementation → run → confirm Green
+3. Write next test → run → confirm Red (existing tests still Green)
+4. Extend implementation → run → confirm all Green
+5. Repeat
+
+**Exception:** When the Tester/Builder split is used (separate subagents), the Tester writes all tests for a task together and confirms all fail, because the Builder has not yet run. The one-at-a-time discipline applies within a single-agent session.
 
 ---
 
@@ -386,17 +483,230 @@ dotnet test --collect:"XPlat Code Coverage"
 ```
 
 ---
+## TDD Level Guidance by Risk
 
-## Prerequisites Before Step 3 (Test Project Setup)
+Not all code warrants the same test investment. Use risk classification to calibrate test coverage without over-testing low-risk code.
 
-These must be fixed when the test project is created. Do NOT create tests until they are resolved:
+### Risk levels
 
-1. **`AppDbContext` missing `QueryTrackingBehavior.NoTracking`** — add to the `OnConfiguring` or options builder. Without it, repository integration tests may have unexpected tracking side effects.
+| Level | Label | Definition | Test requirement |
+|-------|-------|-----------|-----------------|
+| A | **High risk** | Business logic with validation, state mutation, or user-facing failure modes | Full TDD: Red → Green → Refactor. Unit + property-based tests. All branches covered. |
+| B | **Medium risk** | Query logic, mapping, pagination, EF configuration | Example-based tests for happy path + key edge cases. Integration tests for query behavior. |
+| C | **Low risk** | Pure plumbing, DI registration, DTO mapping with no logic, trivial getters | No mandatory test. Optional smoke test if needed for confidence. |
 
-2. **`AppDbContext` has `Console.WriteLine` calls** — remove. Violates code-principles.md (no debug output in production code). Test runs will pollute output.
+### Classification guide
 
-3. **Serilog version drift** — `MyVocaList.Services` uses Serilog 4.2.0, `MyVocaList.Infra` uses 4.3.1. Normalize via `Directory.Packages.props` (CPM) when setting up the test project. CPM is a prerequisite to adding a 5th project cleanly.
+| Code | Risk level |
+|------|-----------|
+| Service validation methods (`ValidateNameInput`, `CreateVenueAsync` guards) | A |
+| Service methods that mutate state (create, update, delete) | A |
+| ViewModel command state transitions, `CanExecute` logic | A |
+| Repository query methods (search, filter, sort, paginate) | B |
+| EF entity configurations (index, collation, cascade) | B |
+| DTO mapping in services | B |
+| Repository CRUD without custom logic (`AddAsync`, `GetByIdAsync`) | B |
+| DI registration in `MauiProgram.cs` | C |
+| DTO record definitions | C |
+| `ObservableProperty` with no derived logic | C |
 
+### Applying the classification
+
+When the Tester subagent receives a task, it must classify each method:
+- Level A → write all tests before Builder starts
+- Level B → write tests for non-trivial paths; mark trivial CRUD as C
+- Level C → document as "no test required" in the task-log; do not write empty test stubs. If a Level C task has ACs, document the no-test decision in the task-log — it will be scrutinized at review.
+
+### Escalation
+
+If a method is initially classified C but a bug is found in production, reclassify to A or B and add regression tests before fixing.
+
+---
+
+## Mutation Testing with Stryker.NET
+
+Use mutation testing to detect tests that pass even when the production code is subtly wrong. Stryker.NET introduces small code mutations and verifies that at least one test fails per mutation.
+
+### When to run
+
+- After completing a Level A feature (see TDD Level Guidance above)
+- When a bug is found in production in an area believed to be well-tested
+- As part of a quality audit requested by Helder
+
+> Do NOT run Stryker on every commit — it is slow (minutes to hours). Run it as a periodic quality gate, not a CI gate.
+
+### Setup (one-time, global .NET tool)
+
+`ash
+dotnet tool install -g dotnet-stryker
+`
+
+### Running
+
+`ash
+# From solution root — targets Services project, reports to TestResults/
+dotnet stryker --project MyVocaList.Services/MyVocaList.Services.csproj \
+               --test-project MyVocaList.Tests/MyVocaList.Tests.csproj \
+               --reporter html \
+               --output TestResults/Stryker
+`
+
+Open TestResults/Stryker/reports/mutation-report.html to review surviving mutants.
+
+### Interpreting results
+
+| Outcome | Meaning | Action |
+|---------|---------|--------|
+| **Killed** | A test caught this mutation | Good |
+| **Survived** | No test failed for this mutation | Test gap — write a test that kills it |
+| **No coverage** | No test exercises this code at all | Test gap or Level C code — classify and decide |
+| **Timeout** | Mutation caused an infinite loop | May indicate a logic bug in the code |
+
+### Target mutation score
+
+| Layer | Minimum score |
+|-------|--------------|
+| Services (Level A methods) | 80% |
+| Repositories (Level B methods) | 60% |
+| ViewModels (Level A state transitions) | 70% |
+
+> These are minimums, not targets. Aim higher when the effort is justified by risk.
+
+### Surviving mutant triage
+
+For each surviving mutant, decide:
+1. **Write a killing test** — the mutant exposes a real gap; write a test that fails for this mutation
+2. **Exclude the mutant** — the mutation is semantically equivalent (e.g., `i++` vs `i += 1`); add to .stryker-config.json excludes with a comment explaining why
+3. **Reclassify code as Level C** — if the surviving mutant is in trivial plumbing, record the decision in the task-log
+
+### Configuration file
+
+Create .stryker-config.json at solution root when exclusions are needed:
+
+`json
+{
+  "stryker-config": {
+    "mutate": [
+      "MyVocaList.Services/**/*.cs",
+      "!MyVocaList.Services/GlobalUsings.cs"
+    ],
+    "excluded-mutations": ["StringLiteral"]
+  }
+}
+`
+
+---
+## Property-Based Testing with FsCheck
+
+Use property-based testing (PBT) for service methods whose correctness must hold across a wide range of inputs — not just the specific examples in example-based tests.
+
+### When to use PBT
+
+| Use PBT | Use example-based tests |
+|---------|------------------------|
+| Validation rules (length, format, range) | Specific error messages |
+| Round-trip invariants (create → read → same) | Exact entity mapping |
+| Pagination arithmetic (skip/take consistency) | Integration flows |
+| Commutative or associative operations | Error path specifics |
+
+### Setup
+
+Add to MyVocaList.Tests.csproj:
+
+`xml
+<PackageReference Include="FsCheck.Xunit" Version="2.*" />
+`
+
+Add to GlobalUsings.cs:
+
+`csharp
+global using FsCheck;
+global using FsCheck.Xunit;
+`
+
+### Usage pattern
+
+`csharp
+[Property]
+public Property CreateVenueAsync_NameWithinLimit_AlwaysSucceeds(string name)
+{
+    // Generate names that are 1–30 chars (within valid range)
+    return Prop.ForAll(
+        Arb.Default.NonEmptyString().Filter(s => s.Value.Length <= 30),
+        async name =>
+        {
+            _repoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(false);
+            var sut = CreateSut();
+            var (success, _, _) = await sut.CreateVenueAsync(name.Value);
+            return success;
+        });
+}
+
+[Property]
+public Property ValidateNameInput_NameExceedsLimit_AlwaysInvalid()
+{
+    return Prop.ForAll(
+        Arb.Default.NonEmptyString().Filter(s => s.Value.Length > 30),
+        name =>
+        {
+            var sut = CreateSut();
+            var (isValid, _) = sut.ValidateNameInput(name.Value);
+            return !isValid;
+        });
+}
+`
+
+### Rules
+
+1. **PBT supplements, does not replace, example-based tests.** Keep the example tests — they document specific behaviors. PBT adds confidence across the input space.
+2. **Always filter generated inputs to valid domains.** Unconstrained string generation produces null, empty, and control characters that test error-handling rather than the property.
+3. **Properties must be deterministic.** A property that depends on external I/O (DB, clock) is not a property — it is a flaky test. Mock all dependencies.
+4. **Label failures.** Use `|@` in FsCheck to attach labels when a property has multiple conditions, so shrunk counterexamples are readable.
+
+---
+## Test Quality Audit Checklist
+
+Run this checklist during code review for any test file. A test that fails one or more items must be fixed before the feature is marked `To Review`.
+
+### For each test method
+
+- [ ] **Name follows convention** — `{Method}_{Context}_{Expected}` with all three parts present
+- [ ] **Has a Red phase** — the test was seen failing before the implementation that makes it pass was written (or Tester/Builder split was used)
+- [ ] **Single behavioral assertion** — the test asserts one outcome; related asserts for the same outcome are permitted, but unrelated behaviors must be in separate tests
+- [ ] **AC tag present** — user-facing behavior tests carry an `// [AC] REQ-XXX-YY` comment
+- [ ] **AC exists in spec** — the referenced AC ID is present in `requirements.md`
+- [ ] **No `Thread.Sleep`** — async timing uses `await Task.Delay` or `TaskCompletionSource`
+- [ ] **No private-state assertions** — only public interface is tested
+- [ ] **Arrange/Act/Assert** structure is visible — blank lines separate the three phases
+
+### For each test class
+
+- [ ] **No shared mutable state** between tests — each `[Fact]` is independent
+- [ ] **Repository tests use real SQLite** — no in-memory EF provider
+- [ ] **Service tests use Moq** — no real repositories, no real DB
+- [ ] **Traceability matrix exists** in task-log for user-facing feature tests
+
+### Audit frequency
+
+- Before setting a task to `To Review` in the task-log
+- During `/project:review` (run after every task)
+
+---
+## Builder Must Not Modify Tests
+
+During the Green phase, the Builder's only permitted action is writing or modifying **production code** in `MyVocaList.Domain`, `MyVocaList.Services`, `MyVocaList.Infra`, or `MyVocaList` (MAUI).
+
+**The Builder must never:**
+- Edit a test file to make a test pass
+- Comment out an assertion
+- Change a test's setup to avoid triggering a failure
+- Delete a test that cannot be made to pass
+
+**If a test appears wrong:**
+The Builder must stop, document the suspected spec gap in the task-log (`blocked: spec gap`), and wait for the architect (Helder) to resolve it. The Builder does not unilaterally decide a test is wrong.
+
+**Rationale:** A test represents an encoded acceptance criterion. Changing the test without changing the spec is silent spec deletion — the behavior remains unverified but appears tested.
 ---
 
 ## Anti-Patterns — Never Do These
@@ -410,3 +720,5 @@ These must be fixed when the test project is created. Do NOT create tests until 
 | Write multiple `Assert.*` for unrelated behaviors | One test, one behavioral assertion (related asserts for a single behavior are fine) |
 | Use `Thread.Sleep` for async timing | Use `await Task.Delay` or `TaskCompletionSource` |
 | Skip writing the failing test first (Step 4+) | This is TDD — the failing test is not optional |
+| Modify a test to make it pass during Green phase | Tests define the contract. Changing a test to pass is not Green — it is spec deletion. If a test is wrong, escalate to the architect; do not silently fix it. See "Builder Must Not Modify Tests" for full escalation protocol. |
+| Delete a failing test instead of implementing the behavior | Same as above — spec deletion. Failing tests are blockers, not noise. |

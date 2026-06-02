@@ -4,4 +4,5 @@ public record MusicSearchResultDto(
     string ExternalId,
     string Provider,
     string ArtistName,
-    string SongTitle);
+    string? SongTitle,
+    string? FeaturedArtists);

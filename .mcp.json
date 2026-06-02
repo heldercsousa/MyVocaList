@@ -23,6 +23,13 @@
       "type": "http",
       "url": "https://gitmcp.io/DevExpress/maui-demo-app"
     },
+    "playwright": {
+      "command": "cmd",
+      "args": [ "/c", "npx", "-y", "@playwright/mcp@latest", "--extension" ],
+      "env": {
+        "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "BM5eHpLqTjDLxBIsoBK1tv4EB9WKpidiiuzEzPPtuYI"
+      }
+    },
     "sqlite": {
       "command": "cmd",
       "args": [

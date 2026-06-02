@@ -11,7 +11,8 @@ public static class NavigationConfig
         [Routes.Venues] = typeof(VenuesPage),
         [Routes.People] = typeof(PeoplePage),
         [Routes.Artists] = typeof(ArtistsPage),
-        [Routes.Preferences] = typeof(PreferencesPage),
+        [Routes.Songs] = typeof(SongsPage),
+        [Routes.Preferences] = typeof(SettingsPage),
         [Routes.Backup] = typeof(BackupRestorePage),
     };
 
@@ -24,11 +25,15 @@ public static class NavigationConfig
         new MenuGroup("Management", [
             new MenuItemDescription("Venues",         "nightlife_outlined",            Routes.Venues,      navigateCommand),
             new MenuItemDescription("People",         "group_outlined",                Routes.People,      navigateCommand),
-            new MenuItemDescription("Artists & Music","music_note_outlined",           Routes.Artists,     navigateCommand)
+        ]),
+        new MenuGroup("Catalog", [
+            new MenuItemDescription("Artists", "group_outlined",      Routes.Artists, navigateCommand),
+            new MenuItemDescription("Songs",   "music_note_outlined", Routes.Songs,   navigateCommand),
         ]),
         new MenuGroup("System", [
             new MenuItemDescription("Preferences",    "settings_outlined",             Routes.Preferences, navigateCommand),
             new MenuItemDescription("Backup & Restore","cloud_sync_outlined",          Routes.Backup,      navigateCommand),
+            new MenuItemDescription("About",          "info_outlined",                 Routes.About,       navigateCommand),
             new MenuItemDescription("Exit",           "logout_outlined",               Routes.Exit,        navigateCommand)
         ])
     ];

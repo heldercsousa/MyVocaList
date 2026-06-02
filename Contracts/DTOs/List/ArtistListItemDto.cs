@@ -3,11 +3,14 @@ namespace MyVocaList.Contracts.DTOs.List;
 public record ArtistListItemDto(
     int Id,
     string Name,
-    string ExternalProvider,
+    string? ExternalProvider,
     bool HasManualEdits,
-    int SongCount)
+    int CatalogCount)
 {
-    public string SongCountText => SongCount == 1 ? "1 song" : $"{SongCount} songs";
+    public string CatalogCountText => CatalogCount == 0
+        ? "No catalog"
+        : CatalogCount == 1 ? "1 song in catalog" : $"{CatalogCount} songs in catalog";
+
     public string ProviderBadgeText => ExternalProvider switch
     {
         "musicbrainz" => "MB",

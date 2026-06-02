@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Infra;
 
 namespace MyVocaList
@@ -9,6 +11,7 @@ namespace MyVocaList
 
         public App(IServiceProvider serviceProvider)
         {
+            GlobalExceptionHandler.Initialize();
             _serviceProvider = serviceProvider;
             InitializeComponent();
             _ = WarmUpDevExpressAsync();
@@ -19,7 +22,27 @@ namespace MyVocaList
         {
             // AppShell is resolved after InitializeComponent() so that Application.Resources
             // already contains MaterialColors.xaml when AppShell.InitializeComponent() runs.
-            return new Window(_serviceProvider.GetRequiredService<AppShell>());
+            var window = new Window(_serviceProvider.GetRequiredService<AppShell>());
+            window.Stopped += OnWindowStopped;
+            return window;
+        }
+
+        private void OnWindowStopped(object? sender, EventArgs e)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    using var scope = _serviceProvider.CreateScope();
+                    var backupService = scope.ServiceProvider.GetRequiredService<IBackupService>();
+                    await backupService.CreateFullBackupAsync(BackupTrigger.AppStop, CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    // GlobalExceptionHandler will catch unobserved — log only
+                    System.Diagnostics.Debug.WriteLine($"Auto-backup on stop failed: {ex.Message}");
+                }
+            });
         }
 
         private async Task MigrateAsync()

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Infra.Collation;
 using MyVocaList.Infra.EntityEFConfig;
 
 namespace MyVocaList.Infra;
@@ -14,6 +15,11 @@ public class AppDbContext : DbContext
     public DbSet<Event> Events { get; set; }
     public DbSet<EventParticipation> EventParticipations { get; set; }
     public DbSet<SystemConfiguration> SystemConfigurations { get; set; }
+    public DbSet<Artist> Artists { get; set; }
+    public DbSet<Song> Songs { get; set; }
+    public DbSet<Catalog> Catalog { get; set; }
+    public DbSet<SongKaraokeUrl> SongKaraokeUrls { get; set; }
+    public DbSet<BackupHistory> BackupHistories { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -55,6 +61,11 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new EventConfiguration());
         modelBuilder.ApplyConfiguration(new EventParticipationConfiguration());
         modelBuilder.ApplyConfiguration(new SystemConfigurationConfiguration());
+        modelBuilder.ApplyConfiguration(new ArtistConfiguration());
+        modelBuilder.ApplyConfiguration(new SongConfiguration());
+        modelBuilder.ApplyConfiguration(new CatalogConfiguration());
+        modelBuilder.ApplyConfiguration(new SongKaraokeUrlConfiguration());
+        modelBuilder.ApplyConfiguration(new BackupHistoryConfiguration());
     }
 
     /// <summary>
@@ -78,7 +89,7 @@ public class AppDbContext : DbContext
             {
                 if (property.ClrType == typeof(string))
                 {
-                    property.SetCollation("NOCASE_NOACCENT");
+                    property.SetCollation(CollationConstants.Default);
                 }
             }
         }

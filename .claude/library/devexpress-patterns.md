@@ -582,6 +582,72 @@ Renamed per MD3 terminology. MD3 distinguishes:
 
 BindableProperties: `Initials` (string), `MonogramColor` (Color), `InitialsColor` (Color)
 
+## FilterChipGroup
+
+`dxe:FilterChipGroup` renders MD3 Filter Chips for toggling list filters.
+
+**Namespace:** `xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"`
+
+### With inline string items (no DisplayMember needed)
+
+```xml
+<dxe:FilterChipGroup SelectedItems="{Binding SelectedRoleFilters, Mode=TwoWay}"
+                     Margin="16,4">
+    <dxe:FilterChipGroup.ItemsSource>
+        <x:Array Type="{x:Type x:String}">
+            <x:String>Authors</x:String>
+            <x:String>Performers</x:String>
+        </x:Array>
+    </dxe:FilterChipGroup.ItemsSource>
+</dxe:FilterChipGroup>
+```
+
+### With ViewModel-bound items (use DisplayMember)
+
+```xml
+<dxe:FilterChipGroup ItemsSource="{Binding FilterItems}"
+                     SelectedItems="{Binding SelectedItems, Mode=TwoWay}"
+                     DisplayMember="DisplayName" />
+```
+
+### ViewModel binding type
+
+`SelectedItems` expects `System.Collections.IList`. Initialize to `new List<object>()`.
+
+```csharp
+[ObservableProperty] private System.Collections.IList _selectedRoleFilters = new List<object>();
+
+partial void OnSelectedRoleFiltersChanged(System.Collections.IList value)
+{
+    var selected = value?.Cast<string>().ToHashSet(StringComparer.Ordinal) ?? [];
+    RoleFilter = (selected.Contains("Authors"), selected.Contains("Performers")) switch
+    {
+        (true, false)  => ArtistRoleFilter.AuthorsOnly,
+        (false, true)  => ArtistRoleFilter.PerformersOnly,
+        _              => ArtistRoleFilter.All
+    };
+}
+```
+
+### Layout note
+
+Place FilterChipGroup in a separate `Auto` row above the collection view:
+
+```xml
+<Grid>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <dxe:FilterChipGroup Grid.Row="0" ... />
+    <dxcv:DXCollectionView Grid.Row="1" ... />
+</Grid>
+```
+
+Do NOT stack FilterChipGroup inside the ShimmerView — it must remain visible during loading.
+
+---
+
 ## BoxView.Color vs BackgroundColor
 
 Always use `BoxView.Color` — it is BoxView's own fill property.

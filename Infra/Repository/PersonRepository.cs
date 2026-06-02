@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Infra.Collation;
 
 namespace MyVocaList.Infra.Repository;
 
@@ -15,7 +16,7 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
         ArgumentException.ThrowIfNullOrWhiteSpace(fullName, nameof(fullName));
         var trimmedName = fullName.Trim();
         return await _dbSet.FirstOrDefaultAsync(p =>
-            EF.Functions.Collate(p.FullNameNormalized, "NOCASE") == EF.Functions.Collate(trimmedName, "NOCASE"),
+            EF.Functions.Collate(p.FullName, CollationConstants.Default) == EF.Functions.Collate(trimmedName, CollationConstants.Default),
             cancellationToken);
     }
 
@@ -28,9 +29,9 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
         var pattern = searchTerm.Trim() + "%";
         return await _dbSet
             .Where(p => EF.Functions.Like(
-                EF.Functions.Collate(p.FullNameNormalized, "NOCASE"),
-                EF.Functions.Collate(pattern, "NOCASE")))
-            .OrderBy(p => p.FullNameNormalized)
+                EF.Functions.Collate(p.FullName, CollationConstants.Default),
+                EF.Functions.Collate(pattern, CollationConstants.Default)))
+            .OrderBy(p => p.FullName)
             .Take(maxResults)
             .ToListAsync(cancellationToken);
     }
@@ -48,13 +49,13 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
         return await _dbSet
             .Where(p =>
                 EF.Functions.Like(
-                    EF.Functions.Collate(p.FullNameNormalized, "NOCASE"),
-                    EF.Functions.Collate(namePattern, "NOCASE"))
+                    EF.Functions.Collate(p.FullName, CollationConstants.Default),
+                    EF.Functions.Collate(namePattern, CollationConstants.Default))
                 ||
                 (p.Email != null && EF.Functions.Like(
-                    EF.Functions.Collate(p.Email, "NOCASE"),
-                    EF.Functions.Collate(emailPattern, "NOCASE"))))
-            .OrderBy(p => p.FullNameNormalized)
+                    EF.Functions.Collate(p.Email, CollationConstants.Email),
+                    EF.Functions.Collate(emailPattern, CollationConstants.Email))))
+            .OrderBy(p => p.FullName)
             .Take(maxResults)
             .ToListAsync(cancellationToken);
     }
@@ -73,17 +74,17 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
 
             q = q.Where(p =>
                 EF.Functions.Like(
-                    EF.Functions.Collate(p.FullNameNormalized, "NOCASE"),
-                    EF.Functions.Collate(namePattern, "NOCASE"))
+                    EF.Functions.Collate(p.FullName, CollationConstants.Default),
+                    EF.Functions.Collate(namePattern, CollationConstants.Default))
                 ||
                 (p.Email != null && EF.Functions.Like(
-                    EF.Functions.Collate(p.Email, "NOCASE"),
-                    EF.Functions.Collate(emailPattern, "NOCASE"))));
+                    EF.Functions.Collate(p.Email, CollationConstants.Email),
+                    EF.Functions.Collate(emailPattern, CollationConstants.Email))));
         }
 
         var totalCount = await q.CountAsync(cancellationToken);
         var items = await q
-            .OrderBy(p => p.FullNameNormalized)
+            .OrderBy(p => p.FullName)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -104,7 +105,7 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
         var trimmedEmail = email.Trim();
         return await _dbSet.AnyAsync(p =>
             p.Email != null &&
-            EF.Functions.Collate(p.Email, "NOCASE") == EF.Functions.Collate(trimmedEmail, "NOCASE") &&
+            EF.Functions.Collate(p.Email, CollationConstants.Email) == EF.Functions.Collate(trimmedEmail, CollationConstants.Email) &&
             (excludePersonId == null || p.Id != excludePersonId.Value),
             cancellationToken);
     }

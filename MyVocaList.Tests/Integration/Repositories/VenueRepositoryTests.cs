@@ -139,4 +139,42 @@ public class VenueRepositoryTests : IAsyncLifetime
 
         Assert.Null(found);
     }
+
+    // ── Accent + case collation (NOCASE_NOACCENT) ─────────────────────────────
+
+    [Fact]
+    public async Task GetPagedWithEventInfoAsync_QueryWithoutAccents_FindsAccentedVenue()
+    {
+        await _repo.AddAsync(new Venue { Name = "Café do Brasil" });
+        await _repo.SaveChangesAsync();
+
+        var (items, total) = await _repo.GetPagedWithEventInfoAsync(1, 20, "cafe");
+
+        Assert.Equal(1, total);
+        Assert.Equal("Café do Brasil", items.First().venue.Name);
+    }
+
+    [Fact]
+    public async Task GetPagedWithEventInfoAsync_UppercaseQueryWithoutAccents_FindsAccentedVenue()
+    {
+        await _repo.AddAsync(new Venue { Name = "João's Bar" });
+        await _repo.SaveChangesAsync();
+
+        var (items, total) = await _repo.GetPagedWithEventInfoAsync(1, 20, "JOAO");
+
+        Assert.Equal(1, total);
+        Assert.Equal("João's Bar", items.First().venue.Name);
+    }
+
+    [Fact]
+    public async Task SearchByNameStartsWithAsync_AccentInsensitive_FindsMatch()
+    {
+        await _repo.AddAsync(new Venue { Name = "Müller's Hall" });
+        await _repo.SaveChangesAsync();
+
+        var results = await _repo.SearchByNameStartsWithAsync("muller", 10);
+
+        Assert.Single(results);
+        Assert.Equal("Müller's Hall", results.First().Name);
+    }
 }

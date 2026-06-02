@@ -10,8 +10,10 @@
     xmlns:venues="clr-namespace:MyVocaList.UI.Pages.Venues"
     xmlns:people="clr-namespace:MyVocaList.UI.Pages.People"
     xmlns:artists="clr-namespace:MyVocaList.UI.Pages.Artists"
-    xmlns:prefs="clr-namespace:MyVocaList.UI.Pages.Preferences"
+    xmlns:songs="clr-namespace:MyVocaList.UI.Pages.Songs"
     xmlns:backup="clr-namespace:MyVocaList.UI.Pages.BackupRestore"
+    xmlns:settings="clr-namespace:MyVocaList.UI.Pages.Settings"
+    xmlns:about="clr-namespace:MyVocaList.UI.Pages.About"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     Title="MyVocaList"
     FlyoutBehavior="Flyout"
@@ -83,12 +85,24 @@
         <ShellContent ContentTemplate="{DataTemplate artists:ArtistsPage}" />
     </FlyoutItem>
 
+    <FlyoutItem Route="songs" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate songs:SongsPage}" />
+    </FlyoutItem>
+
     <FlyoutItem Route="preferences" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate prefs:PreferencesPage}" />
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" />
     </FlyoutItem>
 
     <FlyoutItem Route="backup" FlyoutItemIsVisible="False">
         <ShellContent ContentTemplate="{DataTemplate backup:BackupRestorePage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="settings" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate settings:SettingsPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="about" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate about:AboutPage}" />
     </FlyoutItem>
 
 </Shell>
