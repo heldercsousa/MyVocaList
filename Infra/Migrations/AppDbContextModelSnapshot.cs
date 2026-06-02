@@ -45,12 +45,6 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
-                    b.Property<string>("NameNormalized")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("TEXT")
-                        .UseCollation("NOCASE_NOACCENT");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
@@ -60,9 +54,9 @@ namespace MyVocaList.Infra.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Artists_ExternalId");
 
-                    b.HasIndex("NameNormalized")
+                    b.HasIndex("Name")
                         .IsUnique()
-                        .HasDatabaseName("IX_Artists_NameNormalized");
+                        .HasDatabaseName("IX_Artists_Name");
 
                     b.ToTable("Artists", (string)null);
                 });
@@ -206,12 +200,6 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
-                    b.Property<string>("FullNameNormalized")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("TEXT")
-                        .UseCollation("NOCASE_NOACCENT");
-
                     b.Property<int>("Participations")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
@@ -227,10 +215,10 @@ namespace MyVocaList.Infra.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Persons_ExternalId");
 
-                    b.HasIndex("FullNameNormalized")
-                        .HasDatabaseName("IX_Persons_FullNameNormalized");
+                    b.HasIndex("FullName")
+                        .HasDatabaseName("IX_Persons_FullName");
 
-                    b.HasIndex("FullNameNormalized", "BirthdayDayMonth")
+                    b.HasIndex("FullName", "BirthdayDayMonth")
                         .IsUnique()
                         .HasDatabaseName("IX_Persons_Name_Birthday")
                         .HasFilter("[BirthdayDayMonth] IS NOT NULL");
@@ -278,12 +266,6 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
-                    b.Property<string>("TitleNormalized")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT")
-                        .UseCollation("NOCASE_NOACCENT");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
@@ -292,9 +274,9 @@ namespace MyVocaList.Infra.Migrations
                     b.HasIndex("ExternalId")
                         .HasDatabaseName("IX_Songs_ExternalId");
 
-                    b.HasIndex("ArtistId", "TitleNormalized")
+                    b.HasIndex("ArtistId", "Title")
                         .IsUnique()
-                        .HasDatabaseName("IX_Songs_ArtistId_TitleNormalized");
+                        .HasDatabaseName("IX_Songs_ArtistId_Title");
 
                     b.ToTable("Songs", (string)null);
                 });
