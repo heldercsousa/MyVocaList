@@ -200,8 +200,8 @@ public class PersonRepositoryTests : IAsyncLifetime
     [Fact]
     public async Task SearchByNameStartsWithAsync_QueryWithoutAccents_FindsAccentedPerson()
     {
-        var person = new Person("João Silva");
-        _db.Set<Person>().Add(person);
+        _db.Set<Person>().Add(new Person("João Silva"));
+        _db.Set<Person>().Add(new Person("Anna Smith")); // should not match "joao"
         await _db.SaveChangesAsync();
 
         var results = await _repo.SearchByNameStartsWithAsync("joao", 10, CancellationToken.None);

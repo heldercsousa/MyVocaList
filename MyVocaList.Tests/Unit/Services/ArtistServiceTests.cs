@@ -109,7 +109,7 @@ public class ArtistServiceTests
     [Fact]
     public async Task UpdateArtistAsync_ValidName_ReturnsSuccess()
     {
-        var existing = new Artist { Id = 1, Name = "Old Name", };
+        var existing = new Artist { Id = 1, Name = "Old Name" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(existing);
         _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
