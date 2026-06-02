@@ -299,6 +299,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
     public async Task GetPagedAsync_QueryWithoutAccents_FindsAccentedArtist()
     {
         _db.Set<Artist>().Add(MakeArtist("Björk"));
+        _db.Set<Artist>().Add(MakeArtist("Adele")); // should not match "bjork"
         await _db.SaveChangesAsync();
 
         var (items, totalCount) = await _repo.GetPagedAsync(1, 20, "bjork", ct: CancellationToken.None);
