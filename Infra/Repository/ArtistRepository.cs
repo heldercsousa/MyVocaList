@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Infra.Collation;
 
 namespace MyVocaList.Infra.Repository;
 
@@ -25,8 +26,8 @@ public class ArtistRepository : IArtistRepository
         {
             var pattern = "%" + query + "%";
             q = q.Where(a => EF.Functions.Like(
-                EF.Functions.Collate(a.Name, "NOCASE_NOACCENT"),
-                EF.Functions.Collate(pattern, "NOCASE_NOACCENT")));
+                EF.Functions.Collate(a.Name, CollationConstants.Default),
+                EF.Functions.Collate(pattern, CollationConstants.Default)));
         }
 
         q = roleFilter switch
@@ -58,8 +59,8 @@ public class ArtistRepository : IArtistRepository
         {
             var pattern = query + "%";
             q = q.Where(a => EF.Functions.Like(
-                EF.Functions.Collate(a.Name, "NOCASE_NOACCENT"),
-                EF.Functions.Collate(pattern, "NOCASE_NOACCENT")));
+                EF.Functions.Collate(a.Name, CollationConstants.Default),
+                EF.Functions.Collate(pattern, CollationConstants.Default)));
         }
 
         return await q
@@ -80,13 +81,13 @@ public class ArtistRepository : IArtistRepository
     /// <inheritdoc />
     public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct)
         => await _db.Artists.AnyAsync(
-            a => EF.Functions.Collate(a.Name, "NOCASE_NOACCENT") == EF.Functions.Collate(name, "NOCASE_NOACCENT"), ct);
+            a => EF.Functions.Collate(a.Name, CollationConstants.Default) == EF.Functions.Collate(name, CollationConstants.Default), ct);
 
     /// <inheritdoc />
     public async Task<bool> ExistsByNameAsync(string name, int excludeId, CancellationToken ct)
         => await _db.Artists.AnyAsync(
             a => a.Id != excludeId &&
-                 EF.Functions.Collate(a.Name, "NOCASE_NOACCENT") == EF.Functions.Collate(name, "NOCASE_NOACCENT"), ct);
+                 EF.Functions.Collate(a.Name, CollationConstants.Default) == EF.Functions.Collate(name, CollationConstants.Default), ct);
 
     /// <inheritdoc />
     public Task AddAsync(Artist artist, CancellationToken ct)

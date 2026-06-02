@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Infra.Collation;
 
 namespace MyVocaList.Infra.EntityEFConfig;
 
@@ -17,7 +18,7 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
         builder.Property(s => s.Title)
                .IsRequired()
                .HasMaxLength(100)
-               .UseCollation("NOCASE_NOACCENT");
+               .UseCollation(CollationConstants.Default);
 
         builder.Property(s => s.FeaturedArtists)
                .IsRequired(false);
