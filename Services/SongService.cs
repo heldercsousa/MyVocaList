@@ -48,20 +48,18 @@ public class SongService : ISongService
             return (false, message, null);
 
         title = title.Trim();
-        var normalized = title.ToLowerInvariant();
 
         var artist = await _artistRepository.GetByIdAsync(artistId, ct);
         if (artist == null)
             return (false, "Artist not found", null);
 
-        if (await _songRepository.ExistsByTitleForArtistAsync(artistId, normalized, ct))
+        if (await _songRepository.ExistsByTitleForArtistAsync(artistId, title, ct))
             return (false, "A song with this title already exists for this artist", null);
 
         var song = new Song
         {
             ArtistId = artistId,
             Title = title,
-            TitleNormalized = normalized,
             FeaturedArtists = featuredArtists?.Trim(),
             Lyrics = lyrics,
             ExternalId = externalId,
@@ -85,17 +83,15 @@ public class SongService : ISongService
             return (false, message);
 
         title = title.Trim();
-        var normalized = title.ToLowerInvariant();
 
         var song = await _songRepository.GetByIdAsync(id, ct);
         if (song == null)
             return (false, "Song not found");
 
-        if (await _songRepository.ExistsByTitleForArtistAsync(song.ArtistId, normalized, id, ct))
+        if (await _songRepository.ExistsByTitleForArtistAsync(song.ArtistId, title, id, ct))
             return (false, "A song with this title already exists for this artist");
 
         song.Title = title;
-        song.TitleNormalized = normalized;
         song.FeaturedArtists = featuredArtists?.Trim();
         song.Lyrics = lyrics;
         song.UpdatedAt = DateTime.UtcNow;
@@ -110,10 +106,10 @@ public class SongService : ISongService
     public async Task<bool> ExistsByTitleForArtistAsync(
         string title, int artistId, int? excludeId = null, CancellationToken ct = default)
     {
-        var normalized = title.Trim().ToLowerInvariant();
+        var trimmed = title.Trim();
         return excludeId == null
-            ? await _songRepository.ExistsByTitleForArtistAsync(artistId, normalized, ct)
-            : await _songRepository.ExistsByTitleForArtistAsync(artistId, normalized, excludeId.Value, ct);
+            ? await _songRepository.ExistsByTitleForArtistAsync(artistId, trimmed, ct)
+            : await _songRepository.ExistsByTitleForArtistAsync(artistId, trimmed, excludeId.Value, ct);
     }
 
     /// <inheritdoc />
@@ -137,8 +133,7 @@ public class SongService : ISongService
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
-        var normalized = string.IsNullOrWhiteSpace(query) ? null : query.Trim().ToLowerInvariant();
-        var (items, totalCount) = await _songRepository.GetPagedAsync(pageNumber, pageSize, normalized, ct);
+        var (items, totalCount) = await _songRepository.GetPagedAsync(pageNumber, pageSize, query?.Trim(), ct);
 
         return (items, totalCount);
     }

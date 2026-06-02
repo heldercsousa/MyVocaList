@@ -5,7 +5,6 @@ public class Person
     public int Id { get; set; } // Primary key for the database
     public Guid? ExternalId { get; set; }   // Reserved for future device/account identity
     public string FullName { get; set; }
-    public string FullNameNormalized { get; set; } // For optimized search
     public int Participations { get; set; } = 0; // Participation counter
     public int Absences { get; set; } = 0; // Absence counter
 
@@ -16,7 +15,6 @@ public class Person
     public Person(string fullName)
     {
         FullName = fullName;
-        FullNameNormalized = string.Empty; // Will be set by the service
     }
 
     public Person() { } // Parameterless constructor for EF Core
@@ -59,11 +57,4 @@ public class Person
         return $"{FullName} {identifier}";
     }
 
-    /// <summary>
-    /// Updates normalization when name changes (will be called by the service)
-    /// </summary>
-    public void SetNormalizedName(string normalizedName)
-    {
-        FullNameNormalized = normalizedName;
-    }
 }

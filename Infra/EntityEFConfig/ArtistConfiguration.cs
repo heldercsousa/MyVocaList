@@ -14,11 +14,8 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
 
         builder.Property(a => a.Name)
                .IsRequired()
-               .HasMaxLength(60);
-
-        builder.Property(a => a.NameNormalized)
-               .IsRequired()
-               .HasMaxLength(60);
+               .HasMaxLength(60)
+               .UseCollation("NOCASE_NOACCENT");
 
         builder.Property(a => a.ExternalId)
                .IsRequired(false)
@@ -34,9 +31,9 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
         builder.Property(a => a.CreatedAt).IsRequired();
         builder.Property(a => a.UpdatedAt).IsRequired();
 
-        builder.HasIndex(a => a.NameNormalized)
+        builder.HasIndex(a => a.Name)
                .IsUnique()
-               .HasDatabaseName("IX_Artists_NameNormalized");
+               .HasDatabaseName("IX_Artists_Name");
 
         builder.HasIndex(a => a.ExternalId)
                .IsUnique()

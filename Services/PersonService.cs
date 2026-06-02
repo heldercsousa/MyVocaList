@@ -145,9 +145,7 @@ public class PersonService : IPersonService
             BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim(),
             Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim()
         };
-        // DB collation (NOCASE_NOACCENT) handles accent normalization at query time.
-        // FullNameNormalized stores the raw trimmed name.
-        person.SetNormalizedName(trimmedName);
+        // DB collation (NOCASE_NOACCENT) handles case/accent normalization at query time.
 
         await _personRepository.AddAsync(person);
         await _personRepository.SaveChangesAsync();
@@ -233,7 +231,6 @@ public class PersonService : IPersonService
 
         var trimmedName = fullName.Trim();
         person.FullName = trimmedName;
-        person.SetNormalizedName(trimmedName);
         person.BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim();
         person.Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
 

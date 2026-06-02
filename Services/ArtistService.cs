@@ -50,15 +50,13 @@ public class ArtistService : IArtistService
             return (false, message, null);
 
         name = name.Trim();
-        var normalized = name.ToLowerInvariant();
 
-        if (await _artistRepository.ExistsByNameAsync(normalized, ct))
+        if (await _artistRepository.ExistsByNameAsync(name, ct))
             return (false, "An artist with this name already exists", null);
 
         var artist = new Artist
         {
             Name = name,
-            NameNormalized = normalized,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -77,17 +75,15 @@ public class ArtistService : IArtistService
             return (false, message);
 
         name = name.Trim();
-        var normalized = name.ToLowerInvariant();
 
         var artist = await _artistRepository.GetByIdAsync(id, ct);
         if (artist == null)
             return (false, "Artist not found");
 
-        if (await _artistRepository.ExistsByNameAsync(normalized, id, ct))
+        if (await _artistRepository.ExistsByNameAsync(name, id, ct))
             return (false, "An artist with this name already exists");
 
         artist.Name = name;
-        artist.NameNormalized = normalized;
         artist.UpdatedAt = DateTime.UtcNow;
         artist.HasManualEdits = true;
 
@@ -129,8 +125,7 @@ public class ArtistService : IArtistService
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
-        var normalized = string.IsNullOrWhiteSpace(query) ? null : query.Trim().ToLowerInvariant();
-        var (items, totalCount) = await _artistRepository.GetPagedAsync(pageNumber, pageSize, normalized, roleFilter, ct);
+        var (items, totalCount) = await _artistRepository.GetPagedAsync(pageNumber, pageSize, query?.Trim(), roleFilter, ct);
 
         var dtos = items.Select(x => new ArtistListItemDto(
             x.artist.Id,
@@ -149,8 +144,7 @@ public class ArtistService : IArtistService
         if (string.IsNullOrWhiteSpace(query))
             return [];
 
-        var normalized = query.Trim().ToLowerInvariant();
-        var artists = await _artistRepository.SearchByNameAsync(normalized, maxResults, ct);
+        var artists = await _artistRepository.SearchByNameAsync(query.Trim(), maxResults, ct);
 
         return artists.Select(a => new ArtistListItemDto(
             a.Id, a.Name, a.ExternalProvider, a.HasManualEdits, 0));

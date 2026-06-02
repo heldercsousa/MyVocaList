@@ -17,22 +17,22 @@ public class SongRepository : ISongRepository
 
     /// <inheritdoc />
     public async Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedAsync(
-        int pageNumber, int pageSize, string? normalizedQuery, CancellationToken ct)
+        int pageNumber, int pageSize, string? query, CancellationToken ct)
     {
         var q = _db.Songs.AsQueryable();
 
-        if (!string.IsNullOrEmpty(normalizedQuery))
+        if (!string.IsNullOrEmpty(query))
         {
-            var pattern = normalizedQuery + "%";
+            var pattern = query + "%";
             q = q.Where(s => EF.Functions.Like(
-                EF.Functions.Collate(s.TitleNormalized, "NOCASE"),
-                EF.Functions.Collate(pattern, "NOCASE")));
+                EF.Functions.Collate(s.Title, "NOCASE_NOACCENT"),
+                EF.Functions.Collate(pattern, "NOCASE_NOACCENT")));
         }
 
         var totalCount = await q.CountAsync(ct);
 
         var items = await q
-            .OrderBy(s => s.TitleNormalized)
+            .OrderBy(s => s.Title)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(s => new SongListItemDto(
@@ -58,19 +58,17 @@ public class SongRepository : ISongRepository
             s => s.ExternalId == externalId && s.ExternalProvider == provider, ct);
 
     /// <inheritdoc />
-    public async Task<bool> ExistsByTitleForArtistAsync(int artistId, string normalizedTitle, CancellationToken ct)
+    public async Task<bool> ExistsByTitleForArtistAsync(int artistId, string title, CancellationToken ct)
         => await _db.Songs.AnyAsync(
-            s => s.ArtistId == artistId && EF.Functions.Like(
-                EF.Functions.Collate(s.TitleNormalized, "NOCASE"),
-                EF.Functions.Collate(normalizedTitle, "NOCASE")), ct);
+            s => s.ArtistId == artistId &&
+                 EF.Functions.Collate(s.Title, "NOCASE_NOACCENT") == EF.Functions.Collate(title, "NOCASE_NOACCENT"), ct);
 
     /// <inheritdoc />
     public async Task<bool> ExistsByTitleForArtistAsync(
-        int artistId, string normalizedTitle, int excludeId, CancellationToken ct)
+        int artistId, string title, int excludeId, CancellationToken ct)
         => await _db.Songs.AnyAsync(
-            s => s.Id != excludeId && s.ArtistId == artistId && EF.Functions.Like(
-                EF.Functions.Collate(s.TitleNormalized, "NOCASE"),
-                EF.Functions.Collate(normalizedTitle, "NOCASE")), ct);
+            s => s.Id != excludeId && s.ArtistId == artistId &&
+                 EF.Functions.Collate(s.Title, "NOCASE_NOACCENT") == EF.Functions.Collate(title, "NOCASE_NOACCENT"), ct);
 
     /// <inheritdoc />
     public Task AddAsync(Song song, CancellationToken ct)
