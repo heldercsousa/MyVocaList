@@ -30,7 +30,7 @@
 |--------|---------|--------|-------|
 | 2026-03 | **Venues CRUD** | ✅ Done | Full MD3 list, search, multi-select, swipe-delete |
 | 2026-04 | **Person CRUD** | ✅ Done | Autocomplete field, duplicate detection. Plan: `Docs/Management/BusinessFeatures/persons/plan.md` |
-| 2026-05 | **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/Management/BusinessFeatures/artists-songs/` · Plan: `Docs/Management/BusinessFeatures/artists-songs/plan.md` |
+| 2026-05 | **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/Management/BusinessFeatures/artists-songs/` · Plan: `Docs/Management/BusinessFeatures/artists-songs/plan.md` · ⏳ **Helder:** Phase 16C emulator smoke test pending — see `tasks.md § Phase 16C` |
 | 2026-05 | ↳ Song Karaoke URLs | ✅ Done | YouTube URL management per song; SongFormPage section, settings, converters, tests. Spec: `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/` |
 | 2026-05 | ↳ Bug: GoToSettings navigation exception | ✅ Fixed | `GoToAsync("settings")` called from pushed-page context (SongFormPage); FlyoutItem requires absolute route `//settings`. Single-line fix in `SongFormViewModel.cs`. |
 | 2026-06 | **Crash & Error Reporting** | ✅ Done | 2 bugs found in review (fixed). Spec: `Docs/Management/BusinessFeatures/crash-reporting/` |
@@ -43,7 +43,7 @@
 | 2026-06 | **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
 | 2026-06 | **Visual Theme Refresh** | 🔵 Deferred | Two paths evaluated (2026-06-02). Path B (Blazor Hybrid) chosen as long-term direction. Path A (theme-only) deferred pending spike outcome. |
 | 2026-06 | ↳ Theme Refresh Only | 🔵 Deferred | Superseded by Blazor Hybrid decision. Will apply Karaoke Neon palette via MudTheme during the spike/migration, not as a standalone DevExpress theme patch. |
-| 2026-06 | ↳ ui-2nd-refactor | 📋 Spec | **Direction decided (2026-06-02):** Blazor Hybrid + MudBlazor + shared RCL. MudMCP installed. Parallel spike approach approved. Spec: `Docs/Management/BusinessFeatures/UI-2nd-refactor/` — prompt.md documents full decision session. |
+| 2026-06 | ↳ ui-2nd-refactor | 📋 Spec | **Direction decided (2026-06-02):** Blazor Hybrid + MudBlazor + shared RCL. MudMCP installed. Parallel spike approach approved. Spec: `Docs/Management/BusinessFeatures/UI-2nd-refactor/` — prompt.md documents full decision session. · ⏳ **Helder:** sync mcpmarket MudBlazor skill (`mcpmarket.com/tools/skills/frontend-development-mudblazor-ui`) + verify MudMCP first-run index (~100 components) |
 | 2026-06 | **Data Backup & Restore — Tier 1 + 3** | ✅ Done | Local auto-backup (SQLite snapshot + transaction log) + manual share sheet export/restore. Plan: `Docs/Management/BusinessFeatures/backup-restore/plan.md`. Spec: `Docs/Management/BusinessFeatures/backup-restore/design.md` |
 | 2026-06 | **User Tutorial/Learning** | 💡 Pending | Local or/and online tutorials. Evaluation of best practices in the lower possible effort to produce 1st version and update it always app receives new features and updates existing ones |
 | 2026-06 | **Website** | 💡 Pending | Evaluate the usage of the website - for marketing, documentation, and community engagement - myvocalist.com / myvocalist.app |
