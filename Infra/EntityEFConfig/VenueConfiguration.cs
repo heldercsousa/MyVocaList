@@ -18,7 +18,8 @@ namespace MyVocaList.Infra.EntityEFConfig
             builder.Property(e => e.Name)
                    .HasColumnType("TEXT")
                    .IsRequired()
-                   .HasMaxLength(30); // Multilingual support: EN, PT, ES, FR, JA, KO
+                   .HasMaxLength(30) // Multilingual support: EN, PT, ES, FR, JA, KO
+                   .UseCollation("NOCASE_NOACCENT");
         }
     }
 }
