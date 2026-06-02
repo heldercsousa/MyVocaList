@@ -5,7 +5,7 @@ Karaoke queue management for live events. Manages one active queue at a time wit
 
 **Stack:** .NET MAUI 10 · net10.0-android · net10.0-ios · C# 13 · CommunityToolkit.Mvvm · Serilog · EF Core 10 · SQLite · DevExpress MAUI v25.2.4
 **Planned:** MediatR · FluentValidation (not yet registered in MauiProgram.cs)
-**Post-MVP UI migration:** Blazor Hybrid + MudBlazor + shared RCL. DevExpress MAUI will be replaced (no Windows/WinUI3 support). Research + decision: `Docs/Management/BusinessFeatures/UI-2nd-refactor/`.
+**Post-MVP UI migration (pending spike):** Blazor Hybrid + MudBlazor + shared RCL is the target direction. DevExpress MAUI is the target for replacement (no Windows/WinUI3 support) pending spike go decision. Research + decision: `Docs/Management/BusinessFeatures/UI-2nd-refactor/`.
 
 ## Architecture
 Architecture layer constraints are defined in `code-principles.md § Architecture Constraints`. The "business logic in Services" constraint is unamendable — see Constitutional Constraints.
@@ -25,6 +25,7 @@ Do not activate all MCP servers in every session. Load only what the current tas
 - MAUI/DevExpress implementation: Context7 + DevExpress MCP only
 - Database schema work: SQLite MCP only
 - Tasks that don't touch MAUI APIs: disable Context7 to reduce context overhead
+- Blazor Hybrid / MudBlazor work: MudMCP only (deactivate DevExpress MCP — no overlap)
 
 If tool definitions from all active MCPs exceed ~5,000 tokens combined, deactivate the least-relevant server for that session.
 
@@ -33,6 +34,7 @@ Approved MCP servers for this project (local-first only):
 - Context7 (library docs) — official server only; never install `context7-docs` or similarly named variants
 - SQLite MCP — local stdio only; db at `.claude/MyVocaList.db`
 - DevExpress MAUI MCP — project-installed only
+- MudMCP (`mudblazor`) — community server `mcbodge/MudMCP`, cloned locally at `C:/Users/helde/.claude/tools/MudMCP`; 12 tools for MudBlazor component docs and API reference. **Activate only during Blazor Hybrid / MudBlazor spike or migration work.** Do not activate for current MAUI-native development sessions.
 
 Rules:
 - Never add an MCP server discovered from a public registry without explicit review
@@ -231,7 +233,7 @@ The three items marked `[Unamendable]` require architecture review to change —
   *Reason: multilingual identifiers make search, grep, and onboarding unreliable.*
 - **Native dialogs** `[Unamendable — requires architecture review]`: NEVER use `DisplayAlert`, `DisplayActionSheet`, `DisplayPromptAsync`. Use `dx:BottomSheet` — see `myvocalist-coding` skill.
   *Reason: these dialogs bypass the app's theme, violate MD3 interaction patterns, and on Android are not dismissible via back gesture.*
-- **UI Component Priority** `[Unamendable — requires architecture review]`: DevExpress first, always. Use stock MAUI only when DevExpress has no equivalent — see `myvocalist-coding` skill.
+- **UI Component Priority** `[Unamendable — requires architecture review]`: DevExpress first, always. Use stock MAUI only when DevExpress has no equivalent — see `myvocalist-coding` skill. *Note: Blazor Hybrid + MudBlazor migration is under evaluation (see Stack § Post-MVP). DevExpress-first remains in full effect until spike produces a go decision.*
   *Reason: mixing component libraries produces visual inconsistency and theming conflicts.*
 - **MD3 terminology**: All component names, style keys, BindableProperty names, and rules file documentation must use official MD3 terminology (m3.material.io). Code must be directly cross-referenceable against MD3 docs without mental translation. When unsure, fetch the official docs — never invent names.
   *Reason: invented names require mental translation and break cross-reference with Material Design documentation.*
