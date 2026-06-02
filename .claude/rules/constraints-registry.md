@@ -11,6 +11,7 @@ Review before implementing features in the indicated area.
 - **ObservableRangeCollection / DXCollectionView reset events:** see `code-principles.md § UI Thread Performance — ObservableRangeCollection`.
 - **Native dialogs:** Do NOT use `DisplayAlert`, `DisplayActionSheet`, or `DisplayPromptAsync`. Use `dx:BottomSheet` only. (CLAUDE.md)
 - **Selection after reload:** After a list refresh or search, clear selection (`ClearRange` + `SelectedCount = 0`). Never restore prior selection via `ReplaceRange` — it fires a second Reset and crosses a data-reload boundary. (code-principles.md)
+- **DevExpress MAUI — no Windows/WinUI3 support (hard architectural constraint):** DevExpress MAUI components do not support the Windows/WinUI3 target. Any feature requiring Windows desktop support must use an alternative framework. This is the architectural driver for the post-MVP Blazor Hybrid + MudBlazor migration decision. See `Docs/Management/BusinessFeatures/UI-2nd-refactor/`.
 
 ---
 
@@ -51,6 +52,13 @@ Review before implementing features in the indicated area.
   - Under `Management` root → parent `{15F1DA03-2180-47BF-BC40-1BB457C97F9E}`
 
   **GUIDs:** Use sequential pattern `{FA1234BC-0001-4000-8000-00000000XXXX}` incrementing from the last used value (currently `0014`). Check the `.sln` before picking the next number.
+
+---
+
+## Design / Prototyping Tools
+
+- **Stitch MCP — generates CSS/HTML/Tailwind, NOT MudBlazor:** Stitch converts designs to pure CSS + HTML or Tailwind — no MudBlazor Code Connect integration. Do NOT use Stitch to generate MudBlazor components. Use MudMCP (`mudblazor` server key) for component docs and generation. Stitch's only value in this project is design-token export (palette, typography) → manual mapping to `MudTheme`. Evaluated 2026-06-02.
+- **Figma MCP — no MudBlazor Code Connect; $15/month minimum:** Figma MCP requires a paid plan ($15/month Professional) for useful call volume. No MudBlazor Code Connect plugin exists. Not suitable for MudBlazor code generation from designs. Evaluated 2026-06-02.
 
 ---
 
