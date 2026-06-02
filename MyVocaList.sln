@@ -338,9 +338,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "about-page", "about-page", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-refactor", "{4CB09F16-6E81-425E-9080-840BABFB66BF}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.docx = Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.docx
-		Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.pdf = Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.pdf
-		Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.pdf = Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.pdf
+		Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.md = Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.md
+		Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.md = Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.md
+		Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.md = Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.md
 	EndProjectSection
 EndProject
 Global
