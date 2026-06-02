@@ -468,3 +468,11 @@ CLAUDE.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
 .mcp.json
 Docs/Management/gentle-splashing-wave.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/feedback_claude_md_blocking_restore.md
+.claude/settings.json
+CLAUDE.md
+CLAUDE.md
+CLAUDE.md
+.claude/rules/constraints-registry.md
+.claude/rules/constraints-registry.md
+.claude/settings.json
