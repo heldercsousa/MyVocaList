@@ -453,3 +453,16 @@ Infra/Repository/CatalogRepository.cs
 Infra/Repository/CatalogRepository.cs
 Docs/Management/BACKLOG.md
 Infra/Collation/CollationConstants.cs
+Docs/Management/gentle-splashing-wave.md
+Docs/Management/gentle-splashing-wave.md
+Docs/Management/BusinessFeatures/UI-2nd-refactor/prompt.md
+.mcp.json
+Docs/Management/BACKLOG.md
+.mcp.json
+MyVocaList.sln
+.claude/settings.json
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/feedback_claude_md_blocking_restore.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
+CLAUDE.md
+.claude/settings.json
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
