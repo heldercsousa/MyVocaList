@@ -1,7 +1,24 @@
 # Code Principles
 
-## Language
-All code, comments, logs, and UI text must be English only.
+> Language rule: English only — see `CLAUDE.md § Constitutional Constraints`.
+
+## Contents
+
+- [XML Documentation Comments](#xml-documentation-comments)
+- [Nullable Reference Types — DISABLED](#nullable-reference-types--disabled)
+- [Architecture Constraints](#architecture-constraints)
+- [C# Style](#c-style)
+- [Exception Handling](#exception-handling)
+- [Global Usings](#global-usings)
+- [Pagination](#pagination)
+- [DI Registration Conventions](#di-registration-conventions-mauiprogramcs)
+- [UI Thread Performance — ObservableRangeCollection](#ui-thread-performance--observablerangecollection)
+- [EF Core / SQLite](#ef-core--sqlite)
+- [Static Analysis Suppressions](#static-analysis-suppressions)
+
+---
+
+> Spec language determinism (prohibited vague terms): see `workflow.md § Spec quality four-gate review`.
 
 ## XML Documentation Comments
 - **Interfaces are the source of truth for method documentation.** Write `<summary>`, `<param>`, and `<returns>` on the interface method.
@@ -38,13 +55,13 @@ public sealed class VenueService : IVenueService
 - This is a deliberate project decision — do not "fix" it by enabling stricter checking
 
 ## Architecture Constraints
-- Business logic lives in **Services** only — never in ViewModels or pages
-- Repository interfaces in **Domain** — implementations in **Infra**
-- Only the **MAUI** project references Infra (for DI wiring, AppDbContext, migrations)
-- Services depend only on Domain interfaces — never on Infra types directly
-- DTOs are records in the **Contracts** project
+
+Architecture layer constraints are defined in `CLAUDE.md § Architecture` — they apply equally to code.
 
 ## C# Style
+
+### Design Principles
+- Prefer composition over inheritance
 
 ### Modern C# (13+)
 - Use `record` for DTOs and value objects
@@ -151,6 +168,8 @@ System.Threading.Tasks
 System.Windows.Input
 ```
 
+> *Verify against the project's `Directory.Build.props` — this list is a snapshot, not the authoritative source.*
+
 ### MyVocaList (MAUI) — GlobalUsings.cs
 ```csharp
 CommunityToolkit.Mvvm.ComponentModel
@@ -169,16 +188,22 @@ MyVocaList.UI.Services
 MyVocaList.UI.ViewModels
 ```
 
+> *Verify against the project's `GlobalUsings.cs` — this list is a snapshot, not the authoritative source.*
+
 ### Services — GlobalUsings.cs
 ```csharp
 Microsoft.Extensions.Logging
 ```
+
+> *Verify against the project's `GlobalUsings.cs` — this list is a snapshot, not the authoritative source.*
 
 ### Infra — GlobalUsings.cs
 ```csharp
 Microsoft.Extensions.Logging
 System.Text
 ```
+
+> *Verify against the project's `GlobalUsings.cs` — this list is a snapshot, not the authoritative source.*
 
 ### Rule for new usings
 - Applies to 2+ types in one project → add to that project's `GlobalUsings.cs`
@@ -228,6 +253,16 @@ RunOnUiThread(() =>
 ```
 
 ## EF Core / SQLite
-- Migrations applied on startup via `MigrateAsync()` — blocking call via `Task.Run(...).GetAwaiter().GetResult()`
-- `__EFMigrationsLock` row is cleared before each `MigrateAsync()` call (SQLite single-user workaround)
-- `CollationInterceptor` applied globally for case-insensitive search
+
+EF Core / SQLite constraints: see `.claude/rules/constraints-registry.md § EF Core / SQLite`.
+
+## Static Analysis Suppressions
+
+**Never add a new suppression** (`#pragma warning disable`, `[SuppressMessage]`, `// ReSharper disable`) without:
+1. A comment explaining why the suppression is necessary (one sentence minimum)
+2. An expiry comment if the suppression is temporary: `// TODO: Remove after [condition]`
+3. Logging the suppression in `.claude/exception-registry.md` if it suppresses a constitutional rule
+
+Existing suppressions in `Directory.Build.props` for nullable analysis (CS8618, CS8601, CS8603, CS8604, CS8625, CS8602, etc.) are pre-approved project decisions — do not add to that list without architecture review.
+
+If you cannot fix a warning without suppressing it, log a `blocked: spec gap` status and stop.

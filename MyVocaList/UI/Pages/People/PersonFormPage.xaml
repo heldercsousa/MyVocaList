@@ -20,6 +20,7 @@
                 x:Name="nameField"
                 LabelText="Full Name"
                 Placeholder="First and last name"
+                Text="{Binding PersonName, Mode=TwoWay}"
                 HasError="{Binding NameHasError}"
                 ErrorText="{Binding NameErrorText}"
                 Suggestions="{Binding Suggestions}"

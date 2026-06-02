@@ -203,8 +203,23 @@ xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
 
 | Item type | Selection control slot | Reason |
 |---|---|---|
-| Text-only (no leading/trailing) | `LeadingContent` (LEFT) | Selection is primary action |
-| With leading element (icon/avatar/image) | `TrailingContent` (RIGHT) | Leading slot occupied; don't stack |
+| Text-only (no leading/trailing) | `TrailingContent` (RIGHT) | MD3 baseline spec: "With text and trailing checkbox" — trailing is the default selection control slot |
+| With leading element (icon/avatar/image), no trailing action | `TrailingContent` (RIGHT) | Leading slot occupied by element; checkbox stays trailing — MD3 spec: "With leading icon and trailing checkbox" |
+| With trailing action button (multi-action row) | `LeadingContent` (LEFT) | Trailing slot is taken by the independent action button; checkbox moves left — MD3 multi-action pattern. The leading icon is dropped to avoid crowding. |
+
+**Multi-action row layout (e.g. Artist row with Catalog button):**
+```xml
+<lists:ListItem.LeadingContent>
+    <!-- Checkbox is the ONLY leading element — person icon removed to avoid crowding -->
+    <dx:CheckEdit IsChecked="False" InputTransparent="True" VerticalOptions="Center" />
+</lists:ListItem.LeadingContent>
+<lists:ListItem.TrailingContent>
+    <!-- Catalog navigation button gets its own independent touch target -->
+    <dx:DXButton Style="{StaticResource IconButton}"
+                 Icon="queue_music_outlined"
+                 InputTransparent="False" />
+</lists:ListItem.TrailingContent>
+```
 
 `IsSelected=true` → container `BackgroundColor=SecondaryContainer` (applies regardless).
 
@@ -396,3 +411,63 @@ Namespace: `xmlns:states="clr-namespace:MyVocaList.UI.Components.States"`
 - **Was:** `RobotoMedium 14sp` (= Label Large)
 - **Correct:** `RobotoMedium 12sp` = Label Medium per MD3 Navigation Drawer spec
 - **In code:** `Style="{StaticResource NavDrawerSectionHeader}"` (sets 12sp Medium)
+
+---
+
+## Filter Chip (MD3)
+
+**MD3 reference:** m3.material.io/components/chips/overview — Filter variant
+**DevExpress component:** `dxe:FilterChipGroup` (see `devexpress-patterns.md § FilterChipGroup`)
+
+### When to use Filter Chips
+
+- Toggling a list between discrete views or subsets (e.g. Authors / Performers)
+- Multiple filter chips can be selected simultaneously (non-exclusive by default)
+- Place directly below the TopAppBar / TitleView, above the list content
+
+### Layout pattern (Filter Chip row above list)
+
+```xml
+<Grid>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />  <!-- chip row -->
+        <RowDefinition Height="*" />     <!-- list -->
+    </Grid.RowDefinitions>
+
+    <dxe:FilterChipGroup Grid.Row="0"
+                         SelectedItems="{Binding SelectedFilters, Mode=TwoWay}"
+                         Margin="16,4">
+        <dxe:FilterChipGroup.ItemsSource>
+            <x:Array Type="{x:Type x:String}">
+                <x:String>Label A</x:String>
+                <x:String>Label B</x:String>
+            </x:Array>
+        </dxe:FilterChipGroup.ItemsSource>
+    </dxe:FilterChipGroup>
+
+    <dxcv:DXCollectionView Grid.Row="1" ... />
+</Grid>
+```
+
+### ViewModel: chip selection → domain enum mapping
+
+```csharp
+partial void OnSelectedFiltersChanged(System.Collections.IList value)
+{
+    var selected = value?.Cast<string>().ToHashSet(StringComparer.Ordinal) ?? [];
+    Filter = (selected.Contains("Label A"), selected.Contains("Label B")) switch
+    {
+        (true, false) => MyFilter.AOnly,
+        (false, true) => MyFilter.BOnly,
+        _             => MyFilter.All
+    };
+}
+```
+
+### MD3 terminology
+
+| Term | Meaning |
+|------|---------|
+| Filter chip | Chip that filters a content set; can be selected/deselected |
+| Filter chip group | Row of filter chips (one or more active at a time) |
+| Selected state | Chip is highlighted; contributes to the active filter |

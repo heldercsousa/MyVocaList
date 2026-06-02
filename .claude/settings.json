@@ -1,12 +1,33 @@
-{
+﻿{
+  "plansDirectory": "Docs/Management",
+  "permissions": {
+    "deny": [
+      "Edit(CLAUDE.md)",
+      "Write(CLAUDE.md)",
+      "Edit(.claude/rules/*.md)",
+      "Write(.claude/rules/*.md)"
+    ]
+  },
   "hooks": {
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "timeout": 300,
+            "statusMessage": "Initializing task tracking...",
+            "prompt": "Task JSON: $ARGUMENTS\n\nYou are the task initialization agent. Complete each step fully before starting the next.\n\n## STEP 1 — PARSE\nFrom the task JSON, extract: id, title, and planFile (the path to the associated plan file; the field may be named planFile, plan_file, plan, or similar — use whatever field is present).\n\n## STEP 2 — DERIVE TASK-LOG PATH\nIf planFile is present:\n  task-log = <planFile directory> + \"/\" + <planFile basename without extension> + \"-task-log.md\"\n  Example: \"Docs/DevEnv/plans/artists-songs.md\" → \"Docs/DevEnv/plans/artists-songs-task-log.md\"\nIf planFile is absent:\n  task-log = \"Docs/DevEnv/plans/unassigned-task-log.md\"\nAll paths are relative to CLAUDE_PROJECT_DIR.\n\n## STEP 3 — SAVE ACTIVE TASK STATE\nWrite to \".claude/active-task.json\" (in CLAUDE_PROJECT_DIR):\n{\"taskId\":\"<id>\",\"taskTitle\":\"<title>\",\"planFile\":\"<planFile path or empty string>\",\"taskLogFile\":\"<task-log path>\"}\n\n## STEP 4 — CLEAR CHANGED-FILES BUFFER\nOverwrite \".claude/changed-files.txt\" with an empty file (clear any previous content — do not append).\n\n## STEP 5 — CHECK FOR INTERRUPTED BUILD\nRead the task-log file if it exists. Search for a section \"## Task: <title>\".\nIf that section has \"**Status:** Check build\" → run the CHECK BUILD SEQUENCE below, then stop.\nOtherwise proceed to STEP 6.\n\n## STEP 6 — APPEND IN-PROGRESS ENTRY\nAppend this block to the task-log file (create the file if it does not exist):\n\n---\n## Task: <title>\n**Plan:** <planFile relative path, or \"unassigned\">\n**Status:** in progress\n**Started:** <today MM/DD/YYYY>\n\n---\n## CHECK BUILD SEQUENCE — max 3 attempts\n\nFor each attempt N (1, 2, 3):\n1. Run from CLAUDE_PROJECT_DIR: dotnet build MyVocaList.sln --no-restore -v q 2>&1 | tail -60\n2. If output contains \"Build succeeded\":\n   - In the task-log, update this task's **Status** line to \"To Review\"\n   - Run: git add -A && git commit -m \"chore: build OK — <title>\" && git push origin HEAD\n   - STOP.\n3. If build failed AND N < 3: fix the errors in source files, then run attempt N+1.\n4. If build failed AND N = 3:\n   - Update **Status** to \"Build failure\"\n   - Append under the task entry: \"### Build notes\\nRecurring build failure (3 attempts). Errors: <summary>. Root cause (business view): <diagnosis>\"\n   - Run: git add -A && git commit -m \"chore: build failure — <title>\" && git push origin HEAD\n   - STOP."
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import json,sys; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); r=json.dumps({'continue':False,'stopReason':'WORKFLOW GATE: delegate coding to a subagent (workflow.md Rule 2). Use the Agent tool.'}) if any(fp.endswith(e) for e in ('.cs','.xaml','.xaml.cs')) else ''; print(r) if r else None\" 2>/dev/null || true"
+            "command": "python -c \"import json,sys; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); any(fp.endswith(e) for e in ('.cs','.xaml','.xaml.cs')) and print('WORKFLOW REMINDER: Main agent is editing a code file directly. Prefer delegating to a subagent (workflow.md Rule 2).') \" 2>/dev/null || true"
           }
         ]
       }
@@ -17,13 +38,44 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && dotnet build MyVocaList.sln --no-restore -v q 2>&1 | tail -40"
-          },
+            "command": "python -c \"import json,sys,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); rel=os.path.relpath(fp,proj).replace(os.sep,'/') if fp else ''; open(os.path.join(proj,'.claude','changed-files.txt'),'a',encoding='utf-8').write(rel+'\\n') if fp else None\" 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
           {
             "type": "command",
-            "async": true,
-            "command": "FILE=$(python -c \"import json,sys; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('file_path',''))\" 2>/dev/null); if [ -n \"$FILE\" ]; then cd \"$CLAUDE_PROJECT_DIR\" && git add \"$FILE\" 2>/dev/null && if ! git diff --cached --quiet 2>/dev/null; then git commit -m \"wip: $(basename \\\"$FILE\\\")\" --quiet 2>/dev/null && git push origin HEAD --quiet 2>/dev/null; fi; fi 2>/dev/null || true",
-            "statusMessage": "Securing changes to remote..."
+            "command": "python -c \"import json,sys,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); services=os.path.join(proj,'MyVocaList.Services'); is_service=fp and fp.startswith(services) and fp.endswith('.cs') and not fp.endswith('Tests.cs'); print('TDD REMINDER: You just edited a Services file. Per testing.md, a failing test must exist before implementation code is written. If this is a new method or branch, ensure MyVocaList.Tests has a corresponding test that was red before this edit.') if is_service else None\" 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import os,subprocess; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); result=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); result.stdout.strip() and print('\\u26a0\\ufe0f Subagent returned with uncommitted changes — run /project:commit or the Stop hook will auto-commit at session end.')\" 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -NonInteractive -File .claude/scripts/sync-docs-to-sln.ps1 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import os,json; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); settings=os.path.join(proj,'.claude','settings.json'); data=json.load(open(settings,encoding='utf-8')); hooks=data.get('hooks',{}); expected=['TaskCreated','PreToolUse','PostToolUse','PostCompact','TaskCompleted','Stop','SessionStart']; missing=[h for h in expected if h not in hooks]; print('HOOK HEALTH OK — all expected hooks present.') if not missing else print('HOOK HEALTH WARNING — missing hooks: '+', '.join(missing)+'. Review .claude/settings.json before proceeding.')\" 2>/dev/null || echo 'HOOK HEALTH CHECK — could not verify hooks (settings.json unreadable or Python unavailable).'"
           }
         ]
       }
@@ -33,17 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Spec → Plan → Implement → Review — never skip to implementation. (6) English only in code, comments, logs, UI text. (7) After every completed task: /project:review → /project:commit (stage, commit, push).'"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd \"$CLAUDE_PROJECT_DIR\" && STATUS=$(git status --porcelain 2>/dev/null) && if [ -n \"$STATUS\" ]; then printf '{\"systemMessage\": \"⚠️ Uncommitted changes detected — run /project:commit to complete the task.\"}'; fi"
+            "command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Spec → Plan → Implement → Review — never skip to implementation. (6) English only in code, comments, logs, UI text. (7) After every completed task: /project:review → /project:commit (stage, commit, push). SPEC RE-READ REMINDER: After context compaction, re-read the active feature spec (Docs/specs/<feature>/design.md and requirements.md) before continuing implementation — compaction discards loaded spec context and continuing without re-reading risks spec drift.'"
           }
         ]
       }
@@ -53,9 +95,32 @@
         "hooks": [
           {
             "type": "agent",
-            "prompt": "A task just reached a terminal state. Full task context (JSON): $ARGUMENTS\n\nStep 1 — ALWAYS (any status): append one row to Docs/task-log.md under the existing table:\n`| MM/DD/YYYY | <task name/title from JSON> | <status from JSON> | <one-line outcome or reason, under 100 chars> |`\nExtract status verbatim from the JSON (completed / failed / blocked / cancelled / skipped).\n\nStep 2 — ONLY if status is 'completed' or 'done': also append ONE line to Docs/Changelog/changelog.md.\nChangelog format (match existing entries exactly): `- **MM/DD/YYYY** - type - Brief description`\n- Type: feat / fix / test / docs / chore / refactor / perf\n- Description: under 120 chars, past tense, describes the deliverable\n- Insert at the TOP of the current month's entries section (right after the `## Entries for ...` header)\n- Never modify or reorder existing changelog entries\n- Skip trivial completions: status-only updates or bookkeeping with no file deliverable\n\nWrite only to these two files — no other changes.",
-            "timeout": 90,
-            "statusMessage": "Recording task status..."
+            "timeout": 600,
+            "statusMessage": "Processing task completion...",
+            "prompt": "Task JSON: $ARGUMENTS\n\nYou are the task completion agent. Complete each step fully before starting the next.\n\n## STEP 1 — SETUP\na. Parse task JSON: id, title, description, planFile.\nb. Read \".claude/active-task.json\" for taskLogFile. If missing, derive it: same directory as planFile + <planFile-basename-without-ext>-task-log.md. If no planFile: \"Docs/DevEnv/plans/unassigned-task-log.md\".\nc. Read \".claude/changed-files.txt\" — list of changed files (relative paths, one per line). Identify CODE FILES: those ending in .cs, .xaml, or .xaml.cs.\nd. CLASSIFY: if task title or description contains any of [review, audit, QA, code review, check pass] → REVIEW TASK. Otherwise → NEW ASSET/ENHANCEMENT TASK.\n\n## STEP 2 — ASSESS CHANGE DESCRIPTIONS\nFor each file in the changed-files list, briefly read it.\n- If the change involves non-obvious logic, a business rule, architectural decision, or a workaround: write a 1-sentence business-perspective WHY (not what the code does). Max 100 chars.\n- If the change is self-evident from the file name and context: no description needed.\n\n---\n## NEW ASSET/ENHANCEMENT TASK STEPS:\n\n### STEP 3A — UPDATE TASK-LOG\nFind \"## Task: <title>\" in the task-log file. Update that section:\n  **Status:** Early task done (Check build)    ← omit \"(Check build)\" if NO code files changed\n  **Completed:** <today MM/DD/YYYY>\n  ### Changed files:\n  - `<relative path>`[ — <description if non-obvious>]\n  (one line per changed file)\n\n### STEP 4A — UPDATE CHANGELOG\nIn Docs/Changelog/changelog.md, find \"## Entries for <current month MMMM YYYY>\" and insert immediately after that header line:\n- **MM/DD/YYYY** - Early task done. Plan: [<plan basename>](<planFile>), Tasks: <task title>. Details: [task-log](<taskLogFile>)\n\n### STEP 5A — COMMIT AND PUSH\nRun and wait for completion: git add -A && git commit -m \"task: <title>\" && git push origin HEAD\n\n### STEP 6A — CHECK BUILD AND TEST\nIf code files changed → run CHECK BUILD AND TEST SEQUENCE (see below). Otherwise stop.\n\n---\n## REVIEW TASK STEPS:\n\n### STEP 3B — UPDATE TASK-LOG\nFind \"## Task: <title>\" in the task-log file. Update that section:\n  **Status:** Review task done\n  **Completed:** <today MM/DD/YYYY>\n  ### Changed files:\n  - `<relative path>`[ — <description if non-obvious>]\n\n### STEP 4B — UPDATE CHANGELOG\nIn Docs/Changelog/changelog.md, insert after current month header:\n- **MM/DD/YYYY** - Review task done. Plan: [<plan basename>](<planFile>), Tasks: <task title>. Details: [task-log](<taskLogFile>)\n\n### STEP 5B — COMMIT AND PUSH\nRun and wait: git add -A && git commit -m \"review: <title>\" && git push origin HEAD\n\n### STEP 6B — CHECK BUILD AND TEST\nIf code files changed → run CHECK BUILD AND TEST SEQUENCE (see below). Otherwise stop.\n\n---\n## CHECK BUILD AND TEST SEQUENCE — max 3 attempts\n\nFor each attempt N (1, 2, 3):\n1. Run from CLAUDE_PROJECT_DIR: dotnet build MyVocaList.sln --no-restore -v q 2>&1 | tail -60\n2. If \"Build succeeded\" in output:\n   a. Run: dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --no-build -v q 2>&1 | tail -30\n   b. If tests passed (output contains \"passed\" and zero \"failed\" lines):\n      - Update this task's **Status** in task-log to \"To Review\"\n      - Insert in changelog after current month header: \"- **MM/DD/YYYY** - Build+test OK, task marked 'To Review'. Plan: [<basename>](<planFile>), Tasks: <title>. Details: [task-log](<taskLogFile>)\"\n      - Run: git add -A && git commit -m \"chore: build+test OK — <title>\" && git push origin HEAD\n      - STOP.\n   c. If tests failed:\n      - Update **Status** to \"Test failure\"\n      - Append: \"### Test notes\\nTests failed after build succeeded. Failures: <summary of failed test names and messages>.\"\n      - Insert in changelog: \"- **MM/DD/YYYY** - Test failure. Plan: [<basename>](<planFile>), Tasks: <title>. Details: [task-log](<taskLogFile>)\"\n      - Run: git add -A && git commit -m \"chore: test failure — <title>\" && git push origin HEAD\n      - STOP.\n3. If build failed AND N < 3: fix the errors in source files, proceed to attempt N+1.\n4. If build failed AND N = 3:\n   - Update **Status** to \"Build failure\"\n   - Append under the task entry in task-log: \"### Build notes\\nBuild failed after 3 attempts. Errors: <brief summary>. Root cause (business view): <diagnosis>\"\n   - Insert in changelog: \"- **MM/DD/YYYY** - Check build failure. Plan: [<basename>](<planFile>), Tasks: <title>. Details: [task-log](<taskLogFile>)\"\n   - Run: git add -A && git commit -m \"chore: build failure — <title>\" && git push origin HEAD\n   - STOP."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "timeout": 300,
+            "statusMessage": "Checking for uncommitted changes at session end...",
+            "prompt": "You are the session-end commit agent. Complete each step in order.\n\n## STEP 1 — CHECK FOR UNCOMMITTED CHANGES\nRun: git status --porcelain\nIf output is empty: print 'SESSION END — no uncommitted changes. Done.' and STOP.\n\n## STEP 2 — CHECK FOR CODE FILE CHANGES\nRun: git diff --name-only HEAD\nAlso run: git ls-files --others --exclude-standard\nCombine both outputs. If NO file ending in .cs, .xaml, or .xaml.cs appears in the combined list: skip STEPS 3 and 4, go directly to STEP 5.\n\n## STEP 3 — BUILD CHECK\nRun: dotnet build MyVocaList.sln --no-restore -v q 2>&1 | tail -40\nIf output does NOT contain 'Build succeeded': print 'SESSION END WARNING — uncommitted changes exist but build is failing. Fix build errors before stopping. Changes were NOT auto-committed.' and STOP.\n\n## STEP 4 — TEST CHECK\nRun: dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --no-build -v q 2>&1 | tail -30\nIf output contains 'failed': print 'SESSION END WARNING — uncommitted changes exist but tests are failing. Fix failing tests before stopping. Changes were NOT auto-committed.' and STOP.\n\n## STEP 5 — BACKLOG.MD FRESHNESS CHECK\nRun: git diff --name-only HEAD 2>/dev/null\nAlso run: git ls-files --others --exclude-standard\nIf any file matching \"*task-log*\" appears in the combined output AND Docs/Management/BACKLOG.md does NOT appear in that output: print '⚠️ SESSION END — task-log files changed but Docs/Management/BACKLOG.md was not updated. If a feature phase completed this session, update BACKLOG.md status before or after committing.' Continue regardless — this is a reminder, not a blocker.\n\n## STEP 6 — AUTO-COMMIT\nRun: git add -A && git commit -m \"chore: auto-commit at session end — build+test green\" && git push origin HEAD\nPrint: 'SESSION END — auto-committed all uncommitted changes (build+test green).'"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "asyncRewake": true,
+            "rewakeMessage": "Tasks marked 'To Review' are waiting for a review subagent:",
+            "rewakeSummary": "To Review tasks need attention",
+            "command": "python -c \"import os,glob,sys; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); legacy=glob.glob(os.path.join(proj,'Docs','superpowers','plans','*-task-log.md')); new=glob.glob(os.path.join(proj,'Docs','specs','**','task-log.md'),recursive=True); r=[]; [r.append(os.path.basename(os.path.dirname(f))+': '+b.split('\\n')[0].strip()) for f in legacy+new for c in [open(f,encoding='utf-8').read()] for b in ('\\n'+c).split('\\n## Task:')[1:] if '**Status:** To Review' in b]; r and (print('\\n'.join('- '+x for x in r)+'\\n\\nSpawn one fresh review subagent per plan that has pending To Review tasks. Each subagent should review the changed files listed in the task-log against the plan acceptance criteria.') or sys.exit(2))\" 2>/dev/null"
           }
         ]
       }

@@ -1,0 +1,156 @@
+<h2>Song Form — YouTube URL Management</h2>
+<p class="subtitle">How the admin adds, views, and manages YouTube URLs for a song. Appears at the bottom of the existing SongFormPage, below Lyrics.</p>
+
+<div class="section">
+  <p class="label">SongFormPage — full layout with URL section added</p>
+
+  <div style="width:340px;margin:14px auto 0;font-size:0.78em">
+
+    <!-- App bar -->
+    <div style="background:rgba(30,30,40,0.9);border-radius:14px 14px 0 0;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px">
+      <div style="width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:0.8em">←</div>
+      <div style="font-weight:600;color:white;font-size:1em">Edit Song</div>
+    </div>
+
+    <!-- Form fields (existing) -->
+    <div style="background:rgba(20,20,30,0.95);padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06)">
+      <div style="color:rgba(255,255,255,0.5);font-size:0.75em;margin-bottom:2px">Artist *</div>
+      <div style="background:rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;color:white">Queen</div>
+    </div>
+    <div style="background:rgba(20,20,30,0.95);padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06)">
+      <div style="color:rgba(255,255,255,0.5);font-size:0.75em;margin-bottom:2px">Title *</div>
+      <div style="background:rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;color:white">Bohemian Rhapsody</div>
+    </div>
+    <div style="background:rgba(20,20,30,0.95);padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06)">
+      <div style="color:rgba(255,255,255,0.5);font-size:0.75em;margin-bottom:2px">Lyrics <span style="opacity:0.4">(optional)</span></div>
+      <div style="background:rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;color:rgba(255,255,255,0.4);height:48px">Is this the real life...</div>
+    </div>
+
+    <!-- ─── NEW SECTION: YouTube URLs ─── -->
+    <div style="background:rgba(20,20,30,0.95);padding:14px 16px">
+      <!-- Section header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:16px;height:11px;background:#FF0000;border-radius:3px;display:flex;align-items:center;justify-content:center">
+            <div style="width:0;height:0;border-left:6px solid white;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent;margin-left:1px"></div>
+          </div>
+          <span style="color:white;font-weight:600;font-size:0.95em">YouTube URLs</span>
+          <span style="color:rgba(255,255,255,0.3);font-size:0.8em">(optional)</span>
+        </div>
+        <!-- Add button -->
+        <div style="background:rgba(124,58,237,0.3);border:1px solid rgba(124,58,237,0.5);border-radius:8px;padding:4px 10px;color:#a78bfa;font-size:0.8em;cursor:pointer">+ Add</div>
+      </div>
+
+      <!-- Existing URL rows -->
+      <!-- URL 1 — most used (suggested) -->
+      <div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid rgba(124,58,237,0.3)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:0.65em;background:rgba(124,58,237,0.4);color:#a78bfa;padding:1px 6px;border-radius:4px;font-weight:700">★ SUGGESTED</span>
+          </div>
+          <div style="display:flex;gap:8px">
+            <span style="color:rgba(255,255,255,0.3);font-size:0.75em;cursor:pointer">✏</span>
+            <span style="color:rgba(239,68,68,0.6);font-size:0.75em;cursor:pointer">✕</span>
+          </div>
+        </div>
+        <div style="color:rgba(100,180,255,0.9);font-size:0.8em;font-family:monospace">youtu.be/tgbNymZ7vqY</div>
+        <div style="display:flex;gap:12px;margin-top:6px">
+          <span style="color:rgba(255,255,255,0.4);font-size:0.7em">▶ 12 plays</span>
+          <span style="color:rgba(255,255,255,0.4);font-size:0.7em">⏱ 5:55</span>
+          <span style="color:rgba(255,255,255,0.4);font-size:0.7em">HD version</span>
+        </div>
+      </div>
+
+      <!-- URL 2 -->
+      <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:10px 12px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.06)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div></div>
+          <div style="display:flex;gap:8px">
+            <span style="color:rgba(255,255,255,0.3);font-size:0.75em;cursor:pointer">✏</span>
+            <span style="color:rgba(239,68,68,0.6);font-size:0.75em;cursor:pointer">✕</span>
+          </div>
+        </div>
+        <div style="color:rgba(100,180,255,0.7);font-size:0.8em;font-family:monospace">youtu.be/9bZkp7q19f0</div>
+        <div style="display:flex;gap:12px;margin-top:6px">
+          <span style="color:rgba(255,255,255,0.3);font-size:0.7em">▶ 3 plays</span>
+          <span style="color:rgba(255,255,255,0.3);font-size:0.7em">⏱ 5:48</span>
+        </div>
+      </div>
+
+      <!-- YouTube search strip -->
+      <div style="background:rgba(255,0,0,0.06);border:1px solid rgba(255,0,0,0.2);border-radius:10px;padding:10px 12px">
+        <div style="color:rgba(255,255,255,0.5);font-size:0.7em;margin-bottom:6px">Search YouTube to add a URL</div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:8px;padding:7px 10px;color:rgba(255,255,255,0.4);font-size:0.8em">Bohemian Rhapsody karaoke</div>
+          <div style="background:#FF0000;border-radius:8px;padding:7px 12px;color:white;font-size:0.8em;font-weight:600">▶</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="background:rgba(20,20,30,0.95);border-radius:0 0 14px 14px;padding:14px 16px;display:flex;gap:10px;border-top:1px solid rgba(255,255,255,0.06)">
+      <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:10px;padding:10px;text-align:center;color:rgba(255,255,255,0.6);font-size:0.85em">Cancel</div>
+      <div style="flex:1;background:#7c3aed;border-radius:10px;padding:10px;text-align:center;color:white;font-size:0.85em;font-weight:600">Save</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:28px">
+  <p class="label">YouTube search results — bottom sheet</p>
+  <p style="font-size:0.78em;opacity:0.6;margin-bottom:12px">Opens when admin taps the search button. Shows top 5 results. Admin taps one to add it directly.</p>
+
+  <div style="width:340px;margin:0 auto;background:rgba(20,20,30,0.98);border-radius:20px 20px 0 0;padding:16px;border:1px solid rgba(255,255,255,0.08)">
+    <!-- Handle -->
+    <div style="width:36px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 14px"></div>
+    <div style="font-size:0.85em;font-weight:600;color:white;margin-bottom:12px">Results for "Bohemian Rhapsody karaoke"</div>
+
+    <!-- Result rows -->
+    <div style="display:flex;flex-direction:column;gap:8px">
+
+      <div style="display:flex;gap:10px;align-items:center;background:rgba(255,255,255,0.05);border-radius:10px;padding:10px">
+        <div style="width:56px;height:36px;background:linear-gradient(135deg,#1a0a2e,#2d1b69);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+          <div style="width:0;height:0;border-left:12px solid rgba(255,255,255,0.7);border-top:7px solid transparent;border-bottom:7px solid transparent"></div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="color:white;font-size:0.78em;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Bohemian Rhapsody - Queen (Karaoke HD)</div>
+          <div style="color:rgba(255,255,255,0.4);font-size:0.68em;margin-top:2px">5:55 · KaraokeMania · 2.1M views</div>
+        </div>
+        <div style="color:#a78bfa;font-size:0.75em;font-weight:700;flex-shrink:0">+ Add</div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;background:rgba(255,255,255,0.03);border-radius:10px;padding:10px">
+        <div style="width:56px;height:36px;background:linear-gradient(135deg,#0a1a2e,#0d2d45);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+          <div style="width:0;height:0;border-left:12px solid rgba(255,255,255,0.5);border-top:7px solid transparent;border-bottom:7px solid transparent"></div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="color:rgba(255,255,255,0.8);font-size:0.78em;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Bohemian Rhapsody Karaoke w/ lyrics</div>
+          <div style="color:rgba(255,255,255,0.4);font-size:0.68em;margin-top:2px">5:48 · SingKing · 890K views</div>
+        </div>
+        <div style="color:#a78bfa;font-size:0.75em;font-weight:700;flex-shrink:0">+ Add</div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;background:rgba(255,255,255,0.03);border-radius:10px;padding:10px">
+        <div style="width:56px;height:36px;background:linear-gradient(135deg,#1a2e0a,#2d4510);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+          <div style="width:0;height:0;border-left:12px solid rgba(255,255,255,0.5);border-top:7px solid transparent;border-bottom:7px solid transparent"></div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="color:rgba(255,255,255,0.8);font-size:0.78em;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">BOHEMIAN RHAPSODY - Karaoke Version</div>
+          <div style="color:rgba(255,255,255,0.4);font-size:0.68em;margin-top:2px">6:07 · Karaoke Hits · 440K views</div>
+        </div>
+        <div style="color:#a78bfa;font-size:0.75em;font-weight:700;flex-shrink:0">+ Add</div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:10px;font-size:0.68em;color:rgba(255,255,255,0.25);text-align:center">Results via YouTube Data API v3 · Tap to add · Duration auto-filled</div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:22px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:14px">
+  <p class="label" style="color:#fbbf24">YouTube Data API v3 — one decision needed</p>
+  <p style="font-size:0.8em;margin-top:8px;opacity:0.85;line-height:1.7">
+    In-app search requires a <strong>YouTube Data API v3 key</strong> (free quota: 10,000 units/day — a search costs 100 units → 100 searches/day free).<br>
+    Alternative: admin pastes the URL manually — zero API dependency, works forever.<br>
+    <strong>Recommended: support both.</strong> Paste works always; search is a convenience enhancement that requires the admin to provide their own API key in Settings.
+  </p>
+</div>

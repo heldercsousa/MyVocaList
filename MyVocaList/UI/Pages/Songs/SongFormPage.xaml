@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:autocomplete="clr-namespace:MyVocaList.UI.Components.AutocompleteField"
+    xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs;assembly=MyVocaList.Contracts"
+    xmlns:dtoList="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
+    x:Class="MyVocaList.UI.Pages.Songs.SongFormPage"
+    x:DataType="vm:SongFormViewModel"
+    Title="{Binding PageTitle}"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="All">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+
+            <autocomplete:AutocompleteField
+                LabelText="Artist"
+                Placeholder="Search artists..."
+                Text="{Binding ArtistSearchText, Mode=TwoWay}"
+                Suggestions="{Binding ArtistSuggestions}"
+                SearchRequestedCommand="{Binding SearchArtistsCommand}"
+                SuggestionSelectedCommand="{Binding SelectArtistCommand}"
+                HasError="{Binding ArtistHasError}"
+                ErrorText="{Binding ArtistErrorText}"
+                IsEnabled="{Binding IsArtistLocked, Converter={StaticResource InverseBoolConverter}}" />
+
+            <dxe:TextEdit x:Name="titleEdit"
+                          Text="{Binding SongTitle, Mode=TwoWay}"
+                          LabelText="Title"
+                          PlaceholderText="Enter song title"
+                          MaxCharacterCount="250"
+                          HasError="{Binding TitleHasError}"
+                          ErrorText="{Binding TitleErrorText}" />
+
+            <Label Text="{Binding CharacterCounterText}"
+                   IsVisible="{Binding ShowCharacterCounter}"
+                   StyleClass="Body.Small"
+                   HorizontalOptions="End">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding IsCharacterCounterError}"
+                                 Value="True">
+                        <Setter Property="TextColor" Value="{StaticResource Error}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label"
+                                 Binding="{Binding IsCharacterCounterWarning}"
+                                 Value="True">
+                        <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <!-- API search strip -->
+            <Border BackgroundColor="{StaticResource SurfaceContainerLow}"
+                    StrokeThickness="0"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Search music database"
+                           StyleClass="Title.Small"
+                           TextColor="{StaticResource OnSurface}" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <dxe:TextEdit Grid.Column="0"
+                                      Text="{Binding ApiSearchText, Mode=TwoWay}"
+                                      LabelText="Search term"
+                                      PlaceholderText="Song title..." />
+                        <dx:DXButton Grid.Column="1"
+                                     Content="Search"
+                                     Style="{StaticResource FilledButton}"
+                                     VerticalOptions="End"
+                                     Padding="16,0"
+                                     Command="{Binding SearchApiCommand}"
+                                     IsEnabled="{Binding IsApiSearching, Converter={StaticResource InverseBoolConverter}}" />
+                    </Grid>
+                    <ActivityIndicator IsRunning="{Binding IsApiSearching}"
+                                       IsVisible="{Binding IsApiSearching}"
+                                       Color="{StaticResource Primary}"
+                                       HorizontalOptions="Start" />
+                    <Label Text="{Binding ApiStatusMessage}"
+                           IsVisible="{Binding HasApiStatusMessage}"
+                           StyleClass="Body.Small"
+                           TextColor="{StaticResource OnSurfaceVariant}" />
+                    <VerticalStackLayout IsVisible="{Binding HasApiResults}"
+                                         BindableLayout.ItemsSource="{Binding ApiResults}"
+                                         Spacing="4">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="dto:MusicSearchResultDto">
+                                <dx:DXButton HorizontalOptions="Start"
+                                             Style="{StaticResource OutlinedButton}"
+                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=SelectApiResultCommand}"
+                                             CommandParameter="{Binding .}">
+                                    <dx:DXButton.Content>
+                                        <VerticalStackLayout Spacing="0">
+                                            <Label Text="{Binding SongTitle}" StyleClass="Body.Medium" />
+                                            <Label Text="{Binding ArtistName}" StyleClass="Body.Small" TextColor="{StaticResource OnSurfaceVariant}" />
+                                        </VerticalStackLayout>
+                                    </dx:DXButton.Content>
+                                </dx:DXButton>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <dxe:TextEdit Text="{Binding FeaturedArtists, Mode=TwoWay}"
+                          LabelText="Featured Artists"
+                          PlaceholderText="e.g. feat. Ivete Sangalo" />
+
+            <Editor Placeholder="Song lyrics (optional)"
+                    Text="{Binding Lyrics, Mode=TwoWay}"
+                    MaxLength="10000"
+                    AutoSize="TextChanges"
+                    MinimumHeightRequest="120"
+                    BackgroundColor="{StaticResource SurfaceContainerHighest}"
+                    TextColor="{StaticResource OnSurface}"
+                    PlaceholderColor="{StaticResource OnSurfaceVariant}" />
+
+            <!-- YouTube URLs section header -->
+            <!-- TODO: Replace ▶ label with youtube_icon.svg image asset when added to Resources/Images/ -->
+            <HorizontalStackLayout Spacing="8" Margin="0,8,0,0">
+                <Label Text="▶" TextColor="Red" FontAttributes="Bold" VerticalOptions="Center" />
+                <Label Text="YouTube URLs" StyleClass="Title.Small" VerticalOptions="Center" />
+                <Label Text="optional" Opacity="0.5" StyleClass="Body.Small" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+
+            <!-- Saved URL list -->
+            <VerticalStackLayout Spacing="4"
+                                 BindableLayout.ItemsSource="{Binding KaraokeUrls}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="dtoList:SongKaraokeUrlDto">
+                        <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="{Binding VideoId}"
+                                       StyleClass="Body.Medium"
+                                       LineBreakMode="TailTruncation" />
+                                <HorizontalStackLayout Spacing="8">
+                                    <Label Text="{Binding PlayCount, StringFormat='{0} plays'}"
+                                           StyleClass="Body.Small"
+                                           TextColor="{StaticResource OnSurfaceVariant}" />
+                                    <Label Text="{Binding DurationSeconds, Converter={StaticResource SecondsToMinutesConverter}}"
+                                           StyleClass="Body.Small"
+                                           TextColor="{StaticResource OnSurfaceVariant}"
+                                           IsVisible="{Binding DurationSeconds, Converter={StaticResource IsNotNullConverter}}" />
+                                    <Border BackgroundColor="{StaticResource Primary}"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 4"
+                                            Padding="4,2"
+                                            IsVisible="{Binding IsSuggested}">
+                                        <Label Text="★ SUGGESTED" StyleClass="Body.Small" TextColor="{StaticResource OnPrimary}" />
+                                    </Border>
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding Label}"
+                                       StyleClass="Body.Small"
+                                       TextColor="{StaticResource OnSurfaceVariant}"
+                                       IsVisible="{Binding Label, Converter={StaticResource IsNotNullConverter}}" />
+                            </VerticalStackLayout>
+                            <dx:DXButton Grid.Column="1"
+                                         Content="✕"
+                                         Style="{StaticResource OutlinedButton}"
+                                         VerticalOptions="Center"
+                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=RemoveUrlCommand}"
+                                         CommandParameter="{Binding .}" />
+                        </Grid>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <!-- Search and paste strip -->
+            <Border BackgroundColor="{StaticResource SurfaceContainerLow}"
+                    StrokeThickness="0"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="8">
+
+                    <!-- Search strip (API key present) -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"
+                          IsVisible="{Binding HasYouTubeApiKey}">
+                        <dxe:TextEdit Grid.Column="0"
+                                      Text="{Binding YoutubeSearchQuery, Mode=TwoWay}"
+                                      LabelText="Search YouTube"
+                                      PlaceholderText="Artist + song + karaoke..." />
+                        <dx:DXButton Grid.Column="1"
+                                     Content="Search"
+                                     Style="{StaticResource FilledButton}"
+                                     VerticalOptions="End"
+                                     Padding="16,0"
+                                     Command="{Binding SearchYouTubeCommand}"
+                                     IsEnabled="{Binding IsYouTubeSearching, Converter={StaticResource InverseBoolConverter}}" />
+                    </Grid>
+
+                    <!-- Nudge when no API key -->
+                    <VerticalStackLayout Spacing="4"
+                                         IsVisible="{Binding HasYouTubeApiKey, Converter={StaticResource InverseBoolConverter}}">
+                        <Label Text="Add a YouTube API key in Settings to enable search."
+                               StyleClass="Body.Small"
+                               TextColor="{StaticResource OnSurfaceVariant}" />
+                        <dx:DXButton Content="Go to Settings"
+                                     Style="{StaticResource OutlinedButton}"
+                                     HorizontalOptions="Start"
+                                     Padding="16,0"
+                                     Command="{Binding GoToSettingsCommand}" />
+                    </VerticalStackLayout>
+
+                    <ActivityIndicator IsRunning="{Binding IsYouTubeSearching}"
+                                       IsVisible="{Binding IsYouTubeSearching}"
+                                       Color="{StaticResource Primary}"
+                                       HorizontalOptions="Start" />
+                    <Label Text="{Binding YoutubeSearchStatus}"
+                           IsVisible="{Binding HasYouTubeSearchStatus}"
+                           StyleClass="Body.Small"
+                           TextColor="{StaticResource OnSurfaceVariant}" />
+
+                    <!-- Search results (up to 5 rows) -->
+                    <VerticalStackLayout Spacing="4"
+                                         BindableLayout.ItemsSource="{Binding SearchResults}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="dtoList:YouTubeSearchResultDto">
+                                <Grid ColumnDefinitions="48,*,Auto" ColumnSpacing="8" Padding="0,4">
+                                    <Image Grid.Column="0"
+                                           Source="{Binding ThumbnailUrl}"
+                                           WidthRequest="48"
+                                           HeightRequest="48"
+                                           Aspect="AspectFill"
+                                           VerticalOptions="Center" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                        <Label Text="{Binding Title}"
+                                               StyleClass="Body.Medium"
+                                               LineBreakMode="TailTruncation" />
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="{Binding ChannelName}"
+                                                   StyleClass="Body.Small"
+                                                   TextColor="{StaticResource OnSurfaceVariant}" />
+                                            <Label Text="{Binding DurationSeconds, Converter={StaticResource SecondsToMinutesConverter}}"
+                                                   StyleClass="Body.Small"
+                                                   TextColor="{StaticResource OnSurfaceVariant}"
+                                                   IsVisible="{Binding DurationSeconds, Converter={StaticResource IsNotNullConverter}}" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                    <dx:DXButton Grid.Column="2"
+                                                 Content="+"
+                                                 Style="{StaticResource FilledButton}"
+                                                 VerticalOptions="Center"
+                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=AddFromSearchCommand}"
+                                                 CommandParameter="{Binding .}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <!-- Paste field (always visible) -->
+                    <Label Text="Or paste a YouTube URL"
+                           StyleClass="Body.Small"
+                           TextColor="{StaticResource OnSurfaceVariant}" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <dxe:TextEdit Grid.Column="0"
+                                      Text="{Binding PasteUrlInput, Mode=TwoWay}"
+                                      PlaceholderText="https://youtu.be/..." />
+                        <dx:DXButton Grid.Column="1"
+                                     Content="Add"
+                                     Style="{StaticResource FilledButton}"
+                                     VerticalOptions="End"
+                                     Padding="16,0"
+                                     Command="{Binding AddFromPasteCommand}" />
+                    </Grid>
+                    <Label Text="{Binding PasteUrlError}"
+                           IsVisible="{Binding HasPasteUrlError}"
+                           StyleClass="Body.Small"
+                           TextColor="{StaticResource Error}" />
+
+                </VerticalStackLayout>
+            </Border>
+
+            <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
+                <dx:DXButton Content="Cancel"
+                             Style="{StaticResource OutlinedButton}"
+                             Padding="24,0"
+                             Command="{Binding CancelCommand}" />
+                <dx:DXButton Content="Save"
+                             Style="{StaticResource FilledButton}"
+                             Padding="24,0"
+                             Command="{Binding SaveCommand}" />
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

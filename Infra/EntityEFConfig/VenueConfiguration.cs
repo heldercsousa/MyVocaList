@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Infra.Collation;
 
 namespace MyVocaList.Infra.EntityEFConfig
 {
@@ -18,7 +19,8 @@ namespace MyVocaList.Infra.EntityEFConfig
             builder.Property(e => e.Name)
                    .HasColumnType("TEXT")
                    .IsRequired()
-                   .HasMaxLength(30); // Multilingual support: EN, PT, ES, FR, JA, KO
+                   .HasMaxLength(30) // Multilingual support: EN, PT, ES, FR, JA, KO
+                   .UseCollation(CollationConstants.Default);
         }
     }
 }
