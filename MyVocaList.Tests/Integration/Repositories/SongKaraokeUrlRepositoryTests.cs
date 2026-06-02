@@ -20,7 +20,7 @@ public class SongKaraokeUrlRepositoryTests : IAsyncLifetime
         _repo = new SongKaraokeUrlRepository(_db);
 
         // Seed Artist + Song so FK constraints are satisfied
-        var artist = new Artist { Name = "Test Artist", NameNormalized = "test artist", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+        var artist = new Artist { Name = "Test Artist", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
         _db.Artists.Add(artist);
         await _db.SaveChangesAsync();
 
@@ -28,7 +28,6 @@ public class SongKaraokeUrlRepositoryTests : IAsyncLifetime
         {
             ArtistId = artist.Id,
             Title = "Test Song",
-            TitleNormalized = "test song",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

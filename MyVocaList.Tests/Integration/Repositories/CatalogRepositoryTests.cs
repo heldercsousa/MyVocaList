@@ -157,7 +157,6 @@ public class CatalogRepositoryTests : IAsyncLifetime
         var artist = new Artist
         {
             Name = name,
-            NameNormalized = name.ToLowerInvariant(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -172,7 +171,6 @@ public class CatalogRepositoryTests : IAsyncLifetime
         {
             ArtistId = artistId,
             Title = title,
-            TitleNormalized = title.ToLowerInvariant(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

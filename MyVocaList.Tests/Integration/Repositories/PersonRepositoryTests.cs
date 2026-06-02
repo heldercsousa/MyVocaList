@@ -29,7 +29,6 @@ public class PersonRepositoryTests : IAsyncLifetime
     public async Task AddAsync_ValidPerson_PersistedAndReturnedById()
     {
         var person = new Person("John Doe") { Email = "john@example.com" };
-        person.SetNormalizedName("John Doe");
 
         await _repo.AddAsync(person);
         await _db.SaveChangesAsync();
@@ -46,7 +45,6 @@ public class PersonRepositoryTests : IAsyncLifetime
     public async Task SearchByNameStartsWithAsync_CaseInsensitive_FindsMatch()
     {
         var person = new Person("João Silva");
-        person.SetNormalizedName("João Silva");
         _db.Set<Person>().Add(person);
         await _db.SaveChangesAsync();
 
@@ -60,7 +58,6 @@ public class PersonRepositoryTests : IAsyncLifetime
     public async Task SearchByNameOrEmailAsync_SearchByEmail_FindsMatch()
     {
         var person = new Person("Jane Smith");
-        person.SetNormalizedName("Jane Smith");
         person.Email = "jane@example.com";
         _db.Set<Person>().Add(person);
         await _db.SaveChangesAsync();
@@ -196,10 +193,20 @@ public class PersonRepositoryTests : IAsyncLifetime
 
     // ── Helper ────────────────────────────────────────────────────────────
 
-    private static Person Create(string name)
+    private static Person Create(string name) => new(name);
+
+    // ── Accent-insensitive search ─────────────────────────────────────────
+
+    [Fact]
+    public async Task SearchByNameStartsWithAsync_QueryWithoutAccents_FindsAccentedPerson()
     {
-        var p = new Person(name);
-        p.SetNormalizedName(name);
-        return p;
+        var person = new Person("João Silva");
+        _db.Set<Person>().Add(person);
+        await _db.SaveChangesAsync();
+
+        var results = await _repo.SearchByNameStartsWithAsync("joao", 10, CancellationToken.None);
+
+        Assert.Single(results);
+        Assert.Equal("João Silva", results.First().FullName);
     }
 }

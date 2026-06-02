@@ -60,7 +60,7 @@ public class SongServiceTests
     [Fact]
     public async Task CreateSongAsync_ValidInput_ReturnsSuccessAndEntity()
     {
-        var artist = new Artist { Id = 1, Name = "Queen", NameNormalized = "queen" };
+        var artist = new Artist { Id = 1, Name = "Queen" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(artist);
         _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -108,7 +108,7 @@ public class SongServiceTests
     [Fact]
     public async Task CreateSongAsync_DuplicateTitleForArtist_ReturnsFalse()
     {
-        var artist = new Artist { Id = 1, Name = "Queen", NameNormalized = "queen" };
+        var artist = new Artist { Id = 1, Name = "Queen" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(artist);
         _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -127,7 +127,7 @@ public class SongServiceTests
     [Fact]
     public async Task UpdateSongAsync_ValidTitle_ReturnsSuccess()
     {
-        var song = new Song { Id = 1, ArtistId = 1, Title = "Old Title", TitleNormalized = "old title" };
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Old Title" };
         _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                      .ReturnsAsync(song);
         _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
@@ -157,7 +157,7 @@ public class SongServiceTests
     [Fact]
     public async Task UpdateSongAsync_DuplicateTitleExcludingSelf_ReturnsFalse()
     {
-        var song = new Song { Id = 1, ArtistId = 1, Title = "Title", TitleNormalized = "title" };
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Title" };
         _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                      .ReturnsAsync(song);
         _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
@@ -175,7 +175,7 @@ public class SongServiceTests
     [Fact]
     public async Task CreateSongAsync_WithLyrics_PersistsLyrics()
     {
-        var artist = new Artist { Id = 1, Name = "Queen", NameNormalized = "queen" };
+        var artist = new Artist { Id = 1, Name = "Queen" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(artist);
         _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -196,7 +196,7 @@ public class SongServiceTests
     [Fact]
     public async Task UpdateSongAsync_WithLyrics_ReturnsSuccess()
     {
-        var song = new Song { Id = 1, ArtistId = 1, Title = "Old Title", TitleNormalized = "old title" };
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Old Title" };
         _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                      .ReturnsAsync(song);
         _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))

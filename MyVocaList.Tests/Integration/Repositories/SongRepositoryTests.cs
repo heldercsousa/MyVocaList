@@ -229,7 +229,6 @@ public class SongRepositoryTests : IAsyncLifetime
         await _db.SaveChangesAsync();
 
         song.Title = "New Title";
-        song.TitleNormalized = "new title";
         await _repo.UpdateAsync(song, CancellationToken.None);
         await _db.SaveChangesAsync();
 
@@ -314,7 +313,6 @@ public class SongRepositoryTests : IAsyncLifetime
         var artist = new Artist
         {
             Name = name,
-            NameNormalized = name.ToLowerInvariant(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -327,8 +325,23 @@ public class SongRepositoryTests : IAsyncLifetime
     {
         ArtistId = artistId,
         Title = title,
-        TitleNormalized = title.ToLowerInvariant(),
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
     };
+
+    // ── Accent-insensitive search ─────────────────────────────────────────
+
+    [Fact]
+    public async Task GetPagedAsync_QueryWithoutAccents_FindsAccentedSong()
+    {
+        var artist = await SeedArtistAsync("Anitta");
+        _db.Set<Song>().Add(MakeSong(artist.Id, "Envolver"));
+        _db.Set<Song>().Add(MakeSong(artist.Id, "Clichê"));
+        await _db.SaveChangesAsync();
+
+        var (items, totalCount) = await _repo.GetPagedAsync(1, 20, "cliche", CancellationToken.None);
+
+        Assert.Equal(1, totalCount);
+        Assert.Equal("Clichê", items.Single().Title);
+    }
 }

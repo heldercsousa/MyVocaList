@@ -237,7 +237,6 @@ public class ArtistRepositoryTests : IAsyncLifetime
         await _db.SaveChangesAsync();
 
         artist.Name = "New Name";
-        artist.NameNormalized = "new name";
         await _repo.UpdateAsync(artist, CancellationToken.None);
         await _db.SaveChangesAsync();
 
@@ -282,7 +281,6 @@ public class ArtistRepositoryTests : IAsyncLifetime
     private static Artist MakeArtist(string name) => new()
     {
         Name = name,
-        NameNormalized = name.ToLowerInvariant(),
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
     };
@@ -291,8 +289,21 @@ public class ArtistRepositoryTests : IAsyncLifetime
     {
         ArtistId = artistId,
         Title = title,
-        TitleNormalized = title.ToLowerInvariant(),
         CreatedAt = DateTime.UtcNow,
         UpdatedAt = DateTime.UtcNow
     };
+
+    // ── Accent-insensitive search ─────────────────────────────────────────
+
+    [Fact]
+    public async Task GetPagedAsync_QueryWithoutAccents_FindsAccentedArtist()
+    {
+        _db.Set<Artist>().Add(MakeArtist("Björk"));
+        await _db.SaveChangesAsync();
+
+        var (items, totalCount) = await _repo.GetPagedAsync(1, 20, "bjork", ct: CancellationToken.None);
+
+        Assert.Equal(1, totalCount);
+        Assert.Equal("Björk", items.Single().artist.Name);
+    }
 }

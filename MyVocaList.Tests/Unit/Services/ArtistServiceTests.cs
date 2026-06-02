@@ -109,7 +109,7 @@ public class ArtistServiceTests
     [Fact]
     public async Task UpdateArtistAsync_ValidName_ReturnsSuccess()
     {
-        var existing = new Artist { Id = 1, Name = "Old Name", NameNormalized = "old name" };
+        var existing = new Artist { Id = 1, Name = "Old Name", };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(existing);
         _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
@@ -139,7 +139,7 @@ public class ArtistServiceTests
     [Fact]
     public async Task UpdateArtistAsync_DuplicateNameExcludingSelf_ReturnsFalse()
     {
-        var existing = new Artist { Id = 1, Name = "Artist", NameNormalized = "artist" };
+        var existing = new Artist { Id = 1, Name = "Artist" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(existing);
         _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
@@ -157,7 +157,7 @@ public class ArtistServiceTests
     [Fact]
     public async Task DeleteArtistsAsync_ArtistWithSongs_ReturnsFalse()
     {
-        var artist = new Artist { Id = 1, Name = "Artist With Songs", NameNormalized = "artist with songs" };
+        var artist = new Artist { Id = 1, Name = "Artist With Songs" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(artist);
         _catalogRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
@@ -174,7 +174,7 @@ public class ArtistServiceTests
     [Fact]
     public async Task DeleteArtistsAsync_ArtistWithNoSongs_ReturnsSuccess()
     {
-        var artist = new Artist { Id = 1, Name = "Solo Artist", NameNormalized = "solo artist" };
+        var artist = new Artist { Id = 1, Name = "Solo Artist" };
         _artistRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(artist);
         _catalogRepoMock.Setup(r => r.CountByArtistAsync(1, It.IsAny<CancellationToken>()))
