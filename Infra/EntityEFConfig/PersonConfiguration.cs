@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Infra.Collation;
 
 namespace MyVocaList.Infra.EntityEFConfig;
 
@@ -16,7 +17,7 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
 
         builder.Property(p => p.FullName)
                .HasColumnType("TEXT").IsRequired().HasMaxLength(250)
-               .UseCollation("NOCASE_NOACCENT");
+               .UseCollation(CollationConstants.Default);
 
         builder.Property(p => p.BirthdayDayMonth)
                .HasColumnType("TEXT").IsRequired(false).HasMaxLength(5);

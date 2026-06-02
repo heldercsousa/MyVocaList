@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Infra.Collation;
 
 namespace MyVocaList.Infra.Repository;
 
@@ -27,8 +28,8 @@ public class CatalogRepository : ICatalogRepository
         {
             var pattern = query + "%";
             q = q.Where(s => EF.Functions.Like(
-                EF.Functions.Collate(s.Title, "NOCASE_NOACCENT"),
-                EF.Functions.Collate(pattern, "NOCASE_NOACCENT")));
+                EF.Functions.Collate(s.Title, CollationConstants.Default),
+                EF.Functions.Collate(pattern, CollationConstants.Default)));
         }
 
         var totalCount = await q.CountAsync(ct);

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Infra.Collation;
 
 namespace MyVocaList.Infra.Repository;
 
@@ -25,8 +26,8 @@ public class SongRepository : ISongRepository
         {
             var pattern = query + "%";
             q = q.Where(s => EF.Functions.Like(
-                EF.Functions.Collate(s.Title, "NOCASE_NOACCENT"),
-                EF.Functions.Collate(pattern, "NOCASE_NOACCENT")));
+                EF.Functions.Collate(s.Title, CollationConstants.Default),
+                EF.Functions.Collate(pattern, CollationConstants.Default)));
         }
 
         var totalCount = await q.CountAsync(ct);
@@ -61,14 +62,14 @@ public class SongRepository : ISongRepository
     public async Task<bool> ExistsByTitleForArtistAsync(int artistId, string title, CancellationToken ct)
         => await _db.Songs.AnyAsync(
             s => s.ArtistId == artistId &&
-                 EF.Functions.Collate(s.Title, "NOCASE_NOACCENT") == EF.Functions.Collate(title, "NOCASE_NOACCENT"), ct);
+                 EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default), ct);
 
     /// <inheritdoc />
     public async Task<bool> ExistsByTitleForArtistAsync(
         int artistId, string title, int excludeId, CancellationToken ct)
         => await _db.Songs.AnyAsync(
             s => s.Id != excludeId && s.ArtistId == artistId &&
-                 EF.Functions.Collate(s.Title, "NOCASE_NOACCENT") == EF.Functions.Collate(title, "NOCASE_NOACCENT"), ct);
+                 EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default), ct);
 
     /// <inheritdoc />
     public Task AddAsync(Song song, CancellationToken ct)

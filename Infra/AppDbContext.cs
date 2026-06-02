@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Infra.Collation;
 using MyVocaList.Infra.EntityEFConfig;
 
 namespace MyVocaList.Infra;
@@ -88,7 +89,7 @@ public class AppDbContext : DbContext
             {
                 if (property.ClrType == typeof(string))
                 {
-                    property.SetCollation("NOCASE_NOACCENT");
+                    property.SetCollation(CollationConstants.Default);
                 }
             }
         }
