@@ -466,3 +466,5 @@ MyVocaList.sln
 CLAUDE.md
 .claude/settings.json
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
+.mcp.json
+Docs/Management/gentle-splashing-wave.md
