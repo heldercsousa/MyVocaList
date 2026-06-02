@@ -452,3 +452,4 @@ Infra/Repository/VenueRepository.cs
 Infra/Repository/CatalogRepository.cs
 Infra/Repository/CatalogRepository.cs
 Docs/Management/BACKLOG.md
+Infra/Collation/CollationConstants.cs
