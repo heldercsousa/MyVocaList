@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11519.219
@@ -14,10 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Infra", "Infra\MyVocaList.Infra.csproj", "{9F6E0A44-58C4-440A-A741-00CC0DA3178D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-	ProjectSection(SolutionItems) = preProject
-	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens de Solução", "{380A7511-A354-6D7A-0CC0-8FA1F1BA7B6C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de SoluÃ§Ã£o", "Itens de SoluÃ§Ã£o", "{380A7511-A354-6D7A-0CC0-8FA1F1BA7B6C}"
 	ProjectSection(SolutionItems) = preProject
 		.claudeignore = .claudeignore
 		.gitignore = .gitignore
@@ -27,8 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		LICENSE = LICENSE
 		limparBinObj.bat = limparBinObj.bat
 		README.md = README.md
-				Docs\DevEnv\workflow-layout-findings.md = Docs\DevEnv\workflow-layout-findings.md
-EndProjectSection
+		Docs\DevEnv\workflow-layout-findings.md = Docs\DevEnv\workflow-layout-findings.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
 	ProjectSection(SolutionItems) = preProject
@@ -155,15 +153,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-songs", "{C141C5C9-833C-4A26-96BF-3745A2DA1AD4}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\design.md = Docs\Management\BusinessFeatures\artists-songs\design.md
-		Docs\Management\BusinessFeatures\artists-songs\requirements.md = Docs\Management\BusinessFeatures\artists-songs\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
-			Docs\Management\BusinessFeatures\artists-songs\handoff.md = Docs\Management\BusinessFeatures\artists-songs\handoff.md
+		Docs\Management\BusinessFeatures\artists-songs\handoff.md = Docs\Management\BusinessFeatures\artists-songs\handoff.md
 		Docs\Management\BusinessFeatures\artists-songs\plan-arch-revision.md = Docs\Management\BusinessFeatures\artists-songs\plan-arch-revision.md
 		Docs\Management\BusinessFeatures\artists-songs\plan-phase16.md = Docs\Management\BusinessFeatures\artists-songs\plan-phase16.md
 		Docs\Management\BusinessFeatures\artists-songs\plan-spec-revision.md = Docs\Management\BusinessFeatures\artists-songs\plan-spec-revision.md
 		Docs\Management\BusinessFeatures\artists-songs\plan.md = Docs\Management\BusinessFeatures\artists-songs\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\requirements.md = Docs\Management\BusinessFeatures\artists-songs\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
-EndProjectSection
+		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
 	ProjectSection(SolutionItems) = preProject
@@ -202,8 +200,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "toolbar-fab-vibrant", "tool
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-folder-layout-alignment", "workflow-folder-layout-alignment", "{A1B2C3D4-0001-4000-8000-000000000004}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md
 		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\findings.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\findings.md
+		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hooks-redesign", "hooks-redesign", "{A1B2C3D4-0001-4000-8000-000000000005}"
@@ -219,47 +217,47 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versioning", "{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\app-versioning\design.md = Docs\Management\DevCycleCraft\app-versioning\design.md
-			Docs\Management\DevCycleCraft\app-versioning\plan.md = Docs\Management\DevCycleCraft\app-versioning\plan.md
-EndProjectSection
+		Docs\Management\DevCycleCraft\app-versioning\plan.md = Docs\Management\DevCycleCraft\app-versioning\plan.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "m3-lists", "m3-lists", "{F58ED7A0-0186-4187-9FCF-78A464FB01C5}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\m3-lists\design.md = Docs\Management\DevCycleCraft\m3-lists\design.md
-			Docs\Management\DevCycleCraft\m3-lists\plan.md = Docs\Management\DevCycleCraft\m3-lists\plan.md
-EndProjectSection
+		Docs\Management\DevCycleCraft\m3-lists\plan.md = Docs\Management\DevCycleCraft\m3-lists\plan.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\persons\autocomplete-design.md = Docs\Management\BusinessFeatures\persons\autocomplete-design.md
 		Docs\Management\BusinessFeatures\persons\design.md = Docs\Management\BusinessFeatures\persons\design.md
+		Docs\Management\BusinessFeatures\persons\plan-autocomplete.md = Docs\Management\BusinessFeatures\persons\plan-autocomplete.md
+		Docs\Management\BusinessFeatures\persons\plan.md = Docs\Management\BusinessFeatures\persons\plan.md
 		Docs\Management\BusinessFeatures\persons\requirements.md = Docs\Management\BusinessFeatures\persons\requirements.md
 		Docs\Management\BusinessFeatures\persons\tasks.md = Docs\Management\BusinessFeatures\persons\tasks.md
-			Docs\Management\BusinessFeatures\persons\plan-autocomplete.md = Docs\Management\BusinessFeatures\persons\plan-autocomplete.md
-		Docs\Management\BusinessFeatures\persons\plan.md = Docs\Management\BusinessFeatures\persons\plan.md
-EndProjectSection
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\styles-structure\design.md = Docs\Management\DevCycleCraft\styles-structure\design.md
-			Docs\Management\DevCycleCraft\styles-structure\plan.md = Docs\Management\DevCycleCraft\styles-structure\plan.md
-EndProjectSection
+		Docs\Management\DevCycleCraft\styles-structure\plan.md = Docs\Management\DevCycleCraft\styles-structure\plan.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "venues", "venues", "{9EA47D78-293E-41B7-872D-3B2B85E82710}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\venues\design.md = Docs\Management\BusinessFeatures\venues\design.md
+		Docs\Management\BusinessFeatures\venues\plan.md = Docs\Management\BusinessFeatures\venues\plan.md
 		Docs\Management\BusinessFeatures\venues\requirements.md = Docs\Management\BusinessFeatures\venues\requirements.md
 		Docs\Management\BusinessFeatures\venues\tasks.md = Docs\Management\BusinessFeatures\venues\tasks.md
-			Docs\Management\BusinessFeatures\venues\plan.md = Docs\Management\BusinessFeatures\venues\plan.md
-EndProjectSection
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-karaoke", "youtube-karaoke", "{6851C0F2-5877-4E2F-89C0-9B82A6770BE0}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\design.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\design.md
-		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\plan.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\task-log.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\task-log.md
-EndProjectSection
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
 	ProjectSection(SolutionItems) = preProject
@@ -273,34 +271,32 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevCycleCraft", "DevCycleCr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{15F1DA03-2180-47BF-BC40-1BB457C97F9E}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\adaptive-doodling-knuth.md = Docs\Management\adaptive-doodling-knuth.md
 		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
-		Docs\Management\adaptive-doodling-knuth.md = Docs\Management\adaptive-doodling-knuth.md
-		Docs\Management\happy-knitting-storm.md = Docs\Management\happy-knitting-storm.md
-		Docs\Management\adaptive-doodling-knuth.md = Docs\Management\adaptive-doodling-knuth.md
 		Docs\Management\happy-knitting-storm.md = Docs\Management\happy-knitting-storm.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-restore", "{FA1234BC-0001-4000-8000-000000000011}"
 	ProjectSection(SolutionItems) = preProject
+		MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml = MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml
+		MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml.cs = MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml.cs
+		MyVocaList\UI\ViewModels\BackupRestoreViewModel.cs = MyVocaList\UI\ViewModels\BackupRestoreViewModel.cs
+		Services\BackupService.cs = Services\BackupService.cs
+		MyVocaList.Tests\Unit\Services\BackupServiceTests.cs = MyVocaList.Tests\Unit\Services\BackupServiceTests.cs
 		Docs\Management\BusinessFeatures\backup-restore\design.md = Docs\Management\BusinessFeatures\backup-restore\design.md
+		MyVocaList\Platforms\Android\Resources\xml\file_provider_paths.xml = MyVocaList\Platforms\Android\Resources\xml\file_provider_paths.xml
 		Docs\Management\BusinessFeatures\backup-restore\plan.md = Docs\Management\BusinessFeatures\backup-restore\plan.md
 		Docs\Management\BusinessFeatures\backup-restore\task-log.md = Docs\Management\BusinessFeatures\backup-restore\task-log.md
 		Services\TransactionLogWriter.cs = Services\TransactionLogWriter.cs
-		Services\BackupService.cs = Services\BackupService.cs
-		MyVocaList.Tests\Unit\Services\BackupServiceTests.cs = MyVocaList.Tests\Unit\Services\BackupServiceTests.cs
-		MyVocaList\UI\ViewModels\BackupRestoreViewModel.cs = MyVocaList\UI\ViewModels\BackupRestoreViewModel.cs
-		MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml = MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml
-		MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml.cs = MyVocaList\UI\Pages\BackupRestore\BackupRestorePage.xaml.cs
-		MyVocaList\Platforms\Android\Resources\xml\file_provider_paths.xml = MyVocaList\Platforms\Android\Resources\xml\file_provider_paths.xml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-reporting", "{FA1234BC-0001-4000-8000-000000000012}"
 	ProjectSection(SolutionItems) = preProject
+		MyVocaList\appsettings.template.json = MyVocaList\appsettings.template.json
 		Docs\Management\BusinessFeatures\crash-reporting\design.md = Docs\Management\BusinessFeatures\crash-reporting\design.md
 		Docs\Management\BusinessFeatures\crash-reporting\plan.md = Docs\Management\BusinessFeatures\crash-reporting\plan.md
 		Docs\Management\BusinessFeatures\crash-reporting\requirements.md = Docs\Management\BusinessFeatures\crash-reporting\requirements.md
 		Docs\Management\BusinessFeatures\crash-reporting\tasks.md = Docs\Management\BusinessFeatures\crash-reporting\tasks.md
-		MyVocaList\appsettings.template.json = MyVocaList\appsettings.template.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "user-suggestions", "user-suggestions", "{FA1234BC-0001-4000-8000-000000000013}"
@@ -319,25 +315,32 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "whats-new", "whats-new", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-update-check", "app-update-check", "{FA1234BC-0001-4000-8000-000000000016}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\app-update-check\requirements.md = Docs\Management\BusinessFeatures\app-update-check\requirements.md
 		Docs\Management\BusinessFeatures\app-update-check\design.md = Docs\Management\BusinessFeatures\app-update-check\design.md
+		Docs\Management\BusinessFeatures\app-update-check\requirements.md = Docs\Management\BusinessFeatures\app-update-check\requirements.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-settings", "app-settings", "{FA1234BC-0001-4000-8000-000000000015}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\app-settings\requirements.md = Docs\Management\BusinessFeatures\app-settings\requirements.md
 		Docs\Management\BusinessFeatures\app-settings\design.md = Docs\Management\BusinessFeatures\app-settings\design.md
-		Docs\Management\BusinessFeatures\app-settings\tasks.md = Docs\Management\BusinessFeatures\app-settings\tasks.md
 		Docs\Management\BusinessFeatures\app-settings\plan.md = Docs\Management\BusinessFeatures\app-settings\plan.md
+		Docs\Management\BusinessFeatures\app-settings\requirements.md = Docs\Management\BusinessFeatures\app-settings\requirements.md
+		Docs\Management\BusinessFeatures\app-settings\tasks.md = Docs\Management\BusinessFeatures\app-settings\tasks.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "about-page", "about-page", "{FA1234BC-0001-4000-8000-000000000017}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\about-page\requirements.md = Docs\Management\BusinessFeatures\about-page\requirements.md
 		Docs\Management\BusinessFeatures\about-page\design.md = Docs\Management\BusinessFeatures\about-page\design.md
-		Docs\Management\BusinessFeatures\about-page\tasks.md = Docs\Management\BusinessFeatures\about-page\tasks.md
 		Docs\Management\BusinessFeatures\about-page\plan.md = Docs\Management\BusinessFeatures\about-page\plan.md
+		Docs\Management\BusinessFeatures\about-page\requirements.md = Docs\Management\BusinessFeatures\about-page\requirements.md
 		Docs\Management\BusinessFeatures\about-page\task-log.md = Docs\Management\BusinessFeatures\about-page\task-log.md
+		Docs\Management\BusinessFeatures\about-page\tasks.md = Docs\Management\BusinessFeatures\about-page\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-refactor", "{4CB09F16-6E81-425E-9080-840BABFB66BF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.docx = Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.docx
+		Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.pdf = Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.pdf
+		Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.pdf = Docs\Management\BusinessFeatures\ui-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.pdf
 	EndProjectSection
 EndProject
 Global
@@ -432,21 +435,12 @@ Global
 		{E9A5FC59-0C8C-49B6-9845-7870FA3CD098} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{300D3C1B-4E22-4CEE-85FF-453BD80607BD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-
-		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{FA1234BC-0001-4000-8000-000000000011} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{FA1234BC-0001-4000-8000-000000000012} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{FA1234BC-0001-4000-8000-000000000013} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{FA1234BC-0001-4000-8000-000000000014} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{FA1234BC-0001-4000-8000-000000000015} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{FA1234BC-0001-4000-8000-000000000016} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
-		{FA1234BC-0001-4000-8000-000000000017} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{B1A2C3D4-0001-4000-8000-000000000001} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{C141C5C9-833C-4A26-96BF-3745A2DA1AD4} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{A1B2C3D4-0001-4000-8000-000000000007} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000008} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000009} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-00000000000A} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
-		{B1A2C3D4-0001-4000-8000-000000000001} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D1C7C335-1E7C-4804-9A55-A5D160232353} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000002} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000003} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
@@ -454,15 +448,25 @@ Global
 		{A1B2C3D4-0001-4000-8000-000000000005} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000006} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
-		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
-		{0C4BA720-519E-4818-BD9B-34AC19E4FCD7} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{0C4BA720-519E-4818-BD9B-34AC19E4FCD7} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{15F1DA03-2180-47BF-BC40-1BB457C97F9E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{FA1234BC-0001-4000-8000-000000000011} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000012} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000013} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000014} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000016} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000015} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000017} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{4CB09F16-6E81-425E-9080-840BABFB66BF} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
 	EndGlobalSection
+EndGlobal
