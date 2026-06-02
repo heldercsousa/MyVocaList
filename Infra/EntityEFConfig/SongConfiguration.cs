@@ -16,11 +16,8 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
 
         builder.Property(s => s.Title)
                .IsRequired()
-               .HasMaxLength(100);
-
-        builder.Property(s => s.TitleNormalized)
-               .IsRequired()
-               .HasMaxLength(100);
+               .HasMaxLength(100)
+               .UseCollation("NOCASE_NOACCENT");
 
         builder.Property(s => s.FeaturedArtists)
                .IsRequired(false);
@@ -42,9 +39,9 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
                .HasColumnType("TEXT")
                .HasMaxLength(10000);
 
-        builder.HasIndex(s => new { s.ArtistId, s.TitleNormalized })
+        builder.HasIndex(s => new { s.ArtistId, s.Title })
                .IsUnique()
-               .HasDatabaseName("IX_Songs_ArtistId_TitleNormalized");
+               .HasDatabaseName("IX_Songs_ArtistId_Title");
 
         builder.HasIndex(s => s.ExternalId)
                .HasDatabaseName("IX_Songs_ExternalId");

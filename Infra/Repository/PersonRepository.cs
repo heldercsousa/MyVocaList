@@ -15,7 +15,7 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
         ArgumentException.ThrowIfNullOrWhiteSpace(fullName, nameof(fullName));
         var trimmedName = fullName.Trim();
         return await _dbSet.FirstOrDefaultAsync(p =>
-            EF.Functions.Collate(p.FullNameNormalized, "NOCASE") == EF.Functions.Collate(trimmedName, "NOCASE"),
+            EF.Functions.Collate(p.FullName, "NOCASE_NOACCENT") == EF.Functions.Collate(trimmedName, "NOCASE_NOACCENT"),
             cancellationToken);
     }
 
@@ -28,9 +28,9 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
         var pattern = searchTerm.Trim() + "%";
         return await _dbSet
             .Where(p => EF.Functions.Like(
-                EF.Functions.Collate(p.FullNameNormalized, "NOCASE"),
-                EF.Functions.Collate(pattern, "NOCASE")))
-            .OrderBy(p => p.FullNameNormalized)
+                EF.Functions.Collate(p.FullName, "NOCASE_NOACCENT"),
+                EF.Functions.Collate(pattern, "NOCASE_NOACCENT")))
+            .OrderBy(p => p.FullName)
             .Take(maxResults)
             .ToListAsync(cancellationToken);
     }
@@ -48,13 +48,13 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
         return await _dbSet
             .Where(p =>
                 EF.Functions.Like(
-                    EF.Functions.Collate(p.FullNameNormalized, "NOCASE"),
-                    EF.Functions.Collate(namePattern, "NOCASE"))
+                    EF.Functions.Collate(p.FullName, "NOCASE_NOACCENT"),
+                    EF.Functions.Collate(namePattern, "NOCASE_NOACCENT"))
                 ||
                 (p.Email != null && EF.Functions.Like(
                     EF.Functions.Collate(p.Email, "NOCASE"),
                     EF.Functions.Collate(emailPattern, "NOCASE"))))
-            .OrderBy(p => p.FullNameNormalized)
+            .OrderBy(p => p.FullName)
             .Take(maxResults)
             .ToListAsync(cancellationToken);
     }
@@ -73,8 +73,8 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
 
             q = q.Where(p =>
                 EF.Functions.Like(
-                    EF.Functions.Collate(p.FullNameNormalized, "NOCASE"),
-                    EF.Functions.Collate(namePattern, "NOCASE"))
+                    EF.Functions.Collate(p.FullName, "NOCASE_NOACCENT"),
+                    EF.Functions.Collate(namePattern, "NOCASE_NOACCENT"))
                 ||
                 (p.Email != null && EF.Functions.Like(
                     EF.Functions.Collate(p.Email, "NOCASE"),
@@ -83,7 +83,7 @@ public class PersonRepository : BaseRepository<Person>, IPersonRepository
 
         var totalCount = await q.CountAsync(cancellationToken);
         var items = await q
-            .OrderBy(p => p.FullNameNormalized)
+            .OrderBy(p => p.FullName)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);

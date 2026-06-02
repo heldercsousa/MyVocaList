@@ -16,17 +16,17 @@ public class ArtistRepository : IArtistRepository
 
     /// <inheritdoc />
     public async Task<(IEnumerable<(Artist artist, int catalogCount)> items, int totalCount)> GetPagedAsync(
-        int pageNumber, int pageSize, string normalizedQuery,
+        int pageNumber, int pageSize, string query,
         ArtistRoleFilter roleFilter = ArtistRoleFilter.All, CancellationToken ct = default)
     {
         var q = _db.Artists.AsQueryable();
 
-        if (!string.IsNullOrEmpty(normalizedQuery))
+        if (!string.IsNullOrEmpty(query))
         {
-            var pattern = "%" + normalizedQuery + "%";
+            var pattern = "%" + query + "%";
             q = q.Where(a => EF.Functions.Like(
-                EF.Functions.Collate(a.NameNormalized, "NOCASE"),
-                EF.Functions.Collate(pattern, "NOCASE")));
+                EF.Functions.Collate(a.Name, "NOCASE_NOACCENT"),
+                EF.Functions.Collate(pattern, "NOCASE_NOACCENT")));
         }
 
         q = roleFilter switch
@@ -39,7 +39,7 @@ public class ArtistRepository : IArtistRepository
         var totalCount = await q.CountAsync(ct);
 
         var rawItems = await q
-            .OrderBy(a => a.NameNormalized)
+            .OrderBy(a => a.Name)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(a => new { Artist = a, CatalogCount = a.CatalogEntries.Count() })
@@ -50,20 +50,20 @@ public class ArtistRepository : IArtistRepository
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Artist>> SearchByNameAsync(string normalizedQuery, int maxResults, CancellationToken ct)
+    public async Task<IEnumerable<Artist>> SearchByNameAsync(string query, int maxResults, CancellationToken ct)
     {
         var q = _db.Artists.AsQueryable();
 
-        if (!string.IsNullOrEmpty(normalizedQuery))
+        if (!string.IsNullOrEmpty(query))
         {
-            var pattern = normalizedQuery + "%";
+            var pattern = query + "%";
             q = q.Where(a => EF.Functions.Like(
-                EF.Functions.Collate(a.NameNormalized, "NOCASE"),
-                EF.Functions.Collate(pattern, "NOCASE")));
+                EF.Functions.Collate(a.Name, "NOCASE_NOACCENT"),
+                EF.Functions.Collate(pattern, "NOCASE_NOACCENT")));
         }
 
         return await q
-            .OrderBy(a => a.NameNormalized)
+            .OrderBy(a => a.Name)
             .Take(maxResults)
             .ToListAsync(ct);
     }
@@ -78,18 +78,15 @@ public class ArtistRepository : IArtistRepository
             a => a.ExternalId == externalId && a.ExternalProvider == provider, ct);
 
     /// <inheritdoc />
-    public async Task<bool> ExistsByNameAsync(string normalizedName, CancellationToken ct)
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct)
         => await _db.Artists.AnyAsync(
-            a => EF.Functions.Like(
-                EF.Functions.Collate(a.NameNormalized, "NOCASE"),
-                EF.Functions.Collate(normalizedName, "NOCASE")), ct);
+            a => EF.Functions.Collate(a.Name, "NOCASE_NOACCENT") == EF.Functions.Collate(name, "NOCASE_NOACCENT"), ct);
 
     /// <inheritdoc />
-    public async Task<bool> ExistsByNameAsync(string normalizedName, int excludeId, CancellationToken ct)
+    public async Task<bool> ExistsByNameAsync(string name, int excludeId, CancellationToken ct)
         => await _db.Artists.AnyAsync(
-            a => a.Id != excludeId && EF.Functions.Like(
-                EF.Functions.Collate(a.NameNormalized, "NOCASE"),
-                EF.Functions.Collate(normalizedName, "NOCASE")), ct);
+            a => a.Id != excludeId &&
+                 EF.Functions.Collate(a.Name, "NOCASE_NOACCENT") == EF.Functions.Collate(name, "NOCASE_NOACCENT"), ct);
 
     /// <inheritdoc />
     public Task AddAsync(Artist artist, CancellationToken ct)

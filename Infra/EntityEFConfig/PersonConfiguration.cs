@@ -15,10 +15,8 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
                .IsRequired(false);
 
         builder.Property(p => p.FullName)
-               .HasColumnType("TEXT").IsRequired().HasMaxLength(250);
-
-        builder.Property(p => p.FullNameNormalized)
-               .HasColumnType("TEXT").IsRequired().HasMaxLength(250);
+               .HasColumnType("TEXT").IsRequired().HasMaxLength(250)
+               .UseCollation("NOCASE_NOACCENT");
 
         builder.Property(p => p.BirthdayDayMonth)
                .HasColumnType("TEXT").IsRequired(false).HasMaxLength(5);
@@ -32,8 +30,8 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
         builder.Property(p => p.Absences)
                .IsRequired().HasDefaultValue(0);
 
-        builder.HasIndex(p => p.FullNameNormalized)
-               .HasDatabaseName("IX_Persons_FullNameNormalized");
+        builder.HasIndex(p => p.FullName)
+               .HasDatabaseName("IX_Persons_FullName");
 
         builder.HasIndex(p => p.Email)
                .IsUnique()
@@ -43,7 +41,7 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
                .IsUnique()
                .HasDatabaseName("IX_Persons_ExternalId");
 
-        builder.HasIndex(p => new { p.FullNameNormalized, p.BirthdayDayMonth })
+        builder.HasIndex(p => new { p.FullName, p.BirthdayDayMonth })
                .IsUnique()
                .HasFilter("[BirthdayDayMonth] IS NOT NULL")
                .HasDatabaseName("IX_Persons_Name_Birthday");

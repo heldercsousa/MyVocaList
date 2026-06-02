@@ -17,24 +17,24 @@ public class CatalogRepository : ICatalogRepository
 
     /// <inheritdoc />
     public async Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedByArtistAsync(
-        int artistId, int pageNumber, int pageSize, string? normalizedQuery, CancellationToken ct)
+        int artistId, int pageNumber, int pageSize, string? query, CancellationToken ct)
     {
         var q = _db.Catalog
             .Where(c => c.ArtistId == artistId)
             .Select(c => c.Song);
 
-        if (!string.IsNullOrEmpty(normalizedQuery))
+        if (!string.IsNullOrEmpty(query))
         {
-            var pattern = normalizedQuery + "%";
+            var pattern = query + "%";
             q = q.Where(s => EF.Functions.Like(
-                EF.Functions.Collate(s.TitleNormalized, "NOCASE"),
-                EF.Functions.Collate(pattern, "NOCASE")));
+                EF.Functions.Collate(s.Title, "NOCASE_NOACCENT"),
+                EF.Functions.Collate(pattern, "NOCASE_NOACCENT")));
         }
 
         var totalCount = await q.CountAsync(ct);
 
         var items = await q
-            .OrderBy(s => s.TitleNormalized)
+            .OrderBy(s => s.Title)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(s => new SongListItemDto(

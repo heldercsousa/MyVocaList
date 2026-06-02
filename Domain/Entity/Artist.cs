@@ -4,7 +4,6 @@ public class Artist
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public string NameNormalized { get; set; }
     public string? ExternalProvider { get; set; }
     public string? ExternalId { get; set; }
     public bool HasManualEdits { get; set; }

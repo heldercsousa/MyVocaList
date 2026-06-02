@@ -23,8 +23,7 @@ public class CatalogService : ICatalogService
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
-        var normalized = string.IsNullOrWhiteSpace(query) ? null : query.Trim().ToLowerInvariant();
-        return await _catalogRepository.GetPagedByArtistAsync(artistId, pageNumber, pageSize, normalized, ct);
+        return await _catalogRepository.GetPagedByArtistAsync(artistId, pageNumber, pageSize, query?.Trim(), ct);
     }
 
     /// <inheritdoc />
