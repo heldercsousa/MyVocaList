@@ -1,7 +1,7 @@
 # Plan: UI Architecture Decision & Tooling Setup
 **Scope:** Visual Theme Refresh → ui-2nd-refactor decision  
 **Date:** 2026-06-02  
-**Status:** Revised after Helder's Q&A + MudBlazor tooling research
+**Status:** Reviewed — blockers resolved, warnings documented, pending manual amends
 
 ---
 
@@ -10,15 +10,17 @@
 The app UI is described as "too dark and monochromatic" for a Karaoke/Bandokê app. Two paths exist in BACKLOG:
 
 - **Path A — Theme Refresh Only**: Keep MAUI native + DevExpress, apply a vibrant Karaoke-themed palette
-- **Path B — ui-2nd-refactor**: Replace the entire UI layer with Blazor Hybrid + shared RCL
+- **Path B — ui-2nd-refactor**: Replace the entire UI layer with Blazor Hybrid + shared RCL, enabling one codebase for mobile (Android/iOS/Windows) and future web
 
-Helder ran a deep research session with Gemini AI (docs in `UI-2nd-refactor/`). Conclusion: **Blazor Hybrid + MudBlazor is the correct long-term architecture.** Hard constraints driving this:
+Helder ran a deep research session with Gemini AI (docs in `UI-2nd-refactor/`). Conclusion: **Blazor Hybrid + MudBlazor is the target post-MVP direction** pending spike validation. Hard constraints driving this:
 1. DevExpress MAUI has **no Windows/WinUI3 support** (hard blocker, no roadmap)
 2. A future commercial website must share **exact UI code** with the mobile app — only Blazor Hybrid (RCL) achieves this
 
+> **Pending spike validation** — the DevExpress-first constitutional constraint remains in full effect until the spike produces a go decision.
+
 ---
 
-## Architecture Decision (confirmed)
+## Architecture Decision (direction set, pending spike go/no-go)
 
 ### Target Solution Structure
 
@@ -41,120 +43,118 @@ MyVocaList.Web           (future — Blazor Web App, zero UI rewrite)
 
 All non-UI layers (Domain, Infra, Services, Contracts, Tests) survive unchanged.
 
-### Component Library: MudBlazor (confirmed)
+### Component Library: MudBlazor 9.5.0
+- Targets .NET 8/9/10 — confirmed .NET 10 compatible (NuGet `MudBlazor 9.5.0`, May 2026)
 - `MudTheme` C# class centralises all color tokens — inject Karaoke palette once, all components inherit
 - AI coding (Claude Code) generates idiomatic MudBlazor reliably — vast training data
 - GPU-accelerated CSS animations (`transform` + `opacity`) validated for pulsing speaker / floating notes UX
 - Responsive layout (media queries + MudGrid) auto-adapts from 6" phone to ultrawide monitor
 
+### Known Tradeoffs (documented by review)
+
+| Tradeoff | Details | Mitigation |
+|----------|---------|-----------|
+| WebView performance on low-end Android | BlazorWebView adds a rendering layer. On budget Android devices, jank may be visible in lists. | Spike must test on a mid-range 2021 Android device. Pass threshold: 60fps scroll in VenuesPage list with 100+ items. Fail = return to spike for optimisation or reconsider migration. |
+| Hot reload limitations | MAUI Hot Reload does not apply to Razor component changes inside BlazorWebView the same way it applies to XAML. Developer velocity is slower during spike/migration. | Accept as a known DX regression. Use browser F5 refresh pattern during development. |
+| No JS interop needed | Razor components call C# services directly via DI — no JS bridge for SQLite/services. This is correct and expected. | No mitigation needed; documenting to avoid future confusion. |
+
 ---
 
-## Tooling Decision (corrected after research)
+## Tooling
 
-### What to install NOW
+### MudMCP — installed and fixed
+- Cloned to `C:/Users/helde/.claude/tools/MudMCP`
+- Working tree fixed to `v9.5.0` tag (reviewer found initial clone had HEAD at main, only 8 components indexed)
+- Stale `index.json` deleted — next `dotnet run` rebuilds with all ~100 components
+- `.mcp.json` updated: `--version 9.5.0`
+- 12 tools: `list_components`, `get_component_detail`, `get_component_parameters`, `get_component_examples`, `search_components`, `get_api_reference`, `get_enum_values` + 5 more
+- **Activate only during Blazor Hybrid / MudBlazor work** — not for current MAUI-native development
 
-#### 1. MudMCP — community MCP server for MudBlazor
-- **What**: Clones MudBlazor repo, parses via Roslyn, exposes 12 MCP tools to Claude Code
-- **Why**: Prevents AI hallucination about MudBlazor component APIs; enables accurate component generation
-- **Tools exposed**: `list_components`, `get_component_detail`, `get_component_parameters`, `get_component_examples`, `search_components`, `get_api_reference`, `get_enum_values` + 5 more
-- **Install**: Clone `https://github.com/mcbodge/MudMCP`, run with dotnet
-- **Caveat**: Community project, not official MudBlazor. First run clones MudBlazor repo (slow); subsequent runs use cache
-- **Config** (`.mcp.json`):
-```json
-"mudblazor": {
-  "command": "dotnet",
-  "args": ["run", "--project", "<path>/MudMCP/src/MudBlazor.Mcp/MudBlazor.Mcp.csproj",
-           "--", "--stdio", "--version", "9.0.0"]
-}
+### Stitch MCP — deferred (correct)
+- Stitch generates pure CSS/HTML/Tailwind, **not MudBlazor** — confirmed by Gemini research
+- Its value is design token export (palette, typography) → manual `MudTheme` mapping
+- Requires Google Cloud project + Stitch API + design work in Stitch web UI first
+- Correct sequence when Stitch becomes relevant (post-spike):
+  1. Create Google Cloud project + `gcloud auth login`
+  2. Design Karaoke Neon theme in Stitch web UI
+  3. Export `DESIGN.md` (color tokens)
+  4. Map hex values to `MudTheme` C# properties manually
+  5. MudMCP handles all component generation from that point
+
+### Figma MCP — deferred
+- $15/month minimum (6 calls/month on free tier = useless for real work)
+- No MudBlazor Code Connect support
+- Revisit post-MVP when web design phase begins
+
+---
+
+## Timing Decision: Parallel Spike (approved)
+
+The spike approach runs in parallel with Queue Management (the core MVP feature):
+- `MyVocaList.Blazor.Spike` — new MAUI project in same solution
+- `MyVocaList.UI.Shared` — new RCL in same solution
+- Existing `MyVocaList` (DevExpress) unchanged — Queue Management proceeds there
+
+### Spike scope (extended after review)
+
+Initial scope (VenuesPage + PersonsPage) was flagged as insufficient — it doesn't cover the interaction patterns most divergent from DevExpress. Extended scope:
+
+| Item | Why it validates |
+|------|-----------------|
+| VenuesPage (list + search) | Basic rendering, MudDataGrid/MudList, DI injection |
+| PersonsPage (list) | Confirms DI pattern across multiple pages |
+| **Add Person dialog** (BottomSheet equivalent) | Validates `MudDialog`/`MudDrawer` as replacement for `dx:BottomSheet` constitutional constraint |
+| **VenueFormPage or PersonFormPage** | Validates FluentValidation + MudBlazor form pattern |
+| Performance: 100-item scroll on mid-range Android | Validates 60fps threshold (new explicit pass/fail criterion) |
+
+### Spike output
+- `Docs/Management/BusinessFeatures/UI-2nd-refactor/findings.md` — go/no-go evidence
+- Time-box: 3–4 days (extended from 2–3 to cover dialog + form pages)
+
+---
+
+## Pending Manual Amends (write-protected files)
+
+These cannot be committed by Claude Code — require Helder to manually apply via `amend:` commit.
+
+### 1. CLAUDE.md — fix "will be replaced" wording + annotate DevExpress-first constraint
+
+Current line added this session:
+```
+**Post-MVP UI migration:** Blazor Hybrid + MudBlazor + shared RCL. DevExpress MAUI will be replaced (no Windows/WinUI3 support). Research + decision: `Docs/Management/BusinessFeatures/UI-2nd-refactor/`.
 ```
 
-#### 2. mcpmarket MudBlazor skill (to evaluate)
-- URL: `https://mcpmarket.com/tools/skills/frontend-development-mudblazor-ui`
-- Provides: standardised MudBlazor component/page generation patterns, semantic color mapping, loading/empty/error state patterns
-- Install: sync from mcpmarket to Claude Code
-- **Action**: Helder to visit URL and sync skill; evaluate vs existing dotnet-skills for overlap
+**Change to:**
+```
+**Post-MVP UI migration (pending spike):** Blazor Hybrid + MudBlazor + shared RCL is the target direction. DevExpress MAUI is the target for replacement (no Windows/WinUI3 support) pending spike go decision. Research + decision: `Docs/Management/BusinessFeatures/UI-2nd-refactor/`.
+```
 
-### What NOT to install now (and why)
+**Add annotation to Constitutional Constraints — UI Component Priority:**
+After `DevExpress first, always.` add: ` Note: Blazor Hybrid migration under evaluation (see Stack § Post-MVP UI migration). DevExpress-first rule remains in full effect until spike produces a go decision.`
 
-| Tool | Verdict | Reason |
-|------|---------|--------|
-| **Google Stitch MCP** | Skip until design phase | Stitch generates pure CSS/HTML/Tailwind — **not MudBlazor**. Gemini confirmed: raw CSS output creates instant technical debt when used with MudBlazor. Its value is design tokens (palette, typography) → MudTheme mapping. This requires (a) Google Cloud project setup, (b) design work in Stitch web UI first, (c) then MCP. Correct sequencing: design → Stitch web → export DESIGN.md → manual MudTheme mapping. No rush until we're building the real UI. |
-| **Figma MCP** | Skip for now | $15/month minimum (6 calls/month on free = useless). No MudBlazor Code Connect support exists. Revisit post-MVP when web design begins. |
-| Uno Platform | Skip | XAML-based; no web sharing advantage over Blazor |
-| Syncfusion | Skip | XAML-only; same migration cost, no web sharing |
-| UraniumUI | Skip | Best XAML option but no web sharing |
-| DevExpress Blazor | Skip | Use MudBlazor; more AI training data, more community |
+### 2. CLAUDE.md — add MudMCP to MCP & Skills section
 
-### Stitch Workflow (when we get there, post-spike)
-Correct sequence when Stitch becomes relevant:
-1. Create Google Cloud project + enable Stitch API + `gcloud auth login`
-2. Open Stitch web UI → generate Karaoke Neon theme visually
-3. Stitch exports `DESIGN.md` (color tokens, typography, spacing)
-4. Claude Code reads `DESIGN.md` → maps hex values to `MudTheme` C# properties
-5. **MudMCP** handles all actual component generation from that point on
-6. Stitch's CSS output is **discarded** — only design tokens are used
+In `### MCP Security Stance`, add to approved server list:
+```
+- MudMCP (`mudblazor`) — community server `mcbodge/MudMCP`, cloned locally at `C:/Users/helde/.claude/tools/MudMCP`; provides 12 tools for MudBlazor component docs and API reference. **Activate only during Blazor Hybrid / MudBlazor spike or migration work**. Do not activate for current MAUI-native development sessions.
+```
 
----
+In `### MCP Context Budget`, add:
+```
+- Blazor Hybrid / MudBlazor work: MudMCP only (deactivate DevExpress MCP — no overlap)
+```
 
-## Timing Decision: Spike in Parallel (Helder's proposal — adopted)
+### 3. `.claude/rules/constraints-registry.md` — two new entries
 
-**The question**: Theme refresh now vs post-MVP?
+**Add to `## DevExpress / UI` section:**
+```
+- **DevExpress MAUI — no Windows/WinUI3 support (hard architectural constraint):** DevExpress MAUI components do not support Windows/WinUI3. Any feature requiring Windows desktop support must use an alternative framework. This is the architectural driver for the post-MVP Blazor Hybrid + MudBlazor migration. See `Docs/Management/BusinessFeatures/UI-2nd-refactor/`.
+```
 
-**Answer: Neither full option. Run a Blazor Hybrid spike in a parallel project.**
+**Add new `## Design / Prototyping Tools` section at the bottom:**
+```
+## Design / Prototyping Tools
 
-Helder's proposal is architecturally sound:
-- Create `MyVocaList.Blazor.Spike` (new MAUI project, same solution)
-- Create `MyVocaList.UI.Shared` (new RCL, same solution)
-- Keep existing `MyVocaList` (DevExpress) untouched — Queue Management continues there
-- Build 2–3 representative pages in Blazor Hybrid + MudBlazor
-- Evidence-based decision: if spike succeeds → migration plan; if it fails → document blockers
-
-**Why the spike approach beats both alternatives:**
-- Queue Management (core MVP feature) builds in DevExpress without interruption
-- Spike isolates risk — nothing touches production code
-- By MVP launch, we have real Blazor Hybrid evidence, not just Gemini recommendations
-- If migration is decided post-MVP, the spike code becomes Phase 1 of the RCL
-
-**What the spike validates:**
-1. `BlazorWebView` renders MudBlazor on Android/iOS without jank
-2. Existing `IVenueService` / `IPersonService` DI injection works inside Razor components
-3. Navigation patterns (shell equivalent in Blazor router)
-4. MudBlazor's MudTheme accepts the Karaoke Neon palette without workarounds
-5. CSS animations (transform + opacity) are smooth at 60fps on a real device
-
-**Spike scope (per workflow.md spike task pattern):**
-- Time-box: 2–3 days
-- Pages: VenuesPage (list + search), PersonsPage (list)
-- Produces: `findings.md` artifact — go/no-go evidence for migration spec
-- NO production code touched
-
----
-
-## Steps for This Session
-
-### Step 1: Register prompt
-Create `UI-2nd-refactor/prompt.md` with Helder's original prompt for decision continuity.
-
-### Step 2: Install MudMCP
-Clone `https://github.com/mcbodge/MudMCP` to a local tools folder.
-Add entry to `.mcp.json` (project-level).
-Verify: `claude mcp list` shows `mudblazor`.
-
-### Step 3: Check mcpmarket MudBlazor skill
-Helder visits `https://mcpmarket.com/tools/skills/frontend-development-mudblazor-ui` and syncs to Claude Code.
-
-### Step 4: Update BACKLOG.md
-- `ui-2nd-refactor` → `📋 Spec` (direction decided, spike + spec pending)
-- Add spike entry in Dev Cycle Craft table
-
-### Step 5: Note for CLAUDE.md
-Add a single line under Stack: "Planned post-MVP: Blazor Hybrid + MudBlazor migration. See Docs/Management/BusinessFeatures/UI-2nd-refactor/."
-
----
-
-## Files to Create This Session
-
-1. `UI-2nd-refactor/prompt.md` — original prompt captured
-2. `.mcp.json` — MudMCP entry added
-3. `BACKLOG.md` — status updates
-4. Optional: `CLAUDE.md` — 1-line note about Blazor Hybrid direction
+- **Stitch MCP — generates CSS/HTML/Tailwind, NOT MudBlazor:** Stitch converts designs to pure CSS + HTML or Tailwind — no MudBlazor Code Connect integration. Do NOT use Stitch to generate MudBlazor components. Use MudMCP (`mudblazor` server key) for component docs and generation. Stitch's only value in this project is design-token export (palette, typography) → manual mapping to `MudTheme`. Evaluated 2026-06-02.
+- **Figma MCP — no MudBlazor Code Connect; $15/month minimum:** Figma MCP requires paid plan ($15/month Professional) for useful call volume. No MudBlazor Code Connect plugin exists. Not suitable for MudBlazor code generation. Evaluated 2026-06-02.
+```

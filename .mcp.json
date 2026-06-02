@@ -39,7 +39,7 @@
         "--",
         "--stdio",
         "--version",
-        "9.0.0"
+        "9.5.0"
       ],
       "_comment": "MudBlazor component docs MCP — community project mcbodge/MudMCP. Used during Blazor Hybrid spike and migration. Version 9.0.0 = MudBlazor package version queried."
     },
