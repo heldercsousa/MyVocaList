@@ -5,6 +5,7 @@ Karaoke queue management for live events. Manages one active queue at a time wit
 
 **Stack:** .NET MAUI 10 · net10.0-android · net10.0-ios · C# 13 · CommunityToolkit.Mvvm · Serilog · EF Core 10 · SQLite · DevExpress MAUI v25.2.4
 **Planned:** MediatR · FluentValidation (not yet registered in MauiProgram.cs)
+**Post-MVP UI migration:** Blazor Hybrid + MudBlazor + shared RCL. DevExpress MAUI will be replaced (no Windows/WinUI3 support). Research + decision: `Docs/Management/BusinessFeatures/UI-2nd-refactor/`.
 
 ## Architecture
 Architecture layer constraints are defined in `code-principles.md § Architecture Constraints`. The "business logic in Services" constraint is unamendable — see Constitutional Constraints.
