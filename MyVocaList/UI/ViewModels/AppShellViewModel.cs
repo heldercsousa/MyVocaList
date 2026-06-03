@@ -1,3 +1,6 @@
+using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.UI.Messages;
+
 namespace MyVocaList.UI.ViewModels;
 
 /// <summary>
@@ -6,6 +9,7 @@ namespace MyVocaList.UI.ViewModels;
 public class AppShellViewModel : ViewModelBase
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IVersionCheckService _versionCheckService;
 
     public string AppTitle => AppInfo.Name;
 
@@ -18,11 +22,25 @@ public class AppShellViewModel : ViewModelBase
     /// <summary>Raised when the user requests to exit the app (menu item or back at root).</summary>
     public event Action? ExitRequested;
 
-    public AppShellViewModel(IServiceProvider serviceProvider)
+    public AppShellViewModel(IServiceProvider serviceProvider, IVersionCheckService versionCheckService)
     {
         _serviceProvider = serviceProvider;
+        _versionCheckService = versionCheckService;
         NavigateCommand = new AsyncRelayCommand<string>(route => NavigateAsync(route!));
         MenuGroups = NavigationConfig.BuildMenuGroups(NavigateCommand);
+    }
+
+    /// <summary>
+    /// Runs startup checks (version check) and sends messages to trigger UI responses.
+    /// Called once from AppShell after initialization.
+    /// </summary>
+    public async Task InitializeAsync(CancellationToken ct = default)
+    {
+        var updateResult = await _versionCheckService.CheckForUpdatesAsync(ct);
+        if (updateResult.IsUpdateRequired)
+            WeakReferenceMessenger.Default.Send(new ShowUpdateRequiredMessage(updateResult));
+        else if (updateResult.IsUpdateAvailable)
+            WeakReferenceMessenger.Default.Send(new ShowUpdateAvailableMessage(updateResult));
     }
 
     private async Task NavigateAsync(string route)
