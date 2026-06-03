@@ -24,6 +24,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Routes.PersonForm, typeof(PersonFormPage));
         Routing.RegisterRoute(Routes.ArtistForm, typeof(ArtistFormPage));
         Routing.RegisterRoute(Routes.SongForm, typeof(SongFormPage));
+        Routing.RegisterRoute(Routes.Feedback, typeof(FeedbackPage));
     }
 
     // Fallback: catches back press when Shell is at root and QueuePage.OnBackButtonPressed

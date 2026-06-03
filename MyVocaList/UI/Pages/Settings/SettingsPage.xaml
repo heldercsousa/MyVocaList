@@ -61,6 +61,18 @@
                 TextColor="{StaticResource OnSurfaceVariant}"
                 Text="Free quota: ~100 searches/day. Without a key, paste YouTube URLs directly." />
 
+            <!-- Help and Feedback section -->
+            <Label
+                Text="Help &amp; Feedback"
+                StyleClass="Title.Medium"
+                TextColor="{StaticResource OnSurface}" />
+
+            <dx:DXButton
+                Content="Send Feedback"
+                Style="{StaticResource OutlinedButton}"
+                HorizontalOptions="Fill"
+                Command="{Binding NavigateToFeedbackCommand}" />
+
         </VerticalStackLayout>
     </ScrollView>
 

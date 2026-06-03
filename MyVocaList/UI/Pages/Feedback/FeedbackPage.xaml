@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    x:Class="MyVocaList.UI.Pages.Feedback.FeedbackPage"
+    x:DataType="vm:FeedbackViewModel"
+    Title="Send Feedback"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="Container">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+
+            <Label
+                Text="What's on your mind?"
+                StyleClass="Title.Medium"
+                TextColor="{StaticResource OnSurface}" />
+
+            <Label
+                Text="Your feedback helps improve MyVocaList. Bug reports include device info automatically."
+                StyleClass="Body.Small"
+                TextColor="{StaticResource OnSurfaceVariant}" />
+
+            <!-- Category -->
+            <dxe:ComboBoxEdit
+                LabelText="Category"
+                ItemsSource="{Binding Categories}"
+                SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
+                IsReadOnly="True" />
+
+            <!-- Message -->
+            <dxe:MultilineEdit
+                LabelText="Message"
+                PlaceholderText="Describe the issue or feature request..."
+                Text="{Binding Message, Mode=TwoWay}"
+                MaxCharacterCount="1000"
+                MinLines="5"
+                MaxLines="10" />
+
+            <!-- Email (optional) -->
+            <dxe:TextEdit
+                LabelText="Contact email (optional)"
+                PlaceholderText="your@email.com"
+                Text="{Binding Email, Mode=TwoWay}"
+                Keyboard="Email" />
+
+            <!-- Submit -->
+            <dx:DXButton
+                Content="Send Feedback"
+                Style="{StaticResource FilledButton}"
+                HorizontalOptions="Fill"
+                Command="{Binding SubmitCommand}" />
+
+            <ActivityIndicator
+                IsRunning="{Binding IsSubmitting}"
+                IsVisible="{Binding IsSubmitting}"
+                HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

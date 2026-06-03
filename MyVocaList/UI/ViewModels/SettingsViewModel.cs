@@ -79,6 +79,10 @@ public partial class SettingsViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    private async Task NavigateToFeedbackAsync()
+        => await Shell.Current.GoToAsync(Routes.Feedback);
+
     private async Task ClearApiKeyAsync()
     {
         _secureStorage.Remove("youtube_api_key");
