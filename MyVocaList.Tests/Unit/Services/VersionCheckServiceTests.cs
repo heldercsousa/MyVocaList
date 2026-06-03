@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
-using Microsoft.Maui.ApplicationModel;
 using Moq;
 using Moq.Protected;
 using MyVocaList.Contracts.DTOs;
@@ -11,8 +10,6 @@ namespace MyVocaList.Tests.Unit.Services;
 public class VersionCheckServiceTests
 {
     private readonly Mock<IHttpClientFactory> _factoryMock = new();
-    private readonly Mock<IAppInfo> _appInfoMock = new();
-    private readonly Mock<IDeviceInfo> _deviceInfoMock = new();
     private readonly Mock<ILogger<VersionCheckService>> _loggerMock = new();
 
     private static readonly string ValidManifestJson = JsonSerializer.Serialize(new
@@ -50,19 +47,15 @@ public class VersionCheckServiceTests
             .Returns(new HttpClient(handler.Object));
     }
 
-    private VersionCheckService CreateSut(string currentVersion, DevicePlatform platform)
-    {
-        _appInfoMock.Setup(a => a.VersionString).Returns(currentVersion);
-        _deviceInfoMock.Setup(d => d.Platform).Returns(platform);
-        return new VersionCheckService(_factoryMock.Object, _appInfoMock.Object, _deviceInfoMock.Object, _loggerMock.Object);
-    }
+    private VersionCheckService CreateSut(string currentVersion, string platformKey)
+        => new(_factoryMock.Object, currentVersion, platformKey, _loggerMock.Object);
 
     // [AC] AC-UC-03: App proceeds when up to date
     [Fact]
     public async Task CheckForUpdatesAsync_UpToDate_ReturnsUpToDate()
     {
         SetupHttpResponse(ValidManifestJson);
-        var sut = CreateSut("2.0.0", DevicePlatform.Android);
+        var sut = CreateSut("2.0.0", "android");
 
         var result = await sut.CheckForUpdatesAsync();
 
@@ -76,7 +69,7 @@ public class VersionCheckServiceTests
     public async Task CheckForUpdatesAsync_UpdateAvailable_ReturnsIsUpdateAvailable()
     {
         SetupHttpResponse(ValidManifestJson);
-        var sut = CreateSut("1.8.0", DevicePlatform.Android);
+        var sut = CreateSut("1.8.0", "android");
 
         var result = await sut.CheckForUpdatesAsync();
 
@@ -92,7 +85,7 @@ public class VersionCheckServiceTests
     public async Task CheckForUpdatesAsync_BelowMinimum_ReturnsIsUpdateRequired()
     {
         SetupHttpResponse(ValidManifestJson);
-        var sut = CreateSut("1.0.0", DevicePlatform.Android);
+        var sut = CreateSut("1.0.0", "android");
 
         var result = await sut.CheckForUpdatesAsync();
 
@@ -107,7 +100,7 @@ public class VersionCheckServiceTests
     public async Task CheckForUpdatesAsync_UpdateAvailableOnIos_ReturnsIosStoreUrl()
     {
         SetupHttpResponse(ValidManifestJson);
-        var sut = CreateSut("1.8.0", DevicePlatform.iOS);
+        var sut = CreateSut("1.8.0", "ios");
 
         var result = await sut.CheckForUpdatesAsync();
 
@@ -119,7 +112,7 @@ public class VersionCheckServiceTests
     public async Task CheckForUpdatesAsync_NetworkFailure_ReturnsUpToDate()
     {
         SetupNetworkFailure();
-        var sut = CreateSut("1.0.0", DevicePlatform.Android);
+        var sut = CreateSut("1.0.0", "android");
 
         var result = await sut.CheckForUpdatesAsync();
 
@@ -132,7 +125,7 @@ public class VersionCheckServiceTests
     public async Task CheckForUpdatesAsync_MalformedJson_ReturnsUpToDate()
     {
         SetupHttpResponse("{ not valid json {{");
-        var sut = CreateSut("1.0.0", DevicePlatform.Android);
+        var sut = CreateSut("1.0.0", "android");
 
         var result = await sut.CheckForUpdatesAsync();
 
@@ -151,7 +144,7 @@ public class VersionCheckServiceTests
             updateMessage = ""
         });
         SetupHttpResponse(manifest);
-        var sut = CreateSut("0.3.0-alpha.5", DevicePlatform.Android);
+        var sut = CreateSut("0.3.0-alpha.5", "android");
 
         var result = await sut.CheckForUpdatesAsync();
 
@@ -170,7 +163,7 @@ public class VersionCheckServiceTests
             updateMessage = ""
         });
         SetupHttpResponse(manifest);
-        var sut = CreateSut("1.8.0", DevicePlatform.iOS);
+        var sut = CreateSut("1.8.0", "ios");
 
         var result = await sut.CheckForUpdatesAsync();
 
