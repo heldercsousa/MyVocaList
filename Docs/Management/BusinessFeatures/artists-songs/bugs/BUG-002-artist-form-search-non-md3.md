@@ -63,7 +63,21 @@ Use a full-width MD3 Search bar (pill shape, leading search icon, no separate bu
 **Option B — Filled Text Field with trailing icon button**  
 Use `dx:TextEdit` (`TextFieldType="Filled"`, full width) with a trailing `dx:SimpleButton` icon (`search` icon). Button triggers search. More form-native, lower visual weight.
 
-**Helder must decide** which option after reviewing the MD3 docs and the existing `AppSearchBar` implementation.
+**Option C — Oficial MD3 predicted pattern for search UI (Helder Recommendation)**  
+Use `SearchAppBar` component, as oficial MD3 documentation, no single detail added or removed. The way the page has the search aranged seems more like a deskop (big screeens) like - we
+	  have a search right below the artist name. But, if you gather mobile examples, I don't remember having ever seem
+	  a search that isn't the only functionalitie loaded in the screen. Also, if you fo to oficial MD3 docs at
+	  https://m3.material.io/components/search/<suffix> (replace <suffix> by overview, specs, guidelines or
+	  accessibility to access all related to search component pages) , you will probably not find anything about
+	  searching sharing a page with another functionalitie. At least while reading I didn't read anything. It makes me
+	  believe such search must be in a dedicated page. Let´s plan it, avoid with all your force coding oas 1st
+	  initiative of fixing. Given that we have a search component to reuse, just rteview the docs, and compare with
+	  your internal custom guidelines  about its pattern we must follow to be MD3 compliant. Any conflict with the
+	  oficial docs must be added added as a new Task, nested to the search bar component created priorly, and must the
+	  first or included in the first wave. Please use playright to analyse the oficial docs (update server setup with token BM5eHpLqTjDLxBIsoBK1tv4EB9WKpidiiuzEzPPtuYI). Extend the search across the https://m3.material.io
+	  site aiming find any definition for search entry among other form fields.
+
+**Helder must decide** which option after reviewing the MD3 docs and the existing `AppSearchBar` implementation. (Helder already decided for using option C, but only if no other option was found in oficial docs other than dedicated page for searching)
 
 ---
 
