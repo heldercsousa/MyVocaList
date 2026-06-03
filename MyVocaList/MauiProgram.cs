@@ -108,6 +108,14 @@ public static class MauiProgram
         builder.Services.AddSingleton<IAppInfo>(_ => AppInfo.Current);
         builder.Services.AddSingleton<IFileSystem>(_ => FileSystem.Current);
         builder.Services.AddSingleton<IWhatsNewService, WhatsNewService>();
+
+        // Version check — reads platform info at registration time (Singleton)
+        builder.Services.AddHttpClient("version-check");
+        builder.Services.AddSingleton<IVersionCheckService>(sp => new VersionCheckService(
+            sp.GetRequiredService<IHttpClientFactory>(),
+            AppInfo.Current.VersionString,
+            DeviceInfo.Current.Platform == DevicePlatform.iOS ? "ios" : "android",
+            sp.GetRequiredService<ILogger<VersionCheckService>>()));
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddScoped<IPersonService, PersonService>();
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();

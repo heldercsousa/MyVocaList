@@ -8,6 +8,8 @@ public partial class AppShell : Shell
 {
     private readonly IWhatsNewService _whatsNewService;
     private WhatsNewBottomSheet? _whatsNewSheet;
+    private UpdateAvailableBottomSheet? _updateAvailableSheet;
+    private UpdateRequiredBottomSheet? _updateRequiredSheet;
 
     public AppShell(AppShellViewModel viewModel, IWhatsNewService whatsNewService)
     {
@@ -16,15 +18,18 @@ public partial class AppShell : Shell
         InitializeComponent();
 
         viewModel.ExitRequested += OnExitRequested;
-        WeakReferenceMessenger.Default.Register<ShowWhatsNewMessage>(this, OnShowWhatsNew);
 
-        _ = viewModel.InitializeAsync();
+        WeakReferenceMessenger.Default.Register<ShowWhatsNewMessage>(this, OnShowWhatsNew);
+        WeakReferenceMessenger.Default.Register<ShowUpdateAvailableMessage>(this, OnShowUpdateAvailable);
+        WeakReferenceMessenger.Default.Register<ShowUpdateRequiredMessage>(this, OnShowUpdateRequired);
 
         Routing.RegisterRoute(Routes.VenueForm, typeof(VenueFormPage));
         Routing.RegisterRoute(Routes.PersonForm, typeof(PersonFormPage));
         Routing.RegisterRoute(Routes.ArtistForm, typeof(ArtistFormPage));
         Routing.RegisterRoute(Routes.SongForm, typeof(SongFormPage));
         Routing.RegisterRoute(Routes.Feedback, typeof(FeedbackPage));
+
+        _ = viewModel.InitializeAsync();
     }
 
     // Fallback: catches back press when Shell is at root and QueuePage.OnBackButtonPressed
@@ -51,12 +56,35 @@ public partial class AppShell : Shell
         MainThread.BeginInvokeOnMainThread(() =>
         {
             _whatsNewSheet ??= new WhatsNewBottomSheet();
-            if (CurrentPage is ContentPage page && _whatsNewSheet.Parent is null)
-            {
-                if (page.Content is Layout layout)
-                    layout.Children.Add(_whatsNewSheet);
-            }
+            AttachSheetToCurrentPage(_whatsNewSheet);
             _whatsNewSheet.Show(message.Entry, _whatsNewService);
         });
+    }
+
+    private void OnShowUpdateAvailable(object recipient, ShowUpdateAvailableMessage message)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            _updateAvailableSheet ??= new UpdateAvailableBottomSheet();
+            AttachSheetToCurrentPage(_updateAvailableSheet);
+            _updateAvailableSheet.Show(message.Result);
+        });
+    }
+
+    private void OnShowUpdateRequired(object recipient, ShowUpdateRequiredMessage message)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            _updateRequiredSheet ??= new UpdateRequiredBottomSheet();
+            AttachSheetToCurrentPage(_updateRequiredSheet);
+            _updateRequiredSheet.Show(message.Result);
+        });
+    }
+
+    private void AttachSheetToCurrentPage(ContentView sheet)
+    {
+        if (sheet.Parent is not null) return;
+        if (CurrentPage is ContentPage contentPage && contentPage.Content is Layout layout)
+            layout.Children.Add(sheet);
     }
 }
