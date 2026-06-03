@@ -1,0 +1,13 @@
+[
+  {
+    "version": "0.1.0",
+    "date": "2026-06-01",
+    "highlights": [
+      "Artists & Songs catalog with API search",
+      "YouTube karaoke URL management per song",
+      "Crash reporting with Sentry integration",
+      "Local database backup and restore"
+    ],
+    "fixes": []
+  }
+]
