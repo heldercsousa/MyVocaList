@@ -55,6 +55,7 @@ public partial class ArtistsViewModel : ViewModelBase
         OpenSearchCommand = new RelayCommand(() => IsSearchMode = true);
         CloseSearchCommand = new RelayCommand(CloseSearch);
         ViewCatalogCommand = new RelayCommand<ArtistListItemDto>(NavigateToCatalog);
+        GoBackCommand = new AsyncRelayCommand(GoBackAsync);
     }
 
     public ObservableRangeCollection<ArtistListItemDto> Artists { get; }
@@ -97,6 +98,7 @@ public partial class ArtistsViewModel : ViewModelBase
     public IRelayCommand OpenSearchCommand { get; }
     public IRelayCommand CloseSearchCommand { get; }
     public IRelayCommand<ArtistListItemDto> ViewCatalogCommand { get; }
+    public IAsyncRelayCommand GoBackCommand { get; }
 
     partial void OnSearchTextChanged(string value)
     {
@@ -248,6 +250,8 @@ public partial class ArtistsViewModel : ViewModelBase
             catch (OperationCanceledException) { }
         }, token);
     }
+
+    private Task GoBackAsync() => Shell.Current.GoToAsync("..");
 
     private Task NavigateToAddAsync() =>
         Shell.Current.GoToAsync(Routes.ArtistForm);

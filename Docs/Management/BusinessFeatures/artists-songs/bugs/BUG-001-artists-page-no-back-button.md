@@ -3,7 +3,7 @@
 **Severity:** High — navigation is impossible without back button  
 **Discovered:** 2026-06-02 — Phase 16C emulator smoke test  
 **Reporter:** Helder  
-**Status:** Open
+**Status:** Fixed — 2026-06-03
 
 ---
 
@@ -41,3 +41,11 @@ The button should have a meaningful icon (e.g., `library_music` or `queue_music`
 - Inspect `ArtistListItemTemplate` in `ArtistsPage.xaml` for the trailing button definition
 - Add a descriptive icon inside the button **or** replace with a labeled `dx:SimpleButton` / `ImageButton` with accessible content description
 - Verify against MD3 List Item trailing element specs: m3.material.io/components/lists
+
+---
+
+## Resolution (2026-06-03)
+
+**Issue 1 fix:** Added `NavigationIcon="arrow_back_outlined"` and `NavigationCommand="{Binding GoBackCommand}"` to the `SmallAppBar` in `ArtistsPage.xaml`. Added `GoBackCommand` (calls `Shell.Current.GoToAsync("..")`) to `ArtistsViewModel`.
+
+**Issue 2 fix:** Changed `Style="{StaticResource IconButton}"` → `Style="{StaticResource StandardIconButton}"` on the trailing `dx:DXButton` in both `ItemTemplate` and `SelectedItemTemplate`. The `IconButton` key does not exist in the app resources — `StandardIconButton` is the correct key defined in `MaterialStyles.xaml`. Also added `SemanticProperties.Description="View catalog"` to both buttons for accessibility.
