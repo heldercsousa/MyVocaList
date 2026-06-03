@@ -494,3 +494,12 @@ Docs/Management/BusinessFeatures/whats-new/plan.md
 Docs/Management/BusinessFeatures/user-suggestions/plan.md
 Docs/Management/BusinessFeatures/app-update-check/plan.md
 Docs/Management/BACKLOG.md
+.claude/worktrees/agent-afc08735e0a8cefa6/Contracts/DTOs/FeedbackSubmission.cs
+.claude/worktrees/agent-a9b87d57d881a467e/Domain/ServicesInterfaces/IWhatsNewService.cs
+.claude/worktrees/agent-a9b87d57d881a467e/Services/NullWhatsNewService.cs
+.claude/worktrees/agent-afc08735e0a8cefa6/Domain/ServicesInterfaces/IFeedbackService.cs
+.claude/worktrees/agent-afc08735e0a8cefa6/Domain/ServicesInterfaces/IFeedbackService.cs
+.claude/worktrees/agent-a9b87d57d881a467e/MyVocaList.Tests/Unit/Services/WhatsNewServiceTests.cs
+.claude/worktrees/agent-aaf8e5dcc94c929e3/Domain/ServicesInterfaces/IWhatsNewService.cs
+.claude/worktrees/agent-aaf8e5dcc94c929e3/Domain/ServicesInterfaces/IWhatsNewService.cs
+.claude/worktrees/agent-aaf8e5dcc94c929e3/Services/NullWhatsNewService.cs
