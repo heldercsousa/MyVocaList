@@ -346,6 +346,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-r
 		Docs\Management\BusinessFeatures\UI-2nd-refactor\prompt.md = Docs\Management\BusinessFeatures\UI-2nd-refactor\prompt.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-002-artist-form-search-non-md3.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-002-artist-form-search-non-md3.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -468,6 +474,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000015} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000017} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{4CB09F16-6E81-425E-9080-840BABFB66BF} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{7A021F6B-F297-41EA-A028-C4F881146791} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
