@@ -104,6 +104,14 @@ public static class MauiProgram
         // Services
         // Temporary stub — replace with WhatsNewService when What's New feature is implemented
         builder.Services.AddSingleton<IWhatsNewService, NullWhatsNewService>();
+
+        // Version check — registered as Singleton; reads platform info at registration time
+        builder.Services.AddHttpClient("version-check");
+        builder.Services.AddSingleton<IVersionCheckService>(sp => new VersionCheckService(
+            sp.GetRequiredService<IHttpClientFactory>(),
+            AppInfo.Current.VersionString,
+            DeviceInfo.Current.Platform == DevicePlatform.iOS ? "ios" : "android",
+            sp.GetRequiredService<ILogger<VersionCheckService>>()));
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddScoped<IPersonService, PersonService>();
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();

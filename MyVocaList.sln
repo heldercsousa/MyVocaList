@@ -25,6 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de SoluÃ§Ã£o", "I
 		LICENSE = LICENSE
 		limparBinObj.bat = limparBinObj.bat
 		README.md = README.md
+		version-manifest.json = version-manifest.json
 		Docs\DevEnv\workflow-layout-findings.md = Docs\DevEnv\workflow-layout-findings.md
 	EndProjectSection
 EndProject
@@ -316,6 +317,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-update-check", "app-update-check", "{FA1234BC-0001-4000-8000-000000000016}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\app-update-check\design.md = Docs\Management\BusinessFeatures\app-update-check\design.md
+		Docs\Management\BusinessFeatures\app-update-check\plan.md = Docs\Management\BusinessFeatures\app-update-check\plan.md
 		Docs\Management\BusinessFeatures\app-update-check\requirements.md = Docs\Management\BusinessFeatures\app-update-check\requirements.md
 	EndProjectSection
 EndProject
