@@ -1,4 +1,6 @@
 using CommunityToolkit.Maui;
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Devices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -157,6 +159,14 @@ public static class MauiProgram
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<AboutViewModel>();
         builder.Services.AddTransient<AboutPage>();
+
+        // Feedback
+        builder.Services.AddTransient<IFeedbackService, FeedbackService>();
+        builder.Services.AddTransient<FeedbackViewModel>();
+        builder.Services.AddTransient<FeedbackPage>();
+        builder.Services.AddHttpClient("feedback");
+        builder.Services.AddSingleton<IDeviceInfo>(DeviceInfo.Current);
+        builder.Services.AddSingleton<IAppInfo>(AppInfo.Current);
 
         // Register Serilog (file + debug sinks always; Sentry sink in release builds when DSN is set)
         // Assign Log.Logger so GlobalExceptionHandler's static Log.Fatal/Error calls are captured.
