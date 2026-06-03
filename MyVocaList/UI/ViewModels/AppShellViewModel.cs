@@ -1,3 +1,6 @@
+using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.UI.Messages;
+
 namespace MyVocaList.UI.ViewModels;
 
 /// <summary>
@@ -6,6 +9,7 @@ namespace MyVocaList.UI.ViewModels;
 public class AppShellViewModel : ViewModelBase
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IWhatsNewService _whatsNewService;
 
     public string AppTitle => AppInfo.Name;
 
@@ -18,11 +22,19 @@ public class AppShellViewModel : ViewModelBase
     /// <summary>Raised when the user requests to exit the app (menu item or back at root).</summary>
     public event Action? ExitRequested;
 
-    public AppShellViewModel(IServiceProvider serviceProvider)
+    public AppShellViewModel(IServiceProvider serviceProvider, IWhatsNewService whatsNewService)
     {
         _serviceProvider = serviceProvider;
+        _whatsNewService = whatsNewService;
         NavigateCommand = new AsyncRelayCommand<string>(route => NavigateAsync(route!));
         MenuGroups = NavigationConfig.BuildMenuGroups(NavigateCommand);
+    }
+
+    public async Task InitializeAsync(CancellationToken ct = default)
+    {
+        var entry = await _whatsNewService.GetPendingReleaseAsync(ct);
+        if (entry is not null)
+            WeakReferenceMessenger.Default.Send(new ShowWhatsNewMessage(entry));
     }
 
     private async Task NavigateAsync(string route)

@@ -102,8 +102,10 @@ public static class MauiProgram
         builder.Services.AddScoped<IMusicMetadataProvider, DeezerProvider>();
 
         // Services
-        // Temporary stub — replace with WhatsNewService when What's New feature is implemented
-        builder.Services.AddSingleton<IWhatsNewService, NullWhatsNewService>();
+        builder.Services.AddSingleton<IPreferences>(_ => Preferences.Default);
+        builder.Services.AddSingleton<IAppInfo>(_ => AppInfo.Current);
+        builder.Services.AddSingleton<IFileSystem>(_ => FileSystem.Current);
+        builder.Services.AddSingleton<IWhatsNewService, WhatsNewService>();
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddScoped<IPersonService, PersonService>();
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
