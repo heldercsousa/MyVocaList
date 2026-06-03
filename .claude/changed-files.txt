@@ -564,3 +564,4 @@ Docs/Management/BACKLOG.md
 MyVocaList/UI/ViewModels/AppShellViewModel.cs
 MyVocaList/AppShell.xaml.cs
 MyVocaList/MauiProgram.cs
+Docs/Management/BACKLOG.md
