@@ -37,9 +37,9 @@
 | 2026-06 | ↳ Bug: Artist/Song form search strip non-MD3 | 💡 Pending | TextEdit+Button row is inconsistent with AppSearchBar; requires MD3 investigation before fix. Details: `artists-songs/bugs/BUG-002-artist-form-search-non-md3.md` |
 | 2026-06 | **Crash & Error Reporting** | ✅ Done | 2 bugs found in review (fixed). Spec: `Docs/Management/BusinessFeatures/crash-reporting/` |
 | 2026-06 | ↳ Pre-release checklist | 💡 Pending | App-wide: fill Sentry DSN, run smoke test, add multi-env DSN if needed. Details: `tasks.md`. |
-| 2026-06 | **What's New / Release Notes** | 🟢 Ready | Bundled `releases.json`; one-time modal on version upgrade. Plan: `Docs/Management/BusinessFeatures/whats-new/plan.md` |
-| 2026-06 | **User Suggestions** | 🟢 Ready | In-app form → GitHub Issues API; auto-captures device metadata. Plan: `Docs/Management/BusinessFeatures/user-suggestions/plan.md` |
-| 2026-06 | **App Update Check** | 🟢 Ready | Remote version manifest; soft nudge + hard block sheets; fail-open. Plan: `Docs/Management/BusinessFeatures/app-update-check/plan.md` · ⚠️ Depends on What's New feature merged first (shares AppShellViewModel.InitializeAsync) |
+| 2026-06 | **What's New / Release Notes** | ✅ Done | Bundled `releases.json`; one-time modal on version upgrade. Plan: `Docs/Management/BusinessFeatures/whats-new/plan.md` |
+| 2026-06 | **User Suggestions** | ✅ Done | In-app form → GitHub Issues API; auto-captures device metadata. ⏳ **Helder:** Add fine-grained GitHub PAT to `appsettings.json` (Issues R/W on heldercsousa/MyVocaList). Plan: `Docs/Management/BusinessFeatures/user-suggestions/plan.md` |
+| 2026-06 | **App Update Check** | ✅ Done | Remote version manifest; soft nudge + hard block sheets; fail-open. ⏳ **Helder:** Update `version-manifest.json` versions when shipping; replace `idXXXXXXX` with real App Store ID. Plan: `Docs/Management/BusinessFeatures/app-update-check/plan.md` |
 | 2026-06 | **App Settings** | ✅ Done | YouTube API key management (PasswordEdit, save/test/clear); flyout "Preferences" now navigates to SettingsPage; stale `HasYouTubeApiKey` refreshed on `OnAppearing`. Spec: `Docs/Management/BusinessFeatures/app-settings/` |
 | 2026-06 | **About Page** | ✅ Done | Version, logo, goal sentence, Since year, CC BY-NC-ND 4.0 license, What's New stub (hidden). Spec: `Docs/Management/BusinessFeatures/about-page/` |
 | 2026-06 | **Queue Management** | 💡 Pending | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate |
