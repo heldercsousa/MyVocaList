@@ -489,3 +489,8 @@ Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-001-artists-page-no-back
 Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-002-artist-form-search-non-md3.md
 Docs/Management/BACKLOG.md
 Docs/Management/goofy-munching-widget.md
+Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/whats-new/plan.md
+Docs/Management/BusinessFeatures/user-suggestions/plan.md
+Docs/Management/BusinessFeatures/app-update-check/plan.md
+Docs/Management/BACKLOG.md
