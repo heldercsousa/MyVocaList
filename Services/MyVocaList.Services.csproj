@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Maui.Essentials" />
+    <PackageReference Include="NuGet.Versioning" />
   </ItemGroup>
 
 </Project>
