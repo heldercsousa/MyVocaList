@@ -485,3 +485,7 @@ Docs/Management/BACKLOG.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_pending_manual_actions.md
 Docs/Management/BACKLOG.md
 Docs/Management/goofy-munching-widget.md
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-001-artists-page-no-back-button.md
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-002-artist-form-search-non-md3.md
+Docs/Management/BACKLOG.md
+Docs/Management/goofy-munching-widget.md

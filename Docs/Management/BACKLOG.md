@@ -33,6 +33,8 @@
 | 2026-05 | **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/Management/BusinessFeatures/artists-songs/` · Plan: `Docs/Management/BusinessFeatures/artists-songs/plan.md` · ⏳ **Helder:** Phase 16C emulator smoke test pending — see `tasks.md § Phase 16C` |
 | 2026-05 | ↳ Song Karaoke URLs | ✅ Done | YouTube URL management per song; SongFormPage section, settings, converters, tests. Spec: `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/` |
 | 2026-05 | ↳ Bug: GoToSettings navigation exception | ✅ Fixed | `GoToAsync("settings")` called from pushed-page context (SongFormPage); FlyoutItem requires absolute route `//settings`. Single-line fix in `SongFormViewModel.cs`. |
+| 2026-06 | ↳ Bug: Artists page missing back button + unclear trailing toggle | 💡 Pending | No back button on ArtistsPage AppBar; trailing pill button has no icon/label. Details: `artists-songs/bugs/BUG-001-artists-page-no-back-button.md` |
+| 2026-06 | ↳ Bug: Artist/Song form search strip non-MD3 | 💡 Pending | TextEdit+Button row is inconsistent with AppSearchBar; requires MD3 investigation before fix. Details: `artists-songs/bugs/BUG-002-artist-form-search-non-md3.md` |
 | 2026-06 | **Crash & Error Reporting** | ✅ Done | 2 bugs found in review (fixed). Spec: `Docs/Management/BusinessFeatures/crash-reporting/` |
 | 2026-06 | ↳ Pre-release checklist | 💡 Pending | App-wide: fill Sentry DSN, run smoke test, add multi-env DSN if needed. Details: `tasks.md`. |
 | 2026-06 | **What's New / Release Notes** | 📋 Spec | Bundled `releases.json`; one-time modal on version upgrade; depends on App Versioning. Spec: `Docs/Management/BusinessFeatures/whats-new/` |
