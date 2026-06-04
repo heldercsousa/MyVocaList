@@ -17,12 +17,12 @@
           VerticalOptions="Fill"
           Padding="4,0">
 
-        <!-- Leading icon: auto-switches search ↔ back in code-behind -->
+        <!-- Leading icon: always back arrow per MD3 search-replaces-appbar pattern -->
         <dx:DXButton Grid.Column="0"
                      x:Name="leadingButton"
-                     Icon="search_outlined"
+                     Icon="arrow_back_outlined"
                      Style="{StaticResource NavigationIconButton}"
-                     SemanticProperties.Description="Search"
+                     SemanticProperties.Description="Back"
                      Clicked="OnLeadingButtonClicked" />
 
         <!-- Search input: flat TextEdit on app bar bg, bodyLarge 16sp -->
@@ -42,8 +42,7 @@
                       ReturnType="Search"
                       VerticalOptions="Center"
                       SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}"
-                      Focused="OnSearchEditFocused"
-                      Unfocused="OnSearchEditUnfocused" />
+                       />
 
         <!-- Trailing action 1 -->
         <dx:DXButton Grid.Column="2"

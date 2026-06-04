@@ -1,15 +1,14 @@
+using System.Runtime.CompilerServices;
+
 namespace MyVocaList.UI.Components.AppBars;
 
 public partial class SearchAppBar : AppBarBase
 {
-    private bool _isSearchFocused;
-
     // ── SearchText ─────────────────────────────────────────────────────────
 
     public static readonly BindableProperty SearchTextProperty =
         BindableProperty.Create(nameof(SearchText), typeof(string), typeof(SearchAppBar), string.Empty,
-            BindingMode.TwoWay,
-            propertyChanged: (b, _, _) => ((SearchAppBar)b).UpdateLeadingIcon());
+            BindingMode.TwoWay);
 
     public string SearchText
     {
@@ -55,38 +54,21 @@ public partial class SearchAppBar : AppBarBase
             container.BackgroundColor = (Color)color;
     }
 
-    // ── Leading icon: auto search ↔ back ──────────────────────────────────
+    // ── Auto-focus when shown ──────────────────────────────────────────────
 
-    private void UpdateLeadingIcon()
+    protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
-        var showBack = _isSearchFocused || !string.IsNullOrEmpty(SearchText);
-        leadingButton.Icon = showBack ? "arrow_back_outlined" : "search_outlined";
-        SemanticProperties.SetDescription(leadingButton, showBack ? "Back" : "Search");
+        base.OnPropertyChanged(propertyName);
+        if (propertyName == nameof(IsVisible) && IsVisible)
+            searchEdit?.Focus();
     }
 
-    private void OnSearchEditFocused(object sender, FocusEventArgs e)
-    {
-        _isSearchFocused = true;
-        UpdateLeadingIcon();
-    }
-
-    private void OnSearchEditUnfocused(object sender, FocusEventArgs e)
-    {
-        _isSearchFocused = false;
-        UpdateLeadingIcon();
-    }
+    // ── Leading button: always dismisses search ────────────────────────────
 
     private void OnLeadingButtonClicked(object sender, EventArgs e)
     {
-        if (_isSearchFocused || !string.IsNullOrEmpty(SearchText))
-        {
-            SearchText = string.Empty;
-            searchEdit.Unfocus();
-            BackCommand?.Execute(null);
-        }
-        else
-        {
-            searchEdit.Focus();
-        }
+        SearchText = string.Empty;
+        searchEdit.Unfocus();
+        BackCommand?.Execute(null);
     }
 }
