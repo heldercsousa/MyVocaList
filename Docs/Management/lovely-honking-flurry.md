@@ -63,82 +63,153 @@ ExecuteConfirmActionAsync, DismissConfirmSheet, OnSelectionChanged, CloseSearch`
 
 ## Recommended Approach
 
-### Principle
+### Design principles applied
 
-Use **interface + abstract base class** for both layers. The composition preference (CLAUDE.md) is honoured: the abstract base holds *mechanism*; entity-specific *data and service calls* stay in the concrete class. Do NOT use a single mega-base that forces all behaviour into one type.
+Two C# patterns govern the choice between events and abstract methods here:
+
+| Scenario | Recommended mechanism | Reason |
+|---|---|---|
+| Base CANNOT access the resource (MAUI XAML constraint) | **Event** | Derived class owns the XAML element; base emits intent, derived acts |
+| Base MUST call entity-specific logic | **Abstract method** | Compiler-enforced, no-subscribe-means-broken risk eliminated |
+| Derived class may optionally extend base behavior | **`protected virtual` method with no-op base** | Opt-in extension without forcing override |
 
 ---
 
-### Layer 1 — Code-Behind: `CrudListPageBase` (abstract ContentPage)
+### The MAUI Partial Class Constraint (critical prerequisite)
 
-Extract a non-generic abstract base class in C# only (no XAML):
+In MAUI, changing a page's base class from `ContentPage` to a custom abstract class is supported: change the XAML root element and both partial declarations match. **However**, `x:Name` fields (`confirmSheet`, `collectionView`) are generated as `private` in the XAML-generated partial of the *derived* class. The base class has zero visibility into them.
+
+This means: **`CrudListPageBase` cannot call `confirmSheet.Close()` or `collectionView.SelectedItems = ...` directly.** Any approach that puts these calls in the base (abstract properties returning DX types, etc.) introduces coupling between the base and MAUI/DX UI element types. Events solve this cleanly — the base emits intent, the derived class acts on its own XAML elements.
+
+A secondary benefit: XAML event bindings (`Scrolled="OnCollectionViewScrolled"`) find inherited methods via normal C# method resolution. The base can declare these handlers; XAML wires them up correctly through the derived class.
+
+---
+
+### Layer 1 — Code-Behind: `CrudListPageBase` + Events
 
 ```csharp
 // MyVocaList/UI/Pages/CrudListPageBase.cs
-public abstract partial class CrudListPageBase : ContentPage
+public abstract class CrudListPageBase : ContentPage
 {
-    // Subclass provides the ViewModel reference via this contract
+    // === Required contract (compiler-enforced) ===
     protected abstract ICrudListViewModel ListViewModel { get; }
-    // Subclass provides the selected items IList for DXCollectionView wiring
-    protected abstract System.Collections.IList SelectedItemsRaw { get; }
 
-    protected CrudListPageBase()
-    {
-        // subscribe in subclass constructor after InitializeComponent()
-    }
+    // === Events for UI-element operations the base cannot perform ===
+    // Derived subscribes in constructor; wires up its own XAML x:Name elements.
+    protected event EventHandler<BottomSheetState> ConfirmSheetStateRequired;
+    protected event EventHandler SelectionItemsWireUpRequired;
 
+    // Called by derived constructor after InitializeComponent()
     protected void AttachViewModel()
-    {
-        ListViewModel.PropertyChanged += OnViewModelPropertyChanged;
-    }
+        => ListViewModel.PropertyChanged += OnViewModelPropertyChanged;
 
     private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ICrudListViewModel.ConfirmSheetState))
-        {
-            var state = ListViewModel.ConfirmSheetState;
-            if (state == BottomSheetState.Hidden) confirmSheet.Close();
-            else confirmSheet.Show(state, this);
-        }
+            ConfirmSheetStateRequired?.Invoke(this, ListViewModel.ConfirmSheetState);
     }
-    // + OnConfirmSheetStateChanged, OnCollectionViewScrolled, OnSelectionChanged
-    // + OnAppearing (calls SelectedItemsRaw wiring + InitializeAsync)
-    // + OnBackButtonPressed (sheet → search → base call)
+
+    // Bidirectional sync: sheet closed by gesture → sync back to VM
+    protected void OnConfirmSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
+    {
+        if (e.NewValue == BottomSheetState.Hidden &&
+            ListViewModel.ConfirmSheetState != BottomSheetState.Hidden)
+            ListViewModel.ConfirmSheetState = BottomSheetState.Hidden;
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        SelectionItemsWireUpRequired?.Invoke(this, EventArgs.Empty);
+        _ = ListViewModel.InitializeAsync();
+    }
+
+    // XAML event bindings in derived pages resolve these via inheritance:
+    protected void OnCollectionViewScrolled(object sender, DXCollectionViewScrolledEventArgs e)
+        => ListViewModel.IsScrolled = e.Offset > 0;
+
+    protected void OnSelectionChanged(object sender, CollectionViewSelectionChangedEventArgs e)
+    {
+        // sender IS the collectionView — no x:Name reference needed
+        var count = (sender as DXCollectionView)?.SelectedItems?.Count ?? 0;
+        ListViewModel.OnSelectionChanged(count);
+    }
+
+    protected override bool OnBackButtonPressed()
+    {
+        if (ListViewModel.ConfirmSheetState != BottomSheetState.Hidden)
+        {
+            ListViewModel.ConfirmSheetState = BottomSheetState.Hidden;
+            return true;
+        }
+        if (ListViewModel.IsSearchMode)
+        {
+            ListViewModel.CloseSearchCommand.Execute(null);
+            return true;
+        }
+        return base.OnBackButtonPressed();
+    }
 }
 ```
 
-Each page subclass becomes ~15 lines:
+Each derived page constructor wires its own XAML elements to the base events:
 ```csharp
 public partial class VenuesPage : CrudListPageBase
 {
+    private readonly VenuesViewModel _viewModel;
     protected override ICrudListViewModel ListViewModel => _viewModel;
-    protected override IList SelectedItemsRaw => _viewModel.SelectedVenuesRaw;
-    // constructor + nothing else
+
+    public VenuesPage(VenuesViewModel viewModel)
+    {
+        InitializeComponent();
+        _viewModel = viewModel;
+        BindingContext = _viewModel;
+        AttachViewModel();
+
+        // Wire base events to this page's own XAML x:Name elements
+        ConfirmSheetStateRequired += (_, state) =>
+        {
+            if (state == BottomSheetState.Hidden) confirmSheet.Close();
+            else confirmSheet.Show(state, this);
+        };
+        SelectionItemsWireUpRequired += (_, _) =>
+        {
+            if (collectionView != null)
+                collectionView.SelectedItems = _viewModel.SelectedVenuesRaw;
+        };
+    }
 }
 ```
 
-**XAML change**: Replace root element `<ContentPage …>` with `<pages:CrudListPageBase …>` (one line change per XAML file). The `x:DataType` stays on the concrete ViewModel — no XAML data-binding changes.
+**XAML change per page**: root element `<ContentPage …>` → `<pages:CrudListPageBase …>`. The `x:DataType` remains on the concrete ViewModel; no data-binding changes needed.
+
+**Why events beat abstract properties here**: An abstract `protected abstract BottomSheet ConfirmSheet { get; }` would force a DX type into the base's API surface, coupling it to DevExpress. Events keep the base ignorant of DX types entirely. When the future Blazor Hybrid migration arrives, the base doesn't change.
 
 ---
 
 ### Layer 2 — ViewModel: `ICrudListViewModel` + `CrudListViewModelBase<TItem>`
 
 #### Interface (`ICrudListViewModel`)
-Exposes all common properties and commands needed by the code-behind:
-```
-ConfirmSheetState, IsSearchMode, CloseSearchCommand, OnSelectionChanged(int)
+```csharp
+public interface ICrudListViewModel
+{
+    BottomSheetState ConfirmSheetState { get; set; }
+    bool IsSearchMode { get; }
+    bool IsScrolled { get; set; }
+    IRelayCommand CloseSearchCommand { get; }
+    Task InitializeAsync();
+    void OnSelectionChanged(int count);
+}
 ```
 
 #### Abstract Base (`CrudListViewModelBase<TItem>`)
 
-Holds all shared observable properties, infrastructure fields, and methods.
-
-**CommunityToolkit.Mvvm constraint**: `[ObservableProperty]` is declared in the base; the source generator places `partial void OnXxxChanged` hooks in the base class. This is fine because the hooks are identical in all 4 ViewModels (they call `NotifyEmptyStates()` + `TriggerSearchDebounce()` — both provided by the base).
+**CommunityToolkit.Mvvm source generator note**: `[ObservableProperty]` on fields in a `partial abstract` generic class is fully supported. The source generator emits the `partial void OnXxxChanged` hooks in the same class (the base). Since all four VMs have identical hook implementations (`OnSearchTextChanged`, `OnSelectedCountChanged`, `OnIsInitialLoadingChanged`), they all live in the base — no override needed.
 
 ```csharp
 public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICrudListViewModel
 {
-    // === Infrastructure (moved from all 4 VMs) ===
+    // === Infrastructure (private, moved from all 4 VMs) ===
     private int _currentPage;
     private int _totalCount;
     private string _currentSearchQuery;
@@ -147,54 +218,84 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
     private volatile bool _isLoading;
 
-    // === [ObservableProperty] fields (identical across all 4) ===
+    // === [ObservableProperty] fields — identical in all 4 ===
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private string _searchText = string.Empty;
-    // ... 8 more ...
+    [ObservableProperty] private bool _isSearchMode;
+    [ObservableProperty] private bool _isScrolled;
+    [ObservableProperty] private int _selectedCount;
+    [ObservableProperty] private BottomSheetState _confirmSheetState = BottomSheetState.Hidden;
+    [ObservableProperty] private bool _hasMoreItems = true;
+    [ObservableProperty] private bool _isInitialLoading = true;
+    [ObservableProperty] private string _confirmMessage = string.Empty;
+    [ObservableProperty] private string _confirmActionText = "Delete";
 
-    // === Common commands ===
-    public IAsyncRelayCommand RefreshCommand { get; }
-    public IRelayCommand LoadMoreCommand { get; }
-    // ... 7 more identical commands ...
-
-    // === Abstract contract (entity-specific) ===
+    // === Abstract contract — REQUIRED, compiler-enforced ===
     protected abstract ObservableRangeCollection<TItem> Items { get; }
     protected abstract ObservableRangeCollection<TItem> SelectedItems { get; }
+
     protected abstract Task<(IEnumerable<TItem> items, int totalCount)> FetchPageAsync(
         int page, int pageSize, string query, CancellationToken ct);
+
     protected abstract Task<(IEnumerable<TItem> items, int totalCount)> FetchMoreAsync(
-        int page, int pageSize, string query);
-    protected abstract Task DeleteAsync(IEnumerable<TItem> items);
+        int page, int pageSize, string query, CancellationToken ct = default);
+
+    protected abstract Task ExecuteDeleteAsync(IEnumerable<TItem> items);
     protected abstract string BuildDeleteConfirmMessage(IList<TItem> items);
     protected abstract Task NavigateToAddAsync();
     protected abstract Task NavigateToEditAsync(TItem item);
-    protected abstract void RaiseEmptyStateProperties(); // calls OnPropertyChanged for entity-specific names
 
-    // === Shared methods (moved from all 4 VMs) ===
-    // InitializeAsync, RefreshAsync, LoadMoreAsync, TriggerSearchDebounce,
-    // ExecuteConfirmActionAsync, DismissConfirmSheet, ToggleSelectAll,
-    // OnSelectionChanged, CloseSearch
-    // partial void OnSearchTextChanged, OnSelectedCountChanged, OnIsInitialLoadingChanged
+    // Raises entity-specific empty state property names (IsEmptyNoVenues, etc.)
+    // Abstract = compiler-enforced; every entity has these, events would allow "forgetting" silently.
+    protected abstract void RaiseEntityEmptyStateProperties();
+
+    // === Optional extension hooks — virtual with no-op base ===
+    // Override in derived class to add behavior after a page load completes.
+    protected virtual void OnAfterLoad(IReadOnlyList<TItem> items) { }
+
+    // === Shared methods (identical across all 4 VMs) ===
+    // InitializeAsync, RefreshAsync, LoadFirstPageAsync, LoadMoreAsync,
+    // TriggerSearchDebounce, ExecuteConfirmActionAsync, DismissConfirmSheet,
+    // ToggleSelectAll, OnSelectionChanged, CloseSearch, NotifyEmptyStates
+    // plus partial void hooks: OnSearchTextChanged, OnSelectedCountChanged, OnIsInitialLoadingChanged
 }
 ```
 
-Concrete ViewModel becomes ~80 lines (down from ~320):
+**Why abstract methods (not events) for the ViewModel**:
+- `RaiseEntityEmptyStateProperties` is REQUIRED — forgetting to subscribe an event silently breaks empty states with no build error. An abstract method is a build-time contract.
+- `FetchPageAsync`, `DeleteAsync` etc. are required by the base algorithm — the Template Method pattern is the correct fit.
+- INPC notifications from `CrudListViewModelBase<TItem>` propagate correctly through inheritance. A composed `CrudListController<TItem>` would require forwarding all `PropertyChanged` events manually — more boilerplate than it saves.
+
+Concrete ViewModel becomes ~80 lines:
 ```csharp
 public partial class VenuesViewModel : CrudListViewModelBase<VenueListItemDto>
 {
+    private readonly IVenueService _venueService;
+    // ... snackbar, logger
+
     protected override ObservableRangeCollection<VenueListItemDto> Items => Venues;
     protected override ObservableRangeCollection<VenueListItemDto> SelectedItems => SelectedVenues;
+
+    public ObservableRangeCollection<VenueListItemDto> Venues { get; } = [];
+    public ObservableRangeCollection<VenueListItemDto> SelectedVenues { get; } = [];
+    public System.Collections.IList SelectedVenuesRaw => SelectedVenues;
+
+    public string AppBarTitle => SelectedCount == 0 ? "Venues" : $"{SelectedCount} selected";
+    public bool IsEmptyNoVenues => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
+    public bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
 
     protected override Task<(IEnumerable<VenueListItemDto>, int)> FetchPageAsync(...) =>
         _venueService.GetPagedVenuesForListAsync(...);
 
-    protected override void RaiseEmptyStateProperties()
+    protected override void RaiseEntityEmptyStateProperties()
     {
         OnPropertyChanged(nameof(IsEmptyNoVenues));
         OnPropertyChanged(nameof(IsEmptyNoResults));
-        // ...
     }
-    // + entity-specific: AppBarTitle, IsEmptyNoVenues, AddVenueCommand, NavigateToAddAsync
+
+    public IAsyncRelayCommand AddVenueCommand { get; }
+    protected override Task NavigateToAddAsync() => Shell.Current.GoToAsync(Routes.VenueForm);
+    // ... NavigateToEditAsync, BuildDeleteConfirmMessage, ExecuteDeleteAsync
 }
 ```
 
