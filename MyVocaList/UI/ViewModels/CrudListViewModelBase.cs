@@ -83,7 +83,10 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         OnPropertyChanged(nameof(IsAllSelected));
         DeleteSelectedCommand.NotifyCanExecuteChanged();
         EditSelectedCommand.NotifyCanExecuteChanged();
+        OnSelectedCountUpdated(value);
     }
+
+    protected virtual void OnSelectedCountUpdated(int value) { }
 
     partial void OnIsInitialLoadingChanged(bool value) => NotifyEmptyStates();
 
@@ -135,7 +138,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         }
     }
 
-    private async Task RefreshAsync()
+    protected async Task RefreshAsync()
     {
         RunOnUiThread(() => IsRefreshing = true);
         await LoadFirstPageAsync(CancellationToken.None);
