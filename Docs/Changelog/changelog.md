@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for june 2026
+- **06/02/2026** - amend - Cleaned up CollationConstants.cs (removed multi-provider reference table; file scope is SQLite only); added hard rule to constraints-registry.md prohibiting C#-side string normalization (ToLowerInvariant, *Normalized columns) for search/dedup — correct pattern is UseCollation(CollationConstants.Default) + EF.Functions.Collate in LINQ
 - **06/01/2026** - docs - About page: mark all 5 phases done, add task-log, register task-log in .sln, update BACKLOG.md to ✅ Done
 
 ## Entries for may 2026

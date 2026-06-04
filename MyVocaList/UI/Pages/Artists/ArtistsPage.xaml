@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
+<pages:CrudListPageBase
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
     xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:pages="clr-namespace:MyVocaList.UI.Pages"
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
@@ -27,6 +28,8 @@
             <appbars:SmallAppBar
                 x:Name="smallAppBar"
                 Title="{Binding AppBarTitle}"
+                NavigationIcon="arrow_back_outlined"
+                NavigationCommand="{Binding GoBackCommand}"
                 Action1Icon="search_outlined"
                 Action1Command="{Binding OpenSearchCommand}"
                 IsElevated="{Binding IsScrolled}"
@@ -99,8 +102,9 @@
                                                   VerticalOptions="Center" />
                                 </lists:ListItem.LeadingContent>
                                 <lists:ListItem.TrailingContent>
-                                    <dx:DXButton Style="{StaticResource IconButton}"
+                                    <dx:DXButton Style="{StaticResource StandardIconButton}"
                                                  Icon="queue_music_outlined"
+                                                 SemanticProperties.Description="View catalog"
                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ArtistsViewModel}}, Path=ViewCatalogCommand}"
                                                  CommandParameter="{Binding .}"
                                                  InputTransparent="False" />
@@ -121,8 +125,9 @@
                                                   VerticalOptions="Center" />
                                 </lists:ListItem.LeadingContent>
                                 <lists:ListItem.TrailingContent>
-                                    <dx:DXButton Style="{StaticResource IconButton}"
+                                    <dx:DXButton Style="{StaticResource StandardIconButton}"
                                                  Icon="queue_music_outlined"
+                                                 SemanticProperties.Description="View catalog"
                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ArtistsViewModel}}, Path=ViewCatalogCommand}"
                                                  CommandParameter="{Binding .}"
                                                  InputTransparent="False" />
@@ -206,4 +211,4 @@
 
     </Grid>
 
-</ContentPage>
+</pages:CrudListPageBase>

@@ -74,24 +74,29 @@ Same container specs as Small Top App Bar (64dp, same columns). Only the center 
 | Keyboard | Text |
 | ReturnType | Search |
 
-### Leading icon auto-behavior (code-behind)
+### Leading icon behavior (code-behind)
 ```
-Search state (default):     Icon = "search_outlined",      SemanticDescription = "Search"
-Active state (focused/text): Icon = "arrow_back_outlined",  SemanticDescription = "Back"
+Always: Icon = "arrow_back_outlined", SemanticDescription = "Back"
 
-OnFocused  → _isSearchFocused = true  → UpdateLeadingIcon()
-OnUnfocused → _isSearchFocused = false → UpdateLeadingIcon()
-SearchText changed → UpdateLeadingIcon()
+OnLeadingButtonClicked: SearchText = "", Unfocus(), BackCommand?.Execute(null)
 
-OnLeadingButtonClicked:
-  if focused OR has text → SearchText = "", Unfocus(), BackCommand?.Execute(null)
-  else                   → searchEdit.Focus()
+OnIsVisible → true: searchEdit.Focus() — keyboard opens automatically
 ```
 
 ### BackCommand
-- Invoked when the back arrow is tapped and field is cleared
-- ViewModel sets this to whatever navigation/state-reset is needed
-- NOT invoked when user just taps the search icon to focus
+- Always invoked when the back arrow is tapped
+- ViewModel sets this to whatever navigation/state-reset is needed (e.g. IsSearchMode = false)
+
+### Pattern: Search replaces app bar (secondary action via trailing icon)
+
+**When:** A trailing search icon in SmallAppBar triggers IsSearchMode → SmallAppBar hides, SearchAppBar shows.
+
+**MD3 rule (confirmed m3.material.io/components/search/guidelines):**
+- Leading icon must be `arrow_back_outlined` **immediately** when SearchAppBar becomes visible — never `search_outlined`.
+- "Focus is released when the back icon is selected" — tapping back dismisses search (returns to SmallAppBar), NOT page navigation.
+- Auto-focus the text field when SearchAppBar becomes visible so the keyboard opens immediately.
+
+**The `search → back on focus` transition** applies only to **persistent inline search bars** (always present, not replacing the app bar). Do not use it for the app-bar-swap pattern.
 
 ## M3 Search (standalone/detached — NOT yet implemented)
 

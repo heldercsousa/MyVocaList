@@ -1,3 +1,6 @@
+using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.UI.Messages;
+
 namespace MyVocaList.UI.ViewModels;
 
 /// <summary>
@@ -6,6 +9,8 @@ namespace MyVocaList.UI.ViewModels;
 public class AppShellViewModel : ViewModelBase
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IWhatsNewService _whatsNewService;
+    private readonly IVersionCheckService _versionCheckService;
 
     public string AppTitle => AppInfo.Name;
 
@@ -18,11 +23,33 @@ public class AppShellViewModel : ViewModelBase
     /// <summary>Raised when the user requests to exit the app (menu item or back at root).</summary>
     public event Action? ExitRequested;
 
-    public AppShellViewModel(IServiceProvider serviceProvider)
+    public AppShellViewModel(
+        IServiceProvider serviceProvider,
+        IWhatsNewService whatsNewService,
+        IVersionCheckService versionCheckService)
     {
         _serviceProvider = serviceProvider;
+        _whatsNewService = whatsNewService;
+        _versionCheckService = versionCheckService;
         NavigateCommand = new AsyncRelayCommand<string>(route => NavigateAsync(route!));
         MenuGroups = NavigationConfig.BuildMenuGroups(NavigateCommand);
+    }
+
+    /// <summary>
+    /// Runs startup checks (What's New + version check) and sends messages to trigger UI responses.
+    /// Called once from AppShell after initialization.
+    /// </summary>
+    public async Task InitializeAsync(CancellationToken ct = default)
+    {
+        var entry = await _whatsNewService.GetPendingReleaseAsync(ct);
+        if (entry is not null)
+            WeakReferenceMessenger.Default.Send(new ShowWhatsNewMessage(entry));
+
+        var updateResult = await _versionCheckService.CheckForUpdatesAsync(ct);
+        if (updateResult.IsUpdateRequired)
+            WeakReferenceMessenger.Default.Send(new ShowUpdateRequiredMessage(updateResult));
+        else if (updateResult.IsUpdateAvailable)
+            WeakReferenceMessenger.Default.Send(new ShowUpdateAvailableMessage(updateResult));
     }
 
     private async Task NavigateAsync(string route)

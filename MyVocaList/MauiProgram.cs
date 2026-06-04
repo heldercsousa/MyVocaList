@@ -1,4 +1,6 @@
 using CommunityToolkit.Maui;
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Devices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -102,8 +104,18 @@ public static class MauiProgram
         builder.Services.AddScoped<IMusicMetadataProvider, DeezerProvider>();
 
         // Services
-        // Temporary stub — replace with WhatsNewService when What's New feature is implemented
-        builder.Services.AddSingleton<IWhatsNewService, NullWhatsNewService>();
+        builder.Services.AddSingleton<IPreferences>(_ => Preferences.Default);
+        builder.Services.AddSingleton<IAppInfo>(_ => AppInfo.Current);
+        builder.Services.AddSingleton<IFileSystem>(_ => FileSystem.Current);
+        builder.Services.AddSingleton<IWhatsNewService, WhatsNewService>();
+
+        // Version check — reads platform info at registration time (Singleton)
+        builder.Services.AddHttpClient("version-check");
+        builder.Services.AddSingleton<IVersionCheckService>(sp => new VersionCheckService(
+            sp.GetRequiredService<IHttpClientFactory>(),
+            AppInfo.Current.VersionString,
+            DeviceInfo.Current.Platform == DevicePlatform.iOS ? "ios" : "android",
+            sp.GetRequiredService<ILogger<VersionCheckService>>()));
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddScoped<IPersonService, PersonService>();
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
@@ -155,6 +167,14 @@ public static class MauiProgram
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<AboutViewModel>();
         builder.Services.AddTransient<AboutPage>();
+
+        // Feedback
+        builder.Services.AddTransient<IFeedbackService, FeedbackService>();
+        builder.Services.AddTransient<FeedbackViewModel>();
+        builder.Services.AddTransient<FeedbackPage>();
+        builder.Services.AddHttpClient("feedback");
+        builder.Services.AddSingleton<IDeviceInfo>(DeviceInfo.Current);
+        builder.Services.AddSingleton<IAppInfo>(AppInfo.Current);
 
         // Register Serilog (file + debug sinks always; Sentry sink in release builds when DSN is set)
         // Assign Log.Logger so GlobalExceptionHandler's static Log.Fatal/Error calls are captured.

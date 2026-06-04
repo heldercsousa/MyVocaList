@@ -11,6 +11,7 @@ Review before implementing features in the indicated area.
 - **ObservableRangeCollection / DXCollectionView reset events:** see `code-principles.md § UI Thread Performance — ObservableRangeCollection`.
 - **Native dialogs:** Do NOT use `DisplayAlert`, `DisplayActionSheet`, or `DisplayPromptAsync`. Use `dx:BottomSheet` only. (CLAUDE.md)
 - **Selection after reload:** After a list refresh or search, clear selection (`ClearRange` + `SelectedCount = 0`). Never restore prior selection via `ReplaceRange` — it fires a second Reset and crosses a data-reload boundary. (code-principles.md)
+- **DevExpress MAUI — no Windows/WinUI3 support (hard architectural constraint):** DevExpress MAUI components do not support the Windows/WinUI3 target. Any feature requiring Windows desktop support must use an alternative framework. This is the architectural driver for the post-MVP Blazor Hybrid + MudBlazor migration decision. See `Docs/Management/BusinessFeatures/UI-2nd-refactor/`.
 
 ---
 
@@ -26,6 +27,7 @@ Review before implementing features in the indicated area.
 - **MigrationsLock:** The `__EFMigrationsLock` row must be cleared before each `MigrateAsync()` call (SQLite single-user workaround). Omitting this causes a hang on second launch.
 - **CollationInterceptor:** Must be applied globally for case-insensitive search (`LIKE`) to work correctly. Without it, `ExistsByNameAsync` and search queries are case-sensitive.
 - **First-run table absence:** `DELETE FROM __EFMigrationsLock` will throw on first run (table does not exist). Wrap in a bare `catch { }` — see code-principles.md exception patterns.
+- **No C#-side string normalization for search/deduplication — HARD RULE (all relational DBs):** Never call `ToLowerInvariant()`, `ToUpperInvariant()`, `RemoveDiacritics()`, or any equivalent C#-side normalization in services, repositories, or entity constructors for the purpose of search, duplicate detection, or uniqueness. Never add `*Normalized` shadow columns (properties or DB columns whose sole purpose is storing a lowercased/accent-stripped variant of another column). This rule applies to any relational database, not just SQLite. Two reasons: (1) correctness — `ToLowerInvariant()` handles case only; "café" ≠ "cafe", so accent-insensitive matching silently fails; (2) performance — normalizing strings in C# forces a full table scan on every query because the DB cannot use an index on a computed value it never sees. The correct pattern: configure the appropriate case- and accent-insensitive collation on searchable/unique columns in EF entity configurations; use `EF.Functions.Collate()` in LINQ queries; let the DB engine handle normalization at query time using its own indexes. For SQLite specifically: declare `.UseCollation(CollationConstants.Default)` in entity config and use `EF.Functions.Collate(column, CollationConstants.Default)` in queries, where `CollationConstants` lives in that Infra layer; there is no shared cross-Infra collation abstraction.
 
 ---
 
@@ -50,6 +52,13 @@ Review before implementing features in the indicated area.
   - Under `Management` root → parent `{15F1DA03-2180-47BF-BC40-1BB457C97F9E}`
 
   **GUIDs:** Use sequential pattern `{FA1234BC-0001-4000-8000-00000000XXXX}` incrementing from the last used value (currently `0014`). Check the `.sln` before picking the next number.
+
+---
+
+## Design / Prototyping Tools
+
+- **Stitch MCP — generates CSS/HTML/Tailwind, NOT MudBlazor:** Stitch converts designs to pure CSS + HTML or Tailwind — no MudBlazor Code Connect integration. Do NOT use Stitch to generate MudBlazor components. Use MudMCP (`mudblazor` server key) for component docs and generation. Stitch's only value in this project is design-token export (palette, typography) → manual mapping to `MudTheme`. Evaluated 2026-06-02.
+- **Figma MCP — no MudBlazor Code Connect; $15/month minimum:** Figma MCP requires a paid plan ($15/month Professional) for useful call volume. No MudBlazor Code Connect plugin exists. Not suitable for MudBlazor code generation from designs. Evaluated 2026-06-02.
 
 ---
 
