@@ -87,7 +87,7 @@
   - Risk: Medium — establishes the XAML pattern all three pages share; get it right first
   - Files owned: both page files only — do NOT touch Routes.cs, AppShell, MauiProgram (Phase 4)
   - Demo: page compiles and builds; XAML structure matches design.md pattern
-  - **Agent brief:** `Docs/Management/BusinessFeatures/search-page-component/task-3a-artist-picker-page.md`
+  - **Agent brief:** `Docs/Management/BusinessFeatures/search-picker/task-3a-artist-picker-page.md`
 
 - [ ] **3b — Implement SongPickerPage** [SEQUENTIAL — after 3a committed]
   - Produces: `MyVocaList/UI/Pages/Songs/SongPickerPage.xaml` + `.xaml.cs`
@@ -95,7 +95,7 @@
   - Risk: Low — follows 3a pattern; only difference is two-line ListItem (Headline=SongTitle, SupportingText=ArtistName)
   - Files owned: both page files only
   - Demo: page compiles; two-line list item visible in XAML
-  - **Agent brief:** `Docs/Management/BusinessFeatures/search-page-component/task-3b-song-picker-page.md`
+  - **Agent brief:** `Docs/Management/BusinessFeatures/search-picker/task-3b-song-picker-page.md`
 
 - [ ] **3c — Implement YouTubeSearchPage** [SEQUENTIAL — after 3b committed]
   - Produces: `MyVocaList/UI/Pages/Songs/YouTubeSearchPage.xaml` + `.xaml.cs`
@@ -103,7 +103,7 @@
   - Risk: Medium — leading image slot in ListItem requires verifying `ListItemLeadingImage` component API; SecondsToMinutesConverter for duration
   - Files owned: both page files only
   - Demo: page compiles; ListItem shows thumbnail image leading, title headline, channel/duration supporting
-  - **Agent brief:** `Docs/Management/BusinessFeatures/search-page-component/task-3c-youtube-search-page.md`
+  - **Agent brief:** `Docs/Management/BusinessFeatures/search-picker/task-3c-youtube-search-page.md`
 
 ---
 
