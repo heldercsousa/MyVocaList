@@ -15,13 +15,6 @@
   - Files owned: the 3 message files
   - Demo: files compile; records are accessible from the MAUI project
 
-- [ ] **Extend SearchAppBar with SearchCommand** [P]
-  - Produces: updated `MyVocaList/UI/Components/AppBars/SearchAppBar.xaml.cs` (add `SearchCommand` bindable property, wire to `searchEdit.Completed`)
-  - Consumes: nothing new
-  - Risk: Low — additive only; existing usage is unaffected
-  - Files owned: `SearchAppBar.xaml.cs`
-  - Demo: existing pages build and behave identically; `SearchCommand` property is visible in XAML intellisense
-
 ---
 
 ## Phase 2 — Picker ViewModels (depends on Phase 1)

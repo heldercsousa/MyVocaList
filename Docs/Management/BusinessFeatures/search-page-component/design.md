@@ -39,28 +39,17 @@ ArtistPickerPage    SongPickerPage    YouTubeSearchPage
 
 ---
 
-## SearchAppBar Extension (prerequisite)
+## SearchAppBar — Search Submission Wiring (investigation required)
 
-The current `SearchAppBar` has no bindable `SearchCommand` property. When the user presses the keyboard Search/Return key on the TextEdit, `ReturnType="Search"` fires the `Completed` event — but there is no way to bind an external command to it from XAML.
+The `SearchAppBar` component exposes `SearchText` (TwoWay bindable) and `BackCommand`. The component does not expose a `SearchCommand`. Existing CRUD pages (e.g. `SongsPage`) trigger search reactively via a ViewModel property-change watch on `SearchText` with debounce.
 
-**Required change:** Add a `SearchCommand` bindable property to `SearchAppBar` that is invoked from `searchEdit`'s `Completed` event (keyboard submit).
+**Picker pages require explicit submission** (API cost makes live search impractical). The correct wiring approach must be determined by the implementing subagent before writing page code:
 
-```csharp
-// SearchAppBar.xaml.cs — addition
-public static readonly BindableProperty SearchCommandProperty =
-    BindableProperty.Create(nameof(SearchCommand), typeof(ICommand), typeof(SearchAppBar));
+- Read `myvocalist-coding` skill and any SearchAppBar usage guidelines
+- Check how existing pages handle explicit search submit vs. reactive search
+- Do NOT modify `SearchAppBar` without a dedicated task that includes MD3 compliance review — any component change is out of scope for this feature
 
-public ICommand SearchCommand
-{
-    get => (ICommand)GetValue(SearchCommandProperty);
-    set => SetValue(SearchCommandProperty, value);
-}
-
-// In code-behind: subscribe in constructor or OnApplyTemplate
-searchEdit.Completed += (s, e) => SearchCommand?.Execute(SearchText);
-```
-
-The picker pages will bind `SearchCommand="{Binding SearchCommand}"` on the `SearchAppBar`. Users can also tap the `Action1` trailing button (magnifying glass icon) bound to the same command as an explicit tap-to-search affordance.
+The wiring approach (e.g. ViewModel debounce, page code-behind event, Action1 trailing button as explicit trigger) must be documented in the task-log before implementation starts.
 
 ---
 
