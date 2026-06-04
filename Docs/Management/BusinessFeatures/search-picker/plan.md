@@ -1564,13 +1564,13 @@ git commit -m "feat: wire SongFormViewModel — remove search state, add picker 
 List every file created in this feature. Verify each one is registered in `MyVocaList.sln` in the appropriate `ProjectSection(SolutionItems)`. Source files (`.cs`, `.xaml`) are picked up automatically by their `.csproj` — no `.sln` entry needed. Spec files in `Docs/` require explicit `.sln` Solution Folder entries.
 
 Files that need `.sln` entries (Docs):
-- `Docs/Management/BusinessFeatures/search-page-component/plan.md`
-- `Docs/Management/BusinessFeatures/search-page-component/task-log.md` (if created)
+- `Docs/Management/BusinessFeatures/search-picker/plan.md`
+- `Docs/Management/BusinessFeatures/search-picker/task-log.md` (if created)
 
 Existing entries to verify (spec files created during brainstorm):
-- `Docs/Management/BusinessFeatures/search-page-component/requirements.md`
-- `Docs/Management/BusinessFeatures/search-page-component/design.md`
-- `Docs/Management/BusinessFeatures/search-page-component/tasks.md`
+- `Docs/Management/BusinessFeatures/search-picker/requirements.md`
+- `Docs/Management/BusinessFeatures/search-picker/design.md`
+- `Docs/Management/BusinessFeatures/search-picker/tasks.md`
 
 Add any missing entries using the pattern from `constraints-registry.md § Visual Studio Solution (.sln)`. GUID sequence: check the last used GUID in `.sln` and increment.
 
@@ -1604,7 +1604,7 @@ Expected: 0 failures.
 ```bash
 git add MyVocaList.sln
 git add Docs/Management/BACKLOG.md
-git commit -m "chore: register search-page-component files in .sln; update BACKLOG"
+git commit -m "chore: register search-picker files in .sln; update BACKLOG"
 ```
 
 ---

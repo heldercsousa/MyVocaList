@@ -8,7 +8,7 @@
 **Completed:** 2026-06-03
 
 ### Changed files
-- `Docs/Management/BusinessFeatures/search-page-component/findings.md` — MD3 research results + codebase audit
+- `Docs/Management/BusinessFeatures/search-picker/findings.md` — MD3 research results + codebase audit
 
 ### Verification evidence
 - Playwright browsed: `m3.material.io/components/search/overview`, `/guidelines`, `m3.material.io/components/text-fields/guidelines`

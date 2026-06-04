@@ -343,14 +343,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "about-page", "about-page", 
 		Docs\Management\BusinessFeatures\about-page\tasks.md = Docs\Management\BusinessFeatures\about-page\tasks.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-page-component", "search-page-component", "{FA1234BC-0001-4000-8000-000000000018}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-picker", "search-picker", "{FA1234BC-0001-4000-8000-000000000018}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\search-page-component\findings.md = Docs\Management\BusinessFeatures\search-page-component\findings.md
-		Docs\Management\BusinessFeatures\search-page-component\requirements.md = Docs\Management\BusinessFeatures\search-page-component\requirements.md
-		Docs\Management\BusinessFeatures\search-page-component\design.md = Docs\Management\BusinessFeatures\search-page-component\design.md
-		Docs\Management\BusinessFeatures\search-page-component\tasks.md = Docs\Management\BusinessFeatures\search-page-component\tasks.md
-		Docs\Management\BusinessFeatures\search-page-component\plan.md = Docs\Management\BusinessFeatures\search-page-component\plan.md
-		Docs\Management\BusinessFeatures\search-page-component\task-log.md = Docs\Management\BusinessFeatures\search-page-component\task-log.md
+		Docs\Management\BusinessFeatures\search-picker\findings.md = Docs\Management\BusinessFeatures\search-picker\findings.md
+		Docs\Management\BusinessFeatures\search-picker\requirements.md = Docs\Management\BusinessFeatures\search-picker\requirements.md
+		Docs\Management\BusinessFeatures\search-picker\design.md = Docs\Management\BusinessFeatures\search-picker\design.md
+		Docs\Management\BusinessFeatures\search-picker\tasks.md = Docs\Management\BusinessFeatures\search-picker\tasks.md
+		Docs\Management\BusinessFeatures\search-picker\plan.md = Docs\Management\BusinessFeatures\search-picker\plan.md
+		Docs\Management\BusinessFeatures\search-picker\task-log.md = Docs\Management\BusinessFeatures\search-picker\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-refactor", "{4CB09F16-6E81-425E-9080-840BABFB66BF}"
