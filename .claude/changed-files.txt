@@ -683,3 +683,11 @@ Docs/Management/BusinessFeatures/youtube-share/findings.md
 Docs/Management/pure-petting-noodle.md
 Docs/Management/BusinessFeatures/youtube-share/findings.md
 Docs/Management/BACKLOG.md
+MyVocaList/UI/ViewModels/VenuesViewModel.cs
+Docs/Management/BusinessFeatures/youtube-share/findings.md
+MyVocaList/UI/ViewModels/VenuesViewModel.cs
+Docs/Management/BACKLOG.md
+MyVocaList/UI/ViewModels/PersonsViewModel.cs
+MyVocaList/UI/ViewModels/PersonsViewModel.cs
+MyVocaList/UI/Pages/Venues/VenuesPage.xaml
+MyVocaList/UI/Pages/People/PeoplePage.xaml
