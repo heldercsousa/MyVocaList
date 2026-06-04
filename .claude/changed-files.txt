@@ -638,3 +638,4 @@ MyVocaList/UI/Pages/Artists/ArtistsPage.xaml
 .claude/settings.json
 .claude/settings.json
 .claude/settings.json
+Docs/Management/BACKLOG.md
