@@ -12,6 +12,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private Func<Task> _pendingConfirmAction;
     private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
     private volatile bool _isLoading;
+    private readonly ILogger _logger;
 
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private string _searchText = string.Empty;
@@ -38,7 +39,6 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     protected abstract Task NavigateToAddAsync();
     protected abstract Task NavigateToEditAsync(TItem item);
     protected abstract void RaiseEntityEmptyStateProperties();
-    protected abstract void LogLoadMoreError(Exception ex, int page);
 
     protected virtual void OnAfterLoad(IReadOnlyList<TItem> items) { }
 
@@ -57,8 +57,9 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     public IRelayCommand OpenSearchCommand { get; }
     public IRelayCommand CloseSearchCommand { get; }
 
-    protected CrudListViewModelBase()
+    protected CrudListViewModelBase(ILogger logger)
     {
+        _logger = logger;
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
         LoadMoreCommand = new RelayCommand(() => _ = LoadMoreAsync());
         DeleteSelectedCommand = new RelayCommand(RequestBatchDelete, () => CanDeleteSelected);
@@ -145,6 +146,9 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         RunOnUiThread(() => IsRefreshing = false);
     }
 
+    // Reload without triggering IsInitialLoading — use in response to filter changes.
+    protected Task ReloadAsync() => LoadFirstPageAsync(CancellationToken.None);
+
     private async Task LoadMoreAsync()
     {
         if (_isLoading || !HasMoreItems)
@@ -175,7 +179,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         }
         catch (Exception ex)
         {
-            LogLoadMoreError(ex, loadingPage);
+            _logger.LogError(ex, "Failed to load more items (page {Page})", loadingPage);
             RunOnUiThread(() => IsRefreshing = false);
         }
         finally

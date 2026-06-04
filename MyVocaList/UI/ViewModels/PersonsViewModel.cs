@@ -11,16 +11,14 @@ public partial class PersonsViewModel : CrudListViewModelBase<PersonListItemDto>
 {
     private readonly IPersonService _personService;
     private readonly ISnackbarComponent _snackbarService;
-    private readonly ILogger<PersonsViewModel> _logger;
 
     public PersonsViewModel(
         IPersonService personService,
         ISnackbarComponent snackbarService,
-        ILogger<PersonsViewModel> logger)
+        ILogger<PersonsViewModel> logger) : base(logger)
     {
         _personService = personService;
         _snackbarService = snackbarService;
-        _logger = logger;
 
         Persons = [];
         SelectedPersons = [];
@@ -90,6 +88,4 @@ public partial class PersonsViewModel : CrudListViewModelBase<PersonListItemDto>
         OnPropertyChanged(nameof(IsEmptyNoResults));
     }
 
-    protected override void LogLoadMoreError(Exception ex, int page)
-        => _logger.LogError(ex, "Failed to load more singers (page {Page})", page);
 }

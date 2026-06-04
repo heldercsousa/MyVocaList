@@ -8,7 +8,6 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
 {
     private readonly IArtistService _artistService;
     private readonly ISnackbarComponent _snackbarService;
-    private readonly ILogger<ArtistsViewModel> _logger;
 
     [ObservableProperty] private ArtistRoleFilter _roleFilter = ArtistRoleFilter.All;
     [ObservableProperty] private System.Collections.IList _selectedRoleFilters = new List<object>();
@@ -16,11 +15,10 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
     public ArtistsViewModel(
         IArtistService artistService,
         ISnackbarComponent snackbarService,
-        ILogger<ArtistsViewModel> logger)
+        ILogger<ArtistsViewModel> logger) : base(logger)
     {
         _artistService = artistService;
         _snackbarService = snackbarService;
-        _logger = logger;
 
         Artists = [];
         SelectedArtists = [];
@@ -68,7 +66,7 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
     partial void OnRoleFilterChanged(ArtistRoleFilter value)
     {
         OnPropertyChanged(nameof(AppBarTitle));
-        _ = InitializeAsync();
+        _ = ReloadAsync();
     }
 
     partial void OnSelectedRoleFiltersChanged(System.Collections.IList value)
@@ -120,9 +118,6 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
         OnPropertyChanged(nameof(IsEmptyNoArtists));
         OnPropertyChanged(nameof(IsEmptyNoResults));
     }
-
-    protected override void LogLoadMoreError(Exception ex, int page)
-        => _logger.LogError(ex, "Failed to load more artists (page {Page})", page);
 
     private Task GoBackAsync() => Shell.Current.GoToAsync("..");
 

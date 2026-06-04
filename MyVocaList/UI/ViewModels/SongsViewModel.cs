@@ -9,7 +9,6 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
     private readonly ICatalogService _catalogService;
     private readonly ISongService _songService;
     private readonly ISnackbarComponent _snackbarService;
-    private readonly ILogger<SongsViewModel> _logger;
 
     [ObservableProperty] private int _artistId;
     [ObservableProperty] private string _artistName = string.Empty;
@@ -20,12 +19,11 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
         ICatalogService catalogService,
         ISongService songService,
         ISnackbarComponent snackbarService,
-        ILogger<SongsViewModel> logger)
+        ILogger<SongsViewModel> logger) : base(logger)
     {
         _catalogService = catalogService;
         _songService = songService;
         _snackbarService = snackbarService;
-        _logger = logger;
 
         Songs = [];
         SelectedSongs = [];
@@ -112,9 +110,6 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
         OnPropertyChanged(nameof(IsEmptyNoSongs));
         OnPropertyChanged(nameof(IsEmptyNoResults));
     }
-
-    protected override void LogLoadMoreError(Exception ex, int page)
-        => _logger.LogError(ex, "Failed to load more songs (page {Page})", page);
 
     private Task AddToCatalogAsync()
     {

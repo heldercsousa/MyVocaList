@@ -1,6 +1,6 @@
 namespace MyVocaList.UI.Pages;
 
-public interface ICrudListViewModel
+public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChanged
 {
     BottomSheetState ConfirmSheetState { get; set; }
     bool IsSearchMode { get; }
