@@ -38,7 +38,7 @@
 | 2026-06 | **Search Picker** | 🟡 In Progress | Replaces non-MD3 inline search strips with 3 picker pages (Artist, Song, YouTube). Phase 1 in progress. Spec: `Docs/Management/BusinessFeatures/search-picker/` · Plan: `search-picker/plan.md` · Tasks: `search-picker/tasks.md` |
 | 2026-06 | ↳ ArtistPickerPage | 🔴 Blocked | Blocked on Phase 1+2 (contracts + ViewModels). Brief: `search-picker/task-3a-artist-picker-page.md` |
 | 2026-06 | ↳ SongPickerPage | 🔴 Blocked | Blocked on ArtistPickerPage. Brief: `search-picker/task-3b-song-picker-page.md` |
-| 2026-06 | ↳ YouTubeSearchPage | 🔴 Blocked | Blocked on SongPickerPage. Brief: `search-picker/task-3c-youtube-search-page.md` |
+| 2026-06 | ↳ YouTubeSearchPage |  🔴 Blocked | Blocked on SongPickerPage. Brief: `search-picker/task-3c-youtube-search-page.md` |
 | 2026-06 | ↳ Update search picker coding guidelines | 🔴 Blocked | Blocked on all 3 pages. Document pattern in `.claude/library/` for future agents. |
 | 2026-06 | **Crash & Error Reporting** | ✅ Done | 2 bugs found in review (fixed). Spec: `Docs/Management/BusinessFeatures/crash-reporting/` |
 | 2026-06 | ↳ Pre-release checklist | 💡 Pending | App-wide: fill Sentry DSN, run smoke test, add multi-env DSN if needed. Details: `tasks.md`. |
