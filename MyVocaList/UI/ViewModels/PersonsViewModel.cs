@@ -24,6 +24,7 @@ public partial class PersonsViewModel : CrudListViewModelBase<PersonListItemDto>
         SelectedPersons = [];
 
         AddPersonCommand = new AsyncRelayCommand(NavigateToAddAsync);
+        GoBackCommand = new AsyncRelayCommand(GoBackAsync);
     }
 
     public ObservableRangeCollection<PersonListItemDto> Persons { get; }
@@ -33,6 +34,7 @@ public partial class PersonsViewModel : CrudListViewModelBase<PersonListItemDto>
     public System.Collections.IList SelectedPersonsRaw => SelectedPersons;
 
     public IAsyncRelayCommand AddPersonCommand { get; }
+    public IAsyncRelayCommand GoBackCommand { get; }
 
     public string AppBarTitle => SelectedCount == 0 ? "Singers" : $"{SelectedCount} selected";
     public bool IsEmptyNoPersons => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
@@ -87,5 +89,7 @@ public partial class PersonsViewModel : CrudListViewModelBase<PersonListItemDto>
         OnPropertyChanged(nameof(IsEmptyNoPersons));
         OnPropertyChanged(nameof(IsEmptyNoResults));
     }
+
+    private Task GoBackAsync() => Shell.Current.GoToAsync("..");
 
 }
