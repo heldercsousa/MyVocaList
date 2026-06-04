@@ -338,6 +338,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "about-page", "about-page", 
 		Docs\Management\BusinessFeatures\about-page\tasks.md = Docs\Management\BusinessFeatures\about-page\tasks.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-page-component", "search-page-component", "{FA1234BC-0001-4000-8000-000000000018}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\search-page-component\findings.md = Docs\Management\BusinessFeatures\search-page-component\findings.md
+		Docs\Management\BusinessFeatures\search-page-component\task-log.md = Docs\Management\BusinessFeatures\search-page-component\task-log.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-refactor", "{4CB09F16-6E81-425E-9080-840BABFB66BF}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.md = Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.md
@@ -473,6 +479,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000016} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000015} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000017} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000018} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{4CB09F16-6E81-425E-9080-840BABFB66BF} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{7A021F6B-F297-41EA-A028-C4F881146791} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 	EndGlobalSection
