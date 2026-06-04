@@ -8,7 +8,7 @@ public abstract class CrudListPageBase : ContentPage
     protected event EventHandler SelectionItemsWireUpRequired;
 
     protected void AttachViewModel()
-        => ((System.ComponentModel.INotifyPropertyChanged)ListViewModel).PropertyChanged += OnViewModelPropertyChanged;
+        => ListViewModel.PropertyChanged += OnViewModelPropertyChanged;
 
     private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -35,7 +35,7 @@ public abstract class CrudListPageBase : ContentPage
 
     protected void OnSelectionChanged(object sender, CollectionViewSelectionChangedEventArgs e)
     {
-        var count = (sender as DXCollectionView)?.SelectedItems?.Cast<object>().Count() ?? 0;
+        var count = ((sender as DXCollectionView)?.SelectedItems as System.Collections.ICollection)?.Count ?? 0;
         ListViewModel.OnSelectionChanged(count);
     }
 

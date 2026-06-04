@@ -10,16 +10,14 @@ namespace MyVocaList.UI.ViewModels
     {
         private readonly IVenueService _venueService;
         private readonly ISnackbarComponent _snackbarService;
-        private readonly ILogger<VenuesViewModel> _logger;
 
         public VenuesViewModel(
             IVenueService venueService,
             ISnackbarComponent snackbarService,
-            ILogger<VenuesViewModel> logger)
+            ILogger<VenuesViewModel> logger) : base(logger)
         {
             _venueService = venueService;
             _snackbarService = snackbarService;
-            _logger = logger;
 
             Venues = [];
             SelectedVenues = [];
@@ -83,7 +81,5 @@ namespace MyVocaList.UI.ViewModels
             OnPropertyChanged(nameof(IsEmptyNoResults));
         }
 
-        protected override void LogLoadMoreError(Exception ex, int page)
-            => _logger.LogError(ex, "Failed to load more venues (page {Page})", page);
     }
 }
