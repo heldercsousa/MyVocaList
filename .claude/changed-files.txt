@@ -591,3 +591,4 @@ Docs/Management/BACKLOG.md
 Docs/Management/BusinessFeatures/search-page-component/tasks.md
 Docs/Management/BusinessFeatures/search-page-component/design.md
 Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
