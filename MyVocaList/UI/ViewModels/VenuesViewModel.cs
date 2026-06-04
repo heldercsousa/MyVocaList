@@ -23,6 +23,7 @@ namespace MyVocaList.UI.ViewModels
             SelectedVenues = [];
 
             AddVenueCommand = new AsyncRelayCommand(NavigateToAddAsync);
+            GoBackCommand = new AsyncRelayCommand(GoBackAsync);
         }
 
         public ObservableRangeCollection<VenueListItemDto> Venues { get; }
@@ -32,6 +33,7 @@ namespace MyVocaList.UI.ViewModels
         public System.Collections.IList SelectedVenuesRaw => SelectedVenues;
 
         public IAsyncRelayCommand AddVenueCommand { get; }
+        public IAsyncRelayCommand GoBackCommand { get; }
 
         public string AppBarTitle => SelectedCount == 0 ? "Venues" : $"{SelectedCount} selected";
         public bool IsEmptyNoVenues => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
@@ -80,6 +82,8 @@ namespace MyVocaList.UI.ViewModels
             OnPropertyChanged(nameof(IsEmptyNoVenues));
             OnPropertyChanged(nameof(IsEmptyNoResults));
         }
+
+        private Task GoBackAsync() => Shell.Current.GoToAsync("..");
 
     }
 }
