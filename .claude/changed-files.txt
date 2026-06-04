@@ -581,3 +581,9 @@ Docs/Management/BusinessFeatures/search-page-component/task-log.md
 Docs/Management/BACKLOG.md
 MyVocaList.sln
 MyVocaList.sln
+Docs/Management/BusinessFeatures/search-page-component/requirements.md
+Docs/Management/BusinessFeatures/search-page-component/design.md
+Docs/Management/BusinessFeatures/search-page-component/tasks.md
+Docs/Management/BusinessFeatures/search-page-component/requirements.md
+Docs/Management/BusinessFeatures/search-page-component/design.md
+Docs/Management/BusinessFeatures/search-page-component/tasks.md
