@@ -1,6 +1,13 @@
 ﻿{
   "plansDirectory": "Docs/Management",
   "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(dotnet *)",
+      "Bash(python *)",
+      "Bash(pwsh *)",
+      "Bash(python3 *)"
+    ],
     "deny": [
       "Edit(CLAUDE.md)",
       "Write(CLAUDE.md)",
