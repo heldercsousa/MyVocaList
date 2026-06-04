@@ -1,157 +1,145 @@
-# YouTube Integration Strategy — MyVocaList Research
+# YouTube Integration — Conflict Analysis & Action Plan
 
-> **Status:** Research complete. Ready for spec writing (Phase 1 — Host Share-to-Add).
-> Phase 2 (singer sync) is deferred — blocked on sync architecture, not on this feature.
-
----
-
-## Core Insight: "Share from YouTube" Eliminates the API Key Problem
-
-YouTube Data API v3 `search.list` costs **100 units/call** against a **10,000 unit/day free quota**
-= only 100 searches/day. Asking users to configure their own key is a developer workflow that
-kills adoption. Building in-app search requires either a backend (cost) or user-configured keys (UX failure).
-
-**The solution:** Don't build YouTube search inside MyVocaList at all.
-Users already know YouTube. MyVocaList registers as a share target — user finds the video on YouTube,
-shares it to MyVocaList, and the app handles the rest.
+> **Session goal:** (1) Register this research in its dedicated folder with a proper name.
+> (2) Compare the "Share from YouTube" approach with the existing `YouTubeSearchPage` task
+> in the Search Picker spec and resolve the conflict.
 
 ---
 
-## YouTube oEmbed — Free Metadata, No Key
+## What Already Exists — YouTubeSearchPage (Search Picker, Task 3c)
 
-```
-GET https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=VIDEO_ID&format=json
-```
+The Search Picker spec (`Docs/Management/BusinessFeatures/search-picker/`) defines a full
+in-app YouTube search page as its third picker:
 
-Returns: `title`, `thumbnail_url`, `author_name`. No API key. No quota. No Google Cloud project.
-This is the only YouTube API call MyVocaList needs to make.
+| Aspect | Detail |
+|--------|--------|
+| **File** | `YouTubeSearchPage.xaml` + `YouTubeSearchViewModel.cs` |
+| **Route** | `youtube-search` |
+| **Status** | `🔴 Blocked` (on SongPickerPage / Search Picker Phase 3b) |
+| **How it works** | User types a query inside MyVocaList → calls `IYouTubeService.SearchAsync` → YouTube Data API v3 `search.list` → results list → user picks → URL added to song |
+| **Key gate** | `HasYouTubeApiKey` — trigger row hidden entirely if no API key configured |
+| **Quota cost** | 100 units per `search.list` call; default quota = 100 searches/day total |
 
----
+**ACs that gate on the API key:**
+- AC-YT-01: "Search YouTube" trigger row visible only when `HasYouTubeApiKey` is `true`
+- AC-YT-02: if `HasYouTubeApiKey` is `false`, trigger is hidden and a no-API-key nudge is shown
 
-## Feature Design
-
-### Receive & Confirm Flow (same for host and singer)
-
-```
-YouTube app / browser
-  └─ User finds karaoke video → taps Share → selects MyVocaList
-       ↓
-MyVocaList receives URL
-  └─ Calls oEmbed → gets title + thumbnail
-  └─ Parses title → extracts artist + song name (heuristic, ~80% accuracy)
-  └─ Detects role of sharing user: Host or Singer
-       ↓
-Confirm card (inline editable):
-  ┌─────────────────────────────────┐
-  │ [Thumbnail]  Shape of You       │  ← editable in place
-  │              Ed Sheeran         │  ← editable, matched against DB
-  │              [Confirm] [Cancel] │
-  └─────────────────────────────────┘
-  User can correct any field before confirming.
-  No navigate-away. One tap to save if auto-parse was correct.
-```
-
-**Artist matching:** Fuzzy-match parsed artist name against existing artist DB.
-- Match found → pre-select artist
-- No match → offer "create new artist" inline on the same confirm card
-
-### Host Path
-- Tap Confirm → song saved to host's DB with artist link
-- Immediately available in the song catalog for queue assignment
-
-### Singer Path (Phase 2 — deferred)
-- Detects if singer is enqueued in the active session
-- Offers: **"Set as my next-round song"** | **"Save to my list"**
-- "Next-round" → sync to host DB (sync mechanism TBD: local WiFi → Bluetooth/QR → cloud)
-- "Save locally" → device-local list, no sync
-
-### Multi-URL future extension
-After Phase 1 ships, each song entry can accumulate multiple YouTube URLs
-(different karaoke channels, different keys/arrangements) with per-URL usage stats across events.
-The confirm card naturally extends to support this — each share adds a URL to the existing song entry
-if the song is already recognised.
+The spec already acknowledges the API key problem — it hides the feature entirely for users without one.
 
 ---
 
-## Title Parsing Heuristics
+## What the Research Proposes — Share from YouTube
 
-| Title pattern | Extracted artist | Extracted song |
-|--------------|-----------------|---------------|
-| `"Ed Sheeran - Shape of You (Karaoke)"` | Ed Sheeran | Shape of You |
-| `"Shape of You - Ed Sheeran \| Karaoke"` | Ed Sheeran | Shape of You |
-| `"KARAOKE: Bohemian Rhapsody - Queen"` | Queen | Bohemian Rhapsody |
-| `"Shape of You Karaoke Ed Sheeran"` | (user corrects) | (user corrects) |
+Instead of building search inside the app, MyVocaList becomes an **Android share target**.
+The user searches on YouTube themselves, shares the URL to MyVocaList, and the app handles
+metadata resolution and confirmation.
 
-Strategy:
-1. Strip common karaoke suffixes/prefixes: `(Karaoke)`, `(Karaoke Version)`, `| Karaoke`, `- Karaoke`, `[Karaoke]`, `KARAOKE:`
-2. Split on ` - ` or ` | `
-3. Fuzzy-match each segment against existing artist DB to determine which segment is the artist
-4. Present best guess; user corrects inline if wrong
-
----
-
-## Platform Implementation
-
-### Android (Phase 1)
-
-One `IntentFilter` on `MainActivity` registers the app in the native share sheet:
-
-```csharp
-[IntentFilter(
-    new[] { Intent.ActionSend },
-    Categories = new[] { Intent.CategoryDefault },
-    DataMimeType = "text/plain")]
-```
-
-Extract URL in `OnCreate`:
-```csharp
-if (Intent?.Action == Intent.ActionSend && Intent.Type == "text/plain")
-{
-    string sharedUrl = Intent.GetStringExtra(Intent.ExtraText);
-    // navigate to ShareConfirmPage with URL
-}
-```
-
-**Known MAUI issue:** When the app is already open, a new share intent may not navigate correctly.
-Requires handling via a static pending-URL property read on `AppShell` resume, or `MessagingCenter`.
-
-### iOS (after Android is in production)
-
-Requires a **Share Extension** — a separate project bundled with the main app.
-No official MAUI template exists as of 2026; requires platform-specific Xcode work.
-Deferred until Android ships and is stable in production.
+| Aspect | Detail |
+|--------|--------|
+| **API key required** | None |
+| **Quota** | None — YouTube oEmbed is a free public endpoint |
+| **Works for** | 100% of users, zero setup |
+| **Metadata** | `GET https://www.youtube.com/oembed?url=VIDEO_URL&format=json` → title, thumbnail |
+| **Implementation** | Android `IntentFilter` on `MainActivity`; iOS Share Extension (deferred) |
+| **Confirm card** | Inline editable pre-filled with parsed artist + song; one tap to save |
 
 ---
 
-## Sync Architecture (Phase 2 — deferred, not a blocker)
+## The Conflict — Head-to-Head
 
-Singer → host sync is independent of the share flow and will be addressed separately.
-Planned progression:
-1. **Local WiFi** — host runs a listener; singers POST to it; no internet required at venue
-2. **Bluetooth / QR handoff** — fallback for venues without shared WiFi; evaluated against complexity
-3. **Cloud relay** — if the app gains wider adoption; both devices connect to Helder's server
+Both features solve the same job: **"add a YouTube karaoke URL to a song"**.
 
-Each tier is additive — Phase 1 ships with zero sync, Phase 2 adds local WiFi, etc.
+| | YouTubeSearchPage | Share from YouTube |
+|---|---|---|
+| User stays in MyVocaList | ✓ | ✗ (switches to YouTube app) |
+| Requires API key | ✓ (mandatory) | ✗ (zero config) |
+| Works for all users | ✗ (hidden without key) | ✓ |
+| Search quality | YouTube API results | YouTube's own search (better) |
+| Quota risk | 100 searches/day shared | None |
+| iOS support | Yes (same as Android) | Phase 2 only (no MAUI template) |
+| Implementation complexity | Medium (already specced) | Low (one IntentFilter + oEmbed call) |
+| Coexist possible? | Yes — different entry points | Yes |
 
----
-
-## BACKLOG Impact
-
-| Feature | Phase | Status | Blocked on |
-|---------|-------|--------|-----------|
-| Host Share-to-Add (Android) | 1 | Ready to spec | Nothing |
-| Singer self-service share + local save | 2 | Pending | Sync architecture |
-| Singer → host sync (local WiFi) | 2 | Pending | Sync architecture decision |
-| Multi-URL per song + usage stats | 3 | Pending | Phase 1 shipped |
-| iOS Share Extension | — | Pending | Android in production |
-| In-app YouTube search bar | Indefinitely deferred | — | Monetization decision |
+**Important distinction:** These are NOT the same UX. oEmbed does NOT search — it only resolves
+metadata for a known URL. The Share approach requires the user to leave MyVocaList. The
+YouTubeSearchPage keeps the user in-app. They are complementary, not identical.
 
 ---
 
-## Sources
+## Decision
 
-- [YouTube oEmbed — no API key needed](https://queen.raae.codes/2022-01-21-yt-oembed/)
-- [Android Share Intent in MAUI — Microsoft Q&A](https://learn.microsoft.com/en-us/answers/questions/967073/how-to-wire-up-android-share-intent-in-maui)
-- [iOS Share Extension in MAUI — dotnet/maui Discussion #27199](https://github.com/dotnet/maui/discussions/27199)
-- [YouTube API Limits 2026 — getphyllo.com](https://www.getphyllo.com/post/youtube-api-limits-how-to-calculate-api-usage-cost-and-fix-exceeded-api-quota)
-- [search.list quota cost — Google Developers](https://developers.google.com/youtube/v3/docs/search/list)
+### Recommended resolution: Replace Task 3c, keep the door open for in-app search later
+
+**Rationale:**
+
+1. `YouTubeSearchPage` (Task 3c) is currently `🔴 Blocked` — it hasn't started. The cost of
+   changing direction now is zero.
+
+2. The API key gate (AC-YT-01/02) is an admission that the current design fails a significant
+   portion of users. "Hide the feature if no key" is not a solution — it is feature denial.
+
+3. Share from YouTube delivers the same outcome (URL added to song) with zero adoption friction.
+   The UX of switching to YouTube to search is familiar and arguably better (YouTube's own search
+   is far more powerful than any in-app wrapper).
+
+4. `IYouTubeService` was designed for in-app search. Under the Share model, it becomes unnecessary
+   for the Phase 1 karaoke URL use case. It may have a future role if in-app search is reintroduced
+   via a paid/backend model — but that is post-MVP.
+
+### Action items (not implementation — spec changes only)
+
+| # | Action | Where |
+|---|--------|-------|
+| 1 | Mark Task 3c (`YouTubeSearchPage`) as `[SUSPENDED — superseded by Share from YouTube]` | `search-picker/tasks.md` |
+| 2 | Update Search Picker `requirements.md`: remove AC-YT-01 through AC-YT-08 | `search-picker/requirements.md` |
+| 3 | Update Search Picker `design.md`: remove YouTubeSearchPage section | `search-picker/design.md` |
+| 4 | Add `YouTubeSearchPage` suspension note to BACKLOG (Search Picker row) | `BACKLOG.md` |
+| 5 | Add new BACKLOG entry: **YouTube Share Intent** (Phase 1: host share-to-add, Android) | `BACKLOG.md` |
+| 6 | Create `BusinessFeatures/youtube-share/` folder | filesystem |
+| 7 | Move + rename this file to `BusinessFeatures/youtube-share/findings.md` | filesystem |
+| 8 | Register `findings.md` in `MyVocaList.sln` under a new `youtube-share` Solution Folder | `MyVocaList.sln` |
+
+### What happens to `IYouTubeService` and `HasYouTubeApiKey`?
+
+- `IYouTubeService` — retain the interface; it still exists in the codebase for the Settings page
+  API key test flow. Do not delete. Mark as "future in-app search candidate" in its XML doc.
+- `HasYouTubeApiKey` in `SongFormViewModel` — still used to show/hide the Paste URL section
+  and key nudge. Retain. The "Search YouTube" trigger row it was gating is now gone.
+- `app-settings` spec and `SettingsPage` — unaffected; YouTube API key management stays for users
+  who already configured a key and may want to use it for other future features.
+
+---
+
+## Cleanup Plan for `Docs/Management/` Orphan Files
+
+Several plan-mode-generated files with random names are sitting directly in `Docs/Management/`.
+All should be moved to their feature folder or deleted:
+
+| File | Content | Action | Destination |
+|------|---------|--------|-------------|
+| `adaptive-doodling-knuth.md` | Plan: Fix URL Remove Undo Pattern in SongFormViewModel | Move | `BusinessFeatures/artists-songs/bugs/url-undo-fix-plan.md` |
+| `gentle-splashing-wave.md` | Plan: UI Architecture Decision (ui-2nd-refactor) | Move | `BusinessFeatures/UI-2nd-refactor/ui-arch-decision-plan.md` |
+| `goofy-munching-widget.md` | Ephemeral session work queue (Phase 16C context — done) | Delete | — |
+| `happy-knitting-storm.md` | Backup & Restore plan (feature ✅ Done; `plan.md` exists) | Delete | — |
+| `reflective-fluttering-hinton.md` | App Settings plan (feature ✅ Done; `plan.md` exists) | Delete | — |
+| `tidy-discovering-summit.md` | About Page evaluation (feature ✅ Done) | Delete | — |
+| `agile-weaving-stroustrup.md` | This file — YouTube integration research | Move + rename | `BusinessFeatures/youtube-share/findings.md` |
+
+`.sln` changes required:
+- Remove entries for `adaptive-doodling-knuth.md` and `happy-knitting-storm.md` (the only two registered)
+- Add entries for the two moved files at their new paths
+- Add new `youtube-share` Solution Folder with `findings.md` registered
+
+---
+
+## New BACKLOG Entry (to be written)
+
+**Table: Business Features**
+
+| Target | Feature | Status | Notes |
+|--------|---------|--------|-------|
+| 2026-06 | ↳ YouTube Share Intent | 💡 Pending | Share-from-YouTube replaces in-app search (no API key). Phase 1: host Android share target + oEmbed metadata + confirm card. Research: `Docs/Management/BusinessFeatures/youtube-share/findings.md` |
+
+**Update to existing Search Picker row:**
+
+Add note: `YouTubeSearchPage (Task 3c) suspended — superseded by YouTube Share Intent feature.`

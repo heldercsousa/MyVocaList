@@ -662,3 +662,6 @@ Docs/Management/agile-weaving-stroustrup.md
 Docs/Management/agile-weaving-stroustrup.md
 Docs/Management/agile-weaving-stroustrup.md
 Docs/Management/agile-weaving-stroustrup.md
+Docs/Management/agile-weaving-stroustrup.md
+MyVocaList/UI/ViewModels/SongsViewModel.cs
+MyVocaList/UI/Pages/Songs/SongsPage.xaml

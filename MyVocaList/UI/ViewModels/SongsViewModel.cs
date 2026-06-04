@@ -31,6 +31,7 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
         AddSongCommand = new AsyncRelayCommand(NavigateToAddAsync);
         AddToCatalogCommand = new AsyncRelayCommand(AddToCatalogAsync, () => IsCatalogMode);
         RemoveFromCatalogCommand = new AsyncRelayCommand<SongListItemDto>(RemoveFromCatalogAsync, _ => IsCatalogMode);
+        GoBackCommand = new AsyncRelayCommand(() => Shell.Current.GoToAsync(".."));
     }
 
     public ObservableRangeCollection<SongListItemDto> Songs { get; }
@@ -41,6 +42,7 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
     public IAsyncRelayCommand AddSongCommand { get; }
     public IAsyncRelayCommand AddToCatalogCommand { get; }
     public IAsyncRelayCommand<SongListItemDto> RemoveFromCatalogCommand { get; }
+    public IAsyncRelayCommand GoBackCommand { get; }
 
     public bool IsCatalogMode => ArtistId > 0;
     public string AppBarTitle => IsCatalogMode ? ArtistName : "Songs";
