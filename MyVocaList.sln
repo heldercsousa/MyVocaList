@@ -275,6 +275,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", 
 		Docs\Management\adaptive-doodling-knuth.md = Docs\Management\adaptive-doodling-knuth.md
 		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
 		Docs\Management\happy-knitting-storm.md = Docs\Management\happy-knitting-storm.md
+		Docs\Management\lovely-honking-flurry.md = Docs\Management\lovely-honking-flurry.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-restore", "{FA1234BC-0001-4000-8000-000000000011}"

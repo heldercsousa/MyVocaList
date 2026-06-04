@@ -596,3 +596,6 @@ Docs/Management/BACKLOG.md
 Docs/Management/BusinessFeatures/search-page-component/plan.md
 Docs/Management/BACKLOG.md
 MyVocaList.sln
+Docs/Management/lovely-honking-flurry.md
+Docs/Management/BACKLOG.md
+MyVocaList.sln
