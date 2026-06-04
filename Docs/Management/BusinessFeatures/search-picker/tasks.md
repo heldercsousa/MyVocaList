@@ -97,13 +97,18 @@
   - Demo: page compiles; two-line list item visible in XAML
   - **Agent brief:** `Docs/Management/BusinessFeatures/search-picker/task-3b-song-picker-page.md`
 
-- [ ] **3c — Implement YouTubeSearchPage** [SEQUENTIAL — after 3b committed]
+- [ ] **3c — Implement YouTubeSearchPage** [SEQUENTIAL — after 3b committed] 🔴 BLOCKED
   - Produces: `MyVocaList/UI/Pages/Songs/YouTubeSearchPage.xaml` + `.xaml.cs`
   - Consumes: `YouTubeSearchViewModel`, ArtistPickerPage.xaml as XAML reference, `YouTubeSearchResultDto` (VideoId, Title, ChannelName, DurationSeconds, ThumbnailUrl)
   - Risk: Medium — leading image slot in ListItem requires verifying `ListItemLeadingImage` component API; SecondsToMinutesConverter for duration
   - Files owned: both page files only
   - Demo: page compiles; ListItem shows thumbnail image leading, title headline, channel/duration supporting
   - **Agent brief:** `Docs/Management/BusinessFeatures/search-picker/task-3c-youtube-search-page.md`
+  - **Blocker note (2026-06-04):** Key-per-user requirement dropped — a single developer-held API key
+    routed through a backend proxy is industry-standard and ToS-compliant. Remaining blocks:
+    (1) SongPickerPage (3b) must be committed first; (2) quota math must be validated
+    (100 searches/day default; quota increase process); (3) backend proxy decision needed for
+    key security in a distributed app. See `BACKLOG.md` and `youtube-share/findings.md § Update 2026-06-04`.
 
 ---
 
