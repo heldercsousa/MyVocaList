@@ -576,3 +576,8 @@ Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-001-artists-page-no-back
 Docs/Management/BusinessFeatures/artists-songs/task-log.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/search-page-component/findings.md
+Docs/Management/BusinessFeatures/search-page-component/task-log.md
+Docs/Management/BACKLOG.md
+MyVocaList.sln
+MyVocaList.sln
