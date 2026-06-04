@@ -677,3 +677,6 @@ MyVocaList.sln
 MyVocaList.sln
 MyVocaList.sln
 MyVocaList.sln
+Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/search-picker/tasks.md
+Docs/Management/BusinessFeatures/youtube-share/findings.md
