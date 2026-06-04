@@ -691,3 +691,10 @@ MyVocaList/UI/ViewModels/PersonsViewModel.cs
 MyVocaList/UI/ViewModels/PersonsViewModel.cs
 MyVocaList/UI/Pages/Venues/VenuesPage.xaml
 MyVocaList/UI/Pages/People/PeoplePage.xaml
+MyVocaList/Navigation/NavigationConfig.cs
+MyVocaList/UI/Components/AppBars/SearchAppBar.xaml.cs
+MyVocaList/UI/Components/AppBars/SearchAppBar.xaml
+MyVocaList/UI/Components/AppBars/SearchAppBar.xaml
+.claude/library/m3-components.md
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
