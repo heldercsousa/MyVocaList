@@ -1,4 +1,22 @@
-# Task Log — validated-noodling-island (Artists & Songs)
+f# Task Log — validated-noodling-island (Artists & Songs)
+
+---
+
+## Task: BUG-001 fix — Back button + trailing icon style
+**Plan:** `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-001-artists-page-no-back-button.md`
+**Status:** To Review
+**Started:** 2026-06-03
+**Completed:** 2026-06-03
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/ArtistsViewModel.cs` — added `GoBackCommand` property and `GoBackAsync` private method
+- `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml` — added `NavigationIcon`/`NavigationCommand` to SmallAppBar; changed `IconButton` → `StandardIconButton` + `SemanticProperties.Description` on both ItemTemplate and SelectedItemTemplate trailing buttons
+
+### Verification evidence
+- Build: PASS (0 errors)
+- Tests: SKIPPED (no test files changed — bug fix is pure UI/ViewModel wiring)
+- Post-edit re-read: confirmed — NavigationIcon/GoBackCommand on SmallAppBar; StandardIconButton on both templates; `IconButton` no longer present in ArtistsPage.xaml
+- Spec compliance: confirmed — bug doc updated to Fixed status with resolution notes
 
 ---
 

@@ -30,6 +30,19 @@
         "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "BM5eHpLqTjDLxBIsoBK1tv4EB9WKpidiiuzEzPPtuYI"
       }
     },
+    "mudblazor": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "C:/Users/helde/.claude/tools/MudMCP/src/MudBlazor.Mcp/MudBlazor.Mcp.csproj",
+        "--",
+        "--stdio",
+        "--version",
+        "9.5.0"
+      ],
+      "_comment": "MudBlazor component docs MCP — community project mcbodge/MudMCP. Used during Blazor Hybrid spike and migration. Version 9.0.0 = MudBlazor package version queried."
+    },
     "sqlite": {
       "command": "cmd",
       "args": [

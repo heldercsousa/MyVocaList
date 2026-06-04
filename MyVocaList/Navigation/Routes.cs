@@ -17,4 +17,5 @@ public static class Routes
     public const string Songs      = "songs";
     public const string SongForm   = "song-form";
     public const string Settings   = "settings";
+    public const string Feedback   = "feedback";
 }

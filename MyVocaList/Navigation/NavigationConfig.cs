@@ -24,7 +24,7 @@ public static class NavigationConfig
         ]),
         new MenuGroup("Management", [
             new MenuItemDescription("Venues",         "nightlife_outlined",            Routes.Venues,      navigateCommand),
-            new MenuItemDescription("People",         "group_outlined",                Routes.People,      navigateCommand),
+            new MenuItemDescription("Singers",        "group_outlined",                Routes.People,      navigateCommand),
         ]),
         new MenuGroup("Catalog", [
             new MenuItemDescription("Artists", "group_outlined",      Routes.Artists, navigateCommand),

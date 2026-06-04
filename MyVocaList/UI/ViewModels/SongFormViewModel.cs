@@ -153,8 +153,9 @@ public partial class SongFormViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(term)) { ArtistSuggestions = []; return; }
         var results = await _artistService.SearchArtistsByNameAsync(term, maxResults: 5);
-        ArtistSuggestions = results.Select(a =>
-            new AutocompleteSuggestion(a.Name, a.CatalogCountText, a)).ToList();
+        RunOnUiThread(() =>
+            ArtistSuggestions = results.Select(a =>
+                new AutocompleteSuggestion(a.Name, a.CatalogCountText, a)).ToList());
     }
 
     private void SelectArtist(AutocompleteSuggestion suggestion)
@@ -183,7 +184,9 @@ public partial class SongFormViewModel : ViewModelBase
         if (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0)
         {
             ArtistHasError = true;
-            ArtistErrorText = "Artist is required";
+            ArtistErrorText = string.IsNullOrWhiteSpace(ArtistSearchText)
+                ? "Artist is required"
+                : "Search and select an artist from the list";
             return;
         }
 
