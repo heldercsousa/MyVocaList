@@ -1,11 +1,11 @@
-# YouTube API Research: Key Acquisition & Quota — MyVocaList Context
+# YouTube API Research: Key Acquisition, Quota & UX Strategy — MyVocaList
 
-> **Purpose:** Evaluate whether requiring end users to obtain their own YouTube Data API v3 key is
-> feasible and acceptable UX for MyVocaList. Inform architectural decision for the song-search feature.
+> **Purpose:** Evaluate the YouTube Data API v3 constraints and their impact on MyVocaList's
+> song-search feature across two phases: KJ-only search (Phase 1) and singer self-service search (Phase 2).
 
 ---
 
-## 1. How API Key Acquisition Works (2026)
+## 1. API Key Acquisition — What It Takes
 
 Getting a YouTube Data API v3 key is a **purely developer-facing process**:
 
@@ -13,111 +13,123 @@ Getting a YouTube Data API v3 key is a **purely developer-facing process**:
 2. Create a new Cloud project
 3. Navigate to API Library → enable "YouTube Data API v3"
 4. Go to Credentials → Create credentials → API key
-5. (Recommended) Restrict the key to the YouTube Data API
+5. (Recommended) Restrict the key to the YouTube Data API only
 
-**Total time:** ~10–15 minutes. Requires a Google account and familiarity with developer consoles.
+**Total time:** ~10–15 minutes. Requires a Google account and literacy with developer consoles.
 
-**Verdict on asking end users to do this:** Unacceptable UX. This is a developer workflow — singers and KJs have no context for Google Cloud projects, API libraries, or credential scopes.
+**Verdict for end-user distribution:** Not acceptable UX. Singers and most KJs are not developers.
+The risk is real: requiring this step as onboarding will kill app adoption.
 
 ---
 
-## 2. Quota Limits — Critical Numbers
+## 2. Quota — The Hard Numbers
 
 | Metric | Value |
 |--------|-------|
 | Default daily quota | **10,000 units/day** per Google Cloud project |
 | `search.list` cost | **100 units per call** |
-| Effective search limit | **100 searches/day** with default quota |
+| Effective daily searches | **100 searches/day** with the default allocation |
 | Quota reset | Midnight Pacific Time (no rollover) |
-| Quota scope | Per project (all API keys in the same project share the pool) |
+| Quota scope | Per project — all keys in one project share the pool |
 
-### What this means for a karaoke event
+### Quota pressure by phase
 
-A busy evening with a KJ doing 20–30 song searches (finding tracks for singers, re-searching on bad results) consumes 2,000–3,000 units — 20–30% of the daily quota per event. A single intense session with multiple artists browsing songs could exhaust the 100-search-per-day limit.
+| Phase | Who searches | Searches per event (estimate) | Daily budget consumed |
+|-------|-------------|------------------------------|----------------------|
+| Phase 1 — KJ only | 1 operator | 20–40 (finding tracks, re-searching) | 20–40% |
+| Phase 2 — Singers too | KJ + N singers | 3–5 per singer × 10–20 singers = 50–100+ | **100–200% — quota exhausted** |
 
-### Requesting higher quota
-
-Possible, but requires a compliance audit by Google showing the project adheres to YouTube API Terms of Service. Not guaranteed, and adds operational overhead. Not viable for a lean MVP.
-
----
-
-## 3. Terms of Service — Per-User Key Distribution
-
-**Distributing individual API keys to end users to bypass quota is a ToS violation.**
-
-> "Splitting work across multiple Google Cloud projects (each with its own quota) to systematically bypass limits violates Google's Terms of Service."
-
-The legitimate model: **one developer-owned project, one key, all users share that quota pool.**
-
-Asking each KJ to get their own key is only ToS-compliant if each KJ is truly running their own independent deployment (not sharing infrastructure). For a distributed app installed per-operator, this is technically fine — but the UX problem remains: KJs are not developers.
+Phase 2 makes a single 10,000-unit project unsustainable even for one event, let alone a fleet of KJs.
 
 ---
 
-## 4. OAuth vs API Key — Which Is Needed?
+## 3. Terms of Service — What Is and Isn't Allowed
 
-For **song search only** (read-only YouTube search), an **API key suffices** — no OAuth needed.
-
-OAuth is only required for write operations (uploading videos, managing playlists). However, if OAuth were used:
-- Unverified apps are **limited to 100 unique users** until Google verifies the app
-- Verification requires a formal app review process (weeks)
-- Users see a scary "unverified app" warning screen
-
-MyVocaList avoids this entirely by sticking to API key + read-only `search.list`.
+- **Asking each KJ to get their own key** → ToS-compliant if each is an independent deployment, but breaks adoption (see § 1).
+- **Distributing keys to users to bypass quota** → explicit ToS violation.
+- **Multiple Cloud projects to multiply quota** → ToS violation if done systematically.
+- **One developer-held key proxied server-side** → fully ToS-compliant; the standard commercial app model.
 
 ---
 
-## 5. Architectural Options for MyVocaList
+## 4. Architectural Options by Phase
 
-### Option A — Helder's key embedded / configured once by the operator (KJ)
-- KJ sets up their own Google Cloud key once during app installation (Settings page)
-- Singers never touch it; it's invisible to them
+### Phase 1 — KJ-only search (MVP)
+
+**Option A1 — KJ configures their own key once in Settings**
+- KJ follows a one-time setup guide (~15 min); key stored in `SecureStorage`
 - Each KJ deployment has its own 100 searches/day
-- **Pro:** ToS compliant, no infrastructure cost, simple
-- **Con:** KJ must follow a one-time setup guide; ~15 min onboarding tax
+- Zero server infrastructure
+- **Pro:** ToS-clean, no running costs for Helder, sufficient quota for KJ-only search
+- **Con:** Onboarding friction; KJs who aren't tech-comfortable may drop the app
 
-### Option B — Backend proxy server (Helder holds the key server-side)
-- All MyVocaList instances call Helder's server, which proxies to YouTube
-- Users have zero configuration
-- **Pro:** Zero UX friction
-- **Con:** Requires server infrastructure + hosting costs + quota shared across all users → 100 searches/day total across all KJs is not viable at scale
+**Option A2 — Helder's key embedded server-side (backend proxy)**
+- All installations call Helder's server, which proxies YouTube search
+- Zero config for KJs — works out of the box
+- **Pro:** Zero friction, cleanest UX
+- **Con:** 100 searches/day shared across ALL active KJs worldwide → not viable at any scale without a quota increase or monetization to fund it
 
-### Option C — No YouTube API key; use Invidious/Piped proxy
-- Invidious/Piped are open-source YouTube frontends with public APIs — no API key required
-- **Pro:** Zero key management, no quota
-- **Con:** Against YouTube ToS, unreliable (public instances go down), not suitable for a commercial/distributed product
-
-### Option D — YouTube iFrame search (no API key)
-- Use YouTube's web search embed or direct URL pattern (`youtube.com/results?search_query=...`) scraped via WebView
-- **Pro:** No API key
-- **Con:** Fragile (depends on YouTube web UI not changing), violates ToS, poor data quality
-
-### Option E — Defer YouTube integration; use manual URL entry only
-- KJ or singers paste a YouTube URL manually; app doesn't search YouTube at all
-- **Pro:** No API dependency whatsoever
-- **Con:** UX regression — copy-pasting URLs is cumbersome mid-event
+**Viable for Phase 1:** Either A1 or A2. A1 is practical if the KJ persona is tech-capable; A2 is better UX but requires infrastructure.
 
 ---
 
-## 6. Recommendation
+### Phase 2 — Singer self-service search
 
-**Option A is the right call for MyVocaList's current stage.**
+Once singers search, the 100-searches/day model collapses entirely. The only sustainable paths are:
 
-Rationale:
-- MyVocaList's primary user persona for song search is the **KJ/operator**, not the singers. Singers don't search — the KJ finds and queues tracks.
-- A one-time setup of a YouTube API key by the KJ (who is technically capable enough to install and configure an Android app) is an acceptable onboarding cost.
-- 100 searches/day per KJ deployment is sufficient for a typical evening event (KJs rarely exceed 20–30 unique searches).
-- This avoids all server infrastructure, ToS risk, and OAuth complexity.
-- If quota becomes a real constraint at a specific event, the KJ can request a free quota increase from Google.
+**Option B1 — Backend proxy + monetization (subscription/paid app)**
+- Helder runs a server with a pool of YouTube API projects (rotating keys or requesting quota increases)
+- Subscription revenue funds API quota + server costs
+- **This is the standard model for any SaaS that embeds YouTube search**
+- **Pro:** Zero config for everyone, scalable, Helder controls the experience
+- **Con:** Helder must build and operate a backend; pricing must cover costs
 
-**Implementation note:** The API key should be stored via `SecureStorage` on the device and configurable from a Settings page. The song-search feature should gracefully degrade (show a "Configure YouTube API key in Settings" prompt) rather than crashing when no key is set.
+**Option B2 — Avoid YouTube Data API entirely; use in-app WebView search**
+- Open a YouTube search WebView inside the app — no API key, no quota
+- KJ or singer taps a result; app captures the video ID from the URL
+- **Pro:** Zero API dependency, zero quota, zero config
+- **Con:** UX is less polished (native app embedding a web page); ToS grey area; dependent on YouTube's web UI not changing
+
+**Option B3 — Third-party YouTube search proxy (e.g. Supadata, RapidAPI wrappers)**
+- Pay a third-party service that wraps YouTube API for simpler access
+- Monthly cost replaces quota management
+- **Pro:** Simpler than managing Google Cloud projects at scale
+- **Con:** Adds a vendor dependency; pricing may be unpredictable as scale grows
 
 ---
 
-## 7. Open Questions for Helder
+## 5. Strategic Recommendation
 
-1. Is the target user for song search always the KJ/operator, or will singers also search? (Affects quota pressure significantly.)
-2. Is MyVocaList intended to be distributed to multiple independent KJs, or is it Helder's personal tool? (Affects whether Option B becomes viable later.)
-3. Is a one-time Settings-page API key setup acceptable, or is zero-config a hard requirement?
+### Phase 1 (now, KJ-only):
+**Use Option A1 — one-time API key setup per KJ, configured in Settings.**
+
+Rationale: KJs who install and configure a MAUI app on Android are already technically capable enough for a 15-minute one-time setup. A clear, illustrated in-app setup guide removes the friction. The app should show a friendly "Set up YouTube search in Settings" prompt rather than an error when the key is absent — this frames it as a feature to unlock, not a broken state.
+
+### Phase 2 (singer search):
+**The only viable path is Option B1 — backend proxy funded by app monetization.**
+
+This is unavoidable. Singer-driven search means 50–150+ searches per event, per KJ. That quota cannot be covered by free individual API keys without violating ToS. A subscription model (e.g. per-month or per-event fee) naturally funds the API costs and backend infrastructure. This is also what makes zero-config possible for everyone — users pay, Helder provides the key transparently.
+
+### The zero-config / free / no-backend triangle
+
+You can only pick two:
+
+| | Zero-config | Free to user | No backend |
+|---|:-----------:|:------------:|:----------:|
+| A1 (KJ key in Settings) | ✗ | ✓ | ✓ |
+| A2/B1 (Helder's backend) | ✓ | depends on pricing | ✗ |
+| B2 (WebView) | ✓ | ✓ | ✓ (but ToS risk) |
+
+---
+
+## 6. BACKLOG Implication
+
+This research suggests the song-search feature needs a **two-stage design**:
+
+- `[Phase 1]` Song search: KJ-only, user-configured API key, graceful degradation when absent
+- `[Phase 2]` Song search: singer self-service, backend proxy, requires monetization decision first
+
+Phase 2 is blocked on the **monetization / distribution model decision**, which is an architectural decision Helder must make before any singer-search spec can be written.
 
 ---
 
@@ -131,4 +143,4 @@ Rationale:
 - [YouTube API Limits 2026 — getphyllo.com](https://www.getphyllo.com/post/youtube-api-limits-how-to-calculate-api-usage-cost-and-fix-exceeded-api-quota)
 - [Complete Guide to YouTube Data API v3 Quotas — elfsight.com](https://elfsight.com/blog/youtube-data-api-v3-limits-operations-resources-methods-etc/)
 - [Unverified Apps — Google API Console Help](https://support.google.com/googleapi/answer/7454865?hl=en)
-- [YouTube API Guide 2026 — zernio.com](https://zernio.com/blog/youtube-api)
+- [Free YouTube API 2026 — supadata.ai](https://supadata.ai/youtube-api)
