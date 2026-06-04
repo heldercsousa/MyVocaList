@@ -311,15 +311,6 @@ public partial class VenuesViewModel : CrudListViewModelBase<VenueListItemDto>
 
 ---
 
-## BACKLOG Entry (to add)
-
-Table: **Dev Cycle Craft**
-Name: `Code cleanup — CRUD list page deduplication`
-Status: `💡 Pending` → promote to `📋 Spec` when this plan is approved
-Notes: See this document. Affects 4 code-behind files + 4 ViewModels + new shared files.
-
----
-
 ## Files Affected
 
 ### New files
