@@ -42,6 +42,18 @@ developer-owned key, without requiring each user to obtain their own key?
   bill. Free-tier apps at any meaningful scale will hit the 100-searches/day wall and
   cannot afford the overage costs without passing them on to users.
 
+- **The per-user key model is actually economically superior.** Each KJ creates their own
+  Google Cloud project → their own 10,000 units/day free quota → ~100 searches/day for their
+  own usage alone, which is more than enough for a single operator running events. Cost to
+  the KJ: zero (free tier). Cost to Helder: zero (no central bill). The original design was
+  not wrong economically — it was only wrong on **UX**: the 15-minute Google Cloud setup is a
+  developer workflow that non-technical KJs will not complete.
+
+  **The problem is purely friction, not cost.** This is exactly what the AI agent automation
+  idea addresses (BACKLOG nested task): if an agent can automate the key creation and inject
+  it into Settings on the user's behalf, the per-user model becomes both zero-cost AND
+  zero-friction — the best of all worlds.
+
 ### Implication for YouTubeSearchPage (Task 3c)
 
 The API-key-per-user block is removed — that assumption was wrong architecturally.
