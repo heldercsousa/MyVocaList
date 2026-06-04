@@ -575,3 +575,4 @@ Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-001-artists-page-no-back
 Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-001-artists-page-no-back-button.md
 Docs/Management/BusinessFeatures/artists-songs/task-log.md
 Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
