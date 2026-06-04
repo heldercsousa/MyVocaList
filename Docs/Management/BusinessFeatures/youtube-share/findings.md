@@ -1,5 +1,50 @@
 # YouTube Integration — Conflict Analysis & Action Plan
 
+## Update: Direct API Usage Research (2026-06-04)
+
+**Question:** Can a consumer app call YouTube Data API v3 directly using a single
+developer-owned key, without requiring each user to obtain their own key?
+
+**Answer: Yes — this is the standard industry model.**
+
+### Key findings
+
+- **ToS allows a single developer key for multi-user apps.** The YouTube API Terms of Service
+  bind the *API Client* (the app) to the *API Project* (the Google Cloud project). There is no
+  rule requiring per-user keys. The developer holds one key; all users of that app share the
+  quota from that one project. This is exactly how every consumer app that embeds YouTube search
+  works (Spotify, music playlist apps, karaoke apps, etc.).
+
+- **The "key per user" assumption in the original spec was wrong.** The earlier concern was based
+  on misreading the quota model. The correct model: Helder creates one Google Cloud project,
+  enables YouTube Data API v3, generates one API key, and all MyVocaList users share the 10,000
+  units/day quota from that project.
+
+- **Key security:** Embedding an API key directly in a mobile app binary is risky (can be
+  extracted via reverse engineering). The recommended pattern for distributed mobile apps is a
+  **thin backend proxy** — the app calls Helder's server, the server holds the key and forwards
+  to YouTube. This adds server infrastructure but solves both security and quota management.
+
+- **Quota math for MyVocaList:** 10,000 units/day ÷ 100 units/search = 100 searches/day across
+  ALL users sharing the key. For a small fleet of KJs (Phase 1), this is workable. For Phase 2
+  with singer self-service search, a quota increase request becomes necessary. Google grants
+  increases for legitimate apps with a compliance audit.
+
+- **Quota increase process:** Submit via Google Cloud Console quota extension form. Requires
+  demonstrating ToS compliance and legitimate use. Not instant but not prohibitive for a real app.
+
+### Implication for YouTubeSearchPage (Task 3c)
+
+The API-key-per-user block is removed. The remaining blockers are:
+1. SongPickerPage (3b) must ship first — sequential dependency unchanged
+2. Backend proxy decision — needed before distributing to multiple KJs (key security)
+3. Quota validation — 100 searches/day baseline; plan for quota increase request at launch
+
+The `YouTubeSearchPage` and the `Share from YouTube` feature remain complementary:
+`YouTubeSearchPage` = in-app convenience; Share = zero-infrastructure fallback.
+
+---
+
 > **Session goal:** (1) Register this research in its dedicated folder with a proper name.
 > (2) Compare the "Share from YouTube" approach with the existing `YouTubeSearchPage` task
 > in the Search Picker spec and resolve the conflict.
