@@ -26,19 +26,34 @@ developer-owned key, without requiring each user to obtain their own key?
   to YouTube. This adds server infrastructure but solves both security and quota management.
 
 - **Quota math for MyVocaList:** 10,000 units/day ÷ 100 units/search = 100 searches/day across
-  ALL users sharing the key. For a small fleet of KJs (Phase 1), this is workable. For Phase 2
-  with singer self-service search, a quota increase request becomes necessary. Google grants
-  increases for legitimate apps with a compliance audit.
+  ALL users sharing the key. For a personal/single-KJ install this is workable. For any
+  meaningful distribution (multiple KJs, singer self-service search), the free tier is
+  exhausted quickly.
 
-- **Quota increase process:** Submit via Google Cloud Console quota extension form. Requires
-  demonstrating ToS compliance and legitimate use. Not instant but not prohibitive for a real app.
+- **Quota increase = paid tier, and it is expensive.** Beyond the free 10,000 units/day,
+  additional quota requires entering Google's paid quota programme. Pricing is not published
+  transparently but community reports place significant usage in the range of hundreds to
+  thousands of USD/month at scale. This makes a centrally-funded YouTube search feature
+  only viable under a paid subscription model where app revenue explicitly covers API costs.
+  There is no cheap "just request more quota" path — the extension form leads to billing.
+
+- **Conclusion on central-key viability:** Technically ToS-compliant, but economically
+  only sustainable if MyVocaList charges a subscription fee that covers the YouTube API
+  bill. Free-tier apps at any meaningful scale will hit the 100-searches/day wall and
+  cannot afford the overage costs without passing them on to users.
 
 ### Implication for YouTubeSearchPage (Task 3c)
 
-The API-key-per-user block is removed. The remaining blockers are:
+The API-key-per-user block is removed — that assumption was wrong architecturally.
+But a new economic block replaces it:
+
 1. SongPickerPage (3b) must ship first — sequential dependency unchanged
-2. Backend proxy decision — needed before distributing to multiple KJs (key security)
-3. Quota validation — 100 searches/day baseline; plan for quota increase request at launch
+2. Backend proxy decision — needed for key security in a distributed app
+3. **Monetisation decision required:** in-app YouTube search via a central key is only
+   sustainable under a paid subscription. Shipping it free means either hitting quota daily
+   or absorbing unpredictable API costs. This decision belongs to Helder before Task 3c unblocks.
+4. **Alternative path:** `Share from YouTube` (oEmbed, zero quota, zero cost) may be the
+   right permanent solution rather than a stepping stone — especially pre-monetisation.
 
 The `YouTubeSearchPage` and the `Share from YouTube` feature remain complementary:
 `YouTubeSearchPage` = in-app convenience; Share = zero-infrastructure fallback.
