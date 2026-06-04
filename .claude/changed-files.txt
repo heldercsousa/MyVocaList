@@ -635,3 +635,5 @@ MyVocaList/UI/Pages/Songs/SongsPage.xaml
 MyVocaList/UI/Pages/Songs/SongsPage.xaml
 MyVocaList/UI/Pages/Artists/ArtistsPage.xaml
 MyVocaList/UI/Pages/Artists/ArtistsPage.xaml
+.claude/settings.json
+.claude/settings.json
