@@ -107,6 +107,24 @@
 
 ---
 
+## Phase 3d — Update coding guidelines with search picker pattern [SEQUENTIAL — after 3c committed]
+
+- [ ] **Document search picker pattern in coding guidelines** [SEQUENTIAL]
+  - Produces: updated `.claude/library/crud-pages.md` (or new `.claude/library/search-picker-pattern.md` if no suitable home exists)
+  - Consumes: committed ArtistPickerPage, SongPickerPage, YouTubeSearchPage as reference implementations
+  - Risk: Low — docs only, no code
+  - Files owned: the guideline file only
+  - What to document:
+    - When to use a picker page vs inline search (API cost → explicit submit; local DB → reactive)
+    - SearchAppBar wiring via `Action1Command`/`Action1Icon` (no component modification)
+    - ViewModel shape: `SearchCommand` (IAsyncRelayCommand), `SelectResultCommand`, `BackCommand`, `IsLoading`, `HasResults`, `HasSearched`, `IsShowEmptyState`, `EmptyStateMessage`, `CancellationTokenSource` pattern
+    - WeakReferenceMessenger result return: register before navigate, unregister after receive
+    - Page structure: `SafeAreaEdges="Container"`, `Shell.NavBarIsVisible="False"`, shimmer skeleton, DXCollectionView results, EmptyState
+    - ListItem variants: single-line (headline only), two-line (headline + supporting), leading image
+    - Reference files: `ArtistPickerPage.xaml`, `ArtistPickerViewModel.cs`, `ArtistPickedMessage.cs`
+
+---
+
 ## Phase 4 — Route Registration + DI [SEQUENTIAL — waits for Phase 3]
 
 - [ ] **Register routes and DI** [SEQUENTIAL]
