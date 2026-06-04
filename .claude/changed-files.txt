@@ -659,3 +659,4 @@ MyVocaList/UI/ViewModels/ArtistsViewModel.cs
 MyVocaList/UI/ViewModels/ArtistsViewModel.cs
 MyVocaList/UI/Pages/CrudListPageBase.cs
 Docs/Management/agile-weaving-stroustrup.md
+Docs/Management/agile-weaving-stroustrup.md
