@@ -1,19 +1,23 @@
 # Search Page Component — Tasks
 
 **Feature:** Search Page Component  
-**Status:** Spec  
+**Status:** In Progress  
 **Date:** 2026-06-03  
+**Last updated:** 2026-06-04
+
+> **Session state (2026-06-04):** Phase 1 in progress — `Contracts/Messages/` folder created, files not yet committed (build blocked by unrelated `CrudListPageBase.cs` error in parallel branch). Phase 3 split into 3 sequential tasks (one agent per page). Resume from Phase 1.  
 
 ---
 
 ## Phase 1 — Contracts (no dependencies)
 
-- [ ] **Add WeakReferenceMessenger message records** [P]
-  - Produces: `MyVocaList.Contracts/Messages/ArtistPickedMessage.cs`, `SongPickedMessage.cs`, `YouTubeVideoPickedMessage.cs`
-  - Consumes: `MusicSearchResultDto`, `YouTubeSearchResultDto`
+- [~] **Add WeakReferenceMessenger message records** [SEQUENTIAL]
+  - Produces: `Contracts/Messages/ArtistPickedMessage.cs`, `SongPickedMessage.cs`, `YouTubeVideoPickedMessage.cs`
+  - Consumes: `MusicSearchResultDto` (`Contracts/DTOs/MusicSearchResultDto.cs`), `YouTubeSearchResultDto` (`Contracts/DTOs/List/YouTubeSearchResultDto.cs`)
   - Risk: Low
   - Files owned: the 3 message files
-  - Demo: files compile; records are accessible from the MAUI project
+  - Demo: `dotnet build MyVocaList.sln` passes; records accessible from MAUI project
+  - **State:** `Contracts/Messages/` folder exists, files not yet written. Start here.
 
 ---
 
@@ -73,28 +77,33 @@
 
 ---
 
-## Phase 3 — Picker Pages (depends on Phase 2 ViewModels)
+## Phase 3 — Picker Pages (depends on Phase 2 ViewModels) [SEQUENTIAL — one agent per page]
 
-- [ ] **Implement ArtistPickerPage** [P]
+> **Split rationale:** XAML pages share a visual pattern but differ in data shape and list item layout. Each page is done by a fresh agent. 3b and 3c use 3a's committed XAML as their reference — they must not start until 3a is committed and building. Full agent brief for each sub-task: see `task-3a-artist-picker-page.md`, `task-3b-song-picker-page.md`, `task-3c-youtube-search-page.md`.
+
+- [ ] **3a — Implement ArtistPickerPage** [SEQUENTIAL — first]
   - Produces: `MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml` + `.xaml.cs`
-  - Consumes: `ArtistPickerViewModel`, `SearchAppBar` (with new `SearchCommand`), `ListItem`, `EmptyState`, `dx:ShimmerView`
-  - Risk: Low
-  - Files owned: both page files
-  - Demo: navigating to `artist-picker` shows page; entering a query and tapping search shows loading skeleton, then `ListItem` results; tapping a result pops and pre-fills the artist name field
+  - Consumes: `ArtistPickerViewModel`, `SearchAppBar` (`Action1Command`/`Action1Icon` slots), `ListItem`, `EmptyState`, `dx:ShimmerView`
+  - Risk: Medium — establishes the XAML pattern all three pages share; get it right first
+  - Files owned: both page files only — do NOT touch Routes.cs, AppShell, MauiProgram (Phase 4)
+  - Demo: page compiles and builds; XAML structure matches design.md pattern
+  - **Agent brief:** `Docs/Management/BusinessFeatures/search-page-component/task-3a-artist-picker-page.md`
 
-- [ ] **Implement SongPickerPage** [P]
+- [ ] **3b — Implement SongPickerPage** [SEQUENTIAL — after 3a committed]
   - Produces: `MyVocaList/UI/Pages/Songs/SongPickerPage.xaml` + `.xaml.cs`
-  - Consumes: `SongPickerViewModel`
-  - Risk: Low
-  - Files owned: both page files
-  - Demo: results show two-line `ListItem` (title + artist)
+  - Consumes: `SongPickerViewModel`, ArtistPickerPage.xaml as XAML reference
+  - Risk: Low — follows 3a pattern; only difference is two-line ListItem (Headline=SongTitle, SupportingText=ArtistName)
+  - Files owned: both page files only
+  - Demo: page compiles; two-line list item visible in XAML
+  - **Agent brief:** `Docs/Management/BusinessFeatures/search-page-component/task-3b-song-picker-page.md`
 
-- [ ] **Implement YouTubeSearchPage** [P]
+- [ ] **3c — Implement YouTubeSearchPage** [SEQUENTIAL — after 3b committed]
   - Produces: `MyVocaList/UI/Pages/Songs/YouTubeSearchPage.xaml` + `.xaml.cs`
-  - Consumes: `YouTubeSearchViewModel`
-  - Risk: Low
-  - Files owned: both page files
-  - Demo: results show `ListItem` with thumbnail image in leading slot, title + channel/duration
+  - Consumes: `YouTubeSearchViewModel`, ArtistPickerPage.xaml as XAML reference, `YouTubeSearchResultDto` (VideoId, Title, ChannelName, DurationSeconds, ThumbnailUrl)
+  - Risk: Medium — leading image slot in ListItem requires verifying `ListItemLeadingImage` component API; SecondsToMinutesConverter for duration
+  - Files owned: both page files only
+  - Demo: page compiles; ListItem shows thumbnail image leading, title headline, channel/duration supporting
+  - **Agent brief:** `Docs/Management/BusinessFeatures/search-page-component/task-3c-youtube-search-page.md`
 
 ---
 
