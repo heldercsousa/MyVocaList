@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
+<pages:CrudListPageBase
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
     xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:pages="clr-namespace:MyVocaList.UI.Pages"
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
@@ -181,4 +182,4 @@
 
     </Grid>
 
-</ContentPage>
+</pages:CrudListPageBase>
