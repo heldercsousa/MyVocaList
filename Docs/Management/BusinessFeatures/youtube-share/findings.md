@@ -68,36 +68,29 @@ YouTubeSearchPage keeps the user in-app. They are complementary, not identical.
 
 ## Decision
 
-### Recommended resolution: Replace Task 3c, keep the door open for in-app search later
+### Recommended resolution: Keep Task 3c blocked; Ship Share from YouTube first
 
-**Rationale:**
+Task 3c is NOT removed or suspended. It remains in the spec, blocked. The two features serve
+different UX modes and can coexist. The API key friction problem for Task 3c is real but
+solvable in the future via an automated agent flow — e.g. a browser extension agent (Claude Code
+browser extension is a candidate) that walks the user through Google Cloud project creation,
+API key generation, and injection into the app on their behalf. This is a reasonable near-future
+capability given the AI agent tooling trajectory.
 
-1. `YouTubeSearchPage` (Task 3c) is currently `🔴 Blocked` — it hasn't started. The cost of
-   changing direction now is zero.
-
-2. The API key gate (AC-YT-01/02) is an admission that the current design fails a significant
-   portion of users. "Hide the feature if no key" is not a solution — it is feature denial.
-
-3. Share from YouTube delivers the same outcome (URL added to song) with zero adoption friction.
-   The UX of switching to YouTube to search is familiar and arguably better (YouTube's own search
-   is far more powerful than any in-app wrapper).
-
-4. `IYouTubeService` was designed for in-app search. Under the Share model, it becomes unnecessary
-   for the Phase 1 karaoke URL use case. It may have a future role if in-app search is reintroduced
-   via a paid/backend model — but that is post-MVP.
+**Task 3c remains blocked on:** SongPickerPage (current dependency) AND the future API-key
+automation solution. When that solution exists, Task 3c unblocks and the two flows coexist:
+- Share from YouTube → zero-config, works for everyone
+- YouTubeSearchPage → in-app convenience for users who have automated the API key setup
 
 ### Action items (not implementation — spec changes only)
 
 | # | Action | Where |
 |---|--------|-------|
-| 1 | Mark Task 3c (`YouTubeSearchPage`) as `[SUSPENDED — superseded by Share from YouTube]` | `search-picker/tasks.md` |
-| 2 | Update Search Picker `requirements.md`: remove AC-YT-01 through AC-YT-08 | `search-picker/requirements.md` |
-| 3 | Update Search Picker `design.md`: remove YouTubeSearchPage section | `search-picker/design.md` |
-| 4 | Add `YouTubeSearchPage` suspension note to BACKLOG (Search Picker row) | `BACKLOG.md` |
-| 5 | Add new BACKLOG entry: **YouTube Share Intent** (Phase 1: host share-to-add, Android) | `BACKLOG.md` |
-| 6 | Create `BusinessFeatures/youtube-share/` folder | filesystem |
-| 7 | Move + rename this file to `BusinessFeatures/youtube-share/findings.md` | filesystem |
-| 8 | Register `findings.md` in `MyVocaList.sln` under a new `youtube-share` Solution Folder | `MyVocaList.sln` |
+| 1 | Update BACKLOG: add secondary blocker note to YouTubeSearchPage row | `BACKLOG.md` |
+| 2 | Add new BACKLOG entry: **YouTube Share Intent** (Phase 1: host share-to-add, Android) | `BACKLOG.md` |
+| 3 | Create `BusinessFeatures/youtube-share/` folder | filesystem |
+| 4 | Move + rename this file to `BusinessFeatures/youtube-share/findings.md` | filesystem |
+| 5 | Register `findings.md` in `MyVocaList.sln` under a new `youtube-share` Solution Folder | `MyVocaList.sln` |
 
 ### What happens to `IYouTubeService` and `HasYouTubeApiKey`?
 
@@ -119,10 +112,10 @@ All should be moved to their feature folder or deleted:
 |------|---------|--------|-------------|
 | `adaptive-doodling-knuth.md` | Plan: Fix URL Remove Undo Pattern in SongFormViewModel | Move | `BusinessFeatures/artists-songs/bugs/url-undo-fix-plan.md` |
 | `gentle-splashing-wave.md` | Plan: UI Architecture Decision (ui-2nd-refactor) | Move | `BusinessFeatures/UI-2nd-refactor/ui-arch-decision-plan.md` |
-| `goofy-munching-widget.md` | Ephemeral session work queue (Phase 16C context — done) | Delete | — |
-| `happy-knitting-storm.md` | Backup & Restore plan (feature ✅ Done; `plan.md` exists) | Delete | — |
-| `reflective-fluttering-hinton.md` | App Settings plan (feature ✅ Done; `plan.md` exists) | Delete | — |
-| `tidy-discovering-summit.md` | About Page evaluation (feature ✅ Done) | Delete | — |
+| `goofy-munching-widget.md` | Session work-queue plan (Phase 16C + search-picker context) | Move | `BusinessFeatures/artists-songs/session-plan-phase16c-work-queue.md` |
+| `happy-knitting-storm.md` | Backup & Restore implementation plan draft | Move | `BusinessFeatures/backup-restore/plan-draft.md` |
+| `reflective-fluttering-hinton.md` | App Settings orchestration plan | Move | `BusinessFeatures/app-settings/orchestration-plan.md` |
+| `tidy-discovering-summit.md` | About Page evaluation | Move | `BusinessFeatures/about-page/evaluation.md` |
 | `agile-weaving-stroustrup.md` | This file — YouTube integration research | Move + rename | `BusinessFeatures/youtube-share/findings.md` |
 
 `.sln` changes required:

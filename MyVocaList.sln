@@ -162,6 +162,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-so
 		Docs\Management\BusinessFeatures\artists-songs\requirements.md = Docs\Management\BusinessFeatures\artists-songs\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\session-plan-phase16c-work-queue.md = Docs\Management\BusinessFeatures\artists-songs\session-plan-phase16c-work-queue.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
@@ -277,9 +278,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevCycleCraft", "DevCycleCr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{15F1DA03-2180-47BF-BC40-1BB457C97F9E}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\adaptive-doodling-knuth.md = Docs\Management\adaptive-doodling-knuth.md
 		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
-		Docs\Management\happy-knitting-storm.md = Docs\Management\happy-knitting-storm.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-restore", "{FA1234BC-0001-4000-8000-000000000011}"
@@ -294,6 +293,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-re
 		Docs\Management\BusinessFeatures\backup-restore\plan.md = Docs\Management\BusinessFeatures\backup-restore\plan.md
 		Docs\Management\BusinessFeatures\backup-restore\task-log.md = Docs\Management\BusinessFeatures\backup-restore\task-log.md
 		Services\TransactionLogWriter.cs = Services\TransactionLogWriter.cs
+		Docs\Management\BusinessFeatures\backup-restore\plan-draft.md = Docs\Management\BusinessFeatures\backup-restore\plan-draft.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-reporting", "{FA1234BC-0001-4000-8000-000000000012}"
@@ -332,6 +332,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-settings", "app-setting
 		Docs\Management\BusinessFeatures\app-settings\plan.md = Docs\Management\BusinessFeatures\app-settings\plan.md
 		Docs\Management\BusinessFeatures\app-settings\requirements.md = Docs\Management\BusinessFeatures\app-settings\requirements.md
 		Docs\Management\BusinessFeatures\app-settings\tasks.md = Docs\Management\BusinessFeatures\app-settings\tasks.md
+		Docs\Management\BusinessFeatures\app-settings\orchestration-plan.md = Docs\Management\BusinessFeatures\app-settings\orchestration-plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "about-page", "about-page", "{FA1234BC-0001-4000-8000-000000000017}"
@@ -341,6 +342,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "about-page", "about-page", 
 		Docs\Management\BusinessFeatures\about-page\requirements.md = Docs\Management\BusinessFeatures\about-page\requirements.md
 		Docs\Management\BusinessFeatures\about-page\task-log.md = Docs\Management\BusinessFeatures\about-page\task-log.md
 		Docs\Management\BusinessFeatures\about-page\tasks.md = Docs\Management\BusinessFeatures\about-page\tasks.md
+		Docs\Management\BusinessFeatures\about-page\evaluation.md = Docs\Management\BusinessFeatures\about-page\evaluation.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-picker", "search-picker", "{FA1234BC-0001-4000-8000-000000000018}"
@@ -359,12 +361,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-r
 		Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.md = Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.md
 		Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.md = Docs\Management\BusinessFeatures\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.md
 		Docs\Management\BusinessFeatures\UI-2nd-refactor\prompt.md = Docs\Management\BusinessFeatures\UI-2nd-refactor\prompt.md
+		Docs\Management\BusinessFeatures\UI-2nd-refactor\ui-arch-decision-plan.md = Docs\Management\BusinessFeatures\UI-2nd-refactor\ui-arch-decision-plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-share", "youtube-share", "{FA1234BC-0001-4000-8000-000000000020}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\youtube-share\findings.md = Docs\Management\BusinessFeatures\youtube-share\findings.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-002-artist-form-search-non-md3.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-002-artist-form-search-non-md3.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
 EndProject
 Global
@@ -489,6 +498,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000015} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000017} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000018} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000020} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000019} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{4CB09F16-6E81-425E-9080-840BABFB66BF} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{7A021F6B-F297-41EA-A028-C4F881146791} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
