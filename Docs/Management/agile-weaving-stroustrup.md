@@ -1,146 +1,199 @@
-# YouTube API Research: Key Acquisition, Quota & UX Strategy — MyVocaList
+# YouTube Integration Strategy — MyVocaList Research
 
-> **Purpose:** Evaluate the YouTube Data API v3 constraints and their impact on MyVocaList's
-> song-search feature across two phases: KJ-only search (Phase 1) and singer self-service search (Phase 2).
-
----
-
-## 1. API Key Acquisition — What It Takes
-
-Getting a YouTube Data API v3 key is a **purely developer-facing process**:
-
-1. Sign in to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new Cloud project
-3. Navigate to API Library → enable "YouTube Data API v3"
-4. Go to Credentials → Create credentials → API key
-5. (Recommended) Restrict the key to the YouTube Data API only
-
-**Total time:** ~10–15 minutes. Requires a Google account and literacy with developer consoles.
-
-**Verdict for end-user distribution:** Not acceptable UX. Singers and most KJs are not developers.
-The risk is real: requiring this step as onboarding will kill app adoption.
+> **Core question:** How does MyVocaList integrate YouTube for song discovery without burdening
+> users with API key setup or breaking their experience?
 
 ---
 
-## 2. Quota — The Hard Numbers
+## 1. The Problem With In-App YouTube Search
 
-| Metric | Value |
-|--------|-------|
-| Default daily quota | **10,000 units/day** per Google Cloud project |
-| `search.list` cost | **100 units per call** |
-| Effective daily searches | **100 searches/day** with the default allocation |
-| Quota reset | Midnight Pacific Time (no rollover) |
-| Quota scope | Per project — all keys in one project share the pool |
+| Constraint | Impact |
+|------------|--------|
+| `search.list` costs 100 units/call | Only 100 searches/day per project on free tier |
+| API key acquisition is developer-only | 15-min Google Cloud setup — kills adoption |
+| Asking users to get their own key | ToS-compliant but unusable UX |
+| Singer-driven search phase | One busy event = 50–100+ searches = quota blown |
 
-### Quota pressure by phase
-
-| Phase | Who searches | Searches per event (estimate) | Daily budget consumed |
-|-------|-------------|------------------------------|----------------------|
-| Phase 1 — KJ only | 1 operator | 20–40 (finding tracks, re-searching) | 20–40% |
-| Phase 2 — Singers too | KJ + N singers | 3–5 per singer × 10–20 singers = 50–100+ | **100–200% — quota exhausted** |
-
-Phase 2 makes a single 10,000-unit project unsustainable even for one event, let alone a fleet of KJs.
+**Conclusion:** Building a traditional in-app YouTube search bar is the wrong direction.
+It creates either a cost problem (Helder holds key + backend) or an adoption problem (users hold key).
 
 ---
 
-## 3. Terms of Service — What Is and Isn't Allowed
+## 2. The Better Design: "Share from YouTube"
 
-- **Asking each KJ to get their own key** → ToS-compliant if each is an independent deployment, but breaks adoption (see § 1).
-- **Distributing keys to users to bypass quota** → explicit ToS violation.
-- **Multiple Cloud projects to multiply quota** → ToS violation if done systematically.
-- **One developer-held key proxied server-side** → fully ToS-compliant; the standard commercial app model.
+Users already know how to use YouTube's search. The proposal leverages the **native OS share sheet**
+instead of rebuilding search inside MyVocaList.
 
----
+### Flow
 
-## 4. Architectural Options by Phase
+```
+YouTube app / browser
+  └─ User finds karaoke video
+  └─ Taps "Share" → selects MyVocaList
+       ↓
+MyVocaList receives the URL
+  └─ Calls YouTube oEmbed (free, no API key) → gets title + thumbnail
+  └─ Parses title → extracts artist + song name
+  └─ Detects sharing user's role: Host or Singer
+       ↓
+Host flow:
+  └─ Shows confirm card: [Thumbnail] "Ed Sheeran — Shape of You"
+  └─ Artist auto-matched against MyVocaList DB (or create-new prompt)
+  └─ One tap → saved to DB
 
-### Phase 1 — KJ-only search (MVP)
+Singer flow:
+  └─ Checks if singer is enqueued in the active session
+  └─ Offers: "Set as my next-round song" | "Save to my list"
+  └─ If "next-round" → syncs to host DB automatically
+  └─ If "save locally" → stored on singer's device for later
+```
 
-**Option A1 — KJ configures their own key once in Settings**
-- KJ follows a one-time setup guide (~15 min); key stored in `SecureStorage`
-- Each KJ deployment has its own 100 searches/day
-- Zero server infrastructure
-- **Pro:** ToS-clean, no running costs for Helder, sufficient quota for KJ-only search
-- **Con:** Onboarding friction; KJs who aren't tech-comfortable may drop the app
+### Why this is the right design
 
-**Option A2 — Helder's key embedded server-side (backend proxy)**
-- All installations call Helder's server, which proxies YouTube search
-- Zero config for KJs — works out of the box
-- **Pro:** Zero friction, cleanest UX
-- **Con:** 100 searches/day shared across ALL active KJs worldwide → not viable at any scale without a quota increase or monetization to fund it
-
-**Viable for Phase 1:** Either A1 or A2. A1 is practical if the KJ persona is tech-capable; A2 is better UX but requires infrastructure.
-
----
-
-### Phase 2 — Singer self-service search
-
-Once singers search, the 100-searches/day model collapses entirely. The only sustainable paths are:
-
-**Option B1 — Backend proxy + monetization (subscription/paid app)**
-- Helder runs a server with a pool of YouTube API projects (rotating keys or requesting quota increases)
-- Subscription revenue funds API quota + server costs
-- **This is the standard model for any SaaS that embeds YouTube search**
-- **Pro:** Zero config for everyone, scalable, Helder controls the experience
-- **Con:** Helder must build and operate a backend; pricing must cover costs
-
-**Option B2 — Avoid YouTube Data API entirely; use in-app WebView search**
-- Open a YouTube search WebView inside the app — no API key, no quota
-- KJ or singer taps a result; app captures the video ID from the URL
-- **Pro:** Zero API dependency, zero quota, zero config
-- **Con:** UX is less polished (native app embedding a web page); ToS grey area; dependent on YouTube's web UI not changing
-
-**Option B3 — Third-party YouTube search proxy (e.g. Supadata, RapidAPI wrappers)**
-- Pay a third-party service that wraps YouTube API for simpler access
-- Monthly cost replaces quota management
-- **Pro:** Simpler than managing Google Cloud projects at scale
-- **Con:** Adds a vendor dependency; pricing may be unpredictable as scale grows
+- **Zero API key** — YouTube oEmbed is a free public endpoint, no auth
+- **Zero quota** — oEmbed has no rate limits documented; it's a simple metadata lookup, not search
+- **Better search** — YouTube's own search is far superior to any in-app search widget
+- **Familiar UX** — users know the share sheet; no new mental model needed
+- **Works for both phases** — host catalog building and singer self-service use the same mechanism
 
 ---
 
-## 5. Strategic Recommendation
+## 3. YouTube oEmbed — The Free Metadata Layer
 
-### Phase 1 (now, KJ-only):
-**Use Option A1 — one-time API key setup per KJ, configured in Settings.**
+**Endpoint (no API key, no auth):**
+```
+GET https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=VIDEO_ID&format=json
+```
 
-Rationale: KJs who install and configure a MAUI app on Android are already technically capable enough for a 15-minute one-time setup. A clear, illustrated in-app setup guide removes the friction. The app should show a friendly "Set up YouTube search in Settings" prompt rather than an error when the key is absent — this frames it as a feature to unlock, not a broken state.
+**Response includes:**
+```json
+{
+  "title": "Ed Sheeran - Shape of You (Karaoke Version)",
+  "author_name": "Sing King Karaoke",
+  "thumbnail_url": "https://i.ytimg.com/vi/VIDEO_ID/hqdefault.jpg",
+  "html": "<iframe ...>"
+}
+```
 
-### Phase 2 (singer search):
-**The only viable path is Option B1 — backend proxy funded by app monetization.**
-
-This is unavoidable. Singer-driven search means 50–150+ searches per event, per KJ. That quota cannot be covered by free individual API keys without violating ToS. A subscription model (e.g. per-month or per-event fee) naturally funds the API costs and backend infrastructure. This is also what makes zero-config possible for everyone — users pay, Helder provides the key transparently.
-
-### The zero-config / free / no-backend triangle
-
-You can only pick two:
-
-| | Zero-config | Free to user | No backend |
-|---|:-----------:|:------------:|:----------:|
-| A1 (KJ key in Settings) | ✗ | ✓ | ✓ |
-| A2/B1 (Helder's backend) | ✓ | depends on pricing | ✗ |
-| B2 (WebView) | ✓ | ✓ | ✓ (but ToS risk) |
+**What MyVocaList needs from this:** `title`, `thumbnail_url`. That's it.
+No quota. No API key. No project setup. Works for any public YouTube video.
 
 ---
 
-## 6. BACKLOG Implication
+## 4. Title Parsing — Artist + Song Extraction
 
-This research suggests the song-search feature needs a **two-stage design**:
+Karaoke video titles follow recognisable patterns (~80% coverage with simple heuristics):
 
-- `[Phase 1]` Song search: KJ-only, user-configured API key, graceful degradation when absent
-- `[Phase 2]` Song search: singer self-service, backend proxy, requires monetization decision first
+| Title pattern | Artist | Song |
+|--------------|--------|------|
+| `"Ed Sheeran - Shape of You (Karaoke)"` | Ed Sheeran | Shape of You |
+| `"Shape of You - Ed Sheeran \| Karaoke"` | Ed Sheeran | Shape of You |
+| `"KARAOKE: Bohemian Rhapsody - Queen"` | Queen | Bohemian Rhapsody |
+| `"Shape of You Karaoke Ed Sheeran"` | (manual) | (manual) |
 
-Phase 2 is blocked on the **monetization / distribution model decision**, which is an architectural decision Helder must make before any singer-search spec can be written.
+**Parsing strategy:**
+1. Strip common suffixes: `(Karaoke)`, `(Karaoke Version)`, `| Karaoke`, `- Karaoke`, `[Karaoke]`
+2. Split on ` - ` or ` | ` to separate artist/song (order heuristic: shorter = artist)
+3. Fuzzy-match extracted artist name against MyVocaList's existing artist DB
+4. Pre-fill the confirm card with best guess; user corrects if wrong and taps confirm
+
+The confirm step is the safety net — no parse has to be perfect.
+
+---
+
+## 5. Platform Implementation
+
+### Android (straightforward)
+
+Register MyVocaList as a share target via `IntentFilter` in `Platforms/Android/MainActivity.cs`:
+
+```csharp
+[IntentFilter(
+    new[] { Intent.ActionSend },
+    Categories = new[] { Intent.CategoryDefault },
+    DataMimeType = "text/plain")]
+```
+
+In `OnCreate`, extract the shared URL:
+```csharp
+if (Intent?.Action == Intent.ActionSend && Intent.Type == "text/plain")
+{
+    string sharedUrl = Intent.GetStringExtra(Intent.ExtraText);
+    // navigate to ShareIntentPage with the URL
+}
+```
+
+**Status:** Well-documented, working solution confirmed in the MAUI community.
+Known issue: navigation when the app is already open requires special handling (pass URL via
+`MessagingCenter` or a static `PendingShareUrl` property read on `AppShell` resume).
+
+### iOS (non-trivial)
+
+iOS requires a **Share Extension** — a separate project bundled with the main app.
+MAUI has no official Share Extension template; it requires platform-specific Xcode project setup.
+
+**Status as of 2025–2026:** No official MAUI template. Community workarounds exist
+(Vladislav Antonyuk's MAUI Extensions demo). Requires hands-on platform work.
+
+**Recommendation:** Android-first. iOS Share Extension is a Phase 2 effort — acceptable given
+MyVocaList's Android-primary deployment target (`net10.0-android` in `.csproj`).
+
+---
+
+## 6. Singer → Host Sync — The Dependency
+
+The singer self-service share flow has one assumption: **the singer's device can communicate
+with the host's device to write into the host's DB.**
+
+This is a separate architectural decision not yet made for MyVocaList:
+
+| Sync approach | Complexity | Infrastructure |
+|--------------|-----------|----------------|
+| Same local WiFi (mDNS / local HTTP) | Medium | None — peer-to-peer |
+| Helder's relay server | High | Backend required |
+| QR code handoff (no network) | Low | None — one-way, manual |
+| Bluetooth (BLE) | High | None — but limited range/complexity |
+
+**For Phase 1 (host-only share):** no sync needed — host shares to their own device.
+**For Phase 2 (singer share → host DB):** this sync architecture must be decided first.
+The share flow itself is independent of the sync mechanism; both can be designed separately.
+
+---
+
+## 7. Revised Feature Breakdown
+
+### Phase 1 — Host Share-to-Add (no API key, no sync, Android)
+- Register as Android share target
+- Receive YouTube URL → oEmbed call → title parse → confirm card → save to DB
+- Artist auto-match against existing DB; create-new flow if no match
+- **Zero API key. Zero backend. Works offline after oEmbed call.**
+
+### Phase 2 — Singer Share + Sync (requires sync architecture decision first)
+- Singer shares → role detected → "next-round song" or "save locally"
+- "Next-round" → write to host DB via chosen sync mechanism
+- "Save locally" → device-local song list (no sync)
+
+### Deferred indefinitely — In-app YouTube search bar
+- Only viable if Helder runs a backend proxy funded by app monetization
+- Not needed if Phase 1 + 2 above meet the use case
+
+---
+
+## 8. Open Questions Before Spec
+
+1. **For Phase 2 singer sync:** What is the preferred device-to-device sync mechanism?
+   Local WiFi is the simplest zero-infrastructure option for a live event context.
+2. **Artist matching on confirm:** If the parsed artist doesn't exist in the DB yet, does the
+   confirm card offer "create new artist" inline, or navigate to the full Artist form?
+3. **iOS priority:** Is iOS share target a must-have for launch, or can it ship Android-only first?
 
 ---
 
 ## Sources
 
+- [YouTube oEmbed — no API key needed (queen.raae.codes)](https://queen.raae.codes/2022-01-21-yt-oembed/)
+- [Fetch YouTube metadata in 2 lines — Medium](https://100lvlmaster.medium.com/fetch-any-youtube-videos-metadata-in-2-lines-e97c961c9004)
+- [Android Share Intent in MAUI — Microsoft Q&A](https://learn.microsoft.com/en-us/answers/questions/967073/how-to-wire-up-android-share-intent-in-maui)
+- [iOS Share Extension in MAUI — dotnet/maui Discussion #27199](https://github.com/dotnet/maui/discussions/27199)
 - [YouTube Data API — Getting Started](https://developers.google.com/youtube/v3/getting-started)
-- [YouTube API Services Terms of Service](https://developers.google.com/youtube/terms/api-services-terms-of-service)
-- [Quota and Compliance Audits](https://developers.google.com/youtube/v3/guides/quota_and_compliance_audits)
-- [search.list reference + quota cost](https://developers.google.com/youtube/v3/docs/search/list)
-- [Quota Calculator](https://developers.google.com/youtube/v3/determine_quota_cost)
 - [YouTube API Limits 2026 — getphyllo.com](https://www.getphyllo.com/post/youtube-api-limits-how-to-calculate-api-usage-cost-and-fix-exceeded-api-quota)
-- [Complete Guide to YouTube Data API v3 Quotas — elfsight.com](https://elfsight.com/blog/youtube-data-api-v3-limits-operations-resources-methods-etc/)
-- [Unverified Apps — Google API Console Help](https://support.google.com/googleapi/answer/7454865?hl=en)
-- [Free YouTube API 2026 — supadata.ai](https://supadata.ai/youtube-api)
