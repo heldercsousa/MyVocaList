@@ -698,3 +698,5 @@ MyVocaList/UI/Components/AppBars/SearchAppBar.xaml
 .claude/library/m3-components.md
 MyVocaList/UI/ViewModels/SongFormViewModel.cs
 MyVocaList/UI/ViewModels/SongFormViewModel.cs
+Docs/Management/in-docs-management-backlog-md-a-calm-dolphin.md
+Docs/Management/BACKLOG.md
