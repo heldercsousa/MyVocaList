@@ -43,6 +43,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     protected virtual void OnAfterLoad(IReadOnlyList<TItem> items) { }
 
     public bool IsEmpty => !IsInitialLoading && Items.Count == 0;
+    public virtual bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
     public bool CanEditSelected => SelectedCount == 1;
     public bool CanDeleteSelected => SelectedCount > 0;
     public bool IsAllSelected => Items.Count > 0 && SelectedCount == Items.Count;

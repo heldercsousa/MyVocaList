@@ -38,7 +38,7 @@ public partial class PersonsViewModel : CrudListViewModelBase<PersonListItemDto>
 
     public string AppBarTitle => SelectedCount == 0 ? "Singers" : $"{SelectedCount} selected";
     public bool IsEmptyNoPersons => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
-    public bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
+    public override bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
 
     protected override ObservableRangeCollection<PersonListItemDto> Items => Persons;
     protected override ObservableRangeCollection<PersonListItemDto> SelectedItems => SelectedPersons;

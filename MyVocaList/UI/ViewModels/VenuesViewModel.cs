@@ -37,7 +37,7 @@ namespace MyVocaList.UI.ViewModels
 
         public string AppBarTitle => SelectedCount == 0 ? "Venues" : $"{SelectedCount} selected";
         public bool IsEmptyNoVenues => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
-        public bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
+        public override bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
 
         protected override ObservableRangeCollection<VenueListItemDto> Items => Venues;
         protected override ObservableRangeCollection<VenueListItemDto> SelectedItems => SelectedVenues;
