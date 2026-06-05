@@ -210,6 +210,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-list-deduplication", "
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7d.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7d.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7e.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7e.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-guidelines.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-guidelines.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-folder-layout-alignment", "workflow-folder-layout-alignment", "{A1B2C3D4-0001-4000-8000-000000000004}"
