@@ -93,8 +93,10 @@ CrudListView subscribes to `BindingContextChanged`, casts to `ICrudListViewModel
 - `AttachViewModel()` — subscribes page to VM `PropertyChanged` for back-button logic
 
 **[Obsolete] events — do NOT subscribe to these in new pages:**
-- `ConfirmSheetStateRequired` — replaced by CrudListView internal wiring
-- `SelectionItemsWireUpRequired` — replaced by CrudListView `SelectedItemsSource` BindableProperty
+- `ConfirmSheetStateRequired` — compiler warning message: `"Replaced by CrudListView internal wiring. Will be deleted in Step 7e after all pages migrate."`
+- `SelectionItemsWireUpRequired` — compiler warning message: `"Replaced by CrudListView internal wiring. Will be deleted in Step 7e after all pages migrate."`
+
+Quote these messages verbatim in `crud-pages.md` so future agents recognise the CS0618 warning if they accidentally use these events.
 
 These events will be deleted after all existing pages finish migrating (Step 7e). New pages must not subscribe to them.
 
