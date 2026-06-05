@@ -16,6 +16,7 @@ public partial class PeoplePage : CrudListPageBase
         BindingContext = _viewModel;
         AttachViewModel();
 
+#pragma warning disable CS0618 // Obsolete events used until Step 7c migrates this page to CrudListView
         ConfirmSheetStateRequired += (_, state) =>
         {
             if (state == BottomSheetState.Hidden) confirmSheet.Close();
@@ -26,5 +27,6 @@ public partial class PeoplePage : CrudListPageBase
             if (collectionView != null)
                 collectionView.SelectedItems = _viewModel.SelectedPersonsRaw;
         };
+#pragma warning restore CS0618
     }
 }

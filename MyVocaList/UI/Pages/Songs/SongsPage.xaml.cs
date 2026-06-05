@@ -13,6 +13,7 @@ public partial class SongsPage : CrudListPageBase
         BindingContext = _viewModel;
         AttachViewModel();
 
+#pragma warning disable CS0618 // Obsolete events used until Step 7d migrates this page to CrudListView
         ConfirmSheetStateRequired += (_, state) =>
         {
             if (state == BottomSheetState.Hidden) confirmSheet.Close();
@@ -23,6 +24,7 @@ public partial class SongsPage : CrudListPageBase
             if (collectionView != null)
                 collectionView.SelectedItems = _viewModel.SelectedSongsRaw;
         };
+#pragma warning restore CS0618
     }
 
     private void OnItemTapped(object sender, CollectionViewGestureEventArgs e)
