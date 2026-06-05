@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
+    xmlns:pages="clr-namespace:MyVocaList.UI.Pages"
+    xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
+    xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
+    xmlns:views="clr-namespace:MyVocaList.UI.Views"
+    x:Class="MyVocaList.UI.Views.CrudListView"
+    x:Name="self"
+    x:DataType="pages:ICrudListViewModel">
+
+    <!-- Root Grid: Row 0 (Auto) = optional FilterContent slot; Row 1 (*) = list + overlays -->
+    <Grid x:Name="rootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="filterRow" Height="0" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: FilterContent slot — hidden (Height=0) until FilterContent is set -->
+        <ContentPresenter x:Name="filterContentPresenter"
+                          Grid.Row="0"
+                          Content="{Binding FilterContent, Source={x:Reference self}}"
+                          IsVisible="False" />
+
+        <!-- Row 1: ShimmerView wrapping DXCollectionView -->
+        <dx:ShimmerView Grid.Row="1"
+                        IsLoading="{Binding IsInitialLoading}"
+                        WaveWidth="0.7"
+                        WaveOpacity="0.8">
+            <dx:ShimmerView.LoadingView>
+                <VerticalStackLayout Spacing="0">
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
+                </VerticalStackLayout>
+            </dx:ShimmerView.LoadingView>
+            <dx:ShimmerView.Content>
+                <dxcv:DXCollectionView x:Name="collectionView"
+                       ItemsSource="{Binding ItemsSource, Source={x:Reference self}}"
+                       IsPullToRefreshEnabled="True"
+                       IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
+                       PullToRefreshCommand="{Binding RefreshCommand}"
+                       IsLoadMoreEnabled="{Binding HasMoreItems}"
+                       LoadMoreCommand="{Binding LoadMoreCommand}"
+                       IndicatorColor="{StaticResource Primary}"
+                       SelectionMode="Multiple"
+                       UseRippleEffect="True"
+                       ItemSeparatorThickness="0"
+                       Margin="0,0,0,88"
+                       ItemTemplate="{Binding ItemTemplate, Source={x:Reference self}}"
+                       SelectedItemTemplate="{Binding SelectedItemTemplate, Source={x:Reference self}}"
+                       Scrolled="OnCollectionViewScrolled"
+                       SelectionChanged="OnSelectionChanged" />
+            </dx:ShimmerView.Content>
+        </dx:ShimmerView>
+
+        <!-- Empty state: no items of this entity type registered -->
+        <states:EmptyState Grid.Row="1"
+            Illustration="{Binding EmptyNoItemsIllustration, Source={x:Reference self}}"
+            Headline="{Binding EmptyNoItemsHeadline, Source={x:Reference self}}"
+            IsVisible="{Binding IsEmptyNoItems, Source={x:Reference self}}"
+            Margin="32,32,32,88" />
+
+        <!-- Empty state: search returned no results — bound directly via ICrudListViewModel BindingContext -->
+        <states:EmptyState Grid.Row="1"
+            Illustration="search_outlined"
+            Headline="No results found"
+            IsVisible="{Binding IsEmptyNoResults}"
+            Margin="32,32,32,88" />
+
+        <!-- Toolbar + FAB: centered row, 16dp from bottom -->
+        <HorizontalStackLayout Grid.Row="1"
+                               HorizontalOptions="Center"
+                               VerticalOptions="End"
+                               Margin="0,0,0,16"
+                               Spacing="8">
+            <toolbars:FloatingToolbar
+                VerticalOptions="Center"
+                Action1Icon="done_all_outlined"
+                Action1Command="{Binding SelectAllCommand}"
+                Action1Description="Select all"
+                Action1IsSelected="{Binding IsAllSelected}"
+                Action2Icon="edit_outlined"
+                Action2Command="{Binding EditSelectedCommand}"
+                Action2Description="Edit selected"
+                Action2IsSelected="{Binding CanEditSelected}"
+                Action3Icon="delete_outlined"
+                Action3Command="{Binding DeleteSelectedCommand}"
+                Action3Description="Delete selected"
+                Action3IsSelected="{Binding CanDeleteSelected}" />
+            <dx:DXButton Style="{StaticResource Fab}"
+                         Icon="{Binding FabIcon, Source={x:Reference self}}"
+                         VerticalOptions="Center"
+                         SemanticProperties.Description="{Binding FabDescription, Source={x:Reference self}}"
+                         Command="{Binding FabCommand, Source={x:Reference self}}" />
+        </HorizontalStackLayout>
+
+        <!-- Confirm action BottomSheet — state driven by ICrudListViewModel.ConfirmSheetState -->
+        <dx:BottomSheet x:Name="confirmSheet"
+                        Grid.Row="1"
+                        HalfExpandedRatio="0.28"
+                        AllowedState="HalfExpanded"
+                        IsModal="True"
+                        ShowGrabber="True"
+                        AllowDismiss="True"
+                        BackgroundColor="{StaticResource Surface}"
+                        CornerRadius="28"
+                        StateChanged="OnConfirmSheetStateChanged">
+            <VerticalStackLayout>
+                <Label Text="{Binding ConfirmMessage}"
+                       StyleClass="Title.Medium"
+                       TextColor="{StaticResource OnSurface}"
+                       HorizontalTextAlignment="Center"
+                       Margin="24,20" />
+                <BoxView Style="{StaticResource Divider}" />
+                <dx:DXButton Content="{Binding ConfirmActionText}"
+                             Style="{StaticResource BottomSheetDestructiveAction}"
+                             Command="{Binding ConfirmActionCommand}" />
+                <BoxView Style="{StaticResource Divider}" />
+                <dx:DXButton Content="Cancel"
+                             Style="{StaticResource BottomSheetCancelAction}"
+                             Command="{Binding DismissConfirmCommand}" />
+            </VerticalStackLayout>
+        </dx:BottomSheet>
+
+    </Grid>
+
+</ContentView>

@@ -55,7 +55,7 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
     };
 
     public bool IsEmptyNoArtists => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
-    public bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
+    public override bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
 
     protected override ObservableRangeCollection<ArtistListItemDto> Items => Artists;
     protected override ObservableRangeCollection<ArtistListItemDto> SelectedItems => SelectedArtists;
