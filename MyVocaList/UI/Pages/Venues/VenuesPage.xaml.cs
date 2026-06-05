@@ -16,6 +16,7 @@ public partial class VenuesPage : CrudListPageBase
         BindingContext = _viewModel;
         AttachViewModel();
 
+#pragma warning disable CS0618 // Obsolete events used until Step 7b migrates this page to CrudListView
         ConfirmSheetStateRequired += (_, state) =>
         {
             if (state == BottomSheetState.Hidden) confirmSheet.Close();
@@ -26,5 +27,6 @@ public partial class VenuesPage : CrudListPageBase
             if (collectionView != null)
                 collectionView.SelectedItems = _viewModel.SelectedVenuesRaw;
         };
+#pragma warning restore CS0618
     }
 }

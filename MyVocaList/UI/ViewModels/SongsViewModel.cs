@@ -54,7 +54,7 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
     public string AppBarSubtitle => SelectedCount > 0 ? $"{SelectedCount} selected" : string.Empty;
 
     public bool IsEmptyNoSongs => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
-    public bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
+    public override bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
 
     protected override ObservableRangeCollection<SongListItemDto> Items => Songs;
     protected override ObservableRangeCollection<SongListItemDto> SelectedItems => SelectedSongs;
