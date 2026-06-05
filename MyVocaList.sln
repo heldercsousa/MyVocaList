@@ -203,6 +203,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-list-deduplication", "crud-list-deduplication", "{FA1234BC-0001-4000-8000-000000000019}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\crud-list-deduplication\plan.md = Docs\Management\DevCycleCraft\crud-list-deduplication\plan.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\design.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\design.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7a.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7a.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7b.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7b.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7c.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7c.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7d.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7d.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7e.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7e.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-folder-layout-alignment", "workflow-folder-layout-alignment", "{A1B2C3D4-0001-4000-8000-000000000004}"
