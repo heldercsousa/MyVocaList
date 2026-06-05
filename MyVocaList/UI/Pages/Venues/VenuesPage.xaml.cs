@@ -15,16 +15,5 @@ public partial class VenuesPage : CrudListPageBase
         _viewModel = viewModel;
         BindingContext = _viewModel;
         AttachViewModel();
-
-        ConfirmSheetStateRequired += (_, state) =>
-        {
-            if (state == BottomSheetState.Hidden) confirmSheet.Close();
-            else confirmSheet.Show(state, this);
-        };
-        SelectionItemsWireUpRequired += (_, _) =>
-        {
-            if (collectionView != null)
-                collectionView.SelectedItems = _viewModel.SelectedVenuesRaw;
-        };
     }
 }
