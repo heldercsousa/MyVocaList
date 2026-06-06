@@ -4,12 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
-    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
     xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
     x:Class="MyVocaList.UI.Components.CrudListView"
-    x:Name="self"
-    x:DataType="vm:ICrudListViewModel">
+    x:Name="self">
 
     <!-- Root Grid: Row 0 (Auto) = optional FilterContent slot; Row 1 (*) = list + overlays -->
     <Grid x:Name="rootGrid">
