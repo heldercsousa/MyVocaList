@@ -777,3 +777,5 @@ MyVocaList/UI/Pages/Songs/SongsPage.xaml.cs
 MyVocaList/UI/Pages/People/PeoplePage.xaml.cs
 MyVocaList/UI/Pages/Venues/VenuesPage.xaml.cs
 MyVocaList/UI/Components/CrudListView.xaml
+MyVocaList/UI/Components/CrudListView.xaml
+Docs/Changelog/changelog.md
