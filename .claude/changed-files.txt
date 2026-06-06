@@ -755,3 +755,6 @@ Docs/Management/BACKLOG.md
 .claude/worktrees/agent-aa3672b1e941282f3/MyVocaList/UI/Pages/Venues/VenuesPage.xaml.cs
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+MyVocaList/UI/Pages/ICrudListViewModel.cs
+Docs/Management/BACKLOG.md
