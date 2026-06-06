@@ -1,4 +1,4 @@
-namespace MyVocaList.UI.Pages;
+namespace MyVocaList.UI.ViewModels;
 
 public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChanged
 {

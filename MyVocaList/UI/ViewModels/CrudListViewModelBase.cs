@@ -1,5 +1,4 @@
 using MyVocaList.UI.Collections;
-using MyVocaList.UI.Pages;
 
 namespace MyVocaList.UI.ViewModels;
 

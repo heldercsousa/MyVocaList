@@ -1,6 +1,6 @@
 using DevExpress.Maui.CollectionView;
 
-namespace MyVocaList.UI.Views;
+namespace MyVocaList.UI.Components;
 
 /// <summary>
 /// Shared structural ContentView for CRUD list pages. Hosts the ShimmerView, DXCollectionView,
@@ -178,7 +178,7 @@ public partial class CrudListView : ContentView
     // ViewModel reference (cast from BindingContext when set)
     // -------------------------------------------------------------------------
 
-    private MyVocaList.UI.Pages.ICrudListViewModel _viewModel;
+    private MyVocaList.UI.ViewModels.ICrudListViewModel _viewModel;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -199,7 +199,7 @@ public partial class CrudListView : ContentView
         if (_viewModel != null)
             _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
 
-        _viewModel = BindingContext as MyVocaList.UI.Pages.ICrudListViewModel;
+        _viewModel = BindingContext as MyVocaList.UI.ViewModels.ICrudListViewModel;
 
         if (_viewModel != null)
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
@@ -207,7 +207,7 @@ public partial class CrudListView : ContentView
 
     private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(MyVocaList.UI.Pages.ICrudListViewModel.ConfirmSheetState))
+        if (e.PropertyName == nameof(MyVocaList.UI.ViewModels.ICrudListViewModel.ConfirmSheetState))
         {
             if (_viewModel.ConfirmSheetState == BottomSheetState.Hidden)
                 confirmSheet.Close();

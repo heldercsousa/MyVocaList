@@ -6,7 +6,7 @@
     xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
     xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
-    xmlns:pages="clr-namespace:MyVocaList.UI.Pages"
+    xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"

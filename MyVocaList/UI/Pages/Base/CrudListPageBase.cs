@@ -1,4 +1,4 @@
-namespace MyVocaList.UI.Pages;
+namespace MyVocaList.UI.Pages.Base;
 
 public abstract class CrudListPageBase : ContentPage
 {
