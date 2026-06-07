@@ -1,35 +1,38 @@
-# Plan: Hamburger vs Back Button — Flyout Root Pages
+# Plan: Navigation Icon Pattern — Root Pages vs Pushed Pages
 
 ## Context
 
-All four CRUD list pages (`VenuesPage`, `PeoplePage`, `SongsPage`, `ArtistsPage`) hardcode
-`NavigationIcon="arrow_back_outlined"` on their `SmallAppBar`. This means they always render
-a back-arrow in the leading AppBar slot — even when the user arrived via the hamburger/flyout menu,
-where a hamburger icon (to reopen the drawer) should appear instead.
+**Pattern definition (not a bug):**
+- **Root flyout pages** (reached via hamburger menu) → leading icon = hamburger (`menu`)
+  - Tapping hamburger reopens the drawer (`Shell.Current.FlyoutIsPresented = true`)
+  - Allows re-access to navigation menu from the root page
+  
+- **Pushed detail pages** (navigated from root or another page) → leading icon = back arrow (`arrow_back_outlined`)
+  - Tapping back arrow pops the navigation stack (`Shell.Current.GoToAsync("..")`)
+  - Provides depth cueing and normal back navigation
 
-**Desired behavior:**
-- Page reached from flyout → leading icon is a hamburger (`menu`), tapping reopens the flyout
-- Page reached by push from another page → leading icon is back arrow (`arrow_back_outlined`), tapping pops the stack
+**Current state:**
+All four CRUD list pages (`VenuesPage`, `PeoplePage`, `SongsPage`, `ArtistsPage`) hardcode 
+`NavigationIcon="arrow_back_outlined"` on their `SmallAppBar`, so they always show back arrow 
+regardless of how they were reached.
 
-**Root cause:** BUG-001 fixed `ArtistsPage` having *no* leading icon by hardcoding
-`arrow_back_outlined`. That fix was then replicated to all CRUD pages via the
-`CrudListViewModelBase` / `CrudListPageBase` migration, making it universal.
-
-No existing BACKLOG entry covers this pattern. A new entry must be registered.
-
----
-
-## BACKLOG entry to register
-
-Add to `Docs/Management/BACKLOG.md` under **Dev Cycle Craft** (navigation pattern rule):
-
-```
-| 2026-06 | **Bug: Flyout root pages show back button instead of hamburger icon** | 💡 Pending | All 4 CRUD list pages hardcode `arrow_back_outlined` on SmallAppBar — shows back button even when reached from flyout. Fix: dynamic leading icon based on navigation context. See plan `cls-mellow-lighthouse.md`. |
-```
+**Why this matters:**
+BUG-001 (2026-06-03) fixed `ArtistsPage` having *no* leading icon by hardcoding back arrow.
+That fix was then replicated to all CRUD pages during the `CrudListViewModelBase` / `CrudListPageBase` 
+migration, making it a universal pattern. Now that the migration is stable, we can upgrade this 
+pattern to be context-aware.
 
 ---
 
-## Fix design
+## BACKLOG Status
+
+✅ Registered in `Docs/Management/BACKLOG.md` under **Dev Cycle Craft**:
+- Status: `🟢 Ready` (plan approved, ready for implementation)
+- Entry: "Navigation Icon Pattern — Root Pages vs Pushed Pages"
+
+---
+
+## Fix Design
 
 ### Approach: context-aware icon in `CrudListViewModelBase<TItem>` + `CrudListPageBase`
 
@@ -125,14 +128,14 @@ the dynamic `AppBarNavigationCommand`. Remove it from `ArtistsViewModel.cs`.
 
 ---
 
-## Commit message pattern (bug fix — spec-exempt)
+## Commit message pattern (pattern standardization — spec-exempt)
 
 ```
-fix: flyout root pages — show hamburger icon when accessed from menu, back button when pushed
+feat: navigation icon pattern — context-aware hamburger vs back button on CRUD list pages
 
-Root cause: NavigationIcon="arrow_back_outlined" was hardcoded on all 4 CRUD list pages; no
-distinction between flyout vs push navigation context.
-Fix: CrudListPageBase.OnNavigatedTo sets AppBarNavigationIcon + AppBarNavigationCommand
-dynamically based on Shell.Navigation.NavigationStack.Count.
-Regression risk: Low — ArtistsPage push-from-SongsPage path still shows back arrow correctly.
+Pattern rule: Root flyout pages show hamburger icon (opens drawer); pushed pages show back arrow 
+(pops stack). Currently all 4 CRUD pages hardcode back arrow.
+Implementation: CrudListPageBase.OnNavigatedTo sets AppBarNavigationIcon + AppBarNavigationCommand 
+dynamically based on Shell.Navigation.NavigationStack.Count (≤1 = root/hamburger, >1 = pushed/back).
+Regression risk: Low — ArtistsPage push-from-SongsPage path continues to show back arrow correctly.
 ```
