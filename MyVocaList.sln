@@ -361,6 +361,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-picker", "search-pic
 		Docs\Management\BusinessFeatures\search-picker\tasks.md = Docs\Management\BusinessFeatures\search-picker\tasks.md
 		Docs\Management\BusinessFeatures\search-picker\plan.md = Docs\Management\BusinessFeatures\search-picker\plan.md
 		Docs\Management\BusinessFeatures\search-picker\task-log.md = Docs\Management\BusinessFeatures\search-picker\task-log.md
+		Docs\Management\BusinessFeatures\search-picker\task-3a-artist-picker-page.md = Docs\Management\BusinessFeatures\search-picker\task-3a-artist-picker-page.md
+		Docs\Management\BusinessFeatures\search-picker\task-3b-song-picker-page.md = Docs\Management\BusinessFeatures\search-picker\task-3b-song-picker-page.md
+		Docs\Management\BusinessFeatures\search-picker\task-3c-youtube-search-page.md = Docs\Management\BusinessFeatures\search-picker\task-3c-youtube-search-page.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-refactor", "{4CB09F16-6E81-425E-9080-840BABFB66BF}"
