@@ -1,6 +1,25 @@
 # Task Log — CRUD XAML Sharing
 
 ---
+## Task: Step 7e — Migrate ArtistsPage.xaml to CrudListView + remove [Obsolete] events
+**Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/xaml-sharing/plan-7e.md`
+**Status:** To Review
+**Started:** 06/06/2026
+**Completed:** 06/06/2026
+
+### Changed files:
+- `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml` — replaced 2-row Grid body with `<views:CrudListView>` including `FilterContent` slot (FilterChipGroup), `ItemTemplate`, `SelectedItemTemplate` (both with ViewCatalog DXButton trailing). Added `xmlns:views`, kept `xmlns:dxe`.
+- `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml.cs` — removed obsolete event subscription lambdas; minimal constructor pattern matching VenuesPage.
+- `MyVocaList/UI/Pages/Base/CrudListPageBase.cs` — deleted `ConfirmSheetStateRequired` and `SelectionItemsWireUpRequired` event declarations, their `#pragma` suppressions, the `OnViewModelPropertyChanged` body that raised them, and the `SelectionItemsWireUpRequired?.Invoke` call in `OnAppearing`.
+- `Docs/Management/DevCycleCraft/crud-list-deduplication/xaml-sharing/plan-7e.md` — checked off all completed tasks.
+
+### Verification evidence
+- Build: PASS — 0 errors, 55 warnings (pre-existing only)
+- Tests: PASS — 235 tests, 0 failures
+- Post-edit re-read: confirmed — ArtistsPage.xaml, ArtistsPage.xaml.cs, CrudListPageBase.cs all verified correct
+- Spec compliance: confirmed — plan-7e.md tasks all satisfied; no [Obsolete] event subscribers remain in codebase
+
+---
 ## Task: Step 7a — Create CrudListView + extend ICrudListViewModel + update CrudListPageBase
 **Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/xaml-sharing/plan-7a.md`
 **Status:** To Review
