@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -17,10 +18,9 @@ public class SongFormViewModelTests
             new Mock<ISongService>().Object,
             (snackbar ?? new Mock<ISnackbarComponent>()).Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
-            new Mock<IMusicMetadataService>().Object,
             (urlService ?? new Mock<ISongKaraokeUrlService>()).Object,
-            new Mock<IYouTubeSearchService>().Object,
-            (secureStorage ?? new Mock<ISecureStorageWrapper>()).Object);
+            (secureStorage ?? new Mock<ISecureStorageWrapper>()).Object,
+            new Mock<IMessenger>().Object);
     }
 
     // ── RemoveUrlAsync ────────────────────────────────────────────────────────

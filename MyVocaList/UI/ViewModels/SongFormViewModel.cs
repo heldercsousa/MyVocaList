@@ -1,5 +1,5 @@
-using MyVocaList.Contracts.DTOs;
-using MyVocaList.Domain.ServicesInterfaces;
+using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Contracts.Messages;
 using MyVocaList.UI.Collections;
 
 namespace MyVocaList.UI.ViewModels;
@@ -14,10 +14,9 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ISongService _songService;
     private readonly ISnackbarComponent _snackbarService;
     private readonly ILogger<SongFormViewModel> _logger;
-    private readonly IMusicMetadataService _musicMetadataService;
     private readonly ISongKaraokeUrlService _karaokeUrlService;
-    private readonly IYouTubeSearchService _youtubeSearch;
     private readonly ISecureStorageWrapper _secureStorage;
+    private readonly IMessenger _messenger;
 
     public string SongIdRaw { set => SongId = int.TryParse(value, out var id) ? id : null; }
     public string ArtistIdRaw { set => ArtistId = int.TryParse(value, out var id) ? id : 0; }
@@ -50,23 +49,10 @@ public partial class SongFormViewModel : ViewModelBase
     // YouTube URLs section
     [ObservableProperty] private ObservableRangeCollection<SongKaraokeUrlDto> _karaokeUrls = [];
     private readonly HashSet<string> _addedVideoIds = [];
-    [ObservableProperty] private string _youtubeSearchQuery = string.Empty;
-    [ObservableProperty] private ObservableRangeCollection<YouTubeSearchResultDto> _searchResults = [];
-    [ObservableProperty] private bool _isYouTubeSearching;
-    [ObservableProperty] private string _youtubeSearchStatus = string.Empty;
-    [ObservableProperty] private bool _hasYouTubeSearchStatus;
     [ObservableProperty] private bool _hasYouTubeApiKey;
     [ObservableProperty] private string _pasteUrlInput = string.Empty;
     [ObservableProperty] private string _pasteUrlError = string.Empty;
     [ObservableProperty] private bool _hasPasteUrlError;
-
-    // API search strip
-    [ObservableProperty] private string _apiSearchText = string.Empty;
-    [ObservableProperty] private IEnumerable<MusicSearchResultDto> _apiResults = [];
-    [ObservableProperty] private bool _isApiSearching;
-    [ObservableProperty] private string _apiStatusMessage = string.Empty;
-    [ObservableProperty] private bool _hasApiResults;
-    [ObservableProperty] private bool _hasApiStatusMessage;
 
     public string SelectedExternalId { get; private set; } = string.Empty;
     public string SelectedProvider { get; private set; } = string.Empty;
@@ -79,30 +65,24 @@ public partial class SongFormViewModel : ViewModelBase
         ISongService songService,
         ISnackbarComponent snackbarService,
         ILogger<SongFormViewModel> logger,
-        IMusicMetadataService musicMetadataService,
         ISongKaraokeUrlService karaokeUrlService,
-        IYouTubeSearchService youtubeSearch,
-        ISecureStorageWrapper secureStorage)
+        ISecureStorageWrapper secureStorage,
+        IMessenger messenger)
     {
         _artistService = artistService;
         _songService = songService;
         _snackbarService = snackbarService;
         _logger = logger;
-        _musicMetadataService = musicMetadataService;
         _karaokeUrlService = karaokeUrlService;
-        _youtubeSearch = youtubeSearch;
         _secureStorage = secureStorage;
+        _messenger = messenger;
 
         SaveCommand = new AsyncRelayCommand(SaveAsync);
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         SearchArtistsCommand = new AsyncRelayCommand<string>(SearchArtistsAsync);
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
-        SearchApiCommand = new AsyncRelayCommand(SearchApiAsync);
-        SelectApiResultCommand = new AsyncRelayCommand<MusicSearchResultDto>(SelectApiResultAsync);
-        SearchYouTubeCommand = new AsyncRelayCommand(SearchYouTubeAsync);
-        AddFromSearchCommand = new AsyncRelayCommand<YouTubeSearchResultDto>(
-            AddFromSearchAsync,
-            result => result is not null && !IsVideoIdAdded(result.VideoId));
+        NavigateToSongPickerCommand = new AsyncRelayCommand(NavigateToSongPickerAsync);
+        NavigateToYouTubeSearchCommand = new AsyncRelayCommand(NavigateToYouTubeSearchAsync);
         AddFromPasteCommand = new AsyncRelayCommand(AddFromPasteAsync);
         RemoveUrlCommand = new AsyncRelayCommand<SongKaraokeUrlDto>(RemoveUrlAsync);
         GoToSettingsCommand = new AsyncRelayCommand(async () => await Shell.Current.GoToAsync("//settings"));
@@ -112,10 +92,8 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand<string> SearchArtistsCommand { get; }
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
-    public IAsyncRelayCommand SearchApiCommand { get; }
-    public IAsyncRelayCommand<MusicSearchResultDto> SelectApiResultCommand { get; }
-    public IAsyncRelayCommand SearchYouTubeCommand { get; }
-    public IAsyncRelayCommand<YouTubeSearchResultDto> AddFromSearchCommand { get; }
+    public IAsyncRelayCommand NavigateToSongPickerCommand { get; }
+    public IAsyncRelayCommand NavigateToYouTubeSearchCommand { get; }
     public IAsyncRelayCommand AddFromPasteCommand { get; }
     public IAsyncRelayCommand<SongKaraokeUrlDto> RemoveUrlCommand { get; }
     public IAsyncRelayCommand GoToSettingsCommand { get; }
@@ -232,69 +210,6 @@ public partial class SongFormViewModel : ViewModelBase
 
     private Task CancelAsync() => Shell.Current.GoToAsync("..");
 
-    private async Task SearchApiAsync()
-    {
-        var term = ApiSearchText?.Trim() ?? string.Empty;
-        if (string.IsNullOrEmpty(term)) { ApiResults = []; HasApiResults = false; ApiStatusMessage = string.Empty; HasApiStatusMessage = false; return; }
-
-        IsApiSearching = true;
-        ApiStatusMessage = string.Empty;
-        try
-        {
-            var artistHint = SelectedArtistName;
-            var results = await _musicMetadataService.SearchSongsAsync(term, artistHint);
-            var list = results.Take(5).ToList();
-            ApiResults = list;
-            HasApiResults = list.Count > 0;
-            ApiStatusMessage = HasApiResults ? string.Empty : "No results found";
-            HasApiStatusMessage = !HasApiResults;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "API song search failed for term {Term}", term);
-            ApiStatusMessage = "Search failed";
-            HasApiStatusMessage = true;
-            ApiResults = [];
-            HasApiResults = false;
-        }
-        finally
-        {
-            IsApiSearching = false;
-        }
-    }
-
-    private async Task SelectApiResultAsync(MusicSearchResultDto result)
-    {
-        if (result is null) return;
-        SongTitle = result.SongTitle ?? string.Empty;
-        FeaturedArtists = result.FeaturedArtists ?? string.Empty;
-        SelectedExternalId = result.ExternalId;
-        SelectedProvider = result.Provider;
-        ApiResults = [];
-        ApiStatusMessage = string.Empty;
-
-        if (!string.IsNullOrEmpty(result.ArtistName) && SelectedArtistId.HasValue && SelectedArtistId.Value > 0)
-        {
-            if (string.Equals(result.ArtistName, SelectedArtistName, StringComparison.OrdinalIgnoreCase))
-                IsArtistLocked = true;
-        }
-        else if (!string.IsNullOrEmpty(result.ArtistName) && (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0))
-        {
-            var matches = await _artistService.SearchArtistsByNameAsync(result.ArtistName, maxResults: 1);
-            var match = matches.FirstOrDefault();
-            if (match is not null)
-            {
-                SelectedArtistId = match.Id;
-                SelectedArtistName = match.Name;
-                ArtistSearchText = match.Name;
-                ArtistSuggestions = [];
-                ArtistHasError = false;
-                ArtistErrorText = string.Empty;
-                IsArtistLocked = true;
-            }
-        }
-    }
-
     private void ClearError()
     {
         TitleHasError = false;
@@ -327,56 +242,49 @@ public partial class SongFormViewModel : ViewModelBase
         var urls = await _karaokeUrlService.GetUrlsForSongAsync(SongId.Value, ct);
         foreach (var u in urls) _addedVideoIds.Add(u.VideoId);
         RunOnUiThread(() => KaraokeUrls.ReplaceRange(urls));
-
-        if (string.IsNullOrWhiteSpace(YoutubeSearchQuery))
-            YoutubeSearchQuery = $"{ArtistName} {SongTitle} karaoke".Trim();
     }
 
-    private async Task SearchYouTubeAsync(CancellationToken ct = default)
+    private async Task NavigateToSongPickerAsync()
     {
-        var query = YoutubeSearchQuery?.Trim() ?? string.Empty;
-        if (string.IsNullOrEmpty(query)) return;
-
-        IsYouTubeSearching = true;
-        YoutubeSearchStatus = string.Empty;
-        HasYouTubeSearchStatus = false;
-        try
+        _messenger.Register<SongPickedMessage>(this, (_, msg) =>
         {
-            var results = (await _youtubeSearch.SearchAsync(query, ct)).ToList();
-            RunOnUiThread(() =>
+            SongTitle = msg.Result.SongTitle ?? string.Empty;
+            FeaturedArtists = msg.Result.FeaturedArtists ?? string.Empty;
+            SelectedExternalId = msg.Result.ExternalId;
+            SelectedProvider = msg.Result.Provider;
+
+            // Auto-fill artist if not yet selected
+            if ((!SelectedArtistId.HasValue || SelectedArtistId.Value == 0)
+                && !string.IsNullOrEmpty(msg.Result.ArtistName))
             {
-                SearchResults.ReplaceRange(results);
-                YoutubeSearchStatus = results.Count == 0 ? "No results found" : string.Empty;
-                HasYouTubeSearchStatus = results.Count == 0;
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "YouTube search failed");
-            YoutubeSearchStatus = "Search failed";
-            HasYouTubeSearchStatus = true;
-        }
-        finally
-        {
-            IsYouTubeSearching = false;
-        }
+                ArtistSearchText = msg.Result.ArtistName;
+            }
+
+            _messenger.Unregister<SongPickedMessage>(this);
+        });
+        await Shell.Current.GoToAsync(Routes.SongPicker);
     }
 
-    public bool IsVideoIdAdded(string videoId) => _addedVideoIds.Contains(videoId)
-        || KaraokeUrls.Any(u => u.VideoId == videoId);
-
-    private async Task AddFromSearchAsync(YouTubeSearchResultDto result, CancellationToken ct = default)
+    private async Task NavigateToYouTubeSearchAsync()
     {
-        if (result is null || !SongId.HasValue) return;
-        if (IsVideoIdAdded(result.VideoId)) return;
+        _messenger.Register<YouTubeVideoPickedMessage>(this, (_, msg) =>
+        {
+            if (!SongId.HasValue) return;
+            var rawUrl = $"https://youtu.be/{msg.Result.VideoId}";
+            _ = AddUrlFromPickerAsync(rawUrl, msg.Result.VideoId);
+            _messenger.Unregister<YouTubeVideoPickedMessage>(this);
+        });
+        await Shell.Current.GoToAsync(Routes.YouTubeSearch);
+    }
 
-        var rawUrl = $"https://youtu.be/{result.VideoId}";
-        var (success, message, dto) = await _karaokeUrlService.AddUrlAsync(SongId.Value, rawUrl, ct: ct);
+    private async Task AddUrlFromPickerAsync(string rawUrl, string videoId, CancellationToken ct = default)
+    {
+        if (IsVideoIdAdded(videoId)) return;
+        var (success, message, dto) = await _karaokeUrlService.AddUrlAsync(SongId!.Value, rawUrl, ct: ct);
         if (success && dto is not null)
         {
-            _addedVideoIds.Add(result.VideoId);
+            _addedVideoIds.Add(videoId);
             RunOnUiThread(() => KaraokeUrls.Add(dto));
-            AddFromSearchCommand.NotifyCanExecuteChanged();
             await _snackbarService.ShowSuccessAsync("URL added");
         }
         else
@@ -384,6 +292,9 @@ public partial class SongFormViewModel : ViewModelBase
             await _snackbarService.ShowErrorAsync(message);
         }
     }
+
+    public bool IsVideoIdAdded(string videoId) => _addedVideoIds.Contains(videoId)
+        || KaraokeUrls.Any(u => u.VideoId == videoId);
 
     private async Task AddFromPasteAsync(CancellationToken ct = default)
     {
@@ -440,11 +351,7 @@ public partial class SongFormViewModel : ViewModelBase
             if (reAddSuccess && reAdded is not null)
             {
                 _addedVideoIds.Add(dto.VideoId);
-                RunOnUiThread(() =>
-                {
-                    KaraokeUrls.Add(reAdded);
-                    AddFromSearchCommand.NotifyCanExecuteChanged();
-                });
+                RunOnUiThread(() => KaraokeUrls.Add(reAdded));
             }
         });
     }
