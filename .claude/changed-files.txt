@@ -779,3 +779,6 @@ MyVocaList/UI/Pages/Venues/VenuesPage.xaml.cs
 MyVocaList/UI/Components/CrudListView.xaml
 MyVocaList/UI/Components/CrudListView.xaml
 Docs/Changelog/changelog.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
