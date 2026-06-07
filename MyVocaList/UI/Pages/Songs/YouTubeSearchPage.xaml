@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MyVocaList.UI.Pages.Songs.YouTubeSearchPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
+    xmlns:dtoList="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    x:DataType="vm:YouTubeSearchViewModel"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="Container">
+
+    <Shell.TitleView>
+        <appbars:SearchAppBar
+            SearchText="{Binding SearchText, Mode=TwoWay}"
+            BackCommand="{Binding BackCommand}"
+            Action1Icon="search_outlined"
+            Action1Command="{Binding SearchCommand}"
+            Placeholder="Search YouTube karaoke..." />
+    </Shell.TitleView>
+
+    <Grid>
+
+        <!-- Shimmer skeleton: visible while IsLoading -->
+        <dx:ShimmerView IsActive="{Binding IsLoading}" IsVisible="{Binding IsLoading}">
+            <VerticalStackLayout Spacing="0">
+                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
+                         Color="{StaticResource SurfaceVariant}" />
+                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
+                         Color="{StaticResource SurfaceVariant}" />
+                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
+                         Color="{StaticResource SurfaceVariant}" />
+                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
+                         Color="{StaticResource SurfaceVariant}" />
+                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
+                         Color="{StaticResource SurfaceVariant}" />
+            </VerticalStackLayout>
+        </dx:ShimmerView>
+
+        <!-- EmptyState: visible when searched but no results (list renders on top when HasResults) -->
+        <states:EmptyState
+            Illustration="search_outlined"
+            Headline="{Binding EmptyStateMessage}"
+            IsVisible="{Binding IsShowEmptyState}" />
+
+        <!-- Results list: visible while HasResults — renders above EmptyState in z-order -->
+        <dx:DXCollectionView
+            ItemsSource="{Binding Results}"
+            IsVisible="{Binding HasResults}"
+            UseRippleEffect="True">
+            <dx:DXCollectionView.ItemTemplate>
+                <DataTemplate x:DataType="dtoList:YouTubeSearchResultDto">
+                    <lists:ListItem
+                        Headline="{Binding Title}"
+                        SupportingText="{Binding ChannelName}">
+                        <lists:ListItem.LeadingContent>
+                            <lists:ListItemLeadingImage
+                                ImageSource="{Binding ThumbnailUrl}"
+                                Aspect="AspectFill" />
+                        </lists:ListItem.LeadingContent>
+                        <lists:ListItem.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectResultCommand}"
+                                CommandParameter="{Binding .}" />
+                        </lists:ListItem.GestureRecognizers>
+                    </lists:ListItem>
+                </DataTemplate>
+            </dx:DXCollectionView.ItemTemplate>
+        </dx:DXCollectionView>
+
+    </Grid>
+</ContentPage>
