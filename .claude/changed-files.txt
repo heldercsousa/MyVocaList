@@ -908,3 +908,6 @@ Docs/Management/cls-mellow-lighthouse.md
 Docs/Management/cls-mellow-lighthouse.md
 Docs/Management/cls-mellow-lighthouse.md
 Docs/Management/BACKLOG.md
+MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml
+MyVocaList/UI/Pages/Songs/SongPickerPage.xaml
+MyVocaList/UI/Pages/Songs/YouTubeSearchPage.xaml
