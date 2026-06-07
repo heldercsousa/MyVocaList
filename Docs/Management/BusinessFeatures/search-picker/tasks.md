@@ -11,7 +11,7 @@
 
 ## Phase 1 — Contracts (no dependencies)
 
-- [~] **Add WeakReferenceMessenger message records** [SEQUENTIAL]
+- [x] **Add WeakReferenceMessenger message records** [SEQUENTIAL]
   - Produces: `Contracts/Messages/ArtistPickedMessage.cs`, `SongPickedMessage.cs`, `YouTubeVideoPickedMessage.cs`
   - Consumes: `MusicSearchResultDto` (`Contracts/DTOs/MusicSearchResultDto.cs`), `YouTubeSearchResultDto` (`Contracts/DTOs/List/YouTubeSearchResultDto.cs`)
   - Risk: Low
@@ -23,21 +23,21 @@
 
 ## Phase 2 — Picker ViewModels (depends on Phase 1)
 
-- [ ] **Implement ArtistPickerViewModel** [P]
+- [x] **Implement ArtistPickerViewModel** [P]
   - Produces: `MyVocaList/UI/ViewModels/ArtistPickerViewModel.cs`
   - Consumes: `ArtistPickedMessage`, `IMusicMetadataService.SearchArtistsAsync`, `IMessenger`
   - Risk: Medium — loading discipline and CancellationToken must follow the design contract exactly
   - Files owned: `ArtistPickerViewModel.cs`
   - Demo: unit tests pass (see Phase 2 tests below)
 
-- [ ] **Implement SongPickerViewModel** [P]
+- [x] **Implement SongPickerViewModel** [P]
   - Produces: `MyVocaList/UI/ViewModels/SongPickerViewModel.cs`
   - Consumes: `SongPickedMessage`, `IMusicMetadataService.SearchSongsAsync`, `IMessenger`
   - Risk: Medium
   - Files owned: `SongPickerViewModel.cs`
   - Demo: unit tests pass
 
-- [ ] **Implement YouTubeSearchViewModel** [P]
+- [x] **Implement YouTubeSearchViewModel** [P]
   - Produces: `MyVocaList/UI/ViewModels/YouTubeSearchViewModel.cs`
   - Consumes: `YouTubeVideoPickedMessage`, `IYouTubeService`, `IMessenger`
   - Risk: Medium
@@ -48,7 +48,7 @@
 
 ## Phase 2 — ViewModel Tests (parallel with Phase 2 ViewModels; Tester writes first)
 
-- [ ] **Write ArtistPickerViewModel tests** [P]
+- [x] **Write ArtistPickerViewModel tests** [P]
   - Produces: `MyVocaList.Tests/Unit/ViewModels/ArtistPickerViewModelTests.cs`
   - Consumes: `ArtistPickerViewModel` interface (tests written Red-first)
   - Risk: Low
@@ -64,13 +64,13 @@
     - `SelectResultCommand` sends `ArtistPickedMessage` via injected `IMessenger`
   - Test isolation: inject `IMessenger` via constructor; use `new WeakReferenceMessenger()` (not `.Default`) in tests
 
-- [ ] **Write SongPickerViewModel tests** [P]
+- [x] **Write SongPickerViewModel tests** [P]
   - Produces: `MyVocaList.Tests/Unit/ViewModels/SongPickerViewModelTests.cs`
   - Risk: Low
   - Files owned: test file
   - Same key cases as above; also: `SongTitle = null` from DTO maps to empty string in `SongPickedMessage`
 
-- [ ] **Write YouTubeSearchViewModel tests** [P]
+- [x] **Write YouTubeSearchViewModel tests** [P]
   - Produces: `MyVocaList.Tests/Unit/ViewModels/YouTubeSearchViewModelTests.cs`
   - Risk: Low
   - Files owned: test file
