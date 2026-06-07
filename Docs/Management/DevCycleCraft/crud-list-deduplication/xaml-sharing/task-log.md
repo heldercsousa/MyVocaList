@@ -50,3 +50,20 @@ Build succeeded on first attempt after two-round fix:
 - Post-edit re-read: confirmed — both files reviewed
 - Spec compliance: confirmed — plan-7c.md tasks all checked; CrudListView receives Persons, SelectedPersonsRaw, IsEmptyNoPeople, ListItemLeadingMonogram with Initials binding, ParticipationsAbsencesNumber in SupportingText
 
+---
+## Task: Step 7d — Migrate SongsPage.xaml to CrudListView
+**Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/xaml-sharing/plan-7d.md`
+**Status:** To Review
+**Started:** 06/06/2026
+**Completed:** 06/06/2026
+
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongsPage.xaml` — migration was completed during Step 7b; file already uses `<views:CrudListView>` with all entity-specific bindings (Songs, SelectedSongsRaw, IsEmptyNoSongs, music_note_outlined templates); Shell.TitleView with AppBarSubtitle on SmallAppBar kept in page; no ItemTapCommand (no-op tap removed)
+- `MyVocaList/UI/Pages/Songs/SongsPage.xaml.cs` — minimal constructor: InitializeComponent, ViewModel assignment, BindingContext, AttachViewModel; no event subscription lambdas, no OnItemTapped handler
+
+### Verification evidence
+- Build: PASS — 0 errors (exit code 0)
+- Tests: PASS — 0 failures (exit code 0)
+- Post-edit re-read: confirmed — both files reviewed; already in final migrated state
+- Spec compliance: confirmed — plan-7d.md tasks checked; AppBarSubtitle stays on SmallAppBar in Shell.TitleView (not on CrudListView); ItemTapCommand omitted (no-op)
+

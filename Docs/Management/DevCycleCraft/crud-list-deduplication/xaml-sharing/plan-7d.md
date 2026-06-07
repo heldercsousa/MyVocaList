@@ -64,22 +64,22 @@ artefact — `AppBarSubtitle` can be removed from `CrudListView`'s BindablePrope
 
 ## Tasks
 
-- [ ] **Edit `SongsPage.xaml`**
+- [x] **Edit `SongsPage.xaml`**
   - Move ItemTemplate + SelectedItemTemplate to resources / inline
   - Replace Grid body with `<views:CrudListView ...>` — omit `ItemTapCommand` (no-op)
   - Keep `Shell.TitleView` including `Subtitle="{Binding AppBarSubtitle}"` on SmallAppBar
   - Keep Shell.BackButtonBehavior unchanged
   - Add `xmlns:views` namespace
 
-- [ ] **Edit `SongsPage.xaml.cs`**
+- [x] **Edit `SongsPage.xaml.cs`**
   - Remove both event subscription lambdas from constructor
   - Keep `OnItemTapped` method if it is still referenced anywhere; otherwise remove it
     (it is only wired via XAML `Tap="OnItemTapped"` which is being removed)
 
-- [ ] **Confirm `AppBarSubtitle` BindableProperty is NOT added to CrudListView**
+- [x] **Confirm `AppBarSubtitle` BindableProperty is NOT added to CrudListView**
   - The subtitle is already in SmallAppBar inside the page's Shell.TitleView — not in CrudListView
 
-- [ ] **`dotnet build` — 0 errors**
+- [x] **`dotnet build` — 0 errors**
 - [ ] **Emulator smoke test**
   - Songs list loads with title + featured artists
   - Row tap triggers selection toggle (not navigation)
