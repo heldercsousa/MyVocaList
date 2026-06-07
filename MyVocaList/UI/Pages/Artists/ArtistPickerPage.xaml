@@ -11,8 +11,7 @@
     xmlns:dx="http://schemas.devexpress.com/maui"
     x:DataType="vm:ArtistPickerViewModel"
     BackgroundColor="{StaticResource Surface}"
-    SafeAreaEdges="Container"
-    Shell.NavBarIsVisible="False">
+    SafeAreaEdges="Container">
 
     <Shell.TitleView>
         <appbars:SearchAppBar
