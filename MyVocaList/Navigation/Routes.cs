@@ -18,4 +18,7 @@ public static class Routes
     public const string SongForm   = "song-form";
     public const string Settings   = "settings";
     public const string Feedback   = "feedback";
+    public const string ArtistPicker = "artist-picker";
+    public const string SongPicker   = "song-picker";
+    public const string YouTubeSearch = "youtube-search";
 }
