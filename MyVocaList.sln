@@ -380,6 +380,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-share", "youtube-sh
 		Docs\Management\BusinessFeatures\youtube-share\findings.md = Docs\Management\BusinessFeatures\youtube-share\findings.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-management", "queue-management", "{FA1234BC-0001-4000-8000-000000000021}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\queue-management\design.md = Docs\Management\BusinessFeatures\queue-management\design.md
+		Docs\Management\BusinessFeatures\queue-management\requirements.md = Docs\Management\BusinessFeatures\queue-management\requirements.md
+		Docs\Management\BusinessFeatures\queue-management\tasks.md = Docs\Management\BusinessFeatures\queue-management\tasks.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md
@@ -510,6 +517,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000017} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000018} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000020} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000021} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000019} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{4CB09F16-6E81-425E-9080-840BABFB66BF} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{7A021F6B-F297-41EA-A028-C4F881146791} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}

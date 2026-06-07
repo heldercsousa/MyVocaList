@@ -911,3 +911,9 @@ Docs/Management/BACKLOG.md
 MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml
 MyVocaList/UI/Pages/Songs/SongPickerPage.xaml
 MyVocaList/UI/Pages/Songs/YouTubeSearchPage.xaml
+Docs/Management/BusinessFeatures/queue-management/requirements.md
+Docs/Management/BusinessFeatures/queue-management/design.md
+Docs/Management/BusinessFeatures/queue-management/tasks.md
+Docs/Management/BACKLOG.md
+MyVocaList.sln
+MyVocaList.sln
