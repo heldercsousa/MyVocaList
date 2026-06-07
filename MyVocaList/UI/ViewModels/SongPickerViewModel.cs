@@ -31,6 +31,12 @@ public sealed partial class SongPickerViewModel : ViewModelBase, IDisposable
 
     public ObservableRangeCollection<MusicSearchResultDto> Results { get; } = [];
 
+    partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(IsShowEmptyState));
+    partial void OnHasResultsChanged(bool value) => OnPropertyChanged(nameof(IsShowEmptyState));
+    partial void OnHasSearchedChanged(bool value) => OnPropertyChanged(nameof(IsShowEmptyState));
+
+    public bool IsShowEmptyState => HasSearched && !HasResults && !IsLoading;
+
     public SongPickerViewModel(
         IMusicMetadataService service,
         IMessenger messenger,
