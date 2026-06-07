@@ -25,7 +25,7 @@
     <Grid>
 
         <!-- Shimmer skeleton: visible while IsLoading -->
-        <dx:ShimmerView IsActive="{Binding IsLoading}" IsVisible="{Binding IsLoading}">
+        <dx:ShimmerView IsVisible="{Binding IsLoading}">
             <VerticalStackLayout Spacing="0">
                 <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
                          Color="{StaticResource SurfaceVariant}" />
