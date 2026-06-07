@@ -896,3 +896,8 @@ Docs/Management/BusinessFeatures/search-picker/tasks.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 Docs/Management/BusinessFeatures/search-picker/task-log.md
+.claude/library/search-picker-pattern.md
+Docs/Management/BusinessFeatures/search-picker/tasks.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
