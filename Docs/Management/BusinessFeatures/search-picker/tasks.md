@@ -114,7 +114,7 @@
 
 ## Phase 3d — Update coding guidelines with search picker pattern [SEQUENTIAL — after 3c committed]
 
-- [ ] **Document search picker pattern in coding guidelines** [SEQUENTIAL]
+- [x] **Document search picker pattern in coding guidelines** [SEQUENTIAL]
   - Produces: updated `.claude/library/crud-pages.md` (or new `.claude/library/search-picker-pattern.md` if no suitable home exists)
   - Consumes: committed ArtistPickerPage, SongPickerPage, YouTubeSearchPage as reference implementations
   - Risk: Low — docs only, no code
