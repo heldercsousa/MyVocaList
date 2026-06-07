@@ -32,3 +32,21 @@ Build succeeded on first attempt after two-round fix:
 - Tests: PASS — 235 tests, 0 failures
 - Post-edit re-read: confirmed — all 13 files reviewed
 - Spec compliance: confirmed — plan-7a.md checklist satisfied; design.md §CrudListView BindableProperties table matches implementation
+
+---
+## Task: Step 7c — Migrate PeoplePage.xaml to CrudListView
+**Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/xaml-sharing/plan-7c.md`
+**Status:** To Review
+**Started:** 06/06/2026
+**Completed:** 06/06/2026
+
+### Changed files:
+- `MyVocaList/UI/Pages/People/PeoplePage.xaml` — replaced Grid body (ShimmerView + DXCollectionView + EmptyState + FloatingToolbar + FAB + BottomSheet) with `<views:CrudListView>` using entity-specific bindings; removed unused xmlns (dxcv, toolbars, states); kept Shell sections and SafeAreaEdges unchanged
+- `MyVocaList/UI/Pages/People/PeoplePage.xaml.cs` — removed both obsolete event subscription lambdas (ConfirmSheetStateRequired, SelectionItemsWireUpRequired) and their #pragma warning guards from constructor
+
+### Verification evidence
+- Build: PASS — 0 errors, 0 warnings
+- Tests: PASS — 235 tests, 0 failures
+- Post-edit re-read: confirmed — both files reviewed
+- Spec compliance: confirmed — plan-7c.md tasks all checked; CrudListView receives Persons, SelectedPersonsRaw, IsEmptyNoPeople, ListItemLeadingMonogram with Initials binding, ParticipationsAbsencesNumber in SupportingText
+
