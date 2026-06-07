@@ -3,14 +3,12 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
-    xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
     xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
-    xmlns:toolbars="clr-namespace:MyVocaList.UI.Components.Toolbars"
-    xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
+    xmlns:views="clr-namespace:MyVocaList.UI.Components"
     x:Class="MyVocaList.UI.Pages.People.PeoplePage"
     x:Name="page"
     x:DataType="vm:PersonsViewModel"
@@ -43,142 +41,46 @@
         </Grid>
     </Shell.TitleView>
 
-    <Grid>
+    <views:CrudListView
+        ItemsSource="{Binding Persons}"
+        SelectedItemsSource="{Binding SelectedPersonsRaw}"
+        IsEmptyNoItems="{Binding IsEmptyNoPeople}"
+        SearchPlaceholder="Search people..."
+        EmptyNoItemsIllustration="person_outlined"
+        EmptyNoItemsHeadline="No person registered"
+        FabCommand="{Binding AddPersonCommand}"
+        FabDescription="Add person">
 
-        <dx:ShimmerView IsLoading="{Binding IsInitialLoading}"
-                        WaveWidth="0.7"
-                        WaveOpacity="0.8">
-            <dx:ShimmerView.LoadingView>
-                <VerticalStackLayout Spacing="0">
-                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
-                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
-                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
-                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
-                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
-                    <dx:DXBorder Style="{StaticResource SkeletonBone}" />
-                </VerticalStackLayout>
-            </dx:ShimmerView.LoadingView>
-            <dx:ShimmerView.Content>
-                <dxcv:DXCollectionView x:Name="collectionView"
-                       ItemsSource="{Binding Persons}"
-                       IsPullToRefreshEnabled="True"
-                       IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
-                       PullToRefreshCommand="{Binding RefreshCommand}"
-                       IsLoadMoreEnabled="{Binding HasMoreItems}"
-                       LoadMoreCommand="{Binding LoadMoreCommand}"
-                       IndicatorColor="{StaticResource Primary}"
-                       SelectionMode="Multiple"
-                       UseRippleEffect="True"
-                       ItemSeparatorThickness="0"
-                       Margin="0,0,0,88"
-                       Scrolled="OnCollectionViewScrolled"
-                       SelectionChanged="OnSelectionChanged">
+        <views:CrudListView.ItemTemplate>
+            <DataTemplate x:DataType="models:PersonListItemDto">
+                <lists:ListItem Headline="{Binding FullName}"
+                                SupportingText="{Binding ParticipationsAbsencesNumber}"
+                                IsSelected="False">
+                    <lists:ListItem.LeadingContent>
+                        <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
+                    </lists:ListItem.LeadingContent>
+                    <lists:ListItem.TrailingContent>
+                        <dx:CheckEdit IsChecked="False" InputTransparent="True" VerticalOptions="Center" />
+                    </lists:ListItem.TrailingContent>
+                </lists:ListItem>
+            </DataTemplate>
+        </views:CrudListView.ItemTemplate>
 
-                    <dxcv:DXCollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:PersonListItemDto">
-                            <lists:ListItem Headline="{Binding FullName}"
-                                            SupportingText="{Binding ParticipationsAbsencesNumber}"
-                                            IsSelected="False">
-                                <lists:ListItem.LeadingContent>
-                                    <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
-                                </lists:ListItem.LeadingContent>
-                                <lists:ListItem.TrailingContent>
-                                    <dx:CheckEdit IsChecked="False"
-                                                  InputTransparent="True"
-                                                  VerticalOptions="Center" />
-                                </lists:ListItem.TrailingContent>
-                            </lists:ListItem>
-                        </DataTemplate>
-                    </dxcv:DXCollectionView.ItemTemplate>
+        <views:CrudListView.SelectedItemTemplate>
+            <DataTemplate x:DataType="models:PersonListItemDto">
+                <lists:ListItem Headline="{Binding FullName}"
+                                SupportingText="{Binding ParticipationsAbsencesNumber}"
+                                IsSelected="True">
+                    <lists:ListItem.LeadingContent>
+                        <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
+                    </lists:ListItem.LeadingContent>
+                    <lists:ListItem.TrailingContent>
+                        <dx:CheckEdit IsChecked="True" CheckedCheckBoxColor="{dx:ThemeColor Primary}" InputTransparent="True" VerticalOptions="Center" />
+                    </lists:ListItem.TrailingContent>
+                </lists:ListItem>
+            </DataTemplate>
+        </views:CrudListView.SelectedItemTemplate>
 
-                    <dxcv:DXCollectionView.SelectedItemTemplate>
-                        <DataTemplate x:DataType="models:PersonListItemDto">
-                            <lists:ListItem Headline="{Binding FullName}"
-                                            SupportingText="{Binding ParticipationsAbsencesNumber}"
-                                            IsSelected="True">
-                                <lists:ListItem.LeadingContent>
-                                    <lists:ListItemLeadingMonogram Initials="{Binding Initials}" />
-                                </lists:ListItem.LeadingContent>
-                                <lists:ListItem.TrailingContent>
-                                    <dx:CheckEdit IsChecked="True"
-                                                  CheckedCheckBoxColor="{dx:ThemeColor Primary}"
-                                                  InputTransparent="True"
-                                                  VerticalOptions="Center" />
-                                </lists:ListItem.TrailingContent>
-                            </lists:ListItem>
-                        </DataTemplate>
-                    </dxcv:DXCollectionView.SelectedItemTemplate>
-                </dxcv:DXCollectionView>
-            </dx:ShimmerView.Content>
-        </dx:ShimmerView>
-
-        <!-- Empty state: no singers registered -->
-        <states:EmptyState
-            Illustration="person_outlined"
-            Headline="No singer registered"
-            IsVisible="{Binding IsEmptyNoPersons}"
-            Margin="32,32,32,88" />
-
-        <!-- Empty state: search returned no results -->
-        <states:EmptyState
-            Illustration="search_outlined"
-            Headline="No singer found"
-            IsVisible="{Binding IsEmptyNoResults}"
-            Margin="32,32,32,88" />
-
-        <!-- Toolbar + FAB: centered row, 16dp from safe area bottom -->
-        <HorizontalStackLayout HorizontalOptions="Center"
-                               VerticalOptions="End"
-                               Margin="0,0,0,16"
-                               Spacing="8">
-            <toolbars:FloatingToolbar
-                VerticalOptions="Center"
-                Action1Icon="done_all_outlined"
-                Action1Command="{Binding SelectAllCommand}"
-                Action1Description="Select all"
-                Action1IsSelected="{Binding IsAllSelected}"
-                Action2Icon="edit_outlined"
-                Action2Command="{Binding EditSelectedCommand}"
-                Action2Description="Edit selected"
-                Action2IsSelected="{Binding CanEditSelected}"
-                Action3Icon="delete_outlined"
-                Action3Command="{Binding DeleteSelectedCommand}"
-                Action3Description="Delete selected"
-                Action3IsSelected="{Binding CanDeleteSelected}" />
-            <dx:DXButton Style="{StaticResource Fab}"
-                         Icon="add_outlined"
-                         VerticalOptions="Center"
-                         SemanticProperties.Description="Add singer"
-                         Command="{Binding AddPersonCommand}" />
-        </HorizontalStackLayout>
-
-        <!-- Confirm delete BottomSheet (inline — ConfirmSheet ContentView wrapper causes ANR) -->
-        <dx:BottomSheet x:Name="confirmSheet"
-                        HalfExpandedRatio="0.28"
-                        AllowedState="HalfExpanded"
-                        IsModal="True"
-                        ShowGrabber="True"
-                        AllowDismiss="True"
-                        BackgroundColor="{StaticResource Surface}"
-                        CornerRadius="28"
-                        StateChanged="OnConfirmSheetStateChanged">
-            <VerticalStackLayout>
-                <Label Text="{Binding ConfirmMessage}"
-                       StyleClass="Title.Medium"
-                       TextColor="{StaticResource OnSurface}"
-                       HorizontalTextAlignment="Center"
-                       Margin="24,20" />
-                <BoxView Style="{StaticResource Divider}" />
-                <dx:DXButton Content="{Binding ConfirmActionText}"
-                             Style="{StaticResource BottomSheetDestructiveAction}"
-                             Command="{Binding ConfirmActionCommand}" />
-                <BoxView Style="{StaticResource Divider}" />
-                <dx:DXButton Content="Cancel"
-                             Style="{StaticResource BottomSheetCancelAction}"
-                             Command="{Binding DismissConfirmCommand}" />
-            </VerticalStackLayout>
-        </dx:BottomSheet>
-
-    </Grid>
+    </views:CrudListView>
 
 </pages:CrudListPageBase>

@@ -44,18 +44,18 @@
 
 ## Tasks
 
-- [ ] **Edit `PeoplePage.xaml`**
+- [x] **Edit `PeoplePage.xaml`**
   - Move ItemTemplate (with `ListItemLeadingMonogram` + `ParticipationsAbsencesNumber`) to keyed resource or inline in CrudListView
   - Move SelectedItemTemplate — same
   - Replace Grid body with `<views:CrudListView ...>` with all required BindableProperties
   - Keep Shell.BackButtonBehavior and Shell.TitleView unchanged
   - Add `xmlns:views` namespace
 
-- [ ] **Edit `PeoplePage.xaml.cs`**
+- [x] **Edit `PeoplePage.xaml.cs`**
   - Remove both event subscription lambdas from constructor (same as 7b)
 
-- [ ] **`dotnet build` — 0 errors**
-- [ ] **`dotnet test` — 0 failures**
+- [x] **`dotnet build` — 0 errors**
+- [x] **`dotnet test` — 0 failures**
 - [ ] **Emulator smoke test**
   - People list loads with monogram initials visible
   - ParticipationsAbsencesNumber shown in support text
