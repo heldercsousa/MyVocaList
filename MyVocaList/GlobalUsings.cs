@@ -32,4 +32,5 @@ global using MyVocaList.UI.Pages.Feedback;
 global using MyVocaList.UI.Components;
 global using MyVocaList.UI.Pages.Base;
 // AutocompleteField namespace: add global using once 2+ pages use it (currently PersonFormPage only)
+global using MyVocaList.UI.Services;
 global using MyVocaList.UI.ViewModels;

@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.Messages;
+using MyVocaList.UI.Services;
 using MyVocaList.UI.ViewModels;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -12,11 +13,13 @@ public class ArtistPickerViewModelTests
 
     private ArtistPickerViewModel CreateSut(
         Mock<IMusicMetadataService>? service = null,
-        Mock<IMessenger>? messenger = null)
+        Mock<IMessenger>? messenger = null,
+        Mock<INavigationService>? navigation = null)
     {
         return new ArtistPickerViewModel(
             (service ?? new Mock<IMusicMetadataService>()).Object,
             (messenger ?? new Mock<IMessenger>()).Object,
+            (navigation ?? new Mock<INavigationService>()).Object,
             new Mock<ILogger<ArtistPickerViewModel>>().Object);
     }
 
@@ -132,21 +135,52 @@ public class ArtistPickerViewModelTests
 
     // [AC] AC-2.7 — selecting a result sends ArtistPickedMessage
     [Fact]
-    public void SelectResultCommand_SendsArtistPickedMessage()
+    public async Task SelectResultCommand_SendsArtistPickedMessage()
     {
         var realMessenger = new WeakReferenceMessenger();
         ArtistPickedMessage? received = null;
         realMessenger.Register<ArtistPickedMessage>(this, (_, msg) => received = msg);
 
+        var navigation = new Mock<INavigationService>();
+        navigation.Setup(n => n.GoBackAsync()).Returns(Task.CompletedTask);
+
         var sut = new ArtistPickerViewModel(
             new Mock<IMusicMetadataService>().Object,
             realMessenger,
+            navigation.Object,
             new Mock<ILogger<ArtistPickerViewModel>>().Object);
         var result = MakeResult("Artist A");
 
-        try { sut.SelectResultCommand.Execute(result); } catch { /* Shell.Current null — expected */ }
+        await sut.SelectResultCommand.ExecuteAsync(result);
 
         Assert.NotNull(received);
         Assert.Equal(result, received.Result);
+    }
+
+    // [AC] AC-2.7 — SelectResultCommand calls navigation GoBack
+    [Fact]
+    public async Task SelectResultCommand_CallsNavigationGoBack()
+    {
+        var navigation = new Mock<INavigationService>();
+        navigation.Setup(n => n.GoBackAsync()).Returns(Task.CompletedTask);
+        var sut = CreateSut(navigation: navigation);
+        var result = MakeResult();
+
+        await sut.SelectResultCommand.ExecuteAsync(result);
+
+        navigation.Verify(n => n.GoBackAsync(), Times.Once);
+    }
+
+    // [AC] AC-2.7 — BackCommand calls navigation GoBack
+    [Fact]
+    public async Task BackCommand_CallsNavigationGoBack()
+    {
+        var navigation = new Mock<INavigationService>();
+        navigation.Setup(n => n.GoBackAsync()).Returns(Task.CompletedTask);
+        var sut = CreateSut(navigation: navigation);
+
+        await sut.BackCommand.ExecuteAsync(null);
+
+        navigation.Verify(n => n.GoBackAsync(), Times.Once);
     }
 }
