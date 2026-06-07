@@ -6,7 +6,7 @@
     xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     xmlns:autocomplete="clr-namespace:MyVocaList.UI.Components.AutocompleteField"
-    xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs;assembly=MyVocaList.Contracts"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:dtoList="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     x:Class="MyVocaList.UI.Pages.Songs.SongFormPage"
     x:DataType="vm:SongFormViewModel"
@@ -54,57 +54,22 @@
                 </Label.Triggers>
             </Label>
 
-            <!-- API search strip -->
-            <Border BackgroundColor="{StaticResource SurfaceContainerLow}"
-                    StrokeThickness="0"
-                    Padding="12"
-                    StrokeShape="RoundRectangle 8">
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Search music database"
-                           StyleClass="Title.Small"
-                           TextColor="{StaticResource OnSurface}" />
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                        <dxe:TextEdit Grid.Column="0"
-                                      Text="{Binding ApiSearchText, Mode=TwoWay}"
-                                      LabelText="Search term"
-                                      PlaceholderText="Song title..." />
-                        <dx:DXButton Grid.Column="1"
-                                     Content="Search"
-                                     Style="{StaticResource FilledButton}"
-                                     VerticalOptions="End"
-                                     Padding="16,0"
-                                     Command="{Binding SearchApiCommand}"
-                                     IsEnabled="{Binding IsApiSearching, Converter={StaticResource InverseBoolConverter}}" />
-                    </Grid>
-                    <ActivityIndicator IsRunning="{Binding IsApiSearching}"
-                                       IsVisible="{Binding IsApiSearching}"
-                                       Color="{StaticResource Primary}"
-                                       HorizontalOptions="Start" />
-                    <Label Text="{Binding ApiStatusMessage}"
-                           IsVisible="{Binding HasApiStatusMessage}"
-                           StyleClass="Body.Small"
-                           TextColor="{StaticResource OnSurfaceVariant}" />
-                    <VerticalStackLayout IsVisible="{Binding HasApiResults}"
-                                         BindableLayout.ItemsSource="{Binding ApiResults}"
-                                         Spacing="4">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="dto:MusicSearchResultDto">
-                                <dx:DXButton HorizontalOptions="Start"
-                                             Style="{StaticResource OutlinedButton}"
-                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=SelectApiResultCommand}"
-                                             CommandParameter="{Binding .}">
-                                    <dx:DXButton.Content>
-                                        <VerticalStackLayout Spacing="0">
-                                            <Label Text="{Binding SongTitle}" StyleClass="Body.Medium" />
-                                            <Label Text="{Binding ArtistName}" StyleClass="Body.Small" TextColor="{StaticResource OnSurfaceVariant}" />
-                                        </VerticalStackLayout>
-                                    </dx:DXButton.Content>
-                                </dx:DXButton>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Border>
+            <!-- Navigate to song picker -->
+            <lists:ListItem Headline="Search music database">
+                <lists:ListItem.LeadingContent>
+                    <dx:DXButton Style="{StaticResource StandardIconButton}"
+                                 Icon="search_outlined"
+                                 InputTransparent="True" />
+                </lists:ListItem.LeadingContent>
+                <lists:ListItem.TrailingContent>
+                    <dx:DXButton Style="{StaticResource StandardIconButton}"
+                                 Icon="navigate_next"
+                                 InputTransparent="True" />
+                </lists:ListItem.TrailingContent>
+                <lists:ListItem.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding NavigateToSongPickerCommand}" />
+                </lists:ListItem.GestureRecognizers>
+            </lists:ListItem>
 
             <dxe:TextEdit Text="{Binding FeaturedArtists, Mode=TwoWay}"
                           LabelText="Featured Artists"
@@ -176,21 +141,24 @@
                     StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="8">
 
-                    <!-- Search strip (API key present) -->
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"
-                          IsVisible="{Binding HasYouTubeApiKey}">
-                        <dxe:TextEdit Grid.Column="0"
-                                      Text="{Binding YoutubeSearchQuery, Mode=TwoWay}"
-                                      LabelText="Search YouTube"
-                                      PlaceholderText="Artist + song + karaoke..." />
-                        <dx:DXButton Grid.Column="1"
-                                     Content="Search"
-                                     Style="{StaticResource FilledButton}"
-                                     VerticalOptions="End"
-                                     Padding="16,0"
-                                     Command="{Binding SearchYouTubeCommand}"
-                                     IsEnabled="{Binding IsYouTubeSearching, Converter={StaticResource InverseBoolConverter}}" />
-                    </Grid>
+                    <!-- Navigate to YouTube search (API key present) -->
+                    <lists:ListItem
+                        Headline="Search YouTube"
+                        IsVisible="{Binding HasYouTubeApiKey}">
+                        <lists:ListItem.LeadingContent>
+                            <dx:DXButton Style="{StaticResource StandardIconButton}"
+                                         Icon="search_outlined"
+                                         InputTransparent="True" />
+                        </lists:ListItem.LeadingContent>
+                        <lists:ListItem.TrailingContent>
+                            <dx:DXButton Style="{StaticResource StandardIconButton}"
+                                         Icon="navigate_next"
+                                         InputTransparent="True" />
+                        </lists:ListItem.TrailingContent>
+                        <lists:ListItem.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding NavigateToYouTubeSearchCommand}" />
+                        </lists:ListItem.GestureRecognizers>
+                    </lists:ListItem>
 
                     <!-- Nudge when no API key -->
                     <VerticalStackLayout Spacing="4"
@@ -203,52 +171,6 @@
                                      HorizontalOptions="Start"
                                      Padding="16,0"
                                      Command="{Binding GoToSettingsCommand}" />
-                    </VerticalStackLayout>
-
-                    <ActivityIndicator IsRunning="{Binding IsYouTubeSearching}"
-                                       IsVisible="{Binding IsYouTubeSearching}"
-                                       Color="{StaticResource Primary}"
-                                       HorizontalOptions="Start" />
-                    <Label Text="{Binding YoutubeSearchStatus}"
-                           IsVisible="{Binding HasYouTubeSearchStatus}"
-                           StyleClass="Body.Small"
-                           TextColor="{StaticResource OnSurfaceVariant}" />
-
-                    <!-- Search results (up to 5 rows) -->
-                    <VerticalStackLayout Spacing="4"
-                                         BindableLayout.ItemsSource="{Binding SearchResults}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="dtoList:YouTubeSearchResultDto">
-                                <Grid ColumnDefinitions="48,*,Auto" ColumnSpacing="8" Padding="0,4">
-                                    <Image Grid.Column="0"
-                                           Source="{Binding ThumbnailUrl}"
-                                           WidthRequest="48"
-                                           HeightRequest="48"
-                                           Aspect="AspectFill"
-                                           VerticalOptions="Center" />
-                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                        <Label Text="{Binding Title}"
-                                               StyleClass="Body.Medium"
-                                               LineBreakMode="TailTruncation" />
-                                        <HorizontalStackLayout Spacing="8">
-                                            <Label Text="{Binding ChannelName}"
-                                                   StyleClass="Body.Small"
-                                                   TextColor="{StaticResource OnSurfaceVariant}" />
-                                            <Label Text="{Binding DurationSeconds, Converter={StaticResource SecondsToMinutesConverter}}"
-                                                   StyleClass="Body.Small"
-                                                   TextColor="{StaticResource OnSurfaceVariant}"
-                                                   IsVisible="{Binding DurationSeconds, Converter={StaticResource IsNotNullConverter}}" />
-                                        </HorizontalStackLayout>
-                                    </VerticalStackLayout>
-                                    <dx:DXButton Grid.Column="2"
-                                                 Content="+"
-                                                 Style="{StaticResource FilledButton}"
-                                                 VerticalOptions="Center"
-                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=AddFromSearchCommand}"
-                                                 CommandParameter="{Binding .}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
 
                     <!-- Paste field (always visible) -->
