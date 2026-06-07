@@ -183,4 +183,41 @@ public class YouTubeSearchViewModelTests
 
         navigation.Verify(n => n.GoBackAsync(), Times.Once);
     }
+
+    // [AC] AC-2.5 — IsShowEmptyState is true when search returned no results
+    [Fact]
+    public async Task IsShowEmptyState_OnEmptyResult_IsTrue()
+    {
+        var service = new Mock<IYouTubeSearchService>();
+        service.Setup(s => s.SearchAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+               .ReturnsAsync([]);
+
+        var sut = CreateSut(service: service);
+        sut.SearchText = "xyz";
+
+        await sut.SearchCommand.ExecuteAsync(null);
+
+        Assert.True(sut.IsShowEmptyState);
+        Assert.False(sut.HasResults);
+        Assert.True(sut.HasSearched);
+        Assert.False(sut.IsLoading);
+    }
+
+    // [AC] AC-2.4 — IsShowEmptyState is false when search returned results
+    [Fact]
+    public async Task IsShowEmptyState_OnSuccess_IsFalse()
+    {
+        var results = new[] { MakeResult("Video A") };
+        var service = new Mock<IYouTubeSearchService>();
+        service.Setup(s => s.SearchAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+               .ReturnsAsync(results);
+
+        var sut = CreateSut(service: service);
+        sut.SearchText = "video";
+
+        await sut.SearchCommand.ExecuteAsync(null);
+
+        Assert.False(sut.IsShowEmptyState);
+        Assert.True(sut.HasResults);
+    }
 }

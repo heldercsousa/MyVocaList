@@ -45,7 +45,7 @@
         <states:EmptyState
             Illustration="search_outlined"
             Headline="{Binding EmptyStateMessage}"
-            IsVisible="{Binding HasSearched}" />
+            IsVisible="{Binding IsShowEmptyState}" />
 
         <!-- Results list: visible while HasResults — renders above EmptyState in z-order -->
         <dx:DXCollectionView

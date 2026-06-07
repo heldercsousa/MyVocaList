@@ -184,6 +184,43 @@ public class SongPickerViewModelTests
         navigation.Verify(n => n.GoBackAsync(), Times.Once);
     }
 
+    // [AC] AC-2.5 — IsShowEmptyState is true when search returned no results
+    [Fact]
+    public async Task IsShowEmptyState_OnEmptyResult_IsTrue()
+    {
+        var service = new Mock<IMusicMetadataService>();
+        service.Setup(s => s.SearchSongsAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+               .ReturnsAsync([]);
+
+        var sut = CreateSut(service: service);
+        sut.SearchText = "XYZ";
+
+        await sut.SearchCommand.ExecuteAsync(null);
+
+        Assert.True(sut.IsShowEmptyState);
+        Assert.False(sut.HasResults);
+        Assert.True(sut.HasSearched);
+        Assert.False(sut.IsLoading);
+    }
+
+    // [AC] AC-2.4 — IsShowEmptyState is false when search returned results
+    [Fact]
+    public async Task IsShowEmptyState_OnSuccess_IsFalse()
+    {
+        var results = new[] { MakeResult("Song A") };
+        var service = new Mock<IMusicMetadataService>();
+        service.Setup(s => s.SearchSongsAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+               .ReturnsAsync(results);
+
+        var sut = CreateSut(service: service);
+        sut.SearchText = "Song";
+
+        await sut.SearchCommand.ExecuteAsync(null);
+
+        Assert.False(sut.IsShowEmptyState);
+        Assert.True(sut.HasResults);
+    }
+
     // [AC] AC-2.8 — null SongTitle in result does not throw
     [Fact]
     public async Task SearchCommand_SongTitleNull_DoesNotThrow()
