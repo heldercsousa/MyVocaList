@@ -12,6 +12,7 @@ using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
 using MyVocaList.Services;
 using MyVocaList.UI.Services;
+using CommunityToolkit.Mvvm.Messaging;
 #if DEBUG
 using MauiDevFlow.Agent;
 #endif
@@ -130,6 +131,8 @@ public static class MauiProgram
         builder.Services.AddScoped<IYouTubeSearchService, YouTubeSearchService>();
         builder.Services.AddScoped<INextSingerAlertService, NextSingerAlertService>();
         builder.Services.AddSingleton<ISecureStorageWrapper, SecureStorageWrapper>();
+        builder.Services.AddSingleton<INavigationService, MyVocaList.UI.Services.NavigationService>();
+        builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         builder.Services.AddHttpClient();
 #if ANDROID
         builder.Services.AddSingleton<IOverlayService, MyVocaList.Platforms.Android.Services.OverlayService>();
@@ -150,6 +153,9 @@ public static class MauiProgram
         builder.Services.AddTransient<ArtistFormViewModel>();
         builder.Services.AddTransient<SongsViewModel>();
         builder.Services.AddTransient<SongFormViewModel>();
+        builder.Services.AddTransient<ArtistPickerViewModel>();
+        builder.Services.AddTransient<SongPickerViewModel>();
+        builder.Services.AddTransient<YouTubeSearchViewModel>();
 
         // Pages
         builder.Services.AddTransient<VenueFormPage>();
@@ -162,6 +168,9 @@ public static class MauiProgram
         builder.Services.AddTransient<ArtistFormPage>();
         builder.Services.AddTransient<SongsPage>();
         builder.Services.AddTransient<SongFormPage>();
+        builder.Services.AddTransient<ArtistPickerPage>();
+        builder.Services.AddTransient<SongPickerPage>();
+        builder.Services.AddTransient<YouTubeSearchPage>();
         builder.Services.AddTransient<BackupRestorePage>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<SettingsPage>();
