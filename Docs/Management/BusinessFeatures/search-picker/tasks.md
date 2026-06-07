@@ -3,9 +3,9 @@
 **Feature:** Search Page Component  
 **Status:** In Progress  
 **Date:** 2026-06-03  
-**Last updated:** 2026-06-04
+**Last updated:** 2026-06-07
 
-> **Session state (2026-06-04):** Phase 1 in progress — `Contracts/Messages/` folder created, files not yet committed (build blocked by unrelated `CrudListPageBase.cs` error in parallel branch). Phase 3 split into 3 sequential tasks (one agent per page). Resume from Phase 1.  
+> **Session state (2026-06-07):** Phases 1–5 complete. All 3 picker pages (Artist, Song, YouTube) implemented, tested, and registered. Phase 3d (coding guidelines) remaining.  
 
 ---
 
@@ -81,7 +81,7 @@
 
 > **Split rationale:** XAML pages share a visual pattern but differ in data shape and list item layout. Each page is done by a fresh agent. 3b and 3c use 3a's committed XAML as their reference — they must not start until 3a is committed and building. Full agent brief for each sub-task: see `task-3a-artist-picker-page.md`, `task-3b-song-picker-page.md`, `task-3c-youtube-search-page.md`.
 
-- [ ] **3a — Implement ArtistPickerPage** [SEQUENTIAL — first]
+- [x] **3a — Implement ArtistPickerPage** [SEQUENTIAL — first]
   - Produces: `MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml` + `.xaml.cs`
   - Consumes: `ArtistPickerViewModel`, `SearchAppBar` (`Action1Command`/`Action1Icon` slots), `ListItem`, `EmptyState`, `dx:ShimmerView`
   - Risk: Medium — establishes the XAML pattern all three pages share; get it right first
@@ -89,7 +89,7 @@
   - Demo: page compiles and builds; XAML structure matches design.md pattern
   - **Agent brief:** `Docs/Management/BusinessFeatures/search-picker/task-3a-artist-picker-page.md`
 
-- [ ] **3b — Implement SongPickerPage** [SEQUENTIAL — after 3a committed]
+- [x] **3b — Implement SongPickerPage** [SEQUENTIAL — after 3a committed]
   - Produces: `MyVocaList/UI/Pages/Songs/SongPickerPage.xaml` + `.xaml.cs`
   - Consumes: `SongPickerViewModel`, ArtistPickerPage.xaml as XAML reference
   - Risk: Low — follows 3a pattern; only difference is two-line ListItem (Headline=SongTitle, SupportingText=ArtistName)
@@ -97,7 +97,7 @@
   - Demo: page compiles; two-line list item visible in XAML
   - **Agent brief:** `Docs/Management/BusinessFeatures/search-picker/task-3b-song-picker-page.md`
 
-- [ ] **3c — Implement YouTubeSearchPage** [SEQUENTIAL — after 3b committed] 🔴 BLOCKED
+- [x] **3c — Implement YouTubeSearchPage** [SEQUENTIAL — after 3b committed] 🔴 BLOCKED
   - Produces: `MyVocaList/UI/Pages/Songs/YouTubeSearchPage.xaml` + `.xaml.cs`
   - Consumes: `YouTubeSearchViewModel`, ArtistPickerPage.xaml as XAML reference, `YouTubeSearchResultDto` (VideoId, Title, ChannelName, DurationSeconds, ThumbnailUrl)
   - Risk: Medium — leading image slot in ListItem requires verifying `ListItemLeadingImage` component API; SecondsToMinutesConverter for duration
@@ -132,7 +132,7 @@
 
 ## Phase 4 — Route Registration + DI [SEQUENTIAL — waits for Phase 3]
 
-- [ ] **Register routes and DI** [SEQUENTIAL]
+- [x] **Register routes and DI** [SEQUENTIAL]
   - Produces: route entries for `artist-picker`, `song-picker`, `youtube-search`; transient registrations for 3 pages + 3 ViewModels; `IMessenger` singleton (if not already registered)
   - Consumes: all 3 page types
   - Risk: Low — single-writer constraint on `AppShell.xaml.cs` and `MauiProgram.cs`
@@ -143,14 +143,14 @@
 
 ## Phase 5a — Wire ArtistFormPage [SEQUENTIAL — waits for Phase 4]
 
-- [ ] **Wire ArtistFormPage XAML** [SEQUENTIAL]
+- [x] **Wire ArtistFormPage XAML** [SEQUENTIAL]
   - Produces: updated `ArtistFormPage.xaml`
   - Consumes: `ListItem` component, `ArtistPickerPage` route
   - Risk: Low — XAML-only change
   - Files owned: `ArtistFormPage.xaml`
   - Demo: API search strip Border is gone; `ListItem` trigger row is in its place with search icon + "Search music database" + chevron
 
-- [ ] **Wire ArtistFormViewModel** [SEQUENTIAL — waits for XAML above]
+- [x] **Wire ArtistFormViewModel** [SEQUENTIAL — waits for XAML above]
   - Produces: updated `ArtistFormViewModel.cs`
   - Consumes: `ArtistPickedMessage`, `IMessenger`, `ArtistPickerPage` route
   - Risk: Medium — removing existing search properties and commands; message registration must unregister correctly
@@ -161,14 +161,14 @@
 
 ## Phase 5b — Wire SongFormPage [SEQUENTIAL — waits for Phase 4]
 
-- [ ] **Wire SongFormPage XAML** [SEQUENTIAL]
+- [x] **Wire SongFormPage XAML** [SEQUENTIAL]
   - Produces: updated `SongFormPage.xaml`
   - Consumes: `ListItem` component
   - Risk: Medium — 2 strips removed across a 275-line XAML; Paste URL section must be untouched; YouTube trigger visibility conditional on `HasYouTubeApiKey`
   - Files owned: `SongFormPage.xaml`
   - Demo: music-DB trigger row present; YouTube trigger row present (visible only when API key set); Paste URL section unchanged; no-API-key nudge unchanged
 
-- [ ] **Wire SongFormViewModel** [SEQUENTIAL — waits for XAML above]
+- [x] **Wire SongFormViewModel** [SEQUENTIAL — waits for XAML above]
   - Produces: updated `SongFormViewModel.cs`
   - Consumes: `SongPickedMessage`, `YouTubeVideoPickedMessage`, `IMessenger`
   - Risk: Medium — removing 10+ properties and 4 commands; 2 new navigate commands + 2 message registrations
@@ -179,7 +179,7 @@
 
 ## Phase 6 — Cleanup + .sln Registration [SEQUENTIAL — waits for Phase 5a and 5b]
 
-- [ ] **Register new files in MyVocaList.sln and add BACKLOG entries** [SEQUENTIAL]
+- [x] **Register new files in MyVocaList.sln and add BACKLOG entries** [SEQUENTIAL]
   - Produces: updated `MyVocaList.sln` (all new files registered); 3 new BACKLOG entries (Card Component, Multi-type Video Links, YouTube Preview)
   - Consumes: all new file paths
   - Risk: Low

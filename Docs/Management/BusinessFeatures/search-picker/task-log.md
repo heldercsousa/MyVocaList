@@ -52,3 +52,42 @@ Build: PASS — 0 errors, 0 warnings beyond pre-existing NU1608/DX1001
 - Finding: no inline form search pattern in MD3; standalone search page is the only documented mobile pattern
 - Codebase: 3 search instances identified across ArtistFormPage and SongFormPage
 - Decision logged in findings.md § 3 and § 4
+
+---
+
+## Session: Search Picker Phases 2–5 complete + Phase 6 docs/registration
+**Date:** 2026-06-07
+**Status:** To Review
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/ArtistPickerViewModel.cs` — created
+- `MyVocaList/UI/ViewModels/SongPickerViewModel.cs` — created
+- `MyVocaList/UI/ViewModels/YouTubeSearchViewModel.cs` — created
+- `MyVocaList/UI/Services/INavigationService.cs` — created
+- `MyVocaList/UI/Services/NavigationService.cs` — created
+- `MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml` + `.cs` — created
+- `MyVocaList/UI/Pages/Songs/SongPickerPage.xaml` + `.cs` — created
+- `MyVocaList/UI/Pages/Songs/YouTubeSearchPage.xaml` + `.cs` — created
+- `MyVocaList/Navigation/Routes.cs` — added 3 picker routes
+- `MyVocaList/AppShell.xaml.cs` — registered 3 routes
+- `MyVocaList/MauiProgram.cs` — registered 3 pages, 3 ViewModels, INavigationService, IMessenger
+- `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml` — replaced API search strip with ListItem trigger
+- `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` — removed API search, added NavigateToArtistPickerCommand
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` — replaced both search strips with ListItem triggers
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — removed API+YouTube search, added 2 navigate commands
+- `MyVocaList.Tests/Unit/ViewModels/ArtistPickerViewModelTests.cs` — created (11 tests)
+- `MyVocaList.Tests/Unit/ViewModels/SongPickerViewModelTests.cs` — created (12 tests)
+- `MyVocaList.Tests/Unit/ViewModels/YouTubeSearchViewModelTests.cs` — created (11 tests)
+- `Docs/Management/BusinessFeatures/search-picker/tasks.md` — marked Phases 1–6 complete
+- `Docs/Management/BACKLOG.md` — updated Search Picker status and sub-items
+- `MyVocaList.sln` — added 3 agent brief files to search-picker folder
+
+### Verification evidence:
+- Build: PASS (0 errors)
+- Tests: PASS (269/269 total tests in suite)
+- Post-edit re-read: confirmed
+- Spec compliance: all implemented features match design.md
+- .sln registration: confirmed all 3 agent brief files registered in search-picker project section
+
+### Remaining:
+- Phase 3d: document search picker pattern in `.claude/library/` (pending task)
