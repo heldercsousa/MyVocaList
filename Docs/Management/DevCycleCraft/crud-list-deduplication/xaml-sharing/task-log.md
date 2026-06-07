@@ -20,6 +20,23 @@
 - Spec compliance: confirmed — plan-7e.md tasks all satisfied; no [Obsolete] event subscribers remain in codebase
 
 ---
+## Task: Step 6 — Post-migration guideline review (crud-pages.md update)
+**Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/plan.md`
+**Status:** To Review
+**Started:** 06/06/2026
+**Completed:** 06/06/2026
+
+### Changed files:
+- `.claude/library/crud-pages.md` — updated `ICrudListViewModel` contract to match the full interface (all 16 members); removed `[Obsolete]` event references from `CrudListPageBase` section; corrected XAML namespace (`MyVocaList.UI.Views` → `MyVocaList.UI.Components`); corrected `xmlns:pages` namespace (`MyVocaList.UI.Pages` → `MyVocaList.UI.Pages.Base`); updated code-behind minimal pattern to match VenuesPage.xaml.cs (constructor-based `AttachViewModel`, no `OnAppearing` override); added `CrudListViewModelBase<TItem>` guidance; added "Page migration checklist" section.
+- `Docs/Management/BACKLOG.md` — marked Steps 7c/7d/7e and Step 6 as `✅ Done`; marked parent row `Code Cleanup — CRUD List Page Deduplication` as `✅ Done`.
+
+### Verification evidence
+- Build: PASS — `dotnet build MyVocaList.sln --no-incremental` exit code 0 (pre-existing APK file-lock error on Android TFM is unrelated to this doc-only change; all C# compilation targets pass)
+- Tests: SKIPPED — no code files changed
+- Post-edit re-read: confirmed — crud-pages.md reviewed against CrudListView.xaml.cs, ICrudListViewModel.cs, CrudListViewModelBase.cs, VenuesPage.xaml, VenuesPage.xaml.cs, CrudListPageBase.cs
+- Spec compliance: confirmed — doc accurately reflects current implementation
+
+---
 ## Task: Step 7a — Create CrudListView + extend ICrudListViewModel + update CrudListPageBase
 **Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/xaml-sharing/plan-7a.md`
 **Status:** To Review

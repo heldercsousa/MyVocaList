@@ -62,11 +62,38 @@ Every ViewModel for a CRUD list page must implement `ICrudListViewModel`:
 ```csharp
 public interface ICrudListViewModel : INotifyPropertyChanged
 {
-    BottomSheetState ConfirmSheetState { get; set; }
+    // Search / scroll state
     bool IsSearchMode { get; }
     bool IsScrolled { get; set; }
     bool IsEmptyNoResults { get; }
     IRelayCommand CloseSearchCommand { get; }
+
+    // Loading state
+    bool IsInitialLoading { get; }
+    bool IsRefreshing { get; set; }
+    IAsyncRelayCommand RefreshCommand { get; }
+    bool HasMoreItems { get; }
+    IRelayCommand LoadMoreCommand { get; }
+
+    // Selection state
+    int SelectedCount { get; }
+    bool IsAllSelected { get; }
+    bool CanEditSelected { get; }
+    bool CanDeleteSelected { get; }
+
+    // Toolbar commands
+    IRelayCommand SelectAllCommand { get; }
+    IAsyncRelayCommand EditSelectedCommand { get; }
+    IRelayCommand DeleteSelectedCommand { get; }
+
+    // Confirm bottom sheet
+    BottomSheetState ConfirmSheetState { get; set; }
+    string ConfirmMessage { get; }
+    string ConfirmActionText { get; }
+    IAsyncRelayCommand ConfirmActionCommand { get; }
+    IRelayCommand DismissConfirmCommand { get; }
+
+    // Lifecycle
     Task InitializeAsync();
     void OnSelectionChanged(int count);
 }
@@ -74,20 +101,19 @@ public interface ICrudListViewModel : INotifyPropertyChanged
 
 CrudListView subscribes to `BindingContextChanged`, casts to `ICrudListViewModel`, and subscribes to `PropertyChanged` to drive `confirmSheet.Show()` / `confirmSheet.Close()`.
 
-### CrudListPageBase — what it does and what it no longer does
+**Use `CrudListViewModelBase<TItem>` as the base class** (`MyVocaList/UI/ViewModels/CrudListViewModelBase.cs`). It implements all members above plus pagination, search debounce, and confirm-sheet logic. Concrete VMs override the abstract methods: `FetchPageAsync`, `FetchMoreAsync`, `ExecuteDeleteAsync`, `BuildDeleteConfirmMessage`, `NavigateToAddAsync`, `NavigateToEditAsync`, and `RaiseEntityEmptyStateProperties`.
+
+### CrudListPageBase — what it does
 
 `CrudListPageBase` is the required base class for all CRUD list pages.
 
-**Still provided by CrudListPageBase (do not re-implement in pages):**
+**Provided by CrudListPageBase (do not re-implement in pages):**
 - `OnAppearing()` — calls `ListViewModel.InitializeAsync()`
-- `OnBackButtonPressed()` — dismiss confirm sheet → close search → default back
-- `AttachViewModel()` — subscribes page to VM `PropertyChanged` for back-button logic
+- `OnBackButtonPressed()` — dismiss confirm sheet → close search → default Shell back
+- `AttachViewModel()` — call from the constructor to subscribe `ListViewModel.PropertyChanged`
+- `OnCollectionViewScrolled` / `OnSelectionChanged` / `OnConfirmSheetStateChanged` — protected event handlers (not wired from page code-behind; CrudListView handles these internally)
 
-**[Obsolete] events — do NOT subscribe to these in new pages:**
-- `ConfirmSheetStateRequired` — compiler warning message: `"Replaced by CrudListView internal wiring. Will be deleted in Step 7e after all pages migrate."`
-- `SelectionItemsWireUpRequired` — compiler warning message: `"Replaced by CrudListView internal wiring. Will be deleted in Step 7e after all pages migrate."`
-
-These events will be deleted after all existing pages finish migrating (Step 7e). New pages must not subscribe to them. If you accidentally subscribe to either, the compiler issues a CS0618 warning with the message quoted above.
+The `[Obsolete]` events `ConfirmSheetStateRequired` and `SelectionItemsWireUpRequired` were deleted in Step 7e. Do not reference them.
 
 ### New page XAML skeleton (VenuesPage reference)
 
@@ -98,10 +124,10 @@ These events will be deleted after all existing pages finish migrating (Step 7e)
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
-    xmlns:pages="clr-namespace:MyVocaList.UI.Pages"
+    xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
-    xmlns:views="clr-namespace:MyVocaList.UI.Views"
+    xmlns:views="clr-namespace:MyVocaList.UI.Components"
     x:Class="MyVocaList.UI.Pages.Venues.VenuesPage"
     x:DataType="vm:VenuesViewModel"
     Title="Venues"
@@ -210,6 +236,38 @@ For pages that navigate on item tap (e.g. SongsPage):
 ```
 
 When `ItemTapCommand` is `null` (default), no `Tap` event handler is wired. When set, CrudListView wires `DXCollectionView.Tap` and invokes the command with the tapped item as parameter.
+
+---
+
+## Page migration checklist
+
+Use when migrating an existing CRUD list page to `CrudListView` (or building a new one from scratch).
+
+**XAML**
+- [ ] Root element is `<pages:CrudListPageBase>` with `xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"`
+- [ ] `xmlns:views="clr-namespace:MyVocaList.UI.Components"` declared for CrudListView
+- [ ] `SafeAreaEdges="Container"` present on the root element
+- [ ] `Shell.BackButtonBehavior IsVisible="False" IsEnabled="False"` present
+- [ ] `Shell.TitleView` contains `Grid` with `SmallAppBar` + `SearchAppBar`
+- [ ] Single `<views:CrudListView>` element as page content — no manual ShimmerView, DXCollectionView, FloatingToolbar, EmptyState, or BottomSheet in the page XAML
+- [ ] All required BindableProperties set (`ItemsSource`, `SelectedItemsSource`, `IsEmptyNoItems`, `EmptyNoItemsIllustration`, `EmptyNoItemsHeadline`, `FabCommand`, `FabDescription`)
+- [ ] `ItemTemplate` and `SelectedItemTemplate` slots defined with entity-specific DataTemplates
+
+**Code-behind**
+- [ ] Class inherits `CrudListPageBase`
+- [ ] `ListViewModel` abstract property implemented (`protected override ICrudListViewModel ListViewModel => _viewModel;`)
+- [ ] `ViewModel` public property present for compiled-binding DataTemplates
+- [ ] `AttachViewModel()` called from constructor
+- [ ] No `OnCollectionViewScrolled`, `OnSelectionChanged`, or `OnConfirmSheetStateChanged` overrides — CrudListView owns these
+
+**ViewModel**
+- [ ] Inherits `CrudListViewModelBase<TDto>`
+- [ ] All abstract methods implemented: `FetchPageAsync`, `FetchMoreAsync`, `ExecuteDeleteAsync`, `BuildDeleteConfirmMessage`, `NavigateToAddAsync`, `NavigateToEditAsync`, `RaiseEntityEmptyStateProperties`
+- [ ] Entity-specific `IsEmptyNoXxx` bool property present (e.g. `IsEmptyNoVenues`) and raised inside `RaiseEntityEmptyStateProperties`
+- [ ] `IList SelectedXxxRaw` non-generic wrapper property present for `SelectedItemsSource` binding
+
+**DI**
+- [ ] Page and ViewModel both registered as `AddTransient` in `MauiProgram.cs`
 
 ---
 
@@ -487,22 +545,28 @@ Every list ViewModel shall have:
 Every list page code-behind shall have:
 
 ```csharp
-// Required: typed ViewModel property for compiled bindings in DataTemplates
-public MyViewModel ViewModel => _viewModel;
-
-// Required: abstract ListViewModel property for CrudListPageBase
-protected override ICrudListViewModel ListViewModel => _viewModel;
-
-protected override void OnAppearing()
+public partial class MyEntityPage : CrudListPageBase
 {
-    base.OnAppearing();   // CrudListPageBase calls InitializeAsync() here
-    AttachViewModel();    // subscribe to PropertyChanged for OnBackButtonPressed logic
+    private readonly MyEntityViewModel _viewModel;
+
+    /// <summary>Exposed for compiled bindings inside DataTemplates.</summary>
+    public MyEntityViewModel ViewModel => _viewModel;
+
+    protected override ICrudListViewModel ListViewModel => _viewModel;
+
+    public MyEntityPage(MyEntityViewModel viewModel)
+    {
+        InitializeComponent();
+        _viewModel = viewModel;
+        BindingContext = _viewModel;
+        AttachViewModel();   // subscribe PropertyChanged for OnBackButtonPressed logic
+    }
 }
 ```
 
 `OnCollectionViewScrolled`, `OnSelectionChanged`, `OnConfirmSheetStateChanged`, and the SelectedItems wire-up are all handled internally by `CrudListView`. Do not add them to the page code-behind.
 
-`OnBackButtonPressed` is still handled by `CrudListPageBase` (not by the page code-behind directly) — priority order: dismiss confirm sheet → close search → default Shell back.
+`OnAppearing` and `OnBackButtonPressed` are handled by `CrudListPageBase` — do not override them unless adding page-specific logic on top.
 
 ---
 
