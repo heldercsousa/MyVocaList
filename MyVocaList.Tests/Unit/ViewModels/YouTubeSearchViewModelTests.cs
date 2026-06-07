@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Contracts.Messages;
+using MyVocaList.UI.Services;
 using MyVocaList.UI.ViewModels;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -12,11 +13,13 @@ public class YouTubeSearchViewModelTests
 
     private YouTubeSearchViewModel CreateSut(
         Mock<IYouTubeSearchService>? service = null,
-        Mock<IMessenger>? messenger = null)
+        Mock<IMessenger>? messenger = null,
+        Mock<INavigationService>? navigation = null)
     {
         return new YouTubeSearchViewModel(
             (service ?? new Mock<IYouTubeSearchService>()).Object,
             (messenger ?? new Mock<IMessenger>()).Object,
+            (navigation ?? new Mock<INavigationService>()).Object,
             new Mock<ILogger<YouTubeSearchViewModel>>().Object);
     }
 
@@ -132,21 +135,52 @@ public class YouTubeSearchViewModelTests
 
     // [AC] AC-2.7 — selecting a result sends YouTubeVideoPickedMessage
     [Fact]
-    public void SelectResultCommand_SendsYouTubeVideoPickedMessage()
+    public async Task SelectResultCommand_SendsYouTubeVideoPickedMessage()
     {
         var realMessenger = new WeakReferenceMessenger();
         YouTubeVideoPickedMessage? received = null;
         realMessenger.Register<YouTubeVideoPickedMessage>(this, (_, msg) => received = msg);
 
+        var navigation = new Mock<INavigationService>();
+        navigation.Setup(n => n.GoBackAsync()).Returns(Task.CompletedTask);
+
         var sut = new YouTubeSearchViewModel(
             new Mock<IYouTubeSearchService>().Object,
             realMessenger,
+            navigation.Object,
             new Mock<ILogger<YouTubeSearchViewModel>>().Object);
         var result = MakeResult("Video A");
 
-        try { sut.SelectResultCommand.Execute(result); } catch { /* Shell.Current null — expected */ }
+        await sut.SelectResultCommand.ExecuteAsync(result);
 
         Assert.NotNull(received);
         Assert.Equal(result, received.Result);
+    }
+
+    // [AC] AC-2.7 — SelectResultCommand calls navigation GoBack
+    [Fact]
+    public async Task SelectResultCommand_CallsNavigationGoBack()
+    {
+        var navigation = new Mock<INavigationService>();
+        navigation.Setup(n => n.GoBackAsync()).Returns(Task.CompletedTask);
+        var sut = CreateSut(navigation: navigation);
+        var result = MakeResult();
+
+        await sut.SelectResultCommand.ExecuteAsync(result);
+
+        navigation.Verify(n => n.GoBackAsync(), Times.Once);
+    }
+
+    // [AC] AC-2.7 — BackCommand calls navigation GoBack
+    [Fact]
+    public async Task BackCommand_CallsNavigationGoBack()
+    {
+        var navigation = new Mock<INavigationService>();
+        navigation.Setup(n => n.GoBackAsync()).Returns(Task.CompletedTask);
+        var sut = CreateSut(navigation: navigation);
+
+        await sut.BackCommand.ExecuteAsync(null);
+
+        navigation.Verify(n => n.GoBackAsync(), Times.Once);
     }
 }

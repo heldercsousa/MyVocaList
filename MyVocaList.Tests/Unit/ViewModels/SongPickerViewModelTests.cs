@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.Messages;
+using MyVocaList.UI.Services;
 using MyVocaList.UI.ViewModels;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -12,11 +13,13 @@ public class SongPickerViewModelTests
 
     private SongPickerViewModel CreateSut(
         Mock<IMusicMetadataService>? service = null,
-        Mock<IMessenger>? messenger = null)
+        Mock<IMessenger>? messenger = null,
+        Mock<INavigationService>? navigation = null)
     {
         return new SongPickerViewModel(
             (service ?? new Mock<IMusicMetadataService>()).Object,
             (messenger ?? new Mock<IMessenger>()).Object,
+            (navigation ?? new Mock<INavigationService>()).Object,
             new Mock<ILogger<SongPickerViewModel>>().Object);
     }
 
@@ -132,22 +135,53 @@ public class SongPickerViewModelTests
 
     // [AC] AC-2.7 — selecting a result sends SongPickedMessage
     [Fact]
-    public void SelectResultCommand_SendsSongPickedMessage()
+    public async Task SelectResultCommand_SendsSongPickedMessage()
     {
         var realMessenger = new WeakReferenceMessenger();
         SongPickedMessage? received = null;
         realMessenger.Register<SongPickedMessage>(this, (_, msg) => received = msg);
 
+        var navigation = new Mock<INavigationService>();
+        navigation.Setup(n => n.GoBackAsync()).Returns(Task.CompletedTask);
+
         var sut = new SongPickerViewModel(
             new Mock<IMusicMetadataService>().Object,
             realMessenger,
+            navigation.Object,
             new Mock<ILogger<SongPickerViewModel>>().Object);
         var result = MakeResult("Song A");
 
-        try { sut.SelectResultCommand.Execute(result); } catch { /* Shell.Current null — expected */ }
+        await sut.SelectResultCommand.ExecuteAsync(result);
 
         Assert.NotNull(received);
         Assert.Equal(result, received.Result);
+    }
+
+    // [AC] AC-2.7 — SelectResultCommand calls navigation GoBack
+    [Fact]
+    public async Task SelectResultCommand_CallsNavigationGoBack()
+    {
+        var navigation = new Mock<INavigationService>();
+        navigation.Setup(n => n.GoBackAsync()).Returns(Task.CompletedTask);
+        var sut = CreateSut(navigation: navigation);
+        var result = MakeResult();
+
+        await sut.SelectResultCommand.ExecuteAsync(result);
+
+        navigation.Verify(n => n.GoBackAsync(), Times.Once);
+    }
+
+    // [AC] AC-2.7 — BackCommand calls navigation GoBack
+    [Fact]
+    public async Task BackCommand_CallsNavigationGoBack()
+    {
+        var navigation = new Mock<INavigationService>();
+        navigation.Setup(n => n.GoBackAsync()).Returns(Task.CompletedTask);
+        var sut = CreateSut(navigation: navigation);
+
+        await sut.BackCommand.ExecuteAsync(null);
+
+        navigation.Verify(n => n.GoBackAsync(), Times.Once);
     }
 
     // [AC] AC-2.8 — null SongTitle in result does not throw

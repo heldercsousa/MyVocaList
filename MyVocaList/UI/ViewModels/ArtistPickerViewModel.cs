@@ -5,10 +5,11 @@ using MyVocaList.UI.Collections;
 
 namespace MyVocaList.UI.ViewModels;
 
-public sealed partial class ArtistPickerViewModel : ViewModelBase
+public sealed partial class ArtistPickerViewModel : ViewModelBase, IDisposable
 {
     private readonly IMusicMetadataService _service;
     private readonly IMessenger _messenger;
+    private readonly INavigationService _navigation;
     private readonly ILogger<ArtistPickerViewModel> _logger;
 
     private CancellationTokenSource _cts = new();
@@ -33,10 +34,12 @@ public sealed partial class ArtistPickerViewModel : ViewModelBase
     public ArtistPickerViewModel(
         IMusicMetadataService service,
         IMessenger messenger,
+        INavigationService navigation,
         ILogger<ArtistPickerViewModel> logger)
     {
         _service = service;
         _messenger = messenger;
+        _navigation = navigation;
         _logger = logger;
     }
 
@@ -80,12 +83,18 @@ public sealed partial class ArtistPickerViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void SelectResult(MusicSearchResultDto result)
+    private async Task SelectResultAsync(MusicSearchResultDto result)
     {
         _messenger.Send(new ArtistPickedMessage(result));
-        Shell.Current.GoToAsync("..");
+        await _navigation.GoBackAsync();
     }
 
     [RelayCommand]
-    private void Back() => Shell.Current.GoToAsync("..");
+    private Task BackAsync() => _navigation.GoBackAsync();
+
+    public void Dispose()
+    {
+        try { _cts?.Cancel(); _cts?.Dispose(); }
+        catch { /* ignore disposal races */ }
+    }
 }

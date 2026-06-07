@@ -5,10 +5,11 @@ using MyVocaList.UI.Collections;
 
 namespace MyVocaList.UI.ViewModels;
 
-public sealed partial class YouTubeSearchViewModel : ViewModelBase
+public sealed partial class YouTubeSearchViewModel : ViewModelBase, IDisposable
 {
     private readonly IYouTubeSearchService _service;
     private readonly IMessenger _messenger;
+    private readonly INavigationService _navigation;
     private readonly ILogger<YouTubeSearchViewModel> _logger;
 
     private CancellationTokenSource _cts = new();
@@ -33,10 +34,12 @@ public sealed partial class YouTubeSearchViewModel : ViewModelBase
     public YouTubeSearchViewModel(
         IYouTubeSearchService service,
         IMessenger messenger,
+        INavigationService navigation,
         ILogger<YouTubeSearchViewModel> logger)
     {
         _service = service;
         _messenger = messenger;
+        _navigation = navigation;
         _logger = logger;
     }
 
@@ -80,12 +83,18 @@ public sealed partial class YouTubeSearchViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void SelectResult(YouTubeSearchResultDto result)
+    private async Task SelectResultAsync(YouTubeSearchResultDto result)
     {
         _messenger.Send(new YouTubeVideoPickedMessage(result));
-        Shell.Current.GoToAsync("..");
+        await _navigation.GoBackAsync();
     }
 
     [RelayCommand]
-    private void Back() => Shell.Current.GoToAsync("..");
+    private Task BackAsync() => _navigation.GoBackAsync();
+
+    public void Dispose()
+    {
+        try { _cts?.Cancel(); _cts?.Dispose(); }
+        catch { /* ignore disposal races */ }
+    }
 }
