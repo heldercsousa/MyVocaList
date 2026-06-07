@@ -84,23 +84,23 @@ After migration, this entire Grid is replaced by a single `<views:CrudListView .
 
 ## Tasks
 
-- [ ] **Edit `ArtistsPage.xaml`**
+- [x] **Edit `ArtistsPage.xaml`**
   - Move ItemTemplate + SelectedItemTemplate (including ViewCatalog DXButton) to resources / inline
   - Replace entire Grid (both rows) with `<views:CrudListView ...>` + `FilterContent` slot
   - Keep Shell.BackButtonBehavior and Shell.TitleView unchanged
   - Add `xmlns:views` namespace; keep `xmlns:dxe` for FilterChipGroup
 
-- [ ] **Edit `ArtistsPage.xaml.cs`**
+- [x] **Edit `ArtistsPage.xaml.cs`**
   - Remove both event subscription lambdas from constructor (if not already removed in earlier steps)
   - Constructor body: InitializeComponent, _viewModel, BindingContext, AttachViewModel only
 
-- [ ] **Remove `[Obsolete]` events from `CrudListPageBase`**
+- [x] **Remove `[Obsolete]` events from `CrudListPageBase`**
   - Delete `ConfirmSheetStateRequired` and `SelectionItemsWireUpRequired` event declarations
     (marked `[Obsolete]` in Step 7a; now safe to delete since all 4 pages are migrated)
   - Confirm no remaining subscribers anywhere in the codebase
 
-- [ ] **`dotnet build` — 0 errors**
-- [ ] **`dotnet test` — 0 failures**
+- [x] **`dotnet build` — 0 errors**
+- [x] **`dotnet test` — 0 failures**
 - [ ] **Emulator smoke test**
   - ArtistsPage loads with FilterChipGroup visible above list
   - Tap "Authors" chip → list filters to authors only
