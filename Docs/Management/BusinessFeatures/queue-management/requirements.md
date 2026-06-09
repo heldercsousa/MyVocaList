@@ -220,8 +220,7 @@ Core product feature: manage an active karaoke queue for a live event. Hosts cre
 
 - ❌ Real-time multi-device queue sync (WebSocket, SignalR). MVP: optimistic UI, reload on resume.
 - ❌ Singer self-registration or public join link. MVP: Host enqueues only.
-- ❌ Video playback integration or karaoke software bridging. MVP: Just tracks timing and song selection.
-- ❌ Audio/lyrics streaming. MVP: Song selection only (audio responsibility outside app).
+- ❌ Audio/lyrics streaming or in-app playback. MVP: Video playback supported via external YouTube launch (search and open URL buttons in SongFormPage, pickers, and queue).
 - ❌ Multiple concurrent events per host. MVP: Assume single active event per session.
 - ❌ Event history analytics dashboard. MVP: Basic stats on finish (count, absent, avg time).
 - ❌ Undo for all operations (only for Mark Absent). Full undo available post-MVP.
