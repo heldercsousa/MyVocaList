@@ -12,7 +12,7 @@
     x:DataType="vm:SongFormViewModel"
     Title="{Binding PageTitle}"
     BackgroundColor="{StaticResource Surface}"
-    SafeAreaEdges="All">
+    SafeAreaEdges="Container">
 
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="16">

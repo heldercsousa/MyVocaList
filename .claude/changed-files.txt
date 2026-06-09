@@ -939,3 +939,9 @@ MyVocaList/UI/Pages/Songs/SongsPage.xaml
 MyVocaList/UI/Pages/Songs/SongsPage.xaml
 MyVocaList/UI/ViewModels/SongPickerViewModel.cs
 MyVocaList/UI/Pages/Songs/SongPickerPage.xaml
+MyVocaList/UI/ViewModels/SongsViewModel.cs
+MyVocaList/UI/ViewModels/SongPickerViewModel.cs
+MyVocaList/UI/ViewModels/SongPickerViewModel.cs
+MyVocaList/UI/ViewModels/SongPickerViewModel.cs
+MyVocaList/UI/Pages/Songs/SongFormPage.xaml
+MyVocaList/UI/ViewModels/SongPickerViewModel.cs

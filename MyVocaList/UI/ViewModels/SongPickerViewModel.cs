@@ -10,6 +10,7 @@ public sealed partial class SongPickerViewModel : ViewModelBase, IDisposable
     private readonly IMusicMetadataService _service;
     private readonly IMessenger _messenger;
     private readonly INavigationService _navigation;
+    private readonly ISnackbarComponent _snackbarService;
     private readonly ILogger<SongPickerViewModel> _logger;
 
     private CancellationTokenSource _cts = new();
@@ -41,11 +42,13 @@ public sealed partial class SongPickerViewModel : ViewModelBase, IDisposable
         IMusicMetadataService service,
         IMessenger messenger,
         INavigationService navigation,
+        ISnackbarComponent snackbarService,
         ILogger<SongPickerViewModel> logger)
     {
         _service = service;
         _messenger = messenger;
         _navigation = navigation;
+        _snackbarService = snackbarService;
         _logger = logger;
     }
 
@@ -100,6 +103,7 @@ public sealed partial class SongPickerViewModel : ViewModelBase, IDisposable
     {
         if (result == null || string.IsNullOrWhiteSpace(result.SongTitle) || string.IsNullOrWhiteSpace(result.ArtistName))
         {
+            await _snackbarService.ShowErrorAsync("Song title or artist missing");
             return;
         }
 
