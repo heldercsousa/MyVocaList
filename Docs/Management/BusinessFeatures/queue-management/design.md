@@ -574,6 +574,12 @@ WeakReferenceMessenger.Default.Register<PersonPickerResult>(this, OnPersonSelect
 - **Rationale:** Accommodates both modes (Video Karaoke = pre-selected, Artist Instruments = on-the-fly)
 - **Alternative:** Mandate pre-selection before register (rejected: slower UX)
 
+### Decision 5: Video Playback in MVP
+- **Chosen:** External YouTube launch via search/URL buttons; no in-app playback backend
+- **Rationale:** MVP removes API key burden for hosts; search and "Open YouTube" buttons in SongFormPage, search pickers, and queue are sufficient for Video Karaoke mode. Hosts launch YouTube directly without manual URL uploads.
+- **Scope:** "Open YouTube" button available from queue entry, song picker, and search results; pre-fills search query from song title/artist when available
+- **Future:** In-app playback backend and streaming after MVP
+
 ---
 
 ## Future Enhancements (Post-MVP)
