@@ -917,3 +917,13 @@ Docs/Management/BusinessFeatures/queue-management/tasks.md
 Docs/Management/BACKLOG.md
 MyVocaList.sln
 MyVocaList.sln
+Docs/Management/lively-cooking-torvalds.md
+Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/queue-management/requirements.md
+Docs/Management/BusinessFeatures/queue-management/design.md
+Docs/Management/BusinessFeatures/artists-songs/youtube-search-launch/requirements.md
+Docs/Management/BusinessFeatures/artists-songs/youtube-search-launch/design.md
+Docs/Management/BusinessFeatures/artists-songs/youtube-search-launch/tasks.md
+Docs/Management/BusinessFeatures/artists-songs/youtube-search-launch/plan.md
+MyVocaList.sln
+MyVocaList.sln
