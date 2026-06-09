@@ -65,9 +65,15 @@
                         <lists:ListItemLeadingIcon Icon="music_note_outlined" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
-                        <dx:CheckEdit IsChecked="False"
-                                      InputTransparent="True"
-                                      VerticalOptions="Center" />
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <dx:DXButton Icon="language_outlined"
+                                         Style="{StaticResource StandardIconButton}"
+                                         Command="{Binding Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}, Path=BindingContext.LaunchYouTubeSearchCommand}"
+                                         CommandParameter="{Binding .}" />
+                            <dx:CheckEdit IsChecked="False"
+                                          InputTransparent="True"
+                                          VerticalOptions="Center" />
+                        </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
@@ -82,10 +88,16 @@
                         <lists:ListItemLeadingIcon Icon="music_note_outlined" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
-                        <dx:CheckEdit IsChecked="True"
-                                      CheckedCheckBoxColor="{dx:ThemeColor Primary}"
-                                      InputTransparent="True"
-                                      VerticalOptions="Center" />
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <dx:DXButton Icon="language_outlined"
+                                         Style="{StaticResource StandardIconButton}"
+                                         Command="{Binding Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}, Path=BindingContext.LaunchYouTubeSearchCommand}"
+                                         CommandParameter="{Binding .}" />
+                            <dx:CheckEdit IsChecked="True"
+                                          CheckedCheckBoxColor="{dx:ThemeColor Primary}"
+                                          InputTransparent="True"
+                                          VerticalOptions="Center" />
+                        </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>

@@ -56,6 +56,12 @@
                     <lists:ListItem
                         Headline="{Binding SongTitle}"
                         SupportingText="{Binding ArtistName}">
+                        <lists:ListItem.TrailingContent>
+                            <dx:DXButton Icon="language_outlined"
+                                         Style="{StaticResource StandardIconButton}"
+                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.LaunchYouTubeSearchCommand}"
+                                         CommandParameter="{Binding .}" />
+                        </lists:ListItem.TrailingContent>
                         <lists:ListItem.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectResultCommand}"

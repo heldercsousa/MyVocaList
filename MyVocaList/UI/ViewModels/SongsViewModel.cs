@@ -31,6 +31,7 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
         AddSongCommand = new AsyncRelayCommand(NavigateToAddAsync);
         AddToCatalogCommand = new AsyncRelayCommand(AddToCatalogAsync, () => IsCatalogMode);
         RemoveFromCatalogCommand = new AsyncRelayCommand<SongListItemDto>(RemoveFromCatalogAsync, _ => IsCatalogMode);
+        LaunchYouTubeSearchCommand = new AsyncRelayCommand<SongListItemDto>(LaunchYouTubeSearchAsync);
         GoBackCommand = new AsyncRelayCommand(() => Shell.Current.GoToAsync(".."));
     }
 
@@ -42,6 +43,7 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
     public IAsyncRelayCommand AddSongCommand { get; }
     public IAsyncRelayCommand AddToCatalogCommand { get; }
     public IAsyncRelayCommand<SongListItemDto> RemoveFromCatalogCommand { get; }
+    public IAsyncRelayCommand<SongListItemDto> LaunchYouTubeSearchCommand { get; }
     public IAsyncRelayCommand GoBackCommand { get; }
 
     public bool IsCatalogMode => ArtistId > 0;
@@ -132,5 +134,21 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
         {
             await _snackbarService.ShowErrorAsync(message);
         }
+    }
+
+    private async Task LaunchYouTubeSearchAsync(SongListItemDto song)
+    {
+        if (song == null || string.IsNullOrWhiteSpace(song.Title) || string.IsNullOrWhiteSpace(song.FeaturedArtists))
+        {
+            await _snackbarService.ShowErrorAsync("Song title or artist missing");
+            return;
+        }
+
+        var query = $"karaoke {song.Title} {song.FeaturedArtists}";
+        var encodedQuery = Uri.EscapeDataString(query);
+        var youtubeUri = new Uri($"https://www.youtube.com/results?search_query={encodedQuery}");
+
+        if (!await Launcher.TryOpenAsync(youtubeUri))
+            await Browser.OpenAsync(youtubeUri, BrowserLaunchMode.SystemPreferred);
     }
 }

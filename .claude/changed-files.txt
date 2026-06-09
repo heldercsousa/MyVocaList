@@ -927,3 +927,15 @@ Docs/Management/BusinessFeatures/artists-songs/youtube-search-launch/tasks.md
 Docs/Management/BusinessFeatures/artists-songs/youtube-search-launch/plan.md
 MyVocaList.sln
 MyVocaList.sln
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/ViewModels/SongFormViewModel.cs
+MyVocaList/UI/Pages/Songs/SongFormPage.xaml
+MyVocaList/UI/ViewModels/SongsViewModel.cs
+MyVocaList/UI/ViewModels/SongsViewModel.cs
+MyVocaList/UI/ViewModels/SongsViewModel.cs
+MyVocaList/UI/Pages/Songs/SongsPage.xaml
+MyVocaList/UI/Pages/Songs/SongsPage.xaml
+MyVocaList/UI/ViewModels/SongPickerViewModel.cs
+MyVocaList/UI/Pages/Songs/SongPickerPage.xaml

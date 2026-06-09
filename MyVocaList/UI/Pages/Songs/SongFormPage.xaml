@@ -141,9 +141,16 @@
                     StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="8">
 
+                    <!-- Quick search button (no API key required) -->
+                    <dx:DXButton Content="🔍 Search YouTube"
+                                 Style="{StaticResource OutlinedButton}"
+                                 HorizontalOptions="Fill"
+                                 Command="{Binding LaunchYouTubeSearchCommand}"
+                                 IsEnabled="{Binding CanLaunchYouTubeSearch}" />
+
                     <!-- Navigate to YouTube search (API key present) -->
                     <lists:ListItem
-                        Headline="Search YouTube"
+                        Headline="Search YouTube (API)"
                         IsVisible="{Binding HasYouTubeApiKey}">
                         <lists:ListItem.LeadingContent>
                             <dx:DXButton Style="{StaticResource StandardIconButton}"
