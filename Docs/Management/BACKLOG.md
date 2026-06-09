@@ -51,7 +51,7 @@
 | 2026-06 | **App Settings** | ✅ Done | YouTube API key management (PasswordEdit, save/test/clear); flyout "Preferences" now navigates to SettingsPage; stale `HasYouTubeApiKey` refreshed on `OnAppearing`. Spec: `Docs/Management/BusinessFeatures/app-settings/` |
 | 2026-06 | **About Page** | ✅ Done | Version, logo, goal sentence, Since year, CC BY-NC-ND 4.0 license, What's New stub (hidden). Spec: `Docs/Management/BusinessFeatures/about-page/` |
 | 2026-06 | **Queue Management** | 🗺️ Plan | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate. IA: Queue-First (primary view, 0 taps to register performance). Spec: `Docs/Management/BusinessFeatures/queue-management/` · Plan: `queue-management/plan.md` · Ready for Wave 1 dispatch (entities + DTOs) |
-| 2026-06 | **Visual Theme Refresh** | 💡 pending | Theme Refresh Only pending |apply Karaoke Neon palette|
+| 2026-06 | **Visual Theme Refresh** | 💡 pending | Theme Refresh Only - apply Karaoke Neon palette|
 | 2026-06 | **Data Backup & Restore — Tier 1 + 3** | ✅ Done | Local auto-backup (SQLite snapshot + transaction log) + manual share sheet export/restore. Plan: `Docs/Management/BusinessFeatures/backup-restore/plan.md`. Spec: `Docs/Management/BusinessFeatures/backup-restore/design.md` |
 | 2026-06 | **User Tutorial/Learning** | 💡 Pending | Local or/and online tutorials. Evaluation of best practices in the lower possible effort to produce 1st version and update it always app receives new features and updates existing ones |
 | 2026-06 | **Website** | 💡 Pending | Evaluate the usage of the website - for marketing, documentation, and community engagement - myvocalist.com / myvocalist.app |
