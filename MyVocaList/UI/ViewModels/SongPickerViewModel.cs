@@ -96,6 +96,22 @@ public sealed partial class SongPickerViewModel : ViewModelBase, IDisposable
     }
 
     [RelayCommand]
+    private async Task LaunchYouTubeSearchAsync(MusicSearchResultDto result)
+    {
+        if (result == null || string.IsNullOrWhiteSpace(result.SongTitle) || string.IsNullOrWhiteSpace(result.ArtistName))
+        {
+            return;
+        }
+
+        var query = $"karaoke {result.SongTitle} {result.ArtistName}";
+        var encodedQuery = Uri.EscapeDataString(query);
+        var youtubeUri = new Uri($"https://www.youtube.com/results?search_query={encodedQuery}");
+
+        if (!await Launcher.TryOpenAsync(youtubeUri))
+            await Browser.OpenAsync(youtubeUri, BrowserLaunchMode.SystemPreferred);
+    }
+
+    [RelayCommand]
     private Task BackAsync() => _navigation.GoBackAsync();
 
     public void Dispose()

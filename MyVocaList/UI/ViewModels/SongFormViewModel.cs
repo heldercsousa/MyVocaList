@@ -53,6 +53,7 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private string _pasteUrlInput = string.Empty;
     [ObservableProperty] private string _pasteUrlError = string.Empty;
     [ObservableProperty] private bool _hasPasteUrlError;
+    [ObservableProperty] private bool _canLaunchYouTubeSearch;
 
     public string SelectedExternalId { get; private set; } = string.Empty;
     public string SelectedProvider { get; private set; } = string.Empty;
@@ -110,6 +111,7 @@ public partial class SongFormViewModel : ViewModelBase
     {
         ClearError();
         UpdateCharacterCounter(value?.Length ?? 0);
+        UpdateCanLaunchYouTubeSearch();
     }
 
     partial void OnArtistIdChanged(int value)
@@ -125,6 +127,7 @@ public partial class SongFormViewModel : ViewModelBase
     {
         if (SelectedArtistId.HasValue && SelectedArtistId.Value > 0)
             ArtistSearchText = value;
+        UpdateCanLaunchYouTubeSearch();
     }
 
     private async Task SearchArtistsAsync(string term)
@@ -354,5 +357,28 @@ public partial class SongFormViewModel : ViewModelBase
                 RunOnUiThread(() => KaraokeUrls.Add(reAdded));
             }
         });
+    }
+
+    [RelayCommand]
+    private async Task LaunchYouTubeSearch()
+    {
+        var title = SongTitle?.Trim() ?? string.Empty;
+        var artist = ArtistName?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(artist))
+            return;
+
+        var query = $"karaoke {title} {artist}";
+        var encodedQuery = Uri.EscapeDataString(query);
+        var youtubeUri = new Uri($"https://www.youtube.com/results?search_query={encodedQuery}");
+
+        if (!await Launcher.TryOpenAsync(youtubeUri))
+            await Browser.OpenAsync(youtubeUri, BrowserLaunchMode.SystemPreferred);
+    }
+
+    private void UpdateCanLaunchYouTubeSearch()
+    {
+        CanLaunchYouTubeSearch = !string.IsNullOrWhiteSpace(SongTitle)
+                             && !string.IsNullOrWhiteSpace(ArtistName);
     }
 }
