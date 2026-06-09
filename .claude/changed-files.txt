@@ -945,3 +945,4 @@ MyVocaList/UI/ViewModels/SongPickerViewModel.cs
 MyVocaList/UI/ViewModels/SongPickerViewModel.cs
 MyVocaList/UI/Pages/Songs/SongFormPage.xaml
 MyVocaList/UI/ViewModels/SongPickerViewModel.cs
+Docs/Management/BACKLOG.md
