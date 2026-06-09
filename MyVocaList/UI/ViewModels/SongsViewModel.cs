@@ -138,13 +138,13 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
 
     private async Task LaunchYouTubeSearchAsync(SongListItemDto song)
     {
-        if (song == null || string.IsNullOrWhiteSpace(song.Title) || string.IsNullOrWhiteSpace(song.FeaturedArtists))
+        if (song == null || string.IsNullOrWhiteSpace(song.Title) || string.IsNullOrWhiteSpace(song.OriginalArtistName))
         {
             await _snackbarService.ShowErrorAsync("Song title or artist missing");
             return;
         }
 
-        var query = $"karaoke {song.Title} {song.FeaturedArtists}";
+        var query = $"karaoke {song.Title} {song.OriginalArtistName}";
         var encodedQuery = Uri.EscapeDataString(query);
         var youtubeUri = new Uri($"https://www.youtube.com/results?search_query={encodedQuery}");
 
