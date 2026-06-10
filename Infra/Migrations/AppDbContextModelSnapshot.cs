@@ -17,6 +17,128 @@ namespace MyVocaList.Infra.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
 
+            modelBuilder.Entity("MyVocaList.Domain.Entities.Event", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ActualEndTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ActualStartTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("VideoKaraoke")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<DateTime?>("ScheduledEndTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ScheduledStartTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("VenueId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VenueId", "Name", "ScheduledStartTime")
+                        .IsUnique()
+                        .HasDatabaseName("IX_QueueManagementEvents_UniqueName")
+                        .HasFilter("[Status] <> 3");
+
+                    b.ToTable("QueueManagementEvents", (string)null);
+                });
+
+            modelBuilder.Entity("MyVocaList.Domain.Entities.QueueEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("EventId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int?>("PerformanceDurationMinutes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("PerformanceEndTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("PerformanceStartTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SongId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId");
+
+                    b.HasIndex("SongId");
+
+                    b.HasIndex("EventId", "PersonId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_QueueEntries_UniquePersonPerEvent")
+                        .HasFilter("[Status] <> 4");
+
+                    b.HasIndex("EventId", "Position")
+                        .HasDatabaseName("IX_QueueEntries_EventPosition");
+
+                    b.HasIndex("EventId", "Status")
+                        .HasDatabaseName("IX_QueueEntries_EventStatus");
+
+                    b.ToTable("QueueEntries");
+                });
+
             modelBuilder.Entity("MyVocaList.Domain.Entity.Artist", b =>
                 {
                     b.Property<int>("Id")
@@ -357,6 +479,43 @@ namespace MyVocaList.Infra.Migrations
                     b.ToTable("Venues");
                 });
 
+            modelBuilder.Entity("MyVocaList.Domain.Entities.Event", b =>
+                {
+                    b.HasOne("MyVocaList.Domain.Entity.Venue", "Venue")
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Venue");
+                });
+
+            modelBuilder.Entity("MyVocaList.Domain.Entities.QueueEntry", b =>
+                {
+                    b.HasOne("MyVocaList.Domain.Entities.Event", "Event")
+                        .WithMany("QueueEntries")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyVocaList.Domain.Entity.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MyVocaList.Domain.Entity.Song", "Song")
+                        .WithMany()
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Person");
+
+                    b.Navigation("Song");
+                });
+
             modelBuilder.Entity("MyVocaList.Domain.Entity.Catalog", b =>
                 {
                     b.HasOne("MyVocaList.Domain.Entity.Artist", "Artist")
@@ -426,6 +585,11 @@ namespace MyVocaList.Infra.Migrations
                         .IsRequired();
 
                     b.Navigation("Song");
+                });
+
+            modelBuilder.Entity("MyVocaList.Domain.Entities.Event", b =>
+                {
+                    b.Navigation("QueueEntries");
                 });
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.Artist", b =>
