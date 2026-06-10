@@ -51,7 +51,7 @@
 | 2026-06 | **App Settings** | ✅ Done | YouTube API key management (PasswordEdit, save/test/clear); flyout "Preferences" now navigates to SettingsPage; stale `HasYouTubeApiKey` refreshed on `OnAppearing`. Spec: `Docs/Management/BusinessFeatures/app-settings/` |
 | 2026-06 | **About Page** | ✅ Done | Version, logo, goal sentence, Since year, CC BY-NC-ND 4.0 license, What's New stub (hidden). Spec: `Docs/Management/BusinessFeatures/about-page/` |
 | 2026-06 | **Queue Management** | 🗺️ Plan | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate. IA: Queue-First (primary view, 0 taps to register performance). Spec: `Docs/Management/BusinessFeatures/queue-management/` · Plan: `queue-management/plan.md` · Ready for Wave 1 dispatch (entities + DTOs) |
-| 2026-06 | **Visual Theme Refresh** | 💡 pending | Theme Refresh Only - apply Karaoke Neon palette|
+| 2026-06 | **Visual Theme Refresh** | 💡 pending | Theme Refresh Only - apply Karaoke Neon palette - a Design.md with guidelines for the new pallete and generated in [https://stitch.withgoogle.com/] is found in `Docs\Management\BusinessFeatures\visual-theme-refresh\stitch-output`  |
 | 2026-06 | **Data Backup & Restore — Tier 1 + 3** | ✅ Done | Local auto-backup (SQLite snapshot + transaction log) + manual share sheet export/restore. Plan: `Docs/Management/BusinessFeatures/backup-restore/plan.md`. Spec: `Docs/Management/BusinessFeatures/backup-restore/design.md` |
 | 2026-06 | **User Tutorial/Learning** | 💡 Pending | Local or/and online tutorials. Evaluation of best practices in the lower possible effort to produce 1st version and update it always app receives new features and updates existing ones |
 | 2026-06 | **Website** | 💡 Pending | Evaluate the usage of the website - for marketing, documentation, and community engagement - myvocalist.com / myvocalist.app |
@@ -60,7 +60,7 @@
 | — | **Singer self-registration** | 💡 Pending | Singers register via public link / kiosk device / self device app connected to host device or able to self register into the host somehow |
 | — | **Social features** | 💡 Pending | Post-event sharing, singer stats |
 | — | **Windows version** | 🔴 Blocked | Blocked on DevExpress MAUI Windows support (no Windows renderer exists). Re-evaluate when DX announces Windows support. Spec: `Docs/Management/BusinessFeatures/windows-version/design.md` |
-| - | **UI-2nd-refactor** | 📋 Spec | **Direction decided (2026-06-02):** goal is having a centralized code for UI that works for every type of app - mobile, windows and web. Two paths evaluated (2026-06-02). Path B (Blazor Hybrid) chosen as long-term direction. Path A (theme-only) deferred pending spike outcome. Blazor Hybrid + MudBlazor + shared RCL. MudMCP installed. Parallel spike approach approved. Spec: `Docs/Management/BusinessFeatures/UI-2nd-refactor/` — prompt.md documents full decision session. · ⏳ **Helder (next session):** verify MudMCP index (~100 components) |
+| - | **UI-2nd-refactor** | 📋 Spec | **Direction decided (2026-06-02):** goal is having a centralized code for UI that works for every type of app - mobile, windows and web. Two paths evaluated (2026-06-02). Path B (Blazor Hybrid) chosen as long-term direction. Path A (theme-only) deferred pending spike outcome. Blazor Hybrid + MudBlazor + shared RCL. MudMCP installed. Parallel spike approach approved. Spec: `Docs/Management/DevCycleCraft/UI-2nd-refactor/` — prompt.md documents full decision session. · ⏳ **Helder (next session):** verify MudMCP index (~100 components) |
 
 ---
 
