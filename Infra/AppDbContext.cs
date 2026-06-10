@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.Interfaces;
 using MyVocaList.Infra.Collation;
 using MyVocaList.Infra.EntityEFConfig;
+using QueueManagementEvent = MyVocaList.Domain.Entities.Event;
+using QueueManagementQueueEntry = MyVocaList.Domain.Entities.QueueEntry;
 
 namespace MyVocaList.Infra;
 
@@ -20,6 +23,8 @@ public class AppDbContext : DbContext
     public DbSet<Catalog> Catalog { get; set; }
     public DbSet<SongKaraokeUrl> SongKaraokeUrls { get; set; }
     public DbSet<BackupHistory> BackupHistories { get; set; }
+    public DbSet<QueueManagementEvent> QueueManagementEvents { get; set; }
+    public DbSet<QueueManagementQueueEntry> QueueEntries { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -66,6 +71,8 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new CatalogConfiguration());
         modelBuilder.ApplyConfiguration(new SongKaraokeUrlConfiguration());
         modelBuilder.ApplyConfiguration(new BackupHistoryConfiguration());
+        modelBuilder.ApplyConfiguration(new QueueManagementEventConfiguration());
+        modelBuilder.ApplyConfiguration(new QueueEntryConfiguration());
     }
 
     /// <summary>
