@@ -964,3 +964,4 @@ MyVocaList/Resources/Styles/MaterialStyles.xaml
 Docs/Management/BACKLOG.md
 Docs/Changelog/changelog.md
 MyVocaList/UI/Components/CrudListView.xaml
+Docs/Management/BACKLOG.md
