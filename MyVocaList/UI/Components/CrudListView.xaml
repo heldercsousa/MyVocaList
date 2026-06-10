@@ -16,11 +16,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Row 0: FilterContent slot — hidden (Height=0) until FilterContent is set -->
+        <!-- Row 0: FilterContent slot — visibility controlled by code-behind OnFilterContentChanged -->
         <ContentPresenter x:Name="filterContentPresenter"
                           Grid.Row="0"
-                          Content="{Binding FilterContent, Source={x:Reference self}}"
-                          IsVisible="False" />
+                          Content="{Binding FilterContent, Source={x:Reference self}}" />
 
         <!-- Row 1: ShimmerView wrapping DXCollectionView -->
         <dx:ShimmerView Grid.Row="1"
