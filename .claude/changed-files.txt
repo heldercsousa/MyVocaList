@@ -953,3 +953,13 @@ Docs/Management/BACKLOG.md
 .claude/library/m3-components.md
 Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-003-songpage-filter-chips.md
 Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-004-bottomsheet-title-style-missing.md
+Docs/Management/BACKLOG.md
+MyVocaList/Resources/Styles/MaterialColors.xaml
+MyVocaList/Resources/Styles/MaterialColors.xaml
+MyVocaList/Resources/Styles/MaterialColors.xaml
+MyVocaList/Resources/Styles/MaterialColors.xaml
+MyVocaList/Resources/Styles/MaterialColors.xaml
+MyVocaList/Resources/Styles/MaterialStyles.xaml
+MyVocaList/Resources/Styles/MaterialStyles.xaml
+Docs/Management/BACKLOG.md
+Docs/Changelog/changelog.md
