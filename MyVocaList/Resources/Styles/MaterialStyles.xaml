@@ -243,6 +243,20 @@
         <Setter Property="HeightRequest" Value="56" />
     </Style>
 
+    <!-- Neon glow effect — primary (critical actions) -->
+    <Style x:Key="NeonGlowPrimary" TargetType="Shadow">
+        <Setter Property="Radius" Value="8" />
+        <Setter Property="Opacity" Value="0.6" />
+        <Setter Property="Brush" Value="{StaticResource Primary}" />
+    </Style>
+
+    <!-- Neon glow effect — secondary (secondary features) -->
+    <Style x:Key="NeonGlowSecondary" TargetType="Shadow">
+        <Setter Property="Radius" Value="6" />
+        <Setter Property="Opacity" Value="0.5" />
+        <Setter Property="Brush" Value="{StaticResource Secondary}" />
+    </Style>
+
     <!-- ================================================================ -->
     <!-- EMPTY STATE STYLES                                               -->
     <!-- ================================================================ -->

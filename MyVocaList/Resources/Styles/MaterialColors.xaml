@@ -11,62 +11,62 @@
     <!-- ============================================================================ -->
 
     <!-- ============================================================================ -->
-    <!-- PRIMARY TONAL PALETTE (Pink #E91E63)                                      -->
+    <!-- PRIMARY TONAL PALETTE (Hot Pink Neon #FFB1C0)                              -->
     <!-- ============================================================================ -->
 
-    <!-- Base: #FFE91E63 | Hue: 8,4° | Chroma: 92,9 | Tone: 50,9 -->
+    <!-- Base: #FFFFB1C0 | Hue: 348° | Chroma: 98 | Tone: 73 (Karaoke Neon) -->
 
     <Color x:Key="Primary0">#FF000000</Color>
-    <Color x:Key="Primary10">#FF400014</Color>
-    <Color x:Key="Primary20">#FF660025</Color>
-    <Color x:Key="Primary30">#FF900038</Color>
-    <Color x:Key="Primary40">#FFBC004B</Color>
-    <Color x:Key="Primary50">#FFE61A61</Color>
-    <Color x:Key="Primary60">#FFFF4E7C</Color>
-    <Color x:Key="Primary70">#FFFF869D</Color>
-    <Color x:Key="Primary80">#FFFFB2BE</Color>
-    <Color x:Key="Primary90">#FFFFD9DE</Color>
-    <Color x:Key="Primary95">#FFFFECEE</Color>
+    <Color x:Key="Primary10">#FF5a0023</Color>
+    <Color x:Key="Primary20">#FF660029</Color>
+    <Color x:Key="Primary30">#FF8a0040</Color>
+    <Color x:Key="Primary40">#FFbc0051</Color>
+    <Color x:Key="Primary50">#FFd4167c</Color>
+    <Color x:Key="Primary60">#FFff4c83</Color>
+    <Color x:Key="Primary70">#FFff859d</Color>
+    <Color x:Key="Primary80">#FFffb1c0</Color>
+    <Color x:Key="Primary90">#FFffd9df</Color>
+    <Color x:Key="Primary95">#FFffecee</Color>
     <Color x:Key="Primary99">#FFFFFBFF</Color>
     <Color x:Key="Primary100">#FFFFFFFF</Color>
 
     <!-- ============================================================================ -->
-    <!-- SECONDARY TONAL PALETTE (Purple #8B4CB8)                                     -->
+    <!-- SECONDARY TONAL PALETTE (Electric Violet #DEB7FF)                             -->
     <!-- ============================================================================ -->
 
-    <!-- Base: #FF8B4CB8 | Hue: 314,6° | Chroma: 59,5 | Tone: 44,4 -->
+    <!-- Base: #FFDEB7FF | Hue: 268° | Chroma: 96 | Tone: 73 (Karaoke Neon) -->
 
     <Color x:Key="Secondary0">#FF000000</Color>
-    <Color x:Key="Secondary10">#FF2F004D</Color>
-    <Color x:Key="Secondary20">#FF4D007A</Color>
-    <Color x:Key="Secondary30">#FF662592</Color>
-    <Color x:Key="Secondary40">#FF7F41AC</Color>
-    <Color x:Key="Secondary50">#FF9A5BC7</Color>
-    <Color x:Key="Secondary60">#FFB675E4</Color>
-    <Color x:Key="Secondary70">#FFD190FF</Color>
-    <Color x:Key="Secondary80">#FFE2B5FF</Color>
-    <Color x:Key="Secondary90">#FFF3DAFF</Color>
-    <Color x:Key="Secondary95">#FFFBECFF</Color>
+    <Color x:Key="Secondary10">#FF2c0050</Color>
+    <Color x:Key="Secondary20">#FF4a007f</Color>
+    <Color x:Key="Secondary30">#FF6112a0</Color>
+    <Color x:Key="Secondary40">#FF7c2ab9</Color>
+    <Color x:Key="Secondary50">#FF9649d8</Color>
+    <Color x:Key="Secondary60">#FFb575f0</Color>
+    <Color x:Key="Secondary70">#FFd190ff</Color>
+    <Color x:Key="Secondary80">#FFdeb7ff</Color>
+    <Color x:Key="Secondary90">#FFF0dbff</Color>
+    <Color x:Key="Secondary95">#FFFbecff</Color>
     <Color x:Key="Secondary99">#FFFFFBFF</Color>
     <Color x:Key="Secondary100">#FFFFFFFF</Color>
 
     <!-- ============================================================================ -->
-    <!-- TERTIARY TONAL PALETTE (Gold #FFD700)                                    -->
+    <!-- TERTIARY TONAL PALETTE (Neon Gold #E9C400)                                    -->
     <!-- ============================================================================ -->
 
-    <!-- Base: #FFFFD700 | Hue: 96,7° | Chroma: 64,5 | Tone: 86,9 -->
+    <!-- Base: #FFE9C400 | Hue: 46° | Chroma: 94 | Tone: 71 (Karaoke Neon) -->
 
     <Color x:Key="Tertiary0">#FF000000</Color>
-    <Color x:Key="Tertiary10">#FF221B00</Color>
-    <Color x:Key="Tertiary20">#FF3A3000</Color>
+    <Color x:Key="Tertiary10">#FF221b00</Color>
+    <Color x:Key="Tertiary20">#FF3a3000</Color>
     <Color x:Key="Tertiary30">#FF544600</Color>
-    <Color x:Key="Tertiary40">#FF705D00</Color>
-    <Color x:Key="Tertiary50">#FF8C7500</Color>
-    <Color x:Key="Tertiary60">#FFAA8F00</Color>
-    <Color x:Key="Tertiary70">#FFC9A900</Color>
-    <Color x:Key="Tertiary80">#FFE9C400</Color>
-    <Color x:Key="Tertiary90">#FFFFE16D</Color>
-    <Color x:Key="Tertiary95">#FFFFF0C2</Color>
+    <Color x:Key="Tertiary40">#FF705d00</Color>
+    <Color x:Key="Tertiary50">#FF8c7500</Color>
+    <Color x:Key="Tertiary60">#FFc8a900</Color>
+    <Color x:Key="Tertiary70">#FFe9c400</Color>
+    <Color x:Key="Tertiary80">#FFffe16d</Color>
+    <Color x:Key="Tertiary90">#FFfff0c2</Color>
+    <Color x:Key="Tertiary95">#FFFFF8E6</Color>
     <Color x:Key="Tertiary99">#FFFFFBFF</Color>
     <Color x:Key="Tertiary100">#FFFFFFFF</Color>
 
@@ -131,56 +131,56 @@
 
 
     <!-- ============================================================================ -->
-    <!-- DARK MODE SEMANTIC TOKENS (Primary Theme)                                  -->
+    <!-- DARK MODE SEMANTIC TOKENS (Karaoke Neon Theme)                              -->
     <!-- ============================================================================ -->
 
-    <!-- Primary Role Colors (DARK MODE) -->
-    <Color x:Key="Primary">#BAC3FF</Color>
-    <Color x:Key="OnPrimary">#15267B</Color>
-    <Color x:Key="PrimaryContainer">#5C6BC0</Color>
-    <Color x:Key="OnPrimaryContainer">#F8F6FF</Color>
+    <!-- Primary Role Colors (DARK MODE) - Hot Pink Neon -->
+    <Color x:Key="Primary">#ffb1c0</Color>
+    <Color x:Key="OnPrimary">#660029</Color>
+    <Color x:Key="PrimaryContainer">#ff4c83</Color>
+    <Color x:Key="OnPrimaryContainer">#5a0023</Color>
 
-    <!-- Secondary Role Colors (DARK MODE) -->
-    <Color x:Key="Secondary">#BFC4EC</Color>
-    <Color x:Key="OnSecondary">#292E4E</Color>
-    <Color x:Key="SecondaryContainer">#3F4566</Color>
-    <Color x:Key="OnSecondaryContainer">#AEB3DA</Color>
+    <!-- Secondary Role Colors (DARK MODE) - Electric Violet -->
+    <Color x:Key="Secondary">#deb7ff</Color>
+    <Color x:Key="OnSecondary">#4a007f</Color>
+    <Color x:Key="SecondaryContainer">#6a17ad</Color>
+    <Color x:Key="OnSecondaryContainer">#d4a5ff</Color>
 
-    <!-- Tertiary Role Colors (DARK MODE) -->
-    <Color x:Key="Tertiary">#FFABF2</Color>
-    <Color x:Key="OnTertiary">#551153</Color>
-    <Color x:Key="TertiaryContainer">#A15699</Color>
-    <Color x:Key="OnTertiaryContainer">#FFF4F9</Color>
+    <!-- Tertiary Role Colors (DARK MODE) - Neon Gold -->
+    <Color x:Key="Tertiary">#e9c400</Color>
+    <Color x:Key="OnTertiary">#3a3000</Color>
+    <Color x:Key="TertiaryContainer">#c8a900</Color>
+    <Color x:Key="OnTertiaryContainer">#4b3e00</Color>
 
     <!-- Error Role Colors (DARK MODE) -->
-    <Color x:Key="Error">#FFB4AB</Color>
+    <Color x:Key="Error">#ffb4ab</Color>
     <Color x:Key="OnError">#690005</Color>
-    <Color x:Key="ErrorContainer">#93000A</Color>
-    <Color x:Key="OnErrorContainer">#FFDAD6</Color>
+    <Color x:Key="ErrorContainer">#93000a</Color>
+    <Color x:Key="OnErrorContainer">#ffdad6</Color>
 
     <!-- Background & Surface (DARK MODE) -->
-    <Color x:Key="Background">#121318</Color>
-    <Color x:Key="OnBackground">#E3E1E9</Color>
-    <Color x:Key="Surface">#121318</Color>
-    <Color x:Key="OnSurface">#E3E1E9</Color>
-    <Color x:Key="SurfaceVariant">#454651</Color>
-    <Color x:Key="OnSurfaceVariant">#C6C5D3</Color>
+    <Color x:Key="Background">#131318</Color>
+    <Color x:Key="OnBackground">#e4e1e9</Color>
+    <Color x:Key="Surface">#131318</Color>
+    <Color x:Key="OnSurface">#e4e1e9</Color>
+    <Color x:Key="SurfaceVariant">#35343a</Color>
+    <Color x:Key="OnSurfaceVariant">#e4bdc3</Color>
 
-    <Color x:Key="SurfaceContainerLowest">#0D0E13</Color>
-    <Color x:Key="SurfaceContainerLow">#1B1B21</Color>
-    <Color x:Key="SurfaceContainer">#1F1F25</Color>
-    <Color x:Key="SurfaceContainerHigh">#29292F</Color>
-    <Color x:Key="SurfaceContainerHighest">#34343A</Color>
-    <Color x:Key="SurfaceDim">#121318</Color>
-    <Color x:Key="SurfaceBright">#39393F</Color>
+    <Color x:Key="SurfaceContainerLowest">#0e0e13</Color>
+    <Color x:Key="SurfaceContainerLow">#1b1b20</Color>
+    <Color x:Key="SurfaceContainer">#1f1f25</Color>
+    <Color x:Key="SurfaceContainerHigh">#2a292f</Color>
+    <Color x:Key="SurfaceContainerHighest">#35343a</Color>
+    <Color x:Key="SurfaceDim">#131318</Color>
+    <Color x:Key="SurfaceBright">#39383e</Color>
 
-    <Color x:Key="Outline">#8F909D</Color>
-    <Color x:Key="OutlineVariant">#454651</Color>
+    <Color x:Key="Outline">#ab888e</Color>
+    <Color x:Key="OutlineVariant">#5b3f44</Color>
 
     <!-- Inverse Colors (DARK MODE) -->
-    <Color x:Key="InverseSurface">#E3E1E9</Color>
+    <Color x:Key="InverseSurface">#e4e1e9</Color>
     <Color x:Key="InverseOnSurface">#303036</Color>
-    <Color x:Key="InversePrimary">#4858AB</Color>
+    <Color x:Key="InversePrimary">#bc0051</Color>
 
     <!-- Scrim & Shadow -->
     <Color x:Key="Scrim">#000000</Color>
@@ -222,37 +222,37 @@
     -->
 
     <!-- ============================================================================ -->
-    <!-- GRADIENTS (Using Tonal Palette Values)                                     -->
+    <!-- GRADIENTS (Using Tonal Palette Values - Neon Glow)                          -->
     <!-- ============================================================================ -->
 
-    <!-- App Background Gradient (Dark Purple) -->
+    <!-- App Background Gradient (Deep Black with Hot Pink accent) -->
     <LinearGradientBrush x:Key="AppBackgroundGradient" StartPoint="0,0" EndPoint="1,0">
         <GradientStop Color="{StaticResource Neutral10}" Offset="0.0" />
-        <GradientStop Color="{StaticResource Primary10}" Offset="1.0" />
+        <GradientStop Color="{StaticResource Primary20}" Offset="1.0" />
     </LinearGradientBrush>
 
-    <!-- Card Background Gradient (Diagonal Purple) -->
+    <!-- Card Background Gradient (Hot Pink to Electric Violet) -->
     <LinearGradientBrush x:Key="CardBackgroundGradient" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{StaticResource Primary20}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Primary30}" Offset="0.0" />
         <GradientStop Color="{StaticResource Secondary30}" Offset="1.0" />
     </LinearGradientBrush>
 
-    <!-- Selected Item Gradient (Pink to Purple) -->
+    <!-- Selected Item Gradient (Hot Pink to Electric Violet - Bright) -->
     <LinearGradientBrush x:Key="SelectedGradient" StartPoint="0,0" EndPoint="1,0">
-        <GradientStop Color="{StaticResource Primary30}" Offset="0.0" />
-        <GradientStop Color="{StaticResource Secondary40}" Offset="1.0" />
-    </LinearGradientBrush>
-
-    <!-- Button Gradient (Bright Pink to Purple) -->
-    <LinearGradientBrush x:Key="ButtonGradient" StartPoint="0,0" EndPoint="1,0">
-        <GradientStop Color="{StaticResource Primary70}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Primary60}" Offset="0.0" />
         <GradientStop Color="{StaticResource Secondary70}" Offset="1.0" />
     </LinearGradientBrush>
 
-    <!-- FAB Gradient (Gold to Pink) -->
+    <!-- Button Gradient (Bright Hot Pink to Electric Violet) -->
+    <LinearGradientBrush x:Key="ButtonGradient" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource Primary80}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Secondary80}" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- FAB Gradient (Neon Gold to Hot Pink) -->
     <LinearGradientBrush x:Key="FabGradient" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{StaticResource Tertiary80}" Offset="0.0" />
-        <GradientStop Color="{StaticResource Primary70}" Offset="1.0" />
+        <GradientStop Color="{StaticResource Tertiary70}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Primary80}" Offset="1.0" />
     </LinearGradientBrush>
 
     <!-- ============================================================================ -->
