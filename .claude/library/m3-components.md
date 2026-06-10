@@ -1,5 +1,21 @@
 # M3 Components — AppBar Patterns
 
+---
+
+## ⚠️ PRE-IMPLEMENTATION AUDIT CHECKLIST (REFER TO `devexpress-patterns.md`)
+
+**This file documents custom components (AppBar, ListItem, EmptyState, FloatingToolbar) that were implemented because DevExpress had no equivalent at the time.**
+
+**Before implementing a new component OR adding styles for a component here:**
+
+1. **Check `devexpress-patterns.md § PRE-IMPLEMENTATION AUDIT CHECKLIST` first** — it has the complete pre-implementation workflow.
+2. **Ask:** Does DevExpress now have a newer equivalent? If yes, prefer it over custom code.
+3. **Example:** Before the 2026 DevExpress release, there was no `FilterChipGroup` → we would have built a custom chip component. Now DX has it → use `dxe:FilterChipGroup`, not custom chips.
+
+**This file is the registry of "what we built custom" — not the first place to check before coding.** The first place is always `devexpress-patterns.md`.
+
+---
+
 ## MD3 Terminology Conventions
 
 ### "Body" means a structural slot — not text content
