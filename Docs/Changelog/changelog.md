@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for june 2026
+- **06/10/2026** - feat - Visual Theme Refresh: apply Karaoke Neon palette to MaterialColors.xaml (hot pink primary #ffb1c0, electric violet secondary #deb7ff, neon gold tertiary #e9c400, deep black surfaces #131318); add NeonGlowPrimary & NeonGlowSecondary Shadow styles to MaterialStyles.xaml for neon glow effects (radius 8/6, opacity 60/50%)
 - **06/06/2026** - fix - Remove x:DataType from CrudListView root: MAUI compiled bindings were incorrectly casting CrudListView to ICrudListViewModel for all Source={x:Reference self} bindings, silently nulling FabIcon, ItemsSource, IsEmptyNoItems and all other BindableProperty bindings; reflection-based bindings restore correct resolution
 - **06/06/2026** - refactor - Relocate CrudListView to UI/Components/, ICrudListViewModel to UI/ViewModels/, CrudListPageBase to UI/Pages/Base/ for correct folder placement
 - **06/02/2026** - amend - Cleaned up CollationConstants.cs (removed multi-provider reference table; file scope is SQLite only); added hard rule to constraints-registry.md prohibiting C#-side string normalization (ToLowerInvariant, *Normalized columns) for search/dedup — correct pattern is UseCollation(CollationConstants.Default) + EF.Functions.Collate in LINQ
