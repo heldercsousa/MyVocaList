@@ -948,3 +948,8 @@ MyVocaList/UI/ViewModels/SongPickerViewModel.cs
 Docs/Management/BACKLOG.md
 Docs/Management/BusinessFeatures/queue-management/plan.md
 Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+.claude/library/devexpress-patterns.md
+.claude/library/m3-components.md
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-003-songpage-filter-chips.md
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-004-bottomsheet-title-style-missing.md
