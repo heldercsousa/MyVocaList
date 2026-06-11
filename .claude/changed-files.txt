@@ -1115,3 +1115,4 @@ MyVocaList/MauiProgram.cs
 MyVocaList/MauiProgram.cs
 MyVocaList/AppShell.xaml
 MyVocaList/UI/Pages/Queue/QueueManagementPage.xaml.cs
+Docs/Management/BACKLOG.md
