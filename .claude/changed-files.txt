@@ -1183,3 +1183,10 @@ MyVocaList.sln
 .worktrees/page-load-frozen/MyVocaList/Extensions/LoggingConfiguration.cs
 .worktrees/page-load-frozen/MyVocaList/Extensions/LoggingConfiguration.cs
 .worktrees/page-load-frozen/Docs/Management/DevCycleCraft/page-load-frozen/task-log.md
+.worktrees/page-load-frozen/MyVocaList/UI/Components/Sheets/UpdateAvailableBottomSheet.xaml
+.worktrees/page-load-frozen/MyVocaList/UI/Components/Sheets/UpdateRequiredBottomSheet.xaml
+.worktrees/page-load-frozen/MyVocaList/UI/Components/Sheets/WhatsNewBottomSheet.xaml
+.worktrees/page-load-frozen/MyVocaList/UI/Pages/BackupRestore/BackupRestorePage.xaml
+.worktrees/page-load-frozen/MyVocaList/UI/Pages/BackupRestore/BackupRestorePage.xaml
+.worktrees/page-load-frozen/MyVocaList/UI/Pages/Feedback/FeedbackPage.xaml
+.worktrees/page-load-frozen/MyVocaList/UI/Pages/Feedback/FeedbackPage.xaml
