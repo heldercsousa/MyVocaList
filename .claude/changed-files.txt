@@ -1190,3 +1190,8 @@ MyVocaList.sln
 .worktrees/page-load-frozen/MyVocaList/UI/Pages/BackupRestore/BackupRestorePage.xaml
 .worktrees/page-load-frozen/MyVocaList/UI/Pages/Feedback/FeedbackPage.xaml
 .worktrees/page-load-frozen/MyVocaList/UI/Pages/Feedback/FeedbackPage.xaml
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/feedback_orchestrator_discipline.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
+Docs/Management/cheerful-conjuring-ullman.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
