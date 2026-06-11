@@ -129,11 +129,12 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
             if (cancellationToken.IsCancellationRequested) return;
 
             _totalCount = totalCount;
-            HasMoreItems = totalCount > list.Count;
+            var hasMore = totalCount > list.Count;
 
             RunOnUiThread(() =>
             {
                 Items.ReplaceRange(list);
+                HasMoreItems = hasMore;
                 if (SelectedItems.Count > 0)
                 {
                     SelectedItems.ClearRange();
@@ -170,13 +171,17 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         }
 
         _isLoading = true;
-        var loadingPage = _currentPage + 1;
         var entered = false;
+        var loadingPage = 0;
 
         try
         {
             await DbLoadGate.WaitAsync();
             entered = true;
+
+            // Read the page number AFTER the gate: a first-page load (search/refresh)
+            // holding the gate may reset _currentPage before this load-more runs.
+            loadingPage = _currentPage + 1;
 
             // SQLITE-WORKAROUND: same offload as LoadFirstPageAsync — SQLite query + lazy
             // projection enumeration must not run on the UI thread.
