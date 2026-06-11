@@ -8,7 +8,7 @@
 
     <!--
         MD3 Modal bottom sheet — soft update nudge (dismissible).
-        AllowDismiss="True" and IsCancelable="True" so users can tap away.
+        AllowDismiss="True" so users can tap away or swipe down to dismiss.
         Show via code-behind Show(UpdateCheckResult).
     -->
     <dx:BottomSheet x:Name="Sheet"
@@ -17,7 +17,6 @@
                     IsModal="True"
                     ShowGrabber="True"
                     AllowDismiss="True"
-                    IsCancelable="True"
                     BackgroundColor="{StaticResource Surface}"
                     CornerRadius="28">
         <VerticalStackLayout>

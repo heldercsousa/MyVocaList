@@ -8,8 +8,7 @@
     <dx:BottomSheet
         x:Name="Sheet"
         AllowDismiss="True"
-        HalfExpandedRatio="0.6"
-        ExpandedRatio="0.85">
+        HalfExpandedRatio="0.6">
 
         <dx:BottomSheet.Content>
             <ScrollView>

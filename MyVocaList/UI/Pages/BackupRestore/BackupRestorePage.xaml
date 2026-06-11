@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:entity="clr-namespace:MyVocaList.Domain.Entity;assembly=MyVocaList.Domain"
     x:Class="MyVocaList.UI.Pages.BackupRestore.BackupRestorePage"
     x:DataType="vm:BackupRestoreViewModel"
     Title="Backup &amp; Restore"
@@ -46,8 +47,7 @@
 
             <VerticalStackLayout BindableLayout.ItemsSource="{Binding History}" Spacing="8">
                 <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="entity:BackupHistory"
-                                  xmlns:entity="clr-namespace:MyVocaList.Domain.Entity;assembly=MyVocaList.Domain">
+                    <DataTemplate x:DataType="entity:BackupHistory">
                         <VerticalStackLayout Spacing="2">
                             <Label Text="{Binding CreatedAt, StringFormat='{0:g}'}"
                                    StyleClass="Body.Small"
