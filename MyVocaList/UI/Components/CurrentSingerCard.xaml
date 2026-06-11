@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    x:Class="MyVocaList.UI.Components.CurrentSingerCard"
+    x:Name="self">
+
+    <!-- Card displaying the currently performing singer -->
+    <dx:DXCard Padding="16"
+               CornerRadius="12"
+               Margin="16,8"
+               BackgroundColor="{StaticResource Surface}">
+        <Grid ColumnDefinitions="Auto,*,Auto"
+              RowDefinitions="Auto,Auto,Auto"
+              Spacing="8">
+
+            <!-- Left: Avatar with initials -->
+            <Ellipse Grid.Row="0"
+                     Grid.RowSpan="3"
+                     Grid.Column="0"
+                     WidthRequest="56"
+                     HeightRequest="56"
+                     Fill="{StaticResource Primary}"
+                     Margin="0,0,12,0" />
+            <Label Grid.Row="0"
+                   Grid.RowSpan="3"
+                   Grid.Column="0"
+                   Text="{Binding CurrentSinger.PersonInitials}"
+                   FontAttributes="Bold"
+                   FontSize="20"
+                   TextColor="{StaticResource OnPrimary}"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center" />
+
+            <!-- Center: Singer info -->
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   Text="{Binding CurrentSinger.PersonName}"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource OnSurface}" />
+
+            <Label Grid.Row="1"
+                   Grid.Column="1"
+                   Text="{Binding CurrentSinger.SongTitle}"
+                   FontSize="14"
+                   TextColor="{StaticResource OnSurfaceVariant}" />
+
+            <Label Grid.Row="2"
+                   Grid.Column="1"
+                   Text="{Binding CurrentSinger.ArtistName}"
+                   FontSize="12"
+                   TextColor="{StaticResource OnSurfaceVariant}" />
+
+            <!-- Right: Performance time -->
+            <VerticalStackLayout Grid.Row="0"
+                                 Grid.RowSpan="3"
+                                 Grid.Column="2"
+                                 HorizontalOptions="End"
+                                 VerticalOptions="Center"
+                                 Spacing="4">
+                <Label Text="{Binding PerformanceElapsedTime, StringFormat='{0:mm\\:ss}'}"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"
+                       HorizontalOptions="End" />
+                <Label Text="Performance Time"
+                       FontSize="12"
+                       TextColor="{StaticResource OnSurfaceVariant}"
+                       HorizontalOptions="End" />
+            </VerticalStackLayout>
+
+        </Grid>
+    </dx:DXCard>
+
+</ContentView>
