@@ -106,3 +106,71 @@ Regression tests for a bug fix carry a `// Regression: page-load-frozen` comment
 2. Emulator: deploy debug build, navigate Venues → Artists → Songs → People. Expected: each page appears instantly with the shimmer skeleton animating (visible motion = UI thread free), then data replaces it. While the shimmer shows, the back gesture and drawer must respond.
 3. Rapid navigation stress: open a data-heavy page and immediately navigate to another list page repeatedly — no `InvalidOperationException` (second operation on context), confirming the static gate works.
 4. Helder smoke test on the S23 Ultra (same scenario). If data-heavy pages still show a *long* (but now animated, non-frozen) shimmer, that's the deferred query-optimization follow-up — request the device debug log at that point to quantify query time.
+
+---
+
+# Phase 2 — UI freeze persists on device (2026-06-11)
+
+> **Status:** Phase 1 (DB offload + load gate) shipped and verified in code, but the S23 Ultra still freezes 2.5–4 s per navigation to any CRUD list page — **with an empty database**. Device-log analysis (see `findings.md` in this folder) attributes the freeze to UI-thread page/view construction and measure/layout, NOT to data access.
+>
+> **Evidence digest (full detail in `findings.md`):** per navigation tap the logs show `Choreographer Skipped 53–245 frames`, HWUI `Davey!` frames of 1.0–4.1 s in which (a) the main thread is busy outside rendering for 2.1–2.7 s (IntendedVsync→Vsync gap) and (b) native measure/layout alone takes 1.2–1.3 s (PerformTraversalsStart→DrawStart); bursts of 5–8 MonoVM GC-bridge collections (mass Java-peer creation = native view inflation); and an Android `Dialog` window created mid-freeze (the `dx:BottomSheet` in `CrudListView`). Hypotheses ranked: **H1** composite-tree inflation cost (40–60 elements/page incl. 2 TitleView app bars, ShimmerView, DXCollectionView, BottomSheet, FloatingToolbar, FAB, 2 EmptyStates) — high confidence; **H2** ShimmerView double content swap on every `OnAppearing` (incl. revisits to Shell-cached pages) — medium-high; **H3** debug-build amplification (JIT, no AOT, debugger) — magnitude unknown, must be measured; **H4** Shell.TitleView swap cost — contributor.
+>
+> **Rules honored by all tasks below:** DevExpress-first UI; no `DisplayAlert`/native dialogs; business logic stays in Services; English only; the `SQLITE-WORKAROUND` revert markers from Phase 1 must remain untouched; XAML edits are incremental (ONE file → build → fix → next file).
+
+## Ordered tasks
+
+- [ ] **T1 — Instrument CRUD page lifecycle timings (Serilog)** [SEQUENTIAL]
+  - **Context:** We must attribute the 2.5–4 s freeze between (a) page construction (`InitializeComponent` + DI resolution), (b) native handler attach/first layout, and (c) `InitializeAsync` shimmer toggling. Logs to read on-device via existing Serilog sinks (logcat/file).
+  - **What to do:** In `CrudListPageBase` add `Stopwatch`-based `ILogger`/Serilog timing: log page subclass name + ms for (1) constructor body of each concrete page — measure via a protected `static Stopwatch` started before `InitializeComponent` in each page ctor OR simpler: log timestamps in `CrudListPageBase` ctor, `OnAppearing` start/end, and page `Loaded` + `OnNavigatedTo` events; (2) in `CrudListViewModelBase.InitializeAsync` log ms for the full method and for the `Task.Run` fetch alone; (3) in `CrudListView` ctor log `InitializeComponent` duration and subscribe `Loaded` to log time-from-ctor. Use `Serilog.Log.ForContext` or injected `ILogger` (already available in VMs; for pages use `Serilog.Log.Logger` directly — UI-layer diagnostics, no business logic). Mark every added block with `// PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.`
+  - **Produces:** timing log lines `[PageLoad] {Page} ctor={ms} appearing={ms} loaded={ms} initAsync={ms} fetch={ms}` on every navigation.
+  - **Consumes:** `CrudListPageBase.cs`, `CrudListView.xaml.cs`, `CrudListViewModelBase.cs` (committed state on this branch).
+  - **Files owned:** `MyVocaList/UI/Pages/Base/CrudListPageBase.cs`, `MyVocaList/UI/Components/CrudListView.xaml.cs`, `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs`.
+  - **Demo:** Deploy debug build, navigate Venues → People → Venues; logcat shows one `[PageLoad]` line per navigation with all five timings; first-visit vs revisit numbers visibly differ.
+  - **Risk:** Low — additive logging only; no behavior change. Existing 271 tests must stay green (instrumentation must not break the no-SynchronizationContext regression tests — keep all logging outside `RunOnUiThread` blocks).
+
+- [ ] **T2 — Release-configuration baseline run (no production code change)** [SEQUENTIAL — after T1 so the same instrumentation logs are present]
+  - **Context:** Both freeze reproductions were Debug deploys (Mono JIT, no AOT; one with debugger attached). If Release timing is acceptable, the structural UI work (T5) drops in priority; if not, H1 is confirmed as a real product defect. Phase 1 plan already flagged debug-build cost as out of scope — this task quantifies it instead of guessing.
+  - **What to do:** Build the Android app in Release (`dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -c Release`) and produce a signed-or-debuggable APK artifact for Helder to sideload on the S23 Ultra (document the exact `adb install` step in the task-log). Do NOT change csproj settings other than what Release already defines. Collect the `[PageLoad]` Serilog timings from the Release run (Serilog file sink or logcat) and append a Debug-vs-Release comparison table to `findings.md`.
+  - **Produces:** Release APK + comparison table in `findings.md` (Debug ctor/appearing/loaded ms vs Release).
+  - **Consumes:** T1 instrumentation (committed).
+  - **Files owned:** `Docs/Management/DevCycleCraft/page-load-frozen/findings.md` (append only), `Docs/Management/DevCycleCraft/page-load-frozen/task-log.md`.
+  - **Demo:** Helder installs the Release APK, navigates the 4 CRUD pages, and reports whether the freeze is gone/acceptable; findings.md contains the numbers.
+  - **Risk:** Low — no code change. Note: Release build may take >10 min on first run (AOT/linker).
+
+- [ ] **T3 — Skip the shimmer initial-load cycle on revisits** [SEQUENTIAL — after T1 (so before/after timings exist); independent of T2 results]
+  - **Context:** `CrudListViewModelBase.InitializeAsync` (lines 98–104) unconditionally sets `IsInitialLoading = true` → `false` on every `OnAppearing`. Each toggle makes the `dx:ShimmerView` in `CrudListView.xaml` swap its native subtree (LoadingView with 6 skeleton bones ↔ Content with DXCollectionView), forcing re-attach + full measure/layout twice per navigation — even when the page instance is cached by Shell (all CRUD pages are `ShellContent` in `AppShell.xaml`) and data is already loaded. This is hypothesis H2 in `findings.md` and is a correct behavior fix regardless of other outcomes (a revisit should show existing data instantly, then refresh quietly).
+  - **What to do (TDD — testing.md Level A, regression comment `// Regression: page-load-frozen phase 2`):** Add a private `bool _hasLoadedOnce` to `CrudListViewModelBase`. In `InitializeAsync`: if `_hasLoadedOnce` is false → current behavior (shimmer on, load, shimmer off; set `_hasLoadedOnce = true` after the first successful load). If true → do NOT touch `IsInitialLoading`; still call `LoadFirstPageAsync` (silent refresh keeps the list current after add/edit flows return to the page). Write the failing test first: `InitializeAsync_SecondCall_DoesNotToggleIsInitialLoading` (assert no `PropertyChanged` for `IsInitialLoading` on second call) in the existing `MyVocaList.Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` test-double infrastructure. Confirm the 2 existing SynchronizationContext regression tests still pass. Do NOT remove or alter the `SQLITE-WORKAROUND` comments/code.
+  - **Produces:** revisit navigations with zero ShimmerView subtree swaps; 1 new regression test.
+  - **Consumes:** `CrudListViewModelBase.cs` (with T1 instrumentation in place).
+  - **Files owned:** `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs`, `MyVocaList.Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs`.
+  - **Demo:** Navigate Venues → People → back to Venues: Venues reappears with its list immediately (no skeleton flash); T1 logs show revisit `initAsync` ms drop versus the pre-T3 baseline.
+  - **Risk:** Medium — changes the visible loading behavior on revisits (intended); pull-to-refresh and search paths must be re-verified (they call `LoadFirstPageAsync` directly and never touched `IsInitialLoading`, so they are unaffected by design).
+
+- [ ] **T4 — Add the missing `info_outlined` icon asset** [P — parallel with T2/T3]
+  - **Context:** Both device logs show a Glide `FileNotFoundException: /info_outlined` at startup. `Resources/Images/` contains the full `*_outlined.svg` icon set but `info_outlined.svg` is absent; some XAML (What's New / About area) references it. Not the freeze cause — hygiene fix that removes a misleading error from future log captures.
+  - **What to do:** Grep the `MyVocaList/` project for `info_outlined` to confirm the consumer(s). Add `info_outlined.svg` to `MyVocaList/Resources/Images/` following the exact style/viewBox conventions of the sibling Material icons (copy the source convention of e.g. `check_circle_outlined.svg` — Material Symbols "info" outlined glyph). `MauiImage Include="Resources\Images\*"` already globs the folder — no csproj change.
+  - **Produces:** `MyVocaList/Resources/Images/info_outlined.svg`; no Glide error on startup.
+  - **Consumes:** nothing.
+  - **Files owned:** `MyVocaList/Resources/Images/info_outlined.svg`.
+  - **Demo:** Deploy, open the page/sheet that uses the icon — icon renders; logcat shows no `Load failed for [info_outlined]`.
+  - **Risk:** Low.
+
+- [ ] **T5 — [DECISION GATE + SPIKE] Structural reduction of CRUD page first-render cost** [SEQUENTIAL — only after T1+T2 numbers reviewed with Helder]
+  - **Time-box:** 2 hours (hard stop) for the spike portion.
+  - **Question:** Which single structural change yields the largest reduction in `ctor`+`loaded` time on-device: (a) deferring the `dx:BottomSheet` in `CrudListView` to lazy creation (create/attach on first `ConfirmSheetState` change instead of at inflation — it currently creates an Android Dialog window during every page construction); (b) collapsing `Shell.TitleView` to a single app bar inflated on demand (SearchAppBar created only when search opens); or (c) deferring `DXCollectionView` attach until after the first frame (skeleton-only first paint)?
+  - **Success criterion:** one option shows ≥40% reduction of the T1 `loaded` timing on the S23 Ultra (or emulator as proxy) for VenuesPage.
+  - **Failure criterion:** no option reaches 20% — escalate to Helder; the remaining lever is the Blazor Hybrid migration track already in BACKLOG, not micro-optimization.
+  - **Constraints:** spike on VenuesPage ONLY, throwaway branch commits clearly marked `spike:`; DevExpress-first stays in force (no stock-MAUI replacements of DX components); production rollout of the winning option is a SEPARATE task authored after Helder reviews the spike numbers; XAML edits one-file-at-a-time with a build between each.
+  - **Produces:** `findings.md` § "T5 spike results" with per-option timings + recommendation.
+  - **Consumes:** T1 timings, T2 Debug-vs-Release table, Helder's go decision.
+  - **Files owned (spike, throwaway):** `MyVocaList/UI/Components/CrudListView.xaml(.cs)`, `MyVocaList/UI/Pages/Venues/VenuesPage.xaml(.cs)` — restored or properly re-implemented after the spike.
+  - **Demo:** N/A (spike produces findings, not shipped behavior).
+  - **Risk:** Medium — touches the shared `CrudListView`; mitigated by spike isolation and the separate-rollout rule.
+
+## Phase 2 exit criteria
+
+1. T1 timings captured for all 4 CRUD pages (first visit + revisit) and recorded in `findings.md`.
+2. Debug-vs-Release comparison recorded; Helder decides whether Release-build performance is acceptable for MVP.
+3. T3 shipped: revisits show no skeleton flash and measurably lower `initAsync`/swap cost.
+4. If structural work is needed: T5 spike completed and the winning option scheduled as its own task with Helder's approval.
+5. All instrumentation marked `PHASE2-INSTRUMENTATION` is either removed or explicitly kept by Helder's decision before the branch merges to `develop`.
