@@ -75,6 +75,31 @@ public class CrudListViewModelBaseTests
         Assert.NotSame(uiContext, contextDuringFetch);
     }
 
+    [Fact]
+    // Regression: page-load-frozen phase 2 — revisit should not toggle IsInitialLoading (no shimmer flash)
+    public async Task InitializeAsync_SecondCall_DoesNotToggleIsInitialLoading()
+    {
+        var sut = new TestCrudListViewModel();
+
+        // First call — establishes the loaded state
+        await sut.InitializeAsync();
+        Assert.False(sut.IsInitialLoading); // sanity: first load left shimmer off
+
+        // Capture PropertyChanged events for IsInitialLoading raised by the second call
+        var isInitialLoadingChanges = new List<bool>();
+        sut.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ICrudListViewModel.IsInitialLoading))
+                isInitialLoadingChanges.Add(sut.IsInitialLoading);
+        };
+
+        // Second call — simulates Shell-cached page revisit (OnAppearing fires again)
+        await sut.InitializeAsync();
+
+        // No PropertyChanged for IsInitialLoading must have been raised on the second call
+        Assert.Empty(isInitialLoadingChanges);
+    }
+
     // ── Test double ───────────────────────────────────────────────────────
 
     private sealed class TestCrudListViewModel : CrudListViewModelBase<string>
