@@ -403,6 +403,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-003-songpage-filter-chips.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-003-songpage-filter-chips.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-004-bottomsheet-title-style-missing.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-004-bottomsheet-title-style-missing.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-005-new-song-save-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-005-new-song-save-broken.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-006-search-song-double-tap-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-006-search-song-double-tap-crash.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
