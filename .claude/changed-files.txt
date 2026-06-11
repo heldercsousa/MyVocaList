@@ -1198,3 +1198,6 @@ Docs/Management/BACKLOG.md
 Docs/Changelog/changelog.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_page_load_frozen_phase2.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-005-new-song-save-broken.md
+MyVocaList.sln
+Docs/Management/BACKLOG.md
