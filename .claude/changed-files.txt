@@ -1204,3 +1204,10 @@ Docs/Management/BACKLOG.md
 Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-008-songform-artist-autocomplete.md
 MyVocaList.sln
 Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-006-search-song-double-tap-crash.md
+MyVocaList.sln
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-009-add-url-before-save-ux.md
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-007-searchappbar-duplicate-back-arrow.md
+MyVocaList.sln
+MyVocaList.sln
+Docs/Management/BACKLOG.md
