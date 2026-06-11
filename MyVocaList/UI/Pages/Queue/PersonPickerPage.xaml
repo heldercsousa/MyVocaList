@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    x:Class="MyVocaList.UI.Pages.Queue.PersonPickerPage"
+    x:DataType="vm:PersonPickerViewModel"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="Container">
+
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False" IsEnabled="False" />
+    </Shell.BackButtonBehavior>
+
+    <Grid RowDefinitions="auto,*">
+        <!-- Search -->
+        <dx:DXTextEdit
+            Grid.Row="0"
+            Placeholder="Search singers..."
+            Text="{Binding SearchText, Mode=TwoWay}"
+            Margin="16"
+            ClearButtonDisplayMode="WhileEditing" />
+
+        <!-- Results -->
+        <dx:DXCollectionView
+            Grid.Row="1"
+            ItemsSource="{Binding Results}"
+            SelectionMode="Single"
+            SelectionChangedCommand="{Binding SelectPersonCommand}">
+            <dx:DXCollectionView.ItemTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout Padding="16" Spacing="4">
+                        <Label Text="{Binding Name}" StyleClass="Body.Large" />
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </dx:DXCollectionView.ItemTemplate>
+        </dx:DXCollectionView>
+
+        <!-- Empty State -->
+        <VerticalStackLayout
+            Grid.Row="1"
+            IsVisible="{Binding Results.Count, Converter={StaticResource CountEqualsZeroConverter}}"
+            Padding="24"
+            VerticalOptions="Center"
+            Spacing="16">
+            <Label Text="No singers found" TextColor="{StaticResource OnSurfaceVariant}"
+                   HorizontalTextAlignment="Center" />
+            <dx:DXButton Content="Add New Singer"
+                         Command="{Binding AddNewPersonCommand}"
+                         HorizontalOptions="Fill" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
