@@ -29,7 +29,7 @@ public partial class QueueSongPickerViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public async Task InitializeCommand()
+    public async Task InitializeAsync()
     {
         await SearchAsync(SearchText);
     }
@@ -48,17 +48,17 @@ public partial class QueueSongPickerViewModel : ViewModelBase
     {
         try
         {
-            var songs = await _songRepository.GetAllAsync();
+            var (songs, _) = await _songRepository.GetPagedAsync(1, int.MaxValue, query, CancellationToken.None);
             var filtered = string.IsNullOrWhiteSpace(query)
                 ? songs
                 : songs.Where(s => s.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                                  s.OriginalArtist.Name.Contains(query, StringComparison.OrdinalIgnoreCase));
+                                  (s.OriginalArtistName ?? "").Contains(query, StringComparison.OrdinalIgnoreCase));
 
             var dtos = filtered.Select(s => new SongDto
             {
                 Id = s.Id,
                 Title = s.Title,
-                Artist = s.OriginalArtist.Name
+                Artist = s.OriginalArtistName ?? string.Empty
             }).ToList();
             RunOnUiThread(() => Results.ReplaceRange(dtos));
         }

@@ -29,7 +29,7 @@ public partial class PersonPickerViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public async Task InitializeCommand()
+    public async Task InitializeAsync()
     {
         await SearchAsync(SearchText);
     }
@@ -56,7 +56,7 @@ public partial class PersonPickerViewModel : ViewModelBase
     {
         try
         {
-            var people = await _personRepository.GetAllAsync();
+            var (people, _) = await _personRepository.GetPagedAsync(1, int.MaxValue, query, CancellationToken.None);
             var filtered = string.IsNullOrWhiteSpace(query)
                 ? people
                 : people.Where(p => p.FullName.Contains(query, StringComparison.OrdinalIgnoreCase));

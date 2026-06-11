@@ -40,12 +40,12 @@ public partial class QueueManagementPage : ContentPage
 
     private async void OnCancelFinish(object sender, EventArgs e)
     {
-        await finishEventSheet.DismissAsync();
+        await Shell.Current.GoToAsync("..");
     }
 
     private async void OnConfirmFinish(object sender, EventArgs e)
     {
-        await finishEventSheet.DismissAsync();
+        await Shell.Current.GoToAsync("..");
         if (_viewModel != null)
         {
             await _viewModel.FinishEventCommand.ExecuteAsync(null);
