@@ -6,10 +6,12 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Domain.Interfaces;
 using MyVocaList.Extensions;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
 using MyVocaList.Infra.Repository;
+using MyVocaList.Infra.Repositories;
 using MyVocaList.Services;
 using MyVocaList.UI.Services;
 using CommunityToolkit.Mvvm.Messaging;
@@ -84,11 +86,15 @@ public static class MauiProgram
 
         // Repositories
         builder.Services.AddScoped<IVenueRepository, VenueRepository>();
-        builder.Services.AddScoped<IEventRepository, EventRepository>();
+        builder.Services.AddScoped<Domain.RepositoryInterface.IEventRepository, Infra.Repository.EventRepository>();
         builder.Services.AddScoped<IPersonRepository, PersonRepository>();
         builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
         builder.Services.AddScoped<ISongRepository, SongRepository>();
         builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
+
+        // Queue Management repositories (new architecture)
+        builder.Services.AddScoped<Domain.Interfaces.IEventRepository, Infra.Repositories.EventRepository>();
+        builder.Services.AddScoped<Domain.Interfaces.IQueueRepository, Infra.Repositories.QueueRepository>();
 
         // HTTP Clients — music metadata providers
         builder.Services.AddHttpClient<MusicBrainzProvider>(client =>
@@ -119,6 +125,8 @@ public static class MauiProgram
             sp.GetRequiredService<ILogger<VersionCheckService>>()));
         builder.Services.AddScoped<IVenueService, VenueService>();
         builder.Services.AddScoped<IPersonService, PersonService>();
+        builder.Services.AddScoped<IEventService, EventService>();
+        builder.Services.AddScoped<IQueueServiceNew, QueueServiceNew>();
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
         builder.Services.AddScoped<IArtistService, ArtistService>();
         builder.Services.AddScoped<ISongService, SongService>();
