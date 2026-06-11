@@ -9,7 +9,11 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private string _currentSearchQuery;
     private CancellationTokenSource _searchCts;
     private Func<Task> _pendingConfirmAction;
-    private readonly SemaphoreSlim _loadSemaphore = new(1, 1);
+    // Static: all CRUD list ViewModels share one effectively-singleton AppDbContext
+    // (MAUI has no per-page scope), so at most one DB load may run at a time app-wide.
+    // SQLITE-WORKAROUND: remove this gate when SQLite is replaced (INFRA_MSSQL) —
+    // see constraints-registry.md § EF Core / SQLite and DevCycleCraft/page-load-frozen/plan.md.
+    private static readonly SemaphoreSlim DbLoadGate = new(1, 1);
     private volatile bool _isLoading;
     private readonly ILogger _logger;
 
@@ -104,19 +108,27 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         var entered = false;
         try
         {
-            await _loadSemaphore.WaitAsync(cancellationToken);
+            await DbLoadGate.WaitAsync(cancellationToken);
             entered = true;
 
             _currentPage = 1;
             _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
 
-            var (itemsEnumerable, totalCount) = await FetchPageAsync(
-                _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, cancellationToken);
+            // SQLITE-WORKAROUND: Microsoft.Data.Sqlite completes async methods synchronously
+            // on the calling thread — offload fetch AND enumeration (services return lazy
+            // projections) to the thread pool so the query never runs on the UI thread.
+            // Re-evaluate when SQLite is replaced (INFRA_MSSQL); a truly async provider
+            // does not need this offload.
+            var (list, totalCount) = await Task.Run(async () =>
+            {
+                var (itemsEnumerable, total) = await FetchPageAsync(
+                    _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, cancellationToken);
+                return (itemsEnumerable.ToList(), total);
+            }, cancellationToken);
 
             if (cancellationToken.IsCancellationRequested) return;
 
             _totalCount = totalCount;
-            var list = itemsEnumerable.ToList();
             HasMoreItems = totalCount > list.Count;
 
             RunOnUiThread(() =>
@@ -135,7 +147,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         catch (OperationCanceledException) { }
         finally
         {
-            if (entered) _loadSemaphore.Release();
+            if (entered) DbLoadGate.Release();
         }
     }
 
@@ -159,14 +171,23 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
         _isLoading = true;
         var loadingPage = _currentPage + 1;
+        var entered = false;
 
         try
         {
-            var (itemsEnumerable, totalCount) = await FetchMoreAsync(
-                loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery);
+            await DbLoadGate.WaitAsync();
+            entered = true;
+
+            // SQLITE-WORKAROUND: same offload as LoadFirstPageAsync — SQLite query + lazy
+            // projection enumeration must not run on the UI thread.
+            var (list, totalCount) = await Task.Run(async () =>
+            {
+                var (itemsEnumerable, total) = await FetchMoreAsync(
+                    loadingPage, AppPagination.DefaultPageSize, _currentSearchQuery);
+                return (itemsEnumerable.ToList(), total);
+            });
 
             _totalCount = totalCount;
-            var list = itemsEnumerable.ToList();
             var hasMore = (list.Count + Items.Count) < _totalCount;
             _currentPage = loadingPage;
 
@@ -184,6 +205,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         }
         finally
         {
+            if (entered) DbLoadGate.Release();
             _isLoading = false;
         }
     }
@@ -245,7 +267,10 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         var action = _pendingConfirmAction;
         DismissConfirmSheet();
         if (action != null)
-            await action();
+            // Offload the SQLite delete (+ TransactionLogInterceptor JSON work) to the
+            // thread pool. Do NOT hold DbLoadGate here — concrete deletes end with a
+            // reload that acquires the gate internally (would deadlock).
+            await Task.Run(action);
     }
 
     private void DismissConfirmSheet()
