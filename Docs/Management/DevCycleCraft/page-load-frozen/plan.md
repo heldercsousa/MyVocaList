@@ -119,7 +119,7 @@ Regression tests for a bug fix carry a `// Regression: page-load-frozen` comment
 
 ## Ordered tasks
 
-- [ ] **T1 — Instrument CRUD page lifecycle timings (Serilog)** [SEQUENTIAL]
+- [x] **T1 — Instrument CRUD page lifecycle timings (Serilog)** [SEQUENTIAL]
   - **Context:** We must attribute the 2.5–4 s freeze between (a) page construction (`InitializeComponent` + DI resolution), (b) native handler attach/first layout, and (c) `InitializeAsync` shimmer toggling. Logs to read on-device via existing Serilog sinks (logcat/file).
   - **Approach (decided — single):** base-class timestamp + lifecycle-event spans. A timestamp recorded in the `CrudListPageBase` constructor fires BEFORE the derived page's `InitializeComponent()` (base ctor runs first), so it cannot measure `InitializeComponent` in isolation — but the spans base-ctor → `OnAppearing` and base-ctor → `Loaded` INCLUDE the derived `InitializeComponent` + DI resolution cost, which is exactly the attribution needed, with zero per-page edits.
   - **What to do — exact insertion points:**
@@ -151,7 +151,7 @@ Regression tests for a bug fix carry a `// Regression: page-load-frozen` comment
   - **Demo:** Navigate Venues → People → back to Venues: Venues reappears with its list immediately (no skeleton flash); T1 logs show revisit `initAsync` ms drop versus the pre-T3 baseline.
   - **Risk:** Medium — changes the visible loading behavior on revisits (intended); pull-to-refresh and search paths must be re-verified (they call `LoadFirstPageAsync` directly and never touched `IsInitialLoading`, so they are unaffected by design). Residual: on revisits the silent refresh still fires a `ReplaceRange` Reset, so the scroll-position/selection/pagination reset that was previously hidden behind the shimmer is now visible to the user without shimmer cover.
 
-- [ ] **T4 — Add the missing `info_outlined` icon asset** [P — parallel with T2/T3]
+- [x] **T4 — Add the missing `info_outlined` icon asset** [P — parallel with T2/T3]
   - **Context:** Both device logs show a Glide `FileNotFoundException: /info_outlined` at startup. `Resources/Images/` contains the full `*_outlined.svg` icon set but `info_outlined.svg` is absent; some XAML (What's New / About area) references it. Not the freeze cause — hygiene fix that removes a misleading error from future log captures.
   - **What to do:** Grep the `MyVocaList/` project for `info_outlined` to confirm the consumer(s). Add `info_outlined.svg` to `MyVocaList/Resources/Images/` following the exact style/viewBox conventions of the sibling Material icons (copy the source convention of e.g. `check_circle_outlined.svg` — Material Symbols "info" outlined glyph). `MauiImage Include="Resources\Images\*"` already globs the folder — no csproj change.
   - **Produces:** `MyVocaList/Resources/Images/info_outlined.svg`; no Glide error on startup.
