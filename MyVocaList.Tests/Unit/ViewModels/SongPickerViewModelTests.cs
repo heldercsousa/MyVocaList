@@ -20,6 +20,7 @@ public class SongPickerViewModelTests
             (service ?? new Mock<IMusicMetadataService>()).Object,
             (messenger ?? new Mock<IMessenger>()).Object,
             (navigation ?? new Mock<INavigationService>()).Object,
+            new Mock<ISnackbarComponent>().Object,
             new Mock<ILogger<SongPickerViewModel>>().Object);
     }
 
@@ -148,6 +149,7 @@ public class SongPickerViewModelTests
             new Mock<IMusicMetadataService>().Object,
             realMessenger,
             navigation.Object,
+            new Mock<ISnackbarComponent>().Object,
             new Mock<ILogger<SongPickerViewModel>>().Object);
         var result = MakeResult("Song A");
 
