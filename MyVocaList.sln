@@ -392,6 +392,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-management", "queue-m
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\queue-management\design.md = Docs\Management\BusinessFeatures\queue-management\design.md
 		Docs\Management\BusinessFeatures\queue-management\requirements.md = Docs\Management\BusinessFeatures\queue-management\requirements.md
+		Docs\Management\BusinessFeatures\queue-management\task-log.md = Docs\Management\BusinessFeatures\queue-management\task-log.md
 		Docs\Management\BusinessFeatures\queue-management\tasks.md = Docs\Management\BusinessFeatures\queue-management\tasks.md
 	EndProjectSection
 EndProject
