@@ -105,4 +105,16 @@
         <ShellContent ContentTemplate="{DataTemplate about:AboutPage}" />
     </FlyoutItem>
 
+    <FlyoutItem Route="queue-management" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate queue:QueueManagementPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="person-picker" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate queue:PersonPickerPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Route="song-picker" FlyoutItemIsVisible="False">
+        <ShellContent ContentTemplate="{DataTemplate queue:QueueSongPickerPage}" />
+    </FlyoutItem>
+
 </Shell>
