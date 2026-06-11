@@ -32,6 +32,26 @@ First full-solution build in the worktree: PASS (0 errors; pre-existing NU1608/D
 | Fetch must not run on UI SynchronizationContext (initial load) | CrudListViewModelBase.LoadFirstPageAsync | InitializeAsync_WithSynchronizationContext_ExecutesFetchOffContext |
 | Fetch must not run on UI SynchronizationContext (load more) | CrudListViewModelBase.LoadMoreAsync | LoadMoreCommand_WithSynchronizationContext_ExecutesFetchOffContext |
 
+---
+## Task: Code review + fixes (fresh reviewer subagent)
+**Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md
+**Status:** Review task done
+**Started:** 06/10/2026
+**Completed:** 06/10/2026
+
+Review verdict on `4ee4f56`: REQUEST CHANGES — 1 Major, 3 Minor, 1 Nit. Spec compliance confirmed exact; regression-test detection power verified by simulation.
+
+### Changed files (fix commit):
+- `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs` — (Major) moved `HasMoreItems` assignment inside `RunOnUiThread` in `LoadFirstPageAsync` (bound property raised PropertyChanged on thread-pool thread via the offloaded delete path); (Minor) `loadingPage` now computed after `DbLoadGate` acquisition in `LoadMoreAsync` (stale page race vs gated first-page reset)
+- `MyVocaList.Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` — (Minor) `PumpSynchronizationContext.Post` hardened: late posts after teardown fall back to thread pool instead of throwing (prevents stranding the static gate on already-failing runs); no assertions changed
+- `Docs/Management/BACKLOG.md` — (Minor) known residual documented on the DbContext-per-operation follow-up row: deletes run outside the load gate
+- Nit (polling loop in test 2) — acknowledged, not changed
+
+### Verification evidence
+- Build: PASS (0 errors)
+- Tests: PASS (271 tests, 0 failures) — subagent run + independent orchestrator run
+- Post-edit re-read: confirmed by fix subagent
+
 ### Pending before ✅ Done
 - Emulator smoke test: navigate Venues → Artists → Songs → People; shimmer must animate, UI responsive during load; rapid-navigation stress (no "second operation on this context").
 - Helder smoke test on Galaxy S23 Ultra.
