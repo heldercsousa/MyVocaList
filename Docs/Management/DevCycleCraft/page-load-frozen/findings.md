@@ -23,6 +23,8 @@ Worst single block: `Skipped 245 frames` + `Davey! duration=4121ms` (01:36:05, l
 
 Device logcat (PID 10623, separate run at 01:40 — confirms the same behavior in a second session): `Skipped 150/160/120/67/54 frames`, `Davey! duration=2516ms / 2686ms / 1135ms`, the same `Dialog` creation entry (01:40:45.891), and the same explicit-GC bursts (01:40:46.4 -> 01:40:48.0: 8 GCs in ~1.6 s). Per-navigation freeze ~ 2.5-2.7 s.
 
+The per-navigation repetition of the freeze also rules out one-time DevExpress theme initialization and Shell transition cost as root causes — a one-time cost would affect only the first navigation, not every cycle.
+
 ### 1.2 Davey frame anatomy — where the main thread actually spends the time
 
 Two distinct cost components appear in the `Davey!` HWUI dumps:
