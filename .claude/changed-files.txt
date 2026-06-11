@@ -1119,3 +1119,5 @@ Docs/Management/BACKLOG.md
 MyVocaList/UI/Messages/PersonPickedMessage.cs
 MyVocaList/UI/Messages/SongPickedMessage.cs
 MyVocaList/UI/ViewModels/SongPickerViewModel.cs
+MyVocaList/UI/Pages/Songs/SongPickerPage.xaml.cs
+Docs/Management/BACKLOG.md
