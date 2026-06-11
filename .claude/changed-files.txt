@@ -1180,3 +1180,5 @@ Docs/Management/BusinessFeatures/queue-management/task-log.md
 .worktrees/page-load-frozen/Docs/Management/DevCycleCraft/page-load-frozen/task-log.md
 Docs/Management/BACKLOG.md
 MyVocaList.sln
+.worktrees/page-load-frozen/MyVocaList/Extensions/LoggingConfiguration.cs
+.worktrees/page-load-frozen/MyVocaList/Extensions/LoggingConfiguration.cs
