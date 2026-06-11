@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    x:Class="MyVocaList.UI.Components.QueueListItem"
+    x:Name="self">
+
+    <!-- List item for a queue entry (pending, completed, or absent) -->
+    <Grid ColumnDefinitions="Auto,*,Auto"
+          RowDefinitions="Auto,Auto"
+          Padding="16,12"
+          Spacing="8"
+          BackgroundColor="{StaticResource Surface}">
+
+        <!-- Position badge -->
+        <Label Grid.Row="0"
+               Grid.RowSpan="2"
+               Grid.Column="0"
+               Text="{Binding Position, StringFormat='{0}'}"
+               FontSize="18"
+               FontAttributes="Bold"
+               TextColor="{StaticResource OnSurfaceVariant}"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"
+               MinimumWidthRequest="32" />
+
+        <!-- Singer info -->
+        <Label Grid.Row="0"
+               Grid.Column="1"
+               Text="{Binding PersonName}"
+               FontSize="16"
+               FontAttributes="Bold"
+               TextColor="{StaticResource OnSurface}" />
+
+        <Label Grid.Row="1"
+               Grid.Column="1"
+               Text="{Binding SongTitle}"
+               FontSize="14"
+               TextColor="{StaticResource OnSurfaceVariant}" />
+
+        <!-- Status indicator / Action button area (right column) -->
+        <StackLayout Grid.Row="0"
+                     Grid.RowSpan="2"
+                     Grid.Column="2"
+                     Orientation="Vertical"
+                     HorizontalOptions="End"
+                     VerticalOptions="Center"
+                     Spacing="4">
+            <!-- Status badge: will be filled during Wave 4B -->
+            <Label Text="{Binding Status}"
+                   FontSize="12"
+                   TextColor="{StaticResource OnSurfaceVariant}"
+                   HorizontalOptions="End" />
+        </StackLayout>
+
+    </Grid>
+
+</ContentView>
