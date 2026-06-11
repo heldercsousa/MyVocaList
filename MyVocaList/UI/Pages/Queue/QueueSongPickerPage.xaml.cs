@@ -26,6 +26,6 @@ public partial class QueueSongPickerPage : ContentPage
             }
         }
 
-        await viewModel.InitializeCommand.ExecuteAsync(null);
+        await viewModel.InitializeAsync();
     }
 }

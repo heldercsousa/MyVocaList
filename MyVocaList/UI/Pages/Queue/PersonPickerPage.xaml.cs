@@ -27,6 +27,6 @@ public partial class PersonPickerPage : ContentPage
             }
         }
 
-        await viewModel.InitializeCommand.ExecuteAsync(null);
+        await viewModel.InitializeAsync();
     }
 }
