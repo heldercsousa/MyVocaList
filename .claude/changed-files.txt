@@ -1211,3 +1211,4 @@ Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-007-searchappbar-duplica
 MyVocaList.sln
 MyVocaList.sln
 Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
