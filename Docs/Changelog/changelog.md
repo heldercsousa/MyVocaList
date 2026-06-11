@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for june 2026
+- **06/11/2026** - docs - BUG-005–BUG-009 specs complete: Save silent-exception, double-tap crash (allowConcurrentExecutions), duplicate back arrow (Shell.BackButtonBehavior), Artist autocomplete blur-clear, atomic URL save
 - **06/11/2026** - docs - Register 6 SongForm bugs (BUG-003–BUG-008) in BACKLOG.md under Artists & Songs; add Orchestrator Role Enforcement investigation task to DevCycleCraft
 - **06/10/2026** - feat - Visual Theme Refresh: apply Karaoke Neon palette to MaterialColors.xaml (hot pink primary #ffb1c0, electric violet secondary #deb7ff, neon gold tertiary #e9c400, deep black surfaces #131318); add NeonGlowPrimary & NeonGlowSecondary Shadow styles to MaterialStyles.xaml for neon glow effects (radius 8/6, opacity 60/50%)
 - **06/06/2026** - fix - Remove x:DataType from CrudListView root: MAUI compiled bindings were incorrectly casting CrudListView to ICrudListViewModel for all Source={x:Reference self} bindings, silently nulling FabIcon, ItemsSource, IsEmptyNoItems and all other BindableProperty bindings; reflection-based bindings restore correct resolution
