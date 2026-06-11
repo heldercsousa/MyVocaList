@@ -1172,3 +1172,6 @@ MyVocaList.Tests/Integration/Repositories/QueueRepositoryTests.cs
 .worktrees/page-load-frozen/Docs/Management/DevCycleCraft/page-load-frozen/plan.md
 .worktrees/page-load-frozen/Docs/Management/DevCycleCraft/page-load-frozen/task-log.md
 .worktrees/page-load-frozen/MyVocaList.Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs
+.worktrees/page-load-frozen/MyVocaList/UI/ViewModels/CrudListViewModelBase.cs
+.worktrees/page-load-frozen/MyVocaList/UI/ViewModels/CrudListViewModelBase.cs
+.worktrees/page-load-frozen/MyVocaList/UI/ViewModels/CrudListViewModelBase.cs
