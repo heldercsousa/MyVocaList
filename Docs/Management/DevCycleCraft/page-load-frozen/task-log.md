@@ -75,3 +75,26 @@ Review verdict on `4ee4f56`: REQUEST CHANGES — 1 Major, 3 Minor, 1 Nit. Spec c
 - Tests: SKIPPED (no code files changed)
 - Post-edit re-read: confirmed (findings.md, plan.md Phase 2 section, .sln entries re-read)
 - Spec compliance: confirmed — bug-fix pattern (no requirements.md); Phase 2 tasks honor DevExpress-first, no native dialogs, business-logic-in-Services, English-only, SQLITE-WORKAROUND markers preserved, incremental XAML edit rule
+
+---
+## Task: T1 — Instrument CRUD page lifecycle timings (Serilog) + T4 — Add info_outlined icon asset
+**Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md § Phase 2 T1 + T4
+**Status:** To Review
+**Started:** 06/11/2026
+**Completed:** 06/11/2026
+
+### Changed files:
+- `MyVocaList/UI/Pages/Base/CrudListPageBase.cs` — added `_ctorTimestamp` field, protected constructor with `Loaded` event span log, `ElapsedMs` helper, `OnAppearing` appearing+afterInitDispatch span logs, `OnNavigatedTo` override with span log; all blocks marked `PHASE2-INSTRUMENTATION`
+- `MyVocaList/UI/Components/CrudListView.xaml.cs` — wrapped `InitializeComponent()` in Stopwatch, log duration + Loaded event span log; marked `PHASE2-INSTRUMENTATION`
+- `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs` — added `initAsync` ms log in `InitializeAsync`, `fetch` ms log for the `Task.Run` fetch block in `LoadFirstPageAsync`; marked `PHASE2-INSTRUMENTATION`
+- `MyVocaList/Resources/Images/info_outlined.svg` — NEW: Material Symbols "info" outlined glyph, matching sibling icon conventions (`height="24" viewBox="0 -960 960 960" width="24"`); resolves Glide FileNotFoundException at startup
+- `Docs/Management/DevCycleCraft/page-load-frozen/plan.md` — T1 and T4 checkboxes marked `[x]`
+
+### Build notes
+Full solution build: PASS (0 errors; pre-existing NU1608/DX1001 warnings only).
+
+### Verification evidence
+- Build: PASS (0 errors, full solution)
+- Tests: PASS (271 tests, 0 failures) — existing regression tests unaffected; instrumentation blocks are outside `RunOnUiThread` per plan risk note
+- Post-edit re-read: confirmed — all three .cs files and the SVG asset reviewed
+- Spec compliance: confirmed — plan.md Phase 2 T1 insertion points followed exactly; SQLITE-WORKAROUND markers in CrudListViewModelBase untouched; no DisplayAlert, no business logic outside Services, English only, DevExpress-first (no component changes)

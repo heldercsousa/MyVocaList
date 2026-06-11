@@ -97,10 +97,17 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     public async Task InitializeAsync()
     {
+        // PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.
+        var initSw = System.Diagnostics.Stopwatch.StartNew();
+
         IsInitialLoading = true;
         await Task.Yield();
         await LoadFirstPageAsync(CancellationToken.None);
         RunOnUiThread(() => IsInitialLoading = false);
+
+        // PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.
+        initSw.Stop();
+        _logger.LogInformation("[PageLoad] {ViewModel} initAsync={Ms}ms", GetType().Name, initSw.ElapsedMilliseconds);
     }
 
     private async Task LoadFirstPageAsync(CancellationToken cancellationToken)
@@ -119,12 +126,17 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
             // projections) to the thread pool so the query never runs on the UI thread.
             // Re-evaluate when SQLite is replaced (INFRA_MSSQL); a truly async provider
             // does not need this offload.
+            // PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.
+            var fetchSw = System.Diagnostics.Stopwatch.StartNew();
             var (list, totalCount) = await Task.Run(async () =>
             {
                 var (itemsEnumerable, total) = await FetchPageAsync(
                     _currentPage, AppPagination.DefaultPageSize, _currentSearchQuery, cancellationToken);
                 return (itemsEnumerable.ToList(), total);
             }, cancellationToken);
+            fetchSw.Stop();
+            _logger.LogInformation("[PageLoad] {ViewModel} fetch={Ms}ms", GetType().Name, fetchSw.ElapsedMilliseconds);
+            // PHASE2-INSTRUMENTATION end
 
             if (cancellationToken.IsCancellationRequested) return;
 
