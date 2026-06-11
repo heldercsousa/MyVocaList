@@ -15,6 +15,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     // see constraints-registry.md § EF Core / SQLite and DevCycleCraft/page-load-frozen/plan.md.
     private static readonly SemaphoreSlim DbLoadGate = new(1, 1);
     private volatile bool _isLoading;
+    private bool _hasLoadedOnce;
     private readonly ILogger _logger;
 
     [ObservableProperty] private bool _isRefreshing;
@@ -100,10 +101,20 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         // PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.
         var initSw = System.Diagnostics.Stopwatch.StartNew();
 
-        IsInitialLoading = true;
-        await Task.Yield();
-        await LoadFirstPageAsync(CancellationToken.None);
-        RunOnUiThread(() => IsInitialLoading = false);
+        if (_hasLoadedOnce)
+        {
+            // Shell-cached page revisit: data is already present — refresh silently
+            // without touching IsInitialLoading (no shimmer subtree swap on revisit).
+            // Residual: the silent ReplaceRange Reset is still visible (accepted — see plan.md T3).
+            await LoadFirstPageAsync(CancellationToken.None);
+        }
+        else
+        {
+            IsInitialLoading = true;
+            await Task.Yield();
+            await LoadFirstPageAsync(CancellationToken.None);
+            RunOnUiThread(() => IsInitialLoading = false);
+        }
 
         // PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.
         initSw.Stop();
@@ -154,6 +165,12 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
                 }
                 NotifyEmptyStates();
             });
+
+            // Set AFTER the RunOnUiThread block — this point is reached only when the
+            // fetch completed without cancellation and the list was applied successfully.
+            // Cancellation paths (IsCancellationRequested early return and OperationCanceledException
+            // catch) do NOT set this flag, so a cancelled first load retries the shimmer cycle.
+            _hasLoadedOnce = true;
 
             OnAfterLoad(list);
         }

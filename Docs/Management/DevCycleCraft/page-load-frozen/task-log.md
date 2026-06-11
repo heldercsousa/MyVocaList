@@ -98,3 +98,29 @@ Full solution build: PASS (0 errors; pre-existing NU1608/DX1001 warnings only).
 - Tests: PASS (271 tests, 0 failures) — existing regression tests unaffected; instrumentation blocks are outside `RunOnUiThread` per plan risk note
 - Post-edit re-read: confirmed — all three .cs files and the SVG asset reviewed
 - Spec compliance: confirmed — plan.md Phase 2 T1 insertion points followed exactly; SQLITE-WORKAROUND markers in CrudListViewModelBase untouched; no DisplayAlert, no business logic outside Services, English only, DevExpress-first (no component changes)
+
+---
+## Task: T3 — Skip the shimmer initial-load cycle on revisits
+**Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md § Phase 2 T3
+**Status:** To Review
+**Started:** 06/11/2026
+**Completed:** 06/11/2026
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs` — added `_hasLoadedOnce` private field; `InitializeAsync` now skips the IsInitialLoading shimmer cycle on revisits (flag is true); `LoadFirstPageAsync` sets `_hasLoadedOnce = true` immediately after the `RunOnUiThread` ReplaceRange block (success path only — cancellation paths excluded); SQLITE-WORKAROUND and PHASE2-INSTRUMENTATION markers preserved intact
+- `MyVocaList.Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` — added 1 regression test `InitializeAsync_SecondCall_DoesNotToggleIsInitialLoading`; reuses existing `TestCrudListViewModel` test double
+
+### Build notes
+Full solution build: PASS (0 errors; pre-existing NU1608/DX1001 warnings only).
+
+### Verification evidence
+- Build: PASS (0 errors, `dotnet build MyVocaList/MyVocaList.csproj -f net10.0`)
+- Tests: PASS (272 tests — 271 pre-existing + 1 new — 0 failures, `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`)
+- Red-phase confirmed: new test `InitializeAsync_SecondCall_DoesNotToggleIsInitialLoading` seen failing before implementation (`[FAIL] 142 ms`)
+- Post-edit re-read: confirmed — `CrudListViewModelBase.cs` lines 99–122 (InitializeAsync) and 169–173 (_hasLoadedOnce set) re-read; test file re-read
+- Spec compliance: confirmed — plan.md T3 "precise definition" for _hasLoadedOnce placement followed exactly; cancellation paths untouched; residual (silent ReplaceRange Reset on revisit) accepted per spec; SQLITE-WORKAROUND markers unchanged; no DisplayAlert, no business logic outside Services, English only, DevExpress-first
+
+### Regression test traceability (bug fix — no requirements.md ACs)
+| Regression | Implementation location | Test method |
+|------------|------------------------|-------------|
+| Revisit must not toggle IsInitialLoading (no shimmer flash) | CrudListViewModelBase.InitializeAsync + _hasLoadedOnce | InitializeAsync_SecondCall_DoesNotToggleIsInitialLoading |
