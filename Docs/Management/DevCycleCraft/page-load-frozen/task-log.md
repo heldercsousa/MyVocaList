@@ -33,6 +33,27 @@ First full-solution build in the worktree: PASS (0 errors; pre-existing NU1608/D
 | Fetch must not run on UI SynchronizationContext (load more) | CrudListViewModelBase.LoadMoreAsync | LoadMoreCommand_WithSynchronizationContext_ExecutesFetchOffContext |
 
 ---
+## Task: T2 blocker — LoggingConfiguration Release build fix (CS1061)
+**Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md
+**Status:** To Review
+**Started:** 06/11/2026
+**Completed:** 06/11/2026
+
+### Changed files:
+- `MyVocaList/Extensions/LoggingConfiguration.cs` — replaced `Action<SentrySerilogOptions>` lambda (used non-existent `AttachScreenshot` and `ConfigureScope` members) with the full named-parameter overload of `WriteTo.Sentry(dsn, release, environment, defaultTags, ...)` for all rich options; device tags moved to `defaultTags` dict; `session_id` extra attached via `SentrySdk.ConfigureScope` (static); added `using Sentry;`
+
+### Build notes
+CS1061 errors (AttachScreenshot, ConfigureScope not members of SentrySerilogOptions 5.16.3) resolved.
+Pre-existing XAML XC0009/XC0062 errors in BottomSheet components are unrelated and pre-date this change.
+
+### Verification evidence
+- Build: Release net10.0-android — 0 CS errors (pre-existing XAML XC0009 errors unchanged)
+- Build: Debug full solution — PASS (0 errors, 14 warnings pre-existing)
+- Tests: PASS (272/272, 0 failures)
+- Post-edit re-read: confirmed — `#if !DEBUG` block uses only documented SentrySerilogOptions members; Debug path untouched
+- Spec compliance: N/A — bug fix, no spec file governs this path
+
+---
 ## Task: Code review + fixes (fresh reviewer subagent)
 **Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md
 **Status:** Review task done
