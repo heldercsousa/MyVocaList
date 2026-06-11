@@ -1201,3 +1201,6 @@ Docs/Changelog/changelog.md
 Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-005-new-song-save-broken.md
 MyVocaList.sln
 Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-008-songform-artist-autocomplete.md
+MyVocaList.sln
+Docs/Management/BACKLOG.md
