@@ -1048,3 +1048,4 @@ Services/QueueServiceNew.cs
 MyVocaList/MauiProgram.cs
 MyVocaList/MauiProgram.cs
 MyVocaList/MauiProgram.cs
+Docs/Management/BACKLOG.md
