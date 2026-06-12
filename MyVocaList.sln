@@ -410,6 +410,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000023}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\queue-management\bugs\BUG-011-queuepage-bottomsheet-double-add.md = Docs\Management\BusinessFeatures\queue-management\bugs\BUG-011-queuepage-bottomsheet-double-add.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000024}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\bugs\BUG-012-venuesviewmodel-fetch-slow.md = Docs\Management\BusinessFeatures\venues\bugs\BUG-012-venuesviewmodel-fetch-slow.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "visual-theme-refresh", "visual-theme-refresh", "{15BB70C4-1D36-417D-9F28-E5D6978FAF2C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stitch-output", "stitch-output", "{DAA6CE0B-7CD5-49ED-8C46-D202070039F3}"
@@ -544,6 +554,8 @@ Global
 		{4CB09F16-6E81-425E-9080-840BABFB66BF} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000020} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000021} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000023} = {FA1234BC-0001-4000-8000-000000000021}
+		{FA1234BC-0001-4000-8000-000000000024} = {9EA47D78-293E-41B7-872D-3B2B85E82710}
 		{7A021F6B-F297-41EA-A028-C4F881146791} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{15BB70C4-1D36-417D-9F28-E5D6978FAF2C} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{DAA6CE0B-7CD5-49ED-8C46-D202070039F3} = {15BB70C4-1D36-417D-9F28-E5D6978FAF2C}

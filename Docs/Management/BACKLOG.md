@@ -29,6 +29,7 @@
 | Target | Feature | Status | Notes |
 |--------|---------|--------|-------|
 | 2026-03 | **Venues CRUD** | ✅ Done | Full MD3 list, search, multi-select, swipe-delete |
+| ↳ Bug: VenuesViewModel fetch 2268ms — slow paged query ([BUG-012](BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.md)) | 💡 Pending | Venues list fetch takes 2.2s — N+1 query suspected |
 | 2026-04 | **Person CRUD** | ✅ Done | Autocomplete field, duplicate detection. Plan: `Docs/Management/BusinessFeatures/persons/plan.md` |
 | 2026-05 | **Artists & Songs Catalog** | 🟡 In Progress | Spec: `Docs/Management/BusinessFeatures/artists-songs/` · Plan: `Docs/Management/BusinessFeatures/artists-songs/plan.md` · ⏳ **Helder:** Phase 16C emulator smoke test pending — see `tasks.md § Phase 16C` |
 | 2026-05 | ↳ Song Karaoke URLs | ✅ Done | YouTube URL management per song; SongFormPage section, settings, converters, tests. Spec: `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/` |
@@ -57,6 +58,7 @@
 | 2026-06 | **App Settings** | ✅ Done | YouTube API key management (PasswordEdit, save/test/clear); flyout "Preferences" now navigates to SettingsPage; stale `HasYouTubeApiKey` refreshed on `OnAppearing`. Spec: `Docs/Management/BusinessFeatures/app-settings/` |
 | 2026-06 | **About Page** | ✅ Done | Version, logo, goal sentence, Since year, CC BY-NC-ND 4.0 license, What's New stub (hidden). Spec: `Docs/Management/BusinessFeatures/about-page/` |
 | 2026-06 | **Queue Management** | ✅ Done | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate. IA: Queue-First (primary view, 0 taps to register performance). Spec: `Docs/Management/BusinessFeatures/queue-management/` · Plan: `queue-management/plan.md` · **All 5 waves complete:** Domain (Wave 1) · Infra (Wave 2) · Services (Wave 3) · UI (Wave 4) · Testing (Wave 5A: 17 unit tests + 5B: 9 integration tests). **Test coverage:** 26/26 passing. **AC traceability:** Complete matrix in `task-log.md`. Ready for MVP release. |
+| ↳ Bug: QueuePage BottomSheet double-add on navigation ([BUG-011](BusinessFeatures/queue-management/bugs/BUG-011-queuepage-bottomsheet-double-add.md)) | 💡 Pending | 4103ms Davey on 2nd QueuePage visit — BottomSheet re-add guard missing |
 | 2026-06 | **Visual Theme Refresh** | ✅ Done | Theme Refresh Complete — applied Karaoke Neon palette (hot pink primary, electric violet secondary, neon gold tertiary) to MaterialColors.xaml + added NeonGlowPrimary & NeonGlowSecondary shadow styles to MaterialStyles.xaml |
 | 2026-06 | **Data Backup & Restore — Tier 1 + 3** | ✅ Done | Local auto-backup (SQLite snapshot + transaction log) + manual share sheet export/restore. Plan: `Docs/Management/BusinessFeatures/backup-restore/plan.md`. Spec: `Docs/Management/BusinessFeatures/backup-restore/design.md` |
 | 2026-06 | **User Tutorial/Learning** | 💡 Pending | Local or/and online tutorials. Evaluation of best practices in the lower possible effort to produce 1st version and update it always app receives new features and updates existing ones |
