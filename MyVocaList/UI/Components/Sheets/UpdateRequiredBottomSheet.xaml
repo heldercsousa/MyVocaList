@@ -8,7 +8,7 @@
 
     <!--
         MD3 Modal bottom sheet — hard update block (non-dismissible).
-        AllowDismiss="False" and IsCancelable="False" — user cannot bypass this.
+        AllowDismiss="False" — user cannot bypass this.
         No grabber shown — reinforces non-dismissibility.
     -->
     <dx:BottomSheet x:Name="Sheet"
@@ -17,7 +17,6 @@
                     IsModal="True"
                     ShowGrabber="False"
                     AllowDismiss="False"
-                    IsCancelable="False"
                     BackgroundColor="{StaticResource Surface}"
                     CornerRadius="28">
         <VerticalStackLayout>
