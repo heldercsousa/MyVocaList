@@ -186,7 +186,18 @@ public partial class CrudListView : ContentView
 
     public CrudListView()
     {
+        // PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         InitializeComponent();
+        sw.Stop();
+        Serilog.Log.ForContext("SourceContext", nameof(CrudListView))
+            .Information("[PageLoad] CrudListView InitializeComponent={Ms}ms", sw.ElapsedMilliseconds);
+
+        Loaded += (_, _) =>
+            Serilog.Log.ForContext("SourceContext", nameof(CrudListView))
+                .Information("[PageLoad] CrudListView loaded={Ms}ms (ctor→Loaded)", sw.ElapsedMilliseconds);
+        // PHASE2-INSTRUMENTATION end
+
         BindingContextChanged += OnBindingContextChanged;
     }
 

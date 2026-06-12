@@ -1,0 +1,444 @@
+06-11 01:35:41.503 I/DisplayManager( 9524): Implicitly registering for refresh rate
+06-11 01:35:42.272 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 9584KB AllocSpace bytes, 0(0B) LOS objects, 91% free, 2294KB/26MB, paused 39us,1.064ms total 6.905ms
+06-11 01:35:42.486 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 256KB AllocSpace bytes, 0(0B) LOS objects, 92% free, 2134KB/26MB, paused 36us,786us total 4.495ms
+06-11 01:35:42.592 I/HWUI    ( 9524): Using FreeType backend (prop=Auto)
+06-11 01:35:42.602 I/Choreographer( 9524): Skipped 379 frames!  The application may be doing too much work on its main thread.
+06-11 01:35:42.604 D/ActivityThread( 9524): com.myvocalist will use render engine as VK
+06-11 01:35:42.604 D/HWUI    ( 9524): HWUI - treat SMPTE_170M as sRGB
+06-11 01:35:42.607 D/HWUI    ( 9524): CacheManager constructor. deviceInfo=(1080, 1920)
+06-11 01:35:42.608 I/AdrenoGLES-0( 9524): QUALCOMM build                   : 3df4c357f0, I515341007c
+06-11 01:35:42.608 I/AdrenoGLES-0( 9524): Build Date                       : 01/27/26
+06-11 01:35:42.608 I/AdrenoGLES-0( 9524): OpenGL ES Shader Compiler Version: E031.41.03.64
+06-11 01:35:42.608 I/AdrenoGLES-0( 9524): Local Branch                     : 
+06-11 01:35:42.608 I/AdrenoGLES-0( 9524): Remote Branch                    : refs/tags/AU_LINUX_ANDROID_LA.VENDOR.13.2.0.11.00.00.856.062
+06-11 01:35:42.608 I/AdrenoGLES-0( 9524): Remote Branch                    : NONE
+06-11 01:35:42.608 I/AdrenoGLES-0( 9524): Reconstruct Branch               : NOTHING
+06-11 01:35:42.608 I/AdrenoGLES-0( 9524): Build Config                     : S P 14.1.4 AArch64
+06-11 01:35:42.608 I/AdrenoGLES-0( 9524): Driver Path                      : /vendor/lib64/egl/libGLESv2_adreno.so
+06-11 01:35:42.608 I/AdrenoGLES-0( 9524): Driver Version                   : 0676.77.1
+06-11 01:35:42.613 I/AdrenoGLES-0( 9524): PFP: 0x01740181, ME: 0x00000000
+06-11 01:35:42.616 W/Adreno-AppProfiles( 9524): Could not find QSPM HAL service. Skipping adreno profile processing.
+06-11 01:35:42.617 I/AdrenoUtils( 9524): <ReadGpuID:407>: Reading chip ID through GSL
+06-11 01:35:42.646 D/AppCompatDelegate( 9524): Checking for metadata for AppLocalesMetadataHolderService : Service not found
+06-11 01:35:42.651 E/ashmem  ( 9524): Pinning is deprecated since Android Q. Please use trim or other methods.
+06-11 01:35:42.921 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 612KB AllocSpace bytes, 1(20KB) LOS objects, 90% free, 2482KB/26MB, paused 40us,863us total 6.216ms
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\System.Net.NetworkInformation.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\NuGet.Versioning.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\System.Text.Encodings.Web.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\System.Net.Http.Json.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+[01:35:45 INF] System.Net.Http.HttpClient.version-check.LogicalHandler
+Start processing HTTP request GET https://raw.githubusercontent.com/heldercsousa/MyVocaList/main/version-manifest.json
+[01:35:45 INF] System.Net.Http.HttpClient.version-check.ClientHandler
+Sending HTTP request GET https://raw.githubusercontent.com/heldercsousa/MyVocaList/main/version-manifest.json
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\Xamarin.AndroidX.Lifecycle.LiveData.Core.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+06-11 01:35:45.820 D/CompatChangeReporter( 9524): Compat change id reported: 377864165; UID 10468; state: ENABLED
+06-11 01:35:45.820 D/DesktopExperienceFlags( 9524): Toggle override initialized to: false
+06-11 01:35:45.820 D/DesktopModeFlags( 9524): Toggle override initialized to: OVERRIDE_UNSET
+06-11 01:35:45.826 I/DecorView( 9524): setWindowBackground: isPopOver=false color=ff121212 d=android.graphics.drawable.ColorDrawable@c204bff
+06-11 01:35:46.060 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 11MB AllocSpace bytes, 7(120KB) LOS objects, 87% free, 3642KB/27MB, paused 74us,1.128ms total 11.337ms
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\System.Formats.Asn1.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\System.Runtime.Numerics.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+06-11 01:35:46.120 I/com.myvocalist( 9524): hiddenapi: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (runtime_flags=0, domain=platform, api=unsupported) from Landroidx/appcompat/widget/ViewUtils; (domain=app, TargetSdkVersion=36) using reflection: allowed
+06-11 01:35:46.223 W/TabLayout( 9524): MODE_SCROLLABLE + GRAVITY_FILL is not supported, GRAVITY_START will be used instead
+06-11 01:35:46.305 D/SensorManager( 9524): registerListener :: 11, lsm6dso LSM6DSO Accelerometer Non-wakeup, 200000, 0, 
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\Xamarin.AndroidX.Lifecycle.Runtime.Android.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\Xamarin.KotlinX.Coroutines.Core.Jvm.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\Xamarin.AndroidX.ViewPager2.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\Xamarin.AndroidX.ViewPager.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+[01:35:46 INF] System.Net.Http.HttpClient.version-check.ClientHandler
+Received HTTP response headers after 604.8352ms - 200
+06-11 01:35:46.469 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 676KB AllocSpace bytes, 0(0B) LOS objects, 86% free, 3873KB/27MB, paused 44us,828us total 7.446ms
+06-11 01:35:46.515 W/monodroid-assembly( 9524): Shared library 'liblog' not loaded, p/invoke '__android_log_print' may fail
+06-11 01:35:46.515 I/DOTNET  ( 9524): [MauiDevFlow.Agent] HTTP server started on port 9223
+06-11 01:35:46.526 D/ViewRootImpl( 9524): desktopMode is false
+06-11 01:35:46.527 I/ViewRootImpl( 9524): dVRR is disabled
+06-11 01:35:46.527 D/HardwareRenderer( 9524): onDisplayChanged. displayId=0 current wxh=1080x2316 mLargest wxh=0x0
+06-11 01:35:46.527 D/HardwareRenderer( 9524): Set largestWidth and largestHeight as logical resolution. (1080x2316)
+06-11 01:35:46.527 D/HWUI    ( 9524): setMaxSurfaceArea requested wxh=(1080,2316) requestedSurfaceArea(2501280) mMaxSurfaceArea(2073600)
+06-11 01:35:46.528 D/NativeCustomFrequencyManager( 9524): [NativeCFMS] BpCustomFrequencyManager::BpCustomFrequencyManager()
+06-11 01:35:46.533 D/InputTransport( 9524): Input channel constructed: 'e479c5c', fd=141
+06-11 01:35:46.533 I/InsetsController( 9524): onStateChanged: host=com.myvocalist/crc64eea2bef31ba6694c.MainActivity, from=android.view.ViewRootImpl.onInsetsStateChanged:3038, state=InsetsState: {mDisplayFrame=Rect(0, 0 - 1080, 2316), mDisplayCutout=DisplayCutout{insets=Rect(0, 94 - 0, 0) waterfall=Insets{left=0, top=0, right=0, bottom=0} boundingRect={Bounds=[Rect(0, 0 - 0, 0), Rect(513, 0 - 567, 94), Rect(0, 0 - 0, 0), Rect(0, 0 - 0, 0)]} cutoutPathParserInfo={CutoutPathParserInfo{displayWidth=1080 displayHeight=2316 physicalDisplayWidth=1080 physicalDisplayHeight=2316 density={2.8125} cutoutSpec={M 0,0 H -9.6 V 33.33333333333333 H 9.6 V 0 H 0 Z @dp} rotation={0} scale={1.0} physicalPixelDisplaySizeRatio={1.0}}} sideOverrides={}}, mRoundedCorners=RoundedCorners{[RoundedCorner{position=TopLeft, radius=11, center=Point(11, 11)}, RoundedCorner{position=TopRight, radius=11, center=Point(1069, 11)}, RoundedCorner{position=BottomRight, radius=11, center=Point(1069, 2305)}, RoundedCorner{position=BottomLeft, radius=11, center=Point(11, 2305)}]}  mRoundedCornerFrame=Rect(0, 0 - 1080, 2316), mPrivacyIndicatorBounds=PrivacyIndicatorBounds {static bounds=Rect(956, 0 - 1080, 94) rotation=0}, mDisplayShape=DisplayShape{ spec=-311912193 displayWidth=1080 displayHeight=2316 physicalPixelDisplaySizeRatio=0.75 rotation=0 offsetX=0 offsetY=0 scale=1.0}, mSources= { InsetsSource: {f0dc0001 mType=navigationBars mFrame=[0,2181][1080,2316] mAttachedInsets=null mVisible=true mFlags= mSideHint=BOTTOM mBoundingRects=null}, InsetsSource: {f0dc0004 mType=systemGestures mFrame=[0,0][0,0] mAttachedInsets=null mVisible=true mFlags= mSideHint=NONE mBoundingRects=null}, InsetsSource: {f0dc0005 mType=mandatorySystemGestures mFrame=[0,2181][1080,2316] mAttachedInsets=null mVisible=true mFlags= mSideHint=BOTTOM mBoundingRects=null}, InsetsSource: {f0dc0006 mType=tappableElement mFrame=[0,2181][1080,2316] mAttachedInsets=null mVisible=true mFlags= mSideHint=BOTTOM mBoundingRects=null}, InsetsSource: {f0dc0024 mType=systemGestures mFrame=[0,0][0,0] mAttachedInsets=null mVisible=true mFlags= mSideHint=NONE mBoundingRects=null}, InsetsSource: {3 mType=ime mFrame=[0,0][0,0] mAttachedInsets=null mVisible=false mFlags=INVALID mSideHint=NONE mBoundingRects=null}, InsetsSource: {27 mType=displayCutout mFrame=[0,0][1080,94] mAttachedInsets=null mVisible=true mFlags= mSideHint=TOP mBoundingRects=null}, InsetsSource: {18cd0000 mType=statusBars mFrame=[0,0][1080,94] mAttachedInsets=null mVisible=true mFlags= mSideHint=TOP mBoundingRects=null}, InsetsSource: {18cd0005 mType=mandatorySystemGestures mFrame=[0,0][1080,128] mAttachedInsets=null mVisible=true mFlags= mSideHint=TOP mBoundingRects=null}, InsetsSource: {18cd0006 mType=tappableElement mFrame=[0,0][1080,94] mAttachedInsets=null mVisible=true mFlags= mSideHint=TOP mBoundingRects=null} }
+06-11 01:35:46.535 I/VRI[MainActivity]@fd43317( 9524): synced displayState. AttachInfo displayState=2
+06-11 01:35:46.540 I/VRI[MainActivity]@fd43317( 9524): setView = com.android.internal.policy.DecorView@71b6ab8 IsHRR=false mFlingFrameRateChange=0 TM=true
+06-11 01:35:46.540 I/IDS_TAG ( 9524): Starting IDS observe window
+06-11 01:35:46.540 I/IDS_TAG ( 9524): Getting Shared Preference for crc64eea2bef31ba6694c.MainApplication@3367fee uid = 10468
+06-11 01:35:46.541 I/IDS_TAG ( 9524): App crc64eea2bef31ba6694c.MainApplication@3367fee being boosted by IDS
+06-11 01:35:46.542 I/IDS_TAG ( 9524): Closing IDS observe window
+06-11 01:35:46.542 I/IDS_TAG ( 9524): Getting Shared Preference for crc64eea2bef31ba6694c.MainApplication@3367fee uid = 10468
+06-11 01:35:46.543 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@3d46e0f
+06-11 01:35:46.543 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): crc6488302ad6e9e4df1a.MauiAppCompatActivity_PredictiveBackCallback@fd64fd8
+06-11 01:35:46.549 D/VRI[MainActivity]@fd43317( 9524): WindowInsets changed: 1080x2316 statusBars:[0,94,0,0] navigationBars:[0,0,0,135] mandatorySystemGestures:[0,128,0,135] 
+06-11 01:35:46.587 E/BufferQueueProducer( 9524): Unable to open libpenguin.so: dlopen failed: library "libpenguin.so" not found.
+06-11 01:35:46.587 E/com.myvocalist( 9524): Unable to open libpenguin.so: dlopen failed: library "libpenguin.so" not found.
+06-11 01:35:46.588 W/libc    ( 9524): Access denied finding property "vendor.display.enable_optimal_refresh_rate"
+06-11 01:35:46.588 I/BufferQueueProducer( 9524): [](id:253400000000,api:0,p:1276357760,c:9524) setDequeueTimeout:2077252342
+06-11 01:35:46.588 I/BLASTBufferQueue_Java( 9524): new BLASTBufferQueue, mName= VRI[MainActivity]@fd43317 mNativeObject= 0xb40000704c207400 caller= android.view.ViewRootImpl.updateBlastSurfaceIfNeeded:3603 android.view.ViewRootImpl.relayoutWindow:11813 android.view.ViewRootImpl.performTraversals:4840 android.view.ViewRootImpl.doTraversal:3959 android.view.ViewRootImpl$TraversalRunnable.run:13034 android.view.Choreographer$CallbackRecord.run:1961 android.view.Choreographer$CallbackRecord.run:1970 android.view.Choreographer.doCallbacks:1423 android.view.Choreographer.doFrame:1348 android.view.Choreographer$FrameDisplayEventReceiver.run:1930 
+06-11 01:35:46.588 I/BLASTBufferQueue_Java( 9524): update, w= 1080 h= 2316 mName = VRI[MainActivity]@fd43317 mNativeObject= 0xb40000704c207400 sc.mNativeObject= 0xb40000704bf398c0 format= -1 caller= android.view.ViewRootImpl.updateBlastSurfaceIfNeeded:3608 android.view.ViewRootImpl.relayoutWindow:11813 android.view.ViewRootImpl.performTraversals:4840 android.view.ViewRootImpl.doTraversal:3959 android.view.ViewRootImpl$TraversalRunnable.run:13034 android.view.Choreographer$CallbackRecord.run:1961 
+06-11 01:35:46.589 W/libc    ( 9524): Access denied finding property "vendor.display.enable_optimal_refresh_rate"
+06-11 01:35:46.589 I/VRI[MainActivity]@fd43317( 9524): Relayout returned: old=(0,0,1080,2316) new=(0,0,1080,2316) relayoutAsync=false req=(1080,2316)0 dur=6 res=0x3 s={true 0xb400007050889800} ch=true seqId=0
+06-11 01:35:46.589 I/VRI[MainActivity]@fd43317( 9524): performConfigurationChange setNightDimText nightDimLevel=56
+06-11 01:35:46.595 D/VRI[MainActivity]@fd43317( 9524): mThreadedRenderer.initialize() mSurface={isValid=true 0xb400007050889800} hwInitialized=true
+06-11 01:35:46.625 I/com.myvocalist( 9524): Compiler allocated 5313KB to compile void android.view.ViewRootImpl.performTraversals()
+06-11 01:35:46.694 I/Dialog  ( 9524): mIsDeviceDefault = false, mIsSamsungBasicInteraction = false, isMetaDataInActivity = false
+06-11 01:35:46.706 I/DecorView( 9524): setWindowBackground: isPopOver=false color=0 d=android.graphics.drawable.ColorDrawable@9053fa8
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\DXNavigation.a.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+06-11 01:35:46.779 D/VRI[MainActivity]@fd43317( 9524): reportNextDraw android.view.ViewRootImpl.performTraversals:5507 android.view.ViewRootImpl.doTraversal:3959 android.view.ViewRootImpl$TraversalRunnable.run:13034 android.view.Choreographer$CallbackRecord.run:1961 android.view.Choreographer$CallbackRecord.run:1970 
+06-11 01:35:46.779 D/VRI[MainActivity]@fd43317( 9524): Setup new sync=wmsSync-VRI[MainActivity]@fd43317#0
+06-11 01:35:46.779 I/VRI[MainActivity]@fd43317( 9524): Creating new active sync group VRI[MainActivity]@fd43317#1
+06-11 01:35:46.780 D/VRI[MainActivity]@fd43317( 9524): registerCallbacksForSync syncBuffer=false
+06-11 01:35:46.790 D/VRI[MainActivity]@fd43317( 9524): Received frameDrawingCallback syncResult=0 frameNum=1.
+06-11 01:35:46.790 I/VRI[MainActivity]@fd43317( 9524): mWNT: t=0xb40000704bda6600 mBlastBufferQueue=0xb40000704c207400 fn= 1 HdrRenderState mRenderHdrSdrRatio=1.0 caller= android.view.ViewRootImpl$12.onFrameDraw:15561 android.view.ThreadedRenderer$1.onFrameDraw:751 <bottom of call stack> 
+06-11 01:35:46.790 I/VRI[MainActivity]@fd43317( 9524): Setting up sync and frameCommitCallback
+06-11 01:35:46.799 I/BLASTBufferQueue( 9524): [VRI[MainActivity]@fd43317#0](f:0,a:0,s:0) onFrameAvailable the first frame is available
+06-11 01:35:46.799 I/SurfaceComposerClient( 9524): apply transaction with the first frame. layerId: 617, bufferData(ID: 40905268527107, frameNumber: 1)
+06-11 01:35:46.799 I/VRI[MainActivity]@fd43317( 9524): Received frameCommittedCallback lastAttemptedDrawFrameNum=1 didProduceBuffer=true
+06-11 01:35:46.800 D/HWUI    ( 9524): CFMS:: SetUp Pid : 9524    Tid : 9622
+06-11 01:35:46.800 D/VRI[MainActivity]@fd43317( 9524): reportDrawFinished seqId=0
+06-11 01:35:46.837 D/HWUI    ( 9524): HWUI - treat SMPTE_170M as sRGB
+06-11 01:35:46.932 D/ConnectivityManager( 9524): StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.registerDefaultNetworkCallbackForUid(ConnectivityManager.java:5469)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5436)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5410)] [com.bumptech.glide.manager.SingletonConnectivityReceiver$FrameworkConnectivityMonitorPostApi24.register(SingletonConnectivityReceiver.java:191)] [com.bumptech.glide.manager.SingletonConnectivityReceiver.maybeRegisterReceiver(SingletonConnectivityReceiver.java:113)] [com.bumptech.glide.manager.SingletonConnectivityReceiver.register(SingletonConnectivityReceiver.java:94)] [com.bumptech.glide.manager.DefaultConnectivityMonitor.register(DefaultConnectivityMonitor.java:25)] [com.bumptech.glide.manager.DefaultConnectivityMonitor.onStart(DefaultConnectivityMonitor.java:34)] [com.bumptech.glide.manager.LifecycleLifecycle.addListener(LifecycleLifecycle.java:54)] [com.bumptech.glide.RequestManager.<init>(RequestManager.java:147)] [com.bumptech.glide.RequestManager.<init>(RequestManager.java:105)] [com.microsoft.maui.glide.GlideRequests.<init>(GlideRequests.java:32)] [com.bumptech.glide.GeneratedRequestManagerFactory.build(GeneratedRequestManagerFactory.java:18)] [com.bumptech.glide.manager.LifecycleRequestManagerRetriever.getOrCreate(LifecycleRequestManagerRetriever.java:43)] [com.bumptech.glide.manager.RequestManagerRetriever.get(RequestManagerRetriever.java:114)] [com.bumptech.glide.manager.RequestManagerRetriever.get(RequestManagerRetriever.java:176)] [com.bumptech.glide.Glide.with(Glide.java:634)] [com.microsoft.maui.PlatformInterop.loadImageFromFile(PlatformInterop.java:332)] [crc64338477404e88479c.GenericGlobalLayoutListener.n_onGlobalLayout(Native Method)] [crc64338477404e88479c.GenericGlobalLayoutListener.onGlobalLayout(GenericGlobalLayoutListener.java:29)] [android.view.ViewTreeObserver.dispatchOnGlobalLayout(ViewTreeObserver.java:1258)] [android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:5365)] [android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:3959)] [android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:13034)] [android.view.Choreographer$CallbackRecord.run(Choreographer.java:1961)] [android.view.Choreographer$CallbackRecord.run(Choreographer.java:1970)] [android.view.Choreographer.doCallbacks(Choreographer.java:1423)] [android.view.Choreographer.doFrame(Choreographer.java:1348)] [android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1930)]
+06-11 01:35:46.975 I/InsetsSourceConsumer( 9524): applyRequestedVisibilityToControl: visible=true, type=statusBars, host=com.myvocalist/crc64eea2bef31ba6694c.MainActivity
+06-11 01:35:46.976 I/InsetsSourceConsumer( 9524): applyRequestedVisibilityToControl: visible=true, type=navigationBars, host=com.myvocalist/crc64eea2bef31ba6694c.MainActivity
+06-11 01:35:47.011 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 1668KB AllocSpace bytes, 2(40KB) LOS objects, 83% free, 5017KB/28MB, paused 61us,935us total 9.575ms
+[01:35:46 INF] System.Net.Http.HttpClient.version-check.LogicalHandler
+End processing HTTP request after 1276.0364ms - 200
+06-11 01:35:47.122 D/VRI[MainActivity]@fd43317( 9524): mThreadedRenderer.initializeIfNeeded()#2 mSurface={isValid=true 0xb400007050889800}
+06-11 01:35:47.123 D/InputMethodManagerUtils( 9524): startInputInner - Id : 0
+06-11 01:35:47.123 I/InputMethodManager( 9524): startInputInner - IInputMethodManagerGlobalInvoker.startInputOrWindowGainedFocus
+06-11 01:35:47.134 W/Glide   ( 9524): Load failed for [info_outlined] with dimensions [51x51]
+06-11 01:35:47.134 W/Glide   ( 9524): class com.bumptech.glide.load.engine.GlideException: Failed to load resource
+06-11 01:35:47.134 W/Glide   ( 9524): There were 3 root causes:
+06-11 01:35:47.134 W/Glide   ( 9524): java.io.FileNotFoundException(/info_outlined: open failed: ENOENT (No such file or directory))
+06-11 01:35:47.134 W/Glide   ( 9524): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-11 01:35:47.134 W/Glide   ( 9524): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-11 01:35:47.134 W/Glide   ( 9524):  call GlideException#logRootCauses(String) for more detail
+06-11 01:35:47.134 W/Glide   ( 9524):   Cause (1 of 3): class com.bumptech.glide.load.engine.GlideException: Fetching data failed, class java.io.InputStream, LOCAL
+06-11 01:35:47.134 W/Glide   ( 9524): There was 1 root cause:
+06-11 01:35:47.134 W/Glide   ( 9524): java.io.FileNotFoundException(/info_outlined: open failed: ENOENT (No such file or directory))
+06-11 01:35:47.134 W/Glide   ( 9524):  call GlideException#logRootCauses(String) for more detail
+06-11 01:35:47.134 W/Glide   ( 9524):     Cause (1 of 1): class com.bumptech.glide.load.engine.GlideException: Fetch failed
+06-11 01:35:47.134 W/Glide   ( 9524): There was 1 root cause:
+06-11 01:35:47.134 W/Glide   ( 9524): java.io.FileNotFoundException(/info_outlined: open failed: ENOENT (No such file or directory))
+06-11 01:35:47.134 W/Glide   ( 9524):  call GlideException#logRootCauses(String) for more detail
+06-11 01:35:47.134 W/Glide   ( 9524):       Cause (1 of 1): class java.io.FileNotFoundException: /info_outlined: open failed: ENOENT (No such file or directory)
+06-11 01:35:47.134 W/Glide   ( 9524):   Cause (2 of 3): class com.bumptech.glide.load.engine.GlideException: Fetching data failed, class android.os.ParcelFileDescriptor, LOCAL
+06-11 01:35:47.134 W/Glide   ( 9524): There was 1 root cause:
+06-11 01:35:47.134 W/Glide   ( 9524): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-11 01:35:47.134 W/Glide   ( 9524):  call GlideException#logRootCauses(String) for more detail
+06-11 01:35:47.134 W/Glide   ( 9524):     Cause (1 of 1): class com.bumptech.glide.load.engine.GlideException: Fetch failed
+06-11 01:35:47.134 W/Glide   ( 9524): There was 1 root cause:
+06-11 01:35:47.134 W/Glide   ( 9524): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-11 01:35:47.134 W/Glide   ( 9524):  call GlideException#logRootCauses(String) for more detail
+06-11 01:35:47.134 W/Glide   ( 9524):       Cause (1 of 1): class java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-11 01:35:47.134 W/Glide   ( 9524):   Cause (3 of 3): class com.bumptech.glide.load.engine.GlideException: Fetching data failed, class android.content.res.AssetFileDescriptor, LOCAL
+06-11 01:35:47.134 W/Glide   ( 9524): There was 1 root cause:
+06-11 01:35:47.134 W/Glide   ( 9524): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-11 01:35:47.134 W/Glide   ( 9524):  call GlideException#logRootCauses(String) for more detail
+06-11 01:35:47.134 W/Glide   ( 9524):     Cause (1 of 1): class com.bumptech.glide.load.engine.GlideException: Fetch failed
+06-11 01:35:47.134 W/Glide   ( 9524): There was 1 root cause:
+06-11 01:35:47.134 W/Glide   ( 9524): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-11 01:35:47.134 W/Glide   ( 9524):  call GlideException#logRootCauses(String) for more detail
+06-11 01:35:47.134 W/Glide   ( 9524):       Cause (1 of 1): class java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-11 01:35:47.135 I/Glide   ( 9524): Root cause (1 of 3)
+06-11 01:35:47.135 I/Glide   ( 9524): java.io.FileNotFoundException: /info_outlined: open failed: ENOENT (No such file or directory)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at libcore.io.IoBridge.open(IoBridge.java:574)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at java.io.FileInputStream.<init>(FileInputStream.java:179)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at java.io.FileInputStream.<init>(FileInputStream.java:133)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at android.content.ContentResolver.openInputStream(ContentResolver.java:1532)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.StreamLocalUriFetcher.loadResourceFromUri(StreamLocalUriFetcher.java:74)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.StreamLocalUriFetcher.loadResource(StreamLocalUriFetcher.java:50)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.StreamLocalUriFetcher.loadResource(StreamLocalUriFetcher.java:13)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:44)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.runWrapped(DecodeJob.java:280)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.run(DecodeJob.java:235)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultThreadFactory$1.run(GlideExecutor.java:424)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at java.lang.Thread.run(Thread.java:1572)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultPriorityThreadFactory$1.run(GlideExecutor.java:383)
+06-11 01:35:47.135 I/Glide   ( 9524): Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at libcore.io.Linux.open(Native Method)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at libcore.io.ForwardingOs.open(ForwardingOs.java:579)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at libcore.io.BlockGuardOs.open(BlockGuardOs.java:274)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at libcore.io.ForwardingOs.open(ForwardingOs.java:579)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at android.app.AndroidForwardingOs.open(AndroidForwardingOs.java:120)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at libcore.io.IoBridge.open(IoBridge.java:560)
+06-11 01:35:47.135 I/Glide   ( 9524): 	... 18 more
+06-11 01:35:47.135 I/Glide   ( 9524): Root cause (2 of 3)
+06-11 01:35:47.135 I/Glide   ( 9524): java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at android.os.ParcelFileDescriptor.openInternal(ParcelFileDescriptor.java:356)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at android.os.ParcelFileDescriptor.open(ParcelFileDescriptor.java:233)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1868)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1788)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher.loadResource(FileDescriptorLocalUriFetcher.java:20)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher.loadResource(FileDescriptorLocalUriFetcher.java:12)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:44)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.onDataFetcherFailed(DecodeJob.java:416)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.onLoadFailedInternal(SourceGenerator.java:223)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator$1.onLoadFailed(SourceGenerator.java:108)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.startNextOrFail(MultiModelLoader.java:167)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.onLoadFailed(MultiModelLoader.java:154)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:50)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.runWrapped(DecodeJob.java:280)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.run(DecodeJob.java:235)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultThreadFactory$1.run(GlideExecutor.java:424)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at java.lang.Thread.run(Thread.java:1572)
+06-11 01:35:47.135 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultPriorityThreadFactory$1.run(GlideExecutor.java:383)
+06-11 01:35:47.136 I/Glide   ( 9524): Root cause (3 of 3)
+06-11 01:35:47.136 I/Glide   ( 9524): java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at android.os.ParcelFileDescriptor.openInternal(ParcelFileDescriptor.java:356)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at android.os.ParcelFileDescriptor.open(ParcelFileDescriptor.java:233)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1868)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1788)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.AssetFileDescriptorLocalUriFetcher.loadResource(AssetFileDescriptorLocalUriFetcher.java:20)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.AssetFileDescriptorLocalUriFetcher.loadResource(AssetFileDescriptorLocalUriFetcher.java:11)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:44)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.onDataFetcherFailed(DecodeJob.java:416)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.onLoadFailedInternal(SourceGenerator.java:223)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator$1.onLoadFailed(SourceGenerator.java:108)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.startNextOrFail(MultiModelLoader.java:167)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.onLoadFailed(MultiModelLoader.java:154)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:50)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.onDataFetcherFailed(DecodeJob.java:416)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.onLoadFailedInternal(SourceGenerator.java:223)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator$1.onLoadFailed(SourceGenerator.java:108)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.startNextOrFail(MultiModelLoader.java:167)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.onLoadFailed(MultiModelLoader.java:154)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:50)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.runWrapped(DecodeJob.java:280)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.DecodeJob.run(DecodeJob.java:235)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultThreadFactory$1.run(GlideExecutor.java:424)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at java.lang.Thread.run(Thread.java:1572)
+06-11 01:35:47.136 I/Glide   ( 9524): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultPriorityThreadFactory$1.run(GlideExecutor.java:383)
+06-11 01:35:47.141 D/InputTransport( 9524): Input channel constructed: 'ClientS', fd=162
+06-11 01:35:47.190 D/InsetsController( 9524): hide(ime())
+06-11 01:35:47.190 I/ImeTracker( 9524): com.myvocalist:61cab53a: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+06-11 01:35:47.201 W/Glide   ( 9524): Load failed for [crc6488302ad6e9e4df1a.ImageLoaderCallback@daae844] with dimensions [51x51]
+06-11 01:35:47.201 W/Glide   ( 9524): class com.bumptech.glide.load.engine.GlideException: Failed to load resource
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\DXCollectionView.a.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+06-11 01:35:47.673 D/ProfileInstaller( 9524): Installing profile for com.myvocalist
+06-11 01:35:49.085 I/libc    ( 9524): Requested dump for pid 9524 (com.myvocalist)
+06-11 01:35:49.175 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:35:49.181 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=high hint, reason=touch, vri=VRI[MainActivity]@fd43317
+06-11 01:35:49.183 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:35:49.538 I/ImeFocusController( 9524): onPreWindowFocus: skipped hasWindowFocus=false mHasImeFocus=true
+06-11 01:35:49.539 I/ImeFocusController( 9524): onPostWindowFocus: skipped hasWindowFocus=false mHasImeFocus=true
+06-11 01:35:49.622 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): androidx.appcompat.widget.Toolbar$Api33Impl$$ExternalSyntheticLambda0@718f674
+06-11 01:35:51.239 I/InsetsSourceConsumer( 9524): applyRequestedVisibilityToControl: visible=true, type=statusBars, host=com.myvocalist/crc64eea2bef31ba6694c.MainActivity
+06-11 01:35:51.240 I/InsetsSourceConsumer( 9524): applyRequestedVisibilityToControl: visible=true, type=navigationBars, host=com.myvocalist/crc64eea2bef31ba6694c.MainActivity
+06-11 01:35:51.242 D/VRI[MainActivity]@fd43317( 9524): mThreadedRenderer.initializeIfNeeded()#2 mSurface={isValid=true 0xb400007050889800}
+06-11 01:35:51.243 D/InputMethodManagerUtils( 9524): startInputInner - Id : 0
+06-11 01:35:51.243 I/InputMethodManager( 9524): startInputInner - IInputMethodManagerGlobalInvoker.startInputOrWindowGainedFocus
+06-11 01:35:51.245 D/InsetsController( 9524): hide(ime())
+06-11 01:35:51.245 I/ImeTracker( 9524): com.myvocalist:585303ec: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+06-11 01:35:51.247 D/InputTransport( 9524): Input channel constructed: 'ClientS', fd=153
+06-11 01:35:52.184 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=no preference, reason=boost timeout, vri=VRI[MainActivity]@fd43317
+06-11 01:35:56.588 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:35:56.660 I/GestureDetector( 9524): obtain mCurrentDownEvent. id: 515351665 caller: crc64cb71f025204412d4.PView.n_onTouchEvent:-2 crc64cb71f025204412d4.PView.onTouchEvent:118 android.view.View.performOnTouchCallback:17597 
+06-11 01:35:56.660 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=high hint, reason=touch, vri=VRI[MainActivity]@fd43317
+06-11 01:35:56.661 I/GestureDetector( 9524): obtain mCurrentMotionEventRaw. action: 2 id: 844935651
+06-11 01:35:56.661 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:35:56.791 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 4751KB AllocSpace bytes, 8(280KB) LOS objects, 81% free, 5493KB/29MB, paused 90us,1.445ms total 13.349ms
+06-11 01:35:56.791 D/InputTransport( 9524): Input channel destroyed: 'ClientS', fd=153
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\mscorlib.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\System.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+06-11 01:35:56.988 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 140KB AllocSpace bytes, 0(0B) LOS objects, 81% free, 5481KB/29MB, paused 76us,922us total 9.991ms
+06-11 01:35:57.540 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 128KB AllocSpace bytes, 0(0B) LOS objects, 81% free, 5481KB/29MB, paused 90us,1.511ms total 11.841ms
+06-11 01:35:57.672 I/Choreographer( 9524): Skipped 64 frames!  The application may be doing too much work on its main thread.
+"MyVocaList.dll" (Mono: Default Domain): Carregado "C:\Users\helde\source\repos\MyVocaList\MyVocaList\obj\Debug\net10.0-android\android\assets\arm64-v8a\System.Linq.Queryable.dll". Carregamento de símbolos ignorado. O módulo está otimizado e a opção do depurador 'Apenas Meu Código' está habilitada.
+06-11 01:35:57.678 I/GestureDetector( 9524): handleMessage TAP
+06-11 01:35:57.693 I/HWUI    ( 9524): Davey! duration=1079ms; Flags=0, FrameTimelineVsyncId=185802, IntendedVsync=3245021712206, Vsync=3246088378830, InputEventId=919254452, HandleInputStart=3246090770948, AnimationStart=3246090772407, PerformTraversalsStart=3246093594177, DrawStart=3246094657927, FrameDeadline=3245038378872, FrameStartTime=3246090416990, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=3246095490792, SyncStart=3246095520740, IssueDrawCommandsStart=3246095671209, SwapBuffers=3246096074907, FrameCompleted=3246101675480, DequeueBufferDuration=9218, QueueBufferDuration=229375, GpuCompleted=3246101675480, SwapBuffersCompleted=3246096555896, DisplayPresentTime=0, CommandSubmissionCompleted=3246096074907, 
+06-11 01:35:59.154 I/Dialog  ( 9524): mIsDeviceDefault = false, mIsSamsungBasicInteraction = false, isMetaDataInActivity = false
+06-11 01:35:59.163 I/DecorView( 9524): setWindowBackground: isPopOver=false color=0 d=android.graphics.drawable.ColorDrawable@a029f1b
+06-11 01:35:59.211 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 533KB AllocSpace bytes, 4(76KB) LOS objects, 80% free, 5908KB/29MB, paused 101us,1.546ms total 16.846ms
+06-11 01:35:59.408 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:35:59.807 I/Choreographer( 9524): Skipped 127 frames!  The application may be doing too much work on its main thread.
+06-11 01:35:59.887 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): crc6488302ad6e9e4df1a.MauiAppCompatActivity_PredictiveBackCallback@fd64fd8
+06-11 01:35:59.912 I/HWUI    ( 9524): Davey! duration=2220ms; Flags=0, FrameTimelineVsyncId=185839, IntendedVsync=3246108265626, Vsync=3248224932208, InputEventId=0, HandleInputStart=3248226247197, AnimationStart=3248226249437, PerformTraversalsStart=3248226723552, DrawStart=3248276440062, FrameDeadline=3246124932292, FrameStartTime=3248225744177, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=3248304291052, SyncStart=3248304365843, IssueDrawCommandsStart=3248304520531, SwapBuffers=3248321065270, FrameCompleted=3248329067302, DequeueBufferDuration=12343, QueueBufferDuration=245260, GpuCompleted=3248329067302, SwapBuffersCompleted=3248322862874, DisplayPresentTime=0, CommandSubmissionCompleted=3248321065270, 
+06-11 01:36:00.098 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 2428KB AllocSpace bytes, 3(56KB) LOS objects, 79% free, 6518KB/30MB, paused 101us,975us total 12.674ms
+06-11 01:36:00.356 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 337KB AllocSpace bytes, 0(0B) LOS objects, 78% free, 6786KB/30MB, paused 99us,955us total 12.850ms
+06-11 01:36:00.590 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 329KB AllocSpace bytes, 0(0B) LOS objects, 78% free, 6921KB/30MB, paused 110us,985us total 15.038ms
+06-11 01:36:00.816 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 313KB AllocSpace bytes, 0(0B) LOS objects, 77% free, 7041KB/30MB, paused 103us,997us total 13.739ms
+06-11 01:36:01.046 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 293KB AllocSpace bytes, 0(0B) LOS objects, 77% free, 7181KB/31MB, paused 93us,977us total 13.589ms
+06-11 01:36:01.108 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 272KB AllocSpace bytes, 0(0B) LOS objects, 77% free, 7238KB/31MB, paused 98us,964us total 13.069ms
+06-11 01:36:01.153 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 188KB AllocSpace bytes, 0(0B) LOS objects, 77% free, 7146KB/30MB, paused 102us,944us total 12.952ms
+06-11 01:36:01.275 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=no preference, reason=boost timeout, vri=VRI[MainActivity]@fd43317
+06-11 01:36:01.297 I/HWUI    ( 9524): Davey! duration=1313ms; Flags=0, FrameTimelineVsyncId=185888, IntendedVsync=3248394518280, Vsync=3248427879994, InputEventId=0, HandleInputStart=3248428504124, AnimationStart=3248428506624, PerformTraversalsStart=3248428520635, DrawStart=3249670951676, FrameDeadline=3248427865803, FrameStartTime=3248428498187, FrameInterval=16680857, WorkloadTarget=16666666, SyncQueued=3249690907197, SyncStart=3249690957561, IssueDrawCommandsStart=3249691350009, SwapBuffers=3249704979801, FrameCompleted=3249708242249, DequeueBufferDuration=14843, QueueBufferDuration=206823, GpuCompleted=3249708242249, SwapBuffersCompleted=3249705814489, DisplayPresentTime=0, CommandSubmissionCompleted=3249704979801, 
+06-11 01:36:01.373 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:01.373 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:01.888 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:05.449 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:05.453 I/GestureDetector( 9524): obtain mCurrentDownEvent. id: 27685573 caller: crc64cb71f025204412d4.PView.n_onTouchEvent:-2 crc64cb71f025204412d4.PView.onTouchEvent:118 android.view.View.performOnTouchCallback:17597 
+06-11 01:36:05.453 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=high hint, reason=touch, vri=VRI[MainActivity]@fd43317
+06-11 01:36:05.455 I/GestureDetector( 9524): obtain mCurrentMotionEventRaw. action: 2 id: 804245680
+06-11 01:36:05.456 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:05.477 I/Choreographer( 9524): Skipped 245 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:05.496 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:05.496 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:05.499 I/HWUI    ( 9524): Davey! duration=4121ms; Flags=0, FrameTimelineVsyncId=185927, IntendedVsync=3249795216856, Vsync=3253880276786, InputEventId=568075294, HandleInputStart=3253895767091, AnimationStart=3253895768966, PerformTraversalsStart=3253901055841, DrawStart=3253903850008, FrameDeadline=3249828478660, FrameStartTime=3253895256570, FrameInterval=16673714, WorkloadTarget=16666666, SyncQueued=3253907300841, SyncStart=3253907383081, IssueDrawCommandsStart=3253907871570, SwapBuffers=3253909384227, FrameCompleted=3253916388081, DequeueBufferDuration=12291, QueueBufferDuration=164896, GpuCompleted=3253916388081, SwapBuffersCompleted=3253909806206, DisplayPresentTime=0, CommandSubmissionCompleted=3253909384227, 
+06-11 01:36:06.549 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 3666KB AllocSpace bytes, 8(160KB) LOS objects, 76% free, 7483KB/31MB, paused 103us,1.515ms total 18.713ms
+06-11 01:36:07.451 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:07.987 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:07.988 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:07.996 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@367062f
+06-11 01:36:08.030 I/Choreographer( 9524): Skipped 152 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:08.038 I/GestureDetector( 9524): handleMessage TAP
+06-11 01:36:08.048 I/HWUI    ( 9524): Davey! duration=2551ms; Flags=0, FrameTimelineVsyncId=186020, IntendedVsync=3253913214443, Vsync=3256446547675, InputEventId=0, HandleInputStart=3256449003809, AnimationStart=3256449005788, PerformTraversalsStart=3256453826309, DrawStart=3256455158548, FrameDeadline=3253946964594, FrameStartTime=3256448682559, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=3256455532298, SyncStart=3256455642507, IssueDrawCommandsStart=3256456199226, SwapBuffers=3256457133601, FrameCompleted=3256464416153, DequeueBufferDuration=73438, QueueBufferDuration=256928, GpuCompleted=3256464416153, SwapBuffersCompleted=3256457750111, DisplayPresentTime=0, CommandSubmissionCompleted=3256457133601, 
+06-11 01:36:08.070 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): crc6488302ad6e9e4df1a.MauiAppCompatActivity_PredictiveBackCallback@fd64fd8
+06-11 01:36:08.466 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=no preference, reason=boost timeout, vri=VRI[MainActivity]@fd43317
+06-11 01:36:09.164 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:09.168 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=high hint, reason=touch, vri=VRI[MainActivity]@fd43317
+06-11 01:36:09.294 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:09.721 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): androidx.appcompat.widget.Toolbar$Api33Impl$$ExternalSyntheticLambda0@718f674
+06-11 01:36:11.083 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:11.090 I/GestureDetector( 9524): obtain mCurrentDownEvent. id: 1056437849 caller: crc64cb71f025204412d4.PView.n_onTouchEvent:-2 crc64cb71f025204412d4.PView.onTouchEvent:118 android.view.View.performOnTouchCallback:17597 
+06-11 01:36:11.116 I/GestureDetector( 9524): obtain mCurrentMotionEventRaw. action: 2 id: 407097777
+06-11 01:36:11.183 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:11.367 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 846KB AllocSpace bytes, 0(0B) LOS objects, 76% free, 7391KB/31MB, paused 87us,1.008ms total 14.689ms
+06-11 01:36:11.902 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 148KB AllocSpace bytes, 0(0B) LOS objects, 76% free, 7371KB/31MB, paused 93us,915us total 14.452ms
+06-11 01:36:12.066 I/Choreographer( 9524): Skipped 53 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:12.072 I/GestureDetector( 9524): handleMessage TAP
+06-11 01:36:12.083 I/HWUI    ( 9524): Davey! duration=898ms; Flags=0, FrameTimelineVsyncId=186612, IntendedVsync=3259598125330, Vsync=3260481458628, InputEventId=326284184, HandleInputStart=3260484817818, AnimationStart=3260484834484, PerformTraversalsStart=3260487613807, DrawStart=3260488910318, FrameDeadline=3259614791996, FrameStartTime=3260484311203, FrameInterval=16664047, WorkloadTarget=16666666, SyncQueued=3260489689901, SyncStart=3260489718912, IssueDrawCommandsStart=3260489842245, SwapBuffers=3260490175891, FrameCompleted=3260496305318, DequeueBufferDuration=8489, QueueBufferDuration=199687, GpuCompleted=3260496305318, SwapBuffersCompleted=3260490611359, DisplayPresentTime=0, CommandSubmissionCompleted=3260490175891, 
+06-11 01:36:13.097 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 374KB AllocSpace bytes, 3(60KB) LOS objects, 76% free, 7512KB/31MB, paused 98us,1.342ms total 19.301ms
+06-11 01:36:13.677 I/Dialog  ( 9524): mIsDeviceDefault = false, mIsSamsungBasicInteraction = false, isMetaDataInActivity = false
+06-11 01:36:13.685 I/DecorView( 9524): setWindowBackground: isPopOver=false color=0 d=android.graphics.drawable.ColorDrawable@5002cdf
+06-11 01:36:13.844 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:14.183 I/Choreographer( 9524): Skipped 126 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:14.260 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): crc6488302ad6e9e4df1a.MauiAppCompatActivity_PredictiveBackCallback@fd64fd8
+06-11 01:36:14.271 I/HWUI    ( 9524): Davey! duration=2191ms; Flags=0, FrameTimelineVsyncId=186722, IntendedVsync=3260498027912, Vsync=3262597866926, InputEventId=0, HandleInputStart=3262601963911, AnimationStart=3262601966202, PerformTraversalsStart=3262602270577, DrawStart=3262664862192, FrameDeadline=3260514694578, FrameStartTime=3262601220838, FrameInterval=16665389, WorkloadTarget=16666666, SyncQueued=3262677919275, SyncStart=3262677964015, IssueDrawCommandsStart=3262678120629, SwapBuffers=3262680506463, FrameCompleted=3262689265109, DequeueBufferDuration=14844, QueueBufferDuration=210938, GpuCompleted=3262689265109, SwapBuffersCompleted=3262681110786, DisplayPresentTime=0, CommandSubmissionCompleted=3262680506463, 
+06-11 01:36:14.448 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 2369KB AllocSpace bytes, 3(56KB) LOS objects, 75% free, 7960KB/31MB, paused 115us,1.031ms total 15.463ms
+06-11 01:36:14.675 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 305KB AllocSpace bytes, 0(0B) LOS objects, 75% free, 8083KB/31MB, paused 107us,984us total 15.898ms
+06-11 01:36:14.902 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 293KB AllocSpace bytes, 0(0B) LOS objects, 74% free, 8223KB/32MB, paused 108us,1.055ms total 14.781ms
+06-11 01:36:15.145 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 313KB AllocSpace bytes, 0(0B) LOS objects, 74% free, 8447KB/32MB, paused 104us,1.129ms total 15.505ms
+06-11 01:36:15.374 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 329KB AllocSpace bytes, 0(0B) LOS objects, 74% free, 8551KB/32MB, paused 114us,980us total 16.498ms
+06-11 01:36:15.637 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=no preference, reason=boost timeout, vri=VRI[MainActivity]@fd43317
+06-11 01:36:15.656 I/HWUI    ( 9524): Davey! duration=1446ms; Flags=0, FrameTimelineVsyncId=186735, IntendedVsync=3262615355754, Vsync=3262698689084, InputEventId=0, HandleInputStart=3262711981150, AnimationStart=3262711983286, PerformTraversalsStart=3262712022713, DrawStart=3264027965733, FrameDeadline=3262714525926, FrameStartTime=3262711972140, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=3264046917556, SyncStart=3264046969952, IssueDrawCommandsStart=3264047392868, SwapBuffers=3264052617035, FrameCompleted=3264061826098, DequeueBufferDuration=15365, QueueBufferDuration=274896, GpuCompleted=3264061826098, SwapBuffersCompleted=3264053376046, DisplayPresentTime=0, CommandSubmissionCompleted=3264052617035, 
+06-11 01:36:15.730 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 1313KB AllocSpace bytes, 0(0B) LOS objects, 73% free, 8731KB/32MB, paused 95us,1.097ms total 18.061ms
+06-11 01:36:15.794 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:15.794 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:16.215 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:16.906 I/Choreographer( 9524): Skipped 66 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:16.916 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:16.919 I/GestureDetector( 9524): obtain mCurrentDownEvent. id: 772768739 caller: crc64cb71f025204412d4.PView.n_onTouchEvent:-2 crc64cb71f025204412d4.PView.onTouchEvent:118 android.view.View.performOnTouchCallback:17597 
+06-11 01:36:16.919 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=high hint, reason=touch, vri=VRI[MainActivity]@fd43317
+06-11 01:36:16.938 I/HWUI    ( 9524): Davey! duration=1124ms; Flags=0, FrameTimelineVsyncId=186766, IntendedVsync=3264218150068, Vsync=3265318871668, InputEventId=0, HandleInputStart=3265324410056, AnimationStart=3265324411201, PerformTraversalsStart=3265328763545, DrawStart=3265331700785, FrameDeadline=3264251494334, FrameStartTime=3265323975212, FrameInterval=16677600, WorkloadTarget=16666666, SyncQueued=3265334111983, SyncStart=3265334172139, IssueDrawCommandsStart=3265334475472, SwapBuffers=3265335218545, FrameCompleted=3265342988545, DequeueBufferDuration=12917, QueueBufferDuration=259584, GpuCompleted=3265342988545, SwapBuffersCompleted=3265335801149, DisplayPresentTime=0, CommandSubmissionCompleted=3265335218545, 
+06-11 01:36:16.969 I/GestureDetector( 9524): obtain mCurrentMotionEventRaw. action: 2 id: 973150989
+06-11 01:36:17.140 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:17.157 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:17.157 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:19.008 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:19.551 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:19.551 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:19.559 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@367062f
+06-11 01:36:19.607 I/Choreographer( 9524): Skipped 146 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:19.611 I/GestureDetector( 9524): handleMessage TAP
+06-11 01:36:19.621 I/HWUI    ( 9524): Davey! duration=2452ms; Flags=0, FrameTimelineVsyncId=187084, IntendedVsync=3265585451906, Vsync=3268017700362, InputEventId=0, HandleInputStart=3268025560523, AnimationStart=3268025561877, PerformTraversalsStart=3268025609013, DrawStart=3268027160575, FrameDeadline=3265768847856, FrameStartTime=3268025203284, FrameInterval=16666350, WorkloadTarget=16666666, SyncQueued=3268027549534, SyncStart=3268027709534, IssueDrawCommandsStart=3268028882607, SwapBuffers=3268030770523, FrameCompleted=3268037879221, DequeueBufferDuration=35677, QueueBufferDuration=646146, GpuCompleted=3268037879221, SwapBuffersCompleted=3268033509273, DisplayPresentTime=0, CommandSubmissionCompleted=3268030770523, 
+06-11 01:36:19.650 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): crc6488302ad6e9e4df1a.MauiAppCompatActivity_PredictiveBackCallback@fd64fd8
+06-11 01:36:20.153 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=no preference, reason=boost timeout, vri=VRI[MainActivity]@fd43317
+06-11 01:36:21.191 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:22.309 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=high hint, reason=touch, vri=VRI[MainActivity]@fd43317
+06-11 01:36:22.806 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:22.807 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:22.809 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:23.253 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): androidx.appcompat.widget.Toolbar$Api33Impl$$ExternalSyntheticLambda0@718f674
+06-11 01:36:24.159 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:24.168 I/GestureDetector( 9524): obtain mCurrentDownEvent. id: 826764265 caller: crc64cb71f025204412d4.PView.n_onTouchEvent:-2 crc64cb71f025204412d4.PView.onTouchEvent:118 android.view.View.performOnTouchCallback:17597 
+06-11 01:36:24.185 I/GestureDetector( 9524): obtain mCurrentMotionEventRaw. action: 2 id: 569217901
+06-11 01:36:24.299 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:24.380 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 4229KB AllocSpace bytes, 8(160KB) LOS objects, 74% free, 8632KB/32MB, paused 119us,1.125ms total 17.542ms
+06-11 01:36:24.584 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 232KB AllocSpace bytes, 0(0B) LOS objects, 74% free, 8592KB/32MB, paused 101us,1.081ms total 16.478ms
+06-11 01:36:25.137 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 128KB AllocSpace bytes, 0(0B) LOS objects, 74% free, 8592KB/32MB, paused 113us,1.441ms total 18.465ms
+06-11 01:36:25.245 I/Choreographer( 9524): Skipped 56 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:25.251 I/GestureDetector( 9524): handleMessage TAP
+06-11 01:36:25.272 I/HWUI    ( 9524): Davey! duration=956ms; Flags=0, FrameTimelineVsyncId=187846, IntendedVsync=3272719181518, Vsync=3273652508486, InputEventId=881188389, HandleInputStart=3273663718802, AnimationStart=3273663735938, PerformTraversalsStart=3273666423646, DrawStart=3273667499688, FrameDeadline=3272735848184, FrameStartTime=3273663126354, FrameInterval=16662837, WorkloadTarget=16666666, SyncQueued=3273668385990, SyncStart=3273668418334, IssueDrawCommandsStart=3273668551927, SwapBuffers=3273668926406, FrameCompleted=3273675801511, DequeueBufferDuration=11406, QueueBufferDuration=210104, GpuCompleted=3273675801511, SwapBuffersCompleted=3273669383125, DisplayPresentTime=3249828511051, CommandSubmissionCompleted=3273668926406, 
+06-11 01:36:26.974 I/Dialog  ( 9524): mIsDeviceDefault = false, mIsSamsungBasicInteraction = false, isMetaDataInActivity = false
+06-11 01:36:26.979 I/DecorView( 9524): setWindowBackground: isPopOver=false color=0 d=android.graphics.drawable.ColorDrawable@c528ae7
+06-11 01:36:27.155 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:27.509 I/Choreographer( 9524): Skipped 135 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:27.588 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): crc6488302ad6e9e4df1a.MauiAppCompatActivity_PredictiveBackCallback@fd64fd8
+06-11 01:36:27.605 I/HWUI    ( 9524): Davey! duration=2348ms; Flags=0, FrameTimelineVsyncId=187936, IntendedVsync=3273669126791, Vsync=3275919126701, InputEventId=0, HandleInputStart=3275928714270, AnimationStart=3275928716770, PerformTraversalsStart=3275929029947, DrawStart=3275992942499, FrameDeadline=3273702500826, FrameStartTime=3275927515572, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=3276005763281, SyncStart=3276005808281, IssueDrawCommandsStart=3276005973801, SwapBuffers=3276008656926, FrameCompleted=3276017401770, DequeueBufferDuration=14167, QueueBufferDuration=200157, GpuCompleted=3276017401770, SwapBuffersCompleted=3276009213801, DisplayPresentTime=3253930372142, CommandSubmissionCompleted=3276008656926, 
+06-11 01:36:27.664 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 2629KB AllocSpace bytes, 6(116KB) LOS objects, 73% free, 8977KB/32MB, paused 123us,1.133ms total 16.795ms
+06-11 01:36:27.937 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 426KB AllocSpace bytes, 0(0B) LOS objects, 72% free, 9197KB/32MB, paused 98us,1.099ms total 17.455ms
+06-11 01:36:27.966 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:27.967 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:28.375 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:29.043 I/Choreographer( 9524): Skipped 64 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:29.059 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=no preference, reason=boost timeout, vri=VRI[MainActivity]@fd43317
+06-11 01:36:29.075 I/HWUI    ( 9524): Davey! duration=1096ms; Flags=0, FrameTimelineVsyncId=187988, IntendedVsync=3276387046723, Vsync=3277453713347, InputEventId=0, HandleInputStart=3277462051561, AnimationStart=3277462052811, PerformTraversalsStart=3277466713280, DrawStart=3277470368332, FrameDeadline=3276420379283, FrameStartTime=3277461511926, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=3277474356249, SyncStart=3277474455051, IssueDrawCommandsStart=3277474652290, SwapBuffers=3277475313801, FrameCompleted=3277483271770, DequeueBufferDuration=12344, QueueBufferDuration=184480, GpuCompleted=3277483271770, SwapBuffersCompleted=3277475832082, DisplayPresentTime=3257765025110, CommandSubmissionCompleted=3277475313801, 
+06-11 01:36:30.198 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:30.207 I/GestureDetector( 9524): obtain mCurrentDownEvent. id: 1021473574 caller: com.devexpress.dxlistview.core.GestureListener.onTouchEvent:48 com.devexpress.dxlistview.DXVirtualScrollView.processTouchEvent:322 com.devexpress.dxlistview.VirtualScrollPanel.dispatchTouchEvent:53 
+06-11 01:36:30.208 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=high hint, reason=touch, vri=VRI[MainActivity]@fd43317
+06-11 01:36:30.222 I/GestureDetector( 9524): obtain mCurrentMotionEventRaw. action: 2 id: 607855868
+06-11 01:36:30.307 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:30.507 I/GestureDetector( 9524): handleMessage TAP
+06-11 01:36:31.988 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:31.998 I/GestureDetector( 9524): obtain mCurrentDownEvent. id: 928583554 caller: crc64cb71f025204412d4.PView.n_onTouchEvent:-2 crc64cb71f025204412d4.PView.onTouchEvent:118 android.view.View.performOnTouchCallback:17597 
+06-11 01:36:32.005 I/GestureDetector( 9524): obtain mCurrentMotionEventRaw. action: 2 id: 846636730
+06-11 01:36:32.130 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:32.147 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:32.147 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:34.002 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:34.549 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:34.549 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:34.557 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@367062f
+06-11 01:36:34.586 I/Choreographer( 9524): Skipped 145 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:34.590 I/GestureDetector( 9524): handleMessage TAP
+06-11 01:36:34.609 I/HWUI    ( 9524): Davey! duration=2444ms; Flags=0, FrameTimelineVsyncId=188363, IntendedVsync=3280572924817, Vsync=3282989739867, InputEventId=0, HandleInputStart=3283005249163, AnimationStart=3283005251247, PerformTraversalsStart=3283005324424, DrawStart=3283007109893, FrameDeadline=3280589591483, FrameStartTime=3283004794893, FrameInterval=16660691, WorkloadTarget=16666666, SyncQueued=3283007562861, SyncStart=3283007719580, IssueDrawCommandsStart=3283008494007, SwapBuffers=3283010563643, FrameCompleted=3283017444059, DequeueBufferDuration=40469, QueueBufferDuration=1033073, GpuCompleted=3283017444059, SwapBuffersCompleted=3283012620413, DisplayPresentTime=3259598102610, CommandSubmissionCompleted=3283010563643, 
+06-11 01:36:34.609 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): crc6488302ad6e9e4df1a.MauiAppCompatActivity_PredictiveBackCallback@fd64fd8
+06-11 01:36:35.142 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=no preference, reason=boost timeout, vri=VRI[MainActivity]@fd43317
+06-11 01:36:37.115 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:37.119 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=high hint, reason=touch, vri=VRI[MainActivity]@fd43317
+06-11 01:36:37.253 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:37.685 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): androidx.appcompat.widget.Toolbar$Api33Impl$$ExternalSyntheticLambda0@718f674
+06-11 01:36:39.882 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 0
+06-11 01:36:41.008 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 2481KB AllocSpace bytes, 4(80KB) LOS objects, 72% free, 9242KB/33MB, paused 165us,1.490ms total 28.497ms
+06-11 01:36:41.011 I/GestureDetector( 9524): obtain mCurrentDownEvent. id: 801211956 caller: crc64cb71f025204412d4.PView.n_onTouchEvent:-2 crc64cb71f025204412d4.PView.onTouchEvent:118 android.view.View.performOnTouchCallback:17597 
+06-11 01:36:41.014 I/GestureDetector( 9524): obtain mCurrentMotionEventRaw. action: 2 id: 1073207952
+06-11 01:36:41.015 I/VRI[MainActivity]@fd43317( 9524): ViewPostIme pointer 1
+06-11 01:36:41.211 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 292KB AllocSpace bytes, 0(0B) LOS objects, 72% free, 9110KB/32MB, paused 112us,985us total 16.115ms
+06-11 01:36:41.759 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 132KB AllocSpace bytes, 0(0B) LOS objects, 72% free, 9106KB/32MB, paused 115us,1.219ms total 18.205ms
+06-11 01:36:41.904 I/Choreographer( 9524): Skipped 57 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:41.911 I/GestureDetector( 9524): handleMessage TAP
+06-11 01:36:41.928 I/HWUI    ( 9524): Davey! duration=977ms; Flags=0, FrameTimelineVsyncId=189087, IntendedVsync=3289358525628, Vsync=3290308525590, InputEventId=58028761, HandleInputStart=3290323032806, AnimationStart=3290323034890, PerformTraversalsStart=3290325690619, DrawStart=3290327200098, FrameDeadline=3289375192294, FrameStartTime=3290322462181, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=3290328258536, SyncStart=3290328293327, IssueDrawCommandsStart=3290328483536, SwapBuffers=3290328986348, FrameCompleted=3290336124942, DequeueBufferDuration=14635, QueueBufferDuration=204167, GpuCompleted=3290336124942, SwapBuffersCompleted=3290329564004, DisplayPresentTime=3265585458180, CommandSubmissionCompleted=3290328986348, 
+06-11 01:36:43.627 I/Dialog  ( 9524): mIsDeviceDefault = false, mIsSamsungBasicInteraction = false, isMetaDataInActivity = false
+06-11 01:36:43.635 I/DecorView( 9524): setWindowBackground: isPopOver=false color=0 d=android.graphics.drawable.ColorDrawable@4af2634
+06-11 01:36:43.817 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:44.217 I/Choreographer( 9524): Skipped 137 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:44.286 D/WindowOnBackDispatcher( 9524): setTopOnBackInvokedCallback (unwrapped): crc6488302ad6e9e4df1a.MauiAppCompatActivity_PredictiveBackCallback@fd64fd8
+06-11 01:36:44.297 I/HWUI    ( 9524): Davey! duration=2372ms; Flags=0, FrameTimelineVsyncId=189102, IntendedVsync=3290342147964, Vsync=3292625481206, InputEventId=0, HandleInputStart=3292636245410, AnimationStart=3292636247128, PerformTraversalsStart=3292637248431, DrawStart=3292689790045, FrameDeadline=3290358814630, FrameStartTime=3292635380878, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=3292703381399, SyncStart=3292703423951, IssueDrawCommandsStart=3292703587441, SwapBuffers=3292706008691, FrameCompleted=3292714843899, DequeueBufferDuration=15625, QueueBufferDuration=229584, GpuCompleted=3292714843899, SwapBuffersCompleted=3292706581555, DisplayPresentTime=3265602125888, CommandSubmissionCompleted=3292706008691, 
+06-11 01:36:44.333 I/com.myvocalist( 9524): Explicit concurrent mark compact GC freed 1600KB AllocSpace bytes, 3(60KB) LOS objects, 72% free, 9454KB/33MB, paused 104us,1.082ms total 19.151ms
+06-11 01:36:44.487 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:44.487 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:44.939 D/AutofillManager( 9524): view not autofillable - not passing ime action check
+06-11 01:36:45.580 I/Choreographer( 9524): Skipped 65 frames!  The application may be doing too much work on its main thread.
+06-11 01:36:45.594 I/VRI[MainActivity]@fd43317( 9524): call setFrameRateCategory for touch hint category=no preference, reason=boost timeout, vri=VRI[MainActivity]@fd43317
+06-11 01:36:45.613 I/HWUI    ( 9524): Davey! duration=1110ms; Flags=0, FrameTimelineVsyncId=189169, IntendedVsync=3292909975658, Vsync=3293993266308, InputEventId=0, HandleInputStart=3293999225617, AnimationStart=3293999229315, PerformTraversalsStart=3294004293638, DrawStart=3294007807180, FrameDeadline=3292942468834, FrameStartTime=3293998397024, FrameInterval=16666010, WorkloadTarget=16666666, SyncQueued=3294011185305, SyncStart=3294011256867, IssueDrawCommandsStart=3294011468170, SwapBuffers=3294012270774, FrameCompleted=3294020393170, DequeueBufferDuration=15261, QueueBufferDuration=200260, GpuCompleted=3294020393170, SwapBuffersCompleted=3294012822753, DisplayPresentTime=3265718793701, CommandSubmissionCompleted=3294012270774, 
+O programa "MyVocaList.dll" foi fechado com o código 0 (0x0).
+A sessão de depuração do vsdbg para o projeto 'C:\Users\helde\source\repos\MyVocaList\MyVocaList\MyVocaList.csproj' foi interrompida

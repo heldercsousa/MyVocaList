@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Sentry;
 using Serilog;
 using Serilog.Events;
 
@@ -44,25 +45,29 @@ public static class LoggingConfiguration
         var dsn = config["Sentry:Dsn"];
         if (!string.IsNullOrWhiteSpace(dsn))
         {
-            // Compute session ID before ConfigureScope so Preferences.Get runs before
-            // Sentry SDK init, when the Android Application context is guaranteed ready.
+            // Compute session ID before Sentry SDK init — Preferences.Get requires the
+            // Android Application context to be ready, which it is at this point.
             var sessionId = GetOrCreateSessionId();
-            loggerConfig.WriteTo.Sentry(o =>
-            {
-                o.Dsn = dsn;
-                o.Release = AppInfo.VersionString;
-                o.Environment = "production";
-                o.AttachScreenshot = false;
-                o.MinimumBreadcrumbLevel = LogEventLevel.Information;
-                o.MinimumEventLevel = LogEventLevel.Error;
-                o.ConfigureScope(scope =>
+
+            // Use the full named-parameter overload: SentrySerilogOptions only exposes
+            // MinimumEventLevel / MinimumBreadcrumbLevel — Dsn, Release, Environment and
+            // defaultTags must be passed as named arguments to this overload.
+            // AttachScreenshot is SDK-default false; no explicit assignment is needed.
+            loggerConfig.WriteTo.Sentry(
+                dsn: dsn,
+                release: AppInfo.VersionString,
+                environment: "production",
+                minimumBreadcrumbLevel: LogEventLevel.Information,
+                minimumEventLevel: LogEventLevel.Error,
+                defaultTags: new Dictionary<string, string>
                 {
-                    scope.SetTag("device.model", DeviceInfo.Model);
-                    scope.SetTag("os.name", DeviceInfo.Platform.ToString());
-                    scope.SetTag("os.version", DeviceInfo.VersionString);
-                    scope.SetExtra("session_id", sessionId);
+                    ["device.model"] = DeviceInfo.Model,
+                    ["os.name"] = DeviceInfo.Platform.ToString(),
+                    ["os.version"] = DeviceInfo.VersionString
                 });
-            });
+
+            // session_id is an extra (not a tag) — attach via the static SDK scope.
+            SentrySdk.ConfigureScope(scope => scope.SetExtra("session_id", sessionId));
         }
 #endif
 

@@ -37,8 +37,8 @@
                 PlaceholderText="Describe the issue or feature request..."
                 Text="{Binding Message, Mode=TwoWay}"
                 MaxCharacterCount="1000"
-                MinLines="5"
-                MaxLines="10" />
+                MinLineCount="5"
+                MaxLineCount="10" />
 
             <!-- Email (optional) -->
             <dxe:TextEdit
