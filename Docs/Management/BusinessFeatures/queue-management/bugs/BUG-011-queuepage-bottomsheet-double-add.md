@@ -4,6 +4,7 @@
 **Feature area:** Queue Management
 **Severity:** High — causes 4103ms UI freeze (245 skipped frames / Davey!) on every navigation to QueuePage after first visit
 **Status:** 💡 Pending
+**Recommended model:** `claude-sonnet-4-6` — XAML/code-behind fix, single-file guard pattern; no architectural decisions required
 
 ## Symptom
 
