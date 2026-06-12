@@ -160,7 +160,8 @@ Regression tests for a bug fix carry a `// Regression: page-load-frozen` comment
   - **Demo:** Deploy, open the page/sheet that uses the icon — icon renders; logcat shows no `Load failed for [info_outlined]`.
   - **Risk:** Low.
 
-- [ ] **T5 — [DECISION GATE + SPIKE] Structural reduction of CRUD page first-render cost** [SEQUENTIAL — only after T1+T2 numbers reviewed with Helder]
+- [x] **T5 — [DECISION GATE + SPIKE] Structural reduction of CRUD page first-render cost** [SEQUENTIAL — only after T1+T2 numbers reviewed with Helder]
+  - **Spike completed 2026-06-12.** Findings in `findings.md § T5 spike results`. On-device T1 numbers not available (T2 pending with Helder) — static analysis + build-verify experiments. Recommendation: Options A (lazy BottomSheet) + B (lazy SearchAppBar) combined; Option C disqualified (regression against T3). Rollout is a separate task requiring Helder review of T1/T2 numbers first.
   - **Decision gate:** No preset numeric threshold; Helder reviews T1/T2 numbers and decides go/no-go. Spike-internal success criteria (≥40% reduction / <20% abandon) unchanged.
   - **Time-box:** 2 hours (hard stop) for the spike portion.
   - **Question:** Which single structural change yields the largest reduction in `ctor`+`loaded` time on-device: (a) deferring the `dx:BottomSheet` in `CrudListView` to lazy creation (create/attach on first `ConfirmSheetState` change instead of at inflation — it currently creates an Android Dialog window during every page construction); (b) collapsing `Shell.TitleView` to a single app bar inflated on demand (SearchAppBar created only when search opens); or (c) deferring `DXCollectionView` attach until after the first frame (skeleton-only first paint)?

@@ -145,3 +145,32 @@ Full solution build: PASS (0 errors; pre-existing NU1608/DX1001 warnings only).
 | Regression | Implementation location | Test method |
 |------------|------------------------|-------------|
 | Revisit must not toggle IsInitialLoading (no shimmer flash) | CrudListViewModelBase.InitializeAsync + _hasLoadedOnce | InitializeAsync_SecondCall_DoesNotToggleIsInitialLoading |
+
+---
+## Task: T5 — Structural reduction spike (lazy BottomSheet / TitleView / DXCollectionView defer)
+**Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md § Phase 2 T5
+**Status:** To Review
+**Started:** 06/12/2026
+**Completed:** 06/12/2026
+
+### Changed files:
+- `Docs/Management/DevCycleCraft/page-load-frozen/findings.md` — appended § "T5 spike results" with per-option structural analysis, build results, element-count deltas, recommendations
+- `Docs/Management/DevCycleCraft/page-load-frozen/plan.md` — T5 checkbox marked `[x]` with spike-done note and rollout guidance
+
+### Build notes
+All spike code changes were experimental and fully reverted. Final state: clean (no production files modified). Build verified post-revert.
+
+### Verification evidence
+- Build: PASS (0 errors — `dotnet build MyVocaList/MyVocaList.csproj -f net10.0`; verified both during spike experiments and after revert)
+- Tests: PASS (272 tests, 0 failures — `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`)
+- Post-edit re-read: confirmed — findings.md and plan.md reviewed
+- Spec compliance: confirmed — spike-only, no production code persisted; SQLITE-WORKAROUND and PHASE2-INSTRUMENTATION markers untouched; DevExpress-first honored (no stock-MAUI replacements); no DisplayAlert; English only
+
+### Spike summary
+| Option | Build | Elements removed | Recommendation |
+|--------|-------|-----------------|----------------|
+| A — Lazy BottomSheet (CrudListView) | PASS | −7 (incl. Android Dialog) | go — ship combined with B |
+| B — Lazy SearchAppBar (VenuesPage TitleView) | PASS | −7 (incl. dxe:TextEdit) | go — ship combined with A, all 4 CRUD pages |
+| C — Defer DXCollectionView | NOT BUILT | — | no-go — behavioral regression against T3 |
+
+**Overall:** Options A+B combined estimated at 10–30% reduction (static analysis only; T1 on-device numbers required before Helder approves rollout). Rollout is a separate task.

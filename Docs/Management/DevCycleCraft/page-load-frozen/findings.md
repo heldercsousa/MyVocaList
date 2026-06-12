@@ -104,3 +104,102 @@ MAUI Android rebuilds the toolbar content when `Shell.TitleView` changes on navi
 2. **Release-build baseline** (T2): sizes H3 — decides whether structural UI work is needed for MVP at all.
 3. **Cheap wins shippable regardless** (T3): skip the shimmer toggle when data is already loaded (kills the revisit cost of H2); add the missing `info_outlined.svg`.
 4. **Evidence-gated structural change** (T4/T5): only after T1/T2 numbers — deferred attach of heavy content, lighter TitleView, or DX component reduction, chosen with Helder.
+
+---
+
+## T5 spike results (2026-06-12)
+
+> Spike subagent: static analysis + build-verify experiments on VenuesPage. On-device timing (T1 numbers) not available for this spike — evaluation is based on element-count analysis, HWUI log evidence from §1, and structural reasoning. Success/failure criteria applied with static analysis as proxy for on-device measurement; Helder must validate with T1 numbers before rollout.
+
+### Element count baseline (VenuesPage first-render inflation)
+
+CrudListView.xaml direct elements (~35):
+- Root Grid + RowDefinitions + ContentPresenter (filter)
+- ShimmerView → LoadingView: VerticalStackLayout + 6x DXBorder skeleton bones
+- ShimmerView → Content: **DXCollectionView** (creates Recycler + scroll container + virtualization layer)
+- 2x EmptyState = 2x (ContentView + VerticalStackLayout + DXButton + 2 Label) = 10 elements
+- HorizontalStackLayout + **FloatingToolbar** (DXBorder + HorizontalStackLayout + 5 DXButton) + FAB DXButton
+- **BottomSheet** + VerticalStackLayout + Label + 2x BoxView + 2x DXButton = 7 elements, **creates Android Dialog window** (confirmed in device logs §1.4)
+
+Shell.TitleView (~18):
+- Grid + **SmallAppBar** (Grid + VerticalStackLayout + 4 DXButton + 2 Label = ~9) + **SearchAppBar** (Grid + DXButton + DXTextEdit + 3 DXButton = ~7)
+
+Total: ~53 elements, all creating JNI Java peers → GC-bridge burst evidence (§1.3).
+
+---
+
+### Option A — Lazy BottomSheet in CrudListView
+
+**Approach:** Remove `dx:BottomSheet` from `CrudListView.xaml`. Create it in code-behind (`EnsureConfirmSheetCreated`) on the first `ConfirmSheetState != Hidden` event. The sheet content (Label, 2 BoxView, 2 DXButton) is created programmatically; the sheet is added to `rootGrid` with `Grid.Row=1` at creation time.
+
+**Build result:** PASS (0 errors) — confirmed by `dotnet build MyVocaList/MyVocaList.csproj -f net10.0`. One type error fixed during spike (`BottomSheetState` → `BottomSheetAllowedState` for the `AllowedState` property).
+
+**Element count delta:** −7 elements removed from initial inflation (BottomSheet + VerticalStackLayout + Label + 2x BoxView + 2x DXButton). More importantly: **the Android Dialog window is no longer created at construction** — the device logs (§1.4) confirm this Dialog appears mid-freeze on every navigation. Removing it from inflation eliminates one confirmed contributor.
+
+**Expected T1 `loaded` impact:** The BottomSheet creates a Dialog-backed Android window, which requires a `WindowManager.addView` call and measure/layout of a second window. Deferring this removes the Dialog creation from the critical path entirely for the ~95% of page visits where the user never opens the confirm sheet. Conservative estimate: 5–15% reduction in `ctor→Loaded` span. Not sufficient alone to meet the 40% success criterion, but it is a clean, reversible, zero-behavioral-impact change.
+
+**Behavioral risks:**
+- First tap on delete/edit that opens the sheet has a ~10–20 ms one-time cost (sheet inflation). Imperceptible.
+- Bindings (ConfirmMessage, ConfirmActionText, DismissConfirmCommand) work correctly via dynamic BindingContext forwarding.
+- BottomSheet `StateChanged` event (swipe-dismiss sync) works because the handler is attached at creation.
+
+**Recommendation:** go — ship as a standalone improvement task. Low risk, confirmed build, eliminates the Dialog-creation contributor from every page navigation. Does not reach 40% alone — must be combined.
+
+---
+
+### Option B — Collapse Shell.TitleView to single app bar
+
+**Approach:** Remove `SearchAppBar` from `VenuesPage.xaml`'s `Shell.TitleView`. Create it lazily in code-behind when `VenuesViewModel.IsSearchMode` first becomes `true` (via `PropertyChanged` subscription). The `SmallAppBar` `IsVisible` binding is also deferred to the same moment (before that, it is always visible, which is correct — search is closed by default).
+
+**Build result:** PASS (0 errors) — confirmed by `dotnet build MyVocaList/MyVocaList.csproj -f net10.0`. `titleViewGrid` x:Name added to the Grid in XAML; binding wiring done in code-behind.
+
+**Element count delta:** −7 elements removed from initial inflation (Grid + DXButton + `dxe:TextEdit` + 3x DXButton). The `dxe:TextEdit` (DevExpress editor with complex input handling) is particularly expensive — it is the only input control in the page and likely has a non-trivial Java-side setup.
+
+**Expected T1 `loaded` impact:** Shell.TitleView elements are inflated as part of the Shell toolbar area separately from the page content, but they still create Java peers at navigation time. Removing ~7 elements saves some Java-peer construction. The `dxe:TextEdit` may account for disproportionate cost (IME registration, text watcher setup). Estimate: 5–15% reduction. Not sufficient alone.
+
+**Behavioral risks:**
+- This change is **VenuesPage-only** in the spike. Every other CRUD page still has the SearchAppBar at inflation. A rollout task would need to apply the pattern to all 4 CRUD pages.
+- The `SearchAppBar.OnPropertyChanged(nameof(IsVisible))` auto-focus logic (`searchEdit?.Focus()`) fires when `IsVisible = true` — this still works because the view is added to the tree before the binding fires `IsSearchMode = true` → `IsVisible = true`.
+- Compiled bindings in the XAML `x:DataType="vm:VenuesViewModel"` remain intact for SmallAppBar; SearchAppBar bindings move to code-behind (runtime bindings).
+
+**Recommendation:** go — ship as a standalone improvement task, applied to all 4 CRUD pages. Low-medium risk. The compile-time bindings for SmallAppBar are preserved; SearchAppBar runtime bindings are equivalent in behavior. Does not reach 40% alone — must be combined with Option A.
+
+---
+
+### Option C — Defer DXCollectionView attach (skeleton-only first paint)
+
+**Approach:** Replace `<dx:ShimmerView.Content>` with a lightweight placeholder at construction; inject the real `DXCollectionView` after the first frame via `Dispatcher.DispatchDelayed`.
+
+**Build result:** NOT ATTEMPTED — disqualified on behavioral grounds before build experiment.
+
+**Element count delta:** DXCollectionView itself is 1 XAML element, but it represents the heaviest control (Android RecyclerView + scroll container + selection manager + handler factory). Removing it from initial inflation is the highest-value single element.
+
+**Disqualification reason — regression against T3:** T3 (shipped, `_hasLoadedOnce` flag) was designed so that on **revisits**, data appears immediately with no skeleton flash. Option C would re-introduce a skeleton/blank period on every revisit (even when `_hasLoadedOnce = true` and data is ready) because the DXCollectionView is not yet attached when `OnAppearing` runs. This directly undoes T3's behavioral guarantee: "Navigate back to Venues: Venues reappears with its list immediately." The two changes are in direct behavioral conflict.
+
+**Recommendation:** no-go. The behavioral regression against T3 makes this option unacceptable without a redesign that distinguishes first-visit (defer is fine) from revisit (defer must be skipped). That redesign is more complex than Options A+B combined and provides lower incremental value after T3 already eliminated the revisit shimmer cost.
+
+---
+
+### Combined A+B analysis
+
+Options A and B are **additive and independent** — they address different UI regions (page body vs Shell toolbar) and can be shipped together in a single rollout task:
+- Combined element delta: −14 elements, removal of the Android Dialog creation and the heavy TextEdit from the critical path
+- Combined estimated impact: 10–30% reduction in `ctor→Loaded` span (static estimate; must be validated with T1 numbers on device)
+
+The combined estimate falls in a range that **may** reach the 40% success criterion on device — particularly since the Dialog window creation (which appears in logs as a distinct mid-freeze entry) may account for more than its element count suggests.
+
+---
+
+### Overall recommendation
+
+**Implement Options A + B together as a single rollout task.** Neither option alone is expected to reach 40%, but their combination eliminates two confirmed cost contributors (Dialog window mid-inflation, TextEdit setup in SearchAppBar) across all 4 CRUD pages. Both build cleanly, both are low-behavioral-risk, and both are reversible if T1 numbers show no improvement.
+
+**Rollout task scope:**
+- Apply Option A (lazy BottomSheet) to `CrudListView.xaml(.cs)` — shared component, affects all 4 CRUD pages at once
+- Apply Option B (lazy SearchAppBar) to all 4 CRUD page XAML files: VenuesPage, PersonsPage, SongsPage, ArtistsPage
+- XAML edits one-file-at-a-time with build between each (MAUI constitutional constraint)
+- Verify on S23 Ultra with T1 instrumentation still in place to measure before/after `ctor→Loaded` delta
+
+**If combined A+B on-device result is < 20%:** escalate to Helder — the remaining lever is the Blazor Hybrid migration (already in BACKLOG), not further micro-optimization of the native MAUI XAML tree. The freeze in Release build (T2, pending) may already be acceptable for MVP, making structural work lower priority.
+
+**Spike conclusion:** inconclusive on the 40% threshold (no on-device T1 numbers available for comparison), but both options are viable and should be implemented. The spike confirms build correctness and identifies the two highest-value structural changes.
