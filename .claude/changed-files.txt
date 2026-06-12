@@ -1232,3 +1232,7 @@ Docs/Management/BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.
 .worktrees/page-load-frozen/MyVocaList/UI/Pages/Venues/VenuesPage.xaml
 .worktrees/page-load-frozen/MyVocaList/UI/Pages/Venues/VenuesPage.xaml.cs
 .worktrees/page-load-frozen/MyVocaList/UI/Pages/Venues/VenuesPage.xaml
+.worktrees/page-load-frozen/MyVocaList/UI/Pages/Venues/VenuesPage.xaml.cs
+.worktrees/page-load-frozen/Docs/Management/DevCycleCraft/page-load-frozen/findings.md
+.worktrees/page-load-frozen/Docs/Management/DevCycleCraft/page-load-frozen/plan.md
+.worktrees/page-load-frozen/Docs/Management/DevCycleCraft/page-load-frozen/task-log.md
