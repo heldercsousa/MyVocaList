@@ -1238,3 +1238,6 @@ Docs/Management/BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.
 .worktrees/page-load-frozen/Docs/Management/DevCycleCraft/page-load-frozen/task-log.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+MyVocaList.sln
+MyVocaList.sln
