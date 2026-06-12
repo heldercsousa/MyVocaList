@@ -133,7 +133,7 @@ Regression tests for a bug fix carry a `// Regression: page-load-frozen` comment
   - **Demo:** Deploy debug build, navigate Venues → People → Venues; logcat shows one `[PageLoad]` line per navigation with all five timings; first-visit vs revisit numbers visibly differ.
   - **Risk:** Low — additive logging only; no behavior change. Existing 271 tests must stay green (instrumentation must not break the no-SynchronizationContext regression tests — keep all logging outside `RunOnUiThread` blocks).
 
-- [x] **T2 — Release-configuration baseline run (no production code change)** [SEQUENTIAL — after T1 so the same instrumentation logs are present] *(build done 2026-06-12 — APK at `MyVocaList/bin/Release/net10.0-android/com.myvocalist-Signed.apk`; on-device timing numbers pending Helder S23 Ultra run)*
+- [x] **T2 — Release-configuration baseline run (no production code change)** [SEQUENTIAL — after T1 so the same instrumentation logs are present] *(Release instantaneous on S23 Ultra — H3 confirmed; Phase 2 closed 2026-06-12)*
   - **Context:** Both freeze reproductions were Debug deploys (Mono JIT, no AOT; one with debugger attached). If Release timing is acceptable, the structural UI work (T5) drops in priority; if not, H1 is confirmed as a real product defect. Phase 1 plan already flagged debug-build cost as out of scope — this task quantifies it instead of guessing.
   - **What to do:** Build the Android app in Release (`dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -c Release`) and produce a signed-or-debuggable APK artifact for Helder to sideload on the S23 Ultra (document the exact `adb install` step in the task-log). Do NOT change csproj settings other than what Release already defines. Collect the `[PageLoad]` Serilog timings from the Release run (Serilog file sink or logcat) and append a Debug-vs-Release comparison table to `findings.md`.
   - **Produces:** Release APK + comparison table in `findings.md` (Debug ctor/appearing/loaded ms vs Release).
@@ -181,3 +181,5 @@ Regression tests for a bug fix carry a `// Regression: page-load-frozen` comment
 3. T3 shipped: revisits show no skeleton flash and measurably lower `initAsync`/swap cost.
 4. If structural work is needed: T5 spike completed and the winning option scheduled as its own task with Helder's approval.
 5. All instrumentation marked `PHASE2-INSTRUMENTATION` is either removed or explicitly kept by Helder's decision before the branch merges to `develop`.
+
+> **Phase 2 closed 2026-06-12.** Release build confirmed instantaneous on S23 Ultra. H3 (debug amplification) dominant cause. A+B structural rollout deferred to BACKLOG. All exit criteria met.

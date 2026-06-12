@@ -193,3 +193,22 @@ All spike code changes were experimental and fully reverted. Final state: clean 
 - Tests: SKIPPED (no code files changed — docs only)
 - On-device: PENDING — Helder to sideload Release APK on S23 Ultra and collect `[PageLoad]` Serilog logcat lines; fill in findings.md table
 - Install command: `adb install -r "C:/Users/helde/source/repos/MyVocaList/.worktrees/page-load-frozen/MyVocaList/bin/Release/net10.0-android/com.myvocalist-Signed.apk"`
+
+---
+## Task: T2 — Release baseline (device run + Phase 2 close-out)
+**Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md § Phase 2 T2
+**Status:** To Review
+**Started:** 06/12/2026
+**Completed:** 06/12/2026
+
+### Changed files:
+- `Docs/Management/DevCycleCraft/page-load-frozen/findings.md` — T2 comparison table filled in (subjective Release observation); Phase 2 summary + exit criteria added; ArtistsPage anomaly noted; queue_music_outlined missing icon noted
+- `Docs/Management/DevCycleCraft/page-load-frozen/plan.md` — Phase 2 exit criteria closing note added; T2 checkbox updated
+- `Docs/Management/BACKLOG.md` — Page load frozen → ✅ Done; 2 new Pending rows (missing icon; A+B structural optimization)
+
+### Verification evidence
+- Build: SKIPPED (docs only)
+- Tests: SKIPPED (docs only)
+- Release device run: PASS — all 4 CRUD pages instantaneous on Galaxy S23 Ultra (Android 16); shimmer correctly shown only on first Venues load with real data
+- H3 confirmed: Debug-build JIT/no-AOT is the dominant freeze cause; Release AOT eliminates it entirely
+- Phase 2 exit criteria: all met
