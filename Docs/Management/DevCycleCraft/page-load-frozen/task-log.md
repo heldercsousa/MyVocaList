@@ -174,3 +174,22 @@ All spike code changes were experimental and fully reverted. Final state: clean 
 | C — Defer DXCollectionView | NOT BUILT | — | no-go — behavioral regression against T3 |
 
 **Overall:** Options A+B combined estimated at 10–30% reduction (static analysis only; T1 on-device numbers required before Helder approves rollout). Rollout is a separate task.
+
+---
+## Task: T2 — Release-configuration baseline build
+**Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md § Phase 2 T2
+**Status:** To Review (APK built; on-device run pending Helder)
+**Started:** 06/12/2026
+**Completed:** 06/12/2026
+
+### Changed files:
+- `Docs/Management/DevCycleCraft/page-load-frozen/findings.md` — appended T2 Debug-vs-Release comparison table placeholder (numbers pending device run)
+
+### Build notes
+`dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -c Release`: PASS (0 errors, 87 warnings — all pre-existing NU1608/CS8612/DX1000/DX1001/XamlC — unchanged from Debug build warnings).
+
+### Verification evidence
+- Build: PASS — Release APK produced at `MyVocaList/bin/Release/net10.0-android/com.myvocalist-Signed.apk`
+- Tests: SKIPPED (no code files changed — docs only)
+- On-device: PENDING — Helder to sideload Release APK on S23 Ultra and collect `[PageLoad]` Serilog logcat lines; fill in findings.md table
+- Install command: `adb install -r "C:/Users/helde/source/repos/MyVocaList/.worktrees/page-load-frozen/MyVocaList/bin/Release/net10.0-android/com.myvocalist-Signed.apk"`

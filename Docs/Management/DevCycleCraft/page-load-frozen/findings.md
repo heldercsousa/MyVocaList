@@ -203,3 +203,20 @@ The combined estimate falls in a range that **may** reach the 40% success criter
 **If combined A+B on-device result is < 20%:** escalate to Helder — the remaining lever is the Blazor Hybrid migration (already in BACKLOG), not further micro-optimization of the native MAUI XAML tree. The freeze in Release build (T2, pending) may already be acceptable for MVP, making structural work lower priority.
 
 **Spike conclusion:** inconclusive on the 40% threshold (no on-device T1 numbers available for comparison), but both options are viable and should be implemented. The spike confirms build correctness and identifies the two highest-value structural changes.
+
+---
+
+## T2 Debug-vs-Release comparison (pending Helder device run)
+
+> APK built: 2026-06-12. Release APK at `MyVocaList/bin/Release/net10.0-android/com.myvocalist-Signed.apk`.
+> Install: `adb install -r "MyVocaList/bin/Release/net10.0-android/com.myvocalist-Signed.apk"`
+> After install: navigate Venues → People → Songs → Artists and capture `[PageLoad]` Serilog lines from logcat (`adb logcat | grep PageLoad`).
+
+| Page | Debug `ctor` ms | Debug `loaded` ms | Debug `initAsync` ms | Release `ctor` ms | Release `loaded` ms | Release `initAsync` ms |
+|------|----------------|-------------------|----------------------|-------------------|---------------------|------------------------|
+| VenuesPage | — | — | — | — | — | — |
+| PersonsPage | — | — | — | — | — | — |
+| SongsPage | — | — | — | — | — | — |
+| ArtistsPage | — | — | — | — | — | — |
+
+> Fill in with T1 `[PageLoad]` log lines from both runs. Decision: if Release `loaded` < 500 ms for all pages → structural work (A+B rollout) is low priority; if Release `loaded` > 1000 ms for any page → proceed with A+B rollout task.
