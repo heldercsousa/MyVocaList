@@ -4,6 +4,7 @@
 **Feature area:** Venues CRUD
 **Severity:** Medium — 2.2s fetch on app start, visible shimmer delay for users with any venue data
 **Status:** 💡 Pending
+**Recommended model:** `claude-sonnet-4-6` — EF Core repository query rewrite; requires SQLite MCP + EF Core query analysis but no new architecture
 
 ## Symptom
 
