@@ -1222,3 +1222,12 @@ MyVocaList.sln
 MyVocaList.sln
 Docs/Management/BusinessFeatures/queue-management/bugs/BUG-011-queuepage-bottomsheet-double-add.md
 Docs/Management/BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.md
+.worktrees/page-load-frozen/MyVocaList/UI/Components/CrudListView.xaml
+.worktrees/page-load-frozen/MyVocaList/UI/Components/CrudListView.xaml.cs
+.worktrees/page-load-frozen/MyVocaList/UI/Components/CrudListView.xaml.cs
+.worktrees/page-load-frozen/MyVocaList/UI/Components/CrudListView.xaml.cs
+.worktrees/page-load-frozen/MyVocaList/UI/Components/CrudListView.xaml
+.worktrees/page-load-frozen/MyVocaList/UI/Components/CrudListView.xaml.cs
+.worktrees/page-load-frozen/MyVocaList/UI/Components/CrudListView.xaml.cs
+.worktrees/page-load-frozen/MyVocaList/UI/Pages/Venues/VenuesPage.xaml
+.worktrees/page-load-frozen/MyVocaList/UI/Pages/Venues/VenuesPage.xaml.cs
