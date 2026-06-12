@@ -1214,3 +1214,11 @@ Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 Docs/Changelog/changelog.md
+Docs/Management/BusinessFeatures/queue-management/bugs/BUG-011-queuepage-bottomsheet-double-add.md
+Docs/Management/BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+MyVocaList.sln
+MyVocaList.sln
+Docs/Management/BusinessFeatures/queue-management/bugs/BUG-011-queuepage-bottomsheet-double-add.md
+Docs/Management/BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.md
