@@ -1242,3 +1242,15 @@ Docs/Management/BACKLOG.md
 MyVocaList.sln
 MyVocaList.sln
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_page_load_frozen_phase2.md
+Docs/Management/BACKLOG.md
+MyVocaList/UI/ViewModels/CrudListViewModelBase.cs
+MyVocaList/UI/ViewModels/CrudListViewModelBase.cs
+MyVocaList/UI/ViewModels/ICrudListViewModel.cs
+MyVocaList/UI/Pages/Base/CrudListPageBase.cs
+MyVocaList/UI/Pages/Venues/VenuesPage.xaml
+MyVocaList/UI/Pages/People/PeoplePage.xaml
+MyVocaList/UI/Pages/Songs/SongsPage.xaml
+MyVocaList/UI/Pages/Artists/ArtistsPage.xaml
+MyVocaList/UI/ViewModels/ArtistsViewModel.cs
+MyVocaList/UI/ViewModels/ArtistsViewModel.cs
+Docs/Management/BACKLOG.md
