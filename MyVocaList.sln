@@ -282,6 +282,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-search-launch", "yo
 		Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\tasks.md = Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\tasks.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "song-import-resolution", "song-import-resolution", "{FA1234BC-0001-4000-8000-000000000023}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\requirements.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\design.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\design.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\windows-version\design.md = Docs\Management\BusinessFeatures\windows-version\design.md
@@ -550,6 +556,7 @@ Global
 		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{FA1234BC-0001-4000-8000-000000000022} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-000000000023} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{0C4BA720-519E-4818-BD9B-34AC19E4FCD7} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
