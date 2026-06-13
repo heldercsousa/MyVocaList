@@ -5,6 +5,8 @@ public class Song
     public int Id { get; set; }
     public int ArtistId { get; set; }
     public string Title { get; set; }
+    /// <summary>Variant label (Live/Acoustic/Remix); empty string = canonical version.</summary>
+    public string Version { get; set; } = string.Empty;
     public string? FeaturedArtists { get; set; }
     public string? Lyrics { get; set; }
     public string? ExternalProvider { get; set; }

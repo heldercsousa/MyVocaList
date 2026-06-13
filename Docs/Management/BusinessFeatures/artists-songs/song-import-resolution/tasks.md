@@ -7,9 +7,9 @@
 - [x] **0.1 [SPIKE] Validate fuzzy library on net10.0-android** — DONE 2026-06-13: FuzzySharp 2.0.2, Android-safe, threshold 0.82. See `findings.md`.
 
 ## Wave 1 — Domain `[P]`
-- [ ] **1.1 Add Song.Version** — Produces: `Domain/Entity/Song.cs` change. Consumes: nothing.
-- [ ] **1.2 Resolution contracts** — Produces: `Domain/Resolution/*` (records+enums). Consumes: Song.
-- [ ] **1.3 Service + scorer interfaces** — Produces: `ISongResolutionService`, `IArtistResolutionService`, `ISimilarityScorer`; `ISongService`/`ISongRepository`/`IArtistRepository` additions. Consumes: 1.2.
+- [x] **1.1 Add Song.Version** — `Version` property added to `Song.cs` with XML doc; Domain builds clean.
+- [x] **1.2 Resolution contracts** — `Domain/Resolution/` folder created: `ResolutionEnums.cs` (ResolutionKind, ResolutionChoice), `Candidates.cs` (ArtistCandidate, SongCandidate), `ResolutionResults.cs` (FieldDiff, SongMatch, SongResolution, ArtistResolution); Domain builds clean.
+- [x] **1.3 Service + scorer interfaces** — `ISimilarityScorer.cs`, `IArtistResolutionService.cs`, `ISongResolutionService.cs` created; `ISongService.cs` extended (CreateSongWithUrlsAsync + UpdateSongAsync externalId params); `ISongRepository.cs` extended (ExistsByTitleVersionForArtistAsync ×2 + GetFuzzyCandidatePoolAsync); `IArtistRepository.cs` extended (GetFuzzyCandidatePoolAsync); Domain builds 0 errors.
 
 ## Wave 2 — Infra `[SEQUENTIAL]` (waits W1)
 - [ ] **2.1 SongConfiguration: Version + 3-col unique index** — Files: `SongConfiguration.cs`. Hotspot-adjacent.
