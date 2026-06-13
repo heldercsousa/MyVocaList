@@ -1241,3 +1241,4 @@ Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 MyVocaList.sln
 MyVocaList.sln
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_page_load_frozen_phase2.md
