@@ -29,8 +29,8 @@
             <appbars:SmallAppBar
                 x:Name="smallAppBar"
                 Title="{Binding AppBarTitle}"
-                NavigationIcon="arrow_back_outlined"
-                NavigationCommand="{Binding GoBackCommand}"
+                NavigationIcon="{Binding AppBarNavigationIcon}"
+                NavigationCommand="{Binding AppBarNavigationCommand}"
                 Action1Icon="search_outlined"
                 Action1Command="{Binding OpenSearchCommand}"
                 IsElevated="{Binding IsScrolled}"

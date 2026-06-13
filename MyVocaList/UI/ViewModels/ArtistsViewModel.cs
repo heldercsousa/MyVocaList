@@ -25,7 +25,6 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
 
         AddArtistCommand = new AsyncRelayCommand(NavigateToAddAsync);
         ViewCatalogCommand = new RelayCommand<ArtistListItemDto>(NavigateToCatalog);
-        GoBackCommand = new AsyncRelayCommand(GoBackAsync);
     }
 
     public ObservableRangeCollection<ArtistListItemDto> Artists { get; }
@@ -35,7 +34,6 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
 
     public IAsyncRelayCommand AddArtistCommand { get; }
     public IRelayCommand<ArtistListItemDto> ViewCatalogCommand { get; }
-    public IAsyncRelayCommand GoBackCommand { get; }
 
     public string Mode
     {
@@ -118,8 +116,6 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
         OnPropertyChanged(nameof(IsEmptyNoArtists));
         OnPropertyChanged(nameof(IsEmptyNoResults));
     }
-
-    private Task GoBackAsync() => Shell.Current.GoToAsync("..");
 
     private void NavigateToCatalog(ArtistListItemDto artist)
     {

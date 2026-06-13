@@ -60,6 +60,23 @@ public abstract class CrudListPageBase : ContentPage
         var navigatedMs = ElapsedMs(_ctorTimestamp);
         Serilog.Log.ForContext("SourceContext", GetType().Name)
             .Information("[PageLoad] {Page} navigatedTo={Ms}ms (ctor→OnNavigatedTo)", GetType().Name, navigatedMs);
+
+        var isRootPage = Shell.Current?.Navigation?.NavigationStack?.Count <= 1;
+        if (ListViewModel is ICrudListViewModel vm)
+        {
+            if (isRootPage)
+            {
+                vm.AppBarNavigationIcon = "menu";
+                vm.AppBarNavigationCommand = new Command(
+                    () => Shell.Current.FlyoutIsPresented = true);
+            }
+            else
+            {
+                vm.AppBarNavigationIcon = "arrow_back_outlined";
+                vm.AppBarNavigationCommand = new Command(
+                    async () => await Shell.Current.GoToAsync(".."));
+            }
+        }
     }
 
     protected void OnCollectionViewScrolled(object sender, DXCollectionViewScrolledEventArgs e)
