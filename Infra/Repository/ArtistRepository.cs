@@ -90,6 +90,20 @@ public class ArtistRepository : IArtistRepository
                  EF.Functions.Collate(a.Name, CollationConstants.Default) == EF.Functions.Collate(name, CollationConstants.Default), ct);
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Artist>> GetFuzzyCandidatePoolAsync(
+        string namePrefixToken, int take, CancellationToken ct = default)
+    {
+        var pattern = namePrefixToken + "%";
+        return await _db.Artists
+            .Where(a => EF.Functions.Like(
+                EF.Functions.Collate(a.Name, CollationConstants.Default),
+                pattern))
+            .Take(take)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    /// <inheritdoc />
     public Task AddAsync(Artist artist, CancellationToken ct)
     {
         _db.Artists.Add(artist);

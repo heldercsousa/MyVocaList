@@ -391,14 +391,20 @@ namespace MyVocaList.Infra.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExternalId")
                         .HasDatabaseName("IX_Songs_ExternalId");
 
-                    b.HasIndex("ArtistId", "Title")
+                    b.HasIndex("ArtistId", "Title", "Version")
                         .IsUnique()
-                        .HasDatabaseName("IX_Songs_ArtistId_Title");
+                        .HasDatabaseName("IX_Songs_ArtistId_Title_Version");
 
                     b.ToTable("Songs", (string)null);
                 });
