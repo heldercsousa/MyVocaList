@@ -72,6 +72,40 @@ public class SongRepository : ISongRepository
                  EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default), ct);
 
     /// <inheritdoc />
+    public async Task<bool> ExistsByTitleVersionForArtistAsync(
+        int artistId, string title, string version, CancellationToken ct = default)
+        => await _db.Songs.AnyAsync(
+            s => s.ArtistId == artistId &&
+                 EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default) &&
+                 EF.Functions.Collate(s.Version, CollationConstants.Default) == EF.Functions.Collate(version, CollationConstants.Default),
+            ct);
+
+    /// <inheritdoc />
+    public async Task<bool> ExistsByTitleVersionForArtistAsync(
+        int artistId, string title, string version, int excludeId, CancellationToken ct = default)
+        => await _db.Songs.AnyAsync(
+            s => s.Id != excludeId &&
+                 s.ArtistId == artistId &&
+                 EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default) &&
+                 EF.Functions.Collate(s.Version, CollationConstants.Default) == EF.Functions.Collate(version, CollationConstants.Default),
+            ct);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Song>> GetFuzzyCandidatePoolAsync(
+        int artistId, string titlePrefixToken, int take, CancellationToken ct = default)
+    {
+        var pattern = titlePrefixToken + "%";
+        return await _db.Songs
+            .Where(s => s.ArtistId == artistId &&
+                        EF.Functions.Like(
+                            EF.Functions.Collate(s.Title, CollationConstants.Default),
+                            pattern))
+            .Take(take)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    /// <inheritdoc />
     public Task AddAsync(Song song, CancellationToken ct)
     {
         _db.Songs.Add(song);
