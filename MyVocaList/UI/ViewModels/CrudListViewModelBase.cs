@@ -18,6 +18,9 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private bool _hasLoadedOnce;
     private readonly ILogger _logger;
 
+    [ObservableProperty] private string _appBarNavigationIcon = "arrow_back_outlined";
+    [ObservableProperty] private ICommand _appBarNavigationCommand;
+
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private bool _isSearchMode;
@@ -65,6 +68,7 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     protected CrudListViewModelBase(ILogger logger)
     {
         _logger = logger;
+        _appBarNavigationCommand = new Command(() => { });
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
         LoadMoreCommand = new RelayCommand(() => _ = LoadMoreAsync());
         DeleteSelectedCommand = new RelayCommand(RequestBatchDelete, () => CanDeleteSelected);

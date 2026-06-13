@@ -2,6 +2,10 @@ namespace MyVocaList.UI.ViewModels;
 
 public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChanged
 {
+    // Navigation icon / command (context-aware: hamburger for root, back for pushed pages)
+    string AppBarNavigationIcon { get; set; }
+    ICommand AppBarNavigationCommand { get; set; }
+
     // Search / scroll state
     bool IsSearchMode { get; }
     bool IsScrolled { get; set; }
