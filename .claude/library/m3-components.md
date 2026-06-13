@@ -16,6 +16,20 @@
 
 ---
 
+## ⚠️ Styles Must Exist Before Use
+
+Before referencing any style key in XAML (e.g. `Style="{StaticResource BottomSheetTitle}"`):
+
+1. **Verify** the key exists in `MaterialStyles.xaml` or `MaterialColors.xaml` — grep for it.
+2. **If missing:** add the style definition before (or in the same commit as) the XAML reference.
+3. **Never** leave a `StaticResource` reference with no corresponding definition — it is a runtime crash, not a build error.
+4. **Ownership:** BottomSheet-specific Label/Button styles belong in `MaterialStyles.xaml` near the `BottomSheetDestructiveAction` / `BottomSheetCancelAction` block.
+
+**Previously missing style now defined:**
+- `BottomSheetTitle` — `TargetType="Label"`, titleLarge: 22sp RobotoRegular, `OnSurface` color, `Padding="24,16,24,8"`. Used as the title label inside `dx:BottomSheet` content. Added 2026-06-13 after being referenced in XAML before it existed.
+
+---
+
 ## MD3 Terminology Conventions
 
 ### "Body" means a structural slot — not text content

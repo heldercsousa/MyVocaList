@@ -227,6 +227,14 @@
         <Setter Property="Margin" Value="0,1" />
     </Style>
 
+    <!-- MD3: Bottom sheet — title (titleLarge: 22sp, RobotoRegular, OnSurface) -->
+    <Style x:Key="BottomSheetTitle" TargetType="Label">
+        <Setter Property="FontFamily" Value="RobotoRegular" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+        <Setter Property="Padding" Value="24,16,24,8" />
+    </Style>
+
     <!-- MD3: Bottom sheet — destructive action button -->
     <Style x:Key="BottomSheetDestructiveAction" TargetType="dx:DXButton">
         <Setter Property="BackgroundColor" Value="Transparent" />
