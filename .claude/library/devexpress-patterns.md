@@ -29,6 +29,23 @@
    - [ ] Store the component in `MyVocaList/UI/Components/[SubFolder]/`
    - [ ] Add examples and BindableProperty patterns to the rule file
 
+### Quick-reference substitution table — check before reaching for stock MAUI
+
+| Reach-for | Check DX first | DX component |
+|-----------|---------------|--------------|
+| `Button` for filter chips | ✅ DX has it | `dxe:FilterChipGroup` / `dxe:FilterChip` |
+| `Frame` / `Border` | ✅ DX has it | `dx:DXBorder` |
+| `ListView` / `CollectionView` | ✅ DX has it | `dxcv:DXCollectionView` |
+| `Entry` / `Editor` | ✅ DX has it | `dxe:TextEdit` / `dxe:MultilineEdit` |
+| Custom bottom sheet | ✅ DX has it | `dx:BottomSheet` |
+| `Picker` / `DatePicker` | ✅ DX has it | `dxe:ComboBoxEdit` / `dxe:DateEdit` |
+| Custom swipe actions | ✅ DX has it | `dxcv:SwipeContainer` |
+| `ScrollView` | ✅ DX has it | `dx:DXScrollView` |
+| Loading skeleton | ✅ DX has it | `dx:ShimmerView` |
+
+**Never substitute `DXButton` for filter chips** — use `dxe:FilterChipGroup`.
+**Never substitute `BoxView`/`Frame` for cards** — use `dx:DXBorder` (or `dxe:DXCard` if available).
+
 ### Example: Filter Chips
 
 ❌ **WRONG:** "I need filter buttons on SongsPage. I'll use three `DXButton` elements."
@@ -545,6 +562,21 @@ private void OnCollectionViewScrolled(object sender, DXCollectionViewScrolledEve
     _viewModel.IsScrolled = e.Offset > 0;
 }
 ```
+
+---
+
+## Styles Must Exist Before Use
+
+> ⚠️ Before adding `Style="{StaticResource SomeKey}"` to any XAML file, verify the key is defined in `MaterialStyles.xaml` or `MaterialColors.xaml`.
+
+**Rules:**
+1. Search `MaterialStyles.xaml` for the key **before** referencing it in XAML.
+2. If the key is missing: add it to the correct resource dictionary in the same commit that introduces the XAML reference.
+3. Never add a `StaticResource` reference and leave the definition for "later" — the app will crash at runtime on that page.
+4. If the style is BottomSheet-specific, add it near the `BottomSheetDestructiveAction` / `BottomSheetCancelAction` styles.
+
+**Known styles that have been added (previously missing):**
+- `BottomSheetTitle` — `Label`, titleLarge (22sp, RobotoRegular, OnSurface, Padding="24,16,24,8"). Added 2026-06-13.
 
 ---
 
