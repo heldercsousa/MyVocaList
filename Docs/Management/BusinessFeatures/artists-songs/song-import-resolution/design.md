@@ -127,7 +127,9 @@ public enum ResolutionChoice { CreateNew, CreateNewVersion, UpdateExisting, Atta
 
 ## 5. Fuzzy library (Wave 0 spike)
 
-Candidates: **FuzzySharp** (FuzzyWuzzy port, token-set ratio) and **F23.StringSimilarity** (JaroWinkler, Levenshtein). Both pure managed → expected Android-safe. The spike (30-min, `findings.md`) validates: (a) restore + build on `net10.0-android`, (b) no native dependency, (c) correct scoring on accented samples ("Björk" vs "Biork", "Não Sei" vs "Nao Sei"). `ISimilarityScorer` wraps the chosen library so it stays swappable. Default threshold `0.82` lives in a `SimilarityConstants` constant; it is **provisional** until the Wave 0 spike + Wave 5 smoke test validate it against real accented samples (N2) — the value may be tuned without changing any contract.
+**RESOLVED by Wave 0 spike (`findings.md`):** use **FuzzySharp 2.0.2** (FuzzyWuzzy port, `Fuzz.TokenSetRatio` normalized to 0..1). Pure managed, builds clean on `net10.0-android`, no native dependency. `ISimilarityScorer` wraps it so it stays swappable.
+
+**Mandatory in-memory normalization inside `SimilarityScorer` (spike finding):** FuzzySharp compares raw code points, so `Score(a,b)` MUST NFD-normalize internally — `String.Normalize(NormalizationForm.FormD)` → drop `NonSpacingMark` chars → `ToLowerInvariant` — before scoring (raw "Björk"/"Biork" = 0.60; normalized = 0.80). This does **not** violate the constraints-registry "no C#-side normalization" rule: that rule governs DB search/uniqueness/dedup queries (full-scan + accent-correctness rationale). Here normalization is in-memory only, over a bounded pool already retrieved by DB collation, used solely to surface advisory candidates the user confirms; the DB unique index + collation remain the sole authority for the insert/update decision, and nothing normalized is persisted. See `findings.md` for the full justification. Default threshold `0.82` lives in a `SimilarityConstants` constant; it is **provisional** until the Wave 0 spike + Wave 5 smoke test validate it against real accented samples (N2) — the value may be tuned without changing any contract.
 
 ## 6. UI
 

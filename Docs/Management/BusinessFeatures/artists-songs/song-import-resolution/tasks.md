@@ -4,7 +4,7 @@
 > Full step detail + code in `plan.md`. Read `requirements.md` + `design.md` first. DRY Onion order; worktrees mandatory for any 2+ parallel wave.
 
 ## Wave 0 — Spike
-- [ ] **0.1 [SPIKE] Validate fuzzy library on net10.0-android** — Produces: `findings.md`. Consumes: nothing. Files owned: throwaway. Time-box 30 min.
+- [x] **0.1 [SPIKE] Validate fuzzy library on net10.0-android** — DONE 2026-06-13: FuzzySharp 2.0.2, Android-safe, threshold 0.82. See `findings.md`.
 
 ## Wave 1 — Domain `[P]`
 - [ ] **1.1 Add Song.Version** — Produces: `Domain/Entity/Song.cs` change. Consumes: nothing.
