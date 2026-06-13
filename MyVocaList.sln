@@ -286,6 +286,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "song-import-resolution", "s
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\requirements.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\design.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\design.md
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\plan.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\tasks.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\task-log.md = Docs\Management\BusinessFeatures\artists-songs\song-import-resolution\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
