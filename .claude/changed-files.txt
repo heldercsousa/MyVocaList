@@ -1291,3 +1291,8 @@ Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/tasks.md
 Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/task-log.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_song_import_resolution.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
+.worktrees/song-import-resolution/Infra/EntityEFConfig/SongConfiguration.cs
+Docs/Management/DevCycleCraft/session-continuity-leasing/design.md
+MyVocaList.sln
+MyVocaList.sln
+Docs/Management/BACKLOG.md
