@@ -1340,3 +1340,9 @@ Docs/Management/BACKLOG.md
 .worktrees/song-import-resolution/MyVocaList/UI/ViewModels/SongPickerViewModel.cs
 .worktrees/song-import-resolution/MyVocaList/UI/ViewModels/SongPickerViewModel.cs
 .worktrees/song-import-resolution/MyVocaList.Tests/Unit/ViewModels/SongPickerViewModelTests.cs
+.worktrees/song-import-resolution/Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/tasks.md
+.worktrees/song-import-resolution/Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/task-log.md
+Docs/Management/DevCycleCraft/session-continuity-leasing/requirements.md
+Docs/Management/DevCycleCraft/session-continuity-leasing/design.md
+MyVocaList.sln
+Docs/Management/DevCycleCraft/session-continuity-leasing/requirements.md
