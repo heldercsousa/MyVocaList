@@ -56,7 +56,9 @@ Stamp a claim at two existing scopes:
 
 A claim carries: which session holds it + a **freshness signal**.
 
-### 2. Freshness keyed off git (not a written timestamp)
+### ~~SUPERSEDED~~ 2. Freshness keyed off git (not a written timestamp)
+> Superseded by Decisions locked 2026-06-14 (heartbeat primary; git = fallback only). Retained for history.
+
 "Is this claim alive?" = "has its dedicated worktree branch had a commit within TTL?" Tamper-proof, survives a forgotten heartbeat, and leans on the existing per-wave worktree/branch rule (`orchestrator.md § Git Worktrees`). A claim whose branch is stale → reclaimable.
 
 - **TTL purpose (Helder, 2026-06-13):** the expiry exists so a *fresh* session after a 5-hour-limit reset can auto-resume — NOT as a cross-terminal race window. ~45 min is a starting value tied to task-sizing limits (most tasks ≤ 90 min, commit-per-task).
@@ -64,11 +66,20 @@ A claim carries: which session holds it + a **freshness signal**.
 ### 3. Resume pointer (the only genuinely new artifact)
 A one-line "continue from here" note attached to the claim, so a cold session reads claim + `tasks.md` + last commit and knows the exact next step. Bounds resume cost.
 
+### 3a. Storage locations (pinned 2026-06-14)
+- **Claim file** *(ARCHITECT-DISCRETION DEFAULT — flag for Helder)*: `.claude/leases/<session_id>.json` — one JSON file per session, gitignored (ephemeral, per-machine, never committed). The claim record shape above (L19-25) is serialized as the JSON body. **DECISION DEFAULTED 2026-06-14 — Helder may relocate; low blast radius.**
+- **TTL single source** *(ARCHITECT-DISCRETION DEFAULT — flag for Helder)*: a single named constant `LEASE_TTL_SECONDS` (default `2700` = 45 min) defined once in the lease hook script and read by BOTH the heartbeat writer and the reclaim/freshness check. **DECISION DEFAULTED 2026-06-14 — Helder may retune the value/location.**
+- **Resume pointer**: canonical storage is the `resume_pointer` field inside the per-session claim file; a human-readable one-line echo MAY also be appended to the `tasks.md` `[~]` line, but the claim file is authoritative.
+- **Atomic write**: the heartbeat/reclaim hook writes the claim atomically (write `<file>.tmp`, then `mv`/rename over the target). Because files are keyed by `session_id` (one per session), no two sessions ever write the same file; a corrupt/half-written file is treated as absent/stale (reclaimable).
+- **Concurrent reclaim (single-winner)**: after writing its own claim, a reclaiming session RE-READS the claim and proceeds only if `owner` equals its own `session_id` (enforces INV-3); the loser re-evaluates and selects the next work unit.
+
 ### 4. Reclaim + auto-resume rules
 - Reclaim rule added to `workflow.md` Rule 4 (`[~]` handling) and Rule 8 (collision check — already does a collision check, just without liveness).
 - Auto-resume wired via a scheduled wakeup that re-enters the session and reads the resume pointer.
 
-## Decision required before spec
+## ~~SUPERSEDED~~ Decision required before spec
+> Superseded by Decisions locked 2026-06-14 (heartbeat primary; git = fallback only). Retained for history.
+
 1. **TTL source** — ~45 min written timestamp, or "last git commit on branch" (recommended: git — tamper-proof).
 2. **Session ID source** — Claude Code exposes no stable self-id; generate one at session start (token in a session-scoped file) or key off branch/worktree path (already unique per wave). Recommended: worktree/branch identity.
 
