@@ -110,3 +110,49 @@ Services project: 0 errors, 0 new warnings (pre-existing warnings only).
 | AC-6.1 | CreateSongWithUrlsAsync creates song and URLs atomically | `SongService.CreateSongWithUrlsAsync` | `CreateSongWithUrlsAsync_ValidSongAndUrls_PersistsBoth`, `CreateSongWithUrlsAsync_EmptyUrlList_CreatesSongOnly` |
 | AC-6.2 | Failure rolls back both song and URLs | `SongService.CreateSongWithUrlsAsync` | `CreateSongWithUrlsAsync_DuplicateTitleVersion_ReturnsFalseAndPersistsNothing` |
 | AC-5.5 | Duplicate (ArtistId, Title, Version) rejected | `SongRepository.ExistsByTitleVersionForArtistAsync` + DB unique index | `SongRepositoryResolutionTests.DuplicateTitleVersion_ThrowsDbUpdateException` (Wave 2, now executed) |
+
+---
+## Task: Wave 3B — Artist/Song resolution engine (Tasks 3.1, 3.2)
+**Plan:** `song-import-resolution/plan.md`
+**Status:** To Review
+**Started:** 2026-06-14
+**Completed:** 2026-06-14
+
+### Changed files:
+- `Domain/Resolution/SimilarityConstants.cs` — NEW: moved from Infra to Domain so Services layer can reference without depending on Infra. Values unchanged (DefaultThreshold=0.82, PoolSize=50, PrefixTokenMaxLen=12).
+- `Domain/RepositoryInterface/IArtistRepository.cs` — added `GetByNameAsync(string name, CancellationToken ct)` for exact-name collation match used in ArtistResolutionService step 2.
+- `Infra/Similarity/SimilarityConstants.cs` — replaced class body with `global using SimilarityConstants = MyVocaList.Domain.Resolution.SimilarityConstants;` (re-export; Infra callers still compile via alias).
+- `Infra/Repository/ArtistRepository.cs` — implemented `GetByNameAsync` (AsNoTracking, EF.Functions.Collate exact match).
+- `Services/ArtistResolutionService.cs` — NEW: full `IArtistResolutionService` implementation (external-id hit → exact-name hit → fuzzy pool → NoMatch; CommitAsync: CreateNew sets external identity; UpdateExisting/AttachExternalId sets identity if absent).
+- `Services/SongResolutionService.cs` — NEW: full `ISongResolutionService` implementation (artist-first INV-1; external-id → exact-local → fuzzy → NoMatch; CommitAsync: CreateNewVersion rejects empty Version; UpdateExisting with HasManualEdits applies only acceptedFields; FieldDiffs restricted to {Title, FeaturedArtists, Lyrics, Version}).
+- `MyVocaList.Tests/Unit/Services/ArtistResolutionServiceTests.cs` — NEW: 10 tests.
+- `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs` — NEW: 14 tests.
+- `Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/tasks.md` — Tasks 3.1, 3.2 marked [x].
+
+### Build notes
+Services project: 0 errors. Full test suite: 328 passed, 0 failed (304 pre-existing + 24 new).
+
+### Verification evidence
+- Build: PASS — `dotnet build Services/MyVocaList.Services.csproj` → 0 errors
+- Tests: PASS — `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → **328 passed, 0 failed** (↑24 from Wave 3A baseline of 304)
+- Post-edit re-read: confirmed — ArtistResolutionService and SongResolutionService match design.md §4 algorithm verbatim.
+- Spec compliance: confirmed — INV-1 enforced (artist resolved before song exact/fuzzy); FieldDiffs restricted to N4 mergeable set (ArtistId excluded); AC-1.2 CreateNewVersion empty-version rejection; AC-4.1/4.2 manual-edit guarded update.
+
+### Design §4 clarification (living spec)
+Added one detail to implementation not explicit in the spec: when artist resolves to Fuzzy/NoMatch in `SongResolutionService.ResolveAsync`, the exact-local and fuzzy song checks are skipped (no committed artistId to scope them), but the external-id song check still runs (it does not depend on artistId). The song resolution returns `NoMatch` in this case. This is documented in the code comment on the artist-first block and is consistent with INV-1 and design §4 step 1.
+
+### AC traceability
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| AC-1.1 | Exact match detected and surfaced | `SongResolutionService.ResolveAsync` ExactLocalMatch branch | `ResolveAsync_ExactLocalHit_ReturnsExactLocalMatch` |
+| AC-1.2 | CreateNewVersion requires non-empty Version | `SongResolutionService.CommitAsync` | `CommitAsync_CreateNewVersion_EmptyVersion_ReturnsFalse`, `CommitAsync_CreateNewVersion_WhitespaceVersion_ReturnsFalse` |
+| AC-2.1 | External-id match → ExactExternalMatch | `SongResolutionService.ResolveAsync` | `ResolveAsync_ExternalIdHit_ReturnsExactExternalMatch` |
+| AC-2.2 | No external match + exact local → ExactLocalMatch + AttachExternalId path | `SongResolutionService.ResolveAsync`, `CommitAsync` AttachExternalId | `ResolveAsync_ExactLocalHit_ReturnsExactLocalMatch`, `CommitAsync_AttachExternalId_SetsExternalIdentityOnly` |
+| AC-2.3 | Fuzzy candidates surfaced / NoMatch | `SongResolutionService.ResolveAsync` | `ResolveAsync_FuzzyAboveThreshold_ReturnsFuzzyCandidates`, `ResolveAsync_NoMatchAtAll_ReturnsNoMatch` |
+| AC-2.5 | Artist resolved first (INV-1) | `SongResolutionService.ResolveAsync` | `ResolveAsync_ArtistUnresolved_ReturnsNoMatchWithoutSongLookup` |
+| AC-3.1 | Artist external-id match | `ArtistResolutionService.ResolveAsync` | `ResolveAsync_ExternalIdHit_ReturnsExactExternalMatch` |
+| AC-3.2 | Artist exact-name match | `ArtistResolutionService.ResolveAsync` | `ResolveAsync_ExactNameHit_ReturnsExactLocalMatch` |
+| AC-3.3 | Artist fuzzy candidates | `ArtistResolutionService.ResolveAsync` | `ResolveAsync_FuzzyAboveThreshold_ReturnsFuzzyCandidates`, `ResolveAsync_FuzzyBelowThreshold_ReturnsNoMatch` |
+| AC-3.4 | Artist NoMatch → CreateNew sets external identity | `ArtistResolutionService.CommitAsync` | `CommitAsync_CreateNew_SetsExternalIdentityOnCreatedArtist` |
+| AC-4.1 | No manual edits → overwrite non-empty API fields | `SongResolutionService.CommitAsync` UpdateExisting | `CommitAsync_UpdateExisting_NoManualEdits_OverwritesNonEmptyFields` |
+| AC-4.2 | Manual edits → apply only acceptedFields | `SongResolutionService.CommitAsync` UpdateExisting | `CommitAsync_UpdateExisting_ManualEdits_AppliesOnlyAcceptedFields` |
