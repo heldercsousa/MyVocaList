@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Domain.Resolution;
 using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -11,11 +12,15 @@ public class SongFormViewModelTests
     private SongFormViewModel CreateSut(
         Mock<ISongKaraokeUrlService>? urlService = null,
         Mock<ISnackbarComponent>? snackbar = null,
-        Mock<ISecureStorageWrapper>? secureStorage = null)
+        Mock<ISecureStorageWrapper>? secureStorage = null,
+        Mock<ISongService>? songService = null,
+        Mock<ISongResolutionService>? resolutionService = null,
+        Mock<IArtistService>? artistService = null)
     {
         return new SongFormViewModel(
-            new Mock<IArtistService>().Object,
-            new Mock<ISongService>().Object,
+            (artistService ?? new Mock<IArtistService>()).Object,
+            (songService ?? new Mock<ISongService>()).Object,
+            (resolutionService ?? new Mock<ISongResolutionService>()).Object,
             (snackbar ?? new Mock<ISnackbarComponent>()).Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
             (urlService ?? new Mock<ISongKaraokeUrlService>()).Object,
@@ -23,13 +28,12 @@ public class SongFormViewModelTests
             new Mock<IMessenger>().Object);
     }
 
-    // ── RemoveUrlAsync ────────────────────────────────────────────────────────
+    // ── RemoveUrlAsync (edit mode) ─────────────────────────────────────────
 
     // [AC] AC-1.5 — URL removal commits to DB immediately (before snackbar is shown)
     [Fact]
     public async Task RemoveUrlAsync_ValidUrl_CommitsDeleteBeforeSnackbar()
     {
-        // Arrange
         var callOrder = new List<string>();
 
         var urlService = new Mock<ISongKaraokeUrlService>();
@@ -39,7 +43,6 @@ public class SongFormViewModelTests
         urlService.Setup(s => s.GetUrlsForSongAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync([]);
         var snackbar = new Mock<ISnackbarComponent>();
-        // Timer expires — do NOT invoke the undo callback
         snackbar.Setup(s => s.ShowWithUndoAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Func<Task>>()))
                 .Callback<string, string, Func<Task>>((_, _, _) => callOrder.Add("snackbar"))
                 .Returns(Task.CompletedTask);
@@ -53,10 +56,8 @@ public class SongFormViewModelTests
         var dto = MakeDto();
         sut.KaraokeUrls.Add(dto);
 
-        // Act
         await sut.RemoveUrlCommand.ExecuteAsync(dto);
 
-        // Assert — DB delete must be the first call (before snackbar is shown)
         Assert.Equal(["remove", "snackbar"], callOrder);
     }
 
@@ -64,7 +65,6 @@ public class SongFormViewModelTests
     [Fact]
     public async Task RemoveUrlAsync_UndoTapped_ReAddsUrlToList()
     {
-        // Arrange
         var urlService = new Mock<ISongKaraokeUrlService>();
         urlService.Setup(s => s.RemoveUrlAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync((true, string.Empty));
@@ -74,7 +74,6 @@ public class SongFormViewModelTests
         urlService.Setup(s => s.AddUrlAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync((true, string.Empty, reAdded));
         var snackbar = new Mock<ISnackbarComponent>();
-        // Simulate UNDO tap — invoke the callback immediately
         snackbar.Setup(s => s.ShowWithUndoAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Func<Task>>()))
                 .Callback<string, string, Func<Task>>((_, _, action) => action().GetAwaiter().GetResult())
                 .Returns(Task.CompletedTask);
@@ -88,10 +87,8 @@ public class SongFormViewModelTests
         var dto = MakeDto();
         sut.KaraokeUrls.Add(dto);
 
-        // Act
         await sut.RemoveUrlCommand.ExecuteAsync(dto);
 
-        // Assert — URL must be back in the list after undo
         Assert.Contains(sut.KaraokeUrls, u => u.VideoId == "abc123");
     }
 
@@ -99,7 +96,6 @@ public class SongFormViewModelTests
     [Fact]
     public async Task RemoveUrlAsync_RemoveFails_ShowsErrorAndKeepsUrl()
     {
-        // Arrange
         var urlService = new Mock<ISongKaraokeUrlService>();
         urlService.Setup(s => s.RemoveUrlAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync((false, "Not found"));
@@ -116,11 +112,296 @@ public class SongFormViewModelTests
         var dto = MakeDto();
         sut.KaraokeUrls.Add(dto);
 
-        // Act
         await sut.RemoveUrlCommand.ExecuteAsync(dto);
 
-        // Assert — error shown, URL still in list
         snackbar.Verify(s => s.ShowErrorAsync("Not found"), Times.Once);
         Assert.Contains(sut.KaraokeUrls, u => u.VideoId == "abc123");
+    }
+
+    // ── BUG-005: SaveAsync exception catch ────────────────────────────────
+
+    // [AC] AC-B5 — service throws → error snackbar shown, no crash
+    [Fact]
+    public async Task SaveAsync_ServiceThrows_ShowsErrorSnackbar()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
+                   .Returns((true, string.Empty));
+        var resolution = new Mock<ISongResolutionService>();
+        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
+                  .ThrowsAsync(new InvalidOperationException("DB context error"));
+        var snackbar = new Mock<ISnackbarComponent>();
+
+        var sut = CreateSut(snackbar: snackbar, songService: songService, resolutionService: resolution);
+        sut.SongTitle = "Test Song";
+        sut.SelectedArtistId = 1;
+        sut.SelectedArtistName = "Artist";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        snackbar.Verify(s => s.ShowErrorAsync(It.Is<string>(m => m.Contains("Failed to save"))), Times.Once);
+        Assert.False(sut.IsBusy); // IsBusy reset in finally
+    }
+
+    // [AC] AC-B5 — validation failure (no artist) → does not reach service, no crash
+    [Fact]
+    public async Task SaveAsync_NoArtist_SetsArtistError_NoServiceCall()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
+                   .Returns((true, string.Empty));
+        var sut = CreateSut(songService: songService);
+        sut.SongTitle = "Test Song";
+        // SelectedArtistId not set
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.ArtistHasError);
+        songService.Verify(s => s.CreateSongAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // [AC] AC-B5 — NoMatch path → CreateSongWithUrlsAsync called
+    [Fact]
+    public async Task SaveAsync_NoMatch_CallsCreateSongWithUrls()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
+                   .Returns((true, string.Empty));
+        songService.Setup(s => s.CreateSongWithUrlsAsync(
+            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(),
+            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+            It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, "Song created", (Song?)null));
+
+        var resolution = new Mock<ISongResolutionService>();
+        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
+                  .ReturnsAsync(new SongResolution(ResolutionKind.NoMatch, null, [], [], false));
+
+        var snackbar = new Mock<ISnackbarComponent>();
+
+        var sut = CreateSut(snackbar: snackbar, songService: songService, resolutionService: resolution);
+        sut.SongTitle = "Test Song";
+        sut.SelectedArtistId = 1;
+        sut.SelectedArtistName = "Artist";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        songService.Verify(s => s.CreateSongWithUrlsAsync(
+            1, "Test Song", It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
+            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<IEnumerable<string>>(),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    // [AC] AC-1.1/1.2 — resolution returns ExactLocalMatch → resolution sheet shown
+    [Fact]
+    public async Task SaveAsync_ExactLocalMatch_SetsResolutionSheetVisible()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
+                   .Returns((true, string.Empty));
+
+        var resolution = new Mock<ISongResolutionService>();
+        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
+                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 99, [], [], false));
+
+        var sut = CreateSut(songService: songService, resolutionService: resolution);
+        sut.SongTitle = "Test Song";
+        sut.SelectedArtistId = 1;
+        sut.SelectedArtistName = "Artist";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.IsResolutionSheetVisible);
+        Assert.Equal(1, sut.ResolutionCandidates.Count);
+    }
+
+    // [AC] AC-1.2 — save as new version with empty Version is blocked
+    [Fact]
+    public async Task ConfirmSaveAsNewVersion_EmptyVersion_SetsVersionError()
+    {
+        var sut = CreateSut();
+        sut.SongTitle = "Test Song";
+        sut.SelectedArtistId = 1;
+        sut.SelectedArtistName = "Artist";
+        sut.SongVersion = ""; // empty
+
+        await sut.ConfirmSaveAsNewVersionCommand.ExecuteAsync(null);
+
+        Assert.True(sut.VersionHasError);
+        Assert.False(string.IsNullOrEmpty(sut.VersionErrorText));
+    }
+
+    // ── BUG-008: artist blur-clear ─────────────────────────────────────────
+
+    // [AC] AC-B8-01 — blur without prior selection clears the field
+    [Fact]
+    public void ArtistBlurredWithoutSelection_NoPriorSelection_ClearsField()
+    {
+        var sut = CreateSut();
+        sut.ArtistSearchText = "partial text";
+        // SelectedArtistId not set
+
+        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.ArtistSearchText);
+        Assert.Null(sut.SelectedArtistId);
+    }
+
+    // [AC] AC-B8-02 — blur with a prior selection restores the artist name
+    [Fact]
+    public void ArtistBlurredWithoutSelection_WithPriorSelection_RestoresName()
+    {
+        var sut = CreateSut();
+        sut.SelectedArtistId = 7;
+        sut.SelectedArtistName = "Guns N' Roses";
+        sut.ArtistSearchText = "partial re-type";
+
+        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
+
+        Assert.Equal("Guns N' Roses", sut.ArtistSearchText);
+        Assert.Equal(7, sut.SelectedArtistId);
+    }
+
+    // [AC] AC-B8-03 — InitializeArtistField populates field from query props
+    [Fact]
+    public void InitializeArtistField_WithArtistId_SetsSearchTextAndSelectedId()
+    {
+        var sut = CreateSut();
+        sut.ArtistIdRaw = "5";
+        sut.ArtistName = "Metallica";
+
+        sut.InitializeArtistField();
+
+        Assert.Equal("Metallica", sut.ArtistSearchText);
+        Assert.Equal(5, sut.SelectedArtistId);
+    }
+
+    // ── BUG-009: buffered URLs ────────────────────────────────────────────
+
+    // [AC] AC-6.1 — URL buffered in new-song mode (no SongId) without error
+    [Fact]
+    public async Task AddFromPasteAsync_NewSongMode_BuffersUrlNoError()
+    {
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.ExtractVideoId(It.IsAny<string>())).Returns("vid001");
+
+        var sut = CreateSut(urlService: urlService);
+        // No SongId set
+        sut.PasteUrlInput = "https://youtu.be/vid001";
+
+        await sut.AddFromPasteCommand.ExecuteAsync(null);
+
+        Assert.False(sut.HasPasteUrlError);
+        Assert.Single(sut.KaraokeUrls);
+        Assert.Equal("vid001", sut.KaraokeUrls[0].VideoId);
+    }
+
+    // [AC] AC-6.1 — Buffered URL count is correct
+    [Fact]
+    public async Task AddFromPasteAsync_NewSongMode_TwoUrls_BothBuffered()
+    {
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.SetupSequence(s => s.ExtractVideoId(It.IsAny<string>()))
+                  .Returns("vidA")
+                  .Returns("vidB");
+
+        var sut = CreateSut(urlService: urlService);
+
+        sut.PasteUrlInput = "https://youtu.be/vidA";
+        await sut.AddFromPasteCommand.ExecuteAsync(null);
+
+        sut.PasteUrlInput = "https://youtu.be/vidB";
+        await sut.AddFromPasteCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, sut.KaraokeUrls.Count);
+    }
+
+    // [AC] AC-6.1 — duplicate URL in new-song mode shows error
+    [Fact]
+    public async Task AddFromPasteAsync_NewSongMode_DuplicateUrl_ShowsError()
+    {
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.ExtractVideoId(It.IsAny<string>())).Returns("vid001");
+
+        var sut = CreateSut(urlService: urlService);
+
+        sut.PasteUrlInput = "https://youtu.be/vid001";
+        await sut.AddFromPasteCommand.ExecuteAsync(null);
+
+        sut.PasteUrlInput = "https://youtu.be/vid001"; // same URL
+        await sut.AddFromPasteCommand.ExecuteAsync(null);
+
+        Assert.True(sut.HasPasteUrlError);
+        Assert.Single(sut.KaraokeUrls); // still 1, not 2
+    }
+
+    // [AC] AC-6.1 — invalid URL in new-song mode shows parse error
+    [Fact]
+    public async Task AddFromPasteAsync_NewSongMode_InvalidUrl_ShowsParseError()
+    {
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.ExtractVideoId(It.IsAny<string>())).Returns((string?)null);
+
+        var sut = CreateSut(urlService: urlService);
+        sut.PasteUrlInput = "not-a-youtube-url";
+
+        await sut.AddFromPasteCommand.ExecuteAsync(null);
+
+        Assert.True(sut.HasPasteUrlError);
+        Assert.Empty(sut.KaraokeUrls);
+    }
+
+    // [AC] BUG-009 AC-4 — remove pending URL in new-song mode (no DB call)
+    [Fact]
+    public async Task RemoveUrlAsync_NewSongMode_RemovesFromBufferNoDbCall()
+    {
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.ExtractVideoId(It.IsAny<string>())).Returns("vid001");
+
+        var sut = CreateSut(urlService: urlService);
+        sut.PasteUrlInput = "https://youtu.be/vid001";
+        await sut.AddFromPasteCommand.ExecuteAsync(null);
+
+        Assert.Single(sut.KaraokeUrls);
+        var dto = sut.KaraokeUrls[0];
+
+        await sut.RemoveUrlCommand.ExecuteAsync(dto);
+
+        Assert.Empty(sut.KaraokeUrls);
+        urlService.Verify(s => s.RemoveUrlAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // ── Resolution sheet: merge sheet state from FieldDiffs ───────────────
+
+    // [AC] AC-4.2 — target has manual edits → merge field rows populated
+    [Fact]
+    public async Task ConfirmUpdateExisting_TargetHasManualEdits_PopulatesMergeRows()
+    {
+        var diffs = new List<FieldDiff> { new("Title", "API Title", "Current Title") };
+        var resolution = new Mock<ISongResolutionService>();
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
+                   .Returns((true, string.Empty));
+        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
+                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 77, [], diffs, true));
+
+        var sut = CreateSut(songService: songService, resolutionService: resolution);
+        sut.SongTitle = "Test Song";
+        sut.SelectedArtistId = 1;
+        sut.SelectedArtistName = "Artist";
+
+        // Trigger resolution
+        await sut.SaveCommand.ExecuteAsync(null);
+        Assert.True(sut.IsResolutionSheetVisible);
+
+        // Now confirm update
+        sut.SelectedResolutionTargetId = 77;
+        await sut.ConfirmUpdateExistingCommand.ExecuteAsync(null);
+
+        Assert.True(sut.IsMergeSheetVisible);
+        Assert.Single(sut.MergeFieldRows);
+        Assert.Equal("Title", sut.MergeFieldRows[0].Field);
     }
 }

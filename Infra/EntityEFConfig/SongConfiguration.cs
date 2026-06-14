@@ -20,6 +20,11 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
                .HasMaxLength(100)
                .UseCollation(CollationConstants.Default);
 
+        builder.Property(s => s.Version)
+               .IsRequired()
+               .HasMaxLength(60)
+               .UseCollation(CollationConstants.Default);
+
         builder.Property(s => s.FeaturedArtists)
                .IsRequired(false);
 
@@ -40,9 +45,9 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
                .HasColumnType("TEXT")
                .HasMaxLength(10000);
 
-        builder.HasIndex(s => new { s.ArtistId, s.Title })
+        builder.HasIndex(s => new { s.ArtistId, s.Title, s.Version })
                .IsUnique()
-               .HasDatabaseName("IX_Songs_ArtistId_Title");
+               .HasDatabaseName("IX_Songs_ArtistId_Title_Version");
 
         builder.HasIndex(s => s.ExternalId)
                .HasDatabaseName("IX_Songs_ExternalId");

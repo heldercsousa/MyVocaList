@@ -131,12 +131,38 @@ public enum ResolutionChoice { CreateNew, CreateNewVersion, UpdateExisting, Atta
 
 **Mandatory in-memory normalization inside `SimilarityScorer` (spike finding):** FuzzySharp compares raw code points, so `Score(a,b)` MUST NFD-normalize internally — `String.Normalize(NormalizationForm.FormD)` → drop `NonSpacingMark` chars → `ToLowerInvariant` — before scoring (raw "Björk"/"Biork" = 0.60; normalized = 0.80). This does **not** violate the constraints-registry "no C#-side normalization" rule: that rule governs DB search/uniqueness/dedup queries (full-scan + accent-correctness rationale). Here normalization is in-memory only, over a bounded pool already retrieved by DB collation, used solely to surface advisory candidates the user confirms; the DB unique index + collation remain the sole authority for the insert/update decision, and nothing normalized is persisted. See `findings.md` for the full justification. Default threshold `0.82` lives in a `SimilarityConstants` constant; it is **provisional** until the Wave 0 spike + Wave 5 smoke test validate it against real accented samples (N2) — the value may be tuned without changing any contract.
 
+> **Spec updated 2026-06-14 (Wave 3B):** `SimilarityConstants` lives in `Domain/Resolution/SimilarityConstants.cs` (NOT Infra) — Services consumes it and cannot reference Infra (layer constraint). The `SimilarityScorer` impl stays in Infra (FuzzySharp is there); Infra re-exports the constants via a `global using` alias for backward compatibility.
+
 ## 6. UI
 
 - **SongPickerViewModel** (new, fixes BUG-010): injects `IMusicMetadataService`; `SearchCommand` (`allowConcurrentExecutions:false`, BUG-006), `SelectResultCommand` sends `SongPickedMessage(MusicSearchResultDto)`. `SongPickerPage` code-behind injects this VM (not `QueueSongPickerViewModel`). DI-registered in `MauiProgram.cs`.
 - **Resolution BottomSheet:** shown when `Kind != NoMatch`. Title "This looks like an existing song". Lists exact/fuzzy target(s). Actions: Update existing · Save as new version (reveals Version entry) · Cancel. MD3 styling. **(N6)** Per the project's "style-must-exist-before-use" rule, Wave 4 has a hard dependency on the `BottomSheetTitle` style existing in `MaterialStyles.xaml`; BUG-004 (missing style) is therefore folded into Wave 4 scope — add the style (MD3 titleLarge: 22sp RobotoRegular, OnSurface) before any sheet references it.
 - **Merge BottomSheet:** shown when target `HasManualEdits` and diffs exist. One row per `FieldDiff`: field name, current value, API value, a toggle to accept API. Apply commits accepted fields only.
 - **SongFormViewModel:** on save, build `SongCandidate`, call `ResolveAsync`; `NoMatch` → direct create, else present sheet. Artist field per BUG-008 (autocomplete-only, blur-clear, edit pre-pop, lock on API origin). Buffer YouTube URLs; `CreateSongWithUrlsAsync` atomic save (BUG-009).
+
+### SaveAsync orchestration (Wave 4B, implemented 2026-06-14)
+
+`SongFormViewModel.SaveAsync` new-song flow:
+1. Validate title (via `ISongService.ValidateTitleInput`) and artist selection. Return early with field errors if invalid.
+2. Build `SongCandidate(Title, SongVersion, FeaturedArtists, Lyrics, ArtistCandidate(SelectedArtistName, SelectedProvider, SelectedExternalId), SelectedProvider, SelectedExternalId)`.
+3. `var res = await _songResolution.ResolveAsync(candidate)`.
+4. **`res.Kind == NoMatch`** → call `CreateSongWithUrlsAsync(SelectedArtistId, Title, Version, FeaturedArtists, Lyrics, ExternalId, Provider, _pendingRawUrls)` → snackbar + nav-back on success.
+5. **`res.Kind` is any non-NoMatch** → stash `_pendingCandidate` + `_pendingResolution`; set `IsResolutionSheetVisible = true`; populate `ResolutionCandidates` from ExactMatchSongId or FuzzyCandidates.
+   - **"Select" (Update existing):** `SelectResolutionCandidateCommand(SongMatch)` sets `SelectedResolutionTargetId` and calls `ConfirmUpdateExistingAsync`.
+     - If `TargetHasManualEdits` and `FieldDiffs` non-empty → populate `MergeFieldRows`; set `IsMergeSheetVisible = true`.
+     - Else → `CommitAsync(UpdateExisting, targetId, null)` → snackbar + nav-back.
+   - **"Save as new version":** `ConfirmSaveAsNewVersionCommand` — validates non-empty `SongVersion` (AC-1.2 block) → `CreateSongWithUrlsAsync(... version ...)`.
+   - **"Cancel":** `DismissResolutionSheetCommand` — clears pending context.
+   - **Merge confirmed:** `ConfirmMergeCommand` — collects `acceptedFields` from toggled rows → `CommitAsync(UpdateExisting, targetId, acceptedFields)`.
+6. Any exception in save paths is caught; log + show error snackbar (BUG-005, never silent).
+
+Edit mode does NOT go through resolution — calls `UpdateSongAsync` directly (preserves existing behavior).
+
+**BUG-008 (artist field):** `ArtistBlurredWithoutSelectionCommand` clears field when no selection; restores prior selection name when user had one. `InitializeArtistField()` called from `OnAppearing` after all query props set. `IsArtistLocked = true` when `SelectedExternalId` is populated (API import).
+
+**BUG-009 (buffered URLs):** `_pendingRawUrls` list holds raw URL strings in new-song mode. `AddFromPasteAsync`/`NavigateToYouTubeSearchAsync` validate and buffer when `!SongId.HasValue`. `RemoveUrlCommand` removes from buffer directly (no DB call). `SaveAsync` passes `_pendingRawUrls` to `CreateSongWithUrlsAsync`.
+
+**SongPickedMessage wiring:** VM registers `CanonicalSongPickedMessage` (alias for `Contracts.Messages.SongPickedMessage`) to avoid ambiguity with legacy `QueueSongPickerViewModel.SongPickedMessage`. On receipt: populate title/featured; stash `ExternalId`/`Provider`; call `ResolveAndLockArtistAsync` for exact-match artist lock.
 - **Picker pages:** suppress Shell back chrome (BUG-007).
 
 ## 7. Service additions

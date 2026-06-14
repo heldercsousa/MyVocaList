@@ -101,7 +101,7 @@ public class QueueRepositoryTests : IAsyncLifetime
         _db.Set<Artist>().Add(artist);
         await _db.SaveChangesAsync();
 
-        var song = new Song { Title = "Test Song", OriginalArtistId = artist.Id, OriginalArtist = artist };
+        var song = new Song { Title = "Test Song", ArtistId = artist.Id, OriginalArtist = artist };
         _db.Set<Song>().Add(song);
         await _db.SaveChangesAsync();
 
@@ -158,7 +158,7 @@ public class QueueRepositoryTests : IAsyncLifetime
         _db.Set<Artist>().Add(artist);
         await _db.SaveChangesAsync();
 
-        var song = new Song { Title = "Test Song", OriginalArtistId = artist.Id, OriginalArtist = artist };
+        var song = new Song { Title = "Test Song", ArtistId = artist.Id, OriginalArtist = artist };
         _db.Set<Song>().Add(song);
         await _db.SaveChangesAsync();
 
@@ -228,7 +228,7 @@ public class QueueRepositoryTests : IAsyncLifetime
         _db.Set<Artist>().Add(artist);
         await _db.SaveChangesAsync();
 
-        var song = new Song { Title = "Test Song", OriginalArtistId = artist.Id, OriginalArtist = artist };
+        var song = new Song { Title = "Test Song", ArtistId = artist.Id, OriginalArtist = artist };
         _db.Set<Song>().Add(song);
         await _db.SaveChangesAsync();
 

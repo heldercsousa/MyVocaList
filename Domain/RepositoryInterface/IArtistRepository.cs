@@ -16,6 +16,13 @@ public interface IArtistRepository
 
     Task<Artist> GetByIdAsync(int id, CancellationToken ct);
     Task<Artist> GetByExternalIdAsync(string externalId, string provider, CancellationToken ct);
+
+    /// <summary>
+    /// Returns the artist whose name exactly matches <paramref name="name"/> under the configured
+    /// case- and accent-insensitive collation, or <c>null</c> if not found.
+    /// Used by <c>IArtistResolutionService</c> for exact-local-name matching (AC-3.2).
+    /// </summary>
+    Task<Artist?> GetByNameAsync(string name, CancellationToken ct = default);
     Task<bool> ExistsByNameAsync(string name, CancellationToken ct);
     Task<bool> ExistsByNameAsync(string name, int excludeId, CancellationToken ct);
 
