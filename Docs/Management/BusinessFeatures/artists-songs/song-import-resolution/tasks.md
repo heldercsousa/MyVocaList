@@ -22,7 +22,7 @@
 ## Wave 3 — Services `[SEQUENTIAL]` (waits W2; TDD Level A)
 - [ ] **3.1 ArtistResolutionService (TDD)** — Produces: `Services/ArtistResolutionService.cs` + tests. Consumes: 2.4, 2.5.
 - [ ] **3.2 SongResolutionService (TDD)** — Produces: `Services/SongResolutionService.cs` + tests. Consumes: 3.1, 2.3, 2.5.
-- [ ] **3.3 SongService.CreateSongWithUrlsAsync + update external-id (TDD)** — Files: `SongService.cs` + tests.
+- [x] **3.3 SongService.CreateSongWithUrlsAsync + update external-id (TDD)** — `SongService.cs` updated: `UpdateSongAsync` gains externalId/externalProvider params (M2); `CreateSongWithUrlsAsync` implemented with atomic single-SaveChangesAsync over shared context (N3, AC-6.1/6.2). SimilarityScorer unit tests added (`Similarity/SimilarityScorerTests.cs`). Pre-existing `QueueRepositoryTests` OriginalArtistId→ArtistId bug fixed. Wave 2 integration tests now execute: 304/304 passed.
 
 ## Wave 4 — UI `[SEQUENTIAL]` (waits W3). Invoke `myvocalist-coding`. One XAML file at a time.
 - [ ] **4.1 BottomSheetTitle style (BUG-004)** — Files: `MaterialStyles.xaml`.
