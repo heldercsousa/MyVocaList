@@ -421,6 +421,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "session-continuity-leasing"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\session-continuity-leasing\design.md = Docs\Management\DevCycleCraft\session-continuity-leasing\design.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\requirements.md = Docs\Management\DevCycleCraft\session-continuity-leasing\requirements.md
+		Docs\Management\DevCycleCraft\session-continuity-leasing\findings.md = Docs\Management\DevCycleCraft\session-continuity-leasing\findings.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"

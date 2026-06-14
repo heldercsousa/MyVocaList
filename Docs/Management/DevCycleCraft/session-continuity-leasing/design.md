@@ -1,6 +1,6 @@
 # Session Continuity — Task Leasing & Auto-Resume
 
-> Status: **Spec (awaiting Helder review)**. `brainstorming` complete → see [`requirements.md`](./requirements.md); next is `writing-plans → plan.md`.
+> Status: **Spec (awaiting Helder review)** — spike COMPLETE 2026-06-14 (PASS), design LOCKED. `brainstorming` complete → see [`requirements.md`](./requirements.md); spike outcome in [`findings.md`](./findings.md); next is `writing-plans → plan.md` (plan execution still gated on Helder's approval of the spec).
 > Owner decision session: Helder, 2026-06-13/14.
 > Execution model: Opus 4.8, all phases.
 
@@ -23,8 +23,10 @@
 >   last_active: <ISO-8601 UTC>  # hook-maintained heartbeat (primary liveness signal)
 >   resume_pointer: <one line>   # "continue from here"
 >   ```
-> - **Spike-first:** validating that hooks expose `session_id` and can write the claim file
->   is the first task; the design does not lock until it passes (see AC-5).
+> - **Spike COMPLETE 2026-06-14 — AC-5.1 and AC-5.2 both PASS; design LOCKED.** Hooks expose
+>   `session_id` (AC-5.1 PASS) and `PostToolUse`/`Stop` hooks can write the claim file on every
+>   tool call (AC-5.2 PASS); `cwd` is present so the git-commit fallback is viable (AC-5.3 PASS).
+>   See [`findings.md`](./findings.md).
 
 ## Problem
 
