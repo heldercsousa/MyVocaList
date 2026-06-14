@@ -1,7 +1,30 @@
 # Session Continuity — Task Leasing & Auto-Resume
 
-> Status: **direction captured** (this doc). Needs `brainstorming → requirements.md → plan.md` before implementation.
-> Owner decision session: Helder, 2026-06-13.
+> Status: **Spec (awaiting Helder review)**. `brainstorming` complete → see [`requirements.md`](./requirements.md); next is `writing-plans → plan.md`.
+> Owner decision session: Helder, 2026-06-13/14.
+> Execution model: Opus 4.8, all phases.
+
+> **Decisions locked 2026-06-14** (supersede the "Decision required before spec" section below):
+> - **Freshness mechanism:** a hook-driven *activity heartbeat*. A `PostToolUse`/`Stop` hook
+>   stamps `last_active = now` onto the owning session's claim(s) on every tool call. This
+>   pings only while the session genuinely works and stops instantly on usage-window reset,
+>   `/clear`, or crash — catching all three interruption modes uniformly, with no manual
+>   ping and no background timer. Git-commit-on-branch freshness is retained only as the
+>   *fallback* if the spike (AC-5) shows hooks cannot supply `session_id` or write the claim.
+> - **Session ID source:** the Claude Code `session_id` exposed in hook payloads — a stable
+>   self-id, nothing to generate, no worktree dependency.
+> - **Liveness rule (Helder's two-fact model):** owner identity (`session_id`) + "is it
+>   alive?" Alive = `last_active` within TTL **OR** recorded `pid` still running on this host.
+>   A same-host dead `pid` permits *immediate* reclaim before TTL (fast path).
+> - **Claim record shape:**
+>   ```
+>   owner: <claude session_id>   # who holds it
+>   pid: <process id>            # optional same-host fast-reclaim hint
+>   last_active: <ISO-8601 UTC>  # hook-maintained heartbeat (primary liveness signal)
+>   resume_pointer: <one line>   # "continue from here"
+>   ```
+> - **Spike-first:** validating that hooks expose `session_id` and can write the claim file
+>   is the first task; the design does not lock until it passes (see AC-5).
 
 ## Problem
 
