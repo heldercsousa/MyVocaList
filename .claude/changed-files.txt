@@ -1296,3 +1296,15 @@ Docs/Management/DevCycleCraft/session-continuity-leasing/design.md
 MyVocaList.sln
 MyVocaList.sln
 Docs/Management/BACKLOG.md
+.worktrees/song-import-resolution/Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/tasks.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_song_import_resolution.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_song_import_resolution.md
+.worktrees/song-import-resolution/MyVocaList.Tests/Unit/Services/SongServiceTests.cs
+.worktrees/song-import-resolution/MyVocaList.Tests/Unit/Services/SongServiceTests.cs
+.worktrees/song-import-resolution/MyVocaList.Tests/Unit/Services/Similarity/SimilarityScorerTests.cs
+.worktrees/song-import-resolution/Services/SongService.cs
+.worktrees/song-import-resolution/Services/SongService.cs
+.worktrees/song-import-resolution/Services/SongService.cs
+.worktrees/song-import-resolution/MyVocaList.Tests/Integration/Repositories/QueueRepositoryTests.cs
+.worktrees/song-import-resolution/Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/tasks.md
+.worktrees/song-import-resolution/Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/task-log.md
