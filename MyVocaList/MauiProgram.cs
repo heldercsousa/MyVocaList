@@ -162,6 +162,7 @@ public static class MauiProgram
         builder.Services.AddTransient<SongsViewModel>();
         builder.Services.AddTransient<SongFormViewModel>();
         builder.Services.AddTransient<ArtistPickerViewModel>();
+        builder.Services.AddTransient<SongPickerViewModel>();
         builder.Services.AddTransient<YouTubeSearchViewModel>();
         builder.Services.AddTransient<QueueManagementViewModel>();
         builder.Services.AddTransient<PersonPickerViewModel>();

@@ -232,7 +232,8 @@
         <Setter Property="FontFamily" Value="RobotoRegular" />
         <Setter Property="FontSize" Value="22" />
         <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
-        <Setter Property="Padding" Value="24,16,24,8" />
+        <Setter Property="FontAttributes" Value="None" />
+        <Setter Property="Padding" Value="16,16,16,0" />
     </Style>
 
     <!-- MD3: Bottom sheet — destructive action button -->

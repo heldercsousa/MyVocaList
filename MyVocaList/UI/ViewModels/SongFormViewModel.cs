@@ -82,8 +82,10 @@ public partial class SongFormViewModel : ViewModelBase
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         SearchArtistsCommand = new AsyncRelayCommand<string>(SearchArtistsAsync);
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
-        NavigateToSongPickerCommand = new AsyncRelayCommand(NavigateToSongPickerAsync);
-        NavigateToYouTubeSearchCommand = new AsyncRelayCommand(NavigateToYouTubeSearchAsync);
+        NavigateToSongPickerCommand = new AsyncRelayCommand(NavigateToSongPickerAsync,
+            AsyncRelayCommandOptions.None);
+        NavigateToYouTubeSearchCommand = new AsyncRelayCommand(NavigateToYouTubeSearchAsync,
+            AsyncRelayCommandOptions.None);
         AddFromPasteCommand = new AsyncRelayCommand(AddFromPasteAsync);
         RemoveUrlCommand = new AsyncRelayCommand<SongKaraokeUrlDto>(RemoveUrlAsync);
         GoToSettingsCommand = new AsyncRelayCommand(async () => await Shell.Current.GoToAsync("//settings"));

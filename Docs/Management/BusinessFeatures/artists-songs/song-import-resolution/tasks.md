@@ -25,9 +25,9 @@
 - [x] **3.3 SongService.CreateSongWithUrlsAsync + update external-id (TDD)** — `SongService.cs` updated: `UpdateSongAsync` gains externalId/externalProvider params (M2); `CreateSongWithUrlsAsync` implemented with atomic single-SaveChangesAsync over shared context (N3, AC-6.1/6.2). SimilarityScorer unit tests added (`Similarity/SimilarityScorerTests.cs`). Pre-existing `QueueRepositoryTests` OriginalArtistId→ArtistId bug fixed. Wave 2 integration tests now execute: 304/304 passed.
 
 ## Wave 4 — UI `[SEQUENTIAL]` (waits W3). Invoke `myvocalist-coding`. One XAML file at a time.
-- [ ] **4.1 BottomSheetTitle style (BUG-004)** — Files: `MaterialStyles.xaml`.
-- [ ] **4.2 SongPickerViewModel + page/DI fix (BUG-010, BUG-006)** — Files: `SongPickerViewModel.cs`, `SongPickerPage.xaml.cs`, `MauiProgram.cs` (hotspot) + tests.
-- [ ] **4.3 Picker pages suppress Shell back chrome (BUG-007)** — Files: 4 picker `*.xaml`.
+- [x] **4.1 BottomSheetTitle style (BUG-004)** — Files: `MaterialStyles.xaml`.
+- [x] **4.2 SongPickerViewModel + page/DI fix (BUG-010, BUG-006)** — Files: `SongPickerViewModel.cs`, `SongPickerPage.xaml.cs`, `MauiProgram.cs` (hotspot) + tests.
+- [x] **4.3 Picker pages suppress Shell back chrome (BUG-007)** — Files: 4 picker `*.xaml` (2 already done; added to SongPickerPage.xaml + ArtistPickerPage.xaml).
 - [ ] **4.4 SongFormViewModel: save catch + buffered URLs + artist autocomplete (BUG-005/008/009)** — Files: `SongFormViewModel.cs`, `SongFormPage.xaml(.cs)` + tests.
 - [ ] **4.5 Resolution + merge BottomSheets wiring** — Files: `SongFormPage.xaml(.cs)`, `SongFormViewModel.cs`.
 
