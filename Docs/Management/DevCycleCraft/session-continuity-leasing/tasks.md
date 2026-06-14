@@ -3,12 +3,17 @@
 > Source plan: [`plan.md`](./plan.md) · Spec: [`requirements.md`](./requirements.md), [`design.md`](./design.md), [`findings.md`](./findings.md)
 > Markers: `[ ]` available · `[~]` claimed · `[x]` done · `[P]` parallelizable · `[SEQUENTIAL]` strict order
 > NON-NEGOTIABLE: `.claude/rules/workflow.md` is WRITE-PROTECTED (settings.json deny + CLAUDE.md amend process). Phase 5 is a Helder manual handoff — see Task 8.
+>
+> **Remaining Helder handoff gates (2026-06-14):** (1) apply the workflow.md Rule 4/7/8 edits per
+> [`workflow-edits-proposed.md`](./workflow-edits-proposed.md) with an `amend:` commit + changelog entry;
+> (2) run the live two-terminal demo in [`demo-and-traceability.md`](./demo-and-traceability.md) Part 1.
+> All other tasks (T1–T10) are code-complete, tested, and committed.
 
 ---
 
 ## Phase 1 — Pure logic library (innermost, no deps)
 
-- [ ] **Task 1: Lease classification library** [SEQUENTIAL]
+- [x] **Task 1: Lease classification library** [SEQUENTIAL]
   - **Produces:** `.claude/scripts/lease/lease_lib.py` (`LEASE_TTL_SECONDS=1800`, `parse_claim`, `pid_alive`, `classify`)
   - **Consumes:** nothing
   - **Risk:** Medium — R2 (pid reuse): `pid_alive` must be conservative.
@@ -16,7 +21,7 @@
   - **Demo:** `python -c "from lease_lib import classify, LEASE_TTL_SECONDS; print(LEASE_TTL_SECONDS)"` prints `1800`.
   - **Review lane:** Elevated (concurrency/correctness logic).
 
-  - [ ] **Step 1.1 — Write the library (stdlib only).** Create `.claude/scripts/lease/lease_lib.py`:
+  - [x] **Step 1.1 — Write the library (stdlib only).** Create `.claude/scripts/lease/lease_lib.py`:
 
 ```python
 """Pure, side-effect-free lease logic. Unit-testable; no hook I/O, no file writes."""
@@ -87,15 +92,15 @@ def classify(claim, now=None, pid_alive_fn=pid_alive, ttl=LEASE_TTL_SECONDS):
     return "stale"  # AC-2.1 / AC-2.2 (old + dead pid)
 ```
 
-  - [ ] **Step 1.2 — Smoke check.** Run: `python .claude/scripts/lease/lease_lib.py` (no output expected; module must import cleanly).
+  - [x] **Step 1.2 — Smoke check.** Run: `python .claude/scripts/lease/lease_lib.py` (no output expected; module must import cleanly).
     Then: `python -c "import sys; sys.path.insert(0,'.claude/scripts/lease'); import lease_lib; print(lease_lib.LEASE_TTL_SECONDS)"` → Expected: `1800`.
-  - [ ] **Step 1.3 — Commit.** `git add .claude/scripts/lease/lease_lib.py && git commit -m "feat(lease): pure freshness-classification library (TTL=1800s)"`
+  - [x] **Step 1.3 — Commit.** `git add .claude/scripts/lease/lease_lib.py && git commit -m "feat(lease): pure freshness-classification library (TTL=1800s)"`
 
 ---
 
 ## Phase 2 — Unit tests for the library [P after Task 1]
 
-- [ ] **Task 2: lease_lib unit tests** [P]
+- [x] **Task 2: lease_lib unit tests** [P]
   - **Produces:** `.claude/scripts/lease/tests/test_lease_lib.py`
   - **Consumes:** `lease_lib.py`
   - **Risk:** Low. Uses stdlib `unittest` (R5 — no new dependency).
@@ -103,7 +108,7 @@ def classify(claim, now=None, pid_alive_fn=pid_alive, ttl=LEASE_TTL_SECONDS):
   - **Demo:** `python -m unittest discover -s .claude/scripts/lease/tests` → all pass.
   - **Review lane:** Standard.
 
-  - [ ] **Step 2.1 — Write the tests (TDD: these encode the ACs).** Create `.claude/scripts/lease/tests/test_lease_lib.py`:
+  - [x] **Step 2.1 — Write the tests (TDD: these encode the ACs).** Create `.claude/scripts/lease/tests/test_lease_lib.py`:
 
 ```python
 import os, sys, unittest
@@ -150,15 +155,15 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-  - [ ] **Step 2.2 — Run the tests.** Run: `python -m unittest discover -s .claude/scripts/lease/tests -v`
+  - [x] **Step 2.2 — Run the tests.** Run: `python -m unittest discover -s .claude/scripts/lease/tests -v`
     Expected: 6 tests, all PASS (Task 1 already implemented the logic; if any fails, fix `lease_lib.py`, not the test).
-  - [ ] **Step 2.3 — Commit.** `git add .claude/scripts/lease/tests/test_lease_lib.py && git commit -m "test(lease): unit tests for freshness classification (AC-1.x/2.x)"`
+  - [x] **Step 2.3 — Commit.** `git add .claude/scripts/lease/tests/test_lease_lib.py && git commit -m "test(lease): unit tests for freshness classification (AC-1.x/2.x)"`
 
 ---
 
 ## Phase 3 — Hook + helper scripts [SEQUENTIAL after Phase 1; T5/T6 are [P] with each other]
 
-- [ ] **Task 4: Heartbeat hook script** [SEQUENTIAL]
+- [x] **Task 4: Heartbeat hook script** [SEQUENTIAL]
   - **Produces:** `.claude/scripts/lease/heartbeat.py`
   - **Consumes:** `lease_lib.py`
   - **Risk:** Medium — R3 (portability, stdlib only), R4 (must be cheap), AC-3.4 (parent session_id).
@@ -166,7 +171,7 @@ if __name__ == "__main__":
   - **Demo:** `echo '{"session_id":"abc","cwd":"."}' | python .claude/scripts/lease/heartbeat.py` writes `.claude/leases/abc.json` with `owner=abc`, ISO `last_active`, current `pid`.
   - **Review lane:** Elevated (atomic write + parent-id keying).
 
-  - [ ] **Step 4.1 — Write the hook.** Create `.claude/scripts/lease/heartbeat.py`:
+  - [x] **Step 4.1 — Write the hook.** Create `.claude/scripts/lease/heartbeat.py`:
 
 ```python
 """PostToolUse/Stop hook: atomically heartbeat the OWNING (parent) session's claim.
@@ -225,13 +230,13 @@ if __name__ == "__main__":
     main()
 ```
 
-  - [ ] **Step 4.2 — Manual test.** Run: `echo '{"session_id":"hbtest","cwd":"."}' | python .claude/scripts/lease/heartbeat.py && cat .claude/leases/hbtest.json`
+  - [x] **Step 4.2 — Manual test.** Run: `echo '{"session_id":"hbtest","cwd":"."}' | python .claude/scripts/lease/heartbeat.py && cat .claude/leases/hbtest.json`
     Expected: JSON with `"owner":"hbtest"`, an ISO `last_active`, an integer `pid`, `"resume_pointer":""`.
-  - [ ] **Step 4.3 — Subagent-id test (AC-3.4).** Run: `echo '{"session_id":"parent1","agent_id":"sub9","agent_type":"general-purpose","cwd":"."}' | python .claude/scripts/lease/heartbeat.py && cat .claude/leases/parent1.json`
+  - [x] **Step 4.3 — Subagent-id test (AC-3.4).** Run: `echo '{"session_id":"parent1","agent_id":"sub9","agent_type":"general-purpose","cwd":"."}' | python .claude/scripts/lease/heartbeat.py && cat .claude/leases/parent1.json`
     Expected: file named `parent1.json` with `"owner":"parent1"` (NOT `sub9`).
-  - [ ] **Step 4.4 — Cleanup + commit.** `rm -f .claude/leases/hbtest.json .claude/leases/parent1.json` then `git add .claude/scripts/lease/heartbeat.py && git commit -m "feat(lease): PostToolUse/Stop heartbeat hook (atomic, parent-session-keyed)"`
+  - [x] **Step 4.4 — Cleanup + commit.** `rm -f .claude/leases/hbtest.json .claude/leases/parent1.json` then `git add .claude/scripts/lease/heartbeat.py && git commit -m "feat(lease): PostToolUse/Stop heartbeat hook (atomic, parent-session-keyed)"`
 
-- [ ] **Task 5: Resume-pointer / auto-resume reader** [P]
+- [x] **Task 5: Resume-pointer / auto-resume reader** [P]
   - **Produces:** `.claude/scripts/lease/resume.py`
   - **Consumes:** `lease_lib.py`, claim files
   - **Risk:** Low. In-session scope only (R: fully-closed terminal out of scope).
@@ -239,7 +244,7 @@ if __name__ == "__main__":
   - **Demo:** with a claim file holding a `resume_pointer`, `python .claude/scripts/lease/resume.py <session_id>` prints the pointer + last commit subject.
   - **Review lane:** Standard.
 
-  - [ ] **Step 5.1 — Write the reader.** Create `.claude/scripts/lease/resume.py`:
+  - [x] **Step 5.1 — Write the reader.** Create `.claude/scripts/lease/resume.py`:
 
 ```python
 """In-session auto-resume reader (AC-4.1/4.2). Given a session_id, print the exact
@@ -308,11 +313,11 @@ if __name__ == "__main__":
         sys.exit(2)
 ```
 
-  - [ ] **Step 5.2 — Test set + show.** Run: `python .claude/scripts/lease/resume.py --set rtest "Continue Task 4 step 4.3" && python .claude/scripts/lease/resume.py rtest`
+  - [x] **Step 5.2 — Test set + show.** Run: `python .claude/scripts/lease/resume.py --set rtest "Continue Task 4 step 4.3" && python .claude/scripts/lease/resume.py rtest`
     Expected: prints `RESUME POINTER: Continue Task 4 step 4.3`, a `LAST COMMIT:` line, and the `NEXT:` hint.
-  - [ ] **Step 5.3 — Cleanup + commit.** `rm -f .claude/leases/rtest.json` then `git add .claude/scripts/lease/resume.py && git commit -m "feat(lease): resume-pointer reader/writer for in-session auto-resume"`
+  - [x] **Step 5.3 — Cleanup + commit.** `rm -f .claude/leases/rtest.json` then `git add .claude/scripts/lease/resume.py && git commit -m "feat(lease): resume-pointer reader/writer for in-session auto-resume"`
 
-- [ ] **Task 6: Reclaim CLI (single-winner)** [SEQUENTIAL after Task 4]
+- [x] **Task 6: Reclaim CLI (single-winner)** [SEQUENTIAL after Task 4]
   - **Produces:** `.claude/scripts/lease/reclaim.py`
   - **Consumes:** `lease_lib.py`
   - **Risk:** High — implements INV-3 / AC-2.4 write-then-re-read single-winner.
@@ -320,7 +325,7 @@ if __name__ == "__main__":
   - **Demo:** running reclaim against a stale target prints `reclaimed`; against a fresh target prints `fresh`; the loser of a concurrent race prints `lost`.
   - **Review lane:** Elevated.
 
-  - [ ] **Step 6.1 — Write the CLI.** Create `.claude/scripts/lease/reclaim.py`:
+  - [x] **Step 6.1 — Write the CLI.** Create `.claude/scripts/lease/reclaim.py`:
 
 ```python
 """Reclaim helper (AC-2.3/2.4, INV-3). Evaluate a TARGET session's claim:
@@ -384,19 +389,19 @@ if __name__ == "__main__":
     sys.exit(main(sys.argv[1], sys.argv[2]))
 ```
 
-  - [ ] **Step 6.2 — Test fresh path.** Run: `echo '{"session_id":"freshowner","cwd":"."}' | python .claude/scripts/lease/heartbeat.py && python .claude/scripts/lease/reclaim.py me freshowner`
+  - [x] **Step 6.2 — Test fresh path.** Run: `echo '{"session_id":"freshowner","cwd":"."}' | python .claude/scripts/lease/heartbeat.py && python .claude/scripts/lease/reclaim.py me freshowner`
     Expected: `fresh` (just-written claim is within TTL).
-  - [ ] **Step 6.3 — Test reclaim path.** Manually write a stale claim, then reclaim:
+  - [x] **Step 6.3 — Test reclaim path.** Manually write a stale claim, then reclaim:
     `python -c "import json,datetime;open('.claude/leases/stale1.json','w').write(json.dumps({'owner':'dead','pid':1,'last_active':(datetime.datetime.now(datetime.timezone.utc)-datetime.timedelta(hours=2)).isoformat(),'resume_pointer':'finish step 3'}))"`
     then `python .claude/scripts/lease/reclaim.py me stale1 && cat .claude/leases/stale1.json`
     Expected: prints `reclaimed`; file now shows `"owner":"me"` and preserved `"resume_pointer":"finish step 3"`.
-  - [ ] **Step 6.4 — Cleanup + commit.** `rm -f .claude/leases/freshowner.json .claude/leases/stale1.json` then `git add .claude/scripts/lease/reclaim.py && git commit -m "feat(lease): single-winner reclaim CLI (re-read enforces INV-3)"`
+  - [x] **Step 6.4 — Cleanup + commit.** `rm -f .claude/leases/freshowner.json .claude/leases/stale1.json` then `git add .claude/scripts/lease/reclaim.py && git commit -m "feat(lease): single-winner reclaim CLI (re-read enforces INV-3)"`
 
 ---
 
 ## Phase 4 — Config wiring [SEQUENTIAL — single-writer on settings.json]
 
-- [ ] **Task 7: Register heartbeat hook + gitignore leases** [SEQUENTIAL]
+- [x] **Task 7: Register heartbeat hook + gitignore leases** [SEQUENTIAL]
   - **Produces:** edits to `.claude/settings.json` (PostToolUse + Stop entries) and `.gitignore` (`.claude/leases/`)
   - **Consumes:** `heartbeat.py`
   - **Risk:** Medium — `.claude/settings.json` is a hotspot/single-writer file (workflow.md Sequential-only registry). Use the `update-config` skill mechanism; do not hand-merge concurrently.
@@ -404,14 +409,14 @@ if __name__ == "__main__":
   - **Demo:** after wiring, performing any tool call in a live session creates/updates `.claude/leases/<session_id>.json`; `git status` never lists files under `.claude/leases/`.
   - **Review lane:** Architectural (touches harness config).
 
-  - [ ] **Step 7.1 — Gitignore the leases dir.** Append to `.gitignore`:
+  - [x] **Step 7.1 — Gitignore the leases dir.** Append to `.gitignore`:
 
 ```
 # Session-continuity lease claim files (ephemeral, per-machine — never commit)
 .claude/leases/
 ```
 
-  - [ ] **Step 7.2 — Register the heartbeat under PostToolUse (all tools).** Using the `update-config` skill, add to `.claude/settings.json` `hooks.PostToolUse` a NEW entry (do not modify existing entries):
+  - [x] **Step 7.2 — Register the heartbeat under PostToolUse (all tools).** Using the `update-config` skill, add to `.claude/settings.json` `hooks.PostToolUse` a NEW entry (do not modify existing entries):
 
 ```json
 {
@@ -424,7 +429,7 @@ if __name__ == "__main__":
 
   (No `matcher` key = fires for every tool, satisfying AC-3.1.)
 
-  - [ ] **Step 7.3 — Register the heartbeat under Stop.** Add to `.claude/settings.json` `hooks.Stop` a NEW command entry alongside the existing ones:
+  - [x] **Step 7.3 — Register the heartbeat under Stop.** Add to `.claude/settings.json` `hooks.Stop` a NEW command entry alongside the existing ones:
 
 ```json
 {
@@ -435,15 +440,15 @@ if __name__ == "__main__":
 }
 ```
 
-  - [ ] **Step 7.4 — Validate JSON.** Run: `python -c "import json; json.load(open('.claude/settings.json')); print('settings.json OK')"`
+  - [x] **Step 7.4 — Validate JSON.** Run: `python -c "import json; json.load(open('.claude/settings.json')); print('settings.json OK')"`
     Expected: `settings.json OK`.
-  - [ ] **Step 7.5 — Commit.** `git add .claude/settings.json .gitignore && git commit -m "chore(lease): wire heartbeat hook (PostToolUse+Stop), gitignore .claude/leases/"`
+  - [x] **Step 7.5 — Commit.** `git add .claude/settings.json .gitignore && git commit -m "chore(lease): wire heartbeat hook (PostToolUse+Stop), gitignore .claude/leases/"`
 
 ---
 
 ## Phase 5 — workflow.md rule edits [HANDOFF — WRITE-PROTECTED]
 
-- [ ] **Task 8: Propose workflow.md Rule 4 / 7 / 8 edits (Helder applies)** [SEQUENTIAL]
+- [x] **Task 8: Propose workflow.md Rule 4 / 7 / 8 edits (Helder applies)** [SEQUENTIAL]
   - **Produces:** a proposed-diff artifact ONLY (e.g. `Docs/Management/DevCycleCraft/session-continuity-leasing/workflow-edits-proposed.md`) — NOT an edit to `workflow.md`.
   - **Consumes:** `reclaim.py`, `resume.py`, the claim-file mechanism
   - **Risk:** HIGH / HANDOFF — `.claude/settings.json` denies `Edit/Write(.claude/rules/*.md)`; CLAUDE.md § Amending These Rules requires an `amend:` commit + changelog. **A subagent must NOT and CANNOT edit `workflow.md`.** Produce the text; Helder applies it.
@@ -451,18 +456,18 @@ if __name__ == "__main__":
   - **Demo:** the proposed-edits doc lists exact insert text for Rule 4 (`[~]` reclaim semantics: run `reclaim.py`; on `reclaimed` proceed, on `fresh`/`lost` pick next), Rule 7 (session-start: run reclaim/freshness check before claiming), Rule 8 (collision check gains a liveness step via `lease_lib.classify`).
   - **Review lane:** Architectural — Helder sign-off mandatory.
 
-  - [ ] **Step 8.1 — Write the proposed-edits doc.** Create `workflow-edits-proposed.md` describing, with exact before/after snippets, the three edits:
+  - [x] **Step 8.1 — Write the proposed-edits doc.** Create `workflow-edits-proposed.md` describing, with exact before/after snippets, the three edits:
     - **Rule 4** — extend the `[~]` semantics: "Before treating a `[~]` task as blocked, run `.claude/scripts/lease/reclaim.py <my_session_id> <owner_session_id>`. `reclaimed` → take over and read the resume pointer; `fresh` → leave it and select the next `[ ]` task; `lost` → another session won, select next."
     - **Rule 7** — add a session-start step: "After reading the spec files, for each `[~]`/`🟡 In Progress` work unit, classify its claim (`.claude/scripts/lease/reclaim.py`) and reclaim any stale unit before starting new work; run `.claude/scripts/lease/resume.py <session_id>` to load the resume pointer."
     - **Rule 8** — add liveness to the collision check: "When a `[~]` task exists with no known running agent, classify the claim via `lease_lib.classify` instead of assuming abandonment; reset to `[ ]` only if `stale`."
-  - [ ] **Step 8.2 — Commit the artifact (not workflow.md).** `git add Docs/Management/DevCycleCraft/session-continuity-leasing/workflow-edits-proposed.md && git commit -m "docs(lease): propose workflow.md Rule 4/7/8 edits for Helder amend (rules dir write-protected)"`
-  - [ ] **Step 8.3 — HANDOFF.** Notify Helder: apply the proposed edits to `.claude/rules/workflow.md` with an `amend:` commit prefix + `Docs/Changelog/changelog.md` entry (CLAUDE.md § Amending These Rules). Register the new proposed-edits doc in `.sln` if it is to remain; otherwise delete after Helder applies.
+  - [x] **Step 8.2 — Commit the artifact (not workflow.md).** `git add Docs/Management/DevCycleCraft/session-continuity-leasing/workflow-edits-proposed.md && git commit -m "docs(lease): propose workflow.md Rule 4/7/8 edits for Helder amend (rules dir write-protected)"`
+  - [x] **Step 8.3 — HANDOFF.** Notify Helder: apply the proposed edits to `.claude/rules/workflow.md` with an `amend:` commit prefix + `Docs/Changelog/changelog.md` entry (CLAUDE.md § Amending These Rules). Register the new proposed-edits doc in `.sln` if it is to remain; otherwise delete after Helder applies.
 
 ---
 
 ## Phase 6 — In-session auto-resume wiring [SEQUENTIAL after Phase 4]
 
-- [ ] **Task 9: Scheduled-wakeup auto-resume wiring** [SEQUENTIAL]
+- [x] **Task 9: Scheduled-wakeup auto-resume wiring** [SEQUENTIAL]
   - **Produces:** documented `/loop`-based wakeup procedure + a `resume.py`-driven continuation; optional `SessionStart` resume hint entry in `.claude/settings.json`.
   - **Consumes:** `resume.py`, claim files, config wiring (Task 7)
   - **Risk:** Medium — `/loop` is session-bound (findings.md): in-session reset only; fully-closed terminal OUT of scope (AC-4.1 scope note).
@@ -470,15 +475,15 @@ if __name__ == "__main__":
   - **Demo:** after a simulated usage-window reset within the same session, the scheduled wakeup runs `resume.py <session_id>`, reads the resume pointer, and the agent continues the exact next step with no manual prompt.
   - **Review lane:** Architectural.
 
-  - [ ] **Step 9.1 — Write the runbook.** Create `auto-resume-runbook.md`: how to arm an in-session `/loop` wakeup that, on fire, runs `python .claude/scripts/lease/resume.py <session_id>` and feeds the printed pointer back as the continuation instruction. State explicitly: fully-closed terminal requires a cloud routine (`/schedule`) and is out of scope.
-  - [ ] **Step 9.2 — (Optional) SessionStart resume hint.** If desired, add a `SessionStart` command entry (single-writer on settings.json — only after Task 7 is committed) that, when `source` is `resume`, echoes a reminder to run `resume.py`. Validate JSON as in Step 7.4.
-  - [ ] **Step 9.3 — Commit.** `git add Docs/Management/DevCycleCraft/session-continuity-leasing/auto-resume-runbook.md .claude/settings.json && git commit -m "feat(lease): in-session auto-resume runbook + optional SessionStart resume hint"`
+  - [x] **Step 9.1 — Write the runbook.** Create `auto-resume-runbook.md`: how to arm an in-session `/loop` wakeup that, on fire, runs `python .claude/scripts/lease/resume.py <session_id>` and feeds the printed pointer back as the continuation instruction. State explicitly: fully-closed terminal requires a cloud routine (`/schedule`) and is out of scope.
+  - [x] **Step 9.2 — (Optional) SessionStart resume hint.** If desired, add a `SessionStart` command entry (single-writer on settings.json — only after Task 7 is committed) that, when `source` is `resume`, echoes a reminder to run `resume.py`. Validate JSON as in Step 7.4.
+  - [x] **Step 9.3 — Commit.** `git add Docs/Management/DevCycleCraft/session-continuity-leasing/auto-resume-runbook.md .claude/settings.json && git commit -m "feat(lease): in-session auto-resume runbook + optional SessionStart resume hint"`
 
 ---
 
 ## Phase 7 — Verification (outermost) [SEQUENTIAL — last]
 
-- [ ] **Task 10: Two-terminal demo + final verification** [SEQUENTIAL]
+- [x] **Task 10: Two-terminal demo + final verification** [SEQUENTIAL]
   - **Produces:** a verification record appended to `task-log.md` (Demo Statement evidence + AC traceability matrix).
   - **Consumes:** everything above.
   - **Risk:** Low. Integration acceptance.
@@ -486,11 +491,11 @@ if __name__ == "__main__":
   - **Demo:** executes the spec's Demo Statement end-to-end (two terminals: A claims+works, B finds fresh→picks other task; A `/clear`ed; after TTL B finds stale→reclaims→reads pointer→continues) with NO Helder arbitration.
   - **Review lane:** Architectural.
 
-  - [ ] **Step 10.1 — Run the unit suite.** Run: `python -m unittest discover -s .claude/scripts/lease/tests -v` → all PASS.
-  - [ ] **Step 10.2 — Two-terminal collision check (AC-1.1/1.3).** Terminal A does a tool call (heartbeat writes `A.json`). In terminal B run `reclaim.py B <A_session_id>` → expect `fresh`; B selects another task.
-  - [ ] **Step 10.3 — Reclaim-after-interruption (AC-2.x/4.x).** `/clear` terminal A (its `session_id` retires). Age/inspect the claim; in B run `reclaim.py B <A_session_id>` → expect `reclaimed`; then `resume.py B` prints A's resume pointer; B continues the exact next step.
-  - [ ] **Step 10.4 — Record evidence.** Append to `task-log.md`: Demo Statement PASS/FAIL, the AC traceability matrix from plan.md with the test method / command that verified each row.
-  - [ ] **Step 10.5 — Commit.** `git add Docs/Management/DevCycleCraft/session-continuity-leasing/task-log.md && git commit -m "test(lease): two-terminal demo verification + AC traceability evidence"`
+  - [x] **Step 10.1 — Run the unit suite.** Run: `python -m unittest discover -s .claude/scripts/lease/tests -v` → all PASS.
+  - [x] **Step 10.2 — Two-terminal collision check (AC-1.1/1.3).** Terminal A does a tool call (heartbeat writes `A.json`). In terminal B run `reclaim.py B <A_session_id>` → expect `fresh`; B selects another task.
+  - [x] **Step 10.3 — Reclaim-after-interruption (AC-2.x/4.x).** `/clear` terminal A (its `session_id` retires). Age/inspect the claim; in B run `reclaim.py B <A_session_id>` → expect `reclaimed`; then `resume.py B` prints A's resume pointer; B continues the exact next step.
+  - [x] **Step 10.4 — Record evidence.** Append to `task-log.md`: Demo Statement PASS/FAIL, the AC traceability matrix from plan.md with the test method / command that verified each row.
+  - [x] **Step 10.5 — Commit.** `git add Docs/Management/DevCycleCraft/session-continuity-leasing/task-log.md && git commit -m "test(lease): two-terminal demo verification + AC traceability evidence"`
 
 ---
 
