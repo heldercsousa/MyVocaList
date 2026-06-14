@@ -1,8 +1,10 @@
 # Session Continuity — Task Leasing & Auto-Resume
 
-> Status: **Spec (awaiting Helder review)** — spike COMPLETE 2026-06-14 (PASS), design LOCKED. `brainstorming` complete → see [`requirements.md`](./requirements.md); spike outcome in [`findings.md`](./findings.md); next is `writing-plans → plan.md` (plan execution still gated on Helder's approval of the spec).
+> Status: **Spec APPROVED by Helder 2026-06-14** — spike COMPLETE 2026-06-14 (PASS), design LOCKED, both architect decisions CONFIRMED (TTL = `LEASE_TTL_SECONDS=1800` / 30 min; claim path `.claude/leases/<session_id>.json`). `brainstorming` complete → see [`requirements.md`](./requirements.md); spike outcome in [`findings.md`](./findings.md); **proceeding to `writing-plans → plan.md`.**
 > Owner decision session: Helder, 2026-06-13/14.
 > Execution model: Opus 4.8, all phases.
+
+> **Spec APPROVED by Helder 2026-06-14.** Both architect-discretion items are now CONFIRMED, not defaulted: TTL = `LEASE_TTL_SECONDS=1800` (30 min), and claim-file path `.claude/leases/<session_id>.json` (gitignored). Proceeding to `writing-plans`.
 
 > **Decisions locked 2026-06-14** (supersede the "Decision required before spec" section below):
 > - **Freshness mechanism:** a hook-driven *activity heartbeat*. A `PostToolUse`/`Stop` hook
@@ -61,14 +63,14 @@ A claim carries: which session holds it + a **freshness signal**.
 
 "Is this claim alive?" = "has its dedicated worktree branch had a commit within TTL?" Tamper-proof, survives a forgotten heartbeat, and leans on the existing per-wave worktree/branch rule (`orchestrator.md § Git Worktrees`). A claim whose branch is stale → reclaimable.
 
-- **TTL purpose (Helder, 2026-06-13):** the expiry exists so a *fresh* session after a 5-hour-limit reset can auto-resume — NOT as a cross-terminal race window. ~45 min is a starting value tied to task-sizing limits (most tasks ≤ 90 min, commit-per-task).
+- **TTL purpose (Helder, 2026-06-13):** the expiry exists so a *fresh* session after a 5-hour-limit reset can auto-resume — NOT as a cross-terminal race window. CONFIRMED value 30 min (`LEASE_TTL_SECONDS=1800`), tied to task-sizing limits (most tasks ≤ 90 min, commit-per-task).
 
 ### 3. Resume pointer (the only genuinely new artifact)
 A one-line "continue from here" note attached to the claim, so a cold session reads claim + `tasks.md` + last commit and knows the exact next step. Bounds resume cost.
 
 ### 3a. Storage locations (pinned 2026-06-14)
-- **Claim file** *(ARCHITECT-DISCRETION DEFAULT — flag for Helder)*: `.claude/leases/<session_id>.json` — one JSON file per session, gitignored (ephemeral, per-machine, never committed). The claim record shape above (L19-25) is serialized as the JSON body. **DECISION DEFAULTED 2026-06-14 — Helder may relocate; low blast radius.**
-- **TTL single source** *(ARCHITECT-DISCRETION DEFAULT — flag for Helder)*: a single named constant `LEASE_TTL_SECONDS` (default `2700` = 45 min) defined once in the lease hook script and read by BOTH the heartbeat writer and the reclaim/freshness check. **DECISION DEFAULTED 2026-06-14 — Helder may retune the value/location.**
+- **Claim file**: `.claude/leases/<session_id>.json` — one JSON file per session, gitignored (ephemeral, per-machine, never committed). The claim record shape above (L19-25) is serialized as the JSON body. **DECISION CONFIRMED by Helder 2026-06-14.**
+- **TTL single source**: a single named constant `LEASE_TTL_SECONDS` (`1800` = 30 min) defined once in the lease hook script and read by BOTH the heartbeat writer and the reclaim/freshness check. **DECISION CONFIRMED by Helder 2026-06-14 — TTL = 1800s (30 min).**
 - **Resume pointer**: canonical storage is the `resume_pointer` field inside the per-session claim file; a human-readable one-line echo MAY also be appended to the `tasks.md` `[~]` line, but the claim file is authoritative.
 - **Atomic write**: the heartbeat/reclaim hook writes the claim atomically (write `<file>.tmp`, then `mv`/rename over the target). Because files are keyed by `session_id` (one per session), no two sessions ever write the same file; a corrupt/half-written file is treated as absent/stale (reclaimable).
 - **Concurrent reclaim (single-winner)**: after writing its own claim, a reclaiming session RE-READS the claim and proceeds only if `owner` equals its own `session_id` (enforces INV-3); the loser re-evaluates and selects the next work unit.
