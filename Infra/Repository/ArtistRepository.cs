@@ -79,6 +79,14 @@ public class ArtistRepository : IArtistRepository
             a => a.ExternalId == externalId && a.ExternalProvider == provider, ct);
 
     /// <inheritdoc />
+    public async Task<Artist?> GetByNameAsync(string name, CancellationToken ct = default)
+        => await _db.Artists
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                a => EF.Functions.Collate(a.Name, CollationConstants.Default) ==
+                     EF.Functions.Collate(name, CollationConstants.Default), ct);
+
+    /// <inheritdoc />
     public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct)
         => await _db.Artists.AnyAsync(
             a => EF.Functions.Collate(a.Name, CollationConstants.Default) == EF.Functions.Collate(name, CollationConstants.Default), ct);
@@ -88,6 +96,20 @@ public class ArtistRepository : IArtistRepository
         => await _db.Artists.AnyAsync(
             a => a.Id != excludeId &&
                  EF.Functions.Collate(a.Name, CollationConstants.Default) == EF.Functions.Collate(name, CollationConstants.Default), ct);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Artist>> GetFuzzyCandidatePoolAsync(
+        string namePrefixToken, int take, CancellationToken ct = default)
+    {
+        var pattern = namePrefixToken + "%";
+        return await _db.Artists
+            .Where(a => EF.Functions.Like(
+                EF.Functions.Collate(a.Name, CollationConstants.Default),
+                pattern))
+            .Take(take)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
 
     /// <inheritdoc />
     public Task AddAsync(Artist artist, CancellationToken ct)

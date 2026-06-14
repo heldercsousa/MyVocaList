@@ -44,6 +44,9 @@ public partial class AutocompleteField : ContentView
     public static readonly BindableProperty SuggestionSelectedCommandProperty =
         BindableProperty.Create(nameof(SuggestionSelectedCommand), typeof(ICommand), typeof(AutocompleteField), null);
 
+    public static readonly BindableProperty BlurredWithoutSelectionCommandProperty =
+        BindableProperty.Create(nameof(BlurredWithoutSelectionCommand), typeof(ICommand), typeof(AutocompleteField), null);
+
     // ── Public properties ─────────────────────────────────────────────────
 
     public string LabelText
@@ -100,6 +103,16 @@ public partial class AutocompleteField : ContentView
         set => SetValue(SuggestionSelectedCommandProperty, value);
     }
 
+    /// <summary>
+    /// Invoked when the user blurs the autocomplete field without having tapped a suggestion.
+    /// Allows the ViewModel to clear the field or restore the previous valid selection.
+    /// </summary>
+    public ICommand BlurredWithoutSelectionCommand
+    {
+        get => (ICommand)GetValue(BlurredWithoutSelectionCommandProperty);
+        set => SetValue(BlurredWithoutSelectionCommandProperty, value);
+    }
+
     // ── Private state ─────────────────────────────────────────────────────
 
     private readonly AutocompleteDebouncer _debouncer = new();
@@ -151,7 +164,10 @@ public partial class AutocompleteField : ContentView
     {
         await Task.Yield();
         if (!_isTappingSuggestion)
+        {
             overlayCard.IsVisible = false;
+            BlurredWithoutSelectionCommand?.Execute(null);
+        }
     }
 
     // ── Suggestion tap ────────────────────────────────────────────────────
