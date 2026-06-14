@@ -32,8 +32,15 @@
 - [x] **4.5 Resolution + merge BottomSheets wiring** — Files: `SongFormPage.xaml(.cs)`, `SongFormViewModel.cs`, `MauiProgram.cs`. DONE 2026-06-14.
 
 ## Wave 5 — Tests + gate `[SEQUENTIAL]`
-- [ ] **5.1 Integration + AC traceability matrix** — full `dotnet test` green; matrix in `task-log.md`.
-- [ ] **5.2 Emulator smoke (Helder gate)** — record in `task-log.md`; BACKLOG → ✅ Done on green.
+- [x] **5.1 Integration + AC traceability matrix** — full `dotnet test` = **354 passed, 0 failed** on final branch state (2026-06-14). MAUI Android builds 0 errors. Per-wave AC traceability matrices recorded in `task-log.md` (3A, 3B, 4A, 4B entries).
+- [ ] **5.2 Emulator smoke (Helder gate)** — ⏳ AWAITING HELDER. Branch `feature/song-import-resolution` (NOT pushed/merged). Smoke checklist below. On green → merge + BACKLOG ✅ Done.
+
+### Emulator smoke checklist (Helder)
+1. API search (Song Picker) → select a result → form populates (title/artist/external id); save → song persists with ExternalProvider/ExternalId.
+2. Manually enter a song whose title nearly matches an existing one → resolution sheet surfaces the fuzzy candidate; choose **Update existing** vs **Save as new version** (version required, AC-1.2).
+3. Edit a song (set HasManualEdits), then re-import same from API → **merge sheet** shows per-field API-vs-current; accept some fields → only those change.
+4. New Song: add a YouTube URL **before** saving → no "save first" error; on save, song + URL persist atomically (BUG-009).
+5. Save failure shows an error snackbar (BUG-005). Double-tap "Search music database" does not crash (BUG-006). Picker pages show a single back arrow (BUG-007). Artist field is autocomplete-only, clears on blur-without-selection, locks on API origin (BUG-008).
 
 ## Hotspot / single-writer files (serialize)
 `MauiProgram.cs` · `AppDbContext.cs` + snapshot · `*_AddSongVersion.cs` · `tasks.md` · picker `*.xaml` (edit one at a time).
