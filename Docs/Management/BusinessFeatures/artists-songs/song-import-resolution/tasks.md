@@ -28,8 +28,8 @@
 - [x] **4.1 BottomSheetTitle style (BUG-004)** — Files: `MaterialStyles.xaml`.
 - [x] **4.2 SongPickerViewModel + page/DI fix (BUG-010, BUG-006)** — Files: `SongPickerViewModel.cs`, `SongPickerPage.xaml.cs`, `MauiProgram.cs` (hotspot) + tests.
 - [x] **4.3 Picker pages suppress Shell back chrome (BUG-007)** — Files: 4 picker `*.xaml` (2 already done; added to SongPickerPage.xaml + ArtistPickerPage.xaml).
-- [ ] **4.4 SongFormViewModel: save catch + buffered URLs + artist autocomplete (BUG-005/008/009)** — Files: `SongFormViewModel.cs`, `SongFormPage.xaml(.cs)` + tests.
-- [ ] **4.5 Resolution + merge BottomSheets wiring** — Files: `SongFormPage.xaml(.cs)`, `SongFormViewModel.cs`.
+- [x] **4.4 SongFormViewModel: save catch + buffered URLs + artist autocomplete (BUG-005/008/009)** — Files: `SongFormViewModel.cs`, `SongFormPage.xaml(.cs)`, `AutocompleteField.xaml.cs`, `SongFormViewModelTests.cs` (17 tests). DONE 2026-06-14.
+- [x] **4.5 Resolution + merge BottomSheets wiring** — Files: `SongFormPage.xaml(.cs)`, `SongFormViewModel.cs`, `MauiProgram.cs`. DONE 2026-06-14.
 
 ## Wave 5 — Tests + gate `[SEQUENTIAL]`
 - [ ] **5.1 Integration + AC traceability matrix** — full `dotnet test` green; matrix in `task-log.md`.

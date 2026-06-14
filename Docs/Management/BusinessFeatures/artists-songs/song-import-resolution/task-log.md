@@ -46,6 +46,46 @@
 | AC-2.7 | SelectResult sends SongPickedMessage | SongPickerViewModel.SelectResultAsync | SelectResultCommand_SendsSongPickedMessage |
 
 ---
+## Task: Wave 4B — SongForm fixes (BUG-005/008/009) + Resolution/Merge BottomSheets (Tasks 4.4 + 4.5)
+**Plan:** `song-import-resolution/plan.md`
+**Status:** To Review
+**Started:** 06/14/2026
+**Completed:** 06/14/2026
+
+### Changed files:
+- `MyVocaList/UI/Components/AutocompleteField/AutocompleteField.xaml.cs` — added `BlurredWithoutSelectionCommand` BindableProperty; `OnSearchEditUnfocused` now invokes it when no suggestion was tapped (BUG-008)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — full rewrite: BUG-005 save-catch; BUG-008 artist blur-clear + `InitializeArtistField()` + `IsArtistLocked`; BUG-009 `_pendingRawUrls` buffer + `RemoveUrlAsync` new-song mode; `SongPickedMessage` canonical alias; `ISongResolutionService` injected; `SaveAsync` now builds `SongCandidate` → `ResolveAsync` → direct create (NoMatch) or resolution sheet; `SelectResolutionCandidateCommand`; `ConfirmUpdateExistingCommand`; `ConfirmSaveAsNewVersionCommand` (AC-1.2 version gate); merge sheet state; `MergeFieldRow` class added; `VersionHasError/VersionErrorText/SongVersion` observable properties; `Version` entry field
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` — added `BlurredWithoutSelectionCommand` binding; Version field; Resolution BottomSheet (candidate list, save-as-new-version branch, cancel); Merge BottomSheet (per-field diff rows with CheckEdit toggle, apply/cancel); `resolution:` XAML namespace for `SongMatch`
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — `OnAppearing` calls `vm.InitializeArtistField()` after `RefreshApiKeyFlagAsync` (BUG-008)
+- `MyVocaList/MauiProgram.cs` — registered `IArtistResolutionService`/`ISongResolutionService` as Scoped
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — rewritten with 17 tests covering BUG-005 (save-catch, no-artist early exit, NoMatch path), AC-1.1/1.2 (resolution sheet shown, empty-version blocked), BUG-008 (blur-clear, restore-prior, InitializeArtistField), BUG-009 (buffer, duplicate, invalid, remove), AC-4.2 (merge row population); plus 3 original URL tests
+- `Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/design.md` — §6 updated with SaveAsync orchestration detail (living spec)
+- `Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/tasks.md` — 4.4 and 4.5 marked [x]
+
+### Build notes
+- 0 errors, 5 pre-existing warnings (NU1608 + DX trial) — `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`
+
+### Verification evidence
+- Build: PASS (0 errors) — net10.0-android
+- Tests: PASS (354 tests, 0 failures) — 354 total (17 new SongFormViewModelTests + 337 pre-existing)
+- Post-edit re-read: confirmed for all 7 changed files
+- Spec compliance: confirmed — BUG-005/008/009 specs, AC-1.1/1.2, AC-4.2/4.3, AC-6.1/6.2, AC-B5/B8 checked
+
+### AC traceability
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| AC-1.1 | ExactLocalMatch → resolution sheet shown | SongFormViewModel.ExecuteNewSongSaveAsync | SaveAsync_ExactLocalMatch_SetsResolutionSheetVisible |
+| AC-1.2 | Save as new version with empty Version → blocked | SongFormViewModel.ConfirmSaveAsNewVersionAsync | ConfirmSaveAsNewVersion_EmptyVersion_SetsVersionError |
+| AC-4.1 | NoMatch → CreateSongWithUrlsAsync called | SongFormViewModel.ExecuteNewSongSaveAsync | SaveAsync_NoMatch_CallsCreateSongWithUrls |
+| AC-4.2 | HasManualEdits + FieldDiffs → merge sheet shown | SongFormViewModel.ConfirmUpdateExistingAsync | ConfirmUpdateExisting_TargetHasManualEdits_PopulatesMergeRows |
+| AC-4.3 | Cancel merge → no write | SongFormViewModel.DismissMergeSheet | Structural (no CommitAsync call) |
+| AC-4.4 | HasManualEdits set on manual edit | SongFormViewModel.ExecuteEditSaveAsync (hasManualEdits=true) | N/A — passed to UpdateSongAsync |
+| AC-6.1 | URL buffered in new-song mode, no error | SongFormViewModel.AddFromPasteAsync + BufferUrlAsync | AddFromPasteAsync_NewSongMode_BuffersUrlNoError |
+| AC-6.2 | Atomic save via CreateSongWithUrlsAsync | SongFormViewModel.CommitNewSongAsync | SaveAsync_NoMatch_CallsCreateSongWithUrls |
+| AC-B5 | Exception in SaveAsync → error snackbar shown | SongFormViewModel.SaveAsync catch block | SaveAsync_ServiceThrows_ShowsErrorSnackbar |
+| AC-B8 | Blur without selection → field cleared | AutocompleteField + SongFormViewModel.OnArtistBlurredWithoutSelection | ArtistBlurredWithoutSelection_NoPriorSelection_ClearsField |
+
+---
 ## Task: Spec + plan authored
 **Plan:** `song-import-resolution/plan.md`
 **Status:** Review task done
