@@ -1,6 +1,6 @@
 # Session Continuity — Task Leasing & Auto-Resume — Requirements
 
-> Status: **Spec (awaiting Helder review)** · Owner decisions: Helder, 2026-06-13/14
+> Status: **Spec APPROVED by Helder 2026-06-14** · Owner decisions: Helder, 2026-06-13/14 · TTL=1800s (30 min) and claim-path `.claude/leases/<session_id>.json` CONFIRMED · proceeding to writing-plans
 > Companion direction doc: [`design.md`](./design.md)
 > Execution model: Opus 4.8, all phases.
 
@@ -27,7 +27,7 @@ arbitrate manually:
 | **Reclaim** | A new session takes over a stale claim and resumes its work unit. |
 | **Resume pointer** | A one-line "continue from here" note attached to a claim, bounding the cost of a cold resume. |
 | **Work unit** | Either a feature/phase (BACKLOG `🟡 In Progress` row) or a step (`tasks.md` `[~]` marker). |
-| **TTL** | Time-to-live for the heartbeat freshness window. Starting value ~45 min, tied to task-sizing limits (most tasks ≤ 90 min, commit-per-task). |
+| **TTL** | Time-to-live for the heartbeat freshness window. Value **30 min** (`LEASE_TTL_SECONDS=1800`), tied to task-sizing limits (most tasks ≤ 90 min, commit-per-task). |
 
 ## User Stories & Acceptance Criteria
 
@@ -126,16 +126,16 @@ As the team, I want to confirm the hook mechanism works before committing the de
 | `pid` | Optional. When present, used only for the same-host fast-reclaim path. |
 | `last_active` | Required. ISO-8601 UTC timestamp. Updated by the heartbeat hook. |
 | `resume_pointer` | Required once material progress exists. One line, ≤ ~200 chars. Stored in the per-session claim file (see Storage Locations). |
-| TTL | Single source of truth: the named constant `LEASE_TTL_SECONDS` (default `2700` = 45 min), defined once in the lease hook script and read by BOTH the heartbeat writer and the reclaim/freshness check. |
+| TTL | Single source of truth: the named constant `LEASE_TTL_SECONDS` (`1800` = 30 min), defined once in the lease hook script and read by BOTH the heartbeat writer and the reclaim/freshness check. |
 | claim file write | MUST be written atomically (write to `<file>.tmp` then `mv`/rename over the target). Claim files are per-session, keyed by `session_id` (one file per session), so no two sessions ever write the same file. |
 
 ## Storage Locations
 
 | Item | Location |
 |------|----------|
-| **Claim file** *(ARCHITECT-DISCRETION DEFAULT — flag for Helder)* | `.claude/leases/<session_id>.json` — one JSON file per session. MUST be gitignored (ephemeral, per-machine, never committed). **DECISION DEFAULTED 2026-06-14 — Helder may relocate; low blast radius.** |
+| **Claim file** | `.claude/leases/<session_id>.json` — one JSON file per session. MUST be gitignored (ephemeral, per-machine, never committed). **DECISION CONFIRMED by Helder 2026-06-14.** |
 | **Claim record format** | JSON. The claim record shape (`owner`, `pid`, `last_active`, `resume_pointer` — see `design.md`) is serialized as the JSON body of the claim file. |
-| **TTL constant** *(ARCHITECT-DISCRETION DEFAULT — flag for Helder)* | A single named constant `LEASE_TTL_SECONDS` (default `2700` = 45 min) defined once in the lease hook script; the single source of truth read by both the heartbeat writer and the reclaim/freshness check. **DECISION DEFAULTED 2026-06-14 — Helder may retune the value/location.** |
+| **TTL constant** | A single named constant `LEASE_TTL_SECONDS` (`1800` = 30 min) defined once in the lease hook script; the single source of truth read by both the heartbeat writer and the reclaim/freshness check. **DECISION CONFIRMED by Helder 2026-06-14 — TTL = 1800s (30 min).** |
 | **Resume pointer** | Canonical: the `resume_pointer` field inside the per-session claim file. A human-readable one-line echo MAY also be appended to the `tasks.md` `[~]` line, but the claim file is authoritative. |
 
 ## Out of Scope
