@@ -97,5 +97,46 @@ class TestPidAlive(unittest.TestCase):
         self.assertFalse(lease_lib.pid_alive(-1))
 
 
+class TestBuildHeartbeatClaim(unittest.TestCase):
+    """T4 pure logic: heartbeat claim construction (AC-3.4 parent-keying, AC-4.3 pointer)."""
+
+    def test_keys_owner_off_supplied_session_id(self):  # AC-3.4
+        claim = lease_lib.build_heartbeat_claim("parent1", 4321, iso(NOW))
+        self.assertEqual(claim["owner"], "parent1")
+        self.assertEqual(claim["pid"], 4321)
+        self.assertEqual(claim["last_active"], iso(NOW))
+
+    def test_preserves_existing_resume_pointer(self):  # AC-4.3
+        existing = {"owner": "parent1", "resume_pointer": "finish step 3"}
+        claim = lease_lib.build_heartbeat_claim("parent1", 1, iso(NOW), existing_claim=existing)
+        self.assertEqual(claim["resume_pointer"], "finish step 3")
+
+    def test_no_existing_claim_yields_empty_pointer(self):
+        claim = lease_lib.build_heartbeat_claim("s1", 1, iso(NOW), existing_claim=None)
+        self.assertEqual(claim["resume_pointer"], "")
+
+    def test_existing_without_pointer_field_yields_empty(self):
+        claim = lease_lib.build_heartbeat_claim("s1", 1, iso(NOW), existing_claim={"owner": "s1"})
+        self.assertEqual(claim["resume_pointer"], "")
+
+
+class TestReclaimDecision(unittest.TestCase):
+    """T6 pure logic: single-winner re-read decision (AC-2.4 / INV-3)."""
+
+    def test_reread_owner_is_us_means_reclaimed(self):  # AC-2.4 winner
+        self.assertEqual(
+            lease_lib.reclaim_decision("me", {"owner": "me", "pid": 1}), "reclaimed")
+
+    def test_reread_owner_is_other_means_lost(self):  # AC-2.4 loser
+        self.assertEqual(
+            lease_lib.reclaim_decision("me", {"owner": "rival", "pid": 2}), "lost")
+
+    def test_reread_none_means_lost(self):
+        self.assertEqual(lease_lib.reclaim_decision("me", None), "lost")
+
+    def test_reread_corrupt_dict_without_owner_means_lost(self):
+        self.assertEqual(lease_lib.reclaim_decision("me", {"pid": 9}), "lost")
+
+
 if __name__ == "__main__":
     unittest.main()

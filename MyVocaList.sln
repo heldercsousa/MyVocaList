@@ -429,6 +429,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lease-scripts", "lease-scripts", "{FA1234BC-0001-4000-8000-000000000027}"
 	ProjectSection(SolutionItems) = preProject
 		.claude\scripts\lease\lease_lib.py = .claude\scripts\lease\lease_lib.py
+		.claude\scripts\lease\heartbeat.py = .claude\scripts\lease\heartbeat.py
+		.claude\scripts\lease\resume.py = .claude\scripts\lease\resume.py
+		.claude\scripts\lease\reclaim.py = .claude\scripts\lease\reclaim.py
 		.claude\scripts\lease\tests\test_lease_lib.py = .claude\scripts\lease\tests\test_lease_lib.py
 	EndProjectSection
 EndProject
