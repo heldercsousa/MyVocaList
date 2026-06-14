@@ -132,6 +132,8 @@ public static class MauiProgram
         builder.Services.AddScoped<ISongService, SongService>();
         builder.Services.AddScoped<ICatalogService, CatalogService>();
         builder.Services.AddScoped<IMusicMetadataService, MusicMetadataService>();
+        builder.Services.AddScoped<IArtistResolutionService, ArtistResolutionService>();
+        builder.Services.AddScoped<ISongResolutionService, SongResolutionService>();
 
         // YouTube Karaoke
         builder.Services.AddScoped<ISongKaraokeUrlRepository, SongKaraokeUrlRepository>();
