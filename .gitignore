@@ -497,6 +497,8 @@ $RECYCLE.BIN/
 
 # Local Claude Code settings (machine-specific)
 .claude/settings.local.json
+# Session-continuity lease claim files (ephemeral, per-machine — never commit)
+.claude/leases/
 # Local Sentry DSN — never commit; fill from Sentry project settings
 **/appsettings.json
 
