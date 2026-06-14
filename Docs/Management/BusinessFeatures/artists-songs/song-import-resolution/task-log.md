@@ -3,6 +3,49 @@
 > One entry per task. See `tasks.md` for sequencing, `plan.md` for step detail.
 
 ---
+## Task: Wave 4A — BottomSheetTitle, SongPickerViewModel+DI (BUG-010/006), picker back-chrome (BUG-007)
+**Plan:** `song-import-resolution/plan.md`
+**Status:** To Review
+**Started:** 06/14/2026
+**Completed:** 06/14/2026
+
+### Changed files:
+- `MyVocaList/Resources/Styles/MaterialStyles.xaml` — updated BottomSheetTitle: added `FontAttributes="None"`, padding corrected to `16,16,16,0` per BUG-004 spec (MD3 titleLarge)
+- `MyVocaList/UI/ViewModels/SongPickerViewModel.cs` — created; mirrors ArtistPickerViewModel; injects IMusicMetadataService, IMessenger, INavigationService, ISnackbarComponent, ILogger; SearchCommand (AllowConcurrentExecutions=false), SelectResultCommand (sends SongPickedMessage), LaunchYouTubeSearchCommand, BackCommand; IDisposable CancellationTokenSource
+- `MyVocaList/UI/Pages/Songs/SongPickerPage.xaml.cs` — fixed constructor: was injecting wrong type QueueSongPickerViewModel, now injects correct SongPickerViewModel (BUG-010)
+- `MyVocaList/MauiProgram.cs` — added `builder.Services.AddTransient<SongPickerViewModel>()` beside ArtistPickerViewModel (BUG-010)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — NavigateToSongPickerCommand and NavigateToYouTubeSearchCommand now use AsyncRelayCommandOptions.None to prevent concurrent executions (BUG-006)
+- `MyVocaList/UI/Pages/Songs/SongPickerPage.xaml` — added Shell.BackButtonBehavior IsVisible=False IsEnabled=False (BUG-007)
+- `MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml` — added Shell.BackButtonBehavior IsVisible=False IsEnabled=False (BUG-007)
+- `MyVocaList.Tests/Unit/ViewModels/SongPickerViewModelTests.cs` — enabled (was commented out); 12 tests covering search, empty state, SelectResult message, BackCommand, IsShowEmptyState
+- `Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/tasks.md` — checked 4.1, 4.2, 4.3
+
+### Notes
+- PersonPickerPage.xaml and QueueSongPickerPage.xaml already had Shell.BackButtonBehavior — only 2 of 4 picker pages needed the BUG-007 fix.
+- SongPickedMessage has two definitions: canonical in Contracts.Messages (MusicSearchResultDto Result) and a legacy class in QueueSongPickerViewModel.cs (SongId/QueueEntryId). Used a type alias `SongPickedMsg = MyVocaList.Contracts.Messages.SongPickedMessage` in SongPickerViewModel.cs to avoid ambiguity. The same alias is used in tests. The legacy class and SongFormViewModel's usage of .SongId/.QueueEntryId are pre-existing inconsistencies not in scope for this wave.
+- AsyncRelayCommand in CommunityToolkit.Mvvm 8.x uses AsyncRelayCommandOptions enum, not a bool parameter — used AsyncRelayCommandOptions.None to disable concurrent executions.
+
+### Build notes
+- Attempt 1 failed: SongPickedMessage ambiguity (CS1729), AsyncRelayCommand named param not found (CS1739)
+- Attempt 2 passed: 0 errors, 5 warnings (pre-existing: NU1608 + DX trial warnings)
+
+### Verification evidence
+- Build: PASS (0 errors, 5 pre-existing warnings) — `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`
+- Tests: PASS (340 tests, 0 failures) — 328 pre-existing + 12 new SongPickerViewModelTests
+- Post-edit re-read: confirmed
+- Spec compliance: confirmed — BUG-004, BUG-006, BUG-007, BUG-010 specs checked
+
+### AC traceability
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| AC-B4 (BUG-004) | BottomSheetTitle style exists with MD3 titleLarge | MaterialStyles.xaml | Build-time style resolution |
+| AC-B6 (BUG-006) | Double-tap does not crash / concurrent navigation prevented | SongFormViewModel AsyncRelayCommandOptions.None | Manual E2E only (Shell nav) |
+| AC-B10 (BUG-010) | SongPickerPage injects SongPickerViewModel | SongPickerPage.xaml.cs constructor | SearchCommand_OnSuccess_PopulatesResults |
+| AC-2.4 | Successful search populates Results | SongPickerViewModel.SearchAsync | SearchCommand_OnSuccess_PopulatesResults |
+| AC-2.5 | Empty result sets HasSearched=true, HasResults=false | SongPickerViewModel.SearchAsync | SearchCommand_OnEmptyResult_SetsHasSearchedNoResults |
+| AC-2.7 | SelectResult sends SongPickedMessage | SongPickerViewModel.SelectResultAsync | SelectResultCommand_SendsSongPickedMessage |
+
+---
 ## Task: Spec + plan authored
 **Plan:** `song-import-resolution/plan.md`
 **Status:** Review task done

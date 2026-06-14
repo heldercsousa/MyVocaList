@@ -13,6 +13,10 @@
     BackgroundColor="{StaticResource Surface}"
     SafeAreaEdges="Container">
 
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False" IsEnabled="False" />
+    </Shell.BackButtonBehavior>
+
     <Shell.TitleView>
         <appbars:SearchAppBar
             SearchText="{Binding SearchText, Mode=TwoWay}"
