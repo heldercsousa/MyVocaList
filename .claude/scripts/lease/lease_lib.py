@@ -66,6 +66,32 @@ def classify(claim, now=None, pid_alive_fn=pid_alive, ttl=LEASE_TTL_SECONDS):
     return "stale"  # AC-2.1 / AC-2.2 (old + dead pid)
 
 
+def build_heartbeat_claim(session_id, pid, now_iso, existing_claim=None):
+    """Pure: produce the claim dict a heartbeat should write for `session_id`.
+
+    Preserves an existing resume_pointer (AC-4.3 — the heartbeat must never erase it)
+    and always keys `owner` off the supplied (parent) session_id (AC-3.4)."""
+    existing_pointer = ""
+    if isinstance(existing_claim, dict):
+        existing_pointer = existing_claim.get("resume_pointer", "") or ""
+    return {
+        "owner": session_id,
+        "pid": pid,
+        "last_active": now_iso,
+        "resume_pointer": existing_pointer,
+    }
+
+
+def reclaim_decision(my_session_id, reread_claim):
+    """Pure single-winner decision (AC-2.4 / INV-3): after a reclaimer atomically writes
+    its own owner into the claim, it RE-READS and calls this with the re-read result.
+    Returns 'reclaimed' iff the re-read owner is us; otherwise 'lost' (a concurrent
+    reclaimer overwrote us). A corrupt/None re-read counts as lost."""
+    if isinstance(reread_claim, dict) and reread_claim.get("owner") == my_session_id:
+        return "reclaimed"
+    return "lost"
+
+
 if __name__ == "__main__":
     # Importable smoke check: no output expected on clean import.
     pass
