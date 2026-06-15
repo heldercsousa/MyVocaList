@@ -262,6 +262,8 @@ The SDD workflow has a **J-Curve ROI profile**: it costs more time upfront and r
 
 **All coding is done by subagents. The main agent handles shell-only steps.**
 
+> **Orchestrator never reads source files `[HARD RULE]`:** the main/orchestrator agent must not read `.cs`, `.xaml`, or any other source file — all code inspection (including plan-mode codebase exploration) is delegated to an Explore/Plan subagent. Read-scope allow/deny list, plan-mode reconciliation, and session-start self-check: see `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
+
 | Main agent does | Subagent does |
 |----------------|---------------|
 | `dotnet build` | Any file creation or edit |

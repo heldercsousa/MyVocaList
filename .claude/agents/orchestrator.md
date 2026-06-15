@@ -16,6 +16,32 @@ For commit discipline, task-log format, spec quality gates, and the spec decisio
 - Runs post-wave verification independently
 - Maintains session state (`ACTIVE-CONSIDERATIONS.md`, handoff artifacts, task-log)
 
+## Orchestrator Read-Scope — Never Reads Source Files `[HARD RULE]`
+
+> *Rationale: the orchestrator's job is coordination, not inspection. Reading source files burns coordination context on technical detail a fresh Explore/Plan subagent reads more cheaply and discards — and is the documented recurring cause of the orchestrator drifting into implementer work it should delegate.*
+
+**The main/orchestrator agent never reads `.cs`, `.xaml`, `.csproj`, migration, or any other source/implementation file. All code inspection is delegated to an Explore or Plan subagent.** This rule survives session resets — it lives here, in the durable role file.
+
+**MAY read (allow-list):**
+- `Docs/Management/BACKLOG.md`
+- Spec docs under `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/` (`requirements.md`, `design.md`, `tasks.md`, `plan.md`, `findings.md`, `handoff.md`, `task-log.md`)
+- `Docs/DevEnv/ACTIVE-CONSIDERATIONS.md`
+- Rules / role files: `CLAUDE.md`, `.claude/rules/*.md`, `.claude/agents/*.md`, `.claude/library/*.md`
+- Subagent-returned reports and contract signatures a subagent committed and surfaced
+
+**MAY NOT read (deny-list):**
+- Any file under a code project (`MyVocaList*/**`) — `.cs`, `.xaml`, `.xaml.cs`, `.csproj`, `Migrations/*`, `AppShell.xaml`, `MauiProgram.cs`, etc.
+- Any source file in order to "understand the code", "check what exists", or "see how X is done" — delegate that to a subagent.
+
+**Delegation requirement:** When code facts are needed (does a method exist? what is a signature? how is X wired?), dispatch an `Explore` subagent (read-only fan-out) or a `Plan` subagent and consume only its returned conclusion — never open the files yourself.
+
+**Plan-mode reconciliation:** Plan mode's instruction to "explore the codebase" does NOT authorize the orchestrator to read source files directly. Codebase exploration during planning is delegated to a `Plan` or `Explore` subagent; the orchestrator reads only that subagent's returned plan/findings. Plan mode changes *what* is produced (a plan), not *who* reads the code.
+
+**Session-start self-check (run before any work each session):**
+> "Am I the orchestrator? Then I read specs, BACKLOG, task-logs and rules only. The moment I want to open a `.cs` or `.xaml` file, I stop and dispatch an Explore/Plan subagent instead."
+
+**Narrow exception:** Reading a specific source file is permitted ONLY when the user explicitly and directly instructs the orchestrator to read that exact file. Absent that explicit instruction, delegate.
+
 ## Post-Wave Verification
 
 After every wave completes, the orchestrator must run these steps independently — never rely on self-reported subagent verification:
