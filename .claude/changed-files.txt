@@ -1409,3 +1409,12 @@ Docs/Management/DevCycleCraft/session-continuity-leasing/requirements.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
+.worktrees/governance-rules/.claude/rules/component-change-governance.md
+.worktrees/governance-rules/.claude/rules/bug-tracking.md
+.worktrees/governance-rules/Docs/Changelog/changelog.md
+.worktrees/governance-rules/MyVocaList.sln
+.worktrees/governance-rules/MyVocaList.sln
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
