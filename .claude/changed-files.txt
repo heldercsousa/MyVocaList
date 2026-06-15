@@ -1418,3 +1418,4 @@ Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
+.worktrees/orchestrator-role/.claude/agents/orchestrator.md
