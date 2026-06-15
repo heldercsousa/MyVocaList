@@ -16,10 +16,12 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Row 0: FilterContent slot — visibility controlled by code-behind OnFilterContentChanged -->
-        <ContentPresenter x:Name="filterContentPresenter"
-                          Grid.Row="0"
-                          Content="{Binding FilterContent, Source={x:Reference self}}" />
+        <!-- Row 0: FilterContent slot — Content + visibility assigned in code-behind OnFilterContentChanged.
+             A ContentView host (not ContentPresenter) is used because ContentPresenter only renders its
+             content inside a ControlTemplate; placed directly in a layout it shows nothing. -->
+        <ContentView x:Name="filterContentHost"
+                     Grid.Row="0"
+                     IsVisible="False" />
 
         <!-- Row 1: ShimmerView wrapping DXCollectionView -->
         <dx:ShimmerView Grid.Row="1"
