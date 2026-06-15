@@ -4,9 +4,11 @@
 > Markers: `[ ]` available · `[~]` claimed · `[x]` done · `[P]` parallelizable · `[SEQUENTIAL]` strict order
 > NON-NEGOTIABLE: `.claude/rules/workflow.md` is WRITE-PROTECTED (settings.json deny + CLAUDE.md amend process). Phase 5 is a Helder manual handoff — see Task 8.
 >
-> **Remaining Helder handoff gates (2026-06-14):** (1) apply the workflow.md Rule 4/7/8 edits per
-> [`workflow-edits-proposed.md`](./workflow-edits-proposed.md) with an `amend:` commit + changelog entry;
-> (2) run the live two-terminal demo in [`demo-and-traceability.md`](./demo-and-traceability.md) Part 1.
+> **Remaining Helder handoff gates:** ~~(1) apply the workflow.md Rule 4/7/8 edits per
+> [`workflow-edits-proposed.md`](./workflow-edits-proposed.md) with an `amend:` commit + changelog entry~~
+> **— DONE 2026-06-14** (`amend:` commit on branch `session-continuity-leasing` → merged to `develop`;
+> changelog entry added). (2) ⏳ **STILL PENDING (Helder):** run the live two-terminal demo in
+> [`demo-and-traceability.md`](./demo-and-traceability.md) Part 1.
 > All other tasks (T1–T10) are code-complete, tested, and committed.
 
 ---
@@ -501,6 +503,6 @@ if __name__ == "__main__":
 
 ## Post-completion handoffs (Helder)
 
-1. **Apply Phase 5** — edit `.claude/rules/workflow.md` Rules 4/7/8 per `workflow-edits-proposed.md` with an `amend:` commit + changelog entry (write-protected, R1).
+1. ~~**Apply Phase 5** — edit `.claude/rules/workflow.md` Rules 4/7/8 per `workflow-edits-proposed.md` with an `amend:` commit + changelog entry (write-protected, R1).~~ **DONE 2026-06-14** — block temporarily lifted under Helder authorization, all three edits applied to `workflow.md`, `amend:` commit made on branch `session-continuity-leasing`, changelog entry added, block restored. Merged to `develop`. Only the live two-terminal manual demo remains pending (Helder).
 2. **Decide feature-scope BACKLOG claiming** — this plan implements the session/`[~]`-step layer; whether BACKLOG `🟡 In Progress` rows also get a claim file is flagged as a follow-up (plan.md § Deferred).
 3. **Register any new docs** (`workflow-edits-proposed.md`, `auto-resume-runbook.md`) in `MyVocaList.sln` if they are to persist.
