@@ -1405,3 +1405,5 @@ Docs/Management/DevCycleCraft/session-continuity-leasing/requirements.md
 .worktrees/session-continuity-leasing/.claude/scripts/lease/lease_lib.py
 .worktrees/session-continuity-leasing/MyVocaList.sln
 .worktrees/session-continuity-leasing/MyVocaList.sln
+.worktrees/queue-music-icon/MyVocaList/Resources/Images/queue_music_outlined.svg
+Docs/Management/BACKLOG.md
