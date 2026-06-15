@@ -419,6 +419,28 @@ Check off each task in `Docs/Management/[BusinessFeatures|DevCycleCraft]/[featur
 
 **Rule:** Never dispatch a task marked `[~]`. If a subagent was killed without completing a `[~]` task, reset it to `[ ]` before re-dispatching.
 
+#### Lease-aware `[~]` reclaim (Session Continuity)
+
+A `[~]` claim is a **lease, not a lock** — it is only binding while its owner is *fresh*.
+Before treating a `[~]` task as owned-and-blocked, classify its claim with the lease
+helper rather than assuming the owner is still alive:
+
+1. Identify the owner session id from the claim file under `.claude/leases/` (the claim
+   whose `resume_pointer` matches the work, or the only live claim on this host).
+2. Run `python .claude/scripts/lease/reclaim.py <my_session_id> <owner_session_id>` and act
+   on the single printed word:
+   - `fresh`     → the owner is alive; **leave the `[~]` task** and select the next `[ ]`
+     task (this is AC-1.3 — do not wait).
+   - `reclaimed` → the claim was stale; you now own it. Run
+     `python .claude/scripts/lease/resume.py <owner_session_id>` to read the resume pointer,
+     then continue the exact next step (AC-2.3 / AC-4.2). Leave the marker `[~]` (it is now
+     yours) — do not reset to `[ ]`.
+   - `lost`      → a concurrent session reclaimed first; re-evaluate and select the next
+     `[ ]` task (AC-2.4 / INV-3).
+
+> Only reset a `[~]` to `[ ]` when the claim classifies as **stale** AND you choose not to
+> reclaim it. Never reset a `fresh` claim.
+
 ### Task atomization checklist
 
 A task is **atomic** if it passes this checklist:
@@ -596,8 +618,19 @@ Read in this order — do not skip items, do not resume from memory alone:
 4. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/requirements.md`** — refresh acceptance criteria (do not rely on previous-session memory)
 5. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md`** — refresh architecture and interface signatures
 6. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/task-log.md`** — check for unresolved `blocked:` statuses or `Spec updated — re-planning required` entries
+7. **Lease claim refresh + resume-pointer read (Session Continuity):**
+   - For the picked work unit, classify any existing `[~]`/`🟡 In Progress` claim under
+     `.claude/leases/` via `python .claude/scripts/lease/reclaim.py <my_session_id> <owner_session_id>`:
+     `fresh` → pick a different unit; `reclaimed` → take over; `lost` → pick the next unit
+     (see Rule 4 lease-aware reclaim). Reclaim any **stale** unit before starting new work.
+   - Before resuming, read the resume pointer with
+     `python .claude/scripts/lease/resume.py <session_id>` and continue from it.
+   - The heartbeat hook (registered in `.claude/settings.json`, `PostToolUse`/`Stop`) writes
+     and keeps this session's own claim fresh automatically on every tool call — no manual
+     ping is required (AC-3.1/3.3). Record a resume pointer as material progress is made via
+     `python .claude/scripts/lease/resume.py --set <session_id> "<one-line continue-from-here>"` (AC-4.3).
 
-**Rule:** Steps 1–6 are mandatory. Steps 3–6 may be scoped to the specific feature being worked on if multiple features are in flight.
+**Rule:** Steps 1–7 are mandatory. Steps 3–7 may be scoped to the specific feature being worked on if multiple features are in flight.
 
 **Anti-glob rule:** Never call `Glob("Docs/**")` or equivalent open-ended scans during session start or briefing. Read only the 6 files listed above plus the active feature spec files.
 
@@ -620,6 +653,11 @@ If the GitHub MCP is available:
 - Run `git log --oneline -10` to check recent commits
 - Run `git status` to confirm no uncommitted changes from a previous interrupted session
 - Check `tasks.md` for any tasks marked `[~]` that should not be in-progress
+- **Liveness check (Session Continuity):** for every `[~]` task with no known running
+  agent, classify its claim under `.claude/leases/` via
+  `python .claude/scripts/lease/reclaim.py <my_session_id> <owner_session_id>` (which calls
+  `lease_lib.classify`) **before** assuming abandonment. A `fresh` result means another live
+  session owns it — do NOT reset to `[ ]`.
 
 **Collision types and responses:**
 
@@ -627,5 +665,5 @@ If the GitHub MCP is available:
 |----------------|----------|
 | Another open PR modifies a file in `Files owned` | Do NOT start the wave. Resolve the PR first. |
 | Recent commit from another agent changed an interface the current wave consumes | Re-read the changed interface before briefing. Update briefings if signatures changed. |
-| `[~]` task exists but no agent is known to be running it | Reset to `[ ]` and re-dispatch. |
+| `[~]` task exists but no agent is known to be running it | Classify the claim via `reclaim.py` / `lease_lib.classify`. `fresh` → another live session owns it, leave it and pick the next unit. `stale` → reclaim (`reclaimed`) and resume from the pointer, or reset to `[ ]` and re-dispatch if not resuming. Never reset a `fresh` claim. |
 | No collision detected | Proceed with wave dispatch |
