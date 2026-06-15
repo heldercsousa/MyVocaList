@@ -241,7 +241,13 @@ public partial class CrudListView : ContentView
     {
         var hasFilter = newView != null;
         filterRow.Height = hasFilter ? GridLength.Auto : new GridLength(0);
-        filterContentPresenter.IsVisible = hasFilter;
+        // Host the filter View directly. A bare ContentPresenter only presents content
+        // when it lives inside a ControlTemplate (it resolves Content from the templated
+        // parent); placed directly in a layout it renders nothing regardless of its
+        // Content binding — which is why the filter chips never appeared after migration.
+        // Assigning ContentView.Content reparents the View into the visual tree correctly.
+        filterContentHost.Content = newView;
+        filterContentHost.IsVisible = hasFilter;
     }
 
     private void OnItemTapCommandChanged(System.Windows.Input.ICommand newCommand)
