@@ -90,6 +90,8 @@ Never assume a missing tool response means the tool found nothing — distinguis
 - MediatR patterns: `.claude/rules/mediatr-patterns.md`
 - Code principles: `.claude/rules/code-principles.md`
 - **Testing**: `.claude/rules/testing.md` — read before writing any test. Covers test types, naming, TDD workflow, and test project setup.
+- **Component change governance** `[HARD RULE]`: `.claude/rules/component-change-governance.md` — four gates (dedicated task + MD3 review, consumer map, per-consumer risk assessment, Helder approval) before any change to a shared custom component; no bundling into feature/bug tasks.
+- **Bug tracking**: `.claude/rules/bug-tracking.md` — BUG-NNN IDs, BACKLOG nesting, severity classification, and per-class task-log + regression-test requirements.
 
 ## SDD Applicability for MyVocaList
 MyVocaList is past the 10–20 interdependent file threshold where SDD becomes strictly beneficial:
@@ -315,3 +317,4 @@ Estimated migration effort: 1–2 weeks (per S7.1.2 research). Claude Code is ex
 ## Roles
 - **Helder**: Architect and Technical Auditor. Defines approaches, reviews code, makes trade-off decisions.
 - **Claude Code**: Implementation Specialist. Codes, debugs, documents. Never makes architectural decisions unilaterally.
+- **Orchestrator read-scope** `[HARD RULE]`: When acting as the main/orchestrator agent, Claude Code never reads `.cs`, `.xaml`, or any source/implementation file — all code inspection (including plan-mode codebase exploration) is delegated to an Explore/Plan subagent. See `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
