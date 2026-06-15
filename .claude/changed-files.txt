@@ -1419,3 +1419,7 @@ Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 .worktrees/orchestrator-role/.claude/agents/orchestrator.md
+.worktrees/orchestrator-role/.claude/agents/orchestrator.md
+.worktrees/orchestrator-role/.claude/rules/workflow.md
+.worktrees/orchestrator-role/Docs/Changelog/changelog.md
+Docs/Management/BACKLOG.md
