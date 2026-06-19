@@ -6,6 +6,7 @@
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     xmlns:models="clr-namespace:MyVocaList.UI.Models"
     xmlns:queue="clr-namespace:MyVocaList.UI.Components.Queue"
+    xmlns:sheets="clr-namespace:MyVocaList.UI.Components.Sheets"
     x:Class="MyVocaList.UI.Pages.Queue.QueueManagementPage"
     x:DataType="vm:QueueManagementViewModel"
     Title="Queue"
@@ -90,35 +91,22 @@
                 <dx:DXButton
                     Grid.Column="1"
                     Content="Finish"
-                    Command="{Binding FinishEventCommand}"
+                    Command="{Binding RequestFinishEventCommand}"
                     HorizontalOptions="Fill"
                     HeightRequest="48" />
             </Grid>
         </VerticalStackLayout>
 
-        <!-- Finish Confirmation BottomSheet -->
-        <dx:BottomSheet
-            x:Name="finishEventSheet"
-            HalfExpandedRatio="0.35"
-            AllowedState="HalfExpanded"
-            IsModal="True"
-            ShowGrabber="True"
-            AllowDismiss="True"
-            BackgroundColor="{StaticResource Surface}"
-            CornerRadius="28">
-            <VerticalStackLayout Padding="24">
-                <Label Text="Finish Event?" StyleClass="Title.Medium"
-                       TextColor="{StaticResource OnSurface}" HorizontalTextAlignment="Center" />
-                <Label Text="Archive the queue?" TextColor="{StaticResource OnSurfaceVariant}"
-                       HorizontalTextAlignment="Center" Margin="0,8" />
-                <BoxView HeightRequest="1" BackgroundColor="{StaticResource OutlineVariant}" Margin="0,16" />
-                <dx:DXButton Content="Cancel" TextColor="{StaticResource Primary}"
-                             HorizontalOptions="Fill" HeightRequest="48"
-                             Clicked="OnCancelFinish" />
-                <dx:DXButton Content="Confirm" TextColor="{StaticResource Error}"
-                             HorizontalOptions="Fill" HeightRequest="48"
-                             Clicked="OnConfirmFinish" />
-            </VerticalStackLayout>
-        </dx:BottomSheet>
+        <!-- Finish-event confirmation (AC-5.3) — reuses the safe ConfirmSheet wrapper,
+             driven by FinishConfirmSheetState (TwoWay). Wrapping the modal BottomSheet in a
+             ContentView avoids the cached-page re-parent collision (BUG-011). -->
+        <sheets:ConfirmSheet
+            x:Name="finishConfirmSheet"
+            Grid.Row="0" Grid.RowSpan="2"
+            SheetState="{Binding FinishConfirmSheetState, Mode=TwoWay}"
+            Message="End event and archive queue?"
+            ActionText="Finish Event"
+            ActionCommand="{Binding FinishEventCommand}"
+            DismissCommand="{Binding DismissFinishConfirmCommand}" />
     </Grid>
 </ContentPage>

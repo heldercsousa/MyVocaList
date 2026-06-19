@@ -37,18 +37,4 @@ public partial class QueueManagementPage : ContentPage
         base.OnDisappearing();
         _viewModel?.OnNavigatedFrom();
     }
-
-    private async void OnCancelFinish(object sender, EventArgs e)
-    {
-        await Shell.Current.GoToAsync("..");
-    }
-
-    private async void OnConfirmFinish(object sender, EventArgs e)
-    {
-        await Shell.Current.GoToAsync("..");
-        if (_viewModel != null)
-        {
-            await _viewModel.FinishEventCommand.ExecuteAsync(null);
-        }
-    }
 }

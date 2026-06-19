@@ -3,8 +3,24 @@
 **Filed:** 2026-06-11
 **Feature area:** Queue Management
 **Severity:** High — causes 4103ms UI freeze (245 skipped frames / Davey!) on every navigation to QueuePage after first visit
-**Status:** 💡 Pending
+**Status:** ✅ Fixed (2026-06-19, branch `fix/bug-011-queue-bottomsheet`, not yet merged)
 **Recommended model:** `claude-sonnet-4-6` — XAML/code-behind fix, single-file guard pattern; no architectural decisions required
+
+## Resolution (2026-06-19)
+
+**Misattribution correction:** The title/affected-files name `QueuePage`, but that file is a dead 712-byte placeholder. The real wired page is **`QueueManagementPage`** (Shell root view, backed by `QueueManagementViewModel` + `IQueueServiceNew`). The fix was applied there, not in `QueuePage`.
+
+**Root cause:** `QueueManagementPage.xaml` declared an inline `dx:BottomSheet x:Name="finishEventSheet"` with `IsModal="True"` as a direct child of the page root `<Grid>`. DevExpress re-parents modal sheets to a window overlay on show; on the 2nd navigation to the Shell-cached page the visual-tree reattach collided → `BottomSheet is already a child of ... Grid` + Davey jank.
+
+**Fix:** Removed the inline sheet and routed the finish confirmation through the existing safe `ConfirmSheet` ContentView wrapper (driven by `FinishConfirmSheetState` TwoWay; the modal BottomSheet now lives inside the ContentView and only `Show()`s on an explicit non-Hidden state transition, so a fresh cached-page reattach never re-shows / re-parents). `ConfirmSheet` itself was reused unchanged (governed component).
+
+**AC-5.3 now wired:** Previously the "Finish" button bound straight to `FinishEventCommand` with NO confirmation (irreversible archive without a prompt — violated AC-5.3 / Flow 4). Now "Finish" → `RequestFinishEventCommand` opens the confirmation; only Confirm (`FinishEventCommand`) transitions STARTED → FINISHED; Cancel/dismiss (`DismissFinishConfirmCommand`) leaves the event unchanged.
+
+**Regression test:** `MyVocaList.Tests/Unit/ViewModels/QueueManagementViewModelTests.cs` — 3 tests tagged `// [AC] AC-5.3` (`RequestFinishEvent_StartedEvent_OpensConfirmationWithoutFinishing`, `FinishEvent_AfterConfirmation_FinishesEventAndClosesSheet`, `DismissFinishConfirm_AfterOpening_ClosesSheetWithoutFinishing`). Seen Red (VM members absent before the change) → Green after.
+
+**Verification:** `dotnet build` 0 errors; the 3 new ViewModel tests pass; `QueueRepositoryTests` 5/5 green in isolation. Intermittent full-suite `QueueRepositoryTests` failures (`SQLite Error 19: FOREIGN KEY constraint failed`, count varies 3→1→0 across runs) are the pre-existing flaky parallel-SQLite race — unrelated to this change (green with the change stashed), tracked in BACKLOG. ⏳ Helder: emulator E2E for AC-BUG011-1/2/3.
+
+**Files changed:** `QueueManagementPage.xaml`, `QueueManagementPage.xaml.cs`, `QueueManagementViewModel.cs`, + new `MyVocaList.Tests/Unit/ViewModels/QueueManagementViewModelTests.cs`. Committed as `e4d09bb` on branch `fix/bug-011-queue-bottomsheet` (not pushed, not merged).
 
 ## Symptom
 
