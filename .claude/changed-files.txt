@@ -1444,3 +1444,7 @@ Docs/Management/BusinessFeatures/queue-management/bugs/BUG-011-queuepage-bottoms
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 Docs/Management/BusinessFeatures/queue-management/bugs/BUG-011-queuepage-bottomsheet-double-add.md
+Docs/Management/BusinessFeatures/queue-management/bugs/BUG-011-queuepage-bottomsheet-double-add.md
+Docs/Management/BusinessFeatures/queue-management/queue-deadcode-cleanup.md
+Docs/Management/BACKLOG.md
+MyVocaList.sln
