@@ -62,6 +62,9 @@ public partial class QueueManagementViewModel : ViewModelBase
     [ObservableProperty] private string eventStatusDisplay;
     [ObservableProperty] private bool isLoading;
 
+    /// <summary>Drives the finish-confirmation bottom sheet (TwoWay-bound to ConfirmSheet.SheetState).</summary>
+    [ObservableProperty] private BottomSheetState finishConfirmSheetState = BottomSheetState.Hidden;
+
     /// <summary>Initializes the ViewModel with the given event ID.</summary>
     [RelayCommand]
     public async Task InitializeAsync(int eventId)
@@ -336,11 +339,28 @@ public partial class QueueManagementViewModel : ViewModelBase
         }
     }
 
-    /// <summary>Finishes the event (transitions to FINISHED).</summary>
+    /// <summary>Opens the finish-event confirmation sheet (AC-5.3). Does NOT finish the event.</summary>
+    [RelayCommand]
+    public void RequestFinishEvent()
+    {
+        if (CurrentEvent == null) return;
+        FinishConfirmSheetState = BottomSheetState.HalfExpanded;
+    }
+
+    /// <summary>Dismisses the finish-event confirmation sheet without finishing the event.</summary>
+    [RelayCommand]
+    public void DismissFinishConfirm()
+    {
+        FinishConfirmSheetState = BottomSheetState.Hidden;
+    }
+
+    /// <summary>Finishes the event (transitions to FINISHED). Confirmed path only (AC-5.3).</summary>
     [RelayCommand]
     public async Task FinishEventAsync()
     {
         if (CurrentEvent == null) return;
+
+        FinishConfirmSheetState = BottomSheetState.Hidden;
 
         try
         {
