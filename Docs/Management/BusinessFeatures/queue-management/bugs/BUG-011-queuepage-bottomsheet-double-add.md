@@ -16,17 +16,11 @@
 
 **AC-5.3 now wired:** Previously the "Finish" button bound straight to `FinishEventCommand` with NO confirmation (irreversible archive without a prompt — violated AC-5.3 / Flow 4). Now "Finish" → `RequestFinishEventCommand` opens the confirmation; only Confirm (`FinishEventCommand`) transitions STARTED → FINISHED; Cancel/dismiss (`DismissFinishConfirmCommand`) leaves the event unchanged.
 
-**Regression test:** `MyVocaList.Tests/Unit/ViewModels/QueueManagementViewModelTests.cs` — 3 tests tagged `// [AC] AC-5.3`. Seen Red (VM members absent before the change) → Green after. Full suite 357 passed.
+**Regression test:** `MyVocaList.Tests/Unit/ViewModels/QueueManagementViewModelTests.cs` — 3 tests tagged `// [AC] AC-5.3` (`RequestFinishEvent_StartedEvent_OpensConfirmationWithoutFinishing`, `FinishEvent_AfterConfirmation_FinishesEventAndClosesSheet`, `DismissFinishConfirm_AfterOpening_ClosesSheetWithoutFinishing`). Seen Red (VM members absent before the change) → Green after.
 
-## Resolution (2026-06-19)
+**Verification:** `dotnet build` 0 errors; the 3 new ViewModel tests pass; `QueueRepositoryTests` 5/5 green in isolation. Intermittent full-suite `QueueRepositoryTests` failures (`SQLite Error 19: FOREIGN KEY constraint failed`, count varies 3→1→0 across runs) are the pre-existing flaky parallel-SQLite race — unrelated to this change (green with the change stashed), tracked in BACKLOG. ⏳ Helder: emulator E2E for AC-BUG011-1/2/3.
 
-**Misattribution corrected:** the title names `QueuePage`, but that page is a 712-byte placeholder (dead leftover). The real, Shell-cached root view is **`QueueManagementPage`**, and the offending control was its inline `dx:BottomSheet x:Name="finishEventSheet"` with `IsModal="True"`, declared directly in the page's root `<Grid>`. A DevExpress modal BottomSheet re-parents itself to a window-level overlay when shown; the original Grid still lists it as a child, so when Shell reattaches the cached page tree on a 2nd navigation the sheet collides → the logged warning + Davey.
-
-**Fix:** removed the inline modal BottomSheet and routed the finish-event confirmation through the app's safe reusable `ConfirmSheet` wrapper (driven by a `FinishConfirmSheetState` TwoWay property on `QueueManagementViewModel`). The "Finish Event" button now opens the confirmation (`RequestFinishEventCommand`); only the confirmed path transitions STARTED → FINISHED. This eliminates the re-parent-on-cache collision by construction **and** closes a spec gap — **AC-5.3** (a finish confirmation: "End event and archive queue?") was previously unwired, so finishing archived the queue with no prompt.
-
-**Files changed:** `QueueManagementPage.xaml`, `QueueManagementPage.xaml.cs`, `QueueManagementViewModel.cs`, + new `MyVocaList.Tests/Unit/ViewModels/QueueManagementViewModelTests.cs` (AC-5.3 regression).
-
-**Verification:** `dotnet build` 0 errors; new ViewModel test passes; `QueueRepositoryTests` 5/5 green in isolation. (Intermittent full-suite `QueueRepositoryTests` FK-constraint failures are the pre-existing flaky parallel-SQLite race — unrelated, tracked in BACKLOG.) ⏳ Helder: emulator E2E for AC-BUG011-1/2/3.
+**Files changed:** `QueueManagementPage.xaml`, `QueueManagementPage.xaml.cs`, `QueueManagementViewModel.cs`, + new `MyVocaList.Tests/Unit/ViewModels/QueueManagementViewModelTests.cs`. Committed as `e4d09bb` on branch `fix/bug-011-queue-bottomsheet` (not pushed, not merged).
 
 ## Symptom
 
