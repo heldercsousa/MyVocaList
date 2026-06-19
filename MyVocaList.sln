@@ -410,6 +410,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-management", "queue-m
 		Docs\Management\BusinessFeatures\queue-management\requirements.md = Docs\Management\BusinessFeatures\queue-management\requirements.md
 		Docs\Management\BusinessFeatures\queue-management\task-log.md = Docs\Management\BusinessFeatures\queue-management\task-log.md
 		Docs\Management\BusinessFeatures\queue-management\tasks.md = Docs\Management\BusinessFeatures\queue-management\tasks.md
+		Docs\Management\BusinessFeatures\queue-management\queue-deadcode-cleanup.md = Docs\Management\BusinessFeatures\queue-management\queue-deadcode-cleanup.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "page-load-frozen", "page-load-frozen", "{C81D77D9-056E-44D8-A88F-522682CEE603}"
