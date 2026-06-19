@@ -3,8 +3,30 @@
 **Filed:** 2026-06-11
 **Feature area:** Queue Management
 **Severity:** High — causes 4103ms UI freeze (245 skipped frames / Davey!) on every navigation to QueuePage after first visit
-**Status:** 💡 Pending
+**Status:** ✅ Fixed (2026-06-19, branch `fix/bug-011-queue-bottomsheet`, not yet merged)
 **Recommended model:** `claude-sonnet-4-6` — XAML/code-behind fix, single-file guard pattern; no architectural decisions required
+
+## Resolution (2026-06-19)
+
+**Misattribution correction:** The title/affected-files name `QueuePage`, but that file is a dead 712-byte placeholder. The real wired page is **`QueueManagementPage`** (Shell root view, backed by `QueueManagementViewModel` + `IQueueServiceNew`). The fix was applied there, not in `QueuePage`.
+
+**Root cause:** `QueueManagementPage.xaml` declared an inline `dx:BottomSheet x:Name="finishEventSheet"` with `IsModal="True"` as a direct child of the page root `<Grid>`. DevExpress re-parents modal sheets to a window overlay on show; on the 2nd navigation to the Shell-cached page the visual-tree reattach collided → `BottomSheet is already a child of ... Grid` + Davey jank.
+
+**Fix:** Removed the inline sheet and routed the finish confirmation through the existing safe `ConfirmSheet` ContentView wrapper (driven by `FinishConfirmSheetState` TwoWay; the modal BottomSheet now lives inside the ContentView and only `Show()`s on an explicit non-Hidden state transition, so a fresh cached-page reattach never re-shows / re-parents). `ConfirmSheet` itself was reused unchanged (governed component).
+
+**AC-5.3 now wired:** Previously the "Finish" button bound straight to `FinishEventCommand` with NO confirmation (irreversible archive without a prompt — violated AC-5.3 / Flow 4). Now "Finish" → `RequestFinishEventCommand` opens the confirmation; only Confirm (`FinishEventCommand`) transitions STARTED → FINISHED; Cancel/dismiss (`DismissFinishConfirmCommand`) leaves the event unchanged.
+
+**Regression test:** `MyVocaList.Tests/Unit/ViewModels/QueueManagementViewModelTests.cs` — 3 tests tagged `// [AC] AC-5.3`. Seen Red (VM members absent before the change) → Green after. Full suite 357 passed.
+
+## Resolution (2026-06-19)
+
+**Misattribution corrected:** the title names `QueuePage`, but that page is a 712-byte placeholder (dead leftover). The real, Shell-cached root view is **`QueueManagementPage`**, and the offending control was its inline `dx:BottomSheet x:Name="finishEventSheet"` with `IsModal="True"`, declared directly in the page's root `<Grid>`. A DevExpress modal BottomSheet re-parents itself to a window-level overlay when shown; the original Grid still lists it as a child, so when Shell reattaches the cached page tree on a 2nd navigation the sheet collides → the logged warning + Davey.
+
+**Fix:** removed the inline modal BottomSheet and routed the finish-event confirmation through the app's safe reusable `ConfirmSheet` wrapper (driven by a `FinishConfirmSheetState` TwoWay property on `QueueManagementViewModel`). The "Finish Event" button now opens the confirmation (`RequestFinishEventCommand`); only the confirmed path transitions STARTED → FINISHED. This eliminates the re-parent-on-cache collision by construction **and** closes a spec gap — **AC-5.3** (a finish confirmation: "End event and archive queue?") was previously unwired, so finishing archived the queue with no prompt.
+
+**Files changed:** `QueueManagementPage.xaml`, `QueueManagementPage.xaml.cs`, `QueueManagementViewModel.cs`, + new `MyVocaList.Tests/Unit/ViewModels/QueueManagementViewModelTests.cs` (AC-5.3 regression).
+
+**Verification:** `dotnet build` 0 errors; new ViewModel test passes; `QueueRepositoryTests` 5/5 green in isolation. (Intermittent full-suite `QueueRepositoryTests` FK-constraint failures are the pre-existing flaky parallel-SQLite race — unrelated, tracked in BACKLOG.) ⏳ Helder: emulator E2E for AC-BUG011-1/2/3.
 
 ## Symptom
 
