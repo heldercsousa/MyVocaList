@@ -1465,3 +1465,4 @@ Docs/Management/BusinessFeatures/artists-songs/spec-cleanup-p2.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 MyVocaList.sln
+Docs/Changelog/changelog.md
