@@ -1457,3 +1457,7 @@ Docs/Management/BACKLOG.md
 Docs/Changelog/changelog.md
 Docs/Management/BACKLOG.md
 Docs/Management/BusinessFeatures/artists-songs/tasks.md
+Docs/Management/BusinessFeatures/artists-songs/handoff.md
+Docs/Management/BusinessFeatures/artists-songs/handoff.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_artists_songs_roadmap.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
