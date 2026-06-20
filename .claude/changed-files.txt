@@ -1461,3 +1461,7 @@ Docs/Management/BusinessFeatures/artists-songs/handoff.md
 Docs/Management/BusinessFeatures/artists-songs/handoff.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_artists_songs_roadmap.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
+Docs/Management/BusinessFeatures/artists-songs/spec-cleanup-p2.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+MyVocaList.sln

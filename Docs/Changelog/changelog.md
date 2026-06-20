@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for june 2026
+- **06/20/2026** - docs - BACKLOG-first registration enforcement: add DevCycleCraft task for mechanically enforcing BACKLOG registration over memory-only reminders; add Artists & Songs spec-cleanup-p2 task (6 spec-vs-code divergences to fix before Phase 16C.5); create `spec-cleanup-p2.md` detail doc; register in `.sln`
 - **06/20/2026** - docs - BACKLOG: BUG-005–BUG-010 + fuzzy-match follow-up updated from 📋 Spec → ✅ Fixed (all folded into Song Import & Entity Resolution, merged to develop)
 - **06/20/2026** - docs - Artists & Songs consolidation findings: branch map, stray-commit verdict (8e74527 superseded by develop), bug status audit (BUG-005–010 fixed by Song Import merge), Phase 16C remaining gate. Findings: `artists-songs/consolidation-findings.md`. Registered in .sln.
 - **06/15/2026** - amend - CLAUDE.md pointers wired (follow-up to the three governance amends). Added to `CLAUDE.md`: under § Rules Files — pointers to `component-change-governance.md` and `bug-tracking.md`; under § Roles — the Orchestrator read-scope HARD RULE pointer to `.claude/agents/orchestrator.md § Orchestrator Read-Scope`. Done by temporarily lifting the `deny: Edit/Write(CLAUDE.md)` permission in `.claude/settings.json` (Helder-authorized), then restoring it (net-zero settings diff). Effective 2026-06-15. Rationale: the three new/changed rules were unreferenced from the constitutional index; this closes the wiring the prior amends flagged as pending. Authorship: requires Helder human review.

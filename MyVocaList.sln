@@ -170,6 +170,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-so
 		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
 		Docs\Management\BusinessFeatures\artists-songs\consolidation-findings.md = Docs\Management\BusinessFeatures\artists-songs\consolidation-findings.md
+		Docs\Management\BusinessFeatures\artists-songs\spec-cleanup-p2.md = Docs\Management\BusinessFeatures\artists-songs\spec-cleanup-p2.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
