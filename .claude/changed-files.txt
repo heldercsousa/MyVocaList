@@ -1453,3 +1453,5 @@ Docs/Management/BACKLOG.md
 Docs/Management/BusinessFeatures/artists-songs/consolidation-findings.md
 MyVocaList.sln
 Docs/Changelog/changelog.md
+Docs/Management/BACKLOG.md
+Docs/Changelog/changelog.md
