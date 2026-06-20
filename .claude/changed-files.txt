@@ -1456,3 +1456,4 @@ Docs/Changelog/changelog.md
 Docs/Management/BACKLOG.md
 Docs/Changelog/changelog.md
 Docs/Management/BACKLOG.md
+Docs/Management/BusinessFeatures/artists-songs/tasks.md
