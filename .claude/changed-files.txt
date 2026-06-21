@@ -1481,3 +1481,4 @@ Docs/Management/DevCycleCraft/backlog-first-registration/analysis-pipeline/07-re
 Docs/Management/DevCycleCraft/backlog-first-registration/analysis-pipeline/08-orchestrator-final-judgment.md
 Docs/Management/DevCycleCraft/backlog-first-registration/analysis-pipeline/09-final-consolidated-plan.md
 Docs/Management/DevCycleCraft/backlog-first-registration/analysis-pipeline/10-resume-handoff.md
+Docs/Management/BACKLOG.md
