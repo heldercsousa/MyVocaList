@@ -1497,3 +1497,6 @@ Docs/Management/DevCycleCraft/backlog-first-registration/analysis-pipeline/10-re
 Docs/Management/BusinessFeatures/artists-songs/design.md
 Docs/Management/DevCycleCraft/backlog-first-registration/analysis-pipeline/10-resume-handoff.md
 Docs/Management/BusinessFeatures/artists-songs/design.md
+Docs/Management/BusinessFeatures/artists-songs/requirements.md
+Docs/Management/BusinessFeatures/artists-songs/design.md
+Docs/Management/BACKLOG.md

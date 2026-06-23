@@ -1,7 +1,7 @@
 # Artists & Songs — Technical Design
 
 > **Status:** Spec approved — implementation in progress (phases 1–7 complete)
-> **Last updated:** 2026-04-12
+> **Last updated:** 2026-06-20
 > **Spec updated 2026-05-15:** Unified Artist model clarified: Artist serves dual roles (copyright
 > owner + performer); Song.ArtistId is and must remain int NOT NULL; Catalog join entity added;
 > Songs added as top-level menu item; navigation model revised; Lyrics field added; ILyricsProvider
