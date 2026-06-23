@@ -37,7 +37,7 @@ Hard-blocking session end; forcing CI/headless lockout; replacing human review; 
 |------|-----------|
 | **Work item** | A new business feature, a new Dev Cycle Craft activity, a bug, a deferred follow-up, or a material one-off investigation — anything that MUST get a BACKLOG row (nested per `bug-tracking.md` when it has a parent feature). |
 | **Exempt** | A memory write that is legitimately NOT a work item and must never be flagged (see § 4, the 4 exempt categories). |
-| **Device (auto-)memory** | The harness-managed per-device memory tree at `~/.claude/projects/<project>/memory/` (16 live out-of-tree files at design time). Not git-tracked, not team-visible. |
+| **Device (auto-)memory** | The harness-managed per-device memory tree at `~/.claude/projects/<project>/memory/` (~16 live out-of-tree files — snapshot at design time). Not git-tracked, not team-visible. |
 | **Orphan** | A work item recorded in device memory in a session where BACKLOG.md was NOT changed — the violation this feature detects. |
 | **Advisory** | A non-blocking reminder printed at session end. Fail-open: any error, missing dir, or ambiguity → silent `exit 0`. Never blocks, never fails a session. |
 | **Candidate** | A classifier verdict: a changed memory line that looks like a new work item and therefore warrants a reminder. Opposite of **exempt**. |
