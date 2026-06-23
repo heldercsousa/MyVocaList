@@ -16,12 +16,20 @@ public partial class QueueSongPickerViewModel : ViewModelBase
     {
         _songRepository = songRepository;
         _logger = logger;
-        Results = [];
+        Results = new ObservableRangeCollection<SongDto>();
+        IsLoading = false;
+        HasResults = false;
+        IsShowEmptyState = false;
+        EmptyStateMessage = "No songs available";
     }
 
     [ObservableProperty] private string searchText = string.Empty;
     [ObservableProperty] private ObservableRangeCollection<SongDto> results;
     [ObservableProperty] private int queueEntryId;
+    [ObservableProperty] private bool isLoading;
+    [ObservableProperty] private bool hasResults;
+    [ObservableProperty] private bool isShowEmptyState;
+    [ObservableProperty] private string emptyStateMessage = string.Empty;
 
     partial void OnSearchTextChanged(string value)
     {
@@ -48,6 +56,8 @@ public partial class QueueSongPickerViewModel : ViewModelBase
     {
         try
         {
+            IsLoading = true;
+
             var (songs, _) = await _songRepository.GetPagedAsync(1, int.MaxValue, query, CancellationToken.None);
             var filtered = string.IsNullOrWhiteSpace(query)
                 ? songs
@@ -60,12 +70,28 @@ public partial class QueueSongPickerViewModel : ViewModelBase
                 Title = s.Title,
                 Artist = s.OriginalArtistName ?? string.Empty
             }).ToList();
-            RunOnUiThread(() => Results.ReplaceRange(dtos));
+
+            RunOnUiThread(() =>
+            {
+                Results.ReplaceRange(dtos);
+                UpdateState();
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error searching songs");
         }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void UpdateState()
+    {
+        HasResults = Results != null && Results.Count > 0;
+        IsShowEmptyState = !HasResults && !string.IsNullOrWhiteSpace(SearchText);
+        EmptyStateMessage = string.IsNullOrWhiteSpace(SearchText) ? "No songs available" : "No results found";
     }
 }
 
