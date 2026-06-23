@@ -7,8 +7,9 @@ code, no feature tooling, no `.sln`-affecting change, no rule edit. BACKLOG line
 
 ## Immediate next actions (in order)
 
-1. **Helder posture ratification — BLOCKER (`09` §3.0).** Decide advisory (recommended) vs the literal
-   "block session end" BEFORE Phase 0. This gates Phase 4 hook-wiring.
+1. ~~**Helder posture ratification — BLOCKER (`09` §3.0).**~~ **DONE — Helder ratified 2026-06-23:
+   posture A (advisory / non-blocking).** The Phase 4 Stop-hook orphan check WARNS only; it must
+   never block session end (fail-open; no headless/CI lockout). Wire Phase 4 accordingly.
 2. **Phase 0 spec** for the feature, using `09-final-consolidated-plan.md` as the design input:
    `superpowers:brainstorming` → write `requirements.md` + `design.md` + `tasks.md` in the parent folder
    `Docs/Management/DevCycleCraft/backlog-first-registration/` (NOT inside `analysis-pipeline/`) →
@@ -25,7 +26,7 @@ classification; classifier signal-precedence + adversarial tests) are folded int
 `08-orchestrator-final-judgment.md`.
 
 ## Open Helder decisions carried forward (from `09` §3.8)
-1. Enforcement posture (advisory vs block) — **ratify at Phase 0**.
+1. ~~Enforcement posture (advisory vs block)~~ — **RESOLVED 2026-06-23: A (advisory / non-blocking).**
 2. CLAUDE.md touch (recommend none).
 3. Spike-fail fallback (reviewer-driven; drop mtime baseline).
 4. Dedicated `.sln` subfolder vs flat under DevCycleCraft.
