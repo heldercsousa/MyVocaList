@@ -6,7 +6,7 @@ using MyVocaList.UI.Collections;
 
 namespace MyVocaList.UI.ViewModels;
 
-/// <summary>ViewModel for song picker modal—search and select songs for queue entries.</summary>
+/// <summary>ViewModel  for song picker modal—search and select songs for queue entries.</summary>
 public partial class QueueSongPickerViewModel : ViewModelBase
 {
     private readonly ISongRepository _songRepository;
