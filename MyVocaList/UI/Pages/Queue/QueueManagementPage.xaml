@@ -5,7 +5,7 @@
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     xmlns:models="clr-namespace:MyVocaList.UI.Models"
-    xmlns:queue="clr-namespace:MyVocaList.UI.Components.Queue"
+    xmlns:queue="clr-namespace:MyVocaList.UI.Components"
     xmlns:sheets="clr-namespace:MyVocaList.UI.Components.Sheets"
     x:Class="MyVocaList.UI.Pages.Queue.QueueManagementPage"
     x:DataType="vm:QueueManagementViewModel"
