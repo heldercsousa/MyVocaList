@@ -1500,3 +1500,13 @@ Docs/Management/BusinessFeatures/artists-songs/design.md
 Docs/Management/BusinessFeatures/artists-songs/requirements.md
 Docs/Management/BusinessFeatures/artists-songs/design.md
 Docs/Management/BACKLOG.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/design.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/design.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/design.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/design.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/requirements.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/tasks.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/tasks.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/tasks.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/tasks.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/tasks.md
