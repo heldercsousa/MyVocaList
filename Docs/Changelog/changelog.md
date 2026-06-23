@@ -1,6 +1,7 @@
 # MyVocaList - Changelog
 
 ## Entries for june 2026
+- **06/23/2026** - docs - Artists & Songs spec cleanup (Phase 2 reconciliation): fix 6 spec-vs-code divergences — AC-1.16 rewritten (FilterChipGroup replaces top tab bar), Artist Roles section simplified to single "Artists" menu entry, Page Structure role-filter row updated, AppShell code block corrected (Phase 16A.2 outcome), Song.Version added to entity and data model, unique index updated to IX_Songs_ArtistId_Title_Version (3-col). BACKLOG row marked ✅ Done.
 - **06/20/2026** - docs - BACKLOG-first registration enforcement: add DevCycleCraft task for mechanically enforcing BACKLOG registration over memory-only reminders; add Artists & Songs spec-cleanup-p2 task (6 spec-vs-code divergences to fix before Phase 16C.5); create `spec-cleanup-p2.md` detail doc; register in `.sln`
 - **06/20/2026** - docs - BACKLOG: BUG-005–BUG-010 + fuzzy-match follow-up updated from 📋 Spec → ✅ Fixed (all folded into Song Import & Entity Resolution, merged to develop)
 - **06/20/2026** - docs - Artists & Songs consolidation findings: branch map, stray-commit verdict (8e74527 superseded by develop), bug status audit (BUG-005–010 fixed by Song Import merge), Phase 16C remaining gate. Findings: `artists-songs/consolidation-findings.md`. Registered in .sln.
