@@ -1,61 +1,70 @@
-# Queue Feature: QueueListItem Migration + Entry Point Fix
+# Queue Feature: QueueListItem Migration + Queue List Entry Point
 
 ## Context
 
-Two structural problems in the Queue feature identified by Helder:
+Two structural problems in the Queue feature:
 
-1. **`QueueListItem.xaml` bypasses the `ListItem` pattern** — it is a domain-specific, zero-BindableProperty component that hard-binds directly to `QueueEntryViewModel` fields. Every other list page in the app uses `ListItem` (10 consumers). `QueueListItem` was scaffolded during Wave 4 as a placeholder with a `<!-- Status: will be filled in Wave 4B -->` comment. Wave 4B shipped via Song Import but the component was never migrated. It sits at the root of `UI/Components/` instead of the `Lists/` subfolder and has a namespace mismatch in its only consumer.
+1. **`QueueListItem.xaml` bypasses the `ListItem` pattern** — domain-specific, zero-BindableProperty component that hard-binds to `QueueEntryViewModel` fields. Every other list page uses `ListItem` (10 consumers). Was scaffolded as a placeholder during Wave 4 with a `<!-- Status: will be filled in Wave 4B -->` comment that never shipped.
 
-2. **`QueuePage.xaml` is a placeholder with no navigation** — the "Queue" flyout item leads to a card reading "This page is under construction." The fully-implemented `QueueManagementPage` exists at route `"queue-management"` but is unreachable because `EventsPage` (the intended entry via event selection) is also a placeholder.
+2. **`QueuePage.xaml` is a placeholder** — shows "under construction." The correct design is a **CRUD list page** (same pattern as Venues/People/Artists/Songs): a `CrudListView` showing all queues (events), a FAB to create a new queue, and tap-to-open `QueueManagementPage`. `Event` is an implementation detail of queue management — there is no separate EventsPage.
 
-All changes must be done in a git worktree, not directly on `develop`.
+All changes on a git worktree off `develop`. Not directly on `develop`.
 
 ---
 
 ## Exploration Findings
 
-### QueueListItem (Problem 1)
+### QueueListItem → ListItem Mapping
 
-| Aspect | Detail |
-|--------|--------|
-| Location | `MyVocaList/UI/Components/QueueListItem.xaml` (root, not `Lists/`) |
-| BindableProperties | **Zero** — binds directly to `QueueEntryViewModel.{Position, PersonName, SongTitle, Status}` |
-| Consumers | `QueueManagementPage.xaml` only — 2 DataTemplates (Next Up list + History list) |
-| Namespace bug | Consumer declares `xmlns:queue="clr-namespace:MyVocaList.UI.Components.Queue"` — the `.Queue` sub-namespace does not exist; `QueueListItem` is in `MyVocaList.UI.Components` |
-| Status column | Has a `<!-- will be filled during Wave 4B -->` comment — no actual content to migrate |
-| `CurrentSingerCard` | Also in `MyVocaList.UI.Components` (same namespace), uses the same `queue:` alias — the alias must be updated, not removed |
-
-**ListItem mapping:**
-
-| QueueListItem field | ListItem slot |
-|---------------------|---------------|
-| `Position` (18pt bold number) | `LeadingContent` — a styled `Label` |
+| QueueListItem (current) | ListItem slot |
+|-------------------------|---------------|
+| `Position` — 18pt bold number | `LeadingContent` → styled `Label` |
 | `PersonName` | `Headline` |
 | `SongTitle` | `SupportingText` |
-| `Status` | `TrailingContent` — deferred (no content to migrate yet) |
+| `Status` | `TrailingContent` — empty (Wave 4B placeholder, nothing to migrate) |
 
-Not a governed-component change: `ListItem` is not being modified — only a new consumer is added. `QueueListItem` has one consumer, so removing it does not require the 4-gate process.
+**Namespace bug in consumer:** `QueueManagementPage.xaml` declares `xmlns:queue="clr-namespace:MyVocaList.UI.Components.Queue"` — sub-namespace `.Queue` does not exist. `QueueListItem` and `CurrentSingerCard` are both in `MyVocaList.UI.Components`. Alias must be corrected (not removed — `CurrentSingerCard` uses it too).
 
-### QueuePage Navigation (Problem 2)
+### Event Entity & Service
 
-| Aspect | Detail |
-|--------|--------|
-| Route `"queue"` | Shell root FlyoutItem; `AppShellViewModel` handles it via `PopToRootAsync` |
-| `QueuePage.xaml.cs` | Has `OnBackButtonPressed` → shows exit-app `ConfirmSheet` → `Application.Current.Quit()`. No ViewModel. |
-| `QueueManagementPage` route | `"queue-management"` — registered as FlyoutItem in AppShell (hidden), also navigated as `"queue-management/{eventId}"` |
-| `QueueManagementPage.xaml.cs` | `OnAppearing` parses last URL segment as `int eventId`, calls `_viewModel.InitializeCommand.ExecuteAsync(eventId)` |
-| `QueueManagementViewModel.InitializeAsync` | Calls `GetActiveEventAsync()`, validates that `activeEvent.Id == eventId`. Shows "Event not found" snackbar if mismatch or null. |
-| **`GetActiveEventAsync` bug** | `EventService.GetActiveEventAsync()` calls `GetPagedAsync(1, 1, null)` — only fetches **1 event** (most recently scheduled) then checks its status in memory. If the active event is not the most recently scheduled, returns `null` even though an active event exists. |
-| `PersonPickerPage`/`QueueSongPickerPage` | Sub-pages of `QueueManagementPage`; reached via `GoToAsync("person-picker?eventId=X")` and `GoToAsync("song-picker?entryId=X")`. Not entry-point pages. |
+`Event` required fields for creation: `venueId (int)`, `name (string, 1–100)`, `scheduledStart (DateTime)`, `scheduledEnd (DateTime)`, `mode (string)`.
+
+```
+EventStatus: Created=0, Started=1, Paused=2, Finished=3
+Mode default: "VideoKaraoke"  (other value: "Bandoke")
+```
+
+`IEventService.CreateEventAsync` already exists and validates all fields. No `GetPagedEventsForListAsync` exists yet — must be added.
+
+`EventListItemDto` already exists in `Contracts/DTOs/Event/`:
+```csharp
+record EventListItemDto(int Id, string Name, string? VenueName,
+    DateTime? ScheduledStartTime, EventStatus Status, string Mode)
+```
+
+**`GetActiveEventAsync` bug:** `EventService` calls `GetPagedAsync(1, 1, null)` — fetches only 1 event (most recently scheduled) and checks its status. Misses active events that aren't the most recently scheduled. Fix: increase pageSize.
+
+### Existing CRUD Infrastructure (reused)
+
+| Class | Reused as-is |
+|-------|-------------|
+| `CrudListPageBase` | Base class for `QueuePage.xaml.cs` |
+| `CrudListViewModelBase<TItem>` | Base class for `QueueViewModel` |
+| `CrudListView` | XAML shell in `QueuePage.xaml` |
+| `ListItem` | List item DataTemplate |
+| `AutocompleteField` | Venue picker in `QueueFormPage` |
+| `EmptyState` | Empty states in `QueuePage` |
+| `ListItemLeadingIcon` | Leading `queue_music_outlined` icon in list |
+
+Queue's FAB → `QueueFormPage` follows the same tap pattern as every other CRUD page (VenueFormPage, PersonFormPage, etc.).
 
 ---
 
 ## Plan
 
-### Worktree Setup
+### Worktree Setup (main agent, shell only)
 
-Create a new worktree off `develop`:
-```
+```bash
 git worktree add .worktrees/fix/queue-entry-and-listitem origin/develop -b fix/queue-entry-and-listitem
 ```
 
@@ -63,13 +72,19 @@ git worktree add .worktrees/fix/queue-entry-and-listitem origin/develop -b fix/q
 
 ### Task 1 — Replace QueueListItem with ListItem
 
-**Files owned:** `QueueManagementPage.xaml`, `QueueListItem.xaml`, `QueueListItem.xaml.cs`, `MyVocaList.sln`
+**Subagent works in:** `.worktrees/fix/queue-entry-and-listitem`
+
+**Files owned:**
+- `MyVocaList/UI/Pages/Queue/QueueManagementPage.xaml` (modify)
+- `MyVocaList/UI/Components/QueueListItem.xaml` (delete)
+- `MyVocaList/UI/Components/QueueListItem.xaml.cs` (delete)
+- `MyVocaList.sln` (remove 2 entries)
 
 **Steps:**
 1. In `QueueManagementPage.xaml`:
+   - Fix `xmlns:queue` alias: `clr-namespace:MyVocaList.UI.Components` (remove spurious `.Queue`)
    - Add `xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists;assembly=MyVocaList"`
-   - Fix the `xmlns:queue` alias: change from `clr-namespace:MyVocaList.UI.Components.Queue` to `clr-namespace:MyVocaList.UI.Components` (needed for `CurrentSingerCard` which uses the same alias)
-   - Replace both `<queue:QueueListItem />` DataTemplate usages with `<lists:ListItem>`:
+   - Replace both `<queue:QueueListItem />` DataTemplate usages (Next Up + History) with:
      ```xaml
      <lists:ListItem
          Headline="{Binding PersonName}"
@@ -83,19 +98,22 @@ git worktree add .worktrees/fix/queue-entry-and-listitem origin/develop -b fix/q
          </lists:ListItem.LeadingContent>
      </lists:ListItem>
      ```
-2. Delete `QueueListItem.xaml` and `QueueListItem.xaml.cs`
-3. Remove both files from `MyVocaList.sln` (SolutionItems section)
-4. Build → confirm 0 errors
+2. Delete `QueueListItem.xaml` + `QueueListItem.xaml.cs`
+3. Remove both from `MyVocaList.sln` SolutionItems
+4. Build → 0 errors
+
+**No governance gate** — `ListItem` is not modified, only a new consumer added. `QueueListItem` had 1 consumer.
 
 ---
 
 ### Task 2 — Fix `GetActiveEventAsync` in EventService
 
-**Files owned:** `MyVocaList.Services/EventService.cs`
+**Subagent works in:** `.worktrees/fix/queue-entry-and-listitem`
 
-**Problem:** `GetPagedAsync(1, 1, null)` fetches only the single most-recently-scheduled event and checks its status. Any active event that isn't the most recently scheduled is missed.
+**Files owned:**
+- `Services/EventService.cs`
 
-**Fix:** Change the call to fetch enough events to find an active one:
+**Fix:**
 ```csharp
 public async Task<Event?> GetActiveEventAsync(CancellationToken ct)
 {
@@ -104,60 +122,196 @@ public async Task<Event?> GetActiveEventAsync(CancellationToken ct)
         e.Status == EventStatus.Started || e.Status == EventStatus.Paused);
 }
 ```
-`pageSize: 50` is safe — a user is unlikely to have 50+ events scheduled without any being the active one. A proper DB-side status filter (`IEventRepository.GetActiveEventAsync`) would be cleaner long-term but is out of scope here.
 
-No test change needed — this is a bug fix to an existing behaviour, and the Queue unit tests already cover `GetActiveEventAsync` usage via mocks.
+`pageSize: 50` is safe — a typical user won't have 50+ scheduled events without one being active.
+
+Tasks 1 and 2 can run in parallel (no file overlap).
 
 ---
 
-### Task 3 — Make QueuePage navigate to QueueManagementPage
+### Task 3 — Service Layer: Add `GetPagedEventsForListAsync`
 
-**Files owned:** `QueuePage.xaml`, `QueuePage.xaml.cs`
+**Sequential after Tasks 1+2.**
 
-**Design:** `QueuePage` becomes a routing page. On `OnNavigatedTo` it calls `IQueueServiceNew.GetActiveEventAsync()` (via `IEventService`) and navigates to `QueueManagementPage`. It keeps the exit-app `ConfirmSheet` for the "no active event" state (when the user lands and stays on `QueuePage`).
+**Files owned:**
+- `Domain/ServicesInterfaces/IEventService.cs`
+- `Services/EventService.cs`
+- `MyVocaList.Tests/Unit/Services/EventServiceTests.cs` (add tests)
 
-**`QueuePage.xaml.cs` changes:**
-- Inject `IEventService` via constructor
-- Override `OnNavigatedTo` (not `OnAppearing` — avoids double-fire on sub-page pop):
-  ```csharp
-  protected override async void OnNavigatedTo(NavigatedToEventArgs args)
-  {
-      base.OnNavigatedTo(args);
-      var activeEvent = await _eventService.GetActiveEventAsync(CancellationToken.None);
-      if (activeEvent != null)
-          await Shell.Current.GoToAsync($"queue-management/{activeEvent.Id}");
-  }
-  ```
-- Register `IEventService` injection in constructor (DI already registers it as `AddScoped`)
+**New interface method:**
+```csharp
+Task<(IEnumerable<EventListItemDto> items, int totalCount)> GetPagedEventsForListAsync(
+    int pageNumber, int pageSize, string? query, CancellationToken ct);
+```
 
-**`QueuePage.xaml` changes:**
-- Replace the "under construction" placeholder content with a proper "No active session" empty state using `<states:EmptyState>` (the established pattern)
-- Keep the `exitConfirmSheet` BottomSheet as-is (handles Android back → exit app)
-- Add DI-friendly constructor parameter for `IEventService`
+**Implementation** maps `Event` → `EventListItemDto` (field mapping is direct — all fields exist on entity + navigation property `Venue.Name`). Uses `_eventRepository.GetPagedAsync(pageNumber, pageSize, query, ct)`.
 
-**`MauiProgram.cs`:** No change needed — `QueuePage` is already `AddTransient`. `IEventService` is already `AddScoped`.
+**TDD**: Write failing test first (Red), then implement (Green).
+- `GetPagedEventsForListAsync_NoQuery_ReturnsAllPagedItems`
+- `GetPagedEventsForListAsync_WithQuery_FiltersResults`
+- `GetPagedEventsForListAsync_EmptyDb_ReturnsEmpty`
 
-> **Open question for Helder (before implementation):** When no active event exists and the user lands on QueuePage, should the empty state include a **"Start New Queue" action button** (requires exploring EventService.CreateEventAsync to understand what parameters are needed), or just show a static "No active session — go to Events to start one" message with no action?
+---
+
+### Task 4 — QueueViewModel (CrudListViewModelBase)
+
+**Sequential after Task 3.**
+
+**Files owned:**
+- `MyVocaList/UI/ViewModels/Queue/QueueViewModel.cs` (new)
+- `MyVocaList.Tests/Unit/ViewModels/QueueViewModelTests.cs` (new)
+
+**Design:**
+```csharp
+public partial class QueueViewModel : CrudListViewModelBase<EventListItemDto>
+{
+    // FabCommand → NavigateToCreateQueueAsync (GoToAsync Routes.QueueForm)
+    // ItemTappedCommand → GoToAsync($"queue-management/{item.Id}")
+    // DeleteItemsCommand → IEventService.DeleteAsync (batch delete Created events only)
+    // InitializeAsync → GetPagedEventsForListAsync
+    // SearchAsync → GetPagedEventsForListAsync with query
+}
+```
+
+**TDD** (at minimum):
+- `InitializeAsync_EmptyDb_SetsIsEmptyNoItems`
+- `InitializeAsync_WithEvents_PopulatesCollection`
+- `FabCommand_Executes_NavigatesToQueueForm`
+- `ItemTapped_NavigatesToQueueManagement_WithEventId`
+
+---
+
+### Task 5 — QueueFormViewModel + QueueFormPage
+
+**Sequential after Task 4.**
+
+**Files owned:**
+- `MyVocaList/UI/ViewModels/Queue/QueueFormViewModel.cs` (new)
+- `MyVocaList/UI/Pages/Queue/QueueFormPage.xaml` (new)
+- `MyVocaList/UI/Pages/Queue/QueueFormPage.xaml.cs` (new)
+- `MyVocaList.Tests/Unit/ViewModels/QueueFormViewModelTests.cs` (new)
+
+**QueueFormPage fields:**
+| Field | Control | Default | Constraint |
+|-------|---------|---------|-----------|
+| Queue Name | `DXTextEdit` | empty | required, 1–100 chars |
+| Venue | `AutocompleteField` (existing component) | empty | required |
+| Date | `DXDateEdit` | today | required |
+| Start Time | `DXTimeEdit` | current time | required |
+| End Time | `DXTimeEdit` | current time + 4h | required, must be after start |
+| Mode | `DXComboBoxEdit` | Video Karaoke | required; items: "Video Karaoke" / "Bandokê" → values: `"VideoKaraoke"` / `"Bandoke"` |
+
+**On Save:** `IEventService.CreateEventAsync(...)` → on success → `GoToAsync($"queue-management/{newEvent.Id}")` (takes user directly into the new queue).
+
+**TDD:**
+- `SaveCommand_EmptyName_ShowsValidationError`
+- `SaveCommand_NoVenue_ShowsValidationError`
+- `SaveCommand_EndBeforeStart_ShowsValidationError`
+- `SaveCommand_ValidInputs_NavigatesToQueueManagement`
+
+---
+
+### Task 6 — Redesign QueuePage.xaml as CRUD List
+
+**Sequential after Task 5.**
+
+**Files owned:**
+- `MyVocaList/UI/Pages/Queue/QueuePage.xaml` (full redesign)
+- `MyVocaList/UI/Pages/Queue/QueuePage.xaml.cs` (change base class, inject ViewModel)
+
+**QueuePage.xaml structure:**
+```xaml
+<!-- Extends CrudListPageBase -->
+<crud:CrudListView
+    FabIcon="add"
+    SearchPlaceholder="Search queues"
+    EmptyNoItemsTitle="No queues yet"
+    EmptyNoItemsSubtitle="Tap + to create your first queue"
+    EmptyNoResultsTitle="No queues found"
+    ItemsSource="{Binding Items}"
+    ...>
+    <crud:CrudListView.ItemTemplate>
+        <DataTemplate x:DataType="dto:EventListItemDto">
+            <lists:ListItem
+                Headline="{Binding Name}"
+                SupportingText="{Binding VenueName}">
+                <lists:ListItem.LeadingContent>
+                    <local:ListItemLeadingIcon IconSource="queue_music_outlined" />
+                </lists:ListItem.LeadingContent>
+                <lists:ListItem.TrailingContent>
+                    <!-- Status label: Created/Started/Paused/Finished -->
+                    <Label Text="{Binding Status, Converter={StaticResource EventStatusConverter}}" />
+                </lists:ListItem.TrailingContent>
+            </lists:ListItem>
+        </DataTemplate>
+    </crud:CrudListView.ItemTemplate>
+</crud:CrudListView>
+
+<!-- Preserve exit-app sheet (QueuePage is Shell root) -->
+<dx:BottomSheet x:Name="exitConfirmSheet" ...>...</dx:BottomSheet>
+```
+
+`QueuePage.xaml.cs` extends `CrudListPageBase`, overrides `OnBackButtonPressed` to show `exitConfirmSheet` (preserves existing exit-app behavior — QueuePage is the Shell root).
+
+**Status display** requires a new `EventStatusConverter` (IValueConverter, string → display label).
+
+---
+
+### Task 7 — DI / Routing / Cleanup
+
+**Sequential after Task 6.**
+
+**Files owned:**
+- `MyVocaList/MauiProgram.cs`
+- `MyVocaList/AppShell.xaml.cs`
+- `MyVocaList/Navigation/Routes.cs` (or wherever `Routes` is defined)
+- `MyVocaList/Navigation/NavigationConfig.cs`
+- `MyVocaList/AppShell.xaml`
+- `MyVocaList.sln`
+
+**Changes:**
+1. `MauiProgram.cs`: register `QueueViewModel`, `QueueFormPage`, `QueueFormViewModel` as `AddTransient`
+2. `Routes.cs`: add `public const string QueueForm = "queue-form";`
+3. `AppShell.xaml.cs`: `Routing.RegisterRoute(Routes.QueueForm, typeof(QueueFormPage));`
+4. `AppShell.xaml`: remove `EventsPage` FlyoutItem (Events page no longer exists)
+5. `NavigationConfig.cs`: remove `events` route entry
+6. `MyVocaList.sln`: add `QueueFormPage.xaml`, `QueueFormPage.xaml.cs`, `QueueFormViewModel.cs` entries; remove `EventsPage` entries
+
+**EventsPage deletion:** Delete placeholder files:
+- `MyVocaList/UI/Pages/Events/EventsPage.xaml`
+- `MyVocaList/UI/Pages/Events/EventsPage.xaml.cs`
+- Any `EventsViewModel.cs` if it exists
+
+---
+
+## Wave Structure (for subagent dispatch)
+
+```
+Wave A (parallel): Task 1 + Task 2      → QueueListItem migration + GetActiveEventAsync fix
+Wave B:            Task 3               → Service layer GetPagedEventsForListAsync + tests
+Wave C:            Task 4               → QueueViewModel + tests
+Wave D:            Task 5               → QueueFormViewModel + QueueFormPage + tests
+Wave E:            Task 6               → QueuePage.xaml redesign
+Wave F:            Task 7               → DI/routing/cleanup
+```
 
 ---
 
 ## Verification
 
 1. `dotnet build` → 0 errors
-2. `dotnet test` → 0 failures (queue unit tests cover QueueManagementViewModel + QueueServiceNew)
+2. `dotnet test` → 0 failures
 3. Emulator smoke test:
-   - Tap "Queue" in flyout → if no active event: `EmptyState` shown, back button shows exit confirmation
-   - Tap "Queue" in flyout → if active event: auto-redirects to `QueueManagementPage` with singer list
-   - Drag to reorder in Next Up list → ListItem renders correctly with position badge, name, song
+   - Tap "Queue" in flyout → `CrudListView` list page appears with FAB
+   - Tap FAB → `QueueFormPage` opens; fill in name + venue + dates + mode → Save → navigates to `QueueManagementPage`
+   - Back to queue list → new queue appears with correct name, venue, status "Created"
+   - Tap queue in list → opens `QueueManagementPage` for that queue
+   - Tap QueueManagementPage back → returns to queue list (NOT exit-app)
+   - On queue list, press Android back → exit-app ConfirmSheet appears
+   - Queue list items show position badge, singer name, song title correctly in `QueueManagementPage`
 
-## Files Changed Summary
+## Assumptions / Open Items
 
-| File | Change |
-|------|--------|
-| `MyVocaList/UI/Pages/Queue/QueueManagementPage.xaml` | Replace 2× `QueueListItem` with `ListItem`; fix `xmlns:queue` alias |
-| `MyVocaList/UI/Components/QueueListItem.xaml` | **Deleted** |
-| `MyVocaList/UI/Components/QueueListItem.xaml.cs` | **Deleted** |
-| `MyVocaList.sln` | Remove QueueListItem entries |
-| `MyVocaList.Services/EventService.cs` | Fix `GetActiveEventAsync` page size bug |
-| `MyVocaList/UI/Pages/Queue/QueuePage.xaml` | Replace placeholder with `EmptyState`; keep exit `ConfirmSheet` |
-| `MyVocaList/UI/Pages/Queue/QueuePage.xaml.cs` | Inject `IEventService`; add `OnNavigatedTo` auto-redirect logic |
+- `Mode` string values: `"VideoKaraoke"` and `"Bandoke"` — display as "Video Karaoke" / "Bandokê". Confirm if a second mode string exists in the codebase (agent found only `"VideoKaraoke"` as default; no other value was observed).
+- `EventStatusConverter`: new `IValueConverter` mapping `EventStatus` enum → display string (e.g., `Started` → "Active"). Lives in `MyVocaList/UI/Converters/`.
+- Swipe-delete on queue list: only for `EventStatus.Created` queues (not started/paused/finished). Implementation decision for Task 4.
