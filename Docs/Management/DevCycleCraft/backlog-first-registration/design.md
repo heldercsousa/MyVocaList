@@ -12,7 +12,7 @@ The feature ships in **layers**, smallest blast radius first:
 
 ```
 D (rule strengthening)        ── ships unconditionally  (proposed diff + direct session-ops edit)
-C (review/checklist backstop) ── ships unconditionally  (review.md lane note)
+C (review/checklist backstop) ── ships unconditionally  (.claude/commands/review.md lane note)
 A (Stop-hook advisory)        ── ships unconditionally  (fail-open, classifier-driven, non-blocking)
 B (PostToolUse interception)  ── ships ONLY if Phase 1 spike passes
 ```
@@ -20,8 +20,8 @@ B (PostToolUse interception)  ── ships ONLY if Phase 1 spike passes
 No hard-blocking anywhere. No mtime baseline anywhere.
 
 ### Why device memory is the real target (corrected rationale, R1-1)
-Device auto-memory (`~/.claude/projects/<project>/memory/`, 16 live files at design time) is the
-genuinely team-invisible surface: not git-tracked, not in `changed-files.txt`. The earlier
+Device auto-memory (`~/.claude/projects/<project>/memory/`, ~16 live files — snapshot at design
+time) is the genuinely team-invisible surface: not git-tracked, not in `changed-files.txt`. The earlier
 "in-repo `memory-bank/` is an empty stub already covered" rationale was **false and removed** —
 `.claude/memory-bank/MEMORY.md` is git-tracked (~2410 bytes), and `changed-files.txt` only records
 in-session Edit/Write paths, so it would not capture a harness-injected memory file anyway. The
@@ -75,6 +75,16 @@ def main(device_memory_dir: str | None = None) -> int:
 ```
 - Device-dir path is **injected/parameterized**, never hardcoded-mangled → unit-testable against a fixture dir.
 - Always `return 0`. No `sys.exit(non-zero)` path exists.
+
+```python
+def backlog_changed_this_session() -> bool:
+    """True iff BACKLOG.md changed at any point THIS SESSION — committed OR working-tree.
+    MUST NOT use a bare `git diff HEAD` (R1-7): that misses BACKLOG edits already committed
+    in-session by the auto-commit hook. Detect across the whole session window (e.g. compare
+    against the session-start ref, OR union the working-tree diff with in-session commit history)."""
+```
+This helper carries the §7 suppression-window correctness point — its contract is pinned here so the
+Builder cannot regress to a working-diff-only check.
 
 ### 2.3 `tests/test_backlog_lib.py` + `orphan_check` tests
 `tests/` subdir to match the lease precedent (R2-test-path). Coverage:
@@ -186,7 +196,7 @@ working-tree), not just the current working diff.
 | **2 — Rule/def diffs** | workflow.md proposed-diff (Helder-gated); session-ops.md direct edit + Authorship review | innermost, no code |
 | **3 — Pure logic** | Tester→Builder, Level A full TDD: line-level classifier + precedence + adversarial tests, red→green | — |
 | **4 — Tooling + hook wiring** | `orphan_check.py`; command-type Stop entry; (spike-pass) PostToolUse buffer; manual `.sln` for `.py`; verify expected-keys unchanged | **gated on posture ✅ (ratified)**; SEQUENTIAL — `settings.json` single-writer |
-| **5 — Backstop + close** | apply `review.md` lane note SEPARATELY from / after the workflow.md `amend:`; verification; session-end ritual; BACKLOG → `✅ Done` only after Helder applies the `amend:` | — |
+| **5 — Backstop + close** | apply `.claude/commands/review.md` lane note SEPARATELY from / after the workflow.md `amend:`; verification; session-end ritual; BACKLOG → `✅ Done` only after Helder applies the `amend:` | — |
 
 **Sequencing:** Phase 3 before Phase 4; Phase 1 gates only Phase 4's B-branch; Phase 2's workflow.md
 change is Helder-gated/independent.

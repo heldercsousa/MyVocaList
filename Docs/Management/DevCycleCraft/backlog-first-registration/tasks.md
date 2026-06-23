@@ -8,7 +8,7 @@
 
 ## Phase 0 — Spec (orchestrator; full ceremony)
 
-- [~] **[SPEC] Write requirements / design / tasks** [SEQUENTIAL]
+- [x] **[SPEC] Write requirements / design / tasks** [SEQUENTIAL]
   - **Produces:** `requirements.md`, `design.md`, `tasks.md`
   - **Consumes:** `analysis-pipeline/09-final-consolidated-plan.md`
   - **Risk:** Low — converging an already-reviewed plan
@@ -16,7 +16,7 @@
   - **Demo:** three spec files exist in the feature folder; brainstorming HARD-GATE satisfied
   - **Review lane:** Standard
 
-- [ ] **[SPEC] Register spec `.md` in `.sln` + verify** [SEQUENTIAL]
+- [x] **[SPEC] Register spec `.md` in `.sln` + verify** [SEQUENTIAL]
   - **Produces:** `.sln` SolutionItems entries under `backlog-first-registration` folder
   - **Consumes:** the three spec files
   - **Risk:** Low
@@ -24,13 +24,13 @@
   - **Demo:** `grep backlog-first-registration MyVocaList.sln` shows requirements/design/tasks rows
   - **Review lane:** Standard
 
-- [ ] **[SPEC] Dispatch spec-reviewer subagent → STOP for Helder approval** [SEQUENTIAL]
+- [~] **[SPEC] Dispatch spec-reviewer subagent → STOP for Helder approval** [SEQUENTIAL]
   - **Produces:** spec-reviewer verdict; BACKLOG `💡 → 📋`
   - **Consumes:** the three spec files
   - **Risk:** Low
   - **Files owned:** none (review only) + `BACKLOG.md` status cell
   - **Demo:** spec-reviewer report returned; HARD STOP at Helder approval gate
-  - **Review lane:** Standard
+  - **Status:** spec-reviewer returned **PASS WITH MINOR ISSUES** (no blocking). 4 factual/clarity fixes applied; 1 open decision (precedence semantics, AC-13) surfaced to Helder. ⏸️ STOPPED at Helder approval gate.
 
 > **GATE:** Phases 1–5 do not begin until Helder approves the spec. On approval: BACKLOG `📋 → 🗺️` (plan written) → `🟢` (ready), then writing-plans produces `plan.md`.
 
@@ -129,10 +129,10 @@
 ## Phase 5 — Backstop + close
 
 - [ ] **[BACKSTOP] review.md lane note** [SEQUENTIAL — applied AFTER the workflow.md `amend:`]
-  - **Produces:** review.md backstop note (applied separately so the two halves don't diverge in git, R2)
+  - **Produces:** `.claude/commands/review.md` backstop note (applied separately so the two halves don't diverge in git, R2)
   - **Consumes:** workflow.md `amend:` (Helder-applied)
   - **Risk:** Medium — ordering matters
-  - **Files owned:** `.claude/rules/review.md` (proposed diff if deny-listed — confirm at task time)
+  - **Files owned:** `.claude/commands/review.md` — this is a **command**, NOT under the `rules/*.md` deny glob, so it is a **direct edit** (not a proposed diff)
   - **Demo:** review checklist references the BACKLOG orphan backstop
   - **Review lane:** Elevated
 
@@ -150,7 +150,7 @@
 
 | AC | Task |
 |----|------|
-| AC-1 | Phase 0 spec + Phase 2 RULE |
+| AC-1 | Phase 0 spec + Phase 2 RULE — **verified-by-review** (human-readability criterion; no automated test) |
 | AC-2 | Phase 2 workflow.md proposed diff |
 | AC-3 | Phase 2 session-ops.md |
 | AC-4 | Phase 3 RED/GREEN |
