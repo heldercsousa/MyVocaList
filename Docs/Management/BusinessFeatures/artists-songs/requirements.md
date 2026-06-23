@@ -1,7 +1,7 @@
 # Artists & Songs — Requirements
 
 > **Status:** Spec approved — implementation in progress (phases 1–7 complete)
-> **Last updated:** 2026-04-12
+> **Last updated:** 2026-06-20
 > **Spec updated 2026-05-15:** Unified Artist model clarified: Artist serves dual roles (copyright
 > owner + performer); Catalog join table introduced; Lyrics field added; navigation model revised.
 > **Spec updated 2026-05-15b:** Role filtering added to US-1 (AC-1.16, AC-1.17); Artist Roles section
