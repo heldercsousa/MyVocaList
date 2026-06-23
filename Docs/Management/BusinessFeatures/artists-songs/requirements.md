@@ -6,8 +6,7 @@
 > owner + performer); Catalog join table introduced; Lyrics field added; navigation model revised.
 > **Spec updated 2026-05-15b:** Role filtering added to US-1 (AC-1.16, AC-1.17); Artist Roles section
 > updated to note list supports All/Authors/Performers filter.
-> **Spec updated 2026-05-15c:** Role filter control changed from segmented/chip group to top tab bar
-> (three tabs: All | Authors | Performers). AC-1.16 updated accordingly.
+> **Spec updated 2026-06-20:** Phase 2 reconciliation — FilterChipGroup (two chips) replaces top tab bar; single "Artists" menu entry replaces Authors/Performers split; AC-1.16 rewritten; Song.Version and 3-col unique index added to data model.
 
 ## Artist Roles
 
@@ -24,17 +23,7 @@ Artist plays is determined by usage context, not by a type column or flag.
   Performer (has a live catalog) at the same time — e.g., a band that wrote their own songs and
   performs them live.
 
-The admin UI exposes both roles via two menu entries:
-
-| Menu entry | Route | What it emphasizes |
-|------------|-------|--------------------|
-| "Authors" | `ArtistsPage?mode=author` | Artists who own/created songs |
-| "Performers" | `ArtistsPage?mode=performer` | Artists who have Catalog entries |
-
-Both entries navigate to the same `ArtistsPage` with a `mode` query parameter. All Artist CRUD
-features (browse, register, edit, delete, Catalog management) are available regardless of which
-menu entry was used. The list supports top tabs (All / Authors / Performers) so the admin
-can quickly browse only the relevant subset.
+The admin UI exposes Artists via a single "Artists" flyout menu entry. Role filtering is done on the page itself via filter chips (Authors / Performers). All Artist CRUD features (browse, register, edit, delete, Catalog management) are available from this single entry point.
 
 ---
 
@@ -99,7 +88,7 @@ empty states.
 - AC-1.13: Each list row shall have a leading checkbox (MD3 multi-action rule — trailing slot occupied by catalog button, so checkbox moves left; person icon dropped) and a trailing catalog-navigation icon button.
 - AC-1.14: Tapping a row shall toggle its selection state (selection is always on — no tap-to-navigate on the row itself).
 - AC-1.15: Tapping the catalog-navigation icon button on an artist row shall navigate to that artist's Catalog page.
-- AC-1.16: The page shall show a top tab bar with three tabs: "All", "Authors" (artists who have at least one song), "Performers" (artists who have at least one Catalog entry). Default tab is "All". Artists in both roles appear in both the Authors and Performers tabs.
+- AC-1.16: The page shall show a FilterChipGroup with two filter chips: "Authors" (artists with ≥1 song) and "Performers" (artists with ≥1 Catalog entry). When neither chip is selected, all artists are shown. When a chip is selected, only the matching role subset is shown.
 - AC-1.17: When a role filter is active, the search and pagination shall apply within the filtered set.
 
 ---
@@ -367,6 +356,7 @@ empty states.
 | `Title` | `string` | NOT NULL, maxLen=250 (DB) / 200 (input) | Trimmed before save |
 | `ArtistId` | `int` | **NOT NULL**, FK → `Artist.Id` | Original/copyright artist — mandatory. Never nullable. |
 | `FeaturedArtists` | `string?` | nullable, maxLen=200 | Free text: "feat. Ivete Sangalo" |
+| `Version` | `string?` | nullable | Version variant label (e.g. "live", "acoustic", "remix"). Added by Song Import. |
 | `Lyrics` | `string?` | nullable, maxLen=10 000 | Plain text |
 | `ExternalId` | `string?` | nullable, maxLen=100 | Provider's own ID |
 | `ExternalProvider` | `string?` | nullable, maxLen=50 | `"MusicBrainz"`, `"Deezer"`, or null |
@@ -376,7 +366,7 @@ empty states.
 
 | Index | Fields | Type | Notes |
 |-------|--------|------|-------|
-| `IX_Songs_ArtistId_Title` | `ArtistId, Title` | Composite unique | Same artist cannot have two songs with the same title |
+| `IX_Songs_ArtistId_Title_Version` | `ArtistId, Title, Version` | Composite unique | Same artist cannot have two songs with the same title and version (added by Song Import Wave 2.2) |
 | `IX_Songs_ArtistId` | `ArtistId` | Standard | FK join performance |
 | `IX_Songs_ExternalId` | `ExternalId` | Unique, nullable | |
 
