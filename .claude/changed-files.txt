@@ -1525,3 +1525,6 @@ Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-015-artistspage-trailing
 Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-016-songspage-fab-crash.md
 Docs/Management/BACKLOG.md
 MyVocaList.sln
+MyVocaList.sln
+.claude/worktrees/backlog-first-registration/Docs/Management/BACKLOG.md
+.claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/tasks.md
