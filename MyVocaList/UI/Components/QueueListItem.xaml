@@ -10,7 +10,8 @@
     <Grid ColumnDefinitions="Auto,*,Auto"
           RowDefinitions="Auto,Auto"
           Padding="16,12"
-          Spacing="8"
+          ColumnSpacing="8"
+          RowSpacing="8"
           BackgroundColor="{StaticResource Surface}">
 
         <!-- Position badge -->
