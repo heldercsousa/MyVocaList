@@ -478,6 +478,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-015-artistspage-trailing-button-noop.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-015-artistspage-trailing-button-noop.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000025}"
