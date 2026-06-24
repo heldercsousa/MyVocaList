@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     x:Class="MyVocaList.UI.Pages.Queue.PersonPickerPage"
     x:DataType="vm:PersonPickerViewModel"
@@ -15,23 +16,26 @@
 
     <Grid RowDefinitions="auto,*">
         <!-- Search -->
-        <dx:DXTextEdit
+        <dxe:TextEdit
             Grid.Row="0"
-            Placeholder="Search singers..."
+            PlaceholderText="Search singers..."
             Text="{Binding SearchText, Mode=TwoWay}"
-            Margin="16"
-            ClearButtonDisplayMode="WhileEditing" />
+            Margin="16" />
 
         <!-- Results -->
         <dx:DXCollectionView
             Grid.Row="1"
             ItemsSource="{Binding Results}"
-            SelectionMode="Single"
-            SelectionChangedCommand="{Binding SelectPersonCommand}">
+            UseRippleEffect="True">
             <dx:DXCollectionView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="vm:PersonDto">
                     <VerticalStackLayout Padding="16" Spacing="4">
                         <Label Text="{Binding Name}" StyleClass="Body.Large" />
+                        <VerticalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectPersonCommand}"
+                                CommandParameter="{Binding .}" />
+                        </VerticalStackLayout.GestureRecognizers>
                     </VerticalStackLayout>
                 </DataTemplate>
             </dx:DXCollectionView.ItemTemplate>

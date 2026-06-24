@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
+    x:Class="MyVocaList.UI.Pages.Queue.QueueSongPickerPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:states="clr-namespace:MyVocaList.UI.Components.States"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
-    x:Class="MyVocaList.UI.Pages.Queue.QueueSongPickerPage"
+    xmlns:dx="http://schemas.devexpress.com/maui"
     x:DataType="vm:QueueSongPickerViewModel"
     BackgroundColor="{StaticResource Surface}"
     SafeAreaEdges="Container">
@@ -13,38 +16,55 @@
         <BackButtonBehavior IsVisible="False" IsEnabled="False" />
     </Shell.BackButtonBehavior>
 
-    <Grid RowDefinitions="auto,*">
-        <!-- Search -->
-        <dx:DXTextEdit
-            Grid.Row="0"
-            Placeholder="Search songs..."
-            Text="{Binding SearchText, Mode=TwoWay}"
-            Margin="16"
-            ClearButtonDisplayMode="WhileEditing" />
+    <Shell.TitleView>
+        <appbars:SearchAppBar
+            SearchText="{Binding SearchText, Mode=TwoWay}"
+            Placeholder="Search songs..." />
+    </Shell.TitleView>
 
-        <!-- Results -->
+    <Grid>
+
+        <!-- Shimmer skeleton: visible while IsLoading -->
+        <dx:ShimmerView IsVisible="{Binding IsLoading}">
+            <VerticalStackLayout Spacing="0">
+                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
+                         Color="{StaticResource SurfaceVariant}" />
+                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
+                         Color="{StaticResource SurfaceVariant}" />
+                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
+                         Color="{StaticResource SurfaceVariant}" />
+                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
+                         Color="{StaticResource SurfaceVariant}" />
+                <BoxView HeightRequest="56" Margin="16,8" CornerRadius="8"
+                         Color="{StaticResource SurfaceVariant}" />
+            </VerticalStackLayout>
+        </dx:ShimmerView>
+
+        <!-- EmptyState: visible when searched but no results (list renders on top when HasResults) -->
+        <states:EmptyState
+            Illustration="search_outlined"
+            Headline="{Binding EmptyStateMessage}"
+            IsVisible="{Binding IsShowEmptyState}" />
+
+        <!-- Results list: visible while HasResults — renders above EmptyState in z-order -->
         <dx:DXCollectionView
-            Grid.Row="1"
             ItemsSource="{Binding Results}"
-            SelectionMode="Single"
-            SelectionChangedCommand="{Binding SelectSongCommand}">
+            IsVisible="{Binding HasResults}"
+            UseRippleEffect="True">
             <dx:DXCollectionView.ItemTemplate>
-                <DataTemplate>
-                    <VerticalStackLayout Padding="16" Spacing="4">
-                        <Label Text="{Binding Title}" StyleClass="Body.Large" />
-                        <Label Text="{Binding Artist}" StyleClass="Body.Small" TextColor="{StaticResource OnSurfaceVariant}" />
-                    </VerticalStackLayout>
+                <DataTemplate x:DataType="vm:SongDto">
+                    <lists:ListItem
+                        Headline="{Binding Title}"
+                        SupportingText="{Binding Artist}">
+                        <lists:ListItem.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectSongCommand}"
+                                CommandParameter="{Binding .}" />
+                        </lists:ListItem.GestureRecognizers>
+                    </lists:ListItem>
                 </DataTemplate>
             </dx:DXCollectionView.ItemTemplate>
         </dx:DXCollectionView>
 
-        <!-- Empty -->
-        <Label
-            Grid.Row="1"
-            Text="No songs available"
-            TextColor="{StaticResource OnSurfaceVariant}"
-            HorizontalTextAlignment="Center"
-            VerticalOptions="Center"
-            IsVisible="{Binding Results.Count, Converter={StaticResource CountEqualsZeroConverter}}" />
     </Grid>
 </ContentPage>

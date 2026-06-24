@@ -236,8 +236,7 @@
                         ShowGrabber="True"
                         AllowDismiss="False"
                         BackgroundColor="{StaticResource Surface}"
-                        CornerRadius="28"
-                        IsExpanded="{Binding IsResolutionSheetVisible, Mode=TwoWay}">
+                        CornerRadius="28">
             <VerticalStackLayout Padding="0,0,0,24">
 
                 <Label Text="{Binding ResolutionSheetTitle}"
@@ -317,8 +316,7 @@
                         ShowGrabber="True"
                         AllowDismiss="False"
                         BackgroundColor="{StaticResource Surface}"
-                        CornerRadius="28"
-                        IsExpanded="{Binding IsMergeSheetVisible, Mode=TwoWay}">
+                        CornerRadius="28">
             <VerticalStackLayout Padding="0,0,0,24">
 
                 <Label Text="Review field changes"
@@ -350,7 +348,6 @@
                                 </VerticalStackLayout>
                                 <dxe:CheckEdit Grid.Column="1"
                                                IsChecked="{Binding AcceptApiValue, Mode=TwoWay}"
-                                               LabelText="Accept"
                                                VerticalOptions="Center" />
                             </Grid>
                         </DataTemplate>
