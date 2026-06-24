@@ -4,9 +4,10 @@ using MyVocaList.UI.ViewModels;
 
 public partial class QueueSongPickerPage : ContentPage
 {
-    public QueueSongPickerPage()
+    public QueueSongPickerPage(QueueSongPickerViewModel viewModel)
     {
         InitializeComponent();
+        BindingContext = viewModel;
     }
 
     protected override async void OnAppearing()

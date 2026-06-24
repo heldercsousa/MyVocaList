@@ -2,18 +2,20 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dx="http://schemas.devexpress.com/maui"
     x:Class="MyVocaList.UI.Components.CurrentSingerCard"
     x:Name="self">
 
     <!-- Card displaying the currently performing singer -->
-    <dx:DXCard Padding="16"
-               CornerRadius="12"
-               Margin="16,8"
-               BackgroundColor="{StaticResource Surface}">
+    <Frame Padding="16"
+           CornerRadius="12"
+           Margin="16,8"
+           BorderColor="{StaticResource Surface}"
+           BackgroundColor="{StaticResource Surface}"
+           HasShadow="True">
         <Grid ColumnDefinitions="Auto,*,Auto"
               RowDefinitions="Auto,Auto,Auto"
-              Spacing="8">
+              ColumnSpacing="8"
+              RowSpacing="8">
 
             <!-- Left: Avatar with initials -->
             <Ellipse Grid.Row="0"
@@ -72,6 +74,6 @@
             </VerticalStackLayout>
 
         </Grid>
-    </dx:DXCard>
+    </Frame>
 
 </ContentView>

@@ -1,7 +1,7 @@
 # Artists & Songs — Technical Design
 
 > **Status:** Spec approved — implementation in progress (phases 1–7 complete)
-> **Last updated:** 2026-04-12
+> **Last updated:** 2026-06-20
 > **Spec updated 2026-05-15:** Unified Artist model clarified: Artist serves dual roles (copyright
 > owner + performer); Song.ArtistId is and must remain int NOT NULL; Catalog join entity added;
 > Songs added as top-level menu item; navigation model revised; Lyrics field added; ILyricsProvider
@@ -9,8 +9,7 @@
 > **Spec updated 2026-05-15b:** Role filter added: `ArtistRoleFilter` enum; `_roleFilter` observable
 > on ArtistsViewModel; `IArtistRepository.GetPagedAsync` updated with `roleFilter` parameter; Role
 > filter row added to ArtistsPage Page Structure table.
-> **Spec updated 2026-05-15c:** Role filter control changed from Chip/SegmentedControl to top tab bar
-> (DXTabView or equivalent DevExpress tab component). ArtistsViewModel note updated.
+> **Spec updated 2026-06-20:** Phase 2 reconciliation — FilterChipGroup (two chips) replaces top tab bar; single "Artists" menu entry replaces Authors/Performers split; Song.Version added; IX_Songs_ArtistId_Title_Version replaces 2-col index; ArtistsViewModel and AppShell blocks updated.
 
 ---
 
@@ -71,6 +70,7 @@ public class Song
     public string Title { get; set; }
     public int ArtistId { get; set; }              // original/copyright artist — mandatory
     public string? FeaturedArtists { get; set; }   // Free text: "feat. Ivete Sangalo"
+    public string? Version { get; set; }           // Added by Song Import — version variant label (live, acoustic, remix) within the same artist-title pair
     public string? Lyrics { get; set; }            // plain text, max 10 000 chars
     public string? ExternalId { get; set; }
     public string? ExternalProvider { get; set; }
@@ -216,7 +216,7 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
         builder.Property(s => s.ExternalId).HasColumnType("TEXT").IsRequired(false).HasMaxLength(100);
         builder.Property(s => s.ExternalProvider).HasColumnType("TEXT").IsRequired(false).HasMaxLength(50);
         builder.Property(s => s.HasManualEdits).IsRequired().HasDefaultValue(false);
-        builder.HasIndex(s => new { s.ArtistId, s.Title }).IsUnique().HasDatabaseName("IX_Songs_ArtistId_Title");
+        builder.HasIndex(s => new { s.ArtistId, s.Title, s.Version }).IsUnique().HasDatabaseName("IX_Songs_ArtistId_Title_Version"); // 3-col index added by migration AddSongVersion (Song Import Wave 2.2)
         builder.HasIndex(s => s.ArtistId).HasDatabaseName("IX_Songs_ArtistId");
         builder.HasIndex(s => s.ExternalId).IsUnique().HasDatabaseName("IX_Songs_ExternalId");
     }
@@ -347,7 +347,7 @@ public interface ICatalogService
 | List | `DXCollectionView` | `SelectionMode="Multiple"` hardcoded; row tap = selection toggle only |
 | Item row | `ListItem` | Headline=`Name`; SupportingText=`CatalogCountText`; LeadingContent=`CheckEdit` (MD3 multi-action rule — trailing button present, so checkbox moves LEFT; person icon dropped); TrailingContent=`DXButton` (catalog navigation, own touch target) |
 | Empty states | Two `EmptyState` components | `IsEmptyNoArtists` / `IsEmptyNoResults` |
-| Role filter | Top tab bar (DXTabView or equivalent DevExpress tab component) | "All" / "Authors" / "Performers"; pre-selected from `mode` query param; drives `ArtistRoleFilter` observable on ViewModel |
+| Role filter | FilterChipGroup | Authors / Performers chips; deselect both = All; drives `ArtistRoleFilter` observable on ViewModel |
 | Actions | `FloatingToolbar` + FAB in `HorizontalStackLayout` | |
 | Confirm delete | Inline `dx:BottomSheet` | |
 
@@ -428,27 +428,17 @@ In Global mode, the FAB opens `SongFormPage` to create a new song.
 
 ```csharp
 // AppShellViewModel — Catalog group
-// Artists is exposed via two menu entries pointing to the same ArtistsPage with a mode parameter.
-// "Authors"    → emphasizes artists who own/created songs
-// "Performers" → emphasizes artists who have Catalog entries
-// Both entries navigate to ArtistsPage; the mode parameter controls the title and list filter hints.
+// Phase 16A.2: simplified from two-entry Authors/Performers navigation to a single "Artists" entry.
+// Role filtering is handled on-page via FilterChipGroup chips.
 new MenuGroup("Catalog", [
-    new MenuItemDescription("Authors",    "person_outlined",       Routes.Artists + "?mode=author"),
-    new MenuItemDescription("Performers", "mic_outlined",          Routes.Artists + "?mode=performer"),
-    new MenuItemDescription("Songs",      "music_note_outlined",   Routes.Songs),
+    new MenuItemDescription("Artists", "person_outlined",     Routes.Artists),
+    new MenuItemDescription("Songs",   "music_note_outlined", Routes.Songs),
 ])
 ```
 
-**ArtistsPage mode parameter behavior:**
+**ArtistsPage filter behavior:**
 
-| `mode` value | AppBar title | Default list emphasis |
-|---|---|---|
-| `author` | "Authors" | Artists who have OriginalSongs |
-| `performer` | "Performers" | Artists who have CatalogEntries |
-| absent / other | "Artists" | All artists |
-
-All CRUD operations (register, edit, delete, catalog navigation) are available in both modes.
-The mode parameter affects presentation only — it does not restrict data access.
+The page opens with no chip selected (all artists shown, AppBar title = "Artists"). Selecting a chip activates the role filter. All CRUD operations (register, edit, delete, catalog navigation) are available regardless of the active filter.
 
 ---
 
@@ -485,11 +475,7 @@ OpenSearchCommand, CloseSearchCommand
 ViewCatalogCommand(ArtistListItemDto)  // navigates to Songs page in Catalog mode
 ```
 
-The `_roleFilter` is pre-selected from the `mode` query parameter on page arrival (`author` → `AuthorsOnly`,
-`performer` → `PerformersOnly`, absent → `All`). The three tabs — All (default), Authors, Performers — are
-rendered as a top tab bar; the active tab drives `_roleFilter`. The admin can change the tab after arrival.
-The filter is applied server-side in `IArtistRepository.GetPagedAsync` via an optional `roleFilter`
-parameter; search and pagination operate within the filtered set.
+The `_roleFilter` defaults to `All` on page arrival. A FilterChipGroup renders two chips (Authors, Performers); deselecting both reverts to All; the active chip state drives `_roleFilter`. The filter is applied server-side in `IArtistRepository.GetPagedAsync` via an optional `roleFilter` parameter; search and pagination operate within the filtered set.
 
 ### SongsViewModel
 

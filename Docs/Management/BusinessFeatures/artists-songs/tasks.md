@@ -1,7 +1,7 @@
 # Artists & Songs — Implementation Tasks
 
-> **Status:** Phase 16B complete; Phase 16C (emulator smoke test) pending
-> **Last updated:** 2026-05-17
+> **Status:** Phase 16B complete; Phase 16C (emulator smoke test) pending Helder gate
+> **Last updated:** 2026-06-20
 > **Spec:** `Docs/specs/artists-songs/requirements.md` + `design.md`
 
 Check off each task as it completes. Run `/project:build` after every task. Run `/project:review`
