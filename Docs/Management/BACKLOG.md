@@ -36,6 +36,8 @@
 | 2026-05 | ↳ Bug: GoToSettings navigation exception | ✅ Fixed | `GoToAsync("settings")` called from pushed-page context (SongFormPage); FlyoutItem requires absolute route `//settings`. Single-line fix in `SongFormViewModel.cs`. |
 | 2026-06 | ↳ Bug: Artists page missing back button + unclear trailing toggle | ✅ Fixed | No back button on ArtistsPage AppBar; trailing pill button has no icon/label. Both fixed 2026-06-03. Details: `artists-songs/bugs/BUG-001-artists-page-no-back-button.md` |
 | 2026-06 | ↳ Bug: Artist/Song form search strip non-MD3 | ✅ Fixed | Fixed via Search Picker feature. Dedicated picker pages replace inline search strips; MD3-compliant trigger row (`ListItem`) navigates to picker. Details: `artists-songs/bugs/BUG-002-artist-form-search-non-md3.md` |
+| ↳ BUG-015 💡 Pending — ArtistsPage trailing button (ViewCatalog) does nothing when tapped (Major) | Details: `artists-songs/bugs/BUG-015-artistspage-trailing-button-noop.md` |
+| ↳ BUG-016 💡 Pending — SongsPage FAB crash on Add tap — route "song-picker" collision in AppShell (Critical) | Details: `artists-songs/bugs/BUG-016-songspage-fab-crash.md` |
 | 2026-06 | **Search Picker** | ✅ Done | All phases complete. 3 picker pages (Artist, Song, YouTube), tests, DI/routes, form wiring, coding guidelines. Spec: `Docs/Management/BusinessFeatures/search-picker/` · Plan: `search-picker/plan.md` · Tasks: `search-picker/tasks.md` |
 | 2026-06 | ↳ ArtistPickerPage | ✅ Done | Implemented with search command, results list, empty state, and messaging. Brief: `search-picker/task-3a-artist-picker-page.md` |
 | 2026-06 | ↳ SongPickerPage | ✅ Done | Implemented with two-line list items (title + artist). Brief: `search-picker/task-3b-song-picker-page.md` |
