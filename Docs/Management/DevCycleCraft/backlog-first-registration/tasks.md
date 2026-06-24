@@ -24,15 +24,15 @@
   - **Demo:** `grep backlog-first-registration MyVocaList.sln` shows requirements/design/tasks rows
   - **Review lane:** Standard
 
-- [~] **[SPEC] Dispatch spec-reviewer subagent → STOP for Helder approval** [SEQUENTIAL]
+- [x] **[SPEC] Dispatch spec-reviewer subagent → STOP for Helder approval** [SEQUENTIAL]
   - **Produces:** spec-reviewer verdict; BACKLOG `💡 → 📋`
   - **Consumes:** the three spec files
   - **Risk:** Low
   - **Files owned:** none (review only) + `BACKLOG.md` status cell
   - **Demo:** spec-reviewer report returned; HARD STOP at Helder approval gate
-  - **Status:** spec-reviewer returned **PASS WITH MINOR ISSUES** (no blocking). 4 factual/clarity fixes applied; 1 open decision (precedence semantics, AC-13) surfaced to Helder. ⏸️ STOPPED at Helder approval gate.
+  - **Status:** spec-reviewer returned **PASS WITH MINOR ISSUES** (no blocking). 4 factual/clarity fixes applied. **Spec + execution plan APPROVED by Helder 2026-06-24** (plan approval covered spec approval; AC-13 precedence default per `design.md §2.1` confirmed). `plan.md` written; Phases 1–5 unblocked.
 
-> **GATE:** Phases 1–5 do not begin until Helder approves the spec. On approval: BACKLOG `📋 → 🗺️` (plan written) → `🟢` (ready), then writing-plans produces `plan.md`.
+> **GATE:** ✅ CLEARED — Helder approved the spec + plan 2026-06-24. BACKLOG advanced `💡 → 🟡`; `plan.md` written. Phases 1–5 may proceed.
 
 ---
 
