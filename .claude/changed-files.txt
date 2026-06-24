@@ -1512,3 +1512,10 @@ Docs/Management/BACKLOG.md
 .claude/worktrees/backlog-first-registration/Docs/Management/DevCycleCraft/backlog-first-registration/tasks.md
 Docs/Management/replicated-napping-globe.md
 Docs/Management/replicated-napping-globe.md
+.claude/worktrees/backlog-first-registration/.claude/settings.json
+.claude/worktrees/backlog-first-registration/.claude/settings.json
+.claude/worktrees/backlog-first-registration/.claude/settings.json
+.claude/worktrees/backlog-first-registration/.claude/settings.local.json
+.claude/settings.local.json
+Docs/Management/BACKLOG.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_settings_local_tracked.md
