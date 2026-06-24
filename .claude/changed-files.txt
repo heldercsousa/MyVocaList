@@ -1519,3 +1519,5 @@ Docs/Management/replicated-napping-globe.md
 .claude/settings.local.json
 Docs/Management/BACKLOG.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_settings_local_tracked.md
+../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
+.claude/worktrees/backlog-first-registration/Docs/Management/toasty-wibbling-ullman.md
