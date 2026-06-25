@@ -4,7 +4,7 @@
 
 ## Task: Phase 1, Task 1 — Domain entities, enums, and service interfaces
 **Plan:** Docs/Management/BusinessFeatures/backup-restore/plan.md
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 05/30/2026
 **Completed:** 05/30/2026
 
@@ -30,7 +30,7 @@ N/A — Domain entities are Level C; no user-facing ACs assigned to this task.
 
 ## Task: Phase 2, Tasks 2–4 — EF config, migration, BackupRepository, TransactionLogInterceptor
 **Plan:** Docs/Management/BusinessFeatures/backup-restore/plan.md
-**Status:** To Review
+**Status:** Reviewed — PASS-WITH-MINOR
 **Started:** 05/31/2026
 **Completed:** 05/31/2026
 
@@ -67,7 +67,7 @@ N/A — Domain entities are Level C; no user-facing ACs assigned to this task.
 
 ## Task: Phase 3, Tasks 5–6 — TransactionLogWriter + BackupService + unit tests
 **Plan:** Docs/Management/BusinessFeatures/backup-restore/plan.md
-**Status:** To Review
+**Status:** Reviewed — PASS-WITH-MINOR
 **Started:** 05/31/2026
 **Completed:** 05/31/2026
 
@@ -101,7 +101,7 @@ N/A — Domain entities are Level C; no user-facing ACs assigned to this task.
 
 ## Task: Phase 4, Tasks 7–9 — Android FileProvider, DI registration, BackupRestoreViewModel, BackupRestorePage
 **Plan:** Docs/Management/BusinessFeatures/backup-restore/plan.md
-**Status:** To Review
+**Status:** Reviewed — PASS-WITH-MINOR
 **Started:** 05/31/2026
 **Completed:** 05/31/2026
 
@@ -132,3 +132,14 @@ N/A — Domain entities are Level C; no user-facing ACs assigned to this task.
 | (DI Backup services) | All backup services resolvable at runtime | MauiProgram.cs | N/A — Level C DI plumbing |
 | (Auto-backup on stop) | App stop triggers CreateFullBackupAsync | App.xaml.cs OnWindowStopped | N/A — manual E2E verification |
 | (BackupRestorePage UI) | Page shows status, history, buttons | BackupRestorePage.xaml + BackupRestoreViewModel | N/A — XAML binding, emulator-tested |
+
+---
+
+## Review verdict (2026-06-25, per-task review loop)
+**Phase 1 — PASS.** **Phases 2, 3, 4 — PASS-WITH-MINOR.** No blocking issues. Constitutional checks clean (SafeAreaEdges, DevExpress-first, BindableLayout-in-ScrollView, no native dialogs, English-only, business logic in Services, correct DI lifetimes, real-SQLite repo tests, no C#-side normalization). Items for Helder to reconcile before marking the feature **Done**:
+1. **Restore-from-log scope mismatch:** `BackupService.RestoreFromBundleAsync` (`Services/BackupService.cs:139-145`) reads each log file then discards it (`_ = lines`) — a no-op. plan.md (line 1038) defers log-delta replay to a future phase, but design.md (line 322 Key Decisions) states "Restore from log (MVP) — Implemented — delta only." Fix the design table or implement the delta; remove the wasted read loop until replay exists.
+2. **Snapshot consistency:** `BackupService.cs:44` comment claims "VACUUM INTO is applied in Phase 4" but the implementation uses plain `File.Copy`. No VACUUM INTO exists; a file copy of a WAL-mode SQLite DB can capture an inconsistent state. design.md line 51 / plan line 7 require VACUUM INTO. Consistency guarantee unmet + misleading comment.
+3. **Invisible failure logging:** `App.xaml.cs:43` logs auto-backup failures via `System.Diagnostics.Debug.WriteLine` (stripped in Release) instead of the injected `ILogger`. AppStop backup failures would be invisible in production — switch to ILogger.
+4. **Missing requirements.md:** the feature folder has no `requirements.md`; the spec quality gate requires it for a cross-layer feature, and the task-log AC matrices cite ad-hoc labels not backed by a requirements doc. Pre-existing gap, not introduced by these tasks.
+
+Minor (non-blocking) implementation notes: `TransactionLogInterceptor.cs:42-43` PK extraction defaults to `"0"` for unsaved Added entities (acceptable for MVP log; undo replay is post-MVP); `BackupServiceTests.cs:38` uses `await Task.Delay(1100)` for filename-second uniqueness (allowed async form, timing-fragile).

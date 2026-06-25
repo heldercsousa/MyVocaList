@@ -4,7 +4,7 @@
 
 ## Task: Phase 2 — Picker ViewModels + Tests
 **Plan:** Docs/Management/BusinessFeatures/search-picker/tasks.md
-**Status:** To Review
+**Status:** Reviewed — PASS-WITH-MINOR
 **Started:** 2026-06-07
 **Completed:** 2026-06-07
 
@@ -57,7 +57,7 @@ Build: PASS — 0 errors, 0 warnings beyond pre-existing NU1608/DX1001
 
 ## Session: Search Picker Phases 2–5 complete + Phase 6 docs/registration
 **Date:** 2026-06-07
-**Status:** To Review
+**Status:** Reviewed — PASS-WITH-MINOR
 
 ### Changed files:
 - `MyVocaList/UI/ViewModels/ArtistPickerViewModel.cs` — created
@@ -91,3 +91,10 @@ Build: PASS — 0 errors, 0 warnings beyond pre-existing NU1608/DX1001
 
 ### Remaining:
 - Phase 3d: document search picker pattern in `.claude/library/` (pending task)
+
+---
+
+## Review verdict (2026-06-25, per-task review loop)
+**Phase 2 / Session (Phases 2–5) — PASS-WITH-MINOR.** **MD3 Research Spike — PASS** (already "Early task done"; findings.md sound — 3 documented search entry points, standalone-page conclusion drives AC-TRIGGER-01/02/03; spike produced findings only). No blocking issues.
+All three picker ViewModels follow the design loading discipline exactly (`IsLoading` before await — AC-LOAD-01; CTS cancel + `Results.Clear()` — AC-LOAD-02; `finally` reset — AC-LOAD-03; error path — AC-LOAD-04), use injected `IMessenger`/`INavigationService` (test-isolated), are `sealed`, English-only, no native dialogs, no business logic. Tests carry `[AC]` tags, `TaskCompletionSource` (no `Thread.Sleep`), AAA.
+**Minor (all stem from one undocumented addition):** `SongPickerViewModel.cs:101-107` adds `LaunchYouTubeSearchAsync` that (a) is **not in design.md** (§SongPickerPage specifies only `SongPickedMessage` + pop — SDD-invariant gap), (b) calls `Shell.Current.GoToAsync` directly, bypassing the `INavigationService` abstraction every other command uses (untestable; no test exists), and (c) the class injects `ISnackbarComponent` (`:13,45,52`) that is never used (dead dependency). Either document the song→YouTube-search-with-context flow + route it through `INavigationService` + add a test, or remove both the command and the unused snackbar dependency before merge.

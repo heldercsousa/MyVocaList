@@ -3,7 +3,7 @@
 ---
 ## Task: Step 7e — Migrate ArtistsPage.xaml to CrudListView + remove [Obsolete] events
 **Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/xaml-sharing/plan-7e.md`
-**Status:** To Review
+**Status:** Reviewed — PASS-WITH-MINOR
 **Started:** 06/06/2026
 **Completed:** 06/06/2026
 
@@ -22,7 +22,7 @@
 ---
 ## Task: Step 6 — Post-migration guideline review (crud-pages.md update)
 **Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/plan.md`
-**Status:** To Review
+**Status:** Reviewed — PASS-WITH-MINOR
 **Started:** 06/06/2026
 **Completed:** 06/06/2026
 
@@ -39,7 +39,7 @@
 ---
 ## Task: Step 7a — Create CrudListView + extend ICrudListViewModel + update CrudListPageBase
 **Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/xaml-sharing/plan-7a.md`
-**Status:** To Review
+**Status:** Reviewed — PASS-WITH-MINOR
 **Started:** 06/04/2026
 **Completed:** 06/04/2026
 
@@ -72,7 +72,7 @@ Build succeeded on first attempt after two-round fix:
 ---
 ## Task: Step 7c — Migrate PeoplePage.xaml to CrudListView
 **Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/xaml-sharing/plan-7c.md`
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/06/2026
 **Completed:** 06/06/2026
 
@@ -89,7 +89,7 @@ Build succeeded on first attempt after two-round fix:
 ---
 ## Task: Step 7d — Migrate SongsPage.xaml to CrudListView
 **Plan:** `Docs/Management/DevCycleCraft/crud-list-deduplication/xaml-sharing/plan-7d.md`
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/06/2026
 **Completed:** 06/06/2026
 
@@ -102,4 +102,12 @@ Build succeeded on first attempt after two-round fix:
 - Tests: PASS — 0 failures (exit code 0)
 - Post-edit re-read: confirmed — both files reviewed; already in final migrated state
 - Spec compliance: confirmed — plan-7d.md tasks checked; AppBarSubtitle stays on SmallAppBar in Shell.TitleView (not on CrudListView); ItemTapCommand omitted (no-op)
+
+---
+
+## Review verdict (2026-06-25, per-task review loop)
+**Steps 7c, 7d — PASS.** **Steps 7a, 6, 7e — PASS-WITH-MINOR.** No blocking issues. Constitutional checks clean across all migrated pages (SafeAreaEdges=Container, DevExpress-first, English-only, no native dialogs, no business logic in pages, compiled bindings). CrudListView is a NEW component, so component-change-governance applies to *future* changes — creation is correctly ungoverned. Items to address:
+1. **Dead handlers in base (Steps 7a & 7e):** `CrudListPageBase.cs:33-89` still contains `OnConfirmSheetStateChanged`, `OnCollectionViewScrolled`, `OnSelectionChanged`, and an empty `OnViewModelPropertyChanged`. design.md required their removal in Step 7a ("handlers that move to CrudListView"). No page XAML wires them — confirmed dead code carried through the final migration. Remove to complete the base simplification.
+2. **Wrong path/namespace in crud-pages.md (Step 6):** `.claude/library/crud-pages.md:25,30-36,118` still cite `MyVocaList/UI/Views/CrudListView.xaml` and `xmlns:views="clr-namespace:MyVocaList.UI.Views"`. The actual file is `MyVocaList/UI/Components/CrudListView.xaml`, namespace `MyVocaList.UI.Components` (confirmed in all 4 migrated pages). A future author copying the skeleton namespace gets a build error — most actionable fix.
+3. **Instrumentation shipped (Step 7a):** `CrudListView.xaml.cs:189-199` PHASE2-INSTRUMENTATION Serilog stopwatch logging, flagged "remove after page-load-frozen closes" but shipped in a dedup task — remove when page-load-frozen is closed.
 
