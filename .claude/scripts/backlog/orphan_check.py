@@ -7,12 +7,16 @@ returns 0 — it warns only, it never blocks a session (INV-1).
 Session-scoped signal
 ---------------------
 `.claude/changed-files.txt` is appended by the existing PostToolUse `Edit|Write`
-hook and is **cumulative across sessions**, so it cannot be read whole. A
-SessionStart command (`session_marker.py`) records the line count of that log at
-session start into `.session-marker`; `enumerate_changed_memory_files` reads only
-the lines AFTER that boundary and keeps the ones that touch the project memory dir
-(matched by the substring `projects/<mangled>/memory/`, since the log records
-cwd-relative paths). Missing marker / unreadable log -> empty list (fail open).
+hook and is **cumulative across sessions** (findings.md Q2 caveat), so it cannot be
+read whole. The SessionStart helper `session_marker.py` records, at session start,
+into `.session-marker`:
+  line 1: the line count of `.claude/changed-files.txt` (read boundary)
+  line 2: the git HEAD sha (in-session-commit boundary for BACKLOG detection)
+`enumerate_changed_memory_files` reads only the log lines AFTER that boundary and
+keeps the ones that touch the project memory dir (matched by the substring
+`projects/<mangled>/memory/`, since the log records cwd-relative paths).
+`backlog_changed_this_session` unions the working-tree diff with commits since the
+recorded HEAD. Missing marker / unreadable log -> fail open (empty list / False).
 
 Path resolution (findings.md §Q1)
 --------------------------------
@@ -35,10 +39,34 @@ _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _MARKER_PATH = os.path.join(_THIS_DIR, ".session-marker")
 
 
+def _project_dir():
+    """Best-effort project (worktree) root holding `.claude/`.
+
+    Prefer `$CLAUDE_PROJECT_DIR`; it was observed UNSET in worktree sessions
+    (findings.md Q1), so fall back to the git working-tree root (`git rev-parse
+    --show-toplevel`), then to cwd. This is the WORKTREE root (where
+    `.claude/changed-files.txt` lives), NOT the main-repo root used for the
+    device-memory dir. On any failure -> '.'.
+    """
+    proj = os.environ.get("CLAUDE_PROJECT_DIR")
+    if proj:
+        return proj
+    try:
+        top = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True,
+            text=True,
+        )
+        if top.returncode == 0 and top.stdout.strip():
+            return top.stdout.strip()
+    except Exception:
+        pass
+    return "."
+
+
 def _changed_files_log():
     """Absolute path to the cumulative PostToolUse changed-files log."""
-    proj = os.environ.get("CLAUDE_PROJECT_DIR") or "."
-    return os.path.join(proj, ".claude", "changed-files.txt")
+    return os.path.join(_project_dir(), ".claude", "changed-files.txt")
 
 
 def resolve_device_dir(device_memory_dir=None):
