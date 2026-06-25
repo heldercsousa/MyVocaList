@@ -48,7 +48,7 @@
 ---
 ## Task: Wave 4B — SongForm fixes (BUG-005/008/009) + Resolution/Merge BottomSheets (Tasks 4.4 + 4.5)
 **Plan:** `song-import-resolution/plan.md`
-**Status:** To Review — BLOCKING-ISSUES (review 2026-06-25)
+**Status:** Reviewed — BLOCKING-ISSUES, needs fix (review 2026-06-25)
 **Started:** 06/14/2026
 **Completed:** 06/14/2026
 
