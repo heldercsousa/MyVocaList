@@ -1,7 +1,7 @@
 ---
 ## Task: Navigation Consolidation
 **Plan:** Docs/Management/BusinessFeatures/app-settings/plan.md
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 05/31/2026
 **Completed:** 05/31/2026
 
@@ -23,7 +23,7 @@
 ---
 ## Task: Stale HasYouTubeApiKey Fix
 **Plan:** Docs/Management/BusinessFeatures/app-settings/plan.md
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 05/31/2026
 **Completed:** 05/31/2026
 
@@ -36,3 +36,7 @@
 - Tests: PASS (195 tests, 0 failures)
 - Post-edit re-read: confirmed
 - Spec compliance: confirmed — design.md § Stale HasYouTubeApiKey checked
+
+### Review verdict (2026-06-25, per-task review loop)
+- **Navigation Consolidation — PASS.** `NavigationConfig.cs:15`, `AppShell.xaml:15/92-94`, `MauiProgram.cs` (stub DI removed) all match design.md Steps 1–2. `AppShell.xaml:100-102` retaining a separate `settings` route is intentional (design Key Decisions — SongForm nudge). No constitutional violations.
+- **Stale HasYouTubeApiKey Fix — PASS.** `SongFormViewModel.RefreshApiKeyFlagAsync` (~line 642) + `SongFormPage.xaml.cs` `OnAppearing` match design signature/invariant exactly (AC-SETTINGS-13). Secure-storage read via `ISecureStorageWrapper` is data access, not business logic — no Services-constraint violation. Non-blocking: method lacks an XML doc comment (no interface, so inheritdoc N/A).
