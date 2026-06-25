@@ -471,6 +471,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lease-scripts", "lease-scri
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-scripts", "backlog-scripts", "{FA1234BC-0001-4000-8000-000000000030}"
 	ProjectSection(SolutionItems) = preProject
+		.claude\scripts\backlog\backlog_lib.py = .claude\scripts\backlog\backlog_lib.py
 		.claude\scripts\backlog\tests\test_backlog_lib.py = .claude\scripts\backlog\tests\test_backlog_lib.py
 	EndProjectSection
 EndProject
