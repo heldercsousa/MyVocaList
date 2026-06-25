@@ -92,7 +92,7 @@
 
 ## Phase 4 — Tooling + hook wiring (gated on posture ✅; SEQUENTIAL)
 
-- [ ] **[TDD] `orphan_check.py` + fixture/fail-open tests** [SEQUENTIAL]
+- [x] **[TDD] `orphan_check.py` + fixture/fail-open tests** [SEQUENTIAL] — DONE 2026-06-25 (`4f00675`): 12 new tests; 29 total GREEN; `main()` always exits 0 (verified).
   - **Produces:** `.claude/scripts/backlog/orphan_check.py` + its tests in `tests/`
   - **Consumes:** `backlog_lib.py`, AC-6, AC-12, spike outcome
   - **Risk:** Medium — parameterized path; must be fail-open
@@ -100,7 +100,7 @@
   - **Demo:** fixture-dir tests + fail-open test GREEN; wrapper always exits 0
   - **Review lane:** Standard
 
-- [ ] **[HOOK] Wire `orphan_check.py` into `settings.json` Stop key** [SEQUENTIAL — settings.json single-writer]
+- [x] **[HOOK] Wire `orphan_check.py` into `settings.json` Stop key** [SEQUENTIAL — settings.json single-writer] — DONE 2026-06-25 (`4f00675`): added under existing `Stop`; top-level keys unchanged (`hooks`/`permissions`/`plansDirectory`); JSON valid. Verified.
   - **Produces:** new command-type entry under existing `Stop` key (mirrors `heartbeat.py`)
   - **Consumes:** `orphan_check.py`, AC-10, INV-2
   - **Risk:** High — hotspot file; no new top-level key; expected-keys must stay unchanged
@@ -108,7 +108,7 @@
   - **Demo:** Stop fires `orphan_check.py`; SessionStart expected-keys check still passes
   - **Review lane:** Architectural (hook wiring)
 
-- [ ] **[HOOK] (spike-pass ONLY) PostToolUse memory-write buffer** [SEQUENTIAL — settings.json single-writer]
+- [x] **[HOOK] (spike-pass ONLY) PostToolUse memory-write buffer** [SEQUENTIAL — settings.json single-writer] — [SUPERSEDED 2026-06-25] Spike PASSED, but the simpler **SessionStart-marker** mechanism was chosen instead of a dedicated PostToolUse buffer: `session_marker.py` (under existing `SessionStart`) stamps `.session-marker` (changed-files.txt offset + git HEAD); `orphan_check.py` reads only post-offset memory writes. Reuses the existing `Edit|Write` PostToolUse logging → no new buffer hook needed. No new top-level key.
   - **Produces:** PostToolUse buffer command entry (only if Phase 1 spike PASSED)
   - **Consumes:** spike findings
   - **Risk:** High — hotspot; conditional on spike
@@ -116,7 +116,7 @@
   - **Demo:** memory writes captured to buffer; `[CANCELLED: spike failed]` if Option B is DEAD
   - **Review lane:** Architectural
 
-- [ ] **[SLN] Manual `.sln` registration for `.claude/scripts/backlog/*.py`** [SEQUENTIAL]
+- [x] **[SLN] Manual `.sln` registration for `.claude/scripts/backlog/*.py`** [SEQUENTIAL] — DONE 2026-06-25: `backlog_lib.py`, `orphan_check.py`, `session_marker.py`, `tests/test_backlog_lib.py`, `tests/test_orphan_check.py` all registered in folder `{FA1234BC-…0030}`. Verified.
   - **Produces:** `.sln` entries for all backlog `.py` files
   - **Consumes:** all Phase 3/4 `.py` files
   - **Risk:** Low — but the sync hook does NOT cover `.py` (AC-9)
@@ -128,7 +128,7 @@
 
 ## Phase 5 — Backstop + close
 
-- [ ] **[BACKSTOP] review.md lane note** [SEQUENTIAL — applied AFTER the workflow.md `amend:`]
+- [ ] **[BACKSTOP] review.md lane note** [SEQUENTIAL — applied AFTER the workflow.md `amend:`] — ⏳ **DEFERRED**: gated on Helder gate #2 (apply `workflow.md amend:`). Will be a direct edit to `.claude/commands/review.md` once the rule half exists, so the two halves don't diverge.
   - **Produces:** `.claude/commands/review.md` backstop note (applied separately so the two halves don't diverge in git, R2)
   - **Consumes:** workflow.md `amend:` (Helder-applied)
   - **Risk:** Medium — ordering matters
@@ -136,7 +136,7 @@
   - **Demo:** review checklist references the BACKLOG orphan backstop
   - **Review lane:** Elevated
 
-- [ ] **[CLOSE] Verification pass + session-end ritual + BACKLOG `✅ Done`** [SEQUENTIAL]
+- [~] **[CLOSE] Verification pass + session-end ritual + BACKLOG `✅ Done`** [SEQUENTIAL] — 2026-06-25: verification + AC-1..AC-13 traceability matrix complete in `task-log.md`; 29/29 tests green; `.sln` verified. BACKLOG `✅ Done` flip **HELD** per POST-2 until Helder applies gate #2.
   - **Produces:** final verification evidence; BACKLOG `🟢/🟡 → ✅` (ONLY after Helder applies the `amend:`)
   - **Consumes:** all prior phases
   - **Risk:** Low
