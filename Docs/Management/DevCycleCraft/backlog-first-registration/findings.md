@@ -96,19 +96,28 @@ match is robust across both worktree and main-repo cwds.
 
 ## Option B (PostToolUse memory-write buffer) verdict
 
-**VIABLE.** Both gates pass: the memory dir is deterministically resolvable (Q1) and
-memory writes are observable mid-session via the existing `changed-files.txt` log (Q2).
-No new top-level settings key is required — the PostToolUse `Edit|Write` group already
-captures the writes; an orphan check can read `changed-files.txt` (filtered to this
-session) at Stop time rather than maintaining its own buffer.
+**VIABLE.** Both gates pass: the memory dir is deterministically resolvable (Q1) and a
+memory write IS observable by a PostToolUse hook mid-session (Q2 — the existing
+`Edit|Write` group already logs them). No new top-level settings key is required (the
+buffer command attaches to the existing `PostToolUse` key).
 
-This means the advisory does **not** have to fall back to reviewer-driven-only. It can
-deterministically: (a) detect candidate memory writes this session, (b) check whether
+**Session-scoping caveat (important for Phase 4):** the existing `.claude/changed-files.txt`
+is **cumulative across sessions** (observed 1540 lines, 29 of them memory writes), so it is
+NOT directly reusable as the session signal — reading it whole would surface memory writes
+from prior sessions and produce false reminders. Option B therefore needs a **session-scoped
+signal**, per the design's intended mechanism (§2.4 / §5): a dedicated PostToolUse buffer
+that the orphan check reads at Stop, reset at session start. Implementation choice (dedicated
+buffer file truncated by a SessionStart command, vs. a session-start marker that bounds a
+read of `changed-files.txt`) is left to Phase 4, but **whichever is chosen MUST be
+session-scoped** and MUST attach only to existing settings keys (no new top-level key →
+AC-10 / INV-2 preserved).
+
+This means the advisory does **not** fall back to reviewer-driven-only. It can
+deterministically: (a) detect candidate memory writes **this session**, (b) check whether
 BACKLOG.md changed this session, and (c) warn if a candidate exists with no BACKLOG change.
 
-> Even though Option B is viable, the implementation stays **fail-open and advisory**
-> (always `return 0`, `2>/dev/null || true`). No mtime baseline is needed — observability
-> via the existing log supersedes it.
+> The implementation stays **fail-open and advisory** (always `return 0`,
+> `2>/dev/null || true`). No mtime baseline is needed.
 
 ---
 
