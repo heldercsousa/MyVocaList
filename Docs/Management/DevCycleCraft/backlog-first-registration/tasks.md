@@ -38,7 +38,7 @@
 
 ## Phase 1 — Spike (throwaway only; gates Phase 4 B-branch)
 
-- [ ] **[SPIKE] Device-memory write hook-observability + path-determinism** [SEQUENTIAL]
+- [x] **[SPIKE] Device-memory write hook-observability + path-determinism** [SEQUENTIAL] — PASS 2026-06-24: path DETERMINISTIC (`git rev-parse --git-common-dir`), writes OBSERVABLE (changed-files.txt), Option B VIABLE. See `findings.md`; `design.md §4` updated.
   - Time-box: **60 min — hard stop**
   - Question: Is a device-scoped auto-memory write observable by ANY hook, AND is the device dir path deterministically resolvable? (lead with path-determinism)
   - Success criterion: a hook event fires on a memory write AND the device dir resolves deterministically → Option B viable
@@ -52,7 +52,7 @@
 
 ## Phase 2 — Rule / definition diffs (innermost; no code)
 
-- [ ] **[RULE] workflow.md Rule 1 obligation — proposed diff** [P]
+- [x] **[RULE] workflow.md Rule 1 obligation — proposed diff** [P] — DONE 2026-06-24: `proposed-diffs.md` written & committed (Rule 1 + Rule 2 exit-checklist + hook-table row + amend:/changelog triple). ⏳ Helder gate #2 to apply.
   - **Produces:** `proposed-diffs.md` (workflow.md Rule 1 upgrade + Rule 2 exit-checklist line + hook-table row + `amend:` + changelog triple)
   - **Consumes:** requirements § 4 (work-item def + 4 exempt categories)
   - **Risk:** Medium — deny-listed file; must be proposed diff only, Authorship gate (R1-8)
@@ -60,7 +60,7 @@
   - **Demo:** `proposed-diffs.md` contains the exact diff + the "Helder must read and edit" note
   - **Review lane:** Elevated (rule change)
 
-- [ ] **[RULE] session-ops.md — device memory as 6th tier** [P]
+- [x] **[RULE] session-ops.md — device memory as 6th tier** [P] — DONE 2026-06-24: 6th tier + governance rule #6 added (committed `de23e13`). ⏳ Helder gate #3 Authorship review.
   - **Produces:** edited `session-ops.md` (6th tier "NOT a registration surface")
   - **Consumes:** requirements § 2, AC-3
   - **Risk:** Medium — directly editable but needs Helder Authorship review

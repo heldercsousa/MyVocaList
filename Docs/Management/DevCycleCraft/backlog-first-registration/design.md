@@ -140,6 +140,19 @@ dir path deterministically resolvable?**
   signal or is **reviewer-driven**; **do NOT** fall back to an mtime baseline.
 - Artifact: `findings.md`. Mirrors the Session-Continuity AC-5 spike.
 
+> **§4 Spike outcome (resolved 2026-06-24 — AC-8 cleared).** Both questions passed; full evidence in
+> `findings.md`. **Path determinism: DETERMINISTIC** — `orphan_check.py` resolves the project memory
+> dir via `git rev-parse --git-common-dir` → strip a trailing `/.git` → mangle `[:/\\]→-` →
+> `~/.claude/projects/<mangled>/memory/`. It must NOT use `cwd` or `$CLAUDE_PROJECT_DIR` (the latter was
+> observed unset; the former yields the worktree-mangled trap path
+> `…--claude-worktrees-backlog-first-registration`). On any `git rev-parse` failure it fails open
+> (`return 0`). **Hook observability: OBSERVABLE** — the existing PostToolUse `Edit|Write` group already
+> logs memory-dir writes to `.claude/changed-files.txt` (verified: 29 logged lines), matched by the
+> substring `projects/<mangled>/memory/` (paths are logged cwd-relative, so substring — not absolute —
+> match is required). **Option B is VIABLE**: the Stop check reads the session-scoped
+> `changed-files.txt` for candidate memory writes — no separate buffer and no mtime baseline needed.
+> Posture stays advisory/fail-open: warn only, always exit 0.
+
 ---
 
 ## 5. Files to create / change
