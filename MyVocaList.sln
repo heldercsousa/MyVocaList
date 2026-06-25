@@ -262,6 +262,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration"
 		Docs\Management\DevCycleCraft\backlog-first-registration\tasks.md = Docs\Management\DevCycleCraft\backlog-first-registration\tasks.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\plan.md = Docs\Management\DevCycleCraft\backlog-first-registration\plan.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\proposed-diffs.md = Docs\Management\DevCycleCraft\backlog-first-registration\proposed-diffs.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\findings.md = Docs\Management\DevCycleCraft\backlog-first-registration\findings.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "m3-lists", "m3-lists", "{F58ED7A0-0186-4187-9FCF-78A464FB01C5}"
