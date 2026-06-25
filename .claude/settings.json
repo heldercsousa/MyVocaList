@@ -8,7 +8,12 @@
       "Bash(pwsh *)",
       "Bash(python3 *)"
     ],
-    "deny": []
+    "deny": [
+      "Edit(CLAUDE.md)",
+      "Write(CLAUDE.md)",
+      "Edit(.claude/rules/*.md)",
+      "Write(.claude/rules/*.md)"
+    ]
   },
   "hooks": {
     "TaskCreated": [
