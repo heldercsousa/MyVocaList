@@ -472,7 +472,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-scripts", "backlog-scripts", "{FA1234BC-0001-4000-8000-000000000030}"
 	ProjectSection(SolutionItems) = preProject
 		.claude\scripts\backlog\backlog_lib.py = .claude\scripts\backlog\backlog_lib.py
+		.claude\scripts\backlog\orphan_check.py = .claude\scripts\backlog\orphan_check.py
+		.claude\scripts\backlog\session_marker.py = .claude\scripts\backlog\session_marker.py
 		.claude\scripts\backlog\tests\test_backlog_lib.py = .claude\scripts\backlog\tests\test_backlog_lib.py
+		.claude\scripts\backlog\tests\test_orphan_check.py = .claude\scripts\backlog\tests\test_orphan_check.py
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
