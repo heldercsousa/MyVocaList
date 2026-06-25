@@ -72,7 +72,7 @@
 
 ## Phase 3 — Pure logic (Tester → Builder; Level A full TDD)
 
-- [ ] **[TDD-RED] Tester: write failing classifier + precedence tests** [SEQUENTIAL]
+- [x] **[TDD-RED] Tester: write failing classifier + precedence tests** [SEQUENTIAL] — DONE 2026-06-24 (`20485da`): 17 tests, RED confirmed (ModuleNotFoundError).
   - **Produces:** `.claude/scripts/backlog/tests/test_backlog_lib.py` (red)
   - **Consumes:** AC-4, AC-13, AC-5, AC-6 from requirements
   - **Risk:** Low
@@ -80,7 +80,7 @@
   - **Demo:** tests run and FAIL (no implementation yet)
   - **Review lane:** Standard
 
-- [ ] **[TDD-GREEN] Builder: implement `backlog_lib.py`** [SEQUENTIAL — waits for RED]
+- [x] **[TDD-GREEN] Builder: implement `backlog_lib.py`** [SEQUENTIAL — waits for RED] — DONE 2026-06-24 (`45395ff`): 17/17 GREEN, independently re-verified; tests untouched.
   - **Produces:** `.claude/scripts/backlog/backlog_lib.py` (`classify_memory_change`, `should_remind`)
   - **Consumes:** the failing tests
   - **Risk:** Medium — precedence rule is the subtle part

@@ -149,9 +149,12 @@ dir path deterministically resolvable?**
 > (`return 0`). **Hook observability: OBSERVABLE** — the existing PostToolUse `Edit|Write` group already
 > logs memory-dir writes to `.claude/changed-files.txt` (verified: 29 logged lines), matched by the
 > substring `projects/<mangled>/memory/` (paths are logged cwd-relative, so substring — not absolute —
-> match is required). **Option B is VIABLE**: the Stop check reads the session-scoped
-> `changed-files.txt` for candidate memory writes — no separate buffer and no mtime baseline needed.
-> Posture stays advisory/fail-open: warn only, always exit 0.
+> match is required). **Option B is VIABLE.** Caveat: `changed-files.txt` is **cumulative across
+> sessions** (1540 lines), so it is NOT directly reusable as the session signal — Option B needs a
+> **session-scoped** signal per §2.4/§5 (a dedicated PostToolUse buffer reset at session start, OR a
+> session-start marker bounding a read of `changed-files.txt`); Phase 4 picks the mechanism but it MUST
+> be session-scoped and attach only to existing settings keys (no new top-level key → AC-10/INV-2). No
+> mtime baseline. Posture stays advisory/fail-open: warn only, always exit 0.
 
 ---
 
