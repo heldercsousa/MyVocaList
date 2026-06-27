@@ -1635,3 +1635,14 @@ Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 .claude/settings.json
 Docs/Management/BACKLOG.md
+Docs/Management/buzzing-spinning-lerdorf.md
+Docs/Management/BACKLOG.md
+MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml
+MyVocaList/UI/Pages/Songs/SongFormPage.xaml
+Infra/Repository/ArtistRepository.cs
+MyVocaList.Tests/Integration/Repositories/ArtistRepositoryTests.cs
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-017-artistscrud-emulator-debug-often-stops/plan.md
+Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-save-crash/plan.md
+MyVocaList.sln
+MyVocaList.sln
+Docs/Management/BACKLOG.md
