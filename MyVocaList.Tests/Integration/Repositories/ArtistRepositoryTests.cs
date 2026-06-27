@@ -244,6 +244,40 @@ public class ArtistRepositoryTests : IAsyncLifetime
         Assert.Equal("New Name", found.Name);
     }
 
+    [Fact]
+    // [AC] BUG-018: UpdateAsync must not throw when the same Artist is already in the EF change tracker
+    public async Task UpdateAsync_EntityAlreadyTracked_DoesNotThrow()
+    {
+        // Arrange — persist the artist and let EF track it via GetByIdAsync (tracking query)
+        var artist = MakeArtist("Tracked Artist");
+        _db.Set<Artist>().Add(artist);
+        await _db.SaveChangesAsync();
+
+        // Load via tracking query so the entity is already in the change tracker
+        var trackedInstance = await _db.Artists.FirstAsync(a => a.Id == artist.Id);
+
+        // Create a second C# instance with the same Id (simulates concurrent Task.Run loads)
+        var editedInstance = new Artist
+        {
+            Id        = artist.Id,
+            Name      = "Updated Name",
+            CreatedAt = artist.CreatedAt,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        // Act — must not throw InvalidOperationException despite trackedInstance already being tracked
+        var exception = await Record.ExceptionAsync(async () =>
+        {
+            await _repo.UpdateAsync(editedInstance, CancellationToken.None);
+            await _db.SaveChangesAsync();
+        });
+
+        // Assert — no crash and values were persisted
+        Assert.Null(exception);
+        var found = await _db.Artists.AsNoTracking().FirstAsync(a => a.Id == artist.Id);
+        Assert.Equal("Updated Name", found.Name);
+    }
+
     // ── DeleteAsync ───────────────────────────────────────────────────────
 
     [Fact]
