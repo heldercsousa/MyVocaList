@@ -121,7 +121,12 @@ public class ArtistRepository : IArtistRepository
     /// <inheritdoc />
     public Task UpdateAsync(Artist artist, CancellationToken ct)
     {
-        _db.Artists.Update(artist);
+        var tracked = _db.ChangeTracker.Entries<Artist>()
+                                       .FirstOrDefault(e => e.Entity.Id == artist.Id);
+        if (tracked != null)
+            tracked.CurrentValues.SetValues(artist);
+        else
+            _db.Artists.Update(artist);
         return Task.CompletedTask;
     }
 
