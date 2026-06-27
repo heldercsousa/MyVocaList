@@ -507,7 +507,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stitch-output", "stitch-out
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-017-artistscrud-emulator-debug-often-stops", "BUG-017-artistscrud-emulator-debug-often-stops", "{B92F4F42-00C3-44C3-BC6E-E340782C7183}"
 	ProjectSection(SolutionItems) = preProject
-		artistis-crud-manual-tests.log = artistis-crud-manual-tests.log
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt
 	EndProjectSection
 EndProject
 Global
@@ -650,6 +650,7 @@ Global
 		{15BB70C4-1D36-417D-9F28-E5D6978FAF2C} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{DAA6CE0B-7CD5-49ED-8C46-D202070039F3} = {15BB70C4-1D36-417D-9F28-E5D6978FAF2C}
 		{B92F4F42-00C3-44C3-BC6E-E340782C7183} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000031} = {7A021F6B-F297-41EA-A028-C4F881146791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
