@@ -31,8 +31,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "claude-rules", "claude-rules", "{FA1234BC-0001-4000-8000-000000000028}"
 	ProjectSection(SolutionItems) = preProject
-		.claude\rules\component-change-governance.md = .claude\rules\component-change-governance.md
 		.claude\rules\bug-tracking.md = .claude\rules\bug-tracking.md
+		.claude\rules\component-change-governance.md = .claude\rules\component-change-governance.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
@@ -159,18 +159,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdd", "sdd", "{B1A2C3D4-000
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-songs", "{C141C5C9-833C-4A26-96BF-3745A2DA1AD4}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\archive\consolidation-findings.md = Docs\Management\BusinessFeatures\artists-songs\archive\consolidation-findings.md
 		Docs\Management\BusinessFeatures\artists-songs\design.md = Docs\Management\BusinessFeatures\artists-songs\design.md
-		Docs\Management\BusinessFeatures\artists-songs\plan.md = Docs\Management\BusinessFeatures\artists-songs\plan.md
-		Docs\Management\BusinessFeatures\artists-songs\requirements.md = Docs\Management\BusinessFeatures\artists-songs\requirements.md
-		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
-		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
 		Docs\Management\BusinessFeatures\artists-songs\archive\handoff.md = Docs\Management\BusinessFeatures\artists-songs\archive\handoff.md
 		Docs\Management\BusinessFeatures\artists-songs\archive\plan-arch-revision.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-arch-revision.md
 		Docs\Management\BusinessFeatures\artists-songs\archive\plan-phase16.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-phase16.md
 		Docs\Management\BusinessFeatures\artists-songs\archive\plan-spec-revision.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-spec-revision.md
+		Docs\Management\BusinessFeatures\artists-songs\plan.md = Docs\Management\BusinessFeatures\artists-songs\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\requirements.md = Docs\Management\BusinessFeatures\artists-songs\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\archive\session-plan-phase16c-work-queue.md = Docs\Management\BusinessFeatures\artists-songs\archive\session-plan-phase16c-work-queue.md
-		Docs\Management\BusinessFeatures\artists-songs\archive\consolidation-findings.md = Docs\Management\BusinessFeatures\artists-songs\archive\consolidation-findings.md
 		Docs\Management\BusinessFeatures\artists-songs\archive\spec-cleanup-p2.md = Docs\Management\BusinessFeatures\artists-songs\archive\spec-cleanup-p2.md
+		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
@@ -245,7 +245,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration", "backlog-first-registration", "{FA1234BC-0001-4000-8000-000000000029}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\README.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\README.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\00-original-ask.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\00-original-ask.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\01-analysis-A.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\01-analysis-A.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\02-analysis-B.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\02-analysis-B.md
@@ -257,8 +256,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration"
 		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\08-orchestrator-final-judgment.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\08-orchestrator-final-judgment.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\09-final-consolidated-plan.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\09-final-consolidated-plan.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\10-resume-handoff.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\10-resume-handoff.md
-		Docs\Management\DevCycleCraft\backlog-first-registration\requirements.md = Docs\Management\DevCycleCraft\backlog-first-registration\requirements.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\design.md = Docs\Management\DevCycleCraft\backlog-first-registration\design.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\README.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\README.md
+		Docs\Management\DevCycleCraft\backlog-first-registration\requirements.md = Docs\Management\DevCycleCraft\backlog-first-registration\requirements.md
 		Docs\Management\DevCycleCraft\backlog-first-registration\tasks.md = Docs\Management\DevCycleCraft\backlog-first-registration\tasks.md
 	EndProjectSection
 EndProject
@@ -428,10 +428,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-management", "queue-management", "{FA1234BC-0001-4000-8000-000000000021}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\queue-management\design.md = Docs\Management\BusinessFeatures\queue-management\design.md
+		Docs\Management\BusinessFeatures\queue-management\queue-deadcode-cleanup.md = Docs\Management\BusinessFeatures\queue-management\queue-deadcode-cleanup.md
 		Docs\Management\BusinessFeatures\queue-management\requirements.md = Docs\Management\BusinessFeatures\queue-management\requirements.md
 		Docs\Management\BusinessFeatures\queue-management\task-log.md = Docs\Management\BusinessFeatures\queue-management\task-log.md
 		Docs\Management\BusinessFeatures\queue-management\tasks.md = Docs\Management\BusinessFeatures\queue-management\tasks.md
-		Docs\Management\BusinessFeatures\queue-management\queue-deadcode-cleanup.md = Docs\Management\BusinessFeatures\queue-management\queue-deadcode-cleanup.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "page-load-frozen", "page-load-frozen", "{C81D77D9-056E-44D8-A88F-522682CEE603}"
@@ -447,22 +447,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "page-load-frozen", "page-lo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "session-continuity-leasing", "session-continuity-leasing", "{FA1234BC-0001-4000-8000-000000000026}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\session-continuity-leasing\design.md = Docs\Management\DevCycleCraft\session-continuity-leasing\design.md
-		Docs\Management\DevCycleCraft\session-continuity-leasing\requirements.md = Docs\Management\DevCycleCraft\session-continuity-leasing\requirements.md
-		Docs\Management\DevCycleCraft\session-continuity-leasing\findings.md = Docs\Management\DevCycleCraft\session-continuity-leasing\findings.md
-		Docs\Management\DevCycleCraft\session-continuity-leasing\plan.md = Docs\Management\DevCycleCraft\session-continuity-leasing\plan.md
-		Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md = Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md
-		Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md = Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\auto-resume-runbook.md = Docs\Management\DevCycleCraft\session-continuity-leasing\auto-resume-runbook.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\demo-and-traceability.md = Docs\Management\DevCycleCraft\session-continuity-leasing\demo-and-traceability.md
+		Docs\Management\DevCycleCraft\session-continuity-leasing\design.md = Docs\Management\DevCycleCraft\session-continuity-leasing\design.md
+		Docs\Management\DevCycleCraft\session-continuity-leasing\findings.md = Docs\Management\DevCycleCraft\session-continuity-leasing\findings.md
+		Docs\Management\DevCycleCraft\session-continuity-leasing\plan.md = Docs\Management\DevCycleCraft\session-continuity-leasing\plan.md
+		Docs\Management\DevCycleCraft\session-continuity-leasing\requirements.md = Docs\Management\DevCycleCraft\session-continuity-leasing\requirements.md
+		Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md = Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md
+		Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md = Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lease-scripts", "lease-scripts", "{FA1234BC-0001-4000-8000-000000000027}"
 	ProjectSection(SolutionItems) = preProject
-		.claude\scripts\lease\lease_lib.py = .claude\scripts\lease\lease_lib.py
 		.claude\scripts\lease\heartbeat.py = .claude\scripts\lease\heartbeat.py
-		.claude\scripts\lease\resume.py = .claude\scripts\lease\resume.py
+		.claude\scripts\lease\lease_lib.py = .claude\scripts\lease\lease_lib.py
 		.claude\scripts\lease\reclaim.py = .claude\scripts\lease\reclaim.py
+		.claude\scripts\lease\resume.py = .claude\scripts\lease\resume.py
 		.claude\scripts\lease\tests\test_lease_lib.py = .claude\scripts\lease\tests\test_lease_lib.py
 	EndProjectSection
 EndProject
@@ -477,9 +477,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-007-searchappbar-duplicate-back-arrow.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-007-searchappbar-duplicate-back-arrow.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-015-artistspage-trailing-button-noop.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-015-artistspage-trailing-button-noop.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000025}"
@@ -497,6 +497,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stitch-output", "stitch-output", "{DAA6CE0B-7CD5-49ED-8C46-D202070039F3}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\visual-theme-refresh\stitch-output\DESIGN.md = Docs\Management\BusinessFeatures\visual-theme-refresh\stitch-output\DESIGN.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-017-artistscrud-emulator-debug-often-stops", "BUG-017-artistscrud-emulator-debug-often-stops", "{B92F4F42-00C3-44C3-BC6E-E340782C7183}"
+	ProjectSection(SolutionItems) = preProject
+		artistis-crud-manual-tests.log = artistis-crud-manual-tests.log
 	EndProjectSection
 EndProject
 Global
@@ -637,6 +642,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000024} = {9EA47D78-293E-41B7-872D-3B2B85E82710}
 		{15BB70C4-1D36-417D-9F28-E5D6978FAF2C} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{DAA6CE0B-7CD5-49ED-8C46-D202070039F3} = {15BB70C4-1D36-417D-9F28-E5D6978FAF2C}
+		{B92F4F42-00C3-44C3-BC6E-E340782C7183} = {7A021F6B-F297-41EA-A028-C4F881146791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

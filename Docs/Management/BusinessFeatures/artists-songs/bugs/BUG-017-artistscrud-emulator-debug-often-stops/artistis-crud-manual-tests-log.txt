@@ -1,0 +1,596 @@
+This log stands for Add, Search Filter and Edit an Artist in the Develop´branch.
+Beyond the errors found below, debuging in the android emulator every ~5 seconds a message with a text similar to "The app stops responding" and two buttons "Wait" and "Close app" appears. This dialog message makes the debugging process more difficult, boring, and must be addressed.
+
+06-27 17:59:42.896 D/InsetsController(10713): hide(ime(), fromIme=false)
+06-27 17:59:42.896 I/ImeTracker(10713): com.myvocalist:21fa7888: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+06-27 17:59:46.012 I/com.myvocalist(10713): Explicit concurrent mark compact GC freed 1024KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 7260KB/14MB, paused 1.307ms,2.209ms total 27.765ms
+06-27 17:59:46.090 W/HWUI    (10713): Image decoding logging dropped!
+06-27 17:59:46.091 W/HWUI    (10713): Image decoding logging dropped!
+06-27 17:59:46.092 W/HWUI    (10713): Image decoding logging dropped!
+06-27 17:59:46.124 W/HWUI    (10713): Image decoding logging dropped!
+06-27 17:59:46.157 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@4b610cc
+06-27 17:59:46.322 W/Glide   (10713): Load failed for [navigate_next] with dimensions [50x50]
+06-27 17:59:46.322 W/Glide   (10713): class com.bumptech.glide.load.engine.GlideException: Failed to load resource
+06-27 17:59:46.322 W/Glide   (10713): There were 3 root causes:
+06-27 17:59:46.322 W/Glide   (10713): java.io.FileNotFoundException(/navigate_next: open failed: ENOENT (No such file or directory))
+06-27 17:59:46.322 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 17:59:46.322 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 17:59:46.322 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 17:59:46.322 W/Glide   (10713):   Cause (1 of 3): class com.bumptech.glide.load.engine.GlideException: Fetching data failed, class java.io.InputStream, LOCAL
+06-27 17:59:46.322 W/Glide   (10713): There was 1 root cause:
+06-27 17:59:46.322 W/Glide   (10713): java.io.FileNotFoundException(/navigate_next: open failed: ENOENT (No such file or directory))
+06-27 17:59:46.322 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 17:59:46.322 W/Glide   (10713):     Cause (1 of 1): class com.bumptech.glide.load.engine.GlideException: Fetch failed
+06-27 17:59:46.322 W/Glide   (10713): There was 1 root cause:
+06-27 17:59:46.322 W/Glide   (10713): java.io.FileNotFoundException(/navigate_next: open failed: ENOENT (No such file or directory))
+06-27 17:59:46.322 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 17:59:46.322 W/Glide   (10713):       Cause (1 of 1): class java.io.FileNotFoundException: /navigate_next: open failed: ENOENT (No such file or directory)
+06-27 17:59:46.322 W/Glide   (10713):   Cause (2 of 3): class com.bumptech.glide.load.engine.GlideException: Fetching data failed, class android.os.ParcelFileDescriptor, LOCAL
+06-27 17:59:46.322 W/Glide   (10713): There was 1 root cause:
+06-27 17:59:46.322 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 17:59:46.322 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 17:59:46.322 W/Glide   (10713):     Cause (1 of 1): class com.bumptech.glide.load.engine.GlideException: Fetch failed
+06-27 17:59:46.322 W/Glide   (10713): There was 1 root cause:
+06-27 17:59:46.322 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 17:59:46.322 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 17:59:46.322 W/Glide   (10713):       Cause (1 of 1): class java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-27 17:59:46.322 W/Glide   (10713):   Cause (3 of 3): class com.bumptech.glide.load.engine.GlideException: Fetching data failed, class android.content.res.AssetFileDescriptor, LOCAL
+06-27 17:59:46.322 W/Glide   (10713): There was 1 root cause:
+06-27 17:59:46.322 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 17:59:46.322 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 17:59:46.322 W/Glide   (10713):     Cause (1 of 1): class com.bumptech.glide.load.engine.GlideException: Fetch failed
+06-27 17:59:46.322 W/Glide   (10713): There was 1 root cause:
+06-27 17:59:46.322 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 17:59:46.322 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 17:59:46.322 W/Glide   (10713):       Cause (1 of 1): class java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-27 17:59:46.324 I/Glide   (10713): Root cause (1 of 3)
+06-27 17:59:46.324 I/Glide   (10713): java.io.FileNotFoundException: /navigate_next: open failed: ENOENT (No such file or directory)
+06-27 17:59:46.324 I/Glide   (10713): 	at libcore.io.IoBridge.open(IoBridge.java:574)
+06-27 17:59:46.324 I/Glide   (10713): 	at java.io.FileInputStream.<init>(FileInputStream.java:179)
+06-27 17:59:46.324 I/Glide   (10713): 	at java.io.FileInputStream.<init>(FileInputStream.java:133)
+06-27 17:59:46.324 I/Glide   (10713): 	at android.content.ContentResolver.openInputStream(ContentResolver.java:1528)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.data.StreamLocalUriFetcher.loadResourceFromUri(StreamLocalUriFetcher.java:74)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.data.StreamLocalUriFetcher.loadResource(StreamLocalUriFetcher.java:50)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.data.StreamLocalUriFetcher.loadResource(StreamLocalUriFetcher.java:13)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:44)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runWrapped(DecodeJob.java:280)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.run(DecodeJob.java:235)
+06-27 17:59:46.324 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+06-27 17:59:46.324 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultThreadFactory$1.run(GlideExecutor.java:424)
+06-27 17:59:46.324 I/Glide   (10713): 	at java.lang.Thread.run(Thread.java:1119)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultPriorityThreadFactory$1.run(GlideExecutor.java:383)
+06-27 17:59:46.324 I/Glide   (10713): Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+06-27 17:59:46.324 I/Glide   (10713): 	at libcore.io.Linux.open(Native Method)
+06-27 17:59:46.324 I/Glide   (10713): 	at libcore.io.ForwardingOs.open(ForwardingOs.java:568)
+06-27 17:59:46.324 I/Glide   (10713): 	at libcore.io.BlockGuardOs.open(BlockGuardOs.java:274)
+06-27 17:59:46.324 I/Glide   (10713): 	at libcore.io.ForwardingOs.open(ForwardingOs.java:568)
+06-27 17:59:46.324 I/Glide   (10713): 	at android.app.ActivityThread$AndroidOs.open(ActivityThread.java:8953)
+06-27 17:59:46.324 I/Glide   (10713): 	at libcore.io.IoBridge.open(IoBridge.java:560)
+06-27 17:59:46.324 I/Glide   (10713): 	... 18 more
+06-27 17:59:46.324 I/Glide   (10713): Root cause (2 of 3)
+06-27 17:59:46.324 I/Glide   (10713): java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-27 17:59:46.324 I/Glide   (10713): 	at android.os.ParcelFileDescriptor.openInternal(ParcelFileDescriptor.java:356)
+06-27 17:59:46.324 I/Glide   (10713): 	at android.os.ParcelFileDescriptor.open(ParcelFileDescriptor.java:233)
+06-27 17:59:46.324 I/Glide   (10713): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1855)
+06-27 17:59:46.324 I/Glide   (10713): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1775)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher.loadResource(FileDescriptorLocalUriFetcher.java:20)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher.loadResource(FileDescriptorLocalUriFetcher.java:12)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:44)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.onDataFetcherFailed(DecodeJob.java:416)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.onLoadFailedInternal(SourceGenerator.java:223)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator$1.onLoadFailed(SourceGenerator.java:108)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.startNextOrFail(MultiModelLoader.java:167)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.onLoadFailed(MultiModelLoader.java:154)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:50)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runWrapped(DecodeJob.java:280)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.run(DecodeJob.java:235)
+06-27 17:59:46.324 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+06-27 17:59:46.324 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultThreadFactory$1.run(GlideExecutor.java:424)
+06-27 17:59:46.324 I/Glide   (10713): 	at java.lang.Thread.run(Thread.java:1119)
+06-27 17:59:46.324 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultPriorityThreadFactory$1.run(GlideExecutor.java:383)
+06-27 17:59:46.325 I/Glide   (10713): Root cause (3 of 3)
+06-27 17:59:46.325 I/Glide   (10713): java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-27 17:59:46.325 I/Glide   (10713): 	at android.os.ParcelFileDescriptor.openInternal(ParcelFileDescriptor.java:356)
+06-27 17:59:46.325 I/Glide   (10713): 	at android.os.ParcelFileDescriptor.open(ParcelFileDescriptor.java:233)
+06-27 17:59:46.325 I/Glide   (10713): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1855)
+06-27 17:59:46.325 I/Glide   (10713): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1775)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.data.AssetFileDescriptorLocalUriFetcher.loadResource(AssetFileDescriptorLocalUriFetcher.java:20)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.data.AssetFileDescriptorLocalUriFetcher.loadResource(AssetFileDescriptorLocalUriFetcher.java:11)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:44)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.onDataFetcherFailed(DecodeJob.java:416)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.onLoadFailedInternal(SourceGenerator.java:223)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator$1.onLoadFailed(SourceGenerator.java:108)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.startNextOrFail(MultiModelLoader.java:167)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.onLoadFailed(MultiModelLoader.java:154)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:50)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.onDataFetcherFailed(DecodeJob.java:416)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.onLoadFailedInternal(SourceGenerator.java:223)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator$1.onLoadFailed(SourceGenerator.java:108)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.startNextOrFail(MultiModelLoader.java:167)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.onLoadFailed(MultiModelLoader.java:154)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:50)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runWrapped(DecodeJob.java:280)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.run(DecodeJob.java:235)
+06-27 17:59:46.325 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+06-27 17:59:46.325 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultThreadFactory$1.run(GlideExecutor.java:424)
+06-27 17:59:46.325 I/Glide   (10713): 	at java.lang.Thread.run(Thread.java:1119)
+06-27 17:59:46.325 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultPriorityThreadFactory$1.run(GlideExecutor.java:383)
+06-27 17:59:46.346 W/Glide   (10713): Load failed for [crc6488302ad6e9e4df1a.ImageLoaderCallback@2b935dd] with dimensions [50x50]
+06-27 17:59:46.346 W/Glide   (10713): class com.bumptech.glide.load.engine.GlideException: Failed to load resource
+06-27 17:59:51.649 D/InsetsController(10713): hide(ime(), fromIme=false)
+06-27 17:59:51.650 I/ImeTracker(10713): com.myvocalist:901e98c8: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+06-27 17:59:52.796 I/AutofillManager(10713): showAutofillDialog() return false due to improve fill dialog
+06-27 17:59:52.797 I/ImeTracker(10713): com.myvocalist:98845d8: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser true
+06-27 17:59:52.798 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 17:59:52.798 D/InsetsController(10713): Setting requestedVisibleTypes to -1 (was -9)
+06-27 17:59:52.814 I/ImeTracker(10713): com.myvocalist:95abb410: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+06-27 17:59:52.815 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 17:59:52.815 I/ImeTracker(10713): com.myvocalist:95abb410: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+06-27 17:59:53.411 I/ImeTracker(10713): com.myvocalist:98845d8: onShown
+06-27 17:59:53.475 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123417, 12475818, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.476 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123439, 10876252, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.477 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123461, 8562386, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.477 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123483, 8431320, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.479 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123505, 40711754, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.480 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123527, 34321388, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.481 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123563, 13953856, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.483 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123585, 9431890, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.485 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123607, 9318724, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.485 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123629, 8975758, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.486 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123651, 38567592, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.487 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 123673, 42217226, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 17:59:53.491 V/PerfettoTrigger(10713): Triggering /system/bin/trigger_perfetto com.android.telemetry.interaction-jank-monitor-80
+06-27 17:59:56.647 I/ImeTracker(10713): system_server:ad391d2d: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:00.028 I/ImeTracker(10713): system_server:cd0727ce: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:00.050 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:00:02.612 I/AutofillManager(10713): showAutofillDialog() return false due to improve fill dialog
+06-27 18:00:02.613 I/ImeTracker(10713): com.myvocalist:81c10be5: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser true
+06-27 18:00:02.614 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 18:00:02.614 I/ImeTracker(10713): com.myvocalist:81c10be5: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+06-27 18:00:03.084 I/AssistStructure(10713): Flattened final assist data: 6452 bytes, containing 1 windows, 62 views
+06-27 18:00:03.196 I/AssistStructure(10713): Flattened final assist data: 6456 bytes, containing 1 windows, 62 views
+06-27 18:00:03.219 I/AutofillManager(10713): showAutofillDialog() return false due to improve fill dialog
+06-27 18:00:03.221 I/ImeTracker(10713): com.myvocalist:ced8c847: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser true
+06-27 18:00:03.222 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 18:00:03.223 I/ImeTracker(10713): com.myvocalist:ced8c847: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+06-27 18:00:04.955 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:04.955 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:05.482 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:06.169 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:06.169 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:06.648 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:07.399 I/Choreographer(10713): Skipped 147 frames!  The application may be doing too much work on its main thread.
+06-27 18:00:07.447 I/ImeTracker(10713): system_server:d1ade2fd: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:07.450 I/ImeTracker(10713): system_server:285ad20f: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:07.459 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@4b610cc
+06-27 18:00:07.459 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:00:07.478 I/HWUI    (10713): Davey! duration=2522ms; Flags=0, FrameTimelineVsyncId=125453, IntendedVsync=31627026431012, Vsync=31629476430914, InputEventId=0, HandleInputStart=31629487292700, AnimationStart=31629487325300, PerformTraversalsStart=31629490030900, DrawStart=31629519754000, FrameDeadline=31629559764244, FrameStartTime=31629486390100, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=31629521686800, SyncStart=31629533841800, IssueDrawCommandsStart=31629533973500, SwapBuffers=31629535360100, FrameCompleted=31629561296900, DequeueBufferDuration=14076400, QueueBufferDuration=189900, GpuCompleted=31629561296900, SwapBuffersCompleted=31629550311100, DisplayPresentTime=0, CommandSubmissionCompleted=31629535360100, 
+06-27 18:00:07.498 W/RemoteInputConnectionImpl(10713): getSurroundingText on inactive InputConnection
+06-27 18:00:07.498 D/InsetsController(10713): hide(ime(), fromIme=false)
+06-27 18:00:07.499 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:00:07.500 D/InsetsController(10713): Setting requestedVisibleTypes to -9 (was -1)
+[18:00:07 INF] ArtistsPage
+[PageLoad] ArtistsPage appearing=358745ms (ctor→OnAppearing)
+[18:00:07 INF] ArtistsPage
+[PageLoad] ArtistsPage afterInitDispatch=358747ms (ctor→after InitializeAsync fire)
+[18:00:07 INF] MyVocaList.UI.ViewModels.ArtistsViewModel
+[PageLoad] ArtistsViewModel fetch=76ms
+[18:00:07 INF] MyVocaList.UI.ViewModels.ArtistsViewModel
+[PageLoad] ArtistsViewModel initAsync=81ms
+06-27 18:00:07.572 I/com.myvocalist(10713): NativeAlloc concurrent mark compact GC freed 2349KB AllocSpace bytes, 5(92KB) LOS objects, 49% free, 7797KB/15MB, paused 12.845ms,5.987ms total 97.872ms
+06-27 18:00:07.684 I/com.myvocalist(10713): Explicit concurrent mark compact GC freed 432KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 7461KB/14MB, paused 1.595ms,2.745ms total 28.504ms
+06-27 18:00:07.712 W/HWUI    (10713): Image decoding logging dropped!
+06-27 18:00:07.767 W/RemoteInputConnectionImpl(10713): requestCursorUpdates on inactive InputConnection
+06-27 18:00:07.787 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:07.788 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:08.289 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:08.949 I/Choreographer(10713): Skipped 70 frames!  The application may be doing too much work on its main thread.
+06-27 18:00:08.994 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:00:08.997 I/HWUI    (10713): Davey! duration=1216ms; Flags=0, FrameTimelineVsyncId=127389, IntendedVsync=31629859764232, Vsync=31631026430852, InputEventId=0, HandleInputStart=31631039893300, AnimationStart=31631040692800, PerformTraversalsStart=31631048199900, DrawStart=31631058187000, FrameDeadline=31629926430896, FrameStartTime=31631037168900, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=31631063859100, SyncStart=31631066475500, IssueDrawCommandsStart=31631067317400, SwapBuffers=31631071149400, FrameCompleted=31631078892700, DequeueBufferDuration=27800, QueueBufferDuration=3231000, GpuCompleted=31631078892700, SwapBuffersCompleted=31631075173400, DisplayPresentTime=0, CommandSubmissionCompleted=31631071149400, 
+06-27 18:00:09.033 I/ImeTracker(10713): system_server:6c4665f: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:09.035 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 127322, 265879024, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+06-27 18:00:09.035 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 127374, 26821934, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+06-27 18:00:09.035 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 127389, 1215308468, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+06-27 18:00:09.036 V/PerfettoTrigger(10713): Triggering /system/bin/trigger_perfetto com.android.telemetry.interaction-jank-monitor-81
+[18:00:08 INF] ArtistsPage
+[PageLoad] ArtistsPage navigatedTo=360297ms (ctor→OnNavigatedTo)
+06-27 18:00:13.310 D/InsetsController(10713): hide(ime(), fromIme=false)
+06-27 18:00:13.311 I/ImeTracker(10713): com.myvocalist:177a6ae2: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+06-27 18:00:16.598 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:16.619 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:16.621 I/ImeTracker(10713): com.myvocalist:ab81085b: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+06-27 18:00:16.623 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 18:00:16.624 D/InsetsController(10713): Setting requestedVisibleTypes to -1 (was -9)
+06-27 18:00:16.638 I/ImeTracker(10713): com.myvocalist:14a66d87: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+06-27 18:00:16.638 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 18:00:16.640 I/ImeTracker(10713): com.myvocalist:14a66d87: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+06-27 18:00:17.197 I/ImeTracker(10713): com.myvocalist:ab81085b: onShown
+06-27 18:00:17.254 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 129389, 9219238, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.255 W/FrameTracker(10713): Missed App frame:UNKNOWN: 3, 129447, 22293006, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.255 W/FrameTracker(10713): Missed SF frame:UNKNOWN: 3, 129447, 22293006, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.255 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 129475, 11547040, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.255 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 129504, 15077374, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.255 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 129533, 10086108, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.256 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 129562, 9675042, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.256 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 129591, 11832876, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.256 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 129620, 9793310, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.257 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 129649, 25652344, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.257 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 129678, 16748078, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:00:17.258 V/PerfettoTrigger(10713): Not triggering com.android.telemetry.interaction-jank-monitor-80 - not enough time since last trigger
+06-27 18:00:19.034 I/AutofillManager(10713): showAutofillDialog() return false due to improve fill dialog
+06-27 18:00:19.035 I/ImeTracker(10713): com.myvocalist:a73e60af: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser true
+06-27 18:00:19.036 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 18:00:19.036 I/ImeTracker(10713): com.myvocalist:a73e60af: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+06-27 18:00:19.827 I/Choreographer(10713): Skipped 101 frames!  The application may be doing too much work on its main thread.
+06-27 18:00:19.830 I/ImeTracker(10713): system_server:ec627511: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:19.832 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:19.846 I/HWUI    (10713): Davey! duration=1700ms; Flags=0, FrameTimelineVsyncId=130312, IntendedVsync=31640226430484, Vsync=31641909763750, InputEventId=23216812, HandleInputStart=31641915401800, AnimationStart=31641915429000, PerformTraversalsStart=31641915468600, DrawStart=31641916847900, FrameDeadline=31640243097150, FrameStartTime=31641914936100, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=31641917021700, SyncStart=31641917244700, IssueDrawCommandsStart=31641917382700, SwapBuffers=31641918236600, FrameCompleted=31641927571900, DequeueBufferDuration=33400, QueueBufferDuration=403200, GpuCompleted=31641927571900, SwapBuffersCompleted=31641919622500, DisplayPresentTime=0, CommandSubmissionCompleted=31641918236600, 
+06-27 18:00:21.227 I/ImeTracker(10713): system_server:72af92f8: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:21.231 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+[18:00:23 INF] MyVocaList.UI.ViewModels.ArtistsViewModel
+[PageLoad] ArtistsViewModel fetch=35ms
+06-27 18:00:26.227 I/ImeTracker(10713): system_server:aee3f527: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:27.547 I/ImeTracker(10713): system_server:be4ed396: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:27.550 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:00:30.720 I/com.myvocalist(10713): Explicit concurrent mark compact GC freed 1750KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 7848KB/15MB, paused 1.465ms,2.732ms total 42.377ms
+06-27 18:00:32.543 I/ImeTracker(10713): system_server:78a8a8f0: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:34.028 I/ImeTracker(10713): system_server:87c96e43: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:34.030 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:00:39.012 I/ImeTracker(10713): system_server:856b1063: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:40.294 I/ImeTracker(10713): system_server:4f6f8255: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:40.297 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:00:41.493 W/HWUI    (10713): Image decoding logging dropped!
+06-27 18:00:41.493 W/HWUI    (10713): Image decoding logging dropped!
+06-27 18:00:41.495 W/HWUI    (10713): Image decoding logging dropped!
+06-27 18:00:41.526 W/HWUI    (10713): Image decoding logging dropped!
+06-27 18:00:41.564 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:41.566 D/AutofillManager(10713): view not autofillable - not passing ime action check
+06-27 18:00:41.568 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@4b610cc
+06-27 18:00:41.665 I/com.myvocalist(10713): Explicit concurrent mark compact GC freed 777KB AllocSpace bytes, 3(60KB) LOS objects, 49% free, 7810KB/15MB, paused 1.438ms,2.341ms total 52.239ms
+06-27 18:00:41.847 W/Glide   (10713): Load failed for [navigate_next] with dimensions [50x50]
+06-27 18:00:41.847 W/Glide   (10713): class com.bumptech.glide.load.engine.GlideException: Failed to load resource
+06-27 18:00:41.847 W/Glide   (10713): There were 3 root causes:
+06-27 18:00:41.847 W/Glide   (10713): java.io.FileNotFoundException(/navigate_next: open failed: ENOENT (No such file or directory))
+06-27 18:00:41.847 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 18:00:41.847 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 18:00:41.847 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 18:00:41.847 W/Glide   (10713):   Cause (1 of 3): class com.bumptech.glide.load.engine.GlideException: Fetching data failed, class java.io.InputStream, LOCAL
+06-27 18:00:41.847 W/Glide   (10713): There was 1 root cause:
+06-27 18:00:41.847 W/Glide   (10713): java.io.FileNotFoundException(/navigate_next: open failed: ENOENT (No such file or directory))
+06-27 18:00:41.847 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 18:00:41.847 W/Glide   (10713):     Cause (1 of 1): class com.bumptech.glide.load.engine.GlideException: Fetch failed
+06-27 18:00:41.847 W/Glide   (10713): There was 1 root cause:
+06-27 18:00:41.847 W/Glide   (10713): java.io.FileNotFoundException(/navigate_next: open failed: ENOENT (No such file or directory))
+06-27 18:00:41.847 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 18:00:41.847 W/Glide   (10713):       Cause (1 of 1): class java.io.FileNotFoundException: /navigate_next: open failed: ENOENT (No such file or directory)
+06-27 18:00:41.847 W/Glide   (10713):   Cause (2 of 3): class com.bumptech.glide.load.engine.GlideException: Fetching data failed, class android.os.ParcelFileDescriptor, LOCAL
+06-27 18:00:41.847 W/Glide   (10713): There was 1 root cause:
+06-27 18:00:41.847 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 18:00:41.847 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 18:00:41.847 W/Glide   (10713):     Cause (1 of 1): class com.bumptech.glide.load.engine.GlideException: Fetch failed
+06-27 18:00:41.847 W/Glide   (10713): There was 1 root cause:
+06-27 18:00:41.847 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 18:00:41.847 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 18:00:41.847 W/Glide   (10713):       Cause (1 of 1): class java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-27 18:00:41.847 W/Glide   (10713):   Cause (3 of 3): class com.bumptech.glide.load.engine.GlideException: Fetching data failed, class android.content.res.AssetFileDescriptor, LOCAL
+06-27 18:00:41.847 W/Glide   (10713): There was 1 root cause:
+06-27 18:00:41.847 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 18:00:41.847 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 18:00:41.847 W/Glide   (10713):     Cause (1 of 1): class com.bumptech.glide.load.engine.GlideException: Fetch failed
+06-27 18:00:41.847 W/Glide   (10713): There was 1 root cause:
+06-27 18:00:41.847 W/Glide   (10713): java.io.FileNotFoundException(open failed: ENOENT (No such file or directory))
+06-27 18:00:41.847 W/Glide   (10713):  call GlideException#logRootCauses(String) for more detail
+06-27 18:00:41.847 W/Glide   (10713):       Cause (1 of 1): class java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-27 18:00:41.848 I/Glide   (10713): Root cause (1 of 3)
+06-27 18:00:41.848 I/Glide   (10713): java.io.FileNotFoundException: /navigate_next: open failed: ENOENT (No such file or directory)
+06-27 18:00:41.848 I/Glide   (10713): 	at libcore.io.IoBridge.open(IoBridge.java:574)
+06-27 18:00:41.848 I/Glide   (10713): 	at java.io.FileInputStream.<init>(FileInputStream.java:179)
+06-27 18:00:41.848 I/Glide   (10713): 	at java.io.FileInputStream.<init>(FileInputStream.java:133)
+06-27 18:00:41.848 I/Glide   (10713): 	at android.content.ContentResolver.openInputStream(ContentResolver.java:1528)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.data.StreamLocalUriFetcher.loadResourceFromUri(StreamLocalUriFetcher.java:74)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.data.StreamLocalUriFetcher.loadResource(StreamLocalUriFetcher.java:50)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.data.StreamLocalUriFetcher.loadResource(StreamLocalUriFetcher.java:13)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:44)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runWrapped(DecodeJob.java:280)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.run(DecodeJob.java:235)
+06-27 18:00:41.848 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+06-27 18:00:41.848 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultThreadFactory$1.run(GlideExecutor.java:424)
+06-27 18:00:41.848 I/Glide   (10713): 	at java.lang.Thread.run(Thread.java:1119)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultPriorityThreadFactory$1.run(GlideExecutor.java:383)
+06-27 18:00:41.848 I/Glide   (10713): Caused by: android.system.ErrnoException: open failed: ENOENT (No such file or directory)
+06-27 18:00:41.848 I/Glide   (10713): 	at libcore.io.Linux.open(Native Method)
+06-27 18:00:41.848 I/Glide   (10713): 	at libcore.io.ForwardingOs.open(ForwardingOs.java:568)
+06-27 18:00:41.848 I/Glide   (10713): 	at libcore.io.BlockGuardOs.open(BlockGuardOs.java:274)
+06-27 18:00:41.848 I/Glide   (10713): 	at libcore.io.ForwardingOs.open(ForwardingOs.java:568)
+06-27 18:00:41.848 I/Glide   (10713): 	at android.app.ActivityThread$AndroidOs.open(ActivityThread.java:8953)
+06-27 18:00:41.848 I/Glide   (10713): 	at libcore.io.IoBridge.open(IoBridge.java:560)
+06-27 18:00:41.848 I/Glide   (10713): 	... 18 more
+06-27 18:00:41.848 I/Glide   (10713): Root cause (2 of 3)
+06-27 18:00:41.848 I/Glide   (10713): java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-27 18:00:41.848 I/Glide   (10713): 	at android.os.ParcelFileDescriptor.openInternal(ParcelFileDescriptor.java:356)
+06-27 18:00:41.848 I/Glide   (10713): 	at android.os.ParcelFileDescriptor.open(ParcelFileDescriptor.java:233)
+06-27 18:00:41.848 I/Glide   (10713): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1855)
+06-27 18:00:41.848 I/Glide   (10713): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1775)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher.loadResource(FileDescriptorLocalUriFetcher.java:20)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher.loadResource(FileDescriptorLocalUriFetcher.java:12)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:44)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.onDataFetcherFailed(DecodeJob.java:416)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.onLoadFailedInternal(SourceGenerator.java:223)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator$1.onLoadFailed(SourceGenerator.java:108)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.startNextOrFail(MultiModelLoader.java:167)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.onLoadFailed(MultiModelLoader.java:154)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:50)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runWrapped(DecodeJob.java:280)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.run(DecodeJob.java:235)
+06-27 18:00:41.848 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+06-27 18:00:41.848 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultThreadFactory$1.run(GlideExecutor.java:424)
+06-27 18:00:41.848 I/Glide   (10713): 	at java.lang.Thread.run(Thread.java:1119)
+06-27 18:00:41.848 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultPriorityThreadFactory$1.run(GlideExecutor.java:383)
+06-27 18:00:41.849 I/Glide   (10713): Root cause (3 of 3)
+06-27 18:00:41.849 I/Glide   (10713): java.io.FileNotFoundException: open failed: ENOENT (No such file or directory)
+06-27 18:00:41.849 I/Glide   (10713): 	at android.os.ParcelFileDescriptor.openInternal(ParcelFileDescriptor.java:356)
+06-27 18:00:41.849 I/Glide   (10713): 	at android.os.ParcelFileDescriptor.open(ParcelFileDescriptor.java:233)
+06-27 18:00:41.849 I/Glide   (10713): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1855)
+06-27 18:00:41.849 I/Glide   (10713): 	at android.content.ContentResolver.openAssetFileDescriptor(ContentResolver.java:1775)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.data.AssetFileDescriptorLocalUriFetcher.loadResource(AssetFileDescriptorLocalUriFetcher.java:20)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.data.AssetFileDescriptorLocalUriFetcher.loadResource(AssetFileDescriptorLocalUriFetcher.java:11)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:44)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.onDataFetcherFailed(DecodeJob.java:416)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.onLoadFailedInternal(SourceGenerator.java:223)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator$1.onLoadFailed(SourceGenerator.java:108)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.startNextOrFail(MultiModelLoader.java:167)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.onLoadFailed(MultiModelLoader.java:154)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:50)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.onDataFetcherFailed(DecodeJob.java:416)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.onLoadFailedInternal(SourceGenerator.java:223)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator$1.onLoadFailed(SourceGenerator.java:108)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.startNextOrFail(MultiModelLoader.java:167)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.onLoadFailed(MultiModelLoader.java:154)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.data.LocalUriFetcher.loadData(LocalUriFetcher.java:50)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.model.MultiModelLoader$MultiFetcher.loadData(MultiModelLoader.java:100)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNextLoad(SourceGenerator.java:95)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.SourceGenerator.startNext(SourceGenerator.java:88)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runGenerators(DecodeJob.java:311)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.runWrapped(DecodeJob.java:280)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.DecodeJob.run(DecodeJob.java:235)
+06-27 18:00:41.849 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+06-27 18:00:41.849 I/Glide   (10713): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultThreadFactory$1.run(GlideExecutor.java:424)
+06-27 18:00:41.849 I/Glide   (10713): 	at java.lang.Thread.run(Thread.java:1119)
+06-27 18:00:41.849 I/Glide   (10713): 	at com.bumptech.glide.load.engine.executor.GlideExecutor$DefaultPriorityThreadFactory$1.run(GlideExecutor.java:383)
+06-27 18:00:41.867 W/Glide   (10713): Load failed for [crc6488302ad6e9e4df1a.ImageLoaderCallback@dc01498] with dimensions [50x50]
+06-27 18:00:41.867 W/Glide   (10713): class com.bumptech.glide.load.engine.GlideException: Failed to load resource
+06-27 18:00:43.517 I/AutofillManager(10713): showAutofillDialog() return false due to improve fill dialog
+06-27 18:00:43.518 I/ImeTracker(10713): com.myvocalist:25a77768: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser true
+06-27 18:00:43.518 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 18:00:43.518 I/ImeTracker(10713): com.myvocalist:25a77768: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+06-27 18:00:43.540 I/ImeTracker(10713): com.myvocalist:4278d504: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+06-27 18:00:43.541 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 18:00:43.541 I/ImeTracker(10713): com.myvocalist:4278d504: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+06-27 18:00:43.548 I/AssistStructure(10713): Flattened final assist data: 8188 bytes, containing 2 windows, 79 views
+06-27 18:00:43.588 W/RemoteInputConnectionImpl(10713): requestCursorUpdates on inactive InputConnection
+06-27 18:00:43.605 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:00:45.296 I/ImeTracker(10713): com.myvocalist:9311af51: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:45.348 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.widget.PopupWindow$PopupDecorView$$ExternalSyntheticLambda1@c415214
+06-27 18:00:50.111 I/ImeTracker(10713): system_server:434c08e6: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:00:50.115 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:00:54.817 I/com.myvocalist(10713): AssetManager2(0x7b937cd0f858) locale list changing from [] to [en-US]
+06-27 18:00:55.607 W/RemoteInputConnectionImpl(10713): requestCursorUpdates on inactive InputConnection
+06-27 18:00:55.713 W/RemoteInputConnectionImpl(10713): getSurroundingText on inactive InputConnection
+06-27 18:00:57.098 I/ImeTracker(10713): com.myvocalist:61a9ef34: onShown
+06-27 18:00:59.387 I/com.myvocalist(10713): AssetManager2(0x7b937ccc1c98) locale list changing from [] to [en-US]
+06-27 18:01:00.645 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141629, 58516162, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.645 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141637, 52500996, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.646 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141644, 46487030, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.647 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141678, 29174498, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.647 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141689, 27793032, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.647 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141697, 31356866, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.647 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141705, 25158500, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.648 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141713, 30467334, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.648 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141721, 27170068, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.649 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141729, 28063602, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.650 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141737, 26836036, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.650 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141745, 27110970, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.651 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141753, 25280004, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.651 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141761, 27598638, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.651 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141769, 27501072, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.651 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141785, 27096840, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.651 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 141793, 38404474, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.658 I/ImeTracker(10713): system_server:f7cbcfc6: onShown
+06-27 18:01:00.666 V/PerfettoTrigger(10713): Not triggering com.android.telemetry.interaction-jank-monitor-80 - not enough time since last trigger
+06-27 18:01:00.722 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142304, 147594800, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.722 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142499, 62035738, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.723 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142564, 34761806, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.725 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142636, 24328674, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.725 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142679, 37086108, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.725 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142708, 29498342, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.725 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142744, 43894976, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.725 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142794, 34902510, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.725 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142830, 46427944, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.726 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142867, 19655112, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.726 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142889, 16220946, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.726 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142911, 13527880, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.726 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142933, 14104214, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.726 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142955, 17307348, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.726 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142977, 29099782, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.726 W/FrameTracker(10713): Missed SF frame:JANK_COMPOSER, 142999, 36141816, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+06-27 18:01:00.731 V/PerfettoTrigger(10713): Not triggering com.android.telemetry.interaction-jank-monitor-80 - not enough time since last trigger
+06-27 18:01:12.506 W/RemoteInputConnectionImpl(10713): requestCursorUpdates on inactive InputConnection
+06-27 18:01:12.511 I/ImeTracker(10713): system_server:a94636b4: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:12.514 I/HWUI    (10713): Davey! duration=3211ms; Flags=0, FrameTimelineVsyncId=143230, IntendedVsync=31691376428438, Vsync=31691459761768, InputEventId=0, HandleInputStart=31691461575400, AnimationStart=31691461878700, PerformTraversalsStart=31691462161100, DrawStart=31694523537300, FrameDeadline=31691393095104, FrameStartTime=31691461530500, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=31694531557400, SyncStart=31694533575600, IssueDrawCommandsStart=31694535894800, SwapBuffers=31694538144900, FrameCompleted=31694590321800, DequeueBufferDuration=50096100, QueueBufferDuration=286400, GpuCompleted=31694545019800, SwapBuffersCompleted=31694590321800, DisplayPresentTime=0, CommandSubmissionCompleted=31694538144900, 
+06-27 18:01:12.551 W/RemoteInputConnectionImpl(10713): requestCursorUpdates on inactive InputConnection
+06-27 18:01:12.551 I/ImeTracker(10713): com.myvocalist:d6b96f60: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:12.784 W/RemoteInputConnectionImpl(10713): requestCursorUpdates on inactive InputConnection
+06-27 18:01:13.104 I/ImeTracker(10713): system_server:a336203c: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:14.857 I/com.myvocalist(10713): Explicit concurrent mark compact GC freed 1218KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 7962KB/15MB, paused 1.481ms,2.176ms total 27.834ms
+06-27 18:01:14.899 W/RemoteInputConnectionImpl(10713): requestCursorUpdates on inactive InputConnection
+06-27 18:01:14.936 W/RemoteInputConnectionImpl(10713): getSurroundingText on inactive InputConnection
+06-27 18:01:15.182 I/ImeTracker(10713): system_server:c1f388fa: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:17.527 I/ImeTracker(10713): com.myvocalist:7861adf6: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:17.530 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:01:22.563 I/ImeTracker(10713): system_server:ce15f1c6: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:28.644 I/com.myvocalist(10713): AssetManager2(0x7b937cd278b8) locale list changing from [] to [en-US]
+06-27 18:01:30.012 W/RemoteInputConnectionImpl(10713): requestCursorUpdates on inactive InputConnection
+06-27 18:01:30.014 I/ImeTracker(10713): system_server:d4a95d8: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:30.983 W/RemoteInputConnectionImpl(10713): requestCursorUpdates on inactive InputConnection
+06-27 18:01:31.008 W/RemoteInputConnectionImpl(10713): getSurroundingText on inactive InputConnection
+06-27 18:01:31.231 I/ImeTracker(10713): com.google.android.inputmethod.latin:d286cb28: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:32.210 I/ImeTracker(10713): com.myvocalist:f822fb75: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:32.214 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:01:33.935 I/AutofillManager(10713): showAutofillDialog() return false due to improve fill dialog
+06-27 18:01:33.936 I/ImeTracker(10713): com.myvocalist:420d6215: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser true
+06-27 18:01:33.937 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 18:01:33.937 I/ImeTracker(10713): com.myvocalist:420d6215: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+06-27 18:01:34.679 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.widget.PopupWindow$PopupDecorView$$ExternalSyntheticLambda1@19cf84d
+06-27 18:01:37.214 I/ImeTracker(10713): system_server:4c332a62: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:39.160 I/ImeTracker(10713): system_server:fa917c9b: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:39.164 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:01:40.307 I/AutofillManager(10713): showAutofillDialog() return false due to improve fill dialog
+06-27 18:01:40.308 I/ImeTracker(10713): com.myvocalist:d094d17f: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser true
+06-27 18:01:40.309 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 18:01:40.309 I/ImeTracker(10713): com.myvocalist:d094d17f: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+06-27 18:01:41.913 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.widget.PopupWindow$PopupDecorView$$ExternalSyntheticLambda1@bb68235
+06-27 18:01:44.186 I/ImeTracker(10713): system_server:86885c26: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:46.197 I/ImeTracker(10713): system_server:9eacb81e: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:46.198 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:01:47.593 I/AutofillManager(10713): showAutofillDialog() return false due to improve fill dialog
+06-27 18:01:47.594 I/ImeTracker(10713): com.myvocalist:9f0d7cbc: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser true
+06-27 18:01:47.595 D/InsetsController(10713): show(ime(), fromIme=false)
+06-27 18:01:47.597 I/ImeTracker(10713): com.myvocalist:9f0d7cbc: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+06-27 18:01:48.160 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.widget.PopupWindow$PopupDecorView$$ExternalSyntheticLambda1@4b5a5c0
+06-27 18:01:51.195 I/ImeTracker(10713): system_server:3a08b68c: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:52.360 I/ImeTracker(10713): system_server:c0e39235: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+06-27 18:01:52.363 W/WindowOnBackDispatcher(10713): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8ca77d1
+06-27 18:01:54.210 I/Choreographer(10713): Skipped 71 frames!  The application may be doing too much work on its main thread.
+06-27 18:01:54.620 D/AndroidRuntime(10713): Shutting down VM
+06-27 18:01:54.625 E/AndroidRuntime(10713): FATAL EXCEPTION: main
+06-27 18:01:54.625 E/AndroidRuntime(10713): Process: com.myvocalist, PID: 10713
+06-27 18:01:54.625 E/AndroidRuntime(10713): android.runtime.JavaProxyThrowable: [System.InvalidOperationException]: The instance of entity type 'Artist' cannot be tracked because another instance with the same key value for {'Id'} is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see the conflicting key values.
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].ThrowIdentityConflict + 0x92(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].Add + 0x30(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].Add + 0x0(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].Add + 0x0(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.StartTracking + 0x36(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.OnStateChanging + 0x16(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntryBase.SetEntityState + 0x17d(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.SetEntityState + 0x5d(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.PaintAction + 0xb4(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityEntryGraphIterator.TraverseGraph + 0x0(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.AttachGraph + 0x5a(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1[[MyVocaList.Domain.Entity.Artist, MyVocaList.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]].SetEntityState + 0x8(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1[[MyVocaList.Domain.Entity.Artist, MyVocaList.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]].Update + 0x8(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at MyVocaList.Infra.Repository.ArtistRepository.UpdateAsync(C:\Users\helde\source\repos\MyVocaList\Infra\Repository\ArtistRepository.cs:124)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at MyVocaList.Services.ArtistService+<UpdateArtistAsync>d__11.MoveNext(C:\Users\helde\source\repos\MyVocaList\Services\ArtistService.cs:90)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw + 0x11(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess + 0x37(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification + 0x2d(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at System.Runtime.CompilerServices.TaskAwaiter.ValidateEnd + 0x8(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at System.Runtime.CompilerServices.TaskAwaiter`1[[System.ValueTuple`2[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].GetResult + 0x0(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at MyVocaList.UI.ViewModels.ArtistFormViewModel+<SaveAsync>d__42.MoveNext(C:\Users\helde\source\repos\MyVocaList\MyVocaList\UI\ViewModels\ArtistFormViewModel.cs:86)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw + 0x11(Unknown Source)
+06-27 18:01:54.625 E/AndroidRuntime(10713): 	at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess + 0x37(Unknown Source)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification + 0x2d(Unknown Source)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at System.Runtime.CompilerServices.TaskAwaiter.ValidateEnd + 0x8(Unknown Source)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at System.Runtime.CompilerServices.TaskAwaiter.GetResult + 0x0(Unknown Source)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at CommunityToolkit.Mvvm.Input.AsyncRelayCommand+<AwaitAndThrowIfFailed>d__40.MoveNext(/_/src/CommunityToolkit.Mvvm/Input/AsyncRelayCommand.cs:351)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw + 0x11(Unknown Source)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at System.Threading.Tasks.Task+<>c.<ThrowAsync>b__124_0 + 0x0(Unknown Source)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at Android.App.SyncContext+<>c__DisplayClass2_0.<Post>b__0 + 0x0(Unknown Source)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at Java.Lang.Thread+RunnableImplementor.Run + 0x8(Unknown Source)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at Java.Lang.IRunnableInvoker.n_Run + 0xe(Unknown Source)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at mono.java.lang.RunnableImplementor.n_run(Native Method)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at mono.java.lang.RunnableImplementor.run(RunnableImplementor.java:29)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at android.os.Handler.handleCallback(Handler.java:995)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at android.os.Handler.dispatchMessage(Handler.java:103)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at android.os.Looper.loopOnce(Looper.java:248)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at android.os.Looper.loop(Looper.java:338)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at java.lang.reflect.Method.invoke(Native Method)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+06-27 18:01:54.626 E/AndroidRuntime(10713): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+Ocorreu uma exceção sem tratamento do tipo "Android.Runtime.JavaProxyThrowable" em Mono.Android.Runtime.dll
+
+Erro na sessão de depuração vsdbg do projeto 'C:\Users\helde\source\repos\MyVocaList\MyVocaList\MyVocaList.csproj': Ocorreu uma exceção sem tratamento do tipo "Android.Runtime.JavaProxyThrowable" em Mono.Android.Runtime.dll
+06-27 18:02:04.858 W/monodroid-assembly(10713): Shared library 'liblog' not loaded, p/invoke '__android_log_print' may fail
+06-27 18:02:04.998 I/MonoDroid(10713): UNHANDLED EXCEPTION:
+06-27 18:02:07.310 I/MonoDroid(10713): Android.Runtime.JavaProxyThrowable: Exception of type 'Android.Runtime.JavaProxyThrowable' was thrown.
+06-27 18:02:07.310 I/MonoDroid(10713): 
+06-27 18:02:07.311 I/MonoDroid(10713):   --- End of managed Android.Runtime.JavaProxyThrowable stack trace ---
+06-27 18:02:07.311 I/MonoDroid(10713): android.runtime.JavaProxyThrowable
+06-27 18:02:07.311 I/MonoDroid(10713): 
+06-27 18:02:07.446 I/Process (10713): Sending signal. PID: 10713 SIG: 9
+[18:02:07 FTL] 
+Unhandled exception in AppDomain. IsTerminating: true
+System.InvalidOperationException: The instance of entity type 'Artist' cannot be tracked because another instance with the same key value for {'Id'} is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached. Consider using 'DbContextOptionsBuilder.EnableSensitiveDataLogging' to see the conflicting key values.
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].ThrowIdentityConflict(InternalEntityEntry entry)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].Add(Int32 key, InternalEntityEntry entry, Boolean updateDuplicate)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].Add(Int32 key, InternalEntityEntry entry)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].Add(InternalEntityEntry entry)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.StartTracking(InternalEntityEntry entry)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.OnStateChanging(EntityState newState)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntryBase.SetEntityState(EntityState oldState, EntityState newState, Boolean acceptChanges, Boolean modifyProperties)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.SetEntityState(EntityState entityState, Boolean acceptChanges, Boolean modifyProperties, Nullable`1 forceStateWhenUnknownKey, Nullable`1 fallbackState)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.PaintAction(EntityEntryGraphNode`1 node)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityEntryGraphIterator.TraverseGraph[ValueTuple`3](EntityEntryGraphNode`1 node, Func`2 handleNode)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.AttachGraph(InternalEntityEntry rootEntry, EntityState targetState, EntityState storeGeneratedWithKeySetTargetState, Boolean forceStateWhenUnknownKey)
+   at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1[[MyVocaList.Domain.Entity.Artist, MyVocaList.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]].SetEntityState(InternalEntityEntry entry, EntityState entityState)
+   at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1[[MyVocaList.Domain.Entity.Artist, MyVocaList.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]].Update(Artist entity)
+   at MyVocaList.Infra.Repository.ArtistRepository.UpdateAsync(Artist artist, CancellationToken ct) in C:\Users\helde\source\repos\MyVocaList\Infra\Repository\ArtistRepository.cs:line 124
+   at MyVocaList.Services.ArtistService.UpdateArtistAsync(Int32 id, String name, CancellationToken ct) in C:\Users\helde\source\repos\MyVocaList\Services\ArtistService.cs:line 90
+   at MyVocaList.UI.ViewModels.ArtistFormViewModel.SaveAsync() in C:\Users\helde\source\repos\MyVocaList\MyVocaList\UI\ViewModels\ArtistFormViewModel.cs:line 86
+   at CommunityToolkit.Mvvm.Input.AsyncRelayCommand.AwaitAndThrowIfFailed(Task executionTask) in /_/src/CommunityToolkit.Mvvm/Input/AsyncRelayCommand.cs:line 351
+   at System.Threading.Tasks.Task.<>c.<ThrowAsync>b__124_0(Object state)
+   at Android.App.SyncContext.<>c__DisplayClass2_0.<Post>b__0()
+   at Java.Lang.Thread.RunnableImplementor.Run()
+   at Java.Lang.IRunnableInvoker.n_Run(IntPtr jnienv, IntPtr native__this)
+O programa "MyVocaList.dll" foi fechado com o código 0 (0x0).
+A sessão de depuração do vsdbg para o projeto 'C:\Users\helde\source\repos\MyVocaList\MyVocaList\MyVocaList.csproj' foi interrompida
