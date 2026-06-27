@@ -78,7 +78,7 @@
                         <dx:DXButton Style="{StaticResource StandardIconButton}"
                                      Icon="queue_music_outlined"
                                      SemanticProperties.Description="View catalog"
-                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ArtistsViewModel}}, Path=ViewCatalogCommand}"
+                                     Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
                                      CommandParameter="{Binding .}"
                                      InputTransparent="False" />
                     </lists:ListItem.TrailingContent>
@@ -101,7 +101,7 @@
                         <dx:DXButton Style="{StaticResource StandardIconButton}"
                                      Icon="queue_music_outlined"
                                      SemanticProperties.Description="View catalog"
-                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ArtistsViewModel}}, Path=ViewCatalogCommand}"
+                                     Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
                                      CommandParameter="{Binding .}"
                                      InputTransparent="False" />
                     </lists:ListItem.TrailingContent>
