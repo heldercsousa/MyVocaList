@@ -1623,3 +1623,8 @@ Docs/Management/DevCycleCraft/bug-015-016-fixes/plan.md
 .claude/worktrees/agent-a56fd5c589dfab7bd/MyVocaList.Tests/Unit/Infrastructure/RouteCollisionTests.cs
 .claude/worktrees/agent-a56fd5c589dfab7bd/MyVocaList/Navigation/Routes.cs
 .claude/worktrees/agent-a56fd5c589dfab7bd/MyVocaList/AppShell.xaml
+.claude/worktrees/agent-a56fd5c589dfab7bd/MyVocaList/UI/ViewModels/QueueManagementViewModel.cs
+.claude/worktrees/agent-a404fc060957219e5/Docs/Management/DevCycleCraft/bug-015-016-fixes/task-log.md
+.claude/worktrees/agent-a56fd5c589dfab7bd/Docs/Management/DevCycleCraft/bug-015-016-fixes/task-log.md
+.claude/worktrees/agent-a56fd5c589dfab7bd/MyVocaList.sln
+.claude/worktrees/agent-a56fd5c589dfab7bd/MyVocaList.sln
