@@ -215,7 +215,7 @@ public partial class QueueManagementViewModel : ViewModelBase
     public async Task SelectSongAsync()
     {
         if (CurrentSinger == null) return;
-        await Shell.Current.GoToAsync($"song-picker?entryId={CurrentSinger.Id}");
+        await Shell.Current.GoToAsync($"{Routes.QueueSongPicker}?entryId={CurrentSinger.Id}");
     }
 
     /// <summary>Navigates to person picker modal.</summary>
