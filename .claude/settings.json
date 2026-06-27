@@ -132,14 +132,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import os,glob,sys; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); legacy=glob.glob(os.path.join(proj,'Docs','superpowers','plans','*-task-log.md')); new=glob.glob(os.path.join(proj,'Docs','Management','**','task-log.md'),recursive=True); r=[]; [r.append(os.path.basename(os.path.dirname(f))+': '+b.split('\\n')[0].strip()) for f in legacy+new for c in [open(f,encoding='utf-8').read()] for b in ('\\n'+c).split('\\n## Task:')[1:] if '**Status:** To Review' in b]; r and (print('\\n'.join('- '+x for x in r)+'\\n\\nSpawn one fresh review subagent per plan that has pending To Review tasks. Each subagent should review the changed files listed in the task-log against the plan acceptance criteria.') or sys.exit(2))\" 2>/dev/null"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
             "command": "python .claude/scripts/lease/heartbeat.py 2>/dev/null || true"
           }
         ]
