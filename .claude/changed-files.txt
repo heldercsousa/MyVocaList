@@ -1646,3 +1646,4 @@ Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-
 MyVocaList.sln
 MyVocaList.sln
 Docs/Management/BACKLOG.md
+MyVocaList.sln
