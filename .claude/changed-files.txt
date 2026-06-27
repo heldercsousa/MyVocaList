@@ -1634,3 +1634,4 @@ Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 Docs/Management/BACKLOG.md
 .claude/settings.json
+Docs/Management/BACKLOG.md
