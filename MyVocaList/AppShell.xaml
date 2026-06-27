@@ -113,7 +113,7 @@
         <ShellContent ContentTemplate="{DataTemplate queue:PersonPickerPage}" />
     </FlyoutItem>
 
-    <FlyoutItem Route="song-picker" FlyoutItemIsVisible="False">
+    <FlyoutItem Route="queue-song-picker" FlyoutItemIsVisible="False">
         <ShellContent ContentTemplate="{DataTemplate queue:QueueSongPickerPage}" />
     </FlyoutItem>
 

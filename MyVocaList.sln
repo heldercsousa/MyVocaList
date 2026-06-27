@@ -243,6 +243,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versi
 		Docs\Management\DevCycleCraft\app-versioning\plan.md = Docs\Management\DevCycleCraft\app-versioning\plan.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-015-016-fixes", "bug-015-016-fixes", "{FA1234BC-0001-4000-8000-000000000030}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\bug-015-016-fixes\plan.md = Docs\Management\DevCycleCraft\bug-015-016-fixes\plan.md
+		Docs\Management\DevCycleCraft\bug-015-016-fixes\task-log.md = Docs\Management\DevCycleCraft\bug-015-016-fixes\task-log.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration", "backlog-first-registration", "{FA1234BC-0001-4000-8000-000000000029}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\README.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\README.md
@@ -601,6 +607,7 @@ Global
 		{A1B2C3D4-0001-4000-8000-000000000005} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{A1B2C3D4-0001-4000-8000-000000000006} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000030} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000029} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
