@@ -45,7 +45,7 @@ because a stale tracked instance IS present but the guard missed it.
 | `Services/ArtistService.cs` | Return `ArtistListItem` directly; remove DTO mapping. `IArtistService` return types updated to match. |
 | `Domain/ServicesInterfaces/IArtistService.cs` | Update `GetPagedArtistsForListAsync` and `SearchArtistsByNameAsync` return types to `ArtistListItem` |
 | `Contracts/DTOs/List/ArtistListItemDto.cs` | **Deleted** |
-| All consumers of `ArtistListItemDto` | Update to `ArtistListItem` (primarily `ArtistsViewModel`, `ArtistPickerViewModel`) |
+| All consumers of `ArtistListItemDto` | Update to `ArtistListItem`: `ArtistsViewModel` (list collection), `ArtistPickerViewModel` (search results), `ArtistFormViewModel` (duplicate suggestions + `SelectDuplicateCommand` parameter type) |
 | `MyVocaList.Tests/Integration/Repositories/ArtistRepositoryTests.cs` | Add regression test |
 | `MyVocaList.Tests/Infrastructure/TestDbContextFactory.cs` | No change required |
 
