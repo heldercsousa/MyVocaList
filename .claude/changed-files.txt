@@ -1703,3 +1703,4 @@ MyVocaList.Tests/Integration/Repositories/ArtistRepositoryTests.cs
 MyVocaList.Tests/Integration/Repositories/ArtistRepositoryTests.cs
 Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-save-crash/handoff.md
 Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-save-crash/task-log.md
+Docs/Management/BACKLOG.md
