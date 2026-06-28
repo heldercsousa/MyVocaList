@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra.Collation;
 
@@ -16,11 +17,11 @@ public class ArtistRepository : IArtistRepository
     }
 
     /// <inheritdoc />
-    public async Task<(IEnumerable<(Artist artist, int catalogCount)> items, int totalCount)> GetPagedAsync(
+    public async Task<(IEnumerable<ArtistListItem> items, int totalCount)> GetPagedAsync(
         int pageNumber, int pageSize, string query,
         ArtistRoleFilter roleFilter = ArtistRoleFilter.All, CancellationToken ct = default)
     {
-        var q = _db.Artists.AsQueryable();
+        var q = _db.Artists.AsNoTracking().AsQueryable(); // Explicit + global default = doubly safe
 
         if (!string.IsNullOrEmpty(query))
         {
@@ -43,17 +44,21 @@ public class ArtistRepository : IArtistRepository
             .OrderBy(a => a.Name)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .Select(a => new { Artist = a, CatalogCount = a.CatalogEntries.Count() })
+            .Select(a => new ArtistListItem(           // SQL-level column projection
+                a.Id,
+                a.Name,
+                a.ExternalProvider,
+                a.HasManualEdits,
+                a.CatalogEntries.Count()))             // Scalar subquery in one SQL statement
             .ToListAsync(ct);
 
-        var items = rawItems.Select(x => (x.Artist, x.CatalogCount)).ToList();
-        return (items, totalCount);
+        return (rawItems, totalCount);
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Artist>> SearchByNameAsync(string query, int maxResults, CancellationToken ct)
+    public async Task<IEnumerable<ArtistListItem>> SearchByNameAsync(string query, int maxResults, CancellationToken ct)
     {
-        var q = _db.Artists.AsQueryable();
+        var q = _db.Artists.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrEmpty(query))
         {
@@ -66,16 +71,17 @@ public class ArtistRepository : IArtistRepository
         return await q
             .OrderBy(a => a.Name)
             .Take(maxResults)
+            .Select(a => new ArtistListItem(a.Id, a.Name, a.ExternalProvider, a.HasManualEdits, 0))
             .ToListAsync(ct);
     }
 
     /// <inheritdoc />
     public async Task<Artist> GetByIdAsync(int id, CancellationToken ct)
-        => await _db.Artists.FirstOrDefaultAsync(a => a.Id == id, ct);
+        => await _db.Artists.AsTracking().FirstOrDefaultAsync(a => a.Id == id, ct);
 
     /// <inheritdoc />
     public async Task<Artist> GetByExternalIdAsync(string externalId, string provider, CancellationToken ct)
-        => await _db.Artists.FirstOrDefaultAsync(
+        => await _db.Artists.AsNoTracking().FirstOrDefaultAsync(
             a => a.ExternalId == externalId && a.ExternalProvider == provider, ct);
 
     /// <inheritdoc />
@@ -121,12 +127,7 @@ public class ArtistRepository : IArtistRepository
     /// <inheritdoc />
     public Task UpdateAsync(Artist artist, CancellationToken ct)
     {
-        var tracked = _db.ChangeTracker.Entries<Artist>()
-                                       .FirstOrDefault(e => e.Entity.Id == artist.Id);
-        if (tracked != null)
-            tracked.CurrentValues.SetValues(artist);
-        else
-            _db.Artists.Update(artist);
+        _db.Artists.Update(artist);
         return Task.CompletedTask;
     }
 

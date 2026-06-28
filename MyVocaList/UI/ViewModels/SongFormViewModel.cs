@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.Messages;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.UI.Collections;
 using CanonicalSongPickedMessage = MyVocaList.Contracts.Messages.SongPickedMessage;
@@ -200,7 +201,7 @@ public partial class SongFormViewModel : ViewModelBase
 
     private void SelectArtist(AutocompleteSuggestion suggestion)
     {
-        if (suggestion?.Data is not ArtistListItemDto artist) return;
+        if (suggestion?.Data is not ArtistListItem artist) return;
         SelectedArtistId = artist.Id;
         SelectedArtistName = artist.Name;
         ArtistSearchText = artist.Name;

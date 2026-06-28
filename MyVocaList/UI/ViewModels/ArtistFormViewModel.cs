@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.Messages;
+using MyVocaList.Domain.ReadModels;
 
 namespace MyVocaList.UI.ViewModels;
 
@@ -23,7 +24,7 @@ public partial class ArtistFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isCharacterCounterWarning;
     [ObservableProperty] private bool _isCharacterCounterError;
     [ObservableProperty] private bool _isBusy;
-    [ObservableProperty] private IEnumerable<ArtistListItemDto> _duplicateSuggestions = [];
+    [ObservableProperty] private IEnumerable<ArtistListItem> _duplicateSuggestions = [];
     [ObservableProperty] private bool _hasDuplicateSuggestions;
 
     public string SelectedExternalId { get; private set; } = string.Empty;
@@ -46,13 +47,13 @@ public partial class ArtistFormViewModel : ViewModelBase
         SaveCommand = new AsyncRelayCommand(SaveAsync);
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         NavigateToArtistPickerCommand = new AsyncRelayCommand(NavigateToArtistPickerAsync);
-        SelectDuplicateCommand = new AsyncRelayCommand<ArtistListItemDto>(SelectDuplicateAsync);
+        SelectDuplicateCommand = new AsyncRelayCommand<ArtistListItem>(SelectDuplicateAsync);
     }
 
     public IAsyncRelayCommand SaveCommand { get; }
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand NavigateToArtistPickerCommand { get; }
-    public IAsyncRelayCommand<ArtistListItemDto> SelectDuplicateCommand { get; }
+    public IAsyncRelayCommand<ArtistListItem> SelectDuplicateCommand { get; }
 
     partial void OnArtistIdChanged(int? value)
     {
@@ -130,7 +131,7 @@ public partial class ArtistFormViewModel : ViewModelBase
         await Shell.Current.GoToAsync(Routes.ArtistPicker);
     }
 
-    private Task SelectDuplicateAsync(ArtistListItemDto artist)
+    private Task SelectDuplicateAsync(ArtistListItem artist)
     {
         if (artist is null) return Task.CompletedTask;
         return Shell.Current.GoToAsync($"..?artistId={artist.Id}&artistName={Uri.EscapeDataString(artist.Name)}");

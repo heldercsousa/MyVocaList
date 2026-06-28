@@ -1,5 +1,5 @@
-using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
 
@@ -118,36 +118,24 @@ public class ArtistService : IArtistService
     }
 
     /// <inheritdoc />
-    public async Task<(IEnumerable<ArtistListItemDto> items, int totalCount)> GetPagedArtistsForListAsync(
+    public async Task<(IEnumerable<ArtistListItem> items, int totalCount)> GetPagedArtistsForListAsync(
         int pageNumber, int pageSize, string query = null,
         ArtistRoleFilter roleFilter = ArtistRoleFilter.All, CancellationToken ct = default)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
-        var (items, totalCount) = await _artistRepository.GetPagedAsync(pageNumber, pageSize, query?.Trim(), roleFilter, ct);
-
-        var dtos = items.Select(x => new ArtistListItemDto(
-            x.artist.Id,
-            x.artist.Name,
-            x.artist.ExternalProvider,
-            x.artist.HasManualEdits,
-            x.catalogCount));
-
-        return (dtos, totalCount);
+        return await _artistRepository.GetPagedAsync(pageNumber, pageSize, query?.Trim(), roleFilter, ct);
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<ArtistListItemDto>> SearchArtistsByNameAsync(
+    public async Task<IEnumerable<ArtistListItem>> SearchArtistsByNameAsync(
         string query, int maxResults = 5, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(query))
             return [];
 
-        var artists = await _artistRepository.SearchByNameAsync(query.Trim(), maxResults, ct);
-
-        return artists.Select(a => new ArtistListItemDto(
-            a.Id, a.Name, a.ExternalProvider, a.HasManualEdits, 0));
+        return await _artistRepository.SearchByNameAsync(query.Trim(), maxResults, ct);
     }
 
     /// <inheritdoc />

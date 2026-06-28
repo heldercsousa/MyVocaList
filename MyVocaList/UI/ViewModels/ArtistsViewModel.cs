@@ -1,10 +1,11 @@
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.UI.Collections;
 
 namespace MyVocaList.UI.ViewModels;
 
 [QueryProperty(nameof(Mode), "mode")]
-public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
+public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItem>
 {
     private readonly IArtistService _artistService;
     private readonly ISnackbarComponent _snackbarService;
@@ -24,16 +25,16 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
         SelectedArtists = [];
 
         AddArtistCommand = new AsyncRelayCommand(NavigateToAddAsync);
-        ViewCatalogCommand = new RelayCommand<ArtistListItemDto>(NavigateToCatalog);
+        ViewCatalogCommand = new RelayCommand<ArtistListItem>(NavigateToCatalog);
     }
 
-    public ObservableRangeCollection<ArtistListItemDto> Artists { get; }
-    public ObservableRangeCollection<ArtistListItemDto> SelectedArtists { get; }
+    public ObservableRangeCollection<ArtistListItem> Artists { get; }
+    public ObservableRangeCollection<ArtistListItem> SelectedArtists { get; }
 
     public System.Collections.IList SelectedArtistsRaw => SelectedArtists;
 
     public IAsyncRelayCommand AddArtistCommand { get; }
-    public IRelayCommand<ArtistListItemDto> ViewCatalogCommand { get; }
+    public IRelayCommand<ArtistListItem> ViewCatalogCommand { get; }
 
     public string Mode
     {
@@ -55,8 +56,8 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
     public bool IsEmptyNoArtists => IsEmpty && string.IsNullOrWhiteSpace(SearchText);
     public override bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
 
-    protected override ObservableRangeCollection<ArtistListItemDto> Items => Artists;
-    protected override ObservableRangeCollection<ArtistListItemDto> SelectedItems => SelectedArtists;
+    protected override ObservableRangeCollection<ArtistListItem> Items => Artists;
+    protected override ObservableRangeCollection<ArtistListItem> SelectedItems => SelectedArtists;
 
     protected override void OnSelectedCountUpdated(int value)
         => OnPropertyChanged(nameof(AppBarTitle));
@@ -78,18 +79,18 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
         };
     }
 
-    protected override Task<(IEnumerable<ArtistListItemDto> items, int totalCount)> FetchPageAsync(
+    protected override Task<(IEnumerable<ArtistListItem> items, int totalCount)> FetchPageAsync(
         int page, int pageSize, string query, CancellationToken ct)
         => _artistService.GetPagedArtistsForListAsync(page, pageSize, query, RoleFilter, ct);
 
-    protected override Task<(IEnumerable<ArtistListItemDto> items, int totalCount)> FetchMoreAsync(
+    protected override Task<(IEnumerable<ArtistListItem> items, int totalCount)> FetchMoreAsync(
         int page, int pageSize, string query, CancellationToken ct = default)
         => _artistService.GetPagedArtistsForListAsync(page, pageSize, query, RoleFilter, ct);
 
-    protected override string BuildDeleteConfirmMessage(IList<ArtistListItemDto> items)
+    protected override string BuildDeleteConfirmMessage(IList<ArtistListItem> items)
         => items.Count == 1 ? $"Delete '{items[0].Name}'?" : $"Delete {items.Count} artists?";
 
-    protected override async Task ExecuteDeleteAsync(IEnumerable<ArtistListItemDto> items)
+    protected override async Task ExecuteDeleteAsync(IEnumerable<ArtistListItem> items)
     {
         var ids = items.Select(a => a.Id);
         var (success, message) = await _artistService.DeleteArtistsAsync(ids);
@@ -107,7 +108,7 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
     protected override Task NavigateToAddAsync()
         => Shell.Current.GoToAsync(Routes.ArtistForm);
 
-    protected override async Task NavigateToEditAsync(ArtistListItemDto item)
+    protected override async Task NavigateToEditAsync(ArtistListItem item)
         => await Shell.Current.GoToAsync(
             $"{Routes.ArtistForm}?artistId={item.Id}&artistName={Uri.EscapeDataString(item.Name)}");
 
@@ -117,7 +118,7 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItemDto>
         OnPropertyChanged(nameof(IsEmptyNoResults));
     }
 
-    private void NavigateToCatalog(ArtistListItemDto artist)
+    private void NavigateToCatalog(ArtistListItem artist)
     {
         if (artist == null) return;
         _ = Shell.Current.GoToAsync(
