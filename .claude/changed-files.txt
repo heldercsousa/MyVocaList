@@ -1649,3 +1649,4 @@ Docs/Management/BACKLOG.md
 MyVocaList.sln
 Docs/Management/valiant-zooming-volcano.md
 Docs/Management/BACKLOG.md
+Docs/Management/valiant-zooming-volcano.md
