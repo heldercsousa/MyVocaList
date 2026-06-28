@@ -341,4 +341,34 @@ public class ArtistRepositoryTests : IAsyncLifetime
         Assert.Equal(1, totalCount);
         Assert.Equal("Björk", items.Single().artist.Name);
     }
+
+    // ── BUG-018 Regression test ───────────────────────────────────────────
+
+    [Fact]
+    // [AC] BUG-018: GetPagedAsync must not add entities to the ChangeTracker
+    public async Task GetPagedAsync_ExplicitNoTracking_DoesNotPollutTracker_AndUpdateSucceeds()
+    {
+        // Override global NoTracking — simulates a context where the global setting is absent
+        _db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.TrackAll;
+
+        // Arrange — seed
+        var artist = MakeArtist("Test Artist");
+        _db.Artists.Add(artist);
+        await _db.SaveChangesAsync();
+        _db.ChangeTracker.Clear();
+
+        // Act — list query (must not track despite TrackAll context setting)
+        await _repo.GetPagedAsync(1, 20, string.Empty);
+
+        // Assert 1 — explicit AsNoTracking on GetPagedAsync overrides context default
+        Assert.Empty(_db.ChangeTracker.Entries<Artist>());
+
+        // Assert 2 — update on the same entity Id succeeds with no tracking conflict
+        artist.Name = "Updated Name";
+        await _repo.UpdateAsync(artist, CancellationToken.None);
+        await _db.SaveChangesAsync();
+
+        var saved = await _db.Artists.AsNoTracking().FirstAsync(a => a.Id == artist.Id);
+        Assert.Equal("Updated Name", saved.Name);
+    }
 }

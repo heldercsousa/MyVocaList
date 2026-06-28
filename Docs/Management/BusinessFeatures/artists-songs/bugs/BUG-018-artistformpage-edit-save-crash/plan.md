@@ -1,162 +1,170 @@
-# Plan: BUG-018 — ArtistFormPage Edit Save fatal crash (EF Core duplicate entity tracking)
+# BUG-018 — Final Implementation Plan
+# ArtistFormPage Edit Save crash: EF Core duplicate entity tracking
 
-**Severity:** Critical
-**Feature:** Artists & Songs Catalog
-**Registered:** 2026-06-27
-**Source:** `BUG-017-artistscrud-emulator-debug-often-stops/artistis-crud-manual-tests-log.txt`
-
----
-
-## Root Cause
-
-Fatal crash stack trace (18:01:54 in the debug log):
-
-```
-FATAL EXCEPTION: main
-System.InvalidOperationException: The instance of entity type 'Artist' cannot be tracked
-because another instance with the same key value for {'Id'} is already being tracked.
-    at ArtistRepository.UpdateAsync(ArtistRepository.cs:124)
-    at ArtistService.UpdateArtistAsync(ArtistService.cs:90)
-    at ArtistFormViewModel.SaveAsync(ArtistFormViewModel.cs:86)
-```
-
-### Why it happens
-
-The `AppDbContext` is registered as a **Singleton** (long-lived, shared across all operations — part of the page-load-frozen workaround documented in `constraints-registry.md § EF Core / SQLite`). Because the context lives for the entire app session, entities tracked from earlier operations accumulate in its change tracker.
-
-`ArtistRepository.GetPagedAsync` does **not** call `AsNoTracking()`:
-
-```csharp
-var q = _db.Artists.AsQueryable(); // tracks every returned Artist entity
-```
-
-When a list load materialises `Artist {Id=5}` as instance A, and a subsequent (concurrent `Task.Run`-offloaded) form load later materialises the same record as instance B, the change tracker holds both. Calling `_db.Artists.Update(instanceB)` while instance A is still in the tracker throws `InvalidOperationException` — EF Core's identity map enforces one tracked instance per key.
-
-### Why `GetPagedAsync` is the root entry point
-
-All list/search queries that return full `Artist` entities without `AsNoTracking()` contribute to tracker bloat. Affected methods in `ArtistRepository`:
-
-- `GetPagedAsync` — main list, no `AsNoTracking()`
-- `SearchByNameAsync` — search results, no `AsNoTracking()`
-- `GetByExternalIdAsync` — lookup for import, no `AsNoTracking()`
-- `GetByIdAsync` — single-entity form load (may stay tracked for edit; see Fix below)
+**Severity:** Critical  
+**Feature:** Artists & Songs Catalog  
+**Plan written:** 2026-06-27
 
 ---
 
-## Architectural Fix (Helder's Direction)
+## Context
 
-**Do NOT use the ChangeTracker guard approach.** The correct fix is architectural:
-
-### 1. Add `AsNoTracking()` + DTO projection to all list/search queries
-
-List queries exist to populate read-only CRUD list rows. They should **never** track full entities.
-
-```csharp
-// GetPagedAsync — project to a lightweight DTO, not the full Artist entity
-var q = _db.Artists
-           .AsNoTracking()       // ← no tracking
-           .AsQueryable();
-
-// In the Select projection — emit only what the list row needs:
-.Select(a => new ArtistListItemDto
-{
-    Id = a.Id,
-    Name = a.Name,
-    // ... only the fields actually displayed in the list
-    CatalogCount = a.CatalogEntries.Count()
-})
-```
-
-The same pattern applies to `SearchByNameAsync` and `GetByExternalIdAsync`.
-
-### 2. `GetByIdAsync` for form load (Add / Edit)
-
-For the **Edit** form, `GetByIdAsync` loads a single entity that the user then modifies. After `SaveChangesAsync()` completes, EF Core stops tracking the saved state. The next list reload will re-query fresh data via `AsNoTracking()`. This means the duplicate-tracking window is eliminated: the tracker only ever holds the single in-flight edit entity, not a stale copy from a prior list load.
-
-Option A — keep `GetByIdAsync` tracked (simplest, correct after list queries are fixed):
-```csharp
-// Default EF Core tracking — safe once list queries no longer pollute the tracker
-return await _db.Artists.FindAsync(new object[] { id }, ct);
-```
-
-Option B — use `AsNoTracking()` and re-attach for update:
-```csharp
-var entity = await _db.Artists.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id, ct);
-```
-(Requires `UpdateAsync` to `_db.Entry(artist).State = EntityState.Modified` or `_db.Artists.Update(artist)` — works cleanly with no tracked duplicates.)
-
-**Helder decides which option.** Option A is simpler. Option B is consistent (all queries AsNoTracking) but requires explicit attach logic.
-
-### 3. Update `IArtistRepository` if list return type changes
-
-If `GetPagedAsync` is changed to return `ArtistListItemDto` instead of `(Artist artist, int catalogCount)`, update the interface signature in `MyVocaList.Domain/Interfaces/IArtistRepository.cs` and the consumer in `ArtistService`.
+The Singleton `AppDbContext` + `Task.Run`-offloaded queries produce concurrent, non-thread-safe
+DbContext access. EF Core's ChangeTracker becomes inconsistent under concurrent reads. The
+existing ChangeTracker guard in `UpdateAsync` (lines 122–130, `ArtistRepository.cs`) runs
+`ChangeTracker.Entries<Artist>().FirstOrDefault(...)` on a corrupted collection, finds nothing,
+falls through to `_db.Artists.Update(artist)`, and EF throws `InvalidOperationException`
+because a stale tracked instance IS present but the guard missed it.
 
 ---
 
-## Implementation Steps
+## Architectural decisions (settled in design session)
 
-1. **Write failing regression test first (Critical — mandatory):**
-   - Test in `ArtistRepositoryTests`: load a paged list (which normally tracks), then call `UpdateAsync` on the same entity — confirm no `InvalidOperationException` is thrown after fix.
-   - Confirm test FAILS on the current code (Red).
-
-2. **Add `AsNoTracking()` + DTO projection to `GetPagedAsync` and `SearchByNameAsync`:**
-   - Update `IArtistRepository` return type if needed.
-   - Update `ArtistService` consumer.
-
-3. **Run regression test — confirm it passes (Green).**
-
-4. **Build + all tests green.**
-
-5. **Commit:** `fix: add AsNoTracking + DTO projection to list queries, eliminate EF tracker bloat [BUG-018]`
-
-6. **Emulator smoke test:** Edit an artist and save — confirm no crash.
+| Decision | Rationale |
+|---|---|
+| Global `NoTracking` on `AppDbContext` constructor | Eliminates tracker pollution at the root. Aligns with `efcore-patterns` skill Pattern 1. TestDbContextFactory already mirrors this. |
+| Explicit `.AsNoTracking()` kept on list methods | Defence-in-depth + documents intent. Lets the regression test verify the explicit layer independently of the global setting. |
+| `.AsTracking()` added to `GetByIdAsync` | Edit path must track so `SaveChangesAsync` picks up mutations without an explicit `Update()` call on the entity the service already holds. |
+| Remove ChangeTracker guard from `UpdateAsync` | Guard was unreliable under concurrent access. After the fix, the guard is dead code. |
+| `ArtistListItem` record in `Domain/ReadModels/` | Single type end-to-end. No Infra → Contracts dependency. Drops the `Dto` suffix (it lives in Domain, not a transfer layer). Naming: `ArtistListItem` — describes its role in the list, avoids misleading suffixes. |
+| SQL column projection in `GetPagedAsync` | Avoid fetching unused columns (`ExternalId`, `CreatedAt`, `UpdatedAt`, etc.) for a page of 20 list rows. EF translates `.Select(a => new ArtistListItem(...))` to a narrow `SELECT`. |
+| `SearchByNameAsync` reuses `ArtistListItem` | Shared projection type; `CatalogCount = 0` (search doesn't need it, same as today). Eliminates separate Artist entity mapping in the service. |
+| `ArtistListItemDto` deleted from Contracts | Replaced by `ArtistListItem` in Domain. No intermediary mapping needed. |
+| `GetByExternalIdAsync` gets `AsNoTracking()` | Import callers create via `AddAsync`, never mutate the returned reference through `UpdateAsync`. |
 
 ---
 
-## Files to Change
+## Files to change
 
 | File | Change |
-|------|--------|
-| `Infra/Repository/ArtistRepository.cs` | Add `AsNoTracking()` + DTO projection to `GetPagedAsync`, `SearchByNameAsync`, `GetByExternalIdAsync` |
-| `MyVocaList.Domain/Interfaces/IArtistRepository.cs` | Update `GetPagedAsync` return type if DTO projection changes the signature |
-| `MyVocaList.Services/ArtistService.cs` | Adapt consumer if interface signature changes |
+|---|---|
+| `Infra/AppDbContext.cs` | Add `ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking` to constructor |
+| `Domain/ReadModels/ArtistListItem.cs` | **New file** — `public record ArtistListItem(int Id, string Name, string ExternalProvider, bool HasManualEdits, int CatalogCount)` |
+| `Domain/RepositoryInterface/IArtistRepository.cs` | `GetPagedAsync` return type → `Task<(IEnumerable<ArtistListItem> items, int totalCount)>`. `SearchByNameAsync` return type → `Task<IEnumerable<ArtistListItem>>` |
+| `Infra/Repository/ArtistRepository.cs` | See implementation detail below |
+| `Services/ArtistService.cs` | Return `ArtistListItem` directly; remove DTO mapping. `IArtistService` return types updated to match. |
+| `Domain/ServicesInterfaces/IArtistService.cs` | Update `GetPagedArtistsForListAsync` and `SearchArtistsByNameAsync` return types to `ArtistListItem` |
+| `Contracts/DTOs/List/ArtistListItemDto.cs` | **Deleted** |
+| All consumers of `ArtistListItemDto` | Update to `ArtistListItem`: `ArtistsViewModel` (list collection), `ArtistPickerViewModel` (search results), `ArtistFormViewModel` (duplicate suggestions + `SelectDuplicateCommand` parameter type) |
 | `MyVocaList.Tests/Integration/Repositories/ArtistRepositoryTests.cs` | Add regression test |
+| `MyVocaList.Tests/Infrastructure/TestDbContextFactory.cs` | No change required |
 
 ---
 
-## Regression Test (Critical — Mandatory)
-
-Per `bug-tracking.md § Critical`: write the failing test first (Red), then fix (Green). No exceptions.
+## ArtistRepository implementation detail
 
 ```csharp
-[Fact]
-// [AC] BUG-018: UpdateAsync must not throw when entity was previously loaded by a list query
-public async Task UpdateAsync_EntityPreviouslyLoadedByListQuery_DoesNotThrow()
+// Constructor / class top — no change
+
+// GetPagedAsync
+var q = _db.Artists.AsNoTracking().AsQueryable(); // explicit + global default = doubly safe
+
+// ... existing filters unchanged ...
+
+var rawItems = await q
+    .OrderBy(a => a.Name)
+    .Skip((pageNumber - 1) * pageSize)
+    .Take(pageSize)
+    .Select(a => new ArtistListItem(           // ← SQL-level column projection
+        a.Id,
+        a.Name,
+        a.ExternalProvider,
+        a.HasManualEdits,
+        a.CatalogEntries.Count()))             // ← scalar subquery in one SQL statement
+    .ToListAsync(ct);
+
+return (rawItems, totalCount);                 // no intermediate tuple unwrap needed
+
+// SearchByNameAsync
+var q = _db.Artists.AsNoTracking().AsQueryable();
+// ... existing filter unchanged ...
+return await q
+    .OrderBy(a => a.Name)
+    .Take(maxResults)
+    .Select(a => new ArtistListItem(a.Id, a.Name, a.ExternalProvider, a.HasManualEdits, 0))
+    .ToListAsync(ct);
+
+// GetByIdAsync
+return await _db.Artists.AsTracking().FirstOrDefaultAsync(a => a.Id == id, ct);
+
+// GetByExternalIdAsync
+return await _db.Artists.AsNoTracking().FirstOrDefaultAsync(
+    a => a.ExternalId == externalId && a.ExternalProvider == provider, ct);
+
+// UpdateAsync — guard removed
+public Task UpdateAsync(Artist artist, CancellationToken ct)
 {
-    // Arrange — seed an artist
-    var artist = new Artist { Name = "Test Artist" };
-    _db.Artists.Add(artist);
-    await _db.SaveChangesAsync();
-
-    // Act — simulate a list query that would previously track the entity
-    await _repo.GetPagedAsync(1, 20, string.Empty);
-
-    // Then update the same entity (this threw before the fix)
-    artist.Name = "Updated Name";
-    await _repo.UpdateAsync(artist, CancellationToken.None);
-    await _db.SaveChangesAsync();
-
-    // Assert — no exception, change persisted
-    var saved = await _db.Artists.AsNoTracking().FirstAsync(a => a.Id == artist.Id);
-    Assert.Equal("Updated Name", saved.Name);
+    _db.Artists.Update(artist);
+    return Task.CompletedTask;
 }
 ```
 
 ---
 
-## Verification
+## Regression test
 
-- Regression test: FAIL before fix, PASS after fix
-- Build: 0 errors
-- All tests: 0 failures
-- Emulator: edit an artist → save → no crash, artist name updated in list
+The test overrides the global NoTracking on the specific instance to verify that the
+**explicit** `.AsNoTracking()` on list methods is the defence-in-depth layer that prevents
+tracking even when the global setting is absent. This gives a genuine Red/Green cycle.
+
+```csharp
+[Fact]
+// [AC] BUG-018: GetPagedAsync must not add entities to the ChangeTracker
+public async Task GetPagedAsync_ExplicitNoTracking_DoesNotPollutTracker_AndUpdateSucceeds()
+{
+    // Override global NoTracking — simulates a context where the global setting is absent
+    _db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.TrackAll;
+
+    // Arrange — seed
+    var artist = new Artist { Name = "Test Artist" };
+    _db.Artists.Add(artist);
+    await _db.SaveChangesAsync();
+    _db.ChangeTracker.Clear();
+
+    // Act — list query (must not track despite TrackAll context setting)
+    await _repo.GetPagedAsync(1, 20, string.Empty);
+
+    // Assert 1 — explicit AsNoTracking on GetPagedAsync overrides context default
+    Assert.Empty(_db.ChangeTracker.Entries<Artist>());
+
+    // Assert 2 — update on the same entity Id succeeds with no tracking conflict
+    artist.Name = "Updated Name";
+    await _repo.UpdateAsync(artist, CancellationToken.None);
+    await _db.SaveChangesAsync();
+
+    var saved = await _db.Artists.AsNoTracking().FirstAsync(a => a.Id == artist.Id);
+    Assert.Equal("Updated Name", saved.Name);
+}
+```
+
+**Red:** Remove `.AsNoTracking()` from `GetPagedAsync` — `ChangeTracker.Entries<Artist>()`
+returns 1 entry — first Assert fails.  
+**Green:** `.AsNoTracking()` present — ChangeTracker empty — both Asserts pass.
+
+---
+
+## Interface changes summary (breaking — internal only)
+
+`IArtistRepository.GetPagedAsync` and `SearchByNameAsync` change return types. All consumers
+(`ArtistService`, test classes) are updated in the same commit. No public NuGet API is affected.
+
+---
+
+## Verification checklist
+
+- [ ] `dotnet build` — 0 errors
+- [ ] `dotnet test` — 0 failures (regression test Red before fix, Green after)
+- [ ] Emulator: open ArtistsPage (list loads), tap Edit on any artist, change name, Save — no crash, name updated in list
+- [ ] Emulator: open ArtistsPage, scroll quickly while editing — no crash
+- [ ] BUG-018 BACKLOG row → ✅ Fixed
+
+---
+
+## Out of scope (tracked in BACKLOG)
+
+- `GetByExternalIdAsync` import-path tracking behaviour: verified no mutation via returned ref; `AsNoTracking()` added
+- `Infra/Repository` + `Infra/Repositories` folder consolidation → separate BACKLOG entry
+- Guidelines update for global NoTracking pattern → separate BACKLOG entry (after smoke test)
+- Persons / Songs / Venues CRUD read model refactoring → separate BACKLOG entry
+- Specification Pattern for cross-provider business logic → future architectural initiative
+- `CatalogEntries.Count()` correlated subquery optimisation → existing BACKLOG entry (evidence-driven)
