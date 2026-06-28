@@ -75,7 +75,7 @@
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <dx:DXButton Style="{StaticResource StandardIconButton}"
-                                     Icon="navigate_next"
+                                     Icon="arrow_forward_outlined"
                                      InputTransparent="True" />
                     </lists:ListItem.TrailingContent>
                     <lists:ListItem.GestureRecognizers>
@@ -168,7 +168,7 @@
                             </lists:ListItem.LeadingContent>
                             <lists:ListItem.TrailingContent>
                                 <dx:DXButton Style="{StaticResource StandardIconButton}"
-                                             Icon="navigate_next"
+                                             Icon="arrow_forward_outlined"
                                              InputTransparent="True" />
                             </lists:ListItem.TrailingContent>
                             <lists:ListItem.GestureRecognizers>
