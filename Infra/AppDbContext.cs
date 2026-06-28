@@ -31,6 +31,11 @@ public class AppDbContext : DbContext
         // Collation registration is handled automatically by CollationInterceptor
         // The interceptor registers NOCASE_NOACCENT on every connection (including migrations)
         // No need for manual registration here anymore
+
+        // Global NoTracking default (BUG-018) — prevents ChangeTracker pollution in concurrent queries
+        // Explicit .AsNoTracking() on list methods provides defence-in-depth
+        // Edit queries use explicit .AsTracking() to enable change detection
+        ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
     }
 
     /// <summary>

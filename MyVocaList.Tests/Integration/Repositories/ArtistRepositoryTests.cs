@@ -53,7 +53,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
         var (items, totalCount) = await _repo.GetPagedAsync(1, 20, string.Empty, ct: CancellationToken.None);
 
         Assert.Equal(3, totalCount);
-        var names = items.Select(x => x.artist.Name).ToList();
+        var names = items.Select(x => x.Name).ToList();
         Assert.Equal("ABBA", names[0]);
         Assert.Equal("Metallica", names[1]);
         Assert.Equal("The Rolling Stones", names[2]);
@@ -70,7 +70,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
         var (items, totalCount) = await _repo.GetPagedAsync(1, 20, "beatl", ct: CancellationToken.None);
 
         Assert.Equal(1, totalCount);
-        Assert.Equal("The Beatles", items.Single().artist.Name);
+        Assert.Equal("The Beatles", items.Single().Name);
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
 
         Assert.Equal(3, totalCount);
         Assert.Single(items);
-        Assert.Equal("Artist C", items.Single().artist.Name);
+        Assert.Equal("Artist C", items.Single().Name);
     }
 
     [Fact]
@@ -108,7 +108,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
 
         var (items, _) = await _repo.GetPagedAsync(1, 20, string.Empty, ct: CancellationToken.None);
 
-        Assert.Equal(2, items.Single().catalogCount);
+        Assert.Equal(2, items.Single().CatalogCount);
     }
 
     // ── Case-insensitive search ───────────────────────────────────────────
@@ -122,7 +122,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
         var (items, totalCount) = await _repo.GetPagedAsync(1, 20, "QUEEN", ct: CancellationToken.None);
 
         Assert.Equal(1, totalCount);
-        Assert.Equal("Queen", items.Single().artist.Name);
+        Assert.Equal("Queen", items.Single().Name);
     }
 
     // ── SearchByNameAsync ─────────────────────────────────────────────────
@@ -245,18 +245,18 @@ public class ArtistRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    // [AC] BUG-018: UpdateAsync must not throw when the same Artist is already in the EF change tracker
-    public async Task UpdateAsync_EntityAlreadyTracked_DoesNotThrow()
+    // [AC] BUG-018: UpdateAsync must work with detached instances from form submissions
+    public async Task UpdateAsync_DetachedInstance_Updates()
     {
-        // Arrange — persist the artist and let EF track it via GetByIdAsync (tracking query)
-        var artist = MakeArtist("Tracked Artist");
+        // Arrange — persist the artist
+        var artist = MakeArtist("Original Artist");
         _db.Set<Artist>().Add(artist);
         await _db.SaveChangesAsync();
 
-        // Load via tracking query so the entity is already in the change tracker
-        var trackedInstance = await _db.Artists.FirstAsync(a => a.Id == artist.Id);
+        // Detach — simulates returning from a service layer where the context is not shared
+        _db.ChangeTracker.Clear();
 
-        // Create a second C# instance with the same Id (simulates concurrent Task.Run loads)
+        // Create a detached instance with modified values (simulates data from form/service layer)
         var editedInstance = new Artist
         {
             Id        = artist.Id,
@@ -265,7 +265,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
             UpdatedAt = DateTime.UtcNow
         };
 
-        // Act — must not throw InvalidOperationException despite trackedInstance already being tracked
+        // Act — UpdateAsync with a detached instance should not throw
         var exception = await Record.ExceptionAsync(async () =>
         {
             await _repo.UpdateAsync(editedInstance, CancellationToken.None);
@@ -339,7 +339,7 @@ public class ArtistRepositoryTests : IAsyncLifetime
         var (items, totalCount) = await _repo.GetPagedAsync(1, 20, "bjork", ct: CancellationToken.None);
 
         Assert.Equal(1, totalCount);
-        Assert.Equal("Björk", items.Single().artist.Name);
+        Assert.Equal("Björk", items.Single().Name);
     }
 
     // ── BUG-018 Regression test ───────────────────────────────────────────
