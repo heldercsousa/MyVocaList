@@ -15,6 +15,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <!-- Overrides EF Core's transitive SQLitePCLRaw.bundle_e_sqlite3 2.1.11 (vulnerable
+         lib.e_sqlite3.* natives, NU1903) with the 3.x stack (SourceGear.sqlite3 / SQLite
+         3.50.4.5). Version pinned centrally in Directory.Packages.props. -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="System.Security.Cryptography.Xml" />
   </ItemGroup>

@@ -13,6 +13,13 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <!-- EF Core 10 / Microsoft.Data.Sqlite 10 pull SQLitePCLRaw.bundle_e_sqlite3 2.1.11
+         transitively, whose SQLitePCLRaw.lib.e_sqlite3.* natives carry a known high-severity
+         SQLite vulnerability (NU1903, GHSA-2m69-gcr7-jv3q) with no patch in the 2.1 line.
+         The 3.x stack replaces the vulnerable lib.* packages with SourceGear.sqlite3
+         (SQLite 3.50.4.5). Microsoft.Data.Sqlite.Core 10 requires core [2.1.11, ) with no
+         upper bound, so 3.x is compatible. Activated via the direct reference in Infra. -->
+    <PackageVersion Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
     <PackageVersion Include="Plugin.LocalNotification" Version="14.1.0" />
     <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.8" />
   </ItemGroup>
