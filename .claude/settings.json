@@ -139,6 +139,12 @@
   },
   "plansDirectory": "Docs/Management",
   "enabledPlugins": {
-    "context-budget@teslasoft-skills": true
+    "context-budget@teslasoft-skills": true,
+    "dotnet-skills@dotnet-skills": true,
+    "ddd-dotnet@dotnet-claude-code-skills": true,
+    "data-dotnet@dotnet-claude-code-skills": true,
+    "bdd-dotnet@dotnet-claude-code-skills": true,
+    "ux@teslasoft-skills": true,
+    "frontend-design@claude-plugins-official": true
   }
 }
