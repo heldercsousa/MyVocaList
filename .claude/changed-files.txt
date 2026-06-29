@@ -1706,3 +1706,5 @@ Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-
 Docs/Management/BACKLOG.md
 MyVocaList/MyVocaList.csproj
 Directory.Packages.props
+Directory.Packages.props
+Infra/MyVocaList.Infra.csproj
