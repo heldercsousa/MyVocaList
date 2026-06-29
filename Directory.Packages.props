@@ -42,8 +42,10 @@
     <PackageVersion Include="Sentry.Maui" Version="5.*" />
     <PackageVersion Include="Sentry.Serilog" Version="5.*" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
-    <!-- Pin to match Sentry.Maui's transitive Xamarin.AndroidX.Lifecycle.Common version,
-         resolving NU1608 range conflict (Java8 accepts up to < 2.8.8 by default). -->
+    <!-- Aligns Xamarin.AndroidX.Lifecycle.Common.Java8 with the Lifecycle.Common 2.9.2.1
+         resolved by the MAUI/AndroidX graph, resolving the NU1608 range conflict (Java8's
+         default 2.8.7.2 caps Common at < 2.8.8). CPM only pins direct references, so this
+         version takes effect via the Android-only PackageReference in MyVocaList.csproj. -->
     <PackageVersion Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.9.2.1" />
   </ItemGroup>
   <!-- ================================================================ -->

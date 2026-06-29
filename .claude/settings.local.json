@@ -162,6 +162,19 @@
   "disabledMcpjsonServers": [
     "sqlite"
   ],
+  "skillOverrides": {
+    "maui-geolocation": "off",
+    "maui-authentication": "off",
+    "maui-animations": "off",
+    "maui-hot-reload-diagnostics": "off",
+    "maui-local-notifications": "off",
+    "maui-localization": "off",
+    "maui-permissions": "off",
+    "maui-platform-invoke": "off",
+    "maui-rest-api": "off",
+    "maui-secure-storage": "off",
+    "release": "off"
+  },
   "hooks": {
     "UserPromptSubmit": [
       {
