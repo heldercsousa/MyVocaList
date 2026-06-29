@@ -138,6 +138,16 @@
 		<PackageReference Include="MinVer" PrivateAssets="All" />
 	</ItemGroup>
 
+	<!-- Android transitive-dependency alignment.
+	     Sentry.Maui pulls Xamarin.AndroidX.Lifecycle.Common.Java8 2.8.7.2, whose constraint
+	     (Common >= 2.8.7.2 && < 2.8.8) conflicts with Lifecycle.Common 2.9.2.1 resolved by the
+	     MAUI/AndroidX graph (NU1608). Central Package Management only pins versions for direct
+	     references, so this explicit (Android-only) reference activates the 2.9.2.1 pin in
+	     Directory.Packages.props, aligning Java8 with the resolved Common version. -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\Domain\MyVocaList.Domain.csproj" />
 		<ProjectReference Include="..\Infra\MyVocaList.Infra.csproj" />
