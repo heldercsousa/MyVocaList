@@ -1762,3 +1762,13 @@ Docs/Management/DevCycleCraft/ui-form-validation-guide/ORCHESTRATION-HANDOFF.md
 Docs/Management/DevCycleCraft/ui-form-validation-guide/ORCHESTRATION-HANDOFF.md
 Docs/Management/DevCycleCraft/ui-form-validation-guide/ORCHESTRATION-HANDOFF.md
 Docs/Management/BACKLOG.md
+.claude/worktrees/agent-afd1b94bef4c77862/MyVocaList.Tests/Unit/ViewModels/PersonFormViewModelTests.cs
+.claude/worktrees/agent-afd1b94bef4c77862/MyVocaList/UI/ViewModels/PersonFormViewModel.cs
+.claude/worktrees/agent-afd1b94bef4c77862/MyVocaList/UI/ViewModels/PersonFormViewModel.cs
+.claude/worktrees/agent-afd1b94bef4c77862/MyVocaList/UI/ViewModels/PersonFormViewModel.cs
+.claude/worktrees/agent-afd1b94bef4c77862/MyVocaList/UI/Pages/People/PersonFormPage.xaml
+.claude/worktrees/agent-afd1b94bef4c77862/MyVocaList/UI/Pages/People/PersonFormPage.xaml
+.claude/worktrees/agent-afd1b94bef4c77862/MyVocaList/UI/Pages/People/PersonFormPage.xaml.cs
+.claude/worktrees/agent-afd1b94bef4c77862/MyVocaList.sln
+.claude/worktrees/agent-afd1b94bef4c77862/Docs/Management/BusinessFeatures/persons/form-validation-task-log.md
+.claude/worktrees/agent-afd1b94bef4c77862/Docs/Management/BACKLOG.md
