@@ -373,6 +373,25 @@ public class SongFormViewModelTests
         urlService.Verify(s => s.RemoveUrlAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    // ── BUG-020: SongFormPage FAB crash — SecureStorage failure in OnAppearing ────
+
+    // [AC] BUG-020: SecureStorage.GetAsync failure (e.g. corrupted Android keystore) must not
+    // crash the app when SongFormPage.OnAppearing (async void) awaits RefreshApiKeyFlagAsync.
+    [Fact]
+    public async Task RefreshApiKeyFlagAsync_SecureStorageThrows_DoesNotThrowAndSetsFalse()
+    {
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>()))
+                     .ThrowsAsync(new InvalidOperationException("Keystore error"));
+
+        var sut = CreateSut(secureStorage: secureStorage);
+
+        var exception = await Record.ExceptionAsync(() => sut.RefreshApiKeyFlagAsync());
+
+        Assert.Null(exception);
+        Assert.False(sut.HasYouTubeApiKey);
+    }
+
     // ── Resolution sheet: merge sheet state from FieldDiffs ───────────────
 
     // [AC] AC-4.2 — target has manual edits → merge field rows populated

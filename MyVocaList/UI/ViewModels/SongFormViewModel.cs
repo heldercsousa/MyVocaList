@@ -642,8 +642,20 @@ public partial class SongFormViewModel : ViewModelBase
 
     public async Task RefreshApiKeyFlagAsync()
     {
-        var key = await _secureStorage.GetAsync("youtube_api_key");
-        HasYouTubeApiKey = !string.IsNullOrWhiteSpace(key);
+        // BUG-020: SecureStorage.GetAsync can throw (e.g. corrupted Android keystore alias).
+        // This is awaited from SongFormPage.OnAppearing, which is `async void` — an unhandled
+        // exception here escapes to AppDomain.UnhandledException and crashes the app. Treat a
+        // storage failure the same as "no key configured" instead of crashing.
+        try
+        {
+            var key = await _secureStorage.GetAsync("youtube_api_key");
+            HasYouTubeApiKey = !string.IsNullOrWhiteSpace(key);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to read YouTube API key from secure storage");
+            HasYouTubeApiKey = false;
+        }
     }
 
     private async Task LoadKaraokeUrlsAsync(CancellationToken ct = default)
