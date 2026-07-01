@@ -1744,3 +1744,14 @@ Docs/Management/BACKLOG.md
 MyVocaList.sln
 MyVocaList.sln
 Docs/Management/BACKLOG.md
+.claude/worktrees/agent-a26c6ffb2f045a11d/MyVocaList.Tests/Unit/ViewModels/VenueFormViewModelTests.cs
+.claude/worktrees/agent-a26c6ffb2f045a11d/MyVocaList/UI/ViewModels/VenueFormViewModel.cs
+.claude/worktrees/agent-a26c6ffb2f045a11d/MyVocaList/UI/ViewModels/VenueFormViewModel.cs
+.claude/worktrees/agent-a26c6ffb2f045a11d/MyVocaList/UI/ViewModels/VenueFormViewModel.cs
+.claude/worktrees/agent-a26c6ffb2f045a11d/MyVocaList/UI/Pages/Venues/VenueFormPage.xaml
+.claude/worktrees/agent-a26c6ffb2f045a11d/MyVocaList/UI/Pages/Venues/VenueFormPage.xaml.cs
+.claude/worktrees/agent-a26c6ffb2f045a11d/MyVocaList.sln
+.claude/worktrees/agent-a26c6ffb2f045a11d/Docs/Management/BusinessFeatures/venues/form-validation-task-log.md
+Docs/Management/DevCycleCraft/ui-form-validation-guide/ORCHESTRATION-HANDOFF.md
+MyVocaList.sln
+Docs/Management/BACKLOG.md
