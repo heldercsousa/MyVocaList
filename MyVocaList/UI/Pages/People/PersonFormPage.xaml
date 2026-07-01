@@ -25,7 +25,8 @@
                 ErrorText="{Binding NameErrorText}"
                 Suggestions="{Binding Suggestions}"
                 SearchRequestedCommand="{Binding SearchPersonsCommand}"
-                SuggestionSelectedCommand="{Binding SuggestionSelectedCommand}" />
+                SuggestionSelectedCommand="{Binding SuggestionSelectedCommand}"
+                BlurredWithoutSelectionCommand="{Binding ValidateNameCommand}" />
 
             <!-- Character counter -->
             <Label Text="{Binding CharacterCounterText}"
@@ -47,19 +48,23 @@
             </Label>
 
             <!-- Birthday (optional) -->
-            <dxe:TextEdit Text="{Binding PersonBirthday, Mode=TwoWay}"
+            <dxe:TextEdit x:Name="birthdayEdit"
+                          Text="{Binding PersonBirthday, Mode=TwoWay}"
                           LabelText="Birthday (optional)"
                           PlaceholderText="DD/MM"
                           HasError="{Binding BirthdayHasError}"
-                          ErrorText="{Binding BirthdayErrorText}" />
+                          ErrorText="{Binding BirthdayErrorText}"
+                          Unfocused="OnBirthdayUnfocused" />
 
             <!-- Email (optional) -->
-            <dxe:TextEdit Text="{Binding PersonEmail, Mode=TwoWay}"
+            <dxe:TextEdit x:Name="emailEdit"
+                          Text="{Binding PersonEmail, Mode=TwoWay}"
                           LabelText="Email (optional)"
                           PlaceholderText="singer@example.com"
                           Keyboard="Email"
                           HasError="{Binding EmailHasError}"
-                          ErrorText="{Binding EmailErrorText}" />
+                          ErrorText="{Binding EmailErrorText}"
+                          Unfocused="OnEmailUnfocused" />
 
             <!-- Action buttons -->
             <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
