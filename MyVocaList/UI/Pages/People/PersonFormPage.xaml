@@ -52,6 +52,8 @@
                           Text="{Binding PersonBirthday, Mode=TwoWay}"
                           LabelText="Birthday (optional)"
                           PlaceholderText="DD/MM"
+                          Mask="00/00"
+                          MaskPlaceholderChar="_"
                           HasError="{Binding BirthdayHasError}"
                           ErrorText="{Binding BirthdayErrorText}"
                           Unfocused="OnBirthdayUnfocused" />
