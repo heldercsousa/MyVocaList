@@ -2,7 +2,7 @@
 
 > **Single source of truth to resume the "Form validation" feature.** A fresh session should read ONLY this file + the 5 BACKLOG rows (168–173) to continue — do not re-read the whole feature history. Supersedes the RESUME POINT in `Docs/Management/pure-skipping-firefly.md`.
 >
-> Last updated: 2026-07-01. Reason for handoff: orchestrator context grew to ~235k and account usage limits were hit repeatedly; clearing to a fresh session.
+> Last updated: 2026-07-01 (session 2). Progress this session: Task 02 (Venue) reviewed→merged (`5c669f5`); Task 03 (Person) implemented→reviewed→merged (`11ce501`). **develop tip after Task 03: `11ce501`.** RESUME AT Task 04 (Songs). Reason for handoff: Helder requested stop at ~170k tokens after Task 03 safely merged.
 
 ## Goal
 Establish ONE form-validation standard in the project's internal guidelines, then apply it to every app form — Venue (reference) first, then the rest **in BACKLOG order: Venues → Singer(Person) → Songs → Artists.** Same pattern replicated to each; each obeys the updated guidelines.
@@ -30,9 +30,19 @@ Establish ONE form-validation standard in the project's internal guidelines, the
 - Files changed (6): `MyVocaList/UI/ViewModels/VenueFormViewModel.cs`, `MyVocaList/UI/Pages/Venues/VenueFormPage.xaml`, `…/VenueFormPage.xaml.cs`, `MyVocaList.Tests/Unit/ViewModels/VenueFormViewModelTests.cs` (NEW), `Docs/Management/BusinessFeatures/venues/form-validation-task-log.md` (NEW), `MyVocaList.sln`. `Services/VenueService.cs` intentionally unchanged (already returns the standard tuple).
 - **Helder gate remaining:** emulator E2E of the Venue form (manual — subagents can't run the emulator).
 
-### 💡 Tasks 03–05 — Singer(Person) → Songs → Artists — PENDING
-- Each: Sonnet subagent in a worktree off `origin/develop` (must contain the Venue merge first). Copy the **Reference Pattern** below. TDD, per-task Opus review, merge, then next.
-- **Person/Singer form files** (task 03): `MyVocaList/UI/Pages/People/PersonFormPage.xaml(.cs)`, `MyVocaList/UI/ViewModels/PersonFormViewModel.cs`, `Services/PersonService.cs` (`ValidateNameInput`, `ValidateBirthday`, `ValidateEmail`). Multi-field (name + birthday date + email). **Remove the fragile `SetInlineError` substring routing** — use per-field HasError/ErrorText.
+### ✅ Task 03 — Singer(Person) form — DONE, MERGED to `develop`
+- Merge commit **`11ce501`** (pushed). Branch `worktree-agent-afd1b94bef4c77862` tip `f3428e1`. First **multi-field** form (name + birthday + email).
+- Opus review verdict: **APPROVE** — all six Reference-Pattern points verified per field; truthful test count (30 total in `PersonFormViewModelTests`, 18 net-new; suite 386/386); no native dialogs; birthday no-year mechanism untouched (Helder gate).
+- `PersonService.ValidateNameInput/ValidateBirthday/ValidateEmail` already existed with full coverage — reused unchanged (no service edit).
+- Edit-mode dirty-guard: `_isHydrating` (default true) + `CompleteHydration()` called from `PersonFormPage.OnAppearing` (Shell applies `[QueryProperty]` before `OnAppearing`); each `On<Field>Changed` early-returns while hydrating. ViewModels are Transient so back-nav gets a fresh hydration cycle.
+- `SetInlineError` fragile substring routing **removed** (grep-confirmed no remaining consumers) → replaced by `ApplyAsyncFailureAsync`: the one field-attributable async failure (email uniqueness) routes to the email field; non-attributable failures ("Singer not found") go to the snackbar.
+- Files changed (7): `PersonFormViewModel.cs`, `PersonFormPage.xaml(.cs)`, `PersonFormViewModelTests.cs` (NEW), `persons/form-validation-task-log.md` (NEW), `MyVocaList.sln`, `BACKLOG.md`.
+- **Helder gate remaining:** emulator E2E of the Person form.
+
+### 💡 Tasks 04–05 — Songs → Artists — PENDING (RESUME HERE)
+- **NEXT ACTION (Task 04, Songs):** Sonnet subagent in a worktree off `origin/develop` (now contains Venue + Person merges). Copy the **Reference Pattern** below. TDD, mandatory fresh-Opus review, merge before Task 05.
+  - ⚠️ **Single-writer check first:** Task 04 edits `SongFormViewModel`. A parallel session committed BUG-020 `SongFormViewModel` fix (`3b2cb75`) — confirm it is in `origin/develop` and that develop has no uncommitted SongForm changes before dispatching, to avoid a collision.
+- **Task 05 (Artists):** same pattern on `ArtistFormPage`/`ArtistFormViewModel` after Songs merges.
 
 ---
 
@@ -42,7 +52,10 @@ Establish ONE form-validation standard in the project's internal guidelines, the
 3. **XAML:** `dxe:TextEdit`/`dxe:DateEdit` with `HasError`/`ErrorText` bindings + `Unfocused="On<Field>Unfocused"` — inline only, **no dialog/summary/snackbar/wall-of-red**.
 4. **Code-behind:** `private VM ViewModel => (VM)BindingContext;` and `On<Field>Unfocused(...) => ViewModel.Validate<Field>Command.Execute(null);`
 5. Multi-field: repeat the block once per field (own dirty flag / command / HasError / ErrorText). Don't route one message to a field by substring.
-6. **Edit-mode pre-population must NOT mark a field dirty** (Opus review note, Task 02). `[QueryProperty]`/edit-mode assignment fires `On<Field>Changed`, which would set `_<field>Dirty = true` before the user touches the field. Benign for Venue (an existing name is valid) but the multi-field forms (Person/Songs/Artists) pre-fill fields that *could* be invalid → premature error flash on first blur. Guard pre-population so it does not set the dirty flag (e.g. suppress the dirty-set during initial load / edit-mode hydration).
+6. **Edit-mode pre-population must NOT mark a field dirty** (Opus review note, Task 02). `[QueryProperty]`/edit-mode assignment fires `On<Field>Changed`, which would set `_<field>Dirty = true` before the user touches the field. Benign for Venue (an existing name is valid) but the multi-field forms (Person/Songs/Artists) pre-fill fields that *could* be invalid → premature error flash on first blur. Guard pre-population so it does not set the dirty flag.
+   - **Proven implementation (Task 03 Person):** `private bool _isHydrating = true;` + `public void CompleteHydration() => _isHydrating = false;` called from `<Form>Page.OnAppearing` (Shell applies `[QueryProperty]` values before `OnAppearing`). Each `On<Field>Changed` does `if (_isHydrating) return;` before marking dirty. Never re-arm `_isHydrating` to true — ViewModels are Transient, so back-nav yields a fresh instance. **Copy this verbatim for Songs/Artists.**
+7. **Async-failure routing (replaces removed `SetInlineError`)** (Task 03). Do NOT route service failure messages across fields by substring. Route the one known field-attributable async failure (e.g. uniqueness) to that field's HasError/ErrorText; send any non-field-attributable failure to the **snackbar**, not a guessed field. (Task 03 used `ApplyAsyncFailureAsync` with a single narrow `Contains` for the uniqueness message.)
+8. **Testability improvement to propagate (Task 03):** in `SaveAsync`, use `Shell.Current?.GoToAsync("..") ?? Task.CompletedTask` (null-safe) so the success-path can be unit-tested (verifies the service call) — better than the Venue reference which cannot.
 
 ## Helder gates (do NOT block form work; log them)
 - **DateEdit day/month-only birthday (Person)** — OPEN: DateEdit has no masked no-year entry; two candidate paths documented in `dialogs-validation.md`. Needs emulator decision.
@@ -63,6 +76,7 @@ Establish ONE form-validation standard in the project's internal guidelines, the
 | 1C void (limit-killed) | `worktree-agent-a9d55a7c4aac000f1` | `efcc492` | void, no useful work | delete |
 | 1C guideline impl | `worktree-agent-aaae95a5d8a6c56ec` | `c1814652` | content merged to develop `256e1fb` | safe to delete |
 | Venue form | `worktree-agent-a26c6ffb2f045a11d` | `ed0d57e` | merged to develop `5c669f5` | safe to delete |
+| Person form | `worktree-agent-afd1b94bef4c77862` | `f3428e1` | merged to develop `11ce501` | safe to delete |
 
 ## Efficient continuation prompt (paste into the fresh session)
-> Resume the Form validation orchestration. Read ONLY `Docs/Management/DevCycleCraft/ui-form-validation-guide/ORCHESTRATION-HANDOFF.md` and BACKLOG rows 168–173 — do not re-read feature history. You are the orchestrator (shell/git only; never read source; delegate all code to subagents; each subagent in its own worktree with the STEP 0 fetch+reset guard). Continue exactly at: (1) dispatch a fresh **Opus** reviewer for the Venue branch `worktree-agent-a26c6ffb2f045a11d` (`9c51d4ba`); on APPROVE, merge it to `develop` and push. (2) Then apply the Reference Pattern (in the handoff) to the remaining forms **in BACKLOG order — Singer(Person) → Songs → Artists** — one **Sonnet** subagent each, worktree off `origin/develop`, TDD, mandatory Opus review, merge before the next. Update BACKLOG statuses and this handoff after each. Respect the Helder gates and gotchas listed in the handoff. Be autonomous; all authorizations granted.
+> Resume the Form validation orchestration. Read ONLY `Docs/Management/DevCycleCraft/ui-form-validation-guide/ORCHESTRATION-HANDOFF.md` and BACKLOG rows 168–173 — do not re-read feature history. You are the orchestrator (shell/git only; never read source; delegate all code to subagents; each subagent in its own worktree with the STEP 0 fetch+reset guard). **Tasks 02 (Venue) and 03 (Person) are DONE + merged (develop tip `11ce501`).** Continue exactly at Task 04 (Songs): dispatch one **Sonnet** subagent in a worktree off `origin/develop`, applying the Reference Pattern (points 1–8, incl. the proven `_isHydrating` guard) to `SongFormPage`/`SongFormViewModel` — TDD, then a mandatory fresh-**Opus** review, then merge to develop before Task 05 (Artists). ⚠️ Before dispatching Task 04, confirm BUG-020 `SongFormViewModel` fix (`3b2cb75`) is in `origin/develop` and develop has no uncommitted SongForm changes (single-writer). Update BACKLOG statuses and this handoff after each. Respect the Helder gates and gotchas. Be autonomous; all authorizations granted.
