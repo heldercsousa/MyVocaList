@@ -504,8 +504,17 @@ Use a pinned bottom action bar (outside the `ScrollView`, inside a `Grid`) when:
 </Grid>
 ```
 
+### Validation (law)
+All form fields validate per the **Form Validation Standard** in `dialogs-validation.md` — validate on blur
+(dirty fields), switch to keystroke-on-error so the error clears the moment it is fixed, and use Save as the
+safety net for cross-field / uniqueness / DB checks. Errors are inline per field via `HasError`/`ErrorText`
+only — never a summary, dialog, or snackbar. Validation rules live in `Validate<Field>Input` service methods
+(business logic in Services), not in ViewModels or pages. This is a pointer; the standard is single-sourced in
+`dialogs-validation.md`.
+
 ### Never
 - Do not use `DisplayAlert`, `DisplayActionSheet`, or `DisplayPromptAsync` for validation or confirmation. See `dialogs-validation.md`.
+- Do not validate on Save only (the "Wall of Red" anti-pattern) — see the Form Validation Standard in `dialogs-validation.md`.
 - Do not use `FloatingToolbar` on a form page — it is hidden behind the keyboard on Android.
 
 ---

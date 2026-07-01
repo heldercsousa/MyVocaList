@@ -167,6 +167,147 @@ VenueNameErrorText = string.Empty;
 ```
 
 **Rule:** Never use `DisplayAlert` for validation errors. Set `HasError`/`ErrorText` inline under the field.
+See **Form Validation Standard** below for the full per-field timing, wiring, and surfacing rules.
+
+---
+
+## Form Validation Standard
+
+> **This is the single, canonical form-input validation standard for MyVocaList. Every form page
+> (Venue, Person/Singer, Songs, Artists, and all future forms) must follow it.** The **Venue form** is the
+> single-field reference; the **Person form** (name + birthday + email) is the multi-field reference that
+> Songs and Artists copy. Sourced from `Docs/Management/DevCycleCraft/ui-form-validation-guide/`.
+>
+> Constitutional constraints this standard upholds: DevExpress-first, native-dialog ban (no
+> `DisplayAlert`/summary for validation), MD3 terminology, English-only, and **business logic in Services**
+> (validation rules live in `Validate<Field>Input` service methods — never in ViewModels or pages).
+
+### Validation timing — blur first, keystroke on error, submit as safety net
+
+The "Gold Standard" UX rule is **punish late, reward early**. Validation timing is per field and depends on
+the field's state:
+
+1. **On blur** (field `Unfocused`): if the field is **dirty** (the user has edited it), run the field's
+   service validator and set `HasError`/`ErrorText`. Do **not** fire an error on a *pristine* field the user
+   only tabbed through without editing — that is premature and feels aggressive. (Untouched required fields
+   are caught by the Save safety net.)
+2. **While a field is in error:** re-validate that field **on every keystroke** so the error clears the
+   instant it becomes valid ("reward early"). On `TextChanged`, if `<Field>HasError` is currently `true`,
+   re-run the validator and clear the error when it passes. Do **not** run full validation on keystroke for a
+   field that is *not yet* in error (the "impatient teacher" anti-pattern).
+3. **On Save:** re-run **all** field validators (final safety net) plus any cross-field / uniqueness / DB
+   checks that require the service (duplicate name, email-taken, confirm-password, inventory). A Save-time
+   service failure maps back to the offending field's `HasError`/`ErrorText`.
+
+**Error messages must be specific and actionable** — say what is wrong and how to fix it (e.g. "Name must be
+30 characters or fewer"), never a bare "Invalid".
+
+#### Decision table — field type → when it validates
+
+| Field type | Blur (dirty) | Keystroke while in error | Debounced keystroke (~500 ms) | Submit |
+|------------|:---:|:---:|:---:|:---:|
+| Standard field (name, email, masked date) | ✅ validate | ✅ clear-on-fix | — | ✅ safety net |
+| Guidance-only (character counter, strength meter) | — | — | ✅ guidance | — |
+| Availability / uniqueness (username, duplicate name) | — | — | ✅ guidance + pending indicator | ✅ authoritative check |
+| Cross-field (confirm-password, inventory) | — | — | — | ✅ only |
+
+For any async guidance/availability check, surface a **pending status indicator** while the request is in
+flight (visibility of system status) and debounce ~500 ms so the server is not hit per keystroke.
+
+#### Anti-patterns — forbidden as the primary channel
+
+| Anti-pattern | What it is | Why forbidden |
+|--------------|-----------|---------------|
+| **Wall of Red** | Validating only on Submit, bouncing the user to the top with a list of errors | High cognitive load, form abandonment (R5) |
+| **Impatient Teacher** | Validating every keystroke *always* (even before the field is in error) | Penalizes the user mid-entry; aggressive and distracting |
+| **Native dialog / summary / snackbar for validation** | `DisplayAlert`, an error-summary banner, or a snackbar to report a field error | Bypasses theme + MD3; not field-addressed; snackbar is for non-blocking success only |
+
+### Wiring the pattern (ViewModel + XAML)
+
+**Blur hook — CONFIRMED (DevExpress 25.2.x, Context7 2026-07-01):** `dxe:TextEdit` and `dxe:DateEdit` inherit
+the MAUI `Unfocused` event (from `VisualElement`). Subscribe to it in the page code-behind and invoke a VM
+`Validate<Field>Command`. (If a form is ever migrated to `dxdf:DataFormView`, the DX-native equivalent is
+`ValidationMode="LostFocus"` — the app uses standalone editors today, so `Unfocused` is the mechanism.)
+
+**Service (business logic — required):**
+```csharp
+// One validator per field, returning the standard tuple (see code-principles.md § Service Return Patterns).
+(bool isValid, string message) ValidateNameInput(string name);
+```
+
+**ViewModel (invokes validation, maps result to HasError/ErrorText — no business rules here):**
+```csharp
+[ObservableProperty] private string _name = string.Empty;
+[ObservableProperty] private bool _nameHasError;
+[ObservableProperty] private string _nameErrorText = string.Empty;
+private bool _nameDirty;   // becomes true once the user edits the field
+
+// Blur: validate only a dirty field
+[RelayCommand]
+private void ValidateName()
+{
+    if (!_nameDirty) return;                       // pristine field: no premature error
+    var (isValid, message) = _service.ValidateNameInput(Name);
+    NameHasError = !isValid;
+    NameErrorText = isValid ? string.Empty : message;
+}
+
+// Keystroke: mark dirty; re-validate ONLY if already in error (reward early)
+partial void OnNameChanged(string value)
+{
+    _nameDirty = true;
+    if (!NameHasError) return;                     // not in error yet: do nothing (no impatient teacher)
+    var (isValid, message) = _service.ValidateNameInput(value);
+    NameHasError = !isValid;
+    NameErrorText = isValid ? string.Empty : message;
+}
+```
+
+**XAML (inline error binding + blur hook in code-behind):**
+```xml
+<dxe:TextEdit x:Name="nameEdit"
+              Text="{Binding Name, Mode=TwoWay}"
+              LabelText="Name"
+              HasError="{Binding NameHasError}"
+              ErrorText="{Binding NameErrorText}"
+              Unfocused="OnNameUnfocused" />
+```
+```csharp
+// Page code-behind — bridge the MAUI Unfocused event to the VM command
+private void OnNameUnfocused(object sender, FocusEventArgs e) => ViewModel.ValidateNameCommand.Execute(null);
+```
+
+### Error surfacing — inline only
+
+- Surface every validation error **inline, under the field**, via `dxe:TextEdit`/`dxe:DateEdit`
+  `HasError` + `ErrorText`. Never a summary banner, dialog, or snackbar for validation.
+- **Field-addressed errors, not substring routing.** Each field has its own `Validate<Field>Input` and its own
+  `<Field>HasError`/`<Field>ErrorText`. Do **not** route a single service message to a field by substring
+  matching (the Person form's `SetInlineError` substring approach is the pattern to remove, not replicate).
+
+### Masked inputs — dates
+
+- **Masks are mandatory and never persisted.** Separators (`/`) are applied in the UI only; the DB stores a
+  date type and the value is re-formatted on display. The user manipulates only the day/month/year numbers.
+- **Full dates:** use `dxe:DateEdit` (picker + `DisplayFormat`, e.g. `{0:MM/dd/yyyy}`; the picker cannot
+  produce an out-of-range date, giving built-in validity and satisfying "reuse a specialized validator"), or a
+  masked `dxe:TextEdit` (`Mask="00/00/0000"`) for keyboard-first entry. See `devexpress-patterns.md § DateEdit`.
+- **Locale-driven format:** English `MM/dd/yyyy`, pt-BR `dd/MM/yyyy` (future), Japanese TBD. Do **not**
+  hard-code a single date format. Localization is currently disabled (`useLocalization:false`, no `.resx`) —
+  locale-aware masks are future work; this standard states the intent. See `theme-locale.md § Locale`.
+
+> **OPEN — confirm on emulator (Helder gate): day/month-only birthday (no year).** MyVocaList's Person
+> birthday is entered day/month only, with no year. DevExpress `dxe:DateEdit` has **no** masked no-year
+> text-entry mode — its `Date` is always a full `DateTime`. Two candidate paths, decision pending Helder:
+> (1) masked `dxe:TextEdit` (`Mask="00/00"`) + a service-side `ValidateBirthdayInput` that checks month/day
+> numbers; or (2) `dxe:DateEdit` with a fixed sentinel year + `DisplayFormat="{0:MM/dd}"` (leans on the
+> component's built-in validity). Do not implement the birthday field until this is confirmed on the emulator.
+
+### Integer inputs
+
+> **Spec-incomplete — escalated to Helder.** The requirements doc's Integer section ends with
+> `<TODO> - complete Integer and append any` (`01-ui-form-validation-guide.md`). Do **not** author integer
+> validation rules until Helder completes that section — no rules are invented here. (Traceability item R10.)
 
 ---
 
