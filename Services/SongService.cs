@@ -15,6 +15,7 @@ public class SongService : ISongService
 
     public int MaxTitleLength => 100;
     public int ShowCounterAt => 80;
+    public int MaxVersionLength => 60;
 
     public SongService(
         ISongRepository songRepository,
@@ -40,6 +41,20 @@ public class SongService : ISongService
 
         if (title.Length > MaxTitleLength)
             return (false, $"Title is too long. Maximum {MaxTitleLength} characters.");
+
+        return (true, string.Empty);
+    }
+
+    /// <inheritdoc />
+    public (bool isValid, string message) ValidateVersionInput(string? version, bool isRequired = false)
+    {
+        var trimmed = (version ?? string.Empty).Trim();
+
+        if (isRequired && trimmed.Length == 0)
+            return (false, "A version label is required (e.g. Live, Acoustic, Remix)");
+
+        if (trimmed.Length > MaxVersionLength)
+            return (false, $"Version is too long. Maximum {MaxVersionLength} characters.");
 
         return (true, string.Empty);
     }

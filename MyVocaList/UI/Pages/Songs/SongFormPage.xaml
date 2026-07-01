@@ -39,7 +39,8 @@
                               PlaceholderText="Enter song title"
                               MaxCharacterCount="250"
                               HasError="{Binding TitleHasError}"
-                              ErrorText="{Binding TitleErrorText}" />
+                              ErrorText="{Binding TitleErrorText}"
+                              Unfocused="OnTitleUnfocused" />
 
                 <Label Text="{Binding CharacterCounterText}"
                        IsVisible="{Binding ShowCharacterCounter}"
@@ -64,7 +65,8 @@
                               LabelText="Version (optional)"
                               PlaceholderText="e.g. Live, Acoustic, Remix"
                               HasError="{Binding VersionHasError}"
-                              ErrorText="{Binding VersionErrorText}" />
+                              ErrorText="{Binding VersionErrorText}"
+                              Unfocused="OnVersionUnfocused" />
 
                 <!-- Navigate to song picker -->
                 <lists:ListItem Headline="Search music database">
@@ -288,7 +290,8 @@
                                   PlaceholderText="e.g. Live, Acoustic, Remix 2010"
                                   HasError="{Binding VersionHasError}"
                                   ErrorText="{Binding VersionErrorText}"
-                                  IsVisible="{Binding VersionEntryRequired}" />
+                                  IsVisible="{Binding VersionEntryRequired}"
+                                  Unfocused="OnVersionUnfocused" />
                     <dx:DXButton Content="Save As New Version"
                                  Style="{StaticResource OutlinedButton}"
                                  HorizontalOptions="Fill"
