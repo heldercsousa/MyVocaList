@@ -25,6 +25,10 @@ namespace MyVocaList.UI.ViewModels
         [ObservableProperty] private bool _isCharacterCounterError;
         [ObservableProperty] private bool _isBusy;
 
+        // Becomes true once the user edits the name field. Guards blur validation so a pristine
+        // field the user only tabbed through is not flagged prematurely (Form Validation Standard).
+        private bool _nameDirty;
+
         public bool IsEditMode => VenueId.HasValue;
         public string PageTitle => IsEditMode ? "Edit Venue" : "New Venue";
 
@@ -50,10 +54,38 @@ namespace MyVocaList.UI.ViewModels
             OnPropertyChanged(nameof(PageTitle));
         }
 
+        /// <summary>
+        /// Blur handler (invoked from the page's <c>Unfocused</c> event). Validates the name field
+        /// only when it is dirty — a pristine field the user only tabbed through is left untouched.
+        /// </summary>
+        [RelayCommand]
+        private void ValidateName()
+        {
+            if (!_nameDirty)
+                return;
+
+            ApplyNameValidation(VenueName);
+        }
+
         partial void OnVenueNameChanged(string value)
         {
-            ClearError();
+            _nameDirty = true;
             UpdateCharacterCounter(value?.Length ?? 0);
+
+            // "Reward early": once the field is in error, re-validate on every keystroke so the error
+            // clears the instant it becomes valid. Do NOT validate on keystroke before the field is in
+            // error (that is the "impatient teacher" anti-pattern) — blur/Save handle the first check.
+            if (!NameHasError)
+                return;
+
+            ApplyNameValidation(value);
+        }
+
+        private void ApplyNameValidation(string value)
+        {
+            var (isValid, message) = _venueService.ValidateNameInput(value ?? string.Empty);
+            NameHasError = !isValid;
+            NameErrorText = isValid ? string.Empty : message;
         }
 
         private async Task SaveAsync()
@@ -107,12 +139,6 @@ namespace MyVocaList.UI.ViewModels
         }
 
         private Task CancelAsync() => Shell.Current.GoToAsync("..");
-
-        private void ClearError()
-        {
-            NameHasError = false;
-            NameErrorText = string.Empty;
-        }
 
         private void UpdateCharacterCounter(int length)
         {
