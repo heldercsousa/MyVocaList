@@ -2,7 +2,7 @@
 
 > **Single source of truth to resume the "Form validation" feature.** A fresh session should read ONLY this file + the 5 BACKLOG rows (168–173) to continue — do not re-read the whole feature history. Supersedes the RESUME POINT in `Docs/Management/pure-skipping-firefly.md`.
 >
-> Last updated: 2026-07-01 (session 2). Progress this session: Task 02 (Venue) reviewed→merged (`5c669f5`); Task 03 (Person) implemented→reviewed→merged (`11ce501`). **develop tip after Task 03: `11ce501`.** RESUME AT Task 04 (Songs). Reason for handoff: Helder requested stop at ~170k tokens after Task 03 safely merged.
+> Last updated: 2026-07-01 (session 3). Progress this session: Task 04 (Songs) implementation **STARTED but NOT COMMITTED, NOT REVIEWED, NOT MERGED** — see STATUS below for exact resume point. Reason for handoff: Helder requested a stop-and-document (new session incoming); do NOT advance to Task 05 until Task 04 is finished, reviewed, and merged.
 
 ## Goal
 Establish ONE form-validation standard in the project's internal guidelines, then apply it to every app form — Venue (reference) first, then the rest **in BACKLOG order: Venues → Singer(Person) → Songs → Artists.** Same pattern replicated to each; each obeys the updated guidelines.
@@ -39,10 +39,30 @@ Establish ONE form-validation standard in the project's internal guidelines, the
 - Files changed (7): `PersonFormViewModel.cs`, `PersonFormPage.xaml(.cs)`, `PersonFormViewModelTests.cs` (NEW), `persons/form-validation-task-log.md` (NEW), `MyVocaList.sln`, `BACKLOG.md`.
 - **Helder gate remaining:** emulator E2E of the Person form.
 
-### 💡 Tasks 04–05 — Songs → Artists — PENDING (RESUME HERE)
-- **NEXT ACTION (Task 04, Songs):** Sonnet subagent in a worktree off `origin/develop` (now contains Venue + Person merges). Copy the **Reference Pattern** below. TDD, mandatory fresh-Opus review, merge before Task 05.
-  - ⚠️ **Single-writer check first:** Task 04 edits `SongFormViewModel`. A parallel session committed BUG-020 `SongFormViewModel` fix (`3b2cb75`) — confirm it is in `origin/develop` and that develop has no uncommitted SongForm changes before dispatching, to avoid a collision.
-- **Task 05 (Artists):** same pattern on `ArtistFormPage`/`ArtistFormViewModel` after Songs merges.
+### 🟡 Task 04 — Songs form — IN PROGRESS, **NOT COMMITTED / NOT REVIEWED / NOT MERGED — RESUME HERE**
+
+- **Single-writer pre-check already done and PASSED (2026-07-01, session 3):** confirmed BUG-020 `SongFormViewModel` fix (`3b2cb75`) is present in `origin/develop`; `develop` working tree was clean (`rtk proxy git status --porcelain` empty; `rtk proxy git diff --stat -- '*SongForm*'` empty) before dispatch. Safe to resume without re-checking, unless a new parallel-session commit has landed on `SongFormViewModel.cs`/`SongService.cs` since — re-verify if in doubt.
+- **`.sln` GUID check done:** `artists-songs` SolutionFolder already exists (GUID `{C141C5C9-833C-4A26-...}`, ~line 161 of `MyVocaList.sln`). The new `form-validation-task-log.md` just needs a line added to its existing `ProjectSection(SolutionItems)` — **no new GUID needed** (next free GUID in the `FA1234BC-0001-4000-8000-...` sequence would be `...035` if one is ever needed, but it isn't for this task).
+- **Subagent dispatched:** ONE Sonnet subagent, `isolation:"worktree"`, based off `origin/develop`. Agent ID `aa495a45f830848ae`.
+  - **Worktree path:** `C:\Users\helde\source\repos\MyVocaList\.claude\worktrees\agent-aa495a45f830848ae`
+  - **Branch:** `worktree-agent-aa495a45f830848ae`
+  - **Branch HEAD as of this handoff:** `ad042dd` (== `develop` tip at dispatch time) — **the agent's Songs-form work is NOT YET COMMITTED to this branch.**
+  - **Uncommitted working-tree changes present in that worktree** (confirmed via `git status --porcelain` in the worktree, session 3):
+    ```
+    M Domain/ServicesInterfaces/ISongService.cs
+    M MyVocaList.Tests/Unit/Services/SongServiceTests.cs
+    M MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs
+    M MyVocaList/UI/Pages/Songs/SongFormPage.xaml
+    M MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs
+    M MyVocaList/UI/ViewModels/SongFormViewModel.cs
+    M Services/SongService.cs
+    ```
+  - The agent had reported (mid-task, before first stop) that it was "waiting for the build to finish." It was resumed once (session 3) with instructions to finish the full exit checklist (build/test confirmation, post-edit re-read, task-log at `Docs/Management/BusinessFeatures/artists-songs/form-validation-task-log.md`, `.sln` registration, commit, push). **That resume may still be running in the background, or it may have stopped again without completing — status unknown as of this handoff.** No commit, no task-log file, and no `.sln` edit had landed as of the last check.
+- **NEXT ACTION for the fresh session:**
+  1. First check whether agent `aa495a45f830848ae` is still alive / has produced new output (or just re-check the worktree directly: `git -C .claude/worktrees/agent-aa495a45f830848ae status --porcelain` and `git -C .claude/worktrees/agent-aa495a45f830848ae log --oneline -3`).
+  2. If the working tree in that worktree still shows the 7 modified files above and no new commit: **do not start a new subagent from scratch** — either resume agent `aa495a45f830848ae` (if the harness still has it addressable) or dispatch a fresh subagent instructed to `cd` into the **existing worktree** (do not create a new one) and finish the exit checklist against the existing uncommitted changes — inspect the diff first to confirm it actually followed the Reference Pattern before treating it as reusable.
+  3. Once committed and pushed: dispatch a fresh **Opus** reviewer against the branch (see Orchestration rules). Only on `VERDICT: APPROVE`, merge to `develop`, push, update this handoff + BACKLOG row 174.
+  4. **Do NOT start Task 05 (Artists) until Task 04 is merged.**
 
 ---
 
@@ -77,6 +97,7 @@ Establish ONE form-validation standard in the project's internal guidelines, the
 | 1C guideline impl | `worktree-agent-aaae95a5d8a6c56ec` | `c1814652` | content merged to develop `256e1fb` | safe to delete |
 | Venue form | `worktree-agent-a26c6ffb2f045a11d` | `ed0d57e` | merged to develop `5c669f5` | safe to delete |
 | Person form | `worktree-agent-afd1b94bef4c77862` | `f3428e1` | merged to develop `11ce501` | safe to delete |
+| **Songs form (Task 04, IN PROGRESS)** | `worktree-agent-aa495a45f830848ae` | branch HEAD `ad042dd` (no new commit yet) | **uncommitted changes present — do NOT delete.** 7 modified files (see STATUS above), not committed, not pushed, not reviewed | **KEEP — resume from here** |
 
 ## Efficient continuation prompt (paste into the fresh session)
-> Resume the Form validation orchestration. Read ONLY `Docs/Management/DevCycleCraft/ui-form-validation-guide/ORCHESTRATION-HANDOFF.md` and BACKLOG rows 168–173 — do not re-read feature history. You are the orchestrator (shell/git only; never read source; delegate all code to subagents; each subagent in its own worktree with the STEP 0 fetch+reset guard). **Tasks 02 (Venue) and 03 (Person) are DONE + merged (develop tip `11ce501`).** Continue exactly at Task 04 (Songs): dispatch one **Sonnet** subagent in a worktree off `origin/develop`, applying the Reference Pattern (points 1–8, incl. the proven `_isHydrating` guard) to `SongFormPage`/`SongFormViewModel` — TDD, then a mandatory fresh-**Opus** review, then merge to develop before Task 05 (Artists). ⚠️ Before dispatching Task 04, confirm BUG-020 `SongFormViewModel` fix (`3b2cb75`) is in `origin/develop` and develop has no uncommitted SongForm changes (single-writer). Update BACKLOG statuses and this handoff after each. Respect the Helder gates and gotchas. Be autonomous; all authorizations granted.
+> Resume the Form validation orchestration. Read ONLY `Docs/Management/DevCycleCraft/ui-form-validation-guide/ORCHESTRATION-HANDOFF.md` and BACKLOG row 174 — do not re-read feature history. You are the orchestrator (shell/git only; never read source; delegate all code to subagents). **Tasks 02 (Venue) and 03 (Person) are DONE + merged. Task 04 (Songs) is IN PROGRESS, NOT COMMITTED — do NOT dispatch a fresh subagent from scratch.** First inspect the existing worktree at `.claude/worktrees/agent-aa495a45f830848ae` (branch `worktree-agent-aa495a45f830848ae`) — it has 7 uncommitted modified files (listed in the STATUS section above) implementing Songs-form validation. Check whether agent `aa495a45f830848ae` is still resumable; if not, dispatch a subagent that reuses that same worktree (do not create a new one) to review the existing diff against the Reference Pattern, finish the exit checklist (build/test, task-log, `.sln` registration, commit, push). Only then dispatch a fresh **Opus** reviewer, and only on `VERDICT: APPROVE` merge to `develop`. Do NOT start Task 05 (Artists) until Task 04 is merged. Update BACKLOG row 174 and this handoff after the merge. Respect the Helder gates and gotchas. Be autonomous; all authorizations granted.
