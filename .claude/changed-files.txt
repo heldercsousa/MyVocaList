@@ -1708,3 +1708,14 @@ MyVocaList/MyVocaList.csproj
 Directory.Packages.props
 Directory.Packages.props
 Infra/MyVocaList.Infra.csproj
+Docs/Management/BACKLOG.md
+.claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/MyVocaList/UI/Pages/Artists/ArtistsPage.xaml
+.claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/MyVocaList/UI/Pages/Artists/ArtistsPage.xaml
+.claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/MyVocaList/UI/Pages/Artists/ArtistsPage.xaml
+.claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/MyVocaList/UI/Pages/Artists/ArtistsPage.xaml
+.claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/MyVocaList/UI/Pages/Artists/ArtistsPage.xaml
+.claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/MyVocaList/UI/Pages/Artists/ArtistsPage.xaml
+.claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/MyVocaList.sln
+.claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/MyVocaList.sln
+.claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/task-log.md
+Docs/Management/BACKLOG.md
