@@ -1740,3 +1740,4 @@ MyVocaList/UI/ViewModels/SongFormViewModel.cs
 .claude/worktrees/agent-aaae95a5d8a6c56ec/Docs/Management/DevCycleCraft/ui-form-validation-guide/task-log.md
 Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-020-songspage-fab-crash-secure-storage.md
 MyVocaList.sln
+Docs/Management/BACKLOG.md
