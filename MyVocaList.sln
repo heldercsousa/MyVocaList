@@ -256,6 +256,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-form-validation-guide", 
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\plan.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\plan.md
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\task-log.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\task-log.md
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\ORCHESTRATION-HANDOFF.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\ORCHESTRATION-HANDOFF.md
+		Docs\Management\DevCycleCraft\ui-form-validation-guide\RESUME-PROMPT.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\RESUME-PROMPT.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration", "backlog-first-registration", "{FA1234BC-0001-4000-8000-000000000029}"
