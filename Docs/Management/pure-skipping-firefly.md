@@ -86,6 +86,16 @@ Each form subagent must:
 - Each form: AC traceability matrix in its task-log; validation unit tests (Service + ViewModel) green; Venue pattern demonstrably replicated in Singer/Songs/Artists.
 - Final: all 5 BACKLOG nested rows → `✅ Done`; Helder emulator smoke test of the four forms noted as the remaining human gate (validation UX is UI-observable).
 
+## RESUME POINT (updated after usage-limit interruption, 2026-07-01)
+
+**Where we are:**
+- ✅ Wave 1A (Opus): update plan drafted → `.claude/worktrees/agent-a284a1b6d18225d42/Docs/Management/DevCycleCraft/ui-form-validation-guide/plan.md` (branch `worktree-agent-a284a1b6d18225d42`, commit `6a525e4`).
+- ✅ Wave 1B (fresh Opus review): **APPROVE with 3 light fixes** — (1) confirm the DevExpress blur mechanism up front (doc-based) instead of a later spike; (2) consult `ux:interaction-design` skill; (3) verify the real `.sln` GUID before writing.
+- ✅ Orchestrator: requirements doc `01-ui-form-validation-guide.md` now **tracked on develop**; BACKLOG rows (Form validation + task 01) = 🟡 In Progress. `develop` is clean.
+- ❌ Wave 1C (Opus implement): **FAILED — hit account usage limit (resets 4am America/São_Paulo) after 16 tool calls.** No guideline files were edited. Its branch `worktree-agent-a9d55a7c4aac000f1` is a stale/divergent base — **DO NOT MERGE IT.** Cleanup: `git worktree remove --force .claude/worktrees/agent-a9d55a7c4aac000f1` (optional; also remove `agent-a284a1b6d18225d42` once its plan.md content is captured).
+
+**Next action (after limit resets):** Re-dispatch **Wave 1C** fresh off current `develop` (Opus, `isolation: worktree`), using the exact brief already crafted (finalize plan.md with the 3 reviewer fixes → confirm DX blur/DateEdit mechanism via DevExpress+Context7 MCP → consult UX skill → edit `.claude/library/*.md` only → Integer=spec-incomplete stub → commit + push branch; orchestrator merges to develop). Then proceed to Wave 2 (Venues → Singer → Songs → Artists, BACKLOG order).
+
 ## Notes / risks
 
 - **Path discrepancy:** BACKLOG cites `ui-form-validation/01-form-validation-guide.md`; git status shows untracked `ui-form-validation-guide/`. First subagent resolves the real path.

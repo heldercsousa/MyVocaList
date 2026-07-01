@@ -1724,3 +1724,4 @@ Docs/Management/BACKLOG.md
 .claude/worktrees/agent-a284a1b6d18225d42/Docs/Management/DevCycleCraft/ui-form-validation-guide/plan.md
 .claude/worktrees/agent-a284a1b6d18225d42/MyVocaList.sln
 .claude/worktrees/agent-a284a1b6d18225d42/MyVocaList.sln
+Docs/Management/pure-skipping-firefly.md
