@@ -127,6 +127,8 @@ public class SongFormViewModelTests
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
                    .Returns((true, string.Empty));
+        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
+                   .Returns((true, string.Empty));
         var resolution = new Mock<ISongResolutionService>();
         resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
                   .ThrowsAsync(new InvalidOperationException("DB context error"));
@@ -150,6 +152,8 @@ public class SongFormViewModelTests
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
                    .Returns((true, string.Empty));
+        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
+                   .Returns((true, string.Empty));
         var sut = CreateSut(songService: songService);
         sut.SongTitle = "Test Song";
         // SelectedArtistId not set
@@ -168,6 +172,8 @@ public class SongFormViewModelTests
     {
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
+                   .Returns((true, string.Empty));
+        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
                    .Returns((true, string.Empty));
         songService.Setup(s => s.CreateSongWithUrlsAsync(
             It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(),
@@ -201,6 +207,8 @@ public class SongFormViewModelTests
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
                    .Returns((true, string.Empty));
+        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
+                   .Returns((true, string.Empty));
 
         var resolution = new Mock<ISongResolutionService>();
         resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
@@ -221,7 +229,11 @@ public class SongFormViewModelTests
     [Fact]
     public async Task ConfirmSaveAsNewVersion_EmptyVersion_SetsVersionError()
     {
-        var sut = CreateSut();
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateVersionInput(string.Empty, true))
+                   .Returns((false, "A version label is required (e.g. Live, Acoustic, Remix)"));
+
+        var sut = CreateSut(songService: songService);
         sut.SongTitle = "Test Song";
         sut.SelectedArtistId = 1;
         sut.SelectedArtistName = "Artist";
@@ -403,6 +415,8 @@ public class SongFormViewModelTests
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
                    .Returns((true, string.Empty));
+        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
+                   .Returns((true, string.Empty));
         resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
                   .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 77, [], diffs, true));
 
@@ -422,5 +436,214 @@ public class SongFormViewModelTests
         Assert.True(sut.IsMergeSheetVisible);
         Assert.Single(sut.MergeFieldRows);
         Assert.Equal("Title", sut.MergeFieldRows[0].Field);
+    }
+
+    // ── Title field: blur-first validation (Form Validation Standard, Task 04) ────
+
+    [Fact]
+    // [AC] R8: A pristine title field the user only tabbed through must not show a blur error.
+    public void ValidateTitleCommand_PristineField_DoesNotSetError()
+    {
+        var songService = new Mock<ISongService>();
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+
+        sut.ValidateTitleCommand.Execute(null);
+
+        Assert.False(sut.TitleHasError);
+        Assert.Empty(sut.TitleErrorText);
+        songService.Verify(s => s.ValidateTitleInput(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] R1: On blur, a dirty invalid title field surfaces an inline error.
+    public void ValidateTitleCommand_DirtyInvalidField_SetsError()
+    {
+        var tooLong = new string('x', 101); // exceeds 100-char limit; differs from the default "" so
+                                             // the property-changed handler actually fires
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput(tooLong))
+                   .Returns((false, "Title is too long. Maximum 100 characters."));
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+        sut.SongTitle = tooLong;
+
+        sut.ValidateTitleCommand.Execute(null);
+
+        Assert.True(sut.TitleHasError);
+        Assert.Equal("Title is too long. Maximum 100 characters.", sut.TitleErrorText);
+    }
+
+    [Fact]
+    // [AC] R1: On blur, a dirty valid title field shows no error.
+    public void ValidateTitleCommand_DirtyValidField_NoError()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput("Bohemian Rhapsody")).Returns((true, ""));
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+        sut.SongTitle = "Bohemian Rhapsody";
+
+        sut.ValidateTitleCommand.Execute(null);
+
+        Assert.False(sut.TitleHasError);
+        Assert.Empty(sut.TitleErrorText);
+    }
+
+    [Fact]
+    // [AC] R3: While NOT in error, keystrokes do not run validation (no "impatient teacher").
+    public void OnSongTitleChanged_NotInError_DoesNotValidate()
+    {
+        var songService = new Mock<ISongService>();
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+
+        sut.SongTitle = "x"; // short, but field is not yet in error
+
+        Assert.False(sut.TitleHasError);
+        songService.Verify(s => s.ValidateTitleInput(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] R2: While in error, a keystroke that makes the field valid clears the error immediately.
+    public void OnSongTitleChanged_WhileInError_ClearsErrorWhenValid()
+    {
+        var tooLong = new string('x', 101); // differs from the default "" so the handler fires
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput(tooLong))
+                   .Returns((false, "Title is too long. Maximum 100 characters."));
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+        sut.SongTitle = tooLong;
+        sut.ValidateTitleCommand.Execute(null);
+        Assert.True(sut.TitleHasError);
+
+        songService.Setup(s => s.ValidateTitleInput("Bohemian Rhapsody")).Returns((true, ""));
+        sut.SongTitle = "Bohemian Rhapsody";
+
+        Assert.False(sut.TitleHasError);
+        Assert.Empty(sut.TitleErrorText);
+    }
+
+    [Fact]
+    // [AC] Edit-mode dirty-guard: hydration (query-property pre-population) must not mark the title
+    // field dirty, so a pre-filled invalid value does not flash an error before the user interacts.
+    public void OnSongTitleChanged_DuringHydration_DoesNotDirtyOrValidateOnBlur()
+    {
+        var tooLong = new string('x', 101); // differs from the default "" so the handler fires
+        var songService = new Mock<ISongService>();
+        var sut = CreateSut(songService: songService); // _isHydrating still true — CompleteHydration() not called
+
+        sut.SongTitle = tooLong;                // simulates Shell QueryProperty pre-population
+        sut.ValidateTitleCommand.Execute(null); // simulates a blur that happens before OnAppearing runs
+
+        Assert.False(sut.TitleHasError);
+        Assert.Empty(sut.TitleErrorText);
+        songService.Verify(s => s.ValidateTitleInput(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] Safety net: Save re-validates the title even if the field was never marked dirty.
+    public async Task SaveAsync_TitleNeverDirty_SafetyNetSetsTitleError()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput(""))
+                   .Returns((false, "Song title is required"));
+        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
+                   .Returns((true, string.Empty));
+
+        var sut = CreateSut(songService: songService);
+        // SongTitle left at its default empty value — never marked dirty, never blurred.
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.TitleHasError);
+        Assert.Equal("Song title is required", sut.TitleErrorText);
+    }
+
+    // ── Version field: blur-first validation (Form Validation Standard, Task 04) ──
+
+    [Fact]
+    // [AC] R8: A pristine version field must not show a blur error.
+    public void ValidateVersionCommand_PristineField_DoesNotSetError()
+    {
+        var songService = new Mock<ISongService>();
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+
+        sut.ValidateVersionCommand.Execute(null);
+
+        Assert.False(sut.VersionHasError);
+        Assert.Empty(sut.VersionErrorText);
+        songService.Verify(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] R1: On blur, a dirty invalid version field (too long) surfaces an inline error.
+    public void ValidateVersionCommand_DirtyInvalidField_SetsError()
+    {
+        var tooLong = new string('x', 61);
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateVersionInput(tooLong, false))
+                   .Returns((false, "Version is too long. Maximum 60 characters."));
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+        sut.SongVersion = tooLong;
+
+        sut.ValidateVersionCommand.Execute(null);
+
+        Assert.True(sut.VersionHasError);
+        Assert.Equal("Version is too long. Maximum 60 characters.", sut.VersionErrorText);
+    }
+
+    [Fact]
+    // [AC] R1: On blur, a dirty valid (empty — optional field) version shows no error.
+    public void ValidateVersionCommand_DirtyValidField_NoError()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateVersionInput("Live", false)).Returns((true, ""));
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+        sut.SongVersion = "Live";
+
+        sut.ValidateVersionCommand.Execute(null);
+
+        Assert.False(sut.VersionHasError);
+        Assert.Empty(sut.VersionErrorText);
+    }
+
+    [Fact]
+    // [AC] R2: While in error, a keystroke that makes the field valid clears the error immediately.
+    public void OnSongVersionChanged_WhileInError_ClearsErrorWhenValid()
+    {
+        var tooLong = new string('x', 61);
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateVersionInput(tooLong, false))
+                   .Returns((false, "Version is too long. Maximum 60 characters."));
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+        sut.SongVersion = tooLong;
+        sut.ValidateVersionCommand.Execute(null);
+        Assert.True(sut.VersionHasError);
+
+        songService.Setup(s => s.ValidateVersionInput("Live", false)).Returns((true, ""));
+        sut.SongVersion = "Live";
+
+        Assert.False(sut.VersionHasError);
+        Assert.Empty(sut.VersionErrorText);
+    }
+
+    [Fact]
+    // [AC] R3: While NOT in error, keystrokes do not run validation (no "impatient teacher").
+    public void OnSongVersionChanged_NotInError_DoesNotValidate()
+    {
+        var songService = new Mock<ISongService>();
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+
+        sut.SongVersion = "L"; // field is not yet in error
+
+        Assert.False(sut.VersionHasError);
+        songService.Verify(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
     }
 }

@@ -8,6 +8,13 @@ public interface ISongService
     /// <summary>Validates the song title as typed (UI input, pre-truncation).</summary>
     (bool isValid, string message) ValidateTitleInput(string title);
 
+    /// <summary>
+    /// Validates the song version/variant label as typed (UI input). The field is optional in the
+    /// main form (empty = canonical version); pass <paramref name="isRequired"/> true only for the
+    /// "Save as new version" resolution flow, where an empty value is rejected (AC-1.2).
+    /// </summary>
+    (bool isValid, string message) ValidateVersionInput(string? version, bool isRequired = false);
+
     /// <summary>Creates a song. artistId is mandatory — every song has an original/copyright artist.</summary>
     Task<(bool success, string message, Song? song)> CreateSongAsync(
         int artistId, string title, string? featuredArtists = null, string? lyrics = null,

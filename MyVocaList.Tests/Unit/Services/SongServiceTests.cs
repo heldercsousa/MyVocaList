@@ -62,6 +62,54 @@ public class SongServiceTests
         Assert.True(isValid);
     }
 
+    // ── ValidateVersionInput (Form Validation Standard) ──────────────────
+
+    [Fact]
+    // [AC] Version is optional in the main form: empty + not required → valid.
+    public void ValidateVersionInput_EmptyNotRequired_ReturnsTrue()
+    {
+        var sut = CreateSut();
+        var (isValid, _) = sut.ValidateVersionInput(string.Empty, isRequired: false);
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    // [AC] AC-1.2: "Save as new version" flow requires a non-empty version label.
+    public void ValidateVersionInput_EmptyRequired_ReturnsFalse()
+    {
+        var sut = CreateSut();
+        var (isValid, message) = sut.ValidateVersionInput(string.Empty, isRequired: true);
+        Assert.False(isValid);
+        Assert.NotEmpty(message);
+    }
+
+    [Fact]
+    public void ValidateVersionInput_TooLong_ReturnsFalse()
+    {
+        var sut = CreateSut();
+        var version = new string('x', 61); // exceeds 60-char limit
+        var (isValid, message) = sut.ValidateVersionInput(version);
+        Assert.False(isValid);
+        Assert.NotEmpty(message);
+    }
+
+    [Fact]
+    public void ValidateVersionInput_MaxLength60_ReturnsTrue()
+    {
+        var sut = CreateSut();
+        var version = new string('x', 60);
+        var (isValid, _) = sut.ValidateVersionInput(version);
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    public void ValidateVersionInput_ValidValue_ReturnsTrue()
+    {
+        var sut = CreateSut();
+        var (isValid, _) = sut.ValidateVersionInput("Live");
+        Assert.True(isValid);
+    }
+
     // ── CreateSongAsync ───────────────────────────────────────────────────
 
     [Fact]
