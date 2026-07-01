@@ -162,6 +162,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-so
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\archive\consolidation-findings.md = Docs\Management\BusinessFeatures\artists-songs\archive\consolidation-findings.md
 		Docs\Management\BusinessFeatures\artists-songs\design.md = Docs\Management\BusinessFeatures\artists-songs\design.md
+		Docs\Management\BusinessFeatures\artists-songs\form-validation-task-log.md = Docs\Management\BusinessFeatures\artists-songs\form-validation-task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\archive\handoff.md = Docs\Management\BusinessFeatures\artists-songs\archive\handoff.md
 		Docs\Management\BusinessFeatures\artists-songs\archive\plan-arch-revision.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-arch-revision.md
 		Docs\Management\BusinessFeatures\artists-songs\archive\plan-phase16.md = Docs\Management\BusinessFeatures\artists-songs\archive\plan-phase16.md

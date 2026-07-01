@@ -87,6 +87,17 @@ public partial class SongFormViewModel : ViewModelBase
     private SongCandidate? _pendingCandidate;
     private SongResolution? _pendingResolution;
 
+    // Becomes true once the user edits each field. Guards blur validation so a pristine field the
+    // user only tabbed through is not flagged prematurely (Form Validation Standard).
+    private bool _titleDirty;
+    private bool _versionDirty;
+
+    // True until the page's OnAppearing calls CompleteHydration(). While true, Shell QueryProperty
+    // pre-population (edit mode) must NOT mark any field dirty — otherwise a pre-filled invalid
+    // value would flash an error on the very first blur, before the user has touched anything
+    // (edit-mode dirty-guard, Form Validation Standard).
+    private bool _isHydrating = true;
+
     public bool IsEditMode => SongId.HasValue;
     public string PageTitle => IsEditMode ? "Edit Song" : "New Song";
 
@@ -160,6 +171,50 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand ConfirmMergeCommand { get; }
     public IRelayCommand DismissMergeSheetCommand { get; }
 
+    /// <summary>
+    /// Called by the page's <c>OnAppearing</c> once Shell has finished applying all
+    /// <c>[QueryProperty]</c> values for this navigation. Ends the hydration window so that
+    /// subsequent field edits are tracked as dirty (edit-mode dirty-guard).
+    /// </summary>
+    public void CompleteHydration() => _isHydrating = false;
+
+    /// <summary>
+    /// Blur handler (invoked from the page's <c>Unfocused</c> event). Validates the title field
+    /// only when it is dirty — a pristine field the user only tabbed through is left untouched.
+    /// </summary>
+    [RelayCommand]
+    private void ValidateTitle()
+    {
+        if (!_titleDirty)
+            return;
+
+        ApplyTitleValidation(SongTitle);
+    }
+
+    /// <summary>Blur handler for the version field — see <see cref="ValidateTitle"/>.</summary>
+    [RelayCommand]
+    private void ValidateVersion()
+    {
+        if (!_versionDirty)
+            return;
+
+        ApplyVersionValidation(SongVersion);
+    }
+
+    private void ApplyTitleValidation(string value)
+    {
+        var (isValid, message) = _songService.ValidateTitleInput(value ?? string.Empty);
+        TitleHasError = !isValid;
+        TitleErrorText = isValid ? string.Empty : message;
+    }
+
+    private void ApplyVersionValidation(string value)
+    {
+        var (isValid, message) = _songService.ValidateVersionInput(value);
+        VersionHasError = !isValid;
+        VersionErrorText = isValid ? string.Empty : message;
+    }
+
     // ── QueryProperty change hooks ────────────────────────────────────────
 
     partial void OnSongIdChanged(int? value)
@@ -172,9 +227,34 @@ public partial class SongFormViewModel : ViewModelBase
 
     partial void OnSongTitleChanged(string value)
     {
-        ClearTitleError();
         UpdateCharacterCounter(value?.Length ?? 0);
         UpdateCanLaunchYouTubeSearch();
+
+        if (_isHydrating)
+            return;   // edit-mode pre-population — do not mark dirty
+
+        _titleDirty = true;
+
+        // "Reward early": once the field is in error, re-validate on every keystroke so the error
+        // clears the instant it becomes valid. Do NOT validate on keystroke before the field is in
+        // error (that is the "impatient teacher" anti-pattern) — blur/Save handle the first check.
+        if (!TitleHasError)
+            return;
+
+        ApplyTitleValidation(value);
+    }
+
+    partial void OnSongVersionChanged(string value)
+    {
+        if (_isHydrating)
+            return;
+
+        _versionDirty = true;
+
+        if (!VersionHasError)
+            return;
+
+        ApplyVersionValidation(value);
     }
 
     partial void OnArtistIdChanged(int value)
@@ -323,20 +403,17 @@ public partial class SongFormViewModel : ViewModelBase
 
     private async Task SaveAsync()
     {
-        // Clear version error from any prior attempt
-        VersionHasError = false;
-        VersionErrorText = string.Empty;
-
         var title = SongTitle?.Trim() ?? string.Empty;
         var version = SongVersion?.Trim() ?? string.Empty;
 
-        var validation = _songService.ValidateTitleInput(title);
-        if (!validation.isValid)
-        {
-            TitleHasError = true;
-            TitleErrorText = validation.message;
+        // Safety net: re-run ALL field validators on Save, regardless of dirty state — an
+        // untouched required field (or one whose error was never surfaced) must still be caught.
+        // This also clears any stale Version error left over from the "Save as new version" flow.
+        ApplyTitleValidation(title);
+        ApplyVersionValidation(version);
+
+        if (TitleHasError || VersionHasError)
             return;
-        }
 
         if (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0)
         {
@@ -523,10 +600,11 @@ public partial class SongFormViewModel : ViewModelBase
 
         // AC-1.2: cannot create two rows with identical (ArtistId, Title, "")
         // Version validation runs before candidate check so the UI error is always surfaced.
-        if (string.IsNullOrEmpty(version))
+        var (isValid, message) = _songService.ValidateVersionInput(version, isRequired: true);
+        if (!isValid)
         {
             VersionHasError = true;
-            VersionErrorText = "A version label is required (e.g. Live, Acoustic, Remix)";
+            VersionErrorText = message;
             VersionEntryRequired = true;
             return;
         }
@@ -621,12 +699,6 @@ public partial class SongFormViewModel : ViewModelBase
     // ── Common helpers ────────────────────────────────────────────────────
 
     private Task CancelAsync() => Shell.Current.GoToAsync("..");
-
-    private void ClearTitleError()
-    {
-        TitleHasError = false;
-        TitleErrorText = string.Empty;
-    }
 
     private void UpdateCharacterCounter(int length)
     {
