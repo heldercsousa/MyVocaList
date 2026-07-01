@@ -1719,3 +1719,5 @@ Docs/Management/BACKLOG.md
 .claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/MyVocaList.sln
 .claude/worktrees/fix+bug-019-artistspage-datatype-mismatch/Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/task-log.md
 Docs/Management/BACKLOG.md
+Docs/Management/pure-skipping-firefly.md
+Docs/Management/BACKLOG.md
