@@ -301,6 +301,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "venues", "venues", "{9EA47D78-293E-41B7-872D-3B2B85E82710}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\venues\design.md = Docs\Management\BusinessFeatures\venues\design.md
+		Docs\Management\BusinessFeatures\venues\form-validation-task-log.md = Docs\Management\BusinessFeatures\venues\form-validation-task-log.md
 		Docs\Management\BusinessFeatures\venues\plan.md = Docs\Management\BusinessFeatures\venues\plan.md
 		Docs\Management\BusinessFeatures\venues\requirements.md = Docs\Management\BusinessFeatures\venues\requirements.md
 		Docs\Management\BusinessFeatures\venues\tasks.md = Docs\Management\BusinessFeatures\venues\tasks.md
