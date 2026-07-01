@@ -173,7 +173,20 @@
     "maui-platform-invoke": "off",
     "maui-rest-api": "off",
     "maui-secure-storage": "off",
-    "release": "off"
+    "release": "off",
+    "maui-accessibility": "off",
+    "maui-ai-debugging": "off",
+    "maui-app-icons-splash": "off",
+    "maui-app-lifecycle": "off",
+    "maui-current-apis": "off",
+    "maui-data-binding": "off",
+    "maui-dependency-injection": "off",
+    "maui-performance": "off",
+    "maui-safe-area": "off",
+    "maui-shell-navigation": "off",
+    "maui-unit-testing": "off",
+    "review": "name-only",
+    "myvocalist-coding": "name-only"
   },
   "hooks": {
     "UserPromptSubmit": [
