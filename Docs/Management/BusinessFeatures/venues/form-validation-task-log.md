@@ -43,7 +43,7 @@ below are **derived from its sections + the Form Validation Standard** and used 
 - `MyVocaList/UI/Pages/Venues/VenueFormPage.xaml` — added `Unfocused="OnNameUnfocused"` to `nameEdit`.
 - `MyVocaList/UI/Pages/Venues/VenueFormPage.xaml.cs` — added typed `ViewModel` accessor and `OnNameUnfocused`
   handler bridging the blur event to `ValidateNameCommand`.
-- `MyVocaList.Tests/Unit/ViewModels/VenueFormViewModelTests.cs` — NEW: 8 Level-A tests (blur/keystroke/save).
+- `MyVocaList.Tests/Unit/ViewModels/VenueFormViewModelTests.cs` — NEW: 7 Level-A tests (blur/keystroke/save).
 - `MyVocaList.sln` — registered the new task-log doc under the `venues` solution folder.
 
 Service (`Services/VenueService.cs`) was **unchanged**: `ValidateNameInput` already returns the standard
@@ -55,8 +55,8 @@ Business logic stayed in the Service — the ViewModel only invokes it and maps 
 - Build (Services): PASS — 0 errors, 0 warnings.
 - Build (MyVocaList.Tests, net10.0): PASS — 0 errors, 0 warnings.
 - Build (MyVocaList MAUI head, net10.0-android): PASS — XAML + code-behind compile (see build log).
-- Tests (Venue filter): PASS — 20/20 (12 `VenueServiceTests` + 8 `VenueFormViewModelTests`), 0 failures.
-- Tests (full suite): PASS — see final commit build output.
+- Tests (Venue filter): PASS — 19/19 (12 `VenueServiceTests` + 7 `VenueFormViewModelTests`), 0 failures.
+- Tests (full suite): PASS — 368/368, 0 failures (orchestrator re-ran `dotnet test` in the worktree on merge — 2026-07-01).
 - Post-edit re-read: confirmed (VM, XAML, code-behind, test file).
 - Spec compliance: confirmed against `dialogs-validation.md § Form Validation Standard` (blur/keystroke/Save timing,
   inline `HasError`/`ErrorText`, no native dialog, business logic in Service).
