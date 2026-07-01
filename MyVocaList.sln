@@ -253,10 +253,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-form-validation-guide", "ui-form-validation-guide", "{FA1234BC-0001-4000-8000-000000000033}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\01-ui-form-validation-guide.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\01-ui-form-validation-guide.md
-		Docs\Management\DevCycleCraft\ui-form-validation-guide\plan.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\plan.md
-		Docs\Management\DevCycleCraft\ui-form-validation-guide\task-log.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\task-log.md
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\ORCHESTRATION-HANDOFF.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\ORCHESTRATION-HANDOFF.md
+		Docs\Management\DevCycleCraft\ui-form-validation-guide\plan.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\plan.md
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\RESUME-PROMPT.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\RESUME-PROMPT.md
+		Docs\Management\DevCycleCraft\ui-form-validation-guide\task-log.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration", "backlog-first-registration", "{FA1234BC-0001-4000-8000-000000000029}"
@@ -288,11 +288,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\persons\autocomplete-design.md = Docs\Management\BusinessFeatures\persons\autocomplete-design.md
 		Docs\Management\BusinessFeatures\persons\design.md = Docs\Management\BusinessFeatures\persons\design.md
+		Docs\Management\BusinessFeatures\persons\form-validation-task-log.md = Docs\Management\BusinessFeatures\persons\form-validation-task-log.md
 		Docs\Management\BusinessFeatures\persons\plan-autocomplete.md = Docs\Management\BusinessFeatures\persons\plan-autocomplete.md
 		Docs\Management\BusinessFeatures\persons\plan.md = Docs\Management\BusinessFeatures\persons\plan.md
 		Docs\Management\BusinessFeatures\persons\requirements.md = Docs\Management\BusinessFeatures\persons\requirements.md
 		Docs\Management\BusinessFeatures\persons\tasks.md = Docs\Management\BusinessFeatures\persons\tasks.md
-		Docs\Management\BusinessFeatures\persons\form-validation-task-log.md = Docs\Management\BusinessFeatures\persons\form-validation-task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
@@ -497,8 +497,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-015-artistspage-trailing-button-noop.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-015-artistspage-trailing-button-noop.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
 EndProject
@@ -533,6 +533,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-019-artistspage-listitem-button-noop", "BUG-019-artistspage-listitem-button-noop", "{FA1234BC-0001-4000-8000-000000000032}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-019-artistspage-listitem-button-noop\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-019-artistspage-listitem-button-noop\task-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-021-songspage-fab-crash", "BUG-021-songspage-fab-crash", "{92D65ADE-A1E0-4220-AE25-06691B50D86D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md
 	EndProjectSection
 EndProject
 Global
@@ -643,8 +649,8 @@ Global
 		{A1B2C3D4-0001-4000-8000-000000000006} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000030} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
-		{FA1234BC-0001-4000-8000-000000000029} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000033} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000029} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
@@ -678,6 +684,7 @@ Global
 		{B92F4F42-00C3-44C3-BC6E-E340782C7183} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000031} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000032} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{92D65ADE-A1E0-4220-AE25-06691B50D86D} = {7A021F6B-F297-41EA-A028-C4F881146791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
