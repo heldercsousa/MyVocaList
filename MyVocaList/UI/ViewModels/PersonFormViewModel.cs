@@ -40,6 +40,18 @@ public partial class PersonFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isCharacterCounterWarning;
     [ObservableProperty] private bool _isCharacterCounterError;
 
+    // Becomes true once the user edits each field. Guards blur validation so a pristine field the
+    // user only tabbed through is not flagged prematurely (Form Validation Standard).
+    private bool _nameDirty;
+    private bool _birthdayDirty;
+    private bool _emailDirty;
+
+    // True until the page's OnAppearing calls CompleteHydration(). While true, Shell QueryProperty
+    // pre-population (edit mode) must NOT mark any field dirty — otherwise a pre-filled invalid
+    // value would flash an error on the very first blur, before the user has touched anything
+    // (edit-mode dirty-guard, Form Validation Standard).
+    private bool _isHydrating = true;
+
     public bool IsEditMode => PersonId.HasValue;
     public string PageTitle => IsEditMode ? "Edit Singer" : "New Singer";
 
@@ -69,44 +81,129 @@ public partial class PersonFormViewModel : ViewModelBase
         OnPropertyChanged(nameof(PageTitle));
     }
 
-    partial void OnPersonNameChanged(string value)
+    /// <summary>
+    /// Called by the page's <c>OnAppearing</c> once Shell has finished applying all
+    /// <c>[QueryProperty]</c> values for this navigation. Ends the hydration window so that
+    /// subsequent field edits are tracked as dirty (edit-mode dirty-guard).
+    /// </summary>
+    public void CompleteHydration() => _isHydrating = false;
+
+    /// <summary>
+    /// Blur handler (invoked from the page's <c>Unfocused</c>/<c>BlurredWithoutSelectionCommand</c>).
+    /// Validates the name field only when it is dirty — a pristine field the user only tabbed
+    /// through is left untouched.
+    /// </summary>
+    [RelayCommand]
+    private void ValidateName()
     {
-        ClearNameError();
-        UpdateCharacterCounter(value?.Length ?? 0);
+        if (!_nameDirty)
+            return;
+
+        ApplyNameValidation(PersonName);
     }
 
-    partial void OnPersonBirthdayChanged(string value) => ClearBirthdayError();
-    partial void OnPersonEmailChanged(string value) => ClearEmailError();
+    /// <summary>Blur handler for the birthday field — see <see cref="ValidateName"/>.</summary>
+    [RelayCommand]
+    private void ValidateBirthday()
+    {
+        if (!_birthdayDirty)
+            return;
+
+        ApplyBirthdayValidation(PersonBirthday);
+    }
+
+    /// <summary>Blur handler for the email field — see <see cref="ValidateName"/>.</summary>
+    [RelayCommand]
+    private void ValidateEmail()
+    {
+        if (!_emailDirty)
+            return;
+
+        ApplyEmailValidation(PersonEmail);
+    }
+
+    partial void OnPersonNameChanged(string value)
+    {
+        UpdateCharacterCounter(value?.Length ?? 0);
+
+        if (_isHydrating)
+            return;   // edit-mode pre-population — do not mark dirty
+
+        _nameDirty = true;
+
+        // "Reward early": once the field is in error, re-validate on every keystroke so the error
+        // clears the instant it becomes valid. Do NOT validate on keystroke before the field is in
+        // error (that is the "impatient teacher" anti-pattern) — blur/Save handle the first check.
+        if (!NameHasError)
+            return;
+
+        ApplyNameValidation(value);
+    }
+
+    partial void OnPersonBirthdayChanged(string value)
+    {
+        if (_isHydrating)
+            return;
+
+        _birthdayDirty = true;
+
+        if (!BirthdayHasError)
+            return;
+
+        ApplyBirthdayValidation(value);
+    }
+
+    partial void OnPersonEmailChanged(string value)
+    {
+        if (_isHydrating)
+            return;
+
+        _emailDirty = true;
+
+        if (!EmailHasError)
+            return;
+
+        ApplyEmailValidation(value);
+    }
+
+    private void ApplyNameValidation(string value)
+    {
+        var (isValid, message) = _personService.ValidateNameInput(value ?? string.Empty);
+        NameHasError = !isValid;
+        NameErrorText = isValid ? string.Empty : message;
+    }
+
+    private void ApplyBirthdayValidation(string value)
+    {
+        var birthday = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        var (isValid, message) = _personService.ValidateBirthday(birthday);
+        BirthdayHasError = !isValid;
+        BirthdayErrorText = isValid ? string.Empty : message;
+    }
+
+    private void ApplyEmailValidation(string value)
+    {
+        var email = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        var (isValid, message) = _personService.ValidateEmail(email);
+        EmailHasError = !isValid;
+        EmailErrorText = isValid ? string.Empty : message;
+    }
 
     private async Task SaveAsync()
     {
         var name = PersonName?.Trim() ?? string.Empty;
+
+        // Safety net: re-run ALL field validators on Save, regardless of dirty state — an
+        // untouched required field (or one whose error was never surfaced) must still be caught.
+        ApplyNameValidation(name);
+        ApplyBirthdayValidation(PersonBirthday);
+        ApplyEmailValidation(PersonEmail);
+
+        if (NameHasError || BirthdayHasError || EmailHasError)
+            return;
+
         var birthday = string.IsNullOrWhiteSpace(PersonBirthday) ? null : PersonBirthday.Trim();
         var email = string.IsNullOrWhiteSpace(PersonEmail) ? null : PersonEmail.Trim();
-
-        var nameValidation = _personService.ValidateNameInput(name);
-        if (!nameValidation.isValid)
-        {
-            NameHasError = true;
-            NameErrorText = nameValidation.message;
-            return;
-        }
-
-        var birthdayValidation = _personService.ValidateBirthday(birthday);
-        if (!birthdayValidation.isValid)
-        {
-            BirthdayHasError = true;
-            BirthdayErrorText = birthdayValidation.message;
-            return;
-        }
-
-        var emailValidation = _personService.ValidateEmail(email);
-        if (!emailValidation.isValid)
-        {
-            EmailHasError = true;
-            EmailErrorText = emailValidation.message;
-            return;
-        }
 
         IsBusy = true;
         try
@@ -122,7 +219,7 @@ public partial class PersonFormViewModel : ViewModelBase
                 }
                 else
                 {
-                    SetInlineError(message);
+                    await ApplyAsyncFailureAsync(message);
                 }
             }
             else
@@ -135,7 +232,7 @@ public partial class PersonFormViewModel : ViewModelBase
                 }
                 else
                 {
-                    SetInlineError(message);
+                    await ApplyAsyncFailureAsync(message);
                 }
             }
         }
@@ -145,24 +242,23 @@ public partial class PersonFormViewModel : ViewModelBase
         }
     }
 
-    private void SetInlineError(string message)
+    /// <summary>
+    /// Maps an async CRUD failure to the field that owns it. After the per-field validators above
+    /// all pass, the only field-attributable failure the service can still return is the
+    /// email-uniqueness check — anything else (e.g. "Singer not found" if the record was removed
+    /// concurrently) is not owned by any field and is surfaced as a non-blocking notice instead of
+    /// being guessed onto one via substring routing.
+    /// </summary>
+    private async Task ApplyAsyncFailureAsync(string message)
     {
-        // Route service error messages to the correct field
         if (message.Contains("Email", StringComparison.OrdinalIgnoreCase))
         {
             EmailHasError = true;
             EmailErrorText = message;
         }
-        else if (message.Contains("birthday", StringComparison.OrdinalIgnoreCase) ||
-                 message.Contains("DD/MM", StringComparison.OrdinalIgnoreCase))
-        {
-            BirthdayHasError = true;
-            BirthdayErrorText = message;
-        }
         else
         {
-            NameHasError = true;
-            NameErrorText = message;
+            await _snackbarService.ShowErrorAsync(message);
         }
     }
 
@@ -196,10 +292,6 @@ public partial class PersonFormViewModel : ViewModelBase
         await (Shell.Current?.GoToAsync(
             $"{Routes.PersonForm}?personId={person.Id}&personName={name}&personBirthday={birthday}&personEmail={email}") ?? Task.CompletedTask);
     }
-
-    private void ClearNameError() { NameHasError = false; NameErrorText = string.Empty; }
-    private void ClearBirthdayError() { BirthdayHasError = false; BirthdayErrorText = string.Empty; }
-    private void ClearEmailError() { EmailHasError = false; EmailErrorText = string.Empty; }
 
     private void UpdateCharacterCounter(int length)
     {
