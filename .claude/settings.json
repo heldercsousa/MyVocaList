@@ -62,7 +62,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import os,subprocess; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); result=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); result.stdout.strip() and print('\\u26a0\\ufe0f Subagent returned with uncommitted changes — run /project:commit or the Stop hook will auto-commit at session end.')\" 2>/dev/null || true"
+            "command": "python -c \"import os,subprocess; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); result=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); result.stdout.strip() and print('\\u26a0\\ufe0f Subagent returned with uncommitted changes — run /project:commit now (auto-commit has been removed from the Stop hook).')\" 2>/dev/null || true"
           }
         ]
       },
@@ -120,10 +120,8 @@
       {
         "hooks": [
           {
-            "type": "agent",
-            "prompt": "You are the session-end commit agent. Complete each step in order.\n\n## STEP 1 — CHECK FOR UNCOMMITTED CHANGES\nRun: git status --porcelain\nIf output is empty: print 'SESSION END — no uncommitted changes. Done.' and STOP.\n\n## STEP 2 — CHECK FOR CODE FILE CHANGES\nRun: git diff --name-only HEAD\nAlso run: git ls-files --others --exclude-standard\nCombine both outputs. If NO file ending in .cs, .xaml, or .xaml.cs appears in the combined list: skip STEPS 3 and 4, go directly to STEP 5.\n\n## STEP 3 — BUILD CHECK\nRun: dotnet build MyVocaList/MyVocaList.csproj -f net10.0 --no-restore -v q 2>&1 | tail -20\nIf exit code is NOT 0: print 'SESSION END WARNING — uncommitted changes exist but build is failing. Fix build errors before stopping. Changes were NOT auto-committed.' and STOP.\n\n## STEP 4 — TEST CHECK\nRun: dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --no-build -v q 2>&1 | tail -30\nIf output contains 'failed': print 'SESSION END WARNING — uncommitted changes exist but tests are failing. Fix failing tests before stopping. Changes were NOT auto-committed.' and STOP.\n\n## STEP 5 — BACKLOG.MD FRESHNESS CHECK\nRun: git diff --name-only HEAD 2>/dev/null\nAlso run: git ls-files --others --exclude-standard\nIf any file matching \"*task-log*\" appears in the combined output AND Docs/Management/BACKLOG.md does NOT appear in that output: print '⚠️ SESSION END — task-log files changed but Docs/Management/BACKLOG.md was not updated. If a feature phase completed this session, update BACKLOG.md status before or after committing.' Continue regardless — this is a reminder, not a blocker.\n\n## STEP 6 — AUTO-COMMIT\nRun: git add -A && git commit -m \"chore: auto-commit at session end — build+test green\" && git push origin HEAD\nPrint: 'SESSION END — auto-committed all uncommitted changes (build+test green).'",
-            "timeout": 300,
-            "statusMessage": "Checking for uncommitted changes at session end..."
+            "type": "command",
+            "command": "python -c \"import subprocess,os; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); r=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); status=r.stdout; lines=[l[3:] for l in status.splitlines()]; status.strip() and print('\\u26a0\\ufe0f UNCOMMITTED CHANGES — run dotnet build && dotnet test, then /project:commit with a descriptive message. (Auto-commit was removed from this hook: Stop fires after every response turn, not only true session end, so it was silently pushing unverified/partial work to the current branch under a misleading \\'build+test green\\' message. See BACKLOG.md 2026-06-27 entry for the identical failure mode in a different hook.)'); status.strip() and any('task-log' in l for l in lines) and not any('BACKLOG.md' in l for l in lines) and print('\\u26a0\\ufe0f task-log files changed but Docs/Management/BACKLOG.md was not updated — update it if a feature phase completed.')\" 2>/dev/null || true"
           }
         ]
       },
