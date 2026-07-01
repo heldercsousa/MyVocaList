@@ -133,3 +133,9 @@ StyleClass="Label.Large"     <!-- 14pt RobotoMedium -->
 
 `useLocalization: false` is set in `UseDevExpress()`. No localization framework is active.
 All text is English only. No `.resx` files exist yet.
+
+**Date input/display format is locale-dependent.** English speakers expect `MM/dd/yyyy`; Brazilian
+Portuguese expects `dd/MM/yyyy` (future); Japanese is TBD. The app plans 6 languages, so the
+**Form Validation Standard** (`dialogs-validation.md § Masked inputs — dates`) forbids hard-coding a single
+date format. Because localization is currently disabled (`useLocalization:false`, no `.resx`), locale-aware
+date masks are **future work** — the standard states the intent; implementation waits on localization.

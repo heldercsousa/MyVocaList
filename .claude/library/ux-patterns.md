@@ -10,6 +10,21 @@ All interactive controls must be at least **48×48dp** (WCAG 2.5.5 / MD3).
 
 Icon-only FABs use 56×56 with CornerRadius=16 (MD3 standard FAB shape).
 
+## Form Validation Timing (pointer)
+
+Form-field validation timing follows the **Form Validation Standard** in `dialogs-validation.md § Form
+Validation Standard` — validate on blur (dirty fields), keystroke-on-error to clear immediately, Save as the
+safety net. Two IxD refinements (Nielsen heuristics) apply:
+
+- **Do not fire a blur error on a pristine field** the user only tabbed through without editing (error
+  prevention, H5) — validate on blur only once the field is dirty, or on Save. Firing on untouched fields is
+  the "impatient teacher" anti-pattern.
+- **Async guidance/availability checks** (username, duplicate name) must show a **pending status indicator**
+  while in flight (visibility of system status, H1), and every error message must be **specific and
+  actionable** — say what is wrong and how to fix it, never a bare "Invalid" (help users recover, H9).
+
+The standard itself is single-sourced in `dialogs-validation.md`; this is a pointer.
+
 ## ~~MD3 Contextual Action Bar (Multi-Select Mode)~~ — RETIRED
 
 > **This pattern is retired as of the Venues MD3 rebuild (2026-03-29).**
