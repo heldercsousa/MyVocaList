@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:dto="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
+    xmlns:domain="clr-namespace:MyVocaList.Domain.ReadModels;assembly=MyVocaList.Domain"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
     xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
@@ -65,7 +66,7 @@
         </views:CrudListView.FilterContent>
 
         <views:CrudListView.ItemTemplate>
-            <DataTemplate x:DataType="dto:ArtistListItemDto">
+            <DataTemplate x:DataType="domain:ArtistListItem">
                 <lists:ListItem Headline="{Binding Name}"
                                 SupportingText="{Binding CatalogCountText}"
                                 IsSelected="False">
@@ -87,7 +88,7 @@
         </views:CrudListView.ItemTemplate>
 
         <views:CrudListView.SelectedItemTemplate>
-            <DataTemplate x:DataType="dto:ArtistListItemDto">
+            <DataTemplate x:DataType="domain:ArtistListItem">
                 <lists:ListItem Headline="{Binding Name}"
                                 SupportingText="{Binding CatalogCountText}"
                                 IsSelected="True">

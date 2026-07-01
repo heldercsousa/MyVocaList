@@ -518,6 +518,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-018-artistformpage-edit
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-018-artistformpage-edit-save-crash\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-018-artistformpage-edit-save-crash\plan.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-019-artistspage-listitem-button-noop", "BUG-019-artistspage-listitem-button-noop", "{FA1234BC-0001-4000-8000-000000000032}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-019-artistspage-listitem-button-noop\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-019-artistspage-listitem-button-noop\task-log.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -659,6 +664,7 @@ Global
 		{DAA6CE0B-7CD5-49ED-8C46-D202070039F3} = {15BB70C4-1D36-417D-9F28-E5D6978FAF2C}
 		{B92F4F42-00C3-44C3-BC6E-E340782C7183} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000031} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000032} = {7A021F6B-F297-41EA-A028-C4F881146791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
