@@ -295,6 +295,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D
 		Docs\Management\BusinessFeatures\persons\tasks.md = Docs\Management\BusinessFeatures\persons\tasks.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000034}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md = Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\styles-structure\design.md = Docs\Management\DevCycleCraft\styles-structure\design.md
@@ -653,6 +658,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000029} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000034} = {D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
