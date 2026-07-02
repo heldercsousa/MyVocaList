@@ -438,6 +438,112 @@ public class SongFormViewModelTests
         Assert.Equal("Title", sut.MergeFieldRows[0].Field);
     }
 
+    // ── BUG-024: edit-mode hydration + full-data save (regression) ────────
+
+    private static Mock<ISongService> MakeSongServiceWithSong(Song song)
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.GetSongByIdAsync(song.Id, It.IsAny<CancellationToken>()))
+                   .ReturnsAsync(song);
+        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
+                   .Returns((true, string.Empty));
+        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
+                   .Returns((true, string.Empty));
+        return songService;
+    }
+
+    [Fact]
+    // [AC] BUG-024: navigating to edit mode must hydrate FeaturedArtists, Lyrics and Version
+    // from the stored entity — before the fix only title/artist/URLs were loaded, so Save
+    // silently wiped these fields.
+    public async Task LoadSongForEdit_ExistingSong_HydratesFeaturedArtistsLyricsAndVersion()
+    {
+        var song = new Song
+        {
+            Id = 42, ArtistId = 1, Title = "Stored Title",
+            Version = "Live", FeaturedArtists = "Feat A", Lyrics = "Stored lyrics"
+        };
+        var songService = MakeSongServiceWithSong(song);
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
+                  .ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        sut.SongIdRaw = "42";
+        await Task.Yield();
+
+        Assert.Equal("Feat A", sut.FeaturedArtists);
+        Assert.Equal("Stored lyrics", sut.Lyrics);
+        Assert.Equal("Live", sut.SongVersion);
+    }
+
+    [Fact]
+    // [AC] BUG-024/BUG-008: an API-imported song (ExternalId set, no manual edits) locks the
+    // artist field in edit mode — the full rule is applicable only now that hydration loads
+    // the entity (previously the flag was derived from a never-populated stash and was
+    // always false).
+    public async Task LoadSongForEdit_ApiImportedWithoutManualEdits_LocksArtistField()
+    {
+        var song = new Song
+        {
+            Id = 42, ArtistId = 1, Title = "Stored Title",
+            ExternalId = "dz-99", ExternalProvider = "Deezer", HasManualEdits = false
+        };
+        var songService = MakeSongServiceWithSong(song);
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
+                  .ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        sut.SongIdRaw = "42";
+        await Task.Yield();
+
+        Assert.True(sut.IsArtistLocked);
+    }
+
+    [Fact]
+    // [AC] BUG-024: edit-mode Save must send the complete current form data — hydrated
+    // FeaturedArtists and Lyrics plus the user's edited Version — to UpdateSongAsync.
+    // Before the fix it sent empty FeaturedArtists/Lyrics and ignored Version entirely.
+    public async Task SaveAsync_EditMode_SendsHydratedFieldsAndEditedVersion()
+    {
+        var song = new Song
+        {
+            Id = 42, ArtistId = 1, Title = "Stored Title",
+            Version = "Live", FeaturedArtists = "Feat A", Lyrics = "Stored lyrics"
+        };
+        var songService = MakeSongServiceWithSong(song);
+        songService.Setup(s => s.UpdateSongAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
+                  .ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        sut.SongIdRaw = "42";
+        await Task.Yield();
+        sut.CompleteHydration();
+        sut.SelectedArtistId = 1;
+        sut.SelectedArtistName = "Artist";
+        sut.SongVersion = "Acoustic"; // user edits the version label
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        songService.Verify(s => s.UpdateSongAsync(
+            42, "Stored Title", "Feat A", "Stored lyrics", true,
+            null, null, "Acoustic",
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     // ── Title field: blur-first validation (Form Validation Standard, Task 04) ────
 
     [Fact]

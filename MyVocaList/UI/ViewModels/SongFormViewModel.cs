@@ -328,18 +328,46 @@ public partial class SongFormViewModel : ViewModelBase
     // ── Edit mode: load song entity ───────────────────────────────────────
 
     /// <summary>
-    /// BUG-008: loads the full Song entity in edit mode to determine IsArtistLocked.
-    /// Also loads karaoke URLs.
+    /// BUG-008/BUG-024: loads the full Song entity in edit mode and hydrates every field that
+    /// <c>UpdateSongAsync</c> persists (Title, Version, FeaturedArtists, Lyrics, external identity)
+    /// so Save cannot silently wipe stored data. Also loads karaoke URLs and determines
+    /// IsArtistLocked (API-imported song: ExternalId set AND no manual edits).
     /// </summary>
     private async Task LoadSongForEditAsync(int songId)
     {
         await LoadKaraokeUrlsAsync();
-        // IsArtistLocked: API-imported songs (ExternalId set AND HasManualEdits false) lock the artist field.
-        // We cannot call ISongService without GetSongByIdAsync — derive from query params for now.
-        // Per BUG-008: if ExternalId is stashed from picker, lock artist.
-        // The full rule is applied post-navigation via InitializeArtistField + SelectedExternalId.
-        // When SelectedExternalId is populated (API import path), lock the artist.
-        IsArtistLocked = !string.IsNullOrEmpty(SelectedExternalId);
+
+        var song = await _songService.GetSongByIdAsync(songId);
+        if (song is null)
+        {
+            _logger.LogWarning("Edit mode: song {SongId} not found during hydration", songId);
+            return;
+        }
+
+        // Stash external identity so ExecuteEditSaveAsync round-trips it unchanged.
+        SelectedExternalId = song.ExternalId ?? string.Empty;
+        SelectedProvider = song.ExternalProvider ?? string.Empty;
+
+        RunOnUiThread(() =>
+        {
+            // This may run after the page's OnAppearing already called CompleteHydration()
+            // (the entity load is async) — re-open the hydration window while applying stored
+            // values so pre-population does not mark fields dirty (edit-mode dirty-guard).
+            var wasHydrating = _isHydrating;
+            _isHydrating = true;
+            try
+            {
+                SongTitle = song.Title ?? string.Empty;
+                SongVersion = song.Version ?? string.Empty;
+                FeaturedArtists = song.FeaturedArtists ?? string.Empty;
+                Lyrics = song.Lyrics;
+                IsArtistLocked = !string.IsNullOrEmpty(song.ExternalId) && !song.HasManualEdits;
+            }
+            finally
+            {
+                _isHydrating = wasHydrating;
+            }
+        });
     }
 
     // ── SongPickedMessage handler (canonical, from SongPickerViewModel) ───
@@ -452,10 +480,13 @@ public partial class SongFormViewModel : ViewModelBase
 
     private async Task ExecuteEditSaveAsync(string title, string version)
     {
+        // BUG-024: send the complete current form data — FeaturedArtists/Lyrics are hydrated by
+        // LoadSongForEditAsync, and the (possibly edited) Version is passed through explicitly.
         var (success, message) = await _songService.UpdateSongAsync(
             SongId!.Value, title, FeaturedArtists?.Trim(), Lyrics?.Trim(), true,
             string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId,
-            string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider);
+            string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider,
+            version);
         if (success)
         {
             await _snackbarService.ShowSuccessAsync("Song updated");
