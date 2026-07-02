@@ -30,6 +30,16 @@ public partial class ArtistFormViewModel : ViewModelBase
     public string SelectedExternalId { get; private set; } = string.Empty;
     public string SelectedProvider { get; private set; } = string.Empty;
 
+    // Becomes true once the user edits the field. Guards blur validation so a pristine field the
+    // user only tabbed through is not flagged prematurely (Form Validation Standard, R8).
+    private bool _nameDirty;
+
+    // True until the page's OnAppearing calls CompleteHydration(). While true, Shell QueryProperty
+    // pre-population (edit mode / duplicate selection) must NOT mark the field dirty — otherwise a
+    // pre-filled value would flash an error on the very first blur, before the user has touched
+    // anything (edit-mode dirty-guard, Form Validation Standard).
+    private bool _isHydrating = true;
+
     public bool IsEditMode => ArtistId.HasValue;
     public string PageTitle => IsEditMode ? "Edit Artist" : "New Artist";
 
@@ -61,23 +71,62 @@ public partial class ArtistFormViewModel : ViewModelBase
         OnPropertyChanged(nameof(PageTitle));
     }
 
+    /// <summary>
+    /// Called by the page's <c>OnAppearing</c> once Shell has finished applying all
+    /// <c>[QueryProperty]</c> values for this navigation. Ends the hydration window so that
+    /// subsequent field edits are tracked as dirty (edit-mode dirty-guard).
+    /// </summary>
+    public void CompleteHydration() => _isHydrating = false;
+
+    /// <summary>
+    /// Blur handler (invoked from the page's <c>Unfocused</c> event). Validates the name field
+    /// only when it is dirty — a pristine field the user only tabbed through is left untouched.
+    /// </summary>
+    [RelayCommand]
+    private void ValidateName()
+    {
+        if (!_nameDirty)
+            return;
+
+        ApplyNameValidation(ArtistName);
+    }
+
     partial void OnArtistNameChanged(string value)
     {
-        ClearError();
-        UpdateCharacterCounter(value?.Length ?? 0);
+        // Counter guidance uses the trimmed length — the same string ValidateNameInput checks —
+        // so the counter never reports an error the validator would not.
+        UpdateCharacterCounter(value?.Trim().Length ?? 0);
+
+        if (_isHydrating)
+            return;   // edit-mode / picker pre-population — do not mark dirty
+
+        _nameDirty = true;
+
+        // "Reward early": once the field is in error, re-validate on every keystroke so the error
+        // clears the instant it becomes valid. Do NOT validate on keystroke before the field is in
+        // error (that is the "impatient teacher" anti-pattern) — blur/Save handle the first check.
+        if (!NameHasError)
+            return;
+
+        ApplyNameValidation(value);
+    }
+
+    private void ApplyNameValidation(string value)
+    {
+        var (isValid, message) = _artistService.ValidateNameInput(value ?? string.Empty);
+        NameHasError = !isValid;
+        NameErrorText = isValid ? string.Empty : message;
     }
 
     private async Task SaveAsync()
     {
         var name = ArtistName?.Trim() ?? string.Empty;
 
-        var validation = _artistService.ValidateNameInput(name);
-        if (!validation.isValid)
-        {
-            NameHasError = true;
-            NameErrorText = validation.message;
+        // Safety net: re-run the field validator on Save regardless of dirty state — an untouched
+        // required field (or one whose error was never surfaced) must still be caught.
+        ApplyNameValidation(name);
+        if (NameHasError)
             return;
-        }
 
         IsBusy = true;
         try
@@ -88,12 +137,11 @@ public partial class ArtistFormViewModel : ViewModelBase
                 if (success)
                 {
                     await _snackbarService.ShowSuccessAsync("Artist updated");
-                    await Shell.Current.GoToAsync("..");
+                    await (Shell.Current?.GoToAsync("..") ?? Task.CompletedTask);
                 }
                 else
                 {
-                    NameHasError = true;
-                    NameErrorText = message;
+                    ApplyAsyncFailure(message);
                 }
             }
             else
@@ -102,12 +150,11 @@ public partial class ArtistFormViewModel : ViewModelBase
                 if (success)
                 {
                     await _snackbarService.ShowSuccessAsync("Artist created");
-                    await Shell.Current.GoToAsync("..");
+                    await (Shell.Current?.GoToAsync("..") ?? Task.CompletedTask);
                 }
                 else
                 {
-                    NameHasError = true;
-                    NameErrorText = message;
+                    ApplyAsyncFailure(message);
                 }
             }
         }
@@ -117,7 +164,19 @@ public partial class ArtistFormViewModel : ViewModelBase
         }
     }
 
-    private Task CancelAsync() => Shell.Current.GoToAsync("..");
+    /// <summary>
+    /// Maps an async CRUD failure to the Artist Name field. This is an explicitly documented
+    /// single-field mapping, not substring routing: the Artist form has exactly one editable
+    /// field, so every field-attributable failure the service can return after the local
+    /// validator passes (the duplicate-name uniqueness check) belongs to the Name field.
+    /// </summary>
+    private void ApplyAsyncFailure(string message)
+    {
+        NameHasError = true;
+        NameErrorText = message;
+    }
+
+    private Task CancelAsync() => Shell.Current?.GoToAsync("..") ?? Task.CompletedTask;
 
     private async Task NavigateToArtistPickerAsync()
     {
@@ -135,12 +194,6 @@ public partial class ArtistFormViewModel : ViewModelBase
     {
         if (artist is null) return Task.CompletedTask;
         return Shell.Current.GoToAsync($"..?artistId={artist.Id}&artistName={Uri.EscapeDataString(artist.Name)}");
-    }
-
-    private void ClearError()
-    {
-        NameHasError = false;
-        NameErrorText = string.Empty;
     }
 
     private void UpdateCharacterCounter(int length)

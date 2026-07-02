@@ -57,6 +57,31 @@ public class ArtistServiceTests
         Assert.True(isValid);
     }
 
+    // ── GetCharacterCounterInfo ───────────────────────────────────────────
+
+    [Fact]
+    // [AC] Counter threshold alignment (Form Validation Standard): the counter reports an error
+    // only when ValidateNameInput would reject the same length. 60 chars is valid → no error.
+    public void GetCharacterCounterInfo_AtMaxLength60_IsNotError()
+    {
+        var sut = CreateSut();
+
+        var (_, _, isError) = sut.GetCharacterCounterInfo(60);
+
+        Assert.False(isError);
+    }
+
+    [Fact]
+    // [AC] Counter threshold alignment: 61 chars is rejected by the validator → counter error.
+    public void GetCharacterCounterInfo_OverMaxLength_IsError()
+    {
+        var sut = CreateSut();
+
+        var (_, _, isError) = sut.GetCharacterCounterInfo(61);
+
+        Assert.True(isError);
+    }
+
     // ── CreateArtistAsync ─────────────────────────────────────────────────
 
     [Fact]
