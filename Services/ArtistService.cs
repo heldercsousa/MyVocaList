@@ -160,7 +160,9 @@ public class ArtistService : IArtistService
     {
         var text = $"{currentLength}/{MaxInputLength}";
         var isWarning = currentLength > 55;
-        var isError = currentLength >= MaxInputLength;
+        // Error only when ValidateNameInput would reject the same length (counter threshold
+        // alignment, Form Validation Standard) — exactly MaxInputLength is still valid.
+        var isError = currentLength > MaxInputLength;
         return (text, isWarning, isError);
     }
 }
