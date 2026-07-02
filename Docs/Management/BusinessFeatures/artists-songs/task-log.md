@@ -51,3 +51,27 @@ Domain and Contracts projects compiled cleanly (0 errors in those projects). Thi
 - Tests: FAIL (test project failed to build due to Infra/Services errors — expected at this stage; to be fixed in Phase 15)
 - Post-edit re-read: confirmed — all 9 files match target specifications
 - Spec compliance: confirmed — `tasks.md` Phase 10 section fully checked; `ArtistId` remains `int` NOT NULL; no Lyrics in DTO; `OriginalArtistId` is `int` not `int?`
+
+---
+## Task: BUG-021 — SongsPage FAB crash: ISimilarityScorer not registered in DI (Critical)
+**Plan:** Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-021-songspage-fab-crash/BUG-021-songspage-fab-crash.md (commit message as spec — Bug Fix Pattern)
+**Status:** To Review
+**Started:** 07/02/2026
+**Completed:** 07/02/2026
+
+### Changed files:
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs` — new; `AddAppServices()` extension holding the platform-independent registrations extracted verbatim from `MauiProgram.cs`, plus the missing `ISimilarityScorer` → `SimilarityScorer` Scoped registration (the fix)
+- `MyVocaList/MauiProgram.cs` — replaced the extracted registration blocks with a single `builder.Services.AddAppServices();` call (behavior identical)
+- `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` — new; 3 DI-resolution regression tests for the SongFormViewModel dependency graph
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-021-songspage-fab-crash/BUG-021-songspage-fab-crash.md` — Root Cause / Fix / Regression Test / Status: Fixed
+
+### Verification evidence
+- Build: PASS (0 errors)
+- Tests: PASS (406 tests, 0 failures; regression test `AddAppServices_ResolvingArtistResolutionService_Succeeds` seen RED before the fix with the exact production exception "Unable to resolve service for type 'MyVocaList.Domain.ServicesInterfaces.ISimilarityScorer' while attempting to activate 'MyVocaList.Services.ArtistResolutionService'", GREEN after)
+- Post-edit re-read: confirmed — MauiProgram.cs, ServiceCollectionExtensions.cs, AppServicesRegistrationTests.cs
+- Spec compliance: confirmed — bug doc updated (Bug Fix Pattern, no three-file spec required); full SongFormPage/SongFormViewModel dependency chain walked, no other DI gaps found
+
+### AC traceability
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| BUG-021 | FAB on SongsPage must open SongFormPage without DI crash | ServiceCollectionExtensions.AddAppServices (ISimilarityScorer registration) | AddAppServices_ResolvingArtistResolutionService_Succeeds; AddAppServices_ResolvingSongResolutionService_Succeeds; AddAppServices_ResolvingSongFormViewModelGraph_Succeeds |
