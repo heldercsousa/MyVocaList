@@ -70,7 +70,9 @@ namespace MyVocaList.UI.ViewModels
         partial void OnVenueNameChanged(string value)
         {
             _nameDirty = true;
-            UpdateCharacterCounter(value?.Length ?? 0);
+            // Counter counts the trimmed string — the same string ValidateNameInput checks —
+            // so trailing whitespace cannot inflate the count (counter threshold alignment).
+            UpdateCharacterCounter(value?.Trim().Length ?? 0);
 
             // "Reward early": once the field is in error, re-validate on every keystroke so the error
             // clears the instant it becomes valid. Do NOT validate on keystroke before the field is in

@@ -9,6 +9,31 @@ public class PersonServiceTests
 
     private PersonService CreateSut() => new(_repoMock.Object, _loggerMock.Object);
 
+    // ── GetCharacterCounterInfo ────────────────────────────────────────────────
+
+    [Fact]
+    // [AC] Counter threshold alignment (Form Validation Standard): the counter reports an error
+    // only when ValidateNameInput would reject the same length. 200 chars is valid → no error.
+    public void GetCharacterCounterInfo_AtMaxLength200_IsNotError()
+    {
+        var sut = CreateSut();
+
+        var (_, _, isError) = sut.GetCharacterCounterInfo(200);
+
+        Assert.False(isError);
+    }
+
+    [Fact]
+    // [AC] Counter threshold alignment: 201 chars is rejected by the validator → counter error.
+    public void GetCharacterCounterInfo_OverMaxLength_IsError()
+    {
+        var sut = CreateSut();
+
+        var (_, _, isError) = sut.GetCharacterCounterInfo(201);
+
+        Assert.True(isError);
+    }
+
     // ── ValidateNameInput ──────────────────────────────────────────────────────
 
     [Fact]

@@ -227,7 +227,9 @@ public partial class SongFormViewModel : ViewModelBase
 
     partial void OnSongTitleChanged(string value)
     {
-        UpdateCharacterCounter(value?.Length ?? 0);
+        // Counter counts the trimmed string — the same string ValidateTitleInput checks —
+        // so trailing whitespace cannot inflate the count (counter threshold alignment).
+        UpdateCharacterCounter(value?.Trim().Length ?? 0);
         UpdateCanLaunchYouTubeSearch();
 
         if (_isHydrating)

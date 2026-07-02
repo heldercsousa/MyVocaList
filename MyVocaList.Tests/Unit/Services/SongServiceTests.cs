@@ -62,6 +62,31 @@ public class SongServiceTests
         Assert.True(isValid);
     }
 
+    // ── GetCharacterCounterInfo ───────────────────────────────────────────
+
+    [Fact]
+    // [AC] Counter threshold alignment (Form Validation Standard): the counter reports an error
+    // only when ValidateTitleInput would reject the same length. 100 chars is valid → no error.
+    public void GetCharacterCounterInfo_AtMaxLength100_IsNotError()
+    {
+        var sut = CreateSut();
+
+        var (_, _, isError) = sut.GetCharacterCounterInfo(100);
+
+        Assert.False(isError);
+    }
+
+    [Fact]
+    // [AC] Counter threshold alignment: 101 chars is rejected by the validator → counter error.
+    public void GetCharacterCounterInfo_OverMaxLength_IsError()
+    {
+        var sut = CreateSut();
+
+        var (_, _, isError) = sut.GetCharacterCounterInfo(101);
+
+        Assert.True(isError);
+    }
+
     // ── ValidateVersionInput (Form Validation Standard) ──────────────────
 
     [Fact]
