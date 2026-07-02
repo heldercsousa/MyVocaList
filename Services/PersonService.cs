@@ -270,7 +270,9 @@ public class PersonService : IPersonService
     {
         string text = $"{currentLength}/{MaxInputLength}";
         bool isWarning = currentLength > 190;
-        bool isError = currentLength >= MaxInputLength;
+        // Error only when ValidateNameInput would reject the same length (counter threshold
+        // alignment, Form Validation Standard) — exactly MaxInputLength is still valid.
+        bool isError = currentLength > MaxInputLength;
         return (text, isWarning, isError);
     }
 

@@ -177,6 +177,21 @@ public class PersonFormViewModelTests
         Assert.False(sut.ShowCharacterCounter);
     }
 
+    [Fact]
+    // [AC] Counter threshold alignment: the counter must count the trimmed string, exactly what
+    // ValidateNameInput checks — trailing whitespace must not inflate the count.
+    public void OnPersonNameChanged_TrailingWhitespace_CounterUsesTrimmedLength()
+    {
+        var sut = CreateSut();
+        sut.CompleteHydration();
+        var name = "John " + new string('x', 174) + "      ";   // 179 trimmed, 185 untrimmed
+
+        sut.PersonName = name;
+
+        _serviceMock.Verify(s => s.ShouldShowCharacterCounter(179), Times.Once);
+        _serviceMock.Verify(s => s.ShouldShowCharacterCounter(185), Times.Never);
+    }
+
     // ── Name field: blur-first validation (Form Validation Standard) ──────
 
     [Fact]
