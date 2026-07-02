@@ -646,4 +646,22 @@ public class SongFormViewModelTests
         Assert.False(sut.VersionHasError);
         songService.Verify(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
     }
+
+    // ── Character counter — counts the same (trimmed) string the validator checks ─
+
+    [Fact]
+    // [AC] Counter threshold alignment: the counter must count the trimmed string, exactly what
+    // ValidateTitleInput checks — trailing whitespace must not inflate the count.
+    public void OnSongTitleChanged_TrailingWhitespace_CounterUsesTrimmedLength()
+    {
+        var songService = new Mock<ISongService>();
+        var sut = CreateSut(songService: songService);
+        sut.CompleteHydration();
+        var title = new string('x', 79) + "      ";   // 79 trimmed, 85 untrimmed
+
+        sut.SongTitle = title;
+
+        songService.Verify(s => s.ShouldShowCharacterCounter(79), Times.Once);
+        songService.Verify(s => s.ShouldShowCharacterCounter(85), Times.Never);
+    }
 }

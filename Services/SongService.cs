@@ -240,7 +240,9 @@ public class SongService : ISongService
     {
         var text = $"{currentLength}/{MaxTitleLength}";
         var isWarning = currentLength > 90;
-        var isError = currentLength >= MaxTitleLength;
+        // Error only when ValidateTitleInput would reject the same length (counter threshold
+        // alignment, Form Validation Standard) — exactly MaxTitleLength is still valid.
+        var isError = currentLength > MaxTitleLength;
         return (text, isWarning, isError);
     }
 }

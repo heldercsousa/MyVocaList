@@ -124,7 +124,9 @@ public partial class PersonFormViewModel : ViewModelBase
 
     partial void OnPersonNameChanged(string value)
     {
-        UpdateCharacterCounter(value?.Length ?? 0);
+        // Counter counts the trimmed string — the same string ValidateNameInput checks —
+        // so trailing whitespace cannot inflate the count (counter threshold alignment).
+        UpdateCharacterCounter(value?.Trim().Length ?? 0);
 
         if (_isHydrating)
             return;   // edit-mode pre-population — do not mark dirty

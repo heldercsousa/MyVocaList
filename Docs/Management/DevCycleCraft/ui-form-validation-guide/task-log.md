@@ -73,3 +73,68 @@ The three mandatory pre-implementation fixes were applied before authoring (deta
 3. **Stale note:** `constraints-registry.md § Visual Studio Solution` says the GUID sequence is "currently 0014";
    the real value is `...030` after this task. Consider updating that note (a `.claude/rules/*` edit — deferred,
    out of this task's scope).
+
+---
+## Task: 06 — Character-counter threshold alignment — Song/Venue/Person services (+ trimmed-length VM feed)
+**Plan:** `Docs/Management/BACKLOG.md` (Form Validation section, Task 06) — replicates the Task 05 ArtistService fix (commit `1e4a858`)
+**Status:** To Review
+**Started:** 07/02/2026
+**Completed:** 07/02/2026
+
+### Summary
+Aligned `GetCharacterCounterInfo` `isError` in `SongService`, `VenueService`, and `PersonService` to their
+validator boundary: error only when the length EXCEEDS the max (`> Max`), since each validator accepts
+exactly-max-length input. Same one-character fix + rationale comment as `ArtistService` (Task 05).
+Also aligned the three form ViewModels to feed the **trimmed** length to the counter helpers
+(`value?.Trim().Length ?? 0`), replicating the `ArtistFormViewModel` pattern — the call shape was identical
+(1:1) in all three VMs, so the Artist pattern applied cleanly.
+
+### Per-service validator-boundary confirmation
+| Service | Validator | Boundary evidence | Counter before | Counter after |
+|---------|-----------|-------------------|----------------|---------------|
+| SongService | `ValidateTitleInput` | rejects only `title.Length > MaxTitleLength` (100); existing test `ValidateTitleInput_MaxLength100_ReturnsTrue` proves 100 is valid | `isError = >= 100` | `isError = > 100` |
+| VenueService | `ValidateNameInput` | rejects only `name.Length > MaxInputLength` (30) — exactly 30 is valid | `isError = >= 30` | `isError = > 30` |
+| PersonService | `ValidateNameInput` | rejects only `name.Length > MaxInputLength` (200) — exactly 200 is valid | `isError = >= 200` | `isError = > 200` |
+
+No validator was changed — counter aligned to validator only.
+
+### TDD evidence (per service/VM, one at a time)
+- SongService: `GetCharacterCounterInfo_AtMaxLength100_IsNotError` seen Red → one-char fix → Green; over-max test added, Green.
+- VenueService: `GetCharacterCounterInfo_AtMaxLength30_IsNotError` seen Red → fix → Green (14/14); over-max test added, Green (15/15).
+- PersonService: `GetCharacterCounterInfo_AtMaxLength200_IsNotError` seen Red → fix → Green (24/24); over-max test added, Green (25/25).
+- SongFormViewModel: `OnSongTitleChanged_TrailingWhitespace_CounterUsesTrimmedLength` seen Red → trim fix → Green (31/31).
+- VenueFormViewModel: `OnVenueNameChanged_TrailingWhitespace_CounterUsesTrimmedLength` seen Red → trim fix → Green (8/8).
+- PersonFormViewModel: `OnPersonNameChanged_TrailingWhitespace_CounterUsesTrimmedLength` seen Red → trim fix → Green (31/31).
+
+### Changed files:
+- `Services/SongService.cs` — `GetCharacterCounterInfo` `isError` `>=` → `>` MaxTitleLength, rationale comment.
+- `Services/VenueService.cs` — `GetCharacterCounterInfo` `isError` `>=` → `>` MaxInputLength, rationale comment.
+- `Services/PersonService.cs` — `GetCharacterCounterInfo` `isError` `>=` → `>` MaxInputLength, rationale comment.
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — `OnSongTitleChanged` feeds trimmed length to counter.
+- `MyVocaList/UI/ViewModels/VenueFormViewModel.cs` — `OnVenueNameChanged` feeds trimmed length to counter.
+- `MyVocaList/UI/ViewModels/PersonFormViewModel.cs` — `OnPersonNameChanged` feeds trimmed length to counter.
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` — +2 counter threshold tests.
+- `MyVocaList.Tests/Unit/Services/VenueServiceTests.cs` — +2 counter threshold tests.
+- `MyVocaList.Tests/Unit/Services/PersonServiceTests.cs` — +2 counter threshold tests.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — +1 trimmed-counter test.
+- `MyVocaList.Tests/Unit/ViewModels/VenueFormViewModelTests.cs` — +1 trimmed-counter test.
+- `MyVocaList.Tests/Unit/ViewModels/PersonFormViewModelTests.cs` — +1 trimmed-counter test.
+- `Docs/Management/DevCycleCraft/ui-form-validation-guide/task-log.md` — this entry (existing file, already
+  registered in `MyVocaList.sln`; no `.sln` change required).
+
+### Verification evidence
+- Build: PASS — `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`: 0 errors (test project builds via `dotnet test`).
+- Tests: PASS — full suite 425/425 (baseline 416 + 9 new: 6 service + 3 ViewModel tests), 0 failures.
+- Post-edit re-read: confirmed for all 12 changed code files.
+- Spec compliance: confirmed — counter/validator alignment per `dialogs-validation.md § Form Validation
+  Standard` and the Task 05 reference in `form-validation-task-log.md`; no validator or business rule changed.
+
+### Reported (not changed) — isWarning / ShowCounterAt observations
+- **PersonService (B2 flag):** `isWarning > 190` vs `ShowCounterAt = 180`. Internally this is ordered
+  (show at >180 → warn at >190 → error at >200) and mirrors the Artist pattern (50/55/60), so no drift of the
+  Task 05 kind exists; the earlier B2 concern about the counter counting untrimmed input is now resolved at
+  the VM (trimmed feed). The 190 literal (like Artist's 55, Song's 90, Venue's 27) is hardcoded rather than
+  derived from `ShowCounterAt`/`Max` — left as-is; decision for Helder whether warning thresholds should be
+  formalized as named constants.
+- Song (80/90/100) and Venue (25/27/30) warning thresholds are likewise ordered and internally consistent —
+  nothing beyond the isError alignment required.
