@@ -208,7 +208,7 @@ public class SongResolutionService : ISongResolutionService
                 var (updateSuccess, updateMessage) = await _songService.UpdateSongAsync(
                     song.Id, song.Title, song.FeaturedArtists, song.Lyrics,
                     song.HasManualEdits,
-                    newExternalId, newExternalProvider, ct);
+                    newExternalId, newExternalProvider, song.Version, ct);
 
                 if (!updateSuccess)
                     return (false, updateMessage, null);
@@ -232,7 +232,7 @@ public class SongResolutionService : ISongResolutionService
                     var (updateSuccess, updateMessage) = await _songService.UpdateSongAsync(
                         song.Id, song.Title, song.FeaturedArtists, song.Lyrics,
                         song.HasManualEdits,
-                        candidate.ExternalId, candidate.ExternalProvider, ct);
+                        candidate.ExternalId, candidate.ExternalProvider, song.Version, ct);
 
                     if (!updateSuccess)
                         return (false, updateMessage, null);
