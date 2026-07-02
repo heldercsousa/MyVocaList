@@ -84,33 +84,11 @@ public static class MauiProgram
             backupDir));
         builder.Services.AddTransient<BackupRestoreViewModel>();
 
-        // Repositories
-        builder.Services.AddScoped<IVenueRepository, VenueRepository>();
-        builder.Services.AddScoped<Domain.RepositoryInterface.IEventRepository, Infra.Repository.EventRepository>();
-        builder.Services.AddScoped<IPersonRepository, PersonRepository>();
-        builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
-        builder.Services.AddScoped<ISongRepository, SongRepository>();
-        builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
+        // Repositories, HTTP metadata providers, and business services
+        // (extracted to a testable extension — see BUG-021 DI regression tests)
+        builder.Services.AddAppServices();
 
-        // Queue Management repositories (new architecture)
-        builder.Services.AddScoped<Domain.Interfaces.IEventRepository, Infra.Repositories.EventRepository>();
-        builder.Services.AddScoped<Domain.Interfaces.IQueueRepository, Infra.Repositories.QueueRepository>();
-
-        // HTTP Clients — music metadata providers
-        builder.Services.AddHttpClient<MusicBrainzProvider>(client =>
-        {
-            client.BaseAddress = new Uri("https://musicbrainz.org/ws/2/");
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)");
-        });
-        builder.Services.AddHttpClient<DeezerProvider>(client =>
-        {
-            client.BaseAddress = new Uri("https://api.deezer.com/");
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)");
-        });
-        builder.Services.AddScoped<IMusicMetadataProvider, MusicBrainzProvider>();
-        builder.Services.AddScoped<IMusicMetadataProvider, DeezerProvider>();
-
-        // Services
+        // MAUI-platform services
         builder.Services.AddSingleton<IPreferences>(_ => Preferences.Default);
         builder.Services.AddSingleton<IAppInfo>(_ => AppInfo.Current);
         builder.Services.AddSingleton<IFileSystem>(_ => FileSystem.Current);
@@ -123,23 +101,7 @@ public static class MauiProgram
             AppInfo.Current.VersionString,
             DeviceInfo.Current.Platform == DevicePlatform.iOS ? "ios" : "android",
             sp.GetRequiredService<ILogger<VersionCheckService>>()));
-        builder.Services.AddScoped<IVenueService, VenueService>();
-        builder.Services.AddScoped<IPersonService, PersonService>();
-        builder.Services.AddScoped<IEventService, EventService>();
-        builder.Services.AddScoped<IQueueServiceNew, QueueServiceNew>();
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
-        builder.Services.AddScoped<IArtistService, ArtistService>();
-        builder.Services.AddScoped<ISongService, SongService>();
-        builder.Services.AddScoped<ICatalogService, CatalogService>();
-        builder.Services.AddScoped<IMusicMetadataService, MusicMetadataService>();
-        builder.Services.AddScoped<IArtistResolutionService, ArtistResolutionService>();
-        builder.Services.AddScoped<ISongResolutionService, SongResolutionService>();
-
-        // YouTube Karaoke
-        builder.Services.AddScoped<ISongKaraokeUrlRepository, SongKaraokeUrlRepository>();
-        builder.Services.AddScoped<ISongKaraokeUrlService, SongKaraokeUrlService>();
-        builder.Services.AddScoped<IYouTubeSearchService, YouTubeSearchService>();
-        builder.Services.AddScoped<INextSingerAlertService, NextSingerAlertService>();
         builder.Services.AddSingleton<ISecureStorageWrapper, SecureStorageWrapper>();
         builder.Services.AddSingleton<INavigationService, MyVocaList.UI.Services.NavigationService>();
         builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
