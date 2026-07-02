@@ -20,10 +20,23 @@ public interface ISongService
         int artistId, string title, string? featuredArtists = null, string? lyrics = null,
         string? externalId = null, string? externalProvider = null, CancellationToken ct = default);
 
-    /// <summary>Updates title, featured artists, lyrics, and optionally external identity of an existing song.</summary>
+    /// <summary>
+    /// Updates title, featured artists, lyrics, and optionally version and external identity of an
+    /// existing song.
+    /// </summary>
+    /// <param name="id">Id of the song to update.</param>
+    /// <param name="title">New song title.</param>
+    /// <param name="featuredArtists">Featured-artist names; null clears the field.</param>
+    /// <param name="lyrics">Lyrics text; null clears the field.</param>
+    /// <param name="hasManualEdits">Whether the song now carries manual edits.</param>
+    /// <param name="externalId">External provider song id; null = keep existing value.</param>
+    /// <param name="externalProvider">External provider name; null = keep existing value.</param>
+    /// <param name="version">Variant label (empty string = canonical); null = keep existing value (BUG-024).</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns><c>(true, message)</c> on success; <c>(false, reason)</c> on failure.</returns>
     Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
-        string? externalId = null, string? externalProvider = null,
+        string? externalId = null, string? externalProvider = null, string? version = null,
         CancellationToken ct = default);
 
     /// <summary>
@@ -46,6 +59,15 @@ public interface ISongService
         string? externalId, string? externalProvider,
         IEnumerable<string> urls,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns the full song entity for the given id, including FeaturedArtists, Lyrics, Version
+    /// and external identity — used by edit-mode form hydration (BUG-024).
+    /// </summary>
+    /// <param name="id">Id of the song to load.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The song when found; <c>null</c> when no song has the given id.</returns>
+    Task<Song?> GetSongByIdAsync(int id, CancellationToken ct = default);
 
     /// <summary>Checks per-artist title uniqueness (a song title must be unique per original artist).</summary>
     Task<bool> ExistsByTitleForArtistAsync(string title, int artistId, int? excludeId = null, CancellationToken ct = default);

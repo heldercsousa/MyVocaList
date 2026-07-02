@@ -369,6 +369,83 @@ public class SongServiceTests
         Assert.Equal("spotify", song.ExternalProvider);
     }
 
+    // ── UpdateSongAsync — version (BUG-024) ───────────────────────────────
+
+    [Fact]
+    // [AC] BUG-024: edits to the Version field were discarded — UpdateSongAsync must persist
+    // the provided version label.
+    public async Task UpdateSongAsync_WithVersion_PersistsVersion()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Title", Version = "Live" };
+        _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(song);
+        _songRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()))
+                     .Returns(Task.CompletedTask);
+        var sut = CreateSut();
+
+        var (success, _) = await sut.UpdateSongAsync(
+            1, "Title", null, null, true, version: "Acoustic");
+
+        Assert.True(success);
+        Assert.Equal("Acoustic", song.Version);
+    }
+
+    [Fact]
+    // [AC] BUG-024: a null version must not overwrite the stored version (null = keep existing,
+    // same semantics as externalId/externalProvider).
+    public async Task UpdateSongAsync_NullVersion_KeepsExistingVersion()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Title", Version = "Live" };
+        _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(song);
+        _songRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()))
+                     .Returns(Task.CompletedTask);
+        var sut = CreateSut();
+
+        var (success, _) = await sut.UpdateSongAsync(1, "Title", null, null, true, version: null);
+
+        Assert.True(success);
+        Assert.Equal("Live", song.Version);
+    }
+
+    [Fact]
+    // [AC] BUG-024: version exceeding the 60-char limit is rejected before any write.
+    public async Task UpdateSongAsync_VersionTooLong_ReturnsFalse()
+    {
+        var sut = CreateSut();
+        var version = new string('x', 61);
+
+        var (success, message) = await sut.UpdateSongAsync(1, "Title", null, null, true, version: version);
+
+        Assert.False(success);
+        Assert.NotEmpty(message);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // ── GetSongByIdAsync (BUG-024) ────────────────────────────────────────
+
+    [Fact]
+    // [AC] BUG-024: edit-mode hydration needs the full entity — GetSongByIdAsync must return
+    // the song with FeaturedArtists, Lyrics and Version intact.
+    public async Task GetSongByIdAsync_ExistingId_ReturnsSongWithAllFields()
+    {
+        var song = new Song
+        {
+            Id = 1, ArtistId = 1, Title = "Title",
+            Version = "Live", FeaturedArtists = "Feat A", Lyrics = "Some lyrics"
+        };
+        _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(song);
+        var sut = CreateSut();
+
+        var result = await sut.GetSongByIdAsync(1);
+
+        Assert.NotNull(result);
+        Assert.Equal("Live", result.Version);
+        Assert.Equal("Feat A", result.FeaturedArtists);
+        Assert.Equal("Some lyrics", result.Lyrics);
+    }
+
     // ── CreateSongWithUrlsAsync (N3 atomic save, AC-6.1/6.2) ─────────────
 
     private void SetupArtistAndDuplicateCheck(int artistId, bool duplicate = false)
