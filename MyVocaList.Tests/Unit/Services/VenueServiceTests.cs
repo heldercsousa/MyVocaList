@@ -57,6 +57,31 @@ public class VenueServiceTests
         Assert.Empty(message);
     }
 
+    // ── GetCharacterCounterInfo ───────────────────────────────────────────────
+
+    [Fact]
+    // [AC] Counter threshold alignment (Form Validation Standard): the counter reports an error
+    // only when ValidateNameInput would reject the same length. 30 chars is valid → no error.
+    public void GetCharacterCounterInfo_AtMaxLength30_IsNotError()
+    {
+        var sut = CreateSut();
+
+        var (_, _, isError) = sut.GetCharacterCounterInfo(30);
+
+        Assert.False(isError);
+    }
+
+    [Fact]
+    // [AC] Counter threshold alignment: 31 chars is rejected by the validator → counter error.
+    public void GetCharacterCounterInfo_OverMaxLength_IsError()
+    {
+        var sut = CreateSut();
+
+        var (_, _, isError) = sut.GetCharacterCounterInfo(31);
+
+        Assert.True(isError);
+    }
+
     // ── CreateVenueAsync ──────────────────────────────────────────────────────
 
     [Fact]

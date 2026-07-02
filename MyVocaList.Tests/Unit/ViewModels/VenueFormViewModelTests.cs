@@ -128,4 +128,20 @@ public class VenueFormViewModelTests
         Assert.Equal("Name is too short. Minimum is 2 characters.", sut.NameErrorText);
         _serviceMock.Verify(s => s.CreateVenueAsync(It.IsAny<string>()), Times.Never);
     }
+
+    // ── Character counter — counts the same (trimmed) string the validator checks ─
+
+    [Fact]
+    // [AC] Counter threshold alignment: the counter must count the trimmed string, exactly what
+    // ValidateNameInput checks — trailing whitespace must not inflate the count.
+    public void OnVenueNameChanged_TrailingWhitespace_CounterUsesTrimmedLength()
+    {
+        var sut = CreateSut();
+        var name = new string('x', 24) + "      ";   // 24 trimmed, 30 untrimmed
+
+        sut.VenueName = name;
+
+        _serviceMock.Verify(s => s.ShouldShowCharacterCounter(24), Times.Once);
+        _serviceMock.Verify(s => s.ShouldShowCharacterCounter(30), Times.Never);
+    }
 }
