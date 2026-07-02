@@ -20,9 +20,10 @@
                           Text="{Binding ArtistName, Mode=TwoWay}"
                           LabelText="Artist Name"
                           PlaceholderText="Enter artist name"
-                          MaxCharacterCount="250"
+                          MaxCharacterCount="60"
                           HasError="{Binding NameHasError}"
-                          ErrorText="{Binding NameErrorText}" />
+                          ErrorText="{Binding NameErrorText}"
+                          Unfocused="OnNameUnfocused" />
 
             <Label Text="{Binding CharacterCounterText}"
                    IsVisible="{Binding ShowCharacterCounter}"

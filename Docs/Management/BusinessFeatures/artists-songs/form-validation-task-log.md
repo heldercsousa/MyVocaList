@@ -181,3 +181,125 @@ same IDs, same source (`01-ui-form-validation-guide.md` + `dialogs-validation.md
   sources of truth for the same rule.
 - **No component-change-governance trigger.** No shared/governed component (`AutocompleteField`, `ListItem`,
   etc.) was modified — only page-local `dxe:TextEdit` instances and the page's own ViewModel/code-behind.
+
+---
+
+# Artist Form Validation — Task Log (Task 05)
+
+**Feature:** Apply the Form Validation Standard to `ArtistFormPage` / `ArtistFormViewModel`.
+**Standard source:** `.claude/library/dialogs-validation.md § Form Validation Standard`
+**Requirements source:** `Docs/Management/DevCycleCraft/ui-form-validation-guide/01-ui-form-validation-guide.md`
+**Reference implementation:** Person form (Task 03, multi-field reference), Venue form (Task 02, single-field baseline).
+**Requirement ID scheme:** R1–R10 reused unchanged from Task 02/03/04 (see the table at the top of this file).
+
+---
+
+## Task: Artist form — Name field — blur + keystroke-clear inline validation
+
+**Plan:** `Docs/Management/DevCycleCraft/ui-form-validation-guide/ORCHESTRATION-HANDOFF.md` (Task 05)
+**Status:** To Review
+**Started:** 07/02/2026
+**Completed:** 07/02/2026
+
+### Scope decisions / out of scope
+
+- **Fields validated: Artist Name only** — the form's single free-text `dxe:TextEdit`. Confirmed by reading
+  `ArtistFormPage.xaml`: the only other interactive elements are the "Search music database" picker `ListItem`
+  (navigation, not an input), the duplicate-suggestion buttons (navigation), and Cancel/Save.
+- **Validator already existed and was correctly named** (`IArtistService.ValidateNameInput`) with R7-compliant
+  messages ("Artist name is required" / "Name is too long. Maximum 60 characters.") — no service validator
+  changes were needed.
+- **Async failure mapping — documented single-field mapping, not substring routing.** `ApplyAsyncFailure`
+  routes every Create/Update failure message to the Name field inline. Rationale (documented in the method's
+  XML doc): the form has exactly one editable field, and the only field-attributable failure the service can
+  return after the local validator passes is the duplicate-name uniqueness check. This is the explicitly
+  sanctioned single-field mapping from the Task 05 brief; no `message.Contains(...)` routing exists.
+- **Picker (`ArtistPickedMessage`) sets `ArtistName` after hydration completes** — this intentionally marks
+  the field dirty (it is a user-initiated selection, not programmatic pre-population), so a subsequent blur
+  validates the picked value, and an in-error field is cleared immediately by the keystroke-path re-validation.
+- **Counter threshold drift fixed (Task 04 review lesson).** `ArtistService.GetCharacterCounterInfo` flagged
+  `isError` at `>= MaxInputLength` (60), but `ValidateNameInput` accepts exactly 60 — the counter showed an
+  error state for a value the validator accepts. Changed to `> MaxInputLength` (TDD: seen Red at 60, Green
+  after fix).
+- **Counter counts the trimmed string (Task 04 review lesson).** `OnArtistNameChanged` now passes
+  `value?.Trim().Length` to the counter helpers — the same string `ValidateNameInput` checks — so trailing
+  whitespace cannot inflate the count into a false warning/error.
+- **`MaxCharacterCount` drift fixed.** `ArtistFormPage.xaml` had `MaxCharacterCount="250"`; the service's
+  `MaxInputLength` is 60. Set to 60.
+- **Null-safe Shell navigation** (`Shell.Current?.GoToAsync(..) ?? Task.CompletedTask`) adopted in
+  `SaveAsync`/`CancelAsync` to match the Person reference and allow the Save success-path unit test
+  (`Shell.Current` is null under test). `NavigateToArtistPickerAsync`/`SelectDuplicateAsync` untouched
+  (navigation-only commands, excluded from unit tests per `testing.md`).
+- **No component-change-governance trigger.** No shared/governed component was modified.
+
+### Changed files:
+
+- `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` — added `_nameDirty` dirty-guard, `_isHydrating` +
+  `CompleteHydration()`, `ValidateNameCommand` (blur), keystroke re-validate-only-while-in-error in
+  `OnArtistNameChanged`, `ApplyNameValidation`, Save safety net, `ApplyAsyncFailure` (documented single-field
+  mapping), trimmed-length counter, null-safe Shell navigation; removed the old unconditional
+  `ClearError()`-on-keystroke behavior (which wrongly cleared errors even while still invalid).
+- `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml` — `Unfocused="OnNameUnfocused"` blur hook on `nameEdit`;
+  `MaxCharacterCount` 250 → 60 (service constant alignment).
+- `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml.cs` — `CompleteHydration()` in `OnAppearing`,
+  `OnNameUnfocused` bridge to `ValidateNameCommand`, focus name field only in create mode (Person-reference
+  pattern; previously focused in edit mode too, which would have blurred/validated prematurely on back-nav).
+- `Services/ArtistService.cs` — `GetCharacterCounterInfo` `isError` threshold `>=` → `>` (counter/validator
+  alignment) with rationale comment.
+- `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs` — NEW file, 11 `[Fact]` tests (blur x3,
+  keystroke x3, hydration guard x1, Save safety net / create / duplicate x3, trimmed counter x1).
+- `MyVocaList.Tests/Unit/Services/ArtistServiceTests.cs` — added 2 `GetCharacterCounterInfo` threshold tests.
+- `Docs/Management/BusinessFeatures/artists-songs/form-validation-task-log.md` — this entry (existing file,
+  already registered in `MyVocaList.sln`; no `.sln` change required).
+
+### Verification evidence
+
+- Build: PASS — `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`: 0 errors. Test project builds
+  as part of `dotnet test`.
+- Tests (Artist filter): PASS — `ArtistFormViewModelTests` 11/11 (all new), `ArtistServiceTests` 15/15
+  (13 pre-existing + 2 new).
+- Tests (full suite): PASS — **416/416**, 0 failures (`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`).
+  Baseline before this task was 403/403 (Task 04) — the +13 delta is exactly the 11 new
+  `ArtistFormViewModelTests` + 2 new `ArtistServiceTests` methods.
+- Net-new test count (exact): **13** (11 ViewModel + 2 Service).
+- TDD evidence: ViewModel tests seen Red first (CS1061 — `CompleteHydration`/`ValidateNameCommand` did not
+  exist), then Green after implementation. Counter threshold test seen Red (1 failed at length 60), Green
+  after the one-line service fix. Deviation note: the 4 Save/counter ViewModel tests were written after the
+  ViewModel pattern was already implemented in the first Green increment, so they were first seen passing —
+  the whole blur/dirty/hydration/Save pattern was implemented as one unit against the first Red batch
+  (single-agent batching, transparent per `testing.md § One test at a time`). Two test arranges were corrected
+  during Red→Green (setting `ArtistName = ""` when the default is already `""` never fires the CommunityToolkit
+  property-changed, so the field never became dirty) — arrange-only fixes; no assertion was weakened.
+- Post-edit re-read: confirmed for all 6 changed code files.
+- Spec compliance: confirmed against `dialogs-validation.md § Form Validation Standard` (blur/keystroke/Save
+  timing, inline `HasError`/`ErrorText`, no native dialog, business logic in Services, edit-mode dirty-guard,
+  no substring routing, counter/validator alignment). `SafeAreaEdges="All"` retained on the page (form-page
+  keyboard-avoidance pattern per `dialogs-validation.md`, same as Venue/Person/Song form pages).
+- **E2E emulator (Helder gate — NOT run by agent):** REMAINING MANUAL VERIFICATION. On the emulator confirm:
+  (1) tabbing through the pristine Name field shows no error (R8); (2) clearing the name then blurring shows
+  "Artist name is required" inline (R1/R9); (3) with the error showing, typing a valid name clears it
+  immediately without re-blurring (R2); (4) typing an invalid value before any error shows nothing until blur
+  (R3); (5) Save with an empty name surfaces the inline error, never a dialog (R4/R6); (6) Save with a
+  duplicate name shows "An artist with this name already exists" inline under the Name field; (7) edit an
+  existing artist and confirm no error flashes on page load (hydration guard); (8) pick an artist from the
+  music-database picker and confirm no spurious error appears; (9) type 60 chars — counter shows 60/60 without
+  error color; input is capped at 60 by `MaxCharacterCount`.
+
+### AC traceability
+
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|--------------------------|-------------|
+| R1 | Blur validates a dirty invalid name field | `ArtistFormViewModel.ValidateName` → `ArtistService.ValidateNameInput` | `ValidateNameCommand_DirtyInvalidField_SetsError` |
+| R1 | Blur passes a dirty valid name field | `ArtistFormViewModel.ValidateName` | `ValidateNameCommand_DirtyValidField_NoError` |
+| R2 | Keystroke clears error when valid | `ArtistFormViewModel.OnArtistNameChanged` | `OnArtistNameChanged_WhileInError_ClearsErrorWhenValid` |
+| R2 | Keystroke keeps error while still invalid | `ArtistFormViewModel.OnArtistNameChanged` | `OnArtistNameChanged_WhileInError_StillInvalid_KeepsError` |
+| R3 | No keystroke validation before error | `ArtistFormViewModel.OnArtistNameChanged` | `OnArtistNameChanged_NotInError_DoesNotValidate` |
+| R4 | Save re-validates even a never-dirtied field and aborts (create never called) | `ArtistFormViewModel.SaveAsync` | `SaveCommand_UntouchedEmptyName_SetsErrorAndDoesNotCreate` |
+| R4 | Save with a valid name calls create | `ArtistFormViewModel.SaveAsync` | `SaveCommand_ValidName_CallsCreate` |
+| R4/R9 | Duplicate-name create failure surfaces inline on the Name field | `ArtistFormViewModel.ApplyAsyncFailure` | `SaveCommand_DuplicateName_SetsNameHasErrorInline` |
+| R8 | Pristine field shows no blur error | `ArtistFormViewModel.ValidateName` (dirty guard) | `ValidateNameCommand_PristineField_DoesNotSetError` |
+| Edit-mode dirty-guard | Hydration does not dirty/validate | `ArtistFormViewModel.OnArtistNameChanged` (`_isHydrating`) + `ArtistFormPage.OnAppearing` | `OnArtistNameChanged_DuringHydration_DoesNotDirtyOrValidateOnBlur` |
+| Counter alignment | Counter error only when validator rejects | `ArtistService.GetCharacterCounterInfo` | `GetCharacterCounterInfo_AtMaxLength60_IsNotError` / `GetCharacterCounterInfo_OverMaxLength_IsError` |
+| Counter alignment | Counter counts the trimmed string the validator checks | `ArtistFormViewModel.OnArtistNameChanged` | `OnArtistNameChanged_TrailingWhitespace_CounterUsesTrimmedLength` |
+| R6/R9 | Errors inline via `HasError`/`ErrorText`, never a dialog | `ArtistFormPage.xaml` (`dxe:TextEdit nameEdit`) | (XAML — E2E emulator gate) |
+| R7 | Messages specific/actionable | `ArtistService.ValidateNameInput` (pre-existing) | `ArtistServiceTests.ValidateNameInput_*` (pre-existing) |
