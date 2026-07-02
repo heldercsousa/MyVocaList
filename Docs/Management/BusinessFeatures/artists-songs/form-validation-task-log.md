@@ -303,3 +303,67 @@ same IDs, same source (`01-ui-form-validation-guide.md` + `dialogs-validation.md
 | Counter alignment | Counter counts the trimmed string the validator checks | `ArtistFormViewModel.OnArtistNameChanged` | `OnArtistNameChanged_TrailingWhitespace_CounterUsesTrimmedLength` |
 | R6/R9 | Errors inline via `HasError`/`ErrorText`, never a dialog | `ArtistFormPage.xaml` (`dxe:TextEdit nameEdit`) | (XAML — E2E emulator gate) |
 | R7 | Messages specific/actionable | `ArtistService.ValidateNameInput` (pre-existing) | `ArtistServiceTests.ValidateNameInput_*` (pre-existing) |
+
+---
+## Task: BUG-024 — SongForm edit-mode Save wipes FeaturedArtists + Lyrics and discards Version (Critical)
+**Plan:** commit message as spec (Bug Fix Pattern) + `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-024-songform-edit-data-loss/BUG-024-songform-edit-data-loss.md`
+**Status:** To Review
+**Started:** 07/02/2026
+**Completed:** 07/02/2026
+
+Approved approach (Helder, 2026-07-02): add `GetSongByIdAsync` to `ISongService`/`SongService`,
+fully hydrate `LoadSongForEditAsync` (FeaturedArtists, Lyrics, Version + external identity stash),
+make `ExecuteEditSaveAsync` send the complete current form data including Version.
+Repository check result: `ISongRepository.GetByIdAsync` already returns the full entity
+(FeaturedArtists/Lyrics/Version are scalar columns) — no repository extension needed.
+
+### Changed files:
+- `Domain/ServicesInterfaces/ISongService.cs` — added `GetSongByIdAsync(int, CancellationToken)` with XML docs; added `string? version = null` param (null = keep existing) to `UpdateSongAsync` with full per-param docs
+- `Services/SongService.cs` — implemented `GetSongByIdAsync` (`<inheritdoc />`, delegates to repository); `UpdateSongAsync` validates provided version (`ValidateVersionInput`) and persists `song.Version = version.Trim()` when non-null
+- `Services/SongResolutionService.cs` — both `UpdateSongAsync` call sites pass `song.Version` (preserves prior keep-existing behavior under the new signature)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — `LoadSongForEditAsync` hydrates Title/Version/FeaturedArtists/Lyrics + `SelectedExternalId`/`SelectedProvider` from `GetSongByIdAsync` inside a re-opened `_isHydrating` window (dirty-guard preserved even when the async load lands after `CompleteHydration()`); `IsArtistLocked` now uses the full BUG-008 rule (`ExternalId` set AND `!HasManualEdits`); `ExecuteEditSaveAsync` passes `version`
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` — 4 new tests (GetSongByIdAsync returns full entity; version persisted; null version keeps existing; version too long rejected)
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — 3 new tests (hydration regression — the data-loss proof; edit-save sends hydrated fields + edited version; API-imported song locks artist field) + shared `MakeSongServiceWithSong` helper
+- `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs` — mechanical mock-plumbing update only: 6 `UpdateSongAsync` Setup/Verify arg lists gained an `It.IsAny<string>()` for the new `version` param (no assertion intent changed — `testing.md § Builder Must Not Modify Tests` respected)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-024-songform-edit-data-loss/BUG-024-songform-edit-data-loss.md` — bug details file (NEW)
+- `MyVocaList.sln` — registered the new bug folder/file (`{FA1234BC-0001-4000-8000-000000000035}` nested under artists-songs `bugs` `{7A021F6B-F297-41EA-A028-C4F881146791}`)
+- `Docs/Management/BACKLOG.md` — BUG-024 row status 🟢 Ready → ✅ Fixed
+- `Docs/Management/BusinessFeatures/artists-songs/form-validation-task-log.md` — this entry
+
+### Verification evidence
+- Build: PASS — `dotnet build MyVocaList.Tests` 0 errors; `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` 0 errors
+- Tests: PASS — full suite 435/435 (baseline 428/428 confirmed green before any change; +7 new). One intermittent failure observed in parallel full-suite runs (`SongRepositoryTests.InitializeAsync`, temp-DB `EnsureCreatedAsync` collision) both at baseline and mid-task — passes in isolation and on re-run; pre-existing flake, unrelated to this change.
+- Post-edit re-read: confirmed (all changed sections re-read after final Green)
+- Spec compliance: confirmed — approved BUG-024 approach followed exactly; no spec-described behavior changed outside the bug scope
+
+### Red → Green evidence (regression tests, Critical class — mandatory)
+| Test | Red (exact failure seen before fix) | Green |
+|------|--------------------------------------|-------|
+| `GetSongByIdAsync_ExistingId_ReturnsSongWithAllFields` | CS1061 compile-Red, then `Assert.NotNull() Failure: Value is null` against TDD stub | Pass |
+| `LoadSongForEdit_ExistingSong_HydratesFeaturedArtistsLyricsAndVersion` | `Assert.Equal() Failure: Strings differ` (FeaturedArtists empty — entity never loaded) | Pass |
+| `UpdateSongAsync_WithVersion_PersistsVersion` | CS1503 compile-Red, then `Expected: "Acoustic" / Actual: "Live"` against skeleton param | Pass |
+| `SaveAsync_EditMode_SendsHydratedFieldsAndEditedVersion` | Moq: `Performed invocations: UpdateSongAsync(42, "Stored Title", "Feat A", "Stored lyrics", True, null, null, null, ct)` — version still null | Pass |
+| `UpdateSongAsync_NullVersion_KeepsExistingVersion` / `UpdateSongAsync_VersionTooLong_ReturnsFalse` / `LoadSongForEdit_ApiImportedWithoutManualEdits_LocksArtistField` | Guard-rail/coverage tests for branches written within the preceding Green steps — not individually seen Red (documented deviation from one-test-at-a-time) | Pass |
+
+### AC traceability
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|--------------------------|-------------|
+| BUG-024-1 | Edit hydration loads FeaturedArtists/Lyrics/Version | `SongFormViewModel.LoadSongForEditAsync` + `SongService.GetSongByIdAsync` | `LoadSongForEdit_ExistingSong_HydratesFeaturedArtistsLyricsAndVersion` |
+| BUG-024-2 | Edit Save sends complete form data incl. Version | `SongFormViewModel.ExecuteEditSaveAsync` | `SaveAsync_EditMode_SendsHydratedFieldsAndEditedVersion` |
+| BUG-024-3 | `UpdateSongAsync` persists provided Version | `SongService.UpdateSongAsync` | `UpdateSongAsync_WithVersion_PersistsVersion` |
+| BUG-024-4 | Null Version keeps stored value (resolution paths unaffected) | `SongService.UpdateSongAsync` + `SongResolutionService` call sites | `UpdateSongAsync_NullVersion_KeepsExistingVersion` |
+| BUG-024-5 | Version length rule enforced in Services layer | `SongService.UpdateSongAsync` → `ValidateVersionInput` | `UpdateSongAsync_VersionTooLong_ReturnsFalse` |
+
+### Decisions taken (ambiguities)
+- **Uniqueness check left title-only in `UpdateSongAsync`** (not switched to the 3-column
+  `ExistsByTitleVersionForArtistAsync(..., excludeId)` overload): changing it would alter behavior
+  encoded in the pre-existing test `UpdateSongAsync_DuplicateTitleExcludingSelf_ReturnsFalse`,
+  which is outside the approved scope and forbidden by Builder-must-not-modify-tests. Pre-existing
+  consequence documented in the bug details file (§ Out of scope) — recommend a follow-up bug:
+  a song sharing its title with a sibling version cannot currently be edit-saved.
+- **`version` param semantics: null = keep existing** — mirrors the established
+  `externalId`/`externalProvider` pattern in the same method, so `SongResolutionService` callers
+  keep exact prior behavior.
+- **Hydration guard**: `_isHydrating` is saved/re-opened/restored inside the `RunOnUiThread`
+  block because the entity load is async and can complete after `CompleteHydration()` — without
+  this, hydrated values would mark fields dirty and defeat the edit-mode dirty-guard.

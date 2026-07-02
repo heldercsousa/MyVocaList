@@ -97,12 +97,19 @@ public class SongService : ISongService
     /// <inheritdoc />
     public async Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
-        string? externalId = null, string? externalProvider = null,
+        string? externalId = null, string? externalProvider = null, string? version = null,
         CancellationToken ct = default)
     {
         var (isValid, message) = ValidateTitleInput(title);
         if (!isValid)
             return (false, message);
+
+        if (version != null)
+        {
+            var (versionValid, versionMessage) = ValidateVersionInput(version);
+            if (!versionValid)
+                return (false, versionMessage);
+        }
 
         title = title.Trim();
 
@@ -118,6 +125,11 @@ public class SongService : ISongService
         song.Lyrics = lyrics;
         song.UpdatedAt = DateTime.UtcNow;
         song.HasManualEdits = hasManualEdits;
+
+        // BUG-024: persist the version label when provided; null = keep existing value
+        // (mirrors the externalId/externalProvider null-keeps-existing semantics below).
+        if (version != null)
+            song.Version = version.Trim();
 
         // M2: persist external identity when provided; null = keep existing value
         if (externalId != null)
@@ -195,6 +207,10 @@ public class SongService : ISongService
         await _songRepository.SaveChangesAsync(ct);
         return (true, $"Song '{title}' created successfully", song);
     }
+
+    /// <inheritdoc />
+    public async Task<Song?> GetSongByIdAsync(int id, CancellationToken ct = default)
+        => await _songRepository.GetByIdAsync(id, ct);
 
     /// <inheritdoc />
     public async Task<bool> ExistsByTitleForArtistAsync(

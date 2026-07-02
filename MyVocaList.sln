@@ -547,6 +547,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-021-songspage-fab-crash
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-024-songform-edit-data-loss", "BUG-024-songform-edit-data-loss", "{FA1234BC-0001-4000-8000-000000000035}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -692,6 +697,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000031} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000032} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{92D65ADE-A1E0-4220-AE25-06691B50D86D} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000035} = {7A021F6B-F297-41EA-A028-C4F881146791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
