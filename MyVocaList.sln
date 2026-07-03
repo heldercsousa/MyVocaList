@@ -524,6 +524,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000024}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\venues\bugs\BUG-012-venuesviewmodel-fetch-slow.md = Docs\Management\BusinessFeatures\venues\bugs\BUG-012-venuesviewmodel-fetch-slow.md
+		Docs\Management\BusinessFeatures\venues\bugs\validation-error-26chars.jpg = Docs\Management\BusinessFeatures\venues\bugs\validation-error-26chars.jpg
+		Docs\Management\BusinessFeatures\venues\bugs\validation-error-31morechars.jpg = Docs\Management\BusinessFeatures\venues\bugs\validation-error-31morechars.jpg
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "visual-theme-refresh", "visual-theme-refresh", "{15BB70C4-1D36-417D-9F28-E5D6978FAF2C}"
@@ -563,6 +565,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-023-songform-bottomsheet-broken", "BUG-023-songform-bottomsheet-broken", "{FA1234BC-0001-4000-8000-000000000036}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000038}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000039}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-026-hwui-sigabrt-render-teardown", "BUG-026-hwui-sigabrt-render-teardown", "{FA1234BC-0001-4000-8000-000000000040}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md
 	EndProjectSection
 EndProject
 Global
@@ -713,6 +724,9 @@ Global
 		{92D65ADE-A1E0-4220-AE25-06691B50D86D} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000035} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000036} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000038} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-000000000039} = {FA1234BC-0001-4000-8000-000000000038}
+		{FA1234BC-0001-4000-8000-000000000040} = {FA1234BC-0001-4000-8000-000000000039}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

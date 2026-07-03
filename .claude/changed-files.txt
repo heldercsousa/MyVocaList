@@ -1902,3 +1902,7 @@ MyVocaList.sln
 .gitattributes
 .claude/settings.json
 ../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/5e8a4868-d676-4b87-8391-c94107cd87f3/scratchpad/EMULATOR_TEST_MASTER_LIST.md
+Docs/Management/BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-teardown/BUG-026-hwui-sigabrt-render-teardown.md
+Docs/Management/BACKLOG.md
+MyVocaList.sln
+MyVocaList.sln
