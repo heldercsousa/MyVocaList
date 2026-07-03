@@ -43,11 +43,11 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
 5. Register a 2nd artist "Test Artist 2" (repeat step 4)
 
 **16C.1 errors**: 
-16C.1 - Bug 1) trailing button from ArtistsPage doesn't execute action when tapped. Prior bug was registered and is marked as done, despite it remains not working.
+16C.1 - 1) trailing button from ArtistsPage doesn't execute action when tapped. Prior bug was registered and is marked as done, despite it remains not working.
 16C.1 - 2) artistformpage has a search right above the name entry. 
-	2.1) There ir a leading and trailling icons that are confusing. Also
-	2.2) It's not clear if it will search local song's data and/or 3rd API's database. I'm not sure, but I believe specs predicts searching 3rd APIs in addition. It sounds like a duplicated behavior with the songformpage. Maybe it's case to evaluate its removal. 
-	2.3) When tapped, opens a page for searching Artists, not songs. So, it's inconsistent.
+16C.1 - 	2.1) There ir a leading and trailling icons that are confusing. Also
+16C.1 - 	2.2) It's not clear if it will search local song's data and/or 3rd API's database. I'm not sure, but I believe specs predicts searching 3rd APIs in addition. It sounds like a duplicated behavior with the songformpage. Maybe it's case to evaluate its removal. 
+16C.1 - 	2.3) When tapped, opens a page for searching Artists, not songs. So, it's inconsistent.
 16C.1 - 3) i'm not sure, but I guess specs predicts that whenever typed in ArtistFormPage Name entry, an autocomplete feature should appear to allow picking a artist name retrieved from 3rd api
 
 6. Navigate to Songs menu item (flyout or trailing button) 
@@ -83,6 +83,8 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
    - Select one result from the list
    - Verify: artist name is populated into the Name field
    - Cancel edit (no save)
+**9 errors:**
+9 - 1) "Type "Radiohead" → Tap Search button". Tapping in leading search button crashs the app. The trailling button works, but no result appears when search page is loaded. Anyhow, see the details registered in error 16C.1 - 3.
 
 10. TEST API SEARCH STRIP (Song form)
     - Edit "Test Song A"
@@ -91,6 +93,8 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
     - Verify: results list appears with Title/Artist/Thumbnail
     - If a result is selected: verify Title and FeaturedArtists are pre-filled
     - Cancel edit (no save)
+**10 errors:**
+10 - 1) Edit song blocked due to artists entry bug, avoiding add new song. Test done in add new mode. "Type "Radiohead" → 
 
 11. CATALOG OPERATIONS
     - Open "Test Artist 1" via the trailing "queue_music_outlined" button
@@ -100,6 +104,8 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
     - Select "Test Song B" (from global, even if artist differs)
     - Verify: song is added to artist's catalog
     - Verify: page returns to catalog view, song appears in list
+**11 errors:**
+11 - 1) See error 16C.1 - 1
 
 12. DELETE OPERATIONS (data integrity)
     - From Catalog view, remove "Test Song B" from the catalog
@@ -273,6 +279,9 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
 ✅ Blur-first validation, keystroke-clear, Save safety-net, inline errors only (no dialogs/snackbars as validation channels).
 
 **Status:** ⏳ PENDING
+
+**TEST-004 - errors:** 
+TEST-004 - 1) Step 5 above is shows correctly the error message, but the character counter become duplicated (it becomes duplicated once reaching 26 chars typed). Evidences found at `Docs\Management\BusinessFeatures\venues\bugs\validation-error-26chars.jpg` and `Docs\Management\BusinessFeatures\venues\bugs\validation-error-31morechars.jpg`
 
 ---
 
