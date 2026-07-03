@@ -422,6 +422,7 @@ TEST-005 - 4) Email uniqueness error doesn't appears when entry is blured but on
 
 **errors:**
 Test - 007 - 1: The very same trouble found in venues (TEST-004 - 1) happens in the artist name entry. Evidence at `Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg`
+Test - 007 - 2: Step 4 above works only after save button tapped. I suppose such behavior should háppen aways the entry blured, but I'not sure if it makes sense and is registered in the docs.
 
 ---
 
@@ -443,7 +444,7 @@ Test - 007 - 1: The very same trouble found in venues (TEST-004 - 1) happens in 
 **Expected Result:**  
 ✅ No Glide errors. Icon renders without crashing the debugger.
 
-**Status:** ⏳ PENDING (visual confirmation needed)
+**Status:** ⏳Done
 
 ---
 
@@ -461,9 +462,11 @@ Test - 007 - 1: The very same trouble found in venues (TEST-004 - 1) happens in 
 ```
 
 **Expected Result:**  
-✅ Artist names are visible. Trailing button navigates to catalog.
+✅ Artist names are visible. 
 
-**Status:** ⏳ PENDING
+**Status:** ⏳ Pending
+**errors:**
+TEST-009 1) step 5 above does not happen.
 
 ---
 
@@ -486,7 +489,7 @@ Test - 007 - 1: The very same trouble found in venues (TEST-004 - 1) happens in 
 **Expected Result:**  
 ✅ FAB opens SongFormPage. No SecureStorage crashes. App remains stable.
 
-**Status:** ⏳ PENDING
+**Status:** ⏳ Done
 
 ---
 
@@ -507,7 +510,7 @@ Test - 007 - 1: The very same trouble found in venues (TEST-004 - 1) happens in 
 **Expected Result:**  
 ✅ FAB opens SongFormPage. DI resolution succeeds. No crash.
 
-**Status:** ⏳ PENDING
+**Status:** ⏳ Done
 
 ---
 
@@ -547,7 +550,9 @@ Test - 007 - 1: The very same trouble found in venues (TEST-004 - 1) happens in 
 - AC-BUG011-2: 2nd navigation causes no Davey burst (≤16ms per frame)
 - AC-BUG011-3: Queue functionality (BottomSheet open/close, queue interaction) unaffected
 
-**Status:** ⏳ PENDING
+**Status:** ⏳ PENDING - THERE IS NO WAY TO ACCESS IT. IT SEEMS QueuePage WAS NEVER IMPLEMEMTED
+
+
 
 ---
 
