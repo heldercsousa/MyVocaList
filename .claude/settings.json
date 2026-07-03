@@ -99,6 +99,10 @@
           {
             "type": "command",
             "command": "python -c \"import os,json; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); settings=os.path.join(proj,'.claude','settings.json'); data=json.load(open(settings,encoding='utf-8')); hooks=data.get('hooks',{}); expected=['TaskCreated','PreToolUse','PostToolUse','PostCompact','TaskCompleted','Stop','SessionStart']; missing=[h for h in expected if h not in hooks]; print('HOOK HEALTH OK — all expected hooks present.') if not missing else print('HOOK HEALTH WARNING — missing hooks: '+', '.join(missing)+'. Review .claude/settings.json before proceeding.')\" 2>/dev/null || echo 'HOOK HEALTH CHECK — could not verify hooks (settings.json unreadable or Python unavailable).'"
+          },
+          {
+            "type": "command",
+            "command": "python -c \"import subprocess as s,os; p=os.environ.get('CLAUDE_PROJECT_DIR','.'); want='.claude/githooks'; cur=s.run(['git','config','--get','core.hooksPath'],cwd=p,capture_output=True,text=True).stdout.strip(); (s.run(['git','config','core.hooksPath',want],cwd=p), print('SETUP — registered git core.hooksPath -> '+want+' (pre-commit build/test gate now active on this clone).')) if cur!=want else None\" 2>/dev/null || true"
           }
         ]
       }
