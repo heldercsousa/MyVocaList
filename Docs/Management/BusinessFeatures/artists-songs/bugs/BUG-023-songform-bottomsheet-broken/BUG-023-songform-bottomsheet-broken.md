@@ -46,3 +46,12 @@ Low — the fix is additive (new event wiring); `SongFormViewModel` was not touc
 
 ## Commit
 `fix: SongFormPage — BUG-023 restore BottomSheet state bindings` (branch `develop`, based on `74c5385`).
+
+## Post-review hardening (2026-07-03)
+Three review findings were applied to `SongFormPage.xaml.cs` in a follow-up commit — no ViewModel, XAML, or test changes were needed:
+
+1. **Exception-safe re-entrancy guards (Medium):** `OnResolutionSheetStateChanged` / `OnMergeSheetStateChanged` now wrap the guarded `ViewModel.Is*SheetVisible = false` write in `try { ... } finally { _isSyncing* = false; }`. Previously, if the setter threw, the guard flag stayed `true` forever and the affected sheet could never open again.
+2. **Guard the VM→View sync direction too (Medium):** `SyncResolutionSheetState()` / `SyncMergeSheetState()` now set `_isSyncingResolutionSheet` / `_isSyncingMergeSheet` (with the same `try/finally` reset) around the `Show()`/`Close()` calls, and the corresponding `StateChanged` handlers now check the guard at entry (`if (_isSyncingResolutionSheet) return;` / same for merge). Previously the loop was only avoided by coincidence of current Hidden-only semantics; the guard now makes the short-circuit deterministic in both directions.
+3. **Unsubscribe `PropertyChanged` on teardown (Low):** added `OnDisappearing()` override that unsubscribes `ViewModel.PropertyChanged -= OnViewModelPropertyChanged`, mirroring the codebase's existing `OnDisappearing`-based teardown pattern (`QueueManagementPage.xaml.cs`). Prevents a leaked subscription keeping the page/ViewModel alive after navigation away.
+
+Verification: `dotnet build` — 0 errors; `dotnet test` — 436/436 passing (no test changes required; behavior of the open/close flow is unchanged, only its exception-safety and determinism improved).
