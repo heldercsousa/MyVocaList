@@ -1,0 +1,398 @@
+ ▐▛███▜▌   Claude Code v2.1.200
+▝▜█████▛▘  Opus 4.8 · Claude Pro
+  ▘▘ ▝▝    ~\source\repos\MyVocaList
+
+ ▎ Fable 5 is back.
+ ▎ Until July 7, you can use up to 50% of your plan's weekly usage limit on Fable 5. If you hit your limit, you can continue on Fable 5 with usage credits. Fable 5 draws down usage faster than Opus 4.8. Learn more (https://support.claude.com/en/articles/15424964-claude-fable-5-promotional-access)
+
+> /model                                                                        
+  ⎿  Set model to Opus 4.8 and saved as your default for new sessions
+
+> there is a boring situation when I'm testing in emulator. Debugging there     
+  often shows a "app ins't responding pop up", making its usage completly       
+  anoying. See a small peace of the log gathered from the main page, the queue  
+  placeholder when I just tapped the hamburguer menu: [19:40:52 DBG]            
+  Microsoft.Extensions.Http.DefaultHttpClientFactory                            
+  Starting HttpMessageHandler cleanup cycle with 1 items                        
+  [19:40:52 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Ending HttpMessageHandler cleanup cycle after 0.181ms - processed: 0 items -  
+  remaining: 1 items                                                            
+  [19:40:53 INF] CrudListView                                                   
+  [PageLoad] CrudListView InitializeComponent=797ms                             
+  [19:40:54 INF] PeoplePage                                                     
+  [PageLoad] PeoplePage appearing=1655ms (ctor→OnAppearing)                     
+  [19:40:54 INF] PeoplePage                                                     
+  [PageLoad] PeoplePage afterInitDispatch=1676ms (ctor→after InitializeAsync    
+  fire)                                                                         
+  [19:41:00 INF] PeoplePage                                                     
+  [PageLoad] PeoplePage loaded=8155ms (ctor→Loaded)                             
+  [19:41:00 INF] CrudListView                                                   
+  [PageLoad] CrudListView loaded=797ms (ctor→Loaded)                            
+  [19:41:02 INF] PeoplePage                                                     
+  [PageLoad] PeoplePage navigatedTo=9961ms (ctor→OnNavigatedTo)                 
+  [19:41:02 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Starting HttpMessageHandler cleanup cycle with 1 items                        
+  [19:41:02 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Ending HttpMessageHandler cleanup cycle after 0.0239ms - processed: 0 items - 
+  remaining: 1 items                                                            
+  [19:41:02 INF] MyVocaList.UI.ViewModels.PersonsViewModel                      
+  [PageLoad] PersonsViewModel fetch=8444ms                                      
+  [19:41:02 INF] MyVocaList.UI.ViewModels.PersonsViewModel                      
+  [PageLoad] PersonsViewModel initAsync=8523ms                                  
+  [19:41:12 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Starting HttpMessageHandler cleanup cycle with 1 items                        
+  [19:41:12 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Ending HttpMessageHandler cleanup cycle after 0.0253ms - processed: 0 items - 
+  remaining: 1 items                                                            
+  [19:41:22 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Starting HttpMessageHandler cleanup cycle with 1 items                        
+  [19:41:22 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Ending HttpMessageHandler cleanup cycle after 0.0453ms - processed: 0 items - 
+  remaining: 1 items                                                            
+  07-03 19:41:27.830 W/healthd (    0): battery l=100 v=5000 t=25.0 h=2 st=4    
+  c=900000 fc=3000000 cc=10 chg=                                                
+  [19:41:32 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Starting HttpMessageHandler cleanup cycle with 1 items                        
+  [19:41:32 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Ending HttpMessageHandler cleanup cycle after 0.2086ms - processed: 0 items - 
+  remaining: 1 items                                                            
+  [19:41:42 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Starting HttpMessageHandler cleanup cycle with 1 items                        
+  [19:41:42 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory             
+  Ending HttpMessageHandler cleanup cycle after 0.0693ms - processed: 0 items - 
+  remaining: 1 items                                                            
+  O programa "MyVocaList.dll" foi fechado com o código 0 (0x0).                 
+  A sessão de depuração do vsdbg para o projeto                                 
+  'C:\Users\helde\source\repos\MyVocaList\MyVocaList\MyVocaList.csproj' foi     
+  interrompida                                                                  
+
+● Looking at your log, the ANR trigger is right there in the numbers:
+
+  PeoplePage loaded        = 8155ms  (ctor→Loaded)
+  PersonsViewModel fetch   = 8444ms
+  PersonsViewModel initAsync = 8523ms
+  PeoplePage navigatedTo   = 9961ms
+
+  Android throws the "isn't responding" dialog when the UI thread is 
+  unresponsive for ~5 seconds. Your PeoplePage is taking 8–10s to become
+  interactive, so you blow past that threshold every time you navigate to it.
+  The HttpMessageHandler cleanup cycle lines are just IHttpClientFactory
+  background maintenance on a 10s timer — harmless noise, not the cause.
+
+  There are really two separate things going on, and it's worth not conflating
+  them:
+
+  1. Debug-environment slowness (the biggest multiplier)
+
+  This log is a Debug build attached to vsdbg. MAUI Debug builds run 5–10×
+  slower than Release: no XamlC, JIT instead of AOT, plus debugger
+  thread-pausing overhead. A page that loads in ~1s in Release can genuinely
+  take 8s under the debugger. So a large chunk of that 8155ms is not your app —
+  it's the harness.
+
+  Quick relief options (in rough order of effort):
+
+  - Suppress the ANR dialog on the emulator so it stops interrupting you:
+  adb shell settings put secure anr_show_background 0
+  adb shell settings put global anr_show 0
+  - (Not all API levels honor these; the reliable one is below.)
+  - Extend/disable the ANR timer for your package while debugging — set your app
+  as the persistent debug-app so the watchdog backs off:
+  adb shell am set-debug-app -w --persistent com.myvocalist
+  - Clear it later with adb shell am clear-debug-app.
+  - Test in a Release/AOT build when you're not stepping through code. Most "is
+  the app fast enough" testing should happen on Release anyway — Debug timings
+  are not representative of what users see.
+
+  2. Real app-load cost (the part worth fixing)
+
+  Even accounting for Debug overhead, an 8s fetch is suspicious and it lines up
+  with work you already have in flight. Your own constraints registry documents
+  the root cause:
+
+  ▎ Microsoft.Data.Sqlite executes async methods synchronously — no real async 
+  ▎ I/O. Any EF Core "async" query awaited on the UI thread runs entirely ON the
+  ▎ UI thread and freezes the app.
+
+  And memory shows this is exactly the open page-load-frozen Phase 2 work —
+  where the finding was "S23 freeze is UI-render cost, not DB" and the next step
+  is "fix 5 Release-only XamlC errors, build Release APK for T2." So the
+  performance side is already tracked, not a new discovery.
+
+  ---
+  My recommendation: for the immediate annoyance, use am set-debug-app 
+  --persistent to stop the watchdog from interrupting your debug sessions, and
+  do your "does it feel fast" testing on a Release build. Keep the actual
+  load-time fix inside the existing page-load-frozen Phase 2 stream rather than
+  reacting to Debug-build numbers.
+
+  Want me to:
+  - (a) dig into the current PeoplePage load path (via an Explore subagent, per
+  the orchestrator read-scope rule) to see whether the 8s is DB, render, or
+  debug overhead — with a Release measurement to isolate it, or
+  - (b) just help you get the emulator/ADB setup so the ANR dialog stops
+  interrupting you?
+
+  Which is the actual pain you want gone first — the popup, or the load time?
+  ⎿  Stop says: ⚠️ Uncommitted changes detected — run /project:commit before 
+     closing.
+
+✻ Brewed for 49s
+
+> Before, see some records gathered from recent adb log that may be crucial to  
+  map anyfurther: Tempo    Nome do Dispositivo    Tipo    PID    Marca          
+  Mensagem                                                                      
+  07-03 19:46:47.944    pixel_5_-_api_36_0    Debug    797    WifiScoreCard     
+  network update SIGNAL_POLL "AndroidWifi" ID: 2043738785 RSSI -50 txSpeed -1   
+   ClientModeImpl$L2ConnectedState screen=on 2 0 "AndroidWifi"                  
+  00:13:10:85:fe:01 rssi=-50 f=2447 sc=60 link=5 tx=0.0, 0.0, 0.0 rx=0.0 bcn=0  
+  [on:0 tx:0 rx:0 period:3021] from screen [on:0 period:696580104] score=60     
+  07-03 19:46:47.943    pixel_5_-_api_36_0    Debug    797    WifiScoreCard     
+  txRate: 1 txSpeed: 5                                                          
+  07-03 19:46:47.942    pixel_5_-_api_36_0    Debug    797    WifiScoreCard     
+  BSSID update SIGNAL_POLL ID: 1730041766 SSID: "AndroidWifi", BSSID:           
+  00:13:10:85:fe:01, MAC: 02:15:b2:00:00:00, IP: /10.0.2.16, Security type: 0,  
+  Supplicant state: COMPLETED, Wi-Fi standard: legacy, RSSI: -50, Link speed:   
+  5Mbps, Tx Link speed: 5Mbps, Max Supported Tx Link speed: 11Mbps, Rx Link     
+  speed: 2Mbps, Max Supported Rx Link speed: 11Mbps, Frequency: 2447MHz, Net    
+  ID: 0, Metered hint: false, score: 60, isUsable: true, CarrierMerged: false,  
+  SubscriptionId: -1, IsPrimary: 1, Trusted: true, Restricted: false,           
+  Ephemeral: false, OEM paid: false, OEM private: false, OSU AP: false, FQDN:   
+  <none>, Provider friendly name: <none>, Requesting package name:              
+  <none>"AndroidWifi"openMLO Information: , Is TID-To-Link negotiation          
+  supported by the AP: false, AP MLD Address: <none>, AP MLO Link Id: <none>,   
+  AP MLO Affiliated links: <none>, Vendor Data: <none>                          
+  07-03 19:46:47.932    pixel_5_-_api_36_0    Verbose    797                    
+  WifiConfigManager    Updating scan detail cache freq=2447                     
+  BSSID=00:13:10:85:fe:01 RSSI=-50 for "AndroidWifi"NONE                        
+   utilization (LLS) 80 isBluetoothConnected: false final utilization: 80       
+   BW: 0 RSSI: -50 Nss: 1 Mode: 1 symDur: 4000 snrDb 30 bitPerTone: 4500 rate:  
+  54 throughput: 11                                                             
+   utilization (LLS) 80 isBluetoothConnected: false final utilization: 80       
+   BW: 0 RSSI: -50 Nss: 1 Mode: 1 symDur: 4000 snrDb 30 bitPerTone: 4500 rate:  
+  54 throughput: 11                                                             
+   utilization (LLS) 80 isBluetoothConnected: false final utilization: 80       
+   BW: 0 RSSI: -50 Nss: 1 Mode: 1 symDur: 4000 snrDb 30 bitPerTone: 4500 rate:  
+  54 throughput: 11                                                             
+   utilization (LLS) 80 isBluetoothConnected: false final utilization: 80       
+   BW: 0 RSSI: -50 Nss: 1 Mode: 1 symDur: 4000 snrDb 30 bitPerTone: 4500 rate:  
+  54 throughput: 11                                                             
+  07-03 19:46:47.931    pixel_5_-_api_36_0    Debug    797    WifiDataStall     
+  rx tput in kbps: 11000                                                        
+  07-03                                                                         
+  ──── (9270 lines hidden) ──────────────────────────────────────────────────── 
+  me=null workSource=WorkSource{1000}                                           
+  07-03 19:29:42.107    pixel_5_-_api_36_0    Info    797                       
+  WifiScanningService    singleScanResults listener: ClientInfo[uid=10142,      
+  package=com.google.android.gms, attributionTag=network_location_provider,     
+  android.net.wifi.IWifiScannerListener$Stub$Proxy@a7e65f5],results=1           
+  07-03 19:29:42.107    pixel_5_-_api_36_0    Debug    797                      
+  WifiScanRequestProxy    Received 1 scan results                               
+  07-03 19:29:42.106    pixel_5_-_api_36_0    Debug    797                      
+  WifiScanRequestProxy    Scan results received                                 
+  07-03 19:29:42.105    pixel_5_-_api_36_0    Info    797                       
+  WifiScanningService    singleScanResults listener: ClientInfo[uid=1000,       
+  package=android, attributionTag=null, com.android.server.wifi.scanner.WifiSca 
+  nnerInternal$ScanListener@8cb7a14],results=1                                  
+  07-03 19:29:42.105    pixel_5_-_api_36_0    Info    797                       
+  WifiScanningService    singleScanResults listener: ClientInfo[uid=1000,       
+  package=android, attributionTag=null, com.android.server.wifi.scanner.WifiSca 
+  nnerInternal$ScanListener@ea40f56],results=1                                  
+  07-03 19:29:42.104    pixel_5_-_api_36_0    Info    797                       
+  WifiScanningService    singleScanResults listener: ClientInfo[uid=1000,       
+  package=android, attributionTag=null, com.android.server.wifi.scanner.WifiSca 
+  nnerInternal$ScanListener@2213a01],results=1                                  
+  07-03 19:29:42.103    pixel_5_-_api_36_0    Info    797                       
+  WifiScanningService    singleScanResults: ClientInfo[uid=1000, package=null,  
+  attributionTag=null, com.android.server.wifi.scanner.WifiScannerInternal$Scan 
+  Listener@c26f6f7],results=1                                                   
+  07-03 19:29:42.102    pixel_5_-_api_36_0    Info    6492    WifiScanner       
+  onFullResults                                                                 
+  07-03 19:29:42.100    pixel_5_-_api_36_0    Debug    1980    wpa_supplicant   
+   p2p-dev-wlan0: Do not use results from externally requested scan operation   
+  for network selection                                                         
+  07-03 19:29:42.100    pixel_5_-_api_36_0    Debug    1980    wpa_supplicant   
+   p2p-dev-wlan0: New scan results available (own=0 ext=1)                      
+  07-03 19:29:42.100    pixel_5_-_api_36_0    Debug    1980    wpa_supplicant   
+   BSS: last_scan_res_used=1/32                                                 
+  07-03 19:29:42.100    pixel_5_-_api_36_0    Debug    1980    wpa_supplicant   
+   p2p-dev-wlan0: BSS: Start scan result update 33                              
+  07-03 19:29:42.100    pixel_5_-_api_36_0    Debug    797    WifiNative    get 
+  1 scan results from wificond                                                  
+  07-03 19:29:42.100    pixel_5_-_api_36_0    Debug    1980    wpa_supplicant   
+   nl80211: Received scan results (1 BSSes)                                     
+  07-03 19:29:42.099    pixel_5_-_api_36_0    Debug    797                      
+  WifiNl80211Manager    get 1 scan results from wificond                        
+
+> /compact                                                                      
+
+● Thank you — this second dump has the smoking gun that the first one didn't.
+  The key records are buried near the bottom (19:34:06–19:34:24). Here is what
+  they map to.
+
+  The definitive ANR record
+
+  19:34:24  ActivityManager  ANR in com.myvocalist (…MainActivity)
+            Reason: Input dispatching timed out … Waited 5001ms for MotionEvent
+            (action=UP … pointers=[0: (112.0, 210.9)])
+
+  This is the authoritative cause: the main (UI) thread did not consume a 
+  touch-up event for 5001 ms, so Android raised the ANR dialog. Everything else
+  in the log is a symptom of that same stall.
+
+  What the CPU snapshot rules out — this is the important part
+
+  The ANR CPU dump (19:34:24) shows:
+
+  73% system_server (kernel) — the OS busy DUMPING the ANR stacks
+   4% 8316/com.myvocalist: 4% user + 0% kernel
+        4% 8361/RenderThread
+
+  Your app is using ~4% CPU during its own hang, and the main thread (8316)
+  isn't even in the busy list. Combine that with:
+
+  - some avg10=0.21 on /proc/pressure/io → not disk-I/O bound
+  - iowait 1.9% → negligible
+
+  Conclusion: the UI thread is not computing and not waiting on disk — it is 
+  blocked waiting (on a lock or an await). That is the exact signature of your
+  documented constraint:
+
+  ▎ Microsoft.Data.Sqlite executes async methods synchronously — an EF Core 
+  ▎ "async" query awaited on the UI thread runs entirely ON the UI thread and 
+  ▎ freezes the app. (constraints-registry.md)
+
+  So the 8155 ms PeoplePage load in the first dump and this ANR are the same 
+  defect: a SQLite call (or the static DB load gate that was added to work
+  around it) is being awaited on the main thread, blocking touch dispatch past 5
+  s.
+
+  Corroborating records (all point the same way)
+
+  Record: RemoteInputConnection requestCursorUpdates() didn't respond in 2000 
+    msec and getSurroundingText() didn't respond in 2000 msec
+  What it tells you: The IME asked your app for data and the main thread was too
+   
+    blocked to answer within 2 s — happens on the text-entry fields
+    (inputType=14001 CapSentences|AutoComplete, actionName=SEARCH/DONE).
+  ────────────────────────────────────────
+  Record: Skipped 400 / 411 / 310 frames! The application may be doing too much 
+    work on its main thread.
+  What it tells you: Repeated multi-second main-thread stalls — not just at page
+
+    load, but during typing/search too.
+  ────────────────────────────────────────
+  Record: Explicit concurrent mark compact GC freed … (many, back-to-back)
+  What it tells you: Heavy allocation churn — likely list re-binding / image
+    decoding creating GC pressure that lengthens each stall.
+  ────────────────────────────────────────
+  Record: HWUI Image decoding logging dropped! (dozens)
+  What it tells you: A lot of images decoded on the render thread —
+    thumbnail/icon load in the list.
+  ────────────────────────────────────────
+  Record: 19:41:48 libc FORTIFY: pthread_mutex_lock called on a destroyed mutex 
+  …
+     tid 8390 (hwuiTask0) → Fatal signal 6 (SIGABRT)
+  What it tells you: A separate native crash in the HWUI render pipeline at
+    teardown. This is not the ANR, but it's a second, independent
+  rendering-layer
+     bug worth noting — it fired as the process was force-stopped.
+
+  Updated recommendation
+
+  My earlier advice (suppress the ANR watchdog during debugging, test on
+  Release) still holds for making the emulator bearable. But this dump changes
+  the root-cause picture in a way the page-load-frozen stream should absorb:
+
+  1. The ANR is a main-thread-block, and the block is a wait, not compute. The
+  fix is to get the SQLite call fully off the UI thread (the Task.Run offload +
+  static load gate noted in the constraints registry), and confirm nothing
+  re-enters a synchronous await on the main thread — including the code path
+  that runs when a search/text field gains focus (the IME timeouts show the
+  block also happens during typing, not only initial load).
+  2. The pthread_mutex_lock on a destroyed mutex in hwuiTask0 is a distinct 
+  rendering-layer crash that isn't tracked in your current memory notes. It
+  deserves its own BUG-NNN under Artists & Songs (or Cross-cutting) rather than
+  being folded into the freeze work.
+
+  Given the orchestrator read-scope rule, I haven't opened any .cs/.xaml. To
+  take this further I'd want an Explore subagent to trace the PeoplePage /
+  PersonsViewModel focus-and-load path and confirm where the UI-thread await
+  sits. Want me to:
+
+  - (a) dispatch that Explore subagent to pin down the exact blocking call (and
+  register the HWUI-crash as a new BUG), or
+  - (b) first get you the am set-debug-app --persistent com.myvocalist setup so
+  the ANR dialog stops interrupting debug sessions while the fix is planned?
+
+  Which do you want first?
+
+✻ Brewed for 1m 13s
+
+> /context 
+  ⎿  Context Usage
+     ⛀ ⛁ ⛁ ⛀ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛀ ⛁ ⛁ ⛁ ⛁ ⛁   Opus 4.8
+     ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   claude-opus-4-8
+     ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   958.9k/1m tokens (96%)
+     ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ 
+     ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   Estimated usage by category
+     ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   ⛁ System prompt: 2.9k tokens (0.3%)
+     ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   ⛁ System tools: 13k tokens (1.3%)
+     ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   ⛁ Memory files: 49k tokens (4.9%)
+     ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   ⛁ Skills: 2.3k tokens (0.2%)
+     ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛀ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶   ⛁ Messages: 893.4k tokens (89.3%)
+                                               ⛶ Free space: 39.5k (4.0%)
+
+     Memory files · /memory
+     └ 11 files · 49k tokens
+
+     Skills · /skills
+     └ 23 skills · 2.3k tokens
+
+     /context all to expand
+
+      Suggestions
+      ‼ Context is 96% full
+        Autocompact will trigger soon, which discards older messages. Use /compact now to control what gets kept.
+
+> /compact                                                                      
+  ⎿  Compacted (ctrl+o to see full summary)
+     PostCompact [echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build 
+     after every change, fix all errors before next file. (2) Never use 
+     DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — 
+     check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container
+     on all ContentPages (.NET MAUI 10). (5) Subagent-driven, worktree-isolated 
+     flow — never skip to implementation: Spec → spec-review → Plan → plan-review
+     → Implement → implementation-review. Each stage AND its review runs in a 
+     dedicated subagent (spec-reviewer after the spec, plan-reviewer after the 
+     plan, code review after implementation), always inside a git worktree; the 
+     orchestrator never writes code. (6) English only in code, comments, logs, UI
+     text. (7) After every completed task: /project:review → /project:commit 
+     (stage, commit, push). SPEC RE-READ REMINDER: After context compaction, 
+     re-read the active feature spec 
+     (Docs/Management/[BusinessFeatures|DevCycleCraft]/<feature>/design.md and 
+     requirements.md) before continuing — compaction discards loaded spec context
+     and continuing without re-reading risks spec drift.'] completed 
+     successfully: CONTEXT RESTORED — Non-negotiables: (1) dotnet build after 
+     every change, fix all errors before next file. (2) Never use 
+     DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — 
+     check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container
+     on all ContentPages (.NET MAUI 10). (5) Subagent-driven, worktree-isolated 
+     flow — never skip to implementation: Spec → spec-review → Plan → plan-review
+     → Implement → implementation-review. Each stage AND its review runs in a 
+     dedicated subagent (spec-reviewer after the spec, plan-reviewer after the 
+     plan, code review after implementation), always inside a git worktree; the 
+     orchestrator never writes code. (6) English only in code, comments, logs, UI
+     text. (7) After every completed task: /project:review → /project:commit 
+     (stage, commit, push). SPEC RE-READ REMINDER: After context compaction, 
+     re-read the active feature spec 
+     (Docs/Management/[BusinessFeatures|DevCycleCraft]/<feature>/design.md and 
+     requirements.md) before continuing — compaction discards loaded spec context
+     and continuing without re-reading risks spec drift.
+
+
+  ⎿  Referenced file .claude\rules\workflow.md
+  ⎿  Read .claude\rules\constraints-registry.md (75 lines)
+  ⎿  Read .claude\rules\component-change-governance.md (74 lines)
+  ⎿  Read .claude\rules\bug-tracking.md (87 lines)
+  ⎿  Referenced file .claude\rules\testing.md
