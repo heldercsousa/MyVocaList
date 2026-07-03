@@ -1906,3 +1906,7 @@ Docs/Management/BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-
 Docs/Management/BACKLOG.md
 MyVocaList.sln
 MyVocaList.sln
+.claude/settings.json
+.claude/rules/constraints-registry.md
+Docs/Management/DevCycleCraft/workflow-folder-layout-alignment/findings.md
+Docs/Changelog/changelog.md

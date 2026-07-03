@@ -52,7 +52,7 @@ Review before implementing features in the indicated area.
   - Under `DevCycleCraft` → parent `{0C4BA720-519E-4818-BD9B-34AC19E4FCD7}`
   - Under `Management` root → parent `{15F1DA03-2180-47BF-BC40-1BB457C97F9E}`
 
-  **GUIDs:** Use sequential pattern `{FA1234BC-0001-4000-8000-00000000XXXX}` incrementing from the last used value (currently `0014`). Check the `.sln` before picking the next number.
+  **GUIDs:** Use sequential pattern `{FA1234BC-0001-4000-8000-00000000XXXX}` incrementing from the last used value (currently `0040`). Check the `.sln` before picking the next number.
 
 ---
 

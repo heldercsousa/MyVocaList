@@ -405,29 +405,11 @@ Since no superpowers skill covers spec/plan review, the criteria above should be
 
 ## Permissions Note & Session Startup Protocol
 
-`CLAUDE.md` and `.claude/rules/*.md` are write-protected via the `permissions.deny` list in `.claude/settings.json`.
+> **Superseded 2026-07-03 (Helder):** `CLAUDE.md` and `.claude/rules/*.md` are no longer
+> write-protected. The `permissions.deny` list in `.claude/settings.json` was removed
+> permanently per Helder's explicit instruction — direct edits to these files are now
+> allowed like any other file. The Step A/B/C lift-and-restore protocol below is obsolete
+> and must not be followed; do not re-add the `permissions.deny` entries listed in the
+> original steps.
 
-**The implementing agent must follow this sequence:**
-
-### Step A — Remove write protection (first action, before any phase)
-Edit `.claude/settings.json` and remove these two entries from `permissions.deny`:
-```json
-"Edit(CLAUDE.md)",
-"Write(CLAUDE.md)",
-"Edit(.claude/rules/*.md)",
-"Write(.claude/rules/*.md)"
-```
-
-### Step B — Execute all phases (1 through 6)
-
-### Step C — Re-apply write protection (final action, after all phases)
-Edit `.claude/settings.json` and restore the four entries to `permissions.deny`:
-```json
-"Edit(CLAUDE.md)",
-"Write(CLAUDE.md)",
-"Edit(.claude/rules/*.md)",
-"Write(.claude/rules/*.md)"
-```
-Commit with message: `amend: re-apply write protection to CLAUDE.md and rules files`
-
-**Important:** Step C is mandatory even if any phase fails partway. The protection must be restored before the session ends regardless of completion status.
+~~`CLAUDE.md` and `.claude/rules/*.md` are write-protected via the `permissions.deny` list in `.claude/settings.json`.~~
