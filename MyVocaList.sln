@@ -490,6 +490,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lease-scripts", "lease-scri
 		.claude\scripts\lease\tests\test_lease_lib.py = .claude\scripts\lease\tests\test_lease_lib.py
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "enforcement-automations", "enforcement-automations", "{FA1234BC-0001-4000-8000-000000000037}"
+	ProjectSection(SolutionItems) = preProject
+		.claude\scripts\constitutional-guard.py = .claude\scripts\constitutional-guard.py
+		.claude\githooks\pre-commit = .claude\githooks\pre-commit
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md
@@ -693,6 +699,7 @@ Global
 		{C81D77D9-056E-44D8-A88F-522682CEE603} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000026} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000027} = {FA1234BC-0001-4000-8000-000000000026}
+		{FA1234BC-0001-4000-8000-000000000037} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{7A021F6B-F297-41EA-A028-C4F881146791} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{FA1234BC-0001-4000-8000-000000000025} = {FA1234BC-0001-4000-8000-000000000021}
 		{FA1234BC-0001-4000-8000-000000000024} = {9EA47D78-293E-41B7-872D-3B2B85E82710}
