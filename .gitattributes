@@ -1,0 +1,6 @@
+# Shell hooks and helper scripts MUST stay LF — a CRLF shebang (#!/bin/sh\r)
+# breaks execution under Git Bash ("bad interpreter"). Pin them explicitly so a
+# fresh clone / re-checkout on Windows cannot corrupt them.
+.claude/githooks/pre-commit text eol=lf
+*.sh text eol=lf
+.claude/scripts/**/*.py text eol=lf
