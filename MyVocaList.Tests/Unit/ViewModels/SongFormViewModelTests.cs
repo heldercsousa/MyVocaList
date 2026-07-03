@@ -225,6 +225,38 @@ public class SongFormViewModelTests
         Assert.Equal(1, sut.ResolutionCandidates.Count);
     }
 
+    // [AC] AC-1.1/1.2 — BUG-023 regression guard: the resolution sheet's Cancel button is
+    // bound to DismissResolutionSheetCommand, which the SongFormPage code-behind relies on to
+    // close resolutionSheet (see SongFormPage.xaml.cs OnViewModelPropertyChanged). This test
+    // proves the VM half of that round trip: the flag the view observes must flip back to false
+    // once the sheet is opened and then dismissed. The XAML binding restoration itself is not
+    // unit-testable — see BUG-023 task-log for the required manual E2E verification step.
+    [Fact]
+    public async Task DismissResolutionSheetCommand_AfterExactLocalMatch_SetsIsResolutionSheetVisibleFalse()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
+                   .Returns((true, string.Empty));
+        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
+                   .Returns((true, string.Empty));
+
+        var resolution = new Mock<ISongResolutionService>();
+        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
+                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 99, [], [], false));
+
+        var sut = CreateSut(songService: songService, resolutionService: resolution);
+        sut.SongTitle = "Test Song";
+        sut.SelectedArtistId = 1;
+        sut.SelectedArtistName = "Artist";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+        Assert.True(sut.IsResolutionSheetVisible); // precondition: sheet was opened by the duplicate-title flow
+
+        sut.DismissResolutionSheetCommand.Execute(null);
+
+        Assert.False(sut.IsResolutionSheetVisible);
+    }
+
     // [AC] AC-1.2 — save as new version with empty Version is blocked
     [Fact]
     public async Task ConfirmSaveAsNewVersion_EmptyVersion_SetsVersionError()

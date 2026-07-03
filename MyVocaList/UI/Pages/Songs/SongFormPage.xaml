@@ -238,7 +238,8 @@
                         ShowGrabber="True"
                         AllowDismiss="False"
                         BackgroundColor="{StaticResource Surface}"
-                        CornerRadius="28">
+                        CornerRadius="28"
+                        StateChanged="OnResolutionSheetStateChanged">
             <VerticalStackLayout Padding="0,0,0,24">
 
                 <Label Text="{Binding ResolutionSheetTitle}"
@@ -319,7 +320,8 @@
                         ShowGrabber="True"
                         AllowDismiss="False"
                         BackgroundColor="{StaticResource Surface}"
-                        CornerRadius="28">
+                        CornerRadius="28"
+                        StateChanged="OnMergeSheetStateChanged">
             <VerticalStackLayout Padding="0,0,0,24">
 
                 <Label Text="Review field changes"
