@@ -281,8 +281,8 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
 **Status:** ⏳ PENDING
 
 **TEST-004 - errors:** 
-TEST-004 - 1) Step 5 above is shows correctly the error message, but the character counter become duplicated (it becomes duplicated once reaching 26 chars typed). Evidences found at `Docs\Management\BusinessFeatures\venues\bugs\validation-error-26chars.jpg` and `Docs\Management\BusinessFeatures\venues\bugs\validation-error-31morechars.jpg`
-
+TEST-004 - 1) Step 5 above shows correctly the error message, but the character counter become duplicated (it becomes duplicated once reaching 26 chars typed). Evidences found at `Docs\Management\BusinessFeatures\venues\bugs\validation-error-26chars.jpg` and `Docs\Management\BusinessFeatures\venues\bugs\validation-error-31morechars.jpg`
+TEST-004 - 2) Step 8 wasn't done once there isn't such record with more than 30 chars in DB. We must abandon this step.
 ---
 
 ### TEST-005: Singer (Person) Form Validation
@@ -314,8 +314,14 @@ Apply the same 8 steps from TEST-004 to the Singer form, testing three fields:
 
 **Verification Note:** Task-log states "DONE 2026-07-01, PASSED" for emulator E2E.
 
-**Status:** ✅ DONE (Helder completed 2026-07-01)
+**Status:** ✅ DONE (Helder completed 2026-07-01) - restested 2026-07-03
 
+**TEST-005 - errors:** 
+Just a detail about the test-005 guideline above: "Apply the same 8 steps from TEST-004 to the Singer form, testing three fields:". It does not makes sense other than for Singer Name entry. Only some tests are sduitable for the other 2 entries.
+TEST-005 - 1) Edit singer load page has a UI trouble in the full name entry as shown in the image `Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg`
+TEST-005 - 2) There is a validation error that looks like it is expecting the slash within the string, but the mask shall not persist/deliver slash together the date/month. Probably validation service must expect only 4 chars number only. Evidence at `Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg\singer-bithday-validation-error.jpg`
+TEST-005 - 3) When editing, after save, navigation to prior page is expected, as happens in Venues. Confirm it's the pattern for CRUDs. Singer form doesn't navigate after save, showing succes message correctly.
+TEST-005 - 4) Email uniqueness error doesn't appears when entry is blured but only after Save tapped.
 ---
 
 ### TEST-006: Song Form Validation (Title + Version)
@@ -413,6 +419,9 @@ Apply the same 8 steps from TEST-004 to the Singer form, testing three fields:
 ✅ 416/416 tests passing (403 baseline + 13 new). Counter/validation/duplicate patterns confirmed.
 
 **Status:** ⏳ PENDING
+
+**errors:**
+Test - 007 - 1: The very same trouble found in venues (TEST-004 - 1) happens in the artist name entry. Evidence at `Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg`
 
 ---
 
