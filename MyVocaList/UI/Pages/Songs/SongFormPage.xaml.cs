@@ -64,20 +64,36 @@ public partial class SongFormPage : ContentPage
     {
         if (_isSyncingResolutionSheet) return;
 
-        if (ViewModel.IsResolutionSheetVisible)
-            resolutionSheet.Show(BottomSheetState.HalfExpanded, this);
-        else
-            resolutionSheet.Close();
+        _isSyncingResolutionSheet = true;
+        try
+        {
+            if (ViewModel.IsResolutionSheetVisible)
+                resolutionSheet.Show(BottomSheetState.HalfExpanded, this);
+            else
+                resolutionSheet.Close();
+        }
+        finally
+        {
+            _isSyncingResolutionSheet = false;
+        }
     }
 
     private void SyncMergeSheetState()
     {
         if (_isSyncingMergeSheet) return;
 
-        if (ViewModel.IsMergeSheetVisible)
-            mergeSheet.Show(BottomSheetState.HalfExpanded, this);
-        else
-            mergeSheet.Close();
+        _isSyncingMergeSheet = true;
+        try
+        {
+            if (ViewModel.IsMergeSheetVisible)
+                mergeSheet.Show(BottomSheetState.HalfExpanded, this);
+            else
+                mergeSheet.Close();
+        }
+        finally
+        {
+            _isSyncingMergeSheet = false;
+        }
     }
 
     // Syncs the sheet closing (e.g. Close() completing) back to the ViewModel flag so the two
@@ -86,21 +102,43 @@ public partial class SongFormPage : ContentPage
     // safety net against the flag and the visual state ever diverging.
     private void OnResolutionSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
     {
+        if (_isSyncingResolutionSheet) return;
+
         if (e.NewValue == BottomSheetState.Hidden && ViewModel.IsResolutionSheetVisible)
         {
             _isSyncingResolutionSheet = true;
-            ViewModel.IsResolutionSheetVisible = false;
-            _isSyncingResolutionSheet = false;
+            try
+            {
+                ViewModel.IsResolutionSheetVisible = false;
+            }
+            finally
+            {
+                _isSyncingResolutionSheet = false;
+            }
         }
     }
 
     private void OnMergeSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
     {
+        if (_isSyncingMergeSheet) return;
+
         if (e.NewValue == BottomSheetState.Hidden && ViewModel.IsMergeSheetVisible)
         {
             _isSyncingMergeSheet = true;
-            ViewModel.IsMergeSheetVisible = false;
-            _isSyncingMergeSheet = false;
+            try
+            {
+                ViewModel.IsMergeSheetVisible = false;
+            }
+            finally
+            {
+                _isSyncingMergeSheet = false;
+            }
         }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
     }
 }
