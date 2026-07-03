@@ -1,0 +1,36 @@
+#!/bin/sh
+# Local CI-substitute gate (solo, pre-production).
+# Runs the test suite before allowing a commit that touches code, so a broken
+# build or a red test can never be recorded. `dotnet test` transitively builds
+# Domain, Contracts, Infra, Services AND the MAUI head (net10.0 lib) referenced
+# by MyVocaList.Tests, so ViewModel/Component compile errors are caught too.
+#
+# Scope note: this gate does NOT build the Android head (XAML/XamlC). XAML is
+# covered by the incremental-edit rule + emulator smoke tests. Keeping the gate
+# to `dotnet test` keeps per-commit cost to seconds, not minutes.
+#
+# Docs-only / config-only commits skip the gate entirely.
+# Intentional bypass (e.g. WIP checkpoint): `git commit --no-verify`.
+
+set -e
+
+# Staged files added/copied/modified (ignore deletions and renames' old path).
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Does the commit touch compilable code?
+if ! printf '%s\n' "$STAGED" | grep -Eq '\.(cs|xaml)$'; then
+  echo "pre-commit: no .cs/.xaml changes staged — skipping build+test gate."
+  exit 0
+fi
+
+echo "pre-commit: code changes staged — running dotnet test (bypass with --no-verify)..."
+if ! dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -v q --nologo; then
+  echo ""
+  echo "pre-commit: BLOCKED — build or tests failed. Fix before committing."
+  echo "            To commit anyway (e.g. an intentional WIP checkpoint):"
+  echo "            git commit --no-verify"
+  exit 1
+fi
+
+echo "pre-commit: build + tests green — commit allowed."
+exit 0
