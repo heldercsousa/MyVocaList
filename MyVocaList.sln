@@ -578,6 +578,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-026-hwui-sigabrt-render
 		Docs\Management\BusinessFeatures\cross-cutting\bugs\BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Archive", "Archive", "{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Changelog\Archive\changelog-jan2026-to-jun2026.md = Docs\Changelog\Archive\changelog-jan2026-to-jun2026.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -729,6 +734,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000038} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000039} = {FA1234BC-0001-4000-8000-000000000038}
 		{FA1234BC-0001-4000-8000-000000000040} = {FA1234BC-0001-4000-8000-000000000039}
+		{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE} = {E9A5FC59-0C8C-49B6-9845-7870FA3CD098}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

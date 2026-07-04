@@ -121,6 +121,7 @@ Console/**
 # Docs/DevEnv/devenv-setup.md - DON�T REMOVE IGNORE. here only for new developers be able to create the claude rule ONLY
 .claude/rules/devenv-setup.md #IGNORE as soon as setup is done
 Docs/DevEnv/DevEnv_Setup_Guide.docx #IGNORE as soon as setup is done
+Docs/DevEnv/**
 
 # Docs/ — selective context scope gates (prevents glob scans of high-volume, low-relevance subtrees)
 # Files can still be Read() by explicit absolute path — only open-ended glob scans are blocked.
@@ -132,3 +133,13 @@ Docs/superpowers/plans/**
 Docs/Changelog/**
 # Old Plans folder: superseded by superpowers/plans/
 Docs/Plans/**
+
+# Design old files
+Docs/Design/**
+
+# Temporary files in Docs
+Docs/claude-rules/**
+
+# Specs/Plans/Logs from completed sessions: historical record, not needed during feature work
+Docs/ManagementBypass/
+
