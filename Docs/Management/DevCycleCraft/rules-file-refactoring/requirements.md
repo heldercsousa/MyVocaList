@@ -2,9 +2,11 @@
 
 ## Problem Statement
 
-The `.claude/rules/*.md` files load unconditionally in every session, consuming **17.2k tokens** of the context budget. This duplicates procedures already documented in superpowers skills (`brainstorming`, `writing-plans`, `test-driven-development`, `code-review`) — which are currently disabled to save context.
+The `.claude/rules/*.md` files load unconditionally in every session **and in every subagent** (proven — GATE-A, `findings-measurement.md`), consuming ~**18–22k tokens** of the context budget (7 files, 1,789 lines). This duplicates procedures already documented in superpowers skills (`brainstorming`, `writing-plans`, `test-driven-development`, `code-review`) — which are currently disabled to save context.
 
-**Impact:** 17.2k tokens / 200k budget = 8.6% of context used before the user even starts work. In a multi-agent wave (5 concurrent agents), this multiplies: 5 agents × 17.2k = 86k tokens burned on stale skill documentation alone.
+> **Baseline note (2026-07-04):** earlier drafts cited 17.2k / 28.4k / 33.3k — all unmeasured estimates. Measurement supersedes them: a fresh subagent cold-starts at **60,492 tokens with 0 tool calls** (full system prompt + CLAUDE.md + RTK + all rules); the rules portion is ~18–22k.
+
+**Impact:** In a multi-agent wave (up to 5 concurrent subagents per workflow.md Rule 2), the rules load multiplies — each subagent inherits the full set, so ~18–22k × 5 ≈ 90–110k tokens spent on rules content before any agent does work. Reducing the rules body to routing tables recovers ~16–19k **per subagent**, sticky regardless of skill re-enablement.
 
 ## Goals
 
@@ -51,10 +53,12 @@ The `.claude/rules/*.md` files load unconditionally in every session, consuming 
 
 ## Success Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Unconditional rules token load | ~2–3k | `/context` fresh session, sum of .claude/rules/*.md size |
-| Per-agent on-demand recovery | 14k | Typical subagent session comparing before/after `/context` |
-| Multi-agent wave recovery | 70k | 5 agents × 14k |
-| Rules file line count (all) | <300 total | Sum of .claude/rules/*.md line counts after refactor |
-| Superpowers skill invocation coverage | 100% | Every rules routing table entry has a corresponding enabled skill; invoke each skill once |
+> **Framing correction (2026-07-04, F3):** the *primary* KPI is the **sticky per-agent unconditional reduction** — tokens removed from every subagent's cold-start whether or not any skill is later invoked. The "on-demand recovery per skill" figure is a *ceiling*, not an expected value (TDD/code-review skill bodies reload per-agent anyway — see `tasks.md` Task 11 honesty note); it is demoted to a secondary, informational metric. Baseline is now **measured**, not estimated: a fresh subagent cold-starts at **60,492 tokens with 0 tool calls** (`findings-measurement.md`), of which the 7 rules files are ~18–22k.
+
+| Metric | Priority | Target | Measurement |
+|--------|----------|--------|-------------|
+| **Sticky per-agent unconditional reduction** | **PRIMARY** | rules load ~18–22k → ~2–3k (≈16–19k recovered per subagent) | GATE-A/B probe: subagent cold-start token delta, 0 tools |
+| Unconditional rules token load (absolute) | Primary | ~2–3k | `/context` fresh session, sum of .claude/rules/*.md size |
+| Rules file line count (all) | Primary | <300 total | Sum of .claude/rules/*.md line counts after refactor |
+| On-demand recovery per skill invoked | Secondary (ceiling, not expected) | ≤ body size | before/after `/context`; report *net* across a real wave, not gross ceiling |
+| Enabled superpowers skill coverage | Secondary | brainstorming + writing-plans load descriptions only at start, bodies on-demand | invoke each of the 2 narrowed skills once |

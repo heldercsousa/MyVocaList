@@ -7,17 +7,20 @@
 > **Core insight:** converting unconditional load → on-demand load only saves tokens *if the on-demand condition is usually false*. Situational files (mediatr, component-governance, bug-tracking, constraints) are needed in a minority of sessions → high, safe savings. Core files (workflow.md, testing.md) are needed by almost every orchestrator/implementor → moving them to skill bodies that then reload per-agent nets ≈zero and risks an agent missing a hard rule. So: **do the situational files first, MEASURE the real per-subagent load, and only then decide whether the workflow/testing splits are worth it.**
 
 Tasks are ordered in phases:
+- **GATE-A (subagent inheritance — DONE 2026-07-04, PASS):** proved subagents inherit `.claude/rules/*` in full; measured 60,492-token cold-start with 0 tools. Findings: `findings-measurement.md`. This validated the per-wave multiplication premise *before* any Phase-1 file work (moved ahead of Phase 1 per Helder 2026-07-04, F2).
 - **Phase 0 (Spike):** DONE — validated routing-table pattern on code-principles.md
 - **Phase 1 (situational files — DO FIRST):** mediatr (delete), component-governance, bug-tracking, constraints — genuinely conditional, safe, high-yield
-- **MEASUREMENT GATE (blocking):** dispatch a throwaway subagent that runs `/context` first thing — confirm rules actually reload in a child context and quantify the real per-agent cost *before* investing in the expensive splits
-- **Phase 2 (core files — CONDITIONAL on gate):** workflow.md (3 waves) and testing.md (2 waves), only if the gate proves per-subagent savings are real
-- **Phase 3:** Re-enable superpowers, measure impact, update CLAUDE.md
+- **GATE-B (blocking for 06–10):** post-Phase-1 re-measure — confirm the real always-loaded rules total dropped as expected and decide whether the workflow.md/testing.md split economics justify the effort *before* investing in the expensive splits
+- **Phase 2 (core files — CONDITIONAL on GATE-B):** workflow.md (3 waves) and testing.md (2 waves), only if the gate proves per-subagent savings are real
+- **Phase 3:** Re-enable superpowers (narrowed to `brainstorming` + `writing-plans` — see Task 11), measure impact, update CLAUDE.md
 
 All tasks are sequential except where marked `[P]`.
 
 ### Execution order (revised)
 
-`01 (finalize) → 02 → 04 → 03 → 05 → [MEASUREMENT GATE] → 06–08 → 09–10 → 11 → 12`
+`[GATE-A ✓] → 01 (finalize) → 02 → 04 → 03 → 05 → [GATE-B] → 06–08 → 09–10 → 11 → 12`
+
+> **Numbering vs execution order (F5):** task *numbers* (01–05) reflect authoring order; *execution* order is `02 → 04 → 03 → 05` (risk/yield: pure-delete first, then lowest-risk situational files). Follow the arrow, not the number.
 
 Rationale for the situational-first order: 02 (mediatr) is a pure delete with zero risk; 04/03/05 are near-100% project-specific and needed only during component work / bug fixes / constraint lookups. 06–10 are gated on measured evidence.
 
@@ -109,16 +112,23 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
 
 ---
 
-## MEASUREMENT GATE — quantify real per-subagent load [SEQUENTIAL — BLOCKING for Tasks 06–10]
+## GATE-A — subagent inheritance [DONE 2026-07-04, PASS]
 
-- [ ] **GATE - Measure per-subagent rules load before committing to the workflow.md / testing.md splits**
-  - **Why this is a gate, not a Phase-4 measurement:** the plan's headline savings ("5 agents × 14k = 70k per wave") assumes each subagent reloads the rules and that on-demand skills would *not* reload in every agent. Both assumptions must be proven with evidence *before* investing ~20k tokens of effort in Tasks 06–10, not after. Original plan measured at Task 11 (the end) — backwards.
-  - **Question:** (1) Do `.claude/rules/*.md` actually reload in a fresh **subagent** context (vs. only the top-level session)? (2) After Phase 1, what is the real always-loaded rules total in a subagent? (3) For core guidance (TDD, workflow), would agents invoke the skill in ≥80% of implementor tasks anyway — making the on-demand conversion net-zero?
-  - **Method:** dispatch one throwaway Explore/general subagent whose *first* action is to report what it sees of `.claude/rules/*` in its context, plus run `/context` at top level pre- and post-Phase-1. Record numbers in `findings-measurement.md`.
-  - **Success (proceed to 06–10):** subagents demonstrably reload the rules AND a meaningful fraction of workflow/testing content is *not* needed by the typical implementor.
-  - **Failure (STOP / re-scope 06–10):** subagents do NOT inherit `.claude/rules/*` (then the whole per-agent-savings premise is false and only the top-level session benefits — cap effort at Phase 1), OR every implementor needs TDD+workflow anyway (then splitting them adds indirection for ≈zero saving — prefer the role-scoped-loading approach in the *"Per-Agent MCP/Skill Context Isolation"* BACKLOG item instead).
-  - **Files owned:** `Docs/Management/DevCycleCraft/rules-file-refactoring/findings-measurement.md` (NEW)
-  - **Demo:** `findings-measurement.md` states, with `/context` numbers, whether 06–10 are justified.
+- [x] **GATE-A - Prove subagents inherit `.claude/rules/*` before any file work** — DONE 2026-07-04, PASS.
+  - **Why moved ahead of Phase 1 (F2):** the headline savings ("5 agents × Nk per wave") assumes each subagent reloads the rules in full. That single fact validates/invalidates the premise for *every* phase, including Phase 1 — so it was cheap and decisive to verify first, not mid-plan.
+  - **Method:** one throwaway `general-purpose` subagent, **zero tool uses**, introspecting only its injected context.
+  - **Result:** all 7 rules files inherited in full (verbatim quotes captured); `code-principles.md` arrived in its reduced 44-line routing-table form (proves the pattern shrinks per-subagent load). Measured cold-start: **60,492 tokens, 0 tools**. Baseline now measured (supersedes the 17.2k/28.4k/33.3k estimates). Findings: `findings-measurement.md`.
+  - **Verdict:** PASS → Phase 1 GO (every reduction sticks per-agent).
+
+## GATE-B — split economics [SEQUENTIAL — BLOCKING for Tasks 06–10]
+
+- [ ] **GATE-B - Re-measure after Phase 1; decide whether the workflow.md / testing.md splits are worth it**
+  - **Question:** (1) After Phase 1, what is the real always-loaded rules total in a fresh subagent (target: measurable drop toward ~2–3k for the situational set)? (2) For core guidance (TDD, workflow), is a meaningful fraction of the full body *not* needed by the typical implementor — i.e. does routing-table-izing them save real per-agent tokens without hiding a hard rule?
+  - **Method:** re-run the GATE-A probe post-Phase-1; compare cold-start token delta. Record in `findings-measurement.md` (append).
+  - **Success (proceed to 06–10):** situational-set reduction confirmed AND workflow/testing full bodies are demonstrably unneeded by a majority of implementor tasks.
+  - **Failure (STOP / re-scope):** every implementor needs TDD+workflow anyway → splitting adds indirection for ≈zero saving; prefer the role-scoped-loading approach in the *"Per-Agent MCP/Skill Context Isolation"* BACKLOG item instead.
+  - **Files owned:** `Docs/Management/DevCycleCraft/rules-file-refactoring/findings-measurement.md` (append GATE-B section)
+  - **Demo:** `findings-measurement.md` states, with measured numbers, whether 06–10 are justified.
   - **Review lane:** Standard — Helder confirms the go/no-go before Tasks 06–10.
 
 ---
@@ -197,21 +207,20 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
 
 ## Phase 4 — Skill Re-Enablement & Measurement [SEQUENTIAL]
 
-- [ ] **11 - Re-enable superpowers + verify on-demand loading** [SEQUENTIAL]
-  - **Produces:** Enabled superpowers plugins + verification evidence
+- [ ] **11 - Re-enable superpowers (NARROWED) + verify on-demand loading** [SEQUENTIAL]
+  - **Scope decision (Helder 2026-07-04, F4):** re-enable **only `brainstorming` + `writing-plans`**. Do **NOT** re-enable `test-driven-development` or `code-review` — they duplicate the project's heavily-customized `testing.md` / review flow (real-SQLite, Moq, AC traceability, Tester/Builder split), so re-enabling them (a) saves ≈0 tokens (bodies reload per-agent anyway) and (b) creates a second source of truth → authority ambiguity. Keep TDD/review guidance as project rules + `.claude/library/*` only.
+  - **Produces:** 2 enabled superpowers plugins (brainstorming, writing-plans) + verification evidence
   - **Consumes:** All refactors complete (Tasks 01–10)
   - **Risk:** Low — only configuration change, no content changes
   - **Files owned:** 
-    - `.claude/settings.json` (enable brainstorming, writing-plans, test-driven-development, code-review)
+    - `.claude/settings.json` (enable brainstorming, writing-plans ONLY)
     - `.claude/scripts/verify-skill-loading.py` (NEW — sanity check script to confirm skills load on-demand)
   - **Verification gates:** 
-    - Run `/context fresh` — confirm Memory files shows <20k for .claude/rules/
-    - Invoke brainstorming skill — confirm description loads (~50 tok), full body loads on-demand (~3k tok)
+    - Run `/context fresh` — confirm Memory files shows the expected drop for .claude/rules/
+    - Invoke brainstorming skill — confirm description loads (~50 tok), full body loads on-demand
     - Invoke writing-plans skill — same
-    - Invoke test-driven-development skill — same
-    - Invoke code-review skill — same
-  - **Honesty note (2026-07-04):** the "14k recovered per skill" figure is a *ceiling*, not an expected value. Re-enabled `test-driven-development` and `code-review` bodies will **reload in most implementor/review subagents anyway** — for those, the saving is ~0, the change just moves the cost from unconditional to conditional. Report the *net* effect (unconditional reduction that actually sticks, minus on-demand reloads observed across a real multi-agent wave), not the gross ceiling.
-  - **Demo:** Clean session run `/context` → record net token delta vs. before across a real brainstorm → plan → implement → review wave; note which skill bodies reloaded per-agent
+  - **Rationale note (2026-07-04):** the bankable saving from this feature is the **unconditional rules reduction that sticks in every subagent** (~16–19k/agent per `findings-measurement.md`), NOT an "on-demand recovery per skill" ceiling. Narrowing to 2 skills that the project does *not* already cover avoids duplicate-source churn while keeping the sticky per-agent win.
+  - **Demo:** Clean session run `/context` → record net token delta vs. before across a real brainstorm → plan wave
   - **Review lane:** Standard
 
 - [ ] **12 - Update CLAUDE.md § Skill & MCP Lookup table** [SEQUENTIAL]
