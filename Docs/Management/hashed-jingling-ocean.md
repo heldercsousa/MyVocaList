@@ -106,20 +106,45 @@ Only if step 4 passes cleanly should `code-principles.md` and
 #23569 is confirmed fixed in a released version, or the `InstructionsLoaded` hook
 shows reliable loading across several real worktree sessions.
 
-## Process requirement
+## Track A Results — Completed 2026-07-04
+
+**Commit:** 4 files changed, 178 insertions(+), 26 deletions(-) — `amend: Extract tooling evaluation sections...`
+
+**Changes:**
+- Created `.claude/skills/tooling-evaluations.md` (new skill, ~100 lines)
+- Removed lines 290–315 from CLAUDE.md (Tessl, sdd-mcp, Spec Kit, Cursor sections)
+- Added one-line reference to skill in CLAUDE.md
+
+**Results:**
+- CLAUDE.md: 321 → 296 lines (25-line reduction; still above official <200-line guideline but closer)
+- Token savings: ~1.5–2k per session (evaluation content moved from unconditional → on-demand)
+- Backward compatibility: none; sections still accessible via skill invocation
+
+**Next session:** Can verify token reduction by running `/context` fresh and comparing to baseline 55.8k.
+
+## Track B — Pending (do not proceed yet)
+
+**Why it's deferred:**
+Track B (piloting `paths:` frontmatter on three rule files) has a critical validation gate: issue #23569 reports that path-conditional rules are silently ignored when loaded via git worktree resolution — the exact scenario this project relies on for every subagent dispatch. Before applying `paths:` frontmatter to safety-critical files (`code-principles.md`, `constraints-registry.md`), or moving forward with more aggressive scoping, the mechanism **must be validated in an actual worktree-dispatched subagent**, not just assumed from docs.
+
+**How to proceed in a future session:**
+1. Pick one of the three pilot files (lowest consequence: `mediatr-patterns.md`)
+2. Add `paths: ["MyVocaList.Services/**/*.cs"]` frontmatter
+3. Fresh session: run `/context`, confirm file is NOT in the unconditional load count
+4. Have Claude `Read` a matching `.cs` file in Services, then run `/memory` to confirm the rule now shows as loaded
+5. **Critical step:** Dispatch a subagent to modify a Services file, inside a git worktree (the project's normal execution pattern). Confirm in the subagent's session that the rule was loaded. This is the exact failure case #23569 reports, so it must pass here before trusting any scoping.
+6. Only if step 5 passes: commit the pilot change, document in `Docs/Changelog/`, then consider applying broader path-scoping to other files.
+
+**Files involved:**
+- `.claude/rules/mediatr-patterns.md` (pilot subject)
+- `.claude/rules/component-change-governance.md` (pilot subject, secondary)
+- `.claude/rules/bug-tracking.md` (pilot subject, secondary)
+- **Do NOT scope yet:** `workflow.md`, `testing.md` (safety-critical, too risky without validation)
+
+## Process requirement (for Track B, when executed)
 
 Per `CLAUDE.md § Amending These Rules`, any change to `.claude/rules/*.md`
-requires: (1) documenting what's wrong with the current state and why (this doc),
-(2) noting backward-compatibility impact (none — frontmatter addition is additive),
-(3) commit with `amend:` prefix and rationale, (4) a `Docs/Changelog/changelog.md`
+requires: (1) documenting what's wrong with the current state and why, (2) noting
+backward-compatibility impact (none — frontmatter addition is additive), (3)
+commit with `amend:` prefix and rationale, (4) a `Docs/Changelog/changelog.md`
 entry with old rule / new rule / effective date.
-
-## Verification
-
-- Token comparison: run `/context` on a fresh session before and after Track A/B
-  changes; expect CLAUDE.md down by ~1.5–2k (Track A) and 3 pilot rule files (~4k
-  combined) off the unconditional load (Track B), pending validation passing.
-- Functional check: confirm the extracted CLAUDE.md sections are still reachable
-  by asking Claude the relevant question and confirming the new skill fires.
-- Worktree check (critical, see Track B step 4): must be done before trusting any
-  pilot file's path-scoping in a real subagent wave.
