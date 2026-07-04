@@ -1,4 +1,15 @@
-# Context Efficiency: Path-Scoped Rules + CLAUDE.md Trim
+# Context Efficiency Initiative — Research Complete, Roadmap Ready
+
+## Status: ✅ Research & Planning Complete
+
+**Session:** 2026-07-04 | **Outcome:** Refactoring roadmap committed to BACKLOG.md with 12 phased tasks
+- ✅ **Track A:** Extracted tooling evaluation sections from CLAUDE.md to skill (~0.6k tokens)
+- ✅ **Track B:** Deferred `paths:` frontmatter pilot (worktree-reliability issue #23569)
+- ✅ **Core discovery:** Rules files (17.2k unconditional) duplicate superpowers skill content
+- ✅ **Solution:** Condense rules to routing tables + re-enable superpowers = 14–15k token recovery/session
+- ✅ **Roadmap:** 12 tasks in BACKLOG.md (tasks 01–12, 2026-07-05 through 2026-07-12)
+
+---
 
 ## Context
 
