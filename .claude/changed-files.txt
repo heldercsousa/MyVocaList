@@ -1953,3 +1953,10 @@ Docs/Management/EMULATOR_TEST_MASTER_LIST.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/MEMORY.md
 ../../../.claude/projects/C--Users-helde-source-repos-MyVocaList/memory/project_song_import_resolution.md
 Docs/Changelog/changelog.md
+Docs/Management/sprightly-launching-corbato.md
+Docs/Management/sprightly-launching-corbato.md
+.claudeignore
+Docs/Management/hashed-jingling-ocean.md
+Docs/Management/hashed-jingling-ocean.md
+.claude/skills/tooling-evaluations.md
+CLAUDE.md
