@@ -20,6 +20,9 @@
 
 **Verification:** `dotnet build` 0 errors; the 3 new ViewModel tests pass; `QueueRepositoryTests` 5/5 green in isolation. Intermittent full-suite `QueueRepositoryTests` failures (`SQLite Error 19: FOREIGN KEY constraint failed`, count varies 3→1→0 across runs) are the pre-existing flaky parallel-SQLite race — unrelated to this change (green with the change stashed), tracked in BACKLOG. ⏳ Helder: emulator E2E for AC-BUG011-1/2/3.
 
+### Emulator E2E — BLOCKED 2026-07-03
+Helder's attempt (`Docs/Management/EMULATOR_TEST_MASTER_LIST.md` TEST-012) found **no reachable entry point into `QueueManagementPage`** from the current build — there is no way to navigate to it to exercise the BottomSheet fix at all. This is consistent with the in-flight **Queue Entry Point Redesign** work (`BACKLOG.md` Queue Management section, 🟡 In Progress): the old `QueuePage`/`EventsPage` entry points are being replaced and the new CRUD-list entry point is not yet wired. Re-run TEST-012 once the Queue Entry Point Redesign lands a working navigation path to `QueueManagementPage`.
+
 **Files changed:** `QueueManagementPage.xaml`, `QueueManagementPage.xaml.cs`, `QueueManagementViewModel.cs`, + new `MyVocaList.Tests/Unit/ViewModels/QueueManagementViewModelTests.cs`. Committed as `e4d09bb` on branch `fix/bug-011-queue-bottomsheet` (not pushed, not merged).
 
 ## Symptom

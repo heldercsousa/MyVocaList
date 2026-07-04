@@ -3,7 +3,7 @@
 **Severity:** Critical — app crash; user cannot create a new song
 **Discovered:** 2026-07-01 — Helder, manual smoke test
 **Reporter:** Helder
-**Status:** Fixed
+**Status:** Fixed — emulator-verified 2026-07-03 (TEST-010, `Docs/Management/EMULATOR_TEST_MASTER_LIST.md`): FAB opens SongFormPage, no SecureStorage exception, no crash.
 
 ---
 

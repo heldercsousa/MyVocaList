@@ -165,6 +165,9 @@ same IDs, same source (`01-ui-form-validation-guide.md` + `dialogs-validation.md
 | R6/R9 | Errors surfaced inline via `HasError`/`ErrorText` only | `SongFormPage.xaml` (`dxe:TextEdit` Title, `dxe:TextEdit` Version x2) | (XAML — E2E emulator gate) |
 | R7 | Messages specific/actionable | `SongService.ValidateTitleInput` / `ValidateVersionInput` | `SongServiceTests.ValidateTitleInput_*` / `ValidateVersionInput_*` |
 
+### E2E emulator gate — NOT EXECUTED 2026-07-03 (blocked)
+TEST-006 (`Docs/Management/EMULATOR_TEST_MASTER_LIST.md`) could not be run: **BUG-027** (SongFormPage Artist field has no working required validation/autocomplete) makes it impossible to save any song, new or edited, so none of the Title/Version validation timing (R1–R4) could be exercised end-to-end on-device. Re-run TEST-006 once BUG-027 is fixed.
+
 ---
 
 ## Notes / deviations from the Reference Pattern
@@ -303,6 +306,11 @@ same IDs, same source (`01-ui-form-validation-guide.md` + `dialogs-validation.md
 | Counter alignment | Counter counts the trimmed string the validator checks | `ArtistFormViewModel.OnArtistNameChanged` | `OnArtistNameChanged_TrailingWhitespace_CounterUsesTrimmedLength` |
 | R6/R9 | Errors inline via `HasError`/`ErrorText`, never a dialog | `ArtistFormPage.xaml` (`dxe:TextEdit nameEdit`) | (XAML — E2E emulator gate) |
 | R7 | Messages specific/actionable | `ArtistService.ValidateNameInput` (pre-existing) | `ArtistServiceTests.ValidateNameInput_*` (pre-existing) |
+
+### E2E emulator gate — RESULT 2026-07-03
+TEST-007 (`Docs/Management/EMULATOR_TEST_MASTER_LIST.md`) confirms R1–R3/R8/counter-alignment/trimming work as designed. Two findings:
+1. **Bug (same symptom as Venue, see `venues/form-validation-task-log.md` — BUG-034):** character counter renders duplicated once the Name field reaches ~26 typed characters. Screenshot: `Docs/Management/BusinessFeatures/artists-songs/bugs/artistis-validation-error-charcount-duplicated-01.jpg`.
+2. **Bug (Minor/Major — matches the BUG-025/BUG-038 family):** the duplicate-artist-name inline error only appears after Save is tapped, not on blur — same async-uniqueness-on-blur gap as the Person and Song forms. Registered as **BUG-039**.
 
 ---
 ## Task: BUG-024 — SongForm edit-mode Save wipes FeaturedArtists + Lyrics and discards Version (Critical)

@@ -1,7 +1,7 @@
 ---
 ## Task: BUG-017 -- Replace navigate_next icon with arrow_forward_outlined
 **Plan:** Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-017-artistscrud-emulator-debug-often-stops/
-**Status:** To Review
+**Status:** Emulator-verified 2026-07-03 (TEST-008, `Docs/Management/EMULATOR_TEST_MASTER_LIST.md`) — no Glide FileNotFoundException, icon renders cleanly
 **Started:** 2026-06-27
 **Completed:** 2026-06-27
 

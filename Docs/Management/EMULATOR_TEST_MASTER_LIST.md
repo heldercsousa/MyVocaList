@@ -142,7 +142,7 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
 - Edit song; verify Lyrics field visible and saveable
 - Verify Songs menu item in flyout; search back arrow shows correctly
 
-**Status:** ⏳ PENDING
+**Status:** ❌ FAILED 2026-07-03 — hard blocker BUG-027; BACKLOG.md + `tasks.md § Phase 16C` updated with full findings.
 
 ---
 
@@ -186,7 +186,7 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
 - ❌ NO `DevExpress.Maui.Controls.BottomSheet is already a child...` errors
 - ❌ NO animation stutter or Davey burst when opening/closing sheet
 
-**Status:** ⏳ PENDING
+**Status:** 🚫 BLOCKED 2026-07-03 — could not exercise, song creation blocked by BUG-027 (see TEST-001). Re-run once BUG-027 is fixed.
 
 ---
 
@@ -234,7 +234,7 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
 **Expected Result:**  
 ✅ All fields (FeaturedArtists, Lyrics, Version) persist through edit cycles. No field is silently wiped.
 
-**Status:** ⏳ PENDING
+**Status:** 🚫 BLOCKED 2026-07-03 — could not exercise, editing a song blocked by BUG-027 (see TEST-001). Re-run once BUG-027 is fixed.
 
 ---
 
@@ -278,7 +278,7 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
 **Expected Result:**  
 ✅ Blur-first validation, keystroke-clear, Save safety-net, inline errors only (no dialogs/snackbars as validation channels).
 
-**Status:** ⏳ PENDING
+**Status:** ✅ DONE 2026-07-03 — R1–R4/R6/R8/R9 confirmed. 2 findings below (BUG-034 registered in BACKLOG.md).
 
 **TEST-004 - errors:** 
 TEST-004 - 1) Step 5 above shows correctly the error message, but the character counter become duplicated (it becomes duplicated once reaching 26 chars typed). Evidences found at `Docs\Management\BusinessFeatures\venues\bugs\validation-error-26chars.jpg` and `Docs\Management\BusinessFeatures\venues\bugs\validation-error-31morechars.jpg`
@@ -314,7 +314,7 @@ Apply the same 8 steps from TEST-004 to the Singer form, testing three fields:
 
 **Verification Note:** Task-log states "DONE 2026-07-01, PASSED" for emulator E2E.
 
-**Status:** ✅ DONE (Helder completed 2026-07-01) - restested 2026-07-03
+**Status:** ✅ DONE (Helder completed 2026-07-01) - restested 2026-07-03; 4 new findings below registered as BUG-035–BUG-038 in BACKLOG.md
 
 **TEST-005 - errors:** 
 Just a detail about the test-005 guideline above: "Apply the same 8 steps from TEST-004 to the Singer form, testing three fields:". It does not makes sense other than for Singer Name entry. Only some tests are sduitable for the other 2 entries.
@@ -366,7 +366,7 @@ TEST-005 - 4) Email uniqueness error doesn't appears when entry is blured but on
 **Expected Result:**  
 ✅ 403/403 tests passing (386 baseline + 17 new). Blur/keystroke/Save validation patterns confirmed.
 
-**Status:** ⏳ PENDING
+**Status:** 🚫 BLOCKED 2026-07-03 — could not run, BUG-027 makes song save impossible. Re-run once BUG-027 is fixed.
 
 ---
 
@@ -418,7 +418,7 @@ TEST-005 - 4) Email uniqueness error doesn't appears when entry is blured but on
 **Expected Result:**  
 ✅ 416/416 tests passing (403 baseline + 13 new). Counter/validation/duplicate patterns confirmed.
 
-**Status:** ⏳ PENDING
+**Status:** ✅ DONE 2026-07-03 — R1–R3/R8/counter-alignment/trimming confirmed. 2 findings below (BUG-034, BUG-039 registered in BACKLOG.md).
 
 **errors:**
 Test - 007 - 1: The very same trouble found in venues (TEST-004 - 1) happens in the artist name entry. Evidence at `Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg`
@@ -444,7 +444,7 @@ Test - 007 - 2: Step 4 above works only after save button tapped. I suppose such
 **Expected Result:**  
 ✅ No Glide errors. Icon renders without crashing the debugger.
 
-**Status:** ⏳Done
+**Status:** ✅ DONE 2026-07-03
 
 ---
 
@@ -464,7 +464,7 @@ Test - 007 - 2: Step 4 above works only after save button tapped. I suppose such
 **Expected Result:**  
 ✅ Artist names are visible. 
 
-**Status:** ⏳ Pending
+**Status:** ❌ FAILED 2026-07-03 — regression registered as BUG-028 in BACKLOG.md
 **errors:**
 TEST-009 1) step 5 above does not happen.
 
@@ -489,7 +489,7 @@ TEST-009 1) step 5 above does not happen.
 **Expected Result:**  
 ✅ FAB opens SongFormPage. No SecureStorage crashes. App remains stable.
 
-**Status:** ⏳ Done
+**Status:** ✅ DONE 2026-07-03
 
 ---
 
@@ -510,7 +510,7 @@ TEST-009 1) step 5 above does not happen.
 **Expected Result:**  
 ✅ FAB opens SongFormPage. DI resolution succeeds. No crash.
 
-**Status:** ⏳ Done
+**Status:** ✅ DONE 2026-07-03
 
 ---
 
@@ -550,7 +550,7 @@ TEST-009 1) step 5 above does not happen.
 - AC-BUG011-2: 2nd navigation causes no Davey burst (≤16ms per frame)
 - AC-BUG011-3: Queue functionality (BottomSheet open/close, queue interaction) unaffected
 
-**Status:** ⏳ PENDING - THERE IS NO WAY TO ACCESS IT. IT SEEMS QueuePage WAS NEVER IMPLEMEMTED
+**Status:** 🚫 BLOCKED 2026-07-03 — no reachable navigation entry point to `QueueManagementPage` exists in the current build; consistent with the in-flight Queue Entry Point Redesign (BACKLOG.md, 🟡 In Progress). Re-run once that redesign lands a working entry point.
 
 
 
@@ -659,28 +659,28 @@ dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj
 Use this checklist to track progress:
 
 ```markdown
-## EMULATOR TESTS
+## EMULATOR TESTS (run 2026-07-03)
 
-- [ ] TEST-001 — Phase 16C.1 Full Feature Smoke Test
-- [ ] TEST-002 — BUG-023 BottomSheet State Sync
-- [ ] TEST-003 — BUG-024 Edit Data Integrity
-- [ ] TEST-004 — Venue Form Validation
-- [ ] TEST-005 — Singer Form Validation (pre-done 2026-07-01)
-- [ ] TEST-006 — Song Form Validation
-- [ ] TEST-007 — Artist Form Validation
-- [ ] TEST-008 — BUG-017 Icon Missing
-- [ ] TEST-009 — BUG-019 List Item Button
-- [ ] TEST-010 — BUG-020 SecureStorage Crash
-- [ ] TEST-011 — BUG-021 DI Resolution
-- [ ] TEST-012 — BUG-011 BottomSheet Double-Add
-- [ ] TEST-013 — Session Continuity Live Demo (Helder gate)
+- [x] TEST-001 — Phase 16C.1 Full Feature Smoke Test — ❌ FAILED, blocked by BUG-027
+- [x] TEST-002 — BUG-023 BottomSheet State Sync — 🚫 BLOCKED by BUG-027 (not exercised)
+- [x] TEST-003 — BUG-024 Edit Data Integrity — 🚫 BLOCKED by BUG-027 (not exercised)
+- [x] TEST-004 — Venue Form Validation — ✅ DONE (BUG-034 found)
+- [x] TEST-005 — Singer Form Validation (pre-done 2026-07-01; retested) — ✅ DONE (BUG-035–038 found)
+- [x] TEST-006 — Song Form Validation — 🚫 BLOCKED by BUG-027 (not exercised)
+- [x] TEST-007 — Artist Form Validation — ✅ DONE (BUG-034, BUG-039 found)
+- [x] TEST-008 — BUG-017 Icon Missing — ✅ DONE
+- [x] TEST-009 — BUG-019 List Item Button — ❌ FAILED, regression → BUG-028
+- [x] TEST-010 — BUG-020 SecureStorage Crash — ✅ DONE
+- [x] TEST-011 — BUG-021 DI Resolution — ✅ DONE
+- [x] TEST-012 — BUG-011 BottomSheet Double-Add — 🚫 BLOCKED, no entry point exists
+- [ ] TEST-013 — Session Continuity Live Demo (Helder gate) — not run this session
 
 ## POST-TEST
 
-- [ ] TEST-014 — Build & Test Suite (automated)
-- [ ] All source files updated with ✅ Done status
-- [ ] Screenshots/logcat captured for any failures
-- [ ] BACKLOG.md statuses updated to ✅ Done
+- [ ] TEST-014 — Build & Test Suite (automated) — not run this session
+- [x] All source files updated with test results (task-log.md / bug .md files / tasks.md § Phase 16C)
+- [x] Screenshot references captured for failures (see per-test entries above)
+- [x] BACKLOG.md statuses updated: Artists & Songs Catalog → 🔴 Blocked; BUG-019 → ⚠️ Partially regressed; BUG-017/020/021 → emulator-verified; BUG-023/024 → blocked-note added; new bugs BUG-027–BUG-039 registered nested under their parent features
 ```
 
 ---
