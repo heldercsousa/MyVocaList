@@ -143,3 +143,10 @@ Docs/claude-rules/**
 # Specs/Plans/Logs from completed sessions: historical record, not needed during feature work
 Docs/ManagementBypass/
 
+# Debug and device log captures in Docs/Management (diagnostic artifacts, not specs)
+# Explicit reads still work; this prevents accidental glob-sweep of large debug logs
+Docs/Management/**/*debug*.txt
+Docs/Management/**/*logcat*.txt
+Docs/Management/**/*Release test*.txt
+Docs/Management/**/*VS Debug*.txt
+
