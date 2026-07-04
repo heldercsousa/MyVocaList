@@ -14,7 +14,7 @@ All tasks are sequential except where marked `[P]`.
 
 ## Phase 0 — Spike Validation [SEQUENTIAL — BLOCKING]
 
-- [ ] **[SPIKE] Validate routing-table pattern + skill invocation**
+- [x] **[SPIKE] Validate routing-table pattern + skill invocation** — DONE 2026-07-04, PASS. Findings: `pilot-findings.md`. Executed directly by main agent (no subagent) to avoid ~55k/subagent cold-start that the rules bloat itself inflates.
   - **Time-box:** 90 min (hard stop)
   - **Question:** Does extracting sections from code-principles.md → library file + routing table + skill invocation work end-to-end without workflow changes?
   - **Success criterion:** (1) code-principles.md rewritten as 1-page routing table; (2) ~1k tokens of architecture/naming/style content extracted to `~/library/code-style-reference.md`; (3) dotnet-skills skill invoked and confirmed to load; (4) zero content loss documented; (5) no agent workflow changes needed
