@@ -128,6 +128,15 @@ Reused from the Venue reference (`venues/form-validation-task-log.md`) — same 
 | R6/R9 | Errors surfaced inline via `HasError`/`ErrorText` only | `PersonFormPage.xaml` (`AutocompleteField`, `dxe:TextEdit` x2) | (XAML — E2E emulator gate) |
 | R7 | Messages specific/actionable | `PersonService.ValidateNameInput` / `ValidateBirthday` / `ValidateEmail` | `PersonServiceTests.Validate*` |
 
+### E2E emulator gate — RESULT (Done 2026-07-01; RETESTED 2026-07-03)
+TEST-005 (`Docs/Management/EMULATOR_TEST_MASTER_LIST.md`) confirms the Name field behavior (R1–R4/R8) matches spec. Note: the TEST-005 8-step checklist (copied verbatim from the Venue single-field pattern) only fully applies to the Name field — Birthday/Email needed a subset. Four new findings from the 2026-07-03 retest, none yet fixed:
+1. **UI glitch (Minor):** Edit-Singer load page shows a rendering issue in the full-name entry. Screenshot: `Docs/Management/BusinessFeatures/persons/bugs/edit-singer-load-page-issue.jpg`.
+2. **Bug (Minor):** the birthday validation error message appears to expect the `/` separator inside the validated string, but the mask should only ever deliver the 4 digits (DDMM) to validation, not the separator. Likely a regex/mask mismatch in `PersonService.ValidateBirthday` vs the `Mask="00/00"` added by BUG-022. Screenshot: `Docs/Management/BusinessFeatures/persons/bugs/edit-singer-load-page-issue.jpg/singer-bithday-validation-error.jpg`.
+3. **Bug (Major — UX consistency):** after Save in edit mode, the app does not navigate back to the prior page (Venues does navigate back after edit-save) — success snackbar shows correctly but the user is left on the form. Confirm whether back-navigation-after-save is the intended cross-CRUD pattern before fixing.
+4. **Bug (Major — matches BUG-025 pattern):** the email-uniqueness inline error does not appear on blur as designed — it only appears after Save is tapped. This is distinct from already-registered BUG-025 (uniqueness error being cleared by weaker keystroke re-validation); this is the error never showing on blur in the first place.
+
+These four are registered in `BACKLOG.md` (Person CRUD nested rows, BUG-035–BUG-038) pending dedicated fix sessions.
+
 ---
 
 ## Notes for Songs / Artists (Tasks 04–05)

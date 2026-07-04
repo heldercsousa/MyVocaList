@@ -5,6 +5,9 @@
 **Fixed:** 2026-07-02 (this worktree branch; merged by orchestrator after review)
 **Approved approach:** Helder decision 2026-07-02 — add `GetSongByIdAsync` to `ISongService`/`SongService`, fully hydrate `LoadSongForEditAsync`, make `ExecuteEditSaveAsync` send complete form data including Version.
 
+## Emulator smoke test — BLOCKED 2026-07-03
+Helder's emulator session (`Docs/Management/EMULATOR_TEST_MASTER_LIST.md` TEST-003) could not exercise this fix: editing an existing song was blocked by **BUG-027** (SongFormPage Artist field has no working required-field validation/autocomplete — the same blocker that prevents new-song creation also prevents opening/saving edits in this test run). Re-run TEST-003 once BUG-027 is fixed.
+
 ---
 
 ## Symptom

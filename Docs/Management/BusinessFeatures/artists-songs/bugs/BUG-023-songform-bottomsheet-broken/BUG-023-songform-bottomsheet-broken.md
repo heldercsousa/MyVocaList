@@ -3,6 +3,9 @@
 ## Status
 Fixed — 2026-07-03
 
+## Emulator smoke test — BLOCKED 2026-07-03
+Helder's emulator session (`Docs/Management/EMULATOR_TEST_MASTER_LIST.md` TEST-002) could not exercise this fix: song creation itself is blocked by **BUG-027** (SongFormPage Artist field has no working required-field validation/autocomplete, so no song can be saved to trigger the resolution flow at all). Re-run TEST-002 once BUG-027 is fixed.
+
 ## Root cause
 Commit `e743601` ("fix errors", 2026-06-23) removed `IsExpanded="{Binding IsResolutionSheetVisible, Mode=TwoWay}"` and `IsExpanded="{Binding IsMergeSheetVisible, Mode=TwoWay}"` from `resolutionSheet` and `mergeSheet` in `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` without any replacement (likely because `IsExpanded` is not a valid `dx:BottomSheet` binding target in the DevExpress version in use — `dx:BottomSheet` has no bindable "open" property; opening/closing requires calling `Show(BottomSheetState, Page)` / `Close()` with a host `Page` reference, which cannot be expressed as a pure XAML two-way binding). `SongFormViewModel` continued to set `IsResolutionSheetVisible` / `IsMergeSheetVisible` correctly (confirmed unchanged and already covered by `SaveAsync_ExactLocalMatch_SetsResolutionSheetVisible`), but nothing in the view observed those flags after the removal. Result: the resolution/merge BottomSheets never opened — the entire "Save as new version" / "Update existing" / "Merge fields" flow was unreachable whenever Save encountered a duplicate song title. Save appeared to silently do nothing.
 

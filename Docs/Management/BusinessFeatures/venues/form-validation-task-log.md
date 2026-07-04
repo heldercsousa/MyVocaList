@@ -80,6 +80,11 @@ Business logic stayed in the Service — the ViewModel only invokes it and maps 
 | R6/R9 | Error surfaced inline via `HasError`/`ErrorText` only | `VenueFormPage.xaml` `dxe:TextEdit` | (XAML — E2E emulator gate) |
 | R7 | Messages specific/actionable | `VenueService.ValidateNameInput` | `VenueServiceTests.ValidateNameInput_*` |
 
+### E2E emulator gate — RESULT 2026-07-03
+Helder ran TEST-004 (`Docs/Management/EMULATOR_TEST_MASTER_LIST.md`). R1–R4/R6/R8/R9 all confirmed working as designed (blur-first, keystroke-clear, Save safety-net, inline-only errors). Two findings:
+1. **Bug (Minor, unregistered as dedicated BUG-NNN yet — see BACKLOG.md Artists & Songs Catalog row "BUG-034"):** once the Name field reaches ~26 typed characters, the character counter renders **duplicated** (two overlapping counter labels). Screenshots: `Docs/Management/BusinessFeatures/venues/bugs/validation-error-26chars.jpg`, `Docs/Management/BusinessFeatures/venues/bugs/validation-error-31morechars.jpg`. Same symptom reproduced on ArtistFormPage (see `artists-songs/form-validation-task-log.md`) — likely a shared `dxe:TextEdit` counter configuration issue, not Venue-specific.
+2. Step 8 (edit-mode dirty-guard on legacy over-30-char data) could not be exercised — no such record exists in the current DB. Abandoned for this pass; re-test if/when a pre-existing long-name Venue record is available.
+
 ---
 
 ## Reference Pattern — what Singer/Songs/Artists forms MUST replicate
