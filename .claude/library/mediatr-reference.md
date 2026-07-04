@@ -1,8 +1,6 @@
-# MediatR Patterns
+# MediatR Patterns — Reference (not active)
 
-> Status: MediatR is listed as a planned dependency in CLAUDE.md but is NOT yet registered in MauiProgram.cs.
-> Current architecture uses direct service interfaces (IVenueService, etc.) injected via constructor DI.
-> These patterns are reference patterns for when MediatR is introduced.
+> On-demand reference. **MediatR is NOT registered in `MauiProgram.cs`** — the current architecture uses direct service interfaces (`IVenueService`, etc.) injected via constructor DI. These are reference patterns for *when* MediatR is introduced. Loaded via the `myvocalist-coding` skill map or a pointer from `CLAUDE.md § Rules Files` — it does not load unconditionally.
 > Mark patterns as "confirmed" once the first handler is registered.
 
 ## Command Pattern
@@ -115,3 +113,7 @@ When MediatR is introduced, the ViewModel will `Send()` commands/queries instead
 ## Known Gotchas
 
 <!-- TODO: populate as issues are discovered -->
+
+---
+
+> **Authorship note:** Content moved verbatim from `.claude/rules/mediatr-patterns.md` (Rules File Refactoring, Task 02, 2026-07-04). The rules file was deleted because it documents code that does not exist yet — 1.1k tokens of pure unconditional overhead. Container change only, zero content change. Human-review before relied upon (CLAUDE.md § Continuous Enhancement — Authorship).

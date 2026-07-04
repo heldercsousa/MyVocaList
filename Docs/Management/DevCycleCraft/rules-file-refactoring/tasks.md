@@ -59,7 +59,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
   - **Review lane:** Standard
 
 ### Task 02: DELETE mediatr-patterns.md (do first — pure win, zero risk)
-- [ ] **02 - Delete `mediatr-patterns.md`; move content to library**
+- [x] **02 - Delete `mediatr-patterns.md`; move content to library** — DONE 2026-07-04. Deleted the rule (`git rm`); content moved verbatim to `.claude/library/mediatr-reference.md`; sole live pointer (`CLAUDE.md § Rules Files`) repointed + tagged "reference only"; skill-map row added; historical Docs mentions left as-is. ~1.1k unconditional tokens recovered per agent.
   - **Change from original plan (2026-07-04):** do NOT leave a stub in `.claude/rules/`. MediatR is **not registered in `MauiProgram.cs`** — the file documents code that does not exist yet, so it is 1.1k tokens of pure unconditional overhead every session. Remove it from the always-loaded set entirely; pull the reference back in only when MediatR is actually introduced.
   - **Produces:** `mediatr-patterns.md` removed from `.claude/rules/`; content preserved in library
   - **Consumes:** nothing (independent — can run first)
