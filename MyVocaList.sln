@@ -591,6 +591,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rules-file-refactoring", "r
 		Docs\Management\DevCycleCraft\rules-file-refactoring\tasks.md = Docs\Management\DevCycleCraft\rules-file-refactoring\tasks.md
 		Docs\Management\DevCycleCraft\rules-file-refactoring\task-log.md = Docs\Management\DevCycleCraft\rules-file-refactoring\task-log.md
 		Docs\Management\DevCycleCraft\rules-file-refactoring\pilot-findings.md = Docs\Management\DevCycleCraft\rules-file-refactoring\pilot-findings.md
+		Docs\Management\DevCycleCraft\rules-file-refactoring\findings-measurement.md = Docs\Management\DevCycleCraft\rules-file-refactoring\findings-measurement.md
 	EndProjectSection
 EndProject
 Global
