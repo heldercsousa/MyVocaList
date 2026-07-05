@@ -211,7 +211,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
 
 ## Phase 4 — Skill Re-Enablement & Measurement [SEQUENTIAL]
 
-- [ ] **11 - Re-enable superpowers (NARROWED) + verify on-demand loading** [SEQUENTIAL]
+- [x] **11 - Re-enable superpowers (NARROWED) + verify on-demand loading** — DONE 2026-07-05 (commit `bf9d1cb`), ⏳ RESTART-VERIFY pending. Enabled `superpowers@claude-plugins-official: true` at PROJECT level (overrides user-level false per user<project precedence). `skillOverrides` in settings.json: test-driven-development=off, code-review=off, subagent-driven-development=user-invocable-only, maui-unit-testing=on (also set on in settings.local.json — local overrides project for that key). brainstorming/writing-plans/verification-before-completion left absent=on. **Mechanism confirmed against official settings schema via `update-config` skill** (skillOverrides is per-skill-name, applies to plugin skills; values on/name-only/user-invocable-only/off; absent=on). **Correction logged:** disabled skills only saved ~name+description (~hundreds of tok), NOT ~3k each — bodies always load on-demand; the real per-agent win is the rules-body reduction (Tasks 01–10). `maui-unit-testing` surfaced live this session (confirms mechanism); superpowers plugin skills need a **restart** to load (+ possible one-time plugin-trust prompt). **Verification gate (do at next fresh session):** `/context` → confirm superpowers skills listed as descriptions only; invoke brainstorming + writing-plans → confirm bodies load on demand; confirm test-driven-development/code-review NOT auto-offered to the model.
   - **Scope decision (Helder 2026-07-04, F4):** re-enable **only `brainstorming` + `writing-plans`**. Do **NOT** re-enable `test-driven-development` or `code-review` — they duplicate the project's heavily-customized `testing.md` / review flow (real-SQLite, Moq, AC traceability, Tester/Builder split), so re-enabling them (a) saves ≈0 tokens (bodies reload per-agent anyway) and (b) creates a second source of truth → authority ambiguity. Keep TDD/review guidance as project rules + `.claude/library/*` only.
   - **Produces:** 2 enabled superpowers plugins (brainstorming, writing-plans) + verification evidence
   - **Consumes:** All refactors complete (Tasks 01–10)
@@ -227,7 +227,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
   - **Demo:** Clean session run `/context` → record net token delta vs. before across a real brainstorm → plan wave
   - **Review lane:** Standard
 
-- [ ] **12 - Update CLAUDE.md § Skill & MCP Lookup table** [SEQUENTIAL]
+- [x] **12 - Update CLAUDE.md § Skill & MCP Lookup table** — DONE 2026-07-05 (commit `5ddc667`, amend). Added the pointed **"Project rules override skill defaults where they conflict"** block to § Methodology Authority Hierarchy, naming the two conflicts (brainstorming HARD-GATE vs ceremony table; test-driven-development Iron Law vs Level-C) and cross-referencing `settings.json § skillOverrides` + `skill-overlap-findings.md § Conflicts #1–#2`. CLAUDE.md = 300 lines (< 600 constitutional limit). **Deferred:** the aspirational "<200 lines total" restructure — a large cut with broad blast radius, not safe to force in a long session; tracked as a possible future trim, not blocking.
   - **Produces:** Updated CLAUDE.md with enabled superpowers + reduced narrative
   - **Consumes:** Task 11 complete (skills verified)
   - **Risk:** Low — documentation-only change
