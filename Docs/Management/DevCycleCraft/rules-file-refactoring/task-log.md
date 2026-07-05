@@ -1,5 +1,32 @@
 # Rules File Refactoring — Task Log
 
+---
+## Session: Phase 1 execution + skill-overlap analysis (overnight autonomous)
+**Status:** Phase 1 COMPLETE — GATE-B is the next action
+**Started/Completed:** 2026-07-05
+**Model:** Opus 4.8 (main agent, direct — spike/Task-02 precedent for this feature)
+
+### What was done (all committed to `develop`)
+- `33a49f4` — `skill-overlap-findings.md` (NEW, `.sln`-registered): read actual skill bodies; corrects the plan (drop dotnet-skills, enable maui-unit-testing, Tasks 09–10 → 3 files not 6; two conflicts documented).
+- `6fcb9c3` — **Task 04** component-change-governance → routing table + `library/component-safety-gate.md`.
+- `5cac3c6` — BACKLOG: registered "Scope `myvocalist-coding` skill to project level" (user→project skill leak; library files already project-scoped).
+- `23049cd` — **Task 03** bug-tracking → routing table + `library/bug-tracking-reference.md` (1 file, not 2).
+- `cdbca05` — **Task 05** constraints-registry → routing table + `library/constraints-reference.md` (2 anchored headings preserved).
+- **Task 01** verified (spike-delivered; anchor intact).
+- Skill-map rows added for all 3 new library files (user-level `myvocalist-coding/SKILL.md`, out-of-repo — not committed).
+
+### Verification evidence
+- Build/tests: N/A — only `.claude/rules|library/*.md`, `Docs/*`, `.sln`, changelog changed (no `.cs`/`.xaml`).
+- Inbound `§` anchors: grep-checked per file before each rewrite; only constraints-registry had load-bearing anchors (both preserved).
+- Content integrity: each rule's body moved verbatim to its library file; routing tables keep never-miss HARD RULE/GATE lines inline.
+
+### RESUME POINTER (cheap restart after weekly-budget reset)
+1. **GATE-B** is next: re-run the GATE-A throwaway-subagent probe (0 tools), measure the post-Phase-1 cold-start delta, append to `findings-measurement.md`, Helder confirms go/no-go. (Deferred tonight to conserve near-cap weekly budget — subagent dispatch ≈60k.)
+2. If GATE-B = GO: Tasks 06–08 (workflow.md, 3 waves) then 09–10 (testing.md) **using the 3-file correction in `skill-overlap-findings.md`**, then 11 (enable brainstorming + writing-plans + maui-unit-testing) and 12 (CLAUDE.md).
+3. Separate tracked item: move `myvocalist-coding` skill user→project (needs a restart-verification window — see BACKLOG 2026-07-05).
+4. All rules-file edits still require **Helder authorship review** (CLAUDE.md § Continuous Enhancement — Authorship).
+
+
 ## Session: Spec Writing & Handoff
 
 **Status:** Spec & plan written, ready for spike dispatch  

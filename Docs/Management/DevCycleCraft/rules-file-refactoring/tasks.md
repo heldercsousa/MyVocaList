@@ -46,7 +46,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
 ## Phase 1–5 — Small Rules Files [SEQUENTIAL]
 
 ### Task 01: Finalize code-principles.md (subsumed by spike)
-- [ ] **01 - Finalize `code-principles.md`** — mostly done by the spike; this is a *verification pass*, not a rewrite
+- [x] **01 - Finalize `code-principles.md`** — VERIFIED 2026-07-05. Spike already delivered the 44-line routing table + `code-style-reference.md`. Confirmed this session that its inbound `§` anchor to `constraints-registry.md § EF Core / SQLite` (code-principles.md:18) is intact, and Task 05 preserved that target heading. No `ddi-registration-conventions.md` created (over-fragmentation guard). Not separately re-audited beyond the anchor check — spike findings stand.
   - **Produces:** Confirmed routing table (already written) + skill-map row (already added)
   - **Consumes:** Spike findings from Phase 0
   - **Risk:** Low — spike already delivered the finished routing table + `code-style-reference.md`
@@ -73,7 +73,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
   - **Review lane:** Standard
 
 ### Task 03: Refactor bug-tracking.md
-- [ ] **03 - Refactor `bug-tracking.md`**
+- [x] **03 - Refactor `bug-tracking.md`** — DONE 2026-07-05 (commit `23049cd`). Routing table + ONE cohesive `library/bug-tracking-reference.md` (corrected from the 2-file split below per over-fragmentation guard). `[HARD RULE]` regression-test table kept inline. No inbound `§` anchors. Skill-map row added.
   - **Produces:** Minimal 0.5-page routing table + severity/regression tables in library
   - **Consumes:** Previous refactors
   - **Risk:** Medium — bug-tracking is actively used; ensure severity/regression tables are discoverable
@@ -86,7 +86,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
   - **Review lane:** Standard
 
 ### Task 04: Refactor component-change-governance.md
-- [ ] **04 - Refactor `component-change-governance.md`**
+- [x] **04 - Refactor `component-change-governance.md`** — DONE 2026-07-05 (commit `6fcb9c3`). Routing table + `library/component-safety-gate.md`. Four-gate `[HARD RULE]` + no-bundling kept inline. No inbound `§` anchors. Skill-map row added.
   - **Produces:** Minimal 0.5-page routing table + governance gates in library
   - **Consumes:** Previous refactors
   - **Risk:** Low — 4-gate process is well-defined
@@ -98,7 +98,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
   - **Review lane:** Standard
 
 ### Task 05: Refactor constraints-registry.md
-- [ ] **05 - Refactor `constraints-registry.md`**
+- [x] **05 - Refactor `constraints-registry.md`** — DONE 2026-07-05 (commit `cdbca05`). Routing table + cohesive `library/constraints-reference.md`. Both anchored `##` headings preserved (`EF Core / SQLite`, `Visual Studio Solution (.sln)`) with never-miss HARD RULE/HARD GATE inline. Fixed `.sln` GUID counter 0040→0041. Skill-map row added.
   - **Produces:** Minimal 1-page routing table + indexed constraint categories in library
   - **Consumes:** Previous refactors
   - **Risk:** Low — constraints are well-organized; indexing by DevExpress/EF/MAUI straightforward
@@ -123,6 +123,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
 ## GATE-B — split economics [SEQUENTIAL — BLOCKING for Tasks 06–10]
 
 - [ ] **GATE-B - Re-measure after Phase 1; decide whether the workflow.md / testing.md splits are worth it**
+  - **STATUS 2026-07-05: Phase 1 COMPLETE (02✓ 04✓ 03✓ 05✓) — GATE-B is the next action.** Not run yet (deferred: the re-measure needs a throwaway subagent dispatch ≈60k cold-start; skipped in the overnight run to conserve the near-cap weekly budget). Pre-input already gathered: `skill-overlap-findings.md` answers GATE-B question 2 for the core files — split them (real per-agent saving for trivial-task agents) but do NOT skill-substitute (delete/extract instead); it also **corrects Tasks 09–10 from a 6-file split to 3** and says drop `dotnet-skills`, enable the project's own `maui-unit-testing`. Leaning GO per `findings-measurement.md` Q3. **Resume:** run the GATE-A probe again, compare cold-start delta, append to `findings-measurement.md`, Helder confirms go/no-go.
   - **Question:** (1) After Phase 1, what is the real always-loaded rules total in a fresh subagent (target: measurable drop toward ~2–3k for the situational set)? (2) For core guidance (TDD, workflow), is a meaningful fraction of the full body *not* needed by the typical implementor — i.e. does routing-table-izing them save real per-agent tokens without hiding a hard rule?
   - **Method:** re-run the GATE-A probe post-Phase-1; compare cold-start token delta. Record in `findings-measurement.md` (append).
   - **Success (proceed to 06–10):** situational-set reduction confirmed AND workflow/testing full bodies are demonstrably unneeded by a majority of implementor tasks.
@@ -176,6 +177,8 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
   - **Review lane:** Standard
 
 ### Tasks 09–10: Refactor testing.md (2 waves)
+
+> **CORRECTION 2026-07-05 (`skill-overlap-findings.md`, pending Helder GATE-B confirm):** the 6 library files listed in Tasks 09–10 below violate the over-fragmentation guard (pilot-findings #5) already applied to Tasks 03/05. Collapse to **3**: one cohesive `library/testing-reference.md` (Setup · Unit/Service · ViewModel · Integration/SQLite · Naming · Anti-Patterns · Quality Audit) + two genuinely-separable rarely-used files `library/mutation-testing-stryker.md` and `library/property-based-testing-fscheck.md`. Also: **enable the project's `maui-unit-testing` skill** (clean win, ~1–1.5k), **drop `dotnet-skills`** (testcontainers=Docker / snapshot=Verify — both mismatch this SQLite/Moq project). Keep exhaustive code samples (full test classes, GlobalUsings, csproj) in the library as reduced snippets + pointer, not inline. Do NOT re-enable `test-driven-development` (Iron Law conflicts with the project's Level-C "no mandatory test" — see findings Conflict #1).
 
 - [ ] **09 - Refactor `testing.md` Phase 1 (TDD + AC traceability)** [SEQUENTIAL]
   - **Produces:** Routing table for TDD section + AC format reference
