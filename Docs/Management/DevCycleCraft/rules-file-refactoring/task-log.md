@@ -1,6 +1,34 @@
 # Rules File Refactoring — Task Log
 
 ---
+## Session: workflow.md refactor (Tasks 06–08) — the last file
+**Status:** DONE (workflow.md refactored) — Tasks 11–12 remain
+**Started/Completed:** 2026-07-05
+**Model:** Opus 4.8 (main agent, direct — spike/Task-02 precedent; subagent cold-start would reload the very bloat being cut)
+
+### What was done — committed in 2 checkpoints (per Helder: commit by sections to bound context risk)
+- **Checkpoint 1 — `7512bf7`:** `.claude/library/workflow-reference.md` (NEW) = verbatim `cp` of the 671-line workflow.md + self-describing header. Content safely duplicated before any deletion.
+- **Checkpoint 2 — (this commit):** `.claude/rules/workflow.md` rewritten as a **174-line routing table** (was 671). Detail routed to `workflow-reference.md`; ~10k tokens off every agent's cold start.
+
+### Structural decision (deviation from literal plan — flagged for Helder)
+Executed 06–08 as **one coherent pass** (like 09+10) into **one cohesive `workflow-reference.md`**, NOT 3 waves × 8 separate library files. Applies the over-fragmentation guard already accepted on Tasks 03/05/09/10. tasks.md § Tasks 06–08 carries the full CORRECTION note.
+
+### Anchor preservation (the risk item from the prior resume pointer)
+- **All 6 load-bearing inbound `§` anchors preserved as inline headings** in the routing table: `Rule 1`, `Rule 7`, `Bug Fix Pattern`, `Sequential-only file registry`, `Spike validation task pattern`, `Spec quality four-gate review` (grep-verified: 174-line file, all present).
+- **3 audited `orchestrator.md` refs are PRE-EXISTING DANGLING** — `§ Review SLA and Risk-Tiered Review Lanes`, `§ Verifier subagent`, `§ Pre-dispatch validation checklist` do NOT exist in workflow.md (their content lives in `orchestrator.md` itself; the refs were already stale before this task). Left as-is — fixing `orchestrator.md` is out of scope for this refactor. **Flagged for Helder:** repoint those 3 `orchestrator.md` self-references (they should not cite workflow.md).
+
+### Verification evidence
+- Build/tests: N/A — only `.claude/rules|library/*.md` + `Docs/*` changed (no `.cs`/`.xaml`).
+- Content integrity: `cp` guarantees verbatim reference; routing table keeps every never-miss HARD RULE + SDD Invariant + 7-step session-start order + research-tool order inline.
+- No `SKILL.md` row (workflow is process, not coding-rules; always-loaded routing table is its discovery path). No `.sln` change (`.claude/library|rules/*` are not `.sln`-registered).
+
+### RESUME POINTER — Tasks 11–12 remain (all refactors done)
+1. **Task 11** — enable `brainstorming` + `writing-plans` + `maui-unit-testing` ONLY in `.claude/settings.json` (NOT test-driven-development/code-review — Conflicts #1–#2). Verify on-demand loading after a restart.
+2. **Task 12** — update CLAUDE.md § Skill & MCP table; add "project rules override skill defaults" line.
+3. Helder authorship review still required on all refactored rules files (CLAUDE.md § Continuous Enhancement — Authorship).
+4. Helder follow-up: repoint the 3 dangling `orchestrator.md` self-refs noted above.
+
+---
 ## Session: Phase 1 execution + skill-overlap analysis (overnight autonomous)
 **Status:** Phase 1 COMPLETE — GATE-B is the next action
 **Started/Completed:** 2026-07-05

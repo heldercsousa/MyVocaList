@@ -137,7 +137,9 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
 
 ### Tasks 06–08: Refactor workflow.md (3 waves)
 
-- [ ] **06 - Refactor `workflow.md` Phase 1 (Rules 1–2)** [SEQUENTIAL]
+> **CORRECTION 2026-07-05 (over-fragmentation guard, same as Tasks 03/05/09/10):** Tasks 06–08 were executed as **one coherent pass** (like 09+10), NOT 3 separate waves, and the detail was collapsed into **one cohesive `.claude/library/workflow-reference.md`** (verbatim `cp` of the 671-line original) rather than the 8 separate library files the original design listed. Rationale: a half-rewritten routing table is a broken intermediate state; 8 stub files violate the over-fragmentation guard already applied to 03/05/09/10. workflow.md: 671 → 174 lines. All six inbound `§`-anchor headings preserved inline (Rule 1, Rule 7, Bug Fix Pattern, Sequential-only file registry, Spike validation task pattern, Spec quality four-gate review) + all never-miss HARD RULEs. No `SKILL.md` row added (workflow is process, not coding-rules; the always-loaded routing table is its discovery path). Committed in 2 checkpoints: `7512bf7` (reference file, verbatim) + routing-table rewrite.
+
+- [x] **06 - Refactor `workflow.md` Phase 1 (Rules 1–2)** — DONE 2026-07-05 (executed with 07+08 as one pass; see CORRECTION above).
   - **Produces:** Routing table for Rules 1–2 + linked library guides
   - **Consumes:** Previous phase complete
   - **Risk:** Medium — workflow.md is largest (9.9k tokens); Rules 1–2 are foundational
@@ -149,7 +151,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
   - **Demo:** New agent reads routing table, navigates to spec-writing-guide and subagent-patterns for procedure detail
   - **Review lane:** Standard
 
-- [ ] **07 - Refactor `workflow.md` Phase 2 (Rules 3–5)** [SEQUENTIAL]
+- [x] **07 - Refactor `workflow.md` Phase 2 (Rules 3–5)** — DONE 2026-07-05 (see CORRECTION above; folded into the single workflow-reference.md, not separate commit-ceremony/task-atomization/task-log-format files).
   - **Produces:** Routing table for Rules 3–5 + linked library references
   - **Consumes:** Task 06 complete
   - **Risk:** Medium — Rules 3–5 cover commit, tasks.md, task-log ceremony
@@ -162,7 +164,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
   - **Demo:** Complete a task; navigate from workflow rule 4 to task-atomization guide; write task-log from task-log-format template
   - **Review lane:** Standard
 
-- [ ] **08 - Refactor `workflow.md` Phase 3 (Rules 6–8)** [SEQUENTIAL]
+- [x] **08 - Refactor `workflow.md` Phase 3 (Rules 6–8)** — DONE 2026-07-05 (see CORRECTION above; Rules 6 & 7 kept largely inline — research-tool order + 7-step session-start reading order are per-session never-miss; Rule 8 summarized inline + routed).
   - **Produces:** Final routing table for Rules 6–8 + linked library references
   - **Consumes:** Task 07 complete
   - **Risk:** Medium — Rules 6–8 are integration points (research tools, session start, GitHub collision check)
