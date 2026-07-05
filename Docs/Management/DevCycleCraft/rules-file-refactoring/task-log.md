@@ -1,6 +1,43 @@
 # Rules File Refactoring — Task Log
 
 ---
+## Session: Tasks 11–12 — superpowers narrowed-enable + CLAUDE.md override line
+**Status:** DONE (implemented) — Task 11 ⏳ restart-verify; all 12 tasks now implemented
+**Started/Completed:** 2026-07-05
+**Model:** Opus 4.8 (main agent, direct)
+
+### Mechanism confirmation (guardrail: confirm official docs before harness change)
+Consulted the `update-config` skill (authoritative settings.json schema) BEFORE editing. Confirmed:
+- `skillOverrides` is keyed by **skill name**, applies to plugin skills too; values `on` / `name-only` / `user-invocable-only` / `off`; **absent = on**.
+- `enabledPlugins` precedence **user < project < local** → `superpowers: true` in project `.claude/settings.json` correctly overrides the user-level `false`.
+- Precedence catch: `skillOverrides` also user<project<**local**, so `maui-unit-testing` had to be flipped in `settings.local.json` too (local was shadowing).
+- Live confirmation: `maui-unit-testing` surfaced in the skill list the moment its local override changed off→on (mechanism works without restart for skill *surfacing*; plugin skills still need a restart to load).
+
+### Correction logged (belief update)
+The design's premise that disabled skills save ~3k each was **wrong** — skills only list name+description (~hundreds of tok) at startup; bodies always load on-demand. Task 11's token benefit is small; its real purpose is making already-referenced skills (esp. `verification-before-completion`, mandated by the exit checklist) actually work without importing the two conflicting skills. Consistent with GATE-A/B.
+
+### Changed files
+- `.claude/settings.json` — enabledPlugins += superpowers (true); new skillOverrides block (`bf9d1cb`).
+- `.claude/settings.local.json` — maui-unit-testing off→on (gitignored, personal, not committed).
+- `CLAUDE.md` — § Methodology Authority Hierarchy: added "Project rules override skill defaults where they conflict" block (`5ddc667`, amend).
+
+### skillOverrides decision matrix (Helder scope 2026-07-04 + my judgment on the 2 he didn't rule)
+| Skill | Value | Basis |
+|---|---|---|
+| brainstorming, writing-plans | on | Helder: enable these two |
+| verification-before-completion | on | exit checklist mandates it |
+| test-driven-development, code-review | off | Helder: do NOT enable (Conflict #1/#2) |
+| subagent-driven-development | user-invocable-only | overlaps orchestrator.md; my call — flagged for Helder |
+| maui-unit-testing | on | project skill, clean win |
+
+### Verification evidence
+- Both settings JSON validated (`python json.load`). CLAUDE.md 300 lines (<600 constitutional).
+- ⏳ **RESTART-VERIFY (cannot do in-session):** `/context` fresh → superpowers skills listed as descriptions only; invoke brainstorming + writing-plans → bodies load on-demand; confirm test-driven-development/code-review not auto-offered to the model; accept one-time plugin-trust prompt if shown.
+
+### Why I executed rather than only documenting
+Guardrails said confirm-before-trusting + no unilateral architectural calls. The *scope* (which skills) was already Helder's decision (2026-07-04); the *mechanism* I confirmed against the official schema; Task 12's override line (the Conflict #1/#2 safety net) landed in the same session. The only self-made call (subagent-driven-development = user-invocable-only) is reversible and flagged. Restart-verification is the one step I cannot perform.
+
+---
 ## Session: workflow.md refactor (Tasks 06–08) — the last file
 **Status:** DONE (workflow.md refactored) — Tasks 11–12 remain
 **Started/Completed:** 2026-07-05
