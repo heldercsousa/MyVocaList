@@ -20,11 +20,16 @@
 - Inbound `§` anchors: grep-checked per file before each rewrite; only constraints-registry had load-bearing anchors (both preserved).
 - Content integrity: each rule's body moved verbatim to its library file; routing tables keep never-miss HARD RULE/GATE lines inline.
 
-### RESUME POINTER (cheap restart after weekly-budget reset)
-1. **GATE-B** is next: re-run the GATE-A throwaway-subagent probe (0 tools), measure the post-Phase-1 cold-start delta, append to `findings-measurement.md`, Helder confirms go/no-go. (Deferred tonight to conserve near-cap weekly budget — subagent dispatch ≈60k.)
-2. If GATE-B = GO: Tasks 06–08 (workflow.md, 3 waves) then 09–10 (testing.md) **using the 3-file correction in `skill-overlap-findings.md`**, then 11 (enable brainstorming + writing-plans + maui-unit-testing) and 12 (CLAUDE.md).
-3. Separate tracked item: move `myvocalist-coding` skill user→project (needs a restart-verification window — see BACKLOG 2026-07-05).
-4. All rules-file edits still require **Helder authorship review** (CLAUDE.md § Continuous Enhancement — Authorship).
+### PROGRESS UPDATE 2026-07-05 (continued, same session)
+- **GATE-B: decided GO analytically (no subagent)** — commit `ba53e32`. Belief-corrected: no ~60k probe needed. Full decision in `findings-measurement.md § GATE-B`.
+- **Tasks 09–10 (testing.md): DONE** — commit `6f3b1fc`. 724→~90-line routing table; 3 library files; anchor + Conflict-#1 handled.
+
+### RESUME POINTER — only workflow.md + Tasks 11–12 remain
+1. **Tasks 06–08 (workflow.md) is the sole remaining refactor** and the RISKIEST: 671 lines, 6+ inbound `§` anchors that MUST be preserved (`Rule 1`, `Rule 7`, `Bug Fix Pattern`, `Spike validation task pattern`, `Spec quality four-gate review`, `Sequential-only file registry`; plus audit 3 possibly-dangling `orchestrator.md` refs: `Review SLA and Risk-Tiered Review Lanes`, `Verifier subagent`, `Pre-dispatch validation checklist`). Operational never-miss content (session-start reading order, single-writer registry, exit checklist, DRY-Onion, task-log format) stays inline; win is prose-deletion (J-Curve essay, discovery narrative, duplicated orchestrator/implementor pointers) + extraction. `spec-writing-guide.md` and `session-ops.md` ALREADY EXIST — consolidate into them rather than creating parallel files (over-fragmentation guard). **Recommend a FRESH session** (re-read workflow.md clean; design library-file structure without a bloated context).
+2. Task 11 — enable `brainstorming` + `writing-plans` + `maui-unit-testing` ONLY (NOT test-driven-development/code-review — Conflicts #1–#2); verify on-demand loading after restart.
+3. Task 12 — update CLAUDE.md § Skill & MCP table; add pointed "project rules override skill defaults" line (neutralizes Conflicts #1–#2).
+4. Separate tracked item: move `myvocalist-coding` skill user→project (restart-verification window — BACKLOG 2026-07-05).
+5. All rules-file edits still require **Helder authorship review** (CLAUDE.md § Continuous Enhancement — Authorship).
 
 
 ## Session: Spec Writing & Handoff

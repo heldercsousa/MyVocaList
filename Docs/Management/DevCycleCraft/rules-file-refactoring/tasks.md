@@ -179,7 +179,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
 
 > **CORRECTION 2026-07-05 (`skill-overlap-findings.md`, pending Helder GATE-B confirm):** the 6 library files listed in Tasks 09–10 below violate the over-fragmentation guard (pilot-findings #5) already applied to Tasks 03/05. Collapse to **3**: one cohesive `library/testing-reference.md` (Setup · Unit/Service · ViewModel · Integration/SQLite · Naming · Anti-Patterns · Quality Audit) + two genuinely-separable rarely-used files `library/mutation-testing-stryker.md` and `library/property-based-testing-fscheck.md`. Also: **enable the project's `maui-unit-testing` skill** (clean win, ~1–1.5k), **drop `dotnet-skills`** (testcontainers=Docker / snapshot=Verify — both mismatch this SQLite/Moq project). Keep exhaustive code samples (full test classes, GlobalUsings, csproj) in the library as reduced snippets + pointer, not inline. Do NOT re-enable `test-driven-development` (Iron Law conflicts with the project's Level-C "no mandatory test" — see findings Conflict #1).
 
-- [ ] **09 - Refactor `testing.md` Phase 1 (TDD + AC traceability)** [SEQUENTIAL]
+- [x] **09 - Refactor `testing.md` (TDD + AC traceability)** — DONE 2026-07-05 (commit `6f3b1fc`, done together with Task 10 as one coherent refactor). Never-miss project core kept inline (TDD-within-SDD, AC traceability + `[AC]` format, TDD Level A/B/C + Conflict-#1 authority note, `### Regression tests` anchor preserved).
   - **Produces:** Routing table for TDD section + AC format reference
   - **Consumes:** Tasks 01–08 complete
   - **Risk:** Medium — testing.md is large (8.3k); TDD is foundational
@@ -191,7 +191,7 @@ Rationale for the situational-first order: 02 (mediatr) is a pure delete with ze
   - **Demo:** Agent classifies new task as High-risk; navigates to test-driven-development-levels; confirms test requirements
   - **Review lane:** Standard
 
-- [ ] **10 - Refactor `testing.md` Phase 2 (Test types, structure, anti-patterns)** [SEQUENTIAL]
+- [x] **10 - Refactor `testing.md` (Test types, structure, anti-patterns)** — DONE 2026-07-05 (commit `6f3b1fc`). Bulk → **3** library files (not 6): `testing-reference.md` + `mutation-testing-stryker.md` + `property-based-testing-fscheck.md`. `maui-unit-testing` forward-referenced; `enabledPlugins` untouched (Gotcha 3). 3 skill-map rows added.
   - **Produces:** Final routing table for testing.md + comprehensive test patterns reference
   - **Consumes:** Task 09 complete
   - **Risk:** Medium — test patterns must remain discoverable
