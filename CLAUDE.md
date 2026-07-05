@@ -179,6 +179,10 @@ Priority order when skills, SDD principles, and custom rules conflict:
 
 User-preference overrides apply to superpowers skill *defaults* (e.g. folder locations) — not to skill *disciplines* (e.g. TDD red/green/refactor).
 
+**Project rules override skill defaults where they conflict `[explicit]`:** two enabled superpowers skills contradict project rules, and the project rule wins:
+- `brainstorming`'s HARD-GATE ("present a design and get approval before ANY code, including a config change") does **not** override `workflow.md`'s ceremony decision table — typo / cosmetic / single-file bug fix require no spec/design (workflow-reference.md § Rule 1). Ignore the skill's nag for those.
+- `test-driven-development`'s Iron Law ("no production code without a failing test, no exceptions") is deliberately **not enabled** and does **not** override `testing.md`'s risk-tiered TDD — Level C (plumbing, DI registration, DTO records, trivial getters) has no mandatory test. See `.claude/settings.json § skillOverrides` (test-driven-development/code-review = off; subagent-driven-development = user-invocable-only). Full evidence: `Docs/Management/DevCycleCraft/rules-file-refactoring/skill-overlap-findings.md § Conflicts #1–#2`.
+
 ## Docs/ Folder Layout (canonical)
 
 ```
