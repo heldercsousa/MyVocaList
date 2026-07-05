@@ -53,3 +53,35 @@ Loading is confirmed unconditional: a subagent doing a trivial task (e.g. XAML c
 - **GATE-A: PASS** — subagents inherit rules in full; per-agent savings are real; baseline now measured (60,492 cold-start).
 - **Phase 1 (02→04→03→05):** GO — every reduction sticks per-agent.
 - **GATE-B (before 06–10):** leaning GO on evidence above; Helder confirms go/no-go with a post-Phase-1 re-measure.
+
+---
+
+## GATE-B — decision (2026-07-05): **GO**, decided analytically (no subagent)
+
+**Belief corrected (per Helder "caution to your early beliefs about needed actions"):** the earlier plan said GATE-B needs a throwaway-subagent re-measure (~60k cold-start). It does **not**, and spending ~60k of a near-cap weekly budget on it would be wasteful. Reasons:
+- GATE-A's probe existed to prove *subagents inherit the full rules* — already PROVEN (PASS) and immutable. Re-running it only reconfirms inheritance.
+- GATE-B Q1 (post-Phase-1 rules total) is **deterministic** — derivable from known file sizes; and a fresh `/context` in a new session validates it **for free** (Helder plans to check anyway).
+- GATE-B Q2 (are the core-file bodies worth splitting?) is **already answered** by `skill-overlap-findings.md` + GATE-A Q3.
+
+### Q1 — post-Phase-1 unconditional rules load (arithmetic, `wc -l` grounded)
+| File | Before | After (lines) | Status |
+|------|--------|---------------|--------|
+| mediatr-patterns.md | ~1.1k | deleted | Task 02 |
+| code-principles.md | ~3k → 1.2k | 44 | spike |
+| component-change-governance.md | ~1.4k | 27 | Task 04 |
+| bug-tracking.md | ~1.7k | 30 | Task 03 |
+| constraints-registry.md | ~3.2k | 23 | Task 05 |
+| **workflow.md** | ~13.9k | **671** | **pending (06–08)** |
+| **testing.md** | ~11.6k | **724** | **pending (09–10)** |
+
+The situational set + code-principles dropped from ~7.5k → ~2k unconditional (124 lines across 4 files), plus mediatr −1.1k. **The entire remaining reducible bulk is now workflow.md (671) + testing.md (724) = ~25.5k** unconditional, every session and every subagent. Confirms the per-agent sticky win is real and the big files hold the rest of it.
+
+### Q2 — core-file split economics (from `skill-overlap-findings.md`)
+GO on splitting workflow.md/testing.md **unconditional→routing-table** (GATE-A Q3 proved loading is unconditional, so a trivial-task agent that never needs the body still pays it). BUT the win is **delete redundant prose + extract to library**, NOT skill-substitution (core files reload per-agent anyway; skills conflict — see Conflicts #1–#2).
+
+### Verdict: **GO to Tasks 06–10.** Direction (validated, right-facing):
+- **testing.md (09–10):** ONE cohesive `testing-reference.md` + 2 rarely-used on-demand files (Stryker, FsCheck) = **3 files, not 6**. Preserve the `§ Regression tests` heading (inbound anchor). Forward-reference `maui-unit-testing`; do NOT flip `enabledPlugins` (Gotcha 3 — all enablement in Task 11). Reduced code snippets inline, full samples in library.
+- **workflow.md (06–08):** anchor-heavy — preserve every referenced heading (`Rule 1`, `Rule 7`, `Bug Fix Pattern`, `Spike validation task pattern`, `Spec quality four-gate review`, `Sequential-only file registry`; audit the 3 orchestrator.md refs for pre-existing dangling links). Win is prose-deletion (J-Curve essay, discovery narrative, duplicated orchestrator/implementor pointers) + extraction; Rules 3–8 operational core stays inline.
+
+### Budget-aware execution recommendation (2026-07-05)
+Weekly budget at 86% (resets Jul 7). Recommend Tasks 06–10 run in the **fresh post-reset session**, where (a) full weekly budget covers workflow.md's risky 3-wave anchor-heavy refactor, and (b) Helder gets the free empirical confirmation of the Phase-1 drop via a fresh `/context` first (his stated plan). If executed before reset, do **testing.md first** (1 anchor, cleaner, bigger safe deletion) and leave workflow.md's 3 waves for full-budget headroom.
