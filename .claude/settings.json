@@ -156,7 +156,8 @@
   },
   "skillOverrides": {
     "test-driven-development": "off",
-    "code-review": "off",
+    "requesting-code-review": "off",
+    "receiving-code-review": "off",
     "subagent-driven-development": "user-invocable-only",
     "maui-unit-testing": "on"
   },
