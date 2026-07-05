@@ -151,7 +151,14 @@
     "bdd-dotnet@dotnet-claude-code-skills": false,
     "ux@teslasoft-skills": false,
     "frontend-design@claude-plugins-official": false,
-    "claude-code-setup@claude-plugins-official": true
+    "claude-code-setup@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "skillOverrides": {
+    "test-driven-development": "off",
+    "code-review": "off",
+    "subagent-driven-development": "user-invocable-only",
+    "maui-unit-testing": "on"
   },
   "plansDirectory": "Docs/Management"
 }
