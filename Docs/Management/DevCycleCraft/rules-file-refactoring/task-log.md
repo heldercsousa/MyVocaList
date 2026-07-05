@@ -34,6 +34,12 @@ The design's premise that disabled skills save ~3k each was **wrong** — skills
 - Both settings JSON validated (`python json.load`). CLAUDE.md 300 lines (<600 constitutional).
 - ⏳ **RESTART-VERIFY (cannot do in-session):** `/context` fresh → superpowers skills listed as descriptions only; invoke brainstorming + writing-plans → bodies load on-demand; confirm test-driven-development/code-review not auto-offered to the model; accept one-time plugin-trust prompt if shown.
 
+### CORRECTION 2026-07-05 (caught by Helder via fresh /context, commit `80954d7`)
+Fresh-session `/context` confirmed the headline win (**memory 29.2k→20.8k; workflow.md 13.9k→5.1k**) AND exposed a bug: `test-driven-development`, `subagent-driven-development`, and the code-review skills were still model-visible — the Task 11 `skillOverrides` had **not** applied. Two causes:
+1. **skillOverrides does NOT deep-merge across settings files.** The higher-precedence `settings.local.json` (which already holds a `skillOverrides` block) **replaces** the project one wholesale. So the project-level overrides were dead; `maui-unit-testing` only worked because it was set in *both* files. **Lesson:** put per-skill overrides in the highest-precedence file present (here `settings.local.json`), or ensure no lower-precedence override block shadows them.
+2. **Wrong skill name:** `code-review` is not a real superpowers skill — the actual names are `requesting-code-review` / `receiving-code-review` (confirmed from the `/context all` listing).
+Fix: suppressions moved to `settings.local.json` with correct names; project `settings.json` fallback names corrected too. Re-verify via `/context` after reload.
+
 ### Why I executed rather than only documenting
 Guardrails said confirm-before-trusting + no unilateral architectural calls. The *scope* (which skills) was already Helder's decision (2026-07-04); the *mechanism* I confirmed against the official schema; Task 12's override line (the Conflict #1/#2 safety net) landed in the same session. The only self-made call (subagent-driven-development = user-invocable-only) is reversible and flagged. Restart-verification is the one step I cannot perform.
 
