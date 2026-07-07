@@ -184,7 +184,11 @@
     "maui-performance": "off",
     "maui-safe-area": "off",
     "maui-shell-navigation": "off",
-    "maui-unit-testing": "off",
+    "maui-unit-testing": "on",
+    "test-driven-development": "off",
+    "requesting-code-review": "off",
+    "receiving-code-review": "off",
+    "subagent-driven-development": "user-invocable-only",
     "review": "name-only",
     "myvocalist-coding": "name-only"
   },
