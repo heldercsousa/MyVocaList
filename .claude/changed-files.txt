@@ -2069,3 +2069,6 @@ Docs/Management/BACKLOG.md
 Docs/Management/DevCycleCraft/rules-file-refactoring/task-log.md
 Docs/Management/DevCycleCraft/rules-file-refactoring/context-audit-2026-07-07.md
 Docs/Management/BACKLOG.md
+.mcp.json
+.mcp.json
+.mcp.json
