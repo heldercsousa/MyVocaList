@@ -2072,3 +2072,13 @@ Docs/Management/BACKLOG.md
 .mcp.json
 .mcp.json
 .mcp.json
+CLAUDE.md
+CLAUDE.md
+CLAUDE.md
+CLAUDE.md
+CLAUDE.md
+Docs/Changelog/changelog.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
