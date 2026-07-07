@@ -155,8 +155,6 @@
   },
   "enabledMcpjsonServers": [
     "context7",
-    "sequential-thinking",
-    "github",
     "devexpress-maui"
   ],
   "disabledMcpjsonServers": [
@@ -178,7 +176,7 @@
     "maui-ai-debugging": "off",
     "maui-app-icons-splash": "off",
     "maui-app-lifecycle": "off",
-    "maui-current-apis": "off",
+    "maui-current-apis": "on",
     "maui-data-binding": "off",
     "maui-dependency-injection": "off",
     "maui-performance": "off",
