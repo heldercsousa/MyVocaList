@@ -20,7 +20,6 @@ Project-specific coding rules for the MyVocaList .NET MAUI app. Read the relevan
 | MD3 AppBar, Lists, FloatingToolbar, EmptyState anatomy | `.claude/library/m3-components.md` |
 | Colors, typography, DevExpress theme setup | `.claude/library/theme-locale.md` |
 | Touch targets, multi-select UX, empty state positioning | `.claude/library/ux-patterns.md` |
-| MediatR command/query/event patterns *(reference only — not yet active)* | `.claude/library/mediatr-reference.md` |
 | Changing a shared custom component (4-gate governance, consumer map, no-bundling) | `.claude/library/component-safety-gate.md` |
 | Tracking a bug (BUG-NNN scheme, severity, regression-test requirement, task-log rules) | `.claude/library/bug-tracking-reference.md` |
 | Discovered constraints (DevExpress/UI, .NET MAUI, EF Core/SQLite, .sln registration) | `.claude/library/constraints-reference.md` |
