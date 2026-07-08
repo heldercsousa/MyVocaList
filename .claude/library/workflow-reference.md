@@ -594,13 +594,14 @@ Missing rows = missing tests = incomplete feature.
 
 ---
 
-## Rule 6 — Research Tool Gate (Context7 → Exa → WebSearch)
+## Rule 6 — Research Tool Gate (Context7 → WebSearch)
 
-Before any web research query, follow this three-tier hierarchy:
+Before any web research query, follow this hierarchy:
 
 1. **Library / framework / SDK / API docs** → Context7 (`mcp__context7__resolve-library-id` → `mcp__context7__query-docs`)
-2. **General web research** (comparisons, news, tool evaluations, articles) → Exa MCP (`exa_search`)
-3. **Raw `WebSearch` / `WebFetch`** → last-resort fallback only when both Context7 and Exa return no useful result
+2. **General web research** (comparisons, news, tool evaluations, articles) → `WebSearch` / `WebFetch` — only when Context7 does not cover the topic
+
+> Amended 2026-07-08: the former tier 2 (Exa MCP `exa_search`) was removed — the `exa` server has been disabled locally since before 2026-07-07 and was never in the Security Stance approved list; the rule routed research to a tool that could not respond (BACKLOG row 220c). Re-adding Exa requires the Security Stance review.
 
 This applies to **both the main agent and all subagents.**
 
