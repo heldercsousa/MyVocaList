@@ -1,4 +1,4 @@
-﻿---
+---
 name: orchestrator
 description: MyVocaList multi-wave feature coordinator. Use when coordinating subagent waves for a feature — plans, dispatches, verifies wave output, manages session state. Never writes code and never reads source files (delegates all code inspection to Explore/Plan subagents).
 skills:
