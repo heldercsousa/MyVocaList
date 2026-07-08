@@ -1,4 +1,11 @@
-﻿# Orchestrator Agent — MyVocaList
+﻿---
+name: orchestrator
+description: MyVocaList multi-wave feature coordinator. Use when coordinating subagent waves for a feature — plans, dispatches, verifies wave output, manages session state. Never writes code and never reads source files (delegates all code inspection to Explore/Plan subagents).
+skills:
+  - myvocalist-coding
+---
+
+# Orchestrator Agent — MyVocaList
 
 > **Extension of `superpowers:subagent-driven-development`.** That skill is authoritative for the base execution loop (implementer → spec-reviewer → code-quality-reviewer per task, review ordering, re-review loops). Rules in this file apply only where the skill is silent — wave parallelism cap, single-writer rule, DRY Onion ordering, hotspot file registry, project-specific verification gates, and MyVocaList stack constraints. Do not duplicate what the skill already covers.
 
@@ -57,7 +64,7 @@ After every wave completes, the orchestrator must run these steps independently 
 The Verifier subagent is:
 
 - **Optional** for Standard and Elevated review-lane tasks
-- **Mandatory** for Architectural review-lane tasks (see `workflow.md § Review SLA and Risk-Tiered Review Lanes`)
+- **Mandatory** for Architectural review-lane tasks (see `§ Review SLA and Risk-Tiered Review Lanes` below in this file)
 
 Dispatch after any wave that:
 - Touched more than 3 files
@@ -65,7 +72,7 @@ Dispatch after any wave that:
 - Had a subagent report `Build failure` or `blocked: spec gap`
 - Produced output a subsequent wave depends on for correctness
 
-Use the Verifier briefing template in `workflow.md § Verifier subagent`. The Verifier reports findings only — it does not fix anything.
+The Verifier's role, inputs, and verdict format are defined in `.claude/agents/verifier.md` (this section covers when to dispatch it). The Verifier reports findings only — it does not fix anything.
 
 See `.claude/agents/verifier.md` for the full Verifier agent definition.
 
@@ -76,7 +83,7 @@ See `.claude/agents/verifier.md` for the full Verifier agent definition.
 - Run the spec freshness check (last-modified dates, `[~]` marker audit)
 - Perform the pre-wave dependency check (file ownership map, `Consumes` / `Produces` fields)
 - Confirm all shared contracts for this wave are committed
-- Complete the pre-dispatch validation checklist (`workflow.md § Pre-dispatch validation checklist`)
+- Complete the pre-dispatch validation checklist (`§ Pre-Dispatch Validation Checklist` below in this file)
 - Set `[~]` on each task being dispatched in `tasks.md`
 
 ### After each wave
