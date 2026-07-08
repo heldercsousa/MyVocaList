@@ -1,4 +1,12 @@
-﻿# Plan Reviewer Agent — MyVocaList
+﻿---
+name: plan-reviewer
+description: Fresh-context plan reviewer for MyVocaList. Use after writing-plans produces a plan and before Helder's approval — verifies spec→plan coverage, no placeholders, DRY Onion ordering, and task sizing. Report-only; never modifies the plan.
+tools: Read, Grep, Glob
+skills:
+  - myvocalist-coding
+---
+
+# Plan Reviewer Agent — MyVocaList
 
 > Dispatched by the orchestrator after `writing-plans` self-review and before Helder's approval. Purpose: catch coverage gaps, placeholder violations, ordering errors, and sizing violations so Helder's approval can focus on approach — not mechanics.
 
