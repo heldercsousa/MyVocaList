@@ -2,6 +2,7 @@
 
 > Extracted from `.claude/rules/testing.md` (2026-07-05, rules-file-refactoring Task 09–10). The rule file is now a routing table; this file holds the full detail (project structure, test-type patterns with code, naming, what-to-test, Tester/Builder split, TDD workflow, running tests, quality audit, anti-patterns). Mutation testing (Stryker) and property-based testing (FsCheck) live in their own on-demand files. Discovered via the `myvocalist-coding` skill map or the rule's routing table.
 > Content moved verbatim; only corrupted markdown code-fences (`` `ash ``, `` `json ``, ```` ```r ````) were normalized to proper fences — no wording changed.
+> **Trimmed 2026-07-07 (Task 18, audit F9/R8):** generic xUnit/Moq scaffolding (csproj skeleton, OutputType trick, generic ViewModel test pattern, generic run commands) now lives in the enabled `maui-unit-testing` skill — this file keeps only what is project-specific and points there for the rest.
 
 ---
 
@@ -25,48 +26,14 @@ MyVocaList.Tests/
     └── TestDbContextFactory.cs ← shared DB setup/teardown helper
 ```
 
-### .csproj
+### .csproj — project-specific deltas only
 
-```xml
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>   <!-- NOT net10.0-android -->
-    <IsPackable>false</IsPackable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+Generic test-project setup (csproj skeleton, xUnit/Moq/coverlet packages, conditional `OutputType` trick for referencing the app head) → **`maui-unit-testing` skill § Test Project Setup**. MyVocaList-specific facts:
 
-  <ItemGroup>
-    <PackageReference Include="xunit" Version="2.*" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.*" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
-    <PackageReference Include="coverlet.collector" Version="6.*" />
-    <PackageReference Include="Moq" Version="4.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Domain, Contracts, Infra, Services — the non-MAUI projects -->
-    <ProjectReference Include="..\MyVocaList.Domain\MyVocaList.Domain.csproj" />
-    <ProjectReference Include="..\MyVocaList.Contracts\MyVocaList.Contracts.csproj" />
-    <ProjectReference Include="..\MyVocaList.Infra\MyVocaList.Infra.csproj" />
-    <ProjectReference Include="..\MyVocaList.Services\MyVocaList.Services.csproj" />
-    <!-- MAUI head project: only if ViewModel tests are needed -->
-    <!-- <ProjectReference Include="..\MyVocaList\MyVocaList.csproj" /> -->
-  </ItemGroup>
-</Project>
-```
-
-> **Important:** Do NOT reference `MyVocaList.csproj` (MAUI head) unless ViewModel tests are needed.
-> ViewModels use `CommunityToolkit.Mvvm` which is a plain .NET library — it can be referenced through the MAUI project.
-> If the MAUI project is referenced, add `<OutputType>Library</OutputType>` to its `net10.0` TFM:
->
-> ```xml
-> <!-- In MyVocaList/MyVocaList.csproj -->
-> <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
->   <OutputType>Library</OutputType>
-> </PropertyGroup>
-> ```
+- **TFM is `net10.0` only** (NOT `net10.0-android`) so tests run on the desktop host.
+- Add `Microsoft.EntityFrameworkCore.Sqlite` `10.*` (repository integration tests use real SQLite).
+- Reference the four non-MAUI projects: `MyVocaList.Domain`, `MyVocaList.Contracts`, `MyVocaList.Infra`, `MyVocaList.Services`.
+- Do NOT reference `MyVocaList.csproj` (MAUI head) unless ViewModel tests are needed; if referenced, apply the skill's conditional `<OutputType>Library</OutputType>` on the `net10.0` TFM.
 
 ### GlobalUsings.cs
 
@@ -148,56 +115,11 @@ public class VenueServiceTests
 **Scope:** Commands (`ExecuteAsync`, `CanExecute`), ObservableProperty chains, empty-state flags.
 **Do NOT:** Test XAML bindings, Shell navigation directly (mock via interface), or DX control behavior.
 
-```csharp
-public class VenuesViewModelTests
-{
-    private readonly Mock<IVenueService> _serviceMock = new();
-    private readonly Mock<ISnackbarComponent> _snackMock = new();
-    private readonly Mock<ILogger<VenuesViewModel>> _loggerMock = new();
+Generic scaffolding (mock fields + `CreateSut()` factory, `[Fact]`/`[Theory]`, command-execution pattern, mocking MAUI services table) → **`maui-unit-testing` skill § ViewModel Testing Pattern**. Project-specific test targets for MyVocaList list ViewModels:
 
-    private VenuesViewModel CreateSut() =>
-        new(_serviceMock.Object, _snackMock.Object, _loggerMock.Object);
-
-    [Fact]
-    public async Task InitializeAsync_EmptyDb_SetsIsEmptyNoVenues()
-    {
-        _serviceMock.Setup(s => s.GetPagedVenuesForListAsync(
-                It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>()))
-            .ReturnsAsync((Enumerable.Empty<VenueListItemDto>(), 0));
-        var sut = CreateSut();
-
-        await sut.InitializeAsync();
-
-        Assert.True(sut.IsEmptyNoVenues);
-        Assert.False(sut.IsEmptyNoResults);
-        Assert.False(sut.IsInitialLoading);
-    }
-
-    [Fact]
-    public void OnSelectionChanged_OneSelected_CanEditSelected()
-    {
-        var sut = CreateSut();
-
-        sut.OnSelectionChanged(1);
-
-        Assert.True(sut.CanEditSelected);
-        Assert.True(sut.CanDeleteSelected);
-        Assert.Equal("1 selected", sut.AppBarTitle);
-    }
-
-    [Fact]
-    public void OnSelectionChanged_Zero_AppBarShowsTitle()
-    {
-        var sut = CreateSut();
-
-        sut.OnSelectionChanged(0);
-
-        Assert.Equal("Venues", sut.AppBarTitle);
-        Assert.False(sut.CanEditSelected);
-        Assert.False(sut.CanDeleteSelected);
-    }
-}
-```
+- `InitializeAsync` with an empty service result must set `IsEmptyNoVenues` true, `IsEmptyNoResults` false, `IsInitialLoading` false (empty-state flag family — every CRUD list VM has the equivalent trio).
+- `OnSelectionChanged(n)` drives the derived-state family: `CanEditSelected`/`CanDeleteSelected` gates and `AppBarTitle` ("1 selected" at n=1; the page title, e.g. "Venues", at n=0).
+- Service mocks return the project's paged-tuple shape, e.g. `.ReturnsAsync((Enumerable.Empty<VenueListItemDto>(), 0))`.
 
 **ViewModel test constraints:**
 - `Shell.Current` must NOT be called from tested methods. Commands that navigate must be excluded from unit tests unless `Shell.Current` is mocked (impractical). Test state transitions only; navigation commands are integration-tested via emulator.
@@ -410,22 +332,7 @@ Write and run **one test** before proceeding to the next. Do not write all tests
 
 ## Running Tests
 
-```bash
-# Run all tests
-dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj
-
-# Verbose output (shows test names)
-dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --verbosity normal
-
-# Filter to a specific class
-dotnet test --filter "FullyQualifiedName~VenueServiceTests"
-
-# Filter to a specific method
-dotnet test --filter "FullyQualifiedName~CreateVenueAsync_NameTooLong"
-
-# Coverage (outputs cobertura XML to TestResults/)
-dotnet test --collect:"XPlat Code Coverage"
-```
+Test project path: `MyVocaList.Tests/MyVocaList.Tests.csproj` — e.g. `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`. Filter/verbosity/coverage command variants → **`maui-unit-testing` skill § Running Tests**.
 
 ---
 

@@ -85,7 +85,7 @@ Never assume a missing tool response means the tool found nothing — distinguis
 - **MyVocaList coding rules** (UI, DevExpress, dialogs, EF Core, themes): invoke `myvocalist-coding` skill before any implementation task
 
 ## Rules Files
-- MediatR patterns *(reference only — MediatR not yet registered; not loaded unconditionally)*: `.claude/library/mediatr-reference.md`
+- MediatR *(planned, not registered)*: no local reference file — derive patterns via Context7 (version-pinned) when MediatR is actually introduced (deleted 2026-07-07, audit F9)
 - Code principles: `.claude/rules/code-principles.md`
 - **Testing**: `.claude/rules/testing.md` — read before writing any test. Covers test types, naming, TDD workflow, and test project setup.
 - **Component change governance** `[HARD RULE]`: `.claude/rules/component-change-governance.md` — four gates (dedicated task + MD3 review, consumer map, per-consumer risk assessment, Helder approval) before any change to a shared custom component; no bundling into feature/bug tasks.
