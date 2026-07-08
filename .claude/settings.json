@@ -9,6 +9,9 @@
     ],
     "deny": []
   },
+  "skillOverrides": {
+    "maui-unit-testing": "on"
+  },
   "hooks": {
     "TaskCreated": [
       {
@@ -144,7 +147,6 @@
     ]
   },
   "enabledPlugins": {
-    "context-budget@teslasoft-skills": true,
     "dotnet-skills@dotnet-skills": false,
     "ddd-dotnet@dotnet-claude-code-skills": false,
     "data-dotnet@dotnet-claude-code-skills": false,
@@ -154,9 +156,6 @@
     "claude-code-setup@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true
-  },
-  "skillOverrides": {
-    "maui-unit-testing": "on"
   },
   "plansDirectory": "Docs/Management"
 }
