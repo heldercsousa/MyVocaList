@@ -83,5 +83,18 @@ GO on splitting workflow.md/testing.md **unconditional→routing-table** (GATE-A
 - **testing.md (09–10):** ONE cohesive `testing-reference.md` + 2 rarely-used on-demand files (Stryker, FsCheck) = **3 files, not 6**. Preserve the `§ Regression tests` heading (inbound anchor). Forward-reference `maui-unit-testing`; do NOT flip `enabledPlugins` (Gotcha 3 — all enablement in Task 11). Reduced code snippets inline, full samples in library.
 - **workflow.md (06–08):** anchor-heavy — preserve every referenced heading (`Rule 1`, `Rule 7`, `Bug Fix Pattern`, `Spike validation task pattern`, `Spec quality four-gate review`, `Sequential-only file registry`; audit the 3 orchestrator.md refs for pre-existing dangling links). Win is prose-deletion (J-Curve essay, discovery narrative, duplicated orchestrator/implementor pointers) + extraction; Rules 3–8 operational core stays inline.
 
+## Post-implementation reconciliation (2026-07-07 — Task 17 record-correction, audit R6)
+
+**Measured final state** (fresh-session `/context`, 2026-07-07): rules files total **11.0k tokens** (was ~18–22k per GATE-A) → **~8–11k per-agent sticky reduction**; memory category 29.2k → 20.8k; total cold start ~40.4k main-session vs 60,492 GATE-A probe (~20k off — note: not strictly like-for-like, main session vs 0-tool subagent).
+
+**Corrections to the record:**
+- The per-task "recovered" figures in BACKLOG rows 196–207 (~28k summed) were **estimates presented as measurements**; the per-line token assumption (~17–20 tok/line) was low vs actual (~29 tok/line), and never-miss HARD RULEs deliberately kept inline reduced achievable savings. Measured total stands at ~8–11k.
+- The ~2–3k unconditional routing-table target was missed ~4× (workflow.md alone 5.1k) — a defensible safety trade-off, now recorded as such rather than as target-met.
+- `tasks.md` Success Criteria #1/#4 corrected same date (were checked ✅ but false/incoherent).
+
+**Like-for-like GATE-A post-probe (0-tool subagent): deliberately SKIPPED** — costs a ~40k+ throwaway cold-start for a number already derivable from `/context` + `wc -l`; token thrift takes precedence (same rationale as GATE-B's analytical decision). Run it only if Helder wants the ceremonial closing number.
+
+---
+
 ### Budget-aware execution recommendation (2026-07-05)
 Weekly budget at 86% (resets Jul 7). Recommend Tasks 06–10 run in the **fresh post-reset session**, where (a) full weekly budget covers workflow.md's risky 3-wave anchor-heavy refactor, and (b) Helder gets the free empirical confirmation of the Phase-1 drop via a fresh `/context` first (his stated plan). If executed before reset, do **testing.md first** (1 anchor, cleaner, bigger safe deletion) and leave workflow.md's 3 waves for full-budget headroom.
