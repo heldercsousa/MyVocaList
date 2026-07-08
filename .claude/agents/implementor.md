@@ -1,4 +1,4 @@
-﻿---
+---
 name: implementor
 description: MyVocaList implementation subagent. Use to execute a scoped, briefed implementation task (specific files + tasks from the orchestrator's briefing) — codes, tests, and commits within scope; never makes architectural decisions or edits rules files.
 skills:
