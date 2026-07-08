@@ -250,10 +250,12 @@ After every 2 tasks:
 
 ## Success Criteria (Task perspective)
 
+> **CORRECTED 2026-07-07 (Task 17 record-correction; audit R6).** Criteria #1 and #4 were previously checked ✅ but were false/incoherent as written. Honest status below.
+
 All 12 tasks complete when:
-1. ✅ All .claude/rules/*.md files are 1–2 pages (routing tables only)
-2. ✅ All extracted content is in .claude/library/*.md files
-3. ✅ Every superpowers skill is invoked at least once and verified to work
-4. ✅ /context fresh shows net 14k token savings per skill used (measured in Phase 4)
+1. ⚠️ PARTIALLY MET — situational rules files (code-principles, bug-tracking, component-governance, constraints) are true 1–2 page routing tables; `workflow.md` (174 lines / ~5.1k tok) and `testing.md` (~90 lines / ~2k tok) deliberately keep never-miss HARD RULEs inline and exceed the 1–2 page target. Accepted trade-off (safety over size), not the original criterion.
+2. ✅ All extracted content is in .claude/library/*.md files (verbatim, grep-verified anchors)
+3. ✅ Enabled superpowers skills (brainstorming, writing-plans, verification-before-completion) + maui-unit-testing verified loading (fresh `/context` 2026-07-07)
+4. ❌ NOT MET AS WRITTEN — the "14k per skill used" criterion was incoherent (skills never carried that weight; disabled skills only cost name+description). **Measured actual win: ~8–11k unconditional rules reduction per agent (rules 18–22k → 11.0k), ~20k off total cold start** — real and sticky, but roughly half the summed per-task claims. See `context-audit-2026-07-07.md § Part 1`.
 5. ✅ CLAUDE.md Skill & MCP table is updated with enabled superpowers
 6. ✅ No agent workflow changes required; all rules accessible via routing tables + skills
