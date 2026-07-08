@@ -142,8 +142,7 @@ Full task-log entry template, status vocabulary (`in progress`/`Check build`/`To
 Before any web research query, follow this order — **both main agent and subagents**:
 
 1. **Library / framework / SDK / API docs** → Context7 (`resolve-library-id` → `query-docs`)
-2. **General web research** (comparisons, news, tool evaluations) → Exa MCP (`exa_search`)
-3. **Raw `WebSearch` / `WebFetch`** → last resort only when both above return nothing useful
+2. **General web research** (comparisons, news, tool evaluations) → `WebSearch` / `WebFetch` — only when Context7 does not cover the topic
 
 ---
 
