@@ -48,5 +48,5 @@ Open questions for the spec session: version-header adoption scope (all features
 ## Constraints already known
 
 - `.sln` registration HARD GATE applies to every new `Docs/` file/folder.
-- `CLAUDE.md § Development Methodology`, `workflow.md` Rule 1/3 (Session-End Spec Update Ritual), `spec-writing-guide.md`, and the `Docs/ Folder Layout` section must all be amended **together** when the design lands (`amend:` process).
+- `CLAUDE.md § Development Methodology`, `workflow.md` SDD Invariant + Rules 1/3 (Session-End Spec Update Ritual — transitional immutable-history wording applied to the SDD Invariant 2026-07-09, approved provisionally), `bug-tracking.md` + `library/bug-tracking-reference.md` (approved provisionally 2026-07-09 — must gain the bug-fix→spec-version binding), `spec-writing-guide.md`, and the `Docs/ Folder Layout` section must all be amended **together** when the design lands (`amend:` process).
 - Must stay compatible with Spec-Anchored SDD Level 2: agents still need ONE authoritative current-truth spec per feature to read at session start — history must not force agents to reconstruct truth from deltas.

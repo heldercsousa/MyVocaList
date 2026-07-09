@@ -41,4 +41,4 @@ See `library/code-style-reference.md § UI Thread Performance` — one `ReplaceR
 
 ---
 
-> **Authorship note:** This routing table must be human-reviewed before it is relied upon (CLAUDE.md § Continuous Enhancement — Authorship). Full content preserved in `library/code-style-reference.md`.
+> **Authorship note:** Human-reviewed and approved by Helder 2026-07-09 (CLAUDE.md § Continuous Enhancement — Authorship). Full content preserved in `library/code-style-reference.md`.
