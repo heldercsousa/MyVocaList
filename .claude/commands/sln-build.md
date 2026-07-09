@@ -1,4 +1,4 @@
-# Build Command
+# Build Command (`/sln-build`)
 
 Build the MyVocaList .NET MAUI 10 Android project and verify it is clean.
 

@@ -84,13 +84,13 @@ These files must never have concurrent writers (parallel edits produce conflicts
 
 ## Rule 3 — Commit After Every Task
 
-**Run `/project:commit` after every completed task from `tasks.md`.** A session ending with uncommitted changes is at risk — the `Stop` hook warns; treat it as a hard gate.
+**Run `/sln-commit` after every completed task from `tasks.md`.** A session ending with uncommitted changes is at risk — the `Stop` hook warns; treat it as a hard gate.
 
 - **Task complete =** builds with 0 errors + tests pass (if tested code touched) + checkbox checked in `tasks.md`.
 - **Completion gates before committing:** demo statement verifiable · new service/repo/VM/page registered in `MauiProgram.cs` · ACs satisfied with evidence in the task-log matrix · **`.sln` registration for every file created/moved/deleted in `Docs/` or `.claude/` — BLOCKING**.
 - **Session-End Spec Update Ritual:** review every spec file touched; if it no longer describes what was built, add a `> **Spec updated [YYYY-MM-DD]:**` note; check off completed tasks / mark `[CANCELLED: reason]`; commit spec updates in the final commit.
 
-`/project:review` is automatic via fresh subagents under `subagent-driven-development`; when executing manually, it is the trigger. Full gates + ritual triggers: `workflow-reference.md § Rule 3`.
+`/sln-review` is automatic via fresh subagents under `subagent-driven-development`; when executing manually, it is the trigger. Full gates + ritual triggers: `workflow-reference.md § Rule 3`.
 
 ### Bug Fix Pattern — commit message as spec
 
