@@ -8,17 +8,6 @@
         "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
       }
     },
-    "sequential-thinking": {
-      "command": "cmd",
-      "args": [ "/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking" ]
-    },
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_MCP_PAT}"
-      }
-    },
     "devexpress-maui": {
       "type": "http",
       "url": "https://gitmcp.io/DevExpress/maui-demo-app"

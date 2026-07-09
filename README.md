@@ -69,3 +69,21 @@ Run tests:
 ```bash
 dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj
 ```
+
+## Claude Code setup (for AI-assisted development)
+
+For AI-assisted development with Claude Code:
+
+```bash
+dotnet restore
+dotnet build
+dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj
+```
+
+**Database & Testing Details:** See [`.claude/library/database-setup.md`](.claude/library/database-setup.md) for:
+- How database migrations are applied
+- How the SQLite MCP database is kept in sync (auto-sync via hooks)
+- How tests guarantee the current schema
+- Setup on fresh clones
+
+> ⚠️ **Note:** Database setup instructions are maintained in `.claude/library/database-setup.md` to ensure they stay current if the DB solution changes. The README does not duplicate technical DB details to avoid becoming stale.

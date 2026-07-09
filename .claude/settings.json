@@ -47,6 +47,16 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Bash(dotnet ef database update*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -NonInteractive -Command \"$proj = $env:CLAUDE_PROJECT_DIR; if ($proj) { & dotnet ef database update --connection 'Data Source=$proj/.claude/MyVocaList.db' 2>$null; if ($?) { Write-Host 'SQLite MCP DB synced with latest schema' } }\" 2>/dev/null || true",
+            "statusMessage": "Syncing SQLite MCP database schema..."
+          }
+        ]
+      },
+      {
         "matcher": "Edit|Write",
         "hooks": [
           {
@@ -157,5 +167,10 @@
     "superpowers@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true
   },
+  "disabledMcpjsonServers": [
+    "github",
+    "exa",
+    "sequential-thinking"
+  ],
   "plansDirectory": "Docs/Management"
 }
