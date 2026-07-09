@@ -593,7 +593,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rules-file-refactoring", "r
 		Docs\Management\DevCycleCraft\rules-file-refactoring\pilot-findings.md = Docs\Management\DevCycleCraft\rules-file-refactoring\pilot-findings.md
 		Docs\Management\DevCycleCraft\rules-file-refactoring\findings-measurement.md = Docs\Management\DevCycleCraft\rules-file-refactoring\findings-measurement.md
 		Docs\Management\DevCycleCraft\rules-file-refactoring\skill-overlap-findings.md = Docs\Management\DevCycleCraft\rules-file-refactoring\skill-overlap-findings.md
-		Docs\Management\DevCycleCraftules-file-refactoring\context-audit-2026-07-07.md = Docs\Management\DevCycleCraftules-file-refactoring\context-audit-2026-07-07.md
+		Docs\Management\DevCycleCraft\rules-file-refactoring\context-audit-2026-07-07.md = Docs\Management\DevCycleCraft\rules-file-refactoring\context-audit-2026-07-07.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec-evolution-versioning", "spec-evolution-versioning", "{FA1234BC-0001-4000-8000-000000000043}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\findings.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\findings.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{FA1234BC-0001-4000-8000-000000000042}"
@@ -691,6 +696,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{FA1234BC-0001-4000-8000-000000000043} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000042} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{FA1234BC-0001-4000-8000-000000000028} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{E9A5FC59-0C8C-49B6-9845-7870FA3CD098} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}

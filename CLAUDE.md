@@ -21,7 +21,7 @@ Architecture layer constraints are defined in `code-principles.md § Architectur
 - **MCP Availability Gate:** if a required MCP server (Context7, SQLite) is unavailable at task start, do NOT silently skip the lookup — fail explicitly and wait for Helder to restore it or authorize proceeding. Distinguish "tool returned empty" from "tool unavailable".
 - **GitHub MCP** *(disabled 2026-07-07 — unused during evaluation)*: use `gh` CLI / Bash for GitHub operations; re-enabling requires the Security Stance process (see below).
 - **MyVocaList coding rules** (UI, DevExpress, dialogs, EF Core, themes): invoke `myvocalist-coding` skill before any implementation task
-- **MCP governance** (context budget, Security Stance approved-server list, response token discipline, Playwright usage, emerging patterns): `.claude/library/mcp-governance.md` — read before activating/adding/configuring any MCP server. Never add an MCP server without the Security Stance review.
+- **MCP governance** (token budgeting — a discipline, unrelated to the removed `context-budget` plugin; Security Stance approved-server list; response token discipline; Playwright usage; emerging patterns): `.claude/library/mcp-governance.md` — read before activating/adding/configuring any MCP server. Never add an MCP server without the Security Stance review.
 
 ## Team Environment Setup
 
