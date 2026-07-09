@@ -20,4 +20,4 @@ Full detail (MigrationsLock, CollationInterceptor, first-run table absence, Micr
 - **Solution item registration — HARD GATE:** any file created, moved, or deleted in `Docs/` or `.claude/` **must** be reflected in `MyVocaList.sln` in the same commit (missing entries make files invisible in VS Solution Explorer; checked in the subagent exit checklist). In practice the gate applies to `Docs/` files — `.claude/library/*` and `.claude/rules/*` are NOT `.sln`-registered.
 - Common case: add `RelativePath\file = RelativePath\file` to the matching Solution Folder's `ProjectSection(SolutionItems)`. **New-folder pattern, `NestedProjects` parent GUIDs, and the sequential GUID counter (last used `0041`)** are in `library/constraints-reference.md § Visual Studio Solution (.sln)`.
 
-> **Authorship note:** This routing table must be human-reviewed before it is relied upon (CLAUDE.md § Continuous Enhancement — Authorship). Full content preserved in `library/constraints-reference.md`.
+> **Authorship note:** Human-reviewed and approved by Helder 2026-07-09 (CLAUDE.md § Continuous Enhancement — Authorship). Full content preserved in `library/constraints-reference.md`.

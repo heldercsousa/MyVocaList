@@ -84,4 +84,4 @@ A bug fix is not complete until its regression test exists, has been seen to FAI
 
 ---
 
-> **Authorship note:** This file must be human-reviewed before it is relied upon (CLAUDE.md § Continuous Enhancement — Authorship).
+> **Authorship note:** Human-reviewed and approved by Helder 2026-07-09 (CLAUDE.md § Continuous Enhancement — Authorship). Approval is provisional: these definitions are hooked to the current feature-development/spec-update approach and MUST be revisited when the **Spec Evolution, Versioning & Feature-Folder Organization** feature (BACKLOG 2026-07-09) lands (e.g. bug-fix→spec-version binding).

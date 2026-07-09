@@ -31,7 +31,7 @@ Hooks in `.claude/settings.json` enforce specific rules automatically. Self-enfo
 
 > **Spec changes before code changes.**
 
-- New requirement mid-implementation → update the spec first, then the code.
+- New requirement mid-implementation → record the spec change first, then the code. For a feature **not yet shipped**, update its spec in place. For **shipped/implemented** behavior, do NOT rewrite the existing spec (it is immutable history) — append a new dated change spec that cross-references the original. *(Target pattern being defined: BACKLOG "Spec Evolution, Versioning & Feature-Folder Organization"; until it lands, at minimum add a dated `> **Spec updated [YYYY-MM-DD]:**` note instead of silently rewriting.)*
 - Code contradicts the spec → the code is wrong (the spec is not wrong).
 - Spec incomplete → stop and clarify with Helder; do not improvise.
 - A subagent that modifies behavior not described in the spec has violated this invariant.
@@ -163,11 +163,15 @@ Every implementation/planning session begins with this reading order before any 
 
 ---
 
-## Rule 8 — GitHub MCP Pre-Task Collision Check
+## Rule 8 — Pre-Task Collision Check
 
-Before dispatching any wave that modifies files, confirm no other agent/branch is modifying the same files.
+Before dispatching any wave that modifies files, confirm no other agent/branch is modifying the same files. *(GitHub MCP references removed 2026-07-09 — the server was disabled 2026-07-07; the check is git + lease based, with `gh` CLI for PR checks.)*
 
-- **GitHub MCP available:** check open PRs on the branch base (any touching a wave `Files owned` = collision risk) · review last 10 commits · confirm no `[~]` task is owned by another live session.
-- **Not available:** `git log --oneline -10`, `git status`, scan `tasks.md` for stray `[~]`, and run the **lease liveness check** — classify each `[~]` with no known running agent via `reclaim.py` (`lease_lib.classify`) **before** assuming abandonment. A `fresh` result means another live session owns it — do **not** reset to `[ ]`.
+- `git log --oneline -10` · `git status` · scan `tasks.md` for stray `[~]` · run the **lease liveness check** — classify each `[~]` with no known running agent via `reclaim.py` (`lease_lib.classify`) **before** assuming abandonment. A `fresh` result means another live session owns it — do **not** reset to `[ ]`.
+- If a remote review flow is active: `gh pr list` — any open PR touching a wave's `Files owned` = collision risk.
 
 Collision-type response table: `workflow-reference.md § Rule 8`.
+
+---
+
+> **Authorship note:** Human-reviewed and approved by Helder 2026-07-09 (CLAUDE.md § Continuous Enhancement — Authorship). Approval is provisional where content is hooked to the current spec-update approach (SDD Invariant, Rule 1 spec-gap handling, Rule 3 Session-End Spec Update Ritual): these sections MUST be revisited when the **Spec Evolution, Versioning & Feature-Folder Organization** feature (BACKLOG 2026-07-09) defines the immutable-spec/delta-change pattern.

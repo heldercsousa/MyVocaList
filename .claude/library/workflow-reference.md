@@ -643,20 +643,17 @@ Read in this order — do not skip items, do not resume from memory alone:
 
 ---
 
-## Rule 8 — GitHub MCP Pre-Task Collision Check
+## Rule 8 — Pre-Task Collision Check
 
 Before dispatching any wave that modifies files in the repository, confirm that no other agent or branch is currently modifying the same files.
 
+> Amended 2026-07-09: GitHub MCP references removed (server disabled 2026-07-07 — unused). The check is git + lease based; PR checks use the `gh` CLI.
+
 ### Pre-task collision check protocol
 
-If the GitHub MCP is available:
-1. **Check open PRs:** Query open PRs on the current branch base. If any open PR touches a file in the current wave's `Files owned` list, a collision risk exists.
-2. **Check recent commits:** Review the last 10 commits on the branch. Confirm the current spec reflects those changes.
-3. **Check in-progress `[~]` tasks:** Confirm no task marked `[~]` is being worked on by another agent in a different session.
-
-**If the GitHub MCP is NOT available:**
-- Run `git log --oneline -10` to check recent commits
+- Run `git log --oneline -10` to check recent commits (confirm the current spec reflects those changes)
 - Run `git status` to confirm no uncommitted changes from a previous interrupted session
+- If a remote review flow is active, run `gh pr list` — if any open PR touches a file in the current wave's `Files owned` list, a collision risk exists
 - Check `tasks.md` for any tasks marked `[~]` that should not be in-progress
 - **Liveness check (Session Continuity):** for every `[~]` task with no known running
   agent, classify its claim under `.claude/leases/` via

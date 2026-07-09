@@ -24,4 +24,4 @@ A component becomes governed **the moment a second consumer binds to it** — ad
 |------|--------|
 | Governed-component list, four-gate detail, required-artifacts template, relationship to `workflow.md` Rules 1–2 | `.claude/library/component-safety-gate.md` |
 
-> **Authorship note:** This routing table must be human-reviewed before it is relied upon (CLAUDE.md § Continuous Enhancement — Authorship). Full content preserved in `library/component-safety-gate.md`.
+> **Authorship note:** Human-reviewed and approved by Helder 2026-07-09 (CLAUDE.md § Continuous Enhancement — Authorship). Full content preserved in `library/component-safety-gate.md`.
