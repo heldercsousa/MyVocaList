@@ -25,21 +25,18 @@ Architecture layer constraints are defined in `code-principles.md § Architectur
 
 ## Team Environment Setup
 
-Environment variables for MCP integrations are stored in `.env.local` (gitignored, team-shared).
+Environment variables for MCP integrations (Playwright token, Context7 API key) are stored in `.env.local` (gitignored, team-shared).
 
-**First-time setup (each developer, once per machine):**
+**First-time setup (each developer, once):**
 1. Copy `.env.local.example` to `.env.local`
 2. Fill in your API keys (Playwright MCP token, Context7 API key)
-3. Run `. .\.claude\scripts\load-env.ps1` to load vars into the current session
+3. Run `. .\.claude\scripts\load-env.ps1` **once** to persist vars to User scope
 
-**Each PowerShell session:** run `. .\.claude\scripts\load-env.ps1` to load the env vars. Alternatively, add this to your PowerShell profile (`$PROFILE`) for auto-load on startup:
-```powershell
-if (Test-Path "$PSScriptRoot\..\.claude\scripts\load-env.ps1") {
-    . "$PSScriptRoot\..\.claude\scripts\load-env.ps1"
-}
-```
+After this, env vars are stored in the Windows registry (User scope) and are **automatically available** to Claude Code on every restart — no further action needed.
 
-> **Why `.env.local` instead of System/User env vars?** Team members on different machines need independent keys, and `.env.local` is easier to rotate/revoke than registry entries. Each dev's `.env.local` is never committed.
+**If keys change:** update `.env.local`, then re-run the script. Env vars are only read from `.env.local` during script execution; afterward they live in the registry.
+
+> **Design note:** `.env.local` is the source of truth for key rotation across the team. Each dev maintains their own `.env.local` (never committed). The script is a one-time bridge to the registry.
 
 ## Rules Files
 - MediatR *(planned, not registered)*: no local reference file — derive patterns via Context7 (version-pinned) when MediatR is actually introduced (deleted 2026-07-07, audit F9)
