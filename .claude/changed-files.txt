@@ -2143,3 +2143,15 @@ Docs/Management/BACKLOG.md
 CLAUDE.md
 .claude/scripts/load-env.ps1
 CLAUDE.md
+.claude/scripts/load-env.ps1
+.claude/scripts/load-env.ps1
+CLAUDE.md
+Docs/Changelog/changelog.md
+.claude/commands/sln-review.md
+.claude/commands/sln-review.md
+CLAUDE.md
+.claude/rules/workflow.md
+.claude/rules/workflow.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
+Docs/Changelog/changelog.md

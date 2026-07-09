@@ -1,6 +1,6 @@
-﻿# Review Command
+﻿# Solution Review Command (`/sln-review`)
 
-Post-task review. Run after EVERY completed task before committing.
+Post-task review of THIS solution's changes — distinct from the built-in `/review` skill, which reviews GitHub PRs. Run after EVERY completed task before committing.
 
 ## Severity Levels
 - 🔴 **Blocker** — Must be fixed before any further work. Examples: build failure, `DisplayAlert` usage, cross-layer dependency violation, hardcoded color/string, missing `SafeAreaEdges`.
@@ -16,7 +16,7 @@ Test quality criteria per `testing.md` must also pass (see Test Quality Audit Ch
 ## Checklist
 
 ### 1. Build
-- [ ] 🔴 Run `/project:build` — confirm 0 errors
+- [ ] 🔴 Run `/sln-build` — confirm 0 errors
 
 ### 2. Code Quality
 - [ ] 🔴 No `DisplayAlert`, `DisplayActionSheet`, or `DisplayPromptAsync` in modified files

@@ -24,7 +24,7 @@ Bundled `releases.json` MauiAsset + first-launch-per-version `dx:BottomSheet` mo
 
 **Schema:** See `requirements.md § releases.json Schema`.
 
-**Lifecycle:** Updated manually as part of the `/project:release` command — content sourced from `Docs/Changelog/changelog.md`.
+**Lifecycle:** Updated manually as part of the `/sln-release` command — content sourced from `Docs/Changelog/changelog.md`.
 
 ---
 

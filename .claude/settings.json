@@ -79,7 +79,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import os,subprocess; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); result=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); result.stdout.strip() and print('\\u26a0\\ufe0f Subagent returned with uncommitted changes — run /project:commit now (auto-commit has been removed from the Stop hook).')\" 2>/dev/null || true"
+            "command": "python -c \"import os,subprocess; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); result=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); result.stdout.strip() and print('\\u26a0\\ufe0f Subagent returned with uncommitted changes — run /sln-commit now (auto-commit has been removed from the Stop hook).')\" 2>/dev/null || true"
           }
         ]
       },
@@ -120,7 +120,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Subagent-driven, worktree-isolated flow — never skip to implementation: Spec → spec-review → Plan → plan-review → Implement → implementation-review. Each stage AND its review runs in a dedicated subagent (spec-reviewer after the spec, plan-reviewer after the plan, code review after implementation), always inside a git worktree; the orchestrator never writes code. (6) English only in code, comments, logs, UI text. (7) After every completed task: /project:review → /project:commit (stage, commit, push). SPEC RE-READ REMINDER: After context compaction, re-read the active feature spec (Docs/Management/[BusinessFeatures|DevCycleCraft]/<feature>/design.md and requirements.md) before continuing — compaction discards loaded spec context and continuing without re-reading risks spec drift.'"
+            "command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Subagent-driven, worktree-isolated flow — never skip to implementation: Spec → spec-review → Plan → plan-review → Implement → implementation-review. Each stage AND its review runs in a dedicated subagent (spec-reviewer after the spec, plan-reviewer after the plan, code review after implementation), always inside a git worktree; the orchestrator never writes code. (6) English only in code, comments, logs, UI text. (7) After every completed task: /sln-review → /sln-commit (stage, commit, push). SPEC RE-READ REMINDER: After context compaction, re-read the active feature spec (Docs/Management/[BusinessFeatures|DevCycleCraft]/<feature>/design.md and requirements.md) before continuing — compaction discards loaded spec context and continuing without re-reading risks spec drift.'"
           }
         ]
       }
@@ -142,7 +142,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import subprocess,os; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); r=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); status=r.stdout; lines=[l[3:] for l in status.splitlines()]; status.strip() and print('\\u26a0\\ufe0f UNCOMMITTED CHANGES — run dotnet build && dotnet test, then /project:commit with a descriptive message. (Auto-commit was removed from this hook: Stop fires after every response turn, not only true session end, so it was silently pushing unverified/partial work to the current branch under a misleading \\'build+test green\\' message. See BACKLOG.md 2026-06-27 entry for the identical failure mode in a different hook.)'); status.strip() and any('task-log' in l for l in lines) and not any('BACKLOG.md' in l for l in lines) and print('\\u26a0\\ufe0f task-log files changed but Docs/Management/BACKLOG.md was not updated — update it if a feature phase completed.')\" 2>/dev/null || true"
+            "command": "python -c \"import subprocess,os; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); r=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); status=r.stdout; lines=[l[3:] for l in status.splitlines()]; status.strip() and print('\\u26a0\\ufe0f UNCOMMITTED CHANGES — run dotnet build && dotnet test, then /sln-commit with a descriptive message. (Auto-commit was removed from this hook: Stop fires after every response turn, not only true session end, so it was silently pushing unverified/partial work to the current branch under a misleading \\'build+test green\\' message. See BACKLOG.md 2026-06-27 entry for the identical failure mode in a different hook.)'); status.strip() and any('task-log' in l for l in lines) and not any('BACKLOG.md' in l for l in lines) and print('\\u26a0\\ufe0f task-log files changed but Docs/Management/BACKLOG.md was not updated — update it if a feature phase completed.')\" 2>/dev/null || true"
           }
         ]
       },

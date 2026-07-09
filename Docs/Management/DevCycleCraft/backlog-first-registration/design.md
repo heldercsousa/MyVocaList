@@ -12,7 +12,7 @@ The feature ships in **layers**, smallest blast radius first:
 
 ```
 D (rule strengthening)        ── ships unconditionally  (proposed diff + direct session-ops edit)
-C (review/checklist backstop) ── ships unconditionally  (.claude/commands/review.md lane note)
+C (review/checklist backstop) ── ships unconditionally  (.claude/commands/sln-review.md lane note)
 A (Stop-hook advisory)        ── ships unconditionally  (fail-open, classifier-driven, non-blocking)
 B (PostToolUse interception)  ── ships ONLY if Phase 1 spike passes
 ```
@@ -196,7 +196,7 @@ working-tree), not just the current working diff.
 | **2 — Rule/def diffs** | workflow.md proposed-diff (Helder-gated); session-ops.md direct edit + Authorship review | innermost, no code |
 | **3 — Pure logic** | Tester→Builder, Level A full TDD: line-level classifier + precedence + adversarial tests, red→green | — |
 | **4 — Tooling + hook wiring** | `orphan_check.py`; command-type Stop entry; (spike-pass) PostToolUse buffer; manual `.sln` for `.py`; verify expected-keys unchanged | **gated on posture ✅ (ratified)**; SEQUENTIAL — `settings.json` single-writer |
-| **5 — Backstop + close** | apply `.claude/commands/review.md` lane note SEPARATELY from / after the workflow.md `amend:`; verification; session-end ritual; BACKLOG → `✅ Done` only after Helder applies the `amend:` | — |
+| **5 — Backstop + close** | apply `.claude/commands/sln-review.md` lane note SEPARATELY from / after the workflow.md `amend:`; verification; session-end ritual; BACKLOG → `✅ Done` only after Helder applies the `amend:` | — |
 
 **Sequencing:** Phase 3 before Phase 4; Phase 1 gates only Phase 4's B-branch; Phase 2's workflow.md
 change is Helder-gated/independent.

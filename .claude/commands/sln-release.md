@@ -1,13 +1,13 @@
-# Release Command
+# Release Command (`/sln-release`)
 
 Create and push a version tag to mark a release milestone. Run this for out-of-cycle version events.
 
 ## Usage
 
-- `/project:release stable` — strip pre-release label from current version (e.g. `0.1.0-alpha.0` → `0.1.0`)
-- `/project:release minor alpha` — bump MINOR, reset PATCH, keep alpha label (e.g. `0.1.0` → `0.2.0-alpha.0`)
-- `/project:release patch alpha` — bump PATCH only (e.g. `0.1.0-alpha.2` → `0.1.1-alpha.0`)
-- `/project:release patch stable` — bump PATCH, stable label (e.g. `0.1.0` → `0.1.1`)
+- `/sln-release stable` — strip pre-release label from current version (e.g. `0.1.0-alpha.0` → `0.1.0`)
+- `/sln-release minor alpha` — bump MINOR, reset PATCH, keep alpha label (e.g. `0.1.0` → `0.2.0-alpha.0`)
+- `/sln-release patch alpha` — bump PATCH only (e.g. `0.1.0-alpha.2` → `0.1.1-alpha.0`)
+- `/sln-release patch stable` — bump PATCH, stable label (e.g. `0.1.0` → `0.1.1`)
 
 ## Steps
 
@@ -56,6 +56,6 @@ Create and push a version tag to mark a release milestone. Run this for out-of-c
 
 ## Notes
 
-- MAJOR is always manual — no `/project:release major` command. Bump MAJOR by running `git tag vX.0.0` manually.
+- MAJOR is always manual — no `/sln-release major` command. Bump MAJOR by running `git tag vX.0.0` manually.
 - Never delete or overwrite an existing tag — if a tag already exists at the target version, stop and report the conflict.
-- After `/project:release stable`, the next feature should start with `/project:release minor alpha` or the version-bump prompt in `/project:commit`.
+- After `/sln-release stable`, the next feature should start with `/sln-release minor alpha` or the version-bump prompt in `/sln-commit`.

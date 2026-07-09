@@ -1,4 +1,4 @@
-# Changelog Command
+# Changelog Command (`/sln-changelog`)
 
 Update the project changelog after every commit.
 

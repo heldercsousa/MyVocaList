@@ -4,7 +4,7 @@
 > **Last updated:** 2026-06-20
 > **Spec:** `Docs/specs/artists-songs/requirements.md` + `design.md`
 
-Check off each task as it completes. Run `/project:build` after every task. Run `/project:review`
+Check off each task as it completes. Run `/sln-build` after every task. Run `/sln-review`
 after every major task before committing.
 
 ---
@@ -245,6 +245,6 @@ after every major task before committing.
   - Verify Songs menu item in flyout; search back arrow shows correctly
   - **❌ FAILED 2026-07-03 (Helder emulator run) — full steps + evidence: `Docs/Management/EMULATOR_TEST_MASTER_LIST.md` TEST-001.** Blocking finding: SongFormPage Artist field has no working required-field validation and no autocomplete dropdown; typing a non-matching artist name and blurring clears the entry instead of offering "create new artist" — **song registration is impossible in the current build (BUG-027, Critical)**. This blocks TEST-002 (BUG-023 BottomSheet) and TEST-003 (BUG-024 edit data integrity) from being exercised at all. Additional findings this run: ArtistsPage trailing `queue_music_outlined` button is still a no-op (BUG-028, regression of BUG-015/BUG-019 fix); ArtistFormPage leading search icon crashes the app (BUG-029, Critical); ArtistFormPage search strip UX is confusing/possibly duplicated with SongFormPage search and opens an Artist search when Song search may be intended (BUG-030 — spec-gap, needs Helder clarification); no 3rd-party autocomplete appears while typing in either Artist Name or Song Title fields, unclear if this is a missing AC or was never in scope (BUG-031/BUG-032 — spec-gap). See BACKLOG.md Artists & Songs Catalog row for the full bug list. **Do not re-run 16C.1 until BUG-027 is fixed** (it is the hard blocker for the rest of the checklist).
 - [ ] **16C.2** Build — 0 errors
-- [ ] **16C.3** Run `/project:review`
+- [ ] **16C.3** Run `/sln-review`
 - [ ] **16C.4** Update `Docs/Changelog/changelog.md`
-- [ ] **16C.5** Run `/project:commit`
+- [ ] **16C.5** Run `/sln-commit`
