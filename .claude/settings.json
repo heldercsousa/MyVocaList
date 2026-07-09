@@ -169,7 +169,6 @@
   },
   "disabledMcpjsonServers": [
     "github",
-    "exa",
     "sequential-thinking"
   ],
   "plansDirectory": "Docs/Management"
