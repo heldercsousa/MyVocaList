@@ -19,19 +19,6 @@
         "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "${PLAYWRIGHT_MCP_EXTENSION_TOKEN}"
       }
     },
-    "mudblazor": {
-      "command": "dotnet",
-      "args": [
-        "run",
-        "--project",
-        "C:/Users/helde/.claude/tools/MudMCP/src/MudBlazor.Mcp/MudBlazor.Mcp.csproj",
-        "--",
-        "--stdio",
-        "--version",
-        "9.5.0"
-      ],
-      "_comment": "MudBlazor component docs MCP — community project mcbodge/MudMCP. Used during Blazor Hybrid spike and migration. Version 9.0.0 = MudBlazor package version queried."
-    },
     "sqlite": {
       "command": "cmd",
       "args": [
@@ -40,7 +27,8 @@
         "mcp-server-sqlite",
         "--db-path",
         "C:/Users/helde/source/repos/MyVocaList/.claude/MyVocaList.db"
-      ]
+      ],
+      "_comment": "SQLite MCP database — auto-synced after 'dotnet ef database update' via PostToolUse hook in settings.json. Ensure current schema by running migrations before querying. Tests use TestDbContextFactory (fresh temp DB) so they always have current schema."
     }
   }
 }
