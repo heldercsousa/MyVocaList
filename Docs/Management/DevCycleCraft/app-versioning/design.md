@@ -27,7 +27,7 @@ Format: `MAJOR.MINOR.PATCH-LABEL.HEIGHT`
 ```
 0.1.0-alpha.0    ← tag placed when first coding feature begins
 0.1.0-alpha.4    ← 4 commits later, automatic (no action required)
-0.1.0            ← marked stable via /project:release stable
+0.1.0            ← marked stable via /sln-release stable
 0.2.0-alpha.0    ← next coding feature begins
 0.2.0-alpha.1    ← one commit later
 ```
@@ -92,9 +92,9 @@ Claude then:
 2. Pushes the tag: `git push origin v{...}`
 3. Proceeds with feature dispatch
 
-**On-demand command:** `/project:release` — for out-of-cycle version events:
-- Marking a version stable after manual testing: `/project:release stable`
-- Emergency patch tag: `/project:release patch alpha`
+**On-demand command:** `/sln-release` — for out-of-cycle version events:
+- Marking a version stable after manual testing: `/sln-release stable`
+- Emergency patch tag: `/sln-release patch alpha`
 
 ---
 
@@ -121,7 +121,7 @@ No changes to the changelog format or workflow are required.
 1. Add MinVer NuGet package to the MAUI `.csproj`
 2. Bind `ApplicationDisplayVersion` and `ApplicationVersion` to MinVer MSBuild properties
 3. Place the initial git tag `v0.1.0-alpha.0` to establish baseline
-4. Update `/project:commit` command to include the version bump prompt on coding-feature start
-5. Create `/project:release` command
+4. Update `/sln-commit` command to include the version bump prompt on coding-feature start
+5. Create `/sln-release` command
 6. Update BACKLOG.md entry status from `🔵 Deferred` to reflect current state
 7. Add versioning process note to `workflow.md` Rule 3 (commit discipline)

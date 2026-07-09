@@ -112,7 +112,7 @@ When a new app version is installed, users have no way to discover what changed.
 - `highlights`: list of new feature one-liners (may be empty array)
 - `fixes`: list of fix one-liners (may be empty array)
 
-Content for each release is sourced from `Docs/Changelog/changelog.md` at release time and added to `releases.json` as part of the `/project:release` command workflow.
+Content for each release is sourced from `Docs/Changelog/changelog.md` at release time and added to `releases.json` as part of the `/sln-release` command workflow.
 
 ---
 

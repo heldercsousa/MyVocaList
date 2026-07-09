@@ -53,10 +53,12 @@ After step 4, env vars are **automatically available** to Claude Code on every r
 MyVocaList operates at **Spec-Anchored** (Level 2) SDD: specs in `Docs/Management/` are updated whenever behavior changes and serve as authoritative context for every AI session. Code changes without a corresponding spec update are out of scope unless the change is a bug fix affecting no spec-described behavior. Bug fixes, cosmetic changes, and one-off scripts remain spec-exempt (`workflow.md` bypass rule). Why SDD applies to this codebase (rationale essay): `.claude/library/project-governance-reference.md § SDD Applicability`.
 
 ## Commands
-- Build: `/project:build`
-- Commit: `/project:commit`
-- Changelog: `/project:changelog`
-- Review: `/project:review` — when using `subagent-driven-development` skill, review is automatic via fresh subagents. When executing manually (not via the skill), `/project:review` is the trigger.
+> **Naming pattern `[HARD RULE]`:** every project custom command in `.claude/commands/` carries the `sln-` prefix ("solution"). It marks the command as belonging to THIS solution's dev workflow, prevents name collisions with built-in and plugin skills (e.g. project `review` vs built-in `/review`), and stays valid when these dev settings are copied to bootstrap another solution. New commands MUST use the prefix.
+
+- Build: `/sln-build` · Release: `/sln-release`
+- Commit: `/sln-commit`
+- Changelog: `/sln-changelog`
+- Review: `/sln-review` — reviews this solution's task output (the built-in `/review` skill reviews GitHub PRs — different tool). When using `subagent-driven-development` skill, review is automatic via fresh subagents. When executing manually (not via the skill), `/sln-review` is the trigger.
 - **Before any task completion claim:** invoke `superpowers:verification-before-completion` — evidence before assertions always.
 - **Before spec/plan hand-off to Helder:** dispatch fresh spec-reviewer or plan-reviewer subagent (see `.claude/agents/spec-reviewer.md` and `.claude/agents/plan-reviewer.md`).
 - **Development workflow** (spec-first, subagent delegation, commit discipline): `.claude/rules/workflow.md`

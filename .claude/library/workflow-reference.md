@@ -112,7 +112,7 @@ The spec is the authoritative description of intended behavior. When spec and co
    - **2a. Constitution check** — verify the feature does not violate any Non-Negotiable rule in CLAUDE.md before writing the spec
 3. **Write plan** — invoke `superpowers:writing-plans`; user approves; update status → `🟢 Ready`
 4. **Implement** — delegate to a subagent (see Rule 2); update status → `🟡 In Progress`
-5. **Phase-gate review** — invoke `/project:review` after each phase before starting the next
+5. **Phase-gate review** — invoke `/sln-review` after each phase before starting the next
    - On ship: update status → `✅ Done` in the **Business Features** table (or **Dev Cycle Craft** table for infrastructure/tooling items)
 
 ### Proactive BACKLOG triage — Untracked work
@@ -353,11 +353,11 @@ After every wave completes, the main agent must run the build and tests independ
 
 ## Rule 3 — Commit After Every Task
 
-**Run `/project:commit` after every task from `tasks.md` is complete.**
+**Run `/sln-commit` after every task from `tasks.md` is complete.**
 
 A session that ends with uncommitted changes is a session where progress is at risk. The `Stop` hook warns you — treat it as a hard gate, not a suggestion.
 
-> `/project:review` — when using `superpowers:subagent-driven-development`, review is automatic via fresh spec-compliance and code-quality subagents (the skill handles this). When executing manually (not via the skill), `/project:review` is the trigger. Subagents do not invoke `/project:review`.
+> `/sln-review` — when using `superpowers:subagent-driven-development`, review is automatic via fresh spec-compliance and code-quality subagents (the skill handles this). When executing manually (not via the skill), `/sln-review` is the trigger. Subagents do not invoke `/sln-review`.
 
 ### What counts as "task complete"
 - The code builds with no errors

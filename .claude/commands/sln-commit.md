@@ -1,4 +1,4 @@
-﻿# Commit Command
+﻿# Commit Command (`/sln-commit`)
 
 Perform a full commit and push cycle for the MyVocaList project. Follow these steps exactly:
 
@@ -29,7 +29,7 @@ If `skip`, continue with no tag change.
 > **When NOT to prompt:** spec-only commits, docs-only commits, rule/CLAUDE.md updates, bug fixes, changelog-only commits, plan files. The prompt is for feature implementation sessions only.
 
 ## Pre-Commit Checklist
-- [ ] Build is clean: run `/project:build` and confirm 0 errors
+- [ ] Build is clean: run `/sln-build` and confirm 0 errors
 - [ ] No half-finished work (no TODO markers left in modified code unless pre-existing)
 - [ ] No non-English text introduced
 - [ ] No `DisplayAlert`, `DisplayActionSheet`, or `DisplayPromptAsync` in modified files
@@ -73,4 +73,4 @@ If `skip`, continue with no tag change.
 
 8. **Confirm**: Report the commit hash and what was pushed.
 
-9. **Run changelog command**: After committing, always run `/project:changelog` to verify the changelog entry.
+9. **Run changelog command**: After committing, always run `/sln-changelog` to verify the changelog entry.

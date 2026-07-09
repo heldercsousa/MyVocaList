@@ -129,10 +129,10 @@
 ## Phase 5 — Backstop + close
 
 - [ ] **[BACKSTOP] review.md lane note** [SEQUENTIAL — applied AFTER the workflow.md `amend:`]
-  - **Produces:** `.claude/commands/review.md` backstop note (applied separately so the two halves don't diverge in git, R2)
+  - **Produces:** `.claude/commands/sln-review.md` backstop note (applied separately so the two halves don't diverge in git, R2)
   - **Consumes:** workflow.md `amend:` (Helder-applied)
   - **Risk:** Medium — ordering matters
-  - **Files owned:** `.claude/commands/review.md` — this is a **command**, NOT under the `rules/*.md` deny glob, so it is a **direct edit** (not a proposed diff)
+  - **Files owned:** `.claude/commands/sln-review.md` — this is a **command**, NOT under the `rules/*.md` deny glob, so it is a **direct edit** (not a proposed diff)
   - **Demo:** review checklist references the BACKLOG orphan backstop
   - **Review lane:** Elevated
 

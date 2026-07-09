@@ -361,7 +361,7 @@ Run this checklist during code review for any test file. A test that fails one o
 ### Audit frequency
 
 - Before setting a task to `To Review` in the task-log
-- During `/project:review` (run after every task)
+- During `/sln-review` (run after every task)
 
 ---
 
