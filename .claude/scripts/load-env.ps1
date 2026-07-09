@@ -9,8 +9,7 @@ if (-not (Test-Path $envFile)) {
     return
 }
 
-# Check if running as admin (needed for warning message)
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+# Note: admin rights are NOT needed — User scope writes go to HKCU.
 
 $count = 0
 Get-Content $envFile | ForEach-Object {
@@ -30,7 +29,8 @@ Get-Content $envFile | ForEach-Object {
 }
 
 Write-Host "`nLoaded $count environment variables from .env.local (User scope)" -ForegroundColor Cyan
-Write-Host "Note: Variables are now available to Claude Code and all other applications." -ForegroundColor Green
-if (-not $isAdmin) {
-    Write-Host "Tip: Restart Claude Code to pick up the new environment variables." -ForegroundColor Yellow
-}
+Write-Host "Note: Variables are persisted to the registry (HKCU) and will be available to newly launched apps." -ForegroundColor Green
+Write-Host "IMPORTANT: Already-running processes keep their old environment snapshot." -ForegroundColor Yellow
+Write-Host "  1. Close ALL terminal windows completely (not just this tab) - incl. VS Code / Visual Studio if you launch Claude Code from there." -ForegroundColor Yellow
+Write-Host "  2. Open a fresh terminal from the Start menu / taskbar." -ForegroundColor Yellow
+Write-Host "  3. Verify with: `$env:CONTEXT7_API_KEY  (should print your key), then start claude." -ForegroundColor Yellow
