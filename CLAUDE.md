@@ -23,6 +23,24 @@ Architecture layer constraints are defined in `code-principles.md § Architectur
 - **MyVocaList coding rules** (UI, DevExpress, dialogs, EF Core, themes): invoke `myvocalist-coding` skill before any implementation task
 - **MCP governance** (context budget, Security Stance approved-server list, response token discipline, Playwright usage, emerging patterns): `.claude/library/mcp-governance.md` — read before activating/adding/configuring any MCP server. Never add an MCP server without the Security Stance review.
 
+## Team Environment Setup
+
+Environment variables for MCP integrations are stored in `.env.local` (gitignored, team-shared).
+
+**First-time setup (each developer, once per machine):**
+1. Copy `.env.local.example` to `.env.local`
+2. Fill in your API keys (Playwright MCP token, Context7 API key)
+3. Run `. .\.claude\scripts\load-env.ps1` to load vars into the current session
+
+**Each PowerShell session:** run `. .\.claude\scripts\load-env.ps1` to load the env vars. Alternatively, add this to your PowerShell profile (`$PROFILE`) for auto-load on startup:
+```powershell
+if (Test-Path "$PSScriptRoot\..\.claude\scripts\load-env.ps1") {
+    . "$PSScriptRoot\..\.claude\scripts\load-env.ps1"
+}
+```
+
+> **Why `.env.local` instead of System/User env vars?** Team members on different machines need independent keys, and `.env.local` is easier to rotate/revoke than registry entries. Each dev's `.env.local` is never committed.
+
 ## Rules Files
 - MediatR *(planned, not registered)*: no local reference file — derive patterns via Context7 (version-pinned) when MediatR is actually introduced (deleted 2026-07-07, audit F9)
 - Code principles: `.claude/rules/code-principles.md`
