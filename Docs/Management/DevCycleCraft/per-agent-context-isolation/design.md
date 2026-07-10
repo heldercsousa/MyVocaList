@@ -30,6 +30,8 @@ One file each, frontmatter only:
 
 | File | Change | Rationale | Est. saving |
 |---|---|---|---|
+> **Spec updated [2026-07-10]:** Task 2 probe resolved the row-1 uncertainty — `disallowedTools:` does NOT suppress the skills-listing block (~2–2.5k remains in implementor). Measured implementor post-change: 37,370 (formal ≤35,127 line FAILED — comparator mismatch, see `context-baseline.md § Post-change`; like-for-like saving ~4–5k, within the 3–6k estimate below).
+
 | `.claude/agents/implementor.md` | add `disallowedTools: Agent, Artifact, NotebookEdit, PowerShell`; keep `skills: myvocalist-coding` | Never sub-dispatches, publishes artifacts, or edits notebooks; Bash covers `dotnet`/`git`. Denylist (not allowlist) so future harness tools aren't silently lost. Preload kept — it is the coding-rules router used on every task. *Uncertainty: the baseline's ~11k lever came from a `tools:` allowlist, which also dropped the skills-listing block; whether `disallowedTools` alone does the same is unverified — the Task 2 probe decides* | ~3–6k × 4/wave |
 | `.claude/agents/orchestrator.md` | add `disallowedTools: Artifact, NotebookEdit`; remove `skills:` block | Must keep Agent (dispatch), Edit/Write (tasks.md markers, BACKLOG, handoffs), Bash (git/dotnet). Never implements → preload is dead weight; inherited rules routing tables already point to the library | ~1–2k/session |
 | `.claude/agents/spec-reviewer.md` | remove `skills:` block; `tools: Read, Grep, Glob` unchanged | Report-only; can Read `.claude/library/*.md` directly via routing tables it inherits | ~0.7–1k |
