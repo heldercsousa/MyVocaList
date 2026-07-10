@@ -10,6 +10,12 @@
 > history — they are NOT rewritten. This spec supersedes specific ACs in them (see § Supersession) and the
 > originals receive dated supersession notes as a task of this feature (see `tasks.md` Phase 0).
 
+## Open assumptions (Helder to confirm at review)
+
+1. **REQ-FORMUX-09 — ArtistForm local-pick navigates to Edit Artist.** The approved design said "pick local → selects (existing duplicate-guard rules apply)"; this spec encodes navigate-to-Edit-Artist because it is the only actionable outcome on a create form and preserves the original AC-3.3 intent.
+2. **REQ-FORMUX-08 — manual edit after a remote pick clears the pending external identity (ArtistForm create path).** Supersedes AC-4.7 for the create path only (see § Supersession); chosen for symmetry with the SongForm rule that typing clears only the selection identity. AC-4.7 remains in force for edit mode.
+3. **SongForm Title divergence (REQ-FORMUX-31).** Manual edit after a remote *title* pick keeps the pending external identity and lets the existing `HasManualEdits` mechanism (AC-11.4) govern — a deliberate divergence from the ArtistForm rule above, because the song save runs the resolution/merge engine that `HasManualEdits` protects.
+
 ## Purpose
 
 Fix the form-entry UX that currently makes song registration impossible (BUG-027) and replaces the
@@ -51,15 +57,16 @@ while typing, so I avoid duplicates and get accurate names without a separate se
 - **REQ-FORMUX-07** WHEN the artist is created after a remote pick (name unchanged since the pick), the system SHALL persist `ExternalId` and `ExternalProvider` on the created Artist row. (Fixes the current gap: `ArtistFormViewModel` stashes `SelectedExternalId`/`SelectedProvider` but the save path never passes them to `ArtistService`.)
 - **REQ-FORMUX-08** WHEN the user manually edits the Name text after a remote pick, the system SHALL clear the pending external identity (the record being typed is no longer the picked remote entity) while keeping the typed text intact.
 - **REQ-FORMUX-09** WHEN the user taps a local suggestion on the ArtistForm, the system SHALL navigate to the Edit Artist form pre-populated with that record (the artist already exists — creating it again is blocked by the uniqueness rule regardless).
+- **REQ-FORMUX-32** The Edit Artist form SHALL behave identically to the create form for US-1 and US-2 — in particular, the similar-match warn and confirm sheet (REQ-FORMUX-10…14) SHALL apply when renaming an artist (self excluded from candidates). AC-4.7 `HasManualEdits` tracking remains in force in edit mode (see § Supersession).
 
 ### US-2 — Similar-match warn before save (ArtistForm Name + SongForm Artist)
 
 As an admin, I want to be warned when the name I typed is similar to an existing record before a new
 record is created, so accidental near-duplicates need explicit confirmation.
 
-- **REQ-FORMUX-10** WHILE the typed name has ≥ 1 similar match among the already-fetched suggestions (local or remote), the system SHALL show an inline warning hint below the entry listing the similar names (e.g. "Similar: X, Y — tap to pick"), fed exclusively from the cached suggestion results — no refetch. On the ArtistForm this repurposes the existing (currently never-populated) `DuplicateSuggestions` inline block.
+- **REQ-FORMUX-10** WHILE the typed name has ≥ 1 similar match among the already-fetched suggestions (local or remote), the system SHALL show an inline warning hint below the entry listing the similar names (e.g. "Similar: X, Y — tap to pick"; exact wording is implementer-discretion, but it MUST be English and MUST list the candidate names), fed exclusively from the cached suggestion results — no refetch. On the ArtistForm this repurposes the existing (currently never-populated) `DuplicateSuggestions` inline block.
 - **REQ-FORMUX-11** WHEN the user taps a candidate in the inline hint, the system SHALL apply the pick semantics of the hosting form (ArtistForm: REQ-FORMUX-09 for local / REQ-FORMUX-06 for remote; SongForm Artist: attach per REQ-FORMUX-17).
-- **REQ-FORMUX-12** WHEN the user saves and the typed name has ≥ 1 similar match but no exact match, the system SHALL open the confirm sheet listing the candidates (tap to pick) with a "Create '<typed>'" primary action; the save SHALL NOT complete until the user chooses. The hardware Back button SHALL dismiss the sheet without saving.
+- **REQ-FORMUX-12** WHEN the user saves and the typed name has ≥ 1 similar match but no exact match, the system SHALL open the confirm sheet listing the candidates (tap to pick) with a "Create '<typed>'" primary action; the save SHALL NOT complete until the user chooses. The hardware Back button SHALL dismiss the sheet without saving. Pick semantics on the sheet are form-specific and deliberately asymmetric: on the **ArtistForm**, picking a remote candidate fills the form (name + pending external identity), closes the sheet, and the user MUST tap Save again (no save continues automatically); on the **SongForm**, picking a candidate attaches it as the song's artist and the save continues (REQ-FORMUX-19).
 - **REQ-FORMUX-13** WHEN the user taps "Create '<typed>'" on the confirm sheet, the system SHALL proceed with creation using the typed name.
 - **REQ-FORMUX-14** WHEN the typed name has no exact and no similar match, saving SHALL proceed directly with no sheet and no hint.
 
@@ -75,6 +82,7 @@ offered, or having a new one created for me on save — without the form ever er
 - **REQ-FORMUX-19** WHEN the user saves with no selected artist and the typed name has ≥ 1 similar (non-exact) match, the system SHALL apply the confirm sheet flow (REQ-FORMUX-12); picking a candidate attaches it as the song's artist.
 - **REQ-FORMUX-20** WHEN the user saves with no selected artist and no exact or similar match, the system SHALL create the artist transparently inside the same atomic save as the song (single transaction — a failure rolls back both); a marked-for-create artist carrying external identity SHALL be created with that identity persisted.
 - **REQ-FORMUX-21** WHEN the user saves with an empty or whitespace-only Artist field, the form SHALL show "Artist is required" and SHALL NOT save (unchanged from AC-10.4).
+- **REQ-FORMUX-33** The Edit Song form SHALL behave identically to the create form for US-3 and US-4 — in particular, when the user changes the Artist text in edit mode, the save-resolution ladder (REQ-FORMUX-18…20) SHALL apply identically.
 
 ### US-4 — Song form Title autocomplete (local + remote) with autofill
 
@@ -85,6 +93,7 @@ song should fill the form for me — but nothing is stored until I save.
 - **REQ-FORMUX-23** WHEN the user taps a remote title suggestion, the system SHALL autofill Title, Artist (the local artist if one is collation-equal / external-id-equal, otherwise the remote artist as marked-for-create), and the song's pending external identity — and SHALL NOT persist anything before Save.
 - **REQ-FORMUX-24** WHEN the user saves after a remote title pick, the system SHALL run the existing Song Import & Entity Resolution flow unchanged (resolution sheet / merge sheet per `song-import-resolution/requirements.md` US-1…US-5 — those ACs remain fully in force).
 - **REQ-FORMUX-25** WHEN the user taps a local title suggestion, the system SHALL fill the Title text only (uniqueness per artist is still enforced at save by the existing rules).
+- **REQ-FORMUX-31** WHEN the user manually edits the Title (or any other autofilled field) after a remote title pick, the system SHALL retain the pending external identity and let the existing `HasManualEdits` mechanism (AC-11.4) govern on save — a deliberate divergence from the ArtistForm rule REQ-FORMUX-08 (see § Open assumptions, item 3).
 
 ### US-5 — Search-strip removal and picker page deletion
 
@@ -135,7 +144,8 @@ dated note to each original file:
 | **AC-10.3** — Artist field autocomplete searches local artists only; "user must select an artist from the results" | `artists-songs/requirements.md` | Superseded by REQ-FORMUX-15…20: free text always allowed; local + remote sources; no-match → transparent create on save. |
 | **AC-10.2** (partial) — form shows "an API search strip" | `artists-songs/requirements.md` | Search strip element removed (REQ-FORMUX-26); the rest of AC-10.2 stands. |
 | **AC-11.1 / AC-11.2 / AC-11.2a** — API search strip below Title; artist pre-fill locked (read-only) after API result | `artists-songs/requirements.md` | Superseded by REQ-FORMUX-22…24 (title autocomplete + autofill) and REQ-FORMUX-16 (lock retired). AC-11.3–11.5 (`HasManualEdits`, merge warning) remain in force. |
-| **AC-4.1 / AC-4.5 / AC-4.6** (partial) — Artist form API search strip + result list + tap-to-import | `artists-songs/requirements.md` | Delivery mechanism replaced by remote autocomplete rows (REQ-FORMUX-02, 06, 07). AC-4.2 provider order (MusicBrainz → Deezer fallback), AC-4.4 semantics, and AC-4.7 `HasManualEdits` remain in force, adapted to the autocomplete surface; AC-4.3's blocking error message is replaced by silent local-only degradation (REQ-FORMUX-05). |
+| **AC-4.1 / AC-4.5 / AC-4.6** (partial) — Artist form API search strip + result list + tap-to-import | `artists-songs/requirements.md` | Delivery mechanism replaced by remote autocomplete rows (REQ-FORMUX-02, 06, 07). AC-4.2 provider order (MusicBrainz first, Deezer fallback on empty/error) and AC-4.4 semantics remain in force, adapted to the autocomplete surface; AC-4.3's blocking error message is replaced by silent local-only degradation (REQ-FORMUX-05). AC-4.7: see its own row below. |
+| **AC-4.7** (create path only) — manual edit after API import marks `HasManualEdits = true` on save | `artists-songs/requirements.md` | Superseded **for the ArtistForm create path only** by REQ-FORMUX-08: a manual name edit after a remote pick clears the pending external identity, so the created record is a plain manual record (no identity, no `HasManualEdits`). AC-4.7 remains in force for **edit mode** (REQ-FORMUX-32). Open assumption — see § Open assumptions, item 2. |
 | **AC-B8 (BUG-008)** — Artist field autocomplete-only, "auto-clears on blur without a valid selection", locks when API-imported | `artists-songs/song-import-resolution/requirements.md` | Superseded by REQ-FORMUX-15/16: blur-clear deleted, lock retired. Pre-populate-in-Edit-mode remains in force. |
 
 Bug dispositions (BACKLOG rows updated at close-out, `tasks.md` Phase 6):
