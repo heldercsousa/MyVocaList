@@ -3,7 +3,7 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 > Feature folder: `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/`
-> Spec: `requirements.md` (REQ-FORMUX-01…33) · Design: `design.md` · Tasks: `tasks.md` (this plan is 1:1 with it — same 13 tasks, same phases, same ordering; no tasks.md refinement was needed)
+> Spec: `requirements.md` (REQ-FORMUX-01…33) · Design: `design.md` · Tasks: `tasks.md` (this plan is 1:1 with it — same phases, same ordering. **Refinement 2026-07-10, plan review:** the single SongFormViewModel checkbox was split into two — Tasks 12A/12B below — granularity only, no scope change; `tasks.md` updated in the same commit)
 > Created: 2026-07-10 · Spec approved by Helder 2026-07-10 (downstream gates pre-approved — recorded per task below)
 
 **Goal:** In-field local+remote autocomplete on ArtistForm Name / SongForm Artist / SongForm Title, blur-clear removal (BUG-027), similar-match warn-before-save via confirm BottomSheet, search-strip removal, ArtistPickerPage/SongPickerPage deletion, and the ArtistForm external-identity persistence fix.
@@ -39,16 +39,18 @@ Every task's requirements implicitly include this section (constitutional constr
 | 1b | Task 4 (ArtistSuggestionService) + Task 5 (SongSuggestionService) `[P]` | yes — disjoint files |
 | 1c | Task 6 (ArtistService fix) → Task 7 (DI — hotspot, sequential) | no |
 | 2 | Task 8 (governed component) | solo — Architectural lane |
-| 3 | Task 9 (BUG-027) → Task 10 (ArtistFormVM p1) → Task 11 (ArtistFormVM p2) → Task 12 (SongFormVM) | strictly sequential (Tasks 10/11 share files; Task 12 after Task 9) |
+| 3 | Task 9 (BUG-027) → Task 10 (ArtistFormVM p1) → Task 11 (ArtistFormVM p2) → Task 12A (SongFormVM autocomplete/autofill) → Task 12B (SongFormVM save-resolution ladder) | strictly sequential (Tasks 10/11 share files; Tasks 12A/12B share files; 12A after Task 9) |
 | 4 | Task 13 (ArtistFormPage) → Task 14 (SongFormPage) | sequential — one XAML per build cycle |
 | 5 | Task 15 (picker deletion) | solo — hotspot files |
 | 6 | Task 16 (deprecation note) → Task 17 (E2E + close-out) | sequential |
 
 *(Task numbers below are plan-local; each maps to the identically-titled `tasks.md` checkbox.)*
 
+> **task-log.md concurrency rule (parallel waves 1a and 1b):** `task-log.md` is listed in every task's commit — two concurrent worktree subagents appending to it WILL merge-conflict. Mechanism (single, mandatory): during a parallel wave, subagents do **not** edit `task-log.md`; each returns its task-log entry text at the top of its final commit message body, and the **orchestrator appends both entries to `task-log.md` in one commit immediately after serially merging the wave's worktrees**. Sequential (solo) tasks append to `task-log.md` directly as written in their steps.
+
 ## Open spec gaps
 
-### GAP-1 — Transparent-create path vs. pending YouTube URLs (affects Task 12 only)
+### GAP-1 — Transparent-create path vs. pending YouTube URLs (affects Task 12B only)
 
 - **Location:** `design.md § SongFormPage` save flow ("transparent create: artist + song persisted in ONE transaction (existing atomic-save lever)") vs. REQ-FORMUX-20 vs. BUG-009/AC-6.2 (song + buffered URLs atomic via `CreateSongWithUrlsAsync`).
 - **Gap:** The named lever is `ISongResolutionService.CommitAsync(candidate, ResolutionChoice.CreateNew, null, null)` → `ResolveOrCreateArtistIdAsync` → `_songService.CreateSongAsync(...)` (verified in `Services/SongResolutionService.cs` lines 160–172). That path (a) does **not** carry the VM's `_pendingRawUrls` buffer (BUG-009), and (b) executes artist create and song create as two `SaveChangesAsync` calls on the shared scoped `AppDbContext` — not literally one transaction. The current VM NoMatch path (`CommitNewSongAsync`) instead calls `CreateSongWithUrlsAsync(SelectedArtistId!.Value, …, _pendingRawUrls)`, which requires an already-persisted artist id. No existing seam satisfies REQ-FORMUX-20 ("single transaction — a failure rolls back both") + URL atomicity + "resolution engine consumed unchanged" simultaneously.
@@ -56,7 +58,7 @@ Every task's requirements implicitly include this section (constitutional constr
   - **Option A** — route the no-selected-artist create through `CommitAsync(CreateNew)` (spec's named lever), then attach `_pendingRawUrls` post-create via `ISongKaraokeUrlService.AddUrlAsync` (edit-mode semantics; URL attach failure non-fatal). Consequence: matches the design text literally; weakens BUG-009 URL atomicity for this one path; artist/song remain two saves inside one scoped context (same guarantee level the import flow already ships with — AC-2.5 precedent).
   - **Option B** — add an optional `IEnumerable<string> urls` parameter (default `[]`) to `ISongResolutionService.CommitAsync`, threaded to `CreateSongWithUrlsAsync`. Consequence: true song+URL atomicity, but touches the resolution engine, which `requirements.md § Out of Scope` declares consumed unchanged.
 - **Recommendation:** Option A — it uses exactly the lever the approved design names, and BUG-009 buffering predates artists-created-on-save; the resolution engine stays untouched.
-- **Blocking:** No for Tasks 1–11 and 13–17. **Task 12 step 6 must not be implemented until Helder confirms A or B at plan review** — if unresolved when Task 12 is dispatched, the implementor sets `blocked: spec gap` at that step. All other Task 12 steps (suggestions, exact auto-attach, similar-sheet, autofill) are unaffected.
+- **Blocking:** No for Tasks 1–12A and 13–17. **Task 12B Step 5 must not be implemented until Helder confirms A or B at plan review** — if unresolved when Task 12B is dispatched, the implementor sets `blocked: spec gap` at that step. All other Task 12B steps (exact auto-attach, similar-sheet, empty-artist validation) and all of Task 12A (suggestions, autofill) are unaffected.
 
 No other spec gaps found: interfaces, thresholds, flows, deletion list, and edit-mode behavior (REQ-FORMUX-32/33) are all fully specified.
 
@@ -171,6 +173,7 @@ git commit -m "feat: suggestion DTOs (Contracts) — form-ux-redesign"
 ### Task 3: Repository collation batch lookups + integration tests `[P — parallel with Task 2, different files]`
 
 **tasks.md:** "Repository collation batch lookups + integration tests" `[P]` · Risk Medium · TDD Level B · Review lane Standard
+**Sizing exception (explicit):** 6 files (2 interfaces + 2 implementations + 2 test files) exceeds the 5-file cap — accepted because the two methods are mirror twins sharing one collation pattern (< 2 h total); splitting artist/song halves would duplicate the identical pattern review across two tasks for no isolation benefit.
 
 **Files:**
 - Modify: `Domain/RepositoryInterface/IArtistRepository.cs`
@@ -468,7 +471,7 @@ git commit -m "feat: DI registration for suggestion services — form-ux-redesig
   - `BlurredWithoutSelectionCommand` **remains** — PersonFormPage may still use it. If implementation finds the component itself forces clearing behavior (not just the VM handler), that is non-additive → STOP, `blocked: spec gap`.
 
 - [ ] **Step 1 (Gate 1 — MD3 review):** Check m3.material.io menus + lists: section header uses list *subheader* anatomy; loading row per progress-indicator-in-list guidance. Record findings (style keys, typography role for the subheader) in the task-log BEFORE editing.
-- [ ] **Step 2 (Gate 2 — consumer map):** `grep -rn "AutocompleteField" MyVocaList/UI/Pages/` — expected consumers: `PersonFormPage.xaml`, `SongFormPage.xaml`. Record the actual grep output in the task-log (never from memory). If any unexpected consumer appears, add it to the risk table.
+- [ ] **Step 2 (Gate 2 — consumer map):** grep the **entire repository**, not just pages: `grep -rn "AutocompleteField" --include="*.xaml" --include="*.cs" .` (catches `<autocomplete:AutocompleteField` usages, xmlns declarations, `x:Reference`, code-behind and test references anywhere in the solution). Expected XAML consumers: `PersonFormPage.xaml`, `SongFormPage.xaml`. Record the actual grep output in the task-log (never from memory). Any unexpected consumer → add it to the risk table before editing.
 - [ ] **Step 3 (Gate 3 — per-consumer risk):** Record in task-log:
 
 | Consumer | What could break | Verification |
@@ -559,6 +562,7 @@ Regression risk: Low — regression test seen Red before fix; superseded-AC test
   - `[ObservableProperty] bool _isRemoteLookupRunning`
   - Repurposed similar-warn state: keep `DuplicateSuggestions`/`HasDuplicateSuggestions` property names (existing XAML block rebinds cheaply in Task 13) but feed them from `FilterSimilar(typed, _cachedSuggestions)` — element type becomes `ArtistSuggestionDto`.
   - Pending identity: reuse `SelectedExternalId`/`SelectedProvider` (existing stash properties) — set on remote pick, cleared on manual edit.
+  - `IAsyncRelayCommand<ArtistSuggestionDto> PickInlineHintCandidateCommand` — tap handler for the inline similar-warn hint rows; applies the host form's pick semantics (REQ-FORMUX-11: local → REQ-FORMUX-09 navigate to Edit Artist; remote → REQ-FORMUX-06 fill + stash identity). Task 13 binds the hint rows to exactly this command.
   - Internal: `_cachedSuggestions : List<ArtistSuggestionDto>` (local + remote as fetched), remote-stagger timer with **injectable delay** (constructor param `Func<TimeSpan, CancellationToken, Task>? staggerDelay = null` defaulting to `Task.Delay` — Level B testability per design § Remote staging), `CancellationTokenSource _remoteCts` cancelled on: new search request, suggestion pick, navigation (`CancelAsync`), Save.
 
 Orchestration per `design.md § Remote staging`: `SearchRequestedCommand(term)` → cancel previous remote CTS → `GetLocalAsync(term)` → render local rows immediately (single `RunOnUiThread` block; map DTO→`AutocompleteSuggestion` with `Data` = the DTO) → start 400 ms stagger (injectable) → set `IsRemoteLookupRunning = true` → `GetRemoteAsync(term, localResults, ct)` → append remote rows / on failure-empty just clear the loading flag (log only) → recompute warn state from `_cachedSuggestions` via `FilterSimilar`. Stale completions (token cancelled) render nothing.
