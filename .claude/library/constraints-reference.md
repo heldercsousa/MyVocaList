@@ -52,7 +52,7 @@
   - Under `DevCycleCraft` → parent `{0C4BA720-519E-4818-BD9B-34AC19E4FCD7}`
   - Under `Management` root → parent `{15F1DA03-2180-47BF-BC40-1BB457C97F9E}`
 
-  **GUIDs:** Use sequential pattern `{FA1234BC-0001-4000-8000-00000000XXXX}` incrementing from the last used value (currently `0041`). Check the `.sln` before picking the next number.
+  **GUIDs:** Use sequential pattern `{FA1234BC-0001-4000-8000-00000000XXXX}` incrementing from the last used value (currently `0044`). Check the `.sln` before picking the next number.
 
   **Note (rules-file-refactoring, 2026-07-04):** `.claude/library/*` and `.claude/rules/*` files are NOT `.sln`-registered in practice (the HARD GATE is applied to `Docs/` files). New library files created by the refactor do not need `.sln` entries; only `Docs/` artifacts do.
 
