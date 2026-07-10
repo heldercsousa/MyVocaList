@@ -138,12 +138,17 @@ empty states.
 #### Acceptance Criteria
 
 - AC-4.1: The form shall show an API search strip below the Name field, containing a search input (pre-filled with the current Name value) and a "Search" button.
+  > **Spec updated 2026-07-10:** partially superseded by changes/2026-07-10-form-ux-redesign — delivery mechanism replaced by remote autocomplete rows (REQ-FORMUX-02/06/07); AC-4.2 provider order and AC-4.4 semantics remain in force.
 - AC-4.2: When the user taps "Search", the app shall query MusicBrainz; if the result is empty or a network error occurs, it shall fall back to Deezer silently.
 - AC-4.3: If both providers fail, the app shall show an inline message below the search strip: "Could not reach music catalog. Check your connection."
+  > **Spec updated 2026-07-10:** superseded by changes/2026-07-10-form-ux-redesign — blocking error message replaced by silent local-only degradation (REQ-FORMUX-05).
 - AC-4.4: If no results are found, the app shall show: "No results found. You can register manually."
 - AC-4.5: The app shall show up to 5 API results in a compact list below the search strip.
+  > **Spec updated 2026-07-10:** partially superseded by changes/2026-07-10-form-ux-redesign — delivery mechanism replaced by remote autocomplete rows (REQ-FORMUX-02/06/07); AC-4.2 provider order and AC-4.4 semantics remain in force.
 - AC-4.6: When the user taps an API result, the app shall populate the Name field with the artist name from the API and record `ExternalId` and `ExternalProvider` for saving.
+  > **Spec updated 2026-07-10:** partially superseded by changes/2026-07-10-form-ux-redesign — delivery mechanism replaced by remote autocomplete rows (REQ-FORMUX-02/06/07); AC-4.2 provider order and AC-4.4 semantics remain in force.
 - AC-4.7: After an API import, any subsequent manual edit to the Name field shall mark the record as `HasManualEdits = true` on save.
+  > **Spec updated 2026-07-10:** superseded for the ArtistForm CREATE path only by changes/2026-07-10-form-ux-redesign — manual edit after a remote pick clears the pending external identity (REQ-FORMUX-08). AC-4.7 remains in force for edit mode (REQ-FORMUX-32).
 
 ---
 
@@ -243,7 +248,9 @@ empty states.
 
 - AC-10.1: When the user taps the FAB on the Songs page (global mode), the app shall navigate to the New Song form page.
 - AC-10.2: The form shall show an `Artist` autocomplete field (required), a `Title` field (required), a `Featured Artists` field (optional), a `Lyrics` field (optional), an API search strip, a `Cancel` button, and a `Save` button.
+  > **Spec updated 2026-07-10:** partially superseded by changes/2026-07-10-form-ux-redesign — the API search strip element is removed (REQ-FORMUX-26); the rest of this AC stands.
 - AC-10.3: The `Artist` field shall be an autocomplete that searches registered artists by name (case- and accent-insensitive, ≥ 2 chars, 400ms debounce). The user must select an artist from the results.
+  > **Spec updated 2026-07-10:** superseded by changes/2026-07-10-form-ux-redesign — free text always allowed; local + remote autocomplete; no-match → transparent create on save (REQ-FORMUX-15…20).
 - AC-10.4: When the user submits with no artist selected, the form shall show "Artist is required."
 - AC-10.5: When the user submits with an empty or whitespace-only title, the form shall show "Title is required."
 - AC-10.6: When the user submits a title shorter than 1 character, the form shall show "Title too short."
@@ -264,8 +271,11 @@ empty states.
 #### Acceptance Criteria
 
 - AC-11.1: The song form shall show an API search strip below the Title field.
+  > **Spec updated 2026-07-10:** superseded by changes/2026-07-10-form-ux-redesign — title autocomplete + autofill replace the search strip (REQ-FORMUX-22…24); artist lock retired (REQ-FORMUX-16). AC-11.3–11.5 remain in force.
 - AC-11.2: When the user taps an API result, the app shall populate `Title`, `FeaturedArtists`, and `Artist` from the API data. The `Artist` field shall be matched to a registered artist by name (case-insensitive); if matched, the field shall be pre-filled and disabled (read-only). If not matched, the user may register the artist first and return.
+  > **Spec updated 2026-07-10:** superseded by changes/2026-07-10-form-ux-redesign — title autocomplete + autofill replace the search strip (REQ-FORMUX-22…24); artist lock retired (REQ-FORMUX-16). AC-11.3–11.5 remain in force.
 - AC-11.2a: When the `Artist` field is pre-filled from an API result, it shall be locked (non-editable) to preserve the external attribution.
+  > **Spec updated 2026-07-10:** superseded by changes/2026-07-10-form-ux-redesign — title autocomplete + autofill replace the search strip (REQ-FORMUX-22…24); artist lock retired (REQ-FORMUX-16). AC-11.3–11.5 remain in force.
 - AC-11.3: Error and fallback behavior shall mirror AC-4.3 and AC-4.4.
 - AC-11.4: `HasManualEdits` tracking shall mirror AC-4.7.
 - AC-11.5: If the song has `HasManualEdits = true` and the admin triggers an API import, a warning BottomSheet shall appear before overwriting (mirrors AC-5.7).

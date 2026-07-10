@@ -86,6 +86,7 @@ These pre-existing specs (`artists-songs/bugs/`) are prerequisites for an end-to
 - **AC-B6 (BUG-006)** Navigation commands to picker pages use `allowConcurrentExecutions: false`; a double-tap cannot register the messenger twice or crash.
 - **AC-B7 (BUG-007)** Picker pages suppress the Shell chrome back button (`BackButtonBehavior IsVisible=False`) so only one back affordance renders.
 - **AC-B8 (BUG-008)** Song form artist field: autocomplete-only (no free text), auto-clears on blur without a valid selection, pre-populates in Edit mode, locks when the artist came from an API import.
+  > **Spec updated 2026-07-10:** superseded by changes/2026-07-10-form-ux-redesign — blur-clear deleted, artist lock retired (REQ-FORMUX-15/16). Pre-populate-in-Edit-mode remains in force.
 - **AC-B10 (BUG-010)** `SongPickerViewModel` exists, is DI-registered, and `SongPickerPage` injects it (not `QueueSongPickerViewModel`); selecting a result drives the resolution engine.
 - **AC-B4 (BUG-004)** The `BottomSheetTitle` style exists in `MaterialStyles.xaml` (MD3 titleLarge) before any resolution/merge sheet references it — style-must-exist-before-use.
 
