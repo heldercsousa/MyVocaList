@@ -8,7 +8,7 @@
 
 ## Phase 0 — Spec supersession notes (docs only)
 
-- [ ] **Add dated supersession notes to the two original requirements files** [SEQUENTIAL]
+- [x] **Add dated supersession notes to the two original requirements files** [SEQUENTIAL]
   - **Produces:** `> **Spec updated 2026-07-10:** superseded by changes/2026-07-10-form-ux-redesign — <one line>` notes on: `artists-songs/requirements.md` (at AC-10.2/10.3, AC-11.1/11.2/11.2a, AC-4.1/4.3/4.5/4.6, AC-4.7 create-path-only) and `artists-songs/song-import-resolution/requirements.md` (at AC-B8). Original text stays untouched (immutable history) — notes only.
   - **Consumes:** `requirements.md § Supersession` (this feature)
   - **Risk:** Low — additive doc notes
@@ -18,7 +18,7 @@
 
 ## Phase 1 — Contracts / Infra / Services
 
-- [ ] **Suggestion DTOs (Contracts)** [P]
+- [~] **Suggestion DTOs (Contracts)** [P]
   - **Produces:** `ArtistSuggestionDto`, `SongSuggestionDto` records per `design.md § Interfaces`
   - **Consumes:** nothing new
   - **Risk:** Low — pure DTO records (Level C: no mandatory test; no-test decision documented in task-log)
@@ -26,7 +26,7 @@
   - **Demo:** Solution builds; both records match the `design.md` shapes exactly.
   - **Review lane:** Standard · TDD Level C
 
-- [ ] **Repository collation batch lookups + integration tests** [P — parallel with DTOs, different files]
+- [~] **Repository collation batch lookups + integration tests** [P — parallel with DTOs, different files]
   - **Produces:** `IArtistRepository.GetByNamesCollatedAsync` + `ISongRepository.GetByTitlesCollatedAsync` + implementations; integration tests (real SQLite, accent/case cases)
   - **Consumes:** nothing new
   - **Risk:** Medium — collation query must use `EF.Functions.Collate`, single batch query (no per-candidate round-trips), no C# normalization (HARD RULE)
