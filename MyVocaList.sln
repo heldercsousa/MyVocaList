@@ -45,6 +45,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{2C8F9F
 	ProjectSection(SolutionItems) = preProject
 		Docs\Design\MyVocaList_Iconography_MD3_Guideline.md = Docs\Design\MyVocaList_Iconography_MD3_Guideline.md
 		Docs\Design\Tongues.pdf = Docs\Design\Tongues.pdf
+		Docs\Design\tooling-evaluations.md = Docs\Design\tooling-evaluations.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C1B-4E22-4CEE-85FF-453BD80607BD}"
@@ -610,12 +611,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec-evolution-versioning",
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\findings.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\findings.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{FA1234BC-0001-4000-8000-000000000042}"
-	ProjectSection(SolutionItems) = preProject
-		Docs\Design	ooling-evaluations.md = Docs\Design	ooling-evaluations.md
-		Docs\Design\MyVocaList_Iconography_MD3_Guideline.md = Docs\Design\MyVocaList_Iconography_MD3_Guideline.md
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "per-agent-context-isolation", "per-agent-context-isolation", "{FA1234BC-0001-4000-8000-000000000044}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\requirements.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\requirements.md
@@ -716,7 +711,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FA1234BC-0001-4000-8000-000000000043} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
-		{FA1234BC-0001-4000-8000-000000000042} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{FA1234BC-0001-4000-8000-000000000028} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{E9A5FC59-0C8C-49B6-9845-7870FA3CD098} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
