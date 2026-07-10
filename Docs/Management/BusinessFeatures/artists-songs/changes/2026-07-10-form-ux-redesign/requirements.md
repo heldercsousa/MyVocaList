@@ -57,7 +57,7 @@ while typing, so I avoid duplicates and get accurate names without a separate se
 - **REQ-FORMUX-07** WHEN the artist is created after a remote pick (name unchanged since the pick), the system SHALL persist `ExternalId` and `ExternalProvider` on the created Artist row. (Fixes the current gap: `ArtistFormViewModel` stashes `SelectedExternalId`/`SelectedProvider` but the save path never passes them to `ArtistService`.)
 - **REQ-FORMUX-08** WHEN the user manually edits the Name text after a remote pick, the system SHALL clear the pending external identity (the record being typed is no longer the picked remote entity) while keeping the typed text intact.
 - **REQ-FORMUX-09** WHEN the user taps a local suggestion on the ArtistForm, the system SHALL navigate to the Edit Artist form pre-populated with that record (the artist already exists — creating it again is blocked by the uniqueness rule regardless).
-- **REQ-FORMUX-32** The Edit Artist form SHALL behave identically to the create form for US-1 and US-2 — in particular, the similar-match warn and confirm sheet (REQ-FORMUX-10…14) SHALL apply when renaming an artist (self excluded from candidates). AC-4.7 `HasManualEdits` tracking remains in force in edit mode (see § Supersession).
+- **REQ-FORMUX-32** The Edit Artist form SHALL behave identically to the create form for US-1 and US-2 — except REQ-FORMUX-08, which applies to the create path only; in edit mode AC-4.7 governs manual edits after a pick. In particular, the similar-match warn and confirm sheet (REQ-FORMUX-10…14) SHALL apply when renaming an artist (self excluded from candidates). AC-4.7 `HasManualEdits` tracking remains in force in edit mode (see § Supersession).
 
 ### US-2 — Similar-match warn before save (ArtistForm Name + SongForm Artist)
 
