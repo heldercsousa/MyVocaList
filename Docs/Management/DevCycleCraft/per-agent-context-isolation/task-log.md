@@ -20,7 +20,7 @@
 
 ## Task 2 — Post-change implementor probe (2026-07-09)
 
-**Status:** To Review — **REQ-CTXISO-01 FAILED on the formal threshold; lever effect confirmed** (escalated to Helder per plan Task 2 Step 3 failure path)
+**Status:** Done — **REQ-CTXISO-01 FAILED on the formal threshold; lever effect confirmed.** Escalated per plan Task 2 Step 3 failure path; **Helder approved the measured outcome 2026-07-10** (threshold miss = comparator mismatch, not a lever defect — REQ closed).
 **Commit:** `7263670` — `docs: per-agent context isolation — post-change probe result (REQ-CTXISO-01)`
 
 ### Changed files
