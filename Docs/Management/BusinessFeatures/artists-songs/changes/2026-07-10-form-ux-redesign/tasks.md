@@ -69,6 +69,9 @@
 ## Phase 2 — Governed component (dedicated task — no bundling, HARD RULE)
 
 - [ ] **[COMPONENT] AutocompleteField — remote section marker + loading-hint row (additive)** [SEQUENTIAL]
+  - **Produces:** additive `AutocompleteField` capability — remote-section header row ("From music database") + loading-hint row bound to `IsRemoteLookupRunning`; `AutocompleteSuggestion` model carries a `Data` payload (the source DTO) and a section/kind marker. Purely additive (REQ-FORMUX-30) — existing consumers render identically when the new properties are unbound.
+  - **Consumes:** nothing new (the DTO payload is mapped by the ViewModels in Phase 3; the component only renders `AutocompleteSuggestion`)
+  - **Risk:** Architectural — governed component (2+ consumers); change MUST stay additive or STOP and escalate (`blocked: spec gap`)
   - **MD3 review:** list section header / subheader anatomy per m3.material.io (menus + lists); loading indicator row per MD3 progress-indicator-in-list guidance — record findings in task-log
   - **Consumer map:** grep `<autocomplete:AutocompleteField` before editing — expected: `PersonFormPage.xaml`, `SongFormPage.xaml` (ArtistFormPage becomes a consumer in Phase 4; verify no others)
   - **Per-consumer risk:**
@@ -108,12 +111,22 @@
   - **Demo:** Tests prove: no-match → create called with identity; similar → sheet flag set, no create; exact → uniqueness error; remote-candidate pick on sheet fills form without saving.
   - **Review lane:** Elevated · TDD Level A
 
-- [ ] **SongFormViewModel — artist save resolution + title autocomplete/autofill** [SEQUENTIAL — after BUG-027 task]
-  - **Produces:** artist entry local+remote suggestions via `IArtistSuggestionService`; save resolution (exact → auto-attach; similar → sheet; none → transparent atomic create incl. marked-for-create identity); title suggestions via `ISongSuggestionService`; remote title pick autofill (Title + Artist + pending external identity, nothing persisted); Save routes into existing resolution/merge flow unchanged; tests per `design.md § SongFormPage` flows
+> **Refinement 2026-07-10 (plan review):** the single SongFormViewModel checkbox below was split into **12A** (autocomplete/autofill) and **12B** (save-resolution ladder) — granularity only, no scope change. This isolates the GAP-1-blocked save step (12B) from the unblocked autocomplete work (12A). Same two files; strictly sequential (12B after 12A), never parallel.
+
+- [ ] **SongFormViewModel (12A) — artist + title autocomplete + remote-pick autofill** [SEQUENTIAL — after BUG-027 task]
+  - **Produces:** artist entry local+remote suggestions via `IArtistSuggestionService`; title suggestions via `ISongSuggestionService`; remote title pick autofill (Title + Artist + pending external identity, nothing persisted); similar-warn state fed by `FilterSimilar` (no refetch); tests for suggestion staging, autofill state, cancellation
   - **Consumes:** both suggestion services, DI task, BUG-027 task committed
-  - **Risk:** High — touches the primary blocked flow (song creation)
+  - **Risk:** High — user-facing suggestion behavior on the song form
   - **Files owned:** `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`
-  - **Demo:** Tests prove all three artist-resolution branches + autofill state + resolution-flow invocation unchanged.
+  - **Demo:** Tests prove local rows immediate, remote appended after stagger, remote title pick autofills Title+Artist+pending identity with nothing persisted.
+  - **Review lane:** Elevated · TDD Level A
+
+- [ ] **SongFormViewModel (12B) — artist save-resolution ladder + transparent atomic create** [SEQUENTIAL — after 12A]
+  - **Produces:** save resolution (exact → auto-attach; similar → sheet; none → transparent atomic create incl. marked-for-create identity); Save routes into existing resolution/merge flow unchanged; tests per `design.md § SongFormPage` flows for every branch
+  - **Consumes:** 12A committed, both suggestion services, updated `ArtistService`
+  - **Risk:** High — touches the primary blocked flow (song creation). ⚠ **The transparent-create step is `blocked: spec gap` (GAP-1) until Helder confirms Option A or B at plan review** — all other branches (exact auto-attach, similar → sheet, empty-artist validation) are unaffected.
+  - **Files owned:** `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (same files as 12A — strictly sequential, never parallel)
+  - **Demo:** Tests prove all three artist-resolution branches + resolution-flow invocation unchanged; transparent-create test lands once GAP-1 is resolved.
   - **Review lane:** Elevated · TDD Level A
 
 ## Phase 4 — UI / XAML (one file per task; build between)
