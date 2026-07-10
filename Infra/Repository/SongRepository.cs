@@ -106,6 +106,19 @@ public class SongRepository : ISongRepository
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Song>> GetByTitlesCollatedAsync(
+        IEnumerable<string> titles, CancellationToken ct = default)
+    {
+        var list = titles?.Where(t => !string.IsNullOrWhiteSpace(t)).Distinct().ToList() ?? [];
+        if (list.Count == 0) return [];
+
+        return await _db.Songs
+            .AsNoTracking()
+            .Where(s => list.Contains(EF.Functions.Collate(s.Title, CollationConstants.Default)))
+            .ToListAsync(ct);
+    }
+
+    /// <inheritdoc />
     public Task AddAsync(Song song, CancellationToken ct)
     {
         _db.Songs.Add(song);

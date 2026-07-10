@@ -371,4 +371,28 @@ public class ArtistRepositoryTests : IAsyncLifetime
         var saved = await _db.Artists.AsNoTracking().FirstAsync(a => a.Id == artist.Id);
         Assert.Equal("Updated Name", saved.Name);
     }
+
+    // ── GetByNamesCollatedAsync ──────────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-FORMUX-03: remote dedup tier (b) — collation-equal name via batch DB lookup
+    public async Task GetByNamesCollatedAsync_AccentAndCaseVariants_ResolvesInOneQuery()
+    {
+        _db.Artists.AddRange(new Artist { Name = "cafe" }, new Artist { Name = "Metallica" });
+        await _db.SaveChangesAsync();
+
+        var found = await _repo.GetByNamesCollatedAsync(["Café", "METALLICA", "Nobody"]);
+
+        Assert.Equal(2, found.Count);
+        Assert.Contains(found, a => a.Name == "cafe");
+        Assert.Contains(found, a => a.Name == "Metallica");
+    }
+
+    [Fact]
+    // [AC] REQ-FORMUX-03: batch lookup with no matches returns empty (no exception)
+    public async Task GetByNamesCollatedAsync_NoMatches_ReturnsEmpty()
+    {
+        var found = await _repo.GetByNamesCollatedAsync(["Ghost"]);
+        Assert.Empty(found);
+    }
 }
