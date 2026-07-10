@@ -1,0 +1,66 @@
+About sourcetree usage by agents defined, perhaps including the orchestrator.
+	beyond usage be mandatory a set of subagents types, and always based in the most updated branch
+  (develop is the one always most updated), and concerning about your works on not had gotten the estimated savings
+  with the per-agent context loading tools filterig, woudn't be possible have the git sourcetree branch have a custom
+  content handling only what subagent will really need? It would be a way, I guess, to realy avoid loading uneeded
+  tools given that the branch, would contains fewer, and sometimes, realy fewer guidelines to be loaded.
+  Append a task for this investigation.
+  
+About session locking develop env and making other parallel works in the locked branch not allower
+	Sometimes claude code end up locking the dev env in a specifc branch, concurring with developer usage of the dev IDE, and another possible
+terminal running a distinct set of tasks and that was started after the one that locked the branch in the current one. We must avoid such thing to
+happen, so that the other parallel agents / device developer can do any navigation across branches or whatever needed. I supose it 
+means that, even the backlog handing by the orchestrator, also will need a sourcetree used for this
+
+About sourcetree usage and the risk for loosing prior efforts 
+	I asked to always track sourcetree/any information about where and very last status of each task step to be registered somewhere in task references, to avoid prior efforts lost in case of interruption.
+Such feature is deeply hooked to a feature to resume the task by another agent when identified the agent last handling the step/task no longer is alive, meaning it may be taken by a another distinct agent to be continued.
+I just want to assure such management level is really usefull and, if so, just receive a review of it for assure it's well defined, or even enhance anything found by you. So, just append a task for investigate it.
+
+About song and artist forms, and if their original specs predicts the usage of automcomplete component. 
+
+1) I supose artist have prediction to have a autocomplete feature in name entry from its insert/update form. But it never worked. 
+1.1) Prior fixes were spawned but work didn't solve the issue.
+1.2) For me, when user type an artist name in Name entry, it sounds logical to search matching records both in local DB and 3rd API. 
+1.2.1) The local records matching the string typed must appear in the autocomplete list,
+No doubt about it. 
+1.2.2) The matching records found in 3rd-party API would be realy pragmatic to be listed as well, but before listed as option, should be:
+1.2.2.1) Filtered to avoid list the very same already registered localy
+1.2.2.2) Should add the less possible friction to UX. 
+1.2.2.3) In a case it's not available, the UI/UX must not add any friction to allow the user just freely type a name and save normaly.
+1.2.3) There is a weird element right above the name entry, that I really didn't understando what for it exist (looks like to do the autocomplete same goal). So, I believe such element must realy desapear from the form.
+1.3) A new desire, given the form has 1 only entry, is to swith it to a "bottom sheet" like UI/UX . But it conflict, perhaps, with the autocomplete UI/UX. So, I need your feedback about it! There are other CRUD forma I wish 
+to swap the form to a modal or bottom sheet due to the same reason. E.g. Venues form is realy simple and no autocomplete is present in its name entry, and would avoid navigation to and back only to add/update a simple venue.
+2) The song form has very similar points about autocomplete feature, and the logic is all applicable here as well, but for the song name, except the song unique points and logics.
+2.2) A crucial thing about the form 1st entry: Artist.  This field has the exactly same behavior of the Artist form, realy the very same, except if user wish to update the artist name. 
+2.2.1) Think: if an artist does not exist, it must be added into DB. 
+2.2.2) If a matching one exists locally, it must be picked from the autocomplete, no matter if from local DB or from 3rd-party API.
+2.2.3) And, against what exist today, which I consider a friction in the song's form, it must not clean the artist entry when no match exist locally and remotelly
+2.2.3.1) It must allow the typed name to remain. 
+2.2.3.2) it would be really useful if app could warn user, before saving, to confirm the name to be created, in a case there is at least one "similar", not completelly matching to the string, artist registered localy or remotely
+2.2.3.2.1) Such warn could happen in a confirm modal as the base warn, but could be also have a validation "warn like" message decorating the bottom side of the Artist entry, just for aware user, and also, increasing the UX, provide way to ease pick the already identyied records both localy and remotely, so 
+that avoiding new retrieving from the source, and ease user selecting the similar entry desired.
+2.2.3.3) Such advanced similar records identification is also a outstanding candidate to have autocomplete usage, but only if makes any sense, for sure.
+2.2.2) These points are likely applicable into the artist form.
+2.2.2.1) Considering the similarity, perhaps Artist form is a candidate to become a component, reusable by not only Songs form to define artist entry, but by other autocomplete entries needing similar functionalities.
+2.3) The song title entry really shares lots of behaviors with artist entry. Real candidate for take advantage of a possible autocomplete component mentioned in 2.2.2.
+2.4) As happened in artist form, song form has the very same weid element for searching songs, sounding like if autocompleted was replaced by it. I guess it must desappear.
+2.5) Song add/update logic is pretty complex due to lyric entry, and, by now, must be kept cause, I didn't even test if it works as defined. But, I want you to review the definition to see whether sounds good and return you thoughts about.
+3) Both forms, when not presented by a bottom sheet or modal, sound like out of pattern regarding to the cancel and save buttons. Perhaps cancel is something completely redundant to back navigation button in a case a form is taking the entire screen (makes sense for bottom sheet/modal). And save, perhaps, would be more UX enhanced if showned in the trailing button slot of the app bar (hidding any button there shown by default, or appending it to the available slot not filled yet by another button).
+3.1) It's mandatory to be MD3 compliant about these UI/UX changes. Oficial documentation must be checked to confirm any change is realy the way to go. Whenever such change is defined as the pattern, or any other pattern was found: 
+3.1.1) The internal tools about CRUD/MD3 must be updated to reflect the pattern.
+3.1.2) all the CRUD forms that will remain being loaded to fill the entire screen must receive the change.
+
+About the app bar component, and search app bar component, and their interaction within the CRUD's list pages.
+
+1) I want to stablish a pattern to any page navigated by tapping the hamburguer menu buttons or not:
+1.1) the app bar must show the hamburguer menu with the very same root option. 
+1.2) the app bar must show the back button, allowing return to previous place that made user navigate to it (but, maybe, not always it makes sense at all, so it's something to evaluate per page context)
+2) The app bar component search button tapping switches the top bar to search app bar, which, on its hand, switches back to app bar when its back button is tapped. Back button is to navigate back to prior page, not to switch these bars.
+Current implementation is confusing even for me. So I supose, and I don't want you to agree with me by default, but inspect MD3 compliance for options:
+2.1) The swap of bars must desapear and the search bar must always be shown right below the appbar, without its weird leading back button (also, maybe a leading back button in leading slot of search bar would be useful in a case
+of a page without an app bar handling the title, which currently does not exist, but perhaps may appear sometime.
+
+
+Append these points in backlog, all nested to their parent feature. Defer any pending specific tasks/steps related to the features mentioned here if they will be overwritten by these desires here.
+After had thei, decide if this session is still good to tackle on spec and aftward tasks, or fresh session is the call.
