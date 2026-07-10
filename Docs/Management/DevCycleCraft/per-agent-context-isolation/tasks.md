@@ -22,7 +22,7 @@
   - Demo: verifier verdict returned without tool/context failures
 
 - [ ] **Task 4 — Close-out: BACKLOG + task-log**
-  - Produces: BACKLOG row 174 updated (research (a)–(d) answered, worktree-overlay candidate marked obsolete, status → ✅ or ⏳ Helder gate); task-log.md entry with Changed files + verification evidence; `.sln` registration for ALL new Docs files in this folder (requirements, design, tasks, context-baseline, task-log — 5 files)
+  - Produces: BACKLOG row 174 updated (research (a)–(d) answered, worktree-overlay candidate marked obsolete, status → ✅ or ⏳ Helder gate); task-log.md entry with Changed files + verification evidence; `.sln` registration for ALL new Docs files in this folder (requirements, design, tasks, context-baseline, plan registered at spec/plan phase; task-log registered by Task 3 — verify all 6 present)
   - Consumes: Tasks 1–3
   - Demo: BACKLOG row reflects measured outcome; commit clean
   - Note: BACKLOG has two related rows — close row 174 (line 174); confirm the rules-file-refactoring row (line 195) only cross-references this feature and needs no close-out of its own
