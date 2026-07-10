@@ -124,9 +124,9 @@
 - [ ] **SongFormViewModel (12B) — artist save-resolution ladder + transparent atomic create** [SEQUENTIAL — after 12A]
   - **Produces:** save resolution (exact → auto-attach; similar → sheet; none → transparent atomic create incl. marked-for-create identity); Save routes into existing resolution/merge flow unchanged; tests per `design.md § SongFormPage` flows for every branch
   - **Consumes:** 12A committed, both suggestion services, updated `ArtistService`
-  - **Risk:** High — touches the primary blocked flow (song creation). ⚠ **The transparent-create step is `blocked: spec gap` (GAP-1) until Helder confirms Option A or B at plan review** — all other branches (exact auto-attach, similar → sheet, empty-artist validation) are unaffected.
+  - **Risk:** High — touches the primary blocked flow (song creation). ✅ **GAP-1 RESOLVED — Option A (Helder 2026-07-10):** transparent-create routes via `ISongResolutionService.CommitAsync(CreateNew)` + post-create `_pendingRawUrls` attach through `ISongKaraokeUrlService` (URL-attach failure non-fatal). No `blocked: spec gap` remains; all branches (transparent create, exact auto-attach, similar → sheet, empty-artist validation) are dispatchable.
   - **Files owned:** `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (same files as 12A — strictly sequential, never parallel)
-  - **Demo:** Tests prove all three artist-resolution branches + resolution-flow invocation unchanged; transparent-create test lands once GAP-1 is resolved.
+  - **Demo:** Tests prove all three artist-resolution branches + resolution-flow invocation unchanged; transparent-create test (`Save_NoMatch_...`) implemented per Option A (`CommitAsync(CreateNew)` + post-create URL attach).
   - **Review lane:** Elevated · TDD Level A
 
 ## Phase 4 — UI / XAML (one file per task; build between)

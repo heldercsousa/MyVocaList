@@ -193,6 +193,14 @@ Save tapped (title/artist validation passed)
                  mirrors song-import-resolution AC-2.5 artist-first ordering)
 ```
 
+> **GAP-1 resolution (Helder 2026-07-10 — Option A):** the "existing atomic-save lever" for the no-match
+> transparent-create path is `ISongResolutionService.CommitAsync(candidate, ResolutionChoice.CreateNew, null, null)`
+> (artist-then-song saves inside one scoped `AppDbContext`, AC-2.5 precedent), followed by attaching the VM's
+> buffered `_pendingRawUrls` post-create via `ISongKaraokeUrlService.AddUrlAsync` (URL-attach failure is
+> non-fatal — logged, save still succeeds). The resolution engine is consumed **unchanged** (Out of Scope
+> honored); BUG-009 song+URL atomicity is intentionally relaxed for this single path. No acceptance criterion
+> changes — this is an implementation-lever clarification of REQ-FORMUX-20. Full rationale: `plan.md § GAP-1`.
+
 Title remote pick (autofill only — REQ-FORMUX-23/24): fills Title + Artist (local if exists, else
 marked-for-create) + pending song external identity. Save then enters the **existing** resolution/merge
 flow from `song-import-resolution/design.md` unchanged (`ISongResolutionService` /
