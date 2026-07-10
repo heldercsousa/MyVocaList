@@ -27,6 +27,9 @@ Docs-only task — no build/test required (no code touched).
 ### Open spec gap (recorded — needs Helder decision at plan review)
 - **GAP-1** (plan § Open spec gaps): REQ-FORMUX-20 transparent atomic create vs. BUG-009 pending-URL atomicity vs. "resolution engine consumed unchanged". Options A (route via `ISongResolutionService.CommitAsync(CreateNew)` + post-create URL attach — recommended) / B (add optional `urls` param to `CommitAsync` — touches out-of-scope engine). Affects Task 12B (transparent-create step) only; that step is `blocked: spec gap` until Helder picks A or B. All other tasks unaffected.
 
+Helder reply: Option A.
+
+
 ---
 ## Task: Plan review fix-pass — plan phase
 **Plan:** Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/plan.md
@@ -50,3 +53,22 @@ Docs-only fix pass — no build/test required (no code touched).
 
 ### Residual for Helder (plan approval gate)
 - **GAP-1 A/B decision** is the one substantive item requiring Helder's input before Task 12B's transparent-create step can be implemented. Everything else is unblocked.
+
+---
+## Task: GAP-1 resolution recorded + Task 12B unblocked — implementation kickoff
+**Status:** Done
+**Started:** 2026-07-10
+**Completed:** 2026-07-10
+**Trigger:** Helder decided GAP-1 = **Option A** (route via `ISongResolutionService.CommitAsync(CreateNew)` + post-create `_pendingRawUrls` attach through `ISongKaraokeUrlService`; URL-attach failure non-fatal; resolution engine consumed unchanged; BUG-009 URL atomicity intentionally relaxed for this one path).
+
+### Changed files:
+- `plan.md` — GAP-1 section marked ✅ RESOLVED (Option A, full rationale + accepted consequence); Task 12 header warning, ladder step 4, Step 6, and Coverage-check "Open items" all updated from "needs Helder decision" → resolved.
+- `tasks.md` — Task 12B Risk + Demo lines updated; no `blocked: spec gap` remains on any task.
+- `design.md` — added GAP-1 resolution note under § SongFormPage save flow (implementation-lever clarification of REQ-FORMUX-20; no AC change).
+- `Docs/Management/BACKLOG.md` — Form UX Redesign row: status 🟢 Ready → 🟡 In Progress; GAP-1 marked resolved; all 14 tasks unblocked.
+- `task-log.md` — this entry.
+
+### Notes
+- **No acceptance criterion changed** — Option A is an implementation-lever clarification of REQ-FORMUX-20; `design.md`'s "existing atomic-save lever" text is consistent with it. Per plan.md Task 17, `spec-changelog.md` recording this post-approval refinement is created at close-out (with `.sln` registration) — deferred, not skipped.
+- Docs-only change — no build/test required.
+- Next: begin implementation per plan.md DRY-Onion waves, starting Phase 1 Wave 1a (Task 2 DTOs `[P]` + Task 3 repo collation lookups `[P]`), after Phase 0 Task 1 (supersession notes).
