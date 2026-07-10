@@ -344,4 +344,30 @@ public class SongRepositoryTests : IAsyncLifetime
         Assert.Equal(1, totalCount);
         Assert.Equal("Clichê", items.Single().Title);
     }
+
+    // ── GetByTitlesCollatedAsync ─────────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-FORMUX-03: remote dedup tier (b) — collation-equal title via batch DB lookup
+    public async Task GetByTitlesCollatedAsync_AccentAndCaseVariants_ResolvesInOneQuery()
+    {
+        var artist = await SeedArtistAsync("Anitta");
+        _db.Set<Song>().Add(MakeSong(artist.Id, "cliche"));
+        _db.Set<Song>().Add(MakeSong(artist.Id, "Envolver"));
+        await _db.SaveChangesAsync();
+
+        var found = await _repo.GetByTitlesCollatedAsync(["Clichê", "ENVOLVER", "Nobody"]);
+
+        Assert.Equal(2, found.Count);
+        Assert.Contains(found, s => s.Title == "cliche");
+        Assert.Contains(found, s => s.Title == "Envolver");
+    }
+
+    [Fact]
+    // [AC] REQ-FORMUX-03: batch lookup with no matches returns empty (no exception)
+    public async Task GetByTitlesCollatedAsync_NoMatches_ReturnsEmpty()
+    {
+        var found = await _repo.GetByTitlesCollatedAsync(["Ghost Song"]);
+        Assert.Empty(found);
+    }
 }

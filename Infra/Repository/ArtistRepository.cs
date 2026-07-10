@@ -118,6 +118,19 @@ public class ArtistRepository : IArtistRepository
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Artist>> GetByNamesCollatedAsync(
+        IEnumerable<string> names, CancellationToken ct = default)
+    {
+        var list = names?.Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList() ?? [];
+        if (list.Count == 0) return [];
+
+        return await _db.Artists
+            .AsNoTracking()
+            .Where(a => list.Contains(EF.Functions.Collate(a.Name, CollationConstants.Default)))
+            .ToListAsync(ct);
+    }
+
+    /// <inheritdoc />
     public Task AddAsync(Artist artist, CancellationToken ct)
     {
         _db.Artists.Add(artist);
