@@ -41,6 +41,18 @@
 4. **CLAUDE.md + rules inheritance (~13–16k/agent) is the remaining large chunk** — whether it can be scoped per-agent is the single open research question for this feature. If Claude Code offers no mechanism, achievable additional savings beyond frontmatter hygiene are limited and the time-box rule applies (jump to BUG-027).
 5. **Unscopeable floor** ≈ harness text + minimal tool schemas ≈ 5–7k/agent.
 
+## Post-change (Task 2, 2026-07-09)
+
+| Probe | Cold-start tokens | vs 38,127 comparator | Pass (≤35,127)? |
+|-------|-------------------|----------------------|-----------------|
+| `implementor` (denylist + preload) | **37,370** | −757 | **NO — REQ-CTXISO-01 FAILED on the formal line** |
+
+- **Denied tools confirmed absent:** Agent, Artifact, NotebookEdit, PowerShell all missing from the probe's tool list (8 full schemas remain: Bash, Edit, Glob, Grep, Read, Skill, ToolSearch, Write). **Frontmatter edits apply to dispatches immediately — no session restart required.**
+- **Skills-listing block: PRESENT (~2–2.5k)** — resolves design.md § Changes row-1 uncertainty: `disallowedTools:` denylist does NOT suppress the listing block (the reviewers' allowlists without `Skill` do).
+- **myvocalist-coding preload: confirmed** (~600–700 tokens, router only, no library leak).
+- **Why the formal line missed (analysis, no re-probe):** the 38,127 comparator is `general-purpose`, which carries NO agent role prompt. The probe reports the implementor role body (~250 lines, ~17% of injected context ≈ ~3k) embedded in its system prompt, plus the ~0.7k preload. Like-for-like pre-change implementor ≈ 41–42k → **actual lever saving ≈ 4–5k, within the design's 3–6k estimate**. The pass line inherited the comparator mismatch the spec itself flagged as a caveat (requirements REQ-CTXISO-01 comparator caveat).
+- **Disposition (plan Task 2 Step 3 failure path):** number recorded, REQ-CTXISO-01 marked FAILED on the formal threshold, no rollback (no tool-availability defect — all denials behaved), escalated to Helder via task-log `To Review` + BACKLOG ⏳ gate. Residual reduction candidates if Helder wants more: shrink the implementor role body (~3k, own task), skills-listing block is not per-agent controllable (platform).
+
 ## Probe incidental findings
 
 - spec-reviewer probe noted the harness prose mentions Bash but no Bash schema is provided — cosmetic inconsistency, no action.
