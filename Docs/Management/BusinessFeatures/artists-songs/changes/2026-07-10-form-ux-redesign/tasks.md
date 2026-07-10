@@ -9,7 +9,7 @@
 ## Phase 0 — Spec supersession notes (docs only)
 
 - [ ] **Add dated supersession notes to the two original requirements files** [SEQUENTIAL]
-  - **Produces:** `> **Spec updated 2026-07-10:** superseded by changes/2026-07-10-form-ux-redesign — <one line>` notes on: `artists-songs/requirements.md` (at AC-10.2/10.3, AC-11.1/11.2/11.2a, AC-4.1/4.3/4.5/4.6) and `artists-songs/song-import-resolution/requirements.md` (at AC-B8). Original text stays untouched (immutable history) — notes only.
+  - **Produces:** `> **Spec updated 2026-07-10:** superseded by changes/2026-07-10-form-ux-redesign — <one line>` notes on: `artists-songs/requirements.md` (at AC-10.2/10.3, AC-11.1/11.2/11.2a, AC-4.1/4.3/4.5/4.6, AC-4.7 create-path-only) and `artists-songs/song-import-resolution/requirements.md` (at AC-B8). Original text stays untouched (immutable history) — notes only.
   - **Consumes:** `requirements.md § Supersession` (this feature)
   - **Risk:** Low — additive doc notes
   - **Files owned:** `Docs/Management/BusinessFeatures/artists-songs/requirements.md`, `Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/requirements.md`
