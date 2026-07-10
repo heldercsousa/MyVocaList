@@ -38,6 +38,17 @@ public interface IArtistRepository
     /// <param name="ct">Cancellation token.</param>
     /// <returns>At most <paramref name="take"/> artists matching the prefix, unordered.</returns>
     Task<IReadOnlyList<Artist>> GetFuzzyCandidatePoolAsync(string namePrefixToken, int take, CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns all artists whose name is collation-equal (case- and accent-insensitive) to any
+    /// of the given <paramref name="names"/>, resolved in a single batch query.
+    /// Used for remote-suggestion dedup tier (b) — REQ-FORMUX-03.
+    /// </summary>
+    /// <param name="names">Candidate names to match; blank/duplicate entries are ignored.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Matching artists, unordered; empty when no candidate matches.</returns>
+    Task<IReadOnlyList<Artist>> GetByNamesCollatedAsync(IEnumerable<string> names, CancellationToken ct = default);
+
     Task AddAsync(Artist artist, CancellationToken ct);
     Task UpdateAsync(Artist artist, CancellationToken ct);
     Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct);

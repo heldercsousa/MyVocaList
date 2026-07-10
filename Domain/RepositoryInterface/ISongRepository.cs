@@ -48,6 +48,17 @@ public interface ISongRepository
     /// <param name="ct">Cancellation token.</param>
     /// <returns>At most <paramref name="take"/> songs matching the prefix, unordered.</returns>
     Task<IReadOnlyList<Song>> GetFuzzyCandidatePoolAsync(int artistId, string titlePrefixToken, int take, CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns all songs whose title is collation-equal (case- and accent-insensitive) to any
+    /// of the given <paramref name="titles"/>, resolved in a single batch query.
+    /// Used for remote-suggestion dedup tier (b) — REQ-FORMUX-03.
+    /// </summary>
+    /// <param name="titles">Candidate titles to match; blank/duplicate entries are ignored.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Matching songs, unordered; empty when no candidate matches.</returns>
+    Task<IReadOnlyList<Song>> GetByTitlesCollatedAsync(IEnumerable<string> titles, CancellationToken ct = default);
+
     Task AddAsync(Song song, CancellationToken ct);
     Task UpdateAsync(Song song, CancellationToken ct);
     Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct);
