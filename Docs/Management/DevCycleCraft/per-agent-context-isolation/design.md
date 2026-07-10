@@ -22,6 +22,8 @@ Source: official docs, code.claude.com/docs/en/sub-agents.md + context-window.md
 
 **Working levers (all frontmatter):** `tools:` (allowlist), `disallowedTools:` (denylist), `skills:` (each listed skill's FULL body is preloaded; omitting the key does not remove the listing block, only the preload).
 
+> **Addendum (2026-07-09, post-spec-review follow-up research):** per-agent rules scoping does not exist, but **path-scoped rules DO** — `.claude/rules/*.md` files can carry `paths:` frontmatter (glob list) so the rule loads only when matching files are read (memory.md § Path-specific rules). Also confirmed: CLAUDE.md always loads in full (no offset/partial/truncation mechanism — only MEMORY.md truncates at 200 lines/25KB), and `@`-imports are inline-expanded at launch, never lazy. Path-scoping is a *conditional* lever, not a *per-agent* one, and never-miss HARD RULEs must stay unconditional — so it is registered as an out-of-scope follow-up (see requirements.md), not folded into this MVP. Open question for that follow-up: whether path-scoped rules are also excluded from subagent cold-start injection (needs its own probe).
+
 ## Changes
 
 One file each, frontmatter only:

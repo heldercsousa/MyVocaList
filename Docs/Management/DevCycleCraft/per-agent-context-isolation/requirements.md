@@ -29,6 +29,7 @@ Every subagent dispatched in a wave cold-starts with context it does not need. M
 - Worktree-per-agent `.mcp.json` overlay (BACKLOG row's original candidate design — obsolete: MCP schemas are deferred platform-side and rules inheritance has no scoping mechanism regardless of worktree).
 - `mcpServers:` per-agent frontmatter scoping (<0.5k value at current deferral behavior — documented non-lever).
 - Any hook machinery, load/unload patterns, or settings.json changes.
+- **Path-scoped rules evaluation** (`paths:` frontmatter on `.claude/rules/*.md` — discovered post-spec-review, see `design.md § Research findings` addendum): a real conditional-loading lever, but orthogonal to per-agent scoping and requiring its own probe (does it apply at subagent cold-start?) + a never-miss/HARD-RULE partition of each rules file. Follow-up candidate, not MVP.
 - "Deactivate on completion" from the original row — meaningless for subagents (context dies with the agent).
 
 ## Validation rules
