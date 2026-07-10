@@ -72,3 +72,61 @@ Docs-only fix pass — no build/test required (no code touched).
 - **No acceptance criterion changed** — Option A is an implementation-lever clarification of REQ-FORMUX-20; `design.md`'s "existing atomic-save lever" text is consistent with it. Per plan.md Task 17, `spec-changelog.md` recording this post-approval refinement is created at close-out (with `.sln` registration) — deferred, not skipped.
 - Docs-only change — no build/test required.
 - Next: begin implementation per plan.md DRY-Onion waves, starting Phase 1 Wave 1a (Task 2 DTOs `[P]` + Task 3 repo collation lookups `[P]`), after Phase 0 Task 1 (supersession notes).
+
+---
+## Task: Add dated supersession notes to the two original requirements files (Phase 0, Task 1)
+**Plan:** plan.md — Task 1 · **Status:** Done · **Started/Completed:** 2026-07-10 (orchestrator, docs-only)
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/requirements.md` — additive dated notes below AC-4.1/4.3/4.5/4.6/4.7, AC-10.2/10.3, AC-11.1/11.2/11.2a
+- `Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/requirements.md` — additive dated note below AC-B8
+
+### Verification evidence
+- `git diff --unified=0` confirmed **additive only** (no deleted content lines — immutable history preserved)
+- No `.sln` change (both files already registered)
+- Committed `c7d06be`.
+
+---
+## Task: Suggestion DTOs (Contracts) — Wave 1a [P] (implementor, worktree)
+**Plan:** plan.md — Task 2 · **Status:** To Review · **Completed:** 2026-07-10 · **TDD Level C**
+
+### Changed files:
+- `Contracts/DTOs/Suggestions/ArtistSuggestionDto.cs` — new sealed record, verbatim per plan.md Task 2 Step 1 / design.md § Interfaces
+- `Contracts/DTOs/Suggestions/SongSuggestionDto.cs` — new sealed record, verbatim per plan.md Task 2 Step 2 / design.md § Interfaces
+
+### Verification evidence
+- Build: PASS (Contracts 0 errors; 1 pre-existing unrelated CS8612 warning in PersonListItemDto.cs)
+- Tests: N/A for this task (DTOs only); Level C — no mandatory test (plain data-carrier records, no logic), no-test decision documented per testing.md
+- Post-edit re-read: confirmed; shapes match design.md § Interfaces exactly (field order, types, nullability)
+- Integrated to develop via cherry-pick `464b60e`; full suite green post-integration (440/440)
+
+---
+## Task: Repository collation batch lookups + integration tests — Wave 1a [P] (implementor, worktree)
+**Plan:** plan.md — Task 3 · **Status:** To Review · **Completed:** 2026-07-10 · **TDD Level B**
+
+### Changed files:
+- `Domain/RepositoryInterface/IArtistRepository.cs` — added `GetByNamesCollatedAsync` (`<summary>` XML doc)
+- `Domain/RepositoryInterface/ISongRepository.cs` — added `GetByTitlesCollatedAsync` (`<summary>` XML doc)
+- `Infra/Repository/ArtistRepository.cs` — implemented `GetByNamesCollatedAsync` (`EF.Functions.Collate` + `list.Contains(...)`, `.AsNoTracking()`)
+- `Infra/Repository/SongRepository.cs` — implemented `GetByTitlesCollatedAsync` (mirror over `_db.Songs`/`s.Title`)
+- `MyVocaList.Tests/Integration/Repositories/ArtistRepositoryTests.cs` — `GetByNamesCollatedAsync_AccentAndCaseVariants_ResolvesInOneQuery`, `_NoMatches_ReturnsEmpty`
+- `MyVocaList.Tests/Integration/Repositories/SongRepositoryTests.cs` — `GetByTitlesCollatedAsync_AccentAndCaseVariants_ResolvesInOneQuery`, `_NoMatches_ReturnsEmpty`
+
+### Build notes
+No fallback needed — EF Core 10 translates `list.Contains(EF.Functions.Collate(column, CollationConstants.Default))` to a single SQL `IN (...)` query on SQLite (same precedent as `DeleteAsync`'s `idList.Contains(...)` in both repos). No per-candidate round-trips, no C#-side normalization (HARD RULE honored).
+
+### Verification evidence
+- Build: PASS (0 errors). Tests: PASS — Red→Green confirmed (CS1061 "method not defined" before impl → 2/2 filtered green after; both methods).
+- Real SQLite temp DB via `TestDbContextFactory` (no in-memory provider, no DbContext mocking — testing.md anti-patterns honored)
+- Integrated to develop via cherry-pick `56b25af`; full suite green post-integration (**440/440**, 0 failures)
+
+### AC traceability
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| REQ-FORMUX-03 | Dedup tier (b) — collation-equal name via batch DB lookup | `ArtistRepository.GetByNamesCollatedAsync` | `GetByNamesCollatedAsync_AccentAndCaseVariants_ResolvesInOneQuery` |
+| REQ-FORMUX-03 | Batch lookup, no matches → empty | `ArtistRepository.GetByNamesCollatedAsync` | `GetByNamesCollatedAsync_NoMatches_ReturnsEmpty` |
+| REQ-FORMUX-03 | Dedup tier (b) — collation-equal title via batch DB lookup | `SongRepository.GetByTitlesCollatedAsync` | `GetByTitlesCollatedAsync_AccentAndCaseVariants_ResolvesInOneQuery` |
+| REQ-FORMUX-03 | Batch lookup, no matches → empty | `SongRepository.GetByTitlesCollatedAsync` | `GetByTitlesCollatedAsync_NoMatches_ReturnsEmpty` |
+
+### Environment note (orchestrator action item)
+Both Wave 1a worktrees were **missing `.claude/scripts/constitutional-guard.py`** (only `lease/` present), blocking the Write/Edit pre-hook; agents worked around it (heredoc / copy-in, uncommitted). Worktree base was `efcc492` (an ancestor of develop, ~79 tests behind) — cherry-pick onto current develop + full-suite run mitigated any staleness. **Wave 1b briefings must instruct agents to (a) `git merge --no-edit develop` first so Tasks 2/3 outputs are present, and (b) copy the guard hook if missing.**

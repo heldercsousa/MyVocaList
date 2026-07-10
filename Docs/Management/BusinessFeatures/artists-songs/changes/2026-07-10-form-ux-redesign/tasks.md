@@ -18,7 +18,7 @@
 
 ## Phase 1 — Contracts / Infra / Services
 
-- [~] **Suggestion DTOs (Contracts)** [P]
+- [x] **Suggestion DTOs (Contracts)** [P]
   - **Produces:** `ArtistSuggestionDto`, `SongSuggestionDto` records per `design.md § Interfaces`
   - **Consumes:** nothing new
   - **Risk:** Low — pure DTO records (Level C: no mandatory test; no-test decision documented in task-log)
@@ -26,7 +26,7 @@
   - **Demo:** Solution builds; both records match the `design.md` shapes exactly.
   - **Review lane:** Standard · TDD Level C
 
-- [~] **Repository collation batch lookups + integration tests** [P — parallel with DTOs, different files]
+- [x] **Repository collation batch lookups + integration tests** [P — parallel with DTOs, different files]
   - **Produces:** `IArtistRepository.GetByNamesCollatedAsync` + `ISongRepository.GetByTitlesCollatedAsync` + implementations; integration tests (real SQLite, accent/case cases)
   - **Consumes:** nothing new
   - **Risk:** Medium — collation query must use `EF.Functions.Collate`, single batch query (no per-candidate round-trips), no C# normalization (HARD RULE)
