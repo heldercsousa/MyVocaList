@@ -610,6 +610,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "per-agent-context-isolation", "per-agent-context-isolation", "{FA1234BC-0001-4000-8000-000000000044}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\requirements.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\requirements.md
+		Docs\Management\DevCycleCraft\per-agent-context-isolation\plan.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\plan.md
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\design.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\design.md
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\tasks.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\tasks.md
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\context-baseline.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\context-baseline.md
