@@ -1,7 +1,7 @@
 # Artist & Song Form UX Redesign — Design (dated change spec)
 
 > Feature folder: `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/`
-> Requirements: `requirements.md` in this folder (REQ-FORMUX-01…30)
+> Requirements: `requirements.md` in this folder (REQ-FORMUX-01…33)
 > Cross-references: `Docs/Management/BusinessFeatures/artists-songs/design.md` (original),
 > `Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/design.md` (resolution engine — consumed unchanged)
 > Created: 2026-07-10 · Encodes Helder-approved design of 2026-07-10
@@ -49,7 +49,8 @@ public interface IArtistSuggestionService
     /// <summary>Local artist suggestions for a term (DB collation match, max 5). Immediate path.</summary>
     Task<IReadOnlyList<ArtistSuggestionDto>> GetLocalAsync(string term, CancellationToken ct = default);
 
-    /// <summary>Remote suggestions (all providers), deduplicated against localResults per REQ-FORMUX-03
+    /// <summary>Remote suggestions — MusicBrainz first, Deezer fallback on empty/error, per AC-4.2.
+    /// Deduplicated against localResults per REQ-FORMUX-03
     /// (external-id → collation-equal name via batch DB lookup → similarity ≥ threshold). Max 5.
     /// Returns an empty list on provider failure (logged) — never throws for provider errors.</summary>
     Task<IReadOnlyList<ArtistSuggestionDto>> GetRemoteAsync(
@@ -64,10 +65,16 @@ public interface IArtistSuggestionService
 public interface ISongSuggestionService
 {
     Task<IReadOnlyList<SongSuggestionDto>> GetLocalAsync(string term, CancellationToken ct = default);
+
+    /// <summary>Remote suggestions — same provider order and dedup/failure semantics as
+    /// IArtistSuggestionService.GetRemoteAsync (MusicBrainz first, Deezer fallback per AC-4.2).</summary>
     Task<IReadOnlyList<SongSuggestionDto>> GetRemoteAsync(
         string term, string? artistHint, IReadOnlyList<SongSuggestionDto> localResults, CancellationToken ct = default);
 }
 ```
+
+Provider order (both services): **MusicBrainz first, Deezer fallback when MusicBrainz returns empty or
+errors** — AC-4.2 remains in force (see `requirements.md § Supersession`). Never query both in parallel.
 
 Modified existing signature (Services):
 

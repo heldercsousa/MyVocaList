@@ -1,7 +1,7 @@
 # Artist & Song Form UX Redesign — Tasks
 
 > Feature folder: `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/`
-> Spec: `requirements.md` (REQ-FORMUX-01…30) · Design: `design.md`
+> Spec: `requirements.md` (REQ-FORMUX-01…33) · Design: `design.md`
 > Ordering: DRY Onion (Contracts/Infra → Services → ViewModels → UI → cleanup). No Domain schema change,
 > **no migration** (Artist already has `ExternalId`/`ExternalProvider` — verified 2026-07-10).
 > XAML rule: one file → build → fix → next (never batch UI edits).
@@ -18,11 +18,19 @@
 
 ## Phase 1 — Contracts / Infra / Services
 
-- [ ] **Suggestion DTOs + repository collation batch lookups** [P]
-  - **Produces:** `Contracts` `ArtistSuggestionDto`, `SongSuggestionDto`; `IArtistRepository.GetByNamesCollatedAsync` + `ISongRepository.GetByTitlesCollatedAsync` + implementations; integration tests (real SQLite, accent/case cases)
+- [ ] **Suggestion DTOs (Contracts)** [P]
+  - **Produces:** `ArtistSuggestionDto`, `SongSuggestionDto` records per `design.md § Interfaces`
+  - **Consumes:** nothing new
+  - **Risk:** Low — pure DTO records (Level C: no mandatory test; no-test decision documented in task-log)
+  - **Files owned:** `Contracts/DTOs/Suggestions/ArtistSuggestionDto.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`
+  - **Demo:** Solution builds; both records match the `design.md` shapes exactly.
+  - **Review lane:** Standard · TDD Level C
+
+- [ ] **Repository collation batch lookups + integration tests** [P — parallel with DTOs, different files]
+  - **Produces:** `IArtistRepository.GetByNamesCollatedAsync` + `ISongRepository.GetByTitlesCollatedAsync` + implementations; integration tests (real SQLite, accent/case cases)
   - **Consumes:** nothing new
   - **Risk:** Medium — collation query must use `EF.Functions.Collate`, single batch query (no per-candidate round-trips), no C# normalization (HARD RULE)
-  - **Files owned:** new DTO files, `Domain/RepositoryInterface/IArtistRepository.cs`, `Domain/RepositoryInterface/ISongRepository.cs`, `Infra/Repository/ArtistRepository.cs`, `Infra/Repository/SongRepository.cs`, new integration test file(s)
+  - **Files owned:** `Domain/RepositoryInterface/IArtistRepository.cs`, `Domain/RepositoryInterface/ISongRepository.cs`, `Infra/Repository/ArtistRepository.cs`, `Infra/Repository/SongRepository.cs`, new integration test file(s)
   - **Demo:** Integration test proves "Café" resolves against stored "cafe" via one SQL query.
   - **Review lane:** Standard · TDD Level B
 
@@ -84,13 +92,21 @@
   - **Demo:** Test run log shows the regression test failing before the change and passing after; typed artist text survives blur.
   - **Review lane:** Elevated
 
-- [ ] **ArtistFormViewModel — autocomplete wiring, similar-warn, sheet state, external-identity save path** [SEQUENTIAL]
-  - **Produces:** local-immediate + staggered-remote suggestion orchestration (400 ms injectable timer), repurposed `DuplicateSuggestions` → similar-warn state fed by `FilterSimilar` (no refetch), confirm-sheet observable state + commands (pick local → navigate edit; pick remote → fill + identity; create), pending-identity clear on manual edit, `CreateArtistAsync(name, externalId, provider)` call; tests for every save-flow branch in `design.md § ArtistFormPage`
-  - **Consumes:** `IArtistSuggestionService`, updated `ArtistService`, DI task
-  - **Risk:** High — user-facing save logic
+- [ ] **ArtistFormViewModel (part 1) — suggestion orchestration + similar-warn state** [SEQUENTIAL]
+  - **Produces:** local-immediate + staggered-remote suggestion orchestration (400 ms injectable timer, cancellation on new keystroke/pick/navigation), loading-hint state, repurposed `DuplicateSuggestions` → similar-warn state fed by `FilterSimilar` (no refetch), pending-identity stash on remote pick + clear on manual edit; tests for staging, cancellation, warn state, identity stash/clear
+  - **Consumes:** `IArtistSuggestionService`, DI task
+  - **Risk:** High — user-facing suggestion behavior
   - **Files owned:** `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`, `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs`
-  - **Demo:** Tests prove: no-match → create called with identity; similar → sheet flag set, no create; exact → uniqueness error; manual edit after remote pick → identity cleared.
+  - **Demo:** Tests prove: local rows immediate, remote appended after stagger, stale results discarded, warn state populated from cache only, manual edit after remote pick → identity cleared.
   - **Review lane:** Elevated · TDD Level A (+ Level B staging tests)
+
+- [ ] **ArtistFormViewModel (part 2) — save-flow + confirm-sheet state machine + external-identity save path** [SEQUENTIAL — after part 1]
+  - **Produces:** confirm-sheet observable state + commands (pick local → navigate edit; pick remote → fill + identity, user saves again; create), save-flow branches per `design.md § ArtistFormPage` (exact → uniqueness error; similar → sheet; none → create), `CreateArtistAsync(name, externalId, provider)` call; tests for every save-flow branch
+  - **Consumes:** part 1, updated `ArtistService`
+  - **Risk:** High — user-facing save logic
+  - **Files owned:** `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`, `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs` (same files — strictly sequential with part 1, never parallel)
+  - **Demo:** Tests prove: no-match → create called with identity; similar → sheet flag set, no create; exact → uniqueness error; remote-candidate pick on sheet fills form without saving.
+  - **Review lane:** Elevated · TDD Level A
 
 - [ ] **SongFormViewModel — artist save resolution + title autocomplete/autofill** [SEQUENTIAL — after BUG-027 task]
   - **Produces:** artist entry local+remote suggestions via `IArtistSuggestionService`; save resolution (exact → auto-attach; similar → sheet; none → transparent atomic create incl. marked-for-create identity); title suggestions via `ISongSuggestionService`; remote title pick autofill (Title + Artist + pending external identity, nothing persisted); Save routes into existing resolution/merge flow unchanged; tests per `design.md § SongFormPage` flows
@@ -121,6 +137,7 @@
 ## Phase 5 — Picker deletion cleanup
 
 - [ ] **Delete ArtistPickerPage + SongPickerPage and all wiring** [SEQUENTIAL — hotspot files: MauiProgram.cs, AppShell.xaml]
+  - **Sizing exception (explicit):** this task exceeds the 5-file cap by design — deleting a dead subgraph is atomic; splitting source-deletion from route/DI/test cleanup would leave intermediate commits that do not build. The build MUST go green in this single commit.
   - **Produces:** deletion of `ArtistPickerPage.xaml(.cs)`, `SongPickerPage.xaml(.cs)`, `ArtistPickerViewModel.cs`, `SongPickerViewModel.cs`; route entries removed from `Routes.cs` + `AppShell.xaml(.cs)`; DI registrations removed; picked-message classes + their `ArtistFormViewModel`/`SongFormViewModel` handlers removed; picker VM test files deleted; DI regression tests updated
   - **Consumes:** Phases 3–4 committed (forms no longer navigate to pickers)
   - **Risk:** Medium — irreversible-action class (route removal + file deletion); authorization = Helder decision 2026-07-10 (`design.md § Key Decisions`); MUST verify `YouTubeSearchPage` + `QueueSongPickerPage` untouched (grep before/after)
@@ -129,6 +146,8 @@
   - **Review lane:** Elevated
 
 ## Phase 6 — Docs, guidelines, close-out
+
+> **.sln registration status:** the three spec files of this folder were registered in `MyVocaList.sln` in the spec commit (solution folder GUID `{FA1234BC-0001-4000-8000-000000000045}`, nested under `artists-songs`). The Phase 0 supersession-note edits touch existing, already-registered files — no further `.sln` change is needed unless a task below creates a new `Docs/` file (`task-log.md` / `spec-changelog.md` must be registered when created).
 
 - [ ] **Deprecation note in `.claude/library/search-picker-pattern.md`** [P]
   - **Produces:** dated note marking the artist/song picker portions superseded by in-field autocomplete (this feature); YouTube picker portion explicitly still valid
