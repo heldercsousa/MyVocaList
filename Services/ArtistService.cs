@@ -43,7 +43,7 @@ public class ArtistService : IArtistService
 
     /// <inheritdoc />
     public async Task<(bool success, string message, Artist? artist)> CreateArtistAsync(
-        string name, CancellationToken ct = default)
+        string name, string? externalId = null, string? externalProvider = null, CancellationToken ct = default)
     {
         var (isValid, message) = ValidateNameInput(name);
         if (!isValid)
@@ -57,6 +57,8 @@ public class ArtistService : IArtistService
         var artist = new Artist
         {
             Name = name,
+            ExternalId = string.IsNullOrWhiteSpace(externalId) ? null : externalId,
+            ExternalProvider = string.IsNullOrWhiteSpace(externalProvider) ? null : externalProvider,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
