@@ -9,8 +9,10 @@ public interface IArtistService
     /// <summary>Validates the artist name as typed (UI input, pre-truncation).</summary>
     (bool isValid, string message) ValidateNameInput(string name);
 
-    /// <summary>Creates an artist with the given name. Returns the created entity on success.</summary>
-    Task<(bool success, string message, Artist? artist)> CreateArtistAsync(string name, CancellationToken ct = default);
+    /// <summary>Creates an artist with the given name and optional external identity
+    /// (REQ-FORMUX-07 — persisted when a remote suggestion pick supplied them).</summary>
+    Task<(bool success, string message, Artist? artist)> CreateArtistAsync(
+        string name, string? externalId = null, string? externalProvider = null, CancellationToken ct = default);
 
     /// <summary>Updates the name of an existing artist.</summary>
     Task<(bool success, string message)> UpdateArtistAsync(int id, string name, CancellationToken ct = default);
