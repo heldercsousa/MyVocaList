@@ -130,3 +130,62 @@ No fallback needed — EF Core 10 translates `list.Contains(EF.Functions.Collate
 
 ### Environment note (orchestrator action item)
 Both Wave 1a worktrees were **missing `.claude/scripts/constitutional-guard.py`** (only `lease/` present), blocking the Write/Edit pre-hook; agents worked around it (heredoc / copy-in, uncommitted). Worktree base was `efcc492` (an ancestor of develop, ~79 tests behind) — cherry-pick onto current develop + full-suite run mitigated any staleness. **Wave 1b briefings must instruct agents to (a) `git merge --no-edit develop` first so Tasks 2/3 outputs are present, and (b) copy the guard hook if missing.**
+
+---
+## Task: IArtistSuggestionService + ArtistSuggestionService (TDD Level A) — Wave 1b (implementor, worktree)
+**Plan:** plan.md — Task 4 · **Status:** To Review · **Completed:** 2026-07-10 · **TDD Level A**
+
+### Changed files:
+- `Services/IArtistSuggestionService.cs` (new)
+- `Services/ArtistSuggestionService.cs` (new)
+- `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs` (new — 14 tests)
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|--------------------------|-------------|
+| REQ-FORMUX-01 | Suggestions require ≥ 2 chars; ≤ 5 local rows | `ArtistSuggestionService.GetLocalAsync` | `GetLocalAsync_TermUnderTwoChars_ReturnsEmpty`; `GetLocalAsync_ManyMatches_ReturnsAtMostFive` |
+| REQ-FORMUX-02 | Provider order MusicBrainz→Deezer (empty/throw fallback, never parallel); cancellable | `GetRemoteAsync`→`FetchFromProvidersAsync`/`TrySearchAsync` | `..._MusicBrainzReturnsResults_DeezerNeverCalled`; `..._MusicBrainzEmpty_FallsBackToDeezer`; `..._MusicBrainzThrows_FallsBackToDeezer`; `..._Cancelled_ThrowsOperationCanceled` |
+| REQ-FORMUX-03 | 3-tier dedup: (a) external-id, (b) collation-name via one batch call, (c) similarity ≥ threshold | `GetRemoteAsync` tiers a/b/c | `..._ResultSharesExternalIdWithLocal_IsExcluded`; `..._ResultNameCollationEqualToLocalDb_IsExcluded` (batch `Times.Once`); `..._ResultSimilarAboveThresholdToLocal_IsExcluded`; `..._ResultBelowThreshold_IsKept` |
+| REQ-FORMUX-05 | Provider failure → empty list, logged (silent local-only degradation) | `TrySearchAsync` try-catch | `..._AllProvidersFail_ReturnsEmptyAndLogs` |
+| REQ-FORMUX-10 | Similar = score ≥ DefaultThreshold AND not exact, cache-only | `FilterSimilar` | `FilterSimilar_ScoreAtThresholdNonExact_IsSimilar`; `..._ScoreBelowThreshold_IsNotSimilar`; `..._ExactMatch_IsNotSimilar` |
+
+### Build notes
+Build 0 errors (Android-only XA0142 AOT packaging error unrelated to class-library scope). Red→Green: type-missing Red at Step 1; dedup-pipeline Red (ArgumentNullException at tier-b) → Green after `?? []` null-guard. Worktree commit `f0582c8`; integrated to develop via cherry-pick `7012937`.
+
+### Design concern (reviewer — DEFER-1, non-blocking)
+Tier-(b) remap of DB-collated artists back to remote rows uses `OrdinalIgnoreCase` (case- but not accent-insensitive). DB does the authoritative collation match, but `GetByNamesCollatedAsync` returns `Artist` entities (not matched input tokens), so per-candidate accent-correct correlation isn't possible in the Service layer. Edge case: remote `"Motörhead"` vs local `"Motorhead"` → potential under-dedup (a near-dup remote row survives). Clean fix = Task-3 repo contract returning matched tokens (out of scope). **Flagged for Helder** — carried to the READY-TO-TEST hand-off as an open item.
+
+### Real-signature deviations
+`MusicSearchResultDto.ArtistName` (not `.Name`); `SearchByNameAsync` returns `IReadOnlyList<ArtistListItem>` with required `ct`; `GetByNameAsync` used for local exactness; defensive `?? []` on `GetByNamesCollatedAsync` (Moq null default).
+
+---
+## Task: ISongSuggestionService + SongSuggestionService (TDD Level A) — Wave 1b (implementor, worktree)
+**Plan:** plan.md — Task 5 · **Status:** To Review · **Completed:** 2026-07-10 · **TDD Level A**
+
+### Changed files:
+- `Services/ISongSuggestionService.cs` (new)
+- `Services/SongSuggestionService.cs` (new)
+- `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs` (new — 7 tests)
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|--------------------------|-------------|
+| REQ-FORMUX-22 | Local title suggestions with artist supporting text; capped at 5 | `SongSuggestionService.GetLocalAsync` | `GetLocalAsync_TermMatchesRegisteredSongs_ReturnsTitleAndArtistName`; `..._ManyMatches_ReturnsAtMostFive` |
+| REQ-FORMUX-22 | artistHint pass-through to provider | `FetchFromProvidersAsync`→`TrySearchAsync` | `GetRemoteAsync_ArtistHintProvided_PassedToProvider` |
+| REQ-FORMUX-03 | Remote dedup tier (b) — title collation-equal, single batch call | `DedupAsync` | `GetRemoteAsync_ResultTitleCollationEqualToLocal_IsExcluded` |
+| REQ-FORMUX-23 | Local artist resolved for remote rows via batch name-collation lookup | `ResolveLocalArtistIdsAsync` | `GetRemoteAsync_RemoteArtistExistsLocally_LocalArtistIdResolved` |
+| REQ-FORMUX-05 | All providers fail → empty, logged | `TrySearchAsync` | `GetRemoteAsync_AllProvidersFail_ReturnsEmptyAndLogs` |
+| REQ-FORMUX-02 | Provider order — MusicBrainz first, Deezer fallback on empty | `FetchFromProvidersAsync` | `GetRemoteAsync_MusicBrainzEmpty_FallsBackToDeezer` |
+
+### Build notes
+Build 0 errors (all TFMs). Red→Green: `CS0246 SongSuggestionService not found` (Red) → 7/7 green after service created. Worktree commit `7ba4daf`; integrated to develop via cherry-pick `a8d7236`. Full suite post-integration: **461 passed, 0 failed**.
+
+### Deviations / design notes (non-blocking)
+1. No dedicated song title-search repo method — used existing `ISongRepository.GetPagedAsync(1, 5, term, ct)` (plan's named alternative; returns `SongListItemDto` with artist name joined).
+2. `SongListItemDto` has no `ExternalId` (only `ExternalProvider`) — local rows map `ExternalId = null` (same gap as `ArtistListItem`).
+3. Song-remote-artist resolution is name-collation only — `MusicSearchResultDto` carries no artist-level external id.
+4. Post-batch correlation uses `OrdinalIgnoreCase` in-memory (same DEFER-1 accent-remap concern as Task 4; DB does authoritative match). **Carried to READY-TO-TEST as an open item.**
+5. `term < 2 chars` guard deferred to VM/AutocompleteField layer (Task 12) — not in Task 5's step list.
+
+### Integration note (orchestrator)
+Both Wave 1b agents returned their task-log entries in the commit-message body (parallel-wave task-log concurrency rule); orchestrator appended both here in one bookkeeping commit. Wave 1b worktree bases were behind develop but produced only new files → cherry-pick applied clean, no merge needed.
