@@ -5,6 +5,11 @@
 > Ordering: DRY Onion (Contracts/Infra → Services → ViewModels → UI → cleanup). No Domain schema change,
 > **no migration** (Artist already has `ExternalId`/`ExternalProvider` — verified 2026-07-10).
 > XAML rule: one file → build → fix → next (never batch UI edits).
+>
+> **⏸ PARKED 2026-07-10 — status & merge map:** feature is 🔵 Deferred. All progress is on branch
+> `feature/form-ux-redesign` (pushed). Tasks 1–5 + Phase 0 are merged to `develop`; **Task 6
+> (REQ-FORMUX-07) is done but lives ONLY on `feature/form-ux-redesign` — NOT yet merged to develop.**
+> Next task = *DI registration for suggestion services*. Full merge map + resume steps: `handoff.md`.
 
 ## Phase 0 — Spec supersession notes (docs only)
 
@@ -50,7 +55,7 @@
   - **Demo:** `dotnet test` green for all branches.
   - **Review lane:** Elevated · TDD Level A
 
-- [ ] **ArtistService external-identity persistence fix (REQ-FORMUX-07)** [SEQUENTIAL]
+- [x] **ArtistService external-identity persistence fix (REQ-FORMUX-07)** [SEQUENTIAL] — done in commit `5c510e5` on **`feature/form-ux-redesign`** · ⚠️ **NOT yet merged to develop** (code lives on that branch only)
   - **Produces:** `CreateArtistAsync(string name, string? externalId = null, string? externalProvider = null, CancellationToken ct = default)` persisting both fields; unit tests: identity persisted when supplied, null when manual, existing validation untouched
   - **Consumes:** existing `Artist` entity fields (no migration)
   - **Risk:** Medium — signature change; existing callers compile via optional params

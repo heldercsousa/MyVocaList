@@ -189,3 +189,25 @@ Build 0 errors (all TFMs). Red→Green: `CS0246 SongSuggestionService not found`
 
 ### Integration note (orchestrator)
 Both Wave 1b agents returned their task-log entries in the commit-message body (parallel-wave task-log concurrency rule); orchestrator appended both here in one bookkeeping commit. Wave 1b worktree bases were behind develop but produced only new files → cherry-pick applied clean, no merge needed.
+
+---
+
+## Task 6 — ArtistService external-identity persistence fix (REQ-FORMUX-07)
+
+**Status:** ✅ Done — ⚠️ **on `feature/form-ux-redesign` only, NOT yet merged to develop.**
+**Commit:** `5c510e5` (feature branch). Recorded here on `develop` (2026-07-11) for merge-state
+visibility so agents needn't check out the branch to know it exists. See `handoff.md` for the full
+merge map.
+
+### Changed files (in commit `5c510e5`, feature branch)
+- `Domain/ServicesInterfaces/IArtistService.cs`
+- `Services/ArtistService.cs`
+- `Services/ArtistResolutionService.cs`
+- `MyVocaList.Tests/Unit/Services/ArtistServiceTests.cs` (+40 lines of tests)
+- `MyVocaList.Tests/Unit/Services/ArtistResolutionServiceTests.cs`
+- `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs`
+
+### Note
+Feature was parked immediately after this task (see `handoff.md`). Next task on resume = *DI
+registration for suggestion services*. Task-log detail beyond the commit body was not captured at
+parking time; the commit `5c510e5` message + diff are the authoritative record until resumed.
