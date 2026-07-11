@@ -5,6 +5,8 @@
 > Status: 📋 Spec (Helder-approved design 2026-07-10, encoded here)
 > Created: 2026-07-10
 >
+> **Spec updated 2026-07-11 (dependency):** this change spec is now gated by two new predecessors under *Form & Autocomplete UX Overhaul* — DevCycleCraft **①** *Autocomplete Mobile UX Pattern guideline* (phone autocomplete = full-screen expansion, not exposed-dropdown) and **②** *AutocompleteField Component Evaluation*. The autocomplete-UI acceptance criteria here (AutocompleteField dropdown/remote-section behavior) are **provisional** — they must be reconciled with ①'s adaptive pattern before Phase 2–5 resume. No AC text deleted; this note flags the pending reconciliation.
+>
 > **Dated change spec.** The shipped specs `Docs/Management/BusinessFeatures/artists-songs/requirements.md`
 > and `Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/requirements.md` are immutable
 > history — they are NOT rewritten. This spec supersedes specific ACs in them (see § Supersession) and the
