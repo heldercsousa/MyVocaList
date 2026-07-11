@@ -12,7 +12,7 @@ If a constitutional constraint cannot be followed in a specific case, document i
 
 | Date | Constraint violated | Reason for exception | Code location | Expires |
 |------|---------------------|----------------------|---------------|---------|
-| —    | —                   | —                    | —             | —       |
+| 2026-07-11 | CLAUDE.md § Constitutional Constraints — UI Component Priority (DevExpress first, always) | Evaluated DevExpress MAUI 25.2.4's `AutoCompleteEdit`/`FilteredItemsSourceProvider`/`AsyncItemsSourceProvider` as a replacement for the hand-rolled `AutocompleteField` (BACKLOG ② evaluation, `Docs/Management/DevCycleCraft/autocomplete-component/findings.md`). No deployable demo exists anywhere (DX demo-app repo, NuGet package, doc examples); BottomSheet-hosting compatibility is unproven and conflicts with this project's own documented BottomSheet/keyboard-conflict rule (`dialogs-validation.md`); dual local+remote provider composition is unconfirmed by any doc. Given the pending (not yet "go") Blazor Hybrid + MudBlazor migration also makes any MAUI-XAML investment (DX-based or hand-rolled) non-portable regardless, DX showed no clear win to justify the integration risk — decided (Helder, 2026-07-11) to extend the existing hand-rolled `AutocompleteField` instead of adopting the DevExpress editor. | `MyVocaList/UI/Components/AutocompleteField/` (component to be extended, not replaced) | Re-evaluate if the MudBlazor migration spike returns a "no-go" (DevExpress-first regains full force for MAUI) or if DevExpress ships a proven BottomSheet + async-dual-source example in a future release. |
 
 ---
 
