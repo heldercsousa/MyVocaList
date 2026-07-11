@@ -149,7 +149,8 @@
       "Bash(cp .claude/rules/__TRACKED_VAR__.md .claude/library/__TRACKED_VAR__.md)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\Docs\\\\Management\" -Recurse -Directory | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace\\(\"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\\", \"\"\\) })",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\Docs\\\\Management\\\\DevCycleCraft\\\\workflow-folder-layout-alignment\" -File)",
-      "Bash(Select-Object -ExpandProperty Name)"
+      "Bash(Select-Object -ExpandProperty Name)",
+      "PowerShell(dotnet restore MyVocaList.sln 2>&1)"
     ],
     "defaultMode": "bypassPermissions"
   },
