@@ -35,7 +35,7 @@ Each step is gated on the previous one.
 | # | Task | BACKLOG identity | Status |
 |---|------|------------------|--------|
 | 1 | **AutocompleteField Component Evaluation** — evaluate current component vs. the early guideline; decide adjust vs. replace | ② (DevCycleCraft) — **now first** | 💡 Pending |
-| 2 | **Build the new MD3-compliant autocomplete component** — reuse what works, fix the failures | ↳ new nested task under ② | 💡 Pending |
+| 2 | **Build the new MD3-compliant autocomplete component** — reuse what works, fix the failures | ↳ new nested task under ② | 🟢 Ready — design approved 2026-07-11, see `requirements.md`/`design.md` |
 | 3 | **Apply the new component to the simplest candidate** in the app | ↳ new nested task (likely maps to an existing task) | 💡 Pending |
 | 4 | **Update the internal guideline** (`.claude/library/ux-patterns.md` + `m3-components.md` stub) from the proven concept | ① (DevCycleCraft) — **now last of the foundation work** | 💡 Pending |
 | 5 | **Roll out to the remaining ("lacking") places** — all other autocomplete-bearing forms | downstream form tasks (already in BACKLOG) | 💡 Pending |
@@ -87,6 +87,43 @@ map: `PersonFormPage`, `SongFormPage` (verify by grep, not from memory).
   window class, exposed-dropdown for large/desktop.
 - **2.2.7 — Gather all current consumers of autocomplete.** Note (do not change) every place using the
   current autocomplete, to evaluate whether each remains a candidate for the new component.
+
+---
+
+## 2a. Decision — DevExpress `AutoCompleteEdit` rejected, build on hand-rolled `AutocompleteField` (2026-07-11)
+
+Follow-up research after the ② evaluation (see `findings.md`) checked whether DevExpress MAUI 25.2.4's
+built-in `AutoCompleteEdit`/`FilteredItemsSourceProvider`/`AsyncItemsSourceProvider` could resolve this
+without a rebuild. Result:
+
+- **No deployable demo exists** for `AutoCompleteEdit` anywhere (DX demo-app repo, NuGet package contents,
+  doc examples) — only Context7 doc snippets.
+- **BottomSheet-hosting compatibility is unproven** and in tension with this project's own documented
+  rule that BottomSheets conflict with the soft keyboard on Android (`.claude/library/dialogs-validation.md`),
+  the same class of risk that produced BUG-023.
+- **Dual local+remote suggestion sourcing is unconfirmed** — `FilteredItemsSourceProvider` (sync) and
+  `AsyncItemsSourceProvider` (async) are both real, confirmed-present types in the installed assembly,
+  but no doc shows composing both on one editor to match `IArtistSuggestionService`/`ISongSuggestionService`'s
+  local+remote split.
+- **The pending Blazor Hybrid + MudBlazor migration** (`📋 Spec`, no go-decision yet) makes any MAUI-XAML
+  View-layer investment non-portable regardless of DX vs. hand-rolled — so DX's extra vendor lock-in buys
+  no offsetting portability benefit here.
+
+**Decision (Helder, 2026-07-11): reject the DevExpress route for this task. Extend the existing
+hand-rolled `AutocompleteField`** instead of adopting `AutoCompleteEdit`. Logged as a constitutional
+exception to CLAUDE.md's DevExpress-first rule: `.claude/exception-registry.md` (expires on a MudBlazor
+migration no-go, or if DevExpress ships a proven BottomSheet + async-dual-source example later).
+
+This changes task 2 below: no DX-editor spike — go straight to extending the current component's proven
+parts (debounce, error-forwarding, `BlurredWithoutSelectionCommand`/BUG-008 fix, `ListItem` reuse) with
+the missing responsive full-screen-phone branch.
+
+**Design approved 2026-07-11 (Helder):** see `requirements.md` + `design.md` in this folder. New
+full-screen phone component named **`AutocompleteMobileField`** (mirrors `AutocompleteField`'s naming —
+desktop-default component ↔ its phone-specific counterpart), pushed modally via
+`Shell.Current.Navigation.PushModalAsync` on `IDeviceInfo.Idiom == DeviceIdiom.Phone`. All four
+component-change-governance gates satisfied in `design.md § 6`. Next step: `writing-plans` skill for the
+implementation plan.
 
 ---
 
