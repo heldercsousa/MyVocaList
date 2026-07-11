@@ -10,6 +10,11 @@
 > `feature/form-ux-redesign` (pushed). Tasks 1–5 + Phase 0 are merged to `develop`; **Task 6
 > (REQ-FORMUX-07) is done but lives ONLY on `feature/form-ux-redesign` — NOT yet merged to develop.**
 > Next task = *DI registration for suggestion services*. Full merge map + resume steps: `handoff.md`.
+>
+> **🔗 NEW DEPENDENCY 2026-07-11 (Helder) — apply before resume.** This feature now sits under *Form & Autocomplete UX Overhaul* (BACKLOG) and gains two HARD predecessors:
+> 1. **DevCycleCraft ① — Autocomplete Mobile UX Pattern guideline:** phone = full-screen expansion (entire page + search AppBar + filter term docked at the very screen bottom + results fill the rest); desktop = keep exposed-dropdown. **Phase 2 (AutocompleteField change), Phase 3 (VMs), and Phase 4 (pages) are GATED on ① — do not resume those phases until ① lands.** The DI task (Phase 1, non-UI) is NOT gated and may proceed.
+> 2. **DevCycleCraft ② — AutocompleteField Component Evaluation:** adjust or replace the component. **Phase 5 (ArtistPickerPage/SongPickerPage deletion) is GATED on ②** — those full-screen pick pages may be repurposed as the small-screen autocomplete component; do NOT delete until ② decides.
+> Before resuming UI work, adapt this spec's `design.md`/`requirements.md` autocomplete-UI sections to the ① pattern.
 
 ## Phase 0 — Spec supersession notes (docs only)
 
@@ -73,6 +78,8 @@
 
 ## Phase 2 — Governed component (dedicated task — no bundling, HARD RULE)
 
+> **⛔ GATED 2026-07-11 on DevCycleCraft ① + ②.** The additive change below assumes the exposed-dropdown model. Under ①, phone autocomplete is a full-screen SearchView, and ② may adjust/replace `AutocompleteField` entirely — either could change or void this task's shape. Do NOT implement until ① defines the pattern and ② concludes the component's fate.
+
 - [ ] **[COMPONENT] AutocompleteField — remote section marker + loading-hint row (additive)** [SEQUENTIAL]
   - **Produces:** additive `AutocompleteField` capability — remote-section header row ("From music database") + loading-hint row bound to `IsRemoteLookupRunning`; `AutocompleteSuggestion` model carries a `Data` payload (the source DTO) and a section/kind marker. Purely additive (REQ-FORMUX-30) — existing consumers render identically when the new properties are unbound.
   - **Consumes:** nothing new (the DTO payload is mapped by the ViewModels in Phase 3; the component only renders `AutocompleteSuggestion`)
@@ -99,6 +106,8 @@
   - **Files owned:** `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`
   - **Demo:** Test run log shows the regression test failing before the change and passing after; typed artist text survives blur.
   - **Review lane:** Elevated
+
+> **Artist-logic split refinement 2026-07-11 (Helder):** the Artist form carries several layers of complexity that must NOT ship as one task. Split the ArtistForm work so that **local autocomplete + name-entry logic ships FIRST** (part 1a: local suggestions, blur-keep, name entry), and **3rd-party-API suggestion retrieval + remote dedup/similar-warn is a SEPARATE follow-up task** (part 1b, sequential after 1a). Save-flow (part 2) stays as its own task. Apply the same "split only where complexity justifies" rule to any other over-large task in this spec when it resumes.
 
 - [ ] **ArtistFormViewModel (part 1) — suggestion orchestration + similar-warn state** [SEQUENTIAL]
   - **Produces:** local-immediate + staggered-remote suggestion orchestration (400 ms injectable timer, cancellation on new keystroke/pick/navigation), loading-hint state, repurposed `DuplicateSuggestions` → similar-warn state fed by `FilterSimilar` (no refetch), pending-identity stash on remote pick + clear on manual edit; tests for staging, cancellation, warn state, identity stash/clear
@@ -153,6 +162,8 @@
   - **Review lane:** Standard · E2E emulator gate before To Review
 
 ## Phase 5 — Picker deletion cleanup
+
+> **⛔ GATED 2026-07-11 on DevCycleCraft ②.** `ArtistPickerPage` + `SongPickerPage` are full-screen pick pages and are candidates to be REPURPOSED as the small-screen ("mobile") autocomplete full-screen component (per ① pattern). Do NOT delete them until ② decides. If ② repurposes them, this phase is cancelled/rewritten instead of a deletion.
 
 - [ ] **Delete ArtistPickerPage + SongPickerPage and all wiring** [SEQUENTIAL — hotspot files: MauiProgram.cs, AppShell.xaml]
   - **Sizing exception (explicit):** this task exceeds the 5-file cap by design — deleting a dead subgraph is atomic; splitting source-deletion from route/DI/test cleanup would leave intermediate commits that do not build. The build MUST go green in this single commit.
