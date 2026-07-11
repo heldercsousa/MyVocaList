@@ -50,7 +50,7 @@
   - **Demo:** `dotnet test` green for all branches.
   - **Review lane:** Elevated · TDD Level A
 
-- [ ] **ArtistService external-identity persistence fix (REQ-FORMUX-07)** [SEQUENTIAL]
+- [x] **ArtistService external-identity persistence fix (REQ-FORMUX-07)** [SEQUENTIAL] — done in commit `5c510e5` (this branch)
   - **Produces:** `CreateArtistAsync(string name, string? externalId = null, string? externalProvider = null, CancellationToken ct = default)` persisting both fields; unit tests: identity persisted when supplied, null when manual, existing validation untouched
   - **Consumes:** existing `Artist` entity fields (no migration)
   - **Risk:** Medium — signature change; existing callers compile via optional params
