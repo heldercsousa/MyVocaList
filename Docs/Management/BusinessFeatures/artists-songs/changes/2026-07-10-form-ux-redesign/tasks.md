@@ -34,7 +34,7 @@
   - **Demo:** Integration test proves "Café" resolves against stored "cafe" via one SQL query.
   - **Review lane:** Standard · TDD Level B
 
-- [~] **IArtistSuggestionService + ArtistSuggestionService (TDD Level A)** [SEQUENTIAL — after DTOs/repos]
+- [x] **IArtistSuggestionService + ArtistSuggestionService (TDD Level A)** [SEQUENTIAL — after DTOs/repos]
   - **Produces:** `Services/IArtistSuggestionService.cs`, `Services/ArtistSuggestionService.cs` per `design.md § Interfaces`; unit tests covering: local max-5, remote 3-tier dedup order (external-id → collation name → similarity), `FilterSimilar` threshold branches (≥ 0.82 non-exact only), provider failure → empty list + log, cancellation
   - **Consumes:** suggestion DTOs, repo methods, `IMusicMetadataProvider`, `ISimilarityScorer`, `SimilarityConstants`
   - **Risk:** High — core business logic; every dedup branch is a test case
@@ -42,7 +42,7 @@
   - **Demo:** `dotnet test` shows all dedup/threshold branch tests green; providers fully mocked.
   - **Review lane:** Elevated · TDD Level A (tests first, Red seen)
 
-- [~] **ISongSuggestionService + SongSuggestionService (TDD Level A)** [P — parallel with ArtistSuggestionService, different files]
+- [x] **ISongSuggestionService + SongSuggestionService (TDD Level A)** [P — parallel with ArtistSuggestionService, different files]
   - **Produces:** `Services/ISongSuggestionService.cs`, `Services/SongSuggestionService.cs`; unit tests (local title match, remote dedup, artistHint pass-through, LocalArtistId resolution for remote rows, failure → empty)
   - **Consumes:** same as above + `ISongRepository`
   - **Risk:** High — core business logic
