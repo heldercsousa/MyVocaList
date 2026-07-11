@@ -4,6 +4,8 @@
 > Requirements: `requirements.md` in this folder (REQ-FORMUX-01…33)
 > Cross-references: `Docs/Management/BusinessFeatures/artists-songs/design.md` (original),
 > `Docs/Management/BusinessFeatures/artists-songs/song-import-resolution/design.md` (resolution engine — consumed unchanged)
+>
+> **Spec updated 2026-07-11 (dependency):** the autocomplete-UI design below (AutocompleteField exposed-dropdown + remote-section marker) is **provisional pending DevCycleCraft ① + ②** (see *Form & Autocomplete UX Overhaul*, BACKLOG). ① makes phone autocomplete a full-screen SearchView (entire page + search AppBar + filter term docked at screen bottom + results filling the rest); ② may adjust or replace `AutocompleteField`. Reconcile the AutocompleteField/dropdown sections with ①'s adaptive pattern before Phase 2–5 resume. Phases 1 (non-UI: DTOs/repos/services/DI) are unaffected.
 > Created: 2026-07-10 · Encodes Helder-approved design of 2026-07-10
 
 ## Architecture
