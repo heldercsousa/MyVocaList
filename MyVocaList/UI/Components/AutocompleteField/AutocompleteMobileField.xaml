@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:dxcv="clr-namespace:DevExpress.Maui.CollectionView;assembly=DevExpress.Maui.CollectionView"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
+    x:Class="MyVocaList.UI.Components.AutocompleteField.AutocompleteMobileField"
+    x:Name="self"
+    SafeAreaEdges="Container"
+    BackgroundColor="{StaticResource Surface}">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- MD3 Search Bar row: back button + input, visual constants copied from SearchAppBar -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="0"
+              HeightRequest="64"
+              BackgroundColor="{StaticResource Surface}"
+              Padding="4,0">
+
+            <dx:DXButton Grid.Column="0"
+                         Icon="arrow_back_outlined"
+                         Style="{StaticResource NavigationIconButton}"
+                         SemanticProperties.Description="Back"
+                         Clicked="OnBackButtonClicked" />
+
+            <dxe:TextEdit x:Name="searchEdit"
+                          Grid.Column="1"
+                          Text="{Binding Text, Source={x:Reference self}, Mode=TwoWay}"
+                          PlaceholderText="{Binding Placeholder, Source={x:Reference self}}"
+                          BoxMode="Outlined"
+                          BorderColor="Transparent"
+                          FocusedBorderColor="Transparent"
+                          BackgroundColor="Transparent"
+                          TextColor="{StaticResource OnSurface}"
+                          PlaceholderColor="{StaticResource OnSurfaceVariant}"
+                          ClearIconVisibility="Auto"
+                          ClearIconColor="{StaticResource OnSurfaceVariant}"
+                          Keyboard="Text"
+                          ReturnType="Search"
+                          VerticalOptions="Center" />
+        </Grid>
+
+        <!-- MD3 Search View: results list, ListItem rows reused from CRUD-list pattern -->
+        <dxcv:DXCollectionView
+            x:Name="suggestionsView"
+            Grid.Row="1"
+            ItemsSource="{Binding Suggestions, Source={x:Reference self}}"
+            ItemSeparatorThickness="0"
+            IndicatorColor="{StaticResource Primary}"
+            Tap="OnSuggestionTapped">
+            <dxcv:DXCollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:AutocompleteSuggestion">
+                    <lists:ListItem
+                        Headline="{Binding Headline}"
+                        SupportingText="{Binding SupportingText}" />
+                </DataTemplate>
+            </dxcv:DXCollectionView.ItemTemplate>
+        </dxcv:DXCollectionView>
+
+    </Grid>
+</ContentPage>

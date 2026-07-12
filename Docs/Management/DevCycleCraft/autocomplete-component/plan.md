@@ -42,6 +42,10 @@
 
 **Interfaces:**
 - Produces: `internal static class AutocompleteWindowClass { internal static bool IsCompactWindow(IDeviceInfo deviceInfo); }` — consumed by Task 3's `AutocompleteField.IsCompactWindow` property.
+- Consumes: none.
+
+**Demo:** `dotnet test MyVocaList.Tests --filter AutocompleteWindowClassTests` shows 4/4 passing, covering Phone/Desktop/Tablet/null.
+**Review lane:** Standard.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -150,6 +154,9 @@ git commit -m "feat: add AutocompleteWindowClass idiom-branch helper for phone a
   - `public event EventHandler<AutocompleteSuggestion> SuggestionTapped;`
   - `public event EventHandler Cancelled;`
   These are consumed by Task 3's `AutocompleteField`.
+
+**Demo:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` succeeds 0 errors; the page compiles standalone with no consumer wiring yet (manual on-device render deferred to the later consumer-wiring task per README.md § 4).
+**Review lane:** Standard (new component, no existing consumers yet).
 
 - [ ] **Step 1: Create the XAML**
 
@@ -318,6 +325,9 @@ git commit -m "feat: add AutocompleteMobileField full-screen phone Search View c
 - Consumes: `AutocompleteWindowClass.IsCompactWindow(IDeviceInfo)` (Task 1); `AutocompleteMobileField` with `Text`/`Placeholder`/`Suggestions` bindables and `SuggestionTapped`/`Cancelled` events (Task 2).
 - Produces: `internal IDeviceInfo DeviceInfo { get; set; }` (settable seam for tests) and `internal bool IsCompactWindow { get; }` on `AutocompleteField` — no new public API; existing public bindable properties (`Text`, `Suggestions`, `SearchRequestedCommand`, `SuggestionSelectedCommand`, `HasError`, `ErrorText`, `BlurredWithoutSelectionCommand`, `LabelText`, `Placeholder`, `DebounceDelay`) unchanged in name/type/default.
 
+**Demo:** on a phone-idiom device/emulator, focusing the search field in `PersonFormPage` or `SongFormPage` pushes the full-screen `AutocompleteMobileField` modal instead of the desktop overlay (manual E2E, deferred per Task 4); automated evidence is `AutocompleteFieldDebounceTests` + `AutocompleteWindowClassTests` staying green (Step 6).
+**Review lane:** Elevated — `AutocompleteField` is a governed component with 2 existing consumers (`PersonFormPage`, `SongFormPage`, per design.md Gate 2); all four component-change-governance gates were already satisfied at the design stage, but this task's own review must verify none of the 10 existing public bindable properties changed name/type/default and that the `_isTappingSuggestion`/`_isShowingMobileField` guard interaction in `OnSearchEditUnfocused` is correct for both consumers.
+
 - [ ] **Step 1: Add the `using` statements and `DeviceInfo`/`IsCompactWindow` seam**
 
 Edit `AutocompleteField.xaml.cs`. No new `using` statements are needed — `Microsoft.Maui`, `Microsoft.Maui.Devices`, and `Microsoft.Extensions.DependencyInjection` are already MAUI-SDK-generated global usings for this project (confirmed via `obj/Debug/net10.0-android/MyVocaList.GlobalUsings.g.cs`).
@@ -353,10 +363,11 @@ to:
     public AutocompleteField()
     {
         InitializeComponent();
-        DeviceInfo = IPlatformApplication.Current?.Services.GetService<IDeviceInfo>()
-            ?? Microsoft.Maui.Devices.DeviceInfo.Current;
+        DeviceInfo = IPlatformApplication.Current?.Services.GetService<IDeviceInfo>();
     }
 ```
+
+No fallback to a static `DeviceInfo.Current` call: if DI resolution returns `null` (a DI misconfiguration), `DeviceInfo` stays `null` and `IsCompactWindow` (already null-safe: `deviceInfo?.Idiom == DeviceIdiom.Phone`) degrades to `false` — the safer failure mode (desktop/tablet overlay behavior), and the component contains zero static idiom calls, satisfying requirements.md's Validation rule literally.
 
 - [ ] **Step 2: Build to verify it still compiles with no behavior change yet**
 
@@ -489,8 +500,13 @@ git commit -m "feat: branch AutocompleteField to push AutocompleteMobileField on
 **Files:**
 - Modify: `Docs/Management/DevCycleCraft/autocomplete-component/task-log.md` (create if absent)
 - Modify: `Docs/Management/BACKLOG.md` (status update for this nested task under ②)
+- Modify: `Docs/Management/DevCycleCraft/autocomplete-component/design.md` (Step 3 — dated correction note)
+- Modify: `MyVocaList.sln` (Step 4 — register the new task-log.md)
 
 **Interfaces:** none (documentation only).
+
+**Demo:** `task-log.md` exists with the AC traceability matrix and verification evidence populated; `MyVocaList.sln` opens in VS with `task-log.md` visible under the `autocomplete-component` Solution Folder.
+**Review lane:** Standard.
 
 - [ ] **Step 1: Write the task-log entry**
 
@@ -571,5 +587,5 @@ git commit -m "docs: task-log + BACKLOG status for AutocompleteMobileField build
 
 - **Spec coverage:** AC-1..AC-10 and the one Validation rule are each mapped to a task/file/test above (see Task 4 matrix). Out-of-scope items (PersonFormPage/SongFormPage wiring, SearchAppBar/CrudListView/ListItem changes, ux-patterns.md update, width-breakpoint detection) are not touched by any task.
 - **Design deviation flagged inline, not silently made:** design.md loosely referenced `ItemsSource`/`SearchCommand`/`SelectedItemCommand` — the plan uses the actual existing names `Suggestions`/`SearchRequestedCommand`/`SuggestionSelectedCommand` (confirmed by reading the real file). This is a naming correction, not a behavior change — Gate 2's "no consumer changes" holds.
-- **Design deviation flagged inline #2:** design.md said `IDeviceInfo` would be "injected the same way FeedbackService already does it — DI singleton, constructor-injected." `AutocompleteField` has no constructor-injection path (XAML-instantiated by consumer pages), so Task 3 uses a service-locator seam (`IPlatformApplication.Current.Services`) with an internal settable property for tests — functionally equivalent for the stated intent (mockable, no scattered static `DeviceInfo.Current.Idiom` calls) but not literally constructor DI. Flagged here for Helder's plan review rather than silently implemented.
+- **Design deviation flagged inline #2:** design.md said `IDeviceInfo` would be "injected the same way FeedbackService already does it — DI singleton, constructor-injected." `AutocompleteField` has no constructor-injection path (XAML-instantiated by consumer pages), so Task 3 uses a service-locator seam (`IPlatformApplication.Current.Services`) with an internal settable property for tests — functionally equivalent for the stated intent (mockable, no static `DeviceInfo.Current.Idiom` calls) but not literally constructor DI. Flagged here for Helder's plan review rather than silently implemented. **plan-reviewer correction (2026-07-11):** the constructor originally included a `?? Microsoft.Maui.Devices.DeviceInfo.Current` fallback, which contradicted this very claim (it *was* a static call, reachable if DI resolution failed) and violated requirements.md's Validation rule literally. Removed — `DeviceInfo` now stays `null` on resolution failure and `IsCompactWindow` degrades safely to `false` via its existing null-safe check. See Task 3 Step 1.
 - **Type consistency:** `AutocompleteMobileField.Text`/`Placeholder`/`Suggestions` property names and types match what Task 3's `ShowMobileFieldAsync` binds against; `SuggestionTapped`/`Cancelled` event signatures match Task 3's handler signatures exactly.
