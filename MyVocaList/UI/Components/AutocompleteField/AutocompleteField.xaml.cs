@@ -116,8 +116,8 @@ public partial class AutocompleteField : ContentView
     // ── Private state ─────────────────────────────────────────────────────
 
     private readonly AutocompleteDebouncer _debouncer = new();
+    private readonly MobileFieldReopenGuard _reopenGuard = new();
     private bool _isTappingSuggestion;
-    private bool _isShowingMobileField;
 
     /// <summary>
     /// Resolved via the app's DI container by default (same singleton MauiProgram.cs registers
@@ -169,7 +169,17 @@ public partial class AutocompleteField : ContentView
     {
         if (IsCompactWindow)
         {
-            await ShowMobileFieldAsync();
+            if (_reopenGuard.RequestShowOnFocus())
+            {
+                await ShowMobileFieldAsync();
+            }
+            else
+            {
+                // Suppressed: either the Search View is already open, or this is the one-shot
+                // automatic refocus that follows a dismissal. Keep the field blurred so the
+                // keyboard and Search View do not reappear (BUG-041/042).
+                searchEdit.Unfocus();
+            }
             return;
         }
 
@@ -180,7 +190,6 @@ public partial class AutocompleteField : ContentView
 
     private async Task ShowMobileFieldAsync()
     {
-        _isShowingMobileField = true;
         searchEdit.Unfocus();
 
         var mobileField = new AutocompleteMobileField
@@ -205,7 +214,7 @@ public partial class AutocompleteField : ContentView
         mobileField.Cancelled -= OnMobileFieldCancelled;
 
         SuggestionSelectedCommand?.Execute(suggestion);
-        _isShowingMobileField = false;
+        _reopenGuard.NotifyDismissed();
         await Shell.Current.Navigation.PopModalAsync();
     }
 
@@ -216,14 +225,14 @@ public partial class AutocompleteField : ContentView
         mobileField.Cancelled -= OnMobileFieldCancelled;
 
         BlurredWithoutSelectionCommand?.Execute(null);
-        _isShowingMobileField = false;
+        _reopenGuard.NotifyDismissed();
         await Shell.Current.Navigation.PopModalAsync();
     }
 
     private async void OnSearchEditUnfocused(object sender, FocusEventArgs e)
     {
         await Task.Yield();
-        if (!_isTappingSuggestion && !_isShowingMobileField)
+        if (!_isTappingSuggestion && !_reopenGuard.IsShowing)
         {
             overlayCard.IsVisible = false;
             BlurredWithoutSelectionCommand?.Execute(null);
