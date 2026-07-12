@@ -1,6 +1,6 @@
 # Requirements — Hamburger on CRUD list pages
 
-> **Approval gate:** ⏳ Awaiting Helder review. **To authorize**, edit this line to: `✅ Approved — Helder 2026-07-11.` To request changes, replace it with `🔴 Changes requested:` followed by the notes. Track: **feature** (confirmed by Helder — no BUG-NNN). Spec-reviewer verdict: **PASS** (2026-07-11).
+> **Approval gate:**  `✅ Approved — Helder 2026-07-11.`  Track: **feature** (confirmed by Helder — no BUG-NNN). Spec-reviewer verdict: **PASS** (2026-07-11).
 
 **Feature:** Hamburger Navigation Pattern (CRUD list pages)
 **BACKLOG:** DevCycleCraft — "Hamburger menu on all hamburger-loaded pages" (2026-07-11), cross-ref *AppBar / SearchAppBar Interaction Redesign* point (1).

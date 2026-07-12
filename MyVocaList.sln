@@ -301,6 +301,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hamburger-nav-pattern", "ha
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\requirements.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\requirements.md
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\design.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\design.md
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\tasks.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\tasks.md
+		Docs\Management\DevCycleCraft\hamburger-nav-pattern\plan.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}"
