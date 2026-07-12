@@ -340,6 +340,8 @@ Namespace: `xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"`
 - Navigation actions → use Shell flyout
 - ≤ 3 actions already covered by SmallAppBar trailing slots
 
+**Full-screen CRUD forms (not list pages):** use a native Shell `ToolbarItem` for Save, not `SmallAppBar`. Full pattern + rationale: `crud-pages.md § Save/Cancel placement (full-screen forms)`.
+
 ### Anatomy
 ```
 [DXBorder: pill, 64dp tall, CornerRadius=32, SecondaryContainer (vibrant), Padding="8,0"]
