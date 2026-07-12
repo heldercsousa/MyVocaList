@@ -35,3 +35,24 @@ Investigated `SongFormViewModel.cs` and `SongFormPage.xaml.cs` per the plan's op
 - `SongFormPage.xaml.cs` has no `OnBackButtonPressed` override, no `Shell.SetBackButtonBehavior`/`BackButtonBehavior` customization, and no `OnNavigatedFrom` hook — only `OnDisappearing` (line 139), which does not intercept navigation.
 - After this change, `grep -rn "CancelCommand" MyVocaList/UI/Pages/Songs/` returns no matches — `CancelCommand` is no longer bound from any XAML in this page and is now dead/unreferenced from the UI (it remains a valid public property on the ViewModel, unused).
 - **Conclusion:** the native Shell back button was already performing the same effective action (`GoToAsync("..")`, i.e. simple pop-navigation with no discard confirmation) independently of the deleted Cancel button — MAUI Shell's default back button on a pushed page does this automatically without any app-side wiring. So functionally, back-navigation behavior is unchanged by this task: there was never a confirmation/discard-guard difference between the old Cancel button and native back — both simply navigated back with no unsaved-changes prompt. This matches AC-6's expectation but is a **finding, not an assumption**: if unsaved-changes protection was ever intended for this form, it does not exist today (neither before nor after this task), and `CancelCommand` is now unreachable dead code that a future cleanup task may want to remove (out of scope here per plan's hard boundary — not touching ViewModel).
+
+---
+## Task: Cross-reference the pattern in m3-components.md
+**Plan:** Docs/Management/DevCycleCraft/crud-form-action-pattern/plan.md (Task 3)
+**Status:** To Review
+**Started:** 2026-07-12
+**Completed:** 2026-07-12
+
+### Changed files:
+- `.claude/library/m3-components.md`
+
+### Build notes
+Commit SHA: 3c6ad62796df94603bfe0e2a1cb594d61f175819
+Build: N/A (documentation-only change, no code touched). Tests: N/A.
+Files written and re-read: `.claude/library/m3-components.md` (re-read lines 333-344 after edit, confirmed the cross-reference note was inserted verbatim per plan.md Task 3 Step 1, immediately after the FloatingToolbar "When NOT to use" list and before the "### Anatomy" heading, near the existing "Use SmallAppBar trailing Action1–3 slots when ≤ 3 actions suffice" guidance at line 335).
+
+### Environment note
+No working-directory mismatch encountered in this session — `pwd` and the Edit tool both resolved correctly to `.claude/worktrees/crud-form-action-pattern`. Used the `Edit` tool directly (no Bash/Python workaround needed).
+
+### Scope confirmation
+Only `.claude/library/m3-components.md` was modified. `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`, `.claude/library/crud-pages.md`, and `Docs/Management/BACKLOG.md` were not touched, per briefing boundaries.
