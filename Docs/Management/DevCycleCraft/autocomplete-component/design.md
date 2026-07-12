@@ -7,6 +7,14 @@
 
 ## 1. Architecture
 
+> **Design updated 2026-07-11:** `IDeviceInfo` is not constructor-injected as originally stated —
+> `AutocompleteField` has no DI resolution path (it's instantiated by the XAML compiler in consumer
+> pages, confirmed by its parameterless constructor). Implemented instead via a service-locator seam
+> (`IPlatformApplication.Current.Services.GetService<IDeviceInfo>()`, defaulted in the constructor,
+> overridable via an internal settable `DeviceInfo` property) plus a MAUI-runtime-free static helper
+> `AutocompleteWindowClass.IsCompactWindow(IDeviceInfo)` for unit testability — mirroring the existing
+> `AutocompleteDebouncer` extraction pattern in the same folder. See `plan.md` Task 1/Task 3.
+
 `AutocompleteField` (the existing, desktop-correct component) gets exactly one new decision point: on
 focus/tap, check the injected `IDeviceInfo.Idiom`.
 
@@ -33,6 +41,15 @@ DevExpress `AutoCompleteEdit` (per the logged exception in `.claude/exception-re
 | `AutocompleteField.xaml.cs` | Add an idiom check (`_deviceInfo.Idiom == DeviceIdiom.Phone`) in the existing focus/tap handler; branch to `PushModalAsync(new AutocompleteMobileField(...))` on Phone instead of showing the overlay. Existing bindable properties (`Text`, `ItemsSource`, `SearchCommand`, `SelectedItemCommand`, `HasError`/`ErrorText`, `BlurredWithoutSelectionCommand`) are unchanged. |
 | `AutocompleteMobileField.xaml(.cs)` **(new)** | Top row: back/cancel `ImageButton` + `dx:TextEdit` styled with `SearchAppBar`'s visual constants (transparent background, `ClearIconVisibility="Auto"`, `ReturnType="Search"`) — copied literals, not a component reference. Auto-focuses the input in `OnAppearing`. Middle: `CollectionView` of `ListItem` rows bound to the same `ItemsSource`; reuses the `ShimmerView`/dual-`EmptyState` ("no items" vs. "no results") pattern from `CrudListView.xaml:27-40,62-73` for loading/empty states. Row tap → invoke `SelectedItemCommand`, then `PopModalAsync()`. |
 | `AutocompleteDebouncer.cs` | Unchanged — reused as-is by the host `AutocompleteField`; `AutocompleteMobileField` never debounces independently, it only renders what already flows through `SearchCommand`. |
+
+> **Design updated 2026-07-11:** The shimmer/empty-state pattern described above was NOT implemented in
+> the phone `AutocompleteMobileField` build (Task 2) — the shipped `AutocompleteMobileField.xaml` uses a
+> bare `DXCollectionView` with no loading shimmer and no empty-state view. This is a scope deferral, not
+> a design rejection: the component has no consumer yet (README.md § 4's consumer-wiring task is
+> out of scope for this branch), so loading/empty behavior cannot be meaningfully demonstrated or tested
+> until a real consumer drives it. **Must be addressed as part of the consumer-wiring task** — either
+> implement the `ShimmerView`/dual-`EmptyState` pattern as originally specified, or make and document a
+> deliberate decision not to. Flagged by the final whole-branch code review.
 
 ## 3. Data flow
 
