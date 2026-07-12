@@ -61,21 +61,15 @@ public abstract class CrudListPageBase : ContentPage
         Serilog.Log.ForContext("SourceContext", GetType().Name)
             .Information("[PageLoad] {Page} navigatedTo={Ms}ms (ctor→OnNavigatedTo)", GetType().Name, navigatedMs);
 
-        var isRootPage = Shell.Current?.Navigation?.NavigationStack?.Count <= 1;
         if (ListViewModel is ICrudListViewModel vm)
         {
-            if (isRootPage)
-            {
-                vm.AppBarNavigationIcon = "menu";
-                vm.AppBarNavigationCommand = new Command(
-                    () => Shell.Current.FlyoutIsPresented = true);
-            }
-            else
-            {
-                vm.AppBarNavigationIcon = "arrow_back_outlined";
-                vm.AppBarNavigationCommand = new Command(
-                    async () => await Shell.Current.GoToAsync(".."));
-            }
+            // CRUD list pages are exclusively top-level menu destinations (see
+            // hamburger-nav-pattern/design.md § Classification principle) → always the hamburger.
+            // If a future feature ever pushes a CRUD list as a non-top-level sub-page, replace this
+            // with an explicit "is my route in the top-level menu set?" check (design.md § Assumption).
+            vm.AppBarNavigationIcon = "menu";
+            vm.AppBarNavigationCommand = new Command(
+                () => Shell.Current.FlyoutIsPresented = true);
         }
     }
 
