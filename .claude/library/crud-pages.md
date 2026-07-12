@@ -469,42 +469,19 @@ Add/Edit forms are always separate Shell navigation pages. Never use a `BottomSh
 
 `SafeAreaEdges="All"` + `ScrollView` handles keyboard avoidance automatically.
 
-### Action buttons — when to use inline labeled buttons
+### Save/Cancel placement (full-screen forms)
 
-Use `HorizontalStackLayout(End)` with `OutlinedButton("Cancel")` + `FilledButton("Save")` when:
-- The form is simple (1–3 fields)
-- The buttons appear below the last field in the scroll flow
+**Law:** full-screen CRUD forms use a native Shell `ToolbarItem` for Save, in the top app bar's trailing slot — never an in-body button. The native Shell back button is the sole dismiss/discard action; no in-body Cancel button.
 
 ```xml
-<HorizontalStackLayout HorizontalOptions="End" Spacing="8">
-    <dx:DXButton Content="Cancel" Style="{StaticResource OutlinedButton}" Padding="24,0"
-                 Command="{Binding CancelCommand}" />
-    <dx:DXButton Content="Save" Style="{StaticResource FilledButton}" Padding="24,0"
-                 Command="{Binding SaveCommand}" />
-</HorizontalStackLayout>
+<ContentPage.ToolbarItems>
+    <ToolbarItem Text="Save" Command="{Binding SaveCommand}" />
+</ContentPage.ToolbarItems>
 ```
 
-### Action buttons — when to use a sticky bottom bar
+Rationale: Cancel is redundant with back-navigation once a form occupies the whole screen (it remains meaningful for bottom sheets/modals — see the sheet/modal form pattern, which keeps in-sheet Save/Cancel). Save reads better as a top-app-bar action per MD3's full-screen-dialog guidance. Full research + decision trail: `Docs/Management/DevCycleCraft/crud-form-action-pattern/design.md`.
 
-Use a pinned bottom action bar (outside the `ScrollView`, inside a `Grid`) when:
-- The form has many fields and the buttons would scroll out of view
-- The user needs persistent access to Save/Cancel regardless of scroll position
-
-```xml
-<Grid RowDefinitions="*,Auto">
-    <ScrollView Grid.Row="0">
-        <VerticalStackLayout Padding="24" Spacing="16">
-            <!-- fields only, no buttons here -->
-        </VerticalStackLayout>
-    </ScrollView>
-    <HorizontalStackLayout Grid.Row="1" HorizontalOptions="End" Spacing="8" Padding="24,12">
-        <dx:DXButton Content="Cancel" Style="{StaticResource OutlinedButton}" Padding="24,0"
-                     Command="{Binding CancelCommand}" />
-        <dx:DXButton Content="Save" Style="{StaticResource FilledButton}" Padding="24,0"
-                     Command="{Binding SaveCommand}" />
-    </HorizontalStackLayout>
-</Grid>
-```
+**Currently non-compliant (as of 2026-07-12):** `ArtistFormPage`, `PersonFormPage`, `VenueFormPage` still use the old inline Cancel+Save pattern — they are pending a bottom-sheet/modal conversion decision (BACKLOG rows 43-45); only `SongFormPage` has been migrated to this law so far. Do not treat the other three as a bug — they are tracked separately. If a form's bottom-sheet conversion is later declined, migrate it to this ToolbarItem pattern as a follow-up task.
 
 ### Validation (law)
 All form fields validate per the **Form Validation Standard** in `dialogs-validation.md` — validate on blur
