@@ -117,12 +117,24 @@ public partial class AutocompleteField : ContentView
 
     private readonly AutocompleteDebouncer _debouncer = new();
     private bool _isTappingSuggestion;
+    private bool _isShowingMobileField;
+
+    /// <summary>
+    /// Resolved via the app's DI container by default (same singleton MauiProgram.cs registers
+    /// for <c>IDeviceInfo</c>); settable so tests can inject a mock without a MAUI runtime.
+    /// AutocompleteField has no constructor-injection path — it's instantiated by the compiled
+    /// XAML of consumer pages — so this service-locator seam is the pragmatic equivalent.
+    /// </summary>
+    internal IDeviceInfo DeviceInfo { get; set; }
+
+    internal bool IsCompactWindow => AutocompleteWindowClass.IsCompactWindow(DeviceInfo);
 
     // ── Constructor ───────────────────────────────────────────────────────
 
     public AutocompleteField()
     {
         InitializeComponent();
+        DeviceInfo = IPlatformApplication.Current?.Services.GetService<IDeviceInfo>();
     }
 
     // ── Suggestions changed ───────────────────────────────────────────────
@@ -153,17 +165,65 @@ public partial class AutocompleteField : ContentView
 
     // ── Focus / blur guard ────────────────────────────────────────────────
 
-    private void OnSearchEditFocused(object sender, FocusEventArgs e)
+    private async void OnSearchEditFocused(object sender, FocusEventArgs e)
     {
+        if (IsCompactWindow)
+        {
+            await ShowMobileFieldAsync();
+            return;
+        }
+
         var list = Suggestions?.ToList();
         if (list?.Count > 0)
             overlayCard.IsVisible = true;
     }
 
+    private async Task ShowMobileFieldAsync()
+    {
+        _isShowingMobileField = true;
+        searchEdit.Unfocus();
+
+        var mobileField = new AutocompleteMobileField
+        {
+            Placeholder = Placeholder
+        };
+        mobileField.SetBinding(AutocompleteMobileField.TextProperty,
+            new Binding(nameof(Text), BindingMode.TwoWay, source: this));
+        mobileField.SetBinding(AutocompleteMobileField.SuggestionsProperty,
+            new Binding(nameof(Suggestions), source: this));
+
+        mobileField.SuggestionTapped += OnMobileFieldSuggestionTapped;
+        mobileField.Cancelled += OnMobileFieldCancelled;
+
+        await Shell.Current.Navigation.PushModalAsync(mobileField);
+    }
+
+    private async void OnMobileFieldSuggestionTapped(object sender, AutocompleteSuggestion suggestion)
+    {
+        var mobileField = (AutocompleteMobileField)sender;
+        mobileField.SuggestionTapped -= OnMobileFieldSuggestionTapped;
+        mobileField.Cancelled -= OnMobileFieldCancelled;
+
+        SuggestionSelectedCommand?.Execute(suggestion);
+        _isShowingMobileField = false;
+        await Shell.Current.Navigation.PopModalAsync();
+    }
+
+    private async void OnMobileFieldCancelled(object sender, EventArgs e)
+    {
+        var mobileField = (AutocompleteMobileField)sender;
+        mobileField.SuggestionTapped -= OnMobileFieldSuggestionTapped;
+        mobileField.Cancelled -= OnMobileFieldCancelled;
+
+        BlurredWithoutSelectionCommand?.Execute(null);
+        _isShowingMobileField = false;
+        await Shell.Current.Navigation.PopModalAsync();
+    }
+
     private async void OnSearchEditUnfocused(object sender, FocusEventArgs e)
     {
         await Task.Yield();
-        if (!_isTappingSuggestion)
+        if (!_isTappingSuggestion && !_isShowingMobileField)
         {
             overlayCard.IsVisible = false;
             BlurredWithoutSelectionCommand?.Execute(null);
