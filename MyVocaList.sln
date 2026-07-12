@@ -295,6 +295,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-component", "a
 		Docs\Management\DevCycleCraft\autocomplete-component\design.md = Docs\Management\DevCycleCraft\autocomplete-component\design.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hamburger-nav-pattern", "hamburger-nav-pattern", "{FA1234BC-0001-4000-8000-000000000047}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\hamburger-nav-pattern\findings.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\findings.md
+		Docs\Management\DevCycleCraft\hamburger-nav-pattern\requirements.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\requirements.md
+		Docs\Management\DevCycleCraft\hamburger-nav-pattern\design.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\design.md
+		Docs\Management\DevCycleCraft\hamburger-nav-pattern\tasks.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\tasks.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\persons\autocomplete-design.md = Docs\Management\BusinessFeatures\persons\autocomplete-design.md
@@ -744,6 +752,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000029} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000046} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000047} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000034} = {D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
