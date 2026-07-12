@@ -67,7 +67,7 @@ public abstract class CrudListPageBase : ContentPage
             // hamburger-nav-pattern/design.md § Classification principle) → always the hamburger.
             // If a future feature ever pushes a CRUD list as a non-top-level sub-page, replace this
             // with an explicit "is my route in the top-level menu set?" check (design.md § Assumption).
-            vm.AppBarNavigationIcon = "menu";
+            vm.AppBarNavigationIcon = "menu_outlined";
             vm.AppBarNavigationCommand = new Command(
                 () => Shell.Current.FlyoutIsPresented = true);
         }
