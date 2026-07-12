@@ -109,3 +109,38 @@ Only `.claude/library/m3-components.md` was modified. `MyVocaList/UI/Pages/Songs
 - Manual E2E smoke test (Plan Task 1 Step 4 / requirements.md AC-1–AC-3, AC-6 validation method) was not performed — no device/emulator available to the implementing agent. Task-log documents this explicitly as pending Helder's manual verification rather than silently skipping it, which satisfies the disclosure bar, but the on-device confirmation itself remains outstanding before this can be considered fully verified end-to-end.
 
 **Recommendation:** Proceed. Task 1 (this commit pair) is spec-compliant; Helder should perform the documented manual E2E smoke test on-device before considering the full feature (Tasks 1-4) closed out.
+
+---
+## Task: BACKLOG.md status update
+**Plan:** Docs/Management/DevCycleCraft/crud-form-action-pattern/plan.md (Task 4)
+**Status:** To Review
+**Started:** 2026-07-12
+**Completed:** 2026-07-12
+
+### Changed files:
+- `Docs/Management/BACKLOG.md`
+
+### Build notes
+Docs-only change (no `.cs`/`.xaml` touched) — no `dotnet build`/`dotnet test` required per `.claude/rules/testing.md` Level C. Commit SHA: dd7c7ab4f84c443273f512bf9b6a6d8d1750f577.
+Files written and re-read: `Docs/Management/BACKLOG.md` (re-read row 46 and row 169 after edit — confirmed both status markers changed to `✅ Done` and the implementation notes were appended verbatim, existing prose left intact).
+
+### Feature closeout summary
+
+All 4 tasks of the CRUD Form Action Pattern feature are now complete:
+
+1. **Task 1** — `SongFormPage.xaml`: Save moved to native Shell `ToolbarItem`, inline Cancel/Save buttons removed. Commit `4480728`.
+2. **Task 2** — `.claude/library/crud-pages.md`: ToolbarItem-Save documented as the general law for full-screen CRUD forms. Commit `69264a7`.
+3. **Task 3** — `.claude/library/m3-components.md`: cross-reference to the new pattern added near the SmallAppBar trailing-action guidance. Commit `3c6ad62`.
+4. **Task 4** — `Docs/Management/BACKLOG.md`: row 169 (CRUD Form Action Pattern) and row 46 (Song form AppBar-save) marked `✅ Done`. Commit `dd7c7ab`.
+
+**Build/test status:** build passed with 0 errors throughout (Task 1); 465/465 tests passed (one unrelated flaky integration test on first run, passed clean on re-run — not a regression). Tasks 2-4 are documentation-only, no build/test required per `testing.md` Level C.
+
+**Verifier verdict:** PASS, recorded above under Task 3's entry (verifier reviewed the Task 1 commit pair against `design.md`/`requirements.md` and found no blockers).
+
+**Open item:** the manual on-device E2E smoke test specified in `plan.md` Task 1 Step 4 has NOT been performed — no Android emulator or physical device was available to any implementing agent in this session. This remains pending Helder's manual verification:
+1. SongFormPage top app bar shows a "Save" toolbar item (top-right).
+2. No Cancel or Save button remains in the form body.
+3. Tapping the toolbar "Save" persists the song and navigates away, identically to the old inline Save button.
+4. Native back-button discard behavior matches the old Cancel button's (see the Task 1 finding above — functionally equivalent by construction, since Shell's default pop-navigation was never guarded by a confirmation prompt either before or after this change).
+
+The feature is otherwise code-complete and spec-compliant; this on-device check is the only remaining step before the feature can be considered fully closed out end-to-end.
