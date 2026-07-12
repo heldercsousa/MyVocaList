@@ -18,5 +18,5 @@ Scope: 4 CRUD list pages. Single-file production change + manual E2E verificatio
   - **Exit:** build 0 errors → post-edit re-read → `.sln` already registers spec docs → living-spec check → `task-log.md` entry with AC traceability matrix + E2E evidence → `/sln-commit`.
 
 - [ ] **Task 2 — Session-end BACKLOG + spec close-out**
-  - Update BACKLOG row (2026-07-11 "Hamburger menu on all hamburger-loaded pages") status; note Shell-native pages deferred to AppBar/SearchAppBar redesign (166).
+  - Update BACKLOG row (2026-07-11 "Hamburger menu on all hamburger-loaded pages") status; note Shell-native pages deferred to AppBar/SearchAppBar Interaction Redesign (BACKLOG 2026-07-10).
   - Confirm out-of-scope items (Shell-native pages, AppBar-back animation, SearchAppBar swap) are captured in BACKLOG/requirements.
