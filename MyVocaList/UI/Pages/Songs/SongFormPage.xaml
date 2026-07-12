@@ -15,6 +15,10 @@
     BackgroundColor="{StaticResource Surface}"
     SafeAreaEdges="Container">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Save" Command="{Binding SaveCommand}" />
+    </ContentPage.ToolbarItems>
+
     <!-- Root Grid so BottomSheets can overlay the ScrollView -->
     <Grid>
 
@@ -211,17 +215,6 @@
 
                     </VerticalStackLayout>
                 </Border>
-
-                <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
-                    <dx:DXButton Content="Cancel"
-                                 Style="{StaticResource OutlinedButton}"
-                                 Padding="24,0"
-                                 Command="{Binding CancelCommand}" />
-                    <dx:DXButton Content="Save"
-                                 Style="{StaticResource FilledButton}"
-                                 Padding="24,0"
-                                 Command="{Binding SaveCommand}" />
-                </HorizontalStackLayout>
 
             </VerticalStackLayout>
         </ScrollView>
