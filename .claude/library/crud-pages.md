@@ -107,6 +107,8 @@ CrudListView subscribes to `BindingContextChanged`, casts to `ICrudListViewModel
 
 `CrudListPageBase` is the required base class for all CRUD list pages.
 
+> **Pattern intent (documented pattern, NOT a governed component):** `CrudListPageBase` — together with `CrudListView` and `CrudListViewModelBase<T>` — is the standard pattern for **List pages in general**, not only entity/CRUD-member lists. Its purpose is to cut duplication, reduce error risk, and keep every List page behaving identically (leading-icon behavior, hardware back, shimmer, confirm sheet, pagination). Deliberate **exceptions** exist and more may appear — e.g. the Autocomplete component's in-sheet / full-screen result list is not a "List page" in this sense and does not inherit this base. This base class is intentionally kept as a **documented pattern rather than a governed component** (it is not on the `component-safety-gate.md` governed list): changes still go through normal spec + review and must update every List-page consumer consistently, but they do not require the four-gate component-change ceremony.
+
 **Provided by CrudListPageBase (do not re-implement in pages):**
 - `OnAppearing()` — calls `ListViewModel.InitializeAsync()`
 - `OnBackButtonPressed()` — dismiss confirm sheet → close search → default Shell back
