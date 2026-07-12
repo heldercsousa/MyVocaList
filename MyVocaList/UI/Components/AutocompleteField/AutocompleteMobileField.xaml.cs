@@ -45,7 +45,10 @@ public partial class AutocompleteMobileField : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        searchEdit.Focus();
+        // Focusing synchronously during the modal push animation is unreliable on Android — the
+        // input loses focus and the keyboard never raises, forcing the user to re-tap (BUG-040).
+        // Defer the focus until after the presentation animation settles (AC-3).
+        Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(250), () => searchEdit.Focus());
     }
 
     private void OnBackButtonClicked(object sender, EventArgs e)

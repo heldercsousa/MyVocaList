@@ -70,8 +70,14 @@ public class PersonService : IPersonService
         if (string.IsNullOrWhiteSpace(birthday))
             return (true, "");
 
-        var regex = new Regex(@"^(\d{1,2})/(\d{1,2})$");
-        var match = regex.Match(birthday.Trim());
+        // The birthday TextEdit uses Mask="00/00": the '/' is a display-only mask literal, so the
+        // delivered value is 4 digits ("DDMM"), not "DD/MM" (BUG-036). Legacy records persisted
+        // before BUG-022 may still contain the literal separator ("15/03"); strip it so both the
+        // masked value and legacy records validate identically.
+        var digits = birthday.Trim().Replace("/", "");
+
+        var regex = new Regex(@"^(\d{2})(\d{2})$");
+        var match = regex.Match(digits);
 
         if (!match.Success)
             return (false, "Use DD/MM format (e.g.: 15/03)");
