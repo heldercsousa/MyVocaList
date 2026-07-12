@@ -2,7 +2,7 @@
 
 Scope: 4 CRUD list pages. Single-file production change + manual E2E verification. Light ceremony (single file, < 1 hour) per `workflow.md` Rule 1.
 
-- [ ] **Task 1 — Always-hamburger in `CrudListPageBase.OnNavigatedTo`**
+- [x] **Task 1 — Always-hamburger in `CrudListPageBase.OnNavigatedTo`**
   - **Produces:** correct leading icon (hamburger) on all 4 CRUD list pages.
   - **Consumes:** existing `ICrudListViewModel.AppBarNavigationIcon` / `AppBarNavigationCommand`; existing `"menu"` glyph.
   - **Change:** replace the `NavigationStack.Count <= 1` conditional with unconditional hamburger assignment (icon `"menu"` + open-flyout command); remove the dead `arrow_back_outlined`/`GoToAsync("..")` branch; add the classification/assumption code comment (see `design.md`).
@@ -17,6 +17,6 @@ Scope: 4 CRUD list pages. Single-file production change + manual E2E verificatio
   - **Review lane:** code review (subagent) + Helder emulator observation.
   - **Exit:** build 0 errors → post-edit re-read → `.sln` already registers spec docs → living-spec check → `task-log.md` entry with AC traceability matrix + E2E evidence → `/sln-commit`.
 
-- [ ] **Task 2 — Session-end BACKLOG + spec close-out**
+- [x] **Task 2 — Session-end BACKLOG + spec close-out**
   - Update BACKLOG row (2026-07-11 "Hamburger menu on all hamburger-loaded pages") status; note Shell-native pages deferred to AppBar/SearchAppBar Interaction Redesign (BACKLOG 2026-07-10).
   - Confirm out-of-scope items (Shell-native pages, AppBar-back animation, SearchAppBar swap) are captured in BACKLOG/requirements.
