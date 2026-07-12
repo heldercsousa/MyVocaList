@@ -147,3 +147,41 @@ These four are registered in `BACKLOG.md` (Person CRUD nested rows, BUG-035–BU
   pattern is guessing *any* validation message onto *any* field by generic keyword sniffing across all
   fields (the old `SetInlineError`). If no substring reliably identifies the field, route the failure to
   the non-blocking snackbar channel instead of guessing.
+
+---
+
+## Task: BUG-036 — PersonFormPage birthday validation blocks Save (masked value)
+
+**Plan:** commit-message-as-spec (Bug Fix Pattern) — no three-file spec.
+**Status:** To Review
+**Started:** 2026-07-12
+**Completed:** 2026-07-12
+**Severity:** Major (reclassified from Minor 2026-07-12 — Save is blocked entirely, no Person persists). Confirmed by Helder on-device (release build).
+
+### Root cause
+`PersonService.ValidateBirthday` validated against `^(\d{1,2})/(\d{1,2})$`, requiring a literal
+"/". After BUG-022 added `Mask="00/00"` to the birthday `dxe:TextEdit`, the "/" is a display-only
+mask literal and the delivered `Text` is 4 digits ("1503"). Every non-empty birthday therefore
+failed validation and Save never persisted.
+
+### Fix
+Strip any "/" separator and validate the 4-digit "DDMM" form (`^(\d{2})(\d{2})$`); legacy "DD/MM"
+records still validate (backward compatible). The mask and the storage path
+(`BirthdayDayMonth = birthday.Trim()`) are left unchanged, per Helder's direction.
+
+### Changed files
+- `Services/PersonService.cs` — `ValidateBirthday` regex/normalization (strip "/" + 4-digit match).
+- `MyVocaList.Tests/Unit/Services/PersonServiceTests.cs` — +2 tests (`ValidateBirthday_MaskedFourDigits_ReturnsValid`, `ValidateBirthday_MaskedFourDigitsInvalidMonth_ReturnsInvalid`).
+
+### Verification evidence
+- Build: PASS — Android head 0 errors; test project 0 errors.
+- Tests: PASS — 10/10 `ValidateBirthday` tests (8 existing + 2 new); full suite 476/476. Both new tests seen Red before the fix (masked value returned invalid).
+- Post-edit re-read: confirmed.
+
+### AC traceability
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| BUG-036 | Masked 4-digit birthday accepted | `PersonService.ValidateBirthday` | `ValidateBirthday_MaskedFourDigits_ReturnsValid` |
+| BUG-036 | Range checks still apply to masked form | `PersonService.ValidateBirthday` | `ValidateBirthday_MaskedFourDigitsInvalidMonth_ReturnsInvalid` |
+
+Commit: `1788320`. ⏳ Helder: on-device re-verify Save persists a birthday.
