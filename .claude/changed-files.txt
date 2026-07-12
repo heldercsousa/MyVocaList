@@ -2340,3 +2340,6 @@ Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesi
 Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/tasks.md
 Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/requirements.md
 Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/design.md
+.claude/worktrees/autocomplete-mobile-field/.superpowers/sdd/progress.md
+Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md
