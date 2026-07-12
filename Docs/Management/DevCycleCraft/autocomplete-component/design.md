@@ -7,6 +7,14 @@
 
 ## 1. Architecture
 
+> **Design updated 2026-07-11:** `IDeviceInfo` is not constructor-injected as originally stated —
+> `AutocompleteField` has no DI resolution path (it's instantiated by the XAML compiler in consumer
+> pages, confirmed by its parameterless constructor). Implemented instead via a service-locator seam
+> (`IPlatformApplication.Current.Services.GetService<IDeviceInfo>()`, defaulted in the constructor,
+> overridable via an internal settable `DeviceInfo` property) plus a MAUI-runtime-free static helper
+> `AutocompleteWindowClass.IsCompactWindow(IDeviceInfo)` for unit testability — mirroring the existing
+> `AutocompleteDebouncer` extraction pattern in the same folder. See `plan.md` Task 1/Task 3.
+
 `AutocompleteField` (the existing, desktop-correct component) gets exactly one new decision point: on
 focus/tap, check the injected `IDeviceInfo.Idiom`.
 
