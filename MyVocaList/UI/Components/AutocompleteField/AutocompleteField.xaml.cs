@@ -33,9 +33,16 @@ public partial class AutocompleteField : ContentView
             {
                 var ctrl = (AutocompleteField)b;
                 var newVal = (string)n ?? "";
-                // Guard against feedback loop when OnTextChanged drives this property
+                // Keep the desktop TextEdit in sync (no-op when it originated the change).
                 if (ctrl.searchEdit.Text != newVal)
                     ctrl.searchEdit.Text = newVal;
+                // Drive the search from the shared Text property — the single source of truth for
+                // both the desktop TextEdit and the phone Search View. The desktop TextEdit's
+                // TextChanged event fires only for direct typing into it, which never happens on
+                // phone (the user types into AutocompleteMobileField, which flows here via the
+                // two-way Text binding), so relying on that event dropped every phone-side search
+                // and returned zero suggestions (BUG-043).
+                ctrl.HandleTextChanged(newVal);
             });
 
     public static readonly BindableProperty SearchRequestedCommandProperty =
@@ -150,10 +157,16 @@ public partial class AutocompleteField : ContentView
 
     private void OnTextChanged(object sender, EventArgs e)
     {
-        var text = searchEdit.Text ?? "";
-        Text = text;
+        // Desktop typing → push into the shared Text property; the search is triggered from Text's
+        // propertyChanged (see TextProperty), unifying the desktop and phone Search View paths.
+        Text = searchEdit.Text ?? "";
+    }
 
-        if (text.Length < 2)
+    private void HandleTextChanged(string text)
+    {
+        text ??= "";
+
+        if (!AutocompleteSearchGate.ShouldTriggerSearch(text))
         {
             _debouncer.Cancel();
             Suggestions = null;
