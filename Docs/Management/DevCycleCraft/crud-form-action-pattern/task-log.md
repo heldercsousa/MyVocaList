@@ -13,7 +13,8 @@
 - `MyVocaList.sln` (Solution Folder registration for this feature folder)
 
 ### Build notes
-Build: passed (0 errors, 94 warnings — all pre-existing/unrelated: nullability warnings, CA2024, DevExpress trial-license warnings, CA1416 platform-reachability warnings). Tests: not run — Level C XAML-only change, no `.cs` file touched, no automated test required per `.claude/rules/testing.md`.
+Commit SHA: 44807280d9b188d60e5f3fa11c6b872568f9e332
+Build: passed (0 errors, 94 warnings — all pre-existing/unrelated: nullability warnings, CA2024, DevExpress trial-license warnings, CA1416 platform-reachability warnings). Tests: not mandatory (Level C XAML-only change, no `.cs` file touched, per `.claude/rules/testing.md`) — ran anyway as a sanity check via `dotnet test`: 465 passed, 0 failed on the second run. First run had 1 pre-existing flaky failure (`EventRepositoryTests.ExistsByNameAsync_ExistingName_ReturnsTrue`, an integration test unrelated to this XAML-only change) that passed in isolation and on re-run of the full suite — a test-isolation flake, not a regression from this task.
 Files written and re-read: `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (re-read lines 1-25 and 205-224 after edit, confirmed both changes applied cleanly with no stray whitespace).
 
 ### Environment note
