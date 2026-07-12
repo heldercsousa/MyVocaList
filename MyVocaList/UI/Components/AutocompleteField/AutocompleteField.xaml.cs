@@ -33,9 +33,16 @@ public partial class AutocompleteField : ContentView
             {
                 var ctrl = (AutocompleteField)b;
                 var newVal = (string)n ?? "";
-                // Guard against feedback loop when OnTextChanged drives this property
+                // Keep the desktop TextEdit in sync (no-op when it originated the change).
                 if (ctrl.searchEdit.Text != newVal)
                     ctrl.searchEdit.Text = newVal;
+                // Drive the search from the shared Text property — the single source of truth for
+                // both the desktop TextEdit and the phone Search View. The desktop TextEdit's
+                // TextChanged event fires only for direct typing into it, which never happens on
+                // phone (the user types into AutocompleteMobileField, which flows here via the
+                // two-way Text binding), so relying on that event dropped every phone-side search
+                // and returned zero suggestions (BUG-043).
+                ctrl.HandleTextChanged(newVal);
             });
 
     public static readonly BindableProperty SearchRequestedCommandProperty =
@@ -116,8 +123,8 @@ public partial class AutocompleteField : ContentView
     // ── Private state ─────────────────────────────────────────────────────
 
     private readonly AutocompleteDebouncer _debouncer = new();
+    private readonly MobileFieldReopenGuard _reopenGuard = new();
     private bool _isTappingSuggestion;
-    private bool _isShowingMobileField;
 
     /// <summary>
     /// Resolved via the app's DI container by default (same singleton MauiProgram.cs registers
@@ -150,10 +157,16 @@ public partial class AutocompleteField : ContentView
 
     private void OnTextChanged(object sender, EventArgs e)
     {
-        var text = searchEdit.Text ?? "";
-        Text = text;
+        // Desktop typing → push into the shared Text property; the search is triggered from Text's
+        // propertyChanged (see TextProperty), unifying the desktop and phone Search View paths.
+        Text = searchEdit.Text ?? "";
+    }
 
-        if (text.Length < 2)
+    private void HandleTextChanged(string text)
+    {
+        text ??= "";
+
+        if (!AutocompleteSearchGate.ShouldTriggerSearch(text))
         {
             _debouncer.Cancel();
             Suggestions = null;
@@ -169,7 +182,17 @@ public partial class AutocompleteField : ContentView
     {
         if (IsCompactWindow)
         {
-            await ShowMobileFieldAsync();
+            if (_reopenGuard.RequestShowOnFocus())
+            {
+                await ShowMobileFieldAsync();
+            }
+            else
+            {
+                // Suppressed: either the Search View is already open, or this is the one-shot
+                // automatic refocus that follows a dismissal. Keep the field blurred so the
+                // keyboard and Search View do not reappear (BUG-041/042).
+                searchEdit.Unfocus();
+            }
             return;
         }
 
@@ -180,7 +203,6 @@ public partial class AutocompleteField : ContentView
 
     private async Task ShowMobileFieldAsync()
     {
-        _isShowingMobileField = true;
         searchEdit.Unfocus();
 
         var mobileField = new AutocompleteMobileField
@@ -205,7 +227,7 @@ public partial class AutocompleteField : ContentView
         mobileField.Cancelled -= OnMobileFieldCancelled;
 
         SuggestionSelectedCommand?.Execute(suggestion);
-        _isShowingMobileField = false;
+        _reopenGuard.NotifyDismissed();
         await Shell.Current.Navigation.PopModalAsync();
     }
 
@@ -216,14 +238,14 @@ public partial class AutocompleteField : ContentView
         mobileField.Cancelled -= OnMobileFieldCancelled;
 
         BlurredWithoutSelectionCommand?.Execute(null);
-        _isShowingMobileField = false;
+        _reopenGuard.NotifyDismissed();
         await Shell.Current.Navigation.PopModalAsync();
     }
 
     private async void OnSearchEditUnfocused(object sender, FocusEventArgs e)
     {
         await Task.Yield();
-        if (!_isTappingSuggestion && !_isShowingMobileField)
+        if (!_isTappingSuggestion && !_reopenGuard.IsShowing)
         {
             overlayCard.IsVisible = false;
             BlurredWithoutSelectionCommand?.Execute(null);

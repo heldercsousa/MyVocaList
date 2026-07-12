@@ -132,6 +132,25 @@ public class PersonServiceTests
         Assert.True(isValid);
     }
 
+    [Fact]
+    // [AC] BUG-036: the birthday TextEdit uses Mask="00/00"; the '/' is a display-only mask
+    // literal, so the delivered value is 4 digits ("1503") without a separator. ValidateBirthday
+    // must accept the masked form, otherwise Save is blocked and no Person ever persists.
+    public void ValidateBirthday_MaskedFourDigits_ReturnsValid()
+    {
+        var (isValid, _) = CreateSut().ValidateBirthday("1503");
+        Assert.True(isValid);
+    }
+
+    [Fact]
+    // [AC] BUG-036: range validation still applies to the masked 4-digit form (month 45 invalid).
+    public void ValidateBirthday_MaskedFourDigitsInvalidMonth_ReturnsInvalid()
+    {
+        var (isValid, message) = CreateSut().ValidateBirthday("1545");
+        Assert.False(isValid);
+        Assert.Contains("Month", message);
+    }
+
     // ── ValidateEmail ─────────────────────────────────────────────────────────
 
     [Fact]
