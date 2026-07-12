@@ -74,3 +74,64 @@ AC-1, AC-3, AC-4, AC-5, AC-6 require a real phone-idiom render, which needs a co
 
 **Back-gesture/swipe-dismissal risk (flagged by the opus reviewer's non-blocking finding during Task 3's elevated-lane task review of commit `5f13849`):** confirm `AutocompleteMobileField` raises its `Cancelled` event when dismissed via Android system back gesture or any modal swipe-down — not just the in-page back button and hardware `OnBackButtonPressed` override. If a dismissal path exists that bypasses `Cancelled`, `AutocompleteField._isShowingMobileField` stays permanently `true`, wedging the field (silently suppressing `BlurredWithoutSelectionCommand` forever) and leaking the modal page's event subscriptions.
 - **Shimmer/empty-state pattern (flagged by final whole-branch review):** `AutocompleteMobileField` currently has no loading shimmer or empty-state view, though design.md § 2 originally specified reusing `CrudListView`'s `ShimmerView`/dual-`EmptyState` pattern. See design.md's 2026-07-11 correction note. Must be resolved (implemented or deliberately deferred with rationale) during consumer wiring.
+
+---
+
+## Task: BUG-040/041/042/043 — on-device defect fixes (PersonFormPage phone flow)
+
+**Plan:** commit-message-as-spec (Bug Fix Pattern, `workflow.md` Rule 3) — no three-file spec.
+**Status:** To Review
+**Started:** 2026-07-12
+**Completed:** 2026-07-12
+
+Found by Helder 2026-07-12 testing a **release build on a physical Android device**. All four are
+defects in the `AutocompleteField` phone branch (`AutocompleteMobileField`), surfaced because the
+component is exercised by `PersonFormPage`'s Name field on a phone idiom. The engineer's own final
+review had flagged both root-cause areas as unproven (data-flow chain; back-dismissal state flag) —
+both confirmed as the actual causes.
+
+### Root causes & fixes
+
+| Bug | Severity | Root cause | Fix | Commit |
+|-----|----------|-----------|-----|--------|
+| BUG-040 | Major | `OnAppearing` focused the input synchronously during the modal push animation (unreliable on Android → focus lost, keyboard never raised). | Defer focus with `Dispatcher.DispatchDelayed(250ms)`. | `1078939` |
+| BUG-041 | Critical | Dismissing the Search View pops the modal → underlying `searchEdit` regains focus → `Focused` handler unconditionally re-pushed it (instant reappear; overlap → duplicate). | `MobileFieldReopenGuard` refuses duplicate pushes and swallows the one-shot post-dismiss refocus. | `c48dc1d` |
+| BUG-042 | Critical | Same refocus-driven reopen loop as BUG-041 (every subsequent back repeats it). | Same guard (one-shot suppression breaks the loop). | `c48dc1d` |
+| BUG-043 | Critical | Search fired only from the desktop `TextEdit.TextChanged` UI event, which never fires on phone; the mobile value reached `AutocompleteField.Text` via binding but `propertyChanged` never triggered the search → `SearchRequestedCommand` never ran. | Drive search from the shared `Text` property (`HandleTextChanged`), gated by extracted `AutocompleteSearchGate` + existing debouncer. | `202239e` |
+
+### Changed files
+- `MyVocaList/UI/Components/AutocompleteField/AutocompleteField.xaml.cs` — replaced `_isShowingMobileField` flag with `MobileFieldReopenGuard`; moved search trigger from `OnTextChanged` to `Text` propertyChanged via new `HandleTextChanged`.
+- `MyVocaList/UI/Components/AutocompleteField/AutocompleteMobileField.xaml.cs` — deferred auto-focus (BUG-040).
+- `MyVocaList/UI/Components/AutocompleteField/MobileFieldReopenGuard.cs` — **new** pure guard (BUG-041/042).
+- `MyVocaList/UI/Components/AutocompleteField/AutocompleteSearchGate.cs` — **new** pure min-length gate (BUG-043).
+- `MyVocaList.Tests/Unit/Components/MobileFieldReopenGuardTests.cs` — **new**, 4 tests (Red-first).
+- `MyVocaList.Tests/Unit/Components/AutocompleteSearchGateTests.cs` — **new**, 5 tests (Red-first).
+
+### Verification evidence
+- Build: PASS — `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 5 projects, 0 errors, 2 warnings (pre-existing DevExpress evaluation-license).
+- Tests: PASS — 476/476 (was 465 baseline; +9 new autocomplete tests +2 BUG-036 birthday tests). Each new test seen Red before its fix.
+- Post-edit re-read: confirmed for all edited files.
+- Spec compliance: AC-3 (auto-focus), AC-4 (data-flow parity), AC-6/BUG-008 (`BlurredWithoutSelectionCommand` still fires on cancel — path preserved) checked; desktop/tablet path (AC-2) untouched — `SongFormPage` consumer not modified.
+
+### AC traceability
+| AC ID | Criterion (short) | Implementation location | Test method |
+|-------|-------------------|------------------------|-------------|
+| AC-4 | Query drives search | `AutocompleteField.HandleTextChanged` + `AutocompleteSearchGate.ShouldTriggerSearch` | `AutocompleteSearchGateTests.ShouldTriggerSearch_TwoCharacters_ReturnsTrue` |
+| AC-10 | <2 chars no search (debounce threshold) | `AutocompleteSearchGate.ShouldTriggerSearch` | `ShouldTriggerSearch_SingleCharacter_ReturnsFalse` |
+| AC-1/BUG-041 | No duplicate Search View | `MobileFieldReopenGuard.RequestShowOnFocus` | `RequestShowOnFocus_WhileShowing_ReturnsFalse` |
+| BUG-042 | Dismissal loop broken | `MobileFieldReopenGuard.NotifyDismissed` | `RequestShowOnFocus_ImmediatelyAfterDismiss_IsSuppressed` |
+
+### Manual E2E — required before ✅ (Helder, physical device / phone emulator)
+The pure state/gate logic is unit-tested; the actual on-screen focus, keyboard raise, modal
+push/pop animation, and phone typing→suggestions rendering are UI-layer and not unit-testable in
+this project (design.md § 5). Verify on a phone idiom:
+1. **BUG-040:** tap PersonFormPage Name → Search View input is focused and keyboard raised without a re-tap.
+2. **BUG-041/042:** open the Search View, dismiss via in-field back, hardware back, and system back gesture — each dismisses cleanly and stays dismissed (no reappear, no duplicate).
+3. **BUG-043:** type 2+ chars of an existing Person's name → matching suggestions render; selecting one populates the field.
+4. **Regression:** repeat the SongFormPage Artist field flow (BUG-008 cancel-without-selection parity) — must be unchanged.
+
+> **Note on the earlier back-gesture flag (above):** the Android system back gesture routes through
+> `OnBackButtonPressed`, which raises `Cancelled` → `NotifyDismissed()`. The former wedge risk
+> (`_isShowingMobileField` stuck true) is eliminated: the flag is gone, replaced by the guard whose
+> `IsShowing` is reset on every dismissal path. Modal swipe-down (if present on the platform) still
+> needs the manual E2E confirmation in step 2.
