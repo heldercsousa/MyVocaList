@@ -1,1 +1,0 @@
-adb install -r bin\Release\net10.0-android\publish\com.myvocalist-Signed.apk
