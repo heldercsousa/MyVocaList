@@ -515,7 +515,7 @@ if __name__ == "__main__":
   - **Files owned:** `.claude/scripts/lease/heartbeat.py`, `lease_lib.py`, tests, `.claude/library/session-ops.md`
   - **Demo:** fresh session with no `--set` still yields a non-empty pointer naming the active task-log Checkpoint.
 
-- [ ] **Task 13: Lease GC**
+- [x] **Task 13: Lease GC**
   - **Produces:** heartbeat deletes claim files with `last_active` older than 7 days (skip its own; fail-open; bounded cost — tolerate one `os.scandir` of the small leases dir).
   - **Files owned:** `.claude/scripts/lease/heartbeat.py`, `lease_lib.py`, tests
   - **Demo:** 86-file leases dir shrinks to live claims after one heartbeat.
