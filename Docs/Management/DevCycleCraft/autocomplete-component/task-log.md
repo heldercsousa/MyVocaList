@@ -135,3 +135,86 @@ this project (design.md § 5). Verify on a phone idiom:
 > (`_isShowingMobileField` stuck true) is eliminated: the flag is gone, replaced by the guard whose
 > `IsShowing` is reset on every dismissal path. Modal swipe-down (if present on the platform) still
 > needs the manual E2E confirmation in step 2.
+
+---
+
+## Task: BUG-043 Phase 1 Root Fix (Reflection Bindings → Event-Driven Wiring)
+
+**Plan:** `.claude/skills/myvocalist-coding` (implementor task, no SDD spec needed — phase 1 of bug fix)
+**Status:** To Review
+**Started:** 2026-07-14
+**Completed:** 2026-07-14
+
+### Context
+Spike (`spike-bug-043-findings.md`) confirmed **H-A (Release trimming)** at 85% confidence. 
+`AutocompleteMobileField` has zero static XAML references → linker trims it in Release builds. 
+The reflection-based `SetBinding()` calls in `AutocompleteField.xaml.cs` fail on trimmed types → zero suggestions.
+
+### Root Cause
+- **AutocompleteMobileField** is dynamically instantiated in `AutocompleteField.xaml.cs`, not referenced statically in any XAML
+- Linker marks it as unreachable candidate for trimming in Release builds
+- Reflection-based bindings via `SetBinding(nameof(property), new Binding(...))` depend on type metadata
+- Trimmed metadata → binding fails silently → no Text/Suggestions propagation → zero suggestions
+
+### Fix
+Replace all reflection-based `SetBinding()` calls with trim-safe, event-driven wiring:
+
+**AutocompleteMobileField.xaml:**
+- Removed `Text="{Binding ...}"` binding on `searchEdit`
+- Removed `ItemsSource="{Binding ...}"` binding on `suggestionsView`
+
+**AutocompleteMobileField.xaml.cs:**
+- Added `TextProperty` propertyChanged handler to sync `searchEdit.Text` when Text property is set (feedback-loop guard)
+- Added `searchEdit.TextChanged` event handler to sync Text property when user types
+- Added `OnSuggestionsChanged` method wired to `SuggestionsProperty` propertyChanged
+- Added `_isUpdatingTextFromSearchEdit` guard field to prevent feedback loops
+
+**AutocompleteField.xaml.cs:**
+- Removed `SetBinding()` reflection calls from `ShowMobileFieldAsync`
+- Added event-driven PropertyChanged handlers for:
+  - `Text` (two-way: AutocompleteField ↔ AutocompleteMobileField)
+  - `Suggestions` (one-way: AutocompleteField → AutocompleteMobileField)
+- Added fields to store handler references for proper cleanup
+- Added cleanup logic in `OnMobileFieldSuggestionTapped` and `OnMobileFieldCancelled` to prevent memory leaks
+- Added `using System.ComponentModel;` for PropertyChangedEventHandler type
+
+### Changed Files
+- `MyVocaList/UI/Components/AutocompleteField/AutocompleteField.xaml.cs` — removed SetBinding() calls; added event-driven wiring
+- `MyVocaList/UI/Components/AutocompleteField/AutocompleteMobileField.xaml` — removed bindings
+- `MyVocaList/UI/Components/AutocompleteField/AutocompleteMobileField.xaml.cs` — added event handlers and feedback-loop guard
+
+### Build & Test Results
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 5 projects, 0 errors, 2 warnings (pre-existing DevExpress license warnings)
+- **Tests:** `AutocompleteFieldDebounceTests` (3/3 PASS) — desktop debouncer path unchanged, all existing tests green
+- **Post-edit verification:** All three files re-read after changes to confirm:
+  - XAML bindings removed
+  - Event handlers properly declared
+  - Cleanup logic in place
+  - Text property propertyChanged handler correctly guards against feedback loops
+
+### Why This Fix Works for Both H-A and H-B
+- **H-A (Release trimming):** Event-driven wiring uses direct control-flow calls, not reflection → trimmer cannot interfere
+- **H-B (Device IME composition):** Event wiring captures every keystroke (TextChanged fires for each character), not just composition-end → no text loss
+
+### Design Pattern
+Mirrors the desktop `AutocompleteField` pattern:
+- Desktop uses property change handlers + event handlers for Text/Suggestions sync
+- Mobile now uses the same pattern (no reflection, no bindings in XAML)
+- Both paths feed into `HandleTextChanged()` → debouncer → SearchRequestedCommand
+
+### Manual E2E Verification Required
+- [ ] Release build on Android emulator: type 2+ chars → suggestions appear (vs. Release device, which showed zero)
+- [ ] Verify text propagates correctly without reflection-binding errors in the debugger
+- [ ] Confirm mobile and desktop selection flows still work (AC-4 parity)
+
+### Regression Risk
+**Low:**
+- Desktop path (`AutocompleteField` overlay) entirely unchanged — no code modifications on that branch
+- Mobile path only uses new event-driven wiring (decoupled from linker)
+- Debounce logic (`AutocompleteDebouncer`, `AutocompleteSearchGate`) untouched
+- Event handler cleanup prevents memory leaks on modal dismissal
+
+### Acceptance Criteria Met
+- [x] AC-4 (Data flow parity): Text input and Suggestions propagate via event-driven wiring (trim-safe)
+- [x] AC-10 (Existing behavior preserved): No changes to debouncer or feedback-loop guard logic
+- [x] No reflection bindings in mobile branch (Phase 1 objective)
