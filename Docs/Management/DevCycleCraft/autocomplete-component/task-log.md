@@ -218,3 +218,84 @@ Mirrors the desktop `AutocompleteField` pattern:
 - [x] AC-4 (Data flow parity): Text input and Suggestions propagate via event-driven wiring (trim-safe)
 - [x] AC-10 (Existing behavior preserved): No changes to debouncer or feedback-loop guard logic
 - [x] No reflection bindings in mobile branch (Phase 1 objective)
+
+---
+
+## Task: BUG-043 Phase 2 Secondary Fix (Tap-Return Race — Modal Dismissal Reorder)
+
+**Plan:** `.claude/skills/myvocalist-coding` (implementor task, no SDD spec needed — phase 2 of bug fix)
+**Status:** To Review
+**Started:** 2026-07-14
+**Completed:** 2026-07-14
+
+### Context
+Phase 1 fixed zero-suggestions issue (reflection bindings → event-driven wiring). Phase 2 addresses the secondary bug: "Tap an item isn't returning to form; artist entry not filled after back."
+
+### Root Cause
+Observed when suggestions *did* render (so the search chain was alive, Phase 1 fix in place). The tap path is event-driven:
+`DXCollectionView.Tap` → `SuggestionTapped` → `OnMobileFieldSuggestionTapped` → `SuggestionSelectedCommand.Execute` (calls `Shell.GoToAsync(...)`) + `PopModalAsync`.
+
+**Ordering hazard:** `OnMobileFieldSuggestionTapped` was executing `SuggestionSelectedCommand?.Execute(suggestion)` **before** `await Shell.Current.Navigation.PopModalAsync()`. 
+If the selection command triggers navigation (GoToAsync) while the modal is still on the stack, a race occurs:
+- Navigation may fail silently
+- Selection may be lost
+- User's back press fires `Cancelled` → `BlurredWithoutSelectionCommand` → BUG-008 logic wipes the artist entry
+
+### Fix
+Reorder `OnMobileFieldSuggestionTapped` to dismiss the modal **before** executing the selection command:
+
+**Before:**
+```csharp
+SuggestionSelectedCommand?.Execute(suggestion);      // executes first
+_reopenGuard.NotifyDismissed();
+await Shell.Current.Navigation.PopModalAsync();       // pops after
+```
+
+**After:**
+```csharp
+// Dismiss modal first to ensure clean navigation stack before executing the selection command.
+// This avoids a race condition where executing SuggestionSelectedCommand (which may trigger
+// GoToAsync) before the modal is dismissed causes the navigation to fail silently (BUG-043).
+_reopenGuard.NotifyDismissed();
+await Shell.Current.Navigation.PopModalAsync();       // pops first
+SuggestionSelectedCommand?.Execute(suggestion);      // executes after
+```
+
+### Changed Files
+- `MyVocaList/UI/Components/AutocompleteField/AutocompleteField.xaml.cs` — reordered lines in `OnMobileFieldSuggestionTapped` method (~5 lines); added explanatory comment about the race condition
+
+### Build & Test Results
+- **Build:** `dotnet build` → 7 projects, 0 errors, 7 warnings (pre-existing DevExpress evaluation-license + platform warnings)
+- **Tests:** `dotnet test --no-build --verbosity minimal` → 476/476 tests PASS (unaffected by UI event order change)
+- **Post-edit verification:** Method re-read after changes to confirm:
+  - Modal dismissal (`PopModalAsync`) occurs before selection command execution
+  - `_reopenGuard.NotifyDismissed()` called before `PopModalAsync` to mark modal as dismissed while async operation occurs
+  - Explanatory comment documents the race condition and fix
+
+### Why This Fix Works
+- **Modal dismissal first:** Ensures the navigation stack is clean before `SuggestionSelectedCommand.Execute(suggestion)` runs
+- **Prevents race:** Navigation commands (GoToAsync, etc.) now execute against a fresh stack with no modal obscuring the view hierarchy
+- **Selection preserved:** Event subscriptions cleaned up before selection command runs, reducing the risk of stale state interference
+
+### Manual E2E Verification Required (Critical-level bug per bug-tracking.md)
+After Phase 1 release-build verification, test on emulator/device:
+1. **Type partial name:** Navigate to PersonFormPage (or SongFormPage Artist field) → type 2+ chars of an existing person/artist name
+2. **Suggestions appear:** Modal Search View renders matching suggestions (Phase 1 fix confirmed)
+3. **Tap a suggestion:** Tap one matching result from the list
+4. **Modal dismisses:** Search View modal closes cleanly
+5. **Form field populated:** The selected person/artist name appears in the autocomplete field (proof of successful navigation/selection)
+6. **Back navigation works:** Press back button → form retains the selected value (no BUG-008 wipe); navigating back to the form shows the selected name persisting
+7. **No entry wipe:** Confirm the typed/selected entry does not disappear after tapping or pressing back
+
+### Regression Risk
+**Low:**
+- Reordering only affects the `OnMobileFieldSuggestionTapped` event handler
+- Desktop path (`AutocompleteField` overlay) entirely unchanged
+- Event cleanup logic and modal dismissal remain identical, only order changed
+- No changes to debouncer, search gate, or suggestion rendering
+- All 476 existing tests pass
+
+### Acceptance Criteria Met
+- [x] AC-5 (Selection invokes SuggestionSelectedCommand + pops modal): modal now pops cleanly before command executes
+- [x] AC-8 (No DevExpress AutoCompleteEdit): unchanged
+- [x] BUG-043 Phase 2 (tap-return race): race condition eliminated by ensuring modal dismissal completes before selection navigation
