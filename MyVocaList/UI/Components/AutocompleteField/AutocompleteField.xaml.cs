@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace MyVocaList.UI.Components.AutocompleteField;
 
 public partial class AutocompleteField : ContentView
@@ -126,6 +128,11 @@ public partial class AutocompleteField : ContentView
     private readonly MobileFieldReopenGuard _reopenGuard = new();
     private bool _isTappingSuggestion;
 
+    // PropertyChanged handlers for mobile-field wiring (stored for proper cleanup).
+    private PropertyChangedEventHandler _mobileFieldPropertyChangedHandler;
+    private PropertyChangedEventHandler _selfPropertyChangedHandlerForMobileText;
+    private PropertyChangedEventHandler _selfPropertyChangedHandlerForMobileSuggestions;
+
     /// <summary>
     /// Resolved via the app's DI container by default (same singleton MauiProgram.cs registers
     /// for <c>IDeviceInfo</c>); settable so tests can inject a mock without a MAUI runtime.
@@ -207,12 +214,36 @@ public partial class AutocompleteField : ContentView
 
         var mobileField = new AutocompleteMobileField
         {
-            Placeholder = Placeholder
+            Placeholder = Placeholder,
+            // Trim-safe event-driven wiring: set initial values and sync via property-changed handlers,
+            // not reflection-based SetBinding() which fails under linker trimming (BUG-043).
+            Text = Text,
+            Suggestions = Suggestions
         };
-        mobileField.SetBinding(AutocompleteMobileField.TextProperty,
-            new Binding(nameof(Text), BindingMode.TwoWay, source: this));
-        mobileField.SetBinding(AutocompleteMobileField.SuggestionsProperty,
-            new Binding(nameof(Suggestions), source: this));
+
+        // Wire up two-way Text synchronization: AutocompleteField → mobileField
+        _selfPropertyChangedHandlerForMobileText = (_, args) =>
+        {
+            if (args.PropertyName == nameof(Text))
+                mobileField.Text = Text;
+        };
+        PropertyChanged += _selfPropertyChangedHandlerForMobileText;
+
+        // Wire up two-way Text synchronization: mobileField → AutocompleteField
+        _mobileFieldPropertyChangedHandler = (_, args) =>
+        {
+            if (args.PropertyName == nameof(AutocompleteMobileField.Text))
+                Text = mobileField.Text;
+        };
+        mobileField.PropertyChanged += _mobileFieldPropertyChangedHandler;
+
+        // Wire up Suggestions updates (one-way: AutocompleteField → AutocompleteMobileField).
+        _selfPropertyChangedHandlerForMobileSuggestions = (_, args) =>
+        {
+            if (args.PropertyName == nameof(Suggestions))
+                mobileField.Suggestions = Suggestions;
+        };
+        PropertyChanged += _selfPropertyChangedHandlerForMobileSuggestions;
 
         mobileField.SuggestionTapped += OnMobileFieldSuggestionTapped;
         mobileField.Cancelled += OnMobileFieldCancelled;
@@ -226,6 +257,14 @@ public partial class AutocompleteField : ContentView
         mobileField.SuggestionTapped -= OnMobileFieldSuggestionTapped;
         mobileField.Cancelled -= OnMobileFieldCancelled;
 
+        // Clean up PropertyChanged handlers to avoid memory leaks.
+        if (_selfPropertyChangedHandlerForMobileText != null)
+            PropertyChanged -= _selfPropertyChangedHandlerForMobileText;
+        if (_mobileFieldPropertyChangedHandler != null)
+            mobileField.PropertyChanged -= _mobileFieldPropertyChangedHandler;
+        if (_selfPropertyChangedHandlerForMobileSuggestions != null)
+            PropertyChanged -= _selfPropertyChangedHandlerForMobileSuggestions;
+
         SuggestionSelectedCommand?.Execute(suggestion);
         _reopenGuard.NotifyDismissed();
         await Shell.Current.Navigation.PopModalAsync();
@@ -236,6 +275,14 @@ public partial class AutocompleteField : ContentView
         var mobileField = (AutocompleteMobileField)sender;
         mobileField.SuggestionTapped -= OnMobileFieldSuggestionTapped;
         mobileField.Cancelled -= OnMobileFieldCancelled;
+
+        // Clean up PropertyChanged handlers to avoid memory leaks.
+        if (_selfPropertyChangedHandlerForMobileText != null)
+            PropertyChanged -= _selfPropertyChangedHandlerForMobileText;
+        if (_mobileFieldPropertyChangedHandler != null)
+            mobileField.PropertyChanged -= _mobileFieldPropertyChangedHandler;
+        if (_selfPropertyChangedHandlerForMobileSuggestions != null)
+            PropertyChanged -= _selfPropertyChangedHandlerForMobileSuggestions;
 
         BlurredWithoutSelectionCommand?.Execute(null);
         _reopenGuard.NotifyDismissed();
