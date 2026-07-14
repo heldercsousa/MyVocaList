@@ -521,6 +521,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "session-continuity-leasing"
 		Docs\Management\DevCycleCraft\session-continuity-leasing\findings.md = Docs\Management\DevCycleCraft\session-continuity-leasing\findings.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\plan.md = Docs\Management\DevCycleCraft\session-continuity-leasing\plan.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\requirements.md = Docs\Management\DevCycleCraft\session-continuity-leasing\requirements.md
+		Docs\Management\DevCycleCraft\session-continuity-leasing\task-log.md = Docs\Management\DevCycleCraft\session-continuity-leasing\task-log.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md = Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md = Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md
 	EndProjectSection
