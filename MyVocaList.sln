@@ -399,6 +399,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", 
 		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
 		Docs\Management\Chat with Opus about frozen UI in emulator - TO DO.txt = Docs\Management\Chat with Opus about frozen UI in emulator - TO DO.txt
 		Docs\Management\EMULATOR_TEST_MASTER_LIST.md = Docs\Management\EMULATOR_TEST_MASTER_LIST.md
+		Docs\Management\LEDGER.md = Docs\Management\LEDGER.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-restore", "{FA1234BC-0001-4000-8000-000000000011}"
