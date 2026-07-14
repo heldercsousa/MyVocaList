@@ -265,9 +265,12 @@ public partial class AutocompleteField : ContentView
         if (_selfPropertyChangedHandlerForMobileSuggestions != null)
             PropertyChanged -= _selfPropertyChangedHandlerForMobileSuggestions;
 
-        SuggestionSelectedCommand?.Execute(suggestion);
+        // Dismiss modal first to ensure clean navigation stack before executing the selection command.
+        // This avoids a race condition where executing SuggestionSelectedCommand (which may trigger
+        // GoToAsync) before the modal is dismissed causes the navigation to fail silently (BUG-043).
         _reopenGuard.NotifyDismissed();
         await Shell.Current.Navigation.PopModalAsync();
+        SuggestionSelectedCommand?.Execute(suggestion);
     }
 
     private async void OnMobileFieldCancelled(object sender, EventArgs e)
