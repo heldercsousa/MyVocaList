@@ -8,7 +8,7 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | Task 11 — claim schema + heartbeat location fields | develop (tooling scripts + docs only, no app code) | — | in progress | 13ada4e | Implement Tasks 11–13 (lease scripts), then Task 14 verification, Task 15 cleanup |
+| SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | complete — verifier PASS | develop (tooling scripts + docs only, no app code) | — | to review | b11c10b | Helder: run two-terminal live demo; decide worktree-triage deletions (task-log § Task 15) |
 
 ## Completed (last 20)
 

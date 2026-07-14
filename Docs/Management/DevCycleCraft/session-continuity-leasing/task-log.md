@@ -7,21 +7,7 @@
 **Status:** in progress
 **Scope:** BACKLOG row 2026-07-14 (approved by Helder) → `tasks.md § Phase 8`.
 
-### Checkpoint (live — overwrite on each ping)
-**Pinged:** 2026-07-14 (session start)
-**Branch \ worktree:** develop / main tree (tooling scripts + docs only — no app code)
-**Step:** Task 11 of 15 — last completed: Phase 8 registration committed (BACKLOG/LEDGER/tasks.md) — now attempting: dispatch implementor for Tasks 11–13 (lease script changes + tests)
-**Build\test state:** not yet run (baseline: 22 lease unit tests green as of merge)
-**Next command:** dispatch implementor subagent; on return run `python -m unittest discover -s .claude/scripts/lease/tests -v`
-
-**Context manifest (read ONLY these to resume — no Glob):**
-- `Docs/Management/BACKLOG.md` (row 2026-07-14 Session Continuity enhancements) — approved scope, in value order
-- `Docs/Management/DevCycleCraft/session-continuity-leasing/tasks.md § Phase 8` — Tasks 11–15 definitions
-- `.claude/scripts/lease/heartbeat.py` — main file being extended (location fields, pointer default, GC)
-- `.claude/scripts/lease/lease_lib.py` — pure logic + claim schema
-- `.claude/scripts/lease/resume.py` / `reclaim.py` — must preserve new fields
-- `.claude/scripts/lease/tests/test_lease_lib.py` — unit suite to extend
-- `.claude/library/session-ops.md § Checkpoint Ping & Context Manifest` — canonical resume-pointer target definition
+**Status (Phase 8 close-out, 2026-07-14):** Tasks 11–15 complete — implementor done, independent verifier verdict **PASS** (no blockers, 2 theoretical-only warnings). Remaining Helder gates listed under Task 14/15 entries below.
 
 #### Tasks 11–13 implementation (2026-07-14, implementor subagent)
 
@@ -45,3 +31,28 @@
   - `resume.py smoke1` printed RESUME POINTER + BRANCH/WORKTREE/TASK + LAST COMMIT.
   - `reclaim.py me staleloc` → `reclaimed`; resulting claim preserved `branch="task/orig"`, `worktree="C:/orig/wt"`, `task_id="T9: orig"`, pointer.
 - Commit grouping note: heartbeat.py carries the wiring for all three tasks, so per-task commits are grouped by file (T11: lib/reclaim/resume/tests; T12: session-ops.md; T13: heartbeat.py) — noted in each commit body.
+
+#### Task 14 — Verification: demo re-run + in-session wakeup status (2026-07-14, main agent)
+
+**Status:** Done (script-level) — two-terminal LIVE demo remains a Helder gate (BACKLOG row 2026-06-14).
+
+### Verification evidence
+- Unit suite (main-agent re-run, not just implementor claim): `python -m unittest discover -s .claude/scripts/lease/tests` → `Ran 46 tests ... OK`.
+- Verifier subagent verdict: **PASS** on Tasks 11/12/13 + cross-cutting (no subprocess in heartbeat, fail-open intact, atomic writes, scope clean, non-tautological tests). Warnings: hex-branch-name edge (theoretical only); Task 13 demo evidenced on real dir here (below).
+- **Real-directory GC demo:** `.claude/leases/` shrank **86 → 34** files after this session's live heartbeats (>7-day claims deleted; own claim kept).
+- **Live claim schema demo:** this session's claim file contains `branch="develop"`, `worktree="main"`, `task_id` + auto-defaulted `resume_pointer` from `.claude/active-task.json`. Confirmed caveat: `active-task.json` was stale (previous feature) → pointer default is best-effort as designed; corrected via `resume.py --set` (which also verifies AC-4.2 write path).
+- **Real reclaim demo:** `reclaim.py <this-session> 2b75fd75-...` on a ~30-day-stale claim → `reclaimed`, single-winner re-read confirmed; preserved fields empty because the target predates the new schema (correct behavior).
+- **In-session wakeup (AC-4.1 re-verification post-asyncRewake-removal):** `ScheduleWakeup` accepted arming twice this session; first arm was preempted by task notifications before firing (expected — notifications are the primary wake signal, the wakeup is fallback). AC-4.1 is hereby marked **SUPERSEDED in practice by the LEDGER → Checkpoint → Context-manifest resume chain** (per approved scope item 4): cross-session resume no longer depends on the in-session wakeup firing.
+
+#### Task 15 — Cleanup: merged branch/worktree + stale agent worktree triage (2026-07-14, main agent)
+
+**Status:** Done — merged debris deleted; agent-worktree triage report below awaits Helder decision (NO mass delete performed).
+
+### Changed git state
+- Deleted worktree `.worktrees/session-continuity-leasing` (clean) + branch `feature/session-continuity-leasing` (`git branch -d` succeeded → fully merged, verified with `merge-base --is-ancestor`).
+
+### Triage report — 27 remaining `.claude/worktrees/*` (+1 `.worktrees/page-load-frozen`, `.worktrees/copilot-*`)
+- **Safe to delete (merged into develop AND clean):** agent-a26c6ffb, agent-a56fd5c5, agent-a5dd227f, agent-a651190d, agent-a8b8dcbf, agent-aa495a45, agent-afd1b94b, crud-form-action-pattern, fix+bug-017-navigate-next-icon, fix+bug-019-artistspage-datatype-mismatch — 10 worktrees.
+- **Merged but DIRTY (inspect 1–13 uncommitted files before delete):** agent-a0327c66, agent-a38c5da2, agent-a404fc06, agent-a4e0ec08, agent-a57f0bd7 (13 dirty), agent-a9d55a7c, agent-ab0c207f (10 dirty), agent-ab9120e7, agent-ad07648e, autocomplete-mobile-field — 10 worktrees.
+- **NOT merged — real in-flight work, keep until resolved:** agent-a284a1b6, agent-a459d33a (`feature/form-ux-redesign`), agent-a78dcb73, agent-aaae95a5, agent-aabbb9b1, backlog-first-registration (`feature/backlog-first-registration`), bug-043-fix (`fix/bug-043-mobile-search`, dirty), spike+hamburger-nav-animation (`feat/hamburger-nav-pattern`, locked) — 8 worktrees.
+- Recommendation: delete category 1 now on approval; category 2 after a quick `git -C <wt> status` eyeball each; category 3 goes to LEDGER as untracked in-flight work.
