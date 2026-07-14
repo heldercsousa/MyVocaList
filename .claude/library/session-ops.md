@@ -173,6 +173,7 @@ Wave N+1 — [tasks to dispatch]
 2. **After every build/test run**, record the result.
 3. **At every phase transition** (spec → plan → implement → review; or task step N → N+1).
 4. **Time floor — the heartbeat loop:** regardless of events, ping at least every **~10 minutes of continuous work** (practical proxy for an agent: every **~15 tool operations** since the last ping, whichever comes first). Long single steps (big refactors, long investigations) are exactly where interruptions hurt most — the loop guarantees the checkpoint never goes stale even when no step boundary is reached.
+5. **Cross-session pointer refresh:** each ping should also refresh the lease resume pointer via `python .claude/scripts/lease/resume.py --set <session_id> "<task-log path> § Checkpoint"` — or rely on the heartbeat hook's default (it fills an empty pointer from `.claude/active-task.json`; it never overwrites a non-empty one).
 
 A ping is a 30-second edit — never batch pings "for later"; later may not come.
 

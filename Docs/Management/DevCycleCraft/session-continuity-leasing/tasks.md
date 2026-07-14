@@ -510,7 +510,7 @@ if __name__ == "__main__":
   - **Files owned:** `.claude/scripts/lease/*.py`, `.claude/scripts/lease/tests/test_lease_lib.py`
   - **Demo:** a heartbeat-written claim file contains correct `branch`/`worktree`/`task_id`; unit suite green.
 
-- [ ] **Task 12: Self-maintaining resume pointer**
+- [x] **Task 12: Self-maintaining resume pointer**
   - **Produces:** heartbeat defaults an EMPTY `resume_pointer` from `.claude/active-task.json` (best-effort — file may be stale; never overwrite a non-empty pointer); Checkpoint Ping step in `session-ops.md` gains "run `resume.py --set`" line.
   - **Files owned:** `.claude/scripts/lease/heartbeat.py`, `lease_lib.py`, tests, `.claude/library/session-ops.md`
   - **Demo:** fresh session with no `--set` still yields a non-empty pointer naming the active task-log Checkpoint.
