@@ -30,7 +30,6 @@
 
             <dxe:TextEdit x:Name="searchEdit"
                           Grid.Column="1"
-                          Text="{Binding Text, Source={x:Reference self}, Mode=TwoWay}"
                           PlaceholderText="{Binding Placeholder, Source={x:Reference self}}"
                           BoxMode="Outlined"
                           BorderColor="Transparent"
@@ -49,7 +48,6 @@
         <dxcv:DXCollectionView
             x:Name="suggestionsView"
             Grid.Row="1"
-            ItemsSource="{Binding Suggestions, Source={x:Reference self}}"
             ItemSeparatorThickness="0"
             IndicatorColor="{StaticResource Primary}"
             Tap="OnSuggestionTapped">
