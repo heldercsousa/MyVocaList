@@ -520,11 +520,11 @@ if __name__ == "__main__":
   - **Files owned:** `.claude/scripts/lease/heartbeat.py`, `lease_lib.py`, tests
   - **Demo:** 86-file leases dir shrinks to live claims after one heartbeat.
 
-- [ ] **Task 14: Verification — demo re-run + in-session wakeup status**
+- [x] **Task 14: Verification — demo re-run + in-session wakeup status** *(done 2026-07-14 — AC-4.1 marked SUPERSEDED by LEDGER→Checkpoint→manifest chain; two-terminal live demo still a Helder gate)*
   - **Produces:** task-log evidence — unit suite PASS; scripted reclaim/resume demo with new fields; in-session wakeup re-verified post-`asyncRewake` removal, or AC-4.1 marked SUPERSEDED by the LEDGER→Checkpoint→manifest chain. Two-terminal live demo remains a Helder gate (hand off).
   - **Files owned:** `task-log.md`
 
-- [ ] **Task 15: Cleanup — merged branch/worktree + stale agent worktree triage**
+- [x] **Task 15: Cleanup — merged branch/worktree + stale agent worktree triage** *(done 2026-07-14 — merged branch/worktree deleted; triage report in task-log awaits Helder decision before any mass delete)*
   - **Produces:** `feature/session-continuity-leasing` branch + `.worktrees/session-continuity-leasing` worktree deleted (fully merged, verified); triage report of ~30 stale `.claude/worktrees/agent-*` worktrees (Helder decision before mass delete).
   - **Files owned:** git state only + `task-log.md`
 
