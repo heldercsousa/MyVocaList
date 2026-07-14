@@ -501,6 +501,35 @@ if __name__ == "__main__":
 
 ---
 
+## Phase 8 — Enhancements: lease↔ledger↔checkpoint linking (APPROVED by Helder 2026-07-14, BACKLOG row 2026-07-14)
+
+- [ ] **Task 11: Extend claim record with location fields + canonical resume-pointer redefinition**
+  - **Produces:** claim schema gains `branch` / `worktree` / `task_id`; heartbeat populates them cheaply (read `.git/HEAD` from cwd — NO `git` subprocess, per heartbeat cost budget); `resume_pointer` canonical value documented as a pointer to the task-log `### Checkpoint` block (session-ops.md § Checkpoint Ping).
+  - **Consumes:** `heartbeat.py`, `lease_lib.py`, `resume.py`, `reclaim.py` (preserve new fields on reclaim), tests.
+  - **Risk:** Medium — hook runs after every tool call; must stay cheap and fail-open.
+  - **Files owned:** `.claude/scripts/lease/*.py`, `.claude/scripts/lease/tests/test_lease_lib.py`
+  - **Demo:** a heartbeat-written claim file contains correct `branch`/`worktree`/`task_id`; unit suite green.
+
+- [ ] **Task 12: Self-maintaining resume pointer**
+  - **Produces:** heartbeat defaults an EMPTY `resume_pointer` from `.claude/active-task.json` (best-effort — file may be stale; never overwrite a non-empty pointer); Checkpoint Ping step in `session-ops.md` gains "run `resume.py --set`" line.
+  - **Files owned:** `.claude/scripts/lease/heartbeat.py`, `lease_lib.py`, tests, `.claude/library/session-ops.md`
+  - **Demo:** fresh session with no `--set` still yields a non-empty pointer naming the active task-log Checkpoint.
+
+- [ ] **Task 13: Lease GC**
+  - **Produces:** heartbeat deletes claim files with `last_active` older than 7 days (skip its own; fail-open; bounded cost — tolerate one `os.scandir` of the small leases dir).
+  - **Files owned:** `.claude/scripts/lease/heartbeat.py`, `lease_lib.py`, tests
+  - **Demo:** 86-file leases dir shrinks to live claims after one heartbeat.
+
+- [ ] **Task 14: Verification — demo re-run + in-session wakeup status**
+  - **Produces:** task-log evidence — unit suite PASS; scripted reclaim/resume demo with new fields; in-session wakeup re-verified post-`asyncRewake` removal, or AC-4.1 marked SUPERSEDED by the LEDGER→Checkpoint→manifest chain. Two-terminal live demo remains a Helder gate (hand off).
+  - **Files owned:** `task-log.md`
+
+- [ ] **Task 15: Cleanup — merged branch/worktree + stale agent worktree triage**
+  - **Produces:** `feature/session-continuity-leasing` branch + `.worktrees/session-continuity-leasing` worktree deleted (fully merged, verified); triage report of ~30 stale `.claude/worktrees/agent-*` worktrees (Helder decision before mass delete).
+  - **Files owned:** git state only + `task-log.md`
+
+---
+
 ## Post-completion handoffs (Helder)
 
 1. ~~**Apply Phase 5** — edit `.claude/rules/workflow.md` Rules 4/7/8 per `workflow-edits-proposed.md` with an `amend:` commit + changelog entry (write-protected, R1).~~ **DONE 2026-06-14** — block temporarily lifted under Helder authorization, all three edits applied to `workflow.md`, `amend:` commit made on branch `session-continuity-leasing`, changelog entry added, block restored. Merged to `develop`. Only the live two-terminal manual demo remains pending (Helder).
