@@ -58,6 +58,8 @@ MyVocaList operates at **Spec-Anchored** (Level 2) SDD: specs in `Docs/Managemen
 - Build: `/sln-build` · Release: `/sln-release`
 - Commit: `/sln-commit`
 - Changelog: `/sln-changelog`
+- Ledger: `/sln-ledger` — maintain `Docs/Management/LEDGER.md` (develop-branch tracker of every in-flight task's branch/worktree/phase/status; update at dispatch, phase transition, merge, session end)
+- Docs sync: `/sln-docs-sync` — flush doc changes stranded on worktree/task branches back to develop (docs always live on develop)
 - Review: `/sln-review` — reviews this solution's task output (the built-in `/review` skill reviews GitHub PRs — different tool). When using `subagent-driven-development` skill, review is automatic via fresh subagents. When executing manually (not via the skill), `/sln-review` is the trigger.
 - **Before any task completion claim:** invoke `superpowers:verification-before-completion` — evidence before assertions always.
 - **Before spec/plan hand-off to Helder:** dispatch fresh spec-reviewer or plan-reviewer subagent (see `.claude/agents/spec-reviewer.md` and `.claude/agents/plan-reviewer.md`).

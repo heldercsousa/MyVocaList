@@ -371,18 +371,24 @@ After a parallel wave completes, merge commits in dependency order — Domain �
 
 ---
 
-## Git Worktrees as Isolation Primitive — MANDATORY for Parallel Waves
+## Git Worktrees as Isolation Primitive — MANDATORY for ALL Implementation Work
 
-**This rule is not opt-in. Any wave with 2 or more concurrent subagents MUST use git worktrees.**
+**This rule is not opt-in. Amended 2026-07-14: any task that edits code files (`.cs`, `.xaml`, `.xaml.cs`) — single-subagent tasks and bug fixes included, not just parallel waves — MUST run in a git worktree on a task branch, never directly on `develop` or `main`.** `constitutional-guard.py` blocks code edits on develop/main. `develop` remains the docs + integration branch: specs, task-logs, BACKLOG.md, LEDGER.md, and changelog are committed there directly (docs edits on develop are allowed and expected).
 
-**Why mandatory:** Parallel subagents sharing the same working tree collide on `git add`/`git commit`. One session unstages the other's files between `git add` and `git commit`, making both commits incomplete or missing files. This is not recoverable without re-running the task — use worktrees instead.
+**Why mandatory:** (a) Parallel subagents sharing the same working tree collide on `git add`/`git commit` — one session unstages the other's files between `git add` and `git commit`, making both commits incomplete. Not recoverable without re-running the task. (b) Even a single agent working on develop locks the branch: unfinished code blocks docs commits, ledger updates, and other sessions from using develop as the stable integration point.
 
-**Native tool first (Step 1a of `superpowers:using-git-worktrees` skill):** The harness exposes an `EnterWorktree` tool. Always check for it first. If available, use it — do not fall back to manual `git worktree add` when the native tool is present.
-
-**Manual fallback (only when EnterWorktree is unavailable):**
+**Base branch is `develop` — always verify.** The native `EnterWorktree` tool may base the worktree on the repo default branch (`main`), which is stale. After creating ANY worktree (native or manual), run:
 ```bash
-git worktree add .worktrees/agent-1 develop
-git worktree add .worktrees/agent-2 develop
+git merge-base --is-ancestor develop HEAD && echo OK
+```
+If not OK, recreate the worktree explicitly from develop (manual form below).
+
+**Native tool first (Step 1a of `superpowers:using-git-worktrees` skill):** The harness exposes an `EnterWorktree` tool. Always check for it first. If available, use it — then run the base-branch verification above before dispatching work.
+
+**Manual fallback (only when EnterWorktree is unavailable or based the worktree on the wrong branch):**
+```bash
+git worktree add .worktrees/agent-1 -b task/agent-1 develop
+git worktree add .worktrees/agent-2 -b task/agent-2 develop
 ```
 
 > Verify `.worktrees/` is in `.gitignore` before creating. Add it if missing — unignored worktree directories pollute `git status`.
@@ -397,7 +403,8 @@ git worktree remove .worktrees/agent-2
 - Each subagent commits only within its own worktree — never touches the main working tree
 - Each subagent pushes before stopping so the main agent can pull
 - Worktree directories live at `.worktrees/<name>` (project-local, gitignored) — not outside the repo
-- Sequential tasks share state intentionally — do NOT create worktrees for sequential tasks
+- Sequential code tasks within the same feature may share ONE worktree/branch (state continuity) — but still never run on develop/main directly
+- Docs-only tasks (specs, task-log, BACKLOG, changelog) run on develop in the main working tree — no worktree needed
 - Before dispatching any parallel wave, verify `.worktrees/` is gitignored: `git check-ignore -q .worktrees`
 
 See `superpowers:using-git-worktrees` skill for full setup protocol (Step 0 detection, native vs. manual decision, baseline verification).
