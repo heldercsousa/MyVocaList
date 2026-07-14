@@ -294,6 +294,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-component", "a
 		Docs\Management\DevCycleCraft\autocomplete-component\plan.md = Docs\Management\DevCycleCraft\autocomplete-component\plan.md
 		Docs\Management\DevCycleCraft\autocomplete-component\README.md = Docs\Management\DevCycleCraft\autocomplete-component\README.md
 		Docs\Management\DevCycleCraft\autocomplete-component\requirements.md = Docs\Management\DevCycleCraft\autocomplete-component\requirements.md
+		Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md = Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md
 		Docs\Management\DevCycleCraft\autocomplete-component\task-log.md = Docs\Management\DevCycleCraft\autocomplete-component\task-log.md
 	EndProjectSection
 EndProject
