@@ -24,3 +24,5 @@
 - **Worktree** — `.worktrees/<name>` path, or `—` if the worktree was already removed (branch still holds the commits).
 - **Last commit** — short hash on the task branch, so a resuming session can `git log <hash>..<branch>` instantly.
 - **Next action** — one line: what the next session should do (e.g. "fix failing test X", "await Helder review", "merge after wave 2").
+
+**Resume chain (no globbing):** this ledger row → the feature's `task-log.md` `### Checkpoint` block (live step state, pinged on a ~10-min heartbeat) → read ONLY its Context manifest files. See `session-ops.md § Checkpoint Ping & Context Manifest`.

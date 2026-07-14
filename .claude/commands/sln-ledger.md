@@ -23,7 +23,7 @@ The main agent updates the ledger at every one of these moments, on `develop`:
 
 ## `resume`
 
-For resuming interrupted work: read the Active table, and for the chosen row output: branch, worktree path (recreate if removed: `git worktree add .worktrees/<name> <branch>`), status, last commit, and `Next action`. Cross-check the feature's `task-log.md` and lease state (`workflow.md § Rule 4` reclaim protocol) before continuing.
+For resuming interrupted work: read the Active table, and for the chosen row output: branch, worktree path (recreate if removed: `git worktree add .worktrees/<name> <branch>`), status, last commit, and `Next action`. Then follow the no-glob resume chain: the feature's `task-log.md` `### Checkpoint` block → read ONLY its Context manifest files (`session-ops.md § Checkpoint Ping & Context Manifest`). Cross-check lease state (`workflow.md § Rule 4` reclaim protocol) before continuing. Never Glob to reconstruct state — a manifest gap is logged as a checkpoint-quality defect.
 
 ## `audit`
 

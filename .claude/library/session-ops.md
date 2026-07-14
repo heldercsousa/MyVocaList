@@ -162,6 +162,45 @@ Wave N+1 — [tasks to dispatch]
 
 ---
 
+## Checkpoint Ping & Context Manifest — interruption resilience
+
+> Added 2026-07-14 (Helder directive). The artifacts above write at session/task *end* — they do not survive a hard interruption (connection lost, session limit, crash) mid-task. The Checkpoint Ping is the **write-ahead** counterpart: a small block updated continuously so any interruption loses at most one step, and the resuming agent reads a known short file list instead of globbing.
+
+**Where:** a `### Checkpoint` block inside the task's `task-log.md` entry — **overwritten in place** at each ping (it is live state, not history; history is the rest of the entry).
+
+**Ping cadence (write-ahead — the whole point):**
+1. **Before starting each step**, write what is about to be attempted (if interrupted mid-step, the resumer knows exactly what was in flight and can verify/redo it).
+2. **After every build/test run**, record the result.
+3. **At every phase transition** (spec → plan → implement → review; or task step N → N+1).
+4. **Time floor — the heartbeat loop:** regardless of events, ping at least every **~10 minutes of continuous work** (practical proxy for an agent: every **~15 tool operations** since the last ping, whichever comes first). Long single steps (big refactors, long investigations) are exactly where interruptions hurt most — the loop guarantees the checkpoint never goes stale even when no step boundary is reached.
+
+A ping is a 30-second edit — never batch pings "for later"; later may not come.
+
+**Checkpoint block format:**
+```markdown
+### Checkpoint (live — overwrite on each ping)
+**Pinged:** YYYY-MM-DD HH:MM
+**Branch / worktree:** <branch> / <.worktrees/name or main tree>
+**Step:** <N of M> — last completed: <one line> — now attempting: <one line>
+**Build/test state:** <last known: build 0 errors | test failure X | not yet run>
+**Next command:** <the literal next command or edit, e.g. "dotnet test after fixing VenueServiceTests.Save_...">
+
+**Context manifest (read ONLY these to resume — no Glob):**
+- `path/to/file` — <why: e.g. "the file being edited; method Foo half-done">
+- `Docs/.../design.md § Section` — <why: contract being implemented>
+- `Docs/.../tasks.md` — <why: step list, current step N>
+```
+
+**Context manifest rules:**
+- Lists **every** file a fresh agent must read to diagnose and continue the task — exact paths, optionally `§` sections, each with a one-line why. Aim for ≤ 8 entries; if more are needed, the task is oversized (Rule 2 sizing).
+- Kept current at each ping (files enter/leave as work moves).
+- **Resume protocol:** LEDGER.md row → task-log `### Checkpoint` → read only the manifest files. A resuming agent MUST NOT `Glob` to reconstruct state — if the manifest is insufficient, that is a checkpoint-quality defect: fix the manifest for next time, note the gap in the task-log.
+- On task completion, the Checkpoint block is replaced by the normal final entry fields (`Status: To Review`, `### Changed files`) — the manifest's job is done.
+
+**Relationship to other artifacts:** the resume pointer (`resume.py --set`) stays the one-line cross-session locator; LEDGER.md locates the branch; the Checkpoint block carries the step-level state + read list. handoff.md remains the *planned* session-end artifact — the Checkpoint is what exists when the session never got to write one.
+
+---
+
 ## Context exhaustion warning signs
 
 Context window exhaustion degrades output quality before the window is fully used. Recognize the early signs and act before the damage compounds.
