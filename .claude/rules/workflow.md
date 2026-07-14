@@ -134,6 +134,7 @@ Agents record task outcomes in the feature's `task-log.md` (plan in `plan.md`; u
 
 - **Proof of action (never-miss):** a task-log entry claiming `To Review` without a `### Changed files` section listing every created/modified file is **invalid**.
 - **AC traceability matrix** (AC ID | Criterion | Implementation location | Test method) required for user-facing behavior. Missing rows = missing tests = incomplete feature.
+- **Checkpoint Ping `[HARD RULE — added 2026-07-14]`:** every agent doing multi-step work maintains a live `### Checkpoint` block in the task-log entry — pinged **before** starting each step (write-ahead), after every build/test run, at each phase transition, **and on a heartbeat loop regardless of events — at least every ~10 minutes of continuous work (~15 tool operations)**. The block includes a **Context manifest**: the exact files (≤ 8, with one-line why) a fresh agent must read to resume — so an interruption (connection loss, session limit) loses at most one step and resuming never requires Glob. Format + resume protocol: `session-ops.md § Checkpoint Ping & Context Manifest`.
 
 Full task-log entry template, status vocabulary (`in progress`/`Check build`/`To Review`/`Build failure`/`blocked: spec gap`/…), matrix example: `workflow-reference.md § Rule 5`.
 
@@ -161,7 +162,7 @@ Every implementation/planning session begins with this reading order before any 
 6. **`…/[feature]/task-log.md`** — check for unresolved `blocked:` / `Spec updated — re-planning required`.
 7. **Lease claim refresh + resume-pointer read** — classify existing `[~]` claims via `reclaim.py` (Rule 4); read the resume pointer with `python .claude/scripts/lease/resume.py <session_id>`; the heartbeat hook keeps this session's own claim fresh automatically; record progress via `resume.py --set <session_id> "<continue-from-here>"`.
 
-**Anti-glob rule (never-miss):** never `Glob("Docs/**")` or equivalent open-ended scans during session start or briefing — read only the files above plus the active feature spec. Steps 3–7 may be scoped to the active feature. Session-artifact formats: `session-ops.md`.
+**Anti-glob rule (never-miss):** never `Glob("Docs/**")` or equivalent open-ended scans during session start or briefing — read only the files above plus the active feature spec. **When resuming interrupted work** the read set is even smaller: `Docs/Management/LEDGER.md` row → the task-log's `### Checkpoint` block → only its Context manifest files (`session-ops.md § Checkpoint Ping & Context Manifest`). Globbing to reconstruct interrupted state is a violation — if the manifest is insufficient, log the gap as a checkpoint-quality defect instead. Steps 3–7 may be scoped to the active feature. Session-artifact formats: `session-ops.md`.
 
 ---
 

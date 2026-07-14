@@ -77,6 +77,17 @@ Invoke the `myvocalist-coding` skill before any UI, DevExpress, or CRUD implemen
 
 ---
 
+## Checkpoint Ping (mandatory during work — interruption resilience)
+
+Maintain a live `### Checkpoint` block in your task-log entry, **overwritten in place** at each ping (format: `session-ops.md § Checkpoint Ping & Context Manifest`):
+- Ping **before** starting each step (write what you are about to attempt — write-ahead), after every build/test run, and at each phase transition.
+- **Heartbeat loop:** independent of events, ping at least every ~10 minutes of continuous work (~15 tool operations since the last ping). A long step with no ping is a stale checkpoint — exactly what loses work on interruption.
+- The block carries: branch/worktree, step N of M (last completed / now attempting), last build/test state, the literal next command, and a **Context manifest** — the exact files (≤ 8, one-line why each) a fresh agent must read to resume without any Glob.
+- Rationale: if this session is killed (connection loss, session limit), the resuming agent reads LEDGER.md → your Checkpoint → only the manifest files. A missing or stale checkpoint means lost work and token-expensive glob archaeology.
+- On task completion, replace the Checkpoint block with the normal final entry (below).
+
+---
+
 ## Task-Log Update Format
 
 ```
