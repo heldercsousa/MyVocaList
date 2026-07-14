@@ -41,11 +41,17 @@ def main(my_id, target_id):
 
     # Stale (or corrupt/absent). Attempt reclaim. AC-2.3: overwrite owner/pid/last_active,
     # preserving the prior resume_pointer so the cold resume keeps its continuation hint.
+    # T11: also preserve the prior claim's branch/worktree/task_id — the takeover needs
+    # the ORIGINAL work location, not the reclaimer's current location.
+    prior = claim or {}
     new_claim = {
         "owner": my_id,
         "pid": os.getppid(),
         "last_active": datetime.now(timezone.utc).isoformat(),
-        "resume_pointer": (claim or {}).get("resume_pointer", ""),
+        "resume_pointer": prior.get("resume_pointer", ""),
+        "branch": prior.get("branch", ""),
+        "worktree": prior.get("worktree", ""),
+        "task_id": prior.get("task_id", ""),
     }
     os.makedirs(LEASES, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=LEASES, suffix=".tmp")

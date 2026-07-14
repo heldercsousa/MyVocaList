@@ -1,9 +1,15 @@
 """In-session auto-resume reader/writer (T5, AC-4.1/4.2/4.3).
 
-- `resume.py <session_id>`        prints resume_pointer + last commit subject + next hint.
+- `resume.py <session_id>`        prints resume_pointer + location + last commit subject.
 - `resume.py --set <session_id> <pointer text...>`  writes/updates resume_pointer
   (one line, <=~200 chars) in the session's claim file. The claim file field is the
   CANONICAL resume-pointer location (requirements.md Storage Locations).
+
+CANONICAL POINTER VALUE (T11): the resume_pointer is a pointer to the task-log's
+live `### Checkpoint` block (session-ops.md § Checkpoint Ping & Context Manifest),
+e.g. `Docs/Management/DevCycleCraft/<feature>/task-log.md § Checkpoint`.
+The resumer reads that block + its Context manifest — never a prose to-do.
+The heartbeat self-defaults an empty pointer to this form from active-task.json.
 
 Atomic write follows the heartbeat pattern: temp IN THE SAME .claude/leases/ dir, then
 os.replace() over the target. Single session owns its own file, so intra-session writers
@@ -70,6 +76,13 @@ def show(session_id):
     except (OSError, subprocess.SubprocessError):
         last = "(git log unavailable)"
     print("RESUME POINTER:", pointer)
+    # T11 location fields (present on heartbeat-written claims; may be absent on old ones).
+    if claim.get("branch"):
+        print("BRANCH:", claim["branch"])
+    if claim.get("worktree"):
+        print("WORKTREE:", claim["worktree"])
+    if claim.get("task_id"):
+        print("TASK:", claim["task_id"])
     print("LAST COMMIT:", last or "(no commits)")
     print("NEXT: read the active feature tasks.md, find the [~] step, "
           "and continue from the pointer.")

@@ -503,7 +503,7 @@ if __name__ == "__main__":
 
 ## Phase 8 — Enhancements: lease↔ledger↔checkpoint linking (APPROVED by Helder 2026-07-14, BACKLOG row 2026-07-14)
 
-- [ ] **Task 11: Extend claim record with location fields + canonical resume-pointer redefinition**
+- [x] **Task 11: Extend claim record with location fields + canonical resume-pointer redefinition**
   - **Produces:** claim schema gains `branch` / `worktree` / `task_id`; heartbeat populates them cheaply (read `.git/HEAD` from cwd — NO `git` subprocess, per heartbeat cost budget); `resume_pointer` canonical value documented as a pointer to the task-log `### Checkpoint` block (session-ops.md § Checkpoint Ping).
   - **Consumes:** `heartbeat.py`, `lease_lib.py`, `resume.py`, `reclaim.py` (preserve new fields on reclaim), tests.
   - **Risk:** Medium — hook runs after every tool call; must stay cheap and fail-open.
