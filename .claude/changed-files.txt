@@ -2542,3 +2542,12 @@ MyVocaList.sln
 MyVocaList.sln
 MyVocaList.sln
 .claude/rules/workflow.md
+Docs/Management/BACKLOG.md
+../MyVocaList-wt-bug044/MyVocaList/UI/Services/INavigationService.cs
+../MyVocaList-wt-bug044/MyVocaList/UI/Services/NavigationService.cs
+../MyVocaList-wt-bug044/MyVocaList/UI/ViewModels/PersonFormViewModel.cs
+../MyVocaList-wt-bug044/MyVocaList/UI/ViewModels/PersonFormViewModel.cs
+../MyVocaList-wt-bug044/MyVocaList.Tests/Unit/ViewModels/PersonFormViewModelTests.cs
+../MyVocaList-wt-bug044/MyVocaList.Tests/Unit/ViewModels/PersonFormViewModelBug044Tests.cs
+../MyVocaList-wt-bug044/MyVocaList/UI/ViewModels/PersonFormViewModel.cs
+Docs/Management/BACKLOG.md

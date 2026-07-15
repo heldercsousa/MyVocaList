@@ -690,7 +690,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-043", "bug-043", "{6941D280-F5AE-428A-AC78-42246F3BF3F8}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\ListItem component not used.png = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\ListItem component not used.png
-		log-debug-emulator.txt = log-debug-emulator.txt
 		log-debug-s23.txt = log-debug-s23.txt
 		Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md = Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md
 	EndProjectSection
