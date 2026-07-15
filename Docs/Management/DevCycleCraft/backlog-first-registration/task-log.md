@@ -102,3 +102,12 @@
 ### Invariants / postconditions
 - INV-1 fail-open: ✅ `main()` only returns 0. INV-2 no new top-level key: ✅. INV-3 line-level classification: ✅ (no blanket file exemption; MEMORY.md lines individual). INV-4 deny-list respected: ✅ (workflow.md/CLAUDE.md/changelog.md never edited by agent).
 - POST-1 every new `.md`+`.py` in `.sln`: ✅. POST-2 BACKLOG `✅ Done` only after Helder `amend:`: ⏳ held.
+
+
+## Moved from BACKLOG.md (2026-07-15) — BACKLOG-first Registration Enforcement
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-20 | **BACKLOG-first Registration Enforcement** | 🟡 In Progress | Agents must register work items in BACKLOG.md (nested under parent feature when applicable) before writing to memory. Memory is personal/device-scoped and not team-visible. **Design analysis COMPLETE (2026-06-21):** 7-agent (Opus) design pipeline → `DevCycleCraft/backlog-first-registration/analysis-pipeline/09-final-consolidated-plan.md`. **POSTURE RATIFIED (Helder, 2026-06-23): A — advisory / non-blocking** (Stop-hook orphan check WARNS, never blocks; fail-open). **MERGED to `develop` 2026-07-14** (worktree-triage session; settings.json conflicts resolved keeping develop's newer hooks — the branch's orphan_check/session_marker wiring survived; backlog-scripts .sln folder re-GUIDed 0030→0042 due to collision). **IMPLEMENTATION COMPLETE (2026-06-25)** — Phases 1–5 built & pushed: Phase 1 spike PASS (path deterministic via `git rev-parse --git-common-dir`, writes observable, Option B viable → `findings.md`); Phase 2 `proposed-diffs.md` + `session-ops.md` 6th tier; Phase 3 `backlog_lib.py` (TDD, 17 tests); Phase 4 `orphan_check.py` fail-open Stop wrapper + `session_marker.py` SessionStart-marker session-scoping + `settings.json` wiring (29/29 tests green, no new top-level key, exit 0). AC-1..AC-13 traceability matrix in `task-log.md`. ⏳ **Remaining (Helder-gated, blocks `✅ Done` per POST-2):** (#2) read/edit/apply the `workflow.md` `amend:` from `proposed-diffs.md` (+ changelog triple); (#3) `session-ops.md` Authorship review; (#1a) confirm AC-13 precedence default (proceeded on documented default). **DEFERRED to after #2:** `[BACKSTOP]` direct edit to `.claude/commands/review.md` (kept with the rule half so they don't diverge). `.sln` flat. |

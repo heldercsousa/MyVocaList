@@ -40,3 +40,12 @@
 ### Review verdict (2026-06-25, per-task review loop)
 - **Navigation Consolidation — PASS.** `NavigationConfig.cs:15`, `AppShell.xaml:15/92-94`, `MauiProgram.cs` (stub DI removed) all match design.md Steps 1–2. `AppShell.xaml:100-102` retaining a separate `settings` route is intentional (design Key Decisions — SongForm nudge). No constitutional violations.
 - **Stale HasYouTubeApiKey Fix — PASS.** `SongFormViewModel.RefreshApiKeyFlagAsync` (~line 642) + `SongFormPage.xaml.cs` `OnAppearing` match design signature/invariant exactly (AC-SETTINGS-13). Secure-storage read via `ISecureStorageWrapper` is data access, not business logic — no Services-constraint violation. Non-blocking: method lacks an XML doc comment (no interface, so inheritdoc N/A).
+
+
+## Moved from BACKLOG.md (2026-07-15) — App Settings
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06 | **App Settings** | ✅ Done | YouTube API key management (PasswordEdit, save/test/clear); flyout "Preferences" now navigates to SettingsPage; stale `HasYouTubeApiKey` refreshed on `OnAppearing`. Spec: `Docs/Management/BusinessFeatures/app-settings/` |

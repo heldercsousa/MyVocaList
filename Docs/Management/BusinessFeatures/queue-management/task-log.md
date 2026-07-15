@@ -96,3 +96,57 @@ No deviations from `requirements.md`. All acceptance criteria either implemented
 3. Next: Mark "Queue Management" as ✅ Done in BACKLOG.md
 4. Next: Prepare for MVP release
 
+
+
+## Moved from BACKLOG.md (2026-07-15) — Queue Management
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06 | **Queue Management** | ✅ Done | Core product: active queue, round-based progression, singer registration, absence tracking, completion time estimate. IA: Queue-First (primary view, 0 taps to register performance). Spec: `Docs/Management/BusinessFeatures/queue-management/` · Plan: `queue-management/plan.md` · **All 5 waves complete:** Domain (Wave 1) · Infra (Wave 2) · Services (Wave 3) · UI (Wave 4) · Testing (Wave 5A: 17 unit tests + 5B: 9 integration tests). **Test coverage:** 26/26 passing. **AC traceability:** Complete matrix in `task-log.md`. Ready for MVP release. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — ✅ Fixed
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| ↳ Bug: QueuePage BottomSheet double-add on navigation ([BUG-011](BusinessFeatures/queue-management/bugs/BUG-011-queuepage-bottomsheet-double-add.md)) | ✅ Fixed | Real page was `QueueManagementPage` (not the `QueuePage` placeholder). Removed inline `IsModal` BottomSheet; routed finish confirmation through safe `ConfirmSheet` wrapper — kills the cached-page re-parent collision AND wires the previously-missing AC-5.3 finish confirmation. Branch `fix/bug-011-queue-bottomsheet` (not merged). **Emulator E2E BLOCKED 2026-07-03 (TEST-012) — no reachable navigation entry point into `QueueManagementPage` exists in the current build; consistent with the in-flight Queue Entry Point Redesign below. Re-run once that redesign lands a working entry point.** |
+
+
+## Moved from BACKLOG.md (2026-07-15) — 💡 Pending
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| ↳ Dead-code cleanup: superseded `QueueService`/`IQueueService` | 💡 Pending | Dead `QueueService`/`IQueueService` (only `*New` is registered/consumed). Verify-then-delete. Note: QueuePage placeholder cleanup is superseded — see Queue Entry Point Redesign entry below. Details: `queue-management/queue-deadcode-cleanup.md` |
+
+
+## Moved from BACKLOG.md (2026-07-15) — 🟡 In Progress
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| ↳ **Queue Entry Point Redesign — QueuePage as CRUD event list** | 🟡 In Progress | QueuePage is a non-functional placeholder; EventsPage (also wrong entry) must be deleted. Redesign QueuePage as CRUD list showing all events (same CrudListView pattern as Venues/Artists/Songs) with FAB to create a new queue. Tap → QueueManagementPage. EventsPage deleted. New route: QueueFormPage for event creation. Spec: `Docs/Management/BusinessFeatures/queue-management/` |
+
+
+## Moved from BACKLOG.md (2026-07-15) — 🟡 In Progress
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| ↳ BUG-013: QueueListItem bypasses ListItem — MD3 non-compliance (Major) | 🟡 In Progress | `QueueListItem.xaml` has zero BindableProperties and binds directly to `QueueEntryViewModel` fields — violates MD3 ListItem pattern and blocks the CrudListView migration. Fix: replace both DataTemplate usages in `QueueManagementPage.xaml` with `<lists:ListItem>` using `LeadingContent` slot for position badge. Also fixes namespace mismatch (`xmlns:queue` points to non-existent `.Queue` sub-namespace). |
+
+
+## Moved from BACKLOG.md (2026-07-15) — 🟡 In Progress
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| ↳ BUG-014: `GetActiveEventAsync` fetches only 1 event — wrong business logic (Critical) | 🟡 In Progress | `EventService.GetActiveEventAsync()` calls `GetPagedAsync(1, 1, null, ct)` — fetches only the single most-recently-scheduled event and checks its status in-memory. Any active event that isn't the most recently scheduled is silently missed, returning null. Fix: change pageSize from 1 to 50. |

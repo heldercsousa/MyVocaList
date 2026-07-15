@@ -50,3 +50,21 @@ Open questions for the spec session: version-header adoption scope (all features
 - `.sln` registration HARD GATE applies to every new `Docs/` file/folder.
 - `CLAUDE.md § Development Methodology`, `workflow.md` SDD Invariant + Rules 1/3 (Session-End Spec Update Ritual — transitional immutable-history wording applied to the SDD Invariant 2026-07-09, approved provisionally), `bug-tracking.md` + `library/bug-tracking-reference.md` (approved provisionally 2026-07-09 — must gain the bug-fix→spec-version binding), `spec-writing-guide.md`, and the `Docs/ Folder Layout` section must all be amended **together** when the design lands (`amend:` process).
 - Must stay compatible with Spec-Anchored SDD Level 2: agents still need ONE authoritative current-truth spec per feature to read at session start — history must not force agents to reconstruct truth from deltas.
+
+
+## Moved from BACKLOG.md (2026-07-15) — Spec Evolution, Versioning & Feature-Folder Organization
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-09 | **Spec Evolution, Versioning & Feature-Folder Organization** | 💡 Pending | Registered by Helder 2026-07-09. Core: shipped specs/plans/logs become **immutable history**; feature changes get a NEW dated delta spec in a nested `changes/YYYY-MM-DD-<name>/` subfolder + nested BACKLOG row, cross-linked with the original spec; bug fixes must bind to the spec version they fix against; feature folders need a nested-content pattern (current flat piles untraceable over time — `artists-songs/` worst case); timeline/version tracking beyond BACKLOG.md (today the only time-ordered source). **Holds back:** `CLAUDE.md § Development Methodology` correction (currently says update specs in place — wrong per Helder, but must NOT be amended until this feature defines the target organization; same for workflow.md SDD Invariant + Rules 1/3 (transitional wording applied 2026-07-09 — approved provisionally), `bug-tracking.md` + `library/bug-tracking-reference.md` (approved provisionally 2026-07-09 — need bug-fix→spec-version binding), spec-writing-guide, Docs/ layout — amend together when design lands). Pre-research DONE (internal `sdd/spec-s9-2-1` spec-semver + decision logs + immutability + "regenerated from version" binding; OpenSpec `changes/` delta + date-prefixed archive pattern ≈1:1 match to Helder's proposal; ADR supersession links): `Docs/Management/DevCycleCraft/spec-evolution-versioning/findings.md`. Next: `superpowers:brainstorming` → spec. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — Richer task-status vocabulary (beyond binary checkboxes)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-09 | ↳ Richer task-status vocabulary (beyond binary checkboxes) | 💡 Pending | Registered from workflow.md authorship review (Rule 5, Helder 2026-07-09): several artifacts track step/task state with checkbox-like binary markers; a richer status collection would track work better. Acknowledged constraint: status control across tools beyond workflow is still weak enough that the checkbox pattern remains acceptable **for now** — tasks.md already has 4 markers (`[ ]`/`[~]`/`[x]`/`[CANCELLED]`) and task-log has a status vocabulary (`workflow-reference.md § Rule 5`); the gap is everywhere else (spec checklists, BACKLOG sub-items, review gates). Evaluate a unified status vocabulary as part of the parent feature's timeline/versioning design. |

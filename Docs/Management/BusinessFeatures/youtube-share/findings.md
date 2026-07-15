@@ -208,3 +208,12 @@ All should be moved to their feature folder or deleted:
 **Update to existing Search Picker row:**
 
 Add note: `YouTubeSearchPage (Task 3c) suspended — superseded by YouTube Share Intent feature.`
+
+
+## Moved from BACKLOG.md (2026-07-15) — YouTube Share Intent
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06 | ↳ YouTube Share Intent | 💡 Pending | Share-from-YouTube replaces API-key requirement for adding karaoke URLs. Android share target receives video from YouTube app; extract Title, Artist, Thumbnail/Cap Image via YouTube oEmbed or share metadata. **1st action on received data:** upsert song into MyVocaList DB (INSERT if not exists, UPDATE if exists). Then show inline confirm card for user to review before saving. No API key needed. **Requires analysis before spec:** (a) Android IntentFilter setup for share target, (b) data shape of YouTube share intent extras, (c) oEmbed vs direct extras for metadata extraction, (d) DB upsert strategy (match by ExternalId/VideoId or title+artist), (e) UX flow when share arrives while app is backgrounded. Research: `BusinessFeatures/youtube-share/findings.md` |

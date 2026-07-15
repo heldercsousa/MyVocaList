@@ -73,3 +73,66 @@
 - **form-ux-redesign MERGED to develop** (`f00543a`): REQ-FORMUX-07 ArtistService `externalId`/`externalProvider` persistence + tests + handoff. Doc conflicts resolved keeping develop's newer mirrored versions, handoff.md updated to merged state. **Full suite: 478/478 PASS.** Branch + worktree deleted.
 - **Orphan-test salvage attempt: FAILED to compile** — `QueueServiceTests.cs` references `IQueueRepository`, which no longer exists (queue architecture evolved since 2026-06-04). Files parked (compilation-inert) at `Docs/DevEnv/parked/EventServiceTests.cs.txt` + `QueueServiceTests.cs.txt` (.sln-registered) — they exist in no git history; delete when confident current coverage supersedes them.
 - **Remaining worktrees (untouched, out of this round's mandate):** agent-a284a1b6, agent-a78dcb73, agent-aaae95a5, agent-aabbb9b1 (unmerged, undirected), `backlog-first-registration` (in-flight feature), `.worktrees/page-load-frozen` (BACKLOG says Done — merge state unverified), `MyVocaList.worktrees/copilot-*` (2026-05, pre-dates workflow). 30 worktrees at session start → 8 remain.
+
+
+## Moved from BACKLOG.md (2026-07-15) — Session Continuity — Task Leasing & Auto-Resume
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-13 | **Session Continuity — Task Leasing & Auto-Resume** | 🟡 In Progress | **MERGED to `develop` 2026-06-14 (branch `feature/session-continuity-leasing`, .sln conflict resolved, 22 lease tests pass). Gate (1) DONE 2026-06-14: workflow.md Rule 4/7/8 `amend:` applied (lease-aware `[~]` reclaim, session-start claim/resume, collision liveness) + changelog entry, on branch `session-continuity-leasing` → merged to `develop`. ⏳ One Helder gate remains before this is ✅ Done: run the live two-terminal demo — see the dedicated manual-test row below.** Spec + plan APPROVED by Helder 2026-06-14; AC-5 spike PASS (hooks expose `session_id`, can write claim file). Lease (not lock): heartbeat-via-`PostToolUse`-hook writes `.claude/leases/<session_id>.json` (owner/pid/last_active/resume_pointer, atomic write, parent-session keyed); two-fact liveness (TTL `LEASE_TTL_SECONDS=1800` OR live same-host pid); concurrent-reclaim re-read single-winner; workflow.md Rule 4/7/8 edits delivered as proposed-diff (rules dir write-protected → Helder `amend:` handoff); in-session auto-resume via scheduled wakeup. Spec: `Docs/Management/DevCycleCraft/session-continuity-leasing/`. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — ⏳ Helder MANUAL TEST: live two-terminal lease demo
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-14 | ↳ ⏳ **Helder MANUAL TEST: live two-terminal lease demo** | 🟡 In Progress | **Full steps:** `Docs/Management/DevCycleCraft/session-continuity-leasing/demo-and-traceability.md`. **Quick version:** (1) Open **Terminal A**, start a task so its heartbeat hook writes `.claude/leases/<sessionA>.json` (check the file exists with a recent `last_active`). (2) Open **Terminal B**; it should read A's claim, see it **fresh** (within 1800s TTL or live pid), and pick a *different* task — no collision. (3) `/clear` Terminal A (kills its session_id; heartbeat stops). (4) From B (or a `/loop` wakeup), after the 30-min TTL **or** immediately via the dead-pid fast path, run `python .claude/scripts/lease/reclaim.py` — it should classify A's claim **stale**, reclaim it (owner overwritten), and `python .claude/scripts/lease/resume.py <sessionA>` should surface A's `resume_pointer` so work continues from the exact step — all with **no manual arbitration**. Verifies AC-1.1/1.3/2.2/3.1/3.2/4.1/4.2 (logic already unit/script-verified). |
+
+
+## Moved from BACKLOG.md (2026-07-15) — BUG: "To Review tasks need attention" rewakes every session (Stop hook noise)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-27 | ↳ BUG: "To Review tasks need attention" rewakes every session (Stop hook noise) | ✅ Fixed | Root causes: (1) `asyncRewake: true` removed in `40aec9a` — killed the infinite rewake loop. (2) Scanner was also broken (`CLAUDE_PROJECT_DIR` unset → wrong directory → always exit 0, found nothing). (3) `Stop` event fires after *every* response turn in Claude Code, not only at true session end — scanner was pure noise. Fix: scanner entry removed from Stop hooks entirely (`fix(hooks)` commit 2026-06-27). 32 stale "To Review" entries in completed-feature task-logs left as-is — scanner gone, no action needed. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — Feature-scope BACKLOG-row claiming (phased follow-up)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-14 | ↳ Feature-scope BACKLOG-row claiming (phased follow-up) | 💡 Pending | Plan delivers the session-keyed + `tasks.md` `[~]`-step claim layer first. Stamping the BACKLOG `🟡 In Progress` *feature/phase* row (the layer that would have caught the 2026-06-13 feature-level collision directly) is deferred here — session-keyed claim files don't map 1:1 to a feature row. Decided phased by Helder 2026-06-14. Design ref: `session-continuity-leasing/design.md §1`. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — Review: per-step progress tracking + dead-agent takeover — usefulness & definition audit
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-10 | ↳ **Review: per-step progress tracking + dead-agent takeover — usefulness & definition audit** | 💡 Pending | Registered by Helder 2026-07-10. Helder's ask: always track worktree/branch location + the very last status of each task step, registered somewhere in the task references, so prior efforts are never lost on interruption — deeply hooked to the takeover capability where a task whose owning agent is no longer alive can be continued by a distinct agent. This is largely what Session Continuity already implements (lease + heartbeat + `resume_pointer` + `reclaim.py`/`resume.py`), so the task is an **investigation/review, not new build**: (1) assure this management level is really useful; (2) if so, review the definition end-to-end for gaps — does the resume pointer capture worktree/branch location? Is granularity per task *step*? Are task references (task-log/tasks.md) actually updated with last status, or only the lease file? (3) enhance/propose anything found lacking. Report to Helder before changes. Interacts with the worktree rows above (2026-07-10) — takeover must know *which worktree* holds the in-flight work. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — Session Continuity enhancements — lease↔ledger↔checkpoint linking (APPROVED by Helder 2026-07-14)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-14 | ↳ **Session Continuity enhancements — lease↔ledger↔checkpoint linking (APPROVED by Helder 2026-07-14)** | 🟡 In Progress — code DONE, Helder gates open | **Phase 8 (Tasks 11–15) COMPLETE 2026-07-14, verifier PASS.** Delivered: claim schema `branch`/`worktree`/`task_id` (heartbeat reads `.git/HEAD`, no subprocess); pointer auto-default from `active-task.json` + canonical value = task-log `§ Checkpoint`; lease GC >7d (live: 86→34 files); real reclaim/resume demo PASS; AC-4.1 in-session wakeup marked SUPERSEDED by LEDGER→Checkpoint→manifest chain; merged `feature/session-continuity-leasing` branch+worktree deleted. **Helder gates:** (a) two-terminal live demo (row above); (b) worktree-triage decision — 10 merged+clean deletable, 10 merged-but-dirty need eyeball, 8 hold real in-flight work (report: `session-continuity-leasing/task-log.md § Task 15`). Assessment done 2026-07-14 (reported to Helder in-session; closes most of the parent review row's questions). Findings: `feature/session-continuity-leasing` is FULLY MERGED into develop (branch+worktree are debris); heartbeat works (claims stamped live) but `resume_pointer` is never populated (empty in practice — auto-resume payload hollow); claim records who/when but NOT where (no branch/worktree/task fields); ~85 stale lease files, no GC; in-session wakeup unverified since `asyncRewake` removal (2026-06-27); two-terminal demo gate still open. **Approved scope, in value order:** (1) extend claim record with `branch`/`worktree`/`task_id` (heartbeat.py reads from cwd) + redefine `resume_pointer` canonical value as a pointer to the task-log `### Checkpoint` block (workflow.md Rule 5, session-ops.md § Checkpoint Ping); (2) self-maintaining pointer — heartbeat defaults it from `.claude/active-task.json` / ping step runs `resume.py --set`; (3) lease GC — heartbeat deletes stale claims >7 days; (4) run the pending two-terminal demo + re-verify in-session wakeup (if dead, mark AC-4.1 superseded by the LEDGER→Checkpoint→manifest chain, not silently broken); (5) cleanup: delete merged branch/worktree + triage ~30 stale agent worktrees. No conflicts with prior guidelines — lease (liveness) / LEDGER.md (location) / Checkpoint (step state + read list) are complementary layers; Rules 4/7/8 reclaim protocol unchanged. Context manifest for resuming: this row; `Docs/Management/DevCycleCraft/session-continuity-leasing/design.md`; `.claude/scripts/lease/heartbeat.py` + `lease_lib.py`; `session-ops.md § Checkpoint Ping & Context Manifest`; `Docs/Management/LEDGER.md`. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — Context-Size Self-Monitoring & Auto-Clear Advisory
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-13 | ↳ Context-Size Self-Monitoring & Auto-Clear Advisory | 💡 Pending | Orchestrator advises Helder when context is large enough to clear, emits a continuation prompt + handoff file, and optionally self-interrupts the session. Companion to auto-resume (one ends a bloated session cleanly, the other resumes it). Feasibility: agent can't read exact token count, but CC surfaces context usage + supports a Stop/periodic hook that fires the advisory + writes handoff. Research mechanism + token budget. Design context in `session-continuity-leasing/design.md § Companion task`. |
