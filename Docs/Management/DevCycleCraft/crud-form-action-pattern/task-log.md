@@ -144,3 +144,21 @@ All 4 tasks of the CRUD Form Action Pattern feature are now complete:
 4. Native back-button discard behavior matches the old Cancel button's (see the Task 1 finding above — functionally equivalent by construction, since Shell's default pop-navigation was never guarded by a confirmation prompt either before or after this change).
 
 The feature is otherwise code-complete and spec-compliant; this on-device check is the only remaining step before the feature can be considered fully closed out end-to-end.
+
+
+## Moved from BACKLOG.md (2026-07-15) — Song form → stays full-screen page + AppBar-save pattern
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-11 | ↳ Song form → stays full-screen page + AppBar-save pattern | ✅ Done | Song form is complex enough to remain a loaded page (not a sheet). Its pattern change = move **Save into the AppBar trailing slot** (per DevCycleCraft *CRUD Form Action Pattern*). **Depends on ALL other form tasks above** (Venue, Artist, Singer) — **overridden by Helder 2026-07-12**, spec written and run out of order; see row 168 + `crud-form-action-pattern/design.md § Sequencing override`. Autocomplete (artist + title) → also depends on ① & ②, unaffected by this override (out of scope for this spec). **Implemented 2026-07-12.** |
+
+
+## Moved from BACKLOG.md (2026-07-15) — CRUD Form Action Pattern — MD3 Save/Cancel placement for full-screen forms
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-10 | **CRUD Form Action Pattern — MD3 Save/Cancel placement for full-screen forms** | ✅ Done | Registered by Helder 2026-07-10. Full-screen CRUD forms (Artist, Song, and any not converted to sheet/modal) look off-pattern with in-body Cancel + Save buttons: Cancel is redundant with the back-navigation button when the form takes the entire screen (it stays meaningful for bottom sheets/modals); Save would be more UX-enhanced in the AppBar **trailing button slot** (hiding any default trailing button there, or appending to an available unfilled slot). **MANDATORY: MD3 compliance** — official m3.material.io documentation must be checked to confirm any change is really the way to go; if this or another pattern is confirmed: (1) update the internal CRUD/MD3 rules (`.claude/library/crud-pages.md`, `m3-components.md`, …); (2) apply the change to ALL CRUD forms that remain full-screen. Cross-ref: Business Features ↳ *Form presentation — bottom-sheet/modal conversion*. **Spec written 2026-07-12** (Song-only, native `ToolbarItem`, no `SmallAppBar` change): `Docs/Management/DevCycleCraft/crud-form-action-pattern/`. **Sequencing note:** row 46 sequences this after Venue/Artist/Singer sheet conversions (rows 43–45); **Helder authorized running it now, out of that order (2026-07-12)** — see `design.md § Sequencing override`. Spec-reviewer PASS after fix-pass. ⏳ Helder spec review gate next. **Implemented 2026-07-12** — SongFormPage ToolbarItem-Save shipped; crud-pages.md/m3-components.md updated. Commits: 4480728 (SongFormPage.xaml), 69264a7 (crud-pages.md), 3c6ad62 (m3-components.md). Branch feat/crud-form-action-pattern. |

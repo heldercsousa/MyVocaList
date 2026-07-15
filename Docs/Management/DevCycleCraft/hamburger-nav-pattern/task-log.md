@@ -17,3 +17,12 @@
 
 ### Verification evidence
 Structural fix (icon assignment, command wiring, unconditional hamburger) verified by independent verifier subagent — PASS, no blockers. Icon glyph visibility bug found and fixed post-verification (see Changed files). Final visual confirmation (hamburger glyph renders correctly on all 4 pages) deferred to Helder's own emulator check, to be done at his convenience — not blocking this task's closure per his instruction (2026-07-11). If a further issue is found, follow up as a new fix rather than reopening this entry.
+
+
+## Moved from BACKLOG.md (2026-07-15) — Hamburger menu on all hamburger-loaded pages
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-11 | ↳ Hamburger menu on all hamburger-loaded pages | ✅ Done (CRUD-only) | **Scope narrowed (Helder 2026-07-11): CRUD-only** (Venues/Singers/Artists/Songs list pages) — Shell-native pages (Events/Settings/Backup/About) deferred to *AppBar / SearchAppBar Interaction Redesign* (cross-ref point 1). Spike rejected Shell-native `//route` (broke forward slide + hardware back → app exit; findings.md). Shipped: always-hamburger in `CrudListPageBase.OnNavigatedTo` (`a0b999f`) + icon-glyph-suffix fix (`2f4b1e4`, `"menu"` → `"menu_outlined"`, found during Helder's E2E pass). `PushAsync`/animations untouched. spec-reviewer PASS 2026-07-11; verifier PASS. Final visual glyph confirmation on emulator deferred to Helder at his convenience (non-blocking). **Spec:** `Docs/Management/DevCycleCraft/hamburger-nav-pattern/` (findings + requirements + design + tasks + task-log). |

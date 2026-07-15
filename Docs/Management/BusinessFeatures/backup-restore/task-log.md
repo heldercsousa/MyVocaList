@@ -143,3 +143,12 @@ N/A — Domain entities are Level C; no user-facing ACs assigned to this task.
 4. **Missing requirements.md:** the feature folder has no `requirements.md`; the spec quality gate requires it for a cross-layer feature, and the task-log AC matrices cite ad-hoc labels not backed by a requirements doc. Pre-existing gap, not introduced by these tasks.
 
 Minor (non-blocking) implementation notes: `TransactionLogInterceptor.cs:42-43` PK extraction defaults to `"0"` for unsaved Added entities (acceptable for MVP log; undo replay is post-MVP); `BackupServiceTests.cs:38` uses `await Task.Delay(1100)` for filename-second uniqueness (allowed async form, timing-fragile).
+
+
+## Moved from BACKLOG.md (2026-07-15) — Data Backup & Restore — Tier 2 (WiFi Mirror)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| - | **Data Backup & Restore — Tier 2 (WiFi Mirror)** | 💡 Pending | mDNS auto-discovery + TCP sync + AES-256 pairing code encryption. Second device on same WiFi auto-receives transaction log in real time; fresh install auto-discovers mirror and restores in one tap. Spec: `Docs/Management/BusinessFeatures/backup-restore/design.md § Tier 2`. Depends on Tier 1 being shipped. |
