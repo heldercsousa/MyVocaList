@@ -150,3 +150,19 @@ No deviations from `requirements.md`. All acceptance criteria either implemented
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | ↳ BUG-014: `GetActiveEventAsync` fetches only 1 event — wrong business logic (Critical) | 🟡 In Progress | `EventService.GetActiveEventAsync()` calls `GetPagedAsync(1, 1, null, ct)` — fetches only the single most-recently-scheduled event and checks its status in-memory. Any active event that isn't the most recently scheduled is silently missed, returning null. Fix: change pageSize from 1 to 50. |
+
+## Audit 2026-07-15 — Queue Entry Point Redesign / BUG-013 / BUG-014 status correction
+
+Trigger: Helder reported never seeing any queue element during app tests despite the rows being marked 🟡 In Progress since 2026-06.
+
+Evidence (git + code audit, Explore subagent):
+- Git history: only registration commit `58a710d` ("chore: register queue entry-point redesign + BUG-013/014 in BACKLOG") exists — **no implementation commits ever landed** for the redesign, BUG-013, or BUG-014.
+- `QueuePage.xaml:20-22` — still the "under construction" placeholder; no CRUD event list. `QueueFormPage` does not exist.
+- `EventsPage` still exists, registered (`MauiProgram.cs:139`) and routed (`AppShell.xaml:73`) — was supposed to be deleted.
+- `QueueManagementPage` is unreachable: only route is the hidden `AppShell.xaml:108` FlyoutItem (`FlyoutItemIsVisible="False"`); no `GoToAsync`/FAB/flyout navigates to it. Explains TEST-012 (2026-07-03) being blocked.
+- BUG-013 present: `QueueListItem.xaml.cs` has zero BindableProperties; still consumed by `QueueManagementPage.xaml:45,68`.
+- BUG-014 present: `EventService.cs:193` — `GetActiveEventAsync` still calls `GetPagedAsync(1, 1, null, ct)`.
+- BUG-011 fix IS merged and present (`QueueManagementPage.xaml:103-106` uses `ConfirmSheet`); the 2026-06 archive caveat claiming an unmerged branch was corrected. Its E2E remains blocked on the missing entry point.
+- Dead-code cleanup confirmed still valid: `QueueService`/`IQueueService` exist with no DI registration and no runtime consumer; only `IQueueServiceNew` is registered (`ServiceCollectionExtensions.cs:52`).
+
+Action: BACKLOG rows reset 🟡 → 💡 Pending with audit gates; Helder to re-prioritize the redesign.
