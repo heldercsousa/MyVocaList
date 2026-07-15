@@ -133,6 +133,10 @@ public partial class AutocompleteField : ContentView
     private PropertyChangedEventHandler _selfPropertyChangedHandlerForMobileText;
     private PropertyChangedEventHandler _selfPropertyChangedHandlerForMobileSuggestions;
 
+    // The currently-open mobile Search View (null when none) — lets the short-circuit clear path
+    // reach the modal without writing to the bound Suggestions BindableProperty (BUG-043).
+    private AutocompleteMobileField _activeMobileField;
+
     /// <summary>
     /// Resolved via the app's DI container by default (same singleton MauiProgram.cs registers
     /// for <c>IDeviceInfo</c>); settable so tests can inject a mock without a MAUI runtime.
@@ -151,13 +155,43 @@ public partial class AutocompleteField : ContentView
         DeviceInfo = IPlatformApplication.Current?.Services.GetService<IDeviceInfo>();
     }
 
+    /// <summary>
+    /// Test-only seam: skips <c>InitializeComponent</c> so binding behavior can be unit tested
+    /// without a MAUI application (the XAML's StaticResource lookups require app-level resources).
+    /// Named XAML children (<c>searchEdit</c>, <c>overlayCard</c>, <c>suggestionsView</c>) are null
+    /// on this path — members reachable from tests must null-guard them. Production code always
+    /// uses the public constructor.
+    /// </summary>
+    internal AutocompleteField(bool skipXamlInitForTests)
+    {
+        _ = skipXamlInitForTests;
+    }
+
     // ── Suggestions changed ───────────────────────────────────────────────
 
     private void OnSuggestionsChanged(IEnumerable<AutocompleteSuggestion> suggestions)
     {
         var list = suggestions?.ToList();
-        suggestionsView.ItemsSource = list;
-        overlayCard.IsVisible = list?.Count > 0;
+        // Null-guards: named XAML children are null on the test-only constructor path.
+        if (suggestionsView != null)
+            suggestionsView.ItemsSource = list;
+        if (overlayCard != null)
+            overlayCard.IsVisible = list?.Count > 0;
+    }
+
+    /// <summary>
+    /// Clears the suggestion *presentation* (desktop overlay + open mobile Search View) without
+    /// touching the <see cref="Suggestions"/> BindableProperty, preserving the page binding (BUG-043).
+    /// </summary>
+    private void ClearSuggestionsPresentation()
+    {
+        // Null-guards: named XAML children are null on the test-only constructor path.
+        if (suggestionsView != null)
+            suggestionsView.ItemsSource = null;
+        if (overlayCard != null)
+            overlayCard.IsVisible = false;
+        if (_activeMobileField != null)
+            _activeMobileField.Suggestions = null;
     }
 
     // ── TextEdit events ───────────────────────────────────────────────────
@@ -169,14 +203,18 @@ public partial class AutocompleteField : ContentView
         Text = searchEdit.Text ?? "";
     }
 
-    private void HandleTextChanged(string text)
+    internal void HandleTextChanged(string text)
     {
         text ??= "";
 
         if (!AutocompleteSearchGate.ShouldTriggerSearch(text))
         {
             _debouncer.Cancel();
-            Suggestions = null;
+            // BUG-043: never write `Suggestions = null` here. Suggestions is the *target* of the
+            // page's OneWay `Suggestions="{Binding ...}"` — a manual SetValue on a one-way-bound
+            // BindableProperty removes that binding, so every later ViewModel result assignment
+            // silently stops reaching the control. Clear only the presentation instead.
+            ClearSuggestionsPresentation();
             return;
         }
 
@@ -247,6 +285,7 @@ public partial class AutocompleteField : ContentView
 
         mobileField.SuggestionTapped += OnMobileFieldSuggestionTapped;
         mobileField.Cancelled += OnMobileFieldCancelled;
+        _activeMobileField = mobileField;
 
         await Shell.Current.Navigation.PushModalAsync(mobileField);
     }
@@ -264,6 +303,7 @@ public partial class AutocompleteField : ContentView
             mobileField.PropertyChanged -= _mobileFieldPropertyChangedHandler;
         if (_selfPropertyChangedHandlerForMobileSuggestions != null)
             PropertyChanged -= _selfPropertyChangedHandlerForMobileSuggestions;
+        _activeMobileField = null;
 
         // Dismiss modal first to ensure clean navigation stack before executing the selection command.
         // This avoids a race condition where executing SuggestionSelectedCommand (which may trigger
@@ -286,6 +326,7 @@ public partial class AutocompleteField : ContentView
             mobileField.PropertyChanged -= _mobileFieldPropertyChangedHandler;
         if (_selfPropertyChangedHandlerForMobileSuggestions != null)
             PropertyChanged -= _selfPropertyChangedHandlerForMobileSuggestions;
+        _activeMobileField = null;
 
         BlurredWithoutSelectionCommand?.Execute(null);
         _reopenGuard.NotifyDismissed();
