@@ -25,22 +25,7 @@ Architecture layer constraints are defined in `code-principles.md § Architectur
 
 ## Team Environment Setup
 
-Environment variables for MCP integrations (Playwright token, Context7 API key) are stored in `.env.local` (gitignored, team-shared).
-
-**First-time setup (each developer, once):**
-1. Copy `.env.local.example` to `.env.local`
-2. Fill in your API keys (Playwright MCP token, Context7 API key)
-3. Run `. .\.claude\scripts\load-env.ps1` **once** to persist vars to User scope (no admin needed — User scope writes go to HKCU)
-4. **Close ALL terminal windows completely** (not just the tab — the terminal host process itself, and VS Code / Visual Studio if Claude Code is launched from there), then open a fresh terminal from the Start menu / taskbar
-5. Verify with `$env:CONTEXT7_API_KEY` (should print the key), then start Claude Code
-
-> **Why step 4 matters:** Windows processes get an environment *snapshot* from their parent at launch. The script only updates the registry — already-running processes (including an open Windows Terminal host that spawns "new" tabs/windows) keep the stale snapshot, so Claude Code launched from them won't see the keys and `/mcp` will warn the key is missing. Restarting Claude Code inside the same stale terminal does NOT help.
-
-After step 4, env vars are **automatically available** to Claude Code on every restart — no further action needed.
-
-**If keys change:** update `.env.local`, then re-run the script and repeat step 4. Env vars are only read from `.env.local` during script execution; afterward they live in the registry.
-
-> **Design note:** `.env.local` is the source of truth for key rotation across the team. Each dev maintains their own `.env.local` (never committed). The script is a one-time bridge to the registry.
+One-time developer onboarding (MCP env keys via `.env.local` + `load-env.ps1`, terminal-restart caveat): `.claude/library/dev-env-setup.md`.
 
 ## Rules Files
 - MediatR *(planned, not registered)*: no local reference file — derive patterns via Context7 (version-pinned) when MediatR is actually introduced (deleted 2026-07-07, audit F9)
@@ -106,7 +91,7 @@ Priority order when skills, SDD principles, and custom rules conflict:
 User-preference overrides apply to superpowers skill *defaults* (e.g. folder locations) — not to skill *disciplines* (e.g. TDD red/green/refactor).
 
 **Project rules override skill defaults where they conflict `[explicit]`:** two enabled superpowers skills contradict project rules, and the project rule wins:
-- `brainstorming`'s HARD-GATE ("present a design and get approval before ANY code, including a config change") does **not** override `workflow.md`'s ceremony decision table — typo / cosmetic / single-file bug fix require no spec/design (workflow-reference.md § Rule 1). Ignore the skill's nag for those.
+- `brainstorming`'s HARD-GATE ("present a design and get approval before ANY code, including a config change") does **not** override `workflow.md`'s ceremony decision table — typo / cosmetic / single-file bug fix require no spec/design (workflow-rule-1.md). Ignore the skill's nag for those.
 - `test-driven-development`'s Iron Law ("no production code without a failing test, no exceptions") is deliberately **not enabled** and does **not** override `testing.md`'s risk-tiered TDD — Level C (plumbing, DI registration, DTO records, trivial getters) has no mandatory test. See `.claude/settings.json § skillOverrides` (test-driven-development/code-review = off; subagent-driven-development = user-invocable-only). Full evidence: `Docs/Management/DevCycleCraft/rules-file-refactoring/skill-overlap-findings.md § Conflicts #1–#2`.
 
 ## Docs/ Folder Layout (canonical)
