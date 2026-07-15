@@ -219,3 +219,21 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 
 > Helder note: confirm the changelog line format matches the surrounding entries (it mirrors
 > the `06/15/2026 - amend` lines: `**Old:**…/**New:**…/Effective…/Rationale:…/Authorship:`).
+
+---
+
+## ⚠️ RETARGETING NOTE — 2026-07-14 (post rules-split; read BEFORE applying)
+
+This file was written 2026-06-24 against the **monolithic** `workflow.md`. The 2026-07-14
+token-scoped split (`baa6557`) moved the target sections. Apply the SAME content, but to:
+
+| Diff | Old target | Apply now to |
+|------|-----------|--------------|
+| Diff 1 (Rule 1 Proactive BACKLOG triage) | `workflow.md` Rule 1 body | `.claude/library/workflow-rule-1.md § Proactive BACKLOG triage — Untracked work` (line ~68). Optionally add a one-line "memory is NOT a registration surface" note to the inline Rule 1 summary in `workflow.md`. |
+| Diff 2 (Rule 2 exit checklist) | `workflow.md` Rule 2 body | `.claude/library/workflow-rule-2.md` exit-checklist detail; the inline `workflow.md` Rule 2 exit-checklist one-liner may gain "→ BACKLOG registration check". |
+| Diff 3 (Hook Enforcement table row) | `workflow.md` Hook Enforcement Notes | `workflow.md § Hook Enforcement (never-miss)` inline table (still exists) — add the `orphan_check.py` Stop-hook row there; mirror in `.claude/library/workflow-hooks-invariant.md` if it lists Stop hooks. |
+
+Everything else (rule text, exempt categories, `amend:` commit + changelog triple) is unchanged
+and still valid. The hook wiring itself (Diff 3's subject) is ALREADY LIVE — `orphan_check.py` +
+`session_marker.py` were merged into `settings.json` on 2026-07-14 (`824885d`); only the rule-text
+half awaits this gate.
