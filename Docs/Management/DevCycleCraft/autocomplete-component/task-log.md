@@ -469,3 +469,22 @@ AC-2.3's "navigate to Edit form" with a retained New form in the stack was never
 
 ### BACKLOG registration note
 BUG-044/BUG-045 rows must be registered on develop's BACKLOG/parent-feature nesting by the orchestrator (docs live on develop; this worktree only carries this task-log entry).
+
+---
+
+## 2026-07-15 — Triage registration: BUG-046, BUG-047, "no match → add new" UX analysis (Helder on-device findings; NOT to be fixed in this session)
+
+Registered after Helder's S23 E2E confirmed BUG-043 fixed (row archived). Three follow-ups registered per bug-tracking.md proactive triage — no fix work started, Helder will tackle them in a fresh session.
+
+### BUG-046 (Major) — extra whitespace in autocomplete query returns zero suggestions
+- Symptom: any accidental extra space (leading, trailing, or double space between words) makes the search return no results.
+- Direction from Helder: trim/collapse whitespace in the **string sent to the service only** — never mutate the text in the entry itself. Being reusable, the normalization belongs in a centralized place to avoid per-caller formatting duplication.
+- Related: BACKLOG cross-cutting row *String trimming on persistence* extends the same idea to stored values (`cross-cutting-log.md`).
+
+### BUG-047 (Major) — tapped result loads PersonFormPage with malformed name entry; identical-name duplicates both render
+- Symptom 1: name entry renders with a weird height and shows artist name/birthday or /email content inside it.
+- Symptom 2: when two entities share the exact same name, both render in the entry.
+- Evidence: `bugs/bug-043/bug-personform (1..4).jpg` + `bugs/bug-043/ListItem component not used.png` (screenshots captured during BUG-043 E2E; kept in that folder).
+
+### UX analysis — "no match → add new" reachable only via back button (all autocomplete consumers)
+- Today the mobile search view shows back + clear-entry buttons; tapping a result opens the entity's edit form (correct), but when no line is tapped the user must tap **back** to get to "add person". Helder flags this as weird UX — analyse for a better MD3-compliant affordance than back-button-only. Whatever is chosen applies to every autocomplete consumer (shared solution).
