@@ -5,7 +5,7 @@
 ---
 ## Task: Wave 4A — BottomSheetTitle, SongPickerViewModel+DI (BUG-010/006), picker back-chrome (BUG-007)
 **Plan:** `song-import-resolution/plan.md`
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/14/2026
 **Completed:** 06/14/2026
 
@@ -48,7 +48,7 @@
 ---
 ## Task: Wave 4B — SongForm fixes (BUG-005/008/009) + Resolution/Merge BottomSheets (Tasks 4.4 + 4.5)
 **Plan:** `song-import-resolution/plan.md`
-**Status:** To Review
+**Status:** Reviewed — BLOCKING-ISSUES, needs fix (review 2026-06-25)
 **Started:** 06/14/2026
 **Completed:** 06/14/2026
 
@@ -85,6 +85,12 @@
 | AC-B5 | Exception in SaveAsync → error snackbar shown | SongFormViewModel.SaveAsync catch block | SaveAsync_ServiceThrows_ShowsErrorSnackbar |
 | AC-B8 | Blur without selection → field cleared | AutocompleteField + SongFormViewModel.OnArtistBlurredWithoutSelection | ArtistBlurredWithoutSelection_NoPriorSelection_ClearsField |
 
+### Review verdict (2026-06-25, per-task review loop) — BLOCKING-ISSUES
+**BLOCKING:** `SongFormPage.xaml:232,312` — the `resolutionSheet` and `mergeSheet` `dx:BottomSheet` controls have no binding of their open state, and `SongFormPage.xaml.cs` has no `PropertyChanged` handler. The VM sets `IsResolutionSheetVisible`/`IsMergeSheetVisible = true` (`SongFormViewModel.cs:430,495`) but nothing observes those flags. The project pattern (`CrudListView.xaml.cs:221-226` → `confirmSheet.Show(state,...)`) requires programmatic opening of a `dx:BottomSheet`; an unbound bool does not display it. Result: resolution sheet (AC-1.1, AC-1.4) and merge sheet (AC-4.2) never appear at runtime — core US-1/US-4 behavior is non-functional. Unit tests pass only because they assert VM bools, not sheet display (Tester/Builder gap).
+**Fix:** add a `PropertyChanged` handler in `SongFormPage.xaml.cs` that calls `resolutionSheet.Show(...)`/`mergeSheet.Show(...)` (mirroring `CrudListView.xaml.cs`), plus a wired E2E/code-behind verification (unit tests cannot catch this).
+**MINOR (governance):** `AutocompleteField.xaml.cs:47-48` adds a new `BlurredWithoutSelectionCommand` BindableProperty to a governed shared component (consumers: PersonFormPage, SongFormPage) bundled into this feature/bug wave with no consumer-map/risk artifact — violates `component-change-governance.md` (dedicated task + four gates, no bundling). Additive (default null, no-op for PersonFormPage) so low blast radius, but the gate was bypassed.
+**PASS aspects:** BUG-005 save-catch, BUG-009 buffer/duplicate/remove, AC-1.2 empty-version block; DevExpress/SafeAreaEdges/English-only/no-native-dialogs all satisfied in XAML.
+
 ---
 ## Task: Spec + plan authored
 **Plan:** `song-import-resolution/plan.md`
@@ -110,7 +116,7 @@ Decisions locked with Helder 2026-06-13: (1) version variants first-class + conf
 ---
 ## Task: Wave 1 — Domain contracts (Tasks 1.1, 1.2, 1.3)
 **Plan:** `song-import-resolution/plan.md`
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/13/2026
 **Completed:** 06/13/2026
 
@@ -144,7 +150,7 @@ Decisions locked with Helder 2026-06-13: (1) version variants first-class + conf
 ---
 ## Task: Wave 2 — Infra (Tasks 2.1–2.5)
 **Plan:** `song-import-resolution/plan.md`
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/13/2026
 **Completed:** 06/13/2026
 
@@ -166,7 +172,7 @@ Decisions locked with Helder 2026-06-13: (1) version variants first-class + conf
 ---
 ## Task: Wave 3A — SongService atomic URL save + external-id; scorer unit tests; Wave 2 tests green (Task 3.3)
 **Plan:** `song-import-resolution/plan.md`
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/14/2026
 **Completed:** 06/14/2026
 
@@ -197,7 +203,7 @@ Services project: 0 errors, 0 new warnings (pre-existing warnings only).
 ---
 ## Task: Wave 3B — Artist/Song resolution engine (Tasks 3.1, 3.2)
 **Plan:** `song-import-resolution/plan.md`
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 2026-06-14
 **Completed:** 2026-06-14
 
@@ -239,3 +245,6 @@ Added one detail to implementation not explicit in the spec: when artist resolve
 | AC-3.4 | Artist NoMatch → CreateNew sets external identity | `ArtistResolutionService.CommitAsync` | `CommitAsync_CreateNew_SetsExternalIdentityOnCreatedArtist` |
 | AC-4.1 | No manual edits → overwrite non-empty API fields | `SongResolutionService.CommitAsync` UpdateExisting | `CommitAsync_UpdateExisting_NoManualEdits_OverwritesNonEmptyFields` |
 | AC-4.2 | Manual edits → apply only acceptedFields | `SongResolutionService.CommitAsync` UpdateExisting | `CommitAsync_UpdateExisting_ManualEdits_AppliesOnlyAcceptedFields` |
+
+### Review verdict (2026-06-25, per-task review loop) — PASS
+HARD RULE confirmed: all exact/dedup matching delegates to repo DB collation (`ExistsByTitleVersionForArtistAsync`, `GetByNameAsync`, `EF.Functions.Collate`); `SimilarityScorer` NFD+strip+ToLowerInvariant is in-memory **advisory scoring only** over the bounded fuzzy pool — never touches DB queries, never persisted, unique index remains the authority (design.md §5 sanctioned). INV-1 enforced (artist-first); FieldDiffs restricted to {Title, FeaturedArtists, Lyrics, Version}, ArtistId excluded. Waves 1/2/3A also PASS. Minor (cosmetic): duplicate `using MyVocaList.Domain.Resolution;` at `ArtistResolutionService.cs:5`.

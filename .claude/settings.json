@@ -132,6 +132,14 @@
             "command": "python -c \"import subprocess as s,os; p=os.environ.get('CLAUDE_PROJECT_DIR','.'); want='.claude/githooks'; cur=s.run(['git','config','--get','core.hooksPath'],cwd=p,capture_output=True,text=True).stdout.strip(); (s.run(['git','config','core.hooksPath',want],cwd=p), print('SETUP — registered git core.hooksPath -> '+want+' (pre-commit build/test gate now active on this clone).')) if cur!=want else None\" 2>/dev/null || true"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/scripts/backlog/session_marker.py 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "PostCompact": [
@@ -170,6 +178,14 @@
           {
             "type": "command",
             "command": "python .claude/scripts/lease/heartbeat.py 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/scripts/backlog/orphan_check.py 2>/dev/null || true"
           }
         ]
       }

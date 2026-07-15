@@ -4,7 +4,7 @@ f# Task Log — validated-noodling-island (Artists & Songs)
 
 ## Task: BUG-001 fix — Back button + trailing icon style
 **Plan:** `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-001-artists-page-no-back-button.md`
-**Status:** To Review
+**Status:** Reviewed — PASS-WITH-MINOR
 **Started:** 2026-06-03
 **Completed:** 2026-06-03
 
@@ -18,7 +18,10 @@ f# Task Log — validated-noodling-island (Artists & Songs)
 - Post-edit re-read: confirmed — NavigationIcon/GoBackCommand on SmallAppBar; StandardIconButton on both templates; `IconButton` no longer present in ArtistsPage.xaml
 - Spec compliance: confirmed — bug doc updated to Fixed status with resolution notes
 
----
+### Review verdict (2026-06-25, per-task review loop)
+**PASS-WITH-MINOR.** Both bug issues are resolved in current code (back button + trailing icon style); constitutional checks clean (SafeAreaEdges present, English-only, DevExpress-first `dx:DXButton`, no business logic in VM).
+- **Doc/code divergence (fix as reconciliation):** the actual fix lives in `CrudListPageBase.OnNavigatedTo` (context-aware `menu`/`arrow_back_outlined` + `AppBarNavigationIcon`/`AppBarNavigationCommand` bindings, commit `0d69add`), which superseded the documented `GoBackCommand`/`GoBackAsync` approach. The task-log "Changed files" (line 12) and the bug doc Resolution section describe a `GoBackCommand` on `ArtistsViewModel` that **no longer exists**, and omit `CrudListPageBase.cs` (the real changed file). Reconcile both docs to the shipped implementation.
+- **Regression-test gap (bug-tracking.md HARD RULE):** bug severity is "High" → maps to **Major**. The navigation logic is now testable via the `AppBarNavigationIcon` property, yet no regression test exists and the task-log records `Tests: SKIPPED` with no documented manual E2E verification step. Add a regression test (or a documented E2E step) before closing the bug.
 
 ## Task: Phase 10 — Domain Refactor
 **Plan:** `Docs/superpowers/plans/validated-noodling-island.md`

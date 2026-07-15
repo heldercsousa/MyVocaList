@@ -499,6 +499,8 @@ $RECYCLE.BIN/
 .claude/settings.local.json
 # Session-continuity lease claim files (ephemeral, per-machine — never commit)
 .claude/leases/
+# BACKLOG-first orphan-check session boundary marker (ephemeral, per-session — never commit)
+.claude/scripts/backlog/.session-marker
 # Local Sentry DSN — never commit; fill from Sentry project settings
 **/appsettings.json
 
