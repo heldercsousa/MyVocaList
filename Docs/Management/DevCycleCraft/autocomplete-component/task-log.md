@@ -418,3 +418,54 @@ Removed the BP self-write. The short-circuit now calls `ClearSuggestionsPresenta
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-07-11 | **① Autocomplete Mobile UX Pattern — Full-Screen Expansion Guideline** | 💡 Pending | **🔗 DEPENDENCY INVERTED 2026-07-11 (Helder): ① now runs LAST of the foundation work — GATED ON ② + the new-component build + its first application** (proven concept), no longer the predecessor of everyone. **Rule to encode (responsive by window size class):** large/desktop → keep exposed-dropdown autocomplete as-is; compact/phone → full-screen dedicated view (entire page + search AppBar + input docked at bottom next to the keyboard + results fill the rest). **Lightweight:** short section in `.claude/library/ux-patterns.md` (+ cross-ref stub in `m3-components.md`); MD3 currency checked inline (SearchBar→SearchView / Menus filtering); no spike. Written from the proven concept — detail + early guideline: `Docs/Management/DevCycleCraft/autocomplete-component/`. |
+
+---
+## Task: BUG-044 (Critical) + BUG-045 (Major) — regressions surfaced after BUG-043 round-4 merge
+**Plan:** none (bug fix — commit message is the spec, workflow.md § Bug Fix Pattern)
+**Status:** To Review
+**Started:** 2026-07-15
+**Completed:** 2026-07-15
+**Branch/worktree:** `fix/bug-044-045-autocomplete-regressions` @ `C:\Users\helde\source\repos\MyVocaList-wt-bug044`
+
+### Root cause (BUG-044 — duplicate PersonFormPage / duplicate entity on Save)
+`PersonFormViewModel.SuggestionSelectedAsync` navigated with `GoToAsync("person-form?personId=...")` — a plain PUSH. Selecting a suggestion while already ON the New Singer form therefore stacked a SECOND PersonFormPage (edit mode) on top of the first, which still held the raw typed autocomplete text via the TwoWay `PersonName` binding. Saving the edit form ran `GoToAsync("..")`, popping back to the stale New Singer form (the "second PersonFormPage pre-filled with raw typed text"); saving that form inserted the duplicate entity. Evidence: `SuggestionSelectedAsync` (PersonFormViewModel.cs) route had no `../` prefix; persons spec AC-2.3 requires navigation to the Edit form but never a retained stale New form; logcat double OnAppearing + "destroy window while drawing" match a stacked-then-popped page pair. NOT a defect in `AutocompleteField`/`AutocompleteMobileField` — BUG-043 round 4 (2777a67) merely made mobile suggestion selection WORK for the first time, exposing this latent ViewModel navigation flaw (pre-existing since `d7ee688`).
+
+### Root cause (BUG-045 — cursor stuck at leading position)
+Same root-cause family: the symptom is observed on the STALE duplicate form revealed after Save. When the suggestion was tapped, `MobileFieldReopenGuard.NotifyDismissed()` armed the one-shot focus suppression on that page's field; because navigation immediately covered the page, the suppression was never consumed by the usual automatic refocus. On the revealed stale form the user's tap into the name entry was swallowed (`searchEdit.Unfocus()` in `OnSearchEditFocused`), plus DX TextEdit parks the caret at position 0 after the programmatic `searchEdit.Text` sync — field looks cursor-locked at the leading position. Eliminating the stale page (BUG-044 fix) removes the affected instance. No component code changed (no speculative fix).
+
+### Fix
+- `INavigationService` gains `GoToAsync(string route)` (mockable navigation seam per testing.md — never call `Shell.Current` in ViewModel tests). <!-- impl decision: smallest seam consistent with existing INavigationService design; required for the mandatory Critical regression test -->
+- `PersonFormViewModel` now takes `INavigationService`; `SuggestionSelectedAsync` navigates with the REPLACING relative route `"../person-form?..."` — pops the New Singer form before pushing the Edit form. Resulting stack: PeoplePage → Edit form; Save's `".."` correctly returns to the singers list (AC-1.11 / AC-4.6). AC-2.3 (navigate to Edit form pre-populated) still satisfied.
+
+### Changed files:
+- `MyVocaList/UI/Services/INavigationService.cs`
+- `MyVocaList/UI/Services/NavigationService.cs`
+- `MyVocaList/UI/ViewModels/PersonFormViewModel.cs`
+- `MyVocaList.Tests/Unit/ViewModels/PersonFormViewModelBug044Tests.cs` (new)
+- `MyVocaList.Tests/Unit/ViewModels/PersonFormViewModelTests.cs` (ctor: nav mock added — no assertion touched)
+- `Docs/Management/DevCycleCraft/autocomplete-component/task-log.md` (this entry — MUST be synced to develop via /sln-docs-sync)
+
+### AC traceability / verification evidence
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| persons AC-2.3 + BUG-044 | Suggestion tap → Edit form REPLACES current form (no stacked duplicate) | `PersonFormViewModel.SuggestionSelectedAsync` (`../` route via `INavigationService`) | `PersonFormViewModelBug044Tests.SuggestionSelected_NavigatesWithReplacingRelativeRoute_NotAStackedPush` (seen FAIL pre-fix, PASS post-fix) |
+| AC-2.3 edge | Non-Person suggestion data → no navigation | same method (type guard) | `PersonFormViewModelBug044Tests.SuggestionSelected_NonPersonData_DoesNotNavigate` |
+| BUG-043 non-regression | Suggestions propagation still works | untouched `AutocompleteField.xaml.cs` | `AutocompleteSuggestionsPropagationTests` (2/2 green in full run) |
+
+Build: passed — net10.0-android, 0 errors (DX license warnings only) | Tests: **482 passed, 0 failed** (480 pre-existing + 2 new; regression test confirmed Red first: `Assert.NotNull() Failure: Value is null`) | Files written and re-read: all five code/test files verified post-edit.
+
+### Governed-component per-consumer risk (AutocompleteField — component itself UNCHANGED)
+- **PersonFormPage:** behavior change is in its own ViewModel navigation only. Verify: E2E below.
+- **SongFormPage:** unaffected — `SelectArtistCommand` fills the field in place (no navigation) and `SongFormViewModel` untouched; full suite green. Verify: type artist, pick suggestion, field fills, no navigation.
+- **AutocompleteMobileField:** untouched; selection/cancel wiring identical. Verify: mobile Search View still opens/selects/cancels (covered by BUG-044 E2E).
+
+### Manual E2E for Helder (device required — could not verify here)
+1. BUG-044: PeoplePage → FAB → New Singer → type existing name → tap suggestion → form shows Edit Singer pre-filled → Save → **must land on PeoplePage (singers list)**, exactly one snackbar, no second form, no duplicate row in the list.
+2. BUG-045: after step 1's suggestion tap (before Save), tap into the name entry → Search View opens normally, caret placeable at end of text; after Save, no stale form exists to exhibit the stuck caret. If a stuck caret still reproduces on the fresh Edit form, report — that would be an independent DX TextEdit caret issue (not reachable from unit tests).
+3. Back-gesture from the Edit form after suggestion selection → should return to PeoplePage (the New form was intentionally popped — confirm this UX is acceptable; if Helder wants back to return to the New form with typed text, that is a spec decision, see Design concern).
+
+### Design concern (for review, implemented spec as-is)
+AC-2.3's "navigate to Edit form" with a retained New form in the stack was never coherent (Save from Edit would always reveal the stale New form). Replacement (`../`) is the minimal interpretation that satisfies AC-1.11/AC-4.6 ("navigate back to the list"). If a different UX is preferred (e.g. hydrate the current form in place), re-spec.
+
+### BACKLOG registration note
+BUG-044/BUG-045 rows must be registered on develop's BACKLOG/parent-feature nesting by the orchestrator (docs live on develop; this worktree only carries this task-log entry).
