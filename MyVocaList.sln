@@ -215,7 +215,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "toolbar-fab-vibrant", "tool
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-list-deduplication", "crud-list-deduplication", "{FA1234BC-0001-4000-8000-000000000019}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\crud-list-deduplication\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\task-log.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\design.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\design.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7a.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7a.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7b.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7b.md
@@ -224,6 +223,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-list-deduplication", "
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7e.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-7e.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-guidelines.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\plan-guidelines.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\plan.md = Docs\Management\DevCycleCraft\crud-list-deduplication\plan.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\task-log.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md
 	EndProjectSection
 EndProject
@@ -404,8 +404,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{15F1DA03-2180-47BF-BC40-1BB457C97F9E}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
-		Docs\Management\cross-cutting-log.md = Docs\Management\cross-cutting-log.md
 		Docs\Management\Chat with Opus about frozen UI in emulator - TO DO.txt = Docs\Management\Chat with Opus about frozen UI in emulator - TO DO.txt
+		Docs\Management\cross-cutting-log.md = Docs\Management\cross-cutting-log.md
 		Docs\Management\EMULATOR_TEST_MASTER_LIST.md = Docs\Management\EMULATOR_TEST_MASTER_LIST.md
 		Docs\Management\LEDGER.md = Docs\Management\LEDGER.md
 	EndProjectSection
@@ -689,11 +689,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bugs", "Bugs", "{1AAD9972-3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-043", "bug-043", "{6941D280-F5AE-428A-AC78-42246F3BF3F8}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\debug-log-20260714.txt = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\debug-log-20260714.txt
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\debug-log-s23-20260714.txt = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\debug-log-s23-20260714.txt
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\debug-log.txt.txt = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\debug-log.txt.txt
 		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\ListItem component not used.png = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\ListItem component not used.png
-		logcat-S23-20260714.txt = logcat-S23-20260714.txt
+		log-debug-emulator.txt = log-debug-emulator.txt
+		log-debug-s23.txt = log-debug-s23.txt
 		Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md = Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md
 	EndProjectSection
 EndProject
@@ -856,10 +854,10 @@ Global
 		{FA1234BC-0001-4000-8000-000000000041} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000043} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000044} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
-		{1AAD9972-3FB1-449D-B8DD-145C107CBD67} = {FA1234BC-0001-4000-8000-000000000046}
-		{6941D280-F5AE-428A-AC78-42246F3BF3F8} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
 		{FA1234BC-0001-4000-8000-000000000049} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000050} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{1AAD9972-3FB1-449D-B8DD-145C107CBD67} = {FA1234BC-0001-4000-8000-000000000046}
+		{6941D280-F5AE-428A-AC78-42246F3BF3F8} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
