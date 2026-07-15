@@ -584,3 +584,29 @@ None — implemented exactly per Gates 1–4 and Helder's stated intent (reentra
 
 ### BACKLOG registration note
 BUG-047 row (and its BUG-046 sibling / UX-analysis note, still untouched — out of scope for this task) must be updated by the orchestrator on develop's BACKLOG/parent-feature nesting to close out BUG-047 once merged.
+
+---
+## Task: Autocomplete "no match → add new" UX analysis + ① Full-Screen Expansion Guideline (docs-only)
+**Plan:** Helder briefing 2026-07-15 (pre-approved to proceed autonomously; research-backed recommendations required — no base-knowledge-only claims)
+**Status:** To Review (Helder review of recommendation + authorship review of guideline)
+**Started:** 2026-07-15
+**Completed:** 2026-07-15
+**Branch:** develop (docs-only — no source files edited; worktree rule not applicable)
+
+### What was done
+1. **"No match → add new" analysis** — new `ux-no-match-add-new-analysis.md`. Recommendation: creatable-autocomplete `Add "<typed text>"` action row as last suggestion row (sole row + empty-state copy on zero matches); back retains cancel semantics; IME Done complements. Evidence: MUI Creatable free-solo docs, Material empty-state guidance, MD3 search guidelines, M3 SearchBar ListItem anatomy, Nielsen H1/H4/H5/H6. Implementation deliberately NOT started — governed-component four gates required; sequencing notes vs BUG-046 and shimmer evaluation included.
+2. **① guideline encoded** — authoritative section `ux-patterns.md § Autocomplete — Responsive Full-Screen Expansion (MD3)` (window-size-class table: compact <600dp → full-screen Search View; ≥600dp → docked exposed dropdown, per m3.material.io search guidelines, currency verified 2026-07-15) + implementation invariants distilled from BUG-040…047 fixes + cross-ref stub appended to `m3-components.md`. Marked ⏳ pending Helder authorship review per CLAUDE.md Authorship rule.
+
+### Changed files
+- `Docs/Management/DevCycleCraft/autocomplete-component/ux-no-match-add-new-analysis.md` (new)
+- `.claude/library/ux-patterns.md` (new section)
+- `.claude/library/m3-components.md` (cross-ref stub)
+- `Docs/Management/BACKLOG.md` (both rows → 🟡 In Progress with review gates)
+- `MyVocaList.sln` (new Docs file registered — autocomplete-component solution folder)
+- `Docs/Management/DevCycleCraft/autocomplete-component/task-log.md` (this entry)
+
+### Verification evidence
+Docs-only task: no build/test applicable. MD3 rules cited from m3.material.io search guidelines (full-screen compact / docked ≥600dp confirmed via search-results excerpt), MUI autocomplete Creatable section fetched directly, Material empty-states guidance confirmed. `.sln` registration done (HARD GATE). Note: ①'s original gate ("component build ✅") is technically still 🟡 pending Helder E2E of BUG-044/045/047 — guideline written now per Helder's explicit pre-approval in this session; invariants list must be re-checked if E2E fails.
+
+### Checkpoint
+- All steps complete; nothing in flight. Context manifest for resume: this entry + `ux-no-match-add-new-analysis.md` + `ux-patterns.md § Autocomplete` section + BACKLOG rows (UX analysis, ①).
