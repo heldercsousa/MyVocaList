@@ -36,7 +36,8 @@ public partial class AutocompleteField : ContentView
                 var ctrl = (AutocompleteField)b;
                 var newVal = (string)n ?? "";
                 // Keep the desktop TextEdit in sync (no-op when it originated the change).
-                if (ctrl.searchEdit.Text != newVal)
+                // Null-guard: searchEdit is null on the test-only constructor path.
+                if (ctrl.searchEdit != null && ctrl.searchEdit.Text != newVal)
                     ctrl.searchEdit.Text = newVal;
                 // Drive the search from the shared Text property — the single source of truth for
                 // both the desktop TextEdit and the phone Search View. The desktop TextEdit's
@@ -44,7 +45,16 @@ public partial class AutocompleteField : ContentView
                 // phone (the user types into AutocompleteMobileField, which flows here via the
                 // two-way Text binding), so relying on that event dropped every phone-side search
                 // and returned zero suggestions (BUG-043).
-                ctrl.HandleTextChanged(newVal);
+                //
+                // BUG-047 guard: only fire the search side-effect when this Text change originated
+                // from genuine user input (desktop typing via OnTextChanged, or user typing in the
+                // mobile Search View synced back via _mobileFieldPropertyChangedHandler — both route
+                // through SetTextFromUserInput). A programmatic assignment — e.g. a ViewModel
+                // hydrating the bound Text when loading an existing entity for edit — must sync the
+                // TextEdit's displayed value but must NOT invoke SearchRequestedCommand or populate
+                // Suggestions from a stale search (which then re-appears on focus).
+                if (ctrl._isUserDrivenTextChange)
+                    ctrl.HandleTextChanged(newVal);
             });
 
     public static readonly BindableProperty SearchRequestedCommandProperty =
@@ -124,9 +134,15 @@ public partial class AutocompleteField : ContentView
 
     // ── Private state ─────────────────────────────────────────────────────
 
-    private readonly AutocompleteDebouncer _debouncer = new();
+    private AutocompleteDebouncer _debouncer = new();
     private readonly MobileFieldReopenGuard _reopenGuard = new();
     private bool _isTappingSuggestion;
+
+    // BUG-047 reentrancy guard: true only while Text is being set from genuine user input
+    // (see SetTextFromUserInput). Mirrors AutocompleteMobileField's _isUpdatingTextFromSearchEdit
+    // pattern, applied to the opposite direction — distinguishing user-originated Text writes from
+    // programmatic ones (ViewModel hydration) so only the former triggers a search.
+    private bool _isUserDrivenTextChange;
 
     // PropertyChanged handlers for mobile-field wiring (stored for proper cleanup).
     private PropertyChangedEventHandler _mobileFieldPropertyChangedHandler;
@@ -167,6 +183,14 @@ public partial class AutocompleteField : ContentView
         _ = skipXamlInitForTests;
     }
 
+    /// <summary>
+    /// Test-only seam: replaces the debounce dispatcher with a synchronous one so tests can observe
+    /// <see cref="SearchRequestedCommand"/> invocation deterministically, without depending on
+    /// <c>MainThread.BeginInvokeOnMainThread</c> (unavailable outside a running MAUI app).
+    /// </summary>
+    internal void UseSynchronousDebouncerForTests()
+        => _debouncer = new AutocompleteDebouncer(action => action());
+
     // ── Suggestions changed ───────────────────────────────────────────────
 
     private void OnSuggestionsChanged(IEnumerable<AutocompleteSuggestion> suggestions)
@@ -200,7 +224,28 @@ public partial class AutocompleteField : ContentView
     {
         // Desktop typing → push into the shared Text property; the search is triggered from Text's
         // propertyChanged (see TextProperty), unifying the desktop and phone Search View paths.
-        Text = searchEdit.Text ?? "";
+        SetTextFromUserInput(searchEdit.Text ?? "");
+    }
+
+    /// <summary>
+    /// Sets <see cref="Text"/> while marking the change as user-originated (BUG-047), so the
+    /// <see cref="TextProperty"/> propertyChanged handler knows to trigger
+    /// <see cref="HandleTextChanged"/>'s search side-effect. Used for desktop typing
+    /// (<see cref="OnTextChanged"/>) and for user typing synced back from the mobile Search View
+    /// (see <c>_mobileFieldPropertyChangedHandler</c> in <see cref="ShowMobileFieldAsync"/>).
+    /// Internal so unit tests can simulate genuine user input without a live <c>searchEdit</c>.
+    /// </summary>
+    internal void SetTextFromUserInput(string text)
+    {
+        _isUserDrivenTextChange = true;
+        try
+        {
+            Text = text ?? "";
+        }
+        finally
+        {
+            _isUserDrivenTextChange = false;
+        }
     }
 
     internal void HandleTextChanged(string text)
@@ -267,11 +312,14 @@ public partial class AutocompleteField : ContentView
         };
         PropertyChanged += _selfPropertyChangedHandlerForMobileText;
 
-        // Wire up two-way Text synchronization: mobileField → AutocompleteField
+        // Wire up two-way Text synchronization: mobileField → AutocompleteField.
+        // mobileField's own reentrancy guard (_isUpdatingTextFromSearchEdit) only raises its Text
+        // PropertyChanged for genuine user typing in the Search View, so this is user-originated —
+        // route it through SetTextFromUserInput (BUG-047) so the search still triggers.
         _mobileFieldPropertyChangedHandler = (_, args) =>
         {
             if (args.PropertyName == nameof(AutocompleteMobileField.Text))
-                Text = mobileField.Text;
+                SetTextFromUserInput(mobileField.Text);
         };
         mobileField.PropertyChanged += _mobileFieldPropertyChangedHandler;
 
