@@ -1,0 +1,206 @@
+07-15 13:11:10.255 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 428KB AllocSpace bytes, 1(20KB) LOS objects, 49% free, 5694KB/11MB, paused 1.298ms,1.958ms total 110.210ms
+07-15 13:11:10.875 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 156KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 5666KB/11MB, paused 1.407ms,3.367ms total 59.030ms
+07-15 13:11:10.894 D/app_process64(17621): [13:11:10 INF] CrudListView
+07-15 13:11:10.894 D/app_process64(17621): [PageLoad] CrudListView InitializeComponent=516ms
+07-15 13:11:10.952 D/app_process64(17621): [13:11:10 INF] PeoplePage
+07-15 13:11:10.952 D/app_process64(17621): [PageLoad] PeoplePage appearing=957ms (ctor→OnAppearing)
+07-15 13:11:10.953 D/app_process64(17621): [13:11:10 INF] PeoplePage
+07-15 13:11:10.953 D/app_process64(17621): [PageLoad] PeoplePage afterInitDispatch=958ms (ctor→after InitializeAsync fire)
+07-15 13:11:10.968 I/Choreographer(17621): Skipped 58 frames!  The application may be doing too much work on its main thread.
+07-15 13:11:11.011 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:11.018 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:11.027 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:11.028 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:11.030 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:11.073 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:11.077 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:11.082 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:11.091 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:11.114 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:11.117 D/app_process64(17621): [13:11:11 INF] PeoplePage
+07-15 13:11:11.117 D/app_process64(17621): [PageLoad] PeoplePage loaded=1120ms (ctor→Loaded)
+07-15 13:11:11.118 D/app_process64(17621): [13:11:11 INF] CrudListView
+07-15 13:11:11.118 D/app_process64(17621): [PageLoad] CrudListView loaded=516ms (ctor→Loaded)
+07-15 13:11:11.171 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.appcompat.widget.Toolbar$Api33Impl$$ExternalSyntheticLambda0@d2c8c7f
+07-15 13:11:11.172 D/app_process64(17621): [13:11:11 INF] MyVocaList.UI.ViewModels.PersonsViewModel
+07-15 13:11:11.172 D/app_process64(17621): [PageLoad] PersonsViewModel fetch=192ms
+07-15 13:11:11.182 D/app_process64(17621): [13:11:11 INF] MyVocaList.UI.ViewModels.PersonsViewModel
+07-15 13:11:11.182 D/app_process64(17621): [PageLoad] PersonsViewModel initAsync=229ms
+07-15 13:11:11.291 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 381KB AllocSpace bytes, 3(60KB) LOS objects, 49% free, 5970KB/11MB, paused 1.416ms,2.484ms total 37.885ms
+07-15 13:11:11.448 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:11.448 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:11.452 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:11.456 D/app_process64(17621): [13:11:11 INF] PeoplePage
+07-15 13:11:11.456 D/app_process64(17621): [PageLoad] PeoplePage navigatedTo=1461ms (ctor→OnNavigatedTo)
+07-15 13:11:11.458 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:13.076 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 325KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 6202KB/12MB, paused 1.715ms,2.742ms total 72.696ms
+07-15 13:11:13.225 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:13.225 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:13.226 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:13.311 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@b2d6480
+07-15 13:11:14.748 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:14.775 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@b2d6480
+07-15 13:11:14.781 I/ImeTracker(17621): com.myvocalist:b6bd0d41: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:14.787 D/InsetsController(17621): show(ime(), fromIme=false)
+07-15 13:11:14.788 D/InsetsController(17621): Setting requestedVisibleTypes to -1 (was -9)
+07-15 13:11:14.805 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:14.806 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:15.002 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:15.005 I/ImeTracker(17621): com.myvocalist:c636f3b8: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:15.008 D/InsetsController(17621): show(ime(), fromIme=false)
+07-15 13:11:15.008 D/InsetsController(17621): Setting requestedVisibleTypes to -1 (was -9)
+07-15 13:11:15.029 D/InsetsController(17621): hide(ime(), fromIme=false)
+07-15 13:11:15.031 D/InsetsController(17621): Setting requestedVisibleTypes to -9 (was -1)
+07-15 13:11:15.038 I/ImeTracker(17621): com.myvocalist:dd2836de: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:15.040 D/InsetsController(17621): show(ime(), fromIme=false)
+07-15 13:11:15.046 D/InsetsController(17621): Setting requestedVisibleTypes to -1 (was -9)
+07-15 13:11:15.773 W/InteractionJankMonitor(17621): Initializing without READ_DEVICE_CONFIG permission. enabled=true, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.myvocalist
+07-15 13:11:15.817 I/ImeTracker(17621): com.myvocalist:b6bd0d41: onCancelled at PHASE_CLIENT_ANIMATION_CANCEL
+07-15 13:11:15.826 I/ImeTracker(17621): system_server:19337a01: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+07-15 13:11:15.862 W/RemoteInputConnectionImpl(17621): requestCursorUpdates on inactive InputConnection
+07-15 13:11:15.869 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@34f7648
+07-15 13:11:15.950 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@34f7648
+07-15 13:11:16.743 I/AssistStructure(17621): Flattened final assist data: 9964 bytes, containing 2 windows, 91 views
+07-15 13:11:17.327 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 1733KB AllocSpace bytes, 3(60KB) LOS objects, 49% free, 6715KB/13MB, paused 1.498ms,2.201ms total 56.957ms
+07-15 13:11:19.473 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 824KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 6659KB/13MB, paused 2.357ms,1.968ms total 30.085ms
+07-15 13:11:19.551 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 538KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 6217KB/12MB, paused 1.599ms,2.330ms total 24.269ms
+07-15 13:11:22.884 D/app_process64(17621): [13:11:22 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory
+07-15 13:11:22.884 D/app_process64(17621): HttpMessageHandler expired after 120000ms for client 'version-check'
+07-15 13:11:32.889 D/app_process64(17621): [13:11:32 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory
+07-15 13:11:32.889 D/app_process64(17621): Starting HttpMessageHandler cleanup cycle with 1 items
+07-15 13:11:32.896 D/app_process64(17621): [13:11:32 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory
+07-15 13:11:32.896 D/app_process64(17621): Ending HttpMessageHandler cleanup cycle after 0.272ms - processed: 0 items - remaining: 1 items
+07-15 13:11:34.586 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 764KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 6293KB/12MB, paused 1.306ms,2.220ms total 44.334ms
+07-15 13:11:34.639 I/ImeTracker(17621): com.myvocalist:7ad401e4: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:34.640 I/ImeTracker(17621): com.myvocalist:7ad401e4: onFailed at PHASE_CLIENT_VIEW_SERVED
+07-15 13:11:34.640 W/InputMethodManager(17621): Ignoring showSoftInput() as view=com.devexpress.editors.DXEditText{79df424 VFED..CL. ........ 33,440-805,506 aid=1073741827} is not served.
+07-15 13:11:34.660 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:34.670 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:34.671 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:34.671 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:34.695 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@b2d6480
+07-15 13:11:34.698 I/ImeTracker(17621): com.myvocalist:18ab72d0: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:34.698 I/ImeTracker(17621): com.myvocalist:18ab72d0: onFailed at PHASE_CLIENT_VIEW_SERVED
+07-15 13:11:34.699 W/InputMethodManager(17621): Ignoring showSoftInput() as view=com.devexpress.editors.DXEditText{79df424 VFED..CL. ........ 33,440-805,506 aid=1073741827} is not served.
+07-15 13:11:34.713 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:34.714 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:34.945 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@34f7648
+07-15 13:11:34.945 E/VRI[MainActivity](17621): Attempting to destroy the window while drawing!
+07-15 13:11:34.945 E/VRI[MainActivity](17621):   window=android.view.ViewRootImpl@49f8195, title=com.myvocalist/crc64eea2bef31ba6694c.MainActivity
+07-15 13:11:34.947 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:34.948 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:34.950 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:34.983 I/ImeTracker(17621): system_server:d383b57f: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+07-15 13:11:34.987 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@4cb83b2
+07-15 13:11:35.018 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@b2d6480
+07-15 13:11:35.030 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:35.031 I/ImeTracker(17621): com.myvocalist:e2f63f02: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:35.032 D/InsetsController(17621): show(ime(), fromIme=false)
+07-15 13:11:35.033 D/InsetsController(17621): Setting requestedVisibleTypes to -1 (was -9)
+07-15 13:11:35.046 I/ImeTracker(17621): com.myvocalist:845085e8: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:35.047 D/InsetsController(17621): show(ime(), fromIme=false)
+07-15 13:11:35.047 I/ImeTracker(17621): com.myvocalist:845085e8: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+07-15 13:11:35.048 D/InsetsController(17621): hide(ime(), fromIme=false)
+07-15 13:11:35.048 D/InsetsController(17621): Setting requestedVisibleTypes to -9 (was -1)
+07-15 13:11:35.105 I/ImeTracker(17621): com.myvocalist:adaa7245: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:35.107 I/ImeTracker(17621): com.myvocalist:adaa7245: onFailed at PHASE_CLIENT_VIEW_SERVED
+07-15 13:11:35.107 W/InputMethodManager(17621): Ignoring showSoftInput() as view=com.devexpress.editors.DXEditText{79df424 VFED..CL. ........ 33,440-805,506 aid=1073741827} is not served.
+07-15 13:11:35.110 I/ImeTracker(17621): com.myvocalist:7bfb5cb9: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:35.110 I/ImeTracker(17621): com.myvocalist:7bfb5cb9: onFailed at PHASE_CLIENT_VIEW_SERVED
+07-15 13:11:35.111 W/InputMethodManager(17621): Ignoring showSoftInput() as view=com.devexpress.editors.DXEditText{79df424 VFED..CL. ........ 33,440-805,506 aid=1073741827} is not served.
+07-15 13:11:35.114 E/ImeBackDispatcher(17621): Ime callback not found. Ignoring unregisterReceivedCallback. callbackId: 40917312
+07-15 13:11:35.125 W/RemoteInputConnectionImpl(17621): requestCursorUpdates on inactive InputConnection
+07-15 13:11:35.126 I/ImeTracker(17621): system_server:f36a2be8: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+07-15 13:11:35.332 E/VRI[MainActivity](17621): Attempting to destroy the window while drawing!
+07-15 13:11:35.332 E/VRI[MainActivity](17621):   window=android.view.ViewRootImpl@9d9055a, title=com.myvocalist/crc64eea2bef31ba6694c.MainActivity
+07-15 13:11:35.334 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:35.335 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:35.336 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:35.345 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@93e4a7e
+07-15 13:11:35.364 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@b2d6480
+07-15 13:11:35.457 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 801KB AllocSpace bytes, 3(60KB) LOS objects, 49% free, 6474KB/12MB, paused 1.543ms,3.618ms total 29.332ms
+07-15 13:11:35.614 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:35.615 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:35.618 W/HWUI    (17621): Image decoding logging dropped!
+07-15 13:11:35.690 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@b2d6480
+07-15 13:11:35.766 D/InsetsController(17621): hide(ime(), fromIme=false)
+07-15 13:11:35.767 D/InsetsController(17621): Setting requestedVisibleTypes to -9 (was -1)
+07-15 13:11:35.769 W/RemoteInputConnectionImpl(17621): requestCursorUpdates on inactive InputConnection
+07-15 13:11:36.065 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 892KB AllocSpace bytes, 3(60KB) LOS objects, 49% free, 6737KB/13MB, paused 1.365ms,2.097ms total 25.199ms
+07-15 13:11:36.107 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@b272b82
+07-15 13:11:39.904 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@b2d6480
+07-15 13:11:39.940 I/ImeTracker(17621): com.myvocalist:79b3f5cb: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:39.940 D/InsetsController(17621): show(ime(), fromIme=false)
+07-15 13:11:39.941 D/InsetsController(17621): Setting requestedVisibleTypes to -1 (was -9)
+07-15 13:11:39.943 I/ImeTracker(17621): com.myvocalist:62ddd6d9: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+07-15 13:11:39.944 D/InsetsController(17621): show(ime(), fromIme=false)
+07-15 13:11:39.944 I/ImeTracker(17621): com.myvocalist:62ddd6d9: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+07-15 13:11:40.535 I/ImeTracker(17621): com.myvocalist:79b3f5cb: onShown
+07-15 13:11:40.601 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618511, 43890256, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.603 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618559, 16518524, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.604 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618581, 27906158, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.605 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618603, 24926292, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.605 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618625, 13099626, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.605 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618647, 11085460, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.606 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618669, 10065894, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.606 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618691, 13344528, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.606 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618713, 9576562, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.607 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618735, 11706296, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.607 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618757, 8347130, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.608 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618779, 9714364, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.608 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 618801, 16629198, CUJ=J<IME_INSETS_SHOW_ANIMATION::0@1@com.myvocalist>
+07-15 13:11:40.620 V/PerfettoTrigger(17621): Triggering /system/bin/trigger_perfetto com.android.telemetry.interaction-jank-monitor-80
+07-15 13:11:42.900 D/app_process64(17621): [13:11:42 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory
+07-15 13:11:42.900 D/app_process64(17621): Starting HttpMessageHandler cleanup cycle with 1 items
+07-15 13:11:42.901 D/app_process64(17621): [13:11:42 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory
+07-15 13:11:42.901 D/app_process64(17621): Ending HttpMessageHandler cleanup cycle after 0.0476ms - processed: 0 items - remaining: 1 items
+07-15 13:11:50.175 I/Choreographer(17621): Skipped 31 frames!  The application may be doing too much work on its main thread.
+07-15 13:11:50.208 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:50.209 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:50.214 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:50.218 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:50.218 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:50.225 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:50.228 D/app_process64(17621): [13:11:50 INF] PeoplePage
+07-15 13:11:50.228 D/app_process64(17621): [PageLoad] PeoplePage appearing=40232ms (ctor→OnAppearing)
+07-15 13:11:50.230 D/app_process64(17621): [13:11:50 INF] PeoplePage
+07-15 13:11:50.230 D/app_process64(17621): [PageLoad] PeoplePage afterInitDispatch=40234ms (ctor→after InitializeAsync fire)
+07-15 13:11:50.266 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=androidx.activity.OnBackPressedDispatcher$Api34Impl$createOnBackAnimationCallback$1@b2d6480
+07-15 13:11:50.268 D/app_process64(17621): [13:11:50 INF] MyVocaList.UI.ViewModels.PersonsViewModel
+07-15 13:11:50.268 D/app_process64(17621): [PageLoad] PersonsViewModel fetch=37ms
+07-15 13:11:50.273 D/app_process64(17621): [13:11:50 INF] MyVocaList.UI.ViewModels.PersonsViewModel
+07-15 13:11:50.273 D/app_process64(17621): [PageLoad] PersonsViewModel initAsync=43ms
+07-15 13:11:50.565 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:50.566 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:50.624 I/com.myvocalist(17621): Explicit concurrent mark compact GC freed 1201KB AllocSpace bytes, 0(0B) LOS objects, 49% free, 6998KB/13MB, paused 1.553ms,2.787ms total 30.908ms
+07-15 13:11:50.636 D/AutofillManager(17621): view not autofillable - not passing ime action check
+07-15 13:11:50.638 D/app_process64(17621): [13:11:50 INF] PeoplePage
+07-15 13:11:50.638 D/app_process64(17621): [PageLoad] PeoplePage navigatedTo=40642ms (ctor→OnNavigatedTo)
+07-15 13:11:50.653 W/WindowOnBackDispatcher(17621): sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@b272b82
+07-15 13:11:50.655 I/ImeTracker(17621): com.myvocalist:236d26a7: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT_CLOSE_CURRENT_SESSION fromUser false
+07-15 13:11:50.658 D/InsetsController(17621): hide(ime(), fromIme=false)
+07-15 13:11:50.658 D/InsetsController(17621): Setting requestedVisibleTypes to -9 (was -1)
+07-15 13:11:50.942 E/ImeBackDispatcher(17621): Ime callback not found. Ignoring unregisterReceivedCallback. callbackId: 40917312
+07-15 13:11:50.943 I/ImeTracker(17621): system_server:f1fe7bab: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+07-15 13:11:50.946 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 619953, 10061804, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.947 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 619968, 8459638, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.948 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 619990, 7857972, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.948 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 620005, 7494706, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.948 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 620020, 7368640, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.949 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 620035, 8136474, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.949 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 620050, 9000808, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.950 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 620065, 7925442, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.950 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 620080, 7392976, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.950 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 620095, 8915310, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.951 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 620110, 9010044, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.952 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 620125, 8475278, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.952 W/FrameTracker(17621): Missed SF frame:JANK_COMPOSER, 620140, 10664912, CUJ=J<IME_INSETS_HIDE_ANIMATION::1@1@com.myvocalist>
+07-15 13:11:50.953 V/PerfettoTrigger(17621): Triggering /system/bin/trigger_perfetto com.android.telemetry.interaction-jank-monitor-81
+07-15 13:11:52.906 D/app_process64(17621): [13:11:52 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory
+07-15 13:11:52.906 D/app_process64(17621): Starting HttpMessageHandler cleanup cycle with 1 items
+07-15 13:11:52.908 D/app_process64(17621): [13:11:52 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory
+07-15 13:11:52.908 D/app_process64(17621): Ending HttpMessageHandler cleanup cycle after 0.0121ms - processed: 0 items - remaining: 1 items
+07-15 13:12:02.907 D/app_process64(17621): [13:12:02 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory
+07-15 13:12:02.907 D/app_process64(17621): Starting HttpMessageHandler cleanup cycle with 1 items
+07-15 13:12:02.908 D/app_process64(17621): [13:12:02 DBG] Microsoft.Extensions.Http.DefaultHttpClientFactory
+07-15 13:12:02.908 D/app_process64(17621): Ending HttpMessageHandler cleanup cycle after 0.0242ms - processed: 0 items - remaining: 1 items
