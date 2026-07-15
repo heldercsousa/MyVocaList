@@ -488,3 +488,99 @@ Registered after Helder's S23 E2E confirmed BUG-043 fixed (row archived). Three 
 
 ### UX analysis — "no match → add new" reachable only via back button (all autocomplete consumers)
 - Today the mobile search view shows back + clear-entry buttons; tapping a result opens the entity's edit form (correct), but when no line is tapped the user must tap **back** to get to "add person". Helder flags this as weird UX — analyse for a better MD3-compliant affordance than back-button-only. Whatever is chosen applies to every autocomplete consumer (shared solution).
+
+---
+## Task: BUG-047 (Major) — root-cause investigation + governed-component fix (autocomplete trigger)
+**Plan:** none (bug fix — commit message is the spec, workflow.md § Bug Fix Pattern; governed-component gates below substitute for spec ceremony)
+**Status:** To Review
+**Started:** 2026-07-15
+**Completed:** 2026-07-15
+**Branch/worktree:** `fix/bug-047-autocomplete-trigger` @ `C:\Users\helde\source\repos\MyVocaList-wt-bug047`
+
+### Investigation summary (superseding the two "malformed field" symptoms as originally registered)
+Evidence re-examined directly (screenshots `bugs/bug-043/bug-personform (2).jpg` / `(3).jpg` + `log-debug-s23.txt`, no exceptions logged — purely a UI-state defect, not a crash):
+
+- **Real symptom, Helder-confirmed:** on Edit Singer load, the Full Name field appears to render a `ListItem`-templated suggestions popup (evidence: "ListItem component not used.png") floating open over the field instead of just showing the loaded name.
+- **Root cause (confirmed via code + Helder's own account, not hypothesis):** `AutocompleteField.xaml.cs` search suggestions ARE already triggered by `HandleTextChanged` (debounced), not by focus as first suspected. When `PersonFormViewModel` hydrates `PersonName` programmatically on Edit-mode load, that assignment reaches the bound `Text` property and fires `HandleTextChanged` exactly as a user keystroke would — searching for the loaded name and populating `Suggestions` with real matches (including the near-duplicate "Helder sousa" seen in evidence). `OnSearchEditFocused` then re-shows that stale, already-populated overlay on focus. **Missing:** a guard distinguishing "text set programmatically by the ViewModel on load" from "text typed by the user" — `AutocompleteMobileField.xaml.cs` already has this guard (`_isUpdatingTextFromSearchEdit`) but `AutocompleteField.xaml.cs`'s desktop path does not.
+- **Helder's product intent (clarifies scope — do not remove autocomplete from Edit mode):** autocomplete's purpose is duplicate-prevention when the Full Name is *changed* — this must keep firing even in Edit mode if the user retypes/corrects the name (dedup-checking should still apply). The fix is a reentrancy guard, not a New/Edit mode split.
+
+### Gate 1 — dedicated task
+This entry. MD3 review: no visual/interaction pattern change — behavior-only guard on when the existing suggestions flow fires; no new component states introduced.
+
+### Gate 2 — consumer map (Explore subagent, read-only, confirmed exhaustive)
+| Consumer | File | Binding | Notes |
+|---|---|---|---|
+| PersonFormPage | `MyVocaList/UI/Pages/People/PersonFormPage.xaml:19-28` | `Text="{Binding PersonName}"` etc. | Standard usage, no template override |
+| SongFormPage | `MyVocaList/UI/Pages/Songs/SongFormPage.xaml:28-38` | `Text="{Binding ArtistSearchText}"` etc. | Standard usage; also has `IsArtistLocked`/`IsEnabled` toggle — unrelated to this fix |
+| AutocompleteMobileField | instantiated internally by `AutocompleteField.xaml.cs:253` | n/a | Not an independent consumer; already has the reentrancy guard this fix ports to the desktop path |
+
+Confirmed: neither consumer relies on "popup on focus" as a browse-all/recent-items feature — focus only ever re-shows previously text-driven results. No functionality is removed by guarding programmatic assignment.
+
+### Gate 3 — per-consumer risk assessment
+| Consumer | Risk | Verification |
+|---|---|---|
+| PersonFormPage | Edit-mode hydration must not fire search/populate Suggestions; genuine user typing (including re-typing to correct a name) must still trigger suggestions | Manual E2E: open Edit Singer → no popup on load; tap into field and type a character → suggestions still appear |
+| SongFormPage | `ArtistSearchText` hydration (if the form ever pre-fills an existing artist name) must not fire search; existing `IsArtistLocked` behavior must be unaffected | Manual E2E: open Edit Song with an artist set → no stray popup; unlock and type → suggestions still appear |
+
+### Gate 4 — approval
+Approved in advance by Helder (2026-07-15, this session) — full authorization to proceed through implementation without an additional approval checkpoint, given Gates 1–3 above.
+
+### Fix (implemented)
+Ported an `_isUpdatingTextFromSearchEdit`-style reentrancy guard from `AutocompleteMobileField.xaml.cs` to `AutocompleteField.xaml.cs`. A new private flag `_isUserDrivenTextChange` is set only while `Text` is being written from a genuine user-input path:
+- Desktop typing: `OnTextChanged` now routes through a new internal method `SetTextFromUserInput(string)` (extracted so tests can simulate user typing without a live `searchEdit`), which sets the flag, assigns `Text`, then clears the flag in a `finally`.
+- Mobile Search View typing: the `_mobileFieldPropertyChangedHandler` wired in `ShowMobileFieldAsync` (fires only for genuine user typing in the mobile field, per `AutocompleteMobileField`'s own pre-existing guard) now also routes through `SetTextFromUserInput`.
+- `TextProperty`'s `propertyChanged` handler now only calls `HandleTextChanged` (the debounced search trigger) when `_isUserDrivenTextChange` is true. A programmatic assignment (ViewModel hydration via the TwoWay binding) still syncs the desktop `searchEdit.Text` display value, but no longer invokes `SearchRequestedCommand` or populates `Suggestions` from a stale search.
+- Added a null-guard on `ctrl.searchEdit` in the same handler (previously would NRE if `Text` were set on the test-only constructor path, which the new unit tests exercise).
+- Added a test-only seam `UseSynchronousDebouncerForTests()` (swaps in a synchronous dispatcher) so tests can deterministically observe `SearchRequestedCommand` invocation without depending on `MainThread.BeginInvokeOnMainThread`, which is unavailable outside a running MAUI app.
+- No New/Edit mode split introduced — same code path handles both; the guard is a pure reentrancy fix.
+
+### Changed files
+- `MyVocaList/UI/Components/AutocompleteField/AutocompleteField.xaml.cs` (modified — guard + test seams)
+- `MyVocaList.Tests/Unit/Components/AutocompleteFieldProgrammaticTextGuardTests.cs` (new — regression tests)
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|---|---|---|---|
+| BUG-047-AC1 | Programmatic `Text` assignment must not invoke `SearchRequestedCommand` | `AutocompleteField.xaml.cs` `TextProperty` propertyChanged guard (`_isUserDrivenTextChange`) | `AutocompleteFieldProgrammaticTextGuardTests.SettingTextProgrammatically_DoesNotInvokeSearchRequestedCommand` |
+| BUG-047-AC2 | Genuine user-originated typing must still invoke `SearchRequestedCommand` (no mode split; Edit-mode retyping still triggers dedup search) | `AutocompleteField.xaml.cs` `SetTextFromUserInput` | `AutocompleteFieldProgrammaticTextGuardTests.SetTextFromUserInput_StillInvokesSearchRequestedCommand` |
+| BUG-047-AC3 | Programmatic assignment still syncs the displayed `Text` value | `AutocompleteField.xaml.cs` `TextProperty` propertyChanged (searchEdit sync, unconditional) | `AutocompleteFieldProgrammaticTextGuardTests.SettingTextProgrammatically_StillUpdatesTextProperty` |
+
+### Verification evidence
+
+**TDD Red→Green (BUG-047-AC1, mandatory per bug-tracking.md — Major severity):** temporarily removed the `if (ctrl._isUserDrivenTextChange)` guard and re-ran the new test class — `SettingTextProgrammatically_DoesNotInvokeSearchRequestedCommand` FAILED as expected (`Assert.Empty() Failure: Collection was not empty, Collection: ["Helder Sousa"]`), confirming the test exercises the real defect. Guard restored — same test PASSED (Green).
+
+**dotnet test** (new test class):
+```
+dotnet test MyVocaList.Tests --filter "FullyQualifiedName~AutocompleteFieldProgrammaticTextGuardTests"
+```
+```
+Aprovado! – Com falha: 0, Aprovado: 3, Ignorado: 0, Total: 3, Duração: 290 ms
+```
+
+**dotnet test** (full suite — confirms no regression in `AutocompleteSuggestionsPropagationTests`, `AutocompleteFieldDebounceTests`, or any `PersonFormViewModel`/`SongFormViewModel` test):
+```
+dotnet test MyVocaList.Tests
+```
+```
+Aprovado! – Com falha: 0, Aprovado: 485, Ignorado: 0, Total: 485, Duração: 3 s
+```
+(485 = 482 pre-existing + 3 new BUG-047 tests.)
+
+**dotnet build:**
+```
+dotnet build MyVocaList.sln
+```
+```
+ok dotnet build: 7 projects, 0 errors, 10 warnings (DevExpress trial-license warnings + one pre-existing CA1416 warning — none introduced by this change)
+```
+
+### Manual E2E steps for Helder (device required — could not verify here)
+1. **PersonFormPage:** People list → tap an existing singer to Edit → confirm the Full Name field shows the loaded name with **no** suggestions popup floating over it. Then tap into the field and type one character → confirm suggestions still appear (dedup-checking still active).
+2. **SongFormPage:** Songs list → tap an existing song with an artist set to Edit → confirm the artist field shows the loaded name with **no** stray popup. Unlock the artist field (if locked) and type a character → confirm suggestions still appear.
+3. **Regression check (BUG-044/045 unaffected):** New Singer → type an existing name → tap a suggestion → Edit form loads correctly, Save lands on the People list with no duplicate — confirm this flow is unchanged by the guard (it should be, since suggestion-tap already goes through `OnSuggestionSelectedCommand`/`OnMobileFieldSuggestionTapped`, not the `Text` propertyChanged guard path).
+
+### Design concern
+None — implemented exactly per Gates 1–4 and Helder's stated intent (reentrancy guard, no mode split).
+
+### BACKLOG registration note
+BUG-047 row (and its BUG-046 sibling / UX-analysis note, still untouched — out of scope for this task) must be updated by the orchestrator on develop's BACKLOG/parent-feature nesting to close out BUG-047 once merged.
