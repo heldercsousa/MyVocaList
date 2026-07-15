@@ -95,6 +95,38 @@ Empty state containers must be **vertically centered**, not top-aligned:
 
 Never use `VerticalOptions="Start"` for empty/error/loading placeholder states.
 
+## Autocomplete — Responsive Full-Screen Expansion (MD3)
+
+> Authoritative encoding of BACKLOG ① *Autocomplete Mobile UX Pattern — Full-Screen Expansion Guideline*
+> (2026-07-15), written from the proven concept: `AutocompleteField` + `AutocompleteMobileField`, first
+> applied on PersonFormPage. Early research input: `Docs/Management/DevCycleCraft/autocomplete-component/md3-autocomplete-mobile-ux-guideline.md`.
+> MD3 currency verified 2026-07-15 against m3.material.io/components/search/guidelines.
+> ⏳ Pending Helder authorship review (CLAUDE.md § Continuous Enhancement — Authorship).
+
+**Rule — responsive by window size class, per the MD3 Search guidelines** (suggestions/results are
+full-screen on compact windows, docked on larger ones):
+
+| Window size class | Autocomplete presentation |
+|-------------------|---------------------------|
+| **Compact** (< 600dp width — phone portrait) | **Full-screen Search View** pushed modally: search input in an AppBar-style header, back affordance, results fill the space between input and keyboard. In this codebase: `AutocompleteMobileField`, triggered by `AutocompleteField` when `IDeviceInfo.Idiom == Phone`. |
+| **Medium/Expanded** (≥ 600dp — tablet, desktop) | **Exposed-dropdown / docked overlay** below the input (results list anchored to the field). In this codebase: `AutocompleteField`'s overlay card, unchanged. |
+
+Why: on a compact window the keyboard consumes ~40–50% of the height; a dropdown anchored mid-page
+leaves room for 1–2 rows — unusable. Full-screen expansion (Google Maps / Gmail / Android Settings
+search) gives the results list the whole area between input and keyboard.
+
+Implementation invariants (proven by BUG-040…045/047 fixes — do not regress):
+
+- **Auto-focus + keyboard raise** on Search View appear must be deferred past the push animation (`Dispatcher.DispatchDelayed`), or Android drops focus (BUG-040).
+- **Reopen guard**: dismissing the Search View refocuses the underlying field — a one-shot suppression (`MobileFieldReopenGuard`) must swallow that refocus or the view reopens/duplicates (BUG-041/042).
+- **Trim-safe wiring**: the dynamically-instantiated mobile view must use event-driven wiring, never reflection `SetBinding` (linker trims it in Release — BUG-043).
+- **Programmatic-text guard**: ViewModel hydration of `Text` (Edit-mode load) must NOT trigger the suggestion search — only user-driven input does (BUG-047).
+- Every dismissal path (in-view back, hardware back, system gesture) must raise `Cancelled` → `BlurredWithoutSelectionCommand` so typed text is preserved and validation runs.
+- **No-match → add-new affordance:** an explicit `Add "<typed text>"` action row (creatable-autocomplete pattern), never back-button-only — analysis + spec input: `Docs/Management/DevCycleCraft/autocomplete-component/ux-no-match-add-new-analysis.md` (implementation pending, governed-component gates apply).
+
+MD3 terminology: **Search bar → Search view** (m3.material.io/components/search); the docked variant
+maps to MD3 *Menus — filtering* / exposed dropdown.
+
 ## Badge / Chip Pattern (event count)
 
 Use `dx:DXBorder` + `Label` for informational badges. Show count, not just a binary flag:
