@@ -1,4 +1,5 @@
 using MyVocaList.Contracts.Models;
+using MyVocaList.UI.Services;
 using MyVocaList.UI.ViewModels;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -7,10 +8,11 @@ public class PersonFormViewModelTests
 {
     private readonly Mock<IPersonService> _serviceMock = new();
     private readonly Mock<ISnackbarComponent> _snackMock = new();
+    private readonly Mock<INavigationService> _navigationMock = new();
     private readonly Mock<ILogger<PersonFormViewModel>> _loggerMock = new();
 
     private PersonFormViewModel CreateSut() =>
-        new(_serviceMock.Object, _snackMock.Object, _loggerMock.Object);
+        new(_serviceMock.Object, _snackMock.Object, _navigationMock.Object, _loggerMock.Object);
 
     // ── Derived properties ────────────────────────────────────────────────
 
