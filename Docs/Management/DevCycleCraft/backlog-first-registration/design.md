@@ -12,7 +12,7 @@ The feature ships in **layers**, smallest blast radius first:
 
 ```
 D (rule strengthening)        ── ships unconditionally  (proposed diff + direct session-ops edit)
-C (review/checklist backstop) ── ships unconditionally  (.claude/commands/sln-review.md lane note)
+C (review/checklist backstop) ── ships unconditionally  (.claude/commands/review.md lane note)
 A (Stop-hook advisory)        ── ships unconditionally  (fail-open, classifier-driven, non-blocking)
 B (PostToolUse interception)  ── ships ONLY if Phase 1 spike passes
 ```
@@ -140,6 +140,22 @@ dir path deterministically resolvable?**
   signal or is **reviewer-driven**; **do NOT** fall back to an mtime baseline.
 - Artifact: `findings.md`. Mirrors the Session-Continuity AC-5 spike.
 
+> **§4 Spike outcome (resolved 2026-06-24 — AC-8 cleared).** Both questions passed; full evidence in
+> `findings.md`. **Path determinism: DETERMINISTIC** — `orphan_check.py` resolves the project memory
+> dir via `git rev-parse --git-common-dir` → strip a trailing `/.git` → mangle `[:/\\]→-` →
+> `~/.claude/projects/<mangled>/memory/`. It must NOT use `cwd` or `$CLAUDE_PROJECT_DIR` (the latter was
+> observed unset; the former yields the worktree-mangled trap path
+> `…--claude-worktrees-backlog-first-registration`). On any `git rev-parse` failure it fails open
+> (`return 0`). **Hook observability: OBSERVABLE** — the existing PostToolUse `Edit|Write` group already
+> logs memory-dir writes to `.claude/changed-files.txt` (verified: 29 logged lines), matched by the
+> substring `projects/<mangled>/memory/` (paths are logged cwd-relative, so substring — not absolute —
+> match is required). **Option B is VIABLE.** Caveat: `changed-files.txt` is **cumulative across
+> sessions** (1540 lines), so it is NOT directly reusable as the session signal — Option B needs a
+> **session-scoped** signal per §2.4/§5 (a dedicated PostToolUse buffer reset at session start, OR a
+> session-start marker bounding a read of `changed-files.txt`); Phase 4 picks the mechanism but it MUST
+> be session-scoped and attach only to existing settings keys (no new top-level key → AC-10/INV-2). No
+> mtime baseline. Posture stays advisory/fail-open: warn only, always exit 0.
+
 ---
 
 ## 5. Files to create / change
@@ -196,7 +212,7 @@ working-tree), not just the current working diff.
 | **2 — Rule/def diffs** | workflow.md proposed-diff (Helder-gated); session-ops.md direct edit + Authorship review | innermost, no code |
 | **3 — Pure logic** | Tester→Builder, Level A full TDD: line-level classifier + precedence + adversarial tests, red→green | — |
 | **4 — Tooling + hook wiring** | `orphan_check.py`; command-type Stop entry; (spike-pass) PostToolUse buffer; manual `.sln` for `.py`; verify expected-keys unchanged | **gated on posture ✅ (ratified)**; SEQUENTIAL — `settings.json` single-writer |
-| **5 — Backstop + close** | apply `.claude/commands/sln-review.md` lane note SEPARATELY from / after the workflow.md `amend:`; verification; session-end ritual; BACKLOG → `✅ Done` only after Helder applies the `amend:` | — |
+| **5 — Backstop + close** | apply `.claude/commands/review.md` lane note SEPARATELY from / after the workflow.md `amend:`; verification; session-end ritual; BACKLOG → `✅ Done` only after Helder applies the `amend:` | — |
 
 **Sequencing:** Phase 3 before Phase 4; Phase 1 gates only Phase 4's B-branch; Phase 2's workflow.md
 change is Helder-gated/independent.

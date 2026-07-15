@@ -3,7 +3,7 @@
 ---
 ## Task: Offload CRUD list DB fetches off the UI thread + app-wide load gate
 **Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/10/2026
 **Completed:** 06/10/2026
 
@@ -35,7 +35,7 @@ First full-solution build in the worktree: PASS (0 errors; pre-existing NU1608/D
 ---
 ## Task: T2 blocker — LoggingConfiguration Release build fix (CS1061)
 **Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/11/2026
 **Completed:** 06/11/2026
 
@@ -81,7 +81,7 @@ Review verdict on `4ee4f56`: REQUEST CHANGES — 1 Major, 3 Minor, 1 Nit. Spec c
 ---
 ## Task: Phase 2 investigation — device-log analysis + fix plan (planning subagent, read-only)
 **Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md (§ Phase 2 — UI freeze persists on device)
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/11/2026
 **Completed:** 06/11/2026
 
@@ -100,7 +100,7 @@ Review verdict on `4ee4f56`: REQUEST CHANGES — 1 Major, 3 Minor, 1 Nit. Spec c
 ---
 ## Task: T1 — Instrument CRUD page lifecycle timings (Serilog) + T4 — Add info_outlined icon asset
 **Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md § Phase 2 T1 + T4
-**Status:** To Review
+**Status:** Reviewed — PASS-WITH-MINOR
 **Started:** 06/11/2026
 **Completed:** 06/11/2026
 
@@ -123,7 +123,7 @@ Full solution build: PASS (0 errors; pre-existing NU1608/DX1001 warnings only).
 ---
 ## Task: T3 — Skip the shimmer initial-load cycle on revisits
 **Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md § Phase 2 T3
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/11/2026
 **Completed:** 06/11/2026
 
@@ -149,7 +149,7 @@ Full solution build: PASS (0 errors; pre-existing NU1608/DX1001 warnings only).
 ---
 ## Task: T5 — Structural reduction spike (lazy BottomSheet / TitleView / DXCollectionView defer)
 **Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md § Phase 2 T5
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/12/2026
 **Completed:** 06/12/2026
 
@@ -178,7 +178,7 @@ All spike code changes were experimental and fully reverted. Final state: clean 
 ---
 ## Task: T2 — Release-configuration baseline build
 **Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md § Phase 2 T2
-**Status:** To Review (APK built; on-device run pending Helder)
+**Status:** Reviewed — PASS (APK built; on-device run pending Helder)
 **Started:** 06/12/2026
 **Completed:** 06/12/2026
 
@@ -197,7 +197,7 @@ All spike code changes were experimental and fully reverted. Final state: clean 
 ---
 ## Task: T2 — Release baseline (device run + Phase 2 close-out)
 **Plan:** Docs/Management/DevCycleCraft/page-load-frozen/plan.md § Phase 2 T2
-**Status:** To Review
+**Status:** Reviewed — PASS
 **Started:** 06/12/2026
 **Completed:** 06/12/2026
 
@@ -212,3 +212,15 @@ All spike code changes were experimental and fully reverted. Final state: clean 
 - Release device run: PASS — all 4 CRUD pages instantaneous on Galaxy S23 Ultra (Android 16); shimmer correctly shown only on first Venues load with real data
 - H3 confirmed: Debug-build JIT/no-AOT is the dominant freeze cause; Release AOT eliminates it entirely
 - Phase 2 exit criteria: all met
+
+---
+
+## Review verdict (2026-06-25, per-task review loop)
+**7 PASS / 1 PASS-WITH-MINOR / 0 BLOCKING.** All 8 reviewed tasks pass.
+- **Offload + load gate — PASS.** `DbLoadGate` is `private static readonly` in the UI layer with `SQLITE-WORKAROUND` revert markers citing constraints-registry.md; `Task.Run` offloads (fetch + `.ToList()` + delete) all marked; single `RunOnUiThread`/one `ReplaceRange` with selection cleared (code-principles UI-thread rule); `HasMoreItems` correctly inside the block. Regression tests use a pumping fake SynchronizationContext + timeout guards.
+- **T2 blocker (LoggingConfiguration CS1061) — PASS.** Invalid `AttachScreenshot`/`ConfigureScope` lambda members replaced with the documented named-parameter `WriteTo.Sentry(...)` overload; Debug path untouched.
+- **T2 Release-config baseline + T2 device-run close-out — PASS.** Build-config/findings tasks; Release APK 0 errors, H3 confirmed (Release instantaneous), exit criteria met. (On-device run of the first baseline remains a Helder manual step, already noted in that entry.)
+- **T3 (skip shimmer on revisit) — PASS.** `_hasLoadedOnce` gates the shimmer toggle; flag set after the ReplaceRange block, cancellation paths excluded; search/refresh/reload call `LoadFirstPageAsync` directly and are unaffected (verified). Regression test asserts no `IsInitialLoading` change on second call.
+- **T5 spike + Phase 2 investigation — PASS.** Findings sound; spike code fully reverted; rollout of A+B correctly deferred to a dedicated task (CrudListView is governed — component-change-governance respected); spike honestly self-reports inconclusive on the 40% threshold pending on-device T1 numbers.
+- **T1 + T4 — PASS-WITH-MINOR.** T4 icon asset PASS (valid Material Symbols glyph matching sibling conventions). T1 instrumentation is additive and `PHASE2-INSTRUMENTATION`-marked. **Minor:** `CrudListView.xaml.cs:192,198` — the `Loaded` handler logs `sw.ElapsedMilliseconds` after `sw.Stop()` at line 192, so the "ctor→Loaded" component-level log reprints the InitializeComponent duration, not the true ctor→Loaded span (the page-level metric in `CrudListPageBase` is correct). Mislabeled metric only; instrumentation is temporary/marked for removal, so low impact.
+- Note: the navigation-icon pattern in `CrudListPageBase.cs:56-80` (commit 0d69add) is outside this review's T1–T5 scope and was not assessed here (it is covered by the artists-songs BUG-001 review).

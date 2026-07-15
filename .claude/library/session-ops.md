@@ -16,6 +16,7 @@ Memory in this workflow is tiered by durability and scope. Each tier has a diffe
 | **Operational** | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md`, task-log | Main agent | Feature lifetime | Read at every session start |
 | **Session** | `ACTIVE-CONSIDERATIONS.md`, `session-handoff.md` | Main agent | Single session or single handoff | Read at session start; update continuously |
 | **Ephemeral** | In-context notes, subagent briefing state | Subagent | Context window only | Not persisted — must be written to a durable tier before session ends |
+| **Device auto-memory** (NOT a registration surface) | `~/.claude/projects/<project>/memory/*` | Harness / agent (per-device) | Per-device, not git-tracked, not team-visible | Optional aid only — never the sole home for any work item |
 
 **Governance rules:**
 1. **Constitutional tier** — never modify without explicit approval from Helder. Any agent that edits `CLAUDE.md` or a rules file without authorization has violated the governance model.
@@ -23,6 +24,7 @@ Memory in this workflow is tiered by durability and scope. Each tier has a diffe
 3. **Operational tier** — main agent maintains. Subagents update task-log status and Changed files entries only.
 4. **Session tier** — main agent creates and maintains. Written to disk before session ends (never left as ephemeral).
 5. **Ephemeral tier** — no item should remain ephemeral if it needs to survive past the current session. If it matters, write it to the Operational or Session tier before stopping.
+6. **Device auto-memory tier — NOT a registration surface.** This per-device tree is personal, not git-tracked, and not team-visible. Recording a work item here does NOT register it: `BACKLOG.md` is the only registration surface. A work item that lives only in device memory is an orphan, and the advisory Stop-hook will warn about it at session end. Use this tier as a private continuation aid only — never as the sole home for any work item.
 
 **Promotion rule:** When a constraint, decision, or discovery is discovered during implementation and needs to be remembered:
 - Temporary reminder → `ACTIVE-CONSIDERATIONS.md` (Session tier)
