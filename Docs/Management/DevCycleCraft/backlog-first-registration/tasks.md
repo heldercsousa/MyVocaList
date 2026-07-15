@@ -24,21 +24,21 @@
   - **Demo:** `grep backlog-first-registration MyVocaList.sln` shows requirements/design/tasks rows
   - **Review lane:** Standard
 
-- [~] **[SPEC] Dispatch spec-reviewer subagent → STOP for Helder approval** [SEQUENTIAL]
+- [x] **[SPEC] Dispatch spec-reviewer subagent → STOP for Helder approval** [SEQUENTIAL]
   - **Produces:** spec-reviewer verdict; BACKLOG `💡 → 📋`
   - **Consumes:** the three spec files
   - **Risk:** Low
   - **Files owned:** none (review only) + `BACKLOG.md` status cell
   - **Demo:** spec-reviewer report returned; HARD STOP at Helder approval gate
-  - **Status:** spec-reviewer returned **PASS WITH MINOR ISSUES** (no blocking). 4 factual/clarity fixes applied; 1 open decision (precedence semantics, AC-13) surfaced to Helder. ⏸️ STOPPED at Helder approval gate.
+  - **Status:** spec-reviewer returned **PASS WITH MINOR ISSUES** (no blocking). 4 factual/clarity fixes applied. **Spec + execution plan APPROVED by Helder 2026-06-24** (plan approval covered spec approval; AC-13 precedence default per `design.md §2.1` confirmed). `plan.md` written; Phases 1–5 unblocked.
 
-> **GATE:** Phases 1–5 do not begin until Helder approves the spec. On approval: BACKLOG `📋 → 🗺️` (plan written) → `🟢` (ready), then writing-plans produces `plan.md`.
+> **GATE:** ✅ CLEARED — Helder approved the spec + plan 2026-06-24. BACKLOG advanced `💡 → 🟡`; `plan.md` written. Phases 1–5 may proceed.
 
 ---
 
 ## Phase 1 — Spike (throwaway only; gates Phase 4 B-branch)
 
-- [ ] **[SPIKE] Device-memory write hook-observability + path-determinism** [SEQUENTIAL]
+- [x] **[SPIKE] Device-memory write hook-observability + path-determinism** [SEQUENTIAL] — PASS 2026-06-24: path DETERMINISTIC (`git rev-parse --git-common-dir`), writes OBSERVABLE (changed-files.txt), Option B VIABLE. See `findings.md`; `design.md §4` updated.
   - Time-box: **60 min — hard stop**
   - Question: Is a device-scoped auto-memory write observable by ANY hook, AND is the device dir path deterministically resolvable? (lead with path-determinism)
   - Success criterion: a hook event fires on a memory write AND the device dir resolves deterministically → Option B viable
@@ -52,7 +52,7 @@
 
 ## Phase 2 — Rule / definition diffs (innermost; no code)
 
-- [ ] **[RULE] workflow.md Rule 1 obligation — proposed diff** [P]
+- [x] **[RULE] workflow.md Rule 1 obligation — proposed diff** [P] — DONE 2026-06-24: `proposed-diffs.md` written & committed (Rule 1 + Rule 2 exit-checklist + hook-table row + amend:/changelog triple). ⏳ Helder gate #2 to apply.
   - **Produces:** `proposed-diffs.md` (workflow.md Rule 1 upgrade + Rule 2 exit-checklist line + hook-table row + `amend:` + changelog triple)
   - **Consumes:** requirements § 4 (work-item def + 4 exempt categories)
   - **Risk:** Medium — deny-listed file; must be proposed diff only, Authorship gate (R1-8)
@@ -60,7 +60,7 @@
   - **Demo:** `proposed-diffs.md` contains the exact diff + the "Helder must read and edit" note
   - **Review lane:** Elevated (rule change)
 
-- [ ] **[RULE] session-ops.md — device memory as 6th tier** [P]
+- [x] **[RULE] session-ops.md — device memory as 6th tier** [P] — DONE 2026-06-24: 6th tier + governance rule #6 added (committed `de23e13`). ⏳ Helder gate #3 Authorship review.
   - **Produces:** edited `session-ops.md` (6th tier "NOT a registration surface")
   - **Consumes:** requirements § 2, AC-3
   - **Risk:** Medium — directly editable but needs Helder Authorship review
@@ -72,7 +72,7 @@
 
 ## Phase 3 — Pure logic (Tester → Builder; Level A full TDD)
 
-- [ ] **[TDD-RED] Tester: write failing classifier + precedence tests** [SEQUENTIAL]
+- [x] **[TDD-RED] Tester: write failing classifier + precedence tests** [SEQUENTIAL] — DONE 2026-06-24 (`20485da`): 17 tests, RED confirmed (ModuleNotFoundError).
   - **Produces:** `.claude/scripts/backlog/tests/test_backlog_lib.py` (red)
   - **Consumes:** AC-4, AC-13, AC-5, AC-6 from requirements
   - **Risk:** Low
@@ -80,7 +80,7 @@
   - **Demo:** tests run and FAIL (no implementation yet)
   - **Review lane:** Standard
 
-- [ ] **[TDD-GREEN] Builder: implement `backlog_lib.py`** [SEQUENTIAL — waits for RED]
+- [x] **[TDD-GREEN] Builder: implement `backlog_lib.py`** [SEQUENTIAL — waits for RED] — DONE 2026-06-24 (`45395ff`): 17/17 GREEN, independently re-verified; tests untouched.
   - **Produces:** `.claude/scripts/backlog/backlog_lib.py` (`classify_memory_change`, `should_remind`)
   - **Consumes:** the failing tests
   - **Risk:** Medium — precedence rule is the subtle part
@@ -92,7 +92,7 @@
 
 ## Phase 4 — Tooling + hook wiring (gated on posture ✅; SEQUENTIAL)
 
-- [ ] **[TDD] `orphan_check.py` + fixture/fail-open tests** [SEQUENTIAL]
+- [x] **[TDD] `orphan_check.py` + fixture/fail-open tests** [SEQUENTIAL] — DONE 2026-06-25 (`4f00675`): 12 new tests; 29 total GREEN; `main()` always exits 0 (verified).
   - **Produces:** `.claude/scripts/backlog/orphan_check.py` + its tests in `tests/`
   - **Consumes:** `backlog_lib.py`, AC-6, AC-12, spike outcome
   - **Risk:** Medium — parameterized path; must be fail-open
@@ -100,7 +100,7 @@
   - **Demo:** fixture-dir tests + fail-open test GREEN; wrapper always exits 0
   - **Review lane:** Standard
 
-- [ ] **[HOOK] Wire `orphan_check.py` into `settings.json` Stop key** [SEQUENTIAL — settings.json single-writer]
+- [x] **[HOOK] Wire `orphan_check.py` into `settings.json` Stop key** [SEQUENTIAL — settings.json single-writer] — DONE 2026-06-25 (`4f00675`): added under existing `Stop`; top-level keys unchanged (`hooks`/`permissions`/`plansDirectory`); JSON valid. Verified.
   - **Produces:** new command-type entry under existing `Stop` key (mirrors `heartbeat.py`)
   - **Consumes:** `orphan_check.py`, AC-10, INV-2
   - **Risk:** High — hotspot file; no new top-level key; expected-keys must stay unchanged
@@ -108,7 +108,7 @@
   - **Demo:** Stop fires `orphan_check.py`; SessionStart expected-keys check still passes
   - **Review lane:** Architectural (hook wiring)
 
-- [ ] **[HOOK] (spike-pass ONLY) PostToolUse memory-write buffer** [SEQUENTIAL — settings.json single-writer]
+- [x] **[HOOK] (spike-pass ONLY) PostToolUse memory-write buffer** [SEQUENTIAL — settings.json single-writer] — [SUPERSEDED 2026-06-25] Spike PASSED, but the simpler **SessionStart-marker** mechanism was chosen instead of a dedicated PostToolUse buffer: `session_marker.py` (under existing `SessionStart`) stamps `.session-marker` (changed-files.txt offset + git HEAD); `orphan_check.py` reads only post-offset memory writes. Reuses the existing `Edit|Write` PostToolUse logging → no new buffer hook needed. No new top-level key.
   - **Produces:** PostToolUse buffer command entry (only if Phase 1 spike PASSED)
   - **Consumes:** spike findings
   - **Risk:** High — hotspot; conditional on spike
@@ -116,7 +116,7 @@
   - **Demo:** memory writes captured to buffer; `[CANCELLED: spike failed]` if Option B is DEAD
   - **Review lane:** Architectural
 
-- [ ] **[SLN] Manual `.sln` registration for `.claude/scripts/backlog/*.py`** [SEQUENTIAL]
+- [x] **[SLN] Manual `.sln` registration for `.claude/scripts/backlog/*.py`** [SEQUENTIAL] — DONE 2026-06-25: `backlog_lib.py`, `orphan_check.py`, `session_marker.py`, `tests/test_backlog_lib.py`, `tests/test_orphan_check.py` all registered in folder `{FA1234BC-…0030}`. Verified.
   - **Produces:** `.sln` entries for all backlog `.py` files
   - **Consumes:** all Phase 3/4 `.py` files
   - **Risk:** Low — but the sync hook does NOT cover `.py` (AC-9)
@@ -128,15 +128,15 @@
 
 ## Phase 5 — Backstop + close
 
-- [ ] **[BACKSTOP] review.md lane note** [SEQUENTIAL — applied AFTER the workflow.md `amend:`]
-  - **Produces:** `.claude/commands/sln-review.md` backstop note (applied separately so the two halves don't diverge in git, R2)
+- [ ] **[BACKSTOP] review.md lane note** [SEQUENTIAL — applied AFTER the workflow.md `amend:`] — ⏳ **DEFERRED**: gated on Helder gate #2 (apply `workflow.md amend:`). Will be a direct edit to `.claude/commands/review.md` once the rule half exists, so the two halves don't diverge.
+  - **Produces:** `.claude/commands/review.md` backstop note (applied separately so the two halves don't diverge in git, R2)
   - **Consumes:** workflow.md `amend:` (Helder-applied)
   - **Risk:** Medium — ordering matters
-  - **Files owned:** `.claude/commands/sln-review.md` — this is a **command**, NOT under the `rules/*.md` deny glob, so it is a **direct edit** (not a proposed diff)
+  - **Files owned:** `.claude/commands/review.md` — this is a **command**, NOT under the `rules/*.md` deny glob, so it is a **direct edit** (not a proposed diff)
   - **Demo:** review checklist references the BACKLOG orphan backstop
   - **Review lane:** Elevated
 
-- [ ] **[CLOSE] Verification pass + session-end ritual + BACKLOG `✅ Done`** [SEQUENTIAL]
+- [~] **[CLOSE] Verification pass + session-end ritual + BACKLOG `✅ Done`** [SEQUENTIAL] — 2026-06-25: verification + AC-1..AC-13 traceability matrix complete in `task-log.md`; 29/29 tests green; `.sln` verified. BACKLOG `✅ Done` flip **HELD** per POST-2 until Helder applies gate #2.
   - **Produces:** final verification evidence; BACKLOG `🟢/🟡 → ✅` (ONLY after Helder applies the `amend:`)
   - **Consumes:** all prior phases
   - **Risk:** Low
