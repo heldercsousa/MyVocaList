@@ -8,7 +8,7 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | complete — verifier PASS | develop (tooling scripts + docs only, no app code) | — | to review | b11c10b | Helder: run two-terminal live demo; decide worktree-triage deletions (task-log § Task 15) |
+| SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | complete — verifier PASS; cleanup executed (30→8 worktrees, form-ux merged `f00543a`, 478/478) | develop (tooling scripts + docs only, no app code) | — | to review | 68e1852 | Helder: run two-terminal live demo (last open gate); optionally direct the 4 leftover agent worktrees |
 
 ## Completed (last 20)
 
