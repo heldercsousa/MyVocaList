@@ -52,6 +52,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C
 	ProjectSection(SolutionItems) = preProject
 		Docs\DevEnv\claude-code-task-create-rules.md = Docs\DevEnv\claude-code-task-create-rules.md
 		Docs\DevEnv\devenv-setup.md = Docs\DevEnv\devenv-setup.md
+		Docs\DevEnv\parked\EventServiceTests.cs.txt = Docs\DevEnv\parked\EventServiceTests.cs.txt
+		Docs\DevEnv\parked\QueueServiceTests.cs.txt = Docs\DevEnv\parked\QueueServiceTests.cs.txt
 		Docs\DevEnv\SETUP_QUICKSTART.md = Docs\DevEnv\SETUP_QUICKSTART.md
 	EndProjectSection
 EndProject
