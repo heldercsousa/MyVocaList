@@ -299,3 +299,41 @@ After Phase 1 release-build verification, test on emulator/device:
 - [x] AC-5 (Selection invokes SuggestionSelectedCommand + pops modal): modal now pops cleanly before command executes
 - [x] AC-8 (No DevExpress AutoCompleteEdit): unchanged
 - [x] BUG-043 Phase 2 (tap-return race): race condition eliminated by ensuring modal dismissal completes before selection navigation
+
+---
+## Task: BUG-043 root cause — suggestions never propagate to the field (binding severed by self-write)
+**Plan:** dispatched briefing (on-device probe log: `debug/bug-043-probes` worktree, `bugs/bug-043/debug-log-vs-s23-20260715.txt`)
+**Status:** To Review
+**Started:** 2026-07-15
+**Completed:** 2026-07-15
+**Branch:** `fix/bug-043-suggestions-propagation` (worktree, based on develop — ancestor verified)
+
+### Root cause (confirmed in code)
+`AutocompleteField.xaml.cs` `HandleTextChanged` executed `Suggestions = null;` on the gate short-circuit — a manual `SetValue` on the control's own `SuggestionsProperty`, which is the *target* of the page's OneWay `Suggestions="{Binding Suggestions}"` (PersonFormPage.xaml:26, SongFormPage.xaml:32). In MAUI, a manual SetValue on a OneWay-bound BindableProperty removes the binding, so after the first sub-threshold keystroke every ViewModel result assignment (`PersonFormViewModel.cs:278`, new list reference each time — the VM side is correct) never reached the control. This also explains the probe asymmetry: the count=-1 callbacks were the control's own local null write (the very write that severed the binding), while count=1 VM assignments never arrived. The `Text` property kept working because its binding is TwoWay (survives manual SetValue) — consistent with search still executing per keystroke.
+
+### Fix
+Removed the BP self-write. The short-circuit now calls `ClearSuggestionsPresentation()` — clears `suggestionsView.ItemsSource`, hides `overlayCard`, and nulls the open mobile Search View's suggestions via a new `_activeMobileField` reference (set on `ShowMobileFieldAsync`, cleared in both teardown handlers). The bound `Suggestions` property is never written by the control, so the page binding stays intact. Test seam added: `internal AutocompleteField(bool skipXamlInitForTests)` + `HandleTextChanged` made internal (InternalsVisibleTo already present); null-guards on named XAML children for that path only.
+
+### Regression tests (Critical → test-first, Red→Green)
+`MyVocaList.Tests/Unit/Components/AutocompleteSuggestionsPropagationTests.cs`
+- `HandleTextChanged_SubThresholdShortCircuit_DoesNotDetachSuggestionsBinding`
+- `HandleTextChanged_RepeatedShortCircuits_BindingStillPropagatesResults`
+- **Red (pre-fix):** both FAIL — `Assert.NotNull() Failure: Value is null` / `ArgumentNullException 'collection'` — field.Suggestions stayed null after the VM assigned a fresh result list (exact on-device symptom).
+- **Green (post-fix):** both PASS. Full suite: **480/480 passed** (478 existing + 2 new). Build net10.0-android: **0 errors** (DevExpress license warnings only).
+
+### AC / regression matrix
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| BUG-043 (propagation) | VM suggestion results must reach the field after any short-circuit clear | `AutocompleteField.xaml.cs` — `ClearSuggestionsPresentation()` replaces BP self-write in `HandleTextChanged` | `HandleTextChanged_SubThresholdShortCircuit_DoesNotDetachSuggestionsBinding` |
+| BUG-043 (repeated keystrokes) | Binding survives repeated sub-threshold inputs ("j" → "" → "j" → results) | same | `HandleTextChanged_RepeatedShortCircuits_BindingStillPropagatesResults` |
+
+### Changed files:
+- `MyVocaList/UI/Components/AutocompleteField/AutocompleteField.xaml.cs`
+- `MyVocaList.Tests/Unit/Components/AutocompleteSuggestionsPropagationTests.cs`
+- `Docs/Management/DevCycleCraft/autocomplete-component/task-log.md`
+
+### Notes
+- **Tap-return sub-issue: blocked on this fix.** The probe log never reached the suggestion-tap handler (no suggestions were rendered to tap), so the tap-return path could not be exercised. Re-verify on device with probes after this fix lands; no action taken here.
+- Fix is compatible with the `debug/bug-043-probes` branch (probes untouched; OnSuggestionsChanged signature unchanged).
+- E2E emulator: not run in this session — on-device re-verification with the probes branch is the planned verification step (status per briefing remains To Review with this note).
+- Post-edit re-read done for `AutocompleteField.xaml.cs` (lines 140–240 verified) and test file.
