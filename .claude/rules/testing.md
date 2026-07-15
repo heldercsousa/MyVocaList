@@ -50,7 +50,12 @@ During Green, the Builder edits **production code only**. Never edit a test to p
 
 | Need | Source |
 |------|--------|
-| Test project structure (csproj, GlobalUsings, dir layout), full test-type code patterns (Service/ViewModel/Repository, `TestDbContextFactory`), naming, what-to-test, Tester/Builder split, full TDD workflow, running-tests commands, quality-audit checklist, anti-pattern table | `.claude/library/testing-reference.md` |
+| Test project structure (csproj, GlobalUsings, dir layout) | `.claude/library/testing-structure.md` |
+| Full test-type code patterns (Service/ViewModel/Repository, `TestDbContextFactory`) | `.claude/library/testing-test-types.md` |
+| Naming conventions, what-to-test per layer | `.claude/library/testing-conventions.md` |
+| Tester/Builder split, full TDD workflow, running-tests commands | `.claude/library/testing-tdd-roles.md` |
+| Quality-audit checklist, Builder-must-not-modify protocol, anti-pattern table | `.claude/library/testing-quality-audit.md` |
+| Family index (read ONLY the section file needed) | `.claude/library/testing-reference.md` |
 | Mutation testing (Stryker.NET) — periodic quality gate | `.claude/library/mutation-testing-stryker.md` |
 | Property-based testing (FsCheck) — invariants across input space | `.claude/library/property-based-testing-fscheck.md` |
 | Generic xUnit/Moq/ViewModel test setup | `maui-unit-testing` skill (project) |

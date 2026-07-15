@@ -25,7 +25,7 @@ Project-specific coding rules for the MyVocaList .NET MAUI app. Read the relevan
 | Changing a shared custom component (4-gate governance, consumer map, no-bundling) | `.claude/library/component-safety-gate.md` |
 | Tracking a bug (BUG-NNN scheme, severity, regression-test requirement, task-log rules) | `.claude/library/bug-tracking-reference.md` |
 | Discovered constraints (DevExpress/UI, .NET MAUI, EF Core/SQLite, .sln registration) | `.claude/library/constraints-reference.md` |
-| Writing tests — structure, Service/ViewModel/Repository patterns, naming, Tester/Builder, anti-patterns | `.claude/library/testing-reference.md` (rule: `.claude/rules/testing.md`) |
+| Writing tests — structure, Service/ViewModel/Repository patterns, naming, Tester/Builder, anti-patterns | `.claude/library/testing-reference.md` (index) → `testing-structure.md` · `testing-test-types.md` · `testing-conventions.md` · `testing-tdd-roles.md` · `testing-quality-audit.md` (rule: `.claude/rules/testing.md`) |
 | Mutation testing (Stryker) / property-based testing (FsCheck) | `.claude/library/mutation-testing-stryker.md` · `.claude/library/property-based-testing-fscheck.md` |
 | Activating/adding/budgeting MCP servers (Security Stance, context budget, Playwright, response discipline) | `.claude/library/mcp-governance.md` |
 | Governance narrative (SDD rationale, Continuous Enhancement procedure, Constitutional Audit, Tool Selection) | `.claude/library/project-governance-reference.md` |
