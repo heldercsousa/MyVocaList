@@ -4,7 +4,7 @@
 
 | Need the full detail of | Source |
 |-------------------------|--------|
-| Any rule's decision tables, examples, formats, phase templates, checklists | `.claude/library/workflow-reference.md § Rule N` |
+| Any rule's decision tables, examples, formats, phase templates, checklists | `.claude/library/workflow-rule-N.md` (per-rule section files; index: `workflow-reference.md`) |
 | Orchestrator protocols (pre-dispatch, briefing, waves, worktrees, review lanes) | `.claude/agents/orchestrator.md` |
 | Implementor protocols (context gate, E2E gate, escalation, return protocol) | `.claude/agents/implementor.md` |
 | Spec anatomy, AC format, rebuild test | `.claude/library/spec-writing-guide.md` |
@@ -23,7 +23,7 @@ Hooks in `.claude/settings.json` enforce specific rules automatically. Self-enfo
 | `PostToolUse` (Services/*.cs) | Edit to a Services file | testing.md — TDD reminder |
 | `SessionStart` | New session | Hook health verification |
 
-**Session-start hook health check:** confirm `.claude/settings.json` is valid JSON and the `Stop` hook references the correct script; fix any misconfigured hook before dispatching a subagent. Self-enforced rules (no hook — apply consciously) and full notes: `workflow-reference.md § Hook Enforcement Notes`.
+**Session-start hook health check:** confirm `.claude/settings.json` is valid JSON and the `Stop` hook references the correct script; fix any misconfigured hook before dispatching a subagent. Self-enforced rules (no hook — apply consciously) and full notes: `workflow-hooks-invariant.md`.
 
 ---
 
@@ -50,15 +50,15 @@ Applies to all agents (main and sub) at all times.
 - **Constitution check (2a):** verify the feature violates no CLAUDE.md Non-Negotiable before writing the spec.
 - **BACKLOG.md is the source of truth for feature sequencing** — the main agent updates status at each milestone (💡→📋→🗺️→🟢→🟡→✅). Untracked work discovered mid-session gets a brief BACKLOG row *before* proceeding.
 
-Full spec-decision table, new-feature workflow (steps 0–5), proactive-triage format, spec quality gate + four-gate, SDD decision table, discovery mode, brownfield rule, J-Curve: `workflow-reference.md § Rule 1`.
+Full spec-decision table, new-feature workflow (steps 0–5), proactive-triage format, spec quality gate + four-gate, SDD decision table, discovery mode, brownfield rule, J-Curve: `workflow-rule-1.md`.
 
 ### Spec quality four-gate review
 
-Before a spec is ready for implementation it must pass all four gates — **Correctness** (matches what Helder described), **Completeness** (every story has a criterion; error paths covered), **Consistency** (requirements and design agree), **Testability** (a test can be written from every AC without asking questions). Determinism / prohibited vague terms: `code-style-reference.md`. Full checklist: `workflow-reference.md § Spec quality gate`.
+Before a spec is ready for implementation it must pass all four gates — **Correctness** (matches what Helder described), **Completeness** (every story has a criterion; error paths covered), **Consistency** (requirements and design agree), **Testability** (a test can be written from every AC without asking questions). Determinism / prohibited vague terms: `code-style-reference.md`. Full checklist: `workflow-rule-1.md § Spec quality gate`.
 
 ### Spike validation task pattern
 
-A **spike** is a time-boxed exploration producing a `findings.md` artifact, not production code. Rules: spike code is throwaway (no production files edited); the time-box is a hard stop; success → proceed to spec; failure → escalate to Helder (do not unilaterally pick an alternative); inconclusive → document with a recommendation. `[SPIKE]` task format + discovery mode: `workflow-reference.md § Spike validation task pattern`.
+A **spike** is a time-boxed exploration producing a `findings.md` artifact, not production code. Rules: spike code is throwaway (no production files edited); the time-box is a hard stop; success → proceed to spec; failure → escalate to Helder (do not unilaterally pick an alternative); inconclusive → document with a recommendation. `[SPIKE]` task format + discovery mode: `workflow-rule-1.md § Spike validation task pattern`.
 
 ---
 
@@ -76,11 +76,11 @@ A **spike** is a time-boxed exploration producing a `findings.md` artifact, not 
 - **Task sizing:** if a briefing lists > 5 files or > 2 hours of work, it is a sizing violation — split before dispatching.
 - **Exit checklist (every subagent, in order):** verification-before-completion → build (0 errors, 3-attempt cap) → test (if `.cs` changed) → post-edit re-read → `.sln` registration → living-spec check → task-log → commit → push. Stopping before all steps = task not finished.
 
-Task sizing table, wave rules, exit checklist detail, post-wave verification: `workflow-reference.md § Rule 2`. Orchestrator/implementor protocols: `orchestrator.md` / `implementor.md`.
+Task sizing table, wave rules, exit checklist detail, post-wave verification: `workflow-rule-2.md`. Orchestrator/implementor protocols: `orchestrator.md` / `implementor.md`.
 
 ### Sequential-only file registry
 
-These files must never have concurrent writers (parallel edits produce conflicts/duplicate errors): `MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, any `*Migration.cs`, any `GlobalUsings.cs`, `Directory.Build.props`, any spec `tasks.md`. Rationale per file + how to add entries: `workflow-reference.md § Sequential-only file registry`.
+These files must never have concurrent writers (parallel edits produce conflicts/duplicate errors): `MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, any `*Migration.cs`, any `GlobalUsings.cs`, `Directory.Build.props`, any spec `tasks.md`. Rationale per file + how to add entries: `workflow-rule-2.md § Sequential-only file registry`.
 
 ---
 
@@ -92,7 +92,7 @@ These files must never have concurrent writers (parallel edits produce conflicts
 - **Completion gates before committing:** demo statement verifiable · new service/repo/VM/page registered in `MauiProgram.cs` · ACs satisfied with evidence in the task-log matrix · **`.sln` registration for every file created/moved/deleted in `Docs/` or `.claude/` — BLOCKING**.
 - **Session-End Spec Update Ritual:** review every spec file touched; if it no longer describes what was built, add a `> **Spec updated [YYYY-MM-DD]:**` note; check off completed tasks / mark `[CANCELLED: reason]`; commit spec updates in the final commit.
 
-`/sln-review` is automatic via fresh subagents under `subagent-driven-development`; when executing manually, it is the trigger. Full gates + ritual triggers: `workflow-reference.md § Rule 3`.
+`/sln-review` is automatic via fresh subagents under `subagent-driven-development`; when executing manually, it is the trigger. Full gates + ritual triggers: `workflow-rule-3.md`.
 
 ### Bug Fix Pattern — commit message as spec
 
@@ -124,7 +124,7 @@ Check off each task in the feature's `tasks.md` as it completes. **Sequential co
 - **DRY Onion ordering `[HARD RULE]`:** Domain → Infra → Services → UI. Do not dispatch a Wave N+1 task until all Wave N tasks producing types it consumes are committed.
 - **Lease-aware `[~]` reclaim (never-miss):** a `[~]` claim is a lease, not a lock. Classify via `python .claude/scripts/lease/reclaim.py <my_session_id> <owner_session_id>`: `fresh` → leave it, pick the next `[ ]`; `reclaimed` → you own it, `resume.py <owner_session_id>` and continue (leave marker `[~]`); `lost` → pick the next `[ ]`. Only reset `[~]`→`[ ]` when the claim is **stale** AND you choose not to reclaim. Never reset a `fresh` claim.
 
-Task-atomization checklist, task-entry format (`Produces`/`Consumes`/`Risk`/`Files owned`/`Demo`/`Review lane`), DRY Onion phase example: `workflow-reference.md § Rule 4`.
+Task-atomization checklist, task-entry format (`Produces`/`Consumes`/`Risk`/`Files owned`/`Demo`/`Review lane`), DRY Onion phase example: `workflow-rule-4.md`.
 
 ---
 
@@ -136,7 +136,7 @@ Agents record task outcomes in the feature's `task-log.md` (plan in `plan.md`; u
 - **AC traceability matrix** (AC ID | Criterion | Implementation location | Test method) required for user-facing behavior. Missing rows = missing tests = incomplete feature.
 - **Checkpoint Ping `[HARD RULE — added 2026-07-14]`:** every agent doing multi-step work maintains a live `### Checkpoint` block in the task-log entry — pinged **before** starting each step (write-ahead), after every build/test run, at each phase transition, **and on a heartbeat loop regardless of events — at least every ~10 minutes of continuous work (~15 tool operations)**. The block includes a **Context manifest**: the exact files (≤ 8, with one-line why) a fresh agent must read to resume — so an interruption (connection loss, session limit) loses at most one step and resuming never requires Glob. Format + resume protocol: `session-ops.md § Checkpoint Ping & Context Manifest`.
 
-Full task-log entry template, status vocabulary (`in progress`/`Check build`/`To Review`/`Build failure`/`blocked: spec gap`/…), matrix example: `workflow-reference.md § Rule 5`.
+Full task-log entry template, status vocabulary (`in progress`/`Check build`/`To Review`/`Build failure`/`blocked: spec gap`/…), matrix example: `workflow-rule-5.md`.
 
 ---
 
@@ -173,7 +173,7 @@ Before dispatching any wave that modifies files, confirm no other agent/branch i
 - `git log --oneline -10` · `git status` · scan `tasks.md` for stray `[~]` · run the **lease liveness check** — classify each `[~]` with no known running agent via `reclaim.py` (`lease_lib.classify`) **before** assuming abandonment. A `fresh` result means another live session owns it — do **not** reset to `[ ]`.
 - If a remote review flow is active: `gh pr list` — any open PR touching a wave's `Files owned` = collision risk.
 
-Collision-type response table: `workflow-reference.md § Rule 8`.
+Collision-type response table: `workflow-rules-6-7-8.md § Rule 8`.
 
 ---
 
