@@ -197,7 +197,7 @@ public class ArtistResolutionServiceTests
     {
         var createdArtist = new Artist { Id = 99, Name = "New Artist" };
         _artistServiceMock
-            .Setup(s => s.CreateArtistAsync("New Artist", It.IsAny<CancellationToken>()))
+            .Setup(s => s.CreateArtistAsync("New Artist", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, "Created", createdArtist));
         _repoMock
             .Setup(r => r.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()))

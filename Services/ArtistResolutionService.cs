@@ -120,7 +120,7 @@ public class ArtistResolutionService : IArtistResolutionService
 
             case ResolutionChoice.CreateNew:
             {
-                var (success, message, created) = await _artistService.CreateArtistAsync(candidate.Name, ct);
+                var (success, message, created) = await _artistService.CreateArtistAsync(candidate.Name, ct: ct);
                 if (!success || created is null)
                     return (false, message, 0);
 

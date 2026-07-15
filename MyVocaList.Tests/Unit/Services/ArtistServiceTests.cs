@@ -129,6 +129,46 @@ public class ArtistServiceTests
         _artistRepoMock.Verify(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    [Fact]
+    // [AC] REQ-FORMUX-07: creating an artist with a remote suggestion pick persists ExternalId/ExternalProvider.
+    public async Task CreateArtistAsync_WithExternalIdentity_PersistsBothFields()
+    {
+        _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(false);
+        Artist captured = null;
+        _artistRepoMock.Setup(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()))
+                       .Callback<Artist, CancellationToken>((a, _) => captured = a)
+                       .Returns(Task.CompletedTask);
+        var sut = CreateSut();
+
+        var (success, _, _) = await sut.CreateArtistAsync("Black Sabbath", "mbid-123", "MusicBrainz");
+
+        Assert.True(success);
+        Assert.NotNull(captured);
+        Assert.Equal("mbid-123", captured.ExternalId);
+        Assert.Equal("MusicBrainz", captured.ExternalProvider);
+    }
+
+    [Fact]
+    // [AC] REQ-FORMUX-08: manual creation with no external identity leaves both fields null.
+    public async Task CreateArtistAsync_ManualNoIdentity_FieldsStayNull()
+    {
+        _artistRepoMock.Setup(r => r.ExistsByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(false);
+        Artist captured = null;
+        _artistRepoMock.Setup(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()))
+                       .Callback<Artist, CancellationToken>((a, _) => captured = a)
+                       .Returns(Task.CompletedTask);
+        var sut = CreateSut();
+
+        var (success, _, _) = await sut.CreateArtistAsync("Manual Artist");
+
+        Assert.True(success);
+        Assert.NotNull(captured);
+        Assert.Null(captured.ExternalId);
+        Assert.Null(captured.ExternalProvider);
+    }
+
     // ── UpdateArtistAsync ─────────────────────────────────────────────────
 
     [Fact]
