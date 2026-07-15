@@ -291,7 +291,7 @@ private void OnNameUnfocused(object sender, FocusEventArgs e) => ViewModel.Valid
   date type and the value is re-formatted on display. The user manipulates only the day/month/year numbers.
 - **Full dates:** use `dxe:DateEdit` (picker + `DisplayFormat`, e.g. `{0:MM/dd/yyyy}`; the picker cannot
   produce an out-of-range date, giving built-in validity and satisfying "reuse a specialized validator"), or a
-  masked `dxe:TextEdit` (`Mask="00/00/0000"`) for keyboard-first entry. See `devexpress-patterns.md § DateEdit`.
+  masked `dxe:TextEdit` (`Mask="00/00/0000"`) for keyboard-first entry. See `dx-editors.md § DateEdit`.
 - **Locale-driven format:** English `MM/dd/yyyy`, pt-BR `dd/MM/yyyy` (future), Japanese TBD. Do **not**
   hard-code a single date format. Localization is currently disabled (`useLocalization:false`, no `.resx`) —
   locale-aware masks are future work; this standard states the intent. See `theme-locale.md § Locale`.
