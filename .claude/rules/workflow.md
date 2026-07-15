@@ -48,7 +48,7 @@ Applies to all agents (main and sub) at all times.
 - **Spec structure:** `requirements.md` (stories, ACs, validation, out-of-scope) · `design.md` (architecture, interfaces, flows, decisions) · `tasks.md` (ordered checkboxes).
 - **Key thresholds:** ≥ 2 layers OR > 2 hours → full ceremony (all three spec files). Single file, < 1 hour → light. Typo / cosmetic / bug fix → no spec, commit message is the artifact. **When in doubt, write a spec.**
 - **Constitution check (2a):** verify the feature violates no CLAUDE.md Non-Negotiable before writing the spec.
-- **BACKLOG.md is the source of truth for feature sequencing** — the main agent updates status at each milestone (💡→📋→🗺️→🟢→🟡→✅). Untracked work discovered mid-session gets a brief BACKLOG row *before* proceeding.
+- **BACKLOG.md is the source of truth for feature sequencing** — the main agent updates status at each milestone (💡→📋→🗺️→🟢→🟡→✅). Untracked work discovered mid-session gets a brief BACKLOG row *before* proceeding. BACKLOG rows follow the PO-level template defined in BACKLOG.md's own header (Goal + Gate + one Pointer, ≤3 sentences); technical detail goes to the feature docs, never into the row.
 
 Full spec-decision table, new-feature workflow (steps 0–5), proactive-triage format, spec quality gate + four-gate, SDD decision table, discovery mode, brownfield rule, J-Curve: `workflow-rule-1.md`.
 
