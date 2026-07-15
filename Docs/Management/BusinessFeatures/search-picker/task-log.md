@@ -98,3 +98,57 @@ Build: PASS — 0 errors, 0 warnings beyond pre-existing NU1608/DX1001
 **Phase 2 / Session (Phases 2–5) — PASS-WITH-MINOR.** **MD3 Research Spike — PASS** (already "Early task done"; findings.md sound — 3 documented search entry points, standalone-page conclusion drives AC-TRIGGER-01/02/03; spike produced findings only). No blocking issues.
 All three picker ViewModels follow the design loading discipline exactly (`IsLoading` before await — AC-LOAD-01; CTS cancel + `Results.Clear()` — AC-LOAD-02; `finally` reset — AC-LOAD-03; error path — AC-LOAD-04), use injected `IMessenger`/`INavigationService` (test-isolated), are `sealed`, English-only, no native dialogs, no business logic. Tests carry `[AC]` tags, `TaskCompletionSource` (no `Thread.Sleep`), AAA.
 **Minor (all stem from one undocumented addition):** `SongPickerViewModel.cs:101-107` adds `LaunchYouTubeSearchAsync` that (a) is **not in design.md** (§SongPickerPage specifies only `SongPickedMessage` + pop — SDD-invariant gap), (b) calls `Shell.Current.GoToAsync` directly, bypassing the `INavigationService` abstraction every other command uses (untestable; no test exists), and (c) the class injects `ISnackbarComponent` (`:13,45,52`) that is never used (dead dependency). Either document the song→YouTube-search-with-context flow + route it through `INavigationService` + add a test, or remove both the command and the unused snackbar dependency before merge.
+
+
+## Moved from BACKLOG.md (2026-07-15) — Search Picker
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06 | **Search Picker** | ✅ Done | All phases complete. 3 picker pages (Artist, Song, YouTube), tests, DI/routes, form wiring, coding guidelines. Spec: `Docs/Management/BusinessFeatures/search-picker/` · Plan: `search-picker/plan.md` · Tasks: `search-picker/tasks.md` |
+
+
+## Moved from BACKLOG.md (2026-07-15) — ArtistPickerPage
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06 | ↳ ArtistPickerPage | ✅ Done | Implemented with search command, results list, empty state, and messaging. Brief: `search-picker/task-3a-artist-picker-page.md` |
+
+
+## Moved from BACKLOG.md (2026-07-15) — SongPickerPage
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06 | ↳ SongPickerPage | ✅ Done | Implemented with two-line list items (title + artist). Brief: `search-picker/task-3b-song-picker-page.md` |
+
+
+## Moved from BACKLOG.md (2026-07-15) — YouTubeSearchPage
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06 | ↳ YouTubeSearchPage |  ✅ Done | Implemented with thumbnail leading image and duration display. Brief: `search-picker/task-3c-youtube-search-page.md` |
+
+
+## Moved from BACKLOG.md (2026-07-15) — YouTube API Key — Automated Setup via AI Agent
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06 | ↳ ↳ YouTube API Key — Automated Setup via AI Agent | 💡 Pending | Research: can an AI agent (e.g. Claude Code browser extension, Anthropic agents) automate Google Cloud project creation + YouTube API key generation + injection into app Settings on behalf of the user? Currently a manual 15-min developer-only flow that kills adoption. Not blocking current work — register as future research item. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — Update search picker coding guidelines
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06 | ↳ Update search picker coding guidelines | ✅ Done | `.claude/library/search-picker-pattern.md` created. Covers picker vs inline decision, 3-layer file structure, ViewModel contract, XAML pattern, caller-side messaging, DI, routes, and test patterns. |

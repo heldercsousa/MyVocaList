@@ -224,3 +224,12 @@ All spike code changes were experimental and fully reverted. Final state: clean 
 - **T5 spike + Phase 2 investigation — PASS.** Findings sound; spike code fully reverted; rollout of A+B correctly deferred to a dedicated task (CrudListView is governed — component-change-governance respected); spike honestly self-reports inconclusive on the 40% threshold pending on-device T1 numbers.
 - **T1 + T4 — PASS-WITH-MINOR.** T4 icon asset PASS (valid Material Symbols glyph matching sibling conventions). T1 instrumentation is additive and `PHASE2-INSTRUMENTATION`-marked. **Minor:** `CrudListView.xaml.cs:192,198` — the `Loaded` handler logs `sw.ElapsedMilliseconds` after `sw.Stop()` at line 192, so the "ctor→Loaded" component-level log reprints the InitializeComponent duration, not the true ctor→Loaded span (the page-level metric in `CrudListPageBase` is correct). Mislabeled metric only; instrumentation is temporary/marked for removal, so low impact.
 - Note: the navigation-icon pattern in `CrudListPageBase.cs:56-80` (commit 0d69add) is outside this review's T1–T5 scope and was not assessed here (it is covered by the artists-songs BUG-001 review).
+
+
+## Moved from BACKLOG.md (2026-07-15) — Page load frozen
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06 | **Page load frozen** | ✅ Done | Root cause found (2026-06-10): Microsoft.Data.Sqlite executes async methods synchronously, so EF Core paged queries run on the UI thread — shimmer never animates. Fix: offload fetches to thread pool in `CrudListViewModelBase` + app-wide load gate. Branch: `fix/page-load-frozen`. Plan: `Docs/Management/DevCycleCraft/page-load-frozen/plan.md`. Original report: S23 Ultra debug deploy froze every page load; worst with data. |

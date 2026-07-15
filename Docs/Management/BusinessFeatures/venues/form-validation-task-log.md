@@ -152,3 +152,21 @@ private void OnNameUnfocused(object sender, FocusEventArgs e) => ViewModel.Valid
   never persisted. Person's **day/month-only birthday** is an OPEN emulator decision (see the standard) — do
   not implement it until Helder confirms.
 - Integer validation (R10) is spec-incomplete — do not invent rules.
+
+
+## Moved from BACKLOG.md (2026-07-15) — 02 - Update Venues form
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-30 | ↳ 02 - Update Venues form | ✅ Done | **Reference impl** for 03–05. Merged to develop (`5c669f5`). Opus review: APPROVE (after correcting a false test-count in the task-log evidence — 7 VenueForm tests not 8). Build 0 err, 368/368 tests. Blur-first validation on Venue name (Unfocused + keystroke-clear + dirty-guard + Save safety-net; inline `dxe:TextEdit` HasError/ErrorText). **Emulator E2E DONE 2026-07-03 (TEST-004) — R1–R4/R6/R8/R9 confirmed working.** Found: **BUG-034** (Minor) — character counter renders duplicated past ~26 typed chars (also seen on ArtistFormPage); step 8 (legacy over-30-char record) skipped, no such data exists. Details: `venues/form-validation-task-log.md`. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — BUG-034: Character counter renders duplicated past ~26 chars — Venue Name + Artist Name fields (Mino…
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-03 | ↳ BUG-034: Character counter renders duplicated past ~26 chars — Venue Name + Artist Name fields (Minor) | 💡 Pending | Likely a shared `dxe:TextEdit` counter configuration issue, not entity-specific. Evidence: `venues/bugs/validation-error-26chars.jpg`, `venues/bugs/validation-error-31morechars.jpg`, `artists-songs/bugs/artistis-validation-error-charcount-duplicated-01.jpg`. |

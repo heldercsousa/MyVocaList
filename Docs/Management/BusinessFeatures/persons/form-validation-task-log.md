@@ -185,3 +185,66 @@ records still validate (backward compatible). The mask and the storage path
 | BUG-036 | Range checks still apply to masked form | `PersonService.ValidateBirthday` | `ValidateBirthday_MaskedFourDigitsInvalidMonth_ReturnsInvalid` |
 
 Commit: `1788320`. ⏳ Helder: on-device re-verify Save persists a birthday.
+
+
+## Moved from BACKLOG.md (2026-07-15) — 03 - Update Singer form
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-30 | ↳ 03 - Update Singer form | ✅ Done | Merged to develop (merge `11ce501`). First multi-field form. Build 0 err (Tests + MAUI-android), 386/386 tests (12 pre-existing PersonForm + 18 new). Blur-first validation on name/birthday/email (Unfocused/BlurredWithoutSelectionCommand + keystroke-clear + dirty-guard + edit-mode `_isHydrating` guard + Save safety-net over all 3 fields); removed fragile `SetInlineError` substring routing (→ `ApplyAsyncFailureAsync`: email-uniqueness→field, non-attributable→snackbar). No `PersonService` validator changes needed (already complete). Birthday no-year mechanism untouched (Helder gate, out of scope). Opus review: APPROVE (truthful 30-test count; 2 non-blocking notes propagated). Task-log: `Docs/Management/BusinessFeatures/persons/form-validation-task-log.md`. Emulator E2E of the Person form — **DONE 2026-07-01, PASSED; RETESTED 2026-07-03 (TEST-005) — Name field R1–R4/R8 confirmed; 4 new issues found, registered as BUG-035–BUG-038 below.** |
+
+
+## Moved from BACKLOG.md (2026-07-15) — BUG-035: PersonFormPage edit-load — full-name entry UI glitch (Minor)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-03 | ↳ BUG-035: PersonFormPage edit-load — full-name entry UI glitch (Minor) | 💡 Pending | Screenshot: `persons/bugs/edit-singer-load-page-issue.jpg`. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — BUG-036: PersonFormPage birthday validation — error expects "/" separator in the validated string, b…
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-03 | ↳ BUG-036: PersonFormPage birthday validation — error expects "/" separator in the validated string, but mask should deliver 4 digits only (Major — reclassified 2026-07-12; blocks Save entirely so data never persists) | ✅ Fixed | Confirmed by Helder 2026-07-12 (release build on-device). Root cause: `PersonService.ValidateBirthday` regex `^(\d{1,2})/(\d{1,2})$` required a literal "/", but the birthday `dxe:TextEdit Mask="00/00"` (BUG-022) treats "/" as a display-only mask literal — the delivered `Text` is 4 digits ("1503"), so every non-empty birthday failed validation and Save never persisted. Fix (`1788320`): strip any "/" and validate the 4-digit "DDMM" form (`^(\d{2})(\d{2})$`); legacy "DD/MM" records still validate; mask + storage path unchanged. +2 TDD tests (Red first) + 8 existing birthday tests green (Service layer, fully testable). Screenshot: `persons/bugs/edit-singer-load-page-issue.jpg/singer-bithday-validation-error.jpg`. ⏳ Helder: on-device re-verify. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — BUG-037: PersonFormPage edit-Save does not navigate back to prior page (Major — UX consistency with …
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-03 | ↳ BUG-037: PersonFormPage edit-Save does not navigate back to prior page (Major — UX consistency with Venues) | 💡 Pending | Success snackbar shows correctly; user is left on the form. Confirm intended cross-CRUD pattern before fixing. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — BUG-038: PersonFormPage email-uniqueness inline error only appears after Save, not on blur (Major)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-03 | ↳ BUG-038: PersonFormPage email-uniqueness inline error only appears after Save, not on blur (Major) | 💡 Pending | Distinct from BUG-025 (uniqueness error cleared by weaker re-validation) — this is the error never showing on blur in the first place. Same family as BUG-039 (Artist duplicate-name). |
+
+
+## Moved from BACKLOG.md (2026-07-15) — BUG-022: SingerForm birthday field — mask does not auto-insert "/" separator (Minor)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-01 | ↳ BUG-022: SingerForm birthday field — mask does not auto-insert "/" separator (Minor) | ✅ Fixed | Root cause: `PersonFormPage.xaml`'s birthday `dxe:TextEdit` had no `Mask` configured — cosmetic UX gap only, since the user already typed "/" manually in the same DD/MM string format that is validated/persisted, so no data-integrity issue existed. Fix: added `Mask="00/00"` + `MaskPlaceholderChar="_"` to the existing `dxe:TextEdit` (additive XAML-only change, no hand-written masking code); `PersonService.ValidateBirthday` regex and `Person.BirthdayDayMonth` storage format left unchanged. Details: `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/BUG-022-singerform-birthday-mask.md` |
+
+
+## Moved from BACKLOG.md (2026-07-15) — BUG-025: SingerForm async email-uniqueness error cleared by weaker format-only re-validation (Major)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-02 | ↳ BUG-025: SingerForm async email-uniqueness error cleared by weaker format-only re-validation (Major) | 💡 Pending | Found by Task 03 review (2026-07-02); registered as follow-up per Helder 2026-07-02. `PersonFormViewModel` (`:252-263` at review time) applies the async uniqueness failure ("Email already in use") to the field inline, but the next keystroke re-validates via format-only `PersonService.ValidateEmail` (`PersonService.cs:97-112`), which passes and clears the uniqueness error — the user sees the error vanish while the email is still a duplicate. Save-path uniqueness re-check still blocks persistence (no data corruption → Major, not Critical). Fix direction: keystroke re-validation while an async-sourced error is displayed must not clear it with a weaker check (track error source, or re-run the async check debounced per `dialogs-validation.md` debounced-uniqueness section once that guide ambiguity is resolved). Regression test mandatory (Major, testable VM layer — Red first). |

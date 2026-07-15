@@ -138,3 +138,30 @@ No validator was changed — counter aligned to validator only.
   formalized as named constants.
 - Song (80/90/100) and Venue (25/27/30) warning thresholds are likewise ordered and internally consistent —
   nothing beyond the isError alignment required.
+
+
+## Moved from BACKLOG.md (2026-07-15) — Form validation
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-30 | **Form validation** | 🟡 In Progress | Stabilish and apply patterns for all the existing App's form entries validations |
+
+
+## Moved from BACKLOG.md (2026-07-15) — 01 - Form validation guide
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-30 | ↳ 01 - Form validation guide | ✅ Done | Validation standard encoded across `.claude/library/*` (dialogs-validation.md primary; crud-pages, devexpress-patterns, theme-locale, ux-patterns). Blur-first timing (Unfocused) + keystroke re-validate + Save safety-net; inline `dxe:TextEdit`/`dxe:DateEdit` `HasError`/`ErrorText`; service `(bool,message)` tuples. Opus plan → fresh-Opus review → Opus implement; merged to develop (`256e1fb`). Guide/plan/task-log: `Docs/Management/DevCycleCraft/ui-form-validation-guide/`. ⏳ **Helder gates (do not block forms):** (1) DateEdit day/month-only birthday — OPEN, emulator confirm; (2) Integer/R10 — requirements doc has `<TODO>`, needs completion. |
+
+
+## Moved from BACKLOG.md (2026-07-15) — 06 - Character-counter threshold alignment (Song/Venue/Person services)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-02 | ↳ 06 - Character-counter threshold alignment (Song/Venue/Person services) | ✅ Done | Counter `isError >= Max` off-by-one (flagged the exactly-at-limit valid length as error) aligned to `>` in `SongService` (100), `VenueService` (30), `PersonService` (200) — validators untouched (each accepts exactly-max, trims first). All three form VMs now feed the counter the trimmed length (`value?.Trim().Length ?? 0`), semantically required since validators check trimmed strings. +9 TDD tests (6 service boundary pairs + 3 VM trimmed-feed with `Times.Never` on untrimmed); develop suite 428/428 after merge. Opus review: **APPROVE** (informational nit: AC tags cite standard prose, no REQ-ID scheme exists yet in ui-form-validation-guide spec — consistent with Task 05 practice). Reported for Helder, not changed: counter warning/show thresholds are hardcoded literals (55/90/27/190), internally consistent. Merged to `develop` (branch `worktree-agent-a0ca1221caa28be44`, commit `22bb031`). Task-log: `Docs/Management/DevCycleCraft/ui-form-validation-guide/task-log.md`. |

@@ -375,3 +375,30 @@ Repository check result: `ISongRepository.GetByIdAsync` already returns the full
 - **Hydration guard**: `_isHydrating` is saved/re-opened/restored inside the `RunOnUiThread`
   block because the entity load is async and can complete after `CompleteHydration()` — without
   this, hydrated values would mark fields dirty and defeat the edit-mode dirty-guard.
+
+
+## Moved from BACKLOG.md (2026-07-15) — 04 - Update Songs form
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-30 | ↳ 04 - Update Songs form | ✅ Done | Blur-first validation on Title/Version (`ValidateVersionInput` added to `ISongService`/`SongService`; hardcoded "Save as new version requires a Version" rule rerouted through the service, closing a pre-existing business-logic-in-ViewModel gap). Both Version `TextEdit` instances (main form + resolution sheet) wired. 17 net-new tests (12 VM + 5 Service); full suite 403/403 passing after merge. Opus review: **APPROVE WITH NOTES** (non-blocking — resolution-sheet Version blur uses optional semantics, required-ness enforced at Save; confirm on emulator E2E). Merged to `develop` (merge commit, branch `worktree-agent-aa495a45f830848ae`). Task-log: `Docs/Management/BusinessFeatures/artists-songs/form-validation-task-log.md`. **Emulator E2E BLOCKED 2026-07-03 (TEST-006) — could not run: BUG-027 (SongFormPage Artist field) makes it impossible to save any song, so Title/Version validation timing was never exercised on-device. Re-run once BUG-027 is fixed.** |
+
+
+## Moved from BACKLOG.md (2026-07-15) — 05 - Update Artists form
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-06-30 | ↳ 05 - Update Artists form | ✅ Done | Blur-first validation on Artist Name (only editable field on the page — picker/duplicate buttons are actions, not inputs). Full standard applied: dirty-guard, `_isHydrating` edit-mode guard + `CompleteHydration()` in `OnAppearing`, blur `ValidateNameCommand`, keystroke re-validate only while in error, Save safety-net (aborts inline, `CreateArtistAsync` never called), documented single-field `ApplyAsyncFailure` mapping (no `Contains` routing). Drift fixes: XAML `MaxCharacterCount` 250→60 (= `ArtistService.MaxInputLength`), counter isError `>=60`→`>60` (validator alignment), counter fed trimmed length, edit-mode no longer auto-focuses. 13 net-new tests (11 VM + 2 Service); full suite 416/416 after merge (one flaky `PersonRepositoryTests` temp-DB init race on first run — green in isolation and on re-run). Opus review: **APPROVE WITH NITS** (cosmetic: counter threshold drift remains in Song/Venue/Person services — see follow-up row; XAML `MaxCharacterCount` magic number pattern shared by all forms). Merged to `develop` (branch `worktree-agent-ab6e59616ff5219bc`, commit `1e4a858`). Task-log: `Docs/Management/BusinessFeatures/artists-songs/form-validation-task-log.md`. Out-of-scope finding: `DuplicateSuggestions` in `ArtistFormViewModel` never populated — dead/pending-feature code. **Emulator E2E DONE 2026-07-03 (TEST-007) — R1–R3/R8/counter-alignment/trimming confirmed.** Found: BUG-034 (counter duplication, shared with Venue — see above) and **BUG-039** (duplicate-name inline error only appears after Save, not on blur). |
+
+
+## Moved from BACKLOG.md (2026-07-15) — BUG-039: ArtistFormPage duplicate-name inline error only appears after Save, not on blur (Major)
+
+> Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-07-03 | ↳ BUG-039: ArtistFormPage duplicate-name inline error only appears after Save, not on blur (Major) | 💡 Pending | Same async-uniqueness-on-blur gap family as BUG-025/BUG-038 (Person) — likely a cross-form pattern issue worth a single shared fix once triaged. |
