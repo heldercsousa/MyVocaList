@@ -305,6 +305,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-component", "a
 		Docs\Management\DevCycleCraft\autocomplete-component\task-log.md = Docs\Management\DevCycleCraft\autocomplete-component\task-log.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persisted-string-trimming", "persisted-string-trimming", "{FA1234BC-0001-4000-8000-000000000051}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\persisted-string-trimming\design.md = Docs\Management\DevCycleCraft\persisted-string-trimming\design.md
+		Docs\Management\DevCycleCraft\persisted-string-trimming\requirements.md = Docs\Management\DevCycleCraft\persisted-string-trimming\requirements.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hamburger-nav-pattern", "hamburger-nav-pattern", "{FA1234BC-0001-4000-8000-000000000047}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\design.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\design.md
@@ -689,6 +695,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bugs", "Bugs", "{1AAD9972-3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-043", "bug-043", "{6941D280-F5AE-428A-AC78-42246F3BF3F8}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (1).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (1).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (2).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (2).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (3).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (3).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (4).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (4).jpg
 		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\ListItem component not used.png = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\ListItem component not used.png
 		log-debug-s23.txt = log-debug-s23.txt
 		Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md = Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md
@@ -851,6 +861,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000040} = {FA1234BC-0001-4000-8000-000000000039}
 		{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE} = {E9A5FC59-0C8C-49B6-9845-7870FA3CD098}
 		{FA1234BC-0001-4000-8000-000000000041} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000051} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000043} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000044} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000049} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
