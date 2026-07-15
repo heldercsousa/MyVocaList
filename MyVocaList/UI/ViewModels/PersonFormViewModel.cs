@@ -14,6 +14,7 @@ public partial class PersonFormViewModel : ViewModelBase
 {
     private readonly IPersonService _personService;
     private readonly ISnackbarComponent _snackbarService;
+    private readonly INavigationService _navigation;
     private readonly ILogger<PersonFormViewModel> _logger;
 
     // Shell passes all query parameters as strings; parse manually.
@@ -58,10 +59,12 @@ public partial class PersonFormViewModel : ViewModelBase
     public PersonFormViewModel(
         IPersonService personService,
         ISnackbarComponent snackbarService,
+        INavigationService navigation,
         ILogger<PersonFormViewModel> logger)
     {
         _personService = personService;
         _snackbarService = snackbarService;
+        _navigation = navigation;
         _logger = logger;
 
         SaveCommand = new AsyncRelayCommand(SaveAsync);
@@ -291,8 +294,14 @@ public partial class PersonFormViewModel : ViewModelBase
         var email = Uri.EscapeDataString(person.Email ?? string.Empty);
         var name = Uri.EscapeDataString(person.FullName);
 
-        await (Shell.Current?.GoToAsync(
-            $"{Routes.PersonForm}?personId={person.Id}&personName={name}&personBirthday={birthday}&personEmail={email}") ?? Task.CompletedTask);
+        // BUG-044: use a REPLACING relative route ("../person-form?...") — "../" pops the current
+        // form page before pushing the edit form. Pushing the edit form on top of the New Singer
+        // form left a stale, raw-text-pre-filled form in the Shell stack; after saving the edit
+        // form, "GoToAsync(..)" revealed that stale form and saving it inserted a duplicate entity.
+        // Routed through INavigationService so the behavior is unit-testable (Shell.Current is
+        // null in tests — testing.md anti-pattern).
+        await _navigation.GoToAsync(
+            $"../{Routes.PersonForm}?personId={person.Id}&personName={name}&personBirthday={birthday}&personEmail={email}");
     }
 
     private void UpdateCharacterCounter(int length)
