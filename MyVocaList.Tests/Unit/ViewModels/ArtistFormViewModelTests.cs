@@ -156,7 +156,7 @@ public class ArtistFormViewModelTests
         Assert.True(sut.NameHasError);
         Assert.Equal("Artist name is required", sut.NameErrorText);
         _serviceMock.Verify(
-            s => s.CreateArtistAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            s => s.CreateArtistAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -168,14 +168,14 @@ public class ArtistFormViewModelTests
         sut.CompleteHydration();
         sut.ArtistName = "The Beatles";
         _serviceMock.Setup(s => s.ValidateNameInput("The Beatles")).Returns((true, ""));
-        _serviceMock.Setup(s => s.CreateArtistAsync("The Beatles", It.IsAny<CancellationToken>()))
+        _serviceMock.Setup(s => s.CreateArtistAsync("The Beatles", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                     .ReturnsAsync((true, "Artist 'The Beatles' created successfully", new Artist { Name = "The Beatles" }));
 
         await sut.SaveCommand.ExecuteAsync(null);
 
         Assert.False(sut.NameHasError);
         _serviceMock.Verify(
-            s => s.CreateArtistAsync("The Beatles", It.IsAny<CancellationToken>()),
+            s => s.CreateArtistAsync("The Beatles", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -188,7 +188,7 @@ public class ArtistFormViewModelTests
         sut.CompleteHydration();
         sut.ArtistName = "The Beatles";
         _serviceMock.Setup(s => s.ValidateNameInput("The Beatles")).Returns((true, ""));
-        _serviceMock.Setup(s => s.CreateArtistAsync("The Beatles", It.IsAny<CancellationToken>()))
+        _serviceMock.Setup(s => s.CreateArtistAsync("The Beatles", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                     .ReturnsAsync((false, "An artist with this name already exists", (Artist)null));
 
         await sut.SaveCommand.ExecuteAsync(null);
