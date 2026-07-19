@@ -2,7 +2,7 @@ using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
-using MyVocaList.Services.Text;
+using MyVocaList.Extensions.Strings;
 
 namespace MyVocaList.Services;
 
@@ -24,7 +24,7 @@ public class CatalogService : ICatalogService
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
-        var normalizedQuery = string.IsNullOrWhiteSpace(query) ? null : StringNormalization.NormalizeSearchQuery(query);
+        var normalizedQuery = string.IsNullOrWhiteSpace(query) ? null : query.NormalizeSearchQuery();
         return await _catalogRepository.GetPagedByArtistAsync(artistId, pageNumber, pageSize, normalizedQuery, ct);
     }
 
