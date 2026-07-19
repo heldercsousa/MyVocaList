@@ -45,7 +45,7 @@ public static class StringNormalization
     /// <summary>Edge-trim + collapse internal whitespace runs to one space. Null/whitespace → "".</summary>
     public static string NormalizeSearchQuery(string query);
 
-    /// <summary>Storage form of a required field. Null → null; else edge-trim (+ internal collapse per D1).</summary>
+    /// <summary>Storage form of a required field. Null → null; else edge-trim + internal collapse (D1 approved).</summary>
     public static string TrimForStorage(string value);
 
     /// <summary>Storage form of an optional field. Empty/whitespace-only result → null.</summary>
@@ -57,7 +57,7 @@ Implementation note: single char-scan or `string.Join(' ', value.Split((char[])n
 StringSplitOptions.RemoveEmptyEntries))` — no regex, no allocation surprises, Level-A unit tested.
 Search and persistence stay **separate named entry points** even though they share the same
 collapsing primitive internally — they are different concerns (query shaping vs stored-value
-shaping) and may legitimately diverge later (e.g. D1 declined for storage).
+shaping) and may legitimately diverge later.
 
 ## Call sites (all Service-layer)
 
@@ -86,17 +86,19 @@ behind it is what guarantees correctness.
   contracts (nullability, D1 divergence risk). Two thin named methods cost nothing and keep call
   sites self-documenting.
 
-## Decision points for Helder
+## Decision points (resolved)
 
-- **D1:** Should `TrimForStorage` also collapse *internal* whitespace runs (REQ-TRIM-06)?
-  Recommended **yes** for name-like fields (keeps stored values congruent with search
-  normalization and fixes dedup); if declined, storage does edge-trim only and REQ-TRIM-06 is
-  narrowed. Either way search-side collapsing (REQ-TRIM-01/03) stands.
-- **D2:** Folder/tracking call — BUG-046 is *tracked* under the autocomplete component in
-  BACKLOG.md, but its fix is Service-layer with no component edit, so this spec folder
-  (`persisted-string-trimming/`) owns both items and the BUG-046 BACKLOG pointer moves here
-  (cross-reference left in this section for readers arriving from
-  `DevCycleCraft/autocomplete-component/`). Reasoning: one helper, one spec, one review.
+> **Decision recorded [2026-07-15]:** Helder resolved both points — D1: **YES**; D2: **APPROVED**.
+
+- **D1 (resolved YES):** `TrimForStorage` collapses *internal* whitespace runs in addition to
+  edge-trimming (REQ-TRIM-06, now unconditional) — stored values stay congruent with search
+  normalization and dedup works. Search-side collapsing (REQ-TRIM-01/03) stands regardless.
+- **D2 (resolved APPROVED):** Folder/tracking call — BUG-046 was *tracked* under the autocomplete
+  component in BACKLOG.md, but its fix is Service-layer with no component edit, so this spec folder
+  (`persisted-string-trimming/`) owns both items and the BUG-046 BACKLOG pointer was moved here
+  (cross-reference kept in this section for readers arriving from
+  `DevCycleCraft/autocomplete-component/`). No AutocompleteField four-gate governance is needed
+  for the core fix. Reasoning: one helper, one spec, one review.
 
 ## Governance note — AutocompleteField four-gate (stub)
 
