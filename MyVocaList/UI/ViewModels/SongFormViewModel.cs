@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.Messaging;
-using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.Messages;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;

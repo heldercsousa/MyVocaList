@@ -1,5 +1,3 @@
-using MyVocaList.Domain.ServicesInterfaces;
-
 namespace MyVocaList.UI.ViewModels;
 
 public partial class SettingsViewModel : ViewModelBase

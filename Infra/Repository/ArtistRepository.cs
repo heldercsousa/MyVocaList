@@ -33,9 +33,9 @@ public class ArtistRepository : IArtistRepository
 
         q = roleFilter switch
         {
-            ArtistRoleFilter.AuthorsOnly    => q.Where(a => a.OriginalSongs.Any()),
+            ArtistRoleFilter.AuthorsOnly => q.Where(a => a.OriginalSongs.Any()),
             ArtistRoleFilter.PerformersOnly => q.Where(a => a.CatalogEntries.Any()),
-            _                               => q
+            _ => q
         };
 
         var totalCount = await q.CountAsync(ct);

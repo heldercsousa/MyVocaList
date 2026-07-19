@@ -1,6 +1,6 @@
+using MyVocaList.Contracts.DTOs;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-using MyVocaList.Contracts.DTOs;
 
 namespace MyVocaList.Services;
 

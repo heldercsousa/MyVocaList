@@ -1,7 +1,7 @@
+using MyVocaList.Domain.ServicesInterfaces;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models;
 using Plugin.LocalNotification.Core.Models.AndroidOption;
-using MyVocaList.Domain.ServicesInterfaces;
 
 namespace MyVocaList.Services;
 

@@ -14,12 +14,12 @@ public static class Routes
     public const string VenueForm = "venue-form";
     public const string PersonForm = "person-form";
     public const string ArtistForm = "artist-form";
-    public const string Songs      = "songs";
-    public const string SongForm   = "song-form";
-    public const string Settings   = "settings";
-    public const string Feedback   = "feedback";
-    public const string ArtistPicker    = "artist-picker";
-    public const string SongPicker      = "song-picker";
+    public const string Songs = "songs";
+    public const string SongForm = "song-form";
+    public const string Settings = "settings";
+    public const string Feedback = "feedback";
+    public const string ArtistPicker = "artist-picker";
+    public const string SongPicker = "song-picker";
     public const string QueueSongPicker = "queue-song-picker";
     public const string YouTubeSearch = "youtube-search";
 }

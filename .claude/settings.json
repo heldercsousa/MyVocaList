@@ -9,6 +9,10 @@
     ],
     "deny": []
   },
+  "disabledMcpjsonServers": [
+    "github",
+    "sequential-thinking"
+  ],
   "skillOverrides": {
     "maui-unit-testing": "on"
   },
@@ -192,19 +196,15 @@
     ]
   },
   "enabledPlugins": {
-    "dotnet-skills@dotnet-skills": false,
+    "dotnet-skills@dotnet-skills": true,
     "ddd-dotnet@dotnet-claude-code-skills": false,
     "data-dotnet@dotnet-claude-code-skills": false,
     "bdd-dotnet@dotnet-claude-code-skills": false,
-    "ux@teslasoft-skills": false,
+    "ux@teslasoft-skills": true,
     "frontend-design@claude-plugins-official": false,
     "claude-code-setup@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true
   },
-  "disabledMcpjsonServers": [
-    "github",
-    "sequential-thinking"
-  ],
   "plansDirectory": "Docs/Management"
 }

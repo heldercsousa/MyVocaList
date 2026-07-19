@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.Messaging;
-using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Contracts.Messages;
 using MyVocaList.UI.Collections;
 
