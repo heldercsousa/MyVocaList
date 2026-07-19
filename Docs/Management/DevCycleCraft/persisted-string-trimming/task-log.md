@@ -237,3 +237,72 @@ Files written and re-read: `Services/SongService.cs`, `Services/CatalogService.c
 - Scope note (briefing-authorized): implementation touches `CatalogService.cs` and `SongSuggestionService.cs`, but the corresponding pre-existing test files (`CatalogServiceTests.cs`, `SongSuggestionServiceTests.cs`) were NOT in this task's `Files owned` list, so no new tests were added there — only `SongServiceTests.cs` per the briefing. Full suite green confirms no regression.
 - Did NOT touch `CreateSongAsync`/`UpdateSongAsync`/`CreateSongWithUrlsAsync` persistence — that is Task 6's `ValueConverter` responsibility (D3), per explicit briefing instruction.
 - `GetRemoteAsync`'s normalized term is also forwarded to `artistHint`-paired external provider search (`FetchFromProvidersAsync`) — normalizing the term sent to MusicBrainz/Deezer is a reasonable, low-risk extension of the same fix since garbled whitespace would degrade those queries identically; no spec objection since REQ-TRIM-09 scopes normalization to Service-layer search call sites broadly.
+
+---
+## Task: Task 6a — Relocate StringNormalization to MyVocaList.Extensions (D4)
+**Plan:** Docs/Management/DevCycleCraft/persisted-string-trimming/tasks.md
+**Status:** To Review
+**Started:** 2026-07-19
+**Completed:** 2026-07-19
+
+### Changed files:
+- `MyVocaList.Extensions/MyVocaList.Extensions.csproj` (new project)
+- `MyVocaList.Extensions/Strings/StringExtensions.cs` (new — ported algorithm, extension-method syntax)
+- `MyVocaList.Tests/Unit/Extensions/Strings/StringExtensionsTests.cs` (new — migrated test cases, adapted to extension-method call syntax)
+- `Services/Text/StringNormalization.cs` (deleted)
+- `MyVocaList.Tests/Unit/Services/Text/StringNormalizationTests.cs` (deleted)
+- `Services/ArtistService.cs` (using + call-site update)
+- `Services/ArtistSuggestionService.cs` (using + call-site update)
+- `Services/CatalogService.cs` (using + call-site update)
+- `Services/PersonService.cs` (using + call-site update)
+- `Services/SongService.cs` (using + call-site update)
+- `Services/SongSuggestionService.cs` (using + call-site update)
+- `Services/VenueService.cs` (using + call-site update)
+- `MyVocaList.Tests/Unit/Services/PersonServiceTests.cs` (using + call-site update)
+- `Services/MyVocaList.Services.csproj` (added ProjectReference to MyVocaList.Extensions)
+- `MyVocaList.Tests/MyVocaList.Tests.csproj` (added ProjectReference to MyVocaList.Extensions)
+- `MyVocaList.sln` (registered new project via `dotnet sln add`)
+- `Docs/Management/DevCycleCraft/persisted-string-trimming/tasks.md` (Task 6a checked off)
+
+### Verification evidence
+
+**Zero-dependency confirmation** — `MyVocaList.Extensions.csproj` contents (no `ProjectReference` element present):
+```
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CS8601;CS8603;CS8625</NoWarn>
+  </PropertyGroup>
+</Project>
+```
+
+**Zero remaining old-reference confirmation** — `grep -rn "MyVocaList.Services.Text\|StringNormalization\." --include=*.cs .` returned no matches.
+
+**Build** (non-MAUI-head projects, `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj` — pulls in Extensions/Domain/Contracts/Infra/Services/MyVocaList/MyVocaList.Tests, 7 projects):
+```
+ok dotnet build: 7 projects, 0 errors, 0 warnings (00:00:14.59)
+```
+Note: solution-wide `dotnet build` also hit an unrelated pre-existing environment error (`XA0142`/`XAWAS7024`, Android SDK file lock on `lib_Xamarin.AndroidX.Lifecycle.ViewModel.Ktx.dll.so` from a running .NET host) on the `net10.0-android` head TFM only — not caused by this change (no code path touches Android packaging); all 7 non-Android-head projects (including the MAUI head's other TFMs implicitly via the Tests build) compiled clean.
+
+**Tests** (`dotnet test MyVocaList.Tests`):
+```
+Com falha! – Com falha:     1, Aprovado:   521, Ignorado:     0, Total:   522, Duração: 7 s
+```
+The 1 failure (`ArtistRepositoryTests.GetPagedAsync_NoQuery_ReturnsAllSortedByName`, `ObjectDisposedException` on `SQLitePCL.sqlite3`) is a known-flaky SQLite-connection-disposal issue unrelated to this change — confirmed by re-running the same test in isolation:
+```
+Aprovado!  – Com falha:     0, Aprovado:     1, Ignorado:     0, Total:     1, Duração: 493 ms
+```
+Total count (522) matches the baseline exactly — pure relocation, no test count drift (the ~8 migrated `StringNormalizationTests` cases became `StringExtensionsTests` 1:1).
+
+### Post-edit re-reads
+- `MyVocaList.Extensions/Strings/StringExtensions.cs` — confirmed algorithm identical to original (`Collapse` private helper, same null/whitespace branching).
+- `MyVocaList.Tests/Unit/Extensions/Strings/StringExtensionsTests.cs` — confirmed all 8 original test methods present, calls adapted to `input.Method()` syntax.
+- `Services/ArtistService.cs`, `Services/PersonService.cs` — confirmed `using MyVocaList.Extensions.Strings;` present and call sites read `x.NormalizeSearchQuery()`.
+- `MyVocaList.sln` — confirmed `MyVocaList.Extensions` project entry present.
+
+### Notes
+- Pure relocation + calling-syntax change, no behavior change — per design.md § D4 and REQ-TRIM-08's 2026-07-19 amendment. Algorithm (edge-trim + internal whitespace collapse via `Split`/`Join`, no regex, no case-folding/diacritic removal per REQ-TRIM-10) ported verbatim.
+- Did not touch `Infra/` per briefing — Task 6 (unmerged, `feat/persisted-string-trimming-converters`) will be rebased onto this branch's output separately to point its `EntityTypeConfiguration`/`Infra.csproj` at `MyVocaList.Extensions` directly, removing the `Infra→Services` edge D4 flagged.
+- Not pushed/merged per instructions — committed locally only on `feat/string-extensions-relocation`.
