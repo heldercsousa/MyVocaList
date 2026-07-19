@@ -295,6 +295,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "m3-lists", "m3-lists", "{F5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-component", "autocomplete-component", "{FA1234BC-0001-4000-8000-000000000046}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\2026-07-19-dx-autocomplete-adoption-decision.md = Docs\Management\DevCycleCraft\autocomplete-component\2026-07-19-dx-autocomplete-adoption-decision.md
 		Docs\Management\DevCycleCraft\autocomplete-component\design.md = Docs\Management\DevCycleCraft\autocomplete-component\design.md
 		Docs\Management\DevCycleCraft\autocomplete-component\findings.md = Docs\Management\DevCycleCraft\autocomplete-component\findings.md
 		Docs\Management\DevCycleCraft\autocomplete-component\md3-autocomplete-mobile-ux-guideline.md = Docs\Management\DevCycleCraft\autocomplete-component\md3-autocomplete-mobile-ux-guideline.md
@@ -509,6 +510,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-r
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.md
+		Docs\Management\DevCycleCraft\UI-2nd-refactor\2026-07-19-post-mvp-sequencing-decision.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\2026-07-19-post-mvp-sequencing-decision.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\prompt.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\prompt.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\task-log.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\task-log.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\ui-arch-decision-plan.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\ui-arch-decision-plan.md
