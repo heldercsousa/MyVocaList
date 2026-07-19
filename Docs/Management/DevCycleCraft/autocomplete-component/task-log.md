@@ -610,3 +610,14 @@ Docs-only task: no build/test applicable. MD3 rules cited from m3.material.io se
 
 ### Checkpoint
 - All steps complete; nothing in flight. Context manifest for resume: this entry + `ux-no-match-add-new-analysis.md` + `ux-patterns.md § Autocomplete` section + BACKLOG rows (UX analysis, ①).
+
+---
+
+## 2026-07-19 — Cancellation of pending manual E2E steps (BUG-044/045/047 + back-gesture decision)
+
+**By:** main agent, per Helder directive following the DX `AutoCompleteEdit` adoption decision (`2026-07-19-dx-autocomplete-adoption-decision.md`).
+
+- Manual E2E steps for BUG-044, BUG-045, BUG-047 recorded earlier in this log: **CANCELLED** — the custom `AutocompleteMobileField` is frozen; the E2E targets no longer represent the shipping UI path.
+- BUG-044 back-gesture UX decision (design decision, not a bug): **CANCELLED** for the same reason.
+- BACKLOG rows moved to `backlog-archive/BACKLOG-ARCHIVE-2026-07.md` as `🔵 Superseded (closed 2026-07-19)`.
+- **Carried forward:** the merged fixes altered PersonFormPage navigation/entry behavior, so residual defects may persist independently of the component. New BACKLOG row (2026-07-19, nested under the DX replacement task) mandates evaluating the stacked-navigation / cursor / stale-popup family on PersonFormPage + SongFormPage as the first step of the DX replacement spec, with regression tests for any survivor.
