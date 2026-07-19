@@ -16,7 +16,9 @@
 ## What is retained
 
 - Service-layer normalization work (BUG-046 whitespace normalization, persisted-string-trimming feature) — UI-agnostic, unaffected.
-- Merged fixes for BUG-044/045/047 — remain on develop; their pending Helder E2E steps become moot for consumers migrated to DX (re-verify per consumer during migration).
+- Merged fixes for BUG-044/045/047 — remain on develop.
+
+> **Spec updated [2026-07-19] (Helder directive, same day):** the pending Helder E2E steps for BUG-044/045/047 and the BUG-044 back-gesture UX decision are **CANCELLED** — all exist only because of the custom component. Rows archived as `🔵 Superseded` in `backlog-archive/BACKLOG-ARCHIVE-2026-07.md`. Because those fixes touched PersonFormPage navigation/entry behavior, a mandatory **first evaluation step of the DX replacement spec** is: verify whether the stacked-navigation / cursor / stale-popup defect family survives the DX migration on PersonFormPage (and SongFormPage), and add regression coverage for any survivor (new BACKLOG row 2026-07-19 tracks this).
 - Guideline ① (`ux-patterns.md` / `m3-components.md` full-screen autocomplete pattern) — kept as future UX documentation.
 
 ## Follow-up
