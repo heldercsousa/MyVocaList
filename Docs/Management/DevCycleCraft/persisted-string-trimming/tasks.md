@@ -51,7 +51,7 @@
   - *(Persisted-value trimming for `Song.Title`/`featuredArtists`/`version`/`externalId` → Task 6,
     D3; `CreateSongAsync`/`UpdateSongAsync`/`CreateSongWithUrlsAsync` not touched by this task.)*
 
-- [ ] **Task 6 — Persistence: EF Core `ValueConverter`s for name-like properties (D3, 2026-07-19)** *(depends: Task 1)*
+- [x] **Task 6 — Persistence: EF Core `ValueConverter`s for name-like properties (D3, 2026-07-19)** *(depends: Task 1)*
   - Produces: `ValueConverter<string,string>`/`ValueConverter<string?,string?>` in `EntityTypeConfiguration` for `Person.Name`/`Email`, `Artist.Name`/`externalId`, `Venue.Name`, `Event.Name`, `Song.Title`/`featuredArtists`/`version`/`externalId`, delegating to `StringNormalization.TrimForStorage`/`TrimForStorageOrNull`; real-SQLite round-trip tests per property; removal of now-redundant ad-hoc `Trim()` sites in the corresponding Service Create/Update methods
   - Consumes: Task 1 helper
   - Risk: Medium — touches shared `EntityTypeConfiguration`/possibly `AppDbContext.cs` (sequential-only file registry, `workflow.md`); confirm no wave overlap before dispatch

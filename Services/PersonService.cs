@@ -141,23 +141,26 @@ public class PersonService : IPersonService
 
         if (!string.IsNullOrWhiteSpace(email))
         {
-            var emailTaken = await _personRepository.IsEmailTakenAsync(email.Trim(), cancellationToken: cancellationToken);
+            // EF applies Person.Email's ValueConverter (design.md § D3) to this WHERE parameter
+            // too, so an untrimmed check value still matches trimmed stored rows.
+            var emailTaken = await _personRepository.IsEmailTakenAsync(email, cancellationToken: cancellationToken);
             if (emailTaken)
                 return (false, "Email already registered to another singer.", null);
         }
 
-        var trimmedName = fullName.Trim();
-        var person = new Person(trimmedName)
+        // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
+        // PersonConfiguration (design.md § D3) — not here. BirthdayDayMonth is out of D3's scope.
+        var person = new Person(fullName)
         {
             BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim(),
-            Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim()
+            Email = string.IsNullOrWhiteSpace(email) ? null : email
         };
         // DB collation (NOCASE_NOACCENT) handles case/accent normalization at query time.
 
         await _personRepository.AddAsync(person);
         await _personRepository.SaveChangesAsync();
 
-        return (true, $"{trimmedName} registered successfully!", person);
+        return (true, $"{fullName.Trim()} registered successfully!", person);
     }
 
     /// <inheritdoc />
@@ -235,19 +238,22 @@ public class PersonService : IPersonService
 
         if (!string.IsNullOrWhiteSpace(email))
         {
-            var emailTaken = await _personRepository.IsEmailTakenAsync(email.Trim(), id, cancellationToken);
+            // EF applies Person.Email's ValueConverter (design.md § D3) to this WHERE parameter
+            // too, so an untrimmed check value still matches trimmed stored rows.
+            var emailTaken = await _personRepository.IsEmailTakenAsync(email, id, cancellationToken);
             if (emailTaken)
                 return (false, "Email already registered to another singer.");
         }
 
-        var trimmedName = fullName.Trim();
-        person.FullName = trimmedName;
+        // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
+        // PersonConfiguration (design.md § D3) — not here. BirthdayDayMonth is out of D3's scope.
+        person.FullName = fullName;
         person.BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim();
-        person.Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
+        person.Email = string.IsNullOrWhiteSpace(email) ? null : email;
 
         await _personRepository.SaveChangesAsync();
 
-        return (true, $"{trimmedName} updated successfully!");
+        return (true, $"{fullName.Trim()} updated successfully!");
     }
 
     /// <inheritdoc />

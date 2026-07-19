@@ -306,3 +306,151 @@ Total count (522) matches the baseline exactly — pure relocation, no test coun
 - Pure relocation + calling-syntax change, no behavior change — per design.md § D4 and REQ-TRIM-08's 2026-07-19 amendment. Algorithm (edge-trim + internal whitespace collapse via `Split`/`Join`, no regex, no case-folding/diacritic removal per REQ-TRIM-10) ported verbatim.
 - Did not touch `Infra/` per briefing — Task 6 (unmerged, `feat/persisted-string-trimming-converters`) will be rebased onto this branch's output separately to point its `EntityTypeConfiguration`/`Infra.csproj` at `MyVocaList.Extensions` directly, removing the `Infra→Services` edge D4 flagged.
 - Not pushed/merged per instructions — committed locally only on `feat/string-extensions-relocation`.
+
+---
+## Task: Task 6 — Persistence: EF Core ValueConverters for name-like properties (D3, 2026-07-19)
+**Plan:** Docs/Management/DevCycleCraft/persisted-string-trimming/plan.md (Task 6 section)
+**Status:** To Review
+**Started:** 2026-07-19
+**Completed:** 2026-07-19
+
+### D3 rationale citation
+Implements `design.md § Decision points -> D3` (resolved 2026-07-19): persisted-string trimming
+(REQ-TRIM-05/06/07) is enforced via EF Core `ValueConverter<string,string>` /
+`ValueConverter<string?,string?>` configured per name-like property in
+`IEntityTypeConfiguration<T>` (Infra), delegating to `StringNormalization.TrimForStorage` /
+`TrimForStorageOrNull` (Services). This supersedes the earlier per-Service-Create/Update-method
+`.Trim()` calls. D3's rationale (not business logic — universal data-integrity invariant; no
+SQL-side cost since `ToProviderExpression` runs client-side before parameterization, including
+`WHERE` clause comparands; enforcement over convention; delegation not reimplementation) is fully
+reproduced in `design.md`.
+
+### Live-repo discovery (paths verified, not guessed)
+- `IEntityTypeConfiguration<T>` implementations live in `Infra/EntityEFConfig/*.cs`, applied via
+  `AppDbContext.OnModelCreating`. Existing per-property config (e.g. `.UseCollation(...)`) follows
+  the same per-property fluent-chain pattern mirrored here.
+- Two distinct `Event` entities exist — `MyVocaList.Domain.Entity.Event` (property `EventName`,
+  configured by `EventConfiguration.cs`, table `Events`, appears to be a legacy/unused model, not
+  referenced by `EventService`) vs `MyVocaList.Domain.Entities.Event` (plural namespace, property
+  `Name`, configured by `QueueManagementEventConfiguration.cs`, table `QueueManagementEvents` —
+  this is the entity `EventService.CreateEventAsync` actually persists). The briefing's
+  "Event.Name" therefore maps to `QueueManagementEventConfiguration.cs`, not `EventConfiguration.cs`
+  — verified via `AppDbContext.cs` DbSet registrations and `EventService.cs`'s using directive
+  (`Domain.Entities`, not `Domain.Entity`). `EventConfiguration.cs` (the unused legacy model) was
+  left untouched — out of scope, no live call site feeds it.
+- `Song.Version` is a non-nullable `string` (`= string.Empty` default; `""` = canonical version,
+  domain-meaningful) — used `TrimValueConverters.Required` (not `.Optional`) since
+  `TrimForStorage("")` returns `""`, never `null`.
+- `Person.ExternalId` is `Guid?`, not `string` — not a converter target (briefing's "Artist
+  externalId" only applies to `Artist.ExternalId`/`Song.ExternalId`, both `string?`).
+
+### Implementation
+- Added `Infra/EntityEFConfig/TrimValueConverters.cs` — two shared, reusable `ValueConverter`
+  instances (`Required`, `Optional`) mirroring the existing `Collation/CollationConstants.cs`
+  shared-constant pattern, avoiding per-file converter duplication across the five configurations.
+- Configured `.HasConversion(TrimValueConverters.Required|Optional)` on:
+  - `PersonConfiguration`: `FullName` (Required), `Email` (Optional)
+  - `ArtistConfiguration`: `Name` (Required), `ExternalId` (Optional)
+  - `VenueConfiguration`: `Name` (Required)
+  - `QueueManagementEventConfiguration`: `Name` (Required)
+  - `SongConfiguration`: `Title` (Required), `Version` (Required), `FeaturedArtists` (Optional),
+    `ExternalId` (Optional)
+- Each site carries a one-line `D3 (design.md § D3): ...` comment per the briefing's "why Infra,
+  not Services" requirement.
+- **Architecture note (living-spec, in-scope decision):** `Infra/MyVocaList.Infra.csproj` gained a
+  `ProjectReference` to `Services/MyVocaList.Services.csproj` so the converter lambdas can call
+  `StringNormalization`. No cycle: `Services` does not reference `Infra`. This is the direct,
+  necessary consequence of D3's "delegate to Services, don't reimplement" clause — flagged here per
+  the Living Spec Protocol rather than left silent; `design.md § D3` already documents the
+  delegation intent, no further spec-file edit needed for the csproj mechanics itself.
+- Removed the now-redundant ad-hoc `.Trim()` sites that fed persisted properties in
+  `PersonService.CreatePersonAsync`/`UpdatePersonAsync` (`FullName`, `Email` — `BirthdayDayMonth`
+  is out of D3 scope, untouched), `ArtistService.CreateArtistAsync`/`UpdateArtistAsync` (`Name`),
+  `VenueService.CreateVenueAsync`/`UpdateVenueAsync` (`Name`), `EventService.CreateEventAsync`
+  (`Name` — the length-validation lines now call `.Trim()` inline since that check doesn't feed
+  storage), `SongService.CreateSongAsync`/`UpdateSongAsync`/`CreateSongWithUrlsAsync` (`Title`,
+  `Version`, `FeaturedArtists`). Pre-save duplicate-check calls (`ExistsByNameAsync`,
+  `ExistsByTitleForArtistAsync`, `IsEmailTakenAsync`, `GetByNameAsync`) were also left untrimmed
+  deliberately — EF applies the property's `ValueConverter` to `WHERE` parameters too (verified by
+  the `ArtistName_TrimmedOnWrite_StillMatchesCaseInsensitiveQuery` test below), so passing the raw
+  value still matches trimmed stored rows. Success/failure message strings that display the raw
+  input were left as-is in most cases (cosmetic, not a persistence correctness concern); a few were
+  updated to call `.Trim()` inline for message cleanliness where low-risk (e.g. `PersonService`'s
+  return messages).
+- `SongResolutionService.cs`, `ArtistResolutionService.cs`, `SongKaraokeUrlService.cs`,
+  `FeedbackService.cs` — NOT touched (out of the briefing's five-file scope; their `.Trim()` sites
+  serve different purposes, e.g. resolution-candidate comparison, and were not audited here).
+
+### Red -> Green evidence
+New test file: `MyVocaList.Tests/Integration/Repositories/PersistedStringTrimmingTests.cs` — real
+temp-file SQLite via `TestDbContextFactory` (never EF in-memory provider, per `testing.md`
+anti-pattern rule), 6 tests.
+
+RED (converters temporarily reverted via `git stash` of the 5 `EntityTypeConfiguration` files,
+`dotnet test --filter PersistedStringTrimmingTests`):
+```
+Com falha!  Com falha:     6, Aprovado:     0, Ignorado:     0, Total:     6, Duracao: 619 ms
+```
+(e.g. `PersonFullName_...`: Expected "John Doe", Actual " John  Doe "; `SongTitle_...`: Expected
+"Bohemian Rhapsody", Actual "  Bohemian  Rhapsody " — confirms properties round-tripped raw before
+the fix.)
+
+GREEN (converters restored via `git stash pop`, re-run):
+```
+Aprovado!  Com falha:     0, Aprovado:     6, Ignorado:     0, Total:     6, Duracao: 629 ms
+```
+
+### Collation + converter composition — explicitly verified
+`ArtistName_TrimmedOnWrite_StillMatchesCaseInsensitiveQuery`: saves `Artist.Name = "  Queen  "`,
+then queries `a.Name == "QUEEN"` (case-different, untrimmed) via EF LINQ — passes, proving the
+`ValueConverter` (storage trim) and `.UseCollation(CollationConstants.Default)` (case-insensitive
+comparison) coexist correctly on the same property: EF applies `ToProviderExpression` to both the
+stored value and the query comparand before the collation-aware SQL comparison runs.
+
+### Build/test evidence
+- `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj` → 0 errors (builds Domain, Contracts,
+  Services, Infra, MyVocaList (net10.0 lib target), Tests).
+- `dotnet build` (full solution incl. all MAUI TFMs) → 7 projects, 0 errors, 7 warnings (all
+  warnings pre-existing: DevExpress trial-license notices, one `CA1416` platform-reachability
+  warning — none introduced by this task).
+- `dotnet test MyVocaList.Tests` (full suite) → 528 passed, 0 failed, 0 skipped (baseline before
+  this task: 522 passing per briefing; +6 new round-trip tests = 528; no test was removed or
+  weakened).
+
+### AC traceability matrix
+
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|--------------------------|--------------|
+| REQ-TRIM-05 | Leading/trailing whitespace on a saved name-like field is not persisted | `PersonConfiguration`, `ArtistConfiguration`, `SongConfiguration` `.HasConversion(TrimValueConverters.Required)` | `PersonFullName_LeadingTrailingAndInternalWhitespace_PersistedTrimmedAndCollapsed`, `ArtistName_LeadingTrailingAndInternalWhitespace_PersistedTrimmedAndCollapsed`, `SongTitle_LeadingTrailingAndInternalWhitespace_PersistedTrimmedAndCollapsed` |
+| REQ-TRIM-06 | Internal whitespace runs collapse to a single space on persist | Same converters (`StringNormalization.TrimForStorage` collapses internally, D1) | Same three tests above (input contains internal double-space runs, e.g. `" John  Doe "`) |
+| REQ-TRIM-07 | Optional field normalizing to empty/whitespace-only persists as `null` | `PersonConfiguration.Email`, `SongConfiguration.FeaturedArtists` `.HasConversion(TrimValueConverters.Optional)` | `PersonEmail_WhitespaceOnly_PersistedAsNull`, `SongFeaturedArtists_WhitespaceOnly_PersistedAsNull` |
+
+### Changed files:
+- `Infra/EntityEFConfig/TrimValueConverters.cs` (new)
+- `Infra/EntityEFConfig/PersonConfiguration.cs` (FullName/Email converters)
+- `Infra/EntityEFConfig/ArtistConfiguration.cs` (Name/ExternalId converters)
+- `Infra/EntityEFConfig/VenueConfiguration.cs` (Name converter)
+- `Infra/EntityEFConfig/QueueManagementEventConfiguration.cs` (Name converter — the live `Event`
+  entity used by `EventService`, distinct from the unused `Domain.Entity.Event`/`EventConfiguration.cs`)
+- `Infra/MyVocaList.Infra.csproj` (added `ProjectReference` to `Services/MyVocaList.Services.csproj`)
+- `Services/PersonService.cs` (removed redundant `FullName`/`Email` storage `.Trim()` sites in Create/Update)
+- `Services/ArtistService.cs` (removed redundant `Name` storage `.Trim()` sites in Create/Update)
+- `Services/VenueService.cs` (removed redundant `Name` storage `.Trim()` sites in Create/Update)
+- `Services/EventService.cs` (removed redundant `Name` storage `.Trim()` site in Create; validation-only length check now trims inline)
+- `Services/SongService.cs` (removed redundant `Title`/`Version`/`FeaturedArtists` storage `.Trim()` sites across all three Create/Update methods)
+- `MyVocaList.Tests/Integration/Repositories/PersistedStringTrimmingTests.cs` (new — 6 real-SQLite round-trip tests)
+- `Docs/Management/DevCycleCraft/persisted-string-trimming/tasks.md` (Task 6 checked off)
+
+Files written and re-read: all of the above (each `Edit` diff confirmed in-tool; `PersonService.cs`
+Create/Update sections re-read post-edit; `TrimValueConverters.cs`, all five configuration files,
+and `PersistedStringTrimmingTests.cs` confirmed via successful compile + green test run, which is
+stronger evidence than a visual re-read alone for generated-expression-tree converter code).
+
+### Notes
+- `.sln` registration: N/A — all changed/new files are `.cs`/`.csproj` under SDK-style glob
+  inclusion, not `Docs/`/`.claude/` files (per exit checklist step 4).
+- No new EF Core migration was needed or created — `ValueConverter` only changes CLR<->provider
+  value mapping for an existing `TEXT` column, no schema change (confirmed by the "no migration"
+  success criterion in the briefing).
+- Pre-existing-data caveat (documented in `design.md § D3`, not re-litigated here): rows persisted
+  before this converter existed are not retroactively trimmed; no backfill migration is in scope.
