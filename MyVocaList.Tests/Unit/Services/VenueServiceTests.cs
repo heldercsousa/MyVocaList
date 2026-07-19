@@ -217,4 +217,22 @@ public class VenueServiceTests
         Assert.True(success);
         _repoMock.Verify(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Venue>>()), Times.Once);
     }
+
+    // ── GetPagedVenuesForListAsync ──────────────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-TRIM-03: search query with extra whitespace reaches the repository normalized
+    public async Task GetPagedVenuesForListAsync_QueryWithExtraWhitespace_NormalizesBeforeRepositoryCall()
+    {
+        string capturedQuery = null;
+        _repoMock
+            .Setup(r => r.GetPagedWithEventInfoAsync(1, 10, It.IsAny<string>()))
+            .Callback<int, int, string>((_, _, query) => capturedQuery = query)
+            .ReturnsAsync((new List<(Venue venue, int eventCount)>(), 0));
+        var sut = CreateSut();
+
+        await sut.GetPagedVenuesForListAsync(1, 10, " bar  x ");
+
+        Assert.Equal("bar x", capturedQuery);
+    }
 }

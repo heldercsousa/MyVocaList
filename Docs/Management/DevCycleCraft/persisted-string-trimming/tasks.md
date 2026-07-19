@@ -31,7 +31,7 @@
   - Review lane: verifier subagent
   - *(Persisted-value trimming for `Artist.Name`/`externalId` → Task 6, D3; not in this task.)*
 
-- [ ] **Task 4 [P] — VenueService normalization (search only)** *(depends: Task 1)*
+- [x] **Task 4 [P] — VenueService normalization (search only)** *(depends: Task 1)*
   - Produces: `NormalizeSearchQuery` in `GetPagedVenuesForListAsync` (currently raw pass-through)
   - Consumes: Task 1 helper
   - Risk: Low — small surface; Venue list search gains normalization it never had
