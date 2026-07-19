@@ -84,19 +84,24 @@
 
 ### Helper contract
 
-- **REQ-TRIM-08** — The system SHALL expose exactly one reusable normalization helper:
-  `static class StringNormalization` in the Services project, namespace `MyVocaList.Services.Text`, with:
-  - `string NormalizeSearchQuery(string query)` — null/whitespace-only → `string.Empty`; otherwise edge-trim + collapse internal whitespace runs to a single space.
-  - `string TrimForStorage(string value)` — null → null; otherwise edge-trim + collapse internal whitespace runs (D1 approved).
-  - `string TrimForStorageOrNull(string value)` — as above, but empty/whitespace-only result → `null`.
+- **REQ-TRIM-08** — The system SHALL expose exactly one reusable normalization utility, as
+  extension methods on `string` in a new dependency-free leaf project `MyVocaList.Extensions`,
+  namespace `MyVocaList.Extensions.Strings` *(relocated from a Services-project static class per D4,
+  2026-07-19 — see design.md § D4; behavior/nullability contract unchanged from the original
+  2026-07-19 Task 1 implementation, only calling syntax and project location changed)*:
+  - `string NormalizeSearchQuery(this string query)` — null/whitespace-only → `string.Empty`; otherwise edge-trim + collapse internal whitespace runs to a single space.
+  - `string TrimForStorage(this string value)` — null → null; otherwise edge-trim + collapse internal whitespace runs (D1 approved).
+  - `string TrimForStorageOrNull(this string value)` — as above, but empty/whitespace-only result → `null`.
 - **REQ-TRIM-09** — Search-query normalization call sites (REQ-TRIM-01–04) SHALL be inside
   Service-layer methods (business logic in Services — constitutional constraint). No ViewModel,
   page, or governed-component change is required for the core fix.
   *(Scope carve-out, D3 approved 2026-07-19: persisted-value trimming, REQ-TRIM-05/06/07, is
   reassigned to Infra-layer `ValueConverter`s per design.md § D3 — whitespace-in-storage was
   determined to be a data-integrity invariant, not business logic, so it falls outside this
-  requirement's scope. `StringNormalization.TrimForStorage`/`TrimForStorageOrNull` remain the
-  algorithm the converter delegates to.)*
+  requirement's scope. `TrimForStorage`/`TrimForStorageOrNull` extension methods, now in
+  `MyVocaList.Extensions.Strings` per D4, remain the algorithm the converter delegates to — D4
+  also removes the `Infra→Services` `ProjectReference` D3's implementation had introduced, since
+  `Infra` references `MyVocaList.Extensions` directly instead.)*
 
 ### Non-goals (explicit)
 
