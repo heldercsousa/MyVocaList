@@ -17,11 +17,15 @@ AutocompleteField (raw text, len≥2 gate, debounce)
   → Repository (StartsWith/Contains query — whitespace-sensitive)
 ```
 
-Because every search and every save already funnels through a Service method, normalizing there
-fixes all autocomplete consumers, all list/picker search boxes, and all future CRUD pairs at once —
+Because every search already funnels through a Service method, normalizing search there fixes all
+autocomplete consumers, all list/picker search boxes, and all future search call sites at once —
 with **zero changes to the governed AutocompleteField component** and zero ViewModel changes.
 This also automatically satisfies "never mutate the user's visible entry text" (REQ-TRIM-02):
 the bound `Text` is never written by the Service.
+
+> **Amended by D3 [2026-07-19]:** the *persistence* half of this finding (trim-on-save) no longer
+> lives in Service Create/Update methods — see "Decision points → D3" below. Search-query
+> normalization (REQ-TRIM-01–04) is unaffected and remains exactly as described above.
 
 ## The helper
 
@@ -66,8 +70,8 @@ shaping) and may legitimately diverge later.
 | Autocomplete (BUG-046 core) | `PersonService.SearchPersonsAsync`, `SearchPersonsStartsWithAsync` | `searchTerm = StringNormalization.NormalizeSearchQuery(searchTerm)` at method top; min-length check runs on the normalized value (REQ-TRIM-04) |
 | Autocomplete (artist) | `ArtistService.SearchArtistsByNameAsync`, `ArtistSuggestionService.GetLocal/RemoteAsync`, `SongSuggestionService` | replace ad-hoc `Trim()` with `NormalizeSearchQuery` |
 | List/picker search | `ArtistService.GetPagedAsync`, `CatalogService.GetPagedByArtistAsync`, Venue/Person/Song/Event paged+search methods, `MusicMetadataService.Search*`, `YouTubeSearchService.SearchAsync` | same substitution |
-| Persist (required names) | `PersonService`, `ArtistService`, `VenueService`, `EventService`, `SongService` Create/Update — every current `name.Trim()` site | `TrimForStorage` |
-| Persist (optional fields) | e.g. `PersonService` email/birthday (`string.IsNullOrWhiteSpace(x) ? null : x.Trim()` sites) | `TrimForStorageOrNull` |
+| Persist (required names) | `EntityTypeConfiguration` for `Person.Name`, `Artist.Name`, `Venue.Name`, `Event.Name`, `Song.Title`, … (Infra) | `ValueConverter<string,string>` delegating to `TrimForStorage` (D3 — supersedes per-call-site `name.Trim()`/`TrimForStorage()` calls in Service Create/Update methods) |
+| Persist (optional fields) | `EntityTypeConfiguration` for nullable name-like/optional fields, e.g. `Person.Email` | `ValueConverter<string?,string?>` delegating to `TrimForStorageOrNull` (D3) |
 
 UI layer: no changes. `CrudListViewModelBase._currentSearchQuery = SearchText.Trim()` (UI-side
 edge-trim) is left as-is — harmless, and removing it is out of scope; the Service normalization
@@ -76,19 +80,26 @@ behind it is what guarantees correctness.
 ## Analysis: why NOT the alternatives
 
 - **EF Core SaveChanges interceptor (trim everything automatically):** rejected — violates the
-  "zero friction" gate. It is invisible magic (values change between service and DB), would trim
-  fields where whitespace may be meaningful (future lyrics/notes fields), and puts business
-  behavior in Infra. Explicit helper calls in Services keep intent auditable.
+  "zero friction" gate. It is invisible magic at the DbContext level (affects every string
+  property with no per-field opt-in), would trim fields where whitespace may be meaningful (future
+  lyrics/notes fields), and offers no place to name/scope the behavior per property. Superseded for
+  the *persistence* half by the scoped `ValueConverter` decision below (D3) — the interceptor
+  remains rejected; the converter is a narrower, per-property mechanism and was evaluated
+  separately.
 - **Fix inside AutocompleteField:** rejected for the core fix — it is a governed component
   (four-gate process), it only covers 2 of the ~10 search surfaces, and component-side trimming
-  would still leave the persistence problem. Service-side normalization covers everything.
+  would still leave the persistence problem. Service-side normalization covers everything for the
+  *search* half (D3 does not change this — converters do not see bare query-string parameters).
 - **One shared method for both search and storage:** rejected — same primitive, different
   contracts (nullability, D1 divergence risk). Two thin named methods cost nothing and keep call
-  sites self-documenting.
+  sites self-documenting. `StringNormalization.TrimForStorage`/`TrimForStorageOrNull` remain the
+  implementation the `ValueConverter` delegates to (D3) — the primitive isn't duplicated.
 
 ## Decision points (resolved)
 
-> **Decision recorded [2026-07-15]:** Helder resolved both points — D1: **YES**; D2: **APPROVED**.
+> **Decision recorded [2026-07-15]:** Helder resolved D1/D2 — D1: **YES**; D2: **APPROVED**.
+> **Decision recorded [2026-07-19]:** D3 resolved — **ValueConverter for persistence sites,
+> approved**. See below.
 
 - **D1 (resolved YES):** `TrimForStorage` collapses *internal* whitespace runs in addition to
   edge-trimming (REQ-TRIM-06, now unconditional) — stored values stay congruent with search
@@ -99,6 +110,38 @@ behind it is what guarantees correctness.
   (cross-reference kept in this section for readers arriving from
   `DevCycleCraft/autocomplete-component/`). No AutocompleteField four-gate governance is needed
   for the core fix. Reasoning: one helper, one spec, one review.
+- **D3 (resolved 2026-07-19 — ValueConverter for persistence, approved):** persisted-string
+  trimming (REQ-TRIM-05/06/07) moves from explicit per-Service-method calls to a shared EF Core
+  `ValueConverter<string, string>` applied in `EntityTypeConfiguration` for each name-like property
+  (`Person.Name`, `Artist.Name`, `Venue.Name`, `Event.Name`, `Song.Title`, …). Rationale:
+  - **Not business logic:** unlike domain rules (pricing, workflow state), whitespace-in-storage
+    is a universal, exception-free data-integrity invariant — no entity has a case where leading/
+    trailing/doubled whitespace is meaningful. It sits closer to "column collation" or "NOT NULL"
+    than to domain behavior, so the constitutional "business logic in Services only" constraint
+    does not bind it. This is a deliberate re-scoping of that constraint's boundary for this one
+    concern — recorded here per `CLAUDE.md § Amending These Rules` intent, not a silent exception.
+  - **No SQL-side cost:** a `ValueConverter`'s `ToProviderExpression` runs client-side in .NET on
+    the parameter value before EF binds it to the SQL command (`INSERT`/`UPDATE`/`WHERE` parameter)
+    — EF never emits `TRIM()`/`REPLACE()` into generated SQL. `FromProviderExpression` is the
+    identity function (`v => v`), so reads are zero-cost passthrough. Verified: this eliminates the
+    original objection to "Infra-layer normalization" being a query-performance risk.
+  - **Enforcement over convention:** a converter fires for every write through a mapped property —
+    including ones a future developer adds and forgets to wrap in `TrimForStorage` — closing the
+    gap the original ad-hoc `name.Trim()` pattern had (15+ scattered call sites, easy to miss on a
+    new field).
+  - **Scope limit (unchanged from D1/D2 reasoning):** a converter only sees mapped entity
+    properties. It does **not** reach the autocomplete/search query string (a bare method
+    parameter, never an entity property) — `NormalizeSearchQuery` therefore stays an explicit
+    Service-layer call per REQ-TRIM-01/03/04. D3 only reassigns *where* REQ-TRIM-05/06/07 is
+    enforced; it does not change REQ-TRIM-01–04.
+  - **Delegation, not reimplementation:** the converter's lambda calls
+    `StringNormalization.TrimForStorage`/`TrimForStorageOrNull` (Services project) — Infra
+    configures *where* the rule applies, Services still owns *what* the rule does. This keeps the
+    normalization algorithm itself in one place regardless of D3.
+  - **Pre-existing-data caveat (same as the rejected interceptor and as the original Service-call
+    design):** rows persisted before this converter existed are not retroactively trimmed;
+    converters only affect rows written/rewritten going forward. No backfill migration is in scope
+    unless Helder requests one separately.
 
 ## Governance note — AutocompleteField four-gate (stub)
 
@@ -117,4 +160,9 @@ must never be bundled into the BUG-046 fix task.
 
 1. `StringNormalization` + full unit tests (Red first — BUG-046 is Major, regression mandatory).
 2. Person search path (BUG-046 regression tests fail-before/pass-after).
-3. Remaining search services; 4. persistence sites; each in a worktree task branch per workflow Rule 2.
+3. Remaining search services (Service-layer `NormalizeSearchQuery` calls, unchanged by D3).
+4. Persistence: `ValueConverter<string,string>` / `ValueConverter<string?,string?>` per name-like
+   property in each `EntityTypeConfiguration`, delegating to `TrimForStorage`/`TrimForStorageOrNull`
+   (D3, 2026-07-19 — supersedes the earlier "per-Service-method call" sketch); real-SQLite
+   round-trip tests per converter.
+Each step in its own worktree task branch per workflow Rule 2.
