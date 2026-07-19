@@ -22,7 +22,7 @@
   - Review lane: verifier subagent + Helder on-device E2E (REQ-TRIM-01/02, autocomplete singer field)
   - *(Persisted-value trimming for `Person.Name`/`Email` → Task 6, D3; not in this task.)*
 
-- [ ] **Task 3 [P] — ArtistService + ArtistSuggestionService normalization (search only)** *(depends: Task 1)*
+- [x] **Task 3 [P] — ArtistService + ArtistSuggestionService normalization (search only)** *(depends: Task 1)*
   - Produces: `NormalizeSearchQuery` in `SearchArtistsByNameAsync`/`GetPagedArtistsForListAsync`/suggestion term handling
   - Consumes: Task 1 helper
   - Risk: Low — replaces existing `Trim()` sites; internal-collapse is the only behavior change
