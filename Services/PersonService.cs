@@ -2,6 +2,7 @@ using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Services.Text;
 using System.Text.RegularExpressions;
 
 namespace MyVocaList.Services;
@@ -170,7 +171,8 @@ public class PersonService : IPersonService
     /// <inheritdoc />
     public async Task<IEnumerable<Person>> SearchPersonsAsync(string searchTerm, int maxResults = 5, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 2)
+        searchTerm = StringNormalization.NormalizeSearchQuery(searchTerm);
+        if (searchTerm.Length < 2)
             return [];
         return await _personRepository.SearchByNameStartsWithAsync(searchTerm, maxResults, cancellationToken);
     }
@@ -178,7 +180,8 @@ public class PersonService : IPersonService
     /// <inheritdoc />
     public async Task<IEnumerable<Person>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = 3, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 2)
+        searchTerm = StringNormalization.NormalizeSearchQuery(searchTerm);
+        if (searchTerm.Length < 2)
             return [];
         return await _personRepository.SearchByNameStartsWithAsync(searchTerm, maxResults, cancellationToken);
     }
@@ -191,6 +194,8 @@ public class PersonService : IPersonService
     public async Task<(IEnumerable<PersonListItemDto> items, int totalCount)> GetPagedPersonsForListAsync(
         int pageNumber, int pageSize, string query = null, CancellationToken cancellationToken = default)
     {
+        query = string.IsNullOrWhiteSpace(query) ? null : StringNormalization.NormalizeSearchQuery(query);
+
         var (persons, totalCount) = await _personRepository.GetPagedAsync(
             pageNumber, pageSize, query, cancellationToken);
 
