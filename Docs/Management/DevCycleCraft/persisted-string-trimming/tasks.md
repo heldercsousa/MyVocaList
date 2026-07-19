@@ -5,7 +5,7 @@
 > DRY Onion: search-normalization work (Tasks 2–5) is Services-layer (+ tests) — UI untouched (REQ-TRIM-09). Persistence work (Task 6) is Infra-layer (`EntityTypeConfiguration`) per D3 — this is a deliberate, spec-recorded carve-out from the Services-only rule, not a violation.
 > Every code task: git worktree branched from `develop` (Rule 2 HARD RULE). Tasks 2–5 are `[P]` — disjoint `Files owned`, may run as one wave of ≤4 after Task 1 merges. Task 6 touches `EntityTypeConfiguration`/possibly `AppDbContext.cs` (sequential-only file registry, `workflow.md`) — confirmed no overlap with Tasks 2–5's file lists, but verify at dispatch time; do not run Task 6 in the same wave as any other task touching `AppDbContext.cs`.
 
-- [ ] **Task 1 — `StringNormalization` helper + Level-A unit tests**
+- [x] **Task 1 — `StringNormalization` helper + Level-A unit tests**
   - Produces: `MyVocaList.Services.Text.StringNormalization` (`NormalizeSearchQuery`, `TrimForStorage`, `TrimForStorageOrNull` — exact signatures in plan.md Task 1)
   - Consumes: nothing
   - Risk: Low — new pure static class, no existing behavior touched
