@@ -455,6 +455,26 @@ stronger evidence than a visual re-read alone for generated-expression-tree conv
 - Pre-existing-data caveat (documented in `design.md § D3`, not re-litigated here): rows persisted
   before this converter existed are not retroactively trimmed; no backfill migration is in scope.
 
+### Post-rebase repoint (2026-07-19)
+Rebased onto post-Task-6a `develop`. Repointed `TrimValueConverters.cs` and `Infra/MyVocaList.Infra.csproj`
+from `MyVocaList.Services.Text.StringNormalization` (Services) to `MyVocaList.Extensions.Strings`
+extension-method syntax (`v.TrimForStorage()` / `v.TrimForStorageOrNull()`), per D4. Removed the
+`Infra→Services` `ProjectReference` (via `dotnet remove ... reference`) and added
+`Infra→MyVocaList.Extensions` instead (`dotnet add ... reference`) — resolves the DRY Onion violation
+the verifier flagged on the pre-rebase commit. No `EntityTypeConfiguration` file needed a `using`
+change (they only reference `TrimValueConverters`, same namespace).
+- `grep -rn "MyVocaList.Services.Text\|StringNormalization\." --include=*.cs Infra/` → zero matches.
+- `Infra/MyVocaList.Infra.csproj` `ProjectReference`s: `Domain`, `MyVocaList.Extensions` only (no `Services`).
+- `dotnet build` → 8 projects, 0 errors, 118 warnings (all pre-existing, unrelated).
+- `dotnet test MyVocaList.Tests` → 528 passed, 0 failed, 0 skipped.
+- `dotnet test MyVocaList.Tests --filter "FullyQualifiedName~PersistedStringTrimmingTests"` → 6 passed,
+  0 failed (includes the collation + converter composition test,
+  `ArtistName_TrimmedOnWrite_StillMatchesCaseInsensitiveQuery`, re-verified specifically per the
+  rebase briefing).
+Changed files this repoint: `Infra/EntityEFConfig/TrimValueConverters.cs` (using + call syntax),
+`Infra/MyVocaList.Infra.csproj` (ProjectReference swap), `Docs/Management/DevCycleCraft/persisted-string-trimming/tasks.md`
+(Task 6 status note updated).
+
 ### Verifier Verdict - 2026-07-19
 **Result:** PASS
 
