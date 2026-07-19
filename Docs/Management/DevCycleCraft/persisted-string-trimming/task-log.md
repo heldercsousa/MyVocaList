@@ -454,3 +454,76 @@ stronger evidence than a visual re-read alone for generated-expression-tree conv
   success criterion in the briefing).
 - Pre-existing-data caveat (documented in `design.md § D3`, not re-litigated here): rows persisted
   before this converter existed are not retroactively trimmed; no backfill migration is in scope.
+
+### Verifier Verdict - 2026-07-19
+**Result:** PASS
+
+**Findings:**
+
+- [ARCHITECTURE FINDING - most prominent, surfaced first per verification instructions]
+  Infra/MyVocaList.Infra.csproj gained a new ProjectReference to Services/MyVocaList.Services.csproj
+  (commit cc1af4d diff confirmed) so TrimValueConverters.cs (Infra) can call
+  MyVocaList.Services.Text.StringNormalization.TrimForStorage/TrimForStorageOrNull (Services).
+  Independently re-derived the full reference graph from each .csproj (not from the implementor claim):
+  - Contracts -> (none)
+  - Domain -> Contracts
+  - Services -> Contracts, Domain (does NOT reference Infra)
+  - Infra -> Domain, Services (new, this commit)
+  - MyVocaList (app) -> Domain, Infra, Services
+  Not circular - Services has zero reference to Infra, so .NET build graph is a DAG and the
+  build succeeding (7 projects, 0 errors, independently re-run) is consistent, not suspicious.
+  However it IS a directional violation of the DRY Onion ordering stated in workflow.md Rule 4 and
+  CLAUDE.md Architecture section (Domain -> Infra -> Services -> UI) - Infra now depends forward on
+  Services, which is backward relative to that stated order. design.md D3 (approved by Helder
+  2026-07-19) documents the conceptual decision - Infra configures WHERE, Services owns WHAT -
+  but does not explicitly call out the concrete consequence that this requires a new cross-layer
+  ProjectReference running against the stated Onion order; that mechanical detail was decided by
+  the implementor at build time, not pre-approved in the spec text itself (the implementor did
+  self-flag this transparently in the task-log Architecture note section, which is good practice,
+  but self-flagging is not the same as prior Helder sign-off on the csproj-level mechanism).
+  Alternative not investigated by the implementor: StringNormalization (Services/Text/, namespace
+  MyVocaList.Services.Text) is a pure static function class (verified - unmodified this commit, no
+  DI, no side effects, no Services-layer state). Both Domain (has Entities, Entity, Interfaces,
+  ReadModels, RepositoryInterface, ServicesInterfaces folders) and Contracts (has DTOs, Enums,
+  Messages, Models folders - sits below Domain in the graph, referenced by it) exist as viable
+  lower-layer homes. Moving StringNormalization to Contracts would let Infra continue to depend
+  only on Domain/Contracts (both already in its dependency set) and eliminate the new
+  Infra -> Services edge entirely, restoring strict Onion order with no loss of the D3 shared
+  normalization primitive goal. This alternative was not evaluated in design.md or the task-log.
+  Recommendation: not a build defect and not a spec violation in letter (D3 was approved), but a
+  spec gap - the mechanical layering consequence of D3 was decided unilaterally by the implementor
+  rather than pre-approved by Helder as part of D3 resolution. Escalate to Helder for an explicit
+  yes/no: (a) accept the Infra -> Services reference as a documented, narrow exception to the Onion
+  order (add an explicit note to design.md D3 recording this), or (b) request a follow-up task to
+  relocate StringNormalization to Contracts and drop the new ProjectReference. Not a blocker for
+  merge given D3 conceptual approval and the transparent self-flagging, but must not be treated as
+  silently pre-cleared.
+
+- [PASS] Service method / EF configuration signatures match design.md D3 - ValueConverter<string,string>/ValueConverter<string?,string?> per name-like property, delegating to TrimForStorage/TrimForStorageOrNull.
+- [PASS] Validation rules (REQ-TRIM-05/06/07) enforced at the persistence layer per D3 - verified in PersonConfiguration.cs, ArtistConfiguration.cs, VenueConfiguration.cs, QueueManagementEventConfiguration.cs, SongConfiguration.cs diffs.
+- [PASS] All three ACs (REQ-TRIM-05/06/07) have a traceability-matrix row and a corresponding passing test.
+- [PASS] No DisplayAlert/DisplayActionSheet/DisplayPromptAsync added - diff touches only Infra/Services/test files, no UI.
+- [PASS] No business logic added to ViewModels/pages - Services layer only; the trimming algorithm remains in Services/Text/StringNormalization.cs, confirmed unmodified this commit (empty diff).
+- [PASS] Repository interfaces unaffected - no IRepository changes in this task.
+- [CONDITIONAL - see architecture finding above] Services does not depend on Infra types directly - true and verified, but Infra now depends on Services, which the finding above addresses.
+- [N/A] No new ContentPage added.
+- [PASS] No new pragma warning disable / SuppressMessage introduced.
+- [PASS] Domain.Entities.Event vs Domain.Entity.Event - independently confirmed via grep: two distinct Event classes exist (Domain/Entities/Event.cs implements IAggregateRoot, Domain/Entity/Event.cs is a separate legacy type). EventService.cs imports MyVocaList.Domain.Entities and its CreateEventAsync return type is Domain.Entities.Event?; confirmed the live entity is the one QueueManagementEventConfiguration.cs (converted this commit) configures; EventConfiguration.cs (legacy Domain.Entity.Event) untouched, correctly out of scope.
+- [PASS] Each EntityTypeConfiguration diff: HasConversion(TrimValueConverters.Required or Optional) precedes UseCollation(CollationConstants.Default) in the fluent chain on every converted property (Person.FullName, Artist.Name, Venue.Name, Event.Name, Song.Title, Song.Version) - correct EF Core composition order confirmed by reading each diff hunk directly, not from the implementor summary. FromProvider side is identity (v => v) in both TrimValueConverters.Required/Optional.
+- [PASS] Services/Text/StringNormalization.cs - zero diff this commit (git diff cc1af4d~1..cc1af4d on that path returns empty), Task-1 contract untouched.
+- [PASS] Ad-hoc Trim() removal - confirmed in PersonService.cs/ArtistService.cs/VenueService.cs/EventService.cs/SongService.cs diffs; storage-feeding Trim() calls removed, WHERE-parameter calls left untrimmed with an explanatory comment (correct - EF applies the converter to query comparands too), display-message Trim() calls retained (cosmetic, out of persistence scope). Grep for NormalizeSearchQuery across the full commit diff returns zero matches - confirms Tasks 2-5 search-normalization code was not touched.
+- [PASS] PersistedStringTrimmingTests.cs - uses TestDbContextFactory.Create() (real temp-file SQLite per testing.md anti-pattern rule, not EF in-memory), exercises Person, Artist, Song (3 entities as briefed), includes 2 optional-field null-coercion cases (Person.Email, Song.FeaturedArtists), AC REQ-TRIM-NN comments present on the 5 AC-mapped tests (the 6th, collation-composition test, is an infra/cross-cutting verification test, exempt per testing.md).
+- [PASS] Red to Green claim independently plausible - test assertions compare against a specific collapsed/trimmed string (e.g. "John Doe" vs raw " John  Doe ") that could only pass if the ValueConverter executed; without it (pre-Task-6 raw SQLite round-trip) the assertions would fail by construction. Task-log stated stash/pop RED (6 failed) to GREEN (6 passed) evidence is internally consistent with this.
+- [PASS] task-log.md - exactly 6 "## Task:" headers present (Tasks 1-6), Task 6 entry appended without disturbing prior entries.
+- [PASS] tasks.md - Task 6 checkbox is [x].
+- [PASS] Independent dotnet build MyVocaList.sln - 7 projects, 0 errors, 7 pre-existing warnings (DevExpress trial-license + one CA1416), matches task-log claim.
+- [PASS] Independent dotnet test MyVocaList.Tests - 528/528 passed, 0 failed, 0 skipped, no flaky UI-timing tests observed this run.
+- [PASS] git diff --stat develop..HEAD - 15 files changed, all within Task 6 legitimate scope (5 EntityTypeConfiguration files, new TrimValueConverters.cs, Infra.csproj, 5 Service files, new test file, task-log.md, tasks.md); nothing unexpected. Working tree clean (git status).
+
+**Blockers (must be fixed before proceeding):**
+- None.
+
+**Warnings (should be fixed; may proceed with justification):**
+- The Infra -> Services ProjectReference (architecture finding above) should get an explicit Helder yes/no and, if accepted, a one-line addendum to design.md D3 recording the concrete csproj-level consequence - not because it is wrong, but because it was an implementor-level architectural decision that ran ahead of what the spec text explicitly pre-approved.
+
+**Recommendation:** Proceed to merge. Escalate the Infra -> Services reference-direction question to Helder as a fast-follow (does not block this task) - either add the explicit exception note to design.md D3, or open a follow-up task to relocate StringNormalization to Contracts and remove the new reference.
