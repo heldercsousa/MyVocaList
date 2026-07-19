@@ -208,6 +208,12 @@ Regression risk: Low — normalization is additive; existing clean-query behavio
 > Persisted-value trimming for Person (`Person.Name`, `Person.Email`) is handled in Task 6
 > (`ValueConverter`s, D3) — not in this task.
 
+> **Spec updated [2026-07-19]:** `GetPagedPersonsForListAsync` normalizes as
+> `query = string.IsNullOrWhiteSpace(query) ? null : StringNormalization.NormalizeSearchQuery(query)`,
+> not the literal one-line form above — the literal form would turn a `null` query into `""` and
+> change the existing default-query (`query = null`) contract/repository-call shape. Null is
+> preserved as null; any non-empty query is normalized the same way (REQ-TRIM-03 unaffected).
+
 ---
 
 ### Task 3 [P]: ArtistService + suggestion services — search normalization only
