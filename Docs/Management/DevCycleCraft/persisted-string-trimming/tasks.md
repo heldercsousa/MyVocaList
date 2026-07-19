@@ -13,7 +13,7 @@
   - Demo: `dotnet test --filter StringNormalizationTests` green; `"  jo  hn "` → `"jo hn"` in all three methods per contract
   - Review lane: verifier subagent (spec REQ-TRIM-08/10 vs diff)
 
-- [ ] **Task 2 [P] — PersonService: BUG-046 regression fix (search normalization only)** *(depends: Task 1)*
+- [x] **Task 2 [P] — PersonService: BUG-046 regression fix (search normalization only)** *(depends: Task 1)*
   - Produces: normalized queries in `SearchPersonsAsync`/`SearchPersonsStartsWithAsync`/`GetPagedPersonsForListAsync`; BUG-046 regression tests (Red→Green evidence — Major, mandatory)
   - Consumes: Task 1 helper
   - Risk: Medium — hot search path for autocomplete; min-length gate moves post-normalization (REQ-TRIM-04)
