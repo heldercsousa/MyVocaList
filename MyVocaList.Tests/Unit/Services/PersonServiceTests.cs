@@ -1,5 +1,5 @@
 using MyVocaList.Contracts.Models;
-using MyVocaList.Services.Text;
+using MyVocaList.Extensions.Strings;
 
 namespace MyVocaList.Tests.Unit.Services;
 
@@ -185,7 +185,7 @@ public class PersonServiceTests
     [InlineData(" jo  hn ")]
     public async Task SearchPersonsAsync_ExtraWhitespace_ForwardsNormalizedTermToRepository(string dirty)
     {
-        var expected = StringNormalization.NormalizeSearchQuery(dirty);
+        var expected = dirty.NormalizeSearchQuery();
         _repoMock
             .Setup(r => r.SearchByNameStartsWithAsync(expected, It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Person>())
@@ -220,7 +220,7 @@ public class PersonServiceTests
     [InlineData(" jo  hn ")]
     public async Task SearchPersonsStartsWithAsync_ExtraWhitespace_ForwardsNormalizedTermToRepository(string dirty)
     {
-        var expected = StringNormalization.NormalizeSearchQuery(dirty);
+        var expected = dirty.NormalizeSearchQuery();
         _repoMock
             .Setup(r => r.SearchByNameStartsWithAsync(expected, It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Person>())
