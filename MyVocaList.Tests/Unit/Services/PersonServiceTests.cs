@@ -1,4 +1,5 @@
 using MyVocaList.Contracts.Models;
+using MyVocaList.Services.Text;
 
 namespace MyVocaList.Tests.Unit.Services;
 
@@ -175,6 +176,76 @@ public class PersonServiceTests
         Assert.True(isValid);
     }
 
+    // ── SearchPersonsAsync (BUG-046) ────────────────────────────────────────────
+
+    // [AC] REQ-TRIM-01: whitespace-polluted query produces the same repo call as the clean query
+    [Theory]
+    [InlineData("  jo")]
+    [InlineData("jo ")]
+    [InlineData(" jo  hn ")]
+    public async Task SearchPersonsAsync_ExtraWhitespace_ForwardsNormalizedTermToRepository(string dirty)
+    {
+        var expected = StringNormalization.NormalizeSearchQuery(dirty);
+        _repoMock
+            .Setup(r => r.SearchByNameStartsWithAsync(expected, It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Person>())
+            .Verifiable();
+
+        await CreateSut().SearchPersonsAsync(dirty);
+
+        _repoMock.Verify(); // fails before fix: repo receives the raw dirty term
+    }
+
+    // [AC] REQ-TRIM-04: query that normalizes below min length returns empty WITHOUT hitting the repo
+    [Theory]
+    [InlineData(" a ")]
+    [InlineData("  ")]
+    [InlineData(null)]
+    public async Task SearchPersonsAsync_NormalizesBelowMinLength_ReturnsEmptyWithoutRepositoryCall(string dirty)
+    {
+        var result = await CreateSut().SearchPersonsAsync(dirty);
+
+        Assert.Empty(result);
+        _repoMock.Verify(
+            r => r.SearchByNameStartsWithAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    // ── SearchPersonsStartsWithAsync (BUG-046) ──────────────────────────────────
+
+    // [AC] REQ-TRIM-01: whitespace-polluted query produces the same repo call as the clean query
+    [Theory]
+    [InlineData("  jo")]
+    [InlineData("jo ")]
+    [InlineData(" jo  hn ")]
+    public async Task SearchPersonsStartsWithAsync_ExtraWhitespace_ForwardsNormalizedTermToRepository(string dirty)
+    {
+        var expected = StringNormalization.NormalizeSearchQuery(dirty);
+        _repoMock
+            .Setup(r => r.SearchByNameStartsWithAsync(expected, It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Person>())
+            .Verifiable();
+
+        await CreateSut().SearchPersonsStartsWithAsync(dirty);
+
+        _repoMock.Verify(); // fails before fix: repo receives the raw dirty term
+    }
+
+    // [AC] REQ-TRIM-04: query that normalizes below min length returns empty WITHOUT hitting the repo
+    [Theory]
+    [InlineData(" a ")]
+    [InlineData("  ")]
+    [InlineData(null)]
+    public async Task SearchPersonsStartsWithAsync_NormalizesBelowMinLength_ReturnsEmptyWithoutRepositoryCall(string dirty)
+    {
+        var result = await CreateSut().SearchPersonsStartsWithAsync(dirty);
+
+        Assert.Empty(result);
+        _repoMock.Verify(
+            r => r.SearchByNameStartsWithAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
     // ── GetPagedPersonsForListAsync ───────────────────────────────────────────
 
     [Fact]
@@ -207,6 +278,19 @@ public class PersonServiceTests
         Assert.Equal("15/03", dto.BirthdayDayMonth);
         Assert.Equal("john@example.com", dto.Email);
         Assert.Equal(3, dto.Participations);
+    }
+
+    // [AC] REQ-TRIM-03: list search term with extra whitespace is normalized before hitting the repository
+    [Fact]
+    public async Task GetPagedPersonsForListAsync_ExtraWhitespaceQuery_ForwardsNormalizedTermToRepository()
+    {
+        _repoMock.Setup(r => r.GetPagedAsync(1, 20, "jo hn", default))
+                 .ReturnsAsync((Enumerable.Empty<Person>(), 0))
+                 .Verifiable();
+
+        await CreateSut().GetPagedPersonsForListAsync(1, 20, " jo  hn ");
+
+        _repoMock.Verify();
     }
 
     // ── UpdatePersonAsync ─────────────────────────────────────────────────────
