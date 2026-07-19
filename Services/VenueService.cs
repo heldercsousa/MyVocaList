@@ -58,8 +58,9 @@ namespace MyVocaList.Services
             if (!validation.isValid)
                 return (false, validation.message);
 
-            name = name.Trim();
-
+            // Venue.Name trimming is enforced by the EF Core ValueConverter configured in
+            // VenueConfiguration (design.md § D3) — not here. EF applies the same converter to
+            // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
             var existing = await _venueRepository.GetByNameAsync(name);
             if (existing != null)
                 return (false, "There is another venue registered with this name");
@@ -68,7 +69,7 @@ namespace MyVocaList.Services
             await _venueRepository.AddAsync(venue);
             await _venueRepository.SaveChangesAsync();
 
-            return (true, $"Venue '{name}' successfully created!");
+            return (true, $"Venue '{name.Trim()}' successfully created!");
         }
 
         public async Task<(bool success, string message)> UpdateVenueAsync(int id, string newName)
@@ -79,12 +80,13 @@ namespace MyVocaList.Services
             if (!validation.isValid)
                 return (false, validation.message);
 
-            newName = newName.Trim();
-
             var venue = await _venueRepository.GetByIdAsync(id);
             if (venue == null)
                 return (false, "Venue not found");
 
+            // Venue.Name trimming is enforced by the EF Core ValueConverter configured in
+            // VenueConfiguration (design.md § D3) — not here. EF applies the same converter to
+            // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
             var existing = await _venueRepository.GetByNameAsync(newName);
             if (existing != null && existing.Id != id)
                 return (false, "There is another venue registered with this name");
@@ -93,7 +95,7 @@ namespace MyVocaList.Services
             await _venueRepository.UpdateAsync(venue);
             await _venueRepository.SaveChangesAsync();
 
-            return (true, $"Venue name successfully updated to '{newName}'!");
+            return (true, $"Venue name successfully updated to '{newName.Trim()}'!");
         }
 
         public async Task<(bool success, string message)> DeleteVenuesAsync(IEnumerable<int> ids)
