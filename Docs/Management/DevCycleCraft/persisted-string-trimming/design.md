@@ -100,6 +100,9 @@ behind it is what guarantees correctness.
 > **Decision recorded [2026-07-15]:** Helder resolved D1/D2 — D1: **YES**; D2: **APPROVED**.
 > **Decision recorded [2026-07-19]:** D3 resolved — **ValueConverter for persistence sites,
 > approved**. See below.
+> **Decision recorded [2026-07-19]:** D4 resolved — **relocate `StringNormalization` out of
+> Services into a new dependency-free leaf project, `MyVocaList.Extensions`, as extension methods
+> on `string`**. See below. Supersedes D3's ProjectReference mechanism (Infra→Services is removed).
 
 - **D1 (resolved YES):** `TrimForStorage` collapses *internal* whitespace runs in addition to
   edge-trimming (REQ-TRIM-06, now unconditional) — stored values stay congruent with search
@@ -110,6 +113,40 @@ behind it is what guarantees correctness.
   (cross-reference kept in this section for readers arriving from
   `DevCycleCraft/autocomplete-component/`). No AutocompleteField four-gate governance is needed
   for the core fix. Reasoning: one helper, one spec, one review.
+- **D4 (resolved 2026-07-19 — relocate to `MyVocaList.Extensions`, approved):** Task 6's
+  implementation added a `ProjectReference` from `Infra` to `Services` so `EntityTypeConfiguration`
+  classes could call `StringNormalization` (Services/Text). A verifier flagged this as a directional
+  violation of the DRY Onion order (`Domain → Infra → Services → UI`, `workflow.md` Rule 4) — not
+  circular (confirmed: `Services` does not reference `Infra`), but architecturally backwards for a
+  pure, stateless utility to live in Services at all. Helder's call: `StringNormalization`'s three
+  methods are not business logic and not Infra-specific configuration — they are generic BCL-type
+  utilities with zero dependency on this solution's Domain/Infra/Services types, indistinguishable
+  in kind from something reusable across unrelated .NET solutions.
+  - **New project:** `MyVocaList.Extensions` — a leaf class library with **zero** `ProjectReference`
+    to `Domain`, `Infra`, `Services`, or `Contracts`. Sits structurally *below* the onion (parallel
+    to/under `Domain`), so every layer — including `Infra` — may reference it without inverting
+    anything. Organized by namespace-per-concern to absorb future similar utilities without
+    proliferating near-empty micro-projects: this feature's work lands in
+    `MyVocaList.Extensions.Strings`; a hypothetical future collection/date-time utility would get
+    its own namespace (`MyVocaList.Extensions.Collections`, etc.) inside the same project rather
+    than a new project per concern.
+  - **API shape:** rewritten as extension methods on `string` — `value.TrimForStorage()`,
+    `value.TrimForStorageOrNull()`, `query.NormalizeSearchQuery()` — per Microsoft's Framework
+    Design Guidelines on extension methods: "When an instance method would introduce a dependency
+    on some type that would break dependency management rules, use extension methods instead"
+    (`string` is a BCL type this solution doesn't own; the prior static-class-with-static-methods
+    shape was serviceable but not idiomatic for this case). Behavior and null-handling contract are
+    **unchanged** from Task 1 (REQ-TRIM-08) — only the calling syntax and project location move.
+  - **Consequence for D3:** `Infra`'s `EntityTypeConfiguration` classes now reference
+    `MyVocaList.Extensions` directly instead of `Services` — the `Infra → Services` edge introduced
+    by Task 6 is removed entirely, restoring strict onion order. `Services`' search-normalization
+    call sites (Tasks 2–5, REQ-TRIM-01–04) switch from `StringNormalization.NormalizeSearchQuery(x)`
+    to `x.NormalizeSearchQuery()` — same behavior, updated call syntax only.
+  - **Extraction path preserved:** because the project has no MyVocaList-specific dependencies from
+    day one, promoting it to a standalone repo + NuGet package later (if a second solution needs it)
+    is a near-zero-rework move — copy the project, add a `.sln`/CI, publish. Not done now because
+    only one solution currently needs it; premature repo/feed/CI setup for a 3-method utility would
+    be over-engineering relative to actual present need.
 - **D3 (resolved 2026-07-19 — ValueConverter for persistence, approved):** persisted-string
   trimming (REQ-TRIM-05/06/07) moves from explicit per-Service-method calls to a shared EF Core
   `ValueConverter<string, string>` applied in `EntityTypeConfiguration` for each name-like property
