@@ -1,9 +1,9 @@
-using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Domain.ServicesInterfaces;
+using System.Net.Http.Json;
 
 namespace MyVocaList.Services;
 
@@ -12,9 +12,9 @@ public sealed class FeedbackService : IFeedbackService
     private const string ClientName = "feedback";
     private static readonly Dictionary<FeedbackCategory, (string label, string githubLabel)> CategoryMap = new()
     {
-        [FeedbackCategory.BugReport]      = ("Bug Report",      "bug"),
+        [FeedbackCategory.BugReport] = ("Bug Report", "bug"),
         [FeedbackCategory.FeatureRequest] = ("Feature Request", "enhancement"),
-        [FeedbackCategory.Other]          = ("Other",           "question"),
+        [FeedbackCategory.Other] = ("Other", "question"),
     };
 
     private readonly IHttpClientFactory _httpClientFactory;
@@ -41,7 +41,7 @@ public sealed class FeedbackService : IFeedbackService
     public async Task<(bool success, string? error)> SubmitAsync(
         FeedbackSubmission submission, CancellationToken ct = default)
     {
-        var pat  = _configuration["GitHub:FeedbackPat"];
+        var pat = _configuration["GitHub:FeedbackPat"];
         var repo = _configuration["GitHub:FeedbackRepo"] ?? "heldercsousa/MyVocaList";
 
         if (string.IsNullOrWhiteSpace(pat))
@@ -56,7 +56,7 @@ public sealed class FeedbackService : IFeedbackService
             : submission.Message;
 
         var title = $"[{displayLabel}] {truncatedMessage}";
-        var body  = BuildIssueBody(submission, displayLabel);
+        var body = BuildIssueBody(submission, displayLabel);
         var labels = new[] { "user-feedback", githubLabel };
 
         var payload = new { title, body, labels };

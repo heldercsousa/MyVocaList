@@ -1,9 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Extensions;
 using MyVocaList.Infra;
-using MyVocaList.UI.Components;
 
 namespace MyVocaList.Tests.Unit.DependencyInjection;
 

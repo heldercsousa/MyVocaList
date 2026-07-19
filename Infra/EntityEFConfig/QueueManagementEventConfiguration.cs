@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MyVocaList.Contracts.Enums;
-using MyVocaList.Domain.Entities;
 using MyVocaList.Infra.Collation;
 using Event = MyVocaList.Domain.Entities.Event;
 

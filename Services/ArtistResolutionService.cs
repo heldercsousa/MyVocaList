@@ -1,8 +1,6 @@
-using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Domain.ServicesInterfaces;
-using MyVocaList.Domain.Resolution;
 
 namespace MyVocaList.Services;
 
@@ -95,48 +93,48 @@ public class ArtistResolutionService : IArtistResolutionService
         {
             case ResolutionChoice.UpdateExisting:
             case ResolutionChoice.AttachExternalId:
-            {
-                if (targetArtistId is null)
-                    return (false, "targetArtistId is required for UpdateExisting/AttachExternalId", 0);
-
-                var artist = await _artistRepository.GetByIdAsync(targetArtistId.Value, ct);
-                if (artist is null)
-                    return (false, $"Artist {targetArtistId} not found", 0);
-
-                // Attach external identity if absent
-                if (!string.IsNullOrWhiteSpace(candidate.ExternalProvider) &&
-                    !string.IsNullOrWhiteSpace(candidate.ExternalId) &&
-                    string.IsNullOrWhiteSpace(artist.ExternalId))
                 {
-                    artist.ExternalProvider = candidate.ExternalProvider;
-                    artist.ExternalId = candidate.ExternalId;
-                    artist.UpdatedAt = DateTime.UtcNow;
-                    await _artistRepository.UpdateAsync(artist, ct);
-                    await _artistRepository.SaveChangesAsync(ct);
-                }
+                    if (targetArtistId is null)
+                        return (false, "targetArtistId is required for UpdateExisting/AttachExternalId", 0);
 
-                return (true, "Artist resolved", targetArtistId.Value);
-            }
+                    var artist = await _artistRepository.GetByIdAsync(targetArtistId.Value, ct);
+                    if (artist is null)
+                        return (false, $"Artist {targetArtistId} not found", 0);
+
+                    // Attach external identity if absent
+                    if (!string.IsNullOrWhiteSpace(candidate.ExternalProvider) &&
+                        !string.IsNullOrWhiteSpace(candidate.ExternalId) &&
+                        string.IsNullOrWhiteSpace(artist.ExternalId))
+                    {
+                        artist.ExternalProvider = candidate.ExternalProvider;
+                        artist.ExternalId = candidate.ExternalId;
+                        artist.UpdatedAt = DateTime.UtcNow;
+                        await _artistRepository.UpdateAsync(artist, ct);
+                        await _artistRepository.SaveChangesAsync(ct);
+                    }
+
+                    return (true, "Artist resolved", targetArtistId.Value);
+                }
 
             case ResolutionChoice.CreateNew:
-            {
-                var (success, message, created) = await _artistService.CreateArtistAsync(candidate.Name, ct: ct);
-                if (!success || created is null)
-                    return (false, message, 0);
-
-                // Set external identity on the newly created artist if provided
-                if (!string.IsNullOrWhiteSpace(candidate.ExternalProvider) &&
-                    !string.IsNullOrWhiteSpace(candidate.ExternalId))
                 {
-                    created.ExternalProvider = candidate.ExternalProvider;
-                    created.ExternalId = candidate.ExternalId;
-                    created.UpdatedAt = DateTime.UtcNow;
-                    await _artistRepository.UpdateAsync(created, ct);
-                    await _artistRepository.SaveChangesAsync(ct);
-                }
+                    var (success, message, created) = await _artistService.CreateArtistAsync(candidate.Name, ct: ct);
+                    if (!success || created is null)
+                        return (false, message, 0);
 
-                return (true, message, created.Id);
-            }
+                    // Set external identity on the newly created artist if provided
+                    if (!string.IsNullOrWhiteSpace(candidate.ExternalProvider) &&
+                        !string.IsNullOrWhiteSpace(candidate.ExternalId))
+                    {
+                        created.ExternalProvider = candidate.ExternalProvider;
+                        created.ExternalId = candidate.ExternalId;
+                        created.UpdatedAt = DateTime.UtcNow;
+                        await _artistRepository.UpdateAsync(created, ct);
+                        await _artistRepository.SaveChangesAsync(ct);
+                    }
+
+                    return (true, message, created.Id);
+                }
 
             default:
                 return (false, $"Unsupported resolution choice: {choice}", 0);

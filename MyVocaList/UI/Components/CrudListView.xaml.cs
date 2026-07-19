@@ -1,5 +1,3 @@
-using DevExpress.Maui.CollectionView;
-
 namespace MyVocaList.UI.Components;
 
 /// <summary>

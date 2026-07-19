@@ -1,7 +1,5 @@
 using MyVocaList.Domain.RepositoryInterface;
-using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Infra.Repository;
-using MyVocaList.Infra.Repositories;
 
 namespace MyVocaList.Extensions;
 

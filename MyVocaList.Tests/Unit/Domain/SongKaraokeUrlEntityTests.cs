@@ -1,5 +1,3 @@
-using MyVocaList.Domain.Entity;
-
 namespace MyVocaList.Tests.Unit.Domain;
 
 public class SongKaraokeUrlEntityTests
