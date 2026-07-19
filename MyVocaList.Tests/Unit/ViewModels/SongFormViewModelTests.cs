@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Domain.Resolution;
-using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -492,8 +491,12 @@ public class SongFormViewModelTests
     {
         var song = new Song
         {
-            Id = 42, ArtistId = 1, Title = "Stored Title",
-            Version = "Live", FeaturedArtists = "Feat A", Lyrics = "Stored lyrics"
+            Id = 42,
+            ArtistId = 1,
+            Title = "Stored Title",
+            Version = "Live",
+            FeaturedArtists = "Feat A",
+            Lyrics = "Stored lyrics"
         };
         var songService = MakeSongServiceWithSong(song);
         var secureStorage = new Mock<ISecureStorageWrapper>();
@@ -520,8 +523,12 @@ public class SongFormViewModelTests
     {
         var song = new Song
         {
-            Id = 42, ArtistId = 1, Title = "Stored Title",
-            ExternalId = "dz-99", ExternalProvider = "Deezer", HasManualEdits = false
+            Id = 42,
+            ArtistId = 1,
+            Title = "Stored Title",
+            ExternalId = "dz-99",
+            ExternalProvider = "Deezer",
+            HasManualEdits = false
         };
         var songService = MakeSongServiceWithSong(song);
         var secureStorage = new Mock<ISecureStorageWrapper>();
@@ -545,8 +552,12 @@ public class SongFormViewModelTests
     {
         var song = new Song
         {
-            Id = 42, ArtistId = 1, Title = "Stored Title",
-            Version = "Live", FeaturedArtists = "Feat A", Lyrics = "Stored lyrics"
+            Id = 42,
+            ArtistId = 1,
+            Title = "Stored Title",
+            Version = "Live",
+            FeaturedArtists = "Feat A",
+            Lyrics = "Stored lyrics"
         };
         var songService = MakeSongServiceWithSong(song);
         songService.Setup(s => s.UpdateSongAsync(
@@ -598,7 +609,7 @@ public class SongFormViewModelTests
     public void ValidateTitleCommand_DirtyInvalidField_SetsError()
     {
         var tooLong = new string('x', 101); // exceeds 100-char limit; differs from the default "" so
-                                             // the property-changed handler actually fires
+                                            // the property-changed handler actually fires
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(tooLong))
                    .Returns((false, "Title is too long. Maximum 100 characters."));

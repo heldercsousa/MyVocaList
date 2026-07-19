@@ -1,5 +1,5 @@
-using System.Collections.Concurrent;
 using MyVocaList.UI.Collections;
+using System.Collections.Concurrent;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 

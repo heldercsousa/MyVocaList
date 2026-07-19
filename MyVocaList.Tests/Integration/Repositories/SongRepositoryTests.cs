@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Repository;
 using MyVocaList.Tests.Infrastructure;

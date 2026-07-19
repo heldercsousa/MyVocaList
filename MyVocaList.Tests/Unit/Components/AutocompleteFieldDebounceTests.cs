@@ -24,9 +24,9 @@ public class AutocompleteFieldDebounceTests
         var results = new List<string>();
         var debouncer = new AutocompleteDebouncer(action => action());
 
-        debouncer.Trigger("j",    100, t => results.Add(t));
-        debouncer.Trigger("jo",   100, t => results.Add(t));
-        debouncer.Trigger("joh",  100, t => results.Add(t));
+        debouncer.Trigger("j", 100, t => results.Add(t));
+        debouncer.Trigger("jo", 100, t => results.Add(t));
+        debouncer.Trigger("joh", 100, t => results.Add(t));
         debouncer.Trigger("john", 100, t => results.Add(t));
 
         await Task.Delay(300);

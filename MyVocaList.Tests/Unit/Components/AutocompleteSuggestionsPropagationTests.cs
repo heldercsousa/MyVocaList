@@ -1,7 +1,6 @@
+using MyVocaList.UI.Components.AutocompleteField;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Microsoft.Maui.Controls;
-using MyVocaList.UI.Components.AutocompleteField;
 
 namespace MyVocaList.Tests.Unit.Components;
 

@@ -1,5 +1,3 @@
-using MyVocaList.UI.ViewModels;
-
 namespace MyVocaList.Tests.Unit.ViewModels;
 
 /// <summary>

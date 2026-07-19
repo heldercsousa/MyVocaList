@@ -1,6 +1,4 @@
-using MyVocaList.Contracts.Models;
 using MyVocaList.UI.Services;
-using MyVocaList.UI.ViewModels;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 

@@ -46,7 +46,7 @@ public sealed partial class FeedbackViewModel : ViewModelBase
             if (success)
             {
                 Message = string.Empty;
-                Email   = string.Empty;
+                Email = string.Empty;
                 SelectedCategory = FeedbackCategory.BugReport;
                 await _snackbar.ShowSuccessAsync("Feedback sent — thank you!");
             }

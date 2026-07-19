@@ -1,8 +1,8 @@
-using System.Collections.Concurrent;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using MyVocaList.Domain.ServicesInterfaces;
+using System.Collections.Concurrent;
+using System.Text.Json;
 
 namespace MyVocaList.Infra.Interceptor;
 

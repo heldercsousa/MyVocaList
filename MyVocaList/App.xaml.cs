@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.Entity;
-using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Infra;
 
 namespace MyVocaList

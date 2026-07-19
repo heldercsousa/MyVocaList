@@ -259,8 +259,8 @@ public class ArtistRepositoryTests : IAsyncLifetime
         // Create a detached instance with modified values (simulates data from form/service layer)
         var editedInstance = new Artist
         {
-            Id        = artist.Id,
-            Name      = "Updated Name",
+            Id = artist.Id,
+            Name = "Updated Name",
             CreatedAt = artist.CreatedAt,
             UpdatedAt = DateTime.UtcNow
         };

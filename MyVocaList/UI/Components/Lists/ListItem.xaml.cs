@@ -118,12 +118,12 @@ public partial class ListItem : ContentView
     private void UpdateSlotAlignment()
     {
         bool top = SupportingMaxLines >= 2;
-        leadingSlot.VerticalOptions  = top ? LayoutOptions.Start : LayoutOptions.Center;
-        leadingSlot.Margin           = top ? new Thickness(0, 8, 16, 0) : new Thickness(0, 0, 16, 0);
-        textColumn.VerticalOptions   = top ? LayoutOptions.Start : LayoutOptions.Center;
-        textColumn.Margin            = top ? new Thickness(0, 8, 0, 0) : Thickness.Zero;
+        leadingSlot.VerticalOptions = top ? LayoutOptions.Start : LayoutOptions.Center;
+        leadingSlot.Margin = top ? new Thickness(0, 8, 16, 0) : new Thickness(0, 0, 16, 0);
+        textColumn.VerticalOptions = top ? LayoutOptions.Start : LayoutOptions.Center;
+        textColumn.Margin = top ? new Thickness(0, 8, 0, 0) : Thickness.Zero;
         trailingSlot.VerticalOptions = top ? LayoutOptions.Start : LayoutOptions.Center;
-        trailingSlot.Margin          = top ? new Thickness(8, 8, 0, 0) : new Thickness(8, 0, 0, 0);
+        trailingSlot.Margin = top ? new Thickness(8, 8, 0, 0) : new Thickness(8, 0, 0, 0);
     }
 
     private void UpdateContainerColor()

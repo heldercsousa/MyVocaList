@@ -1,4 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using MyVocaList.Contracts.Enums;
 
 namespace MyVocaList.UI.Models;

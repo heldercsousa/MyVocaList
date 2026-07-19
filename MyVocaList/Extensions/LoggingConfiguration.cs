@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Configuration;
-using Sentry;
 using Serilog;
 using Serilog.Events;
 

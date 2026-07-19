@@ -1,6 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using MyVocaList.Contracts;
-using MyVocaList.Domain.Entities;
 using MyVocaList.Domain.Interfaces;
 using Event = MyVocaList.Domain.Entities.Event;
 

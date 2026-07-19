@@ -1,5 +1,3 @@
-using MyVocaList.Contracts.DTOs;
-
 namespace MyVocaList.UI.Components.Sheets;
 
 public partial class WhatsNewBottomSheet : ContentView
