@@ -3,6 +3,7 @@ using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Services.Mappers;
+using MyVocaList.Services.Text;
 
 namespace MyVocaList.Services
 {
@@ -162,6 +163,8 @@ namespace MyVocaList.Services
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber, nameof(pageNumber));
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize, nameof(pageSize));
+
+            query = StringNormalization.NormalizeSearchQuery(query);
 
             var (items, totalCount) = await _venueRepository.GetPagedWithEventInfoAsync(pageNumber, pageSize, query);
             var dtos = items.Select(x => VenueMapper.ToListDto(x.venue, x.eventCount));
