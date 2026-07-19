@@ -25,11 +25,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\MyVocaList.Domain.csproj" />
-    <!-- D3 (persisted-string-trimming/design.md § D3): ValueConverters in EntityTypeConfiguration
-         delegate to MyVocaList.Services.Text.StringNormalization — Infra configures WHERE the
-         trimming rule applies, Services still owns WHAT the rule does. No reverse dependency
-         (Services does not reference Infra), so this does not introduce a cycle. -->
-    <ProjectReference Include="..\Services\MyVocaList.Services.csproj" />
+    <!-- D3/D4 (persisted-string-trimming/design.md § D3, D4): ValueConverters in
+         EntityTypeConfiguration delegate to MyVocaList.Extensions.Strings string-trimming
+         extension methods — Infra configures WHERE the trimming rule applies. MyVocaList.Extensions
+         is a dependency-free leaf project (Task 6a), so this keeps strict DRY Onion ordering
+         (no Infra -> Services edge). -->
+    <ProjectReference Include="..\MyVocaList.Extensions\MyVocaList.Extensions.csproj" />
   </ItemGroup>
 
 </Project>
