@@ -4,6 +4,7 @@ using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Services.Text;
 
 namespace MyVocaList.Services;
 
@@ -34,7 +35,7 @@ public class ArtistSuggestionService : IArtistSuggestionService
     /// <inheritdoc />
     public async Task<IReadOnlyList<ArtistSuggestionDto>> GetLocalAsync(string term, CancellationToken ct = default)
     {
-        var trimmed = term?.Trim() ?? string.Empty;
+        var trimmed = StringNormalization.NormalizeSearchQuery(term);
         if (trimmed.Length < 2)
             return [];
 
@@ -56,7 +57,8 @@ public class ArtistSuggestionService : IArtistSuggestionService
     public async Task<IReadOnlyList<ArtistSuggestionDto>> GetRemoteAsync(
         string term, IReadOnlyList<ArtistSuggestionDto> localResults, CancellationToken ct = default)
     {
-        var fetched = await FetchFromProvidersAsync(term, ct);
+        var normalizedTerm = StringNormalization.NormalizeSearchQuery(term);
+        var fetched = await FetchFromProvidersAsync(normalizedTerm, ct);
         if (fetched.Count == 0)
             return [];
 
