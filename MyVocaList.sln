@@ -314,6 +314,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persisted-string-trimming",
 		Docs\Management\DevCycleCraft\persisted-string-trimming\tasks.md = Docs\Management\DevCycleCraft\persisted-string-trimming\tasks.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extensions-layer-guidelines", "extensions-layer-guidelines", "{FA1234BC-0001-4000-8000-000000000052}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\extensions-layer-guidelines\audit-candidates.md = Docs\Management\DevCycleCraft\extensions-layer-guidelines\audit-candidates.md
+		Docs\Management\DevCycleCraft\extensions-layer-guidelines\README.md = Docs\Management\DevCycleCraft\extensions-layer-guidelines\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hamburger-nav-pattern", "hamburger-nav-pattern", "{FA1234BC-0001-4000-8000-000000000047}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\design.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\design.md
@@ -820,6 +826,7 @@ Global
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000046} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 	{FA1234BC-0001-4000-8000-000000000051} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+	{FA1234BC-0001-4000-8000-000000000052} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000047} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000048} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
