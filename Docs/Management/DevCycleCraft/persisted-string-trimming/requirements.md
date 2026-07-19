@@ -5,6 +5,16 @@
 > "String trimming on persistence — centralized normalization analysis" BACKLOG item (2026-07-15).
 > Companion design: `design.md` (same folder).
 
+> **Decision recorded [2026-07-15]:** Helder resolved both open decision points — **D1: YES**
+> (`TrimForStorage` collapses internal whitespace runs, not just edge-trim; REQ-TRIM-06 is now
+> unconditional) and **D2: APPROVED** (BUG-046's fix stays routed through this
+> `persisted-string-trimming/` folder as a Services-layer fix; no AutocompleteField four-gate
+> governance needed). See `design.md § Decision points`.
+
+> **Vocabulary:** *edge-trim* = removing leading and trailing whitespace only (`" a b "` → `"a b"`);
+> *internal whitespace run* = a sequence of 2+ consecutive whitespace characters between non-space
+> characters, collapsed to a single space (`"a  b"` → `"a b"`).
+
 ## Problem statements
 
 1. **BUG-046 (search side):** any extra whitespace in an autocomplete query — leading (`"  jo"`),
@@ -52,8 +62,7 @@
   whitespace (visible entry text may still show it until save completes — no live mutation).
 - **REQ-TRIM-06** — WHEN a name-like value is persisted, internal whitespace runs SHALL be
   collapsed to a single space (`"John  Doe"` → `"John Doe"`), so uniqueness/dedup checks agree
-  with search normalization. *(Helder decision point D1 — see design.md; if declined, this AC is
-  reduced to edge-trimming only.)*
+  with search normalization. *(D1 approved 2026-07-15 — unconditional; see design.md.)*
 - **REQ-TRIM-07** — WHEN an optional string field (e.g. Person.Email, birthday) normalizes to
   empty/whitespace-only, the service SHALL persist `null` (existing convention, now via the helper).
 
@@ -62,7 +71,7 @@
 - **REQ-TRIM-08** — The system SHALL expose exactly one reusable normalization helper:
   `static class StringNormalization` in the Services project, namespace `MyVocaList.Services.Text`, with:
   - `string NormalizeSearchQuery(string query)` — null/whitespace-only → `string.Empty`; otherwise edge-trim + collapse internal whitespace runs to a single space.
-  - `string TrimForStorage(string value)` — null → null; otherwise edge-trim (+ internal collapse per D1).
+  - `string TrimForStorage(string value)` — null → null; otherwise edge-trim + collapse internal whitespace runs (D1 approved).
   - `string TrimForStorageOrNull(string value)` — as above, but empty/whitespace-only result → `null`.
 - **REQ-TRIM-09** — All normalization call sites SHALL be inside Service-layer methods (business
   logic in Services — constitutional constraint). No ViewModel, page, or governed-component change
