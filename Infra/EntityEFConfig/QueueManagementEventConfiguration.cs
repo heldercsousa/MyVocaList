@@ -20,9 +20,11 @@ namespace MyVocaList.Infra.EntityEFConfig
 
             builder.Property(e => e.Id).ValueGeneratedOnAdd();
 
+            // D3 (design.md § D3): trim-on-save enforced here, not in EventService CreateEventAsync.
             builder.Property(e => e.Name)
                    .IsRequired()
                    .HasMaxLength(100)
+                   .HasConversion(TrimValueConverters.Required)
                    .UseCollation(CollationConstants.Default);
 
             builder.Property(e => e.ScheduledStartTime);
