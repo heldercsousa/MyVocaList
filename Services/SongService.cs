@@ -2,6 +2,7 @@ using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Services.Text;
 
 namespace MyVocaList.Services;
 
@@ -216,7 +217,7 @@ public class SongService : ISongService
     public async Task<bool> ExistsByTitleForArtistAsync(
         string title, int artistId, int? excludeId = null, CancellationToken ct = default)
     {
-        var trimmed = title.Trim();
+        var trimmed = StringNormalization.NormalizeSearchQuery(title);
         return excludeId == null
             ? await _songRepository.ExistsByTitleForArtistAsync(artistId, trimmed, ct)
             : await _songRepository.ExistsByTitleForArtistAsync(artistId, trimmed, excludeId.Value, ct);
@@ -243,7 +244,8 @@ public class SongService : ISongService
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
-        var (items, totalCount) = await _songRepository.GetPagedAsync(pageNumber, pageSize, query?.Trim(), ct);
+        var normalizedQuery = string.IsNullOrWhiteSpace(query) ? null : StringNormalization.NormalizeSearchQuery(query);
+        var (items, totalCount) = await _songRepository.GetPagedAsync(pageNumber, pageSize, normalizedQuery, ct);
 
         return (items, totalCount);
     }

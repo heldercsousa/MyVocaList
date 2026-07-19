@@ -290,6 +290,22 @@ public class SongServiceTests
         Assert.True(success);
     }
 
+    [Fact]
+    // [AC] REQ-TRIM-06: the comparison term used by ExistsByTitleForArtistAsync must be
+    // normalized the same way persisted titles will be (Task 6's ValueConverter), so dedup
+    // checks agree with the stored, collapsed-whitespace value.
+    public async Task ExistsByTitleForArtistAsync_TitleWithExtraWhitespace_ComparesNormalizedTerm()
+    {
+        _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, "my song", It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(true);
+        var sut = CreateSut();
+
+        var exists = await sut.ExistsByTitleForArtistAsync(" my  song ", 1);
+
+        Assert.True(exists);
+        _songRepoMock.Verify(r => r.ExistsByTitleForArtistAsync(1, "my song", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     // ── GetPagedSongsForListAsync ─────────────────────────────────────────
 
     [Fact]
@@ -307,6 +323,26 @@ public class SongServiceTests
 
         Assert.Single(result);
         Assert.Equal(1, totalCount);
+    }
+
+    [Fact]
+    // [AC] REQ-TRIM-01/03: query whitespace (leading/trailing/internal runs) is normalized
+    // before being forwarded to the repository.
+    public async Task GetPagedSongsForListAsync_QueryWithExtraWhitespace_NormalizesBeforeRepositoryCall()
+    {
+        var items = new List<SongListItemDto>
+        {
+            new(1, "Bohemian Rhapsody", 1, "Queen", null, null, false)
+        };
+        _songRepoMock.Setup(r => r.GetPagedAsync(1, 20, "my song", It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((items.AsEnumerable(), 1));
+        var sut = CreateSut();
+
+        var (result, totalCount) = await sut.GetPagedSongsForListAsync(1, 20, " my  song ");
+
+        Assert.Single(result);
+        Assert.Equal(1, totalCount);
+        _songRepoMock.Verify(r => r.GetPagedAsync(1, 20, "my song", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── DeleteSongsAsync ──────────────────────────────────────────────────
