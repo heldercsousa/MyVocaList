@@ -2,7 +2,7 @@ using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
-using MyVocaList.Services.Text;
+using MyVocaList.Extensions.Strings;
 
 namespace MyVocaList.Services;
 
@@ -129,14 +129,14 @@ public class ArtistService : IArtistService
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
         return await _artistRepository.GetPagedAsync(
-            pageNumber, pageSize, StringNormalization.NormalizeSearchQuery(query), roleFilter, ct);
+            pageNumber, pageSize, query.NormalizeSearchQuery(), roleFilter, ct);
     }
 
     /// <inheritdoc />
     public async Task<IEnumerable<ArtistListItem>> SearchArtistsByNameAsync(
         string query, int maxResults = 5, CancellationToken ct = default)
     {
-        var normalized = StringNormalization.NormalizeSearchQuery(query);
+        var normalized = query.NormalizeSearchQuery();
         if (string.IsNullOrWhiteSpace(normalized))
             return [];
 
