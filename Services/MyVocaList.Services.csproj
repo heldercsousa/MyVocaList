@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Contracts\MyVocaList.Contracts.csproj" />
     <ProjectReference Include="..\Domain\MyVocaList.Domain.csproj" />
+    <ProjectReference Include="..\MyVocaList.Extensions\MyVocaList.Extensions.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
