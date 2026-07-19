@@ -1,3 +1,5 @@
+using MyVocaList.Domain.ReadModels;
+
 namespace MyVocaList.Tests.Unit.Services;
 
 public class ArtistServiceTests
@@ -215,6 +217,38 @@ public class ArtistServiceTests
 
         Assert.False(success);
         Assert.NotEmpty(message);
+    }
+
+    // ── Search normalization (REQ-TRIM-01/03) ──────────────────────────────
+
+    [Fact]
+    // [AC] REQ-TRIM-01/03: whitespace-polluted query reaches the repository fully normalized
+    // (edge-trimmed + internal whitespace runs collapsed), not just edge-trimmed.
+    public async Task SearchArtistsByNameAsync_ExtraInternalWhitespace_ForwardsNormalizedTermToRepository()
+    {
+        _artistRepoMock.Setup(r => r.SearchByNameAsync("ac dc", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                       .ReturnsAsync([])
+                       .Verifiable();
+        var sut = CreateSut();
+
+        await sut.SearchArtistsByNameAsync(" ac  dc ");
+
+        _artistRepoMock.Verify();
+    }
+
+    [Fact]
+    // [AC] REQ-TRIM-01/03: paged list query reaches the repository fully normalized.
+    public async Task GetPagedArtistsForListAsync_ExtraInternalWhitespace_ForwardsNormalizedQueryToRepository()
+    {
+        _artistRepoMock.Setup(r => r.GetPagedAsync(
+                1, 20, "ac dc", It.IsAny<ArtistRoleFilter>(), It.IsAny<CancellationToken>()))
+                       .ReturnsAsync((Enumerable.Empty<ArtistListItem>(), 0))
+                       .Verifiable();
+        var sut = CreateSut();
+
+        await sut.GetPagedArtistsForListAsync(1, 20, " ac  dc ");
+
+        _artistRepoMock.Verify();
     }
 
     // ── DeleteArtistsAsync ────────────────────────────────────────────────
