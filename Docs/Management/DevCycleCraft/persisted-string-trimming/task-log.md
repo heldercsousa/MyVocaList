@@ -194,3 +194,46 @@ Files written and re-read: `Services/VenueService.cs` (confirmed `using MyVocaLi
 ### Notes
 - Scope confirmed: `EventService.cs` not touched; `CreateVenueAsync`/`UpdateVenueAsync` persisted-value trimming left untouched for Task 6 (D3, EF Core ValueConverter).
 - Full-solution Android target build was not run for this Services-only, non-UI change (coordinator direction) — `dotnet test MyVocaList.Tests` builds and exercises `Services`, `Infra`, `MyVocaList`, and `MyVocaList.Tests` projects with 0 errors, which covers all files in scope.
+
+---
+## Task: Task 5 — SongService + SongSuggestionService + CatalogService normalization (search only)
+**Plan:** `Docs/Management/DevCycleCraft/persisted-string-trimming/plan.md` (Task 5 section — plan.md's storage-site instructions superseded by D3/tasks.md; search-normalization scope only)
+**Status:** To Review
+**Started:** 2026-07-19
+**Completed:** 2026-07-19
+
+### Changed files:
+- `Services/SongService.cs`
+- `Services/SongSuggestionService.cs`
+- `Services/CatalogService.cs`
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs`
+- `Docs/Management/DevCycleCraft/persisted-string-trimming/tasks.md` (Task 5 checked off)
+
+### AC traceability matrix
+
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|--------------------------|--------------|
+| REQ-TRIM-01 / 03 | List-page search query with extra whitespace normalizes to single-spaced, edge-trimmed term before hitting the repository | `SongService.GetPagedSongsForListAsync` | `GetPagedSongsForListAsync_QueryWithExtraWhitespace_NormalizesBeforeRepositoryCall` |
+| REQ-TRIM-06 | Comparison term for dedup check normalized consistently with the persisted (converter-collapsed) title, so `"John  Doe"`-style duplicates are caught | `SongService.ExistsByTitleForArtistAsync` | `ExistsByTitleForArtistAsync_TitleWithExtraWhitespace_ComparesNormalizedTerm` |
+| REQ-TRIM-03 | Catalog picker/list search term normalized before repository call | `CatalogService.GetPagedCatalogForArtistAsync` | Covered by existing `CatalogServiceTests.GetPagedCatalogForArtistAsync_ReturnsRepositoryResult` (null-query path) + manual code inspection — `CatalogServiceTests.cs` is out of this task's owned-files scope, no test added there per briefing |
+| REQ-TRIM-01 | Suggestion term (local + remote provider search) normalized before use | `SongSuggestionService.GetLocalAsync` / `GetRemoteAsync` | Out of owned-files scope (`SongSuggestionServiceTests.cs` not listed in briefing); verified by build + full suite green (506/506) and manual code inspection |
+
+### Build notes
+Build: passed (0 errors) | Tests: `SongServiceTests` 34 passed, 0 failed; full suite 506 passed, 0 failed | Commit SHA: see below
+
+Test run evidence (`dotnet test MyVocaList.Tests --filter SongServiceTests`):
+```
+Aprovado!  – Com falha:     0, Aprovado:    34, Ignorado:     0, Total:    34, Duração: 3 s - MyVocaList.Tests.dll (net10.0)
+```
+
+Full suite (`dotnet test MyVocaList.Tests`):
+```
+Aprovado!  – Com falha:     0, Aprovado:   506, Ignorado:     0, Total:   506, Duração: 9 s - MyVocaList.Tests.dll (net10.0)
+```
+
+Files written and re-read: `Services/SongService.cs`, `Services/CatalogService.cs`, `Services/SongSuggestionService.cs`, `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` (all re-read post-edit via grep/read, confirmed `StringNormalization` usage present at expected call sites).
+
+### Notes
+- Scope note (briefing-authorized): implementation touches `CatalogService.cs` and `SongSuggestionService.cs`, but the corresponding pre-existing test files (`CatalogServiceTests.cs`, `SongSuggestionServiceTests.cs`) were NOT in this task's `Files owned` list, so no new tests were added there — only `SongServiceTests.cs` per the briefing. Full suite green confirms no regression.
+- Did NOT touch `CreateSongAsync`/`UpdateSongAsync`/`CreateSongWithUrlsAsync` persistence — that is Task 6's `ValueConverter` responsibility (D3), per explicit briefing instruction.
+- `GetRemoteAsync`'s normalized term is also forwarded to `artistHint`-paired external provider search (`FetchFromProvidersAsync`) — normalizing the term sent to MusicBrainz/Deezer is a reasonable, low-risk extension of the same fix since garbled whitespace would degrade those queries identically; no spec objection since REQ-TRIM-09 scopes normalization to Service-layer search call sites broadly.

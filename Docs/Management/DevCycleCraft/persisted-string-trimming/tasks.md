@@ -41,7 +41,7 @@
   - *(`EventService` has no search-query call site — its only mapping was storage-side, now Task 6.
     Persisted-value trimming for `Venue.Name`/`Event.Name` → Task 6, D3; not in this task.)*
 
-- [ ] **Task 5 [P] — SongService + SongSuggestionService + CatalogService normalization (search only)** *(depends: Task 1)*
+- [x] **Task 5 [P] — SongService + SongSuggestionService + CatalogService normalization (search only)** *(depends: Task 1)*
   - Produces: `NormalizeSearchQuery` in `GetPagedSongsForListAsync`/`GetPagedCatalogForArtistAsync`/suggestion terms; normalized comparison term in `ExistsByTitleForArtistAsync` (agrees with Task 6's converter-normalized stored title — REQ-TRIM-06)
   - Consumes: Task 1 helper
   - Risk: Low — query-side only; no entity-write sites in this task

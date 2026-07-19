@@ -5,6 +5,7 @@ using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Services.Text;
 
 namespace MyVocaList.Services;
 
@@ -41,7 +42,8 @@ public class SongSuggestionService : ISongSuggestionService
         if (string.IsNullOrWhiteSpace(term))
             return [];
 
-        var (items, _) = await _songRepository.GetPagedAsync(1, MaxSuggestions, term, ct);
+        var normalizedTerm = StringNormalization.NormalizeSearchQuery(term);
+        var (items, _) = await _songRepository.GetPagedAsync(1, MaxSuggestions, normalizedTerm, ct);
         return items.Select(MapLocal).ToList();
     }
 
@@ -49,7 +51,8 @@ public class SongSuggestionService : ISongSuggestionService
     public async Task<IReadOnlyList<SongSuggestionDto>> GetRemoteAsync(
         string term, string? artistHint, IReadOnlyList<SongSuggestionDto> localResults, CancellationToken ct = default)
     {
-        var raw = await FetchFromProvidersAsync(term, artistHint, ct);
+        var normalizedTerm = StringNormalization.NormalizeSearchQuery(term);
+        var raw = await FetchFromProvidersAsync(normalizedTerm, artistHint, ct);
         if (raw.Count == 0)
             return [];
 
