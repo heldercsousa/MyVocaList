@@ -32,5 +32,6 @@
     <ProjectReference Include="..\Services\MyVocaList.Services.csproj" />
     <!-- MAUI head project: referenced for ViewModel + Component tests -->
     <ProjectReference Include="..\MyVocaList\MyVocaList.csproj" />
+    <ProjectReference Include="..\MyVocaList.Extensions\MyVocaList.Extensions.csproj" />
   </ItemGroup>
 </Project>
