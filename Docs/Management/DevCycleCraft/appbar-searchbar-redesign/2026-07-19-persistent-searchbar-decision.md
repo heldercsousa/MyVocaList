@@ -23,6 +23,8 @@ Sources: material-components-android `docs/components/Search.md` · nngroup.com 
 
 1. **`SmallAppBar` stays** the only `Shell.TitleView` occupant: title, leading icon per the shipped Navigation Icon Pattern (hamburger on root, back on pushed). The search action icon is removed.
 2. **Persistent M3 standalone search bar** (56dp pill, `SurfaceContainerLow`, leading `search_outlined` — **no back arrow**, trailing auto-clear) docked at the top of the list content, filtering inline as the user types. Optional lift-on-scroll paired with `IsScrolled`.
+> **Spec updated [2026-07-19]:** point 3's "SearchAppBar itself" retirement is narrowed by `design.md` D-1 — a post-approval code inspection found 4 picker pages (SongPicker, ArtistPicker, QueueSongPicker, YouTubeSearch) consume `SearchAppBar` as their sole TitleView outside the CRUD pattern. The component stays alive for them; only CRUD consumption is removed, and full retirement is a registered follow-up (picker migration). Helder to confirm D-1 at the spec review gate.
+
 3. **Delete the swap machinery:** `IsSearchMode`, `OpenSearchCommand`/`CloseSearchCommand`, the TitleView `Grid` + `InverseBoolConverter` toggle, `SearchAppBar` itself (governed component — retirement goes through component-change-governance four gates), and the search branch of `OnBackButtonPressed` (back gesture returns to pure navigation semantics).
 4. **Centralization:** host the persistent search bar **inside `CrudListView`** (already exposes `SearchPlaceholder`; add a `SearchText` bindable property) so every CRUD page gets standard search with zero per-page wiring. `CrudListView`, `SmallAppBar`, `SearchAppBar` are governed components → dedicated four-gate task, never bundled.
 
