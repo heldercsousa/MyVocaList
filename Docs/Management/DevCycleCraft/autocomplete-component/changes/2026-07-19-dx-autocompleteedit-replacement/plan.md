@@ -120,9 +120,10 @@ git commit -m "feat(styles): AutoCompleteEdit implicit style matching Outlined T
     LabelText="Artist"
     Text="{Binding ArtistSearchText, Mode=TwoWay}"
     IsEnabled="{Binding IsArtistLocked, Converter={StaticResource InverseBoolConverter}}"  <!-- keep the page's EXISTING enable/lock binding expression verbatim from the removed element -->
-    HasError="{Binding HasError}"
-    ErrorText="{Binding ErrorText}"
-    ItemsRequested="OnArtistItemsRequested">   <!-- ⚠ event name per T1 -->
+    HasError="{Binding HasError}"              <!-- ⚠ bindability/direction per T1 -->
+    ErrorText="{Binding ErrorText}"            <!-- ⚠ bindability/direction per T1 -->
+    ItemsRequested="OnArtistItemsRequested"    <!-- ⚠ event name per T1 -->
+    SelectionChanged="OnArtistSelectionChanged"> <!-- ⚠ selection event name per T1 — do not drop this handler -->
     <dxe:AutoCompleteEdit.ItemsSourceProvider> <!-- ⚠ property name per T1 -->
         <dxe:AsyncItemsSourceProvider RequestDelay="300" />
     </dxe:AutoCompleteEdit.ItemsSourceProvider>
@@ -158,7 +159,7 @@ void OnArtistSelectionChanged(object sender, EventArgs e)              // wire S
 ```
 Also forward the editor's unfocus (blur) without selection to `ArtistBlurredWithoutSelectionCommand` using the same trigger the old component used (`Unfocused` event): execute only when `SelectedItem == null`. If T1 findings show the provider fulfilment shape differs (e.g. async callback returning `IEnumerable`), adapt the two ⚠ lines to the pinned shape — the invariants are: VM command performs the search; editor never clears `Text`; results come only from the Service.
 
-**Option B (fallback — direct ItemsSource):** bind `ItemsSource="{Binding ArtistSuggestions}"`, disable client filtering with the T1-pinned mechanism, keep `TextChanged`→`SearchArtistsCommand` with the VM-side gate; add a 300 ms debounce in code-behind using `IDispatcherTimer` (restart timer on each change; on tick execute the command). All other bindings identical to Option A.
+**Option B (fallback — direct ItemsSource):** bind `ItemsSource="{Binding ArtistSuggestions}"`, disable client filtering with the T1-pinned mechanism, keep `TextChanged`→`SearchArtistsCommand` with the VM-side gate; add a 300 ms debounce in code-behind using `IDispatcherTimer` (restart timer on each change; on tick execute the command). All other bindings identical to Option A. **Stale-result protection (REQ-DXAC-07):** before relying on it, verify the VM already applies latest-query-wins (compare/cancel on new term); if it does not, add it in the VM with unit tests — Option B is not complete without this.
 
 - [ ] **Step 3: Build**
 
@@ -256,7 +257,7 @@ git commit -m "chore(build): exclude frozen AutocompleteField family from compil
 
 - [ ] **Step 1: Full test run** — `dotnet test` (whole solution) → all green; paste summary into task-log (REQ-DXAC-08 evidence).
 
-- [ ] **Step 2: Write the on-device checklist** into task-log for Helder (REQ-DXAC-09), covering on BOTH pages: (a) focus field → type → suggestions appear ≥ gate chars; (b) blur without selection → text intact + validation error shown; (c) select suggestion → selection applied, no navigation stack growth (no modal was pushed — verify via back gesture returning to the previous page, not a stale search view); (d) rapid type-delete-type → no stale popup, no cursor jump to start; (e) rotate/background-resume with popup open → no crash, text intact; (f) smoke 16C.1: create song end-to-end with a new artist + existing artist.
+- [ ] **Step 2: Write the on-device checklist** into task-log for Helder (REQ-DXAC-09), covering on BOTH pages: (a) focus field → type → suggestions appear ≥ gate chars; (b) blur without selection → text intact + validation error shown; (c) select suggestion → selection applied, no navigation stack growth (no modal was pushed — verify via back gesture returning to the previous page, not a stale search view); (d) rapid type-delete-type → no stale popup, no cursor jump to start; (e) rotate/background-resume with popup open → no crash, text intact; (f) REQ-DXAC-06: query with a diacritic/whitespace mismatch (e.g. "cafe " for "Café") → suggestions shown exactly as the Service returned, proving client-side filtering is off; (g) smoke 16C.1: create song end-to-end with a new artist + existing artist.
 
 - [ ] **Step 3: Commit** — task-log + `.sln` entry for it, message `docs(task-log): T6 evidence + on-device evaluation checklist`.
 
