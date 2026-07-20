@@ -296,6 +296,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "appbar-searchbar-redesign", "appbar-searchbar-redesign", "{FA1234BC-0001-4000-8000-000000000054}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\2026-07-19-persistent-searchbar-decision.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\2026-07-19-persistent-searchbar-decision.md
+		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\design.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\design.md
+		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\requirements.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\requirements.md
+		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\tasks.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\tasks.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-component", "autocomplete-component", "{FA1234BC-0001-4000-8000-000000000046}"
@@ -315,6 +318,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompleteedit-replacement", "2026-07-19-dx-autocompleteedit-replacement", "{FA1234BC-0001-4000-8000-000000000053}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md
