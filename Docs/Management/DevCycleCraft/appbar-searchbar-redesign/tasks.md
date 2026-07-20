@@ -16,7 +16,7 @@
 - [x] **T8 — Update unit tests** (same commit as T7): `CrudListViewModelBaseTests` — remove/replace swap-member tests; keep/extend `SearchText` debounce pipeline coverage (Level B). Full solution build + tests green here.
   - ACs: REQ-14 · Files owned: CrudListViewModelBaseTests.cs
 - [x] **T9 — Verify picker pages untouched** (build + smoke: SongPicker, ArtistPicker, QueueSongPicker, YouTubeSearch still use SearchAppBar). AC: REQ-13
-- [ ] **T10 — Guideline amendments** (`amend:` commit + changelog): `crud-appbar-list-toolbar.md` law rewrite, `m3-appbars.md` promotion/retirement notes, `component-safety-gate.md` adds `SearchBar` to governed list.
+- [x] **T10 — Guideline amendments** (`amend:` commit + changelog): `crud-appbar-list-toolbar.md` law rewrite, `m3-appbars.md` promotion/retirement notes, `component-safety-gate.md` adds `SearchBar` to governed list.
 - [ ] **T11 — BACKLOG follow-up registration**: new row for picker-page SearchAppBar migration/retirement; update parent redesign row status; Helder emulator smoke test gate before ✅.
 
 **Sequential-only files touched:** none from the registry (no MauiProgram/AppShell/DbContext changes — `SearchBar` needs no DI registration; it's a XAML component).
