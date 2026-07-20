@@ -148,3 +148,17 @@ Per `workflow.md` (spec is source of truth; a spec/code conflict stops for Helde
 - If clearing an unresolvable entry is intended product behavior, REQ-DXAC-03 needs rewording to carve out that case.
 
 Checklist item **(a)** exercises this directly — type an artist name that matches nothing, then blur. Note: this finding comes from a code trace, not from reading the file directly; Helder should confirm against the source before acting.
+
+#### What BUG-027's original wording adds
+
+The bug was filed (2026-07-03, from the TEST-001 emulator run) as:
+
+> "SongFormPage Artist field — no required-field validation, no autocomplete, **blur clears typed text with no create-new fallback** (Critical)"
+
+The clearing and the missing create-new path were reported as *one* symptom, and that coupling explains the ViewModel's behavior: it discards an unresolvable entry precisely because there is nowhere for that entry to go. But "no match → add new" was deliberately scoped **out** of this change as a separate follow-up (Helder's decision, 2026-07-19). So the swap delivers two of BUG-027's three parts — validation and autocomplete — while the half that motivated the clearing stays deferred.
+
+That leaves a coherence problem independent of REQ-DXAC-03: **REQ-DXAC-05 requires blur validation to surface an error on the field**, but if blur has just emptied the field, the error describes an input the user can no longer see. Retaining the text *and* showing the error is the self-consistent behavior, and it is what both -03 and -05 read as intending.
+
+This narrows the decision to a genuine product question rather than a spec-wording cleanup:
+- **Retain text + show error** (satisfies -03 and -05 together; smallest change; leaves the entry recoverable until add-new ships) — this is the reading the specs support, but it is still a ViewModel behavior change and needs its own task.
+- **Keep clearing** — then -03 must be reworded, and BUG-027 cannot be closed by this change, because its headline symptom survives.
