@@ -167,4 +167,10 @@
 		<EmbeddedResource Include="appsettings.template.json" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<!-- Frozen custom autocomplete (D-AC1, 2026-07-19) - kept as reference for guideline (1), excluded from build. -->
+		<Compile Remove="UI\Components\AutocompleteField\**\*.cs" />
+		<MauiXaml Remove="UI\Components\AutocompleteField\**\*.xaml" />
+	</ItemGroup>
+
 </Project>
