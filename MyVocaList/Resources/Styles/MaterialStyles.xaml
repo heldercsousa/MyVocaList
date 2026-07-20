@@ -70,6 +70,15 @@
         <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
     </Style>
 
+    <!-- AutoCompleteEdit follows the same Outlined form-field convention as TextEdit (REQ-DXAC-12) -->
+    <Style TargetType="dx:AutoCompleteEdit">
+        <Setter Property="BoxMode" Value="Outlined" />
+        <Setter Property="FocusedBorderColor" Value="{StaticResource Primary}" />
+        <Setter Property="BorderColor" Value="{StaticResource Outline}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceContainerHighest}" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+    </Style>
+
     <!-- ================================================================ -->
     <!-- FLYOUT MENU STYLES                                               -->
     <!-- ================================================================ -->
