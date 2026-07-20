@@ -140,3 +140,27 @@ No new policy invented — every change traces to a specific `design.md § Guide
 Build: N/A (documentation-only edit, no `.cs`/`.xaml` touched). Tests: N/A.
 Files written and re-read: all 3 library files and the changelog entry re-read after edit to confirm content landed correctly and Markdown fences/tables are intact.
 
+
+---
+## Task: T11 — BACKLOG follow-up registration
+**Plan:** `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/tasks.md`
+**Status:** To Review
+**Started:** 2026-07-20
+**Completed:** 2026-07-20
+**Branch/worktree:** `feature/persistent-searchbar` @ `MyVocaList-wt-searchbar` (based on develop)
+
+`Docs/Management/BACKLOG.md` updated:
+- Parent row **"AppBar / SearchAppBar Interaction Redesign — page-nav pattern + persistent search bar"** status `📋 Spec` → `🟡 In Progress`; Gate note rewritten to state T1–T11 code complete (build green) pending Helder's two manual gates (D-1 confirmation + emulator smoke test across the 4 CRUD pages) before final ✅.
+- New nested row **"↳ SearchAppBar retirement — picker pages migration"** added directly under the parent — Goal: migrate the 4 picker pages off the retired `SearchAppBar` pattern; Gate: deferred by decision D-1, blocked on parent reaching ✅; Pointer to `design.md § Design decisions (D-1)`.
+Both rows follow the BACKLOG header's PO-level template (Goal + Gate + one Pointer, ≤3 sentences, no technical detail in the row).
+
+### Changed files:
+- `Docs/Management/BACKLOG.md`
+- `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/tasks.md` (T11 checked)
+- `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/task-log.md` (this entry)
+
+### Build notes
+Build: N/A (documentation-only edit). Tests: N/A.
+Files written and re-read: `BACKLOG.md` re-read after edit — both rows confirmed present with correct status glyphs and template shape.
+
+All three remaining tasks (T9, T10, T11) complete. Feature code-complete pending Helder's manual gates noted above. No push attempted — git-credential-manager auth issue on this worktree per session briefing; local commits only, Helder to push.
