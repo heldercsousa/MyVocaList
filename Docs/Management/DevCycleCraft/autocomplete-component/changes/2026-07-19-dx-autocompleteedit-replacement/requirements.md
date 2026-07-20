@@ -1,6 +1,8 @@
 # Requirements — Replace `AutocompleteMobileField` consumers with DX `AutoCompleteEdit`
 
 > Dated change spec (2026-07-19) under `autocomplete-component` per the SDD Invariant. Parent decision: `../../2026-07-19-dx-autocomplete-adoption-decision.md` (D-AC1). The original custom-component specs remain immutable history.
+>
+> **Domain vocabulary:** terms (`AutocompleteSuggestion` Headline/SupportingText, artist-field "lock", "dedup suggestions") are defined in the parent feature's `requirements.md`/`design.md` (`../../`).
 
 ## Goal
 
@@ -19,9 +21,9 @@ Both autocomplete consumers (SongFormPage Artist field, PersonFormPage Full Name
 - **REQ-DXAC-04:** Tapping a suggestion executes the existing selection command with the tapped `AutocompleteSuggestion` (Song: sets `SelectedArtistId`/name and locks field per current behavior; Person: existing selection flow).
 - **REQ-DXAC-05:** Leaving the field without a selection executes the existing blur/validation command; validation errors render via the DX editor's error properties (not a separate label), matching current messages.
 - **REQ-DXAC-06:** DX client-side suggestion filtering is disabled — the suggestion list shows exactly what the Service returned (Service-side normalization per BUG-046 is the single filter; no double filtering).
-- **REQ-DXAC-07:** Search calls are debounced: at most one Service call per settled typing pause (target ≈300 ms; DX built-in delay acceptable), and stale results do not overwrite newer ones.
+- **REQ-DXAC-07:** Search calls are debounced: at most one Service call per settled typing pause (target ≈300 ms; DX built-in delay acceptable), and stale results do not overwrite newer ones. While a search is in flight, the popup keeps showing the previous results (or stays closed if there were none) — it never flashes an empty state mid-typing.
 - **REQ-DXAC-08:** All existing `SongFormViewModel`/`PersonFormViewModel` unit tests pass **unchanged** (contract-preservation proof).
-- **REQ-DXAC-09:** The BUG-044/045/047 defect-family evaluation checklist (stacked navigation, cursor jump, stale popup) is executed on device on both pages; results recorded in `task-log.md`; any surviving defect gets a BUG row + regression coverage per `bug-tracking.md` severity rules. (Mandated first evaluation step of this spec — decision record 2026-07-19.)
+- **REQ-DXAC-09:** The BUG-044/045/047 defect-family evaluation checklist (stacked navigation, cursor jump, stale popup) is executed on device on both pages; results recorded in `task-log.md`; any surviving defect gets a BUG row + regression coverage per `bug-tracking.md` severity rules. (The decision record's "mandatory first evaluation step" — i.e., the first *verification* step once the swap exists; it can only run post-migration, hence its T6/T7 position.)
 - **REQ-DXAC-10:** On-device smoke test 16C.1 (song registration end-to-end) passes green.
 - **REQ-DXAC-11:** The frozen custom component family (`UI/Components/AutocompleteField/` — 8 files) and its 6 test files are **excluded from compilation** but retained in the repo as reference for future guideline ① (Helder decision, this brainstorm). Solution builds with 0 errors afterward.
 - **REQ-DXAC-12:** The DX editor visually matches the form-field convention (Outlined `dx:TextEdit` style in `MaterialStyles.xaml`): box mode, border/focus colors, background, text color.
