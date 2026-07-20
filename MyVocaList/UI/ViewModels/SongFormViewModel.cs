@@ -152,7 +152,7 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand<string> SearchArtistsCommand { get; }
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
-    /// <summary>Invoked by AutocompleteField when user blurs without selecting a suggestion (BUG-008).</summary>
+    /// <summary>Invoked by DevExpress AutoCompleteEdit when user blurs without selecting a suggestion (BUG-008).</summary>
     public IRelayCommand ArtistBlurredWithoutSelectionCommand { get; }
     public IAsyncRelayCommand NavigateToSongPickerCommand { get; }
     public IAsyncRelayCommand NavigateToYouTubeSearchCommand { get; }
