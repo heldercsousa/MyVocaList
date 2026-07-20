@@ -114,3 +114,37 @@ Both fix branches (`fix/bug-044-045-autocomplete-regressions`, `fix/bug-047-auto
 **Consequence:** the BUG-047 guard is gone. It stopped a *programmatic* `Text` hydration (opening a form for editing) from being treated as user typing and firing a stale suggestions search. Nothing in the new DX wiring reproduces that guard — `AsyncItemsSourceProvider` sees a text change without knowing whether a human or the ViewModel caused it. `CharacterCountThreshold` does not help, because a hydrated value is well past the threshold.
 
 This is the highest-probability regression of the whole change, and it compounds with W2: a spurious hydration search plus the late cancellation check could surface a suggestion popup over a freshly opened edit form. Checklist item **(j)** exists to catch exactly this. If (j) fails, the fix belongs in the DX wiring (suppress the request when the text change originates from the ViewModel), and it needs a new regression test — the old one is no longer compiled and cannot be revived as-is.
+
+### Code trace confirming the (j) risk (2026-07-20)
+
+A read-only trace of both ViewModels and both `ItemsRequested` handlers found **no origin guard anywhere on the path**:
+
+- `SongFormViewModel.InitializeArtistField()` assigns `ArtistSearchText = ArtistName` with no guard, and the page calls it from `OnAppearing` *after* `CompleteHydration()`. Opening an existing song therefore pushes text into the editor programmatically.
+- Three further unguarded programmatic assignments exist: `OnArtistBlurredWithoutSelection()` (two paths) and `ResolveAndLockArtistAsync()` (two paths, inside `RunOnUiThread`).
+- `PersonFormViewModel` never assigns `PersonName` in C#, but edit-mode pre-population still arrives programmatically via the Shell `[QueryProperty]`, so the same binding-driven path exists.
+- Both ViewModels carry an `_isHydrating` flag with a `CompleteHydration()` method — but it guards only **dirty-flag marking** (`OnSongTitleChanged`, `OnSongVersionChanged`, `OnPersonNameChanged`). It is not consulted on any autocomplete text assignment.
+- Neither `OnArtistItemsRequested` nor `OnNameItemsRequested` inspects the origin of the text change; both execute the search command unconditionally on `e.Text`.
+
+Conclusion: item (j) is a **live** risk on the Song form and probably on the Person form. Any fix should likely reuse the existing `_isHydrating` concept rather than inventing a second flag.
+
+### ⚠ ESCALATION — possible REQ-DXAC-03 conflict `[needs Helder's decision]`
+
+The same trace reports that `SongFormViewModel.OnArtistBlurredWithoutSelection()` clears the field:
+
+```csharp
+if (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0)
+{
+    ArtistSearchText = string.Empty;   // typed text discarded on blur
+    ArtistSuggestions = [];
+}
+```
+
+REQ-DXAC-03 states typed text is *never* cleared on blur and that "under no circumstance does the user lose their entry (BUG-027 core criterion)" — yet the preserved ViewModel deliberately empties it when the user typed something that resolved to no artist. The new wiring binds `Unfocused` → `ArtistBlurredWithoutSelectionCommand`, so this behavior carries over unchanged.
+
+If that reading is right, swapping the control does **not** by itself satisfy REQ-DXAC-03 or close BUG-027, because the clearing lives in the ViewModel, not the control. Approach A deliberately preserved ViewModel contracts, so this was never in the swap's scope.
+
+Per `workflow.md` (spec is source of truth; a spec/code conflict stops for Helder) this is **not** being fixed unilaterally — the resolution changes intended behavior:
+- If REQ-DXAC-03 is literal, the ViewModel must stop clearing on blur, which is a ViewModel behavior change needing its own task, spec update, and regression test.
+- If clearing an unresolvable entry is intended product behavior, REQ-DXAC-03 needs rewording to carve out that case.
+
+Checklist item **(a)** exercises this directly — type an artist name that matches nothing, then blur. Note: this finding comes from a code trace, not from reading the file directly; Helder should confirm against the source before acting.
