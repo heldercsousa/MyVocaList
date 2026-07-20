@@ -1,3 +1,6 @@
+using DevExpress.Maui.Editors;
+using MyVocaList.Contracts.Models;
+
 namespace MyVocaList.UI.Pages.People;
 
 public partial class PersonFormPage : ContentPage
@@ -25,6 +28,36 @@ public partial class PersonFormPage : ContentPage
         // Focus the name field only in create mode
         if (!_viewModel.IsEditMode)
             nameField.Focus();
+    }
+
+    // ── DX AutoCompleteEdit glue (T4, 2026-07-19 change spec) ────────────────────────────
+    // Thin forwarding only: the editor's AsyncItemsSourceProvider owns debounce (RequestDelay=300)
+    // and stale-request cancellation; the search runs through the EXISTING VM command path
+    // (SearchPersonsCommand → IPersonService) so the 2-char gate stays in the ViewModel.
+    private void OnNameItemsRequested(object sender, ItemsRequestEventArgs e)
+    {
+        var text = e.Text;
+        var token = e.CancellationToken;
+        e.RequestAsync = async () =>
+        {
+            await _viewModel.SearchPersonsCommand.ExecuteAsync(text);
+            token.ThrowIfCancellationRequested();
+            return _viewModel.Suggestions;
+        };
+    }
+
+    // Forwards drop-down selection to the existing VM selection command.
+    private void OnNameSelectionChanged(object sender, EventArgs e)
+    {
+        if (nameField.SelectedItem is AutocompleteSuggestion suggestion)
+            _viewModel.SuggestionSelectedCommand.Execute(suggestion);
+    }
+
+    // Blur without a selection → existing VM name validation (same trigger the old component used).
+    private void OnNameUnfocused(object sender, FocusEventArgs e)
+    {
+        if (nameField.SelectedItem is null)
+            _viewModel.ValidateNameCommand.Execute(null);
     }
 
     // Bridges the MAUI Unfocused (blur) events to the ViewModel's validation commands.
