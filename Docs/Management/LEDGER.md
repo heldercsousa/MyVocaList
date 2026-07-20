@@ -8,7 +8,7 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| DX-AC | Replace AutocompleteMobileField with DX AutoCompleteEdit | T2–T5 implementation (spec+plan reviewer-passed; T1 done on develop `4da1694`) | feat/dx-autocompleteedit-replacement | ../MyVocaList-wt-dx-autocomplete | dispatched | 4da1694 | on implementor return: code review subagent → merge → T6 evidence → Helder device smoke 16C.1 (T7) |
+| DX-AC | Replace AutocompleteMobileField with DX AutoCompleteEdit | T2–T5 done (4 commits + docs, 501/501 tests); code-review subagent running | feat/dx-autocompleteedit-replacement | ../MyVocaList-wt-dx-autocomplete | to review | 2c579de | on review PASS: merge to develop + /sln-docs-sync → T6 evidence → Helder device smoke 16C.1 (T7) |
 | SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | complete — verifier PASS; cleanup executed (30→8 worktrees, form-ux merged `f00543a`, 478/478) | develop (tooling scripts + docs only, no app code) | — | to review | 68e1852 | Helder: run two-terminal live demo (last open gate); optionally direct the 4 leftover agent worktrees |
 
 ## Completed (last 20)
