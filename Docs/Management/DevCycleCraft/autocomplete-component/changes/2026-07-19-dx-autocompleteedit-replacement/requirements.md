@@ -15,7 +15,7 @@ Both autocomplete consumers (SongFormPage Artist field, PersonFormPage Full Name
 
 ## Acceptance criteria
 
-- **REQ-DXAC-01:** SongFormPage Artist field is a `dxe:AutoCompleteEdit` bound to the existing `SongFormViewModel` members (`ArtistSearchText`, `ArtistSuggestions`, `SearchArtistsCommand`, `SelectArtistCommand`, `ArtistBlurredWithoutSelectionCommand`, `HasError`/`ErrorText`, `IsArtistLocked`). Typing past the existing gate shows Service suggestions (max 5).
+- **REQ-DXAC-01:** SongFormPage Artist field is a `dxe:AutoCompleteEdit` bound to the existing `SongFormViewModel` members (`ArtistSearchText`, `ArtistSuggestions`, `SearchArtistsCommand`, `SelectArtistCommand`, `ArtistBlurredWithoutSelectionCommand`, `ArtistHasError`/`ArtistErrorText`, `IsArtistLocked`). Typing past the existing gate shows Service suggestions (max 5).
 - **REQ-DXAC-02:** PersonFormPage Full Name field is a `dxe:AutoCompleteEdit` bound to the existing `PersonFormViewModel` members (`PersonName`, `Suggestions`, `SearchPersonsCommand`, `SuggestionSelectedCommand`, `ValidateNameCommand`). Suggestions appear from 2 typed characters (existing min-length gate).
 - **REQ-DXAC-03:** Typed text is never cleared or replaced by the control on blur, popup dismiss, focus change, or no-selection — under no circumstance does the user lose their entry (BUG-027 core criterion).
 - **REQ-DXAC-04:** Tapping a suggestion executes the existing selection command with the tapped `AutocompleteSuggestion` (Song: sets `SelectedArtistId`/name and locks field per current behavior; Person: existing selection flow).
