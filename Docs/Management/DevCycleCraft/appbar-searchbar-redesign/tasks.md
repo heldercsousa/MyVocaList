@@ -17,7 +17,7 @@
   - ACs: REQ-14 · Files owned: CrudListViewModelBaseTests.cs
 - [x] **T9 — Verify picker pages untouched** (build + smoke: SongPicker, ArtistPicker, QueueSongPicker, YouTubeSearch still use SearchAppBar). AC: REQ-13
 - [x] **T10 — Guideline amendments** (`amend:` commit + changelog): `crud-appbar-list-toolbar.md` law rewrite, `m3-appbars.md` promotion/retirement notes, `component-safety-gate.md` adds `SearchBar` to governed list.
-- [ ] **T11 — BACKLOG follow-up registration**: new row for picker-page SearchAppBar migration/retirement; update parent redesign row status; Helder emulator smoke test gate before ✅.
+- [x] **T11 — BACKLOG follow-up registration**: new row for picker-page SearchAppBar migration/retirement; update parent redesign row status; Helder emulator smoke test gate before ✅.
 
 **Sequential-only files touched:** none from the registry (no MauiProgram/AppShell/DbContext changes — `SearchBar` needs no DI registration; it's a XAML component).
 **Helder manual gate:** emulator smoke test across the 4 pages (per-consumer verification table in `design.md § Governance`).
