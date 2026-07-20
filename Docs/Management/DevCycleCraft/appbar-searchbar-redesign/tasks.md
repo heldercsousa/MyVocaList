@@ -6,14 +6,14 @@
   - Produces: `SearchBar` type · Consumes: `AppBarBase` · Risk: Low (new file) · Files owned: SearchBar.xaml, SearchBar.xaml.cs · Demo: component renders in isolation · ACs: REQ-02, REQ-03, REQ-11
 - [x] **T2 — Integrate `SearchBar` into `CrudListView`**: new top row; `SearchText` (TwoWay) + elevation BPs; re-point `SearchPlaceholder` to the live placeholder (update its doc-comment); verify FilterContent row stacks below.
   - Produces: CrudListView search surface · Consumes: T1 · Risk: Medium (governed component, 4 consumers) · Files owned: CrudListView.xaml, CrudListView.xaml.cs · Demo: all 4 pages show the bar with zero page changes yet · ACs: REQ-01, REQ-09, REQ-10, REQ-12
-- [ ] **T3 — Convert VenuesPage (pilot)**: TitleView → bare SmallAppBar (drop Grid/converter/SearchAppBar/Action1 search); pass `SearchText` to CrudListView. Build green (swap members still exist but unreferenced by this page).
+- [x] **T3 — Convert VenuesPage (pilot)**: TitleView → bare SmallAppBar (drop Grid/converter/SearchAppBar/Action1 search); pass `SearchText` to CrudListView. Build green (swap members still exist but unreferenced by this page).
   - ACs: REQ-04, REQ-05, REQ-06 (Venues) · Files owned: VenuesPage.xaml · Build after this file.
-- [ ] **T4 — Convert PeoplePage** (same recipe). ACs: REQ-04/05/06 (People) · Files owned: PeoplePage.xaml · Build after this file.
-- [ ] **T5 — Convert ArtistsPage** (verify chips stacking, REQ-10). Files owned: ArtistsPage.xaml · Build after this file.
-- [ ] **T6 — Convert SongsPage** (verify subtitle/catalog layout). Files owned: SongsPage.xaml · Build after this file.
-- [ ] **T7 — Remove swap machinery from base layer** (now reference-free): `CrudListViewModelBase` (delete `IsSearchMode`/`OpenSearchCommand`/`CloseSearchCommand`/`CloseSearch()`), `ICrudListViewModel` (delete 2 members), `CrudListPageBase.OnBackButtonPressed` (delete search branch). Expected compile break only in `CrudListViewModelBaseTests` — fixed by T8 in the same commit.
+- [x] **T4 — Convert PeoplePage** (same recipe). ACs: REQ-04/05/06 (People) · Files owned: PeoplePage.xaml · Build after this file.
+- [x] **T5 — Convert ArtistsPage** (verify chips stacking, REQ-10). Files owned: ArtistsPage.xaml · Build after this file.
+- [x] **T6 — Convert SongsPage** (verify subtitle/catalog layout). Files owned: SongsPage.xaml · Build after this file.
+- [x] **T7 — Remove swap machinery from base layer** (now reference-free): `CrudListViewModelBase` (delete `IsSearchMode`/`OpenSearchCommand`/`CloseSearchCommand`/`CloseSearch()`), `ICrudListViewModel` (delete 2 members), `CrudListPageBase.OnBackButtonPressed` (delete search branch). Expected compile break only in `CrudListViewModelBaseTests` — fixed by T8 in the same commit.
   - Produces: cleaned base contract · Consumes: T3–T6 · Risk: Medium · Files owned: CrudListViewModelBase.cs, ICrudListViewModel.cs, CrudListPageBase.cs · Demo: back gesture = confirm-sheet else navigation · ACs: REQ-07, REQ-08
-- [ ] **T8 — Update unit tests** (same commit as T7): `CrudListViewModelBaseTests` — remove/replace swap-member tests; keep/extend `SearchText` debounce pipeline coverage (Level B). Full solution build + tests green here.
+- [x] **T8 — Update unit tests** (same commit as T7): `CrudListViewModelBaseTests` — remove/replace swap-member tests; keep/extend `SearchText` debounce pipeline coverage (Level B). Full solution build + tests green here.
   - ACs: REQ-14 · Files owned: CrudListViewModelBaseTests.cs
 - [ ] **T9 — Verify picker pages untouched** (build + smoke: SongPicker, ArtistPicker, QueueSongPicker, YouTubeSearch still use SearchAppBar). AC: REQ-13
 - [ ] **T10 — Guideline amendments** (`amend:` commit + changelog): `crud-appbar-list-toolbar.md` law rewrite, `m3-appbars.md` promotion/retirement notes, `component-safety-gate.md` adds `SearchBar` to governed list.

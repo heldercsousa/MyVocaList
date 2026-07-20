@@ -51,3 +51,40 @@ Files written and re-read: SearchBar.xaml, SearchBar.xaml.cs, CrudListView.xaml 
   - `MyVocaList/UI/Components/AppBars/SearchBar.xaml.cs` — BPs + elevation
   - `MyVocaList/UI/Components/CrudListView.xaml` — new Row 0 + shifted rows
   - `MyVocaList/UI/Components/CrudListView.xaml.cs` — SearchText/IsSearchBarElevated BPs
+
+---
+## Task: T7 — Remove swap machinery from base layer / T8 — Update unit tests
+**Plan:** `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/plan.md`
+**Status:** To Review
+**Started:** 2026-07-20
+**Completed:** 2026-07-20
+
+T3–T6 (page conversions) were already committed (`a8bc5dd`) but left unchecked in `tasks.md` — corrected in this pass. T7's deletions (`IsSearchMode`, `OpenSearchCommand`, `CloseSearchCommand`, `CloseSearch()` from `CrudListViewModelBase`; `IsSearchMode`/`CloseSearchCommand` from `ICrudListViewModel`; the search branch in `CrudListPageBase.OnBackButtonPressed`) were found already applied in the working tree, uncommitted. Verified them against the task description — all three files match exactly what T7 specifies, no deviations. A solution-wide grep for the four deleted member names found matches only in `Docs/` and `.claude/library/` (historical spec/guideline prose) — zero remaining references in `.cs`/`.xaml` source or test code.
+
+`CrudListViewModelBaseTests.cs` had no swap-member tests to remove (none existed in this file — the "remove/replace" clause was a no-op check). Added two new tests for the `SearchText` → debounce → fetch pipeline (T8, REQ-SEARCHBAR-14, Level B): one confirms a single `SearchText` change debounces into a `FetchPageAsync` call carrying the trimmed query; the other confirms rapid successive edits cancel the pending debounce so only the final query is fetched (proves `TriggerSearchDebounce`'s CTS-cancel behavior). Both use the existing `TestCrudListViewModel` double, extended with `LastFetchQuery`/`FetchPageCallCount` capture fields and a `ResetFetchCapture()` helper (called after `InitializeAsync()` so the initial load's fetch doesn't pollute assertions).
+
+### AC traceability
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|--------------------------|-------------|
+| REQ-SEARCHBAR-07 | Back gesture closes confirm-sheet or navigates back — no search-mode branch | `CrudListPageBase.OnBackButtonPressed` (search branch removed) | Manual/E2E (UI navigation — no unit-testable surface; existing confirm-sheet/back-nav tests unaffected) |
+| REQ-SEARCHBAR-08 | Swap machinery (`IsSearchMode`, open/close commands) fully removed from base VM/interface | `CrudListViewModelBase.cs`, `ICrudListViewModel.cs` | Compile-level: solution build 0 errors confirms no remaining consumer references |
+| REQ-SEARCHBAR-14 | `CrudListViewModelBaseTests` updated — swap-member tests removed/replaced; `SearchText` → debounce → query pipeline covered | `MyVocaList.Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` | `SearchText_Changed_DebouncesIntoFetchWithTrimmedQuery`, `SearchText_RapidChanges_OnlyFetchesFinalQuery` |
+
+### Changed files:
+- `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/tasks.md` (T3–T8 checked)
+- `MyVocaList/UI/Pages/Base/CrudListPageBase.cs` (search branch removed — already staged, verified)
+- `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs` (swap machinery removed — already staged, verified)
+- `MyVocaList/UI/ViewModels/ICrudListViewModel.cs` (2 members removed — already staged, verified)
+- `MyVocaList.Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` (2 new debounce-pipeline tests)
+
+### Build notes
+Build: solution-wide `dotnet build MyVocaList.sln` passed (0 errors, 110 pre-existing DX-trial/warnings). Android target build hit a transient `XA0142 llvm-objcopy` packaging error on first attempt (unrelated toolchain flake — no CS errors); retry succeeded 0 errors.
+Tests: full `MyVocaList.Tests` suite — 524 passed, 0 failed, 0 skipped.
+Files written and re-read: `CrudListViewModelBaseTests.cs` (re-read after edit — new tests + test-double fields confirmed in place); `tasks.md` (re-read — T3–T8 checkboxes confirmed).
+
+### Checkpoint
+- Branch/worktree: `feature/persistent-searchbar` @ `C:\Users\helde\source\repos\MyVocaList-wt-searchbar`
+- Step: T7+T8 complete and committed. Task done — no further steps this dispatch.
+- Last build/test: solution build 0 errors; `dotnet test` 524/524 passed
+- Next command: none (stopped per briefing scope — T9/T10/T11 excluded)
+- Context manifest: `tasks.md` (all checked through T8); `task-log.md` (this entry); `CrudListViewModelBaseTests.cs` (new tests); `CrudListViewModelBase.cs`, `ICrudListViewModel.cs`, `CrudListPageBase.cs` (T7 deletions, committed)

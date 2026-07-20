@@ -23,7 +23,6 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private string _searchText = string.Empty;
-    [ObservableProperty] private bool _isSearchMode;
     [ObservableProperty] private bool _isScrolled;
     [ObservableProperty] private int _selectedCount;
     [ObservableProperty] private BottomSheetState _confirmSheetState = BottomSheetState.Hidden;
@@ -62,8 +61,6 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     public IRelayCommand SelectAllCommand { get; }
     public IAsyncRelayCommand ConfirmActionCommand { get; }
     public IRelayCommand DismissConfirmCommand { get; }
-    public IRelayCommand OpenSearchCommand { get; }
-    public IRelayCommand CloseSearchCommand { get; }
 
     protected CrudListViewModelBase(ILogger logger)
     {
@@ -76,8 +73,6 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         SelectAllCommand = new RelayCommand(ToggleSelectAll);
         ConfirmActionCommand = new AsyncRelayCommand(ExecuteConfirmActionAsync);
         DismissConfirmCommand = new RelayCommand(DismissConfirmSheet);
-        OpenSearchCommand = new RelayCommand(() => IsSearchMode = true);
-        CloseSearchCommand = new RelayCommand(CloseSearch);
     }
 
     partial void OnSearchTextChanged(string value)
@@ -339,12 +334,6 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     public void OnSelectionChanged(int count)
     {
         SelectedCount = count;
-    }
-
-    private void CloseSearch()
-    {
-        IsSearchMode = false;
-        SearchText = string.Empty;
     }
 
     private void NotifyEmptyStates()
