@@ -12,7 +12,7 @@
   Consumes: T3 (pattern proven). Files owned: `MyVocaList/UI/Pages/People/PersonFormPage.xaml`, `MyVocaList/UI/Pages/People/PersonFormPage.xaml.cs` (+ `PersonFormViewModel.cs` same condition). Demo: dedup suggestions from 2 chars; selection + blur validation intact. Review lane: Elevated (BUG-044/045/047 residual-defect surface).
 - [x] **T5 — Exclude frozen component family from build** (REQ-DXAC-11)
   Consumes: T3, T4 (no remaining references). Files owned: `MyVocaList/MyVocaList.csproj`, `MyVocaList.Tests/MyVocaList.Tests.csproj`, new `UI/Components/AutocompleteField/README-FROZEN.md`. Demo: solution builds 0 errors; 6 component test files no longer executed (record the before/after test-count delta in the task-log as evidence). Review lane: Standard.
-- [ ] **T6 — Full test suite + BUG-044/045/047 evaluation checklist** (REQ-DXAC-08/09)
+- [x] **T6 — Full test suite + BUG-044/045/047 evaluation checklist** (REQ-DXAC-08/09)
   Consumes: T5. `dotnet test` unchanged VM suites green; write the on-device evaluation checklist into `task-log.md` for Helder's run (include an explicit REQ-DXAC-06 item: suggestions shown exactly as the Service returned, e.g. diacritic-mismatch query); register BUG rows + regression tests for any survivor. Review lane: Standard.
 - [ ] **T7 — Helder device verification: smoke 16C.1 + checklist run** (REQ-DXAC-09/10) `[MANUAL — Helder]`
   Consumes: T6. Green → BACKLOG updates: this row ✅; BUG-027 unblocked (fix direction satisfied — re-verify BUG-027 symptoms in 16C.1); residual-evaluation row closed with results.

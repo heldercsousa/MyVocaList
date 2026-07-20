@@ -26,7 +26,7 @@ PersonFormPage.xaml ┘                                  └─ IPersonService.S
 | Search trigger | `SearchArtistsCommand` | `SearchPersonsCommand` |
 | Selection | `SelectArtistCommand` | `SuggestionSelectedCommand` |
 | Blur w/o selection | `ArtistBlurredWithoutSelectionCommand` | `ValidateNameCommand` |
-| Error state | `HasError` / `ErrorText` | `NameHasError` / `NameErrorText` |
+| Error state | `ArtistHasError` / `ArtistErrorText` | `NameHasError` / `NameErrorText` |
 | Enable/lock | `IsArtistLocked` | — |
 
 ## Behavior decisions

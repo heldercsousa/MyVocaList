@@ -69,3 +69,34 @@ Pre-check: `grep -r AutocompleteField MyVocaList/UI/Pages/` → no matches. Befo
 | REQ-DXAC-12 | implicit `dx:AutoCompleteEdit` style | build 0 errors; visual check pending (T7) |
 
 E2E note: emulator not run in this session — pages are user-facing; on-device verification is the plan's T6/T7 (Helder checklist). Per-task status therefore `To Review` with manual E2E explicitly pending (equivalent to `Check build` for the UI-visible ACs).
+
+---
+
+## T6 — Full suite + on-device evaluation checklist (2026-07-20)
+
+**Status:** To Review — automated evidence complete; checklist below is T7 (Helder, on device).
+
+### Automated evidence (post-merge, on `develop`)
+- Merge commit: `feat/dx-autocompleteedit-replacement` merged `--no-ff` into develop, verifier verdict CONDITIONAL PASS (no blockers).
+- `dotnet test` on develop after merge: **Com falha: 0, Aprovado: 501, Total: 501** (11 s). Matches the post-T5 branch result — merge introduced no regression.
+- Test-count delta vs pre-change baseline: 522 → 501 (−21 = the 6 excluded frozen-component test files, REQ-DXAC-11).
+- Solution build: 0 errors (DX1000/DX1001 trial-license warnings only, pre-existing).
+
+### Code-review findings carried into T7
+- **W1 (fixed):** `requirements.md` REQ-DXAC-01 and `design.md` binding table said `HasError`/`ErrorText`; corrected to `ArtistHasError`/`ArtistErrorText` to match the actual VM members.
+- **W3 (fixed):** stale comments referencing the frozen component removed (`GlobalUsings.cs`, `SongFormViewModel.cs`).
+- **W2 (open — watch item for checklist item e):** in both `OnArtistItemsRequested`/`OnNameItemsRequested`, `token.ThrowIfCancellationRequested()` runs *after* `await …Command.ExecuteAsync(text)`, so a superseded request still mutates the VM's shared suggestions collection; cancellation only stops the provider from *displaying* it. Observable risk is a brief stale popup — exactly what item (e) exercises. If (e) fails, this is the root cause to fix.
+
+### On-device checklist `[T7 — MANUAL, Helder]`
+
+Run on a physical Android device. Mark each ✅/❌; any ❌ gets a BUG-NNN row per `bug-tracking.md` before the feature closes.
+
+- [ ] **(a) REQ-DXAC-03 — typed text survives everything (BUG-027 core).** Song form: type a partial artist name, then in turn — tap outside (blur), dismiss the popup with the back gesture, rotate the device, switch apps and return. After each, the typed text must still be exactly what you typed. Repeat on the Person form's Full Name field.
+- [ ] **(b) REQ-DXAC-04 — selection.** Song form: type until suggestions appear, tap one → artist is set and the field locks per existing behavior. Person form: tap a dedup suggestion → existing selection flow runs. Neither may clear the field.
+- [ ] **(c) REQ-DXAC-05 — blur validation.** Song form: type text matching no artist, blur without selecting → the existing error appears via the editor's own error display (no separate error label, no native dialog). Person form: same via `ValidateNameCommand`.
+- [ ] **(d) REQ-DXAC-06 — no client-side filtering.** Type a query whose match depends on DB collation, e.g. `cafe` when the stored artist is `Café` (and the reverse). The popup must show **exactly** what the Service returned — if the Service matches it, it appears. A result that the Service returned but the popup hides means a client filter is active (regression).
+- [ ] **(e) REQ-DXAC-07 — debounce + stale results.** Type quickly (faster than 300 ms/char), then pause. Only the final query's results may be displayed; no flicker of an earlier query's results after the last one lands. See W2 above if this fails.
+- [ ] **(f) REQ-DXAC-12 — visual match.** Both autocomplete fields must be visually indistinguishable from the adjacent Outlined `TextEdit` fields on the same form (border, focus color, label float, background) in both light and dark theme.
+- [ ] **(g) BUG-044 / BUG-045 / BUG-047 residual check.** Re-run each bug's original reproduction steps on the new control. Record per bug: **resolved by the swap** / **still present** (→ new BUG row, since the old component is frozen and the fix must land in the DX wiring).
+- [ ] **(h) Smoke 16C.1 (REQ-DXAC-10).** Full smoke run green.
+- [ ] **(i) BUG-027 re-verification (REQ-DXAC-09).** Confirm the original BUG-027 symptom is gone; if so the Artists & Songs Catalog blocker is cleared.
