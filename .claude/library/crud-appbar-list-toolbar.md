@@ -5,27 +5,23 @@
 ## App Bar — Laws and Variants
 
 ### Law
-Every list page uses `SmallAppBar` as the default title bar, placed in `Shell.TitleView`. `SearchAppBar` replaces it when search is active. Both components are always in the `Shell.TitleView` — a `Grid` wrapper with `IsVisible` toggling between them via `InverseBoolConverter`.
+Every list page uses `SmallAppBar` as the sole `Shell.TitleView` occupant (no search-mode toggle, no wrapper `Grid`). Search is a persistent `SearchBar` (MD3 "Search bar", standalone/docked) docked at Row 0 of `CrudListView` — always visible, never replacing the app bar. `SearchAppBar` (Shell.TitleView bar-swap) is retired for CRUD list pages; it remains in use only by the 4 picker pages (`SongPickerPage`, `ArtistPickerPage`, `QueueSongPickerPage`, `YouTubeSearchPage`) pending their own migration (BACKLOG follow-up).
 
 ### Standard configuration (Venues reference)
 ```xml
 <Shell.TitleView>
-    <Grid>
-        <appbars:SmallAppBar
-            Title="{Binding AppBarTitle}"
-            Action1Icon="search_outlined"
-            Action1Command="{Binding OpenSearchCommand}"
-            IsElevated="{Binding IsScrolled}"
-            IsVisible="{Binding IsSearchMode, Converter={StaticResource InverseBoolConverter}}" />
-        <appbars:SearchAppBar
-            SearchText="{Binding SearchText, Mode=TwoWay}"
-            Placeholder="Search [entity]..."
-            BackCommand="{Binding CloseSearchCommand}"
-            IsElevated="{Binding IsScrolled}"
-            IsVisible="{Binding IsSearchMode}" />
-    </Grid>
+    <appbars:SmallAppBar
+        Title="{Binding AppBarTitle}"
+        IsElevated="{Binding IsScrolled}" />
 </Shell.TitleView>
+...
+<views:CrudListView
+    ItemsSource="{Binding Venues}"
+    SearchText="{Binding SearchText, Mode=TwoWay}"
+    SearchPlaceholder="Search venues..."
+    ... />
 ```
+`CrudListView` owns the `SearchBar` internally (Row 0 of its root Grid) and propagates `SearchText`/`SearchPlaceholder` to it. Pages never place a `SearchBar` element directly in page XAML.
 
 ### Variants — allowed adaptations
 
@@ -40,7 +36,7 @@ Every list page uses `SmallAppBar` as the default title bar, placed in `Shell.Ti
 
 ### Never
 - Do not build a custom title bar Grid in `Shell.TitleView` as a replacement for `SmallAppBar`. The old multi-select contextual bar pattern (5-column Grid) is retired.
-- Do not place a search bar inside the page content area (below the app bar). Search belongs in `Shell.TitleView` via `SearchAppBar`.
+- Do not add `SearchAppBar`, `IsSearchMode`, or a TitleView `Grid`+toggle to a CRUD list page. Search is the persistent `SearchBar` inside `CrudListView` — see the Law above.
 
 ---
 

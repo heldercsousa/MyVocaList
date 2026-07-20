@@ -112,3 +112,31 @@ Verification only, no code changes. Grepped all 4 picker pages for `SearchAppBar
 ### Build notes
 Build: passed (0 errors, 9 warnings — pre-existing nullable/DX-trial warnings unrelated to this feature) — `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` (00:06:15). Tests: not run (no `.cs`/`.xaml` changed).
 Files written and re-read: none edited; grep output reviewed for all 4 target files.
+---
+## Task: T10 — Guideline amendments
+**Plan:** `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/tasks.md`
+**Status:** To Review
+**Started:** 2026-07-20
+**Completed:** 2026-07-20
+**Branch/worktree:** `feature/persistent-searchbar` @ `MyVocaList-wt-searchbar` (based on develop)
+
+Mechanical transcription of `design.md § Guideline amendments` (already Helder-approved via the design doc, not new policy):
+- `crud-appbar-list-toolbar.md`: Law rewritten — `SmallAppBar` is now the sole `Shell.TitleView` occupant on CRUD list pages (no Grid/toggle); `SearchAppBar` retired for CRUD, still valid for the 4 picker pages pending their own migration. Standard-configuration XAML replaced with the `CrudListView SearchText`/`SearchPlaceholder` pattern. "Never" bullet updated to prohibit re-adding the bar-swap to CRUD pages.
+- `m3-appbars.md`: "M3 Search App Bar" section gains a retirement-status note pointing to the new law. "M3 Search (standalone/detached)" section promoted from "NOT yet implemented" to "implemented: `SearchBar`" — documents the shipped component's spec table and its differences from `SearchAppBar` (no BackCommand, no auto-focus, no leading-icon toggle).
+- `component-safety-gate.md`: governed-component table gains `SearchBar` (`UI/Components/AppBars/`) — 4 consumers (Venues/People/Artists/Songs via `CrudListView`).
+- `Docs/Changelog/changelog.md`: new `amend:` entry (old rule / what was wrong / new rule / backward-compat / effective date) per `CLAUDE.md § Amending These Rules`.
+
+No new policy invented — every change traces to a specific `design.md § Guideline amendments` line.
+
+### Changed files:
+- `.claude/library/crud-appbar-list-toolbar.md`
+- `.claude/library/m3-appbars.md`
+- `.claude/library/component-safety-gate.md`
+- `Docs/Changelog/changelog.md`
+- `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/tasks.md` (T10 checked)
+- `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/task-log.md` (this entry)
+
+### Build notes
+Build: N/A (documentation-only edit, no `.cs`/`.xaml` touched). Tests: N/A.
+Files written and re-read: all 3 library files and the changelog entry re-read after edit to confirm content landed correctly and Markdown fences/tables are intact.
+
