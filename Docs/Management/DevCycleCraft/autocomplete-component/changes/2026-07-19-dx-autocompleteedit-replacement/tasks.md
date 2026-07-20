@@ -11,7 +11,7 @@
 - [ ] **T4 — PersonFormPage Full Name field swap** (REQ-DXAC-02/03/04/05/06/07)
   Consumes: T3 (pattern proven). Files owned: `MyVocaList/UI/Pages/People/PersonFormPage.xaml` (+ `PersonFormViewModel.cs` same condition). Demo: dedup suggestions from 2 chars; selection + blur validation intact.
 - [ ] **T5 — Exclude frozen component family from build** (REQ-DXAC-11)
-  Consumes: T3, T4 (no remaining references). Files owned: `MyVocaList/MyVocaList.csproj`, `MyVocaList.Tests/MyVocaList.Tests.csproj`, new `UI/Components/AutocompleteField/README-FROZEN.md`. Demo: solution builds 0 errors; 6 component test files no longer executed.
+  Consumes: T3, T4 (no remaining references). Files owned: `MyVocaList/MyVocaList.csproj`, `MyVocaList.Tests/MyVocaList.Tests.csproj`, new `UI/Components/AutocompleteField/README-FROZEN.md`. Demo: solution builds 0 errors; 6 component test files no longer executed (record the before/after test-count delta in the task-log as evidence).
 - [ ] **T6 — Full test suite + BUG-044/045/047 evaluation checklist** (REQ-DXAC-08/09)
   Consumes: T5. `dotnet test` unchanged VM suites green; write the on-device evaluation checklist into `task-log.md` for Helder's run; register BUG rows + regression tests for any survivor.
 - [ ] **T7 — Helder device verification: smoke 16C.1 + checklist run** (REQ-DXAC-09/10) `[MANUAL — Helder]`
