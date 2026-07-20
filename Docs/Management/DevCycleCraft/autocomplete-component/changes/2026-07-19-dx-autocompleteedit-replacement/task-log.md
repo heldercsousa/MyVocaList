@@ -99,4 +99,18 @@ Run on a physical Android device. Mark each ✅/❌; any ❌ gets a BUG-NNN row 
 - [ ] **(f) REQ-DXAC-12 — visual match.** Both autocomplete fields must be visually indistinguishable from the adjacent Outlined `TextEdit` fields on the same form (border, focus color, label float, background) in both light and dark theme.
 - [ ] **(g) BUG-044 / BUG-045 / BUG-047 residual check.** Re-run each bug's original reproduction steps on the new control. Record per bug: **resolved by the swap** / **still present** (→ new BUG row, since the old component is frozen and the fix must land in the DX wiring).
 - [ ] **(h) Smoke 16C.1 (REQ-DXAC-10).** Full smoke run green.
+- [ ] **(j) BUG-047 guard loss — programmatic text hydration `[HIGH PRIORITY]`.** Open an **existing** song for editing (artist pre-filled) and an **existing** person for editing (name pre-filled). On open, no suggestion popup may appear and no search may fire — the field is being hydrated programmatically, not typed. Then confirm the pre-filled text is intact and editable. See the analysis below for why this is the most likely regression of the whole swap.
 - [ ] **(i) BUG-027 re-verification (REQ-DXAC-09).** Confirm the original BUG-027 symptom is gone; if so the Artists & Songs Catalog blocker is cleared.
+
+### Where the prior BUG-044/045/047 fixes went after the swap (analysis, 2026-07-20)
+
+Both fix branches (`fix/bug-044-045-autocomplete-regressions`, `fix/bug-047-autocomplete-trigger`) are fully merged ancestors of develop — no in-flight work competes with this change, and their worktrees were removed. But the two fixes fared very differently under the freeze:
+
+| Bug | Fix commit | Fix lives in | Survives the swap? |
+|---|---|---|---|
+| BUG-044 / BUG-045 | `219af83` | `PersonFormViewModel.cs`, `NavigationService.cs`, `INavigationService.cs` | **Yes** — all still compiled; regression test `PersonFormViewModelBug044Tests.cs` is under `Unit/ViewModels/` and still runs (it is not in the csproj exclusion list). |
+| BUG-047 | `5fba78d` | `UI/Components/AutocompleteField/AutocompleteField.xaml.cs` | **No** — that file is in the frozen family and is now excluded from compilation. Its regression test `AutocompleteFieldProgrammaticTextGuardTests.cs` is one of the 6 excluded test files, so nothing fails to warn us. |
+
+**Consequence:** the BUG-047 guard is gone. It stopped a *programmatic* `Text` hydration (opening a form for editing) from being treated as user typing and firing a stale suggestions search. Nothing in the new DX wiring reproduces that guard — `AsyncItemsSourceProvider` sees a text change without knowing whether a human or the ViewModel caused it. `CharacterCountThreshold` does not help, because a hydrated value is well past the threshold.
+
+This is the highest-probability regression of the whole change, and it compounds with W2: a spurious hydration search plus the late cancellation check could surface a suggestion popup over a freshly opened edit form. Checklist item **(j)** exists to catch exactly this. If (j) fails, the fix belongs in the DX wiring (suppress the request when the text change originates from the ViewModel), and it needs a new regression test — the old one is no longer compiled and cannot be revived as-is.
