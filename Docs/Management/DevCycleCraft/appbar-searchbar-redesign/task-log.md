@@ -88,3 +88,27 @@ Files written and re-read: `CrudListViewModelBaseTests.cs` (re-read after edit �
 - Last build/test: solution build 0 errors; `dotnet test` 524/524 passed
 - Next command: none (stopped per briefing scope — T9/T10/T11 excluded)
 - Context manifest: `tasks.md` (all checked through T8); `task-log.md` (this entry); `CrudListViewModelBaseTests.cs` (new tests); `CrudListViewModelBase.cs`, `ICrudListViewModel.cs`, `CrudListPageBase.cs` (T7 deletions, committed)
+
+---
+## Task: T9 — Verify picker pages untouched (REQ-SEARCHBAR-13)
+**Plan:** `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/tasks.md`
+**Status:** To Review
+**Started:** 2026-07-20
+**Completed:** 2026-07-20
+**Branch/worktree:** `feature/persistent-searchbar` @ `MyVocaList-wt-searchbar` (based on develop)
+
+Verification only, no code changes. Grepped all 4 picker pages for `SearchAppBar` — each still references it as sole `Shell.TitleView` element:
+`MyVocaList/UI/Pages/Songs/SongPickerPage.xaml`, `MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml`, `MyVocaList/UI/Pages/Queue/QueueSongPickerPage.xaml`, `MyVocaList/UI/Pages/Songs/YouTubeSearchPage.xaml` — 1 match each, confirmed.
+
+### AC traceability
+| AC ID | Criterion | Implementation location | Test method |
+|---|---|---|---|
+| REQ-SEARCHBAR-13 | 4 picker pages remain untouched, still use `SearchAppBar` | (no change — verification) | Grep confirms `SearchAppBar` present in all 4; targeted `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` = 0 errors |
+
+### Changed files:
+- `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/tasks.md` (T9 checked)
+- `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/task-log.md` (this entry)
+
+### Build notes
+Build: passed (0 errors, 9 warnings — pre-existing nullable/DX-trial warnings unrelated to this feature) — `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` (00:06:15). Tests: not run (no `.cs`/`.xaml` changed).
+Files written and re-read: none edited; grep output reviewed for all 4 target files.
