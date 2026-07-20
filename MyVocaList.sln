@@ -293,7 +293,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "m3-lists", "m3-lists", "{F5
 		Docs\Management\DevCycleCraft\m3-lists\plan.md = Docs\Management\DevCycleCraft\m3-lists\plan.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "appbar-searchbar-redesign", "appbar-searchbar-redesign", "{FA1234BC-0001-4000-8000-000000000053}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "appbar-searchbar-redesign", "appbar-searchbar-redesign", "{FA1234BC-0001-4000-8000-000000000054}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\2026-07-19-persistent-searchbar-decision.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\2026-07-19-persistent-searchbar-decision.md
 	EndProjectSection
@@ -853,7 +853,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000029} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000046} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
-		{FA1234BC-0001-4000-8000-000000000053} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000054} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000053} = {FA1234BC-0001-4000-8000-000000000046}
 		{FA1234BC-0001-4000-8000-000000000051} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000052} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
