@@ -8,7 +8,7 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| DX-AC | Replace AutocompleteMobileField with DX AutoCompleteEdit | T2–T6 complete; merged to develop (verifier CONDITIONAL PASS, W1/W3 fixed, W2 = T7 watch item); 501/501 green | merged into develop | — (removable) | merged | (merge commit) | **Helder: run T7 on-device checklist** in task-log.md (items a–i incl. smoke 16C.1 + BUG-044/045/047 + BUG-027 re-verify), then close BACKLOG rows |
+| DX-AC | Replace AutocompleteMobileField with DX AutoCompleteEdit | T2–T6 complete; merged to develop (verifier CONDITIONAL PASS, W1/W3 fixed, W2 = T7 watch item); 501/501 green; worktree removed | merged into develop | — | merged (unpushed) | 286f0d4 | **Helder: (1) `git push origin develop` from own terminal — wincred blocks agent shells, 10 commits pending; (2) run T7 on-device checklist** in task-log.md (items a–i incl. smoke 16C.1 + BUG-044/045/047 + BUG-027 re-verify), then close BACKLOG rows |
 | SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | complete — verifier PASS; cleanup executed (30→8 worktrees, form-ux merged `f00543a`, 478/478) | develop (tooling scripts + docs only, no app code) | — | to review | 68e1852 | Helder: run two-terminal live demo (last open gate); optionally direct the 4 leftover agent worktrees |
 
 ## Completed (last 20)
