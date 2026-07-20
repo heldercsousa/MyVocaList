@@ -285,6 +285,8 @@
 ## Moved from BACKLOG.md (2026-07-15) — AppBar / SearchAppBar Interaction Redesign — page-nav pattern + persistent search bar
 
 > Verbatim row moved during the BACKLOG.md PO-level restructure (`Docs/Management/DevCycleCraft/backlog-purpose-review/`). Original table row preserved below.
+>
+> **Decision recorded 2026-07-19:** Helder's bar-swap-kill hypothesis was validated against official MD3 docs (Material Components Search: persistent SearchBar is the recommended pattern; bar swap is M2-era) and NN/g search-visibility research, and approved. Standard: SmallAppBar stays sole TitleView occupant; persistent 56dp M3 standalone search bar (no leading back arrow) hosted inside `CrudListView`; SearchAppBar + `IsSearchMode` swap machinery retired via four-gate governance. Full record: `DevCycleCraft/appbar-searchbar-redesign/2026-07-19-persistent-searchbar-decision.md`.
 
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
