@@ -2,7 +2,7 @@
 
 > Ordering: API pinning first (doc-source gap), then one XAML file per task (incremental-edits constraint), exclusions last before verification. All code tasks run in a worktree branched from `develop` (Rule 2).
 
-- [ ] **T1 — Pin DX 25.2.4 `AutoCompleteEdit` API surface** `[SPIKE-lite]`
+- [x] **T1 — Pin DX 25.2.4 `AutoCompleteEdit` API surface** `[SPIKE-lite]`
   Produces: `findings.md` section — exact member names for async suggestions (provider/event), suggestion delay/debounce, client-filter disable, error display, item template, text-retention behavior. Sources: DevExpress MCP (verify index health first — MCP Availability Gate), Context7 (version-pinned), installed 25.2.4 package XML docs. Escalate to Helder if unconfirmable. Consumes: —. Risk: doc gap. Files owned: `findings.md`. Demo: `findings.md` contains a pinned-name table + explicit Option A/B wiring decision. Review lane: Standard.
 - [ ] **T2 — MaterialStyles.xaml: AutoCompleteEdit form style** (REQ-DXAC-12)
   Consumes: T1. Files owned: `MyVocaList/Resources/Styles/MaterialStyles.xaml`. Demo: style resource compiles; matches Outlined TextEdit convention. Review lane: Standard.
