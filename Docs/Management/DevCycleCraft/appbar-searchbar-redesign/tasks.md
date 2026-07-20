@@ -15,7 +15,7 @@
   - Produces: cleaned base contract · Consumes: T3–T6 · Risk: Medium · Files owned: CrudListViewModelBase.cs, ICrudListViewModel.cs, CrudListPageBase.cs · Demo: back gesture = confirm-sheet else navigation · ACs: REQ-07, REQ-08
 - [x] **T8 — Update unit tests** (same commit as T7): `CrudListViewModelBaseTests` — remove/replace swap-member tests; keep/extend `SearchText` debounce pipeline coverage (Level B). Full solution build + tests green here.
   - ACs: REQ-14 · Files owned: CrudListViewModelBaseTests.cs
-- [ ] **T9 — Verify picker pages untouched** (build + smoke: SongPicker, ArtistPicker, QueueSongPicker, YouTubeSearch still use SearchAppBar). AC: REQ-13
+- [x] **T9 — Verify picker pages untouched** (build + smoke: SongPicker, ArtistPicker, QueueSongPicker, YouTubeSearch still use SearchAppBar). AC: REQ-13
 - [ ] **T10 — Guideline amendments** (`amend:` commit + changelog): `crud-appbar-list-toolbar.md` law rewrite, `m3-appbars.md` promotion/retirement notes, `component-safety-gate.md` adds `SearchBar` to governed list.
 - [ ] **T11 — BACKLOG follow-up registration**: new row for picker-page SearchAppBar migration/retirement; update parent redesign row status; Helder emulator smoke test gate before ✅.
 
