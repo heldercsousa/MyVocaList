@@ -17,39 +17,28 @@
     SafeAreaEdges="Container">
 
     <!-- Suppress Shell's native back/hamburger icon.
-         IsVisible=False: hides the Shell-rendered nav icon (removes double back arrow in SearchAppBar mode).
+         IsVisible=False: hides the Shell-rendered nav icon.
          IsEnabled=False: prevents Shell from intercepting the hardware back event so OnBackButtonPressed fires.
-         OnBackButtonPressed handles all back/dismiss navigation (confirm sheet → search → default). -->
+         OnBackButtonPressed handles all back/dismiss navigation (confirm sheet → default). -->
     <Shell.BackButtonBehavior>
         <BackButtonBehavior IsVisible="False" IsEnabled="False" />
     </Shell.BackButtonBehavior>
 
     <Shell.TitleView>
-        <Grid>
-            <appbars:SmallAppBar
-                x:Name="smallAppBar"
-                Title="{Binding AppBarTitle}"
-                Subtitle="{Binding AppBarSubtitle}"
-                NavigationIcon="{Binding AppBarNavigationIcon}"
-                NavigationCommand="{Binding AppBarNavigationCommand}"
-                Action1Icon="search_outlined"
-                Action1Command="{Binding OpenSearchCommand}"
-                IsElevated="{Binding IsScrolled}"
-                IsVisible="{Binding IsSearchMode, Converter={StaticResource InverseBoolConverter}}" />
-            <appbars:SearchAppBar
-                x:Name="searchAppBar"
-                SearchText="{Binding SearchText, Mode=TwoWay}"
-                Placeholder="Search songs..."
-                BackCommand="{Binding CloseSearchCommand}"
-                IsElevated="{Binding IsScrolled}"
-                IsVisible="{Binding IsSearchMode}" />
-        </Grid>
+        <appbars:SmallAppBar
+            Title="{Binding AppBarTitle}"
+            Subtitle="{Binding AppBarSubtitle}"
+            NavigationIcon="{Binding AppBarNavigationIcon}"
+            NavigationCommand="{Binding AppBarNavigationCommand}"
+            IsElevated="{Binding IsScrolled}" />
     </Shell.TitleView>
 
     <views:CrudListView
         ItemsSource="{Binding Songs}"
         SelectedItemsSource="{Binding SelectedSongsRaw}"
         IsEmptyNoItems="{Binding IsEmptyNoSongs}"
+        SearchText="{Binding SearchText, Mode=TwoWay}"
+        IsSearchBarElevated="{Binding IsScrolled}"
         SearchPlaceholder="Search songs..."
         EmptyNoItemsIllustration="music_note_outlined"
         EmptyNoItemsHeadline="No song registered"
