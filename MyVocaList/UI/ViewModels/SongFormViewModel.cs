@@ -331,6 +331,7 @@ public partial class SongFormViewModel : ViewModelBase
             SelectedArtistId = ArtistId;
             SelectedArtistName = ArtistName;
             ArtistSearchText = ArtistName;
+            IsArtistLocked = true; // BUG-052: edit-mode hydration must show the artist as locked
         }
     }
 
