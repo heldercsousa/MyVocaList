@@ -425,6 +425,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-10-form-ux-redesign
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\tasks.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-inline-artist-create", "2026-07-21-inline-artist-create", "{FA1234BC-0001-4000-8000-000000000055}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\tasks.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\windows-version\design.md = Docs\Management\BusinessFeatures\windows-version\design.md
