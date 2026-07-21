@@ -21,6 +21,7 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ISongKaraokeUrlService _karaokeUrlService;
     private readonly ISecureStorageWrapper _secureStorage;
     private readonly IMessenger _messenger;
+    private int _searchGeneration; // BUG-051: generation counter — guards SearchArtistsAsync against stale completions
 
     // ── Query properties ──────────────────────────────────────────────────
     public string SongIdRaw { set => SongId = int.TryParse(value, out var id) ? id : null; }
@@ -279,7 +280,9 @@ public partial class SongFormViewModel : ViewModelBase
     private async Task SearchArtistsAsync(string term)
     {
         if (string.IsNullOrWhiteSpace(term)) { ArtistSuggestions = []; return; }
+        var gen = ++_searchGeneration; // BUG-051: guards against a slower earlier query clobbering a newer one
         var results = await _artistService.SearchArtistsByNameAsync(term, maxResults: 5);
+        if (gen != _searchGeneration) return;
         RunOnUiThread(() =>
             ArtistSuggestions = results.Select(a =>
                 new AutocompleteSuggestion(a.Name, a.CatalogCountText, a)).ToList());
