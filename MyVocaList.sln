@@ -713,6 +713,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec-evolution-versioning",
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\findings.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\findings.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\2026-07-21-nested-folders-and-generated-backlog-decision.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\2026-07-21-nested-folders-and-generated-backlog-decision.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\requirements.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\requirements.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\design.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\design.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "per-agent-context-isolation", "per-agent-context-isolation", "{FA1234BC-0001-4000-8000-000000000044}"
