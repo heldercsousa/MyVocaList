@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -319,6 +320,23 @@ public class SongFormViewModelTests
 
         Assert.Equal("Metallica", sut.ArtistSearchText);
         Assert.Equal(5, sut.SelectedArtistId);
+    }
+
+    // ── BUG-050: selecting a suggestion locks the field ───────────────────
+
+    // [AC] REQ-ACREATE-12 (BUG-050): selecting a suggestion locks the field
+    [Fact]
+    public void SelectArtist_ExistingSuggestion_LocksField()
+    {
+        var sut = CreateSut();
+        var artist = new ArtistListItem(7, "Queen", string.Empty, false, 0);
+        var suggestion = new AutocompleteSuggestion("Queen", artist.CatalogCountText, artist);
+        Assert.False(sut.IsArtistLocked); // precondition
+
+        sut.SelectArtistCommand.Execute(suggestion);
+
+        Assert.True(sut.IsArtistLocked);
+        Assert.Equal(7, sut.SelectedArtistId);
     }
 
     // ── BUG-009: buffered URLs ────────────────────────────────────────────

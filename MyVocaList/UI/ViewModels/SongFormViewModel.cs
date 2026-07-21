@@ -291,6 +291,7 @@ public partial class SongFormViewModel : ViewModelBase
         SelectedArtistId = artist.Id;
         SelectedArtistName = artist.Name;
         ArtistSearchText = artist.Name;
+        IsArtistLocked = true; // BUG-050: selecting a suggestion locks the field
         ArtistSuggestions = [];
         ArtistHasError = false;
         ArtistErrorText = string.Empty;
