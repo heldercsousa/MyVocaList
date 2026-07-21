@@ -162,3 +162,29 @@ That leaves a coherence problem independent of REQ-DXAC-03: **REQ-DXAC-05 requir
 This narrows the decision to a genuine product question rather than a spec-wording cleanup:
 - **Retain text + show error** (satisfies -03 and -05 together; smallest change; leaves the entry recoverable until add-new ships) — this is the reading the specs support, but it is still a ViewModel behavior change and needs its own task.
 - **Keep clearing** — then -03 must be reworded, and BUG-027 cannot be closed by this change, because its headline symptom survives.
+
+---
+
+## Deferred UX investigation — autocomplete in form/edit contexts `[Helder 2026-07-20]`
+
+Raised by Helder after the UX research turn. Recorded here as investigate-and-decide items; **none are in scope for the DX-AC swap** — they seed future tasks. Helder's decisions and corrections are captured verbatim below so the follow-up specs inherit them.
+
+### Agreed (research recommendation accepted)
+Helder: *"2. I agree."* — the research reframing stands:
+- **No-match blur → retain typed text + show validation error** (satisfies REQ-DXAC-03 and -05 together). Still a ViewModel behavior change; needs its own task + regression test (the (j) guard fix rides alongside).
+- **Picking an autocomplete item → the picked entity becomes the locked reference** (form switches to its selected/edit state).
+
+### Correction — the primary autocomplete candidate is `ArtistFormPage`, not the Song artist field
+Helder's original UX question was about **`ArtistFormPage.xaml`**, which today offers a separate *"Search music database"* picker (`NavigateToArtistPickerCommand`) plus a local-catalog duplicate-suggestion list. His view: that picker is **bad UX — it adds clicks** to pick from a predicted data source.
+
+- **Investigate:** replace the picker-navigation with inline **autocomplete on the Artist Name field**, drawing suggestions from (a) the local catalog (the existing dedup source) and (b) the predicted/music-database source the picker currently reaches. The pick behavior should mirror what this feature's spec/plan/code already define for autocomplete selection.
+- **Decide:** whether the "Search music database" picker is fully retired or kept as a secondary/advanced path once inline autocomplete exists.
+- MD3 / component-governance note: `AutocompleteField`-class controls are governed components — any new consumer goes through the four-gate process (`component-change-governance.md`).
+
+### On `SongFormPage`
+- **Artist field** = pure **reference picker** (foreign key to Artist). Re-pointing it swaps only the `ArtistId` + display name; it does **not** load or overwrite the song's other data, and needs **no** confirmation dialog. Helder agrees ("not the primary data of song"). No further UX question here beyond the -03/-05 clearing decision above.
+- **Song *title* field** is the genuine autocomplete candidate on this page (it *is* the song's primary data). Helder observes the current autocomplete-selection behavior already shows "medium-to-large alignment" with the agreed pattern — **lacks investigation**, flagged for it.
+  - **Entanglement to investigate:** the title autocomplete intersects the existing **lyric-versions preservation** business logic — the resolution/merge flow (`resolutionSheet` / `mergeSheet`, `HasManualEdits`, per-field `FieldDiff` accept toggles) that tracks and preserves manual lyric edits and keeps version distinctions recognizable. Selecting a title suggestion must not silently clobber a manually-edited lyric version. Any title-autocomplete spec must be designed *around* this logic, not bolted on.
+
+### Routing
+These become their own BACKLOG-tracked tasks (spec → spec-review → plan → plan-review → implement → review), sequenced after the DX-AC swap closes. They are **not** to be bundled into BUG-027 closure.
