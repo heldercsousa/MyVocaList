@@ -893,4 +893,27 @@ public class SongFormViewModelTests
         var suggestion = Assert.Single(sut.ArtistSuggestions);
         Assert.Equal("Queen", suggestion.Headline); // older must NOT clobber
     }
+
+    // ── BUG-052: edit-mode hydration must show the locked artist without searching ─────────
+
+    // [AC] REQ-ACREATE-14 (BUG-052): hydration shows locked artist and fires no search
+    [Fact]
+    public void InitializeArtistField_EditModeHydration_ShowsLockedArtistWithoutSearch()
+    {
+        var artistService = new Mock<IArtistService>();
+
+        var sut = CreateSut(artistService: artistService);
+
+        // Simulates Shell QueryProperty pre-population (edit mode) followed by OnAppearing's call.
+        sut.ArtistIdRaw = "7";
+        sut.ArtistName = "Queen";
+        sut.InitializeArtistField();
+
+        Assert.Equal("Queen", sut.SelectedArtistName);
+        Assert.Equal("Queen", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+        artistService.Verify(
+            s => s.SearchArtistsByNameAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Never());
+    }
 }
