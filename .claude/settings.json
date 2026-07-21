@@ -27,6 +27,15 @@
             "statusMessage": "Initializing task tracking..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/scripts/worktree-base-check.py 2>/dev/null || true",
+            "statusMessage": "Verifying worktree is based on develop..."
+          }
+        ]
       }
     ],
     "PreToolUse": [
