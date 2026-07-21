@@ -525,10 +525,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-picker", "search-pic
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-refactor", "{4CB09F16-6E81-425E-9080-840BABFB66BF}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\UI-2nd-refactor\2026-07-19-post-mvp-sequencing-decision.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\2026-07-19-post-mvp-sequencing-decision.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.md
-		Docs\Management\DevCycleCraft\UI-2nd-refactor\2026-07-19-post-mvp-sequencing-decision.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\2026-07-19-post-mvp-sequencing-decision.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\prompt.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\prompt.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\task-log.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\task-log.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\ui-arch-decision-plan.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\ui-arch-decision-plan.md
@@ -735,6 +735,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-043", "bug-043", "{6941
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Extensions", "MyVocaList.Extensions\MyVocaList.Extensions.csproj", "{9380343D-7BB2-4832-A406-ED77FF9AAEB2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompleteedit-replacement", "2026-07-19-dx-autocompleteedit-replacement", "{DB5ECBBC-566B-4A00-9791-E18E11F49B55}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\task-log.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\task-log.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -858,8 +870,8 @@ Global
 		{FA1234BC-0001-4000-8000-000000000033} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000029} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
-		{FA1234BC-0001-4000-8000-000000000046} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000054} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000046} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000053} = {FA1234BC-0001-4000-8000-000000000046}
 		{FA1234BC-0001-4000-8000-000000000051} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000052} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
@@ -914,6 +926,8 @@ Global
 		{FA1234BC-0001-4000-8000-000000000050} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{1AAD9972-3FB1-449D-B8DD-145C107CBD67} = {FA1234BC-0001-4000-8000-000000000046}
 		{6941D280-F5AE-428A-AC78-42246F3BF3F8} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
+		{D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD} = {FA1234BC-0001-4000-8000-000000000046}
+		{DB5ECBBC-566B-4A00-9791-E18E11F49B55} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
