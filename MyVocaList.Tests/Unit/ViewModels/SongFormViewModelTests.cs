@@ -279,9 +279,9 @@ public class SongFormViewModelTests
 
     // ── BUG-008: artist blur-clear ─────────────────────────────────────────
 
-    // [AC] AC-B8-01 — blur without prior selection clears the field
+    // [AC] REQ-ACREATE-03: blur with unmatched text retains it and surfaces error
     [Fact]
-    public void ArtistBlurredWithoutSelection_NoPriorSelection_ClearsField()
+    public void ArtistBlurredWithoutSelection_NoPriorSelection_RetainsTextAndSetsError()
     {
         var sut = CreateSut();
         sut.ArtistSearchText = "partial text";
@@ -289,8 +289,10 @@ public class SongFormViewModelTests
 
         sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
 
-        Assert.Equal(string.Empty, sut.ArtistSearchText);
+        Assert.Equal("partial text", sut.ArtistSearchText);
         Assert.Null(sut.SelectedArtistId);
+        Assert.True(sut.ArtistHasError);
+        Assert.False(sut.IsArtistLocked);
     }
 
     // [AC] AC-B8-02 — blur with a prior selection restores the artist name
