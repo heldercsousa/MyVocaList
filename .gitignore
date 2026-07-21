@@ -511,3 +511,6 @@ $RECYCLE.BIN/
 temp/
 nul
 .worktrees/
+
+# ITF lane declaration marker (transient, per-worktree) — workflow.md Rule 2
+.itf-active
