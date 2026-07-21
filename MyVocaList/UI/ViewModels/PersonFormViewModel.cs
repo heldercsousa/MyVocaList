@@ -67,7 +67,10 @@ public partial class PersonFormViewModel : ViewModelBase
         _navigation = navigation;
         _logger = logger;
 
-        SaveCommand = new AsyncRelayCommand(SaveAsync);
+        // BUG-049: explicit CanExecute tied to IsBusy — combined with the early-return guard in
+        // SaveAsync — prevents a fast double-tap from firing SaveAsync twice concurrently, which
+        // caused a duplicate "GoToAsync("..")" that overshot the nav stack root.
+        SaveCommand = new AsyncRelayCommand(SaveAsync, () => !IsBusy);
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         SearchPersonsCommand = new AsyncRelayCommand<string>(SearchPersonsAsync);
         SuggestionSelectedCommand = new AsyncRelayCommand<AutocompleteSuggestion>(SuggestionSelectedAsync);
@@ -83,6 +86,8 @@ public partial class PersonFormViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(PageTitle));
     }
+
+    partial void OnIsBusyChanged(bool value) => SaveCommand.NotifyCanExecuteChanged();
 
     /// <summary>
     /// Called by the page's <c>OnAppearing</c> once Shell has finished applying all
@@ -196,6 +201,8 @@ public partial class PersonFormViewModel : ViewModelBase
 
     private async Task SaveAsync()
     {
+        if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
+
         var name = PersonName?.Trim() ?? string.Empty;
 
         // Safety net: re-run ALL field validators on Save, regardless of dirty state — an

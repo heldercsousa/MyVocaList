@@ -813,4 +813,35 @@ public class SongFormViewModelTests
         songService.Verify(s => s.ShouldShowCharacterCounter(79), Times.Once);
         songService.Verify(s => s.ShouldShowCharacterCounter(85), Times.Never);
     }
+
+    // ── Re-entrancy guard (BUG-049) ────────────────────────────────────────
+
+    [Fact]
+    // [AC] BUG-049: a fast double-tap on Save while a save is in flight must not fire the
+    // resolution service call twice (which caused a duplicate "GoToAsync("..")" that overshot
+    // the nav stack root).
+    public async Task SaveCommand_DoubleInvokedWhileSaving_CallsResolveOnlyOnce()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput("Yesterday")).Returns((true, ""));
+        songService.Setup(s => s.ValidateVersionInput(string.Empty, false)).Returns((true, ""));
+        var resolutionService = new Mock<ISongResolutionService>();
+        var gate = new TaskCompletionSource<SongResolution>();
+        resolutionService.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
+                         .Returns(gate.Task);
+
+        var sut = CreateSut(songService: songService, resolutionService: resolutionService);
+        sut.CompleteHydration();
+        sut.SongTitle = "Yesterday";
+        sut.SelectedArtistId = 5;
+
+        var firstCall = sut.SaveCommand.ExecuteAsync(null);
+        var secondCall = sut.SaveCommand.ExecuteAsync(null);   // simulates the second tap of a double-tap
+
+        gate.SetResult(new SongResolution(ResolutionKind.NoMatch, null, [], [], false));
+        await Task.WhenAll(firstCall, secondCall);
+
+        resolutionService.Verify(
+            s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
 }
