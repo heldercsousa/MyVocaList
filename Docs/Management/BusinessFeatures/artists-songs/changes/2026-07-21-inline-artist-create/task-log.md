@@ -12,7 +12,7 @@
 - **2026-07-21 — SPEC APPROVED by Helder.** Cleared for the planning phase (`writing-plans` → plan-reviewer → Helder plan approval → implementation in a worktree, T1 first, regression-test-first).
 
 ## Status
-**Phase:** T1 complete (To Review). Worktree `MyVocaList-inline-ac` on `feat/inline-artist-create`.
+**Phase:** T2 complete (To Review). Worktree `MyVocaList-inline-ac` on `feat/inline-artist-create`.
 
 ---
 ## Task: T1 (BUG-050, Critical) — selecting a suggestion must lock the field
@@ -42,3 +42,33 @@ Build: passed (0 errors) | Tests: 512 passed, 0 failed | Files written and re-re
 
 ### Notes
 - Test helper is `CreateSut(...)` (not `CreateSongFormViewModel`); mocks passed as optional params (no `_artistServiceMock` field). `SelectArtistCommand` is `RelayCommand<AutocompleteSuggestion>` (synchronous). Real `AutocompleteSuggestion(Headline, SupportingText, Data)` with `Data` an `ArtistListItem` — plan sketch's `{ Id, Headline }` shape adapted to the actual record signature.
+
+---
+## Task: T2 (BUG-051, Major) — stale-search race in `SearchArtistsAsync`
+**Plan:** plan.md § Task 2 (T2)
+**Status:** To Review
+**Started:** 2026-07-21
+**Completed:** 2026-07-21
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — added `_searchGeneration` field + generation-counter guard in `SearchArtistsAsync` (BUG-051 fix)
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — added regression test `SearchArtistsAsync_OutOfOrderCompletion_LatestQueryWins`
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|------------------------|-------------|
+| REQ-ACREATE-13 (BUG-051) | A slower, earlier-issued search query must not clobber a faster, later-issued query's results | `SongFormViewModel.SearchArtistsAsync` (`_searchGeneration` guard) | `SongFormViewModelTests.SearchArtistsAsync_OutOfOrderCompletion_LatestQueryWins` |
+
+### Verification evidence
+- **Red** (before fix): `dotnet test --filter SearchArtistsAsync_OutOfOrderCompletion_LatestQueryWins` →
+  `Assert.Equal() Failure — Expected: "Queen", Actual: "Querido"` (older completion overwrote `ArtistSuggestions`). Failed: 1, Passed: 0.
+- **Green** (after fix): same filter → `Aprovado! Com falha: 0, Aprovado: 1`.
+- **Full suite:** `dotnet test` → `Com falha: 0, Aprovado: 513, Ignorado: 0, Total: 513` (baseline 512 + 1 new).
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 6 projects, 0 errors, 22 warnings (DevExpress eval + pre-existing NU1903/nullable warnings only).
+
+### Build notes
+Build: passed (0 errors) | Tests: 513 passed, 0 failed | Files written and re-read: SongFormViewModel.cs, SongFormViewModelTests.cs
+
+### Notes
+- Fix approach: self-contained `int _searchGeneration` counter (Helder-approved 2026-07-21) — captured at entry (`var gen = ++_searchGeneration;`), checked before assigning `ArtistSuggestions` after the `await`. No `CancellationToken` threading (rejected in plan.md in favor of this approach).
+- Confirmed `IArtistService.SearchArtistsByNameAsync(string query, int maxResults = 5, CancellationToken ct = default)` returns `IEnumerable<ArtistListItem>` — mocked via `SetupSequence` with two `TaskCompletionSource<IEnumerable<ArtistListItem>>` to control completion order deterministically.
