@@ -108,3 +108,77 @@ No `.cs` / `.xaml` files were touched, so `dotnet build` / `dotnet test` do not 
 Commits: `64cbef8` (Guard 3 + initial suite), follow-up commit below (verifier W1/W2/W4 + this task-log).
 Files written and re-read after edit: `.claude/scripts/constitutional-guard.py`, `.claude/scripts/tests/test_constitutional_guard.py`.
 Not pushed, not merged, per briefing.
+
+---
+## Task: Fix false-positive in worktree-base-check.py (BEHIND vs MISBASED)
+**Status:** To Review
+**Started:** 2026-07-21
+**Completed:** 2026-07-21
+
+### Problem
+The script's only predicate was `git merge-base --is-ancestor develop HEAD`. That fails for *two* different reasons: (a) the branch forked from main's history — a real Rule 2 violation; (b) the branch forked from develop correctly but develop has since advanced — normal, not a violation. All seven live worktrees were flagged, and the remedy printed ("remove the worktree and recreate") is a data-loss instruction on a branch carrying unmerged commits.
+
+### Changed files
+- `.claude/scripts/worktree-base-check.py` (rewritten classification + messages)
+- `.claude/scripts/tests/test_worktree_base_check.py` (new, 5 tests)
+- `.claude/settings.json` (added `TaskCreated` entry running the same script)
+
+### Predicate chosen (and why)
+Let `MB = git merge-base develop HEAD` — the fork point.
+- `develop` is an ancestor of HEAD → **clean**.
+- Otherwise **misbased** iff `main` exists AND develop is *not* an ancestor of main (i.e. develop has commits main lacks, so the test carries information) AND `MB` is an ancestor of `main`. Rationale: a branch cut from develop's tip forks at a develop-only commit, which by construction is not in main; a branch cut from main forks at a commit inside main's history. When develop is fully merged into main the test is uninformative, so the script degrades to the advisory rather than risk a false violation.
+- Otherwise → **behind** (advisory, with the `N` commits-behind count).
+
+Contract preserved: warn-only, `exit 0` always, `except Exception: pass` fail-open, no repo mutation, and no deletion advice on a merely-behind worktree (the misbased message now also says "check `git log develop..HEAD` before discarding anything").
+
+### Verification evidence
+
+**Validation (a) — the three real feature branches must be CLEAN of violation:**
+```
+feat/inline-artist-create                 -> MyVocaList-inline-ac        => ('behind', 8)
+feature/persistent-searchbar              -> MyVocaList-wt-searchbar     => ('behind', 37)
+feat/persisted-string-trimming-converters -> MyVocaList-wt-trim-persist  => ('behind', 47)
+```
+All three classify `behind`, not `misbased` — previously all three were flagged as violations. Full-script output for them is advisory only:
+```
+note: .../MyVocaList-inline-ac (branch `feat/inline-artist-create`) is correctly based on develop but is 8 commit(s) behind it. Not a violation. To catch up: `git merge --ff-only develop` (or rebase onto develop).
+```
+
+**Validation (b) — deliberately main-based branch in a temp repo must be MISBASED:**
+`test_branch_cut_from_main_is_misbased` builds `main → develop` in a real temp repo, then `git worktree add <wt> -b task/wt-bad main`, commits on it, and asserts `classify() == "misbased"` and that stdout contains `WORKTREE BASE VIOLATION` / `forked from main's history`. Test passes (see suite output below).
+
+**Live true positives (bonus):** four `agent-*` worktrees created by the Agent tool's `isolation: worktree` are genuinely main-based and are still reported:
+```
+fork in main history? True
+fork subject: efcc4924 2026-06-23 Merge branch 'develop'
+HEAD subject: 6a525e4a 2026-07-01 docs(form-validation): add plan ...
+ahead of develop: 1   behind develop: 378
+```
+These are exactly the dispatches the hook never fired for — hence the wiring fix.
+
+**Hook wiring:**
+```
+settings.json: VALID JSON
+TaskCreated entries: 2
+TaskCreated[1]: {"hooks": [{"type": "command", "command": "python .claude/scripts/worktree-base-check.py 2>/dev/null || true", "statusMessage": "Verifying worktree is based on develop..."}]}
+PostToolUse[0] matcher still present: EnterWorktree|Bash(git worktree add*)
+```
+
+**Full suite (`python -m unittest discover -s .claude/scripts/tests -v`):**
+```
+test_based_on_develop_and_current_is_clean ... ok
+test_based_on_develop_but_behind_is_advisory_only ... ok
+test_branch_cut_from_main_is_misbased ... ok
+test_git_failure_is_silent_exit_zero ... ok
+test_no_extra_worktrees_is_exit_zero ... ok
+----------------------------------------------------------------------
+Ran 38 tests in 26.645s
+
+OK
+```
+33 pre-existing tests stayed green; 5 new. No `.cs` / `.xaml` touched, so `dotnet build` / `dotnet test` do not apply.
+
+### Note for Helder (out of scope, not actioned)
+Four stale `agent-*` worktrees are genuinely misbased and 378 commits behind. Removing them is an irreversible action not authorised by this briefing — flagging only.
+
+Committed in the worktree. Not pushed, not merged, per briefing.
