@@ -326,6 +326,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompletee
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inline-trivial-fix", "inline-trivial-fix", "{FA1234BC-0001-4000-8000-000000000056}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\inline-trivial-fix\design.md = Docs\Management\DevCycleCraft\inline-trivial-fix\design.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\proposed-diffs.md = Docs\Management\DevCycleCraft\inline-trivial-fix\proposed-diffs.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\requirements.md = Docs\Management\DevCycleCraft\inline-trivial-fix\requirements.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persisted-string-trimming", "persisted-string-trimming", "{FA1234BC-0001-4000-8000-000000000051}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\persisted-string-trimming\design.md = Docs\Management\DevCycleCraft\persisted-string-trimming\design.md
@@ -885,6 +892,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000046} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000053} = {FA1234BC-0001-4000-8000-000000000046}
 		{FA1234BC-0001-4000-8000-000000000051} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000056} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000052} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000047} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000048} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}

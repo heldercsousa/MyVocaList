@@ -48,6 +48,8 @@ For commit discipline, task-log format, spec quality gates, and the spec decisio
 
 **Narrow exception:** Reading a specific source file is permitted ONLY when the user explicitly and directly instructs the orchestrator to read that exact file. Absent that explicit instruction, delegate.
 
+**Narrow exception 2 — Inline Trivial Fix lane `[amended 2026-07-21]`:** when an active ITF declaration is in place in the target worktree (`workflow.md § Rule 2 — Inline Trivial Fix lane`), the orchestrator MAY read **the single declared file it is about to edit**, and nothing else. It MAY NOT grep, MAY NOT read neighbouring files, and MAY NOT open the file to *determine whether* a fix is needed — condition C2 requires the diagnosis to already exist. The moment the fix turns out to need a second file, more than 5 lines, or any exploration: stop, delete the declaration, and dispatch an implementor.
+
 ## Post-Wave Verification
 
 After every wave completes, the orchestrator must run these steps independently — never rely on self-reported subagent verification:

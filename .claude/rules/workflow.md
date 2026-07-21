@@ -68,6 +68,34 @@ A **spike** is a time-boxed exploration producing a `findings.md` artifact, not 
 
 > **Orchestrator never reads source files `[HARD RULE]`:** the main/orchestrator agent must not read `.cs`, `.xaml`, or any other source file — all code inspection (including plan-mode exploration) is delegated to an Explore/Plan subagent. Allow/deny list + session-start self-check: `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
 
+### Inline Trivial Fix (ITF) lane `[amended 2026-07-21]`
+
+**Narrow, opt-in exception to "all coding is done by subagents".** The orchestrator MAY apply a fix directly — no subagent — only when ALL of the following hold. Any single miss = dispatch an implementor; there is no partial qualification.
+
+| # | Condition |
+|---|-----------|
+| C0 | A **declaration** exists in the worktree where the edit occurs, naming this file |
+| C1 | Exactly **1 file**, **≤ 5 changed lines** (guard's upper-bound count) |
+| C2 | Fix **fully diagnosed** — root cause, exact file and exact line already recorded before the file is opened; if finding the defect would need a grep or a second file, it is not fully diagnosed |
+| C3 | Target is **not** `.xaml` / `.xaml.cs` |
+| C4 | Target is **not** a governed component (`component-change-governance.md`) |
+| C5 | Target is **not** in the sequential-only file registry (below) |
+| C6 | Severity ≤ Major **and** no regression test is mandatory per `bug-tracking.md`. In practice: Critical always dispatches; Major dispatches wherever testable. The lane's population is Minor bugs, UI-only Major bugs verified by manual E2E, and non-bug trivia |
+| C7 | Edit is in a **worktree on a task branch** — ITF grants NO worktree exemption |
+| C8 | Build (0 errors) + affected tests green before commit |
+
+**Opt-in is explicit.** Before editing, the orchestrator (a) writes `<worktree>/.itf-active` — worktree root, never repo root — and (b) logs one line in the feature's `task-log.md`:
+`ITF: BUG-050 — SongFormViewModel.cs — root cause: SelectArtist omits IsArtistLocked = true — expected 1 line.`
+The orchestrator **deletes the marker as the final step of the ITF commit**; a 30-minute expiry is the safety net for a dead session.
+
+**Enforcement is opt-in, and bounded once entered.** Without a declaration the lane is inert and ordinary Rule 2 applies — prose-enforced, as before. Once declared, C1/C3/C4/C5 are hook-enforced (`constitutional-guard.py` Guard 3) and cannot be exceeded. C2/C6, and multi-declaration chaining, are prose rules auditable after the fact via the task-log lines and the commit trailer.
+
+**Commit trailer (required):** append `Lane: ITF (N files, N lines)` to the Bug Fix Pattern message (Rule 3). Audit with `git log --grep "Lane: ITF"`.
+
+**Applies to the orchestrator only.** Implementor subagents are never constrained by ITF bounds.
+
+Full rationale, decisions, and Guard 3 design: `DevCycleCraft/inline-trivial-fix/`.
+
 - **Wave cap `[HARD RULE]`:** max **4** subagents in parallel; dispatch in waves, wait for all, then next wave. Discard a subagent's context after it completes — never reuse the instance.
 - **Git worktrees mandatory for ALL implementation work `[HARD RULE — amended 2026-07-14]`:** every task that edits code files (`.cs`, `.xaml`, `.xaml.cs`) runs in a git worktree on a task branch — never directly on `develop` or `main` (hook-enforced via `constitutional-guard.py`). Applies to single-subagent tasks and bug fixes, not just parallel waves — develop stays unlocked as the docs + integration branch. See `orchestrator.md § Git Worktrees as Isolation Primitive`.
 - **Worktree base branch is `develop` `[HARD RULE]`:** never base a worktree/task branch on `main`. After creating any worktree (native `EnterWorktree` OR manual `git worktree add`), verify `git merge-base --is-ancestor develop HEAD`; if develop is not an ancestor, recreate with `git worktree add <path> -b <branch> develop`. The native `EnterWorktree` tool may default to the repo default branch (`main`) — always verify.
@@ -104,6 +132,7 @@ fix: [component] — [symptom]
 Root cause: [one sentence]
 Fix: [one sentence]
 Regression risk: [None | Low | Medium — reason]
+Lane: ITF (N files, N lines)     ← required for ITF-lane fixes only; omit otherwise
 ```
 
 If the bug reveals a missing AC, add it to `requirements.md` in the fix commit. Bug *tracking* (BUG-NNN, severity, regression tests): `.claude/rules/bug-tracking.md`.
