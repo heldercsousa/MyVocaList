@@ -49,14 +49,28 @@ public partial class SongFormPage : ContentPage
         {
             await ViewModel.SearchArtistsCommand.ExecuteAsync(text);
             token.ThrowIfCancellationRequested();
-            return ViewModel.ArtistSuggestions;
+
+            // REQ-ACREATE-02/03/10: append one synthetic "create new artist" sentinel row as the
+            // LAST item for any non-whitespace typed text (whether or not matches exist). Glue only:
+            // the raw typed text is carried in Headline; the distinct ➕ render is done by the XAML
+            // ItemTemplate (T8), and the actual creation happens in the VM command (T7 VM path).
+            var results = new List<AutocompleteSuggestion>(ViewModel.ArtistSuggestions);
+            if (!string.IsNullOrWhiteSpace(text))
+                results.Add(new AutocompleteSuggestion(text, string.Empty, text) { IsCreateNew = true });
+            return results;
         };
     }
 
-    // Forwards drop-down selection to the existing VM selection command.
+    // Routes drop-down selection: the create-sentinel goes to the inline-create command with the
+    // raw typed text (carried in Headline); a real match goes to the existing selection command.
     private void OnArtistSelectionChanged(object sender, EventArgs e)
     {
-        if (artistEdit.SelectedItem is AutocompleteSuggestion suggestion)
+        if (artistEdit.SelectedItem is not AutocompleteSuggestion suggestion)
+            return;
+
+        if (suggestion.IsCreateNew)
+            ViewModel.CreateArtistInlineCommand.Execute(suggestion.Headline);
+        else
             ViewModel.SelectArtistCommand.Execute(suggestion);
     }
 
