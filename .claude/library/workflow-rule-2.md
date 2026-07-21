@@ -57,7 +57,7 @@ Some files must never be edited by more than one agent at a time:
 | `MauiProgram.cs` | DI registration — ordering matters; parallel edits produce conflicts |
 | `AppShell.xaml` / `AppShell.xaml.cs` | Route registration — one canonical route table |
 | `AppDbContext.cs` | EF Core model config — entity set definitions must be coherent |
-| Any `*Migration.cs` files | EF migrations are sequential by design |
+| Any file under a `Migrations/` folder | EF migrations are sequential by design. Match on the folder, not on a `*Migration.cs` name pattern — EF generates `20260407190608_PersonConfigFixes.cs`, which no name-suffix rule catches (corrected 2026-07-21) |
 | `GlobalUsings.cs` (any project) | Global using declarations — merge conflicts produce duplicate errors |
 | `Directory.Build.props` | Shared MSBuild properties — parallel edits produce conflicts |
 | `tasks.md` (any spec) | Task status tracking — parallel checkbox edits produce divergent state |
