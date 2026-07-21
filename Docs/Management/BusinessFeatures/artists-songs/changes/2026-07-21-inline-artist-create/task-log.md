@@ -171,3 +171,40 @@ Per `testing.md § TDD Level Guidance` this is Level C (pure DTO addition, no br
 
 ### Build notes
 Build: passed (0 errors) | Tests: 514 passed, 0 failed | Files written and re-read: AutocompleteSuggestion.cs, tasks.md
+
+---
+## Task: T7 — inline "create new artist" wiring (VM command + page glue)
+**Plan:** `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/plan.md` (Task 7)
+**Status:** To Review
+**Started:** 2026-07-21
+**Completed:** 2026-07-21
+
+### Confirmed signatures / decisions (on file-open)
+- `IArtistService.CreateArtistAsync(string name, string? externalId = null, string? externalProvider = null, CancellationToken ct = default) → (bool success, string message, Artist? artist)`. Inline path calls the 1-arg form `CreateArtistAsync(name)`; test mocks match `CreateArtistAsync("...", null, null, It.IsAny<CancellationToken>())`.
+- **No pre-existing private lock helper** — `SelectArtist` held the lock logic inline. Extracted a shared `private void LockArtist(int id, string name)` (sets `SelectedArtistId`/`SelectedArtistName`/`ArtistSearchText`, `IsArtistLocked = true`, clears `ArtistSuggestions`/`ArtistHasError`/`ArtistErrorText`); both `SelectArtist` and `CreateArtistInlineAsync` now call it — single lock implementation, no duplication.
+- **Raw typed text carried in `Headline`** (T6 decision: `AutocompleteSuggestion.IsCreateNew` doc states "raw typed text is carried in Headline"). Sentinel built as `new AutocompleteSuggestion(text, string.Empty, text) { IsCreateNew = true }`. The "Add «text» as a new artist" display decoration is deferred to the T8 XAML `ItemTemplate` — keeps code-behind glue-only and avoids storing wrapped text. Routing passes `suggestion.Headline` (the raw text) straight to `CreateArtistInlineCommand`.
+
+### Red → Green evidence
+- **Red:** `dotnet test --filter CreateArtistInline` → 2× `error CS1061: 'SongFormViewModel' não contém uma definição para "CreateArtistInlineCommand"` (SongFormViewModelTests.cs lines 358, 377). Both tests fail (command undefined).
+- **Green:** after implementing `CreateArtistInlineAsync` + command → `Aprovado! Com falha: 0, Aprovado: 2, Total: 2`.
+
+### AC mapping
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-ACREATE-04/08 | inline create success locks created artist, clears error | `SongFormViewModel.CreateArtistInlineAsync` → `LockArtist` | `CreateArtistInline_Success_LocksCreatedArtistAndClearsError` |
+| REQ-ACREATE-05 | create failure maps error, retains text, no lock | `SongFormViewModel.CreateArtistInlineAsync` else-branch | `CreateArtistInline_Failure_MapsErrorAndRetainsText` |
+| REQ-ACREATE-02/10 | sentinel appended (last) for any non-ws text | `SongFormPage.OnArtistItemsRequested` | on-device (T10) |
+| REQ-ACREATE-03 | no-match → list holds only the create row | `OnArtistItemsRequested` (append regardless of matches) | on-device (T10) |
+| REQ-ACREATE-06/07 | no prompt; validation via ArtistService only | VM delegates to `CreateArtistAsync`; no VM-side validation | (by design) |
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — extracted `LockArtist`; added `CreateArtistInlineAsync` + `CreateArtistInlineCommand` (`AsyncRelayCommand<string>`), wired in ctor.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — `OnArtistItemsRequested` appends the create sentinel (last item, non-ws text); `OnArtistSelectionChanged` routes `IsCreateNew` → `CreateArtistInlineCommand`, else `SelectArtistCommand`.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — 2 Level-A tests (success-locks, failure-maps-retains).
+- `Docs/.../tasks.md` — ticked T7.
+
+### Build notes
+Build: passed (`dotnet build MyVocaList.csproj -f net10.0-android` → exit 0, warnings only) | Tests: 516 passed, 0 failed (514 baseline + 2 new) | Files written and re-read: SongFormViewModel.cs, SongFormPage.xaml.cs, SongFormViewModelTests.cs
+
+### E2E note
+User-facing behavior (autocomplete dropdown row + selection routing). Emulator not launched in this task — T8 (XAML ➕ render) + T10 (on-device manual, Helder) cover the visual/E2E gate per the plan. `E2E: emulator not available — requires manual verification (T10)`.

@@ -341,6 +341,48 @@ public class SongFormViewModelTests
         Assert.Equal(7, sut.SelectedArtistId);
     }
 
+    // ── T7: inline "create new artist" ────────────────────────────────────
+
+    // [AC] REQ-ACREATE-04/08: inline create success locks the created artist, clears error
+    [Fact]
+    public async Task CreateArtistInline_Success_LocksCreatedArtistAndClearsError()
+    {
+        var created = new Artist { Id = 42, Name = "New Band" };
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.CreateArtistAsync("New Band", null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, string.Empty, created));
+        var sut = CreateSut(artistService: artistService);
+        sut.ArtistHasError = true;   // prior error present
+
+        await sut.CreateArtistInlineCommand.ExecuteAsync("New Band");
+
+        Assert.Equal(42, sut.SelectedArtistId);
+        Assert.Equal("New Band", sut.SelectedArtistName);
+        Assert.True(sut.IsArtistLocked);
+        Assert.False(sut.ArtistHasError);
+    }
+
+    // [AC] REQ-ACREATE-05: inline create failure maps error, retains text, no lock
+    [Fact]
+    public async Task CreateArtistInline_Failure_MapsErrorAndRetainsText()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.CreateArtistAsync("Dup", null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((false, "Artist already exists.", (Artist?)null));
+        var sut = CreateSut(artistService: artistService);
+        sut.ArtistSearchText = "Dup";
+
+        await sut.CreateArtistInlineCommand.ExecuteAsync("Dup");
+
+        Assert.True(sut.ArtistHasError);
+        Assert.Equal("Artist already exists.", sut.ArtistErrorText);
+        Assert.Equal("Dup", sut.ArtistSearchText);   // retained
+        Assert.False(sut.IsArtistLocked);            // no lock
+        Assert.Null(sut.SelectedArtistId);
+    }
+
     // ── BUG-009: buffered URLs ────────────────────────────────────────────
 
     // [AC] AC-6.1 — URL buffered in new-song mode (no SongId) without error

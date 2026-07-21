@@ -127,6 +127,7 @@ public partial class SongFormViewModel : ViewModelBase
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         SearchArtistsCommand = new AsyncRelayCommand<string>(SearchArtistsAsync);
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
+        CreateArtistInlineCommand = new AsyncRelayCommand<string>(CreateArtistInlineAsync);
         ArtistBlurredWithoutSelectionCommand = new RelayCommand(OnArtistBlurredWithoutSelection);
         NavigateToSongPickerCommand = new AsyncRelayCommand(NavigateToSongPickerAsync,
             AsyncRelayCommandOptions.None);
@@ -156,6 +157,8 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand<string> SearchArtistsCommand { get; }
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
+    /// <summary>REQ-ACREATE-04/05: creates a new artist inline from the typed name and locks it in on success.</summary>
+    public IAsyncRelayCommand<string> CreateArtistInlineCommand { get; }
     /// <summary>Invoked by DevExpress AutoCompleteEdit when user blurs without selecting a suggestion (BUG-008).</summary>
     public IRelayCommand ArtistBlurredWithoutSelectionCommand { get; }
     public IAsyncRelayCommand NavigateToSongPickerCommand { get; }
@@ -291,13 +294,45 @@ public partial class SongFormViewModel : ViewModelBase
     private void SelectArtist(AutocompleteSuggestion suggestion)
     {
         if (suggestion?.Data is not ArtistListItem artist) return;
-        SelectedArtistId = artist.Id;
-        SelectedArtistName = artist.Name;
-        ArtistSearchText = artist.Name;
-        IsArtistLocked = true; // BUG-050: selecting a suggestion locks the field
+        LockArtist(artist.Id, artist.Name);
+    }
+
+    /// <summary>
+    /// REQ-ACREATE-04/12: single lock path shared by an existing-suggestion pick (BUG-050) and the
+    /// inline-create success path. Sets the selected+locked artist, mirrors the name into the search
+    /// text, clears suggestions, and clears any pending artist error.
+    /// </summary>
+    private void LockArtist(int id, string name)
+    {
+        SelectedArtistId = id;
+        SelectedArtistName = name;
+        ArtistSearchText = name;
+        IsArtistLocked = true;
         ArtistSuggestions = [];
         ArtistHasError = false;
         ArtistErrorText = string.Empty;
+    }
+
+    /// <summary>
+    /// REQ-ACREATE-04/05: inline "create new artist" from the Song form. Delegates creation and
+    /// validation entirely to <see cref="IArtistService.CreateArtistAsync(string, string?, string?, CancellationToken)"/>
+    /// (business logic stays in the Service). On success the created artist becomes the selected+locked
+    /// artist via the shared <see cref="LockArtist"/> path; on failure the service message is surfaced
+    /// through <see cref="ArtistHasError"/>/<see cref="ArtistErrorText"/> and the typed text is retained.
+    /// </summary>
+    private async Task CreateArtistInlineAsync(string name)
+    {
+        var (success, message, artist) = await _artistService.CreateArtistAsync(name);
+        if (success && artist is not null)
+        {
+            LockArtist(artist.Id, artist.Name);
+        }
+        else
+        {
+            ArtistHasError = true;
+            ArtistErrorText = message;
+            // REQ-ACREATE-05: retain ArtistSearchText — no clear, no lock, no dialog.
+        }
     }
 
     /// <summary>
