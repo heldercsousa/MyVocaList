@@ -430,6 +430,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-inline-artist-cr
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\design.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\handoff.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\handoff.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
