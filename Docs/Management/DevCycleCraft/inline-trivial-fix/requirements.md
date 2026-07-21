@@ -67,10 +67,14 @@ Any single miss → dispatch an implementor. No partial qualification.
 | **C2** | Fix is **fully diagnosed** (see Vocabulary) | Declaration — auditable, not mechanical |
 | **C3** | Target is **not** `.xaml` / `.xaml.cs` | Hook, once declared |
 | **C4** | Target is **not** a governed component | Hook, once declared |
-| **C5** | Target is **not** in the sequential-only registry (`MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, `*Migration.cs`, `GlobalUsings.cs`, `Directory.Build.props`, any `tasks.md`) | Hook, once declared |
+| **C5** | Target is **not** in the sequential-only registry (`MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, migrations, `GlobalUsings.cs`, `Directory.Build.props`, any `tasks.md`) | Hook for the `.cs`/`.xaml` entries only — see note |
 | **C6** | Severity ≤ **Major**, **and** no regression test is mandatory per `bug-tracking.md` — see note below | Declaration — auditable |
 | **C7** | Edit occurs in a **worktree on a task branch** | Hook (existing Guard 1) |
 | **C8** | `dotnet build` (0 errors) + affected tests green **before** commit | Existing exit checklist |
+
+### Note on C5 — two entries are not hook-reachable
+
+Guard 3 sits behind `main()`'s `_CODE_SUFFIXES` filter (`.cs` / `.xaml` / `.xaml.cs`), so **`Directory.Build.props` and `tasks.md` can never reach it** — for those two, C5 is prose-enforced only. Widening `_CODE_SUFFIXES` would also change Guard 1 and Guard 2 behaviour and was deliberately not done. Migration files are matched by their `Migrations/` directory rather than a `*Migration.cs` name pattern: EF generates `20260407190608_PersonConfigFixes.cs`, which no name-suffix rule would catch — the registry's literal wording has been matching nothing.
 
 ### Note on C6 — the lane is mostly for non-test-bearing fixes
 
