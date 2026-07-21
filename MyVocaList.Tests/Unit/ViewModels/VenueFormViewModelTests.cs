@@ -127,6 +127,31 @@ public class VenueFormViewModelTests
         _serviceMock.Verify(s => s.CreateVenueAsync(It.IsAny<string>()), Times.Never);
     }
 
+    // ── Re-entrancy guard (BUG-049) ────────────────────────────────────────────
+
+    [Fact]
+    // [AC] BUG-049: a fast double-tap on Save while a save is in flight must not fire the
+    // create service call twice (which caused a duplicate "GoToAsync("..")" that overshot the
+    // nav stack root). Service is stubbed to fail so the success path (which calls the untestable
+    // Shell.Current.GoToAsync directly) is never reached — the guard is verified before that.
+    public async Task SaveCommand_DoubleInvokedWhileSaving_CallsCreateOnlyOnce()
+    {
+        var sut = CreateSut();
+        sut.VenueName = "Jazz Club";
+        _serviceMock.Setup(s => s.ValidateNameInput("Jazz Club")).Returns((true, ""));
+
+        var gate = new TaskCompletionSource<(bool, string)>();
+        _serviceMock.Setup(s => s.CreateVenueAsync("Jazz Club")).Returns(gate.Task);
+
+        var firstCall = sut.SaveCommand.ExecuteAsync(null);
+        var secondCall = sut.SaveCommand.ExecuteAsync(null);   // simulates the second tap of a double-tap
+
+        gate.SetResult((false, "stubbed failure — avoids Shell.Current in test context"));
+        await Task.WhenAll(firstCall, secondCall);
+
+        _serviceMock.Verify(s => s.CreateVenueAsync("Jazz Club"), Times.Once);
+    }
+
     // ── Character counter — counts the same (trimmed) string the validator checks ─
 
     [Fact]
