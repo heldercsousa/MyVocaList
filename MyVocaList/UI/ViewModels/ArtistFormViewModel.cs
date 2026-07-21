@@ -54,7 +54,10 @@ public partial class ArtistFormViewModel : ViewModelBase
         _logger = logger;
         _messenger = messenger;
 
-        SaveCommand = new AsyncRelayCommand(SaveAsync);
+        // BUG-049: explicit CanExecute tied to IsBusy — combined with the early-return guard in
+        // SaveAsync — prevents a fast double-tap from firing SaveAsync twice concurrently, which
+        // caused a duplicate "GoToAsync("..")" that overshot the nav stack root.
+        SaveCommand = new AsyncRelayCommand(SaveAsync, () => !IsBusy);
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         NavigateToArtistPickerCommand = new AsyncRelayCommand(NavigateToArtistPickerAsync);
         SelectDuplicateCommand = new AsyncRelayCommand<ArtistListItem>(SelectDuplicateAsync);
@@ -70,6 +73,8 @@ public partial class ArtistFormViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(PageTitle));
     }
+
+    partial void OnIsBusyChanged(bool value) => SaveCommand.NotifyCanExecuteChanged();
 
     /// <summary>
     /// Called by the page's <c>OnAppearing</c> once Shell has finished applying all
@@ -120,6 +125,8 @@ public partial class ArtistFormViewModel : ViewModelBase
 
     private async Task SaveAsync()
     {
+        if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
+
         var name = ArtistName?.Trim() ?? string.Empty;
 
         // Safety net: re-run the field validator on Save regardless of dirty state — an untouched
