@@ -32,6 +32,15 @@ No new layers. The capability already exists in the Service layer; this feature 
 
 6. **Blur behavior.** `OnArtistBlurredWithoutSelection` must **retain** the typed text for the Song artist field (REQ-ACREATE-03) instead of clearing (current BUG-008 path). Adjust only the no-locked-artist branch to keep `ArtistSearchText`; the "restore prior selection" branch is unchanged.
 
+## Correctness fixes (T7 — done first, before inline-create wiring)
+
+These make the field work so REQ-ACREATE-04's "reuse the existing lock path" is actually valid.
+
+- **BUG-050 (REQ-ACREATE-12).** In `SongFormViewModel.SelectArtist` (lines ~283–292) add `IsArtistLocked = true;` alongside the other assignments (mirrors `ResolveAndLockArtistAsync` line ~411). The inline-create success path then reuses this same corrected `SelectArtist`/lock behavior.
+- **BUG-051 (REQ-ACREATE-13).** In `SearchArtistsAsync` (lines ~274–281) add per-request sequencing: capture a generation counter (or thread the `CancellationToken` from `OnArtistItemsRequested` through to `_artistService.SearchArtistsByNameAsync`) and assign `ArtistSuggestions` only if the completing request is still the latest. Prevents an older query from clobbering a newer one. Also resolves the W2 watch-item.
+- **Retain-text on blur (REQ-ACREATE-03).** In `OnArtistBlurredWithoutSelection`, change the no-locked-artist branch to **keep** `ArtistSearchText` instead of setting it to `string.Empty`; still surface the validation error (REQ-ACREATE-05). The restore-prior-selection branch is unchanged.
+- **BUG-052 (REQ-ACREATE-14).** Expected to resolve once BUG-050 lets the artist persist. If edit still shows empty after 050/013, add an origin guard so programmatic hydration (`InitializeArtistField`) does not fire a search — reuse the existing `_isHydrating` concept rather than a new flag.
+
 ## Interaction flow
 
 ```
