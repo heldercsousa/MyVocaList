@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace MyVocaList.UI.Collections
 {
@@ -15,14 +16,24 @@ namespace MyVocaList.UI.Collections
         {
             if (items == null) return;
             CheckReentrancy();
-            bool added = false;
+
+            var startingIndex = Items.Count;
+            var addedItems = new List<T>();
             foreach (var item in items)
             {
                 Items.Add(item);
-                added = true;
+                addedItems.Add(item);
             }
-            if (added)
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+
+            if (addedItems.Count == 0) return;
+
+            OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
+            OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+
+            // BUG-048: raise a single Add-action notification (not Reset) so DXCollectionView appends
+            // the new items instead of fully re-rendering and resetting scroll position on page load.
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(
+                NotifyCollectionChangedAction.Add, addedItems, startingIndex));
         }
 
         public void ReplaceRange(IEnumerable<T> items)
