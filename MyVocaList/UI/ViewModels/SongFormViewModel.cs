@@ -301,15 +301,16 @@ public partial class SongFormViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// BUG-008: blur-clear rule. If no artist is locked in, clear the field.
+    /// REQ-ACREATE-03: blur-retain rule. If no artist is locked in, keep the typed text
+    /// (never clear it) and surface a validation error so the user can retry or use inline-create.
     /// If one was previously selected, restore the name so the field stays consistent.
     /// </summary>
     private void OnArtistBlurredWithoutSelection()
     {
         if (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0)
         {
-            ArtistSearchText = string.Empty;
             ArtistSuggestions = [];
+            ArtistHasError = true;
         }
         else
         {
