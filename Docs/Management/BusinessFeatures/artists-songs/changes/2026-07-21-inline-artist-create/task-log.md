@@ -140,3 +140,34 @@ There is no coupling in the ViewModel between `ArtistSearchText` and `SearchArti
 
 ### Build notes
 Build: passed (0 errors) | Tests: 514 passed, 0 failed | Files written and re-read: SongFormViewModel.cs, SongFormViewModelTests.cs, tasks.md
+
+---
+## Task: T6 — `AutocompleteSuggestion` create-sentinel discriminator (Level C)
+**Plan:** plan.md § Task 6 (T6)
+**Status:** To Review
+**Started:** 2026-07-21
+**Completed:** 2026-07-21
+
+### Record shape (confirmed)
+`Contracts/Models/AutocompleteSuggestion.cs` is a positional record `(string Headline, string SupportingText, object Data)`. Adding a positional parameter would break every existing call site (all use positional construction). Chose the non-breaking approach: added `public bool IsCreateNew { get; init; }` (default `false`) as a body member on the existing positional record — no change to the positional parameter list or order. The raw typed text for the sentinel row is carried by the existing `Headline` member (no new `RawText` property needed — T7/T8 read `Headline` on the sentinel row).
+
+### Level-C no-test decision
+Per `testing.md § TDD Level Guidance` this is Level C (pure DTO addition, no branching logic, no business rule) — no mandatory test. Verification is the build + a full-solution grep of every `new AutocompleteSuggestion(...)` construction site to confirm the addition is non-breaking (positional args and count unchanged everywhere).
+
+### Construction sites grepped (all positional, all unaffected)
+- `MyVocaList/UI/ViewModels/PersonFormViewModel.cs:288`
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs:288`
+- `MyVocaList.Tests/Unit/Components/AutocompleteSuggestionsPropagationTests.cs:76,94`
+- `MyVocaList.Tests/Unit/ViewModels/PersonFormViewModelBug044Tests.cs:56`
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs:335`
+
+### Changed files:
+- `Contracts/Models/AutocompleteSuggestion.cs` — added `IsCreateNew` init-only property (default `false`) with XML doc noting `Headline` carries the raw typed text for the sentinel row.
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/tasks.md` — ticked T6.
+
+### Verification evidence
+- **Build:** `dotnet build` (full solution, 8 projects incl. `net10.0-android`) → `ok dotnet build: 8 projects, 0 errors, 139 warnings` (all warnings pre-existing NU1903/DX-trial/CA1416, unrelated to this change).
+- **Full suite:** `dotnet test` → `Aprovado! Com falha: 0, Aprovado: 514, Ignorado: 0, Total: 514` (unchanged from T4 baseline — no new test, per Level-C decision).
+
+### Build notes
+Build: passed (0 errors) | Tests: 514 passed, 0 failed | Files written and re-read: AutocompleteSuggestion.cs, tasks.md
