@@ -329,6 +329,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inline-trivial-fix", "inline-trivial-fix", "{FA1234BC-0001-4000-8000-000000000056}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\inline-trivial-fix\design.md = Docs\Management\DevCycleCraft\inline-trivial-fix\design.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\handoff.md = Docs\Management\DevCycleCraft\inline-trivial-fix\handoff.md
 		Docs\Management\DevCycleCraft\inline-trivial-fix\proposed-diffs.md = Docs\Management\DevCycleCraft\inline-trivial-fix\proposed-diffs.md
 		Docs\Management\DevCycleCraft\inline-trivial-fix\requirements.md = Docs\Management\DevCycleCraft\inline-trivial-fix\requirements.md
 		Docs\Management\DevCycleCraft\inline-trivial-fix\task-log.md = Docs\Management\DevCycleCraft\inline-trivial-fix\task-log.md
