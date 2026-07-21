@@ -37,20 +37,31 @@ def _make_repo(path):
     return path
 
 
-def _declare(root, rel_file, minutes_ago=0, raw=None):
+def _declare(root, rel_file, minutes_ago=0, raw=None, raw_bytes=None, **overrides):
+    """Write a declaration marker.
+
+    `raw` / `raw_bytes` write the file verbatim (malformed-marker cases);
+    `overrides` mutate individual fields of an otherwise-valid marker.
+    """
     marker = os.path.join(root, ".itf-active")
+    if raw_bytes is not None:
+        with open(marker, "wb") as fh:
+            fh.write(raw_bytes)
+        return marker
     if raw is not None:
         with open(marker, "w", encoding="utf-8") as fh:
             fh.write(raw)
         return marker
     declared_at = datetime.now(timezone.utc) - timedelta(minutes=minutes_ago)
+    body = {
+        "id": "BUG-050",
+        "file": rel_file,
+        "expected_lines": 1,
+        "declared_at": declared_at.isoformat().replace("+00:00", "Z"),
+    }
+    body.update(overrides)
     with open(marker, "w", encoding="utf-8") as fh:
-        json.dump({
-            "id": "BUG-050",
-            "file": rel_file,
-            "expected_lines": 1,
-            "declared_at": declared_at.isoformat().replace("+00:00", "Z"),
-        }, fh)
+        json.dump(body, fh)
     return marker
 
 
@@ -101,6 +112,42 @@ class TestDeclarationScope(ItfGuardTestBase):
     def test_malformed_marker_is_inert(self):
         target = _touch(self.root, "Services/SongService.cs")
         _declare(self.root, None, raw="{not json at all")
+        self.assertEqual(self.run_guard(target, _many_lines(50)), 0)
+
+    # [AC] AC-ITF-09: marker is a JSON array, not an object -> inert
+    def test_marker_that_is_not_an_object_is_inert(self):
+        target = _touch(self.root, "Services/SongService.cs")
+        _declare(self.root, None, raw='["Services/SongService.cs"]')
+        self.assertEqual(self.run_guard(target, _many_lines(50)), 0)
+
+    # [AC] AC-ITF-09: marker bytes are not valid UTF-8 -> inert
+    def test_marker_with_invalid_utf8_is_inert(self):
+        target = _touch(self.root, "Services/SongService.cs")
+        _declare(self.root, None, raw_bytes=b"\xff\xfe\x00{bad")
+        self.assertEqual(self.run_guard(target, _many_lines(50)), 0)
+
+    # [AC] AC-ITF-09: `file` is null -> inert (distinct return-0 branch)
+    def test_marker_with_null_file_is_inert(self):
+        target = _touch(self.root, "Services/SongService.cs")
+        _declare(self.root, "Services/SongService.cs", file=None)
+        self.assertEqual(self.run_guard(target, _many_lines(50)), 0)
+
+    # [AC] AC-ITF-09: `file` is the wrong type -> inert
+    def test_marker_with_non_string_file_is_inert(self):
+        target = _touch(self.root, "Services/SongService.cs")
+        _declare(self.root, "Services/SongService.cs", file=123)
+        self.assertEqual(self.run_guard(target, _many_lines(50)), 0)
+
+    # [AC] AC-ITF-09: `declared_at` is the wrong type -> inert
+    def test_marker_with_non_string_declared_at_is_inert(self):
+        target = _touch(self.root, "Services/SongService.cs")
+        _declare(self.root, "Services/SongService.cs", declared_at=12345)
+        self.assertEqual(self.run_guard(target, _many_lines(50)), 0)
+
+    # [AC] AC-ITF-09: `declared_at` is unparseable -> inert
+    def test_marker_with_unparseable_declared_at_is_inert(self):
+        target = _touch(self.root, "Services/SongService.cs")
+        _declare(self.root, "Services/SongService.cs", declared_at="not-a-date")
         self.assertEqual(self.run_guard(target, _many_lines(50)), 0)
 
 
@@ -218,14 +265,50 @@ class TestChangedLineCounting(unittest.TestCase):
         ]}
         self.assertEqual(guard._changed_lines(payload), 5)
 
-    # [AC] AC-ITF-01: expected_lines in the marker is audit-only, never read
-    def test_expected_lines_is_not_read_by_the_guard(self):
+    # [AC] AC-ITF-01: belt-and-braces — the literal never appears in guard code.
+    # Static only; the behavioural proof is TestExpectedLinesIsAuditOnly below.
+    def test_expected_lines_literal_absent_from_guard_source(self):
         with open(_GUARD_PATH, encoding="utf-8") as fh:
             src = fh.read()
         code = "\n".join(
             ln for ln in src.splitlines() if not ln.strip().startswith("#"))
         self.assertNotIn('"expected_lines"', code)
         self.assertNotIn("'expected_lines'", code)
+
+
+class TestExpectedLinesIsAuditOnly(ItfGuardTestBase):
+    """`expected_lines` is audit-only (design.md § Declaration file shape).
+
+    Behavioural, not source-text: the guard must compare the actual changed-line
+    count against the constant 5 in BOTH directions, whatever the marker claims.
+    """
+
+    # [AC] AC-ITF-01: a generous expected_lines must not loosen the 5-line cap
+    def test_large_expected_lines_does_not_loosen_the_cap(self):
+        target = _touch(self.root, "Services/SongService.cs")
+        _declare(self.root, "Services/SongService.cs", expected_lines=999)
+        self.assertEqual(self.run_guard(target, EDIT_3_LINES), 0)
+        self.assertEqual(self.run_guard(target, _many_lines(9)), 2)
+
+    # [AC] AC-ITF-03: a tight expected_lines must not tighten the 5-line cap
+    def test_small_expected_lines_does_not_tighten_the_cap(self):
+        target = _touch(self.root, "Services/SongService.cs")
+        _declare(self.root, "Services/SongService.cs", expected_lines=1)
+        # 3 lines > expected_lines(1) but <= the constant 5 -> still permitted
+        self.assertEqual(self.run_guard(target, EDIT_3_LINES), 0)
+        # 9 lines -> blocked by the constant, not by expected_lines
+        self.assertEqual(self.run_guard(target, _many_lines(9)), 2)
+
+    # [AC] AC-ITF-09: a missing expected_lines is not required for authorization
+    def test_absent_expected_lines_still_permits_a_valid_edit(self):
+        target = _touch(self.root, "Services/SongService.cs")
+        marker = _declare(self.root, "Services/SongService.cs")
+        with open(marker, encoding="utf-8") as fh:
+            body = json.load(fh)
+        body.pop("expected_lines")
+        with open(marker, "w", encoding="utf-8") as fh:
+            json.dump(body, fh)
+        self.assertEqual(self.run_guard(target, EDIT_3_LINES), 0)
 
 
 class TestGuardOrdering(ItfGuardTestBase):

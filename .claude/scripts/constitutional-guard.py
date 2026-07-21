@@ -217,6 +217,10 @@ def _itf_guard(file_path: str, tool_input: dict) -> int:
         # NOTE: marker["expected_lines"] is AUDIT-ONLY and deliberately not read
         # here — the actual count is compared against the constant _ITF_MAX_LINES.
 
+        # Assumption: case-insensitive path comparison. Correct on Windows (the
+        # project's dev platform); on a case-sensitive filesystem a declaration
+        # for `Foo.cs` would also authorize an edit to `foo.cs` — a different
+        # file. Revisit if the project ever builds on Linux/macOS CI.
         target_abs = os.path.normpath(os.path.abspath(file_path)).replace("\\", "/")
         if declared_abs.lower() != target_abs.lower():
             return _itf_block(
