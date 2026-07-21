@@ -12,4 +12,8 @@
 - **2026-07-21 — SPEC APPROVED by Helder.** Cleared for the planning phase (`writing-plans` → plan-reviewer → Helder plan approval → implementation in a worktree, T1 first, regression-test-first).
 
 ## Status
-**Phase:** spec approved → awaiting plan. No code written yet. No worktree created yet.
+**Phase:** IMPLEMENTING. Worktree `../MyVocaList-inline-ac` on `feat/inline-artist-create` off `develop` (develop confirmed ancestor). Baseline **511/511 green** (plan.md's 501 was an estimate; expected counts offset +10).
+
+## Implementation log
+
+- **T5 — DX capability spike (Option A CONFIRMED via Context7, DevExpress MAUI 25.2.4).** `AutoCompleteEdit` supports a full custom `ItemTemplate`/`DataTemplate` for distinct row rendering; the app supplies suggestions via a custom async provider (`OnArtistItemsRequested`) whose returned items are the authoritative drop-down content, and `AutoCompleteEditTextChangeReason.ItemSelected` fires on selecting any displayed row. Guardrail: the synthetic row's `Headline` (`Add "text" as a new artist`) contains the typed text as a substring, so it survives any residual built-in Contains-filtering. → T7/T8 proceed with the synthetic ➕ row (Option A); Option B not needed. REQ-ACREATE-11 satisfied via Option A.
