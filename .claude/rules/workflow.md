@@ -108,7 +108,7 @@ Task sizing table, wave rules, exit checklist detail, post-wave verification: `w
 
 ### Sequential-only file registry
 
-These files must never have concurrent writers (parallel edits produce conflicts/duplicate errors): `MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, any `*Migration.cs`, any `GlobalUsings.cs`, `Directory.Build.props`, any spec `tasks.md`. Rationale per file + how to add entries: `workflow-rule-2.md § Sequential-only file registry`.
+These files must never have concurrent writers (parallel edits produce conflicts/duplicate errors): `MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, any file under a `Migrations/` folder, any `GlobalUsings.cs`, `Directory.Build.props`, any spec `tasks.md`. Rationale per file + how to add entries: `workflow-rule-2.md § Sequential-only file registry`.
 
 ---
 
