@@ -208,3 +208,31 @@ Build: passed (`dotnet build MyVocaList.csproj -f net10.0-android` → exit 0, w
 
 ### E2E note
 User-facing behavior (autocomplete dropdown row + selection routing). Emulator not launched in this task — T8 (XAML ➕ render) + T10 (on-device manual, Helder) cover the visual/E2E gate per the plan. `E2E: emulator not available — requires manual verification (T10)`.
+
+---
+## Task: T8 — `ItemTemplate` distinct ➕ render (`SongFormPage.xaml`)
+**Plan:** `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/plan.md` (Task 8)
+**Status:** To Review
+**Started:** 2026-07-21
+**Completed:** 2026-07-21
+
+### Approach
+- Confirmed via T7 handoff that the sentinel row is built as `new AutocompleteSuggestion(text, string.Empty, text) { IsCreateNew = true }` — `Headline` carries the **raw typed text**, not the wrapped display string. T8 owns composing the `Add "{text}" as a new artist` wrapper.
+- Existing `AutoCompleteEdit.ItemTemplate` (`SongFormPage.xaml`) had a single always-visible two-`Label` layout (Headline + SupportingText). Rather than a `DataTrigger` toggling `Setter`s on the same `Label`, used direct `IsVisible` bindings on `IsCreateNew` (and its inverse via the existing `InverseBoolConverter` resource already used elsewhere on the same page) to switch between:
+  - **Create row** (`IsCreateNew == true`): a `BoxView` styled `{StaticResource Divider}` (reused — same style key already used for the BottomSheet sections on this page) above the row as a top divider; a leading ➕ `Label` (`TextColor="{StaticResource Primary}"`); and a `FormattedString` (`Span`s) composing `Add "{Headline}" as a new artist` — no hardcoded concatenation, no new converter.
+  - **Real-match row** (`IsCreateNew == false`): unchanged — `Headline` + optional `SupportingText`, same style classes as before (`Body.Large`/`Body.Medium`, `OnSurfaceVariant`).
+- Reused resources only: `Divider`, `Primary`, `OnSurfaceVariant`, `InverseBoolConverter`, `IsNotNullConverter`, style classes `Body.Large`/`Body.Medium` — no invented MD3 style keys, no hardcoded colors.
+- This is an incremental single-file XAML edit (`SongFormPage.xaml` only, one `ItemTemplate` block).
+
+### Level C — no mandatory test
+Visual-only change (dropdown row rendering). Per `testing.md` Level C and the plan's own designation ("Level C — no mandatory test; covered by on-device T10"), no unit test was written. Coverage is the on-device E2E gate (T10, manual, Helder) plus the build check below.
+
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` — `AutoCompleteEdit.ItemTemplate`: added divider + ➕ glyph + `FormattedString` wrapper for `IsCreateNew` rows; real-match rows unchanged in content/style.
+- `Docs/.../tasks.md` — ticked T8.
+
+### Build notes
+Build: passed (`dotnet build MyVocaList.csproj -f net10.0-android` → exit 0, 0 errors, warnings only — pre-existing NU1903/CS8600 etc., none new) | Tests: 516 passed, 0 failed, 0 skipped (unchanged count — visual-only change, no test impact) | Files written and re-read: SongFormPage.xaml
+
+### E2E note
+`E2E: emulator not available — requires manual verification (T10, Helder)`. Visual distinctness (➕ glyph, top divider, wrapper text) to be confirmed on-device per the plan's Task 10 checklist.

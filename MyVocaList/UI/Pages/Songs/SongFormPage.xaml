@@ -41,12 +41,35 @@
                     </dxe:AutoCompleteEdit.ItemsSourceProvider>
                     <dxe:AutoCompleteEdit.ItemTemplate>
                         <DataTemplate x:DataType="models:AutocompleteSuggestion">
-                            <VerticalStackLayout Padding="16,8">
-                                <Label Text="{Binding Headline}" StyleClass="Body.Large" />
-                                <Label Text="{Binding SupportingText}"
-                                       StyleClass="Body.Medium"
-                                       TextColor="{StaticResource OnSurfaceVariant}"
-                                       IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
+                            <VerticalStackLayout>
+                                <BoxView Style="{StaticResource Divider}"
+                                         IsVisible="{Binding IsCreateNew}" />
+                                <HorizontalStackLayout Padding="16,8" Spacing="8">
+                                    <Label Text="➕"
+                                           StyleClass="Body.Large"
+                                           TextColor="{StaticResource Primary}"
+                                           VerticalOptions="Center"
+                                           IsVisible="{Binding IsCreateNew}" />
+                                    <VerticalStackLayout>
+                                        <Label StyleClass="Body.Large"
+                                               IsVisible="{Binding IsCreateNew}">
+                                            <Label.FormattedString>
+                                                <FormattedString>
+                                                    <Span Text="Add &quot;" />
+                                                    <Span Text="{Binding Headline}" />
+                                                    <Span Text="&quot; as a new artist" />
+                                                </FormattedString>
+                                            </Label.FormattedString>
+                                        </Label>
+                                        <Label Text="{Binding Headline}"
+                                               StyleClass="Body.Large"
+                                               IsVisible="{Binding IsCreateNew, Converter={StaticResource InverseBoolConverter}}" />
+                                        <Label Text="{Binding SupportingText}"
+                                               StyleClass="Body.Medium"
+                                               TextColor="{StaticResource OnSurfaceVariant}"
+                                               IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </DataTemplate>
                     </dxe:AutoCompleteEdit.ItemTemplate>
