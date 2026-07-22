@@ -14,7 +14,7 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 
 ## Phase 0 — Setup (worktree)
 
-- [ ] **T0 — Create the worktree**
+- [x] **T0 — Create the worktree**
   Files owned: none. Risk: Low. Review lane: Standard.
   ```bash
   git worktree add ../mvl-backlog-generator -b feature/backlog-generator develop
@@ -25,29 +25,29 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 
 ## Phase 1 — Generator (worktree `feature/backlog-generator`)
 
-- [ ] **T1 — Frontmatter parser**
+- [x] **T1 — Frontmatter parser**
   Consumes: nothing. Produces: `parse(text) -> (dict, body)`, `FrontmatterError(reason, path)`.
   Files owned: `frontmatter.py`, `tests/test_frontmatter.py`. Risk: Low (B). Review lane: Standard. Demo: 8 tests green.
-- [ ] **T2 — Item model, validation, ordering**
+- [x] **T2 — Item model, validation, ordering**
   Consumes: T1. Produces: `Item` (+ `is_terminal`, `is_separator`, `status_label`), `validate`, `order_items`, `target_sort`, `notes_violations`, `STATUSES`, `TERMINAL`, `SEVERITIES`.
   Files owned: `model.py`, `tests/test_model.py`. Risk: **High (A)** — validation is the mechanical enforcement of the row template. Review lane: Elevated. Demo: 22 tests green (19 + 3 separator/section tests added at plan re-review).
-- [ ] **T3 — Row/table rendering + fenced splice**
+- [x] **T3 — Row/table rendering + fenced splice**
   Consumes: T2. Produces: `render_row`, `render_table`, `splice`, `render_backlog`, `RenderError`, `FENCE_BEGIN/END`, the three table heads.
   Files owned: `render.py`, `tests/test_render.py`. Risk: **High (A)** — byte-preservation outside fences is what protects the hand-written header. Review lane: Elevated. Demo: 13 tests green (11 + 2 milestone/group frozen-fixture tests added at plan re-review).
-- [ ] **T4 — Monthly archive rendering**
+- [x] **T4 — Monthly archive rendering**
   Consumes: T3. Produces: `bucket_by_month`, `render_archive`, `ARCHIVE_TEMPLATE`.
   Files owned: `render.py`, `tests/test_render.py`. Risk: Medium (B). Review lane: Standard. Demo: 17 tests green (13 + 4 ArchiveTests); a Done child archives while its active parent stays.
-- [ ] **T5 — CLI shell: `regen`, `--check`, `query`**
+- [x] **T5 — CLI shell: `regen`, `--check`, `query`**
   Consumes: T1–T4. Produces: `walk`, `cmd_regen`, `query_lines`, `cmd_query`, `_read`/`_write`/`_rel`.
   Files owned: `backlog_gen.py`, `tests/test_backlog_gen.py`. Risk: **High (A)** — idempotency is the core guarantee. Review lane: Elevated. Demo: `regen` twice → byte-identical; `--check` writes nothing.
-- [ ] **T6 — `register` / `status` / `renumber` + atomic `.sln` write**
+- [x] **T6 — `register` / `status` / `renumber` + atomic `.sln` write**
   Consumes: T5. Produces: `next_bug_id`, `slugify`, `_folder_for`, `_readme_text`, `sln_add_entry`, `cmd_register`, `cmd_status`, `cmd_renumber`.
   Files owned: `backlog_gen.py`, `tests/test_backlog_gen.py`. Risk: **High (A)** — ID allocation and atomicity. Review lane: Elevated. Demo: register a bug → folder + README + `.sln` line + regenerated row; `renumber` renames folder and id.
-- [ ] **T7 — Widen `orphan_check`'s watch set**
+- [x] **T7 — Widen `orphan_check`'s watch set**
   Consumes: T5. Produces: `WATCHED_PATHS`, `is_watched`; `backlog_changed_this_session` rewritten.
   Files owned: `orphan_check.py`, `tests/test_orphan_check_widening.py`. Risk: Medium (B) — must preserve the fail-open posture (INV-1). Review lane: Standard. Demo: 4 tests green; full suite still green.
   > The **blocking pre-commit gate is NOT here** — it is T12b. Installing it now would block T8–T11's own commits.
-- [ ] **T7b — Code review + merge `feature/backlog-generator` → `develop`**
+- [x] **T7b — Code review + merge `feature/backlog-generator` → `develop`**
   Consumes: T1–T7. Produces: the generator available on develop. Files owned: none (merge only). Risk: Medium. Review lane: **Elevated — fresh code-review subagent before the merge.** Demo: full suite green on develop.
 
 ## Phase 2 — Migration, additive (develop)
