@@ -328,6 +328,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompletee
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\task-log.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\task-log.md
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inline-trivial-fix", "inline-trivial-fix", "{FA1234BC-0001-4000-8000-000000000056}"
@@ -440,6 +441,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-10-form-ux-redesign
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-inline-artist-create", "2026-07-21-inline-artist-create", "{FA1234BC-0001-4000-8000-000000000055}"
@@ -450,6 +452,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-inline-artist-cr
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\handoff.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\handoff.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
@@ -1034,6 +1037,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{FA1234BC-0001-4000-8000-000000000071} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{FA1234BC-0001-4000-8000-000000000072} = {FA1234BC-0001-4000-8000-000000000071}
 		{FA1234BC-0001-4000-8000-000000000067} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-000000000068} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-000000000069} = {FA1234BC-0001-4000-8000-000000000057}
@@ -1145,4 +1150,11 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
 	EndGlobalSection
-EndGlobal
+EndProject("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "milestones", "milestones", "{FA1234BC-0001-4000-8000-000000000071}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-mvp-release", "2026-06-mvp-release", "{FA1234BC-0001-4000-8000-000000000072}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\milestones\2026-06-mvp-release\README.md = Docs\Management\milestones\2026-06-mvp-release\README.md
+	EndProjectSection
+EndProject
+Global
