@@ -194,6 +194,16 @@ supposed to surface.
 >   makes T12's gate impossible to classify honestly. Pin `Docs/Management/backlog-archive/*.md`
 >   and `BACKLOG.md` to `text eol=lf`.
 >
+> - **[ ] F4 (found by T10a; fold into F2's task) — `render._section_from_path` is dead code in
+>   production.** `walk()` builds `rel_path` as `Docs/Management/…`, so the function tests
+>   `parts[0] == "Docs"` and **always returns `None`**. The folder-prefix fallback therefore never
+>   fires outside tests. Combined with F2 (`_render_all` omits `all_items`, so parent resolution
+>   sees only the month's bucket, and archived bugs' parents are non-terminal ⇒ absent), an archived
+>   item without an explicit `section:` hits `RenderError` **regardless of its folder**. T10a is
+>   immune only because it wrote `section:` on every item — that is load-bearing, not belt-and-braces.
+>   Fix `_section_from_path` and the `all_items` call site in the same task, or the fallback chain is
+>   two-thirds fictional.
+>
 > **Environment hazard found during the review — do not repeat:** `grep` is rewritten by the `rtk`
 > proxy into a search tool, which silently corrupted the reviewer's first fence-stripping run and
 > produced bogus "DIFFERS" output. **Never use `grep` for byte-exact work in this repo** — use
