@@ -794,6 +794,38 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompletee
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000057}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "form-autocomplete-ux-overhaul", "form-autocomplete-ux-overhaul", "{FA1234BC-0001-4000-8000-000000000058}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\form-autocomplete-ux-overhaul\README.md = Docs\Management\cross-cutting\form-autocomplete-ux-overhaul\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queueservice-deadcode-cleanup", "queueservice-deadcode-cleanup", "{FA1234BC-0001-4000-8000-000000000059}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\queueservice-deadcode-cleanup\README.md = Docs\Management\cross-cutting\queueservice-deadcode-cleanup\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "user-tutorial-learning", "user-tutorial-learning", "{FA1234BC-0001-4000-8000-00000000005A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\user-tutorial-learning\README.md = Docs\Management\cross-cutting\user-tutorial-learning\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "website", "website", "{FA1234BC-0001-4000-8000-00000000005B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\website\README.md = Docs\Management\cross-cutting\website\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "singer-self-registration", "singer-self-registration", "{FA1234BC-0001-4000-8000-00000000005C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\singer-self-registration\README.md = Docs\Management\cross-cutting\singer-self-registration\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "social-features", "social-features", "{FA1234BC-0001-4000-8000-00000000005D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\social-features\README.md = Docs\Management\cross-cutting\social-features\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -895,6 +927,13 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{FA1234BC-0001-4000-8000-000000000057} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{FA1234BC-0001-4000-8000-000000000058} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000059} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005A} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005B} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005C} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005D} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-000000000028} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{E9A5FC59-0C8C-49B6-9845-7870FA3CD098} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
