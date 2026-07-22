@@ -848,3 +848,102 @@ slots for BUG-019/028 and the not-yet-foldered artists-songs bugs).
 
 ### Deviations
 None. Nothing was written, moved or deleted; `regen` was never run without `--check`.
+
+---
+
+## Task: T9d — `archive` generated-region fences in the 5 monthly archive files
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+Split out of **T12** to fix the sequencing defect recorded in the T10a entry above (BLOCKER 1):
+T10a needs the archive fences to exist, but T12 runs later. T9d is purely additive — it inserts the
+fence pair around each file's EXISTING hand-written table. Nothing is regenerated, moved, reordered
+or reformatted; `regen` was never run without `--check`; `BACKLOG.md` was not touched.
+
+### Changed files
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-03.md`
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-04.md`
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-05.md`
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-06.md`
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md`
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T9d row added before T10a, ticked; T10a blocker 1 annotated resolved; T12 row amended)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+`.sln`: **no change expected or made** — no file was created, moved or deleted; all 5 archive files
+are already registered.
+
+### Fence placement (T8 precedent)
+`BACKLOG.md` puts `<!-- BACKLOG:GENERATED:BEGIN <region> -->` immediately above the table head and
+the END marker immediately after the last row, with the prose header outside. T9d copies that
+exactly, region name `archive` — byte-identical to `render.FENCE_BEGIN/FENCE_END.format("archive")`,
+which is what `render_archive` → `splice(existing_text, "archive", body)` searches for.
+
+**Implementation decision (deviation worth Helder's eye):** every archive file contains **two**
+tables (`## Business Features` and `## Dev Cycle Craft`), whereas `ARCHIVE_TEMPLATE` defines a
+**single flat** `archive` region. With a one-fence-pair / +2-lines budget the only placement that
+keeps every archived row inside the generated region is BEGIN above the *first* table head and END
+after the *last* row — so the intervening `## Dev Cycle Craft` heading now sits **inside** the
+region and will be consumed when T12 regenerates. The alternative (fencing only one of the two
+tables) would leave the other table's rows outside the region, where T12 would silently drop them.
+Flagged, not self-adjudicated: if the two-section split must survive regeneration, that is a
+`render.py` change (two regions, e.g. `archive-business` / `archive-craft`) and belongs to its own
+task before T12.
+
+### Verification evidence
+
+Written by a Python **script file** in **binary** (never a Bash heredoc — the T9a escape-expansion
+corruption). Per file: BOM absent (all 5), line endings LF (all 5, 0 CRLF), trailing newline present
+— all preserved.
+
+`git diff --numstat` — exactly `2  0` for all five:
+
+```
+2	0	Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-03.md
+2	0	Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-04.md
+2	0	Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-05.md
+2	0	Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-06.md
+2	0	Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md
+```
+
+Byte-preservation proof — `git show HEAD:<path>` vs the new file with the 2 fence lines removed,
+sha256 (first 16 hex), all identical:
+
+```
+FILE                         HEAD              NEW-minus-2-fences  IDENTICAL
+BACKLOG-ARCHIVE-2026-03.md   31c90ee8381884f8  31c90ee8381884f8    True
+BACKLOG-ARCHIVE-2026-04.md   73a34616e55eacb3  73a34616e55eacb3    True
+BACKLOG-ARCHIVE-2026-05.md   1c86bd83f1f45300  1c86bd83f1f45300    True
+BACKLOG-ARCHIVE-2026-06.md   f2b21611336b8e3a  f2b21611336b8e3a    True
+BACKLOG-ARCHIVE-2026-07.md   80cf1e6a06074959  80cf1e6a06074959    True
+```
+
+`regen --check` AFTER the fences (never bare `regen`) — exit **1** (stale), the expected value, and
+**no `RenderError` traceback**:
+
+```
+BACKLOG is stale -- run: python .claude/scripts/backlog/backlog_gen.py regen
+  - .\Docs\Management\BACKLOG.md
+REGEN_EXIT=1
+```
+
+Because T10a's probe READMEs were reverted there are currently **no terminal items**, so that run
+does not by itself exercise `render_archive`. The fence was therefore proven directly against the
+real files by calling the generator's own code in-process — the T10a traceback
+(`render.RenderError: missing generated fence for region 'archive'`, `render.py:71`) no longer
+occurs for any of the five:
+
+```
+BACKLOG-ARCHIVE-2026-03.md splice OK (region 'archive' found) -> len 626
+BACKLOG-ARCHIVE-2026-04.md splice OK (region 'archive' found) -> len 532
+BACKLOG-ARCHIVE-2026-05.md splice OK (region 'archive' found) -> len 532
+BACKLOG-ARCHIVE-2026-06.md splice OK (region 'archive' found) -> len 627
+BACKLOG-ARCHIVE-2026-07.md splice OK (region 'archive' found) -> len 627
+```
+
+(That call was read-only — the spliced result was discarded, never written back.)
+
+### Deviations
+Only the fence-placement decision documented above. No item README was created (T10a/T12a's job);
+no `.sln` change; `BACKLOG.md` untouched; `regen` never run without `--check`.

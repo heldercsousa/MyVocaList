@@ -4,6 +4,7 @@
 
 ## Business Features
 
+<!-- BACKLOG:GENERATED:BEGIN archive -->
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-06 | ↳ Bug: Artists page missing back button + unclear trailing toggle (BUG-001) | ✅ Fixed | Fixed 2026-06-03. Pointer: `BusinessFeatures/artists-songs/bugs/BUG-001-artists-page-no-back-button.md`. |
@@ -58,3 +59,4 @@
 | 2026-06-12 | Add missing queue_music_outlined icon asset | ✅ Done | SVG added and merged; emulator smoke test pending. Pointer: `Docs/Management/cross-cutting-log.md`. |
 | 2026-06-27 | ↳ BUG: "To Review tasks need attention" rewakes every session (Stop hook noise) | ✅ Fixed | Scanner removed from Stop hooks 2026-06-27. Pointer: `Docs/Management/DevCycleCraft/session-continuity-leasing/task-log.md`. |
 | 2026-06-30 | ↳ 01 - Form validation guide | ✅ Done | Validation standard encoded across `.claude/library/*`; two Helder gates open (DateEdit birthday confirm; Integer/R10 TODO). Pointer: `Docs/Management/DevCycleCraft/ui-form-validation-guide/`. |
+<!-- BACKLOG:GENERATED:END archive -->

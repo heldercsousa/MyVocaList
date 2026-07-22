@@ -4,6 +4,7 @@
 
 ## Business Features
 
+<!-- BACKLOG:GENERATED:BEGIN archive -->
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-07-01 | ↳ BUG-020: SongsPage FAB crash — unguarded SecureStorage in async void OnAppearing (Critical) | ✅ Fixed | Fixed with try-catch fallback + regression test; emulator-verified 2026-07-03. Pointer: `BusinessFeatures/artists-songs/bugs/BUG-020-songspage-fab-crash-secure-storage.md`. |
@@ -48,3 +49,4 @@
 | 2026-07-15 | ↳↳ BUG-044: duplicate PersonFormPage after Save via autocomplete (Critical) | 🔵 Superseded (closed 2026-07-19) | Fix merged 2026-07-15; Helder E2E + back-gesture UX decision CANCELLED — custom `AutocompleteMobileField` frozen per DX `AutoCompleteEdit` adoption decision; residual defects re-evaluated in the DX replacement task. Pointer: `DevCycleCraft/autocomplete-component/2026-07-19-dx-autocomplete-adoption-decision.md`. |
 | 2026-07-15 | ↳↳ BUG-045: name entry cursor stuck at leading position after autocomplete usage (Major) | 🔵 Superseded (closed 2026-07-19) | Fix merged 2026-07-15; Helder manual E2E CANCELLED — same supersession as BUG-044. Pointer: `DevCycleCraft/autocomplete-component/2026-07-19-dx-autocomplete-adoption-decision.md`. |
 | 2026-07-15 | ↳↳ BUG-047: stale autocomplete suggestions popup on Edit-mode load (Major) | 🔵 Superseded (closed 2026-07-19) | Reentrancy-guard fix merged 2026-07-15 (verifier PASS 485/485); Helder on-device E2E CANCELLED — same supersession as BUG-044. Pointer: `DevCycleCraft/autocomplete-component/2026-07-19-dx-autocomplete-adoption-decision.md`. |
+<!-- BACKLOG:GENERATED:END archive -->
