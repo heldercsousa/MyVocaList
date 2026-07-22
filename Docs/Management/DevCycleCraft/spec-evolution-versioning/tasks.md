@@ -264,7 +264,7 @@ supposed to surface.
 
 ## Phase 3 — Migration, destructive (develop)
 
-- [ ] **T11a — BUG-050/051/052 get folders**
+- [x] **T11a — BUG-050/051/052 get folders** (3 folders + READMEs written; pointer relocation + BUG-052's `050/051` respelling declared as T12 hunks — see task-log T11a)
   Consumes: T10b. Each back-links `DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/task-log.md`; nothing is deleted from it (REQ-SEV-27).
   Files owned: 3 folders, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
 - [ ] **T11b — BUG-027/029/030/031/032 get folders**

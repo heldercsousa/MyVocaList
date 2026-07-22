@@ -1566,3 +1566,218 @@ outside T10b's `Files owned`, and changing it would be Rule 2 bundling.
 - `Changed files` contains only files inside `Files owned` (the READMEs, `MyVocaList.sln`) plus this
   feature's own `tasks.md` / `task-log.md`.
 - No hardcoded values and no `TODO`s; every written file re-read and its Markdown re-checked.
+
+---
+
+## Task: T11a — BUG-050, BUG-051 and BUG-052 get folders
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+**3 folders + 3 READMEs written.** Each back-links the DX `AutoCompleteEdit` replacement
+task-log; **nothing was removed from it** (REQ-SEV-27) — it stays the narrative record. This is
+Phase 3, but T11a itself is still additive: `BACKLOG.md` and the 5 archive files are byte-untouched.
+Executed in the worktree `../mvl-backlog-migration` on `feature/backlog-migration` under the scoped
+"docs land on develop" exception (Helder, 2026-07-22).
+
+### Changed files
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-suggestion-not-locked/README.md` (new folder + README)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-051-autocomplete-stale-results/README.md` (new folder + README)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-052-edit-shows-empty-artist-field/README.md` (new folder + README)
+- `MyVocaList.sln` (3 Solution Folders + 3 SolutionItems + 3 NestedProjects entries; +18/-0)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T11a ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Nesting derived from the current BACKLOG rows, not assumed
+
+The brief warned against assuming the parent from T10b's `dx-autocompleteedit-replacement`
+(`parent: autocomplete-component`, DevCycleCraft). **That is not these bugs' parent.** Read from the
+live `BACKLOG.md`: the three rows sit at lines 64–66 of the **Business Features** table, one `↳`
+deep, in the contiguous child block of `| 2026-05 | **Artists & Songs Catalog** |` (line 62) —
+between BUG-027 (line 63) and the `Song artist field` change row (line 67). The DX-AC task-log is
+their *pointer*, i.e. where the narrative happens to live, not their row parent. So:
+**`section: BusinessFeatures`, `parent: artists-songs`** — identical to T10a's BUG-028.
+
+Confirmed mechanically: `model._path_parent` on each new folder resolves to
+`BusinessFeatures/artists-songs`, so the declared parent and the path parent agree and
+`validate`'s disagreement check passes rather than being merely skipped.
+
+### Folder naming — REQ-SEV-01 followed; T10a's BUG-028 folder differs (noted, not touched)
+
+REQ-SEV-01 mandates `bugs/YYYY-MM-DD-BUG-NNN-<slug>/`, and `design.md` §2's own worked example is
+literally `…/bugs/2026-07-21-BUG-050-suggestion-not-locked/`. Both new folders follow it; the
+BUG-050 slug is the spec's verbatim. T10a's new `BUG-028-…` folder omits the date prefix (it mirrored
+its legacy siblings). Not corrected here — outside T11a's `Files owned`, and it changes only a
+`pointer:` string. Flagged for T12/T13 as a naming inconsistency inside one `bugs/` directory.
+
+### Per-README frontmatter
+
+| id | status | severity | section | parent | order | target | back-link |
+|----|--------|----------|---------|--------|-------|--------|-----------|
+| BUG-050 | `💡 Pending` | Critical | BusinessFeatures | `artists-songs` | 40 | 2026-07-21 | `DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/task-log.md` |
+| BUG-051 | `💡 Pending` | Major | BusinessFeatures | `artists-songs` | 50 | 2026-07-21 | same task-log |
+| BUG-052 | `💡 Pending` | Major | BusinessFeatures | `artists-songs` | 60 | 2026-07-21 | same task-log |
+
+`order:` follows the T9a–T10b convention — 1-based position in the live Business Features table × 10
+(positions 4, 5, 6). Verified by rendering: with `order_items`, the three land at rendered positions
+2/3/4 of the Business Features table, directly after `artists-songs` (20) and before
+`inline-artist-create` (70) — the pre-migration sequence exactly. (BUG-027, order 30, has no folder
+yet and is not T11a's.)
+
+**Every item carries an explicit `section:`, per finding F4.** These three are live, so
+`render_backlog` would resolve them through the parent chain anyway — but `render._section_from_path`
+always returns `None` in production (F4) and `_render_all` omits `all_items` (F2), so the fallback
+chain is two-thirds fictional and `section:` is the only path that is not. Written regardless, as
+briefed.
+
+### Verification evidence
+
+All checks in-process and read-only; rendered output discarded, nothing written back. `regen` was
+never run in either mode — per finding **F1** its `--check` exit code is evidence of nothing (`if
+errors: return 2` fires before `_render_all`, and the pre-existing banned-content error on this
+feature's own folder still stands). `grep` was not used for any byte-level comparison (rtk hazard);
+all comparisons are Python.
+
+**1. Parse + validate over the whole tree** (`backlog_gen.walk` + `model.validate`):
+
+```
+items walked: 55          PARSE ERRORS: none
+VALIDATION ERRORS: 1
+  ! DevCycleCraft/spec-evolution-versioning/: Notes contain banned content (file path beyond the pointer)
+errors touching T11a items: []
+DUPLICATE IDS: none
+```
+
+55 items = T10b's 52 + these 3. The single error is the **pre-existing** decision-2 blocker on this
+feature's own folder, unchanged. **Zero new validation errors; zero on any T11a item.**
+
+**2. Rendered rows, verbatim from `render.render_row` — read, not assumed:**
+
+```
+| 2026-07-21 | ↳ BUG-050: Song form — selecting an artist suggestion does not lock the field (Critical) | 💡 Pending | Goal: picking a suggestion must lock the Artist field. Root cause: `SelectArtist` never sets `IsArtistLocked=true` (one-line omission). Found in DX-AC T7. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-suggestion-not-locked/`. |
+| 2026-07-21 | ↳ BUG-051: Song form — artist autocomplete returns stale results (searches prior keystroke) (Major) | 💡 Pending | Goal: dropdown must reflect the current query. Root cause: shared `ArtistSuggestions` race, no per-request cancellation in `SearchArtistsAsync`. Found in DX-AC T7 (W2 realized). Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-051-autocomplete-stale-results/`. |
+| 2026-07-21 | ↳ BUG-052: Song form — editing a saved song shows an empty Artist field (Major) | 💡 Pending | Goal: edit mode must hydrate the saved artist. Likely compound with BUG-050 (song saved without ArtistId); reconfirm after BUG-050 and BUG-051. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-052-edit-shows-empty-artist-field/`. |
+```
+
+Read and confirmed: one `↳` each (`_depth` = 1, correct — they are one `bugs/` segment below the
+feature, matching the hand-written indent); title, target and status transcribed verbatim; no
+escaped-quote leakage of the T10b kind (the goals were written unquoted-safe and the titles contain
+no inner quotes — checked in the rendered text, not in the source).
+
+**3. Byte-exact diff of each rendered row against its pre-migration line** (Python string equality
+against `BACKLOG.md`'s current lines, not `grep`): every row differs in **the pointer only**, except
+BUG-052 which differs in the pointer plus the one respelling below. Everything else — target, arrow,
+title, status, goal wording, punctuation — is byte-identical.
+
+**4. Live splice** — `render.render_backlog(existing, items)` over the real `BACKLOG.md` returned
+without error; the rendered output contains `BUG-050:`, `BUG-051:` and `BUG-052:`.
+
+**5. Archive regression** — T10a's terminal items still bucket and both T9e regions still splice
+against the real fenced files:
+
+```
+archive 2026-06 -> splice OK, 3 items
+archive 2026-07 -> splice OK, 5 items
+```
+(Called with `all_items=items`, i.e. the F2-correct form; no T11a item is terminal, so none routes
+through the archive at all.)
+
+**6. Additivity — `BACKLOG.md` and the 5 archive files unmodified:**
+
+```
+$ git diff --stat -- Docs/Management/BACKLOG.md Docs/Management/backlog-archive/
+(no output — 0 files changed)
+
+$ git status --porcelain
+ M MyVocaList.sln
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-suggestion-not-locked/
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-051-autocomplete-stale-results/
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-052-edit-shows-empty-artist-field/
+```
+
+Nothing moved, nothing deleted. The DX-AC task-log is untouched (REQ-SEV-27) — confirmed by its
+absence from the diff.
+
+**7. `.sln` HARD GATE.** The brief's `0070`/`0071`/`0072` were re-verified rather than trusted, by
+reading the file: the highest `FA1234BC-0001-4000-8000-0000000000NN` **actually in use was `0x72`**
+(the brief was right this time; `constraints-registry.md`'s `0041` remains stale, already queued for
+T13). T11a allocated **`…0073`, `…0074`, `…0075`**, each asserted absent from the file before the
+write. All three nest under the artists-songs `bugs` folder `{7A021F6B-F297-41EA-A028-C4F881146791}`,
+matching BUG-028's `…0070`. Written in **binary**; BOM and CRLF re-asserted after the write:
+
+```
+.sln BOM: True | CRLF: 1178 | lone LF: 0        (was BOM True | CRLF 1160 | lone LF 0)
+git diff --numstat MyVocaList.sln -> 18  0
+```
+
+Added paths re-read from disk with `repr()`:
+
+```
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-050-suggestion-not-locked\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-050-suggestion-not-locked\\README.md'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-051-autocomplete-stale-results\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-051-autocomplete-stale-results\\README.md'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-052-edit-shows-empty-artist-field\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-052-edit-shows-empty-artist-field\\README.md'
+```
+
+**8. Line endings.** The 3 READMEs are new files with no on-disk EOL to preserve; written **LF**
+(matching every README T9a–T10b produced), with `b'\r\n' not in` asserted on the bytes re-read from
+disk. `MyVocaList.sln`, `tasks.md` and `task-log.md` are pre-existing **CRLF** and were asserted CRLF
+after their writes. Per **F3** the repo still has `core.autocrlf=true` with `*.md` unpinned, so blob
+and working tree differ — these assertions measure the **working tree**.
+
+**9. Files were written by a Python script file in binary mode**, never a Bash heredoc (the `\a`/`\b`
+escape-expansion hazard that corrupted an earlier `.sln` write).
+
+### Declared T12 diff hunks
+
+Two classes, three hunks. Both were expected; neither is a transcription error.
+
+**(a) Pointer relocation — all three rows. This is the task's purpose, not a side effect.**
+
+```
+-... Found in DX-AC T7. Pointer: `DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/task-log.md`. |
++... Found in DX-AC T7. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-suggestion-not-locked/`. |
+```
+
+and, for BUG-051 / BUG-052, the pre-migration prose pointer `same DX-AC task-log` (which is not a
+backticked path at all, so it could not survive REQ-SEV-09's one-path rule) becomes each bug's own
+folder. REQ-SEV-01 requires the folder to be the pointer; REQ-SEV-27 requires the old target to
+survive, which it does — every README carries an explicit **History / back-link** line to it.
+
+**(b) One respelling — BUG-052 only. Needs Helder's confirmation at T12.**
+
+```
+-... (song saved without ArtistId); reconfirm after 050/051. Pointer: ...
++... (song saved without ArtistId); reconfirm after BUG-050 and BUG-051. Pointer: ...
+```
+
+`050/051` matches `model._BANNED`'s test-count pattern `\b\d+\s*/\s*\d+\b`. Relocating it to the
+README body was not available — it is not overflow, it is the sentence's operative content — so the
+ids are spelled out in full. Same two bugs, same order, no meaning changed. This is the same class as
+T10a's `Mask="00/00"` and T10b's `BUG-050/051/052`, and is recorded verbatim in BUG-052's README body.
+
+No goal or gate text was trimmed: all three rows' Notes already satisfied the ≤3-sentence /
+≤55-word budget and, apart from (b), tripped no banned pattern. `gate:` was left unset on all three —
+the pre-migration rows carry no Gate, and inventing one would be fabrication.
+
+### Intent verification
+- The task's original demo statement (`regen --check` never exits 2) is **superseded by F1** and was
+  not used; its in-process equivalent is evidence items 1–5.
+- `Changed files` contains only files inside `Files owned` (3 folders, `MyVocaList.sln`) plus this
+  feature's own `tasks.md` / `task-log.md`.
+- No `TODO`s; every written file re-read from disk and its Markdown re-checked.
+- Nothing outside the three folders and the `.sln` was created, moved or deleted.
+
+### Checkpoint
+Complete — no resumption needed. Worktree `../mvl-backlog-migration`, branch `feature/backlog-migration`.
+Step 6 of 6 done: read specs/T10a+T10b → derive nesting from BACKLOG → write 3 READMEs → `.sln` →
+in-process verify → commit. Build/test state: n/a (no code changed).
+Context manifest, had this been interrupted:
+1. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — decision table, F1–F5, T11a row
+2. `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` — T10a/T10b conventions + this entry
+3. `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` — §2 frontmatter, §3 row rendering
+4. `Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md` — REQ-SEV-00/01/02/27
+5. `Docs/Management/BACKLOG.md` — lines 62–67, the source rows and their nesting
+6. `.claude/scripts/backlog/model.py` — `_BANNED`, `_path_parent`, `validate`, `order_items`
+7. `.claude/scripts/backlog/render.py` — `render_row`, `render_backlog` (arg order is `(existing, items)`)
+8. `MyVocaList.sln` — GUID counter and the artists-songs `bugs` folder GUID
