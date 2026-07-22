@@ -499,3 +499,131 @@ New `cross-cutting` folder GUID `…0057` nested under Management; children `…
 
 Post-edit re-read: all six READMEs re-parsed by the generator's frontmatter walk (the `--check`
 and `query` runs above).
+
+---
+## Task: T9c-2a — Folder-less Dev Cycle Craft rows, first half (9 rows)
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+### Enumeration (done independently, not trusted from T9b)
+
+Global positions counted over the rows inside the `dev-cycle-craft` fence (header and separator
+lines excluded, first data row = position 1). Counting basis verified against two committed
+anchors: `inline-trivial-fix` = position 2 / `order: 20`, and ① Autocomplete Mobile UX Pattern =
+position 24. Both agree — no disagreement with the briefed anchor.
+
+18 folder-less **top-level** Dev Cycle Craft rows found, matching T9b's count exactly:
+
+| # | Pos | Order | Row | Lane |
+|---|-----|-------|-----|------|
+| 1 | 1 | 10 | Documentation & spec-tracking governance — where docs live | **T9c-2a** |
+| 2 | 4 | 40 | Inline Undo Pattern — UX Standard | **T9c-2a** |
+| 3 | 5 | 50 | Mandatory Worktree Rule Enforcement — ALL Subagent Work | **T9c-2a** |
+| 4 | 6 | 60 | Search Pattern Standardization + Navigation Result Service | **T9c-2a** |
+| 5 | 7 | 70 | IAsyncRelayCommand Standardization | **T9c-2a** |
+| 6 | 8 | 80 | Search Error State UX Standardization | **T9c-2a** |
+| 7 | 9 | 90 | Filter Pattern Standardization | **T9c-2a** |
+| 8 | 13 | 130 | Bug: Shell navigation swallows button tap animations | **T9c-2a** |
+| 9 | 14 | 140 | Bug/Verify: FloatingToolbar always visible | **T9c-2a** |
+| 10 | 24 | 240 | ① Autocomplete Mobile UX Pattern — Full-Screen Expansion Guideline | T9c-2b (excluded by briefing) |
+| 11 | 25 | 250 | CRUD page structural reduction — lazy BottomSheet + lazy SearchAppBar | T9c-2b |
+| 12 | 30 | 300 | Large-volume data stress test (1–2 year seed) | T9c-2b |
+| 13 | 31 | 310 | Cross-device / OS version compatibility test | T9c-2b |
+| 14 | 32 | 320 | Play Store + Samsung Galaxy Store pre-submission compliance | T9c-2b |
+| 15 | 33 | 330 | Full pre-release mobile testing checklist (all categories) | T9c-2b |
+| 16 | 42 | 420 | Infra Repository Folder Consolidation | T9c-2b |
+| 17 | 43 | 430 | Read Model + Global NoTracking Pattern — Guidelines Update | T9c-2b |
+| 18 | 44 | 440 | CRUD Read Model Refactoring — Persons, Songs, Venues | T9c-2b |
+
+**Skipped / not applicable:**
+- **BACKLOG-first Registration Enforcement** (pos 39) — excluded by briefing (banned-content
+  conflict). Note for the record: it is **not** folder-less — its pointer is
+  `DevCycleCraft/backlog-first-registration/`, an existing folder. It is therefore absent from the
+  18 above and belongs to the existing-folder lane, not to T9c-2.
+- All `↳`-prefixed sub-rows and all separator rows — out of scope per briefing.
+
+**No row required a notes-overflow relocation and no row was skipped for banned content.** All
+nine Goals/Gates pass `model.notes_violations` unchanged; every Goal, Gate, Status and Target was
+transcribed verbatim from the BACKLOG row (only the leading `Goal: ` / `Gate: ` labels and the
+trailing `Pointer: ` clause were dropped, as they become frontmatter keys).
+
+### Written (row, order, status)
+
+| Row | order | status |
+|-----|-------|--------|
+| Documentation & spec-tracking governance — where docs live | 10 | 💡 Pending |
+| Inline Undo Pattern — UX Standard | 40 | 💡 Pending |
+| Mandatory Worktree Rule Enforcement — ALL Subagent Work | 50 | 💡 Pending |
+| Search Pattern Standardization + Navigation Result Service | 60 | 💡 Pending |
+| IAsyncRelayCommand Standardization | 70 | 💡 Pending |
+| Search Error State UX Standardization | 80 | 💡 Pending |
+| Filter Pattern Standardization | 90 | 💡 Pending |
+| Bug: Shell navigation swallows button tap animations | 130 | 💡 Pending |
+| Bug/Verify: FloatingToolbar always visible | 140 | 💡 Pending |
+
+### Changed files:
+- `Docs/Management/cross-cutting/documentation-spec-tracking-governance/README.md` (new)
+- `Docs/Management/cross-cutting/inline-undo-pattern/README.md` (new)
+- `Docs/Management/cross-cutting/mandatory-worktree-rule-enforcement/README.md` (new)
+- `Docs/Management/cross-cutting/search-pattern-standardization/README.md` (new)
+- `Docs/Management/cross-cutting/iasyncrelaycommand-standardization/README.md` (new)
+- `Docs/Management/cross-cutting/search-error-state-ux-standardization/README.md` (new)
+- `Docs/Management/cross-cutting/filter-pattern-standardization/README.md` (new)
+- `Docs/Management/cross-cutting/shell-navigation-tap-animations/README.md` (new)
+- `Docs/Management/cross-cutting/floatingtoolbar-visibility-verify/README.md` (new)
+- `MyVocaList.sln`
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md`
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md`
+
+### Evidence
+
+Overwrite guard: the script aborts with exit 2 on `os.path.exists(README)` **before** writing
+anything. All nine paths were new (all nine folders appear as `??` in `git status`), so no
+pre-existing README was touched and no byte-for-byte preservation was needed.
+
+`regen --check` — exit **1** (stale), the expected value. Exit 2 (malformed) never occurred:
+
+```
+BACKLOG is stale -- run: python .claude/scripts/backlog/backlog_gen.py regen
+  - .\Docs\Management\BACKLOG.md
+REGEN_EXIT=1
+```
+
+`BACKLOG.md` NOT modified (`git diff --stat`; `.claude/changed-files.txt` was already dirty at
+session start and is not part of this commit):
+
+```
+ .claude/changed-files.txt | 324 ++++++++++++++++++++++++++++++++++++++++++++++
+ MyVocaList.sln            |  54 ++++++++
+ 2 files changed, 378 insertions(+)
+```
+
+`.sln` gate: written by a Python **script file** in binary (never a Bash heredoc — the T9a
+``/`` escape corruption). BOM and CRLF preserved and **re-asserted after the write**
+(`chk.startswith(b'ï»¿')` and a zero bare-LF assertion), and every SolutionItems path
+re-read with `repr()`:
+
+```
+'		Docs\Management\cross-cutting\documentation-spec-tracking-governance\README.md'  guid=...005E
+'		Docs\Management\cross-cutting\inline-undo-pattern\README.md'                     guid=...005F
+'		Docs\Management\cross-cutting\mandatory-worktree-rule-enforcement\README.md'      guid=...0060
+'		Docs\Management\cross-cutting\search-pattern-standardization\README.md'           guid=...0061
+'		Docs\Management\cross-cutting\iasyncrelaycommand-standardization\README.md'       guid=...0062
+'		Docs\Management\cross-cutting\search-error-state-ux-standardization\README.md'    guid=...0063
+'		Docs\Management\cross-cutting\filter-pattern-standardization\README.md'           guid=...0064
+'		Docs\Management\cross-cutting\shell-navigation-tap-animations\README.md'          guid=...0065
+'		Docs\Management\cross-cutting\floatingtoolbar-visibility-verify\README.md'        guid=...0066
+BOM=ok bare-LF=none written=9
+```
+
+GUID counter continued from the highest in use (`…0057` folder, children `…0058`–`…005D`) → new
+children `…005E`–`…0066`, all nested under the existing `cross-cutting` folder `…0057`.
+
+Post-edit re-read: all nine READMEs re-parsed by the generator's frontmatter walk —
+`backlog_gen.py query` lists all nine with the correct title, status and target, confirming the
+restricted frontmatter subset is valid and no key was dropped.
+
+REQ-SEV-28 honoured: every README back-references `Docs/Management/cross-cutting-log.md`, which is
+retained, not deleted.

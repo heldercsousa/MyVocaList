@@ -826,6 +826,51 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "social-features", "social-f
 		Docs\Management\cross-cutting\social-features\README.md = Docs\Management\cross-cutting\social-features\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation-spec-tracking-governance", "documentation-spec-tracking-governance", "{FA1234BC-0001-4000-8000-00000000005E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\documentation-spec-tracking-governance\README.md = Docs\Management\cross-cutting\documentation-spec-tracking-governance\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inline-undo-pattern", "inline-undo-pattern", "{FA1234BC-0001-4000-8000-00000000005F}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\inline-undo-pattern\README.md = Docs\Management\cross-cutting\inline-undo-pattern\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mandatory-worktree-rule-enforcement", "mandatory-worktree-rule-enforcement", "{FA1234BC-0001-4000-8000-000000000060}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\mandatory-worktree-rule-enforcement\README.md = Docs\Management\cross-cutting\mandatory-worktree-rule-enforcement\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-pattern-standardization", "search-pattern-standardization", "{FA1234BC-0001-4000-8000-000000000061}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\search-pattern-standardization\README.md = Docs\Management\cross-cutting\search-pattern-standardization\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "iasyncrelaycommand-standardization", "iasyncrelaycommand-standardization", "{FA1234BC-0001-4000-8000-000000000062}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\iasyncrelaycommand-standardization\README.md = Docs\Management\cross-cutting\iasyncrelaycommand-standardization\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-error-state-ux-standardization", "search-error-state-ux-standardization", "{FA1234BC-0001-4000-8000-000000000063}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\search-error-state-ux-standardization\README.md = Docs\Management\cross-cutting\search-error-state-ux-standardization\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "filter-pattern-standardization", "filter-pattern-standardization", "{FA1234BC-0001-4000-8000-000000000064}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\filter-pattern-standardization\README.md = Docs\Management\cross-cutting\filter-pattern-standardization\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shell-navigation-tap-animations", "shell-navigation-tap-animations", "{FA1234BC-0001-4000-8000-000000000065}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\shell-navigation-tap-animations\README.md = Docs\Management\cross-cutting\shell-navigation-tap-animations\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "floatingtoolbar-visibility-verify", "floatingtoolbar-visibility-verify", "{FA1234BC-0001-4000-8000-000000000066}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\floatingtoolbar-visibility-verify\README.md = Docs\Management\cross-cutting\floatingtoolbar-visibility-verify\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -934,6 +979,15 @@ Global
 		{FA1234BC-0001-4000-8000-00000000005B} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005C} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005D} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005E} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005F} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000060} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000061} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000062} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000063} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000064} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000065} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000066} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-000000000028} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{E9A5FC59-0C8C-49B6-9845-7870FA3CD098} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
