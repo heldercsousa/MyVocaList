@@ -143,5 +143,114 @@ class QueryTests(unittest.TestCase):
         self.assertEqual(len(lines), 1)
 
 
+class RegisterTests(unittest.TestCase):
+    def setUp(self):
+        self.root = tempfile.mkdtemp()
+        self.mgmt = os.path.join(self.root, "Docs", "Management")
+        write(os.path.join(self.mgmt, "BACKLOG.md"), BACKLOG_SKELETON)
+        write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "README.md"), readme())
+        write(os.path.join(self.root, "MyVocaList.sln"), SLN_FIXTURE)
+
+    def tearDown(self):
+        shutil.rmtree(self.root, ignore_errors=True)
+
+    def test_slugify_lowercases_and_hyphenates(self):
+        self.assertEqual(backlog_gen.slugify("Song form — Artist NOT locked!"),
+                         "song-form-artist-not-locked")
+
+    def test_next_bug_id_starts_at_one_when_tree_is_empty(self):
+        self.assertEqual(backlog_gen.next_bug_id(self.root), "BUG-001")
+
+    def test_next_bug_id_is_max_plus_one(self):
+        write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
+                           "2026-07-21-BUG-050-x", "README.md"),
+              readme(id="BUG-050", title="BUG-050: x (Major)", severity="Major",
+                     parent="F-1", section=None))
+        self.assertEqual(backlog_gen.next_bug_id(self.root), "BUG-051")
+
+    def test_next_bug_id_also_scans_archives_so_ids_are_never_reused(self):
+        write(os.path.join(self.mgmt, "backlog-archive", "BACKLOG-ARCHIVE-2026-06.md"),
+              "| 2026-06 | BUG-099: retired thing | ✅ Fixed | Goal: x. |\n")
+        self.assertEqual(backlog_gen.next_bug_id(self.root), "BUG-100")
+
+    def test_register_creates_folder_readme_and_regenerates(self):
+        rc = backlog_gen.cmd_register(
+            self.root, section=None, parent="F-1", kind="bug", severity="Major",
+            title="Artist field not locked", goal="Lock the field.", gate=None,
+            today="2026-07-22")
+        self.assertEqual(rc, 0)
+        folder = os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
+                              "2026-07-22-BUG-001-artist-field-not-locked")
+        self.assertTrue(os.path.exists(os.path.join(folder, "README.md")))
+        with open(os.path.join(self.mgmt, "BACKLOG.md"), encoding="utf-8") as fh:
+            self.assertIn("Artist field not locked", fh.read())
+
+    def test_register_adds_the_sln_entry(self):
+        backlog_gen.cmd_register(
+            self.root, section=None, parent="F-1", kind="bug", severity="Major",
+            title="Some bug", goal="Fix it.", gate=None, today="2026-07-22")
+        with open(os.path.join(self.root, "MyVocaList.sln"), encoding="utf-8") as fh:
+            self.assertIn("2026-07-22-BUG-001-some-bug", fh.read())
+
+    def test_register_rejects_minor_severity(self):
+        rc = backlog_gen.cmd_register(
+            self.root, section=None, parent="F-1", kind="bug", severity="Minor",
+            title="Cosmetic", goal="Tidy.", gate=None, today="2026-07-22")
+        self.assertEqual(rc, 2)
+
+    def test_register_is_atomic_nothing_written_on_failure(self):
+        before = sorted(os.listdir(os.path.join(self.mgmt, "BusinessFeatures", "feat")))
+        backlog_gen.cmd_register(
+            self.root, section=None, parent="ghost", kind="bug", severity="Major",
+            title="Orphan", goal="x.", gate=None, today="2026-07-22")
+        self.assertEqual(before, sorted(os.listdir(
+            os.path.join(self.mgmt, "BusinessFeatures", "feat"))))
+
+    def test_status_updates_frontmatter_and_regenerates(self):
+        self.assertEqual(backlog_gen.cmd_status(self.root, "F-1", "\U0001F7E1 In Progress", None), 0)
+        with open(os.path.join(self.mgmt, "BusinessFeatures", "feat", "README.md"),
+                  encoding="utf-8") as fh:
+            self.assertIn("\U0001F7E1 In Progress", fh.read())
+
+    def test_status_terminal_requires_closed(self):
+        self.assertEqual(backlog_gen.cmd_status(self.root, "F-1", "✅ Done", None), 2)
+        self.assertEqual(backlog_gen.cmd_status(self.root, "F-1", "✅ Done", "2026-07"), 0)
+
+    def test_status_on_unknown_id_changes_nothing(self):
+        before = self._readme()
+        self.assertEqual(backlog_gen.cmd_status(self.root, "NOPE", "\U0001F7E1 In Progress", None), 2)
+        self.assertEqual(before, self._readme())
+
+    def _readme(self):
+        with open(os.path.join(self.mgmt, "BusinessFeatures", "feat", "README.md"),
+                  encoding="utf-8") as fh:
+            return fh.read()
+
+    def test_status_preserves_unknown_frontmatter_keys(self):
+        path = os.path.join(self.mgmt, "BusinessFeatures", "feat", "README.md")
+        write(path, readme(reviewer="Helder"))
+        backlog_gen.cmd_status(self.root, "F-1", "\U0001F7E1 In Progress", None)
+        with open(path, encoding="utf-8") as fh:
+            self.assertIn("reviewer: Helder", fh.read())
+
+    def test_renumber_renames_folder_and_rewrites_id(self):
+        write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
+                           "2026-07-21-BUG-001-dup", "README.md"),
+              readme(id="BUG-001", title="BUG-001: dup (Major)", severity="Major",
+                     parent="F-1", section=None, kind="bug"))
+        self.assertEqual(backlog_gen.cmd_renumber(self.root, "BUG-001"), 0)
+        self.assertTrue(os.path.isdir(os.path.join(
+            self.mgmt, "BusinessFeatures", "feat", "bugs", "2026-07-21-BUG-002-dup")))
+        with open(os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
+                               "2026-07-21-BUG-002-dup", "README.md"),
+                  encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("id: BUG-002", text)
+        self.assertIn("BUG-002: dup", text)
+
+    def test_renumber_on_unknown_id_changes_nothing(self):
+        self.assertEqual(backlog_gen.cmd_renumber(self.root, "BUG-999"), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
