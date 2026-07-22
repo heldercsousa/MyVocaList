@@ -280,15 +280,32 @@ public partial class SongFormViewModel : ViewModelBase
 
     // ── Artist autocomplete ───────────────────────────────────────────────
 
-    private async Task SearchArtistsAsync(string term)
+    private Task SearchArtistsAsync(string term) => SearchArtistsCoreAsync(term);
+
+    /// <summary>
+    /// BUG-056: runs the artist search and RETURNS the current query's mapped suggestions so the
+    /// page's <c>AutoCompleteEdit</c> provider receives them directly (no read-before-dispatch gap
+    /// against <see cref="ArtistSuggestions"/>). The observable <see cref="ArtistSuggestions"/> is
+    /// still updated for the latest query only (BUG-051 generation guard) so other observers see
+    /// latest-query-wins, but the returned list is always this call's own results.
+    /// </summary>
+    public async Task<IReadOnlyList<AutocompleteSuggestion>> SearchArtistsCoreAsync(string term)
     {
-        if (string.IsNullOrWhiteSpace(term)) { ArtistSuggestions = []; return; }
+        if (string.IsNullOrWhiteSpace(term))
+        {
+            RunOnUiThread(() => ArtistSuggestions = []);
+            return [];
+        }
         var gen = Interlocked.Increment(ref _searchGeneration); // BUG-051: guards against a slower earlier query clobbering a newer one
         var results = await _artistService.SearchArtistsByNameAsync(term, maxResults: 5);
-        if (gen != _searchGeneration) return;
-        RunOnUiThread(() =>
-            ArtistSuggestions = results.Select(a =>
-                new AutocompleteSuggestion(a.Name, a.CatalogCountText, a)).ToList());
+        var mapped = results
+            .Select(a => new AutocompleteSuggestion(a.Name, a.CatalogCountText, a))
+            .ToList();
+        // Only the latest query updates the shared observable state; the provider for THIS query
+        // still receives its own results below (DX cancels stale provider requests via its token).
+        if (gen == _searchGeneration)
+            RunOnUiThread(() => ArtistSuggestions = mapped);
+        return mapped;
     }
 
     private void SelectArtist(AutocompleteSuggestion suggestion)
@@ -410,7 +427,20 @@ public partial class SongFormViewModel : ViewModelBase
                 SongVersion = song.Version ?? string.Empty;
                 FeaturedArtists = song.FeaturedArtists ?? string.Empty;
                 Lyrics = song.Lyrics;
-                IsArtistLocked = !string.IsNullOrEmpty(song.ExternalId) && !song.HasManualEdits;
+
+                // BUG-055: hydrate the stored artist so the field shows it (name) and Save preserves
+                // the artist link (the artist-required guard reads SelectedArtistId). InitializeArtistField
+                // only fires for the artistId QueryProperty (0 in normal edit), so hydrate from the
+                // loaded entity here. Runs inside the _isHydrating window above → fires no search
+                // (REQ-ACREATE-14). song.OriginalArtist is eager-loaded by SongRepository.GetByIdAsync.
+                if (song.ArtistId > 0)
+                {
+                    SelectedArtistId = song.ArtistId;
+                    SelectedArtistName = song.OriginalArtist?.Name ?? ArtistName;
+                    ArtistSearchText = SelectedArtistName ?? string.Empty;
+                }
+
+                IsArtistLocked = true; // edit-mode artist is locked (REQ-ACREATE-14); user cannot change it inline
             }
             finally
             {
