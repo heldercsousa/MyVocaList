@@ -951,6 +951,26 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-read-model-refactoring
 		Docs\Management\cross-cutting\crud-read-model-refactoring\README.md = Docs\Management\cross-cutting\crud-read-model-refactoring\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-027-songformpage-artist-field-broken", "2026-07-03-BUG-027-songformpage-artist-field-broken", "{FA1234BC-0001-4000-8000-000000000076}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-027-songformpage-artist-field-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-027-songformpage-artist-field-broken\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-029-artistformpage-search-strip-icon-crash", "2026-07-03-BUG-029-artistformpage-search-strip-icon-crash", "{FA1234BC-0001-4000-8000-000000000077}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-029-artistformpage-search-strip-icon-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-029-artistformpage-search-strip-icon-crash\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear", "2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear", "{FA1234BC-0001-4000-8000-000000000078}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title", "2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title", "{FA1234BC-0001-4000-8000-000000000079}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1164,6 +1184,10 @@ Global
 		{FA1234BC-0001-4000-8000-000000000073} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000074} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000075} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000076} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000077} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000078} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000079} = {7A021F6B-F297-41EA-A028-C4F881146791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
