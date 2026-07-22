@@ -358,3 +358,27 @@ Manual E2E: pending on-device (Helder T10) — typing ≥3 chars in the Artist f
 - **Green:** full suite -> `Com falha: 0, Aprovado: 520, Total: 520`.
 - **Build:** android build exit 0, 0 errors.
 - **Manual E2E (on device):** deferred to T10 re-run (Helder) — name shown + locked on edit; catalog populates (BUG-059 cascade).
+
+---
+## Bug: BUG-054b / BUG-057 / BUG-058 (XAML cluster, UI-only) — Artist AutoCompleteEdit wiring
+**Status:** To Review
+**Severity:** Major (UI-only; no unit seam — manual E2E deferred to T10 re-run, Helder)
+
+Single incremental XAML edit pass on the one `AutoCompleteEdit` in `SongFormPage.xaml`, then build (0 errors).
+
+- **BUG-054b (lock via IsEnabled disabled the clear icon):** replaced `IsEnabled="{Binding IsArtistLocked, Converter=InverseBoolConverter}"` with `IsReadOnly="{Binding IsArtistLocked}"` and added `ClearIconVisibility="Auto"`, so a locked field is non-editable but the clear (X) icon still works. DX API confirmed via Context7/DX docs (DevExpress MAUI 25.2.4): `IsReadOnly` (editor base), `ClearIconVisibility` (EditBase, type `Visibility`, value `Auto`).
+- **BUG-057 (invisible error):** added a dedicated visible `Label` bound to `ArtistErrorText`, `IsVisible="{Binding ArtistHasError}"`, mirroring the existing `PasteUrlError` label on this same page (`StyleClass="Body.Small"` + `TextColor="{StaticResource Error}"`). No invented style keys, no hardcoded colors. The DX editor's own `HasError`/`ErrorText` bindings are retained (red border) but were not surfacing text on-device.
+- **BUG-058 (record ToString leaked into Text):** added `DisplayMember="Headline"`. DX doc (25.2.4) confirms `ItemsEditBase.DisplayMember` sets the data-source field whose value is written into the edit box on selection — so `Headline` (artist name / raw typed text) is written instead of `AutocompleteSuggestion.ToString()`.
+
+### DX API names vs briefing
+All three (`IsReadOnly`, `ClearIconVisibility="Auto"`, `DisplayMember="Headline"`) matched the briefing exactly — no deviations. Confirmed against DevExpress MAUI 25.2.4 docs (`DevExpress.Maui.Editors.AutoCompleteEdit` / `ItemsEditBase.DisplayMember` / `EditBase.ClearIconVisibility`).
+
+### Observation (not fixed — out of scope)
+With `IsReadOnly` locking, tapping the clear (X) icon clears `ArtistSearchText` but `IsArtistLocked` stays true (no unlock-on-clear handler). The briefing scoped BUG-054b to the IsReadOnly/ClearIconVisibility swap only; unlock-on-clear would be a new requirement. Flagged for Helder's T10 observation.
+
+### Changed files
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` — AutoCompleteEdit attributes (IsReadOnly, ClearIconVisibility, DisplayMember) + adjacent artist error Label.
+
+### Verification evidence
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` -> exit 0, 0 errors (warnings only). XAML compiled — all three DX properties valid on the control.
+- **Manual E2E:** deferred to T10 re-run (Helder): locked field keeps clear icon; error text visible; no `IsCreateNew = True` leak into the box.

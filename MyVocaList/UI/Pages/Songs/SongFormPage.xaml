@@ -29,9 +29,11 @@
                                       LabelText="Artist"
                                       PlaceholderText="Search artists..."
                                       Text="{Binding ArtistSearchText, Mode=TwoWay}"
+                                      DisplayMember="Headline"
                                       HasError="{Binding ArtistHasError}"
                                       ErrorText="{Binding ArtistErrorText}"
-                                      IsEnabled="{Binding IsArtistLocked, Converter={StaticResource InverseBoolConverter}}"
+                                      IsReadOnly="{Binding IsArtistLocked}"
+                                      ClearIconVisibility="Auto"
                                       SelectionChanged="OnArtistSelectionChanged"
                                       Unfocused="OnArtistUnfocused">
                     <dxe:AutoCompleteEdit.ItemsSourceProvider>
@@ -74,6 +76,14 @@
                         </DataTemplate>
                     </dxe:AutoCompleteEdit.ItemTemplate>
                 </dxe:AutoCompleteEdit>
+
+                <!-- BUG-057: dedicated visible error sink for the Artist field. The DX editor's own
+                     ErrorText did not surface on-device; this Label mirrors the PasteUrlError pattern
+                     used elsewhere on this page (Body.Small + Error color). -->
+                <Label Text="{Binding ArtistErrorText}"
+                       IsVisible="{Binding ArtistHasError}"
+                       StyleClass="Body.Small"
+                       TextColor="{StaticResource Error}" />
 
                 <dxe:TextEdit x:Name="titleEdit"
                               Text="{Binding SongTitle, Mode=TwoWay}"
