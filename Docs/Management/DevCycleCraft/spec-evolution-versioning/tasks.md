@@ -172,7 +172,7 @@ supposed to surface.
 >   The in-process splice proofs are the ONLY evidence archive rendering is correct. T12 must either
 >   clear the validation error first or invoke `_render_all`/`render_archive` directly. Leaving the
 >   statement as written would let a green-looking gate certify equivalence it never tested.
-> - **[ ] F2 (own follow-up task, before T12a) — `_render_all` must pass `all_items=items`.**
+> - **[x] F2 (done 2026-07-22, branch `feature/generator-fixes`) — `_render_all` now passes `all_items=items`.**
 >   It currently calls `render_archive(existing, month_items, month, titles)`, so parent resolution
 >   sees only that month's bucket. A bug whose parent closed in a different month (or is still open)
 >   falls through to the folder prefix; `BusinessFeatures/`/`DevCycleCraft/` survive, but
@@ -183,7 +183,7 @@ supposed to surface.
 >   the full pool costs nothing — `_render_all` already holds `items` — and leaves the raise for
 >   genuinely unplaceable rows. Not doing it in T9e was procedurally correct (`backlog_gen.py` was
 >   outside its `Files owned`; touching it would have been Rule 2 bundling).
-> - **[ ] F3 (T13-class, but must land BEFORE T12) — pin `.gitattributes`.**
+> - **[x] F3 (done 2026-07-22, branch `feature/generator-fixes`) — `.gitattributes` pinned; NOT renormalized (deliberate — see task-log).**
 >   All 5 archive files are CRLF in the worktree, LF in the blob; `core.autocrlf=true` and
 >   `.gitattributes` pins only `*.sh`, `pre-commit`, `.claude/scripts/**/*.py`. (T9d's log recorded
 >   LF because it measured the blob, not the working tree — the two logs measure different things
@@ -220,6 +220,13 @@ supposed to surface.
 >   Fix `_section_from_path` and the `all_items` call site in the same task, or the fallback chain is
 >   two-thirds fictional.
 >
+>   **F4 correction [2026-07-22]:** `walk()` builds `rel_path` via `_rel`, which is relative to
+>   `Docs/Management`, so the first segment IS the section name (`BusinessFeatures/artists-songs/`).
+>   `parts[0] == "Docs"` never happens and the fallback fires normally on real paths — verified
+>   against live `walk()` output. No code change; a regression test now locks the path shape so a
+>   future change to `_rel` fails loudly instead of silently deleting the third resolution step.
+>   The `cross-cutting/` hard-fail F4 describes is real, but its cause is F2 alone, and F2 fixes it.
+
 > - **[ ] F5 (found by T10b; own task, T13-adjacent) — separators bypass every validation check.**
 >   `model.validate` does `if it.is_separator: continue` **before** any field check, so a
 >   `kind: milestone` / `kind: group` row can carry an invalid `target`, a bogus `severity` or a
