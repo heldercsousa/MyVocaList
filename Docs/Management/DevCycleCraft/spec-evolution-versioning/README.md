@@ -1,13 +1,13 @@
 ---
 id: spec-evolution-versioning
 title: "**Spec Evolution, Versioning & Feature-Folder Organization**"
-status: "🗺️ Plan"
+status: "🟡 In Progress"
 target: 2026-07-09
 section: DevCycleCraft
 kind: feature
 order: 520
 goal: "shipped specs become immutable history; bugs/changes get dated nested folders (`bugs/`, `changes/`); BACKLOG becomes generated from folder frontmatter instead of hand-maintained."
-gate: "spec approved by Helder 2026-07-22."
+gate: "generator merged and 113 tests green; migration paused on 6 decisions listed in tasks.md."
 pointer: DevCycleCraft/spec-evolution-versioning/
 ---
 
