@@ -4,7 +4,7 @@
 
 ## Business Features
 
-<!-- BACKLOG:GENERATED:BEGIN archive -->
+<!-- BACKLOG:GENERATED:BEGIN archive-business -->
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-07-01 | ↳ BUG-020: SongsPage FAB crash — unguarded SecureStorage in async void OnAppearing (Critical) | ✅ Fixed | Fixed with try-catch fallback + regression test; emulator-verified 2026-07-03. Pointer: `BusinessFeatures/artists-songs/bugs/BUG-020-songspage-fab-crash-secure-storage.md`. |
@@ -14,9 +14,11 @@
 | 2026-06 | ↳ Bug/Gap: SongFormPage Artist field autocomplete with blur-clear (BUG-008) | 🔵 Superseded (closed 2026-07-10) | Originally fixed with blur-clear; the Artist & Song Form UX Redesign reverses that behavior and owns the field — no independent action. Pointer: `BusinessFeatures/artists-songs/bugs/BUG-008-songform-artist-autocomplete.md`. |
 | 2026-07-11 | ↳ Song form → stays full-screen page + AppBar-save pattern | ✅ Done | Implemented 2026-07-12 (Save moved to AppBar trailing slot; Helder-authorized sequencing override). Pointer: `Docs/Management/DevCycleCraft/crud-form-action-pattern/`. |
 | 2026-07-11 | ↳ Hamburger menu on all hamburger-loaded pages (CRUD-only scope) | ✅ Done | Shipped for the 4 CRUD list pages; Shell-native pages deferred to the AppBar/SearchAppBar redesign. Pointer: `Docs/Management/DevCycleCraft/hamburger-nav-pattern/`. |
+<!-- BACKLOG:GENERATED:END archive-business -->
 
 ## Dev Cycle Craft
 
+<!-- BACKLOG:GENERATED:BEGIN archive-craft -->
 | Target | Activity | Status | Notes |
 |--------|----------|--------|-------|
 | 2026-07-14 | **Token-scoped subagent reads — library file split + size-budget guard** | ✅ Done | Goal: cut subagent cold-start tokens. Shipped (28 section files, index stubs, size-guard hook). Pointer: `Docs/Management/cross-cutting-log.md`. |
@@ -49,4 +51,4 @@
 | 2026-07-15 | ↳↳ BUG-044: duplicate PersonFormPage after Save via autocomplete (Critical) | 🔵 Superseded (closed 2026-07-19) | Fix merged 2026-07-15; Helder E2E + back-gesture UX decision CANCELLED — custom `AutocompleteMobileField` frozen per DX `AutoCompleteEdit` adoption decision; residual defects re-evaluated in the DX replacement task. Pointer: `DevCycleCraft/autocomplete-component/2026-07-19-dx-autocomplete-adoption-decision.md`. |
 | 2026-07-15 | ↳↳ BUG-045: name entry cursor stuck at leading position after autocomplete usage (Major) | 🔵 Superseded (closed 2026-07-19) | Fix merged 2026-07-15; Helder manual E2E CANCELLED — same supersession as BUG-044. Pointer: `DevCycleCraft/autocomplete-component/2026-07-19-dx-autocomplete-adoption-decision.md`. |
 | 2026-07-15 | ↳↳ BUG-047: stale autocomplete suggestions popup on Edit-mode load (Major) | 🔵 Superseded (closed 2026-07-19) | Reentrancy-guard fix merged 2026-07-15 (verifier PASS 485/485); Helder on-device E2E CANCELLED — same supersession as BUG-044. Pointer: `DevCycleCraft/autocomplete-component/2026-07-19-dx-autocomplete-adoption-decision.md`. |
-<!-- BACKLOG:GENERATED:END archive -->
+<!-- BACKLOG:GENERATED:END archive-craft -->

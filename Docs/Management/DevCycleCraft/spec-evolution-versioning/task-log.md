@@ -947,3 +947,178 @@ BACKLOG-ARCHIVE-2026-07.md splice OK (region 'archive' found) -> len 627
 ### Deviations
 Only the fence-placement decision documented above. No item README was created (T10a/T12a's job);
 no `.sln` change; `BACKLOG.md` untouched; `regen` never run without `--check`.
+
+---
+
+## Task: T9e — Split the flat `archive` region into `archive-business` / `archive-craft`
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+**Branch / worktree:** `feature/archive-regions` @ `../mvl-archive-regions` (based on `develop`, verified with `git merge-base --is-ancestor develop HEAD`). **Not merged** — the orchestrator merges after the Elevated code review.
+
+Implements Helder's **decision 6, option A** (2026-07-22). T9d had to enclose the hand-written
+`## Dev Cycle Craft` heading inside a single flat `archive` region, where T12's regeneration would
+have consumed it. T9e splits that region in two, so both `## Business Features` and
+`## Dev Cycle Craft` — and all prose — now sit OUTSIDE every fence.
+
+### Changed files
+- `.claude/scripts/backlog/render.py` (`ARCHIVE_REGIONS`/`ARCHIVE_SECTIONS`, two-region `ARCHIVE_TEMPLATE`, `render_archive`, `_archive_region_of`, `_section_from_path`)
+- `.claude/scripts/backlog/tests/test_render.py` (12 new tests + 2 module-level helpers)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-03.md`
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-04.md`
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-05.md`
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-06.md`
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md`
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T9e ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+`.sln`: **confirmed no change needed** — `git status --short` shows only `M` entries, no addition,
+rename or deletion, and all five archive files were already registered. Checked, not assumed.
+`BACKLOG.md`: untouched. Bare `regen`: never run — `--check` only.
+
+### Implementation decision — how an item's archive region is resolved
+
+`_render_all` passes `render_archive` only the month's bucket, not the whole item pool, so
+`_section_of`'s parent-chain walk cannot always resolve a nested archived bug's section from the
+bucket alone. Rather than change the call site in `backlog_gen.py` (outside this task's `Files
+owned`), `render_archive` gained an optional `all_items=None` parameter that defaults to `items`,
+and resolution is a three-step chain, entirely item-local in the common case:
+
+1. `_section_of(item, pool)` — the item's own `section:`, else its parent chain.
+2. `_section_from_path(item.rel_path)` — the folder an item lives in already names its section
+   (`DevCycleCraft/f/bugs/...`). This covers every archived bug T10a will write.
+3. Neither resolves → **`RenderError`**.
+
+Step 3 is the deliberate part. The alternative — defaulting an unplaceable row into one region —
+would silently mis-file it, and mis-filing shades into dropping, which would lose an archived
+`BUG-NNN` from the only file `grep` can still find it in (REQ-SEV-18). Failing loud is the correct
+Risk-A posture. The concrete case that hits it is an item under `Docs/Management/cross-cutting/`
+with no `section:` and no resolvable parent; the error message names the fix
+(*"give it a `section:` or a parent that has one"*). **Flagged for review**, since it makes
+`render_archive` newly capable of raising on a validly-walked tree.
+
+Everything else is unchanged: `(under: <parent title>)` suffix, arrow-dropping for archived rows,
+`TABLE_HEAD_ARCHIVE` for both tables, ordering, idempotency. This is a region split, not a
+rendering-semantics change.
+
+### Verification evidence
+
+**Correction to the briefing — line endings.** The brief stated the 5 archive files are LF on
+disk. They are **CRLF**: this worktree has `core.autocrlf=true`, `.gitattributes` pins only
+`*.sh` / `pre-commit` / `.claude/scripts/**/*.py` to LF, and `.md` is not pinned — so the git blob
+is LF while the working tree is CRLF. Re-verified rather than trusted, per the brief. All writes
+were byte-level and preserved each file's own EOL; the two `.py` files are LF and stayed LF.
+
+**Test counts.** Baseline verified independently before any change (not taken on trust):
+
+```
+$ python -m unittest discover -s tests -p "test_*.py" -t tests
+Ran 113 tests in 0.587s
+OK
+```
+
+RED — tests written first, run before any `render.py` change; 12 new tests, 11 failing for exactly
+the intended reason (no two-region template, no section routing, no fail-loud path):
+
+```
+AssertionError: '<!-- BACKLOG:GENERATED:BEGIN archive-business -->' not found in ...
+AssertionError: '\n## Dev Cycle Craft\n' not found in ...
+AssertionError: RenderError not raised
+Ran 125 tests in 0.559s
+FAILED (failures=4, errors=7)
+```
+
+GREEN — after implementing `render.py`:
+
+```
+Ran 125 tests in 0.808s
+OK
+```
+
+**113 before → 125 after (+12).** **No existing test was modified, weakened or deleted** — the
+`item()` fixture already defaults to `section: "BusinessFeatures"`, so the four original
+`ArchiveTests` pass unchanged against the two-region template. Nothing in the old suite turned out
+to encode the single-region contract, so the "legitimate update" carve-out in the brief was not
+needed.
+
+**Byte-preservation of the 5 archive files** (T9d's method: strip every fence line from the new
+file and from `git show HEAD:<path>`, compare sha256; the HEAD blob is LF, so only the *comparison*
+is EOL-normalised, never the file):
+
+```
+FILE                          HEAD-minus-fences  NEW-minus-fences   IDENTICAL  BOM    EOL   NL
+BACKLOG-ARCHIVE-2026-03.md    31c90ee8381884f8   31c90ee8381884f8   True       noBOM  CRLF  trailNL
+BACKLOG-ARCHIVE-2026-04.md    73a34616e55eacb3   73a34616e55eacb3   True       noBOM  CRLF  trailNL
+BACKLOG-ARCHIVE-2026-05.md    1c86bd83f1f45300   1c86bd83f1f45300   True       noBOM  CRLF  trailNL
+BACKLOG-ARCHIVE-2026-06.md    f2b21611336b8e3a   f2b21611336b8e3a   True       noBOM  CRLF  trailNL
+BACKLOG-ARCHIVE-2026-07.md    80cf1e6a06074959   80cf1e6a06074959   True       noBOM  CRLF  trailNL
+```
+
+Those five digests are **identical to the ones T9d recorded**, which independently confirms that
+T9e changed fence lines only — nothing outside a fence has moved since before T9d either.
+Written by a Python **script file in binary mode** (never a Bash heredoc — the T9a
+escape-expansion corruption); BOM state, EOL and trailing newline asserted equal after every write.
+
+`git diff --numstat` — `4 2` for all five (2 fence lines renamed, 2 new fence lines inserted):
+
+```
+4	2	Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-03.md
+4	2	Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-04.md
+4	2	Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-05.md
+4	2	Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-06.md
+4	2	Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md
+```
+
+**In-process `splice` proof — BOTH regions resolve in all 5 files** (read-only; the spliced result
+was discarded, never written back, exactly as T9d did):
+
+```
+BACKLOG-ARCHIVE-2026-03.md | archive-business OK (len 1592) | archive-craft OK (len 945)
+BACKLOG-ARCHIVE-2026-04.md | archive-business OK (len 1165) | archive-craft OK (len 855)
+BACKLOG-ARCHIVE-2026-05.md | archive-business OK (len 2579) | archive-craft OK (len 1160)
+BACKLOG-ARCHIVE-2026-06.md | archive-business OK (len 4512) | archive-craft OK (len 6886)
+BACKLOG-ARCHIVE-2026-07.md | archive-business OK (len 8541) | archive-craft OK (len 2747)
+```
+
+**End-to-end proof through the real generator** — `walk()` over the real tree (36 items, 0 walk
+errors) plus two synthetic terminal probes, driven through `_render_all` → `render_archive`
+(read-only, result discarded). This is the check T9d could not make, because a single flat region
+could not demonstrate routing:
+
+```
+walked items: 36 walk errors: 0
+PROBE-B in business region: True | in craft region: False
+PROBE-C in craft region: True | in business region: False
+## Dev Cycle Craft heading present: True
+heading inside a region: False
+prose header preserved: True
+```
+
+**`regen --check`** (never bare `regen`) — exit **2**, with **no `RenderError` traceback**:
+
+```
+BACKLOG validation failed -- nothing written:
+  - DevCycleCraft/spec-evolution-versioning/: Notes contain banned content (file path beyond the pointer)
+REGEN_EXIT=2
+```
+
+The T9e demo statement expects 0 or 1. The 2 is **pre-existing and unrelated** — proven by
+stashing T9e's changes and re-running at HEAD, which produces the byte-identical message and
+`HEAD_REGEN_EXIT=2`. It is the decision-2 banned-content class (a `.md` pointer in this feature's
+own README notes), already on record; T9e neither caused nor changed it. The demo's real
+requirement — *never a `RenderError`* — holds. Because exit 2 aborts before `_render_all` runs,
+`regen --check` does not by itself exercise `render_archive`, which is precisely why the two
+in-process proofs above were run directly against the real files.
+
+### Deviations / notes for review
+1. **`render_archive` can now raise `RenderError` on an unplaceable row** (rationale above) — the
+   one behavioural addition beyond a pure region split. Worth an explicit yes/no at review.
+2. **`all_items` parameter added** rather than changing `backlog_gen.py`'s call site, to stay
+   inside this task's declared `Files owned`. If review prefers the call site to pass the full
+   pool, that is a one-line change in `_render_all` and the default keeps working either way.
+3. **`ARCHIVE_TEMPLATE`'s `## Archived rows` heading is gone**, replaced by `## Business Features`
+   and `## Dev Cycle Craft` so a brand-new month matches the 5 existing files. No existing file
+   contains `## Archived rows`, so nothing regresses.
+4. T9d's tasks.md note describing the single-region placement is left in place as historical
+   record; the T9e row supersedes it.
