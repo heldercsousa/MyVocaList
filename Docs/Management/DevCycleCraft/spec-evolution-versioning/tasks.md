@@ -52,7 +52,7 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 
 ## Phase 2 — Migration, additive (develop)
 
-- [ ] **T8 — Freeze fixture + insert fences**
+- [x] **T8 — Freeze fixture + insert fences**
   Consumes: T7b. Produces: `migration/BACKLOG-pre-migration.md`, the four fence markers.
   Files owned: `BACKLOG.md` (fences only), `migration/BACKLOG-pre-migration.md`, `MyVocaList.sln`. Risk: Low. Review lane: Standard.
   Demo: `git diff --stat` = 4 insertions, 0 deletions; `regen --check` exit code recorded in the task-log (the cheapest early signal that no pre-existing README breaks the walk).
