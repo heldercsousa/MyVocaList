@@ -236,6 +236,60 @@ supposed to surface.
 >   name mechanically (REQ-SEV-11), so a hand-made folder that departs from the pattern is exactly
 >   the drift the generator exists to prevent. A `git mv` (history follows) + `id:`/pointer update.
 >
+> ### ⚠️ T12 GATE HAZARDS — found by execution-audit 2026-07-22, NOT previously recorded
+>
+> **H1 (biggest classification hazard) — mid-migration, `regen` DELETES most archive rows.** With the
+> validation error cleared, rendered output keeps **3 of ~30** rows for `BACKLOG-ARCHIVE-2026-06.md`,
+> **3 of 7** for `2026-07`, and drops **18** from `BACKLOG.md`. Expected — those legacy rows have no
+> backing item folder until **T12a** completes — but it means **T12 cannot use "regen produces no
+> diff" as its gate** until the migration is finished. Running the gate before T12a would read as
+> catastrophic data loss.
+>
+> **H2 — archived rows drop their `↳` by design, and every committed archive row has one.**
+> `render_row` has an explicit `if archived: label = item.title` branch (docstring: preserving arrows
+> "would break the byte-identical round-trip (REQ-SEV-13)"), yet all current archive rows are spelled
+> `| … | ↳ BUG-015: … |`. Regen will therefore strip a `↳` from **every archived row** — a
+> systematic, expected content diff that **must be named as a permitted class** alongside item (v),
+> or it will read as data loss at the gate.
+>
+> **H3 — F3's pin is INERT for existing working trees.** `eol=lf` applies on **checkout**, so it does
+> nothing for files already on disk. `core.autocrlf=true` is set locally and the working tree is
+> **100% CRLF today** while the blobs are pure LF. Until a post-migration renormalization *or* a
+> forced re-checkout (`git rm --cached -r Docs/Management && git checkout -- Docs/Management`) runs,
+> **every diff T12 measures is contaminated by line endings** — the exact condition F3 exists to
+> eliminate. The F2/F3/F4 commit message's framing ("bites on a *differently-configured* checkout")
+> is wrong: it bites here, now.
+>
+> ### Corrections to this block, from the same audit
+>
+> - **F5 — conclusion CONFIRMED, mechanism WRONG.** A maximally malformed separator (`target:
+>   BANANA-99`, `severity: Catastrophic`, `closed: NOT-A-MONTH`, `status: not-a-status`) validates
+>   clean, so the hole is real. But `continue` does **not** come "before any field check": three
+>   checks run above it (required-keys incl. `target` presence, `section in SECTIONS`, and the
+>   resolves-to-no-section check). **A fix written against F5's stated mechanism would target the
+>   wrong line** — the guard point is the `continue`'s position relative to the *format* checks.
+> - **Item (vi) — UNDERCOUNTED: 10 unprefixed bug folders, not 6.** `git ls-files` on develop shows
+>   **0 of 10 comply** with REQ-SEV-01. Missed: `BUG-026`, `BUG-022`, and **`bug-043`** — the last a
+>   second, distinct violation (lowercase `bug-`, no date, no slug) that no finding mentions. The
+>   REQ-SEV-01 debt is ~67% larger than recorded.
+> - **Item (iv) — the audit called it false; the audit was wrong, on a branch artifact.** It
+>   enumerated on `develop`, where the migration branch has not merged. Verified directly:
+>   develop still has `BUG-028-…`, `feature/backlog-migration` has `2026-07-03-BUG-028-…`. **F6 did
+>   land.** (Lesson recorded because it is the same class of error as F4: enumerate on the branch
+>   that holds the work.)
+> - **F1 — CONFIRMED in full by execution**, including its cause and its corollary: exit 2 precedes
+>   `_render_all`; the cause is the banned-content error on this feature's own folder; clearing only
+>   that error lets `render_archive` run (`months: ['2026-06','2026-07']`, exit 1). T12's gate design
+>   rests on solid ground.
+> - **Item (v) — CONFIRMED.** `_depth` counts `bugs`/`changes` segments only; `parent` changes
+>   nothing. BUG-012 necessarily gains a `↳`.
+>
+> > **Methodological pattern worth keeping:** of five claims re-verified by execution, three were
+> > fully correct (F1, F2, item v), one correct-in-conclusion but wrong-in-mechanism (F5), one
+> > materially undercounted (item vi), and F4 was flatly wrong. **The conclusions have held; the
+> > stated mechanisms and enumerations are where the errors live.** Verify mechanism claims by
+> > running the code, and enumerations with `git ls-files` on the correct branch.
+>
 > ### Open for Helder at T12 (accumulating — audit as a set, not one at a time)
 >
 > **(i) Agent-authored `Goal:` sentences** (decision-1/2 class; no option existed that avoided
