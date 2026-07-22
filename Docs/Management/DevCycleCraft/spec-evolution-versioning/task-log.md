@@ -2043,3 +2043,269 @@ Context manifest, had this been interrupted:
 6. `Docs/Management/DevCycleCraft/spec-evolution-versioning/migration/BACKLOG-pre-migration.md` — the frozen fixture for the byte diff
 7. `.claude/scripts/backlog/model.py` — `REQUIRED`, `_BANNED`, `_path_parent`, `validate`, `order_items`
 8. `MyVocaList.sln` — GUID counter (`0x79` after T11b) and the artists-songs `bugs` folder GUID
+
+---
+
+## Task: T11c — BUG-012 flat file → folder (+ finding F6: rename T10a's BUG-028 folder)
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+**Two `git mv` operations on the same `bugs/` naming convention, one commit** (`7a00979`). History
+survived both — proven below with `git log --follow`. `BACKLOG.md` and the 5 archive files are
+byte-untouched. Executed in the worktree `../mvl-backlog-migration` on `feature/backlog-migration`
+under the scoped "docs land on develop" exception (Helder, 2026-07-22).
+
+### Changed files
+- `Docs/Management/BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.md` → `Docs/Management/BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/README.md` (`git mv` + frontmatter prepended)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-028-artistspage-trailing-catalog-button-noop/README.md` → `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/README.md` (`git mv` + `pointer:` updated + one dated note appended)
+- `MyVocaList.sln` (BUG-028 Solution Folder **renamed in place**, GUID unchanged; BUG-012's item line **removed** from the shared `venues\bugs` folder and re-added under a new Solution Folder; +8/-3)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T11c ticked, F6 marked done)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Part 1 — T11c: BUG-012
+
+The folder name `2026-03-01-BUG-012-venuesviewmodel-fetch-slow` is REQ-SEV-01's pattern with
+REQ-SEV-00's fixed `-01` day (the row's `target` is the bare month `2026-03`); `target:` keeps
+`2026-03` unpadded, as REQ-SEV-00 requires. It matches `plan.md` Task 11 Step 3 verbatim, and
+`requirements.md` line 74's worked example — checked, not assumed.
+
+The flat file was `git mv`-ed **directly to `README.md`** rather than copied beside a new README: a
+copy would have broken `--follow`, which is this task's stated demo. Frontmatter was then prepended;
+**the original 47-line body is preserved byte-for-byte** (asserted in the write script with
+`after.endswith(before)`).
+
+| key | value | derivation |
+|-----|-------|-----------|
+| `id` | `BUG-012` | — |
+| `title` | `Bug: Venues list fetch slow — 2.2s paged query (BUG-012)` | the BACKLOG row's Feature cell, verbatim |
+| `status` | `💡 Pending` | the row, verbatim |
+| `severity` | **unset** | see the decision below |
+| `section` | `BusinessFeatures` | explicit, per **F4** |
+| `parent` | **unset** | see the decision below |
+| `order` | `10` | position 1 of the live Business Features table × 10 (it is the table's first row) |
+| `target` | `2026-03` | the row, unpadded |
+| `pointer` | the new folder | REQ-SEV-01 |
+
+**Decision — `severity` left unset (not fabricated).** The legacy file's header reads
+`**Severity:** Medium`, which is **not** a value in `model.SEVERITIES` (`Critical`/`Major`/`Minor`),
+and the BACKLOG row states no severity at all. `model.validate` treats `severity` as optional, so
+unset validates clean; picking one would be fabrication, and guessing `Minor` would have tripped
+REQ-SEV-03 ("Minor must not have a folder") and blocked the task the spec explicitly schedules.
+Recorded in the README body.
+
+**Decision — `parent` left unset, `section:` explicit.** There is no `venues` *item*:
+`BusinessFeatures/venues/` has no `README.md` with frontmatter, so `walk()` yields no such item and
+`parent: venues` would fail `validate`'s "parent names no existing item" check. `section:` alone
+resolves it — which is also why the explicit `section:` mandated by F4 is load-bearing here rather
+than belt-and-braces.
+
+### Part 2 — F6: BUG-028 folder rename
+
+**The date was derived, not invented.** BUG-028's README already carries `target: 2026-07-03`,
+matching its BACKLOG row (`| 2026-07-03 | ↳ BUG-028: … |`), so the folder is
+`2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop`. No `blocked: spec gap` was needed.
+
+Everything referencing the old path was updated: the README's own `pointer:` (the only occurrence in
+the file), and **both** `.sln` occurrences (the Solution Folder's two name strings and its
+`SolutionItems` path). A repo-wide Python scan (never `grep` — rtk hazard) found the only other
+mentions in `task-log.md` lines 1146/1175, inside **T10a's own entry**. Those were deliberately left
+alone: a task-log entry is an immutable record of what T10a did at the time, and rewriting it would
+falsify history. This entry is the forward pointer.
+
+> **Correction to the brief.** The brief states the rename leaves the directory with one convention.
+> It does not. **Six legacy folders still have no date prefix** — `BUG-017-…`, `BUG-018-…`,
+> `BUG-019-…`, `BUG-021-…`, `BUG-023-…`, `BUG-024-…` (enumerated with `git ls-files`, not `ls`).
+> F6's scope is only T10a's BUG-028 folder, so they were **not** touched — renaming six more folders
+> is neither in this brief's `Files owned` nor sized for it. **Owed to T12/T13:** those six are the
+> remaining REQ-SEV-01 naming debt, and each is `pointer:`-referenced by an archived row.
+
+### Verification evidence
+
+All checks in-process and read-only; rendered output discarded. `regen` was never run in either mode
+— per **F1** `cmd_regen` does `if errors: return 2` **before** `_render_all`, so its exit code proves
+nothing about rendering. No `grep` was used for any byte-level comparison (rtk hazard); all
+comparisons are Python string equality. All writes came from **script files in binary mode**.
+
+**1. `git log --follow` — history survived BOTH moves** (the task's demo statement):
+
+```
+$ git log --follow --oneline -- ".../bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/README.md"
+7a009798 docs(spec-evolution): T11c — BUG-012 flat file to folder, + F6 BUG-0...
+75b89c7a docs: add recommended model field to BUG-011 and BUG-012
+044f51c6 docs: register BUG-011 (QueuePage BottomSheet double-add) and BUG-01...
+
+$ git log --follow --oneline -- ".../bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/README.md"
+7a009798 docs(spec-evolution): T11c — BUG-012 flat file to folder, + F6 BUG-0...
+824c5333 docs(spec-evolution): T10a — READMEs for the 9 existing bug folders
+```
+
+BUG-012 reaches back to its original registration commit; BUG-028 reaches T10a, which created it.
+`git show --stat --find-renames HEAD` reports both as renames, not add+delete.
+
+**2. Parse + validate over the whole tree** (`backlog_gen.walk(ROOT)` + `model.validate`):
+
+```
+items walked: 60          PARSE ERRORS: none
+VALIDATION ERRORS: 1
+  ! DevCycleCraft/spec-evolution-versioning/: Notes contain banned content (file path beyond the pointer)
+errors touching T11c/F6 items: []
+DUPLICATE IDS: none
+```
+
+60 items = T11b's 59 + BUG-012 (BUG-028 was already an item; F6 renames it, adding none). The single
+error is the **pre-existing** decision-2 blocker on this feature's own folder, unchanged.
+**Zero new validation errors; zero on either item.**
+
+**3. Resolved fields, read from the walked items — not from the source frontmatter:**
+
+```
+BUG-012  path=BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/
+         status='💡 Pending' severity=None section='BusinessFeatures' parent=None
+         order='10' target='2026-03' depth=1 kind=bug
+         pointer: BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/
+BUG-028  path=BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/
+         status='💡 Pending' severity='Major' section='BusinessFeatures' parent='artists-songs'
+         order='140' target='2026-07-03' depth=1 kind=bug
+         pointer: BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/
+```
+
+**4. Rendered rows, verbatim from `render.render_row` — read, not assumed:**
+
+```
+| 2026-03 | ↳ Bug: Venues list fetch slow — 2.2s paged query (BUG-012) | 💡 Pending | Goal: restore fast venue list loading (N+1 query suspected). Pointer: `BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/`. |
+| 2026-07-03 | ↳ BUG-028: ArtistsPage trailing catalog button no-op — regression of BUG-015/019 (Major) | 💡 Pending | Goal: trailing button must navigate to the artist's catalog. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/`. |
+```
+
+**5. Byte-diff of each rendered row against its line in `migration/BACKLOG-pre-migration.md`**
+(Python equality, cell by cell). Exactly one fixture line matched each id. **Every difference:**
+
+```
+== BUG-012
+   DIFF [Label]
+     - Bug: Venues list fetch slow — 2.2s paged query (BUG-012)
+     + ↳ Bug: Venues list fetch slow — 2.2s paged query (BUG-012)
+   DIFF [Notes]
+     - … Pointer: `BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.md`.
+     + … Pointer: `BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/`.
+== BUG-028
+   DIFF [Notes]
+     - … Pointer: `BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/`.
+     + … Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/`.
+```
+
+`Target` and `Status` are byte-identical on both rows; Goal wording, punctuation and the BUG-028
+label are byte-identical. Both differences are declared as T12 hunks below.
+
+**6. Live splice + archive regression** — `render.render_backlog(existing, items)` over the real
+`BACKLOG.md` returned without error and contains both rows; both T9e archive regions still splice
+against the real fenced files (called with `all_items=items`, the F2-correct form; neither item is
+terminal, so neither routes through the archive):
+
+```
+render_backlog: OK, BUG-012 present: True | BUG-028 present: True
+archive 2026-06 -> splice OK, 3 items
+archive 2026-07 -> splice OK, 5 items
+```
+
+**7. `BACKLOG.md` and the 5 archive files unmodified:**
+
+```
+$ git diff --stat HEAD~1 HEAD -- Docs/Management/BACKLOG.md Docs/Management/backlog-archive/
+(no output — 0 files changed)
+```
+
+**8. `.sln` HARD GATE — paths *updated*, not duplicated.** The brief's "T11b allocated through
+`0079`" was **re-verified by reading the file**, not trusted: the highest
+`FA1234BC-0001-4000-8000-0000000000NN` actually in use was `0x79`. T11c allocated exactly one new
+GUID, **`…007A`**, asserted absent before the write.
+
+- **BUG-028 (F6): no new GUID.** Its Solution Folder `{…070}` was renamed in place (both name
+  strings) and its one `SolutionItems` path rewritten. `NestedProjects` is unchanged — the parent
+  `bugs` folder did not move.
+- **BUG-012 (T11c): the old item line was *deleted*** from the shared `venues\bugs` folder
+  `{…024}` (a flat file is an item line; a folder needs its own Solution Folder), and a new
+  Solution Folder `{…007A}` added with the README, nested under `{…024}`.
+- Asserted after the write: `old28 not in file`, the old BUG-012 line `not in file`, each new path
+  present exactly twice (`Project` line + `SolutionItems` line). A final scan for
+  `bugs\BUG-012-venuesviewmodel` / `bugs\BUG-028-artistspage` returned **0 stale lines**.
+
+```
+.sln BOM: True | CRLF: 1207 | lone LF: 0        (was BOM True | CRLF 1202 | lone LF 0)
+git diff --numstat HEAD~1 HEAD -- MyVocaList.sln -> 8  3   (8 added: the 5-line new Solution Folder block, the NestedProjects line, the 2 rewritten BUG-028 lines; 3 removed: the old BUG-012 item line and the 2 old BUG-028 lines)
+```
+
+Changed paths re-read from disk with `repr()`:
+
+```
+'Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-03-01-BUG-012-venuesviewmodel-fetch-slow", "2026-03-01-BUG-012-venuesviewmodel-fetch-slow", "{FA1234BC-0001-4000-8000-00000000007A}"'
+'\t\tDocs\\Management\\BusinessFeatures\\venues\\bugs\\2026-03-01-BUG-012-venuesviewmodel-fetch-slow\\README.md = Docs\\Management\\BusinessFeatures\\venues\\bugs\\2026-03-01-BUG-012-venuesviewmodel-fetch-slow\\README.md'
+'Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop", "2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop", "{FA1234BC-0001-4000-8000-000000000070}"'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop\\README.md'
+'\t\t{FA1234BC-0001-4000-8000-00000000007A} = {FA1234BC-0001-4000-8000-000000000024}'
+```
+
+> **Defect found by the mandated post-write re-read — worth recording.** The first `.sln` write
+> emitted the new `Project` line with **unquoted braces** (`…, {FA1234BC-…007A}` instead of
+> `…, "{FA1234BC-…007A}"`), which VS would reject. My byte-level assertions all passed — they
+> checked *presence*, not *shape*. The `repr()` re-read is what caught it; it was corrected before
+> the commit. This is the exact failure mode the post-edit re-read rule exists for.
+
+**9. Line endings.** Every touched file was **CRLF on disk before and after**, asserted with
+`count(b"\r\n") == count(b"\n")` after each write: the moved BUG-012 README (47→66 CRLF, 0 lone
+LF), the BUG-028 README (22→24), `MyVocaList.sln` (1202→1207, BOM preserved), `tasks.md` (319).
+Note the BUG-012 file is **CRLF in the working tree** — per **F3** `*.md` is unpinned with
+`core.autocrlf=true`, so this measures the working tree, not the blob.
+
+### Declared T12 diff hunks
+
+**(a) Pointer relocation — both rows. The task's purpose, not a side effect.** REQ-SEV-01 makes the
+item folder the pointer. REQ-SEV-27 is satisfied: BUG-012's pointer target *is* the moved file
+(nothing lost), and BUG-028's previous target — the BUG-019 folder — is untouched and still
+back-linked from BUG-028's README body.
+
+**(b) BUG-012 gains a depth arrow `↳` — structural, mechanically forced, needs Helder's eye at T12.**
+
+```
+-| 2026-03 | Bug: Venues list fetch slow — 2.2s paged query (BUG-012) | …
++| 2026-03 | ↳ Bug: Venues list fetch slow — 2.2s paged query (BUG-012) | …
+```
+
+Today the row is **top-level** because there is no *Venues* row for it to sit under. But
+`model._depth` computes the arrow **from the path** — one arrow per `bugs/`/`changes/` segment —
+and REQ-SEV-01 requires the bug to live in `venues/bugs/…`. So any REQ-SEV-01-compliant home for
+BUG-012 renders it at depth 1, **whatever its `parent:` says** (its `parent` is unset). There is no
+frontmatter value that suppresses this. The three ways out are all larger than T11c: add a *Venues*
+feature row (adds a row — REQ-SEV-25 forbids), leave the file flat (defeats T11c), or make `_depth`
+respect `parent` instead of the path (a generator change). **Recommendation: accept as permitted
+diff class (d) at T12** — the row's position in the table is unchanged (still first, `order: 10`),
+only its indent. Not escalated as `blocked: spec gap` because it is forced by the approved design
+rather than absent from it; flagged here so T12 does not discover it as a surprise.
+
+No goal or gate text was trimmed or reworded, on either row. **No new respelling hunks** — the four
+existing `\b\d+\s*/\s*\d+\b` hunks stand at four; BUG-028's `BUG-015/019` sits in its *title*,
+which `notes_violations` does not scan, so it survives verbatim.
+
+### Intent verification
+- Demo statement (`git log --follow` shows pre-move commits) — **executed and shown**, evidence 1.
+- `Changed files` contains only `Files owned` (1 new folder, the BUG-028 folder for F6,
+  `MyVocaList.sln`) plus this feature's own `tasks.md` / `task-log.md`.
+- No `TODO`s; every written file re-read from disk (which caught the `.sln` quoting defect).
+- Nothing outside the two folders and the `.sln` was created, moved or deleted; `BACKLOG.md`, the 5
+  archive files and the frozen fixture are byte-untouched.
+
+### Checkpoint
+Complete — no resumption needed. Worktree `../mvl-backlog-migration`, branch
+`feature/backlog-migration`, commit `7a00979` (+ this entry). Step 7 of 7 done: read tasks/T11a/T11b
+conventions → derive both folder names from the rows → `git mv` ×2 → frontmatter + pointer → `.sln`
+→ in-process verify + byte-diff → commit. Build/test: n/a (no code changed).
+Context manifest, had this been interrupted:
+1. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — T11c row, F1–F6, decisions
+2. `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` — T11a/T11b conventions + this entry
+3. `Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md` — REQ-SEV-00/01/02/03/25/27
+4. `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md` — Task 11 Steps 3–5 (the exact `git mv`)
+5. `Docs/Management/BACKLOG.md` — lines 62 (BUG-012) and 75 (BUG-028), the source rows
+6. `.claude/scripts/backlog/model.py` — `_depth`, `_path_parent`, `validate`, `SEVERITIES`
+7. `.claude/scripts/backlog/render.py` — `render_row` (the arrow comes from `item.depth`)
+8. `MyVocaList.sln` — GUID counter (`…007A` now highest) and the `venues\bugs` folder GUID `{…024}`
