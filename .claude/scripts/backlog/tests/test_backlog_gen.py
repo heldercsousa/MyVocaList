@@ -381,5 +381,102 @@ class RegisterTests(unittest.TestCase):
         self.assertEqual(backlog_gen.cmd_renumber(self.root, "BUG-999"), 2)
 
 
+class ArchiveSectionResolutionTests(unittest.TestCase):
+    """F2/F4: how `_render_all` resolves an archived row's section.
+
+    The archive file is the ONLY grep-reachable record of a closed BUG-NNN
+    (REQ-SEV-18), so filing a row into the wrong section table loses it just as
+    effectively as dropping it -- while still looking like a clean run.
+    """
+
+    def setUp(self):
+        self.root = tempfile.mkdtemp()
+        self.mgmt = os.path.join(self.root, "Docs", "Management")
+        write(os.path.join(self.mgmt, "BACKLOG.md"), BACKLOG_SKELETON)
+
+    def tearDown(self):
+        shutil.rmtree(self.root, ignore_errors=True)
+
+    def _archive(self, month):
+        path = os.path.join(self.mgmt, "backlog-archive",
+                            "BACKLOG-ARCHIVE-{0}.md".format(month))
+        with open(path, encoding="utf-8") as fh:
+            return fh.read()
+
+    def _region(self, text, region):
+        begin = "<!-- BACKLOG:GENERATED:BEGIN {0} -->".format(region)
+        end = "<!-- BACKLOG:GENERATED:END {0} -->".format(region)
+        return text[text.index(begin) + len(begin):text.index(end)]
+
+    def test_archived_child_inherits_the_section_of_a_parent_outside_its_bucket(self):
+        # The parent is still OPEN, so it is in no month bucket at all. Before
+        # F2, `_render_all` handed `render_archive` only the month's own items,
+        # so the parent chain could not be walked and resolution silently fell
+        # through to the folder prefix -- which here says the WRONG section.
+        write(os.path.join(self.mgmt, "BusinessFeatures", "host", "README.md"),
+              readme(id="F-9", title="Craft Feature", section="DevCycleCraft"))
+        write(os.path.join(self.mgmt, "BusinessFeatures", "host", "bugs",
+                           "2026-07-21-BUG-001-x", "README.md"),
+              readme(id="BUG-001", title="BUG-001: boom (Major)", severity="Major",
+                     kind="bug", parent="F-9", section=None,
+                     status="✅ Fixed", closed="2026-07"))
+
+        self.assertEqual(backlog_gen.cmd_regen(self.root), 0)
+
+        text = self._archive("2026-07")
+        self.assertIn("BUG-001", self._region(text, "archive-craft"))
+        self.assertNotIn("BUG-001", self._region(text, "archive-business"))
+
+    def test_archived_child_inherits_a_parent_closed_in_a_different_month(self):
+        write(os.path.join(self.mgmt, "BusinessFeatures", "host", "README.md"),
+              readme(id="F-9", title="Craft Feature", section="DevCycleCraft",
+                     status="✅ Done", closed="2026-06"))
+        write(os.path.join(self.mgmt, "BusinessFeatures", "host", "bugs",
+                           "2026-07-21-BUG-001-x", "README.md"),
+              readme(id="BUG-001", title="BUG-001: boom (Major)", severity="Major",
+                     kind="bug", parent="F-9", section=None,
+                     status="✅ Fixed", closed="2026-07"))
+
+        self.assertEqual(backlog_gen.cmd_regen(self.root), 0)
+
+        text = self._archive("2026-07")
+        self.assertIn("BUG-001", self._region(text, "archive-craft"))
+        self.assertNotIn("BUG-001", self._region(text, "archive-business"))
+
+
+    def test_cross_cutting_child_no_longer_hard_fails_when_its_parent_is_open(self):
+        # `cross-cutting/` is a real, populated Docs/Management directory whose
+        # first path segment is NOT an archive section, so the folder-prefix
+        # fallback cannot rescue it. With a bucket-only pool the parent chain
+        # dead-ends and `_archive_region_of` raises RenderError, taking the
+        # whole regen down. The full pool resolves it through the parent.
+        write(os.path.join(self.mgmt, "cross-cutting", "host", "README.md"),
+              readme(id="F-7", title="Cross Cutting Host", section="BusinessFeatures"))
+        write(os.path.join(self.mgmt, "cross-cutting", "host", "bugs",
+                           "2026-07-21-BUG-002-x", "README.md"),
+              readme(id="BUG-002", title="BUG-002: boom (Major)", severity="Major",
+                     kind="bug", parent="F-7", section=None,
+                     status="✅ Fixed", closed="2026-07"))
+
+        self.assertEqual(backlog_gen.cmd_regen(self.root), 0)
+        self.assertIn("BUG-002", self._region(self._archive("2026-07"),
+                                              "archive-business"))
+
+    def test_walk_produces_paths_the_folder_prefix_fallback_can_read(self):
+        # F4 lock: `_rel` makes rel_path relative to Docs/Management, so its
+        # first segment IS the section name. If anyone ever changes `_rel` to
+        # emit a repo-relative path, `_section_from_path` becomes dead code and
+        # the third resolution step silently disappears -- this test fails first.
+        import render
+        write(os.path.join(self.mgmt, "DevCycleCraft", "craft", "README.md"),
+              readme(id="F-8", title="Craft", section="DevCycleCraft"))
+        items, errors = backlog_gen.walk(self.root)
+        self.assertEqual(errors, [])
+        paths = [i.rel_path for i in items]
+        self.assertIn("DevCycleCraft/craft/", paths)
+        self.assertEqual(
+            render._section_from_path("DevCycleCraft/craft/"), "DevCycleCraft")
+
+
 if __name__ == "__main__":
     unittest.main()
