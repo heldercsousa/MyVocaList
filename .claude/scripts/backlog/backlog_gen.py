@@ -111,7 +111,16 @@ def _render_all(root, items):
         path = os.path.join(root, MANAGEMENT, ARCHIVE_DIR,
                             "BACKLOG-ARCHIVE-{0}.md".format(month))
         existing = _read(path) if os.path.exists(path) else render.ARCHIVE_TEMPLATE.format(month=month)
-        outputs[path] = render.render_archive(existing, month_items, month, titles)
+        # `all_items` must be the WHOLE pool, not the month's bucket: an
+        # archived row's section is resolved through its parent chain, and its
+        # parent is routinely outside the bucket -- still open (so in no bucket
+        # at all) or closed in a different month. With only the bucket the walk
+        # dead-ends and resolution drops to the folder-prefix guess, which files
+        # the row into whichever section folder it happens to sit under. That is
+        # a silent mis-file, and under REQ-SEV-18 the archive is the only
+        # grep-reachable record of a closed BUG-NNN.
+        outputs[path] = render.render_archive(existing, month_items, month, titles,
+                                              all_items=items)
     return outputs
 
 
