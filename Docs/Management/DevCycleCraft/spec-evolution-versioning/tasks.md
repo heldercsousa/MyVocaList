@@ -6,6 +6,25 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 
 ---
 
+## ✅ MIGRATION RESUMED — 6 decisions answered by Helder (2026-07-22)
+
+| # | Blocker | Decision |
+|---|---------|----------|
+| 1 | Windows version row has no Goal | **Agent authors a one-line goal**, derived strictly from the row's existing Gate + Pointer text. `model.REQUIRED` is NOT relaxed. Marked *agent-authored, pending review* in the task-log. |
+| 2 | Banned-content vs governance rows | **Agent authors compliant one-line goals** for the 1 blocked + 5 trimmed rows (orders 20, 100, 110, 150, 520). `model._BANNED` is NOT relaxed; no Craft exemption. Each goal marked *agent-authored, pending review*. |
+| 3 | BUG-022 is `Minor` but has a folder | **(A) Reclassify to Major.** Folder stays; the severity value changes in the rendered row → declare as a T12 diff hunk. |
+| 4 | BUG-026 / bug-043 have no valid parent | **(A) Give both parents frontmatter** — `cross-cutting/README.md` and `autocomplete-component/README.md`. The bugs are not re-homed; nesting is preserved. |
+| 5 | BUG-019 free-text status + folder shared with live BUG-028 | **(A) Pick a valid `STATUSES` status and split the folder** so each row owns one. The rows are NOT merged. |
+| 6 | Archive files have two tables, `ARCHIVE_TEMPLATE` has one flat region | **(A) Split into two regions** (`archive-business` / `archive-craft`). Needs a `render.py` change in a worktree + re-fencing the 5 archive files → new task **T9e**, which must land before T10a (T10a's bug READMEs route through `render_archive`). |
+
+> **Blanket authorization (Helder, 2026-07-22):** proceed autonomously on anything that would
+> otherwise need approval, using the recommended approach. **Two carve-outs it does not cover:**
+> (a) **T13** — `CLAUDE.md § Authorship` requires a human to read any rules file before commit;
+> prepare the `amend:` bundle and stop before committing. (b) Every **agent-authored goal** under
+> decisions 1–2 is flagged for audit as a set, since no option existed that avoided authoring.
+
+### Superseded — the original blocker table (kept for the record)
+
 ## ⛔ MIGRATION PAUSED — 6 decisions needed from Helder (2026-07-22)
 
 Phase 1 (generator) is **complete and merged**; 113 tests green. The additive migration ran through
@@ -132,7 +151,13 @@ supposed to surface.
   Consumes: nothing. Produces: the `archive` fence pair in each of the 5 `Docs/Management/backlog-archive/` files, so `render_archive` → `splice` resolves instead of raising `RenderError`.
   Files owned: the 5 archive files, `tasks.md`, `task-log.md`. Risk: Low (purely additive — exactly +2/-0 lines per file, verified via `git diff --numstat` plus a per-file sha256 byte-preservation proof). Review lane: Standard.
   > Placement follows the T8 precedent in `BACKLOG.md`: BEGIN immediately above the table head, END immediately after the last row; the hand-written prose header stays outside. **Implementation decision:** each archive file has *two* tables (Business Features / Dev Cycle Craft) while `ARCHIVE_TEMPLATE` defines a single flat `archive` region, so the single fence pair spans from the first table head to the last row — the intervening `## Dev Cycle Craft` heading therefore sits inside the region and will be consumed by T12's regeneration.
-- [ ] **T10a — READMEs for existing `bugs/` folders** — ⛔ **BLOCKED, 0 of 9 written (see task-log T10a)** — Blocker 1 (archive fences) **resolved by T9d 2026-07-22**; blockers 2–4 still need Helder
+- [ ] **T9e — Split the flat `archive` region into `archive-business` / `archive-craft`** *(decision 6A; code → worktree on a task branch, HARD RULE)*
+  Consumes: T9d. Produces: `render.py` renders two archive regions and `ARCHIVE_TEMPLATE` declares both; the 5 archive files carry two fence pairs instead of one, with the `## Dev Cycle Craft` heading OUTSIDE both regions (it is hand-written prose, and T12 must not consume it).
+  Files owned: `.claude/scripts/backlog/render.py`, `.claude/scripts/backlog/tests/test_render.py`, the 5 archive files. Risk: **High (A)** — this is the only change to merged, green generator code. Review lane: **Elevated — fresh code-review subagent before merge.**
+  Demo: full suite green (was 113); per-file sha256 byte-preservation proof that re-fencing changed only fence lines; `splice` resolves both regions in all 5 files; `regen --check` exits 0 or 1, never a `RenderError`.
+  > Ordering: **before T10a**, not before T12. T10a's 6 archived bug READMEs route through `render_archive` → `splice`, so they must be verified against the final region names, or T10a's evidence is written against a layout that T9e then invalidates.
+
+- [ ] **T10a — READMEs for existing `bugs/` folders** — 0 of 9 written (see task-log T10a) — blocker 1 resolved by T9d; blockers 2–4 resolved by decisions 3/4/5; **now gated only on T9e**
   Consumes: T9c. Files owned: those READMEs, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
   > **Sequencing defect [2026-07-22]:** 9 bug folders exist (not ~12; `ls` under `bugs/` misreports —
   > enumerate with `git ls-files`). **6 back archived (`✅ Fixed`) rows**, so their READMEs route
