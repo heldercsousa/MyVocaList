@@ -86,6 +86,42 @@ def render_backlog(existing_text, items):
     return out
 
 
+ARCHIVE_TEMPLATE = """# BACKLOG Archive — {month}
+
+> Closed backlog rows completed in {month}, moved out of `Docs/Management/BACKLOG.md`. Rows use the slim PO template: Goal + one-sentence outcome + pointer. **Past BUG-NNN / feature lookups must grep all `backlog-archive/` files.**
+
+## Archived rows
+
+<!-- BACKLOG:GENERATED:BEGIN archive -->
+<!-- BACKLOG:GENERATED:END archive -->
+"""
+
+
+def bucket_by_month(items):
+    """Group terminal items by their `closed` month (REQ-SEV-18).
+
+    Bucketing is per item, never per subtree -- that is what lets a Done
+    sub-row archive while its still-active parent stays in the live file.
+    """
+    buckets = {}
+    for it in items or []:
+        if it.status in TERMINAL and it.closed:
+            buckets.setdefault(it.closed, []).append(it)
+    return buckets
+
+
+def render_archive(existing_text, items, month=None, titles_by_id=None):
+    """Splice one month's archive table into its file.
+
+    `month` is accepted for call-site clarity and future header rendering; the
+    table body itself is a pure function of `items`.
+    """
+    body = render_table(
+        items, head=TABLE_HEAD_ARCHIVE, archived=True, titles_by_id=titles_by_id or {}
+    )
+    return splice(existing_text, "archive", body)
+
+
 def _section_of(item, all_items):
     """Resolve an item's section by walking up its parent chain."""
     by_id = dict((i.id, i) for i in all_items if i.id)
