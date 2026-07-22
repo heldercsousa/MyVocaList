@@ -56,7 +56,7 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
   Consumes: T7b. Produces: `migration/BACKLOG-pre-migration.md`, the four fence markers.
   Files owned: `BACKLOG.md` (fences only), `migration/BACKLOG-pre-migration.md`, `MyVocaList.sln`. Risk: Low. Review lane: Standard.
   Demo: `git diff --stat` = 4 insertions, 0 deletions; `regen --check` exit code recorded in the task-log (the cheapest early signal that no pre-existing README breaks the walk).
-- [ ] **T9a — Feature READMEs: Business Features top-level rows** (~12 rows)
+- [x] **T9a — Feature READMEs: Business Features top-level rows** (3 written; 10 rows deferred — see task-log T9a)
   Consumes: T8. Produces: one `README.md` per top-level Business Feature + their `order:` values.
   Files owned: those READMEs, `MyVocaList.sln`. Risk: Medium. Review lane: Standard. Demo: `regen --check` never exits 2.
 - [ ] **T9b — Feature READMEs: Dev Cycle Craft top-level rows** (~18 rows)

@@ -177,3 +177,98 @@ issue D8 did not trigger and no pre-existing `README.md` under `Docs/Management`
 
 ### Deviations
 None.
+
+---
+
+## Task: T9a — Feature READMEs: Business Features top-level rows
+
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md` § Task 9
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/README.md` (created)
+- `Docs/Management/BusinessFeatures/queue-management/README.md` (created)
+- `Docs/Management/BusinessFeatures/backup-restore/README.md` (created)
+- `MyVocaList.sln` (3 SolutionItems entries)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T9a ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Rows written (feature | order | status)
+
+| Feature | `order:` | Status | Fixture row (BACKLOG.md line) |
+|---------|----------|--------|-------------------------------|
+| `artists-songs` | 20 | 🔴 Blocked | 41 (table row 2) |
+| `queue-management` | 300 | 💡 Pending | 69 (table row 30) |
+| `backup-restore` | 360 | 💡 Pending | 75 (table row 36) |
+
+`order:` = 1-based position of the row in the Business Features table × 10 (plan Task 9 Step 2 /
+REQ-SEV-17). Global table position, not position among the migrated subset — this keeps the
+curated order monotonic once the remaining rows land.
+
+### Rows NOT written (10) — with reason
+
+Every one of these is a **top-level Business Features row with no dedicated feature folder**, so per
+the plan they belong to T9c (folder-less rows) rather than T9a. No folder was invented.
+
+| Row (BACKLOG line) | Position | Reason skipped |
+|---|---|---|
+| Bug: Venues list fetch slow (BUG-012) | 1 | pointer is a flat file `venues/bugs/BUG-012-….md`; plan phase 3 converts it via `git mv` |
+| **Form & Autocomplete UX Overhaul** | 21 | pointer is `cross-cutting-log.md` → T9c |
+| Dead-code cleanup: `QueueService`/`IQueueService` | 29 | pointer is a file inside `queue-management/`, whose folder is already owned by the Queue Entry Point Redesign row → needs its own folder (T9c) |
+| **User Tutorial/Learning** | 33 | no pointer, no folder |
+| **Website** | 34 | no pointer, no folder |
+| 🏁 **MVP release** | 35 | `kind: milestone` separator → T10b |
+| **Singer self-registration** | 37 | no pointer, no folder |
+| **Social features** | 38 | no pointer, no folder |
+| **Windows version** | 39 | folder exists, but the row carries **no Goal** (Gate + Pointer only) and `model.REQUIRED` makes `goal` mandatory — see Spec gap below |
+| **Cross-cutting** | 40 | `kind: group` separator → T10b |
+
+### Spec gap: BACKLOG rows with no Goal cannot be transcribed
+
+**Location:** `model.py` `REQUIRED = ("id", "title", "status", "target", "goal")` vs. BACKLOG row
+`| — | **Windows version** | 🔴 Blocked | Gate: … Pointer: … |`.
+**Gap description:** the row template assumes every row has a Goal, but the Windows version row has
+only a Gate; writing a Goal would be invention, and omitting it fails validation with exit 2.
+**Options:**
+- Option A: Helder supplies the one-line Goal, then the README is written — faithful, needs a human.
+- Option B: relax `model.REQUIRED` to drop `goal` and render `Gate:`-only Notes — mechanical, but
+  weakens REQ-SEV-09's template enforcement for every future row.
+**Recommendation:** Option A — one row, one sentence, and the template stays enforced.
+**Blocking:** No — the row is skipped and recorded here; it must be resolved before T12's
+equivalence gate, which would otherwise show the row as missing.
+
+### Design concern: `target: -` is valid to sort but invalid to validate
+
+`model.target_sort` treats both `—` and `-` as "no target", but `model.validate` accepts only `—`.
+The Data Backup & Restore row's fixture target is a plain hyphen `-`, so transcribing it verbatim
+would abort regeneration with exit 2. Transcribed as `—` and flagged in that README's body; T12
+should record the resulting `| - |` → `| — |` cell as a permitted diff. Design §2 documents the
+target grammar as `YYYY-MM-DD | YYYY-MM | "—"`, so **`model.py` is right and the fixture row is the
+outlier** — no code change requested, only the diff-class note.
+
+### Verification evidence
+
+```
+$ python .claude/scripts/backlog/backlog_gen.py regen --check ; echo exit=$?
+BACKLOG is stale -- run: python .claude/scripts/backlog/backlog_gen.py regen
+  - .\Docs\Management\BACKLOG.md
+exit=1
+```
+
+Exit **1** (stale) as the plan requires — never 2, so all three new READMEs parse and validate.
+`regen` (without `--check`) was not run; the migration stays additive until T12.
+
+```
+$ git diff --stat        # BACKLOG.md absent from the list
+ MyVocaList.sln | 3 +
+```
+
+`.sln` verified after writing: UTF-8 BOM present, 100% CRLF line endings, three new
+`SolutionItems` entries with literal backslash paths in the `artists-songs`, `backup-restore` and
+`queue-management` solution folders.
+
+Post-edit re-read: all three READMEs re-parsed by the generator's own walk (the `regen --check`
+run above); `.sln` entries re-read byte-wise via `repr()` after a first attempt corrupted two
+paths (shell escape) — reverted and rewritten from a script file.

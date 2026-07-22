@@ -176,6 +176,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-so
 		Docs\Management\BusinessFeatures\artists-songs\archive\spec-cleanup-p2.md = Docs\Management\BusinessFeatures\artists-songs\archive\spec-cleanup-p2.md
 		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\README.md = Docs\Management\BusinessFeatures\artists-songs\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
@@ -477,6 +478,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-re
 		Docs\Management\BusinessFeatures\backup-restore\plan.md = Docs\Management\BusinessFeatures\backup-restore\plan.md
 		Docs\Management\BusinessFeatures\backup-restore\task-log.md = Docs\Management\BusinessFeatures\backup-restore\task-log.md
 		Services\TransactionLogWriter.cs = Services\TransactionLogWriter.cs
+		Docs\Management\BusinessFeatures\backup-restore\README.md = Docs\Management\BusinessFeatures\backup-restore\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-reporting", "{FA1234BC-0001-4000-8000-000000000012}"
@@ -566,6 +568,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-management", "queue-m
 		Docs\Management\BusinessFeatures\queue-management\requirements.md = Docs\Management\BusinessFeatures\queue-management\requirements.md
 		Docs\Management\BusinessFeatures\queue-management\task-log.md = Docs\Management\BusinessFeatures\queue-management\task-log.md
 		Docs\Management\BusinessFeatures\queue-management\tasks.md = Docs\Management\BusinessFeatures\queue-management\tasks.md
+		Docs\Management\BusinessFeatures\queue-management\README.md = Docs\Management\BusinessFeatures\queue-management\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "page-load-frozen", "page-load-frozen", "{C81D77D9-056E-44D8-A88F-522682CEE603}"
