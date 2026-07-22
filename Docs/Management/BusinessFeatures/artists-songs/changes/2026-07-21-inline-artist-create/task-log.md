@@ -265,3 +265,25 @@ Build: passed (`dotnet build MyVocaList.csproj -f net10.0-android` → exit 0, 0
 - `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 6 projects, 0 errors, 22 warnings (DevExpress eval + pre-existing NU1903/CS8600 etc., none new).
 - `dotnet test` (full suite) → **Com falha: 0, Aprovado: 517, Ignorado: 0, Total: 517** — baseline 516 + 1 net new test (M1) + M3 was an assertion added to an existing test (no count delta). The previously-flaky SQLite test `SongRepositoryTests.GetByTitlesCollatedAsync_NoMatches_ReturnsEmpty` passed in this same full run — no isolation re-run needed (only required if it fails).
 - Files written and re-read: `SongFormViewModel.cs`, `SongFormPage.xaml.cs`, `SongFormViewModelTests.cs` — all three re-read post-edit to confirm the changes landed at the correct location.
+
+---
+
+## Bug: BUG-053 (Major, UI-only) — SongFormPage ItemTemplate FormattedString crash on Artist typing
+
+**Symptom:** Typing ≥3 chars in the Artist field on SongFormPage threw a XAML runtime error at Position 57:50 — "Cannot assign property FormattedString: Property does not exist, or is not assignable, or mismatching type between value and property".
+
+**Root cause:** The create-row `ItemTemplate` used the property-element `<Label.FormattedString>`, but Label's property is named `FormattedText` (`FormattedString` is the type of the value, not the property) — the parser could not resolve a `FormattedString` property on Label and crashed at first render of the AutoCompleteEdit dropdown.
+
+**Fix:** Renamed the property-element `<Label.FormattedString>` → `<Label.FormattedText>` (opening and closing tags); the inner `<FormattedString>`/`<Span>` composition (`Add "{Headline}" as a new artist`) is unchanged and correct.
+
+### Changed files
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`
+
+### Build notes
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 6 projects, **0 errors**, 32 warnings (DevExpress eval + pre-existing NU1903/CS8600, none new).
+- `dotnet test` (full suite) → **Com falha: 0, Aprovado: 517, Ignorado: 0, Total: 517** — no regression.
+
+### Regression test
+UI-only rendering crash — no XAML render seam in the unit test project, so an automated regression test is not feasible (per `bug-tracking.md`, Major UI-only → document manual E2E).
+
+Manual E2E: pending on-device (Helder T10) — typing ≥3 chars in the Artist field renders the ➕ create-row without crashing.
