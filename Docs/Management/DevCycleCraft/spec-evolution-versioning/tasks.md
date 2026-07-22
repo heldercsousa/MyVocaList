@@ -204,6 +204,14 @@ supposed to surface.
 >   Fix `_section_from_path` and the `all_items` call site in the same task, or the fallback chain is
 >   two-thirds fictional.
 >
+> - **[ ] F5 (found by T10b; own task, T13-adjacent) — separators bypass every validation check.**
+>   `model.validate` does `if it.is_separator: continue` **before** any field check, so a
+>   `kind: milestone` / `kind: group` row can carry an invalid `target`, a bogus `severity` or a
+>   stray `closed` and still validate clean. Separators are the one row class with **no mechanical
+>   guard** — the exact inverse of REQ-SEV-09's intent, which is that the row template be
+>   mechanically enforced rather than prose-enforced. Not acted on in T10b (`model.py` was outside
+>   its `Files owned`; changing it would have been Rule 2 bundling).
+>
 > **Environment hazard found during the review — do not repeat:** `grep` is rewritten by the `rtk`
 > proxy into a search tool, which silently corrupted the reviewer's first fence-stripping run and
 > produced bogus "DIFFERS" output. **Never use `grep` for byte-exact work in this repo** — use
