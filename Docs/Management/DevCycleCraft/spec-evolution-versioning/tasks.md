@@ -248,7 +248,7 @@ supposed to surface.
   > (it also unblocks T12a). The other 3 folders are blocked independently: BUG-022 is `Minor`
   > (`model.py` forbids a folder), BUG-026 and bug-043 have no parent item, BUG-019 has a free-text
   > status and is claimed by both the archive row and live BUG-028.
-- [ ] **T10b — READMEs for existing `changes/` folders + the two separator rows**
+- [x] **T10b — READMEs for existing `changes/` folders + the two separator rows** (3 change READMEs + the `🏁 MVP release` milestone; the `Cross-cutting` group README was NOT re-created — T10a already owns it, see task-log T10b)
   Consumes: T10a. Produces: item READMEs, `cross-cutting/README.md` (`kind: group`), `milestones/2026-06-mvp-release/README.md` (`kind: milestone`).
   Files owned: those files, `MyVocaList.sln`. Risk: Medium. Review lane: Standard. Demo: `regen --check` never exits 2.
 
