@@ -104,8 +104,17 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 > fabrication; omitting it makes `regen` exit 2. Options: (A) Helder supplies a one-line goal —
 > recommended; (B) relax `REQUIRED`, which weakens REQ-SEV-09 for every future row. Until resolved,
 > the row cannot be migrated and T12's equivalence gate will show it as missing.
-- [ ] **T10a — READMEs for existing `bugs/` folders**
+- [ ] **T10a — READMEs for existing `bugs/` folders** — ⛔ **BLOCKED, 0 of 9 written (see task-log T10a)**
   Consumes: T9c. Files owned: those READMEs, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
+  > **Sequencing defect [2026-07-22]:** 9 bug folders exist (not ~12; `ls` under `bugs/` misreports —
+  > enumerate with `git ls-files`). **6 back archived (`✅ Fixed`) rows**, so their READMEs route
+  > through `bucket_by_month` → `render_archive` → `splice`, and the 5 archive files have **no
+  > `archive` fence** — those fences are **T12's** owned work. Proven: writing them makes
+  > `regen --check` raise an uncaught `RenderError`, not exit 2. **T10a must run after the archive
+  > fences are inserted.** Recommend splitting fence-insertion out of T12 into a small predecessor
+  > (it also unblocks T12a). The other 3 folders are blocked independently: BUG-022 is `Minor`
+  > (`model.py` forbids a folder), BUG-026 and bug-043 have no parent item, BUG-019 has a free-text
+  > status and is claimed by both the archive row and live BUG-028.
 - [ ] **T10b — READMEs for existing `changes/` folders + the two separator rows**
   Consumes: T10a. Produces: item READMEs, `cross-cutting/README.md` (`kind: group`), `milestones/2026-06-mvp-release/README.md` (`kind: milestone`).
   Files owned: those files, `MyVocaList.sln`. Risk: Medium. Review lane: Standard. Demo: `regen --check` never exits 2.

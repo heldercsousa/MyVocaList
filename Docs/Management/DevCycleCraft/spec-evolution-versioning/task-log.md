@@ -763,3 +763,88 @@ back-referenced from every new README.
 
 ### Deviations
 None.
+
+---
+
+## Task: T10a — READMEs for existing `bugs/` folders
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** blocked: sequencing — T10a cannot land before T12's archive fences
+**Started:** 2026-07-22
+**Completed:** — (blocked)
+
+### Changed files
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T10a annotated `blocked`)
+
+No README.md was written; no `MyVocaList.sln` change; `BACKLOG.md` untouched. T10a is 0-for-9.
+
+### Enumeration (briefed count was wrong again — verified via `git ls-files`)
+`ls` under the six `bugs/` directories reports them EMPTY (rtk-proxied `ls` misreports); the
+authoritative enumeration is `git ls-files | grep '/bugs/'`. **9 bug FOLDERS** exist (the rest of the
+`bugs/` content is flat `.md`/`.jpg` files, which are not items and are out of T10a's scope — BUG-011
+and BUG-012 are flat files; BUG-012 is T11c's).
+
+| # | Bug folder | Parent feature | BACKLOG row lives in | Writable? |
+|---|-----------|----------------|----------------------|-----------|
+| 1 | `BusinessFeatures/artists-songs/bugs/BUG-017-artistscrud-emulator-debug-often-stops/` | artists-songs | ARCHIVE-2026-06 | terminal → blocked |
+| 2 | `…/BUG-018-artistformpage-edit-save-crash/` | artists-songs | ARCHIVE-2026-06 | terminal → blocked |
+| 3 | `…/BUG-019-artistspage-listitem-button-noop/` | artists-songs | ARCHIVE-2026-06 (+ live BUG-028) | blocked (2 reasons) |
+| 4 | `…/BUG-021-songspage-fab-crash/` | artists-songs | ARCHIVE-2026-07 | terminal → blocked |
+| 5 | `…/BUG-023-songform-bottomsheet-broken/` | artists-songs | ARCHIVE-2026-07 | terminal → blocked |
+| 6 | `…/BUG-024-songform-edit-data-loss/` | artists-songs | ARCHIVE-2026-07 | terminal → blocked |
+| 7 | `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/` | persons | ARCHIVE-2026-07 | blocked — **Minor** |
+| 8 | `BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-teardown/` | (none) | live BACKLOG L80 | blocked — no parent item |
+| 9 | `DevCycleCraft/autocomplete-component/bugs/bug-043/` | (none) | ARCHIVE-2026-07 | blocked — no parent item |
+
+### ⛔ BLOCKER 1 (systemic, decides T10a's schedule) — terminal items crash `regen` before T12
+6 of the 9 folders (rows 1–6) are **archived rows** (`✅ Fixed`), so their READMEs carry
+`status: "✅ Fixed"` + `closed:`. `render_backlog` excludes terminal items from the live tables
+(REQ-SEV-16) and `_render_all` routes them through `bucket_by_month` → `render_archive` → `splice`.
+The five archive files have **no `archive` fence** — T8 inserted fences into `BACKLOG.md` only, and
+`tasks.md` assigns the archive fences to **T12** (*"Archive fences + the equivalence gate"*, files
+owned: the 5 archive files). Proven empirically: the 5 READMEs were written, `regen --check` was run,
+and it did not return a status code at all — it raised an **uncaught `render.RenderError: missing
+generated fence for region 'archive'`** (`backlog_gen.py:114` → `render.py:122` → `render.py:71`).
+That is strictly worse than exit 2. The 5 probe files were removed and the baseline re-verified.
+
+**Therefore T10a's archived-row half is a T12-successor, not a T10b-predecessor.** Options for Helder:
+(A) move the archive-fence insertion out of T12 into its own small predecessor task and re-run T10a
+after it — recommended, it is a 5-line additive edit and it also unblocks T12a; (B) reorder T10a to
+run after T12; (C) make `_render_all` create the fence when absent (changes generator behaviour —
+needs its own task and tests).
+
+### ⛔ BLOCKER 2 — BUG-022 is `Minor`; `model.py` forbids a folder for it
+`model.validate` raises *"severity 'Minor' must not have a folder (REQ-SEV-03) — record it in the
+parent task-log instead"*. The folder **already exists** and predates the rule. Writing a README makes
+`regen` exit 2 permanently. Options: (A) Helder re-classifies BUG-022's severity; (B) the folder is
+dissolved into `persons/task-log.md` (destructive — outside T10a, which is purely additive);
+(C) exempt pre-existing folders from the Minor rule. Not resolvable inside T10a.
+
+### ⛔ BLOCKER 3 — two folders have no parent item to attach to
+- `BUG-026` needs `parent: <BusinessFeatures/cross-cutting item id>`; that folder has **no README**
+  (it is not the migrated `Docs/Management/cross-cutting/` group either). `parent` naming no existing
+  item is a validation error, and falling back to `section: BusinessFeatures` would render it as a
+  **top-level** row — a silent structural change, not a transcription.
+- `bug-043` needs `parent: <autocomplete-component>`; `DevCycleCraft/autocomplete-component/README.md`
+  exists but carries **no frontmatter**, so `walk()` skips it and it is not an item.
+Both are unblocked as soon as the two parent rows get frontmatter — likely T10b/T12a territory.
+
+### ⛔ BLOCKER 4 — BUG-019 has no valid status and two claimants
+Its archive Status cell reads free-text **"Closed — partially regressed"**, which is not in
+`model.STATUSES`; and the live row **BUG-028** points at the *same* folder. Mapping the status would
+be rewording, and one folder cannot back two rows. Needs Helder.
+
+### Evidence
+- `regen --check` **before** any write: exit **1** (stale), only `Docs/Management/BACKLOG.md` listed.
+- `regen --check` **with the 5 probe READMEs present**: uncaught `RenderError` traceback (above).
+- `regen --check` **after revert**: exit **1**, identical to baseline — no residue.
+- `git status --porcelain` after revert: only `.claude/changed-files.txt` (pre-existing, untouched by
+  this task). `BACKLOG.md` **not modified**; `MyVocaList.sln` **not modified** (nothing to register).
+
+### Order-within-parent convention (prepared, unused)
+Sibling position among the parent's bug sub-rows in pre-migration table order × 10, chronological by
+target across archive months: BUG-017=10, BUG-018=20, BUG-021=30, BUG-023=40, BUG-024=50 (×10 leaves
+slots for BUG-019/028 and the not-yet-foldered artists-songs bugs).
+
+### Deviations
+None. Nothing was written, moved or deleted; `regen` was never run without `--check`.
