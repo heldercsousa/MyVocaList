@@ -154,11 +154,32 @@ Ordering rationale: phases 1 and 2 are purely additive; phase 3 is additive exce
 | Hand-edits to BACKLOG.md silently lost on next regen | pre-commit `--check` fails the commit; generated banner names the command |
 | Migration loses curated row order | explicit `order:` values + the phase-5 equivalence diff |
 | Frontmatter drifts from an item's own spec files | `pointer` defaults to the folder itself; the README body is the only prose home |
-| Two worktrees register items concurrently | folder-per-item means no shared line to conflict on; regeneration is deterministic, so the merge resolution is "re-run regen" |
+| Two worktrees register items concurrently | folder-per-item means no shared *line* to conflict on and regen is deterministic, so the file merges cleanly — but the **`BUG-NNN` collides** (both derive the same `max+1`). Caught by the duplicate-`id` validation at merge; resolved with `register --renumber` (REQ-SEV-11a). Depends on R-2 being blocking. |
 | Restricted YAML parser rejects a legitimate value | errors name key + path and abort; values are prose in a table cell — nesting is never needed |
 
-## 8. Open for Helder
+## 8. Recommendations — pending Helder's approval gate
 
-1. **`README.md` vs `item.md`** as the frontmatter carrier — README renders nicely in VS/GitHub but adds one `.sln` entry per item; confirm the trade is acceptable.
-2. **Pre-commit `--check`** turns a stale BACKLOG into a blocked commit. Blocking, or advisory-only like `orphan_check.py`? This is load-bearing: it is the mitigation for the top risk in §7 **and** the merge-time duplicate-ID catch (REQ-SEV-11a). If Helder chooses advisory, the fallback is a `regen --check` step added to the subagent exit checklist and to `/sln-commit` — weaker (self-enforced, not mechanical), and REQ-SEV-11a's duplicate-ID guarantee degrades from "cannot reach develop" to "caught at the next regen".
-3. **Migration size:** ~50 rows across 5 phases is one implementor wave at best; confirm it may span two sessions with the phase-4 gate as the handoff point.
+> **Status: RECOMMENDED, NOT APPROVED.** Helder has not yet approved this spec. The three questions previously left open are answered below with a recommendation and its reasoning, so the gate is a yes/no on a concrete proposal rather than an open design discussion. The spec is written *as if* these hold; if Helder rejects one, the named sections change as listed.
+
+### R-1 — Frontmatter carrier: **`README.md`** (recommended)
+
+The `.sln` cost is real but bounded: one `SolutionItems` line per item, appended automatically by `register` (§3), so it is never hand-maintained and never a gate an agent can forget. Against that, `README.md` is what VS Solution Explorer, GitHub, and any future web view render as the folder's front page — the Goal/Gate prose is visible exactly where someone lands. `item.md` would save nothing (the `.sln` line is required either way, per the HARD GATE) and buys only a filename.
+*If rejected:* rename the carrier throughout §2/§3 and REQ-SEV-02/07. No logic changes.
+
+### R-2 — Pre-commit `--check`: **blocking** (recommended)
+
+This is the recommendation I hold most firmly, because advisory defeats the change's core premise. A generated view that *may* be stale is worse than a hand-written file — readers cannot tell which state they are looking at, and the whole argument for generation is that the view cannot drift from the source. Advisory also downgrades REQ-SEV-11a: duplicate `BUG-NNN`s would reach `develop` and be discovered later, when renumbering means touching an item someone has already started work against.
+
+The blocking cost is low and self-clearing: the failure message is *"run `backlog_gen.py regen`"* — a one-command fix, not a debugging session — and it only fires on commits that touch frontmatter. This is the same posture the repo already takes for the `.sln` gate.
+
+Note the deliberate asymmetry with `orphan_check.py`, which is advisory: that hook *guesses* (it classifies prose for new-work intent and can be wrong, so it must not block). `regen --check` is a byte comparison with no false positives. Blocking is only defensible because the check is exact.
+*If rejected:* §7's top risk loses its mitigation; fallback is a `regen --check` step in the subagent exit checklist and `/sln-commit`, and REQ-SEV-11a's duplicate-ID guarantee weakens from "cannot reach develop" to "caught at next regen".
+
+### R-3 — Migration span: **two sessions, handing off at the 3/4 boundary** (recommended)
+
+~50 rows across 5 phases exceeds the Rule 2 task-sizing bound for one dispatch. The 3/4 boundary is the correct seam because it is the last point at which everything done so far is additive — phases 1–3 only add folders and frontmatter, leaving BACKLOG.md and the archives untouched, so an interrupted migration is a no-op for every other agent. Phase 4 is the first destructive step and phase 5 is the gate, so they belong together in one session with the equivalence diff.
+*If rejected:* the planner must instead split within phase 4, which is worse — a half-rewritten archive set has no clean resume point.
+
+### Consequence if all three are approved
+
+Planning may begin (`writing-plans` → plan-reviewer). Nothing above authorizes implementation.
