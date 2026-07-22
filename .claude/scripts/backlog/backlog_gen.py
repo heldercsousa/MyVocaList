@@ -22,7 +22,10 @@ BUG_ID = re.compile(r"\bBUG-(\d{1,4})\b")
 
 
 def _read(path):
-    with open(path, encoding="utf-8") as fh:
+    # utf-8-sig transparently strips a leading BOM and reads plain UTF-8
+    # unchanged. Without it a BOM'd README is not lstrip()-able to '---' and
+    # silently drops out of the backlog. _write stays utf-8: never emit a BOM.
+    with open(path, encoding="utf-8-sig") as fh:
         return fh.read()
 
 
@@ -216,11 +219,14 @@ def sln_add_entry(sln_text, rel_path):
     win_path = rel_path.replace("/", "\\")
     if win_path in sln_text:
         return sln_text
-    line = "\t\t{0} = {0}\n".format(win_path)
-    marker = "\tEndProjectSection\n"
-    index = sln_text.find(marker)
-    if index == -1:
+    # Match the marker newline-agnostically: a VS-written .sln may reach here
+    # with CRLF line endings if it was read in binary/newline-preserving mode.
+    match = re.search(r"\tEndProjectSection\r?\n", sln_text)
+    if match is None:
         return sln_text
+    eol = "\r\n" if match.group(0).endswith("\r\n") else "\n"
+    line = "\t\t{0} = {0}{1}".format(win_path, eol)
+    index = match.start()
     return sln_text[:index] + line + sln_text[index:]
 
 
@@ -273,15 +279,40 @@ def cmd_register(root, section, parent, kind, severity, title, goal, gate,
     rel_readme = os.path.relpath(readme_path, root).replace("\\", "/")
     body = "# {0}\n\n{1}\n".format(title, goal)
 
-    # Stage everything, then write -- REQ-SEV-21a atomicity.
+    # REQ-SEV-21a atomicity: validate the prospective row BEFORE anything is
+    # written. Staging alone was not enough -- a row that only fails once it
+    # exists (banned notes content, say) left the folder on disk and made every
+    # later regen/register/status return 2 until a human deleted it by hand.
+    prospective = Item.from_frontmatter(keys, _rel(root, folder) + "/")
+    errors = validate(items + [prospective])
+    if errors:
+        sys.stderr.write("register rejected -- nothing written:\n")
+        for err in errors:
+            sys.stderr.write("  - {0}\n".format(err))
+        return 2
+
     sln_path = os.path.join(root, "MyVocaList.sln")
     staged = {readme_path: _readme_text(keys, body)}
     if os.path.exists(sln_path):
-        staged[sln_path] = sln_add_entry(_read(sln_path), rel_readme)
+        sln_text = _read(sln_path)
+        updated = sln_add_entry(sln_text, rel_readme)
+        if updated == sln_text and rel_readme.replace("/", "\\") not in sln_text:
+            _warn_sln(rel_readme, "no SolutionItems section found in MyVocaList.sln")
+        else:
+            staged[sln_path] = updated
+    else:
+        _warn_sln(rel_readme, "MyVocaList.sln not found at {0}".format(sln_path))
 
     for path, text in staged.items():
         _write(path, text)
     return cmd_regen(root)
+
+
+def _warn_sln(rel_readme, reason):
+    """.sln registration is a HARD GATE -- never fail it silently."""
+    sys.stderr.write(
+        "warning: .sln registration NOT applied for {0} ({1}); "
+        "add it manually before committing\n".format(rel_readme, reason))
 
 
 def cmd_status(root, item_id, status, closed):
@@ -312,7 +343,13 @@ def cmd_status(root, item_id, status, closed):
 
 def cmd_renumber(root, old_id):
     """Reassign a colliding BUG id: rename the folder and rewrite frontmatter."""
-    items, _errors = walk(root)
+    items, parse_errors = walk(root)
+    # Same guard as cmd_register: an unparseable README is invisible to the
+    # live scan, so next_bug_id could hand back an id that file already holds.
+    if parse_errors:
+        for err in parse_errors:
+            sys.stderr.write("error: {0}\n".format(err))
+        return 2
     match = [i for i in items if i.id == old_id]
     if not match:
         sys.stderr.write("no item with id '{0}'\n".format(old_id))
