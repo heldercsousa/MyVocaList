@@ -4,7 +4,7 @@
 
 **Goal:** Make the `Docs/Management/` folder tree the source of truth for backlog items, with `BACKLOG.md` and the monthly archives generated from per-item YAML frontmatter, and replace the session-start 136-line BACKLOG read with a ~12-line query.
 
-**Architecture:** A new pure/shell-split Python package inside `.claude/scripts/backlog/`. Pure modules (`frontmatter.py`, `model.py`, `render.py`) do parsing, validation, ordering and rendering with no I/O; the shell (`backlog_gen.py`) walks the tree, writes files, and exposes five verbs (`register`, `status`, `regen`, `query`, plus `--renumber`). Generation is a total function of frontmatter + fenced preserved regions, which is what makes it idempotent and safe to run at every workflow milestone.
+**Architecture:** A new pure/shell-split Python package inside `.claude/scripts/backlog/`. Pure modules (`frontmatter.py`, `model.py`, `render.py`) do parsing, validation, ordering and rendering with no I/O; the shell (`backlog_gen.py`) walks the tree, writes files, and exposes five verbs (`register`, `status`, `renumber`, `regen`, `query`). Generation is a total function of frontmatter + fenced preserved regions, which is what makes it idempotent and safe to run at every workflow milestone.
 
 **Tech Stack:** Python 3 (stdlib only — no PyYAML), `unittest` in `.claude/scripts/backlog/tests/`, git, `.claude/githooks/pre-commit`.
 
@@ -20,7 +20,7 @@
 - **Date prefix is always `YYYY-MM-DD`**; unknown day → `-01`. (REQ-SEV-00)
 - **The eight statuses** are exactly: `💡 Pending`, `📋 Spec`, `🗺️ Plan`, `🟢 Ready`, `🟡 In Progress`, `🔵 Deferred`, `🔴 Blocked`, `✅ Done`. `✅ Fixed` is an accepted terminal synonym of `✅ Done`. Terminal = `✅ Done` / `✅ Fixed`.
 - **`.sln` HARD GATE:** every file created/moved/deleted under `Docs/` or `.claude/` gets a `MyVocaList.sln` `SolutionItems` entry in the same commit. `constraints-registry.md` names only `.claude/library/*` and `.claude/rules/*` as exempt. **`.claude/scripts/*` is unresolved — check `MyVocaList.sln` for existing `.claude\scripts\backlog\*` entries at the start of T1 and follow whatever the file already does.** If there are none, treat scripts as exempt and note it in the task-log for Helder to confirm; do not infer silently.
-- **Worktree mandatory** for T1–T7 (code). Docs land on `develop` (T8–T13 are docs/migration — see each task).
+- **Worktree mandatory** for T0–T7 (code); T0 creates it and verifies the base is `develop`. Docs land on `develop` (T8–T13 are docs/migration — see each task).
 - **English only** in all code, comments, and docs.
 
 ---
@@ -38,7 +38,7 @@
 | `.claude/scripts/backlog/tests/test_render.py` | T3/T4 tests | T3, T4 |
 | `.claude/scripts/backlog/tests/test_backlog_gen.py` | CLI + idempotency tests | T5, T6 |
 | `.claude/scripts/backlog/orphan_check.py` | widen the watched-path set (1 function) | T7 |
-| `.claude/githooks/pre-commit` | add blocking `regen --check` | T7 |
+| `.claude/githooks/pre-commit` | add blocking `regen --check` | **T12b** (not T7 — see T7's banner) |
 | `Docs/Management/**/README.md` | ~50 migrated item/feature folders | T8–T11 |
 | `Docs/Management/DevCycleCraft/spec-evolution-versioning/migration/BACKLOG-pre-migration.md` | frozen equivalence fixture | T8 |
 | `CLAUDE.md`, `.claude/rules/*`, `.claude/library/*` | the `amend:` bundle | T13 |
@@ -225,7 +225,7 @@ git commit -m "feat(backlog-gen): restricted stdlib frontmatter parser (T1)"
   - `STATUSES` (tuple of the 8), `TERMINAL` (`("✅ Done", "✅ Fixed")`), `ACTIVE` (the other 6 + `✅`-less).
   - `Item` — constructed via `Item.from_frontmatter(keys, rel_path)`; attributes `id, title, status, severity, target, section, parent, goal, gate, pointer, closed, order, kind, rel_path, depth`.
   - `validate(items) -> list[str]` — one human-readable error per problem, each starting with the item's `rel_path`.
-  - `sort_key(item, index_by_id) -> tuple` and `order_items(items) -> list[Item]`.
+  - `order_items(items) -> list[Item]` and `target_sort(target) -> str`.
   - `notes_violations(goal, gate) -> list[str]` — the REQ-SEV-09 mechanical check, exported for reuse in T3.
   - Used by T3, T5, T6.
 
@@ -297,6 +297,22 @@ class ValidateTests(unittest.TestCase):
     def test_error_message_names_the_path(self):
         errors = validate([item(status="banana", _path="DevCycleCraft/thing/")])
         self.assertIn("DevCycleCraft/thing/", errors[0])
+
+    def test_separator_needs_no_goal_or_status(self):
+        keys = {"id": "mvp", "title": "🏁 **MVP release**", "target": "2026-06",
+                "section": "BusinessFeatures", "kind": "milestone"}
+        self.assertEqual(validate([Item.from_frontmatter(keys, "milestones/mvp/")]), [])
+
+    def test_row_resolving_to_no_section_is_an_error(self):
+        keys = {"id": "mvp", "title": "M", "target": "2026-06", "kind": "milestone"}
+        errors = validate([Item.from_frontmatter(keys, "milestones/mvp/")])
+        self.assertTrue(any("section" in e for e in errors))
+
+    def test_child_inherits_section_via_parent_so_is_valid(self):
+        parent = item(id="p")
+        child = item(id="c", parent="p", section=None,
+                     _path="BusinessFeatures/feat/bugs/2026-07-21-BUG-1-x/")
+        self.assertEqual(validate([parent, child]), [])
 
 
 class NotesBoundTests(unittest.TestCase):
@@ -483,6 +499,13 @@ def validate(items):
             if not it.keys.get(key):
                 err("missing required key '{0}'".format(key))
 
+        # Section resolution applies to EVERY row: a row that resolves to no
+        # section is rendered into neither table and would vanish silently.
+        if it.section is not None and it.section not in SECTIONS:
+            err("invalid section '{0}'".format(it.section))
+        if not it.section and not it.parent:
+            err("row resolves to no section -- set 'section' or 'parent'")
+
         if it.is_separator:
             continue
 
@@ -493,8 +516,6 @@ def validate(items):
         if it.severity == "Minor":
             err("severity 'Minor' must not have a folder (REQ-SEV-03) -- "
                 "record it in the parent task-log instead")
-        if it.section is not None and it.section not in SECTIONS:
-            err("invalid section '{0}'".format(it.section))
         if it.kind not in KINDS:
             err("invalid kind '{0}'".format(it.kind))
 
@@ -602,7 +623,7 @@ def order_items(items):
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_model*.py" -v`
-Expected: PASS — 19 tests OK.
+Expected: PASS — 22 tests OK (19 + the 3 separator/section tests).
 
 - [ ] **Step 5: Commit**
 
@@ -680,6 +701,21 @@ class RowTests(unittest.TestCase):
 
     def test_explicit_pointer_is_used_verbatim(self):
         self.assertIn("`custom/path/`", render_row(item(pointer="custom/path/")))
+
+    def test_milestone_renders_exactly_like_the_frozen_fixture(self):
+        keys = {"id": "mvp", "title": "🏁 **MVP release**", "target": "2026-06",
+                "section": "BusinessFeatures", "kind": "milestone"}
+        row = render_row(Item.from_frontmatter(keys, "milestones/mvp/"))
+        self.assertEqual(row, "| 2026-06 | | 🏁 **MVP release** | |")
+
+    def test_group_renders_exactly_like_the_frozen_fixture(self):
+        keys = {"id": "cross-cutting", "title": "Cross-cutting", "target": "2026-07-03",
+                "section": "BusinessFeatures", "kind": "group",
+                "goal": "Bugs with no single parent business feature"}
+        row = render_row(Item.from_frontmatter(keys, "cross-cutting/"))
+        self.assertEqual(
+            row,
+            "| 2026-07-03 | **Cross-cutting** | — | Bugs with no single parent business feature |")
 
 
 class SpliceTests(unittest.TestCase):
@@ -841,7 +877,7 @@ def _section_of(item, all_items):
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_render*.py" -v`
-Expected: PASS — 11 tests OK.
+Expected: PASS — 13 tests OK (11 + the milestone and group fixture-row tests).
 
 > **Arrow spacing is settled here, not later:** the label is always `"{arrows} {title}"` — arrows concatenated with no internal spaces, one space before the title, at every depth. This matches the frozen fixture's `| ↳ BUG-027: …` and `| ↳↳ Build new MD3-compliant…` rows. Do **not** adjust these tests to match an implementation; if they fail, the implementation is wrong (`testing.md § Builder Must Not Modify Tests`).
 
@@ -957,7 +993,7 @@ def render_archive(existing_text, items, month=None, titles_by_id=None):
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_render*.py" -v`
-Expected: PASS — 15 tests OK.
+Expected: PASS — 17 tests OK.
 
 - [ ] **Step 5: Commit**
 
@@ -1116,9 +1152,17 @@ class QueryTests(unittest.TestCase):
         self.assertEqual(len(lines), 1)
         self.assertIn("Active one", lines[0])
 
-    def test_query_skips_malformed_readme_without_failing(self):
+    def test_query_ignores_a_readme_with_no_frontmatter_fence(self):
         write(os.path.join(self.mgmt, "BusinessFeatures", "broken", "README.md"),
               "no frontmatter at all\n")
+        lines = backlog_gen.query_lines(self.root, [PENDING])
+        self.assertEqual(len(lines), 1)
+
+    def test_query_skips_a_readme_whose_frontmatter_is_malformed(self):
+        # Opens a fence, then fails to parse -- a hard error for regen, but
+        # query must degrade to a warning so session start never blocks.
+        write(os.path.join(self.mgmt, "BusinessFeatures", "broken", "README.md"),
+              "---\nid: X\ntags:\n  - a\n---\n")
         lines = backlog_gen.query_lines(self.root, [PENDING])
         self.assertEqual(len(lines), 1)
 
@@ -1303,7 +1347,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_backlog_gen*.py" -v`
-Expected: PASS — 9 tests OK.
+Expected: PASS — 10 tests OK.
 
 - [ ] **Step 5: Run the whole suite (nothing regressed)**
 
@@ -1319,7 +1363,7 @@ git commit -m "feat(backlog-gen): regen/--check/query CLI shell (T5)"
 
 ---
 
-### Task 6: `register`, `status`, `--renumber` (+ atomic `.sln` write)
+### Task 6: `register`, `status`, `renumber` (+ atomic `.sln` write)
 
 **Files:**
 - Modify: `.claude/scripts/backlog/backlog_gen.py`
@@ -1327,7 +1371,7 @@ git commit -m "feat(backlog-gen): regen/--check/query CLI shell (T5)"
 
 **Interfaces:**
 - Consumes: T5's `walk`, `cmd_regen`, `_write`.
-- Produces: `next_bug_id(root)`, `slugify(title)`, `folder_name(date, bug_id, title)`, `cmd_register(...)`, `cmd_status(root, item_id, status, closed)`, `cmd_renumber(root, old_id)`; `sln_add_entry(sln_text, rel_path, section_name)`.
+- Produces: `next_bug_id(root)`, `slugify(title)`, `_folder_for(root, items, parent_id, kind, today, item_id, title)`, `_readme_text(keys, body)`, `sln_add_entry(sln_text, rel_path)`, `cmd_register(...)`, `cmd_status(root, item_id, status, closed)`, `cmd_renumber(root, old_id)`.
 
 - [ ] **Step 1: Write the failing tests (append to `test_backlog_gen.py`)**
 
@@ -1780,14 +1824,14 @@ Then rewrite `backlog_changed_this_session`'s three git calls. Replace each `-- 
             ["git", "diff", "--name-only", "HEAD", "--", backlog, readmes],
             capture_output=True, text=True,
         )
-        if wt.returncode == 0 and any(is_watched(p) for p in wt.stdout.split()):
+        if wt.returncode == 0 and any(is_watched(p) for p in wt.stdout.splitlines()):
             return True
         # 2. Untracked files (a freshly registered item folder).
         others = subprocess.run(
             ["git", "ls-files", "--others", "--exclude-standard", "--", backlog, readmes],
             capture_output=True, text=True,
         )
-        if others.returncode == 0 and any(is_watched(p) for p in others.stdout.split()):
+        if others.returncode == 0 and any(is_watched(p) for p in others.stdout.splitlines()):
             return True
         # 3. In-session commits since the session-start ref.
         start_ref = _session_start_ref()
@@ -1797,7 +1841,7 @@ Then rewrite `backlog_changed_this_session`'s three git calls. Replace each `-- 
                  "--", backlog, readmes],
                 capture_output=True, text=True,
             )
-            if committed.returncode == 0 and any(is_watched(p) for p in committed.stdout.split()):
+            if committed.returncode == 0 and any(is_watched(p) for p in committed.stdout.splitlines()):
                 return True
         return False
     except Exception:
@@ -1875,7 +1919,7 @@ git commit -m "docs(backlog-gen): freeze pre-migration BACKLOG fixture + add gen
 - [ ] **Step 1: List the top-level rows to migrate**
 
 Run: `python .claude/scripts/backlog/backlog_gen.py regen --check; echo "exit=$?"`
-Expected: exit 0 with empty tables (no READMEs yet) — confirming the fences work.
+Expected: **exit 1.** The fences now wrap the original hand-written rows while no READMEs exist yet, so regeneration would produce empty tables — "stale" is the correct answer and confirms the fences are wired. **Exit 2 is the only real problem** (a validation/parse error). Do not run `regen` without `--check` here — it would blank the tables.
 
 - [ ] **Step 2: Write one `README.md` per top-level feature**
 
@@ -2123,19 +2167,26 @@ fi
 
 - [ ] **Step 4: Prove the gate both blocks and passes**
 
+Both halves must stage a `Docs/Management/` file, or the hook's `grep -qE` guard short-circuits and the gate never runs — proving nothing.
+
 ```bash
-# Should PASS (tree is clean):
-git commit --allow-empty -m "test: gate passes" && git reset --hard HEAD~1
-# Should BLOCK: dirty a row, then try to commit it.
-python - <<'PY'
-import re, pathlib
-p = pathlib.Path("Docs/Management/BACKLOG.md")
-p.write_text(p.read_text(encoding="utf-8") + "\n| x | y | z | w |\n", encoding="utf-8")
+# Should PASS: touch a real item README and regenerate, so the tree is consistent.
+python .claude/scripts/backlog/backlog_gen.py regen
+git add Docs/Management/BACKLOG.md && git commit -m "test: gate passes"; echo "pass_exit=$?"
+git reset --hard HEAD~1
+
+# Should BLOCK: change a README's title WITHOUT regenerating -- the generated
+# row inside the fence no longer matches the frontmatter.
+README=$(git ls-files "Docs/Management/**/README.md" | head -1)
+python - "$README" <<'PY'
+import pathlib, sys
+p = pathlib.Path(sys.argv[1])
+p.write_text(p.read_text(encoding="utf-8").replace("title:", "title: STALE ", 1), encoding="utf-8")
 PY
-git add Docs/Management/BACKLOG.md && git commit -m "test: gate blocks"; echo "exit=$?"
-git checkout -- Docs/Management/BACKLOG.md
+git add "$README" && git commit -m "test: gate blocks"; echo "block_exit=$?"
+git checkout -- "$README"
 ```
-Expected: the second commit is rejected with the "BACKLOG is stale or invalid" message and a non-zero exit. Record both outcomes in the task-log.
+Expected: `pass_exit=0`, and the second commit rejected with "BACKLOG is stale or invalid" and `block_exit` non-zero. **An edit appended outside a fence would NOT block** — `splice` preserves out-of-fence bytes, so `--check` would exit 0; the demo must dirty something the generator actually owns. Record both outcomes in the task-log.
 
 - [ ] **Step 5: Commit**
 
