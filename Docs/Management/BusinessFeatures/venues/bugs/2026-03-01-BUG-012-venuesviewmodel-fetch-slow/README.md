@@ -1,3 +1,22 @@
+---
+id: BUG-012
+title: "Bug: Venues list fetch slow — 2.2s paged query (BUG-012)"
+status: "💡 Pending"
+target: 2026-03
+section: BusinessFeatures
+kind: bug
+order: 10
+goal: "restore fast venue list loading (N+1 query suspected)."
+pointer: BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/
+---
+
+> **Spec updated [2026-07-22]:** this file was the flat
+> `bugs/BUG-012-venuesviewmodel-fetch-slow.md`; `git mv`-ed into a REQ-SEV-01 item folder
+> (day `-01` per REQ-SEV-00, the row's target being the bare month `2026-03`). Content below is
+> the original file byte-for-byte. `severity:` is deliberately unset: the legacy header records
+> "Medium", which is not a value in `model.SEVERITIES`, and neither the BACKLOG row nor this file
+> states a Critical/Major/Minor severity — inventing one would be fabrication (T11c).
+
 # BUG-012 — VenuesViewModel fetch 2268ms — slow paged query
 
 **Filed:** 2026-06-11
