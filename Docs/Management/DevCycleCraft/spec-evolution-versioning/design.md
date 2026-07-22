@@ -157,9 +157,9 @@ Ordering rationale: phases 1 and 2 are purely additive; phase 3 is additive exce
 | Two worktrees register items concurrently | folder-per-item means no shared *line* to conflict on and regen is deterministic, so the file merges cleanly — but the **`BUG-NNN` collides** (both derive the same `max+1`). Caught by the duplicate-`id` validation at merge; resolved with `register --renumber` (REQ-SEV-11a). Depends on R-2 being blocking. |
 | Restricted YAML parser rejects a legitimate value | errors name key + path and abort; values are prose in a table cell — nesting is never needed |
 
-## 8. Recommendations — pending Helder's approval gate
+## 8. Decisions (approved)
 
-> **Status: RECOMMENDED, NOT APPROVED.** Helder has not yet approved this spec. The three questions previously left open are answered below with a recommendation and its reasoning, so the gate is a yes/no on a concrete proposal rather than an open design discussion. The spec is written *as if* these hold; if Helder rejects one, the named sections change as listed.
+> **Status: APPROVED by Helder 2026-07-22** — spec and all three recommendations below accepted as written. R-1/R-2/R-3 are now binding design decisions, not proposals; the "if rejected" notes are retained only as reversal conditions. Spec moves to 🗺️ Plan.
 
 ### R-1 — Frontmatter carrier: **`README.md`** (recommended)
 
