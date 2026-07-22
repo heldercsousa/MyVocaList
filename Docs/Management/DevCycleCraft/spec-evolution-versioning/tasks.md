@@ -104,7 +104,11 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 > fabrication; omitting it makes `regen` exit 2. Options: (A) Helder supplies a one-line goal —
 > recommended; (B) relax `REQUIRED`, which weakens REQ-SEV-09 for every future row. Until resolved,
 > the row cannot be migrated and T12's equivalence gate will show it as missing.
-- [ ] **T10a — READMEs for existing `bugs/` folders** — ⛔ **BLOCKED, 0 of 9 written (see task-log T10a)**
+- [x] **T9d — `archive` generated-region fences in the 5 monthly archive files** *(split out of T12 to fix the T10a sequencing defect recorded below)*
+  Consumes: nothing. Produces: the `archive` fence pair in each of the 5 `Docs/Management/backlog-archive/` files, so `render_archive` → `splice` resolves instead of raising `RenderError`.
+  Files owned: the 5 archive files, `tasks.md`, `task-log.md`. Risk: Low (purely additive — exactly +2/-0 lines per file, verified via `git diff --numstat` plus a per-file sha256 byte-preservation proof). Review lane: Standard.
+  > Placement follows the T8 precedent in `BACKLOG.md`: BEGIN immediately above the table head, END immediately after the last row; the hand-written prose header stays outside. **Implementation decision:** each archive file has *two* tables (Business Features / Dev Cycle Craft) while `ARCHIVE_TEMPLATE` defines a single flat `archive` region, so the single fence pair spans from the first table head to the last row — the intervening `## Dev Cycle Craft` heading therefore sits inside the region and will be consumed by T12's regeneration.
+- [ ] **T10a — READMEs for existing `bugs/` folders** — ⛔ **BLOCKED, 0 of 9 written (see task-log T10a)** — Blocker 1 (archive fences) **resolved by T9d 2026-07-22**; blockers 2–4 still need Helder
   Consumes: T9c. Files owned: those READMEs, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
   > **Sequencing defect [2026-07-22]:** 9 bug folders exist (not ~12; `ls` under `bugs/` misreports —
   > enumerate with `git ls-files`). **6 back archived (`✅ Fixed`) rows**, so their READMEs route
@@ -135,7 +139,7 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 - [ ] **T12a — Archived rows → item folders**
   Consumes: T11c. One folder per row in the 5 archive files, `closed:` from the file name's month. Split per archive month if any single month exceeds ~12 rows.
   Files owned: those folders, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
-- [ ] **T12 — Archive fences + the equivalence gate**
+- [ ] **T12 — Archive regeneration + the equivalence gate** *(fence **insertion** is no longer T12's — it moved to T9d, done 2026-07-22; T12 now only regenerates the already-fenced regions and runs the gate)*
   Consumes: T12a. Files owned: 5 archive files, `task-log.md`. Risk: **High — this is the gate.** Review lane: **Architectural (Helder).**
   Demo: every diff hunk vs the frozen fixture classified into REQ-SEV-25's four permitted classes; `regen --check` exit 0; `grep BUG-048` still hits an archive; query ≤ 20 lines.
 - [ ] **T12b — Install the blocking pre-commit gate**

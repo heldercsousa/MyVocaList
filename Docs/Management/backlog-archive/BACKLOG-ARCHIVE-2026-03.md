@@ -4,6 +4,7 @@
 
 ## Business Features
 
+<!-- BACKLOG:GENERATED:BEGIN archive -->
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-03 | **Venues CRUD** | ✅ Done | Goal: full venue management. Shipped with MD3 list, search, multi-select, swipe-delete. Pointer: `Docs/Management/BusinessFeatures/venues/`. |
@@ -17,3 +18,4 @@
 | 2026-03 | M3 Lists | ✅ Done | Goal: MD3-compliant list components. Shipped. Pointer: `Docs/Management/DevCycleCraft/m3-lists/`. |
 | 2026-03 | Venues MD3 rebuild | ✅ Done | Goal: rebuild Venues pages on the MD3 component set. Shipped. Pointer: `Docs/Management/BusinessFeatures/venues/`. |
 | 2026-03 | Styles & Structure | ✅ Done | Goal: app-wide style/resource structure. Shipped. Pointer: `Docs/Management/DevCycleCraft/styles-structure/`. |
+<!-- BACKLOG:GENERATED:END archive -->
