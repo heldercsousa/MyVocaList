@@ -4,3 +4,18 @@
 .claude/githooks/pre-commit text eol=lf
 *.sh text eol=lf
 .claude/scripts/**/*.py text eol=lf
+
+# BACKLOG generator inputs and outputs MUST stay LF. backlog_gen._write always
+# emits newline="\n" while _read round-trips working-tree bytes, and cmd_regen
+# decides staleness with a raw `current != text` comparison. Under
+# core.autocrlf=true these files are CRLF in the working tree and LF in the
+# blob, so on any differently-configured checkout `regen` rewrites whole files
+# for line-ending reasons alone and reports them stale with no content change.
+# A whole-file diff that is 100% line endings is indistinguishable from one
+# that is not, which makes an equivalence gate unclassifiable. The item
+# README.md files are pinned for the same reason: they are generator inputs,
+# but cmd_status / cmd_register / cmd_renumber also rewrite them through
+# _write, so an unpinned README flips to LF the first time its status changes.
+Docs/Management/BACKLOG.md text eol=lf
+Docs/Management/backlog-archive/*.md text eol=lf
+Docs/Management/**/README.md text eol=lf
