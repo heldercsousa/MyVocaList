@@ -605,11 +605,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "enforcement-automations", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-scripts", "backlog-scripts", "{C9CDD2BC-B529-48CA-9EFD-24A2A2D92DE7}"
 	ProjectSection(SolutionItems) = preProject
+		.claude\scripts\backlog\backlog_gen.py = .claude\scripts\backlog\backlog_gen.py
 		.claude\scripts\backlog\backlog_lib.py = .claude\scripts\backlog\backlog_lib.py
+		.claude\scripts\backlog\frontmatter.py = .claude\scripts\backlog\frontmatter.py
+		.claude\scripts\backlog\model.py = .claude\scripts\backlog\model.py
 		.claude\scripts\backlog\orphan_check.py = .claude\scripts\backlog\orphan_check.py
+		.claude\scripts\backlog\render.py = .claude\scripts\backlog\render.py
 		.claude\scripts\backlog\session_marker.py = .claude\scripts\backlog\session_marker.py
+		.claude\scripts\backlog\tests\test_backlog_gen.py = .claude\scripts\backlog\tests\test_backlog_gen.py
 		.claude\scripts\backlog\tests\test_backlog_lib.py = .claude\scripts\backlog\tests\test_backlog_lib.py
+		.claude\scripts\backlog\tests\test_frontmatter.py = .claude\scripts\backlog\tests\test_frontmatter.py
+		.claude\scripts\backlog\tests\test_model.py = .claude\scripts\backlog\tests\test_model.py
 		.claude\scripts\backlog\tests\test_orphan_check.py = .claude\scripts\backlog\tests\test_orphan_check.py
+		.claude\scripts\backlog\tests\test_orphan_check_widening.py = .claude\scripts\backlog\tests\test_orphan_check_widening.py
+		.claude\scripts\backlog\tests\test_render.py = .claude\scripts\backlog\tests\test_render.py
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
