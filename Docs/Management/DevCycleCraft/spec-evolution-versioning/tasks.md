@@ -77,6 +77,18 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
   Consumes: T9c-1. Count to be established by T9b's report; split further if > 12.
   Files owned: `Docs/Management/cross-cutting/**`, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
 
+> **⛔ SYSTEMIC — needs Helder's decision before T12.** REQ-SEV-09's banned-content rule
+> (`model._BANNED`) rejects file references (`\S+\.(cs|xaml|py|md)`) and review verdicts
+> (`PASS`, `AC-\d+`). For **governance rows the file name IS the subject** — e.g. "BACKLOG-first
+> Registration Enforcement", whose goal is *"work items must be registered in BACKLOG.md before
+> memory writes"*. Such a row cannot be transcribed faithfully AND satisfy the rule.
+> Impact so far: **1 row blocked** (BACKLOG-first Registration Enforcement) and **5 rows trimmed**
+> (orders 20, 100, 110, 150, 520) by relocating overflow verbatim into the README body. No text was
+> reworded, but those rows will render SHORTER in the regenerated BACKLOG than they read today.
+> Options: (A) Helder supplies compliant one-line goals for the affected rows; (B) exempt
+> `Dev Cycle Craft` governance rows from the file-reference pattern; (C) accept the trimming and
+> record it as permitted diff class (d) at T12. **This is why T12 will not be a clean byte-match.**
+
 > **⛔ BLOCKED — needs Helder before T12.** The **Windows version** row has no Goal in BACKLOG
 > (Gate + Pointer only), but `model.REQUIRED` makes `goal` mandatory. Inventing one is content
 > fabrication; omitting it makes `regen` exit 2. Options: (A) Helder supplies a one-line goal —
