@@ -212,6 +212,14 @@ supposed to surface.
 >   mechanically enforced rather than prose-enforced. Not acted on in T10b (`model.py` was outside
 >   its `Files owned`; changing it would have been Rule 2 bundling).
 >
+> - **[ ] F6 (found by T11a) — T10a's `BUG-028` folder violates the REQ-SEV-01 naming pattern.**
+>   REQ-SEV-01 and `design.md` §2's own worked example mandate `YYYY-MM-DD-BUG-NNN-<slug>`;
+>   T10a created `BUG-028-artistspage-trailing-catalog-button-noop/` with **no date prefix**, so one
+>   `bugs/` directory now contains both spellings. T11a followed the spec for its own three folders
+>   and flagged rather than touching T10a's file. **Fix before T12** — `register` derives the folder
+>   name mechanically (REQ-SEV-11), so a hand-made folder that departs from the pattern is exactly
+>   the drift the generator exists to prevent. A `git mv` (history follows) + `id:`/pointer update.
+>
 > **Environment hazard found during the review — do not repeat:** `grep` is rewritten by the `rtk`
 > proxy into a search tool, which silently corrupted the reviewer's first fence-stripping run and
 > produced bogus "DIFFERS" output. **Never use `grep` for byte-exact work in this repo** — use
