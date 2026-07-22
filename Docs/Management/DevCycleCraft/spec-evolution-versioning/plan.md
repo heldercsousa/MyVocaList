@@ -644,7 +644,7 @@ git commit -m "feat(backlog-gen): item model, validation and ordering (T2)"
 - Consumes: `model.Item`, `model.order_items`, `model.TERMINAL` (T2).
 - Produces:
   - `FENCE_BEGIN = "<!-- BACKLOG:GENERATED:BEGIN {0} -->"`, `FENCE_END = "<!-- BACKLOG:GENERATED:END {0} -->"`.
-  - `render_row(item, archived=False) -> str`
+  - `render_row(item, archived=False, parent_title=None) -> str`
   - `render_table(items) -> str`
   - `splice(existing_text, region_name, new_body) -> str` — replaces the fenced region, preserving everything outside byte-for-byte; raises `RenderError` if the fence is absent.
   - `render_backlog(existing_text, items) -> str` — splices the `business-features` and `dev-cycle-craft` regions.
