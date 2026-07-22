@@ -295,6 +295,20 @@ public class SongFormViewModelTests
         Assert.False(sut.IsArtistLocked);
     }
 
+    // [AC] REQ-ACREATE-03: empty blur raises no error
+    [Fact]
+    public void ArtistBlurredWithoutSelection_EmptyText_NoErrorNoLock()
+    {
+        var sut = CreateSut();
+        sut.ArtistSearchText = string.Empty;
+        // SelectedArtistId not set
+
+        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
+
+        Assert.False(sut.ArtistHasError);
+        Assert.False(sut.IsArtistLocked);
+    }
+
     // [AC] AC-B8-02 — blur with a prior selection restores the artist name
     [Fact]
     public void ArtistBlurredWithoutSelection_WithPriorSelection_RestoresName()
@@ -381,6 +395,7 @@ public class SongFormViewModelTests
         Assert.Equal("Dup", sut.ArtistSearchText);   // retained
         Assert.False(sut.IsArtistLocked);            // no lock
         Assert.Null(sut.SelectedArtistId);
+        Assert.Empty(sut.ArtistSuggestions);          // stale suggestions cleared (M3)
     }
 
     // ── BUG-009: buffered URLs ────────────────────────────────────────────

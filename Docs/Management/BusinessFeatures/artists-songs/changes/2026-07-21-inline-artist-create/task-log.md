@@ -236,3 +236,32 @@ Build: passed (`dotnet build MyVocaList.csproj -f net10.0-android` → exit 0, 0
 
 ### E2E note
 `E2E: emulator not available — requires manual verification (T10, Helder)`. Visual distinctness (➕ glyph, top divider, wrapper text) to be confirmed on-device per the plan's Task 10 checklist.
+
+---
+## Task: CODE-REVIEW fold-in — M1/M2/M3/M4/M5 findings
+**Plan:** CODE-REVIEW findings on T1–T8 (2026-07-21)
+**Status:** To Review
+**Started:** 2026-07-21
+**Completed:** 2026-07-21
+
+### Findings applied / skipped
+- **M1 (applied)** — empty-blur (`OnArtistBlurredWithoutSelection`, no-locked branch) no longer sets `ArtistHasError` when `ArtistSearchText` is empty/whitespace; only flags an error when the user actually typed unmatched text. Aligns to REQ-ACREATE-03 ("unmatched TEXT").
+- **M2 (applied)** — `SearchArtistsAsync`'s generation counter now uses `Interlocked.Increment(ref _searchGeneration)` instead of `++_searchGeneration`; hardening only, no behavior change. `gen != _searchGeneration` compare unchanged.
+- **M3 (applied)** — `CreateArtistInlineAsync` failure branch now also clears `ArtistSuggestions = []` so the dropdown (incl. the "Add…" row) doesn't linger behind the error. Success path (`LockArtist`) untouched — already cleared suggestions.
+- **M4 (applied)** — `SongFormPage.xaml.cs` `OnArtistSelectionChanged`: the create-sentinel branch now guards with `CreateArtistInlineCommand.CanExecute(...)` before `Execute(...)`, preventing a second selection event from re-triggering an in-flight create (BUG-049-style double-tap risk). Trivial, no behavior change to the real-match branch.
+- **M5 (skipped)** — whitespace-only confirming test for `OnArtistItemsRequested`'s "no create row" guard. That method lives in `SongFormPage.xaml.cs` (page code-behind, `ItemsRequestEventArgs`/`MAUI` types) with no seam reachable from a ViewModel-level unit test in this test project (no page-level test harness exists for this class). Forcing a test here would require introducing a new test-harness pattern outside this task's scope — logged as skip per the briefing's "SKIP and note why" instruction. The `IsNullOrWhiteSpace` guard itself is unchanged and still present in code.
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — M1 guard on `OnArtistBlurredWithoutSelection`; M2 `Interlocked.Increment`; M3 `ArtistSuggestions = []` on create failure.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — M4 `CanExecute` guard on `OnArtistSelectionChanged`'s create-sentinel branch.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — new test `ArtistBlurredWithoutSelection_EmptyText_NoErrorNoLock` (M1); extended `CreateArtistInline_Failure_MapsErrorAndRetainsText` with `Assert.Empty(sut.ArtistSuggestions)` (M3).
+
+### M1 Red → Green evidence
+- **Red** (before guard): `dotnet test --filter FullyQualifiedName~SongFormViewModelTests` →
+  `ArtistBlurredWithoutSelection_EmptyText_NoErrorNoLock [FAIL]` — `Assert.False() Failure: Expected: False, Actual: True` (line 308, `ArtistHasError` was `true` on empty-text blur). 1 failed, 41 passed of 42 in that file.
+- **Green** (after guard added — `if (!string.IsNullOrWhiteSpace(ArtistSearchText)) ArtistHasError = true;`): full suite green (see below).
+
+### Build notes
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 6 projects, 0 errors, 22 warnings (DevExpress eval + pre-existing NU1903/CS8600 etc., none new).
+- `dotnet test` (full suite) → **Com falha: 0, Aprovado: 517, Ignorado: 0, Total: 517** — baseline 516 + 1 net new test (M1) + M3 was an assertion added to an existing test (no count delta). The previously-flaky SQLite test `SongRepositoryTests.GetByTitlesCollatedAsync_NoMatches_ReturnsEmpty` passed in this same full run — no isolation re-run needed (only required if it fails).
+- Files written and re-read: `SongFormViewModel.cs`, `SongFormPage.xaml.cs`, `SongFormViewModelTests.cs` — all three re-read post-edit to confirm the changes landed at the correct location.

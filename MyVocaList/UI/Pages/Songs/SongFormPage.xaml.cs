@@ -69,9 +69,15 @@ public partial class SongFormPage : ContentPage
             return;
 
         if (suggestion.IsCreateNew)
-            ViewModel.CreateArtistInlineCommand.Execute(suggestion.Headline);
+        {
+            // BUG-049-style guard: an in-flight create must not be re-triggered by a second selection event.
+            if (ViewModel.CreateArtistInlineCommand.CanExecute(suggestion.Headline))
+                ViewModel.CreateArtistInlineCommand.Execute(suggestion.Headline);
+        }
         else
+        {
             ViewModel.SelectArtistCommand.Execute(suggestion);
+        }
     }
 
     // Blur without a selection → existing VM blur command (same trigger the old component used).
