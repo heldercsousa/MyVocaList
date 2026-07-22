@@ -382,3 +382,35 @@ With `IsReadOnly` locking, tapping the clear (X) icon clears `ArtistSearchText` 
 ### Verification evidence
 - **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` -> exit 0, 0 errors (warnings only). XAML compiled — all three DX properties valid on the control.
 - **Manual E2E:** deferred to T10 re-run (Helder): locked field keeps clear icon; error text visible; no `IsCreateNew = True` leak into the box.
+
+---
+## Bug: BUG-054a (Major, UI-only) — create sentinel re-appears when field is locked
+**Status:** To Review
+**Severity:** Major (UI-only; no VM seam — manual E2E deferred to T10 re-run, Helder)
+
+**Root cause:** `SongFormPage.OnArtistItemsRequested.RequestAsync` re-appended the ➕ create sentinel for any non-whitespace text, including when the field was already locked to a selected artist (the editor re-requests items after a lock sets `ArtistSearchText` to the chosen name).
+
+**Fix:** suppress appending the sentinel when `ViewModel.IsArtistLocked` is true OR the requested text equals `ViewModel.SelectedArtistName`. The existing whitespace guard is preserved. Page code-behind stays glue-only.
+
+**Regression risk:** Low — narrows when the sentinel appears; does not change the create/select routing.
+
+### Changed files
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — `OnArtistItemsRequested` sentinel suppression guard.
+
+### Verification evidence
+- **Build:** android build -> exit 0, 0 errors. **Tests:** 520/520 green (no VM seam for the page provider — page code-behind).
+- **Manual E2E:** deferred to T10 re-run (Helder): after selecting/creating an artist (locked), typing/opening the dropdown must not show the ➕ row for the locked name.
+
+---
+## Bug: BUG-059 (Major, cascade) — artist catalog empty
+**Status:** To Review (resolves as a cascade — verify on device)
+
+**Root cause:** the catalog nav/handler wiring is correct (`ViewCatalogCommand` -> `NavigateToCatalog` -> `Songs?artistId=…` -> `GetPagedCatalogForArtistAsync`). The catalog rendered empty only because songs were not linked to an `ArtistId` at save time — a cascade of BUG-054/BUG-055 (edit-save dropped the artist link / hydration left `SelectedArtistId` null so Save was blocked).
+
+**Fix:** none in the catalog handler (verified correct, not edited). Resolves as a cascade of the BUG-055 fix: edit-mode hydration now populates `SelectedArtistId` and the service preserves `song.ArtistId`, so saved/edited songs carry the artist link and the catalog populates.
+
+**Regression risk:** None (no code change here).
+
+### Verification evidence
+- No code change. Confirmed the nav chain is intact (read-only trace; handler untouched).
+- **Manual E2E / DB spot-check:** on device (T10 re-run, Helder) — a saved/edited song now carries `ArtistId`, so the artist catalog populates. Not runnable here (no app run).
