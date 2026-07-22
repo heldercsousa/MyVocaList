@@ -9,6 +9,9 @@ from contextlib import contextmanager
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import backlog_gen  # noqa: E402
 
+# UTF-8 BOM -- Visual Studio writes MyVocaList.sln with one.
+BOM = b"\xef\xbb\xbf"
+
 PENDING = "\U0001F4A1 Pending"
 
 BACKLOG_SKELETON = (
@@ -83,6 +86,13 @@ class RegenTests(unittest.TestCase):
     def test_regen_writes_the_row(self):
         self.assertEqual(backlog_gen.cmd_regen(self.root), 0)
         self.assertIn("Feature One", self._backlog())
+
+    def test_regen_never_writes_a_bom_into_the_generated_backlog(self):
+        # Byte-level: the existing text assertions decode with plain utf-8 and
+        # would silently accept a BOM the generator emitted.
+        backlog_gen.cmd_regen(self.root)
+        with open(os.path.join(self.mgmt, "BACKLOG.md"), "rb") as fh:
+            self.assertFalse(fh.read().startswith(BOM))
 
     def test_regen_preserves_header_prose(self):
         backlog_gen.cmd_regen(self.root)
@@ -259,6 +269,46 @@ class RegisterTests(unittest.TestCase):
             title="Crlf bug", goal="Fix it.", gate=None, today="2026-07-22")
         with open(os.path.join(self.root, "MyVocaList.sln"), encoding="utf-8") as fh:
             self.assertIn("2026-07-22-BUG-001-crlf-bug", fh.read())
+
+    def _write_sln_bytes(self, data):
+        with open(os.path.join(self.root, "MyVocaList.sln"), "wb") as fh:
+            fh.write(data)
+
+    def _sln_bytes(self):
+        with open(os.path.join(self.root, "MyVocaList.sln"), "rb") as fh:
+            return fh.read()
+
+    def _register(self, title):
+        backlog_gen.cmd_register(
+            self.root, section=None, parent="F-1", kind="bug", severity="Major",
+            title=title, goal="Fix it.", gate=None, today="2026-07-22")
+
+    def test_register_preserves_the_bom_and_crlf_of_a_vs_written_sln(self):
+        # Visual Studio writes .sln as UTF-8 with BOM and CRLF. Registration
+        # must round-trip both byte-for-byte or every register churns the one
+        # file the .sln HARD GATE governs. Asserted on RAW BYTES: a decoded-text
+        # assertion cannot see a BOM, which is how this regression slipped in.
+        self._write_sln_bytes(BOM + SLN_FIXTURE.replace("\n", "\r\n").encode("utf-8"))
+        self._register("Bom bug")
+        data = self._sln_bytes()
+        self.assertTrue(data.startswith(BOM))
+        self.assertNotIn(b"\n", data.replace(b"\r\n", b""))
+
+    def test_register_inserts_the_entry_line_with_crlf_in_a_crlf_sln(self):
+        self._write_sln_bytes(BOM + SLN_FIXTURE.replace("\n", "\r\n").encode("utf-8"))
+        self._register("Eol bug")
+        data = self._sln_bytes()
+        start = data.index(b"2026-07-22-BUG-001-eol-bug")
+        # The inserted line must terminate the same way as its neighbours.
+        self.assertTrue(data[start:data.index(b"\n", start) + 1].endswith(b"\r\n"))
+
+    def test_register_introduces_no_bom_in_a_plain_lf_sln(self):
+        self._write_sln_bytes(SLN_FIXTURE.encode("utf-8"))
+        self._register("Lf bug")
+        data = self._sln_bytes()
+        self.assertFalse(data.startswith(BOM))
+        self.assertNotIn(b"\r\n", data)
+        self.assertIn(b"2026-07-22-BUG-001-lf-bug", data)
 
     def test_register_warns_loudly_when_the_sln_is_absent(self):
         os.remove(os.path.join(self.root, "MyVocaList.sln"))
