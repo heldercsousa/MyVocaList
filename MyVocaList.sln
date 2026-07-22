@@ -607,10 +607,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-scripts", "backlog-
 	ProjectSection(SolutionItems) = preProject
 		.claude\scripts\backlog\backlog_lib.py = .claude\scripts\backlog\backlog_lib.py
 		.claude\scripts\backlog\frontmatter.py = .claude\scripts\backlog\frontmatter.py
+		.claude\scripts\backlog\model.py = .claude\scripts\backlog\model.py
 		.claude\scripts\backlog\orphan_check.py = .claude\scripts\backlog\orphan_check.py
 		.claude\scripts\backlog\session_marker.py = .claude\scripts\backlog\session_marker.py
 		.claude\scripts\backlog\tests\test_backlog_lib.py = .claude\scripts\backlog\tests\test_backlog_lib.py
 		.claude\scripts\backlog\tests\test_frontmatter.py = .claude\scripts\backlog\tests\test_frontmatter.py
+		.claude\scripts\backlog\tests\test_model.py = .claude\scripts\backlog\tests\test_model.py
 		.claude\scripts\backlog\tests\test_orphan_check.py = .claude\scripts\backlog\tests\test_orphan_check.py
 	EndProjectSection
 EndProject
