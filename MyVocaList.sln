@@ -717,6 +717,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec-evolution-versioning",
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\design.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\design.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\plan.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\plan.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\tasks.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\tasks.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\task-log.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "per-agent-context-isolation", "per-agent-context-isolation", "{FA1234BC-0001-4000-8000-000000000044}"
