@@ -19,7 +19,7 @@
 - **Row Notes bound:** ≤ 3 sentences AND ≤ 55 whitespace-split words, pointer excluded. (REQ-SEV-09)
 - **Date prefix is always `YYYY-MM-DD`**; unknown day → `-01`. (REQ-SEV-00)
 - **The eight statuses** are exactly: `💡 Pending`, `📋 Spec`, `🗺️ Plan`, `🟢 Ready`, `🟡 In Progress`, `🔵 Deferred`, `🔴 Blocked`, `✅ Done`. `✅ Fixed` is an accepted terminal synonym of `✅ Done`. Terminal = `✅ Done` / `✅ Fixed`.
-- **`.sln` HARD GATE:** every file created/moved/deleted under `Docs/` or `.claude/` gets a `MyVocaList.sln` `SolutionItems` entry in the same commit. `.claude/library/*` and `.claude/rules/*` are NOT `.sln`-registered; `.claude/scripts/*` follows the same exemption.
+- **`.sln` HARD GATE:** every file created/moved/deleted under `Docs/` or `.claude/` gets a `MyVocaList.sln` `SolutionItems` entry in the same commit. `constraints-registry.md` names only `.claude/library/*` and `.claude/rules/*` as exempt. **`.claude/scripts/*` is unresolved — check `MyVocaList.sln` for existing `.claude\scripts\backlog\*` entries at the start of T1 and follow whatever the file already does.** If there are none, treat scripts as exempt and note it in the task-log for Helder to confirm; do not infer silently.
 - **Worktree mandatory** for T1–T7 (code). Docs land on `develop` (T8–T13 are docs/migration — see each task).
 - **English only** in all code, comments, and docs.
 
@@ -43,7 +43,9 @@
 | `Docs/Management/DevCycleCraft/spec-evolution-versioning/migration/BACKLOG-pre-migration.md` | frozen equivalence fixture | T8 |
 | `CLAUDE.md`, `.claude/rules/*`, `.claude/library/*` | the `amend:` bundle | T13 |
 
-**Dependency order (DRY Onion analogue):** T1 → T2 → T3 → T4 → T5 → T6 → T7 (each consumes the previous), then T8 → T9 → T10 → **[handoff seam]** → T11 → T12, then T13. All sequential; **no `[P]` parallel tasks** — the file-overlap check shows every task after T2 touches `model.py`'s contract or the same generated files.
+**Dependency order (DRY Onion analogue):** T0 → T1 → … → T7 → T7b (merge), then T8 → T9 → T10 → **[handoff seam]** → T11 → T12 → T12b, then T13. All sequential; **no `[P]` parallel tasks** — the file-overlap check shows every task after T2 touches `model.py`'s contract or the same generated files, and every migration task writes `MyVocaList.sln`.
+
+> **Sizing:** the migration tasks below (T9–T13) are written here as coherent *procedures*. They exceed the Rule 2 sizing bound (≤ 5 files / ≤ 2h) as single dispatches, so `tasks.md` **splits them by row group** — T9a/T9b/T9c, T10a/T10b, T11a/T11b/T11c, T12a/T12, T13a/T13b/T13c. Dispatch from `tasks.md`, not from the task headings here; the steps below apply to each split unchanged.
 
 ---
 
@@ -387,7 +389,9 @@ _CLOSED = re.compile(r"^\d{4}-\d{2}$")
 
 # REQ-SEV-09 banned content: the prose rule in BACKLOG.md's header, mechanized.
 _BANNED = (
-    (re.compile(r"\b[0-9a-f]{7,40}\b"), "commit hash"),
+    # Require at least one digit so ordinary a-f words ("defaced", "facade")
+    # are not misread as commit hashes mid-migration.
+    (re.compile(r"\b(?=[0-9a-f]{7,40}\b)[a-f]*[0-9][0-9a-f]*\b"), "commit hash"),
     (re.compile(r"\b(PASS|FAIL|CONDITIONAL PASS)\b"), "review verdict"),
     (re.compile(r"\bAC-\d+"), "AC number"),
     (re.compile(r"\b\d+\s*/\s*\d+\b"), "test count"),
@@ -425,12 +429,33 @@ class Item(object):
     def is_terminal(self):
         return self.status in TERMINAL
 
+    @property
+    def is_separator(self):
+        """Milestone/group rows are layout artifacts, not tracked work."""
+        return self.kind in ("milestone", "group")
+
+    def status_label(self):
+        """What goes in the Status cell. Separators carry free text there."""
+        return self.title if self.kind == "milestone" else self.status
+
     def __repr__(self):
         return "<Item {0} {1}>".format(self.id, self.rel_path)
 
 
 def _norm(path):
     return (path or "").replace("\\", "/")
+
+
+def _path_parent(rel_path):
+    """The folder that owns this item: strip the item folder and its bucket.
+
+    'BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-x/' ->
+    'BusinessFeatures/artists-songs'
+    """
+    parts = [p for p in _norm(rel_path).split("/") if p]
+    if len(parts) >= 2 and parts[-2] in ("bugs", "changes"):
+        return "/".join(parts[:-2])
+    return "/".join(parts[:-1])
 
 
 def _depth(rel_path):
@@ -445,14 +470,21 @@ def validate(items):
     items = list(items or [])
     seen = {}
     ids = set(i.id for i in items if i.id)
+    by_path = dict((i.rel_path.rstrip("/"), i) for i in items)
 
     for it in items:
         def err(msg):
             errors.append("{0}: {1}".format(it.rel_path, msg))
 
-        for key in REQUIRED:
+        # Separator rows (milestone/group) carry no goal, status or pointer --
+        # they are layout, not work. Everything else must be complete.
+        required = ("id", "title", "target") if it.is_separator else REQUIRED
+        for key in required:
             if not it.keys.get(key):
                 err("missing required key '{0}'".format(key))
+
+        if it.is_separator:
+            continue
 
         if it.status and it.status not in STATUSES:
             err("invalid status '{0}'".format(it.status))
@@ -480,6 +512,14 @@ def validate(items):
 
         if it.parent and it.parent not in ids:
             err("parent '{0}' names no existing item".format(it.parent))
+        elif it.parent:
+            # Design section 2: the declared parent must agree with the folder's
+            # path parent -- this is what catches a folder filed under the wrong
+            # feature (REQ-SEV-21).
+            declared = by_path.get(_path_parent(it.rel_path))
+            if declared is not None and declared.id != it.parent:
+                err("parent '{0}' disagrees with the folder's path parent '{1}'".format(
+                    it.parent, declared.id))
 
         if it.id:
             if it.id in seen:
@@ -557,11 +597,6 @@ def order_items(items):
         return len(SECTIONS)
 
     return sorted(items, key=lambda it: (section_index(it), chain(it)))
-
-
-def sort_key(item, index_by_id=None):
-    """Exposed for tests/debugging: the ordering key of a single item."""
-    return order_items([item])[0].rel_path
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**
@@ -727,21 +762,25 @@ class RenderError(Exception):
 
 def render_row(item, archived=False, parent_title=None):
     """One markdown table row. Archived rows drop depth arrows (design section 3)."""
+    # Separator artifacts (REQ-SEV-17). Column order is Target | Label | Status
+    # | Notes -- the milestone's marker belongs in the Status cell, matching
+    # the frozen fixture's `| 2026-06 | | 🏁 **MVP release** | |`.
     if item.kind == "milestone":
-        return "| {0} | | {1} | |".format(item.target, item.title)
+        return "| {0} | | {1} | |".format(item.target, item.status_label())
     if item.kind == "group":
-        return "| {0} | **{1}** | — | {2} |".format(item.target, item.title, item.goal)
+        return "| {0} | **{1}** | — | {2} |".format(item.target, item.title, item.goal or "")
 
     if archived:
+        # Archived rows drop depth arrows: the parent row is not in the file,
+        # so the arrows are meaningless and would break the byte-identical
+        # round-trip (REQ-SEV-13).
         label = item.title
         if parent_title:
             label = "{0} (under: {1})".format(label, parent_title)
+    elif item.depth:
+        label = "{0} {1}".format(ARROW * item.depth, item.title)
     else:
-        label = "{0}{1}".format(ARROW * item.depth, item.title)
-        if item.depth:
-            label = "{0} {1}".format(ARROW * item.depth, item.title).replace(
-                ARROW + " ", ARROW, item.depth - 1
-            ) if item.depth > 1 else "{0} {1}".format(ARROW, item.title)
+        label = item.title
 
     notes = "Goal: {0}".format(item.goal)
     if item.gate:
@@ -802,7 +841,9 @@ def _section_of(item, all_items):
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_render*.py" -v`
-Expected: PASS — 11 tests OK. If the arrow-spacing assertions fail, simplify `render_row`'s label branch to `"{0} {1}".format(ARROW * item.depth, item.title)` and adjust the two arrow tests to match — the exact spacing is settled against the frozen fixture in T12, not here.
+Expected: PASS — 11 tests OK.
+
+> **Arrow spacing is settled here, not later:** the label is always `"{arrows} {title}"` — arrows concatenated with no internal spaces, one space before the title, at every depth. This matches the frozen fixture's `| ↳ BUG-027: …` and `| ↳↳ Build new MD3-compliant…` rows. Do **not** adjust these tests to match an implementation; if they fail, the implementation is wrong (`testing.md § Builder Must Not Modify Tests`).
 
 - [ ] **Step 5: Commit**
 
@@ -901,8 +942,12 @@ def bucket_by_month(items):
     return buckets
 
 
-def render_archive(existing_text, items, month, titles_by_id=None):
-    """Splice one month's archive table into its file."""
+def render_archive(existing_text, items, month=None, titles_by_id=None):
+    """Splice one month's archive table into its file.
+
+    `month` is accepted for call-site clarity and future header rendering; the
+    table body itself is a pure function of `items`.
+    """
     body = render_table(
         items, head=TABLE_HEAD_ARCHIVE, archived=True, titles_by_id=titles_by_id or {}
     )
@@ -932,7 +977,7 @@ git commit -m "feat(backlog-gen): monthly archive rendering keyed by closed mont
 **Interfaces:**
 - Consumes: `frontmatter.parse` (T1), `model.*` (T2), `render.*` (T3, T4).
 - Produces:
-  - `walk(root) -> (items, parse_errors)` — every `README.md` under `Docs/Management/` with a frontmatter fence.
+  - `walk(root) -> (items, parse_errors)` — every `README.md` under `Docs/Management/` that **opens with a `---` fence**. A README with no fence is an ordinary doc and is skipped silently; a README that opens a fence and then fails to parse is a hard error.
   - `cmd_regen(root, check=False) -> int` — 0 = clean, 1 = would change / did change under `--check`, 2 = validation error.
   - `cmd_query(root, statuses) -> int`
   - Used by T6, T7.
@@ -975,8 +1020,25 @@ def readme(**over):
     keys = {"id": "F-1", "title": "Feature One", "status": PENDING,
             "target": "2026-07-21", "section": "BusinessFeatures", "goal": "Ship it."}
     keys.update(over)
-    lines = ["---"] + ["{0}: {1}".format(k, v) for k, v in sorted(keys.items())] + ["---", "", "Body."]
+    # An empty value means "omit this key" -- the parser rejects `key:` with no
+    # inline value, so a fixture must never emit one.
+    lines = ["---"] + ["{0}: {1}".format(k, v)
+                       for k, v in sorted(keys.items()) if v not in (None, "")]
+    lines += ["---", "", "Body."]
     return "\n".join(lines) + "\n"
+
+
+# A minimal but REAL .sln shape: sln_add_entry inserts before EndProjectSection,
+# so the fixture must contain one (matching constraints-registry.md).
+SLN_FIXTURE = (
+    "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+    "Project(\"{2150E333-8FDC-42A3-9474-1A3956D46DE8}\") = \"Docs\", \"Docs\", "
+    "\"{FA1234BC-0001-4000-8000-000000000001}\"\n"
+    "\tProjectSection(SolutionItems) = preProject\n"
+    "\tEndProjectSection\n"
+    "EndProject\n"
+    "Global\nEndGlobal\n"
+)
 
 
 class RegenTests(unittest.TestCase):
@@ -1027,7 +1089,7 @@ class RegenTests(unittest.TestCase):
         write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
                            "2026-07-21-BUG-1-x", "README.md"),
               readme(id="BUG-1", title="BUG-1: a thing (Major)", status="✅ Done",
-                     closed="2026-07", parent="F-1", severity="Major", section=""))
+                     closed="2026-07", parent="F-1", severity="Major", section=None))
         self.assertEqual(backlog_gen.cmd_regen(self.root), 0)
         archive = os.path.join(self.mgmt, "backlog-archive", "BACKLOG-ARCHIVE-2026-07.md")
         self.assertTrue(os.path.exists(archive))
@@ -1123,12 +1185,20 @@ def walk(root):
         full = os.path.join(dirpath, "README.md")
         rel_dir = _rel(root, dirpath)
         try:
-            keys, _body = parse(_read(full))
-        except FrontmatterError as exc:
-            errors.append("{0}/README.md: {1}".format(rel_dir, exc.reason))
-            continue
+            text = _read(full)
         except OSError as exc:
             errors.append("{0}/README.md: unreadable ({1})".format(rel_dir, exc))
+            continue
+        # A README with no frontmatter fence at all is an ordinary doc, not a
+        # backlog item -- skip it silently. Only a README that *starts* a fence
+        # and then fails to parse is an error (M3: pre-existing docs must not
+        # break regen).
+        if not text.lstrip().startswith("---"):
+            continue
+        try:
+            keys, _body = parse(text)
+        except FrontmatterError as exc:
+            errors.append("{0}/README.md: {1}".format(rel_dir, exc.reason))
             continue
         items.append(Item.from_frontmatter(keys, rel_dir + "/"))
     return items, errors
@@ -1138,6 +1208,8 @@ def _render_all(root, items):
     """Return {abs_path: new_text} for BACKLOG.md and every archive month."""
     outputs = {}
     backlog_path = os.path.join(root, MANAGEMENT, "BACKLOG.md")
+    if not os.path.exists(backlog_path):
+        raise IOError("BACKLOG.md not found at {0}".format(backlog_path))
     outputs[backlog_path] = render.render_backlog(_read(backlog_path), items)
 
     titles = dict((i.id, i.title) for i in items if i.id)
@@ -1266,8 +1338,7 @@ class RegisterTests(unittest.TestCase):
         self.mgmt = os.path.join(self.root, "Docs", "Management")
         write(os.path.join(self.mgmt, "BACKLOG.md"), BACKLOG_SKELETON)
         write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "README.md"), readme())
-        write(os.path.join(self.root, "MyVocaList.sln"),
-              "Microsoft Visual Studio Solution File\nGlobal\nEndGlobal\n")
+        write(os.path.join(self.root, "MyVocaList.sln"), SLN_FIXTURE)
 
     def tearDown(self):
         shutil.rmtree(self.root, ignore_errors=True)
@@ -1283,7 +1354,7 @@ class RegisterTests(unittest.TestCase):
         write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
                            "2026-07-21-BUG-050-x", "README.md"),
               readme(id="BUG-050", title="BUG-050: x (Major)", severity="Major",
-                     parent="F-1", section=""))
+                     parent="F-1", section=None))
         self.assertEqual(backlog_gen.next_bug_id(self.root), "BUG-051")
 
     def test_next_bug_id_also_scans_archives_so_ids_are_never_reused(self):
@@ -1343,6 +1414,31 @@ class RegisterTests(unittest.TestCase):
         with open(os.path.join(self.mgmt, "BusinessFeatures", "feat", "README.md"),
                   encoding="utf-8") as fh:
             return fh.read()
+
+    def test_status_preserves_unknown_frontmatter_keys(self):
+        path = os.path.join(self.mgmt, "BusinessFeatures", "feat", "README.md")
+        write(path, readme(reviewer="Helder"))
+        backlog_gen.cmd_status(self.root, "F-1", "\U0001F7E1 In Progress", None)
+        with open(path, encoding="utf-8") as fh:
+            self.assertIn("reviewer: Helder", fh.read())
+
+    def test_renumber_renames_folder_and_rewrites_id(self):
+        write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
+                           "2026-07-21-BUG-001-dup", "README.md"),
+              readme(id="BUG-001", title="BUG-001: dup (Major)", severity="Major",
+                     parent="F-1", section=None, kind="bug"))
+        self.assertEqual(backlog_gen.cmd_renumber(self.root, "BUG-001"), 0)
+        self.assertTrue(os.path.isdir(os.path.join(
+            self.mgmt, "BusinessFeatures", "feat", "bugs", "2026-07-21-BUG-002-dup")))
+        with open(os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
+                               "2026-07-21-BUG-002-dup", "README.md"),
+                  encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("id: BUG-002", text)
+        self.assertIn("BUG-002: dup", text)
+
+    def test_renumber_on_unknown_id_changes_nothing(self):
+        self.assertEqual(backlog_gen.cmd_renumber(self.root, "BUG-999"), 2)
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -1408,9 +1504,18 @@ def _folder_for(root, items, parent_id, kind, today, item_id, title):
 
 
 def _readme_text(keys, body):
+    """Serialize frontmatter: known keys in canonical order, then any others.
+
+    The trailing pass matters -- re-serializing on `status` must never silently
+    drop a key an author added or a key a later spec version introduces.
+    """
+    ordered = ("id", "title", "status", "severity", "target", "section",
+               "parent", "goal", "gate", "pointer", "closed", "order", "kind")
     lines = ["---"]
-    for key in ("id", "title", "status", "severity", "target", "section",
-                "parent", "goal", "gate", "pointer", "closed", "order", "kind"):
+    for key in ordered:
+        if keys.get(key):
+            lines.append("{0}: {1}".format(key, _quote(keys[key])))
+    for key in sorted(k for k in keys if k not in ordered):
         if keys.get(key):
             lines.append("{0}: {1}".format(key, _quote(keys[key])))
     lines.append("---")
@@ -1557,23 +1662,29 @@ Then extend `build_parser()` with the two verbs and wire them in `main()`:
     register.add_argument("--goal", required=True)
     register.add_argument("--gate")
     register.add_argument("--id", dest="item_id", help="assert the expected id")
+    # REQ-SEV-11a / design section 3: --renumber belongs to `register`, and when
+    # present it is the ONLY argument needed, so the otherwise-required flags
+    # must not be enforced. Hence the separate subparser rather than a flag on
+    # an argument group that already has required=True members.
+    renumber = sub.add_parser("renumber", help="reassign a colliding BUG id")
+    renumber.add_argument("item_id")
 
     status = sub.add_parser("status", help="set an item's status")
     status.add_argument("item_id")
     status.add_argument("new_status")
     status.add_argument("--closed", help="YYYY-MM, required for a terminal status")
-    status.add_argument("--renumber", action="store_true",
-                        help="reassign a colliding BUG id instead of setting status")
 ```
+
+Note the deviation from design §3's literal `register --renumber <id>` spelling: argparse cannot express "these six flags are required *unless* `--renumber` is passed" without a custom action. `renumber <id>` is the same operation with a reachable CLI. Record this in the task-log as a spec-text deviation (behaviour unchanged).
 
 ```python
     if args.verb == "register":
         return cmd_register(args.root, args.section, args.parent, args.kind,
                             args.severity, args.title, args.goal, args.gate,
                             item_id=args.item_id)
+    if args.verb == "renumber":
+        return cmd_renumber(args.root, args.item_id)
     if args.verb == "status":
-        if args.renumber:
-            return cmd_renumber(args.root, args.item_id)
         return cmd_status(args.root, args.item_id, args.new_status, args.closed)
 ```
 
@@ -1591,23 +1702,19 @@ git commit -m "feat(backlog-gen): register/status/renumber with atomic .sln writ
 
 ---
 
-### Task 7: Hook wiring — widen `orphan_check`, add the blocking pre-commit gate
+### Task 7: Widen `orphan_check`'s watch set
+
+> **The blocking pre-commit gate is NOT installed here — it moved to T12b.** Installing it now would block T8–T11's own commits: those tasks deliberately leave BACKLOG.md stale (`regen --check` exits 1 mid-migration, by design), so a blocking gate would make the migration uncommittable. The gate goes in only once the equivalence gate proves regeneration is clean.
 
 **Files:**
-- Modify: `.claude/scripts/backlog/orphan_check.py` (`backlog_changed_this_session` only)
-- Modify: `.claude/githooks/pre-commit`
+- Modify: `.claude/scripts/backlog/orphan_check.py` (`backlog_changed_this_session` + the new watch helpers)
 - Create: `.claude/scripts/backlog/tests/test_orphan_check_widening.py`
 
 **Interfaces:**
 - Consumes: T5's `cmd_regen(check=True)`.
 - Produces: no new API; behavioural change only.
 
-- [ ] **Step 1: Read the current hook before editing it**
-
-Run: `cat .claude/githooks/pre-commit`
-Note the existing `.cs`/`.xaml` build+test gate and its early-exit path — the new check is **added alongside**, never replacing it.
-
-- [ ] **Step 2: Write the failing test**
+- [ ] **Step 1: Write the failing test**
 
 ```python
 # .claude/scripts/backlog/tests/test_orphan_check_widening.py
@@ -1639,12 +1746,12 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 3: Run the test to verify it fails**
+- [ ] **Step 2: Run the test to verify it fails**
 
 Run: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_orphan_check_widening*.py" -v`
 Expected: FAIL — `AttributeError: module 'orphan_check' has no attribute 'WATCHED_PATHS'`.
 
-- [ ] **Step 4: Widen `orphan_check.py`**
+- [ ] **Step 3: Widen `orphan_check.py`**
 
 Add near the top:
 
@@ -1662,60 +1769,54 @@ def is_watched(path):
     return norm.startswith("Docs/Management/") and norm.endswith("/README.md")
 ```
 
-Then in `backlog_changed_this_session`, replace the three `-- backlog` pathspecs with the widened pair and filter the results through `is_watched`:
+Then rewrite `backlog_changed_this_session`'s three git calls. Replace each `-- backlog` pathspec with the widened pair and filter the output through `is_watched`. The full replacement body:
 
 ```python
     backlog = "Docs/Management/BACKLOG.md"
     readmes = "Docs/Management"
-    ...
+    try:
+        # 1. Working-tree changes vs HEAD.
         wt = subprocess.run(
             ["git", "diff", "--name-only", "HEAD", "--", backlog, readmes],
             capture_output=True, text=True,
         )
         if wt.returncode == 0 and any(is_watched(p) for p in wt.stdout.split()):
             return True
+        # 2. Untracked files (a freshly registered item folder).
+        others = subprocess.run(
+            ["git", "ls-files", "--others", "--exclude-standard", "--", backlog, readmes],
+            capture_output=True, text=True,
+        )
+        if others.returncode == 0 and any(is_watched(p) for p in others.stdout.split()):
+            return True
+        # 3. In-session commits since the session-start ref.
+        start_ref = _session_start_ref()
+        if start_ref:
+            committed = subprocess.run(
+                ["git", "diff", "--name-only", "{0}..HEAD".format(start_ref),
+                 "--", backlog, readmes],
+                capture_output=True, text=True,
+            )
+            if committed.returncode == 0 and any(is_watched(p) for p in committed.stdout.split()):
+                return True
+        return False
+    except Exception:
+        return False
 ```
 
-Apply the same treatment to the `git ls-files --others` call and the in-session commit diff. The fail-open `except Exception: return False` stays exactly as it is.
+The fail-open `except Exception: return False` is preserved exactly — `orphan_check.py` must never block a session (INV-1).
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [ ] **Step 4: Run the test to verify it passes**
 
 Run: `python -m unittest discover -s .claude/scripts/backlog/tests -v`
 Expected: PASS — all tests OK.
 
-- [ ] **Step 6: Add the blocking gate to `.claude/githooks/pre-commit`**
-
-Append, after the existing build/test gate:
-
-```sh
-# BACKLOG generation gate (R-2, approved blocking).
-# Fires only when frontmatter or the generated views are staged. Exact byte
-# comparison -- no false positives, which is why this may block (unlike the
-# advisory orphan_check.py, which classifies prose and can be wrong).
-if git diff --cached --name-only | grep -qE '^Docs/Management/.*(README\.md|BACKLOG.*\.md)$'; then
-    if ! python .claude/scripts/backlog/backlog_gen.py regen --check; then
-        echo "pre-commit: BACKLOG is stale or invalid."
-        echo "  fix: python .claude/scripts/backlog/backlog_gen.py regen"
-        exit 1
-    fi
-    echo "pre-commit: BACKLOG generation gate OK."
-fi
-```
-
-- [ ] **Step 7: Verify the hook end-to-end**
-
-Run:
-```bash
-python .claude/scripts/backlog/backlog_gen.py regen --check; echo "exit=$?"
-```
-Expected before migration: exit 2 (no fences in BACKLOG.md yet) — **this is expected and is fixed by T8**. Record the output in the task-log; do not "fix" it here.
-
-- [ ] **Step 8: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add .claude/scripts/backlog/orphan_check.py .claude/githooks/pre-commit \
+git add .claude/scripts/backlog/orphan_check.py \
         .claude/scripts/backlog/tests/test_orphan_check_widening.py
-git commit -m "feat(backlog-gen): widen orphan_check watch set + blocking pre-commit regen gate (T7)"
+git commit -m "feat(backlog-gen): widen orphan_check watch set to item READMEs (T7)"
 ```
 
 ---
@@ -1799,6 +1900,8 @@ Full artist/song catalog management. Specs: `requirements.md`, `design.md`, `tas
 
 Copy `target`, `status`, `goal` and `gate` **verbatim** from the frozen fixture — this task transcribes, it does not rewrite. Where the existing Notes exceed the REQ-SEV-09 bound, move the overflow sentence into the README body and record the row in the task-log as an allowed diff class (d).
 
+**Assign `order:` while transcribing (REQ-SEV-17 / M5).** The frozen fixture is *not* in pure target order — Helder has curated positions. For each row, compare its fixture position with where the natural sort `(target, path)` would place it; wherever they differ, set `order:` to the row's **1-based position within its section × 10** (10, 20, 30 …). The ×10 spacing leaves room to insert later without renumbering. This is what makes T12's equivalence gate pass — skipping it guarantees row-order hunks that fit none of REQ-SEV-25's four permitted diff classes.
+
 Rows whose pointer is `Docs/Management/cross-cutting-log.md` get a folder under `Docs/Management/cross-cutting/<slug>/` whose body links back to the log (REQ-SEV-28) — the log is retained, never deleted.
 
 - [ ] **Step 3: Validate continuously**
@@ -1851,7 +1954,24 @@ Root cause: `SelectArtist` never sets `IsArtistLocked = true`.
 
 - [ ] **Step 3: Add the two separator rows**
 
-Create `Docs/Management/cross-cutting/README.md` with `kind: group`, and a `kind: milestone` item for the `🏁 MVP release` line, so REQ-SEV-17's non-row artifacts survive.
+Create `Docs/Management/cross-cutting/README.md` with `kind: group`, and the milestone at `Docs/Management/milestones/2026-06-mvp-release/README.md` with:
+
+```markdown
+---
+id: mvp-release
+title: "🏁 **MVP release**"
+target: 2026-06
+section: BusinessFeatures
+kind: milestone
+order: 500
+---
+
+# MVP release
+
+Layout separator — marks where the MVP line falls in the Business Features table.
+```
+
+Separators carry no `status`, `goal` or `pointer`; `validate()` exempts them (`is_separator`). Set `order:` from their fixture position exactly as in T9.
 
 - [ ] **Step 4: Validate**
 
@@ -1967,6 +2087,65 @@ git commit -m "docs(backlog-gen): migrate archives + pass the equivalence gate (
 
 ---
 
+### Task 12b: Install the blocking pre-commit gate
+
+> Deliberately last-but-one: the gate can only be switched on once `regen --check` exits 0 on real data (proved by T12 step 6). Installing it earlier makes the migration itself uncommittable.
+
+**Files:**
+- Modify: `.claude/githooks/pre-commit`
+
+- [ ] **Step 1: Read the current hook before editing it**
+
+Run: `cat .claude/githooks/pre-commit`
+Note the existing `.cs`/`.xaml` build+test gate and its early-exit path — the new check is **added alongside**, never replacing it.
+
+- [ ] **Step 2: Confirm the precondition holds**
+
+Run: `python .claude/scripts/backlog/backlog_gen.py regen --check; echo "exit=$?"`
+Expected: **exit 0.** If it is not 0, stop — T12 is not actually complete and the gate must not be installed.
+
+- [ ] **Step 3: Append the gate**
+
+```sh
+# BACKLOG generation gate (R-2, approved blocking 2026-07-22).
+# Fires only when frontmatter or a generated view is staged. This is an exact
+# byte comparison with no false positives, which is why it may block -- unlike
+# the advisory orphan_check.py, which classifies prose and can be wrong.
+if git diff --cached --name-only | grep -qE '^Docs/Management/.*(README\.md|BACKLOG.*\.md)$'; then
+    if ! python .claude/scripts/backlog/backlog_gen.py regen --check; then
+        echo "pre-commit: BACKLOG is stale or invalid."
+        echo "  fix: python .claude/scripts/backlog/backlog_gen.py regen"
+        exit 1
+    fi
+    echo "pre-commit: BACKLOG generation gate OK."
+fi
+```
+
+- [ ] **Step 4: Prove the gate both blocks and passes**
+
+```bash
+# Should PASS (tree is clean):
+git commit --allow-empty -m "test: gate passes" && git reset --hard HEAD~1
+# Should BLOCK: dirty a row, then try to commit it.
+python - <<'PY'
+import re, pathlib
+p = pathlib.Path("Docs/Management/BACKLOG.md")
+p.write_text(p.read_text(encoding="utf-8") + "\n| x | y | z | w |\n", encoding="utf-8")
+PY
+git add Docs/Management/BACKLOG.md && git commit -m "test: gate blocks"; echo "exit=$?"
+git checkout -- Docs/Management/BACKLOG.md
+```
+Expected: the second commit is rejected with the "BACKLOG is stale or invalid" message and a non-zero exit. Record both outcomes in the task-log.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add .claude/githooks/pre-commit
+git commit -m "feat(backlog-gen): install the blocking pre-commit regen gate (T12b)"
+```
+
+---
+
 ### Task 13: The `amend:` bundle
 
 **Files:** every file in REQ-SEV-30's table + `Docs/Changelog/changelog.md`.
@@ -2042,20 +2221,22 @@ moved. Spec: Docs/Management/DevCycleCraft/spec-evolution-versioning/."
 
 | REQ | Task |
 |-----|------|
-| SEV-00 | T2 (`target_sort`), T11 step 3 |
+| SEV-00 | T6 (`_folder_for` builds the `YYYY-MM-DD` prefix; `register` passes today), T11 step 3 (the `-01` padding for month-only migrated targets). *Not* `target_sort` — that normalizes sort keys, a different concern. |
 | SEV-01/02/05 | T9, T10, T11 |
 | SEV-03 | T2 (Minor validation), T6 (`register` rejects Minor) |
 | SEV-04/28 | T9 step 2 (cross-cutting folders) |
 | SEV-06 | T6 (`sln_add_entry`), T8–T12 `.sln` steps |
 | SEV-07/08/10 | T1, T2 |
 | SEV-09 | T2 (`notes_violations`) |
-| SEV-11/11a | T6 (`next_bug_id`, `cmd_register`, `cmd_renumber`) |
+| SEV-11/11a | T6 (`next_bug_id` scanning live + archives, `cmd_register`, `cmd_renumber` via the `renumber` subcommand — all three tested), T12b (the blocking gate that catches a duplicate at merge) |
 | SEV-12 | T6 (`cmd_status`) |
 | SEV-13/15 | T5 (`cmd_regen`, `--check`), T12 step 6 |
 | SEV-14/20 | T3 (`splice`), T4 (`ARCHIVE_TEMPLATE`) |
-| SEV-16/17 | T3 (`render_backlog`, `order_items`) |
+| SEV-16 | T3 (`render_backlog` filters terminal) |
+| SEV-17 | T2 (`order_items`, `target_sort`) · T3 (separator rendering) · **T9 step 2 + T10 step 3 (`order:` transcription — this is what makes the equivalence gate pass)** |
 | SEV-18/19 | T4 (`bucket_by_month`), T2 (closed validation) |
-| SEV-21/21a | T5 (abort), T6 (atomic register, unknown id), T5 (`query_lines` skip) |
+| SEV-21 | T2 (`validate`, incl. the path-parent check and the Minor-severity rule), T5 (abort-without-writing) |
+| SEV-21a | T6 (atomic `register`, unknown-id `status`/`renumber`), T5 (`query_lines` skips a bad file) |
 | SEV-22/23/24 | T5 (`query`), T13 step 2 |
 | SEV-25/26/27/29 | T11, T12 |
 | SEV-30/31 | T13 |
