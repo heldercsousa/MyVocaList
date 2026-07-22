@@ -21,6 +21,9 @@ ARCHIVE_DIR = "backlog-archive"
 BUG_ID = re.compile(r"\bBUG-(\d{1,4})\b")
 
 
+_UTF8_BOM = b"\xef\xbb\xbf"
+
+
 def _read(path):
     # utf-8-sig transparently strips a leading BOM and reads plain UTF-8
     # unchanged. Without it a BOM'd README is not lstrip()-able to '---' and
@@ -35,6 +38,28 @@ def _write(path, text):
         os.makedirs(directory)
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(text)
+
+
+def _read_sln(path):
+    """Read MyVocaList.sln byte-preservingly: BOM state and CRLF are kept.
+
+    The markdown path (_read/_write) normalises both, which is right for
+    generated docs but wrong here: Visual Studio writes the .sln as UTF-8 with
+    BOM and CRLF, so normalising it makes every registration rewrite the whole
+    file and VS churn it straight back.
+    """
+    with open(path, "rb") as fh:
+        data = fh.read()
+    has_bom = data.startswith(_UTF8_BOM)
+    if has_bom:
+        data = data[len(_UTF8_BOM):]
+    return data.decode("utf-8"), has_bom
+
+
+def _write_sln(path, text, has_bom):
+    data = text.encode("utf-8")
+    with open(path, "wb") as fh:
+        fh.write(_UTF8_BOM + data if has_bom else data)
 
 
 def _rel(root, path):
@@ -219,8 +244,9 @@ def sln_add_entry(sln_text, rel_path):
     win_path = rel_path.replace("/", "\\")
     if win_path in sln_text:
         return sln_text
-    # Match the marker newline-agnostically: a VS-written .sln may reach here
-    # with CRLF line endings if it was read in binary/newline-preserving mode.
+    # Match the marker newline-agnostically: _read_sln is byte-preserving, so a
+    # VS-written .sln DOES reach here with CRLF. The inserted line must copy the
+    # surrounding line ending or the file gains a mixed-EOL row.
     match = re.search(r"\tEndProjectSection\r?\n", sln_text)
     if match is None:
         return sln_text
@@ -293,18 +319,21 @@ def cmd_register(root, section, parent, kind, severity, title, goal, gate,
 
     sln_path = os.path.join(root, "MyVocaList.sln")
     staged = {readme_path: _readme_text(keys, body)}
+    staged_sln = None
     if os.path.exists(sln_path):
-        sln_text = _read(sln_path)
+        sln_text, sln_bom = _read_sln(sln_path)
         updated = sln_add_entry(sln_text, rel_readme)
         if updated == sln_text and rel_readme.replace("/", "\\") not in sln_text:
             _warn_sln(rel_readme, "no SolutionItems section found in MyVocaList.sln")
         else:
-            staged[sln_path] = updated
+            staged_sln = (updated, sln_bom)
     else:
         _warn_sln(rel_readme, "MyVocaList.sln not found at {0}".format(sln_path))
 
     for path, text in staged.items():
         _write(path, text)
+    if staged_sln is not None:
+        _write_sln(sln_path, staged_sln[0], staged_sln[1])
     return cmd_regen(root)
 
 
