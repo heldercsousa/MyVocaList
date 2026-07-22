@@ -283,7 +283,7 @@ public partial class SongFormViewModel : ViewModelBase
     private async Task SearchArtistsAsync(string term)
     {
         if (string.IsNullOrWhiteSpace(term)) { ArtistSuggestions = []; return; }
-        var gen = ++_searchGeneration; // BUG-051: guards against a slower earlier query clobbering a newer one
+        var gen = Interlocked.Increment(ref _searchGeneration); // BUG-051: guards against a slower earlier query clobbering a newer one
         var results = await _artistService.SearchArtistsByNameAsync(term, maxResults: 5);
         if (gen != _searchGeneration) return;
         RunOnUiThread(() =>
@@ -331,6 +331,7 @@ public partial class SongFormViewModel : ViewModelBase
         {
             ArtistHasError = true;
             ArtistErrorText = message;
+            ArtistSuggestions = []; // M3: clear stale suggestions so the dropdown doesn't linger behind the error
             // REQ-ACREATE-05: retain ArtistSearchText — no clear, no lock, no dialog.
         }
     }
@@ -345,7 +346,10 @@ public partial class SongFormViewModel : ViewModelBase
         if (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0)
         {
             ArtistSuggestions = [];
-            ArtistHasError = true;
+            // REQ-ACREATE-03: empty text is not an "unmatched" state — only flag an error
+            // when the user actually typed something that didn't resolve to a selection.
+            if (!string.IsNullOrWhiteSpace(ArtistSearchText))
+                ArtistHasError = true;
         }
         else
         {
