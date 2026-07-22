@@ -157,7 +157,49 @@ supposed to surface.
   Demo: full suite green (was 113); per-file sha256 byte-preservation proof that re-fencing changed only fence lines; `splice` resolves both regions in all 5 files; `regen --check` exits 0 or 1, never a `RenderError`.
   > Ordering: **before T10a**, not before T12. T10a's 6 archived bug READMEs route through `render_archive` → `splice`, so they must be verified against the final region names, or T10a's evidence is written against a layout that T9e then invalidates.
 
-> **⏸ SESSION HALT [2026-07-22] — resume here.** T9e is **implemented, committed (`407aa3d`) and
+> **✅ T9e MERGED [2026-07-22] — Elevated review verdict: PASS WITH FINDINGS.** 125 tests green on
+> develop. Independently re-verified by the reviewer: test count, **zero removed test lines**,
+> byte preservation on all 5 archive files, headings outside every fence, idempotency sound
+> (distinct region names ⇒ re-splice is a fixed point; a missing fence raises rather than appends).
+> **All three findings are about claims made AROUND T9e, not the code in it.** Work owed:
+>
+> - **[ ] F1 (blocking T12) — the `regen --check` demo statements are invalid; correct them.**
+>   `cmd_regen` does `if errors: return 2` **before** `outputs = _render_all(...)`. Exit 2
+>   confirmed pre-existing at develop HEAD (banned-content on this feature's own folder), so T9e
+>   did not break it — but it means **`regen --check` has never once executed `render_archive`**
+>   during this migration and cannot until the validation error clears. *"`regen --check` exits 0"
+>   is a validation gate that never reaches the renderer — it is NOT an archive equivalence gate.*
+>   The in-process splice proofs are the ONLY evidence archive rendering is correct. T12 must either
+>   clear the validation error first or invoke `_render_all`/`render_archive` directly. Leaving the
+>   statement as written would let a green-looking gate certify equivalence it never tested.
+> - **[ ] F2 (own follow-up task, before T12a) — `_render_all` must pass `all_items=items`.**
+>   It currently calls `render_archive(existing, month_items, month, titles)`, so parent resolution
+>   sees only that month's bucket. A bug whose parent closed in a different month (or is still open)
+>   falls through to the folder prefix; `BusinessFeatures/`/`DevCycleCraft/` survive, but
+>   **`cross-cutting/` is not in `ARCHIVE_SECTIONS` and raises** — and `Docs/Management/cross-cutting/`
+>   is a real, populated directory. The first archived `cross-cutting` bug without an explicit
+>   `section:` hard-fails `regen`. Currently masked by F1. Fail-loud itself is **upheld as correct**
+>   (REQ-SEV-18: mis-filing shades into dropping, and a mis-filed row *looks* successful). Passing
+>   the full pool costs nothing — `_render_all` already holds `items` — and leaves the raise for
+>   genuinely unplaceable rows. Not doing it in T9e was procedurally correct (`backlog_gen.py` was
+>   outside its `Files owned`; touching it would have been Rule 2 bundling).
+> - **[ ] F3 (T13-class, but must land BEFORE T12) — pin `.gitattributes`.**
+>   All 5 archive files are CRLF in the worktree, LF in the blob; `core.autocrlf=true` and
+>   `.gitattributes` pins only `*.sh`, `pre-commit`, `.claude/scripts/**/*.py`. (T9d's log recorded
+>   LF because it measured the blob, not the working tree — the two logs measure different things
+>   and should say which.) `_read`/`_write` round-trip working-tree bytes and `cmd_regen` decides
+>   staleness with `current != text`, so on a differently-configured checkout `regen` can rewrite
+>   line endings across whole files and report them stale for reasons unrelated to content —
+>   **a whole-file diff that is 100% line endings is indistinguishable from one that is not**, which
+>   makes T12's gate impossible to classify honestly. Pin `Docs/Management/backlog-archive/*.md`
+>   and `BACKLOG.md` to `text eol=lf`.
+>
+> **Environment hazard found during the review — do not repeat:** `grep` is rewritten by the `rtk`
+> proxy into a search tool, which silently corrupted the reviewer's first fence-stripping run and
+> produced bogus "DIFFERS" output. **Never use `grep` for byte-exact work in this repo** — use
+> Python.
+
+> **⏸ SESSION HALT [2026-07-22] — superseded by the merge above.** T9e was **committed (`407aa3d`) and
 > pushed** to `feature/archive-regions` (worktree `../mvl-archive-regions`), status **To Review**,
 > **NOT merged**. Its Elevated code review was dispatched and **died mid-run on an API session
 > limit (resets 11:40am America/Sao_Paulo) having produced zero findings** — so T9e is unreviewed,
