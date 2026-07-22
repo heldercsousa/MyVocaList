@@ -220,6 +220,29 @@ supposed to surface.
 >   name mechanically (REQ-SEV-11), so a hand-made folder that departs from the pattern is exactly
 >   the drift the generator exists to prevent. A `git mv` (history follows) + `id:`/pointer update.
 >
+> ### Open for Helder at T12 (accumulating — audit as a set, not one at a time)
+>
+> **(i) Agent-authored `Goal:` sentences** (decision-1/2 class; no option existed that avoided
+> authoring). So far: **Windows version** row; **BUG-029, BUG-030, BUG-031/032** (their rows carry
+> no Goal at all — Notes open `Deferred:` / `Answered by Helder 2026-07-10:` — and
+> `model.REQUIRED` mandates one). Plus the decision-2 rows (orders 20, 100, 110, 150, 520 + the
+> blocked BACKLOG-first Registration Enforcement row). **Every one is text Helder would normally
+> write.**
+>
+> **(ii) Forced respellings — four so far, all from ONE pattern.** `model._BANNED`'s test-count
+> regex `\b\d+\s*/\s*\d+\b` has forced: `Mask="00/00"` (T10a), `BUG-050/051/052` (T10b),
+> `after 050/051` (T11a), and would have hit `BUG-031/032` except that `notes_violations` scans
+> only `goal`+`gate`, not `title`. **Four incidents from one rule is a signal the pattern is too
+> broad, not that the content was wrong** — decide at T12 whether to narrow it (e.g. require a
+> `green`/`tests`/`passed` context word) rather than keep rewording real content around it.
+>
+> **(iii) Two bugs carry no `severity:`** — BUG-030 and BUG-031/032 are tagged `(spec gap)`, not
+> Critical/Major/Minor. Left unset rather than invented. This is a literal edge of REQ-SEV-01
+> ("every Critical or Major bug … lives at …"): they are neither, yet own folders because every
+> live row needs one. Observation, not a blocker.
+>
+> **(iv) BUG-028 folder name** — see F6.
+>
 > **Environment hazard found during the review — do not repeat:** `grep` is rewritten by the `rtk`
 > proxy into a search tool, which silently corrupted the reviewer's first fence-stripping run and
 > produced bogus "DIFFERS" output. **Never use `grep` for byte-exact work in this repo** — use
