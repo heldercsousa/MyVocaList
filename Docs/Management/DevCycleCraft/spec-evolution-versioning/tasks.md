@@ -204,6 +204,8 @@ supposed to surface.
 >   Fix `_section_from_path` and the `all_items` call site in the same task, or the fallback chain is
 >   two-thirds fictional.
 >
+> - **[x] F6 (found by T11a; DONE in T11c 2026-07-22) — T10a's `BUG-028-artistspage-trailing-catalog-button-noop/` folder had no date prefix**, leaving two naming conventions in one `bugs/` directory. Renamed with `git mv` to `2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/` (date = the row's own `target: 2026-07-03`, not invented); its `pointer:` and both `.sln` entries were updated in the same commit. **Not in F6's scope and untouched:** the six *legacy* folders (BUG-017/018/019/021/023/024) still carry no date prefix.
+>
 > - **[ ] F5 (found by T10b; own task, T13-adjacent) — separators bypass every validation check.**
 >   `model.validate` does `if it.is_separator: continue` **before** any field check, so a
 >   `kind: milestone` / `kind: group` row can carry an invalid `target`, a bogus `severity` or a
@@ -270,7 +272,7 @@ supposed to surface.
 - [x] **T11b — BUG-027/029/030/031/032 get folders** (4 folders + READMEs written — **four rows, not five**: BUG-031/032 is a single BACKLOG row; pointer relocation, three agent-authored `Goal:` sentences and BUG-029's `Deferred:`→`Gate:` relabelling declared as T12 hunks — see task-log T11b)
   Consumes: T11a. Each back-links `BusinessFeatures/artists-songs/task-log.md`; preserve each row's `🔵 Deferred` status and its deferral reason as `gate:`.
   Files owned: 5 folders, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
-- [ ] **T11c — BUG-012 flat file → folder**
+- [x] **T11c — BUG-012 flat file → folder** (moved to `venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/`; **F6 done in the same task** — T10a's `BUG-028-…` folder renamed to `2026-07-03-BUG-028-…`; two T12 hunks declared — see task-log T11c)
   Consumes: T11b. `git mv` so history follows; `-01` day per REQ-SEV-00.
   Files owned: 1 folder, `MyVocaList.sln`. Risk: Medium (`git mv` history). Review lane: Standard. Demo: `git log --follow` shows pre-move commits.
 - [ ] **T12a — Archived rows → item folders**
