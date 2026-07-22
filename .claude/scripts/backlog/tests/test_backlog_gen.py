@@ -1,8 +1,10 @@
+import io
 import os
 import shutil
 import sys
 import tempfile
 import unittest
+from contextlib import contextmanager
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import backlog_gen  # noqa: E402
@@ -53,6 +55,17 @@ SLN_FIXTURE = (
 )
 
 
+@contextmanager
+def captured_stderr():
+    """Capture sys.stderr writes for warning assertions."""
+    original, buffer = sys.stderr, io.StringIO()
+    sys.stderr = buffer
+    try:
+        yield buffer
+    finally:
+        sys.stderr = original
+
+
 class RegenTests(unittest.TestCase):
     def setUp(self):
         self.root = tempfile.mkdtemp()
@@ -96,6 +109,17 @@ class RegenTests(unittest.TestCase):
         before = self._backlog()
         self.assertEqual(backlog_gen.cmd_regen(self.root), 2)
         self.assertEqual(before, self._backlog())
+
+    def test_regen_includes_a_readme_written_with_a_utf8_bom(self):
+        # A BOM is not whitespace, so lstrip() leaves it in front of '---' and
+        # the file used to take the silent-skip branch: a valid item vanished
+        # from the backlog with exit code 0.
+        path = os.path.join(self.mgmt, "BusinessFeatures", "bom", "README.md")
+        os.makedirs(os.path.dirname(path))
+        with open(path, "w", encoding="utf-8-sig", newline="\n") as fh:
+            fh.write(readme(id="F-BOM", title="Bom Feature"))
+        self.assertEqual(backlog_gen.cmd_regen(self.root), 0)
+        self.assertIn("Bom Feature", self._backlog())
 
     def test_terminal_item_is_written_to_its_archive_month(self):
         write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
@@ -198,13 +222,53 @@ class RegisterTests(unittest.TestCase):
             title="Cosmetic", goal="Tidy.", gate=None, today="2026-07-22")
         self.assertEqual(rc, 2)
 
-    def test_register_is_atomic_nothing_written_on_failure(self):
+    def test_register_rejects_unknown_parent_before_staging(self):
+        # Note: this is a PRE-FLIGHT rejection (the parent lookup happens before
+        # anything is staged), so it does not exercise atomicity -- see
+        # test_register_writes_nothing_when_the_new_row_fails_validation.
         before = sorted(os.listdir(os.path.join(self.mgmt, "BusinessFeatures", "feat")))
         backlog_gen.cmd_register(
             self.root, section=None, parent="ghost", kind="bug", severity="Major",
             title="Orphan", goal="x.", gate=None, today="2026-07-22")
         self.assertEqual(before, sorted(os.listdir(
             os.path.join(self.mgmt, "BusinessFeatures", "feat"))))
+
+    def test_register_writes_nothing_when_the_new_row_fails_validation(self):
+        # The goal trips the REQ-SEV-09 banned-content rule, which is only
+        # detectable once the row exists -- a post-write-class failure. The
+        # folder must not survive, and later regens must stay clean.
+        with captured_stderr():
+            rc = backlog_gen.cmd_register(
+                self.root, section=None, parent="F-1", kind="bug", severity="Major",
+                title="Bad notes", goal="See notes.cs for the cause.", gate=None,
+                today="2026-07-22")
+        self.assertNotEqual(rc, 0)
+        folder = os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
+                              "2026-07-22-BUG-001-bad-notes")
+        self.assertFalse(os.path.exists(folder))
+        self.assertEqual(backlog_gen.cmd_regen(self.root), 0)
+
+    def test_register_adds_the_sln_entry_to_a_crlf_solution_file(self):
+        # A VS-written .sln uses CRLF, so the EndProjectSection marker must be
+        # matched newline-agnostically or the HARD GATE is silently unmet.
+        with open(os.path.join(self.root, "MyVocaList.sln"), "w",
+                  encoding="utf-8", newline="") as fh:
+            fh.write(SLN_FIXTURE.replace("\n", "\r\n"))
+        backlog_gen.cmd_register(
+            self.root, section=None, parent="F-1", kind="bug", severity="Major",
+            title="Crlf bug", goal="Fix it.", gate=None, today="2026-07-22")
+        with open(os.path.join(self.root, "MyVocaList.sln"), encoding="utf-8") as fh:
+            self.assertIn("2026-07-22-BUG-001-crlf-bug", fh.read())
+
+    def test_register_warns_loudly_when_the_sln_is_absent(self):
+        os.remove(os.path.join(self.root, "MyVocaList.sln"))
+        with captured_stderr() as err:
+            rc = backlog_gen.cmd_register(
+                self.root, section=None, parent="F-1", kind="bug", severity="Major",
+                title="No sln", goal="Fix it.", gate=None, today="2026-07-22")
+        self.assertEqual(rc, 0)
+        self.assertIn("warning", err.getvalue().lower())
+        self.assertIn(".sln", err.getvalue())
 
     def test_status_updates_frontmatter_and_regenerates(self):
         self.assertEqual(backlog_gen.cmd_status(self.root, "F-1", "\U0001F7E1 In Progress", None), 0)
@@ -247,6 +311,21 @@ class RegisterTests(unittest.TestCase):
             text = fh.read()
         self.assertIn("id: BUG-002", text)
         self.assertIn("BUG-002: dup", text)
+
+    def test_renumber_refuses_to_run_while_a_readme_is_unparseable(self):
+        # An unparseable README can hold a live BUG id that the scan cannot see,
+        # so renumbering against a partial scan may reuse a retired id.
+        write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
+                           "2026-07-21-BUG-001-dup", "README.md"),
+              readme(id="BUG-001", title="BUG-001: dup (Major)", severity="Major",
+                     parent="F-1", section=None, kind="bug"))
+        write(os.path.join(self.mgmt, "BusinessFeatures", "broken", "README.md"),
+              "---\nid: BUG-050\ntags:\n  - a\n---\n")
+        with captured_stderr():
+            rc = backlog_gen.cmd_renumber(self.root, "BUG-001")
+        self.assertEqual(rc, 2)
+        self.assertTrue(os.path.isdir(os.path.join(
+            self.mgmt, "BusinessFeatures", "feat", "bugs", "2026-07-21-BUG-001-dup")))
 
     def test_renumber_on_unknown_id_changes_nothing(self):
         self.assertEqual(backlog_gen.cmd_renumber(self.root, "BUG-999"), 2)
