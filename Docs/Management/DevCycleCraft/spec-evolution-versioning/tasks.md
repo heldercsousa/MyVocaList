@@ -241,7 +241,24 @@ supposed to surface.
 > ("every Critical or Major bug … lives at …"): they are neither, yet own folders because every
 > live row needs one. Observation, not a blocker.
 >
-> **(iv) BUG-028 folder name** — see F6.
+> **(iv) BUG-028 folder name** — fixed by F6 (T11c).
+>
+> **(v) BUG-012 gains a `↳` — recommended as permitted diff class (d).** The row is top-level today
+> because no *Venues* row exists, but `model._depth` derives the arrow from the **path**, and
+> REQ-SEV-01 forces the bug into `venues/bugs/`. **No frontmatter value suppresses it** — `parent`
+> is unset and irrelevant. Every alternative is larger than T11c: add a Venues row (forbidden by
+> REQ-SEV-25), stay flat (defeats T11c), or make `_depth` respect `parent` (generator change).
+> Table position is unchanged; only the indent differs.
+>
+> **(vi) Six legacy bug folders still violate REQ-SEV-01 naming.** F6 fixed BUG-028, but
+> **BUG-017/018/019/021/023/024 also have no date prefix** (enumerated via `git ls-files`; each is
+> `pointer:`-referenced by an archived row). The F6 brief's premise — that renaming BUG-028 would
+> leave one convention in that directory — was wrong. Out of scope for T11c, untouched, recorded
+> as remaining REQ-SEV-01 debt for T12/T13.
+>
+> **(vii) `severity` unset on BUG-012** — its legacy file says "Medium", which is not in
+> `model.SEVERITIES`, and its row states none. Guessing `Minor` would trip REQ-SEV-03 and block a
+> task the spec schedules; guessing `Major` would be fabrication. Left unset, like (iii).
 >
 > **Environment hazard found during the review — do not repeat:** `grep` is rewritten by the `rtk`
 > proxy into a search tool, which silently corrupted the reviewer's first fence-stripping run and
