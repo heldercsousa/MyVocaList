@@ -617,6 +617,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-scripts", "backlog-
 		.claude\scripts\backlog\tests\test_frontmatter.py = .claude\scripts\backlog\tests\test_frontmatter.py
 		.claude\scripts\backlog\tests\test_model.py = .claude\scripts\backlog\tests\test_model.py
 		.claude\scripts\backlog\tests\test_orphan_check.py = .claude\scripts\backlog\tests\test_orphan_check.py
+		.claude\scripts\backlog\tests\test_orphan_check_widening.py = .claude\scripts\backlog\tests\test_orphan_check_widening.py
 		.claude\scripts\backlog\tests\test_render.py = .claude\scripts\backlog\tests\test_render.py
 	EndProjectSection
 EndProject
