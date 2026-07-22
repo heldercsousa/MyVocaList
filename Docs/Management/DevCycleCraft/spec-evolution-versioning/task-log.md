@@ -121,3 +121,59 @@ defects in shipped tooling rather than in-flight work.
 | Deviation | Spec note |
 |-----------|-----------|
 | `--renumber` shipped as its own subcommand (`renumber BUG-053`), not a flag on `register` — argparse cannot relax `register`'s `required=True` args, making the flag unreachable | `design.md` §3 + REQ-SEV-11a updated on develop (`53dabb2`, `b141f73`) |
+
+---
+
+## Phase 2 — Migration, additive (develop)
+
+### T8 — Freeze fixture + insert fences
+**Status:** To Review
+**Branch:** `develop` (docs land on develop — HARD RULE; T8 is a docs/migration task)
+**Completed:** 2026-07-22
+
+Additive only: froze a byte-exact copy of the hand-curated BACKLOG.md as the T12 equivalence
+fixture, and inserted the four generated-region fence markers around the two existing tables.
+No rows were moved, reordered, reformatted or regenerated.
+
+### Changed files
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/migration/BACKLOG-pre-migration.md` (created — byte-exact freeze)
+- `Docs/Management/BACKLOG.md` (modified — 4 fence markers inserted, nothing else)
+- `MyVocaList.sln` (modified — registered the fixture in the `spec-evolution-versioning` Solution Folder; UTF-8 BOM + CRLF preserved, verified)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Verification evidence
+
+Fence placement (`render.FENCE_BEGIN`/`FENCE_END` formats, region names `business-features`
+and `dev-cycle-craft`):
+
+```
+$ git diff --stat Docs/Management/BACKLOG.md
+Docs/Management/BACKLOG.md | 4 ++++
+ 1 file changed, 4 insertions(+)
+```
+
+4 insertions, 0 deletions — no content altered.
+
+Byte identity of the frozen fixture vs. the pre-fence BACKLOG.md:
+
+```
+$ git show HEAD:Docs/Management/BACKLOG.md | sha256sum
+23497b290efc77dbeedee7c6cc1c44a77b91681558a44b78ecd887dfbaabb1fd *-
+$ sha256sum Docs/Management/DevCycleCraft/spec-evolution-versioning/migration/BACKLOG-pre-migration.md
+23497b290efc77dbeedee7c6cc1c44a77b91681558a44b78ecd887dfbaabb1fd *...BACKLOG-pre-migration.md
+```
+
+Generator wiring signal (expected stale — no item READMEs exist until T9–T11):
+
+```
+$ python .claude/scripts/backlog/backlog_gen.py regen --check
+BACKLOG is stale -- run: python .claude/scripts/backlog/backlog_gen.py regen
+  - .\Docs\Management\BACKLOG.md
+exit=1
+```
+
+Exit 1 (stale), not 2 — the fences are found and parsed; no `RenderError` traceback, so known
+issue D8 did not trigger and no pre-existing `README.md` under `Docs/Management` breaks the walk.
+
+### Deviations
+None.

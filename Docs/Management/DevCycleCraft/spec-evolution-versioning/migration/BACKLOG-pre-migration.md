@@ -34,7 +34,6 @@
 
 ## Business Features
 
-<!-- BACKLOG:GENERATED:BEGIN business-features -->
 | Target | Feature | Status | Notes |
 |--------|---------|--------|-------|
 | 2026-03 | Bug: Venues list fetch slow — 2.2s paged query (BUG-012) | 💡 Pending | Goal: restore fast venue list loading (N+1 query suspected). Pointer: `BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.md`. |
@@ -78,7 +77,6 @@
 | — | **Windows version** | 🔴 Blocked | Gate: DevExpress MAUI has no Windows renderer — re-evaluate when DX announces support. Pointer: `BusinessFeatures/windows-version/design.md`. |
 | 2026-07-03 | **Cross-cutting** | — | Bugs with no single parent business feature |
 | 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) on render teardown (Major) | 💡 Pending | Goal: confirm whether the crash is a real defect or debugger-teardown noise (Release logcat investigation first). Pointer: `Docs/Management/cross-cutting-log.md`. |
-<!-- BACKLOG:GENERATED:END business-features -->
 
 ---
 
@@ -86,7 +84,6 @@
 
 > Infrastructure, tooling, architecture, and process improvements that support business feature delivery.
 
-<!-- BACKLOG:GENERATED:BEGIN dev-cycle-craft -->
 | Target | Activity | Status | Notes |
 |--------|----------|--------|-------|
 | 2026-07-11 | **Documentation & spec-tracking governance — where docs live** | 💡 Pending | Goal: standing rule/mechanism so docs never strand on feature branches (interim rule: docs commit to `develop`). Pointer: `Docs/Management/cross-cutting-log.md`. |
@@ -142,4 +139,3 @@
 | 2026-07-03 | ↳ BUG-039: ArtistFormPage duplicate-name inline error only appears after Save, not on blur (Major) | 💡 Pending | Same family as BUG-025/BUG-038. Pointer: `Docs/Management/BusinessFeatures/artists-songs/form-validation-task-log.md`. |
 | 2026-07-09 | **Spec Evolution, Versioning & Feature-Folder Organization** | 🗺️ Plan | Goal: shipped specs become immutable history; bugs/changes get dated nested folders (`bugs/`, `changes/`); BACKLOG becomes generated from folder frontmatter instead of hand-maintained. Gate: spec approved by Helder 2026-07-22; plan written and plan-reviewer CONDITIONAL PASS with all findings closed — awaiting Helder's plan approval before T0. Pointer: `DevCycleCraft/spec-evolution-versioning/`. |
 | 2026-07-09 | ↳ Richer task-status vocabulary (beyond binary checkboxes) | 💡 Pending | Goal: evaluate a unified status vocabulary as part of the parent feature's design. Pointer: `DevCycleCraft/spec-evolution-versioning/findings.md`. |
-<!-- BACKLOG:GENERATED:END dev-cycle-craft -->
