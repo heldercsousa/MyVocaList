@@ -59,7 +59,7 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 - [x] **T9a — Feature READMEs: Business Features top-level rows** (3 written; 10 rows deferred — see task-log T9a)
   Consumes: T8. Produces: one `README.md` per top-level Business Feature + their `order:` values.
   Files owned: those READMEs, `MyVocaList.sln`. Risk: Medium. Review lane: Standard. Demo: `regen --check` never exits 2.
-- [ ] **T9b — Feature READMEs: Dev Cycle Craft top-level rows** (~18 rows)
+- [x] **T9b — Feature READMEs: Dev Cycle Craft top-level rows** (9 written of 28 top-level rows; 18 folder-less rows → T9c-2, 1 blocked — see task-log T9b)
   Consumes: T8 (independent of T9a in content, but serialized — both write `MyVocaList.sln`).
   Files owned: those READMEs, `MyVocaList.sln`. Risk: Medium. Review lane: Standard. Demo: same.
 > **Sizing correction [2026-07-22]:** T9a's "~12 rows" estimate was wrong. Only **3 of 13**
