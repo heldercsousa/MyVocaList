@@ -224,7 +224,10 @@ supposed to surface.
 >    whether `_render_all` can hit the raise for a `cross-cutting/` item with no `section:`,
 >    (c) whether `_render_all` should pass the full pool instead.
 
-- [ ] **T10a — READMEs for existing `bugs/` folders** — 0 of 9 written (see task-log T10a) — blocker 1 resolved by T9d; blockers 2–4 resolved by decisions 3/4/5; **now gated only on T9e**
+- [x] **T10a — READMEs for existing `bugs/` folders** — **9 of 9 written**, plus `BUG-028`'s new folder (decision 5A), `BusinessFeatures/cross-cutting/README.md` (decision 4A) and frontmatter prepended to `autocomplete-component/README.md` (decision 4A) — 12 items total; see task-log T10a (the superseding entry at the end of the file)
+  > **Correction to the count below:** the split is **8 archived / 1 live**, not 6 archived — BUG-022 and bug-043 are archived too, in the **Dev Cycle Craft** archive table, and both carry an explicit `section: DevCycleCraft` for that reason. All 8 verified routing to the correct T9e region in-process.
+  > **Owed to T10b:** do NOT create a second `cross-cutting` group README — T10a already wrote `Docs/Management/BusinessFeatures/cross-cutting/README.md` (`kind: group`, id `cross-cutting`); a duplicate id is a validation error. `Docs/Management/cross-cutting/` is a different thing and needs no group README.
+  > **Owed to T12:** two declared diff hunks — BUG-022's severity reclassification (`Minor` → `Major`, decision 3A) and the rewording of its Notes (`Mask="00/00"` trips `model._BANNED`'s test-count pattern; the literal is preserved in the README body). Helder confirms the rewording at T12.
   Consumes: T9c. Files owned: those READMEs, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
   > **Sequencing defect [2026-07-22]:** 9 bug folders exist (not ~12; `ls` under `bugs/` misreports —
   > enumerate with `git ls-files`). **6 back archived (`✅ Fixed`) rows**, so their READMEs route

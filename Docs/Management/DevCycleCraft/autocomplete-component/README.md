@@ -1,3 +1,15 @@
+---
+id: autocomplete-component
+title: "**Autocomplete Component — Evaluation, Rebuild & Rollout**"
+status: "🟡 In Progress"
+target: 2026-07-11
+section: DevCycleCraft
+kind: feature
+order: 175
+goal: "make the app autocomplete MD3-compliant — evaluation, component build and rollout."
+pointer: DevCycleCraft/autocomplete-component/
+---
+
 # Autocomplete Component — Evaluation, Rebuild & Rollout Plan
 
 > **Owner:** Helder (architect) · **Registered:** 2026-07-11

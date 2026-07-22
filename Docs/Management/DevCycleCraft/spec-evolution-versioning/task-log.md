@@ -1122,3 +1122,242 @@ in-process proofs above were run directly against the real files.
    contains `## Archived rows`, so nothing regresses.
 4. T9d's tasks.md note describing the single-region placement is left in place as historical
    record; the T9e row supersedes it.
+
+---
+
+## Task: T10a — READMEs for existing `bugs/` folders *(supersedes the blocked T10a entry above)*
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+All four blockers of the earlier entry are resolved: blocker 1 by T9d + T9e (archive fences, two
+regions), blockers 2/3/4 by Helder decisions 3A / 4A / 5A. **11 READMEs written, 1 existing README
+given frontmatter, 1 new folder created.** `BACKLOG.md` and the 5 archive files are untouched — this
+task stays additive.
+
+### Changed files
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-017-artistscrud-emulator-debug-often-stops/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-save-crash/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-021-songspage-fab-crash/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-023-songform-bottomsheet-broken/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-024-songform-edit-data-loss/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-028-artistspage-trailing-catalog-button-noop/README.md` (new folder + README — decision 5A)
+- `Docs/Management/BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/README.md` (new)
+- `Docs/Management/BusinessFeatures/cross-cutting/README.md` (new — decision 4A, `kind: group`)
+- `Docs/Management/BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-teardown/README.md` (new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/bug-043/README.md` (new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/README.md` (**modified** — frontmatter prepended, body byte-for-byte preserved; decision 4A)
+- `MyVocaList.sln` (11 SolutionItems entries + 1 new Solution Folder + 1 NestedProjects entry)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T10a ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Enumeration — re-verified independently with `git ls-files`, not trusted from the brief
+
+`git ls-files | grep '/bugs/'` (the only reliable enumerator — `ls` under `bugs/` misreports).
+**9 bug folders**, confirming the earlier entry's count. The brief said "6 archived"; the correct
+split is **8 archived (terminal) / 1 live**, because BUG-022 and bug-043 are archived too — the
+earlier entry listed them under other blockers and did not count them as archived.
+
+| # | Folder | Live or archived | Archive file / table |
+|---|--------|------------------|----------------------|
+| 1 | `BusinessFeatures/artists-songs/bugs/BUG-017-artistscrud-emulator-debug-often-stops/` | archived | 2026-06 · Business Features |
+| 2 | `BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-save-crash/` | archived | 2026-06 · Business Features |
+| 3 | `BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/` | archived | 2026-06 · Business Features |
+| 4 | `BusinessFeatures/artists-songs/bugs/BUG-021-songspage-fab-crash/` | archived | 2026-07 · Business Features |
+| 5 | `BusinessFeatures/artists-songs/bugs/BUG-023-songform-bottomsheet-broken/` | archived | 2026-07 · Business Features |
+| 6 | `BusinessFeatures/artists-songs/bugs/BUG-024-songform-edit-data-loss/` | archived | 2026-07 · Business Features |
+| 7 | `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/` | archived | 2026-07 · **Dev Cycle Craft** |
+| 8 | `BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-teardown/` | **live** | live BACKLOG, Business Features |
+| 9 | `DevCycleCraft/autocomplete-component/bugs/bug-043/` | archived | 2026-07 · **Dev Cycle Craft** |
+
+Plus one folder created by decision 5A: `…/bugs/BUG-028-artistspage-trailing-catalog-button-noop/` (live).
+
+### Per-README frontmatter
+
+| id | status | severity | section | parent | order |
+|----|--------|----------|---------|--------|-------|
+| BUG-017 | ✅ Fixed | Major | BusinessFeatures | artists-songs | 50 |
+| BUG-018 | ✅ Fixed | Critical | BusinessFeatures | artists-songs | 60 |
+| BUG-019 | ✅ Fixed | Major | BusinessFeatures | artists-songs | 70 |
+| BUG-021 | ✅ Fixed | Critical | BusinessFeatures | artists-songs | 20 |
+| BUG-022 | ✅ Fixed | **Major** (was Minor) | DevCycleCraft | ui-form-validation-guide | 110 |
+| BUG-023 | ✅ Fixed | Critical | BusinessFeatures | artists-songs | 30 |
+| BUG-024 | ✅ Fixed | Critical | BusinessFeatures | artists-songs | 40 |
+| BUG-026 | 💡 Pending | Major | BusinessFeatures | cross-cutting | 410 |
+| BUG-028 | 💡 Pending | Major | BusinessFeatures | artists-songs | 140 |
+| BUG-043 | ✅ Fixed | Critical | DevCycleCraft | autocomplete-component | 90 |
+| cross-cutting | — (`kind: group`) | — | BusinessFeatures | — | 400 |
+| autocomplete-component | 🟡 In Progress | — | DevCycleCraft | — | 175 |
+
+`order:` convention: the row's 1-based position in its own rendered table × 10 (live table for live
+rows, the month's archive table for archived rows) — the same rule T9a–T9c-2b used, so the curated
+order stays monotonic when the remaining rows land.
+
+**Explicit `section:` on every archived item is load-bearing, not redundant.** `walk()` builds
+`rel_path` as `Docs/Management/…`, so `render._section_from_path` (which tests `parts[0]`) can never
+match `BusinessFeatures`/`DevCycleCraft` and always returns `None`. Combined with T9e finding **F2**
+(`_render_all` calls `render_archive` without `all_items`, so parent resolution sees only the month's
+bucket, and every parent here is non-terminal and therefore absent from it), relying on `parent:`
+alone would make each archived row hit `RenderError`. `section:` short-circuits both. F2 remains a
+real defect and its own follow-up task — T10a is merely immune to it.
+
+### Decision 5A — BUG-019's status choice
+
+`model.STATUSES` is `💡 Pending · 📋 Spec · 🗺️ Plan · 🟢 Ready · 🟡 In Progress · 🔵 Deferred ·
+🔴 Blocked · ✅ Done · ✅ Fixed`. The archive row's free text is *"Closed — partially regressed"*.
+
+**Chosen: `✅ Fixed`.** Justification, in order of force:
+1. The row lives in an archive file, and `render.bucket_by_month` only ever buckets `TERMINAL`
+   items. A non-terminal status would silently remove BUG-019 from the archive — the REQ-SEV-18
+   failure mode. So the choice is forced down to `✅ Done` / `✅ Fixed`.
+2. Between the two, `✅ Fixed` is the bug-shaped one; `✅ Done` is used for work items.
+3. "Partially" is not lost. The regressed half is exactly what the live **BUG-028** row carries —
+   the archive row's own Notes already say so, verbatim: *"the trailing-button regression is
+   re-tracked as active BUG-028"*. Recording `✅ Fixed` here plus a live BUG-028 preserves both
+   halves of the original meaning, split across the two rows the split created. Nothing is claimed
+   fixed that is not; the row that says "fixed" is scoped to the half that was.
+
+Had none of these held I would have logged `blocked: spec gap` rather than force a status; the
+determining fact is (1) — the alternatives are not merely less faithful, they are unrepresentable.
+
+The `> **Spec updated [2026-07-22]:**` note recording this is in BUG-019's README body, and the
+matching note recording the folder split is in BUG-028's.
+
+### Decision 3A — BUG-022 severity: declared T12 diff hunk
+
+`severity: Minor` → `severity: Major`. `severity` drives no rendering, only validation, so **the
+rendered row's severity does not change on its own** — the visible `(Minor)` in the row text is part
+of the *title*, transcribed verbatim. The T12 hunk is therefore:
+
+```
+-| 2026-07-01 | ↳ BUG-022: SingerForm birthday field mask missing (Minor) | ✅ Fixed | Fixed (XAML-only `Mask="00/00"`). Pointer: `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/`. |
++| 2026-07-01 | BUG-022: SingerForm birthday field mask missing (Minor) (under: **Form validation**) | ✅ Fixed | Goal: Fixed with a XAML-only date input mask on the birthday field. Pointer: `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/`. |
+```
+
+Three sub-changes in that one hunk, each pre-authorised by design: (a) archived rows drop `↳` and
+gain `(under: …)` (design §3); (b) archived Notes gain the `Goal: ` prefix (`render_row` is one
+function for both tables); (c) the literal mask string is replaced by a prose description, because
+`00/00` matches `model._BANNED`'s test-count pattern `\b\d+\s*/\s*\d+\b`. The literal is
+preserved verbatim in the README body. **Helder should confirm (c) at T12** — it is the only place
+in T10a where row text was reworded rather than transcribed.
+
+`BUG-043`'s Notes were likewise condensed (round-number parenthetical and dates dropped) to fit the
+3-sentence budget; meaning unchanged, full narrative preserved in the parent task log.
+
+### Spec gap: BUG-022's path parent (`persons/`) is not an item — documented assumption, not blocking
+
+**Location:** decision 4A, which names only `cross-cutting/` and `autocomplete-component/`.
+**Gap:** `BusinessFeatures/persons/` has no README and, unlike those two, **has no BACKLOG row at
+all** — there is no top-level Persons/Singers feature; the persons bugs are `↳` children of other
+features' rows. So decision 4A's remedy ("give the parent frontmatter") is unavailable without
+inventing a row.
+**Options:**
+- Option A: `section: DevCycleCraft` + `parent: ui-form-validation-guide` — the row's real table
+  neighbours (it sits in the 2026-07 **Dev Cycle Craft** archive, between BUG-036 and the
+  "0N - Update … form (validation)" rows). Path parent and logical parent differ, which `validate`
+  permits (`_path_parent` resolves to a non-item, so the agreement check does not fire).
+- Option B: `section: BusinessFeatures`, no parent — renders in the wrong archive table, silently
+  moving the row between sections.
+**Recommendation:** Option A, and it is what shipped. Option B is a structural change disguised as a
+transcription, exactly what decision 4 rejected.
+**Blocking:** No — proceeding under the documented assumption; flagged for review at T12.
+
+### Design concern — `BusinessFeatures/cross-cutting/README.md` vs T10b
+
+T10b's file list says *"`cross-cutting/README.md` (`kind: group`)"*. That is **this file**: the
+`kind: group` separator is the live BACKLOG row `| 2026-07-03 | **Cross-cutting** | — | Bugs with no
+single parent business feature |`, whose only child is BUG-026, and both live under
+`Docs/Management/BusinessFeatures/cross-cutting/`. It is *not*
+`Docs/Management/cross-cutting/`, which is a container of independent top-level rows written by
+T9c-1/T9c-2 and needs no group README. **T10b must not create a second one** — a duplicate `id:
+cross-cutting` is a validation error. Implemented here because decision 4A required it.
+
+### Verification evidence
+
+All checks in-process and read-only (rendered output discarded); `regen` was never run without
+`--check`; `grep` was not used for any byte-level comparison (rtk proxy hazard).
+
+**1. Parse + validate over the whole tree** — `backlog_gen.walk` + `model.validate`:
+```
+items: 48   parse errors: []
+validate errors total: 1
+  - DevCycleCraft/spec-evolution-versioning/: Notes contain banned content (file path beyond the pointer)
+validate errors touching T10a items: []
+```
+The single error is the pre-existing decision-2 banned-content error on this feature's own folder
+(T9e finding F1), untouched by T10a. **Zero errors on all 12 T10a items.**
+
+**2. Archive routing — `bucket_by_month` → `_archive_region_of` → `render_archive` → `splice`,
+called directly** (this is the load-bearing proof; `regen --check` returns 2 before `_render_all`
+and never reaches the renderer — F1):
+```
+BUG-017 -> month 2026-06 region archive-business
+BUG-018 -> month 2026-06 region archive-business
+BUG-019 -> month 2026-06 region archive-business
+splice resolved for 2026-06: True
+BUG-021 -> month 2026-07 region archive-business
+BUG-023 -> month 2026-07 region archive-business
+BUG-024 -> month 2026-07 region archive-business
+BUG-022 -> month 2026-07 region archive-craft
+BUG-043 -> month 2026-07 region archive-craft
+splice resolved for 2026-07: True
+```
+Every one of the 8 archived rows lands in the region its pre-migration table dictates — the two
+Dev Cycle Craft rows included, which is what the explicit `section:` buys. Both months' `splice`
+returned without `RenderError` against the real, T9e-fenced files.
+
+**3. Live splice** — `render_backlog` over the real `BACKLOG.md`: returned without error; rendered
+output contains rows for `BUG-026`, `BUG-028`, `Cross-cutting` and `Autocomplete Component`.
+
+**4. `regen --check`** → exit **2**, one error, identical to the pre-task baseline. No traceback, no
+`RenderError` — which is the specific improvement over the earlier blocked attempt. Exit 2 is *not*
+offered as evidence the READMEs are correct; items 1–3 are.
+
+**5. `BACKLOG.md` and the 5 archive files unmodified:**
+```
+$ git diff --stat -- Docs/Management/BACKLOG.md Docs/Management/backlog-archive
+(no output — 0 files changed)
+```
+
+**6. `autocomplete-component/README.md` frontmatter prepend is purely additive:**
+`git diff --numstat` → `12  0` (+12 / −0). Asserted in-process that the new bytes end with the
+original bytes (`after.endswith(orig)` → `True`) and that the file's own CRLF was reused
+(`eol = b'\r\n'`). `_read` opens in text mode, so CRLF is normalised before parsing — the parser is
+unaffected.
+
+**7. `.sln` — BOM + CRLF re-asserted after write, every path re-read:**
+```
+BOM: True        pure CRLF: True (1148 CRLF, 0 bare LF)
+```
+All 11 added `SolutionItems` lines re-read from disk with `repr()` and confirmed present verbatim
+(tab-tab indent, `path = path` form, backslash separators). One new Solution Folder
+`{FA1234BC-0001-4000-8000-000000000070}` for BUG-028, nested under the artists-songs `bugs` folder
+`{7A021F6B-F297-41EA-A028-C4F881146791}` via `NestedProjects`.
+`BusinessFeatures\cross-cutting` `{…0038}` had no `SolutionItems` section; one was created.
+
+> **GUID counter:** highest `FA1234BC-0001-4000-8000-0000000000NN` actually in use before T10a was
+> **`0x6F` (111)**, verified by reading the file. T10a used **`0070`**. The value recorded in
+> `constraints-registry.md` (`0041`) remains stale — already queued for T13.
+
+### Checkpoint
+Complete — no resumption needed. Branch `develop`, main repo (docs task, no worktree).
+Step 6 of 6 done: read specs → enumerate → write 12 files → in-process verify → `.sln` → commit.
+Last build/test state: n/a (no code changed); `regen --check` exit 2 (pre-existing, unchanged).
+Context manifest, had this been interrupted:
+1. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — decision table, T10a row
+2. `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` — this entry + T9e findings
+3. `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` — §2 frontmatter, §3 archive split
+4. `.claude/scripts/backlog/model.py` — `STATUSES`, `validate`, `order_items`
+5. `.claude/scripts/backlog/render.py` — `ARCHIVE_REGIONS`, `render_archive`, `_archive_region_of`
+6. `.claude/scripts/backlog/backlog_gen.py` — `walk` (rel_path shape), `_render_all` (F2)
+7. `Docs/Management/BACKLOG.md` — live rows for BUG-026 / BUG-028 / Cross-cutting
+8. `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-0{6,7}.md` — source rows + table positions
+
+### Deviations
+- One file outside the briefed "READMEs for existing `bugs/` folders": the **new** BUG-028 folder.
+  Required by decision 5A (split so each row owns one folder) and declared in the brief.
+- `Docs/Management/BusinessFeatures/persons/bugs/BUG-022-…` uses `section: DevCycleCraft` — see the
+  spec gap above. Documented assumption, non-blocking.
+- Nothing was moved or deleted. `BACKLOG.md` untouched. T10a remains additive.
