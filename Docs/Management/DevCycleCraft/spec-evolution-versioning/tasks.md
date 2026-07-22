@@ -157,6 +157,31 @@ supposed to surface.
   Demo: full suite green (was 113); per-file sha256 byte-preservation proof that re-fencing changed only fence lines; `splice` resolves both regions in all 5 files; `regen --check` exits 0 or 1, never a `RenderError`.
   > Ordering: **before T10a**, not before T12. T10a's 6 archived bug READMEs route through `render_archive` → `splice`, so they must be verified against the final region names, or T10a's evidence is written against a layout that T9e then invalidates.
 
+> **⏸ SESSION HALT [2026-07-22] — resume here.** T9e is **implemented, committed (`407aa3d`) and
+> pushed** to `feature/archive-regions` (worktree `../mvl-archive-regions`), status **To Review**,
+> **NOT merged**. Its Elevated code review was dispatched and **died mid-run on an API session
+> limit (resets 11:40am America/Sao_Paulo) having produced zero findings** — so T9e is unreviewed,
+> not reviewed-clean. **Resume by re-dispatching the T9e review**, then merge, then T10a.
+>
+> Three T9e items awaiting that review's adjudication:
+> 1. **The 5 archive files are CRLF in the working tree, not LF.** `.gitattributes` pins only
+>    `*.sh`, `pre-commit`, `.claude/scripts/**/*.py`; `.md` is unpinned and `core.autocrlf=true`.
+>    T9d's log recorded LF for the same files — the two worktrees checked out differently. Hazard
+>    for a generator whose guarantee is byte-identity. **→ queued for T13:** pin
+>    `Docs/Management/backlog-archive/*.md` (or `*.md`) in `.gitattributes`.
+> 2. **`regen --check` exits 2, claimed pre-existing** (proven at develop HEAD by stashing —
+>    unverified independently). Corollary: **exit 2 aborts before `_render_all`, so `regen --check`
+>    never exercises `render_archive`** — the in-process splice proofs are load-bearing.
+>    **→ T9e's and T12's demo statements asking for `regen --check` exit 0/1 as the archive gate are
+>    wrong and must be corrected** once the pre-existing claim is confirmed. Exit 2 is the
+>    decision-2 banned-content class and may clear when those goals are authored.
+> 3. **`render_archive` gained an `all_items` param** (default `items`) resolving section via own
+>    `section:` → parent chain → folder prefix → **`RenderError`**. Beyond a pure region split.
+>    Failing loud is argued from REQ-SEV-18 (mis-filing shades into dropping, losing a `BUG-NNN`
+>    from the only grep-reachable file). Review must decide (a) fail-loud vs default-region, (b)
+>    whether `_render_all` can hit the raise for a `cross-cutting/` item with no `section:`,
+>    (c) whether `_render_all` should pass the full pool instead.
+
 - [ ] **T10a — READMEs for existing `bugs/` folders** — 0 of 9 written (see task-log T10a) — blocker 1 resolved by T9d; blockers 2–4 resolved by decisions 3/4/5; **now gated only on T9e**
   Consumes: T9c. Files owned: those READMEs, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
   > **Sequencing defect [2026-07-22]:** 9 bug folders exist (not ~12; `ls` under `bugs/` misreports —
