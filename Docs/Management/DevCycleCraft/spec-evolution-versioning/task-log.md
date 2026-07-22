@@ -627,3 +627,139 @@ restricted frontmatter subset is valid and no key was dropped.
 
 REQ-SEV-28 honoured: every README back-references `Docs/Management/cross-cutting-log.md`, which is
 retained, not deleted.
+
+---
+## Task: T9c-2b — Folder-less Dev Cycle Craft rows, second half (9 rows)
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+Completes the Phase-2 additive migration of **top-level** Dev Cycle Craft rows. Positions were
+re-counted independently over the rows inside the `dev-cycle-craft` fence (header + separator
+excluded, first data row = position 1); the table holds **53 rows**. Counting basis verified against
+the committed anchor `inline-trivial-fix` = position **2** / `order: 20` — agreement, so no
+off-by-one. T9c-2a's remaining-row list was verified against the table rather than trusted.
+
+### Rows written (row, order, status)
+
+| Pos | Row | order | status | target |
+|-----|-----|-------|--------|--------|
+| 24 | **① Autocomplete Mobile UX Pattern — Full-Screen Expansion Guideline** | 240 | 🔵 Deferred | 2026-07-11 |
+| 25 | CRUD page structural reduction — lazy BottomSheet + lazy SearchAppBar | 250 | 💡 Pending | 2026-06-12 |
+| 30 | Large-volume data stress test (1–2 year seed) | 300 | 💡 Pending | 2026-06-12 |
+| 31 | Cross-device / OS version compatibility test | 310 | 💡 Pending | 2026-06-12 |
+| 32 | Play Store + Samsung Galaxy Store pre-submission compliance | 320 | 💡 Pending | 2026-06-12 |
+| 33 | Full pre-release mobile testing checklist (all categories) | 330 | 💡 Pending | 2026-06-12 |
+| 42 | **Infra Repository Folder Consolidation** | 420 | 💡 Pending | 2026-06-27 |
+| 43 | **Read Model + Global NoTracking Pattern — Guidelines Update** | 430 | 💡 Pending | 2026-06-27 |
+| 44 | **CRUD Read Model Refactoring — Persons, Songs, Venues** | 440 | 💡 Pending | 2026-06-27 |
+
+Goal, Gate, Status and Target were **transcribed verbatim** — only the leading `Goal: ` / `Gate: `
+labels and the trailing `Pointer: ` clause were dropped, since those become frontmatter keys.
+**No row needed a notes-overflow relocation and no row was skipped for banned content:** all nine
+pass `model.notes_violations` unchanged (≤3 sentences, ≤55 words, no banned token). This was checked
+as a *pre-flight* that aborts the writer with exit 3 before any file is created.
+
+Row 24 got its **own** folder `cross-cutting/autocomplete-mobile-ux-pattern/` and keeps its original
+`pointer:` verbatim (the decision file inside `autocomplete-component/`). It deliberately does **not**
+claim `autocomplete-component/README.md`, whose folder is owned by the sub-rows this row does not
+parent. Rows carrying a Gate (24, 43, 44) keep it as a `gate:` key; the rest omit it.
+
+### Rows NOT written — accounted for
+
+- **BACKLOG-first Registration Enforcement** (pos 39) — excluded by briefing; blocked by the systemic
+  banned-content conflict recorded under T9b (its Goal/Gate name `BACKLOG.md`, `workflow.md` and an
+  AC number, all matched by `model._BANNED`). It is **not** folder-less — its pointer is the existing
+  `DevCycleCraft/backlog-first-registration/` folder — so it belongs to the existing-folder lane, not
+  to T9c-2. Awaiting Helder's decision (T9b Option A: supply a one-line Goal).
+- Separator rows (`kind: milestone` / `kind: group`) — **T10b**.
+- `↳`-prefixed sub-rows — out of scope of this task.
+
+### Is the Phase-2 additive migration of top-level rows complete?
+
+**Dev Cycle Craft: yes, except one blocked row.** 28 top-level rows: 9 with existing folders (T9b) +
+9 folder-less (T9c-2a) + 9 folder-less (T9c-2b) = **27 migrated**; the 28th is BACKLOG-first
+Registration Enforcement, blocked as above. `backlog_gen.py query` lists exactly 27 Dev Cycle Craft
+items, confirming the arithmetic against the tree rather than against a tally.
+
+**Business Features: one blocked row remains** — **Windows version** (its BACKLOG row carries no
+Goal; T9a/T9c-1 escalation). So across both sections the top-level migration is complete **apart
+from those two rows, both blocked on a Helder decision, neither of which this task was authorised
+to resolve.**
+
+### Changed files:
+- `Docs/Management/cross-cutting/autocomplete-mobile-ux-pattern/README.md` (new)
+- `Docs/Management/cross-cutting/crud-page-structural-reduction/README.md` (new)
+- `Docs/Management/cross-cutting/large-volume-data-stress-test/README.md` (new)
+- `Docs/Management/cross-cutting/cross-device-os-compatibility-test/README.md` (new)
+- `Docs/Management/cross-cutting/store-presubmission-compliance/README.md` (new)
+- `Docs/Management/cross-cutting/pre-release-mobile-testing-checklist/README.md` (new)
+- `Docs/Management/cross-cutting/infra-repository-folder-consolidation/README.md` (new)
+- `Docs/Management/cross-cutting/read-model-notracking-guidelines/README.md` (new)
+- `Docs/Management/cross-cutting/crud-read-model-refactoring/README.md` (new)
+- `MyVocaList.sln` (9 child Solution Folders under the existing `cross-cutting` folder)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T9c-2b ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Verification evidence
+
+Overwrite guard: the writer runs `os.path.exists(README)` over all nine paths and **aborts with exit
+2 before writing anything** if any exists (the T9b `extensions-layer-guidelines` overwrite is the
+precedent). All nine were new — all nine folders appear as `??` in `git status` — so no pre-existing
+README was touched and no body preservation was required.
+
+`regen --check` (never bare `regen` — the migration stays additive until T12):
+
+```
+BACKLOG is stale -- run: python .claude/scripts/backlog/backlog_gen.py regen
+  - .\Docs\Management\BACKLOG.md
+REGEN_EXIT=1
+```
+
+Exit **1** = stale, the expected value. Exit 2 (malformed) never occurred, so all nine READMEs parse
+and validate. Re-run after the `.sln` write with the identical result.
+
+`BACKLOG.md` **NOT** modified (`.claude/changed-files.txt` was already dirty at session start and is
+not part of this task):
+
+```
+$ git diff --stat
+ .claude/changed-files.txt | 327 ++++++++++++++++++++++++++++++++++++++++++++++
+ MyVocaList.sln            |  54 ++++++++
+ 2 files changed, 381 insertions(+)
+```
+
+`.sln` gate: written by a Python **script file** in **binary** (never a Bash heredoc — the T9a
+escape-expansion corruption). BOM asserted before the write and **re-asserted after**, together with
+a zero bare-LF assertion; every SolutionItems path and every NestedProjects line re-read and
+verified, paths printed via `repr()`:
+
+```
+'\t\tDocs\\Management\\cross-cutting\\autocomplete-mobile-ux-pattern\\README.md = ...'      guid=...0067
+'\t\tDocs\\Management\\cross-cutting\\crud-page-structural-reduction\\README.md = ...'      guid=...0068
+'\t\tDocs\\Management\\cross-cutting\\large-volume-data-stress-test\\README.md = ...'       guid=...0069
+'\t\tDocs\\Management\\cross-cutting\\cross-device-os-compatibility-test\\README.md = ...'  guid=...006A
+'\t\tDocs\\Management\\cross-cutting\\store-presubmission-compliance\\README.md = ...'      guid=...006B
+'\t\tDocs\\Management\\cross-cutting\\pre-release-mobile-testing-checklist\\README.md = ...' guid=...006C
+'\t\tDocs\\Management\\cross-cutting\\infra-repository-folder-consolidation\\README.md = ...' guid=...006D
+'\t\tDocs\\Management\\cross-cutting\\read-model-notracking-guidelines\\README.md = ...'    guid=...006E
+'\t\tDocs\\Management\\cross-cutting\\crud-read-model-refactoring\\README.md = ...'         guid=...006F
+BOM=ok bare-LF=0 registered=9
+```
+
+GUID counter continued from the highest **actually in use** (`...0066`, read from the file — T9c-2a
+advanced it) → `...0067`–`...006F`, each asserted collision-free before use and each nested under the
+existing `cross-cutting` Solution Folder `{FA1234BC-0001-4000-8000-000000000057}`. Recorded for the
+next task: a *second*, unrelated `cross-cutting` Solution Folder exists at `...0038`; `...0057` is
+the T9c-1/T9c-2a folder and is the correct parent.
+
+Post-edit re-read: all nine READMEs re-parsed by the generator's own frontmatter walk —
+`backlog_gen.py query` lists all nine with the correct title, status, target and pointer, in the
+intended `order:` positions relative to the already-migrated rows.
+
+REQ-SEV-28 honoured: `Docs/Management/cross-cutting-log.md` is **retained**, untouched, and
+back-referenced from every new README.
+
+### Deviations
+None.
