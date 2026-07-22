@@ -53,13 +53,13 @@
                                     <VerticalStackLayout>
                                         <Label StyleClass="Body.Large"
                                                IsVisible="{Binding IsCreateNew}">
-                                            <Label.FormattedString>
+                                            <Label.FormattedText>
                                                 <FormattedString>
                                                     <Span Text="Add &quot;" />
                                                     <Span Text="{Binding Headline}" />
                                                     <Span Text="&quot; as a new artist" />
                                                 </FormattedString>
-                                            </Label.FormattedString>
+                                            </Label.FormattedText>
                                         </Label>
                                         <Label Text="{Binding Headline}"
                                                StyleClass="Body.Large"
