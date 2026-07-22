@@ -106,5 +106,44 @@ class BacklogTests(unittest.TestCase):
         self.assertNotIn("Shipped", out)
 
 
+class ArchiveTests(unittest.TestCase):
+    def setUp(self):
+        from render import ARCHIVE_TEMPLATE
+        self.template = ARCHIVE_TEMPLATE.format(month="2026-07")
+
+    def test_buckets_terminal_items_by_closed_month(self):
+        from render import bucket_by_month
+        a = item(id="a", status="✅ Done", closed="2026-07")
+        b = item(id="b", status="✅ Fixed", closed="2026-06")
+        c = item(id="c")  # active -> never bucketed
+        buckets = bucket_by_month([a, b, c])
+        self.assertEqual(sorted(buckets.keys()), ["2026-06", "2026-07"])
+        self.assertEqual([i.id for i in buckets["2026-07"]], ["a"])
+
+    def test_done_child_archives_while_active_parent_stays(self):
+        from render import bucket_by_month
+        parent = item(id="p", title="Parent")
+        child = item(id="c", title="Child", status="✅ Done", closed="2026-07",
+                     parent="p", _path="BusinessFeatures/feat/bugs/2026-07-21-BUG-1-x/")
+        buckets = bucket_by_month([parent, child])
+        self.assertEqual([i.id for i in buckets["2026-07"]], ["c"])
+        self.assertNotIn("p", [i.id for i in buckets["2026-07"]])
+
+    def test_archived_child_keeps_bug_id_greppable(self):
+        from render import render_archive
+        child = item(id="BUG-048", title="BUG-048: pagination reloads (Major)",
+                     status="✅ Done", closed="2026-07", parent="p",
+                     _path="DevCycleCraft/f/bugs/2026-07-21-BUG-048-x/")
+        out = render_archive(self.template, [child], "2026-07", {"p": "Parent Feature"})
+        self.assertIn("BUG-048", out)
+        self.assertIn("(under: Parent Feature)", out)
+
+    def test_archive_render_is_idempotent(self):
+        from render import render_archive
+        a = item(id="a", status="✅ Done", closed="2026-07")
+        once = render_archive(self.template, [a], "2026-07", {})
+        self.assertEqual(once, render_archive(once, [a], "2026-07", {}))
+
+
 if __name__ == "__main__":
     unittest.main()
