@@ -1781,3 +1781,265 @@ Context manifest, had this been interrupted:
 6. `.claude/scripts/backlog/model.py` — `_BANNED`, `_path_parent`, `validate`, `order_items`
 7. `.claude/scripts/backlog/render.py` — `render_row`, `render_backlog` (arg order is `(existing, items)`)
 8. `MyVocaList.sln` — GUID counter and the artists-songs `bugs` folder GUID
+---
+
+## Task: T11b — BUG-027, BUG-029, BUG-030 and BUG-031/032 get folders
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+**4 folders + 4 READMEs written — not 5.** The brief said five bugs; the BACKLOG carries
+**four rows**, because **BUG-031 and BUG-032 share a single row** (`BUG-031/032: no API
+autocomplete while typing Artist Name / Song Title`). See the decision below. Each README
+back-links `BusinessFeatures/artists-songs/task-log.md`; **nothing was removed from it**
+(REQ-SEV-27). `BACKLOG.md` and the 5 archive files are byte-untouched. Executed in the worktree
+`../mvl-backlog-migration` on `feature/backlog-migration` under the scoped
+"docs land on develop" exception (Helder, 2026-07-22).
+
+### Changed files
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-027-songformpage-artist-field-broken/README.md` (new folder + README)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-029-artistformpage-search-strip-icon-crash/README.md` (new folder + README)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear/README.md` (new folder + README)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title/README.md` (new folder + README)
+- `MyVocaList.sln` (4 Solution Folders + 4 SolutionItems + 4 NestedProjects entries; +24/-0)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T11b ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Brief corrections — verified against the live BACKLOG, not trusted
+
+1. **"Five folders" is four.** `BUG-031/032` is one row (line 78 of `BACKLOG.md`), not two.
+   Splitting it would add a row to the regenerated table, which **REQ-SEV-25 forbids**
+   (row-for-row equivalence: *same rows*, same order, same Goal/Gate/Pointer text). One row →
+   one folder. The folder and `id:` use `BUG-031`; the **title carries `BUG-031/032` verbatim**,
+   so `BUG-032` stays grep-reachable in BACKLOG.md (the REQ-SEV-18 property). Recorded in that
+   README and declared as a T12 note below. This is a transcription decision, not a re-scoping:
+   the alternative (two rows) changes content the migration is supposed to preserve.
+2. **"Preserve each row's `🔵 Deferred` status" holds for three of four.** **BUG-027 is
+   `💡 Pending`**, not Deferred, and it is the only one of the four with a real
+   `Goal:`/`Gate:` in its Notes. Its status was transcribed as it actually reads.
+3. **`.sln` counter.** The brief's "T11a allocated through `0075`" was **correct this time** —
+   re-verified by reading the file rather than trusting it (evidence 7).
+4. **Parent/section derived from the rows, not the brief.** All four sit one `↳` deep inside the
+   contiguous child block of `| 2026-05 | **Artists & Songs Catalog** |` in the **Business
+   Features** table → `section: BusinessFeatures`, `parent: artists-songs`. Confirmed
+   mechanically (evidence 1).
+
+### Per-README frontmatter
+
+| id | status | severity | section | parent | order | target | `gate:` (verbatim deferral reason) | back-link |
+|----|--------|----------|---------|--------|-------|--------|------------------------------------|-----------|
+| BUG-027 | `💡 Pending` | Critical | BusinessFeatures | `artists-songs` | 30 | 2026-07-03 | *fix direction now owned by the DX `AutoCompleteEdit` replacement task (decision 2026-07-19), superseding foundations ① + ②.* (verbatim from the row's own `Gate:`) | `BusinessFeatures/artists-songs/task-log.md` |
+| BUG-029 | `🔵 Deferred` | Critical | BusinessFeatures | `artists-songs` | 150 | 2026-07-03 | *the search-strip element is slated for deletion by the Form UX Redesign; re-triage only if any part of the strip survives.* | same task-log |
+| BUG-030 | `🔵 Deferred` | *(unset)* | BusinessFeatures | `artists-songs` | 160 | 2026-07-03 | *Answered by Helder 2026-07-10: the element must disappear from both forms — folded into the Form UX Redesign.* | same task-log |
+| BUG-031 | `🔵 Deferred` | *(unset)* | BusinessFeatures | `artists-songs` | 170 | 2026-07-03 | *Answered by Helder 2026-07-10: autocomplete (local + API) IS required on both entries — folded into the Form UX Redesign.* | same task-log |
+
+`order:` follows the T9a–T11a convention — 1-based position in the live Business Features table
+× 10 (positions 3, 15, 16, 17). Verified by rendering the ordered live table (evidence 3): the
+four land at exactly their pre-migration neighbours — BUG-027 immediately after `artists-songs`
+(20) and before BUG-050 (40); BUG-029/030/031 immediately after BUG-028 (140) and before
+`form-ux-redesign` (180).
+
+**Every item carries an explicit `section:`, per finding F4** — `render._section_from_path` always
+returns `None` in production and `_render_all` omits `all_items` (F2), so `section:` is the only
+non-fictional resolution path.
+
+**`severity:` left unset on BUG-030 and BUG-031/032.** Their rows are tagged `(spec gap)` and carry
+no severity; `model.validate` requires one only in the negative sense (a `Minor` folder is an error,
+REQ-SEV-03 — an unset severity is not). Inventing one would be fabrication. Confirmed clean by
+`validate` (evidence 1). Note this is a *literal* reading of REQ-SEV-01 ("every Critical or Major
+bug … lives at …") — these two are neither, yet they own a folder because they are live BACKLOG
+rows and every live row needs one. Flagged for T12 as a spec-wording observation, not a blocker.
+
+### Verification evidence
+
+All checks in-process and read-only; rendered output discarded, nothing written back. `regen` was
+never run in either mode — per finding **F1** its `--check` exit code is evidence of nothing
+(`if errors: return 2` fires before `_render_all`). `grep` was not used for any byte-level
+comparison (rtk hazard); all comparisons are Python. All writes were done by a **Python script file
+in binary mode**, never a Bash heredoc.
+
+**1. Parse + validate over the whole tree** (`backlog_gen.walk` + `model.validate`), plus the
+declared-vs-path parent agreement check:
+
+```
+items walked: 59          PARSE ERRORS: none
+VALIDATION ERRORS: 1
+  ! DevCycleCraft/spec-evolution-versioning/: Notes contain banned content (file path beyond the pointer)
+errors touching T11b items: []
+DUPLICATE IDS: none
+
+BUG-027 | declared parent: artists-songs | path parent: BusinessFeatures/artists-songs | depth: 1 | section: BusinessFeatures | order: 30  | severity: Critical | status: 💡 Pending
+BUG-029 | declared parent: artists-songs | path parent: BusinessFeatures/artists-songs | depth: 1 | section: BusinessFeatures | order: 150 | severity: Critical | status: 🔵 Deferred
+BUG-030 | declared parent: artists-songs | path parent: BusinessFeatures/artists-songs | depth: 1 | section: BusinessFeatures | order: 160 | severity: None     | status: 🔵 Deferred
+BUG-031 | declared parent: artists-songs | path parent: BusinessFeatures/artists-songs | depth: 1 | section: BusinessFeatures | order: 170 | severity: None     | status: 🔵 Deferred
+```
+
+59 items = T11a's 55 + these 4. The single error is the **pre-existing** decision-2 blocker on this
+feature's own folder, unchanged. **Zero new validation errors; zero on any T11b item; zero duplicate
+ids.** `_path_parent` agrees with the declared `parent` on all four, so `validate`'s disagreement
+check *passed* rather than being skipped.
+
+**2. Rendered rows, verbatim from `render.render_row` — read, not assumed:**
+
+```
+| 2026-07-03 | ↳ BUG-027: SongFormPage Artist field — no validation, no autocomplete, blur clears typed text (Critical) | 💡 Pending | Goal: make song creation possible again. Gate: fix direction now owned by the DX `AutoCompleteEdit` replacement task (decision 2026-07-19), superseding foundations ① + ②. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-027-songformpage-artist-field-broken/`. |
+| 2026-07-03 | ↳ BUG-029: ArtistFormPage search-strip icon crashes the app (Critical) | 🔵 Deferred | Goal: the search-strip icon must not crash the app. Gate: the search-strip element is slated for deletion by the Form UX Redesign; re-triage only if any part of the strip survives. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-029-artistformpage-search-strip-icon-crash/`. |
+| 2026-07-03 | ↳ BUG-030: ArtistFormPage search strip UX unclear (spec gap) | 🔵 Deferred | Goal: resolve the search-strip spec gap on the Artist form. Gate: Answered by Helder 2026-07-10: the element must disappear from both forms — folded into the Form UX Redesign. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear/`. |
+| 2026-07-03 | ↳ BUG-031/032: no API autocomplete while typing Artist Name / Song Title (spec gap) | 🔵 Deferred | Goal: settle whether API-backed autocomplete is required on the two name entries. Gate: Answered by Helder 2026-07-10: autocomplete (local + API) IS required on both entries — folded into the Form UX Redesign. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title/`. |
+```
+
+Read and confirmed: one `↳` each (`_depth` = 1); target, title, status and severity suffix
+transcribed verbatim; **no escaped-quote leakage** of the T10b kind (checked in the *rendered* text,
+not in the source — the titles contain no inner quotes and the em dashes survived intact); the
+`① + ②` glyphs in BUG-027's gate round-tripped byte-identically.
+
+**3. Ordered live Business Features table** (`order_items` over the real item pool) — the four land
+in their pre-migration positions:
+
+```
+1 (20) artists-songs | 2 (30) BUG-027 | 3 (40) BUG-050 | 4 (50) BUG-051 | 5 (60) BUG-052
+6 (70) inline-artist-create | 7 (140) BUG-028 | 8 (150) BUG-029 | 9 (160) BUG-030
+10 (170) BUG-031 | 11 (180) form-ux-redesign | …
+```
+
+**4. Byte-exact diff of each rendered row against its pre-migration line** in
+`migration/BACKLOG-pre-migration.md` (Python string equality on the common-prefix/suffix trim, not
+`grep`). Only the differing middles are reproduced:
+
+```
+--- BUG-027 DIFFERS
+  OLD mid: 'task-log.md'
+  NEW mid: 'bugs/2026-07-03-BUG-027-songformpage-artist-field-broken/'
+--- BUG-029 DIFFERS
+  OLD mid: 'Deferred: the search-strip element is slated … survives. Pointer: `BusinessFeatures/artists-songs/task-log.md'
+  NEW mid: 'Goal: the search-strip icon must not crash the app. Gate: the search-strip element is slated … survives. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-029-artistformpage-search-strip-icon-crash/'
+--- BUG-030 DIFFERS
+  OLD mid: 'Answered by Helder 2026-07-10: the element must disappear … Redesign. Pointer: `BusinessFeatures/artists-songs/task-log.md'
+  NEW mid: 'Goal: resolve the search-strip spec gap on the Artist form. Gate: Answered by Helder 2026-07-10: the element must disappear … Redesign. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear/'
+--- BUG-031 DIFFERS
+  OLD mid: 'Answered by Helder 2026-07-10: autocomplete (local + API) IS required … Redesign. Pointer: `BusinessFeatures/artists-songs/task-log.md'
+  NEW mid: 'Goal: settle whether API-backed autocomplete is required on the two name entries. Gate: Answered by Helder 2026-07-10: autocomplete (local + API) IS required … Redesign. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title/'
+```
+
+Reading these: **BUG-027's only delta is the pointer** (same class as all three of T11a's). The other
+three differ in the pointer **plus** the authored `Goal:` sentence and the `Deferred:`→`Gate:`
+relabelling — both declared below. Target, arrow, title, status, and every word of the deferral
+reason itself are byte-identical.
+
+**5. Live splice** — `render.render_backlog(existing, items)` over the real `BACKLOG.md` returned
+without error; the rendered output contains each of the four rows **verbatim as printed above**
+(exact substring match on the full row, not on the id).
+
+**6. Archive regression** — both T9e regions still splice against the real fenced files, called in
+the F2-correct form (`all_items=items`). No T11b item is terminal, so none routes through the
+archive:
+
+```
+archive 2026-06 -> splice OK, 3 items
+archive 2026-07 -> splice OK, 5 items
+```
+
+**7. Additivity — `BACKLOG.md` and the 5 archive files unmodified:**
+
+```
+$ git diff --stat -- Docs/Management/BACKLOG.md Docs/Management/backlog-archive/
+(no output — 0 files changed)
+
+$ git status --porcelain
+ M MyVocaList.sln
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-027-songformpage-artist-field-broken/
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-029-artistformpage-search-strip-icon-crash/
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear/
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title/
+```
+
+Nothing moved, nothing deleted. `BusinessFeatures/artists-songs/task-log.md` is untouched
+(REQ-SEV-27) — confirmed by its absence from the diff.
+
+**8. `.sln` HARD GATE.** Highest `FA1234BC-0001-4000-8000-0000000000NN` **actually in use, read from
+the file: `0x75`** (77 GUIDs in that family). T11b allocated **`…0076`, `…0077`, `…0078`,
+`…0079`**, each asserted absent before the write. All four nest under the artists-songs `bugs`
+folder `{7A021F6B-F297-41EA-A028-C4F881146791}` — the same parent the T11a entries use, read from
+the file's existing `NestedProjects` lines. Written in **binary**; BOM and CRLF re-asserted after:
+
+```
+.sln BOM: True | CRLF: 1202 | lone LF: 0        (was BOM True | CRLF 1178 | lone LF 0)
+git diff --numstat MyVocaList.sln -> 24  0
+```
+
+Added paths re-read from disk with `repr()`:
+
+```
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-027-songformpage-artist-field-broken\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-027-songformpage-artist-field-broken\\README.md'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-029-artistformpage-search-strip-icon-crash\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-029-artistformpage-search-strip-icon-crash\\README.md'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear\\README.md'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title\\README.md'
+```
+
+**9. Line endings.** The 4 READMEs are new files with no on-disk EOL to preserve; written **LF**
+(matching every README T9a–T11a produced), with `b'\r\n' not in` asserted on the bytes re-read from
+disk. `MyVocaList.sln`, `tasks.md` and `task-log.md` are pre-existing **CRLF** and were asserted CRLF
+after their writes. Per **F3** the repo still has `core.autocrlf=true` with `*.md` unpinned — these
+assertions measure the **working tree**.
+
+### Declared T12 diff hunks
+
+Four hunks in three classes. None is a transcription error; all four need Helder's confirmation at
+T12.
+
+**(a) Pointer relocation — all four rows. The task's purpose, not a side effect.** Permitted diff
+class (c). Every row's pointer moves from the shared `BusinessFeatures/artists-songs/task-log.md`
+to its own folder; REQ-SEV-27 is satisfied by the **History / back-link** line in each README, and
+the task-log itself is unmodified.
+
+**(b) Agent-authored `Goal:` sentence — BUG-029, BUG-030, BUG-031/032 (decision 1 class, flagged for
+audit as a set).** These three rows have **no Goal** in BACKLOG: their Notes cells open with
+*"Deferred: …"* / *"Answered by Helder 2026-07-10: …"*. `model.REQUIRED` makes `goal` mandatory and
+`render_row` always emits `Goal: {goal}`, so a goal had to exist. Each was derived **strictly from
+that row's own title**, adds no fact, and is marked *agent-authored, pending review* in its README:
+
+```
+BUG-029  Goal: the search-strip icon must not crash the app.
+BUG-030  Goal: resolve the search-strip spec gap on the Artist form.
+BUG-031  Goal: settle whether API-backed autocomplete is required on the two name entries.
+```
+
+**(c) `Deferred:` label → `Gate:` — BUG-029 only.** The row's Notes begin with the literal label
+`Deferred: `. Transcribing it *inside* `gate:` would render `Gate: Deferred: the search-strip …`,
+duplicating information the Status cell already carries (`🔵 Deferred`). The label was dropped;
+**every word after it is verbatim**. BUG-030 and BUG-031/032 keep their `Answered by Helder
+2026-07-10:` opening in full, because that is content, not a status label.
+
+**(d) One row, one folder — BUG-031/032.** Not a text change; recorded so T12 does not read the
+absent `BUG-032` folder as a dropped row. The row renders byte-identically apart from (a) and (b).
+
+**No respelling was needed this time.** The brief warned about `\b\d+\s*/\s*\d+\b` (which has already
+forced three respellings). It does **not** fire here: `BUG-031/032` and `Artist Name / Song Title`
+live in the **title**, and `model.notes_violations` scans only `goal` + `gate`. No relocation to a
+README body was needed either — all four rows' Notes already sit inside the ≤3-sentence / ≤55-word
+budget and trip no banned pattern (evidence 1).
+
+### Intent verification
+- The task's original demo statement is **superseded by F1** and was not used; its in-process
+  equivalent is evidence items 1–6.
+- `Changed files` contains only files inside `Files owned` (the item folders, `MyVocaList.sln`) plus
+  this feature's own `tasks.md` / `task-log.md`. **Four folders, not the five the brief declared** —
+  the discrepancy is the brief's, documented above.
+- No `TODO`s; every written file re-read from disk and its Markdown re-checked.
+- Nothing outside the four folders and the `.sln` was created, moved or deleted.
+
+### Checkpoint
+Complete — no resumption needed. Worktree `../mvl-backlog-migration`, branch
+`feature/backlog-migration`. Step 6 of 6 done: read specs + T11a conventions → derive rows/nesting
+from BACKLOG → write 4 READMEs → `.sln` → in-process verify → commit. Build/test state: n/a (no code
+changed).
+Context manifest, had this been interrupted:
+1. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — decision table, F1–F5, T11b row
+2. `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` — T11a conventions + this entry
+3. `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` — §2 frontmatter, §3 row rendering
+4. `Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md` — REQ-SEV-00/01/03/25/27
+5. `Docs/Management/BACKLOG.md` — lines 63–78, the source rows and their nesting
+6. `Docs/Management/DevCycleCraft/spec-evolution-versioning/migration/BACKLOG-pre-migration.md` — the frozen fixture for the byte diff
+7. `.claude/scripts/backlog/model.py` — `REQUIRED`, `_BANNED`, `_path_parent`, `validate`, `order_items`
+8. `MyVocaList.sln` — GUID counter (`0x79` after T11b) and the artists-songs `bugs` folder GUID

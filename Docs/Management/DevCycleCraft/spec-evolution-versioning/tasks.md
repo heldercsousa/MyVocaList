@@ -267,7 +267,7 @@ supposed to surface.
 - [x] **T11a — BUG-050/051/052 get folders** (3 folders + READMEs written; pointer relocation + BUG-052's `050/051` respelling declared as T12 hunks — see task-log T11a)
   Consumes: T10b. Each back-links `DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/task-log.md`; nothing is deleted from it (REQ-SEV-27).
   Files owned: 3 folders, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
-- [ ] **T11b — BUG-027/029/030/031/032 get folders**
+- [x] **T11b — BUG-027/029/030/031/032 get folders** (4 folders + READMEs written — **four rows, not five**: BUG-031/032 is a single BACKLOG row; pointer relocation, three agent-authored `Goal:` sentences and BUG-029's `Deferred:`→`Gate:` relabelling declared as T12 hunks — see task-log T11b)
   Consumes: T11a. Each back-links `BusinessFeatures/artists-songs/task-log.md`; preserve each row's `🔵 Deferred` status and its deferral reason as `gate:`.
   Files owned: 5 folders, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
 - [ ] **T11c — BUG-012 flat file → folder**
