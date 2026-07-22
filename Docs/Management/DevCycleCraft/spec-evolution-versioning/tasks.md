@@ -194,8 +194,24 @@ supposed to surface.
 >   makes T12's gate impossible to classify honestly. Pin `Docs/Management/backlog-archive/*.md`
 >   and `BACKLOG.md` to `text eol=lf`.
 >
-> - **[ ] F4 (found by T10a; fold into F2's task) — `render._section_from_path` is dead code in
->   production.** `walk()` builds `rel_path` as `Docs/Management/…`, so the function tests
+> - **[RETRACTED 2026-07-22] F4 was WRONG — `_section_from_path` was never dead code.** `walk()`
+>   sets `rel_dir = _rel(root, dirpath)`, and `_rel` is `os.path.relpath(path, join(root,
+>   MANAGEMENT))` — i.e. relative *to* `Docs/Management`, so those segments are already stripped and
+>   `parts[0]` **is** the section name. Live `walk()` output: `'BusinessFeatures/artists-songs/'` →
+>   `BusinessFeatures`. The fallback has always fired. The `cross-cutting/` hard-fail F4 describes is
+>   real but its sole cause is **F2**; the chain was two-deep-plus-a-raise, not one-deep.
+>   **How the error was made:** the claim was reasoned from the function's apparent intent rather
+>   than from running it, then repeated as established fact in three briefs (T10b, T11a, T11b) —
+>   each of which wrote defensive `section:` keys partly on a false premise. Those keys are still
+>   correct (F2 was real), so nothing shipped wrong, but the reasoning was not.
+>   **Guard added:** `test_walk_produces_paths_the_folder_prefix_fallback_can_read` asserts the real
+>   `walk()` output shape and `_section_from_path`'s result together, so a future change to `_rel`
+>   fails loudly instead of silently deleting the third resolution step.
+>   **⚠️ Audit the rest of this block the same way — by execution, not by reading.** F1's
+>   `regen --check` claim is the next most load-bearing and has never been run by me directly.
+>
+> - **[superseded — original text of F4, kept for the record]** `render._section_from_path` is dead code in
+>   production. `walk()` builds `rel_path` as `Docs/Management/…`, so the function tests
 >   `parts[0] == "Docs"` and **always returns `None`**. The folder-prefix fallback therefore never
 >   fires outside tests. Combined with F2 (`_render_all` omits `all_items`, so parent resolution
 >   sees only the month's bucket, and archived bugs' parents are non-terminal ⇒ absent), an archived
