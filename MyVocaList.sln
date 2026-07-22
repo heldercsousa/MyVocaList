@@ -654,6 +654,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-BUG-050-suggestion-not-locked", "2026-07-21-BUG-050-suggestion-not-locked", "{FA1234BC-0001-4000-8000-000000000073}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-050-suggestion-not-locked\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-050-suggestion-not-locked\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-BUG-051-autocomplete-stale-results", "2026-07-21-BUG-051-autocomplete-stale-results", "{FA1234BC-0001-4000-8000-000000000074}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-051-autocomplete-stale-results\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-051-autocomplete-stale-results\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-BUG-052-edit-shows-empty-artist-field", "2026-07-21-BUG-052-edit-shows-empty-artist-field", "{FA1234BC-0001-4000-8000-000000000075}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-052-edit-shows-empty-artist-field\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-052-edit-shows-empty-artist-field\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-028-artistspage-trailing-catalog-button-noop", "BUG-028-artistspage-trailing-catalog-button-noop", "{FA1234BC-0001-4000-8000-000000000070}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-028-artistspage-trailing-catalog-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-028-artistspage-trailing-catalog-button-noop\README.md
@@ -1146,6 +1161,9 @@ Global
 		{D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD} = {FA1234BC-0001-4000-8000-000000000046}
 		{DB5ECBBC-566B-4A00-9791-E18E11F49B55} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
 		{FA1234BC-0001-4000-8000-000000000070} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000073} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000074} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000075} = {7A021F6B-F297-41EA-A028-C4F881146791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
