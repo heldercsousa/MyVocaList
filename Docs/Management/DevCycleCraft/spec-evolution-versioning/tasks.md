@@ -73,7 +73,7 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
   its pointer sits inside `queue-management/`, already owned by another row), Windows version
   (BLOCKED — see below).
   Files owned: `Docs/Management/cross-cutting/**`, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
-- [ ] **T9c-2a — Folder-less Dev Cycle Craft rows, first half** (~9 rows)
+- [x] **T9c-2a — Folder-less Dev Cycle Craft rows, first half** (9 of 9 written — see task-log T9c-2a)
   Consumes: T9c-1. T9b reported **18** folder-less top-level Dev Cycle Craft rows — over the Rule 2
   bound, so split in two. Take the first 9 in table order.
   Files owned: `Docs/Management/cross-cutting/**`, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
