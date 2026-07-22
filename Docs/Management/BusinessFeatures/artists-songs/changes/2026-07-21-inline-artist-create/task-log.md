@@ -294,3 +294,35 @@ Build: passed (`dotnet build MyVocaList.csproj -f net10.0-android` → exit 0, 0
 | REQ-ACREATE-14 | BUG-052: edit-mode hydration shows locked artist, fires no search | `SongFormViewModel.InitializeArtistField` (`IsArtistLocked=true`) | `InitializeArtistField_EditModeHydration_ShowsLockedArtistWithoutSearch` (Red→Green) |
 
 **On-device-only rows (T10, Helder):** REQ-ACREATE-01/02/08/10 visual+E2E confirmation, plus REQ-ACREATE-04/05 full E2E (novel artist → ➕ → created+locked+saved; exact-existing name → duplicate error, no orphan).
+
+---
+## Bug: BUG-053 (Major, UI-only) — SongFormPage ItemTemplate FormattedString crash on Artist typing
+**Status:** Fixed (`8d33547`, worktree `feat/inline-artist-create`). Found on-device by Helder (T10 prep): typing 3 chars threw `Cannot assign property FormattedString… Position 57:50`.
+- **Root cause:** the create-row `ItemTemplate` used property-element `<Label.FormattedString>`, but `Label`'s property is `FormattedText` (`FormattedString` is the value *type*, not the property).
+- **Fix:** renamed the property-element `<Label.FormattedString>` → `<Label.FormattedText>` (open+close). Inner `FormattedString`/`Span` composition unchanged; real-match rows untouched. XAML-only, no `.cs`.
+- **Evidence:** `dotnet build -f net10.0-android` → 0 errors; `dotnet test` → 517/517.
+- **Manual E2E:** ✅ confirmed on-device by Helder 2026-07-22 (Part A — typing ≥3 chars renders the ➕ row, no crash).
+> Full entry also recorded in the worktree copy of this file; reconcile at merge (develop authoritative).
+
+---
+## T10 outcome (2026-07-22) — Helder ran the on-device checklist; root-cause triage
+Result: **Part A (BUG-053) fixed; Part B/C mostly FAIL — 6 new defects (BUG-054…059).** The T1–T9 fixes for BUG-050/051/052 passed their VM unit tests but **do not hold on-device**, because the real defects live in the DX `AutoCompleteEdit` wiring/XAML — the seam the unit suite never exercises. Root causes below are from a read-only code trace against the worktree (file:line exact).
+
+| Item | Result | Defect | Root cause (file:line) | Fix layer |
+|------|--------|--------|------------------------|-----------|
+| A (BUG-053) | ✅ | — | fixed `8d33547` | — |
+| a (retain text) | ✅ | — | REQ-ACREATE-03 holds | — |
+| b (lock) | ❌ | **BUG-054** | `SongFormPage.xaml:34` locks via `IsEnabled` (disables whole control incl. X; no `ClearIconVisibility` set); `SongFormPage.xaml.cs` `OnArtistItemsRequested` re-appends the ➕ sentinel when `ArtistSearchText` is set to the locked name | XAML (`IsReadOnly` + `ClearIconVisibility="Auto"`) + page code-behind (suppress sentinel when locked / text==SelectedArtistName) |
+| c (error text) | ❌ | **BUG-057** | only sink is the DX editor's own `ErrorText` (`xaml:32-33`); no visible `Label` bound to `ArtistErrorText`; on-device the inline error text doesn't surface | XAML (add error Label) |
+| e (stale search + first-empty) | ❌ | **BUG-056** | `SearchArtistsAsync` (`SongFormViewModel.cs:289-291`) assigns `ArtistSuggestions` inside a fire-and-forget `RunOnUiThread`; provider `RequestAsync` (`SongFormPage.xaml.cs:57`) reads `ArtistSuggestions` **before** the dispatch lands → first read sees `[]`, stale read sees prior list. Interlocked guard (`:286-288`) is irrelevant to this | page↔VM coupling (return results directly / await UI dispatch) |
+| j (edit empty) | ❌ | **BUG-055** | `LoadSongForEditAsync` (`SongFormViewModel.cs:400-419`) never sets `SelectedArtistId`/`SelectedArtistName`/`ArtistSearchText`; `InitializeArtistField` depends on `artistId` QueryProperty (=0 in normal edit). Also `UpdateSongAsync` (`:536-540`) never carries ArtistId. **Hydration bug, not save bug** (new-song save persists ArtistId correctly) | VM load path (+ edit-save ArtistId) |
+| i (catalog no-op) | ❌ | **BUG-059** | handler/nav wiring correct (`ViewCatalogCommand`→`NavigateToCatalog`→`Songs?artistId=…`→`GetPagedCatalogForArtistAsync`); catalog renders empty because songs aren't linked to ArtistId — **cascade of BUG-054/055** | none in handler; resolve via 054/055 + DB spot-check |
+| C1 (novel create) | ✅ | — | created+locked+saved | — |
+| C2 (duplicate) | ❌ (partial) | **BUG-058** | `AutoCompleteEdit` has no `DisplayMember` (`xaml:28`) → DX writes selected object's record `ToString()` into `Text` (two-way→`ArtistSearchText`); success overwrites via `LockArtist`, failure retains → `, IsCreateNew = True }` leaks | XAML (`DisplayMember="Headline"`) + optional VM failure normalize |
+
+### Coupling / single-writer sequencing (same worktree, strictly sequential)
+- `SongFormPage.xaml.cs` — BUG-054a & BUG-056 both in `OnArtistItemsRequested`; BUG-054 & BUG-058 both route `OnArtistSelectionChanged`.
+- `SongFormPage.xaml` — BUG-054b (`:34`), BUG-057 (`:32-33` + new label), BUG-058 (`DisplayMember` on `:28`) all touch the same `AutoCompleteEdit`.
+- `SongFormViewModel.cs` — BUG-055 (`LoadSongForEditAsync`), BUG-056 (`SearchArtistsAsync`), BUG-058 (`CreateArtistInlineAsync`) — separate methods, one file.
+
+**Suggested fix order:** BUG-056 (search race) first (unblocks realistic retest of 054/058) → BUG-055 (hydration + edit-save ArtistId) → XAML cluster BUG-054b/057/058 in one pass → BUG-054a code-behind → BUG-059 verifies as cascade. Each testable defect needs a regression check where a seam exists; the XAML/DX-wiring ones are on-device manual E2E (no unit seam), same as BUG-053. **Consequence:** BUG-027 stays open; the Artists & Songs Catalog stays 🔴 Blocked until T10 re-runs all-green.
