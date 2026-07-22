@@ -414,3 +414,7 @@ With `IsReadOnly` locking, tapping the clear (X) icon clears `ArtistSearchText` 
 ### Verification evidence
 - No code change. Confirmed the nav chain is intact (read-only trace; handler untouched).
 - **Manual E2E / DB spot-check:** on device (T10 re-run, Helder) — a saved/edited song now carries `ArtistId`, so the artist catalog populates. Not runnable here (no app run).
+
+---
+### Checkpoint — COMPLETE (2026-07-22)
+All 6 T10 defects addressed on feat/inline-artist-create (worktree). Build net10.0-android exit 0 (0 errors); dotnet test 520/520 green (517 baseline + 3 new VM tests). Commits: f34cadc (BUG-056+055), cb78f3e (BUG-054b/057/058 XAML), fd83d90 (BUG-054a + BUG-059 note). Regression tests: BUG-056 (SearchArtistsCoreAsync return), BUG-055 (hydration + edit-save link). On-device-only (manual E2E, T10 re-run): BUG-054a/054b/057/058 + BUG-059 cascade. Not pushed/merged (orchestrator handles after Helder T10 re-run).
