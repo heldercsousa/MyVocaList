@@ -62,9 +62,26 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 - [ ] **T9b — Feature READMEs: Dev Cycle Craft top-level rows** (~18 rows)
   Consumes: T8 (independent of T9a in content, but serialized — both write `MyVocaList.sln`).
   Files owned: those READMEs, `MyVocaList.sln`. Risk: Medium. Review lane: Standard. Demo: same.
-- [ ] **T9c — Folder-less rows → `cross-cutting/` folders**
-  Consumes: T9a/T9b. Every row whose pointer is `cross-cutting-log.md` gets a folder that links back to the log (retained, never deleted — REQ-SEV-28).
+> **Sizing correction [2026-07-22]:** T9a's "~12 rows" estimate was wrong. Only **3 of 13**
+> top-level Business Feature rows have an existing spec folder; the other 10 route to T9c, T10b
+> or T11c. The row-group split was estimated from the BACKLOG row count without checking which
+> rows had folders. T9c is correspondingly larger and is split below.
+
+- [ ] **T9c-1 — Folder-less Business Features rows → `cross-cutting/` folders** (~7 rows)
+  Consumes: T9a/T9b. Covers: Form & Autocomplete UX Overhaul, User Tutorial/Learning, Website,
+  Singer self-registration, Social features, Dead-code cleanup QueueService (needs its OWN folder —
+  its pointer sits inside `queue-management/`, already owned by another row), Windows version
+  (BLOCKED — see below).
   Files owned: `Docs/Management/cross-cutting/**`, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
+- [ ] **T9c-2 — Folder-less Dev Cycle Craft rows → `cross-cutting/` folders**
+  Consumes: T9c-1. Count to be established by T9b's report; split further if > 12.
+  Files owned: `Docs/Management/cross-cutting/**`, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
+
+> **⛔ BLOCKED — needs Helder before T12.** The **Windows version** row has no Goal in BACKLOG
+> (Gate + Pointer only), but `model.REQUIRED` makes `goal` mandatory. Inventing one is content
+> fabrication; omitting it makes `regen` exit 2. Options: (A) Helder supplies a one-line goal —
+> recommended; (B) relax `REQUIRED`, which weakens REQ-SEV-09 for every future row. Until resolved,
+> the row cannot be migrated and T12's equivalence gate will show it as missing.
 - [ ] **T10a — READMEs for existing `bugs/` folders**
   Consumes: T9c. Files owned: those READMEs, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
 - [ ] **T10b — READMEs for existing `changes/` folders + the two separator rows**
