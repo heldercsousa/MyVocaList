@@ -73,9 +73,19 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
   its pointer sits inside `queue-management/`, already owned by another row), Windows version
   (BLOCKED — see below).
   Files owned: `Docs/Management/cross-cutting/**`, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
-- [ ] **T9c-2 — Folder-less Dev Cycle Craft rows → `cross-cutting/` folders**
-  Consumes: T9c-1. Count to be established by T9b's report; split further if > 12.
+- [ ] **T9c-2a — Folder-less Dev Cycle Craft rows, first half** (~9 rows)
+  Consumes: T9c-1. T9b reported **18** folder-less top-level Dev Cycle Craft rows — over the Rule 2
+  bound, so split in two. Take the first 9 in table order.
   Files owned: `Docs/Management/cross-cutting/**`, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
+- [ ] **T9c-2b — Folder-less Dev Cycle Craft rows, second half** (~9 rows + the Autocomplete Mobile UX Pattern row)
+  Consumes: T9c-2a. Includes **① Autocomplete Mobile UX Pattern** (pos 24), which needs its OWN
+  folder — its pointer is a file inside `autocomplete-component/`, whose folder is owned by sub-rows
+  that this row does not parent.
+  Files owned: `Docs/Management/cross-cutting/**`, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
+
+> **Queued for T13 (`amend:` process, not to be done mid-migration):** `constraints-registry.md`
+> records the sequential `.sln` Solution-Folder GUID counter as last-used `0041`; the highest
+> actually in use before T9c-1 was `0056`. Found by the T9c-1 implementor.
 
 > **⛔ SYSTEMIC — needs Helder's decision before T12.** REQ-SEV-09's banned-content rule
 > (`model._BANNED`) rejects file references (`\S+\.(cs|xaml|py|md)`) and review verdicts
