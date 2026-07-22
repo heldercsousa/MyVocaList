@@ -67,7 +67,7 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 > or T11c. The row-group split was estimated from the BACKLOG row count without checking which
 > rows had folders. T9c is correspondingly larger and is split below.
 
-- [ ] **T9c-1 — Folder-less Business Features rows → `cross-cutting/` folders** (~7 rows)
+- [x] **T9c-1 — Folder-less Business Features rows → `cross-cutting/` folders** (6 of 7 written; Windows version blocked — see task-log T9c-1)
   Consumes: T9a/T9b. Covers: Form & Autocomplete UX Overhaul, User Tutorial/Learning, Website,
   Singer self-registration, Social features, Dead-code cleanup QueueService (needs its OWN folder —
   its pointer sits inside `queue-management/`, already owned by another row), Windows version

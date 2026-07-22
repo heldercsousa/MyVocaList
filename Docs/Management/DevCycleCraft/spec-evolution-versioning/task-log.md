@@ -405,3 +405,97 @@ heredoc failure avoided by using Python script files throughout).
 
 Post-edit re-read: all nine READMEs re-parsed by the generator's own walk (the `regen --check` run
 above); `extensions-layer-guidelines/README.md` re-read in full to confirm the original body survived.
+
+---
+## Task: T9c-1 — Folder-less Business Features rows → `cross-cutting/` folders
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+Six of the seven target rows migrated to `Docs/Management/cross-cutting/<slug>/README.md`.
+The `cross-cutting/` tree did not exist before this task, so **no pre-existing README was
+touched** — every file is new (checked with an explicit `os.path.exists` guard that aborts the
+script, the T9b `extensions-layer-guidelines` overwrite being the precedent). REQ-SEV-28 honoured:
+`cross-cutting-log.md` is retained untouched and every new README back-references it.
+
+### Rows written (row, order, status)
+
+| # | Row | order | status | target |
+|---|-----|-------|--------|--------|
+| 20 | **Form & Autocomplete UX Overhaul** | 200 | 💡 Pending | 2026-07-11 |
+| 29 | Dead-code cleanup: superseded `QueueService`/`IQueueService` | 290 | 💡 Pending | 2026-06 |
+| 33 | **User Tutorial/Learning** | 330 | 💡 Pending | 2026-06 |
+| 34 | **Website** | 340 | 💡 Pending | 2026-06 |
+| 37 | **Singer self-registration** | 370 | 💡 Pending | — |
+| 38 | **Social features** | 380 | 💡 Pending | — |
+
+**`order:` mismatch found.** The briefing gave Form & Autocomplete UX Overhaul as global
+position **21 → order 210**. Its actual 1-based position in the Business Features table is
+**20**, so `order: 200` was written. The other five matched the briefing. Positions were counted
+mechanically from the rows between the `business-features` fences (header + separator excluded).
+
+Goal/Gate/Status/Target were transcribed verbatim from the pre-migration rows. No row needed
+notes-overflow relocation: all six pass `model.notes_violations` unchanged (≤3 sentences,
+≤55 words, no banned content). Rows with no Pointer in the original (33, 34, 37, 38) omit
+`pointer:`, so the generator falls back to the folder path — a storage-format consequence, not a
+content edit. Rows 20 and 29 keep their original pointers verbatim.
+
+### Row skipped
+- **Windows version** (position 39) — BLOCKED, as flagged in `tasks.md`. Its BACKLOG row carries
+  Gate + Pointer but **no Goal**, and `model.REQUIRED` makes `goal` mandatory. Writing one would be
+  content fabrication, so the row was left unmigrated pending Helder's decision (option A: supply a
+  one-line goal).
+
+### Changed files
+- `Docs/Management/cross-cutting/form-autocomplete-ux-overhaul/README.md` (new)
+- `Docs/Management/cross-cutting/queueservice-deadcode-cleanup/README.md` (new)
+- `Docs/Management/cross-cutting/user-tutorial-learning/README.md` (new)
+- `Docs/Management/cross-cutting/website/README.md` (new)
+- `Docs/Management/cross-cutting/singer-self-registration/README.md` (new)
+- `Docs/Management/cross-cutting/social-features/README.md` (new)
+- `MyVocaList.sln` (new `cross-cutting` Solution Folder + 6 child folders)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T9c-1 ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Verification evidence
+
+`regen --check` (never `regen`):
+
+```
+BACKLOG is stale -- run: python .claude/scripts/backlog/backlog_gen.py regen
+  - .\Docs\Management\BACKLOG.md
+REGEN_EXIT=1
+```
+
+Exit **1** = stale, the expected result. Not 2, so no README written here is malformed and no
+validation rule is violated.
+
+All six rows confirmed to parse and resolve through the generator's own walk:
+
+```
+💡 Pending 2026-07-11  **Form & Autocomplete UX Overhaul**  → Docs/Management/cross-cutting-log.md
+💡 Pending 2026-06  **User Tutorial/Learning**  → cross-cutting/user-tutorial-learning/
+💡 Pending 2026-06  **Website**  → cross-cutting/website/
+💡 Pending —  **Singer self-registration**  → cross-cutting/singer-self-registration/
+💡 Pending —  **Social features**  → cross-cutting/social-features/
+💡 Pending 2026-06  Dead-code cleanup: superseded `QueueService`/`IQueueService`  → BusinessFeatures/queue-management/queue-deadcode-cleanup.md
+```
+
+`BACKLOG.md` NOT modified:
+
+```
+ .claude/changed-files.txt | 321 +++++++++++++++++++++++++++++++++++++
+ MyVocaList.sln            |  39 ++++++
+ 2 files changed, 360 insertions(+)
+```
+
+`.sln` gate: written by a Python **script file** in binary (never a Bash heredoc — the T9a `\a`/`\b`
+escape corruption). UTF-8 BOM and CRLF preserved and re-asserted after the write; all six
+SolutionItems paths re-read with `repr()` and confirmed uncorrupted, e.g.
+`'\t\tDocs\Management\cross-cutting\form-autocomplete-ux-overhaul\README.md = ...'`.
+New `cross-cutting` folder GUID `…0057` nested under Management; children `…0058`–`…005D`
+(sequential counter continued from `…0056`, verified free of collisions before writing).
+
+Post-edit re-read: all six READMEs re-parsed by the generator's frontmatter walk (the `--check`
+and `query` runs above).
