@@ -4,6 +4,30 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 
 **Markers:** `[ ]` available · `[~]` claimed · `[x]` done · `[CANCELLED: reason]`
 
+---
+
+## ⛔ MIGRATION PAUSED — 6 decisions needed from Helder (2026-07-22)
+
+Phase 1 (generator) is **complete and merged**; 113 tests green. The additive migration ran through
+T9d. **T10a is blocked** and everything after it depends on these. None is a generator bug — each is
+a place where the existing BACKLOG predates a rule this feature encodes. This is what a migration is
+supposed to surface.
+
+| # | Blocker | Found by | Options (recommendation first) |
+|---|---------|----------|-------------------------------|
+| 1 | **Windows version** row has no Goal; `model.REQUIRED` mandates one | T9a | (A) supply a one-line goal · (B) relax `REQUIRED` — weakens REQ-SEV-09 for every future row |
+| 2 | **Banned-content vs governance rows.** `model._BANNED` rejects file references, but for rows like *BACKLOG-first Registration Enforcement* the filename IS the subject. 1 row blocked, 5 trimmed (overflow moved verbatim to README bodies — those rows render SHORTER than today) | T9b | (A) compliant one-line goals · (B) exempt Dev Cycle Craft governance rows from the file-reference pattern · (C) accept trimming as permitted diff class (d) |
+| 3 | **BUG-022 is `Minor` but has a folder**; `validate` errors *"severity 'Minor' must not have a folder (REQ-SEV-03)"*. The folder predates the rule | T10a | (A) reclassify to Major · (B) dissolve the folder · (C) exempt pre-existing folders |
+| 4 | **Two bugs have no valid parent.** `BusinessFeatures/cross-cutting/` has no README; `autocomplete-component/README.md` exists but has NO frontmatter so `walk()` skips it. Falling back to `section:` would render them top-level — a structural change, not a transcription | T10a | (A) give both parents frontmatter · (B) re-home the bugs |
+| 5 | **BUG-019** archive status is free text *"Closed — partially regressed"* (not in `model.STATUSES`), and live **BUG-028** points at the same folder — one folder cannot back two rows | T10a | (A) pick a valid status + split the folder · (B) merge the two rows |
+| 6 | **Archive files have TWO tables** (`## Business Features`, `## Dev Cycle Craft`) but `ARCHIVE_TEMPLATE` defines ONE flat `archive` region. T9d's fences therefore enclose the `## Dev Cycle Craft` heading, which T12 would consume. Fencing only one table would make T12 silently DROP the other's rows | T9d | (A) split into two regions (`archive-business` / `archive-craft`) — a `render.py` change needing its own task before T12 · (B) accept a single merged archive table |
+
+> **Consequence for T12:** the equivalence gate will NOT be a clean byte-match. Decisions 2 and 6
+> change rendered content by design. That is a decision to take knowingly, not a diff class to wave
+> through.
+
+---
+
 **All sequential — no `[P]`.** Every task after T2 consumes the previous task's contract or writes the same generated files; the file-overlap check forbids a wave.
 
 **Lane split:** T0–T7 are code → **git worktree on a task branch** (HARD RULE). T8–T13 are docs/migration → **`develop`** (docs land on develop). Merge the worktree (T7b) before starting T8, or the generator will not exist.
