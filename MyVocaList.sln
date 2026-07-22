@@ -232,6 +232,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-folder-layout-alig
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\findings.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\findings.md
 		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md
+		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\README.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hooks-redesign", "hooks-redesign", "{A1B2C3D4-0001-4000-8000-000000000005}"
@@ -263,6 +264,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-form-validation-guide", 
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\plan.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\plan.md
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\RESUME-PROMPT.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\RESUME-PROMPT.md
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\task-log.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\task-log.md
+		Docs\Management\DevCycleCraft\ui-form-validation-guide\README.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration", "backlog-first-registration", "{FA1234BC-0001-4000-8000-000000000029}"
@@ -301,6 +303,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "appbar-searchbar-redesign",
 		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\requirements.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\requirements.md
 		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\tasks.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\tasks.md
 		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\task-log.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\task-log.md
+		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\README.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-component", "autocomplete-component", "{FA1234BC-0001-4000-8000-000000000046}"
@@ -334,6 +337,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inline-trivial-fix", "inlin
 		Docs\Management\DevCycleCraft\inline-trivial-fix\proposed-diffs.md = Docs\Management\DevCycleCraft\inline-trivial-fix\proposed-diffs.md
 		Docs\Management\DevCycleCraft\inline-trivial-fix\requirements.md = Docs\Management\DevCycleCraft\inline-trivial-fix\requirements.md
 		Docs\Management\DevCycleCraft\inline-trivial-fix\task-log.md = Docs\Management\DevCycleCraft\inline-trivial-fix\task-log.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\README.md = Docs\Management\DevCycleCraft\inline-trivial-fix\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persisted-string-trimming", "persisted-string-trimming", "{FA1234BC-0001-4000-8000-000000000051}"
@@ -342,6 +346,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persisted-string-trimming",
 		Docs\Management\DevCycleCraft\persisted-string-trimming\plan.md = Docs\Management\DevCycleCraft\persisted-string-trimming\plan.md
 		Docs\Management\DevCycleCraft\persisted-string-trimming\requirements.md = Docs\Management\DevCycleCraft\persisted-string-trimming\requirements.md
 		Docs\Management\DevCycleCraft\persisted-string-trimming\tasks.md = Docs\Management\DevCycleCraft\persisted-string-trimming\tasks.md
+		Docs\Management\DevCycleCraft\persisted-string-trimming\README.md = Docs\Management\DevCycleCraft\persisted-string-trimming\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extensions-layer-guidelines", "extensions-layer-guidelines", "{FA1234BC-0001-4000-8000-000000000052}"
@@ -554,6 +559,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-r
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\prompt.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\prompt.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\task-log.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\task-log.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\ui-arch-decision-plan.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\ui-arch-decision-plan.md
+		Docs\Management\DevCycleCraft\UI-2nd-refactor\README.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-share", "youtube-share", "{FA1234BC-0001-4000-8000-000000000020}"
@@ -593,6 +599,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "session-continuity-leasing"
 		Docs\Management\DevCycleCraft\session-continuity-leasing\task-log.md = Docs\Management\DevCycleCraft\session-continuity-leasing\task-log.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md = Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md = Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md
+		Docs\Management\DevCycleCraft\session-continuity-leasing\README.md = Docs\Management\DevCycleCraft\session-continuity-leasing\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lease-scripts", "lease-scripts", "{FA1234BC-0001-4000-8000-000000000027}"
@@ -731,6 +738,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec-evolution-versioning",
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\tasks.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\tasks.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\task-log.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\task-log.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\README.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "per-agent-context-isolation", "per-agent-context-isolation", "{FA1234BC-0001-4000-8000-000000000044}"

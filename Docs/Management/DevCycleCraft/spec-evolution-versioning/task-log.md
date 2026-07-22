@@ -272,3 +272,136 @@ $ git diff --stat        # BACKLOG.md absent from the list
 Post-edit re-read: all three READMEs re-parsed by the generator's own walk (the `regen --check`
 run above); `.sln` entries re-read byte-wise via `repr()` after a first attempt corrupted two
 paths (shell escape) — reverted and rewritten from a script file.
+
+---
+## Task: T9b — Feature READMEs: Dev Cycle Craft top-level rows
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md` (Task 9, split T9b)
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+### Enumeration (the number T9c-2 needs)
+
+The Dev Cycle Craft fenced table holds **53 rows**, of which **28 are top-level** (non-`↳`).
+Of those 28, **9 have a dedicated spec folder** under `Docs/Management/DevCycleCraft/` and received a
+`README.md`; the remaining **19 point at `Docs/Management/cross-cutting-log.md`** (or at a folder they
+do not own) and route to **T9c-2**. The row count is therefore *not* the README count, exactly as T9a
+found.
+
+### READMEs written (feature, order, status)
+
+| order | id (folder) | status |
+|-------|-------------|--------|
+| 20 | `inline-trivial-fix` | 🟡 In Progress |
+| 30 | `workflow-folder-layout-alignment` | 🟡 In Progress |
+| 100 | `persisted-string-trimming` | 🗺️ Plan |
+| 110 | `extensions-layer-guidelines` | 💡 Pending |
+| 150 | `appbar-searchbar-redesign` | 🟡 In Progress |
+| 290 | `UI-2nd-refactor` | 📋 Spec |
+| 340 | `session-continuity-leasing` | 🟡 In Progress |
+| 450 | `ui-form-validation-guide` | 🟡 In Progress |
+| 520 | `spec-evolution-versioning` | 🗺️ Plan |
+
+`order:` = the row's 1-based position in the Dev Cycle Craft table × 10, the same convention T9a used,
+so Helder's hand-curated row order survives regeneration (REQ-SEV-17).
+
+### Rows skipped, with reasons
+
+- **BACKLOG-first Registration Enforcement** (row 39, would be `order: 390`, folder
+  `backlog-first-registration/` exists) — **blocked: cannot transcribe.** Its Goal is
+  *"work items must be registered in BACKLOG.md before memory writes (advisory Stop-hook posture)"*
+  and its Gate names `workflow.md` and `AC-13`. `model._BANNED` rejects `\S+\.(cs|xaml|py|md)` as a
+  "file path beyond the pointer" and `AC-\d+` as an "AC number", so the row cannot be written without
+  either rewording (data loss, fails T12) or dropping the required `goal`. Escalated below.
+- **① Autocomplete Mobile UX Pattern — Full-Screen Expansion Guideline** (row 24, would be
+  `order: 240`) — its pointer is a *file* inside `autocomplete-component/`, a folder owned by the
+  autocomplete sub-rows (rows 18–23, T10b's territory), not by this row. Assigning it that folder's
+  `README.md` would make it the parent of rows it is not the parent of. Routed to **T9c-2** for a
+  `cross-cutting/` folder decision rather than invented here.
+- The other 18 folder-less top-level rows (all pointing at `cross-cutting-log.md`) → **T9c-2**.
+
+### Allowed diff class (d) — Notes overflow moved to the README body
+
+Per plan Task 9 step 2, overflow sentences were moved **verbatim** into the README body under
+`**Notes overflow (transcribed from the pre-migration BACKLOG row):**`; no sentence was reworded.
+Rows affected and why:
+
+| order | reason the fixture Notes could not be transcribed whole |
+|-------|--------------------------------------------------------|
+| 20 | > 3 sentences and > 55 words; banned `PASS` / `CONDITIONAL PASS`, `33/33` test count, `handoff.md` path |
+| 100 | > 55 words |
+| 110 | banned `code-principles.md` path |
+| 150 | banned `PASS` verdict |
+| 520 | banned `CONDITIONAL PASS` verdict |
+
+`UI-2nd-refactor`'s fixture target is the plain hyphen `-`; `model.validate` accepts only the em dash
+`—`, so it was transcribed as `—` — the same permitted diff T9a recorded for the Data Backup &
+Restore row.
+
+### Spec gap: banned-content regex rejects faithful transcription of two rows
+
+**Location:** `.claude/scripts/backlog/model.py` `_BANNED` vs. the fixture rows for
+`BACKLOG-first Registration Enforcement` (and, as overflow, four more rows).
+**Gap description:** the "file path beyond the pointer" and "review verdict" patterns fire on Notes
+text that is genuinely the row's Goal, not stray detail — `BACKLOG.md` and `workflow.md` *are* the
+subject of that row.
+**Options:**
+- Option A: Helder supplies a one-line Goal for the row that avoids the banned tokens — faithful to
+  intent, needs a human, keeps the rule mechanical.
+- Option B: narrow `_BANNED`'s file-path pattern to exclude bare `*.md` governance filenames —
+  mechanical, but weakens REQ-SEV-09 for every future row.
+**Recommendation:** Option A, consistent with T9a's Windows-version escalation.
+**Blocking:** No — the row is skipped and recorded here; it must be resolved before T12's equivalence
+gate, which would otherwise show the row as missing.
+
+### Design concern: `extensions-layer-guidelines/README.md` already existed
+
+That folder already had a substantive, `.sln`-registered `README.md` (the placement-guidelines
+document). Frontmatter was **prepended**, body preserved byte-for-byte — verified against
+`git show HEAD:…` after an initial overwrite was reverted with `git checkout --`. Future migration
+tasks must check for an existing `README.md` before writing.
+
+### Changed files
+
+- `Docs/Management/DevCycleCraft/inline-trivial-fix/README.md` (new)
+- `Docs/Management/DevCycleCraft/workflow-folder-layout-alignment/README.md` (new)
+- `Docs/Management/DevCycleCraft/persisted-string-trimming/README.md` (new)
+- `Docs/Management/DevCycleCraft/extensions-layer-guidelines/README.md` (frontmatter prepended)
+- `Docs/Management/DevCycleCraft/appbar-searchbar-redesign/README.md` (new)
+- `Docs/Management/DevCycleCraft/UI-2nd-refactor/README.md` (new)
+- `Docs/Management/DevCycleCraft/session-continuity-leasing/README.md` (new)
+- `Docs/Management/DevCycleCraft/ui-form-validation-guide/README.md` (new)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/README.md` (new)
+- `MyVocaList.sln` (8 `SolutionItems` entries; `extensions-layer-guidelines` already had one)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T9b ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Verification evidence
+
+```
+$ python .claude/scripts/backlog/backlog_gen.py regen --check ; echo exit=$?
+BACKLOG is stale -- run: python .claude/scripts/backlog/backlog_gen.py regen
+  - .\Docs\Management\BACKLOG.md
+exit=1
+```
+
+Exit **1** (stale) as the plan requires — never 2, so all nine READMEs parse and validate. `regen`
+without `--check` was not run; the migration stays additive until T12.
+
+```
+$ git diff --stat
+ .claude/changed-files.txt                          | 316 +++++++++++++++++++++
+ .../extensions-layer-guidelines/README.md          |  15 +
+ MyVocaList.sln                                     |   8 +
+ 3 files changed, 339 insertions(+)
+```
+
+`Docs/Management/BACKLOG.md` is **absent** from the list — BACKLOG.md was not touched.
+(`.claude/changed-files.txt` was already dirty at session start and is not part of this task.)
+
+`.sln` verified after writing: UTF-8 BOM present, 0 LF-only line endings (100% CRLF), and each of the
+eight new entries re-read byte-wise via `repr()` — no shell-escape corruption (T9a's `\a`/`\b`
+heredoc failure avoided by using Python script files throughout).
+
+Post-edit re-read: all nine READMEs re-parsed by the generator's own walk (the `regen --check` run
+above); `extensions-layer-guidelines/README.md` re-read in full to confirm the original body survived.
