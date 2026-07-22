@@ -76,7 +76,9 @@ python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"        
 
 `register` derives the folder name (`YYYY-MM-DD` from today + `BUG-NNN` + slugified title) rather than accepting a path — that is what keeps REQ-SEV-01 from depending on agent discipline. It also derives the **ID** (REQ-SEV-11a): `max(id)` over live folders ∪ all `backlog-archive/` months, + 1. Scanning the archives too is what prevents reuse of a retired number, which is exactly the fact BACKLOG.md used to carry and no longer can. `register` is atomic (REQ-SEV-21a): it stages folder + `README.md` + `.sln` edit in memory and writes them in one pass, rolling back on any failure, so the `.sln` HARD GATE can never be tripped by a half-registration.
 
-**Duplicate-ID resolution across worktrees:** `register --renumber BUG-053` rewrites the folder name and the `id:` key of the later-merged item, then regenerates. Renumbering is safe precisely because the ID appears in exactly two places (folder name, frontmatter) and every other reference is a path.
+> **Spec updated [2026-07-22]:** `--renumber` shipped as its own subcommand, `backlog_gen.py renumber BUG-053`, not as a flag on `register`. A flag was unreachable: `register`'s own arguments are `required=True`, so argparse can never accept a `register` invocation that supplies only `--renumber`. Behaviour is unchanged; only the CLI spelling differs. Caught at plan review, implemented in T6 (`51124a7`).
+
+**Duplicate-ID resolution across worktrees:** `renumber BUG-053` rewrites the folder name and the `id:` key of the later-merged item, then regenerates. Renumbering is safe precisely because the ID appears in exactly two places (folder name, frontmatter) and every other reference is a path.
 
 ### Idempotency (REQ-SEV-13) — how it is guaranteed
 
@@ -154,7 +156,7 @@ Ordering rationale: phases 1 and 2 are purely additive; phase 3 is additive exce
 | Hand-edits to BACKLOG.md silently lost on next regen | pre-commit `--check` fails the commit; generated banner names the command |
 | Migration loses curated row order | explicit `order:` values + the phase-5 equivalence diff |
 | Frontmatter drifts from an item's own spec files | `pointer` defaults to the folder itself; the README body is the only prose home |
-| Two worktrees register items concurrently | folder-per-item means no shared *line* to conflict on and regen is deterministic, so the file merges cleanly — but the **`BUG-NNN` collides** (both derive the same `max+1`). Caught by the duplicate-`id` validation at merge; resolved with `register --renumber` (REQ-SEV-11a). Depends on R-2 being blocking. |
+| Two worktrees register items concurrently | folder-per-item means no shared *line* to conflict on and regen is deterministic, so the file merges cleanly — but the **`BUG-NNN` collides** (both derive the same `max+1`). Caught by the duplicate-`id` validation at merge; resolved with `renumber` (REQ-SEV-11a). Depends on R-2 being blocking. |
 | Restricted YAML parser rejects a legitimate value | errors name key + path and abort; values are prose in a table cell — nesting is never needed |
 
 ## 8. Decisions (approved)
