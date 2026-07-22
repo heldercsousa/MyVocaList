@@ -58,7 +58,12 @@ public partial class SongFormPage : ContentPage
             // the raw typed text is carried in Headline; the distinct ➕ render is done by the XAML
             // ItemTemplate (T8), and the actual creation happens in the VM command (T7 VM path).
             var results = new List<AutocompleteSuggestion>(matches);
-            if (!string.IsNullOrWhiteSpace(text))
+            // BUG-054a: do not re-append the create sentinel when the field is already locked to a
+            // selected artist, or when the query text is exactly that artist's name (the editor
+            // re-requests items after a lock sets ArtistSearchText to the chosen name).
+            var suppressCreateRow = ViewModel.IsArtistLocked
+                || string.Equals(text, ViewModel.SelectedArtistName, StringComparison.Ordinal);
+            if (!string.IsNullOrWhiteSpace(text) && !suppressCreateRow)
                 results.Add(new AutocompleteSuggestion(text, string.Empty, text) { IsCreateNew = true });
             return results;
         };
