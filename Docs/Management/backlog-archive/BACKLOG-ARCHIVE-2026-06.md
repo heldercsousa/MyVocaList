@@ -4,7 +4,7 @@
 
 ## Business Features
 
-<!-- BACKLOG:GENERATED:BEGIN archive -->
+<!-- BACKLOG:GENERATED:BEGIN archive-business -->
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-06 | ↳ Bug: Artists page missing back button + unclear trailing toggle (BUG-001) | ✅ Fixed | Fixed 2026-06-03. Pointer: `BusinessFeatures/artists-songs/bugs/BUG-001-artists-page-no-back-button.md`. |
@@ -37,9 +37,11 @@
 | 2026-06 | **Queue Management** | ✅ Done | Goal: core product — active queue, rounds, registration, absences, time estimate. Shipped, all 5 waves + tests. Pointer: `BusinessFeatures/queue-management/`. |
 | 2026-06 | **Visual Theme Refresh** | ✅ Done | Goal: Karaoke Neon palette + glow styles. Shipped (applied in `MaterialColors.xaml`/`MaterialStyles.xaml`). Pointer: `Docs/Changelog/changelog.md`. |
 | 2026-06 | **Data Backup & Restore — Tier 1 + 3** | ✅ Done | Goal: local auto-backup + manual export/restore. Shipped. Pointer: `BusinessFeatures/backup-restore/`. |
+<!-- BACKLOG:GENERATED:END archive-business -->
 
 ## Dev Cycle Craft
 
+<!-- BACKLOG:GENERATED:BEGIN archive-craft -->
 | Target | Activity | Status | Notes |
 |--------|----------|--------|-------|
 | 2026-06 | **Enforce Git Worktrees for Parallel Subagents** | ✅ Done | Goal: worktree isolation for parallel subagents. Rule encoded in `orchestrator.md`. Pointer: `Docs/Management/cross-cutting-log.md`. |
@@ -59,4 +61,4 @@
 | 2026-06-12 | Add missing queue_music_outlined icon asset | ✅ Done | SVG added and merged; emulator smoke test pending. Pointer: `Docs/Management/cross-cutting-log.md`. |
 | 2026-06-27 | ↳ BUG: "To Review tasks need attention" rewakes every session (Stop hook noise) | ✅ Fixed | Scanner removed from Stop hooks 2026-06-27. Pointer: `Docs/Management/DevCycleCraft/session-continuity-leasing/task-log.md`. |
 | 2026-06-30 | ↳ 01 - Form validation guide | ✅ Done | Validation standard encoded across `.claude/library/*`; two Helder gates open (DateEdit birthday confirm; Integer/R10 TODO). Pointer: `Docs/Management/DevCycleCraft/ui-form-validation-guide/`. |
-<!-- BACKLOG:GENERATED:END archive -->
+<!-- BACKLOG:GENERATED:END archive-craft -->

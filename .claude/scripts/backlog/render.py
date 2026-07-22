@@ -12,6 +12,14 @@ FENCE_END = "<!-- BACKLOG:GENERATED:END {0} -->"
 
 ARROW = "↳"
 
+# One generated region per hand-written table in an archive file. Order matters:
+# it is the order the regions are spliced and the order they appear in the file.
+ARCHIVE_REGIONS = (
+    ("BusinessFeatures", "archive-business"),
+    ("DevCycleCraft", "archive-craft"),
+)
+ARCHIVE_SECTIONS = tuple(section for section, _region in ARCHIVE_REGIONS)
+
 TABLE_HEAD_BUSINESS = "| Target | Feature | Status | Notes |\n|--------|---------|--------|-------|"
 TABLE_HEAD_CRAFT = "| Target | Activity | Status | Notes |\n|--------|----------|--------|-------|"
 TABLE_HEAD_ARCHIVE = "| Target | Feature/Item | Status | Notes |\n|--------|--------------|--------|-------|"
@@ -90,10 +98,15 @@ ARCHIVE_TEMPLATE = """# BACKLOG Archive — {month}
 
 > Closed backlog rows completed in {month}, moved out of `Docs/Management/BACKLOG.md`. Rows use the slim PO template: Goal + one-sentence outcome + pointer. **Past BUG-NNN / feature lookups must grep all `backlog-archive/` files.**
 
-## Archived rows
+## Business Features
 
-<!-- BACKLOG:GENERATED:BEGIN archive -->
-<!-- BACKLOG:GENERATED:END archive -->
+<!-- BACKLOG:GENERATED:BEGIN archive-business -->
+<!-- BACKLOG:GENERATED:END archive-business -->
+
+## Dev Cycle Craft
+
+<!-- BACKLOG:GENERATED:BEGIN archive-craft -->
+<!-- BACKLOG:GENERATED:END archive-craft -->
 """
 
 
@@ -110,16 +123,63 @@ def bucket_by_month(items):
     return buckets
 
 
-def render_archive(existing_text, items, month=None, titles_by_id=None):
-    """Splice one month's archive table into its file.
+def render_archive(existing_text, items, month=None, titles_by_id=None, all_items=None):
+    """Splice one month's archive tables into its file -- one per section.
 
-    `month` is accepted for call-site clarity and future header rendering; the
-    table body itself is a pure function of `items`.
+    Each archive file is hand-written with TWO tables (`## Business Features`
+    and `## Dev Cycle Craft`), so it carries TWO generated regions. Splitting
+    them is what keeps the `## Dev Cycle Craft` heading -- hand-written prose --
+    OUTSIDE every fence, where regeneration preserves it byte-for-byte
+    (REQ-SEV-14/20). A single flat region would have swallowed it.
+
+    `month` is accepted for call-site clarity and future header rendering; each
+    table body is a pure function of the items routed to it.
+
+    `all_items` is the pool used to resolve an item's section through its parent
+    chain; it defaults to `items`, and the item's own folder prefix is the
+    fallback, so the common case needs no extra argument from the caller.
     """
-    body = render_table(
-        items, head=TABLE_HEAD_ARCHIVE, archived=True, titles_by_id=titles_by_id or {}
+    items = list(items or [])
+    pool = list(all_items) if all_items else items
+    titles_by_id = titles_by_id or {}
+
+    by_region = dict((region, []) for _section, region in ARCHIVE_REGIONS)
+    for it in items:
+        by_region[_archive_region_of(it, pool)].append(it)
+
+    out = existing_text
+    for _section, region in ARCHIVE_REGIONS:
+        body = render_table(
+            by_region[region], head=TABLE_HEAD_ARCHIVE, archived=True,
+            titles_by_id=titles_by_id,
+        )
+        out = splice(out, region, body)
+    return out
+
+
+def _archive_region_of(item, all_items):
+    """Which archive region an item belongs in. Never guesses -- raises instead.
+
+    A row that cannot be placed must fail loudly: silently dropping it would
+    lose an archived BUG-NNN from the only file `grep` can still find it in
+    (REQ-SEV-18).
+    """
+    section = _section_of(item, all_items) or _section_from_path(item.rel_path)
+    for candidate, region in ARCHIVE_REGIONS:
+        if section == candidate:
+            return region
+    raise RenderError(
+        "cannot resolve archive section for '{0}' ({1}) -- give it a `section:` "
+        "or a parent that has one".format(item.id or "<no id>", item.rel_path)
     )
-    return splice(existing_text, "archive", body)
+
+
+def _section_from_path(rel_path):
+    """Fallback section: the folder an item lives in already names its section."""
+    parts = [p for p in (rel_path or "").split("/") if p]
+    if parts and parts[0] in ARCHIVE_SECTIONS:
+        return parts[0]
+    return None
 
 
 def _section_of(item, all_items):

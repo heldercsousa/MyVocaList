@@ -4,14 +4,16 @@
 
 ## Business Features
 
-<!-- BACKLOG:GENERATED:BEGIN archive -->
+<!-- BACKLOG:GENERATED:BEGIN archive-business -->
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-05 | ↳ Song Karaoke URLs (Artists & Songs Catalog) | ✅ Done | Goal: YouTube URL management per song. Shipped (SongFormPage section, settings, converters, tests). Pointer: `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/`. |
 | 2026-05 | ↳ Bug: GoToSettings navigation exception | ✅ Fixed | Goal: fix navigation crash from SongFormPage to Settings. Fixed with a single-line absolute-route change. Pointer: `Docs/Management/BusinessFeatures/artists-songs/task-log.md`. |
+<!-- BACKLOG:GENERATED:END archive-business -->
 
 ## Dev Cycle Craft
 
+<!-- BACKLOG:GENERATED:BEGIN archive-craft -->
 | Target | Activity | Status | Notes |
 |--------|----------|--------|-------|
 | 2026-05-07 | SDD Master Plan (Phases 1–11, 162 steps) | ✅ Done | Goal: adopt Spec-Driven Development across the project. Completed. Pointer: `Docs/Management/DevCycleCraft/sdd/impl-master-plan.md`. |
@@ -23,4 +25,4 @@
 | 2026-05-31 | **App Versioning Strategy** | ✅ Done | Goal: git-tag-driven semver. Shipped (MinVer + release command). Pointer: `Docs/Management/DevCycleCraft/app-versioning/`. |
 | 2026-05 | **VS Solution File Registration Rule** | ✅ Done | Goal: every Docs file visible in VS via `.sln` registration. Rule encoded in `workflow.md`/`constraints-registry.md`. Pointer: `.claude/rules/constraints-registry.md`. |
 | 2026-05 | **Proactive BACKLOG Entry Rule** | ✅ Done | Goal: agents register untracked work in BACKLOG.md before proceeding. Rule encoded in `workflow.md` Rule 1. Pointer: `.claude/rules/workflow.md`. |
-<!-- BACKLOG:GENERATED:END archive -->
+<!-- BACKLOG:GENERATED:END archive-craft -->

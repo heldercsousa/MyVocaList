@@ -20,6 +20,32 @@ def item(**over):
     return Item.from_frontmatter(keys, path)
 
 
+def _region_body(text, region):
+    """The text strictly between a region's BEGIN and END fences."""
+    from render import FENCE_BEGIN, FENCE_END
+    begin = FENCE_BEGIN.format(region)
+    end = FENCE_END.format(region)
+    start = text.index(begin) + len(begin)
+    stop = text.index(end)
+    return text[start:stop].strip("\n")
+
+
+def _inside_any_region(text, needle):
+    """True if `needle` occurs between any BEGIN/END fence pair."""
+    import re
+    from render import FENCE_BEGIN, FENCE_END
+    for region in re.findall(r"BACKLOG:GENERATED:BEGIN (\S+)", text):
+        begin = FENCE_BEGIN.format(region)
+        end = FENCE_END.format(region)
+        if begin not in text or end not in text:
+            continue
+        start = text.index(begin) + len(begin)
+        stop = text.index(end)
+        if needle in text[start:stop]:
+            return True
+    return False
+
+
 class RowTests(unittest.TestCase):
     def test_row_has_five_pipes_and_the_pointer(self):
         row = render_row(item())
@@ -143,6 +169,120 @@ class ArchiveTests(unittest.TestCase):
         a = item(id="a", status="✅ Done", closed="2026-07")
         once = render_archive(self.template, [a], "2026-07", {})
         self.assertEqual(once, render_archive(once, [a], "2026-07", {}))
+
+    # --- T9e: two archive regions (archive-business / archive-craft) ---------
+
+    def test_template_declares_both_archive_regions(self):
+        from render import FENCE_BEGIN, FENCE_END
+        for region in ("archive-business", "archive-craft"):
+            self.assertIn(FENCE_BEGIN.format(region), self.template)
+            self.assertIn(FENCE_END.format(region), self.template)
+
+    def test_template_carries_both_section_headings_outside_the_fences(self):
+        """A brand-new month must come out with both hand-written headings, and
+        neither may sit inside a generated region (T12 would consume it)."""
+        self.assertIn("## Business Features", self.template)
+        self.assertIn("## Dev Cycle Craft", self.template)
+        for heading in ("## Business Features", "## Dev Cycle Craft"):
+            self.assertFalse(
+                _inside_any_region(self.template, heading),
+                "{0} must be outside both generated regions".format(heading),
+            )
+
+    def test_business_item_renders_into_the_business_region(self):
+        from render import render_archive
+        a = item(id="a", title="Venues CRUD", status="✅ Done", closed="2026-07",
+                 section="BusinessFeatures")
+        out = render_archive(self.template, [a], "2026-07", {})
+        self.assertIn("Venues CRUD", _region_body(out, "archive-business"))
+        self.assertNotIn("Venues CRUD", _region_body(out, "archive-craft"))
+
+    def test_craft_item_renders_into_the_craft_region(self):
+        from render import render_archive
+        a = item(id="a", title="M3 Lists", status="✅ Done", closed="2026-07",
+                 section="DevCycleCraft", _path="DevCycleCraft/m3-lists/")
+        out = render_archive(self.template, [a], "2026-07", {})
+        self.assertIn("M3 Lists", _region_body(out, "archive-craft"))
+        self.assertNotIn("M3 Lists", _region_body(out, "archive-business"))
+
+    def test_both_regions_are_spliced_in_one_call(self):
+        from render import render_archive
+        b = item(id="b", title="Venues CRUD", status="✅ Done", closed="2026-07",
+                 section="BusinessFeatures")
+        c = item(id="c", title="M3 Lists", status="✅ Done", closed="2026-07",
+                 section="DevCycleCraft", _path="DevCycleCraft/m3-lists/")
+        out = render_archive(self.template, [b, c], "2026-07", {})
+        self.assertIn("Venues CRUD", _region_body(out, "archive-business"))
+        self.assertIn("M3 Lists", _region_body(out, "archive-craft"))
+
+    def test_dev_cycle_craft_heading_survives_rendering_byte_for_byte(self):
+        from render import render_archive
+        b = item(id="b", status="✅ Done", closed="2026-07", section="BusinessFeatures")
+        out = render_archive(self.template, [b], "2026-07", {})
+        self.assertIn("\n## Dev Cycle Craft\n", out)
+        self.assertFalse(_inside_any_region(out, "## Dev Cycle Craft"))
+        self.assertFalse(_inside_any_region(out, "## Business Features"))
+
+    def test_section_is_resolved_through_the_parent_chain(self):
+        """A bug folder carries no `section:`; it inherits its parent feature's."""
+        from render import render_archive
+        parent = item(id="p", title="Parent Feature", section="DevCycleCraft",
+                      _path="DevCycleCraft/f/")
+        child = Item.from_frontmatter(
+            {"id": "BUG-1", "title": "BUG-1: a bug", "status": "✅ Fixed",
+             "target": "2026-07-21", "goal": "Fix it.", "parent": "p", "closed": "2026-07"},
+            "DevCycleCraft/f/bugs/2026-07-21-BUG-1-x/")
+        out = render_archive(self.template, [child], "2026-07", {"p": "Parent Feature"},
+                             all_items=[parent, child])
+        self.assertIn("BUG-1", _region_body(out, "archive-craft"))
+        self.assertNotIn("BUG-1", _region_body(out, "archive-business"))
+
+    def test_section_falls_back_to_the_path_prefix(self):
+        """No `section:` and no resolvable parent in the bucket -- the folder the
+        item lives in still says which section it belongs to."""
+        from render import render_archive
+        child = Item.from_frontmatter(
+            {"id": "BUG-2", "title": "BUG-2: a bug", "status": "✅ Fixed",
+             "target": "2026-07-21", "goal": "Fix it.", "parent": "p", "closed": "2026-07"},
+            "DevCycleCraft/f/bugs/2026-07-21-BUG-2-x/")
+        out = render_archive(self.template, [child], "2026-07", {})
+        self.assertIn("BUG-2", _region_body(out, "archive-craft"))
+
+    def test_unresolvable_section_raises_instead_of_dropping_the_row(self):
+        """Fail loud: a row that cannot be placed must never be silently lost."""
+        from render import render_archive
+        orphan = Item.from_frontmatter(
+            {"id": "BUG-3", "title": "BUG-3: a bug", "status": "✅ Fixed",
+             "target": "2026-07-21", "goal": "Fix it.", "closed": "2026-07"},
+            "cross-cutting/f/bugs/2026-07-21-BUG-3-x/")
+        with self.assertRaises(RenderError):
+            render_archive(self.template, [orphan], "2026-07", {})
+
+    def test_under_suffix_is_preserved_by_the_split(self):
+        from render import render_archive
+        child = item(id="BUG-048", title="BUG-048: pagination reloads (Major)",
+                     status="✅ Done", closed="2026-07", parent="p",
+                     section="DevCycleCraft",
+                     _path="DevCycleCraft/f/bugs/2026-07-21-BUG-048-x/")
+        out = render_archive(self.template, [child], "2026-07", {"p": "Parent Feature"})
+        body = _region_body(out, "archive-craft")
+        self.assertIn("BUG-048", body)
+        self.assertIn("(under: Parent Feature)", body)
+        self.assertNotIn("↳", body)
+
+    def test_two_region_render_is_idempotent(self):
+        from render import render_archive
+        b = item(id="b", status="✅ Done", closed="2026-07", section="BusinessFeatures")
+        c = item(id="c", title="Craft", status="✅ Done", closed="2026-07",
+                 section="DevCycleCraft", _path="DevCycleCraft/c/")
+        once = render_archive(self.template, [b, c], "2026-07", {})
+        self.assertEqual(once, render_archive(once, [b, c], "2026-07", {}))
+
+    def test_an_empty_region_still_renders_its_table_head(self):
+        from render import render_archive, TABLE_HEAD_ARCHIVE
+        b = item(id="b", status="✅ Done", closed="2026-07", section="BusinessFeatures")
+        out = render_archive(self.template, [b], "2026-07", {})
+        self.assertEqual(_region_body(out, "archive-craft"), TABLE_HEAD_ARCHIVE)
 
 
 if __name__ == "__main__":
