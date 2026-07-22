@@ -871,6 +871,51 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "floatingtoolbar-visibility-
 		Docs\Management\cross-cutting\floatingtoolbar-visibility-verify\README.md = Docs\Management\cross-cutting\floatingtoolbar-visibility-verify\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-mobile-ux-pattern", "autocomplete-mobile-ux-pattern", "{FA1234BC-0001-4000-8000-000000000067}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\autocomplete-mobile-ux-pattern\README.md = Docs\Management\cross-cutting\autocomplete-mobile-ux-pattern\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-page-structural-reduction", "crud-page-structural-reduction", "{FA1234BC-0001-4000-8000-000000000068}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\crud-page-structural-reduction\README.md = Docs\Management\cross-cutting\crud-page-structural-reduction\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "large-volume-data-stress-test", "large-volume-data-stress-test", "{FA1234BC-0001-4000-8000-000000000069}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\large-volume-data-stress-test\README.md = Docs\Management\cross-cutting\large-volume-data-stress-test\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-device-os-compatibility-test", "cross-device-os-compatibility-test", "{FA1234BC-0001-4000-8000-00000000006A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\cross-device-os-compatibility-test\README.md = Docs\Management\cross-cutting\cross-device-os-compatibility-test\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "store-presubmission-compliance", "store-presubmission-compliance", "{FA1234BC-0001-4000-8000-00000000006B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\store-presubmission-compliance\README.md = Docs\Management\cross-cutting\store-presubmission-compliance\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pre-release-mobile-testing-checklist", "pre-release-mobile-testing-checklist", "{FA1234BC-0001-4000-8000-00000000006C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\pre-release-mobile-testing-checklist\README.md = Docs\Management\cross-cutting\pre-release-mobile-testing-checklist\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infra-repository-folder-consolidation", "infra-repository-folder-consolidation", "{FA1234BC-0001-4000-8000-00000000006D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\infra-repository-folder-consolidation\README.md = Docs\Management\cross-cutting\infra-repository-folder-consolidation\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "read-model-notracking-guidelines", "read-model-notracking-guidelines", "{FA1234BC-0001-4000-8000-00000000006E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-read-model-refactoring", "crud-read-model-refactoring", "{FA1234BC-0001-4000-8000-00000000006F}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\crud-read-model-refactoring\README.md = Docs\Management\cross-cutting\crud-read-model-refactoring\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -972,6 +1017,15 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{FA1234BC-0001-4000-8000-000000000067} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000068} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000069} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006A} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006B} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006C} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006D} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006E} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006F} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-000000000057} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{FA1234BC-0001-4000-8000-000000000058} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-000000000059} = {FA1234BC-0001-4000-8000-000000000057}
