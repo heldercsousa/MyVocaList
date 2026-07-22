@@ -77,7 +77,7 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
   Consumes: T9c-1. T9b reported **18** folder-less top-level Dev Cycle Craft rows — over the Rule 2
   bound, so split in two. Take the first 9 in table order.
   Files owned: `Docs/Management/cross-cutting/**`, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
-- [ ] **T9c-2b — Folder-less Dev Cycle Craft rows, second half** (~9 rows + the Autocomplete Mobile UX Pattern row)
+- [x] **T9c-2b — Folder-less Dev Cycle Craft rows, second half** (9 of 9 written, incl. the Autocomplete Mobile UX Pattern row)
   Consumes: T9c-2a. Includes **① Autocomplete Mobile UX Pattern** (pos 24), which needs its OWN
   folder — its pointer is a file inside `autocomplete-component/`, whose folder is owned by sub-rows
   that this row does not parent.
