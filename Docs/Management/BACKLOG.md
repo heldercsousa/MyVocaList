@@ -6,6 +6,28 @@
 >
 > **Who updates statuses:** The main agent updates this file at each workflow milestone. Subagents do not touch BACKLOG.md.
 
+> ## ⚠️ GENERATED REGIONS ARE OWNED — read before editing any row
+>
+> **Owner:** `feature/backlog-migration` (worktree `../mvl-backlog-migration`) · **since 2026-07-22**
+> · tracked in `Docs/Management/LEDGER.md`.
+>
+> The rows in this file are **generated** from each item's `README.md` frontmatter. Between the
+> `<!-- BACKLOG:GENERATED:BEGIN … -->` / `END` markers, **a hand-edit is not a merge conflict — it is
+> silently overwritten** on the next `regen`. While an owner is named above, another session's edit
+> inside a fence will be lost without warning.
+>
+> **To change a row:** edit that item's `README.md` frontmatter (or use
+> `python .claude/scripts/backlog/backlog_gen.py status <ID> "<status>"`), never the row itself.
+> **To add an item:** `backlog_gen.py register …` — it creates the folder, README and `.sln` entry
+> together.
+> **If you must touch a fenced row directly:** coordinate via `LEDGER.md` first.
+>
+> Everything **outside** the fences — this header, the row rules, the status reference — is
+> hand-written and preserved byte-for-byte by the generator. Editing here is always safe.
+>
+> *(This notice is retired when the owner's branch merges. Protocol under definition: Spec Evolution
+> T13d, write-ownership for generated artifacts.)*
+
 ## Row rules (agents: do NOT re-fatten this file)
 
 - **Template:** `| Target | Feature/Item | Status | Notes |`. **Target** = registration date (or originally targeted month) — carried over unchanged, never reinterpreted.
