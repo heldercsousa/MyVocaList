@@ -1361,3 +1361,208 @@ Context manifest, had this been interrupted:
 - `Docs/Management/BusinessFeatures/persons/bugs/BUG-022-…` uses `section: DevCycleCraft` — see the
   spec gap above. Documented assumption, non-blocking.
 - Nothing was moved or deleted. `BACKLOG.md` untouched. T10a remains additive.
+
+---
+
+## Task: T10b — READMEs for existing `changes/` folders + the two separator rows
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+**4 READMEs written**, not 5: the three `changes/` item folders plus the `🏁 MVP release` milestone
+separator. The second deliverable in the brief — `Docs/Management/cross-cutting/README.md` with
+`kind: group` — was **deliberately not created**; see *Deliverable withdrawn* below. `BACKLOG.md` and
+the 5 archive files are byte-untouched: T10b stays additive.
+
+### Changed files
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/README.md` (new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/README.md` (new)
+- `Docs/Management/milestones/2026-06-mvp-release/README.md` (new folder + README)
+- `MyVocaList.sln` (3 SolutionItems entries + 2 new Solution Folders + 1 SolutionItem + 2 NestedProjects entries)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T10b ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Verification evidence
+
+#### Enumeration — `git ls-files`, not `ls`, and not trusted from the brief
+
+`git ls-files "Docs/Management/**/changes/**"` returns 18 tracked files across **exactly 3 `changes/`
+folders**. No folder held a pre-existing `README.md`, so nothing had to be byte-preserved and
+prepended (T10a's `autocomplete-component` case did not recur).
+
+| # | `changes/` folder | Live or terminal | Status |
+|---|-------------------|------------------|--------|
+| 1 | `BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/` | **live** | `🔵 Deferred` |
+| 2 | `BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/` | **live** | `🟡 In Progress` |
+| 3 | `DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/` | **live** | `🟡 In Progress` |
+
+**No T10b item is terminal.** None routes through `bucket_by_month` → `render_archive`, so none can
+be affected by findings F1/F2/F4. The archive proof below is therefore a *regression* check (T10a's 8
+archived items still resolve), not a proof about T10b's own rows.
+
+#### Per-README frontmatter
+
+| id | kind | status | section | parent | order | target |
+|----|------|--------|---------|--------|-------|--------|
+| `form-ux-redesign` | change | `🔵 Deferred` | BusinessFeatures | `artists-songs` | 180 | 2026-07-10 |
+| `inline-artist-create` | change | `🟡 In Progress` | BusinessFeatures | `artists-songs` | 70 | 2026-07-21 |
+| `dx-autocompleteedit-replacement` | change | `🟡 In Progress` | DevCycleCraft | `autocomplete-component` | 190 | 2026-07-19 |
+| `2026-06-mvp-release` | **milestone** (separator) | — (separators carry no status) | BusinessFeatures | — | 350 | 2026-06 |
+
+`order:` follows the T9a–T10a convention: the row's 1-based position in its own live table × 10
+(Business Features positions 18, 7, 35; Dev Cycle Craft position 19).
+
+**Every item carries an explicit `section:`, per finding F4.** For the three `change` items it is
+belt-and-braces (they are live, so `render_backlog` resolves them via the parent chain), but writing
+it costs nothing and removes the dependency on a fallback F4 proved fictional. For the milestone it
+is **load-bearing**: it has no `parent`, so `section:` is the only thing that places it in the
+Business Features table — without it `validate` errors *"row resolves to no section"*.
+
+#### In-process proof (read-only; results discarded, nothing written)
+
+`regen --check` was **not** used as evidence. Per finding **F1**, `cmd_regen` does `if errors:
+return 2` *before* `outputs = _render_all(...)`, and the pre-existing banned-content error on this
+feature's own folder still stands — so its exit code is evidence of nothing either way. Instead
+`walk` / `validate` / `render_row` / `render_archive` / `splice` were called directly in-process.
+
+```
+items walked: 52          PARSE ERRORS: none
+VALIDATION ERRORS: 1
+  ! DevCycleCraft/spec-evolution-versioning/: Notes contain banned content (file path beyond the pointer)
+```
+
+That single error is the **pre-existing** decision-2 blocker on this feature's own folder, present at
+develop HEAD before T10b. **Zero errors attributable to any T10b item.**
+
+Rendered rows, verbatim from `render.render_row` (Notes elided here for width; full text in the run log):
+
+```
+| 2026-07-10 | ↳ **Artist & Song Form UX Redesign — autocomplete, similar-match warning, search-strip removal** | 🔵 Deferred | Goal: … Pointer: `BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/`. |
+| 2026-07-21 | ↳ **Song artist field — correctness fixes + inline "create new artist"** | 🟡 In Progress | Goal: … Pointer: `BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/task-log.md`. |
+| 2026-07-19 | ↳ **Replace `AutocompleteMobileField` consumers with DX `AutoCompleteEdit`** | 🟡 In Progress | Goal: … Pointer: `DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/`. |
+| 2026-06 | | 🏁 **MVP release** | |
+```
+
+The milestone row is **byte-identical to the pre-migration line** `| 2026-06 | | 🏁 **MVP release** | |`.
+
+> A first draft quoted the `inline-artist-create` title in the frontmatter; because the title itself
+> contains `"create new artist"`, the escaped inner quotes survived the parser and rendered as
+> `\"create new artist\"`. Caught by reading the rendered row rather than trusting the write. Fixed
+> by leaving that one title unquoted — the parser only strips quotes when the *whole* value is
+> quoted. Re-rendered and re-verified.
+
+Archive regression check — all 8 of T10a's terminal items still route, both T9e regions still splice:
+
+```
+=== 2026-06 -> BACKLOG-ARCHIVE-2026-06.md    archive-business 5 lines · archive-craft 2 lines · splice OK
+=== 2026-07 -> BACKLOG-ARCHIVE-2026-07.md    archive-business 5 lines · archive-craft 4 lines · splice OK
+```
+
+#### No id collides with T10a's — confirmed mechanically
+
+A tree-wide duplicate sweep over all 52 walked items reports **`DUPLICATE IDS: none`**. Separately:
+`[i.rel_path for i in items if i.id == "cross-cutting" or i.kind == "group"]` returns exactly
+**`['BusinessFeatures/cross-cutting/']`** — T10a's, and only T10a's. `[(i.id, i.rel_path) for i in
+items if i.kind == "milestone"]` returns exactly `[('2026-06-mvp-release', 'milestones/2026-06-mvp-release/')]`.
+
+#### Additivity
+
+```
+git diff --stat -- Docs/Management/BACKLOG.md Docs/Management/backlog-archive/
+(no output — both untouched)
+```
+
+Whole-tree diff is `.claude/changed-files.txt`, `LEDGER.md`, `MyVocaList.sln` and `tasks.md`, plus the
+4 new untracked READMEs. Nothing moved, nothing deleted.
+
+#### `.sln` HARD GATE
+
+The documented counter in `constraints-registry.md` (`0041`) is stale, and so is the brief's `0070`
+— `000000000070` is **already in use**. The highest free sequential value was verified by reading the
+file: Solution Folders run to `…006F` and `…0070` is taken, so T10b allocated **`…0071`**
+(`milestones`) and **`…0072`** (`2026-06-mvp-release`), asserting both absent before writing.
+`milestones` nests under `Management` (`{15F1DA03-…}`), matching how `cross-cutting` (`…0057`) nests.
+Written in binary; **BOM re-asserted as `b'\xef\xbb\xbf'` and lone-LF count re-asserted `0`** after
+the write. Added paths re-read with `repr()`:
+
+```
+'Docs\\Management\\BusinessFeatures\\artists-songs\\changes\\2026-07-10-form-ux-redesign\\README.md'
+'Docs\\Management\\BusinessFeatures\\artists-songs\\changes\\2026-07-21-inline-artist-create\\README.md'
+'Docs\\Management\\DevCycleCraft\\autocomplete-component\\changes\\2026-07-19-dx-autocompleteedit-replacement\\README.md'
+'Docs\\Management\\milestones\\2026-06-mvp-release\\README.md'
+```
+
+Note: the `dx-autocompleteedit-replacement` sibling files appear **twice** in the `.sln` (two Solution
+Folders list them). The README was registered under the **first** occurrence only — one registration,
+matching how a single file should appear once in Solution Explorer.
+
+> **Queued for T13 (`amend:`), extending the T9c-1 finding:** `constraints-registry.md`'s last-used
+> GUID counter now reads three generations behind (`0041` documented, `0072` actually in use). The
+> counter is not maintainable by hand and should be dropped from the rules file or derived.
+
+#### Line endings
+
+All 4 READMEs are new files, so there was no on-disk EOL to preserve; they were written **LF**,
+matching every README T9a–T10a produced, with `b'\r\n' not in` asserted after each write.
+`MyVocaList.sln`, `tasks.md` and `task-log.md` are pre-existing **CRLF** and were asserted CRLF after
+their writes. Per finding **F3** the repo still has `core.autocrlf=true` with `*.md` unpinned, so
+working-tree and blob endings differ; these assertions measure the **working tree**.
+
+### Deliverable withdrawn — `Docs/Management/cross-cutting/README.md` NOT created
+
+The brief lists it as a deliverable *and*, three paragraphs later, forbids it. The prohibition is
+correct and the deliverable line is the error. Grounds, independent of the brief:
+
+1. There is exactly **one** `**Cross-cutting**` row in the pre-migration BACKLOG (Business Features
+   position 40). T10a already backs it with `BusinessFeatures/cross-cutting/README.md` (`kind: group`,
+   id `cross-cutting`, order 400 — position 40 × 10, so it is demonstrably the same row). A second
+   `kind: group` README would render a **second** `Cross-cutting` row with no counterpart in the
+   frozen fixture — an unclassifiable T12 diff hunk, i.e. exactly the failure REQ-SEV-25 exists to
+   prevent.
+2. `Docs/Management/cross-cutting/` is not that row. It is the holding directory T9c-1/T9c-2 created
+   for **folder-less top-level rows**, and its 24 items are already complete: each declares its own
+   `section:` and no `parent:`, and each renders as a top-level row in its own table. They do not
+   descend from the `Cross-cutting` group row, and adding a group README above them would silently
+   re-nest all 24.
+3. Confirmed mechanically above: exactly one `kind: group` item exists tree-wide, and no duplicate ids.
+
+### Declared T12 diff hunks introduced by T10b
+
+Three, all pre-authorised by `design.md`; each is recorded in the affected README's body with the
+displaced text preserved **verbatim**, so nothing is lost — only relocated out of the row.
+
+| Item | Trimmed from the row | Why (REQ-SEV-09 / `model._BANNED`) |
+|------|----------------------|-------------------------------------|
+| `form-ux-redesign` | the progress fraction `~6/14 tasks done` | test-count pattern |
+| `inline-artist-create` | commit hash, `517/517 green`, the per-step status trail, the `SongFormPage` file references | commit-hash, test-count and file-path patterns |
+| `dx-autocompleteedit-replacement` | `CONDITIONAL PASS`, `501/501 green` | review-verdict and test-count patterns |
+
+Also, in `inline-artist-create`'s **goal**, the row's `BUG-050/051/052` was respelled
+`BUG-050, BUG-051, BUG-052` — `050/051` is read as a test count. Same three bugs, same order; this is
+the only place in T10b where row text was respelled rather than moved. **Helder should confirm it at
+T12**, alongside T10a's BUG-022 rewording.
+
+A fourth hunk, structural: `dx-autocompleteedit-replacement` is one `changes/` segment deep, so
+`_depth` renders **one** `↳` where the hand-written row shows `↳↳` (it was hand-indented under the
+*Build new MD3-compliant autocomplete component* row). Depth arrows are derived from the path by
+design (`design.md` §3: *"never authored"*), so this is expected, not a transcription error. It is
+recorded in that README's body as a depth note for T12.
+
+### Design concern (not blocking; no action taken)
+
+`model.validate` skips **all** field checks for separators after the required-key loop
+(`if it.is_separator: continue`). A `kind: milestone` item can therefore carry an invalid `target`, a
+bogus `severity`, or a `closed` month and still validate clean. Nothing in T10b relies on this and the
+one milestone written is well-formed; noting it because separators are the one row class with no
+mechanical guard, which is the opposite of what REQ-SEV-09 is for. Not fixed here — `model.py` is
+outside T10b's `Files owned`, and changing it would be Rule 2 bundling.
+
+### Intent verification
+- The task's demo statement (*"`regen --check` never exits 2"*) is **superseded by finding F1** and was
+  not used. Its in-process equivalent — zero validation errors attributable to T10b, every row
+  rendering, every archive region splicing — is above.
+- `Changed files` contains only files inside `Files owned` (the READMEs, `MyVocaList.sln`) plus this
+  feature's own `tasks.md` / `task-log.md`.
+- No hardcoded values and no `TODO`s; every written file re-read and its Markdown re-checked.
