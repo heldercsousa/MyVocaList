@@ -973,4 +973,100 @@ public class SongFormViewModelTests
             s => s.SearchArtistsByNameAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
             Times.Never());
     }
+
+    // ── BUG-056: search returns current-query results directly (no read-before-dispatch gap) ──
+
+    // [AC] REQ-ACREATE-13 (BUG-056): the search must return the CURRENT query's mapped results
+    // directly to the caller (the page's AutoCompleteEdit provider) so the provider never has to
+    // read ArtistSuggestions before the background UI dispatch that assigns it has landed.
+    [Fact]
+    public async Task SearchArtistsCoreAsync_ReturnsCurrentQueryResultsDirectly()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.SearchArtistsByNameAsync("queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new ArtistListItem(2, "Queen", string.Empty, false, 3)]);
+
+        var sut = CreateSut(artistService: artistService);
+
+        var results = await sut.SearchArtistsCoreAsync("queen");
+
+        var suggestion = Assert.Single(results);
+        Assert.Equal("Queen", suggestion.Headline);
+    }
+
+    // ── BUG-055: edit-mode hydration must populate + lock the stored artist ───────────────────
+
+    // [AC] REQ-ACREATE-14 (BUG-055): opening a saved song for edit hydrates its stored artist
+    // (id, name, search text) as locked, without firing a suggestion search.
+    [Fact]
+    public async Task LoadSongForEdit_ExistingSong_HydratesArtistAsLocked()
+    {
+        var song = new Song
+        {
+            Id = 42,
+            ArtistId = 7,
+            Title = "Stored Title",
+            OriginalArtist = new Artist { Id = 7, Name = "Queen" }
+        };
+        var songService = MakeSongServiceWithSong(song);
+        var artistService = new Mock<IArtistService>();
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
+                  .ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage,
+            songService: songService, artistService: artistService);
+        sut.SongIdRaw = "42";
+        await Task.Yield();
+
+        Assert.Equal(7, sut.SelectedArtistId);
+        Assert.Equal("Queen", sut.SelectedArtistName);
+        Assert.Equal("Queen", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+        artistService.Verify(
+            s => s.SearchArtistsByNameAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Never());
+    }
+
+    // [AC] BUG-055: after edit-mode hydration the artist link is preserved — Save passes the
+    // artist-required guard without the user re-selecting, so UpdateSongAsync is invoked (the
+    // service keeps the loaded song's ArtistId). Before the fix the guard blocked Save.
+    [Fact]
+    public async Task SaveAsync_EditMode_AfterHydration_PreservesArtistLink()
+    {
+        var song = new Song
+        {
+            Id = 42,
+            ArtistId = 7,
+            Title = "Stored Title",
+            OriginalArtist = new Artist { Id = 7, Name = "Queen" }
+        };
+        var songService = MakeSongServiceWithSong(song);
+        songService.Setup(s => s.UpdateSongAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
+                  .ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        sut.SongIdRaw = "42";
+        await Task.Yield();
+        sut.CompleteHydration();
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.False(sut.ArtistHasError);
+        songService.Verify(s => s.UpdateSongAsync(
+            42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(), true,
+            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
 }

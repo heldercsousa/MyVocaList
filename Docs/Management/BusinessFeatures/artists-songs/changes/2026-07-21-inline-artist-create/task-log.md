@@ -287,3 +287,74 @@ Build: passed (`dotnet build MyVocaList.csproj -f net10.0-android` → exit 0, 0
 UI-only rendering crash — no XAML render seam in the unit test project, so an automated regression test is not feasible (per `bug-tracking.md`, Major UI-only → document manual E2E).
 
 Manual E2E: pending on-device (Helder T10) — typing ≥3 chars in the Artist field renders the ➕ create-row without crashing.
+
+---
+### Checkpoint (live — overwritten in place)
+**Branch/worktree:** feat/inline-artist-create @ MyVocaList-inline-ac (base 8d33547)
+**Progress:** T10 defect fixes BUG-054…059. Step 1 of 5 (now attempting BUG-056 Red test).
+**Last build/test:** baseline 517/517 green (inherited).
+**Next command:** add SearchArtistsCoreAsync Red test → dotnet test --filter SearchArtistsCoreAsync
+**Context manifest:**
+- MyVocaList/UI/ViewModels/SongFormViewModel.cs — SearchArtistsAsync/LoadSongForEditAsync/LockArtist/CreateArtistInlineAsync
+- MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs — OnArtistItemsRequested/OnArtistSelectionChanged
+- MyVocaList/UI/Pages/Songs/SongFormPage.xaml — AutoCompleteEdit :28-76
+- MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs — CreateSut, MakeSongServiceWithSong, search/hydration tests
+- Infra/Repository/SongRepository.cs — GetByIdAsync :53 (needs Include OriginalArtist for name hydration)
+- Docs/.../2026-07-21-inline-artist-create/task-log.md (worktree copy) — this log
+
+---
+## Bug: BUG-056 (Major) — artist search race + first-search-empty (page-VM coupling)
+**Status:** To Review
+**Severity:** Major (autocomplete unusable on device; testable VM seam -> regression test)
+
+**Root cause:** `SongFormViewModel.SearchArtistsAsync` assigned `ArtistSuggestions` inside a fire-and-forget `RunOnUiThread`; the page provider (`SongFormPage.OnArtistItemsRequested.RequestAsync`) read `ViewModel.ArtistSuggestions` immediately after `await`, before that UI dispatch landed -> first read saw `[]`, later reads saw the prior query's stale list. The `Interlocked` generation guard was irrelevant to this timing gap.
+
+**Fix:** Introduced `public Task<IReadOnlyList<AutocompleteSuggestion>> SearchArtistsCoreAsync(string)` that maps and RETURNS the current query's results directly; the page provider now consumes that return value instead of reading `ArtistSuggestions`. The shared observable `ArtistSuggestions` is still assigned for the latest query only (BUG-051 generation guard preserved), so latest-query-wins holds for other observers. `SearchArtistsAsync` (command target) now delegates to the core method — the existing BUG-051 test path is unchanged.
+
+**Regression risk:** Low — return-value path is deterministic; prior command/observable behavior preserved for the BUG-051 test.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — `SearchArtistsCoreAsync` (returns results) + `SearchArtistsAsync` delegates.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — `OnArtistItemsRequested` consumes returned matches (no `ArtistSuggestions` read).
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — `SearchArtistsCoreAsync_ReturnsCurrentQueryResultsDirectly`.
+
+### AC traceability
+| AC ID | Criterion | Implementation | Test |
+|-------|-----------|----------------|------|
+| REQ-ACREATE-13 (BUG-056) | Search returns current query's results directly; no read-before-dispatch gap | `SongFormViewModel.SearchArtistsCoreAsync` + `OnArtistItemsRequested` | `SearchArtistsCoreAsync_ReturnsCurrentQueryResultsDirectly` (Red->Green) |
+
+### Verification evidence
+- **Red:** new test -> `error CS1061: SearchArtistsCoreAsync` undefined (assembly did not compile).
+- **Green:** full suite -> `Com falha: 0, Aprovado: 520, Total: 520`.
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` -> exit 0, 0 errors (NU1903/DX-eval warnings only).
+
+---
+## Bug: BUG-055 (Major) — edit-mode artist hydration empty; edit-save dropped artist link
+**Status:** To Review
+**Severity:** Major (core edit flow: saved song opened for edit showed empty Artist -> Save blocked -> catalog cascade BUG-059)
+
+**Root cause:** `LoadSongForEditAsync` hydrated Title/Version/FeaturedArtists/Lyrics but never set `SelectedArtistId`/`SelectedArtistName`/`ArtistSearchText`. `InitializeArtistField` only hydrates from the `artistId` QueryProperty (=0 in normal edit navigation), so the artist field stayed empty. With `SelectedArtistId` null, the Save guard blocked with "Artist is required".
+
+**Fix:** `LoadSongForEditAsync` now hydrates `SelectedArtistId = song.ArtistId`, `SelectedArtistName`/`ArtistSearchText` from `song.OriginalArtist.Name`, and locks the field (`IsArtistLocked = true`, REQ-ACREATE-14) inside the existing `_isHydrating` window so no suggestion search fires. Because the field is locked in edit mode and `ISongService.UpdateSongAsync` preserves the loaded song's `ArtistId`, the artist link is carried through Save purely by hydrating the guard — no service-signature change. To supply the name on device, `SongRepository.GetByIdAsync` now eager-loads `OriginalArtist` (scope note below).
+
+**Regression risk:** Low–Medium. `IsArtistLocked` on edit is now always true (was: only API-imported-without-manual-edits). Intentional per REQ-ACREATE-14 and more correct — `UpdateSongAsync` never accepted a new artistId, so an editable-but-unpersistable artist field was misleading. No existing test asserts unlocked-on-edit for a non-API song.
+
+### Scope note (file outside the briefing's owned set — documented, not silent)
+`Infra/Repository/SongRepository.cs` `GetByIdAsync` gained `.Include(s => s.OriginalArtist)`. The briefing assumed the loaded song carried the artist name, but `GetByIdAsync` did not eager-load the navigation and no `GetArtistByIdAsync` exists. One-line eager-load; consumers of `GetByIdAsync`: `SongService.UpdateSongAsync`/`GetSongByIdAsync` (mutate+save — Unchanged artist, safe), `SongResolutionService` (read — harmless), `QueueServiceNew` (read — harmless). No service interface changed; `ArtistService` untouched. Alternative (new `GetArtistByIdAsync` + DI + interface) rejected as larger architectural change for a name lookup.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — `LoadSongForEditAsync` artist hydration + always-lock on edit.
+- `Infra/Repository/SongRepository.cs` — `GetByIdAsync` eager-loads `OriginalArtist`.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — `LoadSongForEdit_ExistingSong_HydratesArtistAsLocked`, `SaveAsync_EditMode_AfterHydration_PreservesArtistLink`.
+
+### AC traceability
+| AC ID | Criterion | Implementation | Test |
+|-------|-----------|----------------|------|
+| REQ-ACREATE-14 (BUG-055) | Edit-mode hydration shows stored artist as locked, no search | `SongFormViewModel.LoadSongForEditAsync` | `LoadSongForEdit_ExistingSong_HydratesArtistAsLocked` (Red->Green) |
+| REQ-ACREATE-08 (BUG-055) | Edit-save preserves the artist link | Save guard hydrated + service preserves `song.ArtistId` | `SaveAsync_EditMode_AfterHydration_PreservesArtistLink` (Red->Green) |
+
+### Verification evidence
+- **Red:** both tests failed pre-fix (hydration assertions / guard blocked Save so `UpdateSongAsync` never called).
+- **Green:** full suite -> `Com falha: 0, Aprovado: 520, Total: 520`.
+- **Build:** android build exit 0, 0 errors.
+- **Manual E2E (on device):** deferred to T10 re-run (Helder) — name shown + locked on edit; catalog populates (BUG-059 cascade).

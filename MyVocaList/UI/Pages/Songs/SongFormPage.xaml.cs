@@ -47,14 +47,17 @@ public partial class SongFormPage : ContentPage
         var token = e.CancellationToken;
         e.RequestAsync = async () =>
         {
-            await ViewModel.SearchArtistsCommand.ExecuteAsync(text);
+            // BUG-056: take the current query's matches DIRECTLY from the search (return value),
+            // never by reading ViewModel.ArtistSuggestions — that observable is assigned on a
+            // background UI dispatch that may not have landed yet, which produced first-empty/stale reads.
+            var matches = await ViewModel.SearchArtistsCoreAsync(text);
             token.ThrowIfCancellationRequested();
 
             // REQ-ACREATE-02/03/10: append one synthetic "create new artist" sentinel row as the
             // LAST item for any non-whitespace typed text (whether or not matches exist). Glue only:
             // the raw typed text is carried in Headline; the distinct ➕ render is done by the XAML
             // ItemTemplate (T8), and the actual creation happens in the VM command (T7 VM path).
-            var results = new List<AutocompleteSuggestion>(ViewModel.ArtistSuggestions);
+            var results = new List<AutocompleteSuggestion>(matches);
             if (!string.IsNullOrWhiteSpace(text))
                 results.Add(new AutocompleteSuggestion(text, string.Empty, text) { IsCreateNew = true });
             return results;
