@@ -214,6 +214,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "toolbar-fab-vibrant", "toolbar-fab-vibrant", "{A1B2C3D4-0001-4000-8000-000000000003}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\toolbar-fab-vibrant\plan.md = Docs\Management\DevCycleCraft\toolbar-fab-vibrant\plan.md
+		Docs\Management\DevCycleCraft\toolbar-fab-vibrant\README.md = Docs\Management\DevCycleCraft\toolbar-fab-vibrant\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-list-deduplication", "crud-list-deduplication", "{FA1234BC-0001-4000-8000-000000000019}"
@@ -240,6 +241,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hooks-redesign", "hooks-redesign", "{A1B2C3D4-0001-4000-8000-000000000005}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\hooks-redesign\plan.md = Docs\Management\DevCycleCraft\hooks-redesign\plan.md
+		Docs\Management\DevCycleCraft\hooks-redesign\README.md = Docs\Management\DevCycleCraft\hooks-redesign\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-workflow-integration", "backlog-workflow-integration", "{A1B2C3D4-0001-4000-8000-000000000006}"
@@ -385,6 +387,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D
 		Docs\Management\BusinessFeatures\persons\plan.md = Docs\Management\BusinessFeatures\persons\plan.md
 		Docs\Management\BusinessFeatures\persons\requirements.md = Docs\Management\BusinessFeatures\persons\requirements.md
 		Docs\Management\BusinessFeatures\persons\tasks.md = Docs\Management\BusinessFeatures\persons\tasks.md
+		Docs\Management\BusinessFeatures\persons\README.md = Docs\Management\BusinessFeatures\persons\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000034}"
@@ -392,6 +395,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0
 		Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md = Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md
 		Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg = Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg
 		Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\README.md = Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-00000000007D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-04-01-autocomplete-field", "2026-04-01-autocomplete-field", "{FA1234BC-0001-4000-8000-00000000007E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\changes\2026-04-01-autocomplete-field\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-04-01-autocomplete-field\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
@@ -1147,6 +1157,8 @@ Global
 		{FA1234BC-0001-4000-8000-000000000048} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000034} = {D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}
+		{FA1234BC-0001-4000-8000-00000000007D} = {D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}
+		{FA1234BC-0001-4000-8000-00000000007E} = {FA1234BC-0001-4000-8000-00000000007D}
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
