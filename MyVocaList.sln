@@ -177,6 +177,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-so
 		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
 		Docs\Management\BusinessFeatures\artists-songs\README.md = Docs\Management\BusinessFeatures\artists-songs\README.md
+		Docs\Management\BusinessFeatures\artists-songs\ENHANCEMENT-artist-owned-song-catalog-autolink.md = Docs\Management\BusinessFeatures\artists-songs\ENHANCEMENT-artist-owned-song-catalog-autolink.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
@@ -453,6 +454,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-inline-artist-cr
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\handoff.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\handoff.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\plan.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\pending-backlog-closeout.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\pending-backlog-closeout.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
