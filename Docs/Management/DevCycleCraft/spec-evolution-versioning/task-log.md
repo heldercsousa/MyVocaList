@@ -2309,3 +2309,142 @@ Context manifest, had this been interrupted:
 6. `.claude/scripts/backlog/model.py` — `_depth`, `_path_parent`, `validate`, `SEVERITIES`
 7. `.claude/scripts/backlog/render.py` — `render_row` (the arrow comes from `item.depth`)
 8. `MyVocaList.sln` — GUID counter (`…007A` now highest) and the `venues\bugs` folder GUID `{…024}`
+## Task: F2/F3/F4 — generator fixes
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T9e findings block)
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+**Branch / worktree:** `feature/generator-fixes` @ `C:\Users\helde\source\repos\mvl-generator-fixes` (based on develop, verified)
+
+### Changed files:
+- `.claude/scripts/backlog/backlog_gen.py`
+- `.claude/scripts/backlog/tests/test_backlog_gen.py`
+- `.gitattributes`
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md`
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md`
+
+Not touched (deliberately — they belong to the migration worktree): `BACKLOG.md`, the 5
+`backlog-archive/*.md` files, every item `README.md`.
+
+### Test counts
+Baseline **125** green — re-verified here rather than taken from the brief
+(`python -m unittest discover -s . -t .` run from `.claude/scripts/backlog/tests`: "Ran 125 tests ... OK").
+After: **129** green. Four tests added, **zero existing tests modified or removed**.
+
+`pytest` is not installed in this environment; the suite runs under `unittest discover` from inside
+the `tests/` directory (it is not importable from the parent). Recorded because earlier logs do not
+say which runner they used.
+
+### F2 — `_render_all` passed a per-month pool (FIXED)
+`_render_all` called `render_archive(existing, month_items, month, titles)`, leaving `all_items` to
+default to the month bucket. It now passes `all_items=items`.
+
+**Two distinct failure modes, both reproduced.** The brief predicted only the second:
+
+1. **Silent mis-file (worse, and previously undocumented).** When the folder prefix names a real
+   section but the item's *resolved* section differs (a `section: DevCycleCraft` feature living
+   under `BusinessFeatures/`), a bucket-only pool dead-ends the parent walk and drops to the
+   folder-prefix guess — filing the row into the wrong section table with **no error at all**.
+   Red transcript before the fix:
+   `AssertionError: 'BUG-001' not found in '| Target | Feature/Item | Status | Notes | ...'`
+   — the row was sitting in `archive-business`. Green after the fix.
+2. **Hard fail.** `cross-cutting/` is not in `ARCHIVE_SECTIONS`, so there is no prefix to fall back
+   to and `_archive_region_of` raises. Direct in-process proof:
+   - bucket-only pool -> `RenderError: cannot resolve archive section for 'BUG-002'
+     (cross-cutting/host/bugs/2026-07-21-BUG-002-x/) -- give it a section: or a parent that has one`
+   - full pool -> placed into `archive-business`, no error.
+   Not hypothetical: `walk()` over this worktree returns **25 items whose path prefix is not a
+   section** (24 under `cross-cutting/`, 1 under `milestones/`).
+
+The `RenderError` was **not** weakened. It still fires for genuinely unplaceable rows — proof 2
+above shows it firing correctly when the parent really is absent from the pool.
+
+Tests added: `test_archived_child_inherits_the_section_of_a_parent_outside_its_bucket`,
+`test_archived_child_inherits_a_parent_closed_in_a_different_month`,
+`test_cross_cutting_child_no_longer_hard_fails_when_its_parent_is_open`.
+
+### F4 — NOT A DEFECT; the finding's premise is stale
+F4 states that `walk()` builds `rel_path` as `Docs/Management/...` so `_section_from_path` tests
+`parts[0] == "Docs"` and always returns `None`. **That is not what the code does.** `walk()` sets
+`rel_dir = _rel(root, dirpath)`, and `_rel` is
+`os.path.relpath(path, os.path.join(root, MANAGEMENT))` — relative **to** `Docs/Management`, so
+those two segments are already stripped and the first remaining segment IS the section name.
+
+Verified against live `walk()` output on this worktree (52 items, 0 errors), not against the tests:
+
+    'BusinessFeatures/artists-songs/'                       -> BusinessFeatures
+    'BusinessFeatures/artists-songs/bugs/BUG-017-.../'      -> BusinessFeatures
+
+The fallback fires in production and always has. **No code change made, and no existing test
+changed** — the existing `test_section_falls_back_to_the_path_prefix` encodes the correct shape, not
+a broken one. What I added is a lock:
+`test_walk_produces_paths_the_folder_prefix_fallback_can_read` asserts the real `walk()` output shape
+and the `_section_from_path` result together, so if `_rel` is ever changed to emit a repo-relative
+path the third resolution step fails loudly instead of silently becoming dead code — which is the
+failure F4 believed it was already looking at.
+
+Consequence for the finding's conclusion: the `cross-cutting/` hard fail F4 describes is real, but
+its sole cause is F2, and F2's fix removes it. The chain (`section:` -> parent chain -> folder prefix
+-> raise) is genuinely three-deep, and was two-deep-plus-a-raise before this task, not one-deep.
+
+### F3 — `.gitattributes` pinned; deliberately NOT renormalized
+Measured state before the change (working-tree bytes, `core.autocrlf=true`):
+
+    CRLF=23  LF=0  backlog-archive/BACKLOG-ARCHIVE-2026-03.md
+    CRLF=21  LF=0  backlog-archive/BACKLOG-ARCHIVE-2026-04.md
+    CRLF=28  LF=0  backlog-archive/BACKLOG-ARCHIVE-2026-05.md
+    CRLF=64  LF=0  backlog-archive/BACKLOG-ARCHIVE-2026-06.md
+    CRLF=54  LF=0  backlog-archive/BACKLOG-ARCHIVE-2026-07.md
+    CRLF=167 LF=0  BACKLOG.md
+    CRLF (all)     every sampled item README.md
+
+Added to `.gitattributes`, after the existing `.claude/scripts/**/*.py` line (plus an explanatory
+comment block):
+
+    Docs/Management/BACKLOG.md text eol=lf
+    Docs/Management/backlog-archive/*.md text eol=lf
+    Docs/Management/**/README.md text eol=lf
+
+`git check-attr text eol` confirms `text: set` / `eol: lf` on all three patterns.
+
+**Item `README.md` files: pinned — yes.** They are generator *inputs*, but they are also generator
+*outputs*: `cmd_status`, `cmd_register` and `cmd_renumber` all rewrite them through `_write`, which
+is hardcoded to `newline="\n"`. An unpinned README therefore flips CRLF->LF the first time its
+status changes, producing exactly the 100%-line-endings whole-file diff F3 exists to prevent.
+Pinning them costs nothing and closes the same hole.
+
+**Renormalization decision: pin now, DO NOT renormalize here.** Reasoning:
+- Adding the attribute rewrites nothing. Verified: `git status --porcelain` after the edit lists only
+  the files I edited — no `Docs/` file moved.
+- The blobs are already LF, so `git add --renormalize` is an index no-op; its only real effect would
+  be rewriting **working-tree** bytes across `BACKLOG.md`, all 5 archive files and ~52 READMEs.
+- Those are precisely the files the migration worktree is mid-flight on (T9d/T12). A CRLF->LF rewrite
+  of every one of them, landing on a separate branch, would collide with the migration's in-flight
+  commits and produce whole-file conflicts on the exact files whose diffs T12's equivalence gate has
+  to read. That is the failure F3 exists to prevent, re-created by the remedy.
+- Correct sequencing: land this pin, let the migration merge, then renormalize once as its own step
+  (`git add --renormalize -- Docs/Management` plus a fresh checkout) with nothing else in flight.
+
+I have not renormalized, and recommend it be scheduled as a separate post-migration task.
+
+### Verification notes
+- **`regen --check` was NOT used as evidence** (per F1 it returns 2 before `_render_all` is reached).
+  Evidence is unit tests over `cmd_regen` against temp-dir fixtures, plus direct in-process
+  `render_archive` calls, as instructed.
+- No bare `regen` was run against this worktree's real `Docs/`.
+- All file writes done from Python scripts with explicit encoding; no Bash heredoc wrote a repo file.
+- No `grep` used for byte-exact work — all measurement done in Python.
+
+### Checkpoint
+- **Branch / worktree:** `feature/generator-fixes` @ `C:\Users\helde\source\repos\mvl-generator-fixes`
+- **Step:** 5 of 5 — last completed: commit. Now attempting: none, task complete.
+- **Build/test state:** 129/129 green (`unittest discover`); baseline was 125.
+- **Next command:** none — the orchestrator merges after review. Do NOT merge from here.
+- **Context manifest (read these to resume):**
+  1. `.claude/scripts/backlog/render.py` — `_archive_region_of` / `_section_of` / `_section_from_path`, the resolution chain
+  2. `.claude/scripts/backlog/backlog_gen.py` — `walk`, `_rel`, `_render_all` (the F2 call site)
+  3. `.claude/scripts/backlog/tests/test_backlog_gen.py` — `ArchiveSectionResolutionTests`, the four new tests
+  4. `.claude/scripts/backlog/tests/test_render.py` — pre-existing archive-section tests (unchanged)
+  5. `.gitattributes` — the F3 pin
+  6. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — findings block F1-F6
+  7. `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` section 3 — archive split / idempotency / preserved regions
