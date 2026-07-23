@@ -172,7 +172,7 @@ supposed to surface.
 >   The in-process splice proofs are the ONLY evidence archive rendering is correct. T12 must either
 >   clear the validation error first or invoke `_render_all`/`render_archive` directly. Leaving the
 >   statement as written would let a green-looking gate certify equivalence it never tested.
-> - **[ ] F2 (own follow-up task, before T12a) — `_render_all` must pass `all_items=items`.**
+> - **[x] F2 (done 2026-07-22, branch `feature/generator-fixes`) — `_render_all` now passes `all_items=items`.**
 >   It currently calls `render_archive(existing, month_items, month, titles)`, so parent resolution
 >   sees only that month's bucket. A bug whose parent closed in a different month (or is still open)
 >   falls through to the folder prefix; `BusinessFeatures/`/`DevCycleCraft/` survive, but
@@ -183,7 +183,7 @@ supposed to surface.
 >   the full pool costs nothing — `_render_all` already holds `items` — and leaves the raise for
 >   genuinely unplaceable rows. Not doing it in T9e was procedurally correct (`backlog_gen.py` was
 >   outside its `Files owned`; touching it would have been Rule 2 bundling).
-> - **[ ] F3 (T13-class, but must land BEFORE T12) — pin `.gitattributes`.**
+> - **[x] F3 (done 2026-07-22, branch `feature/generator-fixes`) — `.gitattributes` pinned; NOT renormalized (deliberate — see task-log).**
 >   All 5 archive files are CRLF in the worktree, LF in the blob; `core.autocrlf=true` and
 >   `.gitattributes` pins only `*.sh`, `pre-commit`, `.claude/scripts/**/*.py`. (T9d's log recorded
 >   LF because it measured the blob, not the working tree — the two logs measure different things
@@ -194,8 +194,24 @@ supposed to surface.
 >   makes T12's gate impossible to classify honestly. Pin `Docs/Management/backlog-archive/*.md`
 >   and `BACKLOG.md` to `text eol=lf`.
 >
-> - **[ ] F4 (found by T10a; fold into F2's task) — `render._section_from_path` is dead code in
->   production.** `walk()` builds `rel_path` as `Docs/Management/…`, so the function tests
+> - **[RETRACTED 2026-07-22] F4 was WRONG — `_section_from_path` was never dead code.** `walk()`
+>   sets `rel_dir = _rel(root, dirpath)`, and `_rel` is `os.path.relpath(path, join(root,
+>   MANAGEMENT))` — i.e. relative *to* `Docs/Management`, so those segments are already stripped and
+>   `parts[0]` **is** the section name. Live `walk()` output: `'BusinessFeatures/artists-songs/'` →
+>   `BusinessFeatures`. The fallback has always fired. The `cross-cutting/` hard-fail F4 describes is
+>   real but its sole cause is **F2**; the chain was two-deep-plus-a-raise, not one-deep.
+>   **How the error was made:** the claim was reasoned from the function's apparent intent rather
+>   than from running it, then repeated as established fact in three briefs (T10b, T11a, T11b) —
+>   each of which wrote defensive `section:` keys partly on a false premise. Those keys are still
+>   correct (F2 was real), so nothing shipped wrong, but the reasoning was not.
+>   **Guard added:** `test_walk_produces_paths_the_folder_prefix_fallback_can_read` asserts the real
+>   `walk()` output shape and `_section_from_path`'s result together, so a future change to `_rel`
+>   fails loudly instead of silently deleting the third resolution step.
+>   **⚠️ Audit the rest of this block the same way — by execution, not by reading.** F1's
+>   `regen --check` claim is the next most load-bearing and has never been run by me directly.
+>
+> - **[superseded — original text of F4, kept for the record]** `render._section_from_path` is dead code in
+>   production. `walk()` builds `rel_path` as `Docs/Management/…`, so the function tests
 >   `parts[0] == "Docs"` and **always returns `None`**. The folder-prefix fallback therefore never
 >   fires outside tests. Combined with F2 (`_render_all` omits `all_items`, so parent resolution
 >   sees only the month's bucket, and archived bugs' parents are non-terminal ⇒ absent), an archived
@@ -203,6 +219,13 @@ supposed to surface.
 >   immune only because it wrote `section:` on every item — that is load-bearing, not belt-and-braces.
 >   Fix `_section_from_path` and the `all_items` call site in the same task, or the fallback chain is
 >   two-thirds fictional.
+>
+>   **F4 correction [2026-07-22]:** `walk()` builds `rel_path` via `_rel`, which is relative to
+>   `Docs/Management`, so the first segment IS the section name (`BusinessFeatures/artists-songs/`).
+>   `parts[0] == "Docs"` never happens and the fallback fires normally on real paths — verified
+>   against live `walk()` output. No code change; a regression test now locks the path shape so a
+>   future change to `_rel` fails loudly instead of silently deleting the third resolution step.
+>   The `cross-cutting/` hard-fail F4 describes is real, but its cause is F2 alone, and F2 fixes it.
 >
 > - **[x] F6 (found by T11a; DONE in T11c 2026-07-22) — T10a's `BUG-028-artistspage-trailing-catalog-button-noop/` folder had no date prefix**, leaving two naming conventions in one `bugs/` directory. Renamed with `git mv` to `2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/` (date = the row's own `target: 2026-07-03`, not invented); its `pointer:` and both `.sln` entries were updated in the same commit. **Not in F6's scope and untouched:** the six *legacy* folders (BUG-017/018/019/021/023/024) still carry no date prefix.
 >
@@ -213,6 +236,108 @@ supposed to surface.
 >   guard** — the exact inverse of REQ-SEV-09's intent, which is that the row template be
 >   mechanically enforced rather than prose-enforced. Not acted on in T10b (`model.py` was outside
 >   its `Files owned`; changing it would have been Rule 2 bundling).
+>
+> - **[x] F6 (found by T11a; DONE in T11c 2026-07-22 — see the resolved bullet above) — T10a's `BUG-028` folder violates the REQ-SEV-01 naming pattern.**
+>   REQ-SEV-01 and `design.md` §2's own worked example mandate `YYYY-MM-DD-BUG-NNN-<slug>`;
+>   T10a created `BUG-028-artistspage-trailing-catalog-button-noop/` with **no date prefix**, so one
+>   `bugs/` directory now contains both spellings. T11a followed the spec for its own three folders
+>   and flagged rather than touching T10a's file. **Fix before T12** — `register` derives the folder
+>   name mechanically (REQ-SEV-11), so a hand-made folder that departs from the pattern is exactly
+>   the drift the generator exists to prevent. A `git mv` (history follows) + `id:`/pointer update.
+>
+> ### ⚠️ T12 GATE HAZARDS — found by execution-audit 2026-07-22, NOT previously recorded
+>
+> **H1 (biggest classification hazard) — mid-migration, `regen` DELETES most archive rows.** With the
+> validation error cleared, rendered output keeps **3 of ~30** rows for `BACKLOG-ARCHIVE-2026-06.md`,
+> **3 of 7** for `2026-07`, and drops **18** from `BACKLOG.md`. Expected — those legacy rows have no
+> backing item folder until **T12a** completes — but it means **T12 cannot use "regen produces no
+> diff" as its gate** until the migration is finished. Running the gate before T12a would read as
+> catastrophic data loss.
+>
+> **H2 — archived rows drop their `↳` by design, and every committed archive row has one.**
+> `render_row` has an explicit `if archived: label = item.title` branch (docstring: preserving arrows
+> "would break the byte-identical round-trip (REQ-SEV-13)"), yet all current archive rows are spelled
+> `| … | ↳ BUG-015: … |`. Regen will therefore strip a `↳` from **every archived row** — a
+> systematic, expected content diff that **must be named as a permitted class** alongside item (v),
+> or it will read as data loss at the gate.
+>
+> **H3 — F3's pin is INERT for existing working trees.** `eol=lf` applies on **checkout**, so it does
+> nothing for files already on disk. `core.autocrlf=true` is set locally and the working tree is
+> **100% CRLF today** while the blobs are pure LF. Until a post-migration renormalization *or* a
+> forced re-checkout (`git rm --cached -r Docs/Management && git checkout -- Docs/Management`) runs,
+> **every diff T12 measures is contaminated by line endings** — the exact condition F3 exists to
+> eliminate. The F2/F3/F4 commit message's framing ("bites on a *differently-configured* checkout")
+> is wrong: it bites here, now.
+>
+> ### Corrections to this block, from the same audit
+>
+> - **F5 — conclusion CONFIRMED, mechanism WRONG.** A maximally malformed separator (`target:
+>   BANANA-99`, `severity: Catastrophic`, `closed: NOT-A-MONTH`, `status: not-a-status`) validates
+>   clean, so the hole is real. But `continue` does **not** come "before any field check": three
+>   checks run above it (required-keys incl. `target` presence, `section in SECTIONS`, and the
+>   resolves-to-no-section check). **A fix written against F5's stated mechanism would target the
+>   wrong line** — the guard point is the `continue`'s position relative to the *format* checks.
+> - **Item (vi) — UNDERCOUNTED: 10 unprefixed bug folders, not 6.** `git ls-files` on develop shows
+>   **0 of 10 comply** with REQ-SEV-01. Missed: `BUG-026`, `BUG-022`, and **`bug-043`** — the last a
+>   second, distinct violation (lowercase `bug-`, no date, no slug) that no finding mentions. The
+>   REQ-SEV-01 debt is ~67% larger than recorded.
+> - **Item (iv) — the audit called it false; the audit was wrong, on a branch artifact.** It
+>   enumerated on `develop`, where the migration branch has not merged. Verified directly:
+>   develop still has `BUG-028-…`, `feature/backlog-migration` has `2026-07-03-BUG-028-…`. **F6 did
+>   land.** (Lesson recorded because it is the same class of error as F4: enumerate on the branch
+>   that holds the work.)
+> - **F1 — CONFIRMED in full by execution**, including its cause and its corollary: exit 2 precedes
+>   `_render_all`; the cause is the banned-content error on this feature's own folder; clearing only
+>   that error lets `render_archive` run (`months: ['2026-06','2026-07']`, exit 1). T12's gate design
+>   rests on solid ground.
+> - **Item (v) — CONFIRMED.** `_depth` counts `bugs`/`changes` segments only; `parent` changes
+>   nothing. BUG-012 necessarily gains a `↳`.
+>
+> > **Methodological pattern worth keeping:** of five claims re-verified by execution, three were
+> > fully correct (F1, F2, item v), one correct-in-conclusion but wrong-in-mechanism (F5), one
+> > materially undercounted (item vi), and F4 was flatly wrong. **The conclusions have held; the
+> > stated mechanisms and enumerations are where the errors live.** Verify mechanism claims by
+> > running the code, and enumerations with `git ls-files` on the correct branch.
+>
+> ### Open for Helder at T12 (accumulating — audit as a set, not one at a time)
+>
+> **(i) Agent-authored `Goal:` sentences** (decision-1/2 class; no option existed that avoided
+> authoring). So far: **Windows version** row; **BUG-029, BUG-030, BUG-031/032** (their rows carry
+> no Goal at all — Notes open `Deferred:` / `Answered by Helder 2026-07-10:` — and
+> `model.REQUIRED` mandates one). Plus the decision-2 rows (orders 20, 100, 110, 150, 520 + the
+> blocked BACKLOG-first Registration Enforcement row). **Every one is text Helder would normally
+> write.**
+>
+> **(ii) Forced respellings — four so far, all from ONE pattern.** `model._BANNED`'s test-count
+> regex `\b\d+\s*/\s*\d+\b` has forced: `Mask="00/00"` (T10a), `BUG-050/051/052` (T10b),
+> `after 050/051` (T11a), and would have hit `BUG-031/032` except that `notes_violations` scans
+> only `goal`+`gate`, not `title`. **Four incidents from one rule is a signal the pattern is too
+> broad, not that the content was wrong** — decide at T12 whether to narrow it (e.g. require a
+> `green`/`tests`/`passed` context word) rather than keep rewording real content around it.
+>
+> **(iii) Two bugs carry no `severity:`** — BUG-030 and BUG-031/032 are tagged `(spec gap)`, not
+> Critical/Major/Minor. Left unset rather than invented. This is a literal edge of REQ-SEV-01
+> ("every Critical or Major bug … lives at …"): they are neither, yet own folders because every
+> live row needs one. Observation, not a blocker.
+>
+> **(iv) BUG-028 folder name** — fixed by F6 (T11c).
+>
+> **(v) BUG-012 gains a `↳` — recommended as permitted diff class (d).** The row is top-level today
+> because no *Venues* row exists, but `model._depth` derives the arrow from the **path**, and
+> REQ-SEV-01 forces the bug into `venues/bugs/`. **No frontmatter value suppresses it** — `parent`
+> is unset and irrelevant. Every alternative is larger than T11c: add a Venues row (forbidden by
+> REQ-SEV-25), stay flat (defeats T11c), or make `_depth` respect `parent` (generator change).
+> Table position is unchanged; only the indent differs.
+>
+> **(vi) Six legacy bug folders still violate REQ-SEV-01 naming.** F6 fixed BUG-028, but
+> **BUG-017/018/019/021/023/024 also have no date prefix** (enumerated via `git ls-files`; each is
+> `pointer:`-referenced by an archived row). The F6 brief's premise — that renaming BUG-028 would
+> leave one convention in that directory — was wrong. Out of scope for T11c, untouched, recorded
+> as remaining REQ-SEV-01 debt for T12/T13.
+>
+> **(vii) `severity` unset on BUG-012** — its legacy file says "Medium", which is not in
+> `model.SEVERITIES`, and its row states none. Guessing `Minor` would trip REQ-SEV-03 and block a
+> task the spec schedules; guessing `Major` would be fabrication. Left unset, like (iii).
 >
 > **Environment hazard found during the review — do not repeat:** `grep` is rewritten by the `rtk`
 > proxy into a search tool, which silently corrupted the reviewer's first fence-stripping run and
