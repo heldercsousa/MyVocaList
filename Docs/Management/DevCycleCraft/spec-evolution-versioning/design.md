@@ -149,6 +149,12 @@ An item whose parent is itself archived in a different month is rendered in its 
 
 Ordering rationale: phases 1 and 2 are purely additive; phase 3 is additive except for BUG-012's `git mv` (a rename, trivially reversible, and the only existing-file rewrite before the gate); phase 4 is the first destructive phase — it rewrites the 5 archive files — and runs only after the live tree already round-trips. Phase 5 gates the whole thing.
 
+> **Spec updated [2026-07-23] — archive-regen gate redefined (Helder decisions F-2/F-3, T12a planning).** The T12a inventory enumerated **105 archived rows** (not the ~50 estimated in R-3) and established that a **byte-match of a regenerated archive against its committed original is impossible**: the renderer emits a canonical Notes format (`Goal: … Pointer: \`…\`.`), **drops the `↳` arrow** on archived rows (intentional `render_row` branch), and **appends `(under: <parent title>)`**, none of which the committed archive text carries. Therefore:
+> - **Phase 4 canonically rewrites** all 5 archive files to the generator's format — this is now understood as the *intended* output, not a transcription that must match the old bytes.
+> - **Phase 5 gate is redefined** to three checks: **(G1)** `regen --check` run twice yields zero diff (idempotency, REQ-SEV-13); **(G2)** every archived `BUG-NNN` from the frozen snapshot is still grep-reachable in some archive file (REQ-SEV-18/20); **(G3)** the `↳`-drop, `Goal:`-prefix, and `(under:)`-suffix reformattings are enumerated in `task-log.md` as a **named archive-migration diff class**, kept *separate* from REQ-SEV-25's four active-BACKLOG classes (those remain unwidened — REQ-SEV-25 governs the live BACKLOG.md gate, not the archives).
+> - **Extended statuses (F-3):** `STATUSES` gains terminal `Superseded` and `Duplicate` states (`model.py` + `render.py`, phase-4 wave, with tests) so committed archive Status cells (`🔵 Superseded (closed …)`, `🔵 Duplicate (closed)`) reproduce faithfully instead of being normalized to `✅ Fixed`. `Closed — partially regressed` (BUG-019) stays reconciled to `✅ Fixed` (resolved decision 5).
+> - **F-1 folder model for the 43 log-pointer rows:** the 21 `cross-cutting-log.md` rows follow §6.3's `cross-cutting/` model; the ~22 non-bug sub-rows sharing a feature `task-log.md` each get a `changes/<slug>/README.md` under their parent with `pointer:` kept on the shared log (REQ-SEV-27, nothing deleted). Their `id`/slug/`title`/`order` are agent-authored and flagged for the gate audit.
+
 ## 7. Risks
 
 | Risk | Mitigation |
