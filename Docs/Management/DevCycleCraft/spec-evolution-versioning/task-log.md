@@ -2517,3 +2517,68 @@ One folder backs exactly one row (folder-tree-is-database). Both 2026-03 rows ca
 - **`order` values (agent-assigned, to pin the frozen-snapshot reading order):** Venues CRUD `10` (Business Features, sole row); Dev Cycle Craft table top-to-bottom → Solution Structure Refactor `10`, MD3 App Bar Components `20`, M3 Lists `30`, Venues MD3 rebuild `40`, Styles & Structure `50`.
 - **Venues MD3 rebuild — folder shape + slug (agent-authored):** slug `venues-md3-rebuild`, folder `BusinessFeatures/venues/changes/2026-03-01-venues-md3-rebuild/`, `kind: change`, explicit `section: DevCycleCraft`, explicit `pointer: BusinessFeatures/venues/`. Rationale in F-5 above.
 - **id values:** kebab of the folder (`venues`, `solution-structure-refactor`, `md3-appbar-components`, `m3-lists`, `styles-structure`, `venues-md3-rebuild`) — checked collision-free tree-wide.
+
+---
+
+## Task: T12a Wave B — 2026-04 archived rows → item folders
+**Plan:** `plan.md` (T12a; tasks.md T12a entry + T12a PLANNING block)
+**Status:** blocked: spec gap
+**Started:** 2026-07-23
+
+Scope: ONLY the 2026-04 archive file (`backlog-archive/BACKLOG-ARCHIVE-2026-04.md`). All 4 rows are Type-1 (shipped feature/activity), terminal `✅ Done`, `closed: 2026-04`.
+
+Row inventory (enumerated from the archive file, both tables — 4 rows, matches the briefing estimate):
+- Business Features (1): **Person CRUD** → `BusinessFeatures/persons/`
+- Dev Cycle Craft (3): Toolbar/FAB vibrant → `DevCycleCraft/toolbar-fab-vibrant/`; Autocomplete field → `BusinessFeatures/persons/plan-autocomplete.md`; Hooks redesign → `DevCycleCraft/hooks-redesign/`
+
+No bug sub-row in 2026-04. No task-log-pointer rows (Autocomplete points at a PLAN file, not a LOG file — not the STOP case; pre-acknowledged by the briefing/REQ-SEV-10).
+
+Target folders: all pointer-target folders already existed with spec files (design.md/plan.md) — no feature/activity folder created, only `README.md` added. The Autocomplete row needed a new `changes/` item folder under persons — see Autocomplete note below.
+
+Autocomplete field — folder shape (agent-authored): its archived Pointer targets `BusinessFeatures/persons/plan-autocomplete.md` (a plan file inside the persons feature, not a standalone folder). Mirroring the Wave A venues-md3-rebuild model (one folder backs one row), filed as `BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/README.md`, `kind: change`, explicit `section: DevCycleCraft`, explicit `pointer: BusinessFeatures/persons/plan-autocomplete.md` (differs from folder — REQ-SEV-10). Day `-01` per REQ-SEV-00.
+
+### The four READMEs authored (parse + validate clean on their own — 0 errors scoped to my items)
+- `Docs/Management/BusinessFeatures/persons/README.md` (id `persons`, `**Person CRUD**`, order 10)
+- `Docs/Management/DevCycleCraft/toolbar-fab-vibrant/README.md` (id `toolbar-fab-vibrant`, order 10)
+- `Docs/Management/BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/README.md` (id `autocomplete-field`, order 20)
+- `Docs/Management/DevCycleCraft/hooks-redesign/README.md` (id `hooks-redesign`, order 30)
+
+### Spec gap: adding `persons/README.md` surfaces a BUG-022 parent-vs-path-parent validation error
+**Location:** validator `model.validate()` parent check (design.md §2 "parent is declared, not inferred … validator warns when they don't"); data in `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/README.md`.
+**Gap description:** BUG-022 is a DevCycleCraft item deliberately filed *physically* under `persons/` with logical `parent: ui-form-validation-guide` (the "BUG-022 precedent" recorded in Wave A's task-log). While `persons/` had no `README.md` it was not an item, so the path-parent `persons` was unresolvable and no error fired. Wave B's required `persons/README.md` makes `persons` an item, so the validator now resolves the path-parent to `persons` and errors: `parent 'ui-form-validation-guide' disagrees with the folder's path parent 'persons'`. This takes the whole-tree validation from 0 → 1 error and would make `regen` exit 2. My four items are individually clean; the error is entirely in the pre-existing BUG-022 frontmatter, outside my `Files owned`.
+**Options:**
+- Option A: Re-parent BUG-022 to `parent: persons` — clears the error but **discards the intentional Wave A precedent** (a DevCycleCraft item logically under `ui-form-validation-guide`); loses the cross-feature grouping.
+- Option B: Relax the validator so a `change`/`bug` item whose declared `parent` is a valid item elsewhere is NOT errored when its path-parent is a *different* valid feature item (the intentional physical-cross-file case) — a validator/spec change, downgrade to a soft warning. Preserves the precedent.
+**Recommendation:** Option B — it preserves the Wave A BUG-022 precedent and makes the intentional physical-cross-file pattern first-class; Option A silently erases a deliberate classification. Either way the decision belongs to Helder (BUG-022 classification + validator semantics), not to this Wave-B implementor.
+**Blocking:** Yes — cannot ship a commit that regresses whole-tree validation 0 → 1 (exit-2 gate), and the fix is outside `Files owned` (BUG-022 frontmatter and/or the validator). Stopping per role protocol; the four authored READMEs are left in the worktree uncommitted for the resolving session.
+
+### Verification evidence (partial — up to the block)
+- `backlog_gen.walk('.')` parse errors: 0.
+- `model.validate()` scoped to my four items (`persons`, `toolbar-fab-vibrant`, `hooks-redesign`, `autocomplete-field`): 0 errors.
+- Whole-tree `model.validate()`: **1 error**, the BUG-022 parent mismatch above. Confirmed it disappears when `persons/README.md` is temporarily removed (baseline 0) — i.e. surfaced, not authored, by Wave B.
+- Full test suite / `.sln` registration / commit / push: NOT performed — blocked pending Helder's decision.
+
+### ⟳ RESOLUTION (Helder, 2026-07-23) — "Allow + warn (align to design §2)" = Option B
+The spec contradicted itself: design §2 always said the parent/path-parent check WARNS; REQ-SEV-21 wrongly listed it as an abort-error. **Decision: cross-filing is permitted; the check becomes a non-fatal warning, not an error.** BUG-022 keeps `parent: ui-form-validation-guide`.
+- **Spec corrected first (done, this session):** REQ-SEV-21 in `requirements.md` amended — parent/path-parent disagreement moved OUT of the abort-error set, marked a non-fatal warning aligning to design §2. Committed on the branch with the four staged READMEs.
+- **Code not yet changed (next session's first implementor task):** `model.validate()` still errors on parent/path-parent disagreement. An implementor must downgrade it to a warning (collect into a `warnings` channel, not `errors`) **+ a test** proving BUG-022's cross-file parent yields 0 errors / 1 warning, and that whole-tree `regen --check` no longer exits 2 from this.
+- **Then finish Wave B:** the four READMEs are authored + staged in the worktree (uncommitted). Register them in `MyVocaList.sln` starting at GUID **007D** (last used 007C), validate (expect 0 errors, 1 warning for BUG-022), then commit + push.
+
+### Checkpoint (session handoff — 2026-07-23)
+- **Branch / worktree:** `feature/backlog-migration` @ `C:\Users\helde\source\repos\mvl-backlog-migration`
+- **Where we are:** T12a Wave B unblocked by Helder's decision. Spec (REQ-SEV-21) corrected this session. Validator code change + Wave B commit are the next session's first actions (both belong to an implementor in this worktree).
+- **Staged-but-uncommitted in worktree:** `BusinessFeatures/persons/README.md`, `DevCycleCraft/toolbar-fab-vibrant/README.md`, `DevCycleCraft/hooks-redesign/README.md`, `BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/README.md`.
+- **Next command:** dispatch an implementor — (1) validator error→warning + test; (2) register 4 READMEs in `.sln` from GUID 007D; (3) validate, commit, push.
+- **Context manifest (read these to resume):**
+  1. This task-log § "T12a Wave B" (the block + this resolution) — full state
+  2. `requirements.md` REQ-SEV-21 (amended) + design.md §2 (warn semantics)
+  3. `.claude/scripts/backlog/model.py` — `validate()` parent check to downgrade
+  4. `.claude/scripts/backlog/tests/test_model.py` — where the new warning test goes
+  5. `MyVocaList.sln` — last-used GUID 007C; add from 007D
+  6. `tasks.md` — T12a waves C–G remaining after B; T12 gate (G1/G2/G3); T13a–d rules bundle (authorship carve-out — stop before commit)
+
+### Agent-authored content (carve-out — for the gate audit, if unblocked as-is)
+- **Goals (4):** all transcribed **verbatim** from the archive Notes cell (`Goal: …` minus the `Pointer:` clause) — none composed, none trimmed (all ≤3 sentences / ≤55 words / no banned content).
+- **`order` values (agent-assigned):** Person CRUD `10`; Dev Cycle Craft table reading order → Toolbar/FAB vibrant `10`, Autocomplete field `20` (filed under persons/changes but ordered to preserve table position), Hooks redesign `30`.
+- **Autocomplete field folder shape + slug (agent-authored):** slug `autocomplete-field`, folder `BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/`, `kind: change`, explicit `section: DevCycleCraft`, explicit `pointer: BusinessFeatures/persons/plan-autocomplete.md`.
+- **id values:** kebab of the folder (`persons`, `toolbar-fab-vibrant`, `hooks-redesign`, `autocomplete-field`) — checked collision-free tree-wide.
