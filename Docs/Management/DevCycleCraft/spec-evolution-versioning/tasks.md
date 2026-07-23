@@ -23,6 +23,24 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 > prepare the `amend:` bundle and stop before committing. (b) Every **agent-authored goal** under
 > decisions 1–2 is flagged for audit as a set, since no option existed that avoided authoring.
 
+## ✅ T12a PLANNING — archive-regen decisions answered by Helder (2026-07-23)
+
+Surfaced by the T12a inventory (Plan subagent, 105 archived rows enumerated). These **redefine the T12 gate** — recorded before any T12a folder work, per the SDD Invariant (spec before code).
+
+| # | Blocker | Decision |
+|---|---------|----------|
+| F-2 | The renderer emits a **canonical** archive format (`Goal: … Pointer: \`…\`.`, drops the `↳` arrow, appends `(under: <parent>)`) that differs from the committed archive text on nearly every row → a clean byte-match against today's files is impossible. | **Canonical rewrite + idempotency gate.** T12 rewrites all 5 archive files ONCE to the generator's canonical format. The gate is redefined: **(1)** `regen --check` run twice yields zero diff (idempotency, REQ-SEV-13); **(2)** every archived `BUG-NNN` still grep-reachable (REQ-SEV-20/18); **(3)** the `↳`-drop, `Goal:`-prefix, and `(under:)`-suffix reformattings are **enumerated as a named archive-migration diff class** — NOT folded into REQ-SEV-25's four active-BACKLOG classes, which stay unwidened. |
+| F-3 | Committed archive Status cells contain terminal states not in the 8 `STATUSES`: `🔵 Superseded (closed …)`, `🔵 Duplicate (closed)`, `Closed — partially regressed`. A README carrying them verbatim fails `validate()`. | **Extend `STATUSES`** with terminal `Superseded` and `Duplicate` states (`model.py` + `render.py` change, in the T12 wave, with tests). Preserves the real distinction (e.g. BUG-008 superseded by the DX AutoCompleteEdit replacement) rather than normalizing history to `✅ Fixed`. `Closed — partially regressed` (BUG-019) stays reconciled to `✅ Fixed` per resolved decision 5. |
+| D | BUG-022, archived as "(Minor)", was given `severity: Major` in frontmatter to dodge REQ-SEV-03. | **Keep the Major re-classification** (confirmed). Only archived Minor bug; title still reads "(Minor)" so the rendered label matches. No broad precedent set. |
+
+### Still open — proposed resolutions (agent-authored; flagged for the T12 gate audit)
+
+> Under the blanket authorization these proceed on the recommended approach, but each is **flagged** because it authors content or shape not present in the archive text (the agent-authored-content carve-out).
+
+- **F-1 (43 rows point at a LOG file, not a folder).** Two model families: **(a)** 21 `cross-cutting-log.md` rows → `Docs/Management/cross-cutting/<slug>/README.md` (REQ-SEV-28 already covers these; log retained + linked; `section: DevCycleCraft` set directly since `cross-cutting/` is not a section root). **(b)** ~22 non-bug sub-rows pointing at a shared feature `task-log.md` (Search-Picker sub-rows, form-validation 01–06, crud-dedup Steps 1–7e, rules-refactoring sub-tasks) have **no design model.** **Proposed:** each gets a `changes/<slug>/README.md` under its parent feature, `pointer:` kept on the shared `task-log.md` (nothing deleted, REQ-SEV-27); `id`/slug/`title` are agent-authored from the row label. **Flagged: 22 invented slugs + titles.**
+- **F-4 (`(under:)` suffix).** Archived rows carry `parent:` → the suffix is emitted for every child row. **Proposed:** keep `parent:` (preserves the logical tree and matches the canonical-rewrite target); the suffix is part of the F-2 archive-migration diff class.
+- **F-5 (pointer/ordering collisions).** 2026-03 "Venues CRUD" + "Venues MD3 rebuild" both point at `venues/`; Search-Picker sub-rows share one `task-log.md`. **Proposed:** author distinct `id` + `order` so rows neither merge nor reorder; reading order pinned to the frozen snapshot. **Flagged: `order` values are agent-assigned.**
+
 ### Superseded — the original blocker table (kept for the record)
 
 ## ⛔ MIGRATION PAUSED — 6 decisions needed from Helder (2026-07-22)
