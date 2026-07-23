@@ -418,7 +418,7 @@ supposed to surface.
 - [x] **T11c — BUG-012 flat file → folder** (moved to `venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/`; **F6 done in the same task** — T10a's `BUG-028-…` folder renamed to `2026-07-03-BUG-028-…`; two T12 hunks declared — see task-log T11c)
   Consumes: T11b. `git mv` so history follows; `-01` day per REQ-SEV-00.
   Files owned: 1 folder, `MyVocaList.sln`. Risk: Medium (`git mv` history). Review lane: Standard. Demo: `git log --follow` shows pre-move commits.
-- [ ] **T12-pre — Extend STATUSES for terminal Superseded / Duplicate** *(added 2026-07-23, F-3; code change, must precede T12a's superseded-bug folders)*
+- [x] **T12-pre — Extend STATUSES for terminal Superseded / Duplicate** *(added 2026-07-23, F-3; code change, must precede T12a's superseded-bug folders)* — DONE `e7b29a5`, 143 tests green (+14); TERMINAL is full-string, suffix reconstructed archive-only from `closed:`.
   Consumes: T11c. Produces: `model.STATUSES`/`TERMINAL` gain `🔵 Superseded`, `🔵 Duplicate` (terminal, keyed on full string not emoji — `🔵 Deferred` stays active); `render.py` reconstructs the archive Status cell's `(closed <month>)` suffix from the `closed:` key. Unit tests for: Superseded/Duplicate validate + archive-route, Deferred stays live, suffix reconstruction, and the emoji-collision guard.
   Files owned: `.claude/scripts/backlog/model.py`, `.claude/scripts/backlog/render.py`, `.claude/scripts/backlog/tests/`. Risk: Medium (generator core). Review lane: Standard. Demo: a README `status: 🔵 Superseded` + `closed: 2026-07` renders `🔵 Superseded (closed 2026-07)` and routes to the archive; a `🔵 Deferred` row stays in live BACKLOG.
 - [ ] **T12a — Archived rows → item folders**
