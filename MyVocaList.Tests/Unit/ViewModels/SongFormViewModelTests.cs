@@ -324,6 +324,62 @@ public class SongFormViewModelTests
         Assert.Equal(7, sut.SelectedArtistId);
     }
 
+    // [AC] REQ-ACREATE-03 (BUG-057): the error Label mirrors ArtistHasError — the VM must set
+    // ArtistErrorText whenever it sets ArtistHasError=true, or the Label reserves layout space
+    // but renders no message.
+    [Fact]
+    public void ArtistBlurredWithoutSelection_NoPriorSelection_SetsErrorText()
+    {
+        var sut = CreateSut();
+        sut.ArtistSearchText = "partial text";
+        // SelectedArtistId not set
+
+        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
+
+        Assert.True(sut.ArtistHasError);
+        Assert.False(string.IsNullOrEmpty(sut.ArtistErrorText));
+    }
+
+    // ── BUG-060 / REQ-ACREATE-15: clearing a locked artist unlocks the field ──────────────
+
+    // [AC] REQ-ACREATE-15: tapping the clear (X) icon on a locked field unlocks it and drops
+    // the selection so the field returns to a normal searchable state.
+    [Fact]
+    public void ClearArtist_WhenLocked_UnlocksAndClearsSelection()
+    {
+        var sut = CreateSut();
+        sut.SelectedArtistId = 7;
+        sut.SelectedArtistName = "Guns N' Roses";
+        sut.ArtistSearchText = "Guns N' Roses";
+        sut.IsArtistLocked = true;
+
+        sut.ClearArtistCommand.Execute(null);
+
+        Assert.False(sut.IsArtistLocked);
+        Assert.Null(sut.SelectedArtistId);
+        Assert.Null(sut.SelectedArtistName);
+        Assert.Equal(string.Empty, sut.ArtistSearchText);
+    }
+
+    // [AC] REQ-ACREATE-15: a deliberate clear must not be silently overwritten by the
+    // restore-prior-selection branch on the next blur.
+    [Fact]
+    public void ArtistBlurredWithoutSelection_AfterDeliberateClear_DoesNotRestorePriorArtist()
+    {
+        var sut = CreateSut();
+        sut.SelectedArtistId = 7;
+        sut.SelectedArtistName = "Guns N' Roses";
+        sut.ArtistSearchText = "Guns N' Roses";
+        sut.IsArtistLocked = true;
+
+        sut.ClearArtistCommand.Execute(null);
+        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
+
+        Assert.Null(sut.SelectedArtistId);
+        Assert.Equal(string.Empty, sut.ArtistSearchText);
+        Assert.False(sut.ArtistHasError); // empty text is not an "unmatched" state (REQ-ACREATE-03)
+    }
+
     // [AC] AC-B8-03 — InitializeArtistField populates field from query props
     [Fact]
     public void InitializeArtistField_WithArtistId_SetsSearchTextAndSelectedId()
