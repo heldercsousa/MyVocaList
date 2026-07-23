@@ -2472,3 +2472,48 @@ I have not renormalized, and recommend it be scheduled as a separate post-migrat
 
 ### Build notes
 Tests: 143 passed, 0 failed. No archive folders/files created (that is T12a). No `.sln` change (existing test files extended, no new files).
+
+---
+
+## Task: T12a Wave A — 2026-03 archived rows → item folders
+**Plan:** `plan.md` (T12a; tasks.md T12a entry + T12a PLANNING block)
+**Status:** To Review
+**Started:** 2026-07-23
+**Completed:** 2026-07-23
+
+Scope: ONLY the 2026-03 archive file (`backlog-archive/BACKLOG-ARCHIVE-2026-03.md`). Later months are separate waves. All 6 rows are Type-1 (shipped feature/activity), terminal `✅ Done`, `closed: 2026-03`.
+
+Row inventory (enumerated from the archive file, both tables — 6 rows, matches the briefing estimate):
+- Business Features (1): **Venues CRUD**
+- Dev Cycle Craft (5): Solution Structure Refactor, MD3 App Bar Components, M3 Lists, Venues MD3 rebuild, Styles & Structure
+
+No bug sub-row in 2026-03 (REQ-SEV-28a stray-bug grep verify: none — the file has only feature/activity rows). No log-pointer rows in 2026-03.
+
+Target folders: all 5 feature/activity folders **already existed** with spec files (design.md/plan.md) — no folder created, only `README.md` added. The 6th row (Venues MD3 rebuild) needed a new folder — see F-5 below.
+
+### F-5 collision (Venues CRUD vs Venues MD3 rebuild — both point at `venues/`)
+One folder backs exactly one row (folder-tree-is-database). Both 2026-03 rows carry `Pointer: venues/`, but they are two distinct rows in two different tables (Business Features vs Dev Cycle Craft). Resolution (matches REQ-SEV-28a / F-1(b) model, and the BUG-022 precedent of a DevCycleCraft item physically under a BusinessFeatures feature):
+- **Venues CRUD** → `BusinessFeatures/venues/README.md` (the feature front page), `section: BusinessFeatures`, pointer omitted (== folder).
+- **Venues MD3 rebuild** → `BusinessFeatures/venues/changes/2026-03-01-venues-md3-rebuild/README.md`, `kind: change`, `section: DevCycleCraft` set explicitly, `pointer: BusinessFeatures/venues/` (explicit, differs from folder — REQ-SEV-10). No `parent:` set (keeps it a plain Dev Cycle Craft row with no `(under:)` suffix / arrows, matching the frozen snapshot). Day `-01` per REQ-SEV-00 (target is bare `2026-03`).
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/venues/README.md` (new)
+- `Docs/Management/BusinessFeatures/venues/changes/2026-03-01-venues-md3-rebuild/README.md` (new)
+- `Docs/Management/DevCycleCraft/solution-structure-refactor/README.md` (new)
+- `Docs/Management/DevCycleCraft/md3-appbar-components/README.md` (new)
+- `Docs/Management/DevCycleCraft/m3-lists/README.md` (new)
+- `Docs/Management/DevCycleCraft/styles-structure/README.md` (new)
+- `MyVocaList.sln` (5 README SolutionItems lines on existing folders; new `changes` Solution Folder GUID `…007B` under venues + item folder GUID `…007C`; 2 NestedProjects lines). GUIDs `007B`/`007C` follow the last-used `007A`.
+
+### Verification evidence
+- `walk()` parse errors: 0. `model.validate()` over the whole tree: 1 error total, and it is **pre-existing and not mine** (`DevCycleCraft/spec-evolution-versioning/` banned-content, a known governance-row issue). All 6 new items: 0 validation errors.
+- `render.render_row(archived=True)` reproduces all 6 rows in canonical format with correct `✅ Done` status, `Goal: … Pointer: \`…\`.` Notes, and no `↳` arrows.
+- Full test suite: **143 passed, 0 failed** (`python -m unittest discover -s .claude/scripts/backlog/tests`).
+- `.sln`: GUID `007B` = 1 folder def + 2 nested lines; `007C` = 1 folder def + 1 nested line; each of the 6 README paths present. No duplicate GUID.
+- NOT run: `regen --check` / `regen` (H1 — would delete the 99 unmigrated archive rows). Validation-only per briefing.
+
+### Agent-authored content (carve-out — for Helder's gate audit)
+- **Goals (6):** all transcribed **verbatim** from the archive Notes cell (`Goal: …` minus the `Pointer:` clause) — none composed, none trimmed (all within ≤3 sentences / ≤55 words / no banned content).
+- **`order` values (agent-assigned, to pin the frozen-snapshot reading order):** Venues CRUD `10` (Business Features, sole row); Dev Cycle Craft table top-to-bottom → Solution Structure Refactor `10`, MD3 App Bar Components `20`, M3 Lists `30`, Venues MD3 rebuild `40`, Styles & Structure `50`.
+- **Venues MD3 rebuild — folder shape + slug (agent-authored):** slug `venues-md3-rebuild`, folder `BusinessFeatures/venues/changes/2026-03-01-venues-md3-rebuild/`, `kind: change`, explicit `section: DevCycleCraft`, explicit `pointer: BusinessFeatures/venues/`. Rationale in F-5 above.
+- **id values:** kebab of the folder (`venues`, `solution-structure-refactor`, `md3-appbar-components`, `m3-lists`, `styles-structure`, `venues-md3-rebuild`) — checked collision-free tree-wide.
