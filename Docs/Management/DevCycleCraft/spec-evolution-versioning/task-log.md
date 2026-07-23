@@ -2448,3 +2448,27 @@ I have not renormalized, and recommend it be scheduled as a separate post-migrat
   5. `.gitattributes` — the F3 pin
   6. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — findings block F1-F6
   7. `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` section 3 — archive split / idempotency / preserved regions
+
+---
+## Task: T12-pre — Extend STATUSES for terminal Superseded / Duplicate
+**Plan:** Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md (T12-pre)
+**Status:** To Review
+**Started:** 2026-07-23
+**Completed:** 2026-07-23
+
+### Changed files
+- `.claude/scripts/backlog/model.py` — added `SUPERSEDED` / `DUPLICATE`; joined `STATUSES` and `TERMINAL` (full-string membership, not the overloaded 🔵 prefix).
+- `.claude/scripts/backlog/render.py` — archive-only `(closed <month>)` suffix reconstructed from the `closed:` key for Superseded/Duplicate; stored `status:` stays the bare enum.
+- `.claude/scripts/backlog/tests/test_model.py` — 6 cases (Superseded/Duplicate valid+terminal, both error without `closed`, Deferred active with no `closed`, Deferred+closed errors).
+- `.claude/scripts/backlog/tests/test_render.py` — 8 cases (Deferred stays live, Superseded excluded from live, Superseded/Duplicate bucket to archive, Deferred never buckets, both suffix reconstructions, live render has no suffix).
+
+### Verification evidence
+`python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` → `Ran 143 tests` `OK` (baseline was 129; +14).
+
+### AC traceability
+- REQ-SEV-16 (active set includes 🔵 Deferred) — `test_deferred_item_stays_in_the_live_file`, `test_deferred_is_active_not_terminal`.
+- REQ-SEV-18 (terminal set = Done/Fixed/Superseded/Duplicate) — `test_superseded_item_buckets_into_the_archive`, `test_duplicate_item_buckets_into_the_archive`, `test_superseded_item_is_excluded_from_the_live_file`.
+- REQ-SEV-08 / REQ-SEV-19 (valid statuses; terminal requires `closed`; overloaded 🔵 disambiguation; bare-enum `status:` + reconstructed suffix) — `test_superseded_without_closed_is_an_error`, `test_duplicate_without_closed_is_an_error`, `test_deferred_with_closed_is_an_error`, `test_superseded_status_cell_reconstructs_closed_suffix`, `test_duplicate_status_cell_reconstructs_closed_suffix`, `test_stored_status_stays_bare_enum_live_render_has_no_suffix`.
+
+### Build notes
+Tests: 143 passed, 0 failed. No archive folders/files created (that is T12a). No `.sln` change (existing test files extended, no new files).
