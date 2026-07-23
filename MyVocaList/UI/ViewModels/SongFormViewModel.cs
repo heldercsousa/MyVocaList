@@ -366,7 +366,10 @@ public partial class SongFormViewModel : ViewModelBase
             // REQ-ACREATE-03: empty text is not an "unmatched" state — only flag an error
             // when the user actually typed something that didn't resolve to a selection.
             if (!string.IsNullOrWhiteSpace(ArtistSearchText))
+            {
                 ArtistHasError = true;
+                ArtistErrorText = "Search and select an artist from the list";
+            }
         }
         else
         {
@@ -374,6 +377,26 @@ public partial class SongFormViewModel : ViewModelBase
             ArtistSearchText = SelectedArtistName ?? string.Empty;
             ArtistSuggestions = [];
         }
+    }
+
+    /// <summary>
+    /// REQ-ACREATE-15 (BUG-060): invoked when the user taps the Artist field's clear (X) icon.
+    /// A locked artist field must be changeable — clearing unlocks it and drops the selection so
+    /// the field returns to a normal searchable state. Because <see cref="SelectedArtistId"/> is
+    /// nulled here, a subsequent blur takes the "no artist selected" branch of
+    /// <see cref="OnArtistBlurredWithoutSelection"/> instead of the restore-prior-selection branch —
+    /// an intentional clear is never silently overwritten with the prior artist.
+    /// </summary>
+    [RelayCommand]
+    private void ClearArtist()
+    {
+        SelectedArtistId = null;
+        SelectedArtistName = null;
+        ArtistSearchText = string.Empty;
+        IsArtistLocked = false;
+        ArtistSuggestions = [];
+        ArtistHasError = false;
+        ArtistErrorText = string.Empty;
     }
 
     /// <summary>
