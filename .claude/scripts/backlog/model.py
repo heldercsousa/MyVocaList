@@ -15,9 +15,15 @@ DEFERRED = "\U0001F535 Deferred"
 BLOCKED = "\U0001F534 Blocked"
 DONE = "✅ Done"
 FIXED = "✅ Fixed"
+# 🔵 is overloaded (F-3, REQ-SEV-08): DEFERRED is an ACTIVE live status, while
+# SUPERSEDED and DUPLICATE are TERMINAL. Terminal detection therefore keys on
+# full-string TERMINAL membership below -- never on the 🔵 emoji prefix.
+SUPERSEDED = "\U0001F535 Superseded"
+DUPLICATE = "\U0001F535 Duplicate"
 
-STATUSES = (PENDING, SPEC, PLAN, READY, IN_PROGRESS, DEFERRED, BLOCKED, DONE, FIXED)
-TERMINAL = (DONE, FIXED)
+STATUSES = (PENDING, SPEC, PLAN, READY, IN_PROGRESS, DEFERRED, BLOCKED,
+            DONE, FIXED, SUPERSEDED, DUPLICATE)
+TERMINAL = (DONE, FIXED, SUPERSEDED, DUPLICATE)
 SEVERITIES = ("Critical", "Major", "Minor")
 SECTIONS = ("BusinessFeatures", "DevCycleCraft")
 KINDS = ("feature", "bug", "change", "milestone", "group")
