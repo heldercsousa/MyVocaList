@@ -35,6 +35,7 @@ public partial class SongFormPage : ContentPage
         // remove that try-catch.
         await ViewModel.RefreshApiKeyFlagAsync();
         ViewModel.InitializeArtistField(); // BUG-008: reliable artist field init after all query props set
+        artistEdit.SelectedItem = null; // BUG-061: no stale lingering row on edit-mode initial load
     }
 
     // ── DX AutoCompleteEdit glue (T3, 2026-07-19 change spec) ────────────────────────────
@@ -86,6 +87,11 @@ public partial class SongFormPage : ContentPage
         {
             ViewModel.SelectArtistCommand.Execute(suggestion);
         }
+
+        // BUG-061: the DX AutoCompleteEdit keeps the picked row marked as SelectedItem, so it
+        // lingers highlighted in the suggestion list until tapped a second time. Reset it once the
+        // pick has been routed to the ViewModel — the field itself already shows the chosen name.
+        artistEdit.SelectedItem = null;
     }
 
     // Blur without a selection → existing VM blur command (same trigger the old component used).
@@ -94,6 +100,12 @@ public partial class SongFormPage : ContentPage
         if (artistEdit.SelectedItem is null)
             ViewModel.ArtistBlurredWithoutSelectionCommand.Execute(null);
     }
+
+    // BUG-060/REQ-ACREATE-15: the Clear (X) icon empties the editor's Text via its own binding,
+    // but a locked (IsReadOnly=true) field must also unlock so the user can search/create a
+    // different artist. Thin forwarding to the VM — see SongFormViewModel.ClearArtist.
+    private void OnArtistClearIconClicked(object sender, EventArgs e) =>
+        ViewModel.ClearArtistCommand.Execute(null);
 
     // Bridges the MAUI Unfocused (blur) events to the ViewModel's validation commands.
     private void OnTitleUnfocused(object sender, FocusEventArgs e) =>

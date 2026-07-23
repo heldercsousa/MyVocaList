@@ -35,7 +35,8 @@
                                       IsReadOnly="{Binding IsArtistLocked}"
                                       ClearIconVisibility="Auto"
                                       SelectionChanged="OnArtistSelectionChanged"
-                                      Unfocused="OnArtistUnfocused">
+                                      Unfocused="OnArtistUnfocused"
+                                      ClearIconClicked="OnArtistClearIconClicked">
                     <dxe:AutoCompleteEdit.ItemsSourceProvider>
                         <dxe:AsyncItemsSourceProvider RequestDelay="300"
                                                       CharacterCountThreshold="1"
