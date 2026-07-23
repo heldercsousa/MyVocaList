@@ -287,6 +287,8 @@ supposed to surface.
 > eliminate. The F2/F3/F4 commit message's framing ("bites on a *differently-configured* checkout")
 > is wrong: it bites here, now.
 >
+> **H4 (found T12a Wave A, 2026-07-23) — `regen` may SKIP a file with committed rows but zero backing items.** After Wave A, `regen --check` flagged 2026-03/06/07 as stale but **NOT 2026-04/05** — the two months with committed rows but zero migrated folders. A month rendering to empty apparently leaves its file untouched rather than emptying the fenced region, so its old rows survive spuriously and the gate would falsely pass. **Self-resolves once every row has a folder** (04/05 get theirs in Waves B/C). But T12 MUST assert every archive file was actually rewritten — e.g. confirm each of the 5 files appears in a `regen` write pass, not just that `regen --check` is clean — or a month accidentally left un-migrated would pass silently. Verify at the gate.
+>
 > ### Corrections to this block, from the same audit
 >
 > - **F5 — conclusion CONFIRMED, mechanism WRONG.** A maximally malformed separator (`target:
@@ -421,7 +423,7 @@ supposed to surface.
 - [x] **T12-pre — Extend STATUSES for terminal Superseded / Duplicate** *(added 2026-07-23, F-3; code change, must precede T12a's superseded-bug folders)* — DONE `e7b29a5`, 143 tests green (+14); TERMINAL is full-string, suffix reconstructed archive-only from `closed:`.
   Consumes: T11c. Produces: `model.STATUSES`/`TERMINAL` gain `🔵 Superseded`, `🔵 Duplicate` (terminal, keyed on full string not emoji — `🔵 Deferred` stays active); `render.py` reconstructs the archive Status cell's `(closed <month>)` suffix from the `closed:` key. Unit tests for: Superseded/Duplicate validate + archive-route, Deferred stays live, suffix reconstruction, and the emoji-collision guard.
   Files owned: `.claude/scripts/backlog/model.py`, `.claude/scripts/backlog/render.py`, `.claude/scripts/backlog/tests/`. Risk: Medium (generator core). Review lane: Standard. Demo: a README `status: 🔵 Superseded` + `closed: 2026-07` renders `🔵 Superseded (closed 2026-07)` and routes to the archive; a `🔵 Deferred` row stays in live BACKLOG.
-- [ ] **T12a — Archived rows → item folders**
+- [~] **T12a — Archived rows → item folders** *(in progress by month-wave; Wave A/2026-03 DONE `b862248` — 6 folders, 143 green, 0 validation errors on its items; F-5 collision resolved via `changes/` item; 6 order values flagged. Waves B–G pending.)*
   Consumes: T12-pre. One folder per row in the 5 archive files, `closed:` from the file name's month. **105 rows enumerated** (see T12a PLANNING); pin the 43 log-pointer partition exactly (REQ-SEV-28/28a) + grep-verify no stray bug sub-row. Split into per-month sub-waves of ≤5 folders; `MyVocaList.sln` is sequential-only so serialize the `.sln` commit at each wave boundary. Feature/activity rows → new README in the existing folder; archived bugs → new `bugs/YYYY-MM-DD-BUG-NNN-slug/` (git mv where a flat file exists); log-pointer rows → REQ-SEV-28/28a model. Agent-authored goals/slugs/titles/order flagged in task-log per the carve-out.
   Files owned: those folders, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
 - [ ] **T12 — Archive regeneration + the equivalence gate** *(fence **insertion** is no longer T12's — it moved to T9d, done 2026-07-22; T12 now only regenerates the already-fenced regions and runs the gate)*
