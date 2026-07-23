@@ -2582,3 +2582,67 @@ The spec contradicted itself: design §2 always said the parent/path-parent chec
 - **`order` values (agent-assigned):** Person CRUD `10`; Dev Cycle Craft table reading order → Toolbar/FAB vibrant `10`, Autocomplete field `20` (filed under persons/changes but ordered to preserve table position), Hooks redesign `30`.
 - **Autocomplete field folder shape + slug (agent-authored):** slug `autocomplete-field`, folder `BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/`, `kind: change`, explicit `section: DevCycleCraft`, explicit `pointer: BusinessFeatures/persons/plan-autocomplete.md`.
 - **id values:** kebab of the folder (`persons`, `toolbar-fab-vibrant`, `hooks-redesign`, `autocomplete-field`) — checked collision-free tree-wide.
+
+---
+## Task: T12a Wave B unblock — validator downgrade + .sln registration
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-23
+**Completed:** 2026-07-23
+
+### Part 1 — validator change
+- `model.py`: extracted the shared validation walk into `_validate_all(items)` returning `(errors, warnings)`. `validate(items)` still returns errors only (unchanged signature/behavior for every existing caller/test). New `validate_warnings(items)` returns the warnings channel.
+- The single line changed in behavior: the parent-vs-path-parent **disagreement** branch (parent resolves to a real item but differs from the folder's path parent) now calls `warn(...)` instead of `err(...)`. The "parent names no existing item" branch is untouched (still `err`).
+- `backlog_gen.cmd_regen`: after the (still error-gated) validation step, calls `validate_warnings(items)` and writes each to stderr prefixed `warning:` — non-fatal, does not affect the 0/1/2 return code.
+
+### Part 1 — Red/Green evidence
+Red (pre-fix, `git stash` of model.py/backlog_gen.py, full suite run):
+```
+ERROR: test_cross_file_parent_disagreement_warns_but_does_not_error (test_backlog_gen.ArchiveSectionResolutionTests)
+ImportError: cannot import name 'validate_warnings' from 'model'
+Ran 144 tests in 0.935s
+FAILED (errors=1)
+```
+Green (`git stash pop`, full suite run):
+```
+Ran 144 tests in 0.626s
+OK
+```
+
+### Full suite
+`python -m unittest discover tests` from `.claude/scripts/backlog/`: **144 passed, 0 failed** (was 143 baseline + 1 new regression test).
+
+### Part 2 — .sln registration
+Confirmed the true highest `FA1234BC-...-00NN` GUID in the .sln before assigning: **007C** (agrees with the ledger). Assigned:
+- `FA1234BC-0001-4000-8000-00000000007D` — new `changes` Solution Folder nested under `persons` (`{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}`)
+- `FA1234BC-0001-4000-8000-00000000007E` — new `2026-04-01-autocomplete-field` Solution Folder nested under `007D`, carrying its README.md SolutionItems entry
+
+The other three READMEs (`persons/README.md`, `DevCycleCraft/toolbar-fab-vibrant/README.md`, `DevCycleCraft/hooks-redesign/README.md`) were added as new lines inside each folder's existing `ProjectSection(SolutionItems)`.
+
+Post-write verification (Python binary mode, never grep — see `rtk-rewrites-grep` memory):
+- BOM present: `True`
+- Bare LF found: `False` (every `\n` preceded by `\r`)
+- All 4 SolutionItems lines + both new `Project(...)`/`NestedProjects` lines present exactly once, verbatim
+
+### Part 2 — in-process validate counts (real Docs/ tree, read-only — no `regen --check` used per briefing)
+```
+parse_errors: 0
+errors: 0
+warnings: 1
+ W BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/: parent 'ui-form-validation-guide' disagrees with the folder's path parent 'persons'
+```
+Note: the briefing expected one additional pre-existing banned-content error on `DevCycleCraft/spec-evolution-versioning/` to remain — this run shows 0 errors total, so that issue appears already resolved on this branch (not reintroduced by this task). Flagging the discrepancy for review rather than silently reconciling it.
+
+### Changed files:
+- `.claude/scripts/backlog/model.py`
+- `.claude/scripts/backlog/backlog_gen.py`
+- `.claude/scripts/backlog/tests/test_backlog_gen.py`
+- `MyVocaList.sln`
+- `Docs/Management/BusinessFeatures/persons/README.md` (pre-authored, registered only)
+- `Docs/Management/BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/README.md` (pre-authored, registered only)
+- `Docs/Management/DevCycleCraft/toolbar-fab-vibrant/README.md` (pre-authored, registered only)
+- `Docs/Management/DevCycleCraft/hooks-redesign/README.md` (pre-authored, registered only)
+
+### Build notes
+No .NET build touched (Python-only change + doc registration). Tests: 144 passed, 0 failed. Commits: `fix(backlog-gen)` for Part 1, `docs(spec-evolution)` for Part 2 (SHAs in the push log). Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: `model.py`, `backlog_gen.py`, `tests/test_backlog_gen.py`, `MyVocaList.sln` — all re-verified after write (BOM/CRLF binary check + string-presence check above).
