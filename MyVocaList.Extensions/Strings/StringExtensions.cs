@@ -23,5 +23,5 @@ public static class StringExtensions
     }
 
     private static string Collapse(string value)
-        => string.Join(' ', value.Split((char[])null, StringSplitOptions.RemoveEmptyEntries));
+        => string.Join(' ', value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 }
