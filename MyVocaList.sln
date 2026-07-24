@@ -159,6 +159,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdd", "sdd", "{B1A2C3D4-000
 		Docs\Management\DevCycleCraft\sdd\spec-s9-3-hallucination-safeguards.md = Docs\Management\DevCycleCraft\sdd\spec-s9-3-hallucination-safeguards.md
 		Docs\Management\DevCycleCraft\sdd\spec-s9-quality-assurance.md = Docs\Management\DevCycleCraft\sdd\spec-s9-quality-assurance.md
 		Docs\Management\DevCycleCraft\sdd\task-log-sdd-adoption.md = Docs\Management\DevCycleCraft\sdd\task-log-sdd-adoption.md
+		Docs\Management\DevCycleCraft\sdd\README.md = Docs\Management\DevCycleCraft\sdd\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-songs", "{C141C5C9-833C-4A26-96BF-3745A2DA1AD4}"
@@ -182,11 +183,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\workflow-compression\plan.md = Docs\Management\DevCycleCraft\workflow-compression\plan.md
+		Docs\Management\DevCycleCraft\workflow-compression\README.md = Docs\Management\DevCycleCraft\workflow-compression\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs-context-scope-control", "docs-context-scope-control", "{A1B2C3D4-0001-4000-8000-000000000008}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\docs-context-scope-control\plan.md = Docs\Management\DevCycleCraft\docs-context-scope-control\plan.md
+		Docs\Management\DevCycleCraft\docs-context-scope-control\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "architecture-tests-evaluation", "architecture-tests-evaluation", "{A1B2C3D4-0001-4000-8000-000000000009}"
@@ -428,6 +431,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-karaoke", "youtube-
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\task-log.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\README.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-search-launch", "youtube-search-launch", "{FA1234BC-0001-4000-8000-000000000022}"
@@ -468,6 +472,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-inline-artist-cr
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\handoff.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\handoff.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\plan.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-00000000007F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-05-01-gotosettings-navigation-fix", "2026-05-01-gotosettings-navigation-fix", "{FA1234BC-0001-4000-8000-000000000080}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-05-01-gotosettings-navigation-fix\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-05-01-gotosettings-navigation-fix\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
@@ -619,6 +630,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "session-continuity-leasing"
 		Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md = Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md = Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\README.md = Docs\Management\DevCycleCraft\session-continuity-leasing\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-000000000081}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-stop-hook-scanner-removal", "2026-06-27-stop-hook-scanner-removal", "{FA1234BC-0001-4000-8000-000000000082}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\session-continuity-leasing\changes\2026-06-27-stop-hook-scanner-removal\README.md = Docs\Management\DevCycleCraft\session-continuity-leasing\changes\2026-06-27-stop-hook-scanner-removal\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lease-scripts", "lease-scripts", "{FA1234BC-0001-4000-8000-000000000027}"
@@ -1165,6 +1183,8 @@ Global
 		{FA1234BC-0001-4000-8000-000000000022} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{FA1234BC-0001-4000-8000-000000000023} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000045} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-00000000007F} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-000000000080} = {FA1234BC-0001-4000-8000-00000000007F}
 		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{0C4BA720-519E-4818-BD9B-34AC19E4FCD7} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
@@ -1183,6 +1203,8 @@ Global
 		{C81D77D9-056E-44D8-A88F-522682CEE603} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000026} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000027} = {FA1234BC-0001-4000-8000-000000000026}
+		{FA1234BC-0001-4000-8000-000000000081} = {FA1234BC-0001-4000-8000-000000000026}
+		{FA1234BC-0001-4000-8000-000000000082} = {FA1234BC-0001-4000-8000-000000000081}
 		{FA1234BC-0001-4000-8000-000000000037} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{7A021F6B-F297-41EA-A028-C4F881146791} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{FA1234BC-0001-4000-8000-000000000025} = {FA1234BC-0001-4000-8000-000000000021}

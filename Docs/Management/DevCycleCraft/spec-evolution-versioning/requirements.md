@@ -97,6 +97,7 @@
 
   A grep for `BACKLOG.md` across `.claude/` at implementation time is mandatory — any hit not in this table is added to it before the amend commit lands.
 - **REQ-SEV-31** BACKLOG.md gains a generated-file banner naming the regeneration command; the defensive "agents: do NOT re-fatten this file" rule is replaced by mechanical validation (REQ-SEV-09).
+- **REQ-SEV-32** An archived row whose `pointer` targets a file **outside** the `Docs/Management` item tree (e.g. `.claude/rules/*.md`, `Docs/Changelog/changelog.md`) gets NO folder during migration — the archive row keeps its plain-text pointer unchanged, the same precedent as a Minor bug (REQ-SEV-03). *(Spec updated 2026-07-24, T12a Wave C: written ahead of the rows that need it — the 3 affected rows ship folder-less in later waves per `T12a-remaining-waves-plan.md` Blocker #1.)*
 
 ---
 
