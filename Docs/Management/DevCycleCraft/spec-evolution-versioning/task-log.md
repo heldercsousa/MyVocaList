@@ -2646,3 +2646,43 @@ Note: the briefing expected one additional pre-existing banned-content error on 
 ### Build notes
 No .NET build touched (Python-only change + doc registration). Tests: 144 passed, 0 failed. Commits: `fix(backlog-gen)` for Part 1, `docs(spec-evolution)` for Part 2 (SHAs in the push log). Pushed to `origin/feature/backlog-migration`.
 Files written and re-read: `model.py`, `backlog_gen.py`, `tests/test_backlog_gen.py`, `MyVocaList.sln` — all re-verified after write (BOM/CRLF binary check + string-presence check above).
+
+
+---
+## Task: T12a Wave C -- 2026-05 pt1 (5 planned folders) + blocker #4 re-triage (6th folder)
+**Plan:** Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md (Wave C section)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-05-01-gotosettings-navigation-fix/README.md` (new folder)
+- `Docs/Management/DevCycleCraft/sdd/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/workflow-compression/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/docs-context-scope-control/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/session-continuity-leasing/changes/2026-06-27-stop-hook-scanner-removal/README.md` (new folder -- blocker #4 re-triage, 6th item this wave)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md` -- added REQ-SEV-32 (blocker #1, written ahead of its Wave E/J rows per the briefing)
+- `MyVocaList.sln` -- GUIDs `007F`-`0082` (see below)
+
+### Blocker #4 re-triage decision
+Opened `DevCycleCraft/session-continuity-leasing/README.md`: it describes the overall feature only, not the specific 2026-06-27 "To Review tasks rewakes every session" Stop-hook-noise fix. Decision: **needs its own folder** -- created `changes/2026-06-27-stop-hook-scanner-removal/README.md`, `pointer:` kept on the shared `task-log.md` (REQ-SEV-27). This is the 6th folder for the wave, not counted in the plan's "5 folders" estimate.
+
+### New REQ-SEV-32 (blocker #1, written now per briefing)
+Added to `requirements.md` after REQ-SEV-31: an archived row whose `pointer` targets a file outside the `Docs/Management` item tree (`.claude/rules/*.md`, `Docs/Changelog/changelog.md`) gets **no folder** during migration -- same precedent as a Minor bug (REQ-SEV-03). Tagged `> **Spec updated 2026-07-24**`. The 3 affected rows (2 in 2026-05, 1 in 2026-06 "Visual Theme Refresh") still ship folder-less in their own waves (E/J) per the plan -- this task did not create folders for them.
+
+### .sln GUIDs consumed
+`007F` (new `changes` Solution Folder under `artists-songs`) and `0080` (`2026-05-01-gotosettings-navigation-fix` item, nested under `007F`) for row 2; `0081` (new `changes` Solution Folder under `session-continuity-leasing`) and `0082` (`2026-06-27-stop-hook-scanner-removal` item, nested under `0081`) for the re-triage row. **Only 2 of the plan's reserved `007F`-`0083` GUIDs were structurally needed for row 2** (the other 4 rows added a single `README.md` line to an already-registered project -- no new GUID required); flagging this discrepancy so Wave D's starting GUID can be corrected downward from `0084` if Helder wants the range tightened, or left as-is (both are safe -- no GUID was reused or skipped-and-later-reused).
+Note: existing `artists-songs\changes\*` items (`2026-07-10-form-ux-redesign`, `2026-07-21-inline-artist-create`) nest **directly** under the `artists-songs` project GUID rather than through an intermediate `changes` folder -- inconsistent with the `persons`-family pattern (`007D`/`007E`) and with the new `007F` folder created this wave. Pre-existing, not touched by this task -- flagged for Helder, not fixed unilaterally. Also noted in passing: `2026-07-21-inline-artist-create` (`{...055}`) has no `NestedProjects` entry at all (pre-existing gap, out of scope here).
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- Row 2 slug (`gotosettings-navigation-fix`) and title ("Bug: GoToSettings navigation exception") -- no `BUG-NNN` id existed for this unnumbered fix.
+- Re-triage row slug (`stop-hook-scanner-removal`) and title -- net-new, not in the plan.
+- All `order` values: 10/20/10/20/30/10 across the 6 rows.
+- New REQ-SEV id: `REQ-SEV-32`.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation: `python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning (BUG-022 parent/path-parent, pre-existing per REQ-SEV-21 amendment); BACKLOG.md reported stale as expected (regen not run in this task -- T12 territory). Tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -> 144 passed, 0 failed. `.sln` BOM + all-CRLF verified before and after edit via Python binary-mode read (never grep, per `rtk-rewrites-grep` memory). Commit SHA: `cc763e9b10784bfc768f018f640f0b0e71552550`. Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: all 7 new/modified files above -- re-read via the Edit/Write tool's post-call state and re-verified frontmatter shape against the Wave A/B `venues`/`persons` precedents before commit.
+
+**STOPPED after Wave C per the briefing -- Wave D not started.**
