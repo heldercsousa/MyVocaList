@@ -2,10 +2,21 @@
 
 **For:** the next (fresh) session. Read this first (Rule 7 session start). Supersedes the 2026-07-21 planning handoff.
 
-## Current state (as of 2026-07-23)
-- Worktree `C:\Users\helde\source\repos\MyVocaList-inline-ac`, branch `feat/inline-artist-create`, HEAD after the BUG-054…059 fix wave. **Committed, not pushed, not merged.** Unit suite **520/520 green**. Code review = **CONDITIONAL PASS, no blockers** (scope-extension `SongRepository.GetByIdAsync .Include(OriginalArtist)` judged SAFE).
-- Fix-wave commits on the branch: `f34cadc` (BUG-056+055), `cb78f3e` (BUG-054b/057/058 XAML), `fd83d90` (BUG-054a+059 note), `b696fd4` (checkpoint doc).
-- **Helder ran T10 on device twice.** Re-run #2 results below are authoritative.
+## Current state (as of 2026-07-23, refreshed)
+- Worktree `C:\Users\helde\source\repos\MyVocaList-inline-ac`, branch `feat/inline-artist-create`, **HEAD `efe65c6`**. **Committed, not pushed, not merged.** Unit suite **523/523 green**. Code review = **CONDITIONAL PASS, no blockers**.
+- **All of INLINE-AC's own code defects are FIXED and committed.** Fix batch 2 (`b0e45da`): BUG-060 (artist locks permanently → `ClearArtistCommand`+`ClearIconClicked`), BUG-057 (`ArtistErrorText` never set — 1-line), BUG-061 (lingering suggestion row → `SelectedItem=null` reset). Plus `efe65c6` = a manual compiler-warning fix in `StringExtensions.cs` (no behavior change, safe to merge — Helder confirmed 2026-07-23).
+- **BUG-059 CANCELLED** (Helder 2026-07-23, works-as-designed): catalog join table is deliberately picker-only; empty catalog after Song-form save is by design. Reframed as a NEW enhancement (auto-link artist-OWNED songs to author's catalog) — seed `BusinessFeatures/artists-songs/ENHANCEMENT-artist-owned-song-catalog-autolink.md`; register in BACKLOG when SPEC-EVO migration settles. **T10 item i is DROPPED.**
+
+> ## ⚠️ HELDER'S DUTIES — the ONLY gate left before closeout
+> No code work remains. Closeout is blocked solely on **your on-device T10 re-run #3** (Android built locally — local Android build is blocked by `XARLP7024` AV/EDR corruption, NOT code). Verify on device:
+> 1. **Change-artist / unlock (BUG-060 fix):** select an artist → tap clear (X) → field unlocks and lets you pick a *different* artist → blur on an intentionally-cleared field does NOT silently restore the old artist.
+> 2. **Inline error text visible (BUG-057 fix):** trigger the artist validation error → the message text is now *visible* (not just blank reserved space).
+> 3. **Lingering dropdown row (BUG-061 fix):** after tapping a suggestion, the selected row disappears from the dropdown immediately.
+> 4. Sanity re-check the already-green items: a (retain text), e (stale/first-empty), j (edit hydration), C1 (novel create), C2 (duplicate). **Skip item i (catalog) — dropped.**
+>
+> **On all-green → tell the next session "T10 re-run #3 passed"** and it runs the closeout below (merge → develop, push, remove worktree, unblock catalog).
+>
+> Two minor decisions carried, non-blocking: (a) AC-label typo — you OK'd folding a one-line comment fix into the merge commit; (b) the auto-link enhancement gets a BACKLOG row once SPEC-EVO settles.
 
 ## T10 re-run #2 (Helder, on device, 2026-07-23)
 | Item | Result | Disposition |
@@ -49,5 +60,5 @@
 
 ## Open decisions still with Helder (do not block the fresh session's investigation)
 1. **BUG-060 unlock behavior** — what exactly should tapping X (and re-editing) do? (proposed AC above)
-2. **AC-label typo** — the BUG-056 test is tagged `[AC] REQ-ACREATE-13` but proves direct-return, not the latest-wins race; correct the comment or leave.
+2. **AC-label typo (DEFERRED to closeout cleanup — Helder OK'd "best option" 2026-07-23):** the test `SearchArtistsCoreAsync_ReturnsCurrentQueryResultsDirectly` is tagged `[AC] REQ-ACREATE-13` but proves direct-return (BUG-056), not the latest-wins race (REQ-ACREATE-13 = BUG-051). Fold a one-line comment correction into the closeout/merge commit — not worth a subagent or an ITF edit on its own.
 3. **Docs commit** — the LEDGER + `pending-backlog-closeout.md` + `.sln` changes are currently UNCOMMITTED on develop (Helder rejected the earlier commit). This handoff + the pending file are also uncommitted until then.
