@@ -286,6 +286,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-form-validation-guide", 
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\README.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000B2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-30-form-validation-guide-shipped", "2026-06-30-form-validation-guide-shipped", "{FA1234BC-0001-4000-8000-0000000000B3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\ui-form-validation-guide\changes\2026-06-30-form-validation-guide-shipped\README.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\changes\2026-06-30-form-validation-guide-shipped\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration", "backlog-first-registration", "{FA1234BC-0001-4000-8000-000000000029}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\00-original-ask.md = Docs\Management\DevCycleCraft\backlog-first-registration\analysis-pipeline\00-original-ask.md
@@ -1429,6 +1436,8 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000AF} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000B0} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000B1} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000B2} = {FA1234BC-0001-4000-8000-000000000033}
+		{FA1234BC-0001-4000-8000-0000000000B3} = {FA1234BC-0001-4000-8000-0000000000B2}
 		{FA1234BC-0001-4000-8000-000000000039} = {FA1234BC-0001-4000-8000-000000000038}
 		{FA1234BC-0001-4000-8000-000000000040} = {FA1234BC-0001-4000-8000-000000000039}
 		{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE} = {E9A5FC59-0C8C-49B6-9845-7870FA3CD098}
