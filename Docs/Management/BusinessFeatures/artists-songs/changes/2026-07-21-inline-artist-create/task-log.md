@@ -587,3 +587,53 @@ seam) and BUG-064 fixed (removed redundant Label). Build 0 errors (net10.0; Andr
 blocked locally by the AV/EDR `XARLP7024` issue — unchanged from prior session, Helder builds
 Android). Tests 526/526 green. Both fixes committed on `feat/inline-artist-create` in worktree
 `MyVocaList-inline-ac`; manual on-device E2E for both is pending Helder's next T10 pass.
+
+---
+## BUG-061 re-fix completion — 2 missed paths closed (review finding)
+**Status:** To Review
+**Severity:** Major (same class as the original BUG-061 re-fix — code review found the guard incomplete)
+
+**Finding:** code review of commit `7c594e2` confirmed the `_suppressNextArtistSearch`/
+`ConsumeSuppressArtistSearch()` guard mechanism was correct but missed two more programmatic
+`ArtistSearchText` assignment paths that reproduce the same dropdown-reopen symptom:
+
+- **`ResolveAndLockArtistAsync`** (song-picker return flow, `OnSongPicked` → `ResolveAndLockArtistAsync`,
+  a real user path): both the exact-match auto-lock branch (`ArtistSearchText = match.Name`) and the
+  no-match prefill branch (`ArtistSearchText = artistName`) were unguarded.
+- **`OnArtistBlurredWithoutSelection`**: the restore-prior-selection branch
+  (`ArtistSearchText = SelectedArtistName ?? string.Empty`) was unguarded.
+
+**Fix:** same one-shot `_suppressNextArtistSearch = true;` pattern already established — set
+immediately before each of the three programmatic assignments above. No change to
+`ConsumeSuppressArtistSearch()` or `OnArtistItemsRequested` (the consumer side was already correct).
+
+**Regression risk:** Low — additive guard-set only; the assignments' existing behavior is unchanged.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — guard set before both `ResolveAndLockArtistAsync`
+  branches and before the `OnArtistBlurredWithoutSelection` restore assignment.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — `CreateSut` gained an optional
+  `messenger` parameter (defaults to a mock, unchanged for all existing tests); added `using
+  MyVocaList.Contracts.DTOs;` and a `CanonicalSongPickedMessage` alias (mirrors the ViewModel's own
+  alias — avoids ambiguity with `MyVocaList.UI.ViewModels.SongPickedMessage`); 3 new tests:
+  `ResolveAndLockArtistAsync_ExactMatch_SuppressesNextArtistSearch`,
+  `ResolveAndLockArtistAsync_NoMatch_SuppressesNextArtistSearch`,
+  `ArtistBlurredWithoutSelection_RestoresPriorSelection_SuppressesNextArtistSearch`. The first two
+  route through a real `WeakReferenceMessenger` instance (`OnSongPicked` is only reachable via
+  message, not a public command) sending a `CanonicalSongPickedMessage`, exercising the exact
+  `OnSongPicked` → `ResolveAndLockArtistAsync` path a real song-picker return uses.
+
+### AC traceability
+| AC ID | Criterion | Implementation | Test |
+|-------|-----------|-----------------|------|
+| BUG-061 | Song-picker exact-match auto-lock must not re-open the dropdown | `ResolveAndLockArtistAsync` match branch sets guard | `ResolveAndLockArtistAsync_ExactMatch_SuppressesNextArtistSearch` |
+| BUG-061 | Song-picker no-match prefill must not re-open the dropdown | `ResolveAndLockArtistAsync` no-match branch sets guard | `ResolveAndLockArtistAsync_NoMatch_SuppressesNextArtistSearch` |
+| BUG-061 | Blur-restore of prior selection must not re-open the dropdown | `OnArtistBlurredWithoutSelection` restore branch sets guard | `ArtistBlurredWithoutSelection_RestoresPriorSelection_SuppressesNextArtistSearch` |
+
+### Verification evidence
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0` → exit 0, 0 errors.
+- **Tests:** 529/529 green (526 baseline + 3 new).
+- **Manual E2E (on device, pending Helder):** import a song via the song-picker (exact-match and
+  no-match cases) → dropdown does not re-open on the auto-locked/pre-filled name; blur the artist
+  field after typing over a previously-selected artist without picking a new suggestion → dropdown
+  does not re-open on the restored name.
