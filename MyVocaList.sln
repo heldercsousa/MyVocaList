@@ -485,6 +485,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-05-01-gotosettings-nav
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-05-01-gotosettings-navigation-fix\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-05-01-gotosettings-navigation-fix\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-fuzzy-entity-matching-import", "2026-06-01-fuzzy-entity-matching-import", "{FA1234BC-0001-4000-8000-000000000091}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-01-fuzzy-entity-matching-import\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-01-fuzzy-entity-matching-import\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-20-spec-cleanup-p2", "2026-06-20-spec-cleanup-p2", "{FA1234BC-0001-4000-8000-000000000093}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-20-spec-cleanup-p2\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-20-spec-cleanup-p2\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\windows-version\design.md = Docs\Management\BusinessFeatures\windows-version\design.md
@@ -701,11 +711,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-003-songpage-filter-chips.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-003-songpage-filter-chips.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-004-bottomsheet-title-style-missing.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-004-bottomsheet-title-style-missing.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-009-add-url-before-save-ux", "2026-06-01-BUG-009-add-url-before-save-ux", "{FA1234BC-0001-4000-8000-00000000008F}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-009-add-url-before-save-ux\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-009-add-url-before-save-ux\BUG-009-add-url-before-save-ux.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-009-add-url-before-save-ux\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-009-add-url-before-save-ux\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-010-song-api-autofill-broken", "2026-06-01-BUG-010-song-api-autofill-broken", "{FA1234BC-0001-4000-8000-000000000090}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-010-song-api-autofill-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-010-song-api-autofill-broken\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-03-BUG-001-artists-page-no-back-button", "2026-06-03-BUG-001-artists-page-no-back-button", "{FA1234BC-0001-4000-8000-00000000008A}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-03-BUG-001-artists-page-no-back-button\BUG-001-artists-page-no-back-button.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-03-BUG-001-artists-page-no-back-button\BUG-001-artists-page-no-back-button.md
@@ -775,8 +795,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-028-artistsp
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000025}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-011-queuepage-bottomsheet-double-add", "2026-06-01-BUG-011-queuepage-bottomsheet-double-add", "{FA1234BC-0001-4000-8000-000000000092}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\queue-management\bugs\BUG-011-queuepage-bottomsheet-double-add.md = Docs\Management\BusinessFeatures\queue-management\bugs\BUG-011-queuepage-bottomsheet-double-add.md
+		Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\BUG-011-queuepage-bottomsheet-double-add.md = Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\BUG-011-queuepage-bottomsheet-double-add.md
+		Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\README.md = Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000024}"
@@ -1310,6 +1333,11 @@ Global
 		{FA1234BC-0001-4000-8000-00000000008C} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-00000000008D} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-00000000008E} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008F} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000090} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000091} = {FA1234BC-0001-4000-8000-00000000007F}
+		{FA1234BC-0001-4000-8000-000000000092} = {FA1234BC-0001-4000-8000-000000000025}
+		{FA1234BC-0001-4000-8000-000000000093} = {FA1234BC-0001-4000-8000-00000000007F}
 		{FA1234BC-0001-4000-8000-000000000085} = {FA1234BC-0001-4000-8000-000000000018}
 		{FA1234BC-0001-4000-8000-000000000086} = {FA1234BC-0001-4000-8000-000000000085}
 		{FA1234BC-0001-4000-8000-000000000087} = {FA1234BC-0001-4000-8000-000000000085}
