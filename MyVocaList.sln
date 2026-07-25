@@ -684,7 +684,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-007-searchappbar-duplicate-back-arrow.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-007-searchappbar-duplicate-back-arrow.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
@@ -694,6 +693,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-BUG-015-artistsp
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\BUG-015-artistspage-trailing-button-noop.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\BUG-015-artistspage-trailing-button-noop.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\README.md
 	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-BUG-016-songspage-fab-crash", "2026-06-27-BUG-016-songspage-fab-crash", "{FA1234BC-0001-4000-8000-000000000084}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\BUG-016-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\BUG-016-songspage-fab-crash.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\README.md
+	EndProjectSection
+EndProject
 EndProject
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-BUG-050-suggestion-not-locked", "2026-07-21-BUG-050-suggestion-not-locked", "{FA1234BC-0001-4000-8000-000000000073}"
@@ -1251,6 +1256,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000078} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000079} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000083} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000084} = {7A021F6B-F297-41EA-A028-C4F881146791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
