@@ -507,6 +507,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-044-duplicat
 		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-044-duplicate-personformpage-after-save\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-044-duplicate-personformpage-after-save\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-045-cursor-stuck-after-autocomplete", "2026-07-15-BUG-045-cursor-stuck-after-autocomplete", "{FA1234BC-0001-4000-8000-0000000000CF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-045-cursor-stuck-after-autocomplete\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-045-cursor-stuck-after-autocomplete\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-047-stale-suggestions-popup-edit-mode", "2026-07-15-BUG-047-stale-suggestions-popup-edit-mode", "{FA1234BC-0001-4000-8000-0000000000D0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-047-stale-suggestions-popup-edit-mode\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-047-stale-suggestions-popup-edit-mode\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\styles-structure\README.md = Docs\Management\DevCycleCraft\styles-structure\README.md
@@ -1523,6 +1533,8 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000CC} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000CD} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000CE} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000CF} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000D0} = {FA1234BC-0001-4000-8000-0000000000BC}
 		{FA1234BC-0001-4000-8000-000000000080} = {FA1234BC-0001-4000-8000-00000000007F}
 		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
