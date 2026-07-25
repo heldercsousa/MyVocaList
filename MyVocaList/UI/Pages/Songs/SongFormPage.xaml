@@ -78,13 +78,11 @@
                     </dxe:AutoCompleteEdit.ItemTemplate>
                 </dxe:AutoCompleteEdit>
 
-                <!-- BUG-057: dedicated visible error sink for the Artist field. The DX editor's own
-                     ErrorText did not surface on-device; this Label mirrors the PasteUrlError pattern
-                     used elsewhere on this page (Body.Small + Error color). -->
-                <Label Text="{Binding ArtistErrorText}"
-                       IsVisible="{Binding ArtistHasError}"
-                       StyleClass="Body.Small"
-                       TextColor="{StaticResource Error}" />
+                <!-- BUG-064: removed the separate error Label added for BUG-057 — the DX editor's
+                     own HasError/ErrorText (bound above, lines 33-34) now surfaces the message
+                     on-device, so the standalone Label duplicated the exact same text underneath it.
+                     ArtistErrorText/ArtistHasError stay in the ViewModel; the control's bindings are
+                     the sole remaining consumer. -->
 
                 <dxe:TextEdit x:Name="titleEdit"
                               Text="{Binding SongTitle, Mode=TwoWay}"
