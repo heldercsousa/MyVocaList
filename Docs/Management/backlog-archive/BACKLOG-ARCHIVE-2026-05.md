@@ -19,6 +19,8 @@
 | 2026-05 | **SDD Master Plan (Phases 1-11, 162 steps)** | ✅ Done | Goal: adopt Spec-Driven Development across the project. Completed. Pointer: `DevCycleCraft/sdd/`. |
 | 2026-05 | **workflow.md Reduction** | ✅ Done | Goal: compress workflow rules into agent role files. Completed (61 findings resolved). Pointer: `DevCycleCraft/workflow-compression/`. |
 | 2026-05 | **CLAUDE.md Deep Restructure** | ✅ Done | Goal: move coding rules to `.claude/library/` and gate Docs/ context scope. Completed. Pointer: `DevCycleCraft/docs-context-scope-control/`. |
+| 2026-05 | **VS Solution File Registration Rule** | ✅ Done | Goal: establish that any doc file visible in Visual Studio must be registered in the solution file before commit. Pointer: `.claude/rules/constraints-registry.md`. |
+| 2026-05 | **Proactive BACKLOG Entry Rule** | ✅ Done | Goal: require agents to add brief BACKLOG entries for untracked work discovered during a session. Pointer: `.claude/rules/workflow.md`. |
 | 2026-05 | Architecture Tests Evaluation | ✅ Done | Goal: decide on NetArchTest/ArchUnitNET adoption. Evaluated — no changes produced. Pointer: `DevCycleCraft/architecture-tests-evaluation/`. |
 | 2026-05 | Claude Managed Agents Evaluation | ✅ Done | Goal: evaluate Anthropic hosted agents for the dev cycle. Discarded — duplicates existing workflow. Pointer: `DevCycleCraft/claude-managed-agents-evaluation/`. |
 | 2026-05 | Day-to-day task management workflow review | ✅ Done | Goal: make the backlog file the first-class SCRUM board. Completed (workflow rules updated). Pointer: `DevCycleCraft/backlog-workflow-integration/`. |
