@@ -234,6 +234,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-list-deduplication", "
 		Docs\Management\DevCycleCraft\crud-list-deduplication\plan.md = Docs\Management\DevCycleCraft\crud-list-deduplication\plan.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\task-log.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-04-steps-1-7e-migration", "2026-06-04-steps-1-7e-migration", "{FA1234BC-0001-4000-8000-0000000000AD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-06-04-steps-1-7e-migration\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-06-04-steps-1-7e-migration\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-folder-layout-alignment", "workflow-folder-layout-alignment", "{A1B2C3D4-0001-4000-8000-000000000004}"
@@ -741,13 +749,23 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg = Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-003-songpage-filter-chips.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-003-songpage-filter-chips.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-004-bottomsheet-title-style-missing.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-004-bottomsheet-title-style-missing.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-14-BUG-003-songpage-filter-chips", "2026-06-14-BUG-003-songpage-filter-chips", "{FA1234BC-0001-4000-8000-0000000000AA}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-003-songpage-filter-chips\BUG-003-songpage-filter-chips.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-003-songpage-filter-chips\BUG-003-songpage-filter-chips.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-003-songpage-filter-chips\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-003-songpage-filter-chips\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-14-BUG-004-bottomsheet-title-style-missing", "2026-06-14-BUG-004-bottomsheet-title-style-missing", "{FA1234BC-0001-4000-8000-0000000000AB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-004-bottomsheet-title-style-missing\BUG-004-bottomsheet-title-style-missing.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-004-bottomsheet-title-style-missing\BUG-004-bottomsheet-title-style-missing.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-004-bottomsheet-title-style-missing\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-004-bottomsheet-title-style-missing\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-009-add-url-before-save-ux", "2026-06-01-BUG-009-add-url-before-save-ux", "{FA1234BC-0001-4000-8000-00000000008F}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-009-add-url-before-save-ux\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-009-add-url-before-save-ux\BUG-009-add-url-before-save-ux.md
@@ -1063,6 +1081,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "component-change-governance
 		Docs\Management\cross-cutting\component-change-governance\README.md = Docs\Management\cross-cutting\component-change-governance\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "md3-devexpress-compliance-gap", "md3-devexpress-compliance-gap", "{FA1234BC-0001-4000-8000-0000000000A9}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\md3-devexpress-compliance-gap\README.md = Docs\Management\cross-cutting\md3-devexpress-compliance-gap\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-pattern-standardization", "search-pattern-standardization", "{FA1234BC-0001-4000-8000-000000000061}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\search-pattern-standardization\README.md = Docs\Management\cross-cutting\search-pattern-standardization\README.md
@@ -1376,6 +1399,11 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000A6} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A7} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A8} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A9} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000AA} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000AB} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000AC} = {FA1234BC-0001-4000-8000-000000000019}
+		{FA1234BC-0001-4000-8000-0000000000AD} = {FA1234BC-0001-4000-8000-0000000000AC}
 		{FA1234BC-0001-4000-8000-000000000039} = {FA1234BC-0001-4000-8000-000000000038}
 		{FA1234BC-0001-4000-8000-000000000040} = {FA1234BC-0001-4000-8000-000000000039}
 		{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE} = {E9A5FC59-0C8C-49B6-9845-7870FA3CD098}
