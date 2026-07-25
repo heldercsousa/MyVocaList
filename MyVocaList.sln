@@ -390,6 +390,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hamburger-nav-pattern", "ha
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\plan.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\plan.md
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\requirements.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\requirements.md
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\tasks.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\tasks.md
+		Docs\Management\DevCycleCraft\hamburger-nav-pattern\README.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-form-action-pattern", "crud-form-action-pattern", "{FA1234BC-0001-4000-8000-000000000048}"
@@ -398,6 +399,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-form-action-pattern", 
 		Docs\Management\DevCycleCraft\crud-form-action-pattern\plan.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\plan.md
 		Docs\Management\DevCycleCraft\crud-form-action-pattern\requirements.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\requirements.md
 		Docs\Management\DevCycleCraft\crud-form-action-pattern\task-log.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\task-log.md
+		Docs\Management\DevCycleCraft\crud-form-action-pattern\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}"
@@ -417,6 +419,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0
 		Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md = Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md
 		Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg = Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg
 		Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\README.md = Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-036-personformpage-birthday-mask", "2026-07-03-BUG-036-personformpage-birthday-mask", "{FA1234BC-0001-4000-8000-0000000000B6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\bugs\2026-07-03-BUG-036-personformpage-birthday-mask\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-07-03-BUG-036-personformpage-birthday-mask\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-00000000007D}"
@@ -757,11 +764,21 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg = Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-008-songform-artist-autocomplete", "2026-06-01-BUG-008-songform-artist-autocomplete", "{FA1234BC-0001-4000-8000-0000000000B5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-008-songform-artist-autocomplete\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-008-songform-artist-autocomplete\BUG-008-songform-artist-autocomplete.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-008-songform-artist-autocomplete\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-008-songform-artist-autocomplete\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-01-BUG-020-songspage-fab-crash-secure-storage", "2026-07-01-BUG-020-songspage-fab-crash-secure-storage", "{FA1234BC-0001-4000-8000-0000000000B4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-020-songspage-fab-crash-secure-storage\BUG-020-songspage-fab-crash-secure-storage.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-020-songspage-fab-crash-secure-storage\BUG-020-songspage-fab-crash-secure-storage.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-020-songspage-fab-crash-secure-storage\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-020-songspage-fab-crash-secure-storage\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-14-BUG-003-songpage-filter-chips", "2026-06-14-BUG-003-songpage-filter-chips", "{FA1234BC-0001-4000-8000-0000000000AA}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-003-songpage-filter-chips\BUG-003-songpage-filter-chips.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-003-songpage-filter-chips\BUG-003-songpage-filter-chips.md
@@ -1369,6 +1386,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000048} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000034} = {D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}
+		{FA1234BC-0001-4000-8000-0000000000B6} = {FA1234BC-0001-4000-8000-000000000034}
 		{FA1234BC-0001-4000-8000-00000000007D} = {D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}
 		{FA1234BC-0001-4000-8000-00000000007E} = {FA1234BC-0001-4000-8000-00000000007D}
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
@@ -1430,6 +1448,8 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000A9} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000AA} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-0000000000AB} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000B4} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000B5} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-0000000000AC} = {FA1234BC-0001-4000-8000-000000000019}
 		{FA1234BC-0001-4000-8000-0000000000AD} = {FA1234BC-0001-4000-8000-0000000000AC}
 		{FA1234BC-0001-4000-8000-0000000000AE} = {FA1234BC-0001-4000-8000-000000000057}
