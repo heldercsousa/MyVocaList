@@ -2785,3 +2785,173 @@ Files written and re-read: all 3 changed files above -- re-read via the Edit/Wri
 state and via Python binary-mode read for `MyVocaList.sln`.
 
 **STOPPED after Wave E per the briefing -- Wave F not started.**
+
+---
+## Task: T12a Wave F -- Search Picker family (5 folders)
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` (`### Wave F`)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/search-picker/README.md` (new, dropped into the existing folder)
+- `Docs/Management/BusinessFeatures/search-picker/changes/2026-06-01-artist-picker-page/README.md` (new folder)
+- `Docs/Management/BusinessFeatures/search-picker/changes/2026-06-01-song-picker-page/README.md` (new folder)
+- `Docs/Management/BusinessFeatures/search-picker/changes/2026-06-01-youtube-search-page/README.md` (new folder)
+- `Docs/Management/BusinessFeatures/search-picker/changes/2026-06-01-coding-guidelines-update/README.md` (new folder)
+- `MyVocaList.sln`
+
+### GUIDs consumed
+`0085` (new `changes` Solution Folder under existing `search-picker` `0018`), `0086`-`0089` (4
+dated sub-item folders nested under `0085`). Next free after Wave F: `008A`. High-water mark
+audited directly from the `.sln` regex scan before editing (max found: `0084`) -- **not** trusted
+from the plan's own GUID estimates, per the briefing's instruction.
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- Row 1 (`search-picker` parent) uses the plan's exact slug/title/order; no authoring needed
+  (existing folder, frontmatter only).
+- Rows 2-5: slug + title + `order` (20/30/40/50) are agent-authored per the plan's F-1b framing
+  ("sub-rows of one `task-log.md`"). `pointer:` stays on the shared `BusinessFeatures/search-picker/task-log.md`
+  (REQ-SEV-27, nothing deleted).
+
+### Reworded goal (flagged)
+Row 5's (`coding-guidelines-update`) archived Notes cell reads
+"`.claude/library/search-picker-pattern.md` created." -- the validator's banned-content check
+rejects file paths beyond the `pointer:` field. Reworded to "New search-picker coding guidelines
+file created." in both the frontmatter `goal:` and the body prose, preserving the meaning (same
+policy as the one Wave D rework).
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing); BACKLOG.md/archive files reported stale as expected
+(regen not run -- T12 territory). Tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"`
+-> 144 passed, 0 failed. `.sln` BOM (`EF BB BF`) + all-CRLF verified before and after edit via
+Python binary-mode read. Commit SHA: `f449f37` (`docs(spec-evolution): T12a Wave F -- Search
+Picker family (5 folders)`). Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: all 6 changed files above -- confirmed via Write/Edit tool state and a
+Python binary-mode BOM/CRLF check on `MyVocaList.sln`.
+
+---
+## Task: T12a Wave G -- artists-songs bug backlog pt1 (BUG-001/002/005/006/007)
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` (`### Wave G`)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-03-BUG-001-artists-page-no-back-button/README.md` (new, `BUG-001-artists-page-no-back-button.md` `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-002-artist-form-search-non-md3/README.md` (new, flat file `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-005-new-song-save-broken/README.md` (new, flat file `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-006-search-song-double-tap-crash/README.md` (new, flat file `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-007-searchappbar-duplicate-back-arrow/README.md` (new, flat file `git mv`'d alongside it)
+- `MyVocaList.sln`
+
+### GUIDs consumed
+`008A` (BUG-001), `008B` (BUG-002), `008C` (BUG-005), `008D` (BUG-006), `008E` (BUG-007) -- all
+nested under the existing `artists-songs` `bugs` Solution Folder (`7A021F6B-F297-41EA-A028-C4F881146791`).
+Next free after Wave G: `008F`.
+
+### git mv vs net-new
+All 5 rows had a pre-existing flat file (confirmed present before the wave) -- all 5 are `git mv`,
+no net-new folders in this wave.
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- `order` values (10/20/60/70/80) are exactly as specified by the plan -- no authoring needed.
+- Day-01 dates authored for rows 2-5 (`Target` cell was bare `2026-06`), per REQ-SEV-00; row 1 kept
+  its own `2026-06-03` (`Target` cell already carried a day).
+
+### Dropped severity field (flagged)
+Three of the five moved flat files stated a pre-BUG-tracking-scheme severity in prose
+(BUG-001 "High", BUG-002 "Medium", BUG-006 "High") that is not one of the validator's three
+allowed enum values (Critical/Major/Minor). The `severity:` frontmatter key was omitted rather than
+mapped/invented for these three; the original severity text remains intact in the body of the
+moved flat file (unchanged, not deleted). BUG-005 and BUG-007's source files stated no severity at
+all, so no field was ever added for them.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing) after the severity-field fix (first pass failed with 3
+`invalid severity` errors, all resolved by dropping the field per above); BACKLOG.md/archive files
+reported stale as expected (regen not run -- T12 territory). Tests:
+`python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -> 144 passed, 0
+failed. `.sln` BOM + all-CRLF verified before and after edit via Python binary-mode read. Commit
+SHA: `885962d` (`docs(spec-evolution): T12a Wave G -- artists-songs bug backlog pt1
+(BUG-001/002/005/006/007)`). Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: all 5 README files + `MyVocaList.sln` above -- confirmed via Write/Edit
+tool state and a Python binary-mode BOM/CRLF check on `MyVocaList.sln`.
+
+---
+## Task: T12a Wave H -- artists-songs bug backlog pt2 + BUG-010 pair
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` (`### Wave H`)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-009-add-url-before-save-ux/README.md` (new, flat file `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-010-song-api-autofill-broken/README.md` (new folder, no flat file existed)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-06-01-fuzzy-entity-matching-import/README.md` (new folder)
+- `Docs/Management/BusinessFeatures/queue-management/bugs/2026-06-01-BUG-011-queuepage-bottomsheet-double-add/README.md` (new, flat file `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-06-20-spec-cleanup-p2/README.md` (new folder, no flat file existed)
+- `MyVocaList.sln`
+
+### GUIDs consumed
+`008F` (BUG-009, nested under `artists-songs` `bugs`), `0090` (BUG-010, nested under `artists-songs`
+`bugs`), `0091` (fuzzy-entity-matching-import, nested under `artists-songs` `changes` `007F`),
+`0092` (BUG-011, nested under `queue-management` `bugs` `0025`), `0093` (spec-cleanup-p2, nested
+under `artists-songs` `changes` `007F`). Next free after Wave H: `0094`.
+
+### git mv vs net-new
+- BUG-009: pre-existing flat file `git mv`'d.
+- **BUG-010: verified via `find`/`git ls-files` before authoring -- no flat file exists** (per the
+  plan's explicit note); folder created net-new.
+- fuzzy-entity-matching-import: no flat file (F-1b follow-up sub-row, never had one); net-new.
+- BUG-011: pre-existing flat file `git mv`'d.
+- spec-cleanup-p2: the archive row's own pointer text
+  (`BusinessFeatures/artists-songs/spec-cleanup-p2.md`) does not exist as a file (verified);
+  net-new folder, `pointer:` redirected to the shared `task-log.md` (REQ-SEV-27).
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- `order` values (90/100/110/10/120) are exactly as specified by the plan -- no authoring needed.
+- Day-01 dates authored for BUG-009, BUG-010, fuzzy-entity-matching-import, BUG-011 (bare `2026-06`
+  `Target` cells), per REQ-SEV-00; spec-cleanup-p2 kept its own `2026-06-20`.
+- fuzzy-entity-matching-import's folder shape/slug are agent-authored (F-1b follow-up sub-row, not
+  itself numbered), per the plan.
+- Removing the two flat-file `.sln` `SolutionItems` lines for BUG-009 and BUG-011 (superseded by
+  their dated-folder equivalents) left the `queue-management` `bugs` Solution Folder's
+  `ProjectSection` empty -- the now-empty `ProjectSection(SolutionItems)...EndProjectSection` block
+  was removed entirely (the Solution Folder itself is kept as a container, matching the existing
+  `search-picker/changes` pattern of a `Project`/`EndProject` pair with no `ProjectSection`).
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing); BACKLOG.md/archive files reported stale as expected
+(regen not run -- T12 territory). Tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"`
+-> 144 passed, 0 failed. `.sln` BOM + all-CRLF verified before and after edit via Python
+binary-mode read. Commit SHA: `72698c1` (`docs(spec-evolution): T12a Wave H -- artists-songs bug
+backlog pt2 + BUG-010 pair`). Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: all 5 README files + `MyVocaList.sln` above -- confirmed via Write/Edit
+tool state and a Python binary-mode BOM/CRLF check on `MyVocaList.sln`.
+
+### Checkpoint
+Branch: `feature/backlog-migration`, worktree `mvl-backlog-migration`. Waves F, G, H all committed
++ pushed (`f449f37`, `885962d`, `72698c1`). **STOPPED after Wave H per the briefing -- Wave I not
+started.** Next-free `.sln` GUID for a future Wave I: `0094` (audit directly from the `.sln`
+before trusting the plan's own estimate, per standing instruction).
+
+**Context manifest for resuming (Wave I onward):**
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` -- read
+  `### Wave I` onward for the next rows to migrate.
+- This `task-log.md`'s Wave F/G/H entries (above) -- the authoritative pattern to replicate
+  (frontmatter shape, GUID-audit method, severity-field/banned-content pitfalls already found).
+- `MyVocaList.sln` -- read directly (binary mode) to re-audit the GUID high-water mark; do not
+  trust any prior wave's stated "next free" number without re-scanning.
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-06.md` -- source of verbatim Goal text for
+  remaining 2026-06 rows.
+- A committed Wave F/G/H README (e.g. `Docs/Management/BusinessFeatures/search-picker/README.md`)
+  as the frontmatter/body template.
+
+**STOPPED after Wave H per the briefing -- Wave I not started.**
