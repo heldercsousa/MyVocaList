@@ -440,6 +440,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-04-01-autocomplete-fie
 		Docs\Management\BusinessFeatures\persons\changes\2026-04-01-autocomplete-field\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-04-01-autocomplete-field\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-30-form-validation-update", "2026-06-30-form-validation-update", "{FA1234BC-0001-4000-8000-0000000000C1}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\changes\2026-06-30-form-validation-update\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-06-30-form-validation-update\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\styles-structure\README.md = Docs\Management\DevCycleCraft\styles-structure\README.md
@@ -898,6 +903,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-03-01-venues-md3-rebui
 		Docs\Management\BusinessFeatures\venues\changes\2026-03-01-venues-md3-rebuild\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-03-01-venues-md3-rebuild\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-30-form-validation-update", "2026-06-30-form-validation-update", "{FA1234BC-0001-4000-8000-0000000000C0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\changes\2026-06-30-form-validation-update\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-06-30-form-validation-update\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "visual-theme-refresh", "visual-theme-refresh", "{15BB70C4-1D36-417D-9F28-E5D6978FAF2C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stitch-output", "stitch-output", "{DAA6CE0B-7CD5-49ED-8C46-D202070039F3}"
@@ -1056,6 +1066,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-040-mobile-input-loses-focus", "2026-07-12-BUG-040-mobile-input-loses-focus", "{FA1234BC-0001-4000-8000-0000000000BD}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-041-search-view-duplicate-on-back", "2026-07-12-BUG-041-search-view-duplicate-on-back", "{FA1234BC-0001-4000-8000-0000000000BE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-041-search-view-duplicate-on-back\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-041-search-view-duplicate-on-back\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-042-back-tap-repeat-cycle", "2026-07-12-BUG-042-back-tap-repeat-cycle", "{FA1234BC-0001-4000-8000-0000000000BF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-042-back-tap-repeat-cycle\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-042-back-tap-repeat-cycle\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000057}"
@@ -1503,6 +1523,10 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000BB} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
 		{FA1234BC-0001-4000-8000-0000000000BC} = {FA1234BC-0001-4000-8000-000000000046}
 		{FA1234BC-0001-4000-8000-0000000000BD} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000BE} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000BF} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000C0} = {FA1234BC-0001-4000-8000-00000000007B}
+		{FA1234BC-0001-4000-8000-0000000000C1} = {FA1234BC-0001-4000-8000-00000000007D}
 		{FA1234BC-0001-4000-8000-0000000000B7} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000B8} = {FA1234BC-0001-4000-8000-000000000048}
 		{FA1234BC-0001-4000-8000-0000000000B9} = {FA1234BC-0001-4000-8000-0000000000B8}
