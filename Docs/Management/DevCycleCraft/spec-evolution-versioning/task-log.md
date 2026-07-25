@@ -3126,3 +3126,147 @@ trusting this number, per standing instruction).
   text for Wave O+ rows (2026-07 rows live in the 07 archive file, not the 06 one used this wave).
 - A committed Wave L/M/N README (e.g.
   `Docs/Management/cross-cutting/db-side-collation/README.md`) as the frontmatter/body template.
+
+---
+
+## Waves O, P, Q — 2026-07 rows (Batch 5, first tranche)
+
+Branch: `feature/backlog-migration`, worktree `mvl-backlog-migration`. All three waves
+committed and pushed separately, in order, per the briefing.
+
+### Wave O — 2026-07 Business bugs, part 1
+
+**Status:** To Review
+**Commit:** `e7400fe`
+
+**Changed files:**
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-01-BUG-020-songspage-fab-crash-secure-storage/` (git mv + `README.md`)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-008-songform-artist-autocomplete/` (git mv + `README.md`)
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-07-03-BUG-036-personformpage-birthday-mask/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/crud-form-action-pattern/README.md` (new file in pre-existing folder)
+- `Docs/Management/DevCycleCraft/hamburger-nav-pattern/README.md` (new file in pre-existing folder)
+- `MyVocaList.sln` (GUIDs `00B4`-`00B6`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (regen-rewritten, migrated rows dropped)
+- `Docs/Management/BACKLOG.md` (regen)
+
+**BUG-008 routing (Blocker #3):** archived in the 2026-07 file's Notes text but its own
+`closed:` date is 2026-06 (original 2026-06-11 filing, superseded 2026-07-10). Per Helder's
+ruling, routed by `closed:` month (REQ-SEV-18) — folder sits at the 2026-06 fence
+(`2026-06-01-BUG-008-...`), `closed: 2026-06`, status `🔵 Superseded`. Flagged in the
+README's spec-updated note. Source severity text ("Medium") was pre-scheme prose, not a
+scheme value — dropped from frontmatter, preserved verbatim in the moved file body.
+
+**crud-form-action-pattern (Blocker #2, half):** Wave O row 3 (Business-table:
+"Song form → stays full-screen page + AppBar-save pattern") is filed as the folder's
+**primary** `README.md`, id `crud-form-action-pattern`, filed top-level with **no `parent`**
+(the folder is not physically nested under `artists-songs`; `section: BusinessFeatures` is
+set explicitly). The Craft-table collision row is deferred to Wave P (below).
+
+**GUIDs:** `00B4` = artists-songs/bugs BUG-020 folder · `00B5` = artists-songs/bugs BUG-008
+folder · `00B6` = persons/bugs BUG-036 folder (new; `crud-form-action-pattern` and
+`hamburger-nav-pattern` folders pre-existed, only their `README.md` SolutionItems lines
+were added — no new GUIDs).
+
+**Validation:** `regen --check` → 0 errors, only the known pre-existing BUG-022
+parent-disagreement warning.
+
+### Wave P — autocomplete-component F-1b bug cluster
+
+**Status:** To Review
+**Commit:** `c0cee01`
+
+**Changed files:**
+- `Docs/Management/cross-cutting/branch-lock-avoidance/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/crud-form-action-pattern/changes/2026-07-10-md3-save-cancel-placement/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-07-11-component-evaluation/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-07-11-apply-to-simplest-candidate/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-040-mobile-input-loses-focus/README.md` (net-new; first item in a fresh **lowercase** `bugs/` folder)
+- `MyVocaList.sln` (GUIDs `00B7`-`00BD`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (regen)
+
+**crud-form-action-pattern (Blocker #2, resolved):** Wave P row 2 ("CRUD Form Action
+Pattern — MD3 Save/Cancel placement", Craft-table) is filed as a `changes/` sub-item under
+the **same folder** as the Wave-O Business README — Venues precedent (two distinct items,
+distinct id + order, one folder). Id `md3-save-cancel-placement`, `section: DevCycleCraft`,
+`parent: crud-form-action-pattern`, order `10`. Neither README overwrites or merges with
+the other; both flagged in this entry and in each file's own migration note.
+
+**Ships 5 real folders** (row 2 no longer held — ruling applied, not deferred further).
+
+**bugs/ vs Bugs/ flag:** `autocomplete-component` already had a pre-existing capitalized
+`Bugs/` solution folder (holding `bug-043`, pre-REQ-SEV-01 scheme). BUG-040 is filed under a
+**new, separate, lowercase** `bugs/` folder (GUID `00BC`) matching every other feature's
+convention — the two folders coexist; the capitalized one was not touched or renamed
+(out of this task's scope). Flagged for audit.
+
+**GUIDs:** `00B7` = cross-cutting/branch-lock-avoidance · `00B8` = new `changes/` subfolder
+under `crud-form-action-pattern` · `00B9` = the `md3-save-cancel-placement` slug ·
+`00BA`/`00BB` = component-evaluation / apply-to-simplest-candidate (under the pre-existing
+`autocomplete-component/changes` GUID) · `00BC` = new lowercase `bugs/` subfolder under
+`autocomplete-component` · `00BD` = the BUG-040 slug (under `00BC`).
+
+**Validation:** `regen --check` → 0 errors (one banned-content fix needed first — the
+`branch-lock-avoidance` goal originally named `LEDGER.md`, tripped the file-path-beyond-pointer
+rule; reworded to "a develop-branch task ledger"). Test suite 144/144.
+
+### Wave Q — autocomplete-component bug cluster cont'd + form-validation start
+
+**Status:** To Review
+**Commit:** `941bd15`
+
+**Changed files:**
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-041-search-view-duplicate-on-back/README.md` (net-new, under `00BC`)
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-042-back-tap-repeat-cycle/README.md` (net-new, under `00BC`)
+- `Docs/Management/BusinessFeatures/venues/changes/2026-06-30-form-validation-update/README.md` (net-new)
+- `Docs/Management/BusinessFeatures/persons/changes/2026-06-30-form-validation-update/README.md` (net-new)
+- `MyVocaList.sln` (GUIDs `00BE`-`00C1`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (regen)
+
+**Id collision (venues/persons form-validation-update):** both archived rows literally use
+the id `form-validation-update` ("02 - Update Venues form (validation)" and "03 - Update
+Singer form (validation)"). Following the Wave-R precedent already visible in the plan
+(`form-validation-update-songs` for the Songs form), disambiguated as
+`form-validation-update-venues` and `form-validation-update-persons` to keep ids globally
+unique (`model.py`'s duplicate-id check is global, not scoped per parent). Flagged for
+audit — the plan's literal id column should be read as "same base name, needs a
+feature-suffix" going forward for the remaining form-validation rows in Wave R.
+
+**BUG-022** (2026-07-01, "SingerForm birthday field mask missing") already done at T10a —
+excluded, matches the plan.
+
+**Reworded goal text (banned-content fixes, both caught by `regen --check` before commit):**
+- `branch-lock-avoidance` (Wave P): `LEDGER.md` → "a develop-branch task ledger" (file-path pattern).
+- `persons` form-validation-update: `2026-07-01/03` → "2026-07-01 through 2026-07-03" (test-count `N/M` pattern; the source en-dash range "BUG-035–038" itself did not trip the pattern and needed no change, transcribed with a plain hyphen for consistency).
+
+**GUIDs:** `00BE`/`00BF` = BUG-041/BUG-042 slugs (under `00BC`) · `00C0` = venues
+form-validation-update slug (under the pre-existing venues `changes` GUID `007B`) ·
+`00C1` = persons form-validation-update slug (under the pre-existing persons `changes`
+GUID `007D`).
+
+**Validation:** `regen --check` → 0 errors, only the known pre-existing BUG-022
+parent-disagreement warning. Test suite 144/144 (re-run after Wave Q's edits).
+
+### Checkpoint — Waves O/P/Q complete, STOPPED per briefing
+
+Branch: `feature/backlog-migration`, worktree `mvl-backlog-migration`. Waves O, P, Q all
+committed and pushed (`e7400fe`, `c0cee01`, `941bd15`). **STOPPED after Wave Q — Wave R not
+started**, per the briefing's explicit instruction.
+
+**Next-free `.sln` GUID for a future Wave R: `00C2`** (audit directly from the `.sln` before
+trusting this number, per standing instruction).
+
+**Flagged audit set (full list, for Helder's review):**
+1. BUG-008 routed to the 2026-06 fence despite living in the 2026-07 archive text (REQ-SEV-18 exception, per ruling).
+2. `crud-form-action-pattern` primary README filed with no `parent` (top-level, `section: BusinessFeatures`) — not nested under `artists-songs` since the folder isn't physically there.
+3. `crud-form-action-pattern`/`md3-save-cancel-placement` Venues-precedent split — two ids, one folder, neither merged nor overwritten.
+4. `autocomplete-component` now has two `bugs`-named solution folders: the pre-existing capitalized `Bugs/` (bug-043, untouched) and a new lowercase `bugs/` (BUG-040/041/042, this batch's convention).
+5. `form-validation-update-venues` / `form-validation-update-persons` — id disambiguation of the plan's literal duplicate `form-validation-update` id, matching the Wave-R `-songs` precedent.
+6. Two goal-text rewordings to clear `model._BANNED` (LEDGER.md file-path; `07-01/03` test-count fraction) — meaning preserved in both cases.
+7. BUG-008's source "Medium" severity text dropped from frontmatter (pre-scheme, not a scheme value) — preserved verbatim in the moved flat-file body.
+
+**Context manifest for resuming (Wave R onward):**
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` — read `### Wave R` onward.
+- This task-log's Wave O/P/Q entries (above) — pattern to replicate, including the id-disambiguation and dual-bugs-folder flags.
+- `MyVocaList.sln` — read directly to re-audit the GUID high-water mark before trusting `00C2`.
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` — source text for Wave R+ rows.
+- A committed Wave Q README (e.g. `Docs/Management/BusinessFeatures/venues/changes/2026-06-30-form-validation-update/README.md`) as the frontmatter/body template for `changes/` sub-items with a shared pointer.
