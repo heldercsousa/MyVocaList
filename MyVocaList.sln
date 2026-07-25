@@ -195,11 +195,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "architecture-tests-evaluation", "architecture-tests-evaluation", "{A1B2C3D4-0001-4000-8000-000000000009}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\architecture-tests-evaluation\plan.md = Docs\Management\DevCycleCraft\architecture-tests-evaluation\plan.md
+		Docs\Management\DevCycleCraft\architecture-tests-evaluation\README.md = Docs\Management\DevCycleCraft\architecture-tests-evaluation\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "claude-managed-agents-evaluation", "claude-managed-agents-evaluation", "{A1B2C3D4-0001-4000-8000-00000000000A}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\plan.md = Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\plan.md
+		Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\README.md = Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution-structure-refactor", "solution-structure-refactor", "{D1C7C335-1E7C-4804-9A55-A5D160232353}"
@@ -250,12 +252,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-workflow-integration", "backlog-workflow-integration", "{A1B2C3D4-0001-4000-8000-000000000006}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\backlog-workflow-integration\plan.md = Docs\Management\DevCycleCraft\backlog-workflow-integration\plan.md
+		Docs\Management\DevCycleCraft\backlog-workflow-integration\README.md = Docs\Management\DevCycleCraft\backlog-workflow-integration\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versioning", "{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\app-versioning\design.md = Docs\Management\DevCycleCraft\app-versioning\design.md
 		Docs\Management\DevCycleCraft\app-versioning\plan.md = Docs\Management\DevCycleCraft\app-versioning\plan.md
+		Docs\Management\DevCycleCraft\app-versioning\README.md = Docs\Management\DevCycleCraft\app-versioning\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-015-016-fixes", "bug-015-016-fixes", "{FA1234BC-0001-4000-8000-000000000030}"
@@ -680,12 +684,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-007-searchappbar-duplicate-back-arrow.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-007-searchappbar-duplicate-back-arrow.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-015-artistspage-trailing-button-noop.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-015-artistspage-trailing-button-noop.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-BUG-015-artistspage-trailing-button-noop", "2026-06-27-BUG-015-artistspage-trailing-button-noop", "{FA1234BC-0001-4000-8000-000000000083}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\BUG-015-artistspage-trailing-button-noop.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\BUG-015-artistspage-trailing-button-noop.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\README.md
+	EndProjectSection
+EndProject
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-BUG-050-suggestion-not-locked", "2026-07-21-BUG-050-suggestion-not-locked", "{FA1234BC-0001-4000-8000-000000000073}"
 	ProjectSection(SolutionItems) = preProject
@@ -1241,6 +1250,7 @@ Global
 		{FA1234BC-0001-4000-8000-000000000077} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000078} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000079} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000083} = {7A021F6B-F297-41EA-A028-C4F881146791}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
