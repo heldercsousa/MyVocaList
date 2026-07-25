@@ -531,6 +531,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-re
 		Docs\Management\BusinessFeatures\backup-restore\README.md = Docs\Management\BusinessFeatures\backup-restore\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000A0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-shipped-tier1-3", "2026-06-shipped-tier1-3", "{FA1234BC-0001-4000-8000-0000000000A1}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\backup-restore\changes\2026-06-shipped-tier1-3\README.md = Docs\Management\BusinessFeatures\backup-restore\changes\2026-06-shipped-tier1-3\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-reporting", "{FA1234BC-0001-4000-8000-000000000012}"
 	ProjectSection(SolutionItems) = preProject
 		MyVocaList\appsettings.template.json = MyVocaList\appsettings.template.json
@@ -583,6 +590,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-settings", "app-setting
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\app-settings\design.md = Docs\Management\BusinessFeatures\app-settings\design.md
 		Docs\Management\BusinessFeatures\app-settings\orchestration-plan.md = Docs\Management\BusinessFeatures\app-settings\orchestration-plan.md
+		Docs\Management\BusinessFeatures\app-settings\README.md = Docs\Management\BusinessFeatures\app-settings\README.md
 		Docs\Management\BusinessFeatures\app-settings\plan.md = Docs\Management\BusinessFeatures\app-settings\plan.md
 		Docs\Management\BusinessFeatures\app-settings\requirements.md = Docs\Management\BusinessFeatures\app-settings\requirements.md
 		Docs\Management\BusinessFeatures\app-settings\tasks.md = Docs\Management\BusinessFeatures\app-settings\tasks.md
@@ -592,6 +600,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "about-page", "about-page", 
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\about-page\design.md = Docs\Management\BusinessFeatures\about-page\design.md
 		Docs\Management\BusinessFeatures\about-page\evaluation.md = Docs\Management\BusinessFeatures\about-page\evaluation.md
+		Docs\Management\BusinessFeatures\about-page\README.md = Docs\Management\BusinessFeatures\about-page\README.md
 		Docs\Management\BusinessFeatures\about-page\plan.md = Docs\Management\BusinessFeatures\about-page\plan.md
 		Docs\Management\BusinessFeatures\about-page\requirements.md = Docs\Management\BusinessFeatures\about-page\requirements.md
 		Docs\Management\BusinessFeatures\about-page\task-log.md = Docs\Management\BusinessFeatures\about-page\task-log.md
@@ -659,6 +668,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-management", "queue-m
 		Docs\Management\BusinessFeatures\queue-management\task-log.md = Docs\Management\BusinessFeatures\queue-management\task-log.md
 		Docs\Management\BusinessFeatures\queue-management\tasks.md = Docs\Management\BusinessFeatures\queue-management\tasks.md
 		Docs\Management\BusinessFeatures\queue-management\README.md = Docs\Management\BusinessFeatures\queue-management\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000A2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-shipped-core-product", "2026-06-shipped-core-product", "{FA1234BC-0001-4000-8000-0000000000A3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\queue-management\changes\2026-06-shipped-core-product\README.md = Docs\Management\BusinessFeatures\queue-management\changes\2026-06-shipped-core-product\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "page-load-frozen", "page-load-frozen", "{C81D77D9-056E-44D8-A88F-522682CEE603}"
@@ -1326,6 +1342,10 @@ Global
 		{FA1234BC-0001-4000-8000-00000000009C} = {FA1234BC-0001-4000-8000-00000000009B}
 		{FA1234BC-0001-4000-8000-00000000009D} = {FA1234BC-0001-4000-8000-000000000016}
 		{FA1234BC-0001-4000-8000-00000000009E} = {FA1234BC-0001-4000-8000-00000000009D}
+		{FA1234BC-0001-4000-8000-0000000000A0} = {FA1234BC-0001-4000-8000-000000000011}
+		{FA1234BC-0001-4000-8000-0000000000A1} = {FA1234BC-0001-4000-8000-0000000000A0}
+		{FA1234BC-0001-4000-8000-0000000000A2} = {FA1234BC-0001-4000-8000-000000000021}
+		{FA1234BC-0001-4000-8000-0000000000A3} = {FA1234BC-0001-4000-8000-0000000000A2}
 		{FA1234BC-0001-4000-8000-000000000039} = {FA1234BC-0001-4000-8000-000000000038}
 		{FA1234BC-0001-4000-8000-000000000040} = {FA1234BC-0001-4000-8000-000000000039}
 		{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE} = {E9A5FC59-0C8C-49B6-9845-7870FA3CD098}
