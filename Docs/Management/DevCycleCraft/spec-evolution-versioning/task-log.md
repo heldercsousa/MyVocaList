@@ -3270,3 +3270,138 @@ trusting this number, per standing instruction).
 - `MyVocaList.sln` — read directly to re-audit the GUID high-water mark before trusting `00C2`.
 - `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` — source text for Wave R+ rows.
 - A committed Wave Q README (e.g. `Docs/Management/BusinessFeatures/venues/changes/2026-06-30-form-validation-update/README.md`) as the frontmatter/body template for `changes/` sub-items with a shared pointer.
+
+### Wave R — form-validation sub-rows cont'd + cross-cutting cluster
+
+**Status:** To Review
+**Commit:** `e78582d`
+
+**Note on source text:** the live `BACKLOG-ARCHIVE-2026-07.md` no longer carried the Wave
+R–U row text — earlier waves' manual hand-appends only ever added rows already migrated,
+and the file's `<!-- BACKLOG:GENERATED -->` fences are literal (script-owned at T12, not
+continuously regenerated pre-T12). The pristine Notes text for all of Wave R–U was
+recovered from `git show 407aa3db:Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md`
+(the commit immediately before the archive-region split), then hand-appended into the
+current file per wave, matching the established Wave O–Q pattern.
+
+**Changed files:**
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-06-30-form-validation-update-songs/README.md` (net-new)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-06-30-form-validation-update-artists/README.md` (net-new)
+- `Docs/Management/cross-cutting/character-counter-threshold-alignment/README.md` (net-new)
+- `Docs/Management/cross-cutting/local-enforcement-automations/README.md` (net-new)
+- `Docs/Management/cross-cutting/myvocalist-coding-skill-scoping/README.md` (net-new)
+- `MyVocaList.sln` (GUIDs `00C2`-`00C6`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (hand-append)
+
+**GUID re-audit:** the plan estimated Wave R starting at `00C1`; the live `.sln` showed
+`00C1` already consumed by Wave Q (persons form-validation-update). Wave R actually uses
+`00C2`-`00C6`.
+
+**Id collision (songs/artists form-validation-update):** same pattern as Wave Q's
+venues/persons collision — both archived rows use the literal id `form-validation-update`
+under the same `artists-songs/changes/` parent. Disambiguated as
+`form-validation-update-songs` / `form-validation-update-artists` per the established
+precedent. Flagged for audit.
+
+**Reworded goal text:** Artists-form goal's archived "BUG-034/039" → "BUG-034 and
+BUG-039" (test-count `N/M` pattern) — wording only, no meaning change.
+
+**Validation:** `regen --check` → exit 1 (expected stale, additive-only until T12), known
+BUG-022 warning only. Test suite 144/144.
+
+### Wave S — rules-file-refactoring + secrets/MCP cluster
+
+**Status:** To Review
+**Commit:** `9870706`
+
+**Changed files:**
+- `Docs/Management/DevCycleCraft/rules-file-refactoring/README.md` (added to pre-existing folder)
+- `Docs/Management/DevCycleCraft/rules-file-refactoring/changes/2026-07-04-spike-01-18-gate-audit/README.md` (net-new, new `changes/` subfolder)
+- `Docs/Management/cross-cutting/mcp-secrets-rotation/README.md` (net-new)
+- `Docs/Management/cross-cutting/mcp-governance-docs-housekeeping/README.md` (net-new)
+- `Docs/Management/cross-cutting/helder-manual-actions-2026-07-09/README.md` (net-new, date-suffixed slug)
+- `MyVocaList.sln` (GUIDs `00C7`-`00CB`; `rules-file-refactoring` reuses existing GUID `0041`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (hand-append)
+
+**Reworded goal text:** `rules-file-refactoring` goal's archived "~8–11k/agent saved"
+paraphrased without the digit+k shorthand (only the literal `Nk tokens` form is banned,
+but reworded proactively for consistency and to avoid ambiguity) — flagged for audit,
+wording only.
+
+**Validation:** `regen --check` → exit 1 (expected stale), known BUG-022 warning only.
+Test suite 144/144.
+
+### Wave T — final Craft cluster + BUG-044
+
+**Status:** To Review
+**Commit:** `8099225`
+
+**Changed files:**
+- `Docs/Management/cross-cutting/tool-registry-cleanup/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/per-agent-context-isolation/README.md` (added to pre-existing folder)
+- `Docs/Management/cross-cutting/search-appbar-pattern/README.md` (net-new, status Superseded)
+- `Docs/Management/DevCycleCraft/backlog-purpose-review/README.md` (added to pre-existing folder)
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-15-BUG-044-duplicate-personformpage-after-save/README.md` (net-new, Critical, status Superseded, under `00BC`)
+- `MyVocaList.sln` (GUIDs `00CC`-`00CE`; `per-agent-context-isolation` reuses `0044`, `backlog-purpose-review` reuses `0049`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (hand-append)
+
+**Row 4 folder-existence check (per plan's flag):** `git ls-files` confirmed
+`DevCycleCraft/backlog-purpose-review/` already existed (`design.md`, `findings.md`,
+`task-log.md`) — no fresh create needed, only `README.md` added.
+
+**Reworded goal text (banned-content fix, caught by `regen --check`):**
+`backlog-purpose-review` goal originally read "restore BACKLOG.md as a PO-level business
+artifact" — the bare `BACKLOG.md` token trips the file-path-beyond-pointer rule even
+though it names the artifact, not a source file. Reworded to "restore the BACKLOG file"
+in both the README frontmatter and the archive row text. Also reworded the body note's
+reference from the literal `workflow.md` filename to "the workflow rules file" for the
+same reason. Wording only, no meaning change — flagged for audit.
+
+**Validation:** `regen --check` → exit 2 on first attempt (the `BACKLOG.md` banned-content
+hit above), fixed, then exit 1 (expected stale), known BUG-022 warning only. Test suite
+144/144.
+
+### Wave U (final) — BUG-045, BUG-047 — T12a COMPLETE
+
+**Status:** To Review
+**Commit:** `b64c510`
+
+**Changed files:**
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-15-BUG-045-cursor-stuck-after-autocomplete/README.md` (net-new, Major, status Superseded, under `00BC`)
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-15-BUG-047-stale-suggestions-popup-edit-mode/README.md` (net-new, Major, status Superseded, under `00BC`)
+- `MyVocaList.sln` (GUIDs `00CF`-`00D0`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (hand-append)
+
+**Reworded goal text:** BUG-047's archived "verifier PASS 485/485" → "verifier suite
+green, all cases" (`PASS` trips the review-verdict ban, `485/485` trips the test-count
+`N/M` ban) — wording only, no meaning change, flagged for audit.
+
+**Validation:** `regen --check` → exit 1 (expected stale, additive-only until T12), known
+BUG-022 warning only. Test suite 144/144.
+
+**Final high-water `.sln` GUID after T12a: `00D0`.**
+
+**T12a is COMPLETE.** Every archived row across all 5 `backlog-archive/*.md` files now has
+a backing folder, modulo the 3-row Blockers list (rule-file/changelog pointer rows,
+2026-05/2026-06 dates) which still requires a Helder decision before its own micro-wave —
+tracked separately, not part of the T12a gate. T12a's own gate is met; T12 (canonical
+archive rewrite + G1/G2/G3 idempotency gate) is ready for Helder architectural review.
+**Not started in this session, per the briefing.**
+
+**Full flagged-audit set across Waves R–U (for Helder's review):**
+1. Wave R: `form-validation-update-songs` / `-artists` id disambiguation (literal archived id collides across sibling rows, same pattern as Wave Q's venues/persons collision).
+2. Wave R: Artists-form "BUG-034/039" reworded to "BUG-034 and BUG-039" to clear the test-count heuristic.
+3. Wave S: `rules-file-refactoring` goal's "~8–11k/agent saved" paraphrased without digit+k shorthand.
+4. Wave S: `spike-01-18-gate-audit` filed as a `changes/` sub-item under `rules-file-refactoring`, requiring a brand-new `changes/` solution subfolder (GUID `00C7`) since none existed yet.
+5. Wave T: `backlog-purpose-review` goal's literal "BACKLOG.md" / "workflow.md" tokens reworded to clear the file-path-beyond-pointer rule (README frontmatter + body + archive row all touched).
+6. Wave T: `per-agent-context-isolation` and `backlog-purpose-review` folders confirmed pre-existing via `git ls-files` (the plan's "not confirmed" flag on `backlog-purpose-review` resolved as existing).
+7. Wave T: `search-appbar-pattern` status filed as `🔵 Superseded` (T12-pre extended vocabulary), closed month 2026-07 per the row's own supersession date, distinct from its `target: 2026-06` origin.
+8. Wave U: BUG-047's "verifier PASS 485/485" reworded to "verifier suite green, all cases" to clear both the review-verdict and test-count heuristics.
+9. Cumulative: `autocomplete-component/bugs/` (lowercase) now holds BUG-040/041/042/044/045/047 — six items — alongside the untouched, pre-existing capitalized `Bugs/` folder holding `bug-043` (Wave-P finding, still unresolved as a naming inconsistency).
+
+**Context manifest for T12 (future session, not started here):**
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` — T12's canonical archive rewrite + G1/G2/G3 idempotency gate design.
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` — the Blockers list (§ end of file) requiring a Helder decision before T12 can treat the archive as fully closed.
+- This task-log's Wave A–U entries (all of them) — the full set of migration decisions, id disambiguations, and reworded-goal flags T12's equivalence gate must reconcile against.
+- `MyVocaList.sln` — GUID high-water mark `00D0` for any T12 pre-audit.
+- `.claude/scripts/backlog/backlog_gen.py` and `model.py` — the generator T12 will finally invoke for real (non-`--check`) regeneration.
