@@ -44,6 +44,16 @@ public partial class SongFormPage : ContentPage
     // (SearchArtistsCommand → IArtistService) so gates and behavior stay in the ViewModel.
     private void OnArtistItemsRequested(object sender, ItemsRequestEventArgs e)
     {
+        // BUG-061: a PROGRAMMATIC ArtistSearchText assignment (selection lock, edit-mode hydration)
+        // also fires this event — re-running the search re-populates the dropdown with the artist
+        // just selected/hydrated, so it appears to "linger". Only a change originated by USER TYPING
+        // should search; ConsumeSuppressArtistSearch() returns true exactly once per programmatic set.
+        if (ViewModel.ConsumeSuppressArtistSearch())
+        {
+            e.RequestAsync = () => Task.FromResult<System.Collections.IEnumerable>(Array.Empty<AutocompleteSuggestion>());
+            return;
+        }
+
         var text = e.Text;
         var token = e.CancellationToken;
         e.RequestAsync = async () =>

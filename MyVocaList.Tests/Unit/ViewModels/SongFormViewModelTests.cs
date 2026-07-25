@@ -411,6 +411,49 @@ public class SongFormViewModelTests
         Assert.Equal(7, sut.SelectedArtistId);
     }
 
+    // ── BUG-061: suppress the item-request search triggered by a PROGRAMMATIC text set ────
+
+    // [AC] BUG-061: selecting a suggestion sets ArtistSearchText programmatically — the next
+    // items-request must be suppressed exactly once so the dropdown does not re-open on the
+    // artist just selected.
+    [Fact]
+    public void SelectArtist_ExistingSuggestion_SuppressesNextArtistSearch()
+    {
+        var sut = CreateSut();
+        var artist = new ArtistListItem(7, "Queen", string.Empty, false, 0);
+        var suggestion = new AutocompleteSuggestion("Queen", artist.CatalogCountText, artist);
+
+        sut.SelectArtistCommand.Execute(suggestion);
+
+        Assert.True(sut.ConsumeSuppressArtistSearch());
+        // Consuming resets the flag — a later item request (from user typing) is not suppressed.
+        Assert.False(sut.ConsumeSuppressArtistSearch());
+    }
+
+    // [AC] BUG-061: edit-mode field hydration (InitializeArtistField) also sets ArtistSearchText
+    // programmatically and must suppress the resulting item request.
+    [Fact]
+    public void InitializeArtistField_WithArtistId_SuppressesNextArtistSearch()
+    {
+        var sut = CreateSut();
+        sut.ArtistIdRaw = "5";
+        sut.ArtistName = "Metallica";
+
+        sut.InitializeArtistField();
+
+        Assert.True(sut.ConsumeSuppressArtistSearch());
+    }
+
+    // [AC] BUG-061: a fresh ViewModel with no programmatic text assignment must not suppress the
+    // first user-typed items request.
+    [Fact]
+    public void ConsumeSuppressArtistSearch_NoProgrammaticSet_ReturnsFalse()
+    {
+        var sut = CreateSut();
+
+        Assert.False(sut.ConsumeSuppressArtistSearch());
+    }
+
     // ── T7: inline "create new artist" ────────────────────────────────────
 
     // [AC] REQ-ACREATE-04/08: inline create success locks the created artist, clears error
