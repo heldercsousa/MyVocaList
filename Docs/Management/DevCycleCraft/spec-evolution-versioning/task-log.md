@@ -2936,22 +2936,109 @@ backlog pt2 + BUG-010 pair`). Pushed to `origin/feature/backlog-migration`.
 Files written and re-read: all 5 README files + `MyVocaList.sln` above -- confirmed via Write/Edit
 tool state and a Python binary-mode BOM/CRLF check on `MyVocaList.sln`.
 
+---
+## Task: T12a Waves I, J, K -- docs-only backlog migration continuation
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md`
+**Status:** To Review
+**Started:** 2026-07-23
+**Completed:** 2026-07-24
+
+### Changed files
+Wave I (commit `efe0a05`):
+- `Docs/Management/BusinessFeatures/artists-songs/youtube-search-launch/README.md` (new -- kind i, existing folder)
+- `Docs/Management/BusinessFeatures/crash-reporting/README.md` (new -- kind i, existing folder)
+- `Docs/Management/BusinessFeatures/whats-new/README.md` (new -- kind i, existing folder)
+- `Docs/Management/BusinessFeatures/user-suggestions/changes/2026-06-01-github-issues-integration/README.md` (new -- kind iii-b, agent-authored slug, pointer stays on parent `task-log.md`)
+- `Docs/Management/BusinessFeatures/app-update-check/changes/2026-06-01-remote-update-manifest/README.md` (new -- kind iii-b, agent-authored slug, pointer stays on parent `task-log.md`)
+- `MyVocaList.sln` -- GUIDs `009B`-`009E` consumed (4 new, not the plan's provisioned 5: rows 1-3 reused already-registered folder GUIDs, needing only a `README.md` `SolutionItems` line each)
+
+Wave J (commit `23e4140`):
+- `Docs/Management/BusinessFeatures/app-settings/README.md` (new -- kind i, existing folder)
+- `Docs/Management/BusinessFeatures/about-page/README.md` (new -- kind i, existing folder)
+- `Docs/Management/BusinessFeatures/queue-management/changes/2026-06-shipped-core-product/README.md` (new -- disambiguated `changes/` sub-item, id `queue-management-core-product`; see Spec gap below)
+- `Docs/Management/BusinessFeatures/backup-restore/changes/2026-06-shipped-tier1-3/README.md` (new -- disambiguated `changes/` sub-item, id `backup-restore-tier1-3`; see Spec gap below)
+- Row 4 "Visual Theme Refresh" (iv, blocked) -- **no folder created**, per REQ-SEV-32 and the plan's explicit instruction; the 5th slot remains provisional pending Helder's (iv)-case resolution.
+- `MyVocaList.sln` -- GUIDs `00A0`-`00A3` consumed (4, matching the plan's "4 real" count)
+
+Wave K (commit `e2211b9`):
+- `Docs/Management/cross-cutting/worktree-enforcement/README.md` (new -- kind iii-a, agent-authored slug)
+- `Docs/Management/cross-cutting/orchestrator-role-enforcement/README.md` (new -- kind iii-a, agent-authored slug)
+- `Docs/Management/cross-cutting/bug-tracking-procedure/README.md` (new -- kind iii-a, agent-authored slug)
+- `Docs/Management/cross-cutting/haiku-model-assignment/README.md` (new -- kind iii-a, agent-authored slug)
+- `Docs/Management/cross-cutting/component-change-governance/README.md` (new -- kind iii-a, agent-authored slug)
+- `MyVocaList.sln` -- GUIDs `00A4`-`00A8` consumed (5, matching the plan)
+
+### Spec gap: Wave J real id collisions (`queue-management`, `backup-restore`)
+**Location:** `Docs/Management/BusinessFeatures/queue-management/README.md` and
+`Docs/Management/BusinessFeatures/backup-restore/README.md` -- both already existed (from an
+earlier wave/session) as live `💡 Pending` items for a **different** backlog row than the one
+Wave J's plan rows 3 and 5 describe (Queue Entry Point Redesign / Backup Tier 2 WiFi Mirror,
+respectively -- not the shipped 2026-06 "Queue Management" / "Data Backup & Restore Tier 1+3"
+rows the plan assigns those ids to). The plan was written assuming clean `id: queue-management`
+/ `id: backup-restore`; both collide with a real, unrelated pre-existing item at the same path.
+**Gap description:** one item = one `README.md` path in this model; two distinct backlog rows
+cannot both own the same folder's `README.md`.
+**Options:**
+- Option A (taken): file the archived Done row as a disambiguated `changes/` sub-item
+  (`queue-management-core-product`, `backup-restore-tier1-3`) inside the same folder, pointer
+  stays on the folder's existing `task-log.md` -- consistent with the (iii-b) sub-item pattern
+  already used elsewhere, and with the Wave K precedent of never merging/reusing a colliding id.
+- Option B: overwrite the existing Pending README with the Done row's content, losing the other
+  item's tracking.
+**Recommendation:** Option A -- implemented. Rationale: nothing is deleted (REQ-SEV-27), both
+items remain independently tracked and audit-visible.
+**Blocking:** No -- proceeded with Option A as a documented assumption; flagged in both new
+README bodies for Helder's gate audit.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation per wave:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing) after every wave; archive/BACKLOG files reported
+stale as expected (regen not run -- T12 territory). Tests:
+`python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -> 144 passed,
+0 failed, after every wave. `.sln` edits made via the Edit tool (UTF-8/CRLF preserved by the
+tool); re-read after each edit to confirm placement.
+Files written and re-read: all 13 new README files + `MyVocaList.sln` above -- confirmed via
+Write/Edit tool state.
+Commit SHAs: `efe0a05` (Wave I), `23e4140` (Wave J), `e2211b9` (Wave K). All pushed to
+`origin/feature/backlog-migration`.
+
+### Flagged items for Helder's gate audit
+- **Reworded goals** (verbatim archive text tripped the file-path/commit-hash banned-content
+  pattern): all 5 Wave K rows (`worktree-enforcement`, `orchestrator-role-enforcement`,
+  `bug-tracking-procedure`, `haiku-model-assignment`, `component-change-governance`).
+- **Agent-authored slugs**: Wave I rows 4-5 (`github-issues-integration`,
+  `remote-update-manifest`); Wave J's two disambiguated sub-items
+  (`queue-management-core-product`, `backup-restore-tier1-3`); all 5 Wave K slugs
+  (`worktree-enforcement`, `orchestrator-role-enforcement`, `bug-tracking-procedure`,
+  `haiku-model-assignment`, `component-change-governance`).
+- **Real id collisions resolved via disambiguation** (not anticipated by the plan): Wave J rows
+  3 and 5 -- see "Spec gap" above.
+- **Wave K collision check**: confirmed clean -- none of the 5 new slugs collide with the 24
+  pre-existing `Docs/Management/cross-cutting/*` folders (enumerated directly before writing);
+  `worktree-enforcement` is confirmed distinct from, and NOT merged with, the existing unrelated
+  `cross-cutting/mandatory-worktree-rule-enforcement/` folder, per the plan's explicit warning.
+- **No pre-scheme `severity` values found** in Waves I/J/K source rows -- nothing to drop this
+  round (unlike Waves D/F/G).
+
 ### Checkpoint
-Branch: `feature/backlog-migration`, worktree `mvl-backlog-migration`. Waves F, G, H all committed
-+ pushed (`f449f37`, `885962d`, `72698c1`). **STOPPED after Wave H per the briefing -- Wave I not
-started.** Next-free `.sln` GUID for a future Wave I: `0094` (audit directly from the `.sln`
-before trusting the plan's own estimate, per standing instruction).
+Branch: `feature/backlog-migration`, worktree `mvl-backlog-migration`. Waves I, J, K all
+committed + pushed (`efe0a05`, `23e4140`, `e2211b9`). **STOPPED after Wave K per the briefing --
+Wave L not started.** Next-free `.sln` GUID for a future Wave L: `00A9` (audit directly from the
+`.sln` before trusting any prior wave's stated number, per standing instruction -- Wave L's own
+plan section already assumes this exact value).
 
-**Context manifest for resuming (Wave I onward):**
+**Context manifest for resuming (Wave L onward):**
 - `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` -- read
-  `### Wave I` onward for the next rows to migrate.
-- This `task-log.md`'s Wave F/G/H entries (above) -- the authoritative pattern to replicate
-  (frontmatter shape, GUID-audit method, severity-field/banned-content pitfalls already found).
-- `MyVocaList.sln` -- read directly (binary mode) to re-audit the GUID high-water mark; do not
-  trust any prior wave's stated "next free" number without re-scanning.
-- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-06.md` -- source of verbatim Goal text for
-  remaining 2026-06 rows.
-- A committed Wave F/G/H README (e.g. `Docs/Management/BusinessFeatures/search-picker/README.md`)
-  as the frontmatter/body template.
+  `### Wave L` for the next rows to migrate.
+- This `task-log.md`'s Wave I/J/K entries (above) -- the authoritative pattern to replicate,
+  including the real-id-collision disambiguation pattern (Wave J) that Wave L may need again
+  (`BUG-003`/`ArtistsPage Filter Chips` row already has known duplicate-status handling per the
+  plan's own note).
+- `MyVocaList.sln` -- read directly to re-audit the GUID high-water mark before trusting `00A9`.
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-06.md` and
+  `Docs/Management/cross-cutting-log.md` -- source of verbatim Goal/Notes text for Wave L rows.
+- A committed Wave I/J/K README (e.g.
+  `Docs/Management/BusinessFeatures/crash-reporting/README.md`) as the frontmatter/body template.
 
-**STOPPED after Wave H per the briefing -- Wave I not started.**
+**STOPPED after Wave K per the briefing -- Wave L not started.**
