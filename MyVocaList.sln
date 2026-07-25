@@ -1068,6 +1068,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec-evolution-versioning",
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\task-log.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\task-log.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\README.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\README.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\POST-MIGRATION-FOLLOWUPS.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\POST-MIGRATION-FOLLOWUPS.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "per-agent-context-isolation", "per-agent-context-isolation", "{FA1234BC-0001-4000-8000-000000000044}"
@@ -1154,6 +1155,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-042-back-tap
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000057}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vs-solution-file-registration-rule", "vs-solution-file-registration-rule", "{FA1234BC-0001-4000-8000-000000000000D1}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\vs-solution-file-registration-rule\README.md = Docs\Management\cross-cutting\vs-solution-file-registration-rule\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proactive-backlog-entry-rule", "proactive-backlog-entry-rule", "{FA1234BC-0001-4000-8000-000000000000D2}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\proactive-backlog-entry-rule\README.md = Docs\Management\cross-cutting\proactive-backlog-entry-rule\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "visual-theme-refresh", "visual-theme-refresh", "{FA1234BC-0001-4000-8000-000000000000D3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\visual-theme-refresh\README.md = Docs\Management\cross-cutting\visual-theme-refresh\README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "branch-lock-avoidance", "branch-lock-avoidance", "{FA1234BC-0001-4000-8000-0000000000B7}"
 	ProjectSection(SolutionItems) = preProject
@@ -1583,6 +1599,9 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000A5} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A6} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A7} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000000D1} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000000D2} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000000D3} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A8} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A9} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000AA} = {7A021F6B-F297-41EA-A028-C4F881146791}
