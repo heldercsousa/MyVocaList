@@ -402,6 +402,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-form-action-pattern", 
 		Docs\Management\DevCycleCraft\crud-form-action-pattern\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-10-md3-save-cancel-placement", "2026-07-10-md3-save-cancel-placement", "{FA1234BC-0001-4000-8000-0000000000B9}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-07-10-md3-save-cancel-placement\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-07-10-md3-save-cancel-placement\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\persons\autocomplete-design.md = Docs\Management\BusinessFeatures\persons\autocomplete-design.md
@@ -1034,7 +1041,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompletee
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-11-component-evaluation", "2026-07-11-component-evaluation", "{FA1234BC-0001-4000-8000-0000000000BA}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-11-component-evaluation\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-11-component-evaluation\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-11-apply-to-simplest-candidate", "2026-07-11-apply-to-simplest-candidate", "{FA1234BC-0001-4000-8000-0000000000BB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-11-apply-to-simplest-candidate\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-11-apply-to-simplest-candidate\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-0000000000BC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-040-mobile-input-loses-focus", "2026-07-12-BUG-040-mobile-input-loses-focus", "{FA1234BC-0001-4000-8000-0000000000BD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000057}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "branch-lock-avoidance", "branch-lock-avoidance", "{FA1234BC-0001-4000-8000-0000000000B7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\branch-lock-avoidance\README.md = Docs\Management\cross-cutting\branch-lock-avoidance\README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "form-autocomplete-ux-overhaul", "form-autocomplete-ux-overhaul", "{FA1234BC-0001-4000-8000-000000000058}"
 	ProjectSection(SolutionItems) = preProject
@@ -1470,6 +1499,13 @@ Global
 		{6941D280-F5AE-428A-AC78-42246F3BF3F8} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
 		{D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD} = {FA1234BC-0001-4000-8000-000000000046}
 		{DB5ECBBC-566B-4A00-9791-E18E11F49B55} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
+		{FA1234BC-0001-4000-8000-0000000000BA} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
+		{FA1234BC-0001-4000-8000-0000000000BB} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
+		{FA1234BC-0001-4000-8000-0000000000BC} = {FA1234BC-0001-4000-8000-000000000046}
+		{FA1234BC-0001-4000-8000-0000000000BD} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000B7} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000B8} = {FA1234BC-0001-4000-8000-000000000048}
+		{FA1234BC-0001-4000-8000-0000000000B9} = {FA1234BC-0001-4000-8000-0000000000B8}
 		{FA1234BC-0001-4000-8000-000000000070} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-00000000007A} = {FA1234BC-0001-4000-8000-000000000024}
 		{FA1234BC-0001-4000-8000-000000000073} = {7A021F6B-F297-41EA-A028-C4F881146791}
