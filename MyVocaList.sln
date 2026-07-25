@@ -694,6 +694,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "page-load-frozen", "page-lo
 		Docs\Management\DevCycleCraft\page-load-frozen\plan.md = Docs\Management\DevCycleCraft\page-load-frozen\plan.md
 		Docs\Management\DevCycleCraft\page-load-frozen\release-pageload-only.txt = Docs\Management\DevCycleCraft\page-load-frozen\release-pageload-only.txt
 		Docs\Management\DevCycleCraft\page-load-frozen\task-log.md = Docs\Management\DevCycleCraft\page-load-frozen\task-log.md
+		Docs\Management\DevCycleCraft\page-load-frozen\README.md = Docs\Management\DevCycleCraft\page-load-frozen\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "session-continuity-leasing", "session-continuity-leasing", "{FA1234BC-0001-4000-8000-000000000026}"
@@ -1086,6 +1087,26 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "md3-devexpress-compliance-g
 		Docs\Management\cross-cutting\md3-devexpress-compliance-gap\README.md = Docs\Management\cross-cutting\md3-devexpress-compliance-gap\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "db-side-collation", "db-side-collation", "{FA1234BC-0001-4000-8000-0000000000AE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\db-side-collation\README.md = Docs\Management\cross-cutting\db-side-collation\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "navigation-icon-pattern", "navigation-icon-pattern", "{FA1234BC-0001-4000-8000-0000000000AF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\navigation-icon-pattern\README.md = Docs\Management\cross-cutting\navigation-icon-pattern\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-crud-filter-fix", "artists-crud-filter-fix", "{FA1234BC-0001-4000-8000-0000000000B0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\artists-crud-filter-fix\README.md = Docs\Management\cross-cutting\artists-crud-filter-fix\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-music-icon-asset", "queue-music-icon-asset", "{FA1234BC-0001-4000-8000-0000000000B1}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\queue-music-icon-asset\README.md = Docs\Management\cross-cutting\queue-music-icon-asset\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-pattern-standardization", "search-pattern-standardization", "{FA1234BC-0001-4000-8000-000000000061}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\search-pattern-standardization\README.md = Docs\Management\cross-cutting\search-pattern-standardization\README.md
@@ -1404,6 +1425,10 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000AB} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-0000000000AC} = {FA1234BC-0001-4000-8000-000000000019}
 		{FA1234BC-0001-4000-8000-0000000000AD} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{FA1234BC-0001-4000-8000-0000000000AE} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000AF} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000B0} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000B1} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-000000000039} = {FA1234BC-0001-4000-8000-000000000038}
 		{FA1234BC-0001-4000-8000-000000000040} = {FA1234BC-0001-4000-8000-000000000039}
 		{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE} = {E9A5FC59-0C8C-49B6-9845-7870FA3CD098}
