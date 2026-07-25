@@ -2,19 +2,22 @@
 
 **For:** the next (fresh) session. Read this first (Rule 7 session start). Supersedes the 2026-07-21 planning handoff.
 
-## Current state (as of 2026-07-23, refreshed)
-- Worktree `C:\Users\helde\source\repos\MyVocaList-inline-ac`, branch `feat/inline-artist-create`, **HEAD `efe65c6`**. **Committed, not pushed, not merged.** Unit suite **523/523 green**. Code review = **CONDITIONAL PASS, no blockers**.
-- **All of INLINE-AC's own code defects are FIXED and committed.** Fix batch 2 (`b0e45da`): BUG-060 (artist locks permanently → `ClearArtistCommand`+`ClearIconClicked`), BUG-057 (`ArtistErrorText` never set — 1-line), BUG-061 (lingering suggestion row → `SelectedItem=null` reset). Plus `efe65c6` = a manual compiler-warning fix in `StringExtensions.cs` (no behavior change, safe to merge — Helder confirmed 2026-07-23).
+## Current state (as of 2026-07-25, refreshed after T10 re-run #3)
+- Worktree `C:\Users\helde\source\repos\MyVocaList-inline-ac`, branch `feat/inline-artist-create`, **HEAD `b8f7d2c` — PUSHED to `origin/feat/inline-artist-create`.** Not merged. Unit suite **530/530 green**. Verifier on the re-fix set = **CONDITIONAL PASS, no blockers** (all residuals closed).
+- **T10 re-run #3 (Helder, on device, 2026-07-25):** item 1 (change-artist/unlock, BUG-060) **✅ PASSED — closed**. Items 2 & 3 still failed → re-fixed this session (below).
+- **Re-fix wave (BUG-061 completion + BUG-064), all pushed:**
+  - **BUG-064** (`283866f`) — duplicate artist error message removed; kept the DX `AutoCompleteEdit` native `HasError`/`ErrorText`, dropped the redundant `Label`.
+  - **BUG-061** — root cause per Helder: programmatic `ArtistSearchText` assignment re-triggered the autocomplete search, re-opening the dropdown. Fix = `_suppressNextArtistSearch` one-shot guard set before EVERY programmatic assignment, consumed in `OnArtistItemsRequested`. Landed across `7c594e2` (initial: LockArtist/init/hydration) → `3e38066` (2 missed paths: `ResolveAndLockArtistAsync` ×2, `OnArtistBlurredWithoutSelection`) → `b8f7d2c` (final residual: `ClearArtist`). **All 7 programmatic sites now guarded.** +7 regression tests total.
+  - Earlier this session: `efe65c6` = manual compiler-warning fix in `StringExtensions.cs` (no behavior change, Helder-confirmed safe).
 - **BUG-059 CANCELLED** (Helder 2026-07-23, works-as-designed): catalog join table is deliberately picker-only; empty catalog after Song-form save is by design. Reframed as a NEW enhancement (auto-link artist-OWNED songs to author's catalog) — seed `BusinessFeatures/artists-songs/ENHANCEMENT-artist-owned-song-catalog-autolink.md`; register in BACKLOG when SPEC-EVO migration settles. **T10 item i is DROPPED.**
 
-> ## ⚠️ HELDER'S DUTIES — the ONLY gate left before closeout
-> No code work remains. Closeout is blocked solely on **your on-device T10 re-run #3** (Android built locally — local Android build is blocked by `XARLP7024` AV/EDR corruption, NOT code). Verify on device:
-> 1. **Change-artist / unlock (BUG-060 fix):** select an artist → tap clear (X) → field unlocks and lets you pick a *different* artist → blur on an intentionally-cleared field does NOT silently restore the old artist.
-> 2. **Inline error text visible (BUG-057 fix):** trigger the artist validation error → the message text is now *visible* (not just blank reserved space).
-> 3. **Lingering dropdown row (BUG-061 fix):** after tapping a suggestion, the selected row disappears from the dropdown immediately.
-> 4. Sanity re-check the already-green items: a (retain text), e (stale/first-empty), j (edit hydration), C1 (novel create), C2 (duplicate). **Skip item i (catalog) — dropped.**
+> ## ⚠️ HELDER'S DUTIES — on-device T10 re-run #4 (the ONLY gate left before closeout)
+> No code work remains. Closeout is blocked solely on **your on-device T10 re-run #4** (Android built locally — local Android build blocked by `XARLP7024` AV/EDR corruption, NOT code). Item 1 already passed re-run #3; re-verify ONLY the two re-fixed items:
+> 2. **Inline error text — no duplicate (BUG-064):** trigger the artist validation error → exactly ONE message shows (the redundant bottom one is gone).
+> 3. **Lingering dropdown row (BUG-061, your diagnosis implemented):** after tapping a suggestion the dropdown does NOT re-open on the just-selected name; also confirm it stays closed on **edit-page load**, after returning from the **song picker** (exact-match and no-match), and after tapping the **clear (X)** icon — all programmatic-text paths are now guarded, so check each.
+> 4. (Optional) sanity re-check a / e / j / C1 / C2. **Skip item i (catalog) — dropped.**
 >
-> **On all-green → tell the next session "T10 re-run #3 passed"** and it runs the closeout below (merge → develop, push, remove worktree, unblock catalog).
+> **On all-green → tell the next session "T10 re-run #4 passed"** and it runs the closeout below (merge → develop, push, remove worktree, unblock catalog).
 >
 > Two minor decisions carried, non-blocking: (a) AC-label typo — you OK'd folding a one-line comment fix into the merge commit; (b) the auto-link enhancement gets a BACKLOG row once SPEC-EVO settles.
 
