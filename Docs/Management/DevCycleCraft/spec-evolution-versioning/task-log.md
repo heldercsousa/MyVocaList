@@ -3405,3 +3405,96 @@ archive rewrite + G1/G2/G3 idempotency gate) is ready for Helder architectural r
 - This task-log's Wave A–U entries (all of them) — the full set of migration decisions, id disambiguations, and reworded-goal flags T12's equivalence gate must reconcile against.
 - `MyVocaList.sln` — GUID high-water mark `00D0` for any T12 pre-audit.
 - `.claude/scripts/backlog/backlog_gen.py` and `model.py` — the generator T12 will finally invoke for real (non-`--check`) regeneration.
+
+---
+## Task: T12 addendum + canonical archive rewrite (H1 fix + G1/G2/G3 gate)
+**Plan:** Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md
+**Status:** To Review
+**Started:** 2026-07-25
+**Completed:** 2026-07-25
+
+### Changed files:
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md` (REQ-SEV-32 amended)
+- `Docs/Management/cross-cutting/vs-solution-file-registration-rule/README.md` (new)
+- `Docs/Management/cross-cutting/proactive-backlog-entry-rule/README.md` (new)
+- `Docs/Management/cross-cutting/visual-theme-refresh/README.md` (new)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md` (registered in .sln)
+- `MyVocaList.sln` (3 new solution-folder entries, GUIDs 00D1/00D2/00D3 under the `cross-cutting`
+  parent `...057`; POST-MIGRATION-FOLLOWUPS.md added to the existing spec-evolution-versioning
+  SolutionItems)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-05.md` (canonical regen)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-06.md` (canonical regen)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (canonical regen)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T12 checked off)
+
+### REQ-SEV-32 amendment
+Changed from "an archived row whose pointer targets a file outside Docs/Management gets NO folder"
+to "still gets a minimal `cross-cutting/<slug>/README.md` folder, pointer unchanged" -- the canonical
+`regen` reconstructs an archive file entirely from folder frontmatter, so a folder-less row is
+silently dropped on rewrite (hazard H1). REQ-SEV-27 ("nothing deleted") wins per Helder's 2026-07-25
+ruling. Both the superseded original wording and the new wording are kept in the spec file with a
+dated `> **Spec updated 2026-07-25:**` note (nothing retracted from history).
+
+### The 3 restored rows
+| Slug (agent-authored) | Title | Target | Closed | Section | Pointer |
+|---|---|---|---|---|---|
+| `vs-solution-file-registration-rule` | VS Solution File Registration Rule | 2026-05 | 2026-05 | DevCycleCraft | `.claude/rules/constraints-registry.md` |
+| `proactive-backlog-entry-rule` | Proactive BACKLOG Entry Rule | 2026-05 | 2026-05 | DevCycleCraft | `.claude/rules/workflow.md` |
+| `visual-theme-refresh` | Visual Theme Refresh | 2026-06 | 2026-06 | BusinessFeatures | `Docs/Changelog/changelog.md` |
+
+Goal text reworded from the frozen pre-migration BACKLOG's Notes cells (verbatim text named the
+rules/changelog files by path, which trips the `model._BANNED` file-path-beyond-pointer pattern) --
+same carve-out already used for `bug-tracking-procedure` and other cross-cutting rows. Flagged per
+the living-spec carve-out: slugs, order values, and reworded goal text are agent-authored.
+No slug collision against existing `Docs/Management/cross-cutting/*` (checked before creating).
+
+### .sln registration
+Next-free GUID re-audited directly against the `.sln` (regex over all `FA1234BC-0001-4000-8000-...`
+entries) -- confirmed highest live is `00D0`, next-free `00D1`. Assigned sequentially: `00D1`
+(vs-solution-file-registration-rule), `00D2` (proactive-backlog-entry-rule), `00D3`
+(visual-theme-refresh), nested under the existing `cross-cutting` parent GUID `...057`.
+POST-MIGRATION-FOLLOWUPS.md added as a `SolutionItems` line inside the existing
+spec-evolution-versioning project block. BOM (`EF BB BF`) and CRLF verified byte-for-byte before and
+after every edit via a binary-mode Python script (no `grep`, per the rtk-corruption caution).
+One transcription slip during scripted editing (a literal `` vertical-tab byte where a
+`\`+letter-v` path separator was intended, in 2 of the 3 new Project lines) was caught by a
+byte-level post-edit re-read and corrected before commit.
+
+### The canonical rewrite (real `regen`, not `--check`)
+Ran the real generator with all 156 discovered items now folder-complete. `BACKLOG.md` itself did
+not change (0 diff); only the 3 archive files changed (13 insertions, 10 deletions across the 3
+files). Diff content: the 3 archive-migration insertions (the previously-dropped rows now present)
+plus the already-confirmed clean in-class diff from the earlier T12 run (pointer canonicalization
+from a `changes/` sub-path to the shared task-log file, `(under:)`-suffix add/drop, Superseded
+`(closed 2026-07)` suffix reconstruction, and punctuation/backtick normalization) -- no diff line
+fell outside a named, already-understood class.
+
+### Gate results
+- **G1 (idempotency):** ran `regen` a second time; every one of the 3 archive files plus BACKLOG.md
+  compared byte-identical to the first run's output (Python binary-mode compare, not `grep`) --
+  zero diff.
+- **G2 (reachability):** `walk()` discovered 156 items (0 parse errors). Checked every non-separator
+  item's rendered `pointer` text against the concatenation of BACKLOG.md + all archive files: 155/156
+  reachable; the sole non-match is the `2026-06-mvp-release` milestone row, which by design (`kind:
+  milestone`, `render_row`) carries no Pointer field at all -- not an orphan. (An earlier, cruder pass
+  that string-matched item `id:` values instead of rendered `pointer` text produced 28 false
+  positives -- ids are internal keys, never rendered verbatim; the pointer-based check is the correct
+  signal and is what's reported here.)
+- **G3 (diff classification):** every archive diff line matches one of: archive-migration row
+  insertion (new folder), pointer-canonicalize, `(under:)`-suffix, Superseded/Duplicate
+  `(closed <month>)` suffix (T12-pre's status model), punctuation-normalize. No unmatched line.
+
+### Build notes
+Unit tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -- 144
+passed, 0 failed (both before and after the rewrite; ran once more post-rewrite to confirm no
+regression). Post-rewrite `python .claude/scripts/backlog/backlog_gen.py regen --check` exits 0 --
+0 errors, 0 staleness; the only stderr output is the pre-existing non-fatal REQ-SEV-21
+parent/path-parent warning for `persons/bugs/BUG-022-singerform-birthday-mask` (unrelated to this
+task, present before and after).
+No `.cs`/`.xaml` files touched -- Docs/`.sln`/Python (script invocation only, no script files
+edited) per the briefing's scope.
+Commit SHA: `64ce6da` (addendum) then `75a6dc9` (canonical rewrite). Both pushed to
+`origin/feature/backlog-migration`.
+
+### Not started
+T12b (blocking pre-commit gate) and T13 (rules bundle) per the briefing's explicit stop instruction.
