@@ -382,6 +382,7 @@ public partial class SongFormViewModel : ViewModelBase
         else
         {
             // User typed-then-blurred without choosing a new suggestion — restore prior selection
+            _suppressNextArtistSearch = true; // BUG-061: programmatic restore, not user typing
             ArtistSearchText = SelectedArtistName ?? string.Empty;
             ArtistSuggestions = [];
         }
@@ -534,6 +535,7 @@ public partial class SongFormViewModel : ViewModelBase
                 {
                     SelectedArtistId = match.Id;
                     SelectedArtistName = match.Name;
+                    _suppressNextArtistSearch = true; // BUG-061: programmatic lock, not user typing
                     ArtistSearchText = match.Name;
                     ArtistSuggestions = [];
                     ArtistHasError = false;
@@ -545,6 +547,7 @@ public partial class SongFormViewModel : ViewModelBase
                 RunOnUiThread(() =>
                 {
                     // No exact match — pre-fill text so user can confirm or adjust
+                    _suppressNextArtistSearch = true; // BUG-061: programmatic prefill, not user typing
                     ArtistSearchText = artistName;
                     SelectedArtistId = null;
                     IsArtistLocked = false;

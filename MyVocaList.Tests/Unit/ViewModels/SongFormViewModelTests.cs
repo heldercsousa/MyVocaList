@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Contracts.DTOs;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
+using CanonicalSongPickedMessage = MyVocaList.Contracts.Messages.SongPickedMessage;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -15,7 +17,8 @@ public class SongFormViewModelTests
         Mock<ISecureStorageWrapper>? secureStorage = null,
         Mock<ISongService>? songService = null,
         Mock<ISongResolutionService>? resolutionService = null,
-        Mock<IArtistService>? artistService = null)
+        Mock<IArtistService>? artistService = null,
+        IMessenger? messenger = null)
     {
         return new SongFormViewModel(
             (artistService ?? new Mock<IArtistService>()).Object,
@@ -25,7 +28,7 @@ public class SongFormViewModelTests
             new Mock<ILogger<SongFormViewModel>>().Object,
             (urlService ?? new Mock<ISongKaraokeUrlService>()).Object,
             (secureStorage ?? new Mock<ISecureStorageWrapper>()).Object,
-            new Mock<IMessenger>().Object);
+            messenger ?? new Mock<IMessenger>().Object);
     }
 
     // ── RemoveUrlAsync (edit mode) ─────────────────────────────────────────
@@ -452,6 +455,69 @@ public class SongFormViewModelTests
         var sut = CreateSut();
 
         Assert.False(sut.ConsumeSuppressArtistSearch());
+    }
+
+    // ── BUG-061 review finding: two more programmatic ArtistSearchText paths were unguarded ──
+
+    // [AC] BUG-061: the song-picker exact-match path (ResolveAndLockArtistAsync, via OnSongPicked)
+    // sets ArtistSearchText programmatically when it auto-locks a matched artist and must suppress
+    // the resulting item request.
+    [Fact]
+    public async Task ResolveAndLockArtistAsync_ExactMatch_SuppressesNextArtistSearch()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.SearchArtistsByNameAsync("Queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new ArtistListItem(7, "Queen", string.Empty, false, 3)]);
+        var messenger = new WeakReferenceMessenger();
+        var sut = CreateSut(artistService: artistService, messenger: messenger);
+
+        messenger.Send(new CanonicalSongPickedMessage(
+            new MusicSearchResultDto("ext-1", "youtube", "Queen", "Bohemian Rhapsody", null)));
+        await Task.Yield();
+        await Task.Yield(); // let the fire-and-forget ResolveAndLockArtistAsync's RunOnUiThread callback land
+
+        Assert.True(sut.IsArtistLocked);
+        Assert.True(sut.ConsumeSuppressArtistSearch());
+    }
+
+    // [AC] BUG-061: the song-picker no-match prefill path (ResolveAndLockArtistAsync) also sets
+    // ArtistSearchText programmatically and must suppress the resulting item request.
+    [Fact]
+    public async Task ResolveAndLockArtistAsync_NoMatch_SuppressesNextArtistSearch()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.SearchArtistsByNameAsync("Unknown Band", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        var messenger = new WeakReferenceMessenger();
+        var sut = CreateSut(artistService: artistService, messenger: messenger);
+
+        messenger.Send(new CanonicalSongPickedMessage(
+            new MusicSearchResultDto("ext-2", "youtube", "Unknown Band", "Some Song", null)));
+        await Task.Yield();
+        await Task.Yield();
+
+        Assert.Equal("Unknown Band", sut.ArtistSearchText);
+        Assert.False(sut.IsArtistLocked);
+        Assert.True(sut.ConsumeSuppressArtistSearch());
+    }
+
+    // [AC] BUG-061: blurring without a new selection restores the prior artist name into
+    // ArtistSearchText programmatically — this restore must also suppress the resulting search.
+    [Fact]
+    public void ArtistBlurredWithoutSelection_RestoresPriorSelection_SuppressesNextArtistSearch()
+    {
+        var sut = CreateSut();
+        sut.SelectedArtistId = 7;
+        sut.SelectedArtistName = "Guns N' Roses";
+        sut.ArtistSearchText = "Guns N' Rose"; // user typed-then-blurred without selecting
+        sut.ConsumeSuppressArtistSearch(); // clear any incidental state from the setup above
+
+        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
+
+        Assert.Equal("Guns N' Roses", sut.ArtistSearchText);
+        Assert.True(sut.ConsumeSuppressArtistSearch());
     }
 
     // ── T7: inline "create new artist" ────────────────────────────────────
