@@ -470,6 +470,28 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "myvocalist-coding-skill-sco
 		Docs\Management\cross-cutting\myvocalist-coding-skill-scoping\README.md = Docs\Management\cross-cutting\myvocalist-coding-skill-scoping\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-04-spike-01-18-gate-audit", "2026-07-04-spike-01-18-gate-audit", "{FA1234BC-0001-4000-8000-0000000000C8}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-07-04-spike-01-18-gate-audit\README.md = Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-07-04-spike-01-18-gate-audit\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp-secrets-rotation", "mcp-secrets-rotation", "{FA1234BC-0001-4000-8000-0000000000C9}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\mcp-secrets-rotation\README.md = Docs\Management\cross-cutting\mcp-secrets-rotation\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp-governance-docs-housekeeping", "mcp-governance-docs-housekeeping", "{FA1234BC-0001-4000-8000-0000000000CA}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\mcp-governance-docs-housekeeping\README.md = Docs\Management\cross-cutting\mcp-governance-docs-housekeeping\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "helder-manual-actions-2026-07-09", "helder-manual-actions-2026-07-09", "{FA1234BC-0001-4000-8000-0000000000CB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\helder-manual-actions-2026-07-09\README.md = Docs\Management\cross-cutting\helder-manual-actions-2026-07-09\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\styles-structure\README.md = Docs\Management\DevCycleCraft\styles-structure\README.md
@@ -1007,6 +1029,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rules-file-refactoring", "r
 		Docs\Management\DevCycleCraft\rules-file-refactoring\skill-overlap-findings.md = Docs\Management\DevCycleCraft\rules-file-refactoring\skill-overlap-findings.md
 		Docs\Management\DevCycleCraft\rules-file-refactoring\task-log.md = Docs\Management\DevCycleCraft\rules-file-refactoring\task-log.md
 		Docs\Management\DevCycleCraft\rules-file-refactoring\tasks.md = Docs\Management\DevCycleCraft\rules-file-refactoring\tasks.md
+		Docs\Management\DevCycleCraft\rules-file-refactoring\README.md = Docs\Management\DevCycleCraft\rules-file-refactoring\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec-evolution-versioning", "spec-evolution-versioning", "{FA1234BC-0001-4000-8000-000000000043}"
@@ -1475,6 +1498,11 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000C4} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000C5} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000C6} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000C7} = {FA1234BC-0001-4000-8000-000000000041}
+		{FA1234BC-0001-4000-8000-0000000000C8} = {FA1234BC-0001-4000-8000-0000000000C7}
+		{FA1234BC-0001-4000-8000-0000000000C9} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000CA} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000CB} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-000000000080} = {FA1234BC-0001-4000-8000-00000000007F}
 		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
