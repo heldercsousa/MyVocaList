@@ -492,6 +492,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "helder-manual-actions-2026-
 		Docs\Management\cross-cutting\helder-manual-actions-2026-07-09\README.md = Docs\Management\cross-cutting\helder-manual-actions-2026-07-09\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tool-registry-cleanup", "tool-registry-cleanup", "{FA1234BC-0001-4000-8000-0000000000CC}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\tool-registry-cleanup\README.md = Docs\Management\cross-cutting\tool-registry-cleanup\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-appbar-pattern", "search-appbar-pattern", "{FA1234BC-0001-4000-8000-0000000000CD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\search-appbar-pattern\README.md = Docs\Management\cross-cutting\search-appbar-pattern\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-044-duplicate-personformpage-after-save", "2026-07-15-BUG-044-duplicate-personformpage-after-save", "{FA1234BC-0001-4000-8000-0000000000CE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-044-duplicate-personformpage-after-save\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-044-duplicate-personformpage-after-save\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\styles-structure\README.md = Docs\Management\DevCycleCraft\styles-structure\README.md
@@ -1053,6 +1068,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "per-agent-context-isolation
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\requirements.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\requirements.md
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\task-log.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\task-log.md
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\tasks.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\tasks.md
+		Docs\Management\DevCycleCraft\per-agent-context-isolation\README.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-purpose-review", "backlog-purpose-review", "{FA1234BC-0001-4000-8000-000000000049}"
@@ -1060,6 +1076,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-purpose-review", "b
 		Docs\Management\DevCycleCraft\backlog-purpose-review\design.md = Docs\Management\DevCycleCraft\backlog-purpose-review\design.md
 		Docs\Management\DevCycleCraft\backlog-purpose-review\findings.md = Docs\Management\DevCycleCraft\backlog-purpose-review\findings.md
 		Docs\Management\DevCycleCraft\backlog-purpose-review\task-log.md = Docs\Management\DevCycleCraft\backlog-purpose-review\task-log.md
+		Docs\Management\DevCycleCraft\backlog-purpose-review\README.md = Docs\Management\DevCycleCraft\backlog-purpose-review\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-archive", "backlog-archive", "{FA1234BC-0001-4000-8000-000000000050}"
@@ -1503,6 +1520,9 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000C9} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000CA} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000CB} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000CC} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000CD} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000CE} = {FA1234BC-0001-4000-8000-0000000000BC}
 		{FA1234BC-0001-4000-8000-000000000080} = {FA1234BC-0001-4000-8000-00000000007F}
 		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
