@@ -698,19 +698,44 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg = Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-002-artist-form-search-non-md3.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-002-artist-form-search-non-md3.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-003-songpage-filter-chips.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-003-songpage-filter-chips.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-004-bottomsheet-title-style-missing.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-004-bottomsheet-title-style-missing.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-005-new-song-save-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-005-new-song-save-broken.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-006-search-song-double-tap-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-006-search-song-double-tap-crash.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-007-searchappbar-duplicate-back-arrow.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-007-searchappbar-duplicate-back-arrow.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-03-BUG-001-artists-page-no-back-button", "2026-06-03-BUG-001-artists-page-no-back-button", "{FA1234BC-0001-4000-8000-00000000008A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-03-BUG-001-artists-page-no-back-button\BUG-001-artists-page-no-back-button.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-03-BUG-001-artists-page-no-back-button\BUG-001-artists-page-no-back-button.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-03-BUG-001-artists-page-no-back-button\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-03-BUG-001-artists-page-no-back-button\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-002-artist-form-search-non-md3", "2026-06-01-BUG-002-artist-form-search-non-md3", "{FA1234BC-0001-4000-8000-00000000008B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-002-artist-form-search-non-md3\BUG-002-artist-form-search-non-md3.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-002-artist-form-search-non-md3\BUG-002-artist-form-search-non-md3.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-002-artist-form-search-non-md3\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-002-artist-form-search-non-md3\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-005-new-song-save-broken", "2026-06-01-BUG-005-new-song-save-broken", "{FA1234BC-0001-4000-8000-00000000008C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-005-new-song-save-broken\BUG-005-new-song-save-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-005-new-song-save-broken\BUG-005-new-song-save-broken.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-005-new-song-save-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-005-new-song-save-broken\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-006-search-song-double-tap-crash", "2026-06-01-BUG-006-search-song-double-tap-crash", "{FA1234BC-0001-4000-8000-00000000008D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-006-search-song-double-tap-crash\BUG-006-search-song-double-tap-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-006-search-song-double-tap-crash\BUG-006-search-song-double-tap-crash.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-006-search-song-double-tap-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-006-search-song-double-tap-crash\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-007-searchappbar-duplicate-back-arrow", "2026-06-01-BUG-007-searchappbar-duplicate-back-arrow", "{FA1234BC-0001-4000-8000-00000000008E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-007-searchappbar-duplicate-back-arrow\BUG-007-searchappbar-duplicate-back-arrow.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-007-searchappbar-duplicate-back-arrow\BUG-007-searchappbar-duplicate-back-arrow.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-007-searchappbar-duplicate-back-arrow\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-007-searchappbar-duplicate-back-arrow\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-BUG-015-artistspage-trailing-button-noop", "2026-06-27-BUG-015-artistspage-trailing-button-noop", "{FA1234BC-0001-4000-8000-000000000083}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\BUG-015-artistspage-trailing-button-noop.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\BUG-015-artistspage-trailing-button-noop.md
@@ -1280,6 +1305,11 @@ Global
 		{FA1234BC-0001-4000-8000-000000000079} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000083} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000084} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008A} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008B} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008C} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008D} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008E} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000085} = {FA1234BC-0001-4000-8000-000000000018}
 		{FA1234BC-0001-4000-8000-000000000086} = {FA1234BC-0001-4000-8000-000000000085}
 		{FA1234BC-0001-4000-8000-000000000087} = {FA1234BC-0001-4000-8000-000000000085}
