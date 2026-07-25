@@ -582,6 +582,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-picker", "search-pic
 		Docs\Management\BusinessFeatures\search-picker\task-3c-youtube-search-page.md = Docs\Management\BusinessFeatures\search-picker\task-3c-youtube-search-page.md
 		Docs\Management\BusinessFeatures\search-picker\task-log.md = Docs\Management\BusinessFeatures\search-picker\task-log.md
 		Docs\Management\BusinessFeatures\search-picker\tasks.md = Docs\Management\BusinessFeatures\search-picker\tasks.md
+		Docs\Management\BusinessFeatures\search-picker\README.md = Docs\Management\BusinessFeatures\search-picker\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-000000000085}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-artist-picker-page", "2026-06-01-artist-picker-page", "{FA1234BC-0001-4000-8000-000000000086}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-artist-picker-page\README.md = Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-artist-picker-page\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-song-picker-page", "2026-06-01-song-picker-page", "{FA1234BC-0001-4000-8000-000000000087}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-song-picker-page\README.md = Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-song-picker-page\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-youtube-search-page", "2026-06-01-youtube-search-page", "{FA1234BC-0001-4000-8000-000000000088}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-youtube-search-page\README.md = Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-youtube-search-page\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-coding-guidelines-update", "2026-06-01-coding-guidelines-update", "{FA1234BC-0001-4000-8000-000000000089}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-coding-guidelines-update\README.md = Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-coding-guidelines-update\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-refactor", "{4CB09F16-6E81-425E-9080-840BABFB66BF}"
@@ -1257,6 +1280,11 @@ Global
 		{FA1234BC-0001-4000-8000-000000000079} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000083} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000084} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000085} = {FA1234BC-0001-4000-8000-000000000018}
+		{FA1234BC-0001-4000-8000-000000000086} = {FA1234BC-0001-4000-8000-000000000085}
+		{FA1234BC-0001-4000-8000-000000000087} = {FA1234BC-0001-4000-8000-000000000085}
+		{FA1234BC-0001-4000-8000-000000000088} = {FA1234BC-0001-4000-8000-000000000085}
+		{FA1234BC-0001-4000-8000-000000000089} = {FA1234BC-0001-4000-8000-000000000085}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
