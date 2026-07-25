@@ -2686,3 +2686,102 @@ Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation: `python .claude/sc
 Files written and re-read: all 7 new/modified files above -- re-read via the Edit/Write tool's post-call state and re-verified frontmatter shape against the Wave A/B `venues`/`persons` precedents before commit.
 
 **STOPPED after Wave C per the briefing -- Wave D not started.**
+
+---
+## Task: T12a Wave D -- 2026-05 pt2 (4 folders) + BUG-015
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` (Wave D)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/DevCycleCraft/architecture-tests-evaluation/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/claude-managed-agents-evaluation/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/backlog-workflow-integration/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/app-versioning/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-015-artistspage-trailing-button-noop/BUG-015-artistspage-trailing-button-noop.md` (`git mv` from the flat file; nothing deleted, REQ-SEV-27)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-015-artistspage-trailing-button-noop/README.md` (new)
+- `MyVocaList.sln` -- GUID `0083` (see below)
+
+### `.sln` GUIDs consumed
+`0083` only, for the new `2026-06-27-BUG-015-artistspage-trailing-button-noop` leaf project nested
+under the existing `artists-songs\bugs` Solution Folder (`{7A021F6B-F297-41EA-A028-C4F881146791}`).
+The plan reserved `0084`-`0088` (5 GUIDs) as an upper bound, matching the Wave C discrepancy
+pattern: the 4 existing DevCycleCraft folders (architecture-tests-evaluation,
+claude-managed-agents-evaluation, backlog-workflow-integration, app-versioning) already had
+registered `ProjectSection(SolutionItems)` blocks -- adding their `README.md` line needed no new
+GUID, only the BUG-015 folder (net-new leaf) did. Confirmed the flat-file line
+`BUG-015-artistspage-trailing-button-noop.md` was removed from the shared `bugs` ProjectSection
+(git mv target) and the new leaf's `NestedProjects` entry maps `0083` -> the `bugs` folder GUID.
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- All `order` values: 40/50/60/70 (the 4 DevCycleCraft rows, continuing the 2026-05 table sequence
+  from Wave C's `30`) and `10` (BUG-015, restarting the 2026-06 bug-table sequence).
+- `goal:` text for `backlog-workflow-integration` was reworded (not verbatim) to avoid the
+  validator's banned-content patterns -- the archived Notes cell read "Completed (workflow.md
+  Rules 1/7 updated)", which trips both the "test count" (`1/7`) and "file path beyond the
+  pointer" (`workflow.md`) bans. Reworded to "Completed (workflow rules updated)" preserving
+  meaning without the banned tokens; flagging the substitution since it is not a verbatim
+  transcription.
+- BUG-015 folder shape/slug are pre-set by the plan (`2026-06-27-BUG-015-...`, REQ-SEV-01), not
+  agent-invented.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing per REQ-SEV-21 amendment); BACKLOG.md/archive files
+reported stale as expected (regen not run in this task -- T12 territory, matches Wave C precedent).
+Tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -> 144 passed,
+0 failed (`pytest` is not installed in this environment; the suite runs under `unittest`, per the
+Wave C precedent note at line 2334). `.sln` BOM + all-CRLF verified before and after edit via
+Python binary-mode read (never grep, per `rtk-rewrites-grep` memory). Commit SHA:
+`6a66b71` (`docs(spec-evolution): T12a Wave D -- 2026-05 pt2 (4 folders) + BUG-015`). Pushed to
+`origin/feature/backlog-migration`.
+Files written and re-read: all 7 changed files above -- re-read via the Edit/Write tool's post-call
+state and via Python binary-mode read for `MyVocaList.sln`; frontmatter shape re-verified against
+the Wave C `sdd`/`gotosettings-navigation-fix` precedents and the T10a `BUG-021`/`BUG-028` bug-folder
+precedents before commit.
+
+---
+## Task: T12a Wave E -- 1 folder (BUG-016), rules-file rows held back
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` (Wave E)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-016-songspage-fab-crash/BUG-016-songspage-fab-crash.md` (`git mv` from the flat file; nothing deleted, REQ-SEV-27)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-016-songspage-fab-crash/README.md` (new)
+- `MyVocaList.sln` -- GUID `0084` (see below)
+
+### `.sln` GUIDs consumed
+`0084` only, for the new `2026-06-27-BUG-016-songspage-fab-crash` leaf project nested under the
+same `artists-songs\bugs` Solution Folder as Wave D's BUG-015 leaf. Flat-file line
+`BUG-016-songspage-fab-crash.md` removed from the shared `bugs` ProjectSection; `NestedProjects`
+entry maps `0084` -> the `bugs` folder GUID.
+
+### REQ-SEV-32 confirmation (rules-file rows held back)
+Per the plan and Helder's standing ruling, the two remaining 2026-05 archive rows -- "VS Solution
+File Registration Rule" (pointer: `.claude/rules/constraints-registry.md`) and "Proactive BACKLOG
+Entry Rule" (pointer: `.claude/rules/workflow.md`) -- got **no folder** this wave. Both pointers
+target files outside `Docs/Management`, matching REQ-SEV-32 exactly. No folder was created, no
+README written, no `.sln` entry added for either row; their archive rows keep their existing text
+pointer unchanged. Wave E therefore ships only the 1 planned BUG-016 folder, as the plan specifies.
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- `order`: `20` (BUG-016, continuing the 2026-06 bug-table sequence from Wave D's BUG-015 `10`).
+- Folder shape/slug are pre-set by the plan (`2026-06-27-BUG-016-...`, REQ-SEV-01), not
+  agent-invented.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing); BACKLOG.md/archive files reported stale as expected
+(regen not run -- T12 territory). Tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"`
+-> 144 passed, 0 failed. `.sln` BOM + all-CRLF verified before and after edit via Python
+binary-mode read. Commit SHA: `e2f8820` (`docs(spec-evolution): T12a Wave E -- 1 folder (BUG-016),
+rules-file rows held back`). Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: all 3 changed files above -- re-read via the Edit/Write tool's post-call
+state and via Python binary-mode read for `MyVocaList.sln`.
+
+**STOPPED after Wave E per the briefing -- Wave F not started.**
