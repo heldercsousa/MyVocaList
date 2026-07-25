@@ -3021,24 +3021,108 @@ Commit SHAs: `efe0a05` (Wave I), `23e4140` (Wave J), `e2211b9` (Wave K). All pus
 - **No pre-scheme `severity` values found** in Waves I/J/K source rows -- nothing to drop this
   round (unlike Waves D/F/G).
 
+---
+## Task: T12a Waves L, M, N -- docs-only backlog migration (2026-06 completion)
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md`
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files (Wave L -- commit `f7640ce`):
+- `Docs/Management/cross-cutting/md3-devexpress-compliance-gap/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-14-BUG-003-songpage-filter-chips/BUG-003-songpage-filter-chips.md` (git mv from flat file)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-14-BUG-003-songpage-filter-chips/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-14-BUG-004-bottomsheet-title-style-missing/BUG-004-bottomsheet-title-style-missing.md` (git mv from flat file)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-14-BUG-004-bottomsheet-title-style-missing/README.md` (new)
+- `Docs/Management/DevCycleCraft/crud-list-deduplication/README.md` (new)
+- `Docs/Management/DevCycleCraft/crud-list-deduplication/changes/2026-06-04-steps-1-7e-migration/README.md` (new)
+- `MyVocaList.sln` (GUIDs `00A9`-`00AD` registered)
+
+### Changed files (Wave M -- commit `bc6202f`):
+- `Docs/Management/cross-cutting/db-side-collation/README.md` (new)
+- `Docs/Management/cross-cutting/navigation-icon-pattern/README.md` (new)
+- `Docs/Management/DevCycleCraft/page-load-frozen/README.md` (new, existing folder)
+- `Docs/Management/cross-cutting/artists-crud-filter-fix/README.md` (new)
+- `Docs/Management/cross-cutting/queue-music-icon-asset/README.md` (new)
+- `MyVocaList.sln` (GUIDs `00AE`-`00B1` registered; `page-load-frozen` reused its existing GUID `{C81D77D9-056E-44D8-A88F-522682CEE603}` -- no new GUID needed)
+
+### Changed files (Wave N -- commit `303a5bd`):
+- `Docs/Management/DevCycleCraft/ui-form-validation-guide/changes/2026-06-30-form-validation-guide-shipped/README.md` (new)
+- `MyVocaList.sln` (GUIDs `00B2`-`00B3` registered)
+
+### Spec gap: Wave N real id collision (`ui-form-validation-guide`)
+**Location:** `Docs/Management/DevCycleCraft/ui-form-validation-guide/README.md` -- already exists
+as a live `🟡 In Progress` item ("Form validation" -- establish + apply validation patterns to all
+form entries), with its own `task-log.md`, distinct from the plan's assumed Done row ("01 - Form
+validation guide", closed 2026-06).
+**Gap description:** one item = one `README.md` path in this model; two distinct backlog rows
+cannot both own the same folder's `README.md`.
+**Options:**
+- Option A (taken): file the archived Done row as a disambiguated `changes/` sub-item
+  (`ui-form-validation-guide-shipped`), pointer stays on the folder's existing `task-log.md` --
+  consistent with the Wave J (`queue-management-core-product`, `backup-restore-tier1-3`) and
+  Wave J-family precedent.
+- Option B: overwrite the existing In Progress README with the Done row's content, losing the
+  live item's tracking.
+**Recommendation:** Option A -- implemented. Rationale: nothing deleted (REQ-SEV-27), both items
+remain independently tracked.
+**Blocking:** No -- proceeded with Option A as a documented assumption; flagged for Helder's gate
+audit.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation per wave:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing) after every wave; archive/BACKLOG files reported stale
+as expected (regen not run -- T12 territory). Tests:
+`python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -> 144 passed,
+0 failed, after every wave. `.sln` edits made via the Edit tool (UTF-8/CRLF preserved by the
+tool); re-read after each edit to confirm placement.
+Files written and re-read: all 13 new/moved files + `MyVocaList.sln` above -- confirmed via
+Write/Edit tool state.
+Commit SHAs: `f7640ce` (Wave L), `bc6202f` (Wave M), `303a5bd` (Wave N). All pushed to
+`origin/feature/backlog-migration`.
+
+### Flagged items for Helder's gate audit
+- **Reworded goals** (verbatim archive text tripped the file-path/commit-hash/test-count banned
+  pattern): `md3-devexpress-compliance-gap`, `db-side-collation`, `artists-crud-filter-fix`,
+  `queue-music-icon-asset` (all cross-cutting Wave L/M rows); BUG-004's goal (dropped a file-path
+  reference to `MaterialStyles.xaml`); `steps-1-7e-migration`'s goal (reworded the `2026-06-04/06`
+  date range so it did not read as a test-count fraction).
+- **Agent-authored slugs**: all Wave L/M cross-cutting slugs (`md3-devexpress-compliance-gap`,
+  `db-side-collation`, `navigation-icon-pattern`, `artists-crud-filter-fix`,
+  `queue-music-icon-asset`); Wave N's disambiguated sub-item (`ui-form-validation-guide-shipped`).
+- **`Duplicate` status used**: BUG-003 (`🔵 Duplicate`) -- T12-pre's extended STATUSES (shipped
+  `e7b29a5`) confirmed already present in `model.py`; no schema change needed this wave.
+- **Real id collision resolved via disambiguation**: Wave N's `ui-form-validation-guide` row --
+  see "Spec gap" above.
+- **Pre-scheme severity dropped**: BUG-003 (`Medium`, found in the moved flat file's body -- not
+  carried into README frontmatter); BUG-004 (`High`, same treatment). Both preserved verbatim in
+  the moved flat file bodies, per standing ruling.
+- **Cross-cutting collision check**: confirmed clean for all 7 new Wave L/M slugs against the
+  29 pre-existing `Docs/Management/cross-cutting/*` folders (enumerated directly before writing,
+  post-Wave-K additions included) -- no collisions found.
+- **BUG-003/BUG-004 `.sln` cleanup**: the parent `bugs` folder's `SolutionItems` block (GUID
+  `{7A021F6B-F297-41EA-A028-C4F881146791}`) had its two now-superseded flat-file lines removed in
+  the same edit that added the new dated-folder entries -- confirmed via direct `.sln` grep before
+  and after.
+
 ### Checkpoint
-Branch: `feature/backlog-migration`, worktree `mvl-backlog-migration`. Waves I, J, K all
-committed + pushed (`efe0a05`, `23e4140`, `e2211b9`). **STOPPED after Wave K per the briefing --
-Wave L not started.** Next-free `.sln` GUID for a future Wave L: `00A9` (audit directly from the
-`.sln` before trusting any prior wave's stated number, per standing instruction -- Wave L's own
-plan section already assumes this exact value).
+Branch: `feature/backlog-migration`, worktree `mvl-backlog-migration`. Waves L, M, N all
+committed + pushed. **This completes ALL 2026-06 rows** (T12a-remaining-waves-plan.md's own
+statement that Wave N's re-triage row was already handled in Wave C is confirmed -- no extra row
+added). **STOPPED after Wave N per the briefing -- Wave O not started.**
 
-**Context manifest for resuming (Wave L onward):**
+**Next-free `.sln` GUID for a future Wave O: `00B4`** (audit directly from the `.sln` before
+trusting this number, per standing instruction).
+
+**Context manifest for resuming (Wave O onward -- Batch 5, 2026-07 rows):**
 - `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` -- read
-  `### Wave L` for the next rows to migrate.
-- This `task-log.md`'s Wave I/J/K entries (above) -- the authoritative pattern to replicate,
-  including the real-id-collision disambiguation pattern (Wave J) that Wave L may need again
-  (`BUG-003`/`ArtistsPage Filter Chips` row already has known duplicate-status handling per the
-  plan's own note).
-- `MyVocaList.sln` -- read directly to re-audit the GUID high-water mark before trusting `00A9`.
-- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-06.md` and
-  `Docs/Management/cross-cutting-log.md` -- source of verbatim Goal/Notes text for Wave L rows.
-- A committed Wave I/J/K README (e.g.
-  `Docs/Management/BusinessFeatures/crash-reporting/README.md`) as the frontmatter/body template.
-
-**STOPPED after Wave K per the briefing -- Wave L not started.**
+  `### Wave O` onward for the next rows to migrate (35 remaining 2026-07 rows across 7 waves).
+- This `task-log.md`'s Wave L/M/N entries (above) -- the authoritative pattern to replicate,
+  including the folder-collision disambiguation pattern (`changes/` sub-item, pointer on the
+  existing `task-log.md`) that later waves will likely need again.
+- `MyVocaList.sln` -- read directly to re-audit the GUID high-water mark before trusting `00B4`.
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` -- source of verbatim Goal/Notes
+  text for Wave O+ rows (2026-07 rows live in the 07 archive file, not the 06 one used this wave).
+- A committed Wave L/M/N README (e.g.
+  `Docs/Management/cross-cutting/db-side-collation/README.md`) as the frontmatter/body template.
