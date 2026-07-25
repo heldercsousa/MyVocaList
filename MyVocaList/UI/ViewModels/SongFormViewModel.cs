@@ -401,6 +401,7 @@ public partial class SongFormViewModel : ViewModelBase
     {
         SelectedArtistId = null;
         SelectedArtistName = null;
+        _suppressNextArtistSearch = true; // BUG-061: programmatic clear, not user typing
         ArtistSearchText = string.Empty;
         IsArtistLocked = false;
         ArtistSuggestions = [];

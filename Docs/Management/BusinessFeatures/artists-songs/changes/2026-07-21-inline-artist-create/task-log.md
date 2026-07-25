@@ -637,3 +637,5 @@ immediately before each of the three programmatic assignments above. No change t
   no-match cases) → dropdown does not re-open on the auto-locked/pre-filled name; blur the artist
   field after typing over a previously-selected artist without picking a new suggestion → dropdown
   does not re-open on the restored name.
+
+BUG-061 — ClearArtist guard added, final residual closed (re-verify finding). `SongFormViewModel.ClearArtist()` now sets `_suppressNextArtistSearch = true` before `ArtistSearchText = string.Empty`. New test `ClearArtist_SuppressesNextArtistSearch`. Build 0 errors; tests 530/530 green (529 baseline + 1 new).

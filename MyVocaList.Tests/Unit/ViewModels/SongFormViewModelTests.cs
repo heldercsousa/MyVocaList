@@ -364,6 +364,22 @@ public class SongFormViewModelTests
         Assert.Equal(string.Empty, sut.ArtistSearchText);
     }
 
+    // [AC] BUG-061: the clear (X) icon also sets ArtistSearchText programmatically (to empty) and
+    // must suppress the resulting item request, same as every other programmatic assignment.
+    [Fact]
+    public void ClearArtist_SuppressesNextArtistSearch()
+    {
+        var sut = CreateSut();
+        sut.SelectedArtistId = 7;
+        sut.SelectedArtistName = "Guns N' Roses";
+        sut.ArtistSearchText = "Guns N' Roses";
+        sut.IsArtistLocked = true;
+
+        sut.ClearArtistCommand.Execute(null);
+
+        Assert.True(sut.ConsumeSuppressArtistSearch());
+    }
+
     // [AC] REQ-ACREATE-15: a deliberate clear must not be silently overwritten by the
     // restore-prior-selection branch on the next blur.
     [Fact]
