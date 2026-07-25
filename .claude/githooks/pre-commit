@@ -11,6 +11,16 @@
 #
 # Docs-only / config-only commits skip the gate entirely.
 # Intentional bypass (e.g. WIP checkpoint): `git commit --no-verify`.
+#
+# --- R-2 (SPEC-EVO T12b) ---
+# BACKLOG.md is a generated view over item README.md frontmatter. This gate is
+# deliberately BLOCKING: `regen --check` is a byte comparison with no false
+# positives (unlike orphan_check.py's advisory heuristic, which guesses at
+# intent and so must not block), and an advisory-only gate would defeat the
+# core premise of generation -- a view that MAY be stale is worse than a
+# hand-written one, because a reader cannot tell which state they are looking
+# at. Fires only on commits that touch frontmatter-bearing files, so ordinary
+# code-only commits pay nothing beyond the check above.
 
 set -e
 
@@ -20,17 +30,37 @@ STAGED=$(git diff --cached --name-only --diff-filter=ACM)
 # Does the commit touch compilable code?
 if ! printf '%s\n' "$STAGED" | grep -Eq '\.(cs|xaml)$'; then
   echo "pre-commit: no .cs/.xaml changes staged — skipping build+test gate."
-  exit 0
+else
+  echo "pre-commit: code changes staged — running dotnet test (bypass with --no-verify)..."
+  if ! dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -v q --nologo; then
+    echo ""
+    echo "pre-commit: BLOCKED — build or tests failed. Fix before committing."
+    echo "            To commit anyway (e.g. an intentional WIP checkpoint):"
+    echo "            git commit --no-verify"
+    exit 1
+  fi
+  echo "pre-commit: build + tests green."
 fi
 
-echo "pre-commit: code changes staged — running dotnet test (bypass with --no-verify)..."
-if ! dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -v q --nologo; then
-  echo ""
-  echo "pre-commit: BLOCKED — build or tests failed. Fix before committing."
-  echo "            To commit anyway (e.g. an intentional WIP checkpoint):"
-  echo "            git commit --no-verify"
-  exit 1
+# Does the commit touch BACKLOG frontmatter (item README.md, BACKLOG.md itself,
+# or an archive month file)?
+BACKLOG_TOUCHED=$(printf '%s\n' "$STAGED" | grep -E \
+  '(^Docs/Management/.*/README\.md$|^Docs/Management/BACKLOG\.md$|^Docs/Management/backlog-archive/.*\.md$)') || true
+
+if [ -n "$BACKLOG_TOUCHED" ]; then
+  echo "pre-commit: BACKLOG-relevant files staged — running regen --check..."
+  if ! python .claude/scripts/backlog/backlog_gen.py regen --check; then
+    echo ""
+    echo "pre-commit: BLOCKED — BACKLOG.md (or an archive) is stale relative to"
+    echo "            item README.md frontmatter."
+    echo "            Run: python .claude/scripts/backlog/backlog_gen.py regen"
+    echo "            Then stage the regenerated files and retry the commit."
+    echo "            To commit anyway (e.g. an intentional WIP checkpoint):"
+    echo "            git commit --no-verify"
+    exit 1
+  fi
+  echo "pre-commit: BACKLOG.md up to date."
 fi
 
-echo "pre-commit: build + tests green — commit allowed."
+echo "pre-commit: commit allowed."
 exit 0
