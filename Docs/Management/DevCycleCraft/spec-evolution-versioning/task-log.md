@@ -1707,3 +1707,73 @@ I have not renormalized, and recommend it be scheduled as a separate post-migrat
   5. `.gitattributes` — the F3 pin
   6. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — findings block F1-F6
   7. `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` section 3 — archive split / idempotency / preserved regions
+
+---
+## Task: T12b — Install the blocking pre-commit gate
+**Plan:** `plan.md`
+**Status:** To Review
+**Started:** 2026-07-25
+**Completed:** 2026-07-25
+
+Consumes: T12 (`regen --check` exits 0, confirmed before touching anything). Implements R-2
+(design.md § Decisions) — blocking `regen --check` on any commit touching BACKLOG frontmatter.
+
+### What was found
+`.claude/githooks/pre-commit` already existed (commit `5261884`, pre-dates this feature) as a
+`dotnet test` gate for `.cs`/`.xaml` changes, with `core.hooksPath` already pointed at
+`.claude/githooks` repo-wide. `.gitattributes` already pinned the file to LF in anticipation of
+this task (comment references "Shell hooks... a CRLF shebang... breaks execution"). T12b therefore
+**extends** the existing script rather than replacing it — the two gates are independent guards
+(sh functions run sequentially; either can block independently) so a commit touching both code and
+BACKLOG frontmatter must pass both.
+
+### What was done
+Added a second guarded section to `.claude/githooks/pre-commit`:
+- Detects staged files matching `Docs/Management/.*/README\.md`, `Docs/Management/BACKLOG\.md`, or
+  `Docs/Management/backlog-archive/.*\.md` (the frontmatter-bearing / generated set).
+- If none staged: skip (existing dotnet-test-only commits pay nothing extra).
+- If any staged: run `python .claude/scripts/backlog/backlog_gen.py regen --check`; non-zero exit
+  blocks the commit with a message naming the fix command (`regen`) — mirrors the existing
+  `dotnet test` gate's message style and its `--no-verify` bypass note.
+- Restructured the existing `.cs`/`.xaml` block from early-`exit 0` to `if/else` so both gates can
+  run in the same invocation without the first short-circuiting the second.
+
+No `.sln` change: `.claude/githooks/pre-commit` is a pre-existing file being edited, not
+created/moved/deleted (HARD GATE scope, `constraints-registry.md`). `.claude/scripts/backlog/*.py`
+were already `.sln`-registered in an earlier task (T0 finding); `.claude/githooks/` itself is not
+and was not before this change either.
+
+### Demo (per tasks.md: "a deliberately stale BACKLOG is rejected; a clean tree commits")
+1. **Stale rejected:** edited `goal:` frontmatter in
+   `Docs/Management/BusinessFeatures/about-page/README.md` (not regenerated), staged it, ran the
+   hook directly (`sh .claude/githooks/pre-commit`) — blocked, exit 1, printed the `regen` fix
+   command; reverted the file after.
+2. **Clean commits:** with only `.claude/githooks/pre-commit` itself staged (no BACKLOG-relevant
+   file touched), `git commit --dry-run` shows the commit proceeding; running the hook directly
+   returns exit 0 ("commit allowed").
+3. `regen --check` on the real, unmodified tree still exits 0 (same pre-existing
+   `BUG-022`-parent warning as T12, unrelated, not new).
+
+### Gate results
+- `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` → **144 passed**, 0
+  failed (unchanged from T12's baseline — T12b touched no `.py` file).
+- `regen --check` → exit 0, 0 staleness (verified before and after the edit).
+- No bare `regen` run at any point (not needed — T12 already left the tree regenerated and
+  idempotent).
+- LF preserved: `.claude/githooks/pre-commit` byte-verified in Python binary mode — 0 CRLF, 0 bare
+  CR before and after the edit (no `grep`/bash text tooling used for the comparison, per the
+  project's rtk-corrupts-grep constraint).
+
+### Changed files:
+- `.claude/githooks/pre-commit`
+
+### Build notes
+No `.cs`/`.xaml` touched — no `dotnet build`/`test` run for this task itself (Docs/`.sln`/Python-only
+scope, per briefing). Backlog test suite: 144 passed, 0 failed. `regen --check`: exit 0.
+Files written and re-read: `.claude/githooks/pre-commit` (re-read via `Read` tool after edit,
+matched intended content; also byte-verified LF via Python).
+
+### Status
+T12b is mechanical and fully specified by `design.md` § R-2 and `tasks.md`'s own demo line — no
+Helder decision was needed. **T12b is DONE**, not a blocker. Per the briefing, stopping here — T13a
+onward is rules-file / architecture-review territory out of this task's scope.
