@@ -1071,6 +1071,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec-evolution-versioning",
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\README.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\README.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\POST-MIGRATION-FOLLOWUPS.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\POST-MIGRATION-FOLLOWUPS.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\T13-proposed-diffs.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\T13-proposed-diffs.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "per-agent-context-isolation", "per-agent-context-isolation", "{FA1234BC-0001-4000-8000-000000000044}"
