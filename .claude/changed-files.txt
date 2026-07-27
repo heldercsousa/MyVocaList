@@ -3579,3 +3579,10 @@ Docs/Management/BACKLOG.md
 Docs/Management/DevCycleCraft/spec-evolution-versioning/README.md
 Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
 Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
+Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md
+Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
+Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
+Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
+Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
+Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
+Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
