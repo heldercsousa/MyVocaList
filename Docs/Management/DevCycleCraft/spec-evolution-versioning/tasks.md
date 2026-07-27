@@ -404,7 +404,7 @@ supposed to surface.
 - [ ] **T12 — Archive regeneration + the equivalence gate** *(fence **insertion** is no longer T12's — it moved to T9d, done 2026-07-22; T12 now only regenerates the already-fenced regions and runs the gate)*
   Consumes: T12a. Files owned: 5 archive files, `task-log.md`. Risk: **High — this is the gate.** Review lane: **Architectural (Helder).**
   Demo: every diff hunk vs the frozen fixture classified into REQ-SEV-25's four permitted classes; `regen --check` exit 0; `grep BUG-048` still hits an archive; query ≤ 20 lines.
-- [ ] **T12b — Install the blocking pre-commit gate**
+- [x] **T12b — Install the blocking pre-commit gate**
   Consumes: T12 (precondition: `regen --check` exits 0). Produces: the R-2 gate.
   Files owned: `.claude/githooks/pre-commit`. Risk: Medium. Review lane: Standard. Demo: a deliberately stale BACKLOG is rejected; a clean tree commits.
 
