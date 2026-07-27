@@ -1568,6 +1568,747 @@ outside T10b's `Files owned`, and changing it would be Rule 2 bundling.
 - No hardcoded values and no `TODO`s; every written file re-read and its Markdown re-checked.
 
 ---
+
+## Task: T11a — BUG-050, BUG-051 and BUG-052 get folders
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+**3 folders + 3 READMEs written.** Each back-links the DX `AutoCompleteEdit` replacement
+task-log; **nothing was removed from it** (REQ-SEV-27) — it stays the narrative record. This is
+Phase 3, but T11a itself is still additive: `BACKLOG.md` and the 5 archive files are byte-untouched.
+Executed in the worktree `../mvl-backlog-migration` on `feature/backlog-migration` under the scoped
+"docs land on develop" exception (Helder, 2026-07-22).
+
+### Changed files
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-suggestion-not-locked/README.md` (new folder + README)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-051-autocomplete-stale-results/README.md` (new folder + README)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-052-edit-shows-empty-artist-field/README.md` (new folder + README)
+- `MyVocaList.sln` (3 Solution Folders + 3 SolutionItems + 3 NestedProjects entries; +18/-0)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T11a ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Nesting derived from the current BACKLOG rows, not assumed
+
+The brief warned against assuming the parent from T10b's `dx-autocompleteedit-replacement`
+(`parent: autocomplete-component`, DevCycleCraft). **That is not these bugs' parent.** Read from the
+live `BACKLOG.md`: the three rows sit at lines 64–66 of the **Business Features** table, one `↳`
+deep, in the contiguous child block of `| 2026-05 | **Artists & Songs Catalog** |` (line 62) —
+between BUG-027 (line 63) and the `Song artist field` change row (line 67). The DX-AC task-log is
+their *pointer*, i.e. where the narrative happens to live, not their row parent. So:
+**`section: BusinessFeatures`, `parent: artists-songs`** — identical to T10a's BUG-028.
+
+Confirmed mechanically: `model._path_parent` on each new folder resolves to
+`BusinessFeatures/artists-songs`, so the declared parent and the path parent agree and
+`validate`'s disagreement check passes rather than being merely skipped.
+
+### Folder naming — REQ-SEV-01 followed; T10a's BUG-028 folder differs (noted, not touched)
+
+REQ-SEV-01 mandates `bugs/YYYY-MM-DD-BUG-NNN-<slug>/`, and `design.md` §2's own worked example is
+literally `…/bugs/2026-07-21-BUG-050-suggestion-not-locked/`. Both new folders follow it; the
+BUG-050 slug is the spec's verbatim. T10a's new `BUG-028-…` folder omits the date prefix (it mirrored
+its legacy siblings). Not corrected here — outside T11a's `Files owned`, and it changes only a
+`pointer:` string. Flagged for T12/T13 as a naming inconsistency inside one `bugs/` directory.
+
+### Per-README frontmatter
+
+| id | status | severity | section | parent | order | target | back-link |
+|----|--------|----------|---------|--------|-------|--------|-----------|
+| BUG-050 | `💡 Pending` | Critical | BusinessFeatures | `artists-songs` | 40 | 2026-07-21 | `DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/task-log.md` |
+| BUG-051 | `💡 Pending` | Major | BusinessFeatures | `artists-songs` | 50 | 2026-07-21 | same task-log |
+| BUG-052 | `💡 Pending` | Major | BusinessFeatures | `artists-songs` | 60 | 2026-07-21 | same task-log |
+
+`order:` follows the T9a–T10b convention — 1-based position in the live Business Features table × 10
+(positions 4, 5, 6). Verified by rendering: with `order_items`, the three land at rendered positions
+2/3/4 of the Business Features table, directly after `artists-songs` (20) and before
+`inline-artist-create` (70) — the pre-migration sequence exactly. (BUG-027, order 30, has no folder
+yet and is not T11a's.)
+
+**Every item carries an explicit `section:`, per finding F4.** These three are live, so
+`render_backlog` would resolve them through the parent chain anyway — but `render._section_from_path`
+always returns `None` in production (F4) and `_render_all` omits `all_items` (F2), so the fallback
+chain is two-thirds fictional and `section:` is the only path that is not. Written regardless, as
+briefed.
+
+### Verification evidence
+
+All checks in-process and read-only; rendered output discarded, nothing written back. `regen` was
+never run in either mode — per finding **F1** its `--check` exit code is evidence of nothing (`if
+errors: return 2` fires before `_render_all`, and the pre-existing banned-content error on this
+feature's own folder still stands). `grep` was not used for any byte-level comparison (rtk hazard);
+all comparisons are Python.
+
+**1. Parse + validate over the whole tree** (`backlog_gen.walk` + `model.validate`):
+
+```
+items walked: 55          PARSE ERRORS: none
+VALIDATION ERRORS: 1
+  ! DevCycleCraft/spec-evolution-versioning/: Notes contain banned content (file path beyond the pointer)
+errors touching T11a items: []
+DUPLICATE IDS: none
+```
+
+55 items = T10b's 52 + these 3. The single error is the **pre-existing** decision-2 blocker on this
+feature's own folder, unchanged. **Zero new validation errors; zero on any T11a item.**
+
+**2. Rendered rows, verbatim from `render.render_row` — read, not assumed:**
+
+```
+| 2026-07-21 | ↳ BUG-050: Song form — selecting an artist suggestion does not lock the field (Critical) | 💡 Pending | Goal: picking a suggestion must lock the Artist field. Root cause: `SelectArtist` never sets `IsArtistLocked=true` (one-line omission). Found in DX-AC T7. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-suggestion-not-locked/`. |
+| 2026-07-21 | ↳ BUG-051: Song form — artist autocomplete returns stale results (searches prior keystroke) (Major) | 💡 Pending | Goal: dropdown must reflect the current query. Root cause: shared `ArtistSuggestions` race, no per-request cancellation in `SearchArtistsAsync`. Found in DX-AC T7 (W2 realized). Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-051-autocomplete-stale-results/`. |
+| 2026-07-21 | ↳ BUG-052: Song form — editing a saved song shows an empty Artist field (Major) | 💡 Pending | Goal: edit mode must hydrate the saved artist. Likely compound with BUG-050 (song saved without ArtistId); reconfirm after BUG-050 and BUG-051. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-052-edit-shows-empty-artist-field/`. |
+```
+
+Read and confirmed: one `↳` each (`_depth` = 1, correct — they are one `bugs/` segment below the
+feature, matching the hand-written indent); title, target and status transcribed verbatim; no
+escaped-quote leakage of the T10b kind (the goals were written unquoted-safe and the titles contain
+no inner quotes — checked in the rendered text, not in the source).
+
+**3. Byte-exact diff of each rendered row against its pre-migration line** (Python string equality
+against `BACKLOG.md`'s current lines, not `grep`): every row differs in **the pointer only**, except
+BUG-052 which differs in the pointer plus the one respelling below. Everything else — target, arrow,
+title, status, goal wording, punctuation — is byte-identical.
+
+**4. Live splice** — `render.render_backlog(existing, items)` over the real `BACKLOG.md` returned
+without error; the rendered output contains `BUG-050:`, `BUG-051:` and `BUG-052:`.
+
+**5. Archive regression** — T10a's terminal items still bucket and both T9e regions still splice
+against the real fenced files:
+
+```
+archive 2026-06 -> splice OK, 3 items
+archive 2026-07 -> splice OK, 5 items
+```
+(Called with `all_items=items`, i.e. the F2-correct form; no T11a item is terminal, so none routes
+through the archive at all.)
+
+**6. Additivity — `BACKLOG.md` and the 5 archive files unmodified:**
+
+```
+$ git diff --stat -- Docs/Management/BACKLOG.md Docs/Management/backlog-archive/
+(no output — 0 files changed)
+
+$ git status --porcelain
+ M MyVocaList.sln
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-suggestion-not-locked/
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-051-autocomplete-stale-results/
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-052-edit-shows-empty-artist-field/
+```
+
+Nothing moved, nothing deleted. The DX-AC task-log is untouched (REQ-SEV-27) — confirmed by its
+absence from the diff.
+
+**7. `.sln` HARD GATE.** The brief's `0070`/`0071`/`0072` were re-verified rather than trusted, by
+reading the file: the highest `FA1234BC-0001-4000-8000-0000000000NN` **actually in use was `0x72`**
+(the brief was right this time; `constraints-registry.md`'s `0041` remains stale, already queued for
+T13). T11a allocated **`…0073`, `…0074`, `…0075`**, each asserted absent from the file before the
+write. All three nest under the artists-songs `bugs` folder `{7A021F6B-F297-41EA-A028-C4F881146791}`,
+matching BUG-028's `…0070`. Written in **binary**; BOM and CRLF re-asserted after the write:
+
+```
+.sln BOM: True | CRLF: 1178 | lone LF: 0        (was BOM True | CRLF 1160 | lone LF 0)
+git diff --numstat MyVocaList.sln -> 18  0
+```
+
+Added paths re-read from disk with `repr()`:
+
+```
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-050-suggestion-not-locked\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-050-suggestion-not-locked\\README.md'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-051-autocomplete-stale-results\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-051-autocomplete-stale-results\\README.md'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-052-edit-shows-empty-artist-field\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-21-BUG-052-edit-shows-empty-artist-field\\README.md'
+```
+
+**8. Line endings.** The 3 READMEs are new files with no on-disk EOL to preserve; written **LF**
+(matching every README T9a–T10b produced), with `b'\r\n' not in` asserted on the bytes re-read from
+disk. `MyVocaList.sln`, `tasks.md` and `task-log.md` are pre-existing **CRLF** and were asserted CRLF
+after their writes. Per **F3** the repo still has `core.autocrlf=true` with `*.md` unpinned, so blob
+and working tree differ — these assertions measure the **working tree**.
+
+**9. Files were written by a Python script file in binary mode**, never a Bash heredoc (the `\a`/`\b`
+escape-expansion hazard that corrupted an earlier `.sln` write).
+
+### Declared T12 diff hunks
+
+Two classes, three hunks. Both were expected; neither is a transcription error.
+
+**(a) Pointer relocation — all three rows. This is the task's purpose, not a side effect.**
+
+```
+-... Found in DX-AC T7. Pointer: `DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/task-log.md`. |
++... Found in DX-AC T7. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-suggestion-not-locked/`. |
+```
+
+and, for BUG-051 / BUG-052, the pre-migration prose pointer `same DX-AC task-log` (which is not a
+backticked path at all, so it could not survive REQ-SEV-09's one-path rule) becomes each bug's own
+folder. REQ-SEV-01 requires the folder to be the pointer; REQ-SEV-27 requires the old target to
+survive, which it does — every README carries an explicit **History / back-link** line to it.
+
+**(b) One respelling — BUG-052 only. Needs Helder's confirmation at T12.**
+
+```
+-... (song saved without ArtistId); reconfirm after 050/051. Pointer: ...
++... (song saved without ArtistId); reconfirm after BUG-050 and BUG-051. Pointer: ...
+```
+
+`050/051` matches `model._BANNED`'s test-count pattern `\b\d+\s*/\s*\d+\b`. Relocating it to the
+README body was not available — it is not overflow, it is the sentence's operative content — so the
+ids are spelled out in full. Same two bugs, same order, no meaning changed. This is the same class as
+T10a's `Mask="00/00"` and T10b's `BUG-050/051/052`, and is recorded verbatim in BUG-052's README body.
+
+No goal or gate text was trimmed: all three rows' Notes already satisfied the ≤3-sentence /
+≤55-word budget and, apart from (b), tripped no banned pattern. `gate:` was left unset on all three —
+the pre-migration rows carry no Gate, and inventing one would be fabrication.
+
+### Intent verification
+- The task's original demo statement (`regen --check` never exits 2) is **superseded by F1** and was
+  not used; its in-process equivalent is evidence items 1–5.
+- `Changed files` contains only files inside `Files owned` (3 folders, `MyVocaList.sln`) plus this
+  feature's own `tasks.md` / `task-log.md`.
+- No `TODO`s; every written file re-read from disk and its Markdown re-checked.
+- Nothing outside the three folders and the `.sln` was created, moved or deleted.
+
+### Checkpoint
+Complete — no resumption needed. Worktree `../mvl-backlog-migration`, branch `feature/backlog-migration`.
+Step 6 of 6 done: read specs/T10a+T10b → derive nesting from BACKLOG → write 3 READMEs → `.sln` →
+in-process verify → commit. Build/test state: n/a (no code changed).
+Context manifest, had this been interrupted:
+1. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — decision table, F1–F5, T11a row
+2. `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` — T10a/T10b conventions + this entry
+3. `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` — §2 frontmatter, §3 row rendering
+4. `Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md` — REQ-SEV-00/01/02/27
+5. `Docs/Management/BACKLOG.md` — lines 62–67, the source rows and their nesting
+6. `.claude/scripts/backlog/model.py` — `_BANNED`, `_path_parent`, `validate`, `order_items`
+7. `.claude/scripts/backlog/render.py` — `render_row`, `render_backlog` (arg order is `(existing, items)`)
+8. `MyVocaList.sln` — GUID counter and the artists-songs `bugs` folder GUID
+---
+
+## Task: T11b — BUG-027, BUG-029, BUG-030 and BUG-031/032 get folders
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+**4 folders + 4 READMEs written — not 5.** The brief said five bugs; the BACKLOG carries
+**four rows**, because **BUG-031 and BUG-032 share a single row** (`BUG-031/032: no API
+autocomplete while typing Artist Name / Song Title`). See the decision below. Each README
+back-links `BusinessFeatures/artists-songs/task-log.md`; **nothing was removed from it**
+(REQ-SEV-27). `BACKLOG.md` and the 5 archive files are byte-untouched. Executed in the worktree
+`../mvl-backlog-migration` on `feature/backlog-migration` under the scoped
+"docs land on develop" exception (Helder, 2026-07-22).
+
+### Changed files
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-027-songformpage-artist-field-broken/README.md` (new folder + README)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-029-artistformpage-search-strip-icon-crash/README.md` (new folder + README)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear/README.md` (new folder + README)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title/README.md` (new folder + README)
+- `MyVocaList.sln` (4 Solution Folders + 4 SolutionItems + 4 NestedProjects entries; +24/-0)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T11b ticked)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Brief corrections — verified against the live BACKLOG, not trusted
+
+1. **"Five folders" is four.** `BUG-031/032` is one row (line 78 of `BACKLOG.md`), not two.
+   Splitting it would add a row to the regenerated table, which **REQ-SEV-25 forbids**
+   (row-for-row equivalence: *same rows*, same order, same Goal/Gate/Pointer text). One row →
+   one folder. The folder and `id:` use `BUG-031`; the **title carries `BUG-031/032` verbatim**,
+   so `BUG-032` stays grep-reachable in BACKLOG.md (the REQ-SEV-18 property). Recorded in that
+   README and declared as a T12 note below. This is a transcription decision, not a re-scoping:
+   the alternative (two rows) changes content the migration is supposed to preserve.
+2. **"Preserve each row's `🔵 Deferred` status" holds for three of four.** **BUG-027 is
+   `💡 Pending`**, not Deferred, and it is the only one of the four with a real
+   `Goal:`/`Gate:` in its Notes. Its status was transcribed as it actually reads.
+3. **`.sln` counter.** The brief's "T11a allocated through `0075`" was **correct this time** —
+   re-verified by reading the file rather than trusting it (evidence 7).
+4. **Parent/section derived from the rows, not the brief.** All four sit one `↳` deep inside the
+   contiguous child block of `| 2026-05 | **Artists & Songs Catalog** |` in the **Business
+   Features** table → `section: BusinessFeatures`, `parent: artists-songs`. Confirmed
+   mechanically (evidence 1).
+
+### Per-README frontmatter
+
+| id | status | severity | section | parent | order | target | `gate:` (verbatim deferral reason) | back-link |
+|----|--------|----------|---------|--------|-------|--------|------------------------------------|-----------|
+| BUG-027 | `💡 Pending` | Critical | BusinessFeatures | `artists-songs` | 30 | 2026-07-03 | *fix direction now owned by the DX `AutoCompleteEdit` replacement task (decision 2026-07-19), superseding foundations ① + ②.* (verbatim from the row's own `Gate:`) | `BusinessFeatures/artists-songs/task-log.md` |
+| BUG-029 | `🔵 Deferred` | Critical | BusinessFeatures | `artists-songs` | 150 | 2026-07-03 | *the search-strip element is slated for deletion by the Form UX Redesign; re-triage only if any part of the strip survives.* | same task-log |
+| BUG-030 | `🔵 Deferred` | *(unset)* | BusinessFeatures | `artists-songs` | 160 | 2026-07-03 | *Answered by Helder 2026-07-10: the element must disappear from both forms — folded into the Form UX Redesign.* | same task-log |
+| BUG-031 | `🔵 Deferred` | *(unset)* | BusinessFeatures | `artists-songs` | 170 | 2026-07-03 | *Answered by Helder 2026-07-10: autocomplete (local + API) IS required on both entries — folded into the Form UX Redesign.* | same task-log |
+
+`order:` follows the T9a–T11a convention — 1-based position in the live Business Features table
+× 10 (positions 3, 15, 16, 17). Verified by rendering the ordered live table (evidence 3): the
+four land at exactly their pre-migration neighbours — BUG-027 immediately after `artists-songs`
+(20) and before BUG-050 (40); BUG-029/030/031 immediately after BUG-028 (140) and before
+`form-ux-redesign` (180).
+
+**Every item carries an explicit `section:`, per finding F4** — `render._section_from_path` always
+returns `None` in production and `_render_all` omits `all_items` (F2), so `section:` is the only
+non-fictional resolution path.
+
+**`severity:` left unset on BUG-030 and BUG-031/032.** Their rows are tagged `(spec gap)` and carry
+no severity; `model.validate` requires one only in the negative sense (a `Minor` folder is an error,
+REQ-SEV-03 — an unset severity is not). Inventing one would be fabrication. Confirmed clean by
+`validate` (evidence 1). Note this is a *literal* reading of REQ-SEV-01 ("every Critical or Major
+bug … lives at …") — these two are neither, yet they own a folder because they are live BACKLOG
+rows and every live row needs one. Flagged for T12 as a spec-wording observation, not a blocker.
+
+### Verification evidence
+
+All checks in-process and read-only; rendered output discarded, nothing written back. `regen` was
+never run in either mode — per finding **F1** its `--check` exit code is evidence of nothing
+(`if errors: return 2` fires before `_render_all`). `grep` was not used for any byte-level
+comparison (rtk hazard); all comparisons are Python. All writes were done by a **Python script file
+in binary mode**, never a Bash heredoc.
+
+**1. Parse + validate over the whole tree** (`backlog_gen.walk` + `model.validate`), plus the
+declared-vs-path parent agreement check:
+
+```
+items walked: 59          PARSE ERRORS: none
+VALIDATION ERRORS: 1
+  ! DevCycleCraft/spec-evolution-versioning/: Notes contain banned content (file path beyond the pointer)
+errors touching T11b items: []
+DUPLICATE IDS: none
+
+BUG-027 | declared parent: artists-songs | path parent: BusinessFeatures/artists-songs | depth: 1 | section: BusinessFeatures | order: 30  | severity: Critical | status: 💡 Pending
+BUG-029 | declared parent: artists-songs | path parent: BusinessFeatures/artists-songs | depth: 1 | section: BusinessFeatures | order: 150 | severity: Critical | status: 🔵 Deferred
+BUG-030 | declared parent: artists-songs | path parent: BusinessFeatures/artists-songs | depth: 1 | section: BusinessFeatures | order: 160 | severity: None     | status: 🔵 Deferred
+BUG-031 | declared parent: artists-songs | path parent: BusinessFeatures/artists-songs | depth: 1 | section: BusinessFeatures | order: 170 | severity: None     | status: 🔵 Deferred
+```
+
+59 items = T11a's 55 + these 4. The single error is the **pre-existing** decision-2 blocker on this
+feature's own folder, unchanged. **Zero new validation errors; zero on any T11b item; zero duplicate
+ids.** `_path_parent` agrees with the declared `parent` on all four, so `validate`'s disagreement
+check *passed* rather than being skipped.
+
+**2. Rendered rows, verbatim from `render.render_row` — read, not assumed:**
+
+```
+| 2026-07-03 | ↳ BUG-027: SongFormPage Artist field — no validation, no autocomplete, blur clears typed text (Critical) | 💡 Pending | Goal: make song creation possible again. Gate: fix direction now owned by the DX `AutoCompleteEdit` replacement task (decision 2026-07-19), superseding foundations ① + ②. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-027-songformpage-artist-field-broken/`. |
+| 2026-07-03 | ↳ BUG-029: ArtistFormPage search-strip icon crashes the app (Critical) | 🔵 Deferred | Goal: the search-strip icon must not crash the app. Gate: the search-strip element is slated for deletion by the Form UX Redesign; re-triage only if any part of the strip survives. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-029-artistformpage-search-strip-icon-crash/`. |
+| 2026-07-03 | ↳ BUG-030: ArtistFormPage search strip UX unclear (spec gap) | 🔵 Deferred | Goal: resolve the search-strip spec gap on the Artist form. Gate: Answered by Helder 2026-07-10: the element must disappear from both forms — folded into the Form UX Redesign. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear/`. |
+| 2026-07-03 | ↳ BUG-031/032: no API autocomplete while typing Artist Name / Song Title (spec gap) | 🔵 Deferred | Goal: settle whether API-backed autocomplete is required on the two name entries. Gate: Answered by Helder 2026-07-10: autocomplete (local + API) IS required on both entries — folded into the Form UX Redesign. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title/`. |
+```
+
+Read and confirmed: one `↳` each (`_depth` = 1); target, title, status and severity suffix
+transcribed verbatim; **no escaped-quote leakage** of the T10b kind (checked in the *rendered* text,
+not in the source — the titles contain no inner quotes and the em dashes survived intact); the
+`① + ②` glyphs in BUG-027's gate round-tripped byte-identically.
+
+**3. Ordered live Business Features table** (`order_items` over the real item pool) — the four land
+in their pre-migration positions:
+
+```
+1 (20) artists-songs | 2 (30) BUG-027 | 3 (40) BUG-050 | 4 (50) BUG-051 | 5 (60) BUG-052
+6 (70) inline-artist-create | 7 (140) BUG-028 | 8 (150) BUG-029 | 9 (160) BUG-030
+10 (170) BUG-031 | 11 (180) form-ux-redesign | …
+```
+
+**4. Byte-exact diff of each rendered row against its pre-migration line** in
+`migration/BACKLOG-pre-migration.md` (Python string equality on the common-prefix/suffix trim, not
+`grep`). Only the differing middles are reproduced:
+
+```
+--- BUG-027 DIFFERS
+  OLD mid: 'task-log.md'
+  NEW mid: 'bugs/2026-07-03-BUG-027-songformpage-artist-field-broken/'
+--- BUG-029 DIFFERS
+  OLD mid: 'Deferred: the search-strip element is slated … survives. Pointer: `BusinessFeatures/artists-songs/task-log.md'
+  NEW mid: 'Goal: the search-strip icon must not crash the app. Gate: the search-strip element is slated … survives. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-029-artistformpage-search-strip-icon-crash/'
+--- BUG-030 DIFFERS
+  OLD mid: 'Answered by Helder 2026-07-10: the element must disappear … Redesign. Pointer: `BusinessFeatures/artists-songs/task-log.md'
+  NEW mid: 'Goal: resolve the search-strip spec gap on the Artist form. Gate: Answered by Helder 2026-07-10: the element must disappear … Redesign. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear/'
+--- BUG-031 DIFFERS
+  OLD mid: 'Answered by Helder 2026-07-10: autocomplete (local + API) IS required … Redesign. Pointer: `BusinessFeatures/artists-songs/task-log.md'
+  NEW mid: 'Goal: settle whether API-backed autocomplete is required on the two name entries. Gate: Answered by Helder 2026-07-10: autocomplete (local + API) IS required … Redesign. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title/'
+```
+
+Reading these: **BUG-027's only delta is the pointer** (same class as all three of T11a's). The other
+three differ in the pointer **plus** the authored `Goal:` sentence and the `Deferred:`→`Gate:`
+relabelling — both declared below. Target, arrow, title, status, and every word of the deferral
+reason itself are byte-identical.
+
+**5. Live splice** — `render.render_backlog(existing, items)` over the real `BACKLOG.md` returned
+without error; the rendered output contains each of the four rows **verbatim as printed above**
+(exact substring match on the full row, not on the id).
+
+**6. Archive regression** — both T9e regions still splice against the real fenced files, called in
+the F2-correct form (`all_items=items`). No T11b item is terminal, so none routes through the
+archive:
+
+```
+archive 2026-06 -> splice OK, 3 items
+archive 2026-07 -> splice OK, 5 items
+```
+
+**7. Additivity — `BACKLOG.md` and the 5 archive files unmodified:**
+
+```
+$ git diff --stat -- Docs/Management/BACKLOG.md Docs/Management/backlog-archive/
+(no output — 0 files changed)
+
+$ git status --porcelain
+ M MyVocaList.sln
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-027-songformpage-artist-field-broken/
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-029-artistformpage-search-strip-icon-crash/
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear/
+?? Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title/
+```
+
+Nothing moved, nothing deleted. `BusinessFeatures/artists-songs/task-log.md` is untouched
+(REQ-SEV-27) — confirmed by its absence from the diff.
+
+**8. `.sln` HARD GATE.** Highest `FA1234BC-0001-4000-8000-0000000000NN` **actually in use, read from
+the file: `0x75`** (77 GUIDs in that family). T11b allocated **`…0076`, `…0077`, `…0078`,
+`…0079`**, each asserted absent before the write. All four nest under the artists-songs `bugs`
+folder `{7A021F6B-F297-41EA-A028-C4F881146791}` — the same parent the T11a entries use, read from
+the file's existing `NestedProjects` lines. Written in **binary**; BOM and CRLF re-asserted after:
+
+```
+.sln BOM: True | CRLF: 1202 | lone LF: 0        (was BOM True | CRLF 1178 | lone LF 0)
+git diff --numstat MyVocaList.sln -> 24  0
+```
+
+Added paths re-read from disk with `repr()`:
+
+```
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-027-songformpage-artist-field-broken\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-027-songformpage-artist-field-broken\\README.md'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-029-artistformpage-search-strip-icon-crash\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-029-artistformpage-search-strip-icon-crash\\README.md'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear\\README.md'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title\\README.md'
+```
+
+**9. Line endings.** The 4 READMEs are new files with no on-disk EOL to preserve; written **LF**
+(matching every README T9a–T11a produced), with `b'\r\n' not in` asserted on the bytes re-read from
+disk. `MyVocaList.sln`, `tasks.md` and `task-log.md` are pre-existing **CRLF** and were asserted CRLF
+after their writes. Per **F3** the repo still has `core.autocrlf=true` with `*.md` unpinned — these
+assertions measure the **working tree**.
+
+### Declared T12 diff hunks
+
+Four hunks in three classes. None is a transcription error; all four need Helder's confirmation at
+T12.
+
+**(a) Pointer relocation — all four rows. The task's purpose, not a side effect.** Permitted diff
+class (c). Every row's pointer moves from the shared `BusinessFeatures/artists-songs/task-log.md`
+to its own folder; REQ-SEV-27 is satisfied by the **History / back-link** line in each README, and
+the task-log itself is unmodified.
+
+**(b) Agent-authored `Goal:` sentence — BUG-029, BUG-030, BUG-031/032 (decision 1 class, flagged for
+audit as a set).** These three rows have **no Goal** in BACKLOG: their Notes cells open with
+*"Deferred: …"* / *"Answered by Helder 2026-07-10: …"*. `model.REQUIRED` makes `goal` mandatory and
+`render_row` always emits `Goal: {goal}`, so a goal had to exist. Each was derived **strictly from
+that row's own title**, adds no fact, and is marked *agent-authored, pending review* in its README:
+
+```
+BUG-029  Goal: the search-strip icon must not crash the app.
+BUG-030  Goal: resolve the search-strip spec gap on the Artist form.
+BUG-031  Goal: settle whether API-backed autocomplete is required on the two name entries.
+```
+
+**(c) `Deferred:` label → `Gate:` — BUG-029 only.** The row's Notes begin with the literal label
+`Deferred: `. Transcribing it *inside* `gate:` would render `Gate: Deferred: the search-strip …`,
+duplicating information the Status cell already carries (`🔵 Deferred`). The label was dropped;
+**every word after it is verbatim**. BUG-030 and BUG-031/032 keep their `Answered by Helder
+2026-07-10:` opening in full, because that is content, not a status label.
+
+**(d) One row, one folder — BUG-031/032.** Not a text change; recorded so T12 does not read the
+absent `BUG-032` folder as a dropped row. The row renders byte-identically apart from (a) and (b).
+
+**No respelling was needed this time.** The brief warned about `\b\d+\s*/\s*\d+\b` (which has already
+forced three respellings). It does **not** fire here: `BUG-031/032` and `Artist Name / Song Title`
+live in the **title**, and `model.notes_violations` scans only `goal` + `gate`. No relocation to a
+README body was needed either — all four rows' Notes already sit inside the ≤3-sentence / ≤55-word
+budget and trip no banned pattern (evidence 1).
+
+### Intent verification
+- The task's original demo statement is **superseded by F1** and was not used; its in-process
+  equivalent is evidence items 1–6.
+- `Changed files` contains only files inside `Files owned` (the item folders, `MyVocaList.sln`) plus
+  this feature's own `tasks.md` / `task-log.md`. **Four folders, not the five the brief declared** —
+  the discrepancy is the brief's, documented above.
+- No `TODO`s; every written file re-read from disk and its Markdown re-checked.
+- Nothing outside the four folders and the `.sln` was created, moved or deleted.
+
+### Checkpoint
+Complete — no resumption needed. Worktree `../mvl-backlog-migration`, branch
+`feature/backlog-migration`. Step 6 of 6 done: read specs + T11a conventions → derive rows/nesting
+from BACKLOG → write 4 READMEs → `.sln` → in-process verify → commit. Build/test state: n/a (no code
+changed).
+Context manifest, had this been interrupted:
+1. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — decision table, F1–F5, T11b row
+2. `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` — T11a conventions + this entry
+3. `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` — §2 frontmatter, §3 row rendering
+4. `Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md` — REQ-SEV-00/01/03/25/27
+5. `Docs/Management/BACKLOG.md` — lines 63–78, the source rows and their nesting
+6. `Docs/Management/DevCycleCraft/spec-evolution-versioning/migration/BACKLOG-pre-migration.md` — the frozen fixture for the byte diff
+7. `.claude/scripts/backlog/model.py` — `REQUIRED`, `_BANNED`, `_path_parent`, `validate`, `order_items`
+8. `MyVocaList.sln` — GUID counter (`0x79` after T11b) and the artists-songs `bugs` folder GUID
+
+---
+
+## Task: T11c — BUG-012 flat file → folder (+ finding F6: rename T10a's BUG-028 folder)
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-22
+**Completed:** 2026-07-22
+
+**Two `git mv` operations on the same `bugs/` naming convention, one commit** (`7a00979`). History
+survived both — proven below with `git log --follow`. `BACKLOG.md` and the 5 archive files are
+byte-untouched. Executed in the worktree `../mvl-backlog-migration` on `feature/backlog-migration`
+under the scoped "docs land on develop" exception (Helder, 2026-07-22).
+
+### Changed files
+- `Docs/Management/BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.md` → `Docs/Management/BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/README.md` (`git mv` + frontmatter prepended)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-028-artistspage-trailing-catalog-button-noop/README.md` → `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/README.md` (`git mv` + `pointer:` updated + one dated note appended)
+- `MyVocaList.sln` (BUG-028 Solution Folder **renamed in place**, GUID unchanged; BUG-012's item line **removed** from the shared `venues\bugs` folder and re-added under a new Solution Folder; +8/-3)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T11c ticked, F6 marked done)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` (this entry)
+
+### Part 1 — T11c: BUG-012
+
+The folder name `2026-03-01-BUG-012-venuesviewmodel-fetch-slow` is REQ-SEV-01's pattern with
+REQ-SEV-00's fixed `-01` day (the row's `target` is the bare month `2026-03`); `target:` keeps
+`2026-03` unpadded, as REQ-SEV-00 requires. It matches `plan.md` Task 11 Step 3 verbatim, and
+`requirements.md` line 74's worked example — checked, not assumed.
+
+The flat file was `git mv`-ed **directly to `README.md`** rather than copied beside a new README: a
+copy would have broken `--follow`, which is this task's stated demo. Frontmatter was then prepended;
+**the original 47-line body is preserved byte-for-byte** (asserted in the write script with
+`after.endswith(before)`).
+
+| key | value | derivation |
+|-----|-------|-----------|
+| `id` | `BUG-012` | — |
+| `title` | `Bug: Venues list fetch slow — 2.2s paged query (BUG-012)` | the BACKLOG row's Feature cell, verbatim |
+| `status` | `💡 Pending` | the row, verbatim |
+| `severity` | **unset** | see the decision below |
+| `section` | `BusinessFeatures` | explicit, per **F4** |
+| `parent` | **unset** | see the decision below |
+| `order` | `10` | position 1 of the live Business Features table × 10 (it is the table's first row) |
+| `target` | `2026-03` | the row, unpadded |
+| `pointer` | the new folder | REQ-SEV-01 |
+
+**Decision — `severity` left unset (not fabricated).** The legacy file's header reads
+`**Severity:** Medium`, which is **not** a value in `model.SEVERITIES` (`Critical`/`Major`/`Minor`),
+and the BACKLOG row states no severity at all. `model.validate` treats `severity` as optional, so
+unset validates clean; picking one would be fabrication, and guessing `Minor` would have tripped
+REQ-SEV-03 ("Minor must not have a folder") and blocked the task the spec explicitly schedules.
+Recorded in the README body.
+
+**Decision — `parent` left unset, `section:` explicit.** There is no `venues` *item*:
+`BusinessFeatures/venues/` has no `README.md` with frontmatter, so `walk()` yields no such item and
+`parent: venues` would fail `validate`'s "parent names no existing item" check. `section:` alone
+resolves it — which is also why the explicit `section:` mandated by F4 is load-bearing here rather
+than belt-and-braces.
+
+### Part 2 — F6: BUG-028 folder rename
+
+**The date was derived, not invented.** BUG-028's README already carries `target: 2026-07-03`,
+matching its BACKLOG row (`| 2026-07-03 | ↳ BUG-028: … |`), so the folder is
+`2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop`. No `blocked: spec gap` was needed.
+
+Everything referencing the old path was updated: the README's own `pointer:` (the only occurrence in
+the file), and **both** `.sln` occurrences (the Solution Folder's two name strings and its
+`SolutionItems` path). A repo-wide Python scan (never `grep` — rtk hazard) found the only other
+mentions in `task-log.md` lines 1146/1175, inside **T10a's own entry**. Those were deliberately left
+alone: a task-log entry is an immutable record of what T10a did at the time, and rewriting it would
+falsify history. This entry is the forward pointer.
+
+> **Correction to the brief.** The brief states the rename leaves the directory with one convention.
+> It does not. **Six legacy folders still have no date prefix** — `BUG-017-…`, `BUG-018-…`,
+> `BUG-019-…`, `BUG-021-…`, `BUG-023-…`, `BUG-024-…` (enumerated with `git ls-files`, not `ls`).
+> F6's scope is only T10a's BUG-028 folder, so they were **not** touched — renaming six more folders
+> is neither in this brief's `Files owned` nor sized for it. **Owed to T12/T13:** those six are the
+> remaining REQ-SEV-01 naming debt, and each is `pointer:`-referenced by an archived row.
+
+### Verification evidence
+
+All checks in-process and read-only; rendered output discarded. `regen` was never run in either mode
+— per **F1** `cmd_regen` does `if errors: return 2` **before** `_render_all`, so its exit code proves
+nothing about rendering. No `grep` was used for any byte-level comparison (rtk hazard); all
+comparisons are Python string equality. All writes came from **script files in binary mode**.
+
+**1. `git log --follow` — history survived BOTH moves** (the task's demo statement):
+
+```
+$ git log --follow --oneline -- ".../bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/README.md"
+7a009798 docs(spec-evolution): T11c — BUG-012 flat file to folder, + F6 BUG-0...
+75b89c7a docs: add recommended model field to BUG-011 and BUG-012
+044f51c6 docs: register BUG-011 (QueuePage BottomSheet double-add) and BUG-01...
+
+$ git log --follow --oneline -- ".../bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/README.md"
+7a009798 docs(spec-evolution): T11c — BUG-012 flat file to folder, + F6 BUG-0...
+824c5333 docs(spec-evolution): T10a — READMEs for the 9 existing bug folders
+```
+
+BUG-012 reaches back to its original registration commit; BUG-028 reaches T10a, which created it.
+`git show --stat --find-renames HEAD` reports both as renames, not add+delete.
+
+**2. Parse + validate over the whole tree** (`backlog_gen.walk(ROOT)` + `model.validate`):
+
+```
+items walked: 60          PARSE ERRORS: none
+VALIDATION ERRORS: 1
+  ! DevCycleCraft/spec-evolution-versioning/: Notes contain banned content (file path beyond the pointer)
+errors touching T11c/F6 items: []
+DUPLICATE IDS: none
+```
+
+60 items = T11b's 59 + BUG-012 (BUG-028 was already an item; F6 renames it, adding none). The single
+error is the **pre-existing** decision-2 blocker on this feature's own folder, unchanged.
+**Zero new validation errors; zero on either item.**
+
+**3. Resolved fields, read from the walked items — not from the source frontmatter:**
+
+```
+BUG-012  path=BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/
+         status='💡 Pending' severity=None section='BusinessFeatures' parent=None
+         order='10' target='2026-03' depth=1 kind=bug
+         pointer: BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/
+BUG-028  path=BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/
+         status='💡 Pending' severity='Major' section='BusinessFeatures' parent='artists-songs'
+         order='140' target='2026-07-03' depth=1 kind=bug
+         pointer: BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/
+```
+
+**4. Rendered rows, verbatim from `render.render_row` — read, not assumed:**
+
+```
+| 2026-03 | ↳ Bug: Venues list fetch slow — 2.2s paged query (BUG-012) | 💡 Pending | Goal: restore fast venue list loading (N+1 query suspected). Pointer: `BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/`. |
+| 2026-07-03 | ↳ BUG-028: ArtistsPage trailing catalog button no-op — regression of BUG-015/019 (Major) | 💡 Pending | Goal: trailing button must navigate to the artist's catalog. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/`. |
+```
+
+**5. Byte-diff of each rendered row against its line in `migration/BACKLOG-pre-migration.md`**
+(Python equality, cell by cell). Exactly one fixture line matched each id. **Every difference:**
+
+```
+== BUG-012
+   DIFF [Label]
+     - Bug: Venues list fetch slow — 2.2s paged query (BUG-012)
+     + ↳ Bug: Venues list fetch slow — 2.2s paged query (BUG-012)
+   DIFF [Notes]
+     - … Pointer: `BusinessFeatures/venues/bugs/BUG-012-venuesviewmodel-fetch-slow.md`.
+     + … Pointer: `BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/`.
+== BUG-028
+   DIFF [Notes]
+     - … Pointer: `BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/`.
+     + … Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/`.
+```
+
+`Target` and `Status` are byte-identical on both rows; Goal wording, punctuation and the BUG-028
+label are byte-identical. Both differences are declared as T12 hunks below.
+
+**6. Live splice + archive regression** — `render.render_backlog(existing, items)` over the real
+`BACKLOG.md` returned without error and contains both rows; both T9e archive regions still splice
+against the real fenced files (called with `all_items=items`, the F2-correct form; neither item is
+terminal, so neither routes through the archive):
+
+```
+render_backlog: OK, BUG-012 present: True | BUG-028 present: True
+archive 2026-06 -> splice OK, 3 items
+archive 2026-07 -> splice OK, 5 items
+```
+
+**7. `BACKLOG.md` and the 5 archive files unmodified:**
+
+```
+$ git diff --stat HEAD~1 HEAD -- Docs/Management/BACKLOG.md Docs/Management/backlog-archive/
+(no output — 0 files changed)
+```
+
+**8. `.sln` HARD GATE — paths *updated*, not duplicated.** The brief's "T11b allocated through
+`0079`" was **re-verified by reading the file**, not trusted: the highest
+`FA1234BC-0001-4000-8000-0000000000NN` actually in use was `0x79`. T11c allocated exactly one new
+GUID, **`…007A`**, asserted absent before the write.
+
+- **BUG-028 (F6): no new GUID.** Its Solution Folder `{…070}` was renamed in place (both name
+  strings) and its one `SolutionItems` path rewritten. `NestedProjects` is unchanged — the parent
+  `bugs` folder did not move.
+- **BUG-012 (T11c): the old item line was *deleted*** from the shared `venues\bugs` folder
+  `{…024}` (a flat file is an item line; a folder needs its own Solution Folder), and a new
+  Solution Folder `{…007A}` added with the README, nested under `{…024}`.
+- Asserted after the write: `old28 not in file`, the old BUG-012 line `not in file`, each new path
+  present exactly twice (`Project` line + `SolutionItems` line). A final scan for
+  `bugs\BUG-012-venuesviewmodel` / `bugs\BUG-028-artistspage` returned **0 stale lines**.
+
+```
+.sln BOM: True | CRLF: 1207 | lone LF: 0        (was BOM True | CRLF 1202 | lone LF 0)
+git diff --numstat HEAD~1 HEAD -- MyVocaList.sln -> 8  3   (8 added: the 5-line new Solution Folder block, the NestedProjects line, the 2 rewritten BUG-028 lines; 3 removed: the old BUG-012 item line and the 2 old BUG-028 lines)
+```
+
+Changed paths re-read from disk with `repr()`:
+
+```
+'Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-03-01-BUG-012-venuesviewmodel-fetch-slow", "2026-03-01-BUG-012-venuesviewmodel-fetch-slow", "{FA1234BC-0001-4000-8000-00000000007A}"'
+'\t\tDocs\\Management\\BusinessFeatures\\venues\\bugs\\2026-03-01-BUG-012-venuesviewmodel-fetch-slow\\README.md = Docs\\Management\\BusinessFeatures\\venues\\bugs\\2026-03-01-BUG-012-venuesviewmodel-fetch-slow\\README.md'
+'Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop", "2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop", "{FA1234BC-0001-4000-8000-000000000070}"'
+'\t\tDocs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop\\README.md = Docs\\Management\\BusinessFeatures\\artists-songs\\bugs\\2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop\\README.md'
+'\t\t{FA1234BC-0001-4000-8000-00000000007A} = {FA1234BC-0001-4000-8000-000000000024}'
+```
+
+> **Defect found by the mandated post-write re-read — worth recording.** The first `.sln` write
+> emitted the new `Project` line with **unquoted braces** (`…, {FA1234BC-…007A}` instead of
+> `…, "{FA1234BC-…007A}"`), which VS would reject. My byte-level assertions all passed — they
+> checked *presence*, not *shape*. The `repr()` re-read is what caught it; it was corrected before
+> the commit. This is the exact failure mode the post-edit re-read rule exists for.
+
+**9. Line endings.** Every touched file was **CRLF on disk before and after**, asserted with
+`count(b"\r\n") == count(b"\n")` after each write: the moved BUG-012 README (47→66 CRLF, 0 lone
+LF), the BUG-028 README (22→24), `MyVocaList.sln` (1202→1207, BOM preserved), `tasks.md` (319).
+Note the BUG-012 file is **CRLF in the working tree** — per **F3** `*.md` is unpinned with
+`core.autocrlf=true`, so this measures the working tree, not the blob.
+
+### Declared T12 diff hunks
+
+**(a) Pointer relocation — both rows. The task's purpose, not a side effect.** REQ-SEV-01 makes the
+item folder the pointer. REQ-SEV-27 is satisfied: BUG-012's pointer target *is* the moved file
+(nothing lost), and BUG-028's previous target — the BUG-019 folder — is untouched and still
+back-linked from BUG-028's README body.
+
+**(b) BUG-012 gains a depth arrow `↳` — structural, mechanically forced, needs Helder's eye at T12.**
+
+```
+-| 2026-03 | Bug: Venues list fetch slow — 2.2s paged query (BUG-012) | …
++| 2026-03 | ↳ Bug: Venues list fetch slow — 2.2s paged query (BUG-012) | …
+```
+
+Today the row is **top-level** because there is no *Venues* row for it to sit under. But
+`model._depth` computes the arrow **from the path** — one arrow per `bugs/`/`changes/` segment —
+and REQ-SEV-01 requires the bug to live in `venues/bugs/…`. So any REQ-SEV-01-compliant home for
+BUG-012 renders it at depth 1, **whatever its `parent:` says** (its `parent` is unset). There is no
+frontmatter value that suppresses this. The three ways out are all larger than T11c: add a *Venues*
+feature row (adds a row — REQ-SEV-25 forbids), leave the file flat (defeats T11c), or make `_depth`
+respect `parent` instead of the path (a generator change). **Recommendation: accept as permitted
+diff class (d) at T12** — the row's position in the table is unchanged (still first, `order: 10`),
+only its indent. Not escalated as `blocked: spec gap` because it is forced by the approved design
+rather than absent from it; flagged here so T12 does not discover it as a surprise.
+
+No goal or gate text was trimmed or reworded, on either row. **No new respelling hunks** — the four
+existing `\b\d+\s*/\s*\d+\b` hunks stand at four; BUG-028's `BUG-015/019` sits in its *title*,
+which `notes_violations` does not scan, so it survives verbatim.
+
+### Intent verification
+- Demo statement (`git log --follow` shows pre-move commits) — **executed and shown**, evidence 1.
+- `Changed files` contains only `Files owned` (1 new folder, the BUG-028 folder for F6,
+  `MyVocaList.sln`) plus this feature's own `tasks.md` / `task-log.md`.
+- No `TODO`s; every written file re-read from disk (which caught the `.sln` quoting defect).
+- Nothing outside the two folders and the `.sln` was created, moved or deleted; `BACKLOG.md`, the 5
+  archive files and the frozen fixture are byte-untouched.
+
+### Checkpoint
+Complete — no resumption needed. Worktree `../mvl-backlog-migration`, branch
+`feature/backlog-migration`, commit `7a00979` (+ this entry). Step 7 of 7 done: read tasks/T11a/T11b
+conventions → derive both folder names from the rows → `git mv` ×2 → frontmatter + pointer → `.sln`
+→ in-process verify + byte-diff → commit. Build/test: n/a (no code changed).
+Context manifest, had this been interrupted:
+1. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — T11c row, F1–F6, decisions
+2. `Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md` — T11a/T11b conventions + this entry
+3. `Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md` — REQ-SEV-00/01/02/03/25/27
+4. `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md` — Task 11 Steps 3–5 (the exact `git mv`)
+5. `Docs/Management/BACKLOG.md` — lines 62 (BUG-012) and 75 (BUG-028), the source rows
+6. `.claude/scripts/backlog/model.py` — `_depth`, `_path_parent`, `validate`, `SEVERITIES`
+7. `.claude/scripts/backlog/render.py` — `render_row` (the arrow comes from `item.depth`)
+8. `MyVocaList.sln` — GUID counter (`…007A` now highest) and the `venues\bugs` folder GUID `{…024}`
 ## Task: F2/F3/F4 — generator fixes
 **Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T9e findings block)
 **Status:** To Review
@@ -1707,6 +2448,1057 @@ I have not renormalized, and recommend it be scheduled as a separate post-migrat
   5. `.gitattributes` — the F3 pin
   6. `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` — findings block F1-F6
   7. `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` section 3 — archive split / idempotency / preserved regions
+
+---
+## Task: T12-pre — Extend STATUSES for terminal Superseded / Duplicate
+**Plan:** Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md (T12-pre)
+**Status:** To Review
+**Started:** 2026-07-23
+**Completed:** 2026-07-23
+
+### Changed files
+- `.claude/scripts/backlog/model.py` — added `SUPERSEDED` / `DUPLICATE`; joined `STATUSES` and `TERMINAL` (full-string membership, not the overloaded 🔵 prefix).
+- `.claude/scripts/backlog/render.py` — archive-only `(closed <month>)` suffix reconstructed from the `closed:` key for Superseded/Duplicate; stored `status:` stays the bare enum.
+- `.claude/scripts/backlog/tests/test_model.py` — 6 cases (Superseded/Duplicate valid+terminal, both error without `closed`, Deferred active with no `closed`, Deferred+closed errors).
+- `.claude/scripts/backlog/tests/test_render.py` — 8 cases (Deferred stays live, Superseded excluded from live, Superseded/Duplicate bucket to archive, Deferred never buckets, both suffix reconstructions, live render has no suffix).
+
+### Verification evidence
+`python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` → `Ran 143 tests` `OK` (baseline was 129; +14).
+
+### AC traceability
+- REQ-SEV-16 (active set includes 🔵 Deferred) — `test_deferred_item_stays_in_the_live_file`, `test_deferred_is_active_not_terminal`.
+- REQ-SEV-18 (terminal set = Done/Fixed/Superseded/Duplicate) — `test_superseded_item_buckets_into_the_archive`, `test_duplicate_item_buckets_into_the_archive`, `test_superseded_item_is_excluded_from_the_live_file`.
+- REQ-SEV-08 / REQ-SEV-19 (valid statuses; terminal requires `closed`; overloaded 🔵 disambiguation; bare-enum `status:` + reconstructed suffix) — `test_superseded_without_closed_is_an_error`, `test_duplicate_without_closed_is_an_error`, `test_deferred_with_closed_is_an_error`, `test_superseded_status_cell_reconstructs_closed_suffix`, `test_duplicate_status_cell_reconstructs_closed_suffix`, `test_stored_status_stays_bare_enum_live_render_has_no_suffix`.
+
+### Build notes
+Tests: 143 passed, 0 failed. No archive folders/files created (that is T12a). No `.sln` change (existing test files extended, no new files).
+
+---
+
+## Task: T12a Wave A — 2026-03 archived rows → item folders
+**Plan:** `plan.md` (T12a; tasks.md T12a entry + T12a PLANNING block)
+**Status:** To Review
+**Started:** 2026-07-23
+**Completed:** 2026-07-23
+
+Scope: ONLY the 2026-03 archive file (`backlog-archive/BACKLOG-ARCHIVE-2026-03.md`). Later months are separate waves. All 6 rows are Type-1 (shipped feature/activity), terminal `✅ Done`, `closed: 2026-03`.
+
+Row inventory (enumerated from the archive file, both tables — 6 rows, matches the briefing estimate):
+- Business Features (1): **Venues CRUD**
+- Dev Cycle Craft (5): Solution Structure Refactor, MD3 App Bar Components, M3 Lists, Venues MD3 rebuild, Styles & Structure
+
+No bug sub-row in 2026-03 (REQ-SEV-28a stray-bug grep verify: none — the file has only feature/activity rows). No log-pointer rows in 2026-03.
+
+Target folders: all 5 feature/activity folders **already existed** with spec files (design.md/plan.md) — no folder created, only `README.md` added. The 6th row (Venues MD3 rebuild) needed a new folder — see F-5 below.
+
+### F-5 collision (Venues CRUD vs Venues MD3 rebuild — both point at `venues/`)
+One folder backs exactly one row (folder-tree-is-database). Both 2026-03 rows carry `Pointer: venues/`, but they are two distinct rows in two different tables (Business Features vs Dev Cycle Craft). Resolution (matches REQ-SEV-28a / F-1(b) model, and the BUG-022 precedent of a DevCycleCraft item physically under a BusinessFeatures feature):
+- **Venues CRUD** → `BusinessFeatures/venues/README.md` (the feature front page), `section: BusinessFeatures`, pointer omitted (== folder).
+- **Venues MD3 rebuild** → `BusinessFeatures/venues/changes/2026-03-01-venues-md3-rebuild/README.md`, `kind: change`, `section: DevCycleCraft` set explicitly, `pointer: BusinessFeatures/venues/` (explicit, differs from folder — REQ-SEV-10). No `parent:` set (keeps it a plain Dev Cycle Craft row with no `(under:)` suffix / arrows, matching the frozen snapshot). Day `-01` per REQ-SEV-00 (target is bare `2026-03`).
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/venues/README.md` (new)
+- `Docs/Management/BusinessFeatures/venues/changes/2026-03-01-venues-md3-rebuild/README.md` (new)
+- `Docs/Management/DevCycleCraft/solution-structure-refactor/README.md` (new)
+- `Docs/Management/DevCycleCraft/md3-appbar-components/README.md` (new)
+- `Docs/Management/DevCycleCraft/m3-lists/README.md` (new)
+- `Docs/Management/DevCycleCraft/styles-structure/README.md` (new)
+- `MyVocaList.sln` (5 README SolutionItems lines on existing folders; new `changes` Solution Folder GUID `…007B` under venues + item folder GUID `…007C`; 2 NestedProjects lines). GUIDs `007B`/`007C` follow the last-used `007A`.
+
+### Verification evidence
+- `walk()` parse errors: 0. `model.validate()` over the whole tree: 1 error total, and it is **pre-existing and not mine** (`DevCycleCraft/spec-evolution-versioning/` banned-content, a known governance-row issue). All 6 new items: 0 validation errors.
+- `render.render_row(archived=True)` reproduces all 6 rows in canonical format with correct `✅ Done` status, `Goal: … Pointer: \`…\`.` Notes, and no `↳` arrows.
+- Full test suite: **143 passed, 0 failed** (`python -m unittest discover -s .claude/scripts/backlog/tests`).
+- `.sln`: GUID `007B` = 1 folder def + 2 nested lines; `007C` = 1 folder def + 1 nested line; each of the 6 README paths present. No duplicate GUID.
+- NOT run: `regen --check` / `regen` (H1 — would delete the 99 unmigrated archive rows). Validation-only per briefing.
+
+### Agent-authored content (carve-out — for Helder's gate audit)
+- **Goals (6):** all transcribed **verbatim** from the archive Notes cell (`Goal: …` minus the `Pointer:` clause) — none composed, none trimmed (all within ≤3 sentences / ≤55 words / no banned content).
+- **`order` values (agent-assigned, to pin the frozen-snapshot reading order):** Venues CRUD `10` (Business Features, sole row); Dev Cycle Craft table top-to-bottom → Solution Structure Refactor `10`, MD3 App Bar Components `20`, M3 Lists `30`, Venues MD3 rebuild `40`, Styles & Structure `50`.
+- **Venues MD3 rebuild — folder shape + slug (agent-authored):** slug `venues-md3-rebuild`, folder `BusinessFeatures/venues/changes/2026-03-01-venues-md3-rebuild/`, `kind: change`, explicit `section: DevCycleCraft`, explicit `pointer: BusinessFeatures/venues/`. Rationale in F-5 above.
+- **id values:** kebab of the folder (`venues`, `solution-structure-refactor`, `md3-appbar-components`, `m3-lists`, `styles-structure`, `venues-md3-rebuild`) — checked collision-free tree-wide.
+
+---
+
+## Task: T12a Wave B — 2026-04 archived rows → item folders
+**Plan:** `plan.md` (T12a; tasks.md T12a entry + T12a PLANNING block)
+**Status:** blocked: spec gap
+**Started:** 2026-07-23
+
+Scope: ONLY the 2026-04 archive file (`backlog-archive/BACKLOG-ARCHIVE-2026-04.md`). All 4 rows are Type-1 (shipped feature/activity), terminal `✅ Done`, `closed: 2026-04`.
+
+Row inventory (enumerated from the archive file, both tables — 4 rows, matches the briefing estimate):
+- Business Features (1): **Person CRUD** → `BusinessFeatures/persons/`
+- Dev Cycle Craft (3): Toolbar/FAB vibrant → `DevCycleCraft/toolbar-fab-vibrant/`; Autocomplete field → `BusinessFeatures/persons/plan-autocomplete.md`; Hooks redesign → `DevCycleCraft/hooks-redesign/`
+
+No bug sub-row in 2026-04. No task-log-pointer rows (Autocomplete points at a PLAN file, not a LOG file — not the STOP case; pre-acknowledged by the briefing/REQ-SEV-10).
+
+Target folders: all pointer-target folders already existed with spec files (design.md/plan.md) — no feature/activity folder created, only `README.md` added. The Autocomplete row needed a new `changes/` item folder under persons — see Autocomplete note below.
+
+Autocomplete field — folder shape (agent-authored): its archived Pointer targets `BusinessFeatures/persons/plan-autocomplete.md` (a plan file inside the persons feature, not a standalone folder). Mirroring the Wave A venues-md3-rebuild model (one folder backs one row), filed as `BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/README.md`, `kind: change`, explicit `section: DevCycleCraft`, explicit `pointer: BusinessFeatures/persons/plan-autocomplete.md` (differs from folder — REQ-SEV-10). Day `-01` per REQ-SEV-00.
+
+### The four READMEs authored (parse + validate clean on their own — 0 errors scoped to my items)
+- `Docs/Management/BusinessFeatures/persons/README.md` (id `persons`, `**Person CRUD**`, order 10)
+- `Docs/Management/DevCycleCraft/toolbar-fab-vibrant/README.md` (id `toolbar-fab-vibrant`, order 10)
+- `Docs/Management/BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/README.md` (id `autocomplete-field`, order 20)
+- `Docs/Management/DevCycleCraft/hooks-redesign/README.md` (id `hooks-redesign`, order 30)
+
+### Spec gap: adding `persons/README.md` surfaces a BUG-022 parent-vs-path-parent validation error
+**Location:** validator `model.validate()` parent check (design.md §2 "parent is declared, not inferred … validator warns when they don't"); data in `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/README.md`.
+**Gap description:** BUG-022 is a DevCycleCraft item deliberately filed *physically* under `persons/` with logical `parent: ui-form-validation-guide` (the "BUG-022 precedent" recorded in Wave A's task-log). While `persons/` had no `README.md` it was not an item, so the path-parent `persons` was unresolvable and no error fired. Wave B's required `persons/README.md` makes `persons` an item, so the validator now resolves the path-parent to `persons` and errors: `parent 'ui-form-validation-guide' disagrees with the folder's path parent 'persons'`. This takes the whole-tree validation from 0 → 1 error and would make `regen` exit 2. My four items are individually clean; the error is entirely in the pre-existing BUG-022 frontmatter, outside my `Files owned`.
+**Options:**
+- Option A: Re-parent BUG-022 to `parent: persons` — clears the error but **discards the intentional Wave A precedent** (a DevCycleCraft item logically under `ui-form-validation-guide`); loses the cross-feature grouping.
+- Option B: Relax the validator so a `change`/`bug` item whose declared `parent` is a valid item elsewhere is NOT errored when its path-parent is a *different* valid feature item (the intentional physical-cross-file case) — a validator/spec change, downgrade to a soft warning. Preserves the precedent.
+**Recommendation:** Option B — it preserves the Wave A BUG-022 precedent and makes the intentional physical-cross-file pattern first-class; Option A silently erases a deliberate classification. Either way the decision belongs to Helder (BUG-022 classification + validator semantics), not to this Wave-B implementor.
+**Blocking:** Yes — cannot ship a commit that regresses whole-tree validation 0 → 1 (exit-2 gate), and the fix is outside `Files owned` (BUG-022 frontmatter and/or the validator). Stopping per role protocol; the four authored READMEs are left in the worktree uncommitted for the resolving session.
+
+### Verification evidence (partial — up to the block)
+- `backlog_gen.walk('.')` parse errors: 0.
+- `model.validate()` scoped to my four items (`persons`, `toolbar-fab-vibrant`, `hooks-redesign`, `autocomplete-field`): 0 errors.
+- Whole-tree `model.validate()`: **1 error**, the BUG-022 parent mismatch above. Confirmed it disappears when `persons/README.md` is temporarily removed (baseline 0) — i.e. surfaced, not authored, by Wave B.
+- Full test suite / `.sln` registration / commit / push: NOT performed — blocked pending Helder's decision.
+
+### ⟳ RESOLUTION (Helder, 2026-07-23) — "Allow + warn (align to design §2)" = Option B
+The spec contradicted itself: design §2 always said the parent/path-parent check WARNS; REQ-SEV-21 wrongly listed it as an abort-error. **Decision: cross-filing is permitted; the check becomes a non-fatal warning, not an error.** BUG-022 keeps `parent: ui-form-validation-guide`.
+- **Spec corrected first (done, this session):** REQ-SEV-21 in `requirements.md` amended — parent/path-parent disagreement moved OUT of the abort-error set, marked a non-fatal warning aligning to design §2. Committed on the branch with the four staged READMEs.
+- **Code not yet changed (next session's first implementor task):** `model.validate()` still errors on parent/path-parent disagreement. An implementor must downgrade it to a warning (collect into a `warnings` channel, not `errors`) **+ a test** proving BUG-022's cross-file parent yields 0 errors / 1 warning, and that whole-tree `regen --check` no longer exits 2 from this.
+- **Then finish Wave B:** the four READMEs are authored + staged in the worktree (uncommitted). Register them in `MyVocaList.sln` starting at GUID **007D** (last used 007C), validate (expect 0 errors, 1 warning for BUG-022), then commit + push.
+
+### Checkpoint (session handoff — 2026-07-23)
+- **Branch / worktree:** `feature/backlog-migration` @ `C:\Users\helde\source\repos\mvl-backlog-migration`
+- **Where we are:** T12a Wave B unblocked by Helder's decision. Spec (REQ-SEV-21) corrected this session. Validator code change + Wave B commit are the next session's first actions (both belong to an implementor in this worktree).
+- **Staged-but-uncommitted in worktree:** `BusinessFeatures/persons/README.md`, `DevCycleCraft/toolbar-fab-vibrant/README.md`, `DevCycleCraft/hooks-redesign/README.md`, `BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/README.md`.
+- **Next command:** dispatch an implementor — (1) validator error→warning + test; (2) register 4 READMEs in `.sln` from GUID 007D; (3) validate, commit, push.
+- **Context manifest (read these to resume):**
+  1. This task-log § "T12a Wave B" (the block + this resolution) — full state
+  2. `requirements.md` REQ-SEV-21 (amended) + design.md §2 (warn semantics)
+  3. `.claude/scripts/backlog/model.py` — `validate()` parent check to downgrade
+  4. `.claude/scripts/backlog/tests/test_model.py` — where the new warning test goes
+  5. `MyVocaList.sln` — last-used GUID 007C; add from 007D
+  6. `tasks.md` — T12a waves C–G remaining after B; T12 gate (G1/G2/G3); T13a–d rules bundle (authorship carve-out — stop before commit)
+
+### Agent-authored content (carve-out — for the gate audit, if unblocked as-is)
+- **Goals (4):** all transcribed **verbatim** from the archive Notes cell (`Goal: …` minus the `Pointer:` clause) — none composed, none trimmed (all ≤3 sentences / ≤55 words / no banned content).
+- **`order` values (agent-assigned):** Person CRUD `10`; Dev Cycle Craft table reading order → Toolbar/FAB vibrant `10`, Autocomplete field `20` (filed under persons/changes but ordered to preserve table position), Hooks redesign `30`.
+- **Autocomplete field folder shape + slug (agent-authored):** slug `autocomplete-field`, folder `BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/`, `kind: change`, explicit `section: DevCycleCraft`, explicit `pointer: BusinessFeatures/persons/plan-autocomplete.md`.
+- **id values:** kebab of the folder (`persons`, `toolbar-fab-vibrant`, `hooks-redesign`, `autocomplete-field`) — checked collision-free tree-wide.
+
+---
+## Task: T12a Wave B unblock — validator downgrade + .sln registration
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md`
+**Status:** To Review
+**Started:** 2026-07-23
+**Completed:** 2026-07-23
+
+### Part 1 — validator change
+- `model.py`: extracted the shared validation walk into `_validate_all(items)` returning `(errors, warnings)`. `validate(items)` still returns errors only (unchanged signature/behavior for every existing caller/test). New `validate_warnings(items)` returns the warnings channel.
+- The single line changed in behavior: the parent-vs-path-parent **disagreement** branch (parent resolves to a real item but differs from the folder's path parent) now calls `warn(...)` instead of `err(...)`. The "parent names no existing item" branch is untouched (still `err`).
+- `backlog_gen.cmd_regen`: after the (still error-gated) validation step, calls `validate_warnings(items)` and writes each to stderr prefixed `warning:` — non-fatal, does not affect the 0/1/2 return code.
+
+### Part 1 — Red/Green evidence
+Red (pre-fix, `git stash` of model.py/backlog_gen.py, full suite run):
+```
+ERROR: test_cross_file_parent_disagreement_warns_but_does_not_error (test_backlog_gen.ArchiveSectionResolutionTests)
+ImportError: cannot import name 'validate_warnings' from 'model'
+Ran 144 tests in 0.935s
+FAILED (errors=1)
+```
+Green (`git stash pop`, full suite run):
+```
+Ran 144 tests in 0.626s
+OK
+```
+
+### Full suite
+`python -m unittest discover tests` from `.claude/scripts/backlog/`: **144 passed, 0 failed** (was 143 baseline + 1 new regression test).
+
+### Part 2 — .sln registration
+Confirmed the true highest `FA1234BC-...-00NN` GUID in the .sln before assigning: **007C** (agrees with the ledger). Assigned:
+- `FA1234BC-0001-4000-8000-00000000007D` — new `changes` Solution Folder nested under `persons` (`{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}`)
+- `FA1234BC-0001-4000-8000-00000000007E` — new `2026-04-01-autocomplete-field` Solution Folder nested under `007D`, carrying its README.md SolutionItems entry
+
+The other three READMEs (`persons/README.md`, `DevCycleCraft/toolbar-fab-vibrant/README.md`, `DevCycleCraft/hooks-redesign/README.md`) were added as new lines inside each folder's existing `ProjectSection(SolutionItems)`.
+
+Post-write verification (Python binary mode, never grep — see `rtk-rewrites-grep` memory):
+- BOM present: `True`
+- Bare LF found: `False` (every `\n` preceded by `\r`)
+- All 4 SolutionItems lines + both new `Project(...)`/`NestedProjects` lines present exactly once, verbatim
+
+### Part 2 — in-process validate counts (real Docs/ tree, read-only — no `regen --check` used per briefing)
+```
+parse_errors: 0
+errors: 0
+warnings: 1
+ W BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/: parent 'ui-form-validation-guide' disagrees with the folder's path parent 'persons'
+```
+Note: the briefing expected one additional pre-existing banned-content error on `DevCycleCraft/spec-evolution-versioning/` to remain — this run shows 0 errors total, so that issue appears already resolved on this branch (not reintroduced by this task). Flagging the discrepancy for review rather than silently reconciling it.
+
+### Changed files:
+- `.claude/scripts/backlog/model.py`
+- `.claude/scripts/backlog/backlog_gen.py`
+- `.claude/scripts/backlog/tests/test_backlog_gen.py`
+- `MyVocaList.sln`
+- `Docs/Management/BusinessFeatures/persons/README.md` (pre-authored, registered only)
+- `Docs/Management/BusinessFeatures/persons/changes/2026-04-01-autocomplete-field/README.md` (pre-authored, registered only)
+- `Docs/Management/DevCycleCraft/toolbar-fab-vibrant/README.md` (pre-authored, registered only)
+- `Docs/Management/DevCycleCraft/hooks-redesign/README.md` (pre-authored, registered only)
+
+### Build notes
+No .NET build touched (Python-only change + doc registration). Tests: 144 passed, 0 failed. Commits: `fix(backlog-gen)` for Part 1, `docs(spec-evolution)` for Part 2 (SHAs in the push log). Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: `model.py`, `backlog_gen.py`, `tests/test_backlog_gen.py`, `MyVocaList.sln` — all re-verified after write (BOM/CRLF binary check + string-presence check above).
+
+
+---
+## Task: T12a Wave C -- 2026-05 pt1 (5 planned folders) + blocker #4 re-triage (6th folder)
+**Plan:** Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md (Wave C section)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/youtube-karaoke/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-05-01-gotosettings-navigation-fix/README.md` (new folder)
+- `Docs/Management/DevCycleCraft/sdd/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/workflow-compression/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/docs-context-scope-control/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/session-continuity-leasing/changes/2026-06-27-stop-hook-scanner-removal/README.md` (new folder -- blocker #4 re-triage, 6th item this wave)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md` -- added REQ-SEV-32 (blocker #1, written ahead of its Wave E/J rows per the briefing)
+- `MyVocaList.sln` -- GUIDs `007F`-`0082` (see below)
+
+### Blocker #4 re-triage decision
+Opened `DevCycleCraft/session-continuity-leasing/README.md`: it describes the overall feature only, not the specific 2026-06-27 "To Review tasks rewakes every session" Stop-hook-noise fix. Decision: **needs its own folder** -- created `changes/2026-06-27-stop-hook-scanner-removal/README.md`, `pointer:` kept on the shared `task-log.md` (REQ-SEV-27). This is the 6th folder for the wave, not counted in the plan's "5 folders" estimate.
+
+### New REQ-SEV-32 (blocker #1, written now per briefing)
+Added to `requirements.md` after REQ-SEV-31: an archived row whose `pointer` targets a file outside the `Docs/Management` item tree (`.claude/rules/*.md`, `Docs/Changelog/changelog.md`) gets **no folder** during migration -- same precedent as a Minor bug (REQ-SEV-03). Tagged `> **Spec updated 2026-07-24**`. The 3 affected rows (2 in 2026-05, 1 in 2026-06 "Visual Theme Refresh") still ship folder-less in their own waves (E/J) per the plan -- this task did not create folders for them.
+
+### .sln GUIDs consumed
+`007F` (new `changes` Solution Folder under `artists-songs`) and `0080` (`2026-05-01-gotosettings-navigation-fix` item, nested under `007F`) for row 2; `0081` (new `changes` Solution Folder under `session-continuity-leasing`) and `0082` (`2026-06-27-stop-hook-scanner-removal` item, nested under `0081`) for the re-triage row. **Only 2 of the plan's reserved `007F`-`0083` GUIDs were structurally needed for row 2** (the other 4 rows added a single `README.md` line to an already-registered project -- no new GUID required); flagging this discrepancy so Wave D's starting GUID can be corrected downward from `0084` if Helder wants the range tightened, or left as-is (both are safe -- no GUID was reused or skipped-and-later-reused).
+Note: existing `artists-songs\changes\*` items (`2026-07-10-form-ux-redesign`, `2026-07-21-inline-artist-create`) nest **directly** under the `artists-songs` project GUID rather than through an intermediate `changes` folder -- inconsistent with the `persons`-family pattern (`007D`/`007E`) and with the new `007F` folder created this wave. Pre-existing, not touched by this task -- flagged for Helder, not fixed unilaterally. Also noted in passing: `2026-07-21-inline-artist-create` (`{...055}`) has no `NestedProjects` entry at all (pre-existing gap, out of scope here).
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- Row 2 slug (`gotosettings-navigation-fix`) and title ("Bug: GoToSettings navigation exception") -- no `BUG-NNN` id existed for this unnumbered fix.
+- Re-triage row slug (`stop-hook-scanner-removal`) and title -- net-new, not in the plan.
+- All `order` values: 10/20/10/20/30/10 across the 6 rows.
+- New REQ-SEV id: `REQ-SEV-32`.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation: `python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning (BUG-022 parent/path-parent, pre-existing per REQ-SEV-21 amendment); BACKLOG.md reported stale as expected (regen not run in this task -- T12 territory). Tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -> 144 passed, 0 failed. `.sln` BOM + all-CRLF verified before and after edit via Python binary-mode read (never grep, per `rtk-rewrites-grep` memory). Commit SHA: `cc763e9b10784bfc768f018f640f0b0e71552550`. Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: all 7 new/modified files above -- re-read via the Edit/Write tool's post-call state and re-verified frontmatter shape against the Wave A/B `venues`/`persons` precedents before commit.
+
+**STOPPED after Wave C per the briefing -- Wave D not started.**
+
+---
+## Task: T12a Wave D -- 2026-05 pt2 (4 folders) + BUG-015
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` (Wave D)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/DevCycleCraft/architecture-tests-evaluation/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/claude-managed-agents-evaluation/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/backlog-workflow-integration/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/DevCycleCraft/app-versioning/README.md` (new -- folder existed, no frontmatter)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-015-artistspage-trailing-button-noop/BUG-015-artistspage-trailing-button-noop.md` (`git mv` from the flat file; nothing deleted, REQ-SEV-27)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-015-artistspage-trailing-button-noop/README.md` (new)
+- `MyVocaList.sln` -- GUID `0083` (see below)
+
+### `.sln` GUIDs consumed
+`0083` only, for the new `2026-06-27-BUG-015-artistspage-trailing-button-noop` leaf project nested
+under the existing `artists-songs\bugs` Solution Folder (`{7A021F6B-F297-41EA-A028-C4F881146791}`).
+The plan reserved `0084`-`0088` (5 GUIDs) as an upper bound, matching the Wave C discrepancy
+pattern: the 4 existing DevCycleCraft folders (architecture-tests-evaluation,
+claude-managed-agents-evaluation, backlog-workflow-integration, app-versioning) already had
+registered `ProjectSection(SolutionItems)` blocks -- adding their `README.md` line needed no new
+GUID, only the BUG-015 folder (net-new leaf) did. Confirmed the flat-file line
+`BUG-015-artistspage-trailing-button-noop.md` was removed from the shared `bugs` ProjectSection
+(git mv target) and the new leaf's `NestedProjects` entry maps `0083` -> the `bugs` folder GUID.
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- All `order` values: 40/50/60/70 (the 4 DevCycleCraft rows, continuing the 2026-05 table sequence
+  from Wave C's `30`) and `10` (BUG-015, restarting the 2026-06 bug-table sequence).
+- `goal:` text for `backlog-workflow-integration` was reworded (not verbatim) to avoid the
+  validator's banned-content patterns -- the archived Notes cell read "Completed (workflow.md
+  Rules 1/7 updated)", which trips both the "test count" (`1/7`) and "file path beyond the
+  pointer" (`workflow.md`) bans. Reworded to "Completed (workflow rules updated)" preserving
+  meaning without the banned tokens; flagging the substitution since it is not a verbatim
+  transcription.
+- BUG-015 folder shape/slug are pre-set by the plan (`2026-06-27-BUG-015-...`, REQ-SEV-01), not
+  agent-invented.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing per REQ-SEV-21 amendment); BACKLOG.md/archive files
+reported stale as expected (regen not run in this task -- T12 territory, matches Wave C precedent).
+Tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -> 144 passed,
+0 failed (`pytest` is not installed in this environment; the suite runs under `unittest`, per the
+Wave C precedent note at line 2334). `.sln` BOM + all-CRLF verified before and after edit via
+Python binary-mode read (never grep, per `rtk-rewrites-grep` memory). Commit SHA:
+`6a66b71` (`docs(spec-evolution): T12a Wave D -- 2026-05 pt2 (4 folders) + BUG-015`). Pushed to
+`origin/feature/backlog-migration`.
+Files written and re-read: all 7 changed files above -- re-read via the Edit/Write tool's post-call
+state and via Python binary-mode read for `MyVocaList.sln`; frontmatter shape re-verified against
+the Wave C `sdd`/`gotosettings-navigation-fix` precedents and the T10a `BUG-021`/`BUG-028` bug-folder
+precedents before commit.
+
+---
+## Task: T12a Wave E -- 1 folder (BUG-016), rules-file rows held back
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` (Wave E)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-016-songspage-fab-crash/BUG-016-songspage-fab-crash.md` (`git mv` from the flat file; nothing deleted, REQ-SEV-27)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-016-songspage-fab-crash/README.md` (new)
+- `MyVocaList.sln` -- GUID `0084` (see below)
+
+### `.sln` GUIDs consumed
+`0084` only, for the new `2026-06-27-BUG-016-songspage-fab-crash` leaf project nested under the
+same `artists-songs\bugs` Solution Folder as Wave D's BUG-015 leaf. Flat-file line
+`BUG-016-songspage-fab-crash.md` removed from the shared `bugs` ProjectSection; `NestedProjects`
+entry maps `0084` -> the `bugs` folder GUID.
+
+### REQ-SEV-32 confirmation (rules-file rows held back)
+Per the plan and Helder's standing ruling, the two remaining 2026-05 archive rows -- "VS Solution
+File Registration Rule" (pointer: `.claude/rules/constraints-registry.md`) and "Proactive BACKLOG
+Entry Rule" (pointer: `.claude/rules/workflow.md`) -- got **no folder** this wave. Both pointers
+target files outside `Docs/Management`, matching REQ-SEV-32 exactly. No folder was created, no
+README written, no `.sln` entry added for either row; their archive rows keep their existing text
+pointer unchanged. Wave E therefore ships only the 1 planned BUG-016 folder, as the plan specifies.
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- `order`: `20` (BUG-016, continuing the 2026-06 bug-table sequence from Wave D's BUG-015 `10`).
+- Folder shape/slug are pre-set by the plan (`2026-06-27-BUG-016-...`, REQ-SEV-01), not
+  agent-invented.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing); BACKLOG.md/archive files reported stale as expected
+(regen not run -- T12 territory). Tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"`
+-> 144 passed, 0 failed. `.sln` BOM + all-CRLF verified before and after edit via Python
+binary-mode read. Commit SHA: `e2f8820` (`docs(spec-evolution): T12a Wave E -- 1 folder (BUG-016),
+rules-file rows held back`). Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: all 3 changed files above -- re-read via the Edit/Write tool's post-call
+state and via Python binary-mode read for `MyVocaList.sln`.
+
+**STOPPED after Wave E per the briefing -- Wave F not started.**
+
+---
+## Task: T12a Wave F -- Search Picker family (5 folders)
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` (`### Wave F`)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/search-picker/README.md` (new, dropped into the existing folder)
+- `Docs/Management/BusinessFeatures/search-picker/changes/2026-06-01-artist-picker-page/README.md` (new folder)
+- `Docs/Management/BusinessFeatures/search-picker/changes/2026-06-01-song-picker-page/README.md` (new folder)
+- `Docs/Management/BusinessFeatures/search-picker/changes/2026-06-01-youtube-search-page/README.md` (new folder)
+- `Docs/Management/BusinessFeatures/search-picker/changes/2026-06-01-coding-guidelines-update/README.md` (new folder)
+- `MyVocaList.sln`
+
+### GUIDs consumed
+`0085` (new `changes` Solution Folder under existing `search-picker` `0018`), `0086`-`0089` (4
+dated sub-item folders nested under `0085`). Next free after Wave F: `008A`. High-water mark
+audited directly from the `.sln` regex scan before editing (max found: `0084`) -- **not** trusted
+from the plan's own GUID estimates, per the briefing's instruction.
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- Row 1 (`search-picker` parent) uses the plan's exact slug/title/order; no authoring needed
+  (existing folder, frontmatter only).
+- Rows 2-5: slug + title + `order` (20/30/40/50) are agent-authored per the plan's F-1b framing
+  ("sub-rows of one `task-log.md`"). `pointer:` stays on the shared `BusinessFeatures/search-picker/task-log.md`
+  (REQ-SEV-27, nothing deleted).
+
+### Reworded goal (flagged)
+Row 5's (`coding-guidelines-update`) archived Notes cell reads
+"`.claude/library/search-picker-pattern.md` created." -- the validator's banned-content check
+rejects file paths beyond the `pointer:` field. Reworded to "New search-picker coding guidelines
+file created." in both the frontmatter `goal:` and the body prose, preserving the meaning (same
+policy as the one Wave D rework).
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing); BACKLOG.md/archive files reported stale as expected
+(regen not run -- T12 territory). Tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"`
+-> 144 passed, 0 failed. `.sln` BOM (`EF BB BF`) + all-CRLF verified before and after edit via
+Python binary-mode read. Commit SHA: `f449f37` (`docs(spec-evolution): T12a Wave F -- Search
+Picker family (5 folders)`). Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: all 6 changed files above -- confirmed via Write/Edit tool state and a
+Python binary-mode BOM/CRLF check on `MyVocaList.sln`.
+
+---
+## Task: T12a Wave G -- artists-songs bug backlog pt1 (BUG-001/002/005/006/007)
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` (`### Wave G`)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-03-BUG-001-artists-page-no-back-button/README.md` (new, `BUG-001-artists-page-no-back-button.md` `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-002-artist-form-search-non-md3/README.md` (new, flat file `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-005-new-song-save-broken/README.md` (new, flat file `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-006-search-song-double-tap-crash/README.md` (new, flat file `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-007-searchappbar-duplicate-back-arrow/README.md` (new, flat file `git mv`'d alongside it)
+- `MyVocaList.sln`
+
+### GUIDs consumed
+`008A` (BUG-001), `008B` (BUG-002), `008C` (BUG-005), `008D` (BUG-006), `008E` (BUG-007) -- all
+nested under the existing `artists-songs` `bugs` Solution Folder (`7A021F6B-F297-41EA-A028-C4F881146791`).
+Next free after Wave G: `008F`.
+
+### git mv vs net-new
+All 5 rows had a pre-existing flat file (confirmed present before the wave) -- all 5 are `git mv`,
+no net-new folders in this wave.
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- `order` values (10/20/60/70/80) are exactly as specified by the plan -- no authoring needed.
+- Day-01 dates authored for rows 2-5 (`Target` cell was bare `2026-06`), per REQ-SEV-00; row 1 kept
+  its own `2026-06-03` (`Target` cell already carried a day).
+
+### Dropped severity field (flagged)
+Three of the five moved flat files stated a pre-BUG-tracking-scheme severity in prose
+(BUG-001 "High", BUG-002 "Medium", BUG-006 "High") that is not one of the validator's three
+allowed enum values (Critical/Major/Minor). The `severity:` frontmatter key was omitted rather than
+mapped/invented for these three; the original severity text remains intact in the body of the
+moved flat file (unchanged, not deleted). BUG-005 and BUG-007's source files stated no severity at
+all, so no field was ever added for them.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing) after the severity-field fix (first pass failed with 3
+`invalid severity` errors, all resolved by dropping the field per above); BACKLOG.md/archive files
+reported stale as expected (regen not run -- T12 territory). Tests:
+`python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -> 144 passed, 0
+failed. `.sln` BOM + all-CRLF verified before and after edit via Python binary-mode read. Commit
+SHA: `885962d` (`docs(spec-evolution): T12a Wave G -- artists-songs bug backlog pt1
+(BUG-001/002/005/006/007)`). Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: all 5 README files + `MyVocaList.sln` above -- confirmed via Write/Edit
+tool state and a Python binary-mode BOM/CRLF check on `MyVocaList.sln`.
+
+---
+## Task: T12a Wave H -- artists-songs bug backlog pt2 + BUG-010 pair
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` (`### Wave H`)
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files:
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-009-add-url-before-save-ux/README.md` (new, flat file `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-010-song-api-autofill-broken/README.md` (new folder, no flat file existed)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-06-01-fuzzy-entity-matching-import/README.md` (new folder)
+- `Docs/Management/BusinessFeatures/queue-management/bugs/2026-06-01-BUG-011-queuepage-bottomsheet-double-add/README.md` (new, flat file `git mv`'d alongside it)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-06-20-spec-cleanup-p2/README.md` (new folder, no flat file existed)
+- `MyVocaList.sln`
+
+### GUIDs consumed
+`008F` (BUG-009, nested under `artists-songs` `bugs`), `0090` (BUG-010, nested under `artists-songs`
+`bugs`), `0091` (fuzzy-entity-matching-import, nested under `artists-songs` `changes` `007F`),
+`0092` (BUG-011, nested under `queue-management` `bugs` `0025`), `0093` (spec-cleanup-p2, nested
+under `artists-songs` `changes` `007F`). Next free after Wave H: `0094`.
+
+### git mv vs net-new
+- BUG-009: pre-existing flat file `git mv`'d.
+- **BUG-010: verified via `find`/`git ls-files` before authoring -- no flat file exists** (per the
+  plan's explicit note); folder created net-new.
+- fuzzy-entity-matching-import: no flat file (F-1b follow-up sub-row, never had one); net-new.
+- BUG-011: pre-existing flat file `git mv`'d.
+- spec-cleanup-p2: the archive row's own pointer text
+  (`BusinessFeatures/artists-songs/spec-cleanup-p2.md`) does not exist as a file (verified);
+  net-new folder, `pointer:` redirected to the shared `task-log.md` (REQ-SEV-27).
+
+### Agent-authored fields (flagged for Helder's gate audit)
+- `order` values (90/100/110/10/120) are exactly as specified by the plan -- no authoring needed.
+- Day-01 dates authored for BUG-009, BUG-010, fuzzy-entity-matching-import, BUG-011 (bare `2026-06`
+  `Target` cells), per REQ-SEV-00; spec-cleanup-p2 kept its own `2026-06-20`.
+- fuzzy-entity-matching-import's folder shape/slug are agent-authored (F-1b follow-up sub-row, not
+  itself numbered), per the plan.
+- Removing the two flat-file `.sln` `SolutionItems` lines for BUG-009 and BUG-011 (superseded by
+  their dated-folder equivalents) left the `queue-management` `bugs` Solution Folder's
+  `ProjectSection` empty -- the now-empty `ProjectSection(SolutionItems)...EndProjectSection` block
+  was removed entirely (the Solution Folder itself is kept as a container, matching the existing
+  `search-picker/changes` pattern of a `Project`/`EndProject` pair with no `ProjectSection`).
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing); BACKLOG.md/archive files reported stale as expected
+(regen not run -- T12 territory). Tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"`
+-> 144 passed, 0 failed. `.sln` BOM + all-CRLF verified before and after edit via Python
+binary-mode read. Commit SHA: `72698c1` (`docs(spec-evolution): T12a Wave H -- artists-songs bug
+backlog pt2 + BUG-010 pair`). Pushed to `origin/feature/backlog-migration`.
+Files written and re-read: all 5 README files + `MyVocaList.sln` above -- confirmed via Write/Edit
+tool state and a Python binary-mode BOM/CRLF check on `MyVocaList.sln`.
+
+---
+## Task: T12a Waves I, J, K -- docs-only backlog migration continuation
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md`
+**Status:** To Review
+**Started:** 2026-07-23
+**Completed:** 2026-07-24
+
+### Changed files
+Wave I (commit `efe0a05`):
+- `Docs/Management/BusinessFeatures/artists-songs/youtube-search-launch/README.md` (new -- kind i, existing folder)
+- `Docs/Management/BusinessFeatures/crash-reporting/README.md` (new -- kind i, existing folder)
+- `Docs/Management/BusinessFeatures/whats-new/README.md` (new -- kind i, existing folder)
+- `Docs/Management/BusinessFeatures/user-suggestions/changes/2026-06-01-github-issues-integration/README.md` (new -- kind iii-b, agent-authored slug, pointer stays on parent `task-log.md`)
+- `Docs/Management/BusinessFeatures/app-update-check/changes/2026-06-01-remote-update-manifest/README.md` (new -- kind iii-b, agent-authored slug, pointer stays on parent `task-log.md`)
+- `MyVocaList.sln` -- GUIDs `009B`-`009E` consumed (4 new, not the plan's provisioned 5: rows 1-3 reused already-registered folder GUIDs, needing only a `README.md` `SolutionItems` line each)
+
+Wave J (commit `23e4140`):
+- `Docs/Management/BusinessFeatures/app-settings/README.md` (new -- kind i, existing folder)
+- `Docs/Management/BusinessFeatures/about-page/README.md` (new -- kind i, existing folder)
+- `Docs/Management/BusinessFeatures/queue-management/changes/2026-06-shipped-core-product/README.md` (new -- disambiguated `changes/` sub-item, id `queue-management-core-product`; see Spec gap below)
+- `Docs/Management/BusinessFeatures/backup-restore/changes/2026-06-shipped-tier1-3/README.md` (new -- disambiguated `changes/` sub-item, id `backup-restore-tier1-3`; see Spec gap below)
+- Row 4 "Visual Theme Refresh" (iv, blocked) -- **no folder created**, per REQ-SEV-32 and the plan's explicit instruction; the 5th slot remains provisional pending Helder's (iv)-case resolution.
+- `MyVocaList.sln` -- GUIDs `00A0`-`00A3` consumed (4, matching the plan's "4 real" count)
+
+Wave K (commit `e2211b9`):
+- `Docs/Management/cross-cutting/worktree-enforcement/README.md` (new -- kind iii-a, agent-authored slug)
+- `Docs/Management/cross-cutting/orchestrator-role-enforcement/README.md` (new -- kind iii-a, agent-authored slug)
+- `Docs/Management/cross-cutting/bug-tracking-procedure/README.md` (new -- kind iii-a, agent-authored slug)
+- `Docs/Management/cross-cutting/haiku-model-assignment/README.md` (new -- kind iii-a, agent-authored slug)
+- `Docs/Management/cross-cutting/component-change-governance/README.md` (new -- kind iii-a, agent-authored slug)
+- `MyVocaList.sln` -- GUIDs `00A4`-`00A8` consumed (5, matching the plan)
+
+### Spec gap: Wave J real id collisions (`queue-management`, `backup-restore`)
+**Location:** `Docs/Management/BusinessFeatures/queue-management/README.md` and
+`Docs/Management/BusinessFeatures/backup-restore/README.md` -- both already existed (from an
+earlier wave/session) as live `💡 Pending` items for a **different** backlog row than the one
+Wave J's plan rows 3 and 5 describe (Queue Entry Point Redesign / Backup Tier 2 WiFi Mirror,
+respectively -- not the shipped 2026-06 "Queue Management" / "Data Backup & Restore Tier 1+3"
+rows the plan assigns those ids to). The plan was written assuming clean `id: queue-management`
+/ `id: backup-restore`; both collide with a real, unrelated pre-existing item at the same path.
+**Gap description:** one item = one `README.md` path in this model; two distinct backlog rows
+cannot both own the same folder's `README.md`.
+**Options:**
+- Option A (taken): file the archived Done row as a disambiguated `changes/` sub-item
+  (`queue-management-core-product`, `backup-restore-tier1-3`) inside the same folder, pointer
+  stays on the folder's existing `task-log.md` -- consistent with the (iii-b) sub-item pattern
+  already used elsewhere, and with the Wave K precedent of never merging/reusing a colliding id.
+- Option B: overwrite the existing Pending README with the Done row's content, losing the other
+  item's tracking.
+**Recommendation:** Option A -- implemented. Rationale: nothing is deleted (REQ-SEV-27), both
+items remain independently tracked and audit-visible.
+**Blocking:** No -- proceeded with Option A as a documented assumption; flagged in both new
+README bodies for Helder's gate audit.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation per wave:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing) after every wave; archive/BACKLOG files reported
+stale as expected (regen not run -- T12 territory). Tests:
+`python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -> 144 passed,
+0 failed, after every wave. `.sln` edits made via the Edit tool (UTF-8/CRLF preserved by the
+tool); re-read after each edit to confirm placement.
+Files written and re-read: all 13 new README files + `MyVocaList.sln` above -- confirmed via
+Write/Edit tool state.
+Commit SHAs: `efe0a05` (Wave I), `23e4140` (Wave J), `e2211b9` (Wave K). All pushed to
+`origin/feature/backlog-migration`.
+
+### Flagged items for Helder's gate audit
+- **Reworded goals** (verbatim archive text tripped the file-path/commit-hash banned-content
+  pattern): all 5 Wave K rows (`worktree-enforcement`, `orchestrator-role-enforcement`,
+  `bug-tracking-procedure`, `haiku-model-assignment`, `component-change-governance`).
+- **Agent-authored slugs**: Wave I rows 4-5 (`github-issues-integration`,
+  `remote-update-manifest`); Wave J's two disambiguated sub-items
+  (`queue-management-core-product`, `backup-restore-tier1-3`); all 5 Wave K slugs
+  (`worktree-enforcement`, `orchestrator-role-enforcement`, `bug-tracking-procedure`,
+  `haiku-model-assignment`, `component-change-governance`).
+- **Real id collisions resolved via disambiguation** (not anticipated by the plan): Wave J rows
+  3 and 5 -- see "Spec gap" above.
+- **Wave K collision check**: confirmed clean -- none of the 5 new slugs collide with the 24
+  pre-existing `Docs/Management/cross-cutting/*` folders (enumerated directly before writing);
+  `worktree-enforcement` is confirmed distinct from, and NOT merged with, the existing unrelated
+  `cross-cutting/mandatory-worktree-rule-enforcement/` folder, per the plan's explicit warning.
+- **No pre-scheme `severity` values found** in Waves I/J/K source rows -- nothing to drop this
+  round (unlike Waves D/F/G).
+
+---
+## Task: T12a Waves L, M, N -- docs-only backlog migration (2026-06 completion)
+**Plan:** `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md`
+**Status:** To Review
+**Started:** 2026-07-24
+**Completed:** 2026-07-24
+
+### Changed files (Wave L -- commit `f7640ce`):
+- `Docs/Management/cross-cutting/md3-devexpress-compliance-gap/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-14-BUG-003-songpage-filter-chips/BUG-003-songpage-filter-chips.md` (git mv from flat file)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-14-BUG-003-songpage-filter-chips/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-14-BUG-004-bottomsheet-title-style-missing/BUG-004-bottomsheet-title-style-missing.md` (git mv from flat file)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-14-BUG-004-bottomsheet-title-style-missing/README.md` (new)
+- `Docs/Management/DevCycleCraft/crud-list-deduplication/README.md` (new)
+- `Docs/Management/DevCycleCraft/crud-list-deduplication/changes/2026-06-04-steps-1-7e-migration/README.md` (new)
+- `MyVocaList.sln` (GUIDs `00A9`-`00AD` registered)
+
+### Changed files (Wave M -- commit `bc6202f`):
+- `Docs/Management/cross-cutting/db-side-collation/README.md` (new)
+- `Docs/Management/cross-cutting/navigation-icon-pattern/README.md` (new)
+- `Docs/Management/DevCycleCraft/page-load-frozen/README.md` (new, existing folder)
+- `Docs/Management/cross-cutting/artists-crud-filter-fix/README.md` (new)
+- `Docs/Management/cross-cutting/queue-music-icon-asset/README.md` (new)
+- `MyVocaList.sln` (GUIDs `00AE`-`00B1` registered; `page-load-frozen` reused its existing GUID `{C81D77D9-056E-44D8-A88F-522682CEE603}` -- no new GUID needed)
+
+### Changed files (Wave N -- commit `303a5bd`):
+- `Docs/Management/DevCycleCraft/ui-form-validation-guide/changes/2026-06-30-form-validation-guide-shipped/README.md` (new)
+- `MyVocaList.sln` (GUIDs `00B2`-`00B3` registered)
+
+### Spec gap: Wave N real id collision (`ui-form-validation-guide`)
+**Location:** `Docs/Management/DevCycleCraft/ui-form-validation-guide/README.md` -- already exists
+as a live `🟡 In Progress` item ("Form validation" -- establish + apply validation patterns to all
+form entries), with its own `task-log.md`, distinct from the plan's assumed Done row ("01 - Form
+validation guide", closed 2026-06).
+**Gap description:** one item = one `README.md` path in this model; two distinct backlog rows
+cannot both own the same folder's `README.md`.
+**Options:**
+- Option A (taken): file the archived Done row as a disambiguated `changes/` sub-item
+  (`ui-form-validation-guide-shipped`), pointer stays on the folder's existing `task-log.md` --
+  consistent with the Wave J (`queue-management-core-product`, `backup-restore-tier1-3`) and
+  Wave J-family precedent.
+- Option B: overwrite the existing In Progress README with the Done row's content, losing the
+  live item's tracking.
+**Recommendation:** Option A -- implemented. Rationale: nothing deleted (REQ-SEV-27), both items
+remain independently tracked.
+**Blocking:** No -- proceeded with Option A as a documented assumption; flagged for Helder's gate
+audit.
+
+### Build notes
+Build: N/A (docs-only, no `.cs`/`.xaml` touched). Validation per wave:
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> 0 errors, 1 known warning
+(BUG-022 parent/path-parent, pre-existing) after every wave; archive/BACKLOG files reported stale
+as expected (regen not run -- T12 territory). Tests:
+`python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -> 144 passed,
+0 failed, after every wave. `.sln` edits made via the Edit tool (UTF-8/CRLF preserved by the
+tool); re-read after each edit to confirm placement.
+Files written and re-read: all 13 new/moved files + `MyVocaList.sln` above -- confirmed via
+Write/Edit tool state.
+Commit SHAs: `f7640ce` (Wave L), `bc6202f` (Wave M), `303a5bd` (Wave N). All pushed to
+`origin/feature/backlog-migration`.
+
+### Flagged items for Helder's gate audit
+- **Reworded goals** (verbatim archive text tripped the file-path/commit-hash/test-count banned
+  pattern): `md3-devexpress-compliance-gap`, `db-side-collation`, `artists-crud-filter-fix`,
+  `queue-music-icon-asset` (all cross-cutting Wave L/M rows); BUG-004's goal (dropped a file-path
+  reference to `MaterialStyles.xaml`); `steps-1-7e-migration`'s goal (reworded the `2026-06-04/06`
+  date range so it did not read as a test-count fraction).
+- **Agent-authored slugs**: all Wave L/M cross-cutting slugs (`md3-devexpress-compliance-gap`,
+  `db-side-collation`, `navigation-icon-pattern`, `artists-crud-filter-fix`,
+  `queue-music-icon-asset`); Wave N's disambiguated sub-item (`ui-form-validation-guide-shipped`).
+- **`Duplicate` status used**: BUG-003 (`🔵 Duplicate`) -- T12-pre's extended STATUSES (shipped
+  `e7b29a5`) confirmed already present in `model.py`; no schema change needed this wave.
+- **Real id collision resolved via disambiguation**: Wave N's `ui-form-validation-guide` row --
+  see "Spec gap" above.
+- **Pre-scheme severity dropped**: BUG-003 (`Medium`, found in the moved flat file's body -- not
+  carried into README frontmatter); BUG-004 (`High`, same treatment). Both preserved verbatim in
+  the moved flat file bodies, per standing ruling.
+- **Cross-cutting collision check**: confirmed clean for all 7 new Wave L/M slugs against the
+  29 pre-existing `Docs/Management/cross-cutting/*` folders (enumerated directly before writing,
+  post-Wave-K additions included) -- no collisions found.
+- **BUG-003/BUG-004 `.sln` cleanup**: the parent `bugs` folder's `SolutionItems` block (GUID
+  `{7A021F6B-F297-41EA-A028-C4F881146791}`) had its two now-superseded flat-file lines removed in
+  the same edit that added the new dated-folder entries -- confirmed via direct `.sln` grep before
+  and after.
+
+### Checkpoint
+Branch: `feature/backlog-migration`, worktree `mvl-backlog-migration`. Waves L, M, N all
+committed + pushed. **This completes ALL 2026-06 rows** (T12a-remaining-waves-plan.md's own
+statement that Wave N's re-triage row was already handled in Wave C is confirmed -- no extra row
+added). **STOPPED after Wave N per the briefing -- Wave O not started.**
+
+**Next-free `.sln` GUID for a future Wave O: `00B4`** (audit directly from the `.sln` before
+trusting this number, per standing instruction).
+
+**Context manifest for resuming (Wave O onward -- Batch 5, 2026-07 rows):**
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` -- read
+  `### Wave O` onward for the next rows to migrate (35 remaining 2026-07 rows across 7 waves).
+- This `task-log.md`'s Wave L/M/N entries (above) -- the authoritative pattern to replicate,
+  including the folder-collision disambiguation pattern (`changes/` sub-item, pointer on the
+  existing `task-log.md`) that later waves will likely need again.
+- `MyVocaList.sln` -- read directly to re-audit the GUID high-water mark before trusting `00B4`.
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` -- source of verbatim Goal/Notes
+  text for Wave O+ rows (2026-07 rows live in the 07 archive file, not the 06 one used this wave).
+- A committed Wave L/M/N README (e.g.
+  `Docs/Management/cross-cutting/db-side-collation/README.md`) as the frontmatter/body template.
+
+---
+
+## Waves O, P, Q — 2026-07 rows (Batch 5, first tranche)
+
+Branch: `feature/backlog-migration`, worktree `mvl-backlog-migration`. All three waves
+committed and pushed separately, in order, per the briefing.
+
+### Wave O — 2026-07 Business bugs, part 1
+
+**Status:** To Review
+**Commit:** `e7400fe`
+
+**Changed files:**
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-01-BUG-020-songspage-fab-crash-secure-storage/` (git mv + `README.md`)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-01-BUG-008-songform-artist-autocomplete/` (git mv + `README.md`)
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-07-03-BUG-036-personformpage-birthday-mask/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/crud-form-action-pattern/README.md` (new file in pre-existing folder)
+- `Docs/Management/DevCycleCraft/hamburger-nav-pattern/README.md` (new file in pre-existing folder)
+- `MyVocaList.sln` (GUIDs `00B4`-`00B6`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (regen-rewritten, migrated rows dropped)
+- `Docs/Management/BACKLOG.md` (regen)
+
+**BUG-008 routing (Blocker #3):** archived in the 2026-07 file's Notes text but its own
+`closed:` date is 2026-06 (original 2026-06-11 filing, superseded 2026-07-10). Per Helder's
+ruling, routed by `closed:` month (REQ-SEV-18) — folder sits at the 2026-06 fence
+(`2026-06-01-BUG-008-...`), `closed: 2026-06`, status `🔵 Superseded`. Flagged in the
+README's spec-updated note. Source severity text ("Medium") was pre-scheme prose, not a
+scheme value — dropped from frontmatter, preserved verbatim in the moved file body.
+
+**crud-form-action-pattern (Blocker #2, half):** Wave O row 3 (Business-table:
+"Song form → stays full-screen page + AppBar-save pattern") is filed as the folder's
+**primary** `README.md`, id `crud-form-action-pattern`, filed top-level with **no `parent`**
+(the folder is not physically nested under `artists-songs`; `section: BusinessFeatures` is
+set explicitly). The Craft-table collision row is deferred to Wave P (below).
+
+**GUIDs:** `00B4` = artists-songs/bugs BUG-020 folder · `00B5` = artists-songs/bugs BUG-008
+folder · `00B6` = persons/bugs BUG-036 folder (new; `crud-form-action-pattern` and
+`hamburger-nav-pattern` folders pre-existed, only their `README.md` SolutionItems lines
+were added — no new GUIDs).
+
+**Validation:** `regen --check` → 0 errors, only the known pre-existing BUG-022
+parent-disagreement warning.
+
+### Wave P — autocomplete-component F-1b bug cluster
+
+**Status:** To Review
+**Commit:** `c0cee01`
+
+**Changed files:**
+- `Docs/Management/cross-cutting/branch-lock-avoidance/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/crud-form-action-pattern/changes/2026-07-10-md3-save-cancel-placement/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-07-11-component-evaluation/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-07-11-apply-to-simplest-candidate/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-040-mobile-input-loses-focus/README.md` (net-new; first item in a fresh **lowercase** `bugs/` folder)
+- `MyVocaList.sln` (GUIDs `00B7`-`00BD`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (regen)
+
+**crud-form-action-pattern (Blocker #2, resolved):** Wave P row 2 ("CRUD Form Action
+Pattern — MD3 Save/Cancel placement", Craft-table) is filed as a `changes/` sub-item under
+the **same folder** as the Wave-O Business README — Venues precedent (two distinct items,
+distinct id + order, one folder). Id `md3-save-cancel-placement`, `section: DevCycleCraft`,
+`parent: crud-form-action-pattern`, order `10`. Neither README overwrites or merges with
+the other; both flagged in this entry and in each file's own migration note.
+
+**Ships 5 real folders** (row 2 no longer held — ruling applied, not deferred further).
+
+**bugs/ vs Bugs/ flag:** `autocomplete-component` already had a pre-existing capitalized
+`Bugs/` solution folder (holding `bug-043`, pre-REQ-SEV-01 scheme). BUG-040 is filed under a
+**new, separate, lowercase** `bugs/` folder (GUID `00BC`) matching every other feature's
+convention — the two folders coexist; the capitalized one was not touched or renamed
+(out of this task's scope). Flagged for audit.
+
+**GUIDs:** `00B7` = cross-cutting/branch-lock-avoidance · `00B8` = new `changes/` subfolder
+under `crud-form-action-pattern` · `00B9` = the `md3-save-cancel-placement` slug ·
+`00BA`/`00BB` = component-evaluation / apply-to-simplest-candidate (under the pre-existing
+`autocomplete-component/changes` GUID) · `00BC` = new lowercase `bugs/` subfolder under
+`autocomplete-component` · `00BD` = the BUG-040 slug (under `00BC`).
+
+**Validation:** `regen --check` → 0 errors (one banned-content fix needed first — the
+`branch-lock-avoidance` goal originally named `LEDGER.md`, tripped the file-path-beyond-pointer
+rule; reworded to "a develop-branch task ledger"). Test suite 144/144.
+
+### Wave Q — autocomplete-component bug cluster cont'd + form-validation start
+
+**Status:** To Review
+**Commit:** `941bd15`
+
+**Changed files:**
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-041-search-view-duplicate-on-back/README.md` (net-new, under `00BC`)
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-042-back-tap-repeat-cycle/README.md` (net-new, under `00BC`)
+- `Docs/Management/BusinessFeatures/venues/changes/2026-06-30-form-validation-update/README.md` (net-new)
+- `Docs/Management/BusinessFeatures/persons/changes/2026-06-30-form-validation-update/README.md` (net-new)
+- `MyVocaList.sln` (GUIDs `00BE`-`00C1`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (regen)
+
+**Id collision (venues/persons form-validation-update):** both archived rows literally use
+the id `form-validation-update` ("02 - Update Venues form (validation)" and "03 - Update
+Singer form (validation)"). Following the Wave-R precedent already visible in the plan
+(`form-validation-update-songs` for the Songs form), disambiguated as
+`form-validation-update-venues` and `form-validation-update-persons` to keep ids globally
+unique (`model.py`'s duplicate-id check is global, not scoped per parent). Flagged for
+audit — the plan's literal id column should be read as "same base name, needs a
+feature-suffix" going forward for the remaining form-validation rows in Wave R.
+
+**BUG-022** (2026-07-01, "SingerForm birthday field mask missing") already done at T10a —
+excluded, matches the plan.
+
+**Reworded goal text (banned-content fixes, both caught by `regen --check` before commit):**
+- `branch-lock-avoidance` (Wave P): `LEDGER.md` → "a develop-branch task ledger" (file-path pattern).
+- `persons` form-validation-update: `2026-07-01/03` → "2026-07-01 through 2026-07-03" (test-count `N/M` pattern; the source en-dash range "BUG-035–038" itself did not trip the pattern and needed no change, transcribed with a plain hyphen for consistency).
+
+**GUIDs:** `00BE`/`00BF` = BUG-041/BUG-042 slugs (under `00BC`) · `00C0` = venues
+form-validation-update slug (under the pre-existing venues `changes` GUID `007B`) ·
+`00C1` = persons form-validation-update slug (under the pre-existing persons `changes`
+GUID `007D`).
+
+**Validation:** `regen --check` → 0 errors, only the known pre-existing BUG-022
+parent-disagreement warning. Test suite 144/144 (re-run after Wave Q's edits).
+
+### Checkpoint — Waves O/P/Q complete, STOPPED per briefing
+
+Branch: `feature/backlog-migration`, worktree `mvl-backlog-migration`. Waves O, P, Q all
+committed and pushed (`e7400fe`, `c0cee01`, `941bd15`). **STOPPED after Wave Q — Wave R not
+started**, per the briefing's explicit instruction.
+
+**Next-free `.sln` GUID for a future Wave R: `00C2`** (audit directly from the `.sln` before
+trusting this number, per standing instruction).
+
+**Flagged audit set (full list, for Helder's review):**
+1. BUG-008 routed to the 2026-06 fence despite living in the 2026-07 archive text (REQ-SEV-18 exception, per ruling).
+2. `crud-form-action-pattern` primary README filed with no `parent` (top-level, `section: BusinessFeatures`) — not nested under `artists-songs` since the folder isn't physically there.
+3. `crud-form-action-pattern`/`md3-save-cancel-placement` Venues-precedent split — two ids, one folder, neither merged nor overwritten.
+4. `autocomplete-component` now has two `bugs`-named solution folders: the pre-existing capitalized `Bugs/` (bug-043, untouched) and a new lowercase `bugs/` (BUG-040/041/042, this batch's convention).
+5. `form-validation-update-venues` / `form-validation-update-persons` — id disambiguation of the plan's literal duplicate `form-validation-update` id, matching the Wave-R `-songs` precedent.
+6. Two goal-text rewordings to clear `model._BANNED` (LEDGER.md file-path; `07-01/03` test-count fraction) — meaning preserved in both cases.
+7. BUG-008's source "Medium" severity text dropped from frontmatter (pre-scheme, not a scheme value) — preserved verbatim in the moved flat-file body.
+
+**Context manifest for resuming (Wave R onward):**
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` — read `### Wave R` onward.
+- This task-log's Wave O/P/Q entries (above) — pattern to replicate, including the id-disambiguation and dual-bugs-folder flags.
+- `MyVocaList.sln` — read directly to re-audit the GUID high-water mark before trusting `00C2`.
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` — source text for Wave R+ rows.
+- A committed Wave Q README (e.g. `Docs/Management/BusinessFeatures/venues/changes/2026-06-30-form-validation-update/README.md`) as the frontmatter/body template for `changes/` sub-items with a shared pointer.
+
+### Wave R — form-validation sub-rows cont'd + cross-cutting cluster
+
+**Status:** To Review
+**Commit:** `e78582d`
+
+**Note on source text:** the live `BACKLOG-ARCHIVE-2026-07.md` no longer carried the Wave
+R–U row text — earlier waves' manual hand-appends only ever added rows already migrated,
+and the file's `<!-- BACKLOG:GENERATED -->` fences are literal (script-owned at T12, not
+continuously regenerated pre-T12). The pristine Notes text for all of Wave R–U was
+recovered from `git show 407aa3db:Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md`
+(the commit immediately before the archive-region split), then hand-appended into the
+current file per wave, matching the established Wave O–Q pattern.
+
+**Changed files:**
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-06-30-form-validation-update-songs/README.md` (net-new)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-06-30-form-validation-update-artists/README.md` (net-new)
+- `Docs/Management/cross-cutting/character-counter-threshold-alignment/README.md` (net-new)
+- `Docs/Management/cross-cutting/local-enforcement-automations/README.md` (net-new)
+- `Docs/Management/cross-cutting/myvocalist-coding-skill-scoping/README.md` (net-new)
+- `MyVocaList.sln` (GUIDs `00C2`-`00C6`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (hand-append)
+
+**GUID re-audit:** the plan estimated Wave R starting at `00C1`; the live `.sln` showed
+`00C1` already consumed by Wave Q (persons form-validation-update). Wave R actually uses
+`00C2`-`00C6`.
+
+**Id collision (songs/artists form-validation-update):** same pattern as Wave Q's
+venues/persons collision — both archived rows use the literal id `form-validation-update`
+under the same `artists-songs/changes/` parent. Disambiguated as
+`form-validation-update-songs` / `form-validation-update-artists` per the established
+precedent. Flagged for audit.
+
+**Reworded goal text:** Artists-form goal's archived "BUG-034/039" → "BUG-034 and
+BUG-039" (test-count `N/M` pattern) — wording only, no meaning change.
+
+**Validation:** `regen --check` → exit 1 (expected stale, additive-only until T12), known
+BUG-022 warning only. Test suite 144/144.
+
+### Wave S — rules-file-refactoring + secrets/MCP cluster
+
+**Status:** To Review
+**Commit:** `9870706`
+
+**Changed files:**
+- `Docs/Management/DevCycleCraft/rules-file-refactoring/README.md` (added to pre-existing folder)
+- `Docs/Management/DevCycleCraft/rules-file-refactoring/changes/2026-07-04-spike-01-18-gate-audit/README.md` (net-new, new `changes/` subfolder)
+- `Docs/Management/cross-cutting/mcp-secrets-rotation/README.md` (net-new)
+- `Docs/Management/cross-cutting/mcp-governance-docs-housekeeping/README.md` (net-new)
+- `Docs/Management/cross-cutting/helder-manual-actions-2026-07-09/README.md` (net-new, date-suffixed slug)
+- `MyVocaList.sln` (GUIDs `00C7`-`00CB`; `rules-file-refactoring` reuses existing GUID `0041`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (hand-append)
+
+**Reworded goal text:** `rules-file-refactoring` goal's archived "~8–11k/agent saved"
+paraphrased without the digit+k shorthand (only the literal `Nk tokens` form is banned,
+but reworded proactively for consistency and to avoid ambiguity) — flagged for audit,
+wording only.
+
+**Validation:** `regen --check` → exit 1 (expected stale), known BUG-022 warning only.
+Test suite 144/144.
+
+### Wave T — final Craft cluster + BUG-044
+
+**Status:** To Review
+**Commit:** `8099225`
+
+**Changed files:**
+- `Docs/Management/cross-cutting/tool-registry-cleanup/README.md` (net-new)
+- `Docs/Management/DevCycleCraft/per-agent-context-isolation/README.md` (added to pre-existing folder)
+- `Docs/Management/cross-cutting/search-appbar-pattern/README.md` (net-new, status Superseded)
+- `Docs/Management/DevCycleCraft/backlog-purpose-review/README.md` (added to pre-existing folder)
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-15-BUG-044-duplicate-personformpage-after-save/README.md` (net-new, Critical, status Superseded, under `00BC`)
+- `MyVocaList.sln` (GUIDs `00CC`-`00CE`; `per-agent-context-isolation` reuses `0044`, `backlog-purpose-review` reuses `0049`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (hand-append)
+
+**Row 4 folder-existence check (per plan's flag):** `git ls-files` confirmed
+`DevCycleCraft/backlog-purpose-review/` already existed (`design.md`, `findings.md`,
+`task-log.md`) — no fresh create needed, only `README.md` added.
+
+**Reworded goal text (banned-content fix, caught by `regen --check`):**
+`backlog-purpose-review` goal originally read "restore BACKLOG.md as a PO-level business
+artifact" — the bare `BACKLOG.md` token trips the file-path-beyond-pointer rule even
+though it names the artifact, not a source file. Reworded to "restore the BACKLOG file"
+in both the README frontmatter and the archive row text. Also reworded the body note's
+reference from the literal `workflow.md` filename to "the workflow rules file" for the
+same reason. Wording only, no meaning change — flagged for audit.
+
+**Validation:** `regen --check` → exit 2 on first attempt (the `BACKLOG.md` banned-content
+hit above), fixed, then exit 1 (expected stale), known BUG-022 warning only. Test suite
+144/144.
+
+### Wave U (final) — BUG-045, BUG-047 — T12a COMPLETE
+
+**Status:** To Review
+**Commit:** `b64c510`
+
+**Changed files:**
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-15-BUG-045-cursor-stuck-after-autocomplete/README.md` (net-new, Major, status Superseded, under `00BC`)
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-15-BUG-047-stale-suggestions-popup-edit-mode/README.md` (net-new, Major, status Superseded, under `00BC`)
+- `MyVocaList.sln` (GUIDs `00CF`-`00D0`)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (hand-append)
+
+**Reworded goal text:** BUG-047's archived "verifier PASS 485/485" → "verifier suite
+green, all cases" (`PASS` trips the review-verdict ban, `485/485` trips the test-count
+`N/M` ban) — wording only, no meaning change, flagged for audit.
+
+**Validation:** `regen --check` → exit 1 (expected stale, additive-only until T12), known
+BUG-022 warning only. Test suite 144/144.
+
+**Final high-water `.sln` GUID after T12a: `00D0`.**
+
+**T12a is COMPLETE.** Every archived row across all 5 `backlog-archive/*.md` files now has
+a backing folder, modulo the 3-row Blockers list (rule-file/changelog pointer rows,
+2026-05/2026-06 dates) which still requires a Helder decision before its own micro-wave —
+tracked separately, not part of the T12a gate. T12a's own gate is met; T12 (canonical
+archive rewrite + G1/G2/G3 idempotency gate) is ready for Helder architectural review.
+**Not started in this session, per the briefing.**
+
+**Full flagged-audit set across Waves R–U (for Helder's review):**
+1. Wave R: `form-validation-update-songs` / `-artists` id disambiguation (literal archived id collides across sibling rows, same pattern as Wave Q's venues/persons collision).
+2. Wave R: Artists-form "BUG-034/039" reworded to "BUG-034 and BUG-039" to clear the test-count heuristic.
+3. Wave S: `rules-file-refactoring` goal's "~8–11k/agent saved" paraphrased without digit+k shorthand.
+4. Wave S: `spike-01-18-gate-audit` filed as a `changes/` sub-item under `rules-file-refactoring`, requiring a brand-new `changes/` solution subfolder (GUID `00C7`) since none existed yet.
+5. Wave T: `backlog-purpose-review` goal's literal "BACKLOG.md" / "workflow.md" tokens reworded to clear the file-path-beyond-pointer rule (README frontmatter + body + archive row all touched).
+6. Wave T: `per-agent-context-isolation` and `backlog-purpose-review` folders confirmed pre-existing via `git ls-files` (the plan's "not confirmed" flag on `backlog-purpose-review` resolved as existing).
+7. Wave T: `search-appbar-pattern` status filed as `🔵 Superseded` (T12-pre extended vocabulary), closed month 2026-07 per the row's own supersession date, distinct from its `target: 2026-06` origin.
+8. Wave U: BUG-047's "verifier PASS 485/485" reworded to "verifier suite green, all cases" to clear both the review-verdict and test-count heuristics.
+9. Cumulative: `autocomplete-component/bugs/` (lowercase) now holds BUG-040/041/042/044/045/047 — six items — alongside the untouched, pre-existing capitalized `Bugs/` folder holding `bug-043` (Wave-P finding, still unresolved as a naming inconsistency).
+
+**Context manifest for T12 (future session, not started here):**
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/design.md` — T12's canonical archive rewrite + G1/G2/G3 idempotency gate design.
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/T12a-remaining-waves-plan.md` — the Blockers list (§ end of file) requiring a Helder decision before T12 can treat the archive as fully closed.
+- This task-log's Wave A–U entries (all of them) — the full set of migration decisions, id disambiguations, and reworded-goal flags T12's equivalence gate must reconcile against.
+- `MyVocaList.sln` — GUID high-water mark `00D0` for any T12 pre-audit.
+- `.claude/scripts/backlog/backlog_gen.py` and `model.py` — the generator T12 will finally invoke for real (non-`--check`) regeneration.
+
+---
+## Task: T12 addendum + canonical archive rewrite (H1 fix + G1/G2/G3 gate)
+**Plan:** Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md
+**Status:** To Review
+**Started:** 2026-07-25
+**Completed:** 2026-07-25
+
+### Changed files:
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/requirements.md` (REQ-SEV-32 amended)
+- `Docs/Management/cross-cutting/vs-solution-file-registration-rule/README.md` (new)
+- `Docs/Management/cross-cutting/proactive-backlog-entry-rule/README.md` (new)
+- `Docs/Management/cross-cutting/visual-theme-refresh/README.md` (new)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md` (registered in .sln)
+- `MyVocaList.sln` (3 new solution-folder entries, GUIDs 00D1/00D2/00D3 under the `cross-cutting`
+  parent `...057`; POST-MIGRATION-FOLLOWUPS.md added to the existing spec-evolution-versioning
+  SolutionItems)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-05.md` (canonical regen)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-06.md` (canonical regen)
+- `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-2026-07.md` (canonical regen)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T12 checked off)
+
+### REQ-SEV-32 amendment
+Changed from "an archived row whose pointer targets a file outside Docs/Management gets NO folder"
+to "still gets a minimal `cross-cutting/<slug>/README.md` folder, pointer unchanged" -- the canonical
+`regen` reconstructs an archive file entirely from folder frontmatter, so a folder-less row is
+silently dropped on rewrite (hazard H1). REQ-SEV-27 ("nothing deleted") wins per Helder's 2026-07-25
+ruling. Both the superseded original wording and the new wording are kept in the spec file with a
+dated `> **Spec updated 2026-07-25:**` note (nothing retracted from history).
+
+### The 3 restored rows
+| Slug (agent-authored) | Title | Target | Closed | Section | Pointer |
+|---|---|---|---|---|---|
+| `vs-solution-file-registration-rule` | VS Solution File Registration Rule | 2026-05 | 2026-05 | DevCycleCraft | `.claude/rules/constraints-registry.md` |
+| `proactive-backlog-entry-rule` | Proactive BACKLOG Entry Rule | 2026-05 | 2026-05 | DevCycleCraft | `.claude/rules/workflow.md` |
+| `visual-theme-refresh` | Visual Theme Refresh | 2026-06 | 2026-06 | BusinessFeatures | `Docs/Changelog/changelog.md` |
+
+Goal text reworded from the frozen pre-migration BACKLOG's Notes cells (verbatim text named the
+rules/changelog files by path, which trips the `model._BANNED` file-path-beyond-pointer pattern) --
+same carve-out already used for `bug-tracking-procedure` and other cross-cutting rows. Flagged per
+the living-spec carve-out: slugs, order values, and reworded goal text are agent-authored.
+No slug collision against existing `Docs/Management/cross-cutting/*` (checked before creating).
+
+### .sln registration
+Next-free GUID re-audited directly against the `.sln` (regex over all `FA1234BC-0001-4000-8000-...`
+entries) -- confirmed highest live is `00D0`, next-free `00D1`. Assigned sequentially: `00D1`
+(vs-solution-file-registration-rule), `00D2` (proactive-backlog-entry-rule), `00D3`
+(visual-theme-refresh), nested under the existing `cross-cutting` parent GUID `...057`.
+POST-MIGRATION-FOLLOWUPS.md added as a `SolutionItems` line inside the existing
+spec-evolution-versioning project block. BOM (`EF BB BF`) and CRLF verified byte-for-byte before and
+after every edit via a binary-mode Python script (no `grep`, per the rtk-corruption caution).
+One transcription slip during scripted editing (a literal `` vertical-tab byte where a
+`\`+letter-v` path separator was intended, in 2 of the 3 new Project lines) was caught by a
+byte-level post-edit re-read and corrected before commit.
+
+### The canonical rewrite (real `regen`, not `--check`)
+Ran the real generator with all 156 discovered items now folder-complete. `BACKLOG.md` itself did
+not change (0 diff); only the 3 archive files changed (13 insertions, 10 deletions across the 3
+files). Diff content: the 3 archive-migration insertions (the previously-dropped rows now present)
+plus the already-confirmed clean in-class diff from the earlier T12 run (pointer canonicalization
+from a `changes/` sub-path to the shared task-log file, `(under:)`-suffix add/drop, Superseded
+`(closed 2026-07)` suffix reconstruction, and punctuation/backtick normalization) -- no diff line
+fell outside a named, already-understood class.
+
+### Gate results
+- **G1 (idempotency):** ran `regen` a second time; every one of the 3 archive files plus BACKLOG.md
+  compared byte-identical to the first run's output (Python binary-mode compare, not `grep`) --
+  zero diff.
+- **G2 (reachability):** `walk()` discovered 156 items (0 parse errors). Checked every non-separator
+  item's rendered `pointer` text against the concatenation of BACKLOG.md + all archive files: 155/156
+  reachable; the sole non-match is the `2026-06-mvp-release` milestone row, which by design (`kind:
+  milestone`, `render_row`) carries no Pointer field at all -- not an orphan. (An earlier, cruder pass
+  that string-matched item `id:` values instead of rendered `pointer` text produced 28 false
+  positives -- ids are internal keys, never rendered verbatim; the pointer-based check is the correct
+  signal and is what's reported here.)
+- **G3 (diff classification):** every archive diff line matches one of: archive-migration row
+  insertion (new folder), pointer-canonicalize, `(under:)`-suffix, Superseded/Duplicate
+  `(closed <month>)` suffix (T12-pre's status model), punctuation-normalize. No unmatched line.
+
+### Build notes
+Unit tests: `python -m unittest discover -s .claude/scripts/backlog/tests -p "test_*.py"` -- 144
+passed, 0 failed (both before and after the rewrite; ran once more post-rewrite to confirm no
+regression). Post-rewrite `python .claude/scripts/backlog/backlog_gen.py regen --check` exits 0 --
+0 errors, 0 staleness; the only stderr output is the pre-existing non-fatal REQ-SEV-21
+parent/path-parent warning for `persons/bugs/BUG-022-singerform-birthday-mask` (unrelated to this
+task, present before and after).
+No `.cs`/`.xaml` files touched -- Docs/`.sln`/Python (script invocation only, no script files
+edited) per the briefing's scope.
+Commit SHA: `64ce6da` (addendum) then `75a6dc9` (canonical rewrite). Both pushed to
+`origin/feature/backlog-migration`.
+
+### Not started
+T12b (blocking pre-commit gate) and T13 (rules bundle) per the briefing's explicit stop instruction.
+
 
 ---
 ## Task: T12b — Install the blocking pre-commit gate

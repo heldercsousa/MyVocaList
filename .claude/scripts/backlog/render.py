@@ -5,7 +5,13 @@ Everything outside a BACKLOG:GENERATED fence is preserved byte-for-byte
 (REQ-SEV-14/20); everything inside is a total function of the items, which is
 what makes regeneration idempotent (REQ-SEV-13).
 """
-from model import TERMINAL, order_items
+from model import TERMINAL, SUPERSEDED, DUPLICATE, order_items
+
+# Statuses whose archive Status cell carries a `(closed <month>)` suffix
+# reconstructed from the item's `closed:` key -- the single source of truth for
+# the closed date (REQ-SEV-08, F-3). The stored `status:` value stays the bare
+# enum; only the archive render path appends the suffix.
+_CLOSED_SUFFIX_STATUSES = (SUPERSEDED, DUPLICATE)
 
 FENCE_BEGIN = "<!-- BACKLOG:GENERATED:BEGIN {0} -->"
 FENCE_END = "<!-- BACKLOG:GENERATED:END {0} -->"
@@ -56,7 +62,14 @@ def render_row(item, archived=False, parent_title=None):
         notes = "{0} Gate: {1}".format(notes, item.gate)
     notes = "{0} Pointer: `{1}`.".format(notes, item.pointer)
 
-    return "| {0} | {1} | {2} | {3} |".format(item.target, label, item.status, notes)
+    status_cell = item.status
+    if archived and item.status in _CLOSED_SUFFIX_STATUSES and item.closed:
+        # Reconstruct the committed cell's `(closed <month>)` suffix from the
+        # `closed:` key -- ONLY in the archive path, so the live BACKLOG never
+        # shows it and the stored `status:` enum and the suffix cannot drift.
+        status_cell = "{0} (closed {1})".format(item.status, item.closed)
+
+    return "| {0} | {1} | {2} | {3} |".format(item.target, label, status_cell, notes)
 
 
 def render_table(items, head=TABLE_HEAD_BUSINESS, archived=False, titles_by_id=None):
