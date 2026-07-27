@@ -28,8 +28,13 @@
 | **`.claude/agents/orchestrator.md:32, 378`** | **NO — added by this sweep** | §10 |
 | **`.claude/exception-registry.md:16`** | **NO — added by this sweep** | §15 (T13d deletes the row) |
 
-Both additions are recorded here per REQ-SEV-30's "any hit not in this table is added to it before
-the amend commit lands". `.claude/library/workflow-rule-3.md` and `.claude/library/spec-writing-guide.md`
+**Applied 2026-07-27:** both hits are now **rows in `requirements.md`'s REQ-SEV-30 table**, which is
+what that requirement instructs ("any hit not in this table is added to it before the amend commit
+lands") — recording them only here would have left the spec describing a narrower change than the
+one that lands. Four further files were added to the same table in that pass, because tasks written
+after REQ-SEV-30 own edits in them: `.claude/library/workflow-rule-2.md` (§14, T13d),
+`.claude/rules/constraints-registry.md` + `.claude/library/constraints-reference.md` (§16, FUP-3),
+and `Docs/Changelog/changelog.md` (§17, T13c). `.claude/library/workflow-rule-3.md` and `.claude/library/spec-writing-guide.md`
 carry no literal `BACKLOG.md` hit but are in the REQ-SEV-30 table for other content (§8, §12).
 
 ---
@@ -289,7 +294,7 @@ an item folder?** (`backlog_gen.py query` to check)".
 Line 378's occurrence: same substitution, in whatever briefing/checklist sentence it appears in —
 verify the exact text at apply time (it was `[Omitted long matching line]` in the sweep).
 
-## 12. `.claude/library/spec-writing-guide.md`
+## 12. `.claude/library/spec-writing-guide.md` *(§11 intentionally unused — the exception-registry edit is §15, under T13d)*
 
 **Add a new section after the spec-anatomy section:**
 
@@ -364,12 +369,39 @@ verify the exact text at apply time (it was `[Omitted long matching line]` in th
 > for the *rendered* file (it is a total function of frontmatter) but the diff is the only signal
 > that a second writer is active, so it must be read, not skipped.
 >
-> **3. How a second session learns a region is owned.** A session doing a **bulk** operation over
-> generated artifacts (a migration, a mass status sweep) announces it in its `LEDGER.md` row —
-> owner, branch, since-date — and retires the announcement when the branch merges. Ordinary
-> single-item work (`register` / `status` on one item) needs **no** announcement: it touches one
-> frontmatter block plus a deterministic re-render, which merges normally. The rule is proportional
-> to blast radius, not applied to every write.
+> **3. How a second session learns a region is owned — LEDGER names the owner, the lease proves it is
+> alive.** A session doing a **bulk** operation over generated artifacts (a migration, a mass status
+> sweep, anything that rewrites rows it did not author) declares it in its `LEDGER.md` row before its
+> first write: **owner session id · branch · since-date**, retired when the branch merges.
+>
+> A second session that wants to regenerate resolves that declaration as follows:
+>
+> | LEDGER declaration | Check | Action |
+> |--------------------|-------|--------|
+> | none | — | no owner; proceed normally |
+> | present, names a session id | `classify()` that session's `.claude/leases/<id>.json` | **fresh** → owner is live: edit your own item's frontmatter only, let the owner regenerate, do not run bare `regen`. **stale** → the owner session is dead: take over, note the takeover in the LEDGER row, proceed |
+> | present, no session id (legacy row) | — | treat as owned until the row's branch merges, or ask Helder |
+>
+> **The lease is session-keyed, not unit-keyed** — `.claude/leases/<session_id>.json`, written by the
+> heartbeat hook, carrying `branch`/`worktree`/`task_id`. There is **no API to claim a named unit**,
+> so "claim the generated region" is not something the lease can express; what it can do, and all
+> this protocol asks of it, is answer *"is the session named in that LEDGER row still alive?"* Use
+> `lease_lib.classify` (read-only) for that. **Do not use `reclaim.py` here** — it *overwrites* the
+> target's claim on a stale result, which is correct for taking over a `[~]` task and wrong for
+> asking a liveness question about a region.
+>
+> **Ordinary single-item work (`register` / `status` on one item) takes no claim.** It writes one
+> frontmatter block plus a deterministic re-render, and the pre-commit gate already fails it loud if
+> another session left the rendered files stale — detection is mechanical, so the coordination cost
+> buys nothing. Requiring a claim per write would make `register` unusable and push agents toward
+> `--no-verify`, which is strictly worse than the race it would be guarding against. The rule is
+> proportional to blast radius.
+>
+> *Rationale for the split, recorded because it is a policy choice and not a derivation:* the
+> failure this protocol exists to prevent is **one session's rows being rewritten from another
+> session's stale view of the tree**. Only a bulk rewrite can do that; a single-item write cannot,
+> because regeneration is a total function of frontmatter and touches no row whose source it did not
+> read.
 >
 > **4. Concurrent `register` / `status` are safe within one repo; the hazard is cross-worktree ID
 > allocation.** Both verbs are atomic (folder + `README.md` + `.sln` + re-render written in one pass,
@@ -452,11 +484,39 @@ counter is documentation for hand-made folders only.
 
 - **Everything above is agent-drafted rules prose.** `CLAUDE.md § Authorship` requires a human read
   before any of it commits — that is the gate this document exists to serve, not a formality.
-- **§10 and §11 are outside REQ-SEV-30's approved file list** (found by the mandatory sweep). They
-  are in scope by REQ-SEV-30's own "add it to the table" instruction, but they widen the bundle.
-- **§14 point 3** ("bulk operations announce in LEDGER; single-item writes do not") is the one
-  genuinely new policy choice here rather than a transcription — the alternative is announcing every
-  write, which would make `register` unusable in practice.
+- **RESOLVED 2026-07-27 (Helder: "do what REQ-SEV-30 says").** The two swept files are no longer a
+  note in this bundle — `requirements.md`'s REQ-SEV-30 table now carries them as rows, per that
+  requirement's own instruction. Four more files were added in the same pass because tasks written
+  *after* REQ-SEV-30 (T13d, T13c, FUP-3) own edits in them: `workflow-rule-2.md`,
+  `constraints-registry.md` + `constraints-reference.md`, and `changelog.md`. Amending the routing
+  tables while those files still describe the old rule is the exact contradiction REQ-SEV-30 exists
+  to prevent. The bundle's file list and the spec's table now agree; nothing is in one and not the
+  other.
+- **RESOLVED 2026-07-27 — §14 point 3 was written against an API that does not exist.** The first
+  draft had bulk writers "claim `generated:backlog`" via `reclaim.py`. Checked against the code: the
+  lease is **session-keyed** (`.claude/leases/<session_id>.json`), there is no named-unit claim, and
+  `reclaim.py` *mutates* the target claim rather than reporting on it. Rewritten to the honest split:
+  the LEDGER row names the owner session, `lease_lib.classify` (read-only) answers whether that
+  session is still alive, and `reclaim.py` is explicitly ruled out for this use. Single-item
+  `register`/`status` still take no claim — the pre-commit gate already fails them loud, so the
+  coordination would buy nothing and would push agents toward `--no-verify`. *(This is the same
+  error class the migration's own methodology note warns about: the conclusion was fine, the
+  mechanism was invented. Caught by running the code, not by reading it.)*
 - The **gate-audit set** from the migration (≈38–41 agent-authored slugs/titles, all `order` values,
   reworded goals, dropped pre-scheme severities) is still open and is **not** part of this bundle —
   it is logged per-wave in `task-log.md`. Deferred follow-ups: `POST-MIGRATION-FOLLOWUPS.md`.
+
+  **Impact of leaving it open (asked 2026-07-27):**
+
+  | | Assessment |
+  |---|---|
+  | **Blocking?** | **No.** T13 amends rules prose and depends on none of that content. The generator, the gate and the pre-commit hook are all indifferent to whether a `goal:` sentence is well-phrased. Nothing waits on this. |
+  | **Where the risk actually lives** | The **archives**, not the live BACKLOG. Live rows get re-read every time someone plans work, so a bad sentence self-corrects. Archived rows are now the *only* grep-reachable record of closed work, and nobody re-reads them — an agent-authored goal that misstates what a closed item did quietly becomes the project's history. |
+  | **Why it will not resurface on its own** | Regeneration is a total function of frontmatter: every future `regen` re-renders the same sentence byte-identically and reports the tree clean. There is no mechanism that will ever raise this set for review again. It is only ever audited because someone chooses to. |
+  | **Cost of correcting late — cheap half** | `title`, `goal`, `gate`, `order`, `status` are frontmatter-only: edit the value, `regen`, done. Cost does not grow with time. **≈ all of the reworded goals and every `order` value are in this half.** |
+  | **Cost of correcting late — expensive half** | `id`/**slug** is the folder name, the `pointer:` value, and the `.sln` entry. Changing one means `git mv` + `.sln` edit + pointer update (or `backlog_gen.py renumber` for a `BUG-NNN`), and any external reference to the old path breaks. This cost **does** grow as links accumulate. |
+  | **Already-accepted losses** | Three pre-scheme severities (BUG-003 `Medium`, BUG-004 `High`, BUG-008 `Medium`) are not in `SEVERITIES` and are no longer rendered; the literals survive in the flat-file bodies. Not recoverable by regeneration — only by re-authoring the frontmatter. |
+
+  **Recommendation:** audit the ~38–41 **slugs/ids** as one pass (the half whose correction cost
+  grows), and let titles/goals/order be corrected opportunistically whenever a row is next touched.
+  Auditing the whole set at once is not necessary and is the reason it has stayed open.
