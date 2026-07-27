@@ -23,6 +23,24 @@ Plan: `plan.md` · Spec: `requirements.md`, `design.md` (approved 2026-07-22)
 > prepare the `amend:` bundle and stop before committing. (b) Every **agent-authored goal** under
 > decisions 1–2 is flagged for audit as a set, since no option existed that avoided authoring.
 
+## ✅ T12a PLANNING — archive-regen decisions answered by Helder (2026-07-23)
+
+Surfaced by the T12a inventory (Plan subagent, 105 archived rows enumerated). These **redefine the T12 gate** — recorded before any T12a folder work, per the SDD Invariant (spec before code).
+
+| # | Blocker | Decision |
+|---|---------|----------|
+| F-2 | The renderer emits a **canonical** archive format (`Goal: … Pointer: \`…\`.`, drops the `↳` arrow, appends `(under: <parent>)`) that differs from the committed archive text on nearly every row → a clean byte-match against today's files is impossible. | **Canonical rewrite + idempotency gate.** T12 rewrites all 5 archive files ONCE to the generator's canonical format. The gate is redefined: **(1)** `regen --check` run twice yields zero diff (idempotency, REQ-SEV-13); **(2)** every archived `BUG-NNN` still grep-reachable (REQ-SEV-20/18); **(3)** the `↳`-drop, `Goal:`-prefix, and `(under:)`-suffix reformattings are **enumerated as a named archive-migration diff class** — NOT folded into REQ-SEV-25's four active-BACKLOG classes, which stay unwidened. |
+| F-3 | Committed archive Status cells contain terminal states not in the 8 `STATUSES`: `🔵 Superseded (closed …)`, `🔵 Duplicate (closed)`, `Closed — partially regressed`. A README carrying them verbatim fails `validate()`. | **Extend `STATUSES`** with terminal `Superseded` and `Duplicate` states (`model.py` + `render.py` change, in the T12 wave, with tests). Preserves the real distinction (e.g. BUG-008 superseded by the DX AutoCompleteEdit replacement) rather than normalizing history to `✅ Fixed`. `Closed — partially regressed` (BUG-019) stays reconciled to `✅ Fixed` per resolved decision 5. |
+| D | BUG-022, archived as "(Minor)", was given `severity: Major` in frontmatter to dodge REQ-SEV-03. | **Keep the Major re-classification** (confirmed). Only archived Minor bug; title still reads "(Minor)" so the rendered label matches. No broad precedent set. |
+
+### Still open — proposed resolutions (agent-authored; flagged for the T12 gate audit)
+
+> Under the blanket authorization these proceed on the recommended approach, but each is **flagged** because it authors content or shape not present in the archive text (the agent-authored-content carve-out).
+
+- **F-1 (43 rows point at a LOG file, not a folder).** Two model families: **(a)** 21 `cross-cutting-log.md` rows → `Docs/Management/cross-cutting/<slug>/README.md` (REQ-SEV-28 already covers these; log retained + linked; `section: DevCycleCraft` set directly since `cross-cutting/` is not a section root). **(b)** ~22 non-bug sub-rows pointing at a shared feature `task-log.md` (Search-Picker sub-rows, form-validation 01–06, crud-dedup Steps 1–7e, rules-refactoring sub-tasks) have **no design model.** **Proposed:** each gets a `changes/<slug>/README.md` under its parent feature, `pointer:` kept on the shared `task-log.md` (nothing deleted, REQ-SEV-27); `id`/slug/`title` are agent-authored from the row label. **Flagged: 22 invented slugs + titles.**
+- **F-4 (`(under:)` suffix).** Archived rows carry `parent:` → the suffix is emitted for every child row. **Proposed:** keep `parent:` (preserves the logical tree and matches the canonical-rewrite target); the suffix is part of the F-2 archive-migration diff class.
+- **F-5 (pointer/ordering collisions).** 2026-03 "Venues CRUD" + "Venues MD3 rebuild" both point at `venues/`; Search-Picker sub-rows share one `task-log.md`. **Proposed:** author distinct `id` + `order` so rows neither merge nor reorder; reading order pinned to the frozen snapshot. **Flagged: `order` values are agent-assigned.**
+
 ### Superseded — the original blocker table (kept for the record)
 
 ## ⛔ MIGRATION PAUSED — 6 decisions needed from Helder (2026-07-22)
@@ -226,7 +244,9 @@ supposed to surface.
 >   against live `walk()` output. No code change; a regression test now locks the path shape so a
 >   future change to `_rel` fails loudly instead of silently deleting the third resolution step.
 >   The `cross-cutting/` hard-fail F4 describes is real, but its cause is F2 alone, and F2 fixes it.
-
+>
+> - **[x] F6 (found by T11a; DONE in T11c 2026-07-22) — T10a's `BUG-028-artistspage-trailing-catalog-button-noop/` folder had no date prefix**, leaving two naming conventions in one `bugs/` directory. Renamed with `git mv` to `2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/` (date = the row's own `target: 2026-07-03`, not invented); its `pointer:` and both `.sln` entries were updated in the same commit. **Not in F6's scope and untouched:** the six *legacy* folders (BUG-017/018/019/021/023/024) still carry no date prefix.
+>
 > - **[ ] F5 (found by T10b; own task, T13-adjacent) — separators bypass every validation check.**
 >   `model.validate` does `if it.is_separator: continue` **before** any field check, so a
 >   `kind: milestone` / `kind: group` row can carry an invalid `target`, a bogus `severity` or a
@@ -235,7 +255,7 @@ supposed to surface.
 >   mechanically enforced rather than prose-enforced. Not acted on in T10b (`model.py` was outside
 >   its `Files owned`; changing it would have been Rule 2 bundling).
 >
-> - **[ ] F6 (found by T11a) — T10a's `BUG-028` folder violates the REQ-SEV-01 naming pattern.**
+> - **[x] F6 (found by T11a; DONE in T11c 2026-07-22 — see the resolved bullet above) — T10a's `BUG-028` folder violates the REQ-SEV-01 naming pattern.**
 >   REQ-SEV-01 and `design.md` §2's own worked example mandate `YYYY-MM-DD-BUG-NNN-<slug>`;
 >   T10a created `BUG-028-artistspage-trailing-catalog-button-noop/` with **no date prefix**, so one
 >   `bugs/` directory now contains both spellings. T11a followed the spec for its own three folders
@@ -266,6 +286,8 @@ supposed to surface.
 > **every diff T12 measures is contaminated by line endings** — the exact condition F3 exists to
 > eliminate. The F2/F3/F4 commit message's framing ("bites on a *differently-configured* checkout")
 > is wrong: it bites here, now.
+>
+> **H4 (found T12a Wave A, 2026-07-23) — `regen` may SKIP a file with committed rows but zero backing items.** After Wave A, `regen --check` flagged 2026-03/06/07 as stale but **NOT 2026-04/05** — the two months with committed rows but zero migrated folders. A month rendering to empty apparently leaves its file untouched rather than emptying the fenced region, so its old rows survive spuriously and the gate would falsely pass. **Self-resolves once every row has a folder** (04/05 get theirs in Waves B/C). But T12 MUST assert every archive file was actually rewritten — e.g. confirm each of the 5 files appears in a `regen` write pass, not just that `regen --check` is clean — or a month accidentally left un-migrated would pass silently. Verify at the gate.
 >
 > ### Corrections to this block, from the same audit
 >
@@ -389,21 +411,25 @@ supposed to surface.
 
 ## Phase 3 — Migration, destructive (develop)
 
-- [ ] **T11a — BUG-050/051/052 get folders**
+- [x] **T11a — BUG-050/051/052 get folders** (3 folders + READMEs written; pointer relocation + BUG-052's `050/051` respelling declared as T12 hunks — see task-log T11a)
   Consumes: T10b. Each back-links `DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/task-log.md`; nothing is deleted from it (REQ-SEV-27).
   Files owned: 3 folders, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
-- [ ] **T11b — BUG-027/029/030/031/032 get folders**
+- [x] **T11b — BUG-027/029/030/031/032 get folders** (4 folders + READMEs written — **four rows, not five**: BUG-031/032 is a single BACKLOG row; pointer relocation, three agent-authored `Goal:` sentences and BUG-029's `Deferred:`→`Gate:` relabelling declared as T12 hunks — see task-log T11b)
   Consumes: T11a. Each back-links `BusinessFeatures/artists-songs/task-log.md`; preserve each row's `🔵 Deferred` status and its deferral reason as `gate:`.
   Files owned: 5 folders, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
-- [ ] **T11c — BUG-012 flat file → folder**
+- [x] **T11c — BUG-012 flat file → folder** (moved to `venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/`; **F6 done in the same task** — T10a's `BUG-028-…` folder renamed to `2026-07-03-BUG-028-…`; two T12 hunks declared — see task-log T11c)
   Consumes: T11b. `git mv` so history follows; `-01` day per REQ-SEV-00.
   Files owned: 1 folder, `MyVocaList.sln`. Risk: Medium (`git mv` history). Review lane: Standard. Demo: `git log --follow` shows pre-move commits.
-- [ ] **T12a — Archived rows → item folders**
-  Consumes: T11c. One folder per row in the 5 archive files, `closed:` from the file name's month. Split per archive month if any single month exceeds ~12 rows.
+- [x] **T12-pre — Extend STATUSES for terminal Superseded / Duplicate** *(added 2026-07-23, F-3; code change, must precede T12a's superseded-bug folders)* — DONE `e7b29a5`, 143 tests green (+14); TERMINAL is full-string, suffix reconstructed archive-only from `closed:`.
+  Consumes: T11c. Produces: `model.STATUSES`/`TERMINAL` gain `🔵 Superseded`, `🔵 Duplicate` (terminal, keyed on full string not emoji — `🔵 Deferred` stays active); `render.py` reconstructs the archive Status cell's `(closed <month>)` suffix from the `closed:` key. Unit tests for: Superseded/Duplicate validate + archive-route, Deferred stays live, suffix reconstruction, and the emoji-collision guard.
+  Files owned: `.claude/scripts/backlog/model.py`, `.claude/scripts/backlog/render.py`, `.claude/scripts/backlog/tests/`. Risk: Medium (generator core). Review lane: Standard. Demo: a README `status: 🔵 Superseded` + `closed: 2026-07` renders `🔵 Superseded (closed 2026-07)` and routes to the archive; a `🔵 Deferred` row stays in live BACKLOG.
+- [~] **T12a — Archived rows → item folders** *(in progress by month-wave; Wave A/2026-03 DONE `b862248` — 6 folders, 143 green, 0 validation errors on its items; F-5 collision resolved via `changes/` item; 6 order values flagged. Waves B–G pending.)*
+  Consumes: T12-pre. One folder per row in the 5 archive files, `closed:` from the file name's month. **105 rows enumerated** (see T12a PLANNING); pin the 43 log-pointer partition exactly (REQ-SEV-28/28a) + grep-verify no stray bug sub-row. Split into per-month sub-waves of ≤5 folders; `MyVocaList.sln` is sequential-only so serialize the `.sln` commit at each wave boundary. Feature/activity rows → new README in the existing folder; archived bugs → new `bugs/YYYY-MM-DD-BUG-NNN-slug/` (git mv where a flat file exists); log-pointer rows → REQ-SEV-28/28a model. Agent-authored goals/slugs/titles/order flagged in task-log per the carve-out.
   Files owned: those folders, `MyVocaList.sln`. Risk: Medium. Review lane: Standard.
-- [ ] **T12 — Archive regeneration + the equivalence gate** *(fence **insertion** is no longer T12's — it moved to T9d, done 2026-07-22; T12 now only regenerates the already-fenced regions and runs the gate)*
+- [x] **T12 — Archive regeneration + the equivalence gate** *(fence **insertion** is no longer T12's — it moved to T9d, done 2026-07-22; T12 now only regenerates the already-fenced regions and runs the gate)* — DONE `75a6dc9` (addendum `64ce6da`), G1/G2/G3 all PASS.
   Consumes: T12a. Files owned: 5 archive files, `task-log.md`. Risk: **High — this is the gate.** Review lane: **Architectural (Helder).**
-  Demo: every diff hunk vs the frozen fixture classified into REQ-SEV-25's four permitted classes; `regen --check` exit 0; `grep BUG-048` still hits an archive; query ≤ 20 lines.
+  Demo (redefined gate, F-2): **G1** `regen --check` run twice → exit 0 (idempotency, after validation clears — T9e-F1 precondition); **G2** every frozen-snapshot `BUG-NNN` still grep-reachable in an archive; **G3** every archive diff line vs the pre-rewrite files matches one of the three transforms (↳-drop / `Goal:`-canonicalize / `(under:)`-suffix) — any unmatched line is a defect. Live-BACKLOG diff still uses REQ-SEV-25's four classes; archives do NOT.
+  > **Spec updated 2026-07-25:** REQ-SEV-32 amended before this run — the 3 external-pointer archived rows (folder-less per the earlier reading) got minimal `cross-cutting/<slug>/README.md` folders first (addendum commit `64ce6da`), since a folder-less row is silently dropped by the canonical rewrite (hazard H1; REQ-SEV-27 wins). G3's third transform is broadened in practice to include archive-migration row insertion (the 3 restored rows) and the Superseded/Duplicate `(closed …)` suffix — both already covered by T12-pre's status model — no diff line fell outside a named class.
 - [x] **T12b — Install the blocking pre-commit gate**
   Consumes: T12 (precondition: `regen --check` exits 0). Produces: the R-2 gate.
   Files owned: `.claude/githooks/pre-commit`. Risk: Medium. Review lane: Standard. Demo: a deliberately stale BACKLOG is rejected; a clean tree commits.
