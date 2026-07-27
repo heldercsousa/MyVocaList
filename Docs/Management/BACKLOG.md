@@ -6,27 +6,24 @@
 >
 > **Who updates statuses:** The main agent updates this file at each workflow milestone. Subagents do not touch BACKLOG.md.
 
-> ## ⚠️ GENERATED REGIONS ARE OWNED — read before editing any row
+> ## ⚠️ THE ROWS IN THIS FILE ARE GENERATED — read before editing any row
 >
-> **Owner:** `feature/backlog-migration` (worktree `../mvl-backlog-migration`) · **since 2026-07-22**
-> · tracked in `Docs/Management/LEDGER.md`.
+> *(Single-branch ownership retired 2026-07-26: `feature/backlog-migration` merged into `develop`.
+> The generated-artifact write-ownership protocol is still under definition — Spec Evolution T13d.)*
 >
 > The rows in this file are **generated** from each item's `README.md` frontmatter. Between the
 > `<!-- BACKLOG:GENERATED:BEGIN … -->` / `END` markers, **a hand-edit is not a merge conflict — it is
-> silently overwritten** on the next `regen`. While an owner is named above, another session's edit
-> inside a fence will be lost without warning.
+> silently overwritten** on the next `regen`. An edit inside a fence can be lost without warning.
+> A pre-commit gate (`regen --check`) blocks a commit that leaves this file stale.
 >
 > **To change a row:** edit that item's `README.md` frontmatter (or use
 > `python .claude/scripts/backlog/backlog_gen.py status <ID> "<status>"`), never the row itself.
 > **To add an item:** `backlog_gen.py register …` — it creates the folder, README and `.sln` entry
 > together.
-> **If you must touch a fenced row directly:** coordinate via `LEDGER.md` first.
+> **If you must touch a fenced row directly:** coordinate via `LEDGER.md` first (until T13d lands).
 >
 > Everything **outside** the fences — this header, the row rules, the status reference — is
 > hand-written and preserved byte-for-byte by the generator. Editing here is always safe.
->
-> *(This notice is retired when the owner's branch merges. Protocol under definition: Spec Evolution
-> T13d, write-ownership for generated artifacts.)*
 
 ## Row rules (agents: do NOT re-fatten this file)
 
@@ -121,5 +118,5 @@
 | 2026-06-27 | **Read Model + Global NoTracking Pattern — Guidelines Update** | 💡 Pending | Goal: encode the BUG-018 canonical patterns into the library rules. Gate: BUG-018 on-device smoke test. Pointer: `cross-cutting/read-model-notracking-guidelines/`. |
 | 2026-06-27 | **CRUD Read Model Refactoring — Persons, Songs, Venues** | 💡 Pending | Goal: apply the read-model pattern to the remaining CRUD entities and retire the list DTOs. Gate: Guidelines Update done first. Pointer: `cross-cutting/crud-read-model-refactoring/`. |
 | 2026-06-30 | **Form validation** | 🟡 In Progress | Goal: establish and apply validation patterns to all form entries (guide + 5 form updates shipped; open bugs below). Pointer: `DevCycleCraft/ui-form-validation-guide/`. |
-| 2026-07-09 | **Spec Evolution, Versioning & Feature-Folder Organization** | 🟡 In Progress | Goal: shipped specs become immutable history; bugs/changes get dated nested folders (`bugs/`, `changes/`); BACKLOG becomes generated from folder frontmatter instead of hand-maintained. Gate: generator merged; archive migration in progress toward the equivalence gate. Pointer: `DevCycleCraft/spec-evolution-versioning/`. |
+| 2026-07-09 | **Spec Evolution, Versioning & Feature-Folder Organization** | 🟡 In Progress | Goal: shipped specs become immutable history; bugs/changes get dated nested folders (`bugs/`, `changes/`); BACKLOG becomes generated from folder frontmatter instead of hand-maintained. Gate: migration merged to develop 2026-07-26; Helder must authorship-review the T13 rules bundle before it commits. Pointer: `DevCycleCraft/spec-evolution-versioning/`. |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->
