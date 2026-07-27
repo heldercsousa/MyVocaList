@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import render  # noqa: E402
 from frontmatter import FrontmatterError, parse  # noqa: E402
-from model import Item, TERMINAL, order_items, validate  # noqa: E402
+from model import Item, TERMINAL, order_items, validate, validate_warnings  # noqa: E402
 
 MANAGEMENT = os.path.join("Docs", "Management")
 ARCHIVE_DIR = "backlog-archive"
@@ -133,6 +133,12 @@ def cmd_regen(root, check=False):
         for err in errors:
             sys.stderr.write("  - {0}\n".format(err))
         return 2
+
+    # REQ-SEV-21 "allow + warn": a parent that disagrees with the folder's
+    # path parent is surfaced but never blocks regen (non-fatal, exit code
+    # unaffected).
+    for warning in validate_warnings(items):
+        sys.stderr.write("warning: {0}\n".format(warning))
 
     outputs = _render_all(root, items)
     stale = []

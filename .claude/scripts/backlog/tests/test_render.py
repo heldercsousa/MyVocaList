@@ -8,6 +8,9 @@ from model import Item  # noqa: E402
 from render import RenderError, render_backlog, render_row, render_table, splice  # noqa: E402
 
 PENDING = "\U0001F4A1 Pending"
+DEFERRED = "\U0001F535 Deferred"
+SUPERSEDED = "\U0001F535 Superseded"
+DUPLICATE = "\U0001F535 Duplicate"
 
 
 def item(**over):
@@ -132,6 +135,32 @@ class BacklogTests(unittest.TestCase):
         self.assertNotIn("Shipped", out)
 
 
+class BacklogDeferredTests(unittest.TestCase):
+    def test_deferred_item_stays_in_the_live_file(self):
+        """🔵 Deferred is active (REQ-SEV-16) -- it must NOT be archived away."""
+        text = (
+            "<!-- BACKLOG:GENERATED:BEGIN business-features -->\n"
+            "<!-- BACKLOG:GENERATED:END business-features -->\n"
+            "<!-- BACKLOG:GENERATED:BEGIN dev-cycle-craft -->\n"
+            "<!-- BACKLOG:GENERATED:END dev-cycle-craft -->\n"
+        )
+        deferred = item(id="d", title="Parked work", status=DEFERRED)
+        out = render_backlog(text, [deferred])
+        self.assertIn("Parked work", out)
+
+    def test_superseded_item_is_excluded_from_the_live_file(self):
+        text = (
+            "<!-- BACKLOG:GENERATED:BEGIN business-features -->\n"
+            "<!-- BACKLOG:GENERATED:END business-features -->\n"
+            "<!-- BACKLOG:GENERATED:BEGIN dev-cycle-craft -->\n"
+            "<!-- BACKLOG:GENERATED:END dev-cycle-craft -->\n"
+        )
+        gone = item(id="s", title="Old approach", status=SUPERSEDED, closed="2026-07")
+        out = render_backlog(text, [item(id="a", title="Active"), gone])
+        self.assertIn("Active", out)
+        self.assertNotIn("Old approach", out)
+
+
 class ArchiveTests(unittest.TestCase):
     def setUp(self):
         from render import ARCHIVE_TEMPLATE
@@ -145,6 +174,52 @@ class ArchiveTests(unittest.TestCase):
         buckets = bucket_by_month([a, b, c])
         self.assertEqual(sorted(buckets.keys()), ["2026-06", "2026-07"])
         self.assertEqual([i.id for i in buckets["2026-07"]], ["a"])
+
+    # --- T12-pre: Superseded / Duplicate archive routing + closed suffix -----
+
+    def test_superseded_item_buckets_into_the_archive(self):
+        from render import bucket_by_month
+        s = item(id="s", status=SUPERSEDED, closed="2026-07")
+        buckets = bucket_by_month([s])
+        self.assertEqual([i.id for i in buckets["2026-07"]], ["s"])
+
+    def test_duplicate_item_buckets_into_the_archive(self):
+        from render import bucket_by_month
+        d = item(id="d", status=DUPLICATE, closed="2026-06")
+        buckets = bucket_by_month([d])
+        self.assertEqual([i.id for i in buckets["2026-06"]], ["d"])
+
+    def test_deferred_item_never_buckets_into_the_archive(self):
+        from render import bucket_by_month
+        d = item(id="d", status=DEFERRED)
+        self.assertEqual(bucket_by_month([d]), {})
+
+    def test_superseded_status_cell_reconstructs_closed_suffix(self):
+        from render import render_archive
+        s = item(id="s", title="Old venues plan", status=SUPERSEDED,
+                 closed="2026-07", section="BusinessFeatures")
+        out = render_archive(self.template, [s], "2026-07", {})
+        self.assertIn(
+            "\U0001F535 Superseded (closed 2026-07)",
+            _region_body(out, "archive-business"),
+        )
+
+    def test_duplicate_status_cell_reconstructs_closed_suffix(self):
+        from render import render_archive
+        d = item(id="d", title="Dup bug", status=DUPLICATE, closed="2026-07",
+                 section="DevCycleCraft", _path="DevCycleCraft/f/")
+        out = render_archive(self.template, [d], "2026-07", {})
+        self.assertIn(
+            "\U0001F535 Duplicate (closed 2026-07)",
+            _region_body(out, "archive-craft"),
+        )
+
+    def test_stored_status_stays_bare_enum_live_render_has_no_suffix(self):
+        """The suffix belongs to the archive path only -- render_row for a live
+        (non-archived) row must never append `(closed ...)` (REQ-SEV-08)."""
+        s = item(id="s", status=SUPERSEDED, closed="2026-07")
+        self.assertEqual(s.status, "\U0001F535 Superseded")
+        self.assertNotIn("(closed", render_row(s, archived=False))
 
     def test_done_child_archives_while_active_parent_stays(self):
         from render import bucket_by_month

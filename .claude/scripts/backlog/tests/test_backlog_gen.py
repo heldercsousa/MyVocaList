@@ -462,6 +462,38 @@ class ArchiveSectionResolutionTests(unittest.TestCase):
         self.assertIn("BUG-002", self._region(self._archive("2026-07"),
                                               "archive-business"))
 
+    def test_cross_file_parent_disagreement_warns_but_does_not_error(self):
+        # BUG-022 lives under persons/bugs/... but declares a cross-file
+        # parent (a guide folder elsewhere) -- REQ-SEV-21 "allow + warn":
+        # this must be 0 errors / 1 warning and must not make regen fail.
+        write(os.path.join(self.mgmt, "BusinessFeatures", "persons", "README.md"),
+              readme(id="F-9", title="Persons", section="BusinessFeatures"))
+        write(os.path.join(self.mgmt, "BusinessFeatures", "ui-form-validation-guide",
+                           "README.md"),
+              readme(id="ui-form-validation-guide", title="UI Form Validation Guide",
+                     section="BusinessFeatures"))
+        write(os.path.join(self.mgmt, "BusinessFeatures", "persons", "bugs",
+                           "2026-07-21-BUG-022-x", "README.md"),
+              readme(id="BUG-022", title="BUG-022: birthday mask (Major)",
+                     severity="Major", kind="bug",
+                     parent="ui-form-validation-guide", section=None,
+                     status="✅ Fixed", closed="2026-07"))
+
+        items, parse_errors = backlog_gen.walk(self.root)
+        self.assertEqual(parse_errors, [])
+        from model import validate, validate_warnings
+        self.assertEqual(validate(items), [])
+        warnings = validate_warnings(items)
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("disagrees with the folder's path parent", warnings[0])
+
+        with captured_stderr() as buffer:
+            self.assertEqual(backlog_gen.cmd_regen(self.root), 0)
+        self.assertIn("disagrees with the folder's path parent", buffer.getvalue())
+
+        with captured_stderr():
+            self.assertEqual(backlog_gen.cmd_regen(self.root, check=True), 0)
+
     def test_walk_produces_paths_the_folder_prefix_fallback_can_read(self):
         # F4 lock: `_rel` makes rel_path relative to Docs/Management, so its
         # first segment IS the section name. If anyone ever changes `_rel` to

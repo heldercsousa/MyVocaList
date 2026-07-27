@@ -8,6 +8,9 @@ from model import Item, validate, order_items, notes_violations  # noqa: E402
 
 PENDING = "\U0001F4A1 Pending"
 DONE = "✅ Done"
+DEFERRED = "\U0001F535 Deferred"
+SUPERSEDED = "\U0001F535 Superseded"
+DUPLICATE = "\U0001F535 Duplicate"
 
 
 def item(**over):
@@ -39,6 +42,38 @@ class ValidateTests(unittest.TestCase):
 
     def test_terminal_with_closed_is_valid(self):
         self.assertEqual(validate([item(status=DONE, closed="2026-07")]), [])
+
+    # --- T12-pre: terminal Superseded / Duplicate (F-3, REQ-SEV-08/18/19) ----
+
+    def test_superseded_with_closed_is_valid_and_terminal(self):
+        it = item(status=SUPERSEDED, closed="2026-07")
+        self.assertEqual(validate([it]), [])
+        self.assertTrue(it.is_terminal)
+
+    def test_duplicate_with_closed_is_valid_and_terminal(self):
+        it = item(status=DUPLICATE, closed="2026-07")
+        self.assertEqual(validate([it]), [])
+        self.assertTrue(it.is_terminal)
+
+    def test_superseded_without_closed_is_an_error(self):
+        errors = validate([item(status=SUPERSEDED)])
+        self.assertTrue(any("closed" in e for e in errors))
+
+    def test_duplicate_without_closed_is_an_error(self):
+        errors = validate([item(status=DUPLICATE)])
+        self.assertTrue(any("closed" in e for e in errors))
+
+    def test_deferred_is_active_not_terminal(self):
+        it = item(status=DEFERRED)
+        self.assertFalse(it.is_terminal)
+        # 🔵 Deferred shares the emoji with Superseded/Duplicate but is active:
+        # it must validate with NO closed month and not require one.
+        self.assertEqual(validate([it]), [])
+
+    def test_deferred_with_closed_is_an_error(self):
+        # closed only belongs on terminal items (REQ-SEV-19 inverse).
+        errors = validate([item(status=DEFERRED, closed="2026-07")])
+        self.assertTrue(any("closed" in e for e in errors))
 
     def test_minor_severity_folder_is_an_error(self):
         errors = validate([item(severity="Minor")])

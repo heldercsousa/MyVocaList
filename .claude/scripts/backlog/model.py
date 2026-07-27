@@ -15,9 +15,15 @@ DEFERRED = "\U0001F535 Deferred"
 BLOCKED = "\U0001F534 Blocked"
 DONE = "✅ Done"
 FIXED = "✅ Fixed"
+# 🔵 is overloaded (F-3, REQ-SEV-08): DEFERRED is an ACTIVE live status, while
+# SUPERSEDED and DUPLICATE are TERMINAL. Terminal detection therefore keys on
+# full-string TERMINAL membership below -- never on the 🔵 emoji prefix.
+SUPERSEDED = "\U0001F535 Superseded"
+DUPLICATE = "\U0001F535 Duplicate"
 
-STATUSES = (PENDING, SPEC, PLAN, READY, IN_PROGRESS, DEFERRED, BLOCKED, DONE, FIXED)
-TERMINAL = (DONE, FIXED)
+STATUSES = (PENDING, SPEC, PLAN, READY, IN_PROGRESS, DEFERRED, BLOCKED,
+            DONE, FIXED, SUPERSEDED, DUPLICATE)
+TERMINAL = (DONE, FIXED, SUPERSEDED, DUPLICATE)
 SEVERITIES = ("Critical", "Major", "Minor")
 SECTIONS = ("BusinessFeatures", "DevCycleCraft")
 KINDS = ("feature", "bug", "change", "milestone", "group")
@@ -111,7 +117,25 @@ def _depth(rel_path):
 
 def validate(items):
     """Return a list of human-readable errors, each prefixed with the item path."""
+    errors, _warnings = _validate_all(items)
+    return errors
+
+
+def validate_warnings(items):
+    """Return a list of human-readable, non-fatal warnings (REQ-SEV-21 WARN).
+
+    A parent that disagrees with the folder's path parent is filed here, not
+    in `validate()`'s errors -- Helder's "allow + warn" ruling. It still does
+    not block `regen --check` from exiting 0.
+    """
+    _errors, warnings = _validate_all(items)
+    return warnings
+
+
+def _validate_all(items):
+    """Shared walk producing (errors, warnings) -- see `validate`/`validate_warnings`."""
     errors = []
+    warnings = []
     items = list(items or [])
     seen = {}
     ids = set(i.id for i in items if i.id)
@@ -120,6 +144,9 @@ def validate(items):
     for it in items:
         def err(msg):
             errors.append("{0}: {1}".format(it.rel_path, msg))
+
+        def warn(msg):
+            warnings.append("{0}: {1}".format(it.rel_path, msg))
 
         # Separator rows (milestone/group) carry no goal, status or pointer --
         # they are layout, not work. Everything else must be complete.
@@ -168,7 +195,7 @@ def validate(items):
             # feature (REQ-SEV-21).
             declared = by_path.get(_path_parent(it.rel_path))
             if declared is not None and declared.id != it.parent:
-                err("parent '{0}' disagrees with the folder's path parent '{1}'".format(
+                warn("parent '{0}' disagrees with the folder's path parent '{1}'".format(
                     it.parent, declared.id))
 
         if it.id:
@@ -180,7 +207,7 @@ def validate(items):
         for violation in notes_violations(it.goal, it.gate):
             err(violation)
 
-    return errors
+    return errors, warnings
 
 
 def notes_violations(goal, gate):
