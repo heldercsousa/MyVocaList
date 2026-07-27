@@ -3569,3 +3569,61 @@ matched intended content; also byte-verified LF via Python).
 T12b is mechanical and fully specified by `design.md` § R-2 and `tasks.md`'s own demo line — no
 Helder decision was needed. **T12b is DONE**, not a blocker. Per the briefing, stopping here — T13a
 onward is rules-file / architecture-review territory out of this task's scope.
+---
+## Task: Merge-back to develop + T13 bundle preparation
+**Plan:** `plan.md` (post-T12b closeout)
+**Status:** To Review
+**Started:** 2026-07-26
+**Completed:** 2026-07-26 (merge-back); T13 bundle **prepared, not applied**
+
+### What was done
+**1. Merge-back (Helder chose "merge first, then draft T13").**
+`feature/backlog-migration` merged into `develop` as `2a6a1f8` (`--no-ff`), pushed; origin == local.
+Pre-merge overlap was computed with Python (not `grep`) over `git diff --name-only` on both sides of
+the merge base `ed20260`: **3 overlapping files**, not the 1 the LEDGER predicted — `MyVocaList.sln`
+(auto-merged clean) plus `tasks.md` and `task-log.md` (both conflicted, both resolved as a **union**:
+the branch's T12 redefined-gate demo text kept, HEAD's T12b entry appended at the end of the log,
+T12b's checkbox `[x]` preserved). No content was dropped from either side.
+
+**2. Post-merge verification on develop:** 144 backlog tests green; `regen --check` exit 0 (only the
+known non-fatal BUG-022 parent/path-parent warning); `.sln` re-checked in Python — 203 solution
+folders, **0 duplicate GUIDs**, inline-ac entries AND backlog entries both present, no conflict
+markers.
+
+**3. Cleanup + status.** All four spec-evo branches verified as ancestors of develop
+(`backlog-migration`, `backlog-generator`, `archive-regions`, `generator-fixes`); their worktrees
+removed. BACKLOG's single-branch ownership banner **retired** (the branch it named has merged); the
+generated-file warning and the pre-commit-gate note stay. Feature `README.md` `gate:` updated and
+BACKLOG regenerated (`regen --check` exit 0 after).
+
+> First attempt at that frontmatter edit **failed validation** — the word `PASS` in the gate
+> sentence tripped `_BANNED`'s review-verdict pattern. Reworded, not exempted. The generator caught
+> an agent violating the row template on the very first post-merge write, which is the mechanism
+> working as designed.
+
+**4. T13 bundle prepared — NOT applied.** `T13-proposed-diffs.md` (new, `.sln`-registered) holds
+`OLD` → `NEW` blocks on exact existing text for all 17 edit sites across T13a/T13b/T13c/T13d plus
+FUP-3. Nothing was written to any rules file: `CLAUDE.md § Authorship` is a HARD gate and the
+2026-07-22 blanket authorization explicitly carves T13 out.
+
+**Mandatory REQ-SEV-30 sweep result — two files are missing from the approved list:**
+`.claude/agents/orchestrator.md` (its read-scope allow-list still names BACKLOG.md as a session-start
+read) and `.claude/exception-registry.md` (the 2026-07-22 row T13d must delete). REQ-SEV-30's own
+instruction is to add such hits to the table before the amend commit lands, so both are drafted in
+the bundle and flagged for Helder as a widening of scope.
+
+### Changed files
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md` (new)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/README.md` (`gate:`)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md`, `task-log.md` (conflict union)
+- `Docs/Management/BACKLOG.md` (banner retired + regenerated), `Docs/Management/LEDGER.md`
+- `MyVocaList.sln` (merge union + 1 new entry)
+
+### Gate results
+- 144 backlog tests green · `regen --check` exit 0 · `.sln` 0 duplicate GUIDs
+- No `.cs`/`.xaml` touched — no `dotnet build`/`test` for this task
+- No rules file written (authorship gate respected)
+
+### Status
+Merge-back **DONE**. T13 is **prepared and blocked on Helder's authorship read** — the last open
+item in the feature. Apply order and post-apply verification are in the bundle's final two sections.
