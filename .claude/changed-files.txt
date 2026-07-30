@@ -3610,3 +3610,8 @@ Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
 .claude/library/constraints-reference.md
 Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/task-log.md
 Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/task-log.md
+Docs/Management/cross-cutting/vs-solution-file-registration-rule/handoff.md
+Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/handoff.md
+Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/handoff.md
+Docs/Management/LEDGER.md
+Docs/Management/LEDGER.md

@@ -18,8 +18,40 @@
 > - **BUG-066 (Major)** — **inline "create new artist" is unreachable** in both add and edit mode: a non-existent name is rejected with *"search and select an artist from the list"*. This is the headline capability of this change and C1 passed in re-run #2, so it is a **regression** from a later fix wave (suspects: BUG-054a sentinel suppression, `_suppressNextArtistSearch`).
 > - **BUG-065 (Major)** — spurious **"Not found"** row: (a) after any programmatic text assignment (selection, edit-page load, re-selection), clearing only on blur; (b) at 1 typed character even when matches exist, resolving at 2 chars. Residual of BUG-061 — keep BUG-061 open until both re-verify.
 >
+> ### ⛔ STOP POINT — session ended 2026-07-30 by Helder: "record progress until here, I will resume another session"
+>
+> **Nothing was coded. No file in the worktree was touched.** Worktree `C:\Users\helde\source\repos\myvocalist-inline-ac` is clean at `b8f7d2c` on `feat/inline-artist-create`. All work this session was diagnosis + tracking, committed to `develop`.
+>
+> **A root cause was found and proven from IL — read `task-log.md § IL evidence (2026-07-30)` before doing anything else.** Summary:
+> `AsyncItemsSourceProvider.OnEditorTextChanged` begins `if (e.Reason != AutoCompleteEditTextChangeReason.UserInput) return;` — so **`ItemsRequested` never fires for a programmatic text change**; DevExpress already suppresses those natively. Therefore `_suppressNextArtistSearch` (added as BUG-061's fix, set at 7 sites) is **never consumed by the assignment it was set for**: it stays set and is consumed by the user's **next real keystroke**, which is then early-returned with an empty array and skips the ➕-append block (`SongFormPage.xaml.cs:51-55` → `:57-80`).
+> That one mechanism explains **BUG-065(b)** (1st char fails, 2nd works) and **BUG-066** (inline create unreachable) with no timing hypothesis.
+>
+> **Also settled by IL, do not re-investigate:** `CharacterCountThreshold` compares `>=` (default 1) and is correctly configured — NOT the cause. "Not found" is DevExpress's own localizer string (`EditorStringId.ComboBox_NotFound`) with **no** bindable override. **`IsDropDownOpen`** (`ItemsEditBase`, two-way `BindableProperty`) is the supported way to force the popup shut — the provider uses it itself. Leaving `RequestAsync`/`Request` unassigned **crashes** (null delegate invoked on a background task, awaited in `async void`) — never do that. `ItemsRequestEventArgs.CancellationToken` is get-only; a handler cannot self-cancel.
+> **Unresolved and unprovable from IL:** BUG-065(a)'s exact native trigger lives in the Android-native widget, outside decompilable IL. `IsDropDownOpen = false` is the evidenced remedy but needs on-device confirmation.
+>
+> #### 🔷 OPEN DECISION FOR HELDER — blocks the fix wave (architectural; an agent must not take it)
+> The coherent fix is to **delete `_suppressNextArtistSearch` at all 7 sites** and close the dropdown via `IsDropDownOpen = false` instead. But that mechanism *is* BUG-061's fix and its regression tests assert on it (`SongFormViewModelTests.cs:476-535`). Three options were put to Helder and **none was chosen** — the session ended first:
+> 1. **(recommended)** Delete the guard, use `IsDropDownOpen`. One coherent change covering 065(a)/065(b)/066; BUG-061's tests get rewritten against the real mechanism; re-verify all 7 sites + BUG-064 in the same pass.
+> 2. Keep the guard, patch narrowly so it cannot leak into the next keystroke. Smaller diff, BUG-061's tests survive — but keeps a mechanism the IL shows is inert.
+> 3. Re-derive what actually caused BUG-061 first, since the flag cannot have been the cure — slower, but guards against removing something that masks a third, unidentified defect.
+>
+> The 7 guard sites (all must be handled together, this class of gap has already regressed twice): `LockArtist` `SongFormViewModel.cs:333` · `InitializeArtistField` `:422` · `LoadSongForEditAsync` `:490` · `OnArtistBlurredWithoutSelection` restore `:385` · `ClearArtist` `:404` · `ResolveAndLockArtistAsync` ×2 `:539`, `:551`.
+>
+> **BUG-067 (Critical — edit-mode artist change not saved) was NOT investigated this session.** Helder chose to start with BUG-065; the trace never reached 067. It remains unanalysed and is still the highest-severity open item.
+>
+> **Resume in this order:** (1) take the decision above; (2) fix per that decision in the worktree; (3) BUG-067 with a failing regression test first (`bug-tracking.md` — Critical); (4) T10 re-run #5 on device re-verifying BUG-061 + BUG-064 alongside 065/066.
+>
+> **Do not trust a green unit suite here.** The popup behavior, the threshold boundary and the debounce are all invisible to VM tests — that is exactly why re-runs #1–#4 passed unit tests and failed on device.
+>
+> **Tooling note:** the DevExpress demo-app MCP returned empty for every query including a bare `AutoCompleteEdit` — treated as **unavailable** per `CLAUDE.md § MCP Availability Gate`, not as an empty result. Context7 lacks these members for `DevExpress.Maui.Editors.AutoCompleteEdit` (it documents only the DataForm/DataGrid siblings). Decompiling the shipped DLL was the route that worked; use it again rather than guessing an API name.
+
+<details>
+<summary>Fix-wave plan as written before the IL evidence (superseded ordering — kept for context)</summary>
+
 > **Next session:** fix wave in the SAME worktree `C:\Users\helde\source\repos\myvocalist-inline-ac` on `feat/inline-artist-create`, strictly sequential (all three converge on `SongFormPage.xaml(.cs)` + `SongFormViewModel.cs`). Order: **BUG-067 → BUG-066 → BUG-065(b) → BUG-065(a)**. Trace BUG-065 and BUG-066 together before editing — both likely live in `OnArtistItemsRequested`. Then **T10 re-run #5** on device, re-verifying BUG-061 and BUG-064 in the same pass. Closeout, merge and the catalog unblock all stay parked.
 >
+</details>
+
 > These three are **not** registered via `backlog_gen.py` — `next_bug_id()` reports BUG-053 because BUG-053…064 have no folders, so it would reissue used ids. Tracked in `task-log.md`; follow-up logged in `spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md`.
 
 <details>
