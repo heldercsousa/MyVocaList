@@ -20,14 +20,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		.claudeignore = .claudeignore
 		.gitignore = .gitignore
 		.mcp.json = .mcp.json
-		build and deploy test release.txt = build and deploy test release.txt
 		CLAUDE.md = CLAUDE.md
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		limparBinObj.bat = limparBinObj.bat
 		README.md = README.md
 		version-manifest.json = version-manifest.json
-		Docs\DevEnv\workflow-layout-findings.md = Docs\DevEnv\workflow-layout-findings.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "claude-rules", "claude-rules", "{FA1234BC-0001-4000-8000-000000000028}"
@@ -58,8 +56,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Tests", "MyVocaList.Tests\MyVocaList.Tests.csproj", "{C3E8D7AF-F4B4-42B9-8355-EACE1EA31762}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{A73F2606-6D4C-3EEE-1759-0E59DCFEF523}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdd", "sdd", "{B1A2C3D4-0001-4000-8000-000000000001}"
 	ProjectSection(SolutionItems) = preProject
@@ -787,12 +783,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-shipped-core-produc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "page-load-frozen", "page-load-frozen", "{C81D77D9-056E-44D8-A88F-522682CEE603}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\page-load-frozen\2026-12-06-1855 - VS Debug in S23 Ultra.txt.txt = Docs\Management\DevCycleCraft\page-load-frozen\2026-12-06-1855 - VS Debug in S23 Ultra.txt.txt
-		Docs\Management\DevCycleCraft\page-load-frozen\debug log device - logcat.txt = Docs\Management\DevCycleCraft\page-load-frozen\debug log device - logcat.txt
-		Docs\Management\DevCycleCraft\page-load-frozen\debug log visual studio debugging in S23 Ultra.txt = Docs\Management\DevCycleCraft\page-load-frozen\debug log visual studio debugging in S23 Ultra.txt
 		Docs\Management\DevCycleCraft\page-load-frozen\findings.md = Docs\Management\DevCycleCraft\page-load-frozen\findings.md
 		Docs\Management\DevCycleCraft\page-load-frozen\plan.md = Docs\Management\DevCycleCraft\page-load-frozen\plan.md
-		Docs\Management\DevCycleCraft\page-load-frozen\release-pageload-only.txt = Docs\Management\DevCycleCraft\page-load-frozen\release-pageload-only.txt
 		Docs\Management\DevCycleCraft\page-load-frozen\task-log.md = Docs\Management\DevCycleCraft\page-load-frozen\task-log.md
 		Docs\Management\DevCycleCraft\page-load-frozen\README.md = Docs\Management\DevCycleCraft\page-load-frozen\README.md
 	EndProjectSection
@@ -1159,17 +1151,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-042-back-tap
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000057}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vs-solution-file-registration-rule", "vs-solution-file-registration-rule", "{FA1234BC-0001-4000-8000-000000000000D1}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vs-solution-file-registration-rule", "vs-solution-file-registration-rule", "{FA1234BC-0001-4000-8000-0000000000D1}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\vs-solution-file-registration-rule\README.md = Docs\Management\cross-cutting\vs-solution-file-registration-rule\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proactive-backlog-entry-rule", "proactive-backlog-entry-rule", "{FA1234BC-0001-4000-8000-000000000000D2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proactive-backlog-entry-rule", "proactive-backlog-entry-rule", "{FA1234BC-0001-4000-8000-0000000000D2}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\proactive-backlog-entry-rule\README.md = Docs\Management\cross-cutting\proactive-backlog-entry-rule\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "visual-theme-refresh", "visual-theme-refresh", "{FA1234BC-0001-4000-8000-000000000000D3}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "visual-theme-refresh", "visual-theme-refresh", "{FA1234BC-0001-4000-8000-0000000000D3}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\visual-theme-refresh\README.md = Docs\Management\cross-cutting\visual-theme-refresh\README.md
 	EndProjectSection
@@ -1609,9 +1601,9 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000A5} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A6} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A7} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000000D1} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000000D2} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000000D3} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D1} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D2} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D3} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A8} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A9} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000AA} = {7A021F6B-F297-41EA-A028-C4F881146791}
