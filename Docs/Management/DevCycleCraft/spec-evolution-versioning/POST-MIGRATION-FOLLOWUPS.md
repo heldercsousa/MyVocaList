@@ -41,3 +41,34 @@ for T12a; only a future `git mv` fixes the name. Recorded here so it isn't lost.
 
 `constraints-registry.md` still says last-used `.sln` GUID = `0041`; actual high-water after T12a
 is `00D0`. Correct it in the T13 rules bundle.
+
+## FUP-4 — `next_bug_id()` can reissue an already-used BUG id (found 2026-07-30)
+
+**What:** `backlog_gen.py next_bug_id()` computes the next id from **item folders + archive files
+only**. Bugs that were tracked in a feature/change `task-log.md` without ever getting a folder are
+invisible to it. Today BUG-053…BUG-064 are exactly that (all found during the INLINE-AC cycle), so
+the generator reports the next id as **BUG-053** — an id already in use.
+
+**How it surfaced:** attempting `backlog_gen.py register --id BUG-067 …` for a defect from the
+INLINE-AC on-device re-run #4; the assertion refused with *"expected id BUG-067 but the tree says
+BUG-053"*. The `--id` assertion did its job — but without it the command would have **silently
+created a colliding `BUG-053` folder**. The three new defects were therefore recorded in
+`artists-songs/changes/2026-07-21-inline-artist-create/task-log.md` instead (BUG-065/066/067),
+matching the precedent of the ids around them.
+
+**Why it matters:** ids are the join key between commit subjects, BACKLOG/archive rows and
+task-logs. A reissued id makes `git log --grep BUG-053` and every archive lookup ambiguous, and it
+fails *silently* whenever a caller omits `--id`.
+
+**Options to weigh (not decided):**
+1. Widen `next_bug_id()` to also scan `task-log.md` files (and any `.md` under `Docs/Management`)
+   for `BUG-(\d{3})` — cheap, makes the allocator authoritative over everything grep-reachable.
+2. Keep a single explicit high-water file (e.g. `Docs/Management/.bug-id-high-water`) that
+   `register` bumps — deterministic, but drifts if anyone numbers a bug by hand.
+3. Backfill folders for BUG-053…064 — largest change, and REQ-SEV-03 deliberately keeps Minor bugs
+   folder-less, so the underlying gap (folder-less ids exist by design) would remain.
+
+Option 1 addresses the root cause: as long as folder-less bug ids are legitimate, the allocator
+must not derive the high-water mark from folders alone.
+
+**Trigger:** before the next `register` call for a bug, or with the T13 bundle — whichever first.

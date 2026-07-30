@@ -8,7 +8,7 @@ parent: artists-songs
 kind: change
 order: 70
 goal: "make the Song Artist autocomplete correct (folding in BUG-050, BUG-051, BUG-052 and retain-text) and add inline create-new-artist (➕ row), closing BUG-027."
-gate: "on-device T10 failed 2026-07-22 — BUG-053 fixed, six defects remain (BUG-054 through BUG-059), rooted in the DX `AutoCompleteEdit` wiring rather than the ViewModel."
+gate: "on-device re-run #4 failed 2026-07-30 — editing a song's artist is not saved, inline create-new-artist is unreachable, and a spurious no-match row appears; a fix wave plus a green re-run gate closeout."
 pointer: BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/task-log.md
 ---
 

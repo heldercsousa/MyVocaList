@@ -326,3 +326,53 @@ Result: **Part A (BUG-053) fixed; Part B/C mostly FAIL — 6 new defects (BUG-05
 - `SongFormViewModel.cs` — BUG-055 (`LoadSongForEditAsync`), BUG-056 (`SearchArtistsAsync`), BUG-058 (`CreateArtistInlineAsync`) — separate methods, one file.
 
 **Suggested fix order:** BUG-056 (search race) first (unblocks realistic retest of 054/058) → BUG-055 (hydration + edit-save ArtistId) → XAML cluster BUG-054b/057/058 in one pass → BUG-054a code-behind → BUG-059 verifies as cascade. Each testable defect needs a regression check where a seam exists; the XAML/DX-wiring ones are on-device manual E2E (no unit seam), same as BUG-053. **Consequence:** BUG-027 stays open; the Artists & Songs Catalog stays 🔴 Blocked until T10 re-runs all-green.
+
+---
+## T10 re-run #4 (2026-07-30) — Helder, on device — outcome: **FAILED**
+**Build under test:** worktree `C:\Users\helde\source\repos\myvocalist-inline-ac`, branch `feat/inline-artist-create`, HEAD `b8f7d2c`. Compiled and run on Helder's Android device.
+**Reported by Helder verbatim (2026-07-30); transcribed here without interpretation, with root-cause hypotheses marked as hypotheses.**
+
+### What passed
+- **BUG-061 core behavior ✅** — tapping a suggestion loads the tapped artist into the Artist entry, hides the suggestion rows, locks the entry; clearing the entry re-enables redefinition; tapping a new suggestion correctly overrides the previously filled artist.
+- **BUG-060 (change-artist / unlock)** remains ✅ as of re-run #3 — not contradicted by this run.
+- **BUG-064** as originally scoped (duplicate error label) — not reported as recurring; the messages observed in this run are single, not duplicated. Treat BUG-064 as holding unless the fix wave finds otherwise.
+
+### What failed — three new defects
+
+| # | Mode | Observed |
+|---|------|----------|
+| 1.1.1 | Add | After selecting a suggestion, a result row reading **"Not found"** appears immediately; it disappears only when tapping outside the Artist entry |
+| 1.1.2 | Add | After defining an artist, clearing the entry and typing **1 char** shows **"Not found"** again |
+| 1.1.3 | Add | Typing the **2nd char** finally renders the matching options |
+| 1.1.4 | Add | Typing an artist that does not exist yet shows the error **"search and select an artist from the list"** — a new artist cannot be created in this context |
+| 1.2.1 | Edit | On page load, a **"Not found"** row appears in the autocomplete result list |
+| 1.2.2 | Edit | After clearing the persisted artist, typing **1 char** that does match an existing artist shows **"Not found"**; **2 chars** retrieves correctly |
+| 1.2.3 | Edit | Clearing the original artist and typing a new artist that does not exist yet shows **"search and select an artist from the list"** — a new artist cannot be created in this context |
+| 1.2.4 | Edit | Clearing the artist and selecting a **different existing** artist shows the **"Not found"** row; it disappears on blur |
+| 1.2.4.1 | Edit | **Saving after changing the artist to another existing artist does not persist the change — the song keeps the original artist** |
+
+### Defect registration
+
+- **BUG-065 (Major, NEW) — spurious "Not found" row in the Artist autocomplete dropdown.**
+  Covers 1.1.1, 1.1.2, 1.2.1, 1.2.2, 1.2.4. Two symptom clusters that may or may not share a root cause:
+  (a) *after a programmatic text assignment* (selection, edit-page hydration, re-selection) the dropdown opens showing a "Not found" row instead of staying closed — i.e. the BUG-061 `_suppressNextArtistSearch` guard suppresses the **search** but not the **dropdown opening / empty-result rendering**; the row clears only on blur.
+  (b) *at 1 typed character* the list renders "Not found" even when matches exist, and only resolves at 2 characters — **hypothesis (unverified):** a minimum-prefix/minimum-search-length threshold (DX `AutoCompleteEdit` or the VM search guard) returns no results below 2 chars, and the empty result is rendered as a "Not found" row rather than suppressed.
+  **Relationship:** this is the same class as BUG-061 (which is otherwise fixed) — do NOT close BUG-061; register BUG-065 as its residual and re-verify both together.
+  Regression seam: (b) is testable at the VM/search seam; (a) is DX/XAML wiring → on-device manual E2E, documented here per `bug-tracking.md`.
+
+- **BUG-066 (Major, NEW) — inline "create new artist" is unreachable; a non-existent artist name is rejected.**
+  Covers 1.1.4 and 1.2.3 (both add and edit mode). Typing a name with no existing match produces the validation error *"search and select an artist from the list"*, so no new artist can be created from the Song form. **This is the headline capability of this whole change** (REQ-ACREATE-01/02/04 — the ➕ create row) and it is currently not available to the user, in either mode. C1 ("novel create") passed in re-run #2, so this is a **regression introduced by one of the later fix waves** — the prime suspects are the BUG-054a sentinel-suppression work and the `_suppressNextArtistSearch` guard (BUG-061), either of which can prevent `OnArtistItemsRequested` from appending the ➕ sentinel row. Verify against those commits before designing a fix.
+  Severity rationale: core feature unusable, no workaround (the user must leave the Song form and create the artist elsewhere) → Major per `bug-tracking.md`.
+
+- **BUG-067 (Critical, NEW) — editing a song's artist does not persist; the original artist is kept.**
+  Covers 1.2.4.1. The user clears the artist, selects a different existing artist, saves — and the song still shows/stores the original artist. The edit is silently discarded, so this is **data-correctness with silent loss of a user edit → Critical** (`bug-tracking.md`), and per the same rule a **failing regression test is MANDATORY before the fix** (Red→Green); the seam exists at the ViewModel/service level (`UpdateSongAsync` + the artist-selection state), so there is no "UI-only" exemption here.
+  **Likely relation:** BUG-055's second half (`UpdateSongAsync` never carrying `ArtistId`) — that path was supposedly addressed; confirm whether it regressed, was only partially fixed (e.g. handles hydration but not a *changed* selection), or whether the clear→re-select flow leaves `SelectedArtistId` stale. Do not assume a cascade — trace it.
+
+### Consequences
+- **T10 re-run #4 = FAILED.** Closeout stays blocked; `feat/inline-artist-create` stays unmerged at `b8f7d2c`; BUG-027 stays open; **Artists & Songs Catalog** stays 🔴 Blocked.
+- A fix wave is required in the SAME worktree (`myvocalist-inline-ac`), strictly sequential — the three defects again converge on `SongFormPage.xaml(.cs)` and `SongFormViewModel.cs`.
+- **Suggested order:** BUG-067 (Critical, regression test first) → BUG-066 (restores the feature's headline capability; likely a one-condition regression in the sentinel/guard logic) → BUG-065 (b) then (a). BUG-065 and BUG-066 may share the `OnArtistItemsRequested` code path — trace both before editing, and re-verify BUG-061/BUG-064 in the same on-device pass so the guards are not re-broken.
+- **Process observation (for the Continuous Enhancement review, not a defect):** this is the fourth on-device re-run in which VM-level unit tests were green while the DX `AutoCompleteEdit` wiring failed, and the second in which a fix wave regressed previously-passing behavior (C1 → BUG-066). The unit suite does not cover this seam at all. Before the next wave, consider whether an instrumented/automated device check for this page is cheaper than a fifth manual round-trip.
+
+### ID-allocation note (blocks `backlog_gen.py register` for these three)
+`backlog_gen.py register` was attempted for BUG-067 and refused: *"expected id BUG-067 but the tree says BUG-053"*. `next_bug_id()` derives the next id from **item folders + archive files only**, and BUG-053…BUG-064 were never given folders — they exist only in this task-log and in `LEDGER.md`. The generator would therefore hand out already-used ids. These three are consequently tracked here (matching the BUG-053…064 precedent) and **not** registered as folders. Logged as a follow-up in `spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md`.
