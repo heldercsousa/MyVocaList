@@ -11,6 +11,20 @@
   - Earlier this session: `efe65c6` = manual compiler-warning fix in `StringExtensions.cs` (no behavior change, Helder-confirmed safe).
 - **BUG-059 CANCELLED** (Helder 2026-07-23, works-as-designed): catalog join table is deliberately picker-only; empty catalog after Song-form save is by design. Reframed as a NEW enhancement (auto-link artist-OWNED songs to author's catalog) — seed `BusinessFeatures/artists-songs/ENHANCEMENT-artist-owned-song-catalog-autolink.md`; register in BACKLOG when SPEC-EVO migration settles. **T10 item i is DROPPED.**
 
+> ## 🔴 SUPERSEDED 2026-07-30 — T10 re-run #4 FAILED; a fix wave is required
+>
+> Helder ran re-run #4 on device against `b8f7d2c` on **2026-07-30**. **BUG-061's core behavior passed** (select → fill → hide rows → lock → clear → re-select overrides). **Three new defects were found** — full verbatim report, per-item table, root-cause hypotheses and fix order in `task-log.md § T10 re-run #4 (2026-07-30)`:
+> - **BUG-067 (Critical)** — editing a song's artist to a different existing artist **is not persisted**; the song keeps the original artist. Silent loss of a user edit. **Failing regression test MANDATORY first** (`bug-tracking.md`).
+> - **BUG-066 (Major)** — **inline "create new artist" is unreachable** in both add and edit mode: a non-existent name is rejected with *"search and select an artist from the list"*. This is the headline capability of this change and C1 passed in re-run #2, so it is a **regression** from a later fix wave (suspects: BUG-054a sentinel suppression, `_suppressNextArtistSearch`).
+> - **BUG-065 (Major)** — spurious **"Not found"** row: (a) after any programmatic text assignment (selection, edit-page load, re-selection), clearing only on blur; (b) at 1 typed character even when matches exist, resolving at 2 chars. Residual of BUG-061 — keep BUG-061 open until both re-verify.
+>
+> **Next session:** fix wave in the SAME worktree `C:\Users\helde\source\repos\myvocalist-inline-ac` on `feat/inline-artist-create`, strictly sequential (all three converge on `SongFormPage.xaml(.cs)` + `SongFormViewModel.cs`). Order: **BUG-067 → BUG-066 → BUG-065(b) → BUG-065(a)**. Trace BUG-065 and BUG-066 together before editing — both likely live in `OnArtistItemsRequested`. Then **T10 re-run #5** on device, re-verifying BUG-061 and BUG-064 in the same pass. Closeout, merge and the catalog unblock all stay parked.
+>
+> These three are **not** registered via `backlog_gen.py` — `next_bug_id()` reports BUG-053 because BUG-053…064 have no folders, so it would reissue used ids. Tracked in `task-log.md`; follow-up logged in `spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md`.
+
+<details>
+<summary>Previous gate (re-run #4 instructions) — kept for history</summary>
+
 > ## ⚠️ HELDER'S DUTIES — on-device T10 re-run #4 (the ONLY gate left before closeout)
 > No code work remains. Closeout is blocked solely on **your on-device T10 re-run #4** (Android built locally — local Android build blocked by `XARLP7024` AV/EDR corruption, NOT code). Item 1 already passed re-run #3; re-verify ONLY the two re-fixed items:
 > 2. **Inline error text — no duplicate (BUG-064):** trigger the artist validation error → exactly ONE message shows (the redundant bottom one is gone).
@@ -20,6 +34,8 @@
 > **On all-green → tell the next session "T10 re-run #4 passed"** and it runs the closeout below (merge → develop, push, remove worktree, unblock catalog).
 >
 > Two minor decisions carried, non-blocking: (a) AC-label typo — you OK'd folding a one-line comment fix into the merge commit; (b) the auto-link enhancement gets a BACKLOG row once SPEC-EVO settles.
+
+</details>
 
 ## T10 re-run #2 (Helder, on device, 2026-07-23)
 | Item | Result | Disposition |

@@ -3586,3 +3586,11 @@ Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
 Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
 Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
 Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
+Directory.Packages.props
+Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/task-log.md
+Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/handoff.md
+Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/handoff.md
+Docs/Management/DevCycleCraft/spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md
+Docs/Management/LEDGER.md
+Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/README.md
+Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/README.md
