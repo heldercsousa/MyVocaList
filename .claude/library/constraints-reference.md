@@ -52,7 +52,15 @@
   - Under `DevCycleCraft` → parent `{0C4BA720-519E-4818-BD9B-34AC19E4FCD7}`
   - Under `Management` root → parent `{15F1DA03-2180-47BF-BC40-1BB457C97F9E}`
 
-  **GUIDs:** Use sequential pattern `{FA1234BC-0001-4000-8000-00000000XXXX}` incrementing from the last used value (currently `0056`). Check the `.sln` before picking the next number.
+  **GUIDs — single source of truth for the counter (do not restate the number elsewhere):**
+  The final GUID segment is **exactly 12 hex characters**. Use `{FA1234BC-0001-4000-8000-0000000000XX}` — ten zeros followed by a two-hex-digit counter. Highest value in use is `D4`, so the next free is `D5`.
+
+  > **Never hand-count.** Derive the next value from the `.sln` itself:
+  > `python -c "import re;print(max(re.findall(r'FA1234BC-0001-4000-8000-0000000000(..)',open('MyVocaList.sln',encoding='utf-8-sig').read())))"`
+
+  `backlog_gen.py register` allocates GUIDs itself — this counter is documentation for **hand-made** folders only.
+
+  **Trap (caused three malformed GUIDs, fixed 2026-07-30):** appending the counter to a full twelve-zero block yields `{FA1234BC-0001-4000-8000-000000000000D1}` — a **14-character** final segment and an invalid GUID. Replace the last two zeros; do not append.
 
   **Note (rules-file-refactoring, 2026-07-04):** `.claude/library/*` and `.claude/rules/*` files are NOT `.sln`-registered in practice (the HARD GATE is applied to `Docs/` files). New library files created by the refactor do not need `.sln` entries; only `Docs/` artifacts do.
 
