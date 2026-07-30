@@ -422,7 +422,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D
 		Docs\Management\BusinessFeatures\persons\README.md = Docs\Management\BusinessFeatures\persons\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000034}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs (persons)", "bugs (persons)", "{FA1234BC-0001-4000-8000-000000000034}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md = Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md
 		Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg = Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg
@@ -847,7 +847,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-scripts", "backlog-
 		.claude\scripts\backlog\tests\test_render.py = .claude\scripts\backlog\tests\test_render.py
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs (artists-songs)", "bugs (artists-songs)", "{7A021F6B-F297-41EA-A028-C4F881146791}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg = Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg
 		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
@@ -956,7 +956,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-028-artistsp
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000025}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs (queue-management)", "bugs (queue-management)", "{FA1234BC-0001-4000-8000-000000000025}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-011-queuepage-bottomsheet-double-add", "2026-06-01-BUG-011-queuepage-bottomsheet-double-add", "{FA1234BC-0001-4000-8000-000000000092}"
 	ProjectSection(SolutionItems) = preProject
@@ -964,7 +964,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-011-queuepag
 		Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\README.md = Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000024}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs (venues)", "bugs (venues)", "{FA1234BC-0001-4000-8000-000000000024}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\venues\bugs\validation-error-26chars.jpg = Docs\Management\BusinessFeatures\venues\bugs\validation-error-26chars.jpg
 		Docs\Management\BusinessFeatures\venues\bugs\validation-error-31morechars.jpg = Docs\Management\BusinessFeatures\venues\bugs\validation-error-31morechars.jpg
@@ -1032,7 +1032,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutt
 		Docs\Management\BusinessFeatures\cross-cutting\README.md = Docs\Management\BusinessFeatures\cross-cutting\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000039}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs (cross-cutting)", "bugs (cross-cutting)", "{FA1234BC-0001-4000-8000-000000000039}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-026-hwui-sigabrt-render-teardown", "BUG-026-hwui-sigabrt-render-teardown", "{FA1234BC-0001-4000-8000-000000000040}"
 	ProjectSection(SolutionItems) = preProject
@@ -1140,7 +1140,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-11-apply-to-simples
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-11-apply-to-simplest-candidate\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-11-apply-to-simplest-candidate\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-0000000000BC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs (autocomplete-component)", "bugs (autocomplete-component)", "{FA1234BC-0001-4000-8000-0000000000BC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-040-mobile-input-loses-focus", "2026-07-12-BUG-040-mobile-input-loses-focus", "{FA1234BC-0001-4000-8000-0000000000BD}"
 	ProjectSection(SolutionItems) = preProject
@@ -1367,6 +1367,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title", "2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title", "{FA1234BC-0001-4000-8000-000000000079}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "milestones", "milestones", "{FA1234BC-0001-4000-8000-000000000071}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-mvp-release", "2026-06-mvp-release", "{FA1234BC-0001-4000-8000-000000000072}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\milestones\2026-06-mvp-release\README.md = Docs\Management\milestones\2026-06-mvp-release\README.md
 	EndProjectSection
 EndProject
 Global
@@ -1672,11 +1679,4 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}
 	EndGlobalSection
-EndProject("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "milestones", "milestones", "{FA1234BC-0001-4000-8000-000000000071}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-mvp-release", "2026-06-mvp-release", "{FA1234BC-0001-4000-8000-000000000072}"
-	ProjectSection(SolutionItems) = preProject
-		Docs\Management\milestones\2026-06-mvp-release\README.md = Docs\Management\milestones\2026-06-mvp-release\README.md
-	EndProjectSection
-EndProject
-Global
+EndGlobal
