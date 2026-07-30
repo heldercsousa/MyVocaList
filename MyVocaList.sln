@@ -1158,6 +1158,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vs-solution-file-registration-rule", "vs-solution-file-registration-rule", "{FA1234BC-0001-4000-8000-0000000000D1}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\vs-solution-file-registration-rule\README.md = Docs\Management\cross-cutting\vs-solution-file-registration-rule\README.md
+		Docs\Management\cross-cutting\vs-solution-file-registration-rule\handoff.md = Docs\Management\cross-cutting\vs-solution-file-registration-rule\handoff.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proactive-backlog-entry-rule", "proactive-backlog-entry-rule", "{FA1234BC-0001-4000-8000-0000000000D2}"
