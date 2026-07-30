@@ -423,7 +423,20 @@ is unrelated and stays.)
 
 # FUP-3 — stale `.sln` GUID counter *(rides in the same commit)*
 
-## 16. `.claude/rules/constraints-registry.md § Visual Studio Solution (.sln)`
+> ⚠️ **SUPERSEDED 2026-07-30 — do not apply block 16.** The counter was corrected during the
+> `.sln` package/registration audit that day (changelog `07/30/2026 - amend`). The OLD fragment
+> below **no longer exists** in `constraints-registry.md`, so this block will not match.
+>
+> The applied fix goes further than the one proposed here, deliberately: restating the number in
+> two files is what let both copies go stale, and `00D3` was itself already behind (`00D4` was
+> allocated the same day). `constraints-registry.md` now **forbids restating the value**, and
+> `constraints-reference.md` is its single source of truth, carrying a one-liner that derives the
+> next free GUID from the `.sln` instead of a hand-maintained number — plus a trap note for the
+> 14-hex-digit malformation that produced three invalid GUIDs. The point about
+> `backlog_gen.py register` allocating GUIDs itself (counter = hand-made folders only) was carried
+> across. **Nothing is left to do for FUP-3; skip to the next block.**
+
+## 16. `.claude/rules/constraints-registry.md § Visual Studio Solution (.sln)` *(superseded — skip)*
 
 **OLD fragment:**
 
