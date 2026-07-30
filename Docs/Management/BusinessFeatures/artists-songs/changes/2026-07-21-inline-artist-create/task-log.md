@@ -397,5 +397,34 @@ Both were **blocked on documentation**: Context7 has no `NoResultsFoundText`-equ
 
 **Architectural decision surfaced for Helder (not for an agent to take):** the control appears to expose a native `TextChanged` `Reason` (`UserInput`/`ProgrammaticChange`/`ItemSelected`) that is not wired anywhere in this codebase and would replace the hand-rolled `_suppressNextArtistSearch` boolean at all 7 sites. That is a design change to a mechanism BUG-061 depends on — Helder decides, per `CLAUDE.md § Roles`.
 
+### IL evidence (2026-07-30) — the `_suppressNextArtistSearch` guard is guarding an event that never fires
+Decompiled `DevExpress.Maui.Editors.dll` + `DevExpress.Maui.Core.dll` v25.2.4 (net10.0-android35.0 — matches the pinned `Directory.Packages.props`, no version mismatch) after both documentation routes failed. Read-only; no repo file touched. **This resolves the two open questions and overturns the working assumption behind the BUG-061 fix.**
+
+**THE FINDING — `ItemsRequested` never fires for a programmatic text change.**
+`AsyncItemsSourceProvider.OnEditorTextChanged` opens with:
+```csharp
+if (e.Reason != AutoCompleteEditTextChangeReason.UserInput) return;
+```
+An early return, before any threshold or request logic. `AutoCompleteEditTextChangeReason` = `UserInput = 0`, `ProgrammaticChange = 1`, `ItemSelected = 2`. **The control already suppresses programmatic changes natively.**
+
+**Consequence — the guard is not merely redundant, it is the defect.** `_suppressNextArtistSearch` is set at 7 programmatic sites and consumed in `OnArtistItemsRequested`. Since no `ItemsRequested` fires for those assignments, **the flag is never consumed by the event it was set for — it stays set and is eaten by the user's NEXT GENUINE KEYSTROKE**, which is then early-returned with an empty array (`SongFormPage.xaml.cs:51-55`), skipping the ➕-append block (`:57-80`).
+
+That mechanism explains two of the three reported defects exactly, with no timing hypothesis required:
+- **BUG-065(b)** — `ClearArtist` (`:404`) sets the flag; the user's **1st** keystroke consumes it → empty result → "Not found". The **2nd** keystroke finds no flag → real matches render. This is precisely the reported 1-char/2-char behavior.
+- **BUG-066** — the same stale-flag consumption early-returns before the ➕ row can be appended, so inline create is unreachable and blur then raises "search and select an artist from the list" (`SongFormViewModel.cs:369-389`) because `SelectedArtistId` was never set.
+
+**Question 1 — `CharacterCountThreshold`: RESOLVED, and it is NOT the cause.** `OnEditorTextChanged` compares `Text.Length >= CharacterCountThreshold` (default `1`). With our `1`, a request fires at 1 character as intended. The threshold is correctly configured; BUG-065(b) is the stale-flag bug above.
+
+**Question 2 — the placeholder and the dropdown: RESOLVED.**
+- The literal text is DevExpress's: `EditorLocalizer` registers `EditorStringId.ComboBox_NotFound` → `"Not found"`. There is **no bindable property** on `AutoCompleteEdit`/`AsyncItemsSourceProvider` to change or suppress it — only the shared localizer string.
+- **`IsDropDownOpen` (on `ItemsEditBase`, `BindableProperty`, two-way) is a public, provider-endorsed way to force the popup shut** — `AsyncItemsSourceProvider` sets it itself in `OnEditorSubmitted` and on empty text. This is the supported lever for BUG-065(a).
+- **Do NOT leave `RequestAsync`/`Request` unassigned** — `RaiseCreateAsyncItemsSourceRequest` falls through and invokes the null `Request()` delegate inside a background `Task`, awaited unguarded in an `async void`: it **crashes**, it does not no-op.
+- **Do NOT try to self-cancel** — `ItemsRequestEventArgs.CancellationToken` is get-only with no `Cancel()`; the token is owned by the provider.
+- Returning `null` instead of an empty array is treated identically by the C# layer (`ItemsSource` is assigned unguarded).
+
+**Still UNRESOLVED (honest limit):** the exact native trigger that opens the popup and renders the no-results row lives in the Android-native widget (`DevExpress.Android.Editors`), not in decompilable IL — the MAUI handler only tints a native `NoResultsFoundTextTint`. So **BUG-065(a)**'s precise mechanism is inferred, not proven; `IsDropDownOpen = false` is the evidenced remedy, but it must be confirmed on-device.
+
+**Implication for BUG-061 — this needs Helder's decision, not an agent's.** BUG-061 was fixed by *adding* this guard. The IL says the guard cannot have been suppressing programmatic searches (they never reached the handler), so whatever BUG-061's real cause was, the flag was not the cure — and it introduced BUG-065(b)/BUG-066. The coherent fix is to **delete the mechanism at all 7 sites and close the dropdown via `IsDropDownOpen = false` instead**, but that removes code BUG-061's regression tests assert on (`SongFormViewModelTests.cs:476-535`) and per `CLAUDE.md § Roles` an agent does not take that call. **Recorded as an open decision for Helder 2026-07-30.**
+
 ### ID-allocation note (blocks `backlog_gen.py register` for these three)
 `backlog_gen.py register` was attempted for BUG-067 and refused: *"expected id BUG-067 but the tree says BUG-053"*. `next_bug_id()` derives the next id from **item folders + archive files only**, and BUG-053…BUG-064 were never given folders — they exist only in this task-log and in `LEDGER.md`. The generator would therefore hand out already-used ids. These three are consequently tracked here (matching the BUG-053…064 precedent) and **not** registered as folders. Logged as a follow-up in `spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md`.
