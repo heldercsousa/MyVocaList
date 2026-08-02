@@ -4,7 +4,7 @@
 
 ## Rule 1 — Spec-First
 
-**Before writing any implementation code for a feature, read `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md`.**
+**Before writing any implementation code for a feature, read `Docs/Management/[section-or-filing-dir]/[feature]/design.md`.**
 
 No exceptions. Code written without reading the spec is code that may contradict it.
 
@@ -153,7 +153,7 @@ A **spike** is a time-boxed exploration task used when the right implementation 
   - Question: [one sentence: what must the spike answer?]
   - Success criterion: [what finding would confirm the approach is viable?]
   - Failure criterion: [what finding would reject the approach?]
-  - Artifact: `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/findings.md`
+  - Artifact: `Docs/Management/[section-or-filing-dir]/[feature]/findings.md`
   - Files owned: throwaway only — no production code created or modified
   - Demo: N/A (spike produces findings, not user-facing behavior)
 ```
@@ -173,7 +173,7 @@ When the right solution is unknown and exploration is needed before committing t
 
 1. **Create a spike task** in `tasks.md` with the prefix `[SPIKE]`.
 2. Work freely — write throwaway code, try approaches, read docs.
-3. At the end of the spike, create `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/findings.md` (see `session-ops.md`).
+3. At the end of the spike, create `Docs/Management/[section-or-filing-dir]/[feature]/findings.md` (see `session-ops.md`).
 4. Delete all throwaway code before transitioning to spec-first implementation.
 5. Write the spec based on findings — do not skip spec-writing because "we already know the solution."
 

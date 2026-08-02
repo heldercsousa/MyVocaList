@@ -12,8 +12,8 @@ Memory in this workflow is tiered by durability and scope. Each tier has a diffe
 | Tier | File | Owner | Lifecycle | Read obligation |
 |------|------|-------|-----------|-----------------|
 | **Constitutional** | `CLAUDE.md`, `.claude/rules/*.md` | Helder | Permanent — amended only by Helder | Read on setup and after any amendment |
-| **Architectural** | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md`, `Key Decisions` | Helder | Feature lifetime | Read at session start for features being worked on |
-| **Operational** | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md`, task-log | Main agent | Feature lifetime | Read at every session start |
+| **Architectural** | `Docs/Management/[section-or-filing-dir]/[feature]/design.md`, `Key Decisions` | Helder | Feature lifetime | Read at session start for features being worked on |
+| **Operational** | `Docs/Management/[section-or-filing-dir]/[feature]/tasks.md`, task-log | Main agent | Feature lifetime | Read at every session start |
 | **Session** | `ACTIVE-CONSIDERATIONS.md`, `session-handoff.md` | Main agent | Single session or single handoff | Read at session start; update continuously |
 | **Ephemeral** | In-context notes, subagent briefing state | Subagent | Context window only | Not persisted — must be written to a durable tier before session ends |
 | **Device auto-memory** (NOT a registration surface) | `~/.claude/projects/<project>/memory/*` | Harness / agent (per-device) | Per-device, not git-tracked, not team-visible | Optional aid only — never the sole home for any work item |
@@ -101,7 +101,7 @@ When a session involves significant exploration, debugging, or spike work, the f
 - Any session where an architectural option was explored and rejected
 - Any session where a library or API was evaluated for the first time
 
-**File location:** `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/findings.md` for feature spikes, or `Docs/DevEnv/findings/[YYYY-MM-DD]-[topic].md` for general technical findings not tied to a feature.
+**File location:** `Docs/Management/[section-or-filing-dir]/[feature]/findings.md` for feature spikes, or `Docs/DevEnv/findings/[YYYY-MM-DD]-[topic].md` for general technical findings not tied to a feature.
 
 **findings.md format:**
 ```markdown
@@ -137,7 +137,7 @@ When a session involves significant exploration, debugging, or spike work, the f
 
 When a feature spans multiple sessions, the state at session end must be captured so the next session can resume without loss.
 
-**Session-end handoff artifact (write to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/handoff.md`):**
+**Session-end handoff artifact (write to `Docs/Management/[section-or-filing-dir]/[feature]/handoff.md`):**
 ```markdown
 # Session Handoff — [Feature Name] — [YYYY-MM-DD]
 
