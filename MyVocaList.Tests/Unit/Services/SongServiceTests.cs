@@ -1,4 +1,4 @@
-namespace MyVocaList.Tests.Unit.Services;
+﻿namespace MyVocaList.Tests.Unit.Services;
 
 public class SongServiceTests
 {
@@ -403,6 +403,90 @@ public class SongServiceTests
         // null params must not overwrite the existing identity
         Assert.Equal("keep-me", song.ExternalId);
         Assert.Equal("spotify", song.ExternalProvider);
+    }
+
+    // ── UpdateSongAsync — artist re-link (BUG-067) ────────────────────────
+
+    [Fact]
+    // [AC] REQ-ACREATE-16: BUG-067 — changing the artist of an already-saved song must be
+    // persisted. Before the fix UpdateSongAsync had no artistId parameter at all and never
+    // assigned song.ArtistId, so the user's edit was silently discarded.
+    public async Task UpdateSongAsync_WithChangedArtistId_PersistsNewArtist()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Title" };
+        _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(song);
+        _artistRepoMock.Setup(r => r.GetByIdAsync(2, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new Artist { Id = 2, Name = "New Artist" });
+        _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(2, It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(false);
+        _songRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()))
+                     .Returns(Task.CompletedTask);
+        var sut = CreateSut();
+
+        var (success, _) = await sut.UpdateSongAsync(1, "Title", null, null, true, artistId: 2);
+
+        Assert.True(success);
+        Assert.Equal(2, song.ArtistId);
+    }
+
+    [Fact]
+    // [AC] REQ-ACREATE-16: null artistId keeps the existing link (same null-keeps-existing
+    // semantics as version/externalId) — an edit that does not touch the artist must not clear it.
+    public async Task UpdateSongAsync_NullArtistId_KeepsExistingArtist()
+    {
+        var song = new Song { Id = 1, ArtistId = 7, Title = "Title" };
+        _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(song);
+        _songRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()))
+                     .Returns(Task.CompletedTask);
+        var sut = CreateSut();
+
+        var (success, _) = await sut.UpdateSongAsync(1, "Title", null, null, true, artistId: null);
+
+        Assert.True(success);
+        Assert.Equal(7, song.ArtistId);
+    }
+
+    [Fact]
+    // [AC] REQ-ACREATE-16: an unknown artist id is rejected with a message and no write.
+    public async Task UpdateSongAsync_UnknownArtistId_ReturnsFalseAndDoesNotWrite()
+    {
+        var song = new Song { Id = 1, ArtistId = 7, Title = "Title" };
+        _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(song);
+        _artistRepoMock.Setup(r => r.GetByIdAsync(99, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync((Artist?)null);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateSongAsync(1, "Title", null, null, true, artistId: 99);
+
+        Assert.False(success);
+        Assert.NotEmpty(message);
+        Assert.Equal(7, song.ArtistId);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-ACREATE-16: the title-uniqueness check on update is evaluated against the NEW
+    // artist — moving a song to an artist that already has that title must be rejected.
+    public async Task UpdateSongAsync_ChangedArtistWithDuplicateTitle_ReturnsFalse()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Title" };
+        _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(song);
+        _artistRepoMock.Setup(r => r.GetByIdAsync(2, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(new Artist { Id = 2, Name = "New Artist" });
+        _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(2, It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(true);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateSongAsync(1, "Title", null, null, true, artistId: 2);
+
+        Assert.False(success);
+        Assert.NotEmpty(message);
+        Assert.Equal(1, song.ArtistId);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     // ── UpdateSongAsync — version (BUG-024) ───────────────────────────────
