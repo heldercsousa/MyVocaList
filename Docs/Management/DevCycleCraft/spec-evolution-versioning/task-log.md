@@ -3725,3 +3725,56 @@ CLAUDE.md:> `BACKLOG.md`, or an archive file, and blocks the commit if the rende
 4.  across CLAUDE.md + .claude/ -> 39 hits remain in files outside this bundle's authorized scope (agents/implementor.md, agents/orchestrator.md, agents/plan-reviewer.md, commands/sln-commit.md, commands/sln-review.md, library/crud-migration-specfirst.md, library/session-ops.md (other lines), library/spec-writing-guide.md (other lines), library/workflow-rule-1/4/5.md, library/workflow-rules-6-7-8.md (other lines), rules/workflow.md line 45). None of these files/lines were named in T13-proposed-diffs.md or the task briefing's Mandatory Corrections list — left unchanged rather than expanding scope unilaterally. CLAUDE.md itself is fully corrected (0 stale hits within CLAUDE.md).
 Build: N/A — docs-only change, no .cs/.xaml touched. Tests: 148 passed, 0 failed (backlog generator suite). Commit SHA: pending (see below).
 Files written and re-read: all Changed files above were Read (or Edit-tool-verified) after write; CRLF preserved in task-log.md via binary-mode append (Python), no blanket newline replacement performed.
+
+---
+## Task: fix backlog_gen.py `query --status` silent-mismatch + `query --help` crash (BUG fix, no new BUG-NNN -- folder-less per bug-tracking.md, recorded here only)
+**Plan:** Docs/Management/DevCycleCraft/spec-evolution-versioning/plan.md
+**Status:** To Review
+**Started:** 2026-08-02
+**Completed:** 2026-08-02
+
+### Changed files:
+- `.claude/scripts/backlog/backlog_gen.py`
+- `.claude/scripts/backlog/tests/test_backlog_gen.py`
+
+### Root cause
+Defect 1 (silent empty result): `query_lines` compared the raw `--status` token against the item's FULL status string with an exact-match set (`i.status in wanted`). Rule 7's documented invocation passes the emoji-only token (e.g. the U+1F7E1 glyph alone), which never equals the full string (glyph + " In Progress") -- so the query silently returned zero rows and exit 0, indistinguishable from "no active work."
+Defect 2 (crash on the full-string form / `query --help`): the emoji glyphs in `STATUSES` and in `--status`'s own argparse help text hit `sys.stdout.write()` on a Windows console defaulting to cp1252, which cannot encode them, raising `UnicodeEncodeError` from `argparse.print_help()` (triggered by both a matched-row print and by `query --help` printing its own help text) -- same root cause, two symptoms.
+
+### Fix
+- Status matching is now prefix-based: a `--status` token matches an item when the token is a PREFIX of the item's full status string (`model.STATUSES` values), so both the emoji-only token and the full string work identically. Chose prefix over substring deliberately: every status begins with its emoji, so prefix is unambiguous, while substring risks an accidental match on unrelated inner text.
+- An unrelated/typo token now warns on stderr (`unknown status token '<token>' -- valid statuses: ...`) instead of failing silently; valid tokens in the same call still return their matches.
+- A legitimately empty result now prints an explicit `no items match` line to stdout instead of nothing, so it is distinguishable from a broken query. Exit code stays 0.
+- All output now goes through two small UTF-8-safe helpers added once, at the output boundary, rather than sprinkling try/except around individual prints: `_ensure_utf8_stdio()` (reconfigures `sys.stdout`/`sys.stderr` to UTF-8 at the top of `main()`, before `parse_args()` -- this is what fixes `query --help`, since argparse's own `print_help()` writes through `sys.stdout`) and `_emit()` (used by `cmd_query`'s own prints; falls back to writing UTF-8 bytes directly to the stream's `.buffer` if `.write()` still raises `UnicodeEncodeError` on a stream `_ensure_utf8_stdio` could not reconfigure).
+- `query --help`'s own root cause is the same encoding path (argparse's `print_help()` -> `sys.stdout.write()`), confirmed by reproducing it standalone before the fix and observing it resolved after.
+
+### AC coverage (from the briefing, no formal requirements.md AC IDs -- bug-fix commit message is the spec per `bug-tracking.md`)
+| Behavior | Test method |
+|---|---|
+| Emoji-only token matches full status | `test_query_matches_an_emoji_only_token_against_the_full_status` |
+| Multi-token emoji-only query | `test_query_matches_multiple_emoji_only_tokens` |
+| Full-string token still works | `test_query_still_matches_a_full_status_string_token` |
+| Unknown token warns, does not suppress valid tokens | `test_query_warns_on_an_unknown_status_token`, `test_query_unknown_token_does_not_suppress_matches_from_valid_tokens` |
+| Empty result prints explicit line | `test_cmd_query_prints_explicit_no_match_line_for_a_legitimate_empty_result` |
+| Output survives a non-UTF-8 stream (encoding boundary, not console-dependent) | `test_emit_falls_back_to_utf8_bytes_when_the_stream_cannot_encode`, `test_emit_plain_ascii_writes_normally_on_a_utf8_stream` |
+| `query --help` no longer crashes on cp1252 | `test_query_help_does_not_crash_on_a_non_utf8_stdout` |
+
+### Red/Green evidence
+RED (old `backlog_gen.py`, restored via `git show HEAD:...` to a scratch copy, tests run against it): 5 failures + 2 errors in `QueryTests`/`QueryOutputEncodingTests`, plus `HelpTextTests.test_query_help_does_not_crash_on_a_non_utf8_stdout` reproduced the exact reported traceback:
+```
+UnicodeEncodeError: 'charmap' codec can't encode character '🟡' in position 164: character maps to <undefined>
+```
+GREEN (fixed `backlog_gen.py` restored): full suite `python -m unittest discover -s tests` -> `Ran 157 tests in 0.839s / OK` (148 pre-existing + 9 new).
+
+### Real-tree verification (per briefing)
+- `query --status "🟡,🟢"` -> lists all 8 `🟡 In Progress` items (no `🟢 Ready` items currently exist in the tree, so none appear -- correct, not a defect).
+- `query --status "🟡 In Progress"` -> same 8 items, no crash.
+- `query --help` -> prints its usage/options text, no crash.
+- `regen --check` -> exit 0, with the pre-existing BUG-022 parent-path warning (`BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/: parent 'ui-form-validation-guide' disagrees with the folder's path parent 'persons'`) -- expected, unrelated to this fix.
+
+### Build notes
+Build: N/A -- Python-only change, no `.cs`/`.xaml` touched. Tests: 157 passed, 0 failed. Commit SHA: pending (see below).
+Files written and re-read: `backlog_gen.py` and `tests/test_backlog_gen.py` re-read via the Edit tool's returned diff after every edit; this task-log entry appended in binary mode to preserve existing CRLF, no blanket newline replacement performed.
+
+### Note for CLAUDE.md/rules maintainers
+Out of scope for this task (boundary: do not edit rules files) -- flagging only: `workflow.md` Rule 7 step 1's exact invocation (`query --status "🟡,🟢"`) now works as documented; no rules-text change is needed as a result of this fix.
