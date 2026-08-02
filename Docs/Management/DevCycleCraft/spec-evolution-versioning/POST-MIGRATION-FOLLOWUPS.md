@@ -42,7 +42,18 @@ for T12a; only a future `git mv` fixes the name. Recorded here so it isn't lost.
 `constraints-registry.md` still says last-used `.sln` GUID = `0041`; actual high-water after T12a
 is `00D0`. Correct it in the T13 rules bundle.
 
-## FUP-4 — `next_bug_id()` can reissue an already-used BUG id (found 2026-07-30)
+## FUP-4 — `next_bug_id()` can reissue an already-used BUG id (found 2026-07-30, resolved 2026-08-02)
+
+> **Resolved 2026-08-02:** implemented Option 1. `next_bug_id()` now additionally walks every
+> `.md` file under `Docs/Management` (not just item folders and archive files) and regexes its
+> content for `BUG-(\d{1,4})`, taking the max across all three sources. Folder-less bug ids
+> recorded only in a `task-log.md` (e.g. BUG-065/066/067) now raise the high-water mark correctly.
+> Regression tests added to `tests/test_backlog_gen.py`. Note: because the scan reads file
+> *content* rather than only structured ids, it also picks up illustrative `BUG-NNN` ids inside
+> code examples/fixtures in spec prose (e.g. `BUG-999` in this feature's own `plan.md`), which
+> pushes the real-tree high-water mark higher than the lowest safe value (`BUG-1000` instead of a
+> tighter `BUG-068`). This is a false positive but a safe-direction one — it never causes reissue,
+> only over-caution — so it was left as-is rather than narrowing the regex.
 
 **What:** `backlog_gen.py next_bug_id()` computes the next id from **item folders + archive files
 only**. Bugs that were tracked in a feature/change `task-log.md` without ever getting a folder are

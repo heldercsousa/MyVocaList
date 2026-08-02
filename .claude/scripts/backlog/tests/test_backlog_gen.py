@@ -207,6 +207,25 @@ class RegisterTests(unittest.TestCase):
               "| 2026-06 | BUG-099: retired thing | ✅ Fixed | Goal: x. |\n")
         self.assertEqual(backlog_gen.next_bug_id(self.root), "BUG-100")
 
+    def test_next_bug_id_scans_task_log_ids_with_no_folder(self):
+        # FUP-4: a Minor bug (or any bug) recorded only in a feature's
+        # task-log.md -- no folder, no archive row -- is legitimate by design
+        # (REQ-SEV-03) but must still raise the high-water mark.
+        write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "task-log.md"),
+              "## Task: fix\nFixed BUG-067 today.\n")
+        self.assertEqual(backlog_gen.next_bug_id(self.root), "BUG-068")
+
+    def test_next_bug_id_counts_folder_archive_and_task_log_ids_once(self):
+        write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "bugs",
+                           "2026-07-21-BUG-050-x", "README.md"),
+              readme(id="BUG-050", title="BUG-050: x (Major)", severity="Major",
+                     parent="F-1", section=None))
+        write(os.path.join(self.mgmt, "backlog-archive", "BACKLOG-ARCHIVE-2026-06.md"),
+              "| 2026-06 | BUG-099: retired thing | ✅ Fixed | Goal: x. |\n")
+        write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "task-log.md"),
+              "## Task: fix\nFixed BUG-067 today.\n")
+        self.assertEqual(backlog_gen.next_bug_id(self.root), "BUG-100")
+
     def test_register_creates_folder_readme_and_regenerates(self):
         rc = backlog_gen.cmd_register(
             self.root, section=None, parent="F-1", kind="bug", severity="Major",
