@@ -428,3 +428,35 @@ That mechanism explains two of the three reported defects exactly, with no timin
 
 ### ID-allocation note (blocks `backlog_gen.py register` for these three)
 `backlog_gen.py register` was attempted for BUG-067 and refused: *"expected id BUG-067 but the tree says BUG-053"*. `next_bug_id()` derives the next id from **item folders + archive files only**, and BUG-053…BUG-064 were never given folders — they exist only in this task-log and in `LEDGER.md`. The generator would therefore hand out already-used ids. These three are consequently tracked here (matching the BUG-053…064 precedent) and **not** registered as folders. Logged as a follow-up in `spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md`.
+
+---
+
+## 🔷 DECISION TAKEN — Helder, 2026-08-02 (unblocks the fix wave)
+
+The open architectural decision recorded in `handoff.md § STOP POINT` is now settled:
+
+**D1 — guard disposition: Option 1 (recommended) ACCEPTED.**
+Delete `_suppressNextArtistSearch` at **all 7 sites** and dismiss the dropdown via
+`IsDropDownOpen = false` instead (the supported `ItemsEditBase` two-way `BindableProperty`;
+DevExpress's own provider uses it). Rationale: the IL evidence (§ IL evidence 2026-07-30) proves
+`AsyncItemsSourceProvider.OnEditorTextChanged` early-returns unless
+`e.Reason == UserInput`, so the guard is never consumed by the programmatic assignment that set
+it — it leaks into the user's next keystroke. One coherent change covers BUG-065(a), BUG-065(b)
+and BUG-066.
+Consequence accepted: **BUG-061's regression tests (`SongFormViewModelTests.cs:476-535`) are
+rewritten against the real mechanism** — they currently assert on an inert flag. All 7 sites plus
+BUG-064 are re-verified in the same on-device pass.
+
+The 7 sites (handled together — this class of gap has already regressed twice):
+`LockArtist` :333 · `InitializeArtistField` :422 · `LoadSongForEditAsync` :490 ·
+`OnArtistBlurredWithoutSelection` restore :385 · `ClearArtist` :404 ·
+`ResolveAndLockArtistAsync` ×2 :539, :551.
+
+**D2 — wave order: BUG-065+066 (one fix) → BUG-067 → single on-device T10 re-run #5.**
+BUG-067 (Critical, still unanalysed) is fixed **regression-test-first (Red→Green)** per
+`bug-tracking.md`. Only one device pass is requested of Helder, covering 065/066/067 plus
+re-verification of BUG-061 and BUG-064.
+
+Wave runs strictly sequential in the existing worktree
+`C:\Users\helde\source\repos\MyVocaList-inline-ac` (clean at `b8f7d2c`) — all three defects
+converge on `SongFormPage.xaml(.cs)` + `SongFormViewModel.cs`.
