@@ -460,3 +460,104 @@ re-verification of BUG-061 and BUG-064.
 Wave runs strictly sequential in the existing worktree
 `C:\Users\helde\source\repos\MyVocaList-inline-ac` (clean at `b8f7d2c`) — all three defects
 converge on `SongFormPage.xaml(.cs)` + `SongFormViewModel.cs`.
+
+---
+## Task: Fix wave step 1 — BUG-065 + BUG-066 (D1, Option 1)
+**Plan:** Helder's decision D1 (`§ DECISION TAKEN — Helder, 2026-08-02` above)
+**Status:** To Review
+**Started:** 2026-08-02
+**Completed:** 2026-08-02
+
+### Approach
+Implemented D1 exactly as decided (no redesign): deleted `_suppressNextArtistSearch` at all 7
+programmatic-assignment sites in `SongFormViewModel.cs` and replaced the mechanism with a new
+two-way bound `IsArtistDropDownOpen` `[ObservableProperty]`, bound in `SongFormPage.xaml` to
+`dxe:AutoCompleteEdit.IsDropDownOpen` (`ItemsEditBase`, `BindableProperty`, two-way — the same
+lever DevExpress's own `AsyncItemsSourceProvider` uses internally, per the IL evidence). Every site
+that previously set the flag now sets `IsArtistDropDownOpen = false` immediately alongside the
+programmatic `ArtistSearchText` assignment, forcing the popup shut directly instead of relying on a
+flag that (per IL) was never consumed by the event it was set for.
+
+`SongFormPage.xaml.cs`'s `OnArtistItemsRequested` no longer has a guard-consumption branch — since
+that event never fires for a programmatic text change in the first place (IL-verified), removing the
+guard restores normal search behavior for every REAL user keystroke, including the character
+immediately following a lock/clear/hydration. This is what unblocks BUG-066 (create-row append is no
+longer skipped by a stale-flag early return) and BUG-065(b) (the 1st keystroke after a programmatic
+set is no longer misrouted to an empty-result branch).
+
+### 7 guard sites confirmed handled (all in `SongFormViewModel.cs`, current line numbers)
+`LockArtist` (`:329-339`) · `OnArtistBlurredWithoutSelection` restore branch (`:369-389`) ·
+`ClearArtist` (`:399-410`) · `InitializeArtistField` (`:416-426`) · `LoadSongForEditAsync`
+(`:452-501`) · `ResolveAndLockArtistAsync` ×2 (`:523-556`) — verified via a full-file grep for
+`IsArtistDropDownOpen` (7 matches, one per site) and for `_suppressNextArtistSearch`/
+`ConsumeSuppressArtistSearch` (0 remaining code references — only explanatory comments referencing
+the deleted mechanism by name).
+
+### BUG-061 regression tests rewritten (per D1's accepted consequence)
+All 7 tests previously asserting `ConsumeSuppressArtistSearch()` were rewritten in place (same test
+count, not added/removed) to assert `IsArtistDropDownOpen == false` on the real mechanism instead:
+- `SelectArtist_ExistingSuggestion_SuppressesNextArtistSearch` → `SelectArtist_ExistingSuggestion_ClosesDropdown`
+- `InitializeArtistField_WithArtistId_SuppressesNextArtistSearch` → `InitializeArtistField_WithArtistId_ClosesDropdown`
+- `ConsumeSuppressArtistSearch_NoProgrammaticSet_ReturnsFalse` → `IsArtistDropDownOpen_NoProgrammaticSet_DefaultsFalse`
+- `ResolveAndLockArtistAsync_ExactMatch_SuppressesNextArtistSearch` → `ResolveAndLockArtistAsync_ExactMatch_ClosesDropdown`
+- `ResolveAndLockArtistAsync_NoMatch_SuppressesNextArtistSearch` → `ResolveAndLockArtistAsync_NoMatch_ClosesDropdown`
+- `ArtistBlurredWithoutSelection_RestoresPriorSelection_SuppressesNextArtistSearch` → `ArtistBlurredWithoutSelection_RestoresPriorSelection_ClosesDropdown`
+- `ClearArtist_SuppressesNextArtistSearch` → `ClearArtist_ClosesDropdown`
+
+Each rewritten test still encodes BUG-061's original behaviour (a programmatic text assignment must
+close/not leave open the suggestion dropdown) via the property that now actually carries it, per the
+briefing's instruction — coverage was not weakened, only re-pointed at the real seam. No other test
+was touched.
+
+### BUG-066 coverage — spec gap, not a silent gap
+The synthetic ➕-row append itself (`OnArtistItemsRequested` in `SongFormPage.xaml.cs`) lives in page
+code-behind (`ItemsRequestEventArgs`/MAUI types) with no page-level test harness in this test project
+— same conclusion the prior CODE-REVIEW fold-in reached for M5. No new unit-testable seam was created
+by this fix; the regression coverage for BUG-066 is indirect (all 7 `IsArtistDropDownOpen` tests above
+prove the stale-flag mechanism that caused the early-return is gone) plus the removal itself (verified
+by the zero-remaining-reference grep). **The actual "create row reachable again" behaviour is NOT
+unit-testable and requires the on-device T10 re-run #5.**
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|------------------------|-------------|
+| REQ-ACREATE-12 (BUG-050/065) | Selecting a suggestion closes the dropdown | `SongFormViewModel.LockArtist` | `SelectArtist_ExistingSuggestion_ClosesDropdown` |
+| REQ-ACREATE-14 (BUG-052/065) | Edit-mode hydration closes the dropdown | `SongFormViewModel.InitializeArtistField` | `InitializeArtistField_WithArtistId_ClosesDropdown` |
+| REQ-ACREATE-01 (BUG-065) | Fresh VM / song-picker no-match prefill: dropdown state correct | `SongFormViewModel` ctor default; `ResolveAndLockArtistAsync` no-match branch | `IsArtistDropDownOpen_NoProgrammaticSet_DefaultsFalse`; `ResolveAndLockArtistAsync_NoMatch_ClosesDropdown` |
+| REQ-ACREATE-04 (BUG-065) | Song-picker exact-match auto-lock closes the dropdown | `SongFormViewModel.ResolveAndLockArtistAsync` exact-match branch | `ResolveAndLockArtistAsync_ExactMatch_ClosesDropdown` |
+| REQ-ACREATE-03 (BUG-065) | Blur-restore of prior selection closes the dropdown | `SongFormViewModel.OnArtistBlurredWithoutSelection` restore branch | `ArtistBlurredWithoutSelection_RestoresPriorSelection_ClosesDropdown` |
+| REQ-ACREATE-15 (BUG-060/065) | Clear (X) icon closes the dropdown | `SongFormViewModel.ClearArtist` | `ClearArtist_ClosesDropdown` |
+| REQ-ACREATE-02/10 (BUG-066) | ➕ create-new-artist row reachable again after any keystroke, including the first after a programmatic set | `SongFormPage.OnArtistItemsRequested` (guard removed) | **on-device only — T10 re-run #5** |
+| REQ-ACREATE-04/05 (BUG-066) | Inline create end-to-end (novel name → ➕ → created + locked) | `SongFormViewModel.CreateArtistInlineAsync` (unchanged) | pre-existing `CreateArtistInline_*` tests (still green) + **on-device T10 re-run #5** |
+
+### What could NOT be verified without a device (stated per the briefing)
+- **BUG-065(a)'s exact remedy** — whether setting `IsDropDownOpen = false` actually closes the native
+  Android popup in this app's rendering. IL evidence proves the property is the provider-endorsed
+  lever but the popup-open/close native behaviour itself lives outside decompilable IL (Android-native
+  widget). Needs on-device confirmation.
+- **BUG-065(b)'s 1-char/2-char fix** — that the first real keystroke after a programmatic set now
+  searches and renders matches immediately, instead of hitting the (now-removed) empty-result branch.
+  Unit tests prove the flag/branch is gone; they cannot observe the DX popup rendering.
+- **BUG-066's headline behaviour** — that the ➕ "Add as new artist" row is selectable again for a
+  novel name in both Add and Edit mode, end to end (create → lock → save).
+- **BUG-061/BUG-064 re-verification** — Helder's instruction was to re-verify both in the same
+  on-device pass; neither was touched by this fix, but no regression check beyond the unit suite is
+  possible here.
+- **BUG-067** — explicitly out of scope for this dispatch (step 2, separate dispatch per the briefing).
+
+### Verification evidence
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0` (worktree `MyVocaList-inline-ac`) → `ok dotnet build: 6 projects, 0 errors, 17 warnings` (all pre-existing NU1903, unrelated to this change).
+- **Full suite:** `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → `Aprovado! – Com falha: 0, Aprovado: 530, Ignorado: 0, Total: 530` (unchanged count from baseline — 7 tests rewritten in place, no net add/remove).
+- **Files written and re-read** (post-edit verification, all 4 re-read after edit to confirm correct placement): `SongFormViewModel.cs`, `SongFormPage.xaml.cs`, `SongFormPage.xaml`, `SongFormViewModelTests.cs`.
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` (worktree) — removed `_suppressNextArtistSearch` field, doc comment, and `ConsumeSuppressArtistSearch()` method; added `IsArtistDropDownOpen` `[ObservableProperty]`; replaced all 7 `_suppressNextArtistSearch = true;` sites with `IsArtistDropDownOpen = false;` alongside each programmatic `ArtistSearchText` assignment.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (worktree) — removed the `ConsumeSuppressArtistSearch()`-gated early-return branch from `OnArtistItemsRequested`; updated the surrounding comment to explain the IL-proven mechanism.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (worktree) — added `IsDropDownOpen="{Binding IsArtistDropDownOpen, Mode=TwoWay}"` to `dxe:AutoCompleteEdit`.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (worktree) — rewrote the 7 BUG-061 regression tests in place against `IsArtistDropDownOpen` (see list above); no other test touched.
+- Commit: `befc2fe` on `feat/inline-artist-create`, pushed to `origin/feat/inline-artist-create`.
+
+### Checkpoint (final — task complete)
+Branch/worktree: `MyVocaList-inline-ac`, `feat/inline-artist-create`, HEAD `befc2fe` (pushed). Build:
+0 errors. Tests: 530/530 green. Next step: BUG-067 (step 2, separate dispatch per the briefing), then
+a single on-device T10 re-run #5 covering 065/066/067 + re-verification of BUG-061/BUG-064.
