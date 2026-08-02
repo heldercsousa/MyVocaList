@@ -176,6 +176,92 @@ class QueryTests(unittest.TestCase):
         lines = backlog_gen.query_lines(self.root, [PENDING])
         self.assertEqual(len(lines), 1)
 
+    def test_query_matches_an_emoji_only_token_against_the_full_status(self):
+        # workflow.md Rule 7: `query --status "\U0001F7E1,\U0001F7E2"` is the
+        # documented session-start invocation -- the emoji alone must match
+        # the full status string ("\U0001F7E1 In Progress"), not just an
+        # exact-string status.
+        lines = backlog_gen.query_lines(self.root, ["\U0001F7E1"])
+        self.assertEqual(len(lines), 1)
+        self.assertIn("Active one", lines[0])
+
+    def test_query_matches_multiple_emoji_only_tokens(self):
+        lines = backlog_gen.query_lines(self.root, ["\U0001F7E1", "\U0001F4A1"])
+        self.assertEqual(len(lines), 2)
+
+    def test_query_still_matches_a_full_status_string_token(self):
+        lines = backlog_gen.query_lines(self.root, ["\U0001F7E1 In Progress"])
+        self.assertEqual(len(lines), 1)
+        self.assertIn("Active one", lines[0])
+
+    def test_query_warns_on_an_unknown_status_token(self):
+        with captured_stderr() as buf:
+            lines = backlog_gen.query_lines(self.root, ["banana"])
+        self.assertIn("unknown status token 'banana'", buf.getvalue())
+        # Still returns matches for whatever tokens WERE valid -- here none,
+        # so the result is empty, but the call must not raise or abort.
+        self.assertEqual(lines, [])
+
+    def test_query_unknown_token_does_not_suppress_matches_from_valid_tokens(self):
+        with captured_stderr():
+            lines = backlog_gen.query_lines(self.root, ["banana", "\U0001F7E1"])
+        self.assertEqual(len(lines), 1)
+
+    def test_cmd_query_prints_explicit_no_match_line_for_a_legitimate_empty_result(self):
+        buf = io.StringIO()
+        # Redirect stdout around the call to capture cmd_query's own print path.
+        original = sys.stdout
+        sys.stdout = buf
+        try:
+            backlog_gen.cmd_query(self.root, ["\U0001F535 Deferred"])
+        finally:
+            sys.stdout = original
+        self.assertIn("no items match", buf.getvalue())
+
+
+class QueryOutputEncodingTests(unittest.TestCase):
+    """`_emit` must survive a stream whose codepage cannot encode the emoji
+    status glyphs (e.g. a Windows console at cp1252) -- REQ: no exception,
+    UTF-8 bytes still reach the underlying buffer.
+    """
+
+    def test_emit_falls_back_to_utf8_bytes_when_the_stream_cannot_encode(self):
+        raw = io.BytesIO()
+        stream = io.TextIOWrapper(raw, encoding="cp1252", errors="strict")
+        try:
+            backlog_gen._emit("\U0001F7E1 In Progress  → pointer", stream)
+        finally:
+            stream.detach()
+        raw.seek(0)
+        written = raw.read().decode("utf-8")
+        self.assertIn("In Progress", written)
+        self.assertIn("\U0001F7E1", written)
+
+    def test_emit_plain_ascii_writes_normally_on_a_utf8_stream(self):
+        buf = io.StringIO()
+        backlog_gen._emit("no items match", buf)
+        self.assertEqual(buf.getvalue(), "no items match\n")
+
+
+class HelpTextTests(unittest.TestCase):
+    def test_query_help_does_not_crash_on_a_non_utf8_stdout(self):
+        # Regression: `query --help`'s --status help string embeds an emoji
+        # example, so argparse's print_help() used to raise
+        # UnicodeEncodeError on a cp1252 console before main() reconfigured
+        # stdio up front.
+        raw = io.BytesIO()
+        fake_stdout = io.TextIOWrapper(raw, encoding="cp1252", errors="strict")
+        original = sys.stdout
+        sys.stdout = fake_stdout
+        try:
+            with self.assertRaises(SystemExit) as ctx:
+                backlog_gen.main(["query", "--help"])
+            self.assertEqual(ctx.exception.code, 0)
+        finally:
+            fake_stdout.flush()
+            sys.stdout = original
+            fake_stdout.detach()
+
 
 class RegisterTests(unittest.TestCase):
     def setUp(self):
