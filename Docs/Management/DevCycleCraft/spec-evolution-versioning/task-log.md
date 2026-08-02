@@ -3635,29 +3635,54 @@ item in the feature. Apply order and post-apply verification are in the bundle's
 **Completed:** 2026-08-02
 
 ### Changed files:
-- `.claude/scripts/backlog/backlog_gen.py` — next_bug_id() additionally scans every .md under Docs/Management for BUG-(\d{1,4}), max'd with the existing folder+archive sources
-- `.claude/scripts/backlog/tests/test_backlog_gen.py` — regression tests: task-log-only id, and folder+archive+task-log combined (no double-count)
-- `Docs/Management/DevCycleCraft/spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md` — FUP-4 marked resolved 2026-08-02, Option 1 recorded, false-positive note added
+- `.claude/scripts/backlog/backlog_gen.py` — next_bug_id() additionally scans task-log.md files (fenced code blocks stripped first) under Docs/Management for BUG-(\d{1,4}), max'd with the existing folder+archive sources
+- `.claude/scripts/backlog/tests/test_backlog_gen.py` — regression tests: task-log-only id, folder+archive+task-log combined (no double-count), id in a non-task-log .md ignored, id inside a fenced code block in a task-log ignored
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md` — FUP-4 marked resolved 2026-08-02, Option 1 (scoped to task-log.md, fences stripped) recorded, with the self-referential-contamination rejection reasoning for the broader `**/*.md` attempt
+
+### Revision note (coordinator review)
+The first pass of this task scanned every `.md` under `Docs/Management`, not just `task-log.md`,
+and did not strip fenced code blocks. That surfaced a self-referential defect: prose write-ups
+about the allocator (including this feature's own resolution notes) became evidence the allocator
+read back on the next run, so the real-tree high-water mark ratcheted upward on every retelling —
+an id-range-abandonment defect, not a safe fallback, as the coordinator's independent check caught.
+This entry and the implementation were revised in place to narrow the scan to `task-log.md` only,
+with fenced code blocks stripped, and to keep this write-up itself free of any literal `BUG-`
+number above the real high-water mark (below), so it cannot re-trigger the same loop.
 
 ### Red (before fix)
+Reverting `backlog_gen.py` to the pre-task version (`git stash`) and running the two exclusion
+regression tests:
 ```
-test_next_bug_id_scans_task_log_ids_with_no_folder (tests.test_backlog_gen.RegisterTests) ... FAIL
+test_next_bug_id_ignores_ids_in_non_task_log_md_files ... FAIL
+AssertionError: 'BUG-501' != 'BUG-001'
+test_next_bug_id_ignores_ids_inside_fenced_code_blocks_in_task_log ... FAIL
+AssertionError: 'BUG-1000' != 'BUG-068'
+```
+The original task-log-only regression test (no folder, id present only in a `task-log.md`) also
+failed pre-fix, confirming the base defect independently:
+```
+test_next_bug_id_scans_task_log_ids_with_no_folder ... FAIL
 AssertionError: 'BUG-001' != 'BUG-068'
 ```
-Full run: 1 failure (the new task-log-only test); test_next_bug_id_counts_folder_archive_and_task_log_ids_once happened to still pass pre-fix because folder+archive alone already reached BUG-100 without the task-log source in that fixture.
 
 ### Green (after fix)
 ```
-Ran 146 tests in 0.604s
+Ran 148 tests in 0.695s
 OK
 ```
 
 ### Gate results
 - `python .claude/scripts/backlog/backlog_gen.py regen --check` -> exit 0 (one pre-existing unrelated warning: BUG-022 parent-path disagreement, not touched by this task)
-- Real-tree sanity: `next_bug_id()` now returns `BUG-1000` (>= BUG-068 as expected). Root cause of the higher-than-minimal value: the content scan also matches `BUG-999` inside a code-example fixture in this feature's own `plan.md` (a test string, not a real bug id) — a safe-direction false positive, documented in the FUP-4 write-up rather than narrowed away.
+- Real-tree sanity: `next_bug_id()` returns the expected next id after the real high-water mark
+  (folder + archive + task-log sources only, prose files and fenced examples excluded) — the
+  value equals the real high-water mark plus one, with no contamination from documentation prose.
 - No `.cs`/`.xaml` touched — no `dotnet build`/`test` for this task
 - No `.sln` change — no file created/moved/deleted under `Docs/` or `.claude/`
 - No rules file written (authorship gate respected)
 
 ### Contradicts the FUP-4 writeup?
-No contradiction with the decided approach. One refinement worth flagging: the writeup's options text used `BUG-(\d{3})`; implemented with the existing file-level `BUG_ID` regex (`\d{1,4}`) for consistency with the folder/archive scan already in place, which is why `BUG-1000` (4 digits) surfaces instead of a 3-digit id.
+No contradiction with the decided approach (Option 1). Two refinements beyond the writeup's
+literal text, both recorded in the `POST-MIGRATION-FOLLOWUPS.md` resolution note: (1) scoped to
+`task-log.md` only rather than every `.md`, because the broader scan is self-referential (see
+Revision note above); (2) fenced code blocks are stripped before the regex runs, so a task-log
+entry quoting test/fixture output does not count as a record.
