@@ -189,17 +189,40 @@ def slugify(title):
     return text.strip("-")
 
 
+_FENCE = re.compile(r"```.*?```", re.S)
+
+
+def _strip_fenced_code(text):
+    """Remove ``` ... ``` fenced blocks before scanning prose for ids.
+
+    A task-log entry legitimately quotes command output or code snippets
+    containing example/fixture ids (e.g. a test asserting `BUG-999`); those
+    are not id *records* and must not feed the allocator.
+    """
+    return _FENCE.sub("", text)
+
+
 def next_bug_id(root):
     """max(BUG-NNN) + 1 over live folders, every archive file, and every
-    other .md under Docs/Management (REQ-SEV-11a).
+    feature's task-log.md (REQ-SEV-11a).
 
     Archives are scanned too so a retired id is never reused -- that fact used
     to live in BACKLOG.md, which agents no longer read. FUP-4: a bug can be
     recorded only in a feature's task-log.md, with no folder and no archive
     row (legitimate for folder-less Minor bugs, REQ-SEV-03) -- invisible to
     the folder/archive scan alone, so the high-water mark also scans every
-    .md file's content for BUG-NNN occurrences. Additive with the existing
-    sources: max() of all three, never a replacement.
+    task-log.md's content (fenced code blocks stripped first) for BUG-NNN
+    occurrences. Additive with the existing sources: max() of all three,
+    never a replacement.
+
+    Deliberately scoped to task-log.md only -- NOT every .md under
+    Docs/Management. A broader scan was tried and rejected: prose files
+    (plan.md, write-ups, this very docstring's neighbours) describe bugs
+    without recording them, and a wide scan is self-referential -- a
+    resolution note that mentions a number becomes evidence the allocator
+    reads back, ratcheting the high-water mark upward on every retelling.
+    task-log.md is where REQ-SEV-03 folder-less bugs are actually recorded,
+    so it is the only prose source that belongs in the allocator.
     """
     highest = 0
     items, _errors = walk(root)
@@ -218,15 +241,15 @@ def next_bug_id(root):
                 highest = max(highest, int(match.group(1)))
     base = os.path.join(root, MANAGEMENT)
     for dirpath, _dirnames, filenames in os.walk(base):
-        for name in filenames:
-            if not name.endswith(".md"):
-                continue
-            try:
-                text = _read(os.path.join(dirpath, name))
-            except OSError:
-                continue
-            for match in BUG_ID.finditer(text):
-                highest = max(highest, int(match.group(1)))
+        if "task-log.md" not in filenames:
+            continue
+        try:
+            text = _read(os.path.join(dirpath, "task-log.md"))
+        except OSError:
+            continue
+        text = _strip_fenced_code(text)
+        for match in BUG_ID.finditer(text):
+            highest = max(highest, int(match.group(1)))
     return "BUG-{0:03d}".format(highest + 1)
 
 
