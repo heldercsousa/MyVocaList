@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import render  # noqa: E402
 from frontmatter import FrontmatterError, parse  # noqa: E402
-from model import Item, TERMINAL, order_items, validate, validate_warnings  # noqa: E402
+from model import STATUSES, Item, TERMINAL, order_items, validate, validate_warnings  # noqa: E402
 
 MANAGEMENT = os.path.join("Docs", "Management")
 ARCHIVE_DIR = "backlog-archive"
@@ -160,13 +160,69 @@ def cmd_regen(root, check=False):
     return 0
 
 
+def _ensure_utf8_stdio():
+    """Reconfigure stdout/stderr to UTF-8 regardless of the console codepage.
+
+    Windows consoles commonly default to cp1252, which cannot encode the
+    emoji status glyphs (STATUSES). Without this, both `query` output and
+    argparse's own `--help` text (which quotes an emoji in --status's help
+    string) raise UnicodeEncodeError. Fixed once, at the output boundary,
+    rather than wrapping every print() in a try/except.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            try:
+                reconfigure(encoding="utf-8", errors="replace")
+            except (ValueError, OSError):
+                pass
+
+
+def _emit(text, stream=None):
+    """Write one UTF-8 line to `stream`, tolerating a non-UTF-8 codepage.
+
+    Defense in depth for streams `_ensure_utf8_stdio` could not reconfigure
+    (e.g. no `.reconfigure`, or a stream substituted by a test/caller).
+    """
+    stream = stream if stream is not None else sys.stdout
+    line = text + "\n"
+    try:
+        stream.write(line)
+    except UnicodeEncodeError:
+        buffer = getattr(stream, "buffer", None)
+        if buffer is None:
+            raise
+        buffer.write(line.encode("utf-8", errors="replace"))
+        buffer.flush()
+        return
+    stream.flush()
+
+
+def _status_tokens(statuses):
+    """Split/strip raw --status tokens; warn on any that match no known status.
+
+    A token matches a status when it is a PREFIX of the full status string
+    (not substring) -- every status begins with its emoji, so `\U0001F7E1`
+    unambiguously selects `\U0001F7E1 In Progress` while a substring match
+    could accidentally pick up unrelated statuses sharing inner text.
+    """
+    tokens = [s.strip() for s in statuses if s.strip()]
+    for token in tokens:
+        if not any(status.startswith(token) for status in STATUSES):
+            sys.stderr.write(
+                "warning: unknown status token '{0}' -- valid statuses: {1}\n".format(
+                    token, ", ".join(STATUSES)))
+    return tokens
+
+
 def query_lines(root, statuses):
     """Compact active-work lines. Never raises on a bad file (REQ-SEV-21a)."""
     items, errors = walk(root)
     for err in errors:
         sys.stderr.write("warning: skipped {0}\n".format(err))
-    wanted = set(s.strip() for s in statuses if s.strip())
-    rows = [i for i in items if not wanted or i.status in wanted]
+    tokens = _status_tokens(statuses)
+    rows = [i for i in items
+            if not tokens or any(i.status.startswith(t) for t in tokens)]
     lines = []
     for it in order_items(rows):
         lines.append("{0} {1}  {2}{3}  → {4}".format(
@@ -175,8 +231,12 @@ def query_lines(root, statuses):
 
 
 def cmd_query(root, statuses):
-    for line in query_lines(root, statuses):
-        print(line)
+    lines = query_lines(root, statuses)
+    if not lines:
+        _emit("no items match")
+    else:
+        for line in lines:
+            _emit(line)
     return 0
 
 
@@ -490,6 +550,7 @@ def build_parser():
 
 
 def main(argv=None):
+    _ensure_utf8_stdio()
     args = build_parser().parse_args(argv)
     if args.verb == "regen":
         return cmd_regen(args.root, check=args.check)
