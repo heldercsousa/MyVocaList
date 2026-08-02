@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
@@ -826,7 +826,7 @@ public class SongFormViewModelTests
         songService.Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<CancellationToken>()))
+                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
         var secureStorage = new Mock<ISecureStorageWrapper>();
         secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
@@ -847,7 +847,51 @@ public class SongFormViewModelTests
         songService.Verify(s => s.UpdateSongAsync(
             42, "Stored Title", "Feat A", "Stored lyrics", true,
             null, null, "Acoustic",
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-ACREATE-16: BUG-067 — after the user unlocks the Artist field and picks a
+    // different artist, edit-mode Save must forward the CURRENT SelectedArtistId to the service.
+    // Before the fix ExecuteEditSaveAsync could not send the artist at all (no parameter existed),
+    // so the change was silently lost.
+    public async Task SaveAsync_EditMode_ArtistChanged_SendsNewArtistIdToService()
+    {
+        var song = new Song
+        {
+            Id = 42,
+            ArtistId = 7,
+            Title = "Stored Title",
+            OriginalArtist = new Artist { Id = 7, Name = "Queen" }
+        };
+        var songService = MakeSongServiceWithSong(song);
+        songService.Setup(s => s.UpdateSongAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
+                  .ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        sut.SongIdRaw = "42";
+        await Task.Yield();
+        sut.CompleteHydration();
+
+        // User clears the locked field (REQ-ACREATE-15) and selects a different artist
+        sut.ClearArtistCommand.Execute(null);
+        sut.SelectedArtistId = 9;
+        sut.SelectedArtistName = "David Bowie";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        songService.Verify(s => s.UpdateSongAsync(
+            42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(), true,
+            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+            9, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── Title field: blur-first validation (Form Validation Standard, Task 04) ────
@@ -1234,7 +1278,7 @@ public class SongFormViewModelTests
         songService.Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<CancellationToken>()))
+                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
         var secureStorage = new Mock<ISecureStorageWrapper>();
         secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
@@ -1253,6 +1297,6 @@ public class SongFormViewModelTests
         songService.Verify(s => s.UpdateSongAsync(
             42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(), true,
             It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
