@@ -447,6 +447,7 @@ public class SongFormViewModelTests
         var sut = CreateSut();
         var artist = new ArtistListItem(7, "Queen", string.Empty, false, 0);
         var suggestion = new AutocompleteSuggestion("Queen", artist.CatalogCountText, artist);
+        sut.IsArtistDropDownOpen = true; // simulate the popup being open before the select
 
         sut.SelectArtistCommand.Execute(suggestion);
 
@@ -461,6 +462,7 @@ public class SongFormViewModelTests
         var sut = CreateSut();
         sut.ArtistIdRaw = "5";
         sut.ArtistName = "Metallica";
+        sut.IsArtistDropDownOpen = true; // simulate the popup being open before hydration
 
         sut.InitializeArtistField();
 
