@@ -226,6 +226,24 @@ class RegisterTests(unittest.TestCase):
               "## Task: fix\nFixed BUG-067 today.\n")
         self.assertEqual(backlog_gen.next_bug_id(self.root), "BUG-100")
 
+    def test_next_bug_id_ignores_ids_in_non_task_log_md_files(self):
+        # A plan.md / write-up that merely *discusses* a bug id is prose, not
+        # a record of one -- scanning it would let a resolution note that
+        # mentions a number ratchet the high-water mark upward on every
+        # retelling (self-referential contamination). Only task-log.md
+        # entries are actual records (REQ-SEV-03).
+        write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "plan.md"),
+              "Discussion of BUG-500 in a design note.\n")
+        self.assertEqual(backlog_gen.next_bug_id(self.root), "BUG-001")
+
+    def test_next_bug_id_ignores_ids_inside_fenced_code_blocks_in_task_log(self):
+        # A task-log entry that quotes a test/fixture id (e.g. an assertion
+        # in pasted test output) must not be read as a real record.
+        write(os.path.join(self.mgmt, "BusinessFeatures", "feat", "task-log.md"),
+              "## Task: fix\n\n```\nself.assertEqual(next_bug_id(root), \"BUG-999\")\n```\n\n"
+              "Fixed BUG-067 today.\n")
+        self.assertEqual(backlog_gen.next_bug_id(self.root), "BUG-068")
+
     def test_register_creates_folder_readme_and_regenerates(self):
         rc = backlog_gen.cmd_register(
             self.root, section=None, parent="F-1", kind="bug", severity="Major",
