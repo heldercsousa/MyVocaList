@@ -4,7 +4,7 @@
 
 ## Rule 4 — Tasks.md Is the Source of Truth
 
-Check off each task in `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md` as it completes.
+Check off each task in `Docs/Management/[section-or-filing-dir]/[feature]/tasks.md` as it completes.
 
 **Sequential constraint:** Never start a task that depends on the output of an incomplete task.
 

@@ -45,7 +45,7 @@ If `skip`, continue with no tag change.
 1. **Build check**: Run `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`. Stop if errors.
 
 2. **Stage changes**: Stage specific files — never `git add -A` blindly. Review what is being staged.
-   - Include ALL changed files: code, specs (`Docs/specs/`), plans (`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/plan.md`, `Docs/DevEnv/plans/`), rules (`.claude/rules/`), `CLAUDE.md`, command files (`.claude/commands/`), and changelog.
+   - Include ALL changed files: code, specs (`Docs/specs/`), plans (`Docs/Management/[section-or-filing-dir]/[feature]/plan.md`, `Docs/DevEnv/plans/`), rules (`.claude/rules/`), `CLAUDE.md`, command files (`.claude/commands/`), and changelog.
    - Any file touched as part of the task belongs in the commit.
 
 3. **Review staged diff**: Run `git diff --cached --stat` to confirm staged files are intentional.
