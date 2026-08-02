@@ -599,11 +599,15 @@ public partial class SongFormViewModel : ViewModelBase
     {
         // BUG-024: send the complete current form data — FeaturedArtists/Lyrics are hydrated by
         // LoadSongForEditAsync, and the (possibly edited) Version is passed through explicitly.
+        // BUG-067 (REQ-ACREATE-16): the currently selected artist is part of "the complete current
+        // form data" — it must be sent too, or a changed artist is silently discarded. The
+        // artist-required guard above has already proven SelectedArtistId has a non-zero value.
         var (success, message) = await _songService.UpdateSongAsync(
             SongId!.Value, title, FeaturedArtists?.Trim(), Lyrics?.Trim(), true,
             string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId,
             string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider,
-            version);
+            version,
+            SelectedArtistId);
         if (success)
         {
             await _snackbarService.ShowSuccessAsync("Song updated");
