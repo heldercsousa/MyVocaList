@@ -3627,3 +3627,37 @@ the bundle and flagged for Helder as a widening of scope.
 ### Status
 Merge-back **DONE**. T13 is **prepared and blocked on Helder's authorship read** — the last open
 item in the feature. Apply order and post-apply verification are in the bundle's final two sections.
+
+## Task: FUP-4 — next_bug_id() can silently reissue an already-used BUG id
+**Plan:** Docs/Management/DevCycleCraft/spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md § FUP-4
+**Status:** To Review
+**Started:** 2026-08-02
+**Completed:** 2026-08-02
+
+### Changed files:
+- `.claude/scripts/backlog/backlog_gen.py` — next_bug_id() additionally scans every .md under Docs/Management for BUG-(\d{1,4}), max'd with the existing folder+archive sources
+- `.claude/scripts/backlog/tests/test_backlog_gen.py` — regression tests: task-log-only id, and folder+archive+task-log combined (no double-count)
+- `Docs/Management/DevCycleCraft/spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md` — FUP-4 marked resolved 2026-08-02, Option 1 recorded, false-positive note added
+
+### Red (before fix)
+```
+test_next_bug_id_scans_task_log_ids_with_no_folder (tests.test_backlog_gen.RegisterTests) ... FAIL
+AssertionError: 'BUG-001' != 'BUG-068'
+```
+Full run: 1 failure (the new task-log-only test); test_next_bug_id_counts_folder_archive_and_task_log_ids_once happened to still pass pre-fix because folder+archive alone already reached BUG-100 without the task-log source in that fixture.
+
+### Green (after fix)
+```
+Ran 146 tests in 0.604s
+OK
+```
+
+### Gate results
+- `python .claude/scripts/backlog/backlog_gen.py regen --check` -> exit 0 (one pre-existing unrelated warning: BUG-022 parent-path disagreement, not touched by this task)
+- Real-tree sanity: `next_bug_id()` now returns `BUG-1000` (>= BUG-068 as expected). Root cause of the higher-than-minimal value: the content scan also matches `BUG-999` inside a code-example fixture in this feature's own `plan.md` (a test string, not a real bug id) — a safe-direction false positive, documented in the FUP-4 write-up rather than narrowed away.
+- No `.cs`/`.xaml` touched — no `dotnet build`/`test` for this task
+- No `.sln` change — no file created/moved/deleted under `Docs/` or `.claude/`
+- No rules file written (authorship gate respected)
+
+### Contradicts the FUP-4 writeup?
+No contradiction with the decided approach. One refinement worth flagging: the writeup's options text used `BUG-(\d{3})`; implemented with the existing file-level `BUG_ID` regex (`\d{1,4}`) for consistency with the folder/archive scan already in place, which is why `BUG-1000` (4 digits) surfaces instead of a 3-digit id.
