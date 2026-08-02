@@ -1,4 +1,4 @@
-# Task Log — Song artist field: correctness fixes + inline "create new artist"
+﻿# Task Log — Song artist field: correctness fixes + inline "create new artist"
 
 **Spec folder:** this folder (`requirements.md` · `design.md` · `tasks.md`).
 **Parent:** Artists & Songs Catalog → closes BUG-027; folds in BUG-050 / BUG-051 / BUG-052 (found in DX-AC T7, 2026-07-21).
@@ -561,3 +561,137 @@ unit-testable and requires the on-device T10 re-run #5.**
 Branch/worktree: `MyVocaList-inline-ac`, `feat/inline-artist-create`, HEAD `befc2fe` (pushed). Build:
 0 errors. Tests: 530/530 green. Next step: BUG-067 (step 2, separate dispatch per the briefing), then
 a single on-device T10 re-run #5 covering 065/066/067 + re-verification of BUG-061/BUG-064.
+
+---
+## Task: Fix wave step 2 — BUG-067 (Critical) — editing a saved song's artist is not persisted
+**Plan:** Helder's decision D2 (`§ DECISION TAKEN — Helder, 2026-08-02`)
+**Status:** To Review
+**Started:** 2026-08-02
+**Completed:** 2026-08-02
+
+### Root cause (Phase 1 — systematic-debugging, evidence before fix)
+**The artist FK was a create-path-only assignment. The edit path could not send the artist at all.**
+
+- `ISongService.UpdateSongAsync` had **no `artistId` parameter** in its signature.
+- `SongService.UpdateSongAsync` (`Services/SongService.cs:99-144` pre-fix) only ever **read**
+  `song.ArtistId` — at line 121, to scope the title-uniqueness check — and **never assigned it**.
+  The FK was written exclusively by `CreateSongWithUrlsAsync`.
+- `SongFormViewModel.ExecuteEditSaveAsync` (`:598-617` pre-fix) therefore passed
+  (id, title, featuredArtists, lyrics, hasManualEdits, externalId, externalProvider, version) —
+  structurally unable to communicate the user's new artist selection.
+
+So on edit-save the ViewModel's `SelectedArtistId` was correct in memory (BUG-060/REQ-ACREATE-15's
+clear-then-reselect works), the artist-required guard passed against it, and then the value was
+simply dropped on the floor at the Service boundary. The stored song kept its original artist —
+a silent loss of a user edit (Critical).
+
+Ruled out by reading the actual code, not assumed: it is **not** a stale field captured at load
+time (`SelectedArtistId` is live), **not** an EF change-tracking/NoTracking problem (the entity is
+tracked and `UpdateAsync`/`SaveChangesAsync` do run — they just had nothing new to write for the
+FK), and **not** hydration overwriting the selection (`LoadSongForEditAsync` runs once, before the
+user's change).
+
+### Observed Red (before the fix)
+The signature was extended first (inert, no assignment) so the defect could be expressed as a test;
+the failures below are the defect itself, not setup errors. Command:
+`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --filter "<the 5 new tests>"`
+
+```
+Com falha SongServiceTests.UpdateSongAsync_WithChangedArtistId_PersistsNewArtist [5 ms]
+  Assert.Equal() Failure: Values differ
+  Expected: 2
+  Actual:   1                       <- song.ArtistId never re-assigned
+
+Com falha SongServiceTests.UpdateSongAsync_UnknownArtistId_ReturnsFalseAndDoesNotWrite [2 ms]
+  Assert.False() Failure  Expected: False  Actual: True     <- unknown artist accepted silently
+
+Com falha SongServiceTests.UpdateSongAsync_ChangedArtistWithDuplicateTitle_ReturnsFalse
+  Assert.False() Failure  Expected: False  Actual: True     <- uniqueness checked against OLD artist
+
+Com falha SongFormViewModelTests.SaveAsync_EditMode_ArtistChanged_SendsNewArtistIdToService [168 ms]
+  Moq.MockException : Expected invocation on the mock once, but was 0 times:
+    s => s.UpdateSongAsync(42, "Stored Title", ..., True, ..., 9, It.IsAny<CancellationToken>())
+  Performed invocations:
+    ISongService.UpdateSongAsync(42, "Stored Title", "", null, True, null, null, "", null, CancellationToken)
+                                                                                     ^^^^ artistId null
+
+Com falha! - Com falha: 4, Aprovado: 1, Ignorado: 0, Total: 5
+```
+
+`UpdateSongAsync_NullArtistId_KeepsExistingArtist` passed pre-fix by construction — it pins the
+null-keeps-existing default so the fix cannot regress untouched-artist edits.
+
+### Fix
+1. **Service (business logic — constitutional layer).** `UpdateSongAsync` gains
+   `int? artistId = null` (null = keep existing, the same semantics `version`/`externalId` already
+   use). When a different id is supplied it is validated against `IArtistRepository` ("Artist not
+   found" on miss, no write); the title-uniqueness check now runs against the **effective** artist;
+   `song.ArtistId = effectiveArtistId` is assigned before the write.
+2. **ViewModel (plumbing only).** `ExecuteEditSaveAsync` forwards `SelectedArtistId` — completing
+   the "send the complete current form data" contract BUG-024 established.
+
+No logic moved into the ViewModel; validation, existence and uniqueness all stay in `SongService`.
+
+### Observed Green (after the fix)
+`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`
+```
+Aprovado! - Com falha: 0, Aprovado: 535, Ignorado: 0, Total: 535, Duracao: 3 s
+```
+535 = 530 baseline + 5 new. No pre-existing test regressed.
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|------------------------|-------------|
+| REQ-ACREATE-16 | A changed artist on a saved song is persisted | `SongService.UpdateSongAsync` (`song.ArtistId = effectiveArtistId`) | `UpdateSongAsync_WithChangedArtistId_PersistsNewArtist` |
+| REQ-ACREATE-16 | Edit-mode Save forwards the current selection | `SongFormViewModel.ExecuteEditSaveAsync` | `SaveAsync_EditMode_ArtistChanged_SendsNewArtistIdToService` |
+| REQ-ACREATE-16 | null = keep existing (untouched artist not cleared) | `SongService.UpdateSongAsync` (`artistId ?? song.ArtistId`) | `UpdateSongAsync_NullArtistId_KeepsExistingArtist` |
+| REQ-ACREATE-16 | Unknown artist id rejected, no write | `SongService.UpdateSongAsync` artist-existence guard | `UpdateSongAsync_UnknownArtistId_ReturnsFalseAndDoesNotWrite` |
+| REQ-ACREATE-16 | Uniqueness evaluated against the NEW artist | `SongService.UpdateSongAsync` (`ExistsByTitleForArtistAsync(effectiveArtistId, ...)`) | `UpdateSongAsync_ChangedArtistWithDuplicateTitle_ReturnsFalse` |
+| REQ-ACREATE-16 | Reopening the song shows the new artist (end-to-end) | full edit flow | **on-device only — T10 re-run #5** |
+
+### Existing tests touched — mechanical arity only, FLAGGED for Helder
+Adding a parameter to `UpdateSongAsync` breaks every Moq `Setup`/`Verify` lambda that names the
+method, because the expression must match the new arity. 10 such expressions were updated by
+inserting `It.IsAny<int?>()` in the new position. **No assertion was relaxed, removed, weakened or
+re-pointed** — this is signature propagation, not adjudication of a failing test, and it is
+categorically different from the (spent) BUG-061 authorisation. Sites:
+`SongResolutionServiceTests.cs` (6) and `SongFormViewModelTests.cs` (4). `SongServiceTests.cs`
+needed none (it already used named arguments). Production call sites in
+`SongResolutionService.cs:208,232` switched their positional `ct` to `ct: ct`.
+If Helder prefers zero test churn, the alternative was placing `artistId` after
+`CancellationToken ct` — rejected as it violates the ct-last convention in a Domain interface.
+
+### Design concern (implemented as specified, raised for review)
+`ExecuteEditSaveAsync` now always sends the current artist id rather than only on change. This is
+consistent with BUG-024's "send the complete current form data" and avoids a stale
+original-artist baseline field, but it means an edit-save re-validates the artist whenever it
+differs from stored (it short-circuits when equal). No behavioural downside found.
+
+### Changed files:
+- `Domain/ServicesInterfaces/ISongService.cs` (worktree) — `UpdateSongAsync` gains `int? artistId = null` + XML doc for it.
+- `Services/SongService.cs` (worktree) — artist-existence guard, effective-artist uniqueness check, `song.ArtistId` assignment.
+- `Services/SongResolutionService.cs` (worktree) — 2 call sites: positional `ct` → named `ct: ct`.
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` (worktree) — `ExecuteEditSaveAsync` forwards `SelectedArtistId`.
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` (worktree) — 4 new service-seam regression tests.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (worktree) — 1 new VM-seam regression test + 4 arity updates.
+- `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs` (worktree) — 6 arity updates.
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/requirements.md` (develop) — **REQ-ACREATE-16 added** (SDD invariant: no existing AC covered artist mutation on an existing song; REQ-ACREATE-08 covers only the create path).
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/task-log.md` (develop) — this entry.
+
+### Verification evidence
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0` → `ok dotnet build: 6 projects, 0 errors, 10 warnings`. First attempt, no retries.
+- **Tests:** `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → `Com falha: 0, Aprovado: 535, Total: 535`.
+- **Red→Green:** both outputs captured above, in this session.
+- **Files re-read after edit:** `Services/SongService.cs` (:98-159), `MyVocaList/UI/ViewModels/SongFormViewModel.cs` (:598-621), `Domain/ServicesInterfaces/ISongService.cs`, `requirements.md`.
+- **.sln registration:** no file created/moved/deleted under `Docs/` or `.claude/` — nothing to register.
+- **BUG-065/066 not re-touched:** this fix is entirely in the save/persistence path; no artist-field
+  search, lock, dropdown or ➕-row behaviour was modified. Helder's pending device verification of
+  065/066 is unaffected.
+
+### Requires Helder's device (T10 re-run #5)
+- End-to-end: open a saved song → clear (X) the locked artist → pick or inline-create a different
+  artist → Save → reopen → the new artist is shown. Persistence is proven by unit test; the UI path
+  that feeds `SelectedArtistId` (the DX `AutoCompleteEdit` clear/select interaction) is not.
+- The duplicate-title-on-new-artist rejection message surfacing correctly in the form
+  (it is routed to `TitleErrorText`, the existing edit-save failure channel).
+
