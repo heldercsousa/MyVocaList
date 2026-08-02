@@ -29,7 +29,7 @@ For commit discipline, task-log format, spec quality gates, and the spec decisio
 **The main/orchestrator agent never reads `.cs`, `.xaml`, `.csproj`, migration, or any other source/implementation file. All code inspection is delegated to an Explore or Plan subagent.** This rule survives session resets — it lives here, in the durable role file.
 
 **MAY read (allow-list):**
-- `Docs/Management/BACKLOG.md`
+- `backlog_gen.py query` output (the agent path to the work set). `Docs/Management/BACKLOG.md` itself is readable but **should not be read at session start** — Rule 7 step 1 replaced that read with the query.
 - Spec docs under `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/` (`requirements.md`, `design.md`, `tasks.md`, `plan.md`, `findings.md`, `handoff.md`, `task-log.md`)
 - `Docs/DevEnv/ACTIVE-CONSIDERATIONS.md`
 - Rules / role files: `CLAUDE.md`, `.claude/rules/*.md`, `.claude/agents/*.md`, `.claude/library/*.md`

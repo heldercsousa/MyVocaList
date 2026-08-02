@@ -3686,3 +3686,42 @@ literal text, both recorded in the `POST-MIGRATION-FOLLOWUPS.md` resolution note
 `task-log.md` only rather than every `.md`, because the broader scan is self-referential (see
 Revision note above); (2) fenced code blocks are stripped before the regex runs, so a task-log
 entry quoting test/fixture output does not count as a record.
+---
+## Task: T13a/T13b/T13c/T13d — apply APPROVED rules-amendment bundle (T13-proposed-diffs.md)
+**Plan:** Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
+**Status:** To Review
+**Started:** 2026-08-02
+**Completed:** 2026-08-02
+
+Applied all 17 numbered OLD->NEW blocks mechanically (skipped block 16, superseded 2026-07-30 per the bundle's own note). Applied Helder's mandatory corrections on top: encoded that Docs/Management/ has five top-level directories (BusinessFeatures/, DevCycleCraft/, cross-cutting/, milestones/, backlog-archive/), that the section vocabulary stays exactly two values (BusinessFeatures | DevCycleCraft) driven by each item's section: frontmatter and independent of physical folder path, and that cross-cutting/ and milestones/ are filing locations, not sections. All corrections (1)-(7) applied as specified.
+
+### Changed files:
+-  (Docs/ Folder Layout tree + five-top-level-dirs subsection + section-independence sentence, folder routing rule rewritten to frontmatter-driven with cross-cutting/milestones bullets, Development Methodology in-place-spec-update wording, Rule 7 per-session-reads path pattern)
+-  (SDD Invariant, Rule 1 BACKLOG bullet, Rule 2 Docs-land-on-develop + new Generated-artifacts HARD RULE, Rule 3 Session-End Spec Update Ritual, Rule 7 step 1)
+-  (ID allocation + Placement bullets, cross-cutting/ disambiguation)
+-  (New-feature workflow steps 0-5, Proactive BACKLOG triage format + trigger questions)
+-  (new Generated artifacts — write-ownership protocol section, points 1-4)
+-  (Session-End Spec Update Ritual step 3 split + new step 6)
+-  (Rule 7 step 1 handoff-file fallback)
+-  (Bug ID scheme, Bug fix workflow step 1)
+-  (Device auto-memory tier note, new BACKLOG.md-not-in-session-start-read-set note)
+-  (Read-scope allow-list line 32; line 378 occurrence assessed as a different, non-read-instructing context — left unchanged, noted as borderline in verification)
+-  (new Item folder file set + frontmatter section, including kind: line per correction 3)
+-  (deleted the 2026-07-22 row per T13d)
+-  (prepended 2026-08-02 amend entry, dated per correction 7, file list corrected to drop constraints-registry.md/constraints-reference.md since block 16 was skipped, folder-vocabulary clarification sentence added)
+-  (checked off T13a/T13b/T13c/T13d)
+-  (status -> Done, closed: 2026-08, gate: removed as resolved)
+-  (regenerated)
+-  (new, generated — item moved to archive on Done)
+
+### Skipped (per bundle instruction):
+- block 16 (, ) — marked SUPERSEDED 2026-07-30 in the bundle; verified OLD fragment no longer exists, not touched.
+
+### Verification evidence
+1. CLAUDE.md:> `DevCycleCraft/spec-evolution-versioning/design.md § 2`). `Docs/Management/BACKLOG.md` and the
+CLAUDE.md:> `BACKLOG.md`, or an archive file, and blocks the commit if the rendered files are stale. (Python-based, rg unavailable via rtk in this session) -> 13 hits, all describe BACKLOG.md as generated / not-to-be-read-at-session-start / a file type committed to develop. None instructs an agent to read the file for context. One borderline hit noted: orchestrator.md:378 mentions BACKLOG.md in a list of doc types committed to develop directly (not a read instruction) — left unchanged as it is unrelated to the read-scope allow-list edited at line 32.
+2.  -> 148 tests, OK (matches session's expected count, not the bundle's stale 144).
+3.  -> exit 0. Pre-existing BUG-022 parent-path warning present, unrelated to this change.
+4.  across CLAUDE.md + .claude/ -> 39 hits remain in files outside this bundle's authorized scope (agents/implementor.md, agents/orchestrator.md, agents/plan-reviewer.md, commands/sln-commit.md, commands/sln-review.md, library/crud-migration-specfirst.md, library/session-ops.md (other lines), library/spec-writing-guide.md (other lines), library/workflow-rule-1/4/5.md, library/workflow-rules-6-7-8.md (other lines), rules/workflow.md line 45). None of these files/lines were named in T13-proposed-diffs.md or the task briefing's Mandatory Corrections list — left unchanged rather than expanding scope unilaterally. CLAUDE.md itself is fully corrected (0 stale hits within CLAUDE.md).
+Build: N/A — docs-only change, no .cs/.xaml touched. Tests: 148 passed, 0 failed (backlog generator suite). Commit SHA: pending (see below).
+Files written and re-read: all Changed files above were Read (or Edit-tool-verified) after write; CRLF preserved in task-log.md via binary-mode append (Python), no blanket newline replacement performed.

@@ -31,7 +31,7 @@ Hooks in `.claude/settings.json` enforce specific rules automatically. Self-enfo
 
 > **Spec changes before code changes.**
 
-- New requirement mid-implementation → record the spec change first, then the code. For a feature **not yet shipped**, update its spec in place. For **shipped/implemented** behavior, do NOT rewrite the existing spec (it is immutable history) — append a new dated change spec that cross-references the original. *(Target pattern being defined: BACKLOG "Spec Evolution, Versioning & Feature-Folder Organization"; until it lands, at minimum add a dated `> **Spec updated [YYYY-MM-DD]:**` note instead of silently rewriting.)*
+- New requirement mid-implementation → record the spec change first, then the code. For a feature **not yet shipped**, update its spec in place. For **shipped/implemented** behavior, do NOT rewrite the existing spec (it is immutable history) — create `changes/YYYY-MM-DD-<slug>/` beside it, with its own `requirements.md`/`design.md`/`README.md` cross-referencing the original (`CLAUDE.md § Docs/ Folder Layout`). Register it with `backlog_gen.py register` so it gets a BACKLOG row.
 - Code contradicts the spec → the code is wrong (the spec is not wrong).
 - Spec incomplete → stop and clarify with Helder; do not improvise.
 - A subagent that modifies behavior not described in the spec has violated this invariant.
@@ -48,7 +48,7 @@ Applies to all agents (main and sub) at all times.
 - **Spec structure:** `requirements.md` (stories, ACs, validation, out-of-scope) · `design.md` (architecture, interfaces, flows, decisions) · `tasks.md` (ordered checkboxes).
 - **Key thresholds:** ≥ 2 layers OR > 2 hours → full ceremony (all three spec files). Single file, < 1 hour → light. Typo / cosmetic / bug fix → no spec, commit message is the artifact. **When in doubt, write a spec.**
 - **Constitution check (2a):** verify the feature violates no CLAUDE.md Non-Negotiable before writing the spec.
-- **BACKLOG.md is the source of truth for feature sequencing** — the main agent updates status at each milestone (💡→📋→🗺️→🟢→🟡→✅). Untracked work discovered mid-session gets a brief BACKLOG row *before* proceeding. BACKLOG rows follow the PO-level template defined in BACKLOG.md's own header (Goal + Gate + one Pointer, ≤3 sentences); technical detail goes to the feature docs, never into the row.
+- **Item frontmatter is the source of truth for feature sequencing; BACKLOG.md is its generated view** — the main agent updates status at each milestone (💡→📋→🗺️→🟢→🟡→✅) with `backlog_gen.py status <ID> "<status>"`, never by editing a row. Untracked work discovered mid-session is registered with `backlog_gen.py register` *before* proceeding. The row template (Goal + Gate + one Pointer, ≤3 sentences, no commit hashes / file paths / verdicts / test counts) is **mechanically enforced** by the generator's validation — a violating `goal:`/`gate:` aborts the write and names the folder. Technical detail goes in the item's own `README.md` body, which has no limit.
 
 Full spec-decision table, new-feature workflow (steps 0–5), proactive-triage format, spec quality gate + four-gate, SDD decision table, discovery mode, brownfield rule, J-Curve: `workflow-rule-1.md`.
 
@@ -99,7 +99,8 @@ Full rationale, decisions, and Guard 3 design: `DevCycleCraft/inline-trivial-fix
 - **Wave cap `[HARD RULE]`:** max **4** subagents in parallel; dispatch in waves, wait for all, then next wave. Discard a subagent's context after it completes — never reuse the instance.
 - **Git worktrees mandatory for ALL implementation work `[HARD RULE — amended 2026-07-14]`:** every task that edits code files (`.cs`, `.xaml`, `.xaml.cs`) runs in a git worktree on a task branch — never directly on `develop` or `main` (hook-enforced via `constitutional-guard.py`). Applies to single-subagent tasks and bug fixes, not just parallel waves — develop stays unlocked as the docs + integration branch. See `orchestrator.md § Git Worktrees as Isolation Primitive`.
 - **Worktree base branch is `develop` `[HARD RULE]`:** never base a worktree/task branch on `main`. After creating any worktree (native `EnterWorktree` OR manual `git worktree add`), verify `git merge-base --is-ancestor develop HEAD`; if develop is not an ancestor, recreate with `git worktree add <path> -b <branch> develop`. The native `EnterWorktree` tool may default to the repo default branch (`main`) — always verify.
-- **Docs land on develop `[HARD RULE]`:** spec files, `task-log.md`, BACKLOG.md, LEDGER.md, and changelog updates are committed to `develop` (by the main agent), never left stranded on a worktree branch. If a subagent edited docs inside a worktree, sync them to develop before/at merge (`/sln-docs-sync`).
+- **Docs land on develop `[HARD RULE]`:** spec files, `task-log.md`, `tasks.md`, LEDGER.md, and changelog updates are committed to `develop` (by the main agent), never left stranded on a worktree branch. If a subagent edited docs inside a worktree, sync them to develop before/at merge (`/sln-docs-sync`).
+- **Generated artifacts are single-writer, not mergeable `[HARD RULE]`:** `Docs/Management/BACKLOG.md`, `Docs/Management/backlog-archive/*.md`, and every `Docs/Management/**/README.md` frontmatter block are **generated**. A concurrent edit to a generated region is not a line conflict — it is a silent overwrite on the next `regen`. Full protocol: `workflow-rule-2.md § Generated artifacts`.
 - **Single-writer rule:** at any moment each file has at most one active writer. Before a wave, run the file-overlap check; if two tasks list the same `Files owned`, serialize them.
 - **Task sizing:** if a briefing lists > 5 files or > 2 hours of work, it is a sizing violation — split before dispatching.
 - **Exit checklist (every subagent, in order):** verification-before-completion → build (0 errors, 3-attempt cap) → test (if `.cs` changed) → post-edit re-read → `.sln` registration → living-spec check → task-log → commit → push. Stopping before all steps = task not finished.
@@ -118,7 +119,7 @@ These files must never have concurrent writers (parallel edits produce conflicts
 
 - **Task complete =** builds with 0 errors + tests pass (if tested code touched) + checkbox checked in `tasks.md`.
 - **Completion gates before committing:** demo statement verifiable · new service/repo/VM/page registered in `MauiProgram.cs` · ACs satisfied with evidence in the task-log matrix · **`.sln` registration for every file created/moved/deleted in `Docs/` or `.claude/` — BLOCKING**.
-- **Session-End Spec Update Ritual:** review every spec file touched; if it no longer describes what was built, add a `> **Spec updated [YYYY-MM-DD]:**` note; check off completed tasks / mark `[CANCELLED: reason]`; commit spec updates in the final commit.
+- **Session-End Spec Update Ritual:** review every spec file touched. **Not-yet-shipped feature** → if the spec no longer describes what was built, add a `> **Spec updated [YYYY-MM-DD]:**` note in place. **Shipped feature** → do not edit the shipped spec; open a `changes/YYYY-MM-DD-<slug>/` folder instead. Check off completed tasks / mark `[CANCELLED: reason]`; update the item's `README.md` frontmatter (`status:`, `gate:`) and run `backlog_gen.py regen`; commit spec updates in the final commit.
 
 `/sln-review` is automatic via fresh subagents under `subagent-driven-development`; when executing manually, it is the trigger. Full gates + ritual triggers: `workflow-rule-3.md`.
 
@@ -183,7 +184,7 @@ Before any web research query, follow this order — **both main agent and subag
 Every implementation/planning session begins with this reading order before any code is written or subagent dispatched. **Do not skip; do not resume from memory alone.**
 
 0. **Hook health verification** (see Hook Enforcement above) — fix misconfigured hooks first.
-1. **Active handoff file** `…/[feature]/handoff.md` if present — else read `Docs/Management/BACKLOG.md` for the current `🟡 In Progress` / highest `🟢 Ready` item.
+1. **Active handoff file** `…/[feature]/handoff.md` if present — else run `python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"` for the current `🟡 In Progress` / highest `🟢 Ready` item. **Do not read `Docs/Management/BACKLOG.md`** — the query returns the same work set in ~12 lines instead of ~136 (REQ-SEV-23). The rendered file is for Helder.
 2. **`ACTIVE-CONSIDERATIONS.md`** (if it exists) — priority stack + open items.
 3. **`…/[feature]/tasks.md`** — done / `[~]` / pending.
 4. **`…/[feature]/requirements.md`** — refresh ACs.

@@ -436,12 +436,12 @@ supposed to surface.
 
 ## Phase 4 — Rules
 
-- [ ] **T13a — Amend the routing tables**
+- [x] **T13a — Amend the routing tables**
   Consumes: T12b. Files owned: `CLAUDE.md`, `.claude/rules/workflow.md`, `.claude/rules/bug-tracking.md`, `BACKLOG.md` header banner. Risk: High. Review lane: **Architectural (Helder).**
-- [ ] **T13b — Amend the library section files**
+- [x] **T13b — Amend the library section files**
   Consumes: T13a. Files owned: `.claude/library/{workflow-rule-1,workflow-rule-3,workflow-rules-6-7-8,bug-tracking-reference,spec-writing-guide,session-ops}.md`. Risk: High. Review lane: **Architectural (Helder).**
   > T13a and T13b must land in **one `amend:` commit** — split for sizing/review only, committed together, or the routing tables contradict the library for the duration.
-- [ ] **T13d — Write-ownership & concurrency protocol for generated artifacts** *(authorized by Helder 2026-07-22; retires the exception-registry row of the same date)*
+- [x] **T13d — Write-ownership & concurrency protocol for generated artifacts** *(authorized by Helder 2026-07-22; retires the exception-registry row of the same date)*
   Consumes: T13b. Files owned: `.claude/rules/workflow.md`, `.claude/library/workflow-rule-2.md`, `.claude/exception-registry.md`. Risk: High. Review lane: **Architectural (Helder) — rules file, `CLAUDE.md § Authorship` applies.**
   > **Why:** "Docs land on develop" was written when every doc was hand-edited by one agent at a time. It cannot cover a **generated** artifact, where a concurrent edit is not a mergeable line conflict but a silent overwrite on the next `regen` — nor two live sessions in one repo, which is now the normal case (this migration + INLINE-AC, 2026-07-22). Detection exists (T12b's pre-commit gate rejects a stale BACKLOG) but **detection is not a protocol**: nothing tells an agent what to do when the gate fires, or how two sessions coordinate ownership of a generated region.
   > **Must answer, at minimum:**
@@ -451,7 +451,7 @@ supposed to surface.
   > 4. Whether `register`/`status` (which write folder + README + `.sln` + regenerate) are safe to run from two sessions at all, given T7b's finding that `register` is **not** atomic (that claim was retracted; the test that "proved" it was tautological).
   > Demo: the exception-registry row dated 2026-07-22 is **deleted**, not renewed, and the protocol covers the case it described.
 
-- [ ] **T13c — Changelog + contradiction sweep**
+- [x] **T13c — Changelog + contradiction sweep**
   Consumes: T13b. Files owned: `Docs/Changelog/changelog.md`. Risk: Low. Review lane: Standard.
   Demo: `grep -rn "BACKLOG.md" .claude/ CLAUDE.md` returns no instruction to read the file.
 
