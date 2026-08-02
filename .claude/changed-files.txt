@@ -3672,3 +3672,8 @@ Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md
 Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md
 Docs/Management/DevCycleCraft/spec-evolution-versioning/README.md
 ../MyVocaList-inline-ac/MyVocaList/UI/ViewModels/SongFormViewModel.cs
+Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/task-log.md
+../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/490e3794-e3d4-49a0-8b32-7c897effd04a/scratchpad/fix_reg.py
+../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/490e3794-e3d4-49a0-8b32-7c897effd04a/scratchpad/fix_paths.py
+../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/490e3794-e3d4-49a0-8b32-7c897effd04a/scratchpad/add_notes.py
+../MyVocaList-wt-query/.claude/scripts/backlog/backlog_gen.py

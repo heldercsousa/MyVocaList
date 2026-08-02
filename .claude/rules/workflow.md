@@ -42,7 +42,9 @@ Applies to all agents (main and sub) at all times.
 
 ## Rule 1 — Spec-First
 
-**Before writing any implementation code for a feature, read `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md`.** No exceptions. Code written without reading the spec may contradict it.
+**Before writing any implementation code for a feature, read `Docs/Management/[section-or-filing-dir]/[feature]/design.md`.** No exceptions. Code written without reading the spec may contradict it.
+
+> `[section-or-filing-dir]` is one of `BusinessFeatures/`, `DevCycleCraft/`, `cross-cutting/` or `milestones/` — the item's physical folder. It does **not** determine table placement; the `section:` frontmatter does (`CLAUDE.md § Docs/ Folder Layout`).
 
 - **Spec is source of truth:** spec complete + approved → fix the code; spec has a gap → stop, clarify with Helder, update spec, then fix code. Never silently fix code and leave the spec describing something that no longer exists.
 - **Spec structure:** `requirements.md` (stories, ACs, validation, out-of-scope) · `design.md` (architecture, interfaces, flows, decisions) · `tasks.md` (ordered checkboxes).
