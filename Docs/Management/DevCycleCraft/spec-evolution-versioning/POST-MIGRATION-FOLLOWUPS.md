@@ -42,7 +42,27 @@ for T12a; only a future `git mv` fixes the name. Recorded here so it isn't lost.
 `constraints-registry.md` still says last-used `.sln` GUID = `0041`; actual high-water after T12a
 is `00D0`. Correct it in the T13 rules bundle.
 
-## FUP-4 — `next_bug_id()` can reissue an already-used BUG id (found 2026-07-30)
+## FUP-4 — `next_bug_id()` can reissue an already-used BUG id (found 2026-07-30, resolved 2026-08-02)
+
+> **Resolved 2026-08-02:** implemented Option 1, scoped to `task-log.md` files only, with fenced
+> code blocks (` ``` `) stripped before the regex runs. `next_bug_id()` now additionally walks
+> every feature/change `task-log.md` under `Docs/Management` and regexes its non-fenced content
+> for `BUG-(\d{1,4})`, taking the max across all three sources (folders, archive files,
+> task-logs). Regression tests added to `tests/test_backlog_gen.py`.
+>
+> A broader first attempt — scanning *every* `.md` under `Docs/Management`, not just
+> `task-log.md` — was tried and rejected. Prose files (plans, write-ups, this very followups
+> file) *discuss* bug ids without *recording* them, so scanning them creates a self-referential
+> feedback loop: a resolution note that mentions a number becomes evidence the allocator reads
+> back on its next run, and each retelling of the number ratchets the high-water mark upward
+> again, indefinitely — a real defect (id-range abandonment), not conservatism. `task-log.md` is
+> the only prose source where REQ-SEV-03 folder-less bugs are actually *recorded*, so it is the
+> only one the allocator should read. Fenced code blocks are stripped for the same reason at
+> finer grain: a task-log entry that quotes test/fixture output (an assertion against an
+> illustrative example id) is not a record either.
+>
+> This paragraph intentionally names no BUG id above the real high-water mark, to avoid
+> reintroducing the same feedback loop it describes.
 
 **What:** `backlog_gen.py next_bug_id()` computes the next id from **item folders + archive files
 only**. Bugs that were tracked in a feature/change `task-log.md` without ever getting a folder are
