@@ -23,13 +23,6 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly IMessenger _messenger;
     private int _searchGeneration; // BUG-051: generation counter — guards SearchArtistsAsync against stale completions
 
-    // BUG-061: true right after ArtistSearchText is set PROGRAMMATICALLY (selection lock, edit-mode
-    // hydration) — the DX AutoCompleteEdit re-requests items on any text change, including one it did
-    // not originate from user typing, which re-opened the dropdown on the just-selected artist. The
-    // page's OnArtistItemsRequested consumes (reads + resets) this flag via ConsumeSuppressArtistSearch
-    // before running the search, so only USER TYPING triggers a new item request.
-    private bool _suppressNextArtistSearch;
-
     // ── Query properties ──────────────────────────────────────────────────
     public string SongIdRaw { set => SongId = int.TryParse(value, out var id) ? id : null; }
     public string ArtistIdRaw { set => ArtistId = int.TryParse(value, out var id) ? id : 0; }
@@ -60,6 +53,12 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private IEnumerable<AutocompleteSuggestion> _artistSuggestions = [];
     [ObservableProperty] private bool _artistHasError;
     [ObservableProperty] private string _artistErrorText = string.Empty;
+    // BUG-065/066: two-way bound to AutoCompleteEdit.IsDropDownOpen (dxe:AutoCompleteEdit, ItemsEditBase
+    // BindableProperty). Every programmatic ArtistSearchText assignment below also sets this false to
+    // force the popup shut (DevExpress's own provider uses the same lever) — replaces the removed
+    // _suppressNextArtistSearch flag, which IL evidence proved never suppressed anything: DevExpress's
+    // AsyncItemsSourceProvider.OnEditorTextChanged already ignores non-UserInput text changes natively.
+    [ObservableProperty] private bool _isArtistDropDownOpen;
 
     // ── Lyrics ────────────────────────────────────────────────────────────
     [ObservableProperty] private string? _lyrics;
@@ -330,8 +329,8 @@ public partial class SongFormViewModel : ViewModelBase
     {
         SelectedArtistId = id;
         SelectedArtistName = name;
-        _suppressNextArtistSearch = true; // BUG-061: this Text assignment is programmatic, not user typing
         ArtistSearchText = name;
+        IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic assignment
         IsArtistLocked = true;
         ArtistSuggestions = [];
         ArtistHasError = false;
@@ -382,8 +381,8 @@ public partial class SongFormViewModel : ViewModelBase
         else
         {
             // User typed-then-blurred without choosing a new suggestion — restore prior selection
-            _suppressNextArtistSearch = true; // BUG-061: programmatic restore, not user typing
             ArtistSearchText = SelectedArtistName ?? string.Empty;
+            IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic restore
             ArtistSuggestions = [];
         }
     }
@@ -401,8 +400,8 @@ public partial class SongFormViewModel : ViewModelBase
     {
         SelectedArtistId = null;
         SelectedArtistName = null;
-        _suppressNextArtistSearch = true; // BUG-061: programmatic clear, not user typing
         ArtistSearchText = string.Empty;
+        IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic clear
         IsArtistLocked = false;
         ArtistSuggestions = [];
         ArtistHasError = false;
@@ -419,26 +418,10 @@ public partial class SongFormViewModel : ViewModelBase
         {
             SelectedArtistId = ArtistId;
             SelectedArtistName = ArtistName;
-            _suppressNextArtistSearch = true; // BUG-061: programmatic hydration, not user typing
             ArtistSearchText = ArtistName;
+            IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic hydration
             IsArtistLocked = true; // BUG-052: edit-mode hydration must show the artist as locked
         }
-    }
-
-    /// <summary>
-    /// BUG-061: consumed by the page's <c>OnArtistItemsRequested</c> before running an items search.
-    /// Returns true (and resets the flag) exactly once for each programmatic <see cref="ArtistSearchText"/>
-    /// assignment (selection lock, edit-mode hydration) — a search triggered by that assignment must be
-    /// suppressed so the dropdown does not re-open on the artist just selected/hydrated. Any subsequent
-    /// change driven by actual user typing finds the flag already false and searches normally.
-    /// </summary>
-    public bool ConsumeSuppressArtistSearch()
-    {
-        if (!_suppressNextArtistSearch)
-            return false;
-
-        _suppressNextArtistSearch = false;
-        return true;
     }
 
     // ── Edit mode: load song entity ───────────────────────────────────────
@@ -487,8 +470,8 @@ public partial class SongFormViewModel : ViewModelBase
                 {
                     SelectedArtistId = song.ArtistId;
                     SelectedArtistName = song.OriginalArtist?.Name ?? ArtistName;
-                    _suppressNextArtistSearch = true; // BUG-061: programmatic hydration, not user typing
                     ArtistSearchText = SelectedArtistName ?? string.Empty;
+                    IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic hydration
                 }
 
                 IsArtistLocked = true; // edit-mode artist is locked (REQ-ACREATE-14); user cannot change it inline
@@ -536,8 +519,8 @@ public partial class SongFormViewModel : ViewModelBase
                 {
                     SelectedArtistId = match.Id;
                     SelectedArtistName = match.Name;
-                    _suppressNextArtistSearch = true; // BUG-061: programmatic lock, not user typing
                     ArtistSearchText = match.Name;
+                    IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic lock
                     ArtistSuggestions = [];
                     ArtistHasError = false;
                     IsArtistLocked = true; // API import: lock artist
@@ -548,8 +531,8 @@ public partial class SongFormViewModel : ViewModelBase
                 RunOnUiThread(() =>
                 {
                     // No exact match — pre-fill text so user can confirm or adjust
-                    _suppressNextArtistSearch = true; // BUG-061: programmatic prefill, not user typing
                     ArtistSearchText = artistName;
+                    IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic prefill
                     SelectedArtistId = null;
                     IsArtistLocked = false;
                 });

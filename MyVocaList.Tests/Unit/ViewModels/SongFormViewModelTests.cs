@@ -364,20 +364,21 @@ public class SongFormViewModelTests
         Assert.Equal(string.Empty, sut.ArtistSearchText);
     }
 
-    // [AC] BUG-061: the clear (X) icon also sets ArtistSearchText programmatically (to empty) and
-    // must suppress the resulting item request, same as every other programmatic assignment.
+    // [AC] REQ-ACREATE-15 (BUG-065): the clear (X) icon also sets ArtistSearchText programmatically
+    // (to empty) and must close the suggestion dropdown, same as every other programmatic assignment.
     [Fact]
-    public void ClearArtist_SuppressesNextArtistSearch()
+    public void ClearArtist_ClosesDropdown()
     {
         var sut = CreateSut();
         sut.SelectedArtistId = 7;
         sut.SelectedArtistName = "Guns N' Roses";
         sut.ArtistSearchText = "Guns N' Roses";
         sut.IsArtistLocked = true;
+        sut.IsArtistDropDownOpen = true; // simulate the popup being open before the clear
 
         sut.ClearArtistCommand.Execute(null);
 
-        Assert.True(sut.ConsumeSuppressArtistSearch());
+        Assert.False(sut.IsArtistDropDownOpen);
     }
 
     // [AC] REQ-ACREATE-15: a deliberate clear must not be silently overwritten by the
@@ -430,13 +431,18 @@ public class SongFormViewModelTests
         Assert.Equal(7, sut.SelectedArtistId);
     }
 
-    // ── BUG-061: suppress the item-request search triggered by a PROGRAMMATIC text set ────
+    // ── BUG-065/066: dismiss the dropdown on every PROGRAMMATIC ArtistSearchText set ──────
+    // Rewritten 2026-08-02 (Helder decision D1) — the removed _suppressNextArtistSearch flag was
+    // proven inert by IL evidence (DevExpress's own AsyncItemsSourceProvider.OnEditorTextChanged
+    // already ignores non-UserInput text changes; the flag was consumed by the user's NEXT real
+    // keystroke instead, causing BUG-065(b)/BUG-066). The real mechanism is the two-way bound
+    // IsArtistDropDownOpen property (SongFormPage.xaml: AutoCompleteEdit.IsDropDownOpen) — every
+    // site that sets ArtistSearchText programmatically also sets IsArtistDropDownOpen = false.
 
-    // [AC] BUG-061: selecting a suggestion sets ArtistSearchText programmatically — the next
-    // items-request must be suppressed exactly once so the dropdown does not re-open on the
-    // artist just selected.
+    // [AC] REQ-ACREATE-12 (BUG-050/065): selecting a suggestion sets ArtistSearchText
+    // programmatically and must close the suggestion dropdown.
     [Fact]
-    public void SelectArtist_ExistingSuggestion_SuppressesNextArtistSearch()
+    public void SelectArtist_ExistingSuggestion_ClosesDropdown()
     {
         var sut = CreateSut();
         var artist = new ArtistListItem(7, "Queen", string.Empty, false, 0);
@@ -444,15 +450,13 @@ public class SongFormViewModelTests
 
         sut.SelectArtistCommand.Execute(suggestion);
 
-        Assert.True(sut.ConsumeSuppressArtistSearch());
-        // Consuming resets the flag — a later item request (from user typing) is not suppressed.
-        Assert.False(sut.ConsumeSuppressArtistSearch());
+        Assert.False(sut.IsArtistDropDownOpen);
     }
 
-    // [AC] BUG-061: edit-mode field hydration (InitializeArtistField) also sets ArtistSearchText
-    // programmatically and must suppress the resulting item request.
+    // [AC] REQ-ACREATE-14 (BUG-052/065): edit-mode field hydration (InitializeArtistField) also
+    // sets ArtistSearchText programmatically and must close the suggestion dropdown.
     [Fact]
-    public void InitializeArtistField_WithArtistId_SuppressesNextArtistSearch()
+    public void InitializeArtistField_WithArtistId_ClosesDropdown()
     {
         var sut = CreateSut();
         sut.ArtistIdRaw = "5";
@@ -460,26 +464,24 @@ public class SongFormViewModelTests
 
         sut.InitializeArtistField();
 
-        Assert.True(sut.ConsumeSuppressArtistSearch());
+        Assert.False(sut.IsArtistDropDownOpen);
     }
 
-    // [AC] BUG-061: a fresh ViewModel with no programmatic text assignment must not suppress the
-    // first user-typed items request.
+    // [AC] REQ-ACREATE-01 (BUG-065): a fresh ViewModel with no programmatic text assignment must
+    // not have forced the dropdown closed (default state, untouched).
     [Fact]
-    public void ConsumeSuppressArtistSearch_NoProgrammaticSet_ReturnsFalse()
+    public void IsArtistDropDownOpen_NoProgrammaticSet_DefaultsFalse()
     {
         var sut = CreateSut();
 
-        Assert.False(sut.ConsumeSuppressArtistSearch());
+        Assert.False(sut.IsArtistDropDownOpen);
     }
 
-    // ── BUG-061 review finding: two more programmatic ArtistSearchText paths were unguarded ──
-
-    // [AC] BUG-061: the song-picker exact-match path (ResolveAndLockArtistAsync, via OnSongPicked)
-    // sets ArtistSearchText programmatically when it auto-locks a matched artist and must suppress
-    // the resulting item request.
+    // [AC] REQ-ACREATE-04 (BUG-065): the song-picker exact-match path (ResolveAndLockArtistAsync,
+    // via OnSongPicked) sets ArtistSearchText programmatically when it auto-locks a matched artist
+    // and must close the suggestion dropdown.
     [Fact]
-    public async Task ResolveAndLockArtistAsync_ExactMatch_SuppressesNextArtistSearch()
+    public async Task ResolveAndLockArtistAsync_ExactMatch_ClosesDropdown()
     {
         var artistService = new Mock<IArtistService>();
         artistService
@@ -487,6 +489,7 @@ public class SongFormViewModelTests
             .ReturnsAsync([new ArtistListItem(7, "Queen", string.Empty, false, 3)]);
         var messenger = new WeakReferenceMessenger();
         var sut = CreateSut(artistService: artistService, messenger: messenger);
+        sut.IsArtistDropDownOpen = true; // simulate the popup having been open before the resolve
 
         messenger.Send(new CanonicalSongPickedMessage(
             new MusicSearchResultDto("ext-1", "youtube", "Queen", "Bohemian Rhapsody", null)));
@@ -494,13 +497,14 @@ public class SongFormViewModelTests
         await Task.Yield(); // let the fire-and-forget ResolveAndLockArtistAsync's RunOnUiThread callback land
 
         Assert.True(sut.IsArtistLocked);
-        Assert.True(sut.ConsumeSuppressArtistSearch());
+        Assert.False(sut.IsArtistDropDownOpen);
     }
 
-    // [AC] BUG-061: the song-picker no-match prefill path (ResolveAndLockArtistAsync) also sets
-    // ArtistSearchText programmatically and must suppress the resulting item request.
+    // [AC] REQ-ACREATE-01 (BUG-065): the song-picker no-match prefill path
+    // (ResolveAndLockArtistAsync) also sets ArtistSearchText programmatically and must close the
+    // suggestion dropdown.
     [Fact]
-    public async Task ResolveAndLockArtistAsync_NoMatch_SuppressesNextArtistSearch()
+    public async Task ResolveAndLockArtistAsync_NoMatch_ClosesDropdown()
     {
         var artistService = new Mock<IArtistService>();
         artistService
@@ -508,6 +512,7 @@ public class SongFormViewModelTests
             .ReturnsAsync([]);
         var messenger = new WeakReferenceMessenger();
         var sut = CreateSut(artistService: artistService, messenger: messenger);
+        sut.IsArtistDropDownOpen = true; // simulate the popup having been open before the resolve
 
         messenger.Send(new CanonicalSongPickedMessage(
             new MusicSearchResultDto("ext-2", "youtube", "Unknown Band", "Some Song", null)));
@@ -516,24 +521,24 @@ public class SongFormViewModelTests
 
         Assert.Equal("Unknown Band", sut.ArtistSearchText);
         Assert.False(sut.IsArtistLocked);
-        Assert.True(sut.ConsumeSuppressArtistSearch());
+        Assert.False(sut.IsArtistDropDownOpen);
     }
 
-    // [AC] BUG-061: blurring without a new selection restores the prior artist name into
-    // ArtistSearchText programmatically — this restore must also suppress the resulting search.
+    // [AC] REQ-ACREATE-03 (BUG-065): blurring without a new selection restores the prior artist
+    // name into ArtistSearchText programmatically — this restore must also close the dropdown.
     [Fact]
-    public void ArtistBlurredWithoutSelection_RestoresPriorSelection_SuppressesNextArtistSearch()
+    public void ArtistBlurredWithoutSelection_RestoresPriorSelection_ClosesDropdown()
     {
         var sut = CreateSut();
         sut.SelectedArtistId = 7;
         sut.SelectedArtistName = "Guns N' Roses";
         sut.ArtistSearchText = "Guns N' Rose"; // user typed-then-blurred without selecting
-        sut.ConsumeSuppressArtistSearch(); // clear any incidental state from the setup above
+        sut.IsArtistDropDownOpen = true; // simulate the popup being open before blur
 
         sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
 
         Assert.Equal("Guns N' Roses", sut.ArtistSearchText);
-        Assert.True(sut.ConsumeSuppressArtistSearch());
+        Assert.False(sut.IsArtistDropDownOpen);
     }
 
     // ── T7: inline "create new artist" ────────────────────────────────────
