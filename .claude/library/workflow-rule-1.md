@@ -54,36 +54,39 @@ The spec is the authoritative description of intended behavior. When spec and co
 
 ### New feature workflow
 
-**BACKLOG.md is the source of truth for feature sequencing.** The main agent (not subagents) is responsible for updating `Docs/Management/BACKLOG.md` status at each milestone below.
+**Item `README.md` frontmatter is the source of truth for feature sequencing; `BACKLOG.md` is its generated view.** The main agent (not subagents) updates status at each milestone below with `backlog_gen.py status <ID> "<status>"` — never by editing a row.
 
-0. **Identify** — read `Docs/Management/BACKLOG.md`; pick the highest-priority `🟢 Ready` item in the **Business Features** table, or the next `💡 Pending` item if none are Ready
-1. **Brainstorm** — invoke `superpowers:brainstorming`; update BACKLOG.md status → `📋 Spec`
-2. **Write spec** — write all three files; user reviews and approves; update status → `🗺️ Plan`
+0. **Identify** — run `backlog_gen.py query --status "🟢,💡"`; pick the highest-priority `🟢 Ready` Business Features item, or the next `💡 Pending` item if none are Ready
+1. **Brainstorm** — invoke `superpowers:brainstorming`; `backlog_gen.py status <ID> "📋 Spec"`
+2. **Write spec** — write all three files; user reviews and approves; `backlog_gen.py status <ID> "🗺️ Plan"`
    - **2a. Constitution check** — verify the feature does not violate any Non-Negotiable rule in CLAUDE.md before writing the spec
-3. **Write plan** — invoke `superpowers:writing-plans`; user approves; update status → `🟢 Ready`
-4. **Implement** — delegate to a subagent (see Rule 2); update status → `🟡 In Progress`
+3. **Write plan** — invoke `superpowers:writing-plans`; user approves; `backlog_gen.py status <ID> "🟢 Ready"`
+4. **Implement** — delegate to a subagent (see Rule 2); `backlog_gen.py status <ID> "🟡 In Progress"`
 5. **Phase-gate review** — invoke `/sln-review` after each phase before starting the next
-   - On ship: update status → `✅ Done` in the **Business Features** table (or **Dev Cycle Craft** table for infrastructure/tooling items)
+   - On ship: `backlog_gen.py status <ID> "✅ Done" --closed YYYY-MM`; the row then renders into `backlog-archive/BACKLOG-ARCHIVE-YYYY-MM.md` automatically — **do not move a row by hand.**
 
 ### Proactive BACKLOG triage — Untracked work
 
-**Any work identified during a session that is not already in BACKLOG.md must get a brief entry before proceeding.**
+**Any work identified during a session that is not already registered must get an item folder before proceeding.**
 
 This applies to:
 - A new DevCycleCraft activity (tooling change, process rule, infrastructure work)
 - A business feature idea mentioned in conversation (even informally)
 - A significant constraint, investigation, or one-off fix that took material effort
 
-**Format — add a row to the appropriate BACKLOG.md table:**
+**Format — register it, never hand-write a row:**
 
-| Date | Activity/Feature | `💡 Pending` | One-line description |
+```bash
+python .claude/scripts/backlog/backlog_gen.py register \
+    --section DevCycleCraft --kind activity \
+    --title "…" --goal "…" [--gate "…"] [--parent <parent-id>]
+```
 
-- Use `💡 Pending` for ideas that arrived but aren't being acted on immediately
-- Use `🟡 In Progress` if work is starting now
-- Keep descriptions to one sentence — BACKLOG is a dashboard, not a spec
+The command creates the folder, its `README.md` frontmatter, the `.sln` entry, and regenerates the
+row. `status:` defaults to `💡 Pending`; pass `🟡 In Progress` if work starts now.
 
 **Trigger questions** (ask at any point in a session):
-- "Is what I'm about to do tracked in BACKLOG.md?"
+- "Does what I'm about to do have an item folder?" (`backlog_gen.py query` to check)
 - "Did Helder mention a feature or idea that has no BACKLOG row?"
 - "Did I discover a process gap that warrants a DevCycleCraft entry?"
 

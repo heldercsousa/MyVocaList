@@ -688,6 +688,46 @@ differs from stored (it short-circuits when equal). No behavioural downside foun
   search, lock, dropdown or ➕-row behaviour was modified. Helder's pending device verification of
   065/066 is unaffected.
 
+---
+## Task: Strengthen two weak dropdown-close regression tests (verifier follow-up, 2026-08-02)
+**Plan:** this folder
+**Status:** To Review
+**Started:** 2026-08-02
+**Completed:** 2026-08-02
+
+### Context
+Verifier flagged `SelectArtist_ExistingSuggestion_ClosesDropdown` and
+`InitializeArtistField_WithArtistId_ClosesDropdown` as asserting `Assert.False(sut.IsArtistDropDownOpen)`
+without seeding the property `true` first. Since `IsArtistDropDownOpen` defaults to `false`, both tests
+passed regardless of whether the production assignment fired — they proved nothing. Production code was
+confirmed correct (both `LockArtist` and `InitializeArtistField` do set `IsArtistDropDownOpen = false`);
+this was a test-quality gap only, no production defect.
+
+### Changed files:
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — both tests now seed
+  `sut.IsArtistDropDownOpen = true;` before the action, mirroring the arrange/act/assert shape already
+  used by `ClearArtist_ClosesDropdown` / `ResolveAndLockArtistAsync_ExactMatch_ClosesDropdown` /
+  `ResolveAndLockArtistAsync_NoMatch_ClosesDropdown` / `ArtistBlurredWithoutSelection_RestoresPriorSelection_ClosesDropdown`.
+  `[AC]` tags preserved unchanged.
+
+### Comment-out / restore evidence (proves the strengthening actually catches the defect)
+- `LockArtist` (`SongFormViewModel.cs:333`, `IsArtistDropDownOpen = false`) commented out →
+  `SelectArtist_ExistingSuggestion_ClosesDropdown`: **FAIL** (`Assert.False() Failure — Expected: False, Actual: True`).
+  Line restored → same test: **PASS** (1/1).
+- `InitializeArtistField` (`SongFormViewModel.cs:422`, `IsArtistDropDownOpen = false`) commented out →
+  `InitializeArtistField_WithArtistId_ClosesDropdown`: **FAIL** (same assertion failure).
+  Line restored → same test: **PASS** (1/1).
+
+### Build notes
+Build: passed (0 errors) | Tests: 535 passed, 0 failed (net10.0 only — Android blocked locally by
+`XARLP7024`, an AV/EDR artifact, not code) | Commit SHA: see `feat/inline-artist-create` HEAD
+`git diff --stat` at commit time showed only `SongFormViewModelTests.cs` — no production file touched.
+
+### BOM observation (report only, not fixed — out of scope)
+`SongResolutionServiceTests.cs`, `SongServiceTests.cs`, and `SongFormViewModelTests.cs` all begin with a
+UTF-8 BOM (`EF BB BF`). Sampled 10 other files in `MyVocaList.Tests/Unit/ViewModels/` — none have a BOM.
+This does not match the project convention; a byte-level sweep to fix it is out of scope for this task.
+
 ### Requires Helder's device (T10 re-run #5)
 - End-to-end: open a saved song → clear (X) the locked artist → pick or inline-create a different
   artist → Save → reopen → the new artist is shown. Persistence is proven by unit test; the UI path

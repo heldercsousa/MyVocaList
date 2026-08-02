@@ -37,9 +37,12 @@ Before ending any session in which implementation occurred:
 
 1. **Review every spec file touched this session** (`requirements.md`, `design.md`, `tasks.md`)
 2. For each spec file, ask: "Does this file still accurately describe what was built?"
-3. If the answer is "no" or "partially": add a `> **Spec updated [YYYY-MM-DD]:**` note; update ACs, signatures, or invariants to reflect delivered behavior
+3. If the answer is "no" or "partially", branch on whether the feature has shipped:
+   - **Not shipped** — add a `> **Spec updated [YYYY-MM-DD]:**` note in place; update ACs, signatures, or invariants to reflect delivered behavior.
+   - **Shipped** — the spec is immutable history. Create `changes/YYYY-MM-DD-<slug>/` beside it with its own spec files cross-referencing the original, and `backlog_gen.py register` it. Do not edit the shipped spec.
 4. **Update `tasks.md`**: check off all completed tasks; add `[CANCELLED: reason]` to tasks no longer needed
 5. Commit all spec updates in the session's final commit
+6. If any item's `status:`/`gate:` changed, update its `README.md` frontmatter and run `backlog_gen.py regen` — the pre-commit gate rejects a commit that leaves the rendered files stale.
 
 **Trigger questions (ask before ending any session):**
 - "Did I implement something that the spec does not describe?"
