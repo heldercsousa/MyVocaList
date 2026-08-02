@@ -190,10 +190,16 @@ def slugify(title):
 
 
 def next_bug_id(root):
-    """max(BUG-NNN) + 1 over live folders AND every archive file (REQ-SEV-11a).
+    """max(BUG-NNN) + 1 over live folders, every archive file, and every
+    other .md under Docs/Management (REQ-SEV-11a).
 
     Archives are scanned too so a retired id is never reused -- that fact used
-    to live in BACKLOG.md, which agents no longer read.
+    to live in BACKLOG.md, which agents no longer read. FUP-4: a bug can be
+    recorded only in a feature's task-log.md, with no folder and no archive
+    row (legitimate for folder-less Minor bugs, REQ-SEV-03) -- invisible to
+    the folder/archive scan alone, so the high-water mark also scans every
+    .md file's content for BUG-NNN occurrences. Additive with the existing
+    sources: max() of all three, never a replacement.
     """
     highest = 0
     items, _errors = walk(root)
@@ -206,6 +212,17 @@ def next_bug_id(root):
         for name in os.listdir(archive_dir):
             try:
                 text = _read(os.path.join(archive_dir, name))
+            except OSError:
+                continue
+            for match in BUG_ID.finditer(text):
+                highest = max(highest, int(match.group(1)))
+    base = os.path.join(root, MANAGEMENT)
+    for dirpath, _dirnames, filenames in os.walk(base):
+        for name in filenames:
+            if not name.endswith(".md"):
+                continue
+            try:
+                text = _read(os.path.join(dirpath, name))
             except OSError:
                 continue
             for match in BUG_ID.finditer(text):
