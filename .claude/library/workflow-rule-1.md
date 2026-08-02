@@ -74,16 +74,25 @@ This applies to:
 - A business feature idea mentioned in conversation (even informally)
 - A significant constraint, investigation, or one-off fix that took material effort
 
-**Format — register it, never hand-write a row:**
+**Format — never hand-write a row.** Which path you take depends on the kind:
+
+**Bug or change** — `register` does it all:
 
 ```bash
 python .claude/scripts/backlog/backlog_gen.py register \
-    --section DevCycleCraft --kind activity \
-    --title "…" --goal "…" [--gate "…"] [--parent <parent-id>]
+    --parent <parent-id> --kind <bug|change> [--severity <Critical|Major|Minor>] \
+    --title "…" --goal "…" [--gate "…"] [--section BusinessFeatures|DevCycleCraft]
 ```
 
-The command creates the folder, its `README.md` frontmatter, the `.sln` entry, and regenerates the
-row. `status:` defaults to `💡 Pending`; pass `🟡 In Progress` if work starts now.
+`--parent`, `--kind`, `--title` and `--goal` are required. `--kind` accepts **only `bug` or
+`change`**. The command creates the folder, its `README.md` frontmatter, the `.sln` entry, and
+regenerates the row.
+
+**Feature, activity, milestone or group** — `register` does **not** support these kinds. Create the
+item folder and its `README.md` frontmatter by hand (schema: `spec-writing-guide.md § Item folder
+file set + frontmatter`), add the `.sln` entry, then run `backlog_gen.py regen`. Set `status:`
+directly in the frontmatter — `register` has no `--status` flag; `backlog_gen.py status <ID>
+"<status>"` changes it afterwards.
 
 **Trigger questions** (ask at any point in a session):
 - "Does what I'm about to do have an item folder?" (`backlog_gen.py query` to check)
