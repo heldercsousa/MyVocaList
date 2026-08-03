@@ -1,26 +1,44 @@
-"""Guard: every documented `backlog_gen.py` invocation must actually parse.
+"""Guard: every documented `backlog_gen.py` (and lease-script) invocation
+must actually parse / match the script's real argument contract.
 
-Three real incidents motivated this file -- each was documentation describing
-a command that had never been run: an invented lease-claim API, a
-`--kind activity` that is not a valid `--kind` choice (only `bug`/`change`
-are), and a `--status "..."` value that parsed but silently matched nothing.
-The generator was correct each time; the prose about it was wrong. This test
-makes the mechanical part of that check (verb exists, every `--flag` is real,
-every documented value that declares `choices` is a real choice, required
-flags/positionals are present) run automatically instead of waiting for a
-human to type the command and notice.
+Four real incidents motivated this file -- each was documentation describing
+a command that had never been run: an invented lease-claim API
+(`reclaim.py` documented with a `generated:backlog` argument that does not
+exist -- the very first incident, and the reason the lease scripts are
+covered below), a `--kind activity` that is not a valid `--kind` choice
+(only `bug`/`change` are), and a `--status "..."` value that parsed but
+silently matched nothing. The generator was correct each time; the prose
+about it was wrong. This test makes the mechanical part of that check (verb
+exists, every `--flag` is real, every documented value that declares
+`choices` is a real choice, required flags/positionals are present) run
+automatically instead of waiting for a human to type the command and notice.
 
-Self-maintaining by construction: it walks every `*.md` under `.claude/` plus
-`CLAUDE.md`, and validates against `backlog_gen.build_parser()` itself --
-never a hand-copied list of flags. A new documented command is covered with
-no edit to this file; a new flag added to `backlog_gen.py` is picked up
-automatically because the parser is introspected live.
+Self-maintaining by construction for `backlog_gen.py`: it walks every `*.md`
+under `.claude/` plus `CLAUDE.md`, and validates against
+`backlog_gen.build_parser()` itself -- never a hand-copied list of flags. A
+new documented command is covered with no edit to this file; a new flag
+added to `backlog_gen.py` is picked up automatically because the parser is
+introspected live.
+
+`reclaim.py` and `resume.py` are NOT argparse-based (they hand-roll a
+`usage:` string and parse `sys.argv` manually), so there is no live parser
+object to introspect. Their contract below is hardcoded to match that
+`usage:` string -- deliberately, not because deriving is impossible, but
+because a generic argv-shape parser for two bespoke, differently-shaped
+mini-CLIs (positional-only vs. a two-branch `--set` form) would be more
+code and more indirection than the two functions it protects. To keep the
+hardcoded contract from silently drifting from the real script (the same
+failure mode this whole file exists to catch), `test_lease_usage_strings_match_hardcoded_contract`
+below actually RUNS both scripts with no arguments and asserts their
+stdout equals the literal `usage:` string this file assumes -- so a future
+signature change fails loudly here instead of drifting silently.
 """
 import argparse
 import glob
 import os
 import re
 import shlex
+import subprocess
 import sys
 import unittest
 
@@ -32,8 +50,16 @@ BACKLOG_DIR = os.path.dirname(TESTS_DIR)
 SCRIPTS_DIR = os.path.dirname(BACKLOG_DIR)
 CLAUDE_DIR = os.path.dirname(SCRIPTS_DIR)
 ROOT = os.path.dirname(CLAUDE_DIR)
+LEASE_DIR = os.path.join(CLAUDE_DIR, "scripts", "lease")
 
 PROG = "backlog_gen.py"
+
+# Hardcoded contract for the two non-argparse lease scripts, derived from
+# (and cross-checked against, see the test below) their `usage:` strings:
+#   usage: reclaim.py <my_session_id> <target_session_id>
+#   usage: resume.py <session_id> | resume.py --set <session_id> <pointer text>
+RECLAIM_USAGE = "usage: reclaim.py <my_session_id> <target_session_id>"
+RESUME_USAGE = "usage: resume.py <session_id> | resume.py --set <session_id> <pointer text>"
 
 FENCE_RE = re.compile(r"```[a-zA-Z]*\n(.*?)```", re.S)
 INLINE_RE = re.compile(r"`([^`]*?)`", re.S)
@@ -94,16 +120,16 @@ def _logical_lines(block, start_line):
         i += 1
 
 
-def _tail_from_prog(text):
-    """Slice `text` to start at the `backlog_gen.py` token, or None if absent."""
-    idx = text.find(PROG)
+def _tail_from_prog(text, prog):
+    """Slice `text` to start at the `prog` token, or None if absent."""
+    idx = text.find(prog)
     if idx == -1:
         return None
     return text[idx:].strip()
 
 
-def extract_invocations(text):
-    """Return [(line_no, source, raw_tail)] for every `backlog_gen.py` mention.
+def extract_invocations(text, prog=PROG):
+    """Return [(line_no, source, raw_tail)] for every `prog` mention.
 
     `source` is `"fenced"` for a ``` code block (treated as a complete,
     runnable, copy-pasteable example -> required-arg/positional-count checks
@@ -119,8 +145,8 @@ def extract_invocations(text):
         block = m.group(1)
         block_start_line = text.count("\n", 0, m.start(1)) + 1
         for line_no, logical in _logical_lines(block, block_start_line):
-            if PROG in logical:
-                tail = _tail_from_prog(logical)
+            if prog in logical:
+                tail = _tail_from_prog(logical, prog)
                 if tail:
                     results.append((line_no, "fenced", tail))
 
@@ -129,18 +155,18 @@ def extract_invocations(text):
     text_wo_fences = FENCE_RE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
     for m in INLINE_RE.finditer(text_wo_fences):
         content = m.group(1)
-        if PROG not in content:
+        if prog not in content:
             continue
         line_no = text_wo_fences.count("\n", 0, m.start()) + 1
         joined = re.sub(r"\s+", " ", content).strip()
-        tail = _tail_from_prog(joined)
+        tail = _tail_from_prog(joined, prog)
         if tail:
             results.append((line_no, "inline", tail))
 
     return results
 
 
-def _tokenize(raw_tail):
+def _tokenize(raw_tail, prog=PROG):
     """Tokens after the verb: strip optional-group brackets, then shlex-split.
 
     `[...]` marks an optional group in these docs (e.g. `[--gate "..."]`) --
@@ -152,10 +178,10 @@ def _tokenize(raw_tail):
         tokens = shlex.split(stripped, posix=True)
     except ValueError:
         return None
-    # tokens[0] should be exactly "backlog_gen.py" (that's where the tail was
-    # sliced from); a shlex quirk (e.g. an unbalanced quote survives bracket
+    # tokens[0] should be exactly `prog` (that's where the tail was sliced
+    # from); a shlex quirk (e.g. an unbalanced quote survives bracket
     # stripping) can shift this -- treat as unparseable rather than guess.
-    if not tokens or tokens[0] != PROG:
+    if not tokens or tokens[0] != prog:
         return None
     return tokens[1:]
 
@@ -236,6 +262,91 @@ def _validate(verb_tokens, source, parser_map):
             len(positional_actions), len(positionals_given)))
 
     return errors
+
+
+def _validate_reclaim(tokens, source):
+    """`reclaim.py <my_session_id> <target_session_id>` -- exactly 2
+    positionals, no flags of any kind (the script never calls
+    `sys.argv[1] ==` on anything other than the two IDs)."""
+    errors = []
+    if not tokens:
+        return errors  # bare "reclaim.py" mention, e.g. "via `reclaim.py`"
+    flags = [t for t in tokens if t.startswith("-")]
+    if flags:
+        errors.append(
+            "{0}: reclaim.py takes no flags -- got {1}".format(
+                ", ".join(flags), tokens))
+    positionals = [t for t in tokens if not t.startswith("-")]
+    if source == "fenced":
+        if len(positionals) < 2:
+            errors.append(
+                "missing positional argument(s): expected 2 "
+                "(<my_session_id> <target_session_id>), got {0}".format(
+                    len(positionals)))
+    if len(positionals) > 2:
+        errors.append(
+            "too many positional arguments: got {0}, expected 2".format(
+                len(positionals)))
+    return errors
+
+
+def _validate_resume(tokens, source):
+    """`resume.py <session_id>` OR `resume.py --set <session_id> <pointer text...>`.
+
+    Any other shape (a flag other than `--set`, `--set` with fewer than 2
+    tokens after it, or more than one bare positional in the non-`--set`
+    form) does not match either branch the real script's `if/elif/else`
+    dispatches on, and would fall through to its `usage:` error at runtime.
+    """
+    errors = []
+    if not tokens:
+        return errors  # bare "resume.py" mention
+    if tokens[0] == "--set":
+        rest = tokens[1:]
+        if source == "fenced":
+            if len(rest) < 2:
+                errors.append(
+                    "--set: expects <session_id> <pointer text...> "
+                    "(>=2 tokens after --set), got {0}".format(rest))
+        return errors
+    # Non-`--set` form: exactly one positional, no flags.
+    flags = [t for t in tokens if t.startswith("-")]
+    if flags:
+        errors.append(
+            "{0}: not a valid flag for resume.py (only --set is; must be "
+            "the first token) -- got {1}".format(", ".join(flags), tokens))
+    positionals = [t for t in tokens if not t.startswith("-")]
+    if len(positionals) > 1:
+        errors.append(
+            "too many positional arguments: got {0}, expected 1 "
+            "(<session_id>) unless the invocation starts with --set".format(
+                len(positionals)))
+    elif source == "fenced" and len(positionals) < 1:
+        errors.append(
+            "missing positional argument: expected <session_id>, got 0")
+    return errors
+
+
+LEASE_SCRIPTS = {
+    "reclaim.py": _validate_reclaim,
+    "resume.py": _validate_resume,
+}
+
+
+def scan_and_validate_lease(md_text):
+    """Return [(line_no, prog, source, raw_tail, [errors])] for every
+    documented `reclaim.py` / `resume.py` invocation."""
+    out = []
+    for prog, validator in LEASE_SCRIPTS.items():
+        for line_no, source, raw_tail in extract_invocations(md_text, prog=prog):
+            tokens = _tokenize(raw_tail, prog=prog)
+            if tokens is None:
+                out.append((line_no, prog, source, raw_tail,
+                           ["could not tokenize invocation (unbalanced quotes?)"]))
+                continue
+            errors = validator(tokens, source)
+            out.append((line_no, prog, source, raw_tail, errors))
+    return out
 
 
 def scan_and_validate(md_text, parser_map):
@@ -361,6 +472,161 @@ class CommandDocsGuardTests(unittest.TestCase):
         _line_no, _source, _raw, errors = results[0]
         self.assertTrue(
             any("--statuz" in e and "not a valid flag" in e for e in errors), errors)
+
+
+class LeaseScriptUsageContractTests(unittest.TestCase):
+    """Cross-check the hardcoded lease-script contract against the scripts
+    themselves, so a future signature change fails HERE loudly instead of
+    the contract silently drifting from reality (the exact failure mode
+    this whole file exists to catch, applied to itself)."""
+
+    def test_lease_usage_strings_match_hardcoded_contract(self):
+        reclaim_path = os.path.join(LEASE_DIR, "reclaim.py")
+        resume_path = os.path.join(LEASE_DIR, "resume.py")
+
+        reclaim_out = subprocess.run(
+            [sys.executable, reclaim_path], capture_output=True, text=True
+        ).stdout.strip()
+        resume_out = subprocess.run(
+            [sys.executable, resume_path], capture_output=True, text=True
+        ).stdout.strip()
+
+        self.assertEqual(
+            RECLAIM_USAGE, reclaim_out,
+            "reclaim.py's real usage string no longer matches the hardcoded "
+            "contract in this test file -- update RECLAIM_USAGE and "
+            "_validate_reclaim to match.")
+        self.assertEqual(
+            RESUME_USAGE, resume_out,
+            "resume.py's real usage string no longer matches the hardcoded "
+            "contract in this test file -- update RESUME_USAGE and "
+            "_validate_resume to match.")
+
+
+class LeaseScriptDocsGuardTests(unittest.TestCase):
+    """Same guard as CommandDocsGuardTests, but for `reclaim.py` / `resume.py`
+    invocations documented across `.claude/**/*.md` + `CLAUDE.md`."""
+
+    def test_every_documented_lease_invocation_matches_contract(self):
+        failures = []
+        total = 0
+        for path in _doc_files(ROOT):
+            with open(path, encoding="utf-8-sig") as fh:
+                text = fh.read()
+            results = scan_and_validate_lease(text)
+            for line_no, prog, source, raw_tail, errors in results:
+                total += 1
+                for err in errors:
+                    rel = os.path.relpath(path, ROOT).replace("\\", "/")
+                    failures.append(
+                        "{0}:{1}: [{2}:{3}] `{4}`\n    -> {5}".format(
+                            rel, line_no, prog, source, raw_tail, err))
+
+        # Sanity floor: 5 documented reclaim.py + 4 documented resume.py
+        # invocations are known to exist (task brief). If this drops far
+        # below that, the extraction itself likely regressed silently.
+        self.assertGreaterEqual(
+            total, 5,
+            "scanner found only {0} lease-script invocation(s) -- "
+            "expected >= 5; extraction likely regressed".format(total))
+
+        if failures:
+            self.fail(
+                "{0} documented reclaim.py/resume.py invocation(s) do not "
+                "match the real script contract:\n\n{1}".format(
+                    len(failures), "\n".join(failures)))
+
+    def test_guard_catches_bogus_reclaim_flag(self):
+        """Reintroduce the historical invented-lease-API defect shape (a
+        flag that reclaim.py's real argv handling has no concept of) in a
+        scratch fixture (never in real docs) and confirm the guard reports
+        it."""
+        fixture = (
+            "```bash\n"
+            "python .claude/scripts/lease/reclaim.py --claim SESSION-A "
+            "SESSION-B\n"
+            "```\n"
+        )
+        results = scan_and_validate_lease(fixture)
+        reclaim_results = [r for r in results if r[1] == "reclaim.py"]
+        self.assertEqual(1, len(reclaim_results))
+        _line_no, _prog, source, _raw, errors = reclaim_results[0]
+        self.assertEqual("fenced", source)
+        self.assertTrue(
+            any("--claim" in e and "takes no flags" in e for e in errors),
+            "expected a 'reclaim.py takes no flags' error, got: {0}".format(errors))
+
+    def test_guard_catches_wrong_reclaim_arity(self):
+        fixture = "`python .claude/scripts/lease/reclaim.py SESSION-A`\n"
+        results = scan_and_validate_lease(fixture)
+        reclaim_results = [r for r in results if r[1] == "reclaim.py"]
+        self.assertEqual(1, len(reclaim_results))
+        # inline (bare backtick) mention: arity errors are NOT flagged there,
+        # mirroring backlog_gen.py's "inline mentions may be abbreviated"
+        # rule -- confirm this deliberately does not fire for source="inline".
+        _line_no, _prog, source, _raw, errors = reclaim_results[0]
+        self.assertEqual("inline", source)
+        self.assertEqual([], errors)
+
+    def test_guard_catches_wrong_reclaim_arity_fenced(self):
+        fixture = (
+            "```bash\npython .claude/scripts/lease/reclaim.py SESSION-A\n```\n"
+        )
+        results = scan_and_validate_lease(fixture)
+        reclaim_results = [r for r in results if r[1] == "reclaim.py"]
+        self.assertEqual(1, len(reclaim_results))
+        _line_no, _prog, source, _raw, errors = reclaim_results[0]
+        self.assertEqual("fenced", source)
+        self.assertTrue(
+            any("missing positional argument" in e for e in errors), errors)
+
+    def test_guard_passes_valid_reclaim_form(self):
+        fixture = (
+            "```bash\n"
+            "python .claude/scripts/lease/reclaim.py SESSION-A SESSION-B\n"
+            "```\n"
+        )
+        results = scan_and_validate_lease(fixture)
+        reclaim_results = [r for r in results if r[1] == "reclaim.py"]
+        self.assertEqual(1, len(reclaim_results))
+        _line_no, _prog, _source, _raw, errors = reclaim_results[0]
+        self.assertEqual([], errors)
+
+    def test_guard_catches_bogus_resume_flag(self):
+        fixture = "`python .claude/scripts/lease/resume.py --claim SESSION-A`\n"
+        results = scan_and_validate_lease(fixture)
+        resume_results = [r for r in results if r[1] == "resume.py"]
+        self.assertEqual(1, len(resume_results))
+        _line_no, _prog, _source, _raw, errors = resume_results[0]
+        self.assertTrue(
+            any("--claim" in e and "not a valid flag" in e for e in errors),
+            "expected a '--claim not a valid flag' error, got: {0}".format(errors))
+
+    def test_guard_catches_resume_set_missing_args(self):
+        fixture = (
+            "```bash\npython .claude/scripts/lease/resume.py --set SESSION-A\n```\n"
+        )
+        results = scan_and_validate_lease(fixture)
+        resume_results = [r for r in results if r[1] == "resume.py"]
+        self.assertEqual(1, len(resume_results))
+        _line_no, _prog, source, _raw, errors = resume_results[0]
+        self.assertEqual("fenced", source)
+        self.assertTrue(
+            any("--set" in e and "expects" in e for e in errors), errors)
+
+    def test_guard_passes_valid_resume_forms(self):
+        fixture = (
+            "```bash\npython .claude/scripts/lease/resume.py SESSION-A\n```\n"
+            "```bash\n"
+            "python .claude/scripts/lease/resume.py --set SESSION-A "
+            "\"task-log.md \xa7 Checkpoint\"\n"
+            "```\n"
+        )
+        results = scan_and_validate_lease(fixture)
+        resume_results = [r for r in results if r[1] == "resume.py"]
+        self.assertEqual(2, len(resume_results))
+        for _line_no, _prog, _source, _raw, errors in resume_results:
+            self.assertEqual([], errors)
 
 
 if __name__ == "__main__":
