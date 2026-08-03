@@ -10,7 +10,7 @@ kind: bug
 order: 70
 closed: 2026-06
 goal: "Name visibility fix holds; the trailing-button regression is re-tracked as active BUG-028."
-pointer: BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/
+pointer: BusinessFeatures/artists-songs/bugs/2026-06-30-BUG-019-artistspage-listitem-button-noop/
 ---
 
 # BUG-019: ArtistsPage list item — trailing button no-op + name invisible

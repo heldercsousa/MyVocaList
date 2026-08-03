@@ -786,15 +786,15 @@ and BUG-012 are flat files; BUG-012 is T11c's).
 
 | # | Bug folder | Parent feature | BACKLOG row lives in | Writable? |
 |---|-----------|----------------|----------------------|-----------|
-| 1 | `BusinessFeatures/artists-songs/bugs/BUG-017-artistscrud-emulator-debug-often-stops/` | artists-songs | ARCHIVE-2026-06 | terminal → blocked |
+| 1 | `BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops/` | artists-songs | ARCHIVE-2026-06 | terminal → blocked |
 | 2 | `…/BUG-018-artistformpage-edit-save-crash/` | artists-songs | ARCHIVE-2026-06 | terminal → blocked |
 | 3 | `…/BUG-019-artistspage-listitem-button-noop/` | artists-songs | ARCHIVE-2026-06 (+ live BUG-028) | blocked (2 reasons) |
 | 4 | `…/BUG-021-songspage-fab-crash/` | artists-songs | ARCHIVE-2026-07 | terminal → blocked |
 | 5 | `…/BUG-023-songform-bottomsheet-broken/` | artists-songs | ARCHIVE-2026-07 | terminal → blocked |
 | 6 | `…/BUG-024-songform-edit-data-loss/` | artists-songs | ARCHIVE-2026-07 | terminal → blocked |
-| 7 | `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/` | persons | ARCHIVE-2026-07 | blocked — **Minor** |
-| 8 | `BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-teardown/` | (none) | live BACKLOG L80 | blocked — no parent item |
-| 9 | `DevCycleCraft/autocomplete-component/bugs/bug-043/` | (none) | ARCHIVE-2026-07 | blocked — no parent item |
+| 7 | `BusinessFeatures/persons/bugs/2026-07-01-BUG-022-singerform-birthday-mask/` | persons | ARCHIVE-2026-07 | blocked — **Minor** |
+| 8 | `BusinessFeatures/cross-cutting/bugs/2026-07-03-BUG-026-hwui-sigabrt-render-teardown/` | (none) | live BACKLOG L80 | blocked — no parent item |
+| 9 | `DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-043-release-build-zero-suggestions/` | (none) | ARCHIVE-2026-07 | blocked — no parent item |
 
 ### ⛔ BLOCKER 1 (systemic, decides T10a's schedule) — terminal items crash `regen` before T12
 6 of the 9 folders (rows 1–6) are **archived rows** (`✅ Fixed`), so their READMEs carry
@@ -1137,17 +1137,17 @@ given frontmatter, 1 new folder created.** `BACKLOG.md` and the 5 archive files 
 task stays additive.
 
 ### Changed files
-- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-017-artistscrud-emulator-debug-often-stops/README.md` (new)
-- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-save-crash/README.md` (new)
-- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/README.md` (new)
-- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-021-songspage-fab-crash/README.md` (new)
-- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-023-songform-bottomsheet-broken/README.md` (new)
-- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-024-songform-edit-data-loss/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-018-artistformpage-edit-save-crash/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-30-BUG-019-artistspage-listitem-button-noop/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-01-BUG-021-songspage-fab-crash/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-02-BUG-023-songform-bottomsheet-broken/README.md` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-02-BUG-024-songform-edit-data-loss/README.md` (new)
 - `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-028-artistspage-trailing-catalog-button-noop/README.md` (new folder + README — decision 5A)
-- `Docs/Management/BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/README.md` (new)
+- `Docs/Management/BusinessFeatures/persons/bugs/2026-07-01-BUG-022-singerform-birthday-mask/README.md` (new)
 - `Docs/Management/BusinessFeatures/cross-cutting/README.md` (new — decision 4A, `kind: group`)
-- `Docs/Management/BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-teardown/README.md` (new)
-- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/bug-043/README.md` (new)
+- `Docs/Management/BusinessFeatures/cross-cutting/bugs/2026-07-03-BUG-026-hwui-sigabrt-render-teardown/README.md` (new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-043-release-build-zero-suggestions/README.md` (new)
 - `Docs/Management/DevCycleCraft/autocomplete-component/README.md` (**modified** — frontmatter prepended, body byte-for-byte preserved; decision 4A)
 - `MyVocaList.sln` (11 SolutionItems entries + 1 new Solution Folder + 1 NestedProjects entry)
 - `Docs/Management/DevCycleCraft/spec-evolution-versioning/tasks.md` (T10a ticked)
@@ -1162,15 +1162,15 @@ earlier entry listed them under other blockers and did not count them as archive
 
 | # | Folder | Live or archived | Archive file / table |
 |---|--------|------------------|----------------------|
-| 1 | `BusinessFeatures/artists-songs/bugs/BUG-017-artistscrud-emulator-debug-often-stops/` | archived | 2026-06 · Business Features |
-| 2 | `BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-save-crash/` | archived | 2026-06 · Business Features |
-| 3 | `BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/` | archived | 2026-06 · Business Features |
-| 4 | `BusinessFeatures/artists-songs/bugs/BUG-021-songspage-fab-crash/` | archived | 2026-07 · Business Features |
-| 5 | `BusinessFeatures/artists-songs/bugs/BUG-023-songform-bottomsheet-broken/` | archived | 2026-07 · Business Features |
-| 6 | `BusinessFeatures/artists-songs/bugs/BUG-024-songform-edit-data-loss/` | archived | 2026-07 · Business Features |
-| 7 | `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/` | archived | 2026-07 · **Dev Cycle Craft** |
-| 8 | `BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-teardown/` | **live** | live BACKLOG, Business Features |
-| 9 | `DevCycleCraft/autocomplete-component/bugs/bug-043/` | archived | 2026-07 · **Dev Cycle Craft** |
+| 1 | `BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops/` | archived | 2026-06 · Business Features |
+| 2 | `BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-018-artistformpage-edit-save-crash/` | archived | 2026-06 · Business Features |
+| 3 | `BusinessFeatures/artists-songs/bugs/2026-06-30-BUG-019-artistspage-listitem-button-noop/` | archived | 2026-06 · Business Features |
+| 4 | `BusinessFeatures/artists-songs/bugs/2026-07-01-BUG-021-songspage-fab-crash/` | archived | 2026-07 · Business Features |
+| 5 | `BusinessFeatures/artists-songs/bugs/2026-07-02-BUG-023-songform-bottomsheet-broken/` | archived | 2026-07 · Business Features |
+| 6 | `BusinessFeatures/artists-songs/bugs/2026-07-02-BUG-024-songform-edit-data-loss/` | archived | 2026-07 · Business Features |
+| 7 | `BusinessFeatures/persons/bugs/2026-07-01-BUG-022-singerform-birthday-mask/` | archived | 2026-07 · **Dev Cycle Craft** |
+| 8 | `BusinessFeatures/cross-cutting/bugs/2026-07-03-BUG-026-hwui-sigabrt-render-teardown/` | **live** | live BACKLOG, Business Features |
+| 9 | `DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-043-release-build-zero-suggestions/` | archived | 2026-07 · **Dev Cycle Craft** |
 
 Plus one folder created by decision 5A: `…/bugs/BUG-028-artistspage-trailing-catalog-button-noop/` (live).
 
@@ -1232,8 +1232,8 @@ rendered row's severity does not change on its own** — the visible `(Minor)` i
 of the *title*, transcribed verbatim. The T12 hunk is therefore:
 
 ```
--| 2026-07-01 | ↳ BUG-022: SingerForm birthday field mask missing (Minor) | ✅ Fixed | Fixed (XAML-only `Mask="00/00"`). Pointer: `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/`. |
-+| 2026-07-01 | BUG-022: SingerForm birthday field mask missing (Minor) (under: **Form validation**) | ✅ Fixed | Goal: Fixed with a XAML-only date input mask on the birthday field. Pointer: `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/`. |
+-| 2026-07-01 | ↳ BUG-022: SingerForm birthday field mask missing (Minor) | ✅ Fixed | Fixed (XAML-only `Mask="00/00"`). Pointer: `BusinessFeatures/persons/bugs/2026-07-01-BUG-022-singerform-birthday-mask/`. |
++| 2026-07-01 | BUG-022: SingerForm birthday field mask missing (Minor) (under: **Form validation**) | ✅ Fixed | Goal: Fixed with a XAML-only date input mask on the birthday field. Pointer: `BusinessFeatures/persons/bugs/2026-07-01-BUG-022-singerform-birthday-mask/`. |
 ```
 
 Three sub-changes in that one hunk, each pre-authorised by design: (a) archived rows drop `↳` and
@@ -2191,7 +2191,7 @@ BUG-028  path=BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage
      + … Pointer: `BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/`.
 == BUG-028
    DIFF [Notes]
-     - … Pointer: `BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/`.
+     - … Pointer: `BusinessFeatures/artists-songs/bugs/2026-06-30-BUG-019-artistspage-listitem-button-noop/`.
      + … Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop/`.
 ```
 
@@ -2544,7 +2544,7 @@ Autocomplete field — folder shape (agent-authored): its archived Pointer targe
 - `Docs/Management/DevCycleCraft/hooks-redesign/README.md` (id `hooks-redesign`, order 30)
 
 ### Spec gap: adding `persons/README.md` surfaces a BUG-022 parent-vs-path-parent validation error
-**Location:** validator `model.validate()` parent check (design.md §2 "parent is declared, not inferred … validator warns when they don't"); data in `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/README.md`.
+**Location:** validator `model.validate()` parent check (design.md §2 "parent is declared, not inferred … validator warns when they don't"); data in `BusinessFeatures/persons/bugs/2026-07-01-BUG-022-singerform-birthday-mask/README.md`.
 **Gap description:** BUG-022 is a DevCycleCraft item deliberately filed *physically* under `persons/` with logical `parent: ui-form-validation-guide` (the "BUG-022 precedent" recorded in Wave A's task-log). While `persons/` had no `README.md` it was not an item, so the path-parent `persons` was unresolvable and no error fired. Wave B's required `persons/README.md` makes `persons` an item, so the validator now resolves the path-parent to `persons` and errors: `parent 'ui-form-validation-guide' disagrees with the folder's path parent 'persons'`. This takes the whole-tree validation from 0 → 1 error and would make `regen` exit 2. My four items are individually clean; the error is entirely in the pre-existing BUG-022 frontmatter, outside my `Files owned`.
 **Options:**
 - Option A: Re-parent BUG-022 to `parent: persons` — clears the error but **discards the intentional Wave A precedent** (a DevCycleCraft item logically under `ui-form-validation-guide`); loses the cross-feature grouping.
@@ -2629,7 +2629,7 @@ Post-write verification (Python binary mode, never grep — see `rtk-rewrites-gr
 parse_errors: 0
 errors: 0
 warnings: 1
- W BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/: parent 'ui-form-validation-guide' disagrees with the folder's path parent 'persons'
+ W BusinessFeatures/persons/bugs/2026-07-01-BUG-022-singerform-birthday-mask/: parent 'ui-form-validation-guide' disagrees with the folder's path parent 'persons'
 ```
 Note: the briefing expected one additional pre-existing banned-content error on `DevCycleCraft/spec-evolution-versioning/` to remain — this run shows 0 errors total, so that issue appears already resolved on this branch (not reintroduced by this task). Flagging the discrepancy for review rather than silently reconciling it.
 
@@ -3770,7 +3770,7 @@ GREEN (fixed `backlog_gen.py` restored): full suite `python -m unittest discover
 - `query --status "🟡,🟢"` -> lists all 8 `🟡 In Progress` items (no `🟢 Ready` items currently exist in the tree, so none appear -- correct, not a defect).
 - `query --status "🟡 In Progress"` -> same 8 items, no crash.
 - `query --help` -> prints its usage/options text, no crash.
-- `regen --check` -> exit 0, with the pre-existing BUG-022 parent-path warning (`BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/: parent 'ui-form-validation-guide' disagrees with the folder's path parent 'persons'`) -- expected, unrelated to this fix.
+- `regen --check` -> exit 0, with the pre-existing BUG-022 parent-path warning (`BusinessFeatures/persons/bugs/2026-07-01-BUG-022-singerform-birthday-mask/: parent 'ui-form-validation-guide' disagrees with the folder's path parent 'persons'`) -- expected, unrelated to this fix.
 
 ### Build notes
 Build: N/A -- Python-only change, no `.cs`/`.xaml` touched. Tests: 157 passed, 0 failed. Commit SHA: pending (see below).

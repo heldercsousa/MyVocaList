@@ -57,7 +57,7 @@ Domain and Contracts projects compiled cleanly (0 errors in those projects). Thi
 
 ---
 ## Task: BUG-021 — SongsPage FAB crash: ISimilarityScorer not registered in DI (Critical)
-**Plan:** Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-021-songspage-fab-crash/BUG-021-songspage-fab-crash.md (commit message as spec — Bug Fix Pattern)
+**Plan:** Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-01-BUG-021-songspage-fab-crash/BUG-021-songspage-fab-crash.md (commit message as spec — Bug Fix Pattern)
 **Status:** To Review
 **Started:** 07/02/2026
 **Completed:** 07/02/2026
@@ -66,7 +66,7 @@ Domain and Contracts projects compiled cleanly (0 errors in those projects). Thi
 - `MyVocaList/Extensions/ServiceCollectionExtensions.cs` — new; `AddAppServices()` extension holding the platform-independent registrations extracted verbatim from `MauiProgram.cs`, plus the missing `ISimilarityScorer` → `SimilarityScorer` Scoped registration (the fix)
 - `MyVocaList/MauiProgram.cs` — replaced the extracted registration blocks with a single `builder.Services.AddAppServices();` call (behavior identical)
 - `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` — new; 3 DI-resolution regression tests for the SongFormViewModel dependency graph
-- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-021-songspage-fab-crash/BUG-021-songspage-fab-crash.md` — Root Cause / Fix / Regression Test / Status: Fixed
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-01-BUG-021-songspage-fab-crash/BUG-021-songspage-fab-crash.md` — Root Cause / Fix / Regression Test / Status: Fixed
 
 ### Verification evidence
 - Build: PASS (0 errors)
@@ -338,4 +338,4 @@ Domain and Contracts projects compiled cleanly (0 errors in those projects). Thi
 
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
-| 2026-06-27 | ↳ Bug: navigate_next icon missing SVG → Glide FileNotFoundException on form pages ([BUG-017](BusinessFeatures/artists-songs/bugs/BUG-017-artistscrud-emulator-debug-often-stops/task-log.md)) | ✅ Fixed | `navigate_next` had no SVG in Resources/Images/; replaced with `arrow_forward_outlined` (SVG confirmed present) in ArtistFormPage.xaml (1×) and SongFormPage.xaml (2×). Minor severity. Build PASS, 357 tests PASS. Commit on branch `fix/bug-017-navigate-next-icon`. |
+| 2026-06-27 | ↳ Bug: navigate_next icon missing SVG → Glide FileNotFoundException on form pages ([BUG-017](BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops/task-log.md)) | ✅ Fixed | `navigate_next` had no SVG in Resources/Images/; replaced with `arrow_forward_outlined` (SVG confirmed present) in ArtistFormPage.xaml (1×) and SongFormPage.xaml (2×). Minor severity. Build PASS, 357 tests PASS. Commit on branch `fix/bug-017-navigate-next-icon`. |

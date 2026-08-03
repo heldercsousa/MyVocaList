@@ -10,7 +10,7 @@ kind: bug
 order: 30
 closed: 2026-07
 goal: "Fixed via the BottomSheet code-behind pattern; emulator re-run pending on BUG-027."
-pointer: BusinessFeatures/artists-songs/bugs/BUG-023-songform-bottomsheet-broken/
+pointer: BusinessFeatures/artists-songs/bugs/2026-07-02-BUG-023-songform-bottomsheet-broken/
 ---
 
 # BUG-023: SongForm resolution/merge BottomSheets can never open
