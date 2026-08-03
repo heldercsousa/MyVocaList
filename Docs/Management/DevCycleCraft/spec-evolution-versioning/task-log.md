@@ -3828,3 +3828,72 @@ Reintroduced `--kind activity` in a throwaway in-memory fixture (never written t
 Confirms the guard fails with an actionable message when the defect is present, and passes when
 fixed. The same run against the real doc tree (`test_every_documented_invocation_parses`) is
 green -- no equivalent defect currently exists in `.claude/` or `CLAUDE.md`.
+
+---
+## Task: Documented-command guard — lease scripts + pre-commit gate
+**Plan:** Docs/Management/DevCycleCraft/spec-evolution-versioning/task-log.md (ad hoc follow-up, no dedicated plan.md)
+**Status:** To Review
+**Started:** 2026-08-02
+**Completed:** 2026-08-03
+
+### Changed files:
+- `.claude/scripts/backlog/tests/test_command_docs_guard.py`
+- `.claude/githooks/pre-commit`
+
+### Contract-derivation choice
+`reclaim.py`/`resume.py` are not argparse-based (hand-rolled `sys.argv` parsing + a
+literal `usage:` string), so there is no live parser object to introspect the way
+`backlog_gen.build_parser()` is introspected for the existing guard. Chose a
+**hardcoded contract** (`RECLAIM_USAGE`/`RESUME_USAGE` + `_validate_reclaim`/
+`_validate_resume`) over a generic argv-shape parser, because a general parser for
+two bespoke, differently-shaped mini-CLIs (positional-only vs. a two-branch `--set`
+form) would be more code and indirection than the two functions it protects. To keep
+the hardcoded contract from silently drifting from the real scripts — the exact
+failure mode this file exists to catch — added
+`test_lease_usage_strings_match_hardcoded_contract`, which actually RUNS both
+scripts with no arguments and asserts stdout equals the literal `usage:` string this
+file assumes. A future signature change fails loudly there instead of drifting.
+
+### Induced-failure proof 1 — guard test suite (in-process)
+Temporarily added a fenced bogus invocation to `.claude/rules/workflow.md`:
+```
+python .claude/scripts/lease/reclaim.py --claim SESSION-A generated:backlog
+```
+`python -m unittest test_command_docs_guard` FAILED:
+```
+FAIL: test_every_documented_lease_invocation_matches_contract
+AssertionError: 1 documented reclaim.py/resume.py invocation(s) do not match the real script contract:
+
+.claude/rules/workflow.md:159: [reclaim.py:fenced] `reclaim.py --claim SESSION-A generated:backlog`
+    -> --claim: reclaim.py takes no flags -- got ['--claim', 'SESSION-A', 'generated:backlog']
+```
+Restored the file, reran: 172 tests, `OK`.
+
+### Induced-failure proof 2 — pre-commit hook gate
+Re-applied the same bogus fenced invocation to `.claude/rules/workflow.md`, staged it,
+ran `git commit`. Output:
+```
+... test_every_documented_lease_invocation_matches_contract ... FAIL
+AssertionError: 1 documented reclaim.py/resume.py invocation(s) do not match the real script contract:
+.claude/rules/workflow.md:159: [reclaim.py:fenced] `reclaim.py --claim SESSION-A generated:backlog`
+    -> --claim: reclaim.py takes no flags -- got ['--claim', 'SESSION-A', 'generated:backlog']
+
+pre-commit: BLOCKED -- a documented backlog_gen.py/reclaim.py/resume.py
+            invocation does not match the real script's contract.
+            Fix the documentation (or the script, if it is wrong).
+            To commit anyway (e.g. an intentional WIP checkpoint):
+            git commit --no-verify
+```
+No commit was created (`git log` unchanged). Reverted `workflow.md` (`git reset` +
+`git checkout --`), confirmed `git status` clean for that file, then staged only the
+real changes (`pre-commit`, `test_command_docs_guard.py`) and committed --
+`pre-commit: commit allowed.` -- commit `d8f7292` succeeded.
+
+### Build notes
+Full suite: `Ran 172 tests ... OK` (was 163 before this task -- +9 new tests: 4 lease
+guard-fixture tests, 1 contract cross-check, plus the coverage this unlocked).
+`python .claude/scripts/backlog/backlog_gen.py regen --check` -> exit 0 (pre-existing
+unrelated parent-mismatch warning for `BUG-022`, not touched by this task).
+Commit SHA: d8f7292
+No real defect found in current `.claude/**/*.md` / `CLAUDE.md` lease-script
+documentation -- all 9 real invocations (5 `reclaim.py`, 4 `resume.py`) pass.
