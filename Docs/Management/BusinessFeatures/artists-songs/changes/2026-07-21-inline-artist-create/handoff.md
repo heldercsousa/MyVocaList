@@ -1,4 +1,123 @@
-# Handoff — Song artist field (INLINE-AC): T10 re-run #2 outcome + remaining fixes
+# Handoff — INLINE-AC (Song artist field: correctness fixes + inline create-new-artist)
+
+> ## ⛔ CURRENT STOP POINT — T10 re-run #5 FAILED (2026-08-02). Branch must NOT be merged.
+>
+> **Build under test:** `e13a495` on `feat/inline-artist-create`, worktree
+> `C:\Users\helde\source\repos\MyVocaList-inline-ac` (clean, pushed, 535/535 unit tests green).
+> **Read `task-log.md § T10 re-run #5` first — it carries the verbatim exception, the per-item table
+> and the evidence.** Do not re-derive what is already recorded there.
+>
+> ### What re-run #5 settled
+>
+> | Verdict | Items |
+> |---------|-------|
+> | ✅ **Genuinely fixed — do not re-open** | BUG-065(b) 1st/2nd keystroke · BUG-066 inline ➕ create (Add **and** Edit mode) · BUG-060 clear-unlock · edit-mode hydration · retain-typed-text |
+> | ❌ **Open — three new IDs** | **BUG-068** (Critical) · **BUG-069** (Major) · **BUG-070** (Minor/UX) |
+>
+> The BUG-067 fix (missing `artistId` parameter) and **REQ-ACREATE-16** were necessary and are
+> **correct — they stay**. They were simply not sufficient: the write now reaches the repository, and
+> the repository throws.
+>
+> ### ⚠️ Helder's standing instruction (2026-08-02): SPLIT THE WORK ACROSS SESSIONS
+>
+> These defects have been re-fixed repeatedly without ever fully closing. One session doing all three
+> is what produced the last three failed re-runs. **Each session below takes ONE session, does only
+> its own scope, and ends.** Do not chain them. Do not "just also fix" an adjacent defect — the
+> accuracy loss from a wide session is the documented failure mode here.
+>
+> ---
+>
+> ## SESSION A — BUG-068 (Critical) · EF Core identity conflict on edit-mode save
+>
+> **Scope: this defect only. Nothing in the autocomplete/dropdown layer.**
+>
+> Symptom 1: tap a suggestion once → Save → UI says **success**, nothing persists (silent data loss).
+> Symptom 2: tap the re-shown suggestion (BUG-069) → Save → *"Failed to save song"* +
+> `InvalidOperationException: The instance of entity type 'Song' cannot be tracked because another
+> instance with the same key value for {'Id'} is already being tracked` at
+> `SongRepository.UpdateAsync` (`Infra\Repository\SongRepository.cs:135`) ← `SongService.UpdateSongAsync`
+> (`Services\SongService.cs:156`) ← `SongFormViewModel.ExecuteEditSaveAsync` (`:605`).
+>
+> **Do this in order:**
+> 1. `superpowers:systematic-debugging`. The hypothesis in the task-log (service loads a tracked
+>    `Song`, repository then calls `DbSet.Update` on a second instance with the same key) is a
+>    **hypothesis, not a finding** — prove or refute it against the real code first.
+> 2. **Write the Red test at the repository/integration seam against REAL SQLite** (temp file), per
+>    `testing.md § Project anti-patterns`: *repository tests use real SQLite, never the in-memory
+>    provider; never mock the DbContext.* A mocked `ISongRepository` test **cannot** reproduce this
+>    and must not be accepted as the regression test — that mocking gap is exactly why 535/535 was
+>    green while every save failed on device. See it FAIL, record the output, then fix.
+> 3. Fix in the **Services/Infra** layer (business logic in Services — unamendable). Evaluate the
+>    options recorded in the task-log; do not pre-commit to one.
+> 4. Silent-success path 1 is its own defect: a failed save must never report success. Verify the
+>    result-tuple handling in `ExecuteEditSaveAsync` surfaces the failure.
+>
+> **Session A ends when:** Red→Green recorded, full suite green, committed, pushed, task-log entry
+> written. **No device pass is requested of Helder for Session A alone** — it is verified by the new
+> integration test. Do NOT proceed to BUG-069.
+>
+> ---
+>
+> ## SESSION B — BUG-069 (Major) · dropdown re-opens after a selection
+>
+> **Scope: this defect only. Do not touch the save/persistence path (Session A owns it).**
+>
+> After tapping a suggestion the list hides, then **immediately re-opens** listing every prefix match
+> (artists *Helder* / *Helder Sousa* / *Helder Carvalho de Sousa* → picking *Helder* re-shows all
+> three). Also fires on **edit-mode page load**. The re-shown row is tappable and tapping it is the
+> exact trigger for BUG-068 path 2.
+>
+> **This is NOT the old BUG-061.** BUG-061 was a *lingering* row (never dismissed). This is
+> *dismiss-then-re-open*: `IsArtistDropDownOpen = false` **does** run, and something re-opens the
+> popup afterwards. Establish **what re-opens it** from decompiled DevExpress IL before editing —
+> `task-log.md § IL evidence (2026-07-30)` confirms `IsDropDownOpen` is the supported lever but does
+> **not** cover the re-open path. Decompiling the shipped DLL is the route that has worked twice; the
+> DevExpress demo-app MCP returns empty (treat as UNAVAILABLE per the MCP Availability Gate) and
+> Context7 lacks these `AutoCompleteEdit` members. **Never guess an API name.**
+>
+> **Session B ends when:** fix committed + pushed, task-log entry written, and the limits of unit
+> verification stated explicitly (popup behaviour is invisible to VM tests).
+>
+> ---
+>
+> ## SESSION C — BUG-070 (Minor/UX) · misleading validation copy — SPEC WORK, needs Helder first
+>
+> On a novel artist name the field shows **"Search and select an artist from the list"**, which reads
+> as "you cannot create a new artist here" — the opposite of the shipped ➕ behaviour (B1–B3 pass).
+> The Artist field also takes the error border while the ➕ path is available.
+>
+> **Blocked on Helder:** the replacement copy and the trigger condition. This likely amends a
+> REQ-ACREATE acceptance criterion, so the **spec changes before the code** (SDD invariant). Do not
+> invent the wording.
+>
+> ---
+>
+> ## Only after A, B and C are all green: T10 re-run #6 (Helder, on device)
+>
+> Re-verify in one pass: BUG-068 (edit-mode artist change persists, and a failure is never reported as
+> success) · BUG-069 (no re-open after selection, none on edit-load) · BUG-070 (copy) · and regression
+> re-checks of BUG-060 / 061 / 064 / 065 / 066. Then closeout per `pending-backlog-closeout.md`,
+> merge, push, remove the worktree, unblock the Artists & Songs Catalog.
+>
+> ## Carry-over constraints (every session)
+>
+> - Orchestrator never reads/edits `.cs`/`.xaml` — delegate to Explore/Plan/implementor subagents.
+>   All code edits in the worktree on the task branch; **docs land on develop**.
+> - Android build is blocked locally by `XARLP7024` (AV/EDR corruption on AndroidX AAR extract — NOT
+>   code). Build/test on the **net10.0** TFM; Helder builds Android locally.
+> - **A green unit suite proves nothing about the device here.** Re-runs #1–#5 all passed unit tests
+>   and failed on device. Say what is unverified rather than implying it is fixed.
+> - BUG-068/069/070 are **task-log-tracked, NOT `backlog_gen.py register`-ed** — the allocator would
+>   reissue BUG-053 (see `spec-evolution-versioning/POST-MIGRATION-FOLLOWUPS.md` FUP-4). Same caveat
+>   as BUG-065/066/067.
+> - DevExpress-first · official MD3 style keys · no native dialogs · English only · incremental
+>   single-file XAML edits (edit → build → fix).
+
+
+---
+
+<details>
+<summary>Earlier handoff history (2026-07-30 stop point, re-runs #2–#4, prior plans)</summary>
 
 **For:** the next (fresh) session. Read this first (Rule 7 session start). Supersedes the 2026-07-21 planning handoff.
 
@@ -18,7 +137,11 @@
 > - **BUG-066 (Major)** — **inline "create new artist" is unreachable** in both add and edit mode: a non-existent name is rejected with *"search and select an artist from the list"*. This is the headline capability of this change and C1 passed in re-run #2, so it is a **regression** from a later fix wave (suspects: BUG-054a sentinel suppression, `_suppressNextArtistSearch`).
 > - **BUG-065 (Major)** — spurious **"Not found"** row: (a) after any programmatic text assignment (selection, edit-page load, re-selection), clearing only on blur; (b) at 1 typed character even when matches exist, resolving at 2 chars. Residual of BUG-061 — keep BUG-061 open until both re-verify.
 >
-> ### ⛔ STOP POINT — session ended 2026-07-30 by Helder: "record progress until here, I will resume another session"
+> ### ✅ SUPERSEDED — stop point of 2026-07-30 (kept: its IL evidence is still authoritative)
+>
+> *Its BUG-065/066 work is DONE and verified on device in re-run #5. Read it only for the IL findings.*
+>
+> ### ⛔ (historical) STOP POINT — session ended 2026-07-30 by Helder: "record progress until here, I will resume another session"
 >
 > **Nothing was coded. No file in the worktree was touched.** Worktree `C:\Users\helde\source\repos\myvocalist-inline-ac` is clean at `b8f7d2c` on `feat/inline-artist-create`. All work this session was diagnosis + tracking, committed to `develop`.
 >
@@ -113,3 +236,5 @@
 1. **BUG-060 unlock behavior** — what exactly should tapping X (and re-editing) do? (proposed AC above)
 2. **AC-label typo (DEFERRED to closeout cleanup — Helder OK'd "best option" 2026-07-23):** the test `SearchArtistsCoreAsync_ReturnsCurrentQueryResultsDirectly` is tagged `[AC] REQ-ACREATE-13` but proves direct-return (BUG-056), not the latest-wins race (REQ-ACREATE-13 = BUG-051). Fold a one-line comment correction into the closeout/merge commit — not worth a subagent or an ITF edit on its own.
 3. **Docs commit** — the LEDGER + `pending-backlog-closeout.md` + `.sln` changes are currently UNCOMMITTED on develop (Helder rejected the earlier commit). This handoff + the pending file are also uncommitted until then.
+
+</details>
