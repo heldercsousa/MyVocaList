@@ -10,7 +10,7 @@ kind: bug
 order: 20
 closed: 2026-07
 goal: "Fixed via `AddAppServices()` extension + DI regression tests; emulator-verified 2026-07-03."
-pointer: BusinessFeatures/artists-songs/bugs/BUG-021-songspage-fab-crash/
+pointer: BusinessFeatures/artists-songs/bugs/2026-07-01-BUG-021-songspage-fab-crash/
 ---
 
 # BUG-021: SongsPage FAB crash — `ISimilarityScorer` not registered

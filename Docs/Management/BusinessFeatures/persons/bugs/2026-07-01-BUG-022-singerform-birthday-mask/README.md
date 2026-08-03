@@ -10,7 +10,7 @@ kind: bug
 order: 110
 closed: 2026-07
 goal: "Fixed with a XAML-only date input mask on the birthday field."
-pointer: BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/
+pointer: BusinessFeatures/persons/bugs/2026-07-01-BUG-022-singerform-birthday-mask/
 ---
 
 # BUG-022: SingerForm birthday field mask missing

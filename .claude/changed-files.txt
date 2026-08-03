@@ -3677,3 +3677,13 @@ Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-
 ../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/490e3794-e3d4-49a0-8b32-7c897effd04a/scratchpad/fix_paths.py
 ../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/490e3794-e3d4-49a0-8b32-7c897effd04a/scratchpad/add_notes.py
 ../MyVocaList-wt-query/.claude/scripts/backlog/backlog_gen.py
+../MyVocaList-wt-query/.claude/scripts/backlog/backlog_gen.py
+../MyVocaList-wt-query/.claude/scripts/backlog/backlog_gen.py
+../MyVocaList-wt-query/.claude/scripts/backlog/tests/test_backlog_gen.py
+../MyVocaList-wt-query/.claude/scripts/backlog/tests/test_backlog_gen.py
+../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/490e3794-e3d4-49a0-8b32-7c897effd04a/scratchpad/ledger.py
+../MyVocaList-wt-query/.claude/scripts/backlog/tests/test_backlog_gen.py
+../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/490e3794-e3d4-49a0-8b32-7c897effd04a/scratchpad/ledger2.py
+../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/490e3794-e3d4-49a0-8b32-7c897effd04a/scratchpad/audit_slugs.py
+../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/490e3794-e3d4-49a0-8b32-7c897effd04a/scratchpad/rename_plan.py
+../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/490e3794-e3d4-49a0-8b32-7c897effd04a/scratchpad/do_rename.py

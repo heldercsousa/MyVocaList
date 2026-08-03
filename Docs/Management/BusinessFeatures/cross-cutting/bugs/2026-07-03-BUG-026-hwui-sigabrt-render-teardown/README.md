@@ -9,7 +9,7 @@ parent: cross-cutting
 kind: bug
 order: 410
 goal: "confirm whether the crash is a real defect or debugger-teardown noise (Release logcat investigation first)."
-pointer: BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-teardown/
+pointer: BusinessFeatures/cross-cutting/bugs/2026-07-03-BUG-026-hwui-sigabrt-render-teardown/
 ---
 
 # BUG-026: HWUI native crash (SIGABRT) on render teardown
