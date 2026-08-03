@@ -735,3 +735,141 @@ This does not match the project convention; a byte-level sweep to fix it is out 
 - The duplicate-title-on-new-artist rejection message surfacing correctly in the form
   (it is routed to `TitleErrorText`, the existing edit-save failure channel).
 
+
+---
+
+## T10 re-run #5 — Helder, on device + emulator, 2026-08-02 → FAILED (Critical regression exposed)
+
+Build under test: `e13a495` on `feat/inline-artist-create` (535/535 unit tests green).
+Tested on BOTH an emulator (x86_64, debugger attached) and a physical device (arm64) — **identical
+behaviour on both**, so nothing here is emulator-specific.
+
+### Per-item results
+
+| Item | Covers | Result | Disposition |
+|------|--------|--------|-------------|
+| A1 first keystroke shows real matches | BUG-065(b) | ✅ | fixed — guard removal worked |
+| A2 second keystroke correct | BUG-065(b) | ✅ | fixed |
+| A3 no spurious "Not found" after programmatic fill | BUG-065(a) | ⚠️ **PARTIAL** | "Not found" row is GONE, but the dropdown **re-opens** after selection — see BUG-069 |
+| B1 ➕ row appears on a novel name (Add mode) | BUG-066 | ✅ | fixed |
+| B2 ➕ completes the creation | BUG-066 | ✅ | fixed |
+| B3 ➕ row appears in Edit mode | BUG-066 | ✅ | fixed |
+| C1 edit page shows the saved artist | BUG-067 | ✅ | hydration correct |
+| C2 clear (X) unlocks the field | BUG-060 | ✅ | still fixed |
+| C3 select a different artist | — | ✅ | selection works |
+| C4 **Save** | BUG-067 | ❌ **FAILED** | **BUG-068 (Critical)** — see below |
+| C5 reopen shows the new artist | BUG-067 | ⛔ **NOT TESTABLE** | blocked by C4 |
+| C6 Songs list under new artist | BUG-067 | ⛔ NOT TESTABLE | blocked by C4 |
+| D1 dropdown does not re-open | BUG-061 | ❌ **FAILED** | **BUG-069** — same defect as A3 |
+| D2 single readable error message | BUG-064/057 | ⚠️ **UX DEFECT** | **BUG-070** — message misleads; see below |
+| D3 typed text retained on blur | REQ-ACREATE-03 | ✅ | holds |
+
+### 🔴 BUG-068 (Critical, NEW) — EF Core identity conflict aborts every edit-mode save
+
+**This supersedes BUG-067 as the reason an artist edit does not persist.** BUG-067's fix (the missing
+`artistId` parameter) was necessary but NOT sufficient — the write now *reaches* the repository, and
+the repository throws.
+
+Two distinct user-visible behaviours, same root area:
+
+1. **Tap a suggestion ONCE, then Save** → the UI reports **success**, but the change is **not
+   persisted** (silent data loss — no exception surfaced to the user).
+2. **Tap a suggestion, then tap it again when the dropdown re-shows it** (i.e. after BUG-069), then
+   Save → **"Failed to save song. Please try again."** plus the logged exception below.
+
+Verbatim exception (identical on emulator `00:19:29` and device `21:32:48`):
+
+```
+[ERR] MyVocaList.UI.ViewModels.SongFormViewModel
+Save failed in Edit mode
+System.InvalidOperationException: The instance of entity type 'Song' cannot be tracked because
+another instance with the same key value for {'Id'} is already being tracked. When attaching
+existing entities, ensure that only one entity instance with a given key value is attached.
+   at ...IdentityMap[System.Int32].ThrowIdentityConflict(InternalEntityEntry entry)
+   at ...StateManager.StartTracking(InternalEntityEntry entry)
+   at ...EntityGraphAttacher.AttachGraph(...)
+   at ...InternalDbSet[MyVocaList.Domain.Entity.Song].Update(Song entity)
+   at MyVocaList.Infra.Repository.SongRepository.UpdateAsync(Song song, CancellationToken ct)
+        in Infra\Repository\SongRepository.cs:line 135
+   at MyVocaList.Services.SongService.UpdateSongAsync(Int32 id, String title, String featuredArtists,
+        String lyrics, Boolean hasManualEdits, String externalId, String externalProvider,
+        String version, Nullable[Int32] artistId, CancellationToken ct)
+        in Services\SongService.cs:line 156
+   at MyVocaList.UI.ViewModels.SongFormViewModel.ExecuteEditSaveAsync(String title, String version)
+        in MyVocaList\UI\ViewModels\SongFormViewModel.cs:line 605
+   at MyVocaList.UI.ViewModels.SongFormViewModel.SaveAsync()
+        in MyVocaList\UI\ViewModels\SongFormViewModel.cs:line 579
+```
+
+**Reading of the trace (hypothesis — NOT proven; must be verified before any code is written):**
+`SongService.UpdateSongAsync` loads the `Song` (tracked) to run its checks, then calls
+`SongRepository.UpdateAsync`, which calls `DbSet.Update(song)` on what is by then a SECOND instance
+carrying the same key — the first is still tracked in the same scoped `DbContext`. The BUG-067 fix
+added a `song.ArtistId = effectiveArtistId` write against the loaded instance, which is plausibly
+what pushed a latent tracking conflict onto the failing path.
+
+Directions to EVALUATE (deliberately not pre-committed to one): mutate the already-tracked instance
+and `SaveChanges` without calling `DbSet.Update`; or read with `AsNoTracking` and attach exactly
+once; or narrow the read/write to a single tracked entity. The read-model / NoTracking rules in
+`library/database-indexing.md` and `code-style-reference.md` apply, and whatever is decided here
+likely feeds the parked **Read Model + Global NoTracking Pattern — Guidelines Update** activity.
+
+**Why the unit suite missed it completely:** `SongServiceTests` mock `ISongRepository`, so
+`DbSet.Update` never executes; and `SongRepository` has no integration test covering
+update-after-read within one context. `testing.md § Project anti-patterns` already requires
+repository tests to run against **real SQLite** — that unmet requirement is precisely why 535/535
+was green while every edit-mode save failed on the device.
+
+**Severity: Critical** (silent data loss on path 1, hard failure on path 2). Regression test is
+MANDATORY, Red before Green, at the **repository/integration seam against real SQLite**. A mocked
+service test cannot reproduce this and must not be accepted as the regression test.
+
+### 🟠 BUG-069 (Major, NEW — supersedes/reopens BUG-061) — dropdown re-opens after a selection, listing prefix matches
+
+After tapping a suggestion the list correctly hides and then **immediately re-opens**, showing every
+artist whose name prefix-matches the picked one. With artists *Helder*, *Helder Sousa* and
+*Helder Carvalho de Sousa*, picking **Helder** re-shows all three. It also occurs on **edit-mode page
+load**.
+
+The re-shown row is tappable, and tapping it is exactly the sequence that produces BUG-068 path 2 —
+so BUG-069 is the **trigger for the Critical failure**, not a cosmetic nuisance. Fixing 068 without
+069 leaves the user one tap away from the same crash.
+
+The mechanism has changed since BUG-061: that was a *lingering* row (never dismissed); this is
+*dismiss-then-re-open* — the selection commits text into the editor, and the committed text then
+appears to be treated as a fresh query. The `IsDropDownOpen = false` write does happen; something
+re-opens the popup afterwards. What re-opens it must be established from decompiled DevExpress IL
+before editing. Per `§ IL evidence (2026-07-30)`, `IsDropDownOpen` is confirmed as the supported
+lever; what is NOT established is the re-open path.
+
+### 🟡 BUG-070 (Minor/UX, NEW) — validation message tells the user to do the one thing it implies they cannot
+
+On a novel artist name the field shows **"Search and select an artist from the list"**, which reads
+as "creating a new artist here is impossible" — the opposite of the feature that now works (B1–B3 all
+passed). The Artist field is also styled with the error border while the ➕ create path is still
+available.
+
+Copy and trigger condition both need Helder's decision, and this likely changes a REQ-ACREATE
+acceptance criterion — so it is spec work first, not a code-only fix.
+
+### Evidence artifacts
+
+Full emulator and device logcat captures were supplied by Helder in-session (2026-08-02). The
+exception blocks are transcribed verbatim above; the remaining lines are HWUI / Choreographer / IME
+noise with no diagnostic value. Screenshots (4-panel) show: the dropdown re-open with three prefix
+matches, the misleading validation message, and two "Failed to save song. Please try again." states.
+
+Also present in the logs and deliberately NOT filed as new bugs (pre-existing or out of scope — do
+not chase these during the fix waves):
+
+- `SongsPage appearing=47883ms (ctor→OnAppearing)` — Debug-build page-load cost; already covered by
+  the CRUD page structural reduction backlog item.
+- `Skipped NN frames` / `Davey! duration=…` — Debug-build jank.
+- `FORTIFY: pthread_mutex_lock called on a destroyed mutex` + `SIGABRT` at emulator teardown — this
+  is the known **BUG-026** HWUI render-teardown crash.
+
+### Status
+
+INLINE-AC closeout is **blocked**, and the branch must **NOT** be merged to develop:
+`feat/inline-artist-create` currently persists no artist edit at all in edit mode. The BUG-067 fix
+and REQ-ACREATE-16 remain correct and stay — they are simply not sufficient on their own.
