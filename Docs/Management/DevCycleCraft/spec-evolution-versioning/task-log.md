@@ -3778,3 +3778,53 @@ Files written and re-read: `backlog_gen.py` and `tests/test_backlog_gen.py` re-r
 
 ### Note for CLAUDE.md/rules maintainers
 Out of scope for this task (boundary: do not edit rules files) -- flagging only: `workflow.md` Rule 7 step 1's exact invocation (`query --status "🟡,🟢"`) now works as documented; no rules-text change is needed as a result of this fix.
+
+---
+## Task: Guard that every documented backlog_gen command actually parses
+**Plan:** N/A (test-only task, briefing given directly)
+**Status:** To Review
+**Started:** 2026-08-02
+**Completed:** 2026-08-02
+
+### Changed files:
+- `.claude/scripts/backlog/tests/test_command_docs_guard.py` (new)
+
+### Build notes
+Full suite: 163 passed, 0 failed (was 157; +6 new tests) | `backlog_gen.py regen --check`: exit 0
+Files written and re-read: test_command_docs_guard.py (Read tool, twice)
+
+### Scanner results (real doc tree)
+33 invocations found across 11 files (`.claude/**/*.md` + `CLAUDE.md`) -- above the >= 20 sanity
+floor asserted in `test_every_documented_invocation_parses`. Zero validation errors: every
+documented `backlog_gen.py` command in the current tree parses against the real
+`build_parser()`. No doc defect found -- nothing to report/escalate.
+
+### Placeholder rule (deliberate, documented in `_is_placeholder` docstring)
+A token is skipped for choices-checking only if it is ENTIRELY placeholder syntax after
+quote-stripping: wrapped in `<...>` (including `<a|b|c>` alternatives), the ellipsis
+character (`...` or the single Unicode ellipsis glyph), or empty. A bare concrete word (e.g. `activity`) is never a
+placeholder and IS checked against `choices` -- that is exactly the shape of the historical
+`--kind activity` defect. `[...]` is treated as this doc convention's optional-group marker
+(not shell syntax) and its brackets are stripped before tokenizing.
+
+Required-flag / required-positional-count checks apply only to invocations extracted from a
+fenced ```bash``` block (a complete, copy-pasteable example). Inline single-backtick mentions
+(e.g. "register it with `backlog_gen.py register`") are exempted from the required-arg check
+because they are frequently abbreviated references to just the verb, not full commands --
+flag-name validity and `choices` correctness are still checked unconditionally for both sources.
+
+### Induced-failure evidence
+Reintroduced `--kind activity` in a throwaway in-memory fixture (never written to `.claude/`):
+
+```
+--- reintroduced defect ---
+2 fenced backlog_gen.py register --parent SOME-FEATURE --kind activity --title "T" --goal "G"
+  ERROR: --kind activity: not in choices bug, change
+--- fixed form ---
+2 fenced backlog_gen.py register --parent SOME-FEATURE --kind bug --title "T" --goal "G"
+  errors: []
+```
+
+Confirms the guard fails with an actionable message when the defect is present, and passes when
+fixed. The same run against the real doc tree (`test_every_documented_invocation_parses`) is
+green -- no equivalent defect currently exists in `.claude/` or `CLAUDE.md`.
