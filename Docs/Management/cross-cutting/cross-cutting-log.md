@@ -63,7 +63,7 @@
 
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
-| 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) — `pthread_mutex_lock` on destroyed mutex in `hwuiTask0` (Major) | 💡 Pending | Native Android render-thread crash captured during the "frozen UI in emulator" investigation, distinct from the ANR (resolved separately as a Debug+emulator artifact). Fired at the moment the debug process was force-stopped by VS/vsdbg — may be debugger-teardown noise rather than a live defect; not yet confirmed reproducible during normal (non-debugger-forced) app close on Release/device. Investigation plan (Release logcat + normal-close emulator logcat) before any fix attempt. Details: `BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-teardown/BUG-026-hwui-sigabrt-render-teardown.md` |
+| 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) — `pthread_mutex_lock` on destroyed mutex in `hwuiTask0` (Major) | 💡 Pending | Native Android render-thread crash captured during the "frozen UI in emulator" investigation, distinct from the ANR (resolved separately as a Debug+emulator artifact). Fired at the moment the debug process was force-stopped by VS/vsdbg — may be debugger-teardown noise rather than a live defect; not yet confirmed reproducible during normal (non-debugger-forced) app close on Release/device. Investigation plan (Release logcat + normal-close emulator logcat) before any fix attempt. Details: `BusinessFeatures/cross-cutting/bugs/2026-07-03-BUG-026-hwui-sigabrt-render-teardown/BUG-026-hwui-sigabrt-render-teardown.md` |
 
 
 ## Moved from BACKLOG.md (2026-07-15) — Token-scoped subagent reads — library file split + size-budget guard

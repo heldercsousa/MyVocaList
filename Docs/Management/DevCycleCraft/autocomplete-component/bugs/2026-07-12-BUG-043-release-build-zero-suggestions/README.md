@@ -10,7 +10,7 @@ kind: bug
 order: 90
 closed: 2026-07
 goal: "Root cause: manual SetValue severed the OneWay `Suggestions` binding; fixed via `ClearSuggestionsPresentation()`, on-device verified. Follow-up defects registered separately (BUG-044–047)."
-pointer: DevCycleCraft/autocomplete-component/bugs/bug-043/
+pointer: DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-043-release-build-zero-suggestions/
 ---
 
 # BUG-043: release build returns zero autocomplete suggestions

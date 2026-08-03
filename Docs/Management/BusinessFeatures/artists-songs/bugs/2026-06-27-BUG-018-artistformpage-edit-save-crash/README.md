@@ -10,7 +10,7 @@ kind: bug
 order: 60
 closed: 2026-06
 goal: "Fixed (global NoTracking + read models); regression test green."
-pointer: BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-save-crash/
+pointer: BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-018-artistformpage-edit-save-crash/
 ---
 
 # BUG-018: ArtistFormPage Edit Save — duplicate-tracking crash

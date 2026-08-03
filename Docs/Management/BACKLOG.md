@@ -78,7 +78,7 @@
 | — | **Singer self-registration** | 💡 Pending | Goal: singers register via public link / kiosk / own device connected to the host. Pointer: `cross-cutting/singer-self-registration/`. |
 | — | **Social features** | 💡 Pending | Goal: post-event sharing, singer stats. Pointer: `cross-cutting/social-features/`. |
 | 2026-07-03 | **Cross-cutting** | — | Bugs with no single parent business feature |
-| 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) on render teardown (Major) | 💡 Pending | Goal: confirm whether the crash is a real defect or debugger-teardown noise (Release logcat investigation first). Pointer: `BusinessFeatures/cross-cutting/bugs/BUG-026-hwui-sigabrt-render-teardown/`. |
+| 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) on render teardown (Major) | 💡 Pending | Goal: confirm whether the crash is a real defect or debugger-teardown noise (Release logcat investigation first). Pointer: `BusinessFeatures/cross-cutting/bugs/2026-07-03-BUG-026-hwui-sigabrt-render-teardown/`. |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---

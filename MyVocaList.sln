@@ -417,9 +417,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000034}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md = Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md = Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md
 		Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg = Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg
-		Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\README.md = Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\README.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\README.md
 		Docs\Management\BusinessFeatures\persons\bugs\singer-bithday-validation-error.jpg = Docs\Management\BusinessFeatures\persons\bugs\singer-bithday-validation-error.jpg
 	EndProjectSection
 EndProject
@@ -841,7 +841,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg = Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
 	EndProjectSection
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-008-songform-artist-autocomplete", "2026-06-01-BUG-008-songform-artist-autocomplete", "{FA1234BC-0001-4000-8000-0000000000B5}"
@@ -982,41 +982,41 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stitch-output", "stitch-out
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-017-artistscrud-emulator-debug-often-stops", "BUG-017-artistscrud-emulator-debug-often-stops", "{B92F4F42-00C3-44C3-BC6E-E340782C7183}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\plan.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-018-artistformpage-edit-save-crash", "BUG-018-artistformpage-edit-save-crash", "{FA1234BC-0001-4000-8000-000000000031}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-018-artistformpage-edit-save-crash\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-018-artistformpage-edit-save-crash\plan.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-018-artistformpage-edit-save-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-018-artistformpage-edit-save-crash\README.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-018-artistformpage-edit-save-crash\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-018-artistformpage-edit-save-crash\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-019-artistspage-listitem-button-noop", "BUG-019-artistspage-listitem-button-noop", "{FA1234BC-0001-4000-8000-000000000032}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-019-artistspage-listitem-button-noop\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-019-artistspage-listitem-button-noop\task-log.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-019-artistspage-listitem-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-019-artistspage-listitem-button-noop\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-021-songspage-fab-crash", "BUG-021-songspage-fab-crash", "{92D65ADE-A1E0-4220-AE25-06691B50D86D}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-024-songform-edit-data-loss", "BUG-024-songform-edit-data-loss", "{FA1234BC-0001-4000-8000-000000000035}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-024-songform-edit-data-loss\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-024-songform-edit-data-loss\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-023-songform-bottomsheet-broken", "BUG-023-songform-bottomsheet-broken", "{FA1234BC-0001-4000-8000-000000000036}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-023-songform-bottomsheet-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-023-songform-bottomsheet-broken\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000038}"
@@ -1028,8 +1028,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-026-hwui-sigabrt-render-teardown", "BUG-026-hwui-sigabrt-render-teardown", "{FA1234BC-0001-4000-8000-000000000040}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\cross-cutting\bugs\BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md
-		Docs\Management\BusinessFeatures\cross-cutting\bugs\BUG-026-hwui-sigabrt-render-teardown\README.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\BUG-026-hwui-sigabrt-render-teardown\README.md
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\README.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Archive", "Archive", "{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE}"
@@ -1099,14 +1099,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bugs", "Bugs", "{1AAD9972-3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-043", "bug-043", "{6941D280-F5AE-428A-AC78-42246F3BF3F8}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (1).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (1).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (2).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (2).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (3).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (3).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (4).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (4).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\ListItem component not used.png = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\ListItem component not used.png
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\log-debug-s23.txt = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\log-debug-s23.txt
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (1).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (1).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (2).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (2).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (3).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (3).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (4).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (4).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\ListItem component not used.png = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\ListItem component not used.png
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\log-debug-s23.txt = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\log-debug-s23.txt
 		Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md = Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\README.md
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Extensions", "MyVocaList.Extensions\MyVocaList.Extensions.csproj", "{9380343D-7BB2-4832-A406-ED77FF9AAEB2}"

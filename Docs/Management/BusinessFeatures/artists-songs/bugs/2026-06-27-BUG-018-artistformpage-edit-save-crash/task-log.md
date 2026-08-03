@@ -3,7 +3,7 @@
 **Bug:** ArtistFormPage Edit Save crash (EF Core ChangeTracker pollution)  
 **Severity:** Critical  
 **Fix Status:** ✅ Complete  
-**Plan:** `/Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-018-artistformpage-edit-save-crash/plan.md`
+**Plan:** `/Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-018-artistformpage-edit-save-crash/plan.md`
 
 ---
 

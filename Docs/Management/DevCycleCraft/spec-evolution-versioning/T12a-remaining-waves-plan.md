@@ -16,7 +16,7 @@ worktree `mvl-backlog-migration`.
   - T10a's 8 archived bug rows (folders already exist, confirmed via `git ls-files`):
     **BUG-017, BUG-018, BUG-019, BUG-021, BUG-022, BUG-023, BUG-024, bug-043** (`022`/`043` are
     the two archived-in-DevCycleCraft-table bugs T10a's log calls out explicitly).
-  - `bug-043`'s folder is `DevCycleCraft/autocomplete-component/bugs/bug-043/` — lowercase, no
+  - `bug-043`'s folder is `DevCycleCraft/autocomplete-component/bugs/2026-07-12-BUG-043-release-build-zero-suggestions/` — lowercase, no
     date, no slug: **REQ-SEV-01 naming debt, out of scope for T12a, tracked at item (vi) in
     `tasks.md`. Do not re-plan a folder for it; only a future `git mv` fixes the name.**
   - **BUG-015 and BUG-016 are NOT done** — despite being 2026-06 archived rows adjacent to

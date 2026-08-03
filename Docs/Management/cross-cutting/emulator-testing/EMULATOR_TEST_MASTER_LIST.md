@@ -147,7 +147,7 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
 ---
 
 ### TEST-002: BUG-023 — SongForm BottomSheet State Sync (Resolution & Merge Sheets)
-**Source File:** `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-023-songform-bottomsheet-broken/BUG-023-songform-bottomsheet-broken.md` (lines 33–42)
+**Source File:** `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-02-BUG-023-songform-bottomsheet-broken/BUG-023-songform-bottomsheet-broken.md` (lines 33–42)
 
 **Test Steps:**
 ```
@@ -191,7 +191,7 @@ This is a consolidated test list for ALL pending emulator smoke tests. Each test
 ---
 
 ### TEST-003: BUG-024 — SongForm Edit Mode Data Integrity (FeaturedArtists + Lyrics + Version)
-**Source File:** `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-024-songform-edit-data-loss/BUG-024-songform-edit-data-loss.md` (lines 10–15)
+**Source File:** `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-02-BUG-024-songform-edit-data-loss/BUG-024-songform-edit-data-loss.md` (lines 10–15)
 
 **Test Steps:**
 ```
@@ -429,7 +429,7 @@ Test - 007 - 2: Step 4 above works only after save button tapped. I suppose such
 ## BUG VERIFICATION TESTS
 
 ### TEST-008: BUG-017 — navigate_next Icon Missing SVG (Glide FileNotFoundException)
-**Source File:** `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-017-artistscrud-emulator-debug-often-stops/` (fixed; no longer appears in main BACKLOG)
+**Source File:** `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops/` (fixed; no longer appears in main BACKLOG)
 
 **Test Steps:**
 ```
@@ -449,7 +449,7 @@ Test - 007 - 2: Step 4 above works only after save button tapped. I suppose such
 ---
 
 ### TEST-009: BUG-019 — ArtistsPage List Item Button Noop (DataTemplate Cast Failure)
-**Source File:** `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-019-artistspage-listitem-button-noop/`
+**Source File:** `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-06-30-BUG-019-artistspage-listitem-button-noop/`
 
 **Test Steps:**
 ```
@@ -494,7 +494,7 @@ TEST-009 1) step 5 above does not happen.
 ---
 
 ### TEST-011: BUG-021 — SongsPage FAB Crash (ISimilarityScorer DI Missing)
-**Source File:** `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-021-songspage-fab-crash/`
+**Source File:** `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-01-BUG-021-songspage-fab-crash/`
 
 **Test Steps:**
 ```
