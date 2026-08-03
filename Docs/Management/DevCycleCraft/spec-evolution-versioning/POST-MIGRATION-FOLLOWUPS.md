@@ -32,10 +32,15 @@ parent). It validates cleanly and loses no data, but the hierarchy reads backwar
 **Trigger:** revisit when the three live items above reach closeout, or during the
 Spec-Evolution feature's own retrospective — whichever comes first.
 
-## FUP-2 — bug-043 REQ-SEV-01 naming debt (pre-existing, tracked in tasks.md item vi)
+## FUP-2 — bug-043 REQ-SEV-01 naming debt — RESOLVED 2026-08-02
 
-`autocomplete-component/bugs/bug-043/` is lowercase, undated, unslugged (pre-scheme). Out of scope
-for T12a; only a future `git mv` fixes the name. Recorded here so it isn't lost.
+`autocomplete-component/bugs/bug-043/` was lowercase, undated, unslugged (pre-scheme). Out of
+scope for T12a; fixed by `git mv` in the gate-audit pass (commit `ecc379f`), together with the
+eight other pre-scheme bug folders that lacked the `YYYY-MM-DD-` prefix. New name:
+`bugs/2026-07-12-BUG-043-release-build-zero-suggestions/`. The date came from the item's own
+`target:` field — no date was invented. `pointer:` frontmatter, 54 `.sln` entries and 17
+referencing docs were updated in the same commit; `BACKLOG.md` and the monthly archives
+regenerated from the new pointers rather than being hand-edited.
 
 ## FUP-3 — `.sln` GUID counter drift in constraints-registry.md (fix under T13)
 
