@@ -31,4 +31,73 @@ public class Bug068RegressionTests
         var reread = await songs.GetSongByIdAsync(song.Id);
         Assert.Equal("Updated Title", reread!.Title);
     }
+
+    // [AC] REQ-UOW-04: create -> read -> update through the normal write path must not throw
+    // "already being tracked", and the update must persist.
+    // Characterization, not regression: this family never reproduced BUG-068 — ArtistRepository.GetByIdAsync
+    // (ArtistRepository.cs:79-80) explicitly calls .AsTracking(), so EF identity resolution returns the
+    // already-tracked instance instead of a fresh detached one. Locks the behavior in through the
+    // unit-of-work refactor.
+    [Fact]
+    public async Task Artist_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict()
+    {
+        await using var host = UnitOfWorkTestHost.CreateLegacy();
+        var artists = host.Resolve<IArtistService>();
+
+        var (createOk, _, artist) = await artists.CreateArtistAsync("Tracking Artist");
+        Assert.True(createOk);
+
+        var (updateOk, message) = await artists.UpdateArtistAsync(artist!.Id, "Updated Artist Name");
+
+        Assert.True(updateOk, message);
+        var (items, _) = await artists.GetPagedArtistsForListAsync(1, 20, "Updated Artist Name");
+        Assert.Contains(items, i => i.Id == artist.Id && i.Name == "Updated Artist Name");
+    }
+
+    // [AC] REQ-UOW-04: create -> read -> update through the normal write path must not throw
+    // "already being tracked", and the update must persist.
+    // Characterization, not regression: this family never reproduced BUG-068 — PersonRepository inherits
+    // GetByIdAsync from BaseRepository<T> (BaseRepository.cs:24-29), which uses _dbSet.FindAsync(id) — also
+    // identity-resolving, so EF returns the already-tracked instance instead of a fresh detached one.
+    // Locks the behavior in through the unit-of-work refactor.
+    [Fact]
+    public async Task Person_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict()
+    {
+        await using var host = UnitOfWorkTestHost.CreateLegacy();
+        var persons = host.Resolve<IPersonService>();
+
+        var (createOk, _, person) = await persons.CreatePersonAsync("Tracking Person");
+        Assert.True(createOk);
+
+        var (updateOk, message) = await persons.UpdatePersonAsync(person!.Id, "Updated Person Name");
+
+        Assert.True(updateOk, message);
+        var reread = await persons.GetPersonByIdAsync(person.Id);
+        Assert.Equal("Updated Person Name", reread!.FullName);
+    }
+
+    // [AC] REQ-UOW-04: create -> read -> update through the normal write path must not throw
+    // "already being tracked", and the update must persist.
+    // Characterization, not regression: this family never reproduced BUG-068 — VenueRepository inherits
+    // GetByIdAsync from BaseRepository<T> (BaseRepository.cs:24-29), which uses _dbSet.FindAsync(id) — also
+    // identity-resolving, so EF returns the already-tracked instance instead of a fresh detached one.
+    // Locks the behavior in through the unit-of-work refactor.
+    [Fact]
+    public async Task Venue_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict()
+    {
+        await using var host = UnitOfWorkTestHost.CreateLegacy();
+        var venues = host.Resolve<IVenueService>();
+
+        var (createOk, _) = await venues.CreateVenueAsync("Tracking Venue");
+        Assert.True(createOk);
+
+        var (items, _) = await venues.GetPagedVenuesForListAsync(1, 20, "Tracking Venue");
+        var created = Assert.Single(items);
+
+        var (updateOk, message) = await venues.UpdateVenueAsync(created.Id, "Updated Venue Name");
+
+        Assert.True(updateOk, message);
+        var (rereadItems, _) = await venues.GetPagedVenuesForListAsync(1, 20, "Updated Venue Name");
+        Assert.Contains(rereadItems, i => i.Id == created.Id && i.Name == "Updated Venue Name");
+    }
 }
