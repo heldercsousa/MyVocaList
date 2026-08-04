@@ -13,6 +13,8 @@ namespace MyVocaList.Services
     public class VenueService : IVenueService
     {
         private readonly IVenueRepository _venueRepository;
+        // TODO [BUG-071 / UOW] — dead cross-boundary dependency: unused elsewhere in this class.
+        // Delete, do not migrate to the unit-of-work pattern.
         private readonly IEventRepository _eventRepository;
         private readonly ILogger<VenueService> _logger;
 

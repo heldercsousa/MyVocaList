@@ -8,6 +8,11 @@ namespace MyVocaList.UI.ViewModels;
 /// <summary>ViewModel for queue management page—handles enqueuing, registration, reordering.</summary>
 public partial class QueueManagementViewModel : ViewModelBase
 {
+    // TODO [BUG-071 / UOW] — mixed migration boundary: _eventService and _queueService are
+    // Queue/Event dependencies deliberately excluded from the unit-of-work migration (see
+    // MyVocaList.Services/Services/EventService.cs class-level note for the full defect); only
+    // _personRepository and _songRepository below migrate to the pattern being established for
+    // Venue/Artist/Person/Song. The two service fields stay as-is until the deferred item lands.
     private readonly IEventService _eventService;
     private readonly IQueueServiceNew _queueService;
     private readonly IPersonRepository _personRepository;
