@@ -1218,21 +1218,48 @@ gains nothing measurable and inherits pooled-state reset semantics as a footgun.
 Already rejected by Helder as production-hotfix-shaped. Recorded here so the rejection is not
 re-litigated: both hide the symptom while leaving the session-lifetime context in place.
 
-### Prerequisite (not part of this change's waves): merge the two repository families — **decided by Helder, supersedes the prior "do not merge" decision**
-**Decision:** `Infra/Repository/*` and `Infra/Repositories/*` are two repository families that exist
-only because of an accident across prior sessions (duplicate `IEventRepository` in both
+### Prerequisite (not part of this change's waves): merge the two repository families — **SUPERSEDED 2026-08-04 by Helder ("a, but not yet!") — no longer a pre-Phase-0 prerequisite**
+**Original decision (2026-08-03, decided by Helder, superseded the prior "do not merge" decision):**
+`Infra/Repository/*` and `Infra/Repositories/*` are two repository families that exist only because
+of an accident across prior sessions (duplicate `IEventRepository` in both
 `Domain/RepositoryInterface/` and `Domain/Interfaces/`, confirmed in § 2a's derived-count run —
 `Domain/Interfaces/IEventRepository.cs` and `Domain/RepositoryInterface/IEventRepository.cs` both
-exist today). Helder has decided the two families are to be **merged into one before any wave in
-§ 10 runs.**
-**This document does not perform the merge.** It is listed here as a hard prerequisite, to be executed
-and completed as its own tracked task before Wave 0 begins. None of Waves 0—7 below assume which
-family survives; whichever survives is the one every wave operates against.
-**Rationale for reversing the prior "do not merge in this change" decision:** the prior decision
-treated the merge as optional scope creep. Helder's view (recorded here, not re-litigated further):
-running seven-plus waves of unit-of-work migration across two duplicate, drifting repository families
-is itself the riskier path — the merge is now sequenced *before* the migration, as a precondition, not
-folded into it as extra scope.
+exist today). Helder had decided the two families were to be merged into one before any wave in
+§ 10 runs.
+**Rationale originally given for reversing the prior "do not merge in this change" decision:** the
+prior decision treated the merge as optional scope creep. Running seven-plus waves of unit-of-work
+migration across two duplicate, drifting repository families was seen as the riskier path — the merge
+was sequenced *before* the migration, as a precondition.
+
+**Superseded 2026-08-04 — new position:** the merge is **no longer a prerequisite blocking Phase 0**.
+It is combined with the deferred Queue/Event unit-of-work item and both now run **after** the pilot's
+Phase 3 gate:
+
+```
+Phase 0 → 1 → 2 (pilot) → 3 (VERIFY, hard gate)
+  → THEN: repository-family merge + Queue/Event unit-of-work migration, together
+  → THEN: Phase 4+ spread
+```
+
+**Rationale for the new ordering:** the merge should target a proven shape, and D13 already defers
+the final API shape to the pilot; also, the merge cannot safely complete without giving Queue/Event a
+commit boundary (those two services have ZERO `SaveChangesAsync` calls and rely entirely on the
+embedded saves being deleted), so the two pieces of work are one.
+
+**Justification that this reordering is safe — verified 2026-08-04:** the pilot is fully independent
+of the family being deleted. All four pilot services (`SongService.cs:21-33`, `ArtistService.cs:19-29`,
+`ArtistResolutionService.cs:15-25`, `SongResolutionService.cs:21-33`) depend only on
+`Domain/RepositoryInterface` abstractions backed by `Infra/Repository/` (singular) implementations,
+and use `Domain/Entity/` (singular) entities. Zero references to `Infra/Repositories/` or
+`Domain.Entities` in any of the four; transitive calls stay inside the four-service pilot set. DI
+registrations confirming the implementations: `MyVocaList/Extensions/ServiceCollectionExtensions.cs:24-26,62`.
+
+**Which family survives:** `Infra/Repositories/` (plural, 2 files, embedded saves) is **deleted**;
+`Infra/Repository/` (singular, 10 files, stage-only) **survives** — stage-only is the
+unit-of-work-compatible shape, the same rule REQ-UOW-11 encodes.
+
+**This document still does not perform the merge.** It remains out of scope for this spec's own
+waves; the change is only to *when* it runs relative to Phase 0 — see the phase table in § 10.
 
 ### Decision: `ExecuteAsync` skips the save when the result signals business failure (Revision 8) — **APPROVED by Helder 2026-08-04**
 **Chosen approach:** `ExecuteAsync` inspects `body`'s returned value for this codebase's universal
@@ -1628,8 +1655,14 @@ shape actually reads well in practice.
 
 ## 10. Migration plan (Phase order per D11, § 8; DRY Onion within each phase: Domain → Infra → Services → UI)
 
-**Prerequisite (outside these phases):** the `Infra/Repository/*` / `Infra/Repositories/*` repository-family
-merge (§ 8, Prerequisite decision) completes first. Every phase below assumes one merged family.
+**Repository-family merge — SUPERSEDED, no longer a pre-Phase-0 prerequisite (§ 8, decision superseded
+2026-08-04):** the `Infra/Repository/*` / `Infra/Repositories/*` merge does **not** complete before
+Phase 0. Phases 0–3 (Tests, Registration + primitive, PILOT, VERIFY) do **not** assume one merged
+family — verified 2026-08-04: all four pilot services depend only on `Infra/Repository/` (singular)
+and `Domain/Entity/` (singular), with zero references to `Infra/Repositories/` (plural) or
+`Domain.Entities` (§ 8 for the full verification evidence). The merge runs, together with the
+deferred Queue/Event unit-of-work migration, in a new step **between Phase 3 and Phase 4+** — see
+that row in the table below.
 
 **Scope exclusion (D12, § 8):** `EventService`, `QueueService`, `QueueServiceNew`, and the repositories
 they exclusively own (`EventRepository` in both families, `QueueRepository`,
@@ -1646,6 +1679,7 @@ should be treated as sequential-only for this change for the same reason.
 | 1 (Registration + primitive) | Domain/Contracts, Infra, Composition | Introduce `IUnitOfWork` — the single `ExecuteAsync<TResult>`/`ExecuteReadAsync<TResult>`/`ExecuteAsync` (no-signal) surface, **PROVISIONAL per D13**, § 6/§ 8 Revision 10; no typed overload — plus `IUnitOfWorkOutcome`; remove `SaveChangesAsync` from the **five standalone** repository interfaces that do not extend `IBaseRepository<T>` (`ISongRepository`, `IArtistRepository`, `ICatalogRepository`, `ISongKaraokeUrlRepository`, `IBackupRepository`) — **`IBaseRepository<T>.SaveChangesAsync()` itself is NOT removed** (§ 8, "IBaseRepository<T>.SaveChangesAsync() is NOT removed" decision — it is shared with the excluded `QueueService.cs`/`IEventRepository`/`IEventParticipationRepository` and removing it would force a de facto edit of an excluded file, REQ-UOW-31). Implement `UnitOfWork`, **including the `AsyncLocal` ambient-scope join** (§ 6a — ships now, not deferred). `MauiProgram.cs`: `AddDbContext` → `AddDbContextFactory(…, Scoped)`; register `IUnitOfWork`; remove the duplicate `IAppInfo` (REQ-UOW-21). Verify `App.xaml.cs:35,:54` scopes still resolve. **Do not touch any repository's pass-through/embedded `SaveChangesAsync` implementations yet** — those are deleted per-repository in Phase 2/4+ as each repository's owning service is actually wrapped, not wholesale here. | no — sequential-only (`MauiProgram.cs`, `AppDbContext.cs`) |
 | 2 (PILOT) | Services + Infra | Wrap **only** `SongService`, `ArtistService`, `ArtistResolutionService`, `SongResolutionService` (**9** methods total across these four, re-derived by direct read of `Services/SongService.cs`, `Services/ArtistService.cs`, `Services/ArtistResolutionService.cs`, `Services/SongResolutionService.cs` — previously miscounted as "5": `CreateSongAsync`/`UpdateSongAsync`/`CreateSongWithUrlsAsync`/`DeleteSongsAsync` (4), `CreateArtistAsync`/`UpdateArtistAsync`/`DeleteArtistsAsync` (3), `CommitAsync` ×2 (2) — 4+3+2=9) in `ExecuteAsync`/`ExecuteReadAsync`, using the PROVISIONAL API shape from Phase 1; delete `SongRepository`'s and `ArtistRepository`'s pass-through `SaveChangesAsync` implementations; re-shape `ArtistResolutionService.CommitAsync` and `SongResolutionService.CommitAsync` to use the ambient join (REQ-UOW-09, REQ-UOW-22 — the deepest nested chain in the spec, `SongResolutionService.CommitAsync` → `ArtistResolutionService.CommitAsync` → `ArtistService.CreateArtistAsync`, is exercised here). **Also delete the `1a114c1` stopgap guard in `SongRepository.UpdateAsync` here** (REQ-UOW-18, no external gate — Helder cancelled the T10 re-run #6 gate 2026-08-04, § 8) — the stopgap and the pilot wrap touch the same method, so removing the old workaround and landing the real fix is one reviewable change. **Load-bearing rule (§ 8, BL-2) applies from this first phase on:** every lambda body resolves repositories from its own `IServiceProvider`, never from `_songRepository`/`_artistRepository` constructor fields (REQ-UOW-28). | partly — one agent per service, no file overlap |
 | 3 (VERIFY — HARD GATE) | Tests + Helder | Confirm the Phase 0 regression tests now PASS for the pilot's scope (REQ-UOW-03, REQ-UOW-04's `ArtistRepository`/`SongRepository` rows, REQ-UOW-22). Run the full automated suite green. **Helder performs an on-device confirmation** that the pilot screens (Song/Artist CRUD) no longer reproduce BUG-068/BUG-071, starting from a **cold app start with no Queue/Event screen visited during the session** (Queue/Event code keeps the pre-existing shared-context defect by design, D12 LIVE RISK — visiting a Queue/Event screen first could poison the shared window-scope context for reasons unrelated to the pilot, making the pilot appear to fail for a defect it did not cause). **Decide the final `IUnitOfWork` API shape (D13, § 8) from the pilot's real call sites** — confirm the provisional shape or replace it; record the decision and rationale in the task-log. **HARD GATE (REQ-UOW-30):** no Phase 4+ task may be dispatched, claimed, or started until this phase's pass (tests + on-device + API-shape decision) is recorded in the task-log. | no — gate, not parallelizable |
+| 3.5 (Repository-family merge + Queue/Event UoW migration) | Infra + Services | **New step, added 2026-08-04 (§ 8, superseded Prerequisite decision) — runs after Phase 3, before Phase 4+.** Merge `Infra/Repository/*` and `Infra/Repositories/*` into one family, targeting the proven pilot shape confirmed in Phase 3 (D13); `Infra/Repositories/` (plural, embedded saves) is deleted, `Infra/Repository/` (singular, stage-only) survives. Combined in the same step: give `QueueService`/`EventService` (currently excluded, D12, zero `SaveChangesAsync` calls of their own) a commit boundary via `IUnitOfWork`, since the merge cannot safely delete the embedded saves those two services rely on without it. Out of scope for this spec's own waves in the sense that this document does not perform the merge — it only fixes the merge's position relative to Phase 0. | no — sequential, touches the repository interfaces every later phase depends on |
 | 4+ (Spread) | Services | Wrap the remaining **12** in-scope service methods (21 in-scope total minus the pilot's 9 — `BackupService.CreateFullBackupAsync` (1), `CatalogService.AddSongToCatalogAsync`/`RemoveSongFromCatalogAsync` (2), `PersonService.CreatePersonAsync`/`UpdatePersonAsync`/`DeletePersonsAsync` (3), `SongKaraokeUrlService.AddUrlAsync`/`RemoveUrlAsync`/`RecordPlayAsync` (3), `VenueService.CreateVenueAsync`/`UpdateVenueAsync`/`DeleteVenuesAsync` (3) — 1+2+3+3+3=12; `SongService.DeleteSongsAsync` is already wrapped in Phase 2 as part of the pilot's 9, not a Phase 4+ item) in `ExecuteAsync`/`ExecuteReadAsync`, using the shape Phase 3 finalised; delete the corresponding pass-through `SaveChangesAsync` implementations (`CatalogRepository`, `SongKaraokeUrlRepository`, `BackupRepository`, and the `BaseRepository<T>` pass-through for `PersonRepository`/`VenueRepository`). **Save-skip wiring (Revision 8, § 6b) — `BackupResult : IUnitOfWorkOutcome` is a blocking, same-phase prerequisite (Revision 9), not a later or optional step:** `BackupService.CreateFullBackupAsync`'s wrap MUST NOT be committed before `: IUnitOfWorkOutcome` is appended to `BackupResult`'s declaration (`Domain/ServicesInterfaces/IBackupService.cs:5`) — under fail-closed, wrapping `BackupService` with an unmarked `BackupResult` makes every call throw `InvalidOperationException` immediately. `SongKaraokeUrlService.RecordPlayAsync` is the **only** in-scope no-signal method (bare `Task`, § 8 D12 item 5 / `requirements.md` REQ-UOW-26 correction) and wraps via the single no-signal `ExecuteAsync(Func<IServiceProvider, Task> body, ct)` overload; every other in-scope method wraps via the single value-returning `ExecuteAsync<TResult>` overload and gets save-skip for free from the `ITuple` structural check. **Load-bearing rule (§ 8, BL-2) — MANDATORY for every method in this phase:** the lambda body MUST resolve repositories from its own `IServiceProvider` parameter, never from the service's constructor-injected field (REQ-UOW-28). Then: audit **every ViewModel or other UI type that constructor-injects a repository or a data-writing service, regardless of the ViewModel's own DI lifetime** (widened from "singletons only" — BL-4). `AddDbContextFactory(..., ServiceLifetime.Scoped)` still registers `AppDbContext` itself as scoped (§ 1 "Reviewer-finding correction"), so a **transient** ViewModel resolving a repository still resolves the window-lifetime context exactly like a singleton would. Confirmed transient ViewModels injecting repositories directly, all registered `AddTransient` in `MauiProgram.cs`: `MyVocaList/UI/ViewModels/QueueSongPickerViewModel.cs` (`ISongRepository`), `MyVocaList/UI/ViewModels/QueueManagementViewModel.cs` (`IPersonRepository`, `ISongRepository`, **and also `IEventService`/`IQueueServiceNew` — both excluded types, § 8 D12 item 6 corrected**), `MyVocaList/UI/ViewModels/PersonPickerViewModel.cs` (`IPersonRepository`) — none of the three injects a Queue/Event **repository** (§ 8 D12 item 6: only the ViewModel names contain "Queue"), so all three remain IN SCOPE for their repository-typed fields. Convert `QueueSongPickerViewModel` and `PersonPickerViewModel` fully to inject `IUnitOfWork` (plus the pre-existing singleton audit: `AppShellViewModel`, `AppShell`, `MauiProgram.cs:109-110`). **`QueueManagementViewModel` converts only its `IPersonRepository`/`ISongRepository` usage to `IUnitOfWork`-wrapped calls — its `IEventService`/`IQueueServiceNew` fields remain untouched, direct constructor injections, per § 8 D12 item 6's correction (**APPROVED by Helder 2026-08-04**).** **Remove the now-obsolete `DbLoadGate` (NB-1) only after (a) every in-scope consumer above is converted AND (b) the `page-load-frozen` regression suite (`DevCycleCraft/page-load-frozen/`) is confirmed green without the gate present** — removing it on condition (a) alone would prematurely stop serializing loads for ViewModels not yet converted; the gate's comment (`CrudListViewModelBase.cs:12-15`) also carries a SEPARATE `SQLITE-WORKAROUND` rationale (the `Microsoft.Data.Sqlite` sync-async freeze) with its own revert trigger (`INFRA_MSSQL`), independent of this spec's unit-of-work migration — removing the gate without confirming (b) would reintroduce that separate bug class (REQ-UOW-29, corrected BL-H). | yes — one agent per service/ViewModel, no file overlap; the `BackupResult` marker edit + `BackupService` wrap are one atomic sub-task, not splittable |
 | LAST (Guidelines) | Docs + Tests | Amend `code-style-reference.md § DI Registration Conventions` (REQ-UOW-19, `amend:` + changelog) — this lands **after** Phase 4+, not before, per D11: a guideline documents an established pattern, and the pattern is not established until it has spread past the pilot. `TestDbContextFactory` alignment; delete the tracking-conflict workarounds at `CatalogRepositoryTests.cs:66` and `ArtistRepositoryTests.cs:366`; fix the stale `GetByIdAsync` "Tracked query" comment (REQ-UOW-20). Confirm the REQ-UOW-24/25/26/27 save-skip tests (authored in Phase 1/2 as the primitive and pilot land) stay GREEN after Phase 4+'s service rewrites. | partly |
 
@@ -1701,8 +1735,10 @@ All five prior open questions are resolved (§ 8 decisions record the answers an
    Task<TResult>>, ct)` form and one no-signal form, both resolving from the lambda's `IServiceProvider`.
    See "Decision: drop the typed overload entirely" (§ 8, Revision 10) for the corrected rationale.
 4. ~~Read paths~~ — resolved: separate `ExecuteReadAsync` that never saves (Revision 6).
-5. ~~Repository-family merge~~ — resolved: in scope, but as a **prerequisite** completed before Wave 0
-   of this change, not as a follow-up and not folded into these waves (§ 8, Prerequisite decision).
+5. ~~Repository-family merge~~ — resolved: in scope; **corrected 2026-08-04** — originally sequenced as
+   a prerequisite completed before Wave 0, this was superseded by Helder ("a, but not yet!") to run
+   after Phase 3's VERIFY gate, combined with the deferred Queue/Event unit-of-work migration (§ 8,
+   superseded Prerequisite decision; § 10 Phase 3.5).
 6. ~~Spec-review finding B3 (unconditional save vs. this codebase's failure-tuple convention)~~ —
    resolved: `ExecuteAsync` skips the save when the result signals failure, via structural `ITuple`
    detection + `IUnitOfWorkOutcome` opt-in + an always-saves no-signal overload for bare-`Task`
