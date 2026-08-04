@@ -38,6 +38,18 @@ _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 # Bound a read of the cumulative changed-files log to THIS session.
 _MARKER_PATH = os.path.join(_THIS_DIR, ".session-marker")
 
+# Registering an item the new way writes a folder README, not BACKLOG.md itself
+# (BACKLOG.md is generated from it). Both count as "the agent registered the work".
+WATCHED_PATHS = ("Docs/Management/BACKLOG.md", "Docs/Management")
+
+
+def is_watched(path):
+    """True for BACKLOG.md or any Docs/Management/**/README.md."""
+    norm = (path or "").replace("\\", "/")
+    if norm == "Docs/Management/BACKLOG.md":
+        return True
+    return norm.startswith("Docs/Management/") and norm.endswith("/README.md")
+
 
 def _project_dir():
     """Best-effort project (worktree) root holding `.claude/`.
@@ -152,41 +164,45 @@ def enumerate_changed_memory_files(signal_source=None, device_memory_dir=None):
 
 
 def backlog_changed_this_session():
-    """True iff BACKLOG.md changed at any point THIS SESSION (committed OR working-tree).
+    """True iff watched backlog state changed THIS SESSION (committed OR working-tree).
 
-    MUST NOT use a bare `git diff HEAD` (design §2.2/§7): that misses BACKLOG edits
-    already auto-committed in-session. Union the working-tree diff (vs HEAD) with the
+    Watched state is BACKLOG.md itself plus any `Docs/Management/**/README.md` item
+    folder (see `WATCHED_PATHS` / `is_watched`): registering an item the generated way
+    writes a folder README, and BACKLOG.md is derived from it.
+
+    MUST NOT use a bare `git diff HEAD` (design §2.2/§7): that misses edits already
+    auto-committed in-session. Union the working-tree diff (vs HEAD) with the
     in-session commit log (commits since the session-start HEAD recorded by the
-    marker, if available). On any git failure return False (fail open -> the advisory
-    may over-warn, never over-suppress).
+    marker, if available). Output is split with `.splitlines()`, never `.split()`,
+    so paths containing spaces survive intact. On any git failure return False
+    (fail open -> the advisory may over-warn, never over-suppress).
     """
     backlog = "Docs/Management/BACKLOG.md"
+    readmes = "Docs/Management"
     try:
-        # 1. Working-tree changes vs HEAD (covers uncommitted + staged BACKLOG edits).
+        # 1. Working-tree changes vs HEAD.
         wt = subprocess.run(
-            ["git", "diff", "--name-only", "HEAD", "--", backlog],
-            capture_output=True,
-            text=True,
+            ["git", "diff", "--name-only", "HEAD", "--", backlog, readmes],
+            capture_output=True, text=True,
         )
-        if wt.returncode == 0 and wt.stdout.strip():
+        if wt.returncode == 0 and any(is_watched(p) for p in wt.stdout.splitlines()):
             return True
-        # 2. Untracked (e.g. a freshly created BACKLOG) — defensive.
+        # 2. Untracked files (a freshly registered item folder).
         others = subprocess.run(
-            ["git", "ls-files", "--others", "--exclude-standard", "--", backlog],
-            capture_output=True,
-            text=True,
+            ["git", "ls-files", "--others", "--exclude-standard", "--", backlog, readmes],
+            capture_output=True, text=True,
         )
-        if others.returncode == 0 and others.stdout.strip():
+        if others.returncode == 0 and any(is_watched(p) for p in others.stdout.splitlines()):
             return True
-        # 3. In-session commits: anything touching BACKLOG since the session-start ref.
+        # 3. In-session commits since the session-start ref.
         start_ref = _session_start_ref()
         if start_ref:
             committed = subprocess.run(
-                ["git", "diff", "--name-only", "{0}..HEAD".format(start_ref), "--", backlog],
-                capture_output=True,
-                text=True,
+                ["git", "diff", "--name-only", "{0}..HEAD".format(start_ref),
+                 "--", backlog, readmes],
+                capture_output=True, text=True,
             )
-            if committed.returncode == 0 and committed.stdout.strip():
+            if committed.returncode == 0 and any(is_watched(p) for p in committed.stdout.splitlines()):
                 return True
         return False
     except Exception:

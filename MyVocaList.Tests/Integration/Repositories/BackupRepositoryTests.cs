@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Repository;
 using MyVocaList.Tests.Infrastructure;

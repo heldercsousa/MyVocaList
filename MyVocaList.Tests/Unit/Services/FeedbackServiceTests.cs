@@ -1,10 +1,7 @@
-using System.Net;
-using System.Net.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Devices;
 using Moq.Protected;
 using MyVocaList.Contracts.DTOs;
+using System.Net;
 
 namespace MyVocaList.Tests.Unit.Services;
 

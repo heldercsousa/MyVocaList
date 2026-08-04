@@ -1,4 +1,3 @@
-using MyVocaList.Domain.Entity;
 using MyVocaList.UI.Collections;
 
 namespace MyVocaList.UI.ViewModels;

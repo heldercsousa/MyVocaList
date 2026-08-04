@@ -1,6 +1,5 @@
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models;
-using MyVocaList.Services;
 
 namespace MyVocaList.Tests.Unit.Services;
 

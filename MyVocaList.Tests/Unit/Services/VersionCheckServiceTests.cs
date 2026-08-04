@@ -1,9 +1,6 @@
-using System.Net;
-using System.Net.Http;
-using System.Text.Json;
-using Moq;
 using Moq.Protected;
-using MyVocaList.Contracts.DTOs;
+using System.Net;
+using System.Text.Json;
 
 namespace MyVocaList.Tests.Unit.Services;
 

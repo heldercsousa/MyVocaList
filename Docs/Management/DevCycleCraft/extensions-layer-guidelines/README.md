@@ -1,3 +1,18 @@
+---
+id: extensions-layer-guidelines
+title: "**`MyVocaList.Extensions` layer guidelines — placement criteria + rules-file promotion**"
+status: "💡 Pending"
+target: 2026-07-19
+section: DevCycleCraft
+kind: feature
+order: 110
+goal: "formalize when a helper belongs in the new dependency-free `MyVocaList.Extensions` project (created by D4 above) vs. Services/Domain, beyond the one worked example."
+gate: "`MyVocaList.Extensions` must exist first (Task 6a)."
+pointer: DevCycleCraft/extensions-layer-guidelines/
+---
+
+**Notes overflow (transcribed from the pre-migration BACKLOG row):** Promote into `code-principles.md` once stable.
+
 # `MyVocaList.Extensions` — Placement Guidelines
 
 > Status: 💡 Pending — not yet written as a formal rules-file amendment; this document captures the

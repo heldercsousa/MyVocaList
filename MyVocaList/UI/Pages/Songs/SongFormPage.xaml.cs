@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using DevExpress.Maui.Editors;
+using MyVocaList.Contracts.Models;
 
 namespace MyVocaList.UI.Pages.Songs;
 
@@ -33,6 +35,36 @@ public partial class SongFormPage : ContentPage
         // remove that try-catch.
         await ViewModel.RefreshApiKeyFlagAsync();
         ViewModel.InitializeArtistField(); // BUG-008: reliable artist field init after all query props set
+    }
+
+    // ── DX AutoCompleteEdit glue (T3, 2026-07-19 change spec) ────────────────────────────
+    // Thin forwarding only: the editor's AsyncItemsSourceProvider owns debounce (RequestDelay=300)
+    // and stale-request cancellation; the search itself runs through the EXISTING VM command path
+    // (SearchArtistsCommand → IArtistService) so gates and behavior stay in the ViewModel.
+    private void OnArtistItemsRequested(object sender, ItemsRequestEventArgs e)
+    {
+        var text = e.Text;
+        var token = e.CancellationToken;
+        e.RequestAsync = async () =>
+        {
+            await ViewModel.SearchArtistsCommand.ExecuteAsync(text);
+            token.ThrowIfCancellationRequested();
+            return ViewModel.ArtistSuggestions;
+        };
+    }
+
+    // Forwards drop-down selection to the existing VM selection command.
+    private void OnArtistSelectionChanged(object sender, EventArgs e)
+    {
+        if (artistEdit.SelectedItem is AutocompleteSuggestion suggestion)
+            ViewModel.SelectArtistCommand.Execute(suggestion);
+    }
+
+    // Blur without a selection → existing VM blur command (same trigger the old component used).
+    private void OnArtistUnfocused(object sender, FocusEventArgs e)
+    {
+        if (artistEdit.SelectedItem is null)
+            ViewModel.ArtistBlurredWithoutSelectionCommand.Execute(null);
     }
 
     // Bridges the MAUI Unfocused (blur) events to the ViewModel's validation commands.

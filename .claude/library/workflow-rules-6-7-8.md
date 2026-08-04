@@ -24,13 +24,13 @@ Every session that involves implementation or planning must begin with this read
 Read in this order — do not skip items, do not resume from memory alone:
 
 0. **Hook health verification** — confirm hooks are operational (see Hook Enforcement Notes at the top of this file). Fix any misconfigured hooks before proceeding.
-1. **Active session handoff file** (if one exists): `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/handoff.md` — use this as the exact continuation point
-   - **If no handoff file exists:** read `Docs/Management/BACKLOG.md` to identify the current `🟡 In Progress` item or the highest-priority `🟢 Ready` item — that is the current work context
+1. **Active session handoff file** (if one exists): `Docs/Management/[section-or-filing-dir]/[feature]/handoff.md` — use this as the exact continuation point
+   - **If no handoff file exists:** run `python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"` to identify the current `🟡 In Progress` item or the highest-priority `🟢 Ready` item — that is the current work context. **Do not read `Docs/Management/BACKLOG.md`**: it renders the same set at ~10× the token cost (REQ-SEV-23), and reading it is not a substitute for the query, which reads frontmatter directly.
 2. **`ACTIVE-CONSIDERATIONS.md`** (if it exists) — read the priority stack and open items
-3. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md`** — confirm which tasks are done, in-progress (`[~]`), and pending
-4. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/requirements.md`** — refresh acceptance criteria (do not rely on previous-session memory)
-5. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md`** — refresh architecture and interface signatures
-6. **`Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/task-log.md`** — check for unresolved `blocked:` statuses or `Spec updated — re-planning required` entries
+3. **`Docs/Management/[section-or-filing-dir]/[feature]/tasks.md`** — confirm which tasks are done, in-progress (`[~]`), and pending
+4. **`Docs/Management/[section-or-filing-dir]/[feature]/requirements.md`** — refresh acceptance criteria (do not rely on previous-session memory)
+5. **`Docs/Management/[section-or-filing-dir]/[feature]/design.md`** — refresh architecture and interface signatures
+6. **`Docs/Management/[section-or-filing-dir]/[feature]/task-log.md`** — check for unresolved `blocked:` statuses or `Spec updated — re-planning required` entries
 7. **Lease claim refresh + resume-pointer read (Session Continuity):**
    - For the picked work unit, classify any existing `[~]`/`🟡 In Progress` claim under
      `.claude/leases/` via `python .claude/scripts/lease/reclaim.py <my_session_id> <owner_session_id>`:

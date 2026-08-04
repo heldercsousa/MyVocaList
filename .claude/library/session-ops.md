@@ -12,8 +12,8 @@ Memory in this workflow is tiered by durability and scope. Each tier has a diffe
 | Tier | File | Owner | Lifecycle | Read obligation |
 |------|------|-------|-----------|-----------------|
 | **Constitutional** | `CLAUDE.md`, `.claude/rules/*.md` | Helder | Permanent — amended only by Helder | Read on setup and after any amendment |
-| **Architectural** | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md`, `Key Decisions` | Helder | Feature lifetime | Read at session start for features being worked on |
-| **Operational** | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md`, task-log | Main agent | Feature lifetime | Read at every session start |
+| **Architectural** | `Docs/Management/[section-or-filing-dir]/[feature]/design.md`, `Key Decisions` | Helder | Feature lifetime | Read at session start for features being worked on |
+| **Operational** | `Docs/Management/[section-or-filing-dir]/[feature]/tasks.md`, task-log | Main agent | Feature lifetime | Read at every session start |
 | **Session** | `ACTIVE-CONSIDERATIONS.md`, `session-handoff.md` | Main agent | Single session or single handoff | Read at session start; update continuously |
 | **Ephemeral** | In-context notes, subagent briefing state | Subagent | Context window only | Not persisted — must be written to a durable tier before session ends |
 | **Device auto-memory** (NOT a registration surface) | `~/.claude/projects/<project>/memory/*` | Harness / agent (per-device) | Per-device, not git-tracked, not team-visible | Optional aid only — never the sole home for any work item |
@@ -24,7 +24,7 @@ Memory in this workflow is tiered by durability and scope. Each tier has a diffe
 3. **Operational tier** — main agent maintains. Subagents update task-log status and Changed files entries only.
 4. **Session tier** — main agent creates and maintains. Written to disk before session ends (never left as ephemeral).
 5. **Ephemeral tier** — no item should remain ephemeral if it needs to survive past the current session. If it matters, write it to the Operational or Session tier before stopping.
-6. **Device auto-memory tier — NOT a registration surface.** This per-device tree is personal, not git-tracked, and not team-visible. Recording a work item here does NOT register it: `BACKLOG.md` is the only registration surface. A work item that lives only in device memory is an orphan, and the advisory Stop-hook will warn about it at session end. Use this tier as a private continuation aid only — never as the sole home for any work item.
+6. **Device auto-memory tier — NOT a registration surface.** This per-device tree is personal, not git-tracked, and not team-visible. Recording a work item here does NOT register it: **an item folder with frontmatter** (created by `backlog_gen.py register`) is the only registration surface — `BACKLOG.md` is a generated view of that surface, not the surface itself. A work item that lives only in device memory is an orphan, and the advisory Stop-hook will warn about it at session end. Use this tier as a private continuation aid only — never as the sole home for any work item.
 
 **Promotion rule:** When a constraint, decision, or discovery is discovered during implementation and needs to be remembered:
 - Temporary reminder → `ACTIVE-CONSIDERATIONS.md` (Session tier)
@@ -35,6 +35,10 @@ Memory in this workflow is tiered by durability and scope. Each tier has a diffe
 ---
 
 ## Session start constraint capture
+
+**BACKLOG.md is not in the session-start read set.** Use `backlog_gen.py query --status "🟡,🟢"`
+(workflow.md Rule 7 step 1). Reading the rendered file costs ~4.5k tokens for the same information
+and is a Rule 7 violation, not a fallback.
 
 After reading the session start steps (Rule 7), before dispatching the first wave, record any newly discovered constraints or decisions from the previous session that have NOT yet been committed to their permanent home:
 
@@ -97,7 +101,7 @@ When a session involves significant exploration, debugging, or spike work, the f
 - Any session where an architectural option was explored and rejected
 - Any session where a library or API was evaluated for the first time
 
-**File location:** `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/findings.md` for feature spikes, or `Docs/DevEnv/findings/[YYYY-MM-DD]-[topic].md` for general technical findings not tied to a feature.
+**File location:** `Docs/Management/[section-or-filing-dir]/[feature]/findings.md` for feature spikes, or `Docs/DevEnv/findings/[YYYY-MM-DD]-[topic].md` for general technical findings not tied to a feature.
 
 **findings.md format:**
 ```markdown
@@ -133,7 +137,7 @@ When a session involves significant exploration, debugging, or spike work, the f
 
 When a feature spans multiple sessions, the state at session end must be captured so the next session can resume without loss.
 
-**Session-end handoff artifact (write to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/handoff.md`):**
+**Session-end handoff artifact (write to `Docs/Management/[section-or-filing-dir]/[feature]/handoff.md`):**
 ```markdown
 # Session Handoff — [Feature Name] — [YYYY-MM-DD]
 

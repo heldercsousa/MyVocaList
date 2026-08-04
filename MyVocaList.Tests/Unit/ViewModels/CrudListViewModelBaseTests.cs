@@ -1,5 +1,5 @@
-using System.Collections.Concurrent;
 using MyVocaList.UI.Collections;
+using System.Collections.Concurrent;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -100,12 +100,51 @@ public class CrudListViewModelBaseTests
         Assert.Empty(isInitialLoadingChanges);
     }
 
+    [Fact]
+    // [AC] REQ-SEARCHBAR-14: SearchText change debounces into a fetch carrying the trimmed query
+    public async Task SearchText_Changed_DebouncesIntoFetchWithTrimmedQuery()
+    {
+        var sut = new TestCrudListViewModel();
+        await sut.InitializeAsync();
+        sut.ResetFetchCapture();
+
+        sut.SearchText = "  abc  ";
+
+        var deadline = DateTime.UtcNow + TestTimeout;
+        while (sut.LastFetchQuery == null && DateTime.UtcNow < deadline)
+            await Task.Delay(20);
+
+        Assert.Equal("abc", sut.LastFetchQuery);
+    }
+
+    [Fact]
+    // [AC] REQ-SEARCHBAR-14: rapid SearchText edits cancel the pending debounce — only the final query is fetched
+    public async Task SearchText_RapidChanges_OnlyFetchesFinalQuery()
+    {
+        var sut = new TestCrudListViewModel();
+        await sut.InitializeAsync();
+        sut.ResetFetchCapture();
+
+        sut.SearchText = "a";
+        sut.SearchText = "ab";
+        sut.SearchText = "abc";
+
+        var deadline = DateTime.UtcNow + TestTimeout;
+        while (sut.LastFetchQuery == null && DateTime.UtcNow < deadline)
+            await Task.Delay(20);
+
+        Assert.Equal("abc", sut.LastFetchQuery);
+        Assert.Equal(1, sut.FetchPageCallCount);
+    }
+
     // ── Test double ───────────────────────────────────────────────────────
 
     private sealed class TestCrudListViewModel : CrudListViewModelBase<string>
     {
         private readonly Action _onFetchPage;
         private readonly Action _onFetchMore;
+        private volatile string _lastFetchQuery;
+        private int _fetchPageCallCount;
 
         public TestCrudListViewModel(Action onFetchPage = null, Action onFetchMore = null)
             : base(Mock.Of<ILogger>())
@@ -115,6 +154,14 @@ public class CrudListViewModelBaseTests
         }
 
         public int ItemCount => Items.Count;
+        public string LastFetchQuery => _lastFetchQuery;
+        public int FetchPageCallCount => _fetchPageCallCount;
+
+        public void ResetFetchCapture()
+        {
+            _lastFetchQuery = null;
+            Interlocked.Exchange(ref _fetchPageCallCount, 0);
+        }
 
         protected override ObservableRangeCollection<string> Items { get; } = [];
         protected override ObservableRangeCollection<string> SelectedItems { get; } = [];
@@ -122,6 +169,8 @@ public class CrudListViewModelBaseTests
         protected override Task<(IEnumerable<string> items, int totalCount)> FetchPageAsync(
             int page, int pageSize, string query, CancellationToken ct)
         {
+            Interlocked.Increment(ref _fetchPageCallCount);
+            _lastFetchQuery = query;
             _onFetchPage?.Invoke();
             return Task.FromResult<(IEnumerable<string>, int)>((["item-1"], 1));
         }

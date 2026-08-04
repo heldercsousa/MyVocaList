@@ -41,7 +41,10 @@ namespace MyVocaList.UI.ViewModels
             _snackbarService = snackbarService;
             _logger = logger;
 
-            SaveCommand = new AsyncRelayCommand(SaveAsync);
+            // BUG-049: explicit CanExecute tied to IsBusy — combined with the early-return guard in
+            // SaveAsync — prevents a fast double-tap from firing SaveAsync twice concurrently, which
+            // caused a duplicate "GoToAsync("..")" that overshot the nav stack root.
+            SaveCommand = new AsyncRelayCommand(SaveAsync, () => !IsBusy);
             CancelCommand = new AsyncRelayCommand(CancelAsync);
         }
 
@@ -53,6 +56,8 @@ namespace MyVocaList.UI.ViewModels
             OnPropertyChanged(nameof(IsEditMode));
             OnPropertyChanged(nameof(PageTitle));
         }
+
+        partial void OnIsBusyChanged(bool value) => SaveCommand.NotifyCanExecuteChanged();
 
         /// <summary>
         /// Blur handler (invoked from the page's <c>Unfocused</c> event). Validates the name field
@@ -92,6 +97,8 @@ namespace MyVocaList.UI.ViewModels
 
         private async Task SaveAsync()
         {
+            if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
+
             var name = VenueName?.Trim() ?? string.Empty;
 
             var validation = _venueService.ValidateNameInput(name);
