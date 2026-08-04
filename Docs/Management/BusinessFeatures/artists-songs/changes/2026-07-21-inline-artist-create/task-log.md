@@ -873,3 +873,160 @@ not chase these during the fix waves):
 INLINE-AC closeout is **blocked**, and the branch must **NOT** be merged to develop:
 `feat/inline-artist-create` currently persists no artist edit at all in edit mode. The BUG-067 fix
 and REQ-ACREATE-16 remain correct and stay — they are simply not sufficient on their own.
+
+---
+## Task: Fix BUG-068 (Critical) — EF Core identity conflict aborts every edit-mode save
+**Plan:** narrow single-bug dispatch (Helder, 2026-08-03) — BUG-069/BUG-070 explicitly out of scope
+**Status:** To Review
+**Started:** 2026-08-03
+**Completed:** 2026-08-03
+
+### Root cause (proven, systematic-debugging — reproduced before any fix)
+**`AppDbContext` is registered `Scoped` (`AddDbContext`), but MAUI's DI container has no
+per-page/request child scope — the root `ServiceProvider` resolves one instance that lives for
+the app's entire session, behaving as a de facto singleton.**
+`ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking` (global default,
+`AppDbContext.cs:37`) only suppresses tracking for **query results** — it does NOT detach
+entities that were explicitly `Add()`'ed/`Update()`'d and then `SaveChangesAsync()`'d earlier in
+that same long-lived context. A Song's own creation (`SongRepository.AddAsync` +
+`SaveChangesAsync`, or any earlier edit-save) therefore leaves it tracked (`Unchanged`) in the
+context's identity map for the rest of the app session. The next edit-save's
+`SongRepository.GetByIdAsync` (untracked, per the global default — it has no `.AsTracking()`
+call despite its stale comment) returns a **second, distinct** `Song` instance with the same
+`Id`. `SongRepository.UpdateAsync`'s `_db.Songs.Update(song)` then tries to attach that second
+instance, and EF Core's `IdentityMap.Add` throws
+`InvalidOperationException: The instance of entity type 'Song' cannot be tracked because another
+instance with the same key value for {'Id'} is already being tracked` — exactly the verbatim
+device/emulator exception in T10 re-run #5.
+
+**Confirmed empirically, not assumed:** a diagnostic test dumped `_db.ChangeTracker.DebugView`
+immediately before the failing `Update(song)` call and showed a **second tracked `Song {Id: 1}
+Unchanged`** entry that neither `GetByIdAsync` call created directly — it was the leftover from
+the test's own `Add` + `SaveChangesAsync` seeding step, on the SAME context, reproducing the
+exact production mechanism (song creation, then a later edit-save, sharing one long-lived
+`AppDbContext`). A control test proved the conflict fires even with **zero prior reads** — a
+single `UpdateSongAsync` call is sufficient, once the row has EVER been written before in that
+context's lifetime (which is always true for a "saved song" — it was created at some point).
+
+**Why 535/535 unit tests were green while every device save failed:** `SongServiceTests` mocks
+`ISongRepository`, so `DbSet.Update`'s identity-map code never executes — `testing.md § Project
+anti-patterns` already flags exactly this gap. No prior test exercised `SongRepository` against a
+`AppDbContext` that had EVER written the same Song row before.
+
+### Both user-visible faces, addressed
+- **Face 2 (hard failure — the exception above):** directly reproduced and fixed by the change
+  below; proven by the Red→Green pair.
+- **Face 1 (silent "success", no persisted change, no exception):** the identity conflict is
+  deterministic — once a Song row has been touched before in the app session (always true for a
+  saved song), `Update()` throws every time, not intermittently. A silent-success-with-no-write
+  and no exception is therefore **not explained by BUG-068's mechanism** and is not reproducible
+  from this root cause; it is consistent with BUG-069 (the dropdown reopening and the user's
+  selection reverting to the original artist before Save reads it) being mistaken for a
+  persistence failure — nothing changed because nothing was actually selected differently by the
+  time Save ran. This fix does not touch the artist-field search/dropdown/selection path (out of
+  this task's scope per the briefing); BUG-069 needs its own on-device re-verification to confirm
+  face 1 is closed. Flagging this explicitly rather than claiming face 1 fixed by inference.
+- Independent of the above, this fix's regression tests DO prove that once a save reaches the
+  repository, it always **persists** the change and never silently no-ops — closing the
+  "no exception, but also nothing written" possibility that would exist even for a correctly
+  selected artist, for any Song row already tracked in the context.
+
+### Fix
+`SongRepository.UpdateAsync` (`Infra/Repository/SongRepository.cs:133-149`): before calling
+`_db.Songs.Update(song)`, look up whether a `Song` with the same `Id` is already tracked in the
+context (`_db.ChangeTracker.Entries<Song>()`). If a tracked instance exists and it is a different
+object reference than the one passed in, copy the new instance's values onto the **tracked**
+entry via `tracked.CurrentValues.SetValues(song)` (scalar/FK properties only — it does not touch
+navigation properties, so it cannot re-attach `song.OriginalArtist`'s graph either). Otherwise
+(first-ever touch of this row in the context, or the exact same tracked instance was passed in),
+fall back to the original `_db.Songs.Update(song)`.
+
+This is scoped to `SongRepository` only, as instructed — it does not change `AppDbContext`'s
+registration, `QueryTrackingBehavior`, or any other repository. The underlying MAUI-DI
+Scoped-behaves-as-Singleton condition is broader than this one repository (every repository over
+`AppDbContext` is subject to the same "row already tracked from an earlier write" hazard) — **this
+implication is flagged for Helder**, per the briefing's escalation instruction, rather than
+generalized here. It likely feeds the parked **Read Model + Global NoTracking Pattern —
+Guidelines Update** activity referenced in the T10 re-run #5 entry above.
+
+### Observed Red (before the fix — both new tests)
+```
+System.InvalidOperationException : The instance of entity type 'Song' cannot be tracked because
+another instance with the same key value for {'Id'} is already being tracked. When attaching
+existing entities, ensure that only one entity instance with a given key value is attached.
+   at ...IdentityMap`1.ThrowIdentityConflict(InternalEntityEntry entry)
+   at ...StateManager.StartTracking(InternalEntityEntry entry)
+   at ...EntityGraphAttacher.AttachGraph(...)
+   at ...InternalDbSet`1.Update(TEntity entity)
+   at MyVocaList.Infra.Repository.SongRepository.UpdateAsync(Song song, CancellationToken ct)
+        in Infra\Repository\SongRepository.cs:line 135
+   at MyVocaList.Services.SongService.UpdateSongAsync(...) in Services\SongService.cs:line 156
+   at MyVocaList.Tests.Integration.Services.SongServiceUpdateIntegrationTests.
+        UpdateSongAsync_AfterPriorHydrationRead_PersistsChangedArtistWithoutThrowing()
+Com falha! - Com falha: 2, Aprovado: 0, Ignorado: 0, Total: 2
+```
+(Both `UpdateSongAsync_AfterPriorHydrationRead_PersistsChangedArtistWithoutThrowing` and
+`UpdateSongAsync_SongAlreadyTrackedInContext_PersistsWithoutThrowing` failed with the identical
+exception — captured with the production fix commented out, then the line was restored:
+comment-out/restore evidence, not a one-shot observation.)
+
+### Observed Green (after the fix)
+```
+dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --filter "FullyQualifiedName~SongServiceUpdateIntegrationTests"
+Aprovado! – Com falha: 0, Aprovado: 2, Ignorado: 0, Total: 2, Duração: 739 ms
+
+dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj (full suite)
+Aprovado! – Com falha: 0, Aprovado: 537, Ignorado: 0, Total: 537, Duração: 4 s
+```
+537 = 535 baseline (per T10 re-run #5's recorded count) + 2 new. No pre-existing test regressed.
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|------------------------|-------------|
+| REQ-ACREATE-16 | A changed artist on an already-saved song persists even after the page's edit-mode hydration read has run on the same `AppDbContext` | `SongRepository.UpdateAsync` (tracked-entry `SetValues` path) | `UpdateSongAsync_AfterPriorHydrationRead_PersistsChangedArtistWithoutThrowing` |
+| REQ-ACREATE-16 | A changed artist persists on a Song row already tracked in the context from its own earlier creation/save (BUG-068 face 2 — the exact device exception) | `SongRepository.UpdateAsync` (tracked-entry `SetValues` path) | `UpdateSongAsync_SongAlreadyTrackedInContext_PersistsWithoutThrowing` |
+| REQ-ACREATE-16 | End-to-end device confirmation that the save no longer throws and the new artist is shown on reopen | full edit flow | **on-device only — requires a fresh T10-style re-run, not covered here (BUG-069 still open on the same page)** |
+
+### What could NOT be verified without a device
+- The actual on-device/emulator save flow end-to-end (the original T10 re-run #5 repro steps).
+  The repository-seam test reproduces the exact exception and proves the fix removes it and
+  persists correctly; it cannot observe the DevExpress UI layer.
+- Whether face 1 (silent success, nothing persisted, no exception) is actually closed — per the
+  analysis above, that symptom is not explained by BUG-068's mechanism and is suspected to be a
+  BUG-069 (dropdown-reopen/selection-reversion) symptom instead. Needs Helder's device
+  re-verification with BUG-069 also fixed (or independently, to isolate which bug degrades which
+  symptom).
+
+### Changed files:
+- `Infra/Repository/SongRepository.cs` (worktree `MyVocaList-inline-ac`) — `UpdateAsync` now
+  checks `_db.ChangeTracker.Entries<Song>()` for an already-tracked instance with the same `Id`
+  and updates its `CurrentValues` instead of attaching a second instance via `DbSet.Update`.
+- `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTests.cs` (worktree,
+  **new file**) — 2 new repository/integration-seam regression tests against real SQLite
+  (`TestDbContextFactory`), constructing `SongService` with real `SongRepository`/`ArtistRepository`
+  (not mocked) so `DbSet.Update`'s identity-map code actually executes.
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/requirements.md`
+  (develop) — `> Spec updated [2026-08-03]` note appended to REQ-ACREATE-16 documenting the
+  repository-seam regression-test requirement this bug exposed.
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/task-log.md`
+  (develop) — this entry.
+
+### Verification evidence
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0` → `ok dotnet build: 6 projects, 0 errors, 11 warnings` (all pre-existing NU1903, unrelated). First attempt, no retries.
+- **Tests:** full suite `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → `Com falha: 0, Aprovado: 537, Total: 537`.
+- **Red→Green:** both captured above in this session, plus an explicit comment-out/restore pass on the production fix (not just the initial Red before any code existed).
+- **Files written and re-read after edit:** `Infra/Repository/SongRepository.cs` (:132-158, re-read after the comment-out/restore cycle to confirm the fix is the version left in place), `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTests.cs` (full file re-read), `requirements.md` (REQ-ACREATE-16 section re-read).
+- **`.sln` registration:** not required — no file created/moved/deleted under `Docs/` or `.claude/`; the new test `.cs` file is covered by the test project's existing glob include, matching the pattern of every other file in `Integration/Repositories/`.
+- **BUG-069/BUG-070 not touched:** confirmed no edit to `SongFormPage.xaml(.cs)`, `SongFormViewModel.cs`'s artist search/dropdown/lock members, or any validation-message string. `git diff --stat` on the worktree shows only `Infra/Repository/SongRepository.cs` (production) and one new test file.
+
+### Design concern / escalation (not blocking, flagged per briefing)
+The root architectural condition — `AppDbContext` Scoped-registered but MAUI has no per-page DI
+scope, so it behaves as a singleton for the app's session — affects every repository built on
+`AppDbContext`, not just `SongRepository`. This fix is intentionally narrow (Song only, per the
+briefing's explicit instruction not to make a broader read-model/NoTracking policy change). The
+same "row already tracked from an earlier write, second read collides on `Update()`" hazard is
+latent in any other repository whose `UpdateAsync` calls `DbSet.Update(entity)` after a fresh
+(NoTracking) read of a previously-written row. Recommend this feeds the parked **Read Model +
+Global NoTracking Pattern — Guidelines Update** activity as a concrete, reproduced case, or that
+Helder considers introducing an actual `IServiceScopeFactory`-based per-page scope in
+`MauiProgram.cs` (sequential-only file — out of this task's scope) as the systemic fix.
