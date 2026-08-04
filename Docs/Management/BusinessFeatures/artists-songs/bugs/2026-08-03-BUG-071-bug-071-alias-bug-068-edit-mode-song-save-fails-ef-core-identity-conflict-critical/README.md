@@ -1,7 +1,7 @@
 ---
 id: BUG-071
 title: "BUG-071 (alias BUG-068): Edit-mode song save fails — EF Core identity conflict (Critical)"
-status: 💡 Pending
+status: 🟡 In Progress
 severity: Critical
 target: 2026-08-03
 section: BusinessFeatures
@@ -94,4 +94,3 @@ Closed by `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTes
 Low, and confined to `SongRepository`. `Song` has no concurrency token and its navigations
 (`OriginalArtist`, `CatalogEntries`) are not written by the update path, so scalar/FK-only copying
 loses nothing.
-
