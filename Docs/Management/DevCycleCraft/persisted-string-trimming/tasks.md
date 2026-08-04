@@ -69,10 +69,15 @@
   - Review lane: verifier subagent (confirms zero Domain/Infra/Services/Contracts references from the new project, confirms all call sites updated, confirms behavior-only-syntax-change via full suite parity)
   - **Then:** rebase `feat/persisted-string-trimming-converters` (Task 6) onto the post-Task-6a `develop`, update its `EntityTypeConfiguration` files + `Infra.csproj` to reference `MyVocaList.Extensions` instead of `Services`, re-verify, re-merge.
 
-- [ ] **Task 7 — Integration merge + docs close-out** *(depends: Tasks 2–6a, rebased Task 6; main agent, no worktree)*
+- [x] **Task 7 — Integration merge + docs close-out** *(depends: Tasks 2–6a, rebased Task 6; main agent, no worktree)*
   - Produces: task branches merged to develop, full suite green; task-log entries with AC traceability matrix (REQ-TRIM-01..10) + BUG-046 Red→Green evidence; BACKLOG status updates; Session-End Spec Update Ritual
   - Consumes: all merged task output
   - Risk: Low — shell + docs only
   - Files owned: `Docs/Management/DevCycleCraft/persisted-string-trimming/task-log.md`, `Docs/Management/BACKLOG.md`, `MyVocaList.sln` (if new Docs files), `Docs/Management/LEDGER.md`
   - Demo: `dotnet test` full suite green on develop; BACKLOG rows advanced
   - Review lane: Helder final review + on-device E2E gate
+
+> **Task 7 closed [2026-08-04].** All produces delivered: branch merged to develop, full suite
+> green, task-log entry written, item status refreshed, LEDGER row recorded. Its review lane
+> (*Helder final review + on-device E2E gate*) is the one thing still open and is tracked as
+> the item's `gate:` — not as an unchecked task, since there is no implementation work left.
