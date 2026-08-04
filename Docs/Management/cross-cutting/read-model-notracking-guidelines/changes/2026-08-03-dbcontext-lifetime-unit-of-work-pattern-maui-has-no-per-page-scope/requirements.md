@@ -75,10 +75,25 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 
 ### Lifetime & structural correctness
 
-- **REQ-UOW-01** — The system SHALL NOT resolve `AppDbContext` from the root/window `IServiceProvider`
-  at any point in application code. *Test:* a DI-composition test asserts that either no
-  `ServiceDescriptor` for `AppDbContext` exists with `ServiceLifetime.Scoped` registered against the
-  root provider, or that resolving it outside an explicitly created scope throws.
+- **REQ-UOW-01** — **Corrected 2026-08-04 (4th-pass spec review, BL-F).** The original wording ("SHALL
+  NOT resolve `AppDbContext` from the root/window `IServiceProvider` at any point," tested by "either no
+  `ServiceDescriptor` ... registered against the root provider, or resolving it outside a scope throws")
+  is **false under the approved Candidate C design and untestable as written**: `AddDbContextFactory<AppDbContext>(…,
+  ServiceLifetime.Scoped)` registers `AppDbContext` itself as an ordinary scoped `ServiceDescriptor`
+  by design (§ 1 "Reviewer-finding correction" — repositories keep constructor-injecting it), so the
+  first disjunct is false by construction; and MAUI does not enable `ValidateScopes` by default (§ 1,
+  framework fact table), so resolving `AppDbContext` from the root/window provider does **not** throw —
+  the second disjunct is also false. Both disjuncts of the original AC are false under the chosen
+  design, making it neither true nor testable. Replaced with the structural guarantee Candidate C
+  actually provides: **all scope creation for a unit of work SHALL go through `IUnitOfWork`; no other
+  production code path SHALL call `IServiceScopeFactory.CreateScope()`/`CreateAsyncScope()` directly.**
+  *Test:* (a) a DI-composition test asserts `IDbContextFactory<AppDbContext>` and `IUnitOfWork` are both
+  registered exactly once; (b) a source-level grep check (review checklist, mirroring REQ-UOW-11's
+  pattern) confirms no file under `Services/`, `MyVocaList/UI/ViewModels/`, or `Infra/` other than
+  `UnitOfWork`'s own implementation calls `CreateScope()`/`CreateAsyncScope()` on an
+  `IServiceScopeFactory`. This does not claim `AppDbContext` is unreachable from the root provider —
+  it claims the *unit-of-work boundary* (not raw scope creation) is the single place a write's lifetime
+  is managed, which is what REQ-UOW-12/REQ-UOW-28 actually depend on.
 - **REQ-UOW-02** — Every `AppDbContext` instance SHALL be disposed at the end of the unit of work
   that created it. *Test:* an integration test creating N units of work asserts N distinct
   `DbContext` instances (compared by reference) and that each is disposed on exit.
@@ -200,6 +215,20 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   `(false, …)` return, then asserts via a fresh read that the row is unchanged. Cover at least one
   `ValueTuple`-shaped method (e.g. `SongService.UpdateSongAsync`) and the `IUnitOfWorkOutcome` shape
   (`BackupService.CreateFullBackupAsync` returning a `BackupResult` with `Success == false`).
+  **Nested-call precedence (new, non-blocking #11, 4th-pass spec review):** WHEN a joined nested
+  `ExecuteAsync` call (§ 6a ambient-scope join) returns a failure signal, THEN the failure SHALL
+  propagate to the OUTER `ExecuteAsync`'s own `ResultSignalsSuccess` check via the outer body's own
+  return value — the join branch (`if (_ambientScope.Value is { } joined) return await body(joined);`,
+  `design.md § 6`) returns the inner result directly to its caller without independently inspecting it,
+  so save-skip is decided exactly once, by the OUTERMOST `ExecuteAsync` in the chain, based on
+  whatever tuple/outcome the outermost body ultimately returns. This is already the code's actual
+  behavior (the join branch does no signal inspection of its own) — this clause makes it an explicit,
+  tested requirement rather than an implicit consequence of the join branch's code shape. *Test:*
+  `SongResolutionService.CommitAsync`'s 3-level chain (REQ-UOW-22) already covers this: assert that when
+  the innermost `ArtistService.CreateArtistAsync` call fails, the failure propagates all the way to
+  `SongResolutionService.CommitAsync`'s own returned tuple, and the outermost `ExecuteAsync` (opened by
+  whichever caller is outermost) skips its save based on that final tuple — not on any intermediate
+  nested call's result.
 - **REQ-UOW-25** — WHEN a service method's body mutates an entity and returns a `ValueTuple` whose
   first element is `bool` set to `true` (or `IUnitOfWorkOutcome.Success == true`), THEN
   `IUnitOfWork.ExecuteAsync` SHALL call `SaveChangesAsync` exactly once and the mutation SHALL be
@@ -218,10 +247,54 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   `SongKaraokeUrlService.RecordPlayAsync`. The first two are `QueueService` methods, excluded from this
   spec's scope under D12 (see REQ-UOW-08/REQ-UOW-23) — `QueueService.RecordParticipationAsync`'s
   three-repository span is no longer relevant to this spec's Phase 4+ work. **The only in-scope
-  no-signal method is `SongKaraokeUrlService.RecordPlayAsync`.** *Test:* an integration test running
-  `SongKaraokeUrlService.RecordPlayAsync` (or an equivalent bare-`Task` in-scope mutating call) asserts
-  the mutation is persisted on a normal return, and a second test asserts an exception thrown inside
-  the body still leaves no partial state (REQ-UOW-06 applies identically to the no-signal overload).
+  no-signal method is `SongKaraokeUrlService.RecordPlayAsync`.**
+  **Further correction (4th-pass spec review, BL-C, verified against source):**
+  `SongKaraokeUrlService.RecordPlayAsync` (`SongKaraokeUrlService.cs:79-83`) calls
+  `_repo.IncrementPlayCountAsync`, whose implementation
+  (`Infra/Repository/SongKaraokeUrlRepository.cs:56-64`) is `db.SongKaraokeUrls.Where(...).ExecuteUpdateAsync(...)`
+  — an immediate-SQL EF Core bulk operation that runs **outside the change tracker** and commits the
+  instant it is awaited, independent of any later `SaveChangesAsync` call. Wrapping this method in the
+  no-signal `ExecuteAsync` overload does not make this AC's "leaves no partial state on exception"
+  guarantee true for it: the mutation is already durable before `ExecuteAsync`'s own (redundant)
+  `SaveChangesAsync` call runs, so an exception thrown *after* `IncrementPlayCountAsync` returns but
+  before `ExecuteAsync` completes would still leave the play-count increment persisted — this is a
+  structural exception to REQ-UOW-06 for this method, not a bug in `IUnitOfWork`. **This AC's exemplar
+  is corrected:** `SongKaraokeUrlService.RecordPlayAsync` is retained as the only in-scope no-signal
+  method for API-shape purposes (it is the only bare-`Task` in-scope mutator), but its "no partial
+  state survives" claim is carved out — see the new REQ-UOW-33 (`ExecuteUpdateAsync`/`ExecuteDeleteAsync`
+  carve-out) below, which REQ-UOW-26's test must be read alongside. *Test:* an integration test running
+  `SongKaraokeUrlService.RecordPlayAsync` asserts the mutation is persisted on a normal return (this
+  part is unaffected — `ExecuteUpdateAsync` always persists immediately, so a normal return is always
+  observably saved); the second "exception still leaves no partial state" test required by the
+  original AC text does NOT apply to this method per REQ-UOW-33 and MUST NOT be written for it — write
+  it instead against a hypothetical or a different in-scope no-signal method if one is added later.
+
+- **REQ-UOW-33** (new, 4th-pass spec review, BL-C) — **Carve-out: `ExecuteUpdateAsync`/`ExecuteDeleteAsync`
+  bypass the unit-of-work save boundary entirely; REQ-UOW-24/25/26's atomicity guarantees do NOT apply
+  to them.** These EF Core bulk operations execute immediate SQL against the database outside the
+  `DbContext` change tracker the instant they are awaited — there is no staged state for
+  `IUnitOfWork.ExecuteAsync`'s implicit `SaveChangesAsync` (or its save-skip logic) to affect, and no
+  rollback is possible once one has run, regardless of what the enclosing service method returns
+  afterward or throws afterward. The following in-scope repository methods are `ExecuteUpdateAsync`/
+  `ExecuteDeleteAsync`-based and are EXEMPT from REQ-UOW-24 (save-skip on failure), REQ-UOW-25
+  (save-on-success), and the "no partial state on exception" clause of REQ-UOW-06/REQ-UOW-26, verified
+  by direct read against current `develop` HEAD:
+  | Repository method | Mechanism | Line | Called by (in-scope service method) |
+  |---|---|---|---|
+  | `SongKaraokeUrlRepository.IncrementPlayCountAsync` | `ExecuteUpdateAsync` | `SongKaraokeUrlRepository.cs:56-64` | `SongKaraokeUrlService.RecordPlayAsync` |
+  | `SongKaraokeUrlRepository.RemoveAsync` | `ExecuteDeleteAsync` | `SongKaraokeUrlRepository.cs:48-53` | `SongKaraokeUrlService.RemoveUrlAsync` |
+  | `ArtistRepository.DeleteAsync` | `ExecuteDeleteAsync` | `ArtistRepository.cs:148-154` | `ArtistService.DeleteArtistsAsync` (pilot, Phase 2) |
+  | `SongRepository.DeleteAsync` | `ExecuteDeleteAsync` | `SongRepository.cs:136-142` | `SongService.DeleteSongsAsync` (pilot, Phase 2) |
+  | `CatalogRepository.RemoveAsync` | `ExecuteDeleteAsync` | `CatalogRepository.cs:70-75` | `CatalogService.RemoveSongFromCatalogAsync` |
+
+  Wrapping any of these five service methods in `IUnitOfWork.ExecuteAsync` is still REQUIRED (§ 10) for
+  consistency of the API surface and because each method may also touch tracked-entity state elsewhere
+  in its body (e.g. `ArtistService.DeleteArtistsAsync` reads via `GetByIdAsync`/`CountByArtistAsync`
+  before deleting) — but the wrap provides no atomicity guarantee for the `ExecuteUpdateAsync`/
+  `ExecuteDeleteAsync` call itself. *Test:* none required beyond the existing repository-level tests for
+  these methods (they already test the immediate-SQL behavior); no new REQ-UOW-24/25/26-shaped
+  atomicity test may be written against any of the five call sites above — doing so would test a
+  guarantee this spec does not provide.
 - **REQ-UOW-27** (Revision 9, 2026-08-04 — resolves the fail-open/fail-closed refinement of finding
   B3) — WHEN a service method's body returns, via `IUnitOfWork.ExecuteAsync<TResult>` (the
   value-returning overload — the only value-returning form under Revision 10, `design.md § 8`), a
@@ -243,7 +316,8 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   *Test:* a unit/integration test calling `ExecuteAsync<TResult>` with a body that returns a
   bespoke named type implementing neither recognised shape asserts `InvalidOperationException` is
   thrown and that no row was written as a result of any mutation performed inside `body` before the
-  return. A second test confirms `BackupService.CreateFullBackupAsync`'s wrap (Wave 5) does NOT throw
+  return. A second test confirms `BackupService.CreateFullBackupAsync`'s wrap (Phase 4+, corrected from
+  stale "Wave 5", non-blocking #1) does NOT throw
   once `BackupResult : IUnitOfWorkOutcome` is in place — the positive counterpart proving the fix
   closes the gap without breaking the one existing named-result case.
 
@@ -257,10 +331,25 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   `AppDbContext` (the same object BUG-068 was caused by), while `IUnitOfWork` saves a *different*,
   freshly-scoped `AppDbContext` that never saw the mutation. This is not detectable by the compiler or
   by a test that only checks the return value — it requires reviewing what the lambda body actually
-  references. *Test:* a per-method code-review checklist item (`design.md § 8` "the load-bearing
-  rule") for every Wave 5 diff, plus a static/grep check in the review checklist confirming no
-  `Services/*.cs` `ExecuteAsync`/`ExecuteReadAsync` lambda body references a `_`-prefixed
-  constructor-injected repository field.
+  references. **Corrected 2026-08-04 (4th-pass spec review, BL-G):** the enforcement check below
+  originally covered only `_`-prefixed REPOSITORY fields. This is a hole: the pilot's deepest chain
+  (`SongResolutionService.CommitAsync`'s lambda calling `_songService.CreateSongAsync`/
+  `CreateSongWithUrlsAsync`/`UpdateSongAsync`, and `_artistResolution.CommitAsync`, per § 6a; similarly
+  `ArtistResolutionService.CommitAsync`'s lambda calling `_artistService.CreateArtistAsync`) is driven
+  through constructor-injected **service** fields, not repository fields — a grep restricted to
+  repository-typed fields would pass a lambda body that still references `_songService`/
+  `_artistResolution`/`_artistService` directly instead of resolving the nested service from `sp`,
+  silently defeating the pattern exactly as a stray `_songRepository` reference would. *Test:* a
+  per-method code-review checklist item (`design.md § 8` "the load-bearing rule") for every Phase 2/4+
+  diff, plus a static/grep check in the review checklist confirming no `Services/*.cs`
+  `ExecuteAsync`/`ExecuteReadAsync` lambda body references **any** `_`-prefixed constructor-injected
+  field of the enclosing service — repository-typed (`_songRepository`, `_artistRepository`, …) AND
+  service-typed (`_songService`, `_artistService`, `_artistResolution`, `_urlService`, …) alike. The
+  check enumerates the specific field names known to matter today:
+  `SongResolutionService._songRepository`, `._artistResolution`, `._songService`;
+  `ArtistResolutionService._artistRepository`, `._artistService`; `SongService._songRepository`,
+  `._artistRepository`, `._urlRepository`, `._urlService`; `ArtistService._artistRepository`,
+  `._songRepository`, `._catalogRepository`.
   ```
   Given SongService wraps UpdateSongAsync's body in _uow.ExecuteAsync<(bool, string)>(async sp => { ... })
   When the lambda body is reviewed
@@ -268,6 +357,13 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
       sp.GetRequiredService<ISongRepository>() inside that same lambda
   And no reference to the service's constructor-injected _songRepository field appears
       anywhere inside the lambda body
+
+  Given SongResolutionService wraps CommitAsync's body in _uow.ExecuteAsync<(bool, string, Song?)>(async sp => { ... })
+  And the body calls the nested ISongService.CreateSongAsync
+  When the lambda body is reviewed
+  Then the nested service is resolved via sp.GetRequiredService<ISongService>() inside that same lambda
+  And no reference to the service's constructor-injected _songService or _artistResolution fields
+      appears anywhere inside the lambda body
   ```
 
 ### DRY & comprehensibility
@@ -276,12 +372,26 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   service method** and **zero lines per repository method**. A design requiring an added
   `AppDbContext` parameter on repository methods, or two or more lines of ceremony per service method,
   fails this criterion. *Test:* reviewer-checked diff statistic recorded in the task-log.
-- **REQ-UOW-11** — The six pass-through `SaveChangesAsync` implementations
-  (`BaseRepository.cs:76-79`, `ArtistRepository.cs:157-158`, `CatalogRepository.cs:78-79`,
+- **REQ-UOW-11** — The five pass-through `SaveChangesAsync` implementations on standalone repository
+  interfaces that do not extend `IBaseRepository<T>`
+  (`ArtistRepository.cs:157-158`, `CatalogRepository.cs:78-79`,
   `SongKaraokeUrlRepository.cs:67-68`, `SongRepository.cs:145-146`, `BackupRepository.cs:46-49`)
   SHALL be reduced to at most one save entry point (the `IUnitOfWork` boundary). *Test:* a source-level
-  assertion (grep in the review checklist) that no in-scope repository implementation declares or
-  calls `SaveChangesAsync`. **Corrected 2026-08-04 (`design.md § 8` D12 item 4):** this requirement
+  assertion (grep in the review checklist) that no in-scope repository interface among these five
+  declares or calls `SaveChangesAsync`. **Corrected 2026-08-04 (4th-pass spec review, BL-B):**
+  `BaseRepository.cs:76-79`'s pass-through implements `IBaseRepository<T>.SaveChangesAsync()`
+  (`Domain/RepositoryInterface/IBaseRepository.cs:18`), a member also relied on by the EXCLUDED
+  `Services/QueueService.cs` via its `IVenueRepository`/`IEventRepository`/`IEventParticipationRepository`
+  fields (`QueueService.cs:97,134,145`, verified). Removing it would force a de facto edit of an
+  excluded file (REQ-UOW-31). It is **out of scope for this spec** — moved to
+  `changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/` alongside
+  the six embedded-mutator saves (D12 item 4 below). This spec's REQ-UOW-11 obligation is limited to
+  the five standalone-interface pass-throughs above; `PersonRepository`/`VenueRepository` retain a
+  technically-reachable inherited `SaveChangesAsync()` after this spec ships (no in-scope service calls
+  it, but the interface member is not deleted) — see `design.md § 8` "IBaseRepository<T>.SaveChangesAsync()
+  is NOT removed" decision, **REQUIRES HELDER'S CONFIRMATION**.
+
+  **Separately, corrected 2026-08-04 (`design.md § 8` D12 item 4):** this requirement
   previously also named "the six `SaveChangesAsync` calls embedded inside repository *mutator*
   methods" (`design.md § 2a` BL-1) as a second category in scope for this spec:
   `Infra/Repository/EventRepository.cs:37` `SetActiveEventAsync`,
@@ -348,23 +458,27 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 
 - **REQ-UOW-18** — The hand-rolled `ChangeTracker.Entries<Song>()` detach guard added to
   `SongRepository.UpdateAsync` in commit `1a114c1` (branch `feat/inline-artist-create`) is an
-  explicitly acknowledged **STOPGAP**. This work SHALL delete it, as part of Wave 3b
-  (`design.md § 10`), an ordinary step of the repository work with no external gate. *(withdrawn
-  2026-08-04: the sub-clause gating this deletion on Helder's on-device T10 re-run #6 is cancelled —
-  see `design.md § 8` decision "cancel the T10 re-run #6 gate". There is no reason to device-test the
-  stopgap when this work deletes and replaces it.)* **Merge-ordering note (NB-4, third-pass spec
-  review):** `feat/inline-artist-create` has NOT merged into `develop` as of this revision. If it
-  merges before Wave 3b runs, Wave 3b deletes the stopgap as described above; if it has not merged,
-  `develop`'s `SongRepository.UpdateAsync` does not contain the stopgap and Wave 3b is a no-op
-  confirmation instead — REQ-UOW-18 is satisfied vacuously in that case. Wave 3b runs unconditionally
-  either way; only whether it deletes anything changes. Record which case applied in the task-log
-  (`design.md § 10`).
+  explicitly acknowledged **STOPGAP**. This work SHALL delete it, as part of **Phase 2 (PILOT)**
+  (corrected from stale "Wave 3b", non-blocking #1 — D11 restructured Waves into Phases and moved this
+  deletion into Phase 2 specifically, `design.md § 10`), an ordinary step of the pilot work with no
+  external gate. *(withdrawn 2026-08-04: the sub-clause gating this deletion on Helder's on-device T10
+  re-run #6 is cancelled — see `design.md § 8` decision "cancel the T10 re-run #6 gate". There is no
+  reason to device-test the stopgap when this work deletes and replaces it.)* **Merge-ordering note
+  (NB-4, third-pass spec review):** `feat/inline-artist-create` has NOT merged into `develop` as of this
+  revision. If it merges before Phase 2 runs, Phase 2 deletes the stopgap as described above; if it has
+  not merged, `develop`'s `SongRepository.UpdateAsync` does not contain the stopgap and Phase 2's
+  stopgap-deletion step is a no-op confirmation instead — REQ-UOW-18 is satisfied vacuously in that
+  case. Phase 2 runs unconditionally either way; only whether it deletes anything changes. Record which
+  case applied in the task-log (`design.md § 10`).
 
 ### Guideline amendments (documentation deliverables)
 
 - **REQ-UOW-19** — `code-style-reference.md § DI Registration Conventions` currently reads
   "`AddScoped` — Repositories, Services, IDatabaseInit (per-lifetime scope)". This is an ASP.NET-shaped
-  rule that is **wrong for MAUI** and is the direct cause of all 25 `AddScoped` registrations. It
+  rule that is **wrong for MAUI** and is the direct cause of all 27 `AddScoped` registrations
+  (corrected 2026-08-04, 4th-pass spec review non-blocking #6 — 25 in
+  `Extensions/ServiceCollectionExtensions.cs` + 2 in `MauiProgram.cs:71-72`, verified by grep; previously
+  stated as 25). It
   SHALL be replaced with a MAUI-correct rule stating that MAUI scopes are per-Window (effectively
   app-lifetime on mobile) and naming the chosen unit-of-work pattern. The change follows
   `CLAUDE.md § Amending These Rules` (`amend:` prefix + changelog entry).
@@ -375,18 +489,41 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 
 ### Obsolete concurrency workaround removal (NB-1, third-pass spec review)
 
-- **REQ-UOW-29** — The static `DbLoadGate` (`MyVocaList/UI/ViewModels/CrudListViewModelBase.cs:12-14`,
-  a `SemaphoreSlim(1, 1)`) SHALL be deleted, along with every acquire/release call site. Its own
-  comment states its reason for existing: "all CRUD list ViewModels share one effectively-singleton
-  AppDbContext (MAUI has no per-page scope), so at most one DB load may run at a time app-wide." This
-  change removes that root cause (Phase 4+, `design.md § 10`); leaving the gate in place afterward
-  would silently reintroduce app-wide load serialization, directly undermining REQ-UOW-05's guarantee
-  that concurrent units of work do not share a context and therefore do not need to queue behind each
-  other. **The gate SHALL NOT be removed before every in-scope consumer is converted (§ 10 Phase 4+)**
-  — removing it earlier would stop serializing loads for ViewModels not yet migrated, which still share
-  the window-scope context. *Test:* a test asserting two concurrent list-load calls (e.g. two different
-  CRUD list ViewModels loading simultaneously) complete without serializing through a shared semaphore,
-  plus a source-level check that `DbLoadGate` no longer exists.
+- **REQ-UOW-29** — **Corrected 2026-08-04 (4th-pass spec review, BL-H).** The static `DbLoadGate`
+  field declaration is at `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs:16`, not `:12-14` (the
+  original line reference pointed at its preceding comment block, not the field itself); the comment
+  spans lines 12–15. The full comment, quoted verbatim (the prior draft quoted only its first
+  sentence), is:
+  ```
+  // Static: all CRUD list ViewModels share one effectively-singleton AppDbContext
+  // (MAUI has no per-page scope), so at most one DB load may run at a time app-wide.
+  // SQLITE-WORKAROUND: remove this gate when SQLite is replaced (INFRA_MSSQL) —
+  // see constraints-registry.md § EF Core / SQLite and DevCycleCraft/page-load-frozen/plan.md.
+  ```
+  This comment carries **two independent rationales with two independent revert triggers**, not one:
+  (1) the MAUI-no-per-page-scope rationale this spec's `IUnitOfWork` pattern resolves, and (2) a
+  SEPARATE `SQLITE-WORKAROUND` rationale — the `page-load-frozen` `Microsoft.Data.Sqlite` sync-async
+  freeze (`constraints-registry.md § EF Core / SQLite`, `DevCycleCraft/page-load-frozen/plan.md`) —
+  whose stated revert trigger is `INFRA_MSSQL` (replacing SQLite), not "MAUI unit-of-work pattern
+  ships." Removing `DbLoadGate` once every in-scope consumer is converted (Phase 4+) resolves rationale
+  (1) but does **nothing** about rationale (2); if the `page-load-frozen` freeze is still live, removing
+  the gate would reintroduce that separate, unrelated bug class. **The static `DbLoadGate` SHALL NOT be
+  removed until BOTH:** (a) every in-scope consumer is converted (§ 10 Phase 4+, as originally stated),
+  AND (b) the `page-load-frozen` regression tests (`DevCycleCraft/page-load-frozen/`) are confirmed
+  green without the gate present — i.e. the sync-async freeze this gate also happens to prevent is
+  independently verified fixed or no longer applicable, not merely assumed fixed because rationale (1)
+  no longer applies. If (b) cannot be confirmed within this spec's Phase 4+, `DbLoadGate` removal is
+  deferred to a follow-up item that owns closing out `page-load-frozen`, and this AC is satisfied
+  vacuously (record which case applied in the task-log, mirroring REQ-UOW-18's NB-4 pattern). This
+  change removes rationale (1)'s root cause (Phase 4+, `design.md § 10`); leaving the gate in place
+  afterward for rationale (1) alone would silently reintroduce app-wide load serialization, directly
+  undermining REQ-UOW-05's guarantee that concurrent units of work do not share a context and therefore
+  do not need to queue behind each other — but rationale (2) is a separate, mandatory precondition on
+  removal that the original AC omitted entirely. *Test:* a test asserting two concurrent list-load calls
+  (e.g. two different CRUD list ViewModels loading simultaneously) complete without serializing through
+  a shared semaphore AND without reproducing the `page-load-frozen` freeze, plus a source-level check
+  that `DbLoadGate` no longer exists, plus confirmation in the task-log that the `page-load-frozen`
+  regression suite is green before the gate is deleted.
 
 ### Phase-order, scope-exclusion, and API-shape-deferral requirements (D11/D12/D13, `design.md § 8`)
 
@@ -414,6 +551,32 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   (keep/replace) with a one-line rationale; if "replace", the first Phase 4+ commit's diff uses the
   replacement shape.
 
+- **REQ-UOW-34** (new, 4th-pass spec review, BL-E, `design.md § 6` Revision 11 —
+  **REQUIRES HELDER'S CONFIRMATION**) — WHEN `IUnitOfWork.ExecuteAsync`/`ExecuteAsync(Func<IServiceProvider,
+  Task>, ct)` (a write) is called while an `ExecuteReadAsync`-opened scope is ambient, THEN it SHALL
+  throw `InvalidOperationException` instead of joining that scope. Joining a read-only ambient scope
+  without this check silently discards the write (the read scope never calls `SaveChangesAsync`) — the
+  same no-exception, no-test-failure defect shape as BUG-071.
+  ```
+  Given a body running inside IUnitOfWork.ExecuteReadAsync
+  And that body calls IUnitOfWork.ExecuteAsync with a body that mutates a tracked entity and returns
+      a success tuple
+  When the nested ExecuteAsync call executes
+  Then an InvalidOperationException is thrown before any attempt to run the nested body
+  And re-reading the row from the database afterward shows no change
+  ```
+  *Test:* an integration test nesting a real `ExecuteAsync` mutation inside an `ExecuteReadAsync` body
+  asserts `InvalidOperationException` is thrown and no row was written. **Note on current reachability
+  (verified against source):** as of this spec's Phase 2 scope, no in-scope pilot method routes a
+  read-only method (`ArtistResolutionService.ResolveAsync`, `SongResolutionService.ResolveAsync`)
+  through `ExecuteReadAsync` — Phase 2 wraps only the `CommitAsync`/CRUD mutator methods listed in § 10.
+  The 4th-pass review's claim that this defect is "reachable in the pilot" via
+  `SongResolutionService.ResolveAsync → ArtistResolutionService.ResolveAsync` is **not substantiated**
+  by the current phase table (that chain is read-only end to end and is not itself wrapped in
+  `ExecuteReadAsync` by any Phase 2 task) — the defect is real and load-bearing regardless, but its
+  reachability claim in the original finding is corrected here to "latent in the API, not demonstrated
+  reachable by name in Phase 2's actual call list."
+
 ## Validation rules
 
 - No service method may call more than one `SaveChangesAsync` per unit of work **unless** the flow is
@@ -421,13 +584,28 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   documented inline.
 - No repository may hold a `DbContext` beyond the unit of work that produced it.
 - No singleton or transient UI type may capture a repository or a data-writing service that owns a
-  `DbContext` (captive dependency) — `AppDbContextFactory(..., ServiceLifetime.Scoped)` registers
+  `DbContext` (captive dependency) — `AddDbContextFactory<AppDbContext>(..., ServiceLifetime.Scoped)`
+  (corrected 2026-08-04, 4th-pass spec review non-blocking #7 — `AppDbContextFactory` without the
+  `Add` prefix is a real, unrelated class, `Infra/AppDbContextFactory.cs`) registers
   `AppDbContext` itself as scoped (§ 1 "Reviewer-finding correction"), so a **transient** ViewModel
   resolving a repository is exactly as captive as a singleton would be; the ViewModel's own DI
   lifetime does not protect it (`design.md § 8`, BL-1 widening). `AppShellViewModel` and `AppShell`
   (`MauiProgram.cs:109-110`, singletons) and the three transient ViewModels named in Phase 4+
-  (`QueueSongPickerViewModel`, `QueueManagementViewModel`, `PersonPickerViewModel` — all IN SCOPE
-  despite their names, `design.md § 8` D12 item 6) are the known offenders to audit and convert.
+  (`QueueSongPickerViewModel`, `QueueManagementViewModel`, `PersonPickerViewModel` — none injects a
+  Queue/Event repository despite their names, `design.md § 8` D12 item 6) are the known offenders to
+  audit and convert. **Corrected 2026-08-04 (4th-pass spec review, BL-D):** `QueueManagementViewModel`
+  also constructor-injects `IEventService`/`IQueueServiceNew` (both excluded types) — it converts only
+  its `IPersonRepository`/`ISongRepository` usage to `IUnitOfWork`; its `IEventService`/`IQueueServiceNew`
+  fields are NOT converted (`design.md § 8` D12 item 6 correction, REQUIRES HELDER'S CONFIRMATION).
+- **No parallel fan-out inside a unit of work (new, non-blocking #10, 4th-pass spec review).** A body
+  passed to `ExecuteAsync`/`ExecuteReadAsync` SHALL NOT start two or more `ExecuteAsync`/`ExecuteReadAsync`
+  calls concurrently (e.g. via `Task.WhenAll`) from within the same outer unit of work. The `AsyncLocal`
+  ambient-scope join (`design.md § 6a`) is not thread-safe across concurrent branches of the same async
+  flow — two parallel joins would share one non-thread-safe `AppDbContext` (§ 1, EF Core's documented
+  concurrency constraint), reproducing the exact hazard this design exists to eliminate. Sequential
+  nested calls (the audited chains in § 6a) are safe; parallel fan-out is not. No test is required for
+  this rule at this time (no in-scope method fans out in parallel today, per § 6a's audit) — it is a
+  documented constraint on future code, enforced by review.
 - No `ExecuteAsync`/`ExecuteReadAsync` lambda body may reference the enclosing service's
   constructor-injected repository/service fields — every repository the lambda uses SHALL be resolved
   from the lambda's own `IServiceProvider` (REQ-UOW-28, BL-2).
@@ -445,8 +623,9 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 - Introducing MediatR or FluentValidation.
 - Performing the repository-family merge itself. Merging `Infra/Repository/*` and
   `Infra/Repositories/*` into one family is a **hard prerequisite** that Helder has decided must
-  complete before Wave 0 of this change (`design.md § 8` Prerequisite decision) — it is out of
-  scope for *this* spec's waves in the sense that this spec does not perform it, not in the sense
+  complete before Phase 0 of this change (corrected from stale "Wave 0", non-blocking #1;
+  `design.md § 8` Prerequisite decision) — it is out of
+  scope for *this* spec's phases in the sense that this spec does not perform it, not in the sense
   that it is optional or deferred indefinitely.
 - Retry/`CreateExecutionStrategy` policies for transient faults — SQLite is local; evaluated in
   `design.md` and deliberately not required.
