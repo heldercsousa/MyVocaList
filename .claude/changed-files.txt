@@ -3906,3 +3906,7 @@ Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-0
 ../myvocalist-uow/Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/task-log.md
 Docs/Management/DevCycleCraft/hooks-redesign/bugs/2026-08-04-BUG-074-pre-commit-test-gate-blocks-the-red-first-commit-that-bug-tracking-mandates/README.md
 MyVocaList.sln
+../myvocalist-uow/MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs
+../myvocalist-uow/MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs
+Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/plan.md
+Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/plan.md
