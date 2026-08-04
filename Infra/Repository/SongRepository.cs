@@ -132,7 +132,29 @@ public class SongRepository : ISongRepository
     /// <inheritdoc />
     public Task UpdateAsync(Song song, CancellationToken ct)
     {
-        _db.Songs.Update(song);
+        // BUG-068: the app's AppDbContext is registered Scoped, but MAUI has no per-page DI
+        // scope — the root provider resolves one instance that lives for the app's entire
+        // session. QueryTrackingBehavior.NoTracking only suppresses tracking for query
+        // results; it does NOT detach entities that were explicitly Add()'ed/Update()'d and
+        // saved earlier in that same long-lived context (e.g. this song's own creation, or a
+        // prior edit-save). GetByIdAsync's fresh (untracked) read of this Song can therefore
+        // collide with a still-tracked instance of the same row left over from an earlier
+        // write, and DbSet.Update(song) throws an EF identity-map conflict on attach.
+        // If a tracked instance for this Id already exists, update ITS values instead of
+        // attaching a second instance — CurrentValues.SetValues copies scalar/FK properties
+        // only (no navigation graph), so this cannot re-attach song.OriginalArtist either.
+        var tracked = _db.ChangeTracker.Entries<Song>()
+            .FirstOrDefault(e => e.Entity.Id == song.Id);
+
+        if (tracked != null && !ReferenceEquals(tracked.Entity, song))
+        {
+            tracked.CurrentValues.SetValues(song);
+        }
+        else
+        {
+            _db.Songs.Update(song);
+        }
+
         return Task.CompletedTask;
     }
 
