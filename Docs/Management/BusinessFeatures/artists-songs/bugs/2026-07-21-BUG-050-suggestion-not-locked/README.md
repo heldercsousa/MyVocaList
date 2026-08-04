@@ -1,15 +1,16 @@
 ---
 id: BUG-050
 title: "BUG-050: Song form — selecting an artist suggestion does not lock the field (Critical)"
-status: "💡 Pending"
+status: ✅ Fixed
 severity: Critical
 target: 2026-07-21
 section: BusinessFeatures
 parent: artists-songs
-kind: bug
-order: 40
 goal: "picking a suggestion must lock the Artist field. Root cause: `SelectArtist` never sets `IsArtistLocked=true` (one-line omission). Found in DX-AC T7."
 pointer: BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-suggestion-not-locked/
+closed: 2026-08
+order: 40
+kind: bug
 ---
 
 # BUG-050: Song form — selecting an artist suggestion does not lock the field
@@ -27,3 +28,8 @@ Found during T7 (on-device checklist) of the DX `AutoCompleteEdit` replacement.
 > REQ-SEV-01 — every Critical/Major bug owns a folder). The row's pointer moves from the
 > DX `AutoCompleteEdit` replacement task-log to this folder. **Nothing was removed from that
 > task-log** (REQ-SEV-27); it remains the narrative record and is linked above.
+
+> **Closed ✅ Fixed [2026-08-03].** `SelectArtist` now sets `IsArtistLocked = true`.
+> Verified on the 2026-08-02 on-device re-run -- selecting a suggestion locks the field.
+> The row had gone stale: it still described the unfixed root cause long after the fix
+> landed.

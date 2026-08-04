@@ -8,7 +8,7 @@ parent: autocomplete-component
 kind: change
 order: 190
 goal: "mature built-in autocomplete on all form consumers; unblocks BUG-027 → Artists & Songs Catalog."
-gate: "T2–T6 complete and merged to develop 2026-07-20; awaiting Helder's T7 on-device checklist (items a–i, incl. smoke 16C.1) before ✅."
+gate: "T2–T7 done and merged; T7 surfaced BUG-050, BUG-051 and BUG-052, all three now fixed and closed. Remaining: confirm no residual DX-migration defect before ✅."
 pointer: DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/
 ---
 
@@ -35,3 +35,12 @@ including smoke 16C.1) before the row can go terminal.
 
 Detail: `requirements.md`, `design.md`, `tasks.md`, `plan.md`, `findings.md`, `task-log.md`
 in this folder.
+
+> **Row refreshed [2026-08-03].** The previous gate read *"awaiting Helder's T7 on-device
+> checklist"* — stale. T7 **was** run; it is what surfaced BUG-050, BUG-051 and BUG-052, and
+> all three are now ✅ Fixed and closed. BUG-027 is also closed, so the goal's
+> *"unblocks BUG-027"* clause is delivered rather than pending.
+>
+> This row is now the **live row** for the autocomplete work: its parent
+> *Autocomplete Component — Evaluation, Rebuild & Rollout* went 🔵 Superseded on 2026-08-03,
+> since the DX adoption decision replaced the build-a-new-component scope.

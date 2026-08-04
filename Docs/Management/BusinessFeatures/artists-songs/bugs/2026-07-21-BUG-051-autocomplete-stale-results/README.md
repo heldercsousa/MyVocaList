@@ -1,15 +1,16 @@
 ---
 id: BUG-051
 title: "BUG-051: Song form — artist autocomplete returns stale results (searches prior keystroke) (Major)"
-status: "💡 Pending"
+status: ✅ Fixed
 severity: Major
 target: 2026-07-21
 section: BusinessFeatures
 parent: artists-songs
-kind: bug
-order: 50
 goal: "dropdown must reflect the current query. Root cause: shared `ArtistSuggestions` race, no per-request cancellation in `SearchArtistsAsync`. Found in DX-AC T7 (W2 realized)."
 pointer: BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-051-autocomplete-stale-results/
+closed: 2026-08
+order: 50
+kind: bug
 ---
 
 # BUG-051: Song form — artist autocomplete returns stale results
@@ -29,3 +30,7 @@ risk W2 of that task, realized.
 > REQ-SEV-01 — every Critical/Major bug owns a folder). The row's pointer moves from the
 > DX `AutoCompleteEdit` replacement task-log to this folder. **Nothing was removed from that
 > task-log** (REQ-SEV-27); it remains the narrative record and is linked above.
+
+> **Closed ✅ Fixed [2026-08-03].** A per-request generation counter (`_searchGeneration`)
+> was added to `SearchArtistsAsync`, so a slower earlier query can no longer clobber the
+> results of a later one. The dropdown reflects the current query.
