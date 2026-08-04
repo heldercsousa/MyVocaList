@@ -4,10 +4,11 @@
 > `NoTracking` as the read-model default; this change establishes the **write-side** lifetime and
 > unit-of-work boundary that `NoTracking` alone does not provide.
 >
-> Status: **Candidate C is chosen** (`design.md § 8`); eight API decisions are APPROVED by Helder
+> Status: **Candidate C is chosen** (`design.md § 8`); the API decisions are APPROVED by Helder
 > (Revision 8, 2026-08-04, adds the failure-tuple save-skip mechanism resolving spec-review finding
-> B3, `design.md § 6b`). The acceptance criteria below reflect the approved, candidate-C-specific
-> design.
+> B3, `design.md § 6b`; Revision 9, 2026-08-04, makes the unrecognised-`TResult` fallback on the
+> value-returning overload fail-closed — throw, not save unconditionally). The acceptance criteria
+> below reflect the approved, candidate-C-specific design.
 
 ---
 
@@ -188,12 +189,35 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   `QueueService.RecordParticipationAsync`, `QueueService.SetActiveEventAsync`,
   `SongKaraokeUrlService.RecordPlayAsync`), THEN `IUnitOfWork.ExecuteAsync<TRepo>(Func<TRepo, Task>
   body, ct)` SHALL call `SaveChangesAsync` unconditionally whenever `body` completes without
-  throwing. This is the documented fallback (`design.md § 6b` "no-signal fallback"), not an
-  unrecognised or ambiguous case — there is no code path where a no-signal result silently skips the
-  save. *Test:* an integration test running `QueueService.RecordParticipationAsync` (or an equivalent
-  bare-`Task` mutating call) asserts the mutation is persisted on a normal return, and a second test
-  asserts an exception thrown inside the body still leaves no partial state (REQ-UOW-06 applies
-  identically to the no-signal overload).
+  throwing. This is the documented fallback (`design.md § 6b` "no-signal fallback"), reachable only
+  through this dedicated overload — the compiler selects it for any `Func<TRepo, Task>` body, so no
+  call site can reach it by accident. *Test:* an integration test running
+  `QueueService.RecordParticipationAsync` (or an equivalent bare-`Task` mutating call) asserts the
+  mutation is persisted on a normal return, and a second test asserts an exception thrown inside the
+  body still leaves no partial state (REQ-UOW-06 applies identically to the no-signal overload).
+- **REQ-UOW-27** (Revision 9, 2026-08-04 — resolves the fail-open/fail-closed refinement of finding
+  B3) — WHEN a service method's body returns, via `IUnitOfWork.ExecuteAsync<TRepo, TResult>` (the
+  value-returning overload), a `TResult` that is neither a `ValueTuple` with a leading `bool` element
+  nor a type implementing `IUnitOfWorkOutcome`, THEN `ExecuteAsync` SHALL throw
+  `InvalidOperationException` before any `SaveChangesAsync` is attempted, and the exception message
+  SHALL name both valid fixes (implement `IUnitOfWorkOutcome`, or use the no-signal
+  `ExecuteAsync<TRepo>(Func<TRepo, Task>, ct)` overload per REQ-UOW-26). This SHALL NOT save the
+  mutation under any circumstance — the prior "always saves" fallback (design.md Revision 8) is
+  superseded for this branch.
+  ```
+  Given a bespoke named result type MyResult that implements neither a ValueTuple-with-leading-bool
+      shape nor IUnitOfWorkOutcome
+  And a body that mutates a tracked entity and then returns a MyResult instance
+  When the body is run through IUnitOfWork.ExecuteAsync<TRepo, MyResult>
+  Then an InvalidOperationException is thrown, naming MyResult and the two valid fixes
+  And re-reading the mutated row from the database shows no change (no save was attempted)
+  ```
+  *Test:* a unit/integration test calling `ExecuteAsync<TRepo, TResult>` with a body that returns a
+  bespoke named type implementing neither recognised shape asserts `InvalidOperationException` is
+  thrown and that no row was written as a result of any mutation performed inside `body` before the
+  return. A second test confirms `BackupService.CreateFullBackupAsync`'s wrap (Wave 5) does NOT throw
+  once `BackupResult : IUnitOfWorkOutcome` is in place — the positive counterpart proving the fix
+  closes the gap without breaking the one existing named-result case.
 
 ### DRY & comprehensibility
 
@@ -258,10 +282,11 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 
 - **REQ-UOW-18** — The hand-rolled `ChangeTracker.Entries<Song>()` detach guard added to
   `SongRepository.UpdateAsync` in commit `1a114c1` (branch `feat/inline-artist-create`) is an
-  explicitly acknowledged **STOPGAP**. This work SHALL delete it. **Hard constraint:** the deletion
-  MUST NOT land before Helder's on-device T10 re-run #6 completes — it survives exactly until then,
-  sequenced as its own gated sub-wave (`design.md § 10`, Wave 3b), not bundled into the rest of the
-  `UnitOfWork` implementation work.
+  explicitly acknowledged **STOPGAP**. This work SHALL delete it, as part of Wave 3b
+  (`design.md § 10`), an ordinary step of the repository work with no external gate. *(withdrawn
+  2026-08-04: the sub-clause gating this deletion on Helder's on-device T10 re-run #6 is cancelled —
+  see `design.md § 8` decision "cancel the T10 re-run #6 gate". There is no reason to device-test the
+  stopgap when this work deletes and replaces it.)*
 
 ### Guideline amendments (documentation deliverables)
 
@@ -283,9 +308,12 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 - No repository may hold a `DbContext` beyond the unit of work that produced it.
 - No singleton may capture a repository or service that owns a `DbContext` (captive dependency).
   `AppShellViewModel` and `AppShell` (`MauiProgram.cs:109-110`) are the known singletons to audit.
-- No unit of work may commit a mutation whose body returned a failure signal (REQ-UOW-24). A
-  `TResult` with no recognised signal always commits (REQ-UOW-26) — this is the one exception to
-  "commit only on success," and it is documented, not silent.
+- No unit of work may commit a mutation whose body returned a failure signal (REQ-UOW-24). The
+  dedicated no-signal `ExecuteAsync<TRepo>(Func<TRepo, Task>, ct)` overload always commits when its
+  body completes without throwing (REQ-UOW-26) — this is the one exception to "commit only on
+  success," documented, not silent, and reachable only through that overload. On the
+  value-returning overload, a `TResult` the unit of work cannot interpret is never committed either —
+  it throws instead (REQ-UOW-27, fail-closed).
 
 ## Out of scope
 
@@ -309,6 +337,7 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 | Body mutates an entity, then returns a failure tuple/outcome (no exception thrown) | **(Revision 8, REQ-UOW-24)** `ExecuteAsync` detects the failure signal and skips `SaveChangesAsync` — the mutation is never persisted. This is the non-exception failure path, distinct from the row above, and is exactly as mandatory: "no partial state survives" holds for both. |
 | Body mutates an entity, then returns a success tuple/outcome | **(Revision 8, REQ-UOW-25)** `ExecuteAsync` detects the success signal and saves exactly once — the mutation is persisted. |
 | Body has no success/failure signal at all (bare `Task`, no `TResult`) | **(Revision 8, REQ-UOW-26)** The no-signal `ExecuteAsync<TRepo>(Func<TRepo, Task>, ct)` overload always saves when `body` completes without throwing — this is the explicit, documented default, not an unrecognised/ambiguous case; an exception thrown inside `body` still leaves no partial state (REQ-UOW-06 applies identically). |
+| `TResult` on the value-returning overload matches neither the `ValueTuple` shape nor `IUnitOfWorkOutcome` | **(Revision 9, REQ-UOW-27)** `ExecuteAsync` throws `InvalidOperationException` before any save is attempted, naming the two valid fixes (implement `IUnitOfWorkOutcome`, or switch to the no-signal overload). Supersedes Revision 8's "always saves" fallback for this branch — that reasoning applied exception-path logic ("no throw ⇒ success") to this codebase's value-return failure idiom, the same category error behind BUG-068's sibling defect. |
 | Two units of work run concurrently on the same row | Last-write-wins as today; no shared-context corruption (REQ-UOW-05). Optimistic concurrency is out of scope. |
 | A ViewModel is disposed mid-operation | The unit of work is owned by the service call, not the ViewModel — it completes or faults independently of the UI. |
 | Migration path (`App.xaml.cs:54`) | The two existing manual scopes (`App.xaml.cs:35`, `:54`) are already correct usage and must continue to work under the new registration. |
