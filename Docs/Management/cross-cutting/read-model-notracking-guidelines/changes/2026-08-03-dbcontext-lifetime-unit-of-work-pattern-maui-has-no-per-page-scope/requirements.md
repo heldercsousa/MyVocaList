@@ -4,9 +4,10 @@
 > `NoTracking` as the read-model default; this change establishes the **write-side** lifetime and
 > unit-of-work boundary that `NoTracking` alone does not provide.
 >
-> Status: **design proposal awaiting Helder's decision.** Three candidates are compared in
-> `design.md`; the acceptance criteria below are candidate-independent and hold for whichever
-> candidate Helder selects.
+> Status: **Candidate C is chosen** (`design.md § 8`); eight API decisions are APPROVED by Helder
+> (Revision 8, 2026-08-04, adds the failure-tuple save-skip mechanism resolving spec-review finding
+> B3, `design.md § 6b`). The acceptance criteria below reflect the approved, candidate-C-specific
+> design.
 
 ---
 
@@ -81,11 +82,13 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   ```
   *Test:* an integration regression test named for BUG-068 that fails on the pre-change code.
 - **REQ-UOW-04** — **The currently-unguarded repositories are covered by the same guarantee.** The
-  REQ-UOW-03 create→read→update sequence SHALL also hold for `ArtistRepository`,
-  `Infra/Repositories/EventRepository`, `Infra/Repositories/QueueRepository`, and every
-  `BaseRepository<T>` descendant (`PersonRepository`, `VenueRepository`,
-  `EventParticipationRepository`, `Infra/Repository/EventRepository`). *Test:* one parameterised
-  integration test per repository family, each failing on pre-change code.
+  REQ-UOW-03 create→read→update sequence SHALL also hold for `ArtistRepository`, `QueueRepository`,
+  every `BaseRepository<T>` descendant (`PersonRepository`, `VenueRepository`,
+  `EventParticipationRepository`), and **the surviving merged `EventRepository`** — the
+  `Infra/Repository/*` / `Infra/Repositories/*` family merge (`design.md § 8` Prerequisite decision)
+  is a hard prerequisite completing before Wave 0, so only one `EventRepository` exists by the time
+  this requirement is tested. *Test:* one parameterised integration test per repository family, each
+  failing on pre-change code.
 - **REQ-UOW-05** — WHEN two units of work run concurrently, the system SHALL NOT share a
   `DbContext` instance between them. *Test:* a test issuing two overlapping service calls asserts two
   distinct context instances and no `InvalidOperationException`.
@@ -130,6 +133,15 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   Then exactly one Song row and exactly one Artist row exist as expected
   And no InvalidOperationException mentioning "already being tracked" is thrown
   And all writes across the nested chain persist atomically (all present, or none)
+
+  Given the same song candidate as above
+  And a fault is injected so that the innermost repository call
+      (ArtistService.CreateArtistAsync -> IArtistRepository.AddAsync/SaveChangesAsync) throws after
+      the outer SongService write has already executed but before the unit of work completes
+      (design.md § 6a 3-level chain)
+  When SongResolutionService.CommitAsync is called
+  Then no Song row and no Artist row exist afterward (all-or-nothing)
+  And the thrown exception propagates to the caller per REQ-UOW-06
   ```
 - **REQ-UOW-23** — `QueueService.AddPersonToQueueAsync` SHALL produce the same observable outcome as
   today across its nested call to `_personService.CreatePersonAsync` (`design.md § 6a`) **without**
@@ -139,7 +151,49 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   When AddPersonToQueueAsync is called
   Then exactly one Person row exists and is queued as expected
   And no InvalidOperationException mentioning "already being tracked" is thrown
+
+  Given the same add-request as above
+  And a fault is injected so that the nested PersonService.CreatePersonAsync repository write
+      (IPersonRepository.AddAsync/SaveChangesAsync) throws before the unit of work completes
+  When AddPersonToQueueAsync is called
+  Then no Person row exists afterward (all-or-nothing)
+  And the thrown exception propagates to the caller per REQ-UOW-06
   ```
+
+### Save-skip on failure-tuple results (Revision 8 — resolves spec-review finding B3)
+
+- **REQ-UOW-24** — WHEN a service method's body mutates an entity and then returns a `ValueTuple`
+  whose first element is `bool` set to `false` (or a named result type implementing
+  `IUnitOfWorkOutcome` with `Success == false`), THEN `IUnitOfWork.ExecuteAsync` SHALL NOT call
+  `SaveChangesAsync` — the mutation SHALL NOT be persisted.
+  ```
+  Given SongService.UpdateSongAsync loads a Song, sets song.Title to a new value,
+      calls repo.UpdateAsync(song, ct), and then returns (false, "A song with this title
+      already exists for this artist") because a later validation check fails
+  When UpdateSongAsync is called through IUnitOfWork.ExecuteAsync
+  Then the returned tuple is (false, "A song with this title already exists for this artist")
+  And re-reading the Song row from the database shows the original Title, not the mutated one
+  ```
+  *Test:* an integration test that runs a body performing a real repository mutation followed by a
+  `(false, …)` return, then asserts via a fresh read that the row is unchanged. Cover at least one
+  `ValueTuple`-shaped method (e.g. `SongService.UpdateSongAsync`) and the `IUnitOfWorkOutcome` shape
+  (`BackupService.CreateFullBackupAsync` returning a `BackupResult` with `Success == false`).
+- **REQ-UOW-25** — WHEN a service method's body mutates an entity and returns a `ValueTuple` whose
+  first element is `bool` set to `true` (or `IUnitOfWorkOutcome.Success == true`), THEN
+  `IUnitOfWork.ExecuteAsync` SHALL call `SaveChangesAsync` exactly once and the mutation SHALL be
+  persisted. *Test:* the positive counterpart of REQ-UOW-24 — same shapes, success path, asserts the
+  mutated value is present on re-read.
+- **REQ-UOW-26** — WHEN a service method's body has no success/failure signal to inspect (its
+  delegate is `Func<TRepo, Task>`, not `Func<TRepo, Task<TResult>>` — e.g.
+  `QueueService.RecordParticipationAsync`, `QueueService.SetActiveEventAsync`,
+  `SongKaraokeUrlService.RecordPlayAsync`), THEN `IUnitOfWork.ExecuteAsync<TRepo>(Func<TRepo, Task>
+  body, ct)` SHALL call `SaveChangesAsync` unconditionally whenever `body` completes without
+  throwing. This is the documented fallback (`design.md § 6b` "no-signal fallback"), not an
+  unrecognised or ambiguous case — there is no code path where a no-signal result silently skips the
+  save. *Test:* an integration test running `QueueService.RecordParticipationAsync` (or an equivalent
+  bare-`Task` mutating call) asserts the mutation is persisted on a normal return, and a second test
+  asserts an exception thrown inside the body still leaves no partial state (REQ-UOW-06 applies
+  identically to the no-signal overload).
 
 ### DRY & comprehensibility
 
@@ -155,10 +209,13 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 - **REQ-UOW-12** — WHEN a new developer reads any service method that writes data, the method SHALL
   name its unit of work explicitly — no write may occur through an implicitly-obtained context.
 - **REQ-UOW-13** — The design SHALL use .NET/EF Core built-ins (`AddDbContextFactory` /
-  `IDbContextFactory<T>`, `IServiceScopeFactory`, `AddPooledDbContextFactory`, `ExecuteUpdateAsync` /
-  `ExecuteDeleteAsync`, `CreateExecutionStrategy`, interceptors, `IServiceCollection` extension
-  composition) in preference to hand-rolled infrastructure. Any hand-written type introduced must be
-  justified in `design.md` under Key Decisions.
+  `IDbContextFactory<T>`, `IServiceScopeFactory`, `ExecuteUpdateAsync` / `ExecuteDeleteAsync`,
+  `CreateExecutionStrategy`, interceptors, `IServiceCollection` extension composition) in preference to
+  hand-rolled infrastructure. `AddPooledDbContextFactory` is explicitly rejected (`design.md § 8`
+  Decision: reject `AddPooledDbContextFactory`) — pooling amortises construction cost under
+  server-grade request rates, which does not apply to a single-user mobile app, and it inherits a
+  reset-semantics footgun for no measured gain. Any hand-written type introduced must be justified in
+  `design.md` under Key Decisions.
 
 #### Inputs / Outputs / Preconditions — `IUnitOfWork` primitive (REQ-UOW-13 scope)
 
@@ -167,12 +224,15 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   `Func<..., Task<TResult>>` body; an optional `CancellationToken`.
 - **Outputs:** `TResult` on success; on business failure, whatever tuple shape `body` returns per
   `code-style-reference.md § Service Return Patterns`; an exception from `body` propagates after the
-  scope disposes (REQ-UOW-06).
+  scope disposes (REQ-UOW-06). **Save-skip (Revision 8, `design.md § 6b`):** `SaveChangesAsync` runs
+  only when the returned `TResult` signals success — a `ValueTuple` with a leading `bool` that is
+  `false`, or an `IUnitOfWorkOutcome.Success` of `false`, skips the save entirely; a `TResult` with no
+  recognised signal (reachable only via the dedicated no-signal overload) always saves.
 - **Preconditions:** the resolved repository/service type must be registered in DI (unchanged
   `AddScoped` registrations, `design.md § 2a` "Reviewer-finding correction"); the caller must not
   retain the resolved instance or its underlying `AppDbContext` past the body's return.
-- Full API surface (typed `ExecuteAsync`/`ExecuteReadAsync` + escape-hatch overloads,
-  implicit-save semantics, ambient-scope join): `design.md § 6`.
+- Full API surface (typed `ExecuteAsync`/`ExecuteReadAsync` + escape-hatch overloads + no-signal
+  overloads, save-skip semantics, ambient-scope join): `design.md § 6`, `design.md § 6b`.
 
 ### Interceptors & existing infrastructure
 
@@ -223,6 +283,9 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 - No repository may hold a `DbContext` beyond the unit of work that produced it.
 - No singleton may capture a repository or service that owns a `DbContext` (captive dependency).
   `AppShellViewModel` and `AppShell` (`MauiProgram.cs:109-110`) are the known singletons to audit.
+- No unit of work may commit a mutation whose body returned a failure signal (REQ-UOW-24). A
+  `TResult` with no recognised signal always commits (REQ-UOW-26) — this is the one exception to
+  "commit only on success," and it is documented, not silent.
 
 ## Out of scope
 
@@ -242,7 +305,10 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 
 | Failure | Required behavior |
 |---------|-------------------|
-| Save fails mid unit of work | Unit of work is disposed; no partial state survives into the next unit of work (REQ-UOW-06). Service returns `(false, message)` per `code-style-reference.md § Service Return Patterns` — no exception escapes the service boundary. |
+| Save fails mid unit of work (EF throws) | Unit of work is disposed; no partial state survives into the next unit of work (REQ-UOW-06). Service returns `(false, message)` per `code-style-reference.md § Service Return Patterns` — no exception escapes the service boundary. |
+| Body mutates an entity, then returns a failure tuple/outcome (no exception thrown) | **(Revision 8, REQ-UOW-24)** `ExecuteAsync` detects the failure signal and skips `SaveChangesAsync` — the mutation is never persisted. This is the non-exception failure path, distinct from the row above, and is exactly as mandatory: "no partial state survives" holds for both. |
+| Body mutates an entity, then returns a success tuple/outcome | **(Revision 8, REQ-UOW-25)** `ExecuteAsync` detects the success signal and saves exactly once — the mutation is persisted. |
+| Body has no success/failure signal at all (bare `Task`, no `TResult`) | **(Revision 8, REQ-UOW-26)** The no-signal `ExecuteAsync<TRepo>(Func<TRepo, Task>, ct)` overload always saves when `body` completes without throwing — this is the explicit, documented default, not an unrecognised/ambiguous case; an exception thrown inside `body` still leaves no partial state (REQ-UOW-06 applies identically). |
 | Two units of work run concurrently on the same row | Last-write-wins as today; no shared-context corruption (REQ-UOW-05). Optimistic concurrency is out of scope. |
 | A ViewModel is disposed mid-operation | The unit of work is owned by the service call, not the ViewModel — it completes or faults independently of the UI. |
 | Migration path (`App.xaml.cs:54`) | The two existing manual scopes (`App.xaml.cs:35`, `:54`) are already correct usage and must continue to work under the new registration. |
