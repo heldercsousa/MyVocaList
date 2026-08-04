@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using MyVocaList.Domain.Entities;
 using MyVocaList.Domain.Interfaces;
 using QueueEntry = MyVocaList.Domain.Entities.QueueEntry;
 

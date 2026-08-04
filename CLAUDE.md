@@ -35,7 +35,7 @@ One-time developer onboarding (MCP env keys via `.env.local` + `load-env.ps1`, t
 - **Bug tracking**: `.claude/rules/bug-tracking.md` — BUG-NNN IDs, BACKLOG nesting, severity classification, and per-class task-log + regression-test requirements.
 
 ## Development Methodology
-MyVocaList operates at **Spec-Anchored** (Level 2) SDD: specs in `Docs/Management/` are updated whenever behavior changes and serve as authoritative context for every AI session. Code changes without a corresponding spec update are out of scope unless the change is a bug fix affecting no spec-described behavior. Bug fixes, cosmetic changes, and one-off scripts remain spec-exempt (`workflow.md` bypass rule). Why SDD applies to this codebase (rationale essay): `.claude/library/project-governance-reference.md § SDD Applicability`.
+MyVocaList operates at **Spec-Anchored** (Level 2) SDD: specs in `Docs/Management/` are updated whenever behavior changes and serve as authoritative context for every AI session. Code changes without a corresponding spec update are out of scope unless the change is a bug fix affecting no spec-described behavior. **A shipped spec is immutable history — it is never rewritten in place.** A change to shipped behavior is recorded in a dated `changes/YYYY-MM-DD-<slug>/` folder beside it (`§ Docs/ Folder Layout`); only a feature that has not yet shipped is edited in place. Bug fixes, cosmetic changes, and one-off scripts remain spec-exempt (`workflow.md` bypass rule). Why SDD applies to this codebase (rationale essay): `.claude/library/project-governance-reference.md § SDD Applicability`.
 
 ## Commands
 > **Naming pattern `[HARD RULE]`:** every project custom command in `.claude/commands/` carries the `sln-` prefix ("solution"). It marks the command as belonging to THIS solution's dev workflow, prevents name collisions with built-in and plugin skills (e.g. project `review` vs built-in `/review`), and stays valid when these dev settings are copied to bootstrap another solution. New commands MUST use the prefix.
@@ -97,7 +97,8 @@ User-preference overrides apply to superpowers skill *defaults* (e.g. folder loc
 ## Docs/ Folder Layout (canonical)
 
 ```
-Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/
+Docs/Management/[section-or-filing-dir]/[feature]/
+  README.md             ← frontmatter carrier — the item's BACKLOG row is GENERATED from it
   requirements.md       ← acceptance criteria, user stories, validation rules
   design.md             ← architecture, interfaces, interaction flows (user-preference override for brainstorming skill default)
   tasks.md              ← ordered checkboxed implementation tasks
@@ -106,12 +107,53 @@ Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/
   findings.md           ← spike results (optional)
   spec-changelog.md     ← spec revision history (required for features with ≥1 post-approval change)
 
+  bugs/YYYY-MM-DD-BUG-NNN-<slug>/README.md      ← one folder per Critical/Major bug
+  changes/YYYY-MM-DD-<slug>/README.md           ← one folder per post-ship change to this feature
 ```
 
-**Folder routing rule — check BACKLOG.md table before creating any spec folder:**
-- Feature listed in **Business Features** table → `Docs/Management/BusinessFeatures/[feature]/`
+### Top-level directories under `Docs/Management/`
+
+- `BusinessFeatures/` — business-facing features (default filing location for `section: BusinessFeatures` items)
+- `DevCycleCraft/` — dev-process/tooling activities (default filing location for `section: DevCycleCraft` items)
+- `cross-cutting/` — items spanning multiple features/areas that don't nest cleanly under one; still declares `section: BusinessFeatures` or `section: DevCycleCraft`
+- `milestones/` — release/milestone markers (`kind: milestone`); still declares one of the two sections
+- `backlog-archive/` — generated monthly archives of terminal-status items; never hand-edited
+
+Physical folder location does not determine table placement — the item's `section:` frontmatter does. An item filed under `cross-cutting/` or `milestones/` must still declare `section: BusinessFeatures` or `section: DevCycleCraft`.
+
+> ### Shipped specs are immutable; changes nest
+>
+> A feature's `requirements.md`/`design.md` describe what shipped. Post-ship behavior changes do NOT
+> rewrite them — they get a dated `changes/YYYY-MM-DD-<slug>/` folder with its own spec files, which
+> cross-references the original. Critical/Major bugs get `bugs/YYYY-MM-DD-BUG-NNN-<slug>/`. Minor
+> bugs get **no folder** (the commit message is the artifact) — a `severity: Minor` folder is a
+> mechanical validation error (`bug-tracking.md`).
+>
+> ### Every item folder carries frontmatter; BACKLOG rows are generated
+>
+> `README.md` opens with a flat `key: value` frontmatter block (`id, title, status, severity,
+> target, section, parent, goal, gate, pointer, closed, order` — schema in
+> `DevCycleCraft/spec-evolution-versioning/design.md § 2`). `Docs/Management/BACKLOG.md` and the
+> monthly `backlog-archive/*.md` files are **generated** from those blocks between
+> `<!-- BACKLOG:GENERATED:BEGIN … -->` fences. **Never hand-edit a fenced row** — it is silently
+> overwritten on the next regeneration, not merge-conflicted.
+>
+> | To do this | Run |
+> |------------|-----|
+> | Register a new item | `python .claude/scripts/backlog/backlog_gen.py register --section … --parent … --kind bug --severity … --title "…" --goal "…"` (creates folder + `README.md` + `.sln` entry atomically, allocates `BUG-NNN`) |
+> | Change a status | `backlog_gen.py status <ID> "🟡 In Progress"` (terminal statuses also need `--closed YYYY-MM`) |
+> | Refresh the rendered file | `backlog_gen.py regen` (`--check` = verify only, writes nothing) |
+> | Find the active work set | `backlog_gen.py query --status "🟡,🟢"` |
+>
+> A pre-commit gate runs `regen --check` on any commit touching a `Docs/Management/**/README.md`,
+> `BACKLOG.md`, or an archive file, and blocks the commit if the rendered files are stale.
+
+**Folder routing rule — driven by `section:` frontmatter, not physical path:**
+- Feature with `section: BusinessFeatures` → files under `Docs/Management/BusinessFeatures/[feature]/`
 - Sub-feature nested under a business feature → `Docs/Management/BusinessFeatures/[parent]/[feature]/`
-- Activity listed in **Dev Cycle Craft** table → `Docs/Management/DevCycleCraft/[feature]/`
+- Activity with `section: DevCycleCraft` → files under `Docs/Management/DevCycleCraft/[feature]/`
+- Item that doesn't nest cleanly under one feature → may be filed under `Docs/Management/cross-cutting/[item]/`, still declaring `section: BusinessFeatures` or `section: DevCycleCraft`
+- Release marker → filed under `Docs/Management/milestones/[item]/` with `kind: milestone`, still declaring one of the two sections
 
 **User-preference overrides (superpowers skills honour these — they override skill defaults):**
 - `brainstorming` skill default `docs/superpowers/specs/` → **OVERRIDE:** write design doc to the folder determined by the routing rule above
@@ -119,7 +161,7 @@ Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/
 - Task-log default → **OVERRIDE:** write to `task-log.md` in the same folder as the spec
 
 ### Docs/ Context Scope
-`Docs/` grows quickly — never glob-scan it. `.claudeignore` excludes the high-volume subtrees (sdd theory, changelog, legacy plans — list in `project-governance-reference.md § Docs/ layout`); direct `Read()` by explicit path still works. **Per-session reads (Rule 7 session start):** scope to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/` for the active feature only. No open-ended `Glob("Docs/**")` calls.
+`Docs/` grows quickly — never glob-scan it. `.claudeignore` excludes the high-volume subtrees (sdd theory, changelog, legacy plans — list in `project-governance-reference.md § Docs/ layout`); direct `Read()` by explicit path still works. **Per-session reads (Rule 7 session start):** scope to `Docs/Management/[section-or-filing-dir]/[feature]/` for the active feature only. No open-ended `Glob("Docs/**")` calls.
 
 **Scope of inspection for complex tasks:** never limit a UI/style/component audit to the files initially mentioned — inspect every page, custom component, relevant rules file, and what the platform already provides. Full rule: `project-governance-reference.md § Scope of inspection`.
 

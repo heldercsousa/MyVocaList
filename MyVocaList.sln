@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11519.219
@@ -20,20 +20,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		.claudeignore = .claudeignore
 		.gitignore = .gitignore
 		.mcp.json = .mcp.json
-		build and deploy test release.txt = build and deploy test release.txt
 		CLAUDE.md = CLAUDE.md
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		limparBinObj.bat = limparBinObj.bat
 		README.md = README.md
 		version-manifest.json = version-manifest.json
-		Docs\DevEnv\workflow-layout-findings.md = Docs\DevEnv\workflow-layout-findings.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "claude-rules", "claude-rules", "{FA1234BC-0001-4000-8000-000000000028}"
-	ProjectSection(SolutionItems) = preProject
-		.claude\rules\bug-tracking.md = .claude\rules\bug-tracking.md
-		.claude\rules\component-change-governance.md = .claude\rules\component-change-governance.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-08-03-BUG-071-bug-071-alias-bug-068-edit-mode-song-save-fails-ef-core-identity-conflict-critical\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-08-03-BUG-071-bug-071-alias-bug-068-edit-mode-song-save-fails-ef-core-identity-conflict-critical\README.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\README.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\design.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\design.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\requirements.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\requirements.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-04-merge-duplicate-repository-families-into-one-infra-repository-infra-repositories\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-04-merge-duplicate-repository-families-into-one-infra-repository-infra-repositories\README.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\bugs\2026-08-04-BUG-072-hook-scripts-invoked-by-relative-path-guards-break-or-go-silently-inert-outside-repo-root\README.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\bugs\2026-08-04-BUG-072-hook-scripts-invoked-by-relative-path-guards-break-or-go-silently-inert-outside-repo-root\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
@@ -55,11 +54,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C
 		Docs\DevEnv\parked\EventServiceTests.cs.txt = Docs\DevEnv\parked\EventServiceTests.cs.txt
 		Docs\DevEnv\parked\QueueServiceTests.cs.txt = Docs\DevEnv\parked\QueueServiceTests.cs.txt
 		Docs\DevEnv\SETUP_QUICKSTART.md = Docs\DevEnv\SETUP_QUICKSTART.md
+		Docs\DevEnv\Chat with Google Gemini about UX and archtecture for V1 V2 and V3.pdf = Docs\DevEnv\Chat with Google Gemini about UX and archtecture for V1 V2 and V3.pdf
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Tests", "MyVocaList.Tests\MyVocaList.Tests.csproj", "{C3E8D7AF-F4B4-42B9-8355-EACE1EA31762}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{A73F2606-6D4C-3EEE-1759-0E59DCFEF523}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdd", "sdd", "{B1A2C3D4-0001-4000-8000-000000000001}"
 	ProjectSection(SolutionItems) = preProject
@@ -159,6 +157,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sdd", "sdd", "{B1A2C3D4-000
 		Docs\Management\DevCycleCraft\sdd\spec-s9-3-hallucination-safeguards.md = Docs\Management\DevCycleCraft\sdd\spec-s9-3-hallucination-safeguards.md
 		Docs\Management\DevCycleCraft\sdd\spec-s9-quality-assurance.md = Docs\Management\DevCycleCraft\sdd\spec-s9-quality-assurance.md
 		Docs\Management\DevCycleCraft\sdd\task-log-sdd-adoption.md = Docs\Management\DevCycleCraft\sdd\task-log-sdd-adoption.md
+		Docs\Management\DevCycleCraft\sdd\README.md = Docs\Management\DevCycleCraft\sdd\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-songs", "{C141C5C9-833C-4A26-96BF-3745A2DA1AD4}"
@@ -176,41 +175,50 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-songs", "artists-so
 		Docs\Management\BusinessFeatures\artists-songs\archive\spec-cleanup-p2.md = Docs\Management\BusinessFeatures\artists-songs\archive\spec-cleanup-p2.md
 		Docs\Management\BusinessFeatures\artists-songs\task-log.md = Docs\Management\BusinessFeatures\artists-songs\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\tasks.md = Docs\Management\BusinessFeatures\artists-songs\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\README.md = Docs\Management\BusinessFeatures\artists-songs\README.md
+		Docs\Management\BusinessFeatures\artists-songs\ENHANCEMENT-artist-owned-song-catalog-autolink.md = Docs\Management\BusinessFeatures\artists-songs\ENHANCEMENT-artist-owned-song-catalog-autolink.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-compression", "workflow-compression", "{A1B2C3D4-0001-4000-8000-000000000007}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\workflow-compression\plan.md = Docs\Management\DevCycleCraft\workflow-compression\plan.md
+		Docs\Management\DevCycleCraft\workflow-compression\README.md = Docs\Management\DevCycleCraft\workflow-compression\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs-context-scope-control", "docs-context-scope-control", "{A1B2C3D4-0001-4000-8000-000000000008}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\docs-context-scope-control\plan.md = Docs\Management\DevCycleCraft\docs-context-scope-control\plan.md
+		Docs\Management\DevCycleCraft\docs-context-scope-control\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "architecture-tests-evaluation", "architecture-tests-evaluation", "{A1B2C3D4-0001-4000-8000-000000000009}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\architecture-tests-evaluation\plan.md = Docs\Management\DevCycleCraft\architecture-tests-evaluation\plan.md
+		Docs\Management\DevCycleCraft\architecture-tests-evaluation\README.md = Docs\Management\DevCycleCraft\architecture-tests-evaluation\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "claude-managed-agents-evaluation", "claude-managed-agents-evaluation", "{A1B2C3D4-0001-4000-8000-00000000000A}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\plan.md = Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\plan.md
+		Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\README.md = Docs\Management\DevCycleCraft\claude-managed-agents-evaluation\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution-structure-refactor", "solution-structure-refactor", "{D1C7C335-1E7C-4804-9A55-A5D160232353}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\solution-structure-refactor\README.md = Docs\Management\DevCycleCraft\solution-structure-refactor\README.md
 		Docs\Management\DevCycleCraft\solution-structure-refactor\plan.md = Docs\Management\DevCycleCraft\solution-structure-refactor\plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "md3-appbar-components", "md3-appbar-components", "{A1B2C3D4-0001-4000-8000-000000000002}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\md3-appbar-components\README.md = Docs\Management\DevCycleCraft\md3-appbar-components\README.md
 		Docs\Management\DevCycleCraft\md3-appbar-components\plan.md = Docs\Management\DevCycleCraft\md3-appbar-components\plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "toolbar-fab-vibrant", "toolbar-fab-vibrant", "{A1B2C3D4-0001-4000-8000-000000000003}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\toolbar-fab-vibrant\plan.md = Docs\Management\DevCycleCraft\toolbar-fab-vibrant\plan.md
+		Docs\Management\DevCycleCraft\toolbar-fab-vibrant\README.md = Docs\Management\DevCycleCraft\toolbar-fab-vibrant\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-list-deduplication", "crud-list-deduplication", "{FA1234BC-0001-4000-8000-000000000019}"
@@ -225,28 +233,40 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-list-deduplication", "
 		Docs\Management\DevCycleCraft\crud-list-deduplication\plan.md = Docs\Management\DevCycleCraft\crud-list-deduplication\plan.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\task-log.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\xaml-sharing\task-log.md
+		Docs\Management\DevCycleCraft\crud-list-deduplication\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000AC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-04-steps-1-7e-migration", "2026-06-04-steps-1-7e-migration", "{FA1234BC-0001-4000-8000-0000000000AD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-06-04-steps-1-7e-migration\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-06-04-steps-1-7e-migration\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow-folder-layout-alignment", "workflow-folder-layout-alignment", "{A1B2C3D4-0001-4000-8000-000000000004}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\findings.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\findings.md
 		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\plan.md
+		Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\README.md = Docs\Management\DevCycleCraft\workflow-folder-layout-alignment\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hooks-redesign", "hooks-redesign", "{A1B2C3D4-0001-4000-8000-000000000005}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\hooks-redesign\plan.md = Docs\Management\DevCycleCraft\hooks-redesign\plan.md
+		Docs\Management\DevCycleCraft\hooks-redesign\README.md = Docs\Management\DevCycleCraft\hooks-redesign\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-workflow-integration", "backlog-workflow-integration", "{A1B2C3D4-0001-4000-8000-000000000006}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\backlog-workflow-integration\plan.md = Docs\Management\DevCycleCraft\backlog-workflow-integration\plan.md
+		Docs\Management\DevCycleCraft\backlog-workflow-integration\README.md = Docs\Management\DevCycleCraft\backlog-workflow-integration\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-versioning", "app-versioning", "{893BCB2E-4C7D-4CF1-BDD4-DFC2A1C9A69B}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\app-versioning\design.md = Docs\Management\DevCycleCraft\app-versioning\design.md
 		Docs\Management\DevCycleCraft\app-versioning\plan.md = Docs\Management\DevCycleCraft\app-versioning\plan.md
+		Docs\Management\DevCycleCraft\app-versioning\README.md = Docs\Management\DevCycleCraft\app-versioning\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-015-016-fixes", "bug-015-016-fixes", "{FA1234BC-0001-4000-8000-000000000030}"
@@ -262,6 +282,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-form-validation-guide", 
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\plan.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\plan.md
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\RESUME-PROMPT.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\RESUME-PROMPT.md
 		Docs\Management\DevCycleCraft\ui-form-validation-guide\task-log.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\task-log.md
+		Docs\Management\DevCycleCraft\ui-form-validation-guide\README.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000B2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-30-form-validation-guide-shipped", "2026-06-30-form-validation-guide-shipped", "{FA1234BC-0001-4000-8000-0000000000B3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\ui-form-validation-guide\changes\2026-06-30-form-validation-guide-shipped\README.md = Docs\Management\DevCycleCraft\ui-form-validation-guide\changes\2026-06-30-form-validation-guide-shipped\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration", "backlog-first-registration", "{FA1234BC-0001-4000-8000-000000000029}"
@@ -289,8 +317,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-first-registration"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "m3-lists", "m3-lists", "{F58ED7A0-0186-4187-9FCF-78A464FB01C5}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\m3-lists\README.md = Docs\Management\DevCycleCraft\m3-lists\README.md
 		Docs\Management\DevCycleCraft\m3-lists\design.md = Docs\Management\DevCycleCraft\m3-lists\design.md
 		Docs\Management\DevCycleCraft\m3-lists\plan.md = Docs\Management\DevCycleCraft\m3-lists\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "appbar-searchbar-redesign", "appbar-searchbar-redesign", "{FA1234BC-0001-4000-8000-000000000054}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\2026-07-19-persistent-searchbar-decision.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\2026-07-19-persistent-searchbar-decision.md
+		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\design.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\design.md
+		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\requirements.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\requirements.md
+		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\tasks.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\tasks.md
+		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\task-log.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\task-log.md
+		Docs\Management\DevCycleCraft\appbar-searchbar-redesign\README.md = Docs\Management\DevCycleCraft\appbar-searchbar-redesign\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-component", "autocomplete-component", "{FA1234BC-0001-4000-8000-000000000046}"
@@ -307,12 +346,35 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-component", "a
 		Docs\Management\DevCycleCraft\autocomplete-component\ux-no-match-add-new-analysis.md = Docs\Management\DevCycleCraft\autocomplete-component\ux-no-match-add-new-analysis.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompleteedit-replacement", "2026-07-19-dx-autocompleteedit-replacement", "{FA1234BC-0001-4000-8000-000000000053}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\task-log.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\task-log.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inline-trivial-fix", "inline-trivial-fix", "{FA1234BC-0001-4000-8000-000000000056}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\inline-trivial-fix\design.md = Docs\Management\DevCycleCraft\inline-trivial-fix\design.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\handoff.md = Docs\Management\DevCycleCraft\inline-trivial-fix\handoff.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\proposed-diffs.md = Docs\Management\DevCycleCraft\inline-trivial-fix\proposed-diffs.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\requirements.md = Docs\Management\DevCycleCraft\inline-trivial-fix\requirements.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\task-log.md = Docs\Management\DevCycleCraft\inline-trivial-fix\task-log.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\README.md = Docs\Management\DevCycleCraft\inline-trivial-fix\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persisted-string-trimming", "persisted-string-trimming", "{FA1234BC-0001-4000-8000-000000000051}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\persisted-string-trimming\design.md = Docs\Management\DevCycleCraft\persisted-string-trimming\design.md
 		Docs\Management\DevCycleCraft\persisted-string-trimming\plan.md = Docs\Management\DevCycleCraft\persisted-string-trimming\plan.md
 		Docs\Management\DevCycleCraft\persisted-string-trimming\requirements.md = Docs\Management\DevCycleCraft\persisted-string-trimming\requirements.md
 		Docs\Management\DevCycleCraft\persisted-string-trimming\tasks.md = Docs\Management\DevCycleCraft\persisted-string-trimming\tasks.md
+		Docs\Management\DevCycleCraft\persisted-string-trimming\README.md = Docs\Management\DevCycleCraft\persisted-string-trimming\README.md
+		Docs\Management\DevCycleCraft\persisted-string-trimming\task-log.md = Docs\Management\DevCycleCraft\persisted-string-trimming\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extensions-layer-guidelines", "extensions-layer-guidelines", "{FA1234BC-0001-4000-8000-000000000052}"
@@ -328,6 +390,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hamburger-nav-pattern", "ha
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\plan.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\plan.md
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\requirements.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\requirements.md
 		Docs\Management\DevCycleCraft\hamburger-nav-pattern\tasks.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\tasks.md
+		Docs\Management\DevCycleCraft\hamburger-nav-pattern\README.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\README.md
+		Docs\Management\DevCycleCraft\hamburger-nav-pattern\task-log.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-form-action-pattern", "crud-form-action-pattern", "{FA1234BC-0001-4000-8000-000000000048}"
@@ -336,6 +400,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-form-action-pattern", 
 		Docs\Management\DevCycleCraft\crud-form-action-pattern\plan.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\plan.md
 		Docs\Management\DevCycleCraft\crud-form-action-pattern\requirements.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\requirements.md
 		Docs\Management\DevCycleCraft\crud-form-action-pattern\task-log.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\task-log.md
+		Docs\Management\DevCycleCraft\crud-form-action-pattern\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-10-md3-save-cancel-placement", "2026-07-10-md3-save-cancel-placement", "{FA1234BC-0001-4000-8000-0000000000B9}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-07-10-md3-save-cancel-placement\README.md = Docs\Management\DevCycleCraft\crud-form-action-pattern\changes\2026-07-10-md3-save-cancel-placement\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}"
@@ -347,16 +419,109 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "persons", "persons", "{D01D
 		Docs\Management\BusinessFeatures\persons\plan.md = Docs\Management\BusinessFeatures\persons\plan.md
 		Docs\Management\BusinessFeatures\persons\requirements.md = Docs\Management\BusinessFeatures\persons\requirements.md
 		Docs\Management\BusinessFeatures\persons\tasks.md = Docs\Management\BusinessFeatures\persons\tasks.md
+		Docs\Management\BusinessFeatures\persons\README.md = Docs\Management\BusinessFeatures\persons\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000034}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md = Docs\Management\BusinessFeatures\persons\bugs\BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md
+		Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md = Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\BUG-022-singerform-birthday-mask.md
 		Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg = Docs\Management\BusinessFeatures\persons\bugs\edit-singer-load-page-issue.jpg
+		Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-07-01-BUG-022-singerform-birthday-mask\README.md
+		Docs\Management\BusinessFeatures\persons\bugs\singer-bithday-validation-error.jpg = Docs\Management\BusinessFeatures\persons\bugs\singer-bithday-validation-error.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-036-personformpage-birthday-mask", "2026-07-03-BUG-036-personformpage-birthday-mask", "{FA1234BC-0001-4000-8000-0000000000B6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\bugs\2026-07-03-BUG-036-personformpage-birthday-mask\README.md = Docs\Management\BusinessFeatures\persons\bugs\2026-07-03-BUG-036-personformpage-birthday-mask\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-00000000007D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-04-01-autocomplete-field", "2026-04-01-autocomplete-field", "{FA1234BC-0001-4000-8000-00000000007E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\changes\2026-04-01-autocomplete-field\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-04-01-autocomplete-field\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-30-form-validation-update", "2026-06-30-form-validation-update", "{FA1234BC-0001-4000-8000-0000000000C1}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\persons\changes\2026-06-30-form-validation-update\README.md = Docs\Management\BusinessFeatures\persons\changes\2026-06-30-form-validation-update\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-30-form-validation-update-songs", "2026-06-30-form-validation-update-songs", "{FA1234BC-0001-4000-8000-0000000000C2}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-30-form-validation-update-songs\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-30-form-validation-update-songs\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-30-form-validation-update-artists", "2026-06-30-form-validation-update-artists", "{FA1234BC-0001-4000-8000-0000000000C3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-30-form-validation-update-artists\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-30-form-validation-update-artists\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "character-counter-threshold-alignment", "character-counter-threshold-alignment", "{FA1234BC-0001-4000-8000-0000000000C4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\character-counter-threshold-alignment\README.md = Docs\Management\cross-cutting\character-counter-threshold-alignment\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "local-enforcement-automations", "local-enforcement-automations", "{FA1234BC-0001-4000-8000-0000000000C5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\local-enforcement-automations\README.md = Docs\Management\cross-cutting\local-enforcement-automations\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "myvocalist-coding-skill-scoping", "myvocalist-coding-skill-scoping", "{FA1234BC-0001-4000-8000-0000000000C6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\myvocalist-coding-skill-scoping\README.md = Docs\Management\cross-cutting\myvocalist-coding-skill-scoping\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000C7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-04-spike-01-18-gate-audit", "2026-07-04-spike-01-18-gate-audit", "{FA1234BC-0001-4000-8000-0000000000C8}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-07-04-spike-01-18-gate-audit\README.md = Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-07-04-spike-01-18-gate-audit\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp-secrets-rotation", "mcp-secrets-rotation", "{FA1234BC-0001-4000-8000-0000000000C9}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\mcp-secrets-rotation\README.md = Docs\Management\cross-cutting\mcp-secrets-rotation\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mcp-governance-docs-housekeeping", "mcp-governance-docs-housekeeping", "{FA1234BC-0001-4000-8000-0000000000CA}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\mcp-governance-docs-housekeeping\README.md = Docs\Management\cross-cutting\mcp-governance-docs-housekeeping\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "helder-manual-actions-2026-07-09", "helder-manual-actions-2026-07-09", "{FA1234BC-0001-4000-8000-0000000000CB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\helder-manual-actions-2026-07-09\README.md = Docs\Management\cross-cutting\helder-manual-actions-2026-07-09\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tool-registry-cleanup", "tool-registry-cleanup", "{FA1234BC-0001-4000-8000-0000000000CC}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\tool-registry-cleanup\README.md = Docs\Management\cross-cutting\tool-registry-cleanup\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-appbar-pattern", "search-appbar-pattern", "{FA1234BC-0001-4000-8000-0000000000CD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\search-appbar-pattern\README.md = Docs\Management\cross-cutting\search-appbar-pattern\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-044-duplicate-personformpage-after-save", "2026-07-15-BUG-044-duplicate-personformpage-after-save", "{FA1234BC-0001-4000-8000-0000000000CE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-044-duplicate-personformpage-after-save\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-044-duplicate-personformpage-after-save\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-045-cursor-stuck-after-autocomplete", "2026-07-15-BUG-045-cursor-stuck-after-autocomplete", "{FA1234BC-0001-4000-8000-0000000000CF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-045-cursor-stuck-after-autocomplete\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-045-cursor-stuck-after-autocomplete\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-15-BUG-047-stale-suggestions-popup-edit-mode", "2026-07-15-BUG-047-stale-suggestions-popup-edit-mode", "{FA1234BC-0001-4000-8000-0000000000D0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-047-stale-suggestions-popup-edit-mode\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-15-BUG-047-stale-suggestions-popup-edit-mode\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "styles-structure", "styles-structure", "{1093A402-3B6A-487E-B4AD-76087EDAC809}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\styles-structure\README.md = Docs\Management\DevCycleCraft\styles-structure\README.md
 		Docs\Management\DevCycleCraft\styles-structure\design.md = Docs\Management\DevCycleCraft\styles-structure\design.md
 		Docs\Management\DevCycleCraft\styles-structure\plan.md = Docs\Management\DevCycleCraft\styles-structure\plan.md
 	EndProjectSection
@@ -367,6 +532,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "venues", "venues", "{9EA47D
 		Docs\Management\BusinessFeatures\venues\form-validation-task-log.md = Docs\Management\BusinessFeatures\venues\form-validation-task-log.md
 		Docs\Management\BusinessFeatures\venues\plan.md = Docs\Management\BusinessFeatures\venues\plan.md
 		Docs\Management\BusinessFeatures\venues\requirements.md = Docs\Management\BusinessFeatures\venues\requirements.md
+		Docs\Management\BusinessFeatures\venues\README.md = Docs\Management\BusinessFeatures\venues\README.md
 		Docs\Management\BusinessFeatures\venues\tasks.md = Docs\Management\BusinessFeatures\venues\tasks.md
 	EndProjectSection
 EndProject
@@ -377,12 +543,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-karaoke", "youtube-
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\task-log.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\README.md = Docs\Management\BusinessFeatures\artists-songs\youtube-karaoke\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-search-launch", "youtube-search-launch", "{FA1234BC-0001-4000-8000-000000000022}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\design.md = Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\design.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\plan.md = Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\README.md = Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\README.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\requirements.md = Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\tasks.md = Docs\Management\BusinessFeatures\artists-songs\youtube-search-launch\tasks.md
 	EndProjectSection
@@ -405,6 +573,36 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-10-form-ux-redesign
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\requirements.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-10-form-ux-redesign\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-inline-artist-create", "2026-07-21-inline-artist-create", "{FA1234BC-0001-4000-8000-000000000055}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\task-log.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\handoff.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\handoff.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\plan.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\pending-backlog-closeout.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-07-21-inline-artist-create\pending-backlog-closeout.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-00000000007F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-05-01-gotosettings-navigation-fix", "2026-05-01-gotosettings-navigation-fix", "{FA1234BC-0001-4000-8000-000000000080}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-05-01-gotosettings-navigation-fix\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-05-01-gotosettings-navigation-fix\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-fuzzy-entity-matching-import", "2026-06-01-fuzzy-entity-matching-import", "{FA1234BC-0001-4000-8000-000000000091}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-01-fuzzy-entity-matching-import\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-01-fuzzy-entity-matching-import\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-20-spec-cleanup-p2", "2026-06-20-spec-cleanup-p2", "{FA1234BC-0001-4000-8000-000000000093}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-20-spec-cleanup-p2\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-06-20-spec-cleanup-p2\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "windows-version", "windows-version", "{FA1234BC-0001-4000-8000-000000000010}"
@@ -420,9 +618,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", "{15F1DA03-2180-47BF-BC40-1BB457C97F9E}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
-		Docs\Management\Chat with Opus about frozen UI in emulator - TO DO.txt = Docs\Management\Chat with Opus about frozen UI in emulator - TO DO.txt
-		Docs\Management\cross-cutting-log.md = Docs\Management\cross-cutting-log.md
-		Docs\Management\EMULATOR_TEST_MASTER_LIST.md = Docs\Management\EMULATOR_TEST_MASTER_LIST.md
 		Docs\Management\LEDGER.md = Docs\Management\LEDGER.md
 	EndProjectSection
 EndProject
@@ -439,6 +634,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-re
 		Docs\Management\BusinessFeatures\backup-restore\plan.md = Docs\Management\BusinessFeatures\backup-restore\plan.md
 		Docs\Management\BusinessFeatures\backup-restore\task-log.md = Docs\Management\BusinessFeatures\backup-restore\task-log.md
 		Services\TransactionLogWriter.cs = Services\TransactionLogWriter.cs
+		Docs\Management\BusinessFeatures\backup-restore\README.md = Docs\Management\BusinessFeatures\backup-restore\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000A0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-shipped-tier1-3", "2026-06-shipped-tier1-3", "{FA1234BC-0001-4000-8000-0000000000A1}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\backup-restore\changes\2026-06-shipped-tier1-3\README.md = Docs\Management\BusinessFeatures\backup-restore\changes\2026-06-shipped-tier1-3\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-reporting", "{FA1234BC-0001-4000-8000-000000000012}"
@@ -446,6 +649,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crash-reporting", "crash-re
 		MyVocaList\appsettings.template.json = MyVocaList\appsettings.template.json
 		Docs\Management\BusinessFeatures\crash-reporting\design.md = Docs\Management\BusinessFeatures\crash-reporting\design.md
 		Docs\Management\BusinessFeatures\crash-reporting\plan.md = Docs\Management\BusinessFeatures\crash-reporting\plan.md
+		Docs\Management\BusinessFeatures\crash-reporting\README.md = Docs\Management\BusinessFeatures\crash-reporting\README.md
 		Docs\Management\BusinessFeatures\crash-reporting\requirements.md = Docs\Management\BusinessFeatures\crash-reporting\requirements.md
 		Docs\Management\BusinessFeatures\crash-reporting\tasks.md = Docs\Management\BusinessFeatures\crash-reporting\tasks.md
 	EndProjectSection
@@ -456,13 +660,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "user-suggestions", "user-su
 		Docs\Management\BusinessFeatures\user-suggestions\requirements.md = Docs\Management\BusinessFeatures\user-suggestions\requirements.md
 		Docs\Management\BusinessFeatures\user-suggestions\task-log.md = Docs\Management\BusinessFeatures\user-suggestions\task-log.md
 		Docs\Management\BusinessFeatures\user-suggestions\tasks.md = Docs\Management\BusinessFeatures\user-suggestions\tasks.md
+		Docs\Management\BusinessFeatures\user-suggestions\plan.md = Docs\Management\BusinessFeatures\user-suggestions\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-00000000009B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-github-issues-integration", "2026-06-01-github-issues-integration", "{FA1234BC-0001-4000-8000-00000000009C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\user-suggestions\changes\2026-06-01-github-issues-integration\README.md = Docs\Management\BusinessFeatures\user-suggestions\changes\2026-06-01-github-issues-integration\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "whats-new", "whats-new", "{FA1234BC-0001-4000-8000-000000000014}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\whats-new\design.md = Docs\Management\BusinessFeatures\whats-new\design.md
+		Docs\Management\BusinessFeatures\whats-new\README.md = Docs\Management\BusinessFeatures\whats-new\README.md
 		Docs\Management\BusinessFeatures\whats-new\requirements.md = Docs\Management\BusinessFeatures\whats-new\requirements.md
 		Docs\Management\BusinessFeatures\whats-new\tasks.md = Docs\Management\BusinessFeatures\whats-new\tasks.md
+		Docs\Management\BusinessFeatures\whats-new\plan.md = Docs\Management\BusinessFeatures\whats-new\plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-update-check", "app-update-check", "{FA1234BC-0001-4000-8000-000000000016}"
@@ -473,19 +687,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-update-check", "app-upd
 		Docs\Management\BusinessFeatures\app-update-check\task-log.md = Docs\Management\BusinessFeatures\app-update-check\task-log.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-00000000009D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-remote-update-manifest", "2026-06-01-remote-update-manifest", "{FA1234BC-0001-4000-8000-00000000009E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\app-update-check\changes\2026-06-01-remote-update-manifest\README.md = Docs\Management\BusinessFeatures\app-update-check\changes\2026-06-01-remote-update-manifest\README.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app-settings", "app-settings", "{FA1234BC-0001-4000-8000-000000000015}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\app-settings\design.md = Docs\Management\BusinessFeatures\app-settings\design.md
 		Docs\Management\BusinessFeatures\app-settings\orchestration-plan.md = Docs\Management\BusinessFeatures\app-settings\orchestration-plan.md
+		Docs\Management\BusinessFeatures\app-settings\README.md = Docs\Management\BusinessFeatures\app-settings\README.md
 		Docs\Management\BusinessFeatures\app-settings\plan.md = Docs\Management\BusinessFeatures\app-settings\plan.md
 		Docs\Management\BusinessFeatures\app-settings\requirements.md = Docs\Management\BusinessFeatures\app-settings\requirements.md
 		Docs\Management\BusinessFeatures\app-settings\tasks.md = Docs\Management\BusinessFeatures\app-settings\tasks.md
+		Docs\Management\BusinessFeatures\app-settings\task-log.md = Docs\Management\BusinessFeatures\app-settings\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "about-page", "about-page", "{FA1234BC-0001-4000-8000-000000000017}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\about-page\design.md = Docs\Management\BusinessFeatures\about-page\design.md
 		Docs\Management\BusinessFeatures\about-page\evaluation.md = Docs\Management\BusinessFeatures\about-page\evaluation.md
+		Docs\Management\BusinessFeatures\about-page\README.md = Docs\Management\BusinessFeatures\about-page\README.md
 		Docs\Management\BusinessFeatures\about-page\plan.md = Docs\Management\BusinessFeatures\about-page\plan.md
 		Docs\Management\BusinessFeatures\about-page\requirements.md = Docs\Management\BusinessFeatures\about-page\requirements.md
 		Docs\Management\BusinessFeatures\about-page\task-log.md = Docs\Management\BusinessFeatures\about-page\task-log.md
@@ -503,17 +727,41 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-picker", "search-pic
 		Docs\Management\BusinessFeatures\search-picker\task-3c-youtube-search-page.md = Docs\Management\BusinessFeatures\search-picker\task-3c-youtube-search-page.md
 		Docs\Management\BusinessFeatures\search-picker\task-log.md = Docs\Management\BusinessFeatures\search-picker\task-log.md
 		Docs\Management\BusinessFeatures\search-picker\tasks.md = Docs\Management\BusinessFeatures\search-picker\tasks.md
+		Docs\Management\BusinessFeatures\search-picker\README.md = Docs\Management\BusinessFeatures\search-picker\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-000000000085}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-artist-picker-page", "2026-06-01-artist-picker-page", "{FA1234BC-0001-4000-8000-000000000086}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-artist-picker-page\README.md = Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-artist-picker-page\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-song-picker-page", "2026-06-01-song-picker-page", "{FA1234BC-0001-4000-8000-000000000087}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-song-picker-page\README.md = Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-song-picker-page\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-youtube-search-page", "2026-06-01-youtube-search-page", "{FA1234BC-0001-4000-8000-000000000088}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-youtube-search-page\README.md = Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-youtube-search-page\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-coding-guidelines-update", "2026-06-01-coding-guidelines-update", "{FA1234BC-0001-4000-8000-000000000089}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-coding-guidelines-update\README.md = Docs\Management\BusinessFeatures\search-picker\changes\2026-06-01-coding-guidelines-update\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI-2nd-refactor", "UI-2nd-refactor", "{4CB09F16-6E81-425E-9080-840BABFB66BF}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\UI-2nd-refactor\2026-07-19-post-mvp-sequencing-decision.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\2026-07-19-post-mvp-sequencing-decision.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke  -MD3 vs Alternativas research.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas  research - chat 2.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\Design App Karaoke - MD3 vs Alternativas research - chat 1.md
-		Docs\Management\DevCycleCraft\UI-2nd-refactor\2026-07-19-post-mvp-sequencing-decision.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\2026-07-19-post-mvp-sequencing-decision.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\prompt.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\prompt.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\task-log.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\task-log.md
 		Docs\Management\DevCycleCraft\UI-2nd-refactor\ui-arch-decision-plan.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\ui-arch-decision-plan.md
+		Docs\Management\DevCycleCraft\UI-2nd-refactor\README.md = Docs\Management\DevCycleCraft\UI-2nd-refactor\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "youtube-share", "youtube-share", "{FA1234BC-0001-4000-8000-000000000020}"
@@ -528,17 +776,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-management", "queue-m
 		Docs\Management\BusinessFeatures\queue-management\requirements.md = Docs\Management\BusinessFeatures\queue-management\requirements.md
 		Docs\Management\BusinessFeatures\queue-management\task-log.md = Docs\Management\BusinessFeatures\queue-management\task-log.md
 		Docs\Management\BusinessFeatures\queue-management\tasks.md = Docs\Management\BusinessFeatures\queue-management\tasks.md
+		Docs\Management\BusinessFeatures\queue-management\README.md = Docs\Management\BusinessFeatures\queue-management\README.md
+		Docs\Management\BusinessFeatures\queue-management\plan.md = Docs\Management\BusinessFeatures\queue-management\plan.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000A2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-shipped-core-product", "2026-06-shipped-core-product", "{FA1234BC-0001-4000-8000-0000000000A3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\queue-management\changes\2026-06-shipped-core-product\README.md = Docs\Management\BusinessFeatures\queue-management\changes\2026-06-shipped-core-product\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "page-load-frozen", "page-load-frozen", "{C81D77D9-056E-44D8-A88F-522682CEE603}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\page-load-frozen\2026-12-06-1855 - VS Debug in S23 Ultra.txt.txt = Docs\Management\DevCycleCraft\page-load-frozen\2026-12-06-1855 - VS Debug in S23 Ultra.txt.txt
-		Docs\Management\DevCycleCraft\page-load-frozen\debug log device - logcat.txt = Docs\Management\DevCycleCraft\page-load-frozen\debug log device - logcat.txt
-		Docs\Management\DevCycleCraft\page-load-frozen\debug log visual studio debugging in S23 Ultra.txt = Docs\Management\DevCycleCraft\page-load-frozen\debug log visual studio debugging in S23 Ultra.txt
 		Docs\Management\DevCycleCraft\page-load-frozen\findings.md = Docs\Management\DevCycleCraft\page-load-frozen\findings.md
 		Docs\Management\DevCycleCraft\page-load-frozen\plan.md = Docs\Management\DevCycleCraft\page-load-frozen\plan.md
-		Docs\Management\DevCycleCraft\page-load-frozen\release-pageload-only.txt = Docs\Management\DevCycleCraft\page-load-frozen\release-pageload-only.txt
 		Docs\Management\DevCycleCraft\page-load-frozen\task-log.md = Docs\Management\DevCycleCraft\page-load-frozen\task-log.md
+		Docs\Management\DevCycleCraft\page-load-frozen\README.md = Docs\Management\DevCycleCraft\page-load-frozen\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "session-continuity-leasing", "session-continuity-leasing", "{FA1234BC-0001-4000-8000-000000000026}"
@@ -552,6 +806,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "session-continuity-leasing"
 		Docs\Management\DevCycleCraft\session-continuity-leasing\task-log.md = Docs\Management\DevCycleCraft\session-continuity-leasing\task-log.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md = Docs\Management\DevCycleCraft\session-continuity-leasing\tasks.md
 		Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md = Docs\Management\DevCycleCraft\session-continuity-leasing\workflow-edits-proposed.md
+		Docs\Management\DevCycleCraft\session-continuity-leasing\README.md = Docs\Management\DevCycleCraft\session-continuity-leasing\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-000000000081}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-stop-hook-scanner-removal", "2026-06-27-stop-hook-scanner-removal", "{FA1234BC-0001-4000-8000-000000000082}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\session-continuity-leasing\changes\2026-06-27-stop-hook-scanner-removal\README.md = Docs\Management\DevCycleCraft\session-continuity-leasing\changes\2026-06-27-stop-hook-scanner-removal\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lease-scripts", "lease-scripts", "{FA1234BC-0001-4000-8000-000000000027}"
@@ -567,42 +829,155 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "enforcement-automations", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-scripts", "backlog-scripts", "{C9CDD2BC-B529-48CA-9EFD-24A2A2D92DE7}"
 	ProjectSection(SolutionItems) = preProject
+		.claude\scripts\backlog\backlog_gen.py = .claude\scripts\backlog\backlog_gen.py
 		.claude\scripts\backlog\backlog_lib.py = .claude\scripts\backlog\backlog_lib.py
+		.claude\scripts\backlog\frontmatter.py = .claude\scripts\backlog\frontmatter.py
+		.claude\scripts\backlog\model.py = .claude\scripts\backlog\model.py
 		.claude\scripts\backlog\orphan_check.py = .claude\scripts\backlog\orphan_check.py
+		.claude\scripts\backlog\render.py = .claude\scripts\backlog\render.py
 		.claude\scripts\backlog\session_marker.py = .claude\scripts\backlog\session_marker.py
+		.claude\scripts\backlog\tests\test_backlog_gen.py = .claude\scripts\backlog\tests\test_backlog_gen.py
 		.claude\scripts\backlog\tests\test_backlog_lib.py = .claude\scripts\backlog\tests\test_backlog_lib.py
+		.claude\scripts\backlog\tests\test_frontmatter.py = .claude\scripts\backlog\tests\test_frontmatter.py
+		.claude\scripts\backlog\tests\test_model.py = .claude\scripts\backlog\tests\test_model.py
 		.claude\scripts\backlog\tests\test_orphan_check.py = .claude\scripts\backlog\tests\test_orphan_check.py
+		.claude\scripts\backlog\tests\test_orphan_check_widening.py = .claude\scripts\backlog\tests\test_orphan_check_widening.py
+		.claude\scripts\backlog\tests\test_render.py = .claude\scripts\backlog\tests\test_render.py
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{7A021F6B-F297-41EA-A028-C4F881146791}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg = Docs\Management\BusinessFeatures\artists-songs\bugs\artistis-validation-error-charcount-duplicated-01.jpg
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-001-artists-page-no-back-button.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-002-artist-form-search-non-md3.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-002-artist-form-search-non-md3.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-003-songpage-filter-chips.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-003-songpage-filter-chips.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-004-bottomsheet-title-style-missing.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-004-bottomsheet-title-style-missing.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-005-new-song-save-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-005-new-song-save-broken.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-006-search-song-double-tap-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-006-search-song-double-tap-crash.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-007-searchappbar-duplicate-back-arrow.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-007-searchappbar-duplicate-back-arrow.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-008-songform-artist-autocomplete.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-009-add-url-before-save-ux.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-015-artistspage-trailing-button-noop.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-015-artistspage-trailing-button-noop.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-016-songspage-fab-crash.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-020-songspage-fab-crash-secure-storage.md
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\task-log.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\url-undo-fix-plan.md
+	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-008-songform-artist-autocomplete", "2026-06-01-BUG-008-songform-artist-autocomplete", "{FA1234BC-0001-4000-8000-0000000000B5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-008-songform-artist-autocomplete\BUG-008-songform-artist-autocomplete.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-008-songform-artist-autocomplete\BUG-008-songform-artist-autocomplete.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-008-songform-artist-autocomplete\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-008-songform-artist-autocomplete\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-01-BUG-020-songspage-fab-crash-secure-storage", "2026-07-01-BUG-020-songspage-fab-crash-secure-storage", "{FA1234BC-0001-4000-8000-0000000000B4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-020-songspage-fab-crash-secure-storage\BUG-020-songspage-fab-crash-secure-storage.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-020-songspage-fab-crash-secure-storage\BUG-020-songspage-fab-crash-secure-storage.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-020-songspage-fab-crash-secure-storage\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-020-songspage-fab-crash-secure-storage\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-14-BUG-003-songpage-filter-chips", "2026-06-14-BUG-003-songpage-filter-chips", "{FA1234BC-0001-4000-8000-0000000000AA}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-003-songpage-filter-chips\BUG-003-songpage-filter-chips.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-003-songpage-filter-chips\BUG-003-songpage-filter-chips.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-003-songpage-filter-chips\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-003-songpage-filter-chips\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-14-BUG-004-bottomsheet-title-style-missing", "2026-06-14-BUG-004-bottomsheet-title-style-missing", "{FA1234BC-0001-4000-8000-0000000000AB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-004-bottomsheet-title-style-missing\BUG-004-bottomsheet-title-style-missing.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-004-bottomsheet-title-style-missing\BUG-004-bottomsheet-title-style-missing.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-004-bottomsheet-title-style-missing\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-14-BUG-004-bottomsheet-title-style-missing\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-009-add-url-before-save-ux", "2026-06-01-BUG-009-add-url-before-save-ux", "{FA1234BC-0001-4000-8000-00000000008F}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-009-add-url-before-save-ux\BUG-009-add-url-before-save-ux.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-009-add-url-before-save-ux\BUG-009-add-url-before-save-ux.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-009-add-url-before-save-ux\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-009-add-url-before-save-ux\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-010-song-api-autofill-broken", "2026-06-01-BUG-010-song-api-autofill-broken", "{FA1234BC-0001-4000-8000-000000000090}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-010-song-api-autofill-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-010-song-api-autofill-broken\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-03-BUG-001-artists-page-no-back-button", "2026-06-03-BUG-001-artists-page-no-back-button", "{FA1234BC-0001-4000-8000-00000000008A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-03-BUG-001-artists-page-no-back-button\BUG-001-artists-page-no-back-button.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-03-BUG-001-artists-page-no-back-button\BUG-001-artists-page-no-back-button.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-03-BUG-001-artists-page-no-back-button\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-03-BUG-001-artists-page-no-back-button\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-002-artist-form-search-non-md3", "2026-06-01-BUG-002-artist-form-search-non-md3", "{FA1234BC-0001-4000-8000-00000000008B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-002-artist-form-search-non-md3\BUG-002-artist-form-search-non-md3.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-002-artist-form-search-non-md3\BUG-002-artist-form-search-non-md3.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-002-artist-form-search-non-md3\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-002-artist-form-search-non-md3\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-005-new-song-save-broken", "2026-06-01-BUG-005-new-song-save-broken", "{FA1234BC-0001-4000-8000-00000000008C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-005-new-song-save-broken\BUG-005-new-song-save-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-005-new-song-save-broken\BUG-005-new-song-save-broken.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-005-new-song-save-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-005-new-song-save-broken\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-006-search-song-double-tap-crash", "2026-06-01-BUG-006-search-song-double-tap-crash", "{FA1234BC-0001-4000-8000-00000000008D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-006-search-song-double-tap-crash\BUG-006-search-song-double-tap-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-006-search-song-double-tap-crash\BUG-006-search-song-double-tap-crash.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-006-search-song-double-tap-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-006-search-song-double-tap-crash\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-007-searchappbar-duplicate-back-arrow", "2026-06-01-BUG-007-searchappbar-duplicate-back-arrow", "{FA1234BC-0001-4000-8000-00000000008E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-007-searchappbar-duplicate-back-arrow\BUG-007-searchappbar-duplicate-back-arrow.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-007-searchappbar-duplicate-back-arrow\BUG-007-searchappbar-duplicate-back-arrow.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-007-searchappbar-duplicate-back-arrow\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-01-BUG-007-searchappbar-duplicate-back-arrow\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-BUG-015-artistspage-trailing-button-noop", "2026-06-27-BUG-015-artistspage-trailing-button-noop", "{FA1234BC-0001-4000-8000-000000000083}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\BUG-015-artistspage-trailing-button-noop.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\BUG-015-artistspage-trailing-button-noop.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-015-artistspage-trailing-button-noop\README.md
+	EndProjectSection
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-27-BUG-016-songspage-fab-crash", "2026-06-27-BUG-016-songspage-fab-crash", "{FA1234BC-0001-4000-8000-000000000084}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\BUG-016-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\BUG-016-songspage-fab-crash.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-016-songspage-fab-crash\README.md
+	EndProjectSection
+EndProject
+EndProject
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-BUG-050-suggestion-not-locked", "2026-07-21-BUG-050-suggestion-not-locked", "{FA1234BC-0001-4000-8000-000000000073}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-050-suggestion-not-locked\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-050-suggestion-not-locked\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-BUG-051-autocomplete-stale-results", "2026-07-21-BUG-051-autocomplete-stale-results", "{FA1234BC-0001-4000-8000-000000000074}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-051-autocomplete-stale-results\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-051-autocomplete-stale-results\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-21-BUG-052-edit-shows-empty-artist-field", "2026-07-21-BUG-052-edit-shows-empty-artist-field", "{FA1234BC-0001-4000-8000-000000000075}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-052-edit-shows-empty-artist-field\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-21-BUG-052-edit-shows-empty-artist-field\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-03-01-BUG-012-venuesviewmodel-fetch-slow", "2026-03-01-BUG-012-venuesviewmodel-fetch-slow", "{FA1234BC-0001-4000-8000-00000000007A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\bugs\2026-03-01-BUG-012-venuesviewmodel-fetch-slow\README.md = Docs\Management\BusinessFeatures\venues\bugs\2026-03-01-BUG-012-venuesviewmodel-fetch-slow\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop", "2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop", "{FA1234BC-0001-4000-8000-000000000070}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-028-artistspage-trailing-catalog-button-noop\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000025}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-011-queuepage-bottomsheet-double-add", "2026-06-01-BUG-011-queuepage-bottomsheet-double-add", "{FA1234BC-0001-4000-8000-000000000092}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\queue-management\bugs\BUG-011-queuepage-bottomsheet-double-add.md = Docs\Management\BusinessFeatures\queue-management\bugs\BUG-011-queuepage-bottomsheet-double-add.md
+		Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\BUG-011-queuepage-bottomsheet-double-add.md = Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\BUG-011-queuepage-bottomsheet-double-add.md
+		Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\README.md = Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000024}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\venues\bugs\BUG-012-venuesviewmodel-fetch-slow.md = Docs\Management\BusinessFeatures\venues\bugs\BUG-012-venuesviewmodel-fetch-slow.md
 		Docs\Management\BusinessFeatures\venues\bugs\validation-error-26chars.jpg = Docs\Management\BusinessFeatures\venues\bugs\validation-error-26chars.jpg
 		Docs\Management\BusinessFeatures\venues\bugs\validation-error-31morechars.jpg = Docs\Management\BusinessFeatures\venues\bugs\validation-error-31morechars.jpg
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-00000000007B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-03-01-venues-md3-rebuild", "2026-03-01-venues-md3-rebuild", "{FA1234BC-0001-4000-8000-00000000007C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\changes\2026-03-01-venues-md3-rebuild\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-03-01-venues-md3-rebuild\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-30-form-validation-update", "2026-06-30-form-validation-update", "{FA1234BC-0001-4000-8000-0000000000C0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\venues\changes\2026-06-30-form-validation-update\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-06-30-form-validation-update\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "visual-theme-refresh", "visual-theme-refresh", "{15BB70C4-1D36-417D-9F28-E5D6978FAF2C}"
@@ -614,43 +989,54 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stitch-output", "stitch-out
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-017-artistscrud-emulator-debug-often-stops", "BUG-017-artistscrud-emulator-debug-often-stops", "{B92F4F42-00C3-44C3-BC6E-E340782C7183}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-017-artistscrud-emulator-debug-often-stops\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-018-artistformpage-edit-save-crash", "BUG-018-artistformpage-edit-save-crash", "{FA1234BC-0001-4000-8000-000000000031}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-018-artistformpage-edit-save-crash\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-018-artistformpage-edit-save-crash\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\plan.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-018-artistformpage-edit-save-crash\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-019-artistspage-listitem-button-noop", "BUG-019-artistspage-listitem-button-noop", "{FA1234BC-0001-4000-8000-000000000032}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-019-artistspage-listitem-button-noop\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-019-artistspage-listitem-button-noop\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\task-log.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-30-BUG-019-artistspage-listitem-button-noop\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-021-songspage-fab-crash", "BUG-021-songspage-fab-crash", "{92D65ADE-A1E0-4220-AE25-06691B50D86D}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash-debug-exception.png
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\BUG-021-songspage-fab-crash.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-01-BUG-021-songspage-fab-crash\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-024-songform-edit-data-loss", "BUG-024-songform-edit-data-loss", "{FA1234BC-0001-4000-8000-000000000035}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\BUG-024-songform-edit-data-loss.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-024-songform-edit-data-loss\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-023-songform-bottomsheet-broken", "BUG-023-songform-bottomsheet-broken", "{FA1234BC-0001-4000-8000-000000000036}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\BUG-023-songform-bottomsheet-broken.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-02-BUG-023-songform-bottomsheet-broken\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000038}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\cross-cutting\README.md = Docs\Management\BusinessFeatures\cross-cutting\README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000039}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-026-hwui-sigabrt-render-teardown", "BUG-026-hwui-sigabrt-render-teardown", "{FA1234BC-0001-4000-8000-000000000040}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\cross-cutting\bugs\BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\BUG-026-hwui-sigabrt-render-teardown.md
+		Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\README.md = Docs\Management\BusinessFeatures\cross-cutting\bugs\2026-07-03-BUG-026-hwui-sigabrt-render-teardown\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Archive", "Archive", "{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE}"
@@ -669,11 +1055,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rules-file-refactoring", "r
 		Docs\Management\DevCycleCraft\rules-file-refactoring\skill-overlap-findings.md = Docs\Management\DevCycleCraft\rules-file-refactoring\skill-overlap-findings.md
 		Docs\Management\DevCycleCraft\rules-file-refactoring\task-log.md = Docs\Management\DevCycleCraft\rules-file-refactoring\task-log.md
 		Docs\Management\DevCycleCraft\rules-file-refactoring\tasks.md = Docs\Management\DevCycleCraft\rules-file-refactoring\tasks.md
+		Docs\Management\DevCycleCraft\rules-file-refactoring\README.md = Docs\Management\DevCycleCraft\rules-file-refactoring\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "spec-evolution-versioning", "spec-evolution-versioning", "{FA1234BC-0001-4000-8000-000000000043}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\findings.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\findings.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\2026-07-21-nested-folders-and-generated-backlog-decision.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\2026-07-21-nested-folders-and-generated-backlog-decision.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\requirements.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\requirements.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\design.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\design.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\plan.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\plan.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\tasks.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\tasks.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\task-log.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\task-log.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\migration\BACKLOG-pre-migration.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\README.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\README.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\POST-MIGRATION-FOLLOWUPS.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\POST-MIGRATION-FOLLOWUPS.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\T13-proposed-diffs.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\T13-proposed-diffs.md
+		Docs\Management\DevCycleCraft\spec-evolution-versioning\T12a-remaining-waves-plan.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\T12a-remaining-waves-plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "per-agent-context-isolation", "per-agent-context-isolation", "{FA1234BC-0001-4000-8000-000000000044}"
@@ -684,6 +1082,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "per-agent-context-isolation
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\requirements.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\requirements.md
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\task-log.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\task-log.md
 		Docs\Management\DevCycleCraft\per-agent-context-isolation\tasks.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\tasks.md
+		Docs\Management\DevCycleCraft\per-agent-context-isolation\README.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-purpose-review", "backlog-purpose-review", "{FA1234BC-0001-4000-8000-000000000049}"
@@ -691,6 +1090,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-purpose-review", "b
 		Docs\Management\DevCycleCraft\backlog-purpose-review\design.md = Docs\Management\DevCycleCraft\backlog-purpose-review\design.md
 		Docs\Management\DevCycleCraft\backlog-purpose-review\findings.md = Docs\Management\DevCycleCraft\backlog-purpose-review\findings.md
 		Docs\Management\DevCycleCraft\backlog-purpose-review\task-log.md = Docs\Management\DevCycleCraft\backlog-purpose-review\task-log.md
+		Docs\Management\DevCycleCraft\backlog-purpose-review\README.md = Docs\Management\DevCycleCraft\backlog-purpose-review\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-archive", "backlog-archive", "{FA1234BC-0001-4000-8000-000000000050}"
@@ -706,16 +1106,285 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bugs", "Bugs", "{1AAD9972-3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-043", "bug-043", "{6941D280-F5AE-428A-AC78-42246F3BF3F8}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (1).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (1).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (2).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (2).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (3).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (3).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (4).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\bug-personform (4).jpg
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\ListItem component not used.png = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\ListItem component not used.png
-		Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\log-debug-s23.txt = Docs\Management\DevCycleCraft\autocomplete-component\bugs\bug-043\log-debug-s23.txt
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (1).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (1).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (2).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (2).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (3).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (3).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (4).jpg = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\bug-personform (4).jpg
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\ListItem component not used.png = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\ListItem component not used.png
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\log-debug-s23.txt = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\log-debug-s23.txt
 		Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md = Docs\Management\DevCycleCraft\autocomplete-component\spike-bug-043-findings.md
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-043-release-build-zero-suggestions\README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyVocaList.Extensions", "MyVocaList.Extensions\MyVocaList.Extensions.csproj", "{9380343D-7BB2-4832-A406-ED77FF9AAEB2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-19-dx-autocompleteedit-replacement", "2026-07-19-dx-autocompleteedit-replacement", "{DB5ECBBC-566B-4A00-9791-E18E11F49B55}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\design.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\findings.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\plan.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\requirements.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\task-log.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\task-log.md
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-19-dx-autocompleteedit-replacement\tasks.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-11-component-evaluation", "2026-07-11-component-evaluation", "{FA1234BC-0001-4000-8000-0000000000BA}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-11-component-evaluation\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-11-component-evaluation\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-11-apply-to-simplest-candidate", "2026-07-11-apply-to-simplest-candidate", "{FA1234BC-0001-4000-8000-0000000000BB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-11-apply-to-simplest-candidate\README.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-07-11-apply-to-simplest-candidate\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs (autocomplete-component)", "bugs (autocomplete-component)", "{FA1234BC-0001-4000-8000-0000000000BC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-040-mobile-input-loses-focus", "2026-07-12-BUG-040-mobile-input-loses-focus", "{FA1234BC-0001-4000-8000-0000000000BD}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-040-mobile-input-loses-focus\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-041-search-view-duplicate-on-back", "2026-07-12-BUG-041-search-view-duplicate-on-back", "{FA1234BC-0001-4000-8000-0000000000BE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-041-search-view-duplicate-on-back\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-041-search-view-duplicate-on-back\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-12-BUG-042-back-tap-repeat-cycle", "2026-07-12-BUG-042-back-tap-repeat-cycle", "{FA1234BC-0001-4000-8000-0000000000BF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-042-back-tap-repeat-cycle\README.md = Docs\Management\DevCycleCraft\autocomplete-component\bugs\2026-07-12-BUG-042-back-tap-repeat-cycle\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-cutting", "cross-cutting", "{FA1234BC-0001-4000-8000-000000000057}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\cross-cutting-log.md = Docs\Management\cross-cutting\cross-cutting-log.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vs-solution-file-registration-rule", "vs-solution-file-registration-rule", "{FA1234BC-0001-4000-8000-0000000000D1}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\vs-solution-file-registration-rule\README.md = Docs\Management\cross-cutting\vs-solution-file-registration-rule\README.md
+		Docs\Management\cross-cutting\vs-solution-file-registration-rule\handoff.md = Docs\Management\cross-cutting\vs-solution-file-registration-rule\handoff.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proactive-backlog-entry-rule", "proactive-backlog-entry-rule", "{FA1234BC-0001-4000-8000-0000000000D2}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\proactive-backlog-entry-rule\README.md = Docs\Management\cross-cutting\proactive-backlog-entry-rule\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "visual-theme-refresh", "visual-theme-refresh", "{FA1234BC-0001-4000-8000-0000000000D3}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\visual-theme-refresh\README.md = Docs\Management\cross-cutting\visual-theme-refresh\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "branch-lock-avoidance", "branch-lock-avoidance", "{FA1234BC-0001-4000-8000-0000000000B7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\branch-lock-avoidance\README.md = Docs\Management\cross-cutting\branch-lock-avoidance\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "form-autocomplete-ux-overhaul", "form-autocomplete-ux-overhaul", "{FA1234BC-0001-4000-8000-000000000058}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\form-autocomplete-ux-overhaul\README.md = Docs\Management\cross-cutting\form-autocomplete-ux-overhaul\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queueservice-deadcode-cleanup", "queueservice-deadcode-cleanup", "{FA1234BC-0001-4000-8000-000000000059}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\queueservice-deadcode-cleanup\README.md = Docs\Management\cross-cutting\queueservice-deadcode-cleanup\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "user-tutorial-learning", "user-tutorial-learning", "{FA1234BC-0001-4000-8000-00000000005A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\user-tutorial-learning\README.md = Docs\Management\cross-cutting\user-tutorial-learning\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "website", "website", "{FA1234BC-0001-4000-8000-00000000005B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\website\README.md = Docs\Management\cross-cutting\website\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "singer-self-registration", "singer-self-registration", "{FA1234BC-0001-4000-8000-00000000005C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\singer-self-registration\README.md = Docs\Management\cross-cutting\singer-self-registration\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "social-features", "social-features", "{FA1234BC-0001-4000-8000-00000000005D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\social-features\README.md = Docs\Management\cross-cutting\social-features\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation-spec-tracking-governance", "documentation-spec-tracking-governance", "{FA1234BC-0001-4000-8000-00000000005E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\documentation-spec-tracking-governance\README.md = Docs\Management\cross-cutting\documentation-spec-tracking-governance\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inline-undo-pattern", "inline-undo-pattern", "{FA1234BC-0001-4000-8000-00000000005F}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\inline-undo-pattern\README.md = Docs\Management\cross-cutting\inline-undo-pattern\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mandatory-worktree-rule-enforcement", "mandatory-worktree-rule-enforcement", "{FA1234BC-0001-4000-8000-000000000060}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\mandatory-worktree-rule-enforcement\README.md = Docs\Management\cross-cutting\mandatory-worktree-rule-enforcement\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "worktree-enforcement", "worktree-enforcement", "{FA1234BC-0001-4000-8000-0000000000A4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\worktree-enforcement\README.md = Docs\Management\cross-cutting\worktree-enforcement\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "orchestrator-role-enforcement", "orchestrator-role-enforcement", "{FA1234BC-0001-4000-8000-0000000000A5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\orchestrator-role-enforcement\README.md = Docs\Management\cross-cutting\orchestrator-role-enforcement\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bug-tracking-procedure", "bug-tracking-procedure", "{FA1234BC-0001-4000-8000-0000000000A6}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\bug-tracking-procedure\README.md = Docs\Management\cross-cutting\bug-tracking-procedure\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "haiku-model-assignment", "haiku-model-assignment", "{FA1234BC-0001-4000-8000-0000000000A7}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\haiku-model-assignment\README.md = Docs\Management\cross-cutting\haiku-model-assignment\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "component-change-governance", "component-change-governance", "{FA1234BC-0001-4000-8000-0000000000A8}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\component-change-governance\README.md = Docs\Management\cross-cutting\component-change-governance\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "md3-devexpress-compliance-gap", "md3-devexpress-compliance-gap", "{FA1234BC-0001-4000-8000-0000000000A9}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\md3-devexpress-compliance-gap\README.md = Docs\Management\cross-cutting\md3-devexpress-compliance-gap\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "db-side-collation", "db-side-collation", "{FA1234BC-0001-4000-8000-0000000000AE}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\db-side-collation\README.md = Docs\Management\cross-cutting\db-side-collation\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "navigation-icon-pattern", "navigation-icon-pattern", "{FA1234BC-0001-4000-8000-0000000000AF}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\navigation-icon-pattern\README.md = Docs\Management\cross-cutting\navigation-icon-pattern\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-crud-filter-fix", "artists-crud-filter-fix", "{FA1234BC-0001-4000-8000-0000000000B0}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\artists-crud-filter-fix\README.md = Docs\Management\cross-cutting\artists-crud-filter-fix\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-music-icon-asset", "queue-music-icon-asset", "{FA1234BC-0001-4000-8000-0000000000B1}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\queue-music-icon-asset\README.md = Docs\Management\cross-cutting\queue-music-icon-asset\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-pattern-standardization", "search-pattern-standardization", "{FA1234BC-0001-4000-8000-000000000061}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\search-pattern-standardization\README.md = Docs\Management\cross-cutting\search-pattern-standardization\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "iasyncrelaycommand-standardization", "iasyncrelaycommand-standardization", "{FA1234BC-0001-4000-8000-000000000062}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\iasyncrelaycommand-standardization\README.md = Docs\Management\cross-cutting\iasyncrelaycommand-standardization\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-error-state-ux-standardization", "search-error-state-ux-standardization", "{FA1234BC-0001-4000-8000-000000000063}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\search-error-state-ux-standardization\README.md = Docs\Management\cross-cutting\search-error-state-ux-standardization\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "filter-pattern-standardization", "filter-pattern-standardization", "{FA1234BC-0001-4000-8000-000000000064}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\filter-pattern-standardization\README.md = Docs\Management\cross-cutting\filter-pattern-standardization\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shell-navigation-tap-animations", "shell-navigation-tap-animations", "{FA1234BC-0001-4000-8000-000000000065}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\shell-navigation-tap-animations\README.md = Docs\Management\cross-cutting\shell-navigation-tap-animations\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "floatingtoolbar-visibility-verify", "floatingtoolbar-visibility-verify", "{FA1234BC-0001-4000-8000-000000000066}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\floatingtoolbar-visibility-verify\README.md = Docs\Management\cross-cutting\floatingtoolbar-visibility-verify\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "autocomplete-mobile-ux-pattern", "autocomplete-mobile-ux-pattern", "{FA1234BC-0001-4000-8000-000000000067}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\autocomplete-mobile-ux-pattern\README.md = Docs\Management\cross-cutting\autocomplete-mobile-ux-pattern\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-page-structural-reduction", "crud-page-structural-reduction", "{FA1234BC-0001-4000-8000-000000000068}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\crud-page-structural-reduction\README.md = Docs\Management\cross-cutting\crud-page-structural-reduction\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "large-volume-data-stress-test", "large-volume-data-stress-test", "{FA1234BC-0001-4000-8000-000000000069}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\large-volume-data-stress-test\README.md = Docs\Management\cross-cutting\large-volume-data-stress-test\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cross-device-os-compatibility-test", "cross-device-os-compatibility-test", "{FA1234BC-0001-4000-8000-00000000006A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\cross-device-os-compatibility-test\README.md = Docs\Management\cross-cutting\cross-device-os-compatibility-test\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "store-presubmission-compliance", "store-presubmission-compliance", "{FA1234BC-0001-4000-8000-00000000006B}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\store-presubmission-compliance\README.md = Docs\Management\cross-cutting\store-presubmission-compliance\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pre-release-mobile-testing-checklist", "pre-release-mobile-testing-checklist", "{FA1234BC-0001-4000-8000-00000000006C}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\pre-release-mobile-testing-checklist\README.md = Docs\Management\cross-cutting\pre-release-mobile-testing-checklist\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infra-repository-folder-consolidation", "infra-repository-folder-consolidation", "{FA1234BC-0001-4000-8000-00000000006D}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\infra-repository-folder-consolidation\README.md = Docs\Management\cross-cutting\infra-repository-folder-consolidation\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "read-model-notracking-guidelines", "read-model-notracking-guidelines", "{FA1234BC-0001-4000-8000-00000000006E}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crud-read-model-refactoring", "crud-read-model-refactoring", "{FA1234BC-0001-4000-8000-00000000006F}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\crud-read-model-refactoring\README.md = Docs\Management\cross-cutting\crud-read-model-refactoring\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-027-songformpage-artist-field-broken", "2026-07-03-BUG-027-songformpage-artist-field-broken", "{FA1234BC-0001-4000-8000-000000000076}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-027-songformpage-artist-field-broken\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-027-songformpage-artist-field-broken\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-029-artistformpage-search-strip-icon-crash", "2026-07-03-BUG-029-artistformpage-search-strip-icon-crash", "{FA1234BC-0001-4000-8000-000000000077}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-029-artistformpage-search-strip-icon-crash\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-029-artistformpage-search-strip-icon-crash\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear", "2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear", "{FA1234BC-0001-4000-8000-000000000078}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title", "2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title", "{FA1234BC-0001-4000-8000-000000000079}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-07-03-BUG-031-no-api-autocomplete-artist-name-song-title\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "milestones", "milestones", "{FA1234BC-0001-4000-8000-000000000071}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-mvp-release", "2026-06-mvp-release", "{FA1234BC-0001-4000-8000-000000000072}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\milestones\2026-06-mvp-release\README.md = Docs\Management\milestones\2026-06-mvp-release\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "emulator-testing", "emulator-testing", "{FA1234BC-0001-4000-8000-0000000000D4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\emulator-testing\Chat with Opus about frozen UI in emulator - TO DO.txt = Docs\Management\cross-cutting\emulator-testing\Chat with Opus about frozen UI in emulator - TO DO.txt
+		Docs\Management\cross-cutting\emulator-testing\EMULATOR_TEST_MASTER_LIST.md = Docs\Management\cross-cutting\emulator-testing\EMULATOR_TEST_MASTER_LIST.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -818,7 +1487,36 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{FA1234BC-0001-4000-8000-000000000028} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{FA1234BC-0001-4000-8000-000000000055} = {FA1234BC-0001-4000-8000-00000000007F}
+		{C9CDD2BC-B529-48CA-9EFD-24A2A2D92DE7} = {FA1234BC-0001-4000-8000-000000000029}
+		{FA1234BC-0001-4000-8000-0000000000D4} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000071} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{FA1234BC-0001-4000-8000-000000000072} = {FA1234BC-0001-4000-8000-000000000071}
+		{FA1234BC-0001-4000-8000-000000000067} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000068} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000069} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006A} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006B} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006C} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006D} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006E} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000006F} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000057} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
+		{FA1234BC-0001-4000-8000-000000000058} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000059} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005A} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005B} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005C} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005D} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005E} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-00000000005F} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000060} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000061} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000062} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000063} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000064} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000065} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-000000000066} = {FA1234BC-0001-4000-8000-000000000057}
 		{E9A5FC59-0C8C-49B6-9845-7870FA3CD098} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{300D3C1B-4E22-4CEE-85FF-453BD80607BD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
@@ -840,19 +1538,42 @@ Global
 		{FA1234BC-0001-4000-8000-000000000033} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000029} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{F58ED7A0-0186-4187-9FCF-78A464FB01C5} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000054} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000046} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000053} = {FA1234BC-0001-4000-8000-000000000046}
 		{FA1234BC-0001-4000-8000-000000000051} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
+		{FA1234BC-0001-4000-8000-000000000056} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000052} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000047} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000048} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{D01D4F5A-EA21-4BEA-9808-B8FD795E79C7} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-000000000034} = {D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}
+		{FA1234BC-0001-4000-8000-0000000000B6} = {FA1234BC-0001-4000-8000-000000000034}
+		{FA1234BC-0001-4000-8000-00000000007D} = {D01D4F5A-EA21-4BEA-9808-B8FD795E79C7}
+		{FA1234BC-0001-4000-8000-00000000007E} = {FA1234BC-0001-4000-8000-00000000007D}
 		{1093A402-3B6A-487E-B4AD-76087EDAC809} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{9EA47D78-293E-41B7-872D-3B2B85E82710} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{6851C0F2-5877-4E2F-89C0-9B82A6770BE0} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{FA1234BC-0001-4000-8000-000000000022} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{FA1234BC-0001-4000-8000-000000000023} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000045} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-00000000007F} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
+		{FA1234BC-0001-4000-8000-0000000000C2} = {FA1234BC-0001-4000-8000-00000000007F}
+		{FA1234BC-0001-4000-8000-0000000000C3} = {FA1234BC-0001-4000-8000-00000000007F}
+		{FA1234BC-0001-4000-8000-0000000000C4} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000C5} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000C6} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000C7} = {FA1234BC-0001-4000-8000-000000000041}
+		{FA1234BC-0001-4000-8000-0000000000C8} = {FA1234BC-0001-4000-8000-0000000000C7}
+		{FA1234BC-0001-4000-8000-0000000000C9} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000CA} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000CB} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000CC} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000CD} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000CE} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000CF} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000D0} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-000000000080} = {FA1234BC-0001-4000-8000-00000000007F}
 		{FA1234BC-0001-4000-8000-000000000010} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{0C4BA720-519E-4818-BD9B-34AC19E4FCD7} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
@@ -871,10 +1592,14 @@ Global
 		{C81D77D9-056E-44D8-A88F-522682CEE603} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000026} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{FA1234BC-0001-4000-8000-000000000027} = {FA1234BC-0001-4000-8000-000000000026}
+		{FA1234BC-0001-4000-8000-000000000081} = {FA1234BC-0001-4000-8000-000000000026}
+		{FA1234BC-0001-4000-8000-000000000082} = {FA1234BC-0001-4000-8000-000000000081}
 		{FA1234BC-0001-4000-8000-000000000037} = {0C4BA720-519E-4818-BD9B-34AC19E4FCD7}
 		{7A021F6B-F297-41EA-A028-C4F881146791} = {C141C5C9-833C-4A26-96BF-3745A2DA1AD4}
 		{FA1234BC-0001-4000-8000-000000000025} = {FA1234BC-0001-4000-8000-000000000021}
 		{FA1234BC-0001-4000-8000-000000000024} = {9EA47D78-293E-41B7-872D-3B2B85E82710}
+		{FA1234BC-0001-4000-8000-00000000007B} = {9EA47D78-293E-41B7-872D-3B2B85E82710}
+		{FA1234BC-0001-4000-8000-00000000007C} = {FA1234BC-0001-4000-8000-00000000007B}
 		{15BB70C4-1D36-417D-9F28-E5D6978FAF2C} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{DAA6CE0B-7CD5-49ED-8C46-D202070039F3} = {15BB70C4-1D36-417D-9F28-E5D6978FAF2C}
 		{B92F4F42-00C3-44C3-BC6E-E340782C7183} = {7A021F6B-F297-41EA-A028-C4F881146791}
@@ -884,6 +1609,35 @@ Global
 		{FA1234BC-0001-4000-8000-000000000035} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000036} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000038} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
+		{FA1234BC-0001-4000-8000-00000000009B} = {FA1234BC-0001-4000-8000-000000000013}
+		{FA1234BC-0001-4000-8000-00000000009C} = {FA1234BC-0001-4000-8000-00000000009B}
+		{FA1234BC-0001-4000-8000-00000000009D} = {FA1234BC-0001-4000-8000-000000000016}
+		{FA1234BC-0001-4000-8000-00000000009E} = {FA1234BC-0001-4000-8000-00000000009D}
+		{FA1234BC-0001-4000-8000-0000000000A0} = {FA1234BC-0001-4000-8000-000000000011}
+		{FA1234BC-0001-4000-8000-0000000000A1} = {FA1234BC-0001-4000-8000-0000000000A0}
+		{FA1234BC-0001-4000-8000-0000000000A2} = {FA1234BC-0001-4000-8000-000000000021}
+		{FA1234BC-0001-4000-8000-0000000000A3} = {FA1234BC-0001-4000-8000-0000000000A2}
+		{FA1234BC-0001-4000-8000-0000000000A4} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A5} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A6} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A7} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D1} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D2} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D3} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A8} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000A9} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000AA} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000AB} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000B4} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000B5} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-0000000000AC} = {FA1234BC-0001-4000-8000-000000000019}
+		{FA1234BC-0001-4000-8000-0000000000AD} = {FA1234BC-0001-4000-8000-0000000000AC}
+		{FA1234BC-0001-4000-8000-0000000000AE} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000AF} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000B0} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000B1} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000B2} = {FA1234BC-0001-4000-8000-000000000033}
+		{FA1234BC-0001-4000-8000-0000000000B3} = {FA1234BC-0001-4000-8000-0000000000B2}
 		{FA1234BC-0001-4000-8000-000000000039} = {FA1234BC-0001-4000-8000-000000000038}
 		{FA1234BC-0001-4000-8000-000000000040} = {FA1234BC-0001-4000-8000-000000000039}
 		{6AACDBD6-FAF8-4319-9AE5-3710AF7670EE} = {E9A5FC59-0C8C-49B6-9845-7870FA3CD098}
@@ -894,6 +1648,45 @@ Global
 		{FA1234BC-0001-4000-8000-000000000050} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{1AAD9972-3FB1-449D-B8DD-145C107CBD67} = {FA1234BC-0001-4000-8000-000000000046}
 		{6941D280-F5AE-428A-AC78-42246F3BF3F8} = {1AAD9972-3FB1-449D-B8DD-145C107CBD67}
+		{D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD} = {FA1234BC-0001-4000-8000-000000000046}
+		{DB5ECBBC-566B-4A00-9791-E18E11F49B55} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
+		{FA1234BC-0001-4000-8000-0000000000BA} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
+		{FA1234BC-0001-4000-8000-0000000000BB} = {D544AE2B-DCB2-4C1D-9BEC-D913DF6585DD}
+		{FA1234BC-0001-4000-8000-0000000000BC} = {FA1234BC-0001-4000-8000-000000000046}
+		{FA1234BC-0001-4000-8000-0000000000BD} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000BE} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000BF} = {FA1234BC-0001-4000-8000-0000000000BC}
+		{FA1234BC-0001-4000-8000-0000000000C0} = {FA1234BC-0001-4000-8000-00000000007B}
+		{FA1234BC-0001-4000-8000-0000000000C1} = {FA1234BC-0001-4000-8000-00000000007D}
+		{FA1234BC-0001-4000-8000-0000000000B7} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000B8} = {FA1234BC-0001-4000-8000-000000000048}
+		{FA1234BC-0001-4000-8000-0000000000B9} = {FA1234BC-0001-4000-8000-0000000000B8}
+		{FA1234BC-0001-4000-8000-000000000070} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000007A} = {FA1234BC-0001-4000-8000-000000000024}
+		{FA1234BC-0001-4000-8000-000000000073} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000074} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000075} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000076} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000077} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000078} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000079} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000083} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000084} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008A} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008B} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008C} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008D} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008E} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-00000000008F} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000090} = {7A021F6B-F297-41EA-A028-C4F881146791}
+		{FA1234BC-0001-4000-8000-000000000091} = {FA1234BC-0001-4000-8000-00000000007F}
+		{FA1234BC-0001-4000-8000-000000000092} = {FA1234BC-0001-4000-8000-000000000025}
+		{FA1234BC-0001-4000-8000-000000000093} = {FA1234BC-0001-4000-8000-00000000007F}
+		{FA1234BC-0001-4000-8000-000000000085} = {FA1234BC-0001-4000-8000-000000000018}
+		{FA1234BC-0001-4000-8000-000000000086} = {FA1234BC-0001-4000-8000-000000000085}
+		{FA1234BC-0001-4000-8000-000000000087} = {FA1234BC-0001-4000-8000-000000000085}
+		{FA1234BC-0001-4000-8000-000000000088} = {FA1234BC-0001-4000-8000-000000000085}
+		{FA1234BC-0001-4000-8000-000000000089} = {FA1234BC-0001-4000-8000-000000000085}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

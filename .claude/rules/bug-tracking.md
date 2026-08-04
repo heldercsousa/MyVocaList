@@ -7,8 +7,8 @@
 
 ## Non-negotiables (inline)
 
-- **ID:** sequential `BUG-NNN`, continue from the highest in BACKLOG.md, never reuse. Used in commit subject + BACKLOG row + task-log.
-- **Placement:** register BEFORE fixing (proactive triage); nest under the parent feature (or `### Cross-cutting`), never free-floating.
+- **ID:** never hand-allocated. `backlog_gen.py register --kind bug` derives the next `BUG-NNN` from `max(id)` over live folders **∪ all `backlog-archive/` months**, so a retired number can never be reused. Used in commit subject + generated row + task-log. A collision after a cross-worktree merge is fixed with `backlog_gen.py renumber BUG-NNN`, never by hand.
+- **Placement:** register BEFORE fixing (proactive triage). **Critical/Major** → its own folder `<parent-feature>/bugs/YYYY-MM-DD-BUG-NNN-<slug>/README.md`, created by `register` (the folder name is derived, never typed). **Minor** → **no folder**; the commit message is the artifact. A `severity: Minor` folder is a validation error that aborts regeneration. Cross-cutting bugs nest under `BusinessFeatures/cross-cutting/` (distinct from the top-level `Docs/Management/cross-cutting/` filing directory — do not confuse the two), never free-floating.
 - **Severity:** **Critical** (data loss / corruption / crash / security), **Major** (core feature unusable, no workaround), **Minor** (cosmetic / edge-case / easy workaround).
 
 ### Regression-test requirement per severity `[HARD RULE]`

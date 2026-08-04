@@ -16,7 +16,7 @@ For commit discipline, task-log format, spec quality gates, and the spec decisio
 
 ## Role
 
-- Reads spec files (`requirements.md`, `design.md`, `tasks.md`) before each wave — scoped to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/` only; never glob-scans `Docs/`
+- Reads spec files (`requirements.md`, `design.md`, `tasks.md`) before each wave — scoped to `Docs/Management/[section-or-filing-dir]/[feature]/` only; never glob-scans `Docs/`
 - Dispatches subagents within sizing and parallelism limits
 - Merges wave output in dependency order
 - Runs post-wave verification independently
@@ -29,8 +29,8 @@ For commit discipline, task-log format, spec quality gates, and the spec decisio
 **The main/orchestrator agent never reads `.cs`, `.xaml`, `.csproj`, migration, or any other source/implementation file. All code inspection is delegated to an Explore or Plan subagent.** This rule survives session resets — it lives here, in the durable role file.
 
 **MAY read (allow-list):**
-- `Docs/Management/BACKLOG.md`
-- Spec docs under `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/` (`requirements.md`, `design.md`, `tasks.md`, `plan.md`, `findings.md`, `handoff.md`, `task-log.md`)
+- `backlog_gen.py query` output (the agent path to the work set). `Docs/Management/BACKLOG.md` itself is readable but **should not be read at session start** — Rule 7 step 1 replaced that read with the query.
+- Spec docs under `Docs/Management/[section-or-filing-dir]/[feature]/` (`requirements.md`, `design.md`, `tasks.md`, `plan.md`, `findings.md`, `handoff.md`, `task-log.md`)
 - `Docs/DevEnv/ACTIVE-CONSIDERATIONS.md`
 - Rules / role files: `CLAUDE.md`, `.claude/rules/*.md`, `.claude/agents/*.md`, `.claude/library/*.md`
 - Subagent-returned reports and contract signatures a subagent committed and surfaced
@@ -47,6 +47,8 @@ For commit discipline, task-log format, spec quality gates, and the spec decisio
 > "Am I the orchestrator? Then I read specs, BACKLOG, task-logs and rules only. The moment I want to open a `.cs` or `.xaml` file, I stop and dispatch an Explore/Plan subagent instead."
 
 **Narrow exception:** Reading a specific source file is permitted ONLY when the user explicitly and directly instructs the orchestrator to read that exact file. Absent that explicit instruction, delegate.
+
+**Narrow exception 2 — Inline Trivial Fix lane `[amended 2026-07-21]`:** when an active ITF declaration is in place in the target worktree (`workflow.md § Rule 2 — Inline Trivial Fix lane`), the orchestrator MAY read **the single declared file it is about to edit**, and nothing else. It MAY NOT grep, MAY NOT read neighbouring files, and MAY NOT open the file to *determine whether* a fix is needed — condition C2 requires the diagnosis to already exist. The moment the fix turns out to need a second file, more than 5 lines, or any exploration: stop, delete the declaration, and dispatch an implementor.
 
 ## Post-Wave Verification
 
@@ -104,9 +106,9 @@ The orchestrator maintains these session artifacts:
 | Artifact | Location | When to update |
 |----------|----------|----------------|
 | `ACTIVE-CONSIDERATIONS.md` | `Docs/DevEnv/ACTIVE-CONSIDERATIONS.md` | After each wave; continuously during session |
-| Session handoff | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/handoff.md` | Before session ends |
-| Task-log | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/task-log.md` | After each wave |
-| `tasks.md` | `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md` | As tasks are claimed `[~]` and completed `[x]` |
+| Session handoff | `Docs/Management/[section-or-filing-dir]/[feature]/handoff.md` | Before session ends |
+| Task-log | `Docs/Management/[section-or-filing-dir]/[feature]/task-log.md` | After each wave |
+| `tasks.md` | `Docs/Management/[section-or-filing-dir]/[feature]/tasks.md` | As tasks are claimed `[~]` and completed `[x]` |
 
 At session end, commit `ACTIVE-CONSIDERATIONS.md` and the handoff file before stopping.
 

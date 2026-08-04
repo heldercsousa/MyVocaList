@@ -1,5 +1,3 @@
-using MyVocaList.Infra.Repository;
-
 namespace MyVocaList.Tests.Unit.Services;
 
 public class VenueServiceTests

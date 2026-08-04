@@ -1,10 +1,7 @@
 using MyVocaList.Contracts.Enums;
 using MyVocaList.Domain.Entities;
-using MyVocaList.Domain.Interfaces;
 using MyVocaList.Domain.RepositoryInterface;
-using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.UI.Collections;
-using MyVocaList.UI.Models;
 
 namespace MyVocaList.UI.ViewModels;
 

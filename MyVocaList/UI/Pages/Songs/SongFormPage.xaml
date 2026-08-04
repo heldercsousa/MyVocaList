@@ -5,8 +5,8 @@
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
-    xmlns:autocomplete="clr-namespace:MyVocaList.UI.Components.AutocompleteField"
     xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
     xmlns:dtoList="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:resolution="clr-namespace:MyVocaList.Domain.Resolution;assembly=MyVocaList.Domain"
     x:Class="MyVocaList.UI.Pages.Songs.SongFormPage"
@@ -25,17 +25,32 @@
         <ScrollView>
             <VerticalStackLayout Padding="24" Spacing="16">
 
-                <autocomplete:AutocompleteField
-                    LabelText="Artist"
-                    Placeholder="Search artists..."
-                    Text="{Binding ArtistSearchText, Mode=TwoWay}"
-                    Suggestions="{Binding ArtistSuggestions}"
-                    SearchRequestedCommand="{Binding SearchArtistsCommand}"
-                    SuggestionSelectedCommand="{Binding SelectArtistCommand}"
-                    BlurredWithoutSelectionCommand="{Binding ArtistBlurredWithoutSelectionCommand}"
-                    HasError="{Binding ArtistHasError}"
-                    ErrorText="{Binding ArtistErrorText}"
-                    IsEnabled="{Binding IsArtistLocked, Converter={StaticResource InverseBoolConverter}}" />
+                <dxe:AutoCompleteEdit x:Name="artistEdit"
+                                      LabelText="Artist"
+                                      PlaceholderText="Search artists..."
+                                      Text="{Binding ArtistSearchText, Mode=TwoWay}"
+                                      HasError="{Binding ArtistHasError}"
+                                      ErrorText="{Binding ArtistErrorText}"
+                                      IsEnabled="{Binding IsArtistLocked, Converter={StaticResource InverseBoolConverter}}"
+                                      SelectionChanged="OnArtistSelectionChanged"
+                                      Unfocused="OnArtistUnfocused">
+                    <dxe:AutoCompleteEdit.ItemsSourceProvider>
+                        <dxe:AsyncItemsSourceProvider RequestDelay="300"
+                                                      CharacterCountThreshold="1"
+                                                      ItemsRequested="OnArtistItemsRequested" />
+                    </dxe:AutoCompleteEdit.ItemsSourceProvider>
+                    <dxe:AutoCompleteEdit.ItemTemplate>
+                        <DataTemplate x:DataType="models:AutocompleteSuggestion">
+                            <VerticalStackLayout Padding="16,8">
+                                <Label Text="{Binding Headline}" StyleClass="Body.Large" />
+                                <Label Text="{Binding SupportingText}"
+                                       StyleClass="Body.Medium"
+                                       TextColor="{StaticResource OnSurfaceVariant}"
+                                       IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </dxe:AutoCompleteEdit.ItemTemplate>
+                </dxe:AutoCompleteEdit>
 
                 <dxe:TextEdit x:Name="titleEdit"
                               Text="{Binding SongTitle, Mode=TwoWay}"

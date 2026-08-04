@@ -9,7 +9,7 @@
 
 ## Bug ID scheme
 
-- Bugs use a sequential ID: `BUG-001`, `BUG-002`, … (continue from the highest existing ID in BACKLOG.md — never reuse).
+- Bugs use a sequential ID: `BUG-001`, `BUG-002`, … allocated by `backlog_gen.py register` from `max(id)` over live item folders ∪ every `backlog-archive/` month — never hand-picked, never reused. (BACKLOG.md no longer carries the retired numbers, so reading it is not a valid way to pick the next ID.)
 - The ID is assigned at registration time and used in commit subject, BACKLOG row, and task-log entry.
 
 > Rationale: a stable ID lets the commit, the backlog row, and any regression test cross-reference one bug without ambiguity.
@@ -73,7 +73,7 @@ A bug fix is not complete until its regression test exists, has been seen to FAI
 
 ## Bug fix workflow (summary)
 
-1. **Register** — assign `BUG-NNN`, classify severity, add nested BACKLOG row under the parent feature.
+1. **Register** — classify severity, then `backlog_gen.py register --kind bug --severity <S> --parent <feature-id> --title "…" --goal "…"`. It assigns `BUG-NNN`, creates the dated folder (Critical/Major only), writes frontmatter, registers the `.sln` entry, and regenerates the nested row. Minor bugs get no folder — register is not run; the commit message is the record.
 2. **Regression test first** (Critical/Major) — write the failing test, confirm Red.
 3. **Fix** — minimal change; confirm test Green.
 4. **Commit** — use `workflow.md` Bug Fix Pattern message; subject includes `BUG-NNN`.

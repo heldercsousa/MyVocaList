@@ -467,8 +467,12 @@ public class SongServiceTests
     {
         var song = new Song
         {
-            Id = 1, ArtistId = 1, Title = "Title",
-            Version = "Live", FeaturedArtists = "Feat A", Lyrics = "Some lyrics"
+            Id = 1,
+            ArtistId = 1,
+            Title = "Title",
+            Version = "Live",
+            FeaturedArtists = "Feat A",
+            Lyrics = "Some lyrics"
         };
         _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                      .ReturnsAsync(song);

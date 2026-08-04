@@ -314,7 +314,7 @@ TEST-007 (`Docs/Management/EMULATOR_TEST_MASTER_LIST.md`) confirms R1–R3/R8/co
 
 ---
 ## Task: BUG-024 — SongForm edit-mode Save wipes FeaturedArtists + Lyrics and discards Version (Critical)
-**Plan:** commit message as spec (Bug Fix Pattern) + `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-024-songform-edit-data-loss/BUG-024-songform-edit-data-loss.md`
+**Plan:** commit message as spec (Bug Fix Pattern) + `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-02-BUG-024-songform-edit-data-loss/BUG-024-songform-edit-data-loss.md`
 **Status:** To Review
 **Started:** 07/02/2026
 **Completed:** 07/02/2026
@@ -333,7 +333,7 @@ Repository check result: `ISongRepository.GetByIdAsync` already returns the full
 - `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` — 4 new tests (GetSongByIdAsync returns full entity; version persisted; null version keeps existing; version too long rejected)
 - `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — 3 new tests (hydration regression — the data-loss proof; edit-save sends hydrated fields + edited version; API-imported song locks artist field) + shared `MakeSongServiceWithSong` helper
 - `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs` — mechanical mock-plumbing update only: 6 `UpdateSongAsync` Setup/Verify arg lists gained an `It.IsAny<string>()` for the new `version` param (no assertion intent changed — `testing.md § Builder Must Not Modify Tests` respected)
-- `Docs/Management/BusinessFeatures/artists-songs/bugs/BUG-024-songform-edit-data-loss/BUG-024-songform-edit-data-loss.md` — bug details file (NEW)
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-07-02-BUG-024-songform-edit-data-loss/BUG-024-songform-edit-data-loss.md` — bug details file (NEW)
 - `MyVocaList.sln` — registered the new bug folder/file (`{FA1234BC-0001-4000-8000-000000000035}` nested under artists-songs `bugs` `{7A021F6B-F297-41EA-A028-C4F881146791}`)
 - `Docs/Management/BACKLOG.md` — BUG-024 row status 🟢 Ready → ✅ Fixed
 - `Docs/Management/BusinessFeatures/artists-songs/form-validation-task-log.md` — this entry

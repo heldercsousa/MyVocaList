@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
-using MyVocaList.Contracts.DTOs;
-using SongPickedMsg = MyVocaList.Contracts.Messages.SongPickedMessage;
 using MyVocaList.UI.Collections;
+using SongPickedMsg = MyVocaList.Contracts.Messages.SongPickedMessage;
 
 namespace MyVocaList.UI.ViewModels;
 

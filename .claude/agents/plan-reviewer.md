@@ -18,10 +18,10 @@ Fresh-context plan reviewer. Read the plan and associated spec with no prior con
 
 ## Inputs (required in briefing)
 
-- Path to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/plan.md` (or the plan file produced by `writing-plans`)
-- Path to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/requirements.md`
-- Path to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md`
-- Path to `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/tasks.md`
+- Path to `Docs/Management/[section-or-filing-dir]/[feature]/plan.md` (or the plan file produced by `writing-plans`)
+- Path to `Docs/Management/[section-or-filing-dir]/[feature]/requirements.md`
+- Path to `Docs/Management/[section-or-filing-dir]/[feature]/design.md`
+- Path to `Docs/Management/[section-or-filing-dir]/[feature]/tasks.md`
 
 ---
 

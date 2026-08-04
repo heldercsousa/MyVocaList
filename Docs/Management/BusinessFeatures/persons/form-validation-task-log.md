@@ -238,7 +238,7 @@ Commit: `1788320`. ⏳ Helder: on-device re-verify Save persists a birthday.
 
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
-| 2026-07-01 | ↳ BUG-022: SingerForm birthday field — mask does not auto-insert "/" separator (Minor) | ✅ Fixed | Root cause: `PersonFormPage.xaml`'s birthday `dxe:TextEdit` had no `Mask` configured — cosmetic UX gap only, since the user already typed "/" manually in the same DD/MM string format that is validated/persisted, so no data-integrity issue existed. Fix: added `Mask="00/00"` + `MaskPlaceholderChar="_"` to the existing `dxe:TextEdit` (additive XAML-only change, no hand-written masking code); `PersonService.ValidateBirthday` regex and `Person.BirthdayDayMonth` storage format left unchanged. Details: `BusinessFeatures/persons/bugs/BUG-022-singerform-birthday-mask/BUG-022-singerform-birthday-mask.md` |
+| 2026-07-01 | ↳ BUG-022: SingerForm birthday field — mask does not auto-insert "/" separator (Minor) | ✅ Fixed | Root cause: `PersonFormPage.xaml`'s birthday `dxe:TextEdit` had no `Mask` configured — cosmetic UX gap only, since the user already typed "/" manually in the same DD/MM string format that is validated/persisted, so no data-integrity issue existed. Fix: added `Mask="00/00"` + `MaskPlaceholderChar="_"` to the existing `dxe:TextEdit` (additive XAML-only change, no hand-written masking code); `PersonService.ValidateBirthday` regex and `Person.BirthdayDayMonth` storage format left unchanged. Details: `BusinessFeatures/persons/bugs/2026-07-01-BUG-022-singerform-birthday-mask/BUG-022-singerform-birthday-mask.md` |
 
 
 ## Moved from BACKLOG.md (2026-07-15) — BUG-025: SingerForm async email-uniqueness error cleared by weaker format-only re-validation (Major)

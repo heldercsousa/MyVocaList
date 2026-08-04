@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Domain.Resolution;
-using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -492,8 +491,12 @@ public class SongFormViewModelTests
     {
         var song = new Song
         {
-            Id = 42, ArtistId = 1, Title = "Stored Title",
-            Version = "Live", FeaturedArtists = "Feat A", Lyrics = "Stored lyrics"
+            Id = 42,
+            ArtistId = 1,
+            Title = "Stored Title",
+            Version = "Live",
+            FeaturedArtists = "Feat A",
+            Lyrics = "Stored lyrics"
         };
         var songService = MakeSongServiceWithSong(song);
         var secureStorage = new Mock<ISecureStorageWrapper>();
@@ -520,8 +523,12 @@ public class SongFormViewModelTests
     {
         var song = new Song
         {
-            Id = 42, ArtistId = 1, Title = "Stored Title",
-            ExternalId = "dz-99", ExternalProvider = "Deezer", HasManualEdits = false
+            Id = 42,
+            ArtistId = 1,
+            Title = "Stored Title",
+            ExternalId = "dz-99",
+            ExternalProvider = "Deezer",
+            HasManualEdits = false
         };
         var songService = MakeSongServiceWithSong(song);
         var secureStorage = new Mock<ISecureStorageWrapper>();
@@ -545,8 +552,12 @@ public class SongFormViewModelTests
     {
         var song = new Song
         {
-            Id = 42, ArtistId = 1, Title = "Stored Title",
-            Version = "Live", FeaturedArtists = "Feat A", Lyrics = "Stored lyrics"
+            Id = 42,
+            ArtistId = 1,
+            Title = "Stored Title",
+            Version = "Live",
+            FeaturedArtists = "Feat A",
+            Lyrics = "Stored lyrics"
         };
         var songService = MakeSongServiceWithSong(song);
         songService.Setup(s => s.UpdateSongAsync(
@@ -598,7 +609,7 @@ public class SongFormViewModelTests
     public void ValidateTitleCommand_DirtyInvalidField_SetsError()
     {
         var tooLong = new string('x', 101); // exceeds 100-char limit; differs from the default "" so
-                                             // the property-changed handler actually fires
+                                            // the property-changed handler actually fires
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(tooLong))
                    .Returns((false, "Title is too long. Maximum 100 characters."));
@@ -801,5 +812,36 @@ public class SongFormViewModelTests
 
         songService.Verify(s => s.ShouldShowCharacterCounter(79), Times.Once);
         songService.Verify(s => s.ShouldShowCharacterCounter(85), Times.Never);
+    }
+
+    // ── Re-entrancy guard (BUG-049) ────────────────────────────────────────
+
+    [Fact]
+    // [AC] BUG-049: a fast double-tap on Save while a save is in flight must not fire the
+    // resolution service call twice (which caused a duplicate "GoToAsync("..")" that overshot
+    // the nav stack root).
+    public async Task SaveCommand_DoubleInvokedWhileSaving_CallsResolveOnlyOnce()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput("Yesterday")).Returns((true, ""));
+        songService.Setup(s => s.ValidateVersionInput(string.Empty, false)).Returns((true, ""));
+        var resolutionService = new Mock<ISongResolutionService>();
+        var gate = new TaskCompletionSource<SongResolution>();
+        resolutionService.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
+                         .Returns(gate.Task);
+
+        var sut = CreateSut(songService: songService, resolutionService: resolutionService);
+        sut.CompleteHydration();
+        sut.SongTitle = "Yesterday";
+        sut.SelectedArtistId = 5;
+
+        var firstCall = sut.SaveCommand.ExecuteAsync(null);
+        var secondCall = sut.SaveCommand.ExecuteAsync(null);   // simulates the second tap of a double-tap
+
+        gate.SetResult(new SongResolution(ResolutionKind.NoMatch, null, [], [], false));
+        await Task.WhenAll(firstCall, secondCall);
+
+        resolutionService.Verify(
+            s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

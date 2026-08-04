@@ -1,11 +1,8 @@
-using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Provider;
-using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using MyVocaList.Domain.ServicesInterfaces;
 using AColor = Android.Graphics.Color;
 using AFormat = Android.Graphics.Format;
 

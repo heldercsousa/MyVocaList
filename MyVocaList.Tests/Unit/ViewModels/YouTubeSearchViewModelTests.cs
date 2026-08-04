@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
-using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Contracts.Messages;
 using MyVocaList.UI.Services;
-using MyVocaList.UI.ViewModels;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 

@@ -85,9 +85,44 @@ Use Given/When/Then for user-facing flows. Use EARS for background rules, constr
 
 ---
 
+## Item folder file set + frontmatter
+
+Every registered item (feature, activity, change, Critical/Major bug) is a folder whose `README.md`
+begins with a flat `key: value` frontmatter block. `register` writes it; agents edit values, never
+the rendered row.
+
+```yaml
+---
+id: BUG-050                       # BUG-NNN, or a kebab slug for non-bugs — unique tree-wide
+title: "Song form — selecting an artist suggestion does not lock the field"
+status: "💡 Pending"              # one of the 8 BACKLOG statuses
+severity: Critical                # Critical | Major | Minor — bugs only; Minor must have NO folder
+target: 2026-07-21                # registration date; YYYY-MM-DD | YYYY-MM | "—"
+section: BusinessFeatures         # BusinessFeatures | DevCycleCraft — the only two legal values; independent of the item's physical folder path (Docs/Management/ has five top-level dirs — see CLAUDE.md § Docs/ Folder Layout)
+kind: bug                         # feature | bug | change | milestone | group
+parent: artists-songs             # id of the logical parent item; omitted at top level
+goal: "…"                         # required — the Goal sentence of the rendered row
+gate: "…"                         # optional — the single blocker
+pointer: BusinessFeatures/artists-songs/bugs/2026-07-21-BUG-050-suggestion-not-locked/
+closed: 2026-07                   # required iff status is terminal (✅ / Superseded / Duplicate)
+order: 20                         # optional tie-breaker within a parent
+---
+```
+
+Parsing is stdlib-only and deliberately restricted (NFR-1): flat `key: value`, no lists, no nested
+blocks, no anchors. Anything nested is a validation error naming the key.
+
+`goal`/`gate` are the row's Notes and are **mechanically bounded**: ≤ 3 sentences, ≤ ~50 words,
+exactly one backticked path, and no commit hashes, review verdicts, `AC-N`, `N/M green`, token
+counts, or extra file paths. Everything that does not fit goes in the `README.md` body below the
+frontmatter, which has no limit. The bound is enforced by `validate()` — a violation aborts
+regeneration and names the folder; it is not a style suggestion.
+
+---
+
 ## spec-changelog.md — required when a spec is revised after approval
 
-Create `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/spec-changelog.md` the first time an approved spec is modified. Every subsequent revision adds a row.
+Create `Docs/Management/[section-or-filing-dir]/[feature]/spec-changelog.md` the first time an approved spec is modified. Every subsequent revision adds a row.
 
 ### Format
 
@@ -256,7 +291,7 @@ A spec that is too long is as harmful as one that is too short. Over-specified s
 
 For features with many architectural trade-offs, a fourth spec file `decisions.md` may be created alongside the three standard files. This file is a chronological log of decisions made during the feature's lifetime.
 
-**Format: `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/decisions.md`**
+**Format: `Docs/Management/[section-or-filing-dir]/[feature]/decisions.md`**
 
 ```markdown
 # Decision Log — [Feature Name]

@@ -89,11 +89,6 @@ public abstract class CrudListPageBase : ContentPage
             ListViewModel.ConfirmSheetState = BottomSheetState.Hidden;
             return true;
         }
-        if (ListViewModel.IsSearchMode)
-        {
-            ListViewModel.CloseSearchCommand.Execute(null);
-            return true;
-        }
         return base.OnBackButtonPressed();
     }
 }

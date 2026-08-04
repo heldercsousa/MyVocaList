@@ -5,7 +5,7 @@
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
-    xmlns:autocomplete="clr-namespace:MyVocaList.UI.Components.AutocompleteField"
+    xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
     x:Class="MyVocaList.UI.Pages.People.PersonFormPage"
     x:DataType="vm:PersonFormViewModel"
     Title="{Binding PageTitle}"
@@ -15,18 +15,32 @@
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="16">
 
-            <!-- Full Name with autocomplete suggestions -->
-            <autocomplete:AutocompleteField
-                x:Name="nameField"
-                LabelText="Full Name"
-                Placeholder="First and last name"
-                Text="{Binding PersonName, Mode=TwoWay}"
-                HasError="{Binding NameHasError}"
-                ErrorText="{Binding NameErrorText}"
-                Suggestions="{Binding Suggestions}"
-                SearchRequestedCommand="{Binding SearchPersonsCommand}"
-                SuggestionSelectedCommand="{Binding SuggestionSelectedCommand}"
-                BlurredWithoutSelectionCommand="{Binding ValidateNameCommand}" />
+            <!-- Full Name with autocomplete suggestions (dedup) -->
+            <dxe:AutoCompleteEdit x:Name="nameField"
+                                  LabelText="Full Name"
+                                  PlaceholderText="First and last name"
+                                  Text="{Binding PersonName, Mode=TwoWay}"
+                                  HasError="{Binding NameHasError}"
+                                  ErrorText="{Binding NameErrorText}"
+                                  SelectionChanged="OnNameSelectionChanged"
+                                  Unfocused="OnNameUnfocused">
+                <dxe:AutoCompleteEdit.ItemsSourceProvider>
+                    <dxe:AsyncItemsSourceProvider RequestDelay="300"
+                                                  CharacterCountThreshold="2"
+                                                  ItemsRequested="OnNameItemsRequested" />
+                </dxe:AutoCompleteEdit.ItemsSourceProvider>
+                <dxe:AutoCompleteEdit.ItemTemplate>
+                    <DataTemplate x:DataType="models:AutocompleteSuggestion">
+                        <VerticalStackLayout Padding="16,8">
+                            <Label Text="{Binding Headline}" StyleClass="Body.Large" />
+                            <Label Text="{Binding SupportingText}"
+                                   StyleClass="Body.Medium"
+                                   TextColor="{StaticResource OnSurfaceVariant}"
+                                   IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </dxe:AutoCompleteEdit.ItemTemplate>
+            </dxe:AutoCompleteEdit>
 
             <!-- Character counter -->
             <Label Text="{Binding CharacterCounterText}"

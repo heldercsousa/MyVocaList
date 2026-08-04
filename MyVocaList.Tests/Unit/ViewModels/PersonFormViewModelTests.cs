@@ -1,6 +1,4 @@
-using MyVocaList.Contracts.Models;
 using MyVocaList.UI.Services;
-using MyVocaList.UI.ViewModels;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -478,5 +476,32 @@ public class PersonFormViewModelTests
         Assert.True(sut.BirthdayHasError);
         Assert.True(sut.EmailHasError);
         _serviceMock.Verify(s => s.CreatePersonAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), default), Times.Never);
+    }
+
+    // ── Re-entrancy guard (BUG-049) ────────────────────────────────────────
+
+    [Fact]
+    // [AC] BUG-049: a fast double-tap on Save while a save is in flight must not fire the
+    // create service call twice (which caused a duplicate "GoToAsync("..")" that overshot the
+    // nav stack root).
+    public async Task SaveCommand_DoubleInvokedWhileSaving_CallsCreateOnlyOnce()
+    {
+        var sut = CreateSut();
+        sut.CompleteHydration();
+        sut.PersonName = "Jane Doe";
+        _serviceMock.Setup(s => s.ValidateNameInput("Jane Doe")).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateBirthday(null)).Returns((true, ""));
+        _serviceMock.Setup(s => s.ValidateEmail(null)).Returns((true, ""));
+
+        var gate = new TaskCompletionSource<(bool success, string message, Person? person)>();
+        _serviceMock.Setup(s => s.CreatePersonAsync("Jane Doe", null, null, default)).Returns(gate.Task);
+
+        var firstCall = sut.SaveCommand.ExecuteAsync(null);
+        var secondCall = sut.SaveCommand.ExecuteAsync(null);   // simulates the second tap of a double-tap
+
+        gate.SetResult((true, "Singer created", new Person { FullName = "Jane Doe" }));
+        await Task.WhenAll(firstCall, secondCall);
+
+        _serviceMock.Verify(s => s.CreatePersonAsync("Jane Doe", null, null, default), Times.Once);
     }
 }

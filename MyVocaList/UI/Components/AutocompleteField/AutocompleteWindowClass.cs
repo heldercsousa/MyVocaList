@@ -1,5 +1,3 @@
-using Microsoft.Maui.Devices;
-
 namespace MyVocaList.UI.Components.AutocompleteField;
 
 /// <summary>

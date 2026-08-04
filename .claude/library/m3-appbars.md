@@ -59,19 +59,21 @@ OnIsVisible → true: searchEdit.Focus() — keyboard opens automatically
 
 **The `search → back on focus` transition** applies only to **persistent inline search bars** (always present, not replacing the app bar). Do not use it for the app-bar-swap pattern.
 
-## M3 Search (standalone/detached — NOT yet implemented)
+> **Status (2026-07-19):** the bar-swap pattern above is **retired for CRUD list pages** — see `crud-appbar-list-toolbar.md § App Bar — Laws and Variants`. It remains valid for the 4 picker pages (`SongPickerPage`, `ArtistPickerPage`, `QueueSongPickerPage`, `YouTubeSearchPage`) until their own migration (BACKLOG follow-up).
 
-When a search bar appears inline inside page content (not in Shell.TitleView):
+## M3 Search (standalone/detached — implemented: `SearchBar`)
+
+Shipped as `MyVocaList/UI/Components/AppBars/SearchBar.xaml(.cs)`, subclassing `AppBarBase`. Docked at Row 0 of `CrudListView` — always visible inside page content, never replacing `Shell.TitleView`'s `SmallAppBar`. Governed component (4 consumers: Venues/People/Artists/Songs via `CrudListView`) — see `component-safety-gate.md`.
 
 | Diff from SearchAppBar | Standalone value |
 |---|---|
 | Height | 56dp (not 64dp) |
 | Shape | Pill: DXBorder CornerRadius="28" |
-| Background | SurfaceContainerLow (not Surface) |
-| Margins | 16dp horizontal |
-| liftOnScroll elevated color | SurfaceContainerLow → SurfaceContainer |
+| Background | SurfaceContainerLow (not Surface); elevated → SurfaceContainer |
+| Margins | 16dp horizontal, 8dp vertical |
+| Leading icon | `search_outlined`, OnSurfaceVariant, non-interactive (no button, no back-arrow toggle) |
 
-All code-behind logic (leading icon toggle, BackCommand, TextEdit properties) is identical — reuse AppBarBase.
+Differs from the bar-swap `SearchAppBar` beyond size/shape: no `BackCommand`, no auto-focus on visibility, no leading-icon toggle — it never hides or replaces another bar, so none of that state machinery applies. TextEdit properties (typography, clear icon, keyboard, ReturnType) are transplanted unchanged from `SearchAppBar`'s search input slot; reuses `AppBarBase.IsElevated`/`UpdateContainerColor()`.
 
 ## Shared Base Class Pattern
 

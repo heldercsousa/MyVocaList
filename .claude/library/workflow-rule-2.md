@@ -57,7 +57,7 @@ Some files must never be edited by more than one agent at a time:
 | `MauiProgram.cs` | DI registration — ordering matters; parallel edits produce conflicts |
 | `AppShell.xaml` / `AppShell.xaml.cs` | Route registration — one canonical route table |
 | `AppDbContext.cs` | EF Core model config — entity set definitions must be coherent |
-| Any `*Migration.cs` files | EF migrations are sequential by design |
+| Any file under a `Migrations/` folder | EF migrations are sequential by design. Match on the folder, not on a `*Migration.cs` name pattern — EF generates `20260407190608_PersonConfigFixes.cs`, which no name-suffix rule catches (corrected 2026-07-21) |
 | `GlobalUsings.cs` (any project) | Global using declarations — merge conflicts produce duplicate errors |
 | `Directory.Build.props` | Shared MSBuild properties — parallel edits produce conflicts |
 | `tasks.md` (any spec) | Task status tracking — parallel checkbox edits produce divergent state |
@@ -90,5 +90,72 @@ After every wave completes, the main agent must run the build and tests independ
 2. Run `dotnet test` — confirm 0 failures. Investigate any new failures before proceeding.
 3. Review the task-log entries from the wave — confirm all entries have Verification evidence and Changed files.
 4. If a subagent reported `Build failure` or `blocked: spec gap`, resolve before dispatching the next wave.
+
+---
+
+## Generated artifacts — write-ownership protocol
+
+**1. Which artifacts are generated.**
+
+| Artifact | Class | Rule |
+|----------|-------|------|
+| `Docs/Management/BACKLOG.md` (inside `BACKLOG:GENERATED` fences) | generated | regenerate, never hand-edit |
+| `Docs/Management/backlog-archive/*.md` (inside fences) | generated | regenerate, never hand-edit |
+| `Docs/Management/**/README.md` frontmatter block | **source** | edit the value, then `regen` |
+| `README.md` body, `task-log.md`, `tasks.md`, `plan.md`, spec files, `LEDGER.md`, changelog | hand-written | ordinary merge; land on develop |
+
+Everything **outside** a fence in a generated file (headers, Row rules, prose) is hand-written and
+byte-preserved by the generator — editing there is always safe.
+
+**2. When the pre-commit gate rejects a stale BACKLOG: regenerate, then re-inspect — never
+`--no-verify`.** Run `backlog_gen.py regen`, then `git diff` the regenerated files **before**
+committing. If the diff touches only rows whose frontmatter this session changed → commit. If it
+touches rows this session never touched, another session's frontmatter change is unregenerated:
+**stop and escalate** — do not commit, and do not revert their rows. Blind regeneration is safe
+for the *rendered* file (it is a total function of frontmatter) but the diff is the only signal
+that a second writer is active, so it must be read, not skipped.
+
+**3. How a second session learns a region is owned — LEDGER names the owner, the lease proves it is
+alive.** A session doing a **bulk** operation over generated artifacts (a migration, a mass status
+sweep, anything that rewrites rows it did not author) declares it in its `LEDGER.md` row before its
+first write: **owner session id · branch · since-date**, retired when the branch merges.
+
+A second session that wants to regenerate resolves that declaration as follows:
+
+| LEDGER declaration | Check | Action |
+|--------------------|-------|--------|
+| none | — | no owner; proceed normally |
+| present, names a session id | `classify()` that session's `.claude/leases/<id>.json` | **fresh** → owner is live: edit your own item's frontmatter only, let the owner regenerate, do not run bare `regen`. **stale** → the owner session is dead: take over, note the takeover in the LEDGER row, proceed |
+| present, no session id (legacy row) | — | treat as owned until the row's branch merges, or ask Helder |
+
+**The lease is session-keyed, not unit-keyed** — `.claude/leases/<session_id>.json`, written by the
+heartbeat hook, carrying `branch`/`worktree`/`task_id`. There is **no API to claim a named unit**,
+so "claim the generated region" is not something the lease can express; what it can do, and all
+this protocol asks of it, is answer *"is the session named in that LEDGER row still alive?"* Use
+`lease_lib.classify` (read-only) for that. **Do not use `reclaim.py` here** — it *overwrites* the
+target's claim on a stale result, which is correct for taking over a `[~]` task and wrong for
+asking a liveness question about a region.
+
+**Ordinary single-item work (`register` / `status` on one item) takes no claim.** It writes one
+frontmatter block plus a deterministic re-render, and the pre-commit gate already fails it loud if
+another session left the rendered files stale — detection is mechanical, so the coordination cost
+buys nothing. Requiring a claim per write would make `register` unusable and push agents toward
+`--no-verify`, which is strictly worse than the race it would be guarding against. The rule is
+proportional to blast radius.
+
+*Rationale for the split, recorded because it is a policy choice and not a derivation:* the
+failure this protocol exists to prevent is **one session's rows being rewritten from another
+session's stale view of the tree**. Only a bulk rewrite can do that; a single-item write cannot,
+because regeneration is a total function of frontmatter and touches no row whose source it did not
+read.
+
+**4. Concurrent `register` / `status` are safe within one repo; the hazard is cross-worktree ID
+allocation.** Both verbs are atomic (folder + `README.md` + `.sln` + re-render written in one pass,
+rolled back on failure), so a half-registration cannot trip the `.sln` HARD GATE. What they cannot
+see is a `BUG-NNN` allocated in a *different worktree* that has not merged yet — two worktrees can
+allocate the same ID. That is detected at merge (duplicate `id` is a validation error, so the
+merge commit cannot pass the gate) and fixed with `backlog_gen.py renumber BUG-NNN`, which rewrites
+the folder name and the `id:` key. Renumbering is safe because the ID lives in exactly two places;
+every other reference is a path.
 
 ---

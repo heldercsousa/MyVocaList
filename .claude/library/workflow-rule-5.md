@@ -14,8 +14,8 @@ A task-log entry that claims `To Review` without a `### Changed files` section i
 
 ### Task-log file location
 
-Task-log files live **beside the spec** at `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/task-log.md`.
-Plan files live at `Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/plan.md`.
+Task-log files live **beside the spec** at `Docs/Management/[section-or-filing-dir]/[feature]/task-log.md`.
+Plan files live at `Docs/Management/[section-or-filing-dir]/[feature]/plan.md`.
 Tasks without a feature association are logged to `Docs/DevEnv/plans/unassigned-task-log.md`.
 
 

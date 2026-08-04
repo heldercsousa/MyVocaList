@@ -9,6 +9,10 @@
     ],
     "deny": []
   },
+  "disabledMcpjsonServers": [
+    "github",
+    "sequential-thinking"
+  ],
   "skillOverrides": {
     "maui-unit-testing": "on"
   },
@@ -21,6 +25,15 @@
             "prompt": "Task JSON: $ARGUMENTS\n\nYou are the task initialization agent. Complete each step fully before starting the next.\n\n## STEP 1 — PARSE\nFrom the task JSON, extract: id, title, and planFile (the path to the associated plan file; the field may be named planFile, plan_file, plan, or similar — use whatever field is present).\n\n## STEP 2 — DERIVE TASK-LOG PATH\nIf planFile is present:\n  task-log = <planFile directory> + \"/\" + <planFile basename without extension> + \"-task-log.md\"\n  Example: \"Docs/DevEnv/plans/artists-songs.md\" → \"Docs/DevEnv/plans/artists-songs-task-log.md\"\nIf planFile is absent:\n  task-log = \"Docs/DevEnv/plans/unassigned-task-log.md\"\nAll paths are relative to CLAUDE_PROJECT_DIR.\n\n## STEP 3 — SAVE ACTIVE TASK STATE\nWrite to \".claude/active-task.json\" (in CLAUDE_PROJECT_DIR):\n{\"taskId\":\"<id>\",\"taskTitle\":\"<title>\",\"planFile\":\"<planFile path or empty string>\",\"taskLogFile\":\"<task-log path>\"}\n\n## STEP 4 — CLEAR CHANGED-FILES BUFFER\nOverwrite \".claude/changed-files.txt\" with an empty file (clear any previous content — do not append).\n\n## STEP 5 — CHECK FOR INTERRUPTED BUILD\nRead the task-log file if it exists. Search for a section \"## Task: <title>\".\nIf that section has \"**Status:** Check build\" → run the CHECK BUILD SEQUENCE below, then stop.\nOtherwise proceed to STEP 6.\n\n## STEP 6 — APPEND IN-PROGRESS ENTRY\nAppend this block to the task-log file (create the file if it does not exist):\n\n---\n## Task: <title>\n**Plan:** <planFile relative path, or \"unassigned\">\n**Status:** in progress\n**Started:** <today MM/DD/YYYY>\n\n---\n## CHECK BUILD SEQUENCE — max 3 attempts\n\nFor each attempt N (1, 2, 3):\n1. Run from CLAUDE_PROJECT_DIR: dotnet build MyVocaList/MyVocaList.csproj -f net10.0 --no-restore -v q 2>&1 | tail -20\n2. If exit code is 0:\n   - In the task-log, update this task's **Status** line to \"To Review\"\n   - Run: git add -A && git commit -m \"chore: build OK — <title>\" && git push origin HEAD\n   - STOP.\n3. If build failed (exit code non-zero) AND N < 3: fix the errors in source files, then run attempt N+1.\n4. If build failed AND N = 3:\n   - Update **Status** to \"Build failure\"\n   - Append under the task entry: \"### Build notes\\nRecurring build failure (3 attempts). Errors: <summary>. Root cause (business view): <diagnosis>\"\n   - Run: git add -A && git commit -m \"chore: build failure — <title>\" && git push origin HEAD\n   - STOP.",
             "timeout": 300,
             "statusMessage": "Initializing task tracking..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/scripts/worktree-base-check.py 2>/dev/null || true",
+            "statusMessage": "Verifying worktree is based on develop..."
           }
         ]
       }
@@ -192,19 +205,15 @@
     ]
   },
   "enabledPlugins": {
-    "dotnet-skills@dotnet-skills": false,
+    "dotnet-skills@dotnet-skills": true,
     "ddd-dotnet@dotnet-claude-code-skills": false,
     "data-dotnet@dotnet-claude-code-skills": false,
     "bdd-dotnet@dotnet-claude-code-skills": false,
-    "ux@teslasoft-skills": false,
+    "ux@teslasoft-skills": true,
     "frontend-design@claude-plugins-official": false,
     "claude-code-setup@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true
   },
-  "disabledMcpjsonServers": [
-    "github",
-    "sequential-thinking"
-  ],
   "plansDirectory": "Docs/Management"
 }

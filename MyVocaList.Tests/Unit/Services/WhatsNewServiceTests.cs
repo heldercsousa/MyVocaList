@@ -1,7 +1,3 @@
-using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Storage;
-using MyVocaList.Contracts.DTOs;
-
 namespace MyVocaList.Tests.Unit.Services;
 
 public class WhatsNewServiceTests

@@ -158,89 +158,89 @@ public class SongResolutionService : ISongResolutionService
         switch (choice)
         {
             case ResolutionChoice.CreateNew:
-            {
-                var artistId = await ResolveOrCreateArtistIdAsync(candidate, ct);
-                if (artistId <= 0)
-                    return (false, "Failed to resolve or create artist", null);
+                {
+                    var artistId = await ResolveOrCreateArtistIdAsync(candidate, ct);
+                    if (artistId <= 0)
+                        return (false, "Failed to resolve or create artist", null);
 
-                var (success, message, song) = await _songService.CreateSongAsync(
-                    artistId, candidate.Title,
-                    candidate.FeaturedArtists, candidate.Lyrics,
-                    candidate.ExternalId, candidate.ExternalProvider, ct);
+                    var (success, message, song) = await _songService.CreateSongAsync(
+                        artistId, candidate.Title,
+                        candidate.FeaturedArtists, candidate.Lyrics,
+                        candidate.ExternalId, candidate.ExternalProvider, ct);
 
-                return (success, message, song);
-            }
+                    return (success, message, song);
+                }
 
             case ResolutionChoice.CreateNewVersion:
-            {
-                // AC-1.2: non-empty Version required
-                if (string.IsNullOrWhiteSpace(candidate.Version))
-                    return (false, "A non-empty Version is required when saving as a new version", null);
+                {
+                    // AC-1.2: non-empty Version required
+                    if (string.IsNullOrWhiteSpace(candidate.Version))
+                        return (false, "A non-empty Version is required when saving as a new version", null);
 
-                var artistId = await ResolveOrCreateArtistIdAsync(candidate, ct);
-                if (artistId <= 0)
-                    return (false, "Failed to resolve or create artist", null);
+                    var artistId = await ResolveOrCreateArtistIdAsync(candidate, ct);
+                    if (artistId <= 0)
+                        return (false, "Failed to resolve or create artist", null);
 
-                var (success, message, song) = await _songService.CreateSongWithUrlsAsync(
-                    artistId, candidate.Title, candidate.Version,
-                    candidate.FeaturedArtists, candidate.Lyrics,
-                    candidate.ExternalId, candidate.ExternalProvider,
-                    [], ct);
+                    var (success, message, song) = await _songService.CreateSongWithUrlsAsync(
+                        artistId, candidate.Title, candidate.Version,
+                        candidate.FeaturedArtists, candidate.Lyrics,
+                        candidate.ExternalId, candidate.ExternalProvider,
+                        [], ct);
 
-                return (success, message, song);
-            }
+                    return (success, message, song);
+                }
 
             case ResolutionChoice.UpdateExisting:
-            {
-                if (targetSongId is null)
-                    return (false, "targetSongId is required for UpdateExisting", null);
-
-                var song = await _songRepository.GetByIdAsync(targetSongId.Value, ct);
-                if (song is null)
-                    return (false, $"Song {targetSongId} not found", null);
-
-                ApplyUpdate(song, candidate, acceptedFields);
-
-                // Persist external identity if not already set
-                var newExternalId = !string.IsNullOrWhiteSpace(candidate.ExternalId) ? candidate.ExternalId : null;
-                var newExternalProvider = !string.IsNullOrWhiteSpace(candidate.ExternalProvider) ? candidate.ExternalProvider : null;
-
-                var (updateSuccess, updateMessage) = await _songService.UpdateSongAsync(
-                    song.Id, song.Title, song.FeaturedArtists, song.Lyrics,
-                    song.HasManualEdits,
-                    newExternalId, newExternalProvider, song.Version, ct);
-
-                if (!updateSuccess)
-                    return (false, updateMessage, null);
-
-                // Reload to return the updated entity
-                var updated = await _songRepository.GetByIdAsync(targetSongId.Value, ct);
-                return (true, updateMessage, updated);
-            }
-
-            case ResolutionChoice.AttachExternalId:
-            {
-                if (targetSongId is null)
-                    return (false, "targetSongId is required for AttachExternalId", null);
-
-                var song = await _songRepository.GetByIdAsync(targetSongId.Value, ct);
-                if (song is null)
-                    return (false, $"Song {targetSongId} not found", null);
-
-                if (string.IsNullOrWhiteSpace(song.ExternalId))
                 {
+                    if (targetSongId is null)
+                        return (false, "targetSongId is required for UpdateExisting", null);
+
+                    var song = await _songRepository.GetByIdAsync(targetSongId.Value, ct);
+                    if (song is null)
+                        return (false, $"Song {targetSongId} not found", null);
+
+                    ApplyUpdate(song, candidate, acceptedFields);
+
+                    // Persist external identity if not already set
+                    var newExternalId = !string.IsNullOrWhiteSpace(candidate.ExternalId) ? candidate.ExternalId : null;
+                    var newExternalProvider = !string.IsNullOrWhiteSpace(candidate.ExternalProvider) ? candidate.ExternalProvider : null;
+
                     var (updateSuccess, updateMessage) = await _songService.UpdateSongAsync(
                         song.Id, song.Title, song.FeaturedArtists, song.Lyrics,
                         song.HasManualEdits,
-                        candidate.ExternalId, candidate.ExternalProvider, song.Version, ct);
+                        newExternalId, newExternalProvider, song.Version, ct);
 
                     if (!updateSuccess)
                         return (false, updateMessage, null);
+
+                    // Reload to return the updated entity
+                    var updated = await _songRepository.GetByIdAsync(targetSongId.Value, ct);
+                    return (true, updateMessage, updated);
                 }
 
-                var attached = await _songRepository.GetByIdAsync(targetSongId.Value, ct);
-                return (true, "External identity attached", attached);
-            }
+            case ResolutionChoice.AttachExternalId:
+                {
+                    if (targetSongId is null)
+                        return (false, "targetSongId is required for AttachExternalId", null);
+
+                    var song = await _songRepository.GetByIdAsync(targetSongId.Value, ct);
+                    if (song is null)
+                        return (false, $"Song {targetSongId} not found", null);
+
+                    if (string.IsNullOrWhiteSpace(song.ExternalId))
+                    {
+                        var (updateSuccess, updateMessage) = await _songService.UpdateSongAsync(
+                            song.Id, song.Title, song.FeaturedArtists, song.Lyrics,
+                            song.HasManualEdits,
+                            candidate.ExternalId, candidate.ExternalProvider, song.Version, ct);
+
+                        if (!updateSuccess)
+                            return (false, updateMessage, null);
+                    }
+
+                    var attached = await _songRepository.GetByIdAsync(targetSongId.Value, ct);
+                    return (true, "External identity attached", attached);
+                }
 
             default:
                 return (false, $"Unsupported resolution choice: {choice}", null);
