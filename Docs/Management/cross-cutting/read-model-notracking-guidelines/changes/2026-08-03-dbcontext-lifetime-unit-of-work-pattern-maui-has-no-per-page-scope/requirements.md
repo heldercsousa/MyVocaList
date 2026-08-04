@@ -122,9 +122,11 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   named `QueueRepository`, `EventParticipationRepository`, and "the surviving merged `EventRepository`"
   — all three are Queue/Event entities excluded from this spec's scope under D12 and are carried by
   `changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/` instead.
-  The `Infra/Repository/*` / `Infra/Repositories/*` family merge remains a hard prerequisite completing
-  before Phase 0 — `design.md § 8` Prerequisite decision — independent of which repositories this
-  requirement covers.)* *Test:* one parameterised integration test per in-scope repository family,
+  The `Infra/Repository/*` / `Infra/Repositories/*` family merge is **no longer** a prerequisite
+  completing before Phase 0 — **corrected 2026-08-04, superseded by Helder ("a, but not yet!")**: the
+  merge now runs after Phase 3's VERIFY gate, combined with the deferred Queue/Event unit-of-work
+  migration (`design.md § 8` superseded Prerequisite decision, `design.md § 10` Phase 3.5) —
+  independent of which repositories this requirement covers.)* *Test:* one parameterised integration test per in-scope repository family,
   each failing on pre-change code.
 - **REQ-UOW-05** — WHEN two units of work run concurrently, the system SHALL NOT share a
   `DbContext` instance between them. *Test:* a test issuing two overlapping service calls asserts two
@@ -647,11 +649,13 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 - The Blazor Hybrid + MudBlazor UI migration.
 - Introducing MediatR or FluentValidation.
 - Performing the repository-family merge itself. Merging `Infra/Repository/*` and
-  `Infra/Repositories/*` into one family is a **hard prerequisite** that Helder has decided must
-  complete before Phase 0 of this change (corrected from stale "Wave 0", non-blocking #1;
-  `design.md § 8` Prerequisite decision) — it is out of
+  `Infra/Repositories/*` into one family is combined with the deferred Queue/Event unit-of-work
+  migration and now runs **after Phase 3's VERIFY gate, before Phase 4+** — **corrected 2026-08-04,
+  superseded by Helder ("a, but not yet!")** from the earlier "hard prerequisite before Phase 0"
+  position (corrected from stale "Wave 0", non-blocking #1; `design.md § 8` superseded Prerequisite
+  decision; `design.md § 10` Phase 3.5) — it is out of
   scope for *this* spec's phases in the sense that this spec does not perform it, not in the sense
-  that it is optional or deferred indefinitely.
+  that it is optional or deferred indefinitely; only its position relative to Phase 0 changed.
 - Retry/`CreateExecutionStrategy` policies for transient faults — SQLite is local; evaluated in
   `design.md` and deliberately not required.
 - Multi-window support.
