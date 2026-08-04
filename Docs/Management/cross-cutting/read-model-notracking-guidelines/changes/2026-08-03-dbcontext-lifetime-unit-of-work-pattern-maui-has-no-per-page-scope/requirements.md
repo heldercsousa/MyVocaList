@@ -16,7 +16,17 @@
 > **corrects the in-scope method count from 35 to 21** (16 single-repository / 5 multi-repository,
 > `design.md § 8` D12); D13 keeps the API shape provisional until the pilot's real call sites decide it
 > in Phase 3. The acceptance criteria below reflect the approved, candidate-C-specific design as
-> corrected by D11/D12/D13.
+> corrected by D11/D12/D13. **REQ-UOW-33 revised 2026-08-04:** `IUnitOfWork.ExecuteAsync` opens an
+> explicit transaction, replacing the earlier "`ExecuteUpdateAsync`/`ExecuteDeleteAsync` are exempt
+> from atomicity" carve-out (`design.md § 8` "Decision: `ExecuteAsync` opens an explicit transaction").
+>
+> **This spec is APPROVED by Helder as of 2026-08-04.** Every decision previously marked "REQUIRES
+> HELDER'S CONFIRMATION" in this file and in `design.md` is now marked **APPROVED by Helder 2026-08-04**
+> at its point of occurrence. This includes the `IBaseRepository<T>.SaveChangesAsync()` deferral
+> decision (narrowing REQ-UOW-11), the `QueueManagementViewModel` Phase 4+ scope correction (§ 8 D12
+> item 6), and the Revision 12 ambient-scope change (REQ-UOW-34). REQ-UOW-11's substance is unchanged
+> by this approval pass — a separate question about it remains open with Helder; only its approval
+> marker was updated.
 
 ---
 
@@ -248,37 +258,40 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   spec's scope under D12 (see REQ-UOW-08/REQ-UOW-23) — `QueueService.RecordParticipationAsync`'s
   three-repository span is no longer relevant to this spec's Phase 4+ work. **The only in-scope
   no-signal method is `SongKaraokeUrlService.RecordPlayAsync`.**
-  **Further correction (4th-pass spec review, BL-C, verified against source):**
+  **Further correction (4th-pass spec review, BL-C, verified against source; superseded 2026-08-04 —
+  see REQ-UOW-33 below):**
   `SongKaraokeUrlService.RecordPlayAsync` (`SongKaraokeUrlService.cs:79-83`) calls
   `_repo.IncrementPlayCountAsync`, whose implementation
   (`Infra/Repository/SongKaraokeUrlRepository.cs:56-64`) is `db.SongKaraokeUrls.Where(...).ExecuteUpdateAsync(...)`
-  — an immediate-SQL EF Core bulk operation that runs **outside the change tracker** and commits the
-  instant it is awaited, independent of any later `SaveChangesAsync` call. Wrapping this method in the
-  no-signal `ExecuteAsync` overload does not make this AC's "leaves no partial state on exception"
-  guarantee true for it: the mutation is already durable before `ExecuteAsync`'s own (redundant)
-  `SaveChangesAsync` call runs, so an exception thrown *after* `IncrementPlayCountAsync` returns but
-  before `ExecuteAsync` completes would still leave the play-count increment persisted — this is a
-  structural exception to REQ-UOW-06 for this method, not a bug in `IUnitOfWork`. **This AC's exemplar
-  is corrected:** `SongKaraokeUrlService.RecordPlayAsync` is retained as the only in-scope no-signal
-  method for API-shape purposes (it is the only bare-`Task` in-scope mutator), but its "no partial
-  state survives" claim is carved out — see the new REQ-UOW-33 (`ExecuteUpdateAsync`/`ExecuteDeleteAsync`
-  carve-out) below, which REQ-UOW-26's test must be read alongside. *Test:* an integration test running
-  `SongKaraokeUrlService.RecordPlayAsync` asserts the mutation is persisted on a normal return (this
-  part is unaffected — `ExecuteUpdateAsync` always persists immediately, so a normal return is always
-  observably saved); the second "exception still leaves no partial state" test required by the
-  original AC text does NOT apply to this method per REQ-UOW-33 and MUST NOT be written for it — write
-  it instead against a hypothetical or a different in-scope no-signal method if one is added later.
+  — an immediate-SQL EF Core bulk operation that runs **outside the change tracker** and, absent an
+  explicit transaction, would commit the instant it is awaited, independent of any later
+  `SaveChangesAsync` call. **This AC's exemplar is corrected:** `SongKaraokeUrlService.RecordPlayAsync`
+  is retained as the only in-scope no-signal method for API-shape purposes (it is the only bare-`Task`
+  in-scope mutator). Its "no partial state survives" guarantee is **no longer carved out** — REQ-UOW-33
+  now wraps it (and the other four `ExecuteUpdateAsync`/`ExecuteDeleteAsync` methods) in
+  `IUnitOfWork.ExecuteAsync`'s explicit transaction (`design.md § 6`/§ 8), so an exception thrown after
+  `IncrementPlayCountAsync` returns but before the transaction commits rolls the increment back too.
+  *Test:* an integration test running `SongKaraokeUrlService.RecordPlayAsync` asserts the mutation is
+  persisted on a normal return, AND a second test (REQ-UOW-33) asserts that a fault injected after
+  `IncrementPlayCountAsync` runs but before the unit of work completes leaves the play count
+  unchanged — the exception-rollback test this AC's original text called for, now satisfiable.
 
-- **REQ-UOW-33** (new, 4th-pass spec review, BL-C) — **Carve-out: `ExecuteUpdateAsync`/`ExecuteDeleteAsync`
-  bypass the unit-of-work save boundary entirely; REQ-UOW-24/25/26's atomicity guarantees do NOT apply
-  to them.** These EF Core bulk operations execute immediate SQL against the database outside the
-  `DbContext` change tracker the instant they are awaited — there is no staged state for
-  `IUnitOfWork.ExecuteAsync`'s implicit `SaveChangesAsync` (or its save-skip logic) to affect, and no
-  rollback is possible once one has run, regardless of what the enclosing service method returns
-  afterward or throws afterward. The following in-scope repository methods are `ExecuteUpdateAsync`/
-  `ExecuteDeleteAsync`-based and are EXEMPT from REQ-UOW-24 (save-skip on failure), REQ-UOW-25
-  (save-on-success), and the "no partial state on exception" clause of REQ-UOW-06/REQ-UOW-26, verified
-  by direct read against current `develop` HEAD:
+- **REQ-UOW-33** (revised 2026-08-04, Helder's decision — supersedes the 4th-pass "carve-out" wording;
+  design record: `design.md § 8` "Decision: `ExecuteAsync` opens an explicit transaction") — **The
+  unit of work is transactional, including for `ExecuteUpdateAsync`/`ExecuteDeleteAsync`-based
+  methods.** `IUnitOfWork.ExecuteAsync`'s two overloads open an explicit
+  `Database.BeginTransactionAsync` immediately after creating the scope (`design.md § 6`). Of the 21
+  in-scope methods, the 16 that mutate only tracked entities were already atomic via EF Core's
+  automatic per-`SaveChangesAsync` transaction (the unit of work has exactly one `SaveChangesAsync`
+  call); the explicit transaction exists specifically to bring the remaining 5 methods — which call
+  `ExecuteUpdateAsync`/`ExecuteDeleteAsync`, immediate-SQL EF Core bulk operations that do **not**
+  implicitly start a transaction (verified against EF Core docs, Context7) — under the same
+  commit/rollback boundary as everything else in the unit of work. WHEN the enclosing service method's
+  body returns a failure signal, or throws, after an `ExecuteUpdateAsync`/`ExecuteDeleteAsync` call has
+  already run inside it, THEN `IUnitOfWork.ExecuteAsync` SHALL roll back the transaction, undoing that
+  bulk operation, exactly as it would a tracked-entity mutation. The following in-scope repository
+  methods are the ones the explicit transaction was introduced for, verified by direct read against
+  current `develop` HEAD:
   | Repository method | Mechanism | Line | Called by (in-scope service method) |
   |---|---|---|---|
   | `SongKaraokeUrlRepository.IncrementPlayCountAsync` | `ExecuteUpdateAsync` | `SongKaraokeUrlRepository.cs:56-64` | `SongKaraokeUrlService.RecordPlayAsync` |
@@ -287,14 +300,26 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   | `SongRepository.DeleteAsync` | `ExecuteDeleteAsync` | `SongRepository.cs:136-142` | `SongService.DeleteSongsAsync` (pilot, Phase 2) |
   | `CatalogRepository.RemoveAsync` | `ExecuteDeleteAsync` | `CatalogRepository.cs:70-75` | `CatalogService.RemoveSongFromCatalogAsync` |
 
-  Wrapping any of these five service methods in `IUnitOfWork.ExecuteAsync` is still REQUIRED (§ 10) for
-  consistency of the API surface and because each method may also touch tracked-entity state elsewhere
-  in its body (e.g. `ArtistService.DeleteArtistsAsync` reads via `GetByIdAsync`/`CountByArtistAsync`
-  before deleting) — but the wrap provides no atomicity guarantee for the `ExecuteUpdateAsync`/
-  `ExecuteDeleteAsync` call itself. *Test:* none required beyond the existing repository-level tests for
-  these methods (they already test the immediate-SQL behavior); no new REQ-UOW-24/25/26-shaped
-  atomicity test may be written against any of the five call sites above — doing so would test a
-  guarantee this spec does not provide.
+  Wrapping any of these five service methods in `IUnitOfWork.ExecuteAsync` is REQUIRED (§ 10), both for
+  API-surface consistency and because REQ-UOW-24/25/26's atomicity guarantees now apply to them too via
+  the explicit transaction.
+  ```
+  Given ArtistService.DeleteArtistsAsync's body calls ArtistRepository.DeleteAsync
+      (ExecuteDeleteAsync), then a later validation check in the same body fails and the method
+      returns (false, "...")
+  When DeleteArtistsAsync is called through IUnitOfWork.ExecuteAsync
+  Then the returned tuple's success element is false
+  And re-reading the Artist row from the database shows it still exists (the ExecuteDeleteAsync
+      call was rolled back by the explicit transaction, not just left un-committed)
+  ```
+  *Test:* an integration test that runs a body performing a real `ExecuteDeleteAsync`/`ExecuteUpdateAsync`
+  call followed by a `(false, …)` return or a thrown exception, then asserts via a fresh read that the
+  row was NOT deleted/updated — this is the regression test that proves the old REQ-UOW-33 carve-out
+  wording was a design gap, not a structural impossibility: it fails under the pre-2026-08-04 design
+  (no transaction, `ExecuteDeleteAsync` commits immediately and unconditionally) and passes under the
+  explicit-transaction design. Cover at least one `ExecuteDeleteAsync` case (`ArtistService.DeleteArtistsAsync`
+  or `SongService.DeleteSongsAsync`, both pilot-phase) and the `ExecuteUpdateAsync` case
+  (`SongKaraokeUrlService.RecordPlayAsync`).
 - **REQ-UOW-27** (Revision 9, 2026-08-04 — resolves the fail-open/fail-closed refinement of finding
   B3) — WHEN a service method's body returns, via `IUnitOfWork.ExecuteAsync<TResult>` (the
   value-returning overload — the only value-returning form under Revision 10, `design.md § 8`), a
@@ -389,7 +414,7 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   the five standalone-interface pass-throughs above; `PersonRepository`/`VenueRepository` retain a
   technically-reachable inherited `SaveChangesAsync()` after this spec ships (no in-scope service calls
   it, but the interface member is not deleted) — see `design.md § 8` "IBaseRepository<T>.SaveChangesAsync()
-  is NOT removed" decision, **REQUIRES HELDER'S CONFIRMATION**.
+  is NOT removed" decision, **APPROVED by Helder 2026-08-04**.
 
   **Separately, corrected 2026-08-04 (`design.md § 8` D12 item 4):** this requirement
   previously also named "the six `SaveChangesAsync` calls embedded inside repository *mutator*
@@ -596,7 +621,7 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   audit and convert. **Corrected 2026-08-04 (4th-pass spec review, BL-D):** `QueueManagementViewModel`
   also constructor-injects `IEventService`/`IQueueServiceNew` (both excluded types) — it converts only
   its `IPersonRepository`/`ISongRepository` usage to `IUnitOfWork`; its `IEventService`/`IQueueServiceNew`
-  fields are NOT converted (`design.md § 8` D12 item 6 correction, REQUIRES HELDER'S CONFIRMATION).
+  fields are NOT converted (`design.md § 8` D12 item 6 correction, **APPROVED by Helder 2026-08-04**).
 - **No parallel fan-out inside a unit of work (new, non-blocking #10, 4th-pass spec review).** A body
   passed to `ExecuteAsync`/`ExecuteReadAsync` SHALL NOT start two or more `ExecuteAsync`/`ExecuteReadAsync`
   calls concurrently (e.g. via `Task.WhenAll`) from within the same outer unit of work. The `AsyncLocal`
