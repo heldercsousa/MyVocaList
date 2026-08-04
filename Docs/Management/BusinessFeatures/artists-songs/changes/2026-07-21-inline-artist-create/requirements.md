@@ -43,6 +43,16 @@ As an admin registering a song, when I type an artist who is not yet in my catal
 
 > **Spec updated [2026-08-02]:** REQ-ACREATE-16 added because no existing AC covered artist mutation on an existing song — REQ-ACREATE-08 covers only the create path. Discovered by BUG-067 (silent loss of a user edit).
 
+> **Spec updated [2026-08-03]:** REQ-ACREATE-16's persistence guarantee also requires a
+> repository-seam regression test against real SQLite (`testing.md § Project anti-patterns`),
+> not only the Service/ViewModel seams listed above. BUG-067's fix reached `DbSet.Update(song)`
+> but that call throws an EF Core identity-map conflict on-device (BUG-068, Critical) because
+> `AppDbContext` is a MAUI-DI Scoped registration that behaves as a de facto singleton for the
+> whole app session (MAUI has no per-page child scope), and `QueryTrackingBehavior.NoTracking`
+> does not detach entities left tracked by an earlier `Add`/`Update` + `SaveChangesAsync` on the
+> same Song row. A mocked `ISongRepository` (the pre-existing Service-seam test) cannot reach
+> this code path at all, which is why 535/535 was green while every on-device edit-save failed.
+
 ## Validation rules
 
 - Inline-create name obeys `ArtistService` rules: non-empty after trim, ≤ 60 chars. Violations return a mapped error (REQ-ACREATE-05), no entity created.

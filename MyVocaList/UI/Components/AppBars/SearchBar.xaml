@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<appbars:AppBarBase
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:appbars="clr-namespace:MyVocaList.UI.Components.AppBars"
+    x:Class="MyVocaList.UI.Components.AppBars.SearchBar"
+    x:Name="self">
+
+    <!-- MD3 Search bar (standalone/docked): 56dp pill, SurfaceContainerLow;
+         IsElevated (liftOnScroll) -> SurfaceContainer via UpdateContainerColor. -->
+    <dx:DXBorder x:Name="container"
+                 CornerRadius="28"
+                 HeightRequest="56"
+                 Margin="16,8"
+                 BackgroundColor="{StaticResource SurfaceContainerLow}">
+
+        <!-- Search input: flat TextEdit, bodyLarge 16sp; leading search_outlined icon is
+             non-interactive (StartIcon, no button); trailing auto clear icon.
+             No back arrow, no BackCommand, no auto-focus (REQ-SEARCHBAR-03). -->
+        <dxe:TextEdit x:Name="searchEdit"
+                      Text="{Binding SearchText, Source={x:Reference self}, Mode=TwoWay}"
+                      PlaceholderText="{Binding Placeholder, Source={x:Reference self}}"
+                      StartIcon="search_outlined"
+                      StartIconColor="{StaticResource OnSurfaceVariant}"
+                      BoxMode="Outlined"
+                      BorderColor="Transparent"
+                      FocusedBorderColor="Transparent"
+                      BackgroundColor="Transparent"
+                      TextColor="{StaticResource OnSurface}"
+                      TextFontSize="16"
+                      TextFontFamily="RobotoRegular"
+                      PlaceholderColor="{StaticResource OnSurfaceVariant}"
+                      ClearIconVisibility="Auto"
+                      ClearIconColor="{StaticResource OnSurfaceVariant}"
+                      Keyboard="Text"
+                      ReturnType="Search"
+                      VerticalOptions="Center"
+                      Margin="8,0"
+                      SemanticProperties.Description="{Binding Placeholder, Source={x:Reference self}}" />
+    </dx:DXBorder>
+</appbars:AppBarBase>

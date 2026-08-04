@@ -33,10 +33,26 @@ public partial class CrudListView : ContentView
         BindableProperty.Create(nameof(SelectedItemTemplate), typeof(DataTemplate),
             typeof(CrudListView), null);
 
-    /// <summary>Placeholder text for the SearchAppBar (informational — not rendered inside CrudListView).</summary>
+    /// <summary>Placeholder text for the internal persistent SearchBar (live — rendered in the search bar row).</summary>
     public static readonly BindableProperty SearchPlaceholderProperty =
         BindableProperty.Create(nameof(SearchPlaceholder), typeof(string),
             typeof(CrudListView), string.Empty);
+
+    /// <summary>
+    /// Search query text, propagated TwoWay to the internal SearchBar. Pages bind this to the
+    /// ViewModel's SearchText so the existing debounce pipeline drives list filtering.
+    /// </summary>
+    public static readonly BindableProperty SearchTextProperty =
+        BindableProperty.Create(nameof(SearchText), typeof(string),
+            typeof(CrudListView), string.Empty, BindingMode.TwoWay);
+
+    /// <summary>
+    /// liftOnScroll elevation for the internal SearchBar (SurfaceContainerLow → SurfaceContainer).
+    /// Pages bind this to the ViewModel's IsScrolled.
+    /// </summary>
+    public static readonly BindableProperty IsSearchBarElevatedProperty =
+        BindableProperty.Create(nameof(IsSearchBarElevated), typeof(bool),
+            typeof(CrudListView), false);
 
     /// <summary>Icon name for the "no items" EmptyState illustration.</summary>
     public static readonly BindableProperty EmptyNoItemsIllustrationProperty =
@@ -122,6 +138,18 @@ public partial class CrudListView : ContentView
     {
         get => (string)GetValue(SearchPlaceholderProperty);
         set => SetValue(SearchPlaceholderProperty, value);
+    }
+
+    public string SearchText
+    {
+        get => (string)GetValue(SearchTextProperty);
+        set => SetValue(SearchTextProperty, value);
+    }
+
+    public bool IsSearchBarElevated
+    {
+        get => (bool)GetValue(IsSearchBarElevatedProperty);
+        set => SetValue(IsSearchBarElevatedProperty, value);
     }
 
     public string EmptyNoItemsIllustration
