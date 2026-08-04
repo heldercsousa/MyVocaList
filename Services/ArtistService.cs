@@ -50,8 +50,9 @@ public class ArtistService : IArtistService
         if (!isValid)
             return (false, message, null);
 
-        name = name.Trim();
-
+        // Artist.Name/ExternalId trimming is enforced by the EF Core ValueConverter configured
+        // in ArtistConfiguration (design.md § D3) — not here. EF applies the same converter to
+        // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
         if (await _artistRepository.ExistsByNameAsync(name, ct))
             return (false, "An artist with this name already exists", null);
 
@@ -66,7 +67,7 @@ public class ArtistService : IArtistService
 
         await _artistRepository.AddAsync(artist, ct);
         await _artistRepository.SaveChangesAsync(ct);
-        return (true, $"Artist '{name}' created successfully", artist);
+        return (true, $"Artist '{name.Trim()}' created successfully", artist);
     }
 
     /// <inheritdoc />
@@ -77,12 +78,13 @@ public class ArtistService : IArtistService
         if (!isValid)
             return (false, message);
 
-        name = name.Trim();
-
         var artist = await _artistRepository.GetByIdAsync(id, ct);
         if (artist == null)
             return (false, "Artist not found");
 
+        // Artist.Name trimming is enforced by the EF Core ValueConverter configured in
+        // ArtistConfiguration (design.md § D3) — not here. EF applies the same converter to
+        // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
         if (await _artistRepository.ExistsByNameAsync(name, id, ct))
             return (false, "An artist with this name already exists");
 
@@ -92,7 +94,7 @@ public class ArtistService : IArtistService
 
         await _artistRepository.UpdateAsync(artist, ct);
         await _artistRepository.SaveChangesAsync(ct);
-        return (true, $"Artist updated to '{name}'");
+        return (true, $"Artist updated to '{name.Trim()}'");
     }
 
     /// <inheritdoc />

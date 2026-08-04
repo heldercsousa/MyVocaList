@@ -15,22 +15,31 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
 
         builder.Property(s => s.ArtistId).IsRequired();
 
+        // D3 (design.md § D3): trim-on-save enforced here, not in SongService Create/Update.
         builder.Property(s => s.Title)
                .IsRequired()
                .HasMaxLength(100)
+               .HasConversion(TrimValueConverters.Required)
                .UseCollation(CollationConstants.Default);
 
+        // D3 (design.md § D3): trim-on-save enforced here, not in SongService Create/Update.
+        // Version is non-nullable ("" = canonical version) — TrimForStorage never nulls it.
         builder.Property(s => s.Version)
                .IsRequired()
                .HasMaxLength(60)
+               .HasConversion(TrimValueConverters.Required)
                .UseCollation(CollationConstants.Default);
 
+        // D3 (design.md § D3): trim-on-save enforced here, not in SongService Create/Update.
         builder.Property(s => s.FeaturedArtists)
-               .IsRequired(false);
+               .IsRequired(false)
+               .HasConversion(TrimValueConverters.Optional);
 
+        // D3 (design.md § D3): trim-on-save enforced here, not in SongService Create/Update.
         builder.Property(s => s.ExternalId)
                .IsRequired(false)
-               .HasMaxLength(100);
+               .HasMaxLength(100)
+               .HasConversion(TrimValueConverters.Optional);
 
         builder.Property(s => s.ExternalProvider)
                .IsRequired(false)

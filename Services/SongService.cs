@@ -69,20 +69,22 @@ public class SongService : ISongService
         if (!isValid)
             return (false, message, null);
 
-        title = title.Trim();
-
         var artist = await _artistRepository.GetByIdAsync(artistId, ct);
         if (artist == null)
             return (false, "Artist not found", null);
 
+        // Song.Title trimming is enforced by the EF Core ValueConverter configured in
+        // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
+        // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
         if (await _songRepository.ExistsByTitleForArtistAsync(artistId, title, ct))
             return (false, "A song with this title already exists for this artist", null);
 
+        // Song.Title/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
         var song = new Song
         {
             ArtistId = artistId,
             Title = title,
-            FeaturedArtists = featuredArtists?.Trim(),
+            FeaturedArtists = featuredArtists,
             Lyrics = lyrics,
             ExternalId = externalId,
             ExternalProvider = externalProvider,
@@ -92,7 +94,7 @@ public class SongService : ISongService
 
         await _songRepository.AddAsync(song, ct);
         await _songRepository.SaveChangesAsync(ct);
-        return (true, $"Song '{title}' created successfully", song);
+        return (true, $"Song '{title.Trim()}' created successfully", song);
     }
 
     /// <inheritdoc />
@@ -112,17 +114,19 @@ public class SongService : ISongService
                 return (false, versionMessage);
         }
 
-        title = title.Trim();
-
         var song = await _songRepository.GetByIdAsync(id, ct);
         if (song == null)
             return (false, "Song not found");
 
+        // Song.Title trimming is enforced by the EF Core ValueConverter configured in
+        // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
+        // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
         if (await _songRepository.ExistsByTitleForArtistAsync(song.ArtistId, title, id, ct))
             return (false, "A song with this title already exists for this artist");
 
+        // Song.Title/FeaturedArtists/Version trimming is enforced by the ValueConverter (design.md § D3).
         song.Title = title;
-        song.FeaturedArtists = featuredArtists?.Trim();
+        song.FeaturedArtists = featuredArtists;
         song.Lyrics = lyrics;
         song.UpdatedAt = DateTime.UtcNow;
         song.HasManualEdits = hasManualEdits;
@@ -130,7 +134,7 @@ public class SongService : ISongService
         // BUG-024: persist the version label when provided; null = keep existing value
         // (mirrors the externalId/externalProvider null-keeps-existing semantics below).
         if (version != null)
-            song.Version = version.Trim();
+            song.Version = version;
 
         // M2: persist external identity when provided; null = keep existing value
         if (externalId != null)
@@ -154,23 +158,25 @@ public class SongService : ISongService
         if (!isValid)
             return (false, message, null);
 
-        title = title.Trim();
-        version = (version ?? string.Empty).Trim();
+        version ??= string.Empty;
 
         var artist = await _artistRepository.GetByIdAsync(artistId, ct);
         if (artist == null)
             return (false, "Artist not found", null);
 
-        // Use the 3-column unique check (artistId, title, version) — AC-5.5 / N3
+        // Song.Title/Version trimming is enforced by the EF Core ValueConverter configured in
+        // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
+        // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
         if (await _songRepository.ExistsByTitleVersionForArtistAsync(artistId, title, version, ct))
             return (false, "A song with this title and version already exists for this artist", null);
 
+        // Song.Title/Version/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
         var song = new Song
         {
             ArtistId = artistId,
             Title = title,
             Version = version,
-            FeaturedArtists = featuredArtists?.Trim(),
+            FeaturedArtists = featuredArtists,
             Lyrics = lyrics,
             ExternalId = externalId,
             ExternalProvider = externalProvider,

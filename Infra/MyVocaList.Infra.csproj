@@ -25,6 +25,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\MyVocaList.Domain.csproj" />
+    <!-- D3/D4 (persisted-string-trimming/design.md § D3, D4): ValueConverters in
+         EntityTypeConfiguration delegate to MyVocaList.Extensions.Strings string-trimming
+         extension methods — Infra configures WHERE the trimming rule applies. MyVocaList.Extensions
+         is a dependency-free leaf project (Task 6a), so this keeps strict DRY Onion ordering
+         (no Infra -> Services edge). -->
+    <ProjectReference Include="..\MyVocaList.Extensions\MyVocaList.Extensions.csproj" />
   </ItemGroup>
 
 </Project>
