@@ -4,6 +4,16 @@ using MyVocaList.Domain.ServicesInterfaces;
 
 namespace MyVocaList.Services;
 
+// TODO [BUG-071 / UOW] — SHARED WINDOW-SCOPED DbContext: OUT OF PATTERN.
+// This code mutates entities on the app-lifetime AppDbContext (MAUI creates no
+// per-page scope), so it can leave an entity tracked and later throw
+// "another instance with the same key value for {'Id'} is already being tracked",
+// and a throw here can poison the shared context for every other feature.
+// Fix by applying the unit-of-work pattern being established for the Venue,
+// Artist, Person and Song CRUDs — do NOT patch this locally.
+// Spec: Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/
+//   2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/
+// Tracked by: .../changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/
 /// <summary>
 /// Service responsible only for queue and event operations
 /// Person operations delegated to IPersonService
@@ -29,6 +39,7 @@ public class QueueService : IQueueService
 
     // --- Queue Operations (using PersonService for person operations) ---
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <summary>
     /// Adds person to queue - delegates creation to PersonService
     /// </summary>
@@ -69,6 +80,7 @@ public class QueueService : IQueueService
         }
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <summary>
     /// Records participation in active event
     /// </summary>
@@ -104,6 +116,7 @@ public class QueueService : IQueueService
         return await _eventRepository.GetActiveEventAsync();
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     public async Task SetActiveEventAsync(int eventId)
     {
         await _eventRepository.SetActiveEventAsync(eventId);
@@ -131,6 +144,10 @@ public class QueueService : IQueueService
             {
                 defaultVenue = new Venue { Name = "Default Venue Created Automatically" };
                 await _venueRepository.AddAsync(defaultVenue);
+                // TODO [BUG-071 / UOW] — cross-boundary: saves via the in-scope IVenueRepository
+                // from this excluded (Queue/Event) code path. This crossing is why
+                // IBaseRepository.SaveChangesAsync cannot yet be removed from the in-scope
+                // Venue unit-of-work migration — Queue still depends on it here.
                 await _venueRepository.SaveChangesAsync();
             }
 
