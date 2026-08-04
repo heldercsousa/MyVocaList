@@ -1,0 +1,130 @@
+ ▐▛███▜▌   Claude Code v2.1.220
+▝▜█████▛▘  Sonnet 5 · Claude Pro
+  ▘▘ ▝▝    ~\source\repos\MyVocaList
+
+   Tackle your toughest work with Opus 5. Switch anytime with /model.
+
+> /resume 
+  ⎿  Resume cancelled
+
+> /model default                                                                
+  ⎿  Set model to Sonnet 5 (default) and saved as your default for new sessions
+
+> in @Docs/Management/BACKLOG.md there is a task for "DX autocomplete           
+  integration and catalog sync" which has about 2 manual tests still pending    
+  from my side. Please, check such work and give me what lacks and where I find 
+  the code to compile and run in my device to finish the task                   
+  ⎿  Read Docs\Management\BACKLOG.md (123 lines)
+
+  Searched for 2 patterns, read 3 files (ctrl+o to expand)
+
+● This is the exact task. Here's the current state and what's needed.
+
+  What's pending
+
+  T10 re-run #4 — an on-device manual verification pass on a physical Android
+  device. Only two items need re-checking (a third is optional):
+
+  1. BUG-064 — trigger the artist validation error and confirm exactly ONE error
+  message shows (the duplicate/redundant one below the field is gone).
+  2. BUG-061 — after tapping a suggestion, confirm the dropdown does NOT re-open
+  showing the just-selected name. Also check it stays closed on: edit-page
+  load, after returning from the song picker (both exact-match and no-match
+  cases), and after tapping the clear (X) icon.
+  3. (Optional sanity check only) items a / e / j / C1 / C2 — skip item i
+  (catalog check), it's dropped/cancelled as works-as-designed.
+
+  Item 1 (BUG-060, artist unlock behavior) already passed in re-run #3 — no need
+  to retest.
+
+  Where to compile and run it
+
+  - Worktree: C:\Users\helde\source\repos\MyVocaList-inline-ac
+  - Branch: feat/inline-artist-create
+  - HEAD commit: b8f7d2c (already pushed to origin/feat/inline-artist-create,
+  not yet merged)
+  - Build/run the Android target from that worktree — the last local Android
+  build was blocked by an AV/EDR issue (XARLP7024) unrelated to the code, so if
+  that recurs it's an environment problem, not a code regression.
+
+  After you test
+
+  - All green: just tell me "T10 re-run #4 passed" — I'll run the closeout
+  (merge feat/inline-artist-create → develop, push, remove the worktree, unblock
+  the Artists & Songs Catalog feature).
+  - Any failure: tell me which item and what you observed (like your prior
+  notes) — I'll register a BUG-NNN and re-open the fix cycle.
+
+  One thing worth flagging: item 3's checklist references "song picker"
+  (exact-match and no-match returns) — if you're not sure what that flow is, let
+  me know and I'll point you to the exact screen/entry point before you test.
+
+✻ Worked for 28s
+
+> /export                                                                       
+  ⎿  Conversation exported to: C:\Users\helde\source\repos\MyVocaList\2026-07-27
+     -170448-complete-dx-autocomplete-integration.txt
+
+> are all tracking info recorder in the their proper files ? I will close the   
+  session now. Or, if anything short to do now, you can just proceed. I 'm with 
+  free time. If you agree, any lacking task you or any agent may do jobs, I     
+  authorize you in advance. Trust you, since I trust you! Just assure each      
+  tracking information for review by a developer or anyone, or even resuming    
+  the jobs from the stopping point.                                             
+
+  Read 1 file, ran 3 shell commands (ctrl+o to expand)
+
+● This is an auto-generated log (hook-maintained, from the SPEC-EVO session's
+  file edits) — not something needing manual action; it'll get committed as part
+  of that session's normal flow. It's unrelated to INLINE-AC.
+
+  I checked the tracking files — everything is properly recorded and consistent:
+
+  - LEDGER.md — INLINE-AC row correctly shows blocked: T10 re-run #4 (Helder, 
+  on-device), HEAD b8f7d2c, and the exact next action.
+  - handoff.md — matches the ledger, has the precise re-test checklist (items 2
+  & 3 only) and full closeout instructions for whoever resumes.
+  - task-log.md — full history/root-cause trace for every bug in the cycle
+  (BUG-050 through BUG-064).
+  - pending-backlog-closeout.md — closeout steps ready to run once T10 #4
+  passes.
+  - Nothing is stranded — worktree branch is pushed to
+  origin/feat/inline-artist-create, docs are already on develop.
+
+  There's nothing left for me to do autonomously. The only remaining gate is the
+  on-device manual test (T10 re-run #4), and I can't perform physical device
+  testing myself — that has to be you, on your Android device, per the checklist
+  I gave you above. Faking or skipping that verification would violate the
+  project's testing discipline (manual E2E is explicitly required here since
+  it's DX-wiring/UI behavior, not something a unit test can cover).
+
+  The only loose end is two /export transcript files sitting untracked at the
+  repo root (2026-07-27-*.txt) — those aren't part of the tracking system, just
+  export artifacts. Want me to move them out of the repo root, or leave them?
+
+  Everything else is safe to close the session on — when you're ready to run T10
+  re-run #4, just come back and tell me the results (pass, or which item
+  failed) and I'll take it from there (closeout or new bug registration).
+  ⎿  Stop says: ⚠️ Uncommitted changes detected — run /project:commit before 
+     closing.
+
+✻ Cooked for 38s
+
+
+
+
+
+
+-----------------------
+ overriding, in the filling moment, the prior artist. But:
+  1.1) In add mode:
+  1.1.1) When selected an option , it imediately shows an result line with text "Not Found". It goes away as soon as I
+  tap anywhere out of the artist entry.
+  1.1.2) After defined the artist, then cleared the entry, and typed 1 char for another artist, it shows "not found"
+  again.
+  1.1.3) When typed 2 char, finaly it renders the matching options
+  1.2) In edit mode:
+  1.2.1) When page just loaded, the option "not found" appears in the autocomplete result list
+  1.2.2)
+
+

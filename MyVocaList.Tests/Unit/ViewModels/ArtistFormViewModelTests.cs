@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.Messaging;
-using MyVocaList.UI.ViewModels;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -195,6 +194,34 @@ public class ArtistFormViewModelTests
 
         Assert.True(sut.NameHasError);
         Assert.Equal("An artist with this name already exists", sut.NameErrorText);
+    }
+
+    // ── Re-entrancy guard (BUG-049) ────────────────────────────────────────────
+
+    [Fact]
+    // [AC] BUG-049: a fast double-tap on Save while a save is in flight must not fire the
+    // create/update service call twice (which caused a duplicate "GoToAsync("..")" that
+    // overshot the nav stack root).
+    public async Task SaveCommand_DoubleInvokedWhileSaving_CallsCreateOnlyOnce()
+    {
+        var sut = CreateSut();
+        sut.CompleteHydration();
+        sut.ArtistName = "The Beatles";
+        _serviceMock.Setup(s => s.ValidateNameInput("The Beatles")).Returns((true, ""));
+
+        var gate = new TaskCompletionSource<(bool, string, Artist?)>();
+        _serviceMock.Setup(s => s.CreateArtistAsync("The Beatles", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                    .Returns(gate.Task);
+
+        var firstCall = sut.SaveCommand.ExecuteAsync(null);
+        var secondCall = sut.SaveCommand.ExecuteAsync(null);   // simulates the second tap of a double-tap
+
+        gate.SetResult((true, "Artist 'The Beatles' created successfully", new Artist { Name = "The Beatles" }));
+        await Task.WhenAll(firstCall, secondCall);
+
+        _serviceMock.Verify(
+            s => s.CreateArtistAsync("The Beatles", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     // ── Character counter — counts the same (trimmed) string the validator checks ─

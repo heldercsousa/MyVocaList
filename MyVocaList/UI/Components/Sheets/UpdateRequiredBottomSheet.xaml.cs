@@ -1,6 +1,3 @@
-using DevExpress.Maui.Controls;
-using MyVocaList.Contracts.DTOs;
-
 namespace MyVocaList.UI.Components.Sheets;
 
 /// <summary>

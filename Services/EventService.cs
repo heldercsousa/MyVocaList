@@ -1,5 +1,4 @@
 using MyVocaList.Contracts.Enums;
-using MyVocaList.Domain.Entities;
 using MyVocaList.Domain.Interfaces;
 using MyVocaList.Domain.ServicesInterfaces;
 

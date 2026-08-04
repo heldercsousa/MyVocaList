@@ -40,17 +40,17 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItem>
     {
         set => RoleFilter = value switch
         {
-            "author"    => ArtistRoleFilter.AuthorsOnly,
+            "author" => ArtistRoleFilter.AuthorsOnly,
             "performer" => ArtistRoleFilter.PerformersOnly,
-            _           => ArtistRoleFilter.All
+            _ => ArtistRoleFilter.All
         };
     }
 
     public string AppBarTitle => SelectedCount > 0 ? $"{SelectedCount} selected" : RoleFilter switch
     {
-        ArtistRoleFilter.AuthorsOnly    => "Authors",
+        ArtistRoleFilter.AuthorsOnly => "Authors",
         ArtistRoleFilter.PerformersOnly => "Performers",
-        _                               => "Artists"
+        _ => "Artists"
     };
 
     public bool IsEmptyNoArtists => IsEmpty && string.IsNullOrWhiteSpace(SearchText);

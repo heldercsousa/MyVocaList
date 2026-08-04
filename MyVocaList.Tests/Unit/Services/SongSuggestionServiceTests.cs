@@ -1,6 +1,4 @@
 using MyVocaList.Contracts.DTOs;
-using MyVocaList.Contracts.DTOs.Suggestions;
-using MyVocaList.Domain.Resolution;
 
 namespace MyVocaList.Tests.Unit.Services;
 

@@ -1,0 +1,258 @@
+ ▐▛███▜▌   Claude Code v2.1.220
+▝▜█████▛▘  Opus 5 · Claude Pro
+  ▘▘ ▝▝    ~\source\repos\MyVocaList
+
+   Tackle your toughest work with Opus 5. Switch anytime with /model.
+
+> /resume 
+  ⎿  Resume cancelled
+
+> read @Docs/Management/BACKLOG.md and resume the Spec Evolution migration      
+  ⎿  Read Docs\Management\BACKLOG.md (168 lines)
+
+  Read 2 files, ran 3 shell commands (ctrl+o to expand)
+
+● State (from LEDGER + tasks.md, no globbing): the migration's autonomous work
+  is finished. T12a (all 19 waves), T12 (canonical rewrite, G1/G2/G3 gate PASS),
+  and T12b (blocking pre-commit gate) are all done, committed and pushed on
+  feature/backlog-migration @ 6f08970, 144 tests green, regen --check exit 0,
+  idempotent.
+
+  I flushed the one stranded doc change to develop (289b0c9 — T12b task-log
+  entry + checkbox).
+
+  Two items remain, and both were explicitly reserved for you:
+
+  1. Merge-back — the whole T12a/T12/T12b history is unmerged. The only file
+  overlap with develop is MyVocaList.sln (develop has inline-ac registrations,
+  the branch has backlog registrations — a union, no other file collides;
+  develop never touched BACKLOG.md or the archives). Ledger says you decide
+  timing/method.
+  2. T13a–d rules bundle — amends CLAUDE.md,
+  .claude/rules/{workflow,bug-tracking}.md, six .claude/library/*.md,
+  .claude/exception-registry.md, changelog. The blanket authorization from
+  2026-07-22 explicitly carves T13 out: I prepare the amend: bundle and stop 
+  before committing, because CLAUDE.md § Authorship requires you to read a rules
+  file before it lands.
+
+  Ordering matters: T13a touches the BACKLOG.md header banner, which the branch
+  currently owns, so doing the merge first keeps T13 a clean single-branch edit
+  on develop.
+
+● User answered Claude's questions:
+  ⎿  · How should I proceed on the two remaining Spec Evolution items? → Merge 
+     back first, then draft T13 (Recommended)
+
+  Read 1 file, ran 5 shell commands (ctrl+o to expand)
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Now the task-log conflicts.
+
+  Read 1 file, ran 7 shell commands (ctrl+o to expand)
+
+● Merge landed. Pushing.
+
+  Ran 6 shell commands (ctrl+o to expand)
+● Updated plan
+  ⎿  /plan to preview
+
+● Now retire the ownership banner in BACKLOG.md (hand-written region, outside
+  the fences):
+
+  Read 1 file (ctrl+o to expand)
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Updated plan
+  ⎿  /plan to preview
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Updated plan
+  ⎿  /plan to preview
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Updated plan
+  ⎿  Error editing file
+
+  Ran 4 shell commands (ctrl+o to expand)
+
+● Merge-back is done and pushed. Now the T13 bundle. Let me read what the spec
+  requires the rules to say.
+
+  Searched for 6 patterns, read 4 files, ran 3 shell commands (ctrl+o to expand)
+
+● Now drafting the T13 bundle as proposed diffs (not committing rules files —
+  authorship gate).
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Updated plan
+  ⎿  /plan to preview
+  Pushed to develop, ran 3 shell commands (ctrl+o to expand)
+
+● Both remaining items are handled as far as they can go without you.
+
+  1. Merge-back — done and pushed.
+  - feature/backlog-migration → develop as 2a6a1f8; origin == local.
+  - The LEDGER predicted one overlapping file (MyVocaList.sln); there were
+  three. The .sln auto-merged clean, but tasks.md and task-log.md both
+  conflicted. I resolved them as a union — the branch's T12 redefined-gate text
+  kept, the develop-side T12b entry appended at the end of the log, T12b's [x]
+  preserved. Nothing dropped from either side.
+  - Verified on develop: 144 backlog tests green · regen --check exit 0 (only
+  the known non-fatal BUG-022 parent/path-parent warning) · .sln has 203
+  solution folders, 0 duplicate GUIDs, with both the inline-ac and backlog
+  registrations present.
+  - All four spec-evo branches confirmed as ancestors of develop; their
+  worktrees removed (9 → 5). BACKLOG's single-branch ownership banner retired.
+
+  One thing worth knowing: my first edit to the feature's README.md frontmatter
+  failed validation — the word "PASS" in the gate sentence tripped the
+  banned-content rule. I reworded rather than exempting. The generator caught an
+  agent violating the row template on the first post-merge write.
+
+  2. T13 bundle — prepared, nothing applied.
+  Docs/Management/DevCycleCraft/spec-evolution-versioning/T13-proposed-diffs.md
+  holds OLD→NEW blocks on exact existing text for 17 edit sites (T13a routing
+  tables, T13b library files, T13d generated-artifact write-ownership protocol,
+  T13c changelog, plus FUP-3's 0041→00D3 GUID counter). No rules file was
+  written — CLAUDE.md § Authorship is a hard gate and the blanket authorization
+  carves T13 out explicitly.
+
+  Three things in that bundle need your judgment, not just your signature:
+  - The mandatory REQ-SEV-30 sweep found two files missing from the approved 
+  amend list: .claude/agents/orchestrator.md (its read-scope allow-list still
+  names BACKLOG.md as a session-start read) and .claude/exception-registry.md
+  (the 2026-07-22 row T13d must delete). REQ-SEV-30 says to add such hits — but
+  it widens the bundle beyond what you approved.
+  - §14 point 3 is the one genuinely new policy in there rather than a
+  transcription: bulk operations over generated artifacts announce ownership in
+  LEDGER, single-item register/status writes do not. Announcing every write
+  would make register unusable, but that's a call, not a derivation.
+  - The migration's gate-audit set (~38–41 agent-authored slugs/titles, all
+  order values, reworded goals, dropped pre-scheme severities) is still open and
+  deliberately not in this bundle — it's logged per-wave in task-log.md.
+
+✻ Worked for 10m 10s
+
+> I authorize you to proceed with the correct way for the three points in the   
+  bundle. Do what  REQ-SEV-30 says.  §14 point 3: do the proper adjust. And,    
+  what is the imapct of "The migration's gate-audit set" aren't in this bundle  
+  ?                                                                             
+
+● Three things: amend the spec's REQ-SEV-30 table (that's what "do what
+  REQ-SEV-30 says" actually requires), fix §14 point 3, then the impact answer.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Now §14 point 3 — replacing my invented policy with the existing lease
+  machinery:
+
+● Updated plan
+  ⎿  /plan to preview
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Updated plan
+  ⎿  /plan to preview
+
+● Updated plan
+  ⎿  /plan to preview
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● All three handled and pushed. Still nothing written to a rules file — the
+  bundle is a proposal awaiting your read.
+
+  1. REQ-SEV-30 — done properly. The requirement says any sweep hit outside its
+  table gets added to the table, so recording the two files only in the bundle
+  would have left the spec describing a narrower change than the one that lands.
+  requirements.md's REQ-SEV-30 table now carries .claude/agents/orchestrator.md
+  and .claude/exception-registry.md as rows, with a dated spec-updated note.
+
+  I added four more in the same pass: workflow-rule-2.md,
+  constraints-registry.md + constraints-reference.md, and changelog.md. Tasks
+  written after REQ-SEV-30 (T13d, T13c, FUP-3) own edits in those files, and
+  amending the routing tables while they still describe the old rule is
+  precisely the contradiction REQ-SEV-30 exists to prevent. The bundle's file
+  list and the spec's table now agree exactly.
+
+  2. §14 point 3 — the adjustment was bigger than a wording fix: my draft was 
+  written against an API that doesn't exist. I had bulk writers "claim
+  generated:backlog" via reclaim.py. Checking the code: the lease is
+  session-keyed (.claude/leases/<session_id>.json), there is no named-unit claim
+  to take, and reclaim.py overwrites the target claim rather than reporting on
+  it — correct for taking over a [~] task, wrong for asking whether a region is
+  owned.
+
+  Rewritten to what the machinery can actually do: the LEDGER row names the
+  owner session, lease_lib.classify (read-only) answers whether that session is
+  alive, reclaim.py is explicitly ruled out for this use, and a legacy row with
+  no session id is treated as owned. Single-item register/status still take no
+  claim — the pre-commit gate already fails them loud, so a claim buys nothing
+  and would push agents toward --no-verify. This is the same failure the
+  migration's own methodology note warns about: sound conclusion, invented
+  mechanism, caught only by running the code.
+
+  3. Impact of the gate-audit set staying open. Short answer: not blocking, but 
+  it will never resurface on its own, and half of it gets more expensive with 
+  time.
+
+  - Nothing waits on it. T13 is rules prose; the generator, gate and hook are
+  all indifferent to how a goal: sentence reads.
+  - The risk sits in the archives, not the live BACKLOG. Live rows get re-read
+  whenever someone plans, so a bad sentence self-corrects. Archived rows are now
+  the only grep-reachable record of closed work and nobody re-reads them — an
+  agent-authored goal that misstates what a closed item did quietly becomes the
+  project's history.
+  - It is invisible to every future check. Regeneration is a total function of
+  frontmatter, so each regen re-renders the same sentence byte-identically and
+  reports clean. No mechanism will ever raise this set again; it gets audited
+  only if you choose to.
+  - Cost splits cleanly. title/goal/gate/order/status are frontmatter-only —
+  edit, regen, done, and that cost never grows. id/slug is the folder name and
+  the pointer: and the .sln entry, so changing one means git mv + .sln + pointer
+  update (or renumber for a BUG-NNN), and that cost does grow as links
+  accumulate.
+  - One already-accepted loss: three pre-scheme severities (BUG-003 Medium,
+  BUG-004 High, BUG-008 Medium) aren't valid values and no longer render; the
+  literals survive in the flat-file bodies only.
+
+  My recommendation, written into the bundle: audit the ~38–41 slugs/ids as a
+  single pass, and let titles/goals/order be fixed opportunistically when a row
+  is next touched. Trying to audit the whole set at once is why it has stayed
+  open.
+  ⎿  Stop says: ⚠️ Uncommitted changes detected — run /project:commit before 
+     closing.
+
+✻ Worked for 3m 21s
+
+> /export                                                                       
+  ⎿  Conversation copied to clipboard

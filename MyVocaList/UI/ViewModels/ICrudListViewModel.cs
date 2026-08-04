@@ -7,10 +7,8 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
     ICommand AppBarNavigationCommand { get; set; }
 
     // Search / scroll state
-    bool IsSearchMode { get; }
     bool IsScrolled { get; set; }
     bool IsEmptyNoResults { get; }
-    IRelayCommand CloseSearchCommand { get; }
 
     // Loading state
     bool IsInitialLoading { get; }

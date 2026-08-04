@@ -4,14 +4,18 @@
 
 ## Business Features
 
+<!-- BACKLOG:GENERATED:BEGIN archive-business -->
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
-| 2026-04 | **Person CRUD** | ✅ Done | Goal: singer (person) management. Shipped with autocomplete field and duplicate detection. Pointer: `Docs/Management/BusinessFeatures/persons/`. |
+| 2026-04 | **Person CRUD** | ✅ Done | Goal: singer (person) management. Shipped with autocomplete field and duplicate detection. Pointer: `BusinessFeatures/persons/`. |
+<!-- BACKLOG:GENERATED:END archive-business -->
 
 ## Dev Cycle Craft
 
-| Target | Activity | Status | Notes |
-|--------|----------|--------|-------|
-| 2026-04 | Toolbar/FAB vibrant | ✅ Done | Goal: vibrant toolbar/FAB styling. Shipped. Pointer: `Docs/Management/DevCycleCraft/toolbar-fab-vibrant/`. |
-| 2026-04 | Autocomplete field | ✅ Done | Goal: reusable autocomplete entry component. Shipped. Pointer: `Docs/Management/BusinessFeatures/persons/plan-autocomplete.md`. |
-| 2026-04 | Hooks redesign | ✅ Done | Goal: Stop/TaskCreated/TaskCompleted hooks with session-end auto-commit. Shipped. Pointer: `Docs/Management/DevCycleCraft/hooks-redesign/`. |
+<!-- BACKLOG:GENERATED:BEGIN archive-craft -->
+| Target | Feature/Item | Status | Notes |
+|--------|--------------|--------|-------|
+| 2026-04 | Toolbar/FAB vibrant | ✅ Done | Goal: vibrant toolbar/FAB styling. Shipped. Pointer: `DevCycleCraft/toolbar-fab-vibrant/`. |
+| 2026-04 | Autocomplete field | ✅ Done | Goal: reusable autocomplete entry component. Shipped. Pointer: `BusinessFeatures/persons/plan-autocomplete.md`. |
+| 2026-04 | Hooks redesign | ✅ Done | Goal: Stop/TaskCreated/TaskCompleted hooks with session-end auto-commit. Shipped. Pointer: `DevCycleCraft/hooks-redesign/`. |
+<!-- BACKLOG:GENERATED:END archive-craft -->

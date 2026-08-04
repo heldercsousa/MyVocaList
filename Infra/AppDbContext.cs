@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Domain.Entity;
-using MyVocaList.Domain.Interfaces;
 using MyVocaList.Infra.Collation;
 using MyVocaList.Infra.EntityEFConfig;
 using QueueManagementEvent = MyVocaList.Domain.Entities.Event;

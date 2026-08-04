@@ -1,4 +1,3 @@
-using System.Windows.Input;
 using MyVocaList.UI.Components.AutocompleteField;
 
 namespace MyVocaList.Tests.Unit.Components;

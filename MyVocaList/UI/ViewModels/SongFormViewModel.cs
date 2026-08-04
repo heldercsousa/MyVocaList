@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.Messaging;
-using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.Messages;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
@@ -120,7 +119,10 @@ public partial class SongFormViewModel : ViewModelBase
         _secureStorage = secureStorage;
         _messenger = messenger;
 
-        SaveCommand = new AsyncRelayCommand(SaveAsync);
+        // BUG-049: explicit CanExecute tied to IsBusy — combined with the early-return guard in
+        // SaveAsync — prevents a fast double-tap from firing SaveAsync twice concurrently, which
+        // caused a duplicate "GoToAsync("..")" that overshot the nav stack root.
+        SaveCommand = new AsyncRelayCommand(SaveAsync, () => !IsBusy);
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         SearchArtistsCommand = new AsyncRelayCommand<string>(SearchArtistsAsync);
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
@@ -153,7 +155,7 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand<string> SearchArtistsCommand { get; }
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
-    /// <summary>Invoked by AutocompleteField when user blurs without selecting a suggestion (BUG-008).</summary>
+    /// <summary>Invoked by DevExpress AutoCompleteEdit when user blurs without selecting a suggestion (BUG-008).</summary>
     public IRelayCommand ArtistBlurredWithoutSelectionCommand { get; }
     public IAsyncRelayCommand NavigateToSongPickerCommand { get; }
     public IAsyncRelayCommand NavigateToYouTubeSearchCommand { get; }
@@ -177,6 +179,8 @@ public partial class SongFormViewModel : ViewModelBase
     /// subsequent field edits are tracked as dirty (edit-mode dirty-guard).
     /// </summary>
     public void CompleteHydration() => _isHydrating = false;
+
+    partial void OnIsBusyChanged(bool value) => SaveCommand.NotifyCanExecuteChanged();
 
     /// <summary>
     /// Blur handler (invoked from the page's <c>Unfocused</c> event). Validates the title field
@@ -433,6 +437,8 @@ public partial class SongFormViewModel : ViewModelBase
 
     private async Task SaveAsync()
     {
+        if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
+
         var title = SongTitle?.Trim() ?? string.Empty;
         var version = SongVersion?.Trim() ?? string.Empty;
 

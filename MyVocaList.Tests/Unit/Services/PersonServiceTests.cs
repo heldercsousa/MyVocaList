@@ -1,4 +1,3 @@
-using MyVocaList.Contracts.Models;
 using MyVocaList.Extensions.Strings;
 
 namespace MyVocaList.Tests.Unit.Services;
