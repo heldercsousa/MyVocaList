@@ -1,16 +1,17 @@
 ---
 id: BUG-029
 title: "BUG-029: ArtistFormPage search-strip icon crashes the app (Critical)"
-status: "🔵 Deferred"
+status: 🔵 Superseded
 severity: Critical
 target: 2026-07-03
 section: BusinessFeatures
 parent: artists-songs
-kind: bug
-order: 150
-goal: "the search-strip icon must not crash the app."
-gate: "the search-strip element is slated for deletion by the Form UX Redesign; re-triage only if any part of the strip survives."
+goal: the search-strip icon must not crash the app.
+gate: the search-strip element is slated for deletion by the Form UX Redesign; re-triage only if any part of the strip survives.
 pointer: BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-029-artistformpage-search-strip-icon-crash/
+closed: 2026-08
+order: 150
+kind: bug
 ---
 
 # BUG-029: ArtistFormPage search-strip icon crashes the app
@@ -32,3 +33,9 @@ re-triage only if any part of the strip survives.
 > REQ-SEV-01). The row's pointer moves from the shared `artists-songs` task-log to this
 > folder. **Nothing was removed from that task-log** (REQ-SEV-27); it remains the
 > narrative record and is linked above.
+
+> **Closed 🔵 Superseded [2026-08-04] -- cancelled as a standalone bug (Helder).** The row was
+> already 🔵 Deferred on exactly this reasoning: the search-strip element is slated for
+> deletion, so the crash disappears with the element. Ownership transfers to **Artist & Song Form UX Redesign** (`BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/`).
+>
+> Re-open only if any part of the search strip survives that redesign.

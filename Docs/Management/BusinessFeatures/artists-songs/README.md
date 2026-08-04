@@ -19,14 +19,8 @@ Full artist/song catalog management. Specs: `requirements.md`, `design.md`, `tas
 > autocomplete, no validation, blur clears typed text) all verify clean. The catalog stays
 > 🔴 Blocked, but on **BUG-068**, not BUG-027.
 
-## Open behavioural expectation — song writes must reflect into the artist's catalog
-
-Recorded from Helder 2026-08-03, not yet traced to an acceptance criterion:
-
-- Creating a song must **also** create the corresponding record in that artist's catalog.
-- Updating a song entity must be **reflected** into the artist's catalog.
-
-Helder believes `SongFormPage`/`SongFormViewModel` already anticipates part of this. Before
-phases 16C.2–16C.5 resume, this must be confirmed against the code and either traced to an
-existing AC in `requirements.md` or added as a new one (SDD Invariant — spec before code).
-It is **not** covered by BUG-068, which is a persistence-layer tracking defect.
+> **Note [2026-08-04]:** the song-writes-propagate-to-the-artist-catalog expectation briefly
+> recorded here on 2026-08-03 has been moved out. A shipped feature's README describes what
+> shipped; a new behavioural expectation belongs in a dated change folder, not appended to
+> the parent. It now lives at
+> `changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/`.

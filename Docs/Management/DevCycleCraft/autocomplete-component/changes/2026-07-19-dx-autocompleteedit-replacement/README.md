@@ -1,15 +1,16 @@
 ---
 id: dx-autocompleteedit-replacement
-title: "**Replace `AutocompleteMobileField` consumers with DX `AutoCompleteEdit`**"
-status: "🟡 In Progress"
+title: **Replace `AutocompleteMobileField` consumers with DX `AutoCompleteEdit`**
+status: ✅ Done
 target: 2026-07-19
 section: DevCycleCraft
 parent: autocomplete-component
-kind: change
-order: 190
-goal: "mature built-in autocomplete on all form consumers; unblocks BUG-027 → Artists & Songs Catalog."
+goal: mature built-in autocomplete on all form consumers; unblocks BUG-027 → Artists & Songs Catalog.
 gate: "T2–T7 done and merged; T7 surfaced BUG-050, BUG-051 and BUG-052, all three now fixed and closed. Remaining: confirm no residual DX-migration defect before ✅."
 pointer: DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/
+closed: 2026-08
+order: 190
+kind: change
 ---
 
 # Replace `AutocompleteMobileField` consumers with DX `AutoCompleteEdit`
@@ -44,3 +45,14 @@ in this folder.
 > This row is now the **live row** for the autocomplete work: its parent
 > *Autocomplete Component — Evaluation, Rebuild & Rollout* went 🔵 Superseded on 2026-08-03,
 > since the DX adoption decision replaced the build-a-new-component scope.
+
+> **Closed ✅ Done [2026-08-04] (Helder).** The migration itself is complete: every form consumer
+> runs on DevExpress `AutoCompleteEdit`, T2-T7 are merged, and the three defects T7 surfaced
+> (BUG-050, BUG-051, BUG-052) plus BUG-027 are all closed.
+>
+> **Closed with defects outstanding, by design.** Remaining faults on the song form are not
+> autocomplete-migration faults and each already owns its own row -- BUG-071 (alias BUG-068),
+> the edit-mode save failure, is a persistence/EF-tracking defect, and the DbContext lifetime
+> and unit-of-work item addresses its root cause. Per `bug-tracking.md` a defect is tracked by
+> its own row, so holding this row open would duplicate that tracking and hide the fact that
+> the migration is finished.
