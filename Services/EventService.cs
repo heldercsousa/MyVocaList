@@ -4,6 +4,16 @@ using MyVocaList.Domain.ServicesInterfaces;
 
 namespace MyVocaList.Services;
 
+// TODO [BUG-071 / UOW] — SHARED WINDOW-SCOPED DbContext: OUT OF PATTERN.
+// This code mutates entities on the app-lifetime AppDbContext (MAUI creates no
+// per-page scope), so it can leave an entity tracked and later throw
+// "another instance with the same key value for {'Id'} is already being tracked",
+// and a throw here can poison the shared context for every other feature.
+// Fix by applying the unit-of-work pattern being established for the Venue,
+// Artist, Person and Song CRUDs — do NOT patch this locally.
+// Spec: Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/
+//   2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/
+// Tracked by: .../changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/
 /// <inheritdoc />
 public sealed class EventService : IEventService
 {
@@ -19,6 +29,7 @@ public sealed class EventService : IEventService
         _logger = logger;
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message, Domain.Entities.Event? @event)> CreateEventAsync(
         int venueId, string name, DateTime scheduledStart, DateTime scheduledEnd,
@@ -80,6 +91,7 @@ public sealed class EventService : IEventService
         return (true, $"Event '{name}' created successfully", @event);
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message)> StartEventAsync(int eventId, CancellationToken ct)
     {
@@ -107,6 +119,7 @@ public sealed class EventService : IEventService
         return (true, "Event started");
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message)> PauseEventAsync(int eventId, CancellationToken ct)
     {
@@ -133,6 +146,7 @@ public sealed class EventService : IEventService
         return (true, "Event paused");
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message)> ResumeEventAsync(int eventId, CancellationToken ct)
     {
@@ -159,6 +173,7 @@ public sealed class EventService : IEventService
         return (true, "Event resumed");
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message)> FinishEventAsync(int eventId, CancellationToken ct)
     {

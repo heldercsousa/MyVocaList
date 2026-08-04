@@ -53,6 +53,8 @@ public sealed class QueueRepository : IQueueRepository
         entity.ModifiedAt = DateTime.UtcNow;
 
         await _dbContext.QueueEntries.AddAsync(entity, cancellationToken);
+        // TODO [BUG-071 / UOW] — out of pattern: SaveChangesAsync embedded in a repository mutator
+        // (see MyVocaList.Services/Services/QueueServiceNew.cs class-level note for the full defect).
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -64,6 +66,8 @@ public sealed class QueueRepository : IQueueRepository
         entity.ModifiedAt = DateTime.UtcNow;
 
         _dbContext.QueueEntries.Update(entity);
+        // TODO [BUG-071 / UOW] — out of pattern: SaveChangesAsync embedded in a repository mutator
+        // (see MyVocaList.Services/Services/QueueServiceNew.cs class-level note for the full defect).
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -90,6 +94,8 @@ public sealed class QueueRepository : IQueueRepository
                 _dbContext.QueueEntries.Update(entry);
             }
 
+            // TODO [BUG-071 / UOW] — out of pattern: SaveChangesAsync embedded in a repository mutator
+            // (see MyVocaList.Services/Services/QueueServiceNew.cs class-level note for the full defect).
             await _dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
