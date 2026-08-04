@@ -63,6 +63,8 @@ public sealed class EventRepository : IEventRepository
         entity.ModifiedAt = DateTime.UtcNow;
 
         await _dbContext.QueueManagementEvents.AddAsync(entity, cancellationToken);
+        // TODO [BUG-071 / UOW] — out of pattern: SaveChangesAsync embedded in a repository mutator
+        // (see MyVocaList.Services/Services/EventService.cs class-level note for the full defect).
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -74,6 +76,8 @@ public sealed class EventRepository : IEventRepository
         entity.ModifiedAt = DateTime.UtcNow;
 
         _dbContext.QueueManagementEvents.Update(entity);
+        // TODO [BUG-071 / UOW] — out of pattern: SaveChangesAsync embedded in a repository mutator
+        // (see MyVocaList.Services/Services/EventService.cs class-level note for the full defect).
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 

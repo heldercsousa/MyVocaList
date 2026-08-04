@@ -34,6 +34,8 @@ namespace MyVocaList.Infra.Repository
                 newActive.QueueActive = true;
                 _dbSet.Update(newActive);
             }
+            // TODO [BUG-071 / UOW] — out of pattern: SaveChangesAsync embedded in a repository mutator
+            // (see MyVocaList.Services/Services/QueueService.cs class-level note for the full defect).
             await _context.SaveChangesAsync();
         }
 
