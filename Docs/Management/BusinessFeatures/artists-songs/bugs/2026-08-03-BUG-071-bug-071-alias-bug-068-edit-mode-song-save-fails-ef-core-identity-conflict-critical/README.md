@@ -65,17 +65,22 @@ It is verified (PASS, no blockers) and 537/537 tests pass, **but it is not the i
   and `QueueRepository`;
 - it hand-rolls what EF Core already ships as `UpdatingIdentityResolutionInterceptor`.
 
-It stays **only** so Helder's on-device T10 re-run #6 is not blocked. It is **deleted** by
+It remains until the unit-of-work waves delete it. It is **deleted** by
 `cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/`,
 which establishes the correct unit-of-work pattern (Helder's decision, 2026-08-03: fix it properly
-rather than mask it — the app is pre-production).
+rather than mask it — the app is pre-production). *(The prior justification — that it stays only so
+Helder's on-device T10 re-run #6 is not blocked — is withdrawn 2026-08-04: there is no reason to
+device-test a stopgap that is about to be deleted and replaced.)*
 
 ## Face 1 is NOT closed
 
 Only face 2 (the exception) is fixed. Face 1 (silent success, nothing persisted) is **not** explained
 by this mechanism — the identity conflict is deterministic, not intermittent, so it either throws or
-persists correctly. Current reading: a **BUG-069** symptom (the selection reverting before Save reads
-it). Unverified — requires device re-confirmation in T10 re-run #6.
+persists correctly. Face 1 was never observed to be fixed, and it is now closed **by inference, not
+observation**: the on-device T10 re-run #6 that would have re-confirmed it on device is not
+happening (Helder cancelled the gate 2026-08-04 — see the unit-of-work spec's § 8 decision). The
+inferred explanation is a **BUG-069** symptom (the selection reverting before Save reads it), tracked
+separately. **This is inference, not verified evidence — do not cite face 1 as confirmed fixed.**
 
 ## Why the unit suite missed it
 

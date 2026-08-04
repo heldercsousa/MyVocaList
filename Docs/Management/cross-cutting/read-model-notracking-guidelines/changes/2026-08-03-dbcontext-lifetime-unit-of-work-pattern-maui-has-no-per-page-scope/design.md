@@ -1,9 +1,10 @@
 # Design — DbContext lifetime & unit-of-work pattern
 
 > **Candidate C is chosen (§ 8, APPROVED by Helder).** Three candidates are presented with the same
-> worked example so they can be compared side by side; § 8 records the eight approved decisions that
-> make Candidate C's shape final (Revision 8 adds the failure-tuple save-skip mechanism, § 6b). No
-> production code has been written for this change.
+> worked example so they can be compared side by side; § 8 records the approved decisions that
+> make Candidate C's shape final (Revision 8 adds the failure-tuple save-skip mechanism, § 6b;
+> Revision 9, 2026-08-04, makes the unrecognised-`TResult` fallback fail-closed instead of
+> fail-open, § 6b / § 8). No production code has been written for this change.
 >
 > Framework claims below are sourced from Context7 (version-pinned): EF Core docs
 > `/dotnet/entityframework.docs`, .NET MAUI `/dotnet/maui@10.0.51`. Both servers were available.
@@ -352,8 +353,11 @@ public interface IUnitOfWork
     /// failure-tuple convention (<c>code-style-reference.md § Service Return Patterns</c>) and saves
     /// only when it signals success. Service code is unchanged — it keeps returning its ordinary
     /// tuple; the save is skipped automatically when the tuple's leading <c>bool</c> is <c>false</c>.
-    /// A <typeparamref name="TResult"/> that carries no recognised success signal always saves — see
-    /// § 6b for the exhaustive rule and the no-signal overload below.</para></summary>
+    /// <b>Fail-closed (Revision 9, § 6b):</b> a <typeparamref name="TResult"/> that carries no
+    /// recognised success signal is refused, not guessed — this overload throws
+    /// <see cref="InvalidOperationException"/> naming the two valid fixes (implement
+    /// <see cref="IUnitOfWorkOutcome"/>, or use the no-signal overload below if the method has no
+    /// failure mode) — see § 6b for the exhaustive rule.</para></summary>
     Task<TResult> ExecuteAsync<TRepo, TResult>(Func<TRepo, Task<TResult>> body, CancellationToken ct = default);
 
     /// <summary>No-signal overload (Revision 8, § 6b). Use for service methods that return bare
@@ -445,8 +449,9 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
         // no SaveChangesAsync — read-only, per Revision 6
     }
 
-    // Save-skip signal detection (Revision 8, § 6b). Exhaustive by construction — every branch is
-    // either a recognised signal or the explicit, safe no-signal fallback (never a silent guess).
+    // Save-skip signal detection (Revision 9, § 6b). Exhaustive by construction — every branch is
+    // either a recognised signal or the explicit, fail-closed refusal below (never a silent guess,
+    // and never a silent commit).
     private static bool ResultSignalsSuccess<TResult>(TResult result)
     {
         // 1) This codebase's universal Service Return Pattern: (bool success, string message, ...).
@@ -456,24 +461,28 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
             return tupleSuccess;
 
         // 2) Named result types opt in explicitly by implementing IUnitOfWorkOutcome
-        //    (e.g. BackupResult — see § 6b for the required future edit, tracked in Wave 5).
+        //    (e.g. BackupResult — appending ": IUnitOfWorkOutcome" is a blocking prerequisite of
+        //    wrapping BackupService in Wave 5, § 10, not a later or optional step; see § 6b).
         if (result is IUnitOfWorkOutcome outcome)
             return outcome.Success;
 
-        // 3) No recognised signal → SAVE UNCONDITIONALLY. This is not a guess: it is the documented,
-        //    exhaustive fallback for any TResult that is neither shape above (§ 6b "no-signal
-        //    fallback"). The unsafe direction is silently discarding a real write; defaulting to
-        //    save is the safe direction, and matches this codebase's convention that reaching the
-        //    end of body without throwing already means success (code-style-reference.md §
-        //    Exception Handling — no exceptions for expected business failures).
-        return true;
+        // 3) No recognised signal -> refuse to guess.
+        throw new InvalidOperationException(
+            $"{typeof(TResult).Name} carries no success signal. " +
+            "Implement IUnitOfWorkOutcome, or use the " +
+            "no-signal ExecuteAsync overload if this method " +
+            "has no failure mode.");
     }
 }
 
 /// <summary>Opt-in marker for named result records/types that carry a success signal but are not a
 /// ValueTuple (Revision 8, § 6b). Implement this instead of relying on structural tuple detection
 /// when a mutating service method's natural return type is a named type, e.g.
-/// <c>public record BackupResult(bool Success, string Message, ...) : IUnitOfWorkOutcome;</c></summary>
+/// <c>public record BackupResult(bool Success, string Message, ...) : IUnitOfWorkOutcome;</c>
+/// <b>Fail-closed (Revision 9):</b> a named result type passed to the value-returning
+/// <c>ExecuteAsync</c> that does NOT implement this interface is no longer assumed successful — it
+/// throws <see cref="InvalidOperationException"/> instead. Implementing this interface is therefore
+/// mandatory, not optional, for any named result type used with that overload.</summary>
 public interface IUnitOfWorkOutcome
 {
     bool Success { get; }
@@ -492,7 +501,11 @@ public interface IUnitOfWorkOutcome
 - **Outputs:** `TResult` returned by `body` on success. On failure inside `body`, whatever the body
   itself returns per `code-style-reference.md § Service Return Patterns` (a `(false, message)` tuple)
   — `ExecuteAsync` itself does not catch or translate exceptions; an exception from `body` propagates
-  after the `using` disposes the scope (no partial state survives, REQ-UOW-06).
+  after the `using` disposes the scope (no partial state survives, REQ-UOW-06). **Fail-closed on an
+  unrecognised `TResult` (Revision 9, § 6b):** if `TResult` is neither a `ValueTuple` with a leading
+  `bool` nor an `IUnitOfWorkOutcome` implementer, `ExecuteAsync` throws `InvalidOperationException`
+  before any save is attempted, naming the two valid fixes (implement `IUnitOfWorkOutcome`, or use
+  the no-signal `ExecuteAsync<TRepo>(Func<TRepo, Task>, ct)` overload).
 - **Preconditions:** `TRepo` must be resolvable from the DI container (registered `AddScoped`/
   `AddSingleton`, unchanged from today, § 2a "Reviewer-finding correction"). Caller must not hold a
   reference to `TRepo` or the `AppDbContext` behind it beyond the lifetime of `body` — doing so
@@ -686,8 +699,9 @@ will wrap:
 (`Task<Song>`) or a bare `bool`/`int` with no tuple wrapper — the codebase's tuple convention is in
 fact near-universal; `BackupResult` and the three void-returning methods are the only exceptions.
 
-**Mechanism chosen: structural `ITuple` detection + opt-in marker interface + explicit no-signal
-fallback — no reflection, no naming heuristics, no new required parameter.**
+**Mechanism chosen: structural `ITuple` detection + opt-in marker interface + a dedicated no-signal
+overload for bare-`Task` methods + a fail-closed throw for anything else — no reflection, no naming
+heuristics, no new required parameter, and no silent guess in either direction (commit or skip).**
 
 1. **ValueTuple convention (31 of 35 methods) — detected structurally, not by reflection.** Every
    C# `ValueTuple<...>`, at every arity, implements `System.Runtime.CompilerServices.ITuple`
@@ -699,9 +713,12 @@ fallback — no reflection, no naming heuristics, no new required parameter.**
    `SaveChangesAsync` round-trip it guards.
 2. **Named result types opt in via `IUnitOfWorkOutcome` (1 of 35 methods today: `BackupResult`).**
    A tiny marker interface (`bool Success { get; }`) that a result record implements explicitly.
-   This requires a one-line edit to `BackupResult`'s declaration
-   (`: IUnitOfWorkOutcome` appended) as part of Wave 5's `BackupService.CreateFullBackupAsync` wrap —
-   tracked in § 10, not performed by this design document. Chosen over reflecting for a property
+   **Under fail-closed (Revision 9) this is no longer optional:** the one-line edit to
+   `BackupResult`'s declaration (`: IUnitOfWorkOutcome` appended) is a **blocking prerequisite** of
+   wrapping `BackupService.CreateFullBackupAsync` in Wave 5, not a later or optional step — without
+   it, the moment `BackupService` is wrapped, every call throws `InvalidOperationException` instead
+   of running. Tracked as a same-wave sub-step in § 10, not performed by this design document
+   itself. Chosen over reflecting for a property
    named `"Success"` by convention: an explicit interface is a compile-time-checked contract: if a
    future result type is renamed or reshaped, the compiler catches a mismatch immediately, whereas a
    property-name convention fails silently (exactly the "convention that usually detects failure" this
@@ -721,8 +738,28 @@ fallback — no reflection, no naming heuristics, no new required parameter.**
    (§ 6, `ExecuteAsync<TRepo>`) so it is impossible to reach this fallback by accident: a service
    method with no signal to give literally cannot call the signal-inspecting overload — the compiler
    picks the overload matching the delegate's return type.
+4. **Fail-closed refusal for any other `TResult` reaching the value-returning overload (Revision 9,
+   supersedes Revision 8's unconditional-save fallback for this case) — a `throw`, not a guess.** If
+   a `TResult` passed to `ExecuteAsync<TRepo, TResult>` is neither an `ITuple` with a leading `bool`
+   nor an `IUnitOfWorkOutcome` implementer, `ResultSignalsSuccess` throws
+   `InvalidOperationException` naming the type and the two valid fixes, before any
+   `SaveChangesAsync` is attempted. **Why the fallback direction changed:** Revision 8 reasoned that
+   defaulting to save was "the safe direction" because it "matches this codebase's convention that
+   reaching the end of body without throwing already means success." That reasoning is **rejected as
+   of Revision 9** — it borrows the exception-signaling idiom's logic and applies it to the
+   value-return idiom. This codebase signals business failure by **returned value**
+   (`code-style-reference.md § Service Return Patterns`), not by exception; "no throw ⇒ success" is
+   true only for the exception-signaling idiom, and applying it here is the same category error that
+   produced BUG-068's sibling defect — an unmarked named result type (e.g. `BackupResult` before it
+   implements `IUnitOfWorkOutcome`) would silently commit on a returned business failure. Fail-closed
+   makes that gap loud at development time (a thrown exception on the very first call) instead of
+   silent in production (a committed mutation nobody asked for).
 
 **Rejected alternatives:**
+- **Save unconditionally on an unrecognised `TResult` (Revision 8's original choice for this
+  branch).** Superseded by Revision 9 (item 4 above) — see the rationale there. Kept here for the
+  record: this was not a bug in Revision 8, it was a deliberate choice that a later, more careful
+  reading of this codebase's failure-signaling convention showed to be the wrong direction.
 - **Explicit `Func<TResult, bool> isSuccess` predicate parameter on every call.** Considered per the
   brief's option list. Rejected as the *default* API: it reintroduces ceremony proportional to call
   count (one extra lambda argument at all ~30 tuple call sites) for a signal the tuple shape already
@@ -740,17 +777,24 @@ fallback — no reflection, no naming heuristics, no new required parameter.**
   Rejected: symmetric with detecting success; adds no clarity, and "assume success unless proven
   otherwise" is exactly the unconditional-save behavior already found unsafe.
 
-**Exhaustiveness — the undetectable case is explicit and safe (item 3 of the brief).** Every one of
-the 35 audited methods falls into exactly one of the three rows above, and each row has a defined,
-non-ambiguous outcome:
+**Exhaustiveness — the undetectable case is explicit and refused, not guessed (item 3 of the brief;
+revised Revision 9).** Every one of the 35 audited methods falls into exactly one of the three rows
+above, and each row has a defined, non-ambiguous outcome:
 - ValueTuple with leading `bool` → that `bool` decides (skip on `false`).
 - `IUnitOfWorkOutcome` implementer → `.Success` decides (skip on `false`).
-- Anything else, **including bare `Task`** → the no-signal overload is the only one whose signature
-  fits, and it always saves. There is no fourth, ambiguous path: a `TResult` that is neither an
-  `ITuple` nor an `IUnitOfWorkOutcome` implementer (e.g. a bare `Task<Song>`, should one ever be added)
-  falls through both `if`s in `ResultSignalsSuccess` and hits the documented `return true;` — always
-  saves, by explicit code, not by absence of a check. It is impossible to reach a silent "skip" for an
-  undetectable shape, because skipping only ever happens inside the two recognised-signal branches.
+- Bare `Task` (no `TResult` at all) → the dedicated no-signal `ExecuteAsync<TRepo>(Func<TRepo, Task>,
+  ct)` overload is the only one whose signature fits; the compiler selects it, and it always saves —
+  unchanged from Revision 8.
+- Any other `TResult` reaching the value-returning `ExecuteAsync<TRepo, TResult>` overload that is
+  neither an `ITuple` nor an `IUnitOfWorkOutcome` implementer (e.g. a bare `Task<Song>`, should one
+  ever be added) falls through both `if`s in `ResultSignalsSuccess` and hits the fail-closed `throw`
+  — by explicit code, not by absence of a check, and before any `SaveChangesAsync` is attempted.
+  There is no ambiguous path: skipping the save happens only inside the two recognised-failure
+  branches, saving happens only inside the two recognised-success branches or the dedicated
+  no-signal overload, and everything else throws instead of guessing either way. Because the
+  compiler selects the no-signal overload for any `Func<TRepo, Task>` body, no legitimate call site
+  — genuinely signal-less or otherwise — can reach the throw; it exists solely to catch a named
+  result type that forgot to implement `IUnitOfWorkOutcome`.
 
 ---
 
@@ -774,6 +818,14 @@ non-ambiguous outcome:
 | Hand-rolled machinery | 1 small type | none | 1 small type + `AsyncLocal` ambient-join (ships now, § 6a — not optional) |
 
 ## 8. Key Decisions
+
+### Decision: cancel the T10 re-run #6 gate on the stopgap deletion (Wave 3b) — **APPROVED by Helder (2026-08-04)**
+**Chosen approach:** the hard constraint that Wave 3b (deleting the `1a114c1` `SongRepository.UpdateAsync`
+stopgap, REQ-UOW-18) must not land before Helder's on-device T10 re-run #6 completes is withdrawn.
+Wave 3b becomes an ordinary step of Wave 3, gated on nothing external.
+**Rationale:** there is no reason to device-test the stopgap when this unit-of-work work deletes and
+replaces it outright — verifying code that is about to be removed is wasted effort.
+**Reversibility:** Reversible — reinstating a gate is a documentation-only change.
 
 ### Decision: adopt a scope-per-operation unit of work (Candidate C) — **APPROVED by Helder**
 **Chosen approach:** `AddDbContextFactory<AppDbContext>(…, ServiceLifetime.Scoped)` + a single
@@ -900,6 +952,29 @@ is live today in `ArtistResolutionService.CommitAsync` (`:112`, `:132`) and
 `SongResolutionService.CommitAsync` (mutates via nested calls, then returns `(false, …)` on later
 branches, `:214`/`:238`) — the two flows named in the finding.
 
+### Decision: fail-closed on an unrecognised `TResult` reaching the value-returning overload (Revision 9) — **APPROVED by Helder 2026-08-04**
+**Chosen approach:** in `ResultSignalsSuccess`, branch 3 ("no recognised signal") no longer defaults
+to save unconditionally. It throws `InvalidOperationException` naming the two valid fixes (implement
+`IUnitOfWorkOutcome`, or use the no-signal `ExecuteAsync<TRepo>(Func<TRepo, Task>, ct)` overload).
+The dedicated no-signal overload itself is unaffected — it still always saves for the 3 genuinely
+signal-less methods (`QueueService.RecordParticipationAsync`, `QueueService.SetActiveEventAsync`,
+`SongKaraokeUrlService.RecordPlayAsync`), because the compiler selects that overload on the
+`Func<TRepo, Task>` delegate type — no legitimate call site can reach the throw.
+**Alternatives considered:** keep Revision 8's unconditional-save fallback (rejected — see § 6b item
+4 rationale); an explicit `isSuccess` predicate parameter (rejected earlier, in Revision 8, for the
+same REQ-UOW-10 ceremony reason, and nothing about fail-closed changes that).
+**Reversibility:** Reversible — confined to `ResultSignalsSuccess`'s branch 3.
+**Rationale:** Revision 8's "reaching the end without throwing means success" argument belongs to the
+exception-signaling idiom. This codebase signals business failure by **returned value**
+(`code-style-reference.md § Service Return Patterns`), never by throwing for expected business
+failures. Applying exception-path reasoning to the value-return path is the same category error that
+produced BUG-068's sibling defect: a named result type that forgets to implement
+`IUnitOfWorkOutcome` would silently commit on a returned failure. Fail-closed converts that into a
+loud, immediate `InvalidOperationException` on the first call — a development-time failure instead of
+a silent production one — and makes `BackupResult : IUnitOfWorkOutcome` a mandatory, same-wave,
+blocking prerequisite of wrapping `BackupService` in Wave 5 (§ 10) rather than an optional or later
+step.
+
 ### Decision: no `CreateExecutionStrategy` / retry policy
 **Rationale:** SQLite is local; there are no transient network faults to retry. Adding a strategy
 would also constrain the manual transaction in `QueueRepository.ReorderAsync`.
@@ -915,11 +990,16 @@ would also constrain the manual transaction in `QueueRepository.ReorderAsync`.
 - **Save-skip on failure (Revision 8, § 6b):** `SaveChangesAsync` executes only when `body`'s
   returned result signals success per § 6b's two recognised shapes (`ITuple` with leading `bool`, or
   `IUnitOfWorkOutcome.Success`) — a mutation followed by a returned failure tuple does **not**
-  persist. For any `TResult` carrying no recognised signal, `ExecuteAsync` always saves; this is the
-  documented default (§ 6b "no-signal fallback"), never a silent guess, and is reachable only through
-  the dedicated no-signal overload whose delegate type (`Func<TRepo, Task>`) has nothing to inspect in
-  the first place. This closes the exception-only reading of REQ-UOW-06: "no partial state survives"
-  now holds for both the throw path and the far more common failure-tuple path.
+  persist. For the 3 genuinely signal-less methods, the dedicated no-signal overload (delegate type
+  `Func<TRepo, Task>`, nothing to inspect) always saves; this is the documented default (§ 6b
+  "no-signal fallback"), never a silent guess, and is reachable only through that overload. This
+  closes the exception-only reading of REQ-UOW-06: "no partial state survives" now holds for both the
+  throw path and the far more common failure-tuple path.
+- **Fail-closed on an unrecognised `TResult` (Revision 9, § 6b):** on the value-returning
+  `ExecuteAsync<TRepo, TResult>` overload, a `TResult` that is neither an `ITuple` with a leading
+  `bool` nor an `IUnitOfWorkOutcome` implementer is never assumed to have succeeded — `ExecuteAsync`
+  throws `InvalidOperationException` before any save is attempted. No unit of work may commit a
+  mutation whose result type it could not interpret.
 
 ## 10. Migration plan (DRY Onion: Domain → Infra → Services → UI)
 
@@ -936,9 +1016,9 @@ should be treated as sequential-only for this change for the same reason.
 | 1 | Docs | Amend `code-style-reference.md § DI Registration Conventions` (REQ-UOW-19, `amend:` + changelog). Land before any code so subagents read the corrected rule. | no |
 | 2 | Domain/Contracts | Introduce `IUnitOfWork` (both the typed primary API and the `IServiceProvider` escape hatch, § 6/§ 8); remove `SaveChangesAsync` from every repository **interface**. | no (single file set) |
 | 3 | Infra | `UnitOfWork` implementation, **including the `AsyncLocal` ambient-scope join** (§ 6a — ships now, not deferred). Delete the 6 pass-through implementations. | partly — one agent per repository family |
-| 3b | Infra (gated) | Delete the `1a114c1` stopgap guard in `SongRepository.UpdateAsync` (REQ-UOW-18). **Hard constraint: this sub-wave MUST NOT land before Helder's on-device T10 re-run #6 completes.** Sequenced as its own commit, separable from the rest of Wave 3, so the rest of the migration is not blocked waiting on the re-run. | no — gated on an external event, not on other waves |
+| 3b | Infra | Delete the `1a114c1` stopgap guard in `SongRepository.UpdateAsync` (REQ-UOW-18), as an ordinary step of Wave 3 — no external gate (Helder cancelled the T10 re-run #6 gate 2026-08-04; § 8). | partly — one agent per repository family, same as Wave 3 |
 | 4 | Composition | `MauiProgram.cs`: `AddDbContext` → `AddDbContextFactory(…, Scoped)`; register `IUnitOfWork`; remove the duplicate `IAppInfo` (REQ-UOW-21). Verify `App.xaml.cs:35,:54` scopes still resolve. | **no — sequential-only** |
-| 5 | Services | Wrap each of the **35** service methods (behavior-derived, § 2a — includes `BackupService.CreateFullBackupAsync`, `EventService.StartEventAsync`/`PauseEventAsync`/`ResumeEventAsync`/`FinishEventAsync`, `QueueService.SetActiveEventAsync`, and `QueueServiceNew.EnqueueSingerAsync`/`RegisterParticipationAsync`/`StopPerformanceAsync`/`MarkAbsentAsync` — all missed by the prior name-regex count) in `ExecuteAsync`/`ExecuteReadAsync`; delete the corresponding `SaveChangesAsync` call sites; re-shape `ArtistResolutionService.CommitAsync`, `SongResolutionService.CommitAsync`, and `QueueService.AddPersonToQueueAsync` to use the ambient join (REQ-UOW-09, REQ-UOW-22, REQ-UOW-23). `QueueService.RecordParticipationAsync` (the public method) is where the wrap goes for the private `GetOrCreateDefaultEventAsync` — see note below. A wave that only covers the prior 25-method list leaves 10 write paths (including `BackupService`, an entire file missing from the prior scope) still using the session-lifetime context, reproducing BUG-068 on those paths. **Save-skip wiring (Revision 8, § 6b):** `BackupService.CreateFullBackupAsync`'s wrap requires `BackupResult` to implement `IUnitOfWorkOutcome` (`: IUnitOfWorkOutcome` appended to its declaration in `Domain/ServicesInterfaces/IBackupService.cs:5`) so its wrap participates in save-skip detection; `QueueService.RecordParticipationAsync`/`SetActiveEventAsync` and `SongKaraokeUrlService.RecordPlayAsync` wrap via the no-signal `ExecuteAsync<TRepo>(Func<TRepo, Task> body, ct)` overload (always saves, § 6b); every other method wraps via the typed `Task<TResult>` overload and gets save-skip for free from the `ITuple` structural check — no per-method opt-in needed. | yes — one agent per service, no file overlap |
+| 5 | Services | Wrap each of the **35** service methods (behavior-derived, § 2a — includes `BackupService.CreateFullBackupAsync`, `EventService.StartEventAsync`/`PauseEventAsync`/`ResumeEventAsync`/`FinishEventAsync`, `QueueService.SetActiveEventAsync`, and `QueueServiceNew.EnqueueSingerAsync`/`RegisterParticipationAsync`/`StopPerformanceAsync`/`MarkAbsentAsync` — all missed by the prior name-regex count) in `ExecuteAsync`/`ExecuteReadAsync`; delete the corresponding `SaveChangesAsync` call sites; re-shape `ArtistResolutionService.CommitAsync`, `SongResolutionService.CommitAsync`, and `QueueService.AddPersonToQueueAsync` to use the ambient join (REQ-UOW-09, REQ-UOW-22, REQ-UOW-23). `QueueService.RecordParticipationAsync` (the public method) is where the wrap goes for the private `GetOrCreateDefaultEventAsync` — see note below. A wave that only covers the prior 25-method list leaves 10 write paths (including `BackupService`, an entire file missing from the prior scope) still using the session-lifetime context, reproducing BUG-068 on those paths. **Save-skip wiring (Revision 8, § 6b) — `BackupResult : IUnitOfWorkOutcome` is a blocking, same-wave prerequisite (Revision 9), not a later or optional step:** `BackupService.CreateFullBackupAsync`'s wrap MUST NOT be committed before `: IUnitOfWorkOutcome` is appended to `BackupResult`'s declaration (`Domain/ServicesInterfaces/IBackupService.cs:5`) — under fail-closed (§ 6b, § 8 Revision 9), wrapping `BackupService` with an unmarked `BackupResult` makes every call throw `InvalidOperationException` immediately, so the marker-interface edit and the service wrap land together, in this order, within Wave 5, never split across sessions or deferred; `QueueService.RecordParticipationAsync`/`SetActiveEventAsync` and `SongKaraokeUrlService.RecordPlayAsync` wrap via the no-signal `ExecuteAsync<TRepo>(Func<TRepo, Task> body, ct)` overload (always saves, § 6b); every other method wraps via the typed `Task<TResult>` overload and gets save-skip for free from the `ITuple` structural check — no per-method opt-in needed. | yes — one agent per service, no file overlap; the `BackupResult` marker edit + `BackupService` wrap are one atomic sub-task, not splittable |
 | 6 | UI | Audit singletons for captive dependencies (`AppShellViewModel`, `AppShell`, `MauiProgram.cs:109-110`); convert any that inject repositories/services. | yes |
 | 7 | Tests (GREEN + cleanup) | Confirm the Wave-0 regression tests now PASS. `TestDbContextFactory` alignment; delete the workarounds at `CatalogRepositoryTests.cs:66` and `ArtistRepositoryTests.cs:366`; fix the stale `GetByIdAsync` "Tracked query" comment (REQ-UOW-20). | partly |
 
@@ -948,9 +1028,9 @@ should be treated as sequential-only for this change for the same reason.
 `GetOrCreateDefaultEventAsync` runs inside that same `ExecuteAsync` lambda as a plain private helper
 call, sharing the one scope and the one implicit save (REQ-UOW-08).
 
-**Branch note / hard constraint:** the stopgap lives on `feat/inline-artist-create` (`1a114c1`). Wave
-3b — which deletes it — **must not land before Helder's on-device T10 re-run #6 completes.** This is
-a hard constraint on sequencing, not a soft preference: landing early blocks the re-run.
+**Branch note:** the stopgap lives on `feat/inline-artist-create` (`1a114c1`). Wave 3b — which
+deletes it — has no external gate; it lands as an ordinary part of Wave 3 (the T10 re-run #6 gate
+was cancelled by Helder 2026-08-04, § 8).
 
 **Testing tier (`testing.md`):** Level **A** — `UnitOfWork`, and every service method re-shaped in
 Wave 5, are business-logic/state-mutation paths requiring full Red→Green→Refactor (Wave 0 is the Red;
@@ -972,6 +1052,9 @@ All five prior open questions are resolved (§ 8 decisions record the answers an
    resolved: `ExecuteAsync` skips the save when the result signals failure, via structural `ITuple`
    detection + `IUnitOfWorkOutcome` opt-in + an always-saves no-signal overload for bare-`Task`
    methods (Revision 8, § 6b). No longer OPEN — pending architect decision.
+7. ~~Fallback direction for an unrecognised `TResult` on the value-returning overload~~ — resolved
+   2026-08-04: fail-closed (throw `InvalidOperationException`), not fail-open (save unconditionally),
+   superseding Revision 8's original choice for this one branch (Revision 9, § 6b / § 8).
 
 No open questions remain for this design. The next step is task-log/tasks.md breakdown against the
 wave table in § 10.
