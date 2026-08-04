@@ -7,7 +7,7 @@ section: DevCycleCraft
 kind: feature
 order: 110
 goal: "formalize when a helper belongs in the new dependency-free `MyVocaList.Extensions` project (created by D4 above) vs. Services/Domain, beyond the one worked example."
-gate: "`MyVocaList.Extensions` must exist first (Task 6a)."
+gate: "Unblocked 2026-08-04 — the project now exists and is in use on develop; what remains is promoting the criteria into a rules or library file."
 pointer: DevCycleCraft/extensions-layer-guidelines/
 ---
 
@@ -93,3 +93,17 @@ This document is the *working* version of the guideline. Promoting it into
 `.claude/rules/code-principles.md` (a new `§ Extension/Utility Layer Placement` section, following
 the existing routing-table pattern) is tracked as a follow-up in
 `Docs/Management/BACKLOG.md` — see the Dev Cycle Craft row for this feature.
+
+> **Gate cleared, item still open [2026-08-04].** The prerequisite is met: `MyVocaList.Extensions`
+> exists, is registered in the solution, and is consumed by both the Services search paths and
+> the Infra `ValueConverter`s merged with the persisted-string-trimming work.
+>
+> **What is still not done is this item's actual goal.** No file under `.claude/rules/` or
+> `.claude/library/` mentions `MyVocaList.Extensions`, so the placement criteria written below
+> are not part of the context any agent loads — they influence nothing. The item stays
+> 💡 Pending for that reason, not because the criteria are unwritten.
+>
+> **To resume:** promote the criteria below into `.claude/rules/code-principles.md` (or a
+> dedicated `.claude/library/` reference routed from it) following the Amending These Rules
+> process — `amend:` commit prefix, rationale in the body, changelog entry. The draft here is
+> the input; it is not the deliverable.

@@ -547,3 +547,86 @@ Changed files this repoint: `Infra/EntityEFConfig/TrimValueConverters.cs` (using
 - The Infra -> Services ProjectReference (architecture finding above) should get an explicit Helder yes/no and, if accepted, a one-line addendum to design.md D3 recording the concrete csproj-level consequence - not because it is wrong, but because it was an implementor-level architectural decision that ran ahead of what the spec text explicitly pre-approved.
 
 **Recommendation:** Proceed to merge. Escalate the Infra -> Services reference-direction question to Helder as a fast-follow (does not block this task) - either add the explicit exception note to design.md D3, or open a follow-up task to relocate StringNormalization to Contracts and remove the new reference.
+
+---
+
+## Task: 7 — Integration merge + docs close-out
+**Status:** To Review
+**Date:** 2026-08-04
+**Agent:** main (orchestrator — shell + docs only, per the task's own "no worktree" note)
+
+### What this task resolved
+
+The item's search half (Tasks 1–5) had been on `develop` since 2026-07-19. The **persistence
+half — Task 6, the EF Core `ValueConverter`s that are this item's title deliverable — had never
+been merged.** It sat on `feat/persisted-string-trimming-converters` in worktree
+`MyVocaList-wt-trim-persist`. The practical consequence on `develop` was that
+`TrimForStorage`/`TrimForStorageOrNull` existed with **zero production call sites**: strings were
+normalized for *search* but stored raw. This task merged that branch.
+
+### Merge procedure
+
+1. `git merge-tree --write-tree develop feat/persisted-string-trimming-converters` — clean, no
+   conflicts, before touching any branch.
+2. `git merge develop` **into the branch** inside its worktree (commit `d08636db`), so `develop`
+   never held an unverified state — a parallel session is working on `develop`.
+3. Build + full suite + targeted suite run on the merge result (evidence below).
+4. `git merge --no-ff` the branch into `develop` (commit `761a1f0f`).
+5. Build + full suite re-run on `develop` itself.
+
+### Changed files
+
+Landed by the merge (branch commits `f451f68a`, `c4ea58da`, `01625dfa`):
+
+- `Infra/EntityEFConfig/TrimValueConverters.cs` *(new)*
+- `Infra/EntityEFConfig/PersonConfiguration.cs`
+- `Infra/EntityEFConfig/ArtistConfiguration.cs`
+- `Infra/EntityEFConfig/VenueConfiguration.cs`
+- `Infra/EntityEFConfig/QueueManagementEventConfiguration.cs`
+- `Infra/EntityEFConfig/SongConfiguration.cs`
+- `Infra/MyVocaList.Infra.csproj`
+- `Services/PersonService.cs`, `Services/ArtistService.cs`, `Services/VenueService.cs`,
+  `Services/EventService.cs`, `Services/SongService.cs` — redundant ad-hoc `Trim()` removed
+- `MyVocaList.Tests/Integration/Repositories/PersistedStringTrimmingTests.cs` *(new)*
+- `Docs/Management/DevCycleCraft/persisted-string-trimming/tasks.md`, `task-log.md`
+
+Written by this task: this entry, `tasks.md` Task 7 checkbox, `README.md` gate + status note,
+`Docs/Management/LEDGER.md`, `Docs/Management/BACKLOG.md` (generated).
+
+### Verification evidence
+
+| Check | Where | Result |
+|---|---|---|
+| Conflict dry run | `git merge-tree` develop vs branch | clean, no conflicts |
+| Build | merge result, in worktree | 8 projects, **0 errors**, 113 warnings (all pre-existing) |
+| Full suite | merge result, in worktree | **519 passed, 0 failed, 0 skipped** |
+| Persistence tests | `--filter FullyQualifiedName~PersistedStringTrimming` | **6 passed, 0 failed** (real temp-file SQLite) |
+| Build | `develop` after merge | 8 projects, **0 errors** |
+| Full suite | `develop` after merge | **519 passed, 0 failed** |
+
+The 6 persistence tests were run under an explicit filter rather than inferred from the total,
+to confirm they execute rather than silently skip.
+
+### AC traceability
+
+REQ-TRIM-01..04 and 08..10 (search normalization) were traced in the Task 1–5 entries above;
+REQ-TRIM-05/06/07 (persistence) in the Task 6 entry, each with a passing test and confirmed
+`[PASS]` by the Task 6 verifier. This task added no new behaviour and therefore no new AC rows —
+it made the already-traced Task 6 rows true of `develop` rather than of a branch.
+
+### Prior verifier warning — resolved, not carried
+
+The Task 6 verifier raised one non-blocking warning: the `Infra → Services` `ProjectReference`
+introduced by D3's implementation inverted the DRY Onion direction. **D4 already fixed this**
+(branch commit `01625dfa`): `Infra` references the leaf `MyVocaList.Extensions` project, which
+has zero `ProjectReference` entries of its own. Nothing is outstanding for Helder here.
+
+### Still open — why this item is not ✅ Done
+
+No implementation work remains and every checkbox in `tasks.md` is checked. The item holds at
+🟡 In Progress solely because **Task 7's review lane is Helder's final review + on-device E2E
+gate**, and Task 2's is Helder's on-device E2E for REQ-TRIM-01/02 (autocomplete singer field).
+Neither has been performed. Recording ✅ would assert a sign-off that was never given.
+
+**Resume point for Helder:** exercise search and save on device, confirm REQ-TRIM-01/02, then
+`backlog_gen.py status persisted-string-trimming "✅ Done" --closed 2026-08`.
