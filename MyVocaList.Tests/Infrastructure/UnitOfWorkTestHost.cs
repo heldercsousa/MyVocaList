@@ -1,5 +1,7 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
@@ -35,6 +37,17 @@ public sealed class UnitOfWorkTestHost : IAsyncDisposable
         return Build(services, dbPath, log, customize);
     }
 
+    /// <summary>Post-Phase-1 composition: <see cref="AppDbContext"/> registered via
+    /// <c>AddDbContextFactory</c> (Scoped) plus <see cref="IUnitOfWork"/> — one short-lived
+    /// context per unit of work, mirroring production after the registration swap (Task 1.3).</summary>
+    public static UnitOfWorkTestHost Create(Action<IServiceCollection>? customize = null)
+    {
+        var (services, dbPath, log) = BaseCollection();
+        services.AddDbContextFactory<AppDbContext>((sp, o) => Configure(sp, o, dbPath), ServiceLifetime.Scoped);
+        services.AddSingleton<IUnitOfWork, MyVocaList.Infra.UnitOfWork.UnitOfWork>();
+        return Build(services, dbPath, log, customize);
+    }
+
     private static (ServiceCollection, string, RecordingTransactionLogWriter) BaseCollection()
     {
         var dbPath = Path.Combine(Path.GetTempPath(), $"uow_test_{Guid.NewGuid():N}.db");
@@ -67,9 +80,13 @@ public sealed class UnitOfWorkTestHost : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        await Db.Database.EnsureDeletedAsync();
         Scope.Dispose();
         await _root.DisposeAsync();
+        // Multiple scopes/UnitOfWork calls against this temp file may leave pooled physical
+        // connections open (Microsoft.Data.Sqlite connection pooling survives logical Dispose) —
+        // clear the pool BEFORE touching the file, or EnsureDeletedAsync/File.Delete can block on
+        // Windows for the full SQLite busy-timeout waiting for a handle that never comes back.
+        SqliteConnection.ClearAllPools();
         try { File.Delete(_dbPath); } catch (IOException) { /* temp file, best effort */ }
     }
 }
