@@ -1,13 +1,14 @@
 ---
 id: autocomplete-component
-title: "**Autocomplete Component — Evaluation, Rebuild & Rollout**"
-status: "🟡 In Progress"
+title: **Autocomplete Component — Evaluation, Rebuild & Rollout**
+status: 🔵 Superseded
 target: 2026-07-11
 section: DevCycleCraft
-kind: feature
-order: 175
-goal: "make the app autocomplete MD3-compliant — evaluation, component build and rollout."
+goal: make the app autocomplete MD3-compliant — evaluation, component build and rollout.
 pointer: DevCycleCraft/autocomplete-component/
+closed: 2026-08
+order: 175
+kind: feature
 ---
 
 # Autocomplete Component — Evaluation, Rebuild & Rollout Plan
@@ -189,3 +190,14 @@ guideline instead of gating on an up-front theoretical guideline.
 - Governance: `.claude/rules/component-change-governance.md` (four gates for `AutocompleteField`)
 - BACKLOG rows: **①** *Autocomplete Mobile UX Pattern guideline*, **②** *AutocompleteField Component
   Evaluation*, and the *Form & Autocomplete UX Overhaul* umbrella.
+
+> **Closed 🔵 Superseded [2026-08-03].** The scope this folder was opened for -- *build a
+> new MD3-compliant autocomplete component* -- no longer exists. Helder's 2026-07-19 adoption
+> decision replaced it with migration onto the DevExpress built-in, executed by the nested
+> change **Replace `AutocompleteMobileField` consumers with DX `AutoCompleteEdit`**
+> (`changes/2026-07-19-dx-autocompleteedit-replacement/`) -- that nested item is the live row.
+>
+> The custom `AutocompleteMobileField` is frozen. Foundation (1) (the full-screen mobile
+> expansion guideline) survives as 🔵 Deferred documented-future-UX and gates nothing.
+> Foundation (2) (component evaluation) was absorbed by the adoption decision itself.
+> Decision record: `2026-07-19-dx-autocomplete-adoption-decision.md`.
