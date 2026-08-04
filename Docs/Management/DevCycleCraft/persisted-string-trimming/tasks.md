@@ -51,14 +51,14 @@
   - *(Persisted-value trimming for `Song.Title`/`featuredArtists`/`version`/`externalId` → Task 6,
     D3; `CreateSongAsync`/`UpdateSongAsync`/`CreateSongWithUrlsAsync` not touched by this task.)*
 
-- [ ] **Task 6 — Persistence: EF Core `ValueConverter`s for name-like properties (D3, 2026-07-19)** *(depends: Task 1)*
+- [x] **Task 6 — Persistence: EF Core `ValueConverter`s for name-like properties (D3, 2026-07-19)** *(depends: Task 1)*
   - Produces: `ValueConverter<string,string>`/`ValueConverter<string?,string?>` in `EntityTypeConfiguration` for `Person.Name`/`Email`, `Artist.Name`/`externalId`, `Venue.Name`, `Event.Name`, `Song.Title`/`featuredArtists`/`version`/`externalId`, delegating to `StringNormalization.TrimForStorage`/`TrimForStorageOrNull`; real-SQLite round-trip tests per property; removal of now-redundant ad-hoc `Trim()` sites in the corresponding Service Create/Update methods
   - Consumes: Task 1 helper
   - Risk: Medium — touches shared `EntityTypeConfiguration`/possibly `AppDbContext.cs` (sequential-only file registry, `workflow.md`); confirm no wave overlap before dispatch
   - Files owned: `Infrastructure/.../EntityTypeConfiguration` files for the five entities (verify exact paths at dispatch — do not guess), possibly `AppDbContext.cs`, new round-trip test file(s)
   - Demo: save `" John  Doe "` → reload → `"John Doe"`; save whitespace-only `Email` → reload → `null`; real-SQLite tests green
   - Review lane: verifier subagent (checks D3 rationale comment + REQ-TRIM-05/06/07 coverage, and that redundant Service-side `Trim()` calls were removed)
-  - **Status note (2026-07-19):** implemented and verified functionally correct (528/528 tests) on branch `feat/persisted-string-trimming-converters`, but NOT YET MERGED — verifier flagged the `Infra→Services` `ProjectReference` this task's implementation added as a DRY Onion violation (not circular, but backwards). See Task 6a below, which must land first; Task 6's branch will be rebased onto Task 6a's output before merge.
+  - **Status note (2026-07-19, updated):** rebased onto post-Task-6a `develop`; `EntityTypeConfiguration` files + `Infra.csproj` now reference `MyVocaList.Extensions` (D4) instead of `Services` — the `Infra→Services` DRY Onion violation flagged by the verifier is resolved (`Infra` now depends only on `Domain`/`MyVocaList.Extensions`). Re-verified: 528/528 tests green on branch `feat/persisted-string-trimming-converters`. Ready for final merge (Task 7).
 
 - [x] **Task 6a — Relocate helper to `MyVocaList.Extensions` (D4, 2026-07-19)** *(depends: Task 1; blocks final merge of Task 6)*
   - Produces: new leaf project `MyVocaList.Extensions` (zero `ProjectReference` to Domain/Infra/Services/Contracts), namespace `MyVocaList.Extensions.Strings`, with `NormalizeSearchQuery`/`TrimForStorage`/`TrimForStorageOrNull` rewritten as extension methods on `string` (same behavior/nullability contract as Task 1); deletion of `Services/Text/StringNormalization.cs` + its test file (moved/rewritten as extension-method tests in the new project); update of every existing call site (Tasks 2–5's `StringNormalization.NormalizeSearchQuery(x)` → `x.NormalizeSearchQuery()` in Person/Artist/Venue/SongService + SongSuggestionService/CatalogService) to the new extension-method syntax; `.sln` registration of the new project

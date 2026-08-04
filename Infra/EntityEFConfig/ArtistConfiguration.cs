@@ -13,14 +13,18 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
         builder.HasKey(a => a.Id);
         builder.Property(a => a.Id).ValueGeneratedOnAdd();
 
+        // D3 (design.md § D3): trim-on-save enforced here, not in ArtistService Create/Update.
         builder.Property(a => a.Name)
                .IsRequired()
                .HasMaxLength(60)
+               .HasConversion(TrimValueConverters.Required)
                .UseCollation(CollationConstants.Default);
 
+        // D3 (design.md § D3): trim-on-save enforced here, not in ArtistService Create/Update.
         builder.Property(a => a.ExternalId)
                .IsRequired(false)
-               .HasMaxLength(100);
+               .HasMaxLength(100)
+               .HasConversion(TrimValueConverters.Optional);
 
         builder.Property(a => a.ExternalProvider)
                .IsRequired(false)

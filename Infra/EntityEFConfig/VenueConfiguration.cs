@@ -16,10 +16,12 @@ namespace MyVocaList.Infra.EntityEFConfig
 
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
+            // D3 (design.md § D3): trim-on-save enforced here, not in VenueService Create/Update.
             builder.Property(e => e.Name)
                    .HasColumnType("TEXT")
                    .IsRequired()
                    .HasMaxLength(30) // Multilingual support: EN, PT, ES, FR, JA, KO
+                   .HasConversion(TrimValueConverters.Required)
                    .UseCollation(CollationConstants.Default);
         }
     }
