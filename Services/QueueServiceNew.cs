@@ -6,6 +6,16 @@ using MyVocaList.Domain.ServicesInterfaces;
 
 namespace MyVocaList.Services;
 
+// TODO [BUG-071 / UOW] — SHARED WINDOW-SCOPED DbContext: OUT OF PATTERN.
+// This code mutates entities on the app-lifetime AppDbContext (MAUI creates no
+// per-page scope), so it can leave an entity tracked and later throw
+// "another instance with the same key value for {'Id'} is already being tracked",
+// and a throw here can poison the shared context for every other feature.
+// Fix by applying the unit-of-work pattern being established for the Venue,
+// Artist, Person and Song CRUDs — do NOT patch this locally.
+// Spec: Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/
+//   2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/
+// Tracked by: .../changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/
 /// <inheritdoc />
 public sealed class QueueServiceNew : IQueueServiceNew
 {
@@ -29,6 +39,7 @@ public sealed class QueueServiceNew : IQueueServiceNew
         _logger = logger;
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message)> EnqueueSingerAsync(
         int eventId, int personId, int? songId, CancellationToken ct)
@@ -89,6 +100,7 @@ public sealed class QueueServiceNew : IQueueServiceNew
         return (true, $"{person.FullName} added to queue");
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message)> RegisterParticipationAsync(
         int queueEntryId, CancellationToken ct)
@@ -117,6 +129,7 @@ public sealed class QueueServiceNew : IQueueServiceNew
         return (true, "Participation registered");
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message)> StopPerformanceAsync(
         int queueEntryId, CancellationToken ct)
@@ -154,6 +167,7 @@ public sealed class QueueServiceNew : IQueueServiceNew
         return (true, "Performance recorded");
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message)> MarkAbsentAsync(
         int queueEntryId, CancellationToken ct)
@@ -181,6 +195,7 @@ public sealed class QueueServiceNew : IQueueServiceNew
         return (true, "Singer marked as absent");
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message)> UpdateSongSelectionAsync(
         int queueEntryId, int? songId, CancellationToken ct)
@@ -212,6 +227,7 @@ public sealed class QueueServiceNew : IQueueServiceNew
         return (true, "Song selection updated");
     }
 
+    // TODO [BUG-071 / UOW] — out of pattern: mutates the shared window-scope DbContext (see class-level note).
     /// <inheritdoc />
     public async Task<(bool success, string message)> ReorderQueueAsync(
         int eventId, IEnumerable<(int entryId, int position)> newOrder, CancellationToken ct)
