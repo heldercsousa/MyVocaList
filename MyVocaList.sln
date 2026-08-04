@@ -27,6 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		README.md = README.md
 		version-manifest.json = version-manifest.json
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-08-03-BUG-071-bug-071-alias-bug-068-edit-mode-song-save-fails-ef-core-identity-conflict-critical\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-08-03-BUG-071-bug-071-alias-bug-068-edit-mode-song-save-fails-ef-core-identity-conflict-critical\README.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
