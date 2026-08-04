@@ -1,8 +1,9 @@
 # Design — DbContext lifetime & unit-of-work pattern
 
-> **Design proposal — Helder decides.** Three candidates are presented with the same worked example
-> so they can be compared side by side. A recommendation is given at the end; it is a recommendation,
-> not a settled choice. No production code has been written for this change.
+> **Candidate C is chosen (§ 8, APPROVED by Helder).** Three candidates are presented with the same
+> worked example so they can be compared side by side; § 8 records the eight approved decisions that
+> make Candidate C's shape final (Revision 8 adds the failure-tuple save-skip mechanism, § 6b). No
+> production code has been written for this change.
 >
 > Framework claims below are sourced from Context7 (version-pinned): EF Core docs
 > `/dotnet/entityframework.docs`, .NET MAUI `/dotnet/maui@10.0.51`. Both servers were available.
@@ -67,6 +68,14 @@ $ for f in Domain/RepositoryInterface/*.cs Domain/Interfaces/IEventRepository.cs
   done
 ```
 
+> **Caveat:** this `grep -cE '\);\s*$'` counts lines ending in `);` — i.e. trailing-paren lines, not
+> declarations — and happens to give the right total (80) for these particular interface files because
+> every method signature here is single-line. It would **miscount** a file containing a multi-line
+> signature (parameters wrapped across lines) or a trailing `);` that isn't a method declaration (e.g.
+> a multi-line default-parameter expression). Treat this number as verified-by-inspection for the
+> current file set, not as a generally reliable counting method — do not reuse this one-liner on a
+> file with wrapped signatures without spot-checking the result.
+
 | File | Methods |
 |---|---|
 | `Domain/RepositoryInterface/IArtistRepository.cs` | 13 |
@@ -83,24 +92,48 @@ $ for f in Domain/RepositoryInterface/*.cs Domain/Interfaces/IEventRepository.cs
 | `Domain/Interfaces/IQueueRepository.cs` | 6 |
 | **Total** | **80** |
 
-**Service methods that would need a UoW wrap** (public mutating methods — `Create*`/`Update*`/`Delete*`/
-`Remove*`/`Add*`/`Record*`/`Commit*`/`Reorder*` — found across `Services/*.cs`):
+**Service methods that need a UoW wrap.** The prior draft derived this count from a method-**name**
+verb regex (`Create*`/`Update*`/`Delete*`/`Remove*`/`Add*`/`Record*`/`Commit*`/`Reorder*`/…), which
+undercounts: it misses any mutator whose name doesn't happen to contain one of those verb substrings,
+even though its body still reaches a write. Recomputed by **behavior** instead — every public service
+method that (transitively) reaches a repository mutation call site (`Add`/`Update`/`Delete`/`Remove`/
+`Set…Async`/`Reorder…Async`, or a direct `…Repository.SaveChangesAsync()` after mutating a fetched
+entity in place) was found via:
 
 ```
-$ grep -nE '^\s*public async Task(<\([^)]*bool[^)]*\)>)? \w*(Create|Update|Delete|Remove|Add|Record|Commit|Reorder|Complete|Reset|Toggle|Merge|Save)\w*Async\(' Services/*.cs
+$ grep -noE '_\w*[Rr]epository\.\w*(Add|Update|Delete|Remove|Set|Reorder|Merge)\w*\(' Services/*.cs
+$ grep -noE '_\w*[Rr]epository\.SaveChangesAsync\(' Services/*.cs
+$ grep -noE '_repo\.\w*(Add|Update|Delete|Remove|Set|Save)\w*\(' Services/*.cs   # BackupService's field is named _repo, not *Repository
 ```
 
-25 methods across 11 files: `ArtistResolutionService` (1), `ArtistService` (3), `CatalogService` (2),
-`EventService` (1), `PersonService` (3), `QueueService` (2), `QueueServiceNew` (2),
-`SongKaraokeUrlService` (2 mutating + `RecordPlayAsync`, counted = 3), `SongResolutionService` (1),
-`SongService` (4), `VenueService` (3).
+then each call site was mapped back to its enclosing public method (or, if the call site is inside a
+private helper, to the public method that reaches that helper — e.g. `QueueService.
+GetOrCreateDefaultEventAsync` is private and folds into `RecordParticipationAsync`, § 10 note).
+
+**35 methods across 12 files** (name-regex figure in parentheses where it differed):
+
+| File | Methods | Mutating methods |
+|---|---|---|
+| `ArtistResolutionService` | 1 (1) | `CommitAsync` |
+| `ArtistService` | 3 (3) | `CreateArtistAsync`, `UpdateArtistAsync`, `DeleteArtistsAsync` |
+| `BackupService` | **1 (0 — missing file)** | `CreateFullBackupAsync` (`_repo.AddAsync` + `SaveChangesAsync`, `BackupService.cs:60-61`) — not in the prior draft's 11-file list at all |
+| `CatalogService` | 2 (2) | `AddSongToCatalogAsync`, `RemoveSongFromCatalogAsync` |
+| `EventService` | **5 (1)** | `CreateEventAsync`, `StartEventAsync`, `PauseEventAsync`, `ResumeEventAsync`, `FinishEventAsync` — the name regex only matched `CreateEventAsync`; `Start`/`Pause`/`Resume`/`Finish` each call `_eventRepository.UpdateAsync` (`EventService.cs:103,129,155,182`) but don't contain a listed verb |
+| `PersonService` | 3 (3) | `CreatePersonAsync`, `UpdatePersonAsync`, `DeletePersonsAsync` |
+| `QueueService` | **3 (2)** | `AddPersonToQueueAsync`, `RecordParticipationAsync`, `SetActiveEventAsync` — the regex missed `SetActiveEventAsync` (`QueueService.cs:107-110`, calls `_eventRepository.SetActiveEventAsync`); name contains "Set", not a listed verb |
+| `QueueServiceNew` | **6 (2)** | `EnqueueSingerAsync`, `RegisterParticipationAsync`, `StopPerformanceAsync`, `MarkAbsentAsync`, `UpdateSongSelectionAsync`, `ReorderQueueAsync` — the regex only matched `UpdateSongSelectionAsync`/`ReorderQueueAsync`; `Enqueue*`/`Register*`/`Stop*`/`Mark*` each reach `_queueRepository.AddAsync`/`UpdateAsync` (`QueueServiceNew.cs:86,114,150,178`) but don't contain a listed verb |
+| `SongKaraokeUrlService` | 3 (2 mutating + `RecordPlayAsync`, counted = 3) | `AddUrlAsync`, `RemoveUrlAsync`, `RecordPlayAsync` |
+| `SongResolutionService` | 1 (1) | `CommitAsync` |
+| `SongService` | 4 (4) | `CreateSongAsync`, `UpdateSongAsync`, `CreateSongWithUrlsAsync`, `DeleteSongsAsync` |
+| `VenueService` | 3 (3) | `CreateVenueAsync`, `UpdateVenueAsync`, `DeleteVenuesAsync` |
+| **Total** | **35 (25)** | |
 
 **Correction to prior draft:** the earlier "~120 signature edits" figure for Candidate B and the
-"~60+ method signatures" figure in § 5 were estimates. Recomputed from the 80-method total above:
-Candidate B adds one `AppDbContext` parameter to every one of the **80** repository interface
-methods (interface + implementation = **160** edits, not counting the ~10 repository class files
-touched once each) plus a `db`-threading change to each of the **25** service methods — the
-side-by-side table in § 7 below uses these corrected numbers.
+"~60+ method signatures" figure in § 5 were estimates. Recomputed from the 80-method repository total
+above and the 35-method service total above: Candidate B adds one `AppDbContext` parameter to every
+one of the **80** repository interface methods (interface + implementation = **160** edits, not
+counting the ~10 repository class files touched once each) plus a `db`-threading change to each of the
+**35** service methods — the side-by-side table in § 7 below uses these corrected numbers.
 
 ## 3. The worked example (identical for all three candidates)
 
@@ -262,7 +295,7 @@ public class SongRepository : ISongRepository
 implementation files + ~15 service files. **~40 files, 80 repository method signatures (derived,
 § 2a) × 2 (interface + implementation) = 160 signature edits.**
 
-**DRY score:** service methods **+1 to +2 lines each × 25 methods (derived, § 2a) = ~35-50 lines**;
+**DRY score:** service methods **+1 to +2 lines each × 35 methods (derived, § 2a) = ~50-70 lines**;
 repository methods **+1 parameter on every one of the 80 methods**, doubled across interface +
 implementation → **160 signature edits**. This is boilerplate-by-convention. Against constraint 3 it
 is the **worst** of the three, by a wide margin.
@@ -313,10 +346,23 @@ public interface IUnitOfWork
 {
     /// <summary>Primary API. Runs <paramref name="body"/> against a repository of type
     /// <typeparamref name="TRepo"/> resolved inside a fresh (or ambiently-joined, § 6a) DI scope
-    /// owning one AppDbContext. Saves once, implicitly, after <paramref name="body"/> returns
-    /// successfully (Revision 5 — no explicit uow.SaveAsync() call in service code). Disposes the
-    /// context on exit.</summary>
+    /// owning one AppDbContext. Disposes the context on exit.
+    /// <para><b>Save-skip (Revision 8, § 6b):</b> after <paramref name="body"/> returns without
+    /// throwing, <c>ExecuteAsync</c> inspects <typeparamref name="TResult"/> for this codebase's
+    /// failure-tuple convention (<c>code-style-reference.md § Service Return Patterns</c>) and saves
+    /// only when it signals success. Service code is unchanged — it keeps returning its ordinary
+    /// tuple; the save is skipped automatically when the tuple's leading <c>bool</c> is <c>false</c>.
+    /// A <typeparamref name="TResult"/> that carries no recognised success signal always saves — see
+    /// § 6b for the exhaustive rule and the no-signal overload below.</para></summary>
     Task<TResult> ExecuteAsync<TRepo, TResult>(Func<TRepo, Task<TResult>> body, CancellationToken ct = default);
+
+    /// <summary>No-signal overload (Revision 8, § 6b). Use for service methods that return bare
+    /// <see cref="Task"/> — e.g. <c>QueueService.RecordParticipationAsync</c>,
+    /// <c>QueueService.SetActiveEventAsync</c>, <c>SongKaraokeUrlService.RecordPlayAsync</c> — which
+    /// have no failure tuple to inspect. <b>Always saves</b> when <paramref name="body"/> returns
+    /// without throwing; this is the safe default for a method with no success/failure signal at all
+    /// (§ 6b "no-signal fallback").</summary>
+    Task ExecuteAsync<TRepo>(Func<TRepo, Task> body, CancellationToken ct = default);
 
     /// <summary>Same as <see cref="ExecuteAsync{TRepo,TResult}"/> but never saves (Revision 6). Use
     /// for read-only service methods so the method name itself carries the intent — a reviewer
@@ -326,8 +372,12 @@ public interface IUnitOfWork
     /// <summary>Escape hatch (Revision 7). Use ONLY for genuinely multi-repository flows or flows
     /// that must call into another service (§ 6a's three nested chains) — resolving from
     /// <see cref="IServiceProvider"/> is a service-locator pattern and is a last resort, not the
-    /// default. Saves once, implicitly, same as the typed overload.</summary>
+    /// default. Save-skip behavior (Revision 8, § 6b) applies identically to the typed overload.</summary>
     Task<TResult> ExecuteAsync<TResult>(Func<IServiceProvider, Task<TResult>> body, CancellationToken ct = default);
+
+    /// <summary>Escape-hatch no-signal variant (Revision 8, § 6b). Always saves; for
+    /// multi-repository/nested-service flows whose body returns bare <see cref="Task"/>.</summary>
+    Task ExecuteAsync(Func<IServiceProvider, Task> body, CancellationToken ct = default);
 
     /// <summary>Escape-hatch read variant — never saves.</summary>
     Task<TResult> ExecuteReadAsync<TResult>(Func<IServiceProvider, Task<TResult>> body, CancellationToken ct = default);
@@ -343,6 +393,9 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
     public Task<TResult> ExecuteAsync<TRepo, TResult>(Func<TRepo, Task<TResult>> body, CancellationToken ct = default)
         => ExecuteAsync<TResult>(sp => body(sp.GetRequiredService<TRepo>()), ct);
 
+    public Task ExecuteAsync<TRepo>(Func<TRepo, Task> body, CancellationToken ct = default)
+        => ExecuteAsync(sp => body(sp.GetRequiredService<TRepo>()), ct);
+
     public Task<TResult> ExecuteReadAsync<TRepo, TResult>(Func<TRepo, Task<TResult>> body, CancellationToken ct = default)
         => ExecuteReadAsync<TResult>(sp => body(sp.GetRequiredService<TRepo>()), ct);
 
@@ -355,8 +408,26 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
         try
         {
             var result = await body(scope.ServiceProvider);
-            await scope.ServiceProvider.GetRequiredService<AppDbContext>().SaveChangesAsync(ct);   // implicit save
+            // Save-skip (Revision 8, § 6b): save only when the result signals success.
+            if (ResultSignalsSuccess(result))
+                await scope.ServiceProvider.GetRequiredService<AppDbContext>().SaveChangesAsync(ct);
             return result;
+        }
+        finally { _ambientScope.Value = null; }
+    }
+
+    // No-signal overload (Revision 8, § 6b) — always saves. For bodies with nothing to inspect
+    // (bare Task): RecordParticipationAsync, SetActiveEventAsync, RecordPlayAsync.
+    public async Task ExecuteAsync(Func<IServiceProvider, Task> body, CancellationToken ct = default)
+    {
+        if (_ambientScope.Value is { } joined) { await body(joined); return; }
+
+        await using var scope = scopeFactory.CreateAsyncScope();
+        _ambientScope.Value = scope.ServiceProvider;
+        try
+        {
+            await body(scope.ServiceProvider);
+            await scope.ServiceProvider.GetRequiredService<AppDbContext>().SaveChangesAsync(ct);   // always — no signal to inspect
         }
         finally { _ambientScope.Value = null; }
     }
@@ -365,10 +436,55 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
     {
         if (_ambientScope.Value is { } joined) return await body(joined);
         await using var scope = scopeFactory.CreateAsyncScope();
-        return await body(scope.ServiceProvider);   // no SaveChangesAsync — read-only, per Revision 6
+        _ambientScope.Value = scope.ServiceProvider;   // symmetric with ExecuteAsync (§ 9: at most
+        try                                            // one AppDbContext per unit of work) — a nested
+        {                                               // ExecuteAsync/ExecuteReadAsync call must join
+            return await body(scope.ServiceProvider);   // this scope rather than opening a second one
+        }
+        finally { _ambientScope.Value = null; }
+        // no SaveChangesAsync — read-only, per Revision 6
+    }
+
+    // Save-skip signal detection (Revision 8, § 6b). Exhaustive by construction — every branch is
+    // either a recognised signal or the explicit, safe no-signal fallback (never a silent guess).
+    private static bool ResultSignalsSuccess<TResult>(TResult result)
+    {
+        // 1) This codebase's universal Service Return Pattern: (bool success, string message, ...).
+        //    Every C# ValueTuple, of every arity, implements System.Runtime.CompilerServices.ITuple —
+        //    this is a real structural type check, not reflection over field names.
+        if (result is System.Runtime.CompilerServices.ITuple t && t.Length > 0 && t[0] is bool tupleSuccess)
+            return tupleSuccess;
+
+        // 2) Named result types opt in explicitly by implementing IUnitOfWorkOutcome
+        //    (e.g. BackupResult — see § 6b for the required future edit, tracked in Wave 5).
+        if (result is IUnitOfWorkOutcome outcome)
+            return outcome.Success;
+
+        // 3) No recognised signal → SAVE UNCONDITIONALLY. This is not a guess: it is the documented,
+        //    exhaustive fallback for any TResult that is neither shape above (§ 6b "no-signal
+        //    fallback"). The unsafe direction is silently discarding a real write; defaulting to
+        //    save is the safe direction, and matches this codebase's convention that reaching the
+        //    end of body without throwing already means success (code-style-reference.md §
+        //    Exception Handling — no exceptions for expected business failures).
+        return true;
     }
 }
+
+/// <summary>Opt-in marker for named result records/types that carry a success signal but are not a
+/// ValueTuple (Revision 8, § 6b). Implement this instead of relying on structural tuple detection
+/// when a mutating service method's natural return type is a named type, e.g.
+/// <c>public record BackupResult(bool Success, string Message, ...) : IUnitOfWorkOutcome;</c></summary>
+public interface IUnitOfWorkOutcome
+{
+    bool Success { get; }
+}
 ```
+
+> **Bug fix (this revision):** the prior draft's `ExecuteReadAsync` created a scope without setting
+> `_ambientScope.Value`, so a nested `ExecuteAsync`/`ExecuteReadAsync` call inside its `body` would open
+> a **second** scope+context instead of joining the read scope — contradicting § 9's "at most one
+> `AppDbContext` per unit of work" invariant. Fixed by setting/clearing `_ambientScope.Value` the same
+> way `ExecuteAsync` does; unintentional bug, not a design change.
 
 **Inputs / Outputs / Preconditions — `IUnitOfWork.ExecuteAsync<TRepo, TResult>` (primary API):**
 - **Inputs:** `body` — a delegate receiving the resolved `TRepo` instance, returning `Task<TResult>`;
@@ -423,7 +539,7 @@ public class SongRepository(AppDbContext db) : ISongRepository        // ctor UN
 
 **API shape — decided (Revision 7): the typed overload is the primary API, not a variant.**
 `ExecuteAsync<TRepo, TResult>(repo => …)` is what a service method calls for the single-repository
-majority (~20 of the 25 methods in § 2a) — the dependency is named in the signature, not pulled from
+majority (~30 of the 35 methods in § 2a) — the dependency is named in the signature, not pulled from
 a bag. The `sp => …` / `IServiceProvider` overload is **retained only as an escape hatch** for
 genuinely multi-repository flows (`CreateSongWithUrlsAsync`, `GetOrCreateDefaultEventAsync`,
 `ReorderQueueAsync`, and the three nested-service chains in § 6a). Resolving a dependency from an
@@ -486,6 +602,7 @@ and every use of that field was inspected for calls into a *mutating* method of 
 | `SongResolutionService.CommitAsync` | `SongResolutionService.cs:208`, `:232` | `_songService.UpdateSongAsync` | 1 | Two call sites, two branches. |
 | `SongResolutionService.CommitAsync` | `SongResolutionService.cs:260` | `_artistResolution.CommitAsync` | 1 (→ 2 via the row above) | **Compounds with the first row**: `SongResolutionService.CommitAsync` → `ArtistResolutionService.CommitAsync` → `ArtistService.CreateArtistAsync` is a **3-level nested unit-of-work chain**, the deepest case found. The `AsyncLocal` join must hold across all three levels, not just one hop. |
 | `SongResolutionService.ResolveAsync` (read path) | `SongResolutionService.cs:39`, `:254` | `_artistResolution.ResolveAsync` | 1 | Read-only — no save involved; relevant to Revision 6 (`ExecuteReadAsync` also needs the join for consistent read snapshots across the two calls, though it never saves). |
+| `QueueService.AddPersonToQueueAsync` (read path) | `QueueService.cs:51` | `_personService.GetPersonByNameAsync` | 1 | Read-only — no save involved; the existing-person lookup that precedes the `CreatePersonAsync` row above. Listed for consistency with the `SongResolutionService.ResolveAsync` read row above — both are read-only nested calls the ambient join must also handle correctly under `ExecuteReadAsync`. |
 
 Services checked with an injected `I*Service` field and found to have **no** mutating cross-service
 call: `NextSingerAlertService` (`_notifications` is `INotificationService`, a UI/OS notification
@@ -501,16 +618,16 @@ speculative machinery for a hypothetical future case — the case already exists
 ~10 repository files (delete `SaveChangesAsync`) + interfaces. **~30 files, but almost all edits are
 one-liners or deletions.** Zero repository *method* signatures change.
 
-**DRY score:** service methods **+1 line each (25 methods, derived § 2a — corrects the prior ~21
-estimate; still the same line every time)**. Repository methods **0** added lines, **0** signature
-changes. Net line count is *negative*: 6 pass-through implementations deleted (~24 lines), 25
-explicit `SaveChangesAsync` call sites deleted (~25 lines), against 25 added wrapper lines + ~20
-lines of `UnitOfWork` (+ ~5 lines for the `AsyncLocal` ambient-join, shipped now per Revision 2).
-✔ REQ-UOW-10.
+**DRY score:** service methods **+1 line each (35 methods, derived § 2a — behavior-derived, corrects
+the prior ~21-then-25 name-regex estimate; still the same line every time)**. Repository methods **0**
+added lines, **0** signature changes. Net line count is *negative*: 6 pass-through implementations
+deleted (~24 lines), 35 explicit `SaveChangesAsync` call sites deleted (~35 lines), against 35 added
+wrapper lines + ~20 lines of `UnitOfWork` (+ ~5 lines for the `AsyncLocal` ambient-join, shipped now
+per Revision 2). ✔ REQ-UOW-10.
 
 **New-developer legibility:** **good.** `_uow.ExecuteAsync(async sp => { … })` is the boundary and it
 is at the top of the method the developer is already reading. The one thing a newcomer must be told
-is that the save is implicit at the end of the lambda — which is the deliberate trade for deleting 25
+is that the save is implicit at the end of the lambda — which is the deliberate trade for deleting 35
 save call sites. Naming the method `ExecuteAsync` on `IUnitOfWork` with the XML doc above puts the
 answer one hover away.
 
@@ -536,6 +653,105 @@ recommended for the REQ-UOW-03/04 regression tests — or (b) construct a reposi
 per-test context directly for narrow repository tests. Both tracking workarounds
 (`CatalogRepositoryTests.cs:66`, `ArtistRepositoryTests.cs:366`) become deletable. ✔ REQ-UOW-17.
 
+### 6b. Save-skip mechanism for the failure-tuple path (Revision 8, resolves spec-review finding B3)
+
+**The gap this closes.** § 9's invariants and the requirements.md failure-mode table claimed "no
+partial state survives" — but as originally specified, `ExecuteAsync` saved unconditionally whenever
+`body` returned without throwing. This codebase signals business failure by **returning** a tuple
+`(bool success, string message, T? entity)`, never by throwing
+(`code-style-reference.md § Service Return Patterns`). So a service that mutates an entity and then
+returns a failure tuple on a later branch got that mutation **committed** — the "no partial state"
+claim was true only for the exception path (REQ-UOW-06), never for the far more common failure-tuple
+path. This is live in the audited flows: `ArtistResolutionService.CommitAsync` mutates
+(`:112`, `:132`) inside branches that return success, but the method also has failure-returning
+branches (`:98`, `:102`, `:123`) reached after the surrounding `switch` could in principle have taken
+a mutating branch on a different call — and `SongResolutionService.CommitAsync` explicitly returns
+`(false, ...)` (`:214`, `:238`) *after* an inner service call (`_songService.UpdateSongAsync`) has
+already run its own nested unit of work. Once Wave 5 deletes the explicit
+`_artistRepository.SaveChangesAsync(ct)` / `_songRepository.SaveChangesAsync(ct)` calls in favor of
+the implicit end-of-`body` save, an unconditional save would commit any mutation that happened to run
+before a failure tuple was returned.
+
+**Return-shape survey (Grep + Read verified against current `develop` HEAD, all 35 methods in § 2a's
+mutating-method table).** Three distinct shapes exist among the methods `IUnitOfWork.ExecuteAsync`
+will wrap:
+
+| Shape | Count | Examples | Success signal available? |
+|---|---|---|---|
+| `ValueTuple` with `bool` as the first element — `(bool success, string message[, T? entity])` | **31** | `ArtistService.CreateArtistAsync/UpdateArtistAsync/DeleteArtistsAsync`, `SongService.*`, `PersonService.*`, `VenueService.*`, `EventService.*` (all 5), `QueueServiceNew.*` (all 6), `CatalogService.*`, `SongKaraokeUrlService.AddUrlAsync/RemoveUrlAsync`, `ArtistResolutionService.CommitAsync`, `SongResolutionService.CommitAsync`, `QueueService.AddPersonToQueueAsync` | Yes — structural (§ below) |
+| Named record type with a `bool Success` property, not a `ValueTuple` | **1** | `BackupService.CreateFullBackupAsync` → `Task<BackupResult>`, `BackupResult` defined as `public record BackupResult(bool Success, string Message, string? FilePath, long FileSizeBytes)` (`Domain/ServicesInterfaces/IBackupService.cs:5`) | Only if the type opts in (§ below) |
+| Bare `Task` — no return value, no signal of any kind | **3** | `QueueService.RecordParticipationAsync` (`Task`, not `Task<T>`), `QueueService.SetActiveEventAsync` (`Task`), `SongKaraokeUrlService.RecordPlayAsync` (`Task`) | No — never can be |
+
+31 + 1 + 3 = 35, matching § 2a's total exactly. No mutating method returns a bare entity
+(`Task<Song>`) or a bare `bool`/`int` with no tuple wrapper — the codebase's tuple convention is in
+fact near-universal; `BackupResult` and the three void-returning methods are the only exceptions.
+
+**Mechanism chosen: structural `ITuple` detection + opt-in marker interface + explicit no-signal
+fallback — no reflection, no naming heuristics, no new required parameter.**
+
+1. **ValueTuple convention (31 of 35 methods) — detected structurally, not by reflection.** Every
+   C# `ValueTuple<...>`, at every arity, implements `System.Runtime.CompilerServices.ITuple`
+   (a BCL interface exposing `Length` and an indexer). `ResultSignalsSuccess` pattern-matches
+   `result is ITuple { Length: > 0 } t && t[0] is bool b` and reads `b`. This is a real type check
+   against a documented BCL contract — not string-matching a tuple element name (element names like
+   `success` are compile-time-only sugar and are erased at runtime; nothing here depends on them).
+   It costs one boxing allocation for value-type `TResult`s, which is negligible next to the
+   `SaveChangesAsync` round-trip it guards.
+2. **Named result types opt in via `IUnitOfWorkOutcome` (1 of 35 methods today: `BackupResult`).**
+   A tiny marker interface (`bool Success { get; }`) that a result record implements explicitly.
+   This requires a one-line edit to `BackupResult`'s declaration
+   (`: IUnitOfWorkOutcome` appended) as part of Wave 5's `BackupService.CreateFullBackupAsync` wrap —
+   tracked in § 10, not performed by this design document. Chosen over reflecting for a property
+   named `"Success"` by convention: an explicit interface is a compile-time-checked contract: if a
+   future result type is renamed or reshaped, the compiler catches a mismatch immediately, whereas a
+   property-name convention fails silently (exactly the "convention that usually detects failure" this
+   design explicitly rejects, item 3 below).
+3. **No-signal fallback (3 of 35 methods today: the two `Task`-returning `QueueService` methods and
+   `SongKaraokeUrlService.RecordPlayAsync`) — a dedicated overload, not a runtime guess.** `IUnitOfWork`
+   gains `ExecuteAsync<TRepo>(Func<TRepo, Task> body, ct)` (and its `IServiceProvider` escape-hatch
+   twin) alongside the existing `Task<TResult>`-returning overloads. This overload has nothing to
+   inspect — `body` returns `Task`, not `Task<TResult>` — so it **always saves** when `body` completes
+   without throwing. The choice of always-save (not always-skip) is deliberate: the two failure modes
+   are not symmetric. Silently discarding a real write is a correctness bug with no local signal a
+   test would easily catch (the entity was mutated in memory; only a re-read from the database would
+   reveal the write never landed). An unnecessary save on a method that always succeeds today is a
+   no-op — SQLite writes nothing new if the change tracker has no dirty entries beyond what the
+   overload's own `body` produced, and this project has no case where a `Task`-returning mutating
+   method is expected to leave state unchanged. The overload's XML doc states this outcome explicitly
+   (§ 6, `ExecuteAsync<TRepo>`) so it is impossible to reach this fallback by accident: a service
+   method with no signal to give literally cannot call the signal-inspecting overload — the compiler
+   picks the overload matching the delegate's return type.
+
+**Rejected alternatives:**
+- **Explicit `Func<TResult, bool> isSuccess` predicate parameter on every call.** Considered per the
+  brief's option list. Rejected as the *default* API: it reintroduces ceremony proportional to call
+  count (one extra lambda argument at all ~30 tuple call sites) for a signal the tuple shape already
+  carries structurally — directly against REQ-UOW-10 ("at most one line of code per service method").
+  Not needed as an *escape hatch* either: the two-tier fallback (ITuple → `IUnitOfWorkOutcome` →
+  always-save) is exhaustive over the actual 35-method survey; there is no third shape in this
+  codebase today that would need a bespoke predicate. If one appears later, adding an explicit-predicate
+  overload remains open — nothing in this design forecloses it — but it is not built speculatively now.
+- **Reflection over a property literally named `"Success"` (case-insensitive), with no interface.**
+  Rejected: this is precisely the "convention that usually detects failure" the brief calls
+  unacceptable. It would silently misfire on a future type with an unrelated bool property named
+  `Success` (e.g. a DTO flag), and it gives no compile-time signal when a result type's shape changes.
+  `IUnitOfWorkOutcome` gets the same coverage with a compiler-checked contract instead of a string.
+- **Detect failure only (assume success is default, look for `IsFailure`/exception-like marker).**
+  Rejected: symmetric with detecting success; adds no clarity, and "assume success unless proven
+  otherwise" is exactly the unconditional-save behavior already found unsafe.
+
+**Exhaustiveness — the undetectable case is explicit and safe (item 3 of the brief).** Every one of
+the 35 audited methods falls into exactly one of the three rows above, and each row has a defined,
+non-ambiguous outcome:
+- ValueTuple with leading `bool` → that `bool` decides (skip on `false`).
+- `IUnitOfWorkOutcome` implementer → `.Success` decides (skip on `false`).
+- Anything else, **including bare `Task`** → the no-signal overload is the only one whose signature
+  fits, and it always saves. There is no fourth, ambiguous path: a `TResult` that is neither an
+  `ITuple` nor an `IUnitOfWorkOutcome` implementer (e.g. a bare `Task<Song>`, should one ever be added)
+  falls through both `if`s in `ResultSignalsSuccess` and hits the documented `return true;` — always
+  saves, by explicit code, not by absence of a check. It is impossible to reach a silent "skip" for an
+  undetectable shape, because skipping only ever happens inside the two recognised-signal branches.
+
 ---
 
 ## 7. Side-by-side
@@ -545,11 +761,11 @@ per-test context directly for narrow repository tests. Both tracking workarounds
 | Fixes BUG-068 structurally | ✔ | ✔ | ✔ |
 | Fixes the 5 unguarded repos | ✔ | ✔ | ✔ |
 | Lines added per service method | 0 | 1–2 | **1** |
-| Lines/params added per repository method | 0 | **1 param × ~60 methods** | **0** |
-| Repository interface churn | none | ~120 signature edits | delete `SaveChangesAsync` only |
+| Lines/params added per repository method | 0 | **1 param × 80 methods (derived, § 2a)** | **0** |
+| Repository interface churn | none | 160 signature edits (derived, § 2a) | delete `SaveChangesAsync` only |
 | Files touched | ~20 (all UI) | ~40 | ~30 (mostly one-liners/deletions) |
 | Repository interface method signatures touched | 0 | 80 × 2 = 160 (derived, § 2a) | 0 (deletion of `SaveChangesAsync` only, not a signature edit to surviving methods) |
-| Service methods needing a wrap | 0 | 25 (derived, § 2a) | 25 (derived, § 2a) |
+| Service methods needing a wrap | 0 | 35 (derived, § 2a) | 35 (derived, § 2a) |
 | Boundary visible where writes happen | ✘ (ambient) | ✔✔ | ✔ |
 | 6 pass-through saves deleted | ✘ | ✔ | ✔ |
 | Captive-dependency risk | **high, invisible** | none | low (audit singletons once) |
@@ -580,7 +796,7 @@ transaction log records this operation" — from comments into structural guaran
 **Chosen approach:** `ExecuteAsync` calls `SaveChangesAsync` automatically after `body` returns
 successfully. No explicit `uow.SaveAsync()` call appears in service code.
 **Rejected alternative:** an explicit `uow.SaveAsync()` call inside every lambda — restores a marginal
-amount of local visibility at the cost of re-adding the ~25 lines the implicit-save design removes,
+amount of local visibility at the cost of re-adding the ~35 lines the implicit-save design removes,
 and reintroduces a class of bug (forgetting the call) that the whole point of `IUnitOfWork` is to
 eliminate.
 **Reversibility:** Reversible — confined to `UnitOfWork`'s two `ExecuteAsync` bodies.
@@ -602,7 +818,7 @@ performs a wasted `SaveChangesAsync` no-op on every read call and offers no sign
 
 ### Decision: typed overload is the primary API; the `sp => …` overload is an escape hatch only (Revision 7) — **APPROVED by Helder**
 **Chosen approach:** `ExecuteAsync<TRepo, TResult>(repo => …)` / `ExecuteReadAsync<TRepo, TResult>(repo
-=> …)` are what the ~20-of-25 single-repository service methods (§ 2a) call. The
+=> …)` are what the ~30-of-35 single-repository service methods (§ 2a) call. The
 `Func<IServiceProvider, Task<TResult>>` overloads are retained **only** for the genuinely
 multi-repository flows (`CreateSongWithUrlsAsync`, `GetOrCreateDefaultEventAsync`, `ReorderQueueAsync`)
 and the three nested-service chains found in § 6a.
@@ -659,6 +875,31 @@ running seven-plus waves of unit-of-work migration across two duplicate, driftin
 is itself the riskier path — the merge is now sequenced *before* the migration, as a precondition, not
 folded into it as extra scope.
 
+### Decision: `ExecuteAsync` skips the save when the result signals business failure (Revision 8) — **APPROVED by Helder 2026-08-04**
+**Chosen approach:** `ExecuteAsync` inspects `body`'s returned value for this codebase's universal
+failure-tuple convention and skips `SaveChangesAsync` when it signals failure (§ 6b). Detection is
+structural (`ITuple`) for the 31-of-35 `ValueTuple`-returning methods, an opt-in
+`IUnitOfWorkOutcome` marker interface for the 1 named-record method (`BackupResult`), and a dedicated
+no-signal `ExecuteAsync<TRepo>(Func<TRepo, Task> body, ct)` overload that **always** saves for the
+3 bare-`Task` methods. Service code is unchanged — it keeps returning its ordinary tuple; nothing
+about `UpdateSongAsync`'s body in § 6's worked example changes under this revision.
+**Alternatives considered:** an explicit `Func<TResult, bool> isSuccess` predicate parameter on every
+call (rejected — reintroduces per-call-site ceremony the tuple shape already carries structurally,
+against REQ-UOW-10; not needed given the 35-method survey is fully covered by the two-tier fallback);
+reflection over a property named `"Success"` by convention with no interface (rejected — exactly the
+"convention that usually detects failure" ruled unacceptable; `IUnitOfWorkOutcome` gets the same
+coverage with a compiler-checked contract).
+**Reversibility:** Reversible — confined to `UnitOfWork.ExecuteAsync`'s two `Task<TResult>` overloads
+and the new `ResultSignalsSuccess` helper; the no-signal overload is additive.
+**Rationale:** resolves spec-review finding B3. `§ 9`'s "no partial state survives" claim was true
+only for the exception path (REQ-UOW-06) before this revision — a mutation followed by a returned
+failure tuple was silently committed, because the codebase's universal failure idiom is the tuple, not
+an exception (`code-style-reference.md § Service Return Patterns`). The UoW must understand that idiom
+or the implicit save Revision 5 chose is unsafe on the majority of this codebase's write paths. This
+is live today in `ArtistResolutionService.CommitAsync` (`:112`, `:132`) and
+`SongResolutionService.CommitAsync` (mutates via nested calls, then returns `(false, …)` on later
+branches, `:214`/`:238`) — the two flows named in the finding.
+
 ### Decision: no `CreateExecutionStrategy` / retry policy
 **Rationale:** SQLite is local; there are no transient network faults to retry. Adding a strategy
 would also constrain the manual transaction in `QueueRepository.ReorderAsync`.
@@ -671,6 +912,14 @@ would also constrain the manual transaction in `QueueRepository.ReorderAsync`.
   one, § 6a).
 - No `ChangeTracker` entry survives a unit of work.
 - No singleton holds a repository, a service that writes, or an `AppDbContext`.
+- **Save-skip on failure (Revision 8, § 6b):** `SaveChangesAsync` executes only when `body`'s
+  returned result signals success per § 6b's two recognised shapes (`ITuple` with leading `bool`, or
+  `IUnitOfWorkOutcome.Success`) — a mutation followed by a returned failure tuple does **not**
+  persist. For any `TResult` carrying no recognised signal, `ExecuteAsync` always saves; this is the
+  documented default (§ 6b "no-signal fallback"), never a silent guess, and is reachable only through
+  the dedicated no-signal overload whose delegate type (`Func<TRepo, Task>`) has nothing to inspect in
+  the first place. This closes the exception-only reading of REQ-UOW-06: "no partial state survives"
+  now holds for both the throw path and the far more common failure-tuple path.
 
 ## 10. Migration plan (DRY Onion: Domain → Infra → Services → UI)
 
@@ -683,13 +932,13 @@ should be treated as sequential-only for this change for the same reason.
 
 | Wave | Layer | Work | Parallel? |
 |---|---|---|---|
-| 0 | Tests (RED) | Write the REQ-UOW-03/04 BUG-068 regression tests, plus new atomicity tests for `SongResolutionService.CommitAsync` and `QueueService.AddPersonToQueueAsync` (Revision 2b), against **current `develop` HEAD, unchanged code**. Run them and confirm they FAIL for the expected reason (`bug-tracking.md`: Critical ⇒ mandatory failing-test-first, no exceptions). This wave produces no production-code change. | no — must complete and be observed RED before Wave 1 |
+| 0 | Tests (RED) | Write the REQ-UOW-03/04 BUG-068 regression tests, plus new atomicity tests for `SongResolutionService.CommitAsync` and `QueueService.AddPersonToQueueAsync` (Revision 2b), against **current `develop` HEAD, unchanged code**. Run them and confirm each FAILS for its exact stated reason (below), not merely "fails" — a test that goes red for the wrong reason is not evidence (`bug-tracking.md`: Critical ⇒ mandatory failing-test-first, no exceptions). This wave produces no production-code change. **Expected failure per test:** REQ-UOW-03 (BUG-068) — the create→read→update sequence on `SongRepository` throws `InvalidOperationException: ... already being tracked` on the second save, because the shared session-lifetime `AppDbContext` still tracks the entity from the first save. REQ-UOW-04 — the same exception, once per repository family parameterisation, for the same reason. REQ-UOW-22 (`SongResolutionService.CommitAsync`, 3-level nested chain) — **two** assertions are exercised and must be shown failing independently: (a) the happy-path Given/When/Then may already PASS the "no InvalidOperationException" assertion on current HEAD, because each nested call currently saves eagerly per inner call rather than sharing a context — so this assertion alone is not evidence of RED; (b) the added fault-injection Given/When/Then (`requirements.md` REQ-UOW-22) is the assertion expected to FAIL today, because nothing rolls back the outer `SongService` write when the inner `ArtistService.CreateArtistAsync` call throws — each nested call already committed its own `SaveChangesAsync` independently, so partial state (a `Song` row with no matching `Artist`) survives the fault, which is the opposite of "all-or-nothing". REQ-UOW-23 (`QueueService.AddPersonToQueueAsync`) — same shape: the plain happy-path assertion may already pass today; the fault-injection Given/When/Then is the one expected to fail, because the nested `PersonService.CreatePersonAsync` save already committed independently of the outer flow, so a `Person` row survives a fault that should have rolled back the whole unit of work. | no — must complete and be observed RED for the stated reason before Wave 1 |
 | 1 | Docs | Amend `code-style-reference.md § DI Registration Conventions` (REQ-UOW-19, `amend:` + changelog). Land before any code so subagents read the corrected rule. | no |
 | 2 | Domain/Contracts | Introduce `IUnitOfWork` (both the typed primary API and the `IServiceProvider` escape hatch, § 6/§ 8); remove `SaveChangesAsync` from every repository **interface**. | no (single file set) |
 | 3 | Infra | `UnitOfWork` implementation, **including the `AsyncLocal` ambient-scope join** (§ 6a — ships now, not deferred). Delete the 6 pass-through implementations. | partly — one agent per repository family |
 | 3b | Infra (gated) | Delete the `1a114c1` stopgap guard in `SongRepository.UpdateAsync` (REQ-UOW-18). **Hard constraint: this sub-wave MUST NOT land before Helder's on-device T10 re-run #6 completes.** Sequenced as its own commit, separable from the rest of Wave 3, so the rest of the migration is not blocked waiting on the re-run. | no — gated on an external event, not on other waves |
 | 4 | Composition | `MauiProgram.cs`: `AddDbContext` → `AddDbContextFactory(…, Scoped)`; register `IUnitOfWork`; remove the duplicate `IAppInfo` (REQ-UOW-21). Verify `App.xaml.cs:35,:54` scopes still resolve. | **no — sequential-only** |
-| 5 | Services | Wrap each of the 25 service methods (derived, § 2a) in `ExecuteAsync`/`ExecuteReadAsync`; delete the corresponding `SaveChangesAsync` call sites; re-shape `ArtistResolutionService.CommitAsync`, `SongResolutionService.CommitAsync`, and `QueueService.AddPersonToQueueAsync` to use the ambient join (REQ-UOW-09, REQ-UOW-22, REQ-UOW-23). `QueueService.RecordParticipationAsync` (the public method) is where the wrap goes for the private `GetOrCreateDefaultEventAsync` — see note below. | yes — one agent per service, no file overlap |
+| 5 | Services | Wrap each of the **35** service methods (behavior-derived, § 2a — includes `BackupService.CreateFullBackupAsync`, `EventService.StartEventAsync`/`PauseEventAsync`/`ResumeEventAsync`/`FinishEventAsync`, `QueueService.SetActiveEventAsync`, and `QueueServiceNew.EnqueueSingerAsync`/`RegisterParticipationAsync`/`StopPerformanceAsync`/`MarkAbsentAsync` — all missed by the prior name-regex count) in `ExecuteAsync`/`ExecuteReadAsync`; delete the corresponding `SaveChangesAsync` call sites; re-shape `ArtistResolutionService.CommitAsync`, `SongResolutionService.CommitAsync`, and `QueueService.AddPersonToQueueAsync` to use the ambient join (REQ-UOW-09, REQ-UOW-22, REQ-UOW-23). `QueueService.RecordParticipationAsync` (the public method) is where the wrap goes for the private `GetOrCreateDefaultEventAsync` — see note below. A wave that only covers the prior 25-method list leaves 10 write paths (including `BackupService`, an entire file missing from the prior scope) still using the session-lifetime context, reproducing BUG-068 on those paths. **Save-skip wiring (Revision 8, § 6b):** `BackupService.CreateFullBackupAsync`'s wrap requires `BackupResult` to implement `IUnitOfWorkOutcome` (`: IUnitOfWorkOutcome` appended to its declaration in `Domain/ServicesInterfaces/IBackupService.cs:5`) so its wrap participates in save-skip detection; `QueueService.RecordParticipationAsync`/`SetActiveEventAsync` and `SongKaraokeUrlService.RecordPlayAsync` wrap via the no-signal `ExecuteAsync<TRepo>(Func<TRepo, Task> body, ct)` overload (always saves, § 6b); every other method wraps via the typed `Task<TResult>` overload and gets save-skip for free from the `ITuple` structural check — no per-method opt-in needed. | yes — one agent per service, no file overlap |
 | 6 | UI | Audit singletons for captive dependencies (`AppShellViewModel`, `AppShell`, `MauiProgram.cs:109-110`); convert any that inject repositories/services. | yes |
 | 7 | Tests (GREEN + cleanup) | Confirm the Wave-0 regression tests now PASS. `TestDbContextFactory` alignment; delete the workarounds at `CatalogRepositoryTests.cs:66` and `ArtistRepositoryTests.cs:366`; fix the stale `GetByIdAsync` "Tracked query" comment (REQ-UOW-20). | partly |
 
@@ -719,6 +968,10 @@ All five prior open questions are resolved (§ 8 decisions record the answers an
 4. ~~Read paths~~ — resolved: separate `ExecuteReadAsync` that never saves (Revision 6).
 5. ~~Repository-family merge~~ — resolved: in scope, but as a **prerequisite** completed before Wave 0
    of this change, not as a follow-up and not folded into these waves (§ 8, Prerequisite decision).
+6. ~~Spec-review finding B3 (unconditional save vs. this codebase's failure-tuple convention)~~ —
+   resolved: `ExecuteAsync` skips the save when the result signals failure, via structural `ITuple`
+   detection + `IUnitOfWorkOutcome` opt-in + an always-saves no-signal overload for bare-`Task`
+   methods (Revision 8, § 6b). No longer OPEN — pending architect decision.
 
 No open questions remain for this design. The next step is task-log/tasks.md breakdown against the
 wave table in § 10.
