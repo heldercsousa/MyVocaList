@@ -31,12 +31,10 @@ public sealed class EventService : IEventService
             return (false, "Event name is required", null);
         }
 
-        name = name.Trim();
-
-        if (name.Length < MinNameLength || name.Length > MaxNameLength)
+        if (name.Trim().Length < MinNameLength || name.Trim().Length > MaxNameLength)
         {
             _logger.LogDebug("Event creation failed: name length {Length} outside range {Min}-{Max}",
-                name.Length, MinNameLength, MaxNameLength);
+                name.Trim().Length, MinNameLength, MaxNameLength);
             return (false, $"Name must be {MinNameLength}–{MaxNameLength} characters", null);
         }
 
@@ -48,7 +46,10 @@ public sealed class EventService : IEventService
             return (false, "Event end time must be after start time", null);
         }
 
-        // Validation: check for duplicate name on the same date at this venue
+        // Event.Name trimming is enforced by the EF Core ValueConverter configured in
+        // QueueManagementEventConfiguration (design.md § D3) — not here. EF applies the same
+        // converter to this WHERE parameter, so an untrimmed check value still matches trimmed
+        // stored rows.
         var isDuplicate = await _eventRepository.ExistsByNameAsync(name, ct);
         if (isDuplicate)
         {

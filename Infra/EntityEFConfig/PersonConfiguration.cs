@@ -15,15 +15,19 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
         builder.Property(p => p.ExternalId)
                .IsRequired(false);
 
+        // D3 (design.md § D3): trim-on-save enforced here, not in PersonService Create/Update.
         builder.Property(p => p.FullName)
                .HasColumnType("TEXT").IsRequired().HasMaxLength(250)
+               .HasConversion(TrimValueConverters.Required)
                .UseCollation(CollationConstants.Default);
 
         builder.Property(p => p.BirthdayDayMonth)
                .HasColumnType("TEXT").IsRequired(false).HasMaxLength(5);
 
+        // D3 (design.md § D3): trim-on-save enforced here, not in PersonService Create/Update.
         builder.Property(p => p.Email)
-               .HasColumnType("TEXT").IsRequired(false).HasMaxLength(100);
+               .HasColumnType("TEXT").IsRequired(false).HasMaxLength(100)
+               .HasConversion(TrimValueConverters.Optional);
 
         builder.Property(p => p.Participations)
                .IsRequired().HasDefaultValue(0);
