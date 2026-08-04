@@ -59,7 +59,8 @@ and the 26 `TODO [BUG-071 / UOW]` markers (none in any file this plan touches).
 | # | Finding | Effect on the plan |
 |---|---|---|
 | **F1** | **Phase 1 as specified does not compile.** § 10 Phase 1 removes `SaveChangesAsync` from the 5 standalone repository *interfaces* while deferring service wraps to Phase 2/4+. Eleven live call sites reach it through those interfaces: `SongService.cs:96,146,214`, `ArtistService.cs:69,96`, `ArtistResolutionService.cs:113,133`, `CatalogService.cs:40`, `SongKaraokeUrlService.cs:61,74,82`, `BackupService.cs:61` — plus test callers (F7). | **Interface-member removal moves out of Phase 1** into the task that wraps the member's *last remaining caller*: `IArtistRepository`→2.3, `ISongRepository`→2.4, `ICatalogRepository`→4.1, `ISongKaraokeUrlRepository`→4.3, `IBackupRepository`→4.5. REQ-UOW-11 fully satisfied by end of Phase 4+. |
-| **F2** | **REQ-UOW-04's Person/Venue rows cannot be green at Phase 3.** Those services are Phase 4+ work, but Phase 3 demands a fully green suite. | Phase 0 writes them, observes RED, then skip-marks **exactly two** with a greppable reason. Removal is owned by Tasks 4.2/4.4 **and** carried as an explicit obligation in the item's `README.md` gate (see Task 0.5) — a permanently-skipped test that went red once is indistinguishable from a forgotten one. |
+| **F2** | ~~REQ-UOW-04's Person/Venue rows cannot be green at Phase 3, so skip-mark them.~~ **SUPERSEDED at execution 2026-08-04 by F8 — the whole problem was imaginary.** All three families already pass; nothing needs skipping. | Skip-marking dropped entirely. Phase 3.1's gate becomes **`Skipped: 0`**, not "exactly 2", and Tasks 4.2/4.4 lose their unskip steps. |
+| **F8** | **REQ-UOW-04's premise is false — verified at execution.** The AC assumes `ArtistRepository`, `PersonRepository` and `VenueRepository` carry the same latent defect as `SongRepository`. They do not, and cannot be made to fail on this path: `ArtistRepository.GetByIdAsync` (`:79-80`) calls `.AsTracking()`, and `PersonRepository`/`VenueRepository` inherit `BaseRepository<T>.GetByIdAsync` (`:24-29`) which uses `FindAsync` — **both identity-resolve and hand back the already-tracked instance**. Only `SongRepository.GetByIdAsync` (`:53-54`) is a bare `FirstOrDefaultAsync` under the global `NoTracking` default, returning a second detached instance that then collides at `Update`. Finding F6 noticed this asymmetry and filed it as a footnote; it actually falsifies an AC. | **Helder's decision 2026-08-04: Option A.** REQ-UOW-04 is satisfied **vacuously** for Artist/Person/Venue (same treatment as F3/F5/F6). The three tests are kept as **passing characterization tests** — they lock the behavior in through the refactor and would catch a future edit that removed `.AsTracking()` from `ArtistRepository`, which is exactly how `SongRepository` reached its current state. Each carries a comment naming its own family's reason. |
 | **F3** | **The stopgap is not on `develop`.** `1a114c1` is not an ancestor of HEAD; `SongRepository.UpdateAsync` (`:128-133`) is a plain `_db.Songs.Update(song)` with no `ChangeTracker` reference anywhere in the file. | REQ-UOW-18 satisfied **vacuously** (`§ 10` NB-4 case 2). Task 2.4 re-checks and records. |
 | **F4** | **No service-over-real-DB integration test exists.** All 12 integration classes test *repositories*; every `Unit/Services/*Tests.cs` is Moq-over-repository. Only `AppServicesRegistrationTests.cs:23` composes `AddAppServices()`. This is why the unit suite missed BUG-068. | Phase 0's first task builds a real DI-composition harness. New infrastructure, not a tweak. |
 | **F5** | ~~`ArtistRepositoryTests.cs:257`/`:358` are deletable workarounds.~~ **WITHDRAWN — this finding of mine was wrong** (caught by plan-review). `:257` is the arrange step that *creates* the detached condition `UpdateAsync_DetachedInstance_Updates` exists to exercise (BUG-018's AC) — deleting it silently deletes the AC. `:358` sits under a deliberately-overridden `QueryTrackingBehavior.TrackAll` (`:352`); deleting it leaves the seeded `Artist` tracked and **fails** the test's own `Assert.Empty(...ChangeTracker.Entries<Artist>())` at `:364`. | **REQ-UOW-17 is partially vacuous.** Exactly one genuine workaround exists: `CatalogRepositoryTests.cs:67` (comment `:66`). The spec's `ArtistRepositoryTests.cs:366` reference resolves to a comment line and to no workaround at all. Recorded like F3/F6. |
@@ -338,13 +339,13 @@ Note `CreateVenueAsync`/`UpdateVenueAsync` take no `CancellationToken` (`VenueSe
 - [ ] **Step 2: Run all three and read each failure.** Expected: **FAIL**, same
   `InvalidOperationException … already being tracked`, once per repository. Record all three exception
   texts in the task-log — this is the RED evidence, and it is captured **before** any skip is applied.
-- [ ] **Step 3: Skip-mark exactly the two that Phase 3 cannot turn green** *(finding F2)*. On the
-  Person and Venue tests only:
-  `[Fact(Skip = "REQ-UOW-04 Person/Venue — RED observed (task-log 2026-08-04); unskipped by plan Task 4.2 / Task 4.4")]`
-  Leave the Artist test active — Task 2.1 turns it green.
+- [ ] **Step 3: ~~Skip-mark~~ CANCELLED by F8.** All three tests pass on unchanged code and stay
+  active as characterization tests. No `[Fact(Skip = …)]` anywhere. Each carries a second comment line
+  naming its OWN family's reason (`.AsTracking()` for Artist; `BaseRepository.FindAsync` for
+  Person/Venue) so a later reader does not mistake a passing test for a missing one.
 - [ ] **Step 4: Run the full suite.** `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`
-  Expected: pre-existing suite still passes; **exactly 2 skipped**; `Bug068RegressionTests` red on
-  REQ-UOW-03 + the Artist row only.
+  Expected: pre-existing suite still passes; **0 skipped**; `Bug068RegressionTests` red on
+  REQ-UOW-03 only — the three REQ-UOW-04 tests PASS (F8).
 - [ ] **Step 5: Commit.** `test(uow): RED — REQ-UOW-04 across Artist/Person/Venue repositories`
 
 ### Task 0.4: REQ-UOW-22 — atomicity of the 3-level nested chain
@@ -409,9 +410,9 @@ method, and its guarantee is that the *observable outcome does not change*.
   skip-marked tests with their justification. Confirm **no production file changed** —
   `git diff develop --name-only` lists test files only.
 - [ ] **Carry the skip-removal obligation forward** *(finding F2, reviewer condition 1)*: add to the
-  UOW item's `README.md` `gate:` line that two REQ-UOW-04 tests are skipped pending Tasks 4.2/4.4, and
-  add the same note to the Phase 3.5 item's `README.md` — Phase 3.5 is currently unstartable, so
-  without this the skips could outlive everyone's memory of them.
+  UOW item's `README.md` `gate:` line. **Superseded by F8: there are no skipped tests, so
+  there is no carry-forward obligation.** Record instead that REQ-UOW-04 is vacuously satisfied for
+  Artist/Person/Venue and why.
 - [ ] Register the O3 hazard (`BackupService.RestoreFromBundleAsync:137`) as a bug now, per proactive
   triage: `python .claude/scripts/backlog/backlog_gen.py register --kind bug --severity Major …`
 - [ ] `backlog_gen.py status <ID> "🟡 In Progress"`, then `regen`.
@@ -658,8 +659,8 @@ public Task<(bool success, string message)> UpdateSongAsync(
   still calls it. The member and `ArtistRepository.cs:157-158` stay until Task 2.3.
 - [ ] **Step 5:** Update `ArtistServiceTests.cs` to construct `ArtistService` with
   `new PassthroughUnitOfWork(sp)` over the existing repository mocks. Do not weaken any assertion.
-- [ ] **Step 6: Run.** The **Artist** REQ-UOW-04 test PASSES; REQ-UOW-03 (Song) still red. Full suite
-  otherwise green, exactly 2 skipped. **Note and verify an intermediate state:** between this task and
+- [ ] **Step 6: Run.** REQ-UOW-03 (Song) still red — ArtistService's wrap does not fix it. Full suite
+  otherwise green, 0 skipped. **Note and verify an intermediate state:** between this task and
   Task 2.3, the still-unwrapped `ArtistResolutionService.CommitAsync` calls the now-wrapped
   `CreateArtistAsync` (`:121`) and then does `_artistRepository.UpdateAsync(created, ct)` (`:132`) on
   the window-scope context, with an entity created in a different, now-disposed context. EF's `Update`
@@ -688,7 +689,7 @@ public Task<(bool success, string message)> UpdateSongAsync(
   rows (same decorator technique as Task 0.4) and assert **no `Song` row** persists.
 - [ ] **Step 6: Do NOT remove `ISongRepository.SaveChangesAsync`** — `SongServiceTests` and Task 2.4's
   caller sweep own that.
-- [ ] **Step 7: Run.** REQ-UOW-03 PASSES. Full suite green, exactly 2 skipped.
+- [ ] **Step 7: Run.** REQ-UOW-03 PASSES — this is the pilot's headline RED->GREEN. Full suite green, 0 skipped.
 - [ ] **Step 8: Commit.** `refactor(uow): wrap SongService create/update methods (Phase 2 pilot)`
 
 ### Task 2.2b: `SongService.DeleteSongsAsync`
@@ -771,10 +772,10 @@ public Task<(bool success, string message)> UpdateSongAsync(
 > are recorded passed in `task-log.md` (REQ-UOW-30).** This is Helder's gate, not the orchestrator's.
 
 - [ ] **3.1 — Full automated suite green.** `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`.
-  Record total/passed/failed/skipped. **The run must report exactly `Skipped: 2`**, and both must be the
-  REQ-UOW-04 Person/Venue tests from Task 0.3 — an accidental third skip does not pass this gate.
-  Confirm the Phase 0 RED tests (REQ-UOW-03, REQ-UOW-04 Artist, REQ-UOW-22, REQ-UOW-24-nested) are now
-  GREEN and record before/after.
+  Record total/passed/failed/skipped. **The run must report `Skipped: 0`** — the skip-mark step was
+  cancelled by F8, so ANY skipped test is an unexplained regression and does not pass this gate.
+  Confirm the Phase 0 RED tests (REQ-UOW-03, REQ-UOW-22, REQ-UOW-24-nested) are now GREEN and record
+  before/after. Phase 0 baseline for comparison: **Failed 3, Passed 525, Skipped 0, Total 528.**
 - [ ] **3.2 — Review-checklist commands**, output pasted into the task-log:
   - `git diff develop --name-only` contains **none** of the seven excluded files (REQ-UOW-31).
   - REQ-UOW-28: `git grep -nE '_(song|artist|catalog|url|person|venue)\w*(Repository|Service|Resolution)' -- Services/*.cs`
@@ -843,7 +844,7 @@ plan-review → implementation cycle. This plan does not attempt it.
   *different* edit from the service-test fix). Retire `ICatalogRepository.cs:20` +
   `CatalogRepository.cs:78-79`. `RemoveSongFromCatalogAsync` is an `ExecuteDeleteAsync` path (REQ-UOW-33).
 - [ ] **4.2 — `PersonService` (3).** Files: `Services/PersonService.cs`, `Unit/Services/PersonServiceTests.cs`,
-  `Integration/UnitOfWork/Bug068RegressionTests.cs` (remove the Person `Skip`). **`IBaseRepository<T>.SaveChangesAsync()`
+  `Integration/UnitOfWork/Bug068RegressionTests.cs` (no `Skip` to remove — F8). **`IBaseRepository<T>.SaveChangesAsync()`
   is NOT removed** — approved decision (`design.md § 8`), unconditional: `PersonRepository`/`VenueRepository`
   retain a technically-reachable inherited member after this spec ships. Its surviving callers are in the
   **excluded** `Services/QueueService.cs` (`:109`, `:151`, `:162`), so removing it would be a compile-level
@@ -856,7 +857,7 @@ plan-review → implementation cycle. This plan does not attempt it.
   **only** in-scope no-signal method — wraps via `ExecuteAsync(Func<IServiceProvider, Task>, ct)`
   (REQ-UOW-26). `RemoveUrlAsync`/`RecordPlayAsync` are two of REQ-UOW-33's five bulk-op paths.
 - [ ] **4.4 — `VenueService` (3).** Files: `Services/VenueService.cs`, `Unit/Services/VenueServiceTests.cs`,
-  `Integration/UnitOfWork/Bug068RegressionTests.cs` (remove the Venue `Skip`). Also delete the dead
+  `Integration/UnitOfWork/Bug068RegressionTests.cs` (no `Skip` to remove — F8). Also delete the dead
   `IEventRepository _eventRepository` field (`VenueService.cs:16-18`, ctor param `:27`, assignment `:31`)
   — verified unused, and it carries its own `TODO [BUG-071 / UOW] — … Delete, do not migrate` marker.
   This edits `VenueService.cs` only, not any excluded file. It changes the constructor arity, so
