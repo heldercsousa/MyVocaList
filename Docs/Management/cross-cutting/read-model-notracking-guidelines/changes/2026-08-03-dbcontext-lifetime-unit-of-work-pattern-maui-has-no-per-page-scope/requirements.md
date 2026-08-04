@@ -7,8 +7,16 @@
 > Status: **Candidate C is chosen** (`design.md § 8`); the API decisions are APPROVED by Helder
 > (Revision 8, 2026-08-04, adds the failure-tuple save-skip mechanism resolving spec-review finding
 > B3, `design.md § 6b`; Revision 9, 2026-08-04, makes the unrecognised-`TResult` fallback on the
-> value-returning overload fail-closed — throw, not save unconditionally). The acceptance criteria
-> below reflect the approved, candidate-C-specific design.
+> value-returning overload fail-closed — throw, not save unconditionally; Revision 10, 2026-08-04,
+> drops the typed overload). **Three further Helder-approved decisions (2026-08-04) are recorded as
+> `design.md § 8` D11/D12/D13:** D11 restructures `design.md § 10` into a pilot-first phase order
+> (SongService/ArtistService/ArtistResolutionService/SongResolutionService first, gated VERIFY, then
+> spread); D12 excludes all Queue and Event entity code from this spec's scope (tracked separately at
+> `changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/`), which
+> **corrects the in-scope method count from 35 to 21** (16 single-repository / 5 multi-repository,
+> `design.md § 8` D12); D13 keeps the API shape provisional until the pilot's real call sites decide it
+> in Phase 3. The acceptance criteria below reflect the approved, candidate-C-specific design as
+> corrected by D11/D12/D13.
 
 ---
 
@@ -82,14 +90,17 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   And the update is persisted
   ```
   *Test:* an integration regression test named for BUG-068 that fails on the pre-change code.
-- **REQ-UOW-04** — **The currently-unguarded repositories are covered by the same guarantee.** The
-  REQ-UOW-03 create→read→update sequence SHALL also hold for `ArtistRepository`, `QueueRepository`,
-  every `BaseRepository<T>` descendant (`PersonRepository`, `VenueRepository`,
-  `EventParticipationRepository`), and **the surviving merged `EventRepository`** — the
-  `Infra/Repository/*` / `Infra/Repositories/*` family merge (`design.md § 8` Prerequisite decision)
-  is a hard prerequisite completing before Wave 0, so only one `EventRepository` exists by the time
-  this requirement is tested. *Test:* one parameterised integration test per repository family, each
-  failing on pre-change code.
+- **REQ-UOW-04** — **The currently-unguarded IN-SCOPE repositories are covered by the same guarantee.**
+  The REQ-UOW-03 create→read→update sequence SHALL also hold for `ArtistRepository` and the two
+  `BaseRepository<T>` descendants that are not Queue/Event entities (`PersonRepository`,
+  `VenueRepository`). *(Corrected 2026-08-04, `design.md § 8` D12: this requirement previously also
+  named `QueueRepository`, `EventParticipationRepository`, and "the surviving merged `EventRepository`"
+  — all three are Queue/Event entities excluded from this spec's scope under D12 and are carried by
+  `changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/` instead.
+  The `Infra/Repository/*` / `Infra/Repositories/*` family merge remains a hard prerequisite completing
+  before Phase 0 — `design.md § 8` Prerequisite decision — independent of which repositories this
+  requirement covers.)* *Test:* one parameterised integration test per in-scope repository family,
+  each failing on pre-change code.
 - **REQ-UOW-05** — WHEN two units of work run concurrently, the system SHALL NOT share a
   `DbContext` instance between them. *Test:* a test issuing two overlapping service calls asserts two
   distinct context instances and no `InvalidOperationException`.
@@ -104,13 +115,14 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   SaveChangesAsync commits both atomically" guarantee and the existing reliance on EF FK fixup via the
   navigation property. *Test:* existing tests plus an assertion that a forced failure on the URL rows
   leaves no `Song` row persisted.
-- **REQ-UOW-08** — `QueueService.GetOrCreateDefaultEventAsync`,
-  `Infra/Repository/EventRepository.SetActiveEventAsync`, and `QueueRepository.ReorderAsync` SHALL
-  each complete within a single unit of work, with their existing all-or-nothing semantics unchanged.
-  **`GetOrCreateDefaultEventAsync` is `private`** — reachable only via the public
-  `QueueService.RecordParticipationAsync`. The unit-of-work wrap goes on `RecordParticipationAsync`;
-  `GetOrCreateDefaultEventAsync` runs as a plain private helper call inside that same unit of work
-  (`design.md § 10`).
+- **REQ-UOW-08** — **OUT OF SCOPE, deferred (corrected 2026-08-04, `design.md § 8` D12).**
+  `QueueService.GetOrCreateDefaultEventAsync`, `Infra/Repository/EventRepository.SetActiveEventAsync`,
+  and `QueueRepository.ReorderAsync` are all Queue/Event entity code, excluded from this spec's scope
+  by Helder's decision (D12). This requirement is not implemented or tested by any phase of this
+  spec — it is carried forward to
+  `changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/`, which must
+  restate it (with its own acceptance criteria) before implementation. Retained here, marked
+  out-of-scope rather than deleted, so the original intent is not lost.
 - **REQ-UOW-09** — `ArtistResolutionService.CommitAsync` SHALL produce the same observable outcome as
   today (an artist exists with the external identity attached) **without** a save→mutate→save sequence
   spanning two contexts. Whether this becomes one save or remains two saves inside one unit of work is
@@ -144,9 +156,11 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   Then no Song row and no Artist row exist afterward (all-or-nothing)
   And the thrown exception propagates to the caller per REQ-UOW-06
   ```
-- **REQ-UOW-23** — `QueueService.AddPersonToQueueAsync` SHALL produce the same observable outcome as
-  today across its nested call to `_personService.CreatePersonAsync` (`design.md § 6a`) **without**
-  the nested call opening a second `AppDbContext`.
+- **REQ-UOW-23** — **OUT OF SCOPE, deferred (corrected 2026-08-04, `design.md § 8` D12).**
+  `QueueService.AddPersonToQueueAsync` is a `QueueService` method, excluded from this spec's scope by
+  Helder's decision (D12) along with the rest of `QueueService`/`EventService`/`QueueServiceNew`. It
+  will **not** be wrapped in `IUnitOfWork` by any phase of this spec, and the Given/When/Then scenarios
+  below are **not** implemented as tests here.
   ```
   Given a queue add-request for a person who does not yet exist
   When AddPersonToQueueAsync is called
@@ -160,6 +174,13 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   Then no Person row exists afterward (all-or-nothing)
   And the thrown exception propagates to the caller per REQ-UOW-06
   ```
+  **Boundary-crossing note (`design.md § 8` D12 item 3):** the nested call itself
+  (`QueueService.AddPersonToQueueAsync` → `PersonService.CreatePersonAsync`) is analysed in
+  `design.md § 8` D12's boundary-crossing table and found **not** to reproduce BUG-068/BUG-071 once
+  `PersonService.CreatePersonAsync` is wrapped in Phase 4+ — the wrapped side opens and disposes its
+  own short-lived context regardless of whether the unwrapped caller ever joins it. This requirement
+  is retained here, marked out-of-scope, so the original acceptance criteria are not lost — it is
+  restated by the deferred item if `QueueService` itself is ever migrated.
 
 ### Save-skip on failure-tuple results (Revision 8 — resolves spec-review finding B3)
 
@@ -185,22 +206,22 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   persisted. *Test:* the positive counterpart of REQ-UOW-24 — same shapes, success path, asserts the
   mutated value is present on re-read.
 - **REQ-UOW-26** — WHEN a service method's body has no success/failure signal to inspect (its
-  delegate is `Func<IServiceProvider, Task>`, not `Func<IServiceProvider, Task<TResult>>` — e.g.
-  `QueueService.RecordParticipationAsync`, `QueueService.SetActiveEventAsync`,
-  `SongKaraokeUrlService.RecordPlayAsync`), THEN `IUnitOfWork.ExecuteAsync(Func<IServiceProvider, Task>
+  delegate is `Func<IServiceProvider, Task>`, not `Func<IServiceProvider, Task<TResult>>`), THEN
+  `IUnitOfWork.ExecuteAsync(Func<IServiceProvider, Task>
   body, ct)` SHALL call `SaveChangesAsync` unconditionally whenever `body` completes without
   throwing. This is the documented fallback (`design.md § 6b` "no-signal fallback"), reachable only
   through this dedicated overload — the compiler selects it for any `Func<IServiceProvider, Task>`
   body, so no call site can reach it by accident. Under Revision 10 (`design.md § 8`) this is the
-  ONLY no-signal form — there is no `TRepo`-typed variant. **`QueueService.RecordParticipationAsync`
-  spans three repositories** (`IEventRepository`, `IVenueRepository`, `IEventParticipationRepository`,
-  `design.md § 6` "D10 correction"), so it MUST resolve all three from the lambda's `IServiceProvider`;
-  a typed single-`TRepo` overload could never have covered it, which is itself evidence for the
-  Revision 10 decision to drop the typed overload rather than special-case this method. *Test:* an
-  integration test running `QueueService.RecordParticipationAsync` (or an equivalent bare-`Task`
-  mutating call) asserts the mutation is persisted on a normal return, and a second test asserts an
-  exception thrown inside the body still leaves no partial state (REQ-UOW-06 applies identically to
-  the no-signal overload).
+  ONLY no-signal form — there is no `TRepo`-typed variant. **Corrected 2026-08-04 (`design.md § 8`
+  D12):** this requirement originally named three no-signal methods —
+  `QueueService.RecordParticipationAsync`, `QueueService.SetActiveEventAsync`,
+  `SongKaraokeUrlService.RecordPlayAsync`. The first two are `QueueService` methods, excluded from this
+  spec's scope under D12 (see REQ-UOW-08/REQ-UOW-23) — `QueueService.RecordParticipationAsync`'s
+  three-repository span is no longer relevant to this spec's Phase 4+ work. **The only in-scope
+  no-signal method is `SongKaraokeUrlService.RecordPlayAsync`.** *Test:* an integration test running
+  `SongKaraokeUrlService.RecordPlayAsync` (or an equivalent bare-`Task` in-scope mutating call) asserts
+  the mutation is persisted on a normal return, and a second test asserts an exception thrown inside
+  the body still leaves no partial state (REQ-UOW-06 applies identically to the no-signal overload).
 - **REQ-UOW-27** (Revision 9, 2026-08-04 — resolves the fail-open/fail-closed refinement of finding
   B3) — WHEN a service method's body returns, via `IUnitOfWork.ExecuteAsync<TResult>` (the
   value-returning overload — the only value-returning form under Revision 10, `design.md § 8`), a
@@ -258,14 +279,21 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 - **REQ-UOW-11** — The six pass-through `SaveChangesAsync` implementations
   (`BaseRepository.cs:76-79`, `ArtistRepository.cs:157-158`, `CatalogRepository.cs:78-79`,
   `SongKaraokeUrlRepository.cs:67-68`, `SongRepository.cs:145-146`, `BackupRepository.cs:46-49`)
-  **AND the six `SaveChangesAsync` calls embedded inside repository *mutator* methods** (a distinct,
-  previously-uncounted third category, `design.md § 2a` BL-1 correction:
+  SHALL be reduced to at most one save entry point (the `IUnitOfWork` boundary). *Test:* a source-level
+  assertion (grep in the review checklist) that no in-scope repository implementation declares or
+  calls `SaveChangesAsync`. **Corrected 2026-08-04 (`design.md § 8` D12 item 4):** this requirement
+  previously also named "the six `SaveChangesAsync` calls embedded inside repository *mutator*
+  methods" (`design.md § 2a` BL-1) as a second category in scope for this spec:
   `Infra/Repository/EventRepository.cs:37` `SetActiveEventAsync`,
   `Infra/Repositories/QueueRepository.cs:56` `AddAsync`, `:67` `UpdateAsync`, `:93` `ReorderAsync`,
-  `Infra/Repositories/EventRepository.cs:66` `AddAsync`, `:77` `UpdateAsync`)
-  SHALL be reduced to at most one save entry point (the `IUnitOfWork` boundary). *Test:* a source-level
-  assertion (grep in the review checklist) that no repository implementation — pass-through or
-  mutator — declares or calls `SaveChangesAsync`.
+  `Infra/Repositories/EventRepository.cs:66` `AddAsync`, `:77` `UpdateAsync`. A source grep
+  (`design.md § 8` D12 item 4) confirms **all six** of these are in `EventRepository` (either family)
+  or `QueueRepository` — i.e. entirely Queue/Event entity code, excluded from this spec's scope under
+  D12. BL-1's claim ("all 6 embedded saves are in `EventRepository`/`QueueRepository`") is verified
+  **TRUE** and is **not deleted**; it is restated as a LIVE RISK owned by
+  `changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/README.md`,
+  which must remove these six saves when it wraps `EventService`/`QueueService`/`QueueServiceNew`.
+  This spec's REQ-UOW-11 obligation is limited to the six pass-throughs above.
 - **REQ-UOW-12** — WHEN a new developer reads any service method that writes data, the method SHALL
   name its unit of work explicitly — no write may occur through an implicitly-obtained context.
 - **REQ-UOW-13** — The design SHALL use .NET/EF Core built-ins (`AddDbContextFactory` /
@@ -351,26 +379,55 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   a `SemaphoreSlim(1, 1)`) SHALL be deleted, along with every acquire/release call site. Its own
   comment states its reason for existing: "all CRUD list ViewModels share one effectively-singleton
   AppDbContext (MAUI has no per-page scope), so at most one DB load may run at a time app-wide." This
-  change removes that root cause (Wave 6, `design.md § 10`); leaving the gate in place afterward would
-  silently reintroduce app-wide load serialization, directly undermining REQ-UOW-05's guarantee that
-  concurrent units of work do not share a context and therefore do not need to queue behind each
-  other. *Test:* a test asserting two concurrent list-load calls (e.g. two different CRUD list
-  ViewModels loading simultaneously) complete without serializing through a shared semaphore, plus a
-  source-level check that `DbLoadGate` no longer exists.
+  change removes that root cause (Phase 4+, `design.md § 10`); leaving the gate in place afterward
+  would silently reintroduce app-wide load serialization, directly undermining REQ-UOW-05's guarantee
+  that concurrent units of work do not share a context and therefore do not need to queue behind each
+  other. **The gate SHALL NOT be removed before every in-scope consumer is converted (§ 10 Phase 4+)**
+  — removing it earlier would stop serializing loads for ViewModels not yet migrated, which still share
+  the window-scope context. *Test:* a test asserting two concurrent list-load calls (e.g. two different
+  CRUD list ViewModels loading simultaneously) complete without serializing through a shared semaphore,
+  plus a source-level check that `DbLoadGate` no longer exists.
+
+### Phase-order, scope-exclusion, and API-shape-deferral requirements (D11/D12/D13, `design.md § 8`)
+
+- **REQ-UOW-30** (D11) — No task belonging to `design.md § 10` Phase 4+ SHALL be dispatched, claimed,
+  or started until Phase 3's VERIFY gate — full automated test suite green, Helder's on-device
+  confirmation that the pilot screens (Song/Artist CRUD) no longer reproduce BUG-068/BUG-071, and the
+  D13 API-shape decision (REQ-UOW-32) — is recorded passed in the feature's task-log. *Test:* not a
+  runtime test — a process check at code review: the task-log entry recording the first Phase 4+ task's
+  dispatch must reference a prior Phase 3 entry recording all three Phase 3 outcomes; its absence is a
+  process defect caught at review.
+- **REQ-UOW-31** (D12) — No commit belonging to `design.md § 10` Phase 0 through Phase 4+ of this spec
+  SHALL modify `Services/EventService.cs`, `Services/QueueService.cs`, `Services/QueueServiceNew.cs`,
+  `Infra/Repository/EventRepository.cs`, `Infra/Repositories/EventRepository.cs`,
+  `Infra/Repositories/QueueRepository.cs`, or the `EventParticipationRepository`
+  interface/implementation. *Test:* a source-level check (grep in the review checklist, mirroring
+  REQ-UOW-11's pattern) confirming none of these files appear in any Phase 0–4+ commit's diff; their
+  existing `SaveChangesAsync` call sites (pass-through and embedded) remain present and unchanged until
+  the deferred item (`changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/`)
+  picks them up.
+- **REQ-UOW-32** (D13) — Phase 3's VERIFY step SHALL include an explicit decision record — "keep
+  provisional" or "replace" — for the `IUnitOfWork` API shape (`design.md § 6`/§ 8 Revision 10), made
+  from the 4 pilot services' actual call sites, not the § 6 audit. IF the decision is "replace", THEN
+  every Phase 4+ task SHALL be written against the replacement shape, not the provisional
+  `Func<IServiceProvider, …>`-only shape. *Test:* the Phase 3 task-log entry names the decision
+  (keep/replace) with a one-line rationale; if "replace", the first Phase 4+ commit's diff uses the
+  replacement shape.
 
 ## Validation rules
 
 - No service method may call more than one `SaveChangesAsync` per unit of work **unless** the flow is
-  listed in REQ-UOW-08/09 and the reason is documented inline.
+  listed in REQ-UOW-09 (REQ-UOW-08 is out of scope, deferred — `design.md § 8` D12) and the reason is
+  documented inline.
 - No repository may hold a `DbContext` beyond the unit of work that produced it.
 - No singleton or transient UI type may capture a repository or a data-writing service that owns a
   `DbContext` (captive dependency) — `AppDbContextFactory(..., ServiceLifetime.Scoped)` registers
   `AppDbContext` itself as scoped (§ 1 "Reviewer-finding correction"), so a **transient** ViewModel
   resolving a repository is exactly as captive as a singleton would be; the ViewModel's own DI
   lifetime does not protect it (`design.md § 8`, BL-1 widening). `AppShellViewModel` and `AppShell`
-  (`MauiProgram.cs:109-110`, singletons) and the three transient ViewModels named in Wave 6
-  (`QueueSongPickerViewModel`, `QueueManagementViewModel`, `PersonPickerViewModel`) are the known
-  offenders to audit and convert.
+  (`MauiProgram.cs:109-110`, singletons) and the three transient ViewModels named in Phase 4+
+  (`QueueSongPickerViewModel`, `QueueManagementViewModel`, `PersonPickerViewModel` — all IN SCOPE
+  despite their names, `design.md § 8` D12 item 6) are the known offenders to audit and convert.
 - No `ExecuteAsync`/`ExecuteReadAsync` lambda body may reference the enclosing service's
   constructor-injected repository/service fields — every repository the lambda uses SHALL be resolved
   from the lambda's own `IServiceProvider` (REQ-UOW-28, BL-2).
@@ -394,6 +451,17 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
 - Retry/`CreateExecutionStrategy` policies for transient faults — SQLite is local; evaluated in
   `design.md` and deliberately not required.
 - Multi-window support.
+- **Queue and Event entity code (added 2026-08-04, `design.md § 8` D12, Helder verbatim: "forget
+  about any code related to Queue and Event entities. They're candidates to be completely refactored
+  later, when we will already have the new approach already established in the guides.")** —
+  `EventService`, `QueueService`, `QueueServiceNew`, `EventRepository` (both families),
+  `QueueRepository`, and `EventParticipationRepository` are excluded from every phase of this spec.
+  Tracked separately at
+  `changes/2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred/`. This
+  corrects the in-scope service-method count from 35 to 21 (see REQ-UOW-04/08/11/23/26 corrections
+  above and `design.md § 8` D12 items 1–2). `PersonPickerViewModel`, `QueueSongPickerViewModel`, and
+  `QueueManagementViewModel` are **not** excluded by this bullet despite their names — none injects a
+  Queue/Event repository (`design.md § 8` D12 item 6).
 
 ## Failure-mode analysis
 
