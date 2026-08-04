@@ -551,31 +551,31 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   (keep/replace) with a one-line rationale; if "replace", the first Phase 4+ commit's diff uses the
   replacement shape.
 
-- **REQ-UOW-34** (new, 4th-pass spec review, BL-E, `design.md § 6` Revision 11 —
-  **REQUIRES HELDER'S CONFIRMATION**) — WHEN `IUnitOfWork.ExecuteAsync`/`ExecuteAsync(Func<IServiceProvider,
-  Task>, ct)` (a write) is called while an `ExecuteReadAsync`-opened scope is ambient, THEN it SHALL
-  throw `InvalidOperationException` instead of joining that scope. Joining a read-only ambient scope
-  without this check silently discards the write (the read scope never calls `SaveChangesAsync`) — the
-  same no-exception, no-test-failure defect shape as BUG-071.
+- **REQ-UOW-34** (4th-pass finding BL-E; mechanism REVISED by Helder 2026-08-04 — `design.md § 6`
+  Revision 12, superseding Revision 11) — A read-only unit of work SHALL NOT publish an ambient scope.
+  `ExecuteReadAsync` never assigns `_ambientScope`; only `ExecuteAsync` does. This removes the silent
+  write-loss defect structurally: because every ambient scope belongs to a write, any nested write that
+  joins one is guaranteed to be saved. **No exception is thrown for nesting, in either direction** —
+  the Revision 11 `IsReadOnly` flag and fail-closed throw are withdrawn as a guard against a scenario
+  with no call site in this codebase.
   ```
-  Given a body running inside IUnitOfWork.ExecuteReadAsync
-  And that body calls IUnitOfWork.ExecuteAsync with a body that mutates a tracked entity and returns
-      a success tuple
-  When the nested ExecuteAsync call executes
-  Then an InvalidOperationException is thrown before any attempt to run the nested body
-  And re-reading the row from the database afterward shows no change
+  Given a body running inside IUnitOfWork.ExecuteAsync (a write)
+  And that body calls IUnitOfWork.ExecuteReadAsync to look up data needed to populate the entity
+  When the outer write body completes successfully
+  Then the nested read joins the SAME scope and no second AppDbContext is created
+  And the outer write is saved
   ```
-  *Test:* an integration test nesting a real `ExecuteAsync` mutation inside an `ExecuteReadAsync` body
-  asserts `InvalidOperationException` is thrown and no row was written. **Note on current reachability
-  (verified against source):** as of this spec's Phase 2 scope, no in-scope pilot method routes a
-  read-only method (`ArtistResolutionService.ResolveAsync`, `SongResolutionService.ResolveAsync`)
-  through `ExecuteReadAsync` — Phase 2 wraps only the `CommitAsync`/CRUD mutator methods listed in § 10.
-  The 4th-pass review's claim that this defect is "reachable in the pilot" via
-  `SongResolutionService.ResolveAsync → ArtistResolutionService.ResolveAsync` is **not substantiated**
-  by the current phase table (that chain is read-only end to end and is not itself wrapped in
-  `ExecuteReadAsync` by any Phase 2 task) — the defect is real and load-bearing regardless, but its
-  reachability claim in the original finding is corrected here to "latent in the API, not demonstrated
-  reachable by name in Phase 2's actual call list."
+  ```
+  Given a body running inside IUnitOfWork.ExecuteReadAsync (a read)
+  And that body calls IUnitOfWork.ExecuteAsync with a body that mutates an entity
+  When the nested write executes
+  Then it opens its OWN scope (no ambient scope is visible to it)
+  And the mutation IS persisted — no exception is thrown and nothing is silently discarded
+  ```
+  *Test:* two integration tests, one per direction above. The first asserts a single `AppDbContext`
+  instance and a persisted write; the second asserts the nested write is persisted and that no
+  `InvalidOperationException` occurs. The second test is the regression test for BL-E — it fails
+  against the Revision 10 design (write silently lost) and against Revision 11 (throws).
 
 ## Validation rules
 

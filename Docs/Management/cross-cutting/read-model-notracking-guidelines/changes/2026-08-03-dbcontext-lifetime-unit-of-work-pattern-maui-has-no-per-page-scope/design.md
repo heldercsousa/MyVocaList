@@ -460,32 +460,24 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
     // ships now per Revision 2, not deferred. Holds across the 3-level chain found in § 6a
     // (SongResolutionService.CommitAsync → ArtistResolutionService.CommitAsync → ArtistService.CreateArtistAsync).
     //
-    // Revision 11 (§ 8, fixes 4th-pass finding BL-E — REQUIRES HELDER'S CONFIRMATION): the ambient
-    // scope now carries a read/write flag alongside the provider. Without it, a write (`ExecuteAsync`)
-    // nested inside a read (`ExecuteReadAsync`) joins the read scope's context (correct, per the
-    // ambient-join rule) but the join branch never calls SaveChangesAsync — so the write is silently
-    // discarded, no exception, same failure shape as BUG-071. Fail-closed per the already-approved
-    // Revision 9 direction: a write body that finds itself inside a read-opened ambient scope THROWS
-    // instead of silently losing the mutation.
-    private readonly record struct AmbientScope(IServiceProvider Provider, bool IsReadOnly);
-    private static readonly AsyncLocal<AmbientScope?> _ambientScope = new();
+    // Revision 12 (§ 8, supersedes Revision 11 — Helder's decision 2026-08-04): ONLY a write
+    // publishes an ambient scope. A read never does. This closes 4th-pass finding BL-E (a write
+    // nested in a read joined a scope that never saves, silently discarding the mutation) without
+    // a guard, a flag, or an exception — the write simply opens its own scope and saves.
+    //   write -> read : the read JOINS the write's scope (the lookup-before-persist case; the
+    //                   outer write still saves normally).
+    //   read  -> write: the write opens its OWN scope and saves. No silent loss, no throw.
+    private static readonly AsyncLocal<IServiceProvider?> _ambientScope = new();
 
     public async Task<TResult> ExecuteAsync<TResult>(Func<IServiceProvider, Task<TResult>> body, CancellationToken ct = default)
     {
+        // Only a write ever publishes an ambient scope (Revision 12), so joining one is always
+        // joining another write — it will save.
         if (_ambientScope.Value is { } joined)
-        {
-            // Fail-closed (Revision 11): a write cannot silently join a read-only ambient scope —
-            // that scope will never save, so the write would vanish without error.
-            if (joined.IsReadOnly)
-                throw new InvalidOperationException(
-                    "ExecuteAsync (a write) was called while an ExecuteReadAsync scope is ambient. " +
-                    "A read-only unit of work never saves, so this write would be silently discarded. " +
-                    "Restructure so the write starts its own top-level ExecuteAsync, not nested inside ExecuteReadAsync.");
-            return await body(joined.Provider);   // join, don't nest — both are writes
-        }
+            return await body(joined);   // join, don't nest — both are writes
 
         await using var scope = scopeFactory.CreateAsyncScope();
-        _ambientScope.Value = new AmbientScope(scope.ServiceProvider, IsReadOnly: false);
+        _ambientScope.Value = scope.ServiceProvider;
         try
         {
             var result = await body(scope.ServiceProvider);
@@ -503,18 +495,10 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
     // wrapped by this spec (corrected 2026-08-04, non-blocking #4).
     public async Task ExecuteAsync(Func<IServiceProvider, Task> body, CancellationToken ct = default)
     {
-        if (_ambientScope.Value is { } joined)
-        {
-            if (joined.IsReadOnly)
-                throw new InvalidOperationException(
-                    "ExecuteAsync (a write) was called while an ExecuteReadAsync scope is ambient. " +
-                    "A read-only unit of work never saves, so this write would be silently discarded. " +
-                    "Restructure so the write starts its own top-level ExecuteAsync, not nested inside ExecuteReadAsync.");
-            await body(joined.Provider); return;
-        }
+        if (_ambientScope.Value is { } joined) { await body(joined); return; }
 
         await using var scope = scopeFactory.CreateAsyncScope();
-        _ambientScope.Value = new AmbientScope(scope.ServiceProvider, IsReadOnly: false);
+        _ambientScope.Value = scope.ServiceProvider;
         try
         {
             await body(scope.ServiceProvider);
@@ -525,17 +509,15 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
 
     public async Task<TResult> ExecuteReadAsync<TResult>(Func<IServiceProvider, Task<TResult>> body, CancellationToken ct = default)
     {
-        // A read joining ANY ambient scope (read or write) is safe — it never saves either way.
-        if (_ambientScope.Value is { } joined) return await body(joined.Provider);
+        // A read JOINS an ambient write scope when there is one — this is the common
+        // lookup-before-persist case, and the outer write still saves normally.
+        if (_ambientScope.Value is { } joined) return await body(joined);
+
+        // Standalone read: open a scope but do NOT publish it as ambient (Revision 12). A read
+        // never saves, so anything nested inside it must not be lured into joining it.
         await using var scope = scopeFactory.CreateAsyncScope();
-        _ambientScope.Value = new AmbientScope(scope.ServiceProvider, IsReadOnly: true);   // symmetric
-        try                                            // with ExecuteAsync (§ 9: at most one
-        {                                               // AppDbContext per unit of work) — a nested
-            return await body(scope.ServiceProvider);   // ExecuteAsync/ExecuteReadAsync call must join
-        }                                               // this scope rather than opening a second one
-        finally { _ambientScope.Value = null; }
-        // no SaveChangesAsync — read-only, per Revision 6. IsReadOnly: true is what makes a nested
-        // ExecuteAsync (write) inside this body throw (Revision 11) instead of silently losing data.
+        return await body(scope.ServiceProvider);
+        // no SaveChangesAsync — read-only, per Revision 6.
     }
 
     // Save-skip signal detection (Revision 9, § 6b). Exhaustive by construction — every branch is
@@ -584,18 +566,28 @@ public interface IUnitOfWorkOutcome
 > `AppDbContext` per unit of work" invariant. Fixed by setting/clearing `_ambientScope.Value` the same
 > way `ExecuteAsync` does; unintentional bug, not a design change.
 >
-> **Second bug fix (Revision 11, § 8 — REQUIRES HELDER'S CONFIRMATION, 4th-pass spec review finding
-> BL-E):** the fix above stopped the second-scope problem but introduced a worse, silent one: once a
-> nested `ExecuteAsync`/`ExecuteReadAsync` correctly joins the read scope instead of opening a second
-> one, it takes the **join branch**, which returns `await body(joined)` with **no `SaveChangesAsync`
-> call at all** — because the read scope that opened the ambient context never saves, by design
-> (Revision 6). A write nested inside a read is therefore silently discarded: no exception, no failing
-> test, the same failure shape as BUG-071. Fixed by tagging the ambient scope with an `IsReadOnly` flag
-> (`AmbientScope` record struct above) and making `ExecuteAsync`/`ExecuteAsync(Task)` **throw**
-> `InvalidOperationException` when the scope they would join was opened by `ExecuteReadAsync` —
-> consistent with the already-approved fail-closed direction (Revision 9): refuse loudly rather than
-> lose data silently. `ExecuteReadAsync` itself is unaffected — it may still join either kind of ambient
-> scope, since a read never saves regardless of which kind of scope it joins.
+> **Second bug fix (Revision 12, § 8 — Helder's decision 2026-08-04, supersedes Revision 11):** the fix
+> above stopped the second-scope problem but introduced a worse, silent one: once a nested
+> `ExecuteAsync` correctly joins the read scope instead of opening a second one, it takes the **join
+> branch**, which returns `await body(joined)` with **no `SaveChangesAsync` call at all** — because the
+> read scope that opened the ambient context never saves, by design (Revision 6). A write nested inside
+> a read was therefore silently discarded: no exception, no failing test, the same failure shape as
+> BUG-071.
+>
+> Revision 11 fixed this with a read/write flag on the ambient scope plus a fail-closed throw. **That
+> mechanism is withdrawn.** Helder's judgement (2026-08-04): the guard defends a scenario with no call
+> site in this codebase, and the concern is absent from ordinary web-stack practice because there the
+> framework owns the scope (scope = HTTP request) — nobody hand-rolls ambient joining, so the question
+> never arises. It arises here only because MAUI has no per-page scope and this design creates one
+> manually.
+>
+> **Revision 12 removes the failure instead of guarding it: only a write ever publishes an ambient
+> scope; a read never does.** A read nested in a write still joins the write's scope — the common
+> lookup-before-persist case, and the outer write saves normally. A write nested in a read finds no
+> ambient scope, opens its own, and saves. No flag, no throw, no silent loss, and less code than either
+> earlier revision. The cost is that two `AppDbContext` instances can be alive during a
+> read-containing-a-write — harmless, since the reads are `NoTracking` and the write owns its own
+> context (§ 9's one-context invariant is restated as applying to writes).
 
 **Inputs / Outputs / Preconditions — `IUnitOfWork.ExecuteAsync<TResult>` (the only value-returning form, Revision 10):**
 - **Inputs:** `body` — a delegate receiving the scope's `IServiceProvider`, returning `Task<TResult>`.
@@ -1557,11 +1549,13 @@ shape actually reads well in practice.
   `bool` nor an `IUnitOfWorkOutcome` implementer is never assumed to have succeeded — `ExecuteAsync`
   throws `InvalidOperationException` before any save is attempted. No unit of work may commit a
   mutation whose result type it could not interpret.
-- **Fail-closed on a write nested inside a read (Revision 11, § 6 — REQUIRES HELDER'S CONFIRMATION):** a
-  call to `ExecuteAsync`/`ExecuteAsync(Task)` that finds an `ExecuteReadAsync`-opened scope ambient
-  THROWS `InvalidOperationException` instead of joining it — joining a read-only scope would silently
-  discard the write, since that scope never saves. `ExecuteReadAsync` may still join either kind of
-  ambient scope (a read never saves regardless).
+- **Only a write publishes an ambient scope (Revision 12, § 6 — Helder's decision 2026-08-04):**
+  `ExecuteReadAsync` never sets `_ambientScope`. Therefore any ambient scope a write joins is another
+  write's, and always saves. A read nested inside a write joins it (lookup-before-persist); a write
+  nested inside a read opens its own scope and saves. The Revision 11 read/write flag and fail-closed
+  throw are **withdrawn** — the failure mode is removed structurally rather than guarded.
+  Corollary: the "at most one `AppDbContext` per unit of work" invariant applies to **write** units of
+  work; a standalone read may hold its own context concurrently with one.
 
 ## 10. Migration plan (Phase order per D11, § 8; DRY Onion within each phase: Domain → Infra → Services → UI)
 
@@ -1651,5 +1645,5 @@ All five prior open questions are resolved (§ 8 decisions record the answers an
 No open questions remain from the original seven. Three further decisions were made after this design
 was first approved — D11 (pilot-first phase order), D12 (Queue/Event exclusion), D13 (API shape
 deferred to the pilot) — recorded in § 8 and reflected in the § 10 phase table above. No open
-questions remain for this design as of Revision 11. The next step is task-log/tasks.md breakdown
+questions remain for this design as of Revision 12. The next step is task-log/tasks.md breakdown
 against the phase table in § 10.
