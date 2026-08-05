@@ -321,3 +321,84 @@ surrounding `ExecuteAsync` overloads are byte-unchanged.
 ### Commit
 `git commit --no-verify` — the pre-commit hook runs `dotnet test` and aborts on the 3 known-RED
 Phase 0 tests (BUG-074, tracked). Helder authorised `--no-verify` for exactly this situation.
+
+---
+## Task: 1.3 — Registration swap (`AddDbContextFactory` + `IUnitOfWork`)
+**Plan:** `plan.md § Task 1.3: Registration swap`
+**Status:** To Review
+**Started:** 2026-08-04
+**Completed:** 2026-08-04
+
+### Changed files:
+- `MyVocaList/MauiProgram.cs`
+- `MyVocaList.Tests/Integration/UnitOfWork/UnitOfWorkCompositionTests.cs` (new)
+
+### The change
+`AddDbContext<AppDbContext>((sp, options) => …)` → `AddDbContextFactory<AppDbContext>((sp, options)
+=> …, ServiceLifetime.Scoped)`. The configuration lambda is byte-identical: same
+`Data Source={dbPath}`, same `AddInterceptors(CollationInterceptor, TransactionLogInterceptor)`,
+same `UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)`. Only the method name and the
+trailing `ServiceLifetime.Scoped` argument differ. Added
+`builder.Services.AddSingleton<IUnitOfWork, MyVocaList.Infra.UnitOfWork.UnitOfWork>();` plus
+`using MyVocaList.Domain.UnitOfWork;`. Removed the second `IAppInfo` registration (REQ-UOW-21),
+keeping the one in the MAUI-platform-services block.
+
+### Verified: `AppDbContext` stays directly resolvable
+Context7 (`/dotnet/entityframework.docs`, EF Core 10.0.0 per `Directory.Packages.props`) — *"The
+`AddDbContextFactory` method in EF Core 6.0 now also registers the `DbContext` type directly as a
+scoped service."* Confirmed empirically:
+`Composition_AppDbContext_StillResolvesDirectlyFromAScope` asserts exactly one `ServiceDescriptor`
+for `typeof(AppDbContext)` with `Lifetime == Scoped`, resolves it, and resolves an
+`IArtistRepository` (which constructor-injects it). Green. Repository constructors need no change.
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|----------------|-------------|
+| REQ-UOW-01 | `IDbContextFactory<AppDbContext>` and `IUnitOfWork` each registered exactly once | `MauiProgram.cs:61-74` | `Composition_RegistersFactoryAndUnitOfWork_ExactlyOnce` |
+| REQ-UOW-01 | `AddDbContextFactory(…, Scoped)` keeps `AppDbContext` an ordinary scoped descriptor | `MauiProgram.cs:65` | `Composition_AppDbContext_StillResolvesDirectlyFromAScope` |
+| REQ-UOW-01 / REQ-UOW-21 | Production registration shape; one `IAppInfo` registration | `MauiProgram.cs:65-74`, `:163` | `MauiProgram_RegistrationShape_MatchesTestHost` |
+| REQ-UOW-02 | One `AppDbContext` per scope; distinct per scope; factory yields fresh instances | `MauiProgram.cs:65` | `Composition_EachScopeGetsADistinctAppDbContext_SameInstanceWithinAScope` |
+| REQ-UOW-14 | Both interceptors survive the swap (collated query + transaction-log entry) | `MauiProgram.cs:67-71` | `Composition_InterceptorsSurviveTheSwap_CollatedQueryAndTransactionLog` |
+
+### Spec/plan deviations (for review)
+1. **The real composition root is unreachable from tests — plan Step 1 as written is unexecutable.**
+   `MyVocaList.csproj` removes `MauiProgram.cs` from the plain `net10.0` TFM the test project
+   consumes (`<Compile Remove="MauiProgram.cs" />`), and it reads `FileSystem.AppDataDirectory`,
+   which has no off-device value. No test can call `MauiProgram.CreateMauiApp()`. Covered in two
+   halves instead: behavioural assertions over `UnitOfWorkTestHost.Create()` (which mirrors the
+   production shape line-for-line) plus a source-text drift guard reading `MauiProgram.cs`, so the
+   two compositions cannot silently diverge. Production compilation is verified by building
+   `-f net10.0-android` (0 errors).
+2. **Test file location:** plan Step 1 names `Unit/DependencyInjection/UnitOfWorkCompositionTests.cs`;
+   the dispatch briefing names `Integration/UnitOfWork/UnitOfWorkCompositionTests.cs`. Followed the
+   briefing — the tests hit a real SQLite file, so `Integration/` is the correct classification.
+3. **Plan Step 4 was already done** — `UnitOfWorkTestHost.Create()` exists from an earlier task and
+   needed no edit. `CreateLegacy()` untouched, per briefing.
+4. **`IUnitOfWork` lifetime:** Singleton, per plan Step 3 and `UnitOfWorkTestHost.Create()`.
+
+### Post-edit verification
+Re-read `MauiProgram.cs:58-74` (registration block) and `:158-164` (`IAppInfo` removal site) after
+each edit; both changes present and syntactically intact. `MauiProgram.cs` compiles under
+`net10.0-android`.
+
+### Build notes
+Build: `MyVocaList.Tests` 0 errors, 99 warnings (pre-existing). `MyVocaList -f net10.0-android`
+0 errors, 2 warnings (DevExpress licensing, pre-existing).
+Tests **before** this task: Failed 3 / Passed 551 / Total 554.
+Tests **after**: Failed 3 / Passed 556 / Total 559 — all 5 new tests pass; the delta is +5 passed,
+0 new failures.
+The 3 failures are the SAME pinned Phase 0 REDs on `CreateLegacy()`, unchanged by the swap:
+`Bug068RegressionTests.Song_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict`,
+`NestedUnitOfWorkTests.CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow`,
+`NestedUnitOfWorkTests.CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow`.
+None turned green — the RED evidence measures the tracking defect, not the registration, as
+intended (finding B1 holds). Phase 2 fixes them.
+
+### Constraints honored
+`UnitOfWorkTestHost.CreateLegacy()`, `Infra/UnitOfWork/UnitOfWork.cs`, and every file carrying a
+`TODO [BUG-071 / UOW]` marker are untouched. `MauiProgram.cs` edit is minimal — no reformatting or
+reordering of unrelated registrations. Phase 2 NOT started.
+
+### Commit
+`git commit --no-verify` — the pre-commit hook runs `dotnet test` and aborts on the 3 known-RED
+Phase 0 tests (BUG-074, tracked). Helder authorised `--no-verify` for exactly this situation.
