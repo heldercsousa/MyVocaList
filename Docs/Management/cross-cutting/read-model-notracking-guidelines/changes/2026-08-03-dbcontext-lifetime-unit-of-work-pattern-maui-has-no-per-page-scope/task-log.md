@@ -188,3 +188,58 @@ as **BUG-074** (`DevCycleCraft/hooks-redesign/bugs/2026-08-04-BUG-074-…`).
 `1974da98` harness · `1963af4b` REQ-UOW-03 RED · `756ed4a3` REQ-UOW-22/24 RED · `f62fae7a` REQ-UOW-04 characterization
 
 **Phase 0 complete. Phase 1 may start.**
+
+---
+## Task: Close Revision-12 ambient-scope invariant test gap (`UnitOfWork.cs`)
+**Plan:** `plan.md`
+**Status:** To Review
+**Started:** 2026-08-04
+**Completed:** 2026-08-04
+
+Review of Task 1.2a's delivery of `Infra/UnitOfWork/UnitOfWork.cs` confirmed the implementation is
+correct but found the Revision 12 invariant — only a WRITE publishes the AsyncLocal ambient scope;
+`ExecuteReadAsync` never does — had no direct test coverage. This task closes that gap with four
+tests appended to `UnitOfWorkLifetimeTests.cs`. `UnitOfWork.cs` itself was **not modified**.
+
+### Changed files
+- `MyVocaList.Tests/Integration/UnitOfWork/UnitOfWorkLifetimeTests.cs` (appended 4 tests)
+- `Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/task-log.md` (this entry)
+
+### AC traceability
+
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|--------------------------|--------------|
+| REQ-UOW-34 | Write nested in a read does NOT join ambient (none exists) — opens own scope, mutation is persisted | `Infra/UnitOfWork/UnitOfWork.cs` `ExecuteReadAsync`/`ExecuteAsync` | `ExecuteReadAsync_NestedWrite_OpensOwnScope_AndPersists` |
+| REQ-UOW-34 | `ExecuteReadAsync` never publishes `_ambientScope` | `Infra/UnitOfWork/UnitOfWork.cs` `ExecuteReadAsync` | `ExecuteReadAsync_Standalone_DoesNotPublishAmbientScope` |
+| REQ-UOW-34 | Read nested in a write JOINS the write's scope (same context); outer write still commits | `Infra/UnitOfWork/UnitOfWork.cs` `ExecuteReadAsync` join branch | `ExecuteAsync_NestedRead_JoinsSameContext_AndOuterWriteCommits` |
+| REQ-UOW-22 | Write nested in a write JOINS the outer scope; failure anywhere in the joined chain rolls back the whole unit of work (all-or-nothing) | `Infra/UnitOfWork/UnitOfWork.cs` `ExecuteAsync` join branch + transaction rollback | `ExecuteAsync_NestedWrite_JoinsSameContext_OuterThrowRollsBackInnerToo` |
+
+Test 1 deliberately asserts more than context identity: it reads the row back through a **fresh**
+`ExecuteReadAsync` scope after the outer read returns, because a NotSame-only assertion would still
+pass even if the nested write's `SaveChangesAsync` were silently skipped — the exact BUG-071-shaped
+failure mode Revision 12 exists to prevent.
+
+### Build / test evidence
+
+- `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj` — 0 errors (104 pre-existing warnings, unrelated).
+- Filtered run (`--filter FullyQualifiedName~UnitOfWorkLifetimeTests`): **9 passed** (5 pre-existing + 4 new), 0 failed.
+- Full suite: **Failed 3, Passed 539, Total 542** — up from the pre-task baseline **Failed 3, Passed 535, Total 538**. The 3 failures are the pre-existing, intentional Phase 0 RED tests (2 in `NestedUnitOfWorkTests`, 1 in `Bug068RegressionTests`) — unchanged, still failing for the same reason, unaffected by this task.
+
+### `UnitOfWorkTestHost.DisposeAsync` teardown change — evidence still holds
+
+The commit that delivered `UnitOfWork.cs` also changed `UnitOfWorkTestHost.DisposeAsync`
+(`EnsureDeletedAsync` → `SqliteConnection.ClearAllPools()` + best-effort `File.Delete`), which
+affects `CreateLegacy`'s teardown too. Re-ran the full suite after this task's changes: the same 3
+RED tests still fail for their original reasons (confirmed by the unchanged failure count and
+messages above) — the teardown change does not invalidate the pinned Phase 0 RED evidence.
+
+### Constraints honored
+- `UnitOfWork.cs` not modified.
+- `UnitOfWorkTestHost.CreateLegacy()` not modified; only `Create()` used by the new tests.
+- Value-returning `ExecuteAsync<TResult>` overload not used (still `NotImplementedException`, Task 1.2b scope).
+- No file carrying a `TODO [BUG-071 / UOW]` marker touched; no existing test modified.
+
+### Commit
+
+`git commit --no-verify` — pre-commit hook runs `dotnet test` and aborts on the 3 known-RED Phase 0
+tests (BUG-074, tracked). Helder authorised `--no-verify` for this situation.
