@@ -108,3 +108,83 @@ Build: passed (0 errors) | Tests (whole suite, filtered to `NestedUnitOfWorkTest
 this task's own file was added: only prior tasks' test files (Bug068RegressionTests.cs,
 UnitOfWorkTestHost.cs, UnitOfWorkTestHostTests.cs) — no production file touched by this task.
 Files written and re-read: `MyVocaList.Tests/Integration/UnitOfWork/NestedUnitOfWorkTests.cs`.
+
+---
+
+## Phase 0 gate — PASSED 2026-08-04 (orchestrator-verified)
+
+Verified by the orchestrator running the suite directly, not from a subagent's report.
+
+### Suite state at end of Phase 0
+
+`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` →
+**Failed: 3, Passed: 525, Skipped: 0, Total: 528** (baseline before Phase 0 was 520/520).
+
+### RED evidence — each failure read and matched to its stated reason
+
+| AC | Test | Failure (verbatim) |
+|----|------|--------------------|
+| REQ-UOW-03 | `Song_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict` | `InvalidOperationException: The instance of entity type 'Song' cannot be tracked because another instance with the same key value for {'Id'} is already being tracked.` — `IdentityMap.ThrowIdentityConflict` → `InternalDbSet.Update` → `SongRepository.cs:131` → `SongService.cs:145` |
+| REQ-UOW-22 | `CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow` | `Assert.Equal() Failure: Expected: 0, Actual: 1` — the Artist row survives a thrown fault in the Song write |
+| REQ-UOW-24 (nested precedence) | `CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow` | `Assert.Equal() Failure: Expected: 0, Actual: 1` — same partial state via a returned `(false, …)` tuple instead of a throw |
+
+Each failed for its stated reason. No test failed for an incidental reason.
+
+### PASSING characterization tests (pin behavior through the refactor, not defect repros)
+
+- `CommitAsync_NovelArtistAndSong_CreatesExactlyOneArtistAndOneSongRow` — happy path. Passes on HEAD
+  because each nested call saves eagerly today; **this assertion alone is not RED evidence.**
+- `CommitAsync_CreateNewWithExternalIdentity_CreatesOneArtistWithExternalFieldsSet` — REQ-UOW-09,
+  pinned before Task 2.3 re-shapes `ArtistResolutionService.CommitAsync`.
+- `Artist_` / `Person_` / `Venue_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict` — REQ-UOW-04,
+  see the decision below.
+
+### Decision: REQ-UOW-04 is VACUOUSLY satisfied for Artist/Person/Venue (Helder, 2026-08-04)
+
+The AC assumed all four in-scope repository families carry the same latent defect. **They do not.**
+Verified by reading the repositories:
+
+| Family | `GetByIdAsync` | Why BUG-068 cannot occur |
+|---|---|---|
+| Artist | `ArtistRepository.cs:79-80` — explicit `.AsTracking()` | EF identity resolution returns the already-tracked instance |
+| Person / Venue | inherited `BaseRepository<T>.GetByIdAsync` `:24-29` — `_dbSet.FindAsync(id)` | `FindAsync` checks the change tracker first — same instance |
+| **Song** | `SongRepository.cs:53-54` — bare `FirstOrDefaultAsync`, no tracking override | inherits the global `NoTracking` default → **fresh detached instance** → collides at `Update` |
+
+Helder chose **Option A**: keep the three tests as passing characterization tests, record the AC as
+vacuously satisfied (same treatment as REQ-UOW-18/20 per findings F3/F6). Rationale: they lock the
+behavior in through the refactor and would catch a future edit removing `.AsTracking()` from
+`ArtistRepository` — which is exactly how `SongRepository` arrived at its current state.
+
+**Consequence:** the plan's skip-mark step (finding F2) is cancelled outright. There are no skipped
+tests, so Phase 3.1's gate is now **`Skipped: 0`**, and Tasks 4.2/4.4 lose their unskip steps.
+
+### Plan correction — Task 0.4's fault-injection point was wrong
+
+`plan.md` Task 0.4 Step 2 specified injecting the fault into `IArtistRepository.AddAsync`. In the
+`CreateNew` branch actually exercised, `SongResolutionService.CommitAsync` resolves/creates the artist
+**first** (`ResolveOrCreateArtistIdAsync` → `ArtistResolutionService.CommitAsync` →
+`ArtistService.CreateArtistAsync`, already committed) and only then calls `_songService.CreateSongAsync`
+— so that throw fires **before any Song write is attempted**. Verified empirically: all 4 tests went
+green with the plan's injection point. Corrected to `ISongRepository.AddAsync` (throw path) and
+`CreateSongAsync`'s own title-length validation (failure-tuple path), both of which genuinely run
+after the Artist row is committed.
+
+### REQ-UOW-31 / scope checks
+
+- `git diff develop --name-only` — test files, docs and `.sln` only. **No production `.cs` modified.**
+- Excluded-file grep (`EventService|QueueService|QueueServiceNew|EventRepository|QueueRepository|EventParticipationRepository`) over the diff — **no matches.**
+- No file carrying a `TODO [BUG-071 / UOW]` marker was touched.
+
+### Process note — hook bypass, authorised
+
+All three RED-era commits (`1963af4b`, `756ed4a3`, `f62fae7a`) used `git commit --no-verify`. The
+pre-commit hook runs `dotnet test` and aborts on any failing test, which makes the RED-first commit
+that `bug-tracking.md` mandates for a Critical bug impossible to land. Helder authorised the bypass
+for Phase 0 RED commits only, and asked for the underlying rules conflict to be tracked — registered
+as **BUG-074** (`DevCycleCraft/hooks-redesign/bugs/2026-08-04-BUG-074-…`).
+
+### Commits (worktree `feat/uow-pilot`)
+
+`1974da98` harness · `1963af4b` REQ-UOW-03 RED · `756ed4a3` REQ-UOW-22/24 RED · `f62fae7a` REQ-UOW-04 characterization
+
+**Phase 0 complete. Phase 1 may start.**
