@@ -108,9 +108,29 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
         // no SaveChangesAsync -- read-only, per Revision 6.
     }
 
-    // Save-skip signal detection (Revision 9, § 6b). Implemented by Task 1.2b -- stubbed here so
-    // Task 1.2a's lifetime/concurrency tests, which use the no-signal overload, can go green
-    // without depending on signal semantics.
+    // Save-skip signal detection (Revision 9, § 6b). Exhaustive by construction -- every branch is
+    // either a recognised signal or the explicit, fail-closed refusal below (never a silent guess,
+    // and never a silent commit).
     private static bool ResultSignalsSuccess<TResult>(TResult result)
-        => throw new NotImplementedException("ResultSignalsSuccess is implemented by Task 1.2b (design.md § 6b).");
+    {
+        // 1) This codebase's universal Service Return Pattern: (bool success, string message, ...).
+        //    Every C# ValueTuple, of every arity, implements System.Runtime.CompilerServices.ITuple --
+        //    this is a real structural type check, not reflection over field names.
+        if (result is System.Runtime.CompilerServices.ITuple t && t.Length > 0 && t[0] is bool tupleSuccess)
+            return tupleSuccess;
+
+        // 2) Named result types opt in explicitly by implementing IUnitOfWorkOutcome
+        //    (e.g. BackupResult -- appending ": IUnitOfWorkOutcome" is a blocking prerequisite of
+        //    wrapping BackupService in Wave 5, § 10, not a later or optional step; see § 6b).
+        if (result is IUnitOfWorkOutcome outcome)
+            return outcome.Success;
+
+        // 3) No recognised signal -> refuse to guess. Defaulting to true would commit a failed
+        //    operation; defaulting to false would silently discard a successful one (REQ-UOW-27).
+        throw new InvalidOperationException(
+            $"{typeof(TResult).Name} carries no success signal. " +
+            "Implement IUnitOfWorkOutcome, or use the " +
+            "no-signal ExecuteAsync overload if this method " +
+            "has no failure mode.");
+    }
 }
