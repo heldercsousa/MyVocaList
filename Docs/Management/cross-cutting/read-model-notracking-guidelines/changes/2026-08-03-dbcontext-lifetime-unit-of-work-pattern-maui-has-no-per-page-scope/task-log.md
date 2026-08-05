@@ -243,3 +243,81 @@ messages above) — the teardown change does not invalidate the pinned Phase 0 R
 
 `git commit --no-verify` — pre-commit hook runs `dotnet test` and aborts on the 3 known-RED Phase 0
 tests (BUG-074, tracked). Helder authorised `--no-verify` for this situation.
+
+---
+## Task: 1.2b — `ResultSignalsSuccess`: save-skip, fail-closed, transactional rollback
+**Plan:** `plan.md § Task 1.2b`
+**Status:** To Review
+**Started:** 2026-08-04
+**Completed:** 2026-08-04
+
+### Changed files:
+- `Infra/UnitOfWork/UnitOfWork.cs` (only `ResultSignalsSuccess` — the stub body replaced; nothing else touched)
+- `MyVocaList.Tests/Integration/UnitOfWork/SaveSkipTests.cs` (new)
+
+### TDD evidence (Red → Green)
+
+Red (stub in place): `--filter FullyQualifiedName~SaveSkipTests` → **Failed 11, Passed 1, Total 12**.
+All 11 failures were `System.NotImplementedException: ResultSignalsSuccess is implemented by Task
+1.2b` — i.e. failing for the right reason. The 1 pass was
+`ExecuteAsync_NoSignalOverload_AlwaysSaves`, which is correct: the no-signal overload never consults
+the signal, so REQ-UOW-26 is green by construction and only guards against a regression.
+
+Green (after implementing): same filter → **Failed 0, Passed 12, Total 12**.
+
+### Build notes
+Build: passed (0 errors). Full suite AFTER: **Failed 3, Passed 551, Total 554** (before: 3/539/542).
+The 3 failures are the pinned Phase 0 REDs, byte-identical in name and reason:
+`NestedUnitOfWorkTests.CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow`,
+`NestedUnitOfWorkTests.CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow`,
+`Bug068RegressionTests.Song_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict`.
+**None of them turned green** — expected, since they run on `CreateLegacy()` (no `IUnitOfWork` in
+that composition) and are Phase 2's obligation.
+
+### AC traceability matrix
+
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|-------------------------|-------------|
+| REQ-UOW-24 | Failure tuple (leading `bool false`) ⇒ no `SaveChangesAsync`, mutation not persisted | `UnitOfWork.cs` `ResultSignalsSuccess` branch 1 + `ExecuteAsync<TResult>` else-branch rollback | `ExecuteAsync_FailureTuple_DoesNotPersistMutation` |
+| REQ-UOW-24 | Same for `IUnitOfWorkOutcome.Success == false` | `ResultSignalsSuccess` branch 2 | `ExecuteAsync_OutcomeWithSuccessFalse_DoesNotPersistMutation` |
+| REQ-UOW-24 | Failure tuple after an UPDATE leaves the original value | same | `ExecuteAsync_FailureTupleAfterUpdate_LeavesOriginalValue` |
+| REQ-UOW-25 | Success tuple ⇒ `SaveChangesAsync` + commit, mutation persisted | `ResultSignalsSuccess` branch 1 + commit-branch | `ExecuteAsync_SuccessTuple_CommitsMutation` |
+| REQ-UOW-25 | Same for `IUnitOfWorkOutcome.Success == true` | `ResultSignalsSuccess` branch 2 | `ExecuteAsync_OutcomeWithSuccessTrue_CommitsMutation` |
+| REQ-UOW-26 | No-signal overload saves unconditionally on non-throwing return | `ExecuteAsync(Func<IServiceProvider, Task>, ct)` | `ExecuteAsync_NoSignalOverload_AlwaysSaves` |
+| REQ-UOW-27 | Unmarked named result ⇒ `InvalidOperationException` naming the type + both fixes, nothing persisted | `ResultSignalsSuccess` branch 3 (fail-closed throw) | `ExecuteAsync_UnmarkedNamedResult_ThrowsAndDoesNotPersist` |
+| REQ-UOW-27 | Primitive (`int`) result ⇒ same fail-closed throw | same | `ExecuteAsync_PrimitiveResult_ThrowsAndDoesNotPersist` |
+| REQ-UOW-27 | Tuple whose FIRST element is not `bool` ⇒ throw, not treated as success | `t[0] is bool` guard | `ExecuteAsync_TupleWithNonBoolFirstElement_ThrowsAndDoesNotPersist` |
+| REQ-UOW-27 | Empty `ValueTuple` (`Length == 0`) ⇒ throw, not implicit success | `t.Length > 0` guard | `ExecuteAsync_EmptyTuple_ThrowsAndDoesNotPersist` |
+| REQ-UOW-33 | Failure signal after `ExecuteDeleteAsync` ⇒ explicit transaction rolls the bulk delete back | `ExecuteAsync<TResult>` `transaction.RollbackAsync` | `ExecuteAsync_FailureTupleAfterExecuteDelete_RollsBackTheDelete` |
+| REQ-UOW-33 | Failure signal after `ExecuteUpdateAsync` ⇒ play count unchanged | same | `ExecuteAsync_FailureTupleAfterExecuteUpdate_RollsBackTheUpdate` |
+
+REQ-UOW-34 (both directions) is **already fully covered** by `UnitOfWorkLifetimeTests`
+(`ExecuteReadAsync_NestedWrite_OpensOwnScope_AndPersists`,
+`ExecuteAsync_NestedRead_JoinsSameContext_AndOuterWriteCommits`,
+`ExecuteReadAsync_Standalone_DoesNotPublishAmbientScope`), delivered by the preceding commit
+(`test(uow): cover Revision-12 ambient-scope invariant`). The plan's Task 1.2b line "Modify
+`NestedUnitOfWorkTests.cs` (REQ-UOW-34 only)" is therefore **already satisfied elsewhere** — no
+existing test was modified, per this task's constraints.
+
+### Deviations from the plan text
+- Plan Step 1 describes the REQ-UOW-24/25 probes as going through `SongService.UpdateSongAsync`.
+  No service is wrapped in `IUnitOfWork` yet (that is Phase 2/3), so the probes call
+  `IArtistRepository` / `ISongKaraokeUrlRepository` directly inside the `ExecuteAsync` body. The
+  signal semantics under test are identical; the service wrap adds no new branch to
+  `ResultSignalsSuccess`.
+- `ProbeOutcome` / `UnmarkedResult` are test-local records, exactly as the plan anticipated for the
+  `BackupResult` stand-in (reviewer non-blocking #1).
+
+### Post-edit verification
+Re-read `Infra/UnitOfWork/UnitOfWork.cs` lines 111–136 after the edit: the three branches are
+present in order (`ITuple`/`Length > 0`/`t[0] is bool` → `IUnitOfWorkOutcome` → throw), and the
+surrounding `ExecuteAsync` overloads are byte-unchanged.
+
+### Constraints honored
+- `UnitOfWorkTestHost.CreateLegacy()` not modified; `SaveSkipTests` uses `Create()` exclusively.
+- No existing test modified; no file carrying a `TODO [BUG-071 / UOW]` marker touched.
+- Task 1.3 (`MauiProgram.cs` registration swap) NOT started.
+
+### Commit
+`git commit --no-verify` — the pre-commit hook runs `dotnet test` and aborts on the 3 known-RED
+Phase 0 tests (BUG-074, tracked). Helder authorised `--no-verify` for exactly this situation.
