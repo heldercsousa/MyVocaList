@@ -172,6 +172,143 @@ public class UnitOfWorkLifetimeTests
         Assert.Contains(newEntries, e => e.Contains("Second Sequential Artist"));
     }
 
+    // [AC] REQ-UOW-34: a write nested inside ExecuteReadAsync does NOT join the (non-existent)
+    // ambient scope — it opens its OWN scope, and the mutation IS persisted. This is the
+    // regression test for 4th-pass finding BL-E: under the withdrawn Revision 10 design the write
+    // would have silently joined a scope that never calls SaveChangesAsync (same shape as
+    // BUG-071). Asserting NotSame alone would not catch that — only reading the row back through a
+    // fresh scope after the outer read returns proves the write was not lost.
+    [Fact]
+    public async Task ExecuteReadAsync_NestedWrite_OpensOwnScope_AndPersists()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var uow = host.Resolve<IUnitOfWork>();
+
+        AppDbContext? readContext = null;
+        AppDbContext? writeContext = null;
+
+        await uow.ExecuteReadAsync(async sp =>
+        {
+            readContext = sp.GetRequiredService<AppDbContext>();
+
+            await uow.ExecuteAsync(async innerSp =>
+            {
+                writeContext = innerSp.GetRequiredService<AppDbContext>();
+                var repo = innerSp.GetRequiredService<IArtistRepository>();
+                await repo.AddAsync(NewArtist("Read Then Write Artist"), CancellationToken.None);
+            });
+
+            return true;
+        });
+
+        Assert.NotSame(readContext, writeContext);
+
+        // Read back through a FRESH scope — proves the write was actually saved, not just that a
+        // distinct context was created.
+        var found = await uow.ExecuteReadAsync(async sp =>
+        {
+            var db = sp.GetRequiredService<AppDbContext>();
+            return await db.Artists.FirstOrDefaultAsync(a => a.Name == "Read Then Write Artist");
+        });
+        Assert.NotNull(found);
+    }
+
+    // [AC] REQ-UOW-34: a standalone ExecuteReadAsync never publishes the ambient scope — a sibling
+    // operation started after it sees no ambient scope (each opens its own distinct context),
+    // proving the read did not leak an AsyncLocal publication for anything to join.
+    [Fact]
+    public async Task ExecuteReadAsync_Standalone_DoesNotPublishAmbientScope()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var uow = host.Resolve<IUnitOfWork>();
+
+        AppDbContext? firstReadContext = null;
+        AppDbContext? secondReadContext = null;
+
+        await uow.ExecuteReadAsync(async sp =>
+        {
+            firstReadContext = sp.GetRequiredService<AppDbContext>();
+            await Task.CompletedTask;
+            return true;
+        });
+
+        await uow.ExecuteReadAsync(async sp =>
+        {
+            secondReadContext = sp.GetRequiredService<AppDbContext>();
+            await Task.CompletedTask;
+            return true;
+        });
+
+        Assert.NotNull(firstReadContext);
+        Assert.NotNull(secondReadContext);
+        Assert.NotSame(firstReadContext, secondReadContext);
+    }
+
+    // [AC] REQ-UOW-34: a read nested inside ExecuteAsync (a write) JOINS the write's scope — same
+    // AppDbContext instance — and the outer write still commits successfully.
+    [Fact]
+    public async Task ExecuteAsync_NestedRead_JoinsSameContext_AndOuterWriteCommits()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var uow = host.Resolve<IUnitOfWork>();
+
+        AppDbContext? writeContext = null;
+        AppDbContext? nestedReadContext = null;
+
+        await uow.ExecuteAsync(async sp =>
+        {
+            writeContext = sp.GetRequiredService<AppDbContext>();
+            var repo = sp.GetRequiredService<IArtistRepository>();
+            await repo.AddAsync(NewArtist("Write Then Read Artist"), CancellationToken.None);
+
+            await uow.ExecuteReadAsync(async innerSp =>
+            {
+                nestedReadContext = innerSp.GetRequiredService<AppDbContext>();
+                await Task.CompletedTask;
+                return true;
+            });
+        });
+
+        Assert.Same(writeContext, nestedReadContext);
+
+        var found = await host.Db.Artists.FirstOrDefaultAsync(a => a.Name == "Write Then Read Artist");
+        Assert.NotNull(found);
+    }
+
+    // [AC] REQ-UOW-22: a write nested inside ExecuteAsync (a write) JOINS the outer scope — same
+    // AppDbContext instance, one commit — and if the OUTER body throws after the inner write has
+    // already run, the rollback undoes the inner write too (all-or-nothing across the joined
+    // scope, matching REQ-UOW-22's atomicity guarantee for the compound nested-write case).
+    [Fact]
+    public async Task ExecuteAsync_NestedWrite_JoinsSameContext_OuterThrowRollsBackInnerToo()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var uow = host.Resolve<IUnitOfWork>();
+
+        AppDbContext? outerContext = null;
+        AppDbContext? innerContext = null;
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            uow.ExecuteAsync(async sp =>
+            {
+                outerContext = sp.GetRequiredService<AppDbContext>();
+
+                await uow.ExecuteAsync(async innerSp =>
+                {
+                    innerContext = innerSp.GetRequiredService<AppDbContext>();
+                    var innerRepo = innerSp.GetRequiredService<IArtistRepository>();
+                    await innerRepo.AddAsync(NewArtist("Inner Doomed Artist"), CancellationToken.None);
+                });
+
+                throw new InvalidOperationException("injected outer failure after inner completed");
+            }));
+
+        Assert.Same(outerContext, innerContext);
+
+        var found = await host.Db.Artists.FirstOrDefaultAsync(a => a.Name == "Inner Doomed Artist");
+        Assert.Null(found);
+    }
+
     private static Artist NewArtist(string name) => new()
     {
         Name = name,
