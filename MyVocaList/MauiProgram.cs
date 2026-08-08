@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions;
 using MyVocaList.Infra;
 using MyVocaList.Infra.Interceptor;
@@ -58,14 +59,19 @@ public static class MauiProgram
         builder.Services.AddSingleton<CollationInterceptor>();
         builder.Services.AddSingleton<ITransactionLogWriter>(_ => new TransactionLogWriter(logDir));
         builder.Services.AddSingleton<TransactionLogInterceptor>();
-        builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+        // AddDbContextFactory(..., ServiceLifetime.Scoped) registers BOTH IDbContextFactory<AppDbContext>
+        // and AppDbContext itself as scoped services (EF Core 6.0+ behaviour) — repository constructors
+        // that inject AppDbContext directly keep working unchanged. IUnitOfWork owns the short-lived
+        // scope per write (REQ-UOW-01). Interceptors + NoTracking are preserved verbatim (REQ-UOW-14).
+        builder.Services.AddDbContextFactory<AppDbContext>((sp, options) =>
         {
             options.UseSqlite($"Data Source={dbPath}")
                    .AddInterceptors(
                        sp.GetRequiredService<CollationInterceptor>(),
                        sp.GetRequiredService<TransactionLogInterceptor>())
                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        });
+        }, ServiceLifetime.Scoped);
+        builder.Services.AddSingleton<IUnitOfWork, MyVocaList.Infra.UnitOfWork.UnitOfWork>();
 
         // Backup & Restore
         builder.Services.AddScoped<IBackupRepository, BackupRepository>();
@@ -154,7 +160,7 @@ public static class MauiProgram
         builder.Services.AddTransient<FeedbackPage>();
         builder.Services.AddHttpClient("feedback");
         builder.Services.AddSingleton<IDeviceInfo>(DeviceInfo.Current);
-        builder.Services.AddSingleton<IAppInfo>(AppInfo.Current);
+        // IAppInfo is registered once, above with the other MAUI-platform services (REQ-UOW-21).
 
         // Register Serilog (file + debug sinks always; Sentry sink in release builds when DSN is set)
         // Assign Log.Logger so GlobalExceptionHandler's static Log.Fatal/Error calls are captured.
