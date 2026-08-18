@@ -1265,3 +1265,58 @@ census. **Do not trust a single `grep` for byte-exact or completeness-critical w
 Documentation-only task — no build or test run required; no source file touched. Suite state re-confirmed
 from the Phase 3.2 verification run at `f6670092`: `Failed 0, Passed 564, Skipped 0, Total 564`.
 No new file created, so no `.sln` registration is required.
+
+---
+## Task: Merge `develop` into `feat/uow-pilot` (takes on `feat/inline-artist-create`)
+**Plan:** `plan.md` (Phase 2 / REQ-UOW-18)
+**Status:** To Review
+**Started:** 2026-08-18
+**Completed:** 2026-08-18
+
+`feat/inline-artist-create` (BUG-050/051/052/054-058/060/061/064/067, REQ-ACREATE-03) had never been
+merged to any branch; it landed on `develop` at `71926980` and is taken on here.
+
+### Conflicts resolved
+1. `Services/SongService.cs` — BUG-067's `int? artistId` / `effectiveArtistId` / artist-existence check /
+   uniqueness-against-effective-artist / `song.ArtistId = effectiveArtistId` re-expressed INSIDE the
+   `_uow.ExecuteAsync` lambda, with `IArtistRepository` resolved from `sp` (REQ-UOW-28).
+2. `Services/SongResolutionService.cs` — HEAD's wrapped body kept; develop's unwrapped duplicate
+   discarded. Both `UpdateSongAsync` call sites switched to the NAMED `ct: ct` argument: the new
+   `int? artistId` parameter sits before `ct`, so the pre-merge positional `ct` would have silently bound
+   to `artistId`.
+3. / 4. `SongServiceTests.cs`, `SongResolutionServiceTests.cs` — using/BOM only; both sides' tests kept,
+   none weakened or deleted.
+5. `task-log.md` — union, chronological.
+
+### REQ-UOW-18 — stopgap DELETED (NB-4 case 1)
+The `ChangeTracker.Entries<Song>()` guard is unreachable under the unit of work (fresh context per write),
+so its deletion is behaviour-neutral. Proven by `SongServiceUpdateIntegrationTests` (both facts green after
+deletion) plus the full suite.
+
+### Defect the stopgap was masking (NEW — needs Helder's ruling)
+`SongRepository.GetByIdAsync` eager-loads `OriginalArtist` (BUG-055). In a fresh unit-of-work context the
+Song is untracked, so `DbSet.Update` attaches the graph and EF FK-fixup rewrites `ArtistId` back from the
+stale navigation — BUG-067's artist change was silently discarded (verified by a throw-away diagnostic:
+`state=Modified ArtistId=1 ArtistIdModified=True curr=1` after setting `ArtistId = 2`). Pre-merge this was
+masked by the stopgap's `CurrentValues.SetValues` (scalars/FK only, no navigation graph). Fixed by
+`song.OriginalArtist = null;` before the write in `SongService.UpdateSongAsync`. **Open question:** service
+vs `SongRepository.UpdateAsync` as the right home for that detach.
+
+### Changed files:
+- `Services/SongService.cs`
+- `Services/SongResolutionService.cs`
+- `Infra/Repository/SongRepository.cs`
+- `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTests.cs` (migrated to `UnitOfWorkTestHost`
+  — its hand-built `SongService(...)` ctor and `ISongRepository.SaveChangesAsync` no longer exist; both ACs
+  preserved verbatim)
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs`, `.../SongResolutionServiceTests.cs`
+- `Docs/.../requirements.md`, `.../task-log.md`
+
+### Build notes
+Build: passed (0 errors, 101 warnings). Tests: **Failed 0, Passed 590, Skipped 0, Total 590**
+(pre-merge branch 564; new `develop` 585 with 2 pinned REDs — `NestedUnitOfWorkTests` are GREEN here).
+BUG-076 flake (`ObjectDisposedException: 'SQLitePCL.sqlite3'`) hit `SaveSkipTests` on the first run and did
+not reproduce on the two subsequent full runs. Android target not built (APK file lock, `XARDF7024`).
+REQ-UOW-28 re-verified across all 11 lambda bodies (comment-stripped brace-scan) — 0 violations; all three
+`SongResolutionService` private helpers are `static`, so a captured field is compiler-impossible.
+

@@ -510,6 +510,16 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   case. Phase 2 runs unconditionally either way; only whether it deletes anything changes. Record which
   case applied in the task-log (`design.md § 10`).
 
+  > **Spec updated [2026-08-18]:** NB-4's *first* case applied — `feat/inline-artist-create` merged into
+  > `develop` (`71926980`) and reached this branch by merge, so the stopgap WAS present and has now been
+  > DELETED (`Infra/Repository/SongRepository.cs`, `UpdateAsync`). Deletion is behaviour-neutral under the
+  > unit of work (a freshly-scoped context never has a tracked `Song`, so the guard was unreachable), proven
+  > by `SongServiceUpdateIntegrationTests` green after deletion. Deletion also exposed a *separate* defect
+  > the stopgap had masked: `GetByIdAsync`'s eager `Include(OriginalArtist)` (BUG-055) makes EF FK-fixup
+  > rewrite `Song.ArtistId` back from the stale navigation on attach, silently discarding BUG-067's artist
+  > change — fixed by detaching the navigation before the write in `SongService.UpdateSongAsync`. Open for
+  > Helder: whether that detach belongs in the service or in `SongRepository.UpdateAsync`.
+
 ### Guideline amendments (documentation deliverables)
 
 - **REQ-UOW-19** — `code-style-reference.md § DI Registration Conventions` currently reads
