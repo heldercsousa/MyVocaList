@@ -525,12 +525,9 @@ public class SongServiceTests
         Assert.NotNull(song);
         // Both URLs staged via url repo
         _urlRepoMock.Verify(r => r.AddAsync(It.IsAny<SongKaraokeUrl>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
-        // [AC] REQ-UOW-10: the save is no longer expressed in the service method at all — the
-        // single commit moved to IUnitOfWork. Neither repository may save. The "exactly one
-        // atomic commit" guarantee this line used to encode (AC-6.2/REQ-UOW-07) is now asserted
-        // where it can actually be observed, against a real context, by
+        // [AC] REQ-UOW-10: ISongRepository.SaveChangesAsync is retired outright - the single
+        // atomic commit moved to IUnitOfWork, and is asserted against a real context by
         // Bug068RegressionTests.CreateSongWithUrls_UrlAddFaults_PersistsNoSongRow.
-        _songRepoMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         // URL repo must NOT call its own SaveChangesAsync
         _urlRepoMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -567,7 +564,5 @@ public class SongServiceTests
         Assert.True(success);
         Assert.NotNull(song);
         _urlRepoMock.Verify(r => r.AddAsync(It.IsAny<SongKaraokeUrl>(), It.IsAny<CancellationToken>()), Times.Never);
-        // [AC] REQ-UOW-10: zero save lines per service method — see the note above.
-        _songRepoMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 }

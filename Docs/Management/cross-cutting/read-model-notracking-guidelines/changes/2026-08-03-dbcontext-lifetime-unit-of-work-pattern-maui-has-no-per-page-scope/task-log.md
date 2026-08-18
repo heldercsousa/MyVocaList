@@ -1054,3 +1054,72 @@ the constructor assignment - the same residue Task 2.3 left on `ArtistResolution
 The fields and their constructor parameters are removal candidates, but the constructor signature is a wider
 surface than this task owns. Phase 3's VERIFY gate remains the right place to sweep the residue across all
 pilot services at once.
+
+---
+## Task: 2.4b - Retire `ISongRepository.SaveChangesAsync`; confirm REQ-UOW-18 stopgap absent
+**Plan:** `plan.md` (Phase 2, final task)
+**Status:** To Review
+**Started:** 2026-08-18
+**Completed:** 2026-08-18
+
+### Step 1 - REQ-UOW-18 stopgap check
+`git merge-base --is-ancestor 1a114c1 HEAD; echo $?` -> **exit 1**.
+Verbatim finding: *"stopgap absent on develop; REQ-UOW-18 satisfied vacuously (NB-4 case 2)"*.
+Nothing deleted for it. Plan finding F3 confirmed.
+
+### Changed files:
+- `Domain/RepositoryInterface/ISongRepository.cs` - removed `Task SaveChangesAsync(CancellationToken ct = default);` (no doc comment attached).
+- `Infra/Repository/SongRepository.cs` - removed the `/// <inheritdoc />` + `public Task SaveChangesAsync(...) => _db.SaveChangesAsync(ct);` implementation (present at `:144-146`, contrary to the pre-task census which reported zero hits in this file).
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` - removed the two authorised `_songRepoMock.Verify(r => r.SaveChangesAsync(...), Times.Never)` lines (`:533`, `:571`) and the comment block that existed solely to introduce them; condensed the surviving REQ-UOW-10 note to three lines that still point at `Bug068RegressionTests.CreateSongWithUrls_UrlAddFaults_PersistsNoSongRow`.
+- `MyVocaList.Tests/Integration/UnitOfWork/NestedUnitOfWorkTests.cs` - **scope exception, see below**.
+
+### Scope exception (documented, not silent)
+`NestedUnitOfWorkTests.cs` was **not** in the task's `Files owned` and was **not** in the pre-task census, but
+the first build failed with `CS1061` at `:267`: the file's private `ISongRepository` test **fake** carried a
+mechanical delegating stub `public Task SaveChangesAsync(...) => _inner.SaveChangesAsync(ct);`. Removing an
+interface member makes such a forwarder uncompilable, so the retirement is not expressible without deleting it.
+The deleted lines are a pass-through forwarder, **not** an assertion - no `Verify`, no `Assert`, no `Setup`
+behaviour was touched, and the file carries no `TODO [BUG-071 / UOW]` marker. Recorded here rather than
+resolved silently; flag for review if the exception is judged too wide.
+
+### Authorised test-assertion deletion (narrow)
+Deleting the member is a **stronger** guarantee than a runtime `Times.Never` assertion: the call becomes
+impossible at compile time rather than merely unobserved. This is a narrow exception to `testing.md`'s
+Builder-must-not-modify-tests rule, granted by Helder for exactly these two lines, and it does not extend to
+any other assertion in the file. Neither host test became empty (both retain `Assert.True/NotNull` plus
+surviving `_urlRepoMock.Verify` assertions); no dead locals resulted.
+
+### Explicitly untouched
+- `SongServiceTests.cs:535` (now `:532`) `_urlRepoMock.Verify(r => r.SaveChangesAsync(...), Times.Never)` on
+  `ISongKaraokeUrlRepository` - retired in **Phase 4.3**, left intact and verified present after the edit.
+- `ISongKaraokeUrlRepository.SaveChangesAsync` + its implementation and its `SongKaraokeUrlService` callers.
+- `IBaseRepository<T>.SaveChangesAsync` (plan Task 4.2, out of scope).
+- `Infra/UnitOfWork/UnitOfWork.cs`, `UnitOfWorkTestHost.CreateLegacy()`.
+- All `Services/SongService.cs` hits (comments about already-deleted calls).
+- No file carrying `TODO [BUG-071 / UOW]` was opened.
+
+### AC traceability matrix
+
+| AC ID | Criterion | Implementation | Test method |
+|---|---|---|---|
+| REQ-UOW-11 | No repository exposes its own save; the single commit is owned by `IUnitOfWork` | `ISongRepository.SaveChangesAsync` + `SongRepository` implementation deleted - the call is now a **compile error**, not a runtime observation | Compile-time enforcement (stronger than a test); atomicity itself asserted by `Bug068RegressionTests.CreateSongWithUrls_UrlAddFaults_PersistsNoSongRow` and `NestedUnitOfWorkTests.CommitAsync_*` |
+| REQ-UOW-18 | The interim stopgap is removed before Phase 2 closes | Vacuous - `1a114c1` is not an ancestor of `HEAD` (exit 1), so the stopgap never landed on this line of development | N/A (git-ancestry check, recorded verbatim above) |
+
+### Post-edit verification
+Every edit applied by a script asserting a **unique** anchor match before replacing (an unmatched anchor
+aborts rather than silently no-ops), preserving each file's existing CRLF/BOM byte profile; each changed
+region was re-read afterwards via `sed`/`tail`. Confirmed after edit: zero `_songRepoMock` save references
+remain in `SongServiceTests.cs`; the `_urlRepoMock` save assertion survives; both edited test bodies still
+end in a non-empty assertion block. A repo-wide `SaveChangesAsync` sweep confirms every remaining hit is
+either `_db.SaveChangesAsync` (DbContext, legitimate) or `ISongKaraokeUrlRepository` (Phase 4.3).
+
+### Build notes
+Build: **passed (0 errors)** on the second attempt - the first failed only on the `NestedUnitOfWorkTests`
+fake described above; all warnings pre-existing.
+Tests: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --no-restore` ->
+**`Com falha: 0, Aprovado: 564, Ignorado: 0, Total: 564`** (7 s), exactly matching the `3896d253` baseline of
+`Failed 0, Passed 564, Skipped 0, Total 564`. No regression; no test adjusted to fit. The known
+`ObjectDisposedException: 'SQLitePCL.sqlite3'` flake did not reproduce.
+
+### Gate
+Phase 3 **not** started - HARD GATE requiring Helder's on-device confirmation.
