@@ -1,5 +1,8 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Contracts.DTOs;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
+using CanonicalSongPickedMessage = MyVocaList.Contracts.Messages.SongPickedMessage;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -14,7 +17,8 @@ public class SongFormViewModelTests
         Mock<ISecureStorageWrapper>? secureStorage = null,
         Mock<ISongService>? songService = null,
         Mock<ISongResolutionService>? resolutionService = null,
-        Mock<IArtistService>? artistService = null)
+        Mock<IArtistService>? artistService = null,
+        IMessenger? messenger = null)
     {
         return new SongFormViewModel(
             (artistService ?? new Mock<IArtistService>()).Object,
@@ -24,7 +28,7 @@ public class SongFormViewModelTests
             new Mock<ILogger<SongFormViewModel>>().Object,
             (urlService ?? new Mock<ISongKaraokeUrlService>()).Object,
             (secureStorage ?? new Mock<ISecureStorageWrapper>()).Object,
-            new Mock<IMessenger>().Object);
+            messenger ?? new Mock<IMessenger>().Object);
     }
 
     // ── RemoveUrlAsync (edit mode) ─────────────────────────────────────────
@@ -278,9 +282,9 @@ public class SongFormViewModelTests
 
     // ── BUG-008: artist blur-clear ─────────────────────────────────────────
 
-    // [AC] AC-B8-01 — blur without prior selection clears the field
+    // [AC] REQ-ACREATE-03: blur with unmatched text retains it and surfaces error
     [Fact]
-    public void ArtistBlurredWithoutSelection_NoPriorSelection_ClearsField()
+    public void ArtistBlurredWithoutSelection_NoPriorSelection_RetainsTextAndSetsError()
     {
         var sut = CreateSut();
         sut.ArtistSearchText = "partial text";
@@ -288,8 +292,24 @@ public class SongFormViewModelTests
 
         sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
 
-        Assert.Equal(string.Empty, sut.ArtistSearchText);
+        Assert.Equal("partial text", sut.ArtistSearchText);
         Assert.Null(sut.SelectedArtistId);
+        Assert.True(sut.ArtistHasError);
+        Assert.False(sut.IsArtistLocked);
+    }
+
+    // [AC] REQ-ACREATE-03: empty blur raises no error
+    [Fact]
+    public void ArtistBlurredWithoutSelection_EmptyText_NoErrorNoLock()
+    {
+        var sut = CreateSut();
+        sut.ArtistSearchText = string.Empty;
+        // SelectedArtistId not set
+
+        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
+
+        Assert.False(sut.ArtistHasError);
+        Assert.False(sut.IsArtistLocked);
     }
 
     // [AC] AC-B8-02 — blur with a prior selection restores the artist name
@@ -307,6 +327,79 @@ public class SongFormViewModelTests
         Assert.Equal(7, sut.SelectedArtistId);
     }
 
+    // [AC] REQ-ACREATE-03 (BUG-057): the error Label mirrors ArtistHasError — the VM must set
+    // ArtistErrorText whenever it sets ArtistHasError=true, or the Label reserves layout space
+    // but renders no message.
+    [Fact]
+    public void ArtistBlurredWithoutSelection_NoPriorSelection_SetsErrorText()
+    {
+        var sut = CreateSut();
+        sut.ArtistSearchText = "partial text";
+        // SelectedArtistId not set
+
+        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
+
+        Assert.True(sut.ArtistHasError);
+        Assert.False(string.IsNullOrEmpty(sut.ArtistErrorText));
+    }
+
+    // ── BUG-060 / REQ-ACREATE-15: clearing a locked artist unlocks the field ──────────────
+
+    // [AC] REQ-ACREATE-15: tapping the clear (X) icon on a locked field unlocks it and drops
+    // the selection so the field returns to a normal searchable state.
+    [Fact]
+    public void ClearArtist_WhenLocked_UnlocksAndClearsSelection()
+    {
+        var sut = CreateSut();
+        sut.SelectedArtistId = 7;
+        sut.SelectedArtistName = "Guns N' Roses";
+        sut.ArtistSearchText = "Guns N' Roses";
+        sut.IsArtistLocked = true;
+
+        sut.ClearArtistCommand.Execute(null);
+
+        Assert.False(sut.IsArtistLocked);
+        Assert.Null(sut.SelectedArtistId);
+        Assert.Null(sut.SelectedArtistName);
+        Assert.Equal(string.Empty, sut.ArtistSearchText);
+    }
+
+    // [AC] REQ-ACREATE-15 (BUG-065): the clear (X) icon also sets ArtistSearchText programmatically
+    // (to empty) and must close the suggestion dropdown, same as every other programmatic assignment.
+    [Fact]
+    public void ClearArtist_ClosesDropdown()
+    {
+        var sut = CreateSut();
+        sut.SelectedArtistId = 7;
+        sut.SelectedArtistName = "Guns N' Roses";
+        sut.ArtistSearchText = "Guns N' Roses";
+        sut.IsArtistLocked = true;
+        sut.IsArtistDropDownOpen = true; // simulate the popup being open before the clear
+
+        sut.ClearArtistCommand.Execute(null);
+
+        Assert.False(sut.IsArtistDropDownOpen);
+    }
+
+    // [AC] REQ-ACREATE-15: a deliberate clear must not be silently overwritten by the
+    // restore-prior-selection branch on the next blur.
+    [Fact]
+    public void ArtistBlurredWithoutSelection_AfterDeliberateClear_DoesNotRestorePriorArtist()
+    {
+        var sut = CreateSut();
+        sut.SelectedArtistId = 7;
+        sut.SelectedArtistName = "Guns N' Roses";
+        sut.ArtistSearchText = "Guns N' Roses";
+        sut.IsArtistLocked = true;
+
+        sut.ClearArtistCommand.Execute(null);
+        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
+
+        Assert.Null(sut.SelectedArtistId);
+        Assert.Equal(string.Empty, sut.ArtistSearchText);
+        Assert.False(sut.ArtistHasError); // empty text is not an "unmatched" state (REQ-ACREATE-03)
+    }
+
     // [AC] AC-B8-03 — InitializeArtistField populates field from query props
     [Fact]
     public void InitializeArtistField_WithArtistId_SetsSearchTextAndSelectedId()
@@ -319,6 +412,178 @@ public class SongFormViewModelTests
 
         Assert.Equal("Metallica", sut.ArtistSearchText);
         Assert.Equal(5, sut.SelectedArtistId);
+    }
+
+    // ── BUG-050: selecting a suggestion locks the field ───────────────────
+
+    // [AC] REQ-ACREATE-12 (BUG-050): selecting a suggestion locks the field
+    [Fact]
+    public void SelectArtist_ExistingSuggestion_LocksField()
+    {
+        var sut = CreateSut();
+        var artist = new ArtistListItem(7, "Queen", string.Empty, false, 0);
+        var suggestion = new AutocompleteSuggestion("Queen", artist.CatalogCountText, artist);
+        Assert.False(sut.IsArtistLocked); // precondition
+
+        sut.SelectArtistCommand.Execute(suggestion);
+
+        Assert.True(sut.IsArtistLocked);
+        Assert.Equal(7, sut.SelectedArtistId);
+    }
+
+    // ── BUG-065/066: dismiss the dropdown on every PROGRAMMATIC ArtistSearchText set ──────
+    // Rewritten 2026-08-02 (Helder decision D1) — the removed _suppressNextArtistSearch flag was
+    // proven inert by IL evidence (DevExpress's own AsyncItemsSourceProvider.OnEditorTextChanged
+    // already ignores non-UserInput text changes; the flag was consumed by the user's NEXT real
+    // keystroke instead, causing BUG-065(b)/BUG-066). The real mechanism is the two-way bound
+    // IsArtistDropDownOpen property (SongFormPage.xaml: AutoCompleteEdit.IsDropDownOpen) — every
+    // site that sets ArtistSearchText programmatically also sets IsArtistDropDownOpen = false.
+
+    // [AC] REQ-ACREATE-12 (BUG-050/065): selecting a suggestion sets ArtistSearchText
+    // programmatically and must close the suggestion dropdown.
+    [Fact]
+    public void SelectArtist_ExistingSuggestion_ClosesDropdown()
+    {
+        var sut = CreateSut();
+        var artist = new ArtistListItem(7, "Queen", string.Empty, false, 0);
+        var suggestion = new AutocompleteSuggestion("Queen", artist.CatalogCountText, artist);
+        sut.IsArtistDropDownOpen = true; // simulate the popup being open before the select
+
+        sut.SelectArtistCommand.Execute(suggestion);
+
+        Assert.False(sut.IsArtistDropDownOpen);
+    }
+
+    // [AC] REQ-ACREATE-14 (BUG-052/065): edit-mode field hydration (InitializeArtistField) also
+    // sets ArtistSearchText programmatically and must close the suggestion dropdown.
+    [Fact]
+    public void InitializeArtistField_WithArtistId_ClosesDropdown()
+    {
+        var sut = CreateSut();
+        sut.ArtistIdRaw = "5";
+        sut.ArtistName = "Metallica";
+        sut.IsArtistDropDownOpen = true; // simulate the popup being open before hydration
+
+        sut.InitializeArtistField();
+
+        Assert.False(sut.IsArtistDropDownOpen);
+    }
+
+    // [AC] REQ-ACREATE-01 (BUG-065): a fresh ViewModel with no programmatic text assignment must
+    // not have forced the dropdown closed (default state, untouched).
+    [Fact]
+    public void IsArtistDropDownOpen_NoProgrammaticSet_DefaultsFalse()
+    {
+        var sut = CreateSut();
+
+        Assert.False(sut.IsArtistDropDownOpen);
+    }
+
+    // [AC] REQ-ACREATE-04 (BUG-065): the song-picker exact-match path (ResolveAndLockArtistAsync,
+    // via OnSongPicked) sets ArtistSearchText programmatically when it auto-locks a matched artist
+    // and must close the suggestion dropdown.
+    [Fact]
+    public async Task ResolveAndLockArtistAsync_ExactMatch_ClosesDropdown()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.SearchArtistsByNameAsync("Queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new ArtistListItem(7, "Queen", string.Empty, false, 3)]);
+        var messenger = new WeakReferenceMessenger();
+        var sut = CreateSut(artistService: artistService, messenger: messenger);
+        sut.IsArtistDropDownOpen = true; // simulate the popup having been open before the resolve
+
+        messenger.Send(new CanonicalSongPickedMessage(
+            new MusicSearchResultDto("ext-1", "youtube", "Queen", "Bohemian Rhapsody", null)));
+        await Task.Yield();
+        await Task.Yield(); // let the fire-and-forget ResolveAndLockArtistAsync's RunOnUiThread callback land
+
+        Assert.True(sut.IsArtistLocked);
+        Assert.False(sut.IsArtistDropDownOpen);
+    }
+
+    // [AC] REQ-ACREATE-01 (BUG-065): the song-picker no-match prefill path
+    // (ResolveAndLockArtistAsync) also sets ArtistSearchText programmatically and must close the
+    // suggestion dropdown.
+    [Fact]
+    public async Task ResolveAndLockArtistAsync_NoMatch_ClosesDropdown()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.SearchArtistsByNameAsync("Unknown Band", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        var messenger = new WeakReferenceMessenger();
+        var sut = CreateSut(artistService: artistService, messenger: messenger);
+        sut.IsArtistDropDownOpen = true; // simulate the popup having been open before the resolve
+
+        messenger.Send(new CanonicalSongPickedMessage(
+            new MusicSearchResultDto("ext-2", "youtube", "Unknown Band", "Some Song", null)));
+        await Task.Yield();
+        await Task.Yield();
+
+        Assert.Equal("Unknown Band", sut.ArtistSearchText);
+        Assert.False(sut.IsArtistLocked);
+        Assert.False(sut.IsArtistDropDownOpen);
+    }
+
+    // [AC] REQ-ACREATE-03 (BUG-065): blurring without a new selection restores the prior artist
+    // name into ArtistSearchText programmatically — this restore must also close the dropdown.
+    [Fact]
+    public void ArtistBlurredWithoutSelection_RestoresPriorSelection_ClosesDropdown()
+    {
+        var sut = CreateSut();
+        sut.SelectedArtistId = 7;
+        sut.SelectedArtistName = "Guns N' Roses";
+        sut.ArtistSearchText = "Guns N' Rose"; // user typed-then-blurred without selecting
+        sut.IsArtistDropDownOpen = true; // simulate the popup being open before blur
+
+        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
+
+        Assert.Equal("Guns N' Roses", sut.ArtistSearchText);
+        Assert.False(sut.IsArtistDropDownOpen);
+    }
+
+    // ── T7: inline "create new artist" ────────────────────────────────────
+
+    // [AC] REQ-ACREATE-04/08: inline create success locks the created artist, clears error
+    [Fact]
+    public async Task CreateArtistInline_Success_LocksCreatedArtistAndClearsError()
+    {
+        var created = new Artist { Id = 42, Name = "New Band" };
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.CreateArtistAsync("New Band", null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, string.Empty, created));
+        var sut = CreateSut(artistService: artistService);
+        sut.ArtistHasError = true;   // prior error present
+
+        await sut.CreateArtistInlineCommand.ExecuteAsync("New Band");
+
+        Assert.Equal(42, sut.SelectedArtistId);
+        Assert.Equal("New Band", sut.SelectedArtistName);
+        Assert.True(sut.IsArtistLocked);
+        Assert.False(sut.ArtistHasError);
+    }
+
+    // [AC] REQ-ACREATE-05: inline create failure maps error, retains text, no lock
+    [Fact]
+    public async Task CreateArtistInline_Failure_MapsErrorAndRetainsText()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.CreateArtistAsync("Dup", null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((false, "Artist already exists.", (Artist?)null));
+        var sut = CreateSut(artistService: artistService);
+        sut.ArtistSearchText = "Dup";
+
+        await sut.CreateArtistInlineCommand.ExecuteAsync("Dup");
+
+        Assert.True(sut.ArtistHasError);
+        Assert.Equal("Artist already exists.", sut.ArtistErrorText);
+        Assert.Equal("Dup", sut.ArtistSearchText);   // retained
+        Assert.False(sut.IsArtistLocked);            // no lock
+        Assert.Null(sut.SelectedArtistId);
+        Assert.Empty(sut.ArtistSuggestions);          // stale suggestions cleared (M3)
     }
 
     // ── BUG-009: buffered URLs ────────────────────────────────────────────
@@ -563,7 +828,7 @@ public class SongFormViewModelTests
         songService.Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<CancellationToken>()))
+                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
         var secureStorage = new Mock<ISecureStorageWrapper>();
         secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
@@ -584,7 +849,51 @@ public class SongFormViewModelTests
         songService.Verify(s => s.UpdateSongAsync(
             42, "Stored Title", "Feat A", "Stored lyrics", true,
             null, null, "Acoustic",
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-ACREATE-16: BUG-067 — after the user unlocks the Artist field and picks a
+    // different artist, edit-mode Save must forward the CURRENT SelectedArtistId to the service.
+    // Before the fix ExecuteEditSaveAsync could not send the artist at all (no parameter existed),
+    // so the change was silently lost.
+    public async Task SaveAsync_EditMode_ArtistChanged_SendsNewArtistIdToService()
+    {
+        var song = new Song
+        {
+            Id = 42,
+            ArtistId = 7,
+            Title = "Stored Title",
+            OriginalArtist = new Artist { Id = 7, Name = "Queen" }
+        };
+        var songService = MakeSongServiceWithSong(song);
+        songService.Setup(s => s.UpdateSongAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
+                  .ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        sut.SongIdRaw = "42";
+        await Task.Yield();
+        sut.CompleteHydration();
+
+        // User clears the locked field (REQ-ACREATE-15) and selects a different artist
+        sut.ClearArtistCommand.Execute(null);
+        sut.SelectedArtistId = 9;
+        sut.SelectedArtistName = "David Bowie";
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        songService.Verify(s => s.UpdateSongAsync(
+            42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(), true,
+            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+            9, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── Title field: blur-first validation (Form Validation Standard, Task 04) ────
@@ -843,5 +1152,153 @@ public class SongFormViewModelTests
 
         resolutionService.Verify(
             s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    // ── BUG-051: stale-search race ──────────────────────────────────────────
+
+    // [AC] REQ-ACREATE-13 (BUG-051): latest query wins over a slower earlier one
+    [Fact]
+    public async Task SearchArtistsAsync_OutOfOrderCompletion_LatestQueryWins()
+    {
+        var older = new TaskCompletionSource<IEnumerable<ArtistListItem>>();
+        var newer = new TaskCompletionSource<IEnumerable<ArtistListItem>>();
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .SetupSequence(s => s.SearchArtistsByNameAsync(
+                It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns(older.Task)
+            .Returns(newer.Task);
+
+        var sut = CreateSut(artistService: artistService);
+
+        var t1 = sut.SearchArtistsCommand.ExecuteAsync("que");   // older request (issued first)
+        var t2 = sut.SearchArtistsCommand.ExecuteAsync("queen"); // newer request (issued second)
+
+        newer.SetResult([new ArtistListItem(2, "Queen", string.Empty, false, 3)]);   // newer completes first
+        await t2;
+        older.SetResult([new ArtistListItem(9, "Querido", string.Empty, false, 1)]); // older completes late
+        await t1;
+
+        var suggestion = Assert.Single(sut.ArtistSuggestions);
+        Assert.Equal("Queen", suggestion.Headline); // older must NOT clobber
+    }
+
+    // ── BUG-052: edit-mode hydration must show the locked artist without searching ─────────
+
+    // [AC] REQ-ACREATE-14 (BUG-052): hydration shows locked artist and fires no search
+    [Fact]
+    public void InitializeArtistField_EditModeHydration_ShowsLockedArtistWithoutSearch()
+    {
+        var artistService = new Mock<IArtistService>();
+
+        var sut = CreateSut(artistService: artistService);
+
+        // Simulates Shell QueryProperty pre-population (edit mode) followed by OnAppearing's call.
+        sut.ArtistIdRaw = "7";
+        sut.ArtistName = "Queen";
+        sut.InitializeArtistField();
+
+        Assert.Equal("Queen", sut.SelectedArtistName);
+        Assert.Equal("Queen", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+        artistService.Verify(
+            s => s.SearchArtistsByNameAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Never());
+    }
+
+    // ── BUG-056: search returns current-query results directly (no read-before-dispatch gap) ──
+
+    // [AC] REQ-ACREATE-13 (BUG-056): the search must return the CURRENT query's mapped results
+    // directly to the caller (the page's AutoCompleteEdit provider) so the provider never has to
+    // read ArtistSuggestions before the background UI dispatch that assigns it has landed.
+    [Fact]
+    public async Task SearchArtistsCoreAsync_ReturnsCurrentQueryResultsDirectly()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.SearchArtistsByNameAsync("queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new ArtistListItem(2, "Queen", string.Empty, false, 3)]);
+
+        var sut = CreateSut(artistService: artistService);
+
+        var results = await sut.SearchArtistsCoreAsync("queen");
+
+        var suggestion = Assert.Single(results);
+        Assert.Equal("Queen", suggestion.Headline);
+    }
+
+    // ── BUG-055: edit-mode hydration must populate + lock the stored artist ───────────────────
+
+    // [AC] REQ-ACREATE-14 (BUG-055): opening a saved song for edit hydrates its stored artist
+    // (id, name, search text) as locked, without firing a suggestion search.
+    [Fact]
+    public async Task LoadSongForEdit_ExistingSong_HydratesArtistAsLocked()
+    {
+        var song = new Song
+        {
+            Id = 42,
+            ArtistId = 7,
+            Title = "Stored Title",
+            OriginalArtist = new Artist { Id = 7, Name = "Queen" }
+        };
+        var songService = MakeSongServiceWithSong(song);
+        var artistService = new Mock<IArtistService>();
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
+                  .ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage,
+            songService: songService, artistService: artistService);
+        sut.SongIdRaw = "42";
+        await Task.Yield();
+
+        Assert.Equal(7, sut.SelectedArtistId);
+        Assert.Equal("Queen", sut.SelectedArtistName);
+        Assert.Equal("Queen", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+        artistService.Verify(
+            s => s.SearchArtistsByNameAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Never());
+    }
+
+    // [AC] BUG-055: after edit-mode hydration the artist link is preserved — Save passes the
+    // artist-required guard without the user re-selecting, so UpdateSongAsync is invoked (the
+    // service keeps the loaded song's ArtistId). Before the fix the guard blocked Save.
+    [Fact]
+    public async Task SaveAsync_EditMode_AfterHydration_PreservesArtistLink()
+    {
+        var song = new Song
+        {
+            Id = 42,
+            ArtistId = 7,
+            Title = "Stored Title",
+            OriginalArtist = new Artist { Id = 7, Name = "Queen" }
+        };
+        var songService = MakeSongServiceWithSong(song);
+        songService.Setup(s => s.UpdateSongAsync(
+                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(42, It.IsAny<CancellationToken>()))
+                  .ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage, songService: songService);
+        sut.SongIdRaw = "42";
+        await Task.Yield();
+        sut.CompleteHydration();
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.False(sut.ArtistHasError);
+        songService.Verify(s => s.UpdateSongAsync(
+            42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(), true,
+            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+            It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

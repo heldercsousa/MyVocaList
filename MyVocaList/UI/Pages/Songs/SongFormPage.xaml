@@ -29,11 +29,15 @@
                                       LabelText="Artist"
                                       PlaceholderText="Search artists..."
                                       Text="{Binding ArtistSearchText, Mode=TwoWay}"
+                                      DisplayMember="Headline"
                                       HasError="{Binding ArtistHasError}"
                                       ErrorText="{Binding ArtistErrorText}"
-                                      IsEnabled="{Binding IsArtistLocked, Converter={StaticResource InverseBoolConverter}}"
+                                      IsReadOnly="{Binding IsArtistLocked}"
+                                      IsDropDownOpen="{Binding IsArtistDropDownOpen, Mode=TwoWay}"
+                                      ClearIconVisibility="Auto"
                                       SelectionChanged="OnArtistSelectionChanged"
-                                      Unfocused="OnArtistUnfocused">
+                                      Unfocused="OnArtistUnfocused"
+                                      ClearIconClicked="OnArtistClearIconClicked">
                     <dxe:AutoCompleteEdit.ItemsSourceProvider>
                         <dxe:AsyncItemsSourceProvider RequestDelay="300"
                                                       CharacterCountThreshold="1"
@@ -41,16 +45,45 @@
                     </dxe:AutoCompleteEdit.ItemsSourceProvider>
                     <dxe:AutoCompleteEdit.ItemTemplate>
                         <DataTemplate x:DataType="models:AutocompleteSuggestion">
-                            <VerticalStackLayout Padding="16,8">
-                                <Label Text="{Binding Headline}" StyleClass="Body.Large" />
-                                <Label Text="{Binding SupportingText}"
-                                       StyleClass="Body.Medium"
-                                       TextColor="{StaticResource OnSurfaceVariant}"
-                                       IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
+                            <VerticalStackLayout>
+                                <BoxView Style="{StaticResource Divider}"
+                                         IsVisible="{Binding IsCreateNew}" />
+                                <HorizontalStackLayout Padding="16,8" Spacing="8">
+                                    <Label Text="➕"
+                                           StyleClass="Body.Large"
+                                           TextColor="{StaticResource Primary}"
+                                           VerticalOptions="Center"
+                                           IsVisible="{Binding IsCreateNew}" />
+                                    <VerticalStackLayout>
+                                        <Label StyleClass="Body.Large"
+                                               IsVisible="{Binding IsCreateNew}">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="Add &quot;" />
+                                                    <Span Text="{Binding Headline}" />
+                                                    <Span Text="&quot; as a new artist" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                        <Label Text="{Binding Headline}"
+                                               StyleClass="Body.Large"
+                                               IsVisible="{Binding IsCreateNew, Converter={StaticResource InverseBoolConverter}}" />
+                                        <Label Text="{Binding SupportingText}"
+                                               StyleClass="Body.Medium"
+                                               TextColor="{StaticResource OnSurfaceVariant}"
+                                               IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </DataTemplate>
                     </dxe:AutoCompleteEdit.ItemTemplate>
                 </dxe:AutoCompleteEdit>
+
+                <!-- BUG-064: removed the separate error Label added for BUG-057 — the DX editor's
+                     own HasError/ErrorText (bound above, lines 33-34) now surfaces the message
+                     on-device, so the standalone Label duplicated the exact same text underneath it.
+                     ArtistErrorText/ArtistHasError stay in the ViewModel; the control's bindings are
+                     the sole remaining consumer. -->
 
                 <dxe:TextEdit x:Name="titleEdit"
                               Text="{Binding SongTitle, Mode=TwoWay}"
