@@ -254,17 +254,26 @@ public class SongService : ISongService
     }
 
     /// <inheritdoc />
-    public async Task<(bool success, string message)> DeleteSongsAsync(
+    public Task<(bool success, string message)> DeleteSongsAsync(
         IEnumerable<int> ids, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
 
-        var idList = ids.ToList();
-        if (idList.Count == 0)
-            return (false, "No song selected for deletion");
+        return _uow.ExecuteAsync<(bool success, string message)>(async sp =>
+        {
+            // REQ-UOW-28: the repository is resolved from the lambda's own scope — never the
+            // constructor field, which holds the window-scope AppDbContext that caused BUG-068.
+            // ISongRepository.DeleteAsync is ExecuteDeleteAsync-based (REQ-UOW-33), so the explicit
+            // transaction opened by IUnitOfWork is what brings the bulk delete under the unit of work.
+            var songRepository = sp.GetRequiredService<ISongRepository>();
 
-        await _songRepository.DeleteAsync(idList, ct);
-        return (true, idList.Count == 1 ? "Song deleted" : $"{idList.Count} songs deleted");
+            var idList = ids.ToList();
+            if (idList.Count == 0)
+                return (false, "No song selected for deletion");
+
+            await songRepository.DeleteAsync(idList, ct);
+            return (true, idList.Count == 1 ? "Song deleted" : $"{idList.Count} songs deleted");
+        }, ct);
     }
 
     /// <inheritdoc />
