@@ -14,7 +14,7 @@ public class Bug068RegressionTests
     [Fact]
     public async Task Song_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict()
     {
-        await using var host = UnitOfWorkTestHost.CreateLegacy();
+        await using var host = UnitOfWorkTestHost.Create();
         var artists = host.Resolve<IArtistService>();
         var songs = host.Resolve<ISongService>();
 
@@ -41,7 +41,7 @@ public class Bug068RegressionTests
     [Fact]
     public async Task Artist_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict()
     {
-        await using var host = UnitOfWorkTestHost.CreateLegacy();
+        await using var host = UnitOfWorkTestHost.Create();
         var artists = host.Resolve<IArtistService>();
 
         var (createOk, _, artist) = await artists.CreateArtistAsync("Tracking Artist");
@@ -63,7 +63,7 @@ public class Bug068RegressionTests
     [Fact]
     public async Task Person_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict()
     {
-        await using var host = UnitOfWorkTestHost.CreateLegacy();
+        await using var host = UnitOfWorkTestHost.Create();
         var persons = host.Resolve<IPersonService>();
 
         var (createOk, _, person) = await persons.CreatePersonAsync("Tracking Person");
@@ -85,7 +85,7 @@ public class Bug068RegressionTests
     [Fact]
     public async Task Venue_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict()
     {
-        await using var host = UnitOfWorkTestHost.CreateLegacy();
+        await using var host = UnitOfWorkTestHost.Create();
         var venues = host.Resolve<IVenueService>();
 
         var (createOk, _) = await venues.CreateVenueAsync("Tracking Venue");

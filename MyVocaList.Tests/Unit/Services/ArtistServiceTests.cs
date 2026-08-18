@@ -1,4 +1,5 @@
 using MyVocaList.Domain.ReadModels;
+using MyVocaList.Tests.Infrastructure;
 
 namespace MyVocaList.Tests.Unit.Services;
 
@@ -9,8 +10,13 @@ public class ArtistServiceTests
     private readonly Mock<ICatalogRepository> _catalogRepoMock = new();
     private readonly Mock<ILogger<ArtistService>> _loggerMock = new();
 
+    // The service now takes IUnitOfWork; PassthroughUnitOfWork runs each wrapped body inline
+    // against these same mocks, so every existing assertion keeps its original meaning
+    // (`plan.md` Task 2.1 Step 5).
     private ArtistService CreateSut() => new(
-        _artistRepoMock.Object, _songRepoMock.Object, _catalogRepoMock.Object, _loggerMock.Object);
+        _artistRepoMock.Object, _songRepoMock.Object, _catalogRepoMock.Object,
+        PassthroughUnitOfWork.Over(_artistRepoMock, _songRepoMock, _catalogRepoMock),
+        _loggerMock.Object);
 
     // ── ValidateNameInput ─────────────────────────────────────────────────
 
