@@ -1,7 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions.Strings;
 
 namespace MyVocaList.Services;
@@ -12,6 +14,7 @@ public class SongService : ISongService
     private readonly IArtistRepository _artistRepository;
     private readonly ISongKaraokeUrlRepository _urlRepository;
     private readonly ISongKaraokeUrlService _urlService;
+    private readonly IUnitOfWork _uow;
     private readonly ILogger<SongService> _logger;
 
     public int MaxTitleLength => 100;
@@ -23,12 +26,14 @@ public class SongService : ISongService
         IArtistRepository artistRepository,
         ISongKaraokeUrlRepository urlRepository,
         ISongKaraokeUrlService urlService,
+        IUnitOfWork uow,
         ILogger<SongService> logger)
     {
         _songRepository = songRepository;
         _artistRepository = artistRepository;
         _urlRepository = urlRepository;
         _urlService = urlService;
+        _uow = uow;
         _logger = logger;
     }
 
@@ -61,159 +66,178 @@ public class SongService : ISongService
     }
 
     /// <inheritdoc />
-    public async Task<(bool success, string message, Song? song)> CreateSongAsync(
+    public Task<(bool success, string message, Song? song)> CreateSongAsync(
         int artistId, string title, string? featuredArtists = null, string? lyrics = null,
         string? externalId = null, string? externalProvider = null, CancellationToken ct = default)
-    {
-        var (isValid, message) = ValidateTitleInput(title);
-        if (!isValid)
-            return (false, message, null);
-
-        var artist = await _artistRepository.GetByIdAsync(artistId, ct);
-        if (artist == null)
-            return (false, "Artist not found", null);
-
-        // Song.Title trimming is enforced by the EF Core ValueConverter configured in
-        // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
-        // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-        if (await _songRepository.ExistsByTitleForArtistAsync(artistId, title, ct))
-            return (false, "A song with this title already exists for this artist", null);
-
-        // Song.Title/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
-        var song = new Song
+        => _uow.ExecuteAsync<(bool success, string message, Song? song)>(async sp =>
         {
-            ArtistId = artistId,
-            Title = title,
-            FeaturedArtists = featuredArtists,
-            Lyrics = lyrics,
-            ExternalId = externalId,
-            ExternalProvider = externalProvider,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            // REQ-UOW-28: both repositories resolved from the lambda's own scope — never the
+            // constructor fields, which hold the window-scope AppDbContext that caused BUG-068.
+            var songRepository = sp.GetRequiredService<ISongRepository>();
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
 
-        await _songRepository.AddAsync(song, ct);
-        await _songRepository.SaveChangesAsync(ct);
-        return (true, $"Song '{title.Trim()}' created successfully", song);
-    }
+            var (isValid, message) = ValidateTitleInput(title);
+            if (!isValid)
+                return (false, message, null);
+
+            var artist = await artistRepository.GetByIdAsync(artistId, ct);
+            if (artist == null)
+                return (false, "Artist not found", null);
+
+            // Song.Title trimming is enforced by the EF Core ValueConverter configured in
+            // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
+            // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
+            if (await songRepository.ExistsByTitleForArtistAsync(artistId, title, ct))
+                return (false, "A song with this title already exists for this artist", null);
+
+            // Song.Title/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
+            var song = new Song
+            {
+                ArtistId = artistId,
+                Title = title,
+                FeaturedArtists = featuredArtists,
+                Lyrics = lyrics,
+                ExternalId = externalId,
+                ExternalProvider = externalProvider,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await songRepository.AddAsync(song, ct);
+            // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+            return (true, $"Song '{title.Trim()}' created successfully", song);
+        }, ct);
 
     /// <inheritdoc />
-    public async Task<(bool success, string message)> UpdateSongAsync(
+    public Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
         string? externalId = null, string? externalProvider = null, string? version = null,
         CancellationToken ct = default)
-    {
-        var (isValid, message) = ValidateTitleInput(title);
-        if (!isValid)
-            return (false, message);
-
-        if (version != null)
+        => _uow.ExecuteAsync<(bool success, string message)>(async sp =>
         {
-            var (versionValid, versionMessage) = ValidateVersionInput(version);
-            if (!versionValid)
-                return (false, versionMessage);
-        }
+            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+            var songRepository = sp.GetRequiredService<ISongRepository>();
 
-        var song = await _songRepository.GetByIdAsync(id, ct);
-        if (song == null)
-            return (false, "Song not found");
+            var (isValid, message) = ValidateTitleInput(title);
+            if (!isValid)
+                return (false, message);
 
-        // Song.Title trimming is enforced by the EF Core ValueConverter configured in
-        // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
-        // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-        if (await _songRepository.ExistsByTitleForArtistAsync(song.ArtistId, title, id, ct))
-            return (false, "A song with this title already exists for this artist");
+            if (version != null)
+            {
+                var (versionValid, versionMessage) = ValidateVersionInput(version);
+                if (!versionValid)
+                    return (false, versionMessage);
+            }
 
-        // Song.Title/FeaturedArtists/Version trimming is enforced by the ValueConverter (design.md § D3).
-        song.Title = title;
-        song.FeaturedArtists = featuredArtists;
-        song.Lyrics = lyrics;
-        song.UpdatedAt = DateTime.UtcNow;
-        song.HasManualEdits = hasManualEdits;
+            var song = await songRepository.GetByIdAsync(id, ct);
+            if (song == null)
+                return (false, "Song not found");
 
-        // BUG-024: persist the version label when provided; null = keep existing value
-        // (mirrors the externalId/externalProvider null-keeps-existing semantics below).
-        if (version != null)
-            song.Version = version;
+            // Song.Title trimming is enforced by the EF Core ValueConverter configured in
+            // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
+            // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
+            if (await songRepository.ExistsByTitleForArtistAsync(song.ArtistId, title, id, ct))
+                return (false, "A song with this title already exists for this artist");
 
-        // M2: persist external identity when provided; null = keep existing value
-        if (externalId != null)
-            song.ExternalId = externalId;
-        if (externalProvider != null)
-            song.ExternalProvider = externalProvider;
+            // Song.Title/FeaturedArtists/Version trimming is enforced by the ValueConverter (design.md § D3).
+            song.Title = title;
+            song.FeaturedArtists = featuredArtists;
+            song.Lyrics = lyrics;
+            song.UpdatedAt = DateTime.UtcNow;
+            song.HasManualEdits = hasManualEdits;
 
-        await _songRepository.UpdateAsync(song, ct);
-        await _songRepository.SaveChangesAsync(ct);
-        return (true, $"Song updated to '{title}'");
-    }
+            // BUG-024: persist the version label when provided; null = keep existing value
+            // (mirrors the externalId/externalProvider null-keeps-existing semantics below).
+            if (version != null)
+                song.Version = version;
+
+            // M2: persist external identity when provided; null = keep existing value
+            if (externalId != null)
+                song.ExternalId = externalId;
+            if (externalProvider != null)
+                song.ExternalProvider = externalProvider;
+
+            await songRepository.UpdateAsync(song, ct);
+            // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+            return (true, $"Song updated to '{title}'");
+        }, ct);
 
     /// <inheritdoc />
-    public async Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
+    public Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
         int artistId, string title, string version, string? featuredArtists, string? lyrics,
         string? externalId, string? externalProvider,
         IEnumerable<string> urls,
         CancellationToken ct = default)
-    {
-        var (isValid, message) = ValidateTitleInput(title);
-        if (!isValid)
-            return (false, message, null);
-
-        version ??= string.Empty;
-
-        var artist = await _artistRepository.GetByIdAsync(artistId, ct);
-        if (artist == null)
-            return (false, "Artist not found", null);
-
-        // Song.Title/Version trimming is enforced by the EF Core ValueConverter configured in
-        // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
-        // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-        if (await _songRepository.ExistsByTitleVersionForArtistAsync(artistId, title, version, ct))
-            return (false, "A song with this title and version already exists for this artist", null);
-
-        // Song.Title/Version/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
-        var song = new Song
+        => _uow.ExecuteAsync<(bool success, string message, Song? song)>(async sp =>
         {
-            ArtistId = artistId,
-            Title = title,
-            Version = version,
-            FeaturedArtists = featuredArtists,
-            Lyrics = lyrics,
-            ExternalId = externalId,
-            ExternalProvider = externalProvider,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            // REQ-UOW-28: all three repositories AND the nested URL service are resolved from the
+            // lambda's own scope — never the constructor fields. All three repositories therefore
+            // share ONE AppDbContext, which is what keeps REQ-UOW-07's single-save FK fixup valid.
+            var songRepository = sp.GetRequiredService<ISongRepository>();
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
+            var urlRepository = sp.GetRequiredService<ISongKaraokeUrlRepository>();
+            var urlService = sp.GetRequiredService<ISongKaraokeUrlService>();
 
-        // Stage the song entity (no SaveChangesAsync yet)
-        await _songRepository.AddAsync(song, ct);
+            var (isValid, message) = ValidateTitleInput(title);
+            if (!isValid)
+                return (false, message, null);
 
-        // Stage URL entities on the SAME context — N3: one SaveChangesAsync commits both atomically
-        var urlList = urls?.ToList() ?? [];
-        foreach (var rawUrl in urlList)
-        {
-            var videoId = _urlService.ExtractVideoId(rawUrl);
-            if (videoId is null)
+            version ??= string.Empty;
+
+            var artist = await artistRepository.GetByIdAsync(artistId, ct);
+            if (artist == null)
+                return (false, "Artist not found", null);
+
+            // Song.Title/Version trimming is enforced by the EF Core ValueConverter configured in
+            // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
+            // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
+            if (await songRepository.ExistsByTitleVersionForArtistAsync(artistId, title, version, ct))
+                return (false, "A song with this title and version already exists for this artist", null);
+
+            // Song.Title/Version/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
+            var song = new Song
             {
-                _logger.LogWarning("Skipping invalid YouTube URL during atomic song create: {Url}", rawUrl);
-                continue;
-            }
-
-            var urlEntity = new SongKaraokeUrl
-            {
-                // SongId is set by EF Core via the navigation after SaveChangesAsync resolves
-                // the song's generated PK. We set the reference via Song navigation property.
-                Song = song,
-                VideoId = videoId,
-                AddedAt = DateTime.UtcNow
+                ArtistId = artistId,
+                Title = title,
+                Version = version,
+                FeaturedArtists = featuredArtists,
+                Lyrics = lyrics,
+                ExternalId = externalId,
+                ExternalProvider = externalProvider,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
-            await _urlRepository.AddAsync(urlEntity, ct);
-        }
+            // Stage the song entity (no SaveChangesAsync yet)
+            await songRepository.AddAsync(song, ct);
 
-        // Single commit — song + all URLs in one transaction (AC-6.2)
-        await _songRepository.SaveChangesAsync(ct);
-        return (true, $"Song '{title}' created successfully", song);
-    }
+            // Stage URL entities on the SAME context — N3: one SaveChangesAsync commits both atomically
+            var urlList = urls?.ToList() ?? [];
+            foreach (var rawUrl in urlList)
+            {
+                var videoId = urlService.ExtractVideoId(rawUrl);
+                if (videoId is null)
+                {
+                    _logger.LogWarning("Skipping invalid YouTube URL during atomic song create: {Url}", rawUrl);
+                    continue;
+                }
+
+                var urlEntity = new SongKaraokeUrl
+                {
+                    // SongId is set by EF Core via the navigation after SaveChangesAsync resolves
+                    // the song's generated PK. We set the reference via Song navigation property.
+                    Song = song,
+                    VideoId = videoId,
+                    AddedAt = DateTime.UtcNow
+                };
+
+                await urlRepository.AddAsync(urlEntity, ct);
+            }
+
+            // REQ-UOW-07: the single commit — song + all URLs — is now owned by IUnitOfWork, which
+            // saves the one shared context inside its explicit transaction (AC-6.2 preserved).
+            return (true, $"Song '{title}' created successfully", song);
+        }, ct);
 
     /// <inheritdoc />
     public async Task<Song?> GetSongByIdAsync(int id, CancellationToken ct = default)

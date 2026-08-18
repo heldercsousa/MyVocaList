@@ -1,3 +1,7 @@
+using Microsoft.Extensions.DependencyInjection;
+using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Infra.Repository;
 using MyVocaList.Tests.Infrastructure;
 
 namespace MyVocaList.Tests.Integration.UnitOfWork;
@@ -99,5 +103,60 @@ public class Bug068RegressionTests
         Assert.True(updateOk, message);
         var (rereadItems, _) = await venues.GetPagedVenuesForListAsync(1, 20, "Updated Venue Name");
         Assert.Contains(rereadItems, i => i.Id == created.Id && i.Name == "Updated Venue Name");
+    }
+
+    // [AC] REQ-UOW-07: CreateSongWithUrlsAsync persists the Song and its SongKaraokeUrl rows in
+    // ONE save. A forced failure on the URL rows must therefore leave NO Song row behind — the
+    // song write and the URL writes are the same unit of work, not two sequential commits.
+    // Fault-injection technique mirrors Task 0.4's ThrowOnAddSongRepository decorator
+    // (NestedUnitOfWorkTests): decorate the real repository, throw from the one member under test,
+    // forward every other member to the inner instance.
+    [Fact]
+    public async Task CreateSongWithUrls_UrlAddFaults_PersistsNoSongRow()
+    {
+        await using var host = UnitOfWorkTestHost.Create(services =>
+            services.AddScoped<ISongKaraokeUrlRepository>(sp =>
+                new ThrowOnAddUrlRepository(
+                    ActivatorUtilities.CreateInstance<SongKaraokeUrlRepository>(sp))));
+
+        var artists = host.Resolve<IArtistService>();
+        var songs = host.Resolve<ISongService>();
+
+        var (artistOk, artistMessage, artist) = await artists.CreateArtistAsync("Atomic URL Artist");
+        Assert.True(artistOk, artistMessage);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => songs.CreateSongWithUrlsAsync(
+            artist!.Id, "Atomic URL Song", string.Empty, null, null, null, null,
+            ["https://www.youtube.com/watch?v=dQw4w9WgXcQ"]));
+
+        Assert.Equal(0, host.Db.Songs.Count(s => s.Title == "Atomic URL Song"));
+        Assert.Equal(0, host.Db.SongKaraokeUrls.Count());
+    }
+
+    /// <summary>Decorator over the real <see cref="SongKaraokeUrlRepository"/> that throws from
+    /// <see cref="AddAsync"/> — the fault point for REQ-UOW-07 — and forwards every other member
+    /// to the inner instance.</summary>
+    private sealed class ThrowOnAddUrlRepository(ISongKaraokeUrlRepository inner) : ISongKaraokeUrlRepository
+    {
+        public Task<List<SongKaraokeUrl>> GetBySongIdAsync(int songId, CancellationToken ct = default)
+            => inner.GetBySongIdAsync(songId, ct);
+
+        public Task<SongKaraokeUrl?> GetSuggestedAsync(int songId, CancellationToken ct = default)
+            => inner.GetSuggestedAsync(songId, ct);
+
+        public Task<bool> ExistsAsync(int songId, string videoId, CancellationToken ct = default)
+            => inner.ExistsAsync(songId, videoId, ct);
+
+        public Task AddAsync(SongKaraokeUrl url, CancellationToken ct = default)
+            => throw new InvalidOperationException("injected");
+
+        public Task RemoveAsync(int songId, string videoId, CancellationToken ct = default)
+            => inner.RemoveAsync(songId, videoId, ct);
+
+        public Task IncrementPlayCountAsync(int songId, string videoId, CancellationToken ct = default)
+            => inner.IncrementPlayCountAsync(songId, videoId, ct);
+
+        public Task SaveChangesAsync(CancellationToken ct = default)
+            => inner.SaveChangesAsync(ct);
     }
 }

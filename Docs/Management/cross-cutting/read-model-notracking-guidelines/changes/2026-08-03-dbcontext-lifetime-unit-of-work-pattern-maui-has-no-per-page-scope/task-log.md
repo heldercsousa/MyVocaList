@@ -601,3 +601,93 @@ Every edited region re-read after the edit: the new `AddSingleton<IUnitOfWork, �
 ### Commit
 `git commit --no-verify` — the pre-commit hook runs `dotnet test` and aborts on the 3 intentional
 REDs (BUG-074). Helder authorised `--no-verify` for exactly that; disclosed in the commit body.
+
+---
+## Task: 2.2 — `SongService` — 3 create/update methods
+**Plan:** `plan.md § Task 2.2`
+**Status:** To Review
+**Started:** 2026-08-18
+**Completed:** 2026-08-18
+
+### Changed files:
+- `Services/SongService.cs`
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs`
+- `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs`
+- `Docs/Management/.../task-log.md` (this file)
+
+### What was done
+- Added `IUnitOfWork _uow` to `SongService`'s constructor (kept all four repository/service fields —
+  the unwrapped read methods and `DeleteSongsAsync` (Task 2.2b) still use them).
+- Wrapped **`CreateSongAsync`**, **`UpdateSongAsync`**, **`CreateSongWithUrlsAsync`** in
+  `_uow.ExecuteAsync<TResult>(async sp => { ... }, ct)`. Each is now an expression-bodied method:
+  **exactly one added line of unit-of-work ceremony per method (REQ-UOW-10)**, zero lines in any
+  repository.
+- Deleted the trailing `await _songRepository.SaveChangesAsync(ct)` from all three.
+  `ISongRepository.SaveChangesAsync` itself is **untouched** (Task 2.4b owns its retirement).
+- `DeleteSongsAsync` **not touched** — Task 2.2b.
+
+### REQ-UOW-28 (the load-bearing rule) — per-method verification
+Mechanically checked by brace-matching each `_uow.ExecuteAsync<` lambda body and grepping it for
+`_songRepository` / `_artistRepository` / `_urlRepository` / `_urlService`:
+
+| Method | Resolved from `sp` | Constructor fields inside lambda |
+|---|---|---|
+| `CreateSongAsync` | `ISongRepository`, `IArtistRepository` | **none** |
+| `UpdateSongAsync` | `ISongRepository` | **none** |
+| `CreateSongWithUrlsAsync` | `ISongRepository`, `IArtistRepository`, `ISongKaraokeUrlRepository`, `ISongKaraokeUrlService` | **none** |
+
+`_logger` is the only constructor field still referenced inside a lambda (`CreateSongWithUrlsAsync`'s
+invalid-URL warning) — it is not a repository or a data-writing service, so REQ-UOW-28 does not apply
+to it; this matches `ArtistService` (Task 2.1).
+
+### REQ-UOW-07 (Step 5) — new test
+`Bug068RegressionTests.CreateSongWithUrls_UrlAddFaults_PersistsNoSongRow`. Uses the Task 0.4
+decorator technique: `ThrowOnAddUrlRepository` wraps the real `SongKaraokeUrlRepository`, throws from
+`AddAsync`, forwards every other member; injected via `UnitOfWorkTestHost.Create(customize)`. Asserts
+**0 `Song` rows** and 0 `SongKaraokeUrl` rows survive the fault — i.e. the song write and the URL
+writes really are one save inside one transaction. **PASSES.**
+
+### Deviation — two `SaveChangesAsync` assertions re-expressed (NOT weakened; flagged for review)
+`SongServiceTests.CreateSongWithUrlsAsync_ValidSongAndUrls_PersistsBoth` (:529) and
+`..._EmptyUrlList_CreatesSongOnly` (:566) asserted
+`_songRepoMock.Verify(r => r.SaveChangesAsync(...), Times.Once)`. REQ-UOW-10 **deliberately removes
+that call from the service method**, so the assertion became structurally unsatisfiable — it encodes
+the save's *old location*, not a guarantee the spec still makes at that location.
+
+Rather than delete either assertion, both were **inverted to `Times.Never`** — the equally strict
+positive encoding of REQ-UOW-10 ("zero save lines per service method") — and the atomic-single-commit
+guarantee they used to carry (AC-6.2 / REQ-UOW-07) was **moved to a stronger observation**: the new
+integration test above, which checks real rows in a real context instead of a mock call count.
+`_urlRepoMock.Verify(SaveChangesAsync, Times.Never)` is unchanged. Net assertion strength increases.
+**This is flagged deliberately for Helder's review** — it is the one place this task altered an
+existing test's expectation.
+
+### Build notes
+Build: passed (0 errors). Test command: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --no-restore`.
+
+| | Failed | Passed | Skipped | Total |
+|---|---|---|---|---|
+| Baseline (going in) | 3 | 555 | 0 | 558 |
+| After | **2** | **557** | **0** | **559** |
+
+Remaining failures — both intentional, both owned by **Task 2.4** (`SongResolutionService` still
+unwrapped, so the 3-level chain is not yet atomic):
+- `NestedUnitOfWorkTests.CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow`
+- `NestedUnitOfWorkTests.CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow`
+
+The baseline's **third** failure was a pre-existing flaky `ObjectDisposedException:
+'SQLitePCL.sqlite3'` during `EnsureCreated` that lands on a *different* integration test each run
+(observed on `SongRepositoryTests.AddAsync_CatalogEntry_LinksArtistAndSong` and on
+`UnitOfWorkCompositionTests.Composition_AppDbContext_StillResolvesDirectlyFromAScope`). Both pass in
+isolation; it did not recur on the final run. Unrelated to this task — noted, not fixed.
+
+### HEADLINE — REQ-UOW-03 RED -> GREEN
+`Bug068RegressionTests.Song_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict`
+- **Before (HEAD `372d691d`, this task not applied):** FAILED — BUG-068 tracking conflict on the
+  create -> read -> update sequence.
+- **After:** **PASSED.** Verified in isolation: `--filter FullyQualifiedName~Bug068RegressionTests`
+  -> `Failed: 0, Passed: 4`. The pilot's headline transition is achieved.
+
+Files written and re-read: `Services/SongService.cs` (lambda bodies re-scanned mechanically for
+REQ-UOW-28), `MyVocaList.Tests/Unit/Services/SongServiceTests.cs`,
+`MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs`.
