@@ -153,7 +153,4 @@ public class ArtistRepository : IArtistRepository
             .ExecuteDeleteAsync(ct);
     }
 
-    /// <inheritdoc />
-    public Task SaveChangesAsync(CancellationToken ct = default)
-        => _db.SaveChangesAsync(ct);
 }

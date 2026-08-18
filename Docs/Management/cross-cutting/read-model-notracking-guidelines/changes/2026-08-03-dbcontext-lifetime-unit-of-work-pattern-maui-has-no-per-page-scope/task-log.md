@@ -731,3 +731,216 @@ going-in baseline. The 2 failures are the two intentional REDs owned by Task 2.4
 No `ObjectDisposedException` flake on this run. Committed with `--no-verify` (pre-commit hook aborts
 on those 2 intentional REDs, BUG-074 — authorised for exactly that).
 Files written and re-read: `Services/SongService.cs`.
+
+---
+## Task 2.3: `ArtistResolutionService` + retire `IArtistRepository.SaveChangesAsync`
+**Plan:** `plan.md § Task 2.3`
+**Status:** blocked: spec gap
+**Started:** 2026-08-18
+**Completed:** —
+
+### What was implemented (present in the worktree, deliberately NOT committed)
+- `Services/ArtistResolutionService.cs` — `CommitAsync` wrapped in `_uow.ExecuteAsync<(bool, string, int)>`
+  (Step 1), `ResolveAsync` wrapped in `_uow.ExecuteReadAsync<ArtistResolution>` (Step 3), `IUnitOfWork`
+  added as a constructor dependency, both embedded `SaveChangesAsync` calls removed.
+- `MyVocaList.Tests/Unit/Services/ArtistResolutionServiceTests.cs` — the two
+  `.Setup(r => r.SaveChangesAsync(...))` stubs removed (Step 4), SUT constructed with
+  `PassthroughUnitOfWork.Over(_repoMock, _artistServiceMock)`. **No assertion was weakened, removed or
+  commented out.**
+- WIP patch preserved at
+  `%LOCALAPPDATA%/Temp/claude/C--Users-helde-source-repos-MyVocaList/f55efc67-60b9-45a1-b5b2-5dc48a150089/scratchpad/task-2.3-wip.patch`.
+
+### REQ-UOW-28 — mechanically verified (not by eye)
+Regex scan of `Services/ArtistResolutionService.cs` for `_artist(Repository|Service)` returns exactly
+4 code hits — the two field declarations (`:12`, `:13`) and the two constructor assignments (`:25`,
+`:26`) — plus one occurrence inside an explanatory comment (`:108`). **Neither `_artistRepository` nor
+`_artistService` appears inside any lambda body.** Both are resolved from the lambda's own `sp`
+(`sp.GetRequiredService<IArtistRepository>()`, `sp.GetRequiredService<IArtistService>()`).
+
+### Step 6 result — the REQ-UOW-09 pinned outcome test FAILS after the re-shape
+`NestedUnitOfWorkTests.CommitAsync_CreateNewWithExternalIdentity_CreatesOneArtistWithExternalFieldsSet`
+(Task 0.4b's characterization test) goes GREEN -> RED. Per the briefing this is "a real signal — report
+it, do not adjust the test". The test was not touched.
+
+### Spec gap: collapsing the save invalidates the CreateNew branch's generated key
+**Location:** `requirements.md § REQ-UOW-09`; `plan.md § Task 2.3 Step 1`.
+**Gap description:** Step 1 asserts the `save -> mutate -> save` pair "collapses to a single implicit
+save". It cannot, as written: the CreateNew branch depends on the Artist's database-generated key
+being materialised *before* the lambda returns, and a single deferred save materialises it *after*.
+Two independent failures follow, both caused by this one fact:
+
+1. `ArtistRepository.UpdateAsync` calls `DbSet.Update(artist)`, which forces state `Modified` on an
+   entity that is still `Added` with a temporary key ->
+   `InvalidOperationException: The property 'Artist.Id' has a temporary value while attempting to
+   change the entity's state to 'Modified'.`
+   (`ArtistRepository.cs:143` <- `ArtistResolutionService.cs:153`.)
+2. `return (true, message, created.Id)` is evaluated inside the lambda, i.e. before
+   `UnitOfWork.ExecuteAsync` saves — so the returned `artistId` is `0`. This breaks REQ-UOW-09's
+   explicit guarantee that "the returned `artistId` must not change", and it is what makes
+   `CommitAsync_NovelArtistAndSong_CreatesExactlyOneArtistAndOneSongRow` fail with
+   `Failed to resolve or create artist` (`SongResolutionService` rejects the `0`).
+
+Note that dropping the now-redundant `UpdateAsync` call (the entity is already tracked as `Added` in
+the same context) would fix (1) but not (2), and would additionally break the existing unit assertion
+`_repoMock.Verify(r => r.UpdateAsync(...), Times.Once)` — which I am not permitted to modify.
+
+**Options:**
+- Option A — take REQ-UOW-09's explicitly sanctioned second branch ("*or remains two saves inside one
+  unit of work*"): keep an intermediate flush inside the single scope so the key materialises before
+  the mutation. This requires **keeping** `IArtistRepository.SaveChangesAsync` (or an equivalent flush
+  affordance on `IUnitOfWork`), which directly contradicts Step 5 / REQ-UOW-11's retirement.
+  Consequence: REQ-UOW-09 and REQ-UOW-11 cannot both be satisfied for this method as currently specified.
+- Option B — change `IArtistService.CreateArtistAsync`'s contract so the caller never needs the
+  generated key inside the unit of work (e.g. `ArtistResolutionService` sets the external identity on
+  the entity *before* `AddAsync`, and `SongResolutionService` consumes the `Artist` instance rather
+  than an `int` id). Consequence: touches `IArtistService`/`ISongResolutionService` signatures and
+  `SongResolutionService` — all outside this task's `Files owned`, and an interface change the
+  subagent scope constraint forbids me making.
+**Recommendation:** Option A, scoped narrowly: add a flush affordance to `IUnitOfWork` (so no
+repository regains a save entry point and REQ-UOW-11 still holds), and have the CreateNew branch call
+it once after `CreateArtistAsync`. This keeps REQ-UOW-09's observable outcome and the returned
+`artistId` intact. It is an `IUnitOfWork` surface change — a D13 API-shape decision — so it is Helder's
+to make, not mine.
+**Blocking:** Yes — cannot proceed without resolution.
+
+### Step 5 — grep result: retirement DEFERRED (not performed)
+Repo-wide grep found **zero** remaining callers of `IArtistRepository.SaveChangesAsync` (production or
+test) once the two mock setups are removed, so the member is mechanically retirable and no excluded
+`TODO [BUG-071 / UOW]` file blocks it. It was nevertheless **not deleted**: Option A above needs
+exactly that member (or its replacement) to exist, and deleting it now would pre-empt Helder's
+decision on the gap. `Domain/RepositoryInterface/IArtistRepository.cs:55` and
+`Infra/Repository/ArtistRepository.cs:157-158` are untouched.
+
+### Verification evidence
+| Run | Result |
+|---|---|
+| Baseline (`git stash`, HEAD `5a6d7ad`) | `Falha: 2, Aprovado: 557, Ignorado: 0, Total: 559` |
+| With Task 2.3 changes | `Falha: 4, Aprovado: 555, Ignorado: 0, Total: 559` |
+
+Baseline failures (both intentional REDs owned by Task 2.4, still red — correct):
+- `NestedUnitOfWorkTests.CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow`
+- `NestedUnitOfWorkTests.CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow`
+
+New failures introduced by this task (the two the gap is about):
+- `NestedUnitOfWorkTests.CommitAsync_CreateNewWithExternalIdentity_CreatesOneArtistWithExternalFieldsSet` (Step 6)
+- `NestedUnitOfWorkTests.CommitAsync_NovelArtistAndSong_CreatesExactlyOneArtistAndOneSongRow`
+
+`Skipped: 0` on every run. No `ObjectDisposedException` flake observed across the three runs.
+
+### Why nothing was committed to `feat/uow-pilot`
+Committing would leave the branch with 4 failures where the plan expects 2, and Task 2.4 consumes 2.3
+— it would build on a known-broken base. The changes remain in the worktree working tree (and as a
+saved patch) for inspection; no code file was committed. Files written and re-read:
+`Services/ArtistResolutionService.cs`, `MyVocaList.Tests/Unit/Services/ArtistResolutionServiceTests.cs`.
+
+---
+## Task: Task 2.3 spec-gap resolution + completion - `IUnitOfWork.FlushAsync` (REQ-UOW-35) and `ArtistResolutionService` wrap
+**Plan:** `plan.md` (Phase 2, Task 2.3)
+**Status:** To Review
+**Started:** 2026-08-18
+**Completed:** 2026-08-18
+
+Resolves the `blocked: spec gap` raised by the previous Task 2.3 attempt ("collapsing the save
+invalidates the CreateNew branch's generated key"). Helder chose the recommended Option A: add a
+flush affordance to `IUnitOfWork`. Implemented exactly as decided; no re-litigation.
+
+### Decision implemented - REQ-UOW-35, `IUnitOfWork.FlushAsync`
+`plan.md` Task 2.3 Step 1's claim that the save->mutate->save pair "collapses to a single implicit
+save" was the error - **not** REQ-UOW-09, whose text explicitly sanctions *"or remains two saves
+inside one unit of work"*. The CreateNew branch evaluates `return (true, message, created.Id)`
+**inside** the `ExecuteAsync` lambda, so a single deferred save returns `artistId = 0`; and
+`ArtistRepository.UpdateAsync` throws on the still-`Added` entity's temporary key. `FlushAsync` calls
+`SaveChangesAsync` on the **ambient scope's** `AppDbContext` and stops - no `CommitAsync`, no
+transaction disposal - so the flushed rows are still rolled back by a later failure tuple or
+exception. The member sits on `IUnitOfWork`, not on a repository, so REQ-UOW-11 holds and
+`IArtistRepository.SaveChangesAsync` **was** retired as Step 5 planned.
+
+`_ambientScope` invariant preserved: `FlushAsync` only **reads** it. The assignment count in
+`Infra/UnitOfWork/UnitOfWork.cs` is unchanged at 4 (2 write-path publications + 2 `finally` clears);
+`ExecuteReadAsync` still never publishes and never saves.
+
+### Step 5 grep - retirement PERFORMED
+Re-ran the repo-wide grep myself before deleting. Only two hits remained, both being the member
+itself (`Domain/RepositoryInterface/IArtistRepository.cs:55`, `Infra/Repository/ArtistRepository.cs:157`);
+the four other `SaveChangesAsync` mentions under `Services/` are the already-deleted-call comments in
+`ArtistResolutionService.cs` and `ArtistService.cs`. Zero callers, production or test. Both deleted.
+
+### REQ-UOW-28 - mechanical confirmation (not by eye)
+A Python scan stripped all `//` and `///` lines from `Services/ArtistResolutionService.cs` and located
+every occurrence of the constructor fields. `_artistService` and `_artistRepository` each appear on
+exactly **two** lines - the field declaration and the constructor assignment - and on **no** line
+inside either lambda body (`ExecuteReadAsync<ArtistResolution>` / `ExecuteAsync<(bool, string, int)>`).
+Both lambdas resolve `IArtistRepository`/`IArtistService` from their own `sp`. `_uow.FlushAsync(ct)`
+is the one constructor field used inside a lambda and is deliberate: `IUnitOfWork` holds no
+`AppDbContext` and flushes the **ambient** scope's context, so REQ-UOW-28's "each call gets its own
+context" rationale does not apply to it (documented inline at the call site).
+
+### Changed files:
+- `Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/requirements.md`
+- `Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/design.md`
+- `Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/plan.md`
+- `Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/task-log.md`
+- `Domain/UnitOfWork/IUnitOfWork.cs`
+- `Infra/UnitOfWork/UnitOfWork.cs`
+- `Domain/RepositoryInterface/IArtistRepository.cs`
+- `Infra/Repository/ArtistRepository.cs`
+- `Services/ArtistResolutionService.cs`
+- `MyVocaList.Tests/Infrastructure/UnitOfWorkMocks.cs`
+- `MyVocaList.Tests/Integration/UnitOfWork/SaveSkipTests.cs`
+- `MyVocaList.Tests/Unit/Services/ArtistResolutionServiceTests.cs`
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|---|---|---|---|
+| REQ-UOW-35 | Flush materialises the generated key inside the body; transaction still open | `Infra/UnitOfWork/UnitOfWork.cs` `FlushAsync` | `SaveSkipTests.FlushAsync_InsideSuccessfulUnitOfWork_MaterialisesGeneratedKeyAndPersists` |
+| REQ-UOW-35 | Flush then failure tuple -> flushed row rolled back | `UnitOfWork.ExecuteAsync` failure branch (`RollbackAsync`) | `SaveSkipTests.FlushAsync_ThenFailureSignal_RollsFlushedRowBack` |
+| REQ-UOW-35 | Flush then exception -> flushed row rolled back | `UnitOfWork.ExecuteAsync` `catch` branch | `SaveSkipTests.FlushAsync_ThenThrow_RollsFlushedRowBack` |
+| REQ-UOW-35 | Flush outside a unit of work throws (fail-closed) | `UnitOfWork.FlushAsync` ambient-scope guard | `SaveSkipTests.FlushAsync_OutsideUnitOfWork_Throws` |
+| REQ-UOW-09 | CreateNew produces exactly one Artist with external fields; returned artistId matches | `Services/ArtistResolutionService.cs` CreateNew branch + `FlushAsync` | `NestedUnitOfWorkTests.CommitAsync_CreateNewWithExternalIdentity_CreatesOneArtistWithExternalFieldsSet` |
+| REQ-UOW-11 | No repository is a save entry point | `IArtistRepository` / `ArtistRepository` - member deleted | Compile-time (zero callers; grep evidence above) |
+| REQ-UOW-28 | Lambda bodies resolve from `sp`, never constructor fields | `Services/ArtistResolutionService.cs` both lambdas | Mechanical scan (above) + `ArtistResolutionServiceTests` via `PassthroughUnitOfWork` |
+| REQ-UOW-34 | `ResolveAsync` is a read - never publishes an ambient scope | `Services/ArtistResolutionService.cs` `ExecuteReadAsync` wrap | `NestedUnitOfWorkTests` Revision-12 ambient-scope tests (pre-existing) |
+
+### Verification evidence
+| Run | Result |
+|---|---|
+| Baseline, HEAD `5a6d7ad` (recorded by previous attempt) | `Falha: 2, Aprovado: 557, Ignorado: 0, Total: 559` |
+| Previous attempt's uncommitted WIP (the gap) | `Falha: 4, Aprovado: 555, Ignorado: 0, Total: 559` |
+| **After this task** | **`Falha: 2, Aprovado: 561, Ignorado: 0, Total: 563`** |
+
+Total rose by 4 - the four new REQ-UOW-35 integration tests. `Ignorado: 0`.
+
+Remaining failures - exactly the two Task-2.4-owned intentional REDs, unchanged and still red (correct):
+- `NestedUnitOfWorkTests.CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow`
+- `NestedUnitOfWorkTests.CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow`
+
+Both previously-broken tests are GREEN. Targeted re-run
+(`--filter CreateNewWithExternalIdentity... | NovelArtistAndSong... | FlushAsync`):
+`Aprovado! - Com falha: 0, Aprovado: 6, Ignorado: 0, Total: 6`.
+
+No test assertion was weakened, skipped or deleted. `_repoMock.Verify(r => r.UpdateAsync(...), Times.Once)`
+is untouched and passing. `UnitOfWorkTestHost.CreateLegacy()` untouched. No file carrying
+`TODO [BUG-071 / UOW]` was opened. Build: 0 errors (1 attempt); warnings pre-existing only.
+The known `ObjectDisposedException: 'SQLitePCL.sqlite3'` flake did **not** reproduce in either run.
+
+### Post-edit verification
+Every edit was applied by a script that asserts a unique anchor match before replacing (an unmatched
+anchor aborts rather than silently no-ops), and each changed region was re-read afterwards:
+`IUnitOfWork.cs` (new `FlushAsync` member + doc comment), `UnitOfWork.cs` (`FlushAsync` body; the
+`_ambientScope.Value =` assignment count re-counted at 4, unchanged), `IArtistRepository.cs` and
+`ArtistRepository.cs` (member gone, brace structure intact), `ArtistResolutionService.cs` (flush call
+sited between `CreateArtistAsync`'s success check and the external-identity mutation),
+`UnitOfWorkMocks.cs` (`PassthroughUnitOfWork.FlushAsync`), `SaveSkipTests.cs` (4 tests inserted above
+the private helpers, inside the class).
+
+### Commits
+Two, in order, both with `--no-verify`: the pre-commit hook runs `dotnet test` and aborts on the two
+known intentional REDs (BUG-074). Helder authorised `--no-verify` for exactly this; disclosed in each
+commit body.
+
+### Design concern (non-blocking, for review)
+`ArtistResolutionService._artistRepository` is now referenced only by the constructor - every use
+moved into a lambda and resolves from `sp`. The field (and its constructor parameter) is a candidate
+for removal, but the constructor signature is a wider surface than this task owns, and Task 2.4 /
+Phase 3's VERIFY gate is the right place to sweep such residue across all four pilot services at once.
+Left in place deliberately; not a defect.
