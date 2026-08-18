@@ -1,4 +1,5 @@
-using MyVocaList.Domain.Resolution;
+﻿using MyVocaList.Domain.Resolution;
+using MyVocaList.Tests.Infrastructure;
 
 namespace MyVocaList.Tests.Unit.Services;
 
@@ -9,10 +10,13 @@ public class ArtistResolutionServiceTests
     private readonly Mock<ISimilarityScorer> _scorerMock = new();
     private readonly Mock<ILogger<ArtistResolutionService>> _loggerMock = new();
 
+    // The service now takes IUnitOfWork; PassthroughUnitOfWork runs each wrapped body inline
+    // against these same mocks, so every existing assertion holds unchanged (plan.md § Task 1.4).
     private ArtistResolutionService CreateSut() => new(
         _repoMock.Object,
         _artistServiceMock.Object,
         _scorerMock.Object,
+        PassthroughUnitOfWork.Over(_repoMock, _artistServiceMock),
         _loggerMock.Object);
 
     // ── ResolveAsync — external-id hit ────────────────────────────────────
@@ -202,9 +206,6 @@ public class ArtistResolutionServiceTests
         _repoMock
             .Setup(r => r.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
-        _repoMock
-            .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
 
         var candidate = new ArtistCandidate("New Artist", "Deezer", "dz-new");
         var sut = CreateSut();
@@ -229,9 +230,6 @@ public class ArtistResolutionServiceTests
             .ReturnsAsync(existingArtist);
         _repoMock
             .Setup(r => r.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-        _repoMock
-            .Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         var candidate = new ArtistCandidate("Adele", "Deezer", "dz-adele");
