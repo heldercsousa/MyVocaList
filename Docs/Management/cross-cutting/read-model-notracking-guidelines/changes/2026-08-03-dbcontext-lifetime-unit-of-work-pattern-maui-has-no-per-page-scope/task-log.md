@@ -533,3 +533,71 @@ first surfaced `CS1061 GetRequiredService`, fixed by adding the
 `git commit --no-verify` — the pre-commit hook runs `dotnet test` and aborts on the known-RED tests
 (BUG-074). Helder authorised `--no-verify` for exactly this situation; the 4 collateral failures are
 disclosed in the commit body as well as here.
+
+---
+## Task: Task 2.1 blocker resolution — `IUnitOfWork` registration site + retire superseded legacy-host test
+**Plan:** `plan.md` (Phase 2)
+**Status:** To Review
+**Started:** 2026-08-18
+**Completed:** 2026-08-18
+
+Resolves the `blocked: spec gap` raised by Task 2.1. Helder authorised both decisions; implemented
+exactly as decided, no re-litigation.
+
+### Decision 1 — single registration site: `AddAppServices()`
+`IUnitOfWork` is now registered inside `AddAppServices()` (`MyVocaList/Extensions/ServiceCollectionExtensions.cs`),
+and the duplicate registrations were removed from `MyVocaList/MauiProgram.cs` and from
+`UnitOfWorkTestHost.Create()`. Rationale: Task 2.1 made `IUnitOfWork` a constructor dependency of
+`ArtistService`, which `AddAppServices()` registers — so any composition built from `AddAppServices()`
+alone (all DI-composition tests) failed to activate `ArtistService`. Registering it beside the
+services that need it makes the graph self-contained, and removing it from the test host means the
+harness now genuinely exercises the production registration rather than a copy of it.
+
+`MauiProgram.cs` is `<Compile Remove/>`-d from the `net10.0` TFM the test project builds, so the
+source-text drift guard `UnitOfWorkCompositionTests.MauiProgram_RegistrationShape_MatchesTestHost`
+was updated in the same commit: it now asserts `MauiProgram.cs` does **not** contain
+`AddSingleton<IUnitOfWork,` and that `ServiceCollectionExtensions.cs` does — the inverse of the
+previous assertion, preserving the same anti-drift guarantee against the new registration site.
+A `LocateSource(relativePath)` helper replaced `LocateMauiProgram`'s hard-coded walk-up.
+
+`UnitOfWorkTestHost.CreateLegacy()` was **not** touched — it is pinned Phase 0 RED evidence.
+
+### Decision 2 — retire `UnitOfWorkTestHostTests.LegacyHost_TwoDifferentServices_ShareOneAppDbContextInstance`
+Deleted (the file became empty and was removed; it had no `.sln` entry — `MyVocaList.Tests` is a
+project, not a solution-items folder). This test was a **Phase-0 characterization of BUG-068's
+cause**, not of desired behaviour: it asserted that an entity created through `ArtistService` is
+still tracked by the host's session-scoped `AppDbContext`, i.e. that one context spans both service
+calls. Phase 2 exists precisely to make that false. **Falsifying this assertion IS the pilot's
+success signal**, so the test cannot survive by design — repairing it would mean re-asserting the
+bug. This is the only test deleted; every other assertion stands exactly as written
+(`testing.md § Builder Must Not Modify Tests`).
+
+Files containing `TODO [BUG-071 / UOW]` (Queue/Event) were not touched.
+
+### Changed files:
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs`
+- `MyVocaList/MauiProgram.cs`
+- `MyVocaList.Tests/Infrastructure/UnitOfWorkTestHost.cs`
+- `MyVocaList.Tests/Integration/UnitOfWork/UnitOfWorkCompositionTests.cs`
+- `MyVocaList.Tests/Integration/UnitOfWork/UnitOfWorkTestHostTests.cs` (deleted)
+
+### Build notes
+Build: passed (0 errors, 1 attempt). Tests before: `Failed 7, Passed 552, Skipped 0, Total 559`.
+Tests after: **`Failed 3, Passed 555, Skipped 0, Total 558`** (one test retired). The 3 remaining
+failures are exactly the intended Phase-2 REDs (BUG-074), unchanged:
+- `Bug068RegressionTests.Song_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict`
+- `NestedUnitOfWorkTests.CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow`
+- `NestedUnitOfWorkTests.CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow`
+
+Drift guard verified green in isolation: `--filter FullyQualifiedName~UnitOfWorkCompositionTests`
+→ `Failed 0, Passed 5`.
+
+### Post-edit verification
+Every edited region re-read after the edit: the new `AddSingleton<IUnitOfWork, …>` block and the
+`using MyVocaList.Domain.UnitOfWork;` in `ServiceCollectionExtensions.cs`; the replaced comment in
+`MauiProgram.cs` (registration line gone, `AddDbContextFactory(…, ServiceLifetime.Scoped)` intact);
+`UnitOfWorkTestHost.Create()` (registration gone, `CreateLegacy()` byte-identical).
+
+### Commit
+`git commit --no-verify` — the pre-commit hook runs `dotnet test` and aborts on the 3 intentional
+REDs (BUG-074). Helder authorised `--no-verify` for exactly that; disclosed in the commit body.
