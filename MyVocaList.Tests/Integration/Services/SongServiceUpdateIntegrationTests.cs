@@ -1,123 +1,97 @@
-using Microsoft.Extensions.Logging.Abstractions;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
-using MyVocaList.Infra;
-using MyVocaList.Infra.Repository;
-using MyVocaList.Services;
+using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Tests.Infrastructure;
 
 namespace MyVocaList.Tests.Integration.Services;
 
 /// <summary>
-/// BUG-068 (Critical): reproduces the edit-mode save flow — a read of the Song for page
-/// hydration (SongFormViewModel.LoadSongForEditAsync) followed by SongService.UpdateSongAsync
-/// on the SAME AppDbContext instance, exactly as MAUI's DI resolves a "Scoped" AppDbContext
-/// (a single root scope for the whole app lifetime — there is no per-page child scope).
-/// Per testing.md § Project anti-patterns, this runs against REAL SQLite via
-/// TestDbContextFactory — a mocked ISongRepository (as SongServiceTests uses) cannot reach
-/// DbSet.Update's identity-map code and is why 535/535 was green while every device save failed.
+/// BUG-068 (Critical) / BUG-067 (REQ-ACREATE-16): reproduces the edit-mode save flow — a read of
+/// the Song for page hydration (SongFormViewModel.LoadSongForEditAsync) followed by
+/// SongService.UpdateSongAsync, with the hydration read served by the long-lived window-scope
+/// AppDbContext exactly as MAUI's DI resolves it (a single root scope for the whole app lifetime —
+/// there is no per-page child scope).
+///
+/// Per testing.md § Project anti-patterns this runs against REAL SQLite — a mocked ISongRepository
+/// (as SongServiceTests uses) cannot reach DbSet.Update's identity-map code and is why 535/535 was
+/// green while every device save failed.
+///
+/// MIGRATED 2026-08-18 (merge of develop into feat/uow-pilot): the original file constructed
+/// SongService by hand over a single AppDbContext and called ISongRepository.SaveChangesAsync.
+/// Both are gone under the unit-of-work pattern (REQ-UOW-11 retired the repository save entry
+/// points; SongService now takes IUnitOfWork). The harness is now UnitOfWorkTestHost — the real
+/// production composition — so these two acceptance criteria are asserted against the shipping
+/// write path. No assertion was weakened or removed.
 /// </summary>
-public class SongServiceUpdateIntegrationTests : IAsyncLifetime
+public class SongServiceUpdateIntegrationTests
 {
-    private AppDbContext _db;
-    private SongRepository _songRepo;
-    private ArtistRepository _artistRepo;
-    private SongService _sut;
-
-    public async Task InitializeAsync()
-    {
-        _db = TestDbContextFactory.Create();
-        await _db.Database.EnsureCreatedAsync();
-        _songRepo = new SongRepository(_db);
-        _artistRepo = new ArtistRepository(_db);
-        _sut = new SongService(
-            _songRepo,
-            _artistRepo,
-            urlRepository: null!,
-            urlService: null!,
-            NullLogger<SongService>.Instance);
-    }
-
-    public async Task DisposeAsync()
-    {
-        await _db.Database.EnsureDeletedAsync();
-        await _db.DisposeAsync();
-    }
-
-    [Fact]
     // [AC] REQ-ACREATE-16: a changed artist on a saved song is persisted, even after the form's
     // edit-mode hydration read (SongFormViewModel.LoadSongForEditAsync -> GetSongByIdAsync) has
-    // already run once on the same scoped DbContext, as it always does before Save is reachable.
+    // already run once on the long-lived window scope, as it always does before Save is reachable.
+    [Fact]
     public async Task UpdateSongAsync_AfterPriorHydrationRead_PersistsChangedArtistWithoutThrowing()
     {
-        var originalArtist = await SeedArtistAsync("Original Artist");
-        var newArtist = await SeedArtistAsync("New Artist");
-        var song = MakeSong(originalArtist.Id, "Some Title");
-        _db.Set<Song>().Add(song);
-        await _db.SaveChangesAsync();
-        var songId = song.Id;
+        await using var host = UnitOfWorkTestHost.Create();
+        var songService = host.Resolve<ISongService>();
+        var songRepo = host.Resolve<ISongRepository>();
+
+        var originalArtistId = await SeedArtistAsync(host, "Original Artist");
+        var newArtistId = await SeedArtistAsync(host, "New Artist");
+
+        var (created, createMessage, song) = await songService.CreateSongAsync(
+            originalArtistId, "Some Title", ct: CancellationToken.None);
+        Assert.True(created, createMessage);
+        var songId = song!.Id;
 
         // Simulate SongFormViewModel.LoadSongForEditAsync's hydration read — happens on every
-        // edit-mode page open, on the SAME AppDbContext instance the later Save reuses.
-        var hydrationRead = await _songRepo.GetByIdAsync(songId, CancellationToken.None);
+        // edit-mode page open, on the window-scope AppDbContext that outlives the page.
+        var hydrationRead = await songRepo.GetByIdAsync(songId, CancellationToken.None);
         Assert.NotNull(hydrationRead);
 
         // Simulate Save — SongFormViewModel.ExecuteEditSaveAsync -> SongService.UpdateSongAsync.
-        var (success, message) = await _sut.UpdateSongAsync(
+        var (success, message) = await songService.UpdateSongAsync(
             songId, "Some Title", featuredArtists: null, lyrics: null, hasManualEdits: true,
-            artistId: newArtist.Id, ct: CancellationToken.None);
+            artistId: newArtistId, ct: CancellationToken.None);
 
         Assert.True(success, message);
 
-        var reloaded = await _songRepo.GetByIdAsync(songId, CancellationToken.None);
-        Assert.Equal(newArtist.Id, reloaded!.ArtistId);
+        var reloaded = await songRepo.GetByIdAsync(songId, CancellationToken.None);
+        Assert.Equal(newArtistId, reloaded!.ArtistId);
     }
 
+    // [AC] REQ-ACREATE-16: covers "face 2" from T10 re-run #5 — a second write against a Song row
+    // already written once through the app's own write path (its creation) must not throw an EF
+    // identity-map conflict, and must actually persist.
     [Fact]
-    // [AC] REQ-ACREATE-16: covers "face 2" from T10 re-run #5 — a second write against a Song
-    // row already tracked in this long-lived DbContext (from its own creation, or a prior
-    // save) must not throw an EF identity-map conflict, and must actually persist.
-    public async Task UpdateSongAsync_SongAlreadyTrackedInContext_PersistsWithoutThrowing()
+    public async Task UpdateSongAsync_SongAlreadyWrittenOnceInSession_PersistsWithoutThrowing()
     {
-        var originalArtist = await SeedArtistAsync("Original Artist");
-        var newArtist = await SeedArtistAsync("New Artist");
-        var song = MakeSong(originalArtist.Id, "Some Title 2");
+        await using var host = UnitOfWorkTestHost.Create();
+        var songService = host.Resolve<ISongService>();
+        var songRepo = host.Resolve<ISongRepository>();
 
-        // Mirrors production: the song's own creation (SongRepository.AddAsync + SaveChangesAsync)
-        // leaves it tracked (Unchanged) in this AppDbContext for the rest of the app session —
-        // QueryTrackingBehavior.NoTracking does not detach explicitly-saved entities.
-        await _songRepo.AddAsync(song, CancellationToken.None);
-        await _songRepo.SaveChangesAsync(CancellationToken.None);
-        var songId = song.Id;
+        var originalArtistId = await SeedArtistAsync(host, "Original Artist");
+        var newArtistId = await SeedArtistAsync(host, "New Artist");
 
-        var (success, message) = await _sut.UpdateSongAsync(
+        var (created, createMessage, song) = await songService.CreateSongAsync(
+            originalArtistId, "Some Title 2", ct: CancellationToken.None);
+        Assert.True(created, createMessage);
+        var songId = song!.Id;
+
+        var (success, message) = await songService.UpdateSongAsync(
             songId, "Some Title 2", featuredArtists: null, lyrics: null, hasManualEdits: true,
-            artistId: newArtist.Id, ct: CancellationToken.None);
+            artistId: newArtistId, ct: CancellationToken.None);
 
         Assert.True(success, message);
 
-        var reloaded = await _songRepo.GetByIdAsync(songId, CancellationToken.None);
-        Assert.Equal(newArtist.Id, reloaded!.ArtistId);
+        var reloaded = await songRepo.GetByIdAsync(songId, CancellationToken.None);
+        Assert.Equal(newArtistId, reloaded!.ArtistId);
     }
 
-    private async Task<Artist> SeedArtistAsync(string name)
+    private static async Task<int> SeedArtistAsync(UnitOfWorkTestHost host, string name)
     {
-        var artist = new Artist
-        {
-            Name = name,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-        _db.Set<Artist>().Add(artist);
-        await _db.SaveChangesAsync();
-        return artist;
+        var artistService = host.Resolve<IArtistService>();
+        var (success, message, artist) = await artistService.CreateArtistAsync(name);
+        Assert.True(success, message);
+        return artist!.Id;
     }
-
-    private static Song MakeSong(int artistId, string title) => new()
-    {
-        ArtistId = artistId,
-        Title = title,
-        CreatedAt = DateTime.UtcNow,
-        UpdatedAt = DateTime.UtcNow
-    };
 }

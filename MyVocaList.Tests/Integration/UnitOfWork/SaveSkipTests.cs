@@ -295,6 +295,109 @@ public class SaveSkipTests
 
     // ---------------------------------------------------------------- helpers
 
+    // ------------------------------------------------------ REQ-UOW-35 (flush without commit)
+
+    // [AC] REQ-UOW-35: FlushAsync makes the database-generated key readable INSIDE the body
+    // (REQ-UOW-09's "two saves inside one unit of work" branch) — and the flushed row survives
+    // when the unit of work goes on to succeed.
+    [Fact]
+    public async Task FlushAsync_InsideSuccessfulUnitOfWork_MaterialisesGeneratedKeyAndPersists()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var uow = host.Resolve<IUnitOfWork>();
+
+        var (success, _, idSeenInsideBody) = await uow.ExecuteAsync(async sp =>
+        {
+            var repo = sp.GetRequiredService<IArtistRepository>();
+            var entity = NewArtist("Flush Success Artist");
+            await repo.AddAsync(entity, CancellationToken.None);
+
+            Assert.Equal(0, entity.Id);          // not yet materialised
+            await uow.FlushAsync(CancellationToken.None);
+            Assert.NotEqual(0, entity.Id);       // materialised by the flush, before the body returns
+
+            return (true, string.Empty, entity.Id);
+        });
+
+        Assert.True(success);
+        Assert.NotEqual(0, idSeenInsideBody);
+
+        var found = await ReadArtistAsync(uow, "Flush Success Artist");
+        Assert.NotNull(found);
+        Assert.Equal(idSeenInsideBody, found!.Id);
+    }
+
+    // [AC] REQ-UOW-35: a flush is NOT a commit — the transaction stays open, so a subsequent
+    // failure tuple SHALL roll the already-flushed row back. This is the atomicity guarantee.
+    [Fact]
+    public async Task FlushAsync_ThenFailureSignal_RollsFlushedRowBack()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var uow = host.Resolve<IUnitOfWork>();
+
+        var (success, _, flushedId) = await uow.ExecuteAsync(async sp =>
+        {
+            var repo = sp.GetRequiredService<IArtistRepository>();
+            var entity = NewArtist("Flush Then Failure Artist");
+            await repo.AddAsync(entity, CancellationToken.None);
+
+            await uow.FlushAsync(CancellationToken.None);
+            Assert.NotEqual(0, entity.Id);   // the flush really did write it
+
+            // ...and only now does the unit of work decide it has failed.
+            return (false, "a later validation check failed", entity.Id);
+        });
+
+        Assert.False(success);
+        Assert.NotEqual(0, flushedId);
+
+        // Fresh scope read — the flushed row must NOT have survived the rollback.
+        Assert.Null(await ReadArtistAsync(uow, "Flush Then Failure Artist"));
+    }
+
+    // [AC] REQ-UOW-35: same guarantee via the exception path — a throw after a flush SHALL roll the
+    // already-flushed row back.
+    [Fact]
+    public async Task FlushAsync_ThenThrow_RollsFlushedRowBack()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var uow = host.Resolve<IUnitOfWork>();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            uow.ExecuteAsync<(bool, string, int)>(async sp =>
+            {
+                var repo = sp.GetRequiredService<IArtistRepository>();
+                var entity = NewArtist("Flush Then Throw Artist");
+                await repo.AddAsync(entity, CancellationToken.None);
+
+                await uow.FlushAsync(CancellationToken.None);
+                Assert.NotEqual(0, entity.Id);
+
+                throw new InvalidOperationException("simulated post-flush failure");
+            }));
+
+        Assert.Null(await ReadArtistAsync(uow, "Flush Then Throw Artist"));
+    }
+
+    // [AC] REQ-UOW-35: calling FlushAsync outside a unit of work (no ambient scope) SHALL throw —
+    // fail-closed, consistent with REQ-UOW-27's refusal to guess. ExecuteReadAsync does not open one
+    // (REQ-UOW-34), so a flush from inside a standalone read throws too.
+    [Fact]
+    public async Task FlushAsync_OutsideUnitOfWork_Throws()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var uow = host.Resolve<IUnitOfWork>();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => uow.FlushAsync(CancellationToken.None));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            uow.ExecuteReadAsync<int>(async _ =>
+            {
+                await uow.FlushAsync(CancellationToken.None);
+                return 0;
+            }));
+    }
+
     private static async Task<Artist?> ReadArtistAsync(IUnitOfWork uow, string name)
         => await uow.ExecuteReadAsync(async sp =>
         {
