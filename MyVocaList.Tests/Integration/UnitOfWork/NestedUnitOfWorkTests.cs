@@ -20,7 +20,7 @@ public class NestedUnitOfWorkTests
     [Fact]
     public async Task CommitAsync_NovelArtistAndSong_CreatesExactlyOneArtistAndOneSongRow()
     {
-        await using var host = UnitOfWorkTestHost.CreateLegacy();
+        await using var host = UnitOfWorkTestHost.Create();
         var songResolution = host.Resolve<ISongResolutionService>();
 
         var candidate = new SongCandidate(
@@ -64,7 +64,7 @@ public class NestedUnitOfWorkTests
     [Fact]
     public async Task CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow()
     {
-        await using var host = UnitOfWorkTestHost.CreateLegacy(services =>
+        await using var host = UnitOfWorkTestHost.Create(services =>
             services.AddScoped<ISongRepository>(sp =>
                 new ThrowOnAddSongRepository(
                     ActivatorUtilities.CreateInstance<SongRepository>(sp))));
@@ -103,7 +103,7 @@ public class NestedUnitOfWorkTests
     [Fact]
     public async Task CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow()
     {
-        await using var host = UnitOfWorkTestHost.CreateLegacy();
+        await using var host = UnitOfWorkTestHost.Create();
         var songResolution = host.Resolve<ISongResolutionService>();
 
         var tooLongTitle = new string('x', 101); // SongService.MaxTitleLength == 100
@@ -137,7 +137,7 @@ public class NestedUnitOfWorkTests
     [Fact]
     public async Task CommitAsync_CreateNewWithExternalIdentity_CreatesOneArtistWithExternalFieldsSet()
     {
-        await using var host = UnitOfWorkTestHost.CreateLegacy();
+        await using var host = UnitOfWorkTestHost.Create();
         var artistResolution = host.Resolve<IArtistResolutionService>();
 
         var candidate = new ArtistCandidate("REQ-UOW-09 Probe Artist", "spotify", "ext-uow-09");

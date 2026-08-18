@@ -402,3 +402,134 @@ reordering of unrelated registrations. Phase 2 NOT started.
 ### Commit
 `git commit --no-verify` — the pre-commit hook runs `dotnet test` and aborts on the 3 known-RED
 Phase 0 tests (BUG-074, tracked). Helder authorised `--no-verify` for exactly this situation.
+
+---
+## Task 2.1: `ArtistService` — wrap the 3 mutating methods + migrate the Phase 0 tests
+**Plan:** `plan.md` § Task 2.1
+**Status:** blocked: spec gap (implementation complete; suite not green — see the spec gap below)
+**Started:** 2026-08-18
+**Completed:** 2026-08-18 (in-scope steps only)
+**Worktree/branch:** `C:\Users\helde\source\repos\myvocalist-uow` / `feat/uow-pilot`
+
+### Changed files
+- `Services/ArtistService.cs`
+- `MyVocaList.Tests/Unit/Services/ArtistServiceTests.cs`
+- `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs`
+- `MyVocaList.Tests/Integration/UnitOfWork/NestedUnitOfWorkTests.cs`
+- this `task-log.md`
+
+### RED evidence captured BEFORE the composition switch (Step 1 requirement)
+Run on the unmodified worktree, `CreateLegacy()` composition still in place:
+`Failed 3, Passed 556, Skipped 0, Total 559`. The 3 failures were exactly the pinned Phase 0 REDs:
+- `Bug068RegressionTests.Song_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict`
+- `NestedUnitOfWorkTests.CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow`
+  (`Expected: 0 / Actual: 1` — the Artist row survives the later Song-write fault)
+- `NestedUnitOfWorkTests.CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow`
+  (`Expected: 0 / Actual: 1`)
+So the RED→GREEN transition is not confounded by the `CreateLegacy()` → `Create()` switch made in
+Step 1 of this task.
+
+### Steps executed
+- **Step 1** — `Bug068RegressionTests.cs` (4 sites) and `NestedUnitOfWorkTests.cs` (4 sites, one of
+  them the `services =>` fault-injection overload) migrated from `UnitOfWorkTestHost.CreateLegacy()`
+  to `UnitOfWorkTestHost.Create()`. `CreateLegacy()` itself untouched.
+- **Step 2** — `IUnitOfWork _uow` added to `ArtistService`'s constructor (after
+  `ICatalogRepository`, before `ILogger`). The three repository fields are kept: the unwrapped read
+  methods (`GetPagedArtistsForListAsync`, `SearchArtistsByNameAsync`,
+  `GetDeleteConfirmationAsync`) still use `_artistRepository`.
+- **Step 3** — `CreateArtistAsync`, `UpdateArtistAsync`, `DeleteArtistsAsync` wrapped in
+  `_uow.ExecuteAsync<T>(async sp => { ... }, ct)`. The two `await _artistRepository.SaveChangesAsync(ct);`
+  lines deleted. `DeleteArtistsAsync` keeps `ArgumentNullException.ThrowIfNull(ids)` OUTSIDE the
+  lambda so the guard still throws synchronously-on-await as before, then returns the
+  `ExecuteAsync` task; its `ICatalogRepository.CountByArtistAsync` validation resolves from `sp`.
+- **Step 4** — `IArtistRepository.SaveChangesAsync` NOT removed (Task 2.3 owns it).
+- **Step 5** — `ArtistServiceTests.CreateSut()` now passes
+  `PassthroughUnitOfWork.Over(_artistRepoMock, _songRepoMock, _catalogRepoMock)`. No assertion was
+  weakened, deleted or commented out; no test file had any `SaveChangesAsync` setup/verify to begin
+  with.
+- **Step 6** — run; see below.
+
+### REQ-UOW-28 compliance (the load-bearing rule) — per method
+No `_`-prefixed constructor field appears anywhere inside a lambda body. Verified by reading each
+wrapped method after the edit:
+| Method | Resolved from `sp` at top of lambda | Constructor fields inside lambda |
+|---|---|---|
+| `CreateArtistAsync` | `IArtistRepository` | none |
+| `UpdateArtistAsync` | `IArtistRepository` | none |
+| `DeleteArtistsAsync` | `IArtistRepository`, `ICatalogRepository` | none |
+Grep confirmation: `git grep -n "_artistRepository\|_songRepository\|_catalogRepository" -- Services/ArtistService.cs`
+returns only the field declarations, the constructor assignments, and the four unwrapped read
+methods — zero hits between an `ExecuteAsync(` and its closing `}, ct);`.
+
+### AC traceability
+| AC | Criterion | Implementation | Test |
+|---|---|---|---|
+| REQ-UOW-04 | Artist create→read→update does not throw a tracking conflict and persists | `ArtistService.CreateArtistAsync` / `UpdateArtistAsync` wrapped | `Bug068RegressionTests.Artist_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict` (GREEN under `Create()`) |
+| REQ-UOW-10 | The trailing `SaveChangesAsync` disappears from the service; the save is the unit of work's | 2 deleted lines in `ArtistService` | whole `Bug068RegressionTests` Artist path + `ArtistServiceTests` |
+| REQ-UOW-28 | Lambda bodies resolve from `sp`, never from constructor fields | 4 `sp.GetRequiredService<...>()` calls | structural — the per-method table above |
+| REQ-UOW-33 | `ExecuteDeleteAsync`-based bulk delete runs under the explicit transaction | `DeleteArtistsAsync` wrap | `SaveSkipTests` (Task 1.2b) |
+
+### Test results
+- **Before (legacy composition, no production change):** `Failed 3, Passed 556, Skipped 0, Total 559`
+- **After:** `Failed 7, Passed 552, Skipped 0, Total 559`
+
+The 3 expected Phase 0 REDs are unchanged and still red, exactly as the plan predicts — the
+`ArtistService` wrap does not fix the Song path (Task 2.2) nor the nested chain (Task 2.4).
+
+`ArtistResolutionServiceTests`: **GREEN — confirmed by running, not assumed** (Step 6's intermediate
+state holds: EF's `Update` on the detached instance created in the now-disposed inner scope works).
+
+**4 NEW failures, all one root cause, all in files outside this task's `Files owned`:**
+| Test | Failure |
+|---|---|
+| `AppServicesRegistrationTests.AddAppServices_ResolvingArtistResolutionService_Succeeds` | `Unable to resolve service for type 'IUnitOfWork' while attempting to activate 'ArtistService'` |
+| `AppServicesRegistrationTests.AddAppServices_ResolvingSongResolutionService_Succeeds` | same |
+| `AppServicesRegistrationTests.AddAppServices_ResolvingSongFormViewModelGraph_Succeeds` | same |
+| `UnitOfWorkTestHostTests.LegacyHost_TwoDifferentServices_ShareOneAppDbContextInstance` | same (host built by `CreateLegacy()`, which deliberately omits `IUnitOfWork`) |
+
+### Spec gap: `AddAppServices()` does not register `IUnitOfWork`, so any host built from it alone cannot activate a wrapped service
+**Location:** `plan.md` § Task 2.1 Step 1 (finding B1) — it names only the two integration-test files.
+**Gap description:** finding B1 is correct but its blast radius is larger than the plan states.
+`IUnitOfWork` is registered in `MyVocaList/MauiProgram.cs:74` and in `UnitOfWorkTestHost.Create()`,
+but NOT in `MyVocaList/Extensions/ServiceCollectionExtensions.AddAppServices()`. From the moment the
+first service constructor requires `IUnitOfWork` — i.e. this task — every composition that calls
+`AddAppServices()` without separately registering `IUnitOfWork` fails to activate it. Two such
+compositions exist beyond the two files the plan lists, and neither is in this task's `Files owned`:
+`MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` (3 tests) and
+`MyVocaList.Tests/Integration/UnitOfWork/UnitOfWorkTestHostTests.cs` (1 test). The problem is
+structural and grows with every subsequent Phase 2/4 task, not specific to `ArtistService`.
+**Options:**
+- **Option A** — register `IUnitOfWork` inside `AddAppServices()` and delete the duplicate line from
+  `MauiProgram.cs:74` and from `UnitOfWorkTestHost.Create()`. Every composition then gets it for
+  free and no later Phase 2/4 task hits this again. Consequence: `ServiceCollectionExtensions.cs` is
+  a sequential-only file and `AddAppServices()` would then depend on `Infra.UnitOfWork.UnitOfWork`,
+  which may cross a layer boundary the design deliberately kept in the composition root; also
+  `CreateLegacy()` would silently gain a `IUnitOfWork` over an `AddDbContext`-registered context,
+  which is not a composition that exists in production.
+- **Option B** — leave `AddAppServices()` alone and fix the 4 tests at their own sites: add
+  `services.AddSingleton<IUnitOfWork, UnitOfWork>()` (plus the `IDbContextFactory` it needs) to
+  `AppServicesRegistrationTests`'s local `ServiceCollection`, and either migrate
+  `UnitOfWorkTestHostTests` to `Create()` or retire it (its assertion — "the entity created through
+  `ArtistService` is still tracked by `host.Db`" — is a characterization of exactly the lifetime
+  behaviour this refactor is removing, so it is expected to die, not to be repaired). Consequence:
+  4 files edited across 2 tasks' scopes; the same registration is then duplicated in 3 places.
+**Recommendation:** Option A for the registration, plus the `UnitOfWorkTestHostTests` retirement
+from Option B — the tracked-across-services assertion is a pinned description of BUG-068's cause and
+cannot survive Phase 2 by design. Both need Helder's decision because they touch a sequential-only
+file and delete a test.
+**Blocking:** Yes for the *suite-green* gate. The in-scope implementation itself is complete and was
+committed so the work is not lost; the 4 collateral failures are recorded here rather than papered
+over. No file outside `Files owned` was touched.
+
+### Post-edit verification
+Re-read `Services/ArtistService.cs:1-140` after every edit — the `using
+Microsoft.Extensions.DependencyInjection;` addition, the constructor change and all three wraps are
+present and structurally intact (`git diff --stat`: 4 files, +102 / -74).
+Build: `dotnet test --no-restore` compiled the solution with **0 errors** (2 build attempts: the
+first surfaced `CS1061 GetRequiredService`, fixed by adding the
+`Microsoft.Extensions.DependencyInjection` using).
+
+### Commit
+`git commit --no-verify` — the pre-commit hook runs `dotnet test` and aborts on the known-RED tests
+(BUG-074). Helder authorised `--no-verify` for exactly this situation; the 4 collateral failures are
+disclosed in the commit body as well as here.
