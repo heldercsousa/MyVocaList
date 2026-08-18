@@ -944,3 +944,113 @@ moved into a lambda and resolves from `sp`. The field (and its constructor param
 for removal, but the constructor signature is a wider surface than this task owns, and Task 2.4 /
 Phase 3's VERIFY gate is the right place to sweep such residue across all four pilot services at once.
 Left in place deliberately; not a defect.
+
+---
+
+## Task: 2.4 - `SongResolutionService` - the 3-level join
+**Plan:** `plan.md § Task 2.4`
+**Status:** To Review
+**Started:** 2026-08-18
+**Completed:** 2026-08-18
+**Branch / worktree:** `feat/uow-pilot` @ `C:\Users\helde\source\repos\myvocalist-uow` (base HEAD `2a98c59`)
+
+### Changed files:
+- `Services/SongResolutionService.cs`
+- `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs`
+- `MyVocaList.Tests/Integration/UnitOfWork/NestedUnitOfWorkTests.cs`
+
+### What was done
+**Step 1 - `CommitAsync` wrapped in `ExecuteAsync`.** The whole `switch (choice)` body moved inside
+`_uow.ExecuteAsync<(bool success, string message, Song? song)>(async sp => { ... }, ct)`. `ISongRepository`,
+`ISongService` and `IArtistResolutionService` are resolved from the lambda's own `sp`. The private helper
+`ResolveOrCreateArtistIdAsync` runs inside that lambda, so it was changed from an instance method reading
+`_artistResolution` to a `static` method **taking `IArtistResolutionService` as a parameter** - a field read
+one call frame away from the lambda is the same defect as one written inline, and would have silently
+defeated the join across levels 2-3 while still compiling and passing.
+
+**Step 2 - `ResolveAsync` wrapped in `ExecuteReadAsync`.** `ISongRepository` and `IArtistResolutionService`
+resolved from `sp`. The nested `IArtistResolutionService.ResolveAsync` is itself an `ExecuteReadAsync`
+(Task 2.3), so the read-join path is now exercised by production code (REQ-UOW-34).
+
+**No `FlushAsync` needed.** Unlike Task 2.3's Artist CreateNew branch, no Song path consumes a
+database-generated key *inside* the lambda: `songService.CreateSongAsync` returns the entity but the value is
+not read before the lambda returns, and both production consumers (`SongFormViewModel.cs:618,:699`) discard it
+(`var (success, message, _) = ...`). The `UpdateExisting`/`AttachExternalId` reloads hit the same tracked
+context. No repository save entry point was reintroduced; `ISongRepository.SaveChangesAsync` is untouched
+(Task 2.4b owns it).
+
+### Verification evidence
+
+**Baseline at HEAD `2a98c59`** (`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --no-restore`):
+`Com falha: 2, Aprovado: 561, Ignorado: 0, Total: 563` - the 2 failures being exactly the two named tests.
+
+**After** (same command): `Com falha: 0, Aprovado: 564, Ignorado: 0, Total: 564`.
+(563 -> 564 = the one new test added below; **Failed 0, Skipped 0** as required.)
+
+**RED -> GREEN, the two outstanding Phase 0 REDs:**
+
+| Test | Before (`2a98c59`) | After |
+|---|---|---|
+| `NestedUnitOfWorkTests.CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow` (REQ-UOW-22) | **FAIL** - `Assert.Equal() Failure: Expected 0, Actual 1` at line 90 (artist row survived the song-write fault) | **PASS** |
+| `NestedUnitOfWorkTests.CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow` (REQ-UOW-24 nested) | **FAIL** - `Assert.Equal() Failure: Expected 0, Actual 1` at line 129 (artist row survived the overall failure tuple) | **PASS** |
+
+Both prove the outermost `ExecuteAsync` decides save-skip **once** for the whole nested chain: the artist row
+flushed at level 2 is rolled back by level 1's transaction, whether the failure arrives as a throw or as a
+leading-`false` tuple.
+
+**3-level join verified directly, not inferred.** REQ-UOW-22 requires the outcome *"**without** any nested call
+opening a second `AppDbContext`"* - a clause the two rollback tests establish only circumstantially. Added
+`CommitAsync_NovelArtistAndSong_UsesOneAppDbContextAcrossAllThreeNestedLevels` (traced to REQ-UOW-22): scoped
+recording factories for `ISongRepository`/`IArtistRepository` capture the `AppDbContext` of the scope each is
+resolved from. `AppDbContext` is scoped, so a level that opened its own scope would re-run the factory there
+and yield a different instance. Observed: >= 2 resolutions, **1 distinct instance** by reference.
+*Falsification performed:* temporarily short-circuiting `UnitOfWork.ExecuteAsync`'s ambient-join branch made
+this test **FAIL**; `Infra/UnitOfWork/UnitOfWork.cs` was then restored with `git checkout --` and `git status`
+confirmed it unmodified. The test is therefore non-vacuous. `UnitOfWork.cs` is **not** in this commit.
+
+**REQ-UOW-28 mechanical confirmation** (comment text stripped, then every occurrence of each of the three
+fields located by word-boundary match - not read by eye):
+
+| Field | Occurrences | Lines | Inside any lambda body? |
+|---|---|---|---|
+| `_songRepository` | 2 | declaration (`:17`), constructor assignment (`:32`) | **No** |
+| `_artistResolution` | 2 | declaration (`:18`), constructor assignment (`:33`) | **No** |
+| `_songService` | 2 | declaration (`:19`), constructor assignment (`:34`) | **No** |
+
+Zero occurrences in any lambda body or in any helper reachable from one. `_uow`, `_scorer` and `_logger` are
+the accepted exceptions (the unit of work itself, plus two stateless non-scoped collaborators), as established
+in Task 2.3.
+
+### AC traceability matrix
+
+| AC ID | Criterion | Implementation | Test method |
+|---|---|---|---|
+| REQ-UOW-22 | 3-level chain is all-or-nothing under a mid-chain fault | `SongResolutionService.CommitAsync` `ExecuteAsync` wrap | `NestedUnitOfWorkTests.CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow` |
+| REQ-UOW-22 | same observable happy-path outcome | idem | `NestedUnitOfWorkTests.CommitAsync_NovelArtistAndSong_CreatesExactlyOneArtistAndOneSongRow` |
+| REQ-UOW-22 | no nested call opens a second `AppDbContext` | ambient join across levels 1-3 | `NestedUnitOfWorkTests.CommitAsync_NovelArtistAndSong_UsesOneAppDbContextAcrossAllThreeNestedLevels` (**new**) |
+| REQ-UOW-24 | nested precedence - save-skip decided once, by the outermost `ExecuteAsync` | leading-`bool` tuple returned from the outer lambda | `NestedUnitOfWorkTests.CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow` |
+| REQ-UOW-28 | every repository *and nested service* resolved from the lambda's own `sp` | `sp.GetRequiredService<...>()` x3 in `CommitAsync`, x2 in `ResolveAsync`; `ResolveOrCreateArtistIdAsync` now takes the service as a parameter | mechanical field audit above + `SongResolutionServiceTests` via `PassthroughUnitOfWork.Over(...)` |
+| REQ-UOW-34 | read-only method uses `ExecuteReadAsync`; read joins an ambient write scope | `ResolveAsync` wrap | existing `SongResolutionServiceTests` `ResolveAsync_*` suite, assertions unchanged |
+
+### Post-edit verification
+Every edit was applied by a script asserting a unique anchor match before replacing (an unmatched anchor aborts
+rather than silently no-ops), and each changed region was re-read afterwards: `SongResolutionService.cs`
+(usings, field + constructor, `ResolveAsync` head/tail and re-indented body, `CommitAsync` head/tail and
+re-indented body, `ResolveOrCreateArtistIdAsync` signature), `SongResolutionServiceTests.cs` (`CreateSut`
+factory + `MyVocaList.Tests.Infrastructure` using), `NestedUnitOfWorkTests.cs` (new test inserted between the
+failure-tuple test and the REQ-UOW-09 test, inside the class). An accidental UTF-8 BOM introduced on
+`SongResolutionService.cs` by the first script was detected by a byte-level check against
+`git show HEAD:...` and removed - the file's on-disk encoding is unchanged from HEAD.
+
+No test assertion was weakened, skipped, commented out or deleted. `UnitOfWorkTestHost.CreateLegacy()`
+untouched. `Infra/UnitOfWork/UnitOfWork.cs` untouched in the commit. `ISongRepository.SaveChangesAsync`
+retained for Task 2.4b. No file carrying `TODO [BUG-071 / UOW]` was opened. Build: **0 errors**, first
+attempt; all 105 warnings pre-existing. The known `ObjectDisposedException: 'SQLitePCL.sqlite3'` flake did
+not reproduce in any of the four runs.
+
+### Design concern (non-blocking, carried forward from Task 2.3)
+`_songRepository`, `_artistResolution` and `_songService` are now referenced **only** by the declaration and
+the constructor assignment - the same residue Task 2.3 left on `ArtistResolutionService._artistRepository`.
+The fields and their constructor parameters are removal candidates, but the constructor signature is a wider
+surface than this task owns. Phase 3's VERIFY gate remains the right place to sweep the residue across all
+pilot services at once.

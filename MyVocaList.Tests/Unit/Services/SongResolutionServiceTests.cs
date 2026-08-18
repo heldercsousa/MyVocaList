@@ -1,4 +1,5 @@
 using MyVocaList.Domain.Resolution;
+using MyVocaList.Tests.Infrastructure;
 
 namespace MyVocaList.Tests.Unit.Services;
 
@@ -10,11 +11,14 @@ public class SongResolutionServiceTests
     private readonly Mock<ISimilarityScorer> _scorerMock = new();
     private readonly Mock<ILogger<SongResolutionService>> _loggerMock = new();
 
+    // The service now takes IUnitOfWork; PassthroughUnitOfWork runs each wrapped body inline
+    // against these same mocks, so every existing assertion holds unchanged (plan.md § Task 1.4).
     private SongResolutionService CreateSut() => new(
         _songRepoMock.Object,
         _artistResolutionMock.Object,
         _songServiceMock.Object,
         _scorerMock.Object,
+        PassthroughUnitOfWork.Over(_songRepoMock, _artistResolutionMock, _songServiceMock),
         _loggerMock.Object);
 
     // ── Helper defaults ────────────────────────────────────────────────────

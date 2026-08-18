@@ -1,5 +1,6 @@
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Domain.ReadModels;
+using MyVocaList.Infra;
 using MyVocaList.Infra.Repository;
 using MyVocaList.Tests.Infrastructure;
 
@@ -127,6 +128,62 @@ public class NestedUnitOfWorkTests
         // All-or-nothing (REQ-UOW-24 nested precedence): should be 0. Observed on HEAD:
         // artistCount == 1 (the Artist row survives despite the overall failure tuple) — RED.
         Assert.Equal(0, artistCount);
+    }
+
+    // [AC] REQ-UOW-22: "...**without** any nested call opening a second `AppDbContext`". The two
+    // tests above prove the OUTCOME of the join (all-or-nothing rollback across the chain); this one
+    // proves its MECHANISM directly, so a future regression that restored per-level scopes while
+    // happening to still roll back correctly could not pass silently.
+    //
+    // How it observes: AppDbContext is scoped, so exactly one instance exists per DI scope. Each
+    // repository registration below is a scoped factory that records the AppDbContext of the scope it
+    // is resolved from. Level 1 (SongResolutionService.CommitAsync) resolves ISongRepository/
+    // ISongService; level 2 (ArtistResolutionService.CommitAsync) and level 3
+    // (ArtistService.CreateArtistAsync) resolve IArtistRepository from whatever scope they run in.
+    // If any level opened its own scope, its factory would run again there and yield a DIFFERENT
+    // instance. One distinct instance == one scope == one context across all three levels.
+    [Fact]
+    public async Task CommitAsync_NovelArtistAndSong_UsesOneAppDbContextAcrossAllThreeNestedLevels()
+    {
+        var observed = new List<AppDbContext>();
+
+        await using var host = UnitOfWorkTestHost.Create(services =>
+        {
+            services.AddScoped<ISongRepository>(sp =>
+            {
+                observed.Add(sp.GetRequiredService<AppDbContext>());
+                return ActivatorUtilities.CreateInstance<SongRepository>(sp);
+            });
+            services.AddScoped<IArtistRepository>(sp =>
+            {
+                observed.Add(sp.GetRequiredService<AppDbContext>());
+                return ActivatorUtilities.CreateInstance<ArtistRepository>(sp);
+            });
+        });
+
+        var songResolution = host.Resolve<ISongResolutionService>();
+
+        var candidate = new SongCandidate(
+            "Three Level Join Song",
+            string.Empty,
+            null,
+            null,
+            new ArtistCandidate("Three Level Join Artist", null, null),
+            null,
+            null);
+
+        // Clear anything the harness itself resolved during EnsureCreated/setup so the assertion
+        // covers only the contexts seen inside the unit of work under test.
+        observed.Clear();
+
+        var (success, message, _) = await songResolution.CommitAsync(
+            candidate, ResolutionChoice.CreateNew, null, null);
+
+        Assert.True(success, message);
+
+        // Both repository levels were exercised (guards against a vacuous zero-observation pass).
+        Assert.True(observed.Count >= 2, $"Expected repositories from >= 2 levels, saw {observed.Count}.");
+        Assert.Single(observed.Distinct(ReferenceEqualityComparer.Instance));
     }
 
     // [AC] REQ-UOW-09: ArtistResolutionService.CommitAsync CreateNew branch — an ArtistCandidate
