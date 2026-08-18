@@ -101,6 +101,7 @@ public class SongService : ISongService
     public async Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
         string? externalId = null, string? externalProvider = null, string? version = null,
+        int? artistId = null,
         CancellationToken ct = default)
     {
         var (isValid, message) = ValidateTitleInput(title);
@@ -118,13 +119,27 @@ public class SongService : ISongService
         if (song == null)
             return (false, "Song not found");
 
+        // BUG-067 (REQ-ACREATE-16): the artist FK used to be written on the create path only, so a
+        // user changing the artist of a saved song lost the edit silently. null = keep existing
+        // (same semantics as version/externalId below); a supplied id must exist.
+        var effectiveArtistId = artistId ?? song.ArtistId;
+        if (artistId.HasValue && artistId.Value != song.ArtistId)
+        {
+            var newArtist = await _artistRepository.GetByIdAsync(artistId.Value, ct);
+            if (newArtist == null)
+                return (false, "Artist not found");
+        }
+
         // Song.Title trimming is enforced by the EF Core ValueConverter configured in
         // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
         // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-        if (await _songRepository.ExistsByTitleForArtistAsync(song.ArtistId, title, id, ct))
+        // Uniqueness is evaluated against the EFFECTIVE artist — moving a song to an artist that
+        // already owns that title must be rejected before any write.
+        if (await _songRepository.ExistsByTitleForArtistAsync(effectiveArtistId, title, id, ct))
             return (false, "A song with this title already exists for this artist");
 
         // Song.Title/FeaturedArtists/Version trimming is enforced by the ValueConverter (design.md § D3).
+        song.ArtistId = effectiveArtistId;
         song.Title = title;
         song.FeaturedArtists = featuredArtists;
         song.Lyrics = lyrics;

@@ -1,4 +1,4 @@
-using MyVocaList.Domain.Entity;
+﻿using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Domain.ServicesInterfaces;
@@ -208,7 +208,7 @@ public class SongResolutionService : ISongResolutionService
                     var (updateSuccess, updateMessage) = await _songService.UpdateSongAsync(
                         song.Id, song.Title, song.FeaturedArtists, song.Lyrics,
                         song.HasManualEdits,
-                        newExternalId, newExternalProvider, song.Version, ct);
+                        newExternalId, newExternalProvider, song.Version, ct: ct);
 
                     if (!updateSuccess)
                         return (false, updateMessage, null);
@@ -232,7 +232,7 @@ public class SongResolutionService : ISongResolutionService
                         var (updateSuccess, updateMessage) = await _songService.UpdateSongAsync(
                             song.Id, song.Title, song.FeaturedArtists, song.Lyrics,
                             song.HasManualEdits,
-                            candidate.ExternalId, candidate.ExternalProvider, song.Version, ct);
+                            candidate.ExternalId, candidate.ExternalProvider, song.Version, ct: ct);
 
                         if (!updateSuccess)
                             return (false, updateMessage, null);
