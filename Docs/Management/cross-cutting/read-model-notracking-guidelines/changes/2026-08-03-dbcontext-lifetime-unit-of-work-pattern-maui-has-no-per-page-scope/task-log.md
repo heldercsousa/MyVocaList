@@ -691,3 +691,43 @@ isolation; it did not recur on the final run. Unrelated to this task — noted, 
 Files written and re-read: `Services/SongService.cs` (lambda bodies re-scanned mechanically for
 REQ-UOW-28), `MyVocaList.Tests/Unit/Services/SongServiceTests.cs`,
 `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs`.
+
+---
+## Task: 2.2b — wrap `SongService.DeleteSongsAsync`
+**Plan:** `plan.md § Task 2.2b`
+**Status:** To Review
+**Started:** 2026-08-18
+**Completed:** 2026-08-18
+
+### Changed files:
+- `Services/SongService.cs`
+
+### Implementation
+`DeleteSongsAsync` now returns `_uow.ExecuteAsync<(bool success, string message)>(...)`, matching the
+style established by `ArtistService.DeleteArtistsAsync` (Task 2.1) and the Task 2.2 `SongService`
+methods. `ArgumentNullException.ThrowIfNull(ids)` stays outside the lambda (argument contract, not
+unit-of-work work). `ISongRepository` is resolved via `sp.GetRequiredService<ISongRepository>()`
+inside the lambda — **no `_`-prefixed constructor field appears in the lambda body** (REQ-UOW-28
+verified by reading the method after the edit). The method has no `SaveChangesAsync`;
+`SongRepository.DeleteAsync` is `ExecuteDeleteAsync`-based, so the value delivered is REQ-UOW-33:
+the bulk delete now runs inside `ExecuteAsync`'s explicit transaction.
+
+### No new `SaveSkipTests` case (deliberate)
+`ExecuteAsync_FailureTupleAfterExecuteDelete_RollsBackTheDelete` (Task 1.2b) already asserts the
+REQ-UOW-33 criterion at the level it lives: a failure signal returned after an `ExecuteDeleteAsync`
+inside the lambda rolls the bulk delete back. That behaviour belongs to `UnitOfWork`, not to a
+particular repository — a `SongRepository` copy of it would re-test the same transaction code with a
+different `DELETE` statement and add no new failure mode. `DeleteSongsAsync` itself has no failure
+return *after* its delete (the empty-id guard precedes it), so there is no service-level rollback
+scenario to encode. Adding one would have meant writing a test with no AC of its own — declined per
+`testing.md`. Existing unit coverage (`DeleteSongsAsync_ValidIds_ReturnsSuccess`, run through
+`PassthroughUnitOfWork`) continues to pass unmodified.
+
+### Build notes
+Build: passed (0 errors) | Tests: `Failed: 2, Passed: 557, Skipped: 0, Total: 559` — identical to the
+going-in baseline. The 2 failures are the two intentional REDs owned by Task 2.4
+(`NestedUnitOfWorkTests.CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow`,
+`NestedUnitOfWorkTests.CommitAsync_SongValidationReturnsFailureTupleAfterArtistAlreadyCommitted_LeavesPartialArtistRow`).
+No `ObjectDisposedException` flake on this run. Committed with `--no-verify` (pre-commit hook aborts
+on those 2 intentional REDs, BUG-074 — authorised for exactly that).
+Files written and re-read: `Services/SongService.cs`.
