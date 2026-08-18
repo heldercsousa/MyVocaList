@@ -71,7 +71,8 @@ public static class MauiProgram
                        sp.GetRequiredService<TransactionLogInterceptor>())
                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }, ServiceLifetime.Scoped);
-        builder.Services.AddSingleton<IUnitOfWork, MyVocaList.Infra.UnitOfWork.UnitOfWork>();
+        // IUnitOfWork itself is registered by AddAppServices() below — single registration site,
+        // shared by production and the DI-composition test harness.
 
         // Backup & Restore
         builder.Services.AddScoped<IBackupRepository, BackupRepository>();

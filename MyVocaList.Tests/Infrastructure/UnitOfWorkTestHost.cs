@@ -43,8 +43,9 @@ public sealed class UnitOfWorkTestHost : IAsyncDisposable
     public static UnitOfWorkTestHost Create(Action<IServiceCollection>? customize = null)
     {
         var (services, dbPath, log) = BaseCollection();
+        // IUnitOfWork comes from AddAppServices() (see BaseCollection) — the harness deliberately
+        // does NOT register it, so it exercises the production registration site.
         services.AddDbContextFactory<AppDbContext>((sp, o) => Configure(sp, o, dbPath), ServiceLifetime.Scoped);
-        services.AddSingleton<IUnitOfWork, MyVocaList.Infra.UnitOfWork.UnitOfWork>();
         return Build(services, dbPath, log, customize);
     }
 
