@@ -114,11 +114,18 @@ public class UnitOfWorkCompositionTests
 
         Assert.Contains("AddDbContextFactory<AppDbContext>", source, StringComparison.Ordinal);
         Assert.Contains("ServiceLifetime.Scoped", source, StringComparison.Ordinal);
-        Assert.Contains("AddSingleton<IUnitOfWork,", source, StringComparison.Ordinal);
         Assert.DoesNotContain("AddDbContext<AppDbContext>", source, StringComparison.Ordinal);
         Assert.Contains("UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)", source, StringComparison.Ordinal);
         Assert.Contains("GetRequiredService<CollationInterceptor>()", source, StringComparison.Ordinal);
         Assert.Contains("GetRequiredService<TransactionLogInterceptor>()", source, StringComparison.Ordinal);
+
+        // The IUnitOfWork registration lives in AddAppServices(), not MauiProgram.cs — a single
+        // registration site, so every composition built from AddAppServices (production, and the
+        // UnitOfWorkTestHost harness) can activate the services that depend on it. MauiProgram must
+        // therefore NOT register it, or the composition test's "exactly once" assertion breaks.
+        Assert.DoesNotContain("AddSingleton<IUnitOfWork,", source, StringComparison.Ordinal);
+        var appServicesSource = File.ReadAllText(LocateAppServices());
+        Assert.Contains("AddSingleton<IUnitOfWork,", appServicesSource, StringComparison.Ordinal);
 
         // REQ-UOW-21: the duplicate IAppInfo registration is removed, leaving one.
         var appInfoRegistrations = source
@@ -135,15 +142,20 @@ public class UnitOfWorkCompositionTests
         return captured;
     }
 
-    private static string LocateMauiProgram()
+    private static string LocateMauiProgram() => LocateSource(Path.Combine("MyVocaList", "MauiProgram.cs"));
+
+    private static string LocateAppServices() =>
+        LocateSource(Path.Combine("MyVocaList", "Extensions", "ServiceCollectionExtensions.cs"));
+
+    private static string LocateSource(string relativePath)
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null)
         {
-            var candidate = Path.Combine(dir.FullName, "MyVocaList", "MauiProgram.cs");
+            var candidate = Path.Combine(dir.FullName, relativePath);
             if (File.Exists(candidate)) return candidate;
             dir = dir.Parent;
         }
-        throw new FileNotFoundException("MyVocaList/MauiProgram.cs not found walking up from the test output directory.");
+        throw new FileNotFoundException($"{relativePath} not found walking up from the test output directory.");
     }
 }

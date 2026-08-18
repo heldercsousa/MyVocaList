@@ -35,4 +35,18 @@ public interface IUnitOfWork
     /// methods so the method name itself carries the intent — a reviewer reading the call site does
     /// not need to open the body to know whether it writes.</summary>
     Task<TResult> ExecuteReadAsync<TResult>(Func<IServiceProvider, Task<TResult>> body, CancellationToken ct = default);
+
+    /// <summary>Persists the pending changes of the CURRENT unit of work <b>without committing its
+    /// transaction</b> (REQ-UOW-35). Use it when a body needs a database-generated value — typically
+    /// an identity key — materialised <b>before</b> the body returns; the canonical case is
+    /// <c>ArtistResolutionService.CommitAsync</c>'s CreateNew branch, which returns <c>created.Id</c>
+    /// from inside the lambda. This is REQ-UOW-09's explicitly sanctioned "two saves inside one unit
+    /// of work" branch: two saves, one <c>AppDbContext</c>, one transaction, one atomic outcome.
+    /// <para><b>Not a commit:</b> the explicit transaction opened by
+    /// <see cref="ExecuteAsync{TResult}(Func{IServiceProvider, Task{TResult}}, CancellationToken)"/>
+    /// stays open, so a later failure tuple or a later exception still rolls the flushed rows back.
+    /// <b>Fail-closed:</b> calling this outside a unit of work (no ambient scope) throws
+    /// <see cref="InvalidOperationException"/> rather than silently doing nothing — there is no
+    /// context to persist to, and a silent no-op would let the caller believe otherwise.</para></summary>
+    Task FlushAsync(CancellationToken ct = default);
 }

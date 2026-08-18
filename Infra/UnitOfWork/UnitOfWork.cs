@@ -108,6 +108,31 @@ public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
         // no SaveChangesAsync -- read-only, per Revision 6.
     }
 
+    // Flush (REQ-UOW-35, added 2026-08-18 -- Helder's decision on Task 2.3's spec gap). Saves the
+    // AMBIENT scope's context and stops there: no CommitAsync, no DisposeAsync on the transaction.
+    // Because the explicit transaction is still open, the failure-signal RollbackAsync above and the
+    // catch-block RollbackAsync both still undo everything this flush wrote -- atomicity unchanged.
+    //
+    // NOTE: this method only READS _ambientScope. It is deliberately NOT a third assignment site --
+    // the two write paths remain the only publishers (Revision 12 / REQ-UOW-34).
+    public async Task FlushAsync(CancellationToken ct = default)
+    {
+        // Fail-closed, consistent with ResultSignalsSuccess's refusal to guess (REQ-UOW-27): no
+        // ambient scope means no unit of work is in progress, so there is nothing to flush and
+        // no transaction to protect the flushed rows. Silently returning would let the caller
+        // believe its changes were persisted.
+        if (_ambientScope.Value is not { } scope)
+            throw new InvalidOperationException(
+                "IUnitOfWork.FlushAsync was called outside a unit of work. " +
+                "A flush persists the pending changes of the CURRENT unit of work without " +
+                "committing it, so it is only valid inside an ExecuteAsync body. " +
+                "Note that ExecuteReadAsync does not open one: a read never saves (REQ-UOW-34).");
+
+        var context = scope.GetRequiredService<AppDbContext>();
+        await context.SaveChangesAsync(ct);
+        // No transaction.CommitAsync and no transaction disposal -- see the note above.
+    }
+
     // Save-skip signal detection (Revision 9, § 6b). Exhaustive by construction -- every branch is
     // either a recognised signal or the explicit, fail-closed refusal below (never a silent guess,
     // and never a silent commit).
