@@ -1,7 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions.Strings;
 
 namespace MyVocaList.Services;
@@ -11,6 +13,7 @@ public class ArtistService : IArtistService
     private readonly IArtistRepository _artistRepository;
     private readonly ISongRepository _songRepository;
     private readonly ICatalogRepository _catalogRepository;
+    private readonly IUnitOfWork _uow;
     private readonly ILogger<ArtistService> _logger;
 
     public int MaxInputLength => 60;
@@ -20,11 +23,13 @@ public class ArtistService : IArtistService
         IArtistRepository artistRepository,
         ISongRepository songRepository,
         ICatalogRepository catalogRepository,
+        IUnitOfWork uow,
         ILogger<ArtistService> logger)
     {
         _artistRepository = artistRepository;
         _songRepository = songRepository;
         _catalogRepository = catalogRepository;
+        _uow = uow;
         _logger = logger;
     }
 
@@ -43,83 +48,101 @@ public class ArtistService : IArtistService
     }
 
     /// <inheritdoc />
-    public async Task<(bool success, string message, Artist? artist)> CreateArtistAsync(
+    public Task<(bool success, string message, Artist? artist)> CreateArtistAsync(
         string name, string? externalId = null, string? externalProvider = null, CancellationToken ct = default)
-    {
-        var (isValid, message) = ValidateNameInput(name);
-        if (!isValid)
-            return (false, message, null);
-
-        // Artist.Name/ExternalId trimming is enforced by the EF Core ValueConverter configured
-        // in ArtistConfiguration (design.md § D3) — not here. EF applies the same converter to
-        // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-        if (await _artistRepository.ExistsByNameAsync(name, ct))
-            return (false, "An artist with this name already exists", null);
-
-        var artist = new Artist
+        => _uow.ExecuteAsync<(bool success, string message, Artist? artist)>(async sp =>
         {
-            Name = name,
-            ExternalId = string.IsNullOrWhiteSpace(externalId) ? null : externalId,
-            ExternalProvider = string.IsNullOrWhiteSpace(externalProvider) ? null : externalProvider,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
 
-        await _artistRepository.AddAsync(artist, ct);
-        await _artistRepository.SaveChangesAsync(ct);
-        return (true, $"Artist '{name.Trim()}' created successfully", artist);
-    }
+            var (isValid, message) = ValidateNameInput(name);
+            if (!isValid)
+                return (false, message, null);
+
+            // Artist.Name/ExternalId trimming is enforced by the EF Core ValueConverter configured
+            // in ArtistConfiguration (design.md § D3) — not here. EF applies the same converter to
+            // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
+            if (await artistRepository.ExistsByNameAsync(name, ct))
+                return (false, "An artist with this name already exists", null);
+
+            var artist = new Artist
+            {
+                Name = name,
+                ExternalId = string.IsNullOrWhiteSpace(externalId) ? null : externalId,
+                ExternalProvider = string.IsNullOrWhiteSpace(externalProvider) ? null : externalProvider,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await artistRepository.AddAsync(artist, ct);
+            // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+            return (true, $"Artist '{name.Trim()}' created successfully", artist);
+        }, ct);
 
     /// <inheritdoc />
-    public async Task<(bool success, string message)> UpdateArtistAsync(
+    public Task<(bool success, string message)> UpdateArtistAsync(
         int id, string name, CancellationToken ct = default)
-    {
-        var (isValid, message) = ValidateNameInput(name);
-        if (!isValid)
-            return (false, message);
+        => _uow.ExecuteAsync<(bool success, string message)>(async sp =>
+        {
+            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
 
-        var artist = await _artistRepository.GetByIdAsync(id, ct);
-        if (artist == null)
-            return (false, "Artist not found");
+            var (isValid, message) = ValidateNameInput(name);
+            if (!isValid)
+                return (false, message);
 
-        // Artist.Name trimming is enforced by the EF Core ValueConverter configured in
-        // ArtistConfiguration (design.md § D3) — not here. EF applies the same converter to
-        // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-        if (await _artistRepository.ExistsByNameAsync(name, id, ct))
-            return (false, "An artist with this name already exists");
+            var artist = await artistRepository.GetByIdAsync(id, ct);
+            if (artist == null)
+                return (false, "Artist not found");
 
-        artist.Name = name;
-        artist.UpdatedAt = DateTime.UtcNow;
-        artist.HasManualEdits = true;
+            // Artist.Name trimming is enforced by the EF Core ValueConverter configured in
+            // ArtistConfiguration (design.md § D3) — not here. EF applies the same converter to
+            // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
+            if (await artistRepository.ExistsByNameAsync(name, id, ct))
+                return (false, "An artist with this name already exists");
 
-        await _artistRepository.UpdateAsync(artist, ct);
-        await _artistRepository.SaveChangesAsync(ct);
-        return (true, $"Artist updated to '{name.Trim()}'");
-    }
+            artist.Name = name;
+            artist.UpdatedAt = DateTime.UtcNow;
+            artist.HasManualEdits = true;
+
+            await artistRepository.UpdateAsync(artist, ct);
+            // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+            return (true, $"Artist updated to '{name.Trim()}'");
+        }, ct);
 
     /// <inheritdoc />
-    public async Task<(bool success, string message)> DeleteArtistsAsync(
+    public Task<(bool success, string message)> DeleteArtistsAsync(
         IEnumerable<int> ids, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(ids);
 
-        var idList = ids.ToList();
-        if (idList.Count == 0)
-            return (false, "No artist selected for deletion");
-
-        foreach (var id in idList)
+        return _uow.ExecuteAsync<(bool success, string message)>(async sp =>
         {
-            var artist = await _artistRepository.GetByIdAsync(id, ct);
-            if (artist == null)
-                continue;
+            // REQ-UOW-28: both repositories resolved from the lambda's own scope — never the
+            // constructor fields. IArtistRepository.DeleteAsync is ExecuteDeleteAsync-based
+            // (REQ-UOW-33), so the explicit transaction opened by IUnitOfWork is what makes the
+            // bulk delete atomic with the per-id validation above it.
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
+            var catalogRepository = sp.GetRequiredService<ICatalogRepository>();
 
-            var songCount = await _catalogRepository.CountByArtistAsync(id, ct);
-            if (songCount > 0)
-                return (false, $"'{artist.Name}' has {songCount} song(s) and cannot be deleted");
-        }
+            var idList = ids.ToList();
+            if (idList.Count == 0)
+                return (false, "No artist selected for deletion");
 
-        await _artistRepository.DeleteAsync(idList, ct);
-        return (true, idList.Count == 1 ? "Artist deleted" : $"{idList.Count} artists deleted");
+            foreach (var id in idList)
+            {
+                var artist = await artistRepository.GetByIdAsync(id, ct);
+                if (artist == null)
+                    continue;
+
+                var songCount = await catalogRepository.CountByArtistAsync(id, ct);
+                if (songCount > 0)
+                    return (false, $"'{artist.Name}' has {songCount} song(s) and cannot be deleted");
+            }
+
+            await artistRepository.DeleteAsync(idList, ct);
+            return (true, idList.Count == 1 ? "Artist deleted" : $"{idList.Count} artists deleted");
+        }, ct);
     }
 
     /// <inheritdoc />
