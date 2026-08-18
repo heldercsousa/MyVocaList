@@ -1123,3 +1123,145 @@ Tests: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --no-restore` ->
 
 ### Gate
 Phase 3 **not** started - HARD GATE requiring Helder's on-device confirmation.
+
+---
+## Task: Phase 3.2 — review-checklist verification (independent verifier)
+**Plan:** `plan.md` (Phase 3.2)
+**Status:** To Review
+**Started:** 2026-08-18
+**Completed:** 2026-08-18
+
+Verification target: `feat/uow-pilot` HEAD **`f6670092`**. Documentation-only task — no `.cs` file was
+edited. Suite re-confirmed independently: **`Failed 0, Passed 564, Skipped 0, Total 564`**.
+
+### Verdicts
+
+**1. REQ-UOW-31 (excluded files untouched) — PASS.**
+`git diff develop --name-only` = 29 files; none of the seven excluded files is present. `git grep -n
+"BUG-071" -- '*.cs'` finds markers in 8 files under `Services/`, `Infra/`, `MyVocaList/UI/` — the 3
+excluded services, the 3 excluded repositories, plus `MyVocaList/UI/ViewModels/QueueManagementViewModel.cs:11`
+and `Services/VenueService.cs:16` (Phase 4.4 / 4.6a work). None of them appears in the diff.
+
+> Verifier note: the marker sweep also hits `Domain/UnitOfWork/IUnitOfWork.cs` and
+> `MyVocaList.Tests/Integration/UnitOfWork/UnitOfWorkLifetimeTests.cs` when run repo-wide (10 files, not 8).
+> Both are the pilot's own artifacts, not excluded files, so the REQ-UOW-31 verdict is unaffected —
+> recorded only so a future re-run of the same command is not surprised by the count.
+
+**2. REQ-UOW-28 (collaborators resolved from `sp`, never from a constructor field) — PASS.**
+All 11 wrap sites confirmed (`git grep -n "_uow.Execute" -- Services/`): `SongService` 4, `ArtistService` 3,
+`ArtistResolutionService` 2, `SongResolutionService` 2 — the 9 wrapped mutating methods plus the 2
+`ResolveAsync` reads. Every lambda resolves its collaborators from `sp`. The remaining
+`_artistService` / `_artistResolution` occurrences are comment text only
+(`ArtistResolutionService.cs:108`; `SongResolutionService.cs:183`, `:288`).
+
+Structural improvement worth recording: `ResolveOrCreateArtistIdAsync`, `ApplyUpdate`, `ComputeFieldDiffs`
+and both `DerivePrefixToken` overloads are now `private static`. A static helper cannot read an instance
+field, so the compiler now **enforces** what the review previously had to check by eye.
+
+**3. REQ-UOW-01 (no ad-hoc scope creation outside the UoW) — PASS.**
+`Create(Async)?Scope()` across `Services/`, `MyVocaList/UI/ViewModels/`, `Infra/` returns only
+`Infra/UnitOfWork/UnitOfWork.cs:42`, `:80`, `:106`. The documented exceptions `App.xaml.cs:35`, `:54` are
+unchanged. All other hits are test infrastructure, out of the requirement's scope.
+
+**4. REQ-UOW-11 (repositories do not own the save) — PASS.**
+`ISongRepository` has no occurrence; `IArtistRepository.cs:56` is a retirement comment.
+**3 of 5 remain, all Phase 4+:** `IBackupRepository` (Task 4.5), `ICatalogRepository` (Task 4.1),
+`ISongKaraokeUrlRepository` (Task 4.3). `IBaseRepository.SaveChangesAsync()` is the separately-approved
+deliberately-retained member (`design.md § 8`) and is **not** one of the five.
+
+**5. REQ-UOW-10 — NOT MET as literally written. ESCALATED to gate 3.4.** See open decision item F1 below.
+
+**6. REQ-UOW-35 / Revision-12 ambient-scope invariant — PASS.**
+`_ambientScope` has exactly two publishing assignments (`UnitOfWork.cs:43`, `:81`) — both write paths.
+`:69` / `:95` are `finally` null-resets and are correct: the join branches return early, so publication
+only ever happens from a null state. `ExecuteReadAsync` (`:98-109`) never publishes and never saves.
+`FlushAsync` (`:118-134`) calls `SaveChangesAsync` with no `CommitAsync` and no transaction disposal, and
+throws when no ambient scope exists (fail-closed).
+
+**7. Behaviour changed vs merely relocated — PASS, no findings.**
+Every removed line with no matching addition is either a `_field.Method(…)` → `local.Method(…)` rename or a
+deleted `SaveChangesAsync` (3 in `SongService`, 2 in `ArtistService`, 2 in `ArtistResolutionService`). No
+validation rule, branch, message string or ordering was altered. The deferred-key hazard was specifically
+checked: UI call sites `ArtistFormViewModel.cs:156` and `SongFormViewModel.cs:554` both discard the returned
+entity with `_` — no exposure.
+
+### Open decision item for gate 3.4 — F1: REQ-UOW-10 line-count reading
+
+REQ-UOW-10 states *"at most one line of code per service method; two or more lines of ceremony per service
+method fails this criterion."* `design.md:857` scores the wrap as *"+1 line each… still the same line every
+time"* — i.e. counting `_uow.ExecuteAsync(async sp => { … })` as **one logical line**. Under that reading
+all 11 methods pass, and the `sp.GetRequiredService` lines are *substitutions* for constructor-field reads
+(each paired with a removed `_field.` usage), not additions. Under a **literal physical-line count**, none
+passes — every method adds 4–7 physical lines (3 wrapper lines + 1–4 `sp.GetRequiredService` lines).
+
+**Root cause:** `design.md`'s "+1 line" accounting predates **Revision 10** (the `Func<IServiceProvider,…>`
+shape) and **REQ-UOW-28**, which together *mandate* the `sp.GetRequiredService` lines. The DRY score was
+never revised for them. `ArtistResolutionService.CommitAsync`'s `await _uow.FlushAsync(ct)` is
+**substance (REQ-UOW-35), not ceremony**, and should not count against the budget.
+
+Per-method count (verifier's table):
+
+| Service | Method | Ceremony lines | `sp.GetRequiredService` lines | Other new executable lines |
+|---|---|---|---|---|
+| SongService | `CreateSongAsync` | 3 | 2 | 0 |
+| SongService | `UpdateSongAsync` | 3 | 1 | 0 |
+| SongService | `CreateSongWithUrlsAsync` | 3 | 4 | 0 |
+| SongService | `DeleteSongsAsync` | 3 | 1 | 0 |
+| ArtistService | `CreateArtistAsync` | 3 | 1 | 0 |
+| ArtistService | `UpdateArtistAsync` | 3 | 1 | 0 |
+| ArtistService | `DeleteArtistsAsync` | 3 | 2 | 0 |
+| ArtistResolutionService | `ResolveAsync` | 3 | 1 | 0 |
+| ArtistResolutionService | `CommitAsync` | 3 | 2 | 1 (`await _uow.FlushAsync(ct)`) |
+| SongResolutionService | `ResolveAsync` | 3 | 2 | 0 |
+| SongResolutionService | `CommitAsync` | 3 | 3 | 0 |
+
+Plus **5 shared class-level lines per file** (2 usings, field, ctor param, ctor assignment) — per file, not
+per method.
+
+**Decision required from Helder at gate 3.4:** logical-line reading (all pass, REQ-UOW-10 text needs
+clarifying) or physical-line reading (REQ-UOW-10 is not met and the target must be renegotiated).
+**Follow-up, required either way:** `design.md`'s DRY-score paragraph (`:857`) must be corrected so a future
+reader is not misled by the stale "+1 line each" accounting. `requirements.md` / `design.md` were
+deliberately **not** edited in this task — the correction depends on the 3.4 outcome.
+
+### Non-blocking findings
+
+**F2 — dead constructor-only fields, broader than previously reported (10, not 4).**
+
+| Service | Dead fields |
+|---|---|
+| `SongService` | `_artistRepository`, `_urlRepository`, `_urlService` |
+| `ArtistService` | `_catalogRepository`, `_songRepository`, **`_logger`** |
+| `ArtistResolutionService` | `_artistRepository` |
+| `SongResolutionService` | `_songRepository`, `_artistResolution`, `_songService` |
+
+`ArtistService._logger` is now **entirely** unused — the one most likely to trip an analyzer. All are
+harmless today, but they inflate constructor arity and keep captive window-scope references alive. Each
+removal changes constructor arity and therefore touches the matching `Unit/Services/*Tests.cs`; a sweep, if
+done, belongs in **one dedicated task**, not folded into Phase 4.
+
+**F3 — undocumented REQ-UOW-28 exception.** `_scorer` (`ISimilarityScorer`) is read from inside both
+`ExecuteReadAsync` lambdas (`ArtistResolutionService.cs:80`, `SongResolutionService.cs:142`). Verified
+benign: `Infra/Similarity/SimilarityScorer.cs` is a stateless pure function over `FuzzySharp` — no fields,
+no `AppDbContext` — so it cannot defeat the join. But it is a **third** accepted exception (alongside `_uow`
+and `_logger`) that no spec line or code comment acknowledges. One line in REQ-UOW-28's exception list
+would close it.
+
+### Tooling hazard (recorded for future sessions)
+
+The `rtk` grep proxy returned **wrong results** during this verification: `grep -c '^+'` reported 0 for all
+four service files, and an `_ambientScope` search came back as a mangled summary. Every
+completeness-critical check was redone with `git grep` / Python. The same hazard bit the Task 2.4b caller
+census. **Do not trust a single `grep` for byte-exact or completeness-critical work.**
+
+### Gate
+
+**Phase 3.3 remains OPEN — Helder's on-device gate. Phase 4+ must not start.**
+
+### Changed files:
+- `Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/task-log.md` (this entry only)
+
+### Build notes
+Documentation-only task — no build or test run required; no source file touched. Suite state re-confirmed
+from the Phase 3.2 verification run at `f6670092`: `Failed 0, Passed 564, Skipped 0, Total 564`.
+No new file created, so no `.sln` registration is required.
