@@ -154,6 +154,18 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   today (an artist exists with the external identity attached) **without** a save→mutate→save sequence
   spanning two contexts. Whether this becomes one save or remains two saves inside one unit of work is
   a design choice; the observable outcome and the returned `artistId` must not change.
+
+  > **Spec updated [2026-08-18]:** the design choice is now made — **two saves inside one unit of
+  > work** (REQ-UOW-09's explicitly sanctioned second branch), realised by the new flush affordance
+  > **REQ-UOW-35**. Collapsing to a single implicit save is *not possible* for the CreateNew branch:
+  > `CommitAsync` evaluates `return (true, message, created.Id)` **inside** the `ExecuteAsync` lambda,
+  > i.e. before the deferred save runs, so a single save returns `artistId = 0` and breaks this very
+  > requirement; and `ArtistRepository.UpdateAsync` forces state `Modified` on an entity still `Added`
+  > with a temporary key (`InvalidOperationException: The property 'Artist.Id' has a temporary
+  > value…`). The flush lives on `IUnitOfWork`, not on a repository, so REQ-UOW-11 still holds — no
+  > repository regains a save entry point. (Helder's decision 2026-08-18; raised as a `blocked: spec
+  > gap` by Task 2.3.)
+
   ```
   Given an artist candidate with an external provider and id and choice = CreateNew
   When CommitAsync is called
@@ -603,6 +615,44 @@ Format: EARS for invariants, Given/When/Then for behavioral scenarios.
   instance and a persisted write; the second asserts the nested write is persisted and that no
   `InvalidOperationException` occurs. The second test is the regression test for BL-E — it fails
   against the Revision 10 design (write silently lost) and against Revision 11 (throws).
+
+- **REQ-UOW-35** (added 2026-08-18, Helder's decision — the second branch of REQ-UOW-09) —
+  `IUnitOfWork` SHALL expose a **flush** affordance (`FlushAsync`) that persists the pending changes
+  of the **current** unit of work **without committing its transaction**. A flush makes
+  database-generated keys (and any other store-generated value) materialised and readable *inside*
+  the lambda body, which is what lets a body return a generated id it has just created. It is NOT a
+  commit: the explicit transaction opened by `ExecuteAsync` stays open, so a later failure signal or
+  a later exception still rolls the flushed rows back — atomicity is unchanged.
+
+  The member lives on `IUnitOfWork` and **not** on any repository: REQ-UOW-11 retires the
+  pass-through `SaveChangesAsync` members, and this requirement must not reintroduce a save entry
+  point on a repository. `IArtistRepository.SaveChangesAsync` is therefore still retired.
+
+  Calling flush **outside** a unit of work (no ambient scope) is invalid and SHALL throw
+  `InvalidOperationException` — fail-closed, consistent with `ResultSignalsSuccess`'s treatment of an
+  unrecognised result (REQ-UOW-27). Silently no-op'ing would let a caller believe its changes were
+  persisted when no context exists to persist them.
+
+  ```
+  Given a body running inside IUnitOfWork.ExecuteAsync
+  When the body calls FlushAsync after creating an entity
+  Then the entity's database-generated key is populated and readable inside the body
+  And the unit of work's transaction is still open (nothing is committed yet)
+  ```
+  ```
+  Given a body running inside IUnitOfWork.ExecuteAsync that has already called FlushAsync
+  When the body subsequently returns a failure tuple, or throws
+  Then the transaction is rolled back
+  And no flushed row survives in the database
+  ```
+  ```
+  Given no unit of work is in progress (no ambient scope)
+  When FlushAsync is called
+  Then an InvalidOperationException is thrown
+  ```
+  *Test:* three integration tests, one per scenario above (flush-then-failure-signal rolls back,
+  flush-then-exception rolls back, flush outside a unit of work throws), plus REQ-UOW-09's existing
+  pinned outcome test which only passes once the flush exists.
 
 ## Validation rules
 

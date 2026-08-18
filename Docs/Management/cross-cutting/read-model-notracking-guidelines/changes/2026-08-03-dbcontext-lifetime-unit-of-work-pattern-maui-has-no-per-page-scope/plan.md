@@ -713,7 +713,16 @@ public Task<(bool success, string message)> UpdateSongAsync(
 - [ ] **Step 1:** Wrap `CommitAsync` (`:86-142`). First ambient-join site: the lambda resolves
   `IArtistService` from `sp` and calls `CreateArtistAsync` (`:121`), whose own `ExecuteAsync` **joins**
   the ambient scope instead of opening a second one. The save→mutate→save at `:112-113`/`:132-133`
-  collapses to a single implicit save (REQ-UOW-09).
+  becomes **two saves inside one unit of work** — REQ-UOW-09's explicitly sanctioned second branch —
+  via `IUnitOfWork.FlushAsync` (REQ-UOW-35).
+  > **Spec updated [2026-08-18]:** this step originally read "collapses to a single implicit save".
+  > That was wrong. `CommitAsync` returns `created.Id` from *inside* the lambda, before `ExecuteAsync`'s
+  > deferred save runs, so a single save returns `artistId = 0` and breaks REQ-UOW-09's own guarantee;
+  > and `UpdateAsync` throws on the still-`Added` entity's temporary key. The CreateNew branch calls
+  > `FlushAsync` once, immediately after `CreateArtistAsync` succeeds. Still **one** context and
+  > **one** transaction: a later failure tuple or exception rolls the flushed rows back. REQ-UOW-11 is
+  > unaffected — the flush is on `IUnitOfWork`, not on a repository — so Step 5's retirement of
+  > `IArtistRepository.SaveChangesAsync` proceeds as planned.
 - [ ] **Step 2: REQ-UOW-28 is at its sharpest here** — `_artistService` **and** `_artistRepository` must
   both disappear from inside the lambda. A surviving `_artistService` reference silently defeats the join.
 - [ ] **Step 3: Wrap `ResolveAsync` (`:28-83`) in `ExecuteReadAsync`** — decided, not optional: the

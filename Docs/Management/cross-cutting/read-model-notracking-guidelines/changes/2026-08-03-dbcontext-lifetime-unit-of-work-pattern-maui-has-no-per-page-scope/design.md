@@ -452,6 +452,17 @@ public interface IUnitOfWork
     /// for read-only service methods so the method name itself carries the intent — a reviewer
     /// reading the call site does not need to open the body to know whether it writes.</summary>
     Task<TResult> ExecuteReadAsync<TResult>(Func<IServiceProvider, Task<TResult>> body, CancellationToken ct = default);
+
+    /// <summary>Persists the pending changes of the CURRENT unit of work WITHOUT committing its
+    /// transaction (REQ-UOW-35, added 2026-08-18). Use it when the body needs a database-generated
+    /// value — typically an identity key — to be materialised <b>before</b> the body returns; the
+    /// canonical case is <c>ArtistResolutionService.CommitAsync</c>'s CreateNew branch, which returns
+    /// <c>created.Id</c> from inside the lambda (REQ-UOW-09's "two saves inside one unit of work"
+    /// branch). <b>Not a commit:</b> the explicit transaction opened by <see cref="ExecuteAsync{TResult}"/>
+    /// stays open, so a later failure tuple or a later exception still rolls the flushed rows back —
+    /// atomicity is unchanged. <b>Fail-closed:</b> calling this outside a unit of work (no ambient
+    /// scope) throws <see cref="InvalidOperationException"/> rather than silently doing nothing.</summary>
+    Task FlushAsync(CancellationToken ct = default);
 }
 
 public sealed class UnitOfWork(IServiceScopeFactory scopeFactory) : IUnitOfWork
@@ -732,8 +743,45 @@ public interface IUnitOfWork
 
     // The only no-signal form, for bodies with nothing to inspect (bare Task).
     Task ExecuteAsync(Func<IServiceProvider, Task> body, CancellationToken ct = default);
+
+    // Flush: save without committing (REQ-UOW-35).
+    Task FlushAsync(CancellationToken ct = default);
 }
 ```
+
+> **Spec updated [2026-08-18] — `FlushAsync` on `IUnitOfWork` (REQ-UOW-35).** Helder's decision,
+> resolving the `blocked: spec gap` raised by Task 2.3.
+>
+> **What it does.** `FlushAsync` calls `SaveChangesAsync` on the **ambient scope's** `AppDbContext`
+> and nothing else — it does not commit, and does not dispose, the explicit transaction opened by
+> `ExecuteAsync`. A flush therefore makes store-generated values (identity keys) readable inside the
+> lambda while leaving the whole unit of work rollback-able: a later failure tuple takes the existing
+> `transaction.RollbackAsync` path and a later exception takes the `catch` path, and in both cases
+> the flushed rows disappear. This is REQ-UOW-09's explicitly sanctioned *"remains two saves inside
+> one unit of work"* branch — two `SaveChangesAsync` calls, **one** context, **one** transaction,
+> **one** atomic outcome.
+>
+> **Why not one save.** `ArtistResolutionService.CommitAsync` evaluates `return (true, message,
+> created.Id)` *inside* the lambda, i.e. strictly before `ExecuteAsync`'s deferred save. With a single
+> save the returned `artistId` is `0`, violating REQ-UOW-09's own "the returned `artistId` must not
+> change"; and `ArtistRepository.UpdateAsync` (`DbSet.Update`) throws
+> `InvalidOperationException: The property 'Artist.Id' has a temporary value while attempting to
+> change the entity's state to 'Modified'` on the still-`Added` entity. The single-save claim in
+> `plan.md § Task 2.3 Step 1` was the error, not REQ-UOW-09.
+>
+> **Why on `IUnitOfWork` and not on a repository.** REQ-UOW-11 retires the pass-through
+> `SaveChangesAsync` members precisely so that no repository is a save entry point and no caller can
+> save behind the unit of work's back. Putting the flush on `IUnitOfWork` keeps a single owner of the
+> save decision, keeps the transaction boundary in the one class that opens it, and lets the flush be
+> defined against the **ambient** scope (which only `UnitOfWork` knows, via its `AsyncLocal`) rather
+> than against whichever `DbContext` a repository happens to hold. A repository-level flush could not
+> make that guarantee, and would silently reopen the door REQ-UOW-11 closes.
+> `IArtistRepository.SaveChangesAsync` is therefore still retired, as Task 2.3 Step 5 planned.
+>
+> **`_ambientScope` is untouched.** `FlushAsync` only *reads* `_ambientScope`; it never assigns it.
+> The two write paths remain the only assignment sites, and `ExecuteReadAsync` still never publishes
+> an ambient scope (Revision 12 / REQ-UOW-34). Reading a scope that is `null` means "no unit of work
+> is in progress" — the fail-closed throw.
 
 > **Superseded-in-scope note (non-blocking #2, 4th-pass spec review):** every `GetOrCreateDefaultEventAsync`/
 > `SetActiveEventAsync`/`QueueRepository.ReorderAsync` bullet below predates D12 (2026-08-04), which
