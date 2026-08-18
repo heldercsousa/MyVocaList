@@ -357,7 +357,7 @@ public class SongResolutionServiceTests
         _songServiceMock
             .Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, "Updated"));
 
         var candidate = MakeCandidate(
@@ -380,7 +380,7 @@ public class SongResolutionServiceTests
             "Original Featured",  // NOT accepted — unchanged
             "Original Lyrics",    // NOT accepted — unchanged
             true,
-            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -403,7 +403,7 @@ public class SongResolutionServiceTests
         _songServiceMock
             .Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, "Updated"));
 
         var candidate = MakeCandidate(
@@ -424,7 +424,7 @@ public class SongResolutionServiceTests
             "New Featured",
             "New Lyrics",
             false,
-            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -450,7 +450,7 @@ public class SongResolutionServiceTests
         _songServiceMock
             .Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
-                It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, "Attached"));
 
         var candidate = MakeCandidate(externalProvider: "Deezer", externalId: "dz-5");
@@ -469,6 +469,7 @@ public class SongResolutionServiceTests
             false,      // unchanged
             "dz-5", "Deezer",
             It.IsAny<string>(),
+            It.IsAny<int?>(),
             It.IsAny<CancellationToken>()),
             Times.Once);
     }

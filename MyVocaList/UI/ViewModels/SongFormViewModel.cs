@@ -21,6 +21,7 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ISongKaraokeUrlService _karaokeUrlService;
     private readonly ISecureStorageWrapper _secureStorage;
     private readonly IMessenger _messenger;
+    private int _searchGeneration; // BUG-051: generation counter — guards SearchArtistsAsync against stale completions
 
     // ── Query properties ──────────────────────────────────────────────────
     public string SongIdRaw { set => SongId = int.TryParse(value, out var id) ? id : null; }
@@ -52,6 +53,12 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private IEnumerable<AutocompleteSuggestion> _artistSuggestions = [];
     [ObservableProperty] private bool _artistHasError;
     [ObservableProperty] private string _artistErrorText = string.Empty;
+    // BUG-065/066: two-way bound to AutoCompleteEdit.IsDropDownOpen (dxe:AutoCompleteEdit, ItemsEditBase
+    // BindableProperty). Every programmatic ArtistSearchText assignment below also sets this false to
+    // force the popup shut (DevExpress's own provider uses the same lever) — replaces the removed
+    // _suppressNextArtistSearch flag, which IL evidence proved never suppressed anything: DevExpress's
+    // AsyncItemsSourceProvider.OnEditorTextChanged already ignores non-UserInput text changes natively.
+    [ObservableProperty] private bool _isArtistDropDownOpen;
 
     // ── Lyrics ────────────────────────────────────────────────────────────
     [ObservableProperty] private string? _lyrics;
@@ -126,6 +133,7 @@ public partial class SongFormViewModel : ViewModelBase
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         SearchArtistsCommand = new AsyncRelayCommand<string>(SearchArtistsAsync);
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
+        CreateArtistInlineCommand = new AsyncRelayCommand<string>(CreateArtistInlineAsync);
         ArtistBlurredWithoutSelectionCommand = new RelayCommand(OnArtistBlurredWithoutSelection);
         NavigateToSongPickerCommand = new AsyncRelayCommand(NavigateToSongPickerAsync,
             AsyncRelayCommandOptions.None);
@@ -155,6 +163,8 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand<string> SearchArtistsCommand { get; }
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
+    /// <summary>REQ-ACREATE-04/05: creates a new artist inline from the typed name and locks it in on success.</summary>
+    public IAsyncRelayCommand<string> CreateArtistInlineCommand { get; }
     /// <summary>Invoked by DevExpress AutoCompleteEdit when user blurs without selecting a suggestion (BUG-008).</summary>
     public IRelayCommand ArtistBlurredWithoutSelectionCommand { get; }
     public IAsyncRelayCommand NavigateToSongPickerCommand { get; }
@@ -276,43 +286,126 @@ public partial class SongFormViewModel : ViewModelBase
 
     // ── Artist autocomplete ───────────────────────────────────────────────
 
-    private async Task SearchArtistsAsync(string term)
+    private Task SearchArtistsAsync(string term) => SearchArtistsCoreAsync(term);
+
+    /// <summary>
+    /// BUG-056: runs the artist search and RETURNS the current query's mapped suggestions so the
+    /// page's <c>AutoCompleteEdit</c> provider receives them directly (no read-before-dispatch gap
+    /// against <see cref="ArtistSuggestions"/>). The observable <see cref="ArtistSuggestions"/> is
+    /// still updated for the latest query only (BUG-051 generation guard) so other observers see
+    /// latest-query-wins, but the returned list is always this call's own results.
+    /// </summary>
+    public async Task<IReadOnlyList<AutocompleteSuggestion>> SearchArtistsCoreAsync(string term)
     {
-        if (string.IsNullOrWhiteSpace(term)) { ArtistSuggestions = []; return; }
+        if (string.IsNullOrWhiteSpace(term))
+        {
+            RunOnUiThread(() => ArtistSuggestions = []);
+            return [];
+        }
+        var gen = Interlocked.Increment(ref _searchGeneration); // BUG-051: guards against a slower earlier query clobbering a newer one
         var results = await _artistService.SearchArtistsByNameAsync(term, maxResults: 5);
-        RunOnUiThread(() =>
-            ArtistSuggestions = results.Select(a =>
-                new AutocompleteSuggestion(a.Name, a.CatalogCountText, a)).ToList());
+        var mapped = results
+            .Select(a => new AutocompleteSuggestion(a.Name, a.CatalogCountText, a))
+            .ToList();
+        // Only the latest query updates the shared observable state; the provider for THIS query
+        // still receives its own results below (DX cancels stale provider requests via its token).
+        if (gen == _searchGeneration)
+            RunOnUiThread(() => ArtistSuggestions = mapped);
+        return mapped;
     }
 
     private void SelectArtist(AutocompleteSuggestion suggestion)
     {
         if (suggestion?.Data is not ArtistListItem artist) return;
-        SelectedArtistId = artist.Id;
-        SelectedArtistName = artist.Name;
-        ArtistSearchText = artist.Name;
+        LockArtist(artist.Id, artist.Name);
+    }
+
+    /// <summary>
+    /// REQ-ACREATE-04/12: single lock path shared by an existing-suggestion pick (BUG-050) and the
+    /// inline-create success path. Sets the selected+locked artist, mirrors the name into the search
+    /// text, clears suggestions, and clears any pending artist error.
+    /// </summary>
+    private void LockArtist(int id, string name)
+    {
+        SelectedArtistId = id;
+        SelectedArtistName = name;
+        ArtistSearchText = name;
+        IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic assignment
+        IsArtistLocked = true;
         ArtistSuggestions = [];
         ArtistHasError = false;
         ArtistErrorText = string.Empty;
     }
 
     /// <summary>
-    /// BUG-008: blur-clear rule. If no artist is locked in, clear the field.
+    /// REQ-ACREATE-04/05: inline "create new artist" from the Song form. Delegates creation and
+    /// validation entirely to <see cref="IArtistService.CreateArtistAsync(string, string?, string?, CancellationToken)"/>
+    /// (business logic stays in the Service). On success the created artist becomes the selected+locked
+    /// artist via the shared <see cref="LockArtist"/> path; on failure the service message is surfaced
+    /// through <see cref="ArtistHasError"/>/<see cref="ArtistErrorText"/> and the typed text is retained.
+    /// </summary>
+    private async Task CreateArtistInlineAsync(string name)
+    {
+        var (success, message, artist) = await _artistService.CreateArtistAsync(name);
+        if (success && artist is not null)
+        {
+            LockArtist(artist.Id, artist.Name);
+        }
+        else
+        {
+            ArtistHasError = true;
+            ArtistErrorText = message;
+            ArtistSuggestions = []; // M3: clear stale suggestions so the dropdown doesn't linger behind the error
+            // REQ-ACREATE-05: retain ArtistSearchText — no clear, no lock, no dialog.
+        }
+    }
+
+    /// <summary>
+    /// REQ-ACREATE-03: blur-retain rule. If no artist is locked in, keep the typed text
+    /// (never clear it) and surface a validation error so the user can retry or use inline-create.
     /// If one was previously selected, restore the name so the field stays consistent.
     /// </summary>
     private void OnArtistBlurredWithoutSelection()
     {
         if (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0)
         {
-            ArtistSearchText = string.Empty;
             ArtistSuggestions = [];
+            // REQ-ACREATE-03: empty text is not an "unmatched" state — only flag an error
+            // when the user actually typed something that didn't resolve to a selection.
+            if (!string.IsNullOrWhiteSpace(ArtistSearchText))
+            {
+                ArtistHasError = true;
+                ArtistErrorText = "Search and select an artist from the list";
+            }
         }
         else
         {
             // User typed-then-blurred without choosing a new suggestion — restore prior selection
             ArtistSearchText = SelectedArtistName ?? string.Empty;
+            IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic restore
             ArtistSuggestions = [];
         }
+    }
+
+    /// <summary>
+    /// REQ-ACREATE-15 (BUG-060): invoked when the user taps the Artist field's clear (X) icon.
+    /// A locked artist field must be changeable — clearing unlocks it and drops the selection so
+    /// the field returns to a normal searchable state. Because <see cref="SelectedArtistId"/> is
+    /// nulled here, a subsequent blur takes the "no artist selected" branch of
+    /// <see cref="OnArtistBlurredWithoutSelection"/> instead of the restore-prior-selection branch —
+    /// an intentional clear is never silently overwritten with the prior artist.
+    /// </summary>
+    [RelayCommand]
+    private void ClearArtist()
+    {
+        SelectedArtistId = null;
+        SelectedArtistName = null;
+        ArtistSearchText = string.Empty;
+        IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic clear
+        IsArtistLocked = false;
+        ArtistSuggestions = [];
+        ArtistHasError = false;
+        ArtistErrorText = string.Empty;
     }
 
     /// <summary>
@@ -326,6 +419,8 @@ public partial class SongFormViewModel : ViewModelBase
             SelectedArtistId = ArtistId;
             SelectedArtistName = ArtistName;
             ArtistSearchText = ArtistName;
+            IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic hydration
+            IsArtistLocked = true; // BUG-052: edit-mode hydration must show the artist as locked
         }
     }
 
@@ -365,7 +460,21 @@ public partial class SongFormViewModel : ViewModelBase
                 SongVersion = song.Version ?? string.Empty;
                 FeaturedArtists = song.FeaturedArtists ?? string.Empty;
                 Lyrics = song.Lyrics;
-                IsArtistLocked = !string.IsNullOrEmpty(song.ExternalId) && !song.HasManualEdits;
+
+                // BUG-055: hydrate the stored artist so the field shows it (name) and Save preserves
+                // the artist link (the artist-required guard reads SelectedArtistId). InitializeArtistField
+                // only fires for the artistId QueryProperty (0 in normal edit), so hydrate from the
+                // loaded entity here. Runs inside the _isHydrating window above → fires no search
+                // (REQ-ACREATE-14). song.OriginalArtist is eager-loaded by SongRepository.GetByIdAsync.
+                if (song.ArtistId > 0)
+                {
+                    SelectedArtistId = song.ArtistId;
+                    SelectedArtistName = song.OriginalArtist?.Name ?? ArtistName;
+                    ArtistSearchText = SelectedArtistName ?? string.Empty;
+                    IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic hydration
+                }
+
+                IsArtistLocked = true; // edit-mode artist is locked (REQ-ACREATE-14); user cannot change it inline
             }
             finally
             {
@@ -411,6 +520,7 @@ public partial class SongFormViewModel : ViewModelBase
                     SelectedArtistId = match.Id;
                     SelectedArtistName = match.Name;
                     ArtistSearchText = match.Name;
+                    IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic lock
                     ArtistSuggestions = [];
                     ArtistHasError = false;
                     IsArtistLocked = true; // API import: lock artist
@@ -422,6 +532,7 @@ public partial class SongFormViewModel : ViewModelBase
                 {
                     // No exact match — pre-fill text so user can confirm or adjust
                     ArtistSearchText = artistName;
+                    IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic prefill
                     SelectedArtistId = null;
                     IsArtistLocked = false;
                 });
@@ -488,11 +599,15 @@ public partial class SongFormViewModel : ViewModelBase
     {
         // BUG-024: send the complete current form data — FeaturedArtists/Lyrics are hydrated by
         // LoadSongForEditAsync, and the (possibly edited) Version is passed through explicitly.
+        // BUG-067 (REQ-ACREATE-16): the currently selected artist is part of "the complete current
+        // form data" — it must be sent too, or a changed artist is silently discarded. The
+        // artist-required guard above has already proven SelectedArtistId has a non-zero value.
         var (success, message) = await _songService.UpdateSongAsync(
             SongId!.Value, title, FeaturedArtists?.Trim(), Lyrics?.Trim(), true,
             string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId,
             string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider,
-            version);
+            version,
+            SelectedArtistId);
         if (success)
         {
             await _snackbarService.ShowSuccessAsync("Song updated");
