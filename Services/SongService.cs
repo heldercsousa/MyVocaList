@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
@@ -112,6 +112,7 @@ public class SongService : ISongService
     public Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
         string? externalId = null, string? externalProvider = null, string? version = null,
+        int? artistId = null,
         CancellationToken ct = default)
         => _uow.ExecuteAsync<(bool success, string message)>(async sp =>
         {
@@ -133,13 +134,37 @@ public class SongService : ISongService
             if (song == null)
                 return (false, "Song not found");
 
+            // BUG-067 (REQ-ACREATE-16): the artist FK used to be written on the create path only, so a
+            // user changing the artist of a saved song lost the edit silently. null = keep existing
+            // (same semantics as version/externalId below); a supplied id must exist.
+            var effectiveArtistId = artistId ?? song.ArtistId;
+            if (artistId.HasValue && artistId.Value != song.ArtistId)
+            {
+                // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+                var artistRepository = sp.GetRequiredService<IArtistRepository>();
+                var newArtist = await artistRepository.GetByIdAsync(artistId.Value, ct);
+                if (newArtist == null)
+                    return (false, "Artist not found");
+            }
+
             // Song.Title trimming is enforced by the EF Core ValueConverter configured in
             // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
             // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-            if (await songRepository.ExistsByTitleForArtistAsync(song.ArtistId, title, id, ct))
+            // Uniqueness is evaluated against the EFFECTIVE artist — moving a song to an artist that
+            // already owns that title must be rejected before any write.
+            if (await songRepository.ExistsByTitleForArtistAsync(effectiveArtistId, title, id, ct))
                 return (false, "A song with this title already exists for this artist");
 
             // Song.Title/FeaturedArtists/Version trimming is enforced by the ValueConverter (design.md § D3).
+            // BUG-067 under the unit-of-work pattern: SongRepository.GetByIdAsync eager-loads
+            // OriginalArtist (BUG-055). Inside a fresh unit-of-work context the entity is untracked,
+            // so ISongRepository.UpdateAsync attaches the whole graph and EF's FK fixup rewrites
+            // ArtistId back from the stale OriginalArtist navigation — silently discarding the
+            // artist change. Detaching the navigation before the write leaves the scalar/FK values
+            // as the only source of truth, which is exactly what the pre-UOW stopgap's
+            // CurrentValues.SetValues achieved ("scalar/FK properties only, no navigation graph").
+            song.OriginalArtist = null;
+            song.ArtistId = effectiveArtistId;
             song.Title = title;
             song.FeaturedArtists = featuredArtists;
             song.Lyrics = lyrics;

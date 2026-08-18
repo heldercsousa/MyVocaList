@@ -32,11 +32,17 @@ public interface ISongService
     /// <param name="externalId">External provider song id; null = keep existing value.</param>
     /// <param name="externalProvider">External provider name; null = keep existing value.</param>
     /// <param name="version">Variant label (empty string = canonical); null = keep existing value (BUG-024).</param>
+    /// <param name="artistId">
+    /// Id of the original/copyright artist; null = keep existing value (BUG-067, REQ-ACREATE-16).
+    /// When supplied and different from the stored value the song is re-linked to that artist, and
+    /// the title-uniqueness check is evaluated against the new artist. An unknown id is rejected.
+    /// </param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns><c>(true, message)</c> on success; <c>(false, reason)</c> on failure.</returns>
     Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
         string? externalId = null, string? externalProvider = null, string? version = null,
+        int? artistId = null,
         CancellationToken ct = default);
 
     /// <summary>

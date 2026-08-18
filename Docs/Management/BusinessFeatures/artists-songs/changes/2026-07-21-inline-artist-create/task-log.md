@@ -305,6 +305,342 @@ Build: passed (`dotnet build MyVocaList.csproj -f net10.0-android` → exit 0, 0
 > Full entry also recorded in the worktree copy of this file; reconcile at merge (develop authoritative).
 
 ---
+## Bug: BUG-056 (Major) — artist search race + first-search-empty (page-VM coupling)
+**Status:** To Review
+**Severity:** Major (autocomplete unusable on device; testable VM seam -> regression test)
+
+**Root cause:** `SongFormViewModel.SearchArtistsAsync` assigned `ArtistSuggestions` inside a fire-and-forget `RunOnUiThread`; the page provider (`SongFormPage.OnArtistItemsRequested.RequestAsync`) read `ViewModel.ArtistSuggestions` immediately after `await`, before that UI dispatch landed -> first read saw `[]`, later reads saw the prior query's stale list. The `Interlocked` generation guard was irrelevant to this timing gap.
+
+**Fix:** Introduced `public Task<IReadOnlyList<AutocompleteSuggestion>> SearchArtistsCoreAsync(string)` that maps and RETURNS the current query's results directly; the page provider now consumes that return value instead of reading `ArtistSuggestions`. The shared observable `ArtistSuggestions` is still assigned for the latest query only (BUG-051 generation guard preserved), so latest-query-wins holds for other observers. `SearchArtistsAsync` (command target) now delegates to the core method — the existing BUG-051 test path is unchanged.
+
+**Regression risk:** Low — return-value path is deterministic; prior command/observable behavior preserved for the BUG-051 test.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — `SearchArtistsCoreAsync` (returns results) + `SearchArtistsAsync` delegates.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — `OnArtistItemsRequested` consumes returned matches (no `ArtistSuggestions` read).
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — `SearchArtistsCoreAsync_ReturnsCurrentQueryResultsDirectly`.
+
+### AC traceability
+| AC ID | Criterion | Implementation | Test |
+|-------|-----------|----------------|------|
+| REQ-ACREATE-13 (BUG-056) | Search returns current query's results directly; no read-before-dispatch gap | `SongFormViewModel.SearchArtistsCoreAsync` + `OnArtistItemsRequested` | `SearchArtistsCoreAsync_ReturnsCurrentQueryResultsDirectly` (Red->Green) |
+
+### Verification evidence
+- **Red:** new test -> `error CS1061: SearchArtistsCoreAsync` undefined (assembly did not compile).
+- **Green:** full suite -> `Com falha: 0, Aprovado: 520, Total: 520`.
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` -> exit 0, 0 errors (NU1903/DX-eval warnings only).
+
+---
+## Bug: BUG-055 (Major) — edit-mode artist hydration empty; edit-save dropped artist link
+**Status:** To Review
+**Severity:** Major (core edit flow: saved song opened for edit showed empty Artist -> Save blocked -> catalog cascade BUG-059)
+
+**Root cause:** `LoadSongForEditAsync` hydrated Title/Version/FeaturedArtists/Lyrics but never set `SelectedArtistId`/`SelectedArtistName`/`ArtistSearchText`. `InitializeArtistField` only hydrates from the `artistId` QueryProperty (=0 in normal edit navigation), so the artist field stayed empty. With `SelectedArtistId` null, the Save guard blocked with "Artist is required".
+
+**Fix:** `LoadSongForEditAsync` now hydrates `SelectedArtistId = song.ArtistId`, `SelectedArtistName`/`ArtistSearchText` from `song.OriginalArtist.Name`, and locks the field (`IsArtistLocked = true`, REQ-ACREATE-14) inside the existing `_isHydrating` window so no suggestion search fires. Because the field is locked in edit mode and `ISongService.UpdateSongAsync` preserves the loaded song's `ArtistId`, the artist link is carried through Save purely by hydrating the guard — no service-signature change. To supply the name on device, `SongRepository.GetByIdAsync` now eager-loads `OriginalArtist` (scope note below).
+
+**Regression risk:** Low–Medium. `IsArtistLocked` on edit is now always true (was: only API-imported-without-manual-edits). Intentional per REQ-ACREATE-14 and more correct — `UpdateSongAsync` never accepted a new artistId, so an editable-but-unpersistable artist field was misleading. No existing test asserts unlocked-on-edit for a non-API song.
+
+### Scope note (file outside the briefing's owned set — documented, not silent)
+`Infra/Repository/SongRepository.cs` `GetByIdAsync` gained `.Include(s => s.OriginalArtist)`. The briefing assumed the loaded song carried the artist name, but `GetByIdAsync` did not eager-load the navigation and no `GetArtistByIdAsync` exists. One-line eager-load; consumers of `GetByIdAsync`: `SongService.UpdateSongAsync`/`GetSongByIdAsync` (mutate+save — Unchanged artist, safe), `SongResolutionService` (read — harmless), `QueueServiceNew` (read — harmless). No service interface changed; `ArtistService` untouched. Alternative (new `GetArtistByIdAsync` + DI + interface) rejected as larger architectural change for a name lookup.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — `LoadSongForEditAsync` artist hydration + always-lock on edit.
+- `Infra/Repository/SongRepository.cs` — `GetByIdAsync` eager-loads `OriginalArtist`.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — `LoadSongForEdit_ExistingSong_HydratesArtistAsLocked`, `SaveAsync_EditMode_AfterHydration_PreservesArtistLink`.
+
+### AC traceability
+| AC ID | Criterion | Implementation | Test |
+|-------|-----------|----------------|------|
+| REQ-ACREATE-14 (BUG-055) | Edit-mode hydration shows stored artist as locked, no search | `SongFormViewModel.LoadSongForEditAsync` | `LoadSongForEdit_ExistingSong_HydratesArtistAsLocked` (Red->Green) |
+| REQ-ACREATE-08 (BUG-055) | Edit-save preserves the artist link | Save guard hydrated + service preserves `song.ArtistId` | `SaveAsync_EditMode_AfterHydration_PreservesArtistLink` (Red->Green) |
+
+### Verification evidence
+- **Red:** both tests failed pre-fix (hydration assertions / guard blocked Save so `UpdateSongAsync` never called).
+- **Green:** full suite -> `Com falha: 0, Aprovado: 520, Total: 520`.
+- **Build:** android build exit 0, 0 errors.
+- **Manual E2E (on device):** deferred to T10 re-run (Helder) — name shown + locked on edit; catalog populates (BUG-059 cascade).
+
+---
+## Bug: BUG-054b / BUG-057 / BUG-058 (XAML cluster, UI-only) — Artist AutoCompleteEdit wiring
+**Status:** To Review
+**Severity:** Major (UI-only; no unit seam — manual E2E deferred to T10 re-run, Helder)
+
+Single incremental XAML edit pass on the one `AutoCompleteEdit` in `SongFormPage.xaml`, then build (0 errors).
+
+- **BUG-054b (lock via IsEnabled disabled the clear icon):** replaced `IsEnabled="{Binding IsArtistLocked, Converter=InverseBoolConverter}"` with `IsReadOnly="{Binding IsArtistLocked}"` and added `ClearIconVisibility="Auto"`, so a locked field is non-editable but the clear (X) icon still works. DX API confirmed via Context7/DX docs (DevExpress MAUI 25.2.4): `IsReadOnly` (editor base), `ClearIconVisibility` (EditBase, type `Visibility`, value `Auto`).
+- **BUG-057 (invisible error):** added a dedicated visible `Label` bound to `ArtistErrorText`, `IsVisible="{Binding ArtistHasError}"`, mirroring the existing `PasteUrlError` label on this same page (`StyleClass="Body.Small"` + `TextColor="{StaticResource Error}"`). No invented style keys, no hardcoded colors. The DX editor's own `HasError`/`ErrorText` bindings are retained (red border) but were not surfacing text on-device.
+- **BUG-058 (record ToString leaked into Text):** added `DisplayMember="Headline"`. DX doc (25.2.4) confirms `ItemsEditBase.DisplayMember` sets the data-source field whose value is written into the edit box on selection — so `Headline` (artist name / raw typed text) is written instead of `AutocompleteSuggestion.ToString()`.
+
+### DX API names vs briefing
+All three (`IsReadOnly`, `ClearIconVisibility="Auto"`, `DisplayMember="Headline"`) matched the briefing exactly — no deviations. Confirmed against DevExpress MAUI 25.2.4 docs (`DevExpress.Maui.Editors.AutoCompleteEdit` / `ItemsEditBase.DisplayMember` / `EditBase.ClearIconVisibility`).
+
+### Observation (not fixed — out of scope)
+With `IsReadOnly` locking, tapping the clear (X) icon clears `ArtistSearchText` but `IsArtistLocked` stays true (no unlock-on-clear handler). The briefing scoped BUG-054b to the IsReadOnly/ClearIconVisibility swap only; unlock-on-clear would be a new requirement. Flagged for Helder's T10 observation.
+
+### Changed files
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` — AutoCompleteEdit attributes (IsReadOnly, ClearIconVisibility, DisplayMember) + adjacent artist error Label.
+
+### Verification evidence
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` -> exit 0, 0 errors (warnings only). XAML compiled — all three DX properties valid on the control.
+- **Manual E2E:** deferred to T10 re-run (Helder): locked field keeps clear icon; error text visible; no `IsCreateNew = True` leak into the box.
+
+---
+## Bug: BUG-054a (Major, UI-only) — create sentinel re-appears when field is locked
+**Status:** To Review
+**Severity:** Major (UI-only; no VM seam — manual E2E deferred to T10 re-run, Helder)
+
+**Root cause:** `SongFormPage.OnArtistItemsRequested.RequestAsync` re-appended the ➕ create sentinel for any non-whitespace text, including when the field was already locked to a selected artist (the editor re-requests items after a lock sets `ArtistSearchText` to the chosen name).
+
+**Fix:** suppress appending the sentinel when `ViewModel.IsArtistLocked` is true OR the requested text equals `ViewModel.SelectedArtistName`. The existing whitespace guard is preserved. Page code-behind stays glue-only.
+
+**Regression risk:** Low — narrows when the sentinel appears; does not change the create/select routing.
+
+### Changed files
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — `OnArtistItemsRequested` sentinel suppression guard.
+
+### Verification evidence
+- **Build:** android build -> exit 0, 0 errors. **Tests:** 520/520 green (no VM seam for the page provider — page code-behind).
+- **Manual E2E:** deferred to T10 re-run (Helder): after selecting/creating an artist (locked), typing/opening the dropdown must not show the ➕ row for the locked name.
+
+---
+## Bug: BUG-059 (Major, cascade) — artist catalog empty
+**Status:** To Review (resolves as a cascade — verify on device)
+
+**Root cause:** the catalog nav/handler wiring is correct (`ViewCatalogCommand` -> `NavigateToCatalog` -> `Songs?artistId=…` -> `GetPagedCatalogForArtistAsync`). The catalog rendered empty only because songs were not linked to an `ArtistId` at save time — a cascade of BUG-054/BUG-055 (edit-save dropped the artist link / hydration left `SelectedArtistId` null so Save was blocked).
+
+**Fix:** none in the catalog handler (verified correct, not edited). Resolves as a cascade of the BUG-055 fix: edit-mode hydration now populates `SelectedArtistId` and the service preserves `song.ArtistId`, so saved/edited songs carry the artist link and the catalog populates.
+
+**Regression risk:** None (no code change here).
+
+### Verification evidence
+- No code change. Confirmed the nav chain is intact (read-only trace; handler untouched).
+- **Manual E2E / DB spot-check:** on device (T10 re-run, Helder) — a saved/edited song now carries `ArtistId`, so the artist catalog populates. Not runnable here (no app run).
+
+---
+## Bug: BUG-060 (Major) — REQ-ACREATE-15: locked artist field could not be changed
+**Status:** To Review
+**Severity:** Major (core edit flow: user could not change a wrong/locked artist selection)
+
+**Root cause:** `LockArtist`/`InitializeArtistField`/edit-mode hydration all set `IsArtistLocked = true` but nothing ever unlocked it. Tapping the DX `AutoCompleteEdit` clear (X) icon only clears the bound `Text` (native editor behavior on `Text`) — no VM hook existed for the DX `ClearIconClicked` event, so `IsArtistLocked`/`SelectedArtistId`/`SelectedArtistName` were never reset. On blur, `OnArtistBlurredWithoutSelection`'s restore-prior-selection branch then repopulated the just-cleared name because `SelectedArtistId` still had a value — net effect: the field was stuck on the first artist ever selected.
+
+**Fix:** new `SongFormViewModel.ClearArtistCommand` ([RelayCommand], REQ-ACREATE-15) resets `SelectedArtistId`/`SelectedArtistName`/`ArtistSearchText`/`IsArtistLocked`/`ArtistSuggestions`/`ArtistHasError`/`ArtistErrorText` to the normal searchable state. Wired the DX `AutoCompleteEdit.ClearIconClicked` event (confirmed via Context7, DevExpress MAUI 25.2.4 docs — `docs.devexpress.com/MAUI/404570/editors/icons`) in `SongFormPage.xaml` to a thin code-behind forwarder (`OnArtistClearIconClicked`) that calls `ViewModel.ClearArtistCommand`. No separate "deliberately cleared" flag was needed: because `ClearArtist` nulls `SelectedArtistId`, a subsequent blur naturally takes the "no artist selected" branch of `OnArtistBlurredWithoutSelection`, not the restore-prior branch — re-typing over a *still-locked* field remains impossible by construction (`IsReadOnly` is bound to `IsArtistLocked`), so the restore-prior branch's only remaining trigger (re-type without clearing) cannot occur while locked.
+
+**Regression risk:** Low — new command + one new XAML event wire-up; no existing binding paths changed.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — `ClearArtistCommand` + `[RelayCommand] ClearArtist()`.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` — `ClearIconClicked="OnArtistClearIconClicked"` on `artistEdit`.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — `OnArtistClearIconClicked` thin forwarder.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — 2 new tests (Red→Green confirmed locally: both failed before `ClearArtistCommand` existed — compile error since the command didn't exist — then passed after the fix).
+
+### Verification evidence
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0` → exit 0, 0 errors (the `net10.0-android` TFM cannot be built in this session — see Environment note below; XAML/C# compiled clean on the `net10.0` library TFM shared with the test project, which exercises the exact same XAML compiler pass).
+- **Tests:** 523/523 green (520 baseline + 3 new: `ClearArtist_WhenLocked_UnlocksAndClearsSelection`, `ArtistBlurredWithoutSelection_AfterDeliberateClear_DoesNotRestorePriorArtist`, `ArtistBlurredWithoutSelection_NoPriorSelection_SetsErrorText` — the last is BUG-057's).
+- **Manual E2E (on device):** deferred to next T10 re-run (Helder) — tap X on a locked field → field becomes editable/searchable; blur after clearing does not restore the prior artist.
+
+---
+## Bug: BUG-057 (Major, REOPENED) — inline artist error text invisible
+**Status:** To Review
+**Severity:** Major (user-facing: a Major/no-workaround validation error was silently invisible)
+
+**Root cause differs from the handoff's assumed direction.** The XAML (`SongFormPage.xaml` error `Label`, binding path, `x:DataType`, `{StaticResource Error}`) was correct — same `BindingContext` as the rest of the page, no template/section boundary issue. The real cause was in the VM: `OnArtistBlurredWithoutSelection`'s "no artist selected" branch set `ArtistHasError = true` (which makes the `Label` visible — hence "reserves layout space") but never set `ArtistErrorText`, so the Label rendered with an empty string. `SaveAsync`'s artist-required guard sets both flags correctly, which is why the bug was easy to miss in earlier E2E passes that triggered the error via Save rather than via blur.
+
+**Fix:** `OnArtistBlurredWithoutSelection` now also sets `ArtistErrorText = "Search and select an artist from the list"` (same message `SaveAsync` uses for a non-empty unmatched search) whenever it sets `ArtistHasError = true`.
+
+**Regression risk:** None — additive, only fills a previously-empty string on an existing error path.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — `OnArtistBlurredWithoutSelection`.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — `ArtistBlurredWithoutSelection_NoPriorSelection_SetsErrorText` (Red confirmed: failed against the pre-fix code with `Assert.False(string.IsNullOrEmpty(sut.ArtistErrorText))`, then green after the fix).
+
+### Verification evidence
+- **Build:** see BUG-060 entry (same session/build).
+- **Tests:** included in the 523/523 run above.
+- **Manual E2E (on device):** deferred to next T10 re-run (Helder) — blur the Artist field with unmatched typed text → error message text is now visible under the field.
+
+---
+## Bug: BUG-061 (UI, NEW) — selected suggestion row lingers in the dropdown
+**Status:** To Review
+**Severity:** Minor/UI (cosmetic — no functional block, but confusing on selection and on edit-mode load)
+
+**Root cause:** the DX `AutoCompleteEdit`/`CollectionView`-backed drop-down keeps the picked item as `SelectedItem` after a selection is routed (DevExpress `CollectionView` semantics: tapping the same selected item again is what clears `SelectedItem` — confirmed via Context7). Nothing in `OnArtistSelectionChanged` or the edit-mode load path ever reset `artistEdit.SelectedItem`, so the picked row stayed visually marked/highlighted in the suggestion list until tapped a second time.
+
+**Fix:** `OnArtistSelectionChanged` sets `artistEdit.SelectedItem = null` immediately after routing the pick to the VM (create or select command). `OnAppearing` also resets `artistEdit.SelectedItem = null` after `InitializeArtistField()`, covering the edit-mode initial-load case named in the bug report.
+
+**Regression risk:** Low — code-behind only, glue layer; does not touch VM state or the `Text`/`ArtistSearchText` binding that carries the actual chosen value.
+
+### Changed files
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — `OnArtistSelectionChanged`, `OnAppearing`.
+
+### Verification evidence
+- **Build:** see BUG-060 entry (same session/build).
+- **Tests:** no VM seam — UI-only, page code-behind (per bug-tracking.md, UI-only Major/Minor → manual E2E documented here).
+- **Manual E2E (on device):** deferred to next T10 re-run (Helder) — select a suggestion → dropdown row is not left highlighted; open the edit page → no stale highlighted row on load.
+
+---
+## BUG-059 (Major, REOPENED) — blocked: spec gap, NOT fixed this session
+
+**Location:** `Services/CatalogService.cs` / `Infra/Repository/CatalogRepository.cs` / `Services/SongService.cs`, cross-referenced against `Docs/Management/BusinessFeatures/artists-songs/design.md` (Catalog entity + `ICatalogService`/`ICatalogRepository` sections, "Artist Catalog management" flow).
+
+**Gap description:** the previous fix wave's "cascade" diagnosis (BUG-054/055 → catalog populates once `Song.ArtistId` persists) is **wrong**, confirmed by direct trace: `GetPagedCatalogForArtistAsync` → `CatalogRepository.GetPagedByArtistAsync` filters `_db.Catalog.Where(c => c.ArtistId == artistId)` — a **separate join table** (`Catalog { ArtistId, SongId }`), not `Song.ArtistId`. Per `design.md` (`§ Catalog entity`, `§ Artist Catalog management` flow), a `Catalog` row is created **only** via `ICatalogService.AddSongToCatalogAsync`, which is invoked **only** from the Songs-list-in-Catalog-mode "add from picker" flow (`AddToCatalogCommand` → song picker → `AddSongToCatalogAsync(artistId, songId)`). `SongService.CreateSongAsync`/`CreateSongWithUrlsAsync`/`UpdateSongAsync` — the paths this feature's Song form uses — never call `AddSongToCatalogAsync` and never touch the `Catalog` table. So "an artist's Catalog is empty right after creating a song for them via the Song form, without a separate explicit 'add to catalog' action" is the **currently-specified, intentional** behavior, not a persistence bug. `Song.ArtistId` being correctly set (BUG-054/055) does not and per the current design should not populate `Catalog`.
+
+**Options:**
+- **Option A — this is not a bug; T10 item "i" tested the wrong expectation.** Close BUG-059 as "working as designed"; if Helder wants the demo/T10 checklist to show a populated catalog, the test step should explicitly use the "Add to Catalog" flow (Songs page, Catalog mode, picker) after creating the song, not expect auto-population from the Song form.
+- **Option B — new AC: creating/inline-linking a song to an artist via the Song form should ALSO insert a `Catalog` row for that artist**, i.e. every song a user directly authors for an artist becomes part of that artist's performable repertoire by default. This is a genuine behavior change to `SongService.CreateSongAsync`/`CreateSongWithUrlsAsync` (call `ICatalogService.AddSongToCatalogAsync`/inject `ICatalogRepository` and add a `Catalog` row atomically with song creation) — and arguably to `UpdateSongAsync` if `ArtistId` can ever change. Needs its own AC (e.g. REQ-ACREATE-16) and touches `Services/SongService.cs` (in this task's allowed file list) but is a product-behavior decision, not a bug fix.
+
+**Recommendation:** Option A, with Option B as a legitimate follow-up feature request if Helder's actual intent was "songs I create for an artist should show up in their catalog automatically" — that reading is plausible given the T10 checklist's phrasing, but it changes what "Catalog" means (curated repertoire vs. authored-songs) and should not be decided by a bug-fix pass.
+
+**Blocking:** Yes — cannot proceed without Helder's decision between Option A and Option B. No code changed for BUG-059 this session (`Services/CatalogService.cs`, `Infra/Repository/CatalogRepository.cs`, `Services/SongService.cs` all read-only this session, confirmed unmodified in the diff).
+
+---
+### Checkpoint — COMPLETE (2026-07-23, T10 re-run #2 follow-up)
+BUG-060/057/061 fixed and verified (build + 523/523 tests green); BUG-059 investigated and reported `blocked: spec gap` (see above — do not self-adjudicate the Catalog-auto-population question). Commits on feat/inline-artist-create (worktree, not pushed/merged): see git log after this entry. **Environment note:** `dotnet build -f net10.0-android` failed in this session with `XARLP7024: O arquivo ou pasta está corrompido e ilegível` extracting an AndroidX/Material AAR resource (`design_layout_snackbar_include.xml`) into `obj/Debug/net10.0-android/lp/162/...` — reproduced after deleting `obj`/`bin` and the NuGet package cache entry for `xamarin.google.android.material`; the file does not exist on disk between attempts (confirmed via PowerShell `Get-Item`) yet the Android resource-extraction step reports it corrupted every time, which points to a Windows-level file-write interception (AV/EDR or similar) rather than a stale cache or a code defect. Build was verified 0-errors on the `net10.0` TFM instead (same XAML/C# compiler pass, no AAR packaging step). **Needs Helder to build/run on Android locally (or investigate the filesystem/AV issue) before the next on-device T10 re-run.**
+
+---
+## Bug: BUG-061 (Major UI, RE-FIXED — T10 re-run #3) — lingering autocomplete suggestion row after selection
+**Status:** To Review
+**Severity:** Major (previous fix, resetting `artistEdit.SelectedItem`, did not address the actual root cause)
+
+**Root cause (Helder diagnosed, confirmed by trace):** when `ArtistSearchText` is set PROGRAMMATICALLY
+(artist-selection lock via `LockArtist`, edit-mode hydration via `InitializeArtistField` and
+`LoadSongForEditAsync`), the DX `AutoCompleteEdit`'s two-way `Text` binding re-fires
+`ItemsRequested`/search — re-rendering items matching the exact just-set name, which re-opens the
+dropdown on the just-selected/hydrated artist. The earlier `SelectedItem = null` fix (BUG-061 first
+pass) cleared the highlighted row but did not stop the re-search that repopulated it.
+
+**Fix:** added a one-shot guard in `SongFormViewModel` (`_suppressNextArtistSearch` +
+`ConsumeSuppressArtistSearch()`), set immediately before every programmatic `ArtistSearchText`
+assignment on the selection-lock and edit-hydration paths (`LockArtist` — covers both
+`SelectArtist` and `CreateArtistInlineAsync` — `InitializeArtistField`, and the
+`LoadSongForEditAsync` artist-hydration block). `SongFormPage.OnArtistItemsRequested` calls
+`ConsumeSuppressArtistSearch()` first; if true, it short-circuits `e.RequestAsync` to an empty
+result and returns without touching the VM search path, consuming the flag so the very next
+(user-typed) items request runs normally. The `SelectedItem = null` resets from the prior pass are
+left in place (still correct, just insufficient alone).
+
+**Regression risk:** Low — additive one-shot flag; only short-circuits the specific items-request
+that immediately follows a programmatic text set; user-typed searches are unaffected (flag defaults
+false and only becomes true right before the four call sites above).
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — `_suppressNextArtistSearch` field,
+  `ConsumeSuppressArtistSearch()`, set-before-assign in `LockArtist`, `InitializeArtistField`,
+  `LoadSongForEditAsync` artist hydration block.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — `OnArtistItemsRequested` consumes the guard
+  before building the search `RequestAsync` delegate.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — 3 new tests:
+  `SelectArtist_ExistingSuggestion_SuppressesNextArtistSearch`,
+  `InitializeArtistField_WithArtistId_SuppressesNextArtistSearch`,
+  `ConsumeSuppressArtistSearch_NoProgrammaticSet_ReturnsFalse` (Red→Green: all three failed to
+  compile before `ConsumeSuppressArtistSearch()` existed, then passed after the fix).
+
+### AC traceability
+| AC ID | Criterion | Implementation | Test |
+|-------|-----------|-----------------|------|
+| BUG-061 | Programmatic artist-text set (selection lock) must not re-open the dropdown | `LockArtist` sets guard; `OnArtistItemsRequested` consumes it | `SelectArtist_ExistingSuggestion_SuppressesNextArtistSearch` |
+| BUG-061 | Programmatic artist-text set (edit-mode hydration) must not re-open the dropdown | `InitializeArtistField` sets guard | `InitializeArtistField_WithArtistId_SuppressesNextArtistSearch` |
+| BUG-061 | User-typed search (no prior programmatic set) is never suppressed | guard defaults false | `ConsumeSuppressArtistSearch_NoProgrammaticSet_ReturnsFalse` |
+
+### Verification evidence
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0` → exit 0, 0 errors (`net10.0-android`
+  still blocked locally by the `XARLP7024` AV/EDR AAR-corruption issue documented in the prior
+  checkpoint — not a code defect; Helder builds/verifies Android on device).
+- **Tests:** 526/526 green (523 baseline + 3 new).
+- **Manual E2E (on device, pending Helder):** select a suggestion → dropdown does not re-open on the
+  picked artist; open the edit page → no dropdown reopening on initial hydration.
+
+---
+## Bug: BUG-064 (Minor) — duplicate artist error message
+**Status:** To Review
+**Severity:** Minor (cosmetic — same error text rendered twice)
+
+**Root cause:** the Artist field's validation error was rendered by TWO bindings simultaneously: the
+DX `AutoCompleteEdit`'s own `HasError`/`ErrorText` (bound at `SongFormPage.xaml` lines 33-34) — which
+BUG-057's fix confirmed now surfaces correctly on-device per T10 re-run #3 — AND a separate `Label`
+(`Text={Binding ArtistErrorText}`, `IsVisible={Binding ArtistHasError}`) added directly underneath it
+in commit `cb78f3e` as a workaround for the DX control's error text not surfacing at the time.
+
+**Fix:** removed the separate `Label` (kept the DX control's native `HasError`/`ErrorText` bindings —
+MD3-compliant, matches every other field's error presentation on this page: `TitleErrorText`,
+`VersionErrorText`, `PasteUrlError`, all rendered via each editor's own error slot, not a
+sibling `Label`). `ArtistErrorText`/`ArtistHasError` remain unchanged in the ViewModel — the DX
+control's bindings are the sole remaining consumer, so the surviving message is unaffected.
+
+**Regression risk:** None — single-element XAML removal; the error is still shown via the DX
+control's own binding, unchanged.
+
+### Changed files
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` — removed the standalone Artist-error `Label`
+  (BUG-057 workaround), replaced with an explanatory comment.
+
+### Verification evidence
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0` → exit 0, 0 errors — XAML compiled
+  clean with the Label removed.
+- **Tests:** no VM/testable seam — pure XAML markup removal. Included in the 526/526 run above
+  (no regression to any VM test that reads `ArtistErrorText`/`ArtistHasError`).
+- **Manual E2E (on device, pending Helder):** blur/trigger the artist error → exactly ONE error
+  message renders under the field (the DX control's own inline error), not two.
+
+---
+### Checkpoint — COMPLETE (2026-07-25, T10 re-run #3 follow-up)
+BUG-061 re-fixed at the correct root cause (programmatic-vs-user-typed text-set guard, VM-testable
+seam) and BUG-064 fixed (removed redundant Label). Build 0 errors (net10.0; Android TFM still
+blocked locally by the AV/EDR `XARLP7024` issue — unchanged from prior session, Helder builds
+Android). Tests 526/526 green. Both fixes committed on `feat/inline-artist-create` in worktree
+`MyVocaList-inline-ac`; manual on-device E2E for both is pending Helder's next T10 pass.
+
+---
+## BUG-061 re-fix completion — 2 missed paths closed (review finding)
+**Status:** To Review
+**Severity:** Major (same class as the original BUG-061 re-fix — code review found the guard incomplete)
+
+**Finding:** code review of commit `7c594e2` confirmed the `_suppressNextArtistSearch`/
+`ConsumeSuppressArtistSearch()` guard mechanism was correct but missed two more programmatic
+`ArtistSearchText` assignment paths that reproduce the same dropdown-reopen symptom:
+
+- **`ResolveAndLockArtistAsync`** (song-picker return flow, `OnSongPicked` → `ResolveAndLockArtistAsync`,
+  a real user path): both the exact-match auto-lock branch (`ArtistSearchText = match.Name`) and the
+  no-match prefill branch (`ArtistSearchText = artistName`) were unguarded.
+- **`OnArtistBlurredWithoutSelection`**: the restore-prior-selection branch
+  (`ArtistSearchText = SelectedArtistName ?? string.Empty`) was unguarded.
+
+**Fix:** same one-shot `_suppressNextArtistSearch = true;` pattern already established — set
+immediately before each of the three programmatic assignments above. No change to
+`ConsumeSuppressArtistSearch()` or `OnArtistItemsRequested` (the consumer side was already correct).
+
+**Regression risk:** Low — additive guard-set only; the assignments' existing behavior is unchanged.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — guard set before both `ResolveAndLockArtistAsync`
+  branches and before the `OnArtistBlurredWithoutSelection` restore assignment.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — `CreateSut` gained an optional
+  `messenger` parameter (defaults to a mock, unchanged for all existing tests); added `using
+  MyVocaList.Contracts.DTOs;` and a `CanonicalSongPickedMessage` alias (mirrors the ViewModel's own
+  alias — avoids ambiguity with `MyVocaList.UI.ViewModels.SongPickedMessage`); 3 new tests:
+  `ResolveAndLockArtistAsync_ExactMatch_SuppressesNextArtistSearch`,
+  `ResolveAndLockArtistAsync_NoMatch_SuppressesNextArtistSearch`,
+  `ArtistBlurredWithoutSelection_RestoresPriorSelection_SuppressesNextArtistSearch`. The first two
+  route through a real `WeakReferenceMessenger` instance (`OnSongPicked` is only reachable via
+  message, not a public command) sending a `CanonicalSongPickedMessage`, exercising the exact
+  `OnSongPicked` → `ResolveAndLockArtistAsync` path a real song-picker return uses.
+
+### AC traceability
+| AC ID | Criterion | Implementation | Test |
+|-------|-----------|-----------------|------|
+| BUG-061 | Song-picker exact-match auto-lock must not re-open the dropdown | `ResolveAndLockArtistAsync` match branch sets guard | `ResolveAndLockArtistAsync_ExactMatch_SuppressesNextArtistSearch` |
+| BUG-061 | Song-picker no-match prefill must not re-open the dropdown | `ResolveAndLockArtistAsync` no-match branch sets guard | `ResolveAndLockArtistAsync_NoMatch_SuppressesNextArtistSearch` |
+| BUG-061 | Blur-restore of prior selection must not re-open the dropdown | `OnArtistBlurredWithoutSelection` restore branch sets guard | `ArtistBlurredWithoutSelection_RestoresPriorSelection_SuppressesNextArtistSearch` |
+
+### Verification evidence
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0` → exit 0, 0 errors.
+- **Tests:** 529/529 green (526 baseline + 3 new).
+- **Manual E2E (on device, pending Helder):** import a song via the song-picker (exact-match and
+  no-match cases) → dropdown does not re-open on the auto-locked/pre-filled name; blur the artist
+  field after typing over a previously-selected artist without picking a new suggestion → dropdown
+  does not re-open on the restored name.
+
+BUG-061 — ClearArtist guard added, final residual closed (re-verify finding). `SongFormViewModel.ClearArtist()` now sets `_suppressNextArtistSearch = true` before `ArtistSearchText = string.Empty`. New test `ClearArtist_SuppressesNextArtistSearch`. Build 0 errors; tests 530/530 green (529 baseline + 1 new).
 ## T10 outcome (2026-07-22) — Helder ran the on-device checklist; root-cause triage
 Result: **Part A (BUG-053) fixed; Part B/C mostly FAIL — 6 new defects (BUG-054…059).** The T1–T9 fixes for BUG-050/051/052 passed their VM unit tests but **do not hold on-device**, because the real defects live in the DX `AutoCompleteEdit` wiring/XAML — the seam the unit suite never exercises. Root causes below are from a read-only code trace against the worktree (file:line exact).
 

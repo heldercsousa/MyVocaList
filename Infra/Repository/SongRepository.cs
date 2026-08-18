@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
@@ -51,7 +51,11 @@ public class SongRepository : ISongRepository
 
     /// <inheritdoc />
     public async Task<Song> GetByIdAsync(int id, CancellationToken ct)
-        => await _db.Songs.FirstOrDefaultAsync(s => s.Id == id, ct);
+        // BUG-055: eager-load OriginalArtist so edit-mode hydration can show the stored artist name.
+        // Tracked query (callers mutate + save); the extra join is harmless for read-only callers.
+        => await _db.Songs
+            .Include(s => s.OriginalArtist)
+            .FirstOrDefaultAsync(s => s.Id == id, ct);
 
     /// <inheritdoc />
     public async Task<Song?> GetByExternalIdAsync(string externalId, string provider, CancellationToken ct)
@@ -128,6 +132,12 @@ public class SongRepository : ISongRepository
     /// <inheritdoc />
     public Task UpdateAsync(Song song, CancellationToken ct)
     {
+        // REQ-UOW-18: the BUG-068 ChangeTracker.Entries<Song>() detach guard (stopgap, commit
+        // 1a114c1 on feat/inline-artist-create) is deleted here. It existed because the app's
+        // AppDbContext was effectively app-lifetime, so a Song saved earlier in the session was
+        // still tracked when a later edit tried to attach a second instance of the same row.
+        // Under the unit-of-work pattern each write runs in its own freshly-scoped context that
+        // has never seen this row, so DbSet.Update attaches cleanly and no guard is needed.
         _db.Songs.Update(song);
         return Task.CompletedTask;
     }
