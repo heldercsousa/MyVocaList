@@ -52,5 +52,8 @@ public interface IArtistRepository
     Task AddAsync(Artist artist, CancellationToken ct);
     Task UpdateAsync(Artist artist, CancellationToken ct);
     Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct);
-    Task SaveChangesAsync(CancellationToken ct = default);
+
+    // SaveChangesAsync retired 2026-08-18 (REQ-UOW-11, Task 2.3 Step 5): the save is owned by
+    // IUnitOfWork, so no repository is a save entry point. Bodies needing a generated key before
+    // they return use IUnitOfWork.FlushAsync (REQ-UOW-35) — still inside the same transaction.
 }

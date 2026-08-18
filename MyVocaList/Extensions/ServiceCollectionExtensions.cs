@@ -1,4 +1,5 @@
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Infra.Repository;
 
 namespace MyVocaList.Extensions;
@@ -17,6 +18,11 @@ public static class ServiceCollectionExtensions
     /// <returns>The same service collection, for chaining.</returns>
     public static IServiceCollection AddAppServices(this IServiceCollection services)
     {
+        // Unit of Work — owns the short-lived AppDbContext per write (REQ-UOW-01). Registered here
+        // (not in MauiProgram.cs) so every composition built from AddAppServices — production and
+        // test harness alike — can activate the services that depend on it.
+        services.AddSingleton<IUnitOfWork, MyVocaList.Infra.UnitOfWork.UnitOfWork>();
+
         // Repositories
         services.AddScoped<IVenueRepository, VenueRepository>();
         services.AddScoped<Domain.RepositoryInterface.IEventRepository, Infra.Repository.EventRepository>();

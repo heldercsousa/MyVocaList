@@ -1,4 +1,6 @@
-﻿namespace MyVocaList.Tests.Unit.Services;
+using MyVocaList.Tests.Infrastructure;
+
+namespace MyVocaList.Tests.Unit.Services;
 
 public class SongServiceTests
 {
@@ -8,11 +10,16 @@ public class SongServiceTests
     private readonly Mock<ISongKaraokeUrlService> _urlServiceMock = new();
     private readonly Mock<ILogger<SongService>> _loggerMock = new();
 
+    // The service now takes IUnitOfWork; PassthroughUnitOfWork runs each wrapped body inline
+    // against these same mocks, so every existing assertion keeps its original meaning
+    // (`plan.md` Task 2.2 Step 1).
     private SongService CreateSut() => new(
         _songRepoMock.Object,
         _artistRepoMock.Object,
         _urlRepoMock.Object,
         _urlServiceMock.Object,
+        PassthroughUnitOfWork.Over(
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock),
         _loggerMock.Object);
 
     // ── ValidateTitleInput ────────────────────────────────────────────────
@@ -602,8 +609,9 @@ public class SongServiceTests
         Assert.NotNull(song);
         // Both URLs staged via url repo
         _urlRepoMock.Verify(r => r.AddAsync(It.IsAny<SongKaraokeUrl>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
-        // Single SaveChangesAsync on song repo (atomic commit)
-        _songRepoMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        // [AC] REQ-UOW-10: ISongRepository.SaveChangesAsync is retired outright - the single
+        // atomic commit moved to IUnitOfWork, and is asserted against a real context by
+        // Bug068RegressionTests.CreateSongWithUrls_UrlAddFaults_PersistsNoSongRow.
         // URL repo must NOT call its own SaveChangesAsync
         _urlRepoMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -640,6 +648,5 @@ public class SongServiceTests
         Assert.True(success);
         Assert.NotNull(song);
         _urlRepoMock.Verify(r => r.AddAsync(It.IsAny<SongKaraokeUrl>(), It.IsAny<CancellationToken>()), Times.Never);
-        _songRepoMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

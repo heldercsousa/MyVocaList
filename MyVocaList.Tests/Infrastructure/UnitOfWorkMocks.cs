@@ -26,6 +26,14 @@ public sealed class PassthroughUnitOfWork(IServiceProvider serviceProvider) : IU
         Func<IServiceProvider, Task<TResult>> body, CancellationToken ct = default)
         => body(serviceProvider);
 
+    /// <inheritdoc />
+    /// <remarks>No-op: a passthrough has no <c>AppDbContext</c> and no transaction, so there is
+    /// nothing to flush. Unit tests assert against mocks whose entities already carry their ids, so
+    /// the flush's only real-world effect (materialising a store-generated key) is not observable
+    /// here. The flush's actual semantics — save without commit, still rollback-able — are covered by
+    /// the integration tests for REQ-UOW-35, which exercise the real <c>UnitOfWork</c>.</remarks>
+    public Task FlushAsync(CancellationToken ct = default) => Task.CompletedTask;
+
     /// <summary>Builds a <see cref="PassthroughUnitOfWork"/> over a fixed set of instances. Accepts
     /// plain instances (repositories, services, anything a lambda body might resolve) and/or
     /// <see cref="Mock{T}"/> objects — a <c>Mock&lt;T&gt;</c> is unwrapped to its <c>.Object</c>
