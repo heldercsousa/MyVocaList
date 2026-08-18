@@ -710,7 +710,7 @@ public Task<(bool success, string message)> UpdateSongAsync(
 `Infra/Repository/ArtistRepository.cs`, `MyVocaList.Tests/Unit/Services/ArtistResolutionServiceTests.cs`
 **Consumes:** 2.1. **Demo:** REQ-UOW-09's pinned outcome (Task 0.4b) still passes after the re-shape.
 
-- [ ] **Step 1:** Wrap `CommitAsync` (`:86-142`). First ambient-join site: the lambda resolves
+- [x] **Step 1:** Wrap `CommitAsync` (`:86-142`). First ambient-join site: the lambda resolves
   `IArtistService` from `sp` and calls `CreateArtistAsync` (`:121`), whose own `ExecuteAsync` **joins**
   the ambient scope instead of opening a second one. The save→mutate→save at `:112-113`/`:132-133`
   becomes **two saves inside one unit of work** — REQ-UOW-09's explicitly sanctioned second branch —
@@ -723,18 +723,18 @@ public Task<(bool success, string message)> UpdateSongAsync(
   > **one** transaction: a later failure tuple or exception rolls the flushed rows back. REQ-UOW-11 is
   > unaffected — the flush is on `IUnitOfWork`, not on a repository — so Step 5's retirement of
   > `IArtistRepository.SaveChangesAsync` proceeds as planned.
-- [ ] **Step 2: REQ-UOW-28 is at its sharpest here** — `_artistService` **and** `_artistRepository` must
+- [x] **Step 2: REQ-UOW-28 is at its sharpest here** — `_artistService` **and** `_artistRepository` must
   both disappear from inside the lambda. A surviving `_artistService` reference silently defeats the join.
-- [ ] **Step 3: Wrap `ResolveAsync` (`:28-83`) in `ExecuteReadAsync`** — decided, not optional: the
+- [x] **Step 3: Wrap `ResolveAsync` (`:28-83`) in `ExecuteReadAsync`** — decided, not optional: the
   method name then carries the read/write intent (Revision 6's stated purpose), and REQ-UOW-34's
   write→read join is exercised by real code rather than only by a synthetic test.
-- [ ] **Step 4:** Remove the two `.Setup(r => r.SaveChangesAsync(...))` calls at
+- [x] **Step 4:** Remove the two `.Setup(r => r.SaveChangesAsync(...))` calls at
   `ArtistResolutionServiceTests.cs:206,234` and construct with `PassthroughUnitOfWork`.
-- [ ] **Step 5: Grep for remaining callers** of `IArtistRepository.SaveChangesAsync` repo-wide. If a
+- [x] **Step 5: Grep for remaining callers** of `IArtistRepository.SaveChangesAsync` repo-wide. If a
   caller survives in an **excluded** file, do **not** remove the member — record the deferral. Otherwise
   delete `IArtistRepository.cs:55` and `ArtistRepository.cs:157-158`.
-- [ ] **Step 6: Run.** Task 0.4b's REQ-UOW-09 test still passes. Full suite green.
-- [ ] **Step 7: Commit.** `refactor(uow): wrap ArtistResolutionService; retire IArtistRepository.SaveChangesAsync`
+- [x] **Step 6: Run.** Task 0.4b's REQ-UOW-09 test still passes. Full suite green.
+- [x] **Step 7: Commit.** `refactor(uow): wrap ArtistResolutionService; retire IArtistRepository.SaveChangesAsync`
 
 ### Task 2.4: `SongResolutionService` — the 3-level join
 
