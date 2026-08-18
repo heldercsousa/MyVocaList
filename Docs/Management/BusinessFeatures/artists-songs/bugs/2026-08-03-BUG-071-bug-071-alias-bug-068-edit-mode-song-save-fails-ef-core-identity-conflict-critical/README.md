@@ -7,7 +7,7 @@ target: 2026-08-03
 section: BusinessFeatures
 parent: artists-songs
 goal: editing a saved song must persist; today one tap reports success but writes nothing (silent data loss) and a second tap throws an EF tracking conflict.
-gate: Red at the repository/real-SQLite seam first — mocked service tests cannot reproduce it.
+gate: "Fixed for Songs and Artists by the unit-of-work pilot. Queue and Event still carry the defect until Phase 3.5, so this stays open."
 kind: bug
 ---
 
