@@ -262,8 +262,5 @@ public class NestedUnitOfWorkTests
 
         public Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct)
             => _inner.DeleteAsync(ids, ct);
-
-        public Task SaveChangesAsync(CancellationToken ct = default)
-            => _inner.SaveChangesAsync(ct);
     }
 }
