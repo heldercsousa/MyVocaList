@@ -25,7 +25,6 @@ public static class ServiceCollectionExtensions
 
         // Repositories
         services.AddScoped<IVenueRepository, VenueRepository>();
-        services.AddScoped<Domain.RepositoryInterface.IEventRepository, Infra.Repository.EventRepository>();
         services.AddScoped<IPersonRepository, PersonRepository>();
         services.AddScoped<IArtistRepository, ArtistRepository>();
         services.AddScoped<ISongRepository, SongRepository>();
