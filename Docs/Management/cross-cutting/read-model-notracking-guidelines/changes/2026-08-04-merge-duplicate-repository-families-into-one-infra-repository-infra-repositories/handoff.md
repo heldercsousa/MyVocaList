@@ -42,7 +42,9 @@ Two questions were conflated in the original framing:
 | 2026-08-18 | `d73db7ab` | Deleted the unregistered `QueueService`/`IQueueService` pair + `VenueService`'s dead `IEventRepository` field (deadcode Item 1 steps 1–2) |
 | 2026-08-18 | `bbea3b6a` | Recorded Item 1 completion + the zero-consumer finding |
 | 2026-08-19 | `5751c27f` | Demoted REQ-UOW-10 to a guideline in `design.md` per gate 3.4 / F1 |
-| 2026-08-19 | *(see LEDGER)* | Deleted the dead OLD-family `IEventRepository`/`EventRepository` pair + its DI line; recorded D13 ratification on `IUnitOfWork.cs` |
+| 2026-08-19 | `45871f70` | This handoff added (+ `.sln` registration) |
+| 2026-08-19 | `ee6cebcb` | LEDGER next-action corrected — it still told a resuming session to execute the INVERTED direction |
+| 2026-08-19 | `e5ec44b1` (merge of `d9fb79c9`) | Deleted the dead OLD-family `IEventRepository`/`EventRepository` pair (14 + 53 lines) + its DI line at `ServiceCollectionExtensions.cs:28`; recorded D13 ratification on `IUnitOfWork.cs`. 4 files, +2/−71. Build 0 errors, **590/590 green on develop** after merge. Worktree and branch removed; zero unmerged commits verified. |
 
 **Key consequence:** the OLD family's `Event` half is now *unreferenced code*, not a competing
 implementation. Phase 3.5's surface is materially smaller than the 2026-08-04 note assumes.
@@ -160,8 +162,11 @@ must go back through the brainstorming architectural path.
 
 ## 7. Known pre-existing issues (not part of this item)
 
-BUG-069 / BUG-070 (unknown whether they still reproduce) · BUG-075 (pre-commit hook needs
-`--no-restore`; confirmed worktree-specific — a `develop` commit runs the hook normally) ·
+BUG-069 / BUG-070 (unknown whether they still reproduce) · **BUG-075 — likely stale, re-verify before working it:** on 2026-08-19 the pre-commit hook ran
+*normally inside a worktree* (`MyVocaList-wt-eventrepo-dead`), executing its own full gate and
+reporting `pre-commit: build + tests green` with 590/590. That contradicts the recorded
+"inoperative in worktrees" symptom, so the bug is either fixed or conditional on something not yet
+identified. Reproduce before spending time on a fix. ·
 BUG-076 (flaky parallel-SQLite `ObjectDisposedException` in `QueueRepositoryTests`; run in
 isolation) · the BUG-067 defect-class audit · ~10 dead constructor-only fields across the four
 pilot services.
