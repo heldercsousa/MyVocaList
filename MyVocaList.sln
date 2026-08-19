@@ -40,6 +40,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-04-BUG-074-pre-commit-test-gate-blocks-the-red-first-commit-that-bug-tracking-mandates\README.md = Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-04-BUG-074-pre-commit-test-gate-blocks-the-red-first-commit-that-bug-tracking-mandates\README.md
 		Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-18-BUG-075-pre-commit-hook-inoperative-in-worktrees-dotnet-test-without-no-restore-aborts-on-netsdk1147\README.md = Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-08-18-BUG-075-pre-commit-hook-inoperative-in-worktrees-dotnet-test-without-no-restore-aborts-on-netsdk1147\README.md
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-08-18-BUG-076-flaky-objectdisposedexception-in-the-uow-sqlite-test-harness\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\bugs\2026-08-18-BUG-076-flaky-objectdisposedexception-in-the-uow-sqlite-test-harness\README.md
+		Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia\README.md = Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-08-18-recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
