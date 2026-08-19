@@ -856,6 +856,15 @@ deleted (~24 lines), 35 explicit `SaveChangesAsync` call sites deleted (~35 line
 wrapper lines + ~20 lines of `UnitOfWork` (+ ~5 lines for the `AsyncLocal` ambient-join, shipped now
 per Revision 2). ✔ REQ-UOW-10.
 
+> **Spec updated [2026-08-19] — REQ-UOW-10 demoted to a guideline (gate 3.4 / F1, Helder):**
+> the "+1 line each" accounting above is a *typical* case, not a criterion to satisfy. Helder's
+> resolution: "the preferred pattern is 1 logical-line reading, but more is allowed as well."
+> A boundary that needs more than one line is therefore **not** a REQ-UOW-10 violation and must not
+> be treated as one during the pilot or in review. The `✔ REQ-UOW-10` tick above should be read as
+> "the common case reads as one line", not as a conformance claim. Rationale recorded in
+> `task-log.md § Gate 3.4 — Helder's decisions (2026-08-18)`. REQ-UOW-28 (resolve every collaborator
+> from the lambda's own `sp`) is unaffected and remains load-bearing.
+
 **New-developer legibility:** **good.** `_uow.ExecuteAsync(async sp => { … })` is the boundary and it
 is at the top of the method the developer is already reading. The one thing a newcomer must be told
 is that the save is implicit at the end of the lambda — which is the deliberate trade for deleting 35
