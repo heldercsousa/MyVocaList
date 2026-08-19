@@ -3,10 +3,9 @@ namespace MyVocaList.Tests.Unit.Services;
 public class VenueServiceTests
 {
     private readonly Mock<IVenueRepository> _repoMock = new();
-    private readonly Mock<IEventRepository> _eventRepoMock = new();
     private readonly Mock<ILogger<VenueService>> _loggerMock = new();
 
-    private VenueService CreateSut() => new(_repoMock.Object, _eventRepoMock.Object, _loggerMock.Object);
+    private VenueService CreateSut() => new(_repoMock.Object, _loggerMock.Object);
 
     // ── ValidateNameInput ─────────────────────────────────────────────────────
 
