@@ -6,9 +6,8 @@ namespace MyVocaList.Domain.UnitOfWork;
 /// needs from the lambda's own <see cref="IServiceProvider"/> — never from a constructor-injected
 /// field — so each call gets its own DI scope and its own <c>AppDbContext</c> instance, closing the
 /// app-lifetime-context tracking conflict (BUG-068/BUG-071).
-/// <para><b>PROVISIONAL shape (D13):</b> this three-member surface is confirmed or replaced at
-/// Phase 3's VERIFY gate, once the pilot's real call sites (Phase 2) have exercised it. Do not treat
-/// it as final until that gate closes.</para></summary>
+/// <para><b>Ratified shape (D13):</b> this four-member surface was confirmed final by Helder on
+/// 2026-08-18 at Phase 3's VERIFY gate, after the pilot's real call sites (Phase 2) exercised it.</para></summary>
 public interface IUnitOfWork
 {
     /// <summary>Runs <paramref name="body"/> inside a fresh (or ambiently-joined) DI scope owning one
