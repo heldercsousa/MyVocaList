@@ -1320,3 +1320,70 @@ not reproduce on the two subsequent full runs. Android target not built (APK fil
 REQ-UOW-28 re-verified across all 11 lambda bodies (comment-stripped brace-scan) — 0 violations; all three
 `SongResolutionService` private helpers are `static`, so a captured field is compiler-impossible.
 
+
+---
+
+## Gate 3.4 — Helder's decisions (2026-08-18)
+
+Both items the Phase 3.2 verifier escalated are now resolved. Recorded here because Phase 3.5 and
+Phase 4+ write new call sites against them.
+
+### F1 — REQ-UOW-10 line-count reading: **RESOLVED — logical-line, as a guideline not an AC**
+
+**Helder's decision (verbatim):** *"I suppose that's not something to lock once someday more than 1
+line will be needed. Perhaps the prefered pattern is 1 logical-line reading, but more is allowed as
+well. I am realy not sure about this rules need, except if clean code is the reason, or avoid commands
+that isn't added into services methods."*
+
+**Resolution.** REQ-UOW-10 is demoted from a binding acceptance criterion to a design guideline:
+
+- The **preferred** shape is one logical line — `_uow.ExecuteAsync(async sp => { … })`.
+- **More is allowed with reason.** Two reasons are pre-sanctioned, so neither needs re-litigating:
+  1. `await _uow.FlushAsync(ct)` for deferred-key materialisation (REQ-UOW-35) — the Phase 3.2
+     verifier correctly classified this as *substance, not ceremony*.
+  2. `sp.GetRequiredService<T>()` lines — each is a **substitution** for a removed `_field.` read
+     (mandated by REQ-UOW-28), not an addition.
+
+**Why the rule existed, and why demotion is correct.** REQ-UOW-10 was a *design-selection* criterion,
+not a coding rule: it made "minimal repeated code" (the parent item's stated goal) machine-checkable so
+the choice between Candidates A/B/C was objective rather than a matter of taste — it is what made
+Candidate B's rejection defensible (160 signature edits). That job ended when Candidate C shipped. Left
+as a binding AC it now misfires on its own successor phases, penalising the very lines REQ-UOW-28 and
+REQ-UOW-35 require. The anti-ceremony *intent* is retained as a guideline; the failing *test* is not.
+
+**Consequential edit required (unchanged by this decision):** `design.md:857`'s "+1 line each … still
+the same line every time" accounting predates Revision 10 and REQ-UOW-28 and is stale either way. It
+must be corrected so a future reader is not misled.
+
+### D13 — final `IUnitOfWork` API shape: **RESOLVED — provisional shape ratified as FINAL**
+
+**Helder's decision:** confirm the provisional shape as final; no typed `TRepo` overload.
+
+The surface below is now the settled contract. Phase 3.5 and Phase 4+ write against it once:
+
+```csharp
+Task<TResult> ExecuteAsync<TResult>(Func<IServiceProvider, Task<TResult>> body, CancellationToken ct = default);
+Task          ExecuteAsync(Func<IServiceProvider, Task> body, CancellationToken ct = default);
+Task<TResult> ExecuteReadAsync<TResult>(Func<IServiceProvider, Task<TResult>> body, CancellationToken ct = default);
+Task          FlushAsync(CancellationToken ct = default);
+```
+
+`FlushAsync` was added mid-pilot under REQ-UOW-35 and is part of the ratified surface — it is not a
+provisional addition awaiting separate approval.
+
+**Follow-up:** the `PROVISIONAL shape (D13)` doc-comment on `Domain/UnitOfWork/IUnitOfWork.cs` must be
+updated to record ratification, so the source stops advertising an open decision that is now closed.
+
+### Evidence corrections carried into Phase 3.5
+
+The 2026-08-04 notes were re-verified against current HEAD and several claims have drifted:
+
+| Prior claim | Current truth |
+|---|---|
+| `TODO [BUG-071 / UOW]` markers ~14 | **26**, across 8 source files |
+| `QueueService.cs:134` saves on `_venueRepository` | Call is real but at **`:151`** |
+| `Infra/Repositories/QueueRepository.cs:56,67,93` | Saves at **`:58,71,99`** (TODOs at `:56,69,97`) |
+| `Infra/Repositories/EventRepository.cs:66,77` | Saves at **`:68,81`** (TODOs at `:66,79`) |
+| DI registration in `MauiProgram.cs` | **`MyVocaList/Extensions/ServiceCollectionExtensions.cs`** |
+
+Line numbers from the 2026-08-04 notes must not be used as coordinates.

@@ -98,3 +98,72 @@ prerequisite item is explicitly exempt. Record that exemption before work starts
 
 The in-source `TODO [BUG-071 / UOW]` markers (`git grep -n "TODO \[BUG-071 / UOW\]"`) cover the same
 Queue/Event files this item edits — reconcile them rather than leaving both.
+
+---
+
+## SCOPE CORRECTION (2026-08-18) — this is not a folder merge
+
+A fresh source census against current HEAD contradicts the premise of the 2026-08-04 direction above.
+**The 2026-08-04 "delete `Infra/Repositories/`" decision should not be executed as written** until the
+question below is settled.
+
+### The two `Event` entities are two live tables, not two copies of one model
+
+Both are mapped, on separate `DbSet`s, to separate tables, with no collision:
+
+| | `Domain/Entity/Event` (OLD) | `Domain/Entities/Event` (NEW) |
+|---|---|---|
+| Table | `Events` | `QueueManagementEvents` (explicit `ToTable`) |
+| Created by | `20260107193224_InitialCreate` | `20260610224249_AddQueueManagementEventAndQueueEntry` |
+| Name field | `EventName` | `Name` (required) |
+| Time | `EventDate` (one) | `ScheduledStartTime`/`ScheduledEndTime`/`ActualStartTime`/`ActualEndTime` |
+| State | `QueueActive` (bool) | `Status` (`EventStatus` enum) |
+| Also | — | `Mode`, `CreatedAt`, `ModifiedAt` |
+| Children | `Participations` → `EventParticipation` | `QueueEntries` → `QueueEntry` |
+| Marker iface | none | `IAggregateRoot` |
+
+**No migration ever dropped the old `Events` table.** `AppDbContextModelSnapshot.cs` carries both
+(`ToTable("Events")` and `ToTable("QueueManagementEvents")`).
+
+### Why that invalidates the recorded direction
+
+The 2026-08-04 decision picked the surviving family on **save semantics** (stage-only is
+pattern-compliant; embedded saves are not). That reasoning is correct *about save semantics* — and is
+not in dispute. But it assumed the two families implement one domain model. They do not: the family
+marked for deletion serves the **newer, richer** model that the live queue-management feature actually
+uses, while the surviving family's `EventRepository` serves the **older** model whose only consumers
+are `QueueService` (dead, unregistered) and `VenueService`'s dead field.
+
+Two independent questions were conflated:
+
+1. **Which save semantics are correct** — settled: stage-only, the unit of work owns the boundary.
+2. **Which domain model survives** — undecided, and it has a schema (and possibly data) behind it.
+
+(1) is fixable *in place*: convert the plural family to stage-only and give its consumers a unit-of-work
+boundary. It does not require deleting either folder.
+
+### Deleting the old `Event` is a domain-model change
+
+`Venue.Events` and `EventParticipation.Event` both navigate to the OLD `Event`. Removing it re-points
+those navigations plus `IEventRepository`, `IEventParticipationRepository`, and needs a migration
+against the `Events` table.
+
+### Sequencing decided by Helder 2026-08-18: **dead-code first, then re-decide**
+
+Land the already-sanctioned dead-code deletions before designing anything
+(`BusinessFeatures/queue-management/queue-deadcode-cleanup.md` Item 1 + `VenueService`'s dead field),
+then re-census. Expected effect: `Infra/Repository/EventRepository` + `Domain.RepositoryInterface.IEventRepository`
+lose their last consumers, and the "which family survives" question largely dissolves instead of
+needing a design decision. The Phase 3.5 spec is written against the reduced surface, not this one.
+
+### Open — data safety
+
+`.claude/MyVocaList.db` cannot answer whether the old `Events` table holds real data: it is a stale
+February snapshot (only `InitialCreate` + `venuesSeedForTest` applied, 8 migrations behind, no
+`QueueManagementEvents`/`QueueEntries` tables at all). At that state `Events` = 0 rows,
+`EventParticipations` = 0 rows.
+
+**Working assumption, to be stated explicitly in the spec and confirmed before any migration:** the old
+`Events` table has never been populated in production — nothing writes to it except the dead,
+unregistered `QueueService`, so no code path could have filled it since June 2026. Confirming this
+needs the live device DB, which is Helder's to pull.
