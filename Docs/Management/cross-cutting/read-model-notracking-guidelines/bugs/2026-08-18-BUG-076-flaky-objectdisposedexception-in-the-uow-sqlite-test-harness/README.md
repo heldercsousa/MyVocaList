@@ -118,3 +118,45 @@ intermittent and lands on a different test each run.
 - Chasing it with repeated full-suite runs is unproductive at this frequency. If it becomes worth
   fixing, drive it from the harness side (temp-file SQLite connection pooling / disposal ordering
   in the test fixture) rather than by trying to reproduce it.
+
+
+## REPRODUCED — 2026-08-20, second attempt (supersedes the negative result above)
+
+Earlier the same day, 11 consecutive full-suite runs on `develop` were clean and this bug looked
+unreproducible. It then reproduced **3 times in 12 runs** on the `chore/demolish-event-queue`
+worktree, which deletes the Event/Queue feature (~22 tests).
+
+| Run | Failing test |
+|-----|--------------|
+| 3 | `Integration.Repositories.PersonRepositoryTests.SearchByNameStartsWithAsync_CaseInsensitive_FindsMatch` |
+| 5 | `Integration.UnitOfWork.SaveSkipTests.ExecuteAsync_FailureTupleAfterUpdate_LeavesOriginalValue` |
+| — | `Integration.UnitOfWork.SaveSkipTests.ExecuteAsync_EmptyTuple_ThrowsAndDoesNotPersist` (seen by the implementor on the same worktree) |
+
+**Three different tests, all real-SQLite integration tests, none touched by the change.** This is the
+recorded signature of this bug ("lands on a different test each run") and is the first solid
+reproduction.
+
+### The useful finding: frequency is sensitive to the test *schedule*
+
+Same machine, same session, minutes apart:
+
+| Branch | Runs | Failures |
+|--------|------|----------|
+| `develop` (592 tests) | 11 | 0 |
+| `chore/demolish-event-queue` (570 tests) | 12 | 3 |
+
+Deleting ~22 tests changed nothing about the harness itself, so the most plausible reading is that
+the removal **re-shuffled xUnit's parallel collection scheduling** and started landing the latent
+race far more often. That makes this a **scheduling-sensitive race**, not a defect in any particular
+test.
+
+Two consequences for whoever fixes it:
+
+1. **Do not chase it by re-running the suite on `develop`** — the earlier 11-clean streak is exactly
+   how this bug hides. Reproduce on a branch whose test set differs.
+2. It is now demonstrably capable of **failing an unrelated, innocent commit's suite run**, which is
+   the real cost: it makes the green/red signal untrustworthy for everyone. That raises its priority
+   above "annoying flake".
+
+Direction unchanged: fix it from the harness side — temp-file SQLite connection pooling / disposal
+ordering in the shared test fixture — not by touching the tests it happens to land on.
