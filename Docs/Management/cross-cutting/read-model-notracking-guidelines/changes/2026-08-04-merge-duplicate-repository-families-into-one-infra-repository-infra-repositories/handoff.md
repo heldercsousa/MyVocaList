@@ -67,9 +67,65 @@ allowed. Do not report a multi-line boundary as a violation.
 
 ---
 
+## 2b. FROZEN — the whole Event/Queue area (Helder, 2026-08-20)
+
+> **Read this before doing anything in §3. Items 3a and 3b are frozen and must not be executed.**
+
+Helder ruled on 2026-08-20 that the Event and Queue feature area is **frozen pending a re-plan**.
+It is not to be refactored, converted, renamed, or cleaned up in its current shape, because the
+shape itself is going to change.
+
+**What is frozen (do not touch):**
+
+- `Services/EventService.cs`, `Services/QueueServiceNew.cs`
+- `Infra/Repositories/EventRepository.cs`, `Infra/Repositories/QueueRepository.cs`
+- `Domain/Interfaces/IEventRepository.cs`, `Domain/Interfaces/IQueueRepository.cs`,
+  `Domain/ServicesInterfaces/IEventService.cs`, `Domain/ServicesInterfaces/IQueueServiceNew.cs`
+- `MyVocaList/UI/ViewModels/QueueManagementViewModel.cs` and the Queue/Event pages
+- The 21 tests covering them (13 `EventRepositoryTests`, 5 `QueueRepositoryTests`,
+  3 `QueueManagementViewModelTests`) — **frozen, not deleted**, so the coverage survives the re-plan
+- The `TODO [BUG-071 / UOW]` markers — left deliberately in place as the signal to the re-planner
+
+**Explicitly unchanged as well** (Helder, same ruling): entity/EF/DbContext **definitions**
+(`AppDbContext` DbSets, all four `IEntityTypeConfiguration` classes, `Venue.Events`,
+`EventParticipation.Event`), the **UI entry points**, and the **DI registrations**. No migration is
+triggered by any of this.
+
+### Why no code change was needed to satisfy "executions must disappear"
+
+The ruling asked that Event/Queue code stop *executing* while its definitions stay intact. A
+reachability trace on 2026-08-20 established that **it already does not execute** — verified by two
+independent methods:
+
+- `QueuePage` (Shell's initial content) and `EventsPage` are static "under construction"
+  placeholders — no `BindingContext`, no DI, no service calls.
+- The route `queue-management` occurs **exactly once** in the entire solution: its own
+  `FlyoutItem` declaration in `AppShell.xaml:108`. Nothing navigates to it; there is no
+  `Routes.QueueManagement` constant and it is absent from `NavigationConfig.BuildMenuGroups`.
+- App startup (`App.xaml.cs`, `AppShell.xaml.cs`, `MauiProgram.cs`) touches no Event/Queue
+  service, repository, or DbSet; there is no seeding of `Events`/`QueueManagementEvents`/`QueueEntries`.
+- Independently corroborated by the pre-existing backlog note *"QueueManagementPage is unreachable
+  in the app; Helder to re-prioritize."*
+
+So `QueueManagementViewModel`'s calls into `IEventService`/`IQueueServiceNew` are real code that no
+user can reach. **Zero files were changed.** Neutralising method bodies was considered and rejected:
+it would have meant editing the very code being frozen, and would be harder to unwind at re-plan
+time than leaving it inert.
+
+**Consequence — BUG-071 is CLOSED** (✅ Fixed, closed 2026-08). It had been held open only by the
+"Queue and Event still carry the defect" gate; with that code unreachable and frozen, no live path
+carries the defect. The closure note in the bug's `README.md` states plainly that this is a *scope*
+closure, not a claim the Queue/Event code was fixed.
+
+**If Queue/Event is ever made reachable again** — e.g. the pending *"Queue Entry Point Redesign —
+QueuePage as CRUD event list"* backlog item — the unit-of-work conversion of those four files is a
+**prerequisite of that work**, not a bug fix. Anything in §3 below is superseded by the re-plan.
+
+---
+
 ## 3. Remaining work, in recommended order
 
-### 3a. Convert the NEW (plural) family to stage-only + add UOW boundaries to Queue/Event
+### 3a. ~~Convert the NEW (plural) family to stage-only~~ — **FROZEN 2026-08-20, do not execute (§2b)**
 The actual BUG-071 fix for this area. **Needs no decision about which `Event` model wins** — it is
 purely the save-semantics half, which was never in dispute. Touches `Infra/Repositories/*` and
 `Services/QueueServiceNew.cs` + `Services/EventService.cs`.
@@ -77,7 +133,7 @@ purely the save-semantics half, which was never in dispute. Touches `Infra/Repos
 > **This is very likely the point at which Phase 3.5's BUG-071 exposure closes.** If it does, item
 > 3b stops being a blocker and becomes ordinary cleanup. Re-assess before committing to 3b.
 
-### 3b. Reconcile the two `Event` domain models + schema
+### 3b. ~~Reconcile the two `Event` domain models + schema~~ — **FROZEN 2026-08-20 (§2b)**
 The real design question, and the only part that touches schema. **No longer gated on data** — §4
 resolved 2026-08-20: there is no production deployment, so the OLD model can be dropped with a plain
 destructive migration. What remains is the code-shape decision (which `Event` model survives, and how
@@ -123,6 +179,9 @@ Not applicable: no production deployment exists (§4). No counts were taken and 
 ---
 
 ## 6. Process state
+
+- **Area status: FROZEN** (§2b) — 3a and 3b are not executable; only §3c is arguably live, and
+  it too touches frozen files, so treat the whole item as parked pending the Queue/Event re-plan.
 
 - **Brainstorming path:** architectural. Step 1 (*explore project context*) **complete**; step 4
   (*propose 2–3 approaches*) **in progress 2026-08-20 for 3a**. The HARD GATE applies — no
