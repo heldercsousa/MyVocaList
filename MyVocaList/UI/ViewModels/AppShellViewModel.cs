@@ -56,12 +56,6 @@ public class AppShellViewModel : ViewModelBase
     {
         Shell.Current.FlyoutIsPresented = false;
 
-        if (route == Routes.Queue)
-        {
-            await Shell.Current.Navigation.PopToRootAsync(animated: false);
-            return;
-        }
-
         if (route == Routes.Exit)
         {
             await Shell.Current.Navigation.PopToRootAsync(animated: false);

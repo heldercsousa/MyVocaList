@@ -128,15 +128,10 @@ public static class MauiProgram
         builder.Services.AddTransient<ArtistPickerViewModel>();
         builder.Services.AddTransient<SongPickerViewModel>();
         builder.Services.AddTransient<YouTubeSearchViewModel>();
-        builder.Services.AddTransient<QueueManagementViewModel>();
-        builder.Services.AddTransient<PersonPickerViewModel>();
-        builder.Services.AddTransient<QueueSongPickerViewModel>();
 
         // Pages
         builder.Services.AddTransient<VenueFormPage>();
         builder.Services.AddTransient<PersonFormPage>();
-        builder.Services.AddTransient<QueuePage>();
-        builder.Services.AddTransient<EventsPage>();
         builder.Services.AddTransient<VenuesPage>();
         builder.Services.AddTransient<PeoplePage>();
         builder.Services.AddTransient<ArtistsPage>();
@@ -147,9 +142,6 @@ public static class MauiProgram
         builder.Services.AddTransient<SongPickerPage>();
         builder.Services.AddTransient<YouTubeSearchPage>();
         builder.Services.AddTransient<BackupRestorePage>();
-        builder.Services.AddTransient<QueueManagementPage>();
-        builder.Services.AddTransient<PersonPickerPage>();
-        builder.Services.AddTransient<QueueSongPickerPage>();
         builder.Services.AddTransient<SettingsViewModel>();
         builder.Services.AddTransient<SettingsPage>();
         builder.Services.AddTransient<AboutViewModel>();

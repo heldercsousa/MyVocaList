@@ -2,8 +2,6 @@ namespace MyVocaList.Navigation;
 
 public static class Routes
 {
-    public const string Queue = "queue";
-    public const string Events = "events";
     public const string Venues = "venues";
     public const string People = "people";
     public const string Artists = "artists";
@@ -20,6 +18,5 @@ public static class Routes
     public const string Feedback = "feedback";
     public const string ArtistPicker = "artist-picker";
     public const string SongPicker = "song-picker";
-    public const string QueueSongPicker = "queue-song-picker";
     public const string YouTubeSearch = "youtube-search";
 }

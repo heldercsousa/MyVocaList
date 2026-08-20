@@ -30,10 +30,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISongRepository, SongRepository>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
 
-        // Queue Management repositories (new architecture)
-        services.AddScoped<Domain.Interfaces.IEventRepository, Infra.Repositories.EventRepository>();
-        services.AddScoped<Domain.Interfaces.IQueueRepository, Infra.Repositories.QueueRepository>();
-
         // HTTP Clients — music metadata providers
         services.AddHttpClient<MusicBrainzProvider>(client =>
         {
@@ -51,8 +47,6 @@ public static class ServiceCollectionExtensions
         // Services
         services.AddScoped<IVenueService, VenueService>();
         services.AddScoped<IPersonService, PersonService>();
-        services.AddScoped<IEventService, EventService>();
-        services.AddScoped<IQueueServiceNew, QueueServiceNew>();
         services.AddScoped<IArtistService, ArtistService>();
         services.AddScoped<ISongService, SongService>();
         services.AddScoped<ICatalogService, CatalogService>();
