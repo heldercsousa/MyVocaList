@@ -74,8 +74,8 @@
 | — | **Social features** | 💡 Pending | Goal: post-event sharing, singer stats. Pointer: `cross-cutting/social-features/`. |
 | 2026-07-03 | **Cross-cutting** | — | Bugs with no single parent business feature |
 | 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) on render teardown (Major) | 💡 Pending | Goal: confirm whether the crash is a real defect or debugger-teardown noise (Release logcat investigation first). Pointer: `BusinessFeatures/cross-cutting/bugs/2026-07-03-BUG-026-hwui-sigabrt-render-teardown/`. |
-| 2026-08-20 | ↳ Flyout About item does not navigate to the About page | 🟡 In Progress | Goal: Tapping About in the flyout leaves the user on the current page; the About page has never been reachable in the shipped app. Gate: Flyout About item navigates to AboutPage; manual E2E recorded in the task-log. Pointer: `BusinessFeatures/about-page/bugs/2026-08-20-BUG-077-flyout-about-item-does-not-navigate-to-the-about-page/`. |
-| 2026-08-20 | ↳ About Page License Text — MIT | 🟡 In Progress | Goal: About page displays MIT instead of CC BY-NC-ND 4.0, matching the relicensed repository. Gate: XAML string updated and About page verified to render MIT. Pointer: `BusinessFeatures/about-page/changes/2026-08-20-about-page-license-text-mit/`. |
+| 2026-08-20 | ↳ Flyout About item does not navigate to the About page | 🟡 In Progress | Goal: Tapping About in the flyout leaves the user on the current page; the About page has never been reachable in the shipped app. Gate: Fix merged to develop; build and full suite green. Awaiting Helder manual E2E: flyout -> About opens the page. Pointer: `BusinessFeatures/about-page/bugs/2026-08-20-BUG-077-flyout-about-item-does-not-navigate-to-the-about-page/`. |
+| 2026-08-20 | ↳ About Page License Text — MIT | 🟡 In Progress | Goal: About page displays MIT instead of CC BY-NC-ND 4.0, matching the relicensed repository. Gate: XAML updated and merged to develop. Awaiting Helder manual E2E: About page License section reads MIT License. Pointer: `BusinessFeatures/about-page/changes/2026-08-20-about-page-license-text-mit/`. |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---
