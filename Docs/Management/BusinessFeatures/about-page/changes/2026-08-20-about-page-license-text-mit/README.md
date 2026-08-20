@@ -6,7 +6,7 @@ target: 2026-08-20
 section: BusinessFeatures
 parent: about-page
 goal: About page displays MIT instead of CC BY-NC-ND 4.0, matching the relicensed repository.
-gate: XAML string updated and About page verified to render MIT.
+gate: XAML updated and merged to develop. Awaiting Helder manual E2E: About page License section reads MIT License.
 kind: change
 ---
 
