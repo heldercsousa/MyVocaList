@@ -5,8 +5,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:models="clr-namespace:MyVocaList.UI.Models"
-    xmlns:queue="clr-namespace:MyVocaList.UI.Pages.Queue"
-    xmlns:events="clr-namespace:MyVocaList.UI.Pages.Events"
     xmlns:venues="clr-namespace:MyVocaList.UI.Pages.Venues"
     xmlns:people="clr-namespace:MyVocaList.UI.Pages.People"
     xmlns:artists="clr-namespace:MyVocaList.UI.Pages.Artists"
@@ -65,14 +63,6 @@
     </Shell.FlyoutContentTemplate>
 
     <!-- Page Routes (hidden from default flyout, navigated via ViewModel) -->
-    <FlyoutItem Route="queue" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate queue:QueuePage}" />
-    </FlyoutItem>
-
-    <FlyoutItem Route="events" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate events:EventsPage}" />
-    </FlyoutItem>
-
     <FlyoutItem Route="venues" FlyoutItemIsVisible="False">
         <ShellContent ContentTemplate="{DataTemplate venues:VenuesPage}" />
     </FlyoutItem>
@@ -103,18 +93,6 @@
 
     <FlyoutItem Route="about" FlyoutItemIsVisible="False">
         <ShellContent ContentTemplate="{DataTemplate about:AboutPage}" />
-    </FlyoutItem>
-
-    <FlyoutItem Route="queue-management" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate queue:QueueManagementPage}" />
-    </FlyoutItem>
-
-    <FlyoutItem Route="person-picker" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate queue:PersonPickerPage}" />
-    </FlyoutItem>
-
-    <FlyoutItem Route="queue-song-picker" FlyoutItemIsVisible="False">
-        <ShellContent ContentTemplate="{DataTemplate queue:QueueSongPickerPage}" />
     </FlyoutItem>
 
 </Shell>

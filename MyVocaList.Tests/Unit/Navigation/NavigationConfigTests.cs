@@ -5,8 +5,8 @@ namespace MyVocaList.Tests.Unit.Navigation;
 /// <summary>
 /// Regression coverage for BUG-077: a menu item whose route is missing from
 /// <see cref="NavigationConfig.PageTypes"/> silently fails to navigate — no exception,
-/// no page shown. Every menu-driven route (excluding the special-cased Queue/Exit
-/// routes handled directly in AppShellViewModel.NavigateAsync) must resolve to a page type.
+/// no page shown. Every menu-driven route (excluding the special-cased Exit
+/// route handled directly in AppShellViewModel.NavigateAsync) must resolve to a page type.
 /// </summary>
 public class NavigationConfigTests
 {
@@ -25,7 +25,7 @@ public class NavigationConfigTests
     [Fact]
     public void PageTypes_ContainsEntryForEveryMenuRoute_ExceptSpecialCasedRoutes()
     {
-        var specialCasedRoutes = new HashSet<string> { Routes.Queue, Routes.Exit };
+        var specialCasedRoutes = new HashSet<string> { Routes.Exit };
 
         var menuRoutes = NavigationConfig.BuildMenuGroups(navigateCommand: null!)
             .SelectMany(g => g.Items)

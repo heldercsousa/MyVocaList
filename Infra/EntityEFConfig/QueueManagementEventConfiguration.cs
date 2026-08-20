@@ -19,7 +19,7 @@ namespace MyVocaList.Infra.EntityEFConfig
 
             builder.Property(e => e.Id).ValueGeneratedOnAdd();
 
-            // D3 (design.md § D3): trim-on-save enforced here, not in EventService CreateEventAsync.
+            // D3 (design.md § D3): trim-on-save enforced here at the EF Core config level, not in a service layer.
             builder.Property(e => e.Name)
                    .IsRequired()
                    .HasMaxLength(100)

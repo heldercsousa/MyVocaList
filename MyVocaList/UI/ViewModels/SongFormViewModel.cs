@@ -154,7 +154,7 @@ public partial class SongFormViewModel : ViewModelBase
         DismissMergeSheetCommand = new RelayCommand(DismissMergeSheet);
 
         // Register for the canonical SongPickedMessage (from SongPickerViewModel)
-        // Uses alias to avoid ambiguity with legacy QueueSongPickerViewModel.SongPickedMessage
+        // Uses alias to avoid ambiguity with any other SongPickedMessage-named type
         _messenger.Register<CanonicalSongPickedMessage>(this, (_, msg) => OnSongPicked(msg));
     }
 
