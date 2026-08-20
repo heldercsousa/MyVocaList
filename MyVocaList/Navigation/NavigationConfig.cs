@@ -14,6 +14,7 @@ public static class NavigationConfig
         [Routes.Songs] = typeof(SongsPage),
         [Routes.Preferences] = typeof(SettingsPage),
         [Routes.Backup] = typeof(BackupRestorePage),
+        [Routes.About] = typeof(AboutPage),
     };
 
     public static List<MenuGroup> BuildMenuGroups(ICommand navigateCommand) =>

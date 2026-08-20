@@ -45,11 +45,11 @@
                     StyleClass="Label.Large"
                     TextColor="{StaticResource OnSurface}" />
                 <Label
-                    Text="CC BY-NC-ND 4.0"
+                    Text="MIT License"
                     StyleClass="Body.Medium"
                     TextColor="{StaticResource OnSurface}" />
                 <Label
-                    Text="Free for personal and non-commercial use. No derivatives."
+                    Text="Free to use, modify, and distribute."
                     StyleClass="Body.Small"
                     TextColor="{StaticResource OnSurfaceVariant}" />
                 <Label
