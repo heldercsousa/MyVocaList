@@ -7,7 +7,6 @@
 <!-- BACKLOG:GENERATED:BEGIN archive-business -->
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
-| 2026-06 | Bug: QueuePage BottomSheet double-add on navigation (under: **Queue Entry Point Redesign — QueuePage as CRUD event list**) | ✅ Fixed | Goal: Fixed via safe ConfirmSheet wrapper; fix branch merged to develop and confirmed present in code (audit 2026-07-15). E2E still blocked until the Queue Entry Point Redesign ships an entry point. Pointer: `BusinessFeatures/queue-management/bugs/2026-06-01-BUG-011-queuepage-bottomsheet-double-add/`. |
 | 2026-06 | **Search Picker** | ✅ Done | Goal: standalone search picker pages for form fields. Shipped (3 picker pages, tests, DI/routes, guidelines). Pointer: `BusinessFeatures/search-picker/`. |
 | 2026-06-03 | Bug: Artists page missing back button + unclear trailing toggle (under: **Artists & Songs Catalog**) | ✅ Fixed | Goal: Fixed 2026-06-03. Pointer: `BusinessFeatures/artists-songs/bugs/2026-06-03-BUG-001-artists-page-no-back-button/`. |
 | 2026-06-27 | BUG-015: ArtistsPage trailing ViewCatalog button no-op (Major) (under: **Artists & Songs Catalog**) | ✅ Fixed | Goal: Fixed (binding resolution inside DataTemplate). Pointer: `BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-015-artistspage-trailing-button-noop/`. |
@@ -36,7 +35,6 @@
 | 2026-06 | App Update Check | ✅ Done | Goal: remote version manifest with soft/hard update prompts. Shipped; Helder gate: maintain manifest versions + real App Store ID. Pointer: `BusinessFeatures/app-update-check/task-log.md`. |
 | 2026-06 | **App Settings** | ✅ Done | Goal: settings page incl. YouTube API key management. Shipped. Pointer: `BusinessFeatures/app-settings/`. |
 | 2026-06 | **About Page** | ✅ Done | Goal: version/license/about surface. Shipped. Pointer: `BusinessFeatures/about-page/`. |
-| 2026-06 | Queue Management | ✅ Done | Goal: core product — active queue, rounds, registration, absences, time estimate. Shipped, all 5 waves + tests. Pointer: `BusinessFeatures/queue-management/task-log.md`. |
 | 2026-06 | Data Backup & Restore — Tier 1 + 3 | ✅ Done | Goal: local auto-backup + manual export/restore. Shipped. Pointer: `BusinessFeatures/backup-restore/task-log.md`. |
 <!-- BACKLOG:GENERATED:END archive-business -->
 
@@ -60,6 +58,5 @@
 | 2026-06 | **Navigation Icon Pattern — Root Pages vs Pushed Pages** | ✅ Done | Goal: standardize leading AppBar icon: root flyout pages show hamburger; pushed detail pages show back arrow. Dynamic icon shipped in CrudListPageBase. Pointer: `cross-cutting/navigation-icon-pattern/`. |
 | 2026-06 | **Page load frozen** | ✅ Done | Goal: unfreeze page loads (sync SQLite calls on the UI thread). Fixed via thread-pool offload plus a load gate. Pointer: `DevCycleCraft/page-load-frozen/task-log.md`. |
 | 2026-06 | **Artists CRUD List filter issue** | ✅ Done | Goal: fix the Author/Performer FilterChipGroup not rendering in ArtistsPage — CrudListView filter slot hosting bug. Fixed; Helder gate: emulator smoke test of the chips. Pointer: `cross-cutting/artists-crud-filter-fix/`. |
-| 2026-06-12 | Add missing queue_music_outlined icon asset | ✅ Done | Goal: add the missing queue_music_outlined icon asset (Material Symbols queue_music outlined), consumed by ArtistsPage. Merged to develop. Pointer: `cross-cutting/queue-music-icon-asset/`. |
 | 2026-06-30 | 01 - Form validation guide | ✅ Done | Goal: validation standard encoded across .claude/library rule files (guide + 5 form updates shipped); two Helder gates open (DateEdit birthday confirm; Integer field TODO). Pointer: `DevCycleCraft/ui-form-validation-guide/task-log.md`. |
 <!-- BACKLOG:GENERATED:END archive-craft -->
