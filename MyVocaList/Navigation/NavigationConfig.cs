@@ -7,7 +7,6 @@ public static class NavigationConfig
 {
     public static readonly Dictionary<string, Type> PageTypes = new()
     {
-        [Routes.Events] = typeof(EventsPage),
         [Routes.Venues] = typeof(VenuesPage),
         [Routes.People] = typeof(PeoplePage),
         [Routes.Artists] = typeof(ArtistsPage),
@@ -19,10 +18,6 @@ public static class NavigationConfig
 
     public static List<MenuGroup> BuildMenuGroups(ICommand navigateCommand) =>
     [
-        new MenuGroup("Event", [
-            new MenuItemDescription("Queue",          "format_list_numbered_outlined", Routes.Queue,       navigateCommand),
-            new MenuItemDescription("Events",         "event_outlined",                Routes.Events,      navigateCommand)
-        ]),
         new MenuGroup("Management", [
             new MenuItemDescription("Venues",         "nightlife_outlined",            Routes.Venues,      navigateCommand),
             new MenuItemDescription("Singers",        "group_outlined",                Routes.People,      navigateCommand),
