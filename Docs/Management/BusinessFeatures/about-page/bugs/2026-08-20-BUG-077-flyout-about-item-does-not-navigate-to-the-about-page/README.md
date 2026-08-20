@@ -1,13 +1,14 @@
 ---
 id: BUG-077
 title: Flyout About item does not navigate to the About page
-status: 🟡 In Progress
+status: ✅ Fixed
 severity: Major
 target: 2026-08-20
 section: BusinessFeatures
 parent: about-page
 goal: Tapping About in the flyout leaves the user on the current page; the About page has never been reachable in the shipped app.
-gate: Fix merged to develop; build and full suite green. Awaiting Helder manual E2E: flyout -> About opens the page.
+gate: Closed. Helder confirmed the manual E2E passed on device 2026-08-20; flyout About navigates and the page renders.
+closed: 2026-08
 kind: bug
 ---
 
@@ -74,14 +75,14 @@ Green after** (2/2 failed → 2/2 passed):
 - `dotnet build MyVocaList.sln -c Debug` → 8 projects, **0 errors** (verified by the orchestrator, not
   only reported by the implementor).
 - `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → **592/592 passed**.
-- Manual E2E (**outstanding — Helder**): launch app → open hamburger flyout → tap "About" under the
+- Manual E2E — **PASSED (Helder, 2026-08-20)**: launch app → open hamburger flyout → tap "About" under the
   System group → About page opens and the License section reads "MIT License" /
   "Free to use, modify, and distribute." / "© 2025 Helder Sousa".
 
 ## Status
 
 Fixed on `fix/about-page-license-and-nav` (`5b4d1954`), merged to develop as `12102115`.
-Automated verification complete; the manual E2E above is the remaining gate.
+Automated verification complete and Helder's manual E2E passed on device 2026-08-20. **Closed.**
 
 ## Follow-up observations (not fixed here)
 
