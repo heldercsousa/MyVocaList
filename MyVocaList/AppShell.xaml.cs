@@ -35,13 +35,13 @@ public partial class AppShell : Shell
         _ = viewModel.InitializeAsync();
     }
 
-    // Fallback: catches back press when Shell is at root and QueuePage.OnBackButtonPressed
+    // Fallback: catches back press when Shell is at root and VenuesPage.OnBackButtonPressed
     // is not called (e.g. certain MAUI/platform back-button routing edge cases).
     protected override bool OnBackButtonPressed()
     {
-        if (Navigation.NavigationStack.Count == 0 && CurrentPage is QueuePage queuePage)
+        if (Navigation.NavigationStack.Count == 0 && CurrentPage is VenuesPage venuesPage)
         {
-            queuePage.ShowExitConfirmation();
+            venuesPage.ShowExitConfirmation();
             return true;
         }
 
@@ -50,8 +50,8 @@ public partial class AppShell : Shell
 
     private void OnExitRequested()
     {
-        if (CurrentPage is QueuePage queuePage)
-            queuePage.ShowExitConfirmation();
+        if (CurrentPage is VenuesPage venuesPage)
+            venuesPage.ShowExitConfirmation();
     }
 
     private void OnShowWhatsNew(object recipient, ShowWhatsNewMessage message)
