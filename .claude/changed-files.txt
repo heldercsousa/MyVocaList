@@ -3961,3 +3961,14 @@ Docs/Management/cross-cutting/read-model-notracking-guidelines/bugs/2026-08-18-B
 ../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/f55efc67-60b9-45a1-b5b2-5dc48a150089/scratchpad/msg.txt
 ../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/f55efc67-60b9-45a1-b5b2-5dc48a150089/scratchpad/entry.md
 ../myvocalist-merge-inline/Services/SongService.cs
+../MyVocaList-wt-queue-deadcode/Services/VenueService.cs
+../MyVocaList-wt-queue-deadcode/Services/VenueService.cs
+../MyVocaList-wt-queue-deadcode/MyVocaList.Tests/Unit/Services/VenueServiceTests.cs
+../MyVocaList-wt-eventrepo-dead/Domain/UnitOfWork/IUnitOfWork.cs
+Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/design.md
+Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-04-merge-duplicate-repository-families-into-one-infra-repository-infra-repositories/handoff.md
+../MyVocaList-wt-eventrepo-dead/Domain/UnitOfWork/IUnitOfWork.cs
+../MyVocaList-about-license/MyVocaList.Tests/Unit/Navigation/NavigationConfigTests.cs
+../MyVocaList-about-license/MyVocaList/Navigation/NavigationConfig.cs
+../MyVocaList-copyright-year/MyVocaList.Tests/Unit/ViewModels/AboutViewModelTests.cs
+../MyVocaList-copyright-year/MyVocaList/UI/ViewModels/AboutViewModel.cs
