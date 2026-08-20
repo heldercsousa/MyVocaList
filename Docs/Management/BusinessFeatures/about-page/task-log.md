@@ -88,3 +88,11 @@ closed ✅ Done — yet the page was unreachable from its only entry point. The 
 reviewer slip: the review checked that `AppShell.xaml` and DI registered the page, but nothing checked
 the third table (`NavigationConfig.PageTypes`) that `NavigateAsync` actually reads, and the miss branch
 is silent. The new class-wide test closes that specific hole.
+
+### 2026-08-20 — Manual E2E gate PASSED (Helder)
+
+Helder confirmed on device that the outstanding manual E2E for both items passed: the flyout **About**
+item navigates to the About page (BUG-077), and the License section renders the MIT text
+(AC-AB-05a / AC-AB-05b). Both items closed ✅ — the last gate on each is now satisfied.
+
+This is also the first end-to-end confirmation that the About page has ever been reachable in the app.
