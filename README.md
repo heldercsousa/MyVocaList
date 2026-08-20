@@ -1,12 +1,12 @@
 ﻿# MyVocaList
 
-[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Karaoke queue management for live events — .NET MAUI 10 (Android & iOS)
 
 **Status:** Active development — Clean Architecture implementation in progress
 
-**License:** [CC BY-NC-ND 4.0](LICENSE) — Portfolio project with commercial intentions
+**License:** [MIT](LICENSE) — free for anyone to use, modify, and distribute
 
 **Author:** Helder Sousa | heldercsousa@gmail.com
 
