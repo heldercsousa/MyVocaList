@@ -30,11 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\README.md
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\design.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\design.md
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\requirements.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\requirements.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-04-merge-duplicate-repository-families-into-one-infra-repository-infra-repositories\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-04-merge-duplicate-repository-families-into-one-infra-repository-infra-repositories\README.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-04-merge-duplicate-repository-families-into-one-infra-repository-infra-repositories\handoff.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-04-merge-duplicate-repository-families-into-one-infra-repository-infra-repositories\handoff.md
 		Docs\Management\DevCycleCraft\spec-evolution-versioning\bugs\2026-08-04-BUG-072-hook-scripts-invoked-by-relative-path-guards-break-or-go-silently-inert-outside-repo-root\README.md = Docs\Management\DevCycleCraft\spec-evolution-versioning\bugs\2026-08-04-BUG-072-hook-scripts-invoked-by-relative-path-guards-break-or-go-silently-inert-outside-repo-root\README.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-08-04-song-writes-propagate-to-the-artist-catalog\README.md
-		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-04-apply-the-unit-of-work-pattern-to-queue-and-event-entities-deferred\README.md
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\plan.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\plan.md
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\task-log.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope\task-log.md
 		Docs\Management\BusinessFeatures\backup-restore\bugs\2026-08-04-BUG-073-restorefrombundleasync-overwrites-the-live-sqlite-file-while-appdbcontext-holds-it-open\README.md = Docs\Management\BusinessFeatures\backup-restore\bugs\2026-08-04-BUG-073-restorefrombundleasync-overwrites-the-live-sqlite-file-while-appdbcontext-holds-it-open\README.md
@@ -69,8 +66,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevEnv", "DevEnv", "{300D3C
 	ProjectSection(SolutionItems) = preProject
 		Docs\DevEnv\claude-code-task-create-rules.md = Docs\DevEnv\claude-code-task-create-rules.md
 		Docs\DevEnv\devenv-setup.md = Docs\DevEnv\devenv-setup.md
-		Docs\DevEnv\parked\EventServiceTests.cs.txt = Docs\DevEnv\parked\EventServiceTests.cs.txt
-		Docs\DevEnv\parked\QueueServiceTests.cs.txt = Docs\DevEnv\parked\QueueServiceTests.cs.txt
 		Docs\DevEnv\SETUP_QUICKSTART.md = Docs\DevEnv\SETUP_QUICKSTART.md
 		Docs\DevEnv\Chat with Google Gemini about UX and archtecture for V1 V2 and V3.pdf = Docs\DevEnv\Chat with Google Gemini about UX and archtecture for V1 V2 and V3.pdf
 	EndProjectSection
@@ -790,20 +785,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-management", "queue-management", "{FA1234BC-0001-4000-8000-000000000021}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BusinessFeatures\queue-management\design.md = Docs\Management\BusinessFeatures\queue-management\design.md
-		Docs\Management\BusinessFeatures\queue-management\queue-deadcode-cleanup.md = Docs\Management\BusinessFeatures\queue-management\queue-deadcode-cleanup.md
 		Docs\Management\BusinessFeatures\queue-management\requirements.md = Docs\Management\BusinessFeatures\queue-management\requirements.md
-		Docs\Management\BusinessFeatures\queue-management\task-log.md = Docs\Management\BusinessFeatures\queue-management\task-log.md
-		Docs\Management\BusinessFeatures\queue-management\tasks.md = Docs\Management\BusinessFeatures\queue-management\tasks.md
 		Docs\Management\BusinessFeatures\queue-management\README.md = Docs\Management\BusinessFeatures\queue-management\README.md
-		Docs\Management\BusinessFeatures\queue-management\plan.md = Docs\Management\BusinessFeatures\queue-management\plan.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "changes", "changes", "{FA1234BC-0001-4000-8000-0000000000A2}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-shipped-core-product", "2026-06-shipped-core-product", "{FA1234BC-0001-4000-8000-0000000000A3}"
-	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\queue-management\changes\2026-06-shipped-core-product\README.md = Docs\Management\BusinessFeatures\queue-management\changes\2026-06-shipped-core-product\README.md
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "page-load-frozen", "page-load-frozen", "{C81D77D9-056E-44D8-A88F-522682CEE603}"
 	ProjectSection(SolutionItems) = preProject
@@ -973,12 +959,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-07-03-BUG-028-artistsp
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000025}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-06-01-BUG-011-queuepage-bottomsheet-double-add", "2026-06-01-BUG-011-queuepage-bottomsheet-double-add", "{FA1234BC-0001-4000-8000-000000000092}"
-	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\BUG-011-queuepage-bottomsheet-double-add.md = Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\BUG-011-queuepage-bottomsheet-double-add.md
-		Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\README.md = Docs\Management\BusinessFeatures\queue-management\bugs\2026-06-01-BUG-011-queuepage-bottomsheet-double-add\README.md
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bugs", "bugs", "{FA1234BC-0001-4000-8000-000000000024}"
 	ProjectSection(SolutionItems) = preProject
@@ -1206,11 +1186,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "form-autocomplete-ux-overha
 		Docs\Management\cross-cutting\form-autocomplete-ux-overhaul\README.md = Docs\Management\cross-cutting\form-autocomplete-ux-overhaul\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queueservice-deadcode-cleanup", "queueservice-deadcode-cleanup", "{FA1234BC-0001-4000-8000-000000000059}"
-	ProjectSection(SolutionItems) = preProject
-		Docs\Management\cross-cutting\queueservice-deadcode-cleanup\README.md = Docs\Management\cross-cutting\queueservice-deadcode-cleanup\README.md
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "user-tutorial-learning", "user-tutorial-learning", "{FA1234BC-0001-4000-8000-00000000005A}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\user-tutorial-learning\README.md = Docs\Management\cross-cutting\user-tutorial-learning\README.md
@@ -1289,11 +1264,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artists-crud-filter-fix", "artists-crud-filter-fix", "{FA1234BC-0001-4000-8000-0000000000B0}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\artists-crud-filter-fix\README.md = Docs\Management\cross-cutting\artists-crud-filter-fix\README.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-music-icon-asset", "queue-music-icon-asset", "{FA1234BC-0001-4000-8000-0000000000B1}"
-	ProjectSection(SolutionItems) = preProject
-		Docs\Management\cross-cutting\queue-music-icon-asset\README.md = Docs\Management\cross-cutting\queue-music-icon-asset\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "search-pattern-standardization", "search-pattern-standardization", "{FA1234BC-0001-4000-8000-000000000061}"
@@ -1521,7 +1491,6 @@ Global
 		{FA1234BC-0001-4000-8000-00000000006F} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-000000000057} = {15F1DA03-2180-47BF-BC40-1BB457C97F9E}
 		{FA1234BC-0001-4000-8000-000000000058} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-000000000059} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005A} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005B} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005C} = {FA1234BC-0001-4000-8000-000000000057}
@@ -1634,7 +1603,6 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000A0} = {FA1234BC-0001-4000-8000-000000000011}
 		{FA1234BC-0001-4000-8000-0000000000A1} = {FA1234BC-0001-4000-8000-0000000000A0}
 		{FA1234BC-0001-4000-8000-0000000000A2} = {FA1234BC-0001-4000-8000-000000000021}
-		{FA1234BC-0001-4000-8000-0000000000A3} = {FA1234BC-0001-4000-8000-0000000000A2}
 		{FA1234BC-0001-4000-8000-0000000000A4} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A5} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000A6} = {FA1234BC-0001-4000-8000-000000000057}
@@ -1653,7 +1621,6 @@ Global
 		{FA1234BC-0001-4000-8000-0000000000AE} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000AF} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000B0} = {FA1234BC-0001-4000-8000-000000000057}
-		{FA1234BC-0001-4000-8000-0000000000B1} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-0000000000B2} = {FA1234BC-0001-4000-8000-000000000033}
 		{FA1234BC-0001-4000-8000-0000000000B3} = {FA1234BC-0001-4000-8000-0000000000B2}
 		{FA1234BC-0001-4000-8000-000000000039} = {FA1234BC-0001-4000-8000-000000000038}
@@ -1698,7 +1665,6 @@ Global
 		{FA1234BC-0001-4000-8000-00000000008F} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000090} = {7A021F6B-F297-41EA-A028-C4F881146791}
 		{FA1234BC-0001-4000-8000-000000000091} = {FA1234BC-0001-4000-8000-00000000007F}
-		{FA1234BC-0001-4000-8000-000000000092} = {FA1234BC-0001-4000-8000-000000000025}
 		{FA1234BC-0001-4000-8000-000000000093} = {FA1234BC-0001-4000-8000-00000000007F}
 		{FA1234BC-0001-4000-8000-000000000085} = {FA1234BC-0001-4000-8000-000000000018}
 		{FA1234BC-0001-4000-8000-000000000086} = {FA1234BC-0001-4000-8000-000000000085}
