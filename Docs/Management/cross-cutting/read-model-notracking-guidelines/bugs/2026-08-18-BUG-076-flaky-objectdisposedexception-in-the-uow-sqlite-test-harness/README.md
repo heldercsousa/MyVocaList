@@ -94,3 +94,27 @@ completion claim.
 - possibly the test project's xUnit collection/parallelism configuration
 
 **Not fixed here** — registered only, per the Phase 2 → Phase 3 hand-off scope.
+
+---
+
+## Reproduction attempt — 2026-08-20 (negative result)
+
+Five consecutive full-suite runs on `develop` (`6a0e3eb8`), all green:
+
+```
+Com falha: 0, Aprovado: 592, Ignorado: 0, Total: 592   (x5)
+```
+
+The flake did **not** reproduce. This is evidence of low frequency, **not** evidence the bug is
+fixed — nothing was changed that would plausibly fix it, and the recorded symptom is explicitly
+intermittent and lands on a different test each run.
+
+**Status deliberately left `💡 Pending`.** Two notes for whoever picks it up:
+
+- It was previously associated with `QueueRepositoryTests`. That association looks incidental: the
+  record itself says the failure lands on a different test each run, so this is a **shared
+  harness** defect, not a Queue/Event one. It is therefore **not** covered by the 2026-08-20
+  Event/Queue freeze and stays live.
+- Chasing it with repeated full-suite runs is unproductive at this frequency. If it becomes worth
+  fixing, drive it from the harness side (temp-file SQLite connection pooling / disposal ordering
+  in the test fixture) rather than by trying to reproduce it.

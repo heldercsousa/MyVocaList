@@ -1,6 +1,34 @@
 # Queue Management — Dead-Code Cleanup
 
-> **Status:** 🟡 Item 1 DONE (2026-08-18, merge `d73db7ab`) · Item 2 still pending — discovered 2026-06-19 during the BUG-011 fix investigation (branch `fix/bug-011-queue-bottomsheet`).
+> # ⛔ FROZEN — DO NOT EXECUTE ANY TASK IN THIS FILE (Helder, 2026-08-20)
+>
+> The entire Event/Queue area is **frozen pending a re-plan**. Nothing below is actionable.
+> Item 1 is already done and is kept only as history; **Item 1 step 3 (the rename) and Item 2
+> (deleting `QueuePage`) must NOT be performed.** Rationale: §2b of
+> `cross-cutting/read-model-notracking-guidelines/changes/2026-08-04-merge-duplicate-repository-families-into-one-infra-repository-infra-repositories/handoff.md`.
+>
+> ## ⚠ Item 2's premise is factually WRONG — acting on it would break the app
+>
+> Item 2 below claims `QueuePage` is dead with no route or DI registration. A reachability trace on
+> 2026-08-20 established the opposite:
+>
+> - `QueuePage` is the **first `FlyoutItem` in `AppShell.xaml` (route `queue`, line 68)**, which makes
+>   it **Shell's initial content** — it is what the app opens to.
+> - `AppShell.xaml.cs` lines **42 and 53** contain hard-coded `CurrentPage is QueuePage` type checks
+>   driving the back-button / exit-confirmation flow. Deleting the type is a **compile error**.
+> - It is registered in DI (`MauiProgram.cs:138`).
+>
+> Deleting `QueuePage` would remove the app's landing screen and break the build. The "verify before
+> deleting" step in Item 2 would have caught this — which is exactly why that step exists. Left
+> uncorrected here as a standing warning.
+>
+> Note also that the *other* Queue/Event pages are genuinely unreachable: route `queue-management`
+> occurs exactly once in the solution (its own `AppShell.xaml:108` declaration) and nothing navigates
+> to it. Unreachable is not the same as unreferenced — `QueuePage` is reachable; `QueueManagementPage`
+> is not.
+
+
+> **Status:** ⛔ FROZEN 2026-08-20 · Item 1 DONE (2026-08-18, merge `d73db7ab`) · Item 2 still pending — discovered 2026-06-19 during the BUG-011 fix investigation (branch `fix/bug-011-queue-bottomsheet`).
 > **Type:** Dev Cycle Craft / cleanup. Two independent, low-risk deletions. Each is its own small task; neither blocks the other.
 > **Out of scope of BUG-011** — registered here so the findings are not lost.
 
@@ -27,7 +55,7 @@ There are **two** service implementations and interfaces for the queue:
 
 ---
 
-## Item 2 — Remove the `QueuePage` placeholder
+## Item 2 — ~~Remove the `QueuePage` placeholder~~ — ⛔ FROZEN + PREMISE DISPROVEN (see banner)
 
 | Artifact | State |
 |----------|-------|
