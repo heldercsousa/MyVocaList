@@ -1,6 +1,6 @@
 # Handoff — UOW Phase 3.5 (repository families / Queue + Event migration)
 
-> **Written 2026-08-19.** Read this first when resuming. It is the Rule 7 §1 active handoff file
+> **Written 2026-08-19; §4/§5 revised 2026-08-20.** Read this first when resuming. It is the Rule 7 §1 active handoff file
 > for this item. Everything a fresh session needs is here or linked from here — do **not** glob `Docs/**`.
 
 ---
@@ -78,7 +78,11 @@ purely the save-semantics half, which was never in dispute. Touches `Infra/Repos
 > 3b stops being a blocker and becomes ordinary cleanup. Re-assess before committing to 3b.
 
 ### 3b. Reconcile the two `Event` domain models + schema
-The real design question, and the **only** part that touches data. **Gated on §4 below.**
+The real design question, and the only part that touches schema. **No longer gated on data** — §4
+resolved 2026-08-20: there is no production deployment, so the OLD model can be dropped with a plain
+destructive migration. What remains is the code-shape decision (which `Event` model survives, and how
+`Venue.Events` / `EventParticipation.Event` are re-pointed), which still needs a design + Helder's
+approval before implementation.
 
 ### 3c. Deadcode cleanup leftovers (independent, low risk)
 Tracked in `Docs/Management/BusinessFeatures/queue-management/queue-deadcode-cleanup.md`:
@@ -91,66 +95,39 @@ Tracked in `Docs/Management/BusinessFeatures/queue-management/queue-deadcode-cle
 
 ---
 
-## 4. OPEN QUESTION — blocks 3b only, needs Helder (manual step)
+## 4. RESOLVED — no production deployment exists (Helder, 2026-08-20)
 
-**Is the OLD `Events` table empty in production?**
+**Original question:** is the OLD `Events` table empty in production?
 
-Working assumption recorded in the spec: *never populated*, because nothing writes to it except the
-now-deleted `QueueService`. **This is an assumption, not a verified fact.** It must be confirmed on a
-real device before any migration touches the `Events` table.
+**Answer: the question is moot.** Helder confirmed on 2026-08-20 that **there is no production
+version of the app** — no deployed installs, no user data at risk. Event data may be discarded
+freely if that is the chosen approach.
 
-`.claude/MyVocaList.db` **cannot answer this** — it is a stale February snapshot, 8 migrations
-behind, containing only `InitialCreate` + `venuesSeedForTest`, with no `QueueManagementEvents` or
-`QueueEntries` tables at all. At that snapshot: `Events`=0, `EventParticipations`=0, `Venues`=498.
+**Consequence for 3b:** the decision rule in the original §4 resolves to its permissive branch.
+The OLD `Domain/Entity/Event` model + its `Events` table can be dropped with a **plain destructive
+migration** — no data-migration design, no return trip through the architectural brainstorming path
+for data-preservation reasons. (A design gate still applies to the *model reconciliation* itself,
+which is a code-shape decision, not a data one.)
 
-### Manual procedure (Helder) — run from the main repo, branch `develop`, no worktree needed
-
-Device must be connected with USB debugging on, and the app must be a debuggable build.
-
-```bash
-# 1. Confirm the device is visible
-/c/Android/platform-tools/adb devices
-
-# 2. Pull the live database out of the app sandbox
-/c/Android/platform-tools/adb exec-out run-as com.companyname.myvocalist \
-  cat databases/MyVocaList.db > /c/Users/helde/Desktop/live-MyVocaList.db
-
-# 3. Answer the question
-/c/Android/platform-tools/sqlite3 /c/Users/helde/Desktop/live-MyVocaList.db \
-  "SELECT 'Events', COUNT(*) FROM Events
-   UNION ALL SELECT 'EventParticipations', COUNT(*) FROM EventParticipations
-   UNION ALL SELECT 'QueueManagementEvents', COUNT(*) FROM QueueManagementEvents
-   UNION ALL SELECT 'QueueEntries', COUNT(*) FROM QueueEntries;"
-```
-
-- If the package name in step 2 is wrong, get it with
-  `/c/Android/platform-tools/adb shell pm list packages | grep -i voca`.
-- If `run-as` is refused, the installed build is not debuggable — rebuild and deploy a Debug build.
-
-**Record the four counts in this file under §5 before starting 3b.**
-
-**Decision rule:** `Events`=0 **and** `EventParticipations`=0 ⇒ the OLD model can be dropped with a
-plain destructive migration, no data move. Any non-zero count ⇒ 3b needs a data-migration design and
-must go back through the brainstorming architectural path.
+The `adb pull` + `sqlite3` count procedure previously recorded here is **obsolete and was never
+run**; it is deliberately not preserved, because executing it would imply a production concern that
+does not exist. Should a deployment ever precede this work, restore the procedure from
+`git show 45871f70 -- <this file>`.
 
 ---
 
-## 5. Verified data counts (fill in after running §4)
+## 5. Verified data counts — N/A
 
-| Table | Count | Source | Date |
-|-------|-------|--------|------|
-| `Events` | *(pending)* | | |
-| `EventParticipations` | *(pending)* | | |
-| `QueueManagementEvents` | *(pending)* | | |
-| `QueueEntries` | *(pending)* | | |
+Not applicable: no production deployment exists (§4). No counts were taken and none are required.
 
 ---
 
 ## 6. Process state
 
-- **Brainstorming path:** architectural. Currently at step 1 (*explore project context*) **complete**;
-  step 4 (*propose 2–3 approaches*) **not started**. The HARD GATE applies — no implementation for
-  3a/3b until Helder approves a presented design.
+- **Brainstorming path:** architectural. Step 1 (*explore project context*) **complete**; step 4
+  (*propose 2–3 approaches*) **in progress 2026-08-20 for 3a**. The HARD GATE applies — no
+  implementation for 3a/3b until Helder approves a presented design.
+- **Open data question: CLOSED** (§4) — no production version exists.
 - **Test baseline on `develop`:** 590 passed / 0 failed / 0 skipped.
 - **Branch discipline:** all code work in a worktree on a task branch based on `develop`
   (`git merge-base --is-ancestor develop HEAD` must pass). Docs land on `develop` directly.
