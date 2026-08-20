@@ -1,13 +1,14 @@
 ---
 id: BUG-071
 title: "BUG-071 (alias BUG-068): Edit-mode song save fails — EF Core identity conflict (Critical)"
-status: 🟡 In Progress
+status: ✅ Fixed
 severity: Critical
 target: 2026-08-03
 section: BusinessFeatures
 parent: artists-songs
 goal: editing a saved song must persist; today one tap reports success but writes nothing (silent data loss) and a second tap throws an EF tracking conflict.
-gate: "Fixed for Songs and Artists by the unit-of-work pilot. Queue and Event still carry the defect until Phase 3.5, so this stays open."
+gate: "Closed 2026-08-20. Fixed for Songs/Artists by the UOW pilot; the Queue/Event remainder was verified unreachable and frozen, so no live path carries it."
+closed: 2026-08
 kind: bug
 ---
 
@@ -94,3 +95,35 @@ Closed by `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTes
 Low, and confined to `SongRepository`. `Song` has no concurrency token and its navigations
 (`OriginalArtist`, `CatalogEntries`) are not written by the update path, so scalar/FK-only copying
 loses nothing.
+
+
+---
+
+## Closure (2026-08-20)
+
+**Closed by Helder's ruling that the Event/Queue area is frozen pending a re-plan.**
+
+The bug was held open solely on the gate *"Queue and Event still carry the defect until
+Phase 3.5"*. That gate no longer describes a live risk:
+
+- The four pilot services (`SongService`, `ArtistService`, `ArtistResolutionService`,
+  `SongResolutionService`) were fixed and verified on device — that half is genuinely done.
+- The Queue/Event half was **verified unreachable on 2026-08-20**: no user-reachable code path
+  executes `EventService`, `QueueServiceNew`, `EventRepository` or `QueueRepository`. `QueuePage`
+  and `EventsPage` are static placeholders; the `queue-management` route appears exactly once in
+  the solution — its own `FlyoutItem` declaration in `AppShell.xaml` — and nothing navigates to
+  it. App startup touches no Event/Queue service, repository or DbSet. (Independently corroborated
+  by the pre-existing backlog note *"QueueManagementPage is unreachable in the app"*.)
+
+So the residual defect sits in code that cannot run. It is not a latent production risk; it is a
+property of code that will be re-planned before it is ever reachable again.
+
+**This is a scope closure, not a claim that the Queue/Event code was fixed.** The
+`TODO [BUG-071 / UOW]` markers in `Infra/Repositories/EventRepository.cs`,
+`Infra/Repositories/QueueRepository.cs`, `Services/EventService.cs` and
+`Services/QueueServiceNew.cs` are deliberately **left in place** — they are the correct signal to
+whoever re-plans the feature. Do not read their presence as an open bug.
+
+**If Queue/Event is ever made reachable again** (e.g. the pending *"Queue Entry Point Redesign —
+QueuePage as CRUD event list"* backlog item), the unit-of-work conversion of those four files is a
+prerequisite of that work, not a bug fix. Re-register it as a task of the re-plan.
