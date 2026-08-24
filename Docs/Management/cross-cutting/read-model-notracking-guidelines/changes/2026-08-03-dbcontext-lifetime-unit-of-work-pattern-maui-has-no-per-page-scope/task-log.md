@@ -1453,3 +1453,63 @@ inside a transaction that already has one. **4.1 first, then the propagation spe
 - `grep -rn "BUG-071" --include=*.cs` -> 1 hit, the test comment named above.
 - `grep -rn "PROVISIONAL" --include=*.cs` -> 0 hits.
 - No production code touched by this entry; suite unaffected (575/575 green on develop at `2b6fc488`).
+
+---
+
+## Task 4.1 — `CatalogService` wrapped in `IUnitOfWork`
+
+**Status:** To Review
+**Branch:** `feat/uow-phase-4-1-catalog` (worktree `MyVocaList-uow-catalog`)
+
+Wrapped `AddSongToCatalogAsync` and `RemoveSongFromCatalogAsync` in `_uow.ExecuteAsync`, following the
+`SongService.CreateSongAsync` / `ArtistService.DeleteArtistsAsync` shape exactly: `ICatalogRepository`
+resolved from the lambda's own `sp` (REQ-UOW-28), never the constructor field. `RemoveSongFromCatalogAsync`
+calls `ICatalogRepository.RemoveAsync`, which is `ExecuteDeleteAsync`-based — the explicit transaction
+`IUnitOfWork.ExecuteAsync` opens now brings it under the unit of work (REQ-UOW-33), matching
+`ArtistService.DeleteArtistsAsync`'s comment for the same pattern.
+
+`GetPagedCatalogForArtistAsync` was left as a direct `_catalogRepository` call, unwrapped — this matches
+the already-migrated `SongService.GetPagedSongsForListAsync` / `ArtistService.GetPagedArtistsForListAsync`,
+neither of which routes single-repository list reads through `ExecuteReadAsync`. That overload is reserved
+for multi-repository read-joins (`ArtistResolutionService`, `SongResolutionService`), which this method is
+not.
+
+Retired `ICatalogRepository.SaveChangesAsync` / `CatalogRepository.SaveChangesAsync` (REQ-UOW-11) — the
+single save is now owned by `IUnitOfWork` (REQ-UOW-10: one line of ceremony per service method, zero per
+repository method).
+
+### AC traceability
+
+| AC | Criterion | Implementation | Test |
+|---|---|---|---|
+| REQ-UOW-10 | ≤1 line of UoW ceremony per service method, 0 per repository method | `CatalogService.cs` — both write methods are a single `_uow.ExecuteAsync(...)` expression body | Reviewer-checked diff, this entry |
+| REQ-UOW-11 | Retire the standalone `SaveChangesAsync` pass-through | `ICatalogRepository.cs` / `CatalogRepository.cs` — member deleted | Compile-level: build green with no remaining references |
+| REQ-UOW-28 | Lambda resolves collaborators from its own `sp`, never a ctor field | `CatalogService.cs` both lambdas — `sp.GetRequiredService<ICatalogRepository>()` | Reviewer-checked; existing `CatalogServiceTests` pass against `PassthroughUnitOfWork` |
+| REQ-UOW-33 | `ExecuteDeleteAsync` path is transactional via `IUnitOfWork`'s explicit transaction | `RemoveSongFromCatalogAsync` → `ICatalogRepository.RemoveAsync` (`ExecuteDeleteAsync`) inside `_uow.ExecuteAsync` | Covered by the shared `IUnitOfWork` implementation's own REQ-UOW-33 tests (`Infra/UnitOfWork/UnitOfWork.cs`); no new test needed — this task only routes an existing `ExecuteDeleteAsync` call through the already-tested transactional boundary |
+| REQ-UOW-24/26/27 | Not applicable here — no-signal/unrecognised-result branches are exercised by `IUnitOfWork`'s own tests, not per-service | `CatalogService`'s two wrapped methods both use the `ValueTuple`-with-leading-`bool` shape | n/a — construction, not new behaviour |
+
+### Changed files
+
+- `Services/CatalogService.cs` — constructor takes `IUnitOfWork uow`; `AddSongToCatalogAsync` and
+  `RemoveSongFromCatalogAsync` wrapped in `_uow.ExecuteAsync`; own `SaveChangesAsync` call deleted.
+- `Domain/RepositoryInterface/ICatalogRepository.cs` — `SaveChangesAsync` member removed.
+- `Infra/Repository/CatalogRepository.cs` — `SaveChangesAsync` implementation removed.
+- `MyVocaList.Tests/Unit/Services/CatalogServiceTests.cs` — `CreateSut` now passes
+  `PassthroughUnitOfWork.Over(_catalogRepoMock)`; removed the now-nonexistent
+  `_catalogRepoMock.Setup(r => r.SaveChangesAsync(...))` line.
+- `MyVocaList.Tests/Integration/Repositories/CatalogRepositoryTests.cs` — all 9 call sites (not just the
+  2 the plan's stale coordinates named) changed from `_repo.SaveChangesAsync()` to `_db.SaveChangesAsync()`.
+
+### Verification evidence
+
+- `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj --no-restore` → `0 errors, 107 warnings` (pre-existing warning baseline, none introduced by this change).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --no-build --no-restore`:
+  - First run: 574/575 passed, 1 failure — `PersistedStringTrimmingTests.PersonEmail_WhitespaceOnly_PersistedAsNull`, `ObjectDisposedException` on `SQLitePCL.sqlite3` during `EnsureCreatedAsync` — matches the documented BUG-076 flake, unrelated to `CatalogService`/`CatalogRepository`.
+  - Re-run: **575/575 passed**, 0 failures.
+- Files re-read after edit to confirm persistence: `Services/CatalogService.cs`,
+  `Domain/RepositoryInterface/ICatalogRepository.cs`, `Infra/Repository/CatalogRepository.cs`,
+  `MyVocaList.Tests/Unit/Services/CatalogServiceTests.cs`.
+
+### Out of scope, found during this task
+
+None — no scope bleed into 4.2–4.7 or any other service.

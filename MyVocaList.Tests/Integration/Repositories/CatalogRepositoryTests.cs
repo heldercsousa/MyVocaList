@@ -46,7 +46,7 @@ public class CatalogRepositoryTests : IAsyncLifetime
         var song = await SeedSongAsync(originalArtist.Id, "A Great Song");
 
         await _repo.AddAsync(new Catalog { ArtistId = performer.Id, SongId = song.Id }, CancellationToken.None);
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var exists = await _repo.ExistsAsync(performer.Id, song.Id, CancellationToken.None);
 
@@ -61,14 +61,14 @@ public class CatalogRepositoryTests : IAsyncLifetime
         var song = await SeedSongAsync(originalArtist.Id, "Unique Song");
 
         await _repo.AddAsync(new Catalog { ArtistId = performer.Id, SongId = song.Id }, CancellationToken.None);
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         // Detach tracked entities so EF doesn't raise identity conflict before hitting the DB constraint
         _db.ChangeTracker.Clear();
 
         await _repo.AddAsync(new Catalog { ArtistId = performer.Id, SongId = song.Id }, CancellationToken.None);
 
-        await Assert.ThrowsAsync<DbUpdateException>(() => _repo.SaveChangesAsync());
+        await Assert.ThrowsAsync<DbUpdateException>(() => _db.SaveChangesAsync());
     }
 
     // ── RemoveAsync ───────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ public class CatalogRepositoryTests : IAsyncLifetime
         var song = await SeedSongAsync(originalArtist.Id, "Removable Song");
 
         await _repo.AddAsync(new Catalog { ArtistId = performer.Id, SongId = song.Id }, CancellationToken.None);
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         await _repo.RemoveAsync(performer.Id, song.Id, CancellationToken.None);
 
@@ -102,7 +102,7 @@ public class CatalogRepositoryTests : IAsyncLifetime
 
         await _repo.AddAsync(new Catalog { ArtistId = performer.Id, SongId = song1.Id }, CancellationToken.None);
         await _repo.AddAsync(new Catalog { ArtistId = performer.Id, SongId = song2.Id }, CancellationToken.None);
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var count = await _repo.CountByArtistAsync(performer.Id, CancellationToken.None);
 
@@ -122,7 +122,7 @@ public class CatalogRepositoryTests : IAsyncLifetime
 
         await _repo.AddAsync(new Catalog { ArtistId = artist1.Id, SongId = song1.Id }, CancellationToken.None);
         await _repo.AddAsync(new Catalog { ArtistId = artist2.Id, SongId = song2.Id }, CancellationToken.None);
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var (items, totalCount) = await _repo.GetPagedByArtistAsync(
             artist1.Id, 1, 20, null, CancellationToken.None);
@@ -141,7 +141,7 @@ public class CatalogRepositoryTests : IAsyncLifetime
 
         await _repo.AddAsync(new Catalog { ArtistId = performer.Id, SongId = song1.Id }, CancellationToken.None);
         await _repo.AddAsync(new Catalog { ArtistId = performer.Id, SongId = song2.Id }, CancellationToken.None);
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var (items, totalCount) = await _repo.GetPagedByArtistAsync(
             performer.Id, 1, 20, "enter", CancellationToken.None);
