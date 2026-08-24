@@ -71,11 +71,5 @@ namespace MyVocaList.Infra.Repository
             // The subsequent SaveChangesAsync will persist all deletions to the database.
             return Task.CompletedTask;
         }
-
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
     }
 }

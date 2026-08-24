@@ -345,7 +345,6 @@ public class PersonServiceTests
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(person);
         _repoMock.Setup(r => r.IsEmailTakenAsync(It.IsAny<string>(), It.IsAny<int?>(), default))
                  .ReturnsAsync(false);
-        _repoMock.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
         var (success, message) = await CreateSut().UpdatePersonAsync(1, "John Doe");
 
@@ -370,7 +369,6 @@ public class PersonServiceTests
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(p1);
         _repoMock.Setup(r => r.GetByIdAsync(2)).ReturnsAsync(p2);
         _repoMock.Setup(r => r.DeleteAsync(It.IsAny<Person>())).Returns(Task.CompletedTask);
-        _repoMock.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
 
         var (success, message) = await CreateSut().DeletePersonsAsync([1, 2]);
 

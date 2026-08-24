@@ -123,8 +123,6 @@ public class VenueServiceTests
                  .ReturnsAsync((Venue?)null);
         _repoMock.Setup(r => r.AddAsync(It.IsAny<Venue>()))
                  .Returns(Task.CompletedTask);
-        _repoMock.Setup(r => r.SaveChangesAsync())
-                 .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
         var (success, message) = await sut.CreateVenueAsync("New Venue");
@@ -171,7 +169,6 @@ public class VenueServiceTests
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venue);
         _repoMock.Setup(r => r.GetByNameAsync("Updated")).ReturnsAsync((Venue?)null);
         _repoMock.Setup(r => r.UpdateAsync(It.IsAny<Venue>())).Returns(Task.CompletedTask);
-        _repoMock.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
         var sut = CreateSut();
 
         var (success, message) = await sut.UpdateVenueAsync(1, "Updated");
@@ -213,7 +210,6 @@ public class VenueServiceTests
         _repoMock.Setup(r => r.GetByIdsWithHasEventsAsync(It.IsAny<IEnumerable<int>>()))
                  .ReturnsAsync([(venue, 0)]);
         _repoMock.Setup(r => r.DeleteRangeAsync(It.IsAny<IEnumerable<Venue>>())).Returns(Task.CompletedTask);
-        _repoMock.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
         var sut = CreateSut();
 
         var (success, message) = await sut.DeleteVenuesAsync([1]);
