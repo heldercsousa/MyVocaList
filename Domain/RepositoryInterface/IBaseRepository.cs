@@ -15,6 +15,5 @@ namespace MyVocaList.Domain.RepositoryInterface
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);
         Task DeleteRangeAsync(IEnumerable<T> entities);
-        Task SaveChangesAsync();
     }
 }
