@@ -18,6 +18,4 @@ public interface ISongKaraokeUrlRepository
 
     /// <summary>Increments PlayCount by 1 and sets LastUsedAt = UtcNow for the given (songId, videoId).</summary>
     Task IncrementPlayCountAsync(int songId, string videoId, CancellationToken ct = default);
-
-    Task SaveChangesAsync(CancellationToken ct = default);
 }

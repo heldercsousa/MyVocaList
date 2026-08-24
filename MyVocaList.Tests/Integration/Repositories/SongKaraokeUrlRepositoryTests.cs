@@ -46,7 +46,7 @@ public class SongKaraokeUrlRepositoryTests : IAsyncLifetime
     {
         var url = new SongKaraokeUrl { SongId = SongId, VideoId = "dQw4w9WgXcQ", AddedAt = DateTime.UtcNow };
         await _repo.AddAsync(url);
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var list = await _repo.GetBySongIdAsync(SongId);
 
@@ -105,7 +105,6 @@ public class SongKaraokeUrlRepositoryTests : IAsyncLifetime
         await _db.SaveChangesAsync();
 
         await _repo.IncrementPlayCountAsync(SongId, "dQw4w9WgXcQ");
-        await _repo.SaveChangesAsync();
 
         var reloaded = await _repo.GetBySongIdAsync(SongId);
         Assert.Equal(3, reloaded[0].PlayCount);
