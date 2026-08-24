@@ -13,6 +13,4 @@ public interface IBackupRepository
 
     /// <summary>Returns the most recent successful full snapshot entry, or null if none exists.</summary>
     Task<BackupHistory?> GetLatestSnapshotAsync(CancellationToken ct);
-
-    Task SaveChangesAsync(CancellationToken ct);
 }
