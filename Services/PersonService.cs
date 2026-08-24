@@ -1,7 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions.Strings;
 using System.Text.RegularExpressions;
 
@@ -11,15 +13,17 @@ namespace MyVocaList.Services;
 public class PersonService : IPersonService
 {
     private readonly IPersonRepository _personRepository;
+    private readonly IUnitOfWork _uow;
     private readonly ILogger<PersonService> _logger;
 
     public int MaxInputLength => 200;
     public int MaxDatabaseLength => 250;
     public int ShowCounterAt => 180;
 
-    public PersonService(IPersonRepository personRepository, ILogger<PersonService> logger)
+    public PersonService(IPersonRepository personRepository, IUnitOfWork uow, ILogger<PersonService> logger)
     {
         _personRepository = personRepository;
+        _uow = uow;
         _logger = logger;
     }
 
@@ -139,28 +143,34 @@ public class PersonService : IPersonService
         if (!emailValidation.isValid)
             return (false, emailValidation.message, null);
 
-        if (!string.IsNullOrWhiteSpace(email))
+        return await _uow.ExecuteAsync<(bool success, string message, Person? person)>(async sp =>
         {
-            // EF applies Person.Email's ValueConverter (design.md § D3) to this WHERE parameter
-            // too, so an untrimmed check value still matches trimmed stored rows.
-            var emailTaken = await _personRepository.IsEmailTakenAsync(email, cancellationToken: cancellationToken);
-            if (emailTaken)
-                return (false, "Email already registered to another singer.", null);
-        }
+            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+            var personRepository = sp.GetRequiredService<IPersonRepository>();
 
-        // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
-        // PersonConfiguration (design.md § D3) — not here. BirthdayDayMonth is out of D3's scope.
-        var person = new Person(fullName)
-        {
-            BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim(),
-            Email = string.IsNullOrWhiteSpace(email) ? null : email
-        };
-        // DB collation (NOCASE_NOACCENT) handles case/accent normalization at query time.
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                // EF applies Person.Email's ValueConverter (design.md § D3) to this WHERE parameter
+                // too, so an untrimmed check value still matches trimmed stored rows.
+                var emailTaken = await personRepository.IsEmailTakenAsync(email, cancellationToken: cancellationToken);
+                if (emailTaken)
+                    return (false, "Email already registered to another singer.", null);
+            }
 
-        await _personRepository.AddAsync(person);
-        await _personRepository.SaveChangesAsync();
+            // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
+            // PersonConfiguration (design.md § D3) — not here. BirthdayDayMonth is out of D3's scope.
+            var person = new Person(fullName)
+            {
+                BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim(),
+                Email = string.IsNullOrWhiteSpace(email) ? null : email
+            };
+            // DB collation (NOCASE_NOACCENT) handles case/accent normalization at query time.
 
-        return (true, $"{fullName.Trim()} registered successfully!", person);
+            await personRepository.AddAsync(person);
+            // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+
+            return (true, $"{fullName.Trim()} registered successfully!", person);
+        }, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -220,10 +230,6 @@ public class PersonService : IPersonService
         int id, string fullName, string birthday = null, string email = null,
         CancellationToken cancellationToken = default)
     {
-        var person = await _personRepository.GetByIdAsync(id);
-        if (person == null)
-            return (false, "Singer not found.");
-
         var nameValidation = ValidateNameInput(fullName);
         if (!nameValidation.isValid)
             return (false, nameValidation.message);
@@ -236,24 +242,40 @@ public class PersonService : IPersonService
         if (!emailValidation.isValid)
             return (false, emailValidation.message);
 
-        if (!string.IsNullOrWhiteSpace(email))
+        return await _uow.ExecuteAsync<(bool success, string message)>(async sp =>
         {
-            // EF applies Person.Email's ValueConverter (design.md § D3) to this WHERE parameter
-            // too, so an untrimmed check value still matches trimmed stored rows.
-            var emailTaken = await _personRepository.IsEmailTakenAsync(email, id, cancellationToken);
-            if (emailTaken)
-                return (false, "Email already registered to another singer.");
-        }
+            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+            var personRepository = sp.GetRequiredService<IPersonRepository>();
 
-        // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
-        // PersonConfiguration (design.md § D3) — not here. BirthdayDayMonth is out of D3's scope.
-        person.FullName = fullName;
-        person.BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim();
-        person.Email = string.IsNullOrWhiteSpace(email) ? null : email;
+            var person = await personRepository.GetByIdAsync(id);
+            if (person == null)
+                return (false, "Singer not found.");
 
-        await _personRepository.SaveChangesAsync();
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                // EF applies Person.Email's ValueConverter (design.md § D3) to this WHERE parameter
+                // too, so an untrimmed check value still matches trimmed stored rows.
+                var emailTaken = await personRepository.IsEmailTakenAsync(email, id, cancellationToken);
+                if (emailTaken)
+                    return (false, "Email already registered to another singer.");
+            }
 
-        return (true, $"{fullName.Trim()} updated successfully!");
+            // Person.FullName/Email trimming is enforced by the EF Core ValueConverter configured in
+            // PersonConfiguration (design.md § D3) — not here. BirthdayDayMonth is out of D3's scope.
+            person.FullName = fullName;
+            person.BirthdayDayMonth = string.IsNullOrWhiteSpace(birthday) ? null : birthday.Trim();
+            person.Email = string.IsNullOrWhiteSpace(email) ? null : email;
+            // Explicit UpdateAsync: GetByIdAsync's FindAsync only returns an already-tracked
+            // instance when one exists in THIS unit of work's local cache. Since each unit of work
+            // gets its own freshly-scoped AppDbContext (REQ-UOW-28), a person fetched here was never
+            // previously tracked, and the DbContext-wide QueryTrackingBehavior.NoTracking default
+            // means FindAsync returns it detached — mutating a detached instance is a silent no-op
+            // at SaveChangesAsync time without this call (mirrors ArtistService.UpdateArtistAsync).
+            await personRepository.UpdateAsync(person);
+            // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+
+            return (true, $"{fullName.Trim()} updated successfully!");
+        }, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -264,15 +286,21 @@ public class PersonService : IPersonService
         if (idList.Count == 0)
             return (true, "0 singer(s) successfully removed!");
 
-        foreach (var id in idList)
+        return await _uow.ExecuteAsync<(bool success, string message)>(async sp =>
         {
-            var person = await _personRepository.GetByIdAsync(id);
-            if (person != null)
-                await _personRepository.DeleteAsync(person);
-        }
+            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+            var personRepository = sp.GetRequiredService<IPersonRepository>();
 
-        await _personRepository.SaveChangesAsync();
-        return (true, $"{idList.Count} singer(s) successfully removed!");
+            foreach (var id in idList)
+            {
+                var person = await personRepository.GetByIdAsync(id);
+                if (person != null)
+                    await personRepository.DeleteAsync(person);
+            }
+            // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+
+            return (true, $"{idList.Count} singer(s) successfully removed!");
+        }, cancellationToken);
     }
 
     #endregion
