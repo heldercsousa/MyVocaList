@@ -6,7 +6,7 @@ target: 2026-08-03
 section: DevCycleCraft
 parent: read-model-notracking-guidelines
 goal: AddDbContext registers Scoped but MAUI never creates a scope, so one AppDbContext lives for the whole app session and leaks tracked entities between operations (root cause of BUG-068). Establish one correct unit-of-work pattern with minimal repeated code.
-gate: "Phases 0-3 merged to develop; Phase 3.5 and Phase 4+ remain, each gated on a spec."
+gate: "Phase 3.5 dissolved by the Event/Queue deletion; Phase 4+ is unblocked and all that remains."
 kind: change
 ---
 
