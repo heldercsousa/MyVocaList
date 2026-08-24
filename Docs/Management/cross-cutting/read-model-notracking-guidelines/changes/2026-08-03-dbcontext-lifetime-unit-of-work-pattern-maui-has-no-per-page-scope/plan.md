@@ -814,7 +814,32 @@ public Task<(bool success, string message)> UpdateSongAsync(
 
 ---
 
-## Phase 3.5 — BLOCKED: repository-family merge + Queue/Event UoW migration
+## Phase 3.5 — RESOLVED 2026-08-24: dissolved by the Event/Queue deletion
+
+> **Both halves of this phase ceased to exist on 2026-08-20** (`32e7a85e`, branch
+> `chore/demolish-event-queue`). `Infra/Repositories/` — the plural family this phase existed to
+> delete — is gone from the tree; `Infra/Repository/` (singular) is now the only repository folder,
+> holding 8 files. The Queue/Event UoW migration is likewise moot: the services, their repositories
+> and every `TODO [BUG-071 / UOW]` marker were deleted with the feature, and only the Event infra
+> definitions (entities, EF configs, `DbSet`s, migrations) were kept — none of which carry a save.
+>
+> The two traps this phase warned about are therefore both discharged, not deferred: the duplicate
+> `Event` entity namespaces collapsed to one, and the "services with zero `SaveChangesAsync` of their
+> own" hazard cannot fire because those services no longer exist.
+>
+> **Consequence: Phase 4+ is UNBLOCKED.** Its gate read *"startable only after Phase 3 passes and
+> Phase 3.5 lands"*; Phase 3 passed (Helder's emulator gate, `cdec7af5`) and Phase 3.5 is now
+> discharged. The owning item's folder
+> (`changes/2026-08-04-merge-duplicate-repository-families-…`) was removed in the same docs purge
+> and is not to be recreated.
+>
+> **Phase 4+ scope shrinks with it:** task 4.6a named `QueueSongPickerViewModel` and
+> `QueueManagementViewModel`, both deleted — only `PersonPickerViewModel` survives from that task.
+> Task 4.2's rationale for retaining `IBaseRepository<T>.SaveChangesAsync()` also lapses: its cited
+> surviving callers were all in `Services/QueueService.cs`, which is gone. Re-check before dispatch
+> rather than assuming either way.
+
+**Historical record of what this phase would have done, kept for context:**
 
 **Not planned here, and not startable.** The owning item —
 `changes/2026-08-04-merge-duplicate-repository-families-into-one-infra-repository-infra-repositories/`
@@ -836,7 +861,9 @@ plan-review → implementation cycle. This plan does not attempt it.
 
 ## Phase 4+ — Spread (12 methods) — GATED
 
-> Startable only after Phase 3 passes **and** Phase 3.5 lands. Written against the **provisional** API
+> ~~Startable only after Phase 3 passes **and** Phase 3.5 lands.~~ **UNBLOCKED 2026-08-24** —
+> Phase 3 passed and Phase 3.5 was dissolved by the Event/Queue deletion (see above).
+> Re-verify each task's file list against the tree before dispatch; several coordinates are stale. Written against the **provisional** API
 > shape; if Phase 3.4 decided "replace", rewrite against the final shape before dispatch. Each task
 > below also owns its service's `Unit/Services/*Tests.cs` construction fix (finding F7).
 
