@@ -1,7 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions.Strings;
 using MyVocaList.Services.Mappers;
 
@@ -13,6 +15,7 @@ namespace MyVocaList.Services
     public class VenueService : IVenueService
     {
         private readonly IVenueRepository _venueRepository;
+        private readonly IUnitOfWork _uow;
         private readonly ILogger<VenueService> _logger;
 
         // Validation constants
@@ -21,9 +24,11 @@ namespace MyVocaList.Services
 
         public VenueService(
             IVenueRepository venueRepository,
+            IUnitOfWork uow,
             ILogger<VenueService> logger)
         {
             _venueRepository = venueRepository;
+            _uow = uow;
             _logger = logger;
         }
 
@@ -55,18 +60,24 @@ namespace MyVocaList.Services
             if (!validation.isValid)
                 return (false, validation.message);
 
-            // Venue.Name trimming is enforced by the EF Core ValueConverter configured in
-            // VenueConfiguration (design.md § D3) — not here. EF applies the same converter to
-            // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-            var existing = await _venueRepository.GetByNameAsync(name);
-            if (existing != null)
-                return (false, "There is another venue registered with this name");
+            return await _uow.ExecuteAsync<(bool success, string message)>(async sp =>
+            {
+                // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+                var venueRepository = sp.GetRequiredService<IVenueRepository>();
 
-            var venue = new Venue { Name = name };
-            await _venueRepository.AddAsync(venue);
-            await _venueRepository.SaveChangesAsync();
+                // Venue.Name trimming is enforced by the EF Core ValueConverter configured in
+                // VenueConfiguration (design.md § D3) — not here. EF applies the same converter to
+                // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
+                var existing = await venueRepository.GetByNameAsync(name);
+                if (existing != null)
+                    return (false, "There is another venue registered with this name");
 
-            return (true, $"Venue '{name.Trim()}' successfully created!");
+                var venue = new Venue { Name = name };
+                await venueRepository.AddAsync(venue);
+                // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+
+                return (true, $"Venue '{name.Trim()}' successfully created!");
+            });
         }
 
         public async Task<(bool success, string message)> UpdateVenueAsync(int id, string newName)
@@ -77,22 +88,36 @@ namespace MyVocaList.Services
             if (!validation.isValid)
                 return (false, validation.message);
 
-            var venue = await _venueRepository.GetByIdAsync(id);
-            if (venue == null)
-                return (false, "Venue not found");
+            return await _uow.ExecuteAsync<(bool success, string message)>(async sp =>
+            {
+                // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+                var venueRepository = sp.GetRequiredService<IVenueRepository>();
 
-            // Venue.Name trimming is enforced by the EF Core ValueConverter configured in
-            // VenueConfiguration (design.md § D3) — not here. EF applies the same converter to
-            // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-            var existing = await _venueRepository.GetByNameAsync(newName);
-            if (existing != null && existing.Id != id)
-                return (false, "There is another venue registered with this name");
+                var venue = await venueRepository.GetByIdAsync(id);
+                if (venue == null)
+                    return (false, "Venue not found");
 
-            venue.Name = newName;
-            await _venueRepository.UpdateAsync(venue);
-            await _venueRepository.SaveChangesAsync();
+                // Venue.Name trimming is enforced by the EF Core ValueConverter configured in
+                // VenueConfiguration (design.md § D3) — not here. EF applies the same converter to
+                // this WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
+                var existing = await venueRepository.GetByNameAsync(newName);
+                if (existing != null && existing.Id != id)
+                    return (false, "There is another venue registered with this name");
 
-            return (true, $"Venue name successfully updated to '{newName.Trim()}'!");
+                venue.Name = newName;
+                // Explicit UpdateAsync: GetByIdAsync's FindAsync only returns an already-tracked
+                // instance when one exists in THIS unit of work's local cache. Since each unit of
+                // work gets its own freshly-scoped AppDbContext (REQ-UOW-28), a venue fetched here
+                // was never previously tracked, and the DbContext-wide QueryTrackingBehavior.NoTracking
+                // default means FindAsync returns it detached — mutating a detached instance is a
+                // silent no-op at SaveChangesAsync time without this call (mirrors
+                // ArtistService.UpdateArtistAsync / PersonService.UpdatePersonAsync). This call was
+                // already present before the unit-of-work wrap.
+                await venueRepository.UpdateAsync(venue);
+                // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+
+                return (true, $"Venue name successfully updated to '{newName.Trim()}'!");
+            });
         }
 
         public async Task<(bool success, string message)> DeleteVenuesAsync(IEnumerable<int> ids)
@@ -102,26 +127,32 @@ namespace MyVocaList.Services
             if (!ids.Any())
                 return (false, "No venue was selected for removal.");
 
-            var venuesWithEvents = await _venueRepository.GetByIdsWithHasEventsAsync(ids);
-            var validationResults = new List<(int id, string name, bool canDelete, string reason)>();
-
-            foreach (var (venue, eventCount) in venuesWithEvents)
-                validationResults.Add((venue.Id, venue.Name, eventCount == 0, eventCount > 0 ? "has registered events" : ""));
-
-            var cannotDelete = validationResults.Where(v => !v.canDelete).ToList();
-            var canDelete = validationResults.Where(v => v.canDelete).ToList();
-
-            if (canDelete.Any())
+            return await _uow.ExecuteAsync<(bool success, string message)>(async sp =>
             {
-                var entitiesToDelete = venuesWithEvents
-                    .Where(x => canDelete.Any(c => c.id == x.venue.Id))
-                    .Select(x => x.venue);
+                // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+                var venueRepository = sp.GetRequiredService<IVenueRepository>();
 
-                await _venueRepository.DeleteRangeAsync(entitiesToDelete);
-                await _venueRepository.SaveChangesAsync();
-            }
+                var venuesWithEvents = await venueRepository.GetByIdsWithHasEventsAsync(ids);
+                var validationResults = new List<(int id, string name, bool canDelete, string reason)>();
 
-            return BuildDeleteResultMessage(canDelete, cannotDelete);
+                foreach (var (venue, eventCount) in venuesWithEvents)
+                    validationResults.Add((venue.Id, venue.Name, eventCount == 0, eventCount > 0 ? "has registered events" : ""));
+
+                var cannotDelete = validationResults.Where(v => !v.canDelete).ToList();
+                var canDelete = validationResults.Where(v => v.canDelete).ToList();
+
+                if (canDelete.Count != 0)
+                {
+                    var entitiesToDelete = venuesWithEvents
+                        .Where(x => canDelete.Any(c => c.id == x.venue.Id))
+                        .Select(x => x.venue);
+
+                    await venueRepository.DeleteRangeAsync(entitiesToDelete);
+                    // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+                }
+
+                return BuildDeleteResultMessage(canDelete, cannotDelete);
+            });
         }
 
         private (bool success, string message) BuildDeleteResultMessage(
