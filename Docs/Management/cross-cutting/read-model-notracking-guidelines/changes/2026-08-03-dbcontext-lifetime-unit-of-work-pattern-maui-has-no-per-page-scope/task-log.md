@@ -1513,3 +1513,54 @@ repository method).
 ### Out of scope, found during this task
 
 None — no scope bleed into 4.2–4.7 or any other service.
+
+---
+
+## Task: UoW Phase 4.3 — wrap `SongKaraokeUrlService` in `IUnitOfWork`
+
+**Plan:** `plan.md` § Phase 4+, Task 4.3 · **Status:** merged to develop (`fcc1509e`) · **Date:** 2026-08-24
+
+Written to develop by the orchestrator: three implementors ran this wave in parallel worktrees and were
+briefed NOT to touch `Docs/`, since a shared task-log is a single-writer file and would have collided.
+
+### Changed files
+
+- `Services/SongKaraokeUrlService.cs` — `AddUrlAsync` / `RemoveUrlAsync` / `RecordPlayAsync` wrapped.
+- `Domain/RepositoryInterface/ISongKaraokeUrlRepository.cs` — `SaveChangesAsync` member retired.
+- `Infra/Repository/SongKaraokeUrlRepository.cs` — its implementation retired.
+- `MyVocaList.Tests/Unit/Services/SongKaraokeUrlServiceTests.cs` — `CreateSut` via `PassthroughUnitOfWork.Over(_repoMock)`.
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` — dropped one `Verify` against the retired member (`SongService` itself untouched).
+- `MyVocaList.Tests/Integration/Repositories/SongKaraokeUrlRepositoryTests.cs` — direct repo saves redirected to `_db.SaveChangesAsync()`.
+- `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs` — the `ThrowOnAddUrlRepository` test decorator no longer implements the retired member.
+
+### Notable decisions
+
+- **`RecordPlayAsync` uses the no-signal overload** `ExecuteAsync(Func<IServiceProvider, Task>, ct)`
+  (REQ-UOW-26) rather than the tuple-returning one — it has no failure mode, so there is no `bool` for
+  the save-skip convention to read. It is the only in-scope method of this shape.
+- **Validation stays outside the transaction.** `AddUrlAsync` rejects a malformed YouTube URL before
+  entering `ExecuteAsync`, returning via `Task.FromResult`. A rejected input therefore never opens a
+  transaction — correct, and worth preserving if this method is edited later.
+- **Three `Moq` `Verify` calls against `SaveChangesAsync` were removed, not weakened.** Retiring the
+  interface member makes those `Verify` expressions uncompilable; there is no way to keep them. The
+  guarantee they encoded — that the URL repository never commits on its own — is asserted against a
+  real context by `Bug068RegressionTests.CreateSongWithUrls_UrlAddFaults_PersistsNoSongRow`, and the
+  surviving comment in `SongServiceTests` was updated to point at it rather than left stale.
+
+### Verification evidence
+
+- Implementor: build 0 errors; `575/575` green.
+- **Orchestrator re-verified independently** before merging: `dotnet build … --no-restore` -> 0 `error CS`;
+  `dotnet test … --no-build --no-restore` -> `Com falha: 0, Aprovado: 575, Total: 575`.
+- **BUG-076 fired twice** during the implementor's runs, on two *different* tests
+  (`NestedUnitOfWorkTests…LeavesPartialArtistRow`, then `PersonRepositoryTests.InitializeAsync`), each
+  time the known `ObjectDisposedException` on `SQLitePCL` during `EnsureCreated`, each time passing on
+  re-run. Recorded, not "fixed" and not used to excuse a failure. This is now the clearest evidence yet
+  that BUG-076 is schedule-sensitive and test-independent.
+
+### File-collision note for the wave
+
+This task edited `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs`, which the Phase 4.2
+briefing also named as owned. The overlap was survivable only because the edits are in different
+members. **Both 4.2 and 4.4 name that same file** — it is effectively a shared fixture for the whole
+Phase 4 rollout and should be treated as sequential-only for the remaining tasks.
