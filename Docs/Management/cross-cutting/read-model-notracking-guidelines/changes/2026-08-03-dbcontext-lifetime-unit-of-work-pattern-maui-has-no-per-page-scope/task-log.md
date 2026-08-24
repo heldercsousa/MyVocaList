@@ -1564,3 +1564,60 @@ This task edited `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.
 briefing also named as owned. The overlap was survivable only because the edits are in different
 members. **Both 4.2 and 4.4 name that same file** — it is effectively a shared fixture for the whole
 Phase 4 rollout and should be treated as sequential-only for the remaining tasks.
+
+---
+
+## Task: UoW Phase 4.5 — wrap `BackupService.CreateFullBackupAsync` in `IUnitOfWork`
+
+**Plan:** `plan.md` § Phase 4+, Task 4.5 · **Status:** merged to develop (`e7b0b1c…` see LEDGER) · **Date:** 2026-08-24
+
+### Changed files
+
+- `Domain/ServicesInterfaces/IBackupService.cs` — `BackupResult : IUnitOfWorkOutcome`.
+- `Services/BackupService.cs` — `CreateFullBackupAsync` wrapped; `PruneOldSnapshotsAsync` converted to a static helper.
+- `Domain/RepositoryInterface/IBackupRepository.cs` + `Infra/Repository/BackupRepository.cs` — `SaveChangesAsync` retired.
+- `MyVocaList/MauiProgram.cs` — one line in the existing `BackupService` factory lambda.
+- `MyVocaList.Tests/Unit/Services/BackupServiceTests.cs` — `CreateSut` via `PassthroughUnitOfWork`.
+- `MyVocaList.Tests/Integration/Repositories/BackupRepositoryTests.cs` — 4 call sites to `_db.SaveChangesAsync()`.
+- `MyVocaList.Tests/Integration/UnitOfWork/SaveSkipTests.cs` — the two new tests this task owns.
+
+### The fail-closed trap, and why this task was unsplittable
+
+`IUnitOfWork` decides whether to commit by inspecting the body's return value, and under fail-closed an
+unrecognised return type throws. `BackupResult` did not implement `IUnitOfWorkOutcome`, so wrapping the
+method *before* adding the marker would have made **every** call to `CreateFullBackupAsync` throw
+immediately — with a green build, since the failure is a runtime type check. Marker and wrap landed in
+one commit. Anyone splitting this later re-introduces the same trap.
+
+### `PruneOldSnapshotsAsync` — a REQ-UOW-28 consequence worth naming
+
+It previously read the constructor's `_repo` field, and it is called from *inside* the wrapped lambda.
+Left as-is it would have been a textbook REQ-UOW-28 violation: the lambda would have committed through
+the scope's context while pruning through the longer-lived one. It is now `static`, taking
+`IBackupRepository` as a parameter, which makes the violation impossible to reintroduce by accident
+rather than merely absent today. **This is the pattern to copy** wherever a private helper is reachable
+from a wrapped body.
+
+`_repo` is deliberately retained as a field: `ExportBundleAsync`, `RestoreFromBundleAsync`,
+`GetHistoryAsync` and `HasRecentBackupAsync` are out of this task's scope and still use it.
+
+### Tests added (both owned by this task per the spec)
+
+- `BackupService_CreateFullBackupAsync_FailureResult_DoesNotPersistHistoryRow` — REQ-UOW-24's
+  `IUnitOfWorkOutcome` exemplar against a **real** `BackupResult`, fault-injecting `ITransactionLogWriter`
+  after the `AddAsync` mutation, proving a failure result skips the save.
+- `BackupService_CreateFullBackupAsync_SuccessResult_DoesNotThrowAndPersistsHistoryRow` — REQ-UOW-27's
+  positive counterpart, proving the wrap does not throw once the marker is present. Without this one the
+  failure test would pass just as happily if the wrap were broken outright.
+
+### Verification evidence
+
+- Implementor: build 0 errors; `577/577` (baseline 575 + 2 new).
+- **Orchestrator re-verified independently** before merging: 0 `error CS`;
+  `Com falha: 0, Aprovado: 577, Total: 577`. Re-run again on develop after the merge: `577/577`.
+
+### Out of scope, confirmed untouched
+
+**BUG-073** — `RestoreFromBundleAsync` does `File.Copy(snapshotFile, _dbPath, overwrite: true)` on the
+path `AppDbContext`'s connection string points at, with no dispose and no connection close. It is a
+file-handle defect, not a unit-of-work one, is registered separately, and was deliberately excluded.
