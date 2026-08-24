@@ -1,7 +1,7 @@
 ---
 id: song-writes-propagate-to-the-artist-catalog
 title: Song writes propagate to the artist catalog
-status: 💡 Pending
+status: 📋 Spec
 target: 2026-08-04
 section: BusinessFeatures
 parent: artists-songs
