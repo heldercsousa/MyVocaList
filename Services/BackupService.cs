@@ -1,6 +1,8 @@
+using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Domain.UnitOfWork;
 using System.IO.Compression;
 using System.Text.Json;
 
@@ -12,6 +14,7 @@ public class BackupService : IBackupService
     private const int MaxSnapshotsRetained = 10;
 
     private readonly IBackupRepository _repo;
+    private readonly IUnitOfWork _uow;
     private readonly ITransactionLogWriter _logWriter;
     private readonly ILogger<BackupService> _logger;
     private readonly string _dbPath;
@@ -19,12 +22,14 @@ public class BackupService : IBackupService
 
     public BackupService(
         IBackupRepository repo,
+        IUnitOfWork uow,
         ITransactionLogWriter logWriter,
         ILogger<BackupService> logger,
         string dbPath,
         string backupDir)
     {
         _repo = repo;
+        _uow = uow;
         _logWriter = logWriter;
         _logger = logger;
         _dbPath = dbPath;
@@ -33,45 +38,49 @@ public class BackupService : IBackupService
     }
 
     /// <inheritdoc />
-    public async Task<BackupResult> CreateFullBackupAsync(BackupTrigger trigger, CancellationToken ct)
-    {
-        try
+    public Task<BackupResult> CreateFullBackupAsync(BackupTrigger trigger, CancellationToken ct)
+        => _uow.ExecuteAsync<BackupResult>(async sp =>
         {
-            var timestamp = DateTime.UtcNow;
-            var fileName = $"backup_{timestamp:yyyyMMdd_HHmmss}.db";
-            var destPath = Path.Combine(_backupDir, fileName);
+            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+            var backupRepository = sp.GetRequiredService<IBackupRepository>();
 
-            // Use file copy; VACUUM INTO is applied in Phase 4 via platform-specific EF Core connection
-            if (File.Exists(_dbPath))
-                File.Copy(_dbPath, destPath, overwrite: true);
-
-            var fileSize = new FileInfo(destPath).Length;
-
-            var history = new BackupHistory
+            try
             {
-                CreatedAt = timestamp,
-                TriggerType = trigger,
-                BackupType = BackupType.FullSnapshot,
-                FilePath = destPath,
-                FileSizeBytes = fileSize,
-                MirrorStatus = MirrorStatus.NotAttempted
-            };
+                var timestamp = DateTime.UtcNow;
+                var fileName = $"backup_{timestamp:yyyyMMdd_HHmmss}.db";
+                var destPath = Path.Combine(_backupDir, fileName);
 
-            await _repo.AddAsync(history, ct);
-            await _repo.SaveChangesAsync(ct);
+                // Use file copy; VACUUM INTO is applied in Phase 4 via platform-specific EF Core connection
+                if (File.Exists(_dbPath))
+                    File.Copy(_dbPath, destPath, overwrite: true);
 
-            await _logWriter.PruneLogsOlderThanAsync(timestamp, ct);
-            await PruneOldSnapshotsAsync(ct);
+                var fileSize = new FileInfo(destPath).Length;
 
-            _logger.LogInformation("Full backup created: {Path} ({Size} bytes)", destPath, fileSize);
-            return new BackupResult(true, "Backup created successfully.", destPath, fileSize);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to create full backup");
-            return new BackupResult(false, "Backup failed. See logs for details.", null, 0);
-        }
-    }
+                var history = new BackupHistory
+                {
+                    CreatedAt = timestamp,
+                    TriggerType = trigger,
+                    BackupType = BackupType.FullSnapshot,
+                    FilePath = destPath,
+                    FileSizeBytes = fileSize,
+                    MirrorStatus = MirrorStatus.NotAttempted
+                };
+
+                await backupRepository.AddAsync(history, ct);
+                // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+
+                await _logWriter.PruneLogsOlderThanAsync(timestamp, ct);
+                await PruneOldSnapshotsAsync(backupRepository, ct);
+
+                _logger.LogInformation("Full backup created: {Path} ({Size} bytes)", destPath, fileSize);
+                return new BackupResult(true, "Backup created successfully.", destPath, fileSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create full backup");
+                return new BackupResult(false, "Backup failed. See logs for details.", null, 0);
+            }
+        }, ct);
 
     /// <inheritdoc />
     public async Task<(bool success, string message)> ExportBundleAsync(CancellationToken ct)
@@ -169,9 +178,9 @@ public class BackupService : IBackupService
         return latest is not null && latest.CreatedAt >= DateTime.UtcNow.AddHours(-24);
     }
 
-    private async Task PruneOldSnapshotsAsync(CancellationToken ct)
+    private static async Task PruneOldSnapshotsAsync(IBackupRepository backupRepository, CancellationToken ct)
     {
-        var all = await _repo.GetRecentAsync(MaxSnapshotsRetained + 10, ct);
+        var all = await backupRepository.GetRecentAsync(MaxSnapshotsRetained + 10, ct);
         var toDelete = all.Where(h => h.BackupType == BackupType.FullSnapshot)
                           .OrderByDescending(h => h.CreatedAt)
                           .Skip(MaxSnapshotsRetained)
