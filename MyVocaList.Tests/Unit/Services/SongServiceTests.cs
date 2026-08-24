@@ -609,11 +609,9 @@ public class SongServiceTests
         Assert.NotNull(song);
         // Both URLs staged via url repo
         _urlRepoMock.Verify(r => r.AddAsync(It.IsAny<SongKaraokeUrl>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
-        // [AC] REQ-UOW-10: ISongRepository.SaveChangesAsync is retired outright - the single
-        // atomic commit moved to IUnitOfWork, and is asserted against a real context by
+        // [AC] REQ-UOW-10: ISongKaraokeUrlRepository.SaveChangesAsync is retired outright (Phase 4.3)
+        // - the single atomic commit moved to IUnitOfWork, and is asserted against a real context by
         // Bug068RegressionTests.CreateSongWithUrls_UrlAddFaults_PersistsNoSongRow.
-        // URL repo must NOT call its own SaveChangesAsync
-        _urlRepoMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
