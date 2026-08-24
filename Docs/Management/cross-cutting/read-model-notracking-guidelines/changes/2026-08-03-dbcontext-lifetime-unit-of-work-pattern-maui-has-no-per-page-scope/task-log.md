@@ -1387,3 +1387,69 @@ The 2026-08-04 notes were re-verified against current HEAD and several claims ha
 | DI registration in `MauiProgram.cs` | **`MyVocaList/Extensions/ServiceCollectionExtensions.cs`** |
 
 Line numbers from the 2026-08-04 notes must not be used as coordinates.
+
+---
+
+## 2026-08-24 — Phase 3.5 dissolved; Phase 4+ unblocked (orchestrator, docs-only)
+
+**Status:** `Phase 3.5 closed — no code, no tests, docs reconciliation only.`
+
+Triggered by Helder confirming his manual tests on the UOW work passed and asking whether any step
+remains. Answer: yes — Phase 4+ — but its stated blocker had silently evaporated four days earlier.
+
+### What changed in the tree (not by this entry — by the Event/Queue deletion, `32e7a85e`)
+
+| Phase 3.5 obligation | Current truth on develop |
+|---|---|
+| Delete `Infra/Repositories/` (plural, 2 files, 6 embedded saves) | Folder does not exist. `Infra/Repository/` (singular) is the only one, 8 files. |
+| Migrate Queue/Event services to UoW | Those services are deleted. Only Event *infra definitions* were kept (entities, EF configs, `DbSet`s, migrations) — none carry a save. |
+| Trap: `Event` in two entity namespaces with different shapes | Collapsed to one. |
+| Trap: `QueueServiceNew`/`EventService` have zero saves of their own | Cannot fire — neither service exists. |
+| 26 `TODO [BUG-071 / UOW]` markers across 8 files | **Zero** remain in production code. The only surviving `BUG-071` mention is a comment in `MyVocaList.Tests/Integration/UnitOfWork/UnitOfWorkLifetimeTests.cs:179`, explaining what an assertion is guarding — correct as-is, do not delete. |
+
+The `PROVISIONAL shape (D13)` doc-comment follow-up recorded in the previous entry is also already
+discharged — no occurrence of `PROVISIONAL` survives in any `.cs` file.
+
+### Consequence
+
+Phase 4+'s gate (*"startable only after Phase 3 passes and Phase 3.5 lands"*) is fully satisfied:
+Phase 3 passed at Helder's emulator gate (`cdec7af5`), Phase 3.5 is discharged rather than deferred.
+**Phase 4+ is the only remaining UoW work and is now dispatchable**, subject to the caveat below.
+
+### Caveat carried forward — plan coordinates are stale, re-verify before dispatch
+
+`plan.md` Phase 4+ was written on 2026-08-04 and predates both the pilot and the deletion:
+
+- **4.6a** named three ViewModels; `QueueSongPickerViewModel` and `QueueManagementViewModel` are
+  deleted. Only `PersonPickerViewModel` survives.
+- **4.2**'s justification for *retaining* `IBaseRepository<T>.SaveChangesAsync()` was that its only
+  surviving callers sat in the excluded `Services/QueueService.cs`. That file is gone, so the
+  justification lapses — the retain/remove decision must be re-taken on current evidence, not
+  inherited.
+- The line numbers throughout Phase 4+ are 2026-08-04 coordinates. As with the earlier evidence
+  corrections in this log, **they must not be used as coordinates** — re-locate each edit site.
+
+### Ordering note for the artist-catalog work
+
+Phase **4.1 is `CatalogService`**, and it is a prerequisite for the separately-registered item
+`BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/`.
+`CatalogService` today injects `ICatalogRepository` and calls `_catalogRepository.SaveChangesAsync(ct)`
+directly — it has no `IUnitOfWork` dependency at all. `SongService`'s write methods are all wrapped in
+`_uow.ExecuteAsync`, and REQ-UOW-28 requires everything used inside that lambda to be resolved from the
+lambda's own `sp`. Propagating a song write into the catalog therefore cannot reuse `CatalogService`
+as it stands without either violating REQ-UOW-28 or opening a second, uncoordinated commit boundary
+inside a transaction that already has one. **4.1 first, then the propagation spec.**
+
+### Changed files
+
+- `plan.md` — Phase 3.5 heading rewritten to RESOLVED with the dissolution record; historical body
+  retained beneath it; Phase 4+ gate struck through and marked UNBLOCKED.
+- `README.md` — `gate:` frontmatter updated.
+- `task-log.md` — this entry.
+
+### Verification evidence
+
+- `ls Infra/Repositories/` -> `No such file or directory`; `ls Infra/Repository/` -> 8 files.
+- `grep -rn "BUG-071" --include=*.cs` -> 1 hit, the test comment named above.
+- `grep -rn "PROVISIONAL" --include=*.cs` -> 0 hits.
+- No production code touched by this entry; suite unaffected (575/575 green on develop at `2b6fc488`).
