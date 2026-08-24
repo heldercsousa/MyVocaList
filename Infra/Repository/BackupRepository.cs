@@ -41,10 +41,4 @@ public class BackupRepository : IBackupRepository
             .OrderByDescending(b => b.CreatedAt)
             .FirstOrDefaultAsync(ct);
     }
-
-    /// <inheritdoc />
-    public async Task SaveChangesAsync(CancellationToken ct)
-    {
-        await _context.SaveChangesAsync(ct);
-    }
 }
