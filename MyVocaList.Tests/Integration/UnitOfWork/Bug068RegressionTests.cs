@@ -155,8 +155,5 @@ public class Bug068RegressionTests
 
         public Task IncrementPlayCountAsync(int songId, string videoId, CancellationToken ct = default)
             => inner.IncrementPlayCountAsync(songId, videoId, ct);
-
-        public Task SaveChangesAsync(CancellationToken ct = default)
-            => inner.SaveChangesAsync(ct);
     }
 }

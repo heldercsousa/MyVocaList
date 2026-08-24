@@ -62,8 +62,4 @@ public class SongKaraokeUrlRepository : ISongKaraokeUrlRepository
                      .SetProperty(u => u.LastUsedAt, _ => DateTime.UtcNow),
                      ct);
     }
-
-    /// <inheritdoc />
-    public Task SaveChangesAsync(CancellationToken ct = default)
-        => _db.SaveChangesAsync(ct);
 }
