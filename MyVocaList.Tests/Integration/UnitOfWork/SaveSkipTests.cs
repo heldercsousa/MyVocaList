@@ -239,6 +239,86 @@ public class SaveSkipTests
         Assert.Null(await ReadArtistAsync(uow, "Empty Tuple Artist"));
     }
 
+    // ------------------------------------------------ REQ-UOW-24/27 (real BackupResult exemplar)
+
+    // [AC] REQ-UOW-24: the real IUnitOfWorkOutcome exemplar named by the spec —
+    // BackupService.CreateFullBackupAsync returning a BackupResult with Success == false SHALL NOT
+    // persist the BackupHistory row the body already added (Task 4.5).
+    [Fact]
+    public async Task BackupService_CreateFullBackupAsync_FailureResult_DoesNotPersistHistoryRow()
+    {
+        await using var host = UnitOfWorkTestHost.Create(services =>
+            services.AddScoped<IBackupRepository, MyVocaList.Infra.Repository.BackupRepository>());
+        var uow = host.Resolve<IUnitOfWork>();
+
+        var backupDir = Path.Combine(Path.GetTempPath(), $"mvl_bkp_fail_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(backupDir);
+        var dbPath = Path.Combine(backupDir, "fake_source.db");
+        File.WriteAllText(dbPath, "fake-db-content");
+
+        // Fault injected after the AddAsync mutation — proves the mutation is rolled back, not
+        // merely never attempted.
+        var faultyLogWriter = new Mock<ITransactionLogWriter>();
+        faultyLogWriter
+            .Setup(l => l.PruneLogsOlderThanAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("simulated post-mutation failure"));
+
+        var backupService = new BackupService(
+            host.Resolve<IBackupRepository>(),
+            uow,
+            faultyLogWriter.Object,
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<BackupService>.Instance,
+            dbPath,
+            backupDir);
+
+        var result = await backupService.CreateFullBackupAsync(BackupTrigger.Manual, CancellationToken.None);
+
+        Assert.False(result.Success);
+
+        var historyCount = await uow.ExecuteReadAsync(async sp =>
+        {
+            var db = sp.GetRequiredService<Infra.AppDbContext>();
+            return await db.BackupHistories.CountAsync();
+        });
+        Assert.Equal(0, historyCount);
+    }
+
+    // [AC] REQ-UOW-27: the positive counterpart — now that BackupResult implements
+    // IUnitOfWorkOutcome, the wrap does NOT throw InvalidOperationException, and a successful
+    // backup's BackupHistory row IS persisted (Task 4.5).
+    [Fact]
+    public async Task BackupService_CreateFullBackupAsync_SuccessResult_DoesNotThrowAndPersistsHistoryRow()
+    {
+        await using var host = UnitOfWorkTestHost.Create(services =>
+            services.AddScoped<IBackupRepository, MyVocaList.Infra.Repository.BackupRepository>());
+        var uow = host.Resolve<IUnitOfWork>();
+
+        var backupDir = Path.Combine(Path.GetTempPath(), $"mvl_bkp_ok_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(backupDir);
+        var dbPath = Path.Combine(backupDir, "fake_source.db");
+        File.WriteAllText(dbPath, "fake-db-content");
+
+        var backupService = new BackupService(
+            host.Resolve<IBackupRepository>(),
+            uow,
+            host.Log,
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<BackupService>.Instance,
+            dbPath,
+            backupDir);
+
+        var result = await backupService.CreateFullBackupAsync(BackupTrigger.Manual, CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.NotNull(result.FilePath);
+
+        var historyCount = await uow.ExecuteReadAsync(async sp =>
+        {
+            var db = sp.GetRequiredService<Infra.AppDbContext>();
+            return await db.BackupHistories.CountAsync();
+        });
+        Assert.Equal(1, historyCount);
+    }
+
     // ---------------------------------------------------------------- REQ-UOW-33 (bulk ops)
 
     // [AC] REQ-UOW-33: WHEN the body returns a failure signal after an ExecuteDeleteAsync has

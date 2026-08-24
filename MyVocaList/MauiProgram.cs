@@ -78,6 +78,7 @@ public static class MauiProgram
         builder.Services.AddScoped<IBackupRepository, BackupRepository>();
         builder.Services.AddScoped<IBackupService>(sp => new BackupService(
             sp.GetRequiredService<IBackupRepository>(),
+            sp.GetRequiredService<IUnitOfWork>(),
             sp.GetRequiredService<ITransactionLogWriter>(),
             sp.GetRequiredService<ILogger<BackupService>>(),
             dbPath,
