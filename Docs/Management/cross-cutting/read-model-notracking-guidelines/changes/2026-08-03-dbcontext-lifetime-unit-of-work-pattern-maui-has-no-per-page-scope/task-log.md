@@ -1621,3 +1621,59 @@ from a wrapped body.
 **BUG-073** — `RestoreFromBundleAsync` does `File.Copy(snapshotFile, _dbPath, overwrite: true)` on the
 path `AppDbContext`'s connection string points at, with no dispose and no connection close. It is a
 file-handle defect, not a unit-of-work one, is registered separately, and was deliberately excluded.
+
+---
+
+## Task: UoW Phase 4.2 — wrap `PersonService` in `IUnitOfWork`
+
+**Plan:** `plan.md` § Phase 4+, Task 4.2 · **Status:** merged to develop · **Date:** 2026-08-24
+
+### Changed files
+
+- `Services/PersonService.cs` — `CreatePersonAsync` / `UpdatePersonAsync` / `DeletePersonsAsync` wrapped.
+- `MyVocaList.Tests/Unit/Services/PersonServiceTests.cs` — `CreateSut` via `PassthroughUnitOfWork.Over(_repoMock)`.
+
+`Bug068RegressionTests.cs` needed no edit — no `Skip` was present, and its
+`Person_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict` test turned out to be the thing that
+caught the defect below.
+
+### A real latent defect, exposed by the migration — the most important finding of this wave
+
+This task did not merely wrap three methods. Wrapping `UpdatePersonAsync` **exposed a silent
+persistence failure that already existed in the design and had no failing test**:
+
+> Under a fresh per-unit-of-work context, `GetByIdAsync` (backed by `FindAsync`) returns a
+> **detached** entity — nothing is tracked yet in that new context, and the harness runs
+> `QueryTrackingBehavior.NoTracking`. Mutating that entity and relying on the unit of work's save is a
+> **silent no-op**: no exception, no tracking conflict, no failing test. The update simply does not
+> persist.
+
+Fixed with an explicit `personRepository.UpdateAsync(person)` after mutation, mirroring
+`ArtistService.UpdateArtistAsync`, which already had it. The implementor confirmed RED against
+baseline (`git stash` of the fix) before going GREEN — no test was edited to make this pass.
+
+**Why this matters beyond `PersonService`.** This is the mirror image of the BUG-067 hazard the pilot
+found: there, a tracked graph caused EF fixup to *revert* a value; here, an untracked entity causes a
+mutation to *vanish*. Both are invisible without an explicit `UpdateAsync`. Any service whose update
+method follows read-mutate-save is suspect, and **each remaining Phase 4 task must return an explicit
+verdict on it rather than assume**. This finding was written into the Phase 4.4 briefing, together
+with the Phase 4.5 *helper* variant (a private method reading a constructor `_field` while called from
+inside a wrapped lambda).
+
+### `SaveChangesAsync` caller census (as of this task)
+
+`QueueService.cs` — the plan's cited justification for retaining `IBaseRepository<T>.SaveChangesAsync()`
+— is confirmed deleted, so that justification has lapsed. The member is nonetheless still genuinely
+reachable: `VenueService` (3 calls, Phase 4.4, not yet migrated at the time of this census) plus the
+then-pending 4.3/4.5 services. `Infra/UnitOfWork/UnitOfWork.cs`'s three `context.SaveChangesAsync`
+calls are the pattern's own commit and are **not** repository callers — do not conflate them when
+deciding on removal.
+
+Correct action, unchanged from the plan's conclusion even though its reasoning lapsed: retain the
+member; let the last Phase 4 task establish the final census and let Helder decide on removal.
+
+### Verification evidence
+
+- Implementor: build 0 errors; `575/575` on its branch (pre-4.5 baseline), no BUG-076 flake on the final run.
+- **Orchestrator re-verified independently** after merging into develop: `577/577` green
+  (575 + Phase 4.5's two new tests).
