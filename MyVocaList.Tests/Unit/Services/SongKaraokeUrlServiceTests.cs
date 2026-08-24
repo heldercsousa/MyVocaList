@@ -1,3 +1,5 @@
+using MyVocaList.Tests.Infrastructure;
+
 namespace MyVocaList.Tests.Unit.Services;
 
 public class SongKaraokeUrlServiceTests
@@ -6,7 +8,7 @@ public class SongKaraokeUrlServiceTests
     private readonly Mock<ILogger<SongKaraokeUrlService>> _loggerMock = new();
 
     private SongKaraokeUrlService CreateSut() =>
-        new(_repoMock.Object, _loggerMock.Object);
+        new(_repoMock.Object, PassthroughUnitOfWork.Over(_repoMock), _loggerMock.Object);
 
     // ── ExtractVideoId ───────────────────────────────────────────────────────
 
@@ -78,7 +80,6 @@ public class SongKaraokeUrlServiceTests
         Assert.NotNull(dto);
         Assert.Equal("dQw4w9WgXcQ", dto!.VideoId);
         _repoMock.Verify(r => r.AddAsync(It.Is<SongKaraokeUrl>(u => u.VideoId == "dQw4w9WgXcQ"), It.IsAny<CancellationToken>()), Times.Once);
-        _repoMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── ExtractVideoId — FsCheck property-based tests ────────────────────────
@@ -165,7 +166,6 @@ public class SongKaraokeUrlServiceTests
 
         Assert.True(success);
         _repoMock.Verify(r => r.RemoveAsync(1, "dQw4w9WgXcQ", It.IsAny<CancellationToken>()), Times.Once);
-        _repoMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── GetUrlsForSongAsync ──────────────────────────────────────────────────
