@@ -53,7 +53,7 @@
                     StyleClass="Body.Small"
                     TextColor="{StaticResource OnSurfaceVariant}" />
                 <Label
-                    Text="© 2025 Helder Sousa"
+                    Text="{Binding Copyright}"
                     StyleClass="Body.Small"
                     TextColor="{StaticResource OnSurfaceVariant}" />
             </VerticalStackLayout>
