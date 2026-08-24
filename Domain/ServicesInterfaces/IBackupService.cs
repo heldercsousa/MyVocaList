@@ -1,8 +1,13 @@
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.UnitOfWork;
 
 namespace MyVocaList.Domain.ServicesInterfaces;
 
-public record BackupResult(bool Success, string Message, string? FilePath, long FileSizeBytes);
+/// <remarks>Implements <see cref="IUnitOfWorkOutcome"/> so
+/// <c>CreateFullBackupAsync</c>'s wrap in <see cref="IUnitOfWork.ExecuteAsync{TResult}"/> can
+/// recognise the success/failure signal (REQ-UOW-24/25/27).</remarks>
+public record BackupResult(bool Success, string Message, string? FilePath, long FileSizeBytes)
+    : IUnitOfWorkOutcome;
 
 /// <summary>Orchestrates snapshot creation, log management, export, and restore.</summary>
 public interface IBackupService
