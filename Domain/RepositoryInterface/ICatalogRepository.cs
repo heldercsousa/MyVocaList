@@ -16,6 +16,4 @@ public interface ICatalogRepository
     Task AddAsync(Catalog entry, CancellationToken ct);
 
     Task RemoveAsync(int artistId, int songId, CancellationToken ct);
-
-    Task SaveChangesAsync(CancellationToken ct = default);
 }

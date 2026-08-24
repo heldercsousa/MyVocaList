@@ -1,3 +1,5 @@
+using MyVocaList.Tests.Infrastructure;
+
 namespace MyVocaList.Tests.Unit.Services;
 
 public class CatalogServiceTests
@@ -5,7 +7,13 @@ public class CatalogServiceTests
     private readonly Mock<ICatalogRepository> _catalogRepoMock = new();
     private readonly Mock<ILogger<CatalogService>> _loggerMock = new();
 
-    private CatalogService CreateSut() => new(_catalogRepoMock.Object, _loggerMock.Object);
+    // The service now takes IUnitOfWork; PassthroughUnitOfWork runs each wrapped body inline
+    // against this same mock, so every existing assertion keeps its original meaning
+    // (`plan.md` Task 4.1).
+    private CatalogService CreateSut() => new(
+        _catalogRepoMock.Object,
+        PassthroughUnitOfWork.Over(_catalogRepoMock),
+        _loggerMock.Object);
 
     // ── AddSongToCatalogAsync ─────────────────────────────────────────────
 
@@ -15,8 +23,6 @@ public class CatalogServiceTests
         _catalogRepoMock.Setup(r => r.ExistsAsync(1, 10, It.IsAny<CancellationToken>()))
                         .ReturnsAsync(false);
         _catalogRepoMock.Setup(r => r.AddAsync(It.IsAny<Catalog>(), It.IsAny<CancellationToken>()))
-                        .Returns(Task.CompletedTask);
-        _catalogRepoMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
                         .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
