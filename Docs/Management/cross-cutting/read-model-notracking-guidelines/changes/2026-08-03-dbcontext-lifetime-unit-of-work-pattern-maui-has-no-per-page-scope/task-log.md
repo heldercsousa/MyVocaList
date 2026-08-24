@@ -1741,3 +1741,68 @@ it, but while it exists any future code can commit outside a unit of work — pr
 BUG-071 defect class. Retiring it converts the rule from a convention into a compiler-enforced
 constraint. Dispatched as its own task under Helder's directive that nothing may sit outside the
 pattern. The plan had deferred this decision to "whichever Phase 4 task lands last"; this is that point.
+
+---
+
+## Task: Retire `IBaseRepository<T>.SaveChangesAsync()` — the pattern becomes compiler-enforced
+
+**Status:** merged to develop · **Date:** 2026-08-24 · Dispatched under Helder's directive that the
+entire app follow the unit-of-work pattern with nothing left outside it.
+
+### Why
+
+After Phases 4.1-4.5 the member had **zero production callers**, but it still existed. A dormant escape
+hatch is not harmless: while the member is on the interface, any future code can commit outside a unit
+of work and the compiler will not object — exactly the BUG-068 / BUG-071 defect class, re-openable at
+any time by a well-meaning edit. Deleting it converts the rule from a convention that must be
+remembered into a constraint that cannot be violated.
+
+### The distinction that had to be got right
+
+- **Removed:** `IBaseRepository<T>.SaveChangesAsync()` — declaration + `BaseRepository` implementation.
+- **Untouched:** `Infra/UnitOfWork/UnitOfWork.cs:52, :87, :132`, which call
+  `DbContext.SaveChangesAsync`. That **is** the pattern's own commit. Conflating the two and removing
+  those would break every write in the application while still compiling.
+
+This was called out explicitly in the briefing because the two read identically at a glance.
+
+### Changed files
+
+- `Domain/RepositoryInterface/IBaseRepository.cs` — member deleted.
+- `Infra/Repository/BaseRepository.cs` — implementation deleted (a `// The subsequent SaveChangesAsync
+  will persist…` comment remains and is correct; it refers to the unit of work's save).
+- `MyVocaList.Tests/Integration/Repositories/VenueRepositoryTests.cs` — 10 sites moved from
+  `_repo.SaveChangesAsync()` to `_db.SaveChangesAsync()`, the idiom every other repository test class
+  already used. This was the last file on the old idiom.
+- `MyVocaList.Tests/Unit/Services/PersonServiceTests.cs` (2) and `VenueServiceTests.cs` (4) — dead Moq
+  setups for the deleted member.
+
+### On those six deleted Moq lines — scaffolding, not assertions
+
+Each was checked individually before deletion and **all six were `Setup(...)` calls, not `Verify(...)`**.
+A `Setup` for a member that no longer exists is dead scaffolding whose removal changes no assertion; a
+`Verify` would have been an encoded expectation and deleting one would have been silent spec deletion
+(`testing.md`). The briefing required stopping and escalating if any turned out to be a `Verify`. None did.
+
+### Verification evidence
+
+- Build 0 errors. Suite `577/577`.
+- **An intermittent failure was observed once and is recorded rather than dismissed.** The first run
+  after the edits reported `Com falha: 1, Aprovado: 576`, with a stack terminating in
+  `Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync`. Four consecutive
+  full runs afterwards were green (`577/577` ×4), and the merged result on develop is green.
+  **This is NOT BUG-076's signature** — BUG-076 is an `ObjectDisposedException` on `SQLitePCL` during
+  `EnsureCreated`, whereas this is an EF Core update-batch failure. It should be treated as a **second,
+  distinct intermittent** in the shared temp-file SQLite harness until proven otherwise, and added to
+  BUG-076's README as a separate observed signature rather than folded into it. Recorded here so the
+  observation is not lost; not investigated, as it is outside this task's scope.
+
+### Orchestrator note on the two stalled agents
+
+Both agents dispatched for this wave (this task and 4.6a/4.6b) ended by announcing they would "wait for
+the background build notification" and stopped without completing their exit checklists. The edits for
+**this** task were already complete and correct in the worktree but uncommitted and unverified; the
+orchestrator verified, committed and merged them directly. The **4.6a/4.6b** worktree was clean — that
+agent produced no changes at all — so the audit was re-dispatched as a read-only analysis, which is what
+4.6b actually is. Worth noting as a dispatch-reliability observation for the agent-settings
+recalibration item already in the backlog.
