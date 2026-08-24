@@ -49,3 +49,73 @@ Per the SDD Invariant (spec before code) this item is 💡 Pending and not dispa
 tracking defect. It will make this behaviour untestable in edit mode until it is fixed, but it
 is not the same problem and fixing it does not deliver this item.
 
+---
+
+## Decisions — Helder, 2026-08-24
+
+These answers close the "Before any code" questions above. They are the authoritative model; the
+`requirements.md` / `design.md` in this folder are written against them.
+
+### D1 — The catalog is the performer relation, and authorship implies performance
+
+Verbatim: *"I consider 'author' as the 'artist', and it is a required data… every author obviously is
+his own song performer… not all artists registered will have song registered, but may have catalog
+registered… an author of multiple songs can also do a cover performance of another artist song, then
+he is a performer only for such song. And an artist could be only a cover performer… In summary, a
+catalog is all about performers only."*
+
+The resulting model:
+
+| Relation | Meaning | Cardinality |
+|---|---|---|
+| `Song.ArtistId` → `Artist` | **Authorship.** Required, exactly one per song. | 1 song → 1 author |
+| `Catalog(ArtistId, SongId)` | **Performance / repertoire.** Who performs this song. | many ↔ many |
+
+**The invariant (new):** for every `Song`, a `Catalog` row MUST exist with
+`ArtistId == Song.ArtistId`. An author always performs their own songs. Additional `Catalog` rows for
+other artists represent covers and are user-managed.
+
+**Why this does not break the Authors / Performers filter chips.** It makes authors a strict subset of
+performers, but the chips still separate two real populations: `Authors` = artists with
+`OriginalSongs` (they wrote something); `Performers` = artists with `CatalogEntries`, which now
+additionally includes **cover-only artists who have written nothing at all**. That second group is the
+one Helder called out, and it is exactly what the `Performers` chip is for. No chip redefinition is
+needed — the earlier concern was based on a wrong reading of the domain.
+
+### D2 — Artist reassignment moves the derived row (option 1), and derived rows are locked in the UI
+
+Verbatim: *"Option 1. I'd like to also have a lock for manual manipulation of catalog entries for
+those having the very same IDs registered as the song owner. An author must always have a catalog
+entrie for each song he owns. Those records might be only manipulated by the songformpage, never
+manualy by user. I supose such lock must live in the catalog form where user has oportunity to
+promote changes on them and shall be denyied for these cases."*
+
+Two rules:
+
+1. **Reassignment moves it.** When a song's author changes A → B, the `Catalog(A, song)` row is
+   removed and `Catalog(B, song)` is created, in the same transaction as the song update. A is not
+   left holding a derived row for a song they no longer own.
+2. **Derived rows are read-only to the user.** A `Catalog` row where `ArtistId == Song.ArtistId` is
+   *derived* and may only be written by the song-form path. The catalog UI must deny manual
+   remove (and any future manual edit) of such a row. Enforcement belongs in the catalog surface where
+   the user can act on entries — with a Services-layer guard behind it, since the UI is not a security
+   boundary and `CLAUDE.md` puts business rules in Services only.
+
+A consequence worth stating plainly: a "delete from catalog" on a derived row is not a catalog
+operation at all — the only way to remove it is to delete or reassign the song.
+
+### D3 — Sequencing: UoW Phase 4.1 first
+
+Helder chose *"Do UOW Phase 4.1 first, then the catalog spec"*. `CatalogService` currently injects
+`ICatalogRepository` and calls `SaveChangesAsync` on it directly, with no `IUnitOfWork` dependency;
+`SongService`'s writes are all inside `_uow.ExecuteAsync`, where REQ-UOW-28 requires every collaborator
+to be resolved from the lambda's own `sp`. Propagation cannot be written correctly until 4.1 lands.
+
+## Open question for Helder — backfill of existing data
+
+D1's invariant is stated over *every* song, not only songs created from now on. Songs already in the
+database were created before this rule existed and have **no** derived catalog row. Making the rule
+true of the existing data needs a one-off backfill (a migration or a startup reconciliation) — which
+is a separate decision, since it silently changes what every existing artist's catalog contains and
+what the `Performers` chip returns. **Not yet answered; the spec treats it as out of scope until it
+is.**
