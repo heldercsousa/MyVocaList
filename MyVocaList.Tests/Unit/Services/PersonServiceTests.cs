@@ -1,4 +1,5 @@
 using MyVocaList.Extensions.Strings;
+using MyVocaList.Tests.Infrastructure;
 
 namespace MyVocaList.Tests.Unit.Services;
 
@@ -7,7 +8,13 @@ public class PersonServiceTests
     private readonly Mock<IPersonRepository> _repoMock = new();
     private readonly Mock<ILogger<PersonService>> _loggerMock = new();
 
-    private PersonService CreateSut() => new(_repoMock.Object, _loggerMock.Object);
+    // The service now takes IUnitOfWork; PassthroughUnitOfWork runs each wrapped body inline
+    // against this same mock, so every existing assertion keeps its original meaning
+    // (`plan.md` Task 4.2).
+    private PersonService CreateSut() => new(
+        _repoMock.Object,
+        PassthroughUnitOfWork.Over(_repoMock),
+        _loggerMock.Object);
 
     // ── GetCharacterCounterInfo ────────────────────────────────────────────────
 
