@@ -37,7 +37,7 @@ public class BackupRepositoryTests : IAsyncLifetime
         };
 
         await _repo.AddAsync(entry, CancellationToken.None);
-        await _repo.SaveChangesAsync(CancellationToken.None);
+        await _db.SaveChangesAsync(CancellationToken.None);
 
         var results = await _repo.GetRecentAsync(10, CancellationToken.None);
 
@@ -55,7 +55,7 @@ public class BackupRepositoryTests : IAsyncLifetime
 
         await _repo.AddAsync(older, CancellationToken.None);
         await _repo.AddAsync(newer, CancellationToken.None);
-        await _repo.SaveChangesAsync(CancellationToken.None);
+        await _db.SaveChangesAsync(CancellationToken.None);
 
         var results = await _repo.GetRecentAsync(10, CancellationToken.None);
 
@@ -72,7 +72,7 @@ public class BackupRepositoryTests : IAsyncLifetime
         {
             await _repo.AddAsync(new BackupHistory { CreatedAt = DateTime.UtcNow.AddMinutes(-i), TriggerType = BackupTrigger.AppStop, BackupType = BackupType.FullSnapshot, FilePath = $"/b{i}.db", FileSizeBytes = 100, MirrorStatus = MirrorStatus.NotAttempted }, CancellationToken.None);
         }
-        await _repo.SaveChangesAsync(CancellationToken.None);
+        await _db.SaveChangesAsync(CancellationToken.None);
 
         var results = await _repo.GetRecentAsync(3, CancellationToken.None);
 
@@ -88,7 +88,7 @@ public class BackupRepositoryTests : IAsyncLifetime
 
         await _repo.AddAsync(log, CancellationToken.None);
         await _repo.AddAsync(snap, CancellationToken.None);
-        await _repo.SaveChangesAsync(CancellationToken.None);
+        await _db.SaveChangesAsync(CancellationToken.None);
 
         var result = await _repo.GetLatestSnapshotAsync(CancellationToken.None);
 

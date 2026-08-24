@@ -1,3 +1,5 @@
+using MyVocaList.Tests.Infrastructure;
+
 namespace MyVocaList.Tests.Unit.Services;
 
 public class TransactionLogWriterTests
@@ -59,16 +61,17 @@ public class BackupServiceTests
         File.WriteAllText(_dbPath, "fake-db-content");
     }
 
+    // The service now takes IUnitOfWork; PassthroughUnitOfWork runs each wrapped body inline
+    // against this same mock, so every existing assertion keeps its original meaning
+    // (`plan.md` Task 4.5).
     private BackupService CreateSut() =>
-        new(_repoMock.Object, _logWriterMock.Object, _loggerMock.Object, _dbPath, _backupDir);
+        new(_repoMock.Object, PassthroughUnitOfWork.Over(_repoMock), _logWriterMock.Object, _loggerMock.Object, _dbPath, _backupDir);
 
     [Fact]
     // [AC] CreateFullBackupAsync creates a snapshot file and records history
     public async Task CreateFullBackupAsync_ValidDb_CreatesFileAndRecordsHistory()
     {
         _repoMock.Setup(r => r.AddAsync(It.IsAny<BackupHistory>(), It.IsAny<CancellationToken>()))
-                 .Returns(Task.CompletedTask);
-        _repoMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
                  .Returns(Task.CompletedTask);
         _repoMock.Setup(r => r.GetRecentAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
                  .ReturnsAsync(new List<BackupHistory>());
