@@ -1869,3 +1869,56 @@ committing outside a unit of work is not expressible in the codebase.
 
 `plan.md` Phase 4+ still claims `PersonPickerViewModel` survives. That line must be corrected so a
 future reader does not go looking for a file that has not existed since 2026-08-20.
+
+---
+
+## CORRECTION 2026-08-24 — the 4.6b "all safe" conclusion was too coarse; BUG-078 registered
+
+The Phase 4.6b entry above records every UI hit as bucket (b) Safe, on the reasoning that the services
+they call "already follow the completed rollout pattern". **A second, independent read-only audit
+rejected that reasoning, and it was right.** The orchestrator verified the rejection directly before
+accepting it.
+
+### What the first pass missed
+
+"The service wraps in `IUnitOfWork`" is true of **writes only**. A service can wrap every write and
+still perform its **reads** through the constructor-injected repository field — which is exactly what
+all of them do. Reads were never in the rollout's scope. The safety argument was applied per *service*
+when it needed to be applied per *method*.
+
+### What is actually true (verified by direct file walk, not grep)
+
+- **Writes:** fully migrated. Every service write runs in `_uow.ExecuteAsync`, and
+  `IBaseRepository<T>.SaveChangesAsync()` no longer exists, so a write cannot escape the pattern. This
+  part of the earlier claim stands.
+- **Reads:** still run on the captive, app-lifetime `AppDbContext` — ~17 call sites across
+  `ArtistService`, `PersonService`, `SongService`, `VenueService`, `CatalogService`,
+  `ArtistSuggestionService`, `SongSuggestionService`.
+- **Tracking:** almost all of those are harmless, because `AppDbContext` sets a **global**
+  `QueryTrackingBehavior.NoTracking` and list/search methods add explicit `.AsNoTracking()` (BUG-018).
+  A census of `Infra/Repository/` found **exactly one** `.AsTracking()` in the entire layer —
+  `ArtistRepository.cs:80` (`GetByIdAsync`) — reached outside a unit of work by
+  `ArtistService.cs:177` (`GetDeleteConfirmationAsync`).
+
+**Registered as BUG-078** (Major, `bugs/2026-08-24-BUG-078-…`). It fails *silently* — the read context
+and the write context are now separate, so nothing throws; a rename committed through `IUnitOfWork`
+simply is not seen by the captive context's cached copy.
+
+### Phase 4.7 verdict: DO NOT PROCEED
+
+`DbLoadGate`'s stated justification — one shared `AppDbContext` app-wide, and `DbContext` is not
+thread-safe — **is fully intact**, because reads still share that context. Removing the gate now would
+allow concurrent operations on a shared context. 4.7 unblocks only when reads are scoped.
+
+The gate's comment block carries a second, *independent* rationale that must not be retired with it: the
+`Task.Run(...)` offloads in `LoadFirstPageAsync` / `LoadMoreAsync` mitigate `Microsoft.Data.Sqlite`
+completing async methods synchronously on the calling thread, and their revert trigger is `INFRA_MSSQL`.
+The semaphore and the offloads address different mechanisms and are not coupled — the offloads survive
+regardless.
+
+### Process lesson
+
+Two audits of the same question reached opposite conclusions, and the more pessimistic one was correct.
+The difference was granularity: per-service reasoning versus per-method reasoning. **A "nothing is
+outside the pattern" claim must be verified at the call-site level**, and — in this environment —
+without trusting `grep`, which produced a false zero twice in this session.
