@@ -111,11 +111,30 @@ Helder chose *"Do UOW Phase 4.1 first, then the catalog spec"*. `CatalogService`
 `SongService`'s writes are all inside `_uow.ExecuteAsync`, where REQ-UOW-28 requires every collaborator
 to be resolved from the lambda's own `sp`. Propagation cannot be written correctly until 4.1 lands.
 
-## Open question for Helder — backfill of existing data
+### D4 — Existing data is backfilled once, by migration (Helder, 2026-08-24)
 
-D1's invariant is stated over *every* song, not only songs created from now on. Songs already in the
-database were created before this rule existed and have **no** derived catalog row. Making the rule
-true of the existing data needs a one-off backfill (a migration or a startup reconciliation) — which
-is a separate decision, since it silently changes what every existing artist's catalog contains and
-what the `Performers` chip returns. **Not yet answered; the spec treats it as out of scope until it
-is.**
+D1's invariant is stated over *every* song, not only songs written from now on. Songs already in the
+database predate the rule and carry no derived row. Helder chose the **one-off backfill migration**:
+an EF Core migration inserts the missing `Catalog(Song.ArtistId, Song.Id)` rows exactly once, so the
+invariant holds over all data from the moment this ships.
+
+Rejected alternatives, and why the record matters: a *startup self-heal* was rejected because it
+writes on every launch and hides drift instead of surfacing it; *leaving old data alone* was rejected
+because it would leave the invariant merely aspirational, so no code could safely rely on it.
+
+Consequences the spec must state as expected, not as defects:
+
+- On first launch after the update, existing artists' catalogs gain entries they never had, and the
+  `Performers` filter chip starts returning authors it previously omitted. This is the intended
+  correction, but it is user-visible and should not surprise anyone reading a bug report later.
+- The migration must be **idempotent in effect** — insert only where no `Catalog(ArtistId, SongId)`
+  row already exists. A song whose author already had a manually-added catalog entry must not produce
+  a duplicate, since `(ArtistId, SongId)` is the composite primary key and a duplicate insert throws
+  `DbUpdateException`.
+- Rows the backfill creates are indistinguishable from rows a user added by hand — the `Catalog`
+  entity is a bare join with no provenance column. Under D2 that is acceptable, because "derived" is
+  computed (`Catalog.ArtistId == Song.ArtistId`), not stored. Worth stating explicitly so nobody later
+  adds a provenance flag believing one is needed.
+## Open questions
+
+None outstanding. D1–D4 close every question the "Before any code" section raised.
