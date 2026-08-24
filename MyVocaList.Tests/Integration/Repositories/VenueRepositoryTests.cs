@@ -29,7 +29,7 @@ public class VenueRepositoryTests : IAsyncLifetime
     {
         var venue = new Venue { Name = "Jazz Club" };
         await _repo.AddAsync(venue);
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var found = await _repo.GetByIdAsync(venue.Id);
 
@@ -44,7 +44,7 @@ public class VenueRepositoryTests : IAsyncLifetime
     {
         await _repo.AddAsync(new Venue { Name = "Rock Arena" });
         await _repo.AddAsync(new Venue { Name = "Jazz Club" });
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var (items, total) = await _repo.GetPagedWithEventInfoAsync(1, 20);
 
@@ -59,7 +59,7 @@ public class VenueRepositoryTests : IAsyncLifetime
     {
         await _repo.AddAsync(new Venue { Name = "Rock Arena" });
         await _repo.AddAsync(new Venue { Name = "Jazz Club" });
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var (items, total) = await _repo.GetPagedWithEventInfoAsync(1, 20, "rock");
 
@@ -72,7 +72,7 @@ public class VenueRepositoryTests : IAsyncLifetime
     {
         await _repo.AddAsync(new Venue { Name = "Rock Arena" });
         await _repo.AddAsync(new Venue { Name = "Jazz Club" });
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var (items, total) = await _repo.GetPagedWithEventInfoAsync(1, 20, "JAZZ");
 
@@ -85,7 +85,7 @@ public class VenueRepositoryTests : IAsyncLifetime
     {
         await _repo.AddAsync(new Venue { Name = "Rock Arena" });
         await _repo.AddAsync(new Venue { Name = "Jazz Club" });
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var (items, total) = await _repo.GetPagedWithEventInfoAsync(1, 20, "arena");
 
@@ -100,7 +100,7 @@ public class VenueRepositoryTests : IAsyncLifetime
         {
             await _repo.AddAsync(new Venue { Name = $"Venue {i:D2}" });
         }
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var (items, total) = await _repo.GetPagedWithEventInfoAsync(pageNumber: 2, pageSize: 2);
 
@@ -124,7 +124,7 @@ public class VenueRepositoryTests : IAsyncLifetime
     public async Task GetByNameAsync_ExistingName_ReturnsVenue()
     {
         await _repo.AddAsync(new Venue { Name = "Jazz Club" });
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var found = await _repo.GetByNameAsync("Jazz Club");
 
@@ -146,7 +146,7 @@ public class VenueRepositoryTests : IAsyncLifetime
     public async Task GetPagedWithEventInfoAsync_QueryWithoutAccents_FindsAccentedVenue()
     {
         await _repo.AddAsync(new Venue { Name = "Café do Brasil" });
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var (items, total) = await _repo.GetPagedWithEventInfoAsync(1, 20, "cafe");
 
@@ -158,7 +158,7 @@ public class VenueRepositoryTests : IAsyncLifetime
     public async Task GetPagedWithEventInfoAsync_UppercaseQueryWithoutAccents_FindsAccentedVenue()
     {
         await _repo.AddAsync(new Venue { Name = "João's Bar" });
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var (items, total) = await _repo.GetPagedWithEventInfoAsync(1, 20, "JOAO");
 
@@ -170,7 +170,7 @@ public class VenueRepositoryTests : IAsyncLifetime
     public async Task SearchByNameStartsWithAsync_AccentInsensitive_FindsMatch()
     {
         await _repo.AddAsync(new Venue { Name = "Müller's Hall" });
-        await _repo.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
         var results = await _repo.SearchByNameStartsWithAsync("muller", 10);
 
