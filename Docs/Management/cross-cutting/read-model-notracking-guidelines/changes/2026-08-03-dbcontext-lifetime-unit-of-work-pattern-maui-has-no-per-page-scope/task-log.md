@@ -1677,3 +1677,67 @@ member; let the last Phase 4 task establish the final census and let Helder deci
 - Implementor: build 0 errors; `575/575` on its branch (pre-4.5 baseline), no BUG-076 flake on the final run.
 - **Orchestrator re-verified independently** after merging into develop: `577/577` green
   (575 + Phase 4.5's two new tests).
+
+---
+
+## Task: UoW Phase 4.4 — wrap `VenueService` in `IUnitOfWork` (last service in the rollout)
+
+**Plan:** `plan.md` § Phase 4+, Task 4.4 · **Status:** merged to develop · **Date:** 2026-08-24
+
+### Changed files
+
+- `Services/VenueService.cs` — `CreateVenueAsync` / `UpdateVenueAsync` / `DeleteVenuesAsync` wrapped.
+- `MyVocaList.Tests/Unit/Services/VenueServiceTests.cs` — construction updated.
+
+`Bug068RegressionTests.cs` needed no edit: its
+`Venue_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict` characterization test already used
+`UnitOfWorkTestHost.Create()` and passed unchanged.
+
+### Both traps checked explicitly — both verdicts negative
+
+The briefing required a stated verdict rather than an assumption, since Phase 4.2's defect was invisible
+without one.
+
+- **Detached-entity trap: NOT present.** `UpdateVenueAsync` already called
+  `await _venueRepository.UpdateAsync(venue)` before the wrap, so the mutation was never relying on
+  tracking. `VenueRepository` does inherit the `FindAsync`-based `GetByIdAsync`, so the *structural*
+  hazard is identical to `PersonService`'s — it was simply already neutralised here. The explicit call
+  was carried through the wrap unchanged and now carries an explanatory comment, so a future edit that
+  removes it will read as obviously wrong rather than harmless.
+- **Helper variant: NOT present.** The only private helper, `BuildDeleteResultMessage`, operates purely
+  on in-memory `List<(int, …)>` data and touches no repository or service field.
+
+### The plan's dead-field instruction was already satisfied
+
+Task 4.4 also called for deleting a dead `IEventRepository _eventRepository` field. It is **already
+absent** — removed with the Event/Queue deletion on 2026-08-20. The constructor arity changed in this
+task only from adding `IUnitOfWork`. Another instance of the plan's 2026-08-04 coordinates being stale.
+
+### Verification evidence
+
+- Implementor: build 0 errors; `577/577`.
+- **Orchestrator re-verified independently**, and did not rely on the agent's grep: `rtk` silently
+  rewrites `grep` and returned "0 matches" for patterns that demonstrably exist, so the file was
+  re-inspected by direct read. Confirmed all three methods wrapped, every collaborator resolved from
+  `sp`, and the explicit `UpdateAsync(venue)` present at `VenueService.cs:116`.
+
+---
+
+## Milestone: the service-layer rollout is COMPLETE — `SaveChangesAsync` census
+
+With Phase 4.4 merged, **every service in the app writes through `IUnitOfWork`.** The orchestrator ran
+an independent tree-wide census (a direct file walk, not `grep`, for the reason above):
+
+| Site | Verdict |
+|---|---|
+| `Domain/RepositoryInterface/IBaseRepository.cs:18` (declaration) + `Infra/Repository/BaseRepository.cs:76-78` (implementation) | The member itself — **zero production callers remain** |
+| `Infra/UnitOfWork/UnitOfWork.cs:52, :87, :132` | `DbContext.SaveChangesAsync` — **the pattern's own commit.** NOT a repository caller. Must never be conflated with the member above |
+| `MyVocaList.Tests/Integration/Repositories/VenueRepositoryTests.cs` (10 sites) | Test-only, uses `_repo.SaveChangesAsync()` — the last file not yet on the `_db.SaveChangesAsync()` idiom |
+| `PersonServiceTests.cs:348,:373`, `VenueServiceTests.cs:126,:174,:216` | Dead Moq `Setup` calls against the member |
+| All other `_db.SaveChangesAsync()` sites in integration tests | `DbContext` directly — a different member, unaffected |
+
+**Consequence.** `IBaseRepository<T>.SaveChangesAsync()` is now a dormant escape hatch: nothing calls
+it, but while it exists any future code can commit outside a unit of work — precisely the BUG-068 /
+BUG-071 defect class. Retiring it converts the rule from a convention into a compiler-enforced
+constraint. Dispatched as its own task under Helder's directive that nothing may sit outside the
+pattern. The plan had deferred this decision to "whichever Phase 4 task lands last"; this is that point.
