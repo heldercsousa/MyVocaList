@@ -910,7 +910,10 @@ plan-review → implementation cycle. This plan does not attempt it.
   claim `MauiProgram.cs` (sequential-only) for that one line. Retire `IBackupRepository.cs:17` +
   `BackupRepository.cs:46-48`, and fix `BackupServiceTests.cs:71` and
   `Integration/Repositories/BackupRepositoryTests.cs:40,58,75,91`.
-- [ ] **4.6a — ViewModel conversion.** Convert `QueueSongPickerViewModel` (`ISongRepository`) and
+- [x] **4.6a — ViewModel conversion. VACUOUS 2026-08-24** — all three named ViewModels,
+  `PersonPickerViewModel` INCLUDED, were deleted in `c7ad5bd4` (2026-08-20). The claim below that
+  `PersonPickerViewModel` survives is STALE; verified by direct directory listing.
+  ~~Original text:~~ Convert `QueueSongPickerViewModel` (`ISongRepository`) and
   `PersonPickerViewModel` (`IPersonRepository`) **fully** to inject `IUnitOfWork`. Convert
   `QueueManagementViewModel`'s `IPersonRepository`/`ISongRepository` usage **only** — its
   `IEventService`/`IQueueServiceNew` fields (`:16-17`, ctor `:27-33`) stay as direct constructor

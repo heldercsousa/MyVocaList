@@ -1806,3 +1806,66 @@ orchestrator verified, committed and merged them directly. The **4.6a/4.6b** wor
 agent produced no changes at all — so the audit was re-dispatched as a read-only analysis, which is what
 4.6b actually is. Worth noting as a dispatch-reliability observation for the agent-settings
 recalibration item already in the backlog.
+
+---
+
+## Task: UoW Phase 4.6a + 4.6b — picker conversion + captive-dependency audit
+
+**Status:** complete, **no code change required** · **Date:** 2026-08-24
+
+### 4.6a — vacuous
+
+All three ViewModels the plan named are deleted. The plan says only `QueueSongPickerViewModel` and
+`QueueManagementViewModel` went with the Event/Queue removal and that `PersonPickerViewModel` survives —
+**that note is stale**: `PersonPickerViewModel.cs` was deleted in the same commit (`c7ad5bd4`,
+2026-08-20). Confirmed independently by the orchestrator via a direct directory listing of
+`MyVocaList/UI/ViewModels/`, not by grep. Nothing to convert.
+
+### 4.6b — the audit that makes "nothing outside the pattern" verifiable
+
+17 ViewModel-level hits plus `AppShell`/`AppShellViewModel` checked directly. **Every one landed in
+bucket (b) Safe. Zero conversions needed, zero follow-ups found.** The reasoning falls into two groups:
+
+1. **Injects a DB-free service** — `IWhatsNewService`, `IVersionCheckService`, `IFeedbackService`,
+   `IYouTubeSearchService`, `IMusicMetadataService`. Each was traced to its implementation and has zero
+   `DbContext` / `Repository` / `IUnitOfWork` references; they are external-API clients or preference
+   readers. This group includes the two **singletons** (`AppShellViewModel`, `AppShell`), which were the
+   worst-case candidates precisely because a singleton capturing a scoped context is the BUG-068 shape.
+   `AppShellViewModel`'s `IServiceProvider` is used only to resolve `Page` types for navigation.
+2. **Injects a data-writing service that is already migrated** — `IArtistService`, `ISongService`,
+   `IPersonService`, `IVenueService`, `ICatalogService`, `IBackupService`, `ISongKaraokeUrlService`,
+   `ISongResolutionService`. All now follow the completed rollout shape: a repository field for reads,
+   `IUnitOfWork` for every write. The captivity question therefore resolves inside the Services layer,
+   which Phases 4.1-4.5 closed.
+
+### Orchestrator's independent verification of the audit's central claim
+
+An audit whose conclusion is "zero hits" cannot rest on a grep in this environment — `rtk` silently
+rewrites `grep` and has already returned a false "0 matches" this session. The orchestrator re-ran the
+census as a **direct file walk** over every `.cs` under `MyVocaList/`, matching `I\w+Repository`:
+
+> **8 references total, and all 8 are DI registrations** — 6 in
+> `Extensions/ServiceCollectionExtensions.cs` (`AddScoped<IVenueRepository, …>` and siblings) and 2 in
+> `MauiProgram.cs` (the `IBackupRepository` registration and its use inside the `BackupService` factory
+> lambda). **No ViewModel, page, or component constructor-injects a repository at all.**
+
+That is the audit's conclusion arrived at independently, so it is now evidence rather than a claim.
+
+### What this means for Helder's directive
+
+*"The entire app must follow the UoW pattern; anything out of this must be migrated."* As of this task
+that is **demonstrated, not assumed**: every service writes through `IUnitOfWork`; no UI type holds a
+repository or a captive `AppDbContext`; and `IBaseRepository<T>.SaveChangesAsync()` no longer exists, so
+committing outside a unit of work is not expressible in the codebase.
+
+### Verification evidence
+
+- Build 0 errors; `577/577` green.
+- A full-solution build hit a transient Android packaging file-lock (`XAWAS7024`, a stray
+  `MyVocaList.exe` holding the file). No `.cs`/`.xaml` was touched by this task, so it is an environment
+  artifact, not a regression.
+
+### Consequential edit required
+
+`plan.md` Phase 4+ still claims `PersonPickerViewModel` survives. That line must be corrected so a
+future reader does not go looking for a file that has not existed since 2026-08-20.
