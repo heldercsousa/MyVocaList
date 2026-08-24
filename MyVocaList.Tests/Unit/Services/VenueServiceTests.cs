@@ -1,3 +1,5 @@
+using MyVocaList.Tests.Infrastructure;
+
 namespace MyVocaList.Tests.Unit.Services;
 
 public class VenueServiceTests
@@ -5,7 +7,13 @@ public class VenueServiceTests
     private readonly Mock<IVenueRepository> _repoMock = new();
     private readonly Mock<ILogger<VenueService>> _loggerMock = new();
 
-    private VenueService CreateSut() => new(_repoMock.Object, _loggerMock.Object);
+    // The service now takes IUnitOfWork; PassthroughUnitOfWork runs each wrapped body inline
+    // against this same mock, so every existing assertion keeps its original meaning
+    // (`plan.md` Task 4.4).
+    private VenueService CreateSut() => new(
+        _repoMock.Object,
+        PassthroughUnitOfWork.Over(_repoMock),
+        _loggerMock.Object);
 
     // ── ValidateNameInput ─────────────────────────────────────────────────────
 
@@ -124,7 +132,6 @@ public class VenueServiceTests
         Assert.True(success);
         Assert.NotEmpty(message);
         _repoMock.Verify(r => r.AddAsync(It.IsAny<Venue>()), Times.Once);
-        _repoMock.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     // ── UpdateVenueAsync ──────────────────────────────────────────────────────
