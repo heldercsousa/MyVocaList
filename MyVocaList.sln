@@ -52,6 +52,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\README.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\README.md
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\requirements.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\requirements.md
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\design.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\design.md
+		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\task-log.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
