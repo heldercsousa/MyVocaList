@@ -159,7 +159,7 @@
     "devexpress-maui"
   ],
   "disabledMcpjsonServers": [
-    "sqlite"
+    "mudblazor"
   ],
   "skillOverrides": {
     "maui-geolocation": "off",
@@ -184,7 +184,39 @@
     "test-driven-development": "off",
     "requesting-code-review": "off",
     "receiving-code-review": "off",
-    "subagent-driven-development": "user-invocable-only"
+    "subagent-driven-development": "user-invocable-only",
+    "dotnet-skills:akka-net-aspire-configuration": "off",
+    "dotnet-skills:akka-net-best-practices": "off",
+    "dotnet-skills:akka-hosting-actor-patterns": "off",
+    "dotnet-skills:akka-net-management": "off",
+    "dotnet-skills:akka-net-testing-patterns": "off",
+    "dotnet-skills:aspire-configuration": "off",
+    "dotnet-skills:aspire-integration-testing": "off",
+    "dotnet-skills:mailpit-integration": "off",
+    "dotnet-skills:aspire-service-defaults": "off",
+    "dotnet-skills:crap-analysis": "off",
+    "dotnet-skills:api-design": "off",
+    "dotnet-skills:csharp-concurrency-patterns": "off",
+    "dotnet-skills:csharp-nullable-reference-types": "off",
+    "dotnet-skills:type-design-performance": "off",
+    "dotnet-skills:dotnet-devcert-trust": "off",
+    "dotnet-skills:ilspy-decompile": "off",
+    "dotnet-skills:dotnet-local-tools": "off",
+    "dotnet-skills:marketplace-publishing": "off",
+    "dotnet-skills:microsoft-extensions-configuration": "off",
+    "dotnet-skills:mjml-email-templates": "off",
+    "dotnet-skills:opentelemetry-net-instrumentation": "off",
+    "dotnet-skills:package-management": "off",
+    "dotnet-skills:playwright-blazor-testing": "off",
+    "dotnet-skills:playwright-ci-caching": "off",
+    "dotnet-skills:dotnet-project-structure": "off",
+    "dotnet-skills:r3-reactive-extensions": "off",
+    "dotnet-skills:serialization": "off",
+    "dotnet-skills:skills-index-snippets": "off",
+    "dotnet-skills:dotnet-slopwatch": "off",
+    "dotnet-skills:snapshot-testing": "off",
+    "dotnet-skills:testcontainers-integration-tests": "off",
+    "dotnet-skills:verify-email-snapshots": "off"
   },
   "hooks": {
     "UserPromptSubmit": [
@@ -207,5 +239,9 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "ux@teslasoft-skills": false,
+    "claude-md-management@claude-plugins-official": false
   }
 }
