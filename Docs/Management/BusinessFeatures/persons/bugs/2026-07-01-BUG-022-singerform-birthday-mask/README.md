@@ -5,7 +5,7 @@ status: "✅ Fixed"
 severity: Major
 target: 2026-07-01
 section: DevCycleCraft
-parent: ui-form-validation-guide
+parent: persons
 kind: bug
 order: 110
 closed: 2026-07
