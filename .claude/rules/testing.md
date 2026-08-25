@@ -60,4 +60,4 @@ During Green, the Builder edits **production code only**. Never edit a test to p
 | Property-based testing (FsCheck) — invariants across input space | `.claude/library/property-based-testing-fscheck.md` |
 | Generic xUnit/Moq/ViewModel test setup | `maui-unit-testing` skill (project) |
 
-> **Authorship note:** Human-reviewed and approved by Helder 2026-07-09 (CLAUDE.md § Continuous Enhancement — Authorship). Full content preserved in `library/testing-reference.md` (+ Stryker/FsCheck files).
+> Authorship + approval provenance: `.claude/library/authorship-log.md`.
