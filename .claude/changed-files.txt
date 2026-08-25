@@ -4083,3 +4083,6 @@ Docs/Changelog/changelog.md
 Docs/Management/LEDGER.md
 ../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/853fec3d-3f99-4469-9610-88500d8dcfa2/scratchpad/cmpdir.py
 ../../../AppData/Local/Temp/claude/C--Users-helde-source-repos-MyVocaList/853fec3d-3f99-4469-9610-88500d8dcfa2/scratchpad/cmpdir2.py
+Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-24-scope-all-service-reads-through-iunitofwork/tasks.md
+Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-24-scope-all-service-reads-through-iunitofwork/plan.md
+Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-24-scope-all-service-reads-through-iunitofwork/tasks.md
