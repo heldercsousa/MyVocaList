@@ -83,19 +83,91 @@ Every exhaustive claim in this spec was verified by direct Python file walk inst
 
 ---
 
+## 2026-08-25 — Spec APPROVED with an amendment; plan authored
+
+**Status:** planning → **awaiting Helder's plan-approval gate**
+**Branch:** `develop` (docs only — still no code, no worktree)
+
+Helder approved the spec with one amendment: **decide the minimum query length that triggers a
+search, for local DB and for remote HTTP, from researched community practice rather than invention.**
+
+**Decision (D8):** **2 characters local, 3 characters remote**, as two named constants. Rationale
+recorded in `design.md § 2c` and `requirements.md` REQ-UOW-51/52. Sources: NCI Design System
+(autocomplete default 3), jQuery UI / Kendo `minLength` guidance (source-relative — 0–1 only for
+small local sets, raise it "when the search could match a lot of items"), the common `minLengthTerm: 3`
+for remote-backed typeaheads. The asymmetry is the point: a local query costs ~1 ms of SQLite, a
+remote one costs a round trip, rate-limit budget and battery. **2 is also the majority existing
+behaviour** (`PersonService` ×2, `ArtistSuggestionService`), so the AC standardises rather than
+invents — exactly two call sites change (`ArtistService.SearchArtistsByNameAsync`,
+`SongSuggestionService.GetLocalAsync`, both `IsNullOrWhiteSpace` → `Length < 2`).
+
+**Debounce deliberately excluded** — a UI-timing concern of the consuming autocomplete feature, the
+same boundary that keeps `MauiProgram.cs` out of every wave. Recorded as a forward constraint.
+
+### Changed files
+
+- `.../requirements.md` — REQ-UOW-51, REQ-UOW-52 added; allocation range now 36…52; `Spec updated
+  [2026-08-25]` note; REQ-UOW-41's guard table annotated with the two guards whose value changes
+- `.../design.md` — decision **D8**; new `§ 2c`; `§ 7` gains **Wave 0** (constants) and folds the
+  threshold work into the waves that already own each file (4.6, 5.1)
+- `.../tasks.md` (**new**) — nine waves, 0–8, with per-task Produces/Consumes/Risk/Files owned/Demo/
+  Review lane/AC and explicit guards
+- `.../plan.md` (**new**) — setup steps, dispatch sequence with per-wave gates, the three
+  invalidating gates, evidence discipline, escalation rules, definition of done
+- `MyVocaList.sln` — `tasks.md` + `plan.md` registered (HARD GATE)
+
+### Verification evidence
+
+No code written, no build run — docs only.
+
+A fresh `plan-reviewer` subagent reviewed `requirements.md` / `design.md` / `tasks.md` / `plan.md`,
+briefed to treat the three deliberate design decisions (inverted Waves 1–3, `MauiProgram.cs` in no
+wave, lifetime-not-tracking rationale) as correct rather than as defects.
+
+**Verdict: APPROVE WITH CHANGES** — 0 Critical, 5 Major, 7 Minor. It confirmed all three deliberate
+decisions were preserved and prominent, that single-writer holds across Wave 4's parallel set, that
+`ArtistService.cs` is correctly serialised between Waves 2 and 4.6, that Waves 4–8 follow ordinary
+DRY Onion, that REQ-UOW-51/52 do not conflict with REQ-UOW-41/43/49, and that there are no
+placeholders and no gold-plating. **All 12 findings were applied.**
+
+| # | Finding | Fix applied |
+|---|---|---|
+| **M1** | REQ-UOW-36/37 had **no owning task** — their mandated *census-wide* walk was unscheduled, yet task 8.1 cited "limb (a) evidence" as a precondition. Nothing produced it. | Added **task 7.2**, owning the tree-wide walk over `Services/*.cs`. 8.1 now consumes it explicitly. |
+| **M2** | Wave 4 owned **no test files**, but REQ-UOW-39/40/41/44 each mandate new tests. A subagent could have written zero tests and still passed its own demo. | Each 4.x task now owns a named **new** test file; the shared demo block spells out the per-method integration tests, the two-distinct-`AppDbContext` assertion, and the per-guard counting-double test. |
+| **M3** | Wave 5's demanded threshold tests had **nowhere to live** — its only test files were the two carve-out suites, marked `CreateSut`-only. Writing them there would have breached REQ-UOW-49. | New threshold-test files added to 5.1/5.2, plus an explicit guard that the carve-out suites stay `CreateSut`-edit-only. |
+| **M4** | REQ-UOW-42 mandates the concurrency run happen **with `DbLoadGate` removed** — unschedulable in Wave 6, and 8.1 did not re-run it. | Wave 6 authors the test (gate present); **8.1 re-runs it gate-free** and co-owns REQ-UOW-42. Both runs pasted. |
+| **M5** | Task 3.1 said "all **three** stale comments"; Wave 3 owns **two**. The third is carve-out row 4 and belongs to Wave 8 — a subagent hunting for a third would have breached the carve-out. | Retitled to "both", with an explicit do-not-touch pointer to Wave 8. `plan.md § 3` row 4 corrected too. |
+| m1 | REQ-UOW-41 guard rows in Waves 2 and 5 unlisted | `REQ-UOW-41` added to 2.1, 5.1, 5.2 |
+| m2 | REQ-UOW-49's own evidence unassigned | Added to 8.1's demo and to Definition of done |
+| m3 | `Files owned` non-exhaustive in 0.1 / 1.1 / 6.1 / 7.1 | All paths named |
+| m4 | 4.1–4.5 said "wrap all reads" | Every method now named inline from the census |
+| m5 | `plan.md § 3` row 6 gate said "wave-5 sub-wave complete" — inverted 4→5 | Corrected to "sub-wave 4a (4.1–4.4) complete" |
+| m6 | `MauiProgram.cs` guard cited "(D3/D6)"; D6 is the Red ordering | Now cites **D3** only |
+| m7 | No hour estimates; 5.1 likely > 2 h and > 5 files once M3's tests were added | Estimates added throughout; **Wave 5 split into 5.1 / 5.2** (disjoint files, parallelisable) |
+
+`design.md § 7` gained a note recording the two structural refinements (the 5.1/5.2 split and task
+7.2) so the design table and the task list do not drift apart.
+
+---
+
 ## Checkpoint
 
-**Live state:** spec complete and committed (`f630b8f8`). **Blocked on Helder's approval gate.**
-Nothing is in flight; no worktree, no branch, no `[~]` claim.
+**Live state:** spec approved with amendment D8; `tasks.md` + `plan.md` written; plan reviewed
+(**APPROVE WITH CHANGES**, 5 Major + 7 Minor, **all applied**). **Blocked on Helder's plan-approval
+gate.** Nothing is in flight; no worktree, no branch, no `[~]` claim. Twelve tasks across nine waves,
+ten dispatch rounds.
 
-**Next step when approved:** write `tasks.md` + `plan.md` from `design.md § 7`'s eight waves, then
-dispatch a fresh `plan-reviewer` (`.claude/agents/plan-reviewer.md`), then implement in a worktree
-based on `develop`.
+**Next step when the plan is approved:** `plan.md § 2` setup steps S1–S5 (worktree on a task branch
+based on `develop`, verify develop is an ancestor, baseline green, status → 🟡), then dispatch Wave 0.
+
+> **Do not start Wave 1 before Wave 0 is committed, and do not touch `.AsTracking()` before Wave 3.**
 
 **Context manifest** — the files a fresh agent must read to resume, and nothing else:
 
 | File | Why |
 |------|-----|
+| `./plan.md` | The execution plan — dispatch sequence, gates, evidence discipline |
+| `./tasks.md` | The nine waves as checkboxed tasks with owned files |
 | `./requirements.md` | REQ-UOW-36…50, the ACs to plan against |
 | `./design.md` | § 7 wave table (the plan's skeleton), § 2 the lifetime rationale, § 5b/5c the ordering constraint, § 6 the `DbLoadGate` removal sequence |
 | `../2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/requirements.md` | Parent ACs — Grep for `REQ-UOW-05`, `-28`, `-29`, `-33`, `-34` only; the file is 59K, never read whole |

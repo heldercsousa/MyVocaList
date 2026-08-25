@@ -1,7 +1,7 @@
 ---
 id: scope-all-service-reads-through-iunitofwork
 title: Scope all service reads through IUnitOfWork
-status: 📋 Spec
+status: 🗺️ Plan
 target: 2026-08-24
 section: DevCycleCraft
 parent: read-model-notracking-guidelines

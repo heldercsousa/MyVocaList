@@ -17,6 +17,7 @@
 | **D5** | `DbLoadGate` removal requires **both** limbs of REQ-UOW-29, with limb (b) actually executed, and the `LoadFirstPageAsync` / `LoadMoreAsync` `Task.Run` offloads survive. |
 | **D6** | The BUG-078 **Red is captured before `.AsTracking()` is removed**. This inverts the usual Infra-before-Services order deliberately; without it the mandatory Red is unobtainable. See § 7's warning. |
 | **D7** | The REQ-UOW-36/37/43 rules are made permanent by an xUnit **architecture test** (REQ-UOW-50), not by task-log file-walk evidence alone. |
+| **D8** *(added 2026-08-25, Helder's approval amendment)* | **Minimum query length is 2 for local DB searches and 3 for remote HTTP provider fetches**, as two named constants. Decided from community practice, not invented — see § 2c. REQ-UOW-51/52. Input **debounce is out of scope** and belongs to the consuming autocomplete feature. |
 
 ---
 
@@ -56,6 +57,47 @@ Two things, both lifetime-derived:
    (REQ-UOW-34, direction 1), it sees the write's uncommitted state and the same context. And because a
    top-level read gets a *fresh* context, it sees the latest committed state rather than a stale cached
    instance. That second half is the BUG-078 staleness class.
+
+---
+
+### 2c. Minimum query length (D8) — why 2 local / 3 remote
+
+This change touches every search entry point in the app, which makes it the only cheap moment to fix
+an inconsistency that is already there: `PersonService` and `ArtistSuggestionService` require 2
+characters, while `ArtistService.SearchArtistsByNameAsync` and `SongSuggestionService.GetLocalAsync`
+fire on **one** — a single space-stripped character against the whole table.
+
+The threshold is a **cost-of-the-next-keystroke** question, and the cost differs by an order of
+magnitude between the two data sources, so a single number for both would be wrong in one direction
+or the other:
+
+| | Local SQLite read | Remote provider fetch |
+|---|---|---|
+| Cost of a useless query | ~1 ms, no network, no quota | network round trip, third-party rate-limit budget, battery |
+| Result quality at 1 char | matches an unbounded fraction of rows — no discriminating value | worse: a global catalogue |
+| Result quality at 2 chars | usefully narrow on an indexed collated column | still very broad |
+| **Chosen minimum** | **2** | **3** |
+
+Community practice lands in the same place: published defaults for API-backed autocomplete cluster on
+**3** (NCI Design System's default; the common `minLengthTerm: 3` for remote sources), while the
+jQuery UI / Kendo guidance is explicitly source-relative — `minLength` of 0–1 is "useful for local
+data with just a few items", and should be raised whenever a query "could match a lot of items".
+Local-vs-remote asymmetry (1–2 local, 3+ remote) is the recurring recommendation, not a compromise
+between two camps.
+
+Two consequences for implementation:
+
+1. **One constant per tier, shared** — `MinimumLocalQueryLength = 2`, `MinimumRemoteQueryLength = 3`.
+   The present inconsistency exists precisely because the number was a literal repeated per service.
+2. **The guards' position does not change** — they stay outside the `ExecuteReadAsync` lambda per
+   § 3 and REQ-UOW-41, so a sub-threshold query still creates no DI scope. D8 changes a *value* and,
+   in one place, adds a missing `Trim`/normalize; it changes no control flow the wrap depends on.
+
+**Debounce is deliberately excluded.** The same sources pair a remote minimum with a ~200–250 ms
+input debounce, but that is a UI-timing concern owned by the `ArtistFormPage`/`SongFormPage`
+autocomplete feature that will consume these services — the same boundary that keeps `MauiProgram.cs`
+out of every wave (D3). Recorded in `requirements.md` REQ-UOW-52 as a forward constraint on that
+feature.
 
 ---
 
@@ -403,16 +445,29 @@ Waves 4 onward follow the ordinary Domain → Infra → Services → UI discipli
 
 | Wave | Work | Files owned |
 |---|---|---|
+| **0** | **REQ-UOW-51/52 constants.** Introduce `SearchConstants` (`MinimumLocalQueryLength = 2`, `MinimumRemoteQueryLength = 3`) with no call-site changes. Domain-layer, consumed by Waves 4 and 5 — DRY-Onion-ordered and safely first, because it touches no file any other wave owns and cannot disturb the Wave 1 Red. | new constants file only |
 | **1** | **REQ-UOW-45 Red.** Write the BUG-078 regression test **with `.AsTracking()` still present and `ArtistService` unchanged**. Run it; it MUST fail, returning `"Delete 'Old Name'?"`. Paste the failing output into `task-log.md`. **No production file is edited in this wave.** | new integration test file only |
 | **2** | **REQ-UOW-45 Green.** Wrap `ArtistService.GetDeleteConfirmationAsync:172`'s `GetByIdAsync` call in `ExecuteReadAsync` per § 3/§ 5a. Re-run the Wave 1 test; it MUST now pass. Paste the passing output. `.AsTracking()` is **still present** at this point — this is the honest Red→Green pair. | `Services/ArtistService.cs` (`GetDeleteConfirmationAsync` only) |
 | **3** | **REQ-UOW-46.** Remove `.AsTracking()` from `ArtistRepository.cs:80`. Re-run the BUG-078 test (still green) **and** the guard tests, including `Bug068RegressionTests.Artist_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict`. Rewrite **both** stale comments **in this same commit** (§ 5b): that test's `:41-44` comment, **and** `Infra/AppDbContext.cs:36` ("Edit queries use explicit `.AsTracking()`…"), which after this wave describes code that no longer exists anywhere. `AppDbContext.cs` was previously owned by no wave, so this stale comment would have survived the change — REQ-UOW-46's file walk is scoped to `Infra/Repository/` and does not reach it. | `Infra/Repository/ArtistRepository.cs`, `Infra/AppDbContext.cs` (**comment only** — `:36`; `ChangeTracker.QueryTrackingBehavior` at `:37` is untouched), `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs` (comment only) |
-| **4** (parallel) | REQ-UOW-39/40/41 wraps — one service per subagent | `PersonService.cs` · `SongService.cs` · `VenueService.cs` + `CatalogService.cs` · `SongKaraokeUrlService.cs` · `BackupService.cs` (incl. REQ-UOW-44) · rest of `ArtistService.cs` |
-| **5** | REQ-UOW-38/43 — the two suggestion services. **No DI registration; `MauiProgram.cs` is NOT owned by this or any wave.** Includes the permitted `CreateSut` edits in both suggestion-service test suites (REQ-UOW-49 carve-out). | `Services/SongSuggestionService.cs`, `Services/ArtistSuggestionService.cs`, `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs` (`CreateSut` only), `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs` (`CreateSut` only) |
+| **4** (parallel) | REQ-UOW-39/40/41 wraps — one service per subagent. **Plus REQ-UOW-51's threshold change in `ArtistService.SearchArtistsByNameAsync`** (`IsNullOrWhiteSpace` → `Length < MinimumLocalQueryLength`) — same file, same wave, same commit. | `PersonService.cs` · `SongService.cs` · `VenueService.cs` + `CatalogService.cs` · `SongKaraokeUrlService.cs` · `BackupService.cs` (incl. REQ-UOW-44) · rest of `ArtistService.cs` |
+| **5** | REQ-UOW-38/43 — the two suggestion services, **plus REQ-UOW-51/52's thresholds in both** (`SongSuggestionService.GetLocalAsync` gains normalize + `Length < 2`; both remote fetches gain the `Length < 3` guard). **No DI registration; `MauiProgram.cs` is NOT owned by this or any wave.** Includes the permitted `CreateSut` edits in both suggestion-service test suites (REQ-UOW-49 carve-out). | `Services/SongSuggestionService.cs`, `Services/ArtistSuggestionService.cs`, `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs` (`CreateSut` only), `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs` (`CreateSut` only) |
 | **6** | REQ-UOW-42 concurrency test | new test file |
 | **7** | REQ-UOW-50 architecture test — built per REQ-UOW-50 (i)–(iv): enumerated governed-field set, `Assert.NotEmpty` + count floor, comment/literal stripping with `_field.` anchoring, and `UnitOfWorkCompositionTests.LocateSource` for path resolution. Demonstrate it failing on a scratch `_field` reintroduction, revert, land green | new test file (plus, if `LocateSource` is extracted rather than called, the shared test-infrastructure file it moves to) |
 | **8** | REQ-UOW-47/48 — gate removal, both limbs evidenced (§ 6), including the tree-wide zero-`DbLoadGate` walk and all three stale-comment rewrites (§ 6 step 4) | `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs`, `MyVocaList.Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` (**comment only** — the `:215` `DbLoadGate` reference; REQ-UOW-49 carve-out row 4) |
 
+> **Plan-level refinement (2026-08-25, after plan review).** `tasks.md` decomposes this table into
+> twelve tasks and adds two things the table implies but does not schedule: **Wave 5 splits into 5.1
+> (`ArtistSuggestionService`) and 5.2 (`SongSuggestionService`)** — disjoint files, so they parallelise —
+> and **task 7.2** owns the *census-wide* REQ-UOW-36/37 file walk over all of `Services/*.cs`. The Wave
+> 4/5 walks are per-file; 7.2 is the tree-wide one, and it is the "limb (a) evidence" Wave 8 depends on.
+> Without it that precondition had no producer. Every test this change adds lands in a **new** file
+> (REQ-UOW-49 caps pre-existing test-file edits at the four-row carve-out).
+
 **Serialisation notes.**
+- Wave 0 is additive-only and blocks nothing except Waves 4 and 5, which consume its constants. It
+  must **not** be folded into Wave 1 — Wave 1 edits no production file by design (REQ-UOW-45's Red).
+- REQ-UOW-51/52 changes ride in the wave that already owns each file (4 and 5); they are never a
+  separate pass over the same files, which would violate single-writer.
 - Waves 1, 2 and 3 are **strictly sequential** — each depends on the previous wave's evidence, not just
   its code. Never collapse them into one task; the Red and the Green must be two separate recorded runs.
 - Wave 4's services are disjoint files, so they parallelise (wave cap 4, `workflow.md` Rule 2).
