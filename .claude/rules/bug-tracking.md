@@ -27,4 +27,4 @@ A fix is not complete until its regression test has been seen to FAIL before and
 |------|--------|
 | BACKLOG nesting example, severity definitions + examples, task-log-entry table, full bug-fix workflow | `.claude/library/bug-tracking-reference.md` |
 
-> **Authorship note:** Human-reviewed and approved by Helder 2026-07-09 (CLAUDE.md § Continuous Enhancement — Authorship). Approval is provisional: these definitions are hooked to the current feature-development/spec-update approach and MUST be revisited when the **Spec Evolution, Versioning & Feature-Folder Organization** feature (BACKLOG 2026-07-09) lands (e.g. bug-fix→spec-version binding). Full content preserved in `library/bug-tracking-reference.md`.
+> Authorship + approval provenance: `.claude/library/authorship-log.md`.

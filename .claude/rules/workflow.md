@@ -2,13 +2,7 @@
 
 > **This file is a routing table.** Full procedure detail for every rule (decision tables, examples, task/task-log formats, checklists, phase templates) lives in `.claude/library/workflow-reference.md`, loaded on demand. Never-miss HARD RULEs and every inbound `§`-anchor heading stay inline below. These rules are hook-enforced — violating them costs rework.
 
-| Need the full detail of | Source |
-|-------------------------|--------|
-| Any rule's decision tables, examples, formats, phase templates, checklists | `.claude/library/workflow-rule-N.md` (per-rule section files; index: `workflow-reference.md`) |
-| Orchestrator protocols (pre-dispatch, briefing, waves, worktrees, review lanes) | `.claude/agents/orchestrator.md` |
-| Implementor protocols (context gate, E2E gate, escalation, return protocol) | `.claude/agents/implementor.md` |
-| Spec anatomy, AC format, rebuild test | `.claude/library/spec-writing-guide.md` |
-| Session artifacts (ACTIVE-CONSIDERATIONS, findings, handoff formats) | `.claude/library/session-ops.md` |
+**Detail lives elsewhere:** per-rule tables/formats/checklists → `library/workflow-rule-N.md` (index: `workflow-reference.md`) · orchestrator + implementor protocols → `.claude/agents/{orchestrator,implementor}.md` · spec anatomy + AC format → `library/spec-writing-guide.md` · session artifacts → `library/session-ops.md`.
 
 ---
 
@@ -56,11 +50,11 @@ Full spec-decision table, new-feature workflow (steps 0–5), proactive-triage f
 
 ### Spec quality four-gate review
 
-Before a spec is ready for implementation it must pass all four gates — **Correctness** (matches what Helder described), **Completeness** (every story has a criterion; error paths covered), **Consistency** (requirements and design agree), **Testability** (a test can be written from every AC without asking questions). Determinism / prohibited vague terms: `code-style-reference.md`. Full checklist: `workflow-rule-1.md § Spec quality gate`.
+All four gates before implementation: **Correctness** (matches what Helder described) · **Completeness** (every story has a criterion; error paths covered) · **Consistency** (requirements and design agree) · **Testability** (a test can be written from every AC without asking questions). Full checklist + prohibited vague terms: `workflow-rule-1.md § Spec quality gate`.
 
 ### Spike validation task pattern
 
-A **spike** is a time-boxed exploration producing a `findings.md` artifact, not production code. Rules: spike code is throwaway (no production files edited); the time-box is a hard stop; success → proceed to spec; failure → escalate to Helder (do not unilaterally pick an alternative); inconclusive → document with a recommendation. `[SPIKE]` task format + discovery mode: `workflow-rule-1.md § Spike validation task pattern`.
+A **spike** is a time-boxed exploration producing `findings.md`, not production code. Never-miss: spike code is throwaway (no production files edited), the time-box is a hard stop, and **failure escalates to Helder — never unilaterally pick an alternative**. `[SPIKE]` format, success/inconclusive paths, discovery mode: `workflow-rule-1.md § Spike validation task pattern`.
 
 ---
 
@@ -70,33 +64,16 @@ A **spike** is a time-boxed exploration producing a `findings.md` artifact, not 
 
 > **Orchestrator never reads source files `[HARD RULE]`:** the main/orchestrator agent must not read `.cs`, `.xaml`, or any other source file — all code inspection (including plan-mode exploration) is delegated to an Explore/Plan subagent. Allow/deny list + session-start self-check: `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
 
-### Inline Trivial Fix (ITF) lane `[amended 2026-07-21]`
+### Inline Trivial Fix (ITF) lane `[amended 2026-07-21]` (never-miss summary)
 
-**Narrow, opt-in exception to "all coding is done by subagents".** The orchestrator MAY apply a fix directly — no subagent — only when ALL of the following hold. Any single miss = dispatch an implementor; there is no partial qualification.
+**Narrow, opt-in exception to "all coding is done by subagents"** — the orchestrator only; implementor subagents are never constrained by ITF bounds.
 
-| # | Condition |
-|---|-----------|
-| C0 | A **declaration** exists in the worktree where the edit occurs, naming this file |
-| C1 | Exactly **1 file**, **≤ 5 changed lines** (guard's upper-bound count) |
-| C2 | Fix **fully diagnosed** — root cause, exact file and exact line already recorded before the file is opened; if finding the defect would need a grep or a second file, it is not fully diagnosed |
-| C3 | Target is **not** `.xaml` / `.xaml.cs` |
-| C4 | Target is **not** a governed component (`component-change-governance.md`) |
-| C5 | Target is **not** in the sequential-only file registry (below) |
-| C6 | Severity ≤ Major **and** no regression test is mandatory per `bug-tracking.md`. In practice: Critical always dispatches; Major dispatches wherever testable. The lane's population is Minor bugs, UI-only Major bugs verified by manual E2E, and non-bug trivia |
-| C7 | Edit is in a **worktree on a task branch** — ITF grants NO worktree exemption |
-| C8 | Build (0 errors) + affected tests green before commit |
+- **Nine conditions (C0–C8), all of them, or dispatch an implementor.** There is no partial qualification. In shape: 1 file / ≤ 5 lines, fully diagnosed before the file is opened, not `.xaml`, not a governed component, not sequential-only, severity ≤ Major with no mandatory regression test, in a worktree on a task branch, green build + tests.
+- **Opt-in is explicit:** write `<worktree>/.itf-active` (worktree root, never repo root) + one `ITF:` line in `task-log.md` BEFORE editing; delete the marker as the final step of the ITF commit.
+- **Without a declaration the lane is inert** and ordinary Rule 2 applies. Once declared, C1/C3/C4/C5 are hook-enforced (`constitutional-guard.py` Guard 3) and cannot be exceeded.
+- **Commit trailer (required):** `Lane: ITF (N files, N lines)`.
 
-**Opt-in is explicit.** Before editing, the orchestrator (a) writes `<worktree>/.itf-active` — worktree root, never repo root — and (b) logs one line in the feature's `task-log.md`:
-`ITF: BUG-050 — SongFormViewModel.cs — root cause: SelectArtist omits IsArtistLocked = true — expected 1 line.`
-The orchestrator **deletes the marker as the final step of the ITF commit**; a 30-minute expiry is the safety net for a dead session.
-
-**Enforcement is opt-in, and bounded once entered.** Without a declaration the lane is inert and ordinary Rule 2 applies — prose-enforced, as before. Once declared, C1/C3/C4/C5 are hook-enforced (`constitutional-guard.py` Guard 3) and cannot be exceeded. C2/C6, and multi-declaration chaining, are prose rules auditable after the fact via the task-log lines and the commit trailer.
-
-**Commit trailer (required):** append `Lane: ITF (N files, N lines)` to the Bug Fix Pattern message (Rule 3). Audit with `git log --grep "Lane: ITF"`.
-
-**Applies to the orchestrator only.** Implementor subagents are never constrained by ITF bounds.
-
-Full rationale, decisions, and Guard 3 design: `DevCycleCraft/inline-trivial-fix/`.
+Full C0–C8 table, marker mechanics, and enforcement detail: `workflow-rule-2.md § Inline Trivial Fix (ITF) lane`. Rationale + Guard 3 design: `DevCycleCraft/inline-trivial-fix/`.
 
 - **Wave cap `[HARD RULE]`:** max **4** subagents in parallel; dispatch in waves, wait for all, then next wave. Discard a subagent's context after it completes — never reuse the instance.
 - **Git worktrees mandatory for ALL implementation work `[HARD RULE — amended 2026-07-14]`:** every task that edits code files (`.cs`, `.xaml`, `.xaml.cs`) runs in a git worktree on a task branch — never directly on `develop` or `main` (hook-enforced via `constitutional-guard.py`). Applies to single-subagent tasks and bug fixes, not just parallel waves — develop stays unlocked as the docs + integration branch. See `orchestrator.md § Git Worktrees as Isolation Primitive`.
@@ -200,13 +177,12 @@ Every implementation/planning session begins with this reading order before any 
 
 ## Rule 8 — Pre-Task Collision Check
 
-Before dispatching any wave that modifies files, confirm no other agent/branch is modifying the same files. *(GitHub MCP references removed 2026-07-09 — the server was disabled 2026-07-07; the check is git + lease based, with `gh` CLI for PR checks.)*
+Before dispatching any wave that modifies files, confirm no other agent/branch is modifying the same files: `git log --oneline -10` · `git status` · scan `tasks.md` for stray `[~]` · `gh pr list` if a remote review flow is active.
 
-- `git log --oneline -10` · `git status` · scan `tasks.md` for stray `[~]` · run the **lease liveness check** — classify each `[~]` with no known running agent via `reclaim.py` (`lease_lib.classify`) **before** assuming abandonment. A `fresh` result means another live session owns it — do **not** reset to `[ ]`.
-- If a remote review flow is active: `gh pr list` — any open PR touching a wave's `Files owned` = collision risk.
+**Never-miss:** run the **lease liveness check** — classify each `[~]` with no known running agent via `reclaim.py` (`lease_lib.classify`) **before** assuming abandonment. A `fresh` result means another live session owns it — do **not** reset to `[ ]`.
 
-Collision-type response table: `workflow-rules-6-7-8.md § Rule 8`.
+Procedure detail + collision-type response table: `workflow-rules-6-7-8.md § Rule 8`.
 
 ---
 
-> **Authorship note:** Human-reviewed and approved by Helder 2026-07-09 (CLAUDE.md § Continuous Enhancement — Authorship). Approval is provisional where content is hooked to the current spec-update approach (SDD Invariant, Rule 1 spec-gap handling, Rule 3 Session-End Spec Update Ritual): these sections MUST be revisited when the **Spec Evolution, Versioning & Feature-Folder Organization** feature (BACKLOG 2026-07-09) defines the immutable-spec/delta-change pattern.
+> Authorship + approval provenance for all rules files: `.claude/library/authorship-log.md`.
