@@ -7,7 +7,13 @@
 > **Defect this change fixes:** `../../bugs/2026-08-24-BUG-078-service-read-paths-still-use-the-captive-appdbcontext-one-of-them-tracks/README.md` (Major).
 >
 > **Requirement numbering continues the parent series.** Highest allocated before this change:
-> `REQ-UOW-35`. This change allocates **REQ-UOW-36 … REQ-UOW-50**.
+> `REQ-UOW-35`. This change allocates **REQ-UOW-36 … REQ-UOW-52**.
+>
+> > **Spec updated [2026-08-25]:** approved by Helder with one amendment — the minimum query length
+> > that triggers a search was left implicit and inconsistent across services. **REQ-UOW-51** (local
+> > DB reads, ≥ 2 characters) and **REQ-UOW-52** (remote HTTP provider fetches, ≥ 3 characters) were
+> > added, and the guard table under REQ-UOW-41 now records the two guards that change. This item has
+> > not shipped, so the spec is edited in place per `workflow.md § SDD Invariant`.
 
 ---
 
@@ -198,6 +204,11 @@ Three consequences bind this change:
   | `VenueService.GetPagedVenuesForListAsync` | `ThrowIfNegativeOrZero(pageNumber, nameof(...))` / `(pageSize, …)` | `:194-195` |
   | `ArtistSuggestionService.GetLocalAsync` | `trimmed.Length < 2` → `return []` | `:39-40` |
   | `SongSuggestionService.GetLocalAsync` | `IsNullOrWhiteSpace(term)` → `return []` | `:42-43` |
+
+  > **Two of these guards change value under REQ-UOW-51** (`ArtistService.SearchArtistsByNameAsync`
+  > and `SongSuggestionService.GetLocalAsync`, both `IsNullOrWhiteSpace` → `Length < 2`). REQ-UOW-41
+  > governs their **position** (outside the lambda); REQ-UOW-51 governs their **threshold**. The two
+  > are independent and both hold.
 
   Note `ArtistSuggestionService.GetLocalAsync`'s guard is preceded by the normalization call
   `var trimmed = term.NormalizeSearchQuery();` at `:38`. Normalization is not itself a guard, but it
@@ -545,6 +556,76 @@ Three consequences bind this change:
   *Test:* the architecture test itself. It SHALL be seen to **fail** against a deliberately
   reintroduced `_field` dereference inside a lambda (demonstrate on a scratch edit, revert, paste both
   outputs into `task-log.md`) — a guard never seen to fail is not known to guard anything.
+
+- **REQ-UOW-51** — Every **local database** search/suggestion entry point SHALL short-circuit and
+  return an empty result when the normalized query is shorter than **2 characters**. The guard stays
+  outside the `ExecuteReadAsync` lambda (REQ-UOW-41), so a sub-threshold query creates no DI scope
+  and issues no SQL.
+
+  **Rationale (community practice, researched 2026-08-25).** Autocomplete convention splits by data
+  source: an in-memory/local index can match usefully at 1–2 characters, while a remote API is
+  conventionally held to 3. A single character over a local table matches an unbounded fraction of
+  rows and returns a list with no discriminating value, so 1 is rejected; 3 is unnecessarily strict
+  for a fast local SQLite query on an indexed collated column. **2 is the local threshold.** This is
+  also the value already in force in `PersonService` (`:188-189`, `:197-198`) and
+  `ArtistSuggestionService` (`:39-40`), so the AC *standardises on the majority existing behaviour*
+  rather than introducing a new one.
+
+  **The set is closed — exactly two call sites change; the other four already comply:**
+
+  | Method | Today | After | Change? |
+  |---|---|---|---|
+  | `ArtistService.SearchArtistsByNameAsync` (`:165-166`) | `IsNullOrWhiteSpace(normalized)` | `normalized.Length < 2` | **CHANGES** |
+  | `SongSuggestionService.GetLocalAsync` (`:42-43`) | `IsNullOrWhiteSpace(term)` | `trimmed.Length < 2` | **CHANGES** |
+  | `PersonService.SearchPersonsAsync` (`:188-189`) | `Length < 2` | unchanged | no |
+  | `PersonService.SearchPersonsStartsWithAsync` (`:197-198`) | `Length < 2` | unchanged | no |
+  | `ArtistSuggestionService.GetLocalAsync` (`:39-40`) | `trimmed.Length < 2` | unchanged | no |
+  | `SongService` / `VenueService` / `CatalogService` paged lists | not a search entry point | n/a | no |
+
+  `SongSuggestionService.GetLocalAsync` has no normalization call today, unlike
+  `ArtistSuggestionService.GetLocalAsync` (`:38`). REQ-UOW-51 requires the threshold to be measured
+  on the **trimmed** term, so the implementor adds the same `NormalizeSearchQuery()` call (or a
+  `Trim()`, matching whatever `ArtistSuggestionService` does) ahead of the guard — this is the only
+  behavioural addition the AC permits, and it stays outside the lambda.
+
+  The threshold SHALL be expressed as a **single named constant** shared by all call sites (e.g.
+  `SearchConstants.MinimumLocalQueryLength = 2`), not as a repeated `2` literal — a magic number
+  repeated across five services is how the current inconsistency arose.
+
+  *Test:* for each of the two changing call sites, a unit test asserting that a 1-character query
+  returns an empty result **and** that the repository mock was never called (`Verify(..., Times.Never)`),
+  plus a 2-character query that does reach the repository. The existing `PersonService` and
+  `ArtistSuggestionService` guard tests MUST stay green **unmodified**.
+
+- **REQ-UOW-52** — Every **remote HTTP provider** fetch SHALL short-circuit before any network call
+  when the normalized query is shorter than **3 characters**. Concretely:
+  `SongSuggestionService.FetchFromProvidersAsync` (`:78`) and the provider fetch reached from
+  `ArtistSuggestionService.GetRemoteAsync` (`:57`).
+
+  **Rationale (community practice, researched 2026-08-25).** 3 is the dominant published default for
+  API-backed autocomplete (NCI Design System default 3; the widely-cited jQuery UI/Kendo guidance to
+  raise `minLength` above 1 whenever a query "could match a lot of items"; the common `minLengthTerm: 3`
+  for remote sources). The asymmetry with REQ-UOW-51 is deliberate and is the whole point: a local
+  query costs a millisecond of SQLite, a remote one costs a network round trip, third-party rate-limit
+  budget, and battery. Two characters against a global music-metadata catalogue returns noise at real
+  cost.
+
+  Expressed as a second named constant (e.g. `SearchConstants.MinimumRemoteQueryLength = 3`) beside
+  the first, so the asymmetry is visible in one place rather than inferred from two call sites.
+
+  The guard SHALL sit **outside** the `ExecuteReadAsync` lambdas exactly as REQ-UOW-41 requires, and
+  its addition SHALL NOT move any provider call inside one (REQ-UOW-43 is unchanged and still binding).
+
+  *Test:* a 2-character query drives the local path only — asserted with a fake
+  `IMusicMetadataProvider` that records invocations and MUST record zero; a 3-character query reaches
+  it. This composes with, and does not replace, REQ-UOW-43's blocking-fake test.
+
+  **Debounce is explicitly NOT in scope.** Community practice pairs a remote minimum length with a
+  ~200–250 ms input debounce, but debounce is a **UI-timing** concern belonging to the
+  `ArtistFormPage`/`SongFormPage` autocomplete feature that will consume these services (see
+  `§ The two suggestion services are pre-built, not dead code`). Recorded here as a **forward
+  constraint on that feature**, not as work for this change: the existing
+  `CrudListViewModelBase.cs:254` debounce path stays untouched (REQ-UOW-48's do-not-touch list).
 
 ---
 
