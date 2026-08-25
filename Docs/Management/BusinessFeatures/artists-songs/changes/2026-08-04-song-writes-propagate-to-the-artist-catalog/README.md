@@ -138,3 +138,42 @@ Consequences the spec must state as expected, not as defects:
 ## Open questions
 
 None outstanding. D1–D4 close every question the "Before any code" section raised.
+
+---
+
+## Status check — 2026-08-25 (audit)
+
+**This item is live and must NOT be deleted.** It was reviewed against the in-flight `READ-SCOPE`
+change (`cross-cutting/read-model-notracking-guidelines/changes/2026-08-24-scope-all-service-reads-through-iunitofwork/`)
+on the suspicion that the two overlapped. **They do not conflict.** READ-SCOPE is an infrastructure
+change — it routes existing service *reads* through `IUnitOfWork.ExecuteReadAsync` and changes no
+business behaviour. This item is unbuilt *business* behaviour: the derived-catalog-row invariant.
+Neither supersedes the other, and D1–D4 remain the only record of Helder's decisions on the domain
+model.
+
+**What the audit did change:**
+
+1. **D3's premise sentence is now stale.** It says `CatalogService` "currently injects
+   `ICatalogRepository` and calls `SaveChangesAsync` on it directly, with no `IUnitOfWork`
+   dependency". UoW Phase 4.1 has since landed: `CatalogService.cs:17` is now
+   `(ICatalogRepository, IUnitOfWork, ILogger)`. **D3's *decision* is satisfied — the sequencing
+   gate it imposed is met and no longer blocks this item.** The description is kept as written
+   because a shipped decision record is history, not a live description.
+
+2. **New sequencing constraint — wait for READ-SCOPE.** READ-SCOPE's Wave 4.3 owns
+   `Services/CatalogService.cs` and Wave 4.2 owns `Services/SongService.cs`, the two files this item
+   must modify. Under the single-writer rule (`workflow.md` Rule 2) this item is **not dispatchable
+   while READ-SCOPE is in flight**. Start it only after READ-SCOPE's Wave 4 is committed, and write
+   the propagation code in the `ExecuteAsync`/`ExecuteReadAsync` shape those waves establish —
+   resolving every collaborator from the lambda's own `sp`, never from a `_`-prefixed field
+   (REQ-UOW-37). Writing it in the old shape would be reverted by READ-SCOPE's Wave 7 architecture
+   test.
+
+3. **The spec was never written.** The folder still holds `README.md` only — a previous session
+   diverted to the UoW work. Next step is unchanged: write `requirements.md` / `design.md` from
+   D1–D4, then spec-reviewer, then Helder's approval gate, then a plan.
+
+**One thing the spec author should carry from D4:** the backfill migration and READ-SCOPE both touch
+the same surface for different reasons. The migration is a *write* path and is unaffected by
+READ-SCOPE's read scoping — but it must still be idempotent in effect (insert only where no
+`Catalog(ArtistId, SongId)` row exists), because `(ArtistId, SongId)` is the composite primary key.

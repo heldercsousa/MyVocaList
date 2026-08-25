@@ -1,12 +1,17 @@
 # Plan — App Settings
 
+> **Closed 2026-05-31.** Both phases were implemented and reviewed **PASS** (see `task-log.md`);
+> the item shipped as `✅ Done`, closed 2026-06. The boxes below were left unchecked at the time —
+> corrected 2026-08-25 during the ORPHAN-APPSET audit. `PreferencesPage/` is absent from the tree,
+> confirming Phase 1 landed. **No work remains here.**
+
 > Two gap fixes. The SettingsPage itself is already implemented. This plan covers the two known gaps identified in `design.md`.
 
 ---
 
 ## Phase 1 — Navigation Consolidation
 
-- [ ] **Consolidate Preferences → Settings navigation** [SEQUENTIAL]
+- [x] **Consolidate Preferences → Settings navigation** [SEQUENTIAL]
   - **Produces:** Updated `NavigationConfig.cs` (route mapped to `SettingsPage`); updated `AppShell.xaml` (template swapped, `xmlns:prefs` removed); deleted `PreferencesPage.xaml` + `PreferencesPage.xaml.cs`; updated `MauiProgram.cs` (removed `PreferencesPage` transient registration); updated `MyVocaList.sln` (deleted file entries removed)
   - **Consumes:** `design.md § Gap Fix 1 — Navigation Consolidation` (read before starting)
   - **Risk:** Medium — deleting a registered page and changing a shell route template. Build will fail if any reference to `PreferencesPage` or the `prefs:` namespace is left behind.
@@ -24,7 +29,7 @@
 
 ## Phase 2 — Stale HasYouTubeApiKey Fix
 
-- [ ] **Refresh HasYouTubeApiKey on SongFormPage appearance** [SEQUENTIAL — after Phase 1 committed]
+- [x] **Refresh HasYouTubeApiKey on SongFormPage appearance** [SEQUENTIAL — after Phase 1 committed]
   - **Produces:** New `RefreshApiKeyFlagAsync()` method on `SongFormViewModel`; updated `SongFormPage.xaml.cs` `OnAppearing` calling `RefreshApiKeyFlagAsync`
   - **Consumes:** `design.md § Gap Fix 2 — Stale HasYouTubeApiKey` (read before starting)
   - **Risk:** Low — additive change; no existing behavior is altered. `OnAppearing` already calls `titleEdit.Focus()` which remains unchanged.

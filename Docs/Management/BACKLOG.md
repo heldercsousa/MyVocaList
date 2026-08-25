@@ -72,7 +72,6 @@
 | — | **Social features** | 💡 Pending | Goal: post-event sharing, singer stats. Pointer: `cross-cutting/social-features/`. |
 | 2026-07-03 | **Cross-cutting** | — | Bugs with no single parent business feature |
 | 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) on render teardown (Major) | 💡 Pending | Goal: confirm whether the crash is a real defect or debugger-teardown noise (Release logcat investigation first). Pointer: `BusinessFeatures/cross-cutting/bugs/2026-07-03-BUG-026-hwui-sigabrt-render-teardown/`. |
-| 2026-08-20 | ↳ About Page Copyright Year — auto-extending range | 🟡 In Progress | Goal: Copyright line renders a founding-to-current year range instead of a hardcoded 2025, so it never goes stale. Gate: Copyright binding renders the range; unit tests cover the rollover and same-year cases. Pointer: `BusinessFeatures/about-page/changes/2026-08-20-about-page-copyright-year-auto-extending-range/`. |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---
