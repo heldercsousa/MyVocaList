@@ -159,3 +159,43 @@ the folder name and the `id:` key. Renumbering is safe because the ID lives in e
 every other reference is a path.
 
 ---
+
+## Inline Trivial Fix (ITF) lane `[amended 2026-07-21]`
+
+> Routed out of `workflow.md` 2026-08-24 (doctor pass). The never-miss summary — the lane exists,
+> it is opt-in, all nine conditions must hold, and C1/C3/C4/C5 are hook-enforced — stays inline in
+> `workflow.md § Rule 2`. Everything below is the procedure detail.
+
+**Narrow, opt-in exception to "all coding is done by subagents".** The orchestrator MAY apply a fix
+directly — no subagent — only when ALL of the following hold. Any single miss = dispatch an
+implementor; there is no partial qualification.
+
+| # | Condition |
+|---|-----------|
+| C0 | A **declaration** exists in the worktree where the edit occurs, naming this file |
+| C1 | Exactly **1 file**, **≤ 5 changed lines** (guard's upper-bound count) |
+| C2 | Fix **fully diagnosed** — root cause, exact file and exact line already recorded before the file is opened; if finding the defect would need a grep or a second file, it is not fully diagnosed |
+| C3 | Target is **not** `.xaml` / `.xaml.cs` |
+| C4 | Target is **not** a governed component (`component-change-governance.md`) |
+| C5 | Target is **not** in the sequential-only file registry (`workflow.md § Sequential-only file registry`) |
+| C6 | Severity ≤ Major **and** no regression test is mandatory per `bug-tracking.md`. In practice: Critical always dispatches; Major dispatches wherever testable. The lane's population is Minor bugs, UI-only Major bugs verified by manual E2E, and non-bug trivia |
+| C7 | Edit is in a **worktree on a task branch** — ITF grants NO worktree exemption |
+| C8 | Build (0 errors) + affected tests green before commit |
+
+**Opt-in is explicit.** Before editing, the orchestrator (a) writes `<worktree>/.itf-active` —
+worktree root, never repo root — and (b) logs one line in the feature's `task-log.md`:
+`ITF: BUG-050 — SongFormViewModel.cs — root cause: SelectArtist omits IsArtistLocked = true — expected 1 line.`
+The orchestrator **deletes the marker as the final step of the ITF commit**; a 30-minute expiry is
+the safety net for a dead session.
+
+**Enforcement is opt-in, and bounded once entered.** Without a declaration the lane is inert and
+ordinary Rule 2 applies — prose-enforced, as before. Once declared, C1/C3/C4/C5 are hook-enforced
+(`constitutional-guard.py` Guard 3) and cannot be exceeded. C2/C6, and multi-declaration chaining,
+are prose rules auditable after the fact via the task-log lines and the commit trailer.
+
+**Commit trailer (required):** append `Lane: ITF (N files, N lines)` to the Bug Fix Pattern message
+(`workflow.md § Rule 3`). Audit with `git log --grep "Lane: ITF"`.
+
+**Applies to the orchestrator only.** Implementor subagents are never constrained by ITF bounds.
+
+Full rationale, decisions, and Guard 3 design: `DevCycleCraft/inline-trivial-fix/`.

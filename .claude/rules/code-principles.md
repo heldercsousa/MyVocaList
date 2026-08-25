@@ -39,6 +39,4 @@ See `library/code-style-reference.md § DI Registration Conventions` — Singlet
 ## UI Thread Performance — ObservableRangeCollection
 See `library/code-style-reference.md § UI Thread Performance` — one `ReplaceRange` per `RunOnUiThread` block; clear selection after reload; no LINQ/service calls inside the UI-thread block.
 
----
-
-> **Authorship note:** Human-reviewed and approved by Helder 2026-07-09 (CLAUDE.md § Continuous Enhancement — Authorship). Full content preserved in `library/code-style-reference.md`.
+> Authorship + approval provenance: `.claude/library/authorship-log.md`.
