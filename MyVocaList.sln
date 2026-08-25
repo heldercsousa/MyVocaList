@@ -53,6 +53,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\requirements.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\requirements.md
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\design.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\design.md
 		Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\task-log.md = Docs\Management\cross-cutting\read-model-notracking-guidelines\changes\2026-08-24-scope-all-service-reads-through-iunitofwork\task-log.md
+		Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-08-25-doctor-pass-route-authorship-notes-generator-detail-and-the-itf-table-to-on-demand-files\README.md = Docs\Management\DevCycleCraft\rules-file-refactoring\changes\2026-08-25-doctor-pass-route-authorship-notes-generator-detail-and-the-itf-table-to-on-demand-files\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
