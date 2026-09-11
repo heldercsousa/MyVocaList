@@ -1,4 +1,4 @@
-namespace MyVocaList.Infra.Collation;
+namespace MyVocaList.Domain.Constants;
 
 /// <summary>Minimum query-length thresholds for search entry points, before which no query is issued.</summary>
 public static class SearchConstants
