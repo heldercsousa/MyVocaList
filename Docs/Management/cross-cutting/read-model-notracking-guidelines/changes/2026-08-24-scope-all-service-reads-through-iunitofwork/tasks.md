@@ -41,7 +41,7 @@ Plan: `./plan.md` · Log: `./task-log.md` · Item: `READ-SCOPE` (LEDGER)
 
 ## Wave 1 — BUG-078 Red `[SEQUENTIAL — no production file edited]`
 
-- [ ] **1.1** Write the BUG-078 regression test and **see it FAIL**
+- [x] **1.1** Write the BUG-078 regression test and **see it FAIL**
   - Produces: new integration test reproducing the stale delete-confirmation
   - Consumes: —
   - Risk: **A** · Est: **1 h**
@@ -54,7 +54,7 @@ Plan: `./plan.md` · Log: `./task-log.md` · Item: `READ-SCOPE` (LEDGER)
 
 ## Wave 2 — BUG-078 Green `[SEQUENTIAL]`
 
-- [ ] **2.1** Wrap `ArtistService.GetDeleteConfirmationAsync`'s `GetByIdAsync` in `ExecuteReadAsync`
+- [x] **2.1** Wrap `ArtistService.GetDeleteConfirmationAsync`'s `GetByIdAsync` in `ExecuteReadAsync`
   - Produces: the fix
   - Consumes: Task 1.1's failing test
   - Risk: **A** · Est: **30 min**
