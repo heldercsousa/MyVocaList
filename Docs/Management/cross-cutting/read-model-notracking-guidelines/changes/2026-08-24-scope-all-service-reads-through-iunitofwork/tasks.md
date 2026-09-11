@@ -23,12 +23,18 @@ Plan: `./plan.md` · Log: `./task-log.md` · Item: `READ-SCOPE` (LEDGER)
 
 ## Wave 0 — Search-length constants
 
-- [ ] **0.1** Introduce `SearchConstants` — `MinimumLocalQueryLength = 2`, `MinimumRemoteQueryLength = 3`
+- [x] **0.1** Introduce `SearchConstants` — `MinimumLocalQueryLength = 2`, `MinimumRemoteQueryLength = 3`
   - Produces: `SearchConstants` (Domain layer, beside `CollationConstants`)
   - Consumes: —
   - Risk: **C** (constants only, no call sites) · Est: **15 min**
-  - Files owned: `MyVocaList/Domain/Constants/SearchConstants.cs` (new — place it beside the existing
-    `CollationConstants` file, wherever that lives)
+  - Files owned: `Domain/Constants/SearchConstants.cs` (new)
+  - > **Corrected 2026-09-11.** This entry originally read "place it beside the existing
+    > `CollationConstants` file, wherever that lives". That hint is **wrong**: `CollationConstants`
+    > lives at `Infra/Collation/CollationConstants.cs`, and `MyVocaList.Services` does **not**
+    > reference `MyVocaList.Infra` (it references Contracts, Domain, Extensions). Constants placed
+    > in Infra are therefore unreachable from the Waves 4/5 services that must consume them — a
+    > break that would only surface at Wave 5, since Wave 0 wires no call sites. The **"Domain
+    > layer"** half of the original instruction governs; the "beside" half is void.
   - Demo: solution builds; both constants exist with XML doc citing REQ-UOW-51/52 and `design.md § 2c`
   - Review lane: build-only
   - AC: REQ-UOW-51, REQ-UOW-52 (constant form)

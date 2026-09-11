@@ -222,3 +222,37 @@ clean. Recorded because a future resumption on another machine will hit the same
   `ArtistRepository.cs:79-80` MUST still be present when 1.1 runs; if the test passes first run, STOP.
 - **Baseline to compare against:** 0 errors, 577 tests
 - **Context manifest:** unchanged from the block above.
+
+### Wave 0 — COMPLETE (task 0.1)
+
+`SearchConstants` added: `MinimumLocalQueryLength = 2`, `MinimumRemoteQueryLength = 3`, XML docs citing
+REQ-UOW-51/52 and `design.md § 2c`. No call sites wired (Waves 4/5 own those).
+
+**Two commits, because the task entry's path hint was wrong.**
+
+| Commit | What |
+|--------|------|
+| `b7ef13c` | Created `Infra/Collation/SearchConstants.cs` — followed the entry's "beside `CollationConstants`" hint |
+| `cf3a604` | `git mv` to `Domain/Constants/SearchConstants.cs` (ns `MyVocaList.Domain.Constants`) |
+
+**Why the relocation was mandatory.** `CollationConstants` lives at `Infra/Collation/`, so "beside it"
+put the constants in Infra — but `MyVocaList.Services.csproj` references Contracts, Domain and
+Extensions and **not** Infra. The Waves 4/5 services that must consume these constants could not have
+seen them. Because Wave 0 wires no call sites by design, the build stayed green and the break would
+have surfaced only at Wave 5, under three rounds of unrelated work. The entry's **"Domain layer"** half
+governs; `tasks.md` records the "beside" half as void. Domain had no `Constants` folder; one was created
+following Domain's established per-folder namespacing.
+
+**Verification:** Python file walk (not `grep`, per R2) → `SearchConstants` in exactly 1 file tree-wide.
+Build 0 errors. Tests **577/577**, equal to baseline.
+
+### Checkpoint
+
+- **Step:** Wave 0 closed. Dispatching Wave 1 (task 1.1, BUG-078 Red).
+- **Guard for 1.1:** `.AsTracking()` at `ArtistRepository.cs:80` MUST still be present, `ArtistService`
+  unchanged. If the new test PASSES on its first run the reproduction is wrong — STOP, fix the test,
+  do not advance to Wave 2 (plan § 7).
+- **Baseline:** 0 errors, 577 tests.
+- **Coordinate caution:** every line number in `tasks.md` / the BUG-078 note was written 2026-08-25.
+  Each implementor re-verifies its own coordinates before editing rather than trusting the entry —
+  Wave 0 already produced one stale-coordinate defect.
