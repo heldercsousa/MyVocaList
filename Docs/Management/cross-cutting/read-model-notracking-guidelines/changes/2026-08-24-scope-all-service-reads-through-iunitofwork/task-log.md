@@ -187,3 +187,38 @@ based on `develop`, verify develop is an ancestor, baseline green, status → �
   If a new data service lands before Wave 7, re-verify it.
 - **Phase 4.7 of the parent spec stays blocked** until this item completes; the parent's `plan.md`
   and `task-log.md` carry the DO-NOT-PROCEED verdict.
+
+---
+
+## 2026-09-11 — Implementation begins (Helder approved spec + plan)
+
+**Status:** in progress · Orchestrator session
+
+Helder approved `requirements.md`, `design.md`, `plan.md` and `tasks.md` on 2026-09-11 after reading
+both this change folder and the parent 2026-08-03 folder. The plan-approval gate recorded in the
+LEDGER `READ-SCOPE` row is therefore CLOSED and implementation is authorised.
+
+### Setup (plan § 2)
+
+| Step | Result |
+|------|--------|
+| S1 worktree | `../MyVocaList-wt-read-scope`, branch `feat/uow-read-scope` |
+| S2 base verified | `git merge-base --is-ancestor develop HEAD` → OK, develop is an ancestor |
+| S3 baseline | **0 errors, 577/577 passing** (see environment note below) |
+| S4 status | `backlog_gen.py status scope-all-service-reads-through-iunitofwork "🟡 In Progress"` |
+| S5 checkpoint | this block |
+
+**Environment note — baseline was initially unobtainable.** The first `dotnet build` failed on
+`develop` *and* in the fresh worktree with `NETSDK1147: wasm-tools` required by `MyVocaList.csproj`
+(`net10.0-android`). Installed workloads were `android` / `ios` / `maccatalyst` / `maui-windows`, all
+sourced from `VS 17.14 / VS 18.10.12113.136` — a Visual Studio update had moved the MAUI manifest to
+one requiring `wasm-tools`. No repo change caused it. Helder resolved it out-of-band; the retry built
+clean. Recorded because a future resumption on another machine will hit the same wall.
+
+### Checkpoint
+
+- **Step:** Wave 0 dispatched (task 0.1, `SearchConstants`), awaiting implementor
+- **Next:** on 0.1 green + committed → Wave 1 (task 1.1, BUG-078 Red). Guard: `.AsTracking()` at
+  `ArtistRepository.cs:79-80` MUST still be present when 1.1 runs; if the test passes first run, STOP.
+- **Baseline to compare against:** 0 errors, 577 tests
+- **Context manifest:** unchanged from the block above.
