@@ -172,12 +172,22 @@ public class ArtistService : IArtistService
     public async Task<string> GetDeleteConfirmationAsync(IEnumerable<int> ids, CancellationToken ct = default)
     {
         var idList = ids.ToList();
+        // REQ-UOW-41: the single-id branch guard stays OUTSIDE the lambda — the multi-artist path
+        // makes no database call and must not create a DI scope.
         if (idList.Count == 1)
         {
-            var artist = await _artistRepository.GetByIdAsync(idList[0], ct);
-            return artist != null
-                ? $"Delete '{artist.Name}'?"
-                : "Delete artist?";
+            // [AC] REQ-UOW-45: read scoped through IUnitOfWork so a rename committed via
+            // ExecuteAsync is visible here — a fresh AppDbContext has no cached copy to prefer
+            // over the database (BUG-078).
+            return await _uow.ExecuteReadAsync<string>(async sp =>
+            {
+                // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+                var artistRepository = sp.GetRequiredService<IArtistRepository>();
+                var artist = await artistRepository.GetByIdAsync(idList[0], ct);
+                return artist != null
+                    ? $"Delete '{artist.Name}'?"
+                    : "Delete artist?";
+            }, ct);
         }
         return $"Delete {idList.Count} artists?";
     }
