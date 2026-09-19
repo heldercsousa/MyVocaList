@@ -613,3 +613,90 @@ also covers lambdas the implementors might have missed. In `PersonService.cs` th
 - **Context manifest:** `plan.md` §§ 4–7 · `tasks.md` §§ Wave 4–5 · this Checkpoint ·
   `requirements.md` REQ-UOW-39/40/41/44/51 · `design.md § 2`, `§ 2c` · integration branch
   `feat/uow-read-scope` @ `0a555492` in worktree `../MyVocaList-wt-read-scope`.
+
+### Sub-wave 4b — COMPLETE (tasks 4.5, 4.6) — WAVE 4 CLOSED
+
+| Task | Service | Reads wrapped | New tests | Branch commit |
+|------|---------|---------------|-----------|---------------|
+| 4.5 | `BackupService` | 3 | 6 | `9b5bc276` |
+| 4.6 | `ArtistService` | 2 (+ REQ-UOW-51) | 5 | `3d7b23eb` |
+
+Suite additive again: 604 → 610 → **615**. Wave 4 total: **6 tasks, 9 services, 37 new tests**, zero
+pre-existing tests modified.
+
+#### 4.5 — REQ-UOW-44 verified mechanically, not by assertion
+
+The risk was hoisting the wrap outside `ExportBundleAsync`'s existing `try`, which would change which
+exceptions are caught and therefore the observable failure tuple. Orchestrator parsed the method and
+compared offsets rather than trusting the report:
+
+```
+ExportBundleAsync: try at 54 | ExecuteReadAsync at 104 => wrap INSIDE try: True
+  File.Exists  at 474 -> after lambda close (outside): True
+  ZipFile.Open at 817 -> after lambda close (outside): True
+```
+
+So the `catch` still covers the read, and file/zip I/O stayed outside the lambda as REQ-UOW-44 and the
+out-of-scope rule require. Surviving `_`-field derefs: `_logWriter`, `_logger`, `_uow` — no repository.
+
+#### 4.6 — REQ-UOW-51 landed; and a null-safety hazard checked and cleared
+
+Threshold change, exactly as specified:
+
+- **Before:** `if (string.IsNullOrWhiteSpace(normalized)) return [];`
+- **After:** `if (normalized.Length < SearchConstants.MinimumLocalQueryLength) return [];`
+
+Orchestrator checks: the constant is used (`SearchConstants.MinimumLocalQueryLength` present, **no
+stray `Length < 2` literal**), the old guard is gone, and the guard sits **outside** the lambda
+(offset 556 vs `ExecuteReadAsync` at 699) so a sub-threshold query opens no DI scope.
+
+> **Hazard found and cleared by the orchestrator, not reported by the implementor.** The old guard was
+> null-safe (`IsNullOrWhiteSpace(null)` ⇒ `true`); the new one dereferences `.Length`. Had
+> `NormalizeSearchQuery` been able to return `null`, this would have converted a benign empty-result
+> path into a `NullReferenceException`. Read the implementation directly:
+> `NormalizeSearchQuery(this string query) => string.IsNullOrWhiteSpace(query) ? string.Empty : Collapse(query)`
+> — it returns `string.Empty`, never `null`. **No regression.** Recorded because the reasoning is not
+> obvious from the diff and a future reader will ask the same question.
+
+**No pre-existing test went red** from the behaviour change — none asserted DB-reaching behaviour for a
+1-character artist search. The `blocked: spec gap` path was available and was not needed.
+
+**Lambda gate held in the riskiest file.** `ArtistService.cs` is where the verifier warned a regression
+was most likely, because the captive `_artistRepository` field still exists. After 4.6 the only
+surviving `_`-field deref in the whole file is `_uow`, across all three lambdas (the two new ones plus
+Wave 2's untouched wrap).
+
+#### Second stall — the pattern is now confirmed, not incidental
+
+Task 4.6 stalled exactly as 4.3 did: it launched a build in the background and stopped waiting for a
+notification that never came, **despite its briefing already carrying the "run in the foreground"
+instruction.** Root cause of the delay that tempted it: it built `MyVocaList.sln`, which drags in
+Android APK packaging (slow, and unreliable in this environment). Recovered by resuming it with two
+corrections — foreground only, and build `MyVocaList.Tests/MyVocaList.Tests.csproj` rather than the
+solution. **Both corrections belong in every future implementor briefing.**
+
+### Checkpoint
+
+- **Step:** **WAVE 4 CLOSED** — all six tasks merged into `feat/uow-read-scope` @ `9a5659a1`,
+  **615 green**. **Wave 5 dispatched** — 5.1 (`ArtistSuggestionService`) and 5.2
+  (`SongSuggestionService`) in parallel, each in its own worktree branched from `9a5659a1`.
+- **Next:** on Wave 5 merged → Wave 6 (6.1 concurrency probe) + Wave 7 (7.1 architecture test) in
+  parallel → 7.2 census walk (single) → Wave 8 (`DbLoadGate` removal, STRICTLY LAST).
+- **Baseline:** 0 errors, **615** tests.
+- **Live risks in Wave 5:**
+  - **REQ-UOW-43 — no open DI scope during the remote fetch.** Only the DB call is wrapped; the
+    provider/HTTP call must stay OUTSIDE every lambda. Holding a scope across a network round-trip is
+    exactly what this AC forbids. 5.2 is the easier one to get wrong — it has THREE wraps, two of them
+    (`DedupAsync`, `ResolveLocalArtistIdsAsync`) sitting in methods that also process provider results.
+  - **REQ-UOW-49 carve-out rows 1 and 2 are consumed here** — `SongSuggestionServiceTests.cs` and
+    `ArtistSuggestionServiceTests.cs`, `CreateSut`-helper edits ONLY (new ctor arg). Any `Assert` /
+    `Setup` / `Verify` / `[Fact]`-body change in those two files is a violation, not a judgement call.
+    Rows 3–4 remain for Wave 8.
+  - **`MauiProgram.cs` must NOT be touched** (D3). Both suggestion services are deliberately
+    unregistered — pre-built for the future autocomplete feature, NOT dead code.
+- **Two corrections now in every briefing**, after two stalls: build/test in the FOREGROUND only, and
+  never build `MyVocaList.sln` (Android APK packaging is slow and unreliable here) — build
+  `MyVocaList.Tests/MyVocaList.Tests.csproj` instead.
+- **Context manifest:** `plan.md` §§ 4–7 · `tasks.md` §§ Wave 5–8 · this Checkpoint ·
+  `requirements.md` REQ-UOW-38/41/43/49/51/52 · `design.md § 2c` · integration branch
+  `feat/uow-read-scope` @ `9a5659a1` in worktree `../MyVocaList-wt-read-scope`.
