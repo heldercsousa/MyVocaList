@@ -110,7 +110,7 @@ Sub-wave 4a: **4.1–4.4** in parallel (cap 4). Sub-wave 4b: **4.5–4.6** in pa
   - Files owned: `MyVocaList/Services/SongKaraokeUrlService.cs`,
     `MyVocaList.Tests/Integration/UnitOfWork/SongKaraokeUrlServiceReadScopeTests.cs` (new)
   - Est: **1 h** · Risk: **B** · AC: REQ-UOW-40
-- [ ] **4.5** `BackupService.cs` — wrap `GetHistoryAsync:169`, `HasRecentBackupAsync:175`, and
+- [x] **4.5** `BackupService.cs` — wrap `GetHistoryAsync:169`, `HasRecentBackupAsync:175`, and
       `ExportBundleAsync:86`'s `_repo.GetLatestSnapshotAsync` call at `:90` **only**
   - Files owned: `MyVocaList/Services/BackupService.cs`,
     `MyVocaList.Tests/Unit/Services/BackupServiceReadScopeTests.cs` (new)
@@ -118,7 +118,7 @@ Sub-wave 4a: **4.1–4.4** in parallel (cap 4). Sub-wave 4b: **4.5–4.6** in pa
   - **Guard (REQ-UOW-44):** the wrap goes **INSIDE** the existing `try` at `:88-89`, never around it —
     hoisting it changes the observable failure tuple. `File.Exists:91`, `ZipFile.Open:97` and the
     entry copies stay **outside** the lambda.
-- [ ] **4.6** Rest of `ArtistService.cs` — wrap `GetPagedArtistsForListAsync:149`,
+- [x] **4.6** Rest of `ArtistService.cs` — wrap `GetPagedArtistsForListAsync:149`,
       `SearchArtistsByNameAsync:161`, **+ REQ-UOW-51 threshold** in `SearchArtistsByNameAsync`
       (`IsNullOrWhiteSpace(normalized)` → `normalized.Length < SearchConstants.MinimumLocalQueryLength`)
   - Files owned: `MyVocaList/Services/ArtistService.cs`,
