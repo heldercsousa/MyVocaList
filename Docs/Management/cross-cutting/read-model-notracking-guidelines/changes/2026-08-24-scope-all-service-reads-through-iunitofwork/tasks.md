@@ -91,22 +91,22 @@ Plan: `./plan.md` · Log: `./task-log.md` · Item: `READ-SCOPE` (LEDGER)
 Sub-wave 4a: **4.1–4.4** in parallel (cap 4). Sub-wave 4b: **4.5–4.6** in parallel.
 4.6 additionally requires Wave 2 committed (same file).
 
-- [ ] **4.1** `PersonService.cs` — wrap `GetPersonByIdAsync:177`, `GetPersonByNameAsync:181`,
+- [x] **4.1** `PersonService.cs` — wrap `GetPersonByIdAsync:177`, `GetPersonByNameAsync:181`,
       `SearchPersonsAsync:185`, `SearchPersonsStartsWithAsync:194`, `GetPagedPersonsForListAsync:207`
   - Files owned: `MyVocaList/Services/PersonService.cs`,
     `MyVocaList.Tests/Integration/UnitOfWork/PersonServiceReadScopeTests.cs` (new)
   - Est: **2 h** · Risk: **B** · AC: REQ-UOW-39, -40, -41
-- [ ] **4.2** `SongService.cs` — wrap `GetSongByIdAsync:268`, `ExistsByTitleForArtistAsync:272`,
+- [x] **4.2** `SongService.cs` — wrap `GetSongByIdAsync:268`, `ExistsByTitleForArtistAsync:272`,
       `GetPagedSongsForListAsync:305`
   - Files owned: `MyVocaList/Services/SongService.cs`,
     `MyVocaList.Tests/Integration/UnitOfWork/SongServiceReadScopeTests.cs` (new)
   - Est: **1.5 h** · Risk: **B** · AC: REQ-UOW-39, -40, -41
-- [ ] **4.3** `VenueService.cs` (`GetPagedVenuesForListAsync:189`) + `CatalogService.cs`
+- [x] **4.3** `VenueService.cs` (`GetPagedVenuesForListAsync:189`) + `CatalogService.cs`
       (`GetPagedCatalogForArtistAsync:25`)
   - Files owned: `MyVocaList/Services/VenueService.cs`, `MyVocaList/Services/CatalogService.cs`,
     `MyVocaList.Tests/Integration/UnitOfWork/VenueCatalogServiceReadScopeTests.cs` (new)
   - Est: **1.5 h** · Risk: **B** · AC: REQ-UOW-40, -41
-- [ ] **4.4** `SongKaraokeUrlService.cs` — wrap `GetUrlsForSongAsync:38`, `GetSuggestedUrlAsync:106`
+- [x] **4.4** `SongKaraokeUrlService.cs` — wrap `GetUrlsForSongAsync:38`, `GetSuggestedUrlAsync:106`
   - Files owned: `MyVocaList/Services/SongKaraokeUrlService.cs`,
     `MyVocaList.Tests/Integration/UnitOfWork/SongKaraokeUrlServiceReadScopeTests.cs` (new)
   - Est: **1 h** · Risk: **B** · AC: REQ-UOW-40
