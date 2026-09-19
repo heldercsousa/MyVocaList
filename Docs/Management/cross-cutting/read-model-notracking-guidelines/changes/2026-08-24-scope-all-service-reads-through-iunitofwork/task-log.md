@@ -436,3 +436,18 @@ hygiene.** Removing `.AsTracking()` is not what fixed the bug.
 Helder additionally pre-authorised autonomous execution of the remaining waves, including any
 permission prompts, **bounded to the MyVocaList repo and its worktrees**. Nothing outside those paths
 is covered by that grant.
+
+### Checkpoint
+
+- **Step:** Both Helder gates closed (commit `054332b1` on develop). **Wave 3 dispatched** (task 3.1,
+  remove `.AsTracking()` + 2 comments, SEQUENTIAL single dispatch).
+- **Next:** on 3.1 green + committed → the 4-parallel sub-wave 4a (tasks 4.1–4.4).
+- **Baseline to compare against:** 0 errors, **578** tests (577 pre-existing + the BUG-078 regression).
+- **Guards live for 3.1:** exactly TWO comments (`AppDbContext.cs`, `Bug068RegressionTests.cs`) — the
+  third, `CrudListViewModelBaseTests.cs`, is Wave 8's carve-out row 4 and must NOT be touched. A red
+  existing test ⇒ `blocked: spec gap`, never restore `.AsTracking()`, never edit a test.
+- **Coordinate drift is a pattern (3 instances).** All `tasks.md` line numbers date from 2026-08-25 and
+  Wave 2's insertions shifted them. Every implementor re-derives its own coordinates before editing.
+- **Context manifest:** `plan.md` (wave order + the 3 invalidating gates) · `tasks.md` § Wave 3 (the
+  task entry) · this `task-log.md` Checkpoint · `design.md § 2` (rationale is lifetime, not tracking) ·
+  worktree `../MyVocaList-wt-read-scope` on `feat/uow-read-scope` @ `85b1cb90`.
