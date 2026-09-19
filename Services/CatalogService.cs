@@ -29,7 +29,13 @@ public class CatalogService : ICatalogService
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
         var normalizedQuery = string.IsNullOrWhiteSpace(query) ? null : query.NormalizeSearchQuery();
-        return await _catalogRepository.GetPagedByArtistAsync(artistId, pageNumber, pageSize, normalizedQuery, ct);
+
+        return await _uow.ExecuteReadAsync<(IEnumerable<SongListItemDto> items, int totalCount)>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var catalogRepository = sp.GetRequiredService<ICatalogRepository>();
+            return await catalogRepository.GetPagedByArtistAsync(artistId, pageNumber, pageSize, normalizedQuery, ct);
+        }, ct);
     }
 
     /// <inheritdoc />
