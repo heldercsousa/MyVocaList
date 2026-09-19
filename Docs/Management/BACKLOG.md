@@ -72,6 +72,7 @@
 | — | **Social features** | 💡 Pending | Goal: post-event sharing, singer stats. Pointer: `cross-cutting/social-features/`. |
 | 2026-07-03 | **Cross-cutting** | — | Bugs with no single parent business feature |
 | 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) on render teardown (Major) | 💡 Pending | Goal: confirm whether the crash is a real defect or debugger-teardown noise (Release logcat investigation first). Pointer: `BusinessFeatures/cross-cutting/bugs/2026-07-03-BUG-026-hwui-sigabrt-render-teardown/`. |
+| 2026-09-19 | ↳ DbLoadGate removal dropped its _currentPage serialisation role | 💡 Pending | Goal: Gate removal accounted for only one of the gate's two documented responsibilities; LoadFirstPageAsync can now reset _currentPage while a LoadMoreAsync is in flight, risking a duplicated or skipped page. Gate: Helder rules whether this is a real regression; if so a guard is added and a regression test proves the interleaving. Pointer: `cross-cutting/read-model-notracking-guidelines/bugs/2026-09-19-BUG-079-dbloadgate-removal-dropped-its-currentpage-serialisation-role/`. |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---
