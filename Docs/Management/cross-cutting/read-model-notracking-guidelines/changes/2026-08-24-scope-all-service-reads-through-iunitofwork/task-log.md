@@ -529,3 +529,87 @@ that identity is not evidence of a no-op — it is the point.
 - **Context manifest:** `plan.md` §§ 4–7 · `tasks.md` § Wave 4 · this Checkpoint ·
   `requirements.md` REQ-UOW-39/40/41/44/51 · `design.md § 2` · worktree
   `../MyVocaList-wt-read-scope` on `feat/uow-read-scope` @ `b2afd095`.
+
+### Sub-wave 4a — COMPLETE (tasks 4.1, 4.2, 4.3, 4.4) — 4 parallel
+
+**Dispatched in four SEPARATE worktrees, not one.** The plan says "4 parallel" but assumed a single
+worktree. Four concurrent `dotnet build` runs sharing one `obj/` tree, plus contention on a single
+`.git/index.lock`, would have corrupted each other. Each task therefore got its own worktree branched
+from `b2afd095`, and the orchestrator merged them sequentially. Their owned files are disjoint, so all
+four merges were conflict-free. **Record this as the pattern for every future parallel wave.**
+
+| Task | Service(s) | Reads wrapped | New tests | Branch commit |
+|------|-----------|---------------|-----------|---------------|
+| 4.1 | `PersonService` | 5 | 9 | `108ce2e7` |
+| 4.2 | `SongService` | 3 | 8 | `0a755c79` |
+| 4.3 | `VenueService` + `CatalogService` | 2 | 5 | `a9901f16` |
+| 4.4 | `SongKaraokeUrlService` | 2 | 4 | `b259c729` |
+
+**Suite is exactly additive at every merge — 578 → 587 → 595 → 600 → 604.** 26 new tests, zero
+pre-existing tests modified, no interference between tasks.
+
+#### Lambda-gate verification — done by the orchestrator, independently of the implementors
+
+This is gate 2 of `plan.md § 4` and the highest-value review item in the change: `_field.Repository(…)`
+*inside* an `ExecuteReadAsync` lambda compiles, passes every test, and leaves the defect fully intact
+while looking fixed. Each implementor ran its own Python walk; the orchestrator re-derived the result
+independently with a lambda-count-vs-`sp`-resolution-count cross-check plus a whole-file census of
+surviving `_`-field dereferences:
+
+| File | `ExecuteReadAsync` | `GetRequiredService` | Surviving `_`-field derefs |
+|------|--------------------|----------------------|----------------------------|
+| `PersonService.cs` | 5 | 8 (5 reads + 3 pre-existing writes) | `_uow` only |
+| `SongService.cs` | 3 | 12 | `_logger`, `_uow` |
+| `VenueService.cs` | 1 | 4 | `_uow` only |
+| `CatalogService.cs` | 1 | 3 | `_uow` only |
+| `SongKaraokeUrlService.cs` | 2 | 5 | `_uow` only |
+
+**No captive repository field survives in any of the five files** — the census is whole-file, so it
+also covers lambdas the implementors might have missed. In `PersonService.cs` the counts match exactly
+(8 lambdas ⇔ 8 resolutions), which is the strongest available form of this check.
+
+#### Per-task notes
+
+- **4.2** — `SongService.cs` is a hotspot. BUG-067's `song.OriginalArtist = null` fix inside
+  `UpdateSongAsync` was verified still present after the change, and no write method was touched.
+- **4.3** — `VenueService` already carried `IUnitOfWork` from an earlier phase, so no constructor
+  change was needed; `CatalogService`'s two writes (wrapped in UoW Phase 4.1) are untouched, the only
+  hunk being inside `GetPagedCatalogForArtistAsync`. This task **stalled**: it stopped mid-run waiting
+  on a background build notification that never arrived, leaving the work uncommitted in its worktree —
+  the same failure mode that stranded COPY-YR for weeks. Detected by inspecting the worktree rather
+  than trusting the completion report, and recovered by resuming the agent with an
+  explicit "run builds in the foreground" instruction. **Every later briefing now carries that
+  instruction.**
+- **4.4** — the HTTP carve-out turned out to be **vacuous, not satisfied**: `SongKaraokeUrlService`
+  contains no `HttpClient`/`SendAsync` token at all, so there was no HTTP call to keep outside the
+  lambda. Worth correcting in the spec's mental model — this service is pure DB-backed URL storage.
+  It also reported "full-solution build fails (Android APK packaging + nullable errors in PersonService,
+  BackupService, MauiProgram)". **That does not reproduce.** After merging all four, the orchestrator
+  built `MyVocaList/MyVocaList.csproj -f net10.0-android`: **6 projects, 0 errors, 2 warnings.** The
+  report was stale state in that agent's own worktree, not a real defect. No action taken.
+
+### Checkpoint
+
+- **Step:** Sub-wave 4a COMPLETE, all four merged into `feat/uow-read-scope` (@ `0a555492`), **604
+  green**. **Sub-wave 4b dispatched** — tasks 4.5 (`BackupService`) and 4.6 (`ArtistService`) in
+  parallel, each in its own worktree branched from `0a555492`.
+- **Next:** on 4b merged → Wave 5 (5.1 `ArtistSuggestionService`, 5.2 `SongSuggestionService`,
+  2 parallel) → Wave 6 + 7 → 7.2 census → Wave 8.
+- **Baseline:** 0 errors, **604** tests. 4b adds tests, so the total must rise again.
+- **Live risks in 4b specifically:**
+  - **4.5 / REQ-UOW-44:** the wrap must go INSIDE `ExportBundleAsync`'s existing `try`, never around
+    it — hoisting it changes the observable failure tuple. `File.Exists` / `ZipFile.Open` / entry
+    copies stay OUTSIDE the lambda (file+zip I/O is out of scope for this change).
+  - **4.6 / REQ-UOW-51 is a real behaviour change** — a 1-char query now short-circuits instead of
+    hitting the DB. A pre-existing test may legitimately go red. The implementor is instructed to STOP
+    and report `blocked: spec gap` rather than edit it; the orchestrator adjudicates.
+  - **4.6 is the likeliest home for a lambda-gate regression** — the verifier's standing warning is
+    that `ArtistService`'s captive `_artistRepository` field still exists and serves other reads.
+- **Pattern established (carry to every future parallel wave):** one worktree PER TASK, never one
+  shared worktree — concurrent `dotnet build` in a shared `obj/` plus `.git/index.lock` contention.
+- **Agents must run builds/tests in the FOREGROUND.** Task 4.3 stalled waiting on a background-job
+  notification and left work uncommitted; verify a worktree's `git status` rather than trusting a
+  completion report.
+- **Context manifest:** `plan.md` §§ 4–7 · `tasks.md` §§ Wave 4–5 · this Checkpoint ·
+  `requirements.md` REQ-UOW-39/40/41/44/51 · `design.md § 2`, `§ 2c` · integration branch
+  `feat/uow-read-scope` @ `0a555492` in worktree `../MyVocaList-wt-read-scope`.
