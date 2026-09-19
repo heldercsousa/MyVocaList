@@ -265,17 +265,29 @@ public class SongService : ISongService
         }, ct);
 
     /// <inheritdoc />
-    public async Task<Song?> GetSongByIdAsync(int id, CancellationToken ct = default)
-        => await _songRepository.GetByIdAsync(id, ct);
+    public Task<Song?> GetSongByIdAsync(int id, CancellationToken ct = default)
+        => _uow.ExecuteReadAsync<Song?>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var songRepository = sp.GetRequiredService<ISongRepository>();
+            return await songRepository.GetByIdAsync(id, ct);
+        }, ct);
 
     /// <inheritdoc />
-    public async Task<bool> ExistsByTitleForArtistAsync(
+    public Task<bool> ExistsByTitleForArtistAsync(
         string title, int artistId, int? excludeId = null, CancellationToken ct = default)
     {
         var trimmed = title.NormalizeSearchQuery();
-        return excludeId == null
-            ? await _songRepository.ExistsByTitleForArtistAsync(artistId, trimmed, ct)
-            : await _songRepository.ExistsByTitleForArtistAsync(artistId, trimmed, excludeId.Value, ct);
+        // REQ-UOW-41: the excludeId branch decision stays OUTSIDE the lambda — it is pure input
+        // shaping, not a database call, and must not create an extra DI scope.
+        return _uow.ExecuteReadAsync<bool>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var songRepository = sp.GetRequiredService<ISongRepository>();
+            return excludeId == null
+                ? await songRepository.ExistsByTitleForArtistAsync(artistId, trimmed, ct)
+                : await songRepository.ExistsByTitleForArtistAsync(artistId, trimmed, excludeId.Value, ct);
+        }, ct);
     }
 
     /// <inheritdoc />
@@ -302,16 +314,23 @@ public class SongService : ISongService
     }
 
     /// <inheritdoc />
-    public async Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedSongsForListAsync(
+    public Task<(IEnumerable<SongListItemDto> items, int totalCount)> GetPagedSongsForListAsync(
         int pageNumber, int pageSize, string? query = null, CancellationToken ct = default)
     {
+        // REQ-UOW-41: argument validation and query normalization stay OUTSIDE the lambda — they
+        // make no database call and must not create a DI scope.
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
         var normalizedQuery = string.IsNullOrWhiteSpace(query) ? null : query.NormalizeSearchQuery();
-        var (items, totalCount) = await _songRepository.GetPagedAsync(pageNumber, pageSize, normalizedQuery, ct);
 
-        return (items, totalCount);
+        return _uow.ExecuteReadAsync<(IEnumerable<SongListItemDto> items, int totalCount)>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var songRepository = sp.GetRequiredService<ISongRepository>();
+            var (items, totalCount) = await songRepository.GetPagedAsync(pageNumber, pageSize, normalizedQuery, ct);
+            return (items, totalCount);
+        }, ct);
     }
 
     /// <inheritdoc />
