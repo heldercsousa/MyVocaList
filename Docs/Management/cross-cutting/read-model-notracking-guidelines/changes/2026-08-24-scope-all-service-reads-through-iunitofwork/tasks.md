@@ -67,7 +67,7 @@ Plan: `./plan.md` · Log: `./task-log.md` · Item: `READ-SCOPE` (LEDGER)
 
 ## Wave 3 — Remove `.AsTracking()` `[SEQUENTIAL]`
 
-- [ ] **3.1** Delete `.AsTracking()` and rewrite **both** stale comments in the same commit
+- [x] **3.1** Delete `.AsTracking()` and rewrite **both** stale comments in the same commit
   - Produces: tracking-free read path
   - Consumes: Waves 1–2 committed
   - Risk: **B** · Est: **45 min**
