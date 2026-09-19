@@ -1245,3 +1245,46 @@ captive-`DbContext` workaround; the paging role existed **only in a code comment
 fix attempted.** Registered as **BUG-079** with the full analysis and the three decisions Helder owns.
 Explicitly *unproven* — it may be unreachable in the real UI, in which case it downgrades to Minor and
 the folder must be removed.
+
+### Checkpoint — session-limit interruption survived
+
+- **Step:** **ALL 12 TASKS COMPLETE AND MERGED** into `feat/uow-read-scope` @ **`4a2264a1`**, **634 green**,
+  **NOT pushed, NOT yet merged to develop.** Worktree `../MyVocaList-wt-read-scope`.
+- **Interruption:** the first gate-fix agent (Opus) died mid-task on the 5-hour session limit having
+  written nothing — its worktree was verified clean, so there is **no partial work to reconcile**.
+  Re-dispatched on Sonnet against the full branch tip.
+- **In flight:** gate-fix (F1 proper) in `../MyVocaList-wt-rs-gatefix` on
+  `feat/uow-read-scope-gatefix`, reset to `4a2264a1`.
+
+#### Remaining work, in order
+
+1. **Gate fix** — constructor-parameter-based detection replacing the evadable declaration regex; must
+   demonstrate each evasion shape failing. **If this cannot be completed, it is NOT a merge blocker:**
+   the 12 spec tasks are done and twice verified, and the gate weakness is an incomplete *new*
+   safeguard, not a regression. Fallback is an honest doc comment + a registered follow-up.
+2. **Merge `feat/uow-read-scope` → `develop`** (`--no-ff`), re-run the suite on develop.
+3. **Route `.claude/scripts/readscope_treewide_walk.py`** — 7.2 committed it on the task branch; it is
+   the only non-source file there and belongs on develop (F5).
+4. **Close BACKLOG + LEDGER**: `backlog_gen.py status READ-SCOPE "✅"`, LEDGER row → merged/closed.
+5. **Parent spec:** lift the Phase 4.7 DO-NOT-PROCEED verdict in the parent UoW change folder.
+6. **Delete the 11 task worktrees + branches** once merged (`-rs-41-person` … `-rs-gatefix`).
+
+#### Open items for Helder (do NOT close silently)
+
+- **BUG-079 (Major, registered)** — `DbLoadGate` removal dropped its second, *paging-serialisation*
+  responsibility. Unproven; needs his ruling on reachability, then a guard + regression test, or a
+  downgrade to Minor (which requires **deleting** the bug folder). Escalated rather than improvised
+  because the spec never recorded that second role — it lived only in a code comment.
+- **F3 judgement call** — `PersonService`'s two `2` literals were replaced with
+  `SearchConstants.MinimumLocalQueryLength`. Behaviour-identical, matches REQ-UOW-51's wording, but
+  `design.md` scoped Wave 0 as "no call-site changes". Two-line revert if he disagrees.
+- **F4** — 18 now-dead injected repository fields, deliberately not actioned.
+- **BUG-076** — one non-reproducing flaky failure observed today (~1 in 5 full runs); a second
+  datapoint, not a fix.
+- **The gate overclaim** — commit `e27ebaae`'s message asserts the gate is non-evadable. That is
+  **false** and is corrected in `42240ba7`. If the gate fix does not land, the doc comment must be made
+  honest before anyone relies on it.
+
+- **Context manifest (resume with ONLY these):** this Checkpoint · `plan.md § 8` (definition of done) ·
+  `tasks.md` (all 12 ticked) · the BUG-079 README · integration branch `feat/uow-read-scope` @
+  `4a2264a1`.
