@@ -35,12 +35,15 @@ public class SongKaraokeUrlService : ISongKaraokeUrlService
     }
 
     /// <inheritdoc />
-    public async Task<List<SongKaraokeUrlDto>> GetUrlsForSongAsync(int songId, CancellationToken ct = default)
-    {
-        var urls = await _repo.GetBySongIdAsync(songId, ct);
-        var suggested = urls.FirstOrDefault();
-        return urls.Select((u, i) => ToDto(u, isSuggested: i == 0 && suggested != null)).ToList();
-    }
+    public Task<List<SongKaraokeUrlDto>> GetUrlsForSongAsync(int songId, CancellationToken ct = default)
+        => _uow.ExecuteReadAsync(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var repo = sp.GetRequiredService<ISongKaraokeUrlRepository>();
+            var urls = await repo.GetBySongIdAsync(songId, ct);
+            var suggested = urls.FirstOrDefault();
+            return urls.Select((u, i) => ToDto(u, isSuggested: i == 0 && suggested != null)).ToList();
+        }, ct);
 
     /// <inheritdoc />
     public Task<(bool success, string message, SongKaraokeUrlDto? url)> AddUrlAsync(
@@ -103,11 +106,14 @@ public class SongKaraokeUrlService : ISongKaraokeUrlService
         }, ct);
 
     /// <inheritdoc />
-    public async Task<SongKaraokeUrlDto?> GetSuggestedUrlAsync(int songId, CancellationToken ct = default)
-    {
-        var entity = await _repo.GetSuggestedAsync(songId, ct);
-        return entity is null ? null : ToDto(entity, isSuggested: true);
-    }
+    public Task<SongKaraokeUrlDto?> GetSuggestedUrlAsync(int songId, CancellationToken ct = default)
+        => _uow.ExecuteReadAsync(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var repo = sp.GetRequiredService<ISongKaraokeUrlRepository>();
+            var entity = await repo.GetSuggestedAsync(songId, ct);
+            return entity is null ? null : ToDto(entity, isSuggested: true);
+        }, ct);
 
     private static SongKaraokeUrlDto ToDto(SongKaraokeUrl u, bool isSuggested)
         => new(u.VideoId, u.SongId, u.PlayCount, u.DurationSeconds, u.LastUsedAt, u.AddedAt, u.Label, isSuggested);
