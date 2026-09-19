@@ -111,6 +111,67 @@ public class ArtistServiceReadScopeTests
         Assert.NotSame(firstContext, secondContext);
     }
 
+    // [AC] REQ-UOW-41: GetPagedArtistsForListAsync's argument-validation guard throws before any
+    // ExecuteReadAsync invocation — zero calls into the unit of work for an invalid pageNumber.
+    [Fact]
+    public async Task GetPagedArtistsForListAsync_InvalidPageNumber_ThrowsWithoutInvokingExecuteReadAsync()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var counting = new CountingUnitOfWork(host.Resolve<IUnitOfWork>());
+        var artistRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.IArtistRepository>();
+        var songRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ISongRepository>();
+        var catalogRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ICatalogRepository>();
+        var logger = host.Resolve<Microsoft.Extensions.Logging.ILogger<MyVocaList.Services.ArtistService>>();
+        var service = new MyVocaList.Services.ArtistService(
+            artistRepository, songRepository, catalogRepository, counting, logger);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => service.GetPagedArtistsForListAsync(0, 10));
+
+        Assert.Equal(0, counting.ReadCallCount);
+    }
+
+    // [AC] REQ-UOW-41: GetPagedArtistsForListAsync's argument-validation guard throws before any
+    // ExecuteReadAsync invocation — zero calls into the unit of work for an invalid pageSize.
+    [Fact]
+    public async Task GetPagedArtistsForListAsync_InvalidPageSize_ThrowsWithoutInvokingExecuteReadAsync()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var counting = new CountingUnitOfWork(host.Resolve<IUnitOfWork>());
+        var artistRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.IArtistRepository>();
+        var songRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ISongRepository>();
+        var catalogRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ICatalogRepository>();
+        var logger = host.Resolve<Microsoft.Extensions.Logging.ILogger<MyVocaList.Services.ArtistService>>();
+        var service = new MyVocaList.Services.ArtistService(
+            artistRepository, songRepository, catalogRepository, counting, logger);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => service.GetPagedArtistsForListAsync(1, 0));
+
+        Assert.Equal(0, counting.ReadCallCount);
+    }
+
+    // [AC] REQ-UOW-41: GetDeleteConfirmationAsync's multi-id branch guard returns a generic count
+    // message before any ExecuteReadAsync invocation — zero calls into the unit of work when more
+    // than one id is selected (only the single-id path needs the artist's name from the database).
+    [Fact]
+    public async Task GetDeleteConfirmationAsync_MultipleIds_ShortCircuitsWithoutExecutingRead()
+    {
+        await using var host = UnitOfWorkTestHost.Create();
+        var counting = new CountingUnitOfWork(host.Resolve<IUnitOfWork>());
+        var artistRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.IArtistRepository>();
+        var songRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ISongRepository>();
+        var catalogRepository = host.Resolve<MyVocaList.Domain.RepositoryInterface.ICatalogRepository>();
+        var logger = host.Resolve<Microsoft.Extensions.Logging.ILogger<MyVocaList.Services.ArtistService>>();
+        var service = new MyVocaList.Services.ArtistService(
+            artistRepository, songRepository, catalogRepository, counting, logger);
+
+        var message = await service.GetDeleteConfirmationAsync([1, 2]);
+
+        Assert.Equal("Delete 2 artists?", message);
+        Assert.Equal(0, counting.ReadCallCount);
+    }
+
     /// <summary>Wraps a real <see cref="IUnitOfWork"/> to count <see cref="ExecuteReadAsync{TResult}"/>
     /// invocations, so a guard's "zero scope creation" claim can be asserted mechanically instead of
     /// by inspection.</summary>
