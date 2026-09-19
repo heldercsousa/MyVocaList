@@ -382,3 +382,57 @@ serves other reads in this file (e.g. `SearchArtistsByNameAsync`), so the lambda
   Wave 2's insertions shifted `SearchArtistsByNameAsync`, so Wave 4.6's stated `:161` is off by +10.
   Every implementor re-derives its own coordinates.
 - **Context manifest:** unchanged.
+
+---
+
+## Helder decision gate — BOTH DECISIONS CLOSED 2026-09-18
+
+The hand-off halt recorded in the Checkpoint above is **lifted**. Both blocking decisions answered.
+
+### Decision 1 — `--no-verify` policy for TDD Red commits: **Option A now, Option C later**
+
+Three options were put to Helder:
+
+| Option | Trade-off |
+|--------|-----------|
+| **A. Allow `--no-verify` for Red commits only**, with a required `Lane: RED` commit trailer | Red and Green stay separate commits, so the fail-before evidence lives in git history. The bypass becomes a legitimate, greppable lane rather than an undisclosed act. |
+| **B. No bypass — squash Red+Green into one commit** | Hook always green, but fail-before evidence survives only in this task-log, not in git. Rejected — it destroys the discriminating artifact the fix rests on. |
+| **C. Teach the hook to recognise a Red marker and skip the test gate itself** | Same guarantee as A with no bypass flag at all. More work up front; safest long-term. |
+
+**Helder chose A as the interim policy and C as the durable fix.** Rationale: A unblocks Wave 3 the
+same day; C is a small, separable tooling task that should not gate this change.
+
+Recorded in two places:
+- `.claude/exception-registry.md` — the 2026-09-11 unauthorised-bypass row is marked **RESOLVED**, and a
+  new standing row grants the Option-A authorisation prospectively, with its conditions (trailer
+  `Lane: RED`; test files only, zero production files; Green in the very next commit; verbatim
+  fail-before and pass-after output recorded here). It expires when C lands.
+- `DevCycleCraft/hooks-redesign/changes/2026-09-18-pre-commit-hook-allow-tdd-red-commits-without-no-verify/`
+  — Option C registered as its own backlog item so it is not forgotten.
+
+**Retroactive effect on Wave 1.** Commit `5110b088` used `--no-verify` before this policy existed. It
+satisfies every Option-A condition except the trailer, which did not yet exist. Helder accepted the
+irregularity; the commit is **not** rewritten — rewriting it would change the very blob hash the
+verifier used to prove the Red/Green pair (`9c09c6fb…` identical at `5110b088` and `85b1cb90`).
+
+### Decision 2 — Wave 3: **AUTHORISED**
+
+Helder gave explicit go-ahead to proceed with Wave 3, which removes `.AsTracking()` from
+`ArtistRepository`. This is the **point of no return** for the BUG-078 reproduction: once the
+`.AsTracking()` call is gone, the Red can no longer be reproduced from the working tree.
+
+That cost is acceptable and was understood, because the evidence is already durably captured:
+- the verbatim failing output is recorded in the Wave 1 entry above;
+- the Red is a real commit (`5110b088`) reachable on `feat/uow-read-scope`;
+- the independent verifier confirmed the Red/Green pair by blob hash, not by re-running.
+
+**Carry forward — do not let a later session misread Wave 3.** The verifier established that
+`.AsTracking()` is *harmless once the read is scoped*: in a fresh scope the change tracker is empty, so
+tracking a freshly-materialised entity still returns database truth. **Wave 2 closed BUG-078; Wave 3 is
+hygiene.** Removing `.AsTracking()` is not what fixed the bug.
+
+### Session authorisation (scope note)
+
+Helder additionally pre-authorised autonomous execution of the remaining waves, including any
+permission prompts, **bounded to the MyVocaList repo and its worktrees**. Nothing outside those paths
+is covered by that grant.
