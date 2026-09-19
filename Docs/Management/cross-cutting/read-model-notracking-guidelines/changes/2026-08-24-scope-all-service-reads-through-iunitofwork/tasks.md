@@ -182,7 +182,7 @@ Sub-wave 4a: **4.1–4.4** in parallel (cap 4). Sub-wave 4b: **4.5–4.6** in pa
 
 ## Wave 6 — Concurrency probe
 
-- [ ] **6.1** Concurrency test — two paged-list loads across two services, overlap forced
+- [x] **6.1** Concurrency test — two paged-list loads across two services, overlap forced
   - Produces: the REQ-UOW-42 test
   - Consumes: Waves 4–5
   - Risk: **A** · Est: **2 h**
@@ -198,7 +198,7 @@ Sub-wave 4a: **4.1–4.4** in parallel (cap 4). Sub-wave 4b: **4.5–4.6** in pa
 
 ## Wave 7 — Enforcement `[after Wave 5]`
 
-- [ ] **7.1** xUnit architecture test enforcing REQ-UOW-36/37/43 permanently
+- [x] **7.1** xUnit architecture test enforcing REQ-UOW-36/37/43 permanently
   - Produces: the permanent gate (highest-value review artifact — R1)
   - Consumes: Wave 5 (fails against unconverted suggestion services)
   - Risk: **A** · Est: **2 h**
