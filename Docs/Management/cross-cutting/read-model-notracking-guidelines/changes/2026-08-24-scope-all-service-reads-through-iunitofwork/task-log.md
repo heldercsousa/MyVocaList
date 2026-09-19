@@ -1051,3 +1051,125 @@ one decision.
 - **F4 → not actioned.** Removing 18 injected fields is a refactor the spec never requested and would
   touch every service again after the census is already clean. Logged for a future task.
 - **F5 → tracked** in the Checkpoint for merge-time routing.
+
+### Wave 8 — COMPLETE (task 8.1) — `DbLoadGate` REMOVED · parent Phase 4.7 unblocked
+
+Commit `08751d60` · three files, `+6/−26` · **630 green** (unchanged — this task adds no tests).
+
+| File | Change |
+|------|--------|
+| `MyVocaList/UI/ViewModels/CrudListViewModelBase.cs` | the gate deleted, `−24` |
+| `MyVocaList.Tests/Unit/ViewModels/CrudListViewModelBaseTests.cs` | comment only, `±1` — **REQ-UOW-49 carve-out row 4, the last unspent row** |
+| `MyVocaList.Tests/Integration/UnitOfWork/PagedListConcurrencyTests.cs` | doc comment only — this change's own file, so not a carve-out consumption |
+
+#### The payoff: REQ-UOW-42's mandated condition is finally satisfiable
+
+Wave 6 could only run the concurrency probe **with the gate present**, which is not what the AC asks
+for. Re-run gate-free:
+
+```
+dotnet test --filter FullyQualifiedName~PagedListConcurrencyTests
+Aprovado: 1, Com falha: 0
+```
+
+Two distinct `AppDbContext` instances, no captive-context exception, **gate absent**. REQ-UOW-42 is
+co-owned by Waves 6 and 8 and is now closed by both limbs.
+
+#### R3 guard honoured — the `Task.Run` offloads survived
+
+This was the way Wave 8 could have quietly regressed `page-load-frozen`: the offloads share a comment
+block with the gate, so deleting the block wholesale takes them with it. Confirmed surviving in
+`LoadFirstPageAsync` and `LoadMoreAsync`; the `:254` fire-and-forget and `:306`
+`ExecuteConfirmActionAsync` calls untouched apart from a comment that no longer names the deleted
+symbol. Both `Assert.NotSame` off-context assertions green — part of `CrudListViewModelBaseTests`
+passing **5/5 both before and after** deletion, which is the clean before/after pair the design asked
+for.
+
+#### Tree-wide `DbLoadGate` walk — and an honest reading of its 72 hits
+
+Python walk (not `grep`) over the whole repo: **72 hits, 68 of them under `Docs/`** — immutable
+historical narrative, correctly left alone (`CLAUDE.md`: shipped specs are immutable history). Of the 4
+outside `Docs/`: 3 are in `.claude/scripts/readscope_treewide_walk.py`'s own comments (7.2's tooling,
+not owned by this task) and 1 is a past-tense reference in this change's own
+`PagedListConcurrencyTests.cs` doc comment.
+
+**All three targeted source-level references are clean** — the `CrudListViewModelBase.cs:12-15` comment
+block, its `:304` comment, and `CrudListViewModelBaseTests.cs:215`. The implementor reported the raw
+count rather than a bare "zero occurrences", which is the correct behaviour: a flat zero would have
+been false, and the distinction between live references and historical prose is exactly what a
+`grep`-shaped answer would have destroyed.
+
+#### REQ-UOW-49 final evidence — the carve-out closed at exactly four rows
+
+`git diff --stat 035d2627..HEAD -- MyVocaList.Tests/` over the whole change range: 15 files touched.
+All four carve-out files reviewed in full — `SongSuggestionServiceTests.cs`,
+`ArtistSuggestionServiceTests.cs`, `Bug068RegressionTests.cs`, `CrudListViewModelBaseTests.cs` — and
+each contains **only** `CreateSut`/comment edits. **Zero `Assert` / `Verify` / `Setup` changes, zero
+test files deleted or renamed.** The independent verifier had already confirmed rows 1–3 clean; row 4
+completes the set.
+
+**All twelve tasks in `tasks.md` are now checked.**
+
+### Hardening — F1 / F2 / F3 fixed (commit `e27ebaae`) — **634 green**
+
+Not a planned wave: three findings from the independent verifier, fixed before close-out because two
+of them are defects in the *evidence this change rests on*.
+
+#### F1 — the architecture gate is no longer evadable
+
+| | |
+|---|---|
+| **Old** | `private\s+readonly\s+(?<type>I[A-Za-z0-9]*)\s+(?<name>_\w+)\s*;` |
+| **New** | `(?:private\|protected\|internal)(?:\s+(?:private\|protected\|internal))*\s+(?:readonly\s+)?(?<type>[\w\.]+(?:<[\w\.,\s]+>)?)\s+(?<name>_\w+)\s*;` |
+
+A `SimpleTypeName` helper strips dotted qualifiers and generic argument lists before the governed-type
+check, so a fully-qualified or generic-wrapped declaration is caught identically to a bare one.
+
+**Governed-field floor added:** `Assert.True(totalGovernedFields >= 15, …)`, baseline measured **20**
+across 30 `Services/*.cs`. This closes the vacuity path REQ-UOW-50(ii) did not cover: its floor is on
+*files*, but once the now-dead fields (F4) are ever cleaned up, a file-count floor would still pass
+while the gate found zero governed fields anywhere and guarded nothing.
+
+**Proven, not asserted.** The verifier's exact evasion — fully-qualified declaration plus a live
+dereference — now **fails**:
+
+```
+UnitOfWorkReadScopeTests.NoGovernedField_IsDereferencedAnywhere_InsideOrOutsideALambda [FAIL]
+   REQ-UOW-36/37 violation(s) — governed field dereferenced directly instead of via `sp`:
+ArtistService.cs:40 — '_artistRepository.' dereferenced (governed field; ...)
+Com falha! – Com falha: 1, Aprovado: 3, Ignorado: 0, Total: 4
+```
+
+and passes after full revert (`git diff --stat Services/ArtistService.cs` empty):
+
+```
+Aprovado! – Com falha: 0, Aprovado: 4, Ignorado: 0, Total: 4
+```
+
+#### F2 — REQ-UOW-41's evidence gap closed
+
+Three tests added to `ArtistServiceReadScopeTests.cs`, each reusing the file's own `CountingUnitOfWork`
+and asserting `ReadCallCount == 0`:
+`GetPagedArtistsForListAsync_InvalidPageNumber_…`, `…_InvalidPageSize_…`, and
+`GetDeleteConfirmationAsync_MultipleIds_ShortCircuitsWithoutExecutingRead`. That is **three**, one more
+than the two rows the verifier flagged — the delete-confirmation branch guard got its own test too.
+ArtistService now matches the coverage its sibling services already had.
+
+#### F3 — REQ-UOW-51's constant now reaches all five local search entry points
+
+`PersonService.cs`: `using MyVocaList.Domain.Constants;` added; both `searchTerm.Length < 2` literals in
+`SearchPersonsAsync` / `SearchPersonsStartsWithAsync` replaced with
+`SearchConstants.MinimumLocalQueryLength`. **Behaviour-identical** — the constant is 2.
+
+> **Flagged for Helder — a judgement call, not a silent closure.** There is genuine tension in the
+> spec: REQ-UOW-51 says the threshold "SHALL be expressed as a single named constant shared by all call
+> sites … not as a repeated `2` literal", but `design.md` scopes Wave 0 as "no call-site changes" and
+> Waves 4/5 name only the two *changing* sites. The orchestrator resolved it toward the AC's explicit
+> wording, per `workflow.md` Rule 1 ("code contradicts the spec ⇒ the code is wrong"), because the
+> change is behaviour-neutral and the alternative leaves two literals free to silently re-diverge from
+> the constant — the exact failure REQ-UOW-51 exists to prevent. **Helder may reverse this**; reverting
+> is a two-line edit.
+
+**F4 (18 dead injected repository fields) deliberately NOT actioned** — removing them is a refactor the
+spec never requested, would touch every service again after the census is already clean, and is better
+done as its own task with its own review. Logged as a follow-up.
