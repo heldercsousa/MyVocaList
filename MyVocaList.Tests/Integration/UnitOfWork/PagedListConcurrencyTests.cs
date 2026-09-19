@@ -14,9 +14,9 @@ namespace MyVocaList.Tests.Integration.UnitOfWork;
 /// across two DIFFERENT services (<see cref="ArtistService.GetPagedArtistsForListAsync"/> and
 /// <see cref="SongService.GetPagedSongsForListAsync"/>), forced to genuinely overlap, resolve
 /// two distinct <see cref="AppDbContext"/> instances and never throw the captive-context
-/// symptom exception. Written and run **with `DbLoadGate` still present** — this wave's test
-/// does not reference the gate at all, so it is agnostic to whether the gate exists; Wave 8
-/// re-runs this same test after the gate is removed to complete REQ-UOW-42's mandated condition.
+/// symptom exception. Originally written and run in Wave 6 with the now-removed `DbLoadGate`
+/// still present; this test never referenced the gate, so it is agnostic to whether the gate
+/// exists. Re-run in Wave 8 after the gate's removal to complete REQ-UOW-42's mandated condition.
 /// </summary>
 public class PagedListConcurrencyTests
 {
