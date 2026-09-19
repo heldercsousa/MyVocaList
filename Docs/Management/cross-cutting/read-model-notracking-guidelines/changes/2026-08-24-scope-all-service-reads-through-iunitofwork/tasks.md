@@ -214,7 +214,7 @@ Sub-wave 4a: **4.1–4.4** in parallel (cap 4). Sub-wave 4b: **4.5–4.6** in pa
   - **Guard:** the allow-list must be empty, or every entry explicitly commented. Never loosen the
     assertion to make it pass.
 
-- [ ] **7.2** **Census-wide file walk — limb (a) evidence** (this is the artifact Wave 8 depends on)
+- [x] **7.2** **Census-wide file walk — limb (a) evidence** (this is the artifact Wave 8 depends on)
   - Produces: the REQ-UOW-36/37 source-level assertion over **all** of `Services/*.cs`, pasted into
     `task-log.md`. Wave 4/5 walks are per-file; this is the tree-wide one, and without it Wave 8's
     "limb (a) evidence" precondition has no producer.

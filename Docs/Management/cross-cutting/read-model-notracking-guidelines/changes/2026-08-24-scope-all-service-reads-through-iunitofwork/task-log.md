@@ -943,3 +943,46 @@ transcript as licence to inline code inspection into the orchestrator.
 - **Context manifest:** `plan.md` §§ 4–8 · `tasks.md` § Wave 8 + "Out of scope" · this Checkpoint ·
   `requirements.md` REQ-UOW-42/47/48/49 · `design.md § 6` (the two limbs + step 4/6) · integration
   branch `feat/uow-read-scope` in worktree `../MyVocaList-wt-read-scope`.
+
+### Wave 7 task 7.2 — COMPLETE — census-wide walk, **limb (a) evidence** (REQ-UOW-36/37)
+
+Commit `09faca2a` · one new script, `.claude/scripts/readscope_treewide_walk.py` · **no production or
+test file edited**, as the task entry requires.
+
+This is the artifact Wave 8 cannot start without. Waves 4/5 produced *per-file* walks; nothing else
+produces the tree-wide assertion.
+
+**Method.** Pure Python (`os.listdir` + brace-balanced parsing) — **no `grep`/`rg`**, per R2, which
+returned false zeroes twice during this change. Comments and string literals are stripped before
+matching; lambda bodies are extracted by brace-balancing, tolerating generic type arguments such as
+`ExecuteReadAsync<Person?>(`.
+
+> **The implementor validated its own matcher before trusting its output** — it injected a synthetic
+> `_songRepository.GetAllAsync()` inside a scratch `ExecuteReadAsync` lambda and confirmed the regex
+> flags it. Without that step a clean result is indistinguishable from a broken scanner, which is the
+> precise way this evidence could have been worthless while looking authoritative.
+
+**Part (a) — coverage: 25/25 § Scope rows resolved, 0 flagged.** Every named method's repository call
+lies textually inside an `ExecuteReadAsync` lambda body. Two rows resolved as expected non-violations
+rather than passes:
+
+- `SongSuggestionService.FetchFromProvidersAsync` — HTTP, **correctly outside** any read lambda
+  (REQ-UOW-43).
+- `CrudListViewModelBase.DbLoadGate` — out of scope for this walk: it lives in `ViewModels/`, not
+  `Services/*.cs`, and is governed by REQ-UOW-47/48 in Wave 8.
+
+`QueueService` is confirmed **absent** from `Services/` (30 `.cs` files, none named `QueueService.cs`),
+matching the spec's historical-exclusion note — reported explicitly rather than silently skipped, which
+would have faked a coverage row.
+
+**Part (b) — purity: clean.** 25 `ExecuteReadAsync` and 21 `ExecuteAsync` lambda call sites found
+tree-wide; **zero** contain a `_`-prefixed repository- or data-service-typed field dereference.
+`ArtistResolutionService.cs` and `SongResolutionService.cs` were included (1 read + 1 write lambda
+each) and pass clean — comment-stripping correctly neutralised their `_artistService` /
+`_artistResolution` prose mentions at `:108`, `:183`, `:288`.
+
+**Verdict: Wave 8 may proceed.** Both REQ-UOW-36/37 assertions hold tree-wide.
+
+> **Docs-on-develop note:** this commit put `readscope_treewide_walk.py` on the task branch. Scripts and
+> docs belong on `develop` (Rule 2). It must be synced at merge time — tracked in the Checkpoint below
+> so it is not stranded the way `feat/inline-artist-create` was.
