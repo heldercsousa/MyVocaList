@@ -212,7 +212,7 @@ public class CrudListViewModelBaseTests
             {
                 // Pump torn down (test already failed its timeout guard) — run the
                 // continuation on the thread pool so SUT finally blocks still execute
-                // (a swallowed post would strand the static DbLoadGate and hang
+                // (a swallowed post would strand the SUT's finally blocks and hang
                 // every later test).
                 ThreadPool.QueueUserWorkItem(_ => d(state));
             }

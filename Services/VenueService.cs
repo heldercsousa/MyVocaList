@@ -196,10 +196,16 @@ namespace MyVocaList.Services
 
             query = query.NormalizeSearchQuery();
 
-            var (items, totalCount) = await _venueRepository.GetPagedWithEventInfoAsync(pageNumber, pageSize, query);
-            var dtos = items.Select(x => VenueMapper.ToListDto(x.venue, x.eventCount));
+            return await _uow.ExecuteReadAsync<(IEnumerable<VenueListItemDto> items, int totalCount)>(async sp =>
+            {
+                // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+                var venueRepository = sp.GetRequiredService<IVenueRepository>();
 
-            return (dtos, totalCount);
+                var (items, totalCount) = await venueRepository.GetPagedWithEventInfoAsync(pageNumber, pageSize, query);
+                var dtos = items.Select(x => VenueMapper.ToListDto(x.venue, x.eventCount));
+
+                return (dtos, totalCount);
+            });
         }
 
         #region Utilities
