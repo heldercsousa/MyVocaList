@@ -986,3 +986,68 @@ each) and pass clean — comment-stripping correctly neutralised their `_artistS
 > **Docs-on-develop note:** this commit put `readscope_treewide_walk.py` on the task branch. Scripts and
 > docs belong on `develop` (Rule 2). It must be synced at merge time — tracked in the Checkpoint below
 > so it is not stranded the way `feat/inline-artist-create` was.
+
+### Independent verification (fresh adversarial verifier) — **CONDITIONAL PASS**
+
+Dispatched over Waves 0–7.2 with an explicit brief to find what the orchestrator's own per-merge
+verification missed, since that verification came from the same context that dispatched the work.
+
+**Verdict: the fix is real, not cosmetic.** Two full foreground runs at **630/0**, no flaky failure
+observed in either. Worktree clean at start and end; nothing committed.
+
+**The decisive evidence is stronger than anything the orchestrator produced.** The verifier found 18
+governed fields (7 `I*Repository` + 5 data-service types) across 12 service files and showed their only
+occurrences anywhere are the declaration and the constructor assignment:
+
+- governed `_field.` dereference **inside** a lambda: **0**
+- **outside** any lambda: **0**
+- **bare (non-`.`) usage — e.g. passing the captive instance in as a lambda argument: 0**
+
+That third check is a hole **neither the orchestrator's census nor the architecture test looks for**.
+Every governed field is now a dead field, which is a stronger claim than "each call site was converted".
+
+**DI lifetimes make scoping meaningful** — the check that decides whether this change is real or
+theatre: all 7 repositories are `AddScoped` (`ServiceCollectionExtensions.cs:27-31,61`,
+`MauiProgram.cs:78`), `AppDbContext` is scoped via `AddDbContextFactory`. `IUnitOfWork` is
+`AddSingleton`, which is correct — it holds the scope factory, not a context. Nothing is Singleton in a
+way that would hand the same instance back inside the lambda.
+
+> **The verifier corrected its own matcher mid-review** — nested generics (`ExecuteReadAsync<List<T>>(`)
+> were unmatched, hiding 6 read lambdas across five services. After the fix, textual `ExecuteReadAsync`
+> count equals matched-span count in all 11 files, so the zero results are not under-reporting. Worth
+> recording: two independent walks on this change (7.2's and this one) both needed a self-validation
+> step before their clean results meant anything.
+
+Q2/Q3/Q4 pass. REQ-UOW-44 confirmed at `BackupService.cs:88-96` with the `catch` at `:128-132` still
+returning the failure tuple, and `_logWriter.CurrentSessionLogPath:100` correctly outside (non-governed
+type). All 10 REQ-UOW-41 guard rows classified `outside`. REQ-UOW-49 clean: exactly 3 pre-existing test
+files touched, zero deleted or renamed, no `Assert`/`Verify`/`Setup`/`[Fact]`/field changed anywhere.
+REQ-UOW-51 introduces no new throw path — extension-method invocation on a null receiver is a static
+call, so `.Length` cannot NRE where `IsNullOrWhiteSpace` could not.
+
+#### Findings
+
+| # | Sev | Finding |
+|---|-----|---------|
+| **F1** | Medium | **The architecture gate is evadable — proven, not theorised.** `UnitOfWorkReadScopeTests.cs:52-53`'s declaration regex matches only `private readonly` + an unqualified non-generic `I…` type. The verifier kept its scratch violation in place, changed **only** the declaration to a fully-qualified `MyVocaList.Domain.RepositoryInterface.IArtistRepository`, and **the gate went green with the violation still present**. `protected`/`internal`, non-`readonly`, and `using`-aliased types evade it identically. Compounded by `:113`'s silent `if (governedFields.Count == 0) continue;`: since every governed field is now dead (F4), a future cleanup deleting them would leave the gate passing permanently while guarding nothing. REQ-UOW-50(ii)'s floor is on *files*; the post-change vacuity risk needs a floor on *governed fields*. |
+| **F2** | Medium | **REQ-UOW-41 evidence gap on 2 of its 10 rows.** `ArtistService.GetPagedArtistsForListAsync` (guards `:155-156`) and `GetDeleteConfirmationAsync` (branch guard) have **no** zero-`ExecuteReadAsync`-invocation test, though their sibling services all got one. The guards are correctly *placed* — this is missing evidence, not a defect. **The signature miss of per-wave self-verification:** each Wave-4 subagent checked its own file and nobody compared the four paged services against each other. |
+| **F3** | Low/Med | **REQ-UOW-51's shared constant reached only 3 of 5 local search entry points.** `PersonService.cs:200` and `:217` still read `searchTerm.Length < 2` as a bare literal. The AC says the threshold "SHALL be expressed as a single named constant shared by all call sites … a magic number repeated across five services is how the current inconsistency arose". Spec-internal tension: `design.md` scopes Wave 0 as "no call-site changes" and Waves 4/5 name only the two *changing* sites, so the implementors were defensible — but the AC's purpose is half-achieved and the literals can silently re-diverge. (`VenueService.cs:47`, `PersonService.cs:43,47,50` are name-validation minimums, correctly untouched.) |
+| **F4** | Low | 18 now-dead constructor-injected repository fields remain — still captive Scoped dependencies held by a Window-lifetime service. The spec never asked for removal, so an observation, not a deviation; but it is F1's vacuity enabler. |
+| **F5** | Info | `HEAD` is `09faca2a` (7.2), one commit past the briefed range; review covers it. That commit's `.claude/scripts/readscope_treewide_walk.py` is the only non-`Services`/`Infra`/`Tests` file on the branch and must be consciously routed at merge. |
+
+**Recommendation: proceed.** F1/F2 are hardening for Wave 8, not reasons to hold the branch. F3 needs
+one decision.
+
+#### Orchestrator disposition
+
+- **F1 and F2 → fixed now**, dispatched as a hardening task alongside Wave 8. Both are defects in the
+  *evidence* this change rests on: a gate that can be evaded by renaming a declaration is not a gate,
+  and REQ-UOW-41 is not satisfied by two of its rows being untested.
+- **F3 → fixed now, and flagged for Helder to reverse.** Swapping `2` for
+  `SearchConstants.MinimumLocalQueryLength` at `PersonService.cs:200,217` is **behaviour-identical**
+  (the constant is 2) and is what REQ-UOW-51 literally requires; `workflow.md` Rule 1 says where code
+  contradicts an approved spec, the code is wrong. Recorded here as a judgement call Helder can
+  overturn, not a silent closure.
+- **F4 → not actioned.** Removing 18 injected fields is a refactor the spec never requested and would
+  touch every service again after the census is already clean. Logged for a future task.
+- **F5 → tracked** in the Checkpoint for merge-time routing.
