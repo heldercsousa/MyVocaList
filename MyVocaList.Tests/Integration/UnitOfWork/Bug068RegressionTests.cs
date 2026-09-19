@@ -39,9 +39,9 @@ public class Bug068RegressionTests
     // [AC] REQ-UOW-04: create -> read -> update through the normal write path must not throw
     // "already being tracked", and the update must persist.
     // Characterization, not regression: this family never reproduced BUG-068 — ArtistRepository.GetByIdAsync
-    // (ArtistRepository.cs:79-80) explicitly calls .AsTracking(), so EF identity resolution returns the
-    // already-tracked instance instead of a fresh detached one. Locks the behavior in through the
-    // unit-of-work refactor.
+    // (ArtistRepository.cs) is now tracking-free like every other read; the read is scoped through a fresh
+    // IUnitOfWork/DbContext per call, so there is no stale tracked instance left to conflict with the
+    // subsequent update. Locks the behavior in through the unit-of-work refactor.
     [Fact]
     public async Task Artist_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict()
     {
