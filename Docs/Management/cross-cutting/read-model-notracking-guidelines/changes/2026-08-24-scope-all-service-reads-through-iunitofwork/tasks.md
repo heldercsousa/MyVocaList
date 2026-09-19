@@ -145,7 +145,7 @@ Sub-wave 4a: **4.1–4.4** in parallel (cap 4). Sub-wave 4b: **4.5–4.6** in pa
 
 ## Wave 5 — Suggestion services `[P]` (both after Wave 4)
 
-- [ ] **5.1** `ArtistSuggestionService.cs` — `IUnitOfWork` injection (**2nd of 5** ctor params, after
+- [x] **5.1** `ArtistSuggestionService.cs` — `IUnitOfWork` injection (**2nd of 5** ctor params, after
       `artistRepository`), wrap `GetLocalAsync:36` and the `GetByNamesCollatedAsync` call at `:79`
       inside `GetRemoteAsync`, **+ REQ-UOW-52** remote guard
   - Files owned: `MyVocaList/Services/ArtistSuggestionService.cs`,
@@ -154,7 +154,7 @@ Sub-wave 4a: **4.1–4.4** in parallel (cap 4). Sub-wave 4b: **4.5–4.6** in pa
   - Est: **2 h** · Risk: **A** · AC: REQ-UOW-38, -41, -43, **-52**
   - Note: its local guard is already `trimmed.Length < 2` — REQ-UOW-51 requires **no change** here
     beyond swapping the literal for `SearchConstants.MinimumLocalQueryLength`.
-- [ ] **5.2** `SongSuggestionService.cs` — `IUnitOfWork` injection (**3rd of 6** ctor params, after
+- [x] **5.2** `SongSuggestionService.cs` — `IUnitOfWork` injection (**3rd of 6** ctor params, after
       `artistRepository`), wrap `GetLocalAsync:40`, `DedupAsync:113`'s `GetByTitlesCollatedAsync` and
       `ResolveLocalArtistIdsAsync:153`'s `GetByNamesCollatedAsync`, **+ REQ-UOW-51/52 thresholds**
   - Files owned: `MyVocaList/Services/SongSuggestionService.cs`,

@@ -700,3 +700,93 @@ solution. **Both corrections belong in every future implementor briefing.**
 - **Context manifest:** `plan.md` §§ 4–7 · `tasks.md` §§ Wave 5–8 · this Checkpoint ·
   `requirements.md` REQ-UOW-38/41/43/49/51/52 · `design.md § 2c` · integration branch
   `feat/uow-read-scope` @ `9a5659a1` in worktree `../MyVocaList-wt-read-scope`.
+
+### Wave 5 — COMPLETE (tasks 5.1, 5.2) — the suggestion services
+
+| Task | Service | Wraps | New tests | Branch commit |
+|------|---------|-------|-----------|---------------|
+| 5.1 | `ArtistSuggestionService` | 2 | 5 | `7a9324ec` |
+| 5.2 | `SongSuggestionService` | 3 | 6 | `0ff26480` |
+
+Suite additive: 615 → 620 → **626**.
+
+#### REQ-UOW-43 — the AC most likely to be silently violated, verified mechanically
+
+REQ-UOW-43 forbids holding a DI scope open across the remote provider fetch. A wrap that merely
+*looks* right can still enclose the network call. The orchestrator extracted every `async sp =>` lambda
+body by **brace-balanced parsing** and scanned each for network tokens
+(`FetchFromProviders`, `_providers`, `HttpClient`, `TrySearchAsync`) and for `_`-field dereferences:
+
+```
+ArtistSuggestionService.cs — lambda 1: network=NONE  fields=NONE
+ArtistSuggestionService.cs — lambda 2: network=NONE  fields=NONE
+SongSuggestionService.cs   — lambda 1: network=NONE  fields=NONE
+SongSuggestionService.cs   — lambda 2: network=NONE  fields=NONE
+SongSuggestionService.cs   — lambda 3: network=NONE  fields=NONE
+```
+
+**All five lambda bodies are clean on both axes.** This mattered most in 5.2, whose `DedupAsync` and
+`ResolveLocalArtistIdsAsync` wraps sit inside methods that also process provider results — the single
+easiest place in the change to accidentally enclose a network round-trip. They do not.
+
+Wrap-to-resolution counts match exactly in both files (2⇔2 and 3⇔3). Surviving `_`-field dereferences
+are `_logger`, `_providers`, `_scorer`, `_uow` in both — **no repository field**, and `_providers` is
+used only outside lambdas.
+
+#### Thresholds
+
+Both constants are used and **no stray `< 2` / `< 3` literal remains** in either file.
+
+- **5.1** — local guard was already `trimmed.Length < 2`; literal swapped for
+  `SearchConstants.MinimumLocalQueryLength`, no behaviour change, as the task entry predicted. The
+  remote guard (`MinimumRemoteQueryLength`) is **new**.
+- **5.2** — `GetLocalAsync` gained the one behavioural addition REQ-UOW-51 permits: a normalize/trim
+  ahead of the guard, with the guard moving from `IsNullOrWhiteSpace` to a length test **on the
+  trimmed term**. `GetRemoteAsync` previously had **no remote guard at all**; it has one now.
+
+#### REQ-UOW-49 carve-out rows 1 and 2 — consumed, and strictly
+
+| File | Change | Verdict |
+|------|--------|---------|
+| `ArtistSuggestionServiceTests.cs` | +3 lines: comment pair + ctor arg | carve-out row 2 ✔ |
+| `SongSuggestionServiceTests.cs` | +4 lines: `using`, comment pair, ctor arg | carve-out row 1 ✔ |
+
+Both diffs are **pure additions** — no `[Fact]` body, no `Assert`, no `Setup`/`Verify`, no field
+changed. Rows 3–4 of the carve-out remain unspent, for Wave 8.
+
+> **False alarm worth recording, so it is not re-investigated.** 5.1's `CreateSut` calls
+> `PassthroughUnitOfWork.Over(...)`, which is not among its owned files — this looked like scope creep.
+> It is not: `PassthroughUnitOfWork` is a **pre-existing** test helper defined in
+> `MyVocaList.Tests/Infrastructure/UnitOfWorkMocks.cs`, landed in `6d5766a7` during an earlier UoW
+> phase, and **unmodified** by either task. The initial `git log` miss was the orchestrator guessing a
+> wrong file path (`Infrastructure/PassthroughUnitOfWork.cs`), not a missing file. Both tasks reuse it
+> correctly, which is also why the existing Moq-based assertions keep their original meaning.
+
+**`MauiProgram.cs` untouched** (D3) — both suggestion services remain deliberately unregistered,
+pre-built for the future autocomplete feature.
+
+### Checkpoint
+
+- **Step:** **WAVE 5 COMPLETE** — merged into `feat/uow-read-scope` @ `29263cf3`, **626 green**.
+  **Dispatched round 8: 6.1 (concurrency probe) and 7.1 (architecture test) in parallel**, each in its
+  own worktree branched from `29263cf3`.
+- **Next:** on both merged → **7.2 census walk (SINGLE dispatch)** → **8.1 `DbLoadGate` removal
+  (STRICTLY LAST)**.
+- **Baseline:** 0 errors, **626** tests.
+- **7.2 is a hard gate on Wave 8.** Its tree-wide Python walk over all of `Services/*.cs` is the
+  REQ-UOW-36/37 "limb (a)" evidence, and **nothing else produces it** — the Wave 4/5 walks are
+  per-file. A non-empty result means Wave 8 does **not** start.
+- **7.1 must be SEEN TO FAIL** against a scratch `_field` reintroduction, then reverted, then landed
+  green — both outputs pasted. A gate that has never failed proves nothing. Its allow-list must be
+  empty or every entry individually justified; loosening the assertion to make it pass is forbidden.
+- **6.1's test is authored here but re-run in Wave 8.** REQ-UOW-42's mandated condition is "with
+  `DbLoadGate` removed", so Wave 8 co-owns that AC. The test must therefore NOT reference
+  `DbLoadGate` or depend on its presence. Overlap is forced with a `TaskCompletionSource` awaited
+  inside each lambda — explicitly **not** `Task.WhenAll`, which does not guarantee simultaneity.
+- **Wave 8 pre-read (do not start early):** `Task.Run` in `LoadFirstPageAsync`/`LoadMoreAsync` must
+  SURVIVE gate removal — they share a comment block with the gate and deleting them regresses
+  `page-load-frozen` (R3). The `:254` and `:306` `Task.Run` calls are out of scope entirely. Exactly
+  **two** `Assert.NotSame` off-context assertions cover this, not three.
+- **Context manifest:** `plan.md` §§ 4–8 · `tasks.md` §§ Wave 6–8 + "Out of scope" · this Checkpoint ·
+  `requirements.md` REQ-UOW-42/47/48/49/50 · `design.md § 6` · integration branch
+  `feat/uow-read-scope` @ `29263cf3` in worktree `../MyVocaList-wt-read-scope`.
