@@ -232,7 +232,7 @@ Sub-wave 4a: **4.1–4.4** in parallel (cap 4). Sub-wave 4b: **4.5–4.6** in pa
 
 ## Wave 8 — `DbLoadGate` removal `[STRICTLY LAST]`
 
-- [ ] **8.1** Remove `DbLoadGate`, both REQ-UOW-29 limbs evidenced
+- [x] **8.1** Remove `DbLoadGate`, both REQ-UOW-29 limbs evidenced
   - Produces: Phase 4.7 of the parent spec closed
   - Consumes: **all** prior waves, and specifically **7.2's clean census walk**
   - Risk: **A** · Est: **2 h**
