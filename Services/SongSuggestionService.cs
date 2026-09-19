@@ -1,10 +1,13 @@
+using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Contracts.DTOs.Suggestions;
+using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions.Strings;
 
 namespace MyVocaList.Services;
@@ -18,6 +21,7 @@ public class SongSuggestionService : ISongSuggestionService
 
     private readonly ISongRepository _songRepository;
     private readonly IArtistRepository _artistRepository;
+    private readonly IUnitOfWork _uow;
     private readonly IReadOnlyList<IMusicMetadataProvider> _providers;
     private readonly ISimilarityScorer _scorer;
     private readonly ILogger<SongSuggestionService> _logger;
@@ -25,33 +29,46 @@ public class SongSuggestionService : ISongSuggestionService
     public SongSuggestionService(
         ISongRepository songRepository,
         IArtistRepository artistRepository,
+        IUnitOfWork uow,
         IEnumerable<IMusicMetadataProvider> providers,
         ISimilarityScorer scorer,
         ILogger<SongSuggestionService> logger)
     {
         _songRepository = songRepository;
         _artistRepository = artistRepository;
+        _uow = uow;
         _providers = providers.ToList();
         _scorer = scorer;
         _logger = logger;
     }
 
     /// <inheritdoc />
+    // [AC] REQ-UOW-38/51: read scoped through IUnitOfWork; guard stays outside the lambda and is
+    // measured on the trimmed term (Length < MinimumLocalQueryLength), not IsNullOrWhiteSpace.
     public async Task<IReadOnlyList<SongSuggestionDto>> GetLocalAsync(string term, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(term))
+        var normalizedTerm = term.NormalizeSearchQuery();
+        if (normalizedTerm.Length < SearchConstants.MinimumLocalQueryLength)
             return [];
 
-        var normalizedTerm = term.NormalizeSearchQuery();
-        var (items, _) = await _songRepository.GetPagedAsync(1, MaxSuggestions, normalizedTerm, ct);
+        var (items, _) = await _uow.ExecuteReadAsync(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var songRepository = sp.GetRequiredService<ISongRepository>();
+            return await songRepository.GetPagedAsync(1, MaxSuggestions, normalizedTerm, ct);
+        }, ct);
         return items.Select(MapLocal).ToList();
     }
 
     /// <inheritdoc />
+    // [AC] REQ-UOW-52: below the remote threshold, no provider fetch is issued.
     public async Task<IReadOnlyList<SongSuggestionDto>> GetRemoteAsync(
         string term, string? artistHint, IReadOnlyList<SongSuggestionDto> localResults, CancellationToken ct = default)
     {
         var normalizedTerm = term.NormalizeSearchQuery();
+        if (normalizedTerm.Length < SearchConstants.MinimumRemoteQueryLength)
+            return [];
+
         var raw = await FetchFromProvidersAsync(normalizedTerm, artistHint, ct);
         if (raw.Count == 0)
             return [];
@@ -129,8 +146,15 @@ public class SongSuggestionService : ISongSuggestionService
             .Distinct()
             .ToList();
 
+        // [AC] REQ-UOW-38/43: its own short-lived read scope — the network fetch above has already
+        // completed, so no scope is ever pinned across HTTP I/O (D3/§ 4a).
         var collated = titles.Count > 0
-            ? await _songRepository.GetByTitlesCollatedAsync(titles, ct)
+            ? await _uow.ExecuteReadAsync(async sp =>
+            {
+                // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+                var songRepository = sp.GetRequiredService<ISongRepository>();
+                return await songRepository.GetByTitlesCollatedAsync(titles, ct);
+            }, ct)
             : (IReadOnlyList<Song>)[];
 
         var afterCollation = afterExternalId
@@ -162,7 +186,14 @@ public class SongSuggestionService : ISongSuggestionService
         if (artistNames.Count == 0)
             return remoteSuggestions;
 
-        var matchedArtists = await _artistRepository.GetByNamesCollatedAsync(artistNames, ct);
+        // [AC] REQ-UOW-38/43: its own short-lived read scope — a second, separate scope from
+        // DedupAsync's (D3/§ 4a); never enclosing the provider fetch that already completed.
+        var matchedArtists = await _uow.ExecuteReadAsync(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
+            return await artistRepository.GetByNamesCollatedAsync(artistNames, ct);
+        }, ct);
         if (matchedArtists.Count == 0)
             return remoteSuggestions;
 
