@@ -19,8 +19,11 @@ public class ArtistSuggestionServiceTests
         _deezerMock.Setup(p => p.ProviderName).Returns("Deezer");
     }
 
+    // The service now takes IUnitOfWork; PassthroughUnitOfWork runs each wrapped body inline
+    // against the same repo mock, so every existing assertion keeps its original meaning.
     private ArtistSuggestionService CreateSut() => new(
         _repoMock.Object,
+        MyVocaList.Tests.Infrastructure.PassthroughUnitOfWork.Over(_repoMock),
         new[] { _musicBrainzMock.Object, _deezerMock.Object },
         _scorerMock.Object,
         _loggerMock.Object);
