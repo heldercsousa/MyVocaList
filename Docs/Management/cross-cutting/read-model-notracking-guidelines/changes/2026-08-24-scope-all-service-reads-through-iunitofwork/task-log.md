@@ -451,3 +451,81 @@ is covered by that grant.
 - **Context manifest:** `plan.md` (wave order + the 3 invalidating gates) · `tasks.md` § Wave 3 (the
   task entry) · this `task-log.md` Checkpoint · `design.md § 2` (rationale is lifetime, not tracking) ·
   worktree `../MyVocaList-wt-read-scope` on `feat/uow-read-scope` @ `85b1cb90`.
+
+### Wave 3 — COMPLETE (task 3.1) — `.AsTracking()` removed
+
+Commit `b2afd095` · **exactly three files**, `+6/−5` total.
+
+| File | Change |
+|------|--------|
+| `Infra/Repository/ArtistRepository.cs` | `GetByIdAsync` — `.AsTracking()` deleted (1 line) |
+| `Infra/AppDbContext.cs` | comment only; `ChangeTracker.QueryTrackingBehavior = NoTracking` on the next line **untouched** |
+| `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs` | comment only, `+3/−3` |
+
+**Guard 1 honoured:** `CrudListViewModelBaseTests.cs` does not appear in the commit — the third
+`DbLoadGate` comment is REQ-UOW-49 carve-out row 4 and stays for Wave 8.
+
+**Comment rewrites.** Both previously asserted `.AsTracking()` was load-bearing, which is now false:
+
+- `AppDbContext.cs`: "Edit queries use explicit `.AsTracking()` to enable change detection" →
+  "Edit/write paths re-attach entities explicitly (e.g. `DbSet.Update`) rather than relying on a
+  tracked read — reads scoped through `IUnitOfWork` stay tracking-free end to end".
+- `Bug068RegressionTests.cs`: the claim that `GetByIdAsync` "explicitly calls `.AsTracking()`, so EF
+  identity resolution returns the already-tracked instance" → "is now tracking-free like every other
+  read; the read is scoped through a fresh `IUnitOfWork`/`DbContext` per call, so there is no stale
+  tracked instance left to conflict with the subsequent update". The "characterization, not
+  regression" framing is preserved — it was accurate and still is.
+
+**Test body untouched.** Orchestrator read the diff directly: the `Bug068RegressionTests.cs` hunk is
+three contiguous comment lines. `[Fact]`, the method signature and every assertion are outside the
+hunk. No test was edited to pass (`testing.md § Builder Must Not Modify Tests` satisfied).
+
+**Python file walk (not `grep`, per plan § 5)** over `Infra/Repository/`, `os.walk` + substring check
+for `.AsTracking(`:
+
+```
+Occurrences of '.AsTracking(' under Infra/Repository: []
+```
+
+**Verification, re-run independently by the orchestrator** (not taken from the implementor):
+
+```
+Aprovado!  – Com falha: 0, Aprovado: 578, Ignorado: 0, Total: 578, Duração: 3 s - MyVocaList.Tests.dll (net10.0)
+```
+
+578/578 — equal to the post-Wave-2 baseline, so nothing regressed. Build 0 errors. The pre-commit hook
+passed **unaided**; `--no-verify` was neither needed nor used, as expected for a non-Red commit under
+the new Option-A policy.
+
+**Stale-coordinate defect #4.** The task entry's `Files owned` paths carry a `MyVocaList/` prefix
+(`MyVocaList/Infra/Repository/ArtistRepository.cs`) that does not exist — in the worktree `Infra/` sits
+at the root. The implementor resolved the real paths before editing rather than trusting the entry.
+**Every remaining wave's `Files owned` paths carry the same bad prefix** — treat them as names, not
+paths.
+
+**Do not misread this wave.** Wave 2 closed BUG-078. `.AsTracking()` was harmless once the read was
+scoped, so this removal is hygiene. The 578/578 result is *expected* to be identical to Wave 2's, and
+that identity is not evidence of a no-op — it is the point.
+
+### Checkpoint
+
+- **Step:** Wave 3 COMPLETE and independently verified. **Dispatching sub-wave 4a — tasks 4.1, 4.2,
+  4.3, 4.4 in PARALLEL** (wave cap 4, exactly at the cap).
+- **Next:** on 4a green + committed → sub-wave 4b (4.5, 4.6 in parallel; 4.6 also needs Wave 2, same
+  file — satisfied) → Wave 5.
+- **Baseline:** 0 errors, **578** tests. Each 4.x task ADDS a new test file, so the count must RISE.
+- **Live guards for every 4.x task:**
+  - **The lambda gate (R1, highest-value review item).** `_field.Repository(...)` *inside* an
+    `ExecuteReadAsync` lambda compiles, passes every test, and leaves the defect fully intact while
+    looking fixed. Resolve from the lambda's own `sp` (REQ-UOW-28/37). The verifier already warned the
+    captive `_artistRepository` field still exists and serves other reads — re-introducible in EVERY
+    wave, so check per-wave, not once.
+  - Validation / short-circuit logic stays **OUTSIDE** the lambda (REQ-UOW-41).
+  - **Single-writer:** each file is owned by exactly one task; no shared helper in another task's file.
+  - New tests go in NEW files only (REQ-UOW-49 carve-out is closed at four rows).
+  - Real SQLite temp file, never the in-memory provider; never mock `DbContext`.
+- **Files-owned paths in `tasks.md` carry a bogus `MyVocaList/` prefix** (defect #4) and **all line
+  numbers are stale** (defects #1–#3). Re-derive every coordinate.
+- **Context manifest:** `plan.md` §§ 4–7 · `tasks.md` § Wave 4 · this Checkpoint ·
+  `requirements.md` REQ-UOW-39/40/41/44/51 · `design.md § 2` · worktree
+  `../MyVocaList-wt-read-scope` on `feat/uow-read-scope` @ `b2afd095`.
