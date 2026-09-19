@@ -77,7 +77,7 @@ public class ArtistRepository : IArtistRepository
 
     /// <inheritdoc />
     public async Task<Artist> GetByIdAsync(int id, CancellationToken ct)
-        => await _db.Artists.AsTracking().FirstOrDefaultAsync(a => a.Id == id, ct);
+        => await _db.Artists.FirstOrDefaultAsync(a => a.Id == id, ct);
 
     /// <inheritdoc />
     public async Task<Artist> GetByExternalIdAsync(string externalId, string provider, CancellationToken ct)

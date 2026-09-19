@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
@@ -150,11 +151,20 @@ public class ArtistService : IArtistService
         int pageNumber, int pageSize, string query = null,
         ArtistRoleFilter roleFilter = ArtistRoleFilter.All, CancellationToken ct = default)
     {
+        // REQ-UOW-41: validation stays OUTSIDE the lambda — no DI scope for an invalid call.
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
-        return await _artistRepository.GetPagedAsync(
-            pageNumber, pageSize, query.NormalizeSearchQuery(), roleFilter, ct);
+        var normalizedQuery = query.NormalizeSearchQuery();
+
+        // [AC] REQ-UOW-40, 42: paged list read scoped through IUnitOfWork.
+        return await _uow.ExecuteReadAsync(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
+            return await artistRepository.GetPagedAsync(
+                pageNumber, pageSize, normalizedQuery, roleFilter, ct);
+        }, ct);
     }
 
     /// <inheritdoc />
@@ -162,22 +172,42 @@ public class ArtistService : IArtistService
         string query, int maxResults = 5, CancellationToken ct = default)
     {
         var normalized = query.NormalizeSearchQuery();
-        if (string.IsNullOrWhiteSpace(normalized))
+        // REQ-UOW-41/51: the guard stays OUTSIDE the lambda — a sub-threshold query creates no DI
+        // scope and issues no SQL. Threshold raised from IsNullOrWhiteSpace to a minimum-length
+        // check (REQ-UOW-51): a local SQLite search below 2 characters matches an unbounded
+        // fraction of rows with no discriminating value.
+        if (normalized.Length < SearchConstants.MinimumLocalQueryLength)
             return [];
 
-        return await _artistRepository.SearchByNameAsync(normalized, maxResults, ct);
+        // [AC] REQ-UOW-40: search read scoped through IUnitOfWork.
+        return await _uow.ExecuteReadAsync(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
+            return await artistRepository.SearchByNameAsync(normalized, maxResults, ct);
+        }, ct);
     }
 
     /// <inheritdoc />
     public async Task<string> GetDeleteConfirmationAsync(IEnumerable<int> ids, CancellationToken ct = default)
     {
         var idList = ids.ToList();
+        // REQ-UOW-41: the single-id branch guard stays OUTSIDE the lambda — the multi-artist path
+        // makes no database call and must not create a DI scope.
         if (idList.Count == 1)
         {
-            var artist = await _artistRepository.GetByIdAsync(idList[0], ct);
-            return artist != null
-                ? $"Delete '{artist.Name}'?"
-                : "Delete artist?";
+            // [AC] REQ-UOW-45: read scoped through IUnitOfWork so a rename committed via
+            // ExecuteAsync is visible here — a fresh AppDbContext has no cached copy to prefer
+            // over the database (BUG-078).
+            return await _uow.ExecuteReadAsync<string>(async sp =>
+            {
+                // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+                var artistRepository = sp.GetRequiredService<IArtistRepository>();
+                var artist = await artistRepository.GetByIdAsync(idList[0], ct);
+                return artist != null
+                    ? $"Delete '{artist.Name}'?"
+                    : "Delete artist?";
+            }, ct);
         }
         return $"Delete {idList.Count} artists?";
     }

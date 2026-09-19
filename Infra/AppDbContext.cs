@@ -33,7 +33,8 @@ public class AppDbContext : DbContext
 
         // Global NoTracking default (BUG-018) — prevents ChangeTracker pollution in concurrent queries
         // Explicit .AsNoTracking() on list methods provides defence-in-depth
-        // Edit queries use explicit .AsTracking() to enable change detection
+        // Edit/write paths re-attach entities explicitly (e.g. DbSet.Update) rather than relying on
+        // a tracked read — reads scoped through IUnitOfWork stay tracking-free end to end
         ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
     }
 

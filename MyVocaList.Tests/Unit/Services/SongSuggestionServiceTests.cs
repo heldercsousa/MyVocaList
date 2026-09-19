@@ -1,4 +1,5 @@
 using MyVocaList.Contracts.DTOs;
+using MyVocaList.Tests.Infrastructure;
 
 namespace MyVocaList.Tests.Unit.Services;
 
@@ -17,9 +18,12 @@ public class SongSuggestionServiceTests
         _deezerMock.SetupGet(p => p.ProviderName).Returns("Deezer");
     }
 
+    // The service now takes IUnitOfWork; PassthroughUnitOfWork runs each wrapped body inline
+    // against these same mocks so the existing Moq-based assertions are unchanged (REQ-UOW-38/49).
     private SongSuggestionService CreateSut() => new(
         _songRepoMock.Object,
         _artistRepoMock.Object,
+        PassthroughUnitOfWork.Over(_songRepoMock, _artistRepoMock),
         [_musicBrainzMock.Object, _deezerMock.Object],
         _scorerMock.Object,
         _loggerMock.Object);
