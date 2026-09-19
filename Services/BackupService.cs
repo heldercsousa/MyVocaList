@@ -87,7 +87,12 @@ public class BackupService : IBackupService
     {
         try
         {
-            var latest = await _repo.GetLatestSnapshotAsync(ct);
+            var latest = await _uow.ExecuteReadAsync<BackupHistory?>(async sp =>
+            {
+                // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+                var backupRepository = sp.GetRequiredService<IBackupRepository>();
+                return await backupRepository.GetLatestSnapshotAsync(ct);
+            }, ct);
             if (latest is null || !File.Exists(latest.FilePath))
                 return (false, "No backup available. Create a backup first.");
 
@@ -166,17 +171,23 @@ public class BackupService : IBackupService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<BackupHistory>> GetHistoryAsync(int limit, CancellationToken ct)
-    {
-        return await _repo.GetRecentAsync(limit, ct);
-    }
+    public Task<IReadOnlyList<BackupHistory>> GetHistoryAsync(int limit, CancellationToken ct)
+        => _uow.ExecuteReadAsync<IReadOnlyList<BackupHistory>>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var backupRepository = sp.GetRequiredService<IBackupRepository>();
+            return await backupRepository.GetRecentAsync(limit, ct);
+        }, ct);
 
     /// <inheritdoc />
-    public async Task<bool> HasRecentBackupAsync(CancellationToken ct)
-    {
-        var latest = await _repo.GetLatestSnapshotAsync(ct);
-        return latest is not null && latest.CreatedAt >= DateTime.UtcNow.AddHours(-24);
-    }
+    public Task<bool> HasRecentBackupAsync(CancellationToken ct)
+        => _uow.ExecuteReadAsync(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var backupRepository = sp.GetRequiredService<IBackupRepository>();
+            var latest = await backupRepository.GetLatestSnapshotAsync(ct);
+            return latest is not null && latest.CreatedAt >= DateTime.UtcNow.AddHours(-24);
+        }, ct);
 
     private static async Task PruneOldSnapshotsAsync(IBackupRepository backupRepository, CancellationToken ct)
     {
