@@ -1173,3 +1173,75 @@ ArtistService now matches the coverage its sibling services already had.
 **F4 (18 dead injected repository fields) deliberately NOT actioned** — removing them is a refactor the
 spec never requested, would touch every service again after the census is already clean, and is better
 done as its own task with its own review. Logged as a follow-up.
+
+### Final independent verification (Wave 8 + hardening) — **CONDITIONAL PASS**
+
+Second fresh verifier, scoped to what no reviewer had seen: task 8.1 and the F1/F2/F3 hardening.
+**634/634, no flake.** Tree clean, nothing committed.
+
+#### Confirmed correct — no concerns
+
+- **R3 holds.** Both `Task.Run` offloads survive (`CrudListViewModelBase.cs:132`, `:197`) with their
+  `SQLITE-WORKAROUND` rationale intact; the `:234` debounce and `:286` `ExecuteConfirmActionAsync`
+  calls untouched beyond the comment rewrite. No `page-load-frozen` regression.
+- **Exactly two `Assert.NotSame`** (`:37`, `:75`), both unmodified.
+- **REQ-UOW-42 is NOT vacuous after gate removal** — a question worth asking, since a test can be
+  trivially satisfied once the thing it raced against is gone. It never touched `DbLoadGate`: the gate
+  lived in the ViewModel, and the test drives `ArtistService`/`SongService` directly, so it was never
+  in the gate's path. Overlap is still genuinely forced.
+- **The `DbLoadGate` reading is honest** — an independent walk over every `.cs`/`.xaml`/`.csproj`/
+  `.props`/`.json` found exactly **one** occurrence left, a doc comment. Nothing depends on the symbol.
+- **F2's tests are real, proven by mutation**: the verifier moved the guards inside the lambda and
+  **both tests failed** (`Expected: 0 / Actual: 1`), then reverted. They catch the drift they claim to.
+- **F3 is behaviour-identical and complete** — and it confirmed no search entry point was missed: the
+  remaining `< 2` literals at `PersonService.cs:44,48,51` are name-format validation, correctly left.
+- **Scope discipline holds** — no `MauiProgram.cs`, no XAML, no page, no `Docs/` on the branch.
+
+#### BLOCKER-CLASS — F1 did NOT achieve what it claimed, and commit `e27ebaae` says otherwise
+
+**The orchestrator's own claim was wrong and is corrected here.** F1 closed two evasion shapes and
+left at least eight open. Two proven empirically with a live violation staying green:
+
+1. **Drop the `private` keyword** — `readonly IArtistRepository _x;` is still private by C# default and
+   compiles identically. Gate went **4/4 green with the violation live**. This is exactly the class F1
+   was written to close.
+2. **Primary constructor (C# 12)** — no `_`-field exists, so no governed field is found, so the file is
+   skipped entirely. **The most dangerous shape:** `CLAUDE.md` steers toward modern C# 13+, so the next
+   service written idiomatically bypasses the gate with **no adversarial intent required**.
+
+Also evading (verified against the regex): no-modifier, `public`, field initialiser, multi-declarator,
+`static`, `using`-alias, and property-instead-of-field. Plus a coverage gap — `GetServiceFiles()` uses
+`SearchOption.TopDirectoryOnly`, so a service in a `Services/` subfolder is never scanned.
+
+**Root design flaw:** the gate is *declaration-gated* — `if (governedFields.Count == 0) continue;`. A
+miss in the declaration regex **silently disables the check for that whole file** instead of failing
+loudly. A text regex cannot close this class.
+
+**Major — the governed-field floor does not prevent the vacuity scenario it was written for.** During
+evasion 1 the count dropped 20→19 and the floor (`>= 15`) **passed** alongside the silently-green
+violation test. Five fields can be blinded before it trips. It catches only a wholesale collapse, not
+the per-service drift that is how a real regression actually arrives.
+
+**Disposition:** a fix is dispatched targeting **constructor parameter types** (classic *and* primary
+constructors) instead of field declarations — a service cannot hold a repository it was never injected,
+so that anchor is shape-independent — plus `AllDirectories` and a fail-loud replacement for the silent
+skip. It must demonstrate **each** evasion failing before being accepted. The previous attempt claimed
+closure without per-shape proof, which is precisely why this round exists.
+
+#### Warning — gate removal dropped a SECOND responsibility → **BUG-079 registered (Major)**
+
+The deleted comment block documented two jobs, and Wave 8's evidence covers only one:
+
+> *"Read the page number AFTER the gate: a first-page load (search/refresh) holding the gate may reset
+> `_currentPage` before this load-more runs."*
+
+`_isLoading` guards `LoadMoreAsync` against itself only; `LoadFirstPageAsync` has **no guard** and
+writes `_currentPage = 1`. A debounced search or refresh can now interleave with an in-flight
+load-more → duplicated or skipped page. Previously the gate serialised them.
+
+**This is a spec gap, not an implementor error** — `requirements.md` describes the gate purely as a
+captive-`DbContext` workaround; the paging role existed **only in a code comment**. Per `workflow.md`
+("spec incomplete → clarify with Helder; do not improvise") **no guard was invented and no concurrency
+fix attempted.** Registered as **BUG-079** with the full analysis and the three decisions Helder owns.
+Explicitly *unproven* — it may be unreachable in the real UI, in which case it downgrades to Minor and
+the folder must be removed.
