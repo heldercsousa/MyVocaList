@@ -9,11 +9,6 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     private string _currentSearchQuery;
     private CancellationTokenSource _searchCts;
     private Func<Task> _pendingConfirmAction;
-    // Static: all CRUD list ViewModels share one effectively-singleton AppDbContext
-    // (MAUI has no per-page scope), so at most one DB load may run at a time app-wide.
-    // SQLITE-WORKAROUND: remove this gate when SQLite is replaced (INFRA_MSSQL) —
-    // see constraints-registry.md § EF Core / SQLite and DevCycleCraft/page-load-frozen/plan.md.
-    private static readonly SemaphoreSlim DbLoadGate = new(1, 1);
     private volatile bool _isLoading;
     private bool _hasLoadedOnce;
     private readonly ILogger _logger;
@@ -122,12 +117,8 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     private async Task LoadFirstPageAsync(CancellationToken cancellationToken)
     {
-        var entered = false;
         try
         {
-            await DbLoadGate.WaitAsync(cancellationToken);
-            entered = true;
-
             _currentPage = 1;
             _currentSearchQuery = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
 
@@ -174,10 +165,6 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
             OnAfterLoad(list);
         }
         catch (OperationCanceledException) { }
-        finally
-        {
-            if (entered) DbLoadGate.Release();
-        }
     }
 
     protected async Task RefreshAsync()
@@ -199,16 +186,10 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         }
 
         _isLoading = true;
-        var entered = false;
         var loadingPage = 0;
 
         try
         {
-            await DbLoadGate.WaitAsync();
-            entered = true;
-
-            // Read the page number AFTER the gate: a first-page load (search/refresh)
-            // holding the gate may reset _currentPage before this load-more runs.
             loadingPage = _currentPage + 1;
 
             // SQLITE-WORKAROUND: same offload as LoadFirstPageAsync — SQLite query + lazy
@@ -238,7 +219,6 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         }
         finally
         {
-            if (entered) DbLoadGate.Release();
             _isLoading = false;
         }
     }
@@ -301,8 +281,8 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         DismissConfirmSheet();
         if (action != null)
             // Offload the SQLite delete (+ TransactionLogInterceptor JSON work) to the
-            // thread pool. Do NOT hold DbLoadGate here — concrete deletes end with a
-            // reload that acquires the gate internally (would deadlock).
+            // thread pool. Concrete deletes end with a reload; offloading here keeps
+            // that reload off the UI thread too.
             await Task.Run(action);
     }
 
