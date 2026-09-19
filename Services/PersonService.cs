@@ -174,29 +174,55 @@ public class PersonService : IPersonService
     }
 
     /// <inheritdoc />
-    public async Task<Person?> GetPersonByIdAsync(int id, CancellationToken cancellationToken = default)
-        => await _personRepository.GetByIdAsync(id);
+    public Task<Person?> GetPersonByIdAsync(int id, CancellationToken cancellationToken = default)
+        => _uow.ExecuteReadAsync<Person?>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var personRepository = sp.GetRequiredService<IPersonRepository>();
+            return await personRepository.GetByIdAsync(id);
+        }, cancellationToken);
 
     /// <inheritdoc />
-    public async Task<Person?> GetPersonByNameAsync(string name, CancellationToken cancellationToken = default)
-        => await _personRepository.GetByFullNameAsync(name, cancellationToken);
+    public Task<Person?> GetPersonByNameAsync(string name, CancellationToken cancellationToken = default)
+        => _uow.ExecuteReadAsync<Person?>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var personRepository = sp.GetRequiredService<IPersonRepository>();
+            return await personRepository.GetByFullNameAsync(name, cancellationToken);
+        }, cancellationToken);
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Person>> SearchPersonsAsync(string searchTerm, int maxResults = 5, CancellationToken cancellationToken = default)
+    public Task<IEnumerable<Person>> SearchPersonsAsync(string searchTerm, int maxResults = 5, CancellationToken cancellationToken = default)
     {
+        // REQ-UOW-41: the short-circuit guard stays OUTSIDE the lambda — a too-short search term
+        // makes no database call and must not create a DI scope.
         searchTerm = searchTerm.NormalizeSearchQuery();
         if (searchTerm.Length < 2)
-            return [];
-        return await _personRepository.SearchByNameStartsWithAsync(searchTerm, maxResults, cancellationToken);
+            return Task.FromResult<IEnumerable<Person>>([]);
+
+        return _uow.ExecuteReadAsync<IEnumerable<Person>>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var personRepository = sp.GetRequiredService<IPersonRepository>();
+            return await personRepository.SearchByNameStartsWithAsync(searchTerm, maxResults, cancellationToken);
+        }, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Person>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = 3, CancellationToken cancellationToken = default)
+    public Task<IEnumerable<Person>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = 3, CancellationToken cancellationToken = default)
     {
+        // REQ-UOW-41: the short-circuit guard stays OUTSIDE the lambda — a too-short search term
+        // makes no database call and must not create a DI scope.
         searchTerm = searchTerm.NormalizeSearchQuery();
         if (searchTerm.Length < 2)
-            return [];
-        return await _personRepository.SearchByNameStartsWithAsync(searchTerm, maxResults, cancellationToken);
+            return Task.FromResult<IEnumerable<Person>>([]);
+
+        return _uow.ExecuteReadAsync<IEnumerable<Person>>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var personRepository = sp.GetRequiredService<IPersonRepository>();
+            return await personRepository.SearchByNameStartsWithAsync(searchTerm, maxResults, cancellationToken);
+        }, cancellationToken);
     }
 
     #endregion
@@ -204,25 +230,31 @@ public class PersonService : IPersonService
     #region List and Mutation Operations
 
     /// <inheritdoc />
-    public async Task<(IEnumerable<PersonListItemDto> items, int totalCount)> GetPagedPersonsForListAsync(
+    public Task<(IEnumerable<PersonListItemDto> items, int totalCount)> GetPagedPersonsForListAsync(
         int pageNumber, int pageSize, string query = null, CancellationToken cancellationToken = default)
     {
         query = string.IsNullOrWhiteSpace(query) ? null : query.NormalizeSearchQuery();
 
-        var (persons, totalCount) = await _personRepository.GetPagedAsync(
-            pageNumber, pageSize, query, cancellationToken);
-
-        var dtos = persons.Select(p => new PersonListItemDto
+        return _uow.ExecuteReadAsync<(IEnumerable<PersonListItemDto> items, int totalCount)>(async sp =>
         {
-            Id = p.Id,
-            FullName = p.FullName,
-            BirthdayDayMonth = p.BirthdayDayMonth,
-            Email = p.Email,
-            Participations = p.Participations,
-            Absences = p.Absences
-        });
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+            var personRepository = sp.GetRequiredService<IPersonRepository>();
 
-        return (dtos, totalCount);
+            var (persons, totalCount) = await personRepository.GetPagedAsync(
+                pageNumber, pageSize, query, cancellationToken);
+
+            var dtos = persons.Select(p => new PersonListItemDto
+            {
+                Id = p.Id,
+                FullName = p.FullName,
+                BirthdayDayMonth = p.BirthdayDayMonth,
+                Email = p.Email,
+                Participations = p.Participations,
+                Absences = p.Absences
+            });
+
+            return (dtos, totalCount);
+        }, cancellationToken);
     }
 
     /// <inheritdoc />
