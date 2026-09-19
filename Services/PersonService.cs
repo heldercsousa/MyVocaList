@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.Models;
+using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
@@ -197,7 +198,7 @@ public class PersonService : IPersonService
         // REQ-UOW-41: the short-circuit guard stays OUTSIDE the lambda — a too-short search term
         // makes no database call and must not create a DI scope.
         searchTerm = searchTerm.NormalizeSearchQuery();
-        if (searchTerm.Length < 2)
+        if (searchTerm.Length < SearchConstants.MinimumLocalQueryLength)
             return Task.FromResult<IEnumerable<Person>>([]);
 
         return _uow.ExecuteReadAsync<IEnumerable<Person>>(async sp =>
@@ -214,7 +215,7 @@ public class PersonService : IPersonService
         // REQ-UOW-41: the short-circuit guard stays OUTSIDE the lambda — a too-short search term
         // makes no database call and must not create a DI scope.
         searchTerm = searchTerm.NormalizeSearchQuery();
-        if (searchTerm.Length < 2)
+        if (searchTerm.Length < SearchConstants.MinimumLocalQueryLength)
             return Task.FromResult<IEnumerable<Person>>([]);
 
         return _uow.ExecuteReadAsync<IEnumerable<Person>>(async sp =>

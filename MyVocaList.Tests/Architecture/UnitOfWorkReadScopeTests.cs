@@ -48,9 +48,21 @@ public class UnitOfWorkReadScopeTests
     private static readonly Regex RepositoryTypeRegex = new(
         @"^I[A-Za-z0-9]*Repository$", RegexOptions.Compiled);
 
-    /// <summary>Matches a <c>private readonly &lt;Type&gt; _field;</c> field declaration.</summary>
+    /// <summary>
+    /// Matches a governed-field declaration such as <c>private readonly IArtistRepository _field;</c>.
+    /// Broadened (F1 hardening, 2026-09-19) beyond the original <c>private readonly I…</c> shape, which
+    /// an adversarial verifier evaded by (a) fully-qualifying the type name
+    /// (<c>MyVocaList.Domain.RepositoryInterface.IArtistRepository</c>) and (b) using a non-<c>private</c>
+    /// or non-<c>readonly</c> modifier — both left a live violation undetected while the gate stayed
+    /// green. The access modifier is now optional-order/any-of <c>private</c>/<c>protected</c>/
+    /// <c>internal</c> (including combinations like <c>private protected</c>), <c>readonly</c> is
+    /// optional, and the captured <c>type</c> group may include a dotted namespace prefix and/or a
+    /// generic argument list — <see cref="IsGoverned"/> reduces it to the bare interface-name segment
+    /// before matching against the governed-type rules.
+    /// </summary>
     private static readonly Regex FieldDeclarationRegex = new(
-        @"private\s+readonly\s+(?<type>I[A-Za-z0-9]*)\s+(?<name>_\w+)\s*;", RegexOptions.Compiled);
+        @"(?:private|protected|internal)(?:\s+(?:private|protected|internal))*\s+(?:readonly\s+)?" +
+        @"(?<type>[\w\.]+(?:<[\w\.,\s]+>)?)\s+(?<name>_\w+)\s*;", RegexOptions.Compiled);
 
     /// <summary>Matches a <c>.ExecuteReadAsync(</c> / <c>.ExecuteAsync(</c> invocation site.</summary>
     private static readonly Regex UowCallRegex = new(
@@ -79,6 +91,38 @@ public class UnitOfWorkReadScopeTests
             serviceFiles.Length >= 25,
             $"Expected at least 25 files under Services/ (30 as of 2026-08-25); found {serviceFiles.Length}. " +
             "A collapse to a near-empty set means this gate is guarding nothing.");
+    }
+
+    [Fact]
+    // [AC] REQ-UOW-50: a floor on the number of *governed fields* detected across Services/*.cs, not
+    // just files. Every governed field is dead by design post-change (assigned in the constructor,
+    // never dereferenced outside `sp`) — so if a future cleanup deletes them all, the field-declaration
+    // regex finds zero governed fields everywhere and NoGovernedField_IsDereferencedAnywhere_… passes
+    // permanently while guarding nothing (it has nothing left to scan). This floor makes that collapse
+    // fail loudly instead of silently. A genuine, deliberate drop below the floor (e.g. a repository
+    // interface removed outright) requires updating this number in the same commit as the removal —
+    // not just deleting the test.
+    public void GovernedFieldDeclarations_MeetCountFloor()
+    {
+        var serviceFiles = GetServiceFiles();
+        Assert.NotEmpty(serviceFiles);
+
+        var totalGovernedFields = 0;
+        foreach (var path in serviceFiles)
+        {
+            var clean = StripCommentsAndStringLiterals(File.ReadAllText(path));
+            totalGovernedFields += FieldDeclarationRegex.Matches(clean)
+                .Cast<System.Text.RegularExpressions.Match>()
+                .Count(m => IsGoverned(m.Groups["type"].Value));
+        }
+
+        Assert.True(
+            totalGovernedFields >= 15,
+            $"Expected at least 15 governed (repository- or data-service-typed) fields across " +
+            $"Services/*.cs (20 as of 2026-09-19); found {totalGovernedFields}. A drop below the floor " +
+            "means either a real, deliberate cleanup (update this floor explicitly) or the field-" +
+            "declaration detector has silently broken and is no longer finding what it should — either " +
+            "way it needs a human decision, not a silent pass.");
     }
 
     // ── (a) + (b) — REQ-UOW-36/37 ───────────────────────────────────────────
@@ -179,8 +223,24 @@ public class UnitOfWorkReadScopeTests
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
-    private static bool IsGoverned(string typeName) =>
-        RepositoryTypeRegex.IsMatch(typeName) || GovernedDataServiceTypes.Contains(typeName);
+    /// <summary>
+    /// Reduces a captured type-name group — which may be fully qualified (
+    /// <c>MyVocaList.Domain.RepositoryInterface.IArtistRepository</c>) and/or carry a generic argument
+    /// list — to the bare interface-name segment before checking governance, so a qualification or
+    /// generic wrapper cannot be used to evade detection (F1 hardening, 2026-09-19).
+    /// </summary>
+    private static string SimpleTypeName(string typeName)
+    {
+        var withoutGenerics = typeName.IndexOf('<') is var idx && idx >= 0 ? typeName[..idx] : typeName;
+        var lastDot = withoutGenerics.LastIndexOf('.');
+        return lastDot >= 0 ? withoutGenerics[(lastDot + 1)..] : withoutGenerics;
+    }
+
+    private static bool IsGoverned(string typeName)
+    {
+        var simple = SimpleTypeName(typeName);
+        return RepositoryTypeRegex.IsMatch(simple) || GovernedDataServiceTypes.Contains(simple);
+    }
 
     /// <summary>
     /// (iv) Path resolution reuses the proven walk-up-from-BaseDirectory shape already established by
