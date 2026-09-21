@@ -256,5 +256,22 @@ Verified, and it is DevExpress:
 renders its `Content` rather than the shimmer — so those pages plausibly show no loading animation at
 all, while appearing correctly wired at a glance.
 
-**Unverified on device, and deliberately not touched** — it is outside BUG-079's scope. Helder was
-asked whether to register it as its own bug; **no answer yet**. Do not fold it into this fix.
+**Unverified on device, and deliberately not touched** — outside BUG-079's scope.
+
+> **Helder's ruling 2026-09-21: BYPASS. Do NOT register this as a bug, do not fix it.**
+>
+> *"Forget picker pages for now. Perhaps they will become stale, but I'm not sure yet… The only one
+> thing I already know is that autocomplete entries are the pattern for those picker pages, in
+> summary. But some cases may not be the way for a good UX. I suppose we will get rid of most of
+> these picker pages."*
+>
+> **Rationale:** the picker pages are likely to be **deleted**, not repaired — autocomplete entries
+> (the `AutocompleteField` / DX `AutoCompleteEdit` pattern) are the intended replacement for the
+> picker-page interaction. Fixing a shimmer binding on a page slated for removal is wasted work, and
+> registering a bug against it would create a row someone later feels obliged to close.
+>
+> **Do not invest in `ArtistPickerPage`, `SongPickerPage` or `YouTubeSearchPage`** beyond keeping them
+> compiling, until Helder decides their fate. If a future task touches them for an unrelated reason,
+> leave the `IsVisible`/`IsLoading` mismatch alone rather than "tidying" it.
+>
+> This note exists so the finding is not rediscovered and re-raised as new.
