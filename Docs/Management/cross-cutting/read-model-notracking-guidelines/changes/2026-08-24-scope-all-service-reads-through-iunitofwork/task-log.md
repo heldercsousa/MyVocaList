@@ -1288,3 +1288,51 @@ the folder must be removed.
 - **Context manifest (resume with ONLY these):** this Checkpoint · `plan.md § 8` (definition of done) ·
   `tasks.md` (all 12 ticked) · the BUG-079 README · integration branch `feat/uow-read-scope` @
   `4a2264a1`.
+
+---
+
+## Helder's rulings on the two open items (2026-09-21)
+
+### F3 — **UPHELD, and broadened into a standing rule**
+
+> *"every CRUD search must follow the very same pattern. No magic numbers anywhere — app must follow
+> patterns everywhere"*
+
+The `PersonService` change **stands**. The spec tension is resolved in favour of REQ-UOW-51's wording:
+`design.md`'s "Wave 0 makes no call-site changes" was a *sequencing* statement about one wave, not a
+licence to leave literals behind — and the AC's stated purpose (stopping a magic number from diverging
+across five services) is exactly what leaving them would have defeated.
+
+**This is broader than F3.** The ruling is a standing pattern requirement, not a one-off approval, so
+it extends past the two literals already fixed:
+
+- **Every** CRUD search path uses `SearchConstants`, never a bare literal.
+- The same applies to **page-size** literals, which are the identical failure mode.
+- A magic-number audit across `Services/`, `UI/ViewModels/` and `UI/Pages/` is in flight; anything it
+  finds that is genuinely a search/paging threshold gets the constant treatment.
+
+Follow-up: this belongs in a rules file (`code-principles.md` or `crud-pages.md`) so it binds future
+work rather than living only in this task-log. **Note `CLAUDE.md § Amending These Rules`** — a rules
+change needs the `amend:` commit prefix, a rationale, and a changelog entry.
+
+### BUG-079 — **CONFIRMED REAL; fix direction decided; NOT downgraded**
+
+> *"LoadFirstPageAsync must work pretty similar to LoadMoreAsync … they're the same thing.
+> LoadFirstPageAsync is supposed to be loaded in the Load Page moment, triggering the 'loading'
+> component … until the records are finally retrieved from DB."*
+
+The folder stays. Full detail in the bug's own README; the short version:
+
+- The fix is **symmetry**, not a bespoke lock. `LoadFirstPageAsync` adopts `LoadMoreAsync`'s guard, and
+  the interleaving closes as a byproduct. The three options originally put to Helder (extend
+  `_isLoading`, re-read after await, cancellation token) are superseded by removing the asymmetry.
+- **Honest reframing:** `LoadMoreAsync` already guarded itself; `LoadFirstPageAsync` never needed to
+  because `DbLoadGate` serialised everything. The gate was **masking a missing guard**. READ-SCOPE did
+  not create this defect — it **revealed** a pre-existing asymmetry.
+- The ruling also adds a **UI behaviour change** (a visible loading state during first-page load) that
+  the bug alone would not have required. That makes this more than a bug fix.
+- **Governance:** `CrudListView` is a governed component, so all four gates in
+  `component-change-governance.md` run before any edit — dedicated task + MD3 review, consumer map
+  (Python walk, never `grep`), per-consumer risk table, recorded approval. Helder approved the
+  *direction*; the gates themselves are not yet run, and this may **not** be bundled into a bug-fix
+  commit.
