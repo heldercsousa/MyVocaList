@@ -18,4 +18,12 @@ public static class SearchConstants
     /// result set against a global catalogue is still very broad, so a higher bar than local is used.
     /// </summary>
     public const int MinimumRemoteQueryLength = 3;
+
+    /// <summary>
+    /// Default maximum number of results returned by a local autocomplete/search entry point.
+    /// REQ-UOW-51; Helder's ruling 2026-09-21: "every CRUD search must follow the very same
+    /// pattern. No magic numbers anywhere." Five results fills a typical autocomplete dropdown
+    /// without overwhelming it, and every local search default now shares this single value.
+    /// </summary>
+    public const int MaxSearchResults = 5;
 }
