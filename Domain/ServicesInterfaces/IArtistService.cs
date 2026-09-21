@@ -1,3 +1,4 @@
+using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
@@ -26,7 +27,7 @@ public interface IArtistService
         ArtistRoleFilter roleFilter = ArtistRoleFilter.All, CancellationToken ct = default);
 
     /// <summary>Returns up to maxResults artists whose name starts with the query (autocomplete).</summary>
-    Task<IEnumerable<ArtistListItem>> SearchArtistsByNameAsync(string query, int maxResults = 5, CancellationToken ct = default);
+    Task<IEnumerable<ArtistListItem>> SearchArtistsByNameAsync(string query, int maxResults = SearchConstants.MaxSearchResults, CancellationToken ct = default);
 
     /// <summary>Returns a human-readable delete confirmation message for the given artist IDs.</summary>
     Task<string> GetDeleteConfirmationAsync(IEnumerable<int> ids, CancellationToken ct = default);
