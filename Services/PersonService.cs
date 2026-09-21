@@ -193,7 +193,7 @@ public class PersonService : IPersonService
         }, cancellationToken);
 
     /// <inheritdoc />
-    public Task<IEnumerable<Person>> SearchPersonsAsync(string searchTerm, int maxResults = 5, CancellationToken cancellationToken = default)
+    public Task<IEnumerable<Person>> SearchPersonsAsync(string searchTerm, int maxResults = SearchConstants.MaxSearchResults, CancellationToken cancellationToken = default)
     {
         // REQ-UOW-41: the short-circuit guard stays OUTSIDE the lambda — a too-short search term
         // makes no database call and must not create a DI scope.
@@ -210,7 +210,7 @@ public class PersonService : IPersonService
     }
 
     /// <inheritdoc />
-    public Task<IEnumerable<Person>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = 3, CancellationToken cancellationToken = default)
+    public Task<IEnumerable<Person>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = SearchConstants.MaxSearchResults, CancellationToken cancellationToken = default)
     {
         // REQ-UOW-41: the short-circuit guard stays OUTSIDE the lambda — a too-short search term
         // makes no database call and must not create a DI scope.
