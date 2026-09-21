@@ -86,3 +86,68 @@ ViewModel-level and therefore testable: force `LoadFirstPageAsync` to reset `_cu
 > **Do not fix this by restoring `DbLoadGate`.** The gate's captive-`DbContext` rationale is genuinely
 > dead — every read is now scoped, proven by task 7.2's clean tree-wide census and two independent
 > verifiers. Only the paging-serialisation role needs a replacement, and it should be solved directly.
+
+## Helder's ruling (2026-09-21) — CONFIRMED REAL, and the fix direction is decided
+
+> *"LoadFirstPageAsync must work pretty similar to LoadMoreAsync; I suppose the distinction between
+> them is minimal. So, in general, they're the same thing. LoadFirstPageAsync is supposed to be loaded
+> in the Load Page moment, triggering the 'loading' component (DevExpress has a component that isn't
+> labeled as 'loading' but has this exact goal) until the records are finally retrieved from DB."*
+
+This answers **both** open questions at once.
+
+### 1. Reachability — settled
+
+The bug is **not** downgraded to Minor. The folder stays. The two methods are the same operation over
+the same paging state, so they were always capable of interleaving; only `DbLoadGate` was stopping it.
+
+### 2. The fix — symmetry, not a bespoke lock
+
+`LoadFirstPageAsync` adopts the **same pattern** as `LoadMoreAsync`: it takes the loading guard
+(`_isLoading`, or whatever the symmetric implementation names it) and surfaces a **loading indicator**
+for the duration of the fetch.
+
+The race closes as a **byproduct**: once both paths honour the same guard, a first-page load cannot
+reset `_currentPage` while a load-more is mid-flight, because it cannot start. **No new lock, no
+cancellation token, no re-read-after-await is needed** — the three options originally offered are
+superseded by "make the asymmetry go away", which is the better fix because it removes the cause rather
+than defending against the effect.
+
+> **Why the asymmetry existed at all:** `LoadMoreAsync` guards itself with `_isLoading`;
+> `LoadFirstPageAsync` never needed a guard because `DbLoadGate` was serialising everything anyway. The
+> gate was masking a missing guard. Removing the gate exposed it — which is the honest reading of this
+> bug: READ-SCOPE did not *create* the defect, it **revealed** a pre-existing asymmetry the gate had
+> been hiding.
+
+### 3. Scope beyond the race — a user-visible improvement
+
+The ruling adds a requirement the bug alone would not have: the first-page load must show a loading
+indicator "until the records are finally retrieved from DB". Today a page load has no visible busy
+state. So this is **not purely a bug fix** — it carries a UI behaviour change.
+
+### Governance consequence `[HARD RULE]`
+
+`CrudListView` is a **governed component** (`component-change-governance.md`) — a custom component with
+many consumers. Adding a loading indicator to it requires **all four gates before any edit**:
+
+1. Dedicated task + explicit MD3 review against m3.material.io.
+2. **Consumer map** — every `<local:CrudListView` and every `CrudListViewModelBase`-derived ViewModel,
+   produced by a Python walk (never `grep` — it has returned false zeroes in this repo).
+3. **Per-consumer risk assessment** — one line per consumer: what could break, and the verification step.
+4. **Helder's approval recorded** before implementation begins.
+
+Helder has approved the *direction*; the four gates still have to be run, and the MD3 review and
+per-consumer risk table do not yet exist. This may **not** be bundled into a bug-fix commit
+(`component-change-governance.md`: no bundling, `[HARD RULE]`).
+
+### Regression test — still mandatory
+
+Severity remains **Major**, so `bug-tracking.md` requires a regression test seen to FAIL before and PASS
+after: force `LoadFirstPageAsync` while a `LoadMoreAsync` is parked mid-await, and assert the resulting
+page sequence. The symmetry fix must be proven to close the interleaving, not merely to look tidier.
+
+### Spec debt to clear in the same work
+
+`requirements.md` must record the paging-serialisation responsibility. Its absence is the root cause:
+the role lived only in a code comment, so the gate's removal dropped it silently and no reviewer caught
+it. See the parent spec's lifted Phase 4.7 note for the same lesson.
