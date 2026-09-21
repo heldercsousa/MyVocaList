@@ -1,4 +1,5 @@
 using MyVocaList.Contracts.Models;
+using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
 
 namespace MyVocaList.Domain.ServicesInterfaces;
@@ -19,8 +20,8 @@ public interface IPersonService
         CancellationToken cancellationToken = default);
     Task<Person?> GetPersonByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<Person?> GetPersonByNameAsync(string name, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Person>> SearchPersonsAsync(string searchTerm, int maxResults = 5, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Person>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = 3, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Person>> SearchPersonsAsync(string searchTerm, int maxResults = SearchConstants.MaxSearchResults, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Person>> SearchPersonsStartsWithAsync(string searchTerm, int maxResults = SearchConstants.MaxSearchResults, CancellationToken cancellationToken = default);
 
     bool ShouldShowCharacterCounter(int currentLength);
     (string text, bool isWarning, bool isError) GetCharacterCounterInfo(int currentLength);
