@@ -169,7 +169,7 @@ public class ArtistService : IArtistService
 
     /// <inheritdoc />
     public async Task<IEnumerable<ArtistListItem>> SearchArtistsByNameAsync(
-        string query, int maxResults = 5, CancellationToken ct = default)
+        string query, int maxResults = SearchConstants.MaxSearchResults, CancellationToken ct = default)
     {
         var normalized = query.NormalizeSearchQuery();
         // REQ-UOW-41/51: the guard stays OUTSIDE the lambda — a sub-threshold query creates no DI

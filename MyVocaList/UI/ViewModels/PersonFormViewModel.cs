@@ -1,3 +1,4 @@
+using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
 
 namespace MyVocaList.UI.ViewModels;
@@ -278,13 +279,13 @@ public partial class PersonFormViewModel : ViewModelBase
 
     private async Task SearchPersonsAsync(string term)
     {
-        if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+        if (string.IsNullOrWhiteSpace(term) || term.Length < SearchConstants.MinimumLocalQueryLength)
         {
             Suggestions = [];
             return;
         }
 
-        var results = await _personService.SearchPersonsStartsWithAsync(term, 5);
+        var results = await _personService.SearchPersonsStartsWithAsync(term);
         Suggestions = results.Select(p => new AutocompleteSuggestion(
             p.FullName,
             p.GetDisplayIdentifier(),
