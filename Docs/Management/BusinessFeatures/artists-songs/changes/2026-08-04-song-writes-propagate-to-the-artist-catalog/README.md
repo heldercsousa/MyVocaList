@@ -177,3 +177,29 @@ model.
 the same surface for different reasons. The migration is a *write* path and is unaffected by
 READ-SCOPE's read scoping — but it must still be idempotent in effect (insert only where no
 `Catalog(ArtistId, SongId)` row exists), because `(ArtistId, SongId)` is the composite primary key.
+
+## Blocker cleared — READ-SCOPE shipped (2026-09-19)
+
+The `§ Status check` note above records this item as **not dispatchable until READ-SCOPE's Wave 4 is
+committed**, because Waves 4.2/4.3 owned `SongService.cs` and `CatalogService.cs` — the two files this
+change must modify.
+
+**That blocker is gone.** READ-SCOPE merged to develop 2026-09-19 (all 12 tasks, 634 green, BACKLOG
+`✅ Done`). Both files are free.
+
+**Two constraints it leaves behind, which still bind this work:**
+
+1. **Write the propagation code in the `sp`-resolved lambda shape.** Any repository used inside an
+   `IUnitOfWork.ExecuteAsync`/`ExecuteReadAsync` lambda must be resolved from the lambda's own `sp`
+   (`sp.GetRequiredService<ICatalogRepository>()`), never from a constructor field. This is REQ-UOW-28/37
+   and it is now **mechanically enforced**: `MyVocaList.Tests/Architecture/UnitOfWorkReadScopeTests.cs`
+   keys on constructor parameter types and will fail the build-time test suite otherwise. It also fails
+   loudly if a service calls `ExecuteReadAsync` while exposing zero governed constructor parameters, so
+   a new service cannot slip past it by using a different storage shape.
+2. **D3's gate is satisfied.** `CatalogService` already takes `IUnitOfWork` (UoW Phase 4.1), and as of
+   READ-SCOPE its `GetPagedCatalogForArtistAsync` read is scoped too. D3's premise sentence — that
+   `CatalogService` has no `IUnitOfWork` — has been stale since 2026-08-24; treat the gate as **met**.
+
+**Still true and unchanged:** the spec-writer was never completed. This folder still holds `README.md`
+only. D1–D4 remain closed and valid; the next session must write `requirements.md` / `design.md` from
+them, then spec-reviewer, then Helder's approval gate, then plan.
