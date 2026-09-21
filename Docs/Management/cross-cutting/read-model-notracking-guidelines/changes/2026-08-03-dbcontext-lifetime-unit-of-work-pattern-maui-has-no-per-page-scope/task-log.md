@@ -1922,3 +1922,47 @@ Two audits of the same question reached opposite conclusions, and the more pessi
 The difference was granularity: per-service reasoning versus per-method reasoning. **A "nothing is
 outside the pattern" claim must be verified at the call-site level**, and — in this environment —
 without trusting `grep`, which produced a false zero twice in this session.
+
+---
+
+## Phase 4.7 — DO-NOT-PROCEED verdict **LIFTED** (2026-09-19)
+
+> The "Phase 4.7 verdict: DO NOT PROCEED" recorded above is **superseded, not rewritten** — it was
+> correct when written. This note supersedes it so a future session does not halt on a stale block.
+
+The verdict's own unblocking condition was *"4.7 unblocks only when reads are scoped."* That condition
+is now met. The **READ-SCOPE** change
+(`../2026-08-24-scope-all-service-reads-through-iunitofwork/`) scoped every service read through
+`IUnitOfWork.ExecuteReadAsync` and **removed `DbLoadGate`** in its Wave 8. Merged to develop
+2026-09-19, **634 tests green**, BACKLOG row `✅ Done`.
+
+Evidence the precondition genuinely held, not merely that the tasks were ticked:
+
+- Task 7.2's **tree-wide census**: 25/25 in-scope methods have their repository call inside an
+  `ExecuteReadAsync` lambda; 46 lambda bodies scanned, zero captive-field dereferences.
+- **Two independent adversarial verifiers**, the second of which established the strongest form of the
+  claim: all 18 governed repository fields are dead **tree-wide** — unused everywhere, including as
+  bare arguments, not merely at the converted call sites — and every repository is `AddScoped`, so the
+  scoping is real rather than cosmetic.
+- BUG-078 closed with recorded fail-before / pass-after evidence.
+
+### The second rationale this verdict flagged — one limb honoured, one limb missed
+
+This entry warned that the gate's comment block carried *"a second, independent rationale that must not
+be retired with it: the `Task.Run(...)` offloads in `LoadFirstPageAsync` / `LoadMoreAsync`"*.
+
+**That limb was honoured.** Both offloads survive gate removal with their `SQLITE-WORKAROUND` rationale
+intact, independently confirmed by a verifier; `page-load-frozen` did not regress.
+
+**But the gate's comment block carried a THIRD responsibility that this verdict did not record, and
+neither did `requirements.md`** — serialising `_currentPage` so a first-page load could not reset it
+mid-`LoadMoreAsync`. It existed **only** in the code comment that was deleted. Gate removal therefore
+dropped it silently. Registered as **BUG-079** (Major, unproven) under this feature's `bugs/` folder and
+escalated to Helder rather than improvised, per `workflow.md` ("spec incomplete → clarify; do not
+improvise").
+
+> **Lesson for future gate/workaround removals:** this verdict correctly anticipated that the gate had
+> more than one job, and still under-counted by one, because the enumeration was drawn from the spec
+> while the third job lived only in a comment. **Enumerate a construct's responsibilities from its code
+> comments as well as from the spec before removing it** — and record them in `requirements.md` so the
+> next removal cannot lose them.
