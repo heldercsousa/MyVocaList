@@ -160,3 +160,32 @@ Two consequences for whoever fixes it:
 
 Direction unchanged: fix it from the harness side — temp-file SQLite connection pooling / disposal
 ordering in the shared test fixture — not by touching the tests it happens to land on.
+
+## Third and fourth datapoints (2026-09-19 / 2026-09-21) — frequency estimate
+
+Two further non-reproducing failures observed, both with the same shape and both passing on an
+immediate re-run:
+
+| Date | Test | Exception | Context |
+|------|------|-----------|---------|
+| 2026-09-19 | not captured — vanished before the name could be read | — | first full run after merging the READ-SCOPE concurrency probe; 1 failed / 626 passed of 627, then **four** consecutive clean full runs |
+| 2026-09-21 | `ArtistRepositoryTests.GetByExternalIdAsync_ExistingExternalId_ReturnsArtist` | `ObjectDisposedException` on `SQLitePCL.sqlite3` inside EF's `SaveChangesAsync` | during the search-constants change, which touches neither that test nor any repository; 633/634 then 634/634 on re-run |
+
+An earlier occurrence in the same period was reported by a separate agent against `SaveSkipTests`, also
+passing in isolation.
+
+**What this adds:** the flake is **not confined to the UoW test harness** the bug title names. It has
+now been seen in `ArtistRepositoryTests` and `SaveSkipTests` as well — i.e. it follows the **real-SQLite
+temp-file pattern** shared by the repository/integration suites, not one specific harness. Worth
+widening the title's implied scope when this is next triaged.
+
+**Rough frequency: ~1 in 5 full-suite runs** across this session's many runs. Always a disposal-ordering
+symptom (`ObjectDisposedException` on the native `sqlite3` handle), always green on re-run.
+
+> **Not fixed, and not harmless.** Every occurrence here was dismissed as a flake only after an
+> immediate clean re-run — which is the correct local call, but it means the suite currently cannot
+> distinguish this from a genuine regression without a second run. That is a real cost to every future
+> change's verification, and it will silently train people to re-run red suites.
+>
+> Likely area: a `DbContext`/connection disposed while an async EF operation is still in flight in the
+> test harness's teardown. The fix is a test-infrastructure concern, not production code.
