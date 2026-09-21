@@ -151,3 +151,74 @@ page sequence. The symmetry fix must be proven to close the interleaving, not me
 `requirements.md` must record the paging-serialisation responsibility. Its absence is the root cause:
 the role lived only in a code comment, so the gate's removal dropped it silently and no reviewer caught
 it. See the parent spec's lifted Phase 4.7 note for the same lesson.
+
+## Investigation findings + Helder's design decisions (2026-09-21)
+
+### The loading component already exists — this is EXTENDING a pattern, not introducing one
+
+`CrudListView.xaml:37-38` already wraps the `DXCollectionView` in a **`dx:ShimmerView`** bound
+`IsLoading="{Binding IsInitialLoading}"`, with six `SkeletonBone`-styled rows sized to match `ListItem`
+(`MaterialStyles.xaml:231-232`). It is shared by all four CRUD pages. Three other pages
+(`ArtistPickerPage`, `SongPickerPage`, `YouTubeSearchPage`) use the same shimmer against a plain
+`IsLoading`.
+
+Confirmed against DevExpress docs for the pinned **25.2.4** (`Directory.Packages.props:52-58`):
+`ShimmerView` is `DevExpress.Maui.Controls.ShimmerView`, with the `IsLoading` and `LoadingView`
+properties this code uses. `dx:` maps to `http://schemas.devexpress.com/maui`.
+
+> **Governance correction.** An earlier note in this session claimed the four gates of
+> `component-change-governance.md` would be required. **They are not engaged** if the work changes only
+> `CrudListViewModelBase` and leaves `CrudListView.xaml` untouched — the component, the binding and the
+> skeleton already exist. Should the implementation end up editing `CrudListView.xaml` after all, the
+> four gates apply in full and this correction is void.
+
+### The precise gap
+
+`IsInitialLoading` is set **only** by `InitializeAsync` (`CrudListViewModelBase.cs:107,110`), and only
+on the "never loaded before" branch. `LoadFirstPageAsync`, `ReloadAsync` (`:178`) and `RefreshAsync`
+(`:170-175`) all bypass it.
+
+And the asymmetry Helder predicted is exact: **`LoadFirstPageAsync` never reads or writes `_isLoading`
+at all.** The field (`:12`, `volatile`) is touched only by `LoadMoreAsync` — read `:182`, set `:188`,
+cleared `:222` in `finally`. `_currentPage` is written `:122` (first page) and `:206` (load-more, on
+success only), and read `:193`.
+
+### Decision 1 — shimmer on **every** `LoadFirstPageAsync` call
+
+Helder chose the literal reading of his ruling over the narrower options:
+
+| Path | Shimmer |
+|------|---------|
+| `InitializeAsync` (page load) | yes |
+| `ReloadAsync` (filter change) | yes |
+| search debounce (`:240`) | **yes** |
+| `RefreshAsync` (pull-to-refresh) | **yes** |
+
+Plus the `_isLoading` guard on all four paths, which is what closes this bug.
+
+> **Two consequences were shown to Helder in the option preview and accepted deliberately** — they are
+> NOT oversights, and a reviewer must not "fix" them without asking:
+> 1. the skeleton will **flash during search typing**, once per debounce;
+> 2. pull-to-refresh will show **two indicators** — the shimmer plus `DXCollectionView`'s own
+>    `IsRefreshing` spinner.
+>
+> If either reads badly on device, that is a **follow-up UX decision for Helder**, not a licence to
+> silently narrow the scope back.
+
+**Open design question for the implementor:** whether to drive the existing `IsInitialLoading` flag
+from all four paths (its name then becomes misleading — it is no longer "initial") or to introduce a
+correctly-named flag and rebind `CrudListView.xaml`. **The second option edits the governed component
+and therefore triggers the four gates.** Prefer reusing the existing flag and renaming only if the name
+becomes actively wrong; either way `CrudListViewModelBaseTests.cs:82-107` already asserts
+`IsInitialLoading` transitions and must stay green.
+
+### Decision 2 — centralise the result cap as a constant
+
+A second inconsistency surfaced in the same call chain:
+`PersonService.SearchPersonsStartsWithAsync` defaults to `maxResults = 3` (`:213`) while
+`ArtistService.SearchArtistsByNameAsync` (`:172`) and `PersonService.SearchPersonsAsync` (`:196`) use
+`5` — and `PersonFormViewModel.cs:287` passes an explicit `5`, **silently overriding the service's own
+default of 3**.
+
+Helder's ruling: add a `SearchConstants` result-cap constant (value **5**), use it at all three service
+defaults, and drop the redundant call-site override. Consistent with "no magic numbers anywhere".
