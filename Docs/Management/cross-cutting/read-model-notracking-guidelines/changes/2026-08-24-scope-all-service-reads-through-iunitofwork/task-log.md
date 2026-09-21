@@ -1336,3 +1336,46 @@ The folder stays. Full detail in the bug's own README; the short version:
   (Python walk, never `grep`), per-consumer risk table, recorded approval. Helder approved the
   *direction*; the gates themselves are not yet run, and this may **not** be bundled into a bug-fix
   commit.
+
+### Magic-number audit (Helder's "no magic numbers anywhere" ruling) — results
+
+Direct Python walk over `Services/`, `UI/ViewModels/`, `UI/Pages/` (never `grep` — R2).
+
+**Already correct (the constant is in use):** `ArtistService.cs:179`, `ArtistSuggestionService.cs:47,77`,
+`PersonService.cs:201,218` (the F3 fix), `SongSuggestionService.cs:51,69`.
+
+**NEW genuine violation found — not previously flagged:**
+
+- **`UI/ViewModels/PersonFormViewModel.cs:281`** — `if (string.IsNullOrWhiteSpace(term) || term.Length < 2)`
+  in the autocomplete handler `SearchPersonsAsync(string term)`. A bare `2` duplicating
+  `SearchConstants.MinimumLocalQueryLength` as a **pre-check**, ahead of the call at `:287` into
+  `_personService.SearchPersonsStartsWithAsync(term, 5)` — which already applies the constant internally
+  at `PersonService.cs:218`. So the threshold is expressed twice, once correctly and once as a literal:
+  exactly the divergence REQ-UOW-51 exists to prevent. **Must use the constant.**
+
+**Result-cap inconsistency in the same call chain (Helder ruled: centralise):**
+
+| Site | Current | |
+|------|---------|--|
+| `ArtistService.cs:172` | `maxResults = 5` | bare default |
+| `PersonService.cs:196` | `maxResults = 5` | bare default |
+| `PersonService.cs:213` | `maxResults = 3` | **inconsistent** |
+| `PersonFormViewModel.cs:287` | passes explicit `5` | **silently overrides the service default of 3** |
+
+Ruling: add a `SearchConstants` result-cap constant (**5**), apply at all three defaults, drop the
+call-site override.
+
+**Prior judgements re-checked and CONFIRMED (not search thresholds — correctly untouched):**
+`VenueService.cs:47` and `PersonService.cs:44,48,51` are all inside `ValidateNameInput`, gating
+name-format messages (name too short, missing last name, last name too short).
+
+> **Coordinate drift, 7th instance.** Those `PersonService` lines were recorded as `43,47,50` and are
+> now `44,48,51`. Re-derive, never trust a recorded line number in this change.
+
+**Page size: clean.** `Contracts/AppPagination.cs:9` defines `DefaultPageSize = 20` and the CRUD list
+path consumes it correctly (`CrudListViewModelBase.cs:135,200`). **No bare page-size literal** in the
+three audited directories. *Uncertain / not audited:* paging call sites under `Infra/` — flagged, not
+verified.
+
+*Uncertain:* `SongSuggestionService.cs:58` uses a named `MaxSuggestions`; whether that is centralised or
+service-local was not established. Worth folding into the result-cap work.
