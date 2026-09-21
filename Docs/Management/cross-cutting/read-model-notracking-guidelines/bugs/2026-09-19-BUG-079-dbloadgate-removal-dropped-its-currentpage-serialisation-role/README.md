@@ -222,3 +222,39 @@ default of 3**.
 
 Helder's ruling: add a `SearchConstants` result-cap constant (value **5**), use it at all three service
 defaults, and drop the redundant call-site override. Consistent with "no magic numbers anywhere".
+
+## Verified: the loading control IS DevExpress (Helder queried this — 2026-09-21)
+
+Helder doubted the existing indicator was the DX one ("perhaps some other approach was applied").
+Verified, and it is DevExpress:
+
+- `CrudListView.xaml:5` declares `xmlns:dx="http://schemas.devexpress.com/maui"`; the control at `:37`
+  is `<dx:ShimmerView IsLoading="{Binding IsInitialLoading}" WaveWidth="0.7" WaveOpacity="0.8">`.
+  A project-local control could not sit under DevExpress's own schema URI.
+- Cross-checked against DevExpress docs for the pinned **25.2.4**: `DevExpress.Maui.Controls.ShimmerView`
+  exposes exactly the `IsLoading` and `LoadingView` properties this XAML uses.
+- No project-local `ShimmerView` exists.
+- The six skeleton rows are `dx:DXBorder` (DevExpress) carrying a **project** style `SkeletonBone`
+  (`MaterialStyles.xaml:232`, 56dp to match `ListItem`). So the controls are DevExpress; the styling is
+  the project's.
+
+> **Evidence caveat, recorded honestly:** the "no local ShimmerView" limb leaned partly on a Glob,
+> which this repo's own rules distrust. It does not weaken the verdict — the xmlns mapping plus the
+> vendor docs settle it independently — but do not cite the Glob as the proof.
+
+## Separate finding — the three picker pages may not shimmer at all `[NOT ACTIONED]`
+
+| File | Binding |
+|------|---------|
+| `CrudListView.xaml:38` | `IsLoading="{Binding IsInitialLoading}"` ← drives the shimmer |
+| `ArtistPickerPage.xaml:32` | `IsVisible="{Binding IsLoading}"` |
+| `SongPickerPage.xaml:32` | `IsVisible="{Binding IsLoading}"` |
+| `YouTubeSearchPage.xaml:28` | `IsVisible="{Binding IsLoading}"` |
+
+`IsVisible` is not `IsLoading`. Those three bind the view-model's `IsLoading` to the control's
+**visibility**, never to the DX `IsLoading` property. If the DX property is never set true, the control
+renders its `Content` rather than the shimmer — so those pages plausibly show no loading animation at
+all, while appearing correctly wired at a glance.
+
+**Unverified on device, and deliberately not touched** — it is outside BUG-079's scope. Helder was
+asked whether to register it as its own bug; **no answer yet**. Do not fold it into this fix.
