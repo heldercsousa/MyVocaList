@@ -275,3 +275,19 @@ all, while appearing correctly wired at a glance.
 > leave the `IsVisible`/`IsLoading` mismatch alone rather than "tidying" it.
 >
 > This note exists so the finding is not rediscovered and re-raised as new.
+
+## On-device observations — Helder, 2026-09-23 (pre-fix baseline)
+
+Recorded before any BUG-079 code change, as the baseline the fix is judged against:
+
+1. **The shimmer appears only on cold start.** On launch, `VenuesPage` shows the DX `ShimmerView`
+   skeleton rows. Navigating to another page from the hamburger menu and back **never** shows it
+   again. This matches the ruling already recorded (shimmer on **every** `LoadFirstPageAsync` path).
+   Today the loading state is visible on the first load only.
+2. **Separate defect seen on the same screen, NOT part of BUG-079:** on cold start `VenuesPage`
+   shows **two** hamburger icons, and only the smaller one works. After navigating away and back,
+   the smaller icon is gone and the larger one works normally. Venues became Shell's initial
+   content on 2026-08-20 (Event/Queue demolition). Leading, unverified hypothesis: on the root page
+   Shell renders its own flyout icon on top of `SmallAppBar`'s navigation icon, and
+   `BackButtonBehavior IsVisible="False"` hides it only once the page is reached by navigation.
+   Not yet registered. Severity awaits Helder: Minor if the smaller icon counts as a workaround.

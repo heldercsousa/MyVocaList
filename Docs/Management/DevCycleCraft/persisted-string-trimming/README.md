@@ -1,12 +1,13 @@
 ---
 id: persisted-string-trimming
 title: **String trimming on persistence — centralized normalization analysis**
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-07-15
 section: DevCycleCraft
 goal: strings persisted to the DB should be trimmed (extension of BUG-046's query-side trimming) via one centralized Services-layer helper (search) + EF Core `ValueConverter`s (persistence).
 gate: All code merged to develop 2026-08-04 — search normalization and the persistence ValueConverters are both live. Only Helder's on-device E2E sign-off remains before this goes terminal.
 pointer: DevCycleCraft/persisted-string-trimming/
+closed: 2026-09
 order: 100
 kind: feature
 ---

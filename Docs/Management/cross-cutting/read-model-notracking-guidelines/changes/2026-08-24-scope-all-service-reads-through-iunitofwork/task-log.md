@@ -1379,3 +1379,23 @@ verified.
 
 *Uncertain:* `SongSuggestionService.cs:58` uses a named `MaxSuggestions`; whether that is centralised or
 service-local was not established. Worth folding into the result-cap work.
+
+## 2026-09-23 — Helder rulings: F3 extended to debounce, F4 closed
+
+**F3 clarified and extended.** Helder: the bare numbers he meant include the **debounce delay**.
+"The very same rule everywhere." Every autocomplete/search timing and threshold literal is
+centralised the same way `SearchConstants` centralises the query-length and result-cap values.
+Concrete evidence already in the tree: `SongFormPage.xaml`'s artist `AsyncItemsSourceProvider` has
+`RequestDelay="300"` and `CharacterCountThreshold="1"` as bare XAML literals. The `1` also
+**contradicts** `SearchConstants.MinimumLocalQueryLength` (2), the divergence REQ-UOW-51 exists to
+prevent.
+
+**This reverses a shipped decision.** READ-SCOPE D8 excluded debounce deliberately, as "UI timing
+owned by the future autocomplete feature". READ-SCOPE is shipped, so its `design.md` is not edited.
+The debounce centralisation needs its own `changes/` folder and a tree-wide census of
+`RequestDelay`/`CharacterCountThreshold`/debounce literals (delegated; orchestrator does not read
+XAML). Still outstanding from the 2026-09-21 ruling: codifying "no magic numbers in search" in a
+rules file (`amend:` + changelog, human-authored).
+
+**F4 closed: leave as is.** The 18 now-dead injected repository fields stay. Helder: "focus on
+progress". No task.
