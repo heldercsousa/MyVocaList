@@ -32,7 +32,6 @@
                                       DisplayMember="Headline"
                                       HasError="{Binding ArtistHasError}"
                                       ErrorText="{Binding ArtistErrorText}"
-                                      IsReadOnly="{Binding IsArtistLocked}"
                                       IsDropDownOpen="{Binding IsArtistDropDownOpen, Mode=TwoWay}"
                                       ClearIconVisibility="Auto"
                                       SelectionChanged="OnArtistSelectionChanged"
