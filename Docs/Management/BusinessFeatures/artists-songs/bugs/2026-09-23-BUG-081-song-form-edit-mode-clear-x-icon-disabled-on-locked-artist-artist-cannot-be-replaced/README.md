@@ -1,7 +1,7 @@
 ---
 id: BUG-081
 title: Song form edit mode — clear (X) icon disabled on locked artist, artist cannot be replaced
-status: 💡 Pending
+status: 🟡 In Progress
 severity: Major
 target: 2026-09-23
 parent: artists-songs
