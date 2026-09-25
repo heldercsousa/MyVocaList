@@ -100,6 +100,22 @@ evaluation `findings.md` and on the shared autocomplete component
 - **YouTube search: out of scope for now.** YouTubeSearchPage and the "Search YouTube (API)" row stay
   as they are. The API-key requirement is a problem that needs its own discussion before any change.
 
+## Helder's decisions — sixth round (2026-09-25)
+
+- **HARD RULE: the app never creates two artists with the same name** (under the DB collation).
+  - A typed artist that exactly matches an existing one is **reused**, with no friction (Q3 = yes).
+  - To keep two real people apart, the **user** makes the names distinct, e.g.
+    "Carlinhos Sanfoneiro - Grajaú". Their songs and catalog also tell them apart.
+  - "Metallica" typed → the single existing Metallica is picked; if none exists, it is created.
+  - A near-duplicate ("Metalica") → the recommended warning sheet.
+  - Any duplicate or validation failure → a warning, or the save is refused when it is an error.
+- **Q13: Title is read-only in edit mode for EVERY song** (Helder: simpler for the MVP). The
+  API-sourced vs manual distinction is dropped.
+- **Q14: agreed.** The Song form's Artist field searches local artists only. Rationale: a user who
+  only remembers the artist types it in Title and picks a song. Showing an artist's songs or albums
+  is a possible future feature.
+- **Q15: agreed.** Picking a local artist on the Artist form opens that artist.
+
 ## Related
 
 - The **catalog auto-update on song save** is item CATALOG-PROP, specified in another session.
