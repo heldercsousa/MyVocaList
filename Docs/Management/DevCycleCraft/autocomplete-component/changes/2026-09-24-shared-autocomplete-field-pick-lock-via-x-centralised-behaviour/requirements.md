@@ -157,6 +157,16 @@ Every agent uses these terms exactly. No synonyms.
   Given a field with `IsReadOnly = true` and text "Don't Cry",
   When the user taps, long-presses or types in it,
   Then the text stays "Don't Cry", no X is visible in any frame, 0 search calls are made, and no menu opens.
+- **REQ-ACF-12c: Supporting text under the field.**
+  WHILE `SupportingText` is non-empty and `HasError` is `false`, the system SHALL show it on the line
+  under the field (MD3 text-field *supporting text*), in every state (unlocked, locked, read-only,
+  search on or off). WHILE `HasError` is `true`, the system SHALL show `ErrorText` on that line and
+  SHALL NOT show `SupportingText` (MD3: the error message replaces the supporting text). When
+  `HasError` returns to `false`, `SupportingText` shows again. The property is generic: the component
+  gives it no meaning. First use: the song form's "Online search unavailable" note.
+  Given `SupportingText = "Online search unavailable"` and no error, Then that text is visible under
+  the field. When `HasError` becomes `true` with `ErrorText = "Title is required"`, Then only "Title is
+  required" is visible there.
 
 ### E. Shared constants (Helder rulings Q2, Q10)
 
@@ -304,7 +314,7 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
 
 | AC | Implementation location | Test |
 |----|-------------------------|------|
-| REQ-ACF-01…06, -12a, -12b | component (`design.md` § 4, § 5) | component logic tests (Level A) + T1 spike + T7 on-device |
+| REQ-ACF-01…06, -12a, -12b, -12c | component (`design.md` § 4, § 5) | component logic tests (Level A) + T1 spike + T7 on-device |
 | REQ-ACF-07/08/10 | component XAML | T7 on-device (DX rendering) |
 | REQ-ACF-11/12 | component + `PersonFormPage.xaml(.cs)` | code review checklist (T6) |
 | REQ-ACF-13/14 | `SearchConstants` + component | constants test (T2) + component logic test (T3) |
