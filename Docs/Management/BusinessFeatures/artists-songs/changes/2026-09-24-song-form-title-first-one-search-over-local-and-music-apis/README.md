@@ -39,6 +39,16 @@ Decisions captured from Helder, 2026-09-24. Spec not yet written. It waits on a 
    save-as-new-version resolution). Helder considers them hard to maintain and a candidate for removal.
    Under evaluation, recommendation per field to follow.
 
+## Helder's decisions — second round (2026-09-24)
+
+- **Title and Artist are always shown, in add AND edit mode.** Title is first and is the search
+  box (option B). The search is optional: a user adding a local band's unrecorded song just types
+  the title, types the artist (or picks an existing one), and types the lyrics.
+- **No inline "create new artist" row.** An artist typed but not picked is **created on Save**,
+  keeping the existing duplicate validation. An API pick whose artist is not local is handled the
+  same way: created on Save.
+- **Pick-lock is on for every autocomplete field** (shared component, no per-page switch).
+
 ## Related
 
 - The **catalog auto-update on song save** is item CATALOG-PROP, specified in another session.

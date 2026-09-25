@@ -308,6 +308,26 @@ non-empty after trim, ≤ 60 chars). The field component validates nothing (REQ-
   Its location (Domain `SearchConstants` vs a UI-layer constant) stays with the design's proposal
   unless Helder rules otherwise.
 
+### Helder rulings — 2026-09-24 (second round)
+
+- **Q1 RESOLVED: no "create new" row in the autocomplete at all.** The ➕ "Add … as a new artist"
+  row is removed. An artist typed but not picked is created **on Save**, keeping the existing
+  duplicate validation. This makes the BUG-070 message question moot: there is no row to point the
+  user at, and the "Search and select an artist from the list" error is removed rather than reworded.
+  **Supersedes** shipped inline-create REQ-ACREATE-02/03/10 (create-row behaviour); the
+  create-on-save rule belongs to the song-form title-first item. REQ-ACF-15, REQ-ACF-16 and the
+  create-row parts of REQ-ACF-21/22 must be rewritten or removed accordingly.
+- **Q3 RESOLVED: pick-lock ON everywhere, with no per-page switch.** Change it when a real need
+  appears. The Person form gets it too. Drop the opt-out property from the design (YAGNI).
+- **Q4 RESOLVED: location is `MyVocaList/UI/Components/`**, following its existing subfolder
+  convention (`AppBars/`, `Lists/`, `Sheets/`, `States/`, `Toolbars/`). The frozen
+  `Components/AutocompleteField/` family sits there too; the design must say what happens to it.
+- **Q5 RESOLVED: as recommended.** Decide C only after seeing the T1 spike measurements.
+- **Q6 RESOLVED: moot.** The song picker is replaced by the title-first search.
+- **Q7 RESOLVED: yes.** X focuses the field and opens the keyboard.
+- **Q8 RESOLVED: yes.** Remove the magnifier.
+- **Q9 RESOLVED: as recommended (accept),** and now largely moot, since there is no inline create.
+
 ## Traceability seed (filled at implementation)
 
 | AC | Implementation location | Test |
