@@ -48,7 +48,12 @@ dropdown menu**, and its *editable* variant lets the user type to filter. Verifi
 the Material Components Android `docs/components/Menu.md`: *"Exposed dropdown menus display the
 currently selected menu item above a list of options"*, implemented as *"an AutoCompleteTextView within
 a TextInputLayout"*; the non-editable variant disables user input. That is exactly this field: editable
-while searching, non-editable once picked. Open question Q4 asks Helder to confirm the name.
+while searching, non-editable once picked.
+**Caveats (Q4):** (a) this evidence is Material Components Android documentation, not m3.material.io,
+which CLAUDE.md names as the MD3 source. m3.material.io renders client-side and returned only its
+page title to WebFetch on 2026-09-24 (`/components/menus/guidelines`, `/components/text-fields/specs`).
+(b) `Menus/` files a component that looks like a text field under the menus category. Helder confirms
+the name and folder, or picks an alternative (e.g. `TextFields/`).
 
 ### Files (new)
 
@@ -127,11 +132,12 @@ commands.
 
 | Function | Rule | REQ |
 |----------|------|-----|
-| `bool ShouldRequestOptions(bool isLocked, bool isPickLockEnabled, IMenuOptionSource? source)` | `false` if `source is null`, or if `isPickLockEnabled && isLocked`. | ACF-04 |
-| `IReadOnlyList<AutocompleteSuggestion> BuildOptions(IReadOnlyList<AutocompleteSuggestion> matches, string query, bool isLocked, string? pickedText, bool createEnabled)` | Returns the matches in order. Appends one create-new row `new AutocompleteSuggestion(query, "", query) { IsCreateNew = true }` last iff `createEnabled && !string.IsNullOrWhiteSpace(query) && !isLocked && !string.Equals(query, pickedText, StringComparison.Ordinal)`. The input is the search's **return value** (BUG-056). | ACF-16, -21, -22 |
+| `bool EffectiveLocked(bool isLocked, bool isPickLockEnabled, string? text)` | `isPickLockEnabled && isLocked && !string.IsNullOrWhiteSpace(text)`. **Every other function and the lock mechanism use this value, never the raw `IsLocked`.** It enforces REQ-ACF-05a (locked-and-empty behaves as unlocked, so the field never becomes read-only with no X). | ACF-05a |
+| `bool ShouldRequestOptions(bool effectiveLocked, IMenuOptionSource? source)` | `false` if `source is null` or `effectiveLocked`. | ACF-04 |
+| `IReadOnlyList<AutocompleteSuggestion> BuildOptions(IReadOnlyList<AutocompleteSuggestion> matches, string query, bool effectiveLocked, string? pickedText, bool createEnabled)` | Returns the matches in order. Appends one create-new row `new AutocompleteSuggestion(query, "", query) { IsCreateNew = true }` last iff `createEnabled && (query?.Trim().Length ?? 0) >= SearchConstants.MinimumLocalQueryLength && !effectiveLocked && !string.Equals(query, pickedText, StringComparison.Ordinal)`. The **trimmed-length** gate closes the whitespace-padding hole: DX `CharacterCountThreshold` counts raw characters, so " a" would otherwise offer "a". The input is the search's **return value** (BUG-056). | ACF-13, -16, -21, -22 |
 | `PickRoute RoutePick(object? selectedItem)` | `None` if not an `AutocompleteSuggestion`; `CreateNew` if `IsCreateNew`; else `Select`. | ACF-11d |
-| `bool ShouldForwardBlur(object? selectedItem, bool isLocked, bool isPickLockEnabled)` | `selectedItem is null && !(isPickLockEnabled && isLocked)`. A locked field has nothing to validate. | ACF-11e |
-| `string? TextToRestore(AutoCompleteEditTextChangeReason reason, bool isLocked, bool isPickLockEnabled, string lockedText)` | *Only used if the spike selects mechanism C (§ 5).* Returns `lockedText` when `reason == UserInput && isLocked && isPickLockEnabled`; otherwise `null`. | ACF-01 |
+| `bool ShouldForwardBlur(object? selectedItem, bool effectiveLocked)` | `selectedItem is null && !effectiveLocked`. A locked field has nothing to validate. | ACF-11e |
+| `string? TextToRestore(AutoCompleteEditTextChangeReason reason, bool effectiveLocked, string lockedText)` | *Only used if mechanism C is accepted (§ 5).* Returns `lockedText` when `reason == UserInput && effectiveLocked`; otherwise `null`. | ACF-01 |
 
 The code-behind maps DX events to these functions and then calls `ICommand.CanExecute`/`Execute`.
 The BUG-049-style re-entry guard (`CanExecute` before `Execute` for create) is kept
@@ -154,7 +160,7 @@ The BUG-049-style re-entry guard (`CanExecute` before `Execute` for create) is k
 state. **An on-device spike is required** (tasks.md T1).
 
 ### Decision: lock mechanism (spike-gated)
-**Chosen approach (primary, B): "read-only + End-icon X".** While `IsLocked && IsPickLockEnabled`:
+**Chosen approach (primary, B): "read-only + End-icon X".** While `EffectiveLocked` (§ 4):
 `IsReadOnly = true`, `ClearIconVisibility = Never`, `EndIcon = close_outlined`
 (`Resources/Images/close_outlined.svg` exists), `IsEndIconVisible = true`,
 `EndIconColor = OnSurfaceVariant`, and `EndIconClicked` → `ClearCommand`. While unlocked:
@@ -164,22 +170,30 @@ state. **An on-device spike is required** (tasks.md T1).
 item requests to suppress, so REQ-ACF-01 holds by construction, with the fewest moving parts. The End
 icon is documented as "a custom button", and the MAUI layer has no read-only check on its click path
 (IL finding 2).
+**Known risk of B: BUG-069.** B brings `IsReadOnly = true` back. BUG-069 (the menu opening on
+edit-load and reopening after a pick) stopped reproducing after BUG-081 removed `IsReadOnly`
+(`Docs/Management/LEDGER.md`, INLINE-AC row, "Update 2026-09-24", which calls it "likely a side effect
+of dropping `IsReadOnly`"). So B passes T1 only if BUG-069 still does not reproduce under B
+(criterion B5). If it does reproduce, B fails and the decision table applies.
 
-**Fallback (C): "soft lock", used only if B fails the spike.** `IsReadOnly` stays `false`, so the
+**Secondary (C): "soft lock". Not an automatic fallback.** C is a *visible compromise*: the field
+can briefly take focus, and the soft keyboard can appear. Helder must see the T1 measurements and
+explicitly accept C under Q5 before it is built. `IsReadOnly` stays `false`, so the
 built-in clear icon is live (proven on device after BUG-081). While locked:
 (a) `TextChanged` with `Reason == UserInput` → restore `lockedText` (`TextToRestore`, documented
 `Reason` enum);
 (b) `ItemsRequested` → no request (`ShouldRequestOptions`), and `IsDropDownOpen = false`;
 (c) `Focused` → `Unfocus()` so the soft keyboard is dismissed.
-Weaknesses to measure in the spike: whether the keyboard flashes, whether a typed character is ever
-visible, and whether tapping X focuses the editor first (then (c) could swallow the tap).
+The spike measures its weaknesses against the thresholds in tasks.md T1 (C1–C5): typed characters
+visible in recorded frames, keyboard visible time, paste, long-press selection, IME composition, and
+whether tapping X focuses the editor first (in which case (c) could swallow the tap).
 
 **Spike outcome → decision table**
 
-| B passes | C passes | Build with |
+| B passes (B1–B6) | C meets C1–C5 | Build with |
 |----------|----------|------------|
 | ✅ | any | **B** |
-| ❌ | ✅ | **C** |
+| ❌ | ✅ | **Escalate (Q5)**: build **C** only if Helder accepts it, after seeing the measurements. |
 | ❌ | ❌ | **Stop and escalate to Helder (Q5).** Options to present: (i) accept C with its measured artefact; (ii) picked state rendered as a read-only DX `TextEdit` with a separate DX "Change" icon button (a second control, so REQ-ACF-07/08 wording changes); (iii) keep today's post-BUG-081 behaviour (type-over allowed, blur restores). The agent does not pick one. |
 
 **Alternatives rejected:**
@@ -214,7 +228,7 @@ as text): `trailing-icon-color = on-surface-variant`, focus/hover also `on-surfa
 `disabled-trailing-icon-opacity = 0.38`.
 The component sets `ClearIconColor` (and `EndIconColor` under B) to `{StaticResource OnSurfaceVariant}`,
 switching to `{StaticResource Error}` via a trigger on `HasError`. Both tokens exist
-(`Resources/Styles/MaterialColors.xaml:156,167`). There is precedent in `SearchBar.xaml:39-40`
+(`Resources/Styles/MaterialColors.xaml:156,167`). There is precedent in `SearchBar.xaml:36`
 (`ClearIconColor="{StaticResource OnSurfaceVariant}"`). The disabled look can only appear if the
 editor is read-only/disabled while the built-in clear icon shows, and mechanism B/C prevents that by
 construction. Removing the magnifier (§ 5.3) also removes the same-colour neighbour that made X read
@@ -274,8 +288,10 @@ Locked          --any other input--> Locked (no change)
 
 ## 7. Invariants and postconditions
 
-- **INV-1:** `IsLocked && IsPickLockEnabled` ⇒ the editor text equals the value the VM set, the menu
-  is closed, and no search call is issued.
+- **INV-1:** `EffectiveLocked` ⇒ the editor text equals the value the VM set, the menu is closed,
+  and no search call is issued.
+- **INV-1a:** the field is never read-only while its text is empty (REQ-ACF-05a, enforced by
+  `EffectiveLocked` in the component, independent of the consumer VM).
 - **INV-2:** X is visible ⇔ the text is non-empty, and X is never rendered in the disabled style
   while visible.
 - **INV-3:** After any routed pick, DX `SelectedItem == null`.
@@ -286,7 +302,7 @@ Locked          --any other input--> Locked (no change)
 
 ## 8. Shared constants
 
-### Decision: debounce constant lives in `SearchConstants`
+### Decision: debounce constant lives in `SearchConstants` (proposed, Helder confirms: Q10)
 **Chosen approach:** add `public const int AutocompleteDebounceMilliseconds = 300;` to
 `Domain/Constants/SearchConstants.cs`, with an XML doc citing this spec and REQ-DXAC-07.
 **Alternatives considered:** a UI-layer constants class (the layering is purer, but it splits
@@ -319,11 +335,11 @@ stay unregistered on purpose; a future consumer wraps them in a `MenuOptionSourc
 | **B** | `SearchConstants.AutocompleteDebounceMilliseconds == 300` (matches the existing constant-value tests, e.g. `SongSuggestionThresholdTests.cs:55`). | the existing threshold test class, or a new `SearchConstantsTests.cs` |
 | **C** | Component XAML shell, BindableProperty plumbing, page XAML swap: build + manual E2E. The no-test decision is recorded in the task-log. | — |
 | **Regression** | All existing `SongFormViewModelTests` artist tests stay green unchanged (list in requirements § G), except the REQ-ACF-15 message assertions. | full `dotnet test` |
-| **Manual E2E (device, Helder)** | T8 checklist: REQ-ACF-01…10, -13, -16, -20, -23, -25, -27. Android only. | task-log |
+| **Manual E2E (device, Helder)** | T7 checklist: REQ-ACF-01…10, -13, -16, -20, -23, -25, -27. Android only. | task-log |
 
 What cannot be tested at the VM seam: the actual read-only rendering, X enablement and colour, the
 keyboard behaviour, the submit icon's absence, DX `SelectedItem` highlight, and menu reopen timing.
-These are DX rendering concerns, covered by T1 (spike) and T8 (E2E).
+These are DX rendering concerns, covered by T1 (spike) and T7 (E2E).
 
 ## 11. Governance
 
@@ -369,11 +385,16 @@ These are DX rendering concerns, covered by T1 (spike) and T8 (E2E).
 
 ## 13. Conflicts and notes found while drafting
 
-1. **BUG-069 is not fixed.** The brief lists it as "must stay fixed", but BUG-081's README (Related,
-   2026-09-23) records that it still reproduces (menu opens on edit-load; reopens after a pick).
-   BUG-081's E2E step 7 expected it unchanged. BUG-069 and BUG-070 were never given BACKLOG
-   rows/folders (`backlog_gen.py query` shows neither). REQ-ACF-04/-25 make fixing BUG-069 part of this
-   item. Registering BUG-069 is the orchestrator's call.
+1. **BUG-069 is fixed and must stay fixed; mechanism B puts that at risk.** Helder confirmed on
+   device on 2026-09-24, after the BUG-081 merge (`2d70ac73`), that BUG-069 no longer reproduces
+   (`Docs/Management/LEDGER.md`, INLINE-AC row, "Update 2026-09-24"; likely a side effect of dropping
+   `IsReadOnly`). BUG-081's README "Related" note is the older 2026-09-23 observation. BUG-069 never
+   had a generated row, so there is nothing to close. Because B re-introduces `IsReadOnly`, T1 has
+   criterion B5 (REQ-ACF-25). BUG-070 still reproduces and is owned here (REQ-ACF-15).
+6. **Song-picker path vs "X is the only way":** `ResolveAndLockArtistAsync` (`SongFormViewModel.cs:516-538`)
+   re-locks to a different artist, or unlocks (`:537`), without X. Left open as Q6.
+7. **Locked-and-empty:** edit-mode load sets `IsArtistLocked = true` even when `song.ArtistId == 0`
+   (`SongFormViewModel.cs:469-477`). Neutralised in the component by `EffectiveLocked` (REQ-ACF-05a).
 2. **REQ-ACREATE-02/10 vs REQ-UOW-51:** "≥1 non-whitespace char" conflicts with the shared minimum of
    2 (Q2).
 3. **REQ-ACREATE-15's type-over branch vs README point 1:** superseded (requirements § Supersedes).

@@ -18,7 +18,7 @@ One reusable DX autocomplete owns all autocomplete behaviour app-wide: a picked 
 ## Origin
 
 Helder, on-device, 2026-09-24, while verifying BUG-081. All points below are his, recorded as
-requirements input for the spec. **Status: spec not yet written.**
+requirements input for the spec. **Status: spec drafted (`requirements.md`, `design.md`, `tasks.md`), in review.**
 
 ## Behaviour Helder requires (app-wide default for every autocomplete field)
 
