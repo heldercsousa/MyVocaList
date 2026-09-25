@@ -78,6 +78,21 @@ Decisions captured from Helder, 2026-09-24. Spec not yet written. It waits on a 
    - the merge sheet writes with every field unchecked (removed along with the merge sheet);
    - edit-save uniqueness ignores Version.
 
+## Helder's decisions — fourth round (2026-09-24)
+
+- **Picker pages removed entirely.** Helder: none of them ever worked as expected (consistent with
+  findings § 1, the provider DI bug). Third-party search happens only through the autocomplete fields.
+  - Remove SongFormPage's "Search music database" row + SongPickerPage.
+  - Remove the equivalent link on **ArtistFormPage** + ArtistPickerPage.
+  - YouTubeSearchPage is not covered by this ruling; it is open.
+- **Artist form:** by the same reasoning its name field should be the shared autocomplete (local
+  + Deezer artists). Scope to be confirmed by Helder.
+- **Typo tolerance: Deezer primary + local FTS5 trigram retrieval + FuzzySharp ranking (option a).**
+  Needs a documented exception to the no-C#-normalisation HARD RULE, limited to ranking a bounded
+  list the DB already retrieved (never filtering or dedup).
+- The 1-minute picker check (ask A) is withdrawn: the picker is being deleted, and the DI bug is
+  a prerequisite of this item regardless.
+
 ## Related
 
 - The **catalog auto-update on song save** is item CATALOG-PROP, specified in another session.
