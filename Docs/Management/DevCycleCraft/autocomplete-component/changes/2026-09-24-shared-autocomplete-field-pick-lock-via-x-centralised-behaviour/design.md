@@ -1,76 +1,90 @@
 # Design: shared exposed dropdown menu field (pick-lock via X, centralised behaviour)
 
-> **Status: DRAFT for Helder's review (2026-09-24).** Requirements: `requirements.md` (REQ-ACF-*).
-> Every current-behaviour claim below cites `file:line` on `develop` as of 2e8a8d63.
-> DevExpress version pinned from `Directory.Packages.props`: **DevExpress.Maui.Editors 25.2.4**
-> (the `.csproj` uses central package management). MAUI Controls 10.0.41.
+> **Status: DRAFT, revised 2026-09-24 after Helder's rulings** (requirements § Helder rulings).
+> Requirements: `requirements.md` (REQ-ACF-*). Every current-behaviour claim cites `file:line` on
+> `develop`. DevExpress version pinned from `Directory.Packages.props`:
+> **DevExpress.Maui.Editors 25.2.4** (central package management). MAUI Controls 10.0.41.
+> **Scope:** the component + the `PersonFormPage` migration. `SongFormPage` is built on the component
+> by the song-form title-first item, not here.
 
 ## 1. Architecture
 
 Affected layers: **UI only**, plus one new constant in Domain. Services are unchanged.
 
 ```
-SongFormPage.xaml ── <menus:ExposedDropdownMenu …bindings only…/>
-                             │  (owns: items-request glue, create-new row, pick routing,
-                             │   blur/clear forwarding, SelectedItem reset, menu-open,
-                             │   debounce + threshold, lock mechanism, icon styling)
-                             ▼
-                     dxe:AutoCompleteEdit (DX 25.2.4, hosted inside the component)
-                             │
-SongFormViewModel ◄──────────┘  commands + properties (unchanged members, plus ArtistOptionSource)
+PersonFormPage.xaml ── <textfields:ExposedDropdownMenu …bindings only…/>
+                              │  owns: items-request glue, pick routing, pick-lock + X,
+                              │  blur forwarding, SelectedItem reset, menu-open, debounce +
+                              │  threshold, search on/off, option template, icon styling
+                              ▼
+                      dxe:AutoCompleteEdit (DX 25.2.4, hosted inside the component)
+                              │
+PersonFormViewModel ◄─────────┘  commands + properties (existing) + NameOptionSource (new)
         │
-IArtistService.SearchArtistsByNameAsync / CreateArtistAsync   (unchanged)
+IPersonService.SearchPersonsStartsWithAsync   (unchanged)
 ```
 
-- **Business logic stays in the ViewModel/Service.** The component forwards to commands only
-  (REQ-ACF-12). The lock flag is consumer-owned (`SongFormViewModel.IsArtistLocked`, `:52`) and bound
-  into the component OneWay.
-- **Pure decision logic is extracted** into a static, UI-free class so it is unit-testable at
-  Level A without a DX handler. The code-behind only adapts DX events to it.
+- **Business logic stays in the ViewModel/Service** (REQ-ACF-12). The component forwards to commands.
+- **Pick-lock is component-owned** and always on (Helder ruling Q3). `IsLocked` is a TwoWay
+  BindableProperty: the component sets it `true` on a pick and `false` on X. A consumer may bind it,
+  to read it or to set it programmatically (hydration), or leave it unbound (the Person form).
+- **No create concept** (Helder ruling Q1). Unpicked text is the consumer's business on Save.
+- **Pure decision logic** lives in a static, UI-free class, unit-testable at Level A. The
+  code-behind only adapts DX events to it.
 
 ## 2. Component name, location and files
 
-### Decision: component name `ExposedDropdownMenu`
-**Chosen approach:** `ExposedDropdownMenu`, under a new MD3-category folder
-`MyVocaList/UI/Components/Menus/`.
+### Decision: `UI/Components/TextFields/ExposedDropdownMenu`
+**Chosen approach:** a new subfolder `MyVocaList/UI/Components/TextFields/`, following the MD3
+component-category convention of its siblings (`AppBars/`, `Lists/`, `Sheets/`, `States/`,
+`Toolbars/`); component name `ExposedDropdownMenu`.
 **Alternatives considered:**
-- `AutocompleteField`: rejected. The name is taken by the frozen family
-  (`UI/Components/AutocompleteField/`, `README-FROZEN.md`), which is still listed in
-  `component-safety-gate.md`'s governed table. Reusing it would make the governance list and grep
-  census ambiguous. "Autocomplete" is also not an MD3 component name.
-- `FormAutocompleteField` (the name floated in the DX-AC design § Wrapper promotion trigger): rejected
-  because it is not MD3 terminology (CLAUDE.md § Constitutional Constraints, "MD3 terminology").
-- `SearchBar`-derived: rejected. The MD3 search bar is a top-level search surface, not a form field.
-**Reversibility:** Easily reversible (a rename while there is one consumer).
-**Rationale:** MD3 has no "autocomplete" component. The Material pattern for "a text field with a
-menu of options under it, where the text field shows the current selection" is the **exposed
-dropdown menu**, and its *editable* variant lets the user type to filter. Verified 2026-09-24 against
-the Material Components Android `docs/components/Menu.md`: *"Exposed dropdown menus display the
-currently selected menu item above a list of options"*, implemented as *"an AutoCompleteTextView within
-a TextInputLayout"*; the non-editable variant disables user input. That is exactly this field: editable
-while searching, non-editable once picked.
-**Caveats (Q4):** (a) this evidence is Material Components Android documentation, not m3.material.io,
-which CLAUDE.md names as the MD3 source. m3.material.io renders client-side and returned only its
-page title to WebFetch on 2026-09-24 (`/components/menus/guidelines`, `/components/text-fields/specs`).
-(b) `Menus/` files a component that looks like a text field under the menus category. Helder confirms
-the name and folder, or picks an alternative (e.g. `TextFields/`).
+- `Menus/`: rejected in review. It files what looks and behaves like a text field under menus.
+  MD3's category for the input surface is *Text fields*, and the exposed dropdown menu is a text
+  field with an attached menu.
+- `AutocompleteField` (name or folder): rejected. It is taken by the frozen family (§ 2.1), which is
+  still listed in `component-safety-gate.md`'s governed table, and "autocomplete" is not an MD3
+  component name.
+- `FormAutocompleteField` (floated in the DX-AC design): not MD3 terminology.
+**Reversibility:** Easily reversible while there is one consumer.
+**Rationale:** MD3 has no "autocomplete" component. The Material pattern for a text field that
+shows the current selection above a menu of options is the **exposed dropdown menu**, whose
+*editable* variant lets the user type to filter (Material Components Android `docs/components/Menu.md`,
+fetched 2026-09-24; m3.material.io renders client-side and could not be read as text). Q4 ruled the
+location; the name has not been separately re-ruled (requirements § Open items).
+
+### 2.1 The frozen `UI/Components/AutocompleteField/` family
+
+**Evidence that it is dead code (2026-09-24):**
+- It is excluded from compilation: `MyVocaList.csproj:172-173` (`<Compile Remove>` / `<MauiXaml Remove>`
+  on `UI\Components\AutocompleteField\**`). Its 6 tests are excluded too: `MyVocaList.Tests.csproj:38-39`.
+- 0 live code references: the census (§ 12) finds only a doc comment, `Contracts/Models/AutocompleteSuggestion.cs:4`.
+- It is not in `MyVocaList.sln` (0 occurrences) and not DI-registered.
+- `README-FROZEN.md` says it is kept only "as reference material for the future full-screen
+  autocomplete guideline ①" (decision D-AC1, REQ-DXAC-11). Git history keeps that reference after deletion.
+- It sits beside the new component's folder and is still in the governed-component table, so it
+  confuses the consumer map and grep census.
+
+**Recommendation:** delete it in a **separate follow-up task** (not bundled here; `tasks.md`
+§ Follow-ups): the 9 files in the folder, the 6 excluded test files, the three `Remove` lines, the
+`AutocompleteField` row in `component-safety-gate.md`'s governed table, and the stale doc comment.
+Deleting it reverses REQ-DXAC-11, so the task needs Helder's approval. Until then the folder stays
+untouched, and this item adds nothing to it.
 
 ### Files (new)
 
 | File | Role |
 |------|------|
-| `MyVocaList/UI/Components/Menus/ExposedDropdownMenu.xaml` | `ContentView` hosting one `dxe:AutoCompleteEdit` + the option `ItemTemplate` (moved from `SongFormPage.xaml:45-78`). |
-| `MyVocaList/UI/Components/Menus/ExposedDropdownMenu.xaml.cs` | BindableProperties, DX event adapters. Thin: every decision calls `ExposedDropdownMenuLogic`. |
-| `MyVocaList/UI/Components/Menus/ExposedDropdownMenuLogic.cs` | `internal static` pure functions (§ 4). No MAUI/DX types in signatures except `AutocompleteSuggestion`. |
-| `MyVocaList/UI/Models/IMenuOptionSource.cs` | Consumer search contract (§ 3.2) + `MenuOptionSource` delegate adapter. |
+| `MyVocaList/UI/Components/TextFields/ExposedDropdownMenu.xaml` | `ContentView` hosting one `dxe:AutoCompleteEdit` + the option `ItemTemplate` (Headline + optional SupportingText, as in `PersonFormPage.xaml:32-42`). |
+| `MyVocaList/UI/Components/TextFields/ExposedDropdownMenu.xaml.cs` | BindableProperties, DX event adapters. Thin: every decision calls `ExposedDropdownMenuLogic`. |
+| `MyVocaList/UI/Components/TextFields/ExposedDropdownMenuLogic.cs` | `internal static` pure functions (§ 4). |
+| `MyVocaList/UI/Models/IMenuOptionSource.cs` | Consumer search contract + `MenuOptionSource` delegate adapter (§ 3.2). |
 | `MyVocaList.Tests/Unit/Components/ExposedDropdownMenuLogicTests.cs` | Level A tests. |
 
-Existing conventions followed: BindableProperty pattern with `…Property` statics and CLR wrappers,
-bound in XAML via `Source={x:Reference self}` (`UI/Components/AppBars/SearchBar.xaml.cs:17-35`,
-`SearchBar.xaml:22-42`). The MD3 category folder mirrors `AppBars/`, `Lists/`, `Sheets/`, `States/`,
-`Toolbars/`. The test project already references the MAUI head for component tests
-(`MyVocaList.Tests/MyVocaList.Tests.csproj:33-34`). New files in `Unit/Components/` are compiled,
-because only six named frozen tests are removed (`:38-39`).
+Conventions followed: the BindableProperty pattern with `…Property` statics and CLR wrappers, bound
+via `Source={x:Reference self}` (`UI/Components/AppBars/SearchBar.xaml.cs:17-35`, `SearchBar.xaml:22-42`).
+The test project references the MAUI head (`MyVocaList.Tests.csproj:33-34`), and new files in
+`Unit/Components/` compile (only six named frozen tests are removed, `:38-39`).
 
 ## 3. Interfaces
 
@@ -78,23 +92,25 @@ because only six named frozen tests are removed (`:38-39`).
 
 | Property | Type | Mode | Default | Purpose / REQ |
 |----------|------|------|---------|---------------|
-| `LabelText` | `string` | OneWay | `""` | Floating label ("Artist"). |
-| `PlaceholderText` | `string` | OneWay | `""` | "Search artists..." (REQ-ACF-06). |
-| `Text` | `string` | **TwoWay** | `""` | The editor text (→ `ArtistSearchText`). |
-| `IsLocked` | `bool` | OneWay | `false` | Picked state, consumer-owned (→ `IsArtistLocked`). Drives the lock mechanism (§ 5) and REQ-ACF-04. |
-| `IsPickLockEnabled` | `bool` | OneWay | `true` | App-wide default ON (README point 1). A consumer whose pick does not keep a value (e.g. `PersonFormPage` dedup navigation) may set `false`. Q3. |
-| `HasError` / `ErrorText` | `bool` / `string` | OneWay | `false` / `""` | Passed to DX `HasError`/`ErrorText` (REQ-DXAC-05 kept). |
-| `IsDropDownOpen` | `bool` | **TwoWay** | `false` | → `IsArtistDropDownOpen` (BUG-065/066 lever, `SongFormViewModel.cs:56-61`). The component also forces `false` while locked (REQ-ACF-04). |
-| `OptionSource` | `IMenuOptionSource` | OneWay | `null` | Search delegate. `null` means no options are requested. |
-| `SelectCommand` | `ICommand` (param `AutocompleteSuggestion`) | OneWay | `null` | Real-option pick (→ `SelectArtistCommand`). |
-| `CreateNewCommand` | `ICommand` (param `string` raw text) | OneWay | `null` | **Opt-in**: when non-null, the create-new row is appended (REQ-ACF-11b) (→ `CreateArtistInlineCommand`). |
-| `CreateNewNoun` | `string` | OneWay | `"item"` | Renders `Add "«text»" as a new «noun»` ("artist"). |
-| `ClearCommand` | `ICommand` | OneWay | `null` | X (→ `ClearArtistCommand`, source-generated from `[RelayCommand] ClearArtist`, `SongFormViewModel.cs:398-399`). |
-| `BlurWithoutPickCommand` | `ICommand` | OneWay | `null` | Blur while unlocked with no routed pick (→ `ArtistBlurredWithoutSelectionCommand`). |
+| `LabelText` / `PlaceholderText` | `string` | OneWay | `""` | Label and placeholder. |
+| `Text` | `string` | **TwoWay** | `""` | Editor text (Person: `PersonName`). |
+| `IsLocked` | `bool` | **TwoWay** | `false` | Picked state. Set `true` by the component on a pick and `false` on X; a consumer may also set it (REQ-ACF-01/02/06). Always honoured, with no opt-out (Q3). |
+| `IsSearchEnabled` | `bool` | OneWay | `true` | Page switch: `false` → no option requests, no menu; the rest of the field is unchanged (REQ-ACF-12a). |
+| `HasError` / `ErrorText` | `bool` / `string` | OneWay | `false` / `""` | Passed to DX `HasError`/`ErrorText`. |
+| `IsDropDownOpen` | `bool` | **TwoWay** | `false` | The BUG-065/066 lever. Forced `false` while effectively locked or when search is off (REQ-ACF-04, -12a). |
+| `OptionSource` | `IMenuOptionSource` | OneWay | `null` | The search. `null` → no requests. |
+| `SelectCommand` | `ICommand` (param `AutocompleteSuggestion`) | OneWay | `null` | Pick routing (Person: `SuggestionSelectedCommand`). |
+| `ClearCommand` | `ICommand` | OneWay | `null` | Optional; run after X empties and unlocks (REQ-ACF-06/09). |
+| `BlurWithoutPickCommand` | `ICommand` | OneWay | `null` | Blur while unlocked, with no routed pick (Person: `ValidateNameCommand`). |
+
+Public method: `bool FocusEditor()` focuses the inner editor, which shows the keyboard on Android
+(DX `EditBase.Focus()`). It replaces `nameField.Focus()` at `PersonFormPage.xaml.cs:30` (REQ-ACF-18)
+and is also used internally after X (REQ-ACF-06).
+
+Removed by the rulings: `IsPickLockEnabled` (Q3), `CreateNewCommand`, `CreateNewNoun` (Q1).
 
 Constants are not properties. The component reads `SearchConstants.MinimumLocalQueryLength` and
-`SearchConstants.AutocompleteDebounceMilliseconds` via `x:Static` (REQ-ACF-13/14). A future
-remote-search consumer would add a `QueryTier` property then (YAGNI now).
+`SearchConstants.AutocompleteDebounceMilliseconds` via `x:Static`.
 
 ### 3.2 Consumer ViewModel contract
 
@@ -113,35 +129,35 @@ public sealed class MenuOptionSource(Func<string, CancellationToken, Task<IReadO
 }
 ```
 
-Why a per-field source object and not an interface on the ViewModel: one ViewModel can host several
-fields (the queue-entry form will have Venue, Artist and Singer), so the contract must be per field.
-The other members are plain bindings, because they are already field-prefixed properties and
-commands.
+The contract is a per-field object, not an interface on the ViewModel, because one ViewModel can host
+several fields (the Song form will have Title and Artist). The other members are plain bindings.
 
-`SongFormViewModel` must expose (✅ = exists today, unchanged):
+**`PersonFormViewModel` changes (first consumer):**
 
 | Member | Status |
 |--------|--------|
-| `ArtistSearchText`, `IsArtistLocked`, `ArtistHasError`, `ArtistErrorText`, `IsArtistDropDownOpen` | ✅ `:49-61` |
-| `SelectArtistCommand`, `CreateArtistInlineCommand`, `ArtistBlurredWithoutSelectionCommand` | ✅ `:164-169` |
-| `ClearArtistCommand` | ✅ generated from `:398-399` |
-| `ArtistOptionSource` (`IMenuOptionSource`) | **new**: `new MenuOptionSource((q, ct) => SearchArtistsCoreAsync(q))`, created in the ctor. `SearchArtistsCoreAsync` (`:298-315`) is unchanged. The token is honoured by the component after the await (current behaviour, `SongFormPage.xaml.cs:60`). |
-| Blur/Save message copy | **changes** per REQ-ACF-15 once Q1 is answered (`:378`, `:570`). |
+| `PersonName`, `NameHasError`, `NameErrorText`, `SuggestionSelectedCommand`, `ValidateNameCommand` | ✅ existing, unchanged |
+| `SearchPersonsCoreAsync(string term)` → `IReadOnlyList<AutocompleteSuggestion>` | **new**: the body of today's `SearchPersonsAsync` (`PersonFormViewModel.cs:280-293`), returning the mapped list (empty below the threshold). `SearchPersonsAsync` becomes `Suggestions = await SearchPersonsCoreAsync(term)`, so `SearchPersonsCommand` and its tests are unchanged. |
+| `NameOptionSource` (`IMenuOptionSource`) | **new**: `new MenuOptionSource((q, ct) => SearchPersonsCoreAsync(q))` (REQ-ACF-16). |
+
+**Handed over to the song-form title-first item:** `SongFormViewModel.ArtistOptionSource`, a Title
+option source, the artist/title lock hydration, and deleting the Song glue
+(`SongFormPage.xaml.cs:38,41-113`). This item does not touch `SongFormPage` or `SongFormViewModel`.
 
 ## 4. Pure logic (`ExposedDropdownMenuLogic`), Level A testable
 
 | Function | Rule | REQ |
 |----------|------|-----|
-| `bool EffectiveLocked(bool isLocked, bool isPickLockEnabled, string? text)` | `isPickLockEnabled && isLocked && !string.IsNullOrWhiteSpace(text)`. **Every other function and the lock mechanism use this value, never the raw `IsLocked`.** It enforces REQ-ACF-05a (locked-and-empty behaves as unlocked, so the field never becomes read-only with no X). | ACF-05a |
-| `bool ShouldRequestOptions(bool effectiveLocked, IMenuOptionSource? source)` | `false` if `source is null` or `effectiveLocked`. | ACF-04 |
-| `IReadOnlyList<AutocompleteSuggestion> BuildOptions(IReadOnlyList<AutocompleteSuggestion> matches, string query, bool effectiveLocked, string? pickedText, bool createEnabled)` | Returns the matches in order. Appends one create-new row `new AutocompleteSuggestion(query, "", query) { IsCreateNew = true }` last iff `createEnabled && (query?.Trim().Length ?? 0) >= SearchConstants.MinimumLocalQueryLength && !effectiveLocked && !string.Equals(query, pickedText, StringComparison.Ordinal)`. The **trimmed-length** gate closes the whitespace-padding hole: DX `CharacterCountThreshold` counts raw characters, so " a" would otherwise offer "a". The input is the search's **return value** (BUG-056). | ACF-13, -16, -21, -22 |
-| `PickRoute RoutePick(object? selectedItem)` | `None` if not an `AutocompleteSuggestion`; `CreateNew` if `IsCreateNew`; else `Select`. | ACF-11d |
-| `bool ShouldForwardBlur(object? selectedItem, bool effectiveLocked)` | `selectedItem is null && !effectiveLocked`. A locked field has nothing to validate. | ACF-11e |
-| `string? TextToRestore(AutoCompleteEditTextChangeReason reason, bool effectiveLocked, string lockedText)` | *Only used if mechanism C is accepted (§ 5).* Returns `lockedText` when `reason == UserInput && effectiveLocked`; otherwise `null`. | ACF-01 |
+| `bool EffectiveLocked(bool isLocked, string? text)` | `isLocked && !string.IsNullOrWhiteSpace(text)`. Every other rule and the lock mechanism use this, never the raw `IsLocked`. | ACF-05a |
+| `bool ShouldRequestOptions(bool effectiveLocked, bool isSearchEnabled, IMenuOptionSource? source, string? query)` | `source != null && isSearchEnabled && !effectiveLocked && (query?.Trim().Length ?? 0) >= SearchConstants.MinimumLocalQueryLength`. The trimmed-length check is needed because DX `CharacterCountThreshold` counts raw characters (" a" would pass it). | ACF-04, -12a, -13 |
+| `PickRoute RoutePick(object? selectedItem)` | `Select` if `selectedItem is AutocompleteSuggestion`; else `None`. | ACF-11b |
+| `bool LockAfterPick(PickRoute route)` | `route == Select`. There is no opt-out (Q3). | ACF-01 |
+| `bool ShouldForwardBlur(object? selectedItem, bool effectiveLocked)` | `selectedItem is null && !effectiveLocked`. | ACF-11c, -17 |
+| `string? TextToRestore(AutoCompleteEditTextChangeReason reason, bool effectiveLocked, string lockedText)` | *Only if mechanism C is accepted (§ 5).* `lockedText` when `reason == UserInput && effectiveLocked`; else `null`. | ACF-01 |
 
-The code-behind maps DX events to these functions and then calls `ICommand.CanExecute`/`Execute`.
-The BUG-049-style re-entry guard (`CanExecute` before `Execute` for create) is kept
-(`SongFormPage.xaml.cs:88-89`).
+The code-behind maps DX events to these and calls `ICommand.CanExecute`/`Execute`. The options
+passed to DX are exactly the `IMenuOptionSource.SearchAsync` result, after
+`ct.ThrowIfCancellationRequested()` (BUG-056, REQ-ACF-22/26).
 
 ## 5. Lock mechanism (the crux)
 
@@ -163,9 +179,9 @@ state. **An on-device spike is required** (tasks.md T1).
 **Chosen approach (primary, B): "read-only + End-icon X".** While `EffectiveLocked` (§ 4):
 `IsReadOnly = true`, `ClearIconVisibility = Never`, `EndIcon = close_outlined`
 (`Resources/Images/close_outlined.svg` exists), `IsEndIconVisible = true`,
-`EndIconColor = OnSurfaceVariant`, and `EndIconClicked` → `ClearCommand`. While unlocked:
+`EndIconColor = OnSurfaceVariant`, and `EndIconClicked` → the X handling in § 6. While unlocked:
 `IsReadOnly = false`, `IsEndIconVisible = false`, and the built-in clear icon is used
-(`ClearIconVisibility = Auto`, `ClearIconColor` per REQ-ACF-08).
+(`ClearIconVisibility = Auto`, `ClearIconColor` per REQ-ACF-08; `ClearIconClicked` → the unlocked-X handling in § 6).
 **Why primary:** it is true read-only. There is no keyboard, no cursor, no text-change events and no
 item requests to suppress, so REQ-ACF-01 holds by construction, with the fewest moving parts. The End
 icon is documented as "a custom button", and the MAUI layer has no read-only check on its click path
@@ -237,72 +253,70 @@ as inert.
 ### 5.3 Submit (magnifier) icon (REQ-ACF-10)
 
 It is a DX default (`SubmitIconVisibility` defaults to `Auto`, IL finding 4). It is not in the project
-XAML (`SongFormPage.xaml:28-44`) or in the implicit style (`MaterialStyles.xaml:74-80`). The component
+XAML (`SongFormPage.xaml:28-44`, `PersonFormPage.xaml:19-31`) or in the implicit style (`MaterialStyles.xaml:74-80`). The component
 sets `SubmitIconVisibility="Never"`. Nothing in the app handles `Submitted`/`SubmitCommand` (census:
 0 hits), so no behaviour is lost.
+
+
 
 ## 6. Interaction flows
 
 ```
-UNLOCKED, typing:
+UNLOCKED, search enabled, typing:
   keystroke ─► DX debounce (AutocompleteDebounceMilliseconds) ─► ItemsRequested
-     ─► ShouldRequestOptions? no ─► (nothing; menu stays closed)
-                             yes ─► OptionSource.SearchAsync(text, ct) ─► ct check
-                                  ─► BuildOptions(matches, text, …) ─► menu shows options [+ create-new]
-  < MinimumLocalQueryLength chars ─► DX requests nothing (CharacterCountThreshold)
+     ─► ShouldRequestOptions? no ─► nothing; menu stays closed
+                              yes ─► OptionSource.SearchAsync(text, ct) ─► ct check ─► menu shows options
 
-PICK (option or create-new):
-  SelectionChanged ─► RoutePick ─► Select: SelectCommand(option)  |  CreateNew: CreateNewCommand(text) (CanExecute guard)
-     ─► SelectedItem = null (BUG-061)
-     ─► VM LockArtist (SongFormViewModel.cs:328-338): text = name, IsArtistDropDownOpen = false, IsArtistLocked = true
-     ─► component sees IsLocked=true ─► applies lock mechanism (B or C), forces IsDropDownOpen=false,
-        SelectedItem = null again
+SEARCH DISABLED (IsSearchEnabled=false):
+  keystroke ─► ItemsRequested ─► ShouldRequestOptions = false ─► nothing; IsDropDownOpen=false
+
+PICK:
+  SelectionChanged ─► RoutePick = Select ─► IsLocked = true (TwoWay → consumer, if bound)
+     ─► SelectCommand(option) ─► SelectedItem = null (BUG-061) ─► IsDropDownOpen = false
+     ─► lock mechanism applied (B or C)
+  (Person: SuggestionSelectedCommand navigates away with a replacing route; the new page starts unlocked.)
 
 LOCKED:
-  tap on text      ─► B: nothing (read-only)  |  C: Unfocus; any UserInput change reverted
+  tap text / long-press / keys / paste ─► B: nothing (read-only)  |  C: reverted, Unfocus
   blur             ─► ShouldForwardBlur = false ─► nothing
   ItemsRequested   ─► ShouldRequestOptions = false ─► nothing (REQ-ACF-04 / BUG-069)
-  tap X            ─► ClearCommand ─► VM ClearArtist (:399-409) ─► IsLocked=false
-                   ─► component removes lock, then Focus() (REQ-ACF-06; DX Focus() shows the keyboard
-                      when not read-only, EditBase.Focus IL)
+  tap X            ─► Text = "" ─► IsLocked = false ─► ClearCommand (if bound) ─► FocusEditor()
 
-EDIT-MODE LOAD:
-  VM LoadSong/InitializeArtistField set text + IsArtistLocked=true + IsArtistDropDownOpen=false
-  (:415-425, :469-477) ─► programmatic text: DX fires no ItemsRequested (BUG-065/066 IL evidence)
-  ─► component in locked state from first bind; SelectedItem = null on IsLocked→true
-     (replaces SongFormPage.xaml.cs:38)
+UNLOCKED, tap X (text non-empty):
+  DX clears Text (built-in clear icon) ─► ClearCommand (if bound) ─► focus stays
+
+PROGRAMMATIC LOCK (consumer sets Text + IsLocked=true, e.g. hydration):
+  DX fires no ItemsRequested for programmatic text (BUG-065/066 IL evidence)
+  ─► component applies the lock (if text non-empty) ─► SelectedItem = null, IsDropDownOpen = false
 ```
 
-State machine (field, from the component's view):
+State machine (component view; `EL` = `EffectiveLocked`):
 
 ```
-Unlocked-Empty  --type (≥ min chars)--> Unlocked-Searching
-Unlocked-Searching --pick option / create succeeds--> Locked
-Unlocked-Searching --blur--> Unlocked-Text (+ error per REQ-ACF-15)
-Unlocked-Text   --type--> Unlocked-Searching
-Unlocked-*      --X (text non-empty)--> Unlocked-Empty (focused)
-Locked          --X--> Unlocked-Empty (focused)
-Locked          --any other input--> Locked (no change)
-(any)           --VM sets IsLocked=true (hydration/picker)--> Locked
+Unlocked-Empty     --type (trimmed ≥ 2, search on)--> Unlocked-Searching
+Unlocked-Searching --pick--> Locked
+Unlocked-*         --blur (no pick)--> Unlocked-Text (BlurWithoutPickCommand)
+Unlocked-*         --X--> Unlocked-Empty (focus kept)
+Locked             --X--> Unlocked-Empty (focused, keyboard up)
+Locked             --any other user input--> Locked (no change)
+(any, text ≠ "")   --consumer sets IsLocked=true--> Locked
+Locked             --consumer empties Text--> Unlocked-Empty (EL false: REQ-ACF-05a)
 ```
 
 ## 7. Invariants and postconditions
 
-- **INV-1:** `EffectiveLocked` ⇒ the editor text equals the value the VM set, the menu is closed,
+- **INV-1:** `EffectiveLocked` ⇒ the editor text is unchanged by user input, the menu is closed,
   and no search call is issued.
-- **INV-1a:** the field is never read-only while its text is empty (REQ-ACF-05a, enforced by
-  `EffectiveLocked` in the component, independent of the consumer VM).
-- **INV-2:** X is visible ⇔ the text is non-empty, and X is never rendered in the disabled style
-  while visible.
-- **INV-3:** After any routed pick, DX `SelectedItem == null`.
-- **INV-4:** No page code-behind references DX autocomplete events for a field hosted by this
-  component.
-- **Post (X):** VM selection is cleared (REQ-ACREATE-15 semantics), the field is unlocked, empty and
-  focused.
+- **INV-1a:** the field is never read-only while its text is empty (REQ-ACF-05a).
+- **INV-2:** X is visible ⇔ the text is non-empty, and X is never rendered disabled while visible.
+- **INV-3:** after any routed pick, DX `SelectedItem == null`.
+- **INV-4:** `IsSearchEnabled == false` ⇒ 0 search calls and the menu closed.
+- **INV-5:** no consumer page code-behind handles DX autocomplete events for a field hosted by the component.
+- **Post (X on locked):** text empty, `IsLocked == false`, consumer clear command run, editor focused.
 
 ## 8. Shared constants
 
-### Decision: debounce constant lives in `SearchConstants` (proposed, Helder confirms: Q10)
+### Decision: debounce constant lives in `SearchConstants` (300 ms shared: ruled; location: proposed, Q10)
 **Chosen approach:** add `public const int AutocompleteDebounceMilliseconds = 300;` to
 `Domain/Constants/SearchConstants.cs`, with an XML doc citing this spec and REQ-DXAC-07.
 **Alternatives considered:** a UI-layer constants class (the layering is purer, but it splits
@@ -315,43 +329,49 @@ with the list search).
 keeps today's shipped value (`SongFormPage.xaml:41`, `PersonFormPage.xaml:28`), so there is no
 behaviour change.
 
-Threshold: the component uses `SearchConstants.MinimumLocalQueryLength` (2). This changes the Song
-Artist field from `1` (`SongFormPage.xaml:42`). `PersonFormPage.xaml:29` already uses `2` but as a
-literal; that is fixed when it migrates.
+Threshold: the component uses `SearchConstants.MinimumLocalQueryLength` (2), measured on trimmed text
+(Helder ruling Q2). `PersonFormPage.xaml:29` already uses `2`, but as a literal; this item replaces it.
+The Song form's divergent `CharacterCountThreshold="1"` (`SongFormPage.xaml:42`) disappears when the
+song-form item rebuilds that page on the component.
+
 
 ## 9. DI / registration impact
 
-None. The component is instantiated from XAML and is not DI-registered. `MauiProgram.cs` is not
-touched (a sequential-only file, spared). `MenuOptionSource` is created by the ViewModel. The two
-suggestion services (`Services/ArtistSuggestionService.cs`, `Services/SongSuggestionService.cs`)
-stay unregistered on purpose; a future consumer wraps them in a `MenuOptionSource`.
+None. The component is instantiated from XAML and is not DI-registered; `MauiProgram.cs` is not
+touched. `MenuOptionSource` is created by the ViewModel. The two suggestion services
+(`Services/ArtistSuggestionService.cs`, `Services/SongSuggestionService.cs`) stay unregistered on
+purpose; the song-form item may wrap them in a `MenuOptionSource`.
 
 ## 10. Test strategy (testing.md risk tiers)
 
 | Level | What | Where |
 |-------|------|-------|
-| **A** | `ExposedDropdownMenuLogic`: every row of § 4, with all branches (locked/unlocked, pick-lock on/off, null source, whitespace query, query == picked text, create enabled/disabled, `Reason` × locked). Each test carries `// [AC] REQ-ACF-NN`. | `MyVocaList.Tests/Unit/Components/ExposedDropdownMenuLogicTests.cs` |
-| **A** | `SongFormViewModel.ArtistOptionSource.SearchAsync` returns `SearchArtistsCoreAsync`'s list (BUG-056 contract); REQ-ACF-15 copy on blur and Save (after Q1: the existing message assertions are updated **with the spec** by the Tester, never by the Builder). | `SongFormViewModelTests.cs` |
-| **B** | `SearchConstants.AutocompleteDebounceMilliseconds == 300` (matches the existing constant-value tests, e.g. `SongSuggestionThresholdTests.cs:55`). | the existing threshold test class, or a new `SearchConstantsTests.cs` |
-| **C** | Component XAML shell, BindableProperty plumbing, page XAML swap: build + manual E2E. The no-test decision is recorded in the task-log. | — |
-| **Regression** | All existing `SongFormViewModelTests` artist tests stay green unchanged (list in requirements § G), except the REQ-ACF-15 message assertions. | full `dotnet test` |
-| **Manual E2E (device, Helder)** | T7 checklist: REQ-ACF-01…10, -13, -16, -20, -23, -25, -27. Android only. | task-log |
+| **A** | `ExposedDropdownMenuLogic`: every row of § 4 with all branches (locked/unlocked, locked + empty/whitespace text, search on/off, null source, trimmed length 1 vs 2 incl. " a", pick routing, blur forwarding, `Reason` × locked if C). Each test tagged `// [AC] REQ-ACF-NN`. | `MyVocaList.Tests/Unit/Components/ExposedDropdownMenuLogicTests.cs` |
+| **A** | `PersonFormViewModel.NameOptionSource.SearchAsync` returns exactly `SearchPersonsCoreAsync`'s list (REQ-ACF-16); `SearchPersonsCoreAsync` returns empty below the threshold without calling the service. | `PersonFormViewModelTests.cs` |
+| **B** | `SearchConstants.AutocompleteDebounceMilliseconds == 300`. | `SongSuggestionThresholdTests.cs` or new `SearchConstantsTests.cs` |
+| **C** | Component XAML shell, BindableProperty plumbing, Person page swap: build + manual E2E; the no-test decision recorded in the task-log. | — |
+| **Regression** | All existing `PersonFormViewModelTests` and `PersonFormViewModelBug044Tests` stay green unchanged (REQ-ACF-20/21/28). | full `dotnet test` |
+| **Spike (T1)** | Lock mechanism, X enablement, BUG-069 (B5). | throwaway page (tasks.md T1) |
+| **Manual E2E (T7, Helder, Android)** | REQ-ACF-01…10, -13, -15, -17, -18, -23, -25, -27. REQ-ACF-12a has no consumer that turns search off in this item: it is covered at Level A here and on device by the song-form item (Title in edit mode). | task-log |
 
-What cannot be tested at the VM seam: the actual read-only rendering, X enablement and colour, the
-keyboard behaviour, the submit icon's absence, DX `SelectedItem` highlight, and menu reopen timing.
-These are DX rendering concerns, covered by T1 (spike) and T7 (E2E).
+Not testable at the VM seam: read-only rendering, X enablement and colour, keyboard behaviour, the
+missing submit icon, `SelectedItem` highlight, and menu timing. T1 and T7 cover these.
 
 ## 11. Governance
 
-- **New component, one consumer → not governed** (`component-safety-gate.md` § Relationship to other
-  rules: "Adding a brand-new component … is NOT governed … Governance begins at the second consumer").
-- The moment a second page binds (expected: `PersonFormPage`), add `ExposedDropdownMenu` to the
-  governed table in `.claude/library/component-safety-gate.md` **in the same commit**, and that
-  migration is a four-gate component task.
-- `SongFormPage.xaml` edits follow the incremental XAML rule: one file → build → fix → next.
-- `SearchConstants.cs` is not on the sequential-only registry. It is edited by one task only.
+- **New component; its first consumer is `PersonFormPage` → not governed**
+  (`component-safety-gate.md` § Relationship to other rules: governance begins at the second consumer).
+- **The second consumer is the new Song form** (song-form title-first item, Title and Artist fields).
+  That item must add `ExposedDropdownMenu` to the governed table in `.claude/library/component-safety-gate.md`
+  **in the same commit** as the second binding. From then on every component change is a four-gate
+  task. Two fields on one page count as one consumer page; the rule counts pages/views.
+- Any surface the song-form item needs beyond § 3.1 (e.g. a Version line in the option template, per
+  its README third round, decision 3) is a component change under those gates, or is added here
+  before the second consumer binds.
+- `PersonFormPage.xaml` edits follow the incremental XAML rule (one file → build → fix → next).
 
 ## 12. Census (Python `os.walk` + substring, 2026-09-24; excludes `bin/obj/.git/Docs/.claude`)
+
 
 `grep` was not used for counts (the rtk proxy has dropped matches before). Scope: `*.cs`, `*.xaml`,
 `*.csproj`, `*.props`. Raw hit counts include comments.
@@ -372,34 +392,30 @@ These are DX rendering concerns, covered by T1 (spike) and T7 (E2E).
 | `*SuggestionService` | 26 | `ArtistSuggestionService`/`SongSuggestionService` + interfaces (`Services/`), tested, **unregistered on purpose**, pre-built for future form autocomplete. Keep. |
 | `MinimumLocalQueryLength` | 19 | Services guard (`ArtistService.cs:179`, `PersonService.cs:201,218`, both suggestion services); `PersonFormViewModel.cs:282`; tests |
 
-**Rollout sizing**
 
-| Consumer | Today | This item | Follow-up |
-|----------|-------|-----------|-----------|
-| `SongFormPage` Artist | DX `AutoCompleteEdit` + ~70 lines of glue (`SongFormPage.xaml:28-79`, `.xaml.cs:38,41-113`) | **Migrated** | — |
-| `PersonFormPage` Full Name | DX `AutoCompleteEdit` + glue (`PersonFormPage.xaml:19-43`, `.xaml.cs:33-62`); pick navigates to the existing person (`PersonFormViewModel.cs:295-313`) | No | Migrate with `IsPickLockEnabled=false`? (Q3). Second consumer → governance starts. |
-| `ArtistFormPage` duplicate suggestions | BindableLayout list under the name field (`ArtistFormPage.xaml:46-51`) | No | Candidate. |
-| `ArtistPickerPage`, `SongPickerPage`, `YouTubeSearchPage` | Navigate-away pickers | No | Out of scope (likely deleted). |
-| Future queue-entry form (Venue/Artist/Singer) | not built | No | Intended consumer (DX-AC design § Wrapper promotion trigger). |
-| List-page search (`CrudListViewModelBase.cs:238`, `Task.Delay(400)`) | list search debounce literal | No | Candidate for a shared constant (not autocomplete). |
+**Rollout (revised per Helder's rulings)**
 
-## 13. Conflicts and notes found while drafting
+| Consumer | Today | This item | Owner / follow-up |
+|----------|-------|-----------|-------------------|
+| `PersonFormPage` Full Name | DX `AutoCompleteEdit` + glue (`PersonFormPage.xaml:19-43`, `.xaml.cs:33-62`); the pick navigates to the existing person (`PersonFormViewModel.cs:295-313`) | **Migrated (first consumer)** | — |
+| `SongFormPage` Artist (+ new Title) | DX `AutoCompleteEdit` + glue (`SongFormPage.xaml:28-79`, `.xaml.cs:38,41-113`) | **No** | Song-form title-first item builds the new form on the component (second consumer → governance). |
+| `ArtistFormPage` duplicate suggestions | BindableLayout list (`ArtistFormPage.xaml:46-51`) | No | Candidate. |
+| `ArtistPickerPage`, `SongPickerPage`, `YouTubeSearchPage` | Navigate-away pickers | No | Replaced or deleted by the song-form item. |
+| Future queue-entry form (Venue/Artist/Singer) | not built | No | Intended consumer. |
+| Frozen `UI/Components/AutocompleteField/` | Excluded from build | No | Deletion follow-up (§ 2.1), with Helder's approval. |
+| List-page search (`CrudListViewModelBase.cs:238`, `Task.Delay(400)`) | literal | No | Candidate for a shared constant. |
 
-1. **BUG-069 is fixed and must stay fixed; mechanism B puts that at risk.** Helder confirmed on
-   device on 2026-09-24, after the BUG-081 merge (`2d70ac73`), that BUG-069 no longer reproduces
-   (`Docs/Management/LEDGER.md`, INLINE-AC row, "Update 2026-09-24"; likely a side effect of dropping
-   `IsReadOnly`). BUG-081's README "Related" note is the older 2026-09-23 observation. BUG-069 never
-   had a generated row, so there is nothing to close. Because B re-introduces `IsReadOnly`, T1 has
-   criterion B5 (REQ-ACF-25). BUG-070 still reproduces and is owned here (REQ-ACF-15).
-6. **Song-picker path vs "X is the only way":** `ResolveAndLockArtistAsync` (`SongFormViewModel.cs:516-538`)
-   re-locks to a different artist, or unlocks (`:537`), without X. Left open as Q6.
-7. **Locked-and-empty:** edit-mode load sets `IsArtistLocked = true` even when `song.ArtistId == 0`
-   (`SongFormViewModel.cs:469-477`). Neutralised in the component by `EffectiveLocked` (REQ-ACF-05a).
-2. **REQ-ACREATE-02/10 vs REQ-UOW-51:** "≥1 non-whitespace char" conflicts with the shared minimum of
-   2 (Q2).
-3. **REQ-ACREATE-15's type-over branch vs README point 1:** superseded (requirements § Supersedes).
-4. **BUG-081 fix rationale vs README point 1:** the fix's reasoning ("literally non-editable was an
-   over-restriction") is reversed by Helder's new requirement. The fix's outcome (a live X) stays.
-5. **Validation-message location:** the artist messages are VM literals (`SongFormViewModel.cs:378,
-   569-570`), while the Form Validation Standard puts messages in services. This is pre-existing and
-   out of scope.
+## 13. Notes and resolved conflicts
+
+1. **BUG-069 is fixed and must stay fixed.** Helder confirmed on device on 2026-09-24, after the
+   BUG-081 merge (`2d70ac73`), that it no longer reproduces (`Docs/Management/LEDGER.md`, INLINE-AC row,
+   "Update 2026-09-24"; likely a side effect of dropping `IsReadOnly`). Mechanism B brings
+   `IsReadOnly` back, so T1 has criterion B5.
+2. **BUG-070 is removed, not reworded:** with no create row, the Song form's "Search and select an
+   artist from the list" error goes away in the song-form item (create on Save). Nothing in this item.
+3. **Locked-and-empty** (`SongFormViewModel.cs:469-477`): neutralised for every consumer by
+   `EffectiveLocked` (REQ-ACF-05a).
+4. **REQ-ACREATE-02/03/10** are superseded by the song-form item's create-on-save
+   (requirements § Supersedes). **REQ-DXAC-11** would be reversed by the frozen-family deletion
+   follow-up, which is pending approval.
+5. **Validation messages as VM literals** (Form Validation Standard deviation): pre-existing, out of scope.
