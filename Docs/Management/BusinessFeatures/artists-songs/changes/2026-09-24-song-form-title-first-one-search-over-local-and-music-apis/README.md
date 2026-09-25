@@ -93,6 +93,13 @@ Decisions captured from Helder, 2026-09-24. Spec not yet written. It waits on a 
 - The 1-minute picker check (ask A) is withdrawn: the picker is being deleted, and the DI bug is
   a prerequisite of this item regardless.
 
+## Helder's decisions — fifth round (2026-09-24)
+
+- **Artist form name field: CONFIRMED.** It becomes the shared autocomplete, searching local
+  artists and Deezer.
+- **YouTube search: out of scope for now.** YouTubeSearchPage and the "Search YouTube (API)" row stay
+  as they are. The API-key requirement is a problem that needs its own discussion before any change.
+
 ## Related
 
 - The **catalog auto-update on song save** is item CATALOG-PROP, specified in another session.
