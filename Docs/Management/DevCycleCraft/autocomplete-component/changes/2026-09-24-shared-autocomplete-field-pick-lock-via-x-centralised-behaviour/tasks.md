@@ -49,6 +49,10 @@
     - R2: tap, long-press and 10 keystrokes leave the text byte-equal, with no keyboard and no cursor in any frame.
     - R3: no menu opens on load or on tap (5 of 5); this is the BUG-069 exposure again, because `IsReadOnly` is back.
     If R1–R3 fail, report it to Helder: the song-form item's read-only Title depends on it.
+  - **Supporting-text check (REQ-ACF-12c):** S1: DX `HelpText="Online search unavailable"` renders
+    under the field in the unlocked, locked and read-only states (screenshots). S2: with `HasError=True`
+    and the component rule applied (`HelpText=""`), only `ErrorText` shows, in one line, with no layout
+    jump beyond DX's own bottom-text line. Record whether DX itself hides `HelpText` while `HasError`.
   - **C procedure (only if B fails):** `IsReadOnly=False`, built-in clear icon; while locked, revert
     `TextChanged` when `Reason==UserInput`, skip `ItemsRequested`, `Unfocus()` on `Focused`.
   - **C is measured against C1–C5.** Passing them does **not** select C: it is a visible compromise
@@ -89,7 +93,7 @@
 - [ ] **T3: `IMenuOptionSource` + `AutocompleteDXFieldLogic` with tests** [SEQUENTIAL, after the T1 verdict]
   - Tester writes `AutocompleteDXFieldLogicTests` first: every rule in `design.md` § 4, each test tagged
     `// [AC] REQ-ACF-NN`: 01 (`LockAfterPick`), 04, 05a (locked + empty/whitespace → not effectively
-    locked), 11b, 11c/17, 12a (search off → no request), 12b (read-only wins over locked and search; no X, no request, no blur forwarding), 13 (" a" and "a" → no request; "ab" → request),
+    locked), 11b, 11c/17, 12a (search off → no request), 12b (read-only wins over locked and search; no X, no request, no blur forwarding), 12c (`BottomSupportingText`: error wins), 13 (" a" and "a" → no request; "ab" → request),
     19, 22, 24; plus 01 via `TextToRestore` **only if Helder accepted C**. Confirm Red, implement, Green.
   - **Produces:** `IMenuOptionSource`, `MenuOptionSource`, `AutocompleteDXFieldLogic`, `PickRoute`
   - **Consumes:** T1 verdict; `AutocompleteSuggestion`; `SearchConstants`
@@ -172,13 +176,16 @@
     7. Type an invalid name and blur → the existing name validation shows; the text is kept (REQ-ACF-17, -19).
     8. Character counter and error clearing while typing behave as before (REQ-ACF-28).
     9. No row stays highlighted after a pick; the field style matches the other Outlined fields (REQ-ACF-23, -27).
+    10. Supporting text renders (REQ-ACF-12c). The Person form doesn't use it, so this is checked with a
+        temporary, uncommitted `SupportingText="Test"` binding: the text shows under the field, and an
+        invalid name blur shows only the error.
   - Picked-state behaviour that the Person form cannot show (REQ-ACF-05 paths (a)–(g), REQ-ACF-06 on a
     locked field) is proven in T1 and re-verified on device by the song-form item.
   - **Produces:** task-log evidence (register `task-log.md` in `MyVocaList.sln` if it is new); the
     item's status moves per Helder's verdict
   - **Consumes:** T6 build on device · **Risk:** High (the only check of DX rendering on a real page)
   - **Files owned:** `…/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md`, `MyVocaList.sln`
-  - **Demo:** Helder completes lines 1–9 on device without a failure.
+  - **Demo:** Helder completes lines 1–10 on device without a failure.
   - **Review lane:** Architectural
 
 ## Handed over to the song-form title-first item (not tasks here)
