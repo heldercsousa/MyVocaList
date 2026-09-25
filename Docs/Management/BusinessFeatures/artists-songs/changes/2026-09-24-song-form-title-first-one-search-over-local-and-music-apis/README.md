@@ -17,8 +17,8 @@ Title becomes the first field and searches local songs and music APIs by title o
 
 ## Status
 
-Decisions captured from Helder, 2026-09-24. Spec not yet written. It waits on a read-only evaluation
-(fuzzy search + API-tracking fields) and will build on the shared autocomplete component
+Spec drafted, in review (2026-09-25): `requirements.md`, `design.md`, `tasks.md`. It builds on the
+evaluation `findings.md` and on the shared autocomplete component
 (`DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/`).
 
 ## Helder's decisions (2026-09-24)
