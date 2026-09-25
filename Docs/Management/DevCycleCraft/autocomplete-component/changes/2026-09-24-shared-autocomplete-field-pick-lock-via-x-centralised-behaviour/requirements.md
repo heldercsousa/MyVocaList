@@ -1,4 +1,4 @@
-# Requirements: shared exposed dropdown menu field (pick-lock via X, centralised behaviour)
+# Requirements: AutocompleteDXField, the shared autocomplete field (pick-lock via X, centralised behaviour)
 
 > **Status: DRAFT, revised 2026-09-24 after Helder's two rounds of rulings** (recorded verbatim in
 > § Helder rulings below). Drafted by a subagent from Helder's on-device requirements in `README.md`
@@ -26,7 +26,7 @@ Every agent uses these terms exactly. No synonyms.
 
 | Term | Definition |
 |------|------------|
-| **Field** | The shared component this item builds: an *editable exposed dropdown menu* (Material term for a text field with a menu of options under it). Code name and folder: `design.md` § 2. |
+| **Field** | The shared component this item builds, `AutocompleteDXField`. It implements the MD3/Material *exposed dropdown menu* pattern (a text field with a menu of options under it). Code name and folder: `design.md` § 2. |
 | **Option** | One row in the field's menu: a match returned by the consumer's search. The `AutocompleteSuggestion` record (`Contracts/Models/AutocompleteSuggestion.cs`). |
 | **Pick** | The user taps an option. |
 | **Picked state / locked** | The field holds a picked value, so its text is read-only. Entered by a pick, or when the consumer sets `IsLocked = true` programmatically (e.g. edit-mode hydration). Left only by X. |
@@ -87,7 +87,7 @@ Every agent uses these terms exactly. No synonyms.
   field as unlocked: text editable, X hidden per REQ-ACF-07, options requested if search is enabled.
   Reason: `SongFormViewModel.cs:469-477` sets the lock even when `song.ArtistId == 0`, and a future
   consumer could do the same. Without this rule the field would be read-only with no X. Enforced in
-  the component (`ExposedDropdownMenuLogic.Mode`, design § 4) for every consumer.
+  the component (`AutocompleteDXFieldLogic.Mode`, design § 4) for every consumer.
 - **REQ-ACF-06: After X, the field is empty, unlocked and focused (Helder ruling Q7).**
   Given the field is in the picked state,
   When the user taps X,
@@ -238,7 +238,6 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
 | **REQ-ACREATE-15** (type-over allowance) | same file | **Narrowed:** typing over a picked value is impossible (REQ-ACF-01/05). The X semantics for the Song form are re-specified by the song-form item. |
 | **REQ-DXAC-07** (≈300 ms) | `DevCycleCraft/autocomplete-component/changes/2026-07-19-dx-autocompleteedit-replacement/requirements.md` | Made concrete by the shared constant (REQ-ACF-14). |
 | **DX-AC "No new custom component" / wrapper promotion trigger** | same folder, `design.md` | Triggered early by Helder's direction (README point 4). |
-| **REQ-DXAC-11** (retain the frozen family as reference) | same folder, `requirements.md` | **Proposed** to be reversed by a follow-up deletion task (design § 2.1). Needs Helder's approval of that task; not decided here. |
 | **BUG-081 fix rationale** ("literally non-editable was an over-restriction") | `BusinessFeatures/artists-songs/bugs/2026-09-23-BUG-081-…/task-log.md` | Reversed by Helder 2026-09-24; the fix's outcome (a live X) is kept. |
 
 ## Out of scope
@@ -248,7 +247,7 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
 - `ArtistFormPage` duplicate suggestions (`ArtistFormPage.xaml:46-51`): a follow-up candidate.
 - The list-page search debounce literal `Task.Delay(400)` (`CrudListViewModelBase.cs:238`): a follow-up candidate.
 - Deleting or wiring `ArtistSuggestionService`/`SongSuggestionService` (unregistered on purpose).
-- Deleting the frozen `UI/Components/AutocompleteField/` family: proposed as a separate follow-up task (design § 2.1).
+- The frozen `UI/Components/AutocompleteField/` family: left as is, per Helder (REQ-DXAC-11 stands).
 - iOS device verification.
 
 ## Open items
@@ -256,9 +255,7 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
 - **Q5 (spike):** as ruled, mechanism C is built only if Helder accepts it after seeing the T1 measurements.
 - **Q10 (location only):** Domain `SearchConstants` vs a UI-layer constant for the debounce value.
   The design keeps `SearchConstants` unless Helder rules otherwise.
-- **Component name:** Q4 ruled the location (`UI/Components/` + subfolder). The design proposes
-  `TextFields/ExposedDropdownMenu`; the name itself has not been re-ruled.
-- **Frozen family deletion:** a follow-up task, pending Helder's approval (reverses REQ-DXAC-11).
+- **Component name and frozen family:** resolved (see the note below the rulings).
 
 ### Helder rulings — 2026-09-24
 
@@ -291,6 +288,11 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
 - **Q7 RESOLVED: yes.** X focuses the field and opens the keyboard.
 - **Q8 RESOLVED: yes.** Remove the magnifier.
 - **Q9 RESOLVED: as recommended (accept),** and now largely moot, since there is no inline create.
+
+> **Q4 RESOLVED (name), Helder 2026-09-24 (added below the rulings; the ruling text above is unchanged):**
+> the component is named `AutocompleteDXField`, at `MyVocaList/UI/Components/TextFields/`. The frozen
+> `Components/AutocompleteField/` family is left as is. The MD3-naming exception is proposed in
+> `design.md` § Constitutional exception.
 
 > **Numbering note (added after the rulings; the rulings text above is unchanged):** the rulings use
 > the previous numbering. Old REQ-ACF-15 (BUG-070 copy), old -16 (create-new row) and old -21

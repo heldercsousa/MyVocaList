@@ -1,4 +1,4 @@
-# Tasks: shared exposed dropdown menu field (pick-lock via X)
+# Tasks: AutocompleteDXField, the shared autocomplete field (pick-lock via X)
 
 > **DRAFT, revised 2026-09-24 after Helder's rulings.** Not dispatchable until Helder approves the
 > revised `requirements.md` + `design.md`. T1 needs no further answers.
@@ -86,30 +86,30 @@
 
 ## Phase 2: UI logic (Level A, Red first)
 
-- [ ] **T3: `IMenuOptionSource` + `ExposedDropdownMenuLogic` with tests** [SEQUENTIAL, after the T1 verdict]
-  - Tester writes `ExposedDropdownMenuLogicTests` first: every rule in `design.md` § 4, each test tagged
+- [ ] **T3: `IMenuOptionSource` + `AutocompleteDXFieldLogic` with tests** [SEQUENTIAL, after the T1 verdict]
+  - Tester writes `AutocompleteDXFieldLogicTests` first: every rule in `design.md` § 4, each test tagged
     `// [AC] REQ-ACF-NN`: 01 (`LockAfterPick`), 04, 05a (locked + empty/whitespace → not effectively
     locked), 11b, 11c/17, 12a (search off → no request), 12b (read-only wins over locked and search; no X, no request, no blur forwarding), 13 (" a" and "a" → no request; "ab" → request),
     19, 22, 24; plus 01 via `TextToRestore` **only if Helder accepted C**. Confirm Red, implement, Green.
-  - **Produces:** `IMenuOptionSource`, `MenuOptionSource`, `ExposedDropdownMenuLogic`, `PickRoute`
+  - **Produces:** `IMenuOptionSource`, `MenuOptionSource`, `AutocompleteDXFieldLogic`, `PickRoute`
   - **Consumes:** T1 verdict; `AutocompleteSuggestion`; `SearchConstants`
   - **Risk:** High (Level A logic: every component rule, including lock and read-only precedence)
-  - **Files owned:** `MyVocaList/UI/Models/IMenuOptionSource.cs`, `MyVocaList/UI/Components/TextFields/ExposedDropdownMenuLogic.cs`, `MyVocaList.Tests/Unit/Components/ExposedDropdownMenuLogicTests.cs`
+  - **Files owned:** `MyVocaList/UI/Models/IMenuOptionSource.cs`, `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs`, `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs`
   - **Demo:** `dotnet test` shows the new logic tests green; the full suite stays green.
   - **Review lane:** Standard
 
 ## Phase 3: Component
 
-- [ ] **T4: `ExposedDropdownMenu` component (XAML + code-behind)** [SEQUENTIAL, after T2 + T3]
+- [ ] **T4: `AutocompleteDXField` component (XAML + code-behind)** [SEQUENTIAL, after T2 + T3]
   - Build the `ContentView` per `design.md` § 3.1 (including `IsSearchEnabled` and `FocusEditor()`;
     no create or opt-out surface), § 5 (the mechanism chosen after T1, driven by `Mode`), `IsReadOnly` (REQ-ACF-12b: inner `IsReadOnly=true`, no clear/end icon),
     § 5.2 (X colour tokens + `Error` trigger), § 5.3 (`SubmitIconVisibility=Never`) and § 6 (X
     handling: empty text, unlock, clear command, focus). Option template = Headline + optional
     SupportingText. Threshold and delay via `x:Static` `SearchConstants`. Incremental: XAML → build →
     code-behind → build. Level C (record the no-test decision in the task-log).
-  - **Produces:** `ExposedDropdownMenu` · **Consumes:** T2 constant, T3 types
+  - **Produces:** `AutocompleteDXField` · **Consumes:** T2 constant, T3 types
   - **Risk:** Medium (DX event wiring; not unit-testable)
-  - **Files owned:** `MyVocaList/UI/Components/TextFields/ExposedDropdownMenu.xaml`, `MyVocaList/UI/Components/TextFields/ExposedDropdownMenu.xaml.cs`
+  - **Files owned:** `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml`, `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml.cs`
   - **Demo:** the solution builds with 0 errors. The component is not yet placed on any page.
   - **Review lane:** Elevated (new shared component; MD3 review of the icon tokens)
 
@@ -134,10 +134,10 @@
 
 ## Phase 5: Page migration
 
-- [ ] **T6: Migrate `PersonFormPage` Full Name onto `ExposedDropdownMenu`** [SEQUENTIAL, after T4 + T5]
+- [ ] **T6: Migrate `PersonFormPage` Full Name onto `AutocompleteDXField`** [SEQUENTIAL, after T4 + T5]
   - One task, two files, so that the task commits only a green build (`workflow.md` Rule 3).
     Steps (incremental XAML rule):
-    1. Edit `PersonFormPage.xaml`: replace `:19-43` with `<textfields:ExposedDropdownMenu x:Name="nameField" …/>`,
+    1. Edit `PersonFormPage.xaml`: replace `:19-43` with `<textfields:AutocompleteDXField x:Name="nameField" …/>`,
        binding `Text`=`PersonName` (TwoWay), `HasError`/`ErrorText`, `OptionSource`=`NameOptionSource`,
        `SelectCommand`=`SuggestionSelectedCommand`, `BlurWithoutPickCommand`=`ValidateNameCommand`,
        `LabelText`="Full Name", `PlaceholderText`="First and last name". `IsLocked` stays unbound. Add
@@ -191,12 +191,10 @@ owns:
   `IsReadOnly=true` for an API-sourced song's Title in edit mode, REQ-ACF-12b; Version shown via
   `SupportingText`).
 - Removing the create-new row path and the BUG-070 message (create on Save).
-- Adding `ExposedDropdownMenu` to the governed table when the Song form binds (second consumer).
+- Adding `AutocompleteDXField` to the governed table when the Song form binds (second consumer).
 - On-device proof of REQ-ACF-05 (a)–(g) and REQ-ACF-06 on a real locked field.
 
 ## Follow-ups (register separately if Helder wants them)
 
-- **Delete the frozen `UI/Components/AutocompleteField/` family** (design § 2.1: evidence, file list,
-  and the governed-table row). Reverses REQ-DXAC-11, so it needs Helder's approval.
 - A shared constant for the list-search debounce (`CrudListViewModelBase.cs:238`).
 - `ArtistFormPage` duplicate suggestions onto the component (candidate).
