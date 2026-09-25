@@ -1,4 +1,4 @@
-# Design: shared exposed dropdown menu field (pick-lock via X, centralised behaviour)
+# Design: AutocompleteDXField, the shared autocomplete field (pick-lock via X, centralised behaviour)
 
 > **Status: DRAFT, revised 2026-09-24 after Helder's rulings** (requirements § Helder rulings).
 > Requirements: `requirements.md` (REQ-ACF-*). Every current-behaviour claim cites `file:line` on
@@ -12,7 +12,7 @@
 Affected layers: **UI only**, plus one new constant in Domain. Services are unchanged.
 
 ```
-PersonFormPage.xaml ── <textfields:ExposedDropdownMenu …bindings only…/>
+PersonFormPage.xaml ── <textfields:AutocompleteDXField …bindings only…/>
                               │  owns: items-request glue, pick routing, pick-lock + X,
                               │  blur forwarding, SelectedItem reset, menu-open, debounce +
                               │  threshold, search on/off, option template, icon styling
@@ -34,52 +34,50 @@ IPersonService.SearchPersonsStartsWithAsync   (unchanged)
 
 ## 2. Component name, location and files
 
-### Decision: `UI/Components/TextFields/ExposedDropdownMenu`
-**Chosen approach:** a new subfolder `MyVocaList/UI/Components/TextFields/`, following the MD3
-component-category convention of its siblings (`AppBars/`, `Lists/`, `Sheets/`, `States/`,
-`Toolbars/`); component name `ExposedDropdownMenu`.
+### Decision: `UI/Components/TextFields/AutocompleteDXField` (Helder rulings Q4 + name, 2026-09-24)
+**Chosen approach:** component name **`AutocompleteDXField`** (Helder's naming ruling), in a new
+subfolder `MyVocaList/UI/Components/TextFields/`, following the MD3 component-category convention of
+its siblings (`AppBars/`, `Lists/`, `Sheets/`, `States/`, `Toolbars/`). It implements the MD3/Material
+**exposed dropdown menu** pattern (a text field with a menu of options under it; Material Components
+Android `docs/components/Menu.md`), which is how it cross-references to MD3 documentation.
 **Alternatives considered:**
-- `Menus/`: rejected in review. It files what looks and behaves like a text field under menus.
-  MD3's category for the input surface is *Text fields*, and the exposed dropdown menu is a text
-  field with an attached menu.
-- `AutocompleteField` (name or folder): rejected. It is taken by the frozen family (§ 2.1), which is
-  still listed in `component-safety-gate.md`'s governed table, and "autocomplete" is not an MD3
-  component name.
-- `FormAutocompleteField` (floated in the DX-AC design): not MD3 terminology.
+- `AutocompleteDXField` (this spec's earlier proposal): replaced by Helder's ruling. "Autocomplete…"
+  says what the field does, and "DX" marks it as built on DevExpress, distinct from the existing
+  `AutocompleteField`.
+- `Menus/` folder: rejected in review. It files what looks and behaves like a text field under menus.
+- `AutocompleteField`: taken by the frozen family (§ 2.1).
 **Reversibility:** Easily reversible while there is one consumer.
-**Rationale:** MD3 has no "autocomplete" component. The Material pattern for a text field that
-shows the current selection above a menu of options is the **exposed dropdown menu**, whose
-*editable* variant lets the user type to filter (Material Components Android `docs/components/Menu.md`,
-fetched 2026-09-24; m3.material.io renders client-side and could not be read as text). Q4 ruled the
-location; the name has not been separately re-ruled (requirements § Open items).
+**Rationale:** Helder's ruling (name) and Q4 (location).
+
+### Constitutional exception: component name (proposed text for `.claude/exception-registry.md`)
+> **Constraint:** CLAUDE.md § Constitutional Constraints, "MD3 terminology": component names must
+> use official MD3 terminology.
+> **Exception:** the shared DevExpress autocomplete component is named `AutocompleteDXField`, not an
+> MD3 term.
+> **Why:** (1) MD3 has no "autocomplete" component; the closest pattern is the exposed dropdown menu
+> (a text field + menu), which the component implements and names in its XML doc for
+> cross-reference. (2) Project precedent: the existing `AutocompleteField` family already uses
+> "Autocomplete". (3) Helder's naming ruling, 2026-09-24: "Autocomplete…" says what it does, and
+> "DX" signals it is built on DevExpress, next to `AutocompleteField`.
+> **Scope:** this component name only (class, files, `AutocompleteDXFieldLogic`,
+> `AutocompleteDXFieldLogicTests`). Its BindableProperty names still follow MD3/DX/MAUI terms where
+> they exist (`LabelText`, `PlaceholderText`, `IsReadOnly`, `IsDropDownOpen`, `HasError`, `ErrorText`).
+> **Approved by:** Helder, 2026-09-24. **Filed by:** the orchestrator.
 
 ### 2.1 The frozen `UI/Components/AutocompleteField/` family
 
-**Evidence that it is dead code (2026-09-24):**
-- It is excluded from compilation: `MyVocaList.csproj:172-173` (`<Compile Remove>` / `<MauiXaml Remove>`
-  on `UI\Components\AutocompleteField\**`). Its 6 tests are excluded too: `MyVocaList.Tests.csproj:38-39`.
-- 0 live code references: the census (§ 12) finds only a doc comment, `Contracts/Models/AutocompleteSuggestion.cs:4`.
-- It is not in `MyVocaList.sln` (0 occurrences) and not DI-registered.
-- `README-FROZEN.md` says it is kept only "as reference material for the future full-screen
-  autocomplete guideline ①" (decision D-AC1, REQ-DXAC-11). Git history keeps that reference after deletion.
-- It sits beside the new component's folder and is still in the governed-component table, so it
-  confuses the consumer map and grep census.
-
-**Recommendation:** delete it in a **separate follow-up task** (not bundled here; `tasks.md`
-§ Follow-ups): the 9 files in the folder, the 6 excluded test files, the three `Remove` lines, the
-`AutocompleteField` row in `component-safety-gate.md`'s governed table, and the stale doc comment.
-Deleting it reverses REQ-DXAC-11, so the task needs Helder's approval. Until then the folder stays
-untouched, and this item adds nothing to it.
+Left as is, per Helder (2026-09-24): this item does not touch, delete or reference it. REQ-DXAC-11
+(retain it as reference) stands.
 
 ### Files (new)
 
 | File | Role |
 |------|------|
-| `MyVocaList/UI/Components/TextFields/ExposedDropdownMenu.xaml` | `ContentView` hosting one `dxe:AutoCompleteEdit` + the option `ItemTemplate` (Headline + optional SupportingText, as in `PersonFormPage.xaml:32-42`). |
-| `MyVocaList/UI/Components/TextFields/ExposedDropdownMenu.xaml.cs` | BindableProperties, DX event adapters. Thin: every decision calls `ExposedDropdownMenuLogic`. |
-| `MyVocaList/UI/Components/TextFields/ExposedDropdownMenuLogic.cs` | `internal static` pure functions (§ 4). |
+| `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml` | `ContentView` hosting one `dxe:AutoCompleteEdit` + the option `ItemTemplate` (Headline + optional SupportingText, as in `PersonFormPage.xaml:32-42`). |
+| `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml.cs` | BindableProperties, DX event adapters. Thin: every decision calls `AutocompleteDXFieldLogic`. |
+| `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs` | `internal static` pure functions (§ 4). |
 | `MyVocaList/UI/Models/IMenuOptionSource.cs` | Consumer search contract + `MenuOptionSource` delegate adapter (§ 3.2). |
-| `MyVocaList.Tests/Unit/Components/ExposedDropdownMenuLogicTests.cs` | Level A tests. |
+| `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs` | Level A tests. |
 
 Conventions followed: the BindableProperty pattern with `…Property` statics and CLR wrappers, bound
 via `Source={x:Reference self}` (`UI/Components/AppBars/SearchBar.xaml.cs:17-35`, `SearchBar.xaml:22-42`).
@@ -145,7 +143,7 @@ several fields (the Song form will have Title and Artist). The other members are
 option source, the artist/title lock hydration, and deleting the Song glue
 (`SongFormPage.xaml.cs:38,41-113`). This item does not touch `SongFormPage` or `SongFormViewModel`.
 
-## 4. Pure logic (`ExposedDropdownMenuLogic`), Level A testable
+## 4. Pure logic (`AutocompleteDXFieldLogic`), Level A testable
 
 | Function | Rule | REQ |
 |----------|------|-----|
@@ -355,7 +353,7 @@ purpose; the song-form item may wrap them in a `MenuOptionSource`.
 
 | Level | What | Where |
 |-------|------|-------|
-| **A** | `ExposedDropdownMenuLogic`: every row of § 4 with all branches (read-only × locked × search on/off, with read-only winning; locked/unlocked, locked + empty/whitespace text, `ShowClearIcon`, search on/off, null source, trimmed length 1 vs 2 incl. " a", pick routing, blur forwarding, `Reason` × locked if C). Each test tagged `// [AC] REQ-ACF-NN`. | `MyVocaList.Tests/Unit/Components/ExposedDropdownMenuLogicTests.cs` |
+| **A** | `AutocompleteDXFieldLogic`: every row of § 4 with all branches (read-only × locked × search on/off, with read-only winning; locked/unlocked, locked + empty/whitespace text, `ShowClearIcon`, search on/off, null source, trimmed length 1 vs 2 incl. " a", pick routing, blur forwarding, `Reason` × locked if C). Each test tagged `// [AC] REQ-ACF-NN`. | `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs` |
 | **A** | `PersonFormViewModel.NameOptionSource.SearchAsync` returns exactly `SearchPersonsCoreAsync`'s list (REQ-ACF-16); `SearchPersonsCoreAsync` returns empty below the threshold, on the **trimmed** term (" a"), without calling the service; the token is passed to the service. | `PersonFormViewModelTests.cs` |
 | **B** | `SearchConstants.AutocompleteDebounceMilliseconds == 300`. | `SongSuggestionThresholdTests.cs` or new `SearchConstantsTests.cs` |
 | **C** | Component XAML shell, BindableProperty plumbing, Person page swap: build + manual E2E; the no-test decision recorded in the task-log. | — |
@@ -371,7 +369,7 @@ missing submit icon, `SelectedItem` highlight, and menu timing. T1 and T7 cover 
 - **New component; its first consumer is `PersonFormPage` → not governed**
   (`component-safety-gate.md` § Relationship to other rules: governance begins at the second consumer).
 - **The second consumer is the new Song form** (song-form title-first item, Title and Artist fields).
-  That item must add `ExposedDropdownMenu` to the governed table in `.claude/library/component-safety-gate.md`
+  That item must add `AutocompleteDXField` to the governed table in `.claude/library/component-safety-gate.md`
   **in the same commit** as the second binding. From then on every component change is a four-gate
   task. Two fields on one page count as one consumer page; the rule counts pages/views.
 - The song-form item's known needs are already in § 3.1: `IsSearchEnabled` (Title search off in
@@ -414,7 +412,7 @@ missing submit icon, `SelectedItem` highlight, and menu timing. T1 and T7 cover 
 | `ArtistFormPage` duplicate suggestions | BindableLayout list (`ArtistFormPage.xaml:46-51`) | No | Candidate. |
 | `ArtistPickerPage`, `SongPickerPage`, `YouTubeSearchPage` | Navigate-away pickers | No | Replaced or deleted by the song-form item. |
 | Future queue-entry form (Venue/Artist/Singer) | not built | No | Intended consumer. |
-| Frozen `UI/Components/AutocompleteField/` | Excluded from build | No | Deletion follow-up (§ 2.1), with Helder's approval. |
+| Frozen `UI/Components/AutocompleteField/` | Excluded from build | No | Left as is, per Helder. |
 | List-page search (`CrudListViewModelBase.cs:238`, `Task.Delay(400)`) | literal | No | Candidate for a shared constant. |
 
 ## 13. Notes and resolved conflicts
@@ -428,6 +426,6 @@ missing submit icon, `SelectedItem` highlight, and menu timing. T1 and T7 cover 
 3. **Locked-and-empty** (`SongFormViewModel.cs:469-477`): neutralised for every consumer by
    `Mode()` (REQ-ACF-05a).
 4. **REQ-ACREATE-02/03/10** are superseded by the song-form item's create-on-save
-   (requirements § Supersedes). **REQ-DXAC-11** would be reversed by the frozen-family deletion
-   follow-up, which is pending approval.
+   (requirements § Supersedes). The frozen `AutocompleteField` family is left as is, per Helder
+   (REQ-DXAC-11 stands).
 5. **Validation messages as VM literals** (Form Validation Standard deviation): pre-existing, out of scope.
