@@ -67,6 +67,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\tasks.md = Docs\Management\DevCycleCraft\autocomplete-component\changes\2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour\tasks.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\README.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\findings.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\findings.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-09-24-song-form-title-first-one-search-over-local-and-music-apis\tasks.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
