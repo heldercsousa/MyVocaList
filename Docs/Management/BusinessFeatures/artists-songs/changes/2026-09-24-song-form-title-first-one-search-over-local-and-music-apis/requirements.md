@@ -27,7 +27,9 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 | **Option** | One row in a Field's menu. |
 | **Local option** | An option for a song already stored in the library. Shows the "In your library" marker. |
 | **Remote option** | An option for a Deezer track that is not in the library. Shows its source ("Deezer"). |
-| **Status row** | The single non-selectable option "Online search unavailable". |
+| **Online-search note** | The text "Online search unavailable" shown in the Field's own supporting text (`AutocompleteDXField.SupportingText`, REQ-ACF-12c: the line under the field, replaced by the error text while the field has an error). Not an option row. |
+| **Option supporting text** | The second line of one option (`AutocompleteSuggestion.SupportingText`). Not the same thing as the Field's supporting text. |
+| **Save outcome** | The result of `ISongService.SaveFromFormAsync`: `Saved`, `Failed`, `ArtistChoiceNeeded` or `SongChoiceNeeded` (`design.md` § 3.5). |
 | **Field states** | As defined by the dependency item: **Editable**; **Locked** (after a pick; text cannot change; X unlocks); **Read-only** (`IsReadOnly`, page-set: text shown, no X, no search; wins over the others). `IsSearchEnabled = false` turns option requests off while the field stays a text field. |
 | **Pick / X** | As defined by the dependency item (REQ-ACF-01…09). |
 | **External identity** | The pair `(ExternalProvider, ExternalId)` stored on a `Song`, e.g. `("Deezer", "3135556")`. |
@@ -60,7 +62,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 
 - **REQ-SFT-01: Field order.** In add and edit mode the form shows, top to bottom: Title, Artist,
   Version, Featured Artists, Lyrics, then the YouTube section (unchanged). The "Search music
-  database" row is absent (`SongFormPage.xaml:122-135` today).
+  database" row is absent (`SongFormPage.xaml:122-137` today).
 
 ### B. Title search (add mode only)
 
@@ -72,13 +74,15 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   The debounce is the shared `SearchConstants.AutocompleteDebounceMilliseconds` (300). No literal
   values in the page or ViewModel.
 - **REQ-SFT-04: Option content and order.** Local options come first (at most
-  `SearchConstants.MaxSearchResults` = 5), then remote options (at most 5).
-  - Local option: headline = title; supporting text = "artist · version" (the " · version" part is
-    omitted when Version is empty); marker "In your library".
+  `SearchConstants.MaxSearchResults` = 5), then remote options (at most 5). The marker and the source
+  are part of the **option supporting text**; the shared Field needs no new option property.
+  - Local option: headline = title; supporting text = "artist · version · In your library" (the
+    " · version" part is omitted when Version is empty).
   - Remote option: headline = title; supporting text = "artist · Deezer".
   Given the library holds "Don't Cry" (Version "") and "Don't Cry" (Version "Live") by Guns N' Roses,
   When the user types "don't cry",
-  Then two local options appear, "Guns N' Roses" and "Guns N' Roses · Live".
+  Then two local options appear, with supporting texts "Guns N' Roses · In your library" and
+  "Guns N' Roses · Live · In your library".
 - **REQ-SFT-05: One row per song.** IF a Deezer result already exists locally, THEN it SHALL appear
   once, as a local option, never as a remote option. "Exists locally" means, in this order:
   (a) a stored song has the same external identity; else
@@ -86,10 +90,17 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   A song found by (a) or (b) that is not already among the local options replaces the remote row
   in place of it, as a local option.
 - **REQ-SFT-06: Offline or API error.** IF Deezer fails (no network, HTTP error, timeout per
-  REQ-SFT-08, or unreadable response), THEN the local options SHALL still show, followed by one status
-  row "Online search unavailable". No snackbar and no dialog. The failure is logged at Warning.
-  Deezer returning zero results is not a failure and adds no status row.
-- **REQ-SFT-07: Status row is inert.** Tapping the status row SHALL NOT pick, lock or change any field.
+  REQ-SFT-08, unreadable response, or an HTTP 200 response carrying an `error` object, e.g. over
+  quota), THEN the local options SHALL still show and the Field's supporting text SHALL read
+  "Online search unavailable" until the next query whose Deezer call succeeds, or until Title is
+  emptied. No option row, snackbar or dialog. The failure is logged at Warning. Deezer returning zero
+  results is not a failure and shows no note.
+- **REQ-SFT-07: Local options do not wait for Deezer.** WHEN a query is requested, the local options
+  SHALL be shown as soon as the local search returns, without waiting for Deezer; remote options are
+  appended when Deezer answers, if the query is still current. This needs one capability from the
+  shared Field (append options to the current menu, `design.md` § 3.4). If the dependency item
+  rejects it, the fallback is: the Field shows local and remote together once Deezer answers or the
+  REQ-SFT-08 bound expires, so local options wait at most 3,000 ms (Q16).
 - **REQ-SFT-08: Remote wait bound.** A Deezer call that has not completed within 3,000 ms
   `[Proposed — confirm]` SHALL be cancelled and treated as a failure (REQ-SFT-06).
 - **REQ-SFT-09: Latest query wins.** Options from an earlier, slower query SHALL never replace options
@@ -131,17 +142,24 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   state after a pick, with no "Add … as a new artist" row and no remote search.
 - **REQ-SFT-17: Blur keeps text, no error.** When Artist loses focus holding unpicked text, the text
   stays and **no** error is shown. ("Search and select an artist from the list" is removed.)
-- **REQ-SFT-18: Unpicked artist on Save.** Given Artist holds non-empty unpicked text, When the user
-  saves, Then, in this order:
+- **REQ-SFT-18: Artist with no local id on Save.** Given Artist is non-empty and has **no local id**
+  (typed and not picked, **or** filled by a Deezer pick with no local match, REQ-SFT-13), When the
+  user saves, Then the Service decides, in this order:
   1. a collated match exists → that artist is used, with no prompt `[Proposed — confirm]`;
-  2. else a near-duplicate exists → REQ-SFT-19;
-  3. else a new artist with the typed name is created **in the same unit of work as the song**. If the
+  2. else a near-duplicate exists → REQ-SFT-19 (this applies to a Deezer-picked artist too);
+  3. else a new artist with that name is created **in the same unit of work as the song**. If the
      song write fails, no artist row remains.
 - **REQ-SFT-19: Near-duplicate guard.** IF step 2 of REQ-SFT-18 applies, THEN one `dx:BottomSheet`
   SHALL show "Similar artist found", one row "Use '<existing>'" per near-duplicate (at most 3,
   highest score first), and one action "Create '<typed>'". Use → the song is saved with that artist.
   Create → the save continues with a new artist. Back or scrim → nothing is saved and the form is
-  unchanged. The sheet SHALL NOT appear in any other case.
+  unchanged. The sheet SHALL NOT appear in any other case. Near-duplicate candidates are retrieved
+  from the artist-name trigram index (REQ-SFT-34), not by first-word prefix.
+  Given "Metallica" is stored and no artist named "Metalica" exists,
+  When the user types "Metalica" as the artist (not picked) and saves,
+  Then the sheet offers "Use 'Metallica'" and "Create 'Metalica'", and nothing is saved yet.
+  (Today this case creates "Metalica" silently: the pool is `LIKE 'Metalica%'`,
+  `ArtistResolutionService.cs:183-195` via `DerivePrefixToken`, which cannot contain "Metallica".)
 - **REQ-SFT-20: Created-artist validation.** The created artist obeys `IArtistService` rules
   (non-empty after trim, ≤ 60 characters, no collated duplicate). A violation shows the service
   message on Artist and saves nothing.
@@ -161,8 +179,12 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   Version requirement.
 - **REQ-SFT-24: No overwrite.** No path SHALL overwrite a stored song with values typed or picked in
   an add form. ("Update existing" is removed.)
-- **REQ-SFT-25: New artist skips the guard.** WHEN the artist is being created by this Save, the
-  system SHALL NOT run REQ-SFT-22/23 (no stored song can match an artist that does not exist).
+- **REQ-SFT-25: A new artist does not skip the song guard.** WHEN the artist is being created by
+  this Save, the song duplicate guard SHALL still run. Its artist-scoped checks cannot match, but the
+  external-identity check can: Given "Don't Cry" is stored with Deezer id 3135556 under the artist
+  "Guns N Roses", When the user picks that Deezer song, which fills a new artist "Guns N' Roses",
+  and saves, Then the exact-duplicate sheet (REQ-SFT-22) offers Open existing, and no artist or song
+  is created unless the user chooses to.
 - **REQ-SFT-26: External identity is unique.** IF a save would give a second song the same external
   identity, THEN it SHALL fail with "This music-database song is already in your library" and save
   nothing. The database enforces the same rule (REQ-SFT-39).
@@ -192,8 +214,9 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-33: Short queries.** WHEN the trimmed query has no word of 3 or more characters (e.g.
   "ab", "a b"), the system SHALL return local songs whose title starts with the query (collated), as
   today.
-- **REQ-SFT-34: Index stays in step.** The local search SHALL reflect every song create, update and
-  delete (including bulk delete) and every artist rename, from the next query after the write commits.
+- **REQ-SFT-34: Index stays in step.** The local song search and the artist near-duplicate search
+  SHALL reflect every song create, update and delete (including bulk delete), every artist create,
+  rename and delete, from the next query after the write commits.
 - **REQ-SFT-35: Deezer query shape.** The system SHALL send Deezer the typed text as a plain query,
   with no `track:`/`artist:` qualifiers.
 - **REQ-SFT-36: MusicBrainz** `[OPEN — Helder decides; recommendation: drop]`. The title search and
@@ -233,6 +256,12 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   The solution builds with 0 errors and a census finds no reference (`design.md` § 9).
 - **REQ-SFT-45: No inline artist create.** The inline "Add … as a new artist" path and its command
   SHALL be removed from the Song form.
+- **REQ-SFT-51: Save decisions live in the Service.** Every Song-form Save SHALL call one Service
+  method that applies REQ-SFT-18/19/22/23/25/26 and returns a save outcome: `Saved`, `Failed(message,
+  field)`, `ArtistChoiceNeeded(typed name, candidates)` or `SongChoiceNeeded(exact?, candidates)`.
+  The ViewModel only maps `ArtistChoiceNeeded`/`SongChoiceNeeded` to BottomSheets and calls the method
+  again with the user's choice. Each rule is tested at the Service (Level A); VM tests check the
+  mapping only.
 - **REQ-SFT-46: One write path.** Every song create and update from the Song form, including the
   artist it creates, SHALL go through `ISongService.CreateSongWithUrlsAsync` or
   `ISongService.UpdateSongAsync`, so CATALOG-PROP's propagation cannot be bypassed.
@@ -270,8 +299,8 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 
 | Situation | Required behaviour |
 |-----------|--------------------|
-| Deezer unreachable, HTTP error, timeout, bad JSON | Local options + status row (REQ-SFT-06); Save unaffected |
-| Deezer returns 0 results | Local options only; no status row |
+| Deezer unreachable, HTTP error, timeout, bad JSON, HTTP 200 with an `error` object (quota) | Local options + Field supporting text "Online search unavailable" (REQ-SFT-06); Save unaffected |
+| Deezer returns 0 results | Local options only; no note |
 | Artist create fails inside Save | Nothing saved; message on Artist (REQ-SFT-20) |
 | Song write fails after the artist was staged | Unit of work rolls back both; the existing save-error path shows the message |
 | Near-duplicate sheet or resolution sheet dismissed | No save; form unchanged |
@@ -285,25 +314,30 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - The YouTube section, `YouTubeSearchPage` and the "Search YouTube (API)" row stay exactly as they
   are, pending a separate discussion on the YouTube API-key requirement (Helder, fifth round).
 - The shared Field's internals (lock mechanism, X styling, debounce plumbing): dependency item.
-- Two-phase rendering (local options first, remote appended later). Options render once per query.
+- `SongPickerPage`'s per-row "YouTube" button (`SongPickerViewModel.cs:100-106`, `SongPickerPage.xaml:66`)
+  disappears with the picker (REQ-SFT-44). The YouTube page itself is untouched.
 - Artist-form duplicate suggestions stub (`ArtistFormPage.xaml:46-51`), Person form.
 - Re-syncing stored songs from Deezer; lyrics providers.
 - Dropping `Artist.ExternalId/ExternalProvider` columns.
 
 ## Dependencies
 
-1. **Provider DI defect (prerequisite bug, may be registered separately).** `ServiceCollectionExtensions.cs:44-45`
+1. **Provider DI defect, BUG-082** (`Docs/Management/BusinessFeatures/artists-songs/bugs/2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient/`). `ServiceCollectionExtensions.cs:44-45`
    re-registers `MusicBrainzProvider`/`DeezerProvider` as plain scoped services, bypassing the typed
    `HttpClient` (no `BaseAddress`), so every remote call fails (findings § 0.1). Fix: register the
    providers through their typed clients. No remote REQ here is testable on device until it lands.
-2. **Shared Field** (dependency item above): pick-lock, X, shared constants. This item additionally
-   needs a **non-selectable option** for the status row (REQ-SFT-07); see `design.md` § 3.4.
+2. **Shared Field `AutocompleteDXField`** (dependency item above): Editable / Locked / Read-only
+   states, `IsSearchEnabled`, `SupportingText` (REQ-ACF-12c), shared constants. This item also asks
+   for one capability, appending options to the open menu (REQ-SFT-07; `design.md` § 3.4).
+4. **FTS5 on Android** is proven on desktop only. Spike gate G5 (`tasks.md`) runs on the device before
+   the migration task; fallback named there.
 3. **CATALOG-PROP**: coordinate on `SongService` (single writer; `tasks.md` § Coordination).
 
 ## Supersedes (shipped specs are not edited)
 
 | Shipped REQ / AC | File | Effect |
 |---|---|---|
+| REQ-FORMUX-01…05 (Artist-form Name autocomplete: local 300 ms, remote +400 ms stagger, 3-tier dedup, loading-hint row, silent offline) | `changes/2026-07-10-form-ux-redesign/requirements.md` | **Replaced** by REQ-SFT-47/48 (Artist form) and REQ-SFT-03…09 (Song form): no 400 ms stagger (remote starts with local), no loading-hint row, collated-name/identity dedup only (tier (c) similarity removed), offline shows the note instead of staying silent |
 | REQ-FORMUX-22 (title autocomplete, local+remote) | `changes/2026-07-10-form-ux-redesign/requirements.md` | **Replaced** by REQ-SFT-02…09 |
 | REQ-FORMUX-23 (remote pick autofills) | same | **Replaced** by REQ-SFT-12/13 (artist created on Save, not "marked" at pick) |
 | REQ-FORMUX-24 (run resolution/merge unchanged) | same | **Replaced** by REQ-SFT-22…26, 38 |
@@ -323,7 +357,8 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 | AC-11.1…11.3 (API strip, error mirror) | same | Already superseded; now fully replaced by REQ-SFT-02…14 |
 | `IX_Songs_ExternalId` "Unique" (schema table, line 381) | same | **Replaced** by the composite unique index (REQ-SFT-39) |
 | AC-ART-01…06, AC-SONG-01…06, AC-TRIGGER-01/02 | `search-picker/requirements.md` | **Removed** (REQ-SFT-44). AC-YT-*, AC-LOAD-* (YouTube page), AC-TRIGGER-03/04 kept |
-| REQ-UOW-09, REQ-UOW-22 (subjects: `ArtistResolutionService.CommitAsync`, `SongResolutionService.CommitAsync`) | `cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-…/requirements.md` | **Re-homed**: both methods are deleted; the same atomicity is required of the new-artist save path (REQ-SFT-18) and its tests port the REQ-UOW-22/24 cases (`design.md` § 10) |
+| REQ-UOW-09 (subject: `ArtistResolutionService.CommitAsync` CreateNew outcome) | `cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-…/requirements.md` | **Removed**: the method is deleted; its test `NestedUnitOfWorkTests.cs:195` is deleted with it. The `FlushAsync` affordance it justified (REQ-UOW-35) keeps a production caller in the new save path |
+| REQ-UOW-22 (subject: `SongResolutionService.CommitAsync` 3-level chain) | same | **Re-homed**: the method is deleted; the same all-or-nothing rule is required of the 2-level new-artist save path (REQ-SFT-18), and its tests are ported (`design.md` § 10.1) |
 | REQ-ACF-03 "picker-result resolve" clause, Q6 | autocomplete dependency item | Moot (picker deleted) |
 
 ## Open questions for Helder
@@ -331,7 +366,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **Q1 (REQ-SFT-36):** MusicBrainz: drop from all Field searches and delete the provider (recommended),
   or keep it behind Deezer?
 - **Q2 (REQ-SFT-11):** confirm the discard prompt on a local pick when other fields hold input.
-- **Q3 (REQ-SFT-18.1):** confirm that an unpicked artist that is a collated match is used silently.
+- **Q3 (REQ-SFT-18.1):** confirm that an artist with no local id that is a collated match is used silently.
 - **Q4 (REQ-SFT-23):** confirm "Save as new song" (no Version needed) for fuzzy-only matches.
 - **Q5:** Deezer returns `title_short` and `title_version` besides `title`. Keep Title = full `title`
   (current reading of your "tap X and retype" ruling), or fill Title = `title_short` and
@@ -341,21 +376,28 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **Q8 (ranking key):** option (a) is chosen. Measured: the existing scorer's `TokenSetRatio` puts
   "Cry" (100) above "Don't Cry" (94) for "dont cry", which fails REQ-SFT-30. `design.md` § 6.3 uses
   FuzzySharp `TokenSortRatio` through the same scorer class and normalisation. Confirm.
-- **Q9:** RESOLVED (fifth round): YouTube search is out of scope.
-- **Q10 (REQ-SFT-49):** Artist-form scope RESOLVED (confirmed). Still open: store the Deezer artist
-  id? Recommended: no.
-- **Q11:** `NestedUnitOfWorkTests` (the UoW nesting showcase) exercises only the deleted `CommitAsync`
-  methods. Port 4 of its 5 tests to the new save path, delete the 5th (artist external identity)?
-- **Q12:** the status row needs a non-selectable option in the shared Field. Accept adding it to the
-  dependency item, or show "Online search unavailable" as the Field's helper text instead?
+- **Q10 (REQ-SFT-49):** store the Deezer artist id on the Artist form? Recommended: no.
+- **Q11:** `NestedUnitOfWorkTests` exercises only the deleted `CommitAsync` methods. Port 4 of its 5
+  tests to the new 2-level save path and delete the 5th (artist external identity, REQ-UOW-09)?
+- **Q13 (REQ-SFT-27):** confirm edit mode: an API-sourced song's Title is Read-only, a manual song's
+  Title is Editable.
+- **Q14 (REQ-SFT-16):** confirm the Song-form Artist field searches local artists only (no Deezer).
+- **Q15 (REQ-SFT-48):** confirm a local pick on the Artist form opens that artist's edit form.
+- **Q16 (REQ-SFT-07):** if the shared Field cannot append options, accept the fallback (local options
+  wait up to 3,000 ms for Deezer)?
+
+Resolved: Q9 (YouTube search out of scope, fifth round); Q12 (the "In your library" marker lives in
+the option supporting text, and "Online search unavailable" is the Field's `SupportingText`; no
+non-selectable row).
 
 ## Traceability seed (filled at implementation)
 
 | AC | Implementation location | Test |
 |----|-------------------------|------|
-| REQ-SFT-02…09 | `SongSuggestionService.SearchTitleAsync`, `SongRepository.SearchTitleCandidatesAsync`, `SongFormViewModel.TitleOptionSource` | `SongSuggestionServiceTests` (A), `SongRepositorySearchTests` (B, real SQLite), VM tests |
+| REQ-SFT-02…09 | `SongSuggestionService.SearchTitleLocalAsync`/`SearchTitleRemoteAsync`, `SongRepository.SearchTitleCandidatesAsync`, `SongFormViewModel.TitleOptionSource` | `SongSuggestionServiceTests` (A), `SongRepositorySearchTests` (B, real SQLite), VM tests |
 | REQ-SFT-10…14 | `SongFormViewModel` pick handlers | `SongFormViewModelTests` (A) |
-| REQ-SFT-15…21, 25, 28 | `SongFormViewModel` save flow, `SongService` create/update | VM (A), `SongServiceTests` (A), UoW integration (A) |
+| REQ-SFT-15…21, 25, 28, 51 | `SongService.SaveFromFormAsync` (rules), `SongService` create/update (writes), `SongFormViewModel` (outcome → sheet mapping) | `SongServiceSaveFromFormTests` (A), UoW integration (A), VM mapping (A) |
+| REQ-SFT-19 (retrieval) | `ArtistRepository.SearchNameCandidatesAsync`, `ArtistResolutionService` | repo test (B, migrated SQLite: "Metalica" → "Metallica") + service (A) |
 | REQ-SFT-22…24, 42 | `SongResolutionService.ResolveAsync`, `SongRepository.FindIdByTitleVersionForArtistAsync` | `SongResolutionServiceTests` (A), repo test (B) |
 | REQ-SFT-26, 39 | `SongService`, migration M2 | service (A), migration test (B) |
 | REQ-SFT-27 | `SongFormViewModel.IsTitleReadOnly`, page | VM (A) + E2E |
@@ -363,7 +405,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 | REQ-SFT-30…34 | FTS5 migration M3, repository, scorer | repo tests (B, migrated SQLite) + service ranking tests (A) |
 | REQ-SFT-35/36 | `DeezerProvider`, DI | provider test with fake handler (B) |
 | REQ-SFT-37/38/40/43 | entities, configs, migration M1, deleted members | build + migration test (B) + census |
-| REQ-SFT-41 | `SongFormViewModel` save flow | regression test Red→Green (A) |
+| REQ-SFT-41 | `SongService.SaveFromFormAsync` | regression test Red→Green (A) |
 | REQ-SFT-44/45 | deletions | census + build (C, recorded) |
 | REQ-SFT-46 | `SongService` | architecture/code review + VM tests assert only these two write calls |
 | REQ-SFT-47…50 | `ArtistFormViewModel`, `ArtistSuggestionService` | VM + service tests (A) |
