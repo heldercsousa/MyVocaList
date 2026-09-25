@@ -1,12 +1,13 @@
 ---
 id: BUG-081
 title: Song form edit mode — clear (X) icon disabled on locked artist, artist cannot be replaced
-status: 🟡 In Progress
+status: ✅ Fixed
 severity: Major
 target: 2026-09-23
 parent: artists-songs
 goal: "Regression of REQ-ACREATE-15: in edit mode the locked Artist field renders its clear icon disabled, so the only unlock affordance is gone and a saved song's artist cannot be changed."
 gate: Clear icon unlocks and clears the field in edit mode; VM-seam regression test Red then Green; Helder re-verifies on device.
+closed: 2026-09
 kind: bug
 ---
 
