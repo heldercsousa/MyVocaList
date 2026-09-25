@@ -49,6 +49,35 @@ Decisions captured from Helder, 2026-09-24. Spec not yet written. It waits on a 
   same way: created on Save.
 - **Pick-lock is on for every autocomplete field** (shared component, no per-page switch).
 
+## Helder's decisions — third round (2026-09-24)
+
+1. **Near-duplicate artist guard on Save: YES.** If the typed (unpicked) artist does not exist but
+   the existing similarity scorer finds a close one, one BottomSheet asks: use the existing artist,
+   or create the typed one. It appears only in that case.
+2. **Pick-lock applies to Title too.** API titles with extras ("(Remastered 2011)", "– Live") are
+   not trimmed in place: the user taps X and retypes.
+3. **Title is not changeable once it came from a pick, and the search is off in edit mode.**
+   Helder: changing the title of an API-sourced song makes little sense. Notes such as "live" or
+   "acoustic" go in **Version**. Version must be shown in search results, to tell versions of the
+   same song apart. Orchestrator's reading, to be confirmed in the spec review:
+   - in edit mode the Title is not a search box;
+   - an API-sourced song's Title is read-only;
+   - a manually entered song's Title stays editable.
+4. **Tracking fields (findings.md § 3): approved as recommended.**
+   - DROP `HasManualEdits` (Song + Artist) and the merge sheet.
+   - SIMPLIFY the resolution sheet to "Open existing / Save as new version".
+   - KEEP Song `ExternalId`/`ExternalProvider` with a unique `(Provider, ExternalId)` index.
+   - Keep the Artist external columns but don't build on them.
+5. **Typo tolerance: Deezer is the main API, plus a local SQLite FTS5 trigram index.** The
+   ranking-step question (the similarity scorer vs the no-C#-normalisation rule) was explained
+   to Helder; resolution pending.
+6. **The four smaller bugs in findings.md are absorbed by this redesign**, at the orchestrator's
+   discretion. The spec must carry each one as an explicit AC so none is lost:
+   - artist lookup given the song's external id;
+   - an accent-only title difference returns an exact match with no id;
+   - the merge sheet writes with every field unchecked (removed along with the merge sheet);
+   - edit-save uniqueness ignores Version.
+
 ## Related
 
 - The **catalog auto-update on song save** is item CATALOG-PROP, specified in another session.
