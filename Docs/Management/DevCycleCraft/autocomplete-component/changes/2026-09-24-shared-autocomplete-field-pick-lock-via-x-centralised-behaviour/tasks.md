@@ -35,12 +35,20 @@
     - B2 (right after a menu pick, **keyboard still up**): 10 keystrokes plus 1 long-press paste leave
       the text byte-equal to the picked value, and 0 frames show a typed or pasted character.
     - B3: the End icon renders in `OnSurfaceVariant`, not dimmed or disabled (screenshot beside an
-      enabled `TextEdit` clear icon).
+      enabled `TextEdit` clear icon). **Also:** the End-icon X (locked) and DX's built-in clear icon
+      (unlocked) render identically in glyph, size, position and colour (side-by-side screenshots).
+      If they differ, record it: the design then uses the End icon as X in both states.
     - B4: tapping the End icon fires `EndIconClicked` (log line) on 5 of 5 taps.
     - B5 (**BUG-069 must stay fixed**, REQ-ACF-25): under B, no menu opens on a programmatic lock or
       on `SongFormPage` edit-load, and no menu reopens after a pick, on 5 of 5 attempts each.
     - B6: after the handler sets `IsReadOnly=False` and focuses the editor, the keyboard opens and
       typing requests options.
+  - **Read-only check (REQ-ACF-12b; whatever B/C's outcome):** with `IsReadOnly=True`,
+    `ClearIconVisibility=Never`, `IsEndIconVisible=False` and text set:
+    - R1: the text is visible in the normal (not disabled) text colour, and **no X** is shown in any frame.
+    - R2: tap, long-press and 10 keystrokes leave the text byte-equal, with no keyboard and no cursor in any frame.
+    - R3: no menu opens on load or on tap (5 of 5); this is the BUG-069 exposure again, because `IsReadOnly` is back.
+    If R1–R3 fail, report it to Helder: the song-form item's read-only Title depends on it.
   - **C procedure (only if B fails):** `IsReadOnly=False`, built-in clear icon; while locked, revert
     `TextChanged` when `Reason==UserInput`, skip `ItemsRequested`, `Unfocus()` on `Focused`.
   - **C is measured against C1–C5.** Passing them does **not** select C: it is a visible compromise
@@ -81,11 +89,11 @@
 - [ ] **T3: `IMenuOptionSource` + `ExposedDropdownMenuLogic` with tests** [SEQUENTIAL, after the T1 verdict]
   - Tester writes `ExposedDropdownMenuLogicTests` first: every rule in `design.md` § 4, each test tagged
     `// [AC] REQ-ACF-NN`: 01 (`LockAfterPick`), 04, 05a (locked + empty/whitespace → not effectively
-    locked), 11b, 11c/17, 12a (search off → no request), 13 (" a" and "a" → no request; "ab" → request),
+    locked), 11b, 11c/17, 12a (search off → no request), 12b (read-only wins over locked and search; no X, no request, no blur forwarding), 13 (" a" and "a" → no request; "ab" → request),
     19, 22, 24; plus 01 via `TextToRestore` **only if Helder accepted C**. Confirm Red, implement, Green.
   - **Produces:** `IMenuOptionSource`, `MenuOptionSource`, `ExposedDropdownMenuLogic`, `PickRoute`
   - **Consumes:** T1 verdict; `AutocompleteSuggestion`; `SearchConstants`
-  - **Risk:** Medium (encodes the rules the component depends on)
+  - **Risk:** High (Level A logic: every component rule, including lock and read-only precedence)
   - **Files owned:** `MyVocaList/UI/Models/IMenuOptionSource.cs`, `MyVocaList/UI/Components/TextFields/ExposedDropdownMenuLogic.cs`, `MyVocaList.Tests/Unit/Components/ExposedDropdownMenuLogicTests.cs`
   - **Demo:** `dotnet test` shows the new logic tests green; the full suite stays green.
   - **Review lane:** Standard
@@ -94,7 +102,7 @@
 
 - [ ] **T4: `ExposedDropdownMenu` component (XAML + code-behind)** [SEQUENTIAL, after T2 + T3]
   - Build the `ContentView` per `design.md` § 3.1 (including `IsSearchEnabled` and `FocusEditor()`;
-    no create or opt-out surface), § 5 (the mechanism chosen after T1, driven by `EffectiveLocked`),
+    no create or opt-out surface), § 5 (the mechanism chosen after T1, driven by `Mode`), `IsReadOnly` (REQ-ACF-12b: inner `IsReadOnly=true`, no clear/end icon),
     § 5.2 (X colour tokens + `Error` trigger), § 5.3 (`SubmitIconVisibility=Never`) and § 6 (X
     handling: empty text, unlock, clear command, focus). Option template = Headline + optional
     SupportingText. Threshold and delay via `x:Static` `SearchConstants`. Incremental: XAML → build →
@@ -109,9 +117,13 @@
 
 - [ ] **T5: `PersonFormViewModel`: `SearchPersonsCoreAsync` + `NameOptionSource`** [SEQUENTIAL, after T3]
   - Tester first: (a) `NameOptionSource.SearchAsync("jo", ct)` returns exactly the list mapped from
-    `IPersonService.SearchPersonsStartsWithAsync` (`// [AC] REQ-ACF-16`); (b) below the threshold it
-    returns empty, and the service is not called (`// [AC] REQ-ACF-13`). Confirm Red, then refactor
-    `SearchPersonsAsync` (`PersonFormViewModel.cs:280-293`) to delegate to the new core method, then Green.
+    `IPersonService.SearchPersonsStartsWithAsync`, and the token passed to `SearchAsync` reaches the
+    service call (`// [AC] REQ-ACF-16`); (b) below the **trimmed** threshold (" a", "a") it returns
+    empty and the service is not called (`// [AC] REQ-ACF-13`). Confirm Red, then refactor
+    `SearchPersonsAsync` (`PersonFormViewModel.cs:280-293`) to delegate to the new core method, which
+    trims before the threshold check (today it checks raw `term.Length`, `:282`) and passes `ct` to
+    `SearchPersonsStartsWithAsync` (`Services/PersonService.cs:213`), then Green. The only behaviour
+    change for the existing command is that padded input such as "a " no longer searches.
     Existing `PersonFormViewModelTests` and `PersonFormViewModelBug044Tests` stay **unchanged** and green
     (REQ-ACF-20/21/28).
   - **Produces:** `SearchPersonsCoreAsync`, `NameOptionSource` · **Consumes:** T3 `MenuOptionSource`
@@ -154,7 +166,7 @@
     2. Typing 1 char, or a space plus 1 char → no menu; 2 chars → up to 5 people after about 300 ms (REQ-ACF-13, -14, -15).
     3. Pick a person → that person's edit form replaces the page (no stacked form), with the name
        editable (REQ-ACF-03, -15, -20); no menu opens on the edit form (REQ-ACF-25).
-    4. Just before navigation completes, the picked name cannot be edited, and no menu reopens (REQ-ACF-01, -04). Record what is observable; the window is short.
+    4. *Informational only, not pass/fail:* just before navigation completes, the picked name cannot be edited and no menu reopens (REQ-ACF-01, -04). The window is short; the proof is T1 (B1–B6).
     5. X is visible whenever there is text, looks enabled, and there is no magnifier icon (REQ-ACF-07, -08, -10).
     6. Type a name, tap X → empty, focus kept, keyboard up (REQ-ACF-09).
     7. Type an invalid name and blur → the existing name validation shows; the text is kept (REQ-ACF-17, -19).
@@ -175,7 +187,9 @@
 owns:
 - `SongFormViewModel` artist flow onto the component: `ArtistOptionSource`, lock hydration, and
   deleting `SongFormPage.xaml.cs:38,41-113` and `SongFormPage.xaml:28-79`.
-- Title field on the component (pick-lock on; `IsSearchEnabled=false` in edit mode, REQ-ACF-12a).
+- Title field on the component (pick-lock on; `IsSearchEnabled=false` in edit mode, REQ-ACF-12a;
+  `IsReadOnly=true` for an API-sourced song's Title in edit mode, REQ-ACF-12b; Version shown via
+  `SupportingText`).
 - Removing the create-new row path and the BUG-070 message (create on Save).
 - Adding `ExposedDropdownMenu` to the governed table when the Song form binds (second consumer).
 - On-device proof of REQ-ACF-05 (a)–(g) and REQ-ACF-06 on a real locked field.

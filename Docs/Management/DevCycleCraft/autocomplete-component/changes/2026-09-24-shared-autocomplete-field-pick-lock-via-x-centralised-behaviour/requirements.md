@@ -31,6 +31,7 @@ Every agent uses these terms exactly. No synonyms.
 | **Pick** | The user taps an option. |
 | **Picked state / locked** | The field holds a picked value, so its text is read-only. Entered by a pick, or when the consumer sets `IsLocked = true` programmatically (e.g. edit-mode hydration). Left only by X. |
 | **Unlocked state** | Not locked. The text is editable. If search is enabled, typing searches. |
+| **Read-only** | The page-controlled state (`IsReadOnly`) in which the text is shown but cannot be changed, and there is no X and no search. Overrides locked and search enabled. |
 | **Search enabled** | The page-controlled switch (`IsSearchEnabled`) that turns option requests and the menu on or off, while keeping the field as a text field. |
 | **Clear icon (X)** | The trailing icon that removes the value (MD3 text-field *trailing icon*). In DevExpress: the built-in `ClearIcon`, or the substitute chosen in `design.md` § 5. |
 | **Submit icon** | The DevExpress `AutoCompleteEdit` default trailing magnifier icon (`SubmitIcon`/`SubmitIconVisibility`). |
@@ -86,7 +87,7 @@ Every agent uses these terms exactly. No synonyms.
   field as unlocked: text editable, X hidden per REQ-ACF-07, options requested if search is enabled.
   Reason: `SongFormViewModel.cs:469-477` sets the lock even when `song.ArtistId == 0`, and a future
   consumer could do the same. Without this rule the field would be read-only with no X. Enforced in
-  the component (`ExposedDropdownMenuLogic.EffectiveLocked`, design § 4) for every consumer.
+  the component (`ExposedDropdownMenuLogic.Mode`, design § 4) for every consumer.
 - **REQ-ACF-06: After X, the field is empty, unlocked and focused (Helder ruling Q7).**
   Given the field is in the picked state,
   When the user taps X,
@@ -143,6 +144,19 @@ Every agent uses these terms exactly. No synonyms.
   Need: the song-form item turns the Title search off in edit mode (its README, third round,
   decision 3). Given a field with `IsSearchEnabled = false`, When the user types 5 characters,
   Then 0 search calls reach the consumer and the menu never opens.
+- **REQ-ACF-12b: The page can make the field read-only.**
+  WHILE `IsReadOnly` is `true`, the system SHALL show the text; accept no typing, paste or edit;
+  show **no** X; request no options, call no search, and keep the menu closed; and SHALL NOT forward
+  blur. **Read-only wins:** it overrides `IsLocked` and `IsSearchEnabled` (a read-only field behaves
+  identically whatever their values). When `IsReadOnly` returns to `false`, the field resumes the state
+  given by `IsLocked`/`IsSearchEnabled`. Default `false`. The field is rendered in the normal (not
+  disabled) style, because the value is meaningful content, not an unavailable control.
+  Need: the song-form item's edit mode shows an API-sourced song's Title read-only, with no way to
+  change it (its README, third round, decision 3). Added now, before a second consumer binds, so that
+  it does not require a governed-component change later.
+  Given a field with `IsReadOnly = true` and text "Don't Cry",
+  When the user taps, long-presses or types in it,
+  Then the text stays "Don't Cry", no X is visible in any frame, 0 search calls are made, and no menu opens.
 
 ### E. Shared constants (Helder rulings Q2, Q10)
 
@@ -184,12 +198,12 @@ Every agent uses these terms exactly. No synonyms.
 
 | ID | Shipped behaviour | Verified by |
 |----|-------------------|-------------|
-| **REQ-ACF-19** (REQ-DXAC-03) | Typed text is never cleared or replaced by the control on blur, menu dismiss or focus change. | Component logic test + T7 |
+| **REQ-ACF-19** (REQ-DXAC-03) | Typed text is never cleared or replaced by the control on blur, menu dismiss or focus change. | Code review (the component writes `Text` only on X, and on the C-mechanism revert while locked) + T7 on-device |
 | **REQ-ACF-20** (BUG-044) | Picking a person replaces the page (no stacked form). | `PersonFormViewModelBug044Tests.SuggestionSelected_NavigatesWithReplacingRelativeRoute_NotAStackedPush` (unchanged) |
 | **REQ-ACF-21** (REQ-DXAC-02 gate) | Person search below 2 characters returns nothing. | `PersonFormViewModelTests.SearchPersonsCommand_ShortTerm_SetsEmptySuggestions` (unchanged) |
-| **REQ-ACF-22** (BUG-056) | Options come from the search's return value. | Component logic test + REQ-ACF-16 VM test |
+| **REQ-ACF-22** (BUG-056) | Options come from the search's return value. | T5 VM test (REQ-ACF-16) + code review of the component's `ItemsRequested` glue |
 | **REQ-ACF-23** (BUG-061) | No option stays highlighted after a pick. | T7 on-device |
-| **REQ-ACF-24** (BUG-065/066) | Programmatic text changes never trigger a search and always close the menu. | Component logic test (programmatic lock) + T7 |
+| **REQ-ACF-24** (BUG-065/066) | Programmatic text changes never trigger a search and always close the menu. | T1 (programmatic lock button) + T7 on-device + code review. DX fires no `ItemsRequested` for programmatic text (BUG-065/066 IL evidence), so there is no component logic to unit-test. |
 | **REQ-ACF-25** (BUG-069, must stay fixed) | No menu reopens after a pick, and none opens on an edit-mode load. BUG-069 stopped reproducing after the BUG-081 merge (`2d70ac73`), confirmed by Helder on device 2026-09-24 (`Docs/Management/LEDGER.md`, INLINE-AC row, "Update 2026-09-24"; likely a side effect of dropping `IsReadOnly`). Any mechanism that brings `IsReadOnly` back must re-prove it. | T1 criterion B5 + T7 |
 | **REQ-ACF-26** (REQ-DXAC-07) | Latest query wins: a stale request never replaces newer options (DX cancellation token honoured after the await). | Code review + T7 |
 | **REQ-ACF-27** (REQ-DXAC-06/12) | No DX client-side filtering. The Outlined form-field style (`MaterialStyles.xaml:74`) applies. | Code review + T7 |
@@ -212,6 +226,9 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
   violates REQ-ACF-01. The spike (T1) and device gate (T7) catch it. iOS is not device-tested here.
 - **Consumer never binds `IsLocked`** (Person form): the component still locks on a pick and
   unlocks on X by itself (TwoWay property with a local value), so pick-lock holds with no VM code.
+- **Person form stays locked on screen after a pick:** if `SuggestionSelectedAsync` returns early
+  (`PersonFormViewModel.cs:297`, suggestion data is not a `Person`) or the navigation fails, the Full
+  Name field remains in the picked state on the New Singer form. Harmless: X unlocks it (REQ-ACF-06).
 
 ## Supersedes (shipped specs are not edited)
 
@@ -275,15 +292,22 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
 - **Q8 RESOLVED: yes.** Remove the magnifier.
 - **Q9 RESOLVED: as recommended (accept),** and now largely moot, since there is no inline create.
 
+> **Numbering note (added after the rulings; the rulings text above is unchanged):** the rulings use
+> the previous numbering. Old REQ-ACF-15 (BUG-070 copy), old -16 (create-new row) and old -21
+> (BUG-054a create-row suppression) are removed. Old -16's trimmed-threshold rule survives as the
+> current REQ-ACF-13. Old -22 (BUG-056) is the current REQ-ACF-22. The current REQ-ACF-15…18 are the
+> Person form ACs, and the current -21 is the Person 2-character gate.
+
 ## Traceability seed (filled at implementation)
 
 | AC | Implementation location | Test |
 |----|-------------------------|------|
-| REQ-ACF-01…06, -12a | component (`design.md` § 4, § 5) | component logic tests (Level A) + T1 spike + T7 on-device |
+| REQ-ACF-01…06, -12a, -12b | component (`design.md` § 4, § 5) | component logic tests (Level A) + T1 spike + T7 on-device |
 | REQ-ACF-07/08/10 | component XAML | T7 on-device (DX rendering) |
 | REQ-ACF-11/12 | component + `PersonFormPage.xaml(.cs)` | code review checklist (T6) |
 | REQ-ACF-13/14 | `SearchConstants` + component | constants test (T2) + component logic test (T3) |
 | REQ-ACF-15…18 | `PersonFormViewModel` + `PersonFormPage` | VM tests (T5) + T7 |
-| REQ-ACF-19, -22, -24 | component logic class | component logic tests (T3) |
+| REQ-ACF-19, -24 | component code-behind | code review + T1/T7 on-device |
+| REQ-ACF-22 | `PersonFormViewModel.NameOptionSource` + component glue | T5 VM test + code review |
 | REQ-ACF-20, -21, -28 | `PersonFormViewModel` (unchanged members) | existing VM tests, unchanged |
 | REQ-ACF-23, -25, -26, -27 | component | T1 + T7 on-device, code review |

@@ -95,9 +95,10 @@ The test project references the MAUI head (`MyVocaList.Tests.csproj:33-34`), and
 | `LabelText` / `PlaceholderText` | `string` | OneWay | `""` | Label and placeholder. |
 | `Text` | `string` | **TwoWay** | `""` | Editor text (Person: `PersonName`). |
 | `IsLocked` | `bool` | **TwoWay** | `false` | Picked state. Set `true` by the component on a pick and `false` on X; a consumer may also set it (REQ-ACF-01/02/06). Always honoured, with no opt-out (Q3). |
+| `IsReadOnly` | `bool` | OneWay | `false` | Page-set read-only state: text shown; no typing, no X, no search, no menu, no blur forwarding. **Wins over `IsLocked` and `IsSearchEnabled`** (REQ-ACF-12b). Hides the inherited name on purpose: `ContentView` has no `IsReadOnly`, and the name matches DX `EditBase.IsReadOnly` and MAUI `InputView.IsReadOnly`. Implemented by setting the inner editor's `IsReadOnly=true`, `ClearIconVisibility=Never` and `IsEndIconVisible=false`. |
 | `IsSearchEnabled` | `bool` | OneWay | `true` | Page switch: `false` → no option requests, no menu; the rest of the field is unchanged (REQ-ACF-12a). |
 | `HasError` / `ErrorText` | `bool` / `string` | OneWay | `false` / `""` | Passed to DX `HasError`/`ErrorText`. |
-| `IsDropDownOpen` | `bool` | **TwoWay** | `false` | The BUG-065/066 lever. Forced `false` while effectively locked or when search is off (REQ-ACF-04, -12a). |
+| `IsDropDownOpen` | `bool` | **TwoWay** | `false` | The BUG-065/066 lever. Forced `false` unless `Mode == Editable` and search is on (REQ-ACF-04, -12a, -12b). |
 | `OptionSource` | `IMenuOptionSource` | OneWay | `null` | The search. `null` → no requests. |
 | `SelectCommand` | `ICommand` (param `AutocompleteSuggestion`) | OneWay | `null` | Pick routing (Person: `SuggestionSelectedCommand`). |
 | `ClearCommand` | `ICommand` | OneWay | `null` | Optional; run after X empties and unlocks (REQ-ACF-06/09). |
@@ -137,8 +138,8 @@ several fields (the Song form will have Title and Artist). The other members are
 | Member | Status |
 |--------|--------|
 | `PersonName`, `NameHasError`, `NameErrorText`, `SuggestionSelectedCommand`, `ValidateNameCommand` | ✅ existing, unchanged |
-| `SearchPersonsCoreAsync(string term)` → `IReadOnlyList<AutocompleteSuggestion>` | **new**: the body of today's `SearchPersonsAsync` (`PersonFormViewModel.cs:280-293`), returning the mapped list (empty below the threshold). `SearchPersonsAsync` becomes `Suggestions = await SearchPersonsCoreAsync(term)`, so `SearchPersonsCommand` and its tests are unchanged. |
-| `NameOptionSource` (`IMenuOptionSource`) | **new**: `new MenuOptionSource((q, ct) => SearchPersonsCoreAsync(q))` (REQ-ACF-16). |
+| `SearchPersonsCoreAsync(string term, CancellationToken ct = default)` → `IReadOnlyList<AutocompleteSuggestion>` | **new**: the body of today's `SearchPersonsAsync` (`PersonFormViewModel.cs:280-293`), changed in two ways: the threshold check uses the **trimmed** term (`term.Trim().Length < SearchConstants.MinimumLocalQueryLength`, REQ-ACF-13; today it checks raw `term.Length`, `:282`), and the method takes a `CancellationToken` and passes it to `IPersonService.SearchPersonsStartsWithAsync(term, ct: ct)` (the parameter exists, `Services/PersonService.cs:213`). It returns the mapped list (empty below the threshold). `SearchPersonsAsync` becomes `Suggestions = await SearchPersonsCoreAsync(term)`, so `SearchPersonsCommand` and its tests are unchanged. |
+| `NameOptionSource` (`IMenuOptionSource`) | **new**: `new MenuOptionSource((q, ct) => SearchPersonsCoreAsync(q, ct))` (REQ-ACF-16), passing the DX request's token through. |
 
 **Handed over to the song-form title-first item:** `SongFormViewModel.ArtistOptionSource`, a Title
 option source, the artist/title lock hydration, and deleting the Song glue
@@ -148,16 +149,20 @@ option source, the artist/title lock hydration, and deleting the Song glue
 
 | Function | Rule | REQ |
 |----------|------|-----|
-| `bool EffectiveLocked(bool isLocked, string? text)` | `isLocked && !string.IsNullOrWhiteSpace(text)`. Every other rule and the lock mechanism use this, never the raw `IsLocked`. | ACF-05a |
-| `bool ShouldRequestOptions(bool effectiveLocked, bool isSearchEnabled, IMenuOptionSource? source, string? query)` | `source != null && isSearchEnabled && !effectiveLocked && (query?.Trim().Length ?? 0) >= SearchConstants.MinimumLocalQueryLength`. The trimmed-length check is needed because DX `CharacterCountThreshold` counts raw characters (" a" would pass it). | ACF-04, -12a, -13 |
+| `FieldMode Mode(bool isReadOnly, bool isLocked, string? text)` | `ReadOnly` if `isReadOnly` (**read-only wins**); else `Locked` if `isLocked && !string.IsNullOrWhiteSpace(text)`; else `Editable`. Every other rule and the lock mechanism use this, never the raw `IsLocked`/`IsReadOnly`. "Effectively locked" below means `Mode == Locked`. | ACF-05a, -12b |
+| `bool ShowClearIcon(FieldMode mode, string? text)` | `mode != ReadOnly && !string.IsNullOrEmpty(text)`. | ACF-07, -12b |
+| `bool ShouldRequestOptions(FieldMode mode, bool isSearchEnabled, IMenuOptionSource? source, string? query)` | `source != null && isSearchEnabled && mode == Editable && (query?.Trim().Length ?? 0) >= SearchConstants.MinimumLocalQueryLength`. The trimmed-length check is needed because DX `CharacterCountThreshold` counts raw characters (" a" would pass it). | ACF-04, -12a, -12b, -13 |
 | `PickRoute RoutePick(object? selectedItem)` | `Select` if `selectedItem is AutocompleteSuggestion`; else `None`. | ACF-11b |
 | `bool LockAfterPick(PickRoute route)` | `route == Select`. There is no opt-out (Q3). | ACF-01 |
-| `bool ShouldForwardBlur(object? selectedItem, bool effectiveLocked)` | `selectedItem is null && !effectiveLocked`. | ACF-11c, -17 |
-| `string? TextToRestore(AutoCompleteEditTextChangeReason reason, bool effectiveLocked, string lockedText)` | *Only if mechanism C is accepted (§ 5).* `lockedText` when `reason == UserInput && effectiveLocked`; else `null`. | ACF-01 |
+| `bool ShouldForwardBlur(object? selectedItem, FieldMode mode)` | `selectedItem is null && mode == Editable`. | ACF-11c, -12b, -17 |
+| `string? TextToRestore(AutoCompleteEditTextChangeReason reason, FieldMode mode, string lockedText)` | *Only if mechanism C is accepted (§ 5).* `lockedText` when `reason == UserInput && mode == Locked`; else `null`. (Read-only always uses DX `IsReadOnly`, whichever mechanism is chosen.) | ACF-01 |
 
 The code-behind maps DX events to these and calls `ICommand.CanExecute`/`Execute`. The options
 passed to DX are exactly the `IMenuOptionSource.SearchAsync` result, after
-`ct.ThrowIfCancellationRequested()` (BUG-056, REQ-ACF-22/26).
+`ct.ThrowIfCancellationRequested()` (BUG-056, REQ-ACF-22/26). That glue has no branching logic
+worth isolating: REQ-ACF-22 is proven at the VM seam (T5) plus code review. REQ-ACF-19 (the component
+never writes `Text` on blur) and REQ-ACF-24 (programmatic text never searches, a DX behaviour) are
+proven by code review and on device (T1/T7), not by unit tests.
 
 ## 5. Lock mechanism (the crux)
 
@@ -176,7 +181,7 @@ passed to DX are exactly the `IMenuOptionSource.SearchAsync` result, after
 state. **An on-device spike is required** (tasks.md T1).
 
 ### Decision: lock mechanism (spike-gated)
-**Chosen approach (primary, B): "read-only + End-icon X".** While `EffectiveLocked` (§ 4):
+**Chosen approach (primary, B): "read-only + End-icon X".** While `Mode == Locked` (§ 4):
 `IsReadOnly = true`, `ClearIconVisibility = Never`, `EndIcon = close_outlined`
 (`Resources/Images/close_outlined.svg` exists), `IsEndIconVisible = true`,
 `EndIconColor = OnSurfaceVariant`, and `EndIconClicked` → the X handling in § 6. While unlocked:
@@ -267,6 +272,9 @@ UNLOCKED, search enabled, typing:
      ─► ShouldRequestOptions? no ─► nothing; menu stays closed
                               yes ─► OptionSource.SearchAsync(text, ct) ─► ct check ─► menu shows options
 
+READ-ONLY (IsReadOnly=true; wins over IsLocked/IsSearchEnabled):
+  text shown ─► DX IsReadOnly=true, no clear/end icon ─► tap/keys/paste: nothing ─► no ItemsRequested search, no menu ─► blur: nothing
+
 SEARCH DISABLED (IsSearchEnabled=false):
   keystroke ─► ItemsRequested ─► ShouldRequestOptions = false ─► nothing; IsDropDownOpen=false
 
@@ -290,7 +298,7 @@ PROGRAMMATIC LOCK (consumer sets Text + IsLocked=true, e.g. hydration):
   ─► component applies the lock (if text non-empty) ─► SelectedItem = null, IsDropDownOpen = false
 ```
 
-State machine (component view; `EL` = `EffectiveLocked`):
+State machine (component view; `Mode` from § 4; `IsReadOnly=true` overrides every state below with ReadOnly, and clearing it returns to the state implied by `IsLocked`/text):
 
 ```
 Unlocked-Empty     --type (trimmed ≥ 2, search on)--> Unlocked-Searching
@@ -300,15 +308,16 @@ Unlocked-*         --X--> Unlocked-Empty (focus kept)
 Locked             --X--> Unlocked-Empty (focused, keyboard up)
 Locked             --any other user input--> Locked (no change)
 (any, text ≠ "")   --consumer sets IsLocked=true--> Locked
-Locked             --consumer empties Text--> Unlocked-Empty (EL false: REQ-ACF-05a)
+Locked             --consumer empties Text--> Unlocked-Empty (Mode = Editable: REQ-ACF-05a)
 ```
 
 ## 7. Invariants and postconditions
 
-- **INV-1:** `EffectiveLocked` ⇒ the editor text is unchanged by user input, the menu is closed,
+- **INV-1:** `Mode == Locked` ⇒ the editor text is unchanged by user input, the menu is closed,
   and no search call is issued.
-- **INV-1a:** the field is never read-only while its text is empty (REQ-ACF-05a).
-- **INV-2:** X is visible ⇔ the text is non-empty, and X is never rendered disabled while visible.
+- **INV-1a:** the field is never *locked* while its text is empty (REQ-ACF-05a). A page-set `IsReadOnly` is exempt.
+- **INV-1b:** `IsReadOnly` ⇒ `Mode == ReadOnly` whatever `IsLocked`/`IsSearchEnabled` say: no X, no search, no menu, no blur forwarding (REQ-ACF-12b).
+- **INV-2:** X is visible ⇔ the text is non-empty and `Mode != ReadOnly`; X is never rendered disabled while visible.
 - **INV-3:** after any routed pick, DX `SelectedItem == null`.
 - **INV-4:** `IsSearchEnabled == false` ⇒ 0 search calls and the menu closed.
 - **INV-5:** no consumer page code-behind handles DX autocomplete events for a field hosted by the component.
@@ -346,8 +355,8 @@ purpose; the song-form item may wrap them in a `MenuOptionSource`.
 
 | Level | What | Where |
 |-------|------|-------|
-| **A** | `ExposedDropdownMenuLogic`: every row of § 4 with all branches (locked/unlocked, locked + empty/whitespace text, search on/off, null source, trimmed length 1 vs 2 incl. " a", pick routing, blur forwarding, `Reason` × locked if C). Each test tagged `// [AC] REQ-ACF-NN`. | `MyVocaList.Tests/Unit/Components/ExposedDropdownMenuLogicTests.cs` |
-| **A** | `PersonFormViewModel.NameOptionSource.SearchAsync` returns exactly `SearchPersonsCoreAsync`'s list (REQ-ACF-16); `SearchPersonsCoreAsync` returns empty below the threshold without calling the service. | `PersonFormViewModelTests.cs` |
+| **A** | `ExposedDropdownMenuLogic`: every row of § 4 with all branches (read-only × locked × search on/off, with read-only winning; locked/unlocked, locked + empty/whitespace text, `ShowClearIcon`, search on/off, null source, trimmed length 1 vs 2 incl. " a", pick routing, blur forwarding, `Reason` × locked if C). Each test tagged `// [AC] REQ-ACF-NN`. | `MyVocaList.Tests/Unit/Components/ExposedDropdownMenuLogicTests.cs` |
+| **A** | `PersonFormViewModel.NameOptionSource.SearchAsync` returns exactly `SearchPersonsCoreAsync`'s list (REQ-ACF-16); `SearchPersonsCoreAsync` returns empty below the threshold, on the **trimmed** term (" a"), without calling the service; the token is passed to the service. | `PersonFormViewModelTests.cs` |
 | **B** | `SearchConstants.AutocompleteDebounceMilliseconds == 300`. | `SongSuggestionThresholdTests.cs` or new `SearchConstantsTests.cs` |
 | **C** | Component XAML shell, BindableProperty plumbing, Person page swap: build + manual E2E; the no-test decision recorded in the task-log. | — |
 | **Regression** | All existing `PersonFormViewModelTests` and `PersonFormViewModelBug044Tests` stay green unchanged (REQ-ACF-20/21/28). | full `dotnet test` |
@@ -365,9 +374,12 @@ missing submit icon, `SelectedItem` highlight, and menu timing. T1 and T7 cover 
   That item must add `ExposedDropdownMenu` to the governed table in `.claude/library/component-safety-gate.md`
   **in the same commit** as the second binding. From then on every component change is a four-gate
   task. Two fields on one page count as one consumer page; the rule counts pages/views.
-- Any surface the song-form item needs beyond § 3.1 (e.g. a Version line in the option template, per
-  its README third round, decision 3) is a component change under those gates, or is added here
-  before the second consumer binds.
+- The song-form item's known needs are already in § 3.1: `IsSearchEnabled` (Title search off in
+  edit mode) and `IsReadOnly` (an API-sourced song's Title in edit mode), both added before the
+  second consumer binds. **Version in search results** (its README, third round, decision 3) needs
+  no template change: the consumer puts the Version into `AutocompleteSuggestion.SupportingText`,
+  which the option template already shows as its second line. Any other new surface is a component
+  change under the four gates.
 - `PersonFormPage.xaml` edits follow the incremental XAML rule (one file → build → fix → next).
 
 ## 12. Census (Python `os.walk` + substring, 2026-09-24; excludes `bin/obj/.git/Docs/.claude`)
@@ -414,7 +426,7 @@ missing submit icon, `SelectedItem` highlight, and menu timing. T1 and T7 cover 
 2. **BUG-070 is removed, not reworded:** with no create row, the Song form's "Search and select an
    artist from the list" error goes away in the song-form item (create on Save). Nothing in this item.
 3. **Locked-and-empty** (`SongFormViewModel.cs:469-477`): neutralised for every consumer by
-   `EffectiveLocked` (REQ-ACF-05a).
+   `Mode()` (REQ-ACF-05a).
 4. **REQ-ACREATE-02/03/10** are superseded by the song-form item's create-on-save
    (requirements § Supersedes). **REQ-DXAC-11** would be reversed by the frozen-family deletion
    follow-up, which is pending approval.
