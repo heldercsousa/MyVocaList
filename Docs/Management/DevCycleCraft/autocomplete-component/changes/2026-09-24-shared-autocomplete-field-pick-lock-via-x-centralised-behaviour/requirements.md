@@ -70,19 +70,37 @@ Every agent uses these terms exactly. No synonyms.
   (`SongFormViewModel.ResolveAndLockArtistAsync`, exact-match branch).
 - **REQ-ACF-04: While picked, no menu and no search.**
   WHILE the field is in the picked state, the system SHALL NOT request options, SHALL NOT call the
-  consumer's search, and SHALL keep the menu closed (`IsDropDownOpen == false`). This also covers
-  BUG-069: the menu SHALL NOT reopen after a pick, and SHALL NOT open on edit-mode page load.
-- **REQ-ACF-05: X is the only unlock.**
-  The system SHALL provide no path, other than tapping X, by which the user can move the field from
-  picked to unlocked. Blur, focus, back navigation and re-appearing do not unlock it.
+  consumer's search, and SHALL keep the menu closed (`IsDropDownOpen == false`). This keeps BUG-069
+  fixed (REQ-ACF-25): the menu SHALL NOT reopen after a pick, and SHALL NOT open on edit-mode page load.
+- **REQ-ACF-05: X is the only user unlock.**
+  None of the following user actions SHALL move the field from picked to unlocked, or change its
+  text. Each is a test case in T7:
+  (a) tapping the text;
+  (b) long-pressing the text (selection handles, paste menu);
+  (c) typing on the soft keyboard, including IME composition;
+  (d) pasting;
+  (e) blur by tapping another field;
+  (f) navigating back from a pushed page and the form reappearing (`OnAppearing` re-runs
+  `InitializeArtistField`, `SongFormPage.xaml.cs:37`);
+  (g) scrolling the form.
+  Programmatic re-locks by the ViewModel (hydration, picker result) are not user unlocks. The
+  song-picker path is Q6.
+- **REQ-ACF-05a: Locked-and-empty is not a state.**
+  IF the lock flag is `true` and the field text is empty or whitespace, THEN the component SHALL
+  treat the field as unlocked: text editable, options requested, X hidden per REQ-ACF-07. This state
+  exists today: edit-mode load sets `IsArtistLocked = true` even when `song.ArtistId == 0`
+  (`SongFormViewModel.cs:469-477`). Without this rule the field would be read-only with no X, a
+  dead end. **Enforced in the component** (`ExposedDropdownMenuLogic.EffectiveLocked`, design § 4),
+  so it holds for every consumer. The VM line is not changed by this item.
 - **REQ-ACF-06: After X, the field is empty, searchable and focused.**
   Given the field is in the picked state,
   When the user taps X,
   Then the field text is empty, the field is unlocked, the field has focus, the soft keyboard is
   shown (Android), the placeholder "Search artists..." is visible, and the next typed characters
   search as usual.
-  *Decision:* focusing after X is chosen because the only reason to tap X is to type a different
-  value. Rejected alternative: leave focus unchanged, which costs an extra tap every time.
+  *Proposed, needs Helder's confirmation (Q7):* focusing after X is chosen because the only reason
+  to tap X is to type a different value. Rejected alternative: leave focus unchanged, which costs an
+  extra tap every time.
 
 ### B. X icon (US-2)
 
@@ -106,6 +124,7 @@ Every agent uses these terms exactly. No synonyms.
 ### C. Trailing search (submit) icon
 
 - **REQ-ACF-10: No submit icon.**
+  *Proposed, needs Helder's confirmation (Q8). The README said "evaluate removing it".*
   The field SHALL NOT show the DevExpress submit (magnifier) icon in any state. Justification:
   options are requested automatically as the user types (debounce), so a submit action adds nothing,
   and its presence next to X made X read as a second inert icon (README point 2).
@@ -144,12 +163,18 @@ Every agent uses these terms exactly. No synonyms.
   This fixes today's divergence, `CharacterCountThreshold="1"` (`SongFormPage.xaml:42`), whose
   1-character request always returns no matches anyway, because `ArtistService.SearchArtistsByNameAsync`
   rejects queries shorter than the constant (`Services/ArtistService.cs:179`).
+  The threshold is measured on the **trimmed** text: leading or trailing whitespace SHALL NOT count
+  towards it. For example, " a" (space + 1 letter) SHALL NOT produce a create-new row offering "a".
+  DX `CharacterCountThreshold` counts raw characters, so the component also gates the create-new row
+  on trimmed length (design § 4).
   **Consequence (needs Helder's ruling, see Open question Q2):** a 1-character typed name no longer
   gets the create-new row.
 - **REQ-ACF-14: Debounce delay is a shared constant.**
   The field's debounce delay SHALL be read from one named constant,
   `SearchConstants.AutocompleteDebounceMilliseconds = 300` (new, `Domain/Constants/SearchConstants.cs`),
   replacing the literal `RequestDelay="300"` (`SongFormPage.xaml:41`). No consumer sets its own value.
+  Placing a UI-timing constant in the Domain layer is proposed and needs Helder's confirmation (Q10);
+  see design § 8.
   This item owns debounce because Helder reversed decision D8's debounce exclusion on 2026-09-23
   (`cross-cutting/read-model-notracking-guidelines/changes/2026-08-24-scope-all-service-reads-through-iunitofwork/design.md` § 2c).
 
@@ -178,7 +203,7 @@ existing test stays green **unchanged**, unless the row says otherwise.
 
 | ID | Shipped behaviour | Verified by |
 |----|-------------------|-------------|
-| **REQ-ACF-16** (REQ-ACREATE-02/10) | When unlocked and the typed text is at least the minimum query length, the create-new row is the last row, with a divider and a leading ➕, whether or not matches exist. | Component logic unit test (new, Level A) + on-device E2E |
+| **REQ-ACF-16** (REQ-ACREATE-02/10, **conditional on Q2**) | When unlocked and the **trimmed** typed text is at least `MinimumLocalQueryLength`, the create-new row is the last row, with a divider and a leading ➕, whether or not matches exist. If Helder rejects Q2, the threshold stays at 1 for this field and this row reverts to "≥1 non-whitespace char". | Component logic unit test (new, Level A) + on-device E2E |
 | **REQ-ACF-17** (REQ-ACREATE-03) | Blur never clears typed text. | `ArtistBlurredWithoutSelection_NoPriorSelection_RetainsText…` |
 | **REQ-ACF-18** (REQ-ACREATE-04/05) | Create-new success locks the created artist. Failure keeps the text and shows the service message, with no dialog. | `CreateArtistInline_Success_LocksCreatedArtistAndClearsError` + existing failure test |
 | **REQ-ACF-19** (REQ-ACREATE-15) | X unlocks and clears. A later blur does not restore the previous artist. | `ClearArtist_WhenLocked_UnlocksAndClearsSelection`, `ClearArtist_ClosesDropdown`, `ArtistBlurredWithoutSelection_AfterDeliberateClear_DoesNotRestorePriorArtist` |
@@ -187,7 +212,7 @@ existing test stays green **unchanged**, unless the row says otherwise.
 | **REQ-ACF-22** (BUG-056) | Options come directly from the search's return value, never from reading `ArtistSuggestions` after the call. | Component logic unit test (new) + code review |
 | **REQ-ACF-23** (BUG-061) | No option stays highlighted after a pick, or on edit-mode load. | On-device E2E (DX rendering; not VM-testable) |
 | **REQ-ACF-24** (BUG-065/066) | Programmatic text changes (lock, hydrate, clear, restore) never trigger a search and always close the menu. | `SelectArtist_ExistingSuggestion_ClosesDropdown`, `InitializeArtistField_WithArtistId_ClosesDropdown`, `ClearArtist_ClosesDropdown`, `ResolveAndLockArtistAsync_*_ClosesDropdown` |
-| **REQ-ACF-25** (BUG-069, **open**, see Conflicts) | The menu does not reopen after a pick and does not open on edit-mode load. | Folded into REQ-ACF-04 + on-device E2E |
+| **REQ-ACF-25** (BUG-069, must stay fixed) | The menu does not reopen after a pick and does not open on edit-mode load. BUG-069 stopped reproducing after the BUG-081 merge (`2d70ac73`), confirmed by Helder on device 2026-09-24 (`Docs/Management/LEDGER.md`, INLINE-AC row, "Update 2026-09-24"; likely a side effect of dropping `IsReadOnly`). Any mechanism that re-introduces `IsReadOnly` must re-prove this (T1). | REQ-ACF-04 + T1 criterion B5 + on-device E2E |
 | **REQ-ACF-26** (REQ-ACREATE-13/BUG-051) | Latest query wins. | Existing out-of-order completion test |
 | **REQ-ACF-27** (REQ-DXAC-06/12) | No DX client-side filtering. The Outlined form-field style (`MaterialStyles.xaml:74`) still applies. | Code review + on-device E2E |
 
@@ -202,10 +227,10 @@ non-empty after trim, ≤ 60 chars). The field component validates nothing (REQ-
   text is long enough; otherwise it stays closed. Search exceptions follow the existing VM behaviour
   (no new catch).
 - **X tapped while a create is in flight:** the clear command runs, and the create completion then
-  locks the created artist (the existing command-guard behaviour). This is recorded as accepted
-  (rare, reversible with X). Not a new requirement.
+  locks the created artist (the existing command-guard behaviour). Proposed to accept this (rare,
+  reversible with X), pending Helder's confirmation (Q9). Not a new requirement.
 - **Lock mechanism fails on a platform** (the text becomes editable in the picked state): this
-  violates REQ-ACF-01. The on-device gate (tasks.md T8) catches it. iOS is not device-tested in this
+  violates REQ-ACF-01. The on-device gate (tasks.md T7) catches it. iOS is not device-tested in this
   item (see Out of scope).
 
 ## Supersedes (shipped specs are not edited)
@@ -250,20 +275,36 @@ non-empty after trim, ≤ 60 chars). The field component validates nothing (REQ-
   `PersonFormPage`'s Full Name is a free-text field whose pick navigates away (dedup). Confirm that
   pick-lock is on by default but can be switched off per consumer (design exposes it as a property),
   or rule otherwise.
-- **Q4 (component name):** `design.md` proposes `ExposedDropdownMenu` (the MD3/Material term for a text
-  field with a menu under it). Confirm or rename.
-- **Q5 (spike outcome):** if neither lock mechanism passes the spike (tasks.md T1), choose between the
-  escalation options listed in `design.md` § Decision: lock mechanism.
+- **Q4 (component name):** `design.md` proposes `ExposedDropdownMenu` in a new `Components/Menus/`
+  folder. Two caveats: (a) the evidence is Material Components Android `docs/components/Menu.md`, not
+  m3.material.io, which CLAUDE.md names as the source (m3.material.io renders client-side and could
+  not be fetched as text on 2026-09-24); (b) `Menus/` files what is visually a text field under
+  menus. Confirm, or rename (e.g. file it under a `TextFields/` folder).
+- **Q5 (spike outcome):** if B fails T1, mechanism C is **not** an automatic fallback. It is a
+  visible compromise (the keyboard can open, and the field briefly takes focus) that Helder must
+  accept after seeing the T1 measurements. If C is not accepted, or also fails, choose among the
+  escalation options in `design.md` § Decision: lock mechanism.
+- **Q6 (song-picker path vs "X is the only way"):** `SongFormViewModel.ResolveAndLockArtistAsync`
+  (`:516-538`) re-locks a picked artist to a *different* artist when a song is chosen in the song
+  picker, and its no-match branch unlocks the field (`:537`), all without X. This conflicts with
+  REQ-ACF-05. Is the picker allowed to replace a locked artist, should it require X first, or is it
+  moot because the picker pages are expected to be deleted? Not decided in this spec.
+- **Q7:** confirm that X focuses the field and opens the keyboard (REQ-ACF-06).
+- **Q8:** confirm removing the magnifier outright (REQ-ACF-10). The README said "evaluate".
+- **Q9:** confirm accepting the race where X tapped during an in-flight create ends locked to the
+  created artist (§ Failure modes).
+- **Q10:** confirm placing the debounce constant in `Domain/Constants/SearchConstants.cs`, a Domain
+  file holding a UI-timing value (design § 8).
 
 ## Traceability seed (filled at implementation)
 
 | AC | Implementation location | Test |
 |----|-------------------------|------|
-| REQ-ACF-01…06 | component (`design.md` § Lock mechanism) + `SongFormViewModel` lock members | component logic tests (Level A) + T8 on-device |
-| REQ-ACF-07/08/10 | component XAML | T8 on-device (DX rendering) |
+| REQ-ACF-01…06 | component (`design.md` § Lock mechanism) + `SongFormViewModel` lock members | component logic tests (Level A) + T7 on-device |
+| REQ-ACF-07/08/10 | component XAML | T7 on-device (DX rendering) |
 | REQ-ACF-09, -17…-20, -24, -26 | `SongFormViewModel` (unchanged members) | existing VM tests, unchanged |
-| REQ-ACF-11/12 | component + `SongFormPage.xaml(.cs)` | code review checklist (T7) |
+| REQ-ACF-11/12 | component + `SongFormPage.xaml(.cs)` | code review checklist (T6) |
 | REQ-ACF-13/14 | `SearchConstants` + component | constants test + component logic test |
 | REQ-ACF-15 | `SongFormViewModel` messages | VM tests updated with the spec (T5) |
 | REQ-ACF-16, -21, -22 | component logic class | component logic tests |
-| REQ-ACF-23, -25, -27 | component | T8 on-device |
+| REQ-ACF-23, -25, -27 | component | T7 on-device |
