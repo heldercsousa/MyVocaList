@@ -203,7 +203,7 @@ existing test stays green **unchanged**, unless the row says otherwise.
 
 | ID | Shipped behaviour | Verified by |
 |----|-------------------|-------------|
-| **REQ-ACF-16** (REQ-ACREATE-02/10, **conditional on Q2**) | When unlocked and the **trimmed** typed text is at least `MinimumLocalQueryLength`, the create-new row is the last row, with a divider and a leading ➕, whether or not matches exist. If Helder rejects Q2, the threshold stays at 1 for this field and this row reverts to "≥1 non-whitespace char". | Component logic unit test (new, Level A) + on-device E2E |
+| **REQ-ACF-16** (REQ-ACREATE-02/10; Q2 resolved 2026-09-24) | When unlocked and the **trimmed** typed text is at least `MinimumLocalQueryLength`, the create-new row is the last row, with a divider and a leading ➕, whether or not matches exist. If Helder rejects Q2, the threshold stays at 1 for this field and this row reverts to "≥1 non-whitespace char". | Component logic unit test (new, Level A) + on-device E2E |
 | **REQ-ACF-17** (REQ-ACREATE-03) | Blur never clears typed text. | `ArtistBlurredWithoutSelection_NoPriorSelection_RetainsText…` |
 | **REQ-ACF-18** (REQ-ACREATE-04/05) | Create-new success locks the created artist. Failure keeps the text and shows the service message, with no dialog. | `CreateArtistInline_Success_LocksCreatedArtistAndClearsError` + existing failure test |
 | **REQ-ACF-19** (REQ-ACREATE-15) | X unlocks and clears. A later blur does not restore the previous artist. | `ClearArtist_WhenLocked_UnlocksAndClearsSelection`, `ClearArtist_ClosesDropdown`, `ArtistBlurredWithoutSelection_AfterDeliberateClear_DoesNotRestorePriorArtist` |
@@ -295,6 +295,18 @@ non-empty after trim, ≤ 60 chars). The field component validates nothing (REQ-
   created artist (§ Failure modes).
 - **Q10:** confirm placing the debounce constant in `Domain/Constants/SearchConstants.cs`, a Domain
   file holding a UI-timing value (design § 8).
+
+### Helder rulings — 2026-09-24
+
+- **Q2 RESOLVED: threshold 2, applied to the create-new row too.** Helder observed on device that the
+  Song form's artist search only returns matches from 2 characters (`SearchConstants.MinimumLocalQueryLength`),
+  but the editor requests items from 1 (`CharacterCountThreshold="1"`). Typing a single character
+  that matches an existing artist therefore shows **only** the "Add … as a new artist" row, which
+  invites duplicate artists. REQ-ACF-16 is no longer conditional: the component requests items and
+  offers the create-new row only from trimmed length ≥ `MinimumLocalQueryLength`.
+- **Q10 RESOLVED (partly): debounce stays 300 ms, one shared constant for every autocomplete field.**
+  Its location (Domain `SearchConstants` vs a UI-layer constant) stays with the design's proposal
+  unless Helder rules otherwise.
 
 ## Traceability seed (filled at implementation)
 
