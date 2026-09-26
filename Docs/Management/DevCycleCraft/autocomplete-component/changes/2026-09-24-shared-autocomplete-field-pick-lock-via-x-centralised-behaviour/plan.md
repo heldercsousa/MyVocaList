@@ -89,21 +89,30 @@ The exit checklist in `implementor.md` says "checkboxes ticked in `tasks.md`". F
 
 ### 0.3 Sequencing deviations from `tasks.md` (not redesign)
 
-1. **T3 is split into T3 (mechanism-independent) and T3-C (conditional).** `tasks.md` marks T3 `[SEQUENTIAL, after the T1 verdict]`. Only one of its functions depends on the verdict: `TextToRestore`, which exists "only if mechanism C is accepted" (`design.md` § 4). Every other § 4 function is identical under B and C. So T3 runs in Wave 1 and `TextToRestore` becomes T3-C. The orchestrator records this in `tasks.md` at Step 0 (a `> **Spec updated 2026-09-25:**` note under T3). The spec is not shipped, so an in-place edit is allowed.
+Every deviation below is recorded **on `develop` by the orchestrator at Step 0** (§ 0.4 step 0.6), as `> **Spec updated 2026-09-25:**` notes. The spec is not shipped, so in-place notes are allowed. No implementor edits `tasks.md` or `design.md` for these.
+
+1. **T3 is split into T3 (mechanism-independent) and T3-C (conditional).** `tasks.md` marks T3 `[SEQUENTIAL, after the T1 verdict]`. Only one of its functions depends on the verdict: `TextToRestore`, which exists "only if mechanism C is accepted" (`design.md` § 4). Every other § 4 function is identical under B and C. So T3 runs in Wave 1 and `TextToRestore` becomes T3-C.
 2. **AC tags 19, 22 and 24 in T3.** `tasks.md` T3 lists them. `design.md` § 4 and § 10 say that REQ-ACF-19 and -24 are proven by code review and on device, and REQ-ACF-22 at the VM seam (T5). The plan follows `design.md`, which is more specific. Under C, T3-C gives REQ-ACF-19 and -24 real unit tests (`TextToRestore` returns `null` for unlocked user input and for programmatic changes). Under B they stay review + device items.
 3. **T1's `findings.md` and the `.sln` registration** are done by the orchestrator (Step 0 skeleton, T1c results), not by the T1 implementor. This keeps `MyVocaList.sln` single-writer while three worktrees are live.
+4. **T1 local commits.** `tasks.md` T1 says "No production file is committed". The plan allows local `spike:` commits on the throwaway branch `spike/acf-t1-lock-mechanism`, so that Helder deploys a known state. The branch is never pushed or merged, and it is deleted at T1c. The same applies to `spike/acf-t7-supporting-text`.
+5. **`design.md` § 3.2 parameter name and term.** The design writes `SearchPersonsStartsWithAsync(term, ct: ct)`. The real parameter is `cancellationToken` (`Domain/ServicesInterfaces/IPersonService.cs:24`), so the call becomes `SearchPersonsStartsWithAsync(trimmed, cancellationToken: ct)`. The core method passes the **trimmed** term, consistent with REQ-ACF-13's trimmed threshold. The service already normalises its input itself (`Services/PersonService.cs:216`, `NormalizeSearchQuery()`), so this changes nothing for unpadded input.
 
 ### 0.4 Step 0: orchestrator prep on `develop` (docs only, before Wave 1)
 
 - [ ] **0.1** Session-start protocol (Rule 7) and hook health check. Record the baseline: run `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` on `develop` and write the pass count into `task-log.md` § Baseline (it is used for the "+N tests" checks below).
 - [ ] **0.2** Status: `python .claude/scripts/backlog/backlog_gen.py status shared-autocomplete-field-pick-lock-via-x-centralised-behaviour "🟢"` (spec approved, plan ready). Move it to 🟡 at Wave 1 dispatch. Run `regen` and inspect the diff (`workflow-rule-2.md` § Generated artifacts).
 - [ ] **0.3** Create `task-log.md` in this folder with these pre-created sections, one per task, so that parallel worktrees edit different hunks: `## Baseline`, `## T1 — Spike`, `## T2`, `## T3`, `## T5`, `## T3-C`, `## T4`, `## T6`, `## T7 — Device gate`. Each section holds only a `### Checkpoint` placeholder.
-- [ ] **0.4** Create `findings.md` in this folder containing the **T1 run sheet** (§ T1b below, copied verbatim, with empty Result/Evidence cells).
+- [ ] **0.4** Create `findings.md` in this folder with two parts:
+  - an empty `## Environment` section (filled at T1c from the T1a handback);
+  - the **T1 run sheet** (§ T1b below, copied verbatim, with empty Result/Evidence cells).
 - [ ] **0.5** Register `task-log.md` and `findings.md` in `MyVocaList.sln` (this folder's SolutionItems, using the same `sln_add.py` helper used for `plan.md`).
-- [ ] **0.6** Add the T3 split note to `tasks.md` (§ 0.3 item 1).
+- [ ] **0.6** Record every § 0.3 deviation on `develop` as `> **Spec updated 2026-09-25:**` notes:
+  - **`tasks.md` T3:** the split into T3 + T3-C (item 1), and the AC-tag change (19/22/24 handled per `design.md` § 4, item 2);
+  - **`tasks.md` T1:** local `spike:` commits allowed, never pushed or merged (item 4), and `findings.md`/`.sln` owned by the orchestrator (item 3);
+  - **`design.md` § 3.2:** the `cancellationToken:` parameter name and the trimmed term (item 5).
 - [ ] **0.7** Add the LEDGER rows for Wave 1 (`/sln-ledger`): branch, worktree, phase, status.
-- [ ] **0.8** Commit on `develop`: `docs(acf): plan prep — task-log + findings skeletons, T3 split note`.
-- [ ] **0.9** Check that `.worktrees/` is ignored: `git check-ignore -q .worktrees`. Create each worktree with `git worktree add .worktrees/<name> -b <branch> develop`, then check `git -C .worktrees/<name> merge-base --is-ancestor develop HEAD`.
+- [ ] **0.8** Commit on `develop`: `docs(acf): plan prep — task-log + findings skeletons, deviation notes`.
+- [ ] **0.9** Check that `.worktrees/` is ignored: `git check-ignore -q .worktrees`. Create **only the Wave-1 worktrees** now (`acf-t1-spike`, `acf-t2`, `acf-t3`). Create each later worktree (T5, T3-C, T4, T6, T7-prep) **only after its dependencies are merged**, so that it branches from the updated `develop`. Use `git worktree add .worktrees/<name> -b <branch> develop`, then check `git -C .worktrees/<name> merge-base --is-ancestor develop HEAD` and that the dependency's merge commit is in `git -C .worktrees/<name> log --oneline -5`.
 
 ### 0.5 Post-merge verification (after EVERY merge into develop)
 
@@ -122,6 +131,10 @@ Then do the following:
 - Update the LEDGER.
 - Dispatch a **Verifier** subagent (Sonnet) on the merge diff.
 - Remove the worktree: `git worktree remove .worktrees/<name>`.
+
+**Known flaky test (BUG-076).** If the **only** failure is the known-flaky SQLite test that throws `ObjectDisposedException`, re-run `dotnet test` **once**. Record both runs (the failing test name and the pass/fail counts of each) in the merged task's `task-log.md` section.
+- The re-run is fully green → continue.
+- It fails again, or any **other** test fails in either run → treat it as red (below).
 
 If the build or the tests go red: **do not merge the next branch.** Roll back the merge with `git revert -m 1 <merge-sha>`, then diagnose on the task branch (`superpowers:systematic-debugging`).
 
@@ -157,17 +170,27 @@ Committing on the spike branch is allowed only as a local checkpoint (`spike:` p
 #### T1a: build the spike page (implementor, Sonnet)
 
 - [ ] **Step 1.** Create the worktree (§ 0.4 0.9). Invoke `myvocalist-coding`. Use Context7 (DevExpress MAUI, 25.2) to confirm these member names on `AutoCompleteEdit`/`EditBase`: `EndIcon`, `IsEndIconVisible`, `EndIconColor`, `EndIconClicked`, `ClearIconVisibility`, `ClearIconColor`, `ClearIconClicked`, `SubmitIconVisibility`, `HelpText`, `HasError`, `ErrorText`, `IsReadOnly`, `IsDropDownOpen`, the `TextChanged` args `Reason` (`UserInput`/`ProgrammaticChange`/`ItemSelected`), `AsyncItemsSourceProvider.RequestDelay` (record its **type**, int or TimeSpan, in the T1 task-log section: T4 needs it).
-- [ ] **Step 2.** Build `AcfSpikePage.xaml` (`SafeAreaEdges="Container"`, inside a `dx:DXScrollView`). It has five blocks:
+- [ ] **Step 2.** Build `AcfSpikePage.xaml` (`SafeAreaEdges="Container"`, inside a `dx:DXScrollView`). It has six blocks:
   1. **Field B**: a `dxe:AutoCompleteEdit` fed by `AsyncItemsSourceProvider` (`RequestDelay` 300, `CharacterCountThreshold` 2) from a static list of 5 `AutocompleteSuggestion`s: "John Doe", "Joan Baez", "Johnny Cash", "Jon Bon Jovi", "Joni Mitchell" (StartsWith, OrdinalIgnoreCase, trimmed length ≥ 2). `SubmitIconVisibility="Never"`. Code-behind implements mechanism B exactly as specified in `tasks.md` T1 "B procedure". While locked: `IsReadOnly=True`, `ClearIconVisibility=Never`, `EndIcon=close_outlined`, `IsEndIconVisible=True`, `EndIconColor=OnSurfaceVariant`, and an `EndIconClicked` handler that logs, then unlocks: `IsReadOnly=False` → `IsEndIconVisible=False` → `ClearIconVisibility=Auto` → `Text=""` → `Focus()`. A pick locks and sets `SelectedItem=null`.
   2. **Field C**: the same list and settings, with mechanism C per `tasks.md` T1 "C procedure": `IsReadOnly=False` and the built-in clear icon. While locked, revert `TextChanged` when `Reason==UserInput`, skip `ItemsRequested`, and call `Unfocus()` on `Focused`. It is built now so that one device session covers both. Helder measures it **only if B fails**.
   3. **Field R** (read-only check): `IsReadOnly=True`, `ClearIconVisibility=Never`, `IsEndIconVisible=False`, `Text="Don't Cry"`.
-  4. **Controls** (DX `DXButton`s / `DXSwitch`): "Lock B programmatically" (sets `IsLocked` first, **then** `Text="Johnny Cash"`, to exercise Review Focus 4), "Lock C programmatically", "Reset all", a "HasError" switch (applies `HasError=True`, `ErrorText="Title is required"` to all three fields and, per the component rule, sets `HelpText=""` while in error), and a "Supporting text" switch (`HelpText="Online search unavailable"` on all three fields).
+  4. **Controls** (DX `DXButton`s / `DXSwitch`): "Lock B programmatically" (sets `IsLocked` first, **then** `Text="Johnny Cash"`, to exercise Review Focus 4), "Lock C programmatically", "Reset all", and three switches:
+     - "Supporting text": `HelpText="Online search unavailable"` on all three fields.
+     - "HasError (component rule)": `HasError=True`, `ErrorText="Title is required"` on all three fields, and, per the component rule, `HelpText=""` while in error.
+     - "HasError, keep HelpText": `HasError=True` and `ErrorText` as above, but `HelpText` is **left as set**. This answers S2's question: does DX hide `HelpText` by itself?
   5. **Reference**: a DX `TextEdit` with `Text="Reference"`, `ClearIconVisibility=Auto` and `ClearIconColor=OnSurfaceVariant`, for the B3 side-by-side.
   6. **Event log**: a `Label` (max 12 lines, newest first) plus counters. Each line reads `HH:mm:ss.fff <field> <event> <detail>` for: `ItemsRequested` (count, and whether a search ran), `TextChanged` (Reason, new text), `SelectionChanged`, `Focused`/`Unfocused`, `EndIconClicked`, `ClearIconClicked`, and `IsDropDownOpen` changes. The log is on screen, so the video records it and no logcat is needed.
 - [ ] **Step 3.** Add the temporary `AppShell.xaml` and `NavigationConfig.cs` entries. Build after each file: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 0 errors.
 - [ ] **Step 4.** B5 prep: in `SongFormPage.xaml`, on the Artist `AutoCompleteEdit`, add B while `IsArtistLocked` is true. Use a `DataTrigger` (or code-behind) that sets `IsReadOnly=True`, `ClearIconVisibility=Never`, `EndIcon=close_outlined`, `IsEndIconVisible=True` and `EndIconColor=OnSurfaceVariant`. `EndIconClicked` calls the existing clear path (the handler behind today's `ClearIconClicked`). Build → 0 errors.
 - [ ] **Step 5.** Smoke-test on the emulator (`dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -t:Run`): the flyout shows "ACF Spike", the page opens, typing "jo" in Field B lists 5 options, and the log fills. Commit locally: `spike: ACF T1 throwaway page (never merge)`. **Do not push.**
-- [ ] **Step 6.** Write in the T1 section of `task-log.md` (worktree copy; the orchestrator syncs it): the branch, the commit SHA, the `RequestDelay` type, and the Context7 results. Status `Check build`. Stop.
+- [ ] **Step 6: Handback, not a worktree file.** The spike branch is deleted at T1c, so nothing the verdict depends on may live only there. **Do not** write the T1 results into the worktree's `task-log.md`. Return them in the **handback message** to the orchestrator:
+  - the branch and the local commit SHA;
+  - the `RequestDelay` type (int or TimeSpan);
+  - the Context7 results per member (confirmed / renamed / missing);
+  - the `devexpress-maui` MCP result ("returned empty" or the hits);
+  - build and emulator smoke results.
+  
+  Status `Check build`. Stop.
 
 #### T1b: Helder runs the spike on device (HARD STOP)
 
@@ -195,7 +218,8 @@ Committing on the spike branch is allowed only as a local checkpoint (`spike:` p
 | R2 | Field R | Tap, long-press, 10 keystrokes | Text byte-equal "Don't Cry"; no keyboard, no cursor in any frame | | |
 | R3 | Field R | Page load + tap, 5× | No menu opens, 5/5 | | |
 | S1 | "Supporting text" ON | Screenshot Field B unlocked, Field B locked, Field R | "Online search unavailable" under each field | | |
-| S2 | "Supporting text" ON, then "HasError" ON | Screenshot | Only "Title is required" shows, on one line, with no layout jump beyond DX's own bottom line. Also: with HasError ON **and** `HelpText` left set, does DX hide `HelpText` by itself? (Log it; informational) | | |
+| S2 | "Supporting text" ON, then "HasError (component rule)" ON | Screenshot | Only "Title is required" shows, on one line, with no layout jump beyond DX's own bottom line | | |
+| S2b | "Supporting text" ON, then "HasError, keep HelpText" ON | Screenshot | Informational: does DX hide `HelpText` by itself while `HasError`? Record yes/no and what renders | | |
 | M | Any field | Look | No magnifier icon (`SubmitIconVisibility=Never`) | | |
 | H | Field B and Field C | Pick, then reopen the menu by unlocking + typing | Does any row stay highlighted? (per mechanism; informational) | | |
 | C1 | *Only if B failed.* Field C locked | 10 keystrokes | Text byte-equal; 0 frames show a typed char | | |
@@ -208,10 +232,16 @@ Committing on the spike branch is allowed only as a local checkpoint (`spike:` p
 
 #### T1c: orchestrator records the verdict (docs only, on develop)
 
+- [ ] Write the T1a handback (SHA, `RequestDelay` type, Context7 and MCP results, smoke results) into the T1 section of `task-log.md` and into `findings.md` § Environment, on `develop`, **before** the spike branch is deleted.
 - [ ] Paste Helder's results into `findings.md`. Add the verdict line (`Verdict: B` / `Verdict: C (accepted by Helder YYYY-MM-DD)` / `Verdict: escalated — <Helder's choice>`), the decision-table row applied, the S2 finding (whether DX hides HelpText on error), the B3 finding (whether the End icon and the built-in icon look identical; if not, `design.md` § 5 says to use the End icon as X in both states, and that goes to T4), and the `RequestDelay` type from T1a.
 - [ ] If the verdict leads to a design change (for example the B3 difference, or escalation option ii/iii), add a `> **Spec updated YYYY-MM-DD:**` note to `design.md` § 5 **before** T4 is briefed.
 - [ ] Commit on develop: `docs(acf): T1 spike findings — verdict <B|C|escalated>`. Delete the spike worktree and branch. Update the LEDGER.
 - [ ] If escalated with no decision: `blocked: spike inconclusive`. T3-C, T4, T6 and T7 do not start.
+- [ ] **If Helder picks escalation option (ii) or (iii)** (`design.md` § 5): these change the component contract, so the already-merged T3 logic may need rework.
+  - Option (ii) is a separate read-only `TextEdit` + "Change" button. It affects `Mode`/`ShowClearIcon`, and REQ-ACF-07/08 wording changes.
+  - Option (iii) allows type-over, which drops pick-lock. It affects `Mode`, `LockAfterPick` and `ShouldRequestOptions`.
+  
+  **Spec first:** record the decision in `requirements.md`/`design.md` (a `> **Spec updated YYYY-MM-DD:**` note plus the changed ACs), and have it reviewed. Then re-plan T3 (a new rework task, Tester/Builder, with the old tests changed **only** where the updated spec changes the AC) and T4 before any code. T5 is unaffected.
 
 ---
 
@@ -310,25 +340,26 @@ internal static class AutocompleteDXFieldLogic
 | `BottomSupportingText_NoError_ReturnsSupportingText` | REQ-ACF-12c | `"Online search unavailable"` |
 | `BottomSupportingText_HasError_ReturnsEmpty` | REQ-ACF-12c | `""` |
 | `BottomSupportingText_NoErrorNullText_ReturnsEmpty` | REQ-ACF-12c | `""` |
-| `ShowClearIcon_EditableOrLockedWithText_ReturnsTrue` (Theory: Editable, Locked) | REQ-ACF-07 | `true` |
-| `ShowClearIcon_EmptyText_ReturnsFalse` (Theory: `null`, `""`) | REQ-ACF-07 | `false` |
-| `ShowClearIcon_ReadOnlyWithText_ReturnsFalse` | REQ-ACF-12b | `false` |
-| `ShouldRequestOptions_EditableSearchOnTrimmedTwoChars_ReturnsTrue` (Theory: `"ab"`, `" ab "`) | REQ-ACF-13 | `true` |
-| `ShouldRequestOptions_BelowTrimmedThreshold_ReturnsFalse` (Theory: `null`, `""`, `"a"`, `" a"`, `"a "`, `"   "`) | REQ-ACF-13 | `false` |
-| `ShouldRequestOptions_Locked_ReturnsFalse` | REQ-ACF-04 | `false` for `("Johnny Cash")` |
-| `ShouldRequestOptions_SearchDisabled_ReturnsFalse` | REQ-ACF-12a | `false` for `(Editable, false, Source, "ab")` |
-| `ShouldRequestOptions_ReadOnly_ReturnsFalse` | REQ-ACF-12b | `false` |
-| `ShouldRequestOptions_NullSource_ReturnsFalse` | REQ-ACF-11 | `false` for `(Editable, true, null, "ab")` |
+| `ShowClearIcon_EditableWithText_ReturnsTrue` (Fact) | REQ-ACF-07 | `ShowClearIcon(FieldMode.Editable, "jo") == true` |
+| `ShowClearIcon_LockedWithText_ReturnsTrue` (Fact) | REQ-ACF-07 | `ShowClearIcon(FieldMode.Locked, "Johnny Cash") == true` |
+| `ShowClearIcon_EmptyText_ReturnsFalse` (Theory over `string?`: `null`, `""`; mode fixed to `FieldMode.Editable` inside the body) | REQ-ACF-07 | `false` |
+| `ShowClearIcon_ReadOnlyWithText_ReturnsFalse` | REQ-ACF-12b | `ShowClearIcon(FieldMode.ReadOnly, "Don't Cry") == false` |
+| `ShouldRequestOptions_EditableSearchOnTrimmedTwoChars_ReturnsTrue` (Theory over `string`: `"ab"`, `" ab "`) | REQ-ACF-13 | `ShouldRequestOptions(FieldMode.Editable, true, Source, query) == true` |
+| `ShouldRequestOptions_BelowTrimmedThreshold_ReturnsFalse` (Theory over `string?`: `null`, `""`, `"a"`, `" a"`, `"a "`, `"   "`) | REQ-ACF-13 | `ShouldRequestOptions(FieldMode.Editable, true, Source, query) == false` |
+| `ShouldRequestOptions_Locked_ReturnsFalse` | REQ-ACF-04 | `ShouldRequestOptions(FieldMode.Locked, true, Source, "Johnny Cash") == false` |
+| `ShouldRequestOptions_SearchDisabled_ReturnsFalse` | REQ-ACF-12a | `ShouldRequestOptions(FieldMode.Editable, false, Source, "ab") == false` |
+| `ShouldRequestOptions_ReadOnly_ReturnsFalse` | REQ-ACF-12b | `ShouldRequestOptions(FieldMode.ReadOnly, true, Source, "ab") == false` |
+| `ShouldRequestOptions_NullSource_ReturnsFalse` | REQ-ACF-11 | `ShouldRequestOptions(FieldMode.Editable, true, null, "ab") == false` |
 | `RoutePick_AutocompleteSuggestion_ReturnsSelect` | REQ-ACF-11 | `Select` |
 | `RoutePick_NullOrNonSuggestion_ReturnsNone` (Theory: `null`, `"text"`, `42`) | REQ-ACF-11 | `None` (Review Focus 2) |
 | `LockAfterPick_Select_ReturnsTrue` | REQ-ACF-01 | `true` |
 | `LockAfterPick_None_ReturnsFalse` | REQ-ACF-01 | `false` |
-| `ShouldForwardBlur_NoPickEditable_ReturnsTrue` | REQ-ACF-17 | `true` |
-| `ShouldForwardBlur_WithSelectedItem_ReturnsFalse` | REQ-ACF-11 | `false` |
-| `ShouldForwardBlur_Locked_ReturnsFalse` | REQ-ACF-11 | `false` |
-| `ShouldForwardBlur_ReadOnly_ReturnsFalse` | REQ-ACF-12b | `false` |
+| `ShouldForwardBlur_NoPickEditable_ReturnsTrue` | REQ-ACF-17 | `ShouldForwardBlur(null, FieldMode.Editable) == true` |
+| `ShouldForwardBlur_WithSelectedItem_ReturnsFalse` | REQ-ACF-11 | `ShouldForwardBlur(suggestion, FieldMode.Editable) == false` |
+| `ShouldForwardBlur_Locked_ReturnsFalse` | REQ-ACF-11 | `ShouldForwardBlur(null, FieldMode.Locked) == false` |
+| `ShouldForwardBlur_ReadOnly_ReturnsFalse` | REQ-ACF-12b | `ShouldForwardBlur(null, FieldMode.ReadOnly) == false` |
 
-Theories use `[InlineData]`. For the `FieldMode` in a Theory, pass the enum value (it is internal, so the test class can use it). Where an AC letter matters, the comment says so (e.g. `REQ-ACF-11 (b): pick routing`).
+**Accessibility rule (compile-critical).** `FieldMode` and `PickRoute` are `internal`. The xUnit test class and its methods are `public`, so a test method **must never take `FieldMode` or `PickRoute` as a parameter**: that is `CS0051: Inconsistent accessibility`. Use `internal` enum values only **inside method bodies**. Every row above that varies the mode is therefore a separate `[Fact]`. Theories (`[InlineData]`) vary only `string`, `bool` or `object` parameters. Where an AC letter matters, the comment says so (e.g. `REQ-ACF-11 (b): pick routing`).
 
 - [ ] **Step 3: Confirm Red.** `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --filter "FullyQualifiedName~AutocompleteDXFieldLogicTests"`. Expected: **every** test fails with `System.NotImplementedException : The method or operation is not implemented.` and none passes. Any other failure (a compile error or a wrong assertion setup) must be fixed in the test before continuing. The full suite keeps the baseline pass count.
 - [ ] **Step 4.** In the T3 section of `task-log.md`: status `Red — tests written`, the list of test names, the Red output excerpt. Commit:
@@ -362,7 +393,7 @@ feat(acf): AutocompleteDXFieldLogic pure rules (Green) — REQ-ACF-01..13 logic
 
 ### Task T3-C: `TextToRestore` (**only if Helder accepted mechanism C**) [Wave 3]
 
-**Model:** Sonnet (one agent, one test at a time). **Level:** A. **Skipped entirely under B.** In that case the orchestrator marks it in `tasks.md` as `[CANCELLED: T1 verdict B — TextToRestore not needed]`.
+**Model:** Sonnet (one agent, one test at a time). **Level:** A. **Review lane:** Standard. **Estimate:** 30 min. **Skipped entirely under B.** The tests are `[Fact]`s only: `FieldMode` is internal, so it must never be a test-method parameter (see the T3 accessibility rule). In that case the orchestrator marks it in `tasks.md` as `[CANCELLED: T1 verdict B — TextToRestore not needed]`.
 
 **Files:** Modify `AutocompleteDXFieldLogic.cs` and `AutocompleteDXFieldLogicTests.cs`.
 
@@ -436,7 +467,7 @@ public bool IsLocked { get => (bool)GetValue(IsLockedProperty); set => SetValue(
   
   No event attributes yet. Create `AutocompleteDXField.xaml.cs` with only the constructor (`InitializeComponent()`). **Build** → 0 errors.
 - [ ] **Step 3: BindableProperties.** Add all 13 properties from the table. `Text`, `IsLocked` and `IsReadOnly` → `ApplyMode()`; `HasError` and `SupportingText` → `ApplySupportingText()` (Review Focus 4, 5). **Build.**
-- [ ] **Step 4: Mode application.** `ApplyMode()` computes `var mode = AutocompleteDXFieldLogic.Mode(IsReadOnly, IsLocked, Text)` and applies it:
+- [ ] **Step 4: Mode application.** Add `private FieldMode CurrentMode => AutocompleteDXFieldLogic.Mode(IsReadOnly, IsLocked, Text);`. `ApplyMode()` reads `var mode = CurrentMode;` and applies it:
   - **ReadOnly:** `editor.IsReadOnly = true`, `ClearIconVisibility = Never`, `IsEndIconVisible = false`, `IsDropDownOpen = false`.
   - **Locked, under B:** `editor.IsReadOnly = true`, `ClearIconVisibility = Never`, `IsEndIconVisible = true`, `IsDropDownOpen = false`, `editor.SelectedItem = null`.
   - **Locked, under C:** `editor.IsReadOnly = false`, built-in clear icon, `IsDropDownOpen = false`, `editor.SelectedItem = null`, and remember `_lockedText = Text`.
@@ -444,8 +475,27 @@ public bool IsLocked { get => (bool)GetValue(IsLockedProperty); set => SetValue(
   
   If the T1 B3 finding was "the icons differ", use the End icon as X in the Editable state too (design § 5.1 note) and keep `ClearIconVisibility = Never` throughout. `ApplySupportingText()`: `editor.HelpText = AutocompleteDXFieldLogic.BottomSupportingText(HasError, SupportingText)`. **Build.**
 - [ ] **Step 5: Event adapters.** Wire them in XAML and the code-behind:
-  - `ItemsRequested`: if `!ShouldRequestOptions(Mode, IsSearchEnabled, OptionSource, editor.Text)` → no request, `IsDropDownOpen = false`. Else `var r = await OptionSource.SearchAsync(text, ct); ct.ThrowIfCancellationRequested();`, **re-check `ShouldRequestOptions`** (Review Focus 1), then hand exactly `r` to DX. Never read a VM collection (REQ-ACF-22, -26).
-  - `SelectionChanged`: `RoutePick(editor.SelectedItem)`. `None` → return (Review Focus 2). `Select` → `IsLocked = LockAfterPick(route)` → `SelectCommand` (`CanExecute`/`Execute` with the option) → `editor.SelectedItem = null` → `IsDropDownOpen = false` → `ApplyMode()` (REQ-ACF-01, BUG-061).
+  - `ItemsRequested` (a synchronous handler; the pattern matches today's glue at `PersonFormPage.xaml.cs:37-47`):
+    ```csharp
+    private void OnItemsRequested(object sender, ItemsRequestEventArgs e)
+    {
+        var text = e.Text;                    // the request's own text, not editor.Text
+        var token = e.CancellationToken;
+        var source = OptionSource;
+        if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, text))
+        { IsDropDownOpen = false; return; }   // no RequestAsync assigned → no request
+        e.RequestAsync = async () =>
+        {
+            var options = await source.SearchAsync(text, token);
+            token.ThrowIfCancellationRequested();          // inside DX's awaited delegate, never async void
+            // Review Focus 1: the field may have locked while the search ran
+            return AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, text)
+                ? options : [];
+        };
+    }
+    ```
+    Hand DX exactly `options`. Never read a VM collection (REQ-ACF-22, -26). **No `async void` handler and no throwing outside `e.RequestAsync`.** A cancellation throw is legal only inside the delegate that DX awaits. Check the return type DX expects from `RequestAsync` with Context7 and adapt the `[]`/`options` expression to it.
+  - `SelectionChanged`: **capture the option first**: `var option = editor.SelectedItem; var route = RoutePick(option);`. `None` → return (Review Focus 2). `Select` → then `IsLocked = LockAfterPick(route)`. This triggers `ApplyMode()`, which nulls `SelectedItem`, which is why the capture must come before it. Then `SelectCommand` (`CanExecute`/`Execute` with the **captured** `option`) → `editor.SelectedItem = null` (idempotent) → `IsDropDownOpen = false` (REQ-ACF-01, BUG-061).
   - `Unfocused`: if `ShouldForwardBlur(editor.SelectedItem, Mode)` → `BlurWithoutPickCommand`. **Never write `Text` here** (REQ-ACF-19).
   - X while Locked (`EndIconClicked` under B, `ClearIconClicked` under C): `Text = ""` → `IsLocked = false` → `ApplyMode()` → `ClearCommand` → `FocusEditor()`. The order matters (Review Focus 3; REQ-ACF-06).
   - X while Editable (`ClearIconClicked`, which DX clears itself): `ClearCommand` → focus stays (REQ-ACF-09).
@@ -486,7 +536,9 @@ public IMenuOptionSource NameOptionSource { get; }   // = new MenuOptionSource((
 
 Access: `internal` or `private` for the core method (the tests go through `NameOptionSource`). The design names only the method, so choose `private`, and write the choice back as an impl note if it differs.
 
-**Parameter-name correction:** `design.md` § 3.2 writes `SearchPersonsStartsWithAsync(term, ct: ct)`. The real parameter is `cancellationToken` (`Domain/ServicesInterfaces/IPersonService.cs:24`), so call `SearchPersonsStartsWithAsync(term, cancellationToken: ct)`. Add a `> **Spec updated 2026-09-25:**` note to `design.md` § 3.2.
+**Service call (per the `design.md` § 3.2 note the orchestrator adds at Step 0; the implementor does not edit spec files):**
+- Call `SearchPersonsStartsWithAsync(trimmed, cancellationToken: ct)`, where `var trimmed = term.Trim();`. The service receives the **trimmed** term (REQ-ACF-13). The real parameter name is `cancellationToken` (`Domain/ServicesInterfaces/IPersonService.cs:24`), not `ct`.
+- `maxResults` is **not** passed. It defaults to `SearchConstants.MaxSearchResults` (= 5), exactly as today's call `SearchPersonsStartsWithAsync(term)` (`PersonFormViewModel.cs:288`). An expression-tree Moq setup must still name it explicitly, so the tests use `SearchConstants.MaxSearchResults`. The existing test `SearchPersonsCommand_ValidTerm_MapsToDtos` sets up `("jo", 5, default)`. It still matches: "jo" trims to "jo", and `SearchPersonsAsync` passes the default token.
 
 - [ ] **Step 1: Write the failing test (REQ-ACF-16).**
 
@@ -533,7 +585,7 @@ public async Task NameOptionSource_SearchAsync_BelowTrimmedThreshold_ReturnsEmpt
 ```
 
 - [ ] **Step 5: Run it, confirm Red** for `" a"` and `"a "`. Today's check uses the raw `term.Length`, so the service is called: the expected failure is `Moq.MockException : Expected invocation on the mock should never have been performed, but was 1 times`. `"a"` may already pass; that is expected, and the two padded cases carry the Red.
-- [ ] **Step 6: Implement the trimmed check.** `if (string.IsNullOrWhiteSpace(term) || term.Trim().Length < SearchConstants.MinimumLocalQueryLength) return [];`. Run → Green.
+- [ ] **Step 6: Implement the trimmed check.** `var trimmed = term?.Trim() ?? ""; if (trimmed.Length < SearchConstants.MinimumLocalQueryLength) return [];`, and pass `trimmed` to the service. Run → Green.
 - [ ] **Step 7: Regression.** The full suite → `Failed: 0`. Specifically, `SearchPersonsCommand_ShortTerm_SetsEmptySuggestions`, `SearchPersonsCommand_ValidTerm_MapsToDtos` (its setup passes `default` as the token, which still matches) and every `PersonFormViewModelBug044Tests` test pass **unchanged** (REQ-ACF-20/21/28). If one of them fails, do not edit it: `blocked: spec gap`.
 - [ ] **Step 8.** Build → 0 errors. The E2E gate is not applicable (no UI change yet; the VM change is not bound until T6), so the status is `To Review`. Exit checklist, with the AC matrix rows REQ-ACF-13 and -16. Commit:
 
@@ -622,20 +674,29 @@ feat(person-form): Full Name on AutocompleteDXField — page glue removed (REQ-A
 
 ---
 
-## Model routing summary
+## Model routing and estimates
 
-| Task | Model | Why |
-|------|-------|-----|
-| T1a spike page | Sonnet | Mechanical: the procedure is fully specified in `tasks.md` T1 |
-| T2 constant | Haiku (Sonnet fallback) | A trivial const + one assertion |
-| T3 Tester / Builder | Sonnet / Sonnet | The rules are verbatim in `design.md` § 4 |
-| T3-C | Sonnet | One pure function, a 5-row table |
-| T4 component | **Opus** | DX event wiring, mechanism realisation, property-change ordering, Review Focus 1–5 |
-| T5 VM | Sonnet | A small refactor with prescribed tests |
-| T6 page | Sonnet | Prescribed XAML swap + deletion |
-| T7-prep | Sonnet | One attribute |
-| Verifier (after every merge) | Sonnet | Diff vs spec checklist |
-| T1c, T7 records, Step 0 | Orchestrator | Docs only |
+| Task | Model | Estimate | Review lane | Why this model |
+|------|-------|----------|-------------|----------------|
+| Step 0 | Orchestrator | 30 min | — | Docs only |
+| T1a spike page | Sonnet | 60 min | Architectural (via T1) | Mechanical: the procedure is fully specified in `tasks.md` T1 |
+| T1b device run | Helder | ≤ 2 h (hard time-box) | — | On-device |
+| T1c verdict record | Orchestrator | 20 min | — | Docs only |
+| T2 constant | Haiku (Sonnet fallback) | 15 min | Standard | A trivial const + one assertion |
+| T3 Tester / Builder | Sonnet / Sonnet | 45 min / 30 min | Standard | The rules are verbatim in `design.md` § 4 |
+| T3-C (C only) | Sonnet | 30 min | Standard | One pure function, a 5-row table |
+| T4 component | **Opus** | 2 h (see the split below) | Elevated | DX event wiring, mechanism realisation, property-change ordering, Review Focus 1–5 |
+| T5 VM | Sonnet | 45 min | Standard | A small refactor with prescribed tests |
+| T6 page | Sonnet | 45 min | Standard | Prescribed XAML swap + deletion |
+| T7-prep | Sonnet | 15 min | — | One attribute |
+| T7 device gate | Helder | 45 min | Architectural | On-device |
+| Verifier (after every merge) | Sonnet | 15 min each | — | Diff vs spec checklist |
+
+**Pre-planned T4 split (if T4 exceeds 2 h, the sizing limit in `workflow-rule-2.md`).** The implementor stops at the end of the current step, commits green, and records a checkpoint. The orchestrator then dispatches the remainder as its own task on the same branch:
+- **T4a** = Steps 1–4 + 6: XAML shell, all BindableProperties, `CurrentMode`/`ApplyMode`/`ApplySupportingText`, XML docs. The build is green and there are no event adapters yet. Commit: `feat(acf): AutocompleteDXField shell + properties + mode application`.
+- **T4b** = Steps 5, 7, 8: event adapters, the Review Focus / invariant self-review, and the final suite. Commit: the T4 message.
+
+Both halves use Opus. The merge happens only after T4b.
 
 ## Self-review (writing-plans checklist)
 

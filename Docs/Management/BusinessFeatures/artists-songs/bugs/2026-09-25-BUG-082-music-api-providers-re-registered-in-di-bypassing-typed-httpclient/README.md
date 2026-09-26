@@ -1,12 +1,13 @@
 ---
 id: BUG-082
 title: Music API providers re-registered in DI, bypassing typed HttpClient
-status: 🟡 In Progress
+status: ✅ Fixed
 severity: Major
 target: 2026-09-25
 parent: artists-songs
 goal: A second DI registration hands the MusicBrainz and Deezer providers an HttpClient with no base URL, so every third-party search fails silently and returns nothing.
 gate: Providers resolve with the configured client; a DI regression test fails first then passes.
+closed: 2026-09
 kind: bug
 ---
 
@@ -27,3 +28,5 @@ covers it, because every provider test uses mocks.
 Helder, 2026-09-24: the picker pages "never ever worked as expected", which is consistent with this.
 The pickers are being deleted, but this fix is gate **G1** of the title-first item: the new
 autocomplete uses the same providers.
+
+> **Closed ✅ Fixed [2026-09-25].** Merged to develop `fa520e3f`; DI regression test Red then Green; independent verifier PASS; 635/635 on develop. The on-device confirmation (a Deezer search returns results) happens in the title-first song form E2E gate, the first UI to use the providers after the picker pages are deleted.
