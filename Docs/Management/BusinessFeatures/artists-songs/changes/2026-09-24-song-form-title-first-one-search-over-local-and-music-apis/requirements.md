@@ -106,6 +106,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   shared Field (append options to the current menu, `design.md` § 3.4). If the dependency item
   rejects it, the fallback is: the Field shows local and remote together once Deezer answers or the
   REQ-SFT-08 bound expires, so local options wait at most 3,000 ms (Q16).
+  > **Spec updated 2026-09-26:** Q16 RESOLVED. The shared Field does **not** gain an append capability in this pipeline (orchestrator decision under Helder's pre-authorisation of 2026-09-25, applying the Q16 recommendation). The fallback is the behaviour: the Field shows local and remote options together once Deezer answers or the REQ-SFT-08 bound expires, so local options wait at most 3,000 ms. Same for the Artist form (REQ-SFT-47). Plan: `plan.md` § 0.3 D1.
 - **REQ-SFT-08: Remote wait bound.** A Deezer call that has not completed within 3,000 ms
   `[Proposed — confirm]` SHALL be cancelled and treated as a failure (REQ-SFT-06).
 - **REQ-SFT-09: Latest query wins.** Options from an earlier, slower query SHALL never replace options
@@ -301,6 +302,9 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   local artists and Deezer artists, with the REQ-SFT-03/06/07/08/09 thresholds and failure rules.
   Local options come first (marker "In your library"), then Deezer options (supporting text
   "Deezer"). In edit mode Name is the Field with `IsSearchEnabled = false`, Editable (rename unchanged).
+  > **Spec updated 2026-09-26:** the Artist form's **local** name search uses the artist-name trigram index (`IArtistRepository.SearchNameCandidatesAsync`, FTS5 `ArtistSearch`, REQ-SFT-19/34), ranked for display by `ISimilarityScorer.RankScore` (ordering only, `design.md` § 6.4), at most 5 — not the collated name-prefix query. Without this, "metalica" could not list the stored "Metallica" and REQ-SFT-48's single-row rule could not hold for a typo. Orchestrator decision under Helder's pre-authorisation (plan § 0.3 D20).
+  Given "Metallica" is stored, When the user types "metalica" in Name on New Artist,
+  Then "Metallica" is the first local option ("In your library"), and a Deezer artist named "Metallica" is not shown as a separate Deezer option (REQ-SFT-48).
 - **REQ-SFT-48: Local artist pick opens it.** Picking a local artist opens that artist's edit form,
   replacing the add form (dedup; carry-over of REQ-FORMUX-09's intent). If a Deezer artist's name is
   a collated match for a local artist, it is shown once, as the local option.
@@ -410,7 +414,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **Q10 (REQ-SFT-49):** store the Deezer artist id on the Artist form? Recommended: no.
 - **Q11:** `NestedUnitOfWorkTests` exercises only the deleted `CommitAsync` methods. Port 4 of its 5
   tests to the new 2-level save path and delete the 5th (artist external identity, REQ-UOW-09)?
-- **Q16 (REQ-SFT-07):** if the shared Field cannot append options, accept the fallback (local options
+- **Q16 (REQ-SFT-07): RESOLVED 2026-09-26: fallback accepted; no append capability (see the note under REQ-SFT-07).** Original question: if the shared Field cannot append options, accept the fallback (local options
   wait up to 3,000 ms for Deezer)?
 
 Resolved: Q3 (collated match reused silently), Q13 (Title editable in edit mode for every song; seventh round, reversing the sixth),
