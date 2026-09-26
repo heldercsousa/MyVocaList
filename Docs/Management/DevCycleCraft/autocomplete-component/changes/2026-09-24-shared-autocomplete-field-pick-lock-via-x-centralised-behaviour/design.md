@@ -386,6 +386,7 @@ missing submit icon, `SelectedItem` highlight, and menu timing. T1 and T7 cover 
   no template change: the consumer puts the Version into `AutocompleteSuggestion.SupportingText`,
   which the option template already shows as its second line. Any other new surface is a component
   change under the four gates.
+  > **Spec updated 2026-09-26:** the song-form item's seventh-round ruling reverses this: in edit mode Title is Editable with `IsSearchEnabled = false` for every song; the song form binds no `IsReadOnly`. `IsReadOnly` stays in the component for future use.
 - `PersonFormPage.xaml` edits follow the incremental XAML rule (one file → build → fix → next).
 
 ## 12. Census (Python `os.walk` + substring, 2026-09-24; excludes `bin/obj/.git/Docs/.claude`)
