@@ -96,7 +96,7 @@
 
 ## Phase 2: UI logic (Level A, Red first)
 
-- [ ] **T3: `IMenuOptionSource` + `AutocompleteDXFieldLogic` with tests** [SEQUENTIAL, after the T1 verdict]
+- [x] **T3: `IMenuOptionSource` + `AutocompleteDXFieldLogic` with tests** [SEQUENTIAL, after the T1 verdict] *(mechanism-independent part merged to develop 2026-09-26, `83065e07`; see note below)*
   - Tester writes `AutocompleteDXFieldLogicTests` first: every rule in `design.md` § 4, each test tagged
     `// [AC] REQ-ACF-NN`: 01 (`LockAfterPick`), 04, 05a (locked + empty/whitespace → not effectively
     locked), 11b, 11c/17, 12a (search off → no request), 12b (read-only wins over locked and search; no X, no request, no blur forwarding), 12c (`BottomSupportingText`: error wins), 13 (" a" and "a" → no request; "ab" → request),
@@ -136,7 +136,7 @@
 
 ## Phase 4: ViewModel
 
-- [ ] **T5: `PersonFormViewModel`: `SearchPersonsCoreAsync` + `NameOptionSource`** [SEQUENTIAL, after T3]
+- [~] **T5: `PersonFormViewModel`: `SearchPersonsCoreAsync` + `NameOptionSource`** [SEQUENTIAL, after T3]
   - Tester first: (a) `NameOptionSource.SearchAsync("jo", ct)` returns exactly the list mapped from
     `IPersonService.SearchPersonsStartsWithAsync`, and the token passed to `SearchAsync` reaches the
     service call (`// [AC] REQ-ACF-16`); (b) below the **trimmed** threshold (" a", "a") it returns
