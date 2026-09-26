@@ -170,6 +170,10 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
   **If rejected (Q16):** `TitleOptionSource` awaits local and remote together and returns one list; the
   3,000 ms bound (REQ-SFT-08) caps how long local options wait.
 
+  > **Spec updated 2026-09-26:** Q16 RESOLVED — the append capability is **not** requested; the fallback above is
+  > the design (`TitleOptionSource` and `NameOptionSource` await local, then remote, and return one list).
+  > Orchestrator decision under Helder's pre-authorisation of 2026-09-25; plan § 0.3 D1.
+
 ### 3.5 Save decisions in the Service (`ISongService.SaveFromFormAsync`, REQ-SFT-51)
 
 ```csharp
@@ -250,7 +254,13 @@ registration (`:156-158`), `CreateArtistInlineCommand`, `ExecuteNewSongSaveAsync
 `IArtistSuggestionService` is reshaped like the song service: `SearchNameLocalAsync(query, ct)` and
 `SearchNameRemoteAsync(query, ct) → ArtistRemoteSearchResult(Remote, RemoteUnavailable)`.
 Local = the existing collated prefix search (`IArtistRepository.SearchByNameAsync`, ≤ 5; no ranking,
-so § 6.4 does not apply). Remote = Deezer `search/artist?q=` (≤ 5), with the same 3,000 ms bound and
+so § 6.4 does not apply).
+
+> **Spec updated 2026-09-26:** superseded. Local = `IArtistRepository.SearchNameCandidatesAsync(q,
+> SimilarityConstants.PoolSize)` (FTS5 `ArtistSearch`, § 6.2; collated prefix fallback under 3 characters), ranked
+> by `ISimilarityScorer.RankScore(q, name)` stable over DB order, take 5. The prefix query could not list "Metallica"
+> for "metalica" (E2E line 11/12, REQ-SFT-47/48). § 6.4 now also covers `ArtistSuggestionService` (ordering only).
+> The Deezer-row dedup by collated name is unchanged. Plan § 0.3 D20. Remote = Deezer `search/artist?q=` (≤ 5), with the same 3,000 ms bound and
 failure handling as § 3.3. Dedup: a Deezer artist whose name is a collated match for a local artist is
 dropped (the local row stays). The similarity dedup tier (c) in `ArtistSuggestionService` and
 `FilterSimilar` lose their callers and are deleted: C# similarity must not deduplicate (§ 6.4 scope).
@@ -455,7 +465,7 @@ decides); the probe corpus is synthetic, so the orders are indicative.
 
 | Date | Constraint violated | Reason for exception | Code location | Expires |
 |------|---------------------|----------------------|---------------|---------|
-| 2026-09-24 | `constraints-registry.md § EF Core / SQLite` — "No C#-side string normalization for search/deduplication — HARD RULE"; and `song-import-resolution/requirements.md` INV-5 ("No matching path performs C#-side case/accent normalization") | Song title search (item `song-form-title-first-one-search-over-local-and-music-apis`, REQ-SFT-30…32). The database does all **retrieval**: an FTS5 trigram index with `remove_diacritics` returns a candidate list bounded by `SimilarityConstants.PoolSize` (50). C# (`SimilarityScorer.Normalize` + FuzzySharp `TokenSortRatio`, via `ISimilarityScorer.RankScore`) only **orders** that bounded list for display. It never decides which rows exist, never filters out a row, never deduplicates and never checks uniqueness. Both reasons behind the rule are absent: correctness (the DB, not C#, decides matches, so "café"/"cafe" is still matched by SQLite) and performance (retrieval uses the index; C# work is at most 50 scores per query). Helder chose this option on 2026-09-24. | `Services/SongSuggestionService.cs` (ranking step of `SearchTitleLocalAsync`); `Infra/Similarity/SimilarityScorer.cs` (`RankScore`). Not `ArtistSuggestionService`: artist search keeps the collated prefix query and does not rank | When the ranking moves into SQL, or if any code path uses `RankScore` to filter, deduplicate or test uniqueness, or if the candidate list stops being DB-bounded. |
+| 2026-09-24 | `constraints-registry.md § EF Core / SQLite` — "No C#-side string normalization for search/deduplication — HARD RULE"; and `song-import-resolution/requirements.md` INV-5 ("No matching path performs C#-side case/accent normalization") | Song title search (item `song-form-title-first-one-search-over-local-and-music-apis`, REQ-SFT-30…32). The database does all **retrieval**: an FTS5 trigram index with `remove_diacritics` returns a candidate list bounded by `SimilarityConstants.PoolSize` (50). C# (`SimilarityScorer.Normalize` + FuzzySharp `TokenSortRatio`, via `ISimilarityScorer.RankScore`) only **orders** that bounded list for display. It never decides which rows exist, never filters out a row, never deduplicates and never checks uniqueness. Both reasons behind the rule are absent: correctness (the DB, not C#, decides matches, so "café"/"cafe" is still matched by SQLite) and performance (retrieval uses the index; C# work is at most 50 scores per query). Helder chose this option on 2026-09-24. | `Services/SongSuggestionService.cs` (ranking step of `SearchTitleLocalAsync`); `Infra/Similarity/SimilarityScorer.cs` (`RankScore`). Not `ArtistSuggestionService`: artist search keeps the collated prefix query and does not rank. **Spec updated 2026-09-26:** also `Services/ArtistSuggestionService.cs` (ranking step of `SearchNameLocalAsync`, which now retrieves from `ArtistSearch`; ordering only; plan § 0.3 D20) | When the ranking moves into SQL, or if any code path uses `RankScore` to filter, deduplicate or test uniqueness, or if the candidate list stops being DB-bounded. |
 
 ### Decision: FTS5 trigram over the token-prefix hybrid
 **Chosen approach:** FTS5 trigram retrieval (Helder, README third round item 5).

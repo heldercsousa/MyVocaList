@@ -24,10 +24,10 @@ Every task implicitly includes these. Values are copied from the spec or the pro
 - **Business logic in Services only** (CLAUDE.md, unamendable). ViewModels map outcomes to sheets and navigate; every Save rule is in `SongService.SaveFromFormAsync` (REQ-SFT-51).
 - **One write path** (REQ-SFT-46, INV-SFT-1): song creates/updates from the Song form go only through `ISongService.CreateSongWithUrlsAsync` / `ISongService.UpdateSongAsync`. `SaveFromFormAsync` itself writes nothing.
 - **Never two artists with the same name** under `NOCASE_NOACCENT` (REQ-SFT-52, INV-SFT-6). An exact collated match is reused silently; no C# string comparison decides a match.
-- **No C#-side normalisation for search/dedup** (`constraints-registry.md § EF Core / SQLite`, HARD RULE). The only exception is `design.md` § 6.4 (filed in `.claude/exception-registry.md` at Step 0): `ISimilarityScorer.RankScore` may **order** a DB-retrieved list bounded by `SimilarityConstants.PoolSize` (50); it never filters, deduplicates or tests uniqueness. Collated matches use `EF.Functions.Collate(..., CollationConstants.Default)`.
+- **No C#-side normalisation for search/dedup** (`constraints-registry.md § EF Core / SQLite`, HARD RULE). The only exception is `design.md` § 6.4 (filed in `.claude/exception-registry.md` at Step 0): `ISimilarityScorer.RankScore` may **order** a DB-retrieved list bounded by `SimilarityConstants.PoolSize` (50); it never filters, deduplicates or tests uniqueness. Code locations: `SongSuggestionService` (title search) and `ArtistSuggestionService` (Artist-form local name search, § 0.3 D20). Collated matches use `EF.Functions.Collate(..., CollationConstants.Default)`.
 - **Unit-of-work read scope** (REQ-UOW-36/37/50, `MyVocaList.Tests/Architecture/UnitOfWorkReadScopeTests.cs`): every repository and every governed data service (`IArtistService`, `ISongService`, `IArtistResolutionService`, `ISongResolutionService`, `ISongKaraokeUrlService`) used by a service is resolved from the `ExecuteAsync`/`ExecuteReadAsync` lambda's own `sp`, never dereferenced from a constructor field. No `ExecuteReadAsync` lambda may reference `IMusicMetadataProvider`/`_providers` (no HTTP inside a read scope). The architecture floors stay met: ≥ 25 files under `Services/`, ≥ 15 governed constructor parameters.
 - **Service return pattern:** tuples `(bool success, string message, T? entity)`; `SongFormSaveOutcome` is the one designed exception (`design.md` § 3.5). No exceptions for business failures.
-- **Constants, never literals:** `SearchConstants.MinimumLocalQueryLength` (2), `SearchConstants.MinimumRemoteQueryLength` (3), `SearchConstants.AutocompleteDebounceMilliseconds` (300), `SearchConstants.MaxSearchResults` (5), `SimilarityConstants.PoolSize` (50), `SimilarityConstants.DefaultThreshold` (0.82). The 3,000 ms remote bound (REQ-SFT-08) becomes a named constant `SearchConstants.RemoteSearchTimeoutMilliseconds = 3000`, added in Task 4.2 (it is a value from the spec, not a new decision).
+- **Constants, never literals:** `SearchConstants.MinimumLocalQueryLength` (2), `SearchConstants.MinimumRemoteQueryLength` (3), `SearchConstants.AutocompleteDebounceMilliseconds` (300), `SearchConstants.MaxSearchResults` (5), `SimilarityConstants.PoolSize` (50), `SimilarityConstants.DefaultThreshold` (0.82). The 3,000 ms remote bound (REQ-SFT-08) becomes a named constant `SearchConstants.RemoteSearchTimeoutMilliseconds = 3000`, added in Task 2.2 (it is a value from the spec, not a new decision).
 - **Exact UI strings** (English only): "In your library", "Deezer", "Online search unavailable", "This music-database song is already in your library", "Similar artist found", "Use '<existing>'", "Create '<typed>'", "Open '<title>'? What you entered here will be discarded.", "Open", "Keep editing", "Open existing", "Save as new version", "Save as new song", "Artist is required". Option supporting text: local = `"artist · version · In your library"` (the ` · version` part omitted when Version is empty); remote = `"artist · Deezer"`.
 - **Deezer only** (Q1 = drop, REQ-SFT-36). Plain query `search/track?q=` / `search/artist?q=` with `Uri.EscapeDataString`, no `track:`/`artist:` qualifiers (REQ-SFT-35). Title = the provider's full `title` (Q5 default). The Deezer artist id is **not** stored (Q10, REQ-SFT-49).
 - **No native dialogs** (`DisplayAlert` etc.): `dx:BottomSheet` only. DevExpress first. `SafeAreaEdges="Container"` on pages. **Incremental XAML:** edit ONE XAML file → build → fix → next file.
@@ -56,7 +56,7 @@ The five input classes or failure modes the spec implies but no AC-level test pi
 
 ### 0.1 Wave structure (one worktree + task branch per task)
 
-Every code task gets its **own** worktree `.worktrees/sft-<task>` on branch `task/sft-<task>-<slug>`, created from `develop` **only after its dependencies are merged**. Tester and Builder of one task run in sequence on one branch. Migration tasks have an orchestrator scaffold step between Part A and Part B (§ 0.3 D11). Wave cap: at most **4** subagents in flight.
+Every code task gets its **own** worktree `.worktrees/sft-<task>` on branch `task/sft-<task>-<slug>`, created from `develop` **only after its dependencies are merged**. Tester and Builder of one task run in sequence on one branch. Migration tasks have an orchestrator scaffold step between Part A and Part B (§ 0.3 D11). Wave cap: at most **4** subagents in flight, **counting post-merge Verifiers** (§ 0.5): a wave of 3 implementors leaves room for one Verifier; with 4 implementors in flight, the Verifier of a finished merge waits.
 
 | Wave | Tasks (parallel within a wave) | Depends on (merged) | Model |
 |------|-------------------------------|---------------------|-------|
@@ -68,10 +68,10 @@ Every code task gets its **own** worktree `.worktrees/sft-<task>` on branch `tas
 | **W4** | **1.6** · **3.2a** · **3.3** | 1.6 ← 1.4+1.5 · 3.2a ← 3.1 · 3.3 ← 3.1+5.1 | Haiku · Sonnet · Sonnet |
 | **W5** | **4.1a** · **3.3b** · **3.4** | 4.1a ← 1.6 + G1 · 3.3b ← 3.3 · 3.4 ← 3.3 | Sonnet · Haiku · Sonnet |
 | **W6** | **3.2b** · **4.1b** | 3.2b ← 3.2a+3.3b · 4.1b ← 4.1a | Sonnet · Haiku |
-| **W7** | **3.2c** | 3.2b | Haiku |
+| **W7** | **3.2c** | 3.2b | Sonnet |
 | **W8** | **3.5a** · **3.5b** | 3.2c + 3.3b | Haiku · Haiku |
 | **W9** | **3.6a** | 3.5a+3.5b | Haiku |
-| **W10** | **3.6b** M1 (Part A → scaffold → Part B) | 3.6a + G3 + § 0.2.2 check | Sonnet → orchestrator → Haiku |
+| **W10** | **3.6b** M1 (Part A → scaffold → Part B) | 3.6a + G3 + § 0.2.2 check | Sonnet → orchestrator → Sonnet |
 | **W11** | **3.7** M2 (Part A → scaffold → Part B) | 3.6b + G3 + § 0.2.2 check | Sonnet → orchestrator → Sonnet |
 | **HARD STOP** | **G5 verdict must read `PASS`** before W12 | G5c | — |
 | **W12** | **3.8** M3 (Part A → scaffold → Part B) | 3.7 + G5 PASS + G3 | Sonnet → orchestrator → **Opus** |
@@ -79,7 +79,7 @@ Every code task gets its **own** worktree `.worktrees/sft-<task>` on branch `tas
 | **W14** | **3.9b** · **4.2-Tester** → **4.2-Builder** | 3.9b ← 3.9 · 4.2 ← 2.2+3.9+4.1b | Sonnet · Sonnet → Sonnet |
 | **W15** | **3.9c** · **4.3** | 3.9c ← 3.9b+3.4 · 4.3 ← 4.2 | Sonnet · Sonnet |
 | **W16** | **3.10-Tester** → **3.10-Builder** · **5.2-Tester** → **5.2-Builder** | 3.10 ← 3.2c+3.3b+3.9c + G3 · 5.2 ← 4.3+3.5b | Sonnet → **Opus** · Sonnet → Sonnet |
-| **W17** | **5.3-Tester** → **5.3-Builder** · **6.1-Tester** → **6.1-Builder** | 5.3 ← 5.2+3.10 · 6.1 ← 4.1b+4.3 | Sonnet → Sonnet · Sonnet → Sonnet |
+| **W17** | **5.3-Tester** → **5.3-Builder** · **6.1-Tester** → **6.1-Builder** | 5.3 ← 5.2+3.10 · 6.1 ← 4.1b+4.3+3.9b | Sonnet → Sonnet · Sonnet → Sonnet |
 | **W18** | **5.3b** · **5.4** · **6.2** | 5.3b ← 5.3 + G3 · 5.4 ← 5.3 · 6.2 ← 6.1+1.2 | Haiku · Sonnet · Sonnet |
 | **GATE G2** | **ACF T4 (`AutocompleteDXField`) merged into `develop`** | ACF plan | — |
 | **W19** | **5.5** (+ former 5.7) · **6.3** | 5.4 + ACF T4 · 6.2 + ACF T4 | Sonnet · Sonnet |
@@ -121,7 +121,7 @@ Within every wave of § 0.1, no two tasks share a file (checked row by row again
 
 #### 0.2.2 Cross-item rule (G3): CATALOG-PROP and BUG-080
 
-**Rule `[HARD]`: never dispatch a task that touches `Services/SongService.cs`, `Domain/ServicesInterfaces/ISongService.cs` or anything under `Infra/Migrations/` while a CATALOG-PROP branch is live.** Before dispatching 3.1, 3.2a, 3.2b, 3.2c, 3.10, 5.3b, 3.6b, 3.7 or 3.8, the orchestrator reads `Docs/Management/LEDGER.md` and checks for any row whose branch/worktree column is non-empty for:
+**Rule `[HARD]`: never dispatch a task that touches `Services/SongService.cs`, `Domain/ServicesInterfaces/ISongService.cs` or anything under `Infra/Migrations/` while a CATALOG-PROP branch is live.** Before dispatching 3.1, 3.2a, 3.2b, 3.2c, 3.10, 5.3b, 3.6b, 3.7 or 3.8, the orchestrator runs **three** checks and records their output: (1) `Docs/Management/LEDGER.md`, any row whose branch/worktree column is non-empty; (2) `git worktree list`; (3) `git branch -a` (a branch or worktree whose name contains `catalog`, `catalog-prop`, `bug-080` or `venue` counts as live until proven otherwise). It checks for:
 
 - **CATALOG-PROP** (`changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/`): it writes `SongService.cs` and adds a backfill migration. If live → do not dispatch; wait for its merge (or ask Helder to pause it).
 - **BUG-080** (`venues/bugs/2026-09-21-BUG-080-…`): its fix may add a Venues-only migration. It rebuilds neither `Songs` nor `Artists`, so it cannot drop the FTS triggers (`design.md` § 7), but it **does** change the model snapshot. For the migration tasks 3.6b, 3.7 and 3.8 only: if a BUG-080 branch with a migration is live → do not dispatch; wait for its merge.
@@ -129,13 +129,15 @@ Within every wave of § 0.1, no two tasks share a file (checked row by row again
 
 **Snapshot rule** (`design.md` § 7): every migration is scaffolded in a worktree created from the **current** `develop`, so it is generated against the merged model snapshot. Whichever item merges second regenerates its migration against the merged snapshot (never only a later timestamp). If CATALOG-PROP or BUG-080 merges a migration while one of M1–M3 is in flight, the in-flight task's Part A worktree is discarded and re-created from the new `develop`, and its scaffold is re-run.
 
-Record the LEDGER check (rows read, result) in the task's `### Checkpoint` block before dispatch.
+Record the three checks (LEDGER rows read, `git worktree list`, `git branch -a`, result) in the task's `### Checkpoint` block before dispatch.
+
+**Two-way rule.** The same constraint is written on the other side at Step 0 (item 0.8): the CATALOG-PROP and BUG-080 LEDGER rows, and this item's `tasks.md` Coordination section, carry the note "Do not dispatch a task touching `SongService.cs`/`ISongService.cs`/`Infra/Migrations/` while a `task/sft-*` branch owning those files (3.1, 3.2a–c, 3.10, 5.3b, 3.6b, 3.7, 3.8) is live; check LEDGER + `git worktree list` + `git branch -a`".
 
 ### 0.3 Sequencing deviations from `tasks.md` (not redesign)
 
 Each item is recorded **on `develop` by the orchestrator at Step 0** (§ 0.4 item 0.7) as a `> **Spec updated 2026-09-26:**` note in `tasks.md` (the spec is not shipped, so in-place notes are allowed). No implementor edits `tasks.md` or `design.md`.
 
-- **D1 (Q16, REQ-SFT-07 fallback).** The approved dependency spec (`AutocompleteDXField`, `design.md` § 3.1/3.2) has **no** append capability; `IMenuOptionSource.SearchAsync` returns one list. The spec's named fallback therefore applies: `TitleOptionSource` awaits the local search, then the remote search (bounded by REQ-SFT-08's 3,000 ms), and returns one list (local, then promoted, then remote). Local options wait at most 3,000 ms. The append capability is a follow-up for the component item (its own governed-component task), not this plan.
+- **D1 (Q16, REQ-SFT-07) — SETTLED 2026-09-26.** The approved Q16 recommendation applies: local options wait up to 3,000 ms for Deezer. The `AutocompleteDXField` component does **not** gain an append capability in this pipeline (orchestrator decision under Helder's pre-authorisation of 2026-09-25; recorded as resolved in `requirements.md` REQ-SFT-07 and § Open questions at Step 0.7). `IMenuOptionSource.SearchAsync` returns one list: `TitleOptionSource` (and `NameOptionSource`) await the local search, then the remote search (bounded by REQ-SFT-08's 3,000 ms), and return one list (local, then promoted, then remote).
 - **D2 (VM tasks before G2).** `tasks.md` puts Phase 5 "after G2". ViewModel tasks 5.1–5.4 and 6.2 consume only `IMenuOptionSource`/`MenuOptionSource`/`AutocompleteSuggestion` (ACF T3, merged `83065e07`), not the component, so they run before ACF T4. Only the page tasks 5.5, 5.6 and 6.3 wait for ACF T4. If ACF T1c escalates to option (ii)/(iii) and that changes `IMenuOptionSource`, the orchestrator re-plans 5.2, 5.3 and 6.2 before dispatching them.
 - **D3 (3.1 keeps a forwarding overload).** Changing `CreateSongWithUrlsAsync(int artistId, …)` in place breaks 3 VM-test mocks, 2 `Bug068RegressionTests` calls and the `SongResolutionService` caller, none of which 3.1 owns. 3.1 therefore **adds** the new overload `(int? artistId, string? newArtistName, …)` and keeps the old one, `[Obsolete]`, forwarding with `newArtistName: null`. 3.1 no longer touches `SongFormViewModel.cs` (the VM keeps calling the old overload until 5.3 replaces the call with `SaveFromFormAsync`). New task **5.3b** deletes the old overload after 5.3.
 - **D4 (3.3 split into 3.3 + 3.3b).** Removing `FieldDiffs`/`TargetHasManualEdits` from the `SongResolution` record breaks 4 positional constructions in `SongFormViewModelTests.cs` (`:189, :218, :248, :1150`). 3.3 simplifies the service and keeps the record shape (passing `[]`/`false`); **3.3b** shrinks the record, deletes `FieldDiff`, and updates the constructions in `SongResolutionService.cs`, `SongResolutionServiceTests.cs` and `SongFormViewModelTests.cs`.
@@ -145,14 +147,15 @@ Each item is recorded **on `develop` by the orchestrator at Step 0** (§ 0.4 ite
 - **D8 (4.1 split into 4.1a + 4.1b; 4.1a after 1.6).** Deleting `MusicBrainzProvider.cs` (Q1) also needs its two registrations in `ServiceCollectionExtensions.cs:34,48`, and the new `MusicProviderException` is a new file, which puts 4.1 at 6 files. **4.1a** = Deezer contract + exception + provider tests; **4.1b** = MusicBrainz deletion + DI lines. 4.1a waits for 1.6 so the dead picker path (`MusicMetadataService`) is gone before providers start throwing.
 - **D9 (3.9b after 3.9).** Both repositories use one FTS match builder (`design.md` § 6.2 "the same builder"). 3.9 creates `Infra/Repository/FtsQueryBuilder.cs`; 3.9b consumes it, so it runs after 3.9 instead of `[P]`.
 - **D10 (3.6b sizing).** 3.6b owns 6 files (the 4 entity/config edits are one-line deletions, plus `Migrations/*` and the new `SongMigrationTests.cs`). Splitting would leave a non-building commit (entity property removed while its configuration still maps it). Accepted and recorded.
-- **D11 (migration scaffold by the orchestrator).** `workflow-rule-2.md` assigns `dotnet ef migrations add` to the main agent, and EF 10 fails `MigrateAsync` on pending model changes, so model edits and the scaffold must land in one commit. Each migration task is: **Part A** (implementor: Red tests committed `Lane: RED`; model/config edits left **uncommitted**, build green, handback) → **scaffold** (orchestrator, in the worktree: `dotnet ef migrations add <Name> -p Infra/MyVocaList.Infra.csproj -s Infra/MyVocaList.Infra.csproj`; the design-time factory is `Infra/AppDbContextFactory.cs`) → **Part B** (implementor: hand-written migration body where the task says so, Green, exit checklist, one commit with model + migration).
+- **D11 (migration scaffold by the orchestrator).** `workflow-rule-2.md` assigns `dotnet ef migrations add` to the main agent, and EF 10 fails `MigrateAsync` on pending model changes, so model edits and the scaffold must land in one commit. Each migration task is: **Part A** (implementor: Red tests committed `Lane: RED`; model/config edits left **uncommitted**, build green, handback) → **scaffold** (orchestrator, in the worktree: `dotnet ef migrations add <Name> -p Infra/MyVocaList.Infra.csproj -s Infra/MyVocaList.Infra.csproj`; the design-time factory is `Infra/AppDbContextFactory.cs`) → **Part B** (implementor: **first** checks the generated `Up`/`Down` against the task's expected operations and stops with `blocked: stale snapshot` if anything else appears; then the hand-written migration body where the task says so, Green, exit checklist, one commit with model + migration). The orchestrator runs the scaffold command only and never opens the generated `.cs` files (orchestrator read-scope HARD RULE).
 - **D12 (4.3 owns `SongSuggestionService.cs` too).** Removing `GetLocalAsync`/`GetRemoteAsync` from the interface also removes their implementation (5 files).
 - **D13 (5.1 owns `AppServicesRegistrationTests.cs`).** Adding `INavigationService` to `SongFormViewModel`'s constructor breaks `AddAppServices_ResolvingSongFormViewModelGraph_Succeeds` (it mocks the MAUI-only services; `INavigationService` is registered in `MauiProgram.cs:107`). 5.1 adds `services.AddSingleton(Mock.Of<INavigationService>());` to that test's setup (a mechanical, Level-C edit; no AC changes).
 - **D14 (Red commits).** Testers commit test files only (`Lane: RED`, `--no-verify`, per the registry row). Unlike ACF T3, no production skeleton is committed with the Red; a missing member is a compile-error Red.
 - **D15 (header and gates).** `tasks.md` still says "DRAFT — not dispatchable". Note: approved 2026-09-26; G1 done (BUG-082 `fa520e3f`); G4 resolved by the pre-authorisation (recommendations); G2 = ACF T4 merged (page tasks only, D2); G3 = § 0.2.2; G5 = STOP G5.
-- **D16 (`SearchConstants.RemoteSearchTimeoutMilliseconds`).** REQ-SFT-08's 3,000 ms is added as a named constant in 4.2 (Global Constraints "no literals"), consumed by 4.2 and 6.1. 4.2 therefore owns 6 files (the sixth is a one-line constant).
+- **D16 (`SearchConstants.RemoteSearchTimeoutMilliseconds`).** REQ-SFT-08's 3,000 ms is added as a named constant in **2.2** (Global Constraints "no literals"), consumed by 4.2 and 6.1. 2.2 owns 5 files; 4.2 stays at 5.
 - **D17 (5.7 folded into 5.5).** Replacing the Artist `AutoCompleteEdit` in XAML breaks the build until the code-behind glue that references it is deleted, so a XAML-only 5.5 commit cannot build. 5.5 owns `SongFormPage.xaml` + `.xaml.cs` (XAML → build → code-behind, as ACF T6 did); 5.7 is cancelled as folded.
-- **D18 (6.1 sizing).** 6.1 owns 6 files: the new one-line record `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` joins the 5 listed in `tasks.md`. Accepted and recorded.
+- **D18 (`ArtistRemoteSearchResult` created in 4.1b).** The new one-line record `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` is created in 4.1b (3 files), so 6.1 stays at 5 files. D10 is the only accepted sizing break.
+- **D20 (Artist-form local search uses the FTS pool) — spec gap resolved 2026-09-26.** `design.md` § 4.1 said the Artist form's local search keeps the collated prefix query (`ArtistRepository.SearchByNameAsync`, `:59-68`), which cannot find "Metallica" for "metalica" and so cannot satisfy E2E line 11 or REQ-SFT-48's dedup of the Deezer row. Orchestrator decision (under the pre-authorisation): `SearchNameLocalAsync` uses `IArtistRepository.SearchNameCandidatesAsync` (3.9b, FTS5 `ArtistSearch`) ranked by `ISimilarityScorer.RankScore`, take 5. 6.1 depends on 3.9b. The § 6.4 exception's code location is extended to `Services/ArtistSuggestionService.cs` (ranking only). Recorded in `requirements.md` REQ-SFT-47 (with an example) and `design.md` § 4.1/§ 6.4 at Step 0.7.
 - **D19 (`ArtistOptionSource` in 5.2).** `design.md` § 4 lists `ArtistOptionSource` as an existing/changed member, but today the Artist search is page glue (`OnArtistItemsRequested`). 5.2 creates `ArtistOptionSource` (`IMenuOptionSource` over the existing local artist search, local only, REQ-SFT-16) so 5.5 can bind it.
 
 ### 0.4 Step 0: orchestrator prep on `develop` (docs only, before W1)
@@ -162,9 +165,10 @@ Each item is recorded **on `develop` by the orchestrator at Step 0** (§ 0.4 ite
 - [ ] **0.3** Create `task-log.md` in this folder with pre-created sections, one per task, each holding only a `### Checkpoint` placeholder: `## Baseline`, `## G5 — FTS5 spike`, `## 1.1` … `## 1.7`, `## 2.1`, `## 2.2`, `## 3.1`, `## 3.2a`, `## 3.3`, `## 3.3b`, `## 3.4`, `## 3.2b`, `## 3.2c`, `## 3.5a`, `## 3.5b`, `## 3.6a`, `## 3.6b`, `## 3.7`, `## 3.8`, `## 3.9`, `## 3.9b`, `## 3.9c`, `## 3.10`, `## 4.1a`, `## 4.1b`, `## 4.2`, `## 4.3`, `## 5.1` … `## 5.4`, `## 5.3b`, `## 5.5`, `## 5.6`, `## 6.1` … `## 6.3`, `## 7.1`, `## 7.2 — Device gate`.
 - [ ] **0.4** Append to `findings.md` a section `## G5 — FTS5 trigram on Android (spike, 2026-09-26)` holding: an empty `### Environment` (device model, Android version, app commit), the **G5 run sheet** (§ G5b below, verbatim, empty Result cells), and an empty `### Verdict`.
 - [ ] **0.5** Register `task-log.md` in `MyVocaList.sln` with the `sln_add.py` helper used for `plan.md` (`findings.md` is already registered).
-- [ ] **0.6** File the `design.md` § 6.4 exception row in `.claude/exception-registry.md` verbatim (required **before 2.2** starts; Review lane Elevated).
-- [ ] **0.7** Record every § 0.3 deviation (D1–D16) in `tasks.md` as `> **Spec updated 2026-09-26:**` notes at the affected tasks, mark 5.7 `[CANCELLED: folded into 5.5]` (D17), and add the new task entries 3.3b, 3.5a/3.5b, 4.1a/4.1b, 5.3b in `tasks.md` format (`workflow-rule-4.md`: Produces/Consumes/Risk/Files owned/Demo/Review lane) copied from this plan.
-- [ ] **0.8** LEDGER rows for W1 (`/sln-ledger`): branch, worktree, phase, status. Note in the item row: "G3: no SongService/Migrations task while CATALOG-PROP or a BUG-080 migration branch is live".
+- [ ] **0.6** File the `design.md` § 6.4 exception row in `.claude/exception-registry.md` verbatim, with the code location extended to `Services/ArtistSuggestionService.cs` (ranking step of `SearchNameLocalAsync`, D20) (required **before 2.2** starts; Review lane Elevated).
+- [ ] **0.7** Record **every** § 0.3 deviation, **D1 through D20 (including D17–D20)**, in `tasks.md` as `> **Spec updated 2026-09-26:**` notes at the affected tasks; mark 5.7 `[CANCELLED: folded into 5.5]` (D17); add the new task entries 3.3b, 3.5a/3.5b, 4.1a/4.1b, 5.3b in `tasks.md` format (`workflow-rule-4.md`: Produces/Consumes/Risk/Files owned/Demo/Review lane) copied from this plan; add "after 3.9b" to 6.1 (D20). (The spec-level notes for D1 and D20 in `requirements.md`/`design.md` were written 2026-09-26 with this plan revision; check they are present.)
+- [ ] **0.7b** ACF spec note: in `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/design.md` at `:384` ("… `IsReadOnly` (an API-sourced song's Title in edit mode) …"), add `> **Spec updated 2026-09-26:** the song-form item's seventh-round ruling reverses this: in edit mode Title is Editable with `IsSearchEnabled = false` for every song; the song form binds no `IsReadOnly`. `IsReadOnly` stays in the component for future use.`
+- [ ] **0.8** LEDGER rows for W1 (`/sln-ledger`): branch, worktree, phase, status. G3 two-way (§ 0.2.2): note in this item's row "G3: no SongService/Migrations task while CATALOG-PROP or a BUG-080 migration branch is live"; add the mirror note to the **CATALOG-PROP** row and the **BUG-080** row (add a BUG-080 row if none exists); add the same two-way note to `tasks.md` § Coordination.
 - [ ] **0.9** Commit on `develop`: `docs(sft): plan prep — task-log skeleton, G5 run sheet, deviation notes, §6.4 exception row`.
 - [ ] **0.10** Create **only the W1 worktrees** (`sft-g5-spike` on `spike/sft-g5-fts5`, `sft-1.1`, `sft-1.2`, `sft-2.1`) with `git worktree add .worktrees/<name> -b <branch> develop`, then verify `git -C .worktrees/<name> merge-base --is-ancestor develop HEAD`. Every later worktree is created only after its dependencies are merged, and its `git log --oneline -5` must show the dependency's merge commit.
 
@@ -343,7 +347,7 @@ The first line of the output is `device: <DeviceInfo.Manufacturer> <DeviceInfo.M
 - Modify: `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` (delete `NavigateToArtistPickerCommand` and the `ArtistPickedMessage` handling; **keep** the `SelectedExternalId`/`SelectedProvider` stash, which 6.2 deletes)
 - Modify: `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs`
 
-**Superseded tests:** every test in `ArtistFormViewModelTests.cs` that exercises `NavigateToArtistPickerCommand` or `ArtistPickedMessage` → delete; superseded AC-ART-01…06 (`search-picker/requirements.md`) → REQ-SFT-44. The implementor lists each by name and line in the task-log.
+**Superseded tests:** none. Census 2026-09-26 (Python scan of `ArtistFormViewModelTests.cs` for `Picker`, `Picked`, `SelectedExternalId`, `SelectedProvider`): **zero hits**, so no test in that file exercises the picker entry point. The test file is edited only if the VM change breaks its build (e.g. a constructor argument); any such edit is mechanical and listed in the task-log. If the implementor's census finds a hit, it lists the test by name and line with AC-ART-01…06 → REQ-SFT-44 before deleting it.
 
 - [ ] **Step 1.** Pre-change census (`['ArtistPicker','ArtistPickedMessage','NavigateToArtistPicker']`) into the task-log.
 - [ ] **Step 2.** XAML edit → build. **Step 3.** VM edit → build. **Step 4.** Tests → build 0 errors, suite `Failed: 0`.
@@ -372,7 +376,9 @@ The first line of the output is `device: <DeviceInfo.Manufacturer> <DeviceInfo.M
 
 **Files (delete):** `MyVocaList/UI/Pages/Songs/SongPickerPage.xaml`, `SongPickerPage.xaml.cs`, `MyVocaList/UI/ViewModels/SongPickerViewModel.cs`, `Contracts/Messages/SongPickedMessage.cs`, `MyVocaList.Tests/Unit/ViewModels/SongPickerViewModelTests.cs`
 
-**Superseded tests:** `SongPickerViewModelTests.cs`, all 12 → delete; AC-SONG-01…06, AC-LOAD-* (song picker), AC-TRIGGER-01/02 → REQ-SFT-44. List each test name in the task-log.
+**Superseded tests:** `SongPickerViewModelTests.cs`, all 12 → delete; AC-SONG-01…06, AC-LOAD-* (song picker), AC-TRIGGER-01/02 → REQ-SFT-44: `SearchCommand_EmptyText_DoesNotCallService`, `SearchCommand_SetsIsLoadingBeforeAwait`, `SearchCommand_ClearsPriorResults`, `SearchCommand_OnSuccess_PopulatesResults`, `SearchCommand_OnEmptyResult_SetsHasSearchedNoResults`, `SearchCommand_OnException_SetsHasSearchedNoResults`, `SelectResultCommand_SendsSongPickedMessage`, `SelectResultCommand_CallsNavigationGoBack`, `BackCommand_CallsNavigationGoBack`, `IsShowEmptyState_OnEmptyResult_IsTrue`, `IsShowEmptyState_OnSuccess_IsFalse`, `SearchCommand_SongTitleNull_DoesNotThrow`.
+
+**Demo:** census finds no `SongPicker`/`SongPickedMessage` reference; build 0 errors. **Review lane:** Standard.
 
 - [ ] Delete the 5 files → build 0 errors → full suite `Failed: 0` (count − 12) → census `['SongPicker','SongPickedMessage']` → **ZERO HITS**. Exit checklist. Commit: `refactor(songs): delete SongPickerPage, VM, message and tests (REQ-SFT-44)`.
 
@@ -382,7 +388,9 @@ The first line of the output is `device: <DeviceInfo.Manufacturer> <DeviceInfo.M
 
 **Files (delete):** `MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml`, `ArtistPickerPage.xaml.cs`, `MyVocaList/UI/ViewModels/ArtistPickerViewModel.cs`, `Contracts/Messages/ArtistPickedMessage.cs`, `MyVocaList.Tests/Unit/ViewModels/ArtistPickerViewModelTests.cs`
 
-**Superseded tests:** `ArtistPickerViewModelTests.cs`, all → delete; AC-ART-01…06 → REQ-SFT-44 (names in the task-log).
+**Superseded tests:** `ArtistPickerViewModelTests.cs`, all 11 → delete; AC-ART-01…06 → REQ-SFT-44: `SearchCommand_EmptyText_DoesNotCallService`, `SearchCommand_SetsIsLoadingBeforeAwait`, `SearchCommand_ClearsPriorResults`, `SearchCommand_OnSuccess_PopulatesResults`, `SearchCommand_OnEmptyResult_SetsHasSearchedNoResults`, `SearchCommand_OnException_SetsHasSearchedNoResults`, `SelectResultCommand_SendsArtistPickedMessage`, `SelectResultCommand_CallsNavigationGoBack`, `BackCommand_CallsNavigationGoBack`, `IsShowEmptyState_OnEmptyResult_IsTrue`, `IsShowEmptyState_OnSuccess_IsFalse`.
+
+**Demo:** census finds no `ArtistPicker`/`ArtistPickedMessage` reference; build 0 errors. **Review lane:** Standard.
 
 - [ ] Delete → build → suite → census `['ArtistPicker','ArtistPickedMessage']` → **ZERO HITS**. Commit: `refactor(artists): delete ArtistPickerPage, VM, message and tests (REQ-SFT-44)`.
 
@@ -397,6 +405,8 @@ The first line of the output is `device: <DeviceInfo.Manufacturer> <DeviceInfo.M
 - [ ] **Step 1.** Census `['IMusicMetadataService','MusicMetadataService']` **before** deleting: hits only in the 3 owned files. Otherwise stop (`blocked: consumer found`).
 - [ ] **Step 2.** Delete + edit → build → full suite `Failed: 0`, including `UnitOfWorkReadScopeTests` (`ServicesDirectory_IsFoundAndNonEmpty` needs ≥ 25 files under `Services/`: record the new count) and `AppServicesRegistrationTests`.
 - [ ] **Step 3.** Census → ZERO HITS. Commit: `refactor(services): delete IMusicMetadataService (picker-only consumer) (REQ-SFT-44)`.
+
+**Demo:** build 0 errors; `AppServicesRegistrationTests` green. **Review lane:** Standard.
 
 ### Task 1.7: Remove inline artist create [W2, after 1.1]
 
@@ -491,6 +501,8 @@ Both compare with `EF.Functions.Collate(..., CollationConstants.Default)` in SQL
 - Modify: `Domain/ServicesInterfaces/ISimilarityScorer.cs`
 - Modify: `Infra/Similarity/SimilarityScorer.cs`
 - Modify: `MyVocaList.Tests/Unit/Services/Similarity/SimilarityScorerTests.cs` (append; existing `Score` tests unchanged)
+- Modify: `Domain/Constants/SearchConstants.cs` (append `public const int RemoteSearchTimeoutMilliseconds = 3000;` with an XML doc citing REQ-SFT-08; § 0.3 D16)
+- Modify: `MyVocaList.Tests/Unit/Domain/SearchConstantsTests.cs` (append one test)
 
 **Interfaces — Produces:**
 
@@ -511,8 +523,9 @@ double RankScore(string query, string candidate);
 | `RankScore_GunsCry_TitleArtistOfDontCryAboveCryByCyndiLauper` | REQ-SFT-32 | `RankScore("guns cry","Don't Cry Guns N' Roses") > RankScore("guns cry","Cry Cyndi Lauper")` |
 | `RankScore_AccentAndCaseVariant_ScoresOne` (Theory `"nao sei"`, `"NAO SEI"`) | REQ-SFT-31 | `RankScore(q,"Não Sei") == 1.0` |
 | `RankScore_Range_IsBetweenZeroAndOne` (Theory over 4 pairs incl. `""`) | REQ-SFT-30 | `0 <= s && s <= 1` |
+| `RemoteSearchTimeoutMilliseconds_Is3000` (in `SearchConstantsTests`) | REQ-SFT-08 | `Assert.Equal(3000, SearchConstants.RemoteSearchTimeoutMilliseconds)` |
 
-- [ ] **Step 2: Red.** Filter `SimilarityScorerTests`. Expected `CS1061 … 'SimilarityScorer' does not contain a definition for 'RankScore'`. Commit tests only, `Lane: RED`.
+- [ ] **Step 2: Red.** Filter `SimilarityScorerTests`. Expected `CS1061 … 'SimilarityScorer' does not contain a definition for 'RankScore'` and `CS0117 … 'SearchConstants' does not contain a definition for 'RemoteSearchTimeoutMilliseconds'`. Commit tests only, `Lane: RED`.
 - [ ] **Step 3: Green.** Implement; XML doc cites the § 6.4 exception and "ordering only". Filter → pass; the existing `Score` tests still pass unchanged; full suite `Failed: 0`.
 - [ ] **Step 4.** Exit checklist. Commit: `feat(similarity): RankScore (TokenSortRatio) for display ordering only (REQ-SFT-30..32, exception §6.4)`.
 
@@ -565,8 +578,8 @@ Failure message for REQ-SFT-26: `"This music-database song is already in your li
 | `CreateSongWithUrlsAsync_BothArtistIdAndNewName_FailsArtistRequired` | SongServiceTests | REQ-SFT-21 | same |
 | `CreateSongWithUrlsAsync_ExternalIdentityHeldByAnotherSong_FailsWithMessage` | SongServiceTests | REQ-SFT-26 | message = "This music-database song is already in your library"; `AddAsync` never called |
 | `CreateSongWithUrlsAsync_NewArtistName_PersistsOneArtistAndOneSong` | NewArtistUoW (port `:22`) | REQ-SFT-18 | 1 artist row + 1 song row, song.ArtistId = new artist id |
-| `CreateSongWithUrlsAsync_ThrowAfterArtistStaged_RollsBackBoth` | NewArtistUoW (port `:66`) | REQ-SFT-18 | 0 artists, 0 songs after the exception (same failure injection as the original) |
-| `CreateSongWithUrlsAsync_FailureTupleAfterArtistStaged_WritesNothing` | NewArtistUoW (port `:105`) | REQ-SFT-18 | 0/0 rows (same injection as the original) |
+| `CreateSongWithUrlsAsync_ThrowAfterArtistStaged_RollsBackBoth` | NewArtistUoW (**rewritten** from `:66`, assertion inverted: the original asserted the 3-level `CommitAsync` path; this asserts 0/0 rows on the 2-level path; REQ-UOW-24 → REQ-SFT-18) | REQ-SFT-18 | 0 artists, 0 songs after the exception (same failure injection as the original) |
+| `CreateSongWithUrlsAsync_FailureTupleAfterArtistStaged_WritesNothing` | NewArtistUoW (**rewritten** from `:105`, assertion inverted as above; REQ-UOW-24 → REQ-SFT-18) | REQ-SFT-18 | 0/0 rows (same injection as the original) |
 | `CreateSongWithUrlsAsync_NewArtist_UsesOneAppDbContextAcrossTwoLevels` | NewArtistUoW (port `:146`, weakened to 2 levels) | REQ-SFT-18 | the `AppDbContext` seen by `ArtistService` and `SongService` is the same instance (REQ-UOW-22 re-homed; doc comment states "2 levels; no 3-level path remains") |
 | `CreateSongWithUrlsAsync_NewArtistNameCollatedDuplicate_FailsAndWritesNothing` | NewArtistUoW | REQ-SFT-52 | "Metallica" stored; `newArtistName = "métallica"` → failure with the `IArtistService` duplicate message; artist count unchanged; 0 songs |
 | `CreateSongWithUrlsAsync_NewArtistAndIdentityHeld_CreatesNoArtist` | NewArtistUoW | REQ-SFT-26 | identity held → failure; artist count unchanged |
@@ -628,7 +641,8 @@ Also update the mocks at `SongServiceTests.cs:245` and `:480` to set up the new 
 | `:435` `AttachExternalId` | delete | AC-2.2 → REQ-SFT-05 |
 | `:481` `CreateNew_ResolvesArtistThenCreatesSong` | delete | AC-2.5 → REQ-SFT-18 (replaced by 3.1's tests) |
 | kept tests with `HasManualEdits = …` initialisers (`:81`, `:154`, `:445` if kept) | edit: drop the initialiser and any `TargetHasManualEdits` assert | REQ-SFT-37 |
-| `NestedUnitOfWorkTests.cs:22,66,105,146` | deleted here, **ported in 3.1** | REQ-UOW-22/24 re-homed |
+| `NestedUnitOfWorkTests.cs:22,146` | deleted here, **ported in 3.1** | REQ-UOW-22 re-homed |
+| `NestedUnitOfWorkTests.cs:66,105` | deleted here, **rewritten in 3.1, assertion inverted** | REQ-UOW-24 → REQ-SFT-18 |
 | `NestedUnitOfWorkTests.cs:195` | delete | REQ-UOW-09 (**removed**) and AC-3.4 → REQ-SFT-40 |
 
 - [ ] **Step 1: Red.** Write:
@@ -695,7 +709,7 @@ Expected Red: `Assert.Equal() Failure: Expected 42, Actual (null)` (today `SongR
 
 ### Task 3.2c: Move the remaining callers; delete the obsolete `UpdateSongAsync` overload [W7; G3]
 
-**Model:** Haiku. **Level:** C. **Estimate:** 30 min.
+**Model:** Sonnet. **Level:** C. **Review lane:** Standard. **Estimate:** 30 min. **Demo:** census finds no `hasManualEdits` argument; all tests green.
 
 **Files:** `ISongService.cs`, `SongService.cs`, `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTests.cs` (2 calls), `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs` (1 `UpdateSongAsync` call; also move its 2 `CreateSongWithUrlsAsync` calls to the new overload), and `SongResolutionServiceTests.cs` **only if** the census finds a remaining `UpdateSongAsync` mock with the flag.
 
@@ -703,7 +717,7 @@ Expected Red: `Assert.Equal() Failure: Expected 42, Actual (null)` (today `SongR
 
 ### Task 3.5a: Drop `HasManualEdits` from the song read model and projections [W8] *(split, § 0.3 D5)*
 
-**Model:** Haiku. **Level:** C. **Estimate:** 30 min.
+**Model:** Haiku. **Level:** C. **Review lane:** Standard. **Estimate:** 30 min. **Demo:** the Songs list renders unchanged.
 
 **Files:** `Contracts/DTOs/List/SongListItemDto.cs`, `Infra/Repository/SongRepository.cs` (`:39-46`), `Infra/Repository/CatalogRepository.cs` (`:41-48`), `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs` (`:60` positional construction)
 
@@ -711,7 +725,7 @@ Expected Red: `Assert.Equal() Failure: Expected 42, Actual (null)` (today `SongR
 
 ### Task 3.5b: Drop `HasManualEdits` from the artist read models and projections [W8, P with 3.5a]
 
-**Model:** Haiku. **Level:** C. **Estimate:** 30 min.
+**Model:** Haiku. **Level:** C. **Review lane:** Standard. **Estimate:** 30 min. **Demo:** the Artists list renders unchanged.
 
 **Files:** `Contracts/DTOs/List/ArtistListItemDto.cs`, `Domain/ReadModels/ArtistListItem.cs`, `Infra/Repository/ArtistRepository.cs` (`:47-51`, `:74`), `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (`:424, :448, :491, :1177, :1179, :1220`), `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs` (`:50`)
 
@@ -721,7 +735,7 @@ Expected Red: `Assert.Equal() Failure: Expected 42, Actual (null)` (today `SongR
 
 ### Task 3.6a: Remove the `Artist.HasManualEdits` writer [W9]
 
-**Model:** Haiku. **Level:** C. **Estimate:** 15 min.
+**Model:** Haiku. **Level:** C. **Review lane:** Standard. **Estimate:** 15 min. **Demo:** build and tests green; editing an artist saves.
 
 **Files:** `Services/ArtistService.cs` (`:107`). (`ArtistServiceTests.cs` has no assertion on the flag; census 2026-09-26.)
 
@@ -729,7 +743,7 @@ Expected Red: `Assert.Equal() Failure: Expected 42, Actual (null)` (today `SongR
 
 ### Task 3.6b: M1 — drop the `HasManualEdits` columns [W10; SEQUENTIAL; G3 + § 0.2.2]
 
-**Model:** Part A Sonnet · scaffold orchestrator · Part B Haiku. **Level:** B. **Review lane:** Elevated. **Estimate:** 45 + 10 + 20 min. **Sizing:** 6 files (§ 0.3 D10).
+**Model:** Part A Sonnet · scaffold orchestrator · Part B Sonnet. **Level:** B. **Review lane:** Elevated. **Estimate:** 45 + 10 + 30 min. **Sizing:** 6 files (§ 0.3 D10).
 
 **Files:**
 - Modify: `Domain/Entity/Song.cs` (`:14`), `Domain/Entity/Artist.cs` (`:9`), `Infra/EntityEFConfig/SongConfiguration.cs` (`:48`), `Infra/EntityEFConfig/ArtistConfiguration.cs` (`:33-34`)
@@ -765,10 +779,11 @@ private static async Task<IReadOnlyList<string>> ColumnsAsync(AppDbContext db, s
 
 #### Scaffold (orchestrator, in `.worktrees/sft-3.6b`)
 
-- [ ] `dotnet ef migrations add DropHasManualEdits -p Infra/MyVocaList.Infra.csproj -s Infra/MyVocaList.Infra.csproj`. Check the generated `Up`: two `DropColumn` calls only; `Down`: two `AddColumn<bool>(… defaultValue: false)`. Nothing else (if other operations appear, the snapshot is stale → § 0.2.2 → recreate the worktree).
+- [ ] `dotnet ef migrations add DropHasManualEdits -p Infra/MyVocaList.Infra.csproj -s Infra/MyVocaList.Infra.csproj`. The orchestrator runs the command only and does **not** open the generated `.cs` files (orchestrator read-scope HARD RULE); the check of the generated code is Part B's first step. Then dispatch Part B.
 
-#### Part B (Haiku)
+#### Part B (Sonnet)
 
+- [ ] **Step 3b: Check the generated migration (first step).** Open `Infra/Migrations/<ts>_DropHasManualEdits.cs`. Expected `Up`: exactly two `DropColumn("HasManualEdits", …)` calls (`Songs`, `Artists`); `Down`: exactly two `AddColumn<bool>("HasManualEdits", … defaultValue: false)`. Any other operation means the snapshot is stale → status `blocked: stale snapshot`, stop, hand back (the orchestrator recreates the worktree from the current `develop` per § 0.2.2 and re-runs Part A's model edit and the scaffold).
 - [ ] **Step 4: Green.** Filter → all pass; full suite `Failed: 0`; `dotnet ef migrations has-pending-changes … --exit-code` → 0. Census `['HasManualEdits']` excluding `Migrations/` → ZERO HITS.
 - [ ] **Step 5.** Exit checklist (AC matrix REQ-SFT-37). Commit (model + migration together): `feat(db): M1 drop HasManualEdits from Songs and Artists (REQ-SFT-37)`.
 
@@ -796,10 +811,11 @@ private static async Task<IReadOnlyList<string>> ColumnsAsync(AppDbContext db, s
 
 #### Scaffold (orchestrator)
 
-- [ ] `dotnet ef migrations add SongExternalIdentityUnique -p Infra/MyVocaList.Infra.csproj -s Infra/MyVocaList.Infra.csproj`.
+- [ ] `dotnet ef migrations add SongExternalIdentityUnique -p Infra/MyVocaList.Infra.csproj -s Infra/MyVocaList.Infra.csproj`. The orchestrator runs the command only and does **not** open the generated `.cs` files (orchestrator read-scope HARD RULE); the check of the generated code is Part B's first step.
 
 #### Part B
 
+- [ ] **Step 3b: Check the generated migration (first step).** Expected `Up`: `DropIndex("IX_Songs_ExternalId")` and `CreateIndex("IX_Songs_ExternalProvider_ExternalId", … unique: true)` only; `Down`: the reverse. Anything else → `blocked: stale snapshot`, stop, hand back.
 - [ ] **Step 4.** In `Up`, insert **before** `CreateIndex` (and after `DropIndex("IX_Songs_ExternalId")`) the dedupe step, verbatim from `design.md` § 7:
 
 ```csharp
@@ -864,10 +880,11 @@ public async Task FullMigrate_AllSevenFtsTriggersExist()
 
 #### Scaffold (orchestrator)
 
-- [ ] `dotnet ef migrations add AddSearchIndexes -p Infra/MyVocaList.Infra.csproj -s Infra/MyVocaList.Infra.csproj` (expected: an empty or annotation-only `Up`).
+- [ ] `dotnet ef migrations add AddSearchIndexes -p Infra/MyVocaList.Infra.csproj -s Infra/MyVocaList.Infra.csproj` (expected: an empty or annotation-only `Up`). The orchestrator runs the command only and does **not** open the generated `.cs` files (orchestrator read-scope HARD RULE); the check of the generated code is Part B's first step.
 
 #### Part B (Opus)
 
+- [ ] **Step 3b: Check the generated migration (first step).** Expected `Up`/`Down`: empty, or annotation-only changes for `Songs`/`Artists` (`UseSqlReturningClause`); no table, column or index operation. Anything else → `blocked: stale snapshot`, stop, hand back.
 - [ ] **Step 4.** Write `Up` as `migrationBuilder.Sql(...)` calls with the `design.md` § 6.2 DDL **verbatim** (two `CREATE VIRTUAL TABLE … tokenize='trigram remove_diacritics 1'`, two backfill `INSERT … SELECT`, seven `CREATE TRIGGER`, one statement per `Sql` call). `Down`: `DROP TRIGGER IF EXISTS` × 7, then `DROP TABLE IF EXISTS SongSearch`, `DROP TABLE IF EXISTS ArtistSearch`. Header comment: "Any migration that rebuilds Songs or Artists must recreate these triggers in the same migration (constraints-reference.md § EF Core / SQLite)".
 - [ ] **Step 5: Green.** Filter → all pass; full suite `Failed: 0` (every EF write test in the suite now runs against the trigger-free `EnsureCreated` schema or the migrated one; both must pass); `has-pending-changes` → 0.
 - [ ] **Step 6.** Exit checklist. Commit: `feat(db): M3 FTS5 trigram SongSearch + ArtistSearch with 7 sync triggers; RETURNING off (REQ-SFT-19/30-34)`.
@@ -1010,7 +1027,7 @@ public sealed record SongFormSaveOutcome(
 Task<SongFormSaveOutcome> SaveFromFormAsync(SongFormSaveRequest request, CancellationToken ct = default);
 ```
 
-Rules in order (`design.md` § 3.5, verbatim intent): 1 validate (title, version, artist required → `Failed(field)`); 2 artist (`ArtistId` → use; else by decision; `None` → `IArtistResolutionService.ResolveAsync(new ArtistCandidate(ArtistText, null, null))` — **never** the song's identity; ExactLocalMatch → id silently; FuzzyCandidates → `ArtistChoiceNeeded` (≤ 3, best first); NoMatch → new); 3 song guard, add mode only, skipped when `SongDecision != None` (external-identity tier always; artist-scoped tiers only with an existing artist); 4 `SaveAsNewVersion` → `ValidateVersionInput(version, isRequired: true)`; 5 write through `CreateSongWithUrlsAsync(artistId|null, newName|null, …)` / `UpdateSongAsync(…, artistId|null, newName|null)` (edit mode passes `null` external identity = keep). Resolution services are resolved from `sp` inside `ExecuteReadAsync`; the write methods open their own unit of work; `SaveFromFormAsync` opens no write scope.
+Rules in order (`design.md` § 3.5, verbatim intent): 1 validate (title, version, artist required → `Failed(field)`; **and, when the artist would be created (no `ArtistId`, or `CreateTyped`), the typed name is validated first with the artist-name rules `IArtistService` applies (non-empty after trim, ≤ 60), so a violation returns `Failed(Artist)` with the service message before any resolution or write (REQ-SFT-20)**. The Builder reads `IArtistService.cs`: if it exposes a name validator, use it (resolved from `sp`); if it exposes none, stop with `blocked: spec gap` (adding a public member to `IArtistService` is a design change) — never duplicate the rules in `SongService`); 2 artist (`ArtistId` → use; else by decision; `None` → `IArtistResolutionService.ResolveAsync(new ArtistCandidate(ArtistText, null, null))` — **never** the song's identity; ExactLocalMatch → id silently; FuzzyCandidates → `ArtistChoiceNeeded` (≤ 3, best first); NoMatch → new); 3 song guard, add mode only, skipped when `SongDecision != None` (external-identity tier always; artist-scoped tiers only with an existing artist); 4 `SaveAsNewVersion` → `ValidateVersionInput(version, isRequired: true)`; 5 write through `CreateSongWithUrlsAsync(artistId|null, newName|null, …)` / `UpdateSongAsync(…, artistId|null, newName|null)` (edit mode passes `null` external identity = keep). Resolution services are resolved from `sp` inside `ExecuteReadAsync`; the write methods open their own unit of work; `SaveFromFormAsync` opens no write scope.
 
 #### W16a: Tester
 
@@ -1020,6 +1037,7 @@ Rules in order (`design.md` § 3.5, verbatim intent): 1 validate (title, version
 |---|---|
 | `SaveFromForm_EmptyTitle_FailsOnTitle` | REQ-SFT-15 |
 | `SaveFromForm_EmptyArtist_FailsArtistRequired` | REQ-SFT-21 |
+| `SaveFromForm_NewArtistNameInvalid_FailsOnArtist` (61-character typed name, no `ArtistId`) | REQ-SFT-20 | → `Failed`, `FailedField == SaveField.Artist`, the `IArtistService` message; no resolution call, no write |
 | `SaveFromForm_TypedArtistExactCollatedMatch_ReusesExistingNeverCreates` | REQ-SFT-52 |
 | `SaveFromForm_DeezerFilledArtistExactCollatedMatch_ReusesExisting` | REQ-SFT-18 |
 | `SaveFromForm_TypedArtistPaddedCaseAccentVariant_ReusesExistingArtist` (`"  métallica "`) | REQ-SFT-52 (Review Focus 2) |
@@ -1100,9 +1118,13 @@ public async Task SaveFromForm_ArtistResolution_NeverReceivesSongExternalIdentit
 
 ### Task 4.1b: Delete `MusicBrainzProvider` (Q1 = drop) [W6, after 4.1a]
 
-**Model:** Haiku. **Level:** C. **Estimate:** 15 min.
+**Model:** Haiku. **Level:** C. **Review lane:** Standard. **Estimate:** 20 min. **Demo:** build 0 errors; the BUG-082 DI test passes with Deezer only.
 
-**Files:** delete `Services/MusicBrainzProvider.cs`; modify `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (delete `AddHttpClient<MusicBrainzProvider>` `:34-38` and the `IMusicMetadataProvider` forward `:48`).
+**Files:** delete `Services/MusicBrainzProvider.cs`; modify `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (delete `AddHttpClient<MusicBrainzProvider>` `:34-38` and the `IMusicMetadataProvider` forward `:48`); create `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` (§ 0.3 D18; consumed by 6.1):
+
+```csharp
+public sealed record ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, bool RemoteUnavailable);
+```
 
 - [ ] Census `['MusicBrainzProvider']` → only the 2 owned files (the suggestion services use the provider **name** string, not the type). Delete/edit → build → suite `Failed: 0` (`AddAppServices_ResolvingMusicMetadataProviders_HaveConfiguredHttpClient` passes with Deezer only; `ServicesDirectory_IsFoundAndNonEmpty` ≥ 25: record the count) → census ZERO HITS. Commit: `refactor(providers): delete MusicBrainzProvider — Deezer is the only remote provider (REQ-SFT-36)`.
 
@@ -1110,7 +1132,7 @@ public async Task SaveFromForm_ArtistResolution_NeverReceivesSongExternalIdentit
 
 **Model:** Tester Sonnet · Builder Sonnet. **Level:** A. **Review lane:** Elevated. **Estimate:** 60 + 90 min.
 
-**Files:** `Services/ISongSuggestionService.cs` (add the two methods; **keep** `GetLocalAsync`/`GetRemoteAsync` until 4.3), `Services/SongSuggestionService.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs` (add `Version` ("" for remote) and `LocalArtistName`), `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new), `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`. Also add `public const int RemoteSearchTimeoutMilliseconds = 3000;` to `Domain/Constants/SearchConstants.cs` (§ 0.3 D16) — a 6th, one-line file; accepted.
+**Files:** `Services/ISongSuggestionService.cs` (add the two methods; **keep** `GetLocalAsync`/`GetRemoteAsync` until 4.3), `Services/SongSuggestionService.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs` (add `Version` ("" for remote) and `LocalArtistName`), `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new), `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`. `SearchConstants.RemoteSearchTimeoutMilliseconds` already exists (added in 2.2, § 0.3 D16).
 
 **Interfaces — Produces (`design.md` § 3.3 verbatim):**
 
@@ -1229,12 +1251,16 @@ private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleOptionsAsyn
     var local = await _suggestions.SearchTitleLocalAsync(query, ct);
     var remote = await _suggestions.SearchTitleRemoteAsync(query, local.Select(l => l.LocalSongId!.Value).ToList(), ct);
     ct.ThrowIfCancellationRequested();                         // a stale query never touches the note (Review Focus 4)
-    TitleSupportingText = remote.RemoteUnavailable ? "Online search unavailable" : "";   // below 3 chars: no remote call → leave as is
+    if (query.Trim().Length >= SearchConstants.MinimumRemoteQueryLength)   // below 3 chars no remote call ran: keep the note as it is (REQ-SFT-06)
+    {
+        var note = remote.RemoteUnavailable ? "Online search unavailable" : "";
+        RunOnUiThread(() => TitleSupportingText = note);       // the VM's existing UI-thread helper; inline in tests
+    }
     return [.. local.Select(ToLocalOption), .. remote.Promoted.Select(ToLocalOption), .. remote.Remote.Select(ToRemoteOption)];
 }
 ```
 
-(Use the DTO's real id member names; the Tester reads `SongSuggestionDto`. A remote call that was skipped for a < 3-char query must not clear or set the note: return from `SearchTitleRemoteAsync` distinguishes "no call" by an empty result with `RemoteUnavailable = false` — the VM only clears the note when the trimmed query length ≥ `SearchConstants.MinimumRemoteQueryLength`.)
+(Use the DTO's real id member names; the Tester reads `SongSuggestionDto`. `RunOnUiThread` stands for the dispatch helper the VM already uses for UI-bound state (`code-style-reference.md § UI Thread Performance`); the option source runs on DX's request thread, so the observable is never set off the UI thread. If the VM has no such helper, use the injected dispatcher abstraction the VM tests already fake; never `MainThread` directly in VM code under test.)
 
 - [ ] **Step 1 (Tester): tests.** `ToLocalOption`: Headline = title, SupportingText = `"artist · version · In your library"` (omit ` · version` when empty); `ToRemoteOption`: `"artist · Deezer"`.
 
@@ -1248,6 +1274,8 @@ private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleOptionsAsyn
 | `TitleOptionSource_RemoteUnavailable_SetsTitleSupportingText` | REQ-SFT-06 |
 | `TitleOptionSource_RemoteSucceedsAfterFailure_ClearsTitleSupportingText` | REQ-SFT-06 |
 | `TitleOptionSource_CancelledQuery_DoesNotChangeTitleSupportingText` | REQ-SFT-09 (Review Focus 4) |
+| `TitleOptionSource_QueryBelowRemoteThreshold_KeepsExistingNote` (note set by a failed "don" query; then "do" → note unchanged) | REQ-SFT-06 |
+| `TitleOptionSource_SetsNoteThroughUiThreadHelper` (the fake dispatcher records one invocation) | REQ-SFT-06 |
 | `ClearTitle_EmptiesNote_AndClearsPendingIdentity_KeepsArtist` | REQ-SFT-06/14 |
 | `SelectTitle_LocalOptionNoOtherInput_NavigatesToEditForm` | REQ-SFT-10 |
 | `SelectTitle_LocalOptionWithOtherInput_ShowsDiscardSheetNoNavigation` (Theory over which field holds input: Artist, Version, Featured, Lyrics, YouTube list) | REQ-SFT-11 |
@@ -1278,7 +1306,14 @@ private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleOptionsAsyn
 | `:174` `SaveAsync_NoMatch_CallsCreateSongWithUrls` | rewrite → `Save_OutcomeSaved_ShowsSnackbarAndNavigatesBack` | rule moved to the Service (REQ-SFT-51) |
 | `:208` (resolution sheet shown) | rewrite → `Save_OutcomeSongChoiceNeededExact_ShowsResolutionSheetExact` | REQ-SFT-22/51 |
 | `:238` (resolution sheet dismissed) | rewrite → `DismissResolutionSheet_NothingSaved` | REQ-SFT-22/51 |
-| every remaining mock of `CreateSongWithUrlsAsync`/`UpdateSongAsync`/`ISongResolutionService` in VM tests | rewrite to `SaveFromFormAsync` or delete; list each | REQ-SFT-51 |
+| `:128` `SaveAsync_ServiceThrows_ShowsErrorSnackbar` | rewrite → `Save_ServiceThrows_ShowsErrorSnackbar` (`SaveFromFormAsync` throws) | AC-B5 kept → REQ-SFT-51 |
+| `:153` `SaveAsync_NoArtist_SetsArtistError_NoServiceCall` | rewrite → covered by `Save_OutcomeFailed_SetsErrorOnFailedField(Artist)`: the required-artist rule is now the Service's rule 1; the VM maps `Failed(Artist)` | AC-B5 / AC-10.4 → REQ-SFT-21/51 |
+| `:816` `SaveAsync_EditMode_SendsHydratedFieldsAndEditedVersion` | rewrite → `EditSave_RequestCarriesHydratedFieldsAndEditedVersion` (asserts the `SongFormSaveRequest`) | BUG-024 kept → REQ-SFT-51 |
+| `:860` `SaveAsync_EditMode_ArtistChanged_SendsNewArtistIdToService` | rewrite → `EditSave_ArtistChanged_RequestCarriesNewArtistId` | REQ-ACREATE-16 → REQ-SFT-28 |
+| `:1005` `SaveAsync_TitleNeverDirty_SafetyNetSetsTitleError` | rewrite → `Save_OutcomeFailedOnTitle_SetsTitleErrorEvenIfNeverDirty` (the safety net is the Service's rule 1; the VM maps `Failed(Title)`) | safety net → REQ-SFT-15/51 |
+| `:1132` `SaveCommand_DoubleInvokedWhileSaving_CallsResolveOnlyOnce` | rewrite → `Save_DoubleTapWhilePending_CallsServiceOnce` (below) | BUG-049 kept → REQ-SFT-51 |
+| `:1270` `SaveAsync_EditMode_AfterHydration_PreservesArtistLink` | rewrite → `EditSave_AfterHydration_RequestCarriesHydratedArtistId` | REQ-SFT-28 |
+| any other remaining mock of `CreateSongWithUrlsAsync`/`UpdateSongAsync`/`ISongResolutionService` in VM tests (census before and after) | rewrite to `SaveFromFormAsync` or delete; list each by name and line | REQ-SFT-51 |
 
 - [ ] **Step 1 (Tester): tests.**
 
@@ -1297,14 +1332,14 @@ private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleOptionsAsyn
 | `ConfirmSaveAsNewSong_ReinvokesWithSaveAsNewSong` | REQ-SFT-23 |
 | `DismissResolutionSheet_NothingSaved` | REQ-SFT-22 |
 | `Save_NeverCallsCreateOrUpdateDirectly` | REQ-SFT-46 |
-| `Save_DoubleTapWhilePending_CallsServiceOnce` (a `TaskCompletionSource` gate; two `ExecuteAsync` calls) | REQ-SFT-51 (Review Focus 5) |
+| `Save_DoubleTapWhilePending_CallsServiceOnce` (rewrite of `:1132`; a `TaskCompletionSource` gate; two `ExecuteAsync` calls) | REQ-SFT-51 (Review Focus 5) |
 
 - [ ] **Step 2 (Tester): Red** (`CS1061` / Moq verify failures), commit `Lane: RED`, stop.
 - [ ] **Step 3 (Builder): Green.** Census `['ISongResolutionService','CreateSongWithUrlsAsync','UpdateSongAsync','CommitNewSongAsync','ExecuteNewSongSaveAsync']` on `SongFormViewModel.cs` → ZERO HITS. Suite `Failed: 0`. Commit: `feat(song-form): Save maps SaveFromFormAsync outcomes to sheets; VM decides nothing (REQ-SFT-19/22/23/46/51)`.
 
 ### Task 5.3b: Delete the forwarding `CreateSongWithUrlsAsync(int, …)` overload [W18; G3] *(new, § 0.3 D3)*
 
-**Model:** Haiku. **Level:** C. **Estimate:** 15 min.
+**Model:** Haiku. **Level:** C. **Review lane:** Standard. **Estimate:** 15 min. **Demo:** build 0 errors with 0 `CS0618`; all tests green.
 
 **Files:** `Domain/ServicesInterfaces/ISongService.cs`, `Services/SongService.cs`
 
@@ -1374,6 +1409,7 @@ python -c "import pathlib,sys; x=pathlib.Path('MyVocaList/UI/Pages/Songs/SongFor
 
 Expected `PASS`; paste it into the task-log.
 - [ ] **Step 6: E2E emulator gate** (`implementor.md`): New Song → Title first; type "don cry" → options; tap a local option → its edit form replaces the page; Edit Song → Title editable with no menu. If no emulator: `Check build` with the note. Exit checklist. Commit: `feat(song-form): Title first; Title and Artist on AutocompleteDXField; page glue removed (REQ-SFT-01/02/16/27, REQ-ACF-11)`.
+- [ ] **Step 7 (orchestrator, at the 5.5 merge on develop).** `SongFormPage` is the **second consumer** of `AutocompleteDXField` (after ACF T6's `PersonFormPage`), so the component becomes governed (`component-change-governance.md` § Scope trigger; ACF `design.md` § 11). In the **same commit** as the 5.5 merge (a follow-up docs commit on develop immediately after the merge commit, before any other merge), add `AutocompleteDXField` to the governed-component list in `.claude/library/component-safety-gate.md`, with its consumers (`PersonFormPage`, `SongFormPage`; `ArtistFormPage` joins at 6.3). If ACF T6 has not merged yet, 5.5 is the first consumer and this step moves to whichever of 5.5/6.3/ACF T6 merges second.
 
 **Merge risk:** Medium (first Song-page consumer of the component). Rollback: `git revert -m 1 <merge-sha>` restores the old page; the merged VM tasks stay (their new bindings are simply unused by the old XAML).
 
@@ -1394,20 +1430,22 @@ The orchestrator marks `tasks.md` 5.7 `[CANCELLED: folded into 5.5 — a XAML-on
 
 ## Phase 6: Artist form name search
 
-### Task 6.1: `ArtistSuggestionService` local and remote name search; register [W17; after 4.1b + 4.3]
+### Task 6.1: `ArtistSuggestionService` local and remote name search; register [W17; after 4.1b + 4.3 + 3.9b]
 
 **Model:** Tester Sonnet · Builder Sonnet. **Level:** A. **Review lane:** Elevated. **Estimate:** 45 + 60 min.
 
 **Files:** `Services/IArtistSuggestionService.cs`, `Services/ArtistSuggestionService.cs`, `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs`, `MyVocaList.Tests/Unit/Services/ArtistSuggestionThresholdTests.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (`AddScoped<IArtistSuggestionService, ArtistSuggestionService>()`)
 
-**Produces (`design.md` § 4.1):** `SearchNameLocalAsync(query, ct)` (existing collated prefix `IArtistRepository.SearchByNameAsync`, ≤ 5, **no ranking**); `SearchNameRemoteAsync(query, ct) → ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, bool RemoteUnavailable)` (Deezer `search/artist?q=`, ≤ 5, `RemoteSearchTimeoutMilliseconds`, same failure handling; a Deezer name that is a collated match of a local artist is dropped, via a collated DB query inside one `ExecuteReadAsync`, never C#). Tier (c) and `FilterSimilar` deleted. Old `GetLocalAsync`/`GetRemoteAsync` deleted. Create `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` (`public sealed record ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, bool RemoteUnavailable);`), mirroring `SongRemoteSearchResult` (6th file, § 0.3 D18).
+**Produces (`design.md` § 4.1 as updated 2026-09-26, § 0.3 D20):** `SearchNameLocalAsync(query, ct)` (< 2 trimmed chars → `[]`; else inside `ExecuteReadAsync` `IArtistRepository.SearchNameCandidatesAsync(q, SimilarityConstants.PoolSize, ct)` from 3.9b (FTS5 `ArtistSearch`, prefix fallback under 3 chars), ranked by `ISimilarityScorer.RankScore(q, name)` stable over DB order, take `MaxSearchResults` — **not** the collated prefix `SearchByNameAsync` at `ArtistRepository.cs:59-68`; ranking only, § 6.4 exception); `SearchNameRemoteAsync(query, ct) → ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, bool RemoteUnavailable)` (Deezer `search/artist?q=`, ≤ 5, `RemoteSearchTimeoutMilliseconds`, same failure handling; a Deezer name that is a collated match of a local artist is dropped, via a collated DB query inside one `ExecuteReadAsync`, never C#). Tier (c) and `FilterSimilar` deleted. Old `GetLocalAsync`/`GetRemoteAsync` deleted. Create `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` (`public sealed record ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, bool RemoteUnavailable);`), mirroring `SongRemoteSearchResult` (6th file, § 0.3 D18).
 
 **Superseded tests:** every `ArtistSuggestionServiceTests` test of tier (c) / `FilterSimilar` → delete; REQ-FORMUX-03(c) / -10 → REQ-SFT-47/48. `ArtistSuggestionThresholdTests` → retarget to the new methods (same assertions). List each in the task-log.
 
 | Test | `// [AC]` |
 |---|---|
 | `SearchNameLocalAsync_BelowTwoTrimmedChars_ReturnsEmpty` | REQ-SFT-03 |
-| `SearchNameLocalAsync_ReturnsCollatedPrefixMatchesMaxFive` | REQ-SFT-47 |
+| `SearchNameLocalAsync_UsesFtsCandidatesRankedMaxFive` (mock `SearchNameCandidatesAsync`, real scorer; `SearchByNameAsync` never called) | REQ-SFT-47 |
+| `SearchNameLocalAsync_Metalica_ReturnsLocalMetallicaFirst` | REQ-SFT-47 |
+| `SearchNameRemoteAsync_DeezerMetallica_DroppedWhenLocalMetallicaExists` | REQ-SFT-48 |
 | `SearchNameRemoteAsync_BelowThreeTrimmedChars_NoProviderCall` | REQ-SFT-03 |
 | `SearchNameRemoteAsync_DeezerNameCollatedMatchOfLocal_Dropped` | REQ-SFT-48 |
 | `SearchNameRemoteAsync_ProviderThrows_RemoteUnavailable` | REQ-SFT-06 |
@@ -1424,7 +1462,7 @@ Red (Tester, `Lane: RED`) → Green (Builder) → census `['FilterSimilar']` ZER
 
 **Files:** `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`, `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs`
 
-**Produces (`design.md` § 4.1):** `NameOptionSource` (local options SupportingText "In your library", then Deezer "Deezer"; one list, § 0.3 D1), `NameSupportingText`, `IsNameLocked`, `IsNameSearchEnabled => !IsEditMode`, `SelectNameCommand` (local → `INavigationService.GoToAsync($"../{Routes.ArtistForm}?artistId={id}&artistName={Uri.EscapeDataString(name)}")`; Deezer → fill `ArtistName`, lock), `ClearNameCommand`. Delete the `SelectedExternalId`/`SelectedProvider` stash (`:30-31`, `:188-198`) (Q10 = not stored). Save unchanged: `CreateArtistAsync(name)` with no external identity. Add `INavigationService` to the constructor if absent.
+**Produces (`design.md` § 4.1):** `NameOptionSource` (local options SupportingText "In your library", then Deezer "Deezer"; one list, § 0.3 D1), `NameSupportingText`, `IsNameLocked`, `IsNameSearchEnabled => !IsEditMode`, `SelectNameCommand` (local → `INavigationService.GoToAsync($"../{Routes.ArtistForm}?artistId={id}&artistName={Uri.EscapeDataString(name)}")`; Deezer → fill `ArtistName`, lock), `ClearNameCommand`. Delete the `SelectedExternalId`/`SelectedProvider` stash (`:30-31`, `:188-198`) (Q10 = not stored). Save unchanged: `CreateArtistAsync(name)` with no external identity. **Constructor:** add `IArtistSuggestionService` (registered in 6.1) explicitly as a constructor dependency, and update the test file's `CreateSut` with its mock. Add `INavigationService` to the constructor if absent.
 
 | Test | `// [AC]` |
 |---|---|
@@ -1454,7 +1492,7 @@ Red → `Lane: RED` → Green → suite → commit: `feat(artist-form): Name opt
 ### Task 7.1: Spec ritual + traceability matrix (orchestrator)
 
 - [ ] Fill `requirements.md` § Traceability seed with the real test names (from the task-log AC matrices); every REQ-SFT-01…52 (except the removed race AC) has ≥ 1 test or a recorded Level-C census/E2E step.
-- [ ] Session-end spec ritual: `> **Spec updated YYYY-MM-DD:**` notes where the build differs from the spec (the § 0.3 deviations are already noted). Follow-ups registered with `backlog_gen.py register` (not hand-edited): `CreateSongAsync` decision (`tasks.md` § Follow-ups), `AutocompleteDXField` append capability (§ 0.3 D1), frozen `UI/Components/AutocompleteField/` deletion.
+- [ ] Session-end spec ritual: `> **Spec updated YYYY-MM-DD:**` notes where the build differs from the spec (the § 0.3 deviations are already noted). Follow-ups registered with `backlog_gen.py register` (not hand-edited): `CreateSongAsync` decision (`tasks.md` § Follow-ups), frozen `UI/Components/AutocompleteField/` deletion. (No append-capability follow-up: D1 is settled.)
 - [ ] README frontmatter `status:`/`gate:`; `backlog_gen.py regen`; `.sln` check (every new doc registered). Rebuild Test (`spec-writing-guide.md § rebuild test`). Commit on develop.
 
 ### Task 7.2: On-device E2E gate (Helder, Android), HARD STOP
@@ -1463,7 +1501,7 @@ Red → `Lane: RED` → Green → suite → commit: `feat(artist-form): Name opt
 
 **Deploy:** from `develop` (main working tree), device on USB: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -t:Run`. Line 1 needs an **existing install with data** from before M1 (install the pre-item build first, add songs/artists/YouTube links, then deploy this build over it without uninstalling).
 
-**Checklist (verbatim from `tasks.md` 7.2, plus the BUG-082 confirmation line B82):**
+**Checklist (from `tasks.md` 7.2, renumbered 1–12 in order — `tasks.md` has line 12 between 8 and 9 — plus the BUG-082 confirmation line B82):**
 
 - **B82. BUG-082 on device:** on New Song, type "sweet child" → at least one option marked "Deezer" with a real track title appears (the providers resolve with their configured `HttpClient`; BUG-082 `fa520e3f`). Repeat on New Artist with "metallica" → at least one "Deezer" row.
 1. Upgrade an existing install: songs, artists and YouTube links intact (M1–M3).
@@ -1474,12 +1512,12 @@ Red → `Lane: RED` → Green → suite → commit: `feat(artist-form): Name opt
 6. Airplane mode → local options still appear, and the text under Title reads "Online search unavailable"; Save works.
 7. Type "Metalica" as artist (with "Metallica" stored) → Save → near-duplicate sheet offers "Use 'Metallica'"; Use and Create both behave; Back saves nothing. Repeat with a Deezer pick whose artist is a near-duplicate of a local one.
 8. Edit an imported song: fix its Title → saves; reopen → new title, still linked to Deezer (same YouTube links). Edit a manual song's Title to a title that artist already has with the same Version → duplicate message. Change Version of a title that exists → saves.
-12. Type an existing artist's name in another case/accent ("metallica") → Save → the song attaches to "Metallica"; no second artist appears in the Artists list.
-9. Save a duplicate by hand → Open existing / Save as new version.
-10. No "Search music database" row on Song or Artist forms; "Search YouTube (API)" unchanged.
-11. New Artist: type "metalica" → local "Metallica" first; tap it → its edit form opens. Pick a Deezer artist → Name filled and locked; Save creates it; a collated duplicate shows the existing message.
+9. Type an existing artist's name in another case/accent ("metallica") → Save → the song attaches to "Metallica"; no second artist appears in the Artists list.
+10. Save a duplicate by hand → Open existing / Save as new version.
+11. No "Search music database" row on Song or Artist forms; "Search YouTube (API)" unchanged.
+12. New Artist: type "metalica" → local "Metallica" first (FTS5 artist search, § 0.3 D20; passes by design); tap it → its edit form opens. Pick a Deezer artist → Name filled and locked; Save creates it; a collated duplicate shows the existing message.
 
-Note for line 2/6 (§ 0.3 D1): local options appear together with Deezer's once Deezer answers, at most 3,000 ms after typing stops ("local options appear before Deezer's" is satisfied by the order within the list, not by timing). Helder records whether the wait is acceptable; if not, that is the append-capability follow-up.
+Note for lines 2 and 6 (§ 0.3 D1, settled): local options appear together with Deezer's once Deezer answers, at most 3,000 ms after typing stops ("local options appear before Deezer's" is satisfied by the order within the list, not by timing). This is the approved Q16 behaviour, not a defect.
 
 - [ ] Orchestrator: record results; commit on develop `docs(sft): 7.2 device gate — <PASS|FAIL lines n,m>`; LEDGER; status.
 
@@ -1506,10 +1544,10 @@ Note for line 2/6 (§ 0.3 D1): local options appear together with Deezer's once 
 | 3.3b | Haiku | 30 min | Standard | Record shrink, 4 construction sites |
 | 3.4 | Sonnet | 45 min | Standard | Deletions |
 | 3.2b | Sonnet | 45 min | Standard | Mechanical + one rewrite |
-| 3.2c | Haiku | 30 min | Standard | Mechanical |
+| 3.2c | Sonnet | 30 min | Standard | Mechanical, but spans 3–5 files with a census |
 | 3.5a / 3.5b | Haiku / Haiku | 30 / 30 min | Standard | Positional record edits |
 | 3.6a | Haiku | 15 min | Standard | One line |
-| 3.6b M1 A / B | Sonnet / Haiku | 45 / 20 min | Elevated | Migration tests; scaffold is generated |
+| 3.6b M1 A / B | Sonnet / Sonnet | 45 / 30 min | Elevated | Migration tests; Part B first verifies the generated scaffold |
 | 3.7 M2 A / B | Sonnet / Sonnet | 45 / 30 min | Elevated | Hand-inserted dedupe SQL |
 | 3.8 M3 A / B | Sonnet / **Opus** | 45 / 90 min | Architectural | Raw DDL, triggers, RETURNING interaction |
 | 3.9 | Sonnet | 90 min | Elevated | FTS query + builder |
@@ -1524,7 +1562,7 @@ Note for line 2/6 (§ 0.3 D1): local options appear together with Deezer's once 
 | 5.3b | Haiku | 15 min | Standard | Delete one overload |
 | 5.4 | Sonnet | 45 min | Standard | Small |
 | 5.5 (+ former 5.7) / 5.6 | Sonnet / Sonnet | 75 / 60 min | Standard | Prescribed XAML + glue deletion |
-| 6.1 Tester / Builder | Sonnet / Sonnet | 45 / 60 min | Elevated | Mirrors 4.2 |
+| 6.1 Tester / Builder | Sonnet / Sonnet | 45 / 60 min | Elevated | Mirrors 4.2 (FTS pool + ranking, D20) |
 | 6.2 / 6.3 | Sonnet / Sonnet | 75 / 60 min | Standard | VM + page |
 | 7.1 | Orchestrator | 45 min | — | Docs |
 | 7.2 | Helder | 60–90 min | Architectural | On-device |
