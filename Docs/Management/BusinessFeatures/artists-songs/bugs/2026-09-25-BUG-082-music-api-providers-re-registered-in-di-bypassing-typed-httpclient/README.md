@@ -1,7 +1,7 @@
 ---
 id: BUG-082
 title: Music API providers re-registered in DI, bypassing typed HttpClient
-status: 💡 Pending
+status: 🟡 In Progress
 severity: Major
 target: 2026-09-25
 parent: artists-songs
