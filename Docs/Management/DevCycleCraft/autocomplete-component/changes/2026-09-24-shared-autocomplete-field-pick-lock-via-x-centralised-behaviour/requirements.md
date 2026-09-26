@@ -310,6 +310,13 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
 > current REQ-ACF-13. Old -22 (BUG-056) is the current REQ-ACF-22. The current REQ-ACF-15…18 are the
 > Person form ACs, and the current -21 is the Person 2-character gate.
 
+### Spec APPROVED — Helder, 2026-09-25
+
+Approved "as recommended", together with every open recommendation (Q10: the 300 ms debounce
+constant lives in `Domain/Constants/SearchConstants.cs`; Q5: mechanism C only if accepted after
+the T1 measurements). Helder stated that he did not read the spec; he pre-authorised the remaining
+process gates for this pipeline. On-device gates (T1 spike, T7 E2E) still require him.
+
 ## Traceability seed (filled at implementation)
 
 | AC | Implementation location | Test |
