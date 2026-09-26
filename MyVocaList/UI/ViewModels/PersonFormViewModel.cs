@@ -1,5 +1,6 @@
 using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
+using MyVocaList.UI.Models;
 
 namespace MyVocaList.UI.ViewModels;
 
@@ -75,12 +76,16 @@ public partial class PersonFormViewModel : ViewModelBase
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         SearchPersonsCommand = new AsyncRelayCommand<string>(SearchPersonsAsync);
         SuggestionSelectedCommand = new AsyncRelayCommand<AutocompleteSuggestion>(SuggestionSelectedAsync);
+        NameOptionSource = new MenuOptionSource((query, ct) => SearchPersonsCoreAsync(query, ct));
     }
 
     public IAsyncRelayCommand SaveCommand { get; }
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand<string> SearchPersonsCommand { get; }
     public IAsyncRelayCommand<AutocompleteSuggestion> SuggestionSelectedCommand { get; }
+
+    /// <summary>Option source for the Full Name autocomplete field (REQ-ACF-13, -16).</summary>
+    public IMenuOptionSource NameOptionSource { get; }
 
     partial void OnPersonIdChanged(int? value)
     {
@@ -279,14 +284,21 @@ public partial class PersonFormViewModel : ViewModelBase
 
     private async Task SearchPersonsAsync(string term)
     {
-        if (string.IsNullOrWhiteSpace(term) || term.Length < SearchConstants.MinimumLocalQueryLength)
-        {
-            Suggestions = [];
-            return;
-        }
+        Suggestions = [.. await SearchPersonsCoreAsync(term)];
+    }
 
-        var results = await _personService.SearchPersonsStartsWithAsync(term);
-        Suggestions = results.Select(p => new AutocompleteSuggestion(
+    /// <summary>
+    /// Core Person-name search, shared by <see cref="SearchPersonsAsync"/> and <see cref="NameOptionSource"/>.
+    /// Never reads or writes <see cref="Suggestions"/> (BUG-056) — it returns THIS query's own results.
+    /// </summary>
+    private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchPersonsCoreAsync(string term, CancellationToken ct = default)
+    {
+        var trimmed = term?.Trim() ?? string.Empty;
+        if (trimmed.Length < SearchConstants.MinimumLocalQueryLength)
+            return [];
+
+        var results = await _personService.SearchPersonsStartsWithAsync(trimmed, cancellationToken: ct);
+        return results.Select(p => new AutocompleteSuggestion(
             p.FullName,
             p.GetDisplayIdentifier(),
             p)).ToList();
