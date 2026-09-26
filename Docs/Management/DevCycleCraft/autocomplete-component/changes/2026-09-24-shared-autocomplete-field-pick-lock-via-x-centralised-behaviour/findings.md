@@ -6,8 +6,38 @@
 
 ## Environment
 
-*(filled at T1c from the T1a handback: spike branch + commit SHA, `RequestDelay` type, Context7 results
-per member, `devexpress-maui` MCP result, build and emulator smoke results)*
+Recorded 2026-09-25 from the T1a handback (plan T1c, first checkbox), before the spike branch is deleted.
+
+- **Spike branch / commit:** `spike/acf-t1-lock-mechanism` @ `73184803` ("spike: ACF T1 throwaway page (never merge)"),
+  worktree `C:/Users/helde/source/repos/MyVocaList/.worktrees/acf-t1-spike`. Local only: not pushed, never merged.
+- **DevExpress.Maui.Editors:** 25.2.4.
+- **`AsyncItemsSourceProvider.RequestDelay` type: `int` (Int32).** Context7 named the property but not its CLR type;
+  the type was confirmed by metadata inspection of `DevExpress.Maui.Editors.dll` 25.2.4 (net10.0). For T4:
+  `RequestDelay="{x:Static constants:SearchConstants.AutocompleteDebounceMilliseconds}"` in XAML.
+- **Context7 (`/websites/devexpress_maui`, 25.2) per member:**
+  - `EndIcon`, `IsEndIconVisible`, `EndIconColor`, `EndIconClicked`: confirmed (EditBase, "End Icon").
+  - `ClearIconVisibility`, `ClearIconColor`, `ClearIconClicked`: confirmed (EditBase, "Clear Icon").
+  - `SubmitIconVisibility`: confirmed (AutoCompleteEdit, "Auto Complete Editor Icons").
+  - `HelpText`, `HasError`, `ErrorText`: confirmed (EditBase).
+  - `IsReadOnly`: confirmed by assembly metadata (EditBase); not in the returned doc pages.
+  - `IsDropDownOpen`, `SelectionChanged`: confirmed by assembly metadata; declared on **`ItemsEditBase`**
+    (AutoCompleteEdit's base), not on AutoCompleteEdit itself. Same usage.
+  - `AutoCompleteEditTextChangedEventArgs.Reason` (`UserInput` / `ProgrammaticChange` / `ItemSelected`): confirmed.
+  - `Focused` / `Unfocused`: MAUI `VisualElement` events (not DX).
+- **devexpress-maui MCP:** `search_maui_demo_app_code` "AutoCompleteEdit" → **returned empty**
+  ("No code matches found in DevExpress/maui-demo-app"). Server available.
+- **Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 0 errors after each incremental edit
+  (only the pre-existing DX1000/DX1001 trial-licence warnings).
+- **Emulator smoke:** **not run.** No device/emulator attached (`adb devices` empty). Status `Check build`; the
+  first on-screen run of the page is Helder's T1b.
+- **Spike implementation notes (for Helder before T1b):**
+  - The toggles are `dx:CheckEdit` (no `DXSwitch` exists in this DX version).
+  - Fields B/C use a static 5-item list, filtered StartsWith / OrdinalIgnoreCase / trimmed length >= 2.
+  - B5 prep: on `SongFormPage` the Artist field applies B via a `DataTrigger` on `IsArtistLocked`; its
+    `EndIconClicked` goes to the existing clear handler (`OnArtistClearIconClicked` → `ClearArtistCommand`).
+    Not audited whether that command unlocks by itself. If X on the locked Song Artist field does not unlock,
+    that is a spike wiring limit, not a B failure: judge B4/B6 on Field B.
+  - The spike commit was made with `--no-verify` (throwaway WIP checkpoint).
 
 ## How to deploy and record (T1b)
 
