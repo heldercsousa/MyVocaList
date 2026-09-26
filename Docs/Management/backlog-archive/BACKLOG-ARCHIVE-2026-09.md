@@ -8,6 +8,7 @@
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-09-23 | Song form edit mode — clear (X) icon disabled on locked artist, artist cannot be replaced (under: **Artists & Songs Catalog**) | ✅ Fixed | Goal: Regression of REQ-ACREATE-15: in edit mode the locked Artist field renders its clear icon disabled, so the only unlock affordance is gone and a saved song's artist cannot be changed. Gate: Clear icon unlocks and clears the field in edit mode; VM-seam regression test Red then Green; Helder re-verifies on device. Pointer: `BusinessFeatures/artists-songs/bugs/2026-09-23-BUG-081-song-form-edit-mode-clear-x-icon-disabled-on-locked-artist-artist-cannot-be-replaced/`. |
+| 2026-09-25 | Music API providers re-registered in DI, bypassing typed HttpClient (under: **Artists & Songs Catalog**) | ✅ Fixed | Goal: A second DI registration hands the MusicBrainz and Deezer providers an HttpClient with no base URL, so every third-party search fails silently and returns nothing. Gate: Providers resolve with the configured client; a DI regression test fails first then passes. Pointer: `BusinessFeatures/artists-songs/bugs/2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient/`. |
 <!-- BACKLOG:GENERATED:END archive-business -->
 
 ## Dev Cycle Craft
