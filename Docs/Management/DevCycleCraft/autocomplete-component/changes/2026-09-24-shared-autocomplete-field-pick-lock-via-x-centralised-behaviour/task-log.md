@@ -57,8 +57,10 @@ Committed with `--no-verify`: deliberate TDD Red (BUG-074) — the repo pre-comm
 
 ### Checkpoint
 
-- T3 Tester wave complete: Red confirmed, task-log written. Next: commit (`--no-verify`) and push, then stop (Builder is a separate dispatch).
-- Context manifest for a fresh agent resuming: `plan.md` § "Task T3" (Wave 1b steps 5-7, the exact rule table) · `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs` (skeleton to fill) · `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs` (tests, do not edit) · `MyVocaList/UI/Models/IMenuOptionSource.cs` (already complete, no action needed).
+- T3 Tester wave complete: Red confirmed, task-log written, commit `f60533a6` created locally with `--no-verify`.
+- **Push blocked:** `git push origin HEAD` fails with a credential error — `fatal: could not read Username for 'https://github.com': No such file or directory` (`manager-core` attempts an interactive prompt, `/dev/tty` unavailable in this sandbox). Retried once with `git -c credential.helper= -c credential.helper=wincred push` (isolating the `wincred` helper) — also fails, `wincred` has no cached credential for this remote. Not retried further per briefing instruction ("don't retry endlessly").
+- **Commit is local, not on origin.** Next agent (Builder or Helder) must push branch `task/acf-t3-field-logic` (commit `f60533a6`) manually or from an environment with working GitHub credentials before merge.
+- Context manifest for a fresh agent resuming: `plan.md` § "Task T3" (Wave 1b steps 5-7, the exact rule table) · `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs` (skeleton to fill) · `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs` (tests, do not edit) · `MyVocaList/UI/Models/IMenuOptionSource.cs` (already complete, no action needed) · this Checkpoint (push-blocked state).
 
 ## T5
 
