@@ -215,6 +215,19 @@ Files written and re-read: `AutocompleteDXFieldLogic.cs` re-read in full after t
 
 None. `git push origin HEAD` was not attempted per the briefing (orchestrator merges locally; credentials unavailable in this environment).
 
+### Post-merge verification (orchestrator, develop)
+
+- Merged `--no-ff` as `7d228c41` (2026-09-26). Pre-authorised by Helder 2026-09-25.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 0 errors. The orchestrator's incremental build reported
+  8 warnings; the Verifier's rebuild gave 2 (DX1000/DX1001 only), and none come from T5's files.
+- `dotnet test` → **Passed 679, Failed 0** (675 + 4 cases), first run.
+- Verifier (Sonnet) on the merge diff: **PASS**, no blockers. Existing `SearchPersonsCommand_*` and `PersonFormViewModelBug044Tests`
+  are unchanged (the test-file diff is additions only).
+- Minor deviation (orchestrator note): the evidence records only the compile Red (CS1061). The plan's Step 5 runtime Red for
+  the padded `" a"`/`"a "` cases (MockException, proving today's raw-length check searched) is not evidenced. The
+  implementation and the Green are correct; only the fail-before proof for REQ-ACF-13's trim is missing.
+- Push unavailable (credentials); merged locally. Worktree removed; branch deleted.
+
 ## T3-C
 
 ### Checkpoint
