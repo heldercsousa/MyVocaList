@@ -116,6 +116,18 @@ evaluation `findings.md` and on the shared autocomplete component
   is a possible future feature.
 - **Q15: agreed.** Picking a local artist on the Artist form opens that artist.
 
+## Helder's decisions — seventh round (2026-09-26)
+
+- **No concurrent-write handling.** The DB lives only on the user's device (single user, single
+  app), so the "two saves collide" race needs no dedicated task or message. The unique name index
+  stays as a safety net; drop the race-specific task and AC.
+- **Q13 REVERSED: Title stays EDITABLE in edit mode, for every song** (plain text, no search).
+  Having to delete and re-create a song to fix a title is unacceptable. A song row carries history
+  that must be preserved: YouTube links, catalog rows, and the per-singer performance history from
+  karaoke events. That history is crucial, because future AI suggestions ("songs this singer could
+  try next") are based on what each singer has performed. Songs must never be deleted and
+  re-created as a workaround.
+
 ## Related
 
 - The **catalog auto-update on song save** is item CATALOG-PROP, specified in another session.
