@@ -1,5 +1,7 @@
 # Tasks: Song form title-first, one search over local and music APIs
 
+> **Spec updated 2026-09-26:** (D15) **APPROVED 2026-09-26 and dispatchable** under Helder's pre-authorisation of 2026-09-25. Gates: G1 done (BUG-082 `fa520e3f`); G4 resolved by the pre-authorisation (every open question takes its recorded recommendation); G2 = ACF T4 merged, blocking only the page tasks 5.5, 5.6, 6.3 (D2); G3 = plan § 0.2.2; G5 = STOP G5 (blocks 3.8 onward). (D14) Testers commit test files only (`Lane: RED`, `--no-verify`, per `.claude/exception-registry.md` row 2026-09-18); no production skeleton is committed with a Red. Every deviation from this file is listed in `plan.md` § 0.3 (D1–D20) and noted at its task below.
+>
 > **Status: DRAFT — not dispatchable** until Helder approves `requirements.md`/`design.md` and the
 > gates in Phase 0 (G1–G5) are met. Format: `.claude/library/workflow-rule-4.md`. Every task: ≤ 5 owned
 > files (a generated migration counts as one `Migrations/*` artifact, as in the rule's template),
@@ -92,6 +94,7 @@
   - **Risk:** Low. **Tests (A, Red first):** § 6.3 table pairs ("dont cry": "Don't Cry" > "Cry"; "don cry"; "guns cry" vs title+artist).
   - **Demo:** scorer tests green; `Score` tests unchanged.
   - **Review lane:** Elevated (exception § 6.4 applies; orchestrator files the registry row before this task starts)
+  > **Spec updated 2026-09-26:** (D16) also owns `Domain/Constants/SearchConstants.cs` (adds `RemoteSearchTimeoutMilliseconds = 3000`, REQ-SFT-08) and `MyVocaList.Tests/Unit/Domain/SearchConstantsTests.cs` (5 files). The § 6.4 exception row is filed in `.claude/exception-registry.md` (Step 0.6).
 
 ## Phase 3 — Services (write path), resolution simplification, schema
 
@@ -103,6 +106,7 @@
   - **Tests (A, Red first):** one artist + one song; throw after the artist is staged → 0/0 rows; failure tuple → 0 rows; one `AppDbContext` across the 2 levels; duplicate artist name → failure, nothing written; identity already held → failure.
   - **Demo:** integration tests green; creating a song with a brand-new artist name persists both.
   - **Review lane:** Architectural
+  > **Spec updated 2026-09-26:** (D3) 3.1 **adds** the new overload and keeps the old `CreateSongWithUrlsAsync(int artistId, …)` `[Obsolete]`, forwarding with `newArtistName: null`; 3.1 no longer touches `SongFormViewModel.cs` (removed from Files owned). New task 5.3b deletes the old overload after 5.3. Tester (W2) / Builder (W3, Opus) split.
 
 - [ ] **3.2a `UpdateSongAsync`: Version-aware uniqueness and `newArtistName`** [SEQUENTIAL — after 3.1]
   - **Produces:** REQ-SFT-29 fix; optional `newArtistName` parameter (added last, so no call site breaks); REQ-SFT-26 on update.
@@ -118,12 +122,22 @@
   - **Risk:** Medium. **Tests:** REQ-SFT-42 regression Red first; deletions per `design.md` § 10.1.
   - **Demo:** resolution tests green; "Nao Sei" for Ana Carolina resolves to the stored "Não Sei" id.
   - **Review lane:** Elevated
+  > **Spec updated 2026-09-26:** (D4) 3.3 keeps the `SongResolution` record shape (passes `FieldDiffs: []`, `TargetHasManualEdits: false`); `ResolutionResults.cs` moves to new task 3.3b. Runs after 5.1 (precondition census: no `CommitAsync(` in `SongFormViewModel.cs`).
+
+- [ ] **3.3b Shrink `SongResolution`; delete `FieldDiff`** [SEQUENTIAL — after 3.3] *(new, plan § 0.3 D4)*
+  - **Produces:** `public sealed record SongResolution(ResolutionKind Kind, int? ExactMatchSongId, IReadOnlyList<SongMatch> FuzzyCandidates);` no `FieldDiff`.
+  - **Consumes:** 3.3.
+  - **Risk:** Low — mechanical.
+  - **Files owned:** `Domain/Resolution/ResolutionResults.cs`, `Services/SongResolutionService.cs`, `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs`, `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (constructions `:189,:218,:248,:1150`)
+  - **Demo:** census finds no `FieldDiff`/`TargetHasManualEdits`; suite green, count unchanged.
+  - **Review lane:** Standard
 
 - [ ] **3.2b Remove `hasManualEdits` from `UpdateSongAsync` (production + unit tests)** [SEQUENTIAL — after 3.2a, 3.3]
   - **Produces:** a new `UpdateSongAsync` overload without `hasManualEdits`; the old one kept, `[Obsolete]`, forwarding, so the build stays green; writer `SongService.cs:172` removed.
   - **Files owned:** `ISongService.cs`, `SongService.cs`, `SongFormViewModel.cs` (call site `:606`), `SongServiceTests.cs`, `SongFormViewModelTests.cs` (6 mock setups)
   - **Risk:** Low — mechanical. **Demo:** build 0 errors, 0 new warnings outside the 2 files left for 3.2c.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** (D6) the `SongFormViewModelTests.cs:787` rewrite (`LoadSongForEdit_ApiImportedSong_LocksArtistField`, no `HasManualEdits`) moves here from 5.4, because M1 (3.6b) removes the property. Runs after 3.3b (not only 3.3).
 
 - [ ] **3.2c Move the remaining callers; delete the obsolete overload** [SEQUENTIAL — after 3.2b]
   - **Files owned:** `ISongService.cs`, `SongService.cs`, `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTests.cs`, `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs`
@@ -135,12 +149,23 @@
   - **Risk:** Low. **Tests:** delete `:200,:225,:249` (AC-3.2/3.4 → REQ-SFT-40).
   - **Demo:** build 0 errors; `AppServicesRegistrationTests` green.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** (D7) `ResolutionChoice` is declared in `Domain/Resolution/ResolutionEnums.cs`, not a `ResolutionChoice.cs` file: 3.4 removes the enum from that file and deletes the file only if it becomes empty.
 
 - [ ] **3.5 Drop `HasManualEdits` from read models and projections** [SEQUENTIAL — after 3.2c, 3.3]
   - **Files owned:** `Contracts/DTOs/List/SongListItemDto.cs`, `Contracts/DTOs/List/ArtistListItemDto.cs`, `Domain/ReadModels/ArtistListItem.cs`, `Infra/Repository/SongRepository.cs`, `Infra/Repository/ArtistRepository.cs` (+ `CatalogRepository.cs` projection in 3.5b if the test census adds files)
   - **Risk:** Low — no XAML binds these (findings § 3.3/3.4).
   - **Demo:** Songs and Artists lists render unchanged.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** (D5) split into 3.5a (song side) and 3.5b (artist side): `CatalogRepository.cs:41-48` also projects `SongListItemDto.HasManualEdits`, and positional constructions exist in three test files, so 3.5 as written could not build. 3.5 itself is superseded by the two entries below.
+
+- [ ] **3.5a Drop `HasManualEdits` from the song read model and projections** [after 3.2c, 3.3b] *(split, plan § 0.3 D5)*
+  - **Files owned:** `Contracts/DTOs/List/SongListItemDto.cs`, `Infra/Repository/SongRepository.cs`, `Infra/Repository/CatalogRepository.cs`, `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`
+  - **Consumes:** 3.2c, 3.3b. **Risk:** Low. **Demo:** Songs list renders unchanged. **Review lane:** Standard
+
+- [ ] **3.5b Drop `HasManualEdits` from the artist read models and projections** [P with 3.5a] *(split, plan § 0.3 D5)*
+  - **Produces:** `public record ArtistListItem(int Id, string Name, string ExternalProvider, int CatalogCount);`
+  - **Files owned:** `Contracts/DTOs/List/ArtistListItemDto.cs`, `Domain/ReadModels/ArtistListItem.cs`, `Infra/Repository/ArtistRepository.cs`, `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`, `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs`
+  - **Consumes:** 3.2c, 3.3b. **Risk:** Low. **Demo:** Artists list renders unchanged. **Review lane:** Standard
 
 - [ ] **3.6a Remove the `Artist.HasManualEdits` writer** [SEQUENTIAL — after 3.5]
   - **Files owned:** `Services/ArtistService.cs` (`:107`), `MyVocaList.Tests/Unit/Services/ArtistServiceTests.cs` (only if an assertion reads the flag; none found 2026-09-25)
@@ -153,6 +178,7 @@
   - **Tests (B):** migration test on a temp file: columns absent after `MigrateAsync`; existing rows survive.
   - **Demo:** app upgrades an existing database and lists all songs.
   - **Review lane:** Elevated
+  > **Spec updated 2026-09-26:** (D10) owns 6 files (4 one-line model deletions + `Migrations/*` + new `MyVocaList.Tests/Integration/Migrations/SongMigrationTests.cs`); splitting would leave a non-building commit — accepted. (D11) every migration task (3.6b, 3.7, 3.8) is Part A (implementor: Red tests, model edits left uncommitted) → scaffold (orchestrator: `dotnet ef migrations add`) → Part B (implementor: check generated Up/Down first, `blocked: stale snapshot` on any surprise; Green; one commit with model + migration).
 
 - [ ] **3.7 M2: unique `(ExternalProvider, ExternalId)`** [SEQUENTIAL — after 3.6b]
   - **Files owned:** `SongConfiguration.cs`, `Infra/Migrations/*` (M2), `MyVocaList.Tests/Integration/Migrations/SongMigrationTests.cs` (new)
@@ -181,6 +207,7 @@
   - **Risk:** Medium. **Tests (B):** "Metalica" retrieves "Metallica"; "beatles" retrieves "The Beatles"; accents folded.
   - **Demo:** repository tests green.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** (D9) runs **after** 3.9, not `[P]`: 3.9 creates `Infra/Repository/FtsQueryBuilder.cs`, which 3.9b consumes.
 
 - [ ] **3.9c `ArtistResolutionService` uses the FTS pool** [SEQUENTIAL — after 3.9b, 3.4]
   - **Produces:** fuzzy tier reads `SearchNameCandidatesAsync`; artist `GetFuzzyCandidatePoolAsync` and `DerivePrefixToken` (artist side) deleted.
@@ -204,6 +231,16 @@
   - **Risk:** Medium. **Tests (B):** URL is `search/track?q=dont%20cry` with no qualifiers; artist URL `search/artist?q=`; HTTP 500, bad JSON and **HTTP 200 with an `error` object** throw; caller cancellation propagates.
   - **Demo:** provider tests green.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** (D8) split into 4.1a and 4.1b (MusicBrainz deletion also needs its two DI lines, and `MusicProviderException` is a new file). 4.1a waits for 1.6. 4.1 itself is superseded by the two entries below.
+
+- [ ] **4.1a Deezer plain query + failure propagation** [after 1.6, G1] *(split, plan § 0.3 D8)*
+  - **Files owned:** `Services/IMusicMetadataProvider.cs`, `Services/MusicProviderException.cs` (new), `Services/DeezerProvider.cs`, `MyVocaList.Tests/Unit/Services/DeezerProviderTests.cs` (new)
+  - **Consumes:** 1.6. **Risk:** Medium. **Tests (B):** plain `search/track?q=` / `search/artist?q=`; HTTP 500, bad JSON, HTTP 200 error body throw; cancellation propagates.
+  - **Demo:** provider tests green. **Review lane:** Standard
+
+- [ ] **4.1b Delete `MusicBrainzProvider` (Q1 = drop)** [after 4.1a] *(split, plan § 0.3 D8/D18)*
+  - **Files owned:** `Services/MusicBrainzProvider.cs` (delete), `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` (new, consumed by 6.1)
+  - **Consumes:** 4.1a. **Risk:** Low. **Demo:** build 0 errors; the BUG-082 DI test passes with Deezer only. **Review lane:** Standard
 
 - [ ] **4.2 `SongSuggestionService` local and remote title search** [SEQUENTIAL — after 2.2, 3.9, 4.1]
   - **Produces:** `SearchTitleLocalAsync`, `SearchTitleRemoteAsync`, `SongRemoteSearchResult`; `SongSuggestionDto.Version`/`LocalArtistName`; ranking, dedup (a)/(b) with promotion, 3,000 ms bound; tier (c) and the C# re-filters deleted.
@@ -211,11 +248,13 @@
   - **Risk:** High — core behaviour. **Tests (A, Red first):** REQ-SFT-04/05/06/08/09/30–32 at service level; local call makes no provider call (REQ-SFT-07); rewrites/deletions per § 10.1.
   - **Demo:** service tests green.
   - **Review lane:** Elevated
+  > **Spec updated 2026-09-26:** (D16) consumes `SearchConstants.RemoteSearchTimeoutMilliseconds` (2.2) for the 3,000 ms bound. (D1) returns one list: local, then promoted, then remote (no append capability).
 
 - [ ] **4.3 Retarget threshold tests; register the service** [SEQUENTIAL — after 4.2]
   - **Files owned:** `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs`, `ISongSuggestionService.cs` (remove `GetLocalAsync`/`GetRemoteAsync`)
   - **Risk:** Low. **Demo:** `ISongSuggestionService` resolves from `AddAppServices`.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** (D12) also owns `Services/SongSuggestionService.cs` (removing `GetLocalAsync`/`GetRemoteAsync` from the interface also removes their implementation; 5 files).
 
 ## Phase 5 — UI (Song form) [after G2; one XAML file per task, build between]
 
@@ -226,12 +265,14 @@
   - **Demo:** saving a duplicate offers Open existing, which opens the stored song.
   - **Review lane:** Elevated
   - *Note:* runs before 3.3 (it removes the last `CommitAsync` caller). Its Save-flow code is replaced again in 5.3.
+  > **Spec updated 2026-09-26:** (D2) runs before G2: it consumes no component surface. (D13) also owns `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` (adds `services.AddSingleton(Mock.Of<INavigationService>());` to the SongFormViewModel graph test; Level C).
 
 - [ ] **5.2 VM: title search, picks, online-search note** [SEQUENTIAL — after 4.3, 5.1, G4 Q16]
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
   - **Risk:** High. **Tests (A, Red first):** REQ-SFT-02…14 (option supporting texts incl. "In your library", local options before remote or the Q16 fallback, `TitleSupportingText` set/cleared, local pick → navigate, discard sheet, remote pick fills + locks, local artist match, X clears pending identity).
   - **Demo:** VM tests green.
   - **Review lane:** Elevated
+  > **Spec updated 2026-09-26:** (D1) Q16 settled: `TitleOptionSource` awaits local, then remote (≤ 3,000 ms), and returns one list. (D2) runs before G2 (needs only `IMenuOptionSource`/`MenuOptionSource`, ACF T3 `83065e07`). (D19) 5.2 also creates `ArtistOptionSource` (`IMenuOptionSource` over the existing local artist search, local only, REQ-SFT-16).
 
 - [ ] **5.3 VM: Save maps service outcomes to sheets** [SEQUENTIAL — after 5.2, 3.10]
   - **Produces:** `SaveCommand` builds `SongFormSaveRequest` and maps `SongFormSaveOutcome`; artist-match and resolution sheets re-invoke with the user's decision; `ISongResolutionService` removed from the VM constructor; old decision code deleted.
@@ -240,24 +281,31 @@
   - **Demo:** VM tests green.
   - **Review lane:** Architectural
 
+- [ ] **5.3b Delete the forwarding `CreateSongWithUrlsAsync(int, …)` overload** [SEQUENTIAL — after 5.3, G3] *(new, plan § 0.3 D3)*
+  - **Files owned:** `Domain/ServicesInterfaces/ISongService.cs`, `Services/SongService.cs`, and the remaining old-overload callers found by census (`SongResolutionService.cs`, `Bug068RegressionTests.cs` if still present)
+  - **Consumes:** 5.3. **Risk:** Low. **Demo:** census finds no call to the obsolete overload; build 0 errors, no `CS0618`. **Review lane:** Standard
+
 - [ ] **5.4 VM: edit-mode title and hydration** [SEQUENTIAL — after 5.3]
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
   - **Risk:** Low. **Tests (A, Red first):** in edit mode Title is editable (no read-only flag) for API-sourced **and** manual songs, and an edited title is sent to `UpdateSongAsync` with `null` external identity (keep); `IsTitleSearchEnabled` false in edit mode; rewrite `:787`; stale docstring `:433` fixed.
   - **Demo:** VM tests green.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** (D2) runs before G2. (D6) the `:787` rewrite moved to 3.2b.
 
 - [ ] **5.5 Page: field order, Title and Artist Fields** [SEQUENTIAL — after 5.4]
   - **Files owned:** `SongFormPage.xaml`
   - **Risk:** Medium (XAML). Title and Artist are `AutocompleteDXField` (`UI/Components/TextFields/`); Title binds `IsSearchEnabled` and `SupportingText` to the VM (`IsReadOnly` unused).
   - **Demo:** New Song shows Title first as a search box; Edit Song shows Title as editable text with no search menu, for every song.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** (D17) 5.5 also owns `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (former 5.7): replacing the Artist `AutoCompleteEdit` breaks the build until the code-behind glue is deleted (XAML → build → code-behind). Waits for ACF T4 (G2).
 
 - [ ] **5.6 Page: sheets (discard, near-duplicate artist, resolution)** [SEQUENTIAL — after 5.5]
   - **Files owned:** `SongFormPage.xaml`
   - **Risk:** Medium. **Demo:** each sheet opens from its trigger and Back dismisses it with no save.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** waits for ACF T4 (G2) via 5.5.
 
-- [ ] **5.7 Code-behind: delete the Song autocomplete glue** [SEQUENTIAL — after 5.6]
+- [CANCELLED: folded into 5.5 (plan § 0.3 D17)] **5.7 Code-behind: delete the Song autocomplete glue** [SEQUENTIAL — after 5.6]
   - **Files owned:** `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs`
   - **Risk:** Low. **Demo:** REQ-ACF-11 check: no `OnArtistItemsRequested`/`OnArtistSelectionChanged`/`OnArtistUnfocused`/`OnArtistClearIconClicked`, no `artistEdit.SelectedItem`.
   - **Review lane:** Standard
@@ -271,15 +319,18 @@
   - **Risk:** Medium. **Tests (A, Red first):** local first, collated-name dedup, status on failure, thresholds; deleted tests mapped to REQ-FORMUX-03(c)/-10 → REQ-SFT-47/48.
   - **Demo:** service tests green; `IArtistSuggestionService` resolves.
   - **Review lane:** Elevated
+  > **Spec updated 2026-09-26:** (D20) runs **after 3.9b** too: `SearchNameLocalAsync` retrieves from `IArtistRepository.SearchNameCandidatesAsync` (FTS5 `ArtistSearch`) ranked by `ISimilarityScorer.RankScore`, take 5 (§ 6.4 exception extended to `ArtistSuggestionService`). (D18) `ArtistRemoteSearchResult` is created in 4.1b.
 - [ ] **6.2 `ArtistFormViewModel`: Name option source, local pick opens the artist, Deezer pick fills the name** [SEQUENTIAL — after 6.1, 1.2, G2, Q10]
   - **Files owned:** `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`, the Artist-form VM test file
   - **Risk:** Medium. **Tests (A, Red first):** REQ-SFT-47…50 (navigation via `INavigationService`; `NameSupportingText` on remote failure).
   - **Demo:** VM tests green.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** (D2) runs before G2 (VM only; consumes `IMenuOptionSource`).
 - [ ] **6.3 `ArtistFormPage`: Name as the Field** [SEQUENTIAL — after 6.2]
   - **Files owned:** `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml`, `ArtistFormPage.xaml.cs`
   - **Risk:** Medium. **Demo:** typing "metalica" on New Artist lists "Metallica" (local, "In your library") and Deezer artists; tapping "Metallica" opens it.
   - **Review lane:** Standard
+  > **Spec updated 2026-09-26:** waits for ACF T4 (G2).
 
 ## Phase 7 — Close-out
 
@@ -299,6 +350,8 @@
   11. New Artist: type "metalica" → local "Metallica" first; tap it → its edit form opens. Pick a Deezer artist → Name filled and locked; Save creates it; a collated duplicate shows the existing message.
 
 ## Coordination
+
+- **G3 two-way rule (2026-09-26):** do not dispatch a task touching `SongService.cs`/`ISongService.cs`/`Infra/Migrations/` while a CATALOG-PROP branch (or, for migrations, a BUG-080 migration branch) is live; and CATALOG-PROP/BUG-080 must not dispatch such a task while a `task/sft-*` branch owning those files (3.1, 3.2a–c, 3.10, 5.3b, 3.6b, 3.7, 3.8) is live. Check LEDGER + `git worktree list` + `git branch -a` (plan § 0.2.2).
 
 - **CATALOG-PROP:** both change `SongService.cs` (3.1/3.2 here) and add migrations. Single writer:
   whichever item's task runs second rebases and re-runs the other's tests. Their propagation hooks

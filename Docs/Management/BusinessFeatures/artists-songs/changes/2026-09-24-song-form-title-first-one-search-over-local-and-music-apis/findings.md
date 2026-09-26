@@ -412,3 +412,30 @@ not Android's system SQLite.
   written, together with Deezer plain `q=` remotely. Move to FTS5 trigram only if the library grows beyond what a
   managed-UDF full scan handles comfortably. Record the INV-5 wording conflict (C# normalisation inside the scorer)
   as a spec amendment rather than leave it contradictory.
+
+## G5 — FTS5 trigram on Android (spike, 2026-09-26)
+
+> Plan § "Gate G5". Probe page built on branch `spike/sft-g5-fts5` (worktree `.worktrees/sft-g5-spike`, never merged). Helder runs it on device (G5b); the orchestrator fills this section from his pasted output (G5c).
+
+### Environment
+
+- Device model:
+- Android version:
+- App commit (spike branch):
+
+### Run sheet
+
+| # | Check | Pass iff | Result |
+|---|-------|----------|--------|
+| G5-1 | P1 `sqlite_version()` | ≥ 3.45.0 | |
+| G5-2 | P2 `ENABLE_FTS5` | `1` | |
+| G5-3 | P3 create trigram table with `remove_diacritics 1` | no exception | |
+| G5-4 | P5 `"nao"` matches "Não Sei" | exactly `1` | |
+| G5-5 | P6 `"don" OR "cry"` (informational) | contains `2` | |
+| G5-6 | P7 drop | no exception | |
+
+**Verdict rule:** G5-2, G5-3 and G5-4 pass → `G5: PASS` (G5-1 explains a G5-3 failure; G5-5 is informational). Otherwise → `G5: FAIL — escalated`.
+
+### Verdict
+
+_(pending — Helder has not run G5b yet)_
