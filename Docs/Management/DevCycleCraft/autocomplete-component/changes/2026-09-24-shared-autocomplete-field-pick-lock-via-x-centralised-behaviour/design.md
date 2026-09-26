@@ -140,6 +140,12 @@ several fields (the Song form will have Title and Artist). The other members are
 | `SearchPersonsCoreAsync(string term, CancellationToken ct = default)` → `IReadOnlyList<AutocompleteSuggestion>` | **new**: the body of today's `SearchPersonsAsync` (`PersonFormViewModel.cs:280-293`), changed in two ways: the threshold check uses the **trimmed** term (`term.Trim().Length < SearchConstants.MinimumLocalQueryLength`, REQ-ACF-13; today it checks raw `term.Length`, `:282`), and the method takes a `CancellationToken` and passes it to `IPersonService.SearchPersonsStartsWithAsync(term, ct: ct)` (the parameter exists, `Services/PersonService.cs:213`). It returns the mapped list (empty below the threshold). `SearchPersonsAsync` becomes `Suggestions = await SearchPersonsCoreAsync(term)`, so `SearchPersonsCommand` and its tests are unchanged. |
 | `NameOptionSource` (`IMenuOptionSource`) | **new**: `new MenuOptionSource((q, ct) => SearchPersonsCoreAsync(q, ct))` (REQ-ACF-16), passing the DX request's token through. |
 
+> **Spec updated 2026-09-25:** (plan § 0.3 item 5) the service call is
+> `SearchPersonsStartsWithAsync(trimmed, cancellationToken: ct)` with `var trimmed = term.Trim();`.
+> The real parameter name is `cancellationToken` (`Domain/ServicesInterfaces/IPersonService.cs:24`), not
+> `ct`, and the service receives the **trimmed** term, consistent with REQ-ACF-13's trimmed threshold.
+> The service already normalises its input (`Services/PersonService.cs:216`), so unpadded input is unaffected.
+
 **Handed over to the song-form title-first item:** `SongFormViewModel.ArtistOptionSource`, a Title
 option source, the artist/title lock hydration, and deleting the Song glue
 (`SongFormPage.xaml.cs:38,41-113`). This item does not touch `SongFormPage` or `SongFormViewModel`.
