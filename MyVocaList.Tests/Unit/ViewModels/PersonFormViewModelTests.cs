@@ -1,3 +1,5 @@
+using MyVocaList.Domain.Constants;
+using MyVocaList.UI.Models;
 using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -503,5 +505,41 @@ public class PersonFormViewModelTests
         await Task.WhenAll(firstCall, secondCall);
 
         _serviceMock.Verify(s => s.CreatePersonAsync("Jane Doe", null, null, default), Times.Once);
+    }
+
+    // ── NameOptionSource ──────────────────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-ACF-16: the Person option source returns the search's own result list and passes the request token through; it never reads Suggestions.
+    public async Task NameOptionSource_SearchAsync_ReturnsMappedServiceResults_AndPassesToken()
+    {
+        using var cts = new CancellationTokenSource();
+        var person = new Person("John Doe");
+        _serviceMock.Setup(s => s.SearchPersonsStartsWithAsync("jo", SearchConstants.MaxSearchResults, cts.Token))
+                    .ReturnsAsync(new List<Person> { person });
+        var sut = CreateSut();
+
+        var result = await sut.NameOptionSource.SearchAsync("jo", cts.Token);
+
+        var option = Assert.Single(result);
+        Assert.Equal("John Doe", option.Headline);
+        Assert.Same(person, option.Data);
+        Assert.Empty(sut.Suggestions);   // BUG-056: the observable is neither the source nor written
+        _serviceMock.Verify(s => s.SearchPersonsStartsWithAsync("jo", SearchConstants.MaxSearchResults, cts.Token), Times.Once);
+    }
+
+    [Theory]
+    [InlineData("a")]
+    [InlineData(" a")]
+    [InlineData("a ")]
+    // [AC] REQ-ACF-13: below the trimmed minimum query length the option source returns nothing and never calls the service.
+    public async Task NameOptionSource_SearchAsync_BelowTrimmedThreshold_ReturnsEmptyAndSkipsService(string term)
+    {
+        var sut = CreateSut();
+
+        var result = await sut.NameOptionSource.SearchAsync(term, CancellationToken.None);
+
+        Assert.Empty(result);
+        _serviceMock.Verify(s => s.SearchPersonsStartsWithAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

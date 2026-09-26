@@ -172,9 +172,48 @@ Files written and re-read: `AutocompleteDXFieldLogic.cs` re-read in full after t
 
 ## T5
 
+**Status:** To Review
+**Started:** 2026-09-26
+**Completed:** 2026-09-26
+
 ### Checkpoint
 
-- (placeholder)
+- All steps complete; final commit made. No further action needed to resume.
+
+### Changed files
+
+- `MyVocaList/UI/ViewModels/PersonFormViewModel.cs`
+- `MyVocaList.Tests/Unit/ViewModels/PersonFormViewModelTests.cs`
+
+### Impl notes
+
+- Core method access is `private` (plan's suggested choice) — tests reach it only through `NameOptionSource.SearchAsync`.
+- `SearchPersonsAsync` now delegates to `SearchPersonsCoreAsync` and assigns `Suggestions` from its result (`[.. await SearchPersonsCoreAsync(term)]`), preserving `Suggestions`' existing `IEnumerable<AutocompleteSuggestion>` type.
+- `_serviceMock`/`CreateSut()` in the existing test file matched the plan's assumed helper names exactly — no adaptation needed.
+
+### Verification evidence
+
+**Red** (`dotnet test --filter "FullyQualifiedName~PersonFormViewModelTests.NameOptionSource"`, before implementation):
+`CS1061: 'PersonFormViewModel' does not contain a definition for 'NameOptionSource'` — 2 occurrences (both new test methods), build failed as expected.
+
+**Green** (same filter, after implementation):
+`Aprovado! – Com falha: 0, Aprovado: 4, Ignorado: 0, Total: 4` (1 Fact + 3 Theory cases — REQ-ACF-16 test + REQ-ACF-13 theory with 3 inline data rows).
+
+**Full suite** (`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`):
+`Aprovado! – Com falha: 0, Aprovado: 679, Ignorado: 0, Total: 679` — single run, fully green, no BUG-076 flake encountered; matches expected baseline (675) + 4 new tests. All pre-existing `SearchPersonsCommand_*` and `PersonFormViewModelBug044Tests` tests passed unchanged.
+
+**Build:** `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → `0 errors, 2 warnings` (both pre-existing DevExpress evaluation-license warnings, unrelated to this change).
+
+### AC traceability matrix
+
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|--------------------------|-------------|
+| REQ-ACF-13 | Below the trimmed minimum query length, the option source returns nothing and never calls the service. | `PersonFormViewModel.SearchPersonsCoreAsync` (trimmed-length guard) | `NameOptionSource_SearchAsync_BelowTrimmedThreshold_ReturnsEmptyAndSkipsService` |
+| REQ-ACF-16 | The Person option source returns the search's own result list and passes the request token through; it never reads `Suggestions`. | `PersonFormViewModel.NameOptionSource` / `SearchPersonsCoreAsync` | `NameOptionSource_SearchAsync_ReturnsMappedServiceResults_AndPassesToken` |
+
+### Deviations / blockers
+
+None. `git push origin HEAD` was not attempted per the briefing (orchestrator merges locally; credentials unavailable in this environment).
 
 ## T3-C
 
