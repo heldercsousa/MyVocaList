@@ -76,6 +76,12 @@
   - **Files owned:** `…/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/findings.md`, `MyVocaList.sln`
   - **Demo:** Helder sees, on his device, a picked value that cannot be typed over, with an X that clears it.
   - **Review lane:** Architectural
+  > **Spec updated 2026-09-25:** (plan § 0.3 items 3, 4) T1 is split into T1a (implementor builds the
+  > throwaway page), T1b (Helder runs it on device) and T1c (orchestrator records the verdict). Local
+  > `spike:` commits are allowed on the throwaway branch `spike/acf-t1-lock-mechanism` so Helder deploys
+  > a known state; the branch is never pushed or merged, and is deleted at T1c. `findings.md` and the
+  > `MyVocaList.sln` registration are owned by the **orchestrator** on `develop` (Step 0 skeleton, T1c
+  > results), not by the T1 implementor, to keep the `.sln` single-writer.
 
 ## Phase 1: Domain
 
@@ -100,6 +106,17 @@
   - **Risk:** High (Level A logic: every component rule, including lock and read-only precedence)
   - **Files owned:** `MyVocaList/UI/Models/IMenuOptionSource.cs`, `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs`, `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs`
   - **Demo:** `dotnet test` shows the new logic tests green; the full suite stays green.
+  - **Review lane:** Standard
+  > **Spec updated 2026-09-25:** (plan § 0.3 items 1, 2) T3 is split. **T3** (mechanism-independent:
+  > `IMenuOptionSource`, `MenuOptionSource`, `FieldMode`, `PickRoute` and every `design.md` § 4 function
+  > except `TextToRestore`) runs in Wave 1 before the T1 verdict. **T3-C** (`TextToRestore`) runs only if
+  > Helder accepts mechanism C, otherwise it is marked `[CANCELLED: T1 verdict B]`. AC tags: REQ-ACF-19
+  > and -24 are proven by code review and on device (and by T3-C unit tests under C); REQ-ACF-22 is
+  > proven at the VM seam (T5), per `design.md` § 4 and § 10, which are more specific than the list above.
+
+- [ ] **T3-C: `TextToRestore` (only if Helder accepted mechanism C)** [SEQUENTIAL, after the T1 verdict + T3 merged]
+  - See `plan.md` § Task T3-C. Skipped entirely under B.
+  - **Files owned:** `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs`, `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs`
   - **Review lane:** Standard
 
 ## Phase 3: Component

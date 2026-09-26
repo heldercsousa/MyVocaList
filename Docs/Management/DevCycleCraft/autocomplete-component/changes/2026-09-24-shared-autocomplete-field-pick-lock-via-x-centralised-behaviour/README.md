@@ -1,7 +1,7 @@
 ---
 id: shared-autocomplete-field-pick-lock-via-x-centralised-behaviour
 title: Shared autocomplete field — pick-lock via X, centralised behaviour
-status: 💡 Pending
+status: 🟢 Ready
 target: 2026-09-24
 section: DevCycleCraft
 parent: autocomplete-component
