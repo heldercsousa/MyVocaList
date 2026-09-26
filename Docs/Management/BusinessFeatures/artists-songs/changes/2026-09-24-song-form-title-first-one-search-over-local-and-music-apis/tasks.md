@@ -17,7 +17,7 @@
 ## Phase 0 — Gates (not tasks of this item)
 
 - [ ] **G1: BUG-082 fixed and merged** — music API providers re-registered in DI, bypassing the typed `HttpClient` (`Docs/Management/BusinessFeatures/artists-songs/bugs/2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient/`). Blocks 4.1–4.3, 6.1 and every E2E step that needs Deezer.
-- [ ] **G2: Shared Field `AutocompleteDXField` merged** (`DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/tasks.md`, all tasks through its on-device gate), with `SupportingText` (REQ-ACF-12c), `IsReadOnly`, `IsSearchEnabled`, and the append capability if accepted (Q16; `design.md` § 3.4). Blocks Phase 5 and 6.2–6.3.
+- [ ] **G2: Shared Field `AutocompleteDXField` merged** (`DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/tasks.md`, all tasks through its on-device gate), with `SupportingText` (REQ-ACF-12c) and `IsSearchEnabled` (`IsReadOnly` exists but is unused here), and the append capability if accepted (Q16; `design.md` § 3.4). Blocks Phase 5 and 6.2–6.3.
 - [ ] **G3: Migration and `SongService` coordination agreed.** CATALOG-PROP (`changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/`) writes `SongService.cs` and adds a backfill migration; BUG-080's fix for `20260211055225_venuesSeedForTest` may add a Venues-only migration (harmless: it rebuilds neither Songs nor Artists). Whichever merges second **regenerates its migration against the merged model snapshot**. Blocks 3.1, 3.2a and 3.6b.
 - [ ] **G4: Helder's answers** to the open questions (`requirements.md` § Open questions). Q1, Q8, Q11 block Phases 3–4; Q4 blocks 3.10; Q10 blocks 6.2; Q16 blocks 5.2; the rest block Phase 5.
 - [ ] **G5: FTS5 trigram spike on Android** (time-box 1 h, throwaway code, no production files). On the device, through the app's own SQLite connection: `SELECT sqlite_compileoption_used('ENABLE_FTS5')` returns 1, and `CREATE VIRTUAL TABLE t USING fts5(x, tokenize='trigram remove_diacritics 1')` succeeds and matches "nao" to "Não". Record the output in `findings.md`. **If either fails: stop and escalate to Helder**; the named fallback is the token-prefix pool + `RankScore` rerank (`design.md` § 6.1), which removes M3 and changes 3.8, 3.9, 3.9b, 3.9c. Blocks 3.8.
@@ -104,19 +104,11 @@
   - **Demo:** integration tests green; creating a song with a brand-new artist name persists both.
   - **Review lane:** Architectural
 
-- [ ] **3.1b Artist-name race mapping (REQ-SFT-52)** [SEQUENTIAL — after 3.1]
-  - **Produces:** `IX_Artists_Name` violation → `(false, "An artist with this name already exists")` in `ArtistService.CreateArtistAsync`/`UpdateArtistAsync` and `SongService.CreateSongWithUrlsAsync`/`UpdateSongAsync`; nothing written.
-  - **Files owned:** `Services/ArtistService.cs`, `Services/SongService.cs`, `MyVocaList.Tests/Unit/Services/ArtistServiceTests.cs`, `MyVocaList.Tests/Integration/UnitOfWork/ArtistNameUniquenessTests.cs` (new, real SQLite: insert a collated duplicate behind the service's check, assert failure tuple and 0 new rows)
-  - **Risk:** Medium — the catch must match only this index (`design.md` INV-SFT-6).
-  - **Tests (A, Red first):** create and rename collisions on both services; "metallica"/"Métallica" vs "Metallica".
-  - **Demo:** tests green; a colliding save shows the message and writes nothing.
-  - **Review lane:** Elevated
-
-- [ ] **3.2a `UpdateSongAsync`: Version-aware uniqueness and `newArtistName`** [SEQUENTIAL — after 3.1b]
+- [ ] **3.2a `UpdateSongAsync`: Version-aware uniqueness and `newArtistName`** [SEQUENTIAL — after 3.1]
   - **Produces:** REQ-SFT-29 fix; optional `newArtistName` parameter (added last, so no call site breaks); REQ-SFT-26 on update.
   - **Files owned:** `ISongService.cs`, `SongService.cs`, `SongServiceTests.cs`
   - **Risk:** High — BUG-067/068 territory (`SongService.cs:159-167` navigation detach must stay).
-  - **Tests (A, Red first):** REQ-SFT-29 regression ("Creep"/"Acoustic"); new artist on update; identity held by another song; update `:245`, `:480` mocks.
+  - **Tests (A, Red first):** REQ-SFT-29 regression ("Creep"/"Acoustic"); REQ-SFT-27 (title edit keeps `ExternalId`/`ExternalProvider`; edited title that collides with (artist, title, version) is rejected); new artist on update; identity held by another song; update `:245`, `:480` mocks.
   - **Demo:** editing a song into a new Version of an existing title saves.
   - **Review lane:** Elevated
 
@@ -201,7 +193,7 @@
   - **Produces:** `SongFormSaveRequest`, `SongFormSaveOutcome` (+ `ArtistDecision`, `SongDecision`, `SaveField`), `ISongService.SaveFromFormAsync` (`design.md` § 3.5). Writes only through `CreateSongWithUrlsAsync`/`UpdateSongAsync`.
   - **Files owned:** `Domain/Resolution/SongFormSaveRequest.cs` (new), `Domain/Resolution/SongFormSaveOutcome.cs` (new), `ISongService.cs`, `SongService.cs`, `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (new)
   - **Risk:** High — the constitutional business-logic boundary; CATALOG-PROP shares the file.
-  - **Tests (A, Red first):** REQ-SFT-52 (no second artist: collated reuse, and a simulated `IX_Artists_Name` violation → `Failed(Artist)`, 0 rows written), REQ-SFT-18 (collated reuse, Deezer-filled artist included), REQ-SFT-19 (`ArtistChoiceNeeded` for "Metalica"), REQ-SFT-22/23 (`SongChoiceNeeded` exact/fuzzy), REQ-SFT-25 (new artist + held identity → `SongChoiceNeeded`), REQ-SFT-26, REQ-SFT-41 regression (the artist candidate never carries the song identity), decisions skip the right step, edit mode runs no song guard, `Failed` fields.
+  - **Tests (A, Red first):** REQ-SFT-52 (no second artist: an exact collated match is reused, never created), REQ-SFT-18 (collated reuse, Deezer-filled artist included), REQ-SFT-19 (`ArtistChoiceNeeded` for "Metalica"), REQ-SFT-22/23 (`SongChoiceNeeded` exact/fuzzy), REQ-SFT-25 (new artist + held identity → `SongChoiceNeeded`), REQ-SFT-26, REQ-SFT-41 regression (the artist candidate never carries the song identity), decisions skip the right step, edit mode runs no song guard, `Failed` fields.
   - **Demo:** service tests green.
   - **Review lane:** Architectural
 
@@ -250,14 +242,14 @@
 
 - [ ] **5.4 VM: edit-mode title and hydration** [SEQUENTIAL — after 5.3]
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
-  - **Risk:** Low. **Tests (A, Red first):** `IsTitleReadOnly` true in edit mode for API-sourced **and** manual songs, false in add mode; `IsTitleSearchEnabled` false in edit mode; rewrite `:787`; stale docstring `:433` fixed.
+  - **Risk:** Low. **Tests (A, Red first):** in edit mode Title is editable (no read-only flag) for API-sourced **and** manual songs, and an edited title is sent to `UpdateSongAsync` with `null` external identity (keep); `IsTitleSearchEnabled` false in edit mode; rewrite `:787`; stale docstring `:433` fixed.
   - **Demo:** VM tests green.
   - **Review lane:** Standard
 
 - [ ] **5.5 Page: field order, Title and Artist Fields** [SEQUENTIAL — after 5.4]
   - **Files owned:** `SongFormPage.xaml`
-  - **Risk:** Medium (XAML). Title and Artist are `AutocompleteDXField` (`UI/Components/TextFields/`); Title binds `IsSearchEnabled`, `IsReadOnly` and `SupportingText` to the VM.
-  - **Demo:** New Song shows Title first as a search box; Edit Song shows Title without search, read-only with no X, for every song.
+  - **Risk:** Medium (XAML). Title and Artist are `AutocompleteDXField` (`UI/Components/TextFields/`); Title binds `IsSearchEnabled` and `SupportingText` to the VM (`IsReadOnly` unused).
+  - **Demo:** New Song shows Title first as a search box; Edit Song shows Title as editable text with no search menu, for every song.
   - **Review lane:** Standard
 
 - [ ] **5.6 Page: sheets (discard, near-duplicate artist, resolution)** [SEQUENTIAL — after 5.5]
@@ -300,7 +292,7 @@
   5. Pick a Deezer song whose artist is not local → Save → song and artist both created; artist's catalog behaviour per CATALOG-PROP if landed.
   6. Airplane mode → local options still appear, and the text under Title reads "Online search unavailable"; Save works.
   7. Type "Metalica" as artist (with "Metallica" stored) → Save → near-duplicate sheet offers "Use 'Metallica'"; Use and Create both behave; Back saves nothing. Repeat with a Deezer pick whose artist is a near-duplicate of a local one.
-  8. Edit any song (imported or manual) → Title read-only, no X; change Version of a title that exists → saves.
+  8. Edit an imported song: fix its Title → saves; reopen → new title, still linked to Deezer (same YouTube links). Edit a manual song's Title to a title that artist already has with the same Version → duplicate message. Change Version of a title that exists → saves.
   12. Type an existing artist's name in another case/accent ("metallica") → Save → the song attaches to "Metallica"; no second artist appears in the Artists list.
   9. Save a duplicate by hand → Open existing / Save as new version.
   10. No "Search music database" row on Song or Artist forms; "Search YouTube (API)" unchanged.
