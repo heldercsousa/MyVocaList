@@ -26,4 +26,11 @@ public static class SearchConstants
     /// without overwhelming it, and every local search default now shares this single value.
     /// </summary>
     public const int MaxSearchResults = 5;
+
+    /// <summary>
+    /// Debounce delay, in milliseconds, before an autocomplete field requests options after the last keystroke.
+    /// REQ-ACF-14 (shared autocomplete field); makes REQ-DXAC-07's ≈300 ms concrete. One value for every autocomplete
+    /// field (Helder 2026-09-23/24).
+    /// </summary>
+    public const int AutocompleteDebounceMilliseconds = 300;
 }
