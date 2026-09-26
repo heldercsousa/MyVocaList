@@ -41,8 +41,12 @@ public static class ServiceCollectionExtensions
             client.BaseAddress = new Uri("https://api.deezer.com/");
             client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)");
         });
-        services.AddScoped<IMusicMetadataProvider, MusicBrainzProvider>();
-        services.AddScoped<IMusicMetadataProvider, DeezerProvider>();
+        // Resolve via the typed-client factory (sp.GetRequiredService<TProvider>()) instead of
+        // AddScoped<IMusicMetadataProvider, TProvider>() — the latter constructs a second,
+        // independent instance through ActivatorUtilities, bypassing the typed HttpClient pipeline
+        // above and injecting an unconfigured HttpClient (no BaseAddress/User-Agent) (BUG-082).
+        services.AddScoped<IMusicMetadataProvider>(sp => sp.GetRequiredService<MusicBrainzProvider>());
+        services.AddScoped<IMusicMetadataProvider>(sp => sp.GetRequiredService<DeezerProvider>());
 
         // Services
         services.AddScoped<IVenueService, VenueService>();
