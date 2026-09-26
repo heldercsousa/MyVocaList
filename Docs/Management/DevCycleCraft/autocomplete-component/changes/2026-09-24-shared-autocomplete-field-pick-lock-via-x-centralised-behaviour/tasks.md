@@ -136,7 +136,7 @@
 
 ## Phase 4: ViewModel
 
-- [~] **T5: `PersonFormViewModel`: `SearchPersonsCoreAsync` + `NameOptionSource`** [SEQUENTIAL, after T3]
+- [x] **T5: `PersonFormViewModel`: `SearchPersonsCoreAsync` + `NameOptionSource`** [SEQUENTIAL, after T3] *(merged to develop 2026-09-26, `7d228c41`)*
   - Tester first: (a) `NameOptionSource.SearchAsync("jo", ct)` returns exactly the list mapped from
     `IPersonService.SearchPersonsStartsWithAsync`, and the token passed to `SearchAsync` reaches the
     service call (`// [AC] REQ-ACF-16`); (b) below the **trimmed** threshold (" a", "a") it returns
