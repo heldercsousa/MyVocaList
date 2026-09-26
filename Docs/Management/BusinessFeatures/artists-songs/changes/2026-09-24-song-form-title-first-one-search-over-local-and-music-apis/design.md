@@ -1,6 +1,6 @@
 # Design: Song form title-first, one search over local and music APIs
 
-> **Status: DRAFT, in review (2026-09-25).** Requirements: `requirements.md` (REQ-SFT-01…51).
+> **Status: DRAFT, in review (2026-09-25).** Requirements: `requirements.md` (REQ-SFT-01…52).
 > Evidence: `findings.md` (same folder) and a scratchpad probe run on 2026-09-24 against the app's
 > bundled SQLite build on desktop (§ 6.1; Android is gated by spike G5). Current-behaviour claims cite
 > `file:line` on `develop` at `f9a67f62`.
@@ -208,7 +208,7 @@ Rules, in order (each a Level A test in `SongServiceSaveFromFormTests`):
 1. Validate title, version, artist required → `Failed(field)`.
 2. Artist (REQ-SFT-18/19): `ArtistId` set → use it. Else by `ArtistDecision`: `UseExisting(id)` → id;
    `CreateTyped` → new; `None` → `IArtistResolutionService.ResolveAsync(new ArtistCandidate(ArtistText, null, null))`
-   — never the song's identity (REQ-SFT-41). ExactLocalMatch → that id (Q3); FuzzyCandidates →
+   — never the song's identity (REQ-SFT-41). ExactLocalMatch → that id, silently (REQ-SFT-18.1, REQ-SFT-52); FuzzyCandidates →
    return `ArtistChoiceNeeded`; NoMatch → new.
 3. Song guard (REQ-SFT-22/23/25), add mode only, skipped when `SongDecision != None`:
    `ISongResolutionService.ResolveAsync` with the external identity and, for an existing artist, its id.
@@ -226,7 +226,7 @@ Rules, in order (each a Level A test in `SongServiceSaveFromFormTests`):
 | `TitleSupportingText` | observable → Field `SupportingText` | "Online search unavailable" while the current query's remote call failed; `""` otherwise (REQ-SFT-06) |
 | `SongTitle` / `IsTitleLocked` | observable, TwoWay to Field | Title text and Locked state |
 | `IsTitleSearchEnabled` | `=> !IsEditMode` | REQ-SFT-27 |
-| `IsTitleReadOnly` | `=> IsEditMode && !string.IsNullOrEmpty(SelectedExternalId)` | Field `IsReadOnly` (REQ-SFT-27). One `AutocompleteDXField` serves both modes |
+| `IsTitleReadOnly` | `=> IsEditMode` | Field `IsReadOnly` (REQ-SFT-27: every song). One `AutocompleteDXField` serves both modes |
 | `SelectTitleCommand(AutocompleteSuggestion)` | command | Local → `OpenExistingAsync` (REQ-SFT-10/11); remote → `ApplyRemotePick` (REQ-SFT-12/13) |
 | `ClearTitleCommand` | command | Clears pending external identity (REQ-SFT-14) |
 | `ArtistOptionSource`, `ArtistSearchText`, `SelectedArtistId`, `SelectedArtistName`, `IsArtistLocked`, `SelectArtistCommand`, `ClearArtistCommand` | existing/changed | Local artists only. `ClearArtist` also clears the pending external identity. `ArtistBlurredWithoutSelection` keeps text and sets no error (REQ-SFT-17) |
@@ -318,8 +318,8 @@ artists by collated name; a write-only value invites the "build on it" drift Hel
 
 **F6: edit mode**
 1. Page opens with `songId`; `LoadSongForEditAsync` hydrates, Artist locked.
-2. Title: the same `AutocompleteDXField` with `IsSearchEnabled = false`; `IsReadOnly = true` if
-   `SelectedExternalId` is set (no X, no typing), else Editable.
+2. Title: the same `AutocompleteDXField` with `IsSearchEnabled = false` and `IsReadOnly = true` for
+   every song (no X, no typing). The stored title is sent back unchanged on Save.
 3. Save: `SaveFromFormAsync` with `SongId` set: rules 1, 2, 5 (no song guard; `UpdateSongAsync`
    enforces (artist, title, version) uniqueness, REQ-SFT-29).
 
@@ -575,6 +575,15 @@ path CATALOG-PROP would have to hook, findings § 4).
 **Reversibility:** Reversible with effort (signature change).
 **Rationale:** one write path per operation (REQ-SFT-46) and all-or-nothing (REQ-SFT-18).
 
+### Decision: Title is read-only in edit mode for every song (Helder, sixth round)
+**Chosen approach:** `IsReadOnly = true` on Title whenever the form edits a stored song.
+**Alternatives considered:** read-only only for API-sourced songs (the earlier draft); editable always.
+**Reversibility:** Easily reversible (one binding).
+**Consequences:** a typo in a stored title is fixed by deleting and re-creating the song, which loses
+its YouTube links and non-derived catalog entries. **Flagged to Helder** by the orchestrator.
+`UpdateSongAsync` keeps its `title` parameter (other callers and tests use it); the form always sends
+the stored value.
+
 ### Decision: artist identity columns are ignored, not dropped
 Dropping needs a SQLite table rebuild and the unique `IX_Artists_ExternalId` removal for no runtime
 gain (findings § 3.2). Helder approved keeping them.
@@ -586,6 +595,18 @@ gain (findings § 3.2). Helder approved keeping them.
 - **INV-SFT-3:** after any committed write, `SongSearch` has exactly one row per song, holding the
   current title and artist name.
 - **INV-SFT-4:** no two songs share a non-null `(ExternalProvider, ExternalId)`.
+- **INV-SFT-6 (HARD RULE, REQ-SFT-52):** no two artists share a name under `NOCASE_NOACCENT`.
+  Layers: (1) `SaveFromFormAsync` rule 2 reuses an exact collated match and never asks to create it;
+  (2) `ArtistService.CreateArtistAsync`/`UpdateArtistAsync` reject a collated duplicate
+  (`ArtistService.cs:66-67,102-103`), and they are the only artist create/rename code (the song path
+  reaches creation only through `CreateArtistAsync`, § 3.2); (3) `IX_Artists_Name`, unique on the
+  collated column (`ArtistConfiguration.cs:17-21,39-41`). Race: a unique violation on
+  `IX_Artists_Name` surfaces as `DbUpdateException` from the unit of work's save; `SongService` and
+  `ArtistService` catch that specific case around their write call and return
+  `(false, "An artist with this name already exists")` (`Failed(Artist)` from `SaveFromFormAsync`).
+  The transaction is already rolled back, so nothing is written. The catch must use one of the
+  allowed patterns in `code-style-reference.md § Exception Handling` and match only this index;
+  other exceptions propagate unchanged.
 - **INV-SFT-5:** in the search/suggestion paths (`SongSuggestionService`, `ArtistSuggestionService`),
   C# similarity code only orders DB-retrieved lists; it never filters or deduplicates (exception
   § 6.4). The resolution services keep their sanctioned `Score ≥ 0.82` threshold over a DB-bounded
