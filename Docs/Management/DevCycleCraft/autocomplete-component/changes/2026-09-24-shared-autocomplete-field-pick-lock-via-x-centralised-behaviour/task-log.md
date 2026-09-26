@@ -157,6 +157,19 @@ Files written and re-read: `AutocompleteDXFieldLogic.cs` re-read in full after t
 - Commit pending as the final step of this handback.
 - Context manifest for a fresh agent resuming (should not be needed — task is complete): `plan.md` § "Task T3" · `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs` (implemented) · `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs` (Red tests, unmodified) · this Checkpoint.
 
+### Post-merge verification (orchestrator, develop)
+
+- Merged `--no-ff` as `83065e07` (2026-09-26). Pre-authorised by Helder 2026-09-25.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 0 errors (DX licence warnings only).
+- `dotnet test` run 1 → **Passed 674, Failed 1**: `UnitOfWorkLifetimeTests.ExecuteAsync_ThreeSequentialCalls_CaptureThreeDistinctDisposedContexts`
+  (UOW SQLite harness; unrelated to T3, which is pure static logic). Treated under the BUG-076 rule; the exception type was
+  not captured in run 1's summary output. That fixture alone → 9/9. **Run 2 (the one allowed re-run) → Passed 675, Failed 0**
+  (636 + 39 new). Continued.
+- Verifier (Sonnet) on the merge diff: **PASS**. Minor: the file has **25** test methods (39 cases), not 24 as labelled above;
+  every plan row is present. `git diff f60533a6 04918b95 -- MyVocaList.Tests/` is empty (the Builder did not modify tests).
+- Deviations: the Tester Red commit used `--no-verify` (deliberate TDD Red; BUG-074). `git push` was unavailable (GitHub
+  credential GUI prompt cannot complete here); merged locally. Worktree removed; branch deleted.
+
 ## T5
 
 ### Checkpoint
