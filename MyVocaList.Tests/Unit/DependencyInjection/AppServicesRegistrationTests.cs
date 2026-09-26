@@ -1,3 +1,6 @@
+using System.Linq;
+using System.Net.Http;
+using System.Reflection;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Extensions;
@@ -66,5 +69,28 @@ public class AppServicesRegistrationTests
         var viewModel = scope.ServiceProvider.GetRequiredService<SongFormViewModel>();
 
         Assert.NotNull(viewModel);
+    }
+
+    [Fact]
+    // [AC] BUG-082: providers resolve with their configured typed HttpClient
+    public void AddAppServices_ResolvingMusicMetadataProviders_HaveConfiguredHttpClient()
+    {
+        using var provider = BuildProvider();
+        using var scope = provider.CreateScope();
+
+        var providers = scope.ServiceProvider.GetServices<IMusicMetadataProvider>().ToList();
+
+        Assert.NotEmpty(providers);
+        foreach (var metadataProvider in providers)
+        {
+            var httpClientField = metadataProvider.GetType()
+                .GetField("_httpClient", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(httpClientField);
+
+            var httpClient = (HttpClient)httpClientField!.GetValue(metadataProvider)!;
+
+            Assert.NotNull(httpClient.BaseAddress);
+            Assert.Contains("MyVocaList", httpClient.DefaultRequestHeaders.UserAgent.ToString());
+        }
     }
 }
