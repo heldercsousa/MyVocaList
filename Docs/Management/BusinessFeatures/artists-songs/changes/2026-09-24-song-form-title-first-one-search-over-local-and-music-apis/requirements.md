@@ -1,5 +1,10 @@
 # Requirements: Song form title-first, one search over local and music APIs
 
+> **Spec APPROVED 2026-09-26** under Helder's pre-authorisation of 2026-09-25 ("approve as you
+> recommend … be automatic"). Every open question takes its recorded recommendation, and all seven
+> decision rounds in README.md apply. Helder did not read the full spec; the on-device E2E gate
+> remains his.
+
 > **Status: DRAFT for Helder's review (2026-09-24).** Written from Helder's five rounds of decisions
 > (`README.md`, same folder) and the read-only evaluation `findings.md` (same folder).
 > Items marked `[OPEN — Helder decides]` or `[Proposed — confirm]` are not decided.
@@ -53,8 +58,8 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **US-5:** As the admin, I want to be asked before a near-duplicate artist is created, so that
   "Metalica" doesn't sit beside "Metallica".
 - **US-6:** As the admin, I want typos such as "dont cry" or "don cry" to still find "Don't Cry".
-- **US-7:** As the admin editing a song, I want its Title protected, so that a stored song is never
-  renamed by mistake (variants go in Version).
+- **US-7:** As the admin editing a song, I want to correct its Title in place, so that I never have to
+  delete and re-create a song, and lose its history, to fix a typo.
 
 ## Acceptance criteria
 
@@ -170,17 +175,15 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   `ArtistService.CreateArtistAsync`/`UpdateArtistAsync`), with the unique collated index
   `IX_Artists_Name` as the backstop.
   - An exact collated match is reused silently (REQ-SFT-18.1); a near-duplicate asks (REQ-SFT-19).
-  - IF a concurrent write makes the create collide anyway (the index rejects it), THEN the save SHALL
-    fail with "An artist with this name already exists", on the Artist field, and **nothing** is
-    written (no artist, no song).
+  - Concurrent writes are not designed for: the database is local to one device and one user (Helder,
+    seventh round). `IX_Artists_Name` stays as the safety net only.
   - Given "Metallica" is stored, When any path tries to create "metallica" or "Métallica", Then no
     second artist exists afterwards.
   - **User guidance:** the app does not model homonyms. Two different artists with the same name are
     told apart by the user in the name itself, e.g. "Carlinhos Sanfoneiro - Grajaú".
   - The Artist form already enforces this: create `Services/ArtistService.cs:66-67`, rename
     `:102-103` (collated query `Infra/Repository/ArtistRepository.cs:98,104`), DB index
-    `Infra/EntityEFConfig/ArtistConfiguration.cs:17-21,39-41`. What is missing on that path is only
-    the race mapping (index violation → message, not an exception); REQ-SFT-52 covers it there too.
+    `Infra/EntityEFConfig/ArtistConfiguration.cs:17-21,39-41`. No change is needed on that path.
 - **REQ-SFT-21: Artist required.** Save with an empty or whitespace Artist shows "Artist is required"
   and saves nothing (unchanged, AC-10.4).
 
@@ -209,11 +212,17 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 
 ### G. Edit mode
 
-- **REQ-SFT-27: Title is read-only in edit mode** (Helder, sixth round). WHILE in edit mode, Title
-  SHALL be **Read-only** for **every** song (the Field with `IsReadOnly = true`, `IsSearchEnabled = false`:
-  no typing, no X, no search). Notes such as "live" go in Version.
-  **Consequence (flagged to Helder):** a typo in a stored title cannot be fixed in place; the user
-  deletes the song and creates it again, which also drops its YouTube links and catalog entries.
+- **REQ-SFT-27: Title is editable in edit mode** (Helder, seventh round; reverses the sixth-round
+  ruling). WHILE in edit mode, Title SHALL be an Editable plain text field for **every** song: the Field
+  with `IsSearchEnabled = false` (no options, no menu) and `IsReadOnly = false`.
+  - **Rationale:** a song carries history that must be preserved: YouTube links, catalog rows, and each
+    singer's performance history from karaoke events, which is the basis for future AI song suggestions.
+    Songs are never deleted and re-created as a workaround.
+  - **API-sourced song:** editing its Title changes only the local title. `ExternalId` and
+    `ExternalProvider` are kept unchanged (the song is still that Deezer track, with a corrected local name).
+  - The edited title is checked for uniqueness with Version (REQ-SFT-29) and with the title rules
+    (REQ-SFT-15). Given Radiohead has "Creep" (Version ""), When the user edits another Radiohead song
+    with Version "" to Title "creep" and saves, Then the save fails with the existing duplicate message.
 - **REQ-SFT-28: Artist in edit mode.** The stored artist loads in the picked state with no search
   (REQ-ACF-03). After X, REQ-SFT-16…21 apply unchanged, including create-on-Save. The changed artist
   is persisted (REQ-ACREATE-16 kept).
@@ -404,7 +413,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **Q16 (REQ-SFT-07):** if the shared Field cannot append options, accept the fallback (local options
   wait up to 3,000 ms for Deezer)?
 
-Resolved: Q3 (collated match reused silently), Q13 (Title read-only in edit mode for every song),
+Resolved: Q3 (collated match reused silently), Q13 (Title editable in edit mode for every song; seventh round, reversing the sixth),
 Q14 (Song-form Artist searches local only), Q15 (Artist-form local pick opens the artist), all
 sixth round; Q9 (YouTube search out of scope, fifth round); Q12 (the "In your library" marker lives in
 the option supporting text, and "Online search unavailable" is the Field's `SupportingText`; no
@@ -420,8 +429,8 @@ non-selectable row).
 | REQ-SFT-19 (retrieval) | `ArtistRepository.SearchNameCandidatesAsync`, `ArtistResolutionService` | repo test (B, migrated SQLite: "Metalica" → "Metallica") + service (A) |
 | REQ-SFT-22…24, 42 | `SongResolutionService.ResolveAsync`, `SongRepository.FindIdByTitleVersionForArtistAsync` | `SongResolutionServiceTests` (A), repo test (B) |
 | REQ-SFT-26, 39 | `SongService`, migration M2 | service (A), migration test (B) |
-| REQ-SFT-27 | `SongFormViewModel.IsTitleReadOnly` (= `IsEditMode`), page | VM (A) + E2E |
-| REQ-SFT-52 | `SongService.SaveFromFormAsync`, `CreateSongWithUrlsAsync`, `UpdateSongAsync`, `ArtistService.CreateArtistAsync`/`UpdateArtistAsync` | `SongServiceSaveFromFormTests` + `ArtistServiceTests` (A), race test on real SQLite (A) |
+| REQ-SFT-27 | `SongFormViewModel.IsTitleSearchEnabled` (= `!IsEditMode`), `SongService.UpdateSongAsync` | VM (A), service (A: identity kept on title edit; duplicate title rejected) + E2E |
+| REQ-SFT-52 | `SongService.SaveFromFormAsync`, `ArtistService.CreateArtistAsync`/`UpdateArtistAsync` | `SongServiceSaveFromFormTests` (A: collated reuse, no second artist), existing `ArtistServiceTests` duplicate cases |
 | REQ-SFT-29 | `SongService.UpdateSongAsync` | regression test Red→Green (A) |
 | REQ-SFT-30…34 | FTS5 migration M3, repository, scorer | repo tests (B, migrated SQLite) + service ranking tests (A) |
 | REQ-SFT-35/36 | `DeezerProvider`, DI | provider test with fake handler (B) |

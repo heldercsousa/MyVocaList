@@ -201,8 +201,8 @@ Task<SongFormSaveOutcome> SaveFromFormAsync(SongFormSaveRequest request, Cancell
 Four outcomes do not fit the `(bool, string, T?)` tuple, so this is a result record; `Failed` carries
 the message exactly as the tuple convention would. `SaveFromFormAsync` itself opens no write unit of
 work: it reads through `ExecuteReadAsync` (resolution) and then calls `CreateSongWithUrlsAsync` or
-`UpdateSongAsync`, which own the only writes (REQ-SFT-46, CATALOG-PROP). The unique DB indexes are the
-backstop for a race between the read and the write.
+`UpdateSongAsync`, which own the only writes (REQ-SFT-46, CATALOG-PROP). The unique DB indexes are a
+safety net only; concurrency is not designed for (one device, one user).
 
 Rules, in order (each a Level A test in `SongServiceSaveFromFormTests`):
 1. Validate title, version, artist required → `Failed(field)`.
@@ -226,7 +226,7 @@ Rules, in order (each a Level A test in `SongServiceSaveFromFormTests`):
 | `TitleSupportingText` | observable → Field `SupportingText` | "Online search unavailable" while the current query's remote call failed; `""` otherwise (REQ-SFT-06) |
 | `SongTitle` / `IsTitleLocked` | observable, TwoWay to Field | Title text and Locked state |
 | `IsTitleSearchEnabled` | `=> !IsEditMode` | REQ-SFT-27 |
-| `IsTitleReadOnly` | `=> IsEditMode` | Field `IsReadOnly` (REQ-SFT-27: every song). One `AutocompleteDXField` serves both modes |
+| (no `IsTitleReadOnly`) | — | Title is never read-only (REQ-SFT-27). The component's `IsReadOnly` has **no consumer in this spec**; it stays in the component (generic, already approved) for future use. One `AutocompleteDXField` serves both modes |
 | `SelectTitleCommand(AutocompleteSuggestion)` | command | Local → `OpenExistingAsync` (REQ-SFT-10/11); remote → `ApplyRemotePick` (REQ-SFT-12/13) |
 | `ClearTitleCommand` | command | Clears pending external identity (REQ-SFT-14) |
 | `ArtistOptionSource`, `ArtistSearchText`, `SelectedArtistId`, `SelectedArtistName`, `IsArtistLocked`, `SelectArtistCommand`, `ClearArtistCommand` | existing/changed | Local artists only. `ClearArtist` also clears the pending external identity. `ArtistBlurredWithoutSelection` keeps text and sets no error (REQ-SFT-17) |
@@ -318,8 +318,10 @@ artists by collated name; a write-only value invites the "build on it" drift Hel
 
 **F6: edit mode**
 1. Page opens with `songId`; `LoadSongForEditAsync` hydrates, Artist locked.
-2. Title: the same `AutocompleteDXField` with `IsSearchEnabled = false` and `IsReadOnly = true` for
-   every song (no X, no typing). The stored title is sent back unchanged on Save.
+2. Title: the same `AutocompleteDXField` with `IsSearchEnabled = false`: Editable plain text for every
+   song (no options, no menu). Save sends the edited title to `UpdateSongAsync`, which applies
+   REQ-SFT-15/29 and leaves `ExternalId`/`ExternalProvider` as stored (the form passes `null` for both,
+   "keep existing", `SongService.cs:180-183`).
 3. Save: `SaveFromFormAsync` with `SongId` set: rules 1, 2, 5 (no song guard; `UpdateSongAsync`
    enforces (artist, title, version) uniqueness, REQ-SFT-29).
 
@@ -575,14 +577,14 @@ path CATALOG-PROP would have to hook, findings § 4).
 **Reversibility:** Reversible with effort (signature change).
 **Rationale:** one write path per operation (REQ-SFT-46) and all-or-nothing (REQ-SFT-18).
 
-### Decision: Title is read-only in edit mode for every song (Helder, sixth round)
-**Chosen approach:** `IsReadOnly = true` on Title whenever the form edits a stored song.
-**Alternatives considered:** read-only only for API-sourced songs (the earlier draft); editable always.
+### Decision: Title is editable in edit mode for every song (Helder, seventh round)
+**Chosen approach:** Title stays an Editable text field in edit mode (`IsSearchEnabled = false`).
+**Alternatives considered:** read-only for every song (sixth round, reversed: a typo would force
+delete + re-create); read-only only for API-sourced songs (first draft).
 **Reversibility:** Easily reversible (one binding).
-**Consequences:** a typo in a stored title is fixed by deleting and re-creating the song, which loses
-its YouTube links and non-derived catalog entries. **Flagged to Helder** by the orchestrator.
-`UpdateSongAsync` keeps its `title` parameter (other callers and tests use it); the form always sends
-the stored value.
+**Rationale:** a song's history (YouTube links, catalog rows, per-singer karaoke performance history
+feeding future AI suggestions) must survive a title fix. An API-sourced song keeps its external
+identity; only the local title changes.
 
 ### Decision: artist identity columns are ignored, not dropped
 Dropping needs a SQLite table rebuild and the unique `IX_Artists_ExternalId` removal for no runtime
@@ -600,13 +602,8 @@ gain (findings § 3.2). Helder approved keeping them.
   (2) `ArtistService.CreateArtistAsync`/`UpdateArtistAsync` reject a collated duplicate
   (`ArtistService.cs:66-67,102-103`), and they are the only artist create/rename code (the song path
   reaches creation only through `CreateArtistAsync`, § 3.2); (3) `IX_Artists_Name`, unique on the
-  collated column (`ArtistConfiguration.cs:17-21,39-41`). Race: a unique violation on
-  `IX_Artists_Name` surfaces as `DbUpdateException` from the unit of work's save; `SongService` and
-  `ArtistService` catch that specific case around their write call and return
-  `(false, "An artist with this name already exists")` (`Failed(Artist)` from `SaveFromFormAsync`).
-  The transaction is already rolled back, so nothing is written. The catch must use one of the
-  allowed patterns in `code-style-reference.md § Exception Handling` and match only this index;
-  other exceptions propagate unchanged.
+  collated column (`ArtistConfiguration.cs:17-21,39-41`), as a safety net. No concurrent-write
+  handling: the database is local to one device and one user (Helder, seventh round).
 - **INV-SFT-5:** in the search/suggestion paths (`SongSuggestionService`, `ArtistSuggestionService`),
   C# similarity code only orders DB-retrieved lists; it never filters or deduplicates (exception
   § 6.4). The resolution services keep their sanctioned `Score ≥ 0.82` threshold over a DB-bounded
