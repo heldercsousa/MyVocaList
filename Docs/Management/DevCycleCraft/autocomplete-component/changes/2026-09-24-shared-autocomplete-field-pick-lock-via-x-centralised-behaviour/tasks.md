@@ -85,7 +85,7 @@
 
 ## Phase 1: Domain
 
-- [ ] **T2: Add `SearchConstants.AutocompleteDebounceMilliseconds = 300`** [P]
+- [x] **T2: Add `SearchConstants.AutocompleteDebounceMilliseconds = 300`** [P] *(merged to develop 2026-09-25, `78b2b735`)*
   - Test first (Level B): assert the value is 300, in the style of `SongSuggestionThresholdTests.cs:55`. Red, then Green.
   - The value is ruled (Q10). The location stays `SearchConstants` unless Helder rules otherwise before dispatch.
   - **Produces:** the constant + XML doc (cites REQ-ACF-14, REQ-DXAC-07) · **Consumes:** nothing
