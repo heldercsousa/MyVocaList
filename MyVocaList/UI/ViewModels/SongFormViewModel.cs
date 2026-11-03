@@ -3,7 +3,6 @@ using MyVocaList.Contracts.Messages;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.UI.Collections;
-using CanonicalSongPickedMessage = MyVocaList.Contracts.Messages.SongPickedMessage;
 
 namespace MyVocaList.UI.ViewModels;
 
@@ -135,8 +134,6 @@ public partial class SongFormViewModel : ViewModelBase
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
         CreateArtistInlineCommand = new AsyncRelayCommand<string>(CreateArtistInlineAsync);
         ArtistBlurredWithoutSelectionCommand = new RelayCommand(OnArtistBlurredWithoutSelection);
-        NavigateToSongPickerCommand = new AsyncRelayCommand(NavigateToSongPickerAsync,
-            AsyncRelayCommandOptions.None);
         NavigateToYouTubeSearchCommand = new AsyncRelayCommand(NavigateToYouTubeSearchAsync,
             AsyncRelayCommandOptions.None);
         AddFromPasteCommand = new AsyncRelayCommand(AddFromPasteAsync);
@@ -153,9 +150,6 @@ public partial class SongFormViewModel : ViewModelBase
         ConfirmMergeCommand = new AsyncRelayCommand(ConfirmMergeAsync);
         DismissMergeSheetCommand = new RelayCommand(DismissMergeSheet);
 
-        // Register for the canonical SongPickedMessage (from SongPickerViewModel)
-        // Uses alias to avoid ambiguity with any other SongPickedMessage-named type
-        _messenger.Register<CanonicalSongPickedMessage>(this, (_, msg) => OnSongPicked(msg));
     }
 
     // ── Commands ──────────────────────────────────────────────────────────
@@ -167,7 +161,6 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand<string> CreateArtistInlineCommand { get; }
     /// <summary>Invoked by DevExpress AutoCompleteEdit when user blurs without selecting a suggestion (BUG-008).</summary>
     public IRelayCommand ArtistBlurredWithoutSelectionCommand { get; }
-    public IAsyncRelayCommand NavigateToSongPickerCommand { get; }
     public IAsyncRelayCommand NavigateToYouTubeSearchCommand { get; }
     public IAsyncRelayCommand AddFromPasteCommand { get; }
     public IAsyncRelayCommand<SongKaraokeUrlDto> RemoveUrlCommand { get; }
@@ -481,67 +474,6 @@ public partial class SongFormViewModel : ViewModelBase
                 _isHydrating = wasHydrating;
             }
         });
-    }
-
-    // ── SongPickedMessage handler (canonical, from SongPickerViewModel) ───
-
-    private void OnSongPicked(CanonicalSongPickedMessage msg)
-    {
-        var result = msg.Result;
-
-        RunOnUiThread(() =>
-        {
-            SongTitle = result.SongTitle ?? string.Empty;
-            FeaturedArtists = result.FeaturedArtists ?? string.Empty;
-
-            // Stash external identity so SaveAsync can persist it
-            SelectedExternalId = result.ExternalId ?? string.Empty;
-            SelectedProvider = result.Provider ?? string.Empty;
-        });
-
-        // Resolve the artist: if exact match found, lock it in; else leave for user
-        _ = ResolveAndLockArtistAsync(result.ArtistName, result.ExternalId, result.Provider);
-    }
-
-    private async Task ResolveAndLockArtistAsync(string? artistName, string? externalId, string? provider)
-    {
-        if (string.IsNullOrWhiteSpace(artistName)) return;
-
-        try
-        {
-            var results = await _artistService.SearchArtistsByNameAsync(artistName, maxResults: 1);
-            var match = results.FirstOrDefault(a =>
-                string.Equals(a.Name, artistName, StringComparison.OrdinalIgnoreCase));
-
-            if (match is not null)
-            {
-                RunOnUiThread(() =>
-                {
-                    SelectedArtistId = match.Id;
-                    SelectedArtistName = match.Name;
-                    ArtistSearchText = match.Name;
-                    IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic lock
-                    ArtistSuggestions = [];
-                    ArtistHasError = false;
-                    IsArtistLocked = true; // API import: lock artist
-                });
-            }
-            else
-            {
-                RunOnUiThread(() =>
-                {
-                    // No exact match — pre-fill text so user can confirm or adjust
-                    ArtistSearchText = artistName;
-                    IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic prefill
-                    SelectedArtistId = null;
-                    IsArtistLocked = false;
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to resolve artist '{ArtistName}' from picker result", artistName);
-        }
     }
 
     // ── Save orchestration (Task 4.4 BUG-005 + Task 4.5 resolution) ──────
@@ -895,11 +827,6 @@ public partial class SongFormViewModel : ViewModelBase
     }
 
     // ── YouTube URL section ───────────────────────────────────────────────
-
-    private async Task NavigateToSongPickerAsync()
-    {
-        await Shell.Current.GoToAsync(Routes.SongPicker);
-    }
 
     private async Task NavigateToYouTubeSearchAsync()
     {
