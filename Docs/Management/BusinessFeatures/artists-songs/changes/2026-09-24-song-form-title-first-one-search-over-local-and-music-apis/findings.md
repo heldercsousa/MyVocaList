@@ -421,7 +421,7 @@ not Android's system SQLite.
 
 - Device model:
 - Android version:
-- App commit (spike branch):
+- App commit (spike branch): `f736314a` on `spike/sft-g5-fts5` (G5a done 2026-11-03; build 0 errors; emulator smoke not run, per the machine-load constraint)
 
 ### Run sheet
 
