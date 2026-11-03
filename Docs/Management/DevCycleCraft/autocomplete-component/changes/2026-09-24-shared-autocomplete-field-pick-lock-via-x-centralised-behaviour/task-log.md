@@ -325,3 +325,6 @@ Build: passed (0 errors) | Tests: 679 passed, 0 failed | Commit: the head of bra
 Verdict **B**, on Helder's functional report from the spike SongFormPage. The formal run sheet was not
 filled; see findings.md § T1c for the caveat and the checks carried to T7. T3-C skipped (C not needed).
 Spike worktree/branch deleted after recording.
+
+### 2026-11-03 — Helder decision: keep the pick-lock
+Helder tested `sft-g5-spike` (which predates T4 and uses the old per-page autocomplete) and saw no lock. Once told that the lock lives only in `AutocompleteDXField`, he chose: "keep the lock once it already lives in the component". No spec change. The lock is verified on device in T7 (Person form, after T6).
