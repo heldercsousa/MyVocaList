@@ -54,7 +54,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IArtistService, ArtistService>();
         services.AddScoped<ISongService, SongService>();
         services.AddScoped<ICatalogService, CatalogService>();
-        services.AddScoped<IMusicMetadataService, MusicMetadataService>();
         // BUG-021 fix: ArtistResolutionService and SongResolutionService require ISimilarityScorer;
         // it was never registered, crashing SongFormPage activation at navigation time.
         services.AddScoped<ISimilarityScorer, Infra.Similarity.SimilarityScorer>();

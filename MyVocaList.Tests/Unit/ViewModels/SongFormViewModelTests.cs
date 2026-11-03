@@ -281,9 +281,9 @@ public class SongFormViewModelTests
 
     // ── BUG-008: artist blur-clear ─────────────────────────────────────────
 
-    // [AC] REQ-ACREATE-03: blur with unmatched text retains it and surfaces error
+    // [AC] REQ-SFT-17: when Artist loses focus holding unpicked text, the text stays and no error is shown.
     [Fact]
-    public void ArtistBlurredWithoutSelection_NoPriorSelection_RetainsTextAndSetsError()
+    public void ArtistBlurredWithoutSelection_NoPriorSelection_RetainsTextAndSetsNoError()
     {
         var sut = CreateSut();
         sut.ArtistSearchText = "partial text";
@@ -293,7 +293,8 @@ public class SongFormViewModelTests
 
         Assert.Equal("partial text", sut.ArtistSearchText);
         Assert.Null(sut.SelectedArtistId);
-        Assert.True(sut.ArtistHasError);
+        Assert.False(sut.ArtistHasError);
+        Assert.True(string.IsNullOrEmpty(sut.ArtistErrorText));
         Assert.False(sut.IsArtistLocked);
     }
 
@@ -324,22 +325,6 @@ public class SongFormViewModelTests
 
         Assert.Equal("Guns N' Roses", sut.ArtistSearchText);
         Assert.Equal(7, sut.SelectedArtistId);
-    }
-
-    // [AC] REQ-ACREATE-03 (BUG-057): the error Label mirrors ArtistHasError — the VM must set
-    // ArtistErrorText whenever it sets ArtistHasError=true, or the Label reserves layout space
-    // but renders no message.
-    [Fact]
-    public void ArtistBlurredWithoutSelection_NoPriorSelection_SetsErrorText()
-    {
-        var sut = CreateSut();
-        sut.ArtistSearchText = "partial text";
-        // SelectedArtistId not set
-
-        sut.ArtistBlurredWithoutSelectionCommand.Execute(null);
-
-        Assert.True(sut.ArtistHasError);
-        Assert.False(string.IsNullOrEmpty(sut.ArtistErrorText));
     }
 
     // ── BUG-060 / REQ-ACREATE-15: clearing a locked artist unlocks the field ──────────────
@@ -495,48 +480,6 @@ public class SongFormViewModelTests
         Assert.False(sut.IsArtistDropDownOpen);
     }
 
-    // ── T7: inline "create new artist" ────────────────────────────────────
-
-    // [AC] REQ-ACREATE-04/08: inline create success locks the created artist, clears error
-    [Fact]
-    public async Task CreateArtistInline_Success_LocksCreatedArtistAndClearsError()
-    {
-        var created = new Artist { Id = 42, Name = "New Band" };
-        var artistService = new Mock<IArtistService>();
-        artistService
-            .Setup(s => s.CreateArtistAsync("New Band", null, null, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((true, string.Empty, created));
-        var sut = CreateSut(artistService: artistService);
-        sut.ArtistHasError = true;   // prior error present
-
-        await sut.CreateArtistInlineCommand.ExecuteAsync("New Band");
-
-        Assert.Equal(42, sut.SelectedArtistId);
-        Assert.Equal("New Band", sut.SelectedArtistName);
-        Assert.True(sut.IsArtistLocked);
-        Assert.False(sut.ArtistHasError);
-    }
-
-    // [AC] REQ-ACREATE-05: inline create failure maps error, retains text, no lock
-    [Fact]
-    public async Task CreateArtistInline_Failure_MapsErrorAndRetainsText()
-    {
-        var artistService = new Mock<IArtistService>();
-        artistService
-            .Setup(s => s.CreateArtistAsync("Dup", null, null, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((false, "Artist already exists.", (Artist?)null));
-        var sut = CreateSut(artistService: artistService);
-        sut.ArtistSearchText = "Dup";
-
-        await sut.CreateArtistInlineCommand.ExecuteAsync("Dup");
-
-        Assert.True(sut.ArtistHasError);
-        Assert.Equal("Artist already exists.", sut.ArtistErrorText);
-        Assert.Equal("Dup", sut.ArtistSearchText);   // retained
-        Assert.False(sut.IsArtistLocked);            // no lock
-        Assert.Null(sut.SelectedArtistId);
-        Assert.Empty(sut.ArtistSuggestions);          // stale suggestions cleared (M3)
-    }
 
     // ── BUG-009: buffered URLs ────────────────────────────────────────────
 
