@@ -281,9 +281,9 @@ public class SongFormViewModelTests
 
     // ── BUG-008: artist blur-clear ─────────────────────────────────────────
 
-    // [AC] REQ-ACREATE-03: blur with unmatched text retains it and surfaces error
+    // [AC] REQ-SFT-17: when Artist loses focus holding unpicked text, the text stays and no error is shown.
     [Fact]
-    public void ArtistBlurredWithoutSelection_NoPriorSelection_RetainsTextAndSetsError()
+    public void ArtistBlurredWithoutSelection_NoPriorSelection_RetainsTextAndSetsNoError()
     {
         var sut = CreateSut();
         sut.ArtistSearchText = "partial text";
@@ -293,7 +293,8 @@ public class SongFormViewModelTests
 
         Assert.Equal("partial text", sut.ArtistSearchText);
         Assert.Null(sut.SelectedArtistId);
-        Assert.True(sut.ArtistHasError);
+        Assert.False(sut.ArtistHasError);
+        Assert.True(string.IsNullOrEmpty(sut.ArtistErrorText));
         Assert.False(sut.IsArtistLocked);
     }
 
