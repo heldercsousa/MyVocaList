@@ -150,13 +150,19 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\Docs\\\\Management\" -Recurse -Directory | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace\\(\"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\\", \"\"\\) })",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\helde\\\\source\\\\repos\\\\MyVocaList\\\\Docs\\\\Management\\\\DevCycleCraft\\\\workflow-folder-layout-alignment\" -File)",
       "Bash(Select-Object -ExpandProperty Name)",
-      "PowerShell(dotnet restore MyVocaList.sln 2>&1)"
+      "PowerShell(dotnet restore MyVocaList.sln 2>&1)",
+      "Bash(rtk proxy *)",
+      "Bash(D=\"Docs/Management/cross-cutting/read-model-notracking-guidelines/changes/2026-08-24-scope-all-service-reads-through-iunitofwork\" && rtk ls \"$D\" && echo \"=== CHECKPOINT ===\" && awk '/### Checkpoint/,0' \"$D/task-log.md\" | head -80)",
+      "Skill(loop)",
+      "Bash(cd *)"
     ],
     "defaultMode": "bypassPermissions"
   },
   "enabledMcpjsonServers": [
     "context7",
-    "devexpress-maui"
+    "devexpress-maui",
+    "playwright",
+    "sqlite"
   ],
   "disabledMcpjsonServers": [
     "mudblazor"
