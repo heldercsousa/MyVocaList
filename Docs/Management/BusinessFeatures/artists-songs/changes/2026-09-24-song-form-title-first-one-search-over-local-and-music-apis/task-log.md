@@ -60,7 +60,22 @@ _(not started)_
 
 ### Checkpoint
 
-_(not started)_
+Branch `task/sft-2.1-song-lookups`, worktree `.worktrees/sft-2.1`, base develop `286b7712`. Step: Red committed, about to implement Green (ISongRepository + SongRepository). Next command: implement the two methods then `dotnet test --filter SongRepositoryTests`.
+Context manifest: `Domain/RepositoryInterface/ISongRepository.cs` (interface to extend), `Infra/Repository/SongRepository.cs` (implementation), `MyVocaList.Tests/Integration/Repositories/SongRepositoryTests.cs` (Red tests, `// ── Lookups (SFT) ──` region), `design.md` §3.1 (verbatim signatures), `plan.md` lines 459-494 (task spec).
+
+### Red
+
+Filter `SongRepositoryTests`. Build failed with the expected compile errors (both new members missing):
+
+```
+SongRepositoryTests.cs(400,33): error CS1061: 'SongRepository' does not contain a definition for 'FindIdByTitleVersionForArtistAsync' ...
+SongRepositoryTests.cs(415,33): error CS1061: 'SongRepository' does not contain a definition for 'FindIdByTitleVersionForArtistAsync' ...
+SongRepositoryTests.cs(432,34): error CS1061: 'SongRepository' does not contain a definition for 'ExistsByExternalIdentityAsync' ...
+SongRepositoryTests.cs(449,34): error CS1061: 'SongRepository' does not contain a definition for 'ExistsByExternalIdentityAsync' ...
+SongRepositoryTests.cs(459,34): error CS1061: 'SongRepository' does not contain a definition for 'ExistsByExternalIdentityAsync' ...
+```
+
+(Original compiler output was localized pt-BR; error code/meaning unchanged.)
 
 ## 2.2
 
