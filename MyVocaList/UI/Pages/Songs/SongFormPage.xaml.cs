@@ -59,39 +59,18 @@ public partial class SongFormPage : ContentPage
             var matches = await ViewModel.SearchArtistsCoreAsync(text);
             token.ThrowIfCancellationRequested();
 
-            // REQ-ACREATE-02/03/10: append one synthetic "create new artist" sentinel row as the
-            // LAST item for any non-whitespace typed text (whether or not matches exist). Glue only:
-            // the raw typed text is carried in Headline; the distinct ➕ render is done by the XAML
-            // ItemTemplate (T8), and the actual creation happens in the VM command (T7 VM path).
-            var results = new List<AutocompleteSuggestion>(matches);
-            // BUG-054a: do not re-append the create sentinel when the field is already locked to a
-            // selected artist, or when the query text is exactly that artist's name (the editor
-            // re-requests items after a lock sets ArtistSearchText to the chosen name).
-            var suppressCreateRow = ViewModel.IsArtistLocked
-                || string.Equals(text, ViewModel.SelectedArtistName, StringComparison.Ordinal);
-            if (!string.IsNullOrWhiteSpace(text) && !suppressCreateRow)
-                results.Add(new AutocompleteSuggestion(text, string.Empty, text) { IsCreateNew = true });
-            return results;
+            return new List<AutocompleteSuggestion>(matches);
         };
     }
 
-    // Routes drop-down selection: the create-sentinel goes to the inline-create command with the
-    // raw typed text (carried in Headline); a real match goes to the existing selection command.
+    // Routes drop-down selection to the existing selection command (REQ-SFT-17/45: no inline
+    // "create new artist" sentinel row anymore — unpicked text is blocked at Save instead).
     private void OnArtistSelectionChanged(object sender, EventArgs e)
     {
         if (artistEdit.SelectedItem is not AutocompleteSuggestion suggestion)
             return;
 
-        if (suggestion.IsCreateNew)
-        {
-            // BUG-049-style guard: an in-flight create must not be re-triggered by a second selection event.
-            if (ViewModel.CreateArtistInlineCommand.CanExecute(suggestion.Headline))
-                ViewModel.CreateArtistInlineCommand.Execute(suggestion.Headline);
-        }
-        else
-        {
-            ViewModel.SelectArtistCommand.Execute(suggestion);
-        }
+        ViewModel.SelectArtistCommand.Execute(suggestion);
 
         // BUG-061: the DX AutoCompleteEdit keeps the picked row marked as SelectedItem, so it
         // lingers highlighted in the suggestion list until tapped a second time. Reset it once the
