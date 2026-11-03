@@ -44,6 +44,7 @@ MyVocaList operates at **Spec-Anchored** (Level 2) SDD: specs in `Docs/Managemen
 
 - Build: `/sln-build` · Release: `/sln-release`
 - Commit: `/sln-commit`
+- Inline trivial fix: `/sln-itf` — orchestrator applies a diagnosed 1-file / ≤ 5-line fix itself (ITF lane), no subagent
 - Changelog: `/sln-changelog`
 - Ledger: `/sln-ledger` — maintain `Docs/Management/LEDGER.md` (develop-branch tracker of every in-flight task's branch/worktree/phase/status; update at dispatch, phase transition, merge, session end)
 - Docs sync: `/sln-docs-sync` — flush doc changes stranded on worktree/task branches back to develop (docs always live on develop)
@@ -216,4 +217,4 @@ Claude Code is the primary AI assistant. Decision rationale, accepted lock-in, r
 ## Roles
 - **Helder**: Architect and Technical Auditor. Defines approaches, reviews code, makes trade-off decisions.
 - **Claude Code**: Implementation Specialist. Codes, debugs, documents. Never makes architectural decisions unilaterally.
-- **Orchestrator read-scope** `[HARD RULE]`: When acting as the main/orchestrator agent, Claude Code never reads `.cs`, `.xaml`, or any source/implementation file — all code inspection (including plan-mode codebase exploration) is delegated to an Explore/Plan subagent. See `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
+- **Orchestrator read-scope** `[HARD RULE — amended 2026-11-03]`: When acting as the main/orchestrator agent, Claude Code does not explore source code — flows, surveys and consumer maps (including plan-mode exploration) are delegated to an Explore/Plan subagent. It may grep + read at most 2 source files per written question to *confirm* a diagnosis (read lane), and applies a diagnosed 1-file / ≤ 5-line fix via the ITF lane (`/sln-itf`) instead of dispatching. See `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.

@@ -53,7 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import json,sys; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); any(fp.endswith(e) for e in ('.cs','.xaml','.xaml.cs')) and print('WORKFLOW REMINDER: Main agent is editing a code file directly. Prefer delegating to a subagent (workflow.md Rule 2).') \" 2>/dev/null || true"
+            "command": "python .claude/scripts/delegate-reminder.py 2>/dev/null || true"
           }
         ]
       }
@@ -160,7 +160,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Subagent-driven, worktree-isolated flow — never skip to implementation: Spec → spec-review → Plan → plan-review → Implement → implementation-review. Each stage AND its review runs in a dedicated subagent (spec-reviewer after the spec, plan-reviewer after the plan, code review after implementation), always inside a git worktree; the orchestrator never writes code. (6) English only in code, comments, logs, UI text. (7) After every completed task: /sln-review → /sln-commit (stage, commit, push). SPEC RE-READ REMINDER: After context compaction, re-read the active feature spec (Docs/Management/[BusinessFeatures|DevCycleCraft]/<feature>/design.md and requirements.md) before continuing — compaction discards loaded spec context and continuing without re-reading risks spec drift.'"
+            "command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Subagent-driven, worktree-isolated flow — never skip to implementation: Spec → spec-review → Plan → plan-review → Implement → implementation-review. Each stage AND its review runs in a dedicated subagent (spec-reviewer after the spec, plan-reviewer after the plan, code review after implementation), always inside a git worktree. Two narrow orchestrator lanes replace a dispatch: the read lane (grep + read at most 2 source files to confirm a diagnosis) and the ITF lane for a diagnosed 1-file / <=5-line fix (/sln-itf). (6) English only in code, comments, logs, UI text. (7) After every completed task: /sln-review → /sln-commit (stage, commit, push). SPEC RE-READ REMINDER: After context compaction, re-read the active feature spec (Docs/Management/[BusinessFeatures|DevCycleCraft]/<feature>/design.md and requirements.md) before continuing — compaction discards loaded spec context and continuing without re-reading risks spec drift.'"
           }
         ]
       }

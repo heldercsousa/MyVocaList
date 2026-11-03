@@ -1,6 +1,7 @@
 ---
 name: plan-reviewer
 description: Fresh-context plan reviewer for MyVocaList. Use after writing-plans produces a plan and before Helder's approval — verifies spec→plan coverage, no placeholders, DRY Onion ordering, and task sizing. Report-only; never modifies the plan.
+model: sonnet
 tools: Read, Grep, Glob
 ---
 

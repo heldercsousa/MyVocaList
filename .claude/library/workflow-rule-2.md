@@ -6,15 +6,17 @@
 
 **All coding is done by subagents. The main agent handles shell-only steps.**
 
-> **Orchestrator never reads source files `[HARD RULE]`:** the main/orchestrator agent must not read `.cs`, `.xaml`, or any other source file — all code inspection (including plan-mode codebase exploration) is delegated to an Explore/Plan subagent. Read-scope allow/deny list, plan-mode reconciliation, and session-start self-check: see `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
+> **Orchestrator read-scope `[HARD RULE — amended 2026-11-03]`:** no source exploration by the orchestrator (plan-mode exploration included) — delegate to Explore/Plan. The **read lane** (grep + at most 2 source files per written question, to confirm a diagnosis/signature/member) is the only inline source reading. Bounds, plan-mode reconciliation, and session-start self-check: `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
 
 | Main agent does | Subagent does |
 |----------------|---------------|
-| `dotnet build` | Any file creation or edit |
+| `dotnet build` | Any file creation or edit outside the ITF lane |
 | `dotnet test` | ViewModels, pages, services, repositories |
-| `dotnet ef migrations add` | XAML, code-behind, DI registration |
+| `dotnet ef migrations add` | XAML, code-behind, multi-line DI registration |
 | `git status`, `git add`, `git commit` | Route additions, AppShell registration |
 | Reading spec before briefing subagent | Everything in `crud-pages.md` |
+| Read lane — grep + ≤ 2 source files to confirm a diagnosis | Exploration — flows, surveys, consumer maps |
+| ITF lane — a diagnosed 1-file / ≤ 5-line fix (`/sln-itf`) | — |
 
 > **Orchestrator-side protocols** (pre-dispatch checklist, pre-wave dependency check, briefing protocol, role scope declaration, adversarial critic, wave handoff, discovery briefs, multi-wave checkpoint, merge sequencing, worktrees, kill criteria, approval authority matrix, review lanes, DGI classification): see `.claude/agents/orchestrator.md`.
 
@@ -62,7 +64,9 @@ Some files must never be edited by more than one agent at a time:
 | `Directory.Build.props` | Shared MSBuild properties — parallel edits produce conflicts |
 | `tasks.md` (any spec) | Task status tracking — parallel checkbox edits produce divergent state |
 
-**How to add entries:** If a session discovers a new hotspot file, add it to this registry before ending the session.
+**ITF soft / hard split `[added 2026-11-03]`:** for the ITF lane only (condition C5), `MauiProgram.cs`, `GlobalUsings.cs` and `Directory.Build.props` are the **soft** set — eligible when the declaration carries `"sole_writer": true` after the sole-writer check (`/sln-itf` step 2). `AppShell.xaml(.cs)`, `AppDbContext.cs`, `tasks.md` and anything under `Migrations/` are the **hard** set — never ITF-eligible. The split does not relax wave planning: two tasks owning the same registry file are still serialized. Guard 3 mirrors this split in `_ITF_SEQUENTIAL_SOFT` / `_ITF_SEQUENTIAL_HARD`.
+
+**How to add entries:** If a session discovers a new hotspot file, add it to this registry before ending the session — and to the hard set in `constitutional-guard.py` unless Helder places it in the soft set.
 
 ### Subagent exit checklist (mandatory before returning)
 
@@ -160,7 +164,7 @@ every other reference is a path.
 
 ---
 
-## Inline Trivial Fix (ITF) lane `[amended 2026-07-21]`
+## Inline Trivial Fix (ITF) lane `[amended 2026-11-03]`
 
 > Routed out of `workflow.md` 2026-08-24 (doctor pass). The never-miss summary — the lane exists,
 > it is opt-in, all nine conditions must hold, and C1/C3/C4/C5 are hook-enforced — stays inline in
@@ -174,12 +178,12 @@ implementor; there is no partial qualification.
 |---|-----------|
 | C0 | A **declaration** exists in the worktree where the edit occurs, naming this file |
 | C1 | Exactly **1 file**, **≤ 5 changed lines** (guard's upper-bound count) |
-| C2 | Fix **fully diagnosed** — root cause, exact file and exact line already recorded before the file is opened; if finding the defect would need a grep or a second file, it is not fully diagnosed |
+| C2 | Fix **fully diagnosed** — root cause, exact file and exact line recorded before the edit. The diagnosis may come from a stack trace, a subagent report, or the **read lane** (grep + ≤ 2 source files, `orchestrator.md § Orchestrator Read-Scope`); if it needs more than that, it is not fully diagnosed *(amended 2026-11-03)* |
 | C3 | Target is **not** `.xaml` / `.xaml.cs` |
 | C4 | Target is **not** a governed component (`component-change-governance.md`) |
-| C5 | Target is **not** in the sequential-only file registry (`workflow.md § Sequential-only file registry`) |
+| C5 | Target is **not** in the hard sequential-only set; a **soft-set** file (`MauiProgram.cs`, `GlobalUsings.cs`, `Directory.Build.props`) qualifies only with `"sole_writer": true` in the declaration after the sole-writer check (`§ Sequential-only file registry`, `/sln-itf` step 2) *(amended 2026-11-03)* |
 | C6 | Severity ≤ Major **and** no regression test is mandatory per `bug-tracking.md`. In practice: Critical always dispatches; Major dispatches wherever testable. The lane's population is Minor bugs, UI-only Major bugs verified by manual E2E, and non-bug trivia |
-| C7 | Edit is in a **worktree on a task branch** — ITF grants NO worktree exemption |
+| C7 | Edit is in a **worktree on a task branch** (a throwaway spike branch qualifies) — ITF grants NO worktree exemption |
 | C8 | Build (0 errors) + affected tests green before commit |
 
 **Opt-in is explicit.** Before editing, the orchestrator (a) writes `<worktree>/.itf-active` —
