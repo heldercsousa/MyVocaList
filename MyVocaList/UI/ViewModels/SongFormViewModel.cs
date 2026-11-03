@@ -132,7 +132,6 @@ public partial class SongFormViewModel : ViewModelBase
         CancelCommand = new AsyncRelayCommand(CancelAsync);
         SearchArtistsCommand = new AsyncRelayCommand<string>(SearchArtistsAsync);
         SelectArtistCommand = new RelayCommand<AutocompleteSuggestion>(SelectArtist);
-        CreateArtistInlineCommand = new AsyncRelayCommand<string>(CreateArtistInlineAsync);
         ArtistBlurredWithoutSelectionCommand = new RelayCommand(OnArtistBlurredWithoutSelection);
         NavigateToYouTubeSearchCommand = new AsyncRelayCommand(NavigateToYouTubeSearchAsync,
             AsyncRelayCommandOptions.None);
@@ -157,8 +156,6 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand CancelCommand { get; }
     public IAsyncRelayCommand<string> SearchArtistsCommand { get; }
     public IRelayCommand<AutocompleteSuggestion> SelectArtistCommand { get; }
-    /// <summary>REQ-ACREATE-04/05: creates a new artist inline from the typed name and locks it in on success.</summary>
-    public IAsyncRelayCommand<string> CreateArtistInlineCommand { get; }
     /// <summary>Invoked by DevExpress AutoCompleteEdit when user blurs without selecting a suggestion (BUG-008).</summary>
     public IRelayCommand ArtistBlurredWithoutSelectionCommand { get; }
     public IAsyncRelayCommand NavigateToYouTubeSearchCommand { get; }
@@ -314,9 +311,9 @@ public partial class SongFormViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// REQ-ACREATE-04/12: single lock path shared by an existing-suggestion pick (BUG-050) and the
-    /// inline-create success path. Sets the selected+locked artist, mirrors the name into the search
-    /// text, clears suggestions, and clears any pending artist error.
+    /// REQ-ACREATE-04/12 (BUG-050): sets the selected+locked artist from an existing-suggestion
+    /// pick, mirrors the name into the search text, clears suggestions, and clears any pending
+    /// artist error.
     /// </summary>
     private void LockArtist(int id, string name)
     {
@@ -331,45 +328,15 @@ public partial class SongFormViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// REQ-ACREATE-04/05: inline "create new artist" from the Song form. Delegates creation and
-    /// validation entirely to <see cref="IArtistService.CreateArtistAsync(string, string?, string?, CancellationToken)"/>
-    /// (business logic stays in the Service). On success the created artist becomes the selected+locked
-    /// artist via the shared <see cref="LockArtist"/> path; on failure the service message is surfaced
-    /// through <see cref="ArtistHasError"/>/<see cref="ArtistErrorText"/> and the typed text is retained.
-    /// </summary>
-    private async Task CreateArtistInlineAsync(string name)
-    {
-        var (success, message, artist) = await _artistService.CreateArtistAsync(name);
-        if (success && artist is not null)
-        {
-            LockArtist(artist.Id, artist.Name);
-        }
-        else
-        {
-            ArtistHasError = true;
-            ArtistErrorText = message;
-            ArtistSuggestions = []; // M3: clear stale suggestions so the dropdown doesn't linger behind the error
-            // REQ-ACREATE-05: retain ArtistSearchText — no clear, no lock, no dialog.
-        }
-    }
-
-    /// <summary>
-    /// REQ-ACREATE-03: blur-retain rule. If no artist is locked in, keep the typed text
-    /// (never clear it) and surface a validation error so the user can retry or use inline-create.
-    /// If one was previously selected, restore the name so the field stays consistent.
+    /// REQ-SFT-17: blur-retain rule. If no artist is locked in, keep the typed text (never clear
+    /// it) and set no error — the text stays available for a later search/pick. If one was
+    /// previously selected, restore the name so the field stays consistent.
     /// </summary>
     private void OnArtistBlurredWithoutSelection()
     {
         if (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0)
         {
             ArtistSuggestions = [];
-            // REQ-ACREATE-03: empty text is not an "unmatched" state — only flag an error
-            // when the user actually typed something that didn't resolve to a selection.
-            if (!string.IsNullOrWhiteSpace(ArtistSearchText))
-            {
-                ArtistHasError = true;
-                ArtistErrorText = "Search and select an artist from the list";
-            }
         }
         else
         {
