@@ -419,6 +419,19 @@ feat(acf): AutocompleteDXFieldLogic pure rules (Green) — REQ-ACF-01..13 logic
 
 ### Task T4: `AutocompleteDXField` component (XAML + code-behind) [Wave 4, after the verdict]
 
+> **Spec updated 2026-11-03 (decompiled-DLL findings, DevExpress.Maui.Editors 25.2.4, T4 checkpoint).**
+> These override the Step 5 snippet:
+> (1) the "no request" branch must still assign a delegate that returns `null`, because DX invokes
+> a null `Request` and throws an NRE in an async-void runner;
+> (2) `RequestAsync` is a `Func<Task<IEnumerable>>`, not generic; catch `OperationCanceledException`
+> inside it and return `null` (allowed try-catch pattern 1);
+> (3) `ItemsRequested` runs on a timer thread, so UI property sets go through `Dispatcher.Dispatch`;
+> (4) `ClearIconClicked` fires before DX clears the text, so dispatch `ClearCommand` to keep the
+> design § 3.1 order;
+> (5) `SelectionChanged` fires only from the dropdown, after `SelectedItem` is set; capturing the
+> option before the lock is correct.
+> Context7 was unavailable this session; the members were verified by ilspy decompilation.
+
 **Model:** **Opus.** The DX event wiring, the mechanism realisation, the BindableProperty change ordering and Review Focus 1–5 all need design judgement. **Level:** C (no mandatory test; record the no-test decision in the task-log). **Review lane:** Elevated (new shared component; MD3 review of the icon tokens).
 
 **Files:**
