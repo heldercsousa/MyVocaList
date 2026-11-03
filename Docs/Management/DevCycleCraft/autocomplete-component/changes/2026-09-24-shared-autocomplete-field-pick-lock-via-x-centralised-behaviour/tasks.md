@@ -121,7 +121,7 @@
 
 ## Phase 3: Component
 
-- [ ] **T4: `AutocompleteDXField` component (XAML + code-behind)** [SEQUENTIAL, after T2 + T3]
+- [x] **T4: `AutocompleteDXField` component (XAML + code-behind)** [SEQUENTIAL, after T2 + T3] — merged `0d74b4a6` 2026-11-03, Verifier PASS
   - Build the `ContentView` per `design.md` § 3.1 (including `IsSearchEnabled` and `FocusEditor()`;
     no create or opt-out surface), § 5 (the mechanism chosen after T1, driven by `Mode`), `IsReadOnly` (REQ-ACF-12b: inner `IsReadOnly=true`, no clear/end icon),
     § 5.2 (X colour tokens + `Error` trigger), § 5.3 (`SubmitIconVisibility=Never`) and § 6 (X
