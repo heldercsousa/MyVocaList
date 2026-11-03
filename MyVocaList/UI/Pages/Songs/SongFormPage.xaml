@@ -119,23 +119,6 @@
                               ErrorText="{Binding VersionErrorText}"
                               Unfocused="OnVersionUnfocused" />
 
-                <!-- Navigate to song picker -->
-                <lists:ListItem Headline="Search music database">
-                    <lists:ListItem.LeadingContent>
-                        <dx:DXButton Style="{StaticResource StandardIconButton}"
-                                     Icon="search_outlined"
-                                     InputTransparent="True" />
-                    </lists:ListItem.LeadingContent>
-                    <lists:ListItem.TrailingContent>
-                        <dx:DXButton Style="{StaticResource StandardIconButton}"
-                                     Icon="arrow_forward_outlined"
-                                     InputTransparent="True" />
-                    </lists:ListItem.TrailingContent>
-                    <lists:ListItem.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding NavigateToSongPickerCommand}" />
-                    </lists:ListItem.GestureRecognizers>
-                </lists:ListItem>
-
                 <dxe:TextEdit Text="{Binding FeaturedArtists, Mode=TwoWay}"
                               LabelText="Featured Artists"
                               PlaceholderText="e.g. feat. Ivete Sangalo" />
