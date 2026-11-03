@@ -1,5 +1,4 @@
 using CommunityToolkit.Mvvm.Messaging;
-using MyVocaList.Contracts.Messages;
 using MyVocaList.Domain.ReadModels;
 
 namespace MyVocaList.UI.ViewModels;
@@ -59,13 +58,11 @@ public partial class ArtistFormViewModel : ViewModelBase
         // caused a duplicate "GoToAsync("..")" that overshot the nav stack root.
         SaveCommand = new AsyncRelayCommand(SaveAsync, () => !IsBusy);
         CancelCommand = new AsyncRelayCommand(CancelAsync);
-        NavigateToArtistPickerCommand = new AsyncRelayCommand(NavigateToArtistPickerAsync);
         SelectDuplicateCommand = new AsyncRelayCommand<ArtistListItem>(SelectDuplicateAsync);
     }
 
     public IAsyncRelayCommand SaveCommand { get; }
     public IAsyncRelayCommand CancelCommand { get; }
-    public IAsyncRelayCommand NavigateToArtistPickerCommand { get; }
     public IAsyncRelayCommand<ArtistListItem> SelectDuplicateCommand { get; }
 
     partial void OnArtistIdChanged(int? value)
@@ -184,18 +181,6 @@ public partial class ArtistFormViewModel : ViewModelBase
     }
 
     private Task CancelAsync() => Shell.Current?.GoToAsync("..") ?? Task.CompletedTask;
-
-    private async Task NavigateToArtistPickerAsync()
-    {
-        _messenger.Register<ArtistPickedMessage>(this, (_, msg) =>
-        {
-            ArtistName = msg.Result.ArtistName;
-            SelectedExternalId = msg.Result.ExternalId;
-            SelectedProvider = msg.Result.Provider;
-            _messenger.Unregister<ArtistPickedMessage>(this);
-        });
-        await Shell.Current.GoToAsync(Routes.ArtistPicker);
-    }
 
     private Task SelectDuplicateAsync(ArtistListItem artist)
     {
