@@ -251,3 +251,9 @@ None. `git push origin HEAD` was not attempted per the briefing (orchestrator me
 ### Checkpoint
 
 - (placeholder)
+
+
+### T1c — 2026-11-03 (orchestrator)
+Verdict **B**, on Helder's functional report from the spike SongFormPage. The formal run sheet was not
+filled; see findings.md § T1c for the caveat and the checks carried to T7. T3-C skipped (C not needed).
+Spike worktree/branch deleted after recording.

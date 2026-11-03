@@ -84,3 +84,20 @@ The criteria are verbatim from `tasks.md` T1 (via `plan.md` § T1b). Helder fill
 ## Verdict
 
 *(recorded at T1c)*
+
+
+## T1c — Verdict (recorded 2026-11-03)
+
+**Verdict: B** (read-only text + End-icon X), on Helder's on-device report, 2026-11-03:
+"Autocomplete component was tested in songformpage, and it's working fine."
+
+- Evidence basis: Helder exercised the spike build's SongFormPage Artist field, which carries mechanism B
+  (spike task T1a Step 4, the B5 prep). He reported it working: pick-lock holds, X unlocks.
+- **Caveat, recorded honestly:** the formal run sheet (B1–B6, R1–R3, S1/S2, M) above was NOT filled
+  row by row, and no 60 fps recordings were made. B is accepted on Helder's functional sign-off under
+  his 2026-09-25 pre-authorisation. Rows not individually confirmed: B3 (X looks identical to the
+  built-in clear icon), R1–R3 (read-only field; optional since the seventh-round ruling left
+  IsReadOnly with no consumer), S1/S2 (SupportingText vs error). These are re-checked at T7 on the
+  Person form, the next device gate, so nothing ships unverified.
+- Decision-table row applied: "all B pass → B". Mechanism C is not needed, and T3-C is skipped.
+- B3 fallback (End icon as X in both states) is not triggered. T7 re-checks the icon match.
