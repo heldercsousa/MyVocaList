@@ -59,6 +59,26 @@ public interface ISongRepository
     /// <returns>Matching songs, unordered; empty when no candidate matches.</returns>
     Task<IReadOnlyList<Song>> GetByTitlesCollatedAsync(IEnumerable<string> titles, CancellationToken ct = default);
 
+    /// <summary>
+    /// REQ-SFT-42: the id of the collated (artist, title, version) match, or null. Replaces the
+    /// Exists + pool re-match + OrdinalIgnoreCase path (SongResolutionService.cs:96-127).
+    /// </summary>
+    /// <param name="artistId">Scope: original artist of the song.</param>
+    /// <param name="title">Song title to match.</param>
+    /// <param name="version">Version label to match; pass empty string for canonical versions.</param>
+    /// <param name="excludeId">Id of the song being edited — excluded from the match; null when creating.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task<int?> FindIdByTitleVersionForArtistAsync(int artistId, string title, string version, int? excludeId, CancellationToken ct);
+
+    /// <summary>
+    /// REQ-SFT-26: true when another song holds this external identity.
+    /// </summary>
+    /// <param name="provider">External provider name (e.g. "Deezer").</param>
+    /// <param name="externalId">External id value for that provider.</param>
+    /// <param name="excludeId">Id of the song being edited — excluded from the check; null when creating.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task<bool> ExistsByExternalIdentityAsync(string provider, string externalId, int? excludeId, CancellationToken ct);
+
     Task AddAsync(Song song, CancellationToken ct);
     Task UpdateAsync(Song song, CancellationToken ct);
     Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct);
