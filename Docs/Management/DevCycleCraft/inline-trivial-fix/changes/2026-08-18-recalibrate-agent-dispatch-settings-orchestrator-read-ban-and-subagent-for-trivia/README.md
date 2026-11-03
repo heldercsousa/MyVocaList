@@ -6,7 +6,7 @@ target: 2026-08-18
 section: DevCycleCraft
 parent: inline-trivial-fix
 goal: "Agent-dispatch settings over-trigger: the orchestrator is barred from reading any source file, and tiny tasks spawn fresh subagents that reload full context they never use."
-gate: Review alongside the ITF lane's first live fix so both share one calibration pass.
+gate: "Helder asked 2026-11-03 to do this right after the title-first pipeline: stop spawning subagents for one-line fixes."
 kind: change
 ---
 
@@ -43,3 +43,7 @@ Two settings appear miscalibrated in opposite directions, and they compound:
 This nests under the ITF lane because it is the same trade-off — orchestrator autonomy vs. drift
 risk — seen from the read side rather than the write side. Reviewing them together avoids setting
 two inconsistent thresholds.
+
+## Second observation (Helder, 2026-11-03)
+
+A spike page crashed on device because it was never registered in DI. Diagnosis was complete from the stack trace and the fix was one registration line, yet the orchestrator spawned an implementor (about 50k tokens to start) because the read-ban plus "all coding by subagents" left no other lane. MauiProgram.cs being sequential-only also excludes it from ITF. Helder stopped the agent: "We need to stop spawning subagents to do things so simple ... update the internal settings to avoid spawning for situations like that." Inputs for the calibration pass: (1) allow inline one-line fixes on throwaway spike branches; (2) reconsider excluding sequential-only files from ITF when no other writer is live; (3) let the orchestrator grep/read a single source file to confirm a diagnosis.
