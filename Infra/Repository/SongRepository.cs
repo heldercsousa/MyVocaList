@@ -123,6 +123,26 @@ public class SongRepository : ISongRepository
     }
 
     /// <inheritdoc />
+    public async Task<int?> FindIdByTitleVersionForArtistAsync(
+        int artistId, string title, string version, int? excludeId, CancellationToken ct)
+        => await _db.Songs
+            .Where(s => (excludeId == null || s.Id != excludeId.Value) &&
+                        s.ArtistId == artistId &&
+                        EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default) &&
+                        EF.Functions.Collate(s.Version, CollationConstants.Default) == EF.Functions.Collate(version, CollationConstants.Default))
+            .Select(s => (int?)s.Id)
+            .FirstOrDefaultAsync(ct);
+
+    /// <inheritdoc />
+    public async Task<bool> ExistsByExternalIdentityAsync(
+        string provider, string externalId, int? excludeId, CancellationToken ct)
+        => await _db.Songs.AnyAsync(
+            s => (excludeId == null || s.Id != excludeId.Value) &&
+                 s.ExternalProvider == provider &&
+                 s.ExternalId == externalId,
+            ct);
+
+    /// <inheritdoc />
     public Task AddAsync(Song song, CancellationToken ct)
     {
         _db.Songs.Add(song);
