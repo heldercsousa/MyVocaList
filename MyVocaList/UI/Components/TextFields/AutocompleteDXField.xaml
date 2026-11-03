@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
+    xmlns:constants="clr-namespace:MyVocaList.Domain.Constants;assembly=MyVocaList.Domain"
+    x:Class="MyVocaList.UI.Components.TextFields.AutocompleteDXField"
+    x:Name="self">
+
+    <!-- MD3 exposed dropdown menu (text field + menu of options), built on DX AutoCompleteEdit.
+         Outlined form-field look comes from the implicit dx:AutoCompleteEdit style (REQ-ACF-27).
+         Mechanism B (findings.md § T1c): while locked the editor is read-only and the X is the End icon;
+         while editable the X is DX's built-in clear icon. Icon/drop-down/read-only state is applied in
+         code-behind (ApplyMode), never by triggers, so a single rule set owns it (design.md § 4).
+         Only the X colour uses a trigger (HasError → Error, below). -->
+    <dxe:AutoCompleteEdit x:Name="editor"
+                          LabelText="{Binding LabelText, Source={x:Reference self}}"
+                          PlaceholderText="{Binding PlaceholderText, Source={x:Reference self}}"
+                          Text="{Binding Text, Source={x:Reference self}, Mode=TwoWay}"
+                          HasError="{Binding HasError, Source={x:Reference self}}"
+                          ErrorText="{Binding ErrorText, Source={x:Reference self}}"
+                          IsDropDownOpen="{Binding IsDropDownOpen, Source={x:Reference self}, Mode=TwoWay}"
+                          SubmitIconVisibility="Never"
+                          ClearIconColor="{StaticResource OnSurfaceVariant}"
+                          EndIcon="close_outlined"
+                          IsEndIconVisible="False"
+                          EndIconColor="{StaticResource OnSurfaceVariant}"
+                          SelectionChanged="OnSelectionChanged"
+                          Unfocused="OnUnfocused"
+                          EndIconClicked="OnEndIconClicked"
+                          ClearIconClicked="OnClearIconClicked">
+        <!-- MD3 outlined-text-field error-trailing-icon-color = error (REQ-ACF-08) -->
+        <dxe:AutoCompleteEdit.Triggers>
+            <DataTrigger TargetType="dxe:AutoCompleteEdit"
+                         Binding="{Binding HasError, Source={x:Reference self}}"
+                         Value="True">
+                <Setter Property="ClearIconColor" Value="{StaticResource Error}" />
+                <Setter Property="EndIconColor" Value="{StaticResource Error}" />
+            </DataTrigger>
+        </dxe:AutoCompleteEdit.Triggers>
+        <dxe:AutoCompleteEdit.ItemsSourceProvider>
+            <dxe:AsyncItemsSourceProvider RequestDelay="{x:Static constants:SearchConstants.AutocompleteDebounceMilliseconds}"
+                                          CharacterCountThreshold="{x:Static constants:SearchConstants.MinimumLocalQueryLength}"
+                                          ItemsRequested="OnItemsRequested" />
+        </dxe:AutoCompleteEdit.ItemsSourceProvider>
+        <dxe:AutoCompleteEdit.ItemTemplate>
+            <DataTemplate x:DataType="models:AutocompleteSuggestion">
+                <VerticalStackLayout Padding="16,8">
+                    <Label Text="{Binding Headline}" StyleClass="Body.Large" />
+                    <Label Text="{Binding SupportingText}"
+                           StyleClass="Body.Medium"
+                           TextColor="{StaticResource OnSurfaceVariant}"
+                           IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
+                </VerticalStackLayout>
+            </DataTemplate>
+        </dxe:AutoCompleteEdit.ItemTemplate>
+    </dxe:AutoCompleteEdit>
+</ContentView>

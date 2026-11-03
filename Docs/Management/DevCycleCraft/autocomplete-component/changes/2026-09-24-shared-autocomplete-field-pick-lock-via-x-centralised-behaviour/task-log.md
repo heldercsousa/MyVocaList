@@ -236,9 +236,77 @@ None. `git push origin HEAD` was not attempted per the briefing (orchestrator me
 
 ## T4
 
-### Checkpoint
+**Plan:** `plan.md` § Task T4
+**Status:** Check build (E2E: the component is on no page yet; first on-device proof is T7. The emulator was not run, per the machine-load constraint.)
+**Started:** 2026-11-03 (first implementor, stopped after Step 2 by machine restarts) · **Resumed/Completed:** 2026-11-03
 
-- (placeholder)
+### Resume review (partial work inherited)
+- **Kept:** `AutocompleteDXField.xaml` Step 2 shell, with all bindings, `SubmitIconVisibility=Never`, the OnSurfaceVariant/Error X colours + `HasError` DataTrigger, End icon `close_outlined`, `x:Static` RequestDelay/CharacterCountThreshold, and the item template. All of it matched plan Step 2. I made one comment clarification (the colour trigger is the only trigger). The first implementor's IL findings 1–5 are kept and applied (below).
+- **Replaced:** `AutocompleteDXField.xaml.cs` had only the constructor stub, so Steps 3–6 were written fresh.
+- **Added to XAML:** the five event attributes (Step 5).
+
+### Changed files
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml` (new)
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml.cs` (new)
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md` (this section)
+
+### DX API verification
+Context7 and the devexpress-maui MCP were unavailable (ENOTFOUND) this session. I verified via `ilspycmd` decompiling `~/.nuget/packages/devexpress.maui.editors/25.2.4/lib/net10.0-android35.0/DevExpress.Maui.Editors.dll` and via `findings.md` § Environment (the Context7 results recorded at T1a). I re-checked these myself on resume: `ItemsRequestEventArgs` {`Text`, `CancellationToken`, `Func<IEnumerable> Request`, `Func<Task<IEnumerable>> RequestAsync`}; `AsyncItemsSourceProvider.RaiseCreateAsyncItemsSourceRequest` (falls back to `eventArgs.Request()` when `RequestAsync` is null); `RequestItem.Run` (async void, no try/catch, drops the result when the token is cancelled); `SearchTimerCallback` (timer thread); `EditBase.Focus()` (keyboard only if `!IsReadOnly`); `SendClearIconClicked` (`HandledEventHandler`, System.ComponentModel); `SendEndIconClicked`.
+
+**Decompiled-DLL findings, T4 checkpoint (applied; they override the plan's Step 5 snippet):**
+1. The no-request branch assigns `RequestAsync = NoOptions` (returns `null`), because an unassigned delegate makes DX throw an NRE. `.xaml.cs:309, 322`
+2. `RequestAsync` is a non-generic `Func<Task<IEnumerable>>`, so the delegate returns `options`/`null` instead of `[]`. It catches `OperationCanceledException` → `null` (allowed try-catch pattern 1). `.xaml.cs:326-350`
+3. `ItemsRequested` runs on a timer thread, so `IsDropDownOpen = false` goes through `Dispatcher.Dispatch` (`CloseMenuOnUiThread`). `.xaml.cs:323, 340, 418`
+4. `ClearIconClicked` fires before DX clears the text, so `ClearCommand` is dispatched. `.xaml.cs:408`
+5. `SelectionChanged` fires after `SelectedItem` is set. The option is captured before the lock. `.xaml.cs:359-360`
+
+### Review Focus 1–5
+| # | Where enforced |
+|---|----------------|
+| 1 Stale in-flight results after a pick | `OnItemsRequested`: `token.ThrowIfCancellationRequested()` `.xaml.cs:335`, then a `ShouldRequestOptions(CurrentMode, …)` re-check `.xaml.cs:338`. If false → `null` + menu closed. |
+| 2 `SelectedItem = null` re-entrancy | `OnSelectionChanged`: `RoutePick(null)` → `None` → return `.xaml.cs:360-362`. No second `SelectCommand`, no lock flip. |
+| 3 X order on a locked field | `OnEndIconClicked`: `Text = ""` → `IsLocked = false` → `ApplyMode()` (inner `IsReadOnly = false`) → `ClearCommand` → `FocusEditor()` `.xaml.cs:393-397` |
+| 4 Hydration in either order | `ApplyMode()` runs from the `propertyChanged` of `Text` `.xaml.cs:55`, `IsLocked` `:72` and `IsReadOnly` `:89` |
+| 5 HasError/SupportingText while locked | `ApplySupportingText()` runs from the `SupportingText` `:106` and `HasError` `:139` callbacks → `editor.HelpText` `:301`. The X-colour DataTrigger on `HasError` sets both `ClearIconColor` and `EndIconColor` (`.xaml:33-40`). |
+
+### Invariants (design § 7)
+- **INV-1** (Locked ⇒ no input, menu closed, no search): `ApplyMode` Locked branch (`editor.IsReadOnly = true`, `IsDropDownOpen = false`) + `OnItemsRequested` gate.
+- **INV-1a** (never locked while empty): `CurrentMode` → `AutocompleteDXFieldLogic.Mode`.
+- **INV-1b** (IsReadOnly wins): `ApplyMode` ReadOnly branch; `Mode` puts read-only first; `ShouldRequestOptions`/`ShouldForwardBlur` gate on the mode.
+- **INV-2** (X visible ⇔ text non-empty and not read-only; never disabled): `ApplyMode`. Editable uses `ClearIconVisibility=Auto`; Locked uses the End icon via `ShowClearIcon`; ReadOnly hides both. The colour is never the disabled style.
+- **INV-3** (SelectedItem null after a pick): `OnSelectionChanged` + the `ApplyMode` Locked branch.
+- **INV-4** (search off ⇒ no calls): `OnItemsRequested` → `ShouldRequestOptions(…, IsSearchEnabled, …)`.
+- **INV-5** (no page glue): the component owns all five DX handlers. The page side is T6.
+
+### Verification evidence
+- Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` → **0 Erro(s), 27 Aviso(s)**, none from `AutocompleteDX*` (NU190x advisories + DX licence). I built after each step: Step 3/4/6, the `.xaml.cs` handlers, the `.xaml` event attributes, and a final build.
+- Tests: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` → **Failed 0, Passed 679, Total 679** (single run; no BUG-076 re-run needed).
+- **Level-C no-test decision:** XAML + DX event adapters with no branching logic of their own. Every decision delegates to `AutocompleteDXFieldLogic`, which is pinned at Level A by T3. There are no new tests, per plan T4.
+- Post-edit re-read: both files re-read after each edit (handler/attribute line numbers above).
+
+### AC traceability matrix
+| AC | Criterion | Implementation | Test / proof |
+|----|-----------|----------------|--------------|
+| REQ-ACF-01 | Pick locks the text | `OnSelectionChanged` + `ApplyMode` Locked | T3 `LockAfterPick`/`RoutePick` tests; T7 device |
+| REQ-ACF-02 | Programmatic lock = picked | `ApplyMode` from the `IsLocked`/`Text` callbacks | T3 `Mode` tests; T7 |
+| REQ-ACF-04 | Picked: no menu, no search | `ApplyMode` Locked; `OnItemsRequested` gate | T3 `ShouldRequestOptions`; T7 |
+| REQ-ACF-05a | Locked+empty = editable | `CurrentMode` | T3 `Mode` tests |
+| REQ-ACF-06 | X on locked → empty, unlocked, focused | `OnEndIconClicked` | Code review (RF3); T7 |
+| REQ-ACF-07/08 | X visible with value; enabled colours | `ApplyMode`; XAML colours + trigger | T3 `ShowClearIcon`; T7 |
+| REQ-ACF-09 | X on unlocked | `OnClearIconClicked` | T7 |
+| REQ-ACF-10 | No submit icon | `.xaml:24` | T7 |
+| REQ-ACF-11a–h | Component owns the glue | 5 handlers, `ApplyMode`, template, constants | Code review; T6 census |
+| REQ-ACF-12a/12b | Search off / read-only | `OnItemsRequested`, `ApplyMode` ReadOnly | T3 tests; T7 |
+| REQ-ACF-12c | Supporting text vs error | `ApplySupportingText` | T3 `BottomSupportingText`; T7 |
+| REQ-ACF-13/14 | Trimmed threshold, shared debounce | `x:Static` constants + `ShouldRequestOptions` | T2/T3 tests |
+| REQ-ACF-19 | Never writes Text on blur | `OnUnfocused` (forwards only) | Code review |
+| REQ-ACF-22/26 | Options = this query's result; latest wins | `OnItemsRequested` delegate | Code review (RF1); T5 VM test; T7 |
+
+### Design concern (for review, not acted on)
+- The XAML sets `ClearIconColor`/`EndIconColor` as local values and the `HasError` DataTrigger overrides them. MAUI's setter specificity ranks Trigger above a manual value, so this should hold, but it is unverified on device. T7 line 10 checks it.
+
+### Build notes
+Build: passed (0 errors) | Tests: 679 passed, 0 failed | Commit: the head of branch `task/acf-t4-component` (not pushed, per the briefing)
 
 ## T6
 
