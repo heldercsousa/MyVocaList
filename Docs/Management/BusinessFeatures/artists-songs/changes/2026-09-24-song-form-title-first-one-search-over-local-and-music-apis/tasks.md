@@ -18,8 +18,8 @@
 
 ## Phase 0 — Gates (not tasks of this item)
 
-- [ ] **G1: BUG-082 fixed and merged** — music API providers re-registered in DI, bypassing the typed `HttpClient` (`Docs/Management/BusinessFeatures/artists-songs/bugs/2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient/`). Blocks 4.1–4.3, 6.1 and every E2E step that needs Deezer.
-- [ ] **G2: Shared Field `AutocompleteDXField` merged** (`DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/tasks.md`, all tasks through its on-device gate), with `SupportingText` (REQ-ACF-12c) and `IsSearchEnabled` (`IsReadOnly` exists but is unused here), and the append capability if accepted (Q16; `design.md` § 3.4). Blocks Phase 5 and 6.2–6.3.
+- [x] **G1: BUG-082 fixed and merged** — music API providers re-registered in DI, bypassing the typed `HttpClient` (`Docs/Management/BusinessFeatures/artists-songs/bugs/2026-09-25-BUG-082-music-api-providers-re-registered-in-di-bypassing-typed-httpclient/`). Blocks 4.1–4.3, 6.1 and every E2E step that needs Deezer.
+- [x] **G2: Shared Field `AutocompleteDXField` merged** (`DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/tasks.md`, all tasks through its on-device gate), with `SupportingText` (REQ-ACF-12c) and `IsSearchEnabled` (`IsReadOnly` exists but is unused here), and the append capability if accepted (Q16; `design.md` § 3.4). Blocks Phase 5 and 6.2–6.3.
 - [ ] **G3: Migration and `SongService` coordination agreed.** CATALOG-PROP (`changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/`) writes `SongService.cs` and adds a backfill migration; BUG-080's fix for `20260211055225_venuesSeedForTest` may add a Venues-only migration (harmless: it rebuilds neither Songs nor Artists). Whichever merges second **regenerates its migration against the merged model snapshot**. Blocks 3.1, 3.2a and 3.6b.
 - [ ] **G4: Helder's answers** to the open questions (`requirements.md` § Open questions). Q1, Q8, Q11 block Phases 3–4; Q4 blocks 3.10; Q10 blocks 6.2; Q16 blocks 5.2; the rest block Phase 5.
 - [ ] **G5: FTS5 trigram spike on Android** (time-box 1 h, throwaway code, no production files). On the device, through the app's own SQLite connection: `SELECT sqlite_compileoption_used('ENABLE_FTS5')` returns 1, and `CREATE VIRTUAL TABLE t USING fts5(x, tokenize='trigram remove_diacritics 1')` succeeds and matches "nao" to "Não". Record the output in `findings.md`. **If either fails: stop and escalate to Helder**; the named fallback is the token-prefix pool + `RankScore` rerank (`design.md` § 6.1), which removes M3 and changes 3.8, 3.9, 3.9b, 3.9c. Blocks 3.8.
@@ -43,7 +43,7 @@
   - **Demo:** Admin opens New Artist and sees no "Search music database" row.
   - **Review lane:** Standard
 
-- [ ] **1.3 Unregister both picker pages** [SEQUENTIAL — after 1.1, 1.2]
+- [x] **1.3 Unregister both picker pages** [SEQUENTIAL — after 1.1, 1.2]
   - **Produces:** no routes, Shell registrations or DI entries for either picker.
   - **Consumes:** 1.1, 1.2.
   - **Risk:** Low.
@@ -51,25 +51,25 @@
   - **Demo:** App builds and runs; Songs and Artists forms open normally.
   - **Review lane:** Standard
 
-- [ ] **1.4 Delete the Song picker** [P with 1.5 — after 1.3]
+- [x] **1.4 Delete the Song picker** [P with 1.5 — after 1.3]
   - **Files owned:** `MyVocaList/UI/Pages/Songs/SongPickerPage.xaml`, `SongPickerPage.xaml.cs`, `MyVocaList/UI/ViewModels/SongPickerViewModel.cs`, `Contracts/Messages/SongPickedMessage.cs`, `MyVocaList.Tests/Unit/ViewModels/SongPickerViewModelTests.cs`
   - **Produces / Consumes:** deletions / 1.3. **Risk:** Low. **Tests:** delete all 12 (AC-SONG-*, REQ-SFT-44).
   - **Demo:** census (Python `os.walk`) finds no `SongPicker`/`SongPickedMessage` reference; build 0 errors.
   - **Review lane:** Standard
 
-- [ ] **1.5 Delete the Artist picker** [P with 1.4 — after 1.3]
+- [x] **1.5 Delete the Artist picker** [P with 1.4 — after 1.3]
   - **Files owned:** `MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml`, `ArtistPickerPage.xaml.cs`, `MyVocaList/UI/ViewModels/ArtistPickerViewModel.cs`, `Contracts/Messages/ArtistPickedMessage.cs`, `MyVocaList.Tests/Unit/ViewModels/ArtistPickerViewModelTests.cs`
   - **Produces / Consumes:** deletions / 1.3. **Risk:** Low. **Tests:** delete all (AC-ART-*, REQ-SFT-44).
   - **Demo:** census finds no `ArtistPicker`/`ArtistPickedMessage` reference; build 0 errors.
   - **Review lane:** Standard
 
-- [ ] **1.6 Delete `IMusicMetadataService`** [SEQUENTIAL — after 1.4, 1.5]
+- [x] **1.6 Delete `IMusicMetadataService`** [SEQUENTIAL — after 1.4, 1.5]
   - **Files owned:** `Services/IMusicMetadataService.cs`, `Services/MusicMetadataService.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs`
   - **Risk:** Low — census must show zero remaining consumers first.
   - **Demo:** build 0 errors; `AppServicesRegistrationTests` green.
   - **Review lane:** Standard
 
-- [ ] **1.7 Remove inline artist create** [SEQUENTIAL — after 1.1]
+- [x] **1.7 Remove inline artist create** [SEQUENTIAL — after 1.1]
   - **Produces:** no `CreateArtistInlineCommand`, no create sentinel; blur keeps text and sets **no** error (REQ-SFT-17).
   - **Files owned:** `SongFormViewModel.cs`, `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs`, `SongFormViewModelTests.cs`
   - **Risk:** Medium — the Save guard still requires a picked artist until 5.3; unpicked text is blocked at Save in the meantime (acceptable interim, not shipped).
