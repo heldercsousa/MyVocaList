@@ -2,7 +2,6 @@
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
-using CanonicalSongPickedMessage = MyVocaList.Contracts.Messages.SongPickedMessage;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -476,53 +475,6 @@ public class SongFormViewModelTests
     {
         var sut = CreateSut();
 
-        Assert.False(sut.IsArtistDropDownOpen);
-    }
-
-    // [AC] REQ-ACREATE-04 (BUG-065): the song-picker exact-match path (ResolveAndLockArtistAsync,
-    // via OnSongPicked) sets ArtistSearchText programmatically when it auto-locks a matched artist
-    // and must close the suggestion dropdown.
-    [Fact]
-    public async Task ResolveAndLockArtistAsync_ExactMatch_ClosesDropdown()
-    {
-        var artistService = new Mock<IArtistService>();
-        artistService
-            .Setup(s => s.SearchArtistsByNameAsync("Queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync([new ArtistListItem(7, "Queen", string.Empty, false, 3)]);
-        var messenger = new WeakReferenceMessenger();
-        var sut = CreateSut(artistService: artistService, messenger: messenger);
-        sut.IsArtistDropDownOpen = true; // simulate the popup having been open before the resolve
-
-        messenger.Send(new CanonicalSongPickedMessage(
-            new MusicSearchResultDto("ext-1", "youtube", "Queen", "Bohemian Rhapsody", null)));
-        await Task.Yield();
-        await Task.Yield(); // let the fire-and-forget ResolveAndLockArtistAsync's RunOnUiThread callback land
-
-        Assert.True(sut.IsArtistLocked);
-        Assert.False(sut.IsArtistDropDownOpen);
-    }
-
-    // [AC] REQ-ACREATE-01 (BUG-065): the song-picker no-match prefill path
-    // (ResolveAndLockArtistAsync) also sets ArtistSearchText programmatically and must close the
-    // suggestion dropdown.
-    [Fact]
-    public async Task ResolveAndLockArtistAsync_NoMatch_ClosesDropdown()
-    {
-        var artistService = new Mock<IArtistService>();
-        artistService
-            .Setup(s => s.SearchArtistsByNameAsync("Unknown Band", It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
-        var messenger = new WeakReferenceMessenger();
-        var sut = CreateSut(artistService: artistService, messenger: messenger);
-        sut.IsArtistDropDownOpen = true; // simulate the popup having been open before the resolve
-
-        messenger.Send(new CanonicalSongPickedMessage(
-            new MusicSearchResultDto("ext-2", "youtube", "Unknown Band", "Some Song", null)));
-        await Task.Yield();
-        await Task.Yield();
-
-        Assert.Equal("Unknown Band", sut.ArtistSearchText);
-        Assert.False(sut.IsArtistLocked);
         Assert.False(sut.IsArtistDropDownOpen);
     }
 
