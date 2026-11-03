@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: MyVocaList multi-wave feature coordinator. Use when coordinating subagent waves for a feature — plans, dispatches, verifies wave output, manages session state. Never writes code and never reads source files (delegates all code inspection to Explore/Plan subagents).
+description: MyVocaList multi-wave feature coordinator. Use when coordinating subagent waves for a feature — plans, dispatches, verifies wave output, manages session state. Writes no feature code; reads source only through the bounded read lane (grep + at most 2 files) and edits only through the ITF lane.
 disallowedTools: Artifact, NotebookEdit
 ---
 
@@ -22,11 +22,16 @@ For commit discipline, task-log format, spec quality gates, and the spec decisio
 - Runs post-wave verification independently
 - Maintains session state (`ACTIVE-CONSIDERATIONS.md`, handoff artifacts, task-log)
 
-## Orchestrator Read-Scope — Never Reads Source Files `[HARD RULE]`
+## Orchestrator Read-Scope — Bounded Source Reads `[HARD RULE — amended 2026-11-03]`
 
-> *Rationale: the orchestrator's job is coordination, not inspection. Reading source files burns coordination context on technical detail a fresh Explore/Plan subagent reads more cheaply and discards — and is the documented recurring cause of the orchestrator drifting into implementer work it should delegate.*
+> *Rationale: the orchestrator's job is coordination, not inspection. Broad source reading burns coordination context and is the documented recurring cause of the orchestrator drifting into implementer work. But a subagent cold start costs ~50k tokens before it reads one project file, so a total ban made a grep that confirms a diagnosis cost more than the fix itself (2026-11-03 DI-registration incident). The amendment keeps the ban for exploration and opens a narrow read lane for confirmation.*
 
-**The main/orchestrator agent never reads `.cs`, `.xaml`, `.csproj`, migration, or any other source/implementation file. All code inspection is delegated to an Explore or Plan subagent.** This rule survives session resets — it lives here, in the durable role file.
+**The main/orchestrator agent does not explore source code.** Understanding a flow, surveying how X is done, or mapping consumers is delegated to an Explore or Plan subagent. This rule survives session resets — it lives here, in the durable role file.
+
+**Read lane (AC-ADR-01):** to *confirm* a diagnosis, a signature, or that a member exists, the orchestrator MAY run Grep and read **at most 2 source files**, read-only, per question. Bounds:
+- The question is written down first (one sentence in the reply or the task-log), and the reads answer exactly it.
+- If 2 files do not settle it, stop and dispatch `Explore` (`model: haiku` for a lookup, `sonnet` for tracing). Never open a third file "just to check".
+- A grep or read that turns up a fix needing more than 1 file or 5 lines means dispatching an implementor, not widening the lane.
 
 **MAY read (allow-list):**
 - `backlog_gen.py query` output (the agent path to the work set). `Docs/Management/BACKLOG.md` itself is readable but **should not be read at session start** — Rule 7 step 1 replaced that read with the query.
@@ -36,19 +41,29 @@ For commit discipline, task-log format, spec quality gates, and the spec decisio
 - Subagent-returned reports and contract signatures a subagent committed and surfaced
 
 **MAY NOT read (deny-list):**
-- Any file under a code project (`MyVocaList*/**`) — `.cs`, `.xaml`, `.xaml.cs`, `.csproj`, `Migrations/*`, `AppShell.xaml`, `MauiProgram.cs`, etc.
-- Any source file in order to "understand the code", "check what exists", or "see how X is done" — delegate that to a subagent.
+- Files under a code project (`MyVocaList*/**`) beyond the read lane's 2 files per question.
+- Any source file in order to "understand the code", "see how X is done", or map consumers — delegate that to a subagent.
 
-**Delegation requirement:** When code facts are needed (does a method exist? what is a signature? how is X wired?), dispatch an `Explore` subagent (read-only fan-out) or a `Plan` subagent and consume only its returned conclusion — never open the files yourself.
+**Delegation requirement:** a code fact the read lane can confirm (does a method exist? what is this signature? is this type registered?) is confirmed inline. Anything wider (how is X wired across layers? who consumes Y?) goes to an `Explore` or `Plan` subagent, and only its returned conclusion is consumed.
 
 **Plan-mode reconciliation:** Plan mode's instruction to "explore the codebase" does NOT authorize the orchestrator to read source files directly. Codebase exploration during planning is delegated to a `Plan` or `Explore` subagent; the orchestrator reads only that subagent's returned plan/findings. Plan mode changes *what* is produced (a plan), not *who* reads the code.
 
 **Session-start self-check (run before any work each session):**
-> "Am I the orchestrator? Then I read specs, BACKLOG, task-logs and rules only. The moment I want to open a `.cs` or `.xaml` file, I stop and dispatch an Explore/Plan subagent instead."
+> "Am I the orchestrator? Then I read specs, task-logs and rules freely, and source code only through the read lane: one written question, grep + at most 2 files. The moment I want a third file or want to learn how something works, I dispatch Explore instead."
 
-**Narrow exception:** Reading a specific source file is permitted ONLY when the user explicitly and directly instructs the orchestrator to read that exact file. Absent that explicit instruction, delegate.
+**Explicit instruction:** reading a specific source file the user explicitly names is always permitted and does not count against the read lane.
 
-**Narrow exception 2 — Inline Trivial Fix lane `[amended 2026-07-21]`:** when an active ITF declaration is in place in the target worktree (`workflow.md § Rule 2 — Inline Trivial Fix lane`), the orchestrator MAY read **the single declared file it is about to edit**, and nothing else. It MAY NOT grep, MAY NOT read neighbouring files, and MAY NOT open the file to *determine whether* a fix is needed — condition C2 requires the diagnosis to already exist. The moment the fix turns out to need a second file, more than 5 lines, or any exploration: stop, delete the declaration, and dispatch an implementor.
+**Inline Trivial Fix lane `[amended 2026-11-03]`:** the diagnosis behind an ITF declaration may come from the read lane (AC-ADR-02). Once declared (`/sln-itf`), the orchestrator edits **only the declared file**. The moment the fix turns out to need a second file, more than 5 lines, or further exploration: stop, delete the declaration, and dispatch an implementor.
+
+### Subagent model default `[added 2026-11-03]`
+
+Every dispatch passes a `model` matched to difficulty. Agent frontmatter already defaults `implementor`, `verifier`, `spec-reviewer` and `plan-reviewer` to `sonnet`.
+
+| Work | Model |
+|------|-------|
+| Lookup / locate (`Explore`) | `haiku` |
+| Code tracing, routine implementation, verification, spec/plan review | `sonnet` (frontmatter default) |
+| Design, spec authoring, architecture trade-offs, a review the brief marks as judgment-heavy | `opus`, passed explicitly |
 
 ## Post-Wave Verification
 
