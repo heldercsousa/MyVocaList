@@ -254,6 +254,12 @@ public class NestedUnitOfWorkTests
         public Task<IReadOnlyList<Song>> GetByTitlesCollatedAsync(IEnumerable<string> titles, CancellationToken ct = default)
             => _inner.GetByTitlesCollatedAsync(titles, ct);
 
+        public Task<int?> FindIdByTitleVersionForArtistAsync(int artistId, string title, string version, int? excludeId, CancellationToken ct)
+            => _inner.FindIdByTitleVersionForArtistAsync(artistId, title, version, excludeId, ct);
+
+        public Task<bool> ExistsByExternalIdentityAsync(string provider, string externalId, int? excludeId, CancellationToken ct)
+            => _inner.ExistsByExternalIdentityAsync(provider, externalId, excludeId, ct);
+
         public Task AddAsync(Song song, CancellationToken ct)
             => throw new InvalidOperationException("injected");
 
