@@ -26,7 +26,7 @@
 
 ## Phase 1 — Removal of picker entry points and inline create (UI, outside-in)
 
-- [~] **1.1 Remove the Song-picker entry from the Song form** [SEQUENTIAL]
+- [x] **1.1 Remove the Song-picker entry from the Song form** [SEQUENTIAL]
   - **Produces:** `SongFormPage` without the "Search music database" row; `SongFormViewModel` without `NavigateToSongPickerCommand`, `OnSongPicked`, `ResolveAndLockArtistAsync`, the messenger registration.
   - **Consumes:** nothing.
   - **Risk:** Low — dead path (providers never worked, findings § 0.1).
@@ -35,7 +35,7 @@
   - **Demo:** Admin opens New Song and sees no "Search music database" row.
   - **Review lane:** Standard
 
-- [~] **1.2 Remove the Artist-picker entry from the Artist form** [P with 1.1]
+- [x] **1.2 Remove the Artist-picker entry from the Artist form** (REQ-SFT-44) [P with 1.1]
   - **Produces:** `ArtistFormPage` without the row; `ArtistFormViewModel` without `NavigateToArtistPickerCommand` and its message handling.
   - **Consumes:** nothing.
   - **Risk:** Low.
@@ -79,7 +79,7 @@
 
 ## Phase 2 — Domain + Infra additions and fixes
 
-- [~] **2.1 Song lookup queries for duplicates and identity** [P with 2.2]
+- [x] **2.1 Song lookup queries for duplicates and identity** [P with 2.2]
   - **Produces:** `ISongRepository.FindIdByTitleVersionForArtistAsync`, `ExistsByExternalIdentityAsync` + implementations.
   - **Consumes:** nothing.
   - **Risk:** Medium — collation must be DB-side (`EF.Functions.Collate`), no C# re-filter.
