@@ -16,15 +16,48 @@ _(not started)_
 
 ## 1.1
 
-### Checkpoint
+**Status:** To Review
+**Worktree:** `.worktrees/sft-1.1` (branch `task/sft-1.1-song-picker-entry`)
 
-_(not started)_
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` — removed the "Search music database" `ListItem` row
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — removed `NavigateToSongPickerCommand`, `OnSongPicked`, `ResolveAndLockArtistAsync`, the `SongPickedMessage` registration, and the `NavigateToSongPickerAsync` method
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — removed the two tests covering the removed picker-resolve path (`ResolveAndLockArtistAsync_ExactMatch_ClosesDropdown`, `ResolveAndLockArtistAsync_NoMatch_ClosesDropdown`)
+
+Verified no remaining references to `NavigateToSongPickerCommand`, `OnSongPicked`, or `ResolveAndLockArtistAsync` anywhere in `MyVocaList/` or `MyVocaList.Tests/`.
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|-----------------|--------------|
+| REQ-SFT-44 | Song form has no Song-picker entry row or navigation command | `SongFormPage.xaml`, `SongFormViewModel.cs` | Demo-verified (no automated UI test for XAML absence); covering VM tests for the removed path deleted |
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` — 0 errors, 27 warnings (pre-existing NU1902/NU1903 advisories, unrelated).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` — 677/677 passed.
+- Commit: `ec16fda3`.
+- gates pre-authorised by Helder 2026-09-25
 
 ## 1.2
 
-### Checkpoint
+**Status:** To Review
+**Worktree:** `.worktrees/sft-1.2` (branch `task/sft-1.2-artist-picker-entry`)
 
-_(not started)_
+### Changed files:
+- `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml` — removed the "Search music database" `ListItem` row
+- `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` — removed `NavigateToArtistPickerCommand`, `NavigateToArtistPickerAsync`, the `ArtistPickedMessage` registration
+
+Census: no Artist-form VM test file referenced the removed command/message — no test file changes required. `ArtistPickerViewModel.cs` and `ArtistPickerViewModelTests.cs` left untouched (unused but not deleted, per Helder's instruction).
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|-----------------|--------------|
+| (task 1.2, no dedicated REQ-SFT ID cited in tasks.md) | Artist form has no Artist-picker entry row or navigation command | `ArtistFormPage.xaml`, `ArtistFormViewModel.cs` | Demo-verified (no automated UI test for XAML absence) |
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` — 0 errors, 27 warnings (pre-existing NU1902/NU1903 advisories, unrelated).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` — 679/679 passed.
+- Commit: `a54d7257`.
+- gates pre-authorised by Helder 2026-09-25
 
 ## 1.3
 
@@ -58,9 +91,31 @@ _(not started)_
 
 ## 2.1
 
-### Checkpoint
+**Status:** To Review
+**Worktree:** `.worktrees/sft-2.1` (branch `task/sft-2.1-song-lookups`)
 
-_(not started)_
+### Changed files:
+- `Domain/RepositoryInterface/ISongRepository.cs` — added `FindIdByTitleVersionForArtistAsync`, `ExistsByExternalIdentityAsync`
+- `Infra/Repository/SongRepository.cs` — implementations using `EF.Functions.Collate` (DB collation, no C#-side normalization)
+- `MyVocaList.Tests/Integration/UnitOfWork/NestedUnitOfWorkTests.cs` — test-double decorator updated to delegate the two new interface members to `_inner`
+- `MyVocaList.Tests/Integration/Repositories/SongRepositoryTests.cs` (Red, prior commit `ad534180`)
+
+### Deviation note
+`NestedUnitOfWorkTests.cs`'s in-file fake repository required the two new interface members to compile. The fix delegates both to `_inner` (pass-through) — a mechanical compile fix, not a behavior or assertion change. No assertion was weakened or removed.
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|-----------------|--------------|
+| REQ-SFT-42 | Collated (artist, title, version) match ignores accent difference | `SongRepository.FindIdByTitleVersionForArtistAsync` | `SongRepositoryTests` (3 tests, see below) |
+| REQ-SFT-29 | Version mismatch is not a match; excluding the edited row yields no match | `SongRepository.FindIdByTitleVersionForArtistAsync` | `SongRepositoryTests` (2 tests) |
+| REQ-SFT-26 | External identity uniqueness check, with exclude | `SongRepository.ExistsByExternalIdentityAsync` | `SongRepositoryTests` (3 tests) |
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` — 0 errors, 27 warnings (pre-existing NU1902/NU1903 advisories, unrelated).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` — 684 passed, 1 failed (full suite). The one failure (`SongKaraokeUrlRepositoryTests.GetBySongIdAsync_AfterAdd_ReturnsUrl`, `ObjectDisposedException` on SQLite handle) is an unrelated flaky SQLite-disposal race, not in scope for this task.
+- `dotnet test --filter "FullyQualifiedName~SongRepositoryTests"` — 27/27 passed (all tests touched by this task, including the 8 `[AC]`-tagged new tests).
+- Commit: `45d0e4a8` (Green, in worktree `.worktrees/sft-2.1`); Red at `ad534180`.
+- gates pre-authorised by Helder 2026-09-25
 
 ## 2.2
 
