@@ -201,6 +201,57 @@ class TestItfBounds(ItfGuardTestBase):
         self.assertEqual(self.run_guard(target, EDIT_3_LINES), 2)
 
 
+class TestSoleWriterSoftSet(ItfGuardTestBase):
+    """C5 split: soft set relaxes on sole_writer: true; hard set never does."""
+
+    SOFT = ("MyVocaList/MauiProgram.cs",
+            "MyVocaList.Services/GlobalUsings.cs",
+            "Directory.Build.props")
+    HARD = ("MyVocaList.Infra/AppDbContext.cs",
+            "Docs/Management/x/tasks.md",
+            "MyVocaList.Infra/Migrations/20260407190608_PersonConfigFixes.cs")
+
+    def _rc(self, rel, **overrides):
+        target = _touch(self.root, rel)
+        _declare(self.root, rel, **overrides)
+        return self.run_guard(target, EDIT_3_LINES)
+
+    # [AC] AC-ADR-03: soft-set file + sole_writer true + within C1 -> permitted
+    def test_soft_set_with_sole_writer_is_permitted(self):
+        for rel in self.SOFT:
+            with self.subTest(rel=rel):
+                self.assertEqual(self._rc(rel, sole_writer=True), 0)
+
+    # [AC] AC-ADR-03: sole_writer does not lift C1 — 9 lines still blocks
+    def test_soft_set_with_sole_writer_still_capped_by_c1(self):
+        target = _touch(self.root, "MyVocaList/MauiProgram.cs")
+        _declare(self.root, "MyVocaList/MauiProgram.cs", sole_writer=True)
+        self.assertEqual(self.run_guard(target, _many_lines(9)), 2)
+
+    # [AC] AC-ADR-04: soft-set file without a boolean-true sole_writer -> block C5
+    def test_soft_set_without_boolean_true_blocks(self):
+        for value in (None, False, "true", 1):
+            with self.subTest(sole_writer=value):
+                kwargs = {} if value is None else {"sole_writer": value}
+                self.assertEqual(self._rc("MyVocaList/MauiProgram.cs", **kwargs), 2)
+
+    # [AC] AC-ADR-04: the block message still names C5
+    def test_soft_set_block_names_c5(self):
+        target = _touch(self.root, "MyVocaList/MauiProgram.cs")
+        _declare(self.root, "MyVocaList/MauiProgram.cs")
+        buf = io.StringIO()
+        with contextlib.redirect_stderr(buf):
+            self.run_guard(target, EDIT_3_LINES)
+        self.assertIn("C5", buf.getvalue())
+        self.assertIn("sole_writer", buf.getvalue())
+
+    # [AC] AC-ADR-05: hard-set files block even with sole_writer true
+    def test_hard_set_ignores_sole_writer(self):
+        for rel in self.HARD:
+            with self.subTest(rel=rel):
+                self.assertEqual(self._rc(rel, sole_writer=True), 2)
+
+
 class TestBlockMessages(ItfGuardTestBase):
     """Every block must name its condition ID and point at a rules file."""
 

@@ -66,15 +66,22 @@ _ITF_GOVERNED_COMPONENTS = {
 
 # C5 -- sequential-only file registry. KEEP IN SYNC WITH
 # `.claude/rules/workflow.md` Rule 2 § Sequential-only file registry.
-_ITF_SEQUENTIAL_FILES = {
+# Split 2026-11-03 (AC-ADR-03..05): the SOFT set is ITF-eligible when the
+# declaration asserts `"sole_writer": true` (no other live writer — checked by
+# the orchestrator, see `/sln-itf`); the HARD set (plus any `Migrations/` file)
+# never is. AppShell.xaml(.cs) stay listed here although C3 already blocks them.
+_ITF_SEQUENTIAL_SOFT = {
     "MauiProgram.cs",
+    "GlobalUsings.cs",
+    "Directory.Build.props",
+}
+_ITF_SEQUENTIAL_HARD = {
     "AppShell.xaml",
     "AppShell.xaml.cs",
     "AppDbContext.cs",
-    "GlobalUsings.cs",
-    "Directory.Build.props",
     "tasks.md",
 }
+_ITF_SEQUENTIAL_FILES = _ITF_SEQUENTIAL_SOFT | _ITF_SEQUENTIAL_HARD
 
 
 def _branch_guard(file_path: str) -> int:
@@ -244,12 +251,22 @@ def _itf_guard(file_path: str, tool_input: dict) -> int:
                 f"per-consumer risk assessment, Helder approval).",
                 "`.claude/rules/component-change-governance.md`")
 
-        if name in _ITF_SEQUENTIAL_FILES or name.endswith("Migration.cs") \
-                or "/Migrations/" in target_abs:
+        hard = name in _ITF_SEQUENTIAL_HARD or name.endswith("Migration.cs") \
+            or "/Migrations/" in target_abs
+        if hard:
             return _itf_block(
                 "C5 (no sequential-only registry files)", file_path,
-                f"`{name}` is in the sequential-only file registry.",
+                f"`{name}` is in the hard sequential-only set; `sole_writer` "
+                f"does not apply to it.",
                 "`.claude/rules/workflow.md` Rule 2 § Sequential-only file registry")
+        # Strict identity check: only the JSON boolean true relaxes the soft set.
+        if name in _ITF_SEQUENTIAL_SOFT and marker.get("sole_writer") is not True:
+            return _itf_block(
+                "C5 (no sequential-only registry files)", file_path,
+                f"`{name}` is sequential-only; it is ITF-eligible only when the "
+                f"declaration sets `\"sole_writer\": true` after the sole-writer "
+                f"check.",
+                "`.claude/commands/sln-itf.md` step 2")
 
         lines = _changed_lines(tool_input)
         if lines > _ITF_MAX_LINES:

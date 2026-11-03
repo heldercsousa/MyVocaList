@@ -1,12 +1,12 @@
 ---
 id: recalibrate-agent-dispatch-settings-orchestrator-read-ban-and-subagent-for-trivia
 title: Recalibrate agent-dispatch settings — orchestrator read-ban and subagent-for-trivia
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-08-18
 section: DevCycleCraft
 parent: inline-trivial-fix
 goal: "Agent-dispatch settings over-trigger: the orchestrator is barred from reading any source file, and tiny tasks spawn fresh subagents that reload full context they never use."
-gate: "Helder asked 2026-11-03 to do this right after the title-first pipeline: stop spawning subagents for one-line fixes."
+gate: Amendment applied 2026-11-03 and awaiting Helder's review of the rules diff before the amend commit. Done once the first live /sln-itf fix runs end to end without a dispatch.
 kind: change
 ---
 
@@ -47,3 +47,31 @@ two inconsistent thresholds.
 ## Second observation (Helder, 2026-11-03)
 
 A spike page crashed on device because it was never registered in DI. Diagnosis was complete from the stack trace and the fix was one registration line, yet the orchestrator spawned an implementor (about 50k tokens to start) because the read-ban plus "all coding by subagents" left no other lane. MauiProgram.cs being sequential-only also excludes it from ITF. Helder stopped the agent: "We need to stop spawning subagents to do things so simple ... update the internal settings to avoid spawning for situations like that." Inputs for the calibration pass: (1) allow inline one-line fixes on throwaway spike branches; (2) reconsider excluding sequential-only files from ITF when no other writer is live; (3) let the orchestrator grep/read a single source file to confirm a diagnosis.
+
+## Automation-recommender pass (2026-11-03)
+
+Run before deciding, at Helder's request. Findings that bear on this item:
+
+- **Hooks pushed toward dispatch on every turn.** The `UserPromptSubmit` gate (`settings.local.json`)
+  matched almost any prompt and injected "the main agent does shell only and never writes code",
+  which overrode the ITF lane in practice; it also cited the retired `/project:commit`. The `.cs`-edit
+  reminder fired even inside a declared ITF edit, and the `PostCompact` reminder restated the ban.
+- **No agent declared `model:`**, so every implementor and reviewer ran on Opus (open task from the
+  2026-07-23 model-routing feedback).
+- **Cold-start cost.** About 60 KB of always-loaded instructions (`CLAUDE.md`, `.claude/rules/*`,
+  global + memory index), roughly 15k tokens, load before skills, the system prompt and the
+  SessionStart preamble, consistent with the ~50k observed start. Not measured per dispatch.
+- **`type: agent` hooks on `TaskCreated` / `TaskCompleted`** start an agent per task event and run
+  `git add -A && commit && push`. Out of scope here; registered as its own item.
+- Nothing useful under MCP servers or plugins.
+
+## Decisions (Helder, 2026-11-03)
+
+| Question | Decision |
+|----------|----------|
+| Read side | **Read lane:** grep + at most 2 source files per written question, read-only, to confirm a diagnosis/signature/member. Wider questions go to Explore. Prose-enforced. |
+| C5 | **Soft/hard split.** `MauiProgram.cs`, `GlobalUsings.cs`, `Directory.Build.props` are ITF-eligible with `"sole_writer": true` after the sole-writer check; `AppShell`, `AppDbContext.cs`, `tasks.md`, `Migrations/` never. Guard 3 enforces it. |
+| Spike branches | Already task branches under C7; stated explicitly. |
+| Extras | Hooks reworded and the `.cs` reminder made ITF-aware · `model: sonnet` on implementor/verifier/reviewers + a difficulty→model table in `orchestrator.md` · `/sln-itf` command · agent-hook item registered separately. |
+
+Acceptance criteria: `requirements.md`.

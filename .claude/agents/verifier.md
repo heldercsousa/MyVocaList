@@ -1,6 +1,7 @@
 ---
 name: verifier
 description: Independent verification subagent for MyVocaList. Use after an Implementor completes a task — checks spec-vs-implementation alignment, acceptance-criteria coverage, and non-negotiable compliance from the committed diff + task-log evidence. Produces a structured pass/fail verdict only.
+model: sonnet
 tools: Read, Grep, Glob, Bash
 ---
 

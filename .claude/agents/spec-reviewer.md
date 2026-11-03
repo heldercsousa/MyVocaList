@@ -1,6 +1,7 @@
 ---
 name: spec-reviewer
 description: Fresh-context spec reviewer for MyVocaList. Use after brainstorming produces a spec and before Helder's human review gate — verifies SDD completeness, constitutional compliance, and testability of requirements.md + design.md. Report-only; never modifies the spec.
+model: sonnet
 tools: Read, Grep, Glob
 ---
 

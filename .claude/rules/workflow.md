@@ -62,14 +62,14 @@ A **spike** is a time-boxed exploration producing `findings.md`, not production 
 
 **All coding is done by subagents. The main agent handles shell-only steps** (`dotnet build`/`test`, `dotnet ef`, `git`, reading the spec before briefing).
 
-> **Orchestrator never reads source files `[HARD RULE]`:** the main/orchestrator agent must not read `.cs`, `.xaml`, or any other source file — all code inspection (including plan-mode exploration) is delegated to an Explore/Plan subagent. Allow/deny list + session-start self-check: `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
+> **Orchestrator read-scope `[HARD RULE — amended 2026-11-03]`:** the main/orchestrator agent does not explore source code — understanding flows, surveys and consumer maps (including plan-mode exploration) go to an Explore/Plan subagent. **Read lane:** to *confirm* a diagnosis, signature or member, it may grep + read **at most 2 source files** per written question; past that, dispatch Explore. Bounds + session-start self-check: `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
 
-### Inline Trivial Fix (ITF) lane `[amended 2026-07-21]` (never-miss summary)
+### Inline Trivial Fix (ITF) lane `[amended 2026-11-03]` (never-miss summary)
 
-**Narrow, opt-in exception to "all coding is done by subagents"** — the orchestrator only; implementor subagents are never constrained by ITF bounds.
+**Narrow, opt-in exception to "all coding is done by subagents"** — the orchestrator only; implementor subagents are never constrained by ITF bounds. **A fix that qualifies goes through ITF — dispatching an implementor for it is the wrong lane, not the safe one.**
 
-- **Nine conditions (C0–C8), all of them, or dispatch an implementor.** There is no partial qualification. In shape: 1 file / ≤ 5 lines, fully diagnosed before the file is opened, not `.xaml`, not a governed component, not sequential-only, severity ≤ Major with no mandatory regression test, in a worktree on a task branch, green build + tests.
-- **Opt-in is explicit:** write `<worktree>/.itf-active` (worktree root, never repo root) + one `ITF:` line in `task-log.md` BEFORE editing; delete the marker as the final step of the ITF commit.
+- **Nine conditions (C0–C8), all of them, or dispatch an implementor.** There is no partial qualification. In shape: 1 file / ≤ 5 lines, fully diagnosed (the read lane may be used for this), not `.xaml`, not a governed component, not hard sequential-only (`MauiProgram.cs` / `GlobalUsings.cs` / `Directory.Build.props` qualify once the sole-writer check passes), severity ≤ Major with no mandatory regression test, in a worktree on a task branch (spike branches included), green build + tests.
+- **Run it with `/sln-itf`**, which writes `<worktree>/.itf-active` (worktree root, never repo root) + one `ITF:` line in `task-log.md` BEFORE editing, and deletes the marker as the final step of the ITF commit.
 - **Without a declaration the lane is inert** and ordinary Rule 2 applies. Once declared, C1/C3/C4/C5 are hook-enforced (`constitutional-guard.py` Guard 3) and cannot be exceeded.
 - **Commit trailer (required):** `Lane: ITF (N files, N lines)`.
 
@@ -88,7 +88,7 @@ Task sizing table, wave rules, exit checklist detail, post-wave verification: `w
 
 ### Sequential-only file registry
 
-These files must never have concurrent writers (parallel edits produce conflicts/duplicate errors): `MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, any file under a `Migrations/` folder, any `GlobalUsings.cs`, `Directory.Build.props`, any spec `tasks.md`. Rationale per file + how to add entries: `workflow-rule-2.md § Sequential-only file registry`.
+These files must never have concurrent writers (parallel edits produce conflicts/duplicate errors): `MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, any file under a `Migrations/` folder, any `GlobalUsings.cs`, `Directory.Build.props`, any spec `tasks.md`. Rationale per file, the ITF soft/hard split, and how to add entries: `workflow-rule-2.md § Sequential-only file registry`.
 
 ---
 
