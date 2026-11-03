@@ -369,4 +369,96 @@ public class SongRepositoryTests : IAsyncLifetime
         var found = await _repo.GetByTitlesCollatedAsync(["Ghost Song"]);
         Assert.Empty(found);
     }
+
+    // ── Lookups (SFT) ──────────────────────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-SFT-42: collated (artist, title, version) match ignores accent difference
+    public async Task FindIdByTitleVersionForArtistAsync_AccentOnlyDifference_ReturnsStoredId()
+    {
+        var artist = await SeedArtistAsync("Ana Carolina");
+        var song = MakeSong(artist.Id, "Não Sei");
+        _db.Set<Song>().Add(song);
+        await _db.SaveChangesAsync();
+
+        var found = await _repo.FindIdByTitleVersionForArtistAsync(
+            artist.Id, "Nao Sei", "", null, CancellationToken.None);
+
+        Assert.Equal(song.Id, found);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-29: a different version label is not a match
+    public async Task FindIdByTitleVersionForArtistAsync_DifferentVersion_ReturnsNull()
+    {
+        var artist = await SeedArtistAsync("Radiohead");
+        var song = MakeSong(artist.Id, "Creep");
+        song.Version = "Live";
+        _db.Set<Song>().Add(song);
+        await _db.SaveChangesAsync();
+
+        var found = await _repo.FindIdByTitleVersionForArtistAsync(
+            artist.Id, "Creep", "Acoustic", null, CancellationToken.None);
+
+        Assert.Null(found);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-29: excluding the only matching row (the song being edited) yields no match
+    public async Task FindIdByTitleVersionForArtistAsync_ExcludeSelf_ReturnsNull()
+    {
+        var artist = await SeedArtistAsync("The Who");
+        var song = MakeSong(artist.Id, "My Generation");
+        _db.Set<Song>().Add(song);
+        await _db.SaveChangesAsync();
+
+        var found = await _repo.FindIdByTitleVersionForArtistAsync(
+            artist.Id, "My Generation", "", song.Id, CancellationToken.None);
+
+        Assert.Null(found);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-26: another song already holds this external identity
+    public async Task ExistsByExternalIdentityAsync_HeldByAnotherSong_ReturnsTrue()
+    {
+        var artist = await SeedArtistAsync("Deezer Artist");
+        var song = MakeSong(artist.Id, "Deezer Song");
+        song.ExternalProvider = "Deezer";
+        song.ExternalId = "3135556";
+        _db.Set<Song>().Add(song);
+        await _db.SaveChangesAsync();
+
+        var result = await _repo.ExistsByExternalIdentityAsync(
+            "Deezer", "3135556", null, CancellationToken.None);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-26: excluding the holder itself means the identity is not held by another song
+    public async Task ExistsByExternalIdentityAsync_HeldOnlyBySelf_ReturnsFalse()
+    {
+        var artist = await SeedArtistAsync("Deezer Artist");
+        var song = MakeSong(artist.Id, "Deezer Song");
+        song.ExternalProvider = "Deezer";
+        song.ExternalId = "3135556";
+        _db.Set<Song>().Add(song);
+        await _db.SaveChangesAsync();
+
+        var result = await _repo.ExistsByExternalIdentityAsync(
+            "Deezer", "3135556", song.Id, CancellationToken.None);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-26: an unknown external identity is not held by any song
+    public async Task ExistsByExternalIdentityAsync_Unknown_ReturnsFalse()
+    {
+        var result = await _repo.ExistsByExternalIdentityAsync(
+            "Deezer", "unknown-id", null, CancellationToken.None);
+
+        Assert.False(result);
+    }
 }
