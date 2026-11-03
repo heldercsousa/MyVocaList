@@ -61,33 +61,137 @@ Census: no Artist-form VM test file referenced the removed command/message — n
 
 ## 1.3
 
-### Checkpoint
+**Status:** To Review
+**Worktree:** `.worktrees/sft-w2` (branch `task/sft-w2-picker-teardown`)
 
-_(not started)_
+### Changed files:
+- `MyVocaList/Navigation/Routes.cs` — removed `ArtistPicker`/`SongPicker` route constants
+- `MyVocaList/AppShell.xaml.cs` — removed both `Routing.RegisterRoute` lines
+- `MyVocaList/MauiProgram.cs` — removed `ArtistPickerViewModel`/`SongPickerViewModel`/`ArtistPickerPage`/`SongPickerPage` DI registrations
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|-----------------|--------------|
+| REQ-SFT-44 | Neither picker has a route, Shell registration, or DI entry | `Routes.cs`, `AppShell.xaml.cs`, `MauiProgram.cs` | Demo-verified (no automated test for route/DI absence); census below |
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` — 0 errors, 33 warnings (pre-existing NU1902/NU1903 advisories, unrelated).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` — 683/683 passed.
+- Census `Routes\.(SongPicker|ArtistPicker)` — zero hits in `.cs`/`.xaml` (only doc files under `Docs/` reference the retired names).
+- Commit: `11cb7d19`.
+- gates pre-authorised by Helder 2026-09-25
 
 ## 1.4
 
-### Checkpoint
+**Status:** To Review
+**Worktree:** `.worktrees/sft-w2` (branch `task/sft-w2-picker-teardown`)
 
-_(not started)_
+### Changed files (deleted):
+- `MyVocaList/UI/Pages/Songs/SongPickerPage.xaml`
+- `MyVocaList/UI/Pages/Songs/SongPickerPage.xaml.cs`
+- `MyVocaList/UI/ViewModels/SongPickerViewModel.cs`
+- `Contracts/Messages/SongPickedMessage.cs`
+- `MyVocaList.Tests/Unit/ViewModels/SongPickerViewModelTests.cs` (12 tests)
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|-----------------|--------------|
+| REQ-SFT-44 | SongPickerPage, VM, message and tests fully removed | deletions above | Python `os.walk` census (below); full suite |
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` — 0 errors.
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` — 671/671 passed (683 − 12 deleted).
+- Census: Python `os.walk` over all `.cs`/`.xaml` for `SongPicker|SongPickedMessage` → **0 hits**.
+- Commit: `c2367091`.
+- gates pre-authorised by Helder 2026-09-25
 
 ## 1.5
 
-### Checkpoint
+**Status:** To Review
+**Worktree:** `.worktrees/sft-w2` (branch `task/sft-w2-picker-teardown`)
 
-_(not started)_
+### Changed files (deleted):
+- `MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml`
+- `MyVocaList/UI/Pages/Artists/ArtistPickerPage.xaml.cs`
+- `MyVocaList/UI/ViewModels/ArtistPickerViewModel.cs`
+- `Contracts/Messages/ArtistPickedMessage.cs`
+- `MyVocaList.Tests/Unit/ViewModels/ArtistPickerViewModelTests.cs` (11 tests)
+
+`YouTubeSearchPage`/VM/route/row left untouched, as instructed.
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|-----------------|--------------|
+| REQ-SFT-44 | ArtistPickerPage, VM, message and tests fully removed | deletions above | Python `os.walk` census (below); full suite |
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` — 0 errors.
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` — 660/660 passed (671 − 11 deleted).
+- Census: Python `os.walk` over all `.cs`/`.xaml` for `ArtistPicker|ArtistPickedMessage` → **0 hits**.
+- Commit: `dba12eb7`.
+- gates pre-authorised by Helder 2026-09-25
 
 ## 1.6
 
-### Checkpoint
+**Status:** To Review
+**Worktree:** `.worktrees/sft-w2` (branch `task/sft-w2-picker-teardown`)
 
-_(not started)_
+### Changed files:
+- `Services/IMusicMetadataService.cs` — deleted
+- `Services/MusicMetadataService.cs` — deleted
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs` — removed `AddScoped<IMusicMetadataService, MusicMetadataService>()`
+
+Note: the `ServiceCollectionExtensions.cs` edit was made in the same work session but initially left staged uncommitted; it was committed separately as a documented 1.6 follow-up (`fc25520d`) once the gap was found on session resume. No behavior difference — build/tests were already green against the combined change before either commit.
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|-----------------|--------------|
+| REQ-SFT-44 | `IMusicMetadataService`/impl and DI entry fully removed, zero remaining consumers | deletions + DI edit above | Pre-deletion census (below); `AppServicesRegistrationTests`, `UnitOfWorkReadScopeTests.ServicesDirectory_IsFoundAndNonEmpty` |
+
+### Verification evidence
+- **Pre-deletion census** (`IMusicMetadataService|MusicMetadataService` over all `.cs`/`.xaml`): 3 hits, all in the 3 owned files — no external consumer found.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` — 0 errors (both commits).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` — 660/660 passed, including `AppServicesRegistrationTests` and `UnitOfWorkReadScopeTests`.
+- **Post-deletion census** — 0 hits. `Services/` directory count: 32 (≥ 25 required).
+- Commits: `305f493c` (interface/impl deletion), `fc25520d` (DI line, follow-up).
+- gates pre-authorised by Helder 2026-09-25
 
 ## 1.7
 
-### Checkpoint
+**Status:** To Review
+**Worktree:** `.worktrees/sft-w2` (branch `task/sft-w2-picker-teardown`)
+**Model:** Sonnet (single agent, Red first, per plan.md).
 
-_(not started)_
+### Changed files:
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — removed `CreateArtistInlineCommand` (registration + property + `CreateArtistInlineAsync` method); `OnArtistBlurredWithoutSelection` no longer sets `ArtistHasError`/`ArtistErrorText` when text is unmatched (REQ-SFT-17)
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — removed the create-sentinel row append in `OnArtistItemsRequested` and the `IsCreateNew` routing branch in `OnArtistSelectionChanged` (always routes to `SelectArtistCommand` now)
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` — rewrote `ArtistBlurredWithoutSelection_NoPriorSelection_RetainsTextAndSetsError` → `…RetainsTextAndSetsNoError`; deleted `ArtistBlurredWithoutSelection_NoPriorSelection_SetsErrorText`, `CreateArtistInline_Success_LocksCreatedArtistAndClearsError`, `CreateArtistInline_Failure_MapsErrorAndRetainsText`
+
+### Superseded-test mapping
+| Test | Action | Superseded AC → replacing REQ |
+|---|---|---|
+| `ArtistBlurredWithoutSelection_NoPriorSelection_RetainsTextAndSetsError` | rewritten → `…RetainsTextAndSetsNoError` | REQ-ACREATE-03 error clause → REQ-SFT-17 |
+| `ArtistBlurredWithoutSelection_NoPriorSelection_SetsErrorText` | deleted | REQ-ACREATE-03 error clause → REQ-SFT-17 |
+| `CreateArtistInline_Success_LocksCreatedArtistAndClearsError` | deleted | REQ-ACREATE-04/08 → REQ-SFT-45/18/20 |
+| `CreateArtistInline_Failure_MapsErrorAndRetainsText` | deleted | REQ-ACREATE-05 → REQ-SFT-45/18/20 |
+| `ArtistBlurredWithoutSelection_EmptyText_NoErrorNoLock`, `…WithPriorSelection_RestoresName` | kept unchanged | REQ-ACF-17/24 carry-over |
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|-----------------|--------------|
+| REQ-SFT-17 | Blur with unpicked text keeps the text and sets no error | `SongFormViewModel.OnArtistBlurredWithoutSelection` | `ArtistBlurredWithoutSelection_NoPriorSelection_RetainsTextAndSetsNoError` |
+| REQ-SFT-45/18/20 | No inline artist-create path remains in the Song form | removal of `CreateArtistInlineCommand` + sentinel glue | Census (`CreateArtistInline`) → 0 hits in production code |
+
+### TDD evidence (Red → Green)
+- **Red:** rewritten test run alone — failed with `Assert.False() Failure: Expected False, Actual True` (old `ArtistHasError` assignment still present) — confirmed failing for the right reason. Committed test-only, `Lane: RED`, commit `9401ee6e`.
+- **Green:** removed the error assignment, deleted inline-create members/glue/superseded tests; filtered test passes; full suite green. Commit `bec7378f`.
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` — 0 errors (Red commit stage and Green stage both built 0 errors; two transient unrelated-error build outputs during the session were concurrent-build noise, not reproducible on a clean rebuild).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` — 657/657 passed (660 − 3 net: 1 rewritten, 2 deleted). One run showed 2 unrelated Integration/Repository failures (`PersonRepositoryTests.GetPagedAsync_WithQuery_FiltersResults`, `ArtistRepositoryTests.DeleteAsync_ExistingArtist_Removed`) that passed clean on immediate rerun — known-flaky SQLite integration tests per briefing, not caused by this change.
+- Census `CreateArtistInline` → 0 hits in production/test code. Census `"Search and select an artist from the list"` → 1 remaining hit, in `SaveAsync`'s existing guard (`SongFormViewModel.cs`), which is explicitly retained per the task's documented interim risk (Save still requires a picked artist until 5.3) — not a regression of this task's scope.
+- Commits: `9401ee6e` (RED), `bec7378f` (Green).
+- gates pre-authorised by Helder 2026-09-25
 
 ## 2.1
 
