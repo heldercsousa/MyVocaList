@@ -223,7 +223,7 @@ public class SongServiceTests
                      .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(1, "New Title", null, null, true);
+        var (success, message) = await sut.UpdateSongAsync(1, "New Title", null, null);
 
         Assert.True(success);
     }
@@ -235,7 +235,7 @@ public class SongServiceTests
                      .ReturnsAsync((Song)null);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(99, "New Title", null, null, true);
+        var (success, message) = await sut.UpdateSongAsync(99, "New Title", null, null);
 
         Assert.False(success);
         Assert.NotEmpty(message);
@@ -251,7 +251,7 @@ public class SongServiceTests
                      .ReturnsAsync((int?)2);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(1, "Existing Other Title", null, null, true);
+        var (success, message) = await sut.UpdateSongAsync(1, "Existing Other Title", null, null);
 
         Assert.False(success);
         Assert.NotEmpty(message);
@@ -282,7 +282,7 @@ public class SongServiceTests
                      .ReturnsAsync((int?)null);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(2, "Creep", null, null, true, version: "Acoustic");
+        var (success, message) = await sut.UpdateSongAsync(2, "Creep", null, null, version: "Acoustic");
 
         Assert.True(success, message);
     }
@@ -297,7 +297,7 @@ public class SongServiceTests
                      .ReturnsAsync((int?)1);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(2, "Creep", null, null, true, version: "");
+        var (success, message) = await sut.UpdateSongAsync(2, "Creep", null, null, version: "");
 
         Assert.False(success);
         Assert.Equal(DuplicateMessage, message);
@@ -318,7 +318,7 @@ public class SongServiceTests
         var sut = CreateSut();
 
         var (success, message) = await sut.UpdateSongAsync(
-            1, "Creep (Remastered)", null, null, true, externalId: null, externalProvider: null);
+            1, "Creep (Remastered)", null, null, externalId: null, externalProvider: null);
 
         Assert.True(success, message);
         Assert.Equal("Creep (Remastered)", song.Title);
@@ -337,7 +337,7 @@ public class SongServiceTests
                      .ReturnsAsync((int?)5);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(1, "creep", null, null, true);
+        var (success, message) = await sut.UpdateSongAsync(1, "creep", null, null);
 
         Assert.False(success);
         Assert.Equal(DuplicateMessage, message);
@@ -357,7 +357,7 @@ public class SongServiceTests
         var sut = CreateSut();
 
         var (success, message) = await sut.UpdateSongAsync(
-            1, "Creep", null, null, true, externalId: "999", externalProvider: "Deezer");
+            1, "Creep", null, null, externalId: "999", externalProvider: "Deezer");
 
         Assert.False(success);
         Assert.Equal("This music-database song is already in your library", message);
@@ -386,7 +386,7 @@ public class SongServiceTests
         var sut = CreateSutWithArtistService(artistService);
 
         var (success, message) = await sut.UpdateSongAsync(
-            1, "Creep", null, null, true, newArtistName: "New Band");
+            1, "Creep", null, null, newArtistName: "New Band");
 
         Assert.True(success, message);
         Assert.Equal(9, song.ArtistId);
@@ -407,7 +407,7 @@ public class SongServiceTests
         var sut = CreateSutWithArtistService(artistService);
 
         var (success, message) = await sut.UpdateSongAsync(
-            1, "Creep", null, null, true, newArtistName: "Dup");
+            1, "Creep", null, null, newArtistName: "Dup");
 
         Assert.False(success);
         Assert.Equal("Artist already exists", message);
@@ -425,7 +425,7 @@ public class SongServiceTests
         var sut = CreateSut();
 
         var (success, message) = await sut.UpdateSongAsync(
-            1, "Creep", null, null, true, artistId: 2, newArtistName: "New Band");
+            1, "Creep", null, null, artistId: 2, newArtistName: "New Band");
 
         Assert.False(success);
         Assert.Equal("Artist is required", message);
@@ -467,7 +467,7 @@ public class SongServiceTests
                      .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
-        var (success, _) = await sut.UpdateSongAsync(1, "New Title", null, "Updated lyrics", true);
+        var (success, _) = await sut.UpdateSongAsync(1, "New Title", null, "Updated lyrics");
 
         Assert.True(success);
     }
@@ -557,7 +557,7 @@ public class SongServiceTests
         var sut = CreateSut();
 
         var (success, _) = await sut.UpdateSongAsync(
-            1, "New Title", null, null, false,
+            1, "New Title", null, null,
             externalId: "ext-123", externalProvider: "spotify");
 
         Assert.True(success);
@@ -578,7 +578,7 @@ public class SongServiceTests
         var sut = CreateSut();
 
         var (success, _) = await sut.UpdateSongAsync(
-            1, "New Title", null, null, false,
+            1, "New Title", null, null,
             externalId: null, externalProvider: null);
 
         Assert.True(success);
@@ -606,7 +606,7 @@ public class SongServiceTests
                      .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
-        var (success, _) = await sut.UpdateSongAsync(1, "Title", null, null, true, artistId: 2);
+        var (success, _) = await sut.UpdateSongAsync(1, "Title", null, null, artistId: 2);
 
         Assert.True(success);
         Assert.Equal(2, song.ArtistId);
@@ -624,7 +624,7 @@ public class SongServiceTests
                      .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
-        var (success, _) = await sut.UpdateSongAsync(1, "Title", null, null, true, artistId: null);
+        var (success, _) = await sut.UpdateSongAsync(1, "Title", null, null, artistId: null);
 
         Assert.True(success);
         Assert.Equal(7, song.ArtistId);
@@ -641,7 +641,7 @@ public class SongServiceTests
                        .ReturnsAsync((Artist?)null);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(1, "Title", null, null, true, artistId: 99);
+        var (success, message) = await sut.UpdateSongAsync(1, "Title", null, null, artistId: 99);
 
         Assert.False(success);
         Assert.NotEmpty(message);
@@ -663,7 +663,7 @@ public class SongServiceTests
                      .ReturnsAsync((int?)3);
         var sut = CreateSut();
 
-        var (success, message) = await sut.UpdateSongAsync(1, "Title", null, null, true, artistId: 2);
+        var (success, message) = await sut.UpdateSongAsync(1, "Title", null, null, artistId: 2);
 
         Assert.False(success);
         Assert.NotEmpty(message);
@@ -686,7 +686,7 @@ public class SongServiceTests
         var sut = CreateSut();
 
         var (success, _) = await sut.UpdateSongAsync(
-            1, "Title", null, null, true, version: "Acoustic");
+            1, "Title", null, null, version: "Acoustic");
 
         Assert.True(success);
         Assert.Equal("Acoustic", song.Version);
@@ -704,7 +704,7 @@ public class SongServiceTests
                      .Returns(Task.CompletedTask);
         var sut = CreateSut();
 
-        var (success, _) = await sut.UpdateSongAsync(1, "Title", null, null, true, version: null);
+        var (success, _) = await sut.UpdateSongAsync(1, "Title", null, null, version: null);
 
         Assert.True(success);
         Assert.Equal("Live", song.Version);
@@ -717,7 +717,7 @@ public class SongServiceTests
         var sut = CreateSut();
         var version = new string('x', 61);
 
-        var (success, message) = await sut.UpdateSongAsync(1, "Title", null, null, true, version: version);
+        var (success, message) = await sut.UpdateSongAsync(1, "Title", null, null, version: version);
 
         Assert.False(success);
         Assert.NotEmpty(message);

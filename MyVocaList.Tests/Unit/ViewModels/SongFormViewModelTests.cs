@@ -661,11 +661,8 @@ public class SongFormViewModelTests
     }
 
     [Fact]
-    // [AC] BUG-024/BUG-008: an API-imported song (ExternalId set, no manual edits) locks the
-    // artist field in edit mode — the full rule is applicable only now that hydration loads
-    // the entity (previously the flag was derived from a never-populated stash and was
-    // always false).
-    public async Task LoadSongForEdit_ApiImportedWithoutManualEdits_LocksArtistField()
+    // [AC] REQ-SFT-28: the stored artist loads in the picked state
+    public async Task LoadSongForEdit_ApiImportedSong_LocksArtistField()
     {
         var song = new Song
         {
@@ -673,8 +670,7 @@ public class SongFormViewModelTests
             ArtistId = 1,
             Title = "Stored Title",
             ExternalId = "dz-99",
-            ExternalProvider = "Deezer",
-            HasManualEdits = false
+            ExternalProvider = "Deezer"
         };
         var songService = MakeSongServiceWithSong(song);
         var secureStorage = new Mock<ISecureStorageWrapper>();
@@ -708,7 +704,7 @@ public class SongFormViewModelTests
         var songService = MakeSongServiceWithSong(song);
         songService.Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
         var secureStorage = new Mock<ISecureStorageWrapper>();
@@ -728,7 +724,7 @@ public class SongFormViewModelTests
         await sut.SaveCommand.ExecuteAsync(null);
 
         songService.Verify(s => s.UpdateSongAsync(
-            42, "Stored Title", "Feat A", "Stored lyrics", true,
+            42, "Stored Title", "Feat A", "Stored lyrics",
             null, null, "Acoustic",
             It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -750,7 +746,7 @@ public class SongFormViewModelTests
         var songService = MakeSongServiceWithSong(song);
         songService.Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
         var secureStorage = new Mock<ISecureStorageWrapper>();
@@ -772,7 +768,7 @@ public class SongFormViewModelTests
         await sut.SaveCommand.ExecuteAsync(null);
 
         songService.Verify(s => s.UpdateSongAsync(
-            42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(), true,
+            42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(),
             It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
             9, It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -1160,7 +1156,7 @@ public class SongFormViewModelTests
         var songService = MakeSongServiceWithSong(song);
         songService.Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
+                It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
         var secureStorage = new Mock<ISecureStorageWrapper>();
@@ -1178,7 +1174,7 @@ public class SongFormViewModelTests
 
         Assert.False(sut.ArtistHasError);
         songService.Verify(s => s.UpdateSongAsync(
-            42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(), true,
+            42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(),
             It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
             It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
