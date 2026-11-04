@@ -968,8 +968,13 @@ _(not started)_
 ## 4.1a
 
 ### Checkpoint
+Branch task/sft-4.1a-deezer-plain-query. Step 1 of 2 done (Red). Now: Green (DeezerProvider, MusicProviderException, DTO Version, interface doc).
+Context manifest: Services/DeezerProvider.cs, Services/IMusicMetadataProvider.cs, Services/MusicProviderException.cs, Contracts/DTOs/MusicSearchResultDto.cs, MyVocaList.Tests/Unit/Services/DeezerProviderTests.cs.
+Inherited: clean worktree, nothing half-done.
 
-_(not started)_
+### Red output (verbatim CS lines)
+DeezerProviderTests.cs(129,35), (145,31), (164,37): error CS1061: MusicSearchResultDto has no definition for "Version"
+DeezerProviderTests.cs(94,43): error CS0246: type "MusicProviderException" not found
 
 ## 4.1b
 
