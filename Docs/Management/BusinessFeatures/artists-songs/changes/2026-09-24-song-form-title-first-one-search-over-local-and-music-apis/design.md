@@ -562,7 +562,7 @@ has no picker reference (checked).
 
 ## 11. Other key decisions
 
-### Decision: MusicBrainz (Q1; recommendation, not decided)
+### Decision: MusicBrainz (Q1; decided — drop, Helder 2026-11-04)
 **Recommended approach:** drop MusicBrainz from every Field search and delete the provider.
 **Alternatives considered:** keep it behind Deezer as a fallback when Deezer returns nothing.
 **Reversibility:** Easily reversible (re-register a class kept in git history).
