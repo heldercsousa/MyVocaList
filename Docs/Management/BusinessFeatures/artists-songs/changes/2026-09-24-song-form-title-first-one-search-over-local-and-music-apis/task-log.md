@@ -459,6 +459,11 @@ SongFormViewModelTests.cs(47,19): error CS1061: 'SongFormViewModel' does not con
 - Candidate-row button relabelled "Open existing" (was "Select") and bound to `OpenExistingSongCommand`, so tapping a fuzzy-candidate row also opens that song (REQ-SFT-23 direction); the Save flow itself is replaced in 5.3.
 - Requested spec note: tasks.md 5.1 Files owned should list `SongFormPage.xaml.cs`; the `MergeFieldRow` file did not exist separately (nested class).
 
+### Verifier + merge (orchestrator, 2026-11-04)
+- Verifier: **PASS** — 0 blockers, 0 warnings; census re-run (Python) zero hits; deviations (a) `SongFormPage.xaml.cs` edit and (b) single build for VM+XAML+code-behind judged acceptable; worktree 668/668.
+- Merged into develop `f687e72d` (`--no-ff`). Post-merge on develop: build `0 Erro(s)`; `Aprovado! – Com falha: 0, Aprovado: 668, Total: 668`.
+- Open: on-device check of the resolution sheet → Open existing navigation (Helder's 7.2 gate).
+
 ## 5.2
 
 ### Checkpoint

@@ -269,7 +269,7 @@
 
 ## Phase 5 — UI (Song form) [after G2; one XAML file per task, build between]
 
-- [ ] **5.1 VM: resolution sheet → Open existing; merge sheet removed** [SEQUENTIAL]
+- [x] **5.1 VM: resolution sheet → Open existing; merge sheet removed** [SEQUENTIAL]
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`, `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (merge sheet deleted, labels), `MergeFieldRow` file (delete; census)
   - **Consumes:** `INavigationService`. **Risk:** Medium.
   - **Tests (A, Red first):** Open existing navigates `../song-form?songId=N`; delete `:707` (AC-4.2).
@@ -277,6 +277,7 @@
   - **Review lane:** Elevated
   - *Note:* runs before 3.3 (it removes the last `CommitAsync` caller). Its Save-flow code is replaced again in 5.3.
   > **Spec updated 2026-09-26:** (D2) runs before G2: it consumes no component surface. (D13) also owns `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` (adds `services.AddSingleton(Mock.Of<INavigationService>());` to the SongFormViewModel graph test; Level C).
+  > **Spec updated 2026-11-04:** also owned `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (merge-sheet sync/handlers removed; the page did not compile otherwise). VM + XAML + code-behind were built together because the merge sheet's compiled bindings broke the one-file-then-build order (Verifier: acceptable). Merged `f687e72d` 2026-11-04; Verifier PASS; develop 668/668.
 
 - [ ] **5.2 VM: title search, picks, online-search note** [SEQUENTIAL — after 4.3, 5.1, G4 Q16]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, pending Helder's approval):** `TitleSupportingText` maps `Status` to the two approved notes (REQ-SFT-06); a remote pick sets Version from Deezer (REQ-SFT-12); remote option supporting text "artist · version · Deezer" (REQ-SFT-04); +4 tests.
