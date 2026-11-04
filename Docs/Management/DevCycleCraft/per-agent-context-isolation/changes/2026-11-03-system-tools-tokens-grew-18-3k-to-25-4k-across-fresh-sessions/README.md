@@ -24,6 +24,7 @@ The always-loaded System tools block grew about 7k between sessions on 2026-11-0
 | Fresh #3 (after plugin disable) | 25.4k | 2.8k | 0.5k | 49.0k |
 | Fresh #4 (baseline, no change; sqlite down) | 26.1k (+28.2k deferred) | 2.8k | 0.5k | 62.6k* |
 | Fresh #5 (2026-11-04, sqlite up after BUG-083 pin) | 25.4k (+28.2k deferred) | 2.8k | 0.5k | 49k |
+| Fresh #6 — lever 1: `deny: ["Artifact"]` (`settings.local.json`; Helder OK 2026-11-04) | _pending_ | | | |
 
 \* Total includes 14.9k Messages (measured mid-session). Deferred line is back in #4 → hypothesis "deferred vanished" not confirmed;
 #3's output may just have omitted it. Always-on extras in #4: Claude Docs MCP (3 tools loaded + 1.5k MCP instructions incl. Docs).
