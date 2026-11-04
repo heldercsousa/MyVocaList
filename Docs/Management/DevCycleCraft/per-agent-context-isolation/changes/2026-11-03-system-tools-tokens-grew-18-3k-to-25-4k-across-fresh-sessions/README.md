@@ -32,8 +32,8 @@ The always-loaded System tools block grew about 7k between sessions on 2026-11-0
 | Item | Finding |
 |---|---|
 | Root cause | `Artifact` built-in tool schema (~11k), always loaded; not used in this project |
-| Lever kept | `permissions.deny: ["Artifact"]` in `.claude/settings.local.json` — **gitignored, local-only**; re-apply on a new machine |
-| Revert | delete the `deny` entry |
+| Lever kept | `"Artifact"` in `permissions.deny` of tracked `.claude/settings.json` — applies to every clone (moved from gitignored `settings.local.json` 2026-11-04, Helder) |
+| Revert | delete the `"Artifact"` deny entry |
 | Not applied | Bash/PowerShell shell lever — 14k is already below the 18.3k start-of-day; a shell deny risks the rtk Bash hook |
 | Residual | built-in `artifact-*` skills still listed (~390 tokens); left as-is |
 
