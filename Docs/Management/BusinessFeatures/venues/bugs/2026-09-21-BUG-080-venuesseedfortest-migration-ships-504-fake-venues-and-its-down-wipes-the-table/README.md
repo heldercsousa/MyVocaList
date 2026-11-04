@@ -1,13 +1,14 @@
 ---
 id: BUG-080
 title: venuesSeedForTest migration ships ~504 fake venues and its Down wipes the table
-status: 🟡 In Progress
+status: ✅ Fixed
 severity: Major
 target: 2026-09-21
 section: BusinessFeatures
 parent: venues
 goal: A test-data seed migration sits in the production chain, so real installs get ~504 fake venues, and its Down() runs an unscoped DELETE FROM Venues that would destroy genuine user data on rollback.
 gate: "Decided 2026-11-04: guard the seed with #if DEBUG so Release builds insert nothing, and make Down() a no-op; no new migration (G3-safe)."
+closed: 2026-11
 kind: bug
 ---
 
@@ -128,3 +129,38 @@ testing. He suggested compiler directives and left the pragmatic choice open. Ch
   venue in place; the `#if DEBUG` split is verified by inspection + a Release build, documented here.
 - The broader "seed / empty data on demand for dev and QA" idea is registered separately as a post-MVP
   item: `cross-cutting/large-volume-data-stress-test/changes/2026-11-04-dev-and-qa-data-tooling-seed-and-empty-app-data-on-demand/`.
+
+## Fix (2026-11-04)
+
+Implemented the Decision above. `Up()` wraps the seed in `#if DEBUG`; `Down()` is a no-op. No new
+migration, no snapshot or `.Designer.cs` change.
+
+### Changed files
+- `Infra/Migrations/20260211055225_venuesSeedForTest.cs` (modified)
+- `MyVocaList.Tests/Integration/Migrations/VenuesSeedMigrationDownTests.cs` (new)
+- this README (body only)
+
+### Verification evidence
+- **`DEBUG` reaches Infra:** `Infra/MyVocaList.Infra.csproj` and `Directory.Build.props` set no `DefineConstants`;
+  the SDK defines `DEBUG` per project for `Configuration=Debug`. Confirmed empirically below.
+- **Regression test** `VenuesSeedMigrationDownTests.Down_DoesNotDeleteUserVenues` (real SQLite temp file via
+  `TestDbContextFactory`; `IMigrator.MigrateAsync` up to `20260211055225_venuesSeedForTest`, insert a user
+  venue, migrate down to `20260107193224_InitialCreate`, assert the venue survives).
+  - Red (commit 2f59a4fb), against `migrationBuilder.Sql("DELETE FROM Venues")`:
+    `Assert.Equal() Failure: Values differ / Expected: 1 / Actual:   0` (`VenuesSeedMigrationDownTests.cs:line 35`)
+  - Green: `Aprovado! - Com falha: 0, Aprovado: 1, Ignorado: 0, Total: 1`
+- **Full suite:** `Com falha: 0, Aprovado: 669, Ignorado: 0, Total: 669` (baseline 668, +1 new test).
+- **Builds:** Infra Debug and Release `0 Erro(s)`; Android `-c Debug`: `27 Aviso(s) 0 Erro(s)`;
+  Android `-c Release`: `131 Aviso(s) 0 Erro(s)` (no signing failure).
+- **`#if DEBUG` split, by IL inspection** of `Infra/bin/{Debug,Release}/net10.0/MyVocaList.Infra.dll`
+  (System.Reflection.Metadata probe, type `venuesSeedForTest`):
+
+  | Config | `Up` IL bytes | `Down` IL bytes | UTF-16 `INSERT INTO Venues` | `DELETE FROM Venues` | `Café Central` |
+  |--------|---------------|-----------------|-----------------------------|----------------------|----------------|
+  | Debug | 1187 | 2 | present | absent | present |
+  | Release | 1 | 1 | absent | absent | absent |
+
+  Release `Up()` is a bare `ret` with no seed strings in the assembly.
+
+### Known limit (accepted)
+A Debug build installed over a device's real data still seeds the fake venues once. Dev only.

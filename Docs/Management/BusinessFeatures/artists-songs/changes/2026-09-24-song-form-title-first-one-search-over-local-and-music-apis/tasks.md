@@ -117,7 +117,7 @@
   - **Demo:** editing a song into a new Version of an existing title saves.
   - **Review lane:** Elevated
 
-- [ ] **3.3 Simplify `SongResolutionService`** [SEQUENTIAL — after 3.1, 5.1]
+- [x] **3.3 Simplify `SongResolutionService`** [SEQUENTIAL — after 3.1, 5.1]
   - **Produces:** `ResolveAsync` only; exact match via `FindIdByTitleVersionForArtistAsync` (REQ-SFT-42); no `FieldDiffs`/`TargetHasManualEdits`/`ApplyUpdate`/`CommitAsync`.
   - **Files owned:** `Domain/ServicesInterfaces/ISongResolutionService.cs`, `Services/SongResolutionService.cs`, `Domain/Resolution/ResolutionResults.cs`, `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs`, `MyVocaList.Tests/Integration/UnitOfWork/NestedUnitOfWorkTests.cs` (delete, after 3.1 ported 4 tests; `:195` deleted with REQ-UOW-09 / AC-3.4 mapping)
   - **Risk:** Medium. **Tests:** REQ-SFT-42 regression Red first; deletions per `design.md` § 10.1.
@@ -126,6 +126,7 @@
   > **Spec updated 2026-09-26:** (D4) 3.3 keeps the `SongResolution` record shape (passes `FieldDiffs: []`, `TargetHasManualEdits: false`); `ResolutionResults.cs` moves to new task 3.3b. Runs after 5.1 (precondition census: no `CommitAsync(` in `SongFormViewModel.cs`).
 
 - [ ] **3.3b Shrink `SongResolution`; delete `FieldDiff`** [SEQUENTIAL — after 3.3] *(new, plan § 0.3 D4)*
+  > **Spec updated 2026-11-04:** 3.3 merged (`c59c61d1`, Verifier PASS) and left `SongResolutionService`'s `_songRepository`, `_artistResolution`, `_songService` fields unused (constructor unchanged). 3.3b already owns the constructor (`SongResolutionService.cs` "constructors"): drop those three parameters too, updating `SongResolutionServiceTests` `CreateSut` (DI is container-resolved; confirm `AppServicesRegistrationTests` stays green). 3.3b also waits for 3.2a's merge — both write `SongResolutionServiceTests.cs`/`SongFormViewModelTests.cs`.
   - **Produces:** `public sealed record SongResolution(ResolutionKind Kind, int? ExactMatchSongId, IReadOnlyList<SongMatch> FuzzyCandidates);` no `FieldDiff`.
   - **Consumes:** 3.3.
   - **Risk:** Low — mechanical.

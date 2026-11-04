@@ -465,6 +465,10 @@ BUG-067 navigation-detach block (`song.OriginalArtist = null`) untouched.
 
 _(not started)_
 
+### Verifier + merge (orchestrator, 2026-11-04)
+- Verifier **PASS** (0 blockers/warnings). Red reason `Expected ExactLocalMatch / Actual NoMatch` judged valid (same cause as the plan's id assert). Census `NestedUnitOfWorkTests`: 7 hits, all `//`/`///` provenance comments, no code reference — meets the zero-code-reference intent. Info: three unused constructor fields → folded into 3.3b (tasks.md note).
+- Merged `c59c61d1`. Post-merge develop: `0 Erro(s)`; `Aprovado! – Com falha: 0, Aprovado: 666, Total: 666` (678 − 12).
+
 ## 3.3b
 
 ### Checkpoint
@@ -690,3 +694,38 @@ _(not started)_
 
 _(not started)_
 
+
+## 3.3
+**Status:** To Review. **Branch:** task/sft-3.3-song-resolution. Context7 not used (no new library API; `FindIdByTitleVersionForArtistAsync` already in repo, 3.1/2.x). Inherited: nothing.
+
+Red (`--no-verify`, `Lane: RED`), verbatim: `Assert.Equal() Failure: Values differ / Expected: ExactLocalMatch / Actual: NoMatch` (SongResolutionServiceTests.cs:183; today the unmocked `ExistsByTitleVersionForArtistAsync` returns false so the Kind assert trips before the id assert).
+
+Green: `ResolveAsync` exact-local path now one `FindIdByTitleVersionForArtistAsync(artistId, title, version, null, ct)`; `CommitAsync`, `ApplyUpdate`, `ComputeFieldDiffs`, `ResolveOrCreateArtistIdAsync`, `MergeableFields` deleted; interface keeps only `ResolveAsync`; `SongResolution` constructed with `FieldDiffs: []`, `TargetHasManualEdits: false` (ResolutionResults.cs untouched, 3.3b). Constructor left unchanged (fields now unused; removal is a DI/test-wide change out of scope).
+
+### Superseded tests
+| Test (original file:line) | Action | Superseded AC -> replacing REQ |
+|---|---|---|
+| SongResolutionServiceTests:100 ExternalIdHitWithManualEdits_PopulatesFieldDiffs | deleted | AC-4.2 -> REQ-SFT-38 |
+| :271 ExternalMatch_FieldDiffsRestrictedToMergeableSet | deleted | AC-4.2 -> REQ-SFT-38 |
+| :312, :327 CommitAsync_CreateNewVersion_* | deleted | CommitAsync removed; AC-1.2 covered by SongFormViewModelTests:265 |
+| :343, :389 CommitAsync_UpdateExisting_* | deleted | AC-4.1/4.2 -> REQ-SFT-24 |
+| :435 CommitAsync_AttachExternalId_* | deleted | AC-2.2 -> REQ-SFT-05 |
+| :481 CommitAsync_CreateNew_ResolvesArtistThenCreatesSong | deleted | AC-2.5 -> REQ-SFT-18 (3.1 tests) |
+| :70 ExternalIdHit, :140 ExactLocalHit (HasManualEdits initialisers, FieldDiffs/TargetHasManualEdits asserts) | edited | REQ-SFT-37 |
+| :140 ExactLocalHit mock, :47/:208/:238/:172 mocks | edited mechanically: `ExistsByTitleVersionForArtistAsync` -> `FindIdByTitleVersionForArtistAsync` (null / 5) | REQ-SFT-42 |
+| NestedUnitOfWorkTests.cs (whole file, 5 tests :22,:66,:105,:146,:195) | file deleted | :22/:146 ported in 3.1 (REQ-UOW-22 re-homed); :66/:105 rewritten in 3.1 (REQ-SFT-18); :195 REQ-UOW-09 removed / AC-3.4 -> REQ-SFT-40 |
+
+### AC matrix
+| AC | Criterion | Implementation | Test |
+|---|---|---|---|
+| REQ-SFT-42 | accent-only title difference -> exact match with stored id | SongResolutionService.ResolveAsync step 2 | ResolveAsync_AccentOnlyTitleDifference_ReturnsExactLocalMatchWithId |
+
+### Changed files:
+- `Domain/ServicesInterfaces/ISongResolutionService.cs`
+- `Services/SongResolutionService.cs`
+- `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs`
+- `MyVocaList.Tests/Integration/UnitOfWork/NestedUnitOfWorkTests.cs` (deleted)
+- this task-log section
+
+### Verification evidence
+Build (android, -m:1): 0 Erro(s). Full suite: `Failed: 0, Passed: 665, Total: 665` (baseline 677 + 1 new - 8 deleted SongResolution tests - 5 deleted Nested tests = 665). Census `ApplyUpdate` / `CommitAsync(` / `NestedUnitOfWorkTests`: ApplyUpdate zero; CommitAsync( only in IArtistResolutionService.cs, ArtistResolutionService.cs, ArtistResolutionServiceTests.cs, UnitOfWork.cs; `NestedUnitOfWorkTests` has NOT-zero hits, all provenance COMMENTS in files not owned by 3.3 (Bug068RegressionTests.cs:112, SongServiceNewArtistUnitOfWorkTests.cs:12,23,41,60,77,99); no code references. SongFormViewModel.cs `CommitAsync(`: zero.
