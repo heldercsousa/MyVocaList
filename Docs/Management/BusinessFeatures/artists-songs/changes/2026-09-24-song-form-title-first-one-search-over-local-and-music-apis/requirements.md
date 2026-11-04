@@ -172,7 +172,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   Then:
   - **Title** = Deezer's `title_short` (the title without its version suffix); if `title_short` is
     missing or empty, Deezer's full `title`.
-  - **Version** = Deezer's `title_version`, normalised: trim, then remove the outer brackets **only when** the value starts with `(` or `[` and that bracket's **matching** closer is the value's last character; trim again; otherwise keep it as is (`"(Live)"` → `"Live"`,
+  - **Version** = Deezer's `title_version`, normalised: trim, then remove the outer brackets **only when** the value starts with `(` or `[` and that bracket's **matching** closer is the value's last character; trim again; otherwise keep it as is ("matching" counts nesting depth of the same bracket type only; the other type is ignored, so `"(Live [2011])"` → `"Live [2011]"`) (`"(Live)"` → `"Live"`,
     `"[Remastered 2011]"` → `"Remastered 2011"`, `"Live at Wembley"` unchanged, `"(Live) (2011)"` unchanged
     because the first `(` closes before the end, `"(Live]"` unchanged, missing or empty → `""`). `[Proposed — confirm: the bracket stripping (Q17)]` Version is **overwritten** by the
     pick, including with `""` (the pick defines the song's identity). `[Proposed — confirm: overwrite
