@@ -20,6 +20,7 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ISongKaraokeUrlService _karaokeUrlService;
     private readonly ISecureStorageWrapper _secureStorage;
     private readonly IMessenger _messenger;
+    private readonly INavigationService _navigationService;
     private int _searchGeneration; // BUG-051: generation counter — guards SearchArtistsAsync against stale completions
 
     // ── Query properties ──────────────────────────────────────────────────
@@ -80,17 +81,11 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isResolutionSheetVisible;
     [ObservableProperty] private string _resolutionSheetTitle = "This looks like an existing song";
     [ObservableProperty] private IReadOnlyList<SongMatch> _resolutionCandidates = [];
-    [ObservableProperty] private int? _selectedResolutionTargetId;
     [ObservableProperty] private bool _isSaveAsNewVersionMode;
     [ObservableProperty] private bool _versionEntryRequired; // reveals version entry when "Save as new version"
 
-    // ── Merge sheet state (Task 4.5) ──────────────────────────────────────
-    [ObservableProperty] private bool _isMergeSheetVisible;
-    [ObservableProperty] private IReadOnlyList<MergeFieldRow> _mergeFieldRows = [];
-
     // ── Stashed resolution context (survives between sheet steps) ─────────
     private SongCandidate? _pendingCandidate;
-    private SongResolution? _pendingResolution;
 
     // Becomes true once the user edits each field. Guards blur validation so a pristine field the
     // user only tabbed through is not flagged prematurely (Form Validation Standard).
@@ -114,7 +109,8 @@ public partial class SongFormViewModel : ViewModelBase
         ILogger<SongFormViewModel> logger,
         ISongKaraokeUrlService karaokeUrlService,
         ISecureStorageWrapper secureStorage,
-        IMessenger messenger)
+        IMessenger messenger,
+        INavigationService navigationService)
     {
         _artistService = artistService;
         _songService = songService;
@@ -124,6 +120,7 @@ public partial class SongFormViewModel : ViewModelBase
         _karaokeUrlService = karaokeUrlService;
         _secureStorage = secureStorage;
         _messenger = messenger;
+        _navigationService = navigationService;
 
         // BUG-049: explicit CanExecute tied to IsBusy — combined with the early-return guard in
         // SaveAsync — prevents a fast double-tap from firing SaveAsync twice concurrently, which
@@ -140,15 +137,9 @@ public partial class SongFormViewModel : ViewModelBase
         GoToSettingsCommand = new AsyncRelayCommand(async () => await Shell.Current.GoToAsync("//settings"));
 
         // Resolution sheet commands
-        SelectResolutionCandidateCommand = new AsyncRelayCommand<SongMatch>(SelectResolutionCandidateAsync);
-        ConfirmUpdateExistingCommand = new AsyncRelayCommand(ConfirmUpdateExistingAsync);
+        OpenExistingSongCommand = new AsyncRelayCommand<SongMatch>(OpenExistingSongAsync);
         ConfirmSaveAsNewVersionCommand = new AsyncRelayCommand(ConfirmSaveAsNewVersionAsync);
         DismissResolutionSheetCommand = new RelayCommand(DismissResolutionSheet);
-
-        // Merge sheet commands
-        ConfirmMergeCommand = new AsyncRelayCommand(ConfirmMergeAsync);
-        DismissMergeSheetCommand = new RelayCommand(DismissMergeSheet);
-
     }
 
     // ── Commands ──────────────────────────────────────────────────────────
@@ -164,14 +155,10 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand GoToSettingsCommand { get; }
 
     // Resolution sheet
-    public IAsyncRelayCommand<SongMatch> SelectResolutionCandidateCommand { get; }
-    public IAsyncRelayCommand ConfirmUpdateExistingCommand { get; }
+    /// <summary>Opens the stored song's edit form in place of this add form (REQ-SFT-22/24).</summary>
+    public IAsyncRelayCommand<SongMatch> OpenExistingSongCommand { get; }
     public IAsyncRelayCommand ConfirmSaveAsNewVersionCommand { get; }
     public IRelayCommand DismissResolutionSheetCommand { get; }
-
-    // Merge sheet
-    public IAsyncRelayCommand ConfirmMergeCommand { get; }
-    public IRelayCommand DismissMergeSheetCommand { get; }
 
     /// <summary>
     /// Called by the page's <c>OnAppearing</c> once Shell has finished applying all
@@ -545,7 +532,6 @@ public partial class SongFormViewModel : ViewModelBase
         {
             // Store context and show resolution sheet
             _pendingCandidate = candidate;
-            _pendingResolution = resolution;
 
             var candidates = resolution.Kind == ResolutionKind.FuzzyCandidates
                 ? resolution.FuzzyCandidates
@@ -589,61 +575,18 @@ public partial class SongFormViewModel : ViewModelBase
 
     // ── Resolution sheet actions ──────────────────────────────────────────
 
-    /// <summary>Tapping a candidate row selects it and immediately triggers the update flow.</summary>
-    private async Task SelectResolutionCandidateAsync(SongMatch match)
+    /// <summary>
+    /// User chose "Open existing" (or tapped a candidate row): closes the sheet and opens the stored
+    /// song's edit form in place of this add form. Nothing typed here is written (REQ-SFT-22/24).
+    /// </summary>
+    private async Task OpenExistingSongAsync(SongMatch? match)
     {
         if (match is null) return;
-        SelectedResolutionTargetId = match.SongId;
-        await ConfirmUpdateExistingAsync();
-    }
-
-    /// <summary>User chose "Update existing" — target is SelectedResolutionTargetId (or ExactMatchSongId).</summary>
-    private async Task ConfirmUpdateExistingAsync()
-    {
-        if (_pendingCandidate is null || _pendingResolution is null) return;
-
-        var targetId = SelectedResolutionTargetId
-            ?? _pendingResolution.ExactMatchSongId;
-
-        if (!targetId.HasValue) return;
 
         RunOnUiThread(() => IsResolutionSheetVisible = false);
+        _pendingCandidate = null;
 
-        IsBusy = true;
-        try
-        {
-            if (_pendingResolution.TargetHasManualEdits && _pendingResolution.FieldDiffs.Count > 0)
-            {
-                // Show merge sheet
-                var rows = _pendingResolution.FieldDiffs
-                    .Select(f => new MergeFieldRow(f.Field, f.CurrentValue, f.ApiValue))
-                    .ToList();
-
-                RunOnUiThread(() =>
-                {
-                    MergeFieldRows = rows;
-                    _selectedMergeTargetId = targetId.Value;
-                    IsMergeSheetVisible = true;
-                });
-            }
-            else
-            {
-                // No manual edits — overwrite directly
-                var (success, message, _) = await _songResolution.CommitAsync(
-                    _pendingCandidate, ResolutionChoice.UpdateExisting, targetId, null);
-
-                await HandleCommitResultAsync(success, message, "Song updated");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to commit update-existing resolution");
-            await _snackbarService.ShowErrorAsync("Failed to update song. Please try again.");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        await _navigationService.GoToAsync($"../{Routes.SongForm}?songId={match.SongId}");
     }
 
     /// <summary>User chose "Save as new version" — requires a non-empty Version (AC-1.2).</summary>
@@ -686,67 +629,8 @@ public partial class SongFormViewModel : ViewModelBase
     {
         IsResolutionSheetVisible = false;
         _pendingCandidate = null;
-        _pendingResolution = null;
-        SelectedResolutionTargetId = null;
         IsSaveAsNewVersionMode = false;
         VersionEntryRequired = false;
-    }
-
-    // ── Merge sheet actions ───────────────────────────────────────────────
-
-    private int _selectedMergeTargetId;
-
-    private async Task ConfirmMergeAsync()
-    {
-        if (_pendingCandidate is null) return;
-
-        var acceptedFields = MergeFieldRows
-            .Where(r => r.AcceptApiValue)
-            .Select(r => r.Field)
-            .ToList();
-
-        RunOnUiThread(() => IsMergeSheetVisible = false);
-
-        IsBusy = true;
-        try
-        {
-            var (success, message, _) = await _songResolution.CommitAsync(
-                _pendingCandidate, ResolutionChoice.UpdateExisting, _selectedMergeTargetId,
-                acceptedFields.Count > 0 ? acceptedFields : null);
-
-            await HandleCommitResultAsync(success, message, "Song updated");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to commit merge resolution");
-            await _snackbarService.ShowErrorAsync("Failed to update song. Please try again.");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    private void DismissMergeSheet()
-    {
-        IsMergeSheetVisible = false;
-        _pendingCandidate = null;
-        _pendingResolution = null;
-        MergeFieldRows = [];
-    }
-
-    private async Task HandleCommitResultAsync(bool success, string message, string successText)
-    {
-        if (success)
-        {
-            await _snackbarService.ShowSuccessAsync(successText);
-            await Shell.Current.GoToAsync("..");
-        }
-        else
-        {
-            TitleHasError = true;
-            TitleErrorText = message;
-        }
     }
 
     // ── Common helpers ────────────────────────────────────────────────────
@@ -961,31 +845,5 @@ public partial class SongFormViewModel : ViewModelBase
     {
         CanLaunchYouTubeSearch = !string.IsNullOrWhiteSpace(SongTitle)
                              && !string.IsNullOrWhiteSpace(ArtistName);
-    }
-}
-
-/// <summary>
-/// Represents one row in the Merge BottomSheet — a per-field diff between the API candidate value
-/// and the current local value. The user can toggle <see cref="AcceptApiValue"/> per row.
-/// Mergeable fields: Title, FeaturedArtists, Lyrics, Version (ArtistId is never mergeable).
-/// </summary>
-public sealed class MergeFieldRow : ObservableObject
-{
-    public string Field { get; }
-    public string? CurrentValue { get; }
-    public string? ApiValue { get; }
-
-    private bool _acceptApiValue;
-    public bool AcceptApiValue
-    {
-        get => _acceptApiValue;
-        set => SetProperty(ref _acceptApiValue, value);
-    }
-
-    public MergeFieldRow(string field, string? currentValue, string? apiValue)
-    {
-        Field = field;
-        CurrentValue = currentValue;
-        ApiValue = apiValue;
     }
 }

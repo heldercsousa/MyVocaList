@@ -8,11 +8,10 @@ public partial class SongFormPage : ContentPage
 {
     private SongFormViewModel ViewModel => (SongFormViewModel)BindingContext;
 
-    // Re-entrancy guards for the two-way sheet-state sync (BUG-023): prevent the
-    // ViewModel -> code-behind -> ViewModel round trip from looping when a sheet
+    // Re-entrancy guard for the two-way sheet-state sync (BUG-023): prevents the
+    // ViewModel -> code-behind -> ViewModel round trip from looping when the sheet
     // is closed programmatically in response to the flag it was opened by.
     private bool _isSyncingResolutionSheet;
-    private bool _isSyncingMergeSheet;
 
     public SongFormPage(SongFormViewModel viewModel)
     {
@@ -98,7 +97,7 @@ public partial class SongFormPage : ContentPage
     private void OnVersionUnfocused(object sender, FocusEventArgs e) =>
         ViewModel.ValidateVersionCommand.Execute(null);
 
-    // BUG-023: resolutionSheet/mergeSheet lost their state binding when IsExpanded was removed
+    // BUG-023: resolutionSheet lost its state binding when IsExpanded was removed
     // without replacement. dx:BottomSheet has no bindable "open" property that can be driven
     // declaratively from XAML — Show()/Close() require a host Page — so the sync is done here in
     // code-behind, mirroring the confirmed pattern in ConfirmSheet.xaml.cs (see
@@ -109,9 +108,6 @@ public partial class SongFormPage : ContentPage
         {
             case nameof(SongFormViewModel.IsResolutionSheetVisible):
                 SyncResolutionSheetState();
-                break;
-            case nameof(SongFormViewModel.IsMergeSheetVisible):
-                SyncMergeSheetState();
                 break;
         }
     }
@@ -134,26 +130,8 @@ public partial class SongFormPage : ContentPage
         }
     }
 
-    private void SyncMergeSheetState()
-    {
-        if (_isSyncingMergeSheet) return;
-
-        _isSyncingMergeSheet = true;
-        try
-        {
-            if (ViewModel.IsMergeSheetVisible)
-                mergeSheet.Show(BottomSheetState.HalfExpanded, this);
-            else
-                mergeSheet.Close();
-        }
-        finally
-        {
-            _isSyncingMergeSheet = false;
-        }
-    }
-
     // Syncs the sheet closing (e.g. Close() completing) back to the ViewModel flag so the two
-    // stay consistent. AllowDismiss="False" on both sheets means the user cannot swipe-dismiss;
+    // stay consistent. AllowDismiss="False" on the sheet means the user cannot swipe-dismiss;
     // closing is always driven by a ViewModel command (Cancel/Confirm), so this is primarily a
     // safety net against the flag and the visual state ever diverging.
     private void OnResolutionSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
@@ -170,24 +148,6 @@ public partial class SongFormPage : ContentPage
             finally
             {
                 _isSyncingResolutionSheet = false;
-            }
-        }
-    }
-
-    private void OnMergeSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
-    {
-        if (_isSyncingMergeSheet) return;
-
-        if (e.NewValue == BottomSheetState.Hidden && ViewModel.IsMergeSheetVisible)
-        {
-            _isSyncingMergeSheet = true;
-            try
-            {
-                ViewModel.IsMergeSheetVisible = false;
-            }
-            finally
-            {
-                _isSyncingMergeSheet = false;
             }
         }
     }

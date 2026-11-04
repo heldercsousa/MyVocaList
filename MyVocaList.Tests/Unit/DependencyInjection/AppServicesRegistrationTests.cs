@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Extensions;
 using MyVocaList.Infra;
+using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.DependencyInjection;
 
@@ -62,6 +63,7 @@ public class AppServicesRegistrationTests
             services.AddSingleton(Mock.Of<ISnackbarComponent>());
             services.AddSingleton(Mock.Of<ISecureStorageWrapper>());
             services.AddSingleton<IMessenger>(new WeakReferenceMessenger());
+            services.AddSingleton(Mock.Of<INavigationService>());
             services.AddTransient<SongFormViewModel>();
         });
         using var scope = provider.CreateScope();
