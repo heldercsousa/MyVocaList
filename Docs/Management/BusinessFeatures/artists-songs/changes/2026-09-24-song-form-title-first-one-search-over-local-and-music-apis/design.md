@@ -247,6 +247,16 @@ Rules, in order (each a Level A test in `SongServiceSaveFromFormTests`):
 5. Write: add → `CreateSongWithUrlsAsync(artistId | null, newName | null, …)`; edit →
    `UpdateSongAsync(…, artistId | null, newName | null)`. Tuple `(false, msg)` → `Failed`; else `Saved`.
 
+> **Spec updated 2026-11-04 (3.10 Red `f4fd7de1`) — choices fixed by the Tester where this section was open; PENDING Helder's Architectural-lane review of 3.10:**
+> 1. Rule 1 order: `ValidateTitleInput` → `Failed(Title)`; `ValidateVersionInput(v, false)` (incl. > 60) → `Failed(Version)`; no `ArtistId` and blank `ArtistText` → `Failed(Artist)` "Artist is required"; when an artist would be created (no `ArtistId`, decision ≠ `UseExisting`) `IArtistService.ValidateNameInput(ArtistText)` → `Failed(Artist)` with its message. All before any resolution or write.
+> 2. Artist step: `ArtistId` / `UseExisting(id)` → id, no resolver call; `CreateTyped` → create, no resolver call; `None` → `ResolveAsync(new ArtistCandidate(text, null, null))` (trim allowed); `FuzzyCandidates` → `ArtistChoiceNeeded` with the top 3 sorted by score descending (the service sorts); returns before the song guard.
+> 3. **Song-guard artist (deviation from "for an existing artist, its id"):** `SongCandidate` carries no artist id, so the artist goes in as `ArtistCandidate(name, null, null)` — the typed text for a new/text-resolved artist, the **stored** name (`IArtistRepository.GetByIdAsync`) for a picked / `UseExisting` / resolver-exact artist. The song's provider/id go on the `SongCandidate`, never on its `Artist` (REQ-SFT-41).
+> 4. Exact `SongChoiceNeeded`: `ExactLocalMatch` and `ExactExternalMatch` both exact; `SongCandidates` = one `SongMatch` loaded via `ISongRepository.GetByIdAsync(ExactMatchSongId)`; fuzzy → resolver candidates in order, `IsExactSongMatch = false`; nothing written.
+> 5. Song guard only in add mode with `SongDecision == None`; `SaveAsNewVersion` requires a non-empty Version; `SaveAsNewSong` does not.
+> 6. **Edit mode** runs no song guard and always passes `null` external identity to `UpdateSongAsync` (stored identity kept, even if the request carries a different one); artist rules still apply.
+> 7. Write failure `(false, msg)` → `Failed`, message as returned, `SavedSongId = null`; success → `Saved`, `SavedSongId` = new id, `FailedField = None`, non-empty message.
+> `SaveFromForm_Metalica_RealResolutionAndScorer_ReturnsArtistChoiceNeeded` uses the real `ArtistResolutionService` + `SimilarityScorer` and closes the 3.9c W1 follow-up.
+
 ### 3.6 Network status (new 2026-11-04, REQ-SFT-53)
 
 ```csharp
