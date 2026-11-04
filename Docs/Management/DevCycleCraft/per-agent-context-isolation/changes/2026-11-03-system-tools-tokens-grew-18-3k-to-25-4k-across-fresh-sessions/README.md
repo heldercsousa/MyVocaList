@@ -1,7 +1,7 @@
 ---
 id: system-tools-tokens-grew-18-3k-to-25-4k-across-fresh-sessions
 title: System tools tokens grew 18.3k to 25.4k across fresh sessions
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-03
 section: DevCycleCraft
 parent: per-agent-context-isolation
@@ -22,10 +22,23 @@ The always-loaded System tools block grew about 7k between sessions on 2026-11-0
 | Start of day | 18.3k (+27.4k deferred) | 9.9k | 1.1k | 49.0k |
 | Fresh #2 (after overrides) | 21.6k | 6.6k | 1.1k | 49.7k |
 | Fresh #3 (after plugin disable) | 25.4k | 2.8k | 0.5k | 49.0k |
+| Fresh #4 (baseline, no change; sqlite down) | 26.1k (+28.2k deferred) | 2.8k | 0.5k | 62.6k* |
+| Fresh #5 (2026-11-04, sqlite up after BUG-083 pin) | 25.4k (+28.2k deferred) | 2.8k | 0.5k | 49k |
+
+\* Total includes 14.9k Messages (measured mid-session). Deferred line is back in #4 → hypothesis "deferred vanished" not confirmed;
+#3's output may just have omitted it. Always-on extras in #4: Claude Docs MCP (3 tools loaded + 1.5k MCP instructions incl. Docs).
 
 The skill cuts (sibling item `2026-11-03-disabled-dotnet-skills-…`) saved ~7.8k; System tools ate it. Same version,
 same machine, same day. Not a skill lever. Hypothesis to test first: fewer listed skills/agents → harness loads
 more tool schemas up front instead of deferring them (the deferred line vanished from #3's output).
+
+## Hypotheses (2026-11-04, from #5's loaded-tool list)
+
+| Candidate | Est. tokens | Lever (needs Helder OK — disables a tool) |
+|---|---|---|
+| `Artifact` tool (long schema; matches the ~7k jump) | ~6–7k | `permissions.deny: ["Artifact"]` in settings |
+| `Bash` + `PowerShell` both loaded | ~2k each | deny one shell |
+| `ScheduleWakeup`, `ReportFindings`, `SendFeedback`, `ListAgents` | <1k each | low value; skip |
 
 ## How to investigate
 
