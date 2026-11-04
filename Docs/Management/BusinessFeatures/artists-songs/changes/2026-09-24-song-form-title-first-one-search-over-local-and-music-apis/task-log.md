@@ -1448,3 +1448,54 @@ Compiler output (`dotnet build MyVocaList.Tests -m:1`, first errors; the compile
 ### Changed files
 - `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (new)
 - this task-log section
+
+### Green (Builder, Opus) - 2026-11-04
+**Status:** To Review (Architectural lane - Helder review before merge). Red `f4fd7de1` · Green: see the line below. Inherited: clean worktree, no half-done edits. Test file untouched (byte-identical to Red).
+
+#### Implementation
+- `SaveFromFormAsync` (Services/SongService.cs): rule 1 title/version/artist-required validation OUTSIDE any unit of work (REQ-UOW-41); then ONE `ExecuteReadAsync` that holds rule 2 (`ResolveFormArtistAsync`: typed-name `IArtistService.ValidateNameInput` -> decision -> `IArtistResolutionService.ResolveAsync(new ArtistCandidate(trimmed text, null, null))`) and rule 3 (`RunSongGuardAsync`, add mode + `SongDecision.None` only); rule 4 (`ValidateVersionInput(v, isRequired: true)`) after the read; rule 5 calls `CreateSongWithUrlsAsync(int?, string?, ...)` / `UpdateSongAsync(..., externalId: null, externalProvider: null, ..., artistId, newArtistName)`. No write scope opened by the method itself.
+- All governed services/repositories (`IArtistService`, `IArtistResolutionService`, `ISongResolutionService`, `IArtistRepository`, `ISongRepository`) come from the read lambda's `sp`; constructor unchanged (6 params). Resolving `ISongResolutionService` at call time avoids the `SongResolutionService -> ISongService` constructor cycle.
+- The nested `ResolveAsync` calls open their own standalone read scopes (no ambient scope is published by a read; UnitOfWork Revision 12) - read-in-read, never write-in-read.
+- Private constants: `MaxArtistChoiceCandidates = 3`, `ExactSongMatchScore = 1.0`, `ArtistRequiredMessage`, `ArtistNotFoundMessage`. Private record `SaveFormResolution(StopOutcome, ArtistId, NewArtistName)` carries the read's result.
+
+#### Decisions not fixed by design § 3.5 / its 2026-11-04 note (for the Architectural review)
+1. **Stored artist missing in the song guard:** a picked / `UseExisting` / resolver-exact id whose artist row is not found -> `Failed(Artist, "Artist not found")` (same text the write path returns), nothing written.
+2. **Exact duplicate song not loadable:** if `GetByIdAsync(ExactMatchSongId)` returns null (same read scope, so only a concurrent delete) -> Warning log, guard treated as no match, the write's own checks decide.
+3. **Exact `SongMatch` fields:** `Score = 1.0` (`ExactSongMatchScore`), `ArtistName = OriginalArtist?.Name ?? guard artist name`.
+4. **Defensive kinds:** an exact artist/song kind with a null id, or a `FuzzyCandidates` kind with an empty list, falls through to "no match" (artist: create via the write path, where `IArtistService` still refuses a collated duplicate - REQ-SFT-52).
+5. **Name passed on:** `ValidateNameInput` receives the raw `ArtistText` (the service trims); the resolver, `CreateArtistAsync` (via `newArtistName`) and the song-guard `ArtistCandidate` receive `ArtistText.Trim()` (trim only, no case/accent folding).
+6. **Rule 4 position:** kept after rules 2-3 as § 3.5 orders them, so with `SaveAsNewVersion` an `ArtistChoiceNeeded` outcome wins over an empty-Version failure.
+7. Edit mode passes `request.Version` (non-null) to `UpdateSongAsync`; `SavedSongId` = `request.SongId`; write failures carry `FailedField = None`.
+
+#### AC traceability matrix
+| AC | Criterion | Implementation | Test(s) |
+|---|---|---|---|
+| REQ-SFT-12 | Version > 60 fails on Version | `SaveFromFormAsync` rule 1 | `SaveFromForm_VersionOver60_FailsOnVersionField` |
+| REQ-SFT-15 | Empty title fails on Title | rule 1 | `SaveFromForm_EmptyTitle_FailsOnTitle` |
+| REQ-SFT-18 | Exact collated artist reused; no match -> created in the same write | `ResolveFormArtistAsync` + `CreateSongWithUrlsAsync` | `DeezerFilledArtistExactCollatedMatch_ReusesExisting`, `NoArtistMatch_CreatesNewArtistInSameWrite` |
+| REQ-SFT-19 | Near-duplicate -> ArtistChoiceNeeded top 3; Use/Create decisions | `ResolveFormArtistAsync` | `TypedArtistNearDuplicate_...TopThreeBestFirst`, `Metalica_RealResolutionAndScorer_...`, `UseExistingDecision_...`, `CreateTypedDecision_...` |
+| REQ-SFT-20 | Invalid typed name fails on Artist with service message | `ResolveFormArtistAsync` (first check) | `NewArtistNameInvalid_FailsOnArtist` |
+| REQ-SFT-21 | Empty artist -> "Artist is required" | rule 1 | `EmptyArtist_FailsArtistRequired` |
+| REQ-SFT-22 | Exact duplicate -> SongChoiceNeeded exact; SaveAsNewVersion | `RunSongGuardAsync`, rule 4 | `ExactDuplicateSong_...`, `PickedArtist_SongGuardCandidateCarriesStoredArtistName`, `SaveAsNewVersionEmptyVersion_...`, `SaveAsNewVersionDecision_...` |
+| REQ-SFT-23 | Fuzzy duplicate -> SongChoiceNeeded not exact; SaveAsNewSong | `RunSongGuardAsync` | `FuzzyDuplicateSong_...`, `SaveAsNewSongDecision_...` |
+| REQ-SFT-25 | New artist still runs the identity guard | `RunSongGuardAsync` | `NewArtistWithHeldIdentity_...` |
+| REQ-SFT-26 | Held identity -> refusal message | write path | `IdentityHeldByAnotherSong_FailsWithMessage` |
+| REQ-SFT-27 | Edit: no guard, null identity to Update | rule 5 | `EditMode_RunsNoSongGuard_CallsUpdateWithNullIdentity` |
+| REQ-SFT-41 | Artist lookup never gets the song identity | `ResolveFormArtistAsync`, `RunSongGuardAsync` | `ArtistResolution_NeverReceivesSongExternalIdentity` |
+| REQ-SFT-46 | Writes only through Create/Update | rule 5 | `WritesOnlyThroughCreateOrUpdate` |
+| REQ-SFT-51 | Outcome mapping (Failed / Saved) | rule 5 | `WriteReturnsFailureTuple_...`, `Success_ReturnsSavedWithId` |
+| REQ-SFT-52 | Collated artist match reused, never C# folding | `ResolveFormArtistAsync` | `TypedArtistExactCollatedMatch_...`, `TypedArtistPaddedCaseAccentVariant_...` |
+
+#### Verification evidence (verbatim)
+- Focused (`SongServiceSaveFromFormTests|UnitOfWorkReadScopeTests`): `Aprovado!  – Com falha:     0, Aprovado:    29, Ignorado:     0, Total:    29`
+- Full suite: `Aprovado!  – Com falha:     0, Aprovado:   773, Ignorado:     0, Total:   773, Duração: 11 s - MyVocaList.Tests.dll (net10.0)` (baseline 748 at `65fdb63f` + 25 Red tests = 773, delta +25)
+- Android build (`-f net10.0-android -m:1`): `Compilação com êxito.` `28 Aviso(s)` `0 Erro(s)`
+- Census (Python substring scan of the 3 production files): `ToLower`, `ToUpper`, `RemoveDiacritics`, `Normalized`, `OrdinalIgnoreCase`, governed-field dereferences (`_songRepository.` etc.) -> 0 hits.
+- Superseded tests: none. Post-edit re-read done for all changed files.
+
+#### Changed files
+- `Domain/Resolution/SongFormSaveRequest.cs` (new)
+- `Domain/Resolution/SongFormSaveOutcome.cs` (new)
+- `Domain/ServicesInterfaces/ISongService.cs`
+- `Services/SongService.cs`
+- this task-log section

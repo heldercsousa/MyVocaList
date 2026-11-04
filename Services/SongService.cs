@@ -2,6 +2,7 @@
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Domain.Resolution;
 using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions.Strings;
@@ -20,6 +21,15 @@ public class SongService : ISongService
     public int MaxTitleLength => 100;
     public int ShowCounterAt => 80;
     public int MaxVersionLength => 60;
+
+    /// <summary>Most near-duplicate artists offered on the artist-choice sheet (REQ-SFT-19).</summary>
+    private const int MaxArtistChoiceCandidates = 3;
+
+    /// <summary>Score reported for the stored song of an exact-duplicate outcome (REQ-SFT-22/25).</summary>
+    private const double ExactSongMatchScore = 1.0;
+
+    private const string ArtistRequiredMessage = "Artist is required";
+    private const string ArtistNotFoundMessage = "Artist not found";
 
     public SongService(
         ISongRepository songRepository,
@@ -342,6 +352,227 @@ public class SongService : ISongService
             // saves the one shared context inside its explicit transaction (AC-6.2 preserved).
             return (true, $"Song '{title}' created successfully", song);
         }, ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<SongFormSaveOutcome> SaveFromFormAsync(
+        SongFormSaveRequest request, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        // Rule 1 (REQ-SFT-15 / REQ-SFT-12 / REQ-SFT-21): pure input validation — it stays OUTSIDE any
+        // unit of work (REQ-UOW-41), so a rejected save opens no DI scope. The typed-artist-name rule
+        // (REQ-SFT-20) needs IArtistService, so it runs first thing inside the read below.
+        var (titleValid, titleMessage) = ValidateTitleInput(request.Title);
+        if (!titleValid)
+            return SaveFailed(titleMessage, SaveField.Title);
+
+        var (versionValid, versionMessage) = ValidateVersionInput(request.Version);
+        if (!versionValid)
+            return SaveFailed(versionMessage, SaveField.Version);
+
+        if (request.ArtistId is null && string.IsNullOrWhiteSpace(request.ArtistText))
+            return SaveFailed(ArtistRequiredMessage, SaveField.Artist);
+
+        var isAddMode = request.SongId is null;
+
+        // Rules 2–3 are reads only. SaveFromFormAsync opens no write unit of work (REQ-SFT-46): the
+        // only writes are CreateSongWithUrlsAsync / UpdateSongAsync below, each with its own unit of
+        // work. Resolving the governed services from sp (REQ-UOW-37) also keeps SongService free of
+        // the SongResolutionService -> ISongService constructor cycle.
+        var resolved = await _uow.ExecuteReadAsync<SaveFormResolution>(async sp =>
+        {
+            var artistStep = await ResolveFormArtistAsync(sp, request, ct);
+            if (artistStep.StopOutcome is not null)
+                return artistStep;
+
+            // Rule 3 (REQ-SFT-22/23/25): add mode only, and only until the user has answered the
+            // duplicate-song sheet. Edit mode never runs the guard (REQ-SFT-27).
+            if (!isAddMode || request.SongDecision != SongDecision.None)
+                return artistStep;
+
+            var guardOutcome = await RunSongGuardAsync(sp, request, artistStep, ct);
+            return guardOutcome is null ? artistStep : SaveFormResolution.Stop(guardOutcome);
+        }, ct);
+
+        if (resolved.StopOutcome is { } stopOutcome)
+            return stopOutcome;
+
+        // Rule 4 (AC-1.2): "Save as new version" requires a non-empty Version.
+        if (request.SongDecision == SongDecision.SaveAsNewVersion)
+        {
+            var (newVersionValid, newVersionMessage) = ValidateVersionInput(request.Version, isRequired: true);
+            if (!newVersionValid)
+                return SaveFailed(newVersionMessage, SaveField.Version);
+        }
+
+        // Rule 5 (REQ-SFT-46 / REQ-SFT-51): write through the two write paths only; their failure
+        // tuple comes back as Failed with the message unchanged.
+        if (isAddMode)
+        {
+            var (created, createMessage, song) = await CreateSongWithUrlsAsync(
+                resolved.ArtistId, resolved.NewArtistName, request.Title, request.Version,
+                request.FeaturedArtists, request.Lyrics, request.ExternalId, request.ExternalProvider,
+                request.PendingUrls ?? [], ct);
+
+            return created && song is not null
+                ? SaveSucceeded(createMessage, song.Id)
+                : SaveFailed(createMessage, SaveField.None);
+        }
+
+        // REQ-SFT-27: edit mode passes a null external identity — the stored identity is kept,
+        // whatever the request carries.
+        var songId = request.SongId!.Value;
+        var (updated, updateMessage) = await UpdateSongAsync(
+            songId, request.Title, request.FeaturedArtists, request.Lyrics,
+            externalId: null, externalProvider: null, version: request.Version,
+            artistId: resolved.ArtistId, newArtistName: resolved.NewArtistName, ct: ct);
+
+        return updated
+            ? SaveSucceeded(updateMessage, songId)
+            : SaveFailed(updateMessage, SaveField.None);
+    }
+
+    /// <summary>
+    /// Rule 2 (REQ-SFT-18/19/20/41/52): decides which artist the song is saved with. A picked id or a
+    /// "Use existing" decision is used as is; a "Create" decision creates the typed name; otherwise
+    /// the typed name — never the song's external identity (REQ-SFT-41) — goes to
+    /// <see cref="IArtistResolutionService"/>, whose DB collation alone decides a match (REQ-SFT-52).
+    /// </summary>
+    private async Task<SaveFormResolution> ResolveFormArtistAsync(
+        IServiceProvider sp, SongFormSaveRequest request, CancellationToken ct)
+    {
+        if (request.ArtistId is { } pickedArtistId)
+            return SaveFormResolution.Proceed(pickedArtistId, newArtistName: null);
+
+        if (request.ArtistDecision is ArtistDecision.UseExisting useExisting)
+            return SaveFormResolution.Proceed(useExisting.ArtistId, newArtistName: null);
+
+        // Rule 1, last check (REQ-SFT-20): the artist may be created, so the typed name is validated
+        // with IArtistService's own rules before any resolution or write — never duplicated here.
+        var artistService = sp.GetRequiredService<IArtistService>();
+        var (nameValid, nameMessage) = artistService.ValidateNameInput(request.ArtistText!);
+        if (!nameValid)
+            return SaveFormResolution.Stop(SaveFailed(nameMessage, SaveField.Artist));
+
+        // Trim only — case and accents are left to the DB collation (constraints-registry HARD RULE).
+        var typedName = request.ArtistText!.Trim();
+
+        if (request.ArtistDecision is ArtistDecision.CreateTyped)
+            return SaveFormResolution.Proceed(artistId: null, typedName);
+
+        var artistResolutionService = sp.GetRequiredService<IArtistResolutionService>();
+        var resolution = await artistResolutionService.ResolveAsync(
+            new ArtistCandidate(typedName, ExternalProvider: null, ExternalId: null), ct);
+
+        switch (resolution.Kind)
+        {
+            case ResolutionKind.ExactLocalMatch or ResolutionKind.ExactExternalMatch
+                when resolution.ExactMatchArtistId is { } exactArtistId:
+                // REQ-SFT-18.1 / REQ-SFT-52: an exact collated match is reused silently.
+                return SaveFormResolution.Proceed(exactArtistId, newArtistName: null);
+
+            case ResolutionKind.FuzzyCandidates when resolution.FuzzyCandidates.Count > 0:
+                var candidates = resolution.FuzzyCandidates
+                    .OrderByDescending(c => c.Score)
+                    .Take(MaxArtistChoiceCandidates)
+                    .Select(c => new ArtistMatch(c.ArtistId, c.Name, c.Score))
+                    .ToList();
+                _logger.LogDebug("Song form save: artist '{Name}' has {Count} near-duplicate(s); choice needed",
+                    typedName, candidates.Count);
+                return SaveFormResolution.Stop(new SongFormSaveOutcome(
+                    SongFormSaveKind.ArtistChoiceNeeded, string.Empty, SaveField.None, null,
+                    candidates, false, []));
+
+            default:
+                // NoMatch: the artist is created inside the song's write (REQ-SFT-18). Should a
+                // collated duplicate exist after all, IArtistService refuses it (REQ-SFT-52).
+                return SaveFormResolution.Proceed(artistId: null, typedName);
+        }
+    }
+
+    /// <summary>
+    /// Rule 3 (REQ-SFT-22/23/25): the add-mode duplicate-song guard. The external-identity tier runs
+    /// whatever the artist's origin; the artist-scoped tiers run only when the artist already exists,
+    /// which the resolver decides from the artist name: the typed name for a new artist, the STORED
+    /// name for an existing one (<see cref="SongCandidate"/> carries no artist id). Returns
+    /// <c>null</c> when nothing matches.
+    /// </summary>
+    private async Task<SongFormSaveOutcome?> RunSongGuardAsync(
+        IServiceProvider sp, SongFormSaveRequest request, SaveFormResolution artistStep, CancellationToken ct)
+    {
+        string guardArtistName;
+        if (artistStep.ArtistId is { } existingArtistId)
+        {
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
+            var storedArtist = await artistRepository.GetByIdAsync(existingArtistId, ct);
+            if (storedArtist is null)
+                return SaveFailed(ArtistNotFoundMessage, SaveField.Artist);
+            guardArtistName = storedArtist.Name;
+        }
+        else
+        {
+            guardArtistName = artistStep.NewArtistName!;
+        }
+
+        // REQ-SFT-41: the song's identity goes on the SongCandidate, never on its Artist.
+        var songResolutionService = sp.GetRequiredService<ISongResolutionService>();
+        var guard = await songResolutionService.ResolveAsync(
+            new SongCandidate(
+                request.Title, request.Version ?? string.Empty, request.FeaturedArtists, request.Lyrics,
+                new ArtistCandidate(guardArtistName, ExternalProvider: null, ExternalId: null),
+                request.ExternalProvider, request.ExternalId),
+            ct);
+
+        switch (guard.Kind)
+        {
+            case ResolutionKind.ExactLocalMatch or ResolutionKind.ExactExternalMatch
+                when guard.ExactMatchSongId is { } exactSongId:
+                var songRepository = sp.GetRequiredService<ISongRepository>();
+                var existing = await songRepository.GetByIdAsync(exactSongId, ct);
+                if (existing is null)
+                {
+                    // Same read scope as the resolver, so this needs a delete in between; the song no
+                    // longer exists, so there is nothing to duplicate — the write's checks decide.
+                    _logger.LogWarning("Song form save: exact duplicate {SongId} vanished before it was loaded",
+                        exactSongId);
+                    return null;
+                }
+
+                _logger.LogDebug("Song form save: exact duplicate song {SongId}; choice needed", exactSongId);
+                return new SongFormSaveOutcome(
+                    SongFormSaveKind.SongChoiceNeeded, string.Empty, SaveField.None, null, [], true,
+                    [new SongMatch(existing.Id, existing.Title, existing.Version,
+                        existing.OriginalArtist?.Name ?? guardArtistName, ExactSongMatchScore)]);
+
+            case ResolutionKind.FuzzyCandidates when guard.FuzzyCandidates.Count > 0:
+                _logger.LogDebug("Song form save: {Count} possible duplicate song(s); choice needed",
+                    guard.FuzzyCandidates.Count);
+                return new SongFormSaveOutcome(
+                    SongFormSaveKind.SongChoiceNeeded, string.Empty, SaveField.None, null, [], false,
+                    guard.FuzzyCandidates);
+
+            default:
+                return null;
+        }
+    }
+
+    private static SongFormSaveOutcome SaveFailed(string message, SaveField field)
+        => new(SongFormSaveKind.Failed, message, field, null, [], false, []);
+
+    private static SongFormSaveOutcome SaveSucceeded(string message, int songId)
+        => new(SongFormSaveKind.Saved, message, SaveField.None, songId, [], false, []);
+
+    /// <summary>
+    /// Intermediate result of the <see cref="SaveFromFormAsync"/> read: either an outcome that ends the
+    /// save (<see cref="StopOutcome"/>), or the artist to write with — an existing id XOR a new name.
+    /// </summary>
+    private sealed record SaveFormResolution(SongFormSaveOutcome? StopOutcome, int? ArtistId, string? NewArtistName)
+    {
+        public static SaveFormResolution Stop(SongFormSaveOutcome outcome) => new(outcome, null, null);
+
+        public static SaveFormResolution Proceed(int? artistId, string? newArtistName)
+            => new(null, artistId, newArtistName);
     }
 
     /// <inheritdoc />
