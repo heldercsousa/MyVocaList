@@ -26,6 +26,7 @@ The always-loaded System tools block grew about 7k between sessions on 2026-11-0
 | Fresh #4 (baseline, no change; sqlite down) | 26.1k (+28.2k deferred) | 2.8k | 0.5k | 62.6k* |
 | Fresh #5 (2026-11-04, sqlite up after BUG-083 pin) | 25.4k (+28.2k deferred) | 2.8k | 0.5k | 49k |
 | Fresh #6 — lever 1: `deny: ["Artifact"]` (`settings.local.json`; Helder OK 2026-11-04) | **14.0k** (−11.4k) | 2.8k | 0.5k | **37.4k** (−11.6k) |
+| Fresh #7 — deny moved to tracked `settings.json` | 14.0k | 2.8k | 0.5k | 37.4k |
 
 ## Result (2026-11-04)
 
