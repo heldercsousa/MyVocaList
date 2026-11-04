@@ -736,6 +736,10 @@ ITF: SFT-3.6a — Services/ArtistService.cs — root cause: `ArtistService.Updat
 
 - 2026-11-04 (orchestrator) — **Pre-dispatch G3 / § 0.2.2 checks (migration task):** (1) LEDGER: no live branch (CATALOG-PROP spec-only, deferred; BUG-080 merged `8f5d716c` with **no** migration). (2) `git worktree list`: main + `sft-3.6a` (merged, being removed). (3) `git branch -a --no-merged develop`: only `remotes/origin/worktree-agent-aaae95a5d8a6c56ec` (old agent branch, matches no G3 pattern). **Clear.** Snapshot rule: worktree created from current develop `29de1054`+, so the scaffold is generated against the merged snapshot. Worktree `.worktrees/sft-3.6b`, branch `task/sft-3.6b-m1-drop-hasmanualedits`. Part A dispatched.
 
+- 2026-11-04 (Part A implementor, Sonnet) — **Part A Step 1-2 done (Red).** Context7 not queried; EF Core APIs (`IMigrator`, `GetMigrations`, `SqlQueryRaw`) verified via the existing codebase pattern `MyVocaList.Tests/Integration/Migrations/VenuesSeedMigrationDownTests.cs`. Inherited: clean worktree, nothing half-done. Tests: `MyVocaList.Tests/Integration/Migrations/SongMigrationTests.cs` (3 tests; temp DB files deleted in `DisposeAsync`). The guard test `M1_TableRebuild_KeepsUniqueCollatedIndexes` inserts with/without the `HasManualEdits` column depending on the schema (the pre-M1 NOT NULL column otherwise breaks the guard).
+- Red output (verbatim, trimmed to the result lines): `M1_DropsHasManualEditsFromSongsAndArtists [FAIL]` — `Assert.DoesNotContain() Failure: Item found in collection ... Found: "HasManualEdits"`; `M1_ExistingRowsSurvive [FAIL]` — `System.InvalidOperationException : Migration 'DropHasManualEdits' not found (or has no predecessor).`; `M1_TableRebuild_KeepsUniqueCollatedIndexes` PASSED (guard, as the plan allowed). Totals: `Com falha! – Com falha: 2, Aprovado: 1, Ignorado: 0, Total: 3`.
+- Next: Step 3 (delete four model lines, build, leave uncommitted) -> handback "model edited, awaiting scaffold".
+
 ## 3.7
 
 ### Checkpoint
