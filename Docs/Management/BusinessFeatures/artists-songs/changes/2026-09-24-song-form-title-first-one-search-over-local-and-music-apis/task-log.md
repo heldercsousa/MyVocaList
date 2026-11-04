@@ -1168,3 +1168,30 @@ No-new-test decision: Level C deletion; nothing new to assert.
 ### Verification evidence
 Build (android, -m:1): exit 0, 0 errors. Full suite: `Failed: 0, Passed: 663, Total: 663` (baseline 666, delta -3 = deleted CommitAsync tests).
 Census `ResolutionChoice`: ZERO HITS. Census `CommitAsync(`: only `Infra/UnitOfWork/UnitOfWork.cs:53,88` (plus unrelated doc text `.claude/skills/efcore-patterns/SKILL.md:376`).
+
+## 4.1c
+
+**Plan:** `plan.md` § Task 4.1c (W5) · **Branch:** `task/sft-4.1c-network-status` (worktree `.worktrees/sft-4.1c`, base `develop` d0a06dd4, ancestor verified)
+
+### Checkpoint
+- Step 2 of 6 — Red committed (test file only, `Lane: RED`, `--no-verify`). Next: Green = `Domain/ServicesInterfaces/INetworkStatus.cs`, `Contracts/DTOs/Suggestions/RemoteSearchStatus.cs`, `MyVocaList/UI/Services/MauiNetworkStatus.cs`, `MyVocaList/MauiProgram.cs` registrations.
+- Build/test state: Red = CS0103 (expected). Build not yet green.
+- Next command: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` after Green edits.
+- Context manifest:
+  - Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/design.md § 3.6 (~246-275)
+  - Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/requirements.md (REQ-SFT-53, ~146)
+  - MyVocaList.Tests/Unit/Services/MauiNetworkStatusTests.cs (Red test)
+  - MyVocaList/MauiProgram.cs (registration site)
+  - MyVocaList/UI/Services/INavigationService.cs (namespace/placement reference)
+
+### Context7 lookup (MAUI, pinned to csproj: Microsoft.Maui.Controls 10.0.41 via Directory.Packages.props)
+- Library: `/dotnet/maui` (versions available 10.0.20, 10.0.51; closest to pin used).
+- Confirmed: `IConnectivity { NetworkAccess NetworkAccess {get;} ... }`, `Connectivity.Current` (IConnectivity), `Connectivity.NetworkAccess`, namespace `Microsoft.Maui.Networking`; `NetworkAccess` = Unknown(0), None(1), Local(2).
+- Not in the returned snippet: `ConstrainedInternet`, `Internet`. Design § 3.6 cites them from PublicAPI.Shipped.txt; the Green build is the compile check.
+
+### Red (test-only commit, `Lane: RED`)
+Test: `MauiNetworkStatusTests.IsInternetReachable_MapsEachNetworkAccessValue` (5 InlineData cases), AC REQ-SFT-53.
+Output (`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --filter "FullyQualifiedName~MauiNetworkStatusTests"`, exit 1), compiler line verbatim:
+```
+MyVocaList.Tests\Unit\Services\MauiNetworkStatusTests.cs(21,22): error CS0103: O nome "MauiNetworkStatus" não existe no contexto atual [MyVocaList.Tests\MyVocaList.Tests.csproj]
+```
