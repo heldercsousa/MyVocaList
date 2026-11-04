@@ -1010,9 +1010,36 @@ _(not started)_
 
 ## 4.1a
 
-### Checkpoint
+**Status:** To Review. Branch task/sft-4.1a-deezer-plain-query. Red a5c9cc7c (Lane: RED), Green in the following commit.
+Inherited: clean worktree, nothing half-done.
 
-_(not started)_
+### Red output (verbatim CS lines)
+DeezerProviderTests.cs(129,35), (145,31), (164,37): error CS1061: MusicSearchResultDto has no definition for "Version"
+DeezerProviderTests.cs(94,43): error CS0246: type "MusicProviderException" not found
+
+### Changed files:
+- `Services/IMusicMetadataProvider.cs` (contract doc: failures throw; artistHint ignored)
+- `Services/MusicProviderException.cs` (new)
+- `Services/DeezerProvider.cs` (plain query, failures throw, title_short/title_version mapping, version normaliser)
+- `Contracts/DTOs/MusicSearchResultDto.cs` (trailing `string? Version = null`)
+- `MyVocaList.Tests/Unit/Services/DeezerProviderTests.cs` (new, 18 cases)
+- this task-log section
+
+### Verification evidence
+Focused: Aprovado! Com falha: 0, Aprovado: 18, Total: 18.
+Full suite: Failed 0, Passed 706, Total 706 (baseline 688, +18). First full run showed one FAIL, Bug068RegressionTests.Artist_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict (BUG-076 flaky family); re-run passed 706/706.
+Android build (net10.0-android, -m:1): no error lines.
+
+### AC matrix
+REQ-SFT-35 SendsPlainQueryWithoutQualifiers; REQ-SFT-47 SendsPlainArtistQuery; REQ-SFT-06 Http500_Throws (HttpRequestException), MalformedJson_Throws (JsonException, unwrapped), Http200WithErrorObject (MusicProviderException), EmptyData_ReturnsEmpty; REQ-SFT-09 CallerCancelled; REQ-SFT-12 MapsIdTitleShortVersionArtistName, TitleShortMissing_FallsBackToTitle (2 cases), NormalisesVersion (8 cases). All in DeezerProviderTests.cs.
+
+### Superseded tests
+None.
+
+### Notes
+Version normaliser also trims the stripped result and supports (), [], {} pairs; brace support is an implementation choice within REQ-SFT-12 (requested spec note optional). Downstream: 4.2 must catch the new exceptions (callers previously got empty on failure).
+
+ITF: SFT-4.1a — Services/DeezerProvider.cs — root cause: NormaliseVersion also strips `{}` pairs, beyond REQ-SFT-12 / design § 3.4 (only `(` and `[`) — Verifier blocker 1 — expected 1 line(s).
 
 ## 4.1b
 
