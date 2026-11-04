@@ -50,29 +50,6 @@ public interface ISongService
         CancellationToken ct = default);
 
     /// <summary>
-    /// Legacy overload carrying the retired <c>hasManualEdits</c> flag. Forwards to the overload
-    /// without it and ignores the flag (REQ-SFT-37).
-    /// </summary>
-    /// <param name="id">Id of the song to update.</param>
-    /// <param name="title">New song title.</param>
-    /// <param name="featuredArtists">Featured-artist names; null clears the field.</param>
-    /// <param name="lyrics">Lyrics text; null clears the field.</param>
-    /// <param name="hasManualEdits">Ignored.</param>
-    /// <param name="externalId">External provider song id; null = keep existing value.</param>
-    /// <param name="externalProvider">External provider name; null = keep existing value.</param>
-    /// <param name="version">Variant label; null = keep existing value.</param>
-    /// <param name="artistId">Id of the original artist; null = keep existing value.</param>
-    /// <param name="newArtistName">Name of a not-yet-existing artist to create and link.</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns><c>(true, message)</c> on success; <c>(false, reason)</c> on failure.</returns>
-    [Obsolete("hasManualEdits is retired (REQ-SFT-37); use the overload without it. Removed in 3.2c.")]
-    Task<(bool success, string message)> UpdateSongAsync(
-        int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
-        string? externalId = null, string? externalProvider = null, string? version = null,
-        int? artistId = null, string? newArtistName = null,
-        CancellationToken ct = default);
-
-    /// <summary>
     /// Creates a song and atomically persists the supplied YouTube/streaming URLs in a single transaction.
     /// Both repositories must share the same scoped <c>AppDbContext</c> so a single
     /// <c>SaveChangesAsync</c> commits song and URLs together (AC-6.2).

@@ -50,7 +50,7 @@ public class SongServiceUpdateIntegrationTests
 
         // Simulate Save — SongFormViewModel.ExecuteEditSaveAsync -> SongService.UpdateSongAsync.
         var (success, message) = await songService.UpdateSongAsync(
-            songId, "Some Title", featuredArtists: null, lyrics: null, hasManualEdits: true,
+            songId, "Some Title", featuredArtists: null, lyrics: null,
             artistId: newArtistId, ct: CancellationToken.None);
 
         Assert.True(success, message);
@@ -78,7 +78,7 @@ public class SongServiceUpdateIntegrationTests
         var songId = song!.Id;
 
         var (success, message) = await songService.UpdateSongAsync(
-            songId, "Some Title 2", featuredArtists: null, lyrics: null, hasManualEdits: true,
+            songId, "Some Title 2", featuredArtists: null, lyrics: null,
             artistId: newArtistId, ct: CancellationToken.None);
 
         Assert.True(success, message);
