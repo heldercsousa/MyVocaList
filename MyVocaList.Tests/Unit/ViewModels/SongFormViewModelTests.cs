@@ -2,6 +2,8 @@
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
+using MyVocaList.Navigation;
+using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -9,6 +11,8 @@ public class SongFormViewModelTests
 {
     private static SongKaraokeUrlDto MakeDto(string videoId = "abc123", int songId = 42) =>
         new(videoId, songId, 0, null, null, DateTime.UtcNow, null, false);
+
+    private readonly Mock<INavigationService> _navigationMock = new();
 
     private SongFormViewModel CreateSut(
         Mock<ISongKaraokeUrlService>? urlService = null,
@@ -27,7 +31,23 @@ public class SongFormViewModelTests
             new Mock<ILogger<SongFormViewModel>>().Object,
             (urlService ?? new Mock<ISongKaraokeUrlService>()).Object,
             (secureStorage ?? new Mock<ISecureStorageWrapper>()).Object,
-            messenger ?? new Mock<IMessenger>().Object);
+            messenger ?? new Mock<IMessenger>().Object,
+            _navigationMock.Object);
+    }
+
+    // ── Resolution sheet: Open existing (Task 5.1) ─────────────────────────
+
+    [Fact]
+    // [AC] REQ-SFT-22: Open existing on the resolution sheet opens the stored song's edit form in place of the add form.
+    public async Task OpenExistingSong_FromResolutionSheet_NavigatesToEditFormReplacingAddForm()
+    {
+        var sut = CreateSut();
+        var match = new SongMatch(77, "Creep", "", "Radiohead", 1.0);
+
+        await sut.OpenExistingSongCommand.ExecuteAsync(match);
+
+        _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=77"), Times.Once);
+        Assert.False(sut.IsResolutionSheetVisible);
     }
 
     // ── RemoveUrlAsync (edit mode) ─────────────────────────────────────────
