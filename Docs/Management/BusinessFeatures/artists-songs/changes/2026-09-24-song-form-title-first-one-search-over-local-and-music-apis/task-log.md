@@ -459,6 +459,11 @@ Duplicate-title mocks in `UpdateSongAsync_DuplicateTitleExcludingSelf_ReturnsFal
 
 BUG-067 navigation-detach block (`song.OriginalArtist = null`) untouched.
 
+### Verifier + merge (orchestrator, 2026-11-04)
+- Verifier **PASS** (BUG-067 detach block unchanged; effective version `version ?? song.Version ?? ""` correct for REQ-SFT-29; 12 Moq edits purely mechanical). W1: REQ-SFT-29 cites the old `SongService.cs:155` (stale spec line ref, ignored). W2: unified duplicate message recorded in `design.md` § 3.2 note.
+- Conflict with merged 3.3 (only `SongResolutionServiceTests.cs`: 3.2a's edits sat in 3 tests 3.3 deleted) resolved on the branch by taking develop's version (0 `UpdateSongAsync` refs remain) — `9f8e083`; worktree build 0 errors, 674/674.
+- Merged `eab8b6b2`. Post-merge develop: build `0 Erro(s)`; test run 1: `Com falha: 1, Aprovado: 673, Total: 674` (failing test name NOT captured — output filter dropped it); merged tree identical to the branch tip (`rev-parse ^{tree}` equal) that passed 674/674; re-run once: `Com falha: 0, Aprovado: 674, Total: 674`. Treated as flaky (third intermittent failure this session — flagged to Helder).
+
 ## 3.3
 
 ### Checkpoint
