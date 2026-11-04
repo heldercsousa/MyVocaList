@@ -1168,3 +1168,57 @@ No-new-test decision: Level C deletion; nothing new to assert.
 ### Verification evidence
 Build (android, -m:1): exit 0, 0 errors. Full suite: `Failed: 0, Passed: 663, Total: 663` (baseline 666, delta -3 = deleted CommitAsync tests).
 Census `ResolutionChoice`: ZERO HITS. Census `CommitAsync(`: only `Infra/UnitOfWork/UnitOfWork.cs:53,88` (plus unrelated doc text `.claude/skills/efcore-patterns/SKILL.md:376`).
+
+## 4.1c
+
+**Plan:** `plan.md` § Task 4.1c (W5) · **Branch:** `task/sft-4.1c-network-status` (worktree `.worktrees/sft-4.1c`, base `develop` d0a06dd4, ancestor verified) · **Status:** To Review
+
+### Context7 lookup (MAUI, pinned to csproj: Microsoft.Maui.Controls 10.0.41 via Directory.Packages.props)
+- Library: `/dotnet/maui` (Context7 versions available 10.0.20, 10.0.51; closest to pin used).
+- Confirmed: `IConnectivity { NetworkAccess NetworkAccess {get;} ... }`, `Connectivity.Current` (IConnectivity), `Connectivity.NetworkAccess`, namespace `Microsoft.Maui.Networking`; `NetworkAccess` = Unknown(0), None(1), Local(2).
+- Not in the returned snippet: `ConstrainedInternet`, `Internet`. Design § 3.6 cites them from PublicAPI.Shipped.txt; the Green Android build compiled them, so they exist in the pinned MAUI.
+
+### Commits
+- Red: `94fb324d` · `Lane: RED` · `--no-verify` (test file + this section only).
+- Green: this commit (SHA reported in the handback; the log cannot contain its own SHA).
+
+### Red (test-only commit, `Lane: RED`)
+Test: `MauiNetworkStatusTests.IsInternetReachable_MapsEachNetworkAccessValue` (5 InlineData cases), AC REQ-SFT-53.
+Output (`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --filter "FullyQualifiedName~MauiNetworkStatusTests"`, exit 1), compiler line verbatim:
+```
+C:\Users\helde\source\repos\MyVocaList\.worktrees\sft-4.1c\MyVocaList.Tests\Unit\Services\MauiNetworkStatusTests.cs(21,22): error CS0103: O nome "MauiNetworkStatus" não existe no contexto atual [C:\Users\helde\source\repos\MyVocaList\.worktrees\sft-4.1c\MyVocaList.Tests\MyVocaList.Tests.csproj]
+```
+
+### Green
+- Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` → `Compilação com êxito.` / `0 Erro(s)` / `Tempo Decorrido 00:07:18.17`.
+- Focused: `MauiNetworkStatusTests` → `Aprovado!  – Com falha: 0, Aprovado: 5, Ignorado: 0, Total: 5`.
+- Full suite: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` → `Aprovado!  – Com falha: 0, Aprovado: 693, Ignorado: 0, Total: 693` (baseline 688; delta +5, the new theory cases). Exit 0.
+
+### Changed files
+- `Domain/ServicesInterfaces/INetworkStatus.cs` (new) — `bool HasInternetAccess { get; }`, no MAUI types.
+- `Contracts/DTOs/Suggestions/RemoteSearchStatus.cs` (new) — `enum RemoteSearchStatus { Ok, Offline, Unavailable }`.
+- `MyVocaList/UI/Services/MauiNetworkStatus.cs` (new) — `MauiNetworkStatus(IConnectivity)`, `HasInternetAccess`, static pure `IsInternetReachable(NetworkAccess)`.
+- `MyVocaList/MauiProgram.cs` — two lines (110-111) beside `INavigationService`: `AddSingleton<IConnectivity>(_ => Connectivity.Current)` and `AddSingleton<INetworkStatus, MauiNetworkStatus>`. Not in `AddAppServices`.
+- `MyVocaList.Tests/Unit/Services/MauiNetworkStatusTests.cs` (new) — Level B theory, 5 cases.
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` — `## 4.1c` section only.
+
+### AC traceability matrix (REQ-SFT-53)
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-SFT-53 | None/Local → no internet (Deezer not called); Unknown/ConstrainedInternet/Internet → attempt | `MauiNetworkStatus.IsInternetReachable` | `MauiNetworkStatusTests.IsInternetReachable_MapsEachNetworkAccessValue` (5 cases) |
+
+Consumer wiring (`INetworkStatus` into the suggestion services) is task 4.1b/4.2 scope, not this task.
+
+### No-test decisions (Level C)
+- `INetworkStatus` (interface), `RemoteSearchStatus` (enum), `MauiNetworkStatus.HasInternetAccess` (one-line delegation to `IConnectivity`), and the two `MauiProgram.cs` registrations: Level C, no mandatory test. Behaviour is exercised through the pure mapping; DI wiring is verified by the Android build and the full suite.
+
+### Verification evidence
+- Context7 lookup: recorded above.
+- Post-edit re-read: `INetworkStatus.cs` (16 lines), `RemoteSearchStatus.cs` (17 lines), `MauiNetworkStatus.cs` (19 lines) verified non-empty and correct; `MauiProgram.cs` lines 107-111 re-read: registrations present.
+- No SafeAreaEdges / XAML touched. No tasks.md tick. No push.
+
+### Deviations / notes for review
+- Design § 3.6 places `MauiNetworkStatus` in namespace `MyVocaList.UI.Services` (beside `INavigationService`); implemented that way. The brief named no namespace, so this is the spec's placement.
+- `ConstrainedInternet` / `Internet` not visible in the Context7 snippet; compiled successfully, so the pinned MAUI defines them.
+- Inherited state: none (fresh branch from develop; the Red was written in this session).
+- Requested spec notes: none required by this task.

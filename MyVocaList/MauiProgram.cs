@@ -105,6 +105,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<ISnackbarComponent, SnackbarComponent>();
         builder.Services.AddSingleton<ISecureStorageWrapper, SecureStorageWrapper>();
         builder.Services.AddSingleton<INavigationService, MyVocaList.UI.Services.NavigationService>();
+        // REQ-SFT-53: device network state for the offline check. Kept here (not in AddAppServices) so the
+        // off-device DI test graph never resolves Connectivity.Current (design.md § 3.6).
+        builder.Services.AddSingleton<IConnectivity>(_ => Connectivity.Current);
+        builder.Services.AddSingleton<INetworkStatus, MyVocaList.UI.Services.MauiNetworkStatus>();
         builder.Services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         builder.Services.AddHttpClient();
 #if ANDROID
