@@ -992,12 +992,33 @@ None required; optionally note `FtsQueryBuilder` is public (see Deviations).
 
 ## 3.9b
 
-### Checkpoint
-Step 1 of 3 done (Red). Now: implement `IArtistRepository.SearchNameCandidatesAsync` + `ArtistRepository` (Green).
-Context manifest: `Infra/Repository/ArtistRepository.cs`, `Domain/RepositoryInterface/IArtistRepository.cs`, `MyVocaList.Tests/Integration/Repositories/ArtistRepositorySearchTests.cs`, `Infra/Repository/SongRepository.cs` (pattern).
+**Status:** To Review
+**Red SHA:** 61deac4d (CS1061 x11, see below) | **Green SHA:** see handback / `git log` (commit `feat(artist-repo): FTS5 trigram artist-name candidates`)
 
 ### Red (verbatim, CS1061)
-`ArtistRepositorySearchTests.cs(42,32): error CS1061: 'ArtistRepository' does not contain a definition for 'SearchNameCandidatesAsync'` (same at lines 50, 58, 66, 81, 89, 105, 106, 125, 126; localized pt-BR in the raw output).
+`ArtistRepositorySearchTests.cs(42,32): error CS1061: 'ArtistRepository' does not contain a definition for 'SearchNameCandidatesAsync'` (same at lines 50, 58, 66, 81, 89, 105, 106, 125, 126; localized pt-BR in raw output).
+
+### Implementation notes
+- `IArtistRepository.SearchNameCandidatesAsync(name, take, ct)`; `ArtistRepository` ctor gains optional `ILogger<ArtistRepository>? logger = null` (NullLogger default; existing `new ArtistRepository(_db)` sites compile).
+- FTS path: `SqlQueryRaw<int>` ids from `ArtistSearch MATCH @m ORDER BY bm25(ArtistSearch), length(name) LIMIT @take`, then one `Artists` query (AsNoTracking) re-ordered by id position. Prefix path (no word >= 3 chars): collated `LIKE` ordered by name length.
+- Index-missing catch is specific to `ArtistSearch` (3.9 verifier follow-up W3): `SqliteException` containing both "no such table" and "ArtistSearch".
+- Test defect found in Green (my own Red): the rename test needed `ChangeTracker.Clear()` + `Update` because the test context is NoTracking by default and seeding leaves entities tracked. Test fixed in the Green commit; no spec change; assertions unchanged.
+- IArtistRepository implementer census (Python os.walk): only `ArtistRepository`; all other hits are Moq mocks, `GetRequiredService`, or an `AddScoped` factory. No forwarding members needed; no files outside the owned set touched.
+
+### Changed files:
+- `Domain/RepositoryInterface/IArtistRepository.cs`
+- `Infra/Repository/ArtistRepository.cs`
+- `MyVocaList.Tests/Integration/Repositories/ArtistRepositorySearchTests.cs` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
+
+### Verification evidence
+Focused: Aprovado, Falha 0, Aprovado 14, Total 14. Full suite: Falha 0, Aprovado 751, Total 751 (baseline 737, delta +14). Android build: 0 Erro(s).
+
+### AC matrix
+| AC | Test |
+|---|---|
+| REQ-SFT-19 | Metalica, Beatles, Unaccented, ShortName, FtsSyntaxCharacters (x7), RespectsTake, IndexMissing |
+| REQ-SFT-34 | AfterRename_ReflectsNewName |
 
 ## 3.9c
 
