@@ -171,7 +171,7 @@
   - **Files owned:** `Contracts/DTOs/List/ArtistListItemDto.cs`, `Domain/ReadModels/ArtistListItem.cs`, `Infra/Repository/ArtistRepository.cs`, `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`, `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs`
   - **Consumes:** 3.2c, 3.3b. **Risk:** Low. **Demo:** Artists list renders unchanged. **Review lane:** Standard
 
-- [ ] **3.6a Remove the `Artist.HasManualEdits` writer** [SEQUENTIAL — after 3.5]
+- [x] **3.6a Remove the `Artist.HasManualEdits` writer** [SEQUENTIAL — after 3.5]
   - **Files owned:** `Services/ArtistService.cs` (`:107`), `MyVocaList.Tests/Unit/Services/ArtistServiceTests.cs` (only if an assertion reads the flag; none found 2026-09-25)
   - **Risk:** Low. **Demo:** build and tests green.
   - **Review lane:** Standard
