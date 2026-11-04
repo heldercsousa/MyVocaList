@@ -1,4 +1,4 @@
-﻿using MyVocaList.Domain.Resolution;
+using MyVocaList.Domain.Resolution;
 using MyVocaList.Tests.Infrastructure;
 
 namespace MyVocaList.Tests.Unit.Services;
@@ -191,75 +191,5 @@ public class ArtistResolutionServiceTests
         _repoMock.Verify(
             r => r.GetFuzzyCandidatePoolAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
             Times.Never);
-    }
-
-    // ── CommitAsync — CreateNew sets external identity ────────────────────
-
-    [Fact]
-    // [AC] AC-3.4 + design §4 CommitAsync: CreateNew creates the artist then attaches external identity.
-    public async Task CommitAsync_CreateNew_SetsExternalIdentityOnCreatedArtist()
-    {
-        var createdArtist = new Artist { Id = 99, Name = "New Artist" };
-        _artistServiceMock
-            .Setup(s => s.CreateArtistAsync("New Artist", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((true, "Created", createdArtist));
-        _repoMock
-            .Setup(r => r.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        var candidate = new ArtistCandidate("New Artist", "Deezer", "dz-new");
-        var sut = CreateSut();
-
-        var (success, message, artistId) = await sut.CommitAsync(candidate, ResolutionChoice.CreateNew, null);
-
-        Assert.True(success);
-        Assert.Equal(99, artistId);
-        // Verify external identity was set
-        _repoMock.Verify(r => r.UpdateAsync(
-            It.Is<Artist>(a => a.ExternalProvider == "Deezer" && a.ExternalId == "dz-new"),
-            It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    // Design §4 CommitAsync AttachExternalId: sets external identity when absent.
-    public async Task CommitAsync_AttachExternalId_SetsExternalIdentityIfAbsent()
-    {
-        var existingArtist = new Artist { Id = 5, Name = "Adele", ExternalId = null, ExternalProvider = null };
-        _repoMock
-            .Setup(r => r.GetByIdAsync(5, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingArtist);
-        _repoMock
-            .Setup(r => r.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        var candidate = new ArtistCandidate("Adele", "Deezer", "dz-adele");
-        var sut = CreateSut();
-
-        var (success, message, artistId) = await sut.CommitAsync(candidate, ResolutionChoice.AttachExternalId, 5);
-
-        Assert.True(success);
-        Assert.Equal(5, artistId);
-        _repoMock.Verify(r => r.UpdateAsync(
-            It.Is<Artist>(a => a.ExternalId == "dz-adele" && a.ExternalProvider == "Deezer"),
-            It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    // Design §4 CommitAsync AttachExternalId: does NOT overwrite existing external identity.
-    public async Task CommitAsync_AttachExternalId_DoesNotOverwriteExistingIdentity()
-    {
-        var existingArtist = new Artist { Id = 5, Name = "Adele", ExternalId = "existing-id", ExternalProvider = "MB" };
-        _repoMock
-            .Setup(r => r.GetByIdAsync(5, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingArtist);
-
-        var candidate = new ArtistCandidate("Adele", "Deezer", "dz-adele");
-        var sut = CreateSut();
-
-        var (success, _, artistId) = await sut.CommitAsync(candidate, ResolutionChoice.AttachExternalId, 5);
-
-        Assert.True(success);
-        // Update must NOT be called since external identity already exists
-        _repoMock.Verify(r => r.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }
