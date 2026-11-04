@@ -17,7 +17,7 @@
 | Static analysis suppressions | `library/code-style-reference.md § Static Analysis Suppressions` |
 | EF Core / SQLite constraints | `constraints-registry.md § EF Core / SQLite` |
 
-Design skills for deeper C#/.NET guidance: `dotnet-skills:modern-csharp-coding-standards`, `dotnet-skills:dependency-injection-patterns`, `dotnet-skills:efcore-patterns`.
+Design skills for deeper C#/.NET guidance: `modern-csharp-coding-standards`, `dependency-injection-patterns`, `efcore-patterns`.
 
 ---
 
