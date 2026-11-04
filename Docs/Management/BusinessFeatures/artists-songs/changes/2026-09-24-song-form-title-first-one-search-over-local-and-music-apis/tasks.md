@@ -99,7 +99,7 @@
 
 ## Phase 3 — Services (write path), resolution simplification, schema
 
-- [ ] **3.1 `SongService`: create a typed artist inside the song's unit of work** [SEQUENTIAL — after 2.1, G3]
+- [x] **3.1 `SongService`: create a typed artist inside the song's unit of work** [SEQUENTIAL — after 2.1, G3]
   - **Produces:** `CreateSongWithUrlsAsync(int? artistId, string? newArtistName, …)` with `FlushAsync`; external-identity uniqueness check (REQ-SFT-26).
   - **Consumes:** 2.1; `IUnitOfWork.FlushAsync`.
   - **Risk:** High — atomicity; CATALOG-PROP hooks the same method.

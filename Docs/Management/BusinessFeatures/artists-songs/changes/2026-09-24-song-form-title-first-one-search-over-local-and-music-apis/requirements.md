@@ -258,6 +258,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
     `Infra/EntityEFConfig/ArtistConfiguration.cs:17-21,39-41`. No change is needed on that path.
 - **REQ-SFT-21: Artist required.** Save with an empty or whitespace Artist shows "Artist is required"
   and saves nothing (unchanged, AC-10.4).
+  > **Spec updated 2026-11-04 (3.1):** at the Service, a blank or whitespace `newArtistName` counts as not supplied, so `CreateSongWithUrlsAsync(null, "  ", …)` returns "Artist is required" (consistent with this REQ; Verifier-confirmed).
 
 ### F. Save-time song duplicate guard (simplified resolution sheet)
 
