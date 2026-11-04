@@ -159,6 +159,8 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
 
 > **Spec updated 2026-11-04 (4.2 Red `008ef44d`):** constructor order fixed by the Tester (design left it open): `SongSuggestionService(ISongRepository, IArtistRepository, IUnitOfWork, IEnumerable<IMusicMetadataProvider>, ISimilarityScorer, INetworkStatus, ILogger<SongSuggestionService>)`. The provider is picked by `ProviderName == "Deezer"`; the song-side `MusicBrainz` branch is removed from the new path (4.3 removes the legacy methods).
 
+> **Spec updated 2026-11-04 (4.2 merge `b100ceb7`, Verifier CONDITIONAL PASS):** steps 3–4 are implemented per item, not as one batch: one `FindByTitleAndArtistNamesAsync([triple])` per unmatched Deezer row (all inside the single dedup `ExecuteReadAsync`), then one `GetByNamesCollatedAsync([name])` per distinct remaining artist in a **second** read scope after take-5. Reason: mapping batch hits back to rows would need C#-side case/accent matching (HARD RULE); positional per-item calls keep the DB the only judge. Accepted (≤ ~25 + 5 indexed reads, single device). The defensive "no Deezer provider registered" branch returns `Unavailable` + Warning — accepted as Level-C plumbing (DI always registers Deezer; BUG-082 test). A batch repository method returning the input index is a possible later optimisation.
+
 ### 3.4 Providers and the Field dependency
 
 - `IMusicMetadataProvider` contract change: `SearchSongsAsync`/`SearchArtistsAsync` **throw** on

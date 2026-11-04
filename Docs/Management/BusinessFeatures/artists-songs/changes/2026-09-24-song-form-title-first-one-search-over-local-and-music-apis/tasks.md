@@ -261,7 +261,7 @@
   > **Spec updated 2026-11-04 (D21):** also after 4.1c; `ArtistRemoteSearchResult(Remote, RemoteSearchStatus Status)`.
   > **Spec updated 2026-11-04 (4.1b merge `1aee99f6`, Verifier PASS):** dead `"MusicBrainz"`-first branches remain in `SongSuggestionService.cs:19/98` and `ArtistSuggestionService.cs:18/152` (+ test literals in `ArtistSuggestionServiceTests.cs`); harmless (falls through to Deezer). **Retirement is explicit:** 4.2/4.3 remove the song-side `MusicBrainzProviderName` branch and literals; 6.1 removes the artist-side one and the `ArtistSuggestionDto.cs:10` doc example.
 
-- [ ] **4.2 `SongSuggestionService` local and remote title search** [SEQUENTIAL — after 2.2, 3.9, 4.1]
+- [x] **4.2 `SongSuggestionService` local and remote title search** [SEQUENTIAL — after 2.2, 3.9, 4.1]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** also after 4.1c; `SongRemoteSearchResult.Status` (`RemoteSearchStatus`) replaces `RemoteUnavailable`; `INetworkStatus` ctor dependency — offline → no Deezer call, `Offline` (REQ-SFT-53); dedup (b) uses (title_short, artist, version) triples; +5 tests (plan § Task 4.2).
   - **Produces:** `SearchTitleLocalAsync`, `SearchTitleRemoteAsync`, `SongRemoteSearchResult`; `SongSuggestionDto.Version`/`LocalArtistName`; ranking, dedup (a)/(b) with promotion, 3,000 ms bound; tier (c) and the C# re-filters deleted.
   - **Files owned:** `Services/ISongSuggestionService.cs`, `Services/SongSuggestionService.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`, `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new), `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`
