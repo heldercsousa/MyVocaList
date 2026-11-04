@@ -1,7 +1,7 @@
 ---
 id: disabled-dotnet-skills-still-listed-at-every-session-start
 title: Disabled dotnet-skills still listed at every session start
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-03
 section: DevCycleCraft
 parent: per-agent-context-isolation
@@ -66,9 +66,11 @@ Order: (a) `off` test on one built-in + one synced skill (zero risk, settings-on
 |---|---|---|---|
 | Baseline | 39,417 | 31,449 | full (~100 entries) — subagents now get the full listing + memory files (July: ~2–2.5k, none) |
 | A: `off` for `dataviz`, `anthropic-skills:morning`, `dotnet-skills:akka-aspire-configuration` (declared name) | 40,310 | — | `dataviz`, `morning` gone; akka still listed |
+| C: `off` 12 unused built-in/synced; `user-invocable-only` 8 command-only built-ins | 39,221 | — | all 20 gone (~95 → 72 entries); `user-invocable-only` hides from the model, `/command` still works |
+| B: `dotnet-skills` + `claude-code-setup` plugins disabled, 4 skills vendored | 38,346 | — | not applied live — plugins load at session start; confirm with `/context` after restart |
 
 - Built-in and claude.ai-synced skills honour `off`, live, no restart. Plugin skills ignore it under either key form → only lever for dotnet-skills is disabling the plugin (b).
 - Probe token totals vary ±1k with answer length — too noisy for sub-1k deltas; use the listing presence (binary) and `/context` in a fresh session for sizes.
 - A is kept (local `settings.local.json`).
 
-**Next:** (b) disable `dotnet-skills`, vendor the 4 used skills (~4k/agent) — needs Helder approval (CLAUDE.md names them as plugin skills); (c) `off` for further unused built-in/synced skills.
+**Done (Helder-approved 2026-11-03):** A, B, C; all overrides now in `settings.json`. **Close when** a fresh-session `/context` shows no `dotnet-skills:*` skills/agents and Skills ≈ 5k (from 10k).
