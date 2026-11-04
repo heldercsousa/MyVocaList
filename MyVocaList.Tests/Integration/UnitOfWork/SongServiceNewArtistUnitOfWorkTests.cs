@@ -96,9 +96,13 @@ public class SongServiceNewArtistUnitOfWorkTests
             });
         });
 
+        // Resolve the service BEFORE clearing (as NestedUnitOfWorkTests:164/177 do): resolving
+        // SongService records the host's AppDbContext, which must not count as in-unit-of-work.
+        var service = host.Resolve<ISongService>();
         observed.Clear(); // only contexts seen inside the unit of work under test
 
-        var (success, message, _) = await CreateWithNewArtist(host, "Two Level Join Artist", "Two Level Join Song");
+        var (success, message, _) = await service.CreateSongWithUrlsAsync(
+            null, "Two Level Join Artist", "Two Level Join Song", string.Empty, null, null, null, null, []);
 
         Assert.True(success, message);
         Assert.True(observed.Count >= 2, $"Expected repositories from >= 2 levels, saw {observed.Count}.");

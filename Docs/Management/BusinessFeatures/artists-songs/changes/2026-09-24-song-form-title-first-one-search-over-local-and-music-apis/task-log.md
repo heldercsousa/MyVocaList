@@ -319,6 +319,45 @@ SongServiceTests.cs(696,66): error CS1503: Argumento 8: nao e possivel converter
 ```
 (Accents transliterated; full set: CS1503, CS8130, CS8183, CS9174 across both files.)
 
+### Builder (W3) — Status: blocked: spec gap
+
+- 2026-11-04 (Builder W3, Opus) — branch `task/sft-3.1-new-artist-uow`, worktree `.worktrees/sft-3.1`. Step 3 implemented (new overload + `[Obsolete]` forwarder in `ISongService.cs` / `SongService.cs`), **left UNCOMMITTED in the worktree** (no Green commit: one Red test cannot pass for a reason inside the test). Context7 available; not needed (no new library API; `IUnitOfWork.FlushAsync` + ambient join verified from `Infra/UnitOfWork/UnitOfWork.cs` and the `ArtistResolutionService.CommitAsync` precedent).
+- Build (attempt 1): `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` → `6 projects, 0 errors, 35 warnings`.
+- Focused tests (`SongServiceTests|SongServiceNewArtistUnitOfWorkTests`): `Com falha: 1, Aprovado: 46, Total: 47`. Failing: `CreateSongWithUrlsAsync_NewArtist_UsesOneAppDbContextAcrossTwoLevels` — `Assert.Single() Failure: The collection contained 2 items`.
+- Also run (`--no-build`): `UnitOfWorkReadScopeTests|NestedUnitOfWorkTests|Bug068RegressionTests|SongFormViewModelTests` → `Com falha: 0, Aprovado: 65, Total: 65`. Full suite NOT run (stopped at the block).
+- New CS0618 warnings (old-overload call sites only): `MyVocaList/UI/ViewModels/SongFormViewModel.cs(568)`, `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs(128)`, `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs(180, 199)`.
+
+#### Spec gap: two-level context test records the window-scope SongService's constructor repositories
+**Location:** `SongServiceNewArtistUnitOfWorkTests.cs:81-106` (port of `NestedUnitOfWorkTests.cs:146`).
+**Gap description:** the helper `CreateWithNewArtist` calls `host.Resolve<ISongService>()` AFTER `observed.Clear()`, so constructing `SongService` resolves its constructor-injected `ISongRepository`/`IArtistRepository` from the host scope and records the host's `AppDbContext`; the unit of work's own context is the second distinct instance. The original test resolved the service BEFORE `observed.Clear()` (`NestedUnitOfWorkTests.cs:164` then `:177`). No production change can fix this without removing `SongService`'s constructor fields (constructor signature is pinned by `SongServiceTests.CreateSut` and by the architecture floor of governed constructor parameters).
+**Options:**
+- Option A: Tester resolves `var service = host.Resolve<ISongService>();` before `observed.Clear()` and calls `service.CreateSongWithUrlsAsync(null, "Two Level Join Artist", …)` directly — the test then measures only the unit of work's contexts, as the original did.
+- Option B: Builder alters `SongService`'s constructor — breaks every test's `CreateSut` and the architecture floors; out of scope.
+**Recommendation:** Option A, because it restores the original test's observation window and is a test-only change.
+**Blocking:** Yes — Builder must not edit tests.
+
+#### Note for the Verifier — `FailureTupleAfterArtistStaged_WritesNothing`
+With this implementation the title is validated (top of the lambda) BEFORE the artist is created, so the 101-char title fails before any artist is staged: the test passes but does NOT exercise a staged-artist rollback. The rollback of a flushed artist is exercised by `ThrowAfterArtistStaged_RollsBackBoth` (exception path) and `NewArtistNameCollatedDuplicate_FailsAndWritesNothing` covers the nested failure-tuple path.
+
+#### Implementation decisions (for review)
+- XOR check (`artistId.HasValue == !IsNullOrWhiteSpace(newArtistName)` → `"Artist is required"`) runs OUTSIDE the lambda (REQ-UOW-41: no DI scope for pure input validation); a blank `newArtistName` counts as not supplied.
+- Order inside the lambda: title validation → external-identity check (only when both `externalId` and `externalProvider` are non-blank; `ExistsByExternalIdentityAsync(provider, externalId, null, ct)`) → new artist via `IArtistService` from `sp` + `_uow.FlushAsync` (or existing artist lookup "Artist not found") → title/version duplicate check against the effective artist → stage song → stage URLs.
+- `_uow.FlushAsync` is called on the constructor field (it holds no `AppDbContext`; same rationale as `ArtistResolutionService.CommitAsync`).
+
+### Changed files (uncommitted)
+- `Domain/ServicesInterfaces/ISongService.cs`
+- `Services/SongService.cs`
+- this task-log section
+
+- Context manifest: `Services/SongService.cs` (impl) · `Domain/ServicesInterfaces/ISongService.cs` (surface) · `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` · `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` · `Infra/UnitOfWork/UnitOfWork.cs` (ambient join/flush) · `plan.md` § Task 3.1.
+
+### Tester correction (2026-11-04)
+
+- **What was wrong:** in `CreateSongWithUrlsAsync_NewArtist_UsesOneAppDbContextAcrossTwoLevels`, `observed.Clear()` ran before `CreateWithNewArtist(...)`, whose helper resolves `ISongService` after the clear. Constructing `SongService` from the host scope recorded the host's `AppDbContext`, so `Assert.Single` saw 2 contexts. The source test (`NestedUnitOfWorkTests.cs:164` then `:177`) resolves the service first and clears afterwards.
+- **Fix:** test-only. The test now resolves `var service = host.Resolve<ISongService>();` before `observed.Clear();` and calls `service.CreateSongWithUrlsAsync(null, "Two Level Join Artist", "Two Level Join Song", string.Empty, null, null, null, null, [])` directly, matching the helper's argument list. Comment added on the resolve line.
+- No assertion changed; AC REQ-SFT-18 unchanged. No production file touched (`ISongService.cs` / `SongService.cs` remain uncommitted, untouched).
+- Test output: `Aprovado!  – Com falha:     0, Aprovado:     6, Ignorado:     0, Total:     6, Duração: 12 s - MyVocaList.Tests.dll (net10.0)`
+
 ## 3.2a
 
 ### Checkpoint
