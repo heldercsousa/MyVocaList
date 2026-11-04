@@ -127,7 +127,7 @@
   > **Spec updated 2026-09-26:** (D4) 3.3 keeps the `SongResolution` record shape (passes `FieldDiffs: []`, `TargetHasManualEdits: false`); `ResolutionResults.cs` moves to new task 3.3b. Runs after 5.1 (precondition census: no `CommitAsync(` in `SongFormViewModel.cs`).
 
 - [ ] **3.3b Shrink `SongResolution`; delete `FieldDiff`** [SEQUENTIAL — after 3.3] *(new, plan § 0.3 D4)*
-  > **Spec updated 2026-11-04:** 3.3 merged (`c59c61d1`, Verifier PASS) and left `SongResolutionService`'s `_songRepository`, `_artistResolution`, `_songService` fields unused (constructor unchanged). 3.3b already owns the constructor (`SongResolutionService.cs` "constructors"): drop those three parameters too, updating `SongResolutionServiceTests` `CreateSut` (DI is container-resolved; confirm `AppServicesRegistrationTests` stays green). 3.3b also waits for 3.2a's merge — both write `SongResolutionServiceTests.cs`/`SongFormViewModelTests.cs`.
+  > **Spec updated 2026-11-04 (withdrawn the same day):** an earlier note told 3.3b to also drop `SongResolutionService`'s now-unused constructor parameters. **Withdrawn** — the permanent architecture gate `UnitOfWorkReadScopeTests.NoGovernedField_IsDereferencedAnywhere_InsideOrOutsideALambda` (REQ-UOW-36/37) requires governed constructor parameters on every service that calls `ExecuteReadAsync`, so removing them fails it, and allow-listing would weaken an approved gate. 3.3b keeps the plan's scope (record shrink only; constructor unchanged). Dead injected fields stay under READ-SCOPE open item **F4** (Helder). 3.3b ran after 3.2a's merge (shared test files).
   - **Produces:** `public sealed record SongResolution(ResolutionKind Kind, int? ExactMatchSongId, IReadOnlyList<SongMatch> FuzzyCandidates);` no `FieldDiff`.
   - **Consumes:** 3.3.
   - **Risk:** Low — mechanical.
@@ -147,7 +147,7 @@
   - **Risk:** Low. **Demo:** census finds no `hasManualEdits` argument; all tests green.
   - **Review lane:** Standard
 
-- [ ] **3.4 Simplify `ArtistResolutionService` (commit side); delete `ResolutionChoice`** [SEQUENTIAL — after 3.3]
+- [x] **3.4 Simplify `ArtistResolutionService` (commit side); delete `ResolutionChoice`** [SEQUENTIAL — after 3.3]
   - **Files owned:** `Domain/ServicesInterfaces/IArtistResolutionService.cs`, `Services/ArtistResolutionService.cs`, `Domain/Resolution/ResolutionChoice.cs` (delete), `MyVocaList.Tests/Unit/Services/ArtistResolutionServiceTests.cs`
   - **Risk:** Low. **Tests:** delete `:200,:225,:249` (AC-3.2/3.4 → REQ-SFT-40).
   - **Demo:** build 0 errors; `AppServicesRegistrationTests` green.

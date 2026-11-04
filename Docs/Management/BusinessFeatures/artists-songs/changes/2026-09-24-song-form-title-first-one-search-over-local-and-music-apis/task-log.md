@@ -486,6 +486,10 @@ _(not started)_
 
 _(not started)_
 
+### Verifier + merge (orchestrator, 2026-11-04)
+- Verifier **PASS** (0 blockers/warnings; `ResolveAsync` byte-unchanged; censuses: `ResolutionChoice` 0, `CommitAsync(` only `UnitOfWork.cs:53,88`). Info: test file lost its UTF-8 BOM (cosmetic); `_artistRepository`/`_artistService` now dead → READ-SCOPE F4 (Helder).
+- Merged `23428828`. Post-merge develop: `0 Erro(s)`; `Aprovado! – Com falha: 0, Aprovado: 671, Total: 671` (674 − 3).
+
 ## 3.2b
 
 ### Checkpoint
