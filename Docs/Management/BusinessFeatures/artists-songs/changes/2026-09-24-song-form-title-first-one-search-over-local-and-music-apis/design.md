@@ -332,6 +332,8 @@ registration (`:156-158`), `CreateArtistInlineCommand`, `ExecuteNewSongSaveAsync
 `DismissMergeSheetCommand`, `_selectedMergeTargetId`, `_pendingCandidate`/`_pendingResolution`,
 `MergeFieldRow`. The stale docstring at `:433` is rewritten.
 
+> **Spec updated 2026-11-04 (5.2 Red `7b8e27a2`) — choices fixed by the Tester:** `SongFormViewModel` takes `ISongSuggestionService` as its **last** constructor parameter (after `INavigationService`); option `Data` is the `SongSuggestionDto` (dispatch on `IsRemote` / `LocalId`); supporting text "artist · version · In your library" (local/promoted) or "artist · version · Deezer" (remote), version part omitted when empty; the note is set only for queries ≥ `MinimumRemoteQueryLength`, through one `RunOnUiThread`, after `ct.ThrowIfCancellationRequested()`; "other input" for the discard sheet (REQ-SFT-11) = non-empty Artist text, Version, Featured, Lyrics, or any YouTube URL; Keep editing restores the **last query** passed to the option source (the Field may already show the headline), unlocks Title, changes nothing else; X on Title resets Version only if it still equals the value the last pick wrote (Q21).
+
 ### 4.1 Artist form (`ArtistFormViewModel`, REQ-SFT-47…50)
 
 `IArtistSuggestionService` is reshaped like the song service: `SearchNameLocalAsync(query, ct)` and
