@@ -943,9 +943,52 @@ REQ-SFT-19 and REQ-SFT-30…33 are enabled by this schema but exercised by the 3
 
 ## 3.9
 
-### Checkpoint
+**Status:** To Review
 
-_(not started)_
+### Orchestrator decision 2026-11-04 (Option A, recorded in tasks.md on develop 55d906e9)
+Also owned: `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` (only 3 forwarding members in `ThrowOnAddSongRepository`). `SongRepository` gets optional `ILogger<SongRepository>? logger = null`, stored as `logger ?? NullLogger<SongRepository>.Instance`.
+
+### Red output (dotnet test --filter SongRepositorySearchTests, compile errors, excerpt)
+- CS1061 `SongRepository` has no `SearchTitleCandidatesAsync` (lines 71, 79, 87, 97, 107, 124, 132, 151, 152)
+- CS1061 `SongRepository` has no `FindByExternalIdsAsync` (line 167)
+- CS1061 `SongRepository` has no `FindByTitleAndArtistNamesAsync` (lines 177, 188, 190)
+- CS0103 `FtsQueryBuilder` does not exist (lines 52, 60, 65)
+
+### Superseded tests
+None (all new; nothing deleted or rewritten).
+
+### Deviations
+- `FtsQueryBuilder` and `BuildTrigramMatch` are `public` (plan: `internal`). The Red test class (`MyVocaList.Tests`) calls them directly and `Infra` has no `InternalsVisibleTo`; the csproj is not owned. 3.9b still consumes it in-assembly.
+- `FindByTitleAndArtistNamesAsync` runs one collated indexed query per triple (loop, results de-duplicated by SongId) rather than one combined statement; the batch is a result page.
+
+### Changed files:
+- `Domain/ReadModels/SongSearchHit.cs` (new)
+- `Domain/RepositoryInterface/ISongRepository.cs`
+- `Infra/Repository/SongRepository.cs` (3 methods, optional `ILogger<SongRepository>? logger = null`)
+- `Infra/Repository/FtsQueryBuilder.cs` (new)
+- `MyVocaList.Tests/Integration/Repositories/SongRepositorySearchTests.cs` (new, Red commit de57f010)
+- `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` (3 forwarding members in `ThrowOnAddSongRepository` only)
+- `Docs/.../task-log.md` (this section)
+
+### Verification evidence
+- Focused: `Aprovado! Com falha: 0, Aprovado: 26, Total: 26` (SongRepositorySearchTests)
+- Full suite: `Com falha: 0, Aprovado: 714, Total: 714` (baseline 688, delta +26)
+- Android build: `ok dotnet build: 6 projects, 0 errors, 28 warnings`
+
+### AC matrix
+| AC | Implementation | Test |
+|---|---|---|
+| REQ-SFT-30 | FtsQueryBuilder.BuildTrigramMatch, SearchTitleCandidatesAsync | BuildTrigramMatch_DontCry_ReturnsQuotedWindowsOred, SearchTitleCandidatesAsync_DontCry/DonCry_IncludesDontCry |
+| REQ-SFT-31 | FTS trigram remove_diacritics | SearchTitleCandidatesAsync_NaoSeiAnyCase_MatchesAccentedTitle |
+| REQ-SFT-32 | bm25 over title+artist columns | SearchTitleCandidatesAsync_GunsCry_IncludesDontCryViaArtist |
+| REQ-SFT-33 | collated title prefix + missing-index catch | ..._ShortQuery_UsesCollatedTitlePrefix, BuildTrigramMatch_NoWordOfThreeChars_ReturnsNull, ..._IndexMissing_ReturnsEmptyAndPrefixStillWorks |
+| REQ-SFT-02 | quote doubling + parameters | BuildTrigramMatch_QuoteInWord_IsDoubled, ..._FtsSyntaxCharacters_DoNotThrow |
+| REQ-SFT-04 | LIMIT @take / Take | SearchTitleCandidatesAsync_RespectsTake |
+| REQ-SFT-05(a) | FindByExternalIdsAsync | FindByExternalIdsAsync_ReturnsHoldersOnly |
+| REQ-SFT-05(b) | FindByTitleAndArtistNamesAsync | ..._CollatedTripleEmptyVersion_Returns, ..._VersionMustMatch |
+
+### Requested spec notes
+None required; optionally note `FtsQueryBuilder` is public (see Deviations).
 
 ## 3.9b
 

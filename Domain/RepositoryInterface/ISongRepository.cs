@@ -1,5 +1,6 @@
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.ReadModels;
 
 namespace MyVocaList.Domain.RepositoryInterface;
 
@@ -78,6 +79,29 @@ public interface ISongRepository
     /// <param name="excludeId">Id of the song being edited — excluded from the check; null when creating.</param>
     /// <param name="ct">Cancellation token.</param>
     Task<bool> ExistsByExternalIdentityAsync(string provider, string externalId, int? excludeId, CancellationToken ct);
+
+    /// <summary>
+    /// Local title-field search (REQ-SFT-02, 30-34). Infra chooses the strategy:
+    /// FTS5 trigram OR-match when the query has a word of &gt;= 3 chars, else collated title prefix.
+    /// </summary>
+    /// <param name="query">Raw user query.</param>
+    /// <param name="take">Maximum number of rows to return.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>At most <paramref name="take"/> rows in DB relevance order (bm25, then shorter title).</returns>
+    Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesAsync(string query, int take, CancellationToken ct);
+
+    /// <summary>REQ-SFT-05(a): songs holding any of the given external ids for one provider.</summary>
+    /// <param name="provider">External provider name (e.g. "Deezer").</param>
+    /// <param name="externalIds">External ids to look up.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task<IReadOnlyList<SongSearchHit>> FindByExternalIdsAsync(string provider, IReadOnlyCollection<string> externalIds, CancellationToken ct);
+
+    /// <summary>
+    /// REQ-SFT-05(b): collated (title, artist name, version) matches. The version comes per item (Q5 = B, D21).
+    /// </summary>
+    /// <param name="items">Triples to match; the version is empty for the canonical version.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName, string Version)> items, CancellationToken ct);
 
     Task AddAsync(Song song, CancellationToken ct);
     Task UpdateAsync(Song song, CancellationToken ct);
