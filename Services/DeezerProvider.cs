@@ -78,7 +78,7 @@ public sealed class DeezerProvider : IMusicMetadataProvider
         if (value.Length < 2) return value;
 
         var open = value[0];
-        var close = open switch { '(' => ')', '[' => ']', '{' => '}', _ => '\0' };
+        var close = open switch { '(' => ')', '[' => ']', _ => '\0' };
         if (close == '\0') return value;
 
         var depth = 0;
