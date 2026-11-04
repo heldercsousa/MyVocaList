@@ -109,16 +109,6 @@ public class SongService : ISongService
         }, ct);
 
     /// <inheritdoc />
-    [Obsolete("hasManualEdits is retired (REQ-SFT-37); use the overload without it. Removed in 3.2c.")]
-    public Task<(bool success, string message)> UpdateSongAsync(
-        int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
-        string? externalId = null, string? externalProvider = null, string? version = null,
-        int? artistId = null, string? newArtistName = null,
-        CancellationToken ct = default)
-        => UpdateSongAsync(id, title, featuredArtists, lyrics, externalId, externalProvider, version,
-            artistId, newArtistName, ct);
-
-    /// <inheritdoc />
     public Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics,
         string? externalId = null, string? externalProvider = null, string? version = null,
