@@ -6,7 +6,7 @@ target: 2026-09-24
 section: DevCycleCraft
 parent: autocomplete-component
 goal: "One reusable DX autocomplete owns all autocomplete behaviour app-wide: a picked option is read-only until X is tapped, X looks enabled, and timing and threshold use shared constants."
-gate: Helder approves the spec, then SongFormPage moves onto the component and passes on device.
+gate: "Component merged; T6 moves the Person form Full Name onto it, then Helder passes the on-device gate T7 (Person form, pick-lock)."
 kind: change
 ---
 

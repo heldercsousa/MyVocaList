@@ -15,7 +15,7 @@
 
 ## Phase 0: Spike (gates the lock mechanism)
 
-- [ ] **T1 [SPIKE]: On-device lock-mechanism spike, B then C** [SEQUENTIAL]
+- [x] **T1 [SPIKE]: On-device lock-mechanism spike, B then C** — verdict B 2026-11-03 (`findings.md` § T1c) [SEQUENTIAL]
   - **Where:** a **throwaway test page**, never committed: one `dxe:AutoCompleteEdit` fed by a static
     in-memory list of 5 options, plus a "lock programmatically" button that sets text + lock, to
     simulate edit-mode hydration. Criterion B5 (BUG-069) is also checked on a **local, uncommitted edit
@@ -114,7 +114,7 @@
   > and -24 are proven by code review and on device (and by T3-C unit tests under C); REQ-ACF-22 is
   > proven at the VM seam (T5), per `design.md` § 4 and § 10, which are more specific than the list above.
 
-- [ ] **T3-C: `TextToRestore` (only if Helder accepted mechanism C)** [SEQUENTIAL, after the T1 verdict + T3 merged]
+- [CANCELLED: T1 verdict B — mechanism C not needed] **T3-C: `TextToRestore` (only if Helder accepted mechanism C)** [SEQUENTIAL, after the T1 verdict + T3 merged]
   - See `plan.md` § Task T3-C. Skipped entirely under B.
   - **Files owned:** `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs`, `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs`
   - **Review lane:** Standard

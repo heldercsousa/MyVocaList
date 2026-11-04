@@ -419,23 +419,23 @@ not Android's system SQLite.
 
 ### Environment
 
-- Device model:
-- Android version:
-- App commit (spike branch): `f736314a` on `spike/sft-g5-fts5` (G5a done 2026-11-03; build 0 errors; emulator smoke not run, per the machine-load constraint)
+- Device model: Samsung SM-S918B (Galaxy S23 Ultra)
+- Android version: 16
+- App commit (spike branch): `f736314a` on `spike/sft-g5-fts5` (G5a done 2026-11-03; build 0 errors; emulator smoke not run, per the machine-load constraint); run on `81e838a8` after two spike-only fixes (XAML `DXButton.Content`, DI registration of the probe page)
 
 ### Run sheet
 
 | # | Check | Pass iff | Result |
 |---|-------|----------|--------|
-| G5-1 | P1 `sqlite_version()` | ≥ 3.45.0 | |
-| G5-2 | P2 `ENABLE_FTS5` | `1` | |
-| G5-3 | P3 create trigram table with `remove_diacritics 1` | no exception | |
-| G5-4 | P5 `"nao"` matches "Não Sei" | exactly `1` | |
-| G5-5 | P6 `"don" OR "cry"` (informational) | contains `2` | |
-| G5-6 | P7 drop | no exception | |
+| G5-1 | P1 `sqlite_version()` | ≥ 3.45.0 | `3.50.4` ✅ |
+| G5-2 | P2 `ENABLE_FTS5` | `1` | `1` ✅ |
+| G5-3 | P3 create trigram table with `remove_diacritics 1` | no exception | `ok` ✅ |
+| G5-4 | P5 `"nao"` matches "Não Sei" | exactly `1` | `1` ✅ |
+| G5-5 | P6 `"don" OR "cry"` (informational) | contains `2` | `2,3` ✅ |
+| G5-6 | P7 drop | no exception | `ok` ✅ |
 
 **Verdict rule:** G5-2, G5-3 and G5-4 pass → `G5: PASS` (G5-1 explains a G5-3 failure; G5-5 is informational). Otherwise → `G5: FAIL — escalated`.
 
 ### Verdict
 
-_(pending — Helder has not run G5b yet)_
+**G5: PASS** (G5c, recorded 2026-11-04 from Helder's on-device output). G5-2, G5-3 and G5-4 all pass; G5-1 and G5-5 pass too. P4 (not in the sheet) inserted the expected `3` rows. The FTS5 trigram design stands (`design.md` § 6); the token-prefix fallback is not needed, so M3 and tasks 3.8, 3.9, 3.9b and 3.9c proceed as planned. Spike branch `spike/sft-g5-fts5` (`81e838a8`) and its worktree deleted after recording.
