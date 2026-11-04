@@ -112,9 +112,16 @@ public class SongService : ISongService
     public Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
         string? externalId = null, string? externalProvider = null, string? version = null,
-        int? artistId = null,
+        int? artistId = null, string? newArtistName = null,
         CancellationToken ct = default)
-        => _uow.ExecuteAsync<(bool success, string message)>(async sp =>
+    {
+        // REQ-SFT-28 / REQ-SFT-21: at most one of artistId / newArtistName (blank name = not
+        // supplied). Pure input validation stays OUTSIDE the lambda (REQ-UOW-41).
+        var hasNewArtistName = !string.IsNullOrWhiteSpace(newArtistName);
+        if (artistId.HasValue && hasNewArtistName)
+            return Task.FromResult<(bool success, string message)>((false, "Artist is required"));
+
+        return _uow.ExecuteAsync<(bool success, string message)>(async sp =>
         {
             // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
             var songRepository = sp.GetRequiredService<ISongRepository>();
@@ -134,11 +141,33 @@ public class SongService : ISongService
             if (song == null)
                 return (false, "Song not found");
 
+            // REQ-SFT-26: an external identity held by ANOTHER song (self excluded) is rejected before
+            // any artist is created, so a refused save never leaves a new artist behind.
+            if (!string.IsNullOrWhiteSpace(externalId) && !string.IsNullOrWhiteSpace(externalProvider)
+                && await songRepository.ExistsByExternalIdentityAsync(externalProvider, externalId, id, ct))
+                return (false, "This music-database song is already in your library");
+
             // BUG-067 (REQ-ACREATE-16): the artist FK used to be written on the create path only, so a
             // user changing the artist of a saved song lost the edit silently. null = keep existing
             // (same semantics as version/externalId below); a supplied id must exist.
             var effectiveArtistId = artistId ?? song.ArtistId;
-            if (artistId.HasValue && artistId.Value != song.ArtistId)
+            if (hasNewArtistName)
+            {
+                // REQ-SFT-28 / REQ-UOW-28: resolved from sp, so the nested service's ExecuteAsync JOINS
+                // this ambient scope (one context, one transaction). A failure tuple is returned as-is
+                // and the unit of work skips the save and rolls back.
+                var artistService = sp.GetRequiredService<IArtistService>();
+                var (artistCreated, artistMessage, createdArtist) =
+                    await artistService.CreateArtistAsync(newArtistName!, ct: ct);
+                if (!artistCreated || createdArtist is null)
+                    return (false, artistMessage);
+
+                // REQ-UOW-35: flush (not commit) so the generated Artist.Id exists; _uow holds no
+                // AppDbContext (it flushes the AMBIENT scope), so REQ-UOW-28 does not apply to it.
+                await _uow.FlushAsync(ct);
+                effectiveArtistId = createdArtist.Id;
+            }
+            else if (artistId.HasValue && artistId.Value != song.ArtistId)
             {
                 // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
                 var artistRepository = sp.GetRequiredService<IArtistRepository>();
@@ -147,13 +176,14 @@ public class SongService : ISongService
                     return (false, "Artist not found");
             }
 
-            // Song.Title trimming is enforced by the EF Core ValueConverter configured in
-            // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
-            // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-            // Uniqueness is evaluated against the EFFECTIVE artist — moving a song to an artist that
-            // already owns that title must be rejected before any write.
-            if (await songRepository.ExistsByTitleForArtistAsync(effectiveArtistId, title, id, ct))
-                return (false, "A song with this title already exists for this artist");
+            // REQ-SFT-29 / REQ-SFT-27: uniqueness = (collated effective artist, title, effective
+            // version) excluding this song; null version = keep the stored one. Title/Version trimming
+            // is enforced by the EF ValueConverter (design.md § D3), which also applies to this WHERE
+            // parameter.
+            var effectiveVersion = version ?? song.Version ?? string.Empty;
+            if (await songRepository.FindIdByTitleVersionForArtistAsync(
+                    effectiveArtistId, title, effectiveVersion, id, ct) is not null)
+                return (false, "A song with this title and version already exists for this artist");
 
             // Song.Title/FeaturedArtists/Version trimming is enforced by the ValueConverter (design.md § D3).
             // BUG-067 under the unit-of-work pattern: SongRepository.GetByIdAsync eager-loads
@@ -186,6 +216,7 @@ public class SongService : ISongService
             // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
             return (true, $"Song updated to '{title}'");
         }, ct);
+    }
 
     /// <inheritdoc />
     [Obsolete("Use the (int? artistId, string? newArtistName, …) overload — REQ-SFT-18. Removed in task 5.3b.")]

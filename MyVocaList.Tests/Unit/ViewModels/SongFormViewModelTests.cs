@@ -709,7 +709,7 @@ public class SongFormViewModelTests
         songService.Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
         var secureStorage = new Mock<ISecureStorageWrapper>();
         secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
@@ -730,7 +730,7 @@ public class SongFormViewModelTests
         songService.Verify(s => s.UpdateSongAsync(
             42, "Stored Title", "Feat A", "Stored lyrics", true,
             null, null, "Acoustic",
-            It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -751,7 +751,7 @@ public class SongFormViewModelTests
         songService.Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
         var secureStorage = new Mock<ISecureStorageWrapper>();
         secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
@@ -774,7 +774,7 @@ public class SongFormViewModelTests
         songService.Verify(s => s.UpdateSongAsync(
             42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(), true,
             It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-            9, It.IsAny<CancellationToken>()), Times.Once);
+            9, It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── Title field: blur-first validation (Form Validation Standard, Task 04) ────
@@ -1161,7 +1161,7 @@ public class SongFormViewModelTests
         songService.Setup(s => s.UpdateSongAsync(
                 It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<bool>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
         var secureStorage = new Mock<ISecureStorageWrapper>();
         secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
@@ -1180,6 +1180,6 @@ public class SongFormViewModelTests
         songService.Verify(s => s.UpdateSongAsync(
             42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(), true,
             It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-            It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

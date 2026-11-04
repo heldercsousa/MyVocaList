@@ -37,12 +37,17 @@ public interface ISongService
     /// When supplied and different from the stored value the song is re-linked to that artist, and
     /// the title-uniqueness check is evaluated against the new artist. An unknown id is rejected.
     /// </param>
+    /// <param name="newArtistName">
+    /// Name of a not-yet-existing artist to create inside this call's unit of work and link the song to
+    /// (REQ-SFT-28). At most one of <paramref name="artistId"/> / <paramref name="newArtistName"/>;
+    /// both null or a blank name = keep the stored artist (REQ-SFT-21 blank-not-supplied rule).
+    /// </param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns><c>(true, message)</c> on success; <c>(false, reason)</c> on failure.</returns>
     Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
         string? externalId = null, string? externalProvider = null, string? version = null,
-        int? artistId = null,
+        int? artistId = null, string? newArtistName = null,
         CancellationToken ct = default);
 
     /// <summary>
