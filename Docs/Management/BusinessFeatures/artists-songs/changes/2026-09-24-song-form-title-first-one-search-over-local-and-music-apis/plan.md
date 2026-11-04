@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 >
-> **Plan status:** written 2026-09-26 against the spec **APPROVED 2026-09-26** under Helder's pre-authorisation of 2026-09-25 (`requirements.md` header). Every open question takes its recorded recommendation (Q1 drop MusicBrainz, Q2 discard sheet yes, Q4 "Save as new song" yes, Q5 full `title`, Q6 X on Artist clears identity, Q7 3,000 ms, Q8 `TokenSortRatio`, Q10 do not store the Deezer artist id, Q11 port 4 tests + delete 1, Q16 see § 0.3 D1). `tasks.md` is the authoritative task list; this plan turns it into executable steps and does not redesign. Every place where the plan sequences or splits a task differently from `tasks.md` is listed in § 0.3 with its reason.
+> **Plan status:** written 2026-09-26 against the spec **APPROVED 2026-09-26** under Helder's pre-authorisation of 2026-09-25 (`requirements.md` header). Every open question takes its recorded recommendation (Q1 drop MusicBrainz, Q2 discard sheet yes, Q4 "Save as new song" yes, Q5 full `title` — **superseded 2026-11-04: Q5 = B, § 0.3 D21**, Q6 X on Artist clears identity, Q7 3,000 ms, Q8 `TokenSortRatio`, Q10 do not store the Deezer artist id, Q11 port 4 tests + delete 1, Q16 see § 0.3 D1). `tasks.md` is the authoritative task list; this plan turns it into executable steps and does not redesign. Every place where the plan sequences or splits a task differently from `tasks.md` is listed in § 0.3 with its reason.
 
 **Goal:** On the Song form, Title comes first and, in add mode, is one search over the local library (FTS5 trigram, typo-tolerant) and Deezer. A local pick opens the song; a Deezer pick fills Title and Artist. Every Save decision lives in `SongService.SaveFromFormAsync`. The Artist form's Name gets the same local + Deezer search. `HasManualEdits`, the merge sheet, inline artist create and both picker pages are removed.
 
@@ -76,7 +76,7 @@ Every code task gets its **own** worktree `.worktrees/sft-<task>` on branch `tas
 | **HARD STOP** | **G5 verdict must read `PASS`** before W12 | G5c | — |
 | **W12** | **3.8** M3 (Part A → scaffold → Part B) | 3.7 + G5 PASS + G3 | Sonnet → orchestrator → **Opus** |
 | **W13** | **3.9** | 3.8 | Sonnet |
-| **W14** | **3.9b** · **4.2-Tester** → **4.2-Builder** | 3.9b ← 3.9 · 4.2 ← 2.2+3.9+4.1b | Sonnet · Sonnet → Sonnet |
+| **W14** | **3.9b** · **4.2-Tester** → **4.2-Builder** | 3.9b ← 3.9 · 4.2 ← 2.2+3.9+4.1b+4.1c | Sonnet · Sonnet → Sonnet |
 | **W15** | **3.9c** · **4.3** | 3.9c ← 3.9b+3.4 · 4.3 ← 4.2 | Sonnet · Sonnet |
 | **W16** | **3.10-Tester** → **3.10-Builder** · **5.2-Tester** → **5.2-Builder** | 3.10 ← 3.2c+3.3b+3.9c + G3 · 5.2 ← 4.3+3.5b | Sonnet → **Opus** · Sonnet → Sonnet |
 | **W17** | **5.3-Tester** → **5.3-Builder** · **6.1-Tester** → **6.1-Builder** | 5.3 ← 5.2+3.10 · 6.1 ← 4.1b+4.3+3.9b | Sonnet → Sonnet · Sonnet → Sonnet |
@@ -162,7 +162,8 @@ Each item is recorded **on `develop` by the orchestrator at Step 0** (§ 0.4 ite
   - **4.1a:** `MusicSearchResultDto` gains trailing `string? Version = null`; `DeezerProvider` maps `title_short` (fallback `title`) and the normalised `title_version`; +3 tests. Files +1 (`Contracts/DTOs/MusicSearchResultDto.cs`) → 5.
   - **4.1c (new):** `INetworkStatus` + `MauiNetworkStatus` (pure mapping, Level B theory) + `RemoteSearchStatus` + `MauiProgram.cs` registration (manifest permission already present). Runs with 4.1a (W5; no shared file). `MauiProgram.cs` is sequential-only: no other writer is in flight (1.3 was its only planned writer).
   - **4.1b:** `ArtistRemoteSearchResult(Remote, RemoteSearchStatus Status)`; now after 4.1a **and 4.1c**.
-  - **4.2:** `SongRemoteSearchResult.Status`; offline step; triples to `FindByTitleAndArtistNamesAsync`; tests renamed/added (below). After 4.1c too.
+  - **4.2:** `SongRemoteSearchResult.Status`; offline step; triples to `FindByTitleAndArtistNamesAsync`; tests renamed/added (below). After 4.1c too. **Also owns `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs` for the constructor call only** (`:141` builds `SongSuggestionService` with the old arguments; adding `INetworkStatus` would otherwise break the test build): pass a `Mock<INetworkStatus>` with `HasInternetAccess` returning `true`, nothing else; 4.3 still retargets those tests. 6 files — **second accepted sizing exception beside D10** (the alternative, a temporary second constructor, adds throwaway production code).
+  - **Mock default trap (4.2, 4.3, 6.1):** `Mock<INetworkStatus>` returns `false` by default, which reads as **Offline** and skips the provider. Every service test fixture sets `HasInternetAccess` to `true` explicitly; only the Offline tests set `false`.
   - **4.3:** `AppServicesRegistrationTests` graph setup adds `Mock.Of<INetworkStatus>()`.
   - **5.2:** note mapped from `Status` with the two texts; remote pick fills Version; remote supporting text includes version; tests added (below).
   - **6.1 / 6.2:** same status/offline handling; artist offline wording per Q18 (proposed).
@@ -175,11 +176,11 @@ Each item is recorded **on `develop` by the orchestrator at Step 0** (§ 0.4 ite
 
 - [ ] **0.1** Session-start protocol (Rule 7) and hook health check (`.claude/settings.json` is valid JSON; `.worktrees/` is git-ignored: `git check-ignore -q .worktrees`). Record the baseline: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` on `develop` → write the pass count into `task-log.md` § Baseline (679 at `744ea7d6` per the ACF task-log; re-measure).
 - [ ] **0.2** Status: `python .claude/scripts/backlog/backlog_gen.py status song-form-title-first-one-search-over-local-and-music-apis "🟢"` (spec approved, plan ready); update the README `gate:` to "Helder's on-device E2E gate (plan § 7.2)". Move to 🟡 at W1 dispatch. Run `regen`; inspect the diff (`workflow-rule-2.md` § Generated artifacts).
-- [ ] **0.3** Create `task-log.md` in this folder with pre-created sections, one per task, each holding only a `### Checkpoint` placeholder: `## Baseline`, `## G5 — FTS5 spike`, `## 1.1` … `## 1.7`, `## 2.1`, `## 2.2`, `## 3.1`, `## 3.2a`, `## 3.3`, `## 3.3b`, `## 3.4`, `## 3.2b`, `## 3.2c`, `## 3.5a`, `## 3.5b`, `## 3.6a`, `## 3.6b`, `## 3.7`, `## 3.8`, `## 3.9`, `## 3.9b`, `## 3.9c`, `## 3.10`, `## 4.1a`, `## 4.1b`, `## 4.2`, `## 4.3`, `## 5.1` … `## 5.4`, `## 5.3b`, `## 5.5`, `## 5.6`, `## 6.1` … `## 6.3`, `## 7.1`, `## 7.2 — Device gate`.
+- [ ] **0.3** Create `task-log.md` in this folder with pre-created sections, one per task, each holding only a `### Checkpoint` placeholder: `## Baseline`, `## G5 — FTS5 spike`, `## 1.1` … `## 1.7`, `## 2.1`, `## 2.2`, `## 3.1`, `## 3.2a`, `## 3.3`, `## 3.3b`, `## 3.4`, `## 3.2b`, `## 3.2c`, `## 3.5a`, `## 3.5b`, `## 3.6a`, `## 3.6b`, `## 3.7`, `## 3.8`, `## 3.9`, `## 3.9b`, `## 3.9c`, `## 3.10`, `## 4.1a`, `## 4.1b`, `## 4.1c` (added 2026-11-04, D21), `## 4.2`, `## 4.3`, `## 5.1` … `## 5.4`, `## 5.3b`, `## 5.5`, `## 5.6`, `## 6.1` … `## 6.3`, `## 7.1`, `## 7.2 — Device gate`.
 - [ ] **0.4** Append to `findings.md` a section `## G5 — FTS5 trigram on Android (spike, 2026-09-26)` holding: an empty `### Environment` (device model, Android version, app commit), the **G5 run sheet** (§ G5b below, verbatim, empty Result cells), and an empty `### Verdict`.
 - [ ] **0.5** Register `task-log.md` in `MyVocaList.sln` with the `sln_add.py` helper used for `plan.md` (`findings.md` is already registered).
 - [ ] **0.6** File the `design.md` § 6.4 exception row in `.claude/exception-registry.md` verbatim, with the code location extended to `Services/ArtistSuggestionService.cs` (ranking step of `SearchNameLocalAsync`, D20) (required **before 2.2** starts; Review lane Elevated).
-- [ ] **0.7** Record **every** § 0.3 deviation, **D1 through D20 (including D17–D20)**, in `tasks.md` as `> **Spec updated 2026-09-26:**` notes at the affected tasks; mark 5.7 `[CANCELLED: folded into 5.5]` (D17); add the new task entries 3.3b, 3.5a/3.5b, 4.1a/4.1b, 5.3b in `tasks.md` format (`workflow-rule-4.md`: Produces/Consumes/Risk/Files owned/Demo/Review lane) copied from this plan; add "after 3.9b" to 6.1 (D20). (The spec-level notes for D1 and D20 in `requirements.md`/`design.md` were written 2026-09-26 with this plan revision; check they are present.)
+- [ ] **0.7** Record **every** § 0.3 deviation, **D1 through D20 (including D17–D20)** (D21 added 2026-11-04 with its own notes), in `tasks.md` as `> **Spec updated 2026-09-26:**` notes at the affected tasks; mark 5.7 `[CANCELLED: folded into 5.5]` (D17); add the new task entries 3.3b, 3.5a/3.5b, 4.1a/4.1b, 5.3b in `tasks.md` format (`workflow-rule-4.md`: Produces/Consumes/Risk/Files owned/Demo/Review lane) copied from this plan; add "after 3.9b" to 6.1 (D20). (The spec-level notes for D1 and D20 in `requirements.md`/`design.md` were written 2026-09-26 with this plan revision; check they are present.)
 - [ ] **0.7b** ACF spec note: in `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/design.md` at `:384` ("… `IsReadOnly` (an API-sourced song's Title in edit mode) …"), add `> **Spec updated 2026-09-26:** the song-form item's seventh-round ruling reverses this: in edit mode Title is Editable with `IsSearchEnabled = false` for every song; the song form binds no `IsReadOnly`. `IsReadOnly` stays in the component for future use.`
 - [ ] **0.8** LEDGER rows for W1 (`/sln-ledger`): branch, worktree, phase, status. G3 two-way (§ 0.2.2): note in this item's row "G3: no SongService/Migrations task while CATALOG-PROP or a BUG-080 migration branch is live"; add the mirror note to the **CATALOG-PROP** row and the **BUG-080** row (add a BUG-080 row if none exists); add the same two-way note to `tasks.md` § Coordination.
 - [ ] **0.9** Commit on `develop`: `docs(sft): plan prep — task-log skeleton, G5 run sheet, deviation notes, §6.4 exception row`.
@@ -1070,6 +1071,7 @@ Rules in order (`design.md` § 3.5, verbatim intent): 1 validate (title, version
 | `SaveFromForm_IdentityHeldByAnotherSong_FailsWithMessage` | REQ-SFT-26 |
 | `SaveFromForm_Success_ReturnsSavedWithId` | REQ-SFT-51 |
 | `SaveFromForm_WritesOnlyThroughCreateOrUpdate` (Verify no repository `AddAsync`/`UpdateAsync` from this method) | REQ-SFT-46 |
+| `SaveFromForm_VersionOver60_FailsOnVersionField` (a pick-filled Version of 61 chars → `Failed`, `FailedField == SaveField.Version`, nothing written) (D21) | REQ-SFT-12 |
 
 Example (the REQ-SFT-41 regression):
 
@@ -1131,7 +1133,7 @@ The provider does **not** check connectivity: offline detection is the suggestio
 | `SearchSongsAsync_EmptyData_ReturnsEmpty` | REQ-SFT-06 | `{"data":[]}` → empty, no throw |
 | `SearchSongsAsync_MapsIdTitleShortVersionArtistName` | REQ-SFT-12 | *(D21, replaces `…MapsIdTitleArtistName`)* `{"title":"Creep (Live)","title_short":"Creep","title_version":"(Live)"}` → `SongTitle` "Creep", `Version` "Live", `ExternalId`, `ArtistName` |
 | `SearchSongsAsync_TitleShortMissing_FallsBackToTitle` | REQ-SFT-12 | no/empty `title_short` → `SongTitle` = `title`; no `title_version` → `Version` "" |
-| `SearchSongsAsync_NormalisesVersion` (Theory) | REQ-SFT-12 | `"(Live)"`→`"Live"`, `" [Remastered 2011] "`→`"Remastered 2011"`, `"Live at Wembley"`→ unchanged, `"((x))"`→`"(x)"` (one pair only), `"(Live) (2011)"`→ unchanged (first `(` closes early), `"(Live]"`→ unchanged (mismatched), `""`→`""` |
+| `SearchSongsAsync_NormalisesVersion` (Theory) | REQ-SFT-12 | `"(Live)"`→`"Live"`, `" [Remastered 2011] "`→`"Remastered 2011"`, `"Live at Wembley"`→ unchanged, `"((x))"`→`"(x)"` (one pair only), `"(Live) (2011)"`→ unchanged (first `(` closes early), `"(Live]"`→ unchanged (mismatched), `"(Live [2011])"`→`"Live [2011]"`, `""`→`""` |
 
 - [ ] Red (today every failure returns empty, `DeezerProvider.cs:60-64`; the URL has qualifiers `:47-50`) → commit tests `Lane: RED` → Green → suite `Failed: 0` (the BUG-082 DI test stays green) → commit: `feat(deezer): plain query; failures throw (HTTP, JSON, error body) (REQ-SFT-06/35)`.
 
@@ -1161,7 +1163,7 @@ public sealed record ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto>
 
 **Model:** Tester Sonnet · Builder Sonnet. **Level:** A. **Review lane:** Elevated. **Estimate:** 60 + 90 min.
 
-**Files:** `Services/ISongSuggestionService.cs` (add the two methods; **keep** `GetLocalAsync`/`GetRemoteAsync` until 4.3), `Services/SongSuggestionService.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs` (add `Version` — local: stored; remote: the provider's normalised Deezer version, `MusicSearchResultDto.Version ?? ""` (D21) — and `LocalArtistName`; the service coalesces a null provider `Version` to `""` before building the REQ-SFT-05(b) triples), `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new), `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`. `SearchConstants.RemoteSearchTimeoutMilliseconds` already exists (added in 2.2, § 0.3 D16).
+**Files:** `Services/ISongSuggestionService.cs` (add the two methods; **keep** `GetLocalAsync`/`GetRemoteAsync` until 4.3), `Services/SongSuggestionService.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs` + `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs` (constructor call only, D21: `Mock<INetworkStatus>` with `HasInternetAccess` → `true`) + (add `Version` — local: stored; remote: the provider's normalised Deezer version, `MusicSearchResultDto.Version ?? ""` (D21) — and `LocalArtistName`; the service coalesces a null provider `Version` to `""` before building the REQ-SFT-05(b) triples), `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new), `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`. `SearchConstants.RemoteSearchTimeoutMilliseconds` already exists (added in 2.2, § 0.3 D16).
 
 **Interfaces — Produces (`design.md` § 3.3 verbatim):**
 
@@ -1317,6 +1319,8 @@ private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleOptionsAsyn
 | `TitleOptionSource_OfflineThenOk_ClearsNote` (D21) | REQ-SFT-06 |
 | `SelectTitle_RemoteOption_SetsVersionFromDeezer_OverwritingTypedVersion` (typed "Demo" → pick with Version "" → Version ""; pick with "Live" → "Live") (D21; Q20) | REQ-SFT-12 |
 | `ClearTitle_AfterRemotePick_ResetsUnchangedPickFilledVersion` (D21; Q21) | REQ-SFT-14 |
+| `SongTitle_EmptiedByTyping_ClearsTitleSupportingText` (mechanism: the `OnSongTitleChanged` partial clears the note when the title is empty or whitespace — the Field never queries an empty string) (D21) | REQ-SFT-06 |
+| `ClearTitle_AfterRemotePickThenLocalPick_NoDiscardSheetFromPickFilledVersion` (D21; Q21) | REQ-SFT-14/11 |
 | `ClearTitle_AfterRemotePick_KeepsVersionEditedAfterPick` (D21; Q21) | REQ-SFT-14 |
 | `TitleOptionSource_RemoteSucceedsAfterFailure_ClearsTitleSupportingText` | REQ-SFT-06 |
 | `TitleOptionSource_CancelledQuery_DoesNotChangeTitleSupportingText` | REQ-SFT-09 (Review Focus 4) |
@@ -1331,7 +1335,7 @@ private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleOptionsAsyn
 | `SelectTitle_RemoteOptionArtistIsLocal_LocksLocalArtist` | REQ-SFT-13 |
 | `SelectTitle_RemoteOptionArtistNotLocal_LocksTypedArtistWithNoId` | REQ-SFT-13 |
 | `RemotePick_ClosesDropdowns` (replaces the deleted `:486/:509`) | REQ-SFT-12 |
-| `ClearArtist_AfterRemotePick_ClearsPendingIdentity_KeepsTitle` | REQ-SFT-14 |
+| `ClearArtist_AfterRemotePick_ClearsPendingIdentity_KeepsTitle` (also asserts Version is kept, D21/Q21) | REQ-SFT-14 |
 | `ArtistOptionSource_ReturnsLocalArtistsOnly_NoRemoteCall` | REQ-SFT-16 |
 
 - [ ] **Step 2 (Tester): Red** (`CS1061`), commit tests only `Lane: RED`, stop.
@@ -1378,6 +1382,7 @@ private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleOptionsAsyn
 | `ConfirmSaveAsNewSong_ReinvokesWithSaveAsNewSong` | REQ-SFT-23 |
 | `DismissResolutionSheet_NothingSaved` | REQ-SFT-22 |
 | `Save_NeverCallsCreateOrUpdateDirectly` | REQ-SFT-46 |
+| `Save_FailedOnVersion_ShowsErrorOnVersionField` (mapping only, D21) | REQ-SFT-12 |
 | `Save_DoubleTapWhilePending_CallsServiceOnce` (rewrite of `:1132`; a `TaskCompletionSource` gate; two `ExecuteAsync` calls) | REQ-SFT-51 (Review Focus 5) |
 
 - [ ] **Step 2 (Tester): Red** (`CS1061` / Moq verify failures), commit `Lane: RED`, stop.
@@ -1494,7 +1499,7 @@ The orchestrator marks `tasks.md` 5.7 `[CANCELLED: folded into 5.5 — a XAML-on
 | `SearchNameRemoteAsync_DeezerMetallica_DroppedWhenLocalMetallicaExists` | REQ-SFT-48 |
 | `SearchNameRemoteAsync_BelowThreeTrimmedChars_NoProviderCall` | REQ-SFT-03 |
 | `SearchNameRemoteAsync_DeezerNameCollatedMatchOfLocal_Dropped` | REQ-SFT-48 |
-| `SearchNameRemoteAsync_ProviderThrows_StatusUnavailable` | REQ-SFT-06 |
+| `SearchNameRemoteAsync_ProviderThrows_StatusUnavailable_LogsWarning` (D21) | REQ-SFT-06 |
 | `SearchNameRemoteAsync_ProviderSlowerThanBound_StatusUnavailable` | REQ-SFT-08 |
 | `SearchNameRemoteAsync_CallerCancelled_Rethrows` | REQ-SFT-09 |
 | `SearchNameRemoteAsync_ZeroResults_StatusOk` | REQ-SFT-06 |
@@ -1522,6 +1527,7 @@ Red (Tester, `Lane: RED`) → Green (Builder) → census `['FilterSimilar']` ZER
 | `NameOptionSource_QueryBelowRemoteThreshold_KeepsExistingNote` (D21) | REQ-SFT-47/06 |
 | `NameOptionSource_CancelledQuery_DoesNotChangeNote` (D21) | REQ-SFT-47/09 |
 | `ClearName_ClearsNote` (D21) | REQ-SFT-47/06 |
+| `ArtistName_EmptiedByTyping_ClearsNameSupportingText` (same mechanism as the Song form) (D21) | REQ-SFT-47/06 |
 | `SelectName_LocalOption_NavigatesToArtistEditForm` | REQ-SFT-48 |
 | `SelectName_DeezerOption_FillsNameAndLocks_WritesNothing` | REQ-SFT-49 |
 | `ClearName_EmptiesAndUnlocks` | REQ-SFT-49 |
