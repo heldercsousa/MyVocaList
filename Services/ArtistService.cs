@@ -104,7 +104,6 @@ public class ArtistService : IArtistService
 
             artist.Name = name;
             artist.UpdatedAt = DateTime.UtcNow;
-            artist.HasManualEdits = true;
 
             await artistRepository.UpdateAsync(artist, ct);
             // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
