@@ -7,9 +7,8 @@ namespace MyVocaList.Domain.ReadModels;
 /// <param name="Id">Unique identifier</param>
 /// <param name="Name">Artist display name</param>
 /// <param name="ExternalProvider">Source provider (e.g. "musicbrainz")</param>
-/// <param name="HasManualEdits">Whether artist has been manually edited since import</param>
 /// <param name="CatalogCount">Number of songs in the catalog for this artist</param>
-public record ArtistListItem(int Id, string Name, string ExternalProvider, bool HasManualEdits, int CatalogCount)
+public record ArtistListItem(int Id, string Name, string ExternalProvider, int CatalogCount)
 {
     /// <summary>Human-readable catalog count text for UI display.</summary>
     public string CatalogCountText => CatalogCount == 0

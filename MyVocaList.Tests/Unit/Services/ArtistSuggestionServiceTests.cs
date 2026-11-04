@@ -47,7 +47,7 @@ public class ArtistSuggestionServiceTests
     public async Task GetLocalAsync_ManyMatches_ReturnsAtMostFive()
     {
         var items = Enumerable.Range(1, 5)
-            .Select(i => new ArtistListItem(i, $"Artist {i}", "musicbrainz", false, 0))
+            .Select(i => new ArtistListItem(i, $"Artist {i}", "musicbrainz", 0))
             .ToList();
         _repoMock
             .Setup(r => r.SearchByNameAsync("Art", 5, It.IsAny<CancellationToken>()))

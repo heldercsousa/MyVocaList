@@ -4,7 +4,6 @@ public record ArtistListItemDto(
     int Id,
     string Name,
     string? ExternalProvider,
-    bool HasManualEdits,
     int CatalogCount)
 {
     public string CatalogCountText => CatalogCount == 0
