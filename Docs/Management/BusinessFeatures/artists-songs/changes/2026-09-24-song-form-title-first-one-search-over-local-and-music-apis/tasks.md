@@ -12,7 +12,7 @@
 > task names the addition it waits for. Level A tests are written **Red first** (`Lane: RED` commit
 > per `.claude/exception-registry.md`, then Green).
 >
-> **Sequential-only files touched:** `MauiProgram.cs`, `AppShell.xaml.cs`, every `Migrations/` file,
+> **Sequential-only files touched:** `MauiProgram.cs` (1.3, and 4.1c per D21), `AppShell.xaml.cs`, every `Migrations/` file,
 > this `tasks.md`. `SongFormViewModel.cs`, `SongFormViewModelTests.cs`, `SongService.cs` are
 > single-writer hotspots here: tasks owning them never run in the same wave.
 
@@ -241,10 +241,10 @@
   - **Demo:** provider tests green. **Review lane:** Standard
   > **Spec updated 2026-11-04 (plan § 0.3 D21, PENDING Helder's approval of the Q5/Q7 amendment — do not dispatch before):** also owns `Contracts/DTOs/MusicSearchResultDto.cs` (trailing `string? Version = null`); the provider maps `title_short` (fallback `title`) and the normalised `title_version` (REQ-SFT-12); +3 tests. The provider does not check connectivity; the Q7 offline/unavailable split lives in 4.1c + 4.2/6.1.
 
-- [ ] **4.1c Network status abstraction** [P with 4.1a; after D21 approval] *(new 2026-11-04, plan § 0.3 D21)*
+- [ ] **4.1c Network status abstraction** [P with 4.1a — sole writer of `MauiProgram.cs` in flight; after D21 approval] *(new 2026-11-04, plan § 0.3 D21)*
   - **Produces:** `INetworkStatus` (Domain), `RemoteSearchStatus { Ok, Offline, Unavailable }` (Contracts), `MauiNetworkStatus` (app project), registrations in `MauiProgram.cs` (REQ-SFT-53, `design.md` § 3.6).
-  - **Files owned:** `Domain/ServicesInterfaces/INetworkStatus.cs` (new), `Contracts/DTOs/Suggestions/RemoteSearchStatus.cs` (new), `MyVocaList/Platform/MauiNetworkStatus.cs` (new), `MyVocaList/MauiProgram.cs`, `MyVocaList/Platforms/Android/AndroidManifest.xml` (only if `ACCESS_NETWORK_STATE` is absent)
-  - **Risk:** Low. **Tests:** Level C (no mandatory test; the no-test decision is recorded in the task-log; airplane-mode check in 7.2). **Review lane:** Standard
+  - **Files owned:** `Domain/ServicesInterfaces/INetworkStatus.cs` (new), `Contracts/DTOs/Suggestions/RemoteSearchStatus.cs` (new), `MyVocaList/UI/Services/MauiNetworkStatus.cs` (new), `MyVocaList/MauiProgram.cs`, `MyVocaList.Tests/Unit/Services/MauiNetworkStatusTests.cs` (new)
+  - **Risk:** Low. **Tests:** Level B theory for the pure access-level mapping (REQ-SFT-53); the rest Level C; airplane-mode check in 7.2. **Review lane:** Standard
 
 - [ ] **4.1b Delete `MusicBrainzProvider` (Q1 = drop)** [after 4.1a] *(split, plan § 0.3 D8/D18)*
   - **Files owned:** `Services/MusicBrainzProvider.cs` (delete), `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` (new, consumed by 6.1)

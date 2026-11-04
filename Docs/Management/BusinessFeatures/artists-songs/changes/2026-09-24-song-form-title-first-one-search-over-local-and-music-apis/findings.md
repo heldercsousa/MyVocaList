@@ -439,3 +439,24 @@ not Android's system SQLite.
 ### Verdict
 
 **G5: PASS** (G5c, recorded 2026-11-04 from Helder's on-device output). G5-2, G5-3 and G5-4 all pass; G5-1 and G5-5 pass too. P4 (not in the sheet) inserted the expected `3` rows. The FTS5 trigram design stands (`design.md` § 6); the token-prefix fallback is not needed, so M3 and tasks 3.8, 3.9, 3.9b and 3.9c proceed as planned. Spike branch `spike/sft-g5-fts5` (`81e838a8`) and its worktree deleted after recording.
+
+## Deezer title fields (live public API, 2026-11-04 — evidence for REQ-SFT-12 / Q5)
+
+Fetched without authentication (`api.deezer.com`, the same public API the app uses). Values verbatim.
+
+| Request | id | `title` | `title_short` | `title_version` | `artist.name` |
+|---|---|---|---|---|---|
+| `track/3135556` | 3135556 | Harder, Better, Faster, Stronger | Harder, Better, Faster, Stronger | "" | (not fetched) |
+| `search?q=creep radiohead live` | 1082668372 | Creep (Live) | Creep | (Live) | Radiohead |
+| same | 2215315187 | Creep (Acoustic) | Creep | (Acoustic) | Radiohead |
+| `search?q=hey jude remastered` | 977945 | Juke Box Hero (2008 Remaster) | Juke Box Hero | (2008 Remaster) | Foreigner |
+| `search?q=despacito justin bieber` | 63456718 | Take You (Acoustic Version) | Take You | (Acoustic Version) | Justin Bieber |
+| `search?q=old town road billy ray cyrus` | 699056192 | Old Town Road (feat. Billy Ray Cyrus) (Remix) | Old Town Road (feat. Billy Ray Cyrus) | (Remix) | Lil Nas X |
+| same | 670998062 | Old Town Road (8-Bit Lil Nas X & Billy Ray Cyrus Emulation) | (same as title) | "" | 8-Bit Arcade |
+
+Conclusions:
+- Both `/search` items and `/track/{id}` carry `title`, `title_short`, `title_version`.
+- `title_version` keeps its parentheses → the REQ-SFT-12 normalisation (Q17).
+- `title_short` keeps "(feat. …)"; only the version suffix is split off, so a pick loses no featuring info.
+- Not every parenthetical is a version: the "8-Bit … Emulation" title has an empty `title_version`.
+- **No lyrics text anywhere.** Track keys: id, readable, title, title_short, title_version, isrc, link, share, duration, track_position, disk_number, rank, release_date, explicit_lyrics, explicit_content_lyrics, explicit_content_cover, preview, bpm, gain, available_countries, contributors, md5_image, track_token, artist, album, type. `explicit_*` are content-rating flags. The official reference page (`developers.deezer.com/api/track`) is login-gated; Context7 indexes only the third-party `deezer-python` client, whose Track model lists the same fields and no lyrics.
