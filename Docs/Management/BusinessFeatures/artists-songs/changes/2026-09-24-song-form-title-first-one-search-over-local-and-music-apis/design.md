@@ -109,6 +109,8 @@ Task<(bool success, string message)> UpdateSongAsync(
     int? artistId = null, string? newArtistName = null, CancellationToken ct = default);
 ```
 
+> **Spec updated 2026-11-04 (3.2a):** both `artistId` and a non-blank `newArtistName` → `(false, "Artist is required")` (no new UI string; blank name = not supplied, REQ-SFT-21 note). The update duplicate message is now the create path's "A song with this title and version already exists for this artist" (one message for both paths; the title-only text is gone). Effective version = `version ?? stored Version ?? ""`.
+
 Both remain the only song write paths (REQ-SFT-46). `CreateSongAsync` (title-only uniqueness,
 `SongService.cs:90`) loses its last production caller when `SongResolutionService.CommitAsync` goes;
 it is left in place for its test fixtures and flagged as a follow-up, not changed here.

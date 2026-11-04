@@ -109,7 +109,8 @@
   - **Review lane:** Architectural
   > **Spec updated 2026-09-26:** (D3) 3.1 **adds** the new overload and keeps the old `CreateSongWithUrlsAsync(int artistId, …)` `[Obsolete]`, forwarding with `newArtistName: null`; 3.1 no longer touches `SongFormViewModel.cs` (removed from Files owned). New task 5.3b deletes the old overload after 5.3. Tester (W2) / Builder (W3, Opus) split.
 
-- [ ] **3.2a `UpdateSongAsync`: Version-aware uniqueness and `newArtistName`** [SEQUENTIAL — after 3.1]
+- [x] **3.2a `UpdateSongAsync`: Version-aware uniqueness and `newArtistName`** [SEQUENTIAL — after 3.1]
+  > **Spec updated 2026-11-04:** (merged `eab8b6b2`) also edited 12 Moq `UpdateSongAsync` expressions in `SongResolutionServiceTests.cs`/`SongFormViewModelTests.cs` — forced: expression trees cannot omit the new optional `newArtistName`, so plan § 3.2a's "no call site breaks" holds for real callers only, not for Moq setups. Lesson for 3.2b/3.2c: a signature change on `ISongService` must list every Moq expression file as owned.
   - **Produces:** REQ-SFT-29 fix; optional `newArtistName` parameter (added last, so no call site breaks); REQ-SFT-26 on update.
   - **Files owned:** `ISongService.cs`, `SongService.cs`, `SongServiceTests.cs`
   - **Risk:** High — BUG-067/068 territory (`SongService.cs:159-167` navigation detach must stay).
