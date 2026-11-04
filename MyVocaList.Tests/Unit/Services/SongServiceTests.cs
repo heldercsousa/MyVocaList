@@ -495,7 +495,7 @@ public class SongServiceTests
     {
         var items = new List<SongListItemDto>
         {
-            new(1, "Bohemian Rhapsody", 1, "Queen", null, null, false)
+            new(1, "Bohemian Rhapsody", 1, "Queen", null, null)
         };
         _songRepoMock.Setup(r => r.GetPagedAsync(1, 20, null, It.IsAny<CancellationToken>()))
                      .ReturnsAsync((items.AsEnumerable(), 1));
@@ -514,7 +514,7 @@ public class SongServiceTests
     {
         var items = new List<SongListItemDto>
         {
-            new(1, "Bohemian Rhapsody", 1, "Queen", null, null, false)
+            new(1, "Bohemian Rhapsody", 1, "Queen", null, null)
         };
         _songRepoMock.Setup(r => r.GetPagedAsync(1, 20, "my song", It.IsAny<CancellationToken>()))
                      .ReturnsAsync((items.AsEnumerable(), 1));

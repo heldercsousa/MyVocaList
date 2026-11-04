@@ -38,7 +38,7 @@ public class SongSuggestionServiceTests
             .Setup(r => r.GetPagedAsync(1, 5, "Bohemian", It.IsAny<CancellationToken>()))
             .ReturnsAsync((new List<SongListItemDto>
             {
-                new(1, "Bohemian Rhapsody", 10, "Queen", null, null, false)
+                new(1, "Bohemian Rhapsody", 10, "Queen", null, null)
             }, 1));
         var sut = CreateSut();
 
@@ -57,7 +57,7 @@ public class SongSuggestionServiceTests
     public async Task GetLocalAsync_ManyMatches_ReturnsAtMostFive()
     {
         var items = Enumerable.Range(1, 5)
-            .Select(i => new SongListItemDto(i, $"Song {i}", 10, "Queen", null, null, false))
+            .Select(i => new SongListItemDto(i, $"Song {i}", 10, "Queen", null, null))
             .ToList();
         _songRepoMock
             .Setup(r => r.GetPagedAsync(1, 5, "Song", It.IsAny<CancellationToken>()))
