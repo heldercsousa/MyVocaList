@@ -568,6 +568,69 @@ _(not started)_
 
 - 2026-11-04 (orchestrator) — **G3 checks:** LEDGER no live branch; `git worktree list` main only (+ `sft-3.2b` being removed, merged); `git branch -a` only the two merged 2026-08-24 UoW branches. **Clear.** Worktree `.worktrees/sft-3.2c`, branch `task/sft-3.2c-delete-obsolete-update`.
 
+### Implementor entry (task 3.2c)
+
+**Plan:** `plan.md` § Task 3.2c
+**Status:** To Review
+**Branch:** `task/sft-3.2c-delete-obsolete-update` (worktree `.worktrees/sft-3.2c`)
+**Started:** 2026-11-04
+**Completed:** 2026-11-04
+
+**Inherited:** nothing. Fresh worktree at `e2f5ffe8` (develop ancestor check passed); no uncommitted edits existed when started.
+**Tooling:** no new library API was used, so no Context7 lookup was required. Briefing says Context7 is available.
+
+**Census before** (Python `os.walk` substring `hasManualEdits`; skipped bin, obj, .worktrees, Docs, .claude, .git, Migrations): 4 files, 10 hits.
+- `Domain/ServicesInterfaces/ISongService.cs`: 53, 60, 68, 70 (obsolete overload + XML doc)
+- `Services/SongService.cs`: 112, 114 (obsolete forwarder)
+- `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTests.cs`: 53, 81
+- `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs`: 32
+Hits outside the four files: none (matched the expected set, so no STOP).
+
+**Census after:** `hasManualEdits` zero hits (outside `Migrations/`).
+
+### Changed files:
+- `Domain/ServicesInterfaces/ISongService.cs`: deleted the `[Obsolete]` `UpdateSongAsync(..., bool hasManualEdits, ...)` overload with its XML doc (-23 lines).
+- `Services/SongService.cs`: deleted the `[Obsolete]` forwarder with its `<inheritdoc />` (-10 lines).
+- `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTests.cs`: lines 53 and 81 drop the `hasManualEdits: true,` argument. No assertion or expected value changed.
+- `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs`: line 32 drops `hasManualEdits: false`. Line 129 `CreateSongWithUrlsAsync` call inserts `null` as the `newArtistName` argument, so it binds to the new overload (`artist!.Id, null, "Atomic URL Song", string.Empty, null, null, null, null, [...]`). Assertions unchanged.
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`: this section only.
+
+**Superseded tests:** none. No test was deleted or rewritten; only argument lists at the four call sites changed.
+
+**Level C no-test decision:** the task is a call-site argument removal plus deletion of an `[Obsolete]` forwarder. It owns no new acceptance criterion. The existing integration tests (`SongServiceUpdateIntegrationTests` x2, `Bug068RegressionTests`) keep exercising the surviving overloads, with unchanged assertions. No new test added.
+
+**Moq note (3.2a lesson):** no Moq `UpdateSongAsync` expression exists in these four files; the census confirmed no other hit.
+
+**Design concern:** none. **Spec gap:** none. **Spec note requested:** none.
+
+### Verification evidence (verbatim)
+
+Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1`, run alone:
+```
+    34 Aviso(s)
+    0 Erro(s)
+
+Tempo Decorrido 00:03:53.64
+[exited with code 0]
+```
+The only CS0618 in that build is `MyVocaList/UI/ViewModels/SongFormViewModel.cs(554,43)` (expected, owned by 5.3b). The harness moved this build to background after 180 s; it ran alone and completed with exit 0.
+
+Tests: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` (single run; `SongRepositoryTests` flake did not occur):
+```
+Aprovado!  – Com falha:     0, Aprovado:   671, Ignorado:     0, Total:   671, Duração: 7 s - MyVocaList.Tests.dll (net10.0)
+```
+Delta vs baseline 671: 0.
+
+**Pre-commit hook run (first commit attempt, blocked; --no-verify NOT used):** `Com falha: 1, Aprovado: 670, Total: 671`. Failing test: `MyVocaList.Tests.Integration.Repositories.BackupRepositoryTests.GetLatestSnapshotAsync_MixedTypes_ReturnsOnlySnapshot [FAIL]`. The full-suite run immediately before this one (above) had 0 failures.
+**Focused re-run** `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --no-build --filter "FullyQualifiedName~BackupRepositoryTests"`: `Aprovado: 4, Falha: 0, Total: 4`.
+**Full-suite re-run after the hook failure** `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1`: `Aprovado: 671, Falha: 0, Total: 671`. The failure did not reproduce on the re-runs. It is not the BUG-076 flake named in the briefing (`ObjectDisposedException`) and was not investigated further (out of scope for 3.2c).
+
+
+Remaining CS0618 in the test build (expected only): `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs(200,32)` and `(219,33)`, both `CreateSongWithUrlsAsync(int, ...)`. `Bug068RegressionTests.cs` and `SongServiceUpdateIntegrationTests.cs` no longer warn.
+
+**Files verified by re-read after edit:** the four changed files were re-checked via `git diff` (4 files, 4 insertions, 37 deletions; the test diffs are one-line changes each).
+
+
 ## 3.5a
 
 ### Checkpoint
