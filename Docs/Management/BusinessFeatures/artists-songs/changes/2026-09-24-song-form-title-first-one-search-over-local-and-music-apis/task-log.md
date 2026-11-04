@@ -854,6 +854,21 @@ migrationBuilder.Sql(
 ### Checkpoint
 
 - 2026-11-04 (orchestrator) — **Pre-dispatch:** `findings.md` § G5 Verdict = `G5: PASS` (confirmed). **G3 / § 0.2.2:** LEDGER no live branch; `git worktree list` main only; `git branch -a --no-merged develop` only the old `remotes/origin/worktree-agent-aaae95a5d8a6c56ec`. **Clear.** Snapshot rule: worktree from develop `75966b9c` (includes M1 + M2). Worktree `.worktrees/sft-3.8`, branch `task/sft-3.8-m3-fts5`. Part A (Sonnet) dispatched; Part B will be Opus (Architectural lane).
+**Part A (Sonnet) — 2026-11-04.** Context7 available this session; `UseSqlReturningClause` verified via Context7 `/dotnet/entityframework.docs` (query "UseSqlReturningClause(false) ToTable ...", docs `sqlite/misc.md` + EF Core 8 what's-new): `modelBuilder.Entity<T>().ToTable(tb => tb.UseSqlReturningClause(false))`; Infra pins `Microsoft.EntityFrameworkCore.Sqlite` 10.0.0 (Directory.Packages.props). Inherited nothing (clean worktree).
+
+### Part A Red output (commit: see git log, Lane: RED)
+Run: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --filter "FullyQualifiedName~SongMigrationTests"` -> Failed 9, Passed 8, Total 17.
+- FAIL `FullMigrate_AllSevenFtsTriggersExist` — Assert.Contains() Failure: Not found: "SongSearch_ai"
+- FAIL `FullMigrate_CreatesSongSearchAndArtistSearch` — Assert.Contains() Failure: Not found: "SongSearch"
+- FAIL `M3_Backfill_OneRowPerSongAndArtist` — SqliteException: SQLite Error 1: 'no such table: SongSearch'.
+- FAIL `SongInsertViaEf_AddsSongSearchRow` — SqliteException: no such table: SongSearch (EF insert itself passed; fails on the FTS assertion)
+- FAIL `SongTitleUpdateViaEf_ReplacesSongSearchRow` — SqliteException: no such table: SongSearch
+- FAIL `SongExecuteDelete_RemovesSongSearchRow` — SqliteException: no such table: SongSearch
+- FAIL `ArtistInsertViaEf_AddsArtistSearchRow` — SqliteException: no such table: ArtistSearch
+- FAIL `ArtistRenameViaEf_UpdatesSongSearchAndArtistSearch` — SqliteException: no such table: SongSearch
+- FAIL `ArtistDelete_CascadeRemovesSongSearchRows` — SqliteException: no such table: SongSearch
+- PASS (vacuous until M3 exists) `M3_Down_DropsTablesAndTriggers` — "latest" == SongExternalIdentityUnique, so nothing to drop; becomes meaningful once M3 exists.
+- PASS (unchanged) M1_DropsHasManualEditsFromSongsAndArtists, M1_ExistingRowsSurvive, M1_TableRebuild_KeepsUniqueCollatedIndexes, M2_DuplicateIdentities..., M2_UniqueIndex_RejectsSecondSongWithSameIdentity, M2_NullIdentities_AllowMany, M2_IndexName_IsComposite.
 
 ## 3.9
 
