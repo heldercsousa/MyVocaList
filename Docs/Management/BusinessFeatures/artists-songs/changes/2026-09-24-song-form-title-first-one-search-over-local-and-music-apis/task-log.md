@@ -240,9 +240,48 @@ SongRepositoryTests.cs(459,34): error CS1061: 'SongRepository' does not contain 
 
 ## 2.2
 
-### Checkpoint
+**Status:** To Review
+**Worktree:** `.worktrees/sft-2.2` (branch `task/sft-2.2-rankscore`, base develop `1db92388`)
 
-_(not started)_
+Context7 was not needed (FuzzySharp `Fuzz.TokenSortRatio` already used by `Score` via `Fuzz.TokenSetRatio`; same package 2.0.2). No inherited partial work.
+
+### Red (commit `5257d208`, `Lane: RED`, tests only)
+
+Filter `SimilarityScorerTests` + `SearchConstantsTests`; build failed (compiler output localized pt-BR, codes verbatim):
+
+```
+SearchConstantsTests.cs(15,47): error CS0117: "SearchConstants" nao contem uma definicao para "RemoteSearchTimeoutMilliseconds"
+SimilarityScorerTests.cs(105,26): error CS1061: 'SimilarityScorer' nao contem uma definicao para "RankScore" ...
+(same CS1061 at lines 105, 112, 119, 126, 135 and others)
+```
+
+### Green
+
+Filter `SimilarityScorerTests|SearchConstantsTests`: `Failed: 0, Passed: 23, Total: 23` (pt-BR "Aprovado!"). Existing `Score` tests unchanged and green.
+
+### Changed files:
+- `Domain/ServicesInterfaces/ISimilarityScorer.cs` - added `RankScore` (XML doc: ordering only, cites exception design.md § 6.4)
+- `Infra/Similarity/SimilarityScorer.cs` - `RankScore` = `Fuzz.TokenSortRatio(Normalize(q), Normalize(c)) / 100.0`; null/empty -> 0.0
+- `Domain/Constants/SearchConstants.cs` - `RemoteSearchTimeoutMilliseconds = 3000`
+- `MyVocaList.Tests/Unit/Services/Similarity/SimilarityScorerTests.cs` - 6 new tests (Red commit)
+- `MyVocaList.Tests/Unit/Domain/SearchConstantsTests.cs` - 1 new test (Red commit)
+- task-log.md (this section)
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|----------------|-------------|
+| REQ-SFT-30 | typo/truncated queries rank closest title first; range [0,1] | `SimilarityScorer.RankScore` | `RankScore_DontCry_RanksDontCryAboveCry`, `RankScore_DonCry_RanksDontCryAboveCry`, `RankScore_DontCry_RanksDontCryAboveBoysDontCry`, `RankScore_Range_IsBetweenZeroAndOne` |
+| REQ-SFT-31 | accents/case ignored | `Normalize` in `RankScore` | `RankScore_AccentAndCaseVariant_ScoresOne` |
+| REQ-SFT-32 | artist words in query rank title+artist | `SimilarityScorer.RankScore` | `RankScore_GunsCry_TitleArtistOfDontCryAboveCryByCyndiLauper` |
+| REQ-SFT-08 | remote bound 3,000 ms | `SearchConstants.RemoteSearchTimeoutMilliseconds` | `RemoteSearchTimeoutMilliseconds_Is3000` |
+
+### Superseded tests
+None.
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1`: no `error` lines (0 errors; exit 0).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` (full): `Aprovado! - Com falha: 0, Aprovado: 668, Ignorado: 0, Total: 668` (Failed 0; 7 new tests included).
+- Files re-read after edit: ISimilarityScorer.cs, SimilarityScorer.cs, SearchConstants.cs (tail), both test files.
 
 ## 3.1
 
