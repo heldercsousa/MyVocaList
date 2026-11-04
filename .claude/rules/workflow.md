@@ -1,188 +1,75 @@
 # Development Workflow — Routing Table
 
-> **This file is a routing table.** Full procedure detail for every rule (decision tables, examples, task/task-log formats, checklists, phase templates) lives in `.claude/library/workflow-reference.md`, loaded on demand. Never-miss HARD RULEs and every inbound `§`-anchor heading stay inline below. These rules are hook-enforced — violating them costs rework.
-
-**Detail lives elsewhere:** per-rule tables/formats/checklists → `library/workflow-rule-N.md` (index: `workflow-reference.md`) · orchestrator + implementor protocols → `.claude/agents/{orchestrator,implementor}.md` · spec anatomy + AC format → `library/spec-writing-guide.md` · session artifacts → `library/session-ops.md`.
-
----
+> Never-miss rules only. Procedure detail per rule: `library/workflow-rule-N.md` (index `workflow-reference.md`) · hooks + self-enforced rules: `workflow-hooks-invariant.md` · orchestrator/implementor protocols: `.claude/agents/` · spec anatomy: `spec-writing-guide.md` · session artifacts: `session-ops.md`.
 
 ## Hook Enforcement (never-miss)
-
-Hooks in `.claude/settings.json` enforce specific rules automatically. Self-enforced rules (no hook) must be applied consciously.
-
-| Hook | Trigger | Rule enforced |
-|------|---------|---------------|
-| `Stop` | Session ends with uncommitted changes | Rule 3 — commit after every task (+ Verifier dispatch reminder) |
-| `PostCompact` | Context compaction | Session resume — re-read spec |
-| `PostToolUse` (Services/*.cs) | Edit to a Services file | testing.md — TDD reminder |
-| `SessionStart` | New session | Hook health verification |
-
-**Session-start hook health check:** confirm `.claude/settings.json` is valid JSON and the `Stop` hook references the correct script; fix any misconfigured hook before dispatching a subagent. Self-enforced rules (no hook — apply consciously) and full notes: `workflow-hooks-invariant.md`.
-
----
+Hooks (`Stop`, `PostCompact`, `PostToolUse` on Services, `SessionStart`) enforce parts of these rules; the rest are self-enforced (list: `workflow-hooks-invariant.md`). At session start, confirm `.claude/settings.json` is valid and its hooks are healthy before dispatching anything.
 
 ## SDD Invariant (never-miss)
-
-> **Spec changes before code changes.**
-
-- New requirement mid-implementation → record the spec change first, then the code. For a feature **not yet shipped**, update its spec in place. For **shipped/implemented** behavior, do NOT rewrite the existing spec (it is immutable history) — create `changes/YYYY-MM-DD-<slug>/` beside it, with its own `requirements.md`/`design.md`/`README.md` cross-referencing the original (`CLAUDE.md § Docs/ Folder Layout`). Register it with `backlog_gen.py register` so it gets a BACKLOG row.
-- Code contradicts the spec → the code is wrong (the spec is not wrong).
-- Spec incomplete → stop and clarify with Helder; do not improvise.
-- A subagent that modifies behavior not described in the spec has violated this invariant.
-
-Applies to all agents (main and sub) at all times.
-
----
+**Spec changes before code changes.** Not yet shipped → update the spec in place; shipped → never rewrite it, add `changes/YYYY-MM-DD-<slug>/` and `backlog_gen.py register` it. Code contradicts spec → the code is wrong. Spec incomplete → stop and ask Helder. Applies to every agent.
 
 ## Rule 1 — Spec-First
+**Read the feature's `design.md` before writing implementation code.** Spec gap → stop, clarify with Helder, update the spec, then code.
+- **Ceremony:** ≥ 2 layers or > 2 h → full (requirements + design + tasks); 1 file, < 1 h → light; typo / cosmetic / bug fix → commit message only. When in doubt, write a spec. Check the feature against CLAUDE.md's Constitutional Constraints first.
+- **Status lives in item frontmatter**; BACKLOG.md is generated. Change it with `backlog_gen.py status <ID> "<status>"` (💡→📋→🗺️→🟢→🟡→✅); register untracked work with `backlog_gen.py register` *before* doing it. Row text is validated (Goal + Gate + one Pointer); detail goes in the README body.
 
-**Before writing any implementation code for a feature, read `Docs/Management/[section-or-filing-dir]/[feature]/design.md`.** No exceptions. Code written without reading the spec may contradict it.
-
-> `[section-or-filing-dir]` is one of `BusinessFeatures/`, `DevCycleCraft/`, `cross-cutting/` or `milestones/` — the item's physical folder. It does **not** determine table placement; the `section:` frontmatter does (`CLAUDE.md § Docs/ Folder Layout`).
-
-- **Spec is source of truth:** spec complete + approved → fix the code; spec has a gap → stop, clarify with Helder, update spec, then fix code. Never silently fix code and leave the spec describing something that no longer exists.
-- **Spec structure:** `requirements.md` (stories, ACs, validation, out-of-scope) · `design.md` (architecture, interfaces, flows, decisions) · `tasks.md` (ordered checkboxes).
-- **Key thresholds:** ≥ 2 layers OR > 2 hours → full ceremony (all three spec files). Single file, < 1 hour → light. Typo / cosmetic / bug fix → no spec, commit message is the artifact. **When in doubt, write a spec.**
-- **Constitution check (2a):** verify the feature violates no CLAUDE.md Non-Negotiable before writing the spec.
-- **Item frontmatter is the source of truth for feature sequencing; BACKLOG.md is its generated view** — the main agent updates status at each milestone (💡→📋→🗺️→🟢→🟡→✅) with `backlog_gen.py status <ID> "<status>"`, never by editing a row. Untracked work discovered mid-session is registered with `backlog_gen.py register` *before* proceeding. The row template (Goal + Gate + one Pointer, ≤3 sentences, no commit hashes / file paths / verdicts / test counts) is **mechanically enforced** by the generator's validation — a violating `goal:`/`gate:` aborts the write and names the folder. Technical detail goes in the item's own `README.md` body, which has no limit.
-
-Full spec-decision table, new-feature workflow (steps 0–5), proactive-triage format, spec quality gate + four-gate, SDD decision table, discovery mode, brownfield rule, J-Curve: `workflow-rule-1.md`.
+Decision tables, new-feature steps, triage, discovery mode, brownfield rule: `workflow-rule-1.md`.
 
 ### Spec quality four-gate review
-
-All four gates before implementation: **Correctness** (matches what Helder described) · **Completeness** (every story has a criterion; error paths covered) · **Consistency** (requirements and design agree) · **Testability** (a test can be written from every AC without asking questions). Full checklist + prohibited vague terms: `workflow-rule-1.md § Spec quality gate`.
+Before implementation: **Correctness · Completeness · Consistency · Testability** (`workflow-rule-1.md § Spec quality gate`).
 
 ### Spike validation task pattern
-
-A **spike** is a time-boxed exploration producing `findings.md`, not production code. Never-miss: spike code is throwaway (no production files edited), the time-box is a hard stop, and **failure escalates to Helder — never unilaterally pick an alternative**. `[SPIKE]` format, success/inconclusive paths, discovery mode: `workflow-rule-1.md § Spike validation task pattern`.
-
----
+Spike = time-boxed exploration producing `findings.md`. Its code is throwaway, the time-box is hard, and **failure escalates to Helder — never pick an alternative alone** (`workflow-rule-1.md § Spike validation task pattern`).
 
 ## Rule 2 — Subagent Delegation
+**Feature coding is done by subagents.** The main agent does shell steps (build, test, `dotnet ef`, git), docs, and the two orchestrator lanes below.
 
-**All coding is done by subagents. The main agent handles shell-only steps** (`dotnet build`/`test`, `dotnet ef`, `git`, reading the spec before briefing).
-
-> **Orchestrator read-scope `[HARD RULE — amended 2026-11-03]`:** the main/orchestrator agent does not explore source code — understanding flows, surveys and consumer maps (including plan-mode exploration) go to an Explore/Plan subagent. **Read lane:** to *confirm* a diagnosis, signature or member, it may grep + read **at most 2 source files** per written question; past that, dispatch Explore. Bounds + session-start self-check: `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
+> **Orchestrator read-scope `[HARD RULE — amended 2026-11-03]`:** no source exploration by the orchestrator (plan mode included) — delegate to Explore/Plan. **Read lane:** grep + read **at most 2 source files** per written question, to *confirm* a diagnosis/signature/member. Bounds: `orchestrator.md § Orchestrator Read-Scope`.
 
 ### Inline Trivial Fix (ITF) lane `[amended 2026-11-03]` (never-miss summary)
+Orchestrator only. **A fix that qualifies goes through ITF — dispatching for it is the wrong lane, not the safe one.** All of C0–C8 or dispatch: 1 file / ≤ 5 lines, fully diagnosed (read lane allowed), not `.xaml`, not a governed component, not hard sequential-only (`MauiProgram.cs` / `GlobalUsings.cs` / `Directory.Build.props` qualify after the sole-writer check), severity ≤ Major with no mandatory regression test, worktree on a task/spike branch, green build + tests. Run it with **`/sln-itf`** (marker + `ITF:` task-log line; Guard 3 enforces C1/C3/C4/C5). Trailer: `Lane: ITF (N files, N lines)`. Detail: `workflow-rule-2.md § Inline Trivial Fix (ITF) lane`.
 
-**Narrow, opt-in exception to "all coding is done by subagents"** — the orchestrator only; implementor subagents are never constrained by ITF bounds. **A fix that qualifies goes through ITF — dispatching an implementor for it is the wrong lane, not the safe one.**
-
-- **Nine conditions (C0–C8), all of them, or dispatch an implementor.** There is no partial qualification. In shape: 1 file / ≤ 5 lines, fully diagnosed (the read lane may be used for this), not `.xaml`, not a governed component, not hard sequential-only (`MauiProgram.cs` / `GlobalUsings.cs` / `Directory.Build.props` qualify once the sole-writer check passes), severity ≤ Major with no mandatory regression test, in a worktree on a task branch (spike branches included), green build + tests.
-- **Run it with `/sln-itf`**, which writes `<worktree>/.itf-active` (worktree root, never repo root) + one `ITF:` line in `task-log.md` BEFORE editing, and deletes the marker as the final step of the ITF commit.
-- **Without a declaration the lane is inert** and ordinary Rule 2 applies. Once declared, C1/C3/C4/C5 are hook-enforced (`constitutional-guard.py` Guard 3) and cannot be exceeded.
-- **Commit trailer (required):** `Lane: ITF (N files, N lines)`.
-
-Full C0–C8 table, marker mechanics, and enforcement detail: `workflow-rule-2.md § Inline Trivial Fix (ITF) lane`. Rationale + Guard 3 design: `DevCycleCraft/inline-trivial-fix/`.
-
-- **Wave cap `[HARD RULE]`:** max **4** subagents in parallel; dispatch in waves, wait for all, then next wave. Discard a subagent's context after it completes — never reuse the instance.
-- **Git worktrees mandatory for ALL implementation work `[HARD RULE — amended 2026-07-14]`:** every task that edits code files (`.cs`, `.xaml`, `.xaml.cs`) runs in a git worktree on a task branch — never directly on `develop` or `main` (hook-enforced via `constitutional-guard.py`). Applies to single-subagent tasks and bug fixes, not just parallel waves — develop stays unlocked as the docs + integration branch. See `orchestrator.md § Git Worktrees as Isolation Primitive`.
-- **Worktree base branch is `develop` `[HARD RULE]`:** never base a worktree/task branch on `main`. After creating any worktree (native `EnterWorktree` OR manual `git worktree add`), verify `git merge-base --is-ancestor develop HEAD`; if develop is not an ancestor, recreate with `git worktree add <path> -b <branch> develop`. The native `EnterWorktree` tool may default to the repo default branch (`main`) — always verify.
-- **Docs land on develop `[HARD RULE]`:** spec files, `task-log.md`, `tasks.md`, LEDGER.md, and changelog updates are committed to `develop` (by the main agent), never left stranded on a worktree branch. If a subagent edited docs inside a worktree, sync them to develop before/at merge (`/sln-docs-sync`).
-- **Generated artifacts are single-writer, not mergeable `[HARD RULE]`:** `Docs/Management/BACKLOG.md`, `Docs/Management/backlog-archive/*.md`, and every `Docs/Management/**/README.md` frontmatter block are **generated**. A concurrent edit to a generated region is not a line conflict — it is a silent overwrite on the next `regen`. Full protocol: `workflow-rule-2.md § Generated artifacts`.
-- **Single-writer rule:** at any moment each file has at most one active writer. Before a wave, run the file-overlap check; if two tasks list the same `Files owned`, serialize them.
-- **Task sizing:** if a briefing lists > 5 files or > 2 hours of work, it is a sizing violation — split before dispatching.
-- **Exit checklist (every subagent, in order):** verification-before-completion → build (0 errors, 3-attempt cap) → test (if `.cs` changed) → post-edit re-read → `.sln` registration → living-spec check → task-log → commit → push. Stopping before all steps = task not finished.
-
-Task sizing table, wave rules, exit checklist detail, post-wave verification: `workflow-rule-2.md`. Orchestrator/implementor protocols: `orchestrator.md` / `implementor.md`.
+- **Wave cap `[HARD RULE]`:** max **4** parallel subagents; wait for the whole wave; never reuse a finished subagent.
+- **Worktrees `[HARD RULE]`:** every `.cs`/`.xaml` edit happens in a worktree on a task branch, never on `develop`/`main` (hook-enforced). **Base is `develop`** — after any `EnterWorktree`/`git worktree add`, verify `git merge-base --is-ancestor develop HEAD`.
+- **Docs land on develop `[HARD RULE]`:** specs, task-logs, `tasks.md`, LEDGER, changelog — never stranded on a task branch (`/sln-docs-sync`).
+- **Generated artifacts `[HARD RULE]`:** BACKLOG.md, `backlog-archive/`, README frontmatter are single-writer — a concurrent edit is silently overwritten (`workflow-rule-2.md § Generated artifacts`).
+- **One writer per file;** a briefing over 5 files or 2 hours must be split.
+- **Subagent exit checklist:** verification → build (0 errors, 3 tries) → test → re-read → `.sln` registration → living-spec check → task-log → commit → push.
 
 ### Sequential-only file registry
-
-These files must never have concurrent writers (parallel edits produce conflicts/duplicate errors): `MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, any file under a `Migrations/` folder, any `GlobalUsings.cs`, `Directory.Build.props`, any spec `tasks.md`. Rationale per file, the ITF soft/hard split, and how to add entries: `workflow-rule-2.md § Sequential-only file registry`.
-
----
+Never concurrent writers: `MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, `Migrations/*`, `GlobalUsings.cs`, `Directory.Build.props`, spec `tasks.md`. Rationale and the ITF soft/hard split: `workflow-rule-2.md § Sequential-only file registry`.
 
 ## Rule 3 — Commit After Every Task
-
-**Run `/sln-commit` after every completed task from `tasks.md`.** A session ending with uncommitted changes is at risk — the `Stop` hook warns; treat it as a hard gate.
-
-- **Task complete =** builds with 0 errors + tests pass (if tested code touched) + checkbox checked in `tasks.md`.
-- **Completion gates before committing:** demo statement verifiable · new service/repo/VM/page registered in `MauiProgram.cs` · ACs satisfied with evidence in the task-log matrix · **`.sln` registration for every file created/moved/deleted in `Docs/` or `.claude/` — BLOCKING**.
-- **Session-End Spec Update Ritual:** review every spec file touched. **Not-yet-shipped feature** → if the spec no longer describes what was built, add a `> **Spec updated [YYYY-MM-DD]:**` note in place. **Shipped feature** → do not edit the shipped spec; open a `changes/YYYY-MM-DD-<slug>/` folder instead. Check off completed tasks / mark `[CANCELLED: reason]`; update the item's `README.md` frontmatter (`status:`, `gate:`) and run `backlog_gen.py regen`; commit spec updates in the final commit.
-
-`/sln-review` is automatic via fresh subagents under `subagent-driven-development`; when executing manually, it is the trigger. Full gates + ritual triggers: `workflow-rule-3.md`.
+**`/sln-commit` after every completed task.** Complete = 0 build errors + tests pass + `tasks.md` box checked. Before committing: demo verifiable · new types registered in `MauiProgram.cs` · AC evidence in the task-log · **`.sln` registration of every created/moved/deleted `Docs/` file — BLOCKING**. Session end: reconcile touched specs (in-place note if unshipped, `changes/` folder if shipped), update frontmatter + `backlog_gen.py regen`. Review: automatic under `subagent-driven-development`, otherwise run `/sln-review`. Detail: `workflow-rule-3.md`.
 
 ### Bug Fix Pattern — commit message as spec
-
-Bug fixes need no three-file spec; the commit message **is** the spec:
-
 ```
 fix: [component] — [symptom]
 
 Root cause: [one sentence]
 Fix: [one sentence]
 Regression risk: [None | Low | Medium — reason]
-Lane: ITF (N files, N lines)     ← required for ITF-lane fixes only; omit otherwise
+Lane: ITF (N files, N lines)     ← ITF-lane fixes only
 ```
-
-If the bug reveals a missing AC, add it to `requirements.md` in the fix commit. Bug *tracking* (BUG-NNN, severity, regression tests): `.claude/rules/bug-tracking.md`.
-
----
+A bug that reveals a missing AC adds it to `requirements.md` in the same commit. Tracking + regression tests: `bug-tracking.md`.
 
 ## Rule 4 — Tasks.md Is the Source of Truth
+Markers `[ ]` available · `[~]` claimed (never dispatch it) · `[x]` committed · `[CANCELLED: reason]`. Never start a task whose dependency is incomplete; `[P]` tasks may run as a wave.
+- **DRY Onion `[HARD RULE]`:** Domain → Infra → Services → UI; Wave N+1 waits for the Wave N types it consumes.
+- **`[~]` is a lease:** classify with `python .claude/scripts/lease/reclaim.py <my_session_id> <owner_session_id>` — `fresh` → leave it · `reclaimed` → resume with `resume.py` · `lost` → next `[ ]`. Never reset a `fresh` claim.
 
-Check off each task in the feature's `tasks.md` as it completes. **Sequential constraint:** never start a task that depends on an incomplete task. **Parallel exception:** `[P]` tasks may run as a wave (Rule 2).
-
-| Marker | Meaning |
-|--------|---------|
-| `[ ]` | Available — not started |
-| `[~]` | In progress — claimed by a dispatched subagent (never dispatch a `[~]` task) |
-| `[x]` | Done — committed |
-| `[CANCELLED: reason]` | Removed from scope |
-
-- **DRY Onion ordering `[HARD RULE]`:** Domain → Infra → Services → UI. Do not dispatch a Wave N+1 task until all Wave N tasks producing types it consumes are committed.
-- **Lease-aware `[~]` reclaim (never-miss):** a `[~]` claim is a lease, not a lock. Classify via `python .claude/scripts/lease/reclaim.py <my_session_id> <owner_session_id>`: `fresh` → leave it, pick the next `[ ]`; `reclaimed` → you own it, `resume.py <owner_session_id>` and continue (leave marker `[~]`); `lost` → pick the next `[ ]`. Only reset `[~]`→`[ ]` when the claim is **stale** AND you choose not to reclaim. Never reset a `fresh` claim.
-
-Task-atomization checklist, task-entry format (`Produces`/`Consumes`/`Risk`/`Files owned`/`Demo`/`Review lane`), DRY Onion phase example: `workflow-rule-4.md`.
-
----
+Task format and phase template: `workflow-rule-4.md`.
 
 ## Rule 5 — Task Status Registration
-
-Agents record task outcomes in the feature's `task-log.md` (plan in `plan.md`; unassigned tasks → `Docs/DevEnv/plans/unassigned-task-log.md`).
-
-- **Proof of action (never-miss):** a task-log entry claiming `To Review` without a `### Changed files` section listing every created/modified file is **invalid**.
-- **AC traceability matrix** (AC ID | Criterion | Implementation location | Test method) required for user-facing behavior. Missing rows = missing tests = incomplete feature.
-- **Checkpoint Ping `[HARD RULE — added 2026-07-14]`:** every agent doing multi-step work maintains a live `### Checkpoint` block in the task-log entry — pinged **before** starting each step (write-ahead), after every build/test run, at each phase transition, **and on a heartbeat loop regardless of events — at least every ~10 minutes of continuous work (~15 tool operations)**. The block includes a **Context manifest**: the exact files (≤ 8, with one-line why) a fresh agent must read to resume — so an interruption (connection loss, session limit) loses at most one step and resuming never requires Glob. Format + resume protocol: `session-ops.md § Checkpoint Ping & Context Manifest`.
-
-Full task-log entry template, status vocabulary (`in progress`/`Check build`/`To Review`/`Build failure`/`blocked: spec gap`/…), matrix example: `workflow-rule-5.md`.
-
----
+Outcomes go in the feature's `task-log.md`. A `To Review` entry without `### Changed files` is **invalid**; user-facing behavior needs the AC traceability matrix. **Checkpoint Ping `[HARD RULE]`:** multi-step work keeps a live `### Checkpoint` block — updated before each step, after each build/test, at phase changes, and at least every ~10 minutes — with a Context manifest (≤ 8 files) for resuming (`session-ops.md § Checkpoint Ping & Context Manifest`). Template: `workflow-rule-5.md`.
 
 ## Rule 6 — Research Tool Gate (never-miss)
-
-Before any web research query, follow this order — **both main agent and subagents**:
-
-1. **Library / framework / SDK / API docs** → Context7 (`resolve-library-id` → `query-docs`)
-2. **General web research** (comparisons, news, tool evaluations) → `WebSearch` / `WebFetch` — only when Context7 does not cover the topic
-
----
+Library/framework/API docs → Context7 first; `WebSearch`/`WebFetch` only for what Context7 does not cover. Main agent and subagents alike.
 
 ## Rule 7 — Session Start Protocol
-
-Every implementation/planning session begins with this reading order before any code is written or subagent dispatched. **Do not skip; do not resume from memory alone.**
-
-0. **Hook health verification** (see Hook Enforcement above) — fix misconfigured hooks first.
-1. **Active handoff file** `…/[feature]/handoff.md` if present — else run `python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"` for the current `🟡 In Progress` / highest `🟢 Ready` item. **Do not read `Docs/Management/BACKLOG.md`** — the query returns the same work set in ~12 lines instead of ~136 (REQ-SEV-23). The rendered file is for Helder.
-2. **`ACTIVE-CONSIDERATIONS.md`** (if it exists) — priority stack + open items.
-3. **`…/[feature]/tasks.md`** — done / `[~]` / pending.
-4. **`…/[feature]/requirements.md`** — refresh ACs.
-5. **`…/[feature]/design.md`** — refresh architecture + interface signatures.
-6. **`…/[feature]/task-log.md`** — check for unresolved `blocked:` / `Spec updated — re-planning required`.
-7. **Lease claim refresh + resume-pointer read** — classify existing `[~]` claims via `reclaim.py` (Rule 4); read the resume pointer with `python .claude/scripts/lease/resume.py <session_id>`; the heartbeat hook keeps this session's own claim fresh automatically; record progress via `resume.py --set <session_id> "<continue-from-here>"`.
-
-**Anti-glob rule (never-miss):** never `Glob("Docs/**")` or equivalent open-ended scans during session start or briefing — read only the files above plus the active feature spec. **When resuming interrupted work** the read set is even smaller: `Docs/Management/LEDGER.md` row → the task-log's `### Checkpoint` block → only its Context manifest files (`session-ops.md § Checkpoint Ping & Context Manifest`). Globbing to reconstruct interrupted state is a violation — if the manifest is insufficient, log the gap as a checkpoint-quality defect instead. Steps 3–7 may be scoped to the active feature. Session-artifact formats: `session-ops.md`.
-
----
+Before code or dispatch, in order: hook health → `handoff.md` if present, else `python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"` (**not** BACKLOG.md) → `ACTIVE-CONSIDERATIONS.md` → the feature's `tasks.md`, `requirements.md`, `design.md`, `task-log.md` → lease refresh (`reclaim.py`, `resume.py <session_id>`). **Never glob `Docs/`.** Resuming interrupted work: LEDGER row → task-log `### Checkpoint` → only its manifest files. Detail: `workflow-rules-6-7-8.md § Rule 7`.
 
 ## Rule 8 — Pre-Task Collision Check
+Before a wave: `git log --oneline -10`, `git status`, stray `[~]` in `tasks.md`. Classify every unowned `[~]` with `reclaim.py` before assuming it is abandoned — `fresh` means another live session owns it. Detail: `workflow-rules-6-7-8.md § Rule 8`.
 
-Before dispatching any wave that modifies files, confirm no other agent/branch is modifying the same files: `git log --oneline -10` · `git status` · scan `tasks.md` for stray `[~]` · `gh pr list` if a remote review flow is active.
-
-**Never-miss:** run the **lease liveness check** — classify each `[~]` with no known running agent via `reclaim.py` (`lease_lib.classify`) **before** assuming abandonment. A `fresh` result means another live session owns it — do **not** reset to `[ ]`.
-
-Procedure detail + collision-type response table: `workflow-rules-6-7-8.md § Rule 8`.
-
----
-
-> Authorship + approval provenance for all rules files: `.claude/library/authorship-log.md`.
+> Authorship + approval provenance: `.claude/library/authorship-log.md`.
