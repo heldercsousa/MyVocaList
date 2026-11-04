@@ -190,13 +190,14 @@
   - **Demo:** migration test green.
   - **Review lane:** Elevated
 
-- [ ] **3.8 M3: FTS5 `SongSearch` + `ArtistSearch`, 7 triggers, RETURNING off** [SEQUENTIAL — after 3.7, **G5**]
+- [x] **3.8 M3: FTS5 `SongSearch` + `ArtistSearch`, 7 triggers, RETURNING off** [SEQUENTIAL — after 3.7, **G5**]
   - **Files owned:** `Infra/Migrations/*` (M3), `SongMigrationTests.cs`, `SongConfiguration.cs`, `ArtistConfiguration.cs` (`ToTable(tb => tb.UseSqlReturningClause(false))`, `design.md` § 6.2 consequence 3)
   - **Risk:** High — raw SQL; a later table rebuild drops the triggers.
   - **Tests (B):** after `MigrateAsync`: both tables + 7 triggers exist; backfill counts = song and artist counts; insert / title update / artist create, rename, delete / `ExecuteDelete` keep both in step (REQ-SFT-34); EF insert and update of a Song and an Artist succeed after migrating.
   - **Demo:** migration tests green; the existing library is searchable.
   - **Review lane:** Architectural
   - **Orchestrator step:** add to `constraints-reference.md § EF Core / SQLite`: "Any migration that rebuilds Songs or Artists must recreate the FTS triggers in the same migration."
+  > **Spec updated 2026-11-04:** merged `eca9f708` (Verifier CONDITIONAL PASS); orchestrator step done (constraints-reference.md). **Follow-up (Verifier W1, not blocking):** `ArtistDelete_CascadeRemovesSongSearchRows` deletes EF-tracked songs, so SQLite's own `ON DELETE CASCADE` → `SongSearch_ad` path has no regression test (the Verifier probed it correct in SQLite). Add a test that seeds songs by raw SQL / a fresh context and deletes the artist via `ExecuteDeleteAsync` — candidate for the next task that owns `SongMigrationTests.cs` (none planned) or a small dedicated task; Helder to place it.
 
 - [ ] **3.9 Title-field search query** [SEQUENTIAL — after 3.8]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, pending Helder's approval):** `FindByTitleAndArtistNamesAsync` takes `(Title, ArtistName, Version)` triples (REQ-SFT-05(b) amended); its two tests become `…CollatedTripleEmptyVersion_Returns` and `…VersionMustMatch`.
