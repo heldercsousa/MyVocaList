@@ -685,3 +685,30 @@ Green: `ResolveAsync` exact-local path now one `FindIdByTitleVersionForArtistAsy
 
 ### Verification evidence
 Build (android, -m:1): 0 Erro(s). Full suite: `Failed: 0, Passed: 665, Total: 665` (baseline 677 + 1 new - 8 deleted SongResolution tests - 5 deleted Nested tests = 665). Census `ApplyUpdate` / `CommitAsync(` / `NestedUnitOfWorkTests`: ApplyUpdate zero; CommitAsync( only in IArtistResolutionService.cs, ArtistResolutionService.cs, ArtistResolutionServiceTests.cs, UnitOfWork.cs; `NestedUnitOfWorkTests` has NOT-zero hits, all provenance COMMENTS in files not owned by 3.3 (Bug068RegressionTests.cs:112, SongServiceNewArtistUnitOfWorkTests.cs:12,23,41,60,77,99); no code references. SongFormViewModel.cs `CommitAsync(`: zero.
+
+## 3.4
+**Status:** To Review. Branch `task/sft-3.4-artist-resolution`. Level C (deletions), no new test.
+Context7 not needed (pure deletion; no API lookups). Inherited: clean worktree, nothing half-done.
+
+Census before: `ResolutionChoice` hit only the 4 owned files (enum, interface, service, ArtistResolutionServiceTests).
+Green: `CommitAsync` removed from `IArtistResolutionService` and `ArtistResolutionService`; `ResolutionChoice` enum deleted from `ResolutionEnums.cs` (file kept, `ResolutionKind` remains). Constructor left unchanged (`_artistRepository`, `_artistService` fields now unused; removal is a DI/test-wide change out of scope).
+
+### Superseded tests
+| Test (original file:line) | Action | Superseded AC -> replacing REQ |
+|---|---|---|
+| ArtistResolutionServiceTests:200 CommitAsync_CreateNew_SetsExternalIdentityOnCreatedArtist | deleted | AC-3.4 -> REQ-SFT-40 |
+| :225 CommitAsync_AttachExternalId_SetsExternalIdentityIfAbsent | deleted | AC-3.2 -> REQ-SFT-40 |
+| :249 CommitAsync_AttachExternalId_DoesNotOverwriteExistingIdentity | deleted | AC-3.2 -> REQ-SFT-40 |
+
+No-new-test decision: Level C deletion; nothing new to assert.
+
+### Changed files:
+- `Domain/ServicesInterfaces/IArtistResolutionService.cs`
+- `Services/ArtistResolutionService.cs`
+- `Domain/Resolution/ResolutionEnums.cs`
+- `MyVocaList.Tests/Unit/Services/ArtistResolutionServiceTests.cs`
+- this task-log section
+
+### Verification evidence
+Build (android, -m:1): exit 0, 0 errors. Full suite: `Failed: 0, Passed: 663, Total: 663` (baseline 666, delta -3 = deleted CommitAsync tests).
+Census `ResolutionChoice`: ZERO HITS. Census `CommitAsync(`: only `Infra/UnitOfWork/UnitOfWork.cs:53,88` (plus unrelated doc text `.claude/skills/efcore-patterns/SKILL.md:376`).
