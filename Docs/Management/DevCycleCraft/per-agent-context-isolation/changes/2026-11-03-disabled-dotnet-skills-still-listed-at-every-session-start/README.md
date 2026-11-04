@@ -1,12 +1,13 @@
 ---
 id: disabled-dotnet-skills-still-listed-at-every-session-start
 title: Disabled dotnet-skills still listed at every session start
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-03
 section: DevCycleCraft
 parent: per-agent-context-isolation
 goal: About 30 dotnet-skills skills set off in settings.local.json still appear in the skill listing, so every session and subagent start pays for them.
 gate: Find whether off only blocks invocation or is not applied, then drop them from the listing.
+closed: 2026-11
 kind: change
 ---
 
@@ -74,3 +75,10 @@ Order: (a) `off` test on one built-in + one synced skill (zero risk, settings-on
 - A is kept (local `settings.local.json`).
 
 **Done (Helder-approved 2026-11-03):** A, B, C; all overrides now in `settings.json`. **Close when** a fresh-session `/context` shows no `dotnet-skills:*` skills/agents and Skills ≈ 5k (from 10k).
+
+## Outcome (closed 2026-11-03)
+
+Fresh-process check (`claude -p`): 0 `dotnet-skills:*` skills/agents, `claude-code-setup` gone, vendored skills present.
+Main-session `/context` Skills **10k → 6.6k** measured after A + C (plugin still loaded there — `/clear` does not
+reload plugins; restart the process). Expected after restart ≈ 3.0k Skills, Custom agents 1.1k → 0.5k.
+Left: `cowork-plugin-management` (~0.24k) is synced from the claude.ai account — not repo-controllable.
