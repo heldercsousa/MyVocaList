@@ -188,18 +188,35 @@ public class SongService : ISongService
         }, ct);
 
     /// <inheritdoc />
+    [Obsolete("Use the (int? artistId, string? newArtistName, …) overload — REQ-SFT-18. Removed in task 5.3b.")]
     public Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
         int artistId, string title, string version, string? featuredArtists, string? lyrics,
         string? externalId, string? externalProvider,
         IEnumerable<string> urls,
         CancellationToken ct = default)
-        => _uow.ExecuteAsync<(bool success, string message, Song? song)>(async sp =>
+        => CreateSongWithUrlsAsync(
+            (int?)artistId, newArtistName: null, title, version, featuredArtists, lyrics,
+            externalId, externalProvider, urls, ct);
+
+    /// <inheritdoc />
+    public Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
+        int? artistId, string? newArtistName, string title, string version,
+        string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
+        IEnumerable<string> urls, CancellationToken ct = default)
+    {
+        // REQ-SFT-21: exactly one of artistId / newArtistName. Pure input validation — it stays
+        // OUTSIDE the lambda (REQ-UOW-41), so a rejected call opens no DI scope and writes nothing.
+        var hasNewArtistName = !string.IsNullOrWhiteSpace(newArtistName);
+        if (artistId.HasValue == hasNewArtistName)
+            return Task.FromResult<(bool success, string message, Song? song)>(
+                (false, "Artist is required", null));
+
+        return _uow.ExecuteAsync<(bool success, string message, Song? song)>(async sp =>
         {
             // REQ-UOW-28: all three repositories AND the nested URL service are resolved from the
             // lambda's own scope — never the constructor fields. All three repositories therefore
             // share ONE AppDbContext, which is what keeps REQ-UOW-07's single-save FK fixup valid.
             var songRepository = sp.GetRequiredService<ISongRepository>();
-            var artistRepository = sp.GetRequiredService<IArtistRepository>();
             var urlRepository = sp.GetRequiredService<ISongKaraokeUrlRepository>();
             var urlService = sp.GetRequiredService<ISongKaraokeUrlService>();
 
@@ -209,20 +226,52 @@ public class SongService : ISongService
 
             version ??= string.Empty;
 
-            var artist = await artistRepository.GetByIdAsync(artistId, ct);
-            if (artist == null)
-                return (false, "Artist not found", null);
+            // REQ-SFT-26: an external identity already held by another song is rejected BEFORE any
+            // artist is created, so a refused save never leaves a new artist behind.
+            if (!string.IsNullOrWhiteSpace(externalId) && !string.IsNullOrWhiteSpace(externalProvider)
+                && await songRepository.ExistsByExternalIdentityAsync(externalProvider, externalId, null, ct))
+                return (false, "This music-database song is already in your library", null);
+
+            int effectiveArtistId;
+            if (hasNewArtistName)
+            {
+                // REQ-SFT-18 / REQ-UOW-28: the nested service is resolved from sp, so its own
+                // ExecuteAsync JOINS this ambient scope — one AppDbContext, one transaction. A
+                // failure tuple (e.g. the REQ-SFT-52 collated-duplicate refusal) is returned as-is
+                // and the unit of work skips the save and rolls back.
+                var artistService = sp.GetRequiredService<IArtistService>();
+                var (artistCreated, artistMessage, newArtist) =
+                    await artistService.CreateArtistAsync(newArtistName!, ct: ct);
+                if (!artistCreated || newArtist is null)
+                    return (false, artistMessage, null);
+
+                // REQ-UOW-35: flush (not commit) so the generated Artist.Id exists before the song is
+                // staged. The transaction stays open — any later failure rolls the artist back too.
+                // _uow holds no AppDbContext (it flushes the AMBIENT scope), so REQ-UOW-28 does not
+                // apply to it (same rationale as ArtistResolutionService.CommitAsync).
+                await _uow.FlushAsync(ct);
+                effectiveArtistId = newArtist.Id;
+            }
+            else
+            {
+                // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+                var artistRepository = sp.GetRequiredService<IArtistRepository>();
+                var artist = await artistRepository.GetByIdAsync(artistId!.Value, ct);
+                if (artist == null)
+                    return (false, "Artist not found", null);
+                effectiveArtistId = artistId.Value;
+            }
 
             // Song.Title/Version trimming is enforced by the EF Core ValueConverter configured in
             // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
             // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
-            if (await songRepository.ExistsByTitleVersionForArtistAsync(artistId, title, version, ct))
+            if (await songRepository.ExistsByTitleVersionForArtistAsync(effectiveArtistId, title, version, ct))
                 return (false, "A song with this title and version already exists for this artist", null);
 
             // Song.Title/Version/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
             var song = new Song
             {
-                ArtistId = artistId,
+                ArtistId = effectiveArtistId,
                 Title = title,
                 Version = version,
                 FeaturedArtists = featuredArtists,
@@ -263,6 +312,7 @@ public class SongService : ISongService
             // saves the one shared context inside its explicit transaction (AC-6.2 preserved).
             return (true, $"Song '{title}' created successfully", song);
         }, ct);
+    }
 
     /// <inheritdoc />
     public Task<Song?> GetSongByIdAsync(int id, CancellationToken ct = default)
