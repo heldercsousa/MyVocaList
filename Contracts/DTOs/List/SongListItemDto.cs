@@ -6,5 +6,4 @@ public record SongListItemDto(
     int OriginalArtistId,
     string? OriginalArtistName,
     string? FeaturedArtists,
-    string? ExternalProvider,
-    bool HasManualEdits);
+    string? ExternalProvider);

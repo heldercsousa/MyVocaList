@@ -42,8 +42,7 @@ public class SongRepository : ISongRepository
                 s.ArtistId,
                 s.OriginalArtist.Name,
                 s.FeaturedArtists,
-                s.ExternalProvider,
-                s.HasManualEdits))
+                s.ExternalProvider))
             .ToListAsync(ct);
 
         return (items, totalCount);
