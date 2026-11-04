@@ -1298,9 +1298,53 @@ _(not started)_
 
 ## 6.1
 
-### Checkpoint
+**Status:** Tester Red done (Builder pending). **Branch:** task/sft-6.1-artist-suggestions (base develop a55cbb52). Inherited: clean worktree. Context7 not needed (mirrors merged 4.2/4.3 patterns; no new library API).
 
-_(not started)_
+### Checkpoint
+Red committed; next: Builder implements Green. Context manifest: plan.md Task 6.1; Services/ArtistSuggestionService.cs; Services/IArtistSuggestionService.cs; Services/SongSuggestionService.cs (reference); MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs; ArtistSuggestionThresholdTests.cs; Extensions/ServiceCollectionExtensions.cs (registration).
+
+### Red (compile error, `Lane: RED`, `--no-verify`) - `dotnet build MyVocaList.Tests -m:1`, distinct CS lines
+- CS1729: 'ArtistSuggestionService' does not contain a constructor that takes 6 arguments (ArtistSuggestionServiceTests.cs:49, ArtistSuggestionThresholdTests.cs:41)
+- CS1061: 'ArtistSuggestionService' does not contain a definition for 'SearchNameLocalAsync' (ServiceTests 103,125,150; ThresholdTests 60,78)
+- CS1061: ... 'SearchNameRemoteAsync' (ServiceTests 167..316; ThresholdTests 98,120,149)
+
+### Tests and ACs
+| Test | AC |
+|---|---|
+| SearchNameLocalAsync_BelowTwoTrimmedChars_ReturnsEmpty (theory) | REQ-SFT-03 |
+| SearchNameLocalAsync_UsesFtsCandidatesRankedMaxFive | REQ-SFT-47 |
+| SearchNameLocalAsync_Metalica_ReturnsLocalMetallicaFirst | REQ-SFT-47 |
+| SearchNameRemoteAsync_DeezerMetallica_DroppedWhenLocalMetallicaExists | REQ-SFT-48 |
+| SearchNameRemoteAsync_BelowThreeTrimmedChars_NoProviderCall (theory) | REQ-SFT-03 |
+| SearchNameRemoteAsync_DeezerNameCollatedMatchOfLocal_Dropped | REQ-SFT-48 |
+| SearchNameRemoteAsync_ProviderThrows_StatusUnavailable_LogsWarning | REQ-SFT-06 |
+| SearchNameRemoteAsync_ProviderSlowerThanBound_StatusUnavailable | REQ-SFT-08 |
+| SearchNameRemoteAsync_CallerCancelled_Rethrows | REQ-SFT-09 |
+| SearchNameRemoteAsync_ZeroResults_StatusOk | REQ-SFT-06 |
+| SearchNameRemoteAsync_Offline_NoProviderCall_StatusOffline_LogsInformation | REQ-SFT-53 |
+| SearchNameRemoteAsync_OnlineButProviderThrows_StatusUnavailableNotOffline | REQ-SFT-53 |
+| SearchNameRemoteAsync_ReadsNetworkStatusPerCall | REQ-SFT-53 |
+| AddAppServices_ResolvingArtistSuggestionService_Succeeds | REQ-SFT-47 |
+| Threshold: SearchNameLocalAsync_OneCharQuery_..., _QueryAtMinimumLength_ReachesRepository; SearchNameRemoteAsync_TwoCharQuery_..., _QueryAtMinimumRemoteLength_ReachesProvider, _WhileProviderFetchBlocks_NoScopeIsOpen | REQ-UOW-51 / 52 / 43 (retargeted, same assertions) |
+
+### Superseded tests
+| Test (original) | Action | Superseded AC -> replacing REQ |
+|---|---|---|
+| ArtistSuggestionServiceTests: GetLocalAsync_TermUnderTwoChars_ReturnsEmpty | rewritten as SearchNameLocalAsync_BelowTwoTrimmedChars_ReturnsEmpty | REQ-FORMUX-01 -> REQ-SFT-03 |
+| GetLocalAsync_ManyMatches_ReturnsAtMostFive | rewritten as ..._UsesFtsCandidatesRankedMaxFive | REQ-FORMUX-01 -> REQ-SFT-47 |
+| GetRemoteAsync_MusicBrainzReturnsResults_DeezerNeverCalled, _MusicBrainzEmpty_FallsBackToDeezer, _MusicBrainzThrows_FallsBackToDeezer | deleted (MusicBrainz-first order gone) | REQ-FORMUX-02 -> REQ-SFT-36 (Deezer only) |
+| GetRemoteAsync_ResultSharesExternalIdWithLocal_IsExcluded (tier a) | deleted | REQ-FORMUX-03(a) -> REQ-SFT-48 |
+| GetRemoteAsync_ResultNameCollationEqualToLocalDb_IsExcluded (tier b) | rewritten as ..._DeezerNameCollatedMatchOfLocal_Dropped | REQ-FORMUX-03(b) -> REQ-SFT-48 |
+| GetRemoteAsync_ResultSimilarAboveThresholdToLocal_IsExcluded, _ResultBelowThreshold_IsKept (tier c) | deleted | REQ-FORMUX-03(c) -> REQ-SFT-47/48 |
+| GetRemoteAsync_AllProvidersFail_ReturnsEmptyAndLogs | rewritten as ..._ProviderThrows_StatusUnavailable_LogsWarning | REQ-FORMUX-05 -> REQ-SFT-06 |
+| GetRemoteAsync_Cancelled_ThrowsOperationCanceled | rewritten as ..._CallerCancelled_Rethrows | REQ-FORMUX-02 -> REQ-SFT-09 |
+| FilterSimilar_ScoreAtThresholdNonExact_IsSimilar, _ScoreBelowThreshold_IsNotSimilar, _ExactMatch_IsNotSimilar | deleted (FilterSimilar removed) | REQ-FORMUX-10 -> REQ-SFT-47/48 |
+| ArtistSuggestionThresholdTests: 5 GetLocal/GetRemote tests | retargeted to SearchName* (same assertions) | REQ-UOW-51/52/43 unchanged |
+
+### Changed files:
+- `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs`
+- `MyVocaList.Tests/Unit/Services/ArtistSuggestionThresholdTests.cs`
+- this task-log section
 
 ## 6.2
 
