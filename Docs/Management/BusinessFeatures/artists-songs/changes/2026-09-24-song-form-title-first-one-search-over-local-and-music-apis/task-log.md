@@ -774,6 +774,11 @@ No other operation. Snapshot diff: only the two `b.Property<bool>("HasManualEdit
 | REQ-SFT-37 | Existing rows survive the drop | same | `M1_ExistingRowsSurvive` |
 | REQ-SFT-52 | Unique collated indexes preserved after table rebuild | same | `M1_TableRebuild_KeepsUniqueCollatedIndexes` (guard) |
 
+### Verifier + merge (orchestrator, 2026-11-04)
+- Red `439f95ad`, Green `6c290e27`; scaffold `20261104150926_DropHasManualEdits` by the orchestrator (generated files not opened by the orchestrator; Part B verified Up = 2 x DropColumn, Down = 2 x AddColumn<bool> default false). Part B's first full run had 1 intermittent failure (`PersonServiceReadScopeTests.SearchPersonsAsync_TooShortTerm_ShortCircuitsWithoutExecutingRead`), green on 2 re-runs (6th intermittent failure this session).
+- Verifier **PASS** (0 warnings; the guard's conditional insert does not weaken REQ-SFT-52).
+- Merged `a6a34647`. Post-merge develop: `0 Erro(s)`; `Aprovado! - Com falha: 0, Aprovado: 674, Total: 674`; `has-pending-model-changes`: "No changes have been made to the model since the last migration." `database update` on `.claude/MyVocaList.db`: relative path failed (SQLite Error 14), absolute path succeeded (`Done.`); DB committed in `e7dbf9a2`; plan section 0.5 note added.
+
 ## 3.7
 
 ### Checkpoint
