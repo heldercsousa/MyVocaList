@@ -88,7 +88,7 @@
   - **Demo:** repository tests green on real SQLite.
   - **Review lane:** Standard
 
-- [~] **2.2 `ISimilarityScorer.RankScore`** [P with 2.1]
+- [x] **2.2 `ISimilarityScorer.RankScore`** [P with 2.1]
   - **Produces:** `RankScore` (FuzzySharp `TokenSortRatio` on `Normalize`d strings, 0–1).
   - **Files owned:** `Domain/ServicesInterfaces/ISimilarityScorer.cs`, `Infra/Similarity/SimilarityScorer.cs`, `MyVocaList.Tests/Unit/Services/Similarity/SimilarityScorerTests.cs`
   - **Risk:** Low. **Tests (A, Red first):** § 6.3 table pairs ("dont cry": "Don't Cry" > "Cry"; "don cry"; "guns cry" vs title+artist).
