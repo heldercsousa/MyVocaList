@@ -1397,3 +1397,54 @@ Note: the plan cited line numbers 73/101/128/152; actual tests were located by n
 - UnitOfWorkReadScopeTests still green (constructor unchanged).
 - No SafeAreaEdges/XAML touched. No tasks.md tick. No push.
 - **3.9c:** Red `1d20d01a`, Green `191c4410` (test file byte-identical Red→Green). Verifier (Opus) **CONDITIONAL PASS**, 0 blockers (W1 real-scorer proof → 3.10/5.3; W2 Green SHA recorded here; W3 deleted tests carried non-existent AC IDs 5.8–5.10, mapped to AC-5.2). Merged `8163505b`. Post-merge develop: `0 errors`; first full run `Com falha: 1, Aprovado: 747` (intermittent), re-run `Aprovado! – Com falha: 0, Aprovado: 748, Total: 748`.
+
+## 3.10
+
+### Red (Tester, Sonnet) - 2026-11-04
+Status: Red committed (compile-error Red). No production stub. Not pushed, tasks.md not ticked.
+
+Compiler output (`dotnet build MyVocaList.Tests -m:1`, first errors; the compiler stops at declaration-level errors, the remaining missing members surface after the Builder adds the types):
+- `CS0246` x3 (types not found): `SongFormSaveRequest` (SongServiceSaveFromFormTests.cs(79,20)), `ArtistDecision` (87,9), `SongDecision` (88,9)
+- `CS0103` x1: `SongDecision` does not exist in the current context (88,37)
+
+### Tests (24) - all in `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs`
+| Test | AC |
+|---|---|
+| EmptyTitle_FailsOnTitle | REQ-SFT-15 |
+| EmptyArtist_FailsArtistRequired | REQ-SFT-21 |
+| NewArtistNameInvalid_FailsOnArtist | REQ-SFT-20 |
+| VersionOver60_FailsOnVersionField | REQ-SFT-12 |
+| TypedArtistExactCollatedMatch_ReusesExistingNeverCreates | REQ-SFT-52 |
+| DeezerFilledArtistExactCollatedMatch_ReusesExisting | REQ-SFT-18 |
+| TypedArtistPaddedCaseAccentVariant_ReusesExistingArtist | REQ-SFT-52 |
+| TypedArtistNearDuplicate_ReturnsArtistChoiceNeededTopThreeBestFirst | REQ-SFT-19 |
+| Metalica_RealResolutionAndScorer_ReturnsArtistChoiceNeeded (real ArtistResolutionService + SimilarityScorer; 3.9c W1) | REQ-SFT-19 |
+| UseExistingDecision_SkipsArtistResolution_UsesId | REQ-SFT-19 |
+| CreateTypedDecision_CreatesNewArtistViaWritePath | REQ-SFT-19 |
+| NoArtistMatch_CreatesNewArtistInSameWrite | REQ-SFT-18 |
+| ArtistResolution_NeverReceivesSongExternalIdentity | REQ-SFT-41 |
+| ExactDuplicateSong_ReturnsSongChoiceNeededExact | REQ-SFT-22 |
+| FuzzyDuplicateSong_ReturnsSongChoiceNeededNotExact | REQ-SFT-23 |
+| NewArtistWithHeldIdentity_ReturnsSongChoiceNeededExact_CreatesNothing | REQ-SFT-25 |
+| PickedArtist_SongGuardCandidateCarriesStoredArtistName | REQ-SFT-22 |
+| SaveAsNewVersionEmptyVersion_FailsOnVersion | REQ-SFT-22 |
+| SaveAsNewVersionDecision_SkipsSongGuard_Writes | REQ-SFT-22 |
+| SaveAsNewSongDecision_SkipsSongGuard_NoVersionRequired | REQ-SFT-23 |
+| EditMode_RunsNoSongGuard_CallsUpdateWithNullIdentity | REQ-SFT-27 |
+| WriteReturnsFailureTuple_ReturnsFailedWithMessage | REQ-SFT-51 |
+| IdentityHeldByAnotherSong_FailsWithMessage | REQ-SFT-26 |
+| Success_ReturnsSavedWithId | REQ-SFT-51 |
+| WritesOnlyThroughCreateOrUpdate | REQ-SFT-46 |
+
+### Choices fixed by the tests (design left open; record in design § 3.5)
+1. Constructor of `SongService` UNCHANGED; `IArtistService`, `IArtistResolutionService`, `ISongResolutionService` resolved from `sp`.
+2. Rule 1 order: title -> version (non-required `ValidateVersionInput`) -> artist required ("Artist is required") -> typed-name `IArtistService.ValidateNameInput` (only when artist is to be created: no ArtistId and decision not UseExisting) - all before any resolution.
+3. Song-guard candidate: `SongCandidate.Artist` = `ArtistCandidate(name, null, null)`; name = typed text for a new/resolved-by-text artist, the STORED name (`IArtistRepository.GetByIdAsync`) for a picked/UseExisting/resolved id (SongCandidate has no artist id).
+4. `SongChoiceNeeded` exact: `SongCandidates` holds one `SongMatch` for the exact song, loaded via `ISongRepository.GetByIdAsync(ExactMatchSongId)` (ExactLocalMatch and ExactExternalMatch both = exact). Fuzzy: resolver candidates in order.
+5. `ArtistChoiceNeeded`: candidates sorted by Score desc, take 3 (`ArtistMatch(ArtistId, Name, Score)`).
+6. Write failure `FailedField` is not asserted (None expected); success has `FailedField == None`, `Message` non-empty, `SavedSongId` = created song id.
+7. Edit mode passes `null` external identity to `UpdateSongAsync` even if the request carries one; artist rules (2) still apply.
+
+### Changed files
+- `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (new)
+- this task-log section
