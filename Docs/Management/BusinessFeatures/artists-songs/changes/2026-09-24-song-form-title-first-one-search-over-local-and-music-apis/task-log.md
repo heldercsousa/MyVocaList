@@ -358,6 +358,40 @@ With this implementation the title is validated (top of the lambda) BEFORE the a
 - No assertion changed; AC REQ-SFT-18 unchanged. No production file touched (`ISongService.cs` / `SongService.cs` remain uncommitted, untouched).
 - Test output: `Aprovado!  – Com falha:     0, Aprovado:     6, Ignorado:     0, Total:     6, Duração: 12 s - MyVocaList.Tests.dll (net10.0)`
 
+### Builder (finishing) - Green (2026-11-04)
+
+Inherited: the previous Builder's uncommitted `ISongService.cs` / `SongService.cs`; reviewed against plan 3.1 Step 3 and design 3.2, kept unchanged (no deviations). Context7 not needed (no new API surface; existing `IUnitOfWork` / `IArtistService` patterns).
+
+### Changed files
+- `Domain/ServicesInterfaces/ISongService.cs` (new `int? artistId, string? newArtistName` overload; old overload `[Obsolete]`)
+- `Services/SongService.cs` (new overload implementation; old overload forwards with `newArtistName: null`)
+- `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` (Red 3dc296b1 + Tester fix 4d4125be, already committed)
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` (Red 3dc296b1, already committed)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
+
+### Verification evidence
+- Build: `ok dotnet build: 6 projects, 0 errors, 35 warnings (00:03:51.10)`
+- Focused (SongServiceTests + SongServiceNewArtistUnitOfWorkTests): `Aprovado!  - Com falha:     0, Aprovado:    47, Ignorado:     0, Total:    47`
+- Full suite: `Aprovado!  - Com falha:     0, Aprovado:   677, Ignorado:     0, Total:   677` (baseline 668, delta +9; no flaky re-run needed)
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|-------------------------|-------------|
+| REQ-SFT-18 | Typed new artist + song + URLs persisted in one unit of work | `SongService.CreateSongWithUrlsAsync(int?, string?, ...)` (artist via `IArtistService` from `sp`, `_uow.FlushAsync`) | `CreateSongWithUrlsAsync_NewArtistName_PersistsOneArtistAndOneSong`, `_ThrowAfterArtistStaged_RollsBackBoth`, `_FailureTupleAfterArtistStaged_WritesNothing`, `_NewArtist_UsesOneAppDbContextAcrossTwoLevels` |
+| REQ-SFT-21 | Exactly one of artistId / newArtistName, else "Artist is required" | guard before `_uow.ExecuteAsync` | `CreateSongWithUrlsAsync_NeitherArtistIdNorNewName_FailsArtistRequired`, `_BothArtistIdAndNewName_FailsArtistRequired` |
+| REQ-SFT-26 | External identity held by another song rejected before any artist is created | `ExistsByExternalIdentityAsync` check ahead of the artist branch | `CreateSongWithUrlsAsync_ExternalIdentityHeldByAnotherSong_FailsWithMessage`, `_NewArtistAndIdentityHeld_CreatesNoArtist` |
+| REQ-SFT-52 | Collated duplicate artist name refused, nothing written | `IArtistService.CreateArtistAsync` failure tuple returned as-is | `CreateSongWithUrlsAsync_NewArtistNameCollatedDuplicate_FailsAndWritesNothing` |
+
+Note on `FailureTupleAfterArtistStaged_WritesNothing`: the title is validated before the artist is created, so this test does not exercise staged-artist rollback. That rollback is covered by `ThrowAfterArtistStaged_RollsBackBoth` and `NewArtistNameCollatedDuplicate_FailsAndWritesNothing`.
+
+### CS0618 warnings (old overload `int artistId`; allowed at call sites only)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs(568)` (production caller; migrated by a later task, overload removed in 5.3b)
+- `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs(128)`
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs(180, 199)`
+
+### Spec notes requested
+- REQ-SFT-21: a blank/whitespace `newArtistName` is treated as not supplied.
+
 ## 3.2a
 
 ### Checkpoint
