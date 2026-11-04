@@ -785,6 +785,20 @@ No other operation. Snapshot diff: only the two `b.Property<bool>("HasManualEdit
 
 - 2026-11-04 (orchestrator) — **Pre-dispatch G3 / § 0.2.2 checks (migration task):** (1) LEDGER: no live branch (CATALOG-PROP spec-only, deferred; BUG-080 merged with no migration). (2) `git worktree list`: main only. (3) `git branch -a --no-merged develop`: only `remotes/origin/worktree-agent-aaae95a5d8a6c56ec` (old agent branch, no G3 pattern). **Clear.** Snapshot rule: worktree from develop `5789f115` (includes M1 `20261104150926_DropHasManualEdits`). Worktree `.worktrees/sft-3.7`, branch `task/sft-3.7-m2-external-identity-unique`. Part A dispatched.
 
+### Part A (Sonnet implementor, 2026-11-04)
+**Status:** Part A Red done; model edit pending commit by scaffold flow. Context7 not needed (raw-SQL tests reuse the `SongMigrationTests` helpers). Inherited: clean worktree.
+
+Red (`dotnet test ... -m:1 --filter "FullyQualifiedName~SongMigrationTests"`): `Failed: 3, Passed: 4, Total: 7`.
+- `M2_UniqueIndex_RejectsSecondSongWithSameIdentity` FAIL: `Assert.ThrowsAny() Failure: No exception was thrown`
+- `M2_IndexName_IsComposite` FAIL: `Assert.True() Failure Expected: True Actual: False`
+- `M2_DuplicateIdentities_LowestIdKeepsIdentity_OthersClearedNotDeleted` FAIL: songs 2 and 3 still `Deezer|3135556` (expected `null|null`)
+- `M2_NullIdentities_AllowMany` PASS (guard: holds before and after M2); three `M1_*` PASS.
+
+### Changed files:
+- `MyVocaList.Tests/Integration/Migrations/SongMigrationTests.cs`
+- `Infra/EntityEFConfig/SongConfiguration.cs` (model edit, uncommitted, awaiting scaffold)
+- this task-log section
+
 ## 3.8
 
 ### Checkpoint
