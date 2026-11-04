@@ -209,13 +209,14 @@
   - **Demo:** repository tests green.
   - **Review lane:** Elevated
 
-- [ ] **3.9b Artist-name candidate query** [P with 3.9 — after 3.8]
+- [x] **3.9b Artist-name candidate query** [P with 3.9 — after 3.8]
   - **Produces:** `IArtistRepository.SearchNameCandidatesAsync` (FTS `ArtistSearch`, prefix fallback under 3 chars).
   - **Files owned:** `Domain/RepositoryInterface/IArtistRepository.cs`, `Infra/Repository/ArtistRepository.cs`, `MyVocaList.Tests/Integration/Repositories/ArtistRepositorySearchTests.cs` (new, uses `MigrateAsync`)
   - **Risk:** Medium. **Tests (B):** "Metalica" retrieves "Metallica"; "beatles" retrieves "The Beatles"; accents folded.
   - **Demo:** repository tests green.
   - **Review lane:** Standard
   > **Spec updated 2026-09-26:** (D9) runs **after** 3.9, not `[P]`: 3.9 creates `Infra/Repository/FtsQueryBuilder.cs`, which 3.9b consumes.
+  > **Spec updated 2026-11-04 (3.9b merge `02fc76b7`, Verifier PASS):** optional `ILogger<ArtistRepository>? logger = null` (same shape as 3.9); index-missing filter narrowed to "no such table" + "ArtistSearch". Follow-ups (minor): `RespectsTake` asserts `<= 1` (passes on empty — seed two matches and assert `== 1` when a task next owns `ArtistRepositorySearchTests.cs`); user-typed `%`/`_` act as LIKE wildcards in the prefix path (same as songs, "as today").
 
 - [ ] **3.9c `ArtistResolutionService` uses the FTS pool** [SEQUENTIAL — after 3.9b, 3.4]
   - **Produces:** fuzzy tier reads `SearchNameCandidatesAsync`; artist `GetFuzzyCandidatePoolAsync` and `DerivePrefixToken` (artist side) deleted.
