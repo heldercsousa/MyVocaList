@@ -157,6 +157,8 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
 4. For remaining remote rows, resolve `LocalArtistId/LocalArtistName` by collated artist name in the
    same read; the C# `OrdinalIgnoreCase` re-filters (`SongSuggestionService.cs:162,204`) are removed.
 
+> **Spec updated 2026-11-04 (4.2 Red `008ef44d`):** constructor order fixed by the Tester (design left it open): `SongSuggestionService(ISongRepository, IArtistRepository, IUnitOfWork, IEnumerable<IMusicMetadataProvider>, ISimilarityScorer, INetworkStatus, ILogger<SongSuggestionService>)`. The provider is picked by `ProviderName == "Deezer"`; the song-side `MusicBrainz` branch is removed from the new path (4.3 removes the legacy methods).
+
 ### 3.4 Providers and the Field dependency
 
 - `IMusicMetadataProvider` contract change: `SearchSongsAsync`/`SearchArtistsAsync` **throw** on
