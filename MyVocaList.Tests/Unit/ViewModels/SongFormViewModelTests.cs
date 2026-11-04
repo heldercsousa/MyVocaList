@@ -205,7 +205,7 @@ public class SongFormViewModelTests
 
         var resolution = new Mock<ISongResolutionService>();
         resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new SongResolution(ResolutionKind.NoMatch, null, [], [], false));
+                  .ReturnsAsync(new SongResolution(ResolutionKind.NoMatch, null, []));
 
         var snackbar = new Mock<ISnackbarComponent>();
 
@@ -234,7 +234,7 @@ public class SongFormViewModelTests
 
         var resolution = new Mock<ISongResolutionService>();
         resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 99, [], [], false));
+                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 99, []));
 
         var sut = CreateSut(songService: songService, resolutionService: resolution);
         sut.SongTitle = "Test Song";
@@ -264,7 +264,7 @@ public class SongFormViewModelTests
 
         var resolution = new Mock<ISongResolutionService>();
         resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 99, [], [], false));
+                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 99, []));
 
         var sut = CreateSut(songService: songService, resolutionService: resolution);
         sut.SongTitle = "Test Song";
@@ -1028,7 +1028,7 @@ public class SongFormViewModelTests
         var firstCall = sut.SaveCommand.ExecuteAsync(null);
         var secondCall = sut.SaveCommand.ExecuteAsync(null);   // simulates the second tap of a double-tap
 
-        gate.SetResult(new SongResolution(ResolutionKind.NoMatch, null, [], [], false));
+        gate.SetResult(new SongResolution(ResolutionKind.NoMatch, null, []));
         await Task.WhenAll(firstCall, secondCall);
 
         resolutionService.Verify(

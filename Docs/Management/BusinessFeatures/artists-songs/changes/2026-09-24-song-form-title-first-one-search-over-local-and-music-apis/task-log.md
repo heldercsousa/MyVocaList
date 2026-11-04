@@ -476,9 +476,52 @@ _(not started)_
 
 ## 3.3b
 
-### Checkpoint
+**Status:** To Review
+**Plan:** `plan.md` § Task 3.3b · **Branch:** `task/sft-3.3b-shrink-resolution` · **Model:** Haiku · **Level:** C (mechanical, no new test; no-test decision recorded below) · **Review lane:** Standard
+**Started:** 2026-11-04 · **Completed:** 2026-11-04
 
-_(not started)_
+Context7 unavailable this session (per briefing); no new library API used (mechanical removal and construction-site edits), so no lookup was needed.
+
+### Inherited (uncommitted edits, kept)
+- `Domain/Resolution/ResolutionResults.cs`: `FieldDiff` deleted; `SongResolution(ResolutionKind Kind, int? ExactMatchSongId, IReadOnlyList<SongMatch> FuzzyCandidates)`.
+- `Services/SongResolutionService.cs`: six `SongResolution` constructions reduced to 3 args.
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`: four constructions reduced to 3 args.
+- This section (previous draft).
+
+### Withdrawn change (undone, reason recorded)
+The previous implementor also removed the `SongResolutionService` constructor parameters and fields `_songRepository`, `_artistResolution`, `_songService`, and changed `SongResolutionServiceTests.CreateSut()` to 3 args. This is reverted: the constructor is restored exactly as on develop, and `SongResolutionServiceTests.cs` is restored to the develop version (`git checkout develop -- …`; the file no longer differs).
+Reason: the permanent architecture gate `UnitOfWorkReadScopeTests.NoGovernedField_IsDereferencedAnywhere_InsideOrOutsideALambda` (REQ-UOW-36/37) requires governed constructor parameters on services that call `ExecuteReadAsync`. With the shrunk constructor the gate failed (`SongResolutionService.cs — calls ExecuteAsync/ExecuteReadAsync but zero governed constructor parameters were detected`). The dead fields stay under READ-SCOPE open item F4 (Helder). No architecture test was edited; no assertion, `Times`, or setup value changed.
+
+### Changed files
+- `Domain/Resolution/ResolutionResults.cs` (`FieldDiff` deleted; `SongResolution` 3-arg record)
+- `Services/SongResolutionService.cs` (6 `SongResolution` constructions → 3 args; constructor unchanged vs develop)
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (4 `SongResolution` constructions → 3 args)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
+
+Not changed vs develop: `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs` (restored).
+
+### Construction sites edited
+- `Services/SongResolutionService.cs`: ExactExternalMatch, NoMatch (artist unresolved), ExactLocalMatch, FuzzyCandidates, NoMatch (final).
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`: 4 positional constructions → 3 args.
+
+### Level C no-test decision
+Mechanical removal of the unused `FieldDiff` member and its positional arguments from `SongResolution` construction sites; no new behaviour, no new AC. No test added or altered; existing suite covers the record through its consumers.
+
+### Superseded tests
+None. No test deleted, rewritten, or renamed.
+
+### Build / test evidence (verbatim)
+- Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` → `ok dotnet build: 6 projects, 0 errors, 33 warnings (00:02:38.08)`
+- Tests: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` → `Aprovado! – Com falha: 0, Aprovado: 674, Ignorado: 0, Total: 674, Duração: 6 s - MyVocaList.Tests.dll (net10.0)`
+- Count: 674 on this base; delta vs. base 0 (the briefing's 671 figure predates 3.4 merging; the count on this base is 674 and is unchanged by this task).
+- Census `['FieldDiff','TargetHasManualEdits']` (Python `os.walk`, skipping `Docs`, `.git`, `bin`, `obj`, `.worktrees`): `hits: 0`.
+
+### Verification
+- `rtk proxy git diff develop -- Services/SongResolutionService.cs` shows only `SongResolution` construction hunks (no constructor change).
+- Re-read after each edit: service constructor lines 13–25 match develop; `SongResolutionServiceTests.cs` matches develop.
+
+### Checkpoint
+_(none — section final)_
 
 ## 3.4
 
