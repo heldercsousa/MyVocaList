@@ -293,6 +293,32 @@ None.
   3. `git branch -a`: no local or remote branch name contains `catalog`, `catalog-prop`, `bug-080` or `venue`.
   - **Result: clear to dispatch.** Worktree `.worktrees/sft-3.1`, branch `task/sft-3.1-new-artist-uow`, from develop `dae05832`. Role: Tester (W2), then a fresh Builder (Opus).
 
+- 2026-11-04 (Tester W2) - Step 1 + Step 2 done; Red committed. Build is a compile failure (expected). Now: STOP, hand back to orchestrator for the Builder (W3, Opus).
+
+### Tester notes (W2)
+
+- Context7 available; not needed (only existing test mechanics reused). Skills: myvocalist-coding.
+- Edited `SongServiceTests.cs`: the 3 existing `CreateSongWithUrlsAsync(artistId, ...)` calls (lines ~604, 624, 642 -> `artistId, null, ...`) moved to the new overload; +3 new unit tests. NOTE: the plan says "10 existing calls"; only 3 exist in this file (the others are in `SongFormViewModelTests.cs` / `Bug068RegressionTests.cs`, not owned; they keep compiling against the `[Obsolete]` old overload).
+- Created `SongServiceNewArtistUnitOfWorkTests.cs` (6 tests, own copy of the `ThrowOnAddSongRepository` decorator).
+- Superseded tests (NOT deleted; `NestedUnitOfWorkTests.cs` stays until 3.3): `:66` `CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow` (REQ-UOW-22) -> `CreateSongWithUrlsAsync_ThrowAfterArtistStaged_RollsBackBoth` (REQ-SFT-18); `:105` `..._LeavesPartialArtistRow` failure-tuple (REQ-UOW-24) -> `CreateSongWithUrlsAsync_FailureTupleAfterArtistStaged_WritesNothing` (REQ-SFT-18); `:22` -> `..._NewArtistName_PersistsOneArtistAndOneSong`; `:146` -> `..._UsesOneAppDbContextAcrossTwoLevels`.
+- Flag: the "failure tuple after artist staged" test uses the prescribed 101-char title; if the Builder validates the title BEFORE creating the artist (natural), that test passes without exercising rollback of a staged artist (weak but spec-prescribed).
+
+### Red output (verbatim, `dotnet test ... -m:1 --filter "FullyQualifiedName~SongServiceTests|FullyQualifiedName~SongServiceNewArtistUnitOfWorkTests"`; compiler is pt-BR localised)
+
+Compile failure. The expected CS1501 does NOT appear: the old overload is the only candidate with optional `ct`, so the 9-arg calls bind to it and fail with CS1503/CS9174/CS8130 instead.
+
+```
+SongServiceNewArtistUnitOfWorkTests.cs(20,13): error CS1503: Argumento 1: nao e possivel converter de "<nulo>" para "int"
+SongServiceNewArtistUnitOfWorkTests.cs(20,76): error CS1503: Argumento 8: nao e possivel converter de "string" para "System.Collections.Generic.IEnumerable<string>"
+SongServiceNewArtistUnitOfWorkTests.cs(20,94): error CS9174: Nao e possivel inicializar o tipo 'CancellationToken' com uma expressao de colecao porque o tipo nao e construivel.
+SongServiceNewArtistUnitOfWorkTests.cs(134,14): error CS8130: Nao e possivel inferir o tipo da variavel de desconstrucao digitada implicitamente 'holderOk'.
+SongServiceTests.cs(604,14): error CS8130: Nao e possivel inferir o tipo da variavel de desconstrucao digitada implicitamente 'success'.
+SongServiceTests.cs(606,13): error CS9174: Nao e possivel inicializar o tipo 'CancellationToken' com uma expressao de colecao porque o tipo nao e construivel.
+SongServiceTests.cs(659,13): error CS1503: Argumento 1: nao e possivel converter de "<nulo>" para "int"
+SongServiceTests.cs(696,66): error CS1503: Argumento 8: nao e possivel converter de "string" para "System.Collections.Generic.IEnumerable<string>"
+```
+(Accents transliterated; full set: CS1503, CS8130, CS8183, CS9174 across both files.)
+
 ## 3.2a
 
 ### Checkpoint
