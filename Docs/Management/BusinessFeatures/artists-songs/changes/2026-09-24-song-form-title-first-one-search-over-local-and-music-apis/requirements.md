@@ -1,8 +1,8 @@
 # Requirements: Song form title-first, one search over local and music APIs
 
-> **Amendment 2026-11-04 (Q5/Q7: REQ-SFT-04/05/06/08/12/14/47 amended, REQ-SFT-53 new) is PENDING
-> Helder's approval.** Dated notes mark every change; until approved, the tasks gated by plan § 0.3 D21
-> are not dispatched.
+> **Amendment 2026-11-04 (Q5/Q7: REQ-SFT-04/05/06/08/12/14/47 amended, REQ-SFT-53 new) APPROVED by
+> Helder on 2026-11-04, including the author proposals Q17–Q21.** Dated notes mark every change; the
+> tasks gated by plan § 0.3 D21 are now dispatchable.
 
 > **Spec APPROVED 2026-09-26** under Helder's pre-authorisation of 2026-09-25 ("approve as you
 > recommend … be automatic"). Every open question takes its recorded recommendation, and all seven
@@ -11,7 +11,7 @@
 
 > **Status: DRAFT for Helder's review (2026-09-24).** Written from Helder's five rounds of decisions
 > (`README.md`, same folder) and the read-only evaluation `findings.md` (same folder).
-> Items marked `[OPEN — Helder decides]` or `[Proposed — confirm]` are not decided.
+> Items marked `[OPEN — Helder decides]` or `[Proposed — confirm]` are not decided (none of the latter remain after the 2026-11-04 approval).
 >
 > Dated change spec under `artists-songs`. The shipped specs it replaces or narrows are immutable and
 > are **not** edited (§ Supersedes). Design: `design.md`. Tasks: `tasks.md`.
@@ -143,7 +143,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   (REQ-SFT-53), so this bound does not apply and local options do not wait.
 - **REQ-SFT-09: Latest query wins.** Options from an earlier, slower query SHALL never replace options
   of a later query (carry-over of REQ-ACREATE-13 / REQ-ACF-26).
-- **REQ-SFT-53: Offline detection skips Deezer** `[New 2026-11-04 — Helder, Q7: offline skips Deezer, read through an interface; the access-level mapping below is an author proposal (Q19)]`. Before each remote
+- **REQ-SFT-53: Offline detection skips Deezer** `[New 2026-11-04 — Helder, Q7: offline skips Deezer, read through an interface; access-level mapping (Q19) approved by Helder 2026-11-04]`. Before each remote
   query (≥ 3 trimmed characters), the search Service SHALL ask the device's network state through an
   interface it owns (`INetworkStatus`, `design.md` § 3.6). IF the device reports **no internet**,
   THEN the Service SHALL NOT call Deezer and SHALL return status Offline at once (REQ-SFT-06 case 1).
@@ -151,7 +151,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   - "No internet" means the platform reports network access **None** or **Local** (connected to a
     network with no internet route). **Unknown** and **ConstrainedInternet** (e.g. a captive portal)
     are **not** treated as offline: Deezer is tried, and a failure shows the unavailable note. This
-    avoids a false "You're offline" when the platform cannot tell. `[Proposed — confirm (Q19)]`
+    avoids a false "You're offline" when the platform cannot tell. `[Approved — Helder, 2026-11-04 — (Q19)]`
   - The state is read per query, never cached, so going back online is picked up by the next query.
   - **No MAUI type in Services or Domain:** Services see only `INetworkStatus`; the MAUI
     implementation lives in the app project (constitutional layering, `code-principles.md`).
@@ -174,8 +174,8 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
     missing or empty, Deezer's full `title`.
   - **Version** = Deezer's `title_version`, normalised: trim, then remove the outer brackets **only when** the value starts with `(` or `[` and that bracket's **matching** closer is the value's last character; trim again; otherwise keep it as is ("matching" counts nesting depth of the same bracket type only; the other type is ignored, so `"(Live [2011])"` → `"Live [2011]"`) (`"(Live)"` → `"Live"`,
     `"[Remastered 2011]"` → `"Remastered 2011"`, `"Live at Wembley"` unchanged, `"(Live) (2011)"` unchanged
-    because the first `(` closes before the end, `"(Live]"` unchanged, missing or empty → `""`). `[Proposed — confirm: the bracket stripping (Q17)]` Version is **overwritten** by the
-    pick, including with `""` (the pick defines the song's identity). `[Proposed — confirm: overwrite
+    because the first `(` closes before the end, `"(Live]"` unchanged, missing or empty → `""`). `[Approved — Helder, 2026-11-04 — the bracket stripping (Q17)]` Version is **overwritten** by the
+    pick, including with `""` (the pick defines the song's identity). `[Approved — Helder, 2026-11-04 — overwrite
     with "" (Q20)]`
   - **Artist** = the provider's artist name; the pending external identity = `("Deezer", <track id>)`.
   - Title and Artist are both in the picked state. Version stays an ordinary editable field.
@@ -201,7 +201,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   pick, the pending external identity SHALL be cleared, because the record is no longer the picked
   Deezer song `[Confirmed for Artist — Helder 2026-11-04]`. X on Title also empties and unlocks Title; X on
   Artist also empties and unlocks Artist. The other field keeps its value and state.
-  **Version filled by the pick** `[Proposed — confirm (Q21), 2026-11-04]`: X on **Title** also resets Version
+  **Version filled by the pick** `[Approved — Helder, 2026-11-04 — (Q21)]`: X on **Title** also resets Version
   to `""` if it still holds the value the pick wrote (unchanged since the pick); a Version the user edited
   after the pick is kept. X on Artist leaves Version as is. Consequence for REQ-SFT-11: after X on Title, a
   pick-filled Version is gone, so it never triggers the discard sheet; a Version the user typed or edited
@@ -375,7 +375,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   Local options come first (marker "In your library"), then Deezer options (supporting text
   "Deezer"). In edit mode Name is the Field with `IsSearchEnabled = false`, Editable (rename unchanged).
   > **Spec updated 2026-11-04 (Q7):** the two notes and offline detection (REQ-SFT-06/53) apply here.
-  > Wording on this form `[Proposed — confirm (Q18)]`: offline → *"You're offline — showing artists
+  > Wording on this form `[Approved — Helder, 2026-11-04 — (Q18)]`: offline → *"You're offline — showing artists
   > from your library only."*; unavailable → *"Online search isn't available right now — showing
   > your library only."* (the unavailable text is the Song form's, verbatim).
   > **Spec updated 2026-09-26:** the Artist form's **local** name search uses the artist-name trigram index (`IArtistRepository.SearchNameCandidatesAsync`, FTS5 `ArtistSearch`, REQ-SFT-19/34), ranked for display by `ISimilarityScorer.RankScore` (ordering only, `design.md` § 6.4), at most 5 — not the collated name-prefix query. Without this, "metalica" could not list the stored "Metallica" and REQ-SFT-48's single-row rule could not hold for a typo. Orchestrator decision under Helder's pre-authorisation (plan § 0.3 D20).
@@ -496,7 +496,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
        showing your library only."*
     Connectivity is read through an interface (no MAUI types in Services). REQ-SFT-06/08 and the Deezer-pick
     REQs (Q5) are amended in the next spec step, then spec-reviewer, then Helder's approval.
-  - **Amendment written 2026-11-04 (awaiting Helder's approval):** Q5 → REQ-SFT-04/05/12; Q7 →
+  - **Amendment written and APPROVED 2026-11-04 (Helder: "Step 1: Approved" — Q17–Q21 resolved as recommended):** Q5 → REQ-SFT-04/05/12; Q7 →
     REQ-SFT-06/08, new REQ-SFT-53, REQ-SFT-47 note; `design.md` § 3.3/3.4/3.6/4; plan D21. Two
     sub-questions it raised:
     - **Q17 (Version normalisation):** Deezer's `title_version` comes with parentheses (`"(Live)"`).

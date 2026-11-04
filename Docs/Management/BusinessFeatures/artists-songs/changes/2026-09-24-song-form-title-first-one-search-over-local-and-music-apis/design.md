@@ -1,6 +1,6 @@
 # Design: Song form title-first, one search over local and music APIs
 
-> **Status: DRAFT, in review (2026-09-25).** Requirements: `requirements.md` (REQ-SFT-01…53; Q5/Q7 amendment 2026-11-04 pending Helder's approval).
+> **Status: DRAFT, in review (2026-09-25).** Requirements: `requirements.md` (REQ-SFT-01…53; Q5/Q7 amendment 2026-11-04 approved by Helder 2026-11-04).
 > Evidence: `findings.md` (same folder) and a scratchpad probe run on 2026-09-24 against the app's
 > bundled SQLite build on desktop (§ 6.1; Android is gated by spike G5). Current-behaviour claims cite
 > `file:line` on `develop` at `f9a67f62`.
@@ -336,7 +336,7 @@ dropped (the local row stays). The similarity dedup tier (c) in `ArtistSuggestio
 | Member | Purpose |
 |--------|---------|
 | `NameOptionSource` (`IMenuOptionSource`) | Local options (SupportingText "In your library"), then Deezer options (SupportingText "Deezer") |
-| `NameSupportingText` | Field `SupportingText` mapped from `Status` as on the Song form; offline text "You're offline — showing artists from your library only." (Q18, proposed), unavailable text verbatim from the Song form (REQ-SFT-47 note, 2026-11-04) |
+| `NameSupportingText` | Field `SupportingText` mapped from `Status` as on the Song form; offline text "You're offline — showing artists from your library only." (Q18, approved 2026-11-04), unavailable text verbatim from the Song form (REQ-SFT-47 note, 2026-11-04) |
 | `ArtistName`, `IsNameLocked`, `IsNameSearchEnabled => !IsEditMode` | Field bindings |
 | `SelectNameCommand` | Local → `INavigationService.GoToAsync($"../{Routes.ArtistForm}?artistId={id}&artistName={escaped}")` (query shape as `ArtistFormViewModel.cs:203`); Deezer → fill `ArtistName`, lock |
 | `ClearNameCommand` | X: empty and unlock |
