@@ -13,12 +13,4 @@ public interface ISongSuggestionService
     /// <param name="ct">Caller cancellation; rethrown (stale query).</param>
     Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
         string query, IReadOnlyCollection<int> shownLocalSongIds, CancellationToken ct = default);
-
-    /// <summary>Local song-title suggestions for a term (registered songs; title + artist name), max 5.</summary>
-    Task<IReadOnlyList<SongSuggestionDto>> GetLocalAsync(string term, CancellationToken ct = default);
-
-    /// <summary>Remote suggestions — same provider order and dedup/failure semantics as
-    /// IArtistSuggestionService.GetRemoteAsync (MusicBrainz first, Deezer fallback per AC-4.2).</summary>
-    Task<IReadOnlyList<SongSuggestionDto>> GetRemoteAsync(
-        string term, string? artistHint, IReadOnlyList<SongSuggestionDto> localResults, CancellationToken ct = default);
 }
