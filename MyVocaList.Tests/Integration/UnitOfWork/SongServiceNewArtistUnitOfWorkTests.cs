@@ -193,6 +193,15 @@ public class SongServiceNewArtistUnitOfWorkTests
         public Task<bool> ExistsByExternalIdentityAsync(string provider, string externalId, int? excludeId, CancellationToken ct)
             => _inner.ExistsByExternalIdentityAsync(provider, externalId, excludeId, ct);
 
+        public Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesAsync(string query, int take, CancellationToken ct)
+            => _inner.SearchTitleCandidatesAsync(query, take, ct);
+
+        public Task<IReadOnlyList<SongSearchHit>> FindByExternalIdsAsync(string provider, IReadOnlyCollection<string> externalIds, CancellationToken ct)
+            => _inner.FindByExternalIdsAsync(provider, externalIds, ct);
+
+        public Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName, string Version)> items, CancellationToken ct)
+            => _inner.FindByTitleAndArtistNamesAsync(items, ct);
+
         public Task AddAsync(Song song, CancellationToken ct)
             => throw new InvalidOperationException("injected");
 
