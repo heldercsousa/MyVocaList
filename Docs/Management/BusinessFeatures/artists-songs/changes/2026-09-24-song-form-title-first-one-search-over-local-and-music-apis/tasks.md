@@ -270,7 +270,7 @@
   - **Review lane:** Elevated
   > **Spec updated 2026-09-26:** (D16) consumes `SearchConstants.RemoteSearchTimeoutMilliseconds` (2.2) for the 3,000 ms bound. (D1) returns one list: local, then promoted, then remote (no append capability).
 
-- [ ] **4.3 Retarget threshold tests; register the service** [SEQUENTIAL — after 4.2]
+- [x] **4.3 Retarget threshold tests; register the service** [SEQUENTIAL — after 4.2]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** DI tests resolving the service add `Mock.Of<INetworkStatus>()` (registered in `MauiProgram.cs`, not `AddAppServices`).
   - **Files owned:** `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs`, `ISongSuggestionService.cs` (remove `GetLocalAsync`/`GetRemoteAsync`)
   - **Risk:** Low. **Demo:** `ISongSuggestionService` resolves from `AddAppServices`.
