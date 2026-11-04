@@ -41,7 +41,9 @@
       "args": [
         "/c",
         "uvx",
-        "mcp-server-sqlite",
+        "--with",
+        "mcp==1.30.0",
+        "mcp-server-sqlite==2025.4.25",
         "--db-path",
         "C:/Users/helde/source/repos/MyVocaList/.claude/MyVocaList.db"
       ]
