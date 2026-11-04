@@ -364,6 +364,74 @@ public class SongServiceTests
         _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    private SongService CreateSutWithArtistService(Mock<IArtistService> artistServiceMock) => new(
+        _songRepoMock.Object,
+        _artistRepoMock.Object,
+        _urlRepoMock.Object,
+        _urlServiceMock.Object,
+        PassthroughUnitOfWork.Over(
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, artistServiceMock),
+        _loggerMock.Object);
+
+    [Fact]
+    // [AC] REQ-SFT-28: a typed new artist on edit is created through the sp-resolved IArtistService
+    // inside the song's unit of work, and the song is re-linked to the new artist's id.
+    public async Task UpdateSongAsync_NewArtistName_CreatesArtistInSameUnitOfWork()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Creep", Version = "" };
+        SetupStoredSong(song);
+        var artistService = new Mock<IArtistService>();
+        artistService.Setup(s => s.CreateArtistAsync("New Band", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((true, "created", new Artist { Id = 9, Name = "New Band" }));
+        var sut = CreateSutWithArtistService(artistService);
+
+        var (success, message) = await sut.UpdateSongAsync(
+            1, "Creep", null, null, true, newArtistName: "New Band");
+
+        Assert.True(success, message);
+        Assert.Equal(9, song.ArtistId);
+        artistService.Verify(s => s.CreateArtistAsync("New Band", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        _songRepoMock.Verify(r => r.UpdateAsync(song, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-28: a failed artist creation (e.g. the REQ-SFT-52 collated-duplicate refusal)
+    // returns its message and the song is not written.
+    public async Task UpdateSongAsync_NewArtistCreationFails_ReturnsMessageAndDoesNotWrite()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Creep", Version = "" };
+        SetupStoredSong(song);
+        var artistService = new Mock<IArtistService>();
+        artistService.Setup(s => s.CreateArtistAsync("Dup", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((false, "Artist already exists", (Artist?)null));
+        var sut = CreateSutWithArtistService(artistService);
+
+        var (success, message) = await sut.UpdateSongAsync(
+            1, "Creep", null, null, true, newArtistName: "Dup");
+
+        Assert.False(success);
+        Assert.Equal("Artist already exists", message);
+        Assert.Equal(1, song.ArtistId);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-28: at most one of artistId / newArtistName (REQ-SFT-21 XOR); supplying both is
+    // rejected before anything is read or written.
+    public async Task UpdateSongAsync_BothArtistIdAndNewArtistName_Rejected()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Creep", Version = "" };
+        SetupStoredSong(song);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateSongAsync(
+            1, "Creep", null, null, true, artistId: 2, newArtistName: "New Band");
+
+        Assert.False(success);
+        Assert.Equal("Artist is required", message);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     // ── CreateSongAsync — lyrics ──────────────────────────────────────────
 
     [Fact]
