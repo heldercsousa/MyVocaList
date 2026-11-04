@@ -870,6 +870,71 @@ Run: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --filter "FullyQ
 - PASS (vacuous until M3 exists) `M3_Down_DropsTablesAndTriggers` — "latest" == SongExternalIdentityUnique, so nothing to drop; becomes meaningful once M3 exists.
 - PASS (unchanged) M1_DropsHasManualEditsFromSongsAndArtists, M1_ExistingRowsSurvive, M1_TableRebuild_KeepsUniqueCollatedIndexes, M2_DuplicateIdentities..., M2_UniqueIndex_RejectsSecondSongWithSameIdentity, M2_NullIdentities_AllowMany, M2_IndexName_IsComposite.
 
+### Part B (Opus) — 2026-11-04
+**Status:** To Review. Context7 available this session (Part A verified `UseSqlReturningClause` against EF Core 10 docs; no new API used in Part B — `migrationBuilder.Sql` only). Inherited (uncommitted, kept as-is, correct per plan): both configurations' `ToTable(..., tb => tb.UseSqlReturningClause(false))` (Part A Step 3) and the orchestrator's scaffold (migration + Designer + snapshot).
+
+**Step 3b — generated migration (verbatim, before editing):**
+```csharp
+protected override void Up(MigrationBuilder migrationBuilder)
+{
+
+}
+
+protected override void Down(MigrationBuilder migrationBuilder)
+{
+
+}
+```
+Snapshot diff vs. `75966b9c`: annotation-only — `+ b.HasAnnotation("Sqlite:UseSqlReturningClause", false);` inside the `Artist` and the `Song` entity blocks (4 lines added incl. blank lines, 0 removed). No table/column/index operation → not stale; proceeded.
+
+**Step 4 — final `Up` (11 `Sql` calls, one statement each, DDL verbatim from `design.md` § 6.2):**
+1. `CREATE VIRTUAL TABLE SongSearch USING fts5(title, artist, tokenize='trigram remove_diacritics 1')`
+2. `INSERT INTO SongSearch(rowid, title, artist) SELECT s.Id, s.Title, a.Name FROM Songs s JOIN Artists a ON a.Id = s.ArtistId`
+3. `CREATE TRIGGER SongSearch_ai AFTER INSERT ON Songs …`
+4. `CREATE TRIGGER SongSearch_au AFTER UPDATE OF Title, ArtistId ON Songs …` (delete + insert)
+5. `CREATE TRIGGER SongSearch_ad AFTER DELETE ON Songs …`
+6. `CREATE TRIGGER SongSearch_artist_au AFTER UPDATE OF Name ON Artists …` (UPDATE SongSearch.artist for the artist's songs)
+7. `CREATE VIRTUAL TABLE ArtistSearch USING fts5(name, tokenize='trigram remove_diacritics 1')`
+8. `INSERT INTO ArtistSearch(rowid, name) SELECT Id, Name FROM Artists`
+9. `CREATE TRIGGER ArtistSearch_ai AFTER INSERT ON Artists …`
+10. `CREATE TRIGGER ArtistSearch_au AFTER UPDATE OF Name ON Artists …` (delete + insert)
+11. `CREATE TRIGGER ArtistSearch_ad AFTER DELETE ON Artists …`
+
+`Down` (9 calls): `DROP TRIGGER IF EXISTS` SongSearch_ai, SongSearch_au, SongSearch_ad, SongSearch_artist_au, ArtistSearch_ai, ArtistSearch_au, ArtistSearch_ad; then `DROP TABLE IF EXISTS SongSearch`, `DROP TABLE IF EXISTS ArtistSearch`. Header comment carries the rebuild constraint sentence. No annotation operations existed to keep (generated Up/Down were empty).
+
+**DDL review against the real schema (no defect found):** `Songs.Id/Title/ArtistId` and `Artists.Id/Name` match the snapshot; `Songs.ArtistId` is required (`SongConfiguration.cs`, `IsRequired()`) so the backfill's inner `JOIN` drops no song; artist delete cascades via FK (`ArtistConfiguration.cs`, `OnDelete(Cascade)`) and SQLite FK actions fire `SongSearch_ad` (proven by `ArtistDelete_CascadeRemovesSongSearchRows`); artist rename is covered by `SongSearch_artist_au` (proven by `ArtistRenameViaEf_UpdatesSongSearchAndArtistSearch`). Note (not a defect, no action): `SongSearch_au` is `OF Title, ArtistId`, so an `UPDATE` that sets `Id` would desync — no code path updates a PK.
+
+### Verification evidence
+- Filtered `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --filter "FullyQualifiedName~SongMigrationTests"` → `Aprovado!  – Com falha:     0, Aprovado:    17, Ignorado:     0, Total:    17, Duração: 4 s` (`M3_Down_DropsTablesAndTriggers` now meaningful: latest = `AddSearchIndexes`, rolled back to `SongExternalIdentityUnique`).
+- Full `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` → `Aprovado!  – Com falha:     0, Aprovado:   688, Ignorado:     0, Total:   688, Duração: 7 s` (baseline 678 → 688, +10). All EF write tests pass on both the trigger-free `EnsureCreated` schema and migrated DBs; no flaky failure observed (single run).
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` → `6 projects, 0 errors, 28 warnings (00:02:31.58)`.
+- `dotnet ef migrations has-pending-model-changes -p Infra/MyVocaList.Infra.csproj -s Infra/MyVocaList.Infra.csproj` → `No changes have been made to the model since the last migration.`
+- Post-edit re-read: migration `.cs` compared line-by-line with `design.md` § 6.2 (lines 438-464).
+
+### AC matrix
+| AC | Criterion | Implementation | Test |
+|---|---|---|---|
+| REQ-SFT-34 | all seven FTS triggers exist after a full migrate | `AddSearchIndexes.Up` calls 3-6, 9-11 | `FullMigrate_AllSevenFtsTriggersExist` |
+| REQ-SFT-34 | both FTS tables exist | `Up` calls 1, 7 | `FullMigrate_CreatesSongSearchAndArtistSearch` |
+| REQ-SFT-34 / INV-SFT-3 | backfill one row per song/artist, artist name in `SongSearch.artist` | `Up` calls 2, 8 | `M3_Backfill_OneRowPerSongAndArtist` |
+| REQ-SFT-34 | EF song insert succeeds (RETURNING off) and indexes | `SongSearch_ai`; `SongConfiguration` | `SongInsertViaEf_AddsSongSearchRow` |
+| REQ-SFT-34 | EF title update replaces the row | `SongSearch_au` | `SongTitleUpdateViaEf_ReplacesSongSearchRow` |
+| REQ-SFT-34 | `ExecuteDeleteAsync` removes the row | `SongSearch_ad` | `SongExecuteDelete_RemovesSongSearchRow` |
+| REQ-SFT-34 | EF artist insert succeeds and indexes | `ArtistSearch_ai`; `ArtistConfiguration` | `ArtistInsertViaEf_AddsArtistSearchRow` |
+| REQ-SFT-34 | artist rename updates both tables | `SongSearch_artist_au`, `ArtistSearch_au` | `ArtistRenameViaEf_UpdatesSongSearchAndArtistSearch` |
+| REQ-SFT-34 | artist delete (cascade) removes song + artist rows | `SongSearch_ad` (via FK cascade), `ArtistSearch_ad` | `ArtistDelete_CascadeRemovesSongSearchRows` |
+| REQ-SFT-34 | rollback drops tables and triggers | `AddSearchIndexes.Down` | `M3_Down_DropsTablesAndTriggers` |
+
+REQ-SFT-19 and REQ-SFT-30…33 are enabled by this schema but exercised by the 3.9 / 3.9b query tests, not here. No superseded tests (none deleted or edited).
+
+### Changed files:
+- `Infra/EntityEFConfig/SongConfiguration.cs`
+- `Infra/EntityEFConfig/ArtistConfiguration.cs`
+- `Infra/Migrations/20261104161213_AddSearchIndexes.cs` (created)
+- `Infra/Migrations/20261104161213_AddSearchIndexes.Designer.cs` (created, generated, untouched)
+- `Infra/Migrations/AppDbContextModelSnapshot.cs` (generated, untouched)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
+
 ## 3.9
 
 ### Checkpoint
