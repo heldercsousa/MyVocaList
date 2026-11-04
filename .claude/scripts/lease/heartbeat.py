@@ -122,6 +122,16 @@ def main():
     os.makedirs(leases_dir, exist_ok=True)
     target = os.path.join(leases_dir, f"{session_id}.json")
 
+    # Throttle: PostToolUse fires on every tool call; skip if beaten recently
+    # (Stop always beats). Well inside LEASE_TTL_SECONDS, so freshness is unaffected.
+    if payload.get("hook_event_name") != "Stop":
+        try:
+            age = datetime.now(timezone.utc).timestamp() - os.path.getmtime(target)
+            if 0 <= age < lease_lib.HEARTBEAT_MIN_INTERVAL_SECONDS:
+                return
+        except OSError:
+            pass
+
     # T11: cheap location fields — no subprocess, no git calls.
     cwd = payload.get("cwd") or proj
     active_task = _read_active_task(proj)

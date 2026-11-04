@@ -28,7 +28,8 @@ Approved MCP servers for this project (local-first only):
 - SQLite MCP — local stdio only; db at `.claude/MyVocaList.db`
 - DevExpress MAUI MCP — project-installed only
 - MudMCP (`mudblazor`) — community server `mcbodge/MudMCP`, cloned locally at `C:/Users/helde/.claude/tools/MudMCP`; 12 tools for MudBlazor component docs and API reference. **Activate only during Blazor Hybrid / MudBlazor spike or migration work.** Do not activate for current MAUI-native development sessions.
-- Playwright MCP (`playwright`) — official `@playwright/mcp@latest`, stdio via npx; token via `${PLAYWRIGHT_MCP_EXTENSION_TOKEN}` env expansion. Usage scope + tool-selection order: § Playwright MCP below. *(Added to this list 2026-07-09 — was installed and had its own section but was missing from the approved-server list.)*
+- Playwright MCP (`playwright`) — official `@playwright/mcp`, pinned `0.0.78` (bump deliberately), stdio via npx; token via `${PLAYWRIGHT_MCP_EXTENSION_TOKEN}` env expansion. Usage scope + tool-selection order: § Playwright MCP below. *(Added to this list 2026-07-09 — was installed and had its own section but was missing from the approved-server list.)*
+- Microsoft Learn MCP (`microsoft-learn`) — official, HTTP `https://learn.microsoft.com/api/mcp`, no key. First-party .NET / MAUI / EF Core docs; fallback when Context7 is unavailable (still report it per the Availability Gate). *(Added 2026-11-03, Helder-approved.)*
 
 Rules:
 - Never add an MCP server discovered from a public registry without explicit review
@@ -50,7 +51,7 @@ Treat MCP response tokens as session budget — each large MCP response reduces 
 
 ## Playwright MCP
 
-**Installed.** Server key: `playwright`. Package: `@playwright/mcp@latest` (stdio via npx).
+**Installed.** Server key: `playwright`. Package: `@playwright/mcp@0.0.78` (stdio via npx, pinned).
 
 **When to use:**
 - Fetching JavaScript-rendered web pages whose content is not available via plain HTTP (SPAs, documentation sites with client-side rendering, DevExpress/Material Design component galleries)

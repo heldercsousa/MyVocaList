@@ -501,6 +501,9 @@ $RECYCLE.BIN/
 .claude/leases/
 # BACKLOG-first orphan-check session boundary marker (ephemeral, per-session — never commit)
 .claude/scripts/backlog/.session-marker
+# Hook runtime buffers (per-machine, rewritten every session — never commit)
+.claude/changed-files.txt
+.claude/active-task.json
 # Local Sentry DSN — never commit; fill from Sentry project settings
 **/appsettings.json
 
