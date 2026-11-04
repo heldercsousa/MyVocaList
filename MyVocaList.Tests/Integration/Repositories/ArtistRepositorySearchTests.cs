@@ -118,8 +118,10 @@ public class ArtistRepositorySearchTests : IAsyncLifetime
     [Fact]
     public async Task SearchNameCandidatesAsync_AfterRename_ReflectsNewName()
     {
+        _db.ChangeTracker.Clear(); // seeding left the inserted entities tracked
         var oasis = await _db.Artists.SingleAsync(a => a.Name == "Oasis");
         oasis.Name = "Radiohead";
+        _db.Artists.Update(oasis); // the context is NoTracking by default
         await _db.SaveChangesAsync();
 
         var renamed = await _repo.SearchNameCandidatesAsync("Radiohead", 50, CancellationToken.None);

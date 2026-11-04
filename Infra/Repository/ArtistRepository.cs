@@ -1,4 +1,7 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
@@ -9,11 +12,22 @@ namespace MyVocaList.Infra.Repository;
 /// <inheritdoc />
 public class ArtistRepository : IArtistRepository
 {
-    private readonly AppDbContext _db;
+    private const string NameSearchSql =
+        """
+        SELECT rowid AS Value
+        FROM ArtistSearch
+        WHERE ArtistSearch MATCH @m
+        ORDER BY bm25(ArtistSearch), length(name)
+        LIMIT @take
+        """;
 
-    public ArtistRepository(AppDbContext db)
+    private readonly AppDbContext _db;
+    private readonly ILogger<ArtistRepository> _logger;
+
+    public ArtistRepository(AppDbContext db, ILogger<ArtistRepository>? logger = null)
     {
         _db = db;
+        _logger = logger ?? NullLogger<ArtistRepository>.Instance;
     }
 
     /// <inheritdoc />
@@ -114,6 +128,55 @@ public class ArtistRepository : IArtistRepository
             .Take(take)
             .AsNoTracking()
             .ToListAsync(ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Artist>> SearchNameCandidatesAsync(
+        string name, int take, CancellationToken ct)
+    {
+        var match = FtsQueryBuilder.BuildTrigramMatch(name);
+        if (match is null)
+        {
+            // REQ-SFT-19: no word of >= 3 chars - collated name prefix, still DB-side.
+            var pattern = (name ?? string.Empty).Trim() + "%";
+            return await _db.Artists
+                .AsNoTracking()
+                .Where(a => EF.Functions.Like(
+                    EF.Functions.Collate(a.Name, CollationConstants.Default),
+                    EF.Functions.Collate(pattern, CollationConstants.Default)))
+                .OrderBy(a => a.Name.Length)
+                .Take(take)
+                .ToListAsync(ct);
+        }
+
+        List<int> ids;
+        try
+        {
+            ids = await _db.Database
+                .SqlQueryRaw<int>(
+                    NameSearchSql,
+                    new SqliteParameter("@m", match),
+                    new SqliteParameter("@take", take))
+                .ToListAsync(ct);
+        }
+        catch (SqliteException ex) when (
+            ex.Message.Contains("no such table", StringComparison.OrdinalIgnoreCase) &&
+            ex.Message.Contains("ArtistSearch", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogError(ex, "ArtistSearch FTS index is missing; artist name search returns no candidates");
+            return [];
+        }
+
+        if (ids.Count == 0) return [];
+
+        var artists = await _db.Artists
+            .AsNoTracking()
+            .Where(a => ids.Contains(a.Id))
+            .ToListAsync(ct);
+
+        // Keep the bm25 order of the index (positional, not a string comparison).
+        var position = ids.Select((id, i) => (id, i)).ToDictionary(x => x.id, x => x.i);
+        return artists.OrderBy(a => position[a.Id]).ToList();
     }
 
     /// <inheritdoc />
