@@ -672,6 +672,11 @@ Task is DTO/projection plumbing (remove a DTO member and its projection assignme
 - Context7 unavailable this session; no new library API used (plumbing only).
 - Emulator smoke deferred to Helder's device gate.
 
+### Build notes + Verifier + merge (orchestrator, 2026-11-04)
+- Commit `9425579d` (finishing Haiku implementor; first implementor stopped on 3 target-typed `new(` sites in unowned files → owned files extended). Build `0 Erro(s)`; 671/671.
+- Verifier **CONDITIONAL PASS** (0 blockers; W1 SHA/Build notes → this block).
+- Merged `39dbc58d`. Post-merge develop: `0 Erro(s)`; `Aprovado! – Com falha: 0, Aprovado: 671, Total: 671`. Combined census `HasManualEdits`: only `Artist.cs:9`, `Song.cs:14`, `ArtistConfiguration.cs:33`, `SongConfiguration.cs:48`, `ArtistService.cs:107` (3.6a/3.6b).
+
 ## 3.5b
 
 **Status:** To Review
