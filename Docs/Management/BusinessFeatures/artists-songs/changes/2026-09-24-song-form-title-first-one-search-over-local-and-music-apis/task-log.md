@@ -1076,7 +1076,19 @@ Files written and re-read: `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.
 
 ## 4.2
 
-**Status:** Red committed (Tester); awaiting Builder (Green).
+**Status:** To Review (Builder Green done; see `### Green`).
+
+### Green (Builder)
+- Inherited: clean worktree at Red `008ef44d`; no half-done edits.
+- Tests: full suite `Aprovado! Com falha: 0, Aprovado: 757, Total: 757` (focused `SongSuggestion`: 33/33). `UnitOfWorkReadScopeTests` included, green.
+- Build: android app build did not finish in ~40 min under machine load (stopped, no error output); Services/Contracts compile via the test project (0 errors). E2E: not applicable (service unregistered until 4.3).
+- `SongSuggestionDto` census: all construction sites positional with 7 args; new `Version = ""` / `LocalArtistName = null` are trailing optional parameters, so no non-owned file changed.
+
+### Green changed files
+- `Services/ISongSuggestionService.cs`, `Services/SongSuggestionService.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`, `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new), this task-log section.
+
+### Design concern (implementation deviates in shape, not behaviour)
+Design § 3.3 step 3/4 describes batch `FindByTitleAndArtistNamesAsync(triples)` and a batch artist lookup. Mapping batch hits back to Deezer rows needs a C#-side case/accent-insensitive comparison, which the HARD RULE forbids (the Red test returns hit "creep"/"RADIOHEAD" for row "Creep"/"Radiohead"). Implemented instead one single-item collated repository call per row (triple) and per distinct artist name, all inside one `ExecuteReadAsync` (dedup) plus one (artist resolution). Up to ~25 cheap SQLite queries per remote search; the DB stays the sole decider. Provider with no `Deezer` entry yields `Unavailable`.
 
 ### Checkpoint
 - Branch/worktree: `task/sft-4.2-song-suggestion-search` @ `.worktrees/sft-4.2` (base develop 6310f83d). Step 2 of 3 done (Tester Red). Next: Builder Green.
