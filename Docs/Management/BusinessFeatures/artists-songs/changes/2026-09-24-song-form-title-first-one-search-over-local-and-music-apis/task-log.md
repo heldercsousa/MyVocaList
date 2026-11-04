@@ -993,8 +993,11 @@ None required; optionally note `FtsQueryBuilder` is public (see Deviations).
 ## 3.9b
 
 ### Checkpoint
+Step 1 of 3 done (Red). Now: implement `IArtistRepository.SearchNameCandidatesAsync` + `ArtistRepository` (Green).
+Context manifest: `Infra/Repository/ArtistRepository.cs`, `Domain/RepositoryInterface/IArtistRepository.cs`, `MyVocaList.Tests/Integration/Repositories/ArtistRepositorySearchTests.cs`, `Infra/Repository/SongRepository.cs` (pattern).
 
-_(not started)_
+### Red (verbatim, CS1061)
+`ArtistRepositorySearchTests.cs(42,32): error CS1061: 'ArtistRepository' does not contain a definition for 'SearchNameCandidatesAsync'` (same at lines 50, 58, 66, 81, 89, 105, 106, 125, 126; localized pt-BR in the raw output).
 
 ## 3.9c
 
