@@ -109,8 +109,18 @@ public class SongService : ISongService
         }, ct);
 
     /// <inheritdoc />
+    [Obsolete("hasManualEdits is retired (REQ-SFT-37); use the overload without it. Removed in 3.2c.")]
     public Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
+        string? externalId = null, string? externalProvider = null, string? version = null,
+        int? artistId = null, string? newArtistName = null,
+        CancellationToken ct = default)
+        => UpdateSongAsync(id, title, featuredArtists, lyrics, externalId, externalProvider, version,
+            artistId, newArtistName, ct);
+
+    /// <inheritdoc />
+    public Task<(bool success, string message)> UpdateSongAsync(
+        int id, string title, string? featuredArtists, string? lyrics,
         string? externalId = null, string? externalProvider = null, string? version = null,
         int? artistId = null, string? newArtistName = null,
         CancellationToken ct = default)
@@ -199,7 +209,6 @@ public class SongService : ISongService
             song.FeaturedArtists = featuredArtists;
             song.Lyrics = lyrics;
             song.UpdatedAt = DateTime.UtcNow;
-            song.HasManualEdits = hasManualEdits;
 
             // BUG-024: persist the version label when provided; null = keep existing value
             // (mirrors the externalId/externalProvider null-keeps-existing semantics below).
