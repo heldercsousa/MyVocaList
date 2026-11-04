@@ -165,6 +165,25 @@ public class SongResolutionServiceTests
         Assert.Equal(5, result.ExactMatchSongId);
     }
 
+    [Fact]
+    // [AC] REQ-SFT-42: an accent-only title difference returns an exact match carrying the stored song's id.
+    public async Task ResolveAsync_AccentOnlyTitleDifference_ReturnsExactLocalMatchWithId()
+    {
+        _artistResolutionMock
+            .Setup(a => a.ResolveAsync(It.IsAny<ArtistCandidate>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ArtistExactLocal(7));
+        _songRepoMock
+            .Setup(r => r.FindIdByTitleVersionForArtistAsync(7, "Nao Sei", "", null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(42);
+
+        var sut = CreateSut();
+
+        var result = await sut.ResolveAsync(MakeCandidate(title: "Nao Sei"));
+
+        Assert.Equal(ResolutionKind.ExactLocalMatch, result.Kind);
+        Assert.Equal(42, result.ExactMatchSongId);
+    }
+
     // ── ResolveAsync — fuzzy candidates ──────────────────────────────────
 
     [Fact]
