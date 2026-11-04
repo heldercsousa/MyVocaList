@@ -176,7 +176,7 @@
   - **Risk:** Low. **Demo:** build and tests green.
   - **Review lane:** Standard
 
-- [ ] **3.6b M1: drop the `HasManualEdits` columns** [SEQUENTIAL — after 3.6a, G3]
+- [x] **3.6b M1: drop the `HasManualEdits` columns** [SEQUENTIAL — after 3.6a, G3]
   - **Files owned:** `Domain/Entity/Song.cs`, `Domain/Entity/Artist.cs`, `Infra/EntityEFConfig/SongConfiguration.cs`, `Infra/EntityEFConfig/ArtistConfiguration.cs`, `Infra/Migrations/*` (M1)
   - **Risk:** Medium — SQLite table rebuild.
   - **Tests (B):** migration test on a temp file: columns absent after `MigrateAsync`; existing rows survive.

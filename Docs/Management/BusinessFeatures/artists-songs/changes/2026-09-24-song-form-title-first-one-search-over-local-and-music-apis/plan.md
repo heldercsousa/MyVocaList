@@ -202,6 +202,8 @@ dotnet ef migrations has-pending-changes -p Infra/MyVocaList.Infra.csproj -s Inf
 dotnet ef database update -p Infra/MyVocaList.Infra.csproj -s Infra/MyVocaList.Infra.csproj --connection "Data Source=.claude/MyVocaList.db"   # keeps the SQLite MCP copy current
 ```
 
+> **Spec updated 2026-11-04 (3.6b merge):** the relative `Data Source=.claude/MyVocaList.db` fails with *SQLite Error 14: unable to open database file* (the path resolves against the Infra project, not the repo root). Use the absolute path: `--connection "Data Source=C:\Users\helde\source\repos\MyVocaList\.claude\MyVocaList.db"` (PowerShell: `"Data Source=$((Resolve-Path .claude/MyVocaList.db).Path)"`). `.claude/MyVocaList.db` is git-tracked: commit it on develop after the update. The `PRAGMA foreign_keys = 0 ... cannot be executed in a transaction` message is EF's standard notice for a SQLite table rebuild, not an error.
+
 Then:
 
 - Review the merged task's `task-log.md` section: `### Changed files`, Verification evidence (Red + Green output verbatim for Level A/B), the AC matrix for user-facing tasks, and the **superseded-test table** (deleted/rewritten test → superseded AC → replacing REQ) for every task that deletes or rewrites a test.
