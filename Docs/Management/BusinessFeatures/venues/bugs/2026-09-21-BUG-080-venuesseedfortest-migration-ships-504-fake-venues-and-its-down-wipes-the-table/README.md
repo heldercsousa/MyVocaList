@@ -1,13 +1,14 @@
 ---
 id: BUG-080
 title: venuesSeedForTest migration ships ~504 fake venues and its Down wipes the table
-status: 🟡 In Progress
+status: ✅ Fixed
 severity: Major
 target: 2026-09-21
 section: BusinessFeatures
 parent: venues
 goal: A test-data seed migration sits in the production chain, so real installs get ~504 fake venues, and its Down() runs an unscoped DELETE FROM Venues that would destroy genuine user data on rollback.
 gate: "Decided 2026-11-04: guard the seed with #if DEBUG so Release builds insert nothing, and make Down() a no-op; no new migration (G3-safe)."
+closed: 2026-11
 kind: bug
 ---
 
