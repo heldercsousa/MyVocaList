@@ -63,3 +63,8 @@ of uncommitted work is not determinable from git. It was reviewed line-by-line b
 has now been reviewed and approved by Helder. No rule was weakened; every HARD RULE, the four spec
 gates, ITF's nine conditions and the regression-test mandate remain inline or explicitly routed.
 
+
+## 2026-11-03 — dotnet-skills vendoring (`594db617`)
+
+`CLAUDE.md § MCP & Skills` and `code-principles.md` edited by Claude Code (prefix `dotnet-skills:` dropped,
+vendoring note). **Human review: APPROVED by Helder 2026-11-03.**
