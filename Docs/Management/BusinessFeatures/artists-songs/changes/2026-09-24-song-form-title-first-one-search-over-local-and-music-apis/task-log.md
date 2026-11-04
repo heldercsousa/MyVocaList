@@ -523,6 +523,10 @@ None. No test deleted, rewritten, or renamed.
 ### Checkpoint
 _(none — section final)_
 
+### Verifier + merge (orchestrator, 2026-11-04)
+- Verifier **CONDITIONAL PASS** (0 blockers). Only warning: unrelated flaky `MyVocaList.Tests.Integration.Repositories.SongRepositoryTests.AddAsync_ValidSong_PersistedAndReturnedById` — `DbUpdateException: An error occurred while saving the entity changes` (inner exception not captured) on run 1, green on run 2. Info: five `new SongResolution` sites, not six (cosmetic).
+- Merged `5191b255`. Post-merge develop: `0 Erro(s)`; `Aprovado! – Com falha: 0, Aprovado: 671, Total: 671`.
+
 ## 3.4
 
 ### Checkpoint
@@ -537,7 +541,7 @@ _(not started)_
 
 ### Checkpoint
 
-_(not started)_
+- 2026-11-04 (orchestrator) — **Pre-dispatch G3 checks (plan § 0.2.2):** (1) LEDGER: no live branch (BUG-080 merged+closed; CATALOG-PROP deferred, no branch). (2) `git worktree list`: main only. (3) `git branch -a`: only `feat/uow-phase-4-1-catalog`, `feat/uow-phase-4-venue` (merged 2026-08-24). **Clear.** Worktree `.worktrees/sft-3.2b`, branch `task/sft-3.2b-remove-hasmanualedits`, from develop after 3.3b's merge.
 
 ## 3.2c
 
