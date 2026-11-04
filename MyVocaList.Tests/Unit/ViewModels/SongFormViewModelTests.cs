@@ -615,40 +615,6 @@ public class SongFormViewModelTests
         Assert.False(sut.HasYouTubeApiKey);
     }
 
-    // ── Resolution sheet: merge sheet state from FieldDiffs ───────────────
-
-    // [AC] AC-4.2 — target has manual edits → merge field rows populated
-    [Fact]
-    public async Task ConfirmUpdateExisting_TargetHasManualEdits_PopulatesMergeRows()
-    {
-        var diffs = new List<FieldDiff> { new("Title", "API Title", "Current Title") };
-        var resolution = new Mock<ISongResolutionService>();
-        var songService = new Mock<ISongService>();
-        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
-                   .Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
-                   .Returns((true, string.Empty));
-        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 77, [], diffs, true));
-
-        var sut = CreateSut(songService: songService, resolutionService: resolution);
-        sut.SongTitle = "Test Song";
-        sut.SelectedArtistId = 1;
-        sut.SelectedArtistName = "Artist";
-
-        // Trigger resolution
-        await sut.SaveCommand.ExecuteAsync(null);
-        Assert.True(sut.IsResolutionSheetVisible);
-
-        // Now confirm update
-        sut.SelectedResolutionTargetId = 77;
-        await sut.ConfirmUpdateExistingCommand.ExecuteAsync(null);
-
-        Assert.True(sut.IsMergeSheetVisible);
-        Assert.Single(sut.MergeFieldRows);
-        Assert.Equal("Title", sut.MergeFieldRows[0].Field);
-    }
-
     // ── BUG-024: edit-mode hydration + full-data save (regression) ────────
 
     private static Mock<ISongService> MakeSongServiceWithSong(Song song)

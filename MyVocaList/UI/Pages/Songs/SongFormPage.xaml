@@ -252,7 +252,7 @@
         <!-- ── Resolution BottomSheet (Task 4.5) ──────────────────────────────── -->
         <!--
             Shown when the resolution engine returns a non-NoMatch result.
-            Lists exact/fuzzy candidates; user chooses Update existing, Save as new version, or Cancel.
+            Lists exact/fuzzy candidates; user chooses Open existing, Save as new version, or Cancel.
         -->
         <dx:BottomSheet x:Name="resolutionSheet"
                         AllowedState="HalfExpanded"
@@ -290,11 +290,11 @@
                                            IsVisible="{Binding Version, Converter={StaticResource IsNotNullConverter}}" />
                                 </VerticalStackLayout>
                                 <dx:DXButton Grid.Column="1"
-                                             Content="Select"
+                                             Content="Open existing"
                                              Style="{StaticResource OutlinedButton}"
                                              Padding="16,0"
                                              VerticalOptions="Center"
-                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=SelectResolutionCandidateCommand}"
+                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=OpenExistingSongCommand}"
                                              CommandParameter="{Binding .}" />
                             </Grid>
                         </DataTemplate>
@@ -316,7 +316,7 @@
                                   ErrorText="{Binding VersionErrorText}"
                                   IsVisible="{Binding VersionEntryRequired}"
                                   Unfocused="OnVersionUnfocused" />
-                    <dx:DXButton Content="Save As New Version"
+                    <dx:DXButton Content="Save as new version"
                                  Style="{StaticResource OutlinedButton}"
                                  HorizontalOptions="Fill"
                                  Command="{Binding ConfirmSaveAsNewVersionCommand}" />
@@ -327,72 +327,6 @@
                 <dx:DXButton Content="Cancel"
                              Style="{StaticResource BottomSheetCancelAction}"
                              Command="{Binding DismissResolutionSheetCommand}" />
-
-            </VerticalStackLayout>
-        </dx:BottomSheet>
-
-        <!-- ── Merge BottomSheet (Task 4.5) ───────────────────────────────────── -->
-        <!--
-            Shown when update target has HasManualEdits = true and there are field diffs.
-            One row per FieldDiff: field name, current value, API value, accept toggle.
-        -->
-        <dx:BottomSheet x:Name="mergeSheet"
-                        AllowedState="HalfExpanded"
-                        HalfExpandedRatio="0.65"
-                        IsModal="True"
-                        ShowGrabber="True"
-                        AllowDismiss="False"
-                        BackgroundColor="{StaticResource Surface}"
-                        CornerRadius="28"
-                        StateChanged="OnMergeSheetStateChanged">
-            <VerticalStackLayout Padding="0,0,0,24">
-
-                <Label Text="Review field changes"
-                       Style="{StaticResource BottomSheetTitle}"
-                       Margin="24,20,24,8" />
-                <Label Text="Choose which API values to accept for this record."
-                       StyleClass="Body.Small"
-                       TextColor="{StaticResource OnSurfaceVariant}"
-                       Margin="24,0,24,12" />
-
-                <BoxView Style="{StaticResource Divider}" />
-
-                <!-- Per-field diff rows -->
-                <VerticalStackLayout Spacing="0"
-                                     BindableLayout.ItemsSource="{Binding MergeFieldRows}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="vm:MergeFieldRow">
-                            <Grid ColumnDefinitions="*,Auto" Padding="24,12">
-                                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                    <Label Text="{Binding Field}"
-                                           StyleClass="Label.Small"
-                                           TextColor="{StaticResource OnSurfaceVariant}" />
-                                    <Label Text="{Binding CurrentValue}"
-                                           StyleClass="Body.Medium"
-                                           TextColor="{StaticResource OnSurface}" />
-                                    <Label Text="{Binding ApiValue, StringFormat='API: {0}'}"
-                                           StyleClass="Body.Small"
-                                           TextColor="{StaticResource Secondary}" />
-                                </VerticalStackLayout>
-                                <dxe:CheckEdit Grid.Column="1"
-                                               IsChecked="{Binding AcceptApiValue, Mode=TwoWay}"
-                                               VerticalOptions="Center" />
-                            </Grid>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
-
-                <BoxView Style="{StaticResource Divider}" />
-
-                <dx:DXButton Content="Apply Selected Changes"
-                             Style="{StaticResource FilledButton}"
-                             HorizontalOptions="Fill"
-                             Margin="24,12"
-                             Command="{Binding ConfirmMergeCommand}" />
-
-                <dx:DXButton Content="Cancel"
-                             Style="{StaticResource BottomSheetCancelAction}"
-                             Command="{Binding DismissMergeSheetCommand}" />
 
             </VerticalStackLayout>
         </dx:BottomSheet>
