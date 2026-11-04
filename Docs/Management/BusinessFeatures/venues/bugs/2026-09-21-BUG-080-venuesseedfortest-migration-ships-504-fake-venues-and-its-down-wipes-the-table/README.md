@@ -7,7 +7,7 @@ target: 2026-09-21
 section: BusinessFeatures
 parent: venues
 goal: A test-data seed migration sits in the production chain, so real installs get ~504 fake venues, and its Down() runs an unscoped DELETE FROM Venues that would destroy genuine user data on rollback.
-gate: Helder decides whether the seed ships or is gated/removed before release, and Down() is scoped or made a no-op.
+gate: "Decided 2026-11-04: guard the seed with #if DEBUG so Release builds insert nothing, and make Down() a no-op; no new migration (G3-safe)."
 kind: bug
 ---
 
@@ -110,3 +110,21 @@ on production installs.
 
 **Action: none now.** Recorded so whoever writes the drop migration has this reasoning in hand rather
 than rediscovering it.
+
+## Decision (Helder, 2026-11-04)
+
+Helder: the seed **should run in dev environments only**; the venues are useful while developing and
+testing. He suggested compiler directives and left the pragmatic choice open. Chosen fix:
+
+- `Up()`: wrap the inserts in `#if DEBUG … #endif`. Debug builds keep seeding exactly as today; Release
+  builds run an empty `Up()`. EF still records the migration as applied in Release, which is harmless —
+  it is a data-only migration, so the model snapshot is untouched.
+- `Down()`: make it a no-op (comment explaining why). This removes Concern 2 — no rollback can delete
+  user venues.
+- **No new migration** and no snapshot change, so this does not collide with SFT's migrations (G3).
+- Concern 1 (drop the seed before release) is **no longer needed**: Release never inserts it.
+- Known limit, accepted: a Debug build installed over a device's real data still seeds once. Dev only.
+- Regression evidence (Major — mandatory where testable): a test that `Down()` leaves a pre-existing
+  venue in place; the `#if DEBUG` split is verified by inspection + a Release build, documented here.
+- The broader "seed / empty data on demand for dev and QA" idea is registered separately as a post-MVP
+  item: `cross-cutting/large-volume-data-stress-test/changes/2026-11-04-dev-and-qa-data-tooling-seed-and-empty-app-data-on-demand/`.
