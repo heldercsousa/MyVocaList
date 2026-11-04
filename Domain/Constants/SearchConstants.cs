@@ -33,4 +33,10 @@ public static class SearchConstants
     /// field (Helder 2026-09-23/24).
     /// </summary>
     public const int AutocompleteDebounceMilliseconds = 300;
+
+    /// <summary>
+    /// Upper bound, in milliseconds, on a remote music-provider search call. REQ-SFT-08: a call not
+    /// completed within this bound is abandoned so local options wait at most 3,000 ms (design § 0.3 D16).
+    /// </summary>
+    public const int RemoteSearchTimeoutMilliseconds = 3000;
 }
