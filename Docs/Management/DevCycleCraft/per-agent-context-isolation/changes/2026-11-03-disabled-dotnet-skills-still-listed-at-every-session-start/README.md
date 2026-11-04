@@ -35,8 +35,7 @@ About 30 dotnet-skills skills set off in settings.local.json still appear in the
 
 **Q1 answered — `"off"` works for project skills, is ignored for plugin skills.** Evidence from one
 session's skill listing: the 19 `maui-*` project skills set `off` are absent; `dotnet-skills:crap-analysis`
-and `superpowers:test-driven-development` (both `off`) are still listed. Several keys also use the
-directory id, not the listed name (`akka-net-aspire-configuration` vs listed `akka-aspire-configuration`).
+and `superpowers:test-driven-development` (both `off`) are still listed.
 
 **Skill listing by source (~9.9k total, `/context` estimates):**
 
@@ -60,3 +59,16 @@ Memory files (13.9k) remain the largest always-loaded block — tracked by the d
 
 Order: (a) `off` test on one built-in + one synced skill (zero risk, settings-only) → (b) dotnet-skills vendoring
 (needs Helder approval: changes the CLAUDE.md `dotnet-skills:` references) → (c) plugin toggles.
+
+## Results
+
+| Run | general-purpose | implementor | Listing |
+|---|---|---|---|
+| Baseline | 39,417 | 31,449 | full (~100 entries) — subagents now get the full listing + memory files (July: ~2–2.5k, none) |
+| A: `off` for `dataviz`, `anthropic-skills:morning`, `dotnet-skills:akka-aspire-configuration` (declared name) | 40,310 | — | `dataviz`, `morning` gone; akka still listed |
+
+- Built-in and claude.ai-synced skills honour `off`, live, no restart. Plugin skills ignore it under either key form → only lever for dotnet-skills is disabling the plugin (b).
+- Probe token totals vary ±1k with answer length — too noisy for sub-1k deltas; use the listing presence (binary) and `/context` in a fresh session for sizes.
+- A is kept (local `settings.local.json`).
+
+**Next:** (b) disable `dotnet-skills`, vendor the 4 used skills (~4k/agent) — needs Helder approval (CLAUDE.md names them as plugin skills); (c) `off` for further unused built-in/synced skills.
