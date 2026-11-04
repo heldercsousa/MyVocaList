@@ -1100,9 +1100,74 @@ Files written and re-read: `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.
 
 ## 4.2
 
-### Checkpoint
+**Status:** To Review (Builder Green done; see `### Green`).
 
-_(not started)_
+### Green (Builder)
+- Inherited: clean worktree at Red `008ef44d`; no half-done edits.
+- Tests: full suite `Aprovado! Com falha: 0, Aprovado: 757, Total: 757` (focused `SongSuggestion`: 33/33). `UnitOfWorkReadScopeTests` included, green.
+- Build: android app build did not finish in ~40 min under machine load (stopped, no error output); Services/Contracts compile via the test project (0 errors). E2E: not applicable (service unregistered until 4.3).
+- `SongSuggestionDto` census: all construction sites positional with 7 args; new `Version = ""` / `LocalArtistName = null` are trailing optional parameters, so no non-owned file changed.
+
+### Green changed files
+- `Services/ISongSuggestionService.cs`, `Services/SongSuggestionService.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`, `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new), this task-log section.
+
+### Design concern (implementation deviates in shape, not behaviour)
+Design § 3.3 step 3/4 describes batch `FindByTitleAndArtistNamesAsync(triples)` and a batch artist lookup. Mapping batch hits back to Deezer rows needs a C#-side case/accent-insensitive comparison, which the HARD RULE forbids (the Red test returns hit "creep"/"RADIOHEAD" for row "Creep"/"Radiohead"). Implemented instead one single-item collated repository call per row (triple) and per distinct artist name, all inside one `ExecuteReadAsync` (dedup) plus one (artist resolution). Up to ~25 cheap SQLite queries per remote search; the DB stays the sole decider. Provider with no `Deezer` entry yields `Unavailable`.
+
+### Checkpoint
+- Branch/worktree: `task/sft-4.2-song-suggestion-search` @ `.worktrees/sft-4.2` (base develop 6310f83d). Step 2 of 3 done (Tester Red). Next: Builder Green.
+- Last build: Red compile errors (below). Next command: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --filter "FullyQualifiedName~SongSuggestion"`.
+- Context manifest: `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs` (the Red); `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs` (ctor call); `Services/SongSuggestionService.cs`; `Services/ISongSuggestionService.cs`; `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`; `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new); design.md § 3.3.
+
+### Red output (`dotnet build MyVocaList.Tests -m:1`, compile errors; deduplicated)
+- CS1061 x7: `'SongSuggestionService' does not contain a definition for 'SearchTitleLocalAsync'` (SongSuggestionServiceTests.cs)
+- CS1061 x18: `'SongSuggestionService' does not contain a definition for 'SearchTitleRemoteAsync'` (SongSuggestionServiceTests.cs)
+- CS1729 x1: `'SongSuggestionService' does not contain a constructor that takes 7 arguments` (SongSuggestionServiceTests.cs:52)
+- CS1729 x2: same, SongSuggestionThresholdTests.cs:29 and :144
+- Not yet visible (masked by `var` inference, will surface once the methods exist): `SongSuggestionDto.Version`, `SongSuggestionDto.LocalArtistName`, `SongRemoteSearchResult`.
+
+### Constructor order (implementation decision; design § 3.3 does not fix it)
+`SongSuggestionService(ISongRepository, IArtistRepository, IUnitOfWork, IEnumerable<IMusicMetadataProvider>, ISimilarityScorer, INetworkStatus, ILogger<SongSuggestionService>)` - `INetworkStatus` between the scorer and the logger. Both test files use this order.
+
+### Superseded tests (old `SongSuggestionServiceTests.cs`; file was rewritten whole, line numbers differ from design § 10.1 which referenced an older revision)
+| Old test (line) | Action | Superseded AC | Replacing REQ / new test |
+|---|---|---|---|
+| `GetLocalAsync_TermMatchesRegisteredSongs_ReturnsTitleAndArtistName` (:35) | rewritten | REQ-FORMUX-22 | REQ-SFT-04 `SearchTitleLocalAsync_MapsVersionAndArtist` |
+| `GetLocalAsync_ManyMatches_ReturnsAtMostFive` (:57) | rewritten | REQ-FORMUX-22 | REQ-SFT-04 `SearchTitleLocalAsync_TakesAtMostFive` |
+| `GetRemoteAsync_ArtistHintProvided_PassedToProvider` (:76) | deleted | REQ-FORMUX-22 artistHint | REQ-SFT-35 (`QueriesDeezerOnlyWithoutHint` asserts null hint) |
+| `GetRemoteAsync_ResultTitleCollationEqualToLocal_IsExcluded` (:94) | rewritten (artist/version scoped) | REQ-FORMUX-03 | REQ-SFT-05 `..._MatchAlreadyShownLocally_DroppedNotPromoted`, `..._OtherArtistSameTitle_StaysRemote`, `..._Promoted` x3 |
+| `GetRemoteAsync_RemoteArtistExistsLocally_LocalArtistIdResolved` (:119) | rewritten | REQ-FORMUX-23 | REQ-SFT-13 `..._CarriesLocalArtistIdAndName` |
+| `GetRemoteAsync_AllProvidersFail_ReturnsEmptyAndLogs` (:145) | rewritten (`Status = Unavailable`) | REQ-FORMUX-05 | REQ-SFT-06 `..._ProviderThrows_StatusUnavailable_LogsWarning` |
+| `GetRemoteAsync_MusicBrainzEmpty_FallsBackToDeezer` (:170) | deleted | REQ-FORMUX-02 provider order | REQ-SFT-36 (Q1 = drop MusicBrainz) |
+
+Note: the legacy `GetLocalAsync`/`GetRemoteAsync` methods stay in production until 4.3 and are still exercised by `SongSuggestionThresholdTests.cs` (unchanged apart from the constructor call: new `Mock<INetworkStatus>` with `HasInternetAccess` explicitly `true`).
+
+### AC matrix (tests -> Builder implements)
+| AC | Test(s) |
+|---|---|
+| REQ-SFT-03 | `SearchTitleLocalAsync_BelowTwoTrimmedChars_ReturnsEmptyNoRepositoryCall` (theory x3), `SearchTitleRemoteAsync_BelowThreeTrimmedChars_NoProviderCall` (theory x2) |
+| REQ-SFT-30 | `SearchTitleLocalAsync_DontCry_DontCryFirst`, `_DonCry_DontCryFirst` |
+| REQ-SFT-32 | `SearchTitleLocalAsync_GunsCry_DontCryFirstViaArtist` |
+| REQ-SFT-04 | `SearchTitleLocalAsync_TakesAtMostFive`, `_MapsVersionAndArtist`, `SearchTitleRemoteAsync_TakesAtMostFiveRemote` |
+| REQ-SFT-07 | `SearchTitleLocalAsync_MakesNoProviderCall` |
+| REQ-SFT-05 | `ExternalIdentityMatchNotShown_Promoted`, `CollatedTitleArtistEmptyVersionMatch_Promoted`, `CollatedTitleArtistVersionMatch_Promoted`, `MatchAlreadyShownLocally_DroppedNotPromoted`, `OtherArtistSameTitle_StaysRemote` |
+| REQ-SFT-06 | `ProviderThrows_StatusUnavailable_LogsWarning`, `ZeroResults_StatusOk` |
+| REQ-SFT-08 | `ProviderSlowerThanBound_StatusUnavailable` (~3 s) |
+| REQ-SFT-09 | `CallerCancelled_Rethrows` |
+| REQ-SFT-53 | `Offline_NoProviderCall_StatusOffline_LogsInformation`, `OnlineButProviderThrows_StatusUnavailableNotOffline`, `ReadsNetworkStatusPerCall` |
+| REQ-SFT-12 | `RemoteRowCarriesVersion` |
+| REQ-SFT-13 | `RemoteRowArtistIsLocal_CarriesLocalArtistIdAndName` |
+| REQ-SFT-35/36 | `QueriesDeezerOnlyWithoutHint` (one AC line names both; 35 primary) |
+
+### Notes
+- Test-side decisions: ranking tests use the real `SimilarityScorer`; Moq repository defaults are set to explicit empty lists in the fixture; Moq predicates build triples via a `Triple(...)` helper (expression trees reject tuple literals).
+- Ranking tests (REQ-SFT-30/32) were not run (Red is compile-level); they use the same strings as the passing `SimilarityScorerTests.RankScore_*`.
+- `Mock<INetworkStatus>` default is false (= Offline): fixture sets true; only Offline test sets false.
+
+### Changed files:
+- `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs` (rewritten)
+- `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs` (constructor call only: +`Mock<INetworkStatus>`)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
 
 ## 4.3
 
