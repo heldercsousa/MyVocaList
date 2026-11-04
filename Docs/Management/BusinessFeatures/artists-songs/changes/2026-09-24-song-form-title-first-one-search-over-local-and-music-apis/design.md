@@ -12,6 +12,7 @@
 | **Domain** | Drop `HasManualEdits` (Song, Artist). New read model `SongSearchHit`. `ISongRepository`/`IArtistRepository` gain search/lookup methods. `ISimilarityScorer.RankScore`. Save request/outcome records (§ 3.5). `ISongResolutionService`/`IArtistResolutionService` shrink to `ResolveAsync`. `ResolutionChoice` and `FieldDiff` deleted. |
 | **Infra** | Migrations M1–M3 (§ 7). FTS5 trigram tables `SongSearch` and `ArtistSearch` + triggers. New repository queries. `SimilarityScorer.RankScore`. `UseSqlReturningClause(false)` on Songs and Artists. |
 | **Services** | `SongService.SaveFromFormAsync` holds every Save decision (§ 3.5) and delegates writes to `CreateSongWithUrlsAsync`/`UpdateSongAsync`, which create a typed artist inside the song's unit of work. `SongSuggestionService` local and remote title search. `ArtistResolutionService` retrieves near-duplicate candidates from `ArtistSearch`. `DeezerProvider` plain query. Resolution `CommitAsync` paths deleted. |
+| **Q5/Q7 additions (2026-11-04)** | Domain: `INetworkStatus`. Contracts: `RemoteSearchStatus`, `MusicSearchResultDto.Version`. Services: offline check + status in both suggestion services; `DeezerProvider` maps `title_short`/`title_version`. App project: `UI/Services/MauiNetworkStatus` + `MauiProgram.cs` registration (§ 3.6) |
 | **UI** | `SongFormViewModel`/`SongFormPage` rebuilt on the shared Field `AutocompleteDXField` (Title + Artist). `ArtistFormViewModel`/`ArtistFormPage` Name becomes the Field (§ 4.1). The VM maps save outcomes to sheets and navigates; it decides nothing. Picker pages, inline create and merge sheet deleted. |
 
 Business rules stay in Services (dedup, ranking, artist reuse/creation, duplicate guards,
@@ -170,7 +171,7 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
   > trailing optional `string? Version = null` (optional so existing constructions, e.g.
   > `MusicBrainzProvider` until 4.1b and test fixtures, still compile). `DeezerProvider` maps
   > `SongTitle` = `title_short` (fallback `title` when `title_short` is missing or empty) and
-  > `Version` = `NormalizeVersion(title_version)`: trim, then remove the outer brackets only when the value starts with `(` or `[` and that bracket's matching closer is the value's last character; trim again; otherwise keep it as is; `""` when missing or empty
+  > `Version` = `NormalizeVersion(title_version)`: trim, then remove the outer brackets only when the value starts with `(` or `[` and that bracket's matching closer is the value's last character; trim again; otherwise keep it as is ("matching" counts nesting depth of the same bracket type only; the other type is ignored, so `"(Live [2011])"` → `"Live [2011]"`); `""` when missing or empty
   > (`"(Live) (2011)"` and `"(Live]"` stay unchanged). It is a `private static` helper in `DeezerProvider`. This is
   > provider data shaping at the boundary (removing Deezer's display brackets), not case/accent folding
   > and not a `*Normalized` column. The shaped value is what gets stored and what REQ-SFT-05(b) compares,
@@ -290,7 +291,7 @@ public sealed class MauiNetworkStatus(IConnectivity connectivity) : INetworkStat
 | Member | Kind | Purpose / REQ |
 |--------|------|---------------|
 | `TitleOptionSource` | `IMenuOptionSource` | Phase 1: `SearchTitleLocalAsync` → options (Headline title, SupportingText "artist · version · In your library"). Phase 2: `SearchTitleRemoteAsync` → promoted rows appended to local, then remote options ("artist · version · Deezer", version part omitted when empty; 2026-11-04). REQ-SFT-02…09 |
-| `TitleSupportingText` | observable → Field `SupportingText` | Mapped from the latest remote-step query's `RemoteSearchStatus` (REQ-SFT-06, amended 2026-11-04): `Offline` → "You're offline — showing songs from your library only."; `Unavailable` → "Online search isn't available right now — showing your library only."; `Ok` → `""`. A query below 3 characters leaves it unchanged; X / empty Title clears it. The two texts are `const string`s in the VM (UI text; one place) |
+| `TitleSupportingText` | observable → Field `SupportingText` | Mapped from the latest remote-step query's `RemoteSearchStatus` (REQ-SFT-06, amended 2026-11-04): `Offline` → "You're offline — showing songs from your library only."; `Unavailable` → "Online search isn't available right now — showing your library only."; `Ok` → `""`. A query below 3 characters leaves it unchanged; X clears it, and so does Title becoming empty (`OnSongTitleChanged` partial — the Field never queries an empty string). The two texts are `const string`s in the VM (UI text; one place) |
 | `ApplyRemotePick` (Version) | private | *(2026-11-04, Q5 = B)* sets `SongTitle` = the DTO title (`title_short`) and **`Version` = the DTO's normalised version** (overwrites, including with `""`); Version is not locked (REQ-SFT-12). Remote option SupportingText = "artist · version · Deezer", version part omitted when empty (REQ-SFT-04) |
 | `SongTitle` / `IsTitleLocked` | observable, TwoWay to Field | Title text and Locked state |
 | `IsTitleSearchEnabled` | `=> !IsEditMode` | REQ-SFT-27 |
