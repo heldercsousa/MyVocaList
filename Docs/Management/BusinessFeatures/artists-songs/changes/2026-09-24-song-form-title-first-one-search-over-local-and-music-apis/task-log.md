@@ -417,7 +417,23 @@ _(not started)_
 
 ### Checkpoint
 
-_(not started)_
+Branch task/sft-5.1-open-existing (worktree .worktrees/sft-5.1). Step 1 Red done, test written (compile-error Red). Now: commit Red, then Green (VM -> xaml.cs/xaml -> DI test -> delete superseded test).
+Last build: test project Red (CS1729, CS1061). Next: dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1 after VM edit.
+Note: 4 files outside owned list needed: SongFormPage.xaml.cs (merge-sheet sync references removed VM property; would not compile).
+Context7 available; no external API lookups needed (pure deletion + INavigationService, already in codebase).
+
+Context manifest:
+- plan.md § Task 5.1 (spec)
+- MyVocaList/UI/ViewModels/SongFormViewModel.cs
+- MyVocaList/UI/Pages/Songs/SongFormPage.xaml and .xaml.cs
+- MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs
+- MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs
+
+### Red output (verbatim)
+```
+SongFormViewModelTests.cs(26,20): error CS1729: 'SongFormViewModel' does not contain a constructor that takes 9 arguments
+SongFormViewModelTests.cs(47,19): error CS1061: 'SongFormViewModel' does not contain a definition for 'OpenExistingSongCommand' and no accessible extension method 'OpenExistingSongCommand' accepting a first argument of type 'SongFormViewModel' could be found
+```
 
 ## 5.2
 
