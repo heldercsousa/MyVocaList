@@ -31,11 +31,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICatalogRepository, CatalogRepository>();
 
         // HTTP Clients — music metadata providers
-        services.AddHttpClient<MusicBrainzProvider>(client =>
-        {
-            client.BaseAddress = new Uri("https://musicbrainz.org/ws/2/");
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)");
-        });
         services.AddHttpClient<DeezerProvider>(client =>
         {
             client.BaseAddress = new Uri("https://api.deezer.com/");
@@ -45,7 +40,6 @@ public static class ServiceCollectionExtensions
         // AddScoped<IMusicMetadataProvider, TProvider>() — the latter constructs a second,
         // independent instance through ActivatorUtilities, bypassing the typed HttpClient pipeline
         // above and injecting an unconfigured HttpClient (no BaseAddress/User-Agent) (BUG-082).
-        services.AddScoped<IMusicMetadataProvider>(sp => sp.GetRequiredService<MusicBrainzProvider>());
         services.AddScoped<IMusicMetadataProvider>(sp => sp.GetRequiredService<DeezerProvider>());
 
         // Services
