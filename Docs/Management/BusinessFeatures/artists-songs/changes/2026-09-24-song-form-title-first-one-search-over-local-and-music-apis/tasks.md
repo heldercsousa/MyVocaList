@@ -161,7 +161,7 @@
   - **Review lane:** Standard
   > **Spec updated 2026-09-26:** (D5) split into 3.5a (song side) and 3.5b (artist side): `CatalogRepository.cs:41-48` also projects `SongListItemDto.HasManualEdits`, and positional constructions exist in three test files, so 3.5 as written could not build. 3.5 itself is superseded by the two entries below.
 
-- [ ] **3.5a Drop `HasManualEdits` from the song read model and projections** [after 3.2c, 3.3b] *(split, plan § 0.3 D5)*
+- [x] **3.5a Drop `HasManualEdits` from the song read model and projections** [after 3.2c, 3.3b] *(split, plan § 0.3 D5)*
   > **Spec updated 2026-11-04:** Files owned extended by the orchestrator to `MyVocaList.Tests/Unit/Services/CatalogServiceTests.cs` and `SongServiceTests.cs` — three target-typed `new(...)` `SongListItemDto` constructions evaded the plan's `SongListItemDto(` census (lesson: censuses for record-shape changes must also catch target-typed `new(`).
   - **Files owned:** `Contracts/DTOs/List/SongListItemDto.cs`, `Infra/Repository/SongRepository.cs`, `Infra/Repository/CatalogRepository.cs`, `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`
   - **Consumes:** 3.2c, 3.3b. **Risk:** Low. **Demo:** Songs list renders unchanged. **Review lane:** Standard
