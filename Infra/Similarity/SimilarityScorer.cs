@@ -21,6 +21,16 @@ public class SimilarityScorer : ISimilarityScorer
         return ratio / 100.0;
     }
 
+    /// <inheritdoc />
+    public double RankScore(string query, string candidate)
+    {
+        if (string.IsNullOrEmpty(query) || string.IsNullOrEmpty(candidate))
+            return 0.0;
+
+        // Fuzz.TokenSortRatio returns an integer 0..100. Ordering only (design § 6.4 exception).
+        return Fuzz.TokenSortRatio(Normalize(query), Normalize(candidate)) / 100.0;
+    }
+
     /// <summary>
     /// NFD-normalizes, strips non-spacing marks (diacritics), and lower-cases the input.
     /// Required because FuzzySharp compares Unicode code points directly; without this,
