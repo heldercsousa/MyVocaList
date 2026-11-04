@@ -28,7 +28,7 @@ Every task implicitly includes these. Values are copied from the spec or the pro
 - **Unit-of-work read scope** (REQ-UOW-36/37/50, `MyVocaList.Tests/Architecture/UnitOfWorkReadScopeTests.cs`): every repository and every governed data service (`IArtistService`, `ISongService`, `IArtistResolutionService`, `ISongResolutionService`, `ISongKaraokeUrlService`) used by a service is resolved from the `ExecuteAsync`/`ExecuteReadAsync` lambda's own `sp`, never dereferenced from a constructor field. No `ExecuteReadAsync` lambda may reference `IMusicMetadataProvider`/`_providers` (no HTTP inside a read scope). The architecture floors stay met: ≥ 25 files under `Services/`, ≥ 15 governed constructor parameters.
 - **Service return pattern:** tuples `(bool success, string message, T? entity)`; `SongFormSaveOutcome` is the one designed exception (`design.md` § 3.5). No exceptions for business failures.
 - **Constants, never literals:** `SearchConstants.MinimumLocalQueryLength` (2), `SearchConstants.MinimumRemoteQueryLength` (3), `SearchConstants.AutocompleteDebounceMilliseconds` (300), `SearchConstants.MaxSearchResults` (5), `SimilarityConstants.PoolSize` (50), `SimilarityConstants.DefaultThreshold` (0.82). The 3,000 ms remote bound (REQ-SFT-08) becomes a named constant `SearchConstants.RemoteSearchTimeoutMilliseconds = 3000`, added in Task 2.2 (it is a value from the spec, not a new decision).
-- **Exact UI strings** (English only): "In your library", "Deezer", "Online search unavailable", "This music-database song is already in your library", "Similar artist found", "Use '<existing>'", "Create '<typed>'", "Open '<title>'? What you entered here will be discarded.", "Open", "Keep editing", "Open existing", "Save as new version", "Save as new song", "Artist is required". Option supporting text: local = `"artist · version · In your library"` (the ` · version` part omitted when Version is empty); remote = `"artist · Deezer"`.
+- **Exact UI strings** (English only): "In your library", "Deezer", "You're offline — showing songs from your library only." and "Online search isn't available right now — showing your library only." (D21; were "Online search unavailable"), "This music-database song is already in your library", "Similar artist found", "Use '<existing>'", "Create '<typed>'", "Open '<title>'? What you entered here will be discarded.", "Open", "Keep editing", "Open existing", "Save as new version", "Save as new song", "Artist is required". Option supporting text: local = `"artist · version · In your library"` (the ` · version` part omitted when Version is empty); remote = `"artist · version · Deezer"` (version part omitted when empty; D21).
 - **Deezer only** (Q1 = drop, REQ-SFT-36). Plain query `search/track?q=` / `search/artist?q=` with `Uri.EscapeDataString`, no `track:`/`artist:` qualifiers (REQ-SFT-35). Title = the provider's full `title` (Q5 default). The Deezer artist id is **not** stored (Q10, REQ-SFT-49).
 - **No native dialogs** (`DisplayAlert` etc.): `dx:BottomSheet` only. DevExpress first. `SafeAreaEdges="Container"` on pages. **Incremental XAML:** edit ONE XAML file → build → fix → next file.
 - **Navigation from ViewModels** only through `INavigationService` (never `Shell.Current` in new paths; `testing.md`). Open an existing song: `$"../{Routes.SongForm}?songId={id}"`; open an existing artist: `$"../{Routes.ArtistForm}?artistId={id}&artistName={Uri.EscapeDataString(name)}"`.
@@ -47,7 +47,7 @@ The five input classes or failure modes the spec implies but no AC-level test pi
 1. **FTS5 query syntax in user text.** A typed `"`, `*`, `:`, `(`, `-`, `/`, `NEAR` or `AND` must never raise an FTS5 syntax error or change the query's meaning; the user just gets results (or none). Every trigram window is double-quoted with `"` doubled. **Owner: Task 3.9** (`SearchTitleCandidatesAsync_FtsSyntaxCharacters_DoNotThrow`) and **Task 3.9b** (`SearchNameCandidatesAsync_FtsSyntaxCharacters_DoNotThrow`).
 2. **Padded or differently-cased typed artist.** `"  métallica "` typed with "Metallica" stored must reuse the stored artist, never create a second one or ask. **Owner: Task 3.10** (`SaveFromForm_TypedArtistPaddedCaseAccentVariant_ReusesExistingArtist`).
 3. **M1's SQLite table rebuild loses an index or a collation.** After `DropColumn` rebuilds `Songs` and `Artists`, the unique collated `IX_Artists_Name` and the unique `(ArtistId, Title, Version)` song index must still exist and still reject duplicates. **Owner: Task 3.6b** (`M1_TableRebuild_KeepsUniqueCollatedIndexes`).
-4. **A stale remote failure sets the note after a newer success.** A slow, failing Deezer call for an old query must not write "Online search unavailable" after a newer query succeeded. **Owner: Task 5.2** (`TitleOptionSource_CancelledQuery_DoesNotChangeTitleSupportingText`).
+4. **A stale remote failure sets the note after a newer success.** A slow, failing Deezer call for an old query must not write an online-search note (offline or unavailable, D21) after a newer query succeeded. **Owner: Task 5.2** (`TitleOptionSource_CancelledQuery_DoesNotChangeTitleSupportingText`).
 5. **Double-tap Save while an outcome is pending.** Two taps must produce one `SaveFromFormAsync` call and at most one write. **Owner: Task 5.3** (`Save_DoubleTapWhilePending_CallsServiceOnce`).
 
 ---
@@ -66,8 +66,8 @@ Every code task gets its **own** worktree `.worktrees/sft-<task>` on branch `tas
 | **W2** | **1.3** · **1.7** · **2.2** · **3.1-Tester** | 1.3 ← 1.1+1.2 · 1.7 ← 1.1 · 3.1 ← 2.1 + G3 | Haiku · Sonnet · Sonnet · Sonnet |
 | **W3** | **1.4** · **1.5** · **3.1-Builder** · **5.1** | 1.4/1.5 ← 1.3 · 5.1 ← 1.7 | Haiku · Haiku · **Opus** · Sonnet |
 | **W4** | **1.6** · **3.2a** · **3.3** | 1.6 ← 1.4+1.5 · 3.2a ← 3.1 · 3.3 ← 3.1+5.1 | Haiku · Sonnet · Sonnet |
-| **W5** | **4.1a** · **3.3b** · **3.4** | 4.1a ← 1.6 + G1 · 3.3b ← 3.3 · 3.4 ← 3.3 | Sonnet · Haiku · Sonnet |
-| **W6** | **3.2b** · **4.1b** | 3.2b ← 3.2a+3.3b · 4.1b ← 4.1a | Sonnet · Haiku |
+| **W5** | **4.1a** · **4.1c** · **3.3b** · **3.4** | 4.1a ← 1.6 + G1 + **D21 approved** · 4.1c ← **D21 approved** · 3.3b ← 3.3 · 3.4 ← 3.3 | Sonnet · Haiku · Haiku · Sonnet |
+| **W6** | **3.2b** · **4.1b** | 3.2b ← 3.2a+3.3b · 4.1b ← 4.1a + 4.1c | Sonnet · Haiku |
 | **W7** | **3.2c** | 3.2b | Sonnet |
 | **W8** | **3.5a** · **3.5b** | 3.2c + 3.3b | Haiku · Haiku |
 | **W9** | **3.6a** | 3.5a+3.5b | Haiku |
@@ -101,7 +101,8 @@ Every code task gets its **own** worktree `.worktrees/sft-<task>` on branch `tas
 | `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` | 1.1 → 1.7 → 5.1 → 3.3b → 3.2b → 3.5b → 5.2 → 5.3 → 5.4 | single-writer chain |
 | `Services/SongService.cs`, `Domain/ServicesInterfaces/ISongService.cs` | 3.1 → 3.2a → 3.2b → 3.2c → 3.10 → 5.3b | **G3: CATALOG-PROP rule** (§ 0.2.2) |
 | `Infra/Migrations/*`, `Infra/EntityEFConfig/SongConfiguration.cs`, `ArtistConfiguration.cs` | 3.6b → 3.7 → 3.8 | sequential-only; § 0.2.2 |
-| `MyVocaList/MauiProgram.cs`, `MyVocaList/AppShell.xaml.cs`, `MyVocaList/Navigation/Routes.cs` | 1.3 only | sequential-only |
+| `MyVocaList/MauiProgram.cs`, `MyVocaList/AppShell.xaml.cs`, `MyVocaList/Navigation/Routes.cs` | 1.3 only; `MauiProgram.cs` also **4.1c** (D21) | sequential-only |
+| `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` (D21 addition) | 4.3 adds `Mock.Of<INetworkStatus>()` | covered by the row below |
 | `MyVocaList/Extensions/ServiceCollectionExtensions.cs` | 1.6 → 4.1b → 4.3 → 6.1 | serial |
 | `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` | 5.1 → 4.3 | serial |
 | `Infra/Repository/SongRepository.cs`, `Domain/RepositoryInterface/ISongRepository.cs` | 2.1 → 3.5a (repo only) → 3.9 | serial |
@@ -156,6 +157,16 @@ Each item is recorded **on `develop` by the orchestrator at Step 0** (§ 0.4 ite
 - **D17 (5.7 folded into 5.5).** Replacing the Artist `AutoCompleteEdit` in XAML breaks the build until the code-behind glue that references it is deleted, so a XAML-only 5.5 commit cannot build. 5.5 owns `SongFormPage.xaml` + `.xaml.cs` (XAML → build → code-behind, as ACF T6 did); 5.7 is cancelled as folded.
 - **D18 (`ArtistRemoteSearchResult` created in 4.1b).** The new one-line record `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` is created in 4.1b (3 files), so 6.1 stays at 5 files. D10 is the only accepted sizing break.
 - **D20 (Artist-form local search uses the FTS pool) — spec gap resolved 2026-09-26.** `design.md` § 4.1 said the Artist form's local search keeps the collated prefix query (`ArtistRepository.SearchByNameAsync`, `:59-68`), which cannot find "Metallica" for "metalica" and so cannot satisfy E2E line 11 or REQ-SFT-48's dedup of the Deezer row. Orchestrator decision (under the pre-authorisation): `SearchNameLocalAsync` uses `IArtistRepository.SearchNameCandidatesAsync` (3.9b, FTS5 `ArtistSearch`) ranked by `ISimilarityScorer.RankScore`, take 5. 6.1 depends on 3.9b. The § 6.4 exception's code location is extended to `Services/ArtistSuggestionService.cs` (ranking only). Recorded in `requirements.md` REQ-SFT-47 (with an example) and `design.md` § 4.1/§ 6.4 at Step 0.7.
+- **D21 (Q5 = B + Q7 two notes; spec amendment 2026-11-04, PENDING Helder's approval — no affected task is dispatched before it).** Requirements REQ-SFT-04/05/06/08/12/47 amended, REQ-SFT-53 new; `design.md` § 3.1/3.3/3.4/3.6/4/4.1/F7/§ 8. Per task:
+  - **3.9:** `FindByTitleAndArtistNamesAsync` takes `(Title, ArtistName, Version)` triples (no shared `version` parameter); its two tests change (below).
+  - **4.1a:** `MusicSearchResultDto` gains trailing `string? Version = null`; `DeezerProvider` maps `title_short` (fallback `title`) and the normalised `title_version`; +3 tests. Files +1 (`Contracts/DTOs/MusicSearchResultDto.cs`) → 5.
+  - **4.1c (new):** `INetworkStatus` + `MauiNetworkStatus` + `RemoteSearchStatus` + `MauiProgram.cs` registration (+ Android manifest permission if absent). Level C. Runs with 4.1a (W5; no shared file). `MauiProgram.cs` is sequential-only: no other writer is in flight (1.3 was its only planned writer).
+  - **4.1b:** `ArtistRemoteSearchResult(Remote, RemoteSearchStatus Status)`; now after 4.1a **and 4.1c**.
+  - **4.2:** `SongRemoteSearchResult.Status`; offline step; triples to `FindByTitleAndArtistNamesAsync`; tests renamed/added (below). After 4.1c too.
+  - **4.3:** `AppServicesRegistrationTests` graph setup adds `Mock.Of<INetworkStatus>()`.
+  - **5.2:** note mapped from `Status` with the two texts; remote pick fills Version; remote supporting text includes version; tests added (below).
+  - **6.1 / 6.2:** same status/offline handling; artist offline wording per Q18 (proposed).
+  - **Sizing:** no task exceeds 5 files except the already-accepted D10.
 - **D19 (`ArtistOptionSource` in 5.2).** `design.md` § 4 lists `ArtistOptionSource` as an existing/changed member, but today the Artist search is page glue (`OnArtistItemsRequested`). 5.2 creates `ArtistOptionSource` (`IMenuOptionSource` over the existing local artist search, local only, REQ-SFT-16) so 5.5 can bind it.
 
 ### 0.4 Step 0: orchestrator prep on `develop` (docs only, before W1)
@@ -912,7 +923,7 @@ public sealed record SongSearchHit(
 
 Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesAsync(string query, int take, CancellationToken ct);
 Task<IReadOnlyList<SongSearchHit>> FindByExternalIdsAsync(string provider, IReadOnlyCollection<string> externalIds, CancellationToken ct);
-Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName)> pairs, string version, CancellationToken ct);
+Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName, string Version)> items, CancellationToken ct);   // D21: per-item version
 
 internal static class FtsQueryBuilder
 {
@@ -941,8 +952,8 @@ SQL (`design.md` § 6.2): `SELECT s.Id, s.Title, s.Version, s.ArtistId, a.Name, 
 | `SearchTitleCandidatesAsync_RespectsTake` | REQ-SFT-04 | `take: 2` → ≤ 2 rows |
 | `SearchTitleCandidatesAsync_IndexMissing_ReturnsEmptyAndPrefixStillWorks` | failure modes (REQ-SFT-33) | on an `EnsureCreated` DB: "dont cry" → `[]` without throwing; "ab" → "Abba Song" |
 | `FindByExternalIdsAsync_ReturnsHoldersOnly` | REQ-SFT-05(a) | ids ["3135556","x"] → the one holder |
-| `FindByTitleAndArtistNamesAsync_CollatedPairWithEmptyVersion_Returns` | REQ-SFT-05(b) | ("dont cry" ≠ …) use ("DON'T CRY","guns n' roses") → "Don't Cry" |
-| `FindByTitleAndArtistNamesAsync_NonEmptyVersion_NotReturned` | REQ-SFT-05(b) | a "Live" version is not returned for version "" |
+| `FindByTitleAndArtistNamesAsync_CollatedTripleEmptyVersion_Returns` | REQ-SFT-05(b) | ("DON'T CRY","guns n' roses","") → "Don't Cry" |
+| `FindByTitleAndArtistNamesAsync_VersionMustMatch` | REQ-SFT-05(b) | seed "Don't Cry"/"Live" too: ("don't cry","guns n' roses","") → only the "" song; ("don't cry","guns n' roses","LIVE") → only the "Live" song (collated) (D21) |
 
 - [ ] **Step 2: Red** (`CS0246 SongSearchHit` / `CS0103 FtsQueryBuilder` / `CS1061`). Commit tests only, `Lane: RED`.
 - [ ] **Step 3: Green.** Implement. Filter → pass; suite `Failed: 0`.
@@ -1099,7 +1110,11 @@ public async Task SaveFromForm_ArtistResolution_NeverReceivesSongExternalIdentit
 
 **Model:** Sonnet. **Level:** B. **Review lane:** Standard. **Estimate:** 60 min.
 
-**Files:** `Services/IMusicMetadataProvider.cs` (contract doc: `SearchSongsAsync`/`SearchArtistsAsync` **throw** on transport failure, bad JSON, timeout and a Deezer error body; the `artistHint` parameter stays in the signature and is ignored — removing it would break `MusicBrainzProvider` before 4.1b), `Services/MusicProviderException.cs` (new), `Services/DeezerProvider.cs`, `MyVocaList.Tests/Unit/Services/DeezerProviderTests.cs` (new; fake `HttpMessageHandler` + `HttpClient { BaseAddress = new("https://api.deezer.com/") }`)
+**Gate (D21):** dispatch only after Helder approves the 2026-11-04 spec amendment.
+
+**Files:** `Services/IMusicMetadataProvider.cs` (contract doc: `SearchSongsAsync`/`SearchArtistsAsync` **throw** on transport failure, bad JSON, timeout and a Deezer error body; the `artistHint` parameter stays in the signature and is ignored — removing it would break `MusicBrainzProvider` before 4.1b), `Services/MusicProviderException.cs` (new), `Services/DeezerProvider.cs`, `MyVocaList.Tests/Unit/Services/DeezerProviderTests.cs` (new; fake `HttpMessageHandler` + `HttpClient { BaseAddress = new("https://api.deezer.com/") }`), `Contracts/DTOs/MusicSearchResultDto.cs` (D21: add trailing `string? Version = null`)
+
+The provider does **not** check connectivity: offline detection is the suggestion services' job (4.2/6.1, REQ-SFT-53). A transport failure while "online" still throws, and the service maps it to `Unavailable`.
 
 - [ ] **Step 1: Tests.**
 
@@ -1112,23 +1127,35 @@ public async Task SaveFromForm_ArtistResolution_NeverReceivesSongExternalIdentit
 | `SearchSongsAsync_Http200WithErrorObject_ThrowsMusicProviderException` | REQ-SFT-06 | body `{"error":{"type":"Exception","message":"Quota limit exceeded","code":4}}` |
 | `SearchSongsAsync_CallerCancelled_PropagatesOperationCanceled` | REQ-SFT-09 | `OperationCanceledException` |
 | `SearchSongsAsync_EmptyData_ReturnsEmpty` | REQ-SFT-06 | `{"data":[]}` → empty, no throw |
-| `SearchSongsAsync_MapsIdTitleArtistName` | REQ-SFT-12 | `id`, full `title` (e.g. "Don't Cry (Original)"), `artist.name` |
+| `SearchSongsAsync_MapsIdTitleShortVersionArtistName` | REQ-SFT-12 | *(D21, replaces `…MapsIdTitleArtistName`)* `{"title":"Creep (Live)","title_short":"Creep","title_version":"(Live)"}` → `SongTitle` "Creep", `Version` "Live", `ExternalId`, `ArtistName` |
+| `SearchSongsAsync_TitleShortMissing_FallsBackToTitle` | REQ-SFT-12 | no/empty `title_short` → `SongTitle` = `title`; no `title_version` → `Version` "" |
+| `SearchSongsAsync_NormalisesVersion` (Theory) | REQ-SFT-12 | `"(Live)"`→`"Live"`, `" [Remastered 2011] "`→`"Remastered 2011"`, `"Live at Wembley"`→ unchanged, `"((x))"`→`"(x)"` (one pair only), `""`→`""` |
 
 - [ ] Red (today every failure returns empty, `DeezerProvider.cs:60-64`; the URL has qualifiers `:47-50`) → commit tests `Lane: RED` → Green → suite `Failed: 0` (the BUG-082 DI test stays green) → commit: `feat(deezer): plain query; failures throw (HTTP, JSON, error body) (REQ-SFT-06/35)`.
 
-### Task 4.1b: Delete `MusicBrainzProvider` (Q1 = drop) [W6, after 4.1a]
+### Task 4.1c: Network status abstraction (REQ-SFT-53) [W5, P with 4.1a; D21] *(new 2026-11-04)*
+
+**Model:** Haiku. **Level:** C (interface, enum, one-line platform adapter, DI lines — no mandatory test; record the no-test decision in the task-log). **Review lane:** Standard. **Estimate:** 20 min. **Gate:** D21 approved.
+
+**Files:** `Domain/ServicesInterfaces/INetworkStatus.cs` (new), `Contracts/DTOs/Suggestions/RemoteSearchStatus.cs` (new: `public enum RemoteSearchStatus { Ok, Offline, Unavailable }`), `MyVocaList/Platform/MauiNetworkStatus.cs` (new; folder: use the app project's existing platform-adapter folder if one exists, else create `Platform/`), `MyVocaList/MauiProgram.cs` (two registrations, `design.md` § 3.6), `MyVocaList/Platforms/Android/AndroidManifest.xml` (only if `ACCESS_NETWORK_STATE` is absent).
+
+- [ ] Verify `IConnectivity`/`NetworkAccess` via Context7 at the `.csproj` MAUI version. Implement exactly `design.md` § 3.6. Build 0 errors; full suite `Failed: 0` (unchanged count). Commit: `feat(network): INetworkStatus + MAUI adapter (REQ-SFT-53)`.
+
+**Merge risk:** Low (nothing consumes it until 4.1b/4.2).
+
+### Task 4.1b: Delete `MusicBrainzProvider` (Q1 = drop) [W6, after 4.1a + 4.1c]
 
 **Model:** Haiku. **Level:** C. **Review lane:** Standard. **Estimate:** 20 min. **Demo:** build 0 errors; the BUG-082 DI test passes with Deezer only.
 
 **Files:** delete `Services/MusicBrainzProvider.cs`; modify `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (delete `AddHttpClient<MusicBrainzProvider>` `:34-38` and the `IMusicMetadataProvider` forward `:48`); create `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` (§ 0.3 D18; consumed by 6.1):
 
 ```csharp
-public sealed record ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, bool RemoteUnavailable);
+public sealed record ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, RemoteSearchStatus Status);   // D21 (was bool RemoteUnavailable)
 ```
 
 - [ ] Census `['MusicBrainzProvider']` → only the 2 owned files (the suggestion services use the provider **name** string, not the type). Delete/edit → build → suite `Failed: 0` (`AddAppServices_ResolvingMusicMetadataProviders_HaveConfiguredHttpClient` passes with Deezer only; `ServicesDirectory_IsFoundAndNonEmpty` ≥ 25: record the count) → census ZERO HITS. Commit: `refactor(providers): delete MusicBrainzProvider — Deezer is the only remote provider (REQ-SFT-36)`.
 
-### Task 4.2: `SongSuggestionService` local and remote title search [W14; after 2.2 + 3.9 + 4.1b]
+### Task 4.2: `SongSuggestionService` local and remote title search [W14; after 2.2 + 3.9 + 4.1b + 4.1c]
 
 **Model:** Tester Sonnet · Builder Sonnet. **Level:** A. **Review lane:** Elevated. **Estimate:** 60 + 90 min.
 
@@ -1138,12 +1165,13 @@ public sealed record ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto>
 
 ```csharp
 public sealed record SongRemoteSearchResult(
-    IReadOnlyList<SongSuggestionDto> Promoted, IReadOnlyList<SongSuggestionDto> Remote, bool RemoteUnavailable);
+    IReadOnlyList<SongSuggestionDto> Promoted, IReadOnlyList<SongSuggestionDto> Remote, RemoteSearchStatus Status);   // D21 (was bool RemoteUnavailable)
+// D21: SongSuggestionService gains an INetworkStatus constructor dependency (4.1c).
 Task<IReadOnlyList<SongSuggestionDto>> SearchTitleLocalAsync(string query, CancellationToken ct = default);
 Task<SongRemoteSearchResult> SearchTitleRemoteAsync(string query, IReadOnlyCollection<int> shownLocalSongIds, CancellationToken ct = default);
 ```
 
-Local: `NormalizeSearchQuery`; < 2 → `[]`; `ExecuteReadAsync` → `SearchTitleCandidatesAsync(q, SimilarityConstants.PoolSize)`; rank by `max(RankScore(q, title), RankScore(q, title + " " + artist))`, stable over DB order; take `MaxSearchResults`. Remote: < 3 → empty, no call; Deezer only, **outside** any UoW lambda, linked CTS `CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds)`; caller cancellation rethrows; any other exception/timeout → `RemoteUnavailable = true` + Warning log; dedup in one `ExecuteReadAsync` (identity, then collated (title, artist, "")) → `Promoted` if not in `shownLocalSongIds`, dropped from `Remote` either way; remaining rows resolve `LocalArtistId`/`LocalArtistName` by collated name in the same read. Tier (c) similarity dedup and the `OrdinalIgnoreCase` re-filters (`:130-175`, `:162`, `:204`) are deleted.
+Local: `NormalizeSearchQuery`; < 2 → `[]`; `ExecuteReadAsync` → `SearchTitleCandidatesAsync(q, SimilarityConstants.PoolSize)`; rank by `max(RankScore(q, title), RankScore(q, title + " " + artist))`, stable over DB order; take `MaxSearchResults`. Remote: < 3 → empty, no call, `Ok`; **D21:** `!INetworkStatus.HasInternetAccess` → empty, no call, `Offline` + Information log; Deezer only, **outside** any UoW lambda, linked CTS `CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds)`; caller cancellation rethrows; any other exception/timeout → `Unavailable` + Warning log; dedup in one `ExecuteReadAsync` (identity, then collated (title_short, artist, normalised version) triples, D21) → `Promoted` if not in `shownLocalSongIds`, dropped from `Remote` either way; remaining rows resolve `LocalArtistId`/`LocalArtistName` by collated name in the same read. Tier (c) similarity dedup and the `OrdinalIgnoreCase` re-filters (`:130-175`, `:162`, `:204`) are deleted.
 
 **Superseded tests (`design.md` § 10.1):**
 
@@ -1151,7 +1179,7 @@ Local: `NormalizeSearchQuery`; < 2 → `[]`; `ExecuteReadAsync` → `SearchTitle
 |---|---|---|
 | `SongSuggestionServiceTests.cs:35`, `:57`, `:119` | rewrite against `SearchTitleLocalAsync`/`SearchTitleRemoteAsync` | REQ-FORMUX-03/05 → REQ-SFT-05/06 |
 | `:94` (similarity dedup) | rewrite: dedup is artist- and version-scoped (`SearchTitleRemoteAsync_OtherArtistSameTitle_StaysRemote`) | REQ-FORMUX-03(c) → REQ-SFT-05 |
-| `:145` (offline) | rewrite: `RemoteUnavailable = true`, local still returned | REQ-FORMUX-05 → REQ-SFT-06 |
+| `:145` (offline) | rewrite: `Status = Unavailable` (D21; was `RemoteUnavailable = true`), local still returned | REQ-FORMUX-05 → REQ-SFT-06 |
 | `:76` (artist hint) | delete | REQ-SFT-35 |
 | `:170` (MusicBrainz → Deezer fallback) | delete (Q1 = drop) | AC-4.2 provider order → REQ-SFT-36 |
 
@@ -1171,10 +1199,15 @@ Local: `NormalizeSearchQuery`; < 2 → `[]`; `ExecuteReadAsync` → `SearchTitle
 | `SearchTitleRemoteAsync_CollatedTitleArtistMatch_Promoted` | REQ-SFT-05 |
 | `SearchTitleRemoteAsync_MatchAlreadyShownLocally_DroppedNotPromoted` | REQ-SFT-05 |
 | `SearchTitleRemoteAsync_OtherArtistSameTitle_StaysRemote` | REQ-SFT-05 |
-| `SearchTitleRemoteAsync_ProviderThrows_RemoteUnavailable_LogsWarning` | REQ-SFT-06 |
-| `SearchTitleRemoteAsync_ProviderSlowerThanBound_RemoteUnavailable` (provider awaits `Task.Delay(Timeout.Infinite, ct)`; test ≈ 3 s) | REQ-SFT-08 |
+| `SearchTitleRemoteAsync_ProviderThrows_StatusUnavailable_LogsWarning` | REQ-SFT-06 |
+| `SearchTitleRemoteAsync_ProviderSlowerThanBound_StatusUnavailable` (provider awaits `Task.Delay(Timeout.Infinite, ct)`; test ≈ 3 s) | REQ-SFT-08 |
 | `SearchTitleRemoteAsync_CallerCancelled_Rethrows` | REQ-SFT-09 |
-| `SearchTitleRemoteAsync_ZeroResults_NotUnavailable` | REQ-SFT-06 |
+| `SearchTitleRemoteAsync_ZeroResults_StatusOk` | REQ-SFT-06 |
+| `SearchTitleRemoteAsync_Offline_NoProviderCall_StatusOffline` (D21) | REQ-SFT-53 |
+| `SearchTitleRemoteAsync_OnlineButProviderThrows_StatusUnavailableNotOffline` (D21) | REQ-SFT-53 |
+| `SearchTitleRemoteAsync_ReadsNetworkStatusPerCall` (offline then online across two calls → 0 then 1 provider call) (D21) | REQ-SFT-53 |
+| `SearchTitleRemoteAsync_CollatedTitleArtistVersionMatch_Promoted` (Deezer "Creep"/"Live" vs stored "Creep"/"Live") (D21) | REQ-SFT-05 |
+| `SearchTitleRemoteAsync_RemoteRowCarriesVersion` (D21) | REQ-SFT-12 |
 | `SearchTitleRemoteAsync_RemoteRowArtistIsLocal_CarriesLocalArtistIdAndName` | REQ-SFT-13 |
 | `SearchTitleRemoteAsync_QueriesDeezerOnlyWithoutHint` | REQ-SFT-35/36 |
 | `SearchTitleRemoteAsync_TakesAtMostFiveRemote` | REQ-SFT-04 |
@@ -1190,6 +1223,7 @@ Local: `NormalizeSearchQuery`; < 2 → `[]`; `ExecuteReadAsync` → `SearchTitle
 
 **Files:** `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs` (6 tests retargeted to `SearchTitleLocalAsync`/`SearchTitleRemoteAsync`, same assertions, REQ-UOW-51/52 kept), `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (`services.AddScoped<ISongSuggestionService, SongSuggestionService>();`), `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs`, `Services/ISongSuggestionService.cs` + `Services/SongSuggestionService.cs` (delete `GetLocalAsync`/`GetRemoteAsync`, § 0.3 D12)
 
+- [ ] **D21:** `INetworkStatus` is registered in `MauiProgram.cs` (4.1c), not `AddAppServices`, so the DI tests that resolve `SongSuggestionService` (and the SongFormViewModel graph) add `services.AddSingleton(Mock.Of<INetworkStatus>());`, as they do for `INavigationService`.
 - [ ] Add `AddAppServices_ResolvingSongSuggestionService_Succeeds` (`// [AC] REQ-SFT-02: the title search service resolves from AddAppServices`). Red (`Unable to resolve service`) → register → Green. Retarget the 6 threshold tests (record old → new name). Census `['GetLocalAsync','GetRemoteAsync']` on `ISongSuggestionService.cs`/`SongSuggestionService.cs` → zero (the artist service keeps its own until 6.1). Suite `Failed: 0`. Commit: `feat(di): register ISongSuggestionService; retarget threshold tests (REQ-SFT-02, REQ-UOW-51/52)`.
 
 ---
@@ -1253,7 +1287,12 @@ private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleOptionsAsyn
     ct.ThrowIfCancellationRequested();                         // a stale query never touches the note (Review Focus 4)
     if (query.Trim().Length >= SearchConstants.MinimumRemoteQueryLength)   // below 3 chars no remote call ran: keep the note as it is (REQ-SFT-06)
     {
-        var note = remote.RemoteUnavailable ? "Online search unavailable" : "";
+        var note = remote.Status switch                        // D21 (REQ-SFT-06 amended 2026-11-04)
+        {
+            RemoteSearchStatus.Offline     => OfflineNote,     // "You're offline — showing songs from your library only."
+            RemoteSearchStatus.Unavailable => UnavailableNote, // "Online search isn't available right now — showing your library only."
+            _                              => "",
+        };
         RunOnUiThread(() => TitleSupportingText = note);       // the VM's existing UI-thread helper; inline in tests
     }
     return [.. local.Select(ToLocalOption), .. remote.Promoted.Select(ToLocalOption), .. remote.Remote.Select(ToRemoteOption)];
@@ -1262,16 +1301,19 @@ private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleOptionsAsyn
 
 (Use the DTO's real id member names; the Tester reads `SongSuggestionDto`. `RunOnUiThread` stands for the dispatch helper the VM already uses for UI-bound state (`code-style-reference.md § UI Thread Performance`); the option source runs on DX's request thread, so the observable is never set off the UI thread. If the VM has no such helper, use the injected dispatcher abstraction the VM tests already fake; never `MainThread` directly in VM code under test.)
 
-- [ ] **Step 1 (Tester): tests.** `ToLocalOption`: Headline = title, SupportingText = `"artist · version · In your library"` (omit ` · version` when empty); `ToRemoteOption`: `"artist · Deezer"`.
+- [ ] **Step 1 (Tester): tests.** `ToLocalOption`: Headline = title, SupportingText = `"artist · version · In your library"` (omit ` · version` when empty); `ToRemoteOption`: `"artist · version · Deezer"` (omit ` · version` when empty; D21, REQ-SFT-04 amended). `ApplyRemotePick` also sets `Version` from the DTO (overwrites, incl. `""`; Version not locked; REQ-SFT-12 amended).
 
 | Test | `// [AC]` |
 |---|---|
 | `TitleOptionSource_LocalHit_SupportingTextHasArtistVersionAndLibraryMarker` | REQ-SFT-04 |
 | `TitleOptionSource_LocalHitEmptyVersion_OmitsVersionPart` | REQ-SFT-04 |
-| `TitleOptionSource_RemoteHit_SupportingTextIsArtistAndDeezer` | REQ-SFT-04 |
+| `TitleOptionSource_RemoteHit_SupportingTextIsArtistVersionAndDeezer` (+ empty-version case omits the part) (D21) | REQ-SFT-04 |
 | `TitleOptionSource_OrdersLocalThenPromotedThenRemote` | REQ-SFT-05/07 |
 | `TitleOptionSource_PassesShownLocalIdsAndToken` | REQ-SFT-05/09 |
-| `TitleOptionSource_RemoteUnavailable_SetsTitleSupportingText` | REQ-SFT-06 |
+| `TitleOptionSource_StatusUnavailable_SetsUnavailableNote` (exact text) (D21) | REQ-SFT-06 |
+| `TitleOptionSource_StatusOffline_SetsOfflineNote` (exact text) (D21) | REQ-SFT-06/53 |
+| `TitleOptionSource_OfflineThenOk_ClearsNote` (D21) | REQ-SFT-06 |
+| `SelectTitle_RemoteOption_SetsVersionFromDeezer_OverwritingTypedVersion` (typed "Demo" → pick with Version "" → Version ""; pick with "Live" → "Live") (D21) | REQ-SFT-12 |
 | `TitleOptionSource_RemoteSucceedsAfterFailure_ClearsTitleSupportingText` | REQ-SFT-06 |
 | `TitleOptionSource_CancelledQuery_DoesNotChangeTitleSupportingText` | REQ-SFT-09 (Review Focus 4) |
 | `TitleOptionSource_QueryBelowRemoteThreshold_KeepsExistingNote` (note set by a failed "don" query; then "do" → note unchanged) | REQ-SFT-06 |
@@ -1281,7 +1323,7 @@ private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleOptionsAsyn
 | `SelectTitle_LocalOptionWithOtherInput_ShowsDiscardSheetNoNavigation` (Theory over which field holds input: Artist, Version, Featured, Lyrics, YouTube list) | REQ-SFT-11 |
 | `ConfirmOpenExisting_FromDiscardSheet_Navigates` | REQ-SFT-11 |
 | `KeepEditing_RestoresTypedQueryUnlocked_NothingElseChanges` | REQ-SFT-11 |
-| `SelectTitle_RemoteOption_FillsTitleAndArtistAndPendingIdentity_WritesNothing` | REQ-SFT-12 |
+| `SelectTitle_RemoteOption_FillsTitleAndArtistAndPendingIdentity_WritesNothing` (Title = the DTO's `title_short`-derived title, D21) | REQ-SFT-12 |
 | `SelectTitle_RemoteOptionArtistIsLocal_LocksLocalArtist` | REQ-SFT-13 |
 | `SelectTitle_RemoteOptionArtistNotLocal_LocksTypedArtistWithNoId` | REQ-SFT-13 |
 | `RemotePick_ClosesDropdowns` (replaces the deleted `:486/:509`) | REQ-SFT-12 |
@@ -1436,7 +1478,7 @@ The orchestrator marks `tasks.md` 5.7 `[CANCELLED: folded into 5.5 — a XAML-on
 
 **Files:** `Services/IArtistSuggestionService.cs`, `Services/ArtistSuggestionService.cs`, `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs`, `MyVocaList.Tests/Unit/Services/ArtistSuggestionThresholdTests.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (`AddScoped<IArtistSuggestionService, ArtistSuggestionService>()`)
 
-**Produces (`design.md` § 4.1 as updated 2026-09-26, § 0.3 D20):** `SearchNameLocalAsync(query, ct)` (< 2 trimmed chars → `[]`; else inside `ExecuteReadAsync` `IArtistRepository.SearchNameCandidatesAsync(q, SimilarityConstants.PoolSize, ct)` from 3.9b (FTS5 `ArtistSearch`, prefix fallback under 3 chars), ranked by `ISimilarityScorer.RankScore(q, name)` stable over DB order, take `MaxSearchResults` — **not** the collated prefix `SearchByNameAsync` at `ArtistRepository.cs:59-68`; ranking only, § 6.4 exception); `SearchNameRemoteAsync(query, ct) → ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, bool RemoteUnavailable)` (Deezer `search/artist?q=`, ≤ 5, `RemoteSearchTimeoutMilliseconds`, same failure handling; a Deezer name that is a collated match of a local artist is dropped, via a collated DB query inside one `ExecuteReadAsync`, never C#). Tier (c) and `FilterSimilar` deleted. Old `GetLocalAsync`/`GetRemoteAsync` deleted. Create `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` (`public sealed record ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, bool RemoteUnavailable);`), mirroring `SongRemoteSearchResult` (6th file, § 0.3 D18).
+**Produces (`design.md` § 4.1 as updated 2026-09-26, § 0.3 D20):** `SearchNameLocalAsync(query, ct)` (< 2 trimmed chars → `[]`; else inside `ExecuteReadAsync` `IArtistRepository.SearchNameCandidatesAsync(q, SimilarityConstants.PoolSize, ct)` from 3.9b (FTS5 `ArtistSearch`, prefix fallback under 3 chars), ranked by `ISimilarityScorer.RankScore(q, name)` stable over DB order, take `MaxSearchResults` — **not** the collated prefix `SearchByNameAsync` at `ArtistRepository.cs:59-68`; ranking only, § 6.4 exception); `SearchNameRemoteAsync(query, ct) → ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, RemoteSearchStatus Status)` (**D21:** `INetworkStatus` ctor dependency; offline → no call, `Offline`; failure → `Unavailable`; Deezer `search/artist?q=`, ≤ 5, `RemoteSearchTimeoutMilliseconds`, same failure handling; a Deezer name that is a collated match of a local artist is dropped, via a collated DB query inside one `ExecuteReadAsync`, never C#). Tier (c) and `FilterSimilar` deleted. Old `GetLocalAsync`/`GetRemoteAsync` deleted. Create `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` (`public sealed record ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, bool RemoteUnavailable);`), mirroring `SongRemoteSearchResult` (6th file, § 0.3 D18).
 
 **Superseded tests:** every `ArtistSuggestionServiceTests` test of tier (c) / `FilterSimilar` → delete; REQ-FORMUX-03(c) / -10 → REQ-SFT-47/48. `ArtistSuggestionThresholdTests` → retarget to the new methods (same assertions). List each in the task-log.
 
@@ -1448,10 +1490,11 @@ The orchestrator marks `tasks.md` 5.7 `[CANCELLED: folded into 5.5 — a XAML-on
 | `SearchNameRemoteAsync_DeezerMetallica_DroppedWhenLocalMetallicaExists` | REQ-SFT-48 |
 | `SearchNameRemoteAsync_BelowThreeTrimmedChars_NoProviderCall` | REQ-SFT-03 |
 | `SearchNameRemoteAsync_DeezerNameCollatedMatchOfLocal_Dropped` | REQ-SFT-48 |
-| `SearchNameRemoteAsync_ProviderThrows_RemoteUnavailable` | REQ-SFT-06 |
-| `SearchNameRemoteAsync_ProviderSlowerThanBound_RemoteUnavailable` | REQ-SFT-08 |
+| `SearchNameRemoteAsync_ProviderThrows_StatusUnavailable` | REQ-SFT-06 |
+| `SearchNameRemoteAsync_ProviderSlowerThanBound_StatusUnavailable` | REQ-SFT-08 |
 | `SearchNameRemoteAsync_CallerCancelled_Rethrows` | REQ-SFT-09 |
-| `SearchNameRemoteAsync_ZeroResults_NotUnavailable` | REQ-SFT-06 |
+| `SearchNameRemoteAsync_ZeroResults_StatusOk` | REQ-SFT-06 |
+| `SearchNameRemoteAsync_Offline_NoProviderCall_StatusOffline` (D21) | REQ-SFT-53 |
 | `AddAppServices_ResolvingArtistSuggestionService_Succeeds` (in `ArtistSuggestionServiceTests`, building `AddAppServices` like the DI test) | REQ-SFT-47 |
 
 Red (Tester, `Lane: RED`) → Green (Builder) → census `['FilterSimilar']` ZERO HITS → suite → commit: `feat(artist-suggestions): local + Deezer name search with failure status; register (REQ-SFT-47/48)`.
@@ -1467,7 +1510,8 @@ Red (Tester, `Lane: RED`) → Green (Builder) → census `['FilterSimilar']` ZER
 | Test | `// [AC]` |
 |---|---|
 | `NameOptionSource_OrdersLocalThenDeezer_WithSupportingTexts` | REQ-SFT-47 |
-| `NameOptionSource_RemoteUnavailable_SetsNameSupportingText` | REQ-SFT-47 |
+| `NameOptionSource_StatusUnavailable_SetsUnavailableNote` (exact text) (D21) | REQ-SFT-47 |
+| `NameOptionSource_StatusOffline_SetsArtistOfflineNote` (exact text per Q18) (D21) | REQ-SFT-47/53 |
 | `SelectName_LocalOption_NavigatesToArtistEditForm` | REQ-SFT-48 |
 | `SelectName_DeezerOption_FillsNameAndLocks_WritesNothing` | REQ-SFT-49 |
 | `ClearName_EmptiesAndUnlocks` | REQ-SFT-49 |
@@ -1509,7 +1553,8 @@ Red → `Lane: RED` → Green → suite → commit: `feat(artist-form): Name opt
 3. Tap the local row → the edit form of that song opens; Back returns to the Songs list.
 4. Type "sweet chld o mine" → Deezer rows marked "Deezer". Pick one not in the library → Title and Artist filled and locked; X on Title empties it.
 5. Pick a Deezer song whose artist is not local → Save → song and artist both created; artist's catalog behaviour per CATALOG-PROP if landed.
-6. Airplane mode → local options still appear, and the text under Title reads "Online search unavailable"; Save works.
+6. Airplane mode → local options appear at once (no 3 s wait), and the text under Title reads "You're offline — showing songs from your library only."; Save works. Airplane mode off → the next query clears the note (REQ-SFT-06/53, D21).
+6b. Type "creep live" → pick the Deezer "Creep" row whose supporting text reads "Radiohead · Live · Deezer" → Title "Creep", Version "Live"; Save stores both (REQ-SFT-04/12, D21).
 7. Type "Metalica" as artist (with "Metallica" stored) → Save → near-duplicate sheet offers "Use 'Metallica'"; Use and Create both behave; Back saves nothing. Repeat with a Deezer pick whose artist is a near-duplicate of a local one.
 8. Edit an imported song: fix its Title → saves; reopen → new title, still linked to Deezer (same YouTube links). Edit a manual song's Title to a title that artist already has with the same Version → duplicate message. Change Version of a title that exists → saves.
 9. Type an existing artist's name in another case/accent ("metallica") → Save → the song attaches to "Metallica"; no second artist appears in the Artists list.

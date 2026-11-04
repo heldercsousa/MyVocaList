@@ -32,7 +32,8 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 | **Option** | One row in a Field's menu. |
 | **Local option** | An option for a song already stored in the library. Shows the "In your library" marker. |
 | **Remote option** | An option for a Deezer track that is not in the library. Shows its source ("Deezer"). |
-| **Online-search note** | The text "Online search unavailable" shown in the Field's own supporting text (`AutocompleteDXField.SupportingText`, REQ-ACF-12c: the line under the field, replaced by the error text while the field has an error). Not an option row. |
+| **Online-search note** | One of two texts shown in the Field's own supporting text (`AutocompleteDXField.SupportingText`, REQ-ACF-12c: the line under the field, replaced by the error text while the field has an error): the **offline note** or the **unavailable note** (REQ-SFT-06). Not an option row. *(Amended 2026-11-04, Q7: was the single text "Online search unavailable".)* |
+| **Remote search status** | The outcome of one remote query: **Ok** (Deezer answered, including with zero results), **Offline** (the device reported no internet, so Deezer was not called, REQ-SFT-53) or **Unavailable** (Deezer was called and failed or timed out, REQ-SFT-06/08). |
 | **Option supporting text** | The second line of one option (`AutocompleteSuggestion.SupportingText`). Not the same thing as the Field's supporting text. |
 | **Save outcome** | The result of `ISongService.SaveFromFormAsync`: `Saved`, `Failed`, `ArtistChoiceNeeded` or `SongChoiceNeeded` (`design.md` § 3.5). |
 | **Field states** | As defined by the dependency item: **Editable**; **Locked** (after a pick; text cannot change; X unlocks); **Read-only** (`IsReadOnly`, page-set: text shown, no X, no search; wins over the others). `IsSearchEnabled = false` turns option requests off while the field stays a text field. |
@@ -83,7 +84,13 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   are part of the **option supporting text**; the shared Field needs no new option property.
   - Local option: headline = title; supporting text = "artist · version · In your library" (the
     " · version" part is omitted when Version is empty).
-  - Remote option: headline = title; supporting text = "artist · Deezer".
+  - Remote option: headline = title; supporting text = "artist · version · Deezer" (the " · version"
+    part is omitted when the Deezer version is empty). Title and version are the Deezer values as
+    defined in REQ-SFT-12.
+  > **Spec updated 2026-11-04 (Q5 = B):** the remote option's supporting text gains the version, because
+  > its headline is now Deezer's `title_short`, so "Creep" and "Creep (Live)" would otherwise be two
+  > identical-looking rows. Example: Deezer "Creep (Live)" by Radiohead → headline "Creep", supporting
+  > text "Radiohead · Live · Deezer".
   Given the library holds "Don't Cry" (Version "") and "Don't Cry" (Version "Live") by Guns N' Roses,
   When the user types "don't cry",
   Then two local options appear, with supporting texts "Guns N' Roses · In your library" and
@@ -91,15 +98,34 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-05: One row per song.** IF a Deezer result already exists locally, THEN it SHALL appear
   once, as a local option, never as a remote option. "Exists locally" means, in this order:
   (a) a stored song has the same external identity; else
-  (b) a stored song is a collated match on title **and** artist name, with Version "".
+  (b) a stored song is a collated match on title **and** artist name **and** version, where the
+  Deezer side uses the REQ-SFT-12 values (title = `title_short`, version = the normalised
+  `title_version`, "" when Deezer has none).
   A song found by (a) or (b) that is not already among the local options replaces the remote row
   in place of it, as a local option.
-- **REQ-SFT-06: Offline or API error.** IF Deezer fails (no network, HTTP error, timeout per
-  REQ-SFT-08, unreadable response, or an HTTP 200 response carrying an `error` object, e.g. over
-  quota), THEN the local options SHALL still show and the Field's supporting text SHALL read
-  "Online search unavailable" until the next query whose Deezer call succeeds, or until Title is
-  emptied. No option row, snackbar or dialog. The failure is logged at Warning. Deezer returning zero
-  results is not a failure and shows no note.
+  > **Spec updated 2026-11-04 (Q5 = B):** (b) compared Deezer's full title against stored songs with
+  > Version "". Now that a pick stores `title_short` + version, (b) compares the same three values a
+  > pick would save, so a stored "Creep" / "Live" by Radiohead is found for Deezer's "Creep (Live)".
+- **REQ-SFT-06: Offline or API error — two notes** `[Amended 2026-11-04 — Helder, Q7]`. The local options
+  SHALL always show. The Field's supporting text depends on the remote search status:
+  1. **Offline** (REQ-SFT-53: the device reports no internet; Deezer is **not** called) → the
+     **offline note**: *"You're offline — showing songs from your library only."* Logged at
+     Information (an expected device state, not an app failure).
+  2. **Unavailable** — Deezer was called and failed: no network reached it, HTTP error, timeout per
+     REQ-SFT-08, unreadable response, or an HTTP 200 response carrying an `error` object (e.g. over
+     quota) → the **unavailable note**: *"Online search isn't available right now — showing your
+     library only."* Logged at Warning.
+  3. **Ok** (including zero results) → no note.
+  The note shown is the status of the **latest** query that reached the remote step (≥ 3 trimmed
+  characters, REQ-SFT-03); a shorter query leaves the current note as it is. Emptying Title (or X on
+  Title) clears the note. No option row, snackbar or dialog.
+  Given the device is in airplane mode, When the user types "creep", Then local options appear with
+  no 3,000 ms wait, no Deezer request is sent, and the supporting text reads the offline note.
+  Given Deezer answers HTTP 500, When the user types "creep", Then the local options appear and the
+  supporting text reads the unavailable note.
+  > **Spec updated 2026-11-04 (Q7):** was one note, "Online search unavailable", for every failure.
+  > Helder asked for two distinct messages so the user can tell "my phone is offline" from "the music
+  > service is down".
 - **REQ-SFT-07: Local options do not wait for Deezer.** WHEN a query is requested, the local options
   SHALL be shown as soon as the local search returns, without waiting for Deezer; remote options are
   appended when Deezer answers, if the query is still current. This needs one capability from the
@@ -108,9 +134,24 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   REQ-SFT-08 bound expires, so local options wait at most 3,000 ms (Q16).
   > **Spec updated 2026-09-26:** Q16 RESOLVED. The shared Field does **not** gain an append capability in this pipeline (orchestrator decision under Helder's pre-authorisation of 2026-09-25, applying the Q16 recommendation). The fallback is the behaviour: the Field shows local and remote options together once Deezer answers or the REQ-SFT-08 bound expires, so local options wait at most 3,000 ms. Same for the Artist form (REQ-SFT-47). Plan: `plan.md` § 0.3 D1.
 - **REQ-SFT-08: Remote wait bound.** A Deezer call that has not completed within 3,000 ms
-  `[Confirmed — Helder 2026-11-04]` SHALL be cancelled and treated as a failure (REQ-SFT-06).
+  `[Confirmed — Helder 2026-11-04]` SHALL be cancelled and treated as a failure: status Unavailable,
+  the unavailable note (REQ-SFT-06 case 2). When the device is offline the call is never made
+  (REQ-SFT-53), so this bound does not apply and local options do not wait.
 - **REQ-SFT-09: Latest query wins.** Options from an earlier, slower query SHALL never replace options
   of a later query (carry-over of REQ-ACREATE-13 / REQ-ACF-26).
+- **REQ-SFT-53: Offline detection skips Deezer** `[New 2026-11-04 — Helder, Q7]`. Before each remote
+  query (≥ 3 trimmed characters), the search Service SHALL ask the device's network state through an
+  interface it owns (`INetworkStatus`, `design.md` § 3.6). IF the device reports **no internet**,
+  THEN the Service SHALL NOT call Deezer and SHALL return status Offline at once (REQ-SFT-06 case 1).
+  Otherwise it calls Deezer as in REQ-SFT-06/08.
+  - "No internet" means the platform reports network access **None** or **Local** (connected to a
+    network with no internet route). **Unknown** and **ConstrainedInternet** (e.g. a captive portal)
+    are **not** treated as offline: Deezer is tried, and a failure shows the unavailable note. This
+    avoids a false "You're offline" when the platform cannot tell.
+  - The state is read per query, never cached, so going back online is picked up by the next query.
+  - **No MAUI type in Services or Domain:** Services see only `INetworkStatus`; the MAUI
+    implementation lives in the app project (constitutional layering, `code-principles.md`).
+  - Applies to the Artist form's Name search too (REQ-SFT-47).
 
 ### C. Picks
 
@@ -124,10 +165,31 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   Title shows the text the user had typed, unlocked, and nothing else changes. With no such input,
   REQ-SFT-10 runs with no sheet.
 - **REQ-SFT-12: New Deezer pick fills the form.** Given add mode, When the user picks a remote option,
-  Then: Title = the provider's title exactly as returned (no trimming of "(Remastered 2011)" etc.);
-  Artist = the provider's artist name; the pending external identity = `("Deezer", <track id>)`;
-  Title and Artist are both in the picked state; Version, Featured Artists and Lyrics are unchanged;
-  **nothing is written to the database**.
+  Then:
+  - **Title** = Deezer's `title_short` (the title without its version suffix); if `title_short` is
+    missing or empty, Deezer's full `title`.
+  - **Version** = Deezer's `title_version`, normalised: surrounding whitespace trimmed and **one**
+    enclosing pair of parentheses or square brackets removed, then trimmed again (`"(Live)"` →
+    `"Live"`, `"[Remastered 2011]"` → `"Remastered 2011"`, `"Live at Wembley"` unchanged, missing or
+    empty → `""`). Version is **overwritten** by the pick, including with `""`.
+    `[Proposed — confirm: the bracket stripping (Q17)]`
+  - **Artist** = the provider's artist name; the pending external identity = `("Deezer", <track id>)`.
+  - Title and Artist are both in the picked state. Version stays an ordinary editable field.
+    Featured Artists and Lyrics are unchanged.
+  - **Nothing is written to the database** at pick time. On Save, Title and Version are persisted
+    like typed values (REQ-SFT-22/26/29 rules apply unchanged); the song's identity is
+    (artist, title, version).
+  Given Deezer returns "Creep (Live)" (`title_short` "Creep", `title_version` "(Live)") by Radiohead,
+  When the user picks it, Then Title = "Creep", Version = "Live", Artist = "Radiohead", and Save
+  stores Title "Creep" and Version "Live".
+  > **Spec updated 2026-11-04 (Q5 = B, Helder):** was "Title = the provider's title exactly as
+  > returned; Version unchanged". Rationale (Helder): artist + title + version is the song's identity
+  > (a unique-key candidate), and the same three make a precise YouTube query. Verified against
+  > Deezer's live public API 2026-11-04: `/search` and `/track/{id}` both return `title`,
+  > `title_short` and `title_version`, and `title_version` carries the parentheses, e.g.
+  > `"(Live)"`, `"(Acoustic)"` (hence the normalisation). **Lyrics:** neither response carries any
+  > lyrics text, only the content-rating flags `explicit_lyrics` and `explicit_content_lyrics`, so
+  > Lyrics stays user input (lyrics providers remain out of scope).
 - **REQ-SFT-13: Artist of a Deezer pick.** IF the provider's artist name is a collated match for a
   local artist, THEN Artist is picked as that local artist. Otherwise Artist is picked with the
   provider's name and no local id, and the artist is created on Save (REQ-SFT-18).
@@ -302,6 +364,10 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   local artists and Deezer artists, with the REQ-SFT-03/06/07/08/09 thresholds and failure rules.
   Local options come first (marker "In your library"), then Deezer options (supporting text
   "Deezer"). In edit mode Name is the Field with `IsSearchEnabled = false`, Editable (rename unchanged).
+  > **Spec updated 2026-11-04 (Q7):** the two notes and offline detection (REQ-SFT-06/53) apply here.
+  > Wording on this form `[Proposed — confirm (Q18)]`: offline → *"You're offline — showing artists
+  > from your library only."*; unavailable → *"Online search isn't available right now — showing
+  > your library only."* (the unavailable text is the Song form's, verbatim).
   > **Spec updated 2026-09-26:** the Artist form's **local** name search uses the artist-name trigram index (`IArtistRepository.SearchNameCandidatesAsync`, FTS5 `ArtistSearch`, REQ-SFT-19/34), ranked for display by `ISimilarityScorer.RankScore` (ordering only, `design.md` § 6.4), at most 5 — not the collated name-prefix query. Without this, "metalica" could not list the stored "Metallica" and REQ-SFT-48's single-row rule could not hold for a typo. Orchestrator decision under Helder's pre-authorisation (plan § 0.3 D20).
   Given "Metallica" is stored, When the user types "metalica" in Name on New Artist,
   Then "Metallica" is the first local option ("In your library"), and a Deezer artist named "Metallica" is not shown as a separate Deezer option (REQ-SFT-48).
@@ -323,7 +389,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 | Field | Rule | Source (unchanged unless noted) |
 |-------|------|------|
 | Title | required; ≤ 100 chars after trim | `SongService.ValidateTitleInput` |
-| Version | optional; ≤ 60; required for "Save as new version" | `SongService.ValidateVersionInput` |
+| Version | optional; ≤ 60; required for "Save as new version"; a Deezer pick fills it (REQ-SFT-12) | `SongService.ValidateVersionInput` |
 | Artist | required; typed name ≤ 60, non-empty after trim, no collated duplicate when created | `IArtistService` |
 | Song identity | unique `(ArtistId, Title, Version)` collated, on create **and** update | DB index + REQ-SFT-29 (update: changed) |
 | External identity | unique `(ExternalProvider, ExternalId)` when both non-null | REQ-SFT-26/39 (new) |
@@ -332,7 +398,9 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 
 | Situation | Required behaviour |
 |-----------|--------------------|
-| Deezer unreachable, HTTP error, timeout, bad JSON, HTTP 200 with an `error` object (quota) | Local options + Field supporting text "Online search unavailable" (REQ-SFT-06); Save unaffected |
+| Device reports no internet (network access None/Local) | Deezer not called; local options at once + the offline note (REQ-SFT-06 case 1, REQ-SFT-53); Save unaffected |
+| Deezer unreachable, HTTP error, timeout, bad JSON, HTTP 200 with an `error` object (quota) | Local options + the unavailable note (REQ-SFT-06 case 2); Save unaffected |
+| Deezer `title_version` longer than 60 characters after normalisation | The pick fills it as is; Save shows the existing Version length message (`ValidateVersionInput`) and the user shortens it (REQ-SFT-12) |
 | Deezer returns 0 results | Local options only; no note |
 | Artist create fails inside Save | Nothing saved; message on Artist (REQ-SFT-20) |
 | Song write fails after the artist was staged | Unit of work rolls back both; the existing save-error path shows the message |
@@ -418,6 +486,14 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
        showing your library only."*
     Connectivity is read through an interface (no MAUI types in Services). REQ-SFT-06/08 and the Deezer-pick
     REQs (Q5) are amended in the next spec step, then spec-reviewer, then Helder's approval.
+  - **Amendment written 2026-11-04 (awaiting Helder's approval):** Q5 → REQ-SFT-04/05/12; Q7 →
+    REQ-SFT-06/08, new REQ-SFT-53, REQ-SFT-47 note; `design.md` § 3.3/3.4/3.6/4; plan D21. Two
+    sub-questions it raised:
+    - **Q17 (Version normalisation):** Deezer's `title_version` comes with parentheses (`"(Live)"`).
+      Recommended: strip one enclosing pair of `()` or `[]` and trim, so a pick stores `Live` like a
+      typed Version, and REQ-SFT-05(b) finds a stored "Live". Alternative: store it raw.
+    - **Q18 (Artist form wording):** recommended *"You're offline — showing artists from your library
+      only."* for the offline note, with the unavailable note verbatim from the Song form.
   - **Q8 → confirmed:** ranking uses `TokenSortRatio` via `ISimilarityScorer.RankScore` (merged in 2.2).
   - **Q10 → not stored** (REQ-SFT-49): only the name is saved.
   - **Q11 → confirmed:** port 4 of the 5 `NestedUnitOfWorkTests` to the new save path; delete the 5th
@@ -429,7 +505,7 @@ Resolved: Q3 (collated match reused silently), Q13 (Title editable in edit mode 
 Q14 (Song-form Artist searches local only), Q15 (Artist-form local pick opens the artist), all
 sixth round; Q9 (YouTube search out of scope, fifth round); Q12 (the "In your library" marker lives in
 the option supporting text, and "Online search unavailable" is the Field's `SupportingText`; no
-non-selectable row).
+non-selectable row — the text itself was replaced by the two Q7 notes on 2026-11-04, REQ-SFT-06).
 
 ## Traceability seed (filled at implementation)
 
@@ -451,3 +527,5 @@ non-selectable row).
 | REQ-SFT-44/45 | deletions | census + build (C, recorded) |
 | REQ-SFT-46 | `SongService` | architecture/code review + VM tests assert only these two write calls |
 | REQ-SFT-47…50 | `ArtistFormViewModel`, `ArtistSuggestionService` | VM + service tests (A) |
+| REQ-SFT-12 (Q5 mapping) | `DeezerProvider` (title_short, normalised title_version), `SongFormViewModel.ApplyRemotePick` | provider tests (B, fake handler), VM (A) |
+| REQ-SFT-53 | `INetworkStatus` / `MauiNetworkStatus`, `SongSuggestionService`, `ArtistSuggestionService` | service tests with `Mock<INetworkStatus>` (A); adapter Level C + airplane-mode check in the device gate (7.2) |
