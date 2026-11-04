@@ -29,7 +29,7 @@ public class Bug068RegressionTests
         Assert.True(createOk);
 
         var (updateOk, message) = await songs.UpdateSongAsync(
-            song!.Id, "Updated Title", featuredArtists: null, lyrics: null, hasManualEdits: false);
+            song!.Id, "Updated Title", featuredArtists: null, lyrics: null);
 
         Assert.True(updateOk, message);
         var reread = await songs.GetSongByIdAsync(song.Id);
@@ -126,7 +126,7 @@ public class Bug068RegressionTests
         Assert.True(artistOk, artistMessage);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => songs.CreateSongWithUrlsAsync(
-            artist!.Id, "Atomic URL Song", string.Empty, null, null, null, null,
+            artist!.Id, null, "Atomic URL Song", string.Empty, null, null, null, null,
             ["https://www.youtube.com/watch?v=dQw4w9WgXcQ"]));
 
         Assert.Equal(0, host.Db.Songs.Count(s => s.Title == "Atomic URL Song"));
