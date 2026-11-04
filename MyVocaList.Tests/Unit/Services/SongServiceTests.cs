@@ -247,14 +247,189 @@ public class SongServiceTests
         var song = new Song { Id = 1, ArtistId = 1, Title = "Title" };
         _songRepoMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
                      .ReturnsAsync(song);
-        _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(true);
+        _songRepoMock.Setup(r => r.FindIdByTitleVersionForArtistAsync(1, It.IsAny<string>(), It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((int?)2);
         var sut = CreateSut();
 
         var (success, message) = await sut.UpdateSongAsync(1, "Existing Other Title", null, null, true);
 
         Assert.False(success);
         Assert.NotEmpty(message);
+    }
+
+    // ── UpdateSongAsync — version-aware uniqueness, external identity (SFT 3.2a) ──
+
+    private const string DuplicateMessage = "A song with this title and version already exists for this artist";
+
+    private void SetupStoredSong(Song song)
+    {
+        _songRepoMock.Setup(r => r.GetByIdAsync(song.Id, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(song);
+        _songRepoMock.Setup(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()))
+                     .Returns(Task.CompletedTask);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-29: Radiohead has "Creep" (Version "") and "Creep" (Version "Live"); editing the
+    // "Live" song's Version to "Acoustic" succeeds. Regression: the update check used to ignore Version.
+    public async Task UpdateSongAsync_VersionChangedToNewVersionOfExistingTitle_Succeeds()
+    {
+        SetupStoredSong(new Song { Id = 2, ArtistId = 1, Title = "Creep", Version = "Live" });
+        // The old, title-only check would see the canonical "Creep" and reject.
+        _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(1, It.IsAny<string>(), 2, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(true);
+        _songRepoMock.Setup(r => r.FindIdByTitleVersionForArtistAsync(1, "Creep", "Acoustic", 2, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((int?)null);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateSongAsync(2, "Creep", null, null, true, version: "Acoustic");
+
+        Assert.True(success, message);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-29: changing that Version to "" collides with the canonical "Creep" and fails
+    // with the duplicate message; nothing is written.
+    public async Task UpdateSongAsync_VersionChangedToExistingVersion_FailsDuplicate()
+    {
+        SetupStoredSong(new Song { Id = 2, ArtistId = 1, Title = "Creep", Version = "Live" });
+        _songRepoMock.Setup(r => r.FindIdByTitleVersionForArtistAsync(1, "Creep", "", 2, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((int?)1);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateSongAsync(2, "Creep", null, null, true, version: "");
+
+        Assert.False(success);
+        Assert.Equal(DuplicateMessage, message);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-27: editing the title of an API-sourced song changes only the local title; the
+    // stored ("Deezer","3135556") identity is untouched when the call passes null/null.
+    public async Task UpdateSongAsync_TitleEditedOnApiSourcedSong_KeepsExternalIdentity()
+    {
+        var song = new Song
+        {
+            Id = 1, ArtistId = 1, Title = "Creep", Version = "",
+            ExternalProvider = "Deezer", ExternalId = "3135556"
+        };
+        SetupStoredSong(song);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateSongAsync(
+            1, "Creep (Remastered)", null, null, true, externalId: null, externalProvider: null);
+
+        Assert.True(success, message);
+        Assert.Equal("Creep (Remastered)", song.Title);
+        Assert.Equal("Deezer", song.ExternalProvider);
+        Assert.Equal("3135556", song.ExternalId);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-27: an edited title that collides with another song of the same artist and
+    // version is rejected with the duplicate message.
+    public async Task UpdateSongAsync_EditedTitleCollidesWithArtistTitleVersion_Rejected()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Karma Police", Version = "" };
+        SetupStoredSong(song);
+        _songRepoMock.Setup(r => r.FindIdByTitleVersionForArtistAsync(1, "creep", "", 1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((int?)5);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateSongAsync(1, "creep", null, null, true);
+
+        Assert.False(success);
+        Assert.Equal(DuplicateMessage, message);
+        Assert.Equal("Karma Police", song.Title);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-26: an external identity already held by ANOTHER song (self excluded) is
+    // rejected and nothing is written.
+    public async Task UpdateSongAsync_ExternalIdentityHeldByAnotherSong_Fails()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Creep", Version = "" };
+        SetupStoredSong(song);
+        _songRepoMock.Setup(r => r.ExistsByExternalIdentityAsync("Deezer", "999", 1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(true);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateSongAsync(
+            1, "Creep", null, null, true, externalId: "999", externalProvider: "Deezer");
+
+        Assert.False(success);
+        Assert.Equal("This music-database song is already in your library", message);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    private SongService CreateSutWithArtistService(Mock<IArtistService> artistServiceMock) => new(
+        _songRepoMock.Object,
+        _artistRepoMock.Object,
+        _urlRepoMock.Object,
+        _urlServiceMock.Object,
+        PassthroughUnitOfWork.Over(
+            _songRepoMock, _artistRepoMock, _urlRepoMock, _urlServiceMock, artistServiceMock),
+        _loggerMock.Object);
+
+    [Fact]
+    // [AC] REQ-SFT-28: a typed new artist on edit is created through the sp-resolved IArtistService
+    // inside the song's unit of work, and the song is re-linked to the new artist's id.
+    public async Task UpdateSongAsync_NewArtistName_CreatesArtistInSameUnitOfWork()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Creep", Version = "" };
+        SetupStoredSong(song);
+        var artistService = new Mock<IArtistService>();
+        artistService.Setup(s => s.CreateArtistAsync("New Band", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((true, "created", new Artist { Id = 9, Name = "New Band" }));
+        var sut = CreateSutWithArtistService(artistService);
+
+        var (success, message) = await sut.UpdateSongAsync(
+            1, "Creep", null, null, true, newArtistName: "New Band");
+
+        Assert.True(success, message);
+        Assert.Equal(9, song.ArtistId);
+        artistService.Verify(s => s.CreateArtistAsync("New Band", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        _songRepoMock.Verify(r => r.UpdateAsync(song, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-28: a failed artist creation (e.g. the REQ-SFT-52 collated-duplicate refusal)
+    // returns its message and the song is not written.
+    public async Task UpdateSongAsync_NewArtistCreationFails_ReturnsMessageAndDoesNotWrite()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Creep", Version = "" };
+        SetupStoredSong(song);
+        var artistService = new Mock<IArtistService>();
+        artistService.Setup(s => s.CreateArtistAsync("Dup", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((false, "Artist already exists", (Artist?)null));
+        var sut = CreateSutWithArtistService(artistService);
+
+        var (success, message) = await sut.UpdateSongAsync(
+            1, "Creep", null, null, true, newArtistName: "Dup");
+
+        Assert.False(success);
+        Assert.Equal("Artist already exists", message);
+        Assert.Equal(1, song.ArtistId);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-28: at most one of artistId / newArtistName (REQ-SFT-21 XOR); supplying both is
+    // rejected before anything is read or written.
+    public async Task UpdateSongAsync_BothArtistIdAndNewArtistName_Rejected()
+    {
+        var song = new Song { Id = 1, ArtistId = 1, Title = "Creep", Version = "" };
+        SetupStoredSong(song);
+        var sut = CreateSut();
+
+        var (success, message) = await sut.UpdateSongAsync(
+            1, "Creep", null, null, true, artistId: 2, newArtistName: "New Band");
+
+        Assert.False(success);
+        Assert.Equal("Artist is required", message);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     // ── CreateSongAsync — lyrics ──────────────────────────────────────────
@@ -484,8 +659,8 @@ public class SongServiceTests
                      .ReturnsAsync(song);
         _artistRepoMock.Setup(r => r.GetByIdAsync(2, It.IsAny<CancellationToken>()))
                        .ReturnsAsync(new Artist { Id = 2, Name = "New Artist" });
-        _songRepoMock.Setup(r => r.ExistsByTitleForArtistAsync(2, It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(true);
+        _songRepoMock.Setup(r => r.FindIdByTitleVersionForArtistAsync(2, It.IsAny<string>(), It.IsAny<string>(), 1, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((int?)3);
         var sut = CreateSut();
 
         var (success, message) = await sut.UpdateSongAsync(1, "Title", null, null, true, artistId: 2);

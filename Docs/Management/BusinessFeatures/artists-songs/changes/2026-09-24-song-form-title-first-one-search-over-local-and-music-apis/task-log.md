@@ -407,13 +407,57 @@ Note on `FailureTupleAfterArtistStaged_WritesNothing`: the title is validated be
 
 ## 3.2a
 
-### Checkpoint
+### Checkpoint (final)
 
 - 2026-11-04 (orchestrator) — **Pre-dispatch G3 checks (plan § 0.2.2):**
   1. `LEDGER.md` rows with a live branch: BUG-080 (`fix/bug-080-venue-seed-debug-only`) — touches only `Infra/Migrations/20260211055225_venuesSeedForTest.cs` (edit, no new migration, no snapshot), `MyVocaList.Tests/Integration/Migrations/VenuesSeedMigrationDownTests.cs`, its README (`git diff --name-only develop...` verified); no `SongService.cs`/`ISongService.cs`; not a migration-adding branch. CATALOG-PROP: deferred, no branch.
   2. `git worktree list`: main (develop `4748326b`), `.worktrees/bug-080`, `.worktrees/sft-3.1` (merged; being removed).
   3. `git branch -a` matches: `feat/uow-phase-4-1-catalog` and `feat/uow-phase-4-venue` — both merged into develop 2026-08-24 (UoW phases 4.1/4.4, `merge-base --is-ancestor` true), not live; `fix/bug-080-…` as in 1.
   - **Result: clear to dispatch.** Worktree `.worktrees/sft-3.2a`, branch `task/sft-3.2a-update-version-uniqueness`, from develop after 3.1's merge.
+
+**Status:** To Review (E2E: not applicable - Service-only change, no emulator run per briefing)
+**Started/Completed:** 2026-11-04
+Context7 available; no API lookup needed (patterns copied from 3.1's `CreateSongWithUrlsAsync`). Inherited: nothing (clean worktree).
+
+### Red evidence
+Red A (`289f25e5`, `Lane: RED`): `dotnet test --filter SongServiceTests.UpdateSongAsync` -> `Com falha: 6, Aprovado: 12, Total: 18`. Failing: `VersionChangedToExistingVersion_FailsDuplicate`, `EditedTitleCollidesWithArtistTitleVersion_Rejected`, `ChangedArtistWithDuplicateTitle_ReturnsFalse`, `DuplicateTitleExcludingSelf_ReturnsFalse`, `ExternalIdentityHeldByAnotherSong_Fails` - all `Assert.False() Failure / Expected: False / Actual: True` (REQ-SFT-29 regression Red); `VersionChangedToNewVersionOfExistingTitle_Succeeds` - message `A song with this title already exists for this artist` (title-only check).
+Red B (`553f4cd7`, `Lane: RED`): compile error `CS1739: A melhor sobrecarga de "UpdateSongAsync" nao tem um parametro chamado "newArtistName"` (SongServiceTests.cs 389, 410, 428) + `CS8130`.
+Note: `UpdateSongAsync_TitleEditedOnApiSourcedSong_KeepsExternalIdentity` (REQ-SFT-27) passed from the start (characterization of null-keeps-existing).
+
+### Green
+Full suite: `Aprovado! - Com falha: 0, Aprovado: 685, Total: 685` (baseline 677, +8 new tests; Bug068RegressionTests and UnitOfWorkReadScopeTests included). Android build: `0 errors`.
+
+### Mechanical mock changes (SongServiceTests.cs)
+Duplicate-title mocks in `UpdateSongAsync_DuplicateTitleExcludingSelf_ReturnsFalse` and `UpdateSongAsync_ChangedArtistWithDuplicateTitle_ReturnsFalse` now set up `FindIdByTitleVersionForArtistAsync` (returns 2 / 3) instead of `ExistsByTitleForArtistAsync`.
+
+### Spec gap (Blocking: No - documented assumption, review please)
+**Location:** plan.md Task 3.2a "no call site breaks".
+**Gap:** adding `newArtistName` before `ct` shifts the positional arg of Moq expression-tree `Setup/Verify(s => s.UpdateSongAsync(..., It.IsAny<CancellationToken>()))`; 12 calls in `SongResolutionServiceTests.cs` (6) and `SongFormViewModelTests.cs` (6) stopped compiling (CS1503). Both files are outside Files owned.
+**Option A (taken):** insert `It.IsAny<string?>(),` before the final arg in those 12 expressions (mechanical, no assertion changed). **Option B:** block and have the orchestrator edit them.
+**Recommendation:** A. Orchestrator should confirm the two files are not being edited by 3.3 (3.3 owns SongResolutionService tests - merge conflict likely, trivial to resolve).
+
+### Decisions / requested spec notes
+- Duplicate message on update is now `A song with this title and version already exists for this artist` (same as create); the old title-only text no longer exists on this path.
+- Both `artistId` and `newArtistName` supplied -> `(false, "Artist is required")` outside the UoW (no new string invented).
+- Request: `> **Spec updated 2026-11-04:**` note in design.md 3.2 for `newArtistName` on `UpdateSongAsync` + the two points above.
+
+### AC matrix
+| AC | Implementation | Test |
+|---|---|---|
+| REQ-SFT-26 | SongService.UpdateSongAsync `ExistsByExternalIdentityAsync(..., id)` before artist creation | UpdateSongAsync_ExternalIdentityHeldByAnotherSong_Fails |
+| REQ-SFT-27 | collated uniqueness; null/null keeps identity | UpdateSongAsync_TitleEditedOnApiSourcedSong_KeepsExternalIdentity, UpdateSongAsync_EditedTitleCollidesWithArtistTitleVersion_Rejected |
+| REQ-SFT-28 | sp-resolved IArtistService.CreateArtistAsync + FlushAsync | UpdateSongAsync_NewArtistName_CreatesArtistInSameUnitOfWork, ..._NewArtistCreationFails_ReturnsMessageAndDoesNotWrite, ..._BothArtistIdAndNewArtistName_Rejected |
+| REQ-SFT-29 | FindIdByTitleVersionForArtistAsync(effectiveArtist, title, effectiveVersion, id) | UpdateSongAsync_VersionChangedToNewVersionOfExistingTitle_Succeeds, ..._VersionChangedToExistingVersion_FailsDuplicate |
+
+### Changed files:
+- `Domain/ServicesInterfaces/ISongService.cs`
+- `Services/SongService.cs`
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs`
+- `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs` (off-list, mechanical, see spec gap)
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (off-list, mechanical)
+- task-log.md (section 3.2a)
+
+BUG-067 navigation-detach block (`song.OriginalArtist = null`) untouched.
 
 ## 3.3
 
