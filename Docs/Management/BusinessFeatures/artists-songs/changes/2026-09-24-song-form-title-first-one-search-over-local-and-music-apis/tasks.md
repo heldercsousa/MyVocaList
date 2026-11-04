@@ -142,7 +142,7 @@
   - **Review lane:** Standard
   > **Spec updated 2026-09-26:** (D6) the `SongFormViewModelTests.cs:787` rewrite (`LoadSongForEdit_ApiImportedSong_LocksArtistField`, no `HasManualEdits`) moves here from 5.4, because M1 (3.6b) removes the property. Runs after 3.3b (not only 3.3).
 
-- [ ] **3.2c Move the remaining callers; delete the obsolete overload** [SEQUENTIAL — after 3.2b]
+- [x] **3.2c Move the remaining callers; delete the obsolete overload** [SEQUENTIAL — after 3.2b]
   - **Files owned:** `ISongService.cs`, `SongService.cs`, `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTests.cs`, `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs`
   - **Risk:** Low. **Demo:** census finds no `hasManualEdits` argument; all tests green.
   - **Review lane:** Standard

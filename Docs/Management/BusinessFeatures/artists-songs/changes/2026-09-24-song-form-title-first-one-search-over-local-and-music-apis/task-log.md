@@ -631,6 +631,11 @@ Remaining CS0618 in the test build (expected only): `MyVocaList.Tests/Unit/ViewM
 **Files verified by re-read after edit:** the four changed files were re-checked via `git diff` (4 files, 4 insertions, 37 deletions; the test diffs are one-line changes each).
 
 
+### Build notes + Verifier + merge (orchestrator, 2026-11-04)
+- Commit `936fd20e` (Haiku). Verifier **CONDITIONAL PASS** (0 blockers): diff = obsolete overload + XML doc deleted; 2+1 call sites lost only the flag; `Bug068RegressionTests` `CreateSongWithUrlsAsync` moved to the new overload with correct alignment; census `hasManualEdits` → 0. W1 (this block + SHA) applied here.
+- **SQLite flake evidence (W2):** Verifier run 1 `Com falha: 1, Aprovado: 670` — `SongRepositoryResolutionTests.DuplicateTitleVersion_ThrowsDbUpdateException`: `System.InvalidOperationException : Collection was modified; enumeration operation may not execute.` thrown inside Microsoft.Data.Sqlite pool clearing, from `DisposeAsync` → `EnsureDeletedAsync` (`SongRepositoryResolutionTests.cs:26`); the test body passed. Run 2: 671/0. Implementor's pre-commit hook run also failed once on `BackupRepositoryTests.GetLatestSnapshotAsync_MixedTypes_ReturnsOnlySnapshot` (green on retry). Hypothesis (unconfirmed): concurrent pool clears across parallel xUnit test classes. Escalated to Helder (new bug vs BUG-076).
+- Merged `a9094bf5`. Post-merge develop: `0 Erro(s)`; `Aprovado! – Com falha: 0, Aprovado: 671, Total: 671`.
+
 ## 3.5a
 
 ### Checkpoint
