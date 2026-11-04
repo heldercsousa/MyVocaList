@@ -310,9 +310,27 @@ Build: passed (0 errors) | Tests: 679 passed, 0 failed | Commit: the head of bra
 
 ## T6
 
-### Checkpoint
+**Status:** To Review (E2E: not run - no emulator per briefing; device gate is T7)
+**Started/Completed:** 2026-11-04
 
-- (placeholder)
+Replaced the Full Name `dxe:AutoCompleteEdit` in `PersonFormPage.xaml` with `textfields:AutocompleteDXField` (bindings per plan T6; `IsLocked` unbound; character counter untouched). Added `xmlns:textfields`. Code-behind: deleted `OnNameItemsRequested`, `OnNameSelectionChanged`, `OnNameUnfocused`; focus call is now `nameField.FocusEditor()`; birthday/email blur handlers kept. Line numbers in the plan matched the file (XAML 19-43, cs 33-61, focus at 30).
+Context7 / devexpress MCP not needed (no new DX API used beyond the T4 component).
+
+**Level C - no-test decision:** page swap with no new logic; behaviour is covered by existing PersonFormViewModel tests and the T7 device gate.
+
+### Observation (not acted on)
+`PersonFormPage.xaml` has `SafeAreaEdges="All"`, not `"Container"` as CLAUDE.md prescribes. Pre-existing and left untouched (out of T6 scope); flagging for the orchestrator.
+
+### Verification evidence
+- After XAML edit only, build errors were exactly 2 x CS1061 `AutocompleteDXField` has no `SelectedItem` at `PersonFormPage.xaml.cs(52,23)` and `(59,23)` (expected).
+- Final build `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1`: exit 0, 0 errors (only pre-existing NU1903 warnings).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1`: `Aprovado! - Com falha: 0, Aprovado: 657, Ignorado: 0, Total: 657` (T4 log recorded 679 on its branch; this worktree's base differs, no tests were added/removed by T6).
+- REQ-ACF-11 Python substring scan: `PASS`.
+
+### Changed files:
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml`
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml.cs`
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md`
 
 ## T7 — Device gate
 
