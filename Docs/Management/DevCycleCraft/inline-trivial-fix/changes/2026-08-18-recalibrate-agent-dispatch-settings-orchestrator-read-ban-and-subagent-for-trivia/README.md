@@ -6,7 +6,7 @@ target: 2026-08-18
 section: DevCycleCraft
 parent: inline-trivial-fix
 goal: "Agent-dispatch settings over-trigger: the orchestrator is barred from reading any source file, and tiny tasks spawn fresh subagents that reload full context they never use."
-gate: Amendment applied 2026-11-03 and awaiting Helder's review of the rules diff before the amend commit. Done once the first live /sln-itf fix runs end to end without a dispatch.
+gate: Amendment shipped 2026-11-03 (approved, pushed). Done after the post-ship review below confirms the first live /sln-itf fixes ran end to end without a dispatch.
 kind: change
 ---
 
@@ -75,3 +75,15 @@ Run before deciding, at Helder's request. Findings that bear on this item:
 | Extras | Hooks reworded and the `.cs` reminder made ITF-aware · `model: sonnet` on implementor/verifier/reviewers + a difficulty→model table in `orchestrator.md` · `/sln-itf` command · agent-hook item registered separately. |
 
 Acceptance criteria: `requirements.md`.
+
+## Post-ship review (open — run after a few work sessions)
+
+Two claims were not proven when the amendment shipped. Review them after a few real work sessions.
+
+| # | Claim | Status | How to check |
+|---|-------|--------|--------------|
+| 1 | Trivial fixes now take the ITF lane instead of a dispatch | **Open** | `git log --grep "Lane: ITF" --oneline` (≥ 1 entry expected); `grep -rn "^ITF:" Docs/Management --include=task-log.md` (any `ITF aborted:` lines and their reasons); session transcripts (`~/.claude/projects/<project>/*.jsonl`): count `implementor` dispatches whose briefing was a 1-file / ≤ 5-line fix. Any of those = the lane is still being bypassed. |
+| 2 | The trim lowers always-loaded context | **Measured 2026-11-03** | `/context` in a fresh session: memory files fell from 22.9k to 13.9k tokens (CLAUDE.md 8.8k → 3.2k, workflow.md 6.8k → 3.1k). Re-check that the figure has not crept back up. |
+
+`/doctor` checks installation and settings health, not dispatch behavior, so it cannot answer #1 on its own. Use it alongside the checks above to confirm the hooks still load.
+Close this item (`backlog_gen.py status … "✅ Done" --closed YYYY-MM`) once #1 shows at least one clean ITF commit and no trivial-fix dispatches.
