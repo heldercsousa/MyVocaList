@@ -30,9 +30,6 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
                .IsRequired(false)
                .HasMaxLength(50);
 
-        builder.Property(a => a.HasManualEdits)
-               .IsRequired();
-
         builder.Property(a => a.CreatedAt).IsRequired();
         builder.Property(a => a.UpdatedAt).IsRequired();
 

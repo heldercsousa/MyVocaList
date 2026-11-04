@@ -158,9 +158,6 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
-                    b.Property<bool>("HasManualEdits")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
@@ -373,9 +370,6 @@ namespace MyVocaList.Infra.Migrations
                     b.Property<string>("FeaturedArtists")
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
-
-                    b.Property<bool>("HasManualEdits")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Lyrics")
                         .HasMaxLength(10000)
