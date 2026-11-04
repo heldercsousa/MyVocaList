@@ -5,4 +5,5 @@ public record MusicSearchResultDto(
     string Provider,
     string ArtistName,
     string? SongTitle,
-    string? FeaturedArtists);
+    string? FeaturedArtists,
+    string? Version = null);
