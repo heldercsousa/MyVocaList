@@ -902,7 +902,7 @@ Snapshot diff vs. `75966b9c`: annotation-only — `+ b.HasAnnotation("Sqlite:Use
 
 `Down` (9 calls): `DROP TRIGGER IF EXISTS` SongSearch_ai, SongSearch_au, SongSearch_ad, SongSearch_artist_au, ArtistSearch_ai, ArtistSearch_au, ArtistSearch_ad; then `DROP TABLE IF EXISTS SongSearch`, `DROP TABLE IF EXISTS ArtistSearch`. Header comment carries the rebuild constraint sentence. No annotation operations existed to keep (generated Up/Down were empty).
 
-**DDL review against the real schema (no defect found):** `Songs.Id/Title/ArtistId` and `Artists.Id/Name` match the snapshot; `Songs.ArtistId` is required (`SongConfiguration.cs`, `IsRequired()`) so the backfill's inner `JOIN` drops no song; artist delete cascades via FK (`ArtistConfiguration.cs`, `OnDelete(Cascade)`) and SQLite FK actions fire `SongSearch_ad` (proven by `ArtistDelete_CascadeRemovesSongSearchRows`); artist rename is covered by `SongSearch_artist_au` (proven by `ArtistRenameViaEf_UpdatesSongSearchAndArtistSearch`). Note (not a defect, no action): `SongSearch_au` is `OF Title, ArtistId`, so an `UPDATE` that sets `Id` would desync — no code path updates a PK.
+**DDL review against the real schema (no defect found):** `Songs.Id/Title/ArtistId` and `Artists.Id/Name` match the snapshot; `Songs.ArtistId` is required (`SongConfiguration.cs`, `IsRequired()`) so the backfill's inner `JOIN` drops no song; artist delete cascades via FK (`ArtistConfiguration.cs`, `OnDelete(Cascade)`) and SQLite FK actions fire `SongSearch_ad` (NOT proven by `ArtistDelete_CascadeRemovesSongSearchRows` — that test deletes EF-tracked songs (EF issues the DELETEs); the DB-level `ON DELETE CASCADE` path was probed correct by the Verifier but has no regression test (follow-up in tasks.md 3.8) [corrected by the orchestrator 2026-11-04]); artist rename is covered by `SongSearch_artist_au` (proven by `ArtistRenameViaEf_UpdatesSongSearchAndArtistSearch`). Note (not a defect, no action): `SongSearch_au` is `OF Title, ArtistId`, so an `UPDATE` that sets `Id` would desync — no code path updates a PK.
 
 ### Verification evidence
 - Filtered `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --filter "FullyQualifiedName~SongMigrationTests"` → `Aprovado!  – Com falha:     0, Aprovado:    17, Ignorado:     0, Total:    17, Duração: 4 s` (`M3_Down_DropsTablesAndTriggers` now meaningful: latest = `AddSearchIndexes`, rolled back to `SongExternalIdentityUnique`).
@@ -934,6 +934,12 @@ REQ-SFT-19 and REQ-SFT-30…33 are enabled by this schema but exercised by the 3
 - `Infra/Migrations/20261104161213_AddSearchIndexes.Designer.cs` (created, generated, untouched)
 - `Infra/Migrations/AppDbContextModelSnapshot.cs` (generated, untouched)
 - `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
+
+### Verifier + merge (orchestrator, 2026-11-04)
+- Red `c820a6a9`, Green `b0aeef2d`; scaffold `20261104161213_AddSearchIndexes` by the orchestrator (generated Up/Down empty; snapshot gained only the two `Sqlite:UseSqlReturningClause` annotations). The commit hook hit one intermittent failure (`SongRepositoryResolutionTests.GetFuzzyCandidatePoolAsync_RespectsArtistScopeAndTake`), green on re-runs (7th this session).
+- Verifier (Opus) **CONDITIONAL PASS**, 0 blockers: all 11 statements match design section 6.2 character for character; trigger set correct against the real schema (ArtistId change and DB-level FK cascade probed correct in SQLite). W1: DB-level cascade has no regression test (follow-up queued). W2: the over-claim above corrected. Info: EF1002 analyzer warnings in the test helpers (constant/integer interpolation only).
+- Merged `eca9f708`. Post-merge develop: `0 Erro(s)`; `Aprovado! - Com falha: 0, Aprovado: 688, Total: 688`; `has-pending-model-changes`: no changes; `database update` (absolute path) on `.claude/MyVocaList.db`: `Done.`
+- Orchestrator post-merge step: FTS-trigger rule added to `.claude/library/constraints-reference.md` § EF Core / SQLite.
 
 ## 3.9
 
