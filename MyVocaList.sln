@@ -1131,6 +1131,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-archive", "backlog-
 		Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-05.md = Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-05.md
 		Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-06.md = Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-06.md
 		Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-07.md = Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-07.md
+		Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-08.md = Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-08.md
+		Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-09.md = Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-09.md
+		Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-11.md = Docs\Management\backlog-archive\BACKLOG-ARCHIVE-2026-11.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bugs", "Bugs", "{1AAD9972-3FB1-449D-B8DD-145C107CBD67}"
