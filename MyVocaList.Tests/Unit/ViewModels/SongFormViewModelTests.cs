@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.DTOs;
+using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Navigation;
@@ -32,7 +33,8 @@ public class SongFormViewModelTests
             (urlService ?? new Mock<ISongKaraokeUrlService>()).Object,
             (secureStorage ?? new Mock<ISecureStorageWrapper>()).Object,
             messenger ?? new Mock<IMessenger>().Object,
-            _navigationMock.Object);
+            _navigationMock.Object,
+            _suggestionsMock.Object);
     }
 
     // ── Resolution sheet: Open existing (Task 5.1) ─────────────────────────
@@ -48,6 +50,560 @@ public class SongFormViewModelTests
 
         _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=77"), Times.Once);
         Assert.False(sut.IsResolutionSheetVisible);
+    }
+
+    // ── Task 5.2: title search, picks, online-search note ──────────────────
+
+    private const string OfflineNoteText = "You're offline — showing songs from your library only.";
+    private const string UnavailableNoteText = "Online search isn't available right now — showing your library only.";
+
+    private readonly Mock<ISongSuggestionService> _suggestionsMock = new();
+
+    public SongFormViewModelTests() => SetupSearch([], [], []);
+
+    private static SongSuggestionDto LocalDto(
+        int id, string title = "Creep", string artist = "Radiohead", string version = "", int? artistId = 1) =>
+        new(id, title, artist, artistId, null, null, false, version, artist);
+
+    private static SongSuggestionDto RemoteDto(
+        string title = "Creep", string artist = "Radiohead", string version = "",
+        int? localArtistId = null, string? localArtistName = null, string externalId = "dz-1") =>
+        new(null, title, artist, localArtistId, externalId, "Deezer", true, version, localArtistName);
+
+    private void SetupSearch(
+        IReadOnlyList<SongSuggestionDto> local,
+        IReadOnlyList<SongSuggestionDto> promoted,
+        IReadOnlyList<SongSuggestionDto> remote,
+        RemoteSearchStatus status = RemoteSearchStatus.Ok)
+    {
+        _suggestionsMock
+            .Setup(s => s.SearchTitleLocalAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(local);
+        _suggestionsMock
+            .Setup(s => s.SearchTitleRemoteAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SongRemoteSearchResult(promoted, remote, status));
+    }
+
+    private void SetupRemoteStatus(string query, RemoteSearchStatus status) =>
+        _suggestionsMock
+            .Setup(s => s.SearchTitleRemoteAsync(query, It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SongRemoteSearchResult([], [], status));
+
+    /// <summary>An add-form VM past hydration (Shell has applied the query properties).</summary>
+    private SongFormViewModel CreateAddFormSut(
+        Mock<ISongService>? songService = null, Mock<IArtistService>? artistService = null)
+    {
+        var sut = CreateSut(songService: songService, artistService: artistService);
+        sut.CompleteHydration();
+        return sut;
+    }
+
+    private static Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitle(
+        SongFormViewModel sut, string query, CancellationToken ct = default) =>
+        sut.TitleOptionSource.SearchAsync(query, ct);
+
+    /// <summary>An option as the Field hands it back to SelectTitleCommand: Data is the SongSuggestionDto.</summary>
+    private static AutocompleteSuggestion Pick(SongSuggestionDto dto) =>
+        new(dto.Title, string.Empty, dto);
+
+    // [AC] REQ-SFT-04: a local option shows "artist · version · In your library".
+    [Fact]
+    public async Task TitleOptionSource_LocalHit_SupportingTextHasArtistVersionAndLibraryMarker()
+    {
+        SetupSearch([LocalDto(1, "Creep", "Radiohead", "Pablo Honey")], [], []);
+        var sut = CreateAddFormSut();
+
+        var options = await SearchTitle(sut, "creep");
+
+        var option = Assert.Single(options);
+        Assert.Equal("Creep", option.Headline);
+        Assert.Equal("Radiohead · Pablo Honey · In your library", option.SupportingText);
+    }
+
+    // [AC] REQ-SFT-04: a local option with an empty Version omits the version part.
+    [Fact]
+    public async Task TitleOptionSource_LocalHitEmptyVersion_OmitsVersionPart()
+    {
+        SetupSearch([LocalDto(1, "Creep", "Radiohead", "")], [], []);
+        var sut = CreateAddFormSut();
+
+        var options = await SearchTitle(sut, "creep");
+
+        Assert.Equal("Radiohead · In your library", Assert.Single(options).SupportingText);
+    }
+
+    // [AC] REQ-SFT-04: a remote option shows "artist · version · Deezer" (D21).
+    [Fact]
+    public async Task TitleOptionSource_RemoteHit_SupportingTextIsArtistVersionAndDeezer()
+    {
+        SetupSearch([], [], [RemoteDto("Creep", "Radiohead", "Live")]);
+        var sut = CreateAddFormSut();
+
+        var options = await SearchTitle(sut, "creep");
+
+        var option = Assert.Single(options);
+        Assert.Equal("Creep", option.Headline);
+        Assert.Equal("Radiohead · Live · Deezer", option.SupportingText);
+    }
+
+    // [AC] REQ-SFT-04: a remote option with an empty Version omits the version part (D21).
+    [Fact]
+    public async Task TitleOptionSource_RemoteHitEmptyVersion_OmitsVersionPart()
+    {
+        SetupSearch([], [], [RemoteDto("Creep", "Radiohead", "")]);
+        var sut = CreateAddFormSut();
+
+        var options = await SearchTitle(sut, "creep");
+
+        Assert.Equal("Radiohead · Deezer", Assert.Single(options).SupportingText);
+    }
+
+    // [AC] REQ-SFT-05: one row per song; local first, then promoted (local rows), then remote.
+    [Fact]
+    public async Task TitleOptionSource_OrdersLocalThenPromotedThenRemote()
+    {
+        SetupSearch(
+            [LocalDto(1, "Local One")],
+            [LocalDto(2, "Promoted Two")],
+            [RemoteDto("Remote Three")]);
+        var sut = CreateAddFormSut();
+
+        var options = await SearchTitle(sut, "song");
+
+        Assert.Equal(["Local One", "Promoted Two", "Remote Three"], options.Select(o => o.Headline));
+        Assert.Equal(1, Assert.IsType<SongSuggestionDto>(options[0].Data).LocalId);
+        Assert.Equal(2, Assert.IsType<SongSuggestionDto>(options[1].Data).LocalId);
+        Assert.True(Assert.IsType<SongSuggestionDto>(options[2].Data).IsRemote);
+    }
+
+    // [AC] REQ-SFT-09: the remote step receives the shown local ids and the caller's token (latest query wins).
+    [Fact]
+    public async Task TitleOptionSource_PassesShownLocalIdsAndToken()
+    {
+        SetupSearch([LocalDto(5), LocalDto(6, "Other")], [], []);
+        var sut = CreateAddFormSut();
+        using var cts = new CancellationTokenSource();
+
+        await SearchTitle(sut, "creep", cts.Token);
+
+        _suggestionsMock.Verify(s => s.SearchTitleLocalAsync("creep", cts.Token), Times.Once);
+        _suggestionsMock.Verify(
+            s => s.SearchTitleRemoteAsync("creep", It.Is<IReadOnlyCollection<int>>(ids => ids.SequenceEqual(new[] { 5, 6 })), cts.Token),
+            Times.Once);
+    }
+
+    // [AC] REQ-SFT-06: Unavailable status shows the unavailable note, exact text (D21).
+    [Fact]
+    public async Task TitleOptionSource_StatusUnavailable_SetsUnavailableNote()
+    {
+        SetupSearch([LocalDto(1)], [], [], RemoteSearchStatus.Unavailable);
+        var sut = CreateAddFormSut();
+
+        await SearchTitle(sut, "creep");
+
+        Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-53: Offline status shows the offline note, exact text (D21).
+    [Fact]
+    public async Task TitleOptionSource_StatusOffline_SetsOfflineNote()
+    {
+        SetupSearch([LocalDto(1)], [], [], RemoteSearchStatus.Offline);
+        var sut = CreateAddFormSut();
+
+        await SearchTitle(sut, "creep");
+
+        Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-06: a later Ok query clears the offline note (D21).
+    [Fact]
+    public async Task TitleOptionSource_OfflineThenOk_ClearsNote()
+    {
+        var sut = CreateAddFormSut();
+        SetupSearch([], [], [], RemoteSearchStatus.Offline);
+        await SearchTitle(sut, "creep");
+        Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+
+        SetupSearch([], [], [], RemoteSearchStatus.Ok);
+        await SearchTitle(sut, "creep");
+
+        Assert.Equal(string.Empty, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-06: a remote query that succeeds after a failure clears the unavailable note.
+    [Fact]
+    public async Task TitleOptionSource_RemoteSucceedsAfterFailure_ClearsTitleSupportingText()
+    {
+        var sut = CreateAddFormSut();
+        SetupSearch([], [], [], RemoteSearchStatus.Unavailable);
+        await SearchTitle(sut, "creep");
+        Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
+
+        SetupSearch([], [], [RemoteDto()], RemoteSearchStatus.Ok);
+        await SearchTitle(sut, "creep");
+
+        Assert.Equal(string.Empty, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-09: a stale (cancelled) query never touches the note (Review Focus 4).
+    [Fact]
+    public async Task TitleOptionSource_CancelledQuery_DoesNotChangeTitleSupportingText()
+    {
+        var sut = CreateAddFormSut();
+        SetupSearch([], [], [], RemoteSearchStatus.Offline);
+        await SearchTitle(sut, "creep");
+        Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+
+        SetupSearch([], [], [], RemoteSearchStatus.Ok);
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        try { await SearchTitle(sut, "creeps", cts.Token); }
+        catch (OperationCanceledException) { /* a stale query may surface as cancellation */ }
+
+        Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-06: a query below 3 characters (no remote call ran) leaves the current note as it is.
+    [Fact]
+    public async Task TitleOptionSource_QueryBelowRemoteThreshold_KeepsExistingNote()
+    {
+        var sut = CreateAddFormSut();
+        SetupRemoteStatus("don", RemoteSearchStatus.Unavailable);
+        SetupRemoteStatus("do", RemoteSearchStatus.Ok);   // the service answers Ok, without a call, below 3 characters
+        await SearchTitle(sut, "don");
+        Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
+
+        await SearchTitle(sut, "do");
+
+        Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-06: the note is set through the VM's UI-thread helper (observable never set off the UI thread).
+    [Fact]
+    public async Task TitleOptionSource_SetsNoteThroughUiThreadHelper()
+    {
+        var provider = new CountingDispatcherProvider();
+        Microsoft.Maui.Dispatching.DispatcherProvider.SetCurrent(provider);
+        var previous = Microsoft.Maui.Controls.Application.Current;
+        Microsoft.Maui.Controls.Application.Current = new Microsoft.Maui.Controls.Application();
+        try
+        {
+            SetupSearch([], [], [], RemoteSearchStatus.Offline);
+            var sut = CreateAddFormSut();
+            var before = provider.Dispatcher.DispatchCount;
+
+            await SearchTitle(sut, "creep");
+
+            Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+            Assert.Equal(1, provider.Dispatcher.DispatchCount - before);
+        }
+        finally
+        {
+            Microsoft.Maui.Controls.Application.Current = previous;
+        }
+    }
+
+    private sealed class CountingDispatcherProvider : Microsoft.Maui.Dispatching.IDispatcherProvider
+    {
+        public CountingDispatcher Dispatcher { get; } = new();
+        public Microsoft.Maui.Dispatching.IDispatcher GetForCurrentThread() => Dispatcher;
+    }
+
+    /// <summary>Reports dispatch as required so every RunOnUiThread call is counted, then runs inline.</summary>
+    private sealed class CountingDispatcher : Microsoft.Maui.Dispatching.IDispatcher
+    {
+        public int DispatchCount { get; private set; }
+        public bool IsDispatchRequired => true;
+        public bool Dispatch(Action action) { DispatchCount++; action(); return true; }
+        public bool DispatchDelayed(TimeSpan delay, Action action) { action(); return true; }
+        public Microsoft.Maui.Dispatching.IDispatcherTimer CreateTimer() => throw new NotSupportedException();
+    }
+
+    // [AC] REQ-SFT-06: emptying Title by typing clears the note (the Field never queries an empty string).
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task SongTitle_EmptiedByTyping_ClearsTitleSupportingText(string emptied)
+    {
+        var sut = CreateAddFormSut();
+        sut.SongTitle = "creep";
+        SetupSearch([], [], [], RemoteSearchStatus.Offline);
+        await SearchTitle(sut, "creep");
+        Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+
+        sut.SongTitle = emptied;
+
+        Assert.Equal(string.Empty, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-06: X on Title clears the note.
+    [Fact]
+    public async Task ClearTitle_EmptiesNote()
+    {
+        var sut = CreateAddFormSut();
+        sut.SongTitle = "creep";
+        SetupSearch([], [], [], RemoteSearchStatus.Unavailable);
+        await SearchTitle(sut, "creep");
+        Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
+
+        sut.ClearTitleCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-14: X on Title clears the pending identity, empties and unlocks Title, keeps Artist.
+    [Fact]
+    public async Task ClearTitle_AfterRemotePick_ClearsPendingIdentity_KeepsArtist()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live", localArtistId: 7, localArtistName: "Radiohead")));
+        Assert.Equal("dz-1", sut.SelectedExternalId);
+
+        sut.ClearTitleCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.SelectedExternalId);
+        Assert.Equal(string.Empty, sut.SelectedProvider);
+        Assert.Equal(string.Empty, sut.SongTitle);
+        Assert.False(sut.IsTitleLocked);
+        Assert.Equal(7, sut.SelectedArtistId);
+        Assert.Equal("Radiohead", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+    }
+
+    // [AC] REQ-SFT-14: X on Title resets a Version that still holds the pick-written value (Q21).
+    [Fact]
+    public async Task ClearTitle_AfterRemotePick_ResetsUnchangedPickFilledVersion()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live")));
+        Assert.Equal("Live", sut.SongVersion);
+
+        sut.ClearTitleCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.SongVersion);
+    }
+
+    // [AC] REQ-SFT-14: X on Title keeps a Version the user edited after the pick (Q21).
+    [Fact]
+    public async Task ClearTitle_AfterRemotePick_KeepsVersionEditedAfterPick()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live")));
+        sut.SongVersion = "Live 2011";
+
+        sut.ClearTitleCommand.Execute(null);
+
+        Assert.Equal("Live 2011", sut.SongVersion);
+    }
+
+    // [AC] REQ-SFT-11: after X on Title a pick-filled Version never triggers the discard sheet (Q21).
+    [Fact]
+    public async Task ClearTitle_AfterRemotePickThenLocalPick_NoDiscardSheetFromPickFilledVersion()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live")));
+        sut.ClearArtistCommand.Execute(null);   // the pick also filled Artist; only the Version is under test
+        sut.ClearTitleCommand.Execute(null);
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
+
+        Assert.False(sut.IsDiscardSheetVisible);
+        _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=42"), Times.Once);
+    }
+
+    // [AC] REQ-SFT-12: a remote pick overwrites Version with the Deezer value, including "" (Q20).
+    [Theory]
+    [InlineData("Demo", "", "")]
+    [InlineData("Demo", "Live", "Live")]
+    public async Task SelectTitle_RemoteOption_SetsVersionFromDeezer_OverwritingTypedVersion(
+        string typedVersion, string deezerVersion, string expected)
+    {
+        var sut = CreateAddFormSut();
+        sut.SongVersion = typedVersion;
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", deezerVersion)));
+
+        Assert.Equal(expected, sut.SongVersion);
+    }
+
+    // [AC] REQ-SFT-12: a remote pick fills Title, Artist and the pending identity, and writes nothing.
+    [Fact]
+    public async Task SelectTitle_RemoteOption_FillsTitleAndArtistAndPendingIdentity_WritesNothing()
+    {
+        var songService = new Mock<ISongService>();
+        var artistService = new Mock<IArtistService>();
+        var sut = CreateAddFormSut(songService, artistService);
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live", externalId: "dz-99")));
+
+        Assert.Equal("Creep", sut.SongTitle);
+        Assert.True(sut.IsTitleLocked);
+        Assert.Equal("Radiohead", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+        Assert.Equal("dz-99", sut.SelectedExternalId);
+        Assert.Equal("Deezer", sut.SelectedProvider);
+        songService.VerifyNoOtherCalls();
+        artistService.VerifyNoOtherCalls();
+        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    // [AC] REQ-SFT-13: a provider artist that is a local artist is picked as that local artist.
+    [Fact]
+    public async Task SelectTitle_RemoteOptionArtistIsLocal_LocksLocalArtist()
+    {
+        var sut = CreateAddFormSut();
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "radiohead", localArtistId: 7, localArtistName: "Radiohead")));
+
+        Assert.Equal(7, sut.SelectedArtistId);
+        Assert.Equal("Radiohead", sut.SelectedArtistName);
+        Assert.Equal("Radiohead", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+    }
+
+    // [AC] REQ-SFT-13: a provider artist that is not local is picked by its name with no id (created on Save).
+    [Fact]
+    public async Task SelectTitle_RemoteOptionArtistNotLocal_LocksTypedArtistWithNoId()
+    {
+        var sut = CreateAddFormSut();
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", localArtistId: null, localArtistName: null)));
+
+        Assert.Null(sut.SelectedArtistId);
+        Assert.Equal("Radiohead", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+    }
+
+    // [AC] REQ-SFT-12: a remote pick closes the artist dropdown and empties its suggestions.
+    [Fact]
+    public async Task RemotePick_ClosesDropdowns()
+    {
+        var sut = CreateAddFormSut();
+        sut.IsArtistDropDownOpen = true;
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto(localArtistId: 7, localArtistName: "Radiohead")));
+
+        Assert.False(sut.IsArtistDropDownOpen);
+        Assert.Empty(sut.ArtistSuggestions);
+    }
+
+    // [AC] REQ-SFT-14: X on Artist after a remote pick clears the pending identity and keeps Title and Version (Q21).
+    [Fact]
+    public async Task ClearArtist_AfterRemotePick_ClearsPendingIdentity_KeepsTitle()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live", localArtistId: 7, localArtistName: "Radiohead")));
+
+        sut.ClearArtistCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.SelectedExternalId);
+        Assert.Equal(string.Empty, sut.SelectedProvider);
+        Assert.Equal("Creep", sut.SongTitle);
+        Assert.True(sut.IsTitleLocked);
+        Assert.Equal("Live", sut.SongVersion);
+        Assert.False(sut.IsArtistLocked);
+    }
+
+    // [AC] REQ-SFT-10: a local pick with no other input replaces the add form with the song's edit form.
+    [Fact]
+    public async Task SelectTitle_LocalOptionNoOtherInput_NavigatesToEditForm()
+    {
+        var sut = CreateAddFormSut();
+        sut.SongTitle = "cre";
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
+
+        _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=42"), Times.Once);
+        Assert.False(sut.IsDiscardSheetVisible);
+    }
+
+    // [AC] REQ-SFT-11: a local pick with user input in Artist, Version, Featured, Lyrics or the YouTube list asks first.
+    [Theory]
+    [InlineData("Artist")]
+    [InlineData("Version")]
+    [InlineData("Featured")]
+    [InlineData("Lyrics")]
+    [InlineData("YouTube")]
+    public async Task SelectTitle_LocalOptionWithOtherInput_ShowsDiscardSheetNoNavigation(string field)
+    {
+        var sut = CreateAddFormSut();
+        sut.SongTitle = "cre";
+        FillOtherInput(sut, field);
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
+
+        Assert.True(sut.IsDiscardSheetVisible);
+        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    private static void FillOtherInput(SongFormViewModel sut, string field)
+    {
+        switch (field)
+        {
+            case "Artist": sut.ArtistSearchText = "Radio"; break;
+            case "Version": sut.SongVersion = "Live"; break;
+            case "Featured": sut.FeaturedArtists = "Someone"; break;
+            case "Lyrics": sut.Lyrics = "Some lyrics"; break;
+            case "YouTube": sut.KaraokeUrls.Add(MakeDto("vid-1", 0)); break;
+            default: throw new ArgumentOutOfRangeException(nameof(field), field, null);
+        }
+    }
+
+    // [AC] REQ-SFT-11: Open on the discard sheet opens the picked song's edit form.
+    [Fact]
+    public async Task ConfirmOpenExisting_FromDiscardSheet_Navigates()
+    {
+        var sut = CreateAddFormSut();
+        sut.SongVersion = "Live";
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
+        Assert.True(sut.IsDiscardSheetVisible);
+
+        await sut.ConfirmOpenExistingCommand.ExecuteAsync(null);
+
+        _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=42"), Times.Once);
+        Assert.False(sut.IsDiscardSheetVisible);
+    }
+
+    // [AC] REQ-SFT-11: Keep editing closes the sheet and restores the typed query, unlocked; nothing else changes.
+    [Fact]
+    public async Task KeepEditing_RestoresTypedQueryUnlocked_NothingElseChanges()
+    {
+        var sut = CreateAddFormSut();
+        SetupSearch([LocalDto(42, "Creep")], [], []);
+        await SearchTitle(sut, "cre");                  // the typed query
+        sut.SongTitle = "Creep";                        // the Field writes the picked headline into Title
+        sut.SongVersion = "Live";
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42, "Creep")));
+        Assert.True(sut.IsDiscardSheetVisible);
+
+        sut.KeepEditingCommand.Execute(null);
+
+        Assert.False(sut.IsDiscardSheetVisible);
+        Assert.Equal("cre", sut.SongTitle);
+        Assert.False(sut.IsTitleLocked);
+        Assert.Equal("Live", sut.SongVersion);
+        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    // [AC] REQ-SFT-16: the Artist option source searches local artists only and never calls Deezer.
+    [Fact]
+    public async Task ArtistOptionSource_ReturnsLocalArtistsOnly_NoRemoteCall()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.SearchArtistsByNameAsync("queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new ArtistListItem(2, "Queen", string.Empty, 3)]);
+        var sut = CreateAddFormSut(artistService: artistService);
+
+        var options = await sut.ArtistOptionSource.SearchAsync("queen", CancellationToken.None);
+
+        var option = Assert.Single(options);
+        Assert.Equal("Queen", option.Headline);
+        Assert.False(option.IsCreateNew);
+        _suggestionsMock.Verify(
+            s => s.SearchTitleRemoteAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     // ── RemoveUrlAsync (edit mode) ─────────────────────────────────────────
