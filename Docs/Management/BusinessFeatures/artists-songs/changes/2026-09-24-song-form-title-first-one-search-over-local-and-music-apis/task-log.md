@@ -736,6 +736,44 @@ ITF: SFT-3.6a — Services/ArtistService.cs — root cause: `ArtistService.Updat
 
 - 2026-11-04 (orchestrator) — **Pre-dispatch G3 / § 0.2.2 checks (migration task):** (1) LEDGER: no live branch (CATALOG-PROP spec-only, deferred; BUG-080 merged `8f5d716c` with **no** migration). (2) `git worktree list`: main + `sft-3.6a` (merged, being removed). (3) `git branch -a --no-merged develop`: only `remotes/origin/worktree-agent-aaae95a5d8a6c56ec` (old agent branch, matches no G3 pattern). **Clear.** Snapshot rule: worktree created from current develop `29de1054`+, so the scaffold is generated against the merged snapshot. Worktree `.worktrees/sft-3.6b`, branch `task/sft-3.6b-m1-drop-hasmanualedits`. Part A dispatched.
 
+- 2026-11-04 (Part A implementor, Sonnet) — **Part A Step 1-2 done (Red).** Context7 not queried; EF Core APIs (`IMigrator`, `GetMigrations`, `SqlQueryRaw`) verified via the existing codebase pattern `MyVocaList.Tests/Integration/Migrations/VenuesSeedMigrationDownTests.cs`. Inherited: clean worktree, nothing half-done. Tests: `MyVocaList.Tests/Integration/Migrations/SongMigrationTests.cs` (3 tests; temp DB files deleted in `DisposeAsync`). The guard test `M1_TableRebuild_KeepsUniqueCollatedIndexes` inserts with/without the `HasManualEdits` column depending on the schema (the pre-M1 NOT NULL column otherwise breaks the guard).
+- Red output (verbatim, trimmed to the result lines): `M1_DropsHasManualEditsFromSongsAndArtists [FAIL]` — `Assert.DoesNotContain() Failure: Item found in collection ... Found: "HasManualEdits"`; `M1_ExistingRowsSurvive [FAIL]` — `System.InvalidOperationException : Migration 'DropHasManualEdits' not found (or has no predecessor).`; `M1_TableRebuild_KeepsUniqueCollatedIndexes` PASSED (guard, as the plan allowed). Totals: `Com falha! – Com falha: 2, Aprovado: 1, Ignorado: 0, Total: 3`.
+- Next: Step 3 (delete four model lines, build, leave uncommitted) -> handback "model edited, awaiting scaffold".
+
+### Part B (Green) - 2026-11-04, Sonnet implementor
+
+Context7 not queried (no new EF API used; migration is orchestrator-scaffolded). Inherited: four model edits + scaffolded migration/Designer/snapshot, uncommitted; reviewed against the plan, all correct, nothing changed beyond this section.
+
+**Step 3b - generated migration (verbatim).**
+`Up`: `migrationBuilder.DropColumn(name: "HasManualEdits", table: "Songs");` then `migrationBuilder.DropColumn(name: "HasManualEdits", table: "Artists");`
+`Down`: `migrationBuilder.AddColumn<bool>(name: "HasManualEdits", table: "Songs", type: "INTEGER", nullable: false, defaultValue: false);` then the same for `table: "Artists"`.
+No other operation. Snapshot diff: only the two `b.Property<bool>("HasManualEdits").HasColumnType("INTEGER");` blocks removed (Artists ~line 161, Songs ~line 374).
+
+### Changed files
+- `Domain/Entity/Song.cs`
+- `Domain/Entity/Artist.cs`
+- `Infra/EntityEFConfig/SongConfiguration.cs`
+- `Infra/EntityEFConfig/ArtistConfiguration.cs`
+- `Infra/Migrations/20261104150926_DropHasManualEdits.cs` (new)
+- `Infra/Migrations/20261104150926_DropHasManualEdits.Designer.cs` (new)
+- `Infra/Migrations/AppDbContextModelSnapshot.cs`
+- `MyVocaList.Tests/Integration/Migrations/SongMigrationTests.cs` (Red commit 439f95ad, unchanged in Part B)
+- this task-log section
+
+### Verification evidence
+- Filtered `SongMigrationTests`: `Aprovado! - Com falha: 0, Aprovado: 3, Ignorado: 0, Total: 3`.
+- Full suite run 1: `Com falha: 1, Aprovado: 673, Total: 674` - failing `PersonServiceReadScopeTests.SearchPersonsAsync_TooShortTerm_ShortCircuitsWithoutExecutingRead` (PersonServiceReadScopeTests.cs:84), unrelated; message not captured (stack top only). Re-runs 2 and 3: `Com falha: 0, Aprovado: 674, Total: 674` (baseline 671, delta +3).
+- Build (`MyVocaList.csproj -f net10.0-android -m:1`): `0 Erro(s)`, 28 warnings.
+- `dotnet ef migrations has-pending-model-changes`: "No changes have been made to the model since the last migration."
+- Census `HasManualEdits` (.cs/.xaml, excl. bin/obj/.worktrees/Docs/.claude/.git/Migrations): ZERO HITS.
+
+### AC matrix
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-SFT-37 | Songs/Artists no longer have HasManualEdits | DropHasManualEdits migration + model edits | `M1_DropsHasManualEditsFromSongsAndArtists` |
+| REQ-SFT-37 | Existing rows survive the drop | same | `M1_ExistingRowsSurvive` |
+| REQ-SFT-52 | Unique collated indexes preserved after table rebuild | same | `M1_TableRebuild_KeepsUniqueCollatedIndexes` (guard) |
+
 ## 3.7
 
 ### Checkpoint

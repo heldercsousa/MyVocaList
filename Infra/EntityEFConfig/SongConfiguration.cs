@@ -45,7 +45,6 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
                .IsRequired(false)
                .HasMaxLength(50);
 
-        builder.Property(s => s.HasManualEdits).IsRequired();
         builder.Property(s => s.CreatedAt).IsRequired();
         builder.Property(s => s.UpdatedAt).IsRequired();
 
