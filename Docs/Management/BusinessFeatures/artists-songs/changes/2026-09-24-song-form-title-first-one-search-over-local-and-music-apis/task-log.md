@@ -638,9 +638,39 @@ Remaining CS0618 in the test build (expected only): `MyVocaList.Tests/Unit/ViewM
 
 ## 3.5a
 
-### Checkpoint
+**Plan:** `plan.md` § 3.5a · **Status:** To Review · **Started:** 2026-11-03 (inherited edits) · **Completed:** 2026-11-04
+**Branch:** `task/sft-3.5a-song-readmodel` @ `.worktrees/sft-3.5a` (base develop verified)
 
-_(not started)_
+### Inherited work
+The previous implementor left correct uncommitted edits to `SongListItemDto.cs`, `SongRepository.cs`, `CatalogRepository.cs` and `SongSuggestionServiceTests.cs` (positional constructions). Reviewed against plan § 3.5a and kept unchanged. Its blocked note (unowned test-file compile failure) was resolved by the orchestrator extending Files owned.
+
+### Owned-files extension (orchestrator decision, sequencing)
+Target-typed `new(...)` constructions evaded the plan's census pattern (`SongListItemDto(`). The orchestrator added the following two test files to 3.5a's Files owned. Only the trailing `, false` (removed `HasManualEdits` argument) was dropped at each site; no assertion or expected value changed:
+- `MyVocaList.Tests/Unit/Services/CatalogServiceTests.cs:69` — `GetPagedByArtistAsync` list setup (`new(1, "Bohemian Rhapsody", 1, "Queen", null, null)`)
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs:498` — `GetPagedSongsForListAsync_ReturnsFromRepository` list setup
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs:517` — `GetPagedSongsForListAsync_QueryWithExtraWhitespace_NormalizesBeforeRepositoryCall` list setup
+
+### Level C no-test decision
+Task is DTO/projection plumbing (remove a DTO member and its projection assignment). Level C per `testing.md`: no mandatory new test. Existing tests were updated to the new 6-argument constructor; their assertions are unchanged.
+
+### Changed files:
+- `Contracts/DTOs/List/SongListItemDto.cs`
+- `Infra/Repository/SongRepository.cs`
+- `Infra/Repository/CatalogRepository.cs`
+- `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`
+- `MyVocaList.Tests/Unit/Services/CatalogServiceTests.cs`
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
+
+### Verification evidence
+- Census (Python `os.walk`, bin/obj/.worktrees/Docs/.claude/.git/Migrations excluded): `HasManualEdits` count in `SongListItemDto.cs` = 0, `SongRepository.cs` = 0, `CatalogRepository.cs` = 0.
+- Census for 7-argument `SongListItemDto` constructions: none remain; the remaining `false` arguments in the scan belong to other record types (`ArtistListItemDto`, `ArtistListItem`, `SongFormViewModelTests` local record).
+- Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` exit code 0, no `error` lines in output (summary line not captured in the harness output file; exit code 0 used as the pass signal).
+- Tests: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` (run once, no re-run needed):
+  `Aprovado!  � Com falha:     0, Aprovado:   671, Ignorado:     0, Total:   671, Dura��o: 7 s - MyVocaList.Tests.dll (net10.0)`
+  Passed 671, Failed 0, Total 671.
+- Context7 unavailable this session; no new library API used (plumbing only).
+- Emulator smoke deferred to Helder's device gate.
 
 ## 3.5b
 

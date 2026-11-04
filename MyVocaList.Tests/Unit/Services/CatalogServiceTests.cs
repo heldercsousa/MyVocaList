@@ -66,7 +66,7 @@ public class CatalogServiceTests
     {
         var items = new List<SongListItemDto>
         {
-            new(1, "Bohemian Rhapsody", 1, "Queen", null, null, false)
+            new(1, "Bohemian Rhapsody", 1, "Queen", null, null)
         };
         _catalogRepoMock.Setup(r => r.GetPagedByArtistAsync(1, 1, 20, null, It.IsAny<CancellationToken>()))
                         .ReturnsAsync((items.AsEnumerable(), 1));
