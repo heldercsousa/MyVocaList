@@ -84,6 +84,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-11-03-post-ship-review-did-the-agent-dispatch-recalibration-meet-its-expectations\README.md = Docs\Management\DevCycleCraft\inline-trivial-fix\changes\2026-11-03-post-ship-review-did-the-agent-dispatch-recalibration-meet-its-expectations\README.md
 		Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-rotate-the-devexpress-license-key\README.md = Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-rotate-the-devexpress-license-key\README.md
 		Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-move-the-playwright-mcp-token-to-env-local\README.md = Docs\Management\DevCycleCraft\hooks-redesign\changes\2026-11-03-move-the-playwright-mcp-token-to-env-local\README.md
+		Docs\Management\DevCycleCraft\per-agent-context-isolation\changes\2026-11-03-system-tools-tokens-grew-18-3k-to-25-4k-across-fresh-sessions\README.md = Docs\Management\DevCycleCraft\per-agent-context-isolation\changes\2026-11-03-system-tools-tokens-grew-18-3k-to-25-4k-across-fresh-sessions\README.md
+		Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-11-03-BUG-083-sqlite-mcp-fails-to-connect-at-session-start\README.md = Docs\Management\DevCycleCraft\hooks-redesign\bugs\2026-11-03-BUG-083-sqlite-mcp-fails-to-connect-at-session-start\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
