@@ -844,6 +844,11 @@ migrationBuilder.Sql(
 | REQ-SFT-39 lowest Id keeps identity, others cleared not deleted | `Up` dedupe SQL | `M2_DuplicateIdentities_LowestIdKeepsIdentity_OthersClearedNotDeleted` |
 | REQ-SFT-39 null identities unaffected | unique index ignores NULLs | `M2_NullIdentities_AllowMany` |
 
+### Verifier + merge (orchestrator, 2026-11-04)
+- Red `67327f7e`, Green `6c3c4790`; scaffold `20261104154053_SongExternalIdentityUnique` by the orchestrator (generated files not opened by it; Part B confirmed Up = DropIndex + CreateIndex(unique) only, then inserted the design section 7 dedupe SQL between them).
+- Verifier **PASS** (0 warnings). Edge cases reasoned: a row with ExternalId set and ExternalProvider null is untouched and allowed (SQLite NULLs distinct in unique indexes); provider case variants are distinct identities under BINARY collation, consistently for both the GROUP BY dedupe and the index.
+- Merged `4e81916b`. Post-merge develop: `0 Erro(s)`; `Aprovado! - Com falha: 0, Aprovado: 678, Total: 678`; `has-pending-model-changes`: no changes; `database update` (absolute path) on `.claude/MyVocaList.db`: `Done.` (DB committed with this record).
+
 ## 3.8
 
 ### Checkpoint

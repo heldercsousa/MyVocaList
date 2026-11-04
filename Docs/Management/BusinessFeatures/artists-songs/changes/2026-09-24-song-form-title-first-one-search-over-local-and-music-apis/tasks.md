@@ -184,7 +184,7 @@
   - **Review lane:** Elevated
   > **Spec updated 2026-09-26:** (D10) owns 6 files (4 one-line model deletions + `Migrations/*` + new `MyVocaList.Tests/Integration/Migrations/SongMigrationTests.cs`); splitting would leave a non-building commit — accepted. (D11) every migration task (3.6b, 3.7, 3.8) is Part A (implementor: Red tests, model edits left uncommitted) → scaffold (orchestrator: `dotnet ef migrations add`) → Part B (implementor: check generated Up/Down first, `blocked: stale snapshot` on any surprise; Green; one commit with model + migration).
 
-- [ ] **3.7 M2: unique `(ExternalProvider, ExternalId)`** [SEQUENTIAL — after 3.6b]
+- [x] **3.7 M2: unique `(ExternalProvider, ExternalId)`** [SEQUENTIAL — after 3.6b]
   - **Files owned:** `SongConfiguration.cs`, `Infra/Migrations/*` (M2), `MyVocaList.Tests/Integration/Migrations/SongMigrationTests.cs` (new)
   - **Risk:** Medium — data fix. **Tests (B):** migrate to M1, seed two songs with one identity, migrate → lowest Id keeps it, other row intact; duplicate insert then fails.
   - **Demo:** migration test green.
