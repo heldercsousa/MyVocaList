@@ -1171,9 +1171,43 @@ Note: the legacy `GetLocalAsync`/`GetRemoteAsync` methods stay in production unt
 
 ## 4.3
 
-### Checkpoint
+**Status:** To Review
+**Started:** 2026-11-04 **Completed:** 2026-11-04
+**Plan:** plan.md § Task 4.3 - Level C + retargeted tests - Review lane Standard
 
-_(not started)_
+Inherited nothing (clean worktree). Context7 not needed (no new external API).
+
+### Changed files
+- `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs` (6 tests retargeted; MusicBrainz mock/literals removed)
+- `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` (new REQ-SFT-02 test, `Mock.Of<INetworkStatus>()`)
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (`AddScoped<ISongSuggestionService, SongSuggestionService>()`)
+- `Services/ISongSuggestionService.cs` (removed `GetLocalAsync`/`GetRemoteAsync`)
+- `Services/SongSuggestionService.cs` (deleted legacy `GetLocalAsync`/`GetRemoteAsync`, `FetchFromProvidersAsync`, `TrySearchAsync`, `DedupAsync`, `ResolveLocalArtistIdsAsync`, `MapLocal(SongListItemDto)`, consts `MaxSuggestions`/`MusicBrainzProviderName`; `SearchTitle*` untouched)
+- `Docs/.../task-log.md` (this section)
+
+### Red (commit 83ac2c20, Lane: RED)
+`AddAppServices_ResolvingSongSuggestionService_Succeeds`: `System.InvalidOperationException : No service for type 'MyVocaList.Services.ISongSuggestionService' has been registered.` (Failed 1, Passed 10 in the two filtered classes; the 6 retargeted threshold tests were green in Red because SearchTitle* already exist.)
+
+### Green
+Build: `0 Erro(s)`. Full suite: `Aprovado! - Com falha: 0, Aprovado: 769, Total: 769` (baseline 768 -> +1 new DI test).
+
+### Retargeted tests (same assertion intent; REQ-UOW-51/52 kept)
+| Old | New |
+|---|---|
+| GetLocalAsync_OneCharQuery_ReturnsEmptyAndNeverCallsRepository | SearchTitleLocalAsync_OneCharQuery_ReturnsEmptyAndNeverCallsRepository |
+| GetLocalAsync_TwoCharQuery_ReachesRepository | SearchTitleLocalAsync_TwoCharQuery_ReachesRepository |
+| GetLocalAsync_QueryTrimsBelowThreshold_ShortCircuits | SearchTitleLocalAsync_QueryTrimsBelowThreshold_ShortCircuits |
+| GetRemoteAsync_TwoCharQuery_ProviderNeverInvoked | SearchTitleRemoteAsync_TwoCharQuery_ProviderNeverInvoked |
+| GetRemoteAsync_ThreeCharQuery_ReachesProvider | SearchTitleRemoteAsync_ThreeCharQuery_ReachesProvider |
+| GetRemoteAsync_ProviderBlocks_NoOpenScopeDuringFetch | SearchTitleRemoteAsync_ProviderBlocks_NoOpenScopeDuringFetch |
+
+Adaptations forced by the new API: repo call `GetPagedAsync(1,5,..)` -> `SearchTitleCandidatesAsync(q, PoolSize, ..)`; result is `SongRemoteSearchResult` (asserts on Promoted/Remote); MusicBrainz mock dropped (Deezer-only, REQ-SFT-36); test 6 uses Deezer result + Find* repo setups instead of `GetByTitlesCollatedAsync`.
+
+### Census (Python os.walk)
+`GetLocalAsync(`/`GetRemoteAsync(`/`MusicBrainzProviderName`: zero hits in `ISongSuggestionService.cs`, `SongSuggestionService.cs`, `SongSuggestionThresholdTests.cs`. Remaining hits are only `ArtistSuggestionService`, `IArtistSuggestionService` and their tests (task 6.1). No song-side caller outside owned files. One `"MusicBrainz"` literal remains at `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs:31` (`_musicBrainzMock` provider-name setup) - not an owned file; reported for the orchestrator.
+
+### Verification evidence
+Post-edit diff re-read of all 5 source files. Not pushed; tasks.md not ticked.
 
 ## 5.1
 

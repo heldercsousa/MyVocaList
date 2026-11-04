@@ -74,6 +74,22 @@ public class AppServicesRegistrationTests
     }
 
     [Fact]
+    // [AC] REQ-SFT-02: the title search service resolves from AddAppServices
+    public void AddAppServices_ResolvingSongSuggestionService_Succeeds()
+    {
+        using var provider = BuildProvider(services =>
+        {
+            // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
+            services.AddSingleton(Mock.Of<INetworkStatus>());
+        });
+        using var scope = provider.CreateScope();
+
+        var service = scope.ServiceProvider.GetRequiredService<ISongSuggestionService>();
+
+        Assert.NotNull(service);
+    }
+
+    [Fact]
     // [AC] BUG-082: providers resolve with their configured typed HttpClient
     public void AddAppServices_ResolvingMusicMetadataProviders_HaveConfiguredHttpClient()
     {
