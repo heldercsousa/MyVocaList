@@ -728,12 +728,13 @@ None required. No `> **Spec updated**` note needed: the change is within REQ-SFT
 ### Checkpoint
 
 ITF: SFT-3.6a — Services/ArtistService.cs — root cause: `ArtistService.UpdateArtistAsync` still writes the retired flag (`artist.HasManualEdits = true;`, :107), the last writer before M1 drops the column (REQ-SFT-37) — expected 1 line(s).
+- ITF commit `8db66028` (`Lane: ITF (1 files, 1 lines)`); the first pre-commit-hook test run failed one unnamed test (output not captured), the second passed unchanged (5th intermittent failure this session). Verifier **PASS**. Merged `29de1054`; post-merge develop `0 Erro(s)`, 671/671.
 
 ## 3.6b
 
 ### Checkpoint
 
-_(not started)_
+- 2026-11-04 (orchestrator) — **Pre-dispatch G3 / § 0.2.2 checks (migration task):** (1) LEDGER: no live branch (CATALOG-PROP spec-only, deferred; BUG-080 merged `8f5d716c` with **no** migration). (2) `git worktree list`: main + `sft-3.6a` (merged, being removed). (3) `git branch -a --no-merged develop`: only `remotes/origin/worktree-agent-aaae95a5d8a6c56ec` (old agent branch, matches no G3 pattern). **Clear.** Snapshot rule: worktree created from current develop `29de1054`+, so the scaffold is generated against the merged snapshot. Worktree `.worktrees/sft-3.6b`, branch `task/sft-3.6b-m1-drop-hasmanualedits`. Part A dispatched.
 
 ## 3.7
 
