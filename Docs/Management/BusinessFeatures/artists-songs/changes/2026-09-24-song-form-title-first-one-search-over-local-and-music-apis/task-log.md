@@ -853,7 +853,7 @@ migrationBuilder.Sql(
 
 ### Checkpoint
 
-_(not started)_
+- 2026-11-04 (orchestrator) — **Pre-dispatch:** `findings.md` § G5 Verdict = `G5: PASS` (confirmed). **G3 / § 0.2.2:** LEDGER no live branch; `git worktree list` main only; `git branch -a --no-merged develop` only the old `remotes/origin/worktree-agent-aaae95a5d8a6c56ec`. **Clear.** Snapshot rule: worktree from develop `75966b9c` (includes M1 + M2). Worktree `.worktrees/sft-3.8`, branch `task/sft-3.8-m3-fts5`. Part A (Sonnet) dispatched; Part B will be Opus (Architectural lane).
 
 ## 3.9
 
