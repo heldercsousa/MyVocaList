@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 # Single source of truth for the freshness window (confirmed by Helder 2026-06-14).
 LEASE_TTL_SECONDS = 1800  # 30 minutes
+HEARTBEAT_MIN_INTERVAL_SECONDS = 60  # PostToolUse throttle; must stay << TTL
 
 # T13: claim files whose last_active (or file mtime, if corrupt) is older than this
 # are garbage-collected by the heartbeat.

@@ -8,13 +8,17 @@
         "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
       }
     },
+    "microsoft-learn": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
+    },
     "devexpress-maui": {
       "type": "http",
       "url": "https://gitmcp.io/DevExpress/maui-demo-app"
     },
     "playwright": {
       "command": "cmd",
-      "args": [ "/c", "npx", "-y", "@playwright/mcp@latest", "--extension" ],
+      "args": [ "/c", "npx", "-y", "@playwright/mcp@0.0.78", "--extension" ],
       "env": {
         "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "${PLAYWRIGHT_MCP_EXTENSION_TOKEN}"
       }
