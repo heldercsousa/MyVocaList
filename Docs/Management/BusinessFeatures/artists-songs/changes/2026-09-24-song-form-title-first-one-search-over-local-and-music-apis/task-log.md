@@ -1350,3 +1350,49 @@ Consumer wiring (`INetworkStatus` into the suggestion services) is task 4.1b/4.2
 - **4.1a:** Red `a5c9cc7c`, Green `17c4aaed`. Verifier **CONDITIONAL PASS**: blocker 1 = `{}` stripping beyond REQ-SFT-12 → fixed by orchestrator ITF `de13e317` (1 file, 1 line; DeezerProvider 18/18; the first hook run had one intermittent failure, full suite 706/706 on re-run). Verifier build line: `Compilação com êxito. 0 Erro(s)`. Merged `bc81f9e4` (task-log conflict = both sides appended; resolved keeping both, ITF line moved into § 4.1a). Post-merge develop: pre-commit hook build + tests green; `Aprovado! – Com falha: 0, Aprovado: 737, Total: 737`.
 - **4.1b:** code `36305a69`, task-log `ca789189`. Verifier **PASS** (shape matches plan:1159; Deezer DI + BUG-082 forward intact; W1 dead MusicBrainz name branches → owned by 4.2/4.3/6.1, now explicit in tasks.md). Merged `1aee99f6`. Post-merge develop: `0 errors`; `Aprovado! – Com falha: 0, Aprovado: 737, Total: 737`.
 - **3.9b:** Red `61deac4d`, Green `6fcff60b`. Verifier **PASS** (Green edited the self-written Red rename test: `ChangeTracker.Clear()` + `Update` in setup only, assertions unchanged — the NoTracking default meant the rename was never saved; judged acceptable). Merged `02fc76b7`. Post-merge develop: `0 errors`; first full run `Com falha: 1, Aprovado: 750` (intermittent, name not captured), re-run `Aprovado! – Com falha: 0, Aprovado: 751, Total: 751`.
+
+## 3.9c
+**Status:** To Review. **Branch:** `task/sft-3.9c-artist-resolution-fts` (base develop `825fb96b`). **Inherited state:** none.
+**Red SHA:** `1d20d01a` (tests only, `Lane: RED`, `--no-verify`). **Green SHA:** see the commit that adds this section (recorded in the handback).
+
+### Red output (verbatim)
+```
+Expected: FuzzyCandidates / Actual: NoMatch
+Com falha: ResolveAsync_FuzzyAboveThreshold_ReturnsFuzzyCandidates (line 93)
+Com falha: ResolveAsync_Metalica_ReturnsFuzzyCandidateMetallica (line 170)
+Com falha!  - Com falha: 2, Aprovado: 5, Ignorado: 0, Total: 7
+```
+(Assert failure, not a compile error: `SearchNameCandidatesAsync` already exists from 3.9b; the service still called the prefix pool.)
+
+### Changed files
+- `Services/ArtistResolutionService.cs` - fuzzy tier calls `SearchNameCandidatesAsync(candidate.Name, PoolSize, ct)` (repo from lambda `sp`); `DerivePrefixToken` deleted; blank-name guard kept; constructor untouched.
+- `Domain/RepositoryInterface/IArtistRepository.cs` - artist `GetFuzzyCandidatePoolAsync` removed.
+- `Infra/Repository/ArtistRepository.cs` - artist `GetFuzzyCandidatePoolAsync` removed.
+- `MyVocaList.Tests/Unit/Services/ArtistResolutionServiceTests.cs` - rewritten per table.
+- `MyVocaList.Tests/Integration/Repositories/ArtistRepositoryResolutionTests.cs` - deleted (all 3 tests superseded; file held nothing else).
+- this task-log section.
+
+### Superseded tests
+| Test | Action | Superseded AC -> replacing REQ |
+|---|---|---|
+| `ArtistResolutionServiceTests` `ResolveAsync_FuzzyAboveThreshold_ReturnsFuzzyCandidates` | rewritten: mocks `SearchNameCandidatesAsync("The Beatle", 50, ..)` | AC-5.2 -> REQ-SFT-19 |
+| `ResolveAsync_FuzzyBelowThreshold_ReturnsNoMatch` | rewritten likewise ("Foo Something") | AC-5.2 -> REQ-SFT-19 |
+| `ResolveAsync_NothingMatches_ReturnsNoMatch` | rewritten likewise ("Unknown Artist") | AC-5.2 -> REQ-SFT-19 |
+| `ResolveAsync_EmptyName_ReturnsNoMatchWithoutPoolQuery` | Verify now on `SearchNameCandidatesAsync` (Times.Never) | AC-5.2 -> REQ-SFT-19 |
+| `ResolveAsync_LongMultiWordName_UsesFirstTokenCapped` | deleted (prefix-token derivation gone) | AC-5.2 -> REQ-SFT-19 |
+| `ArtistRepositoryResolutionTests`: `GetFuzzyCandidatePoolAsync_RespectsTake` (AC-5.8), `_PrefixFilter_ReturnsOnlyMatchingPrefix` (AC-5.9), `_CaseInsensitivePrefix_FindsMatch` (AC-5.10) | deleted (file removed) | AC-5.2 -> REQ-SFT-19 (replaced by 3.9b `ArtistRepositorySearchTests`) |
+| new: `ResolveAsync_Metalica_ReturnsFuzzyCandidateMetallica` | added | REQ-SFT-19 |
+
+Note: the plan cited line numbers 73/101/128/152; actual tests were located by name.
+
+### AC matrix
+| AC | Implementation | Test |
+|---|---|---|
+| REQ-SFT-19 | `ArtistResolutionService.ResolveAsync` step 3 -> `SearchNameCandidatesAsync` | `ResolveAsync_Metalica_ReturnsFuzzyCandidateMetallica` |
+
+### Verification evidence
+- Census (Python os.walk, excl. bin/obj/.git/.worktrees/Migrations), before and after: `DerivePrefixToken` -> only `Services/SongResolutionService.cs` (2 hits); `GetFuzzyCandidatePoolAsync` -> only song-side files (`ISongRepository`, `SongRepository`, `SongResolutionService`, `SongRepositoryResolutionTests`, `SongServiceNewArtistUnitOfWorkTests`, `SongResolutionServiceTests`). No artist-side caller/mock outside owned files.
+- Build: `dotnet build ... -f net10.0-android -m:1` -> 6 projects, 0 errors, 34 warnings.
+- Tests: `Com falha: 0, Aprovado: 748, Total: 748` (baseline 751; delta -3 = -3 deleted repo tests, -1 deleted long-token test, +1 Metalica).
+- UnitOfWorkReadScopeTests still green (constructor unchanged).
+- No SafeAreaEdges/XAML touched. No tasks.md tick. No push.
