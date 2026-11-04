@@ -1193,3 +1193,5 @@ No-new-test decision: Level C deletion; nothing new to assert.
 ### Verification evidence
 Build (android, -m:1): exit 0, 0 errors. Full suite: `Failed: 0, Passed: 663, Total: 663` (baseline 666, delta -3 = deleted CommitAsync tests).
 Census `ResolutionChoice`: ZERO HITS. Census `CommitAsync(`: only `Infra/UnitOfWork/UnitOfWork.cs:53,88` (plus unrelated doc text `.claude/skills/efcore-patterns/SKILL.md:376`).
+
+ITF: SFT-4.1a — Services/DeezerProvider.cs — root cause: NormaliseVersion also strips `{}` pairs, beyond REQ-SFT-12 / design § 3.4 (only `(` and `[`) — Verifier blocker 1 — expected 1 line(s).
