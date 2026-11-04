@@ -65,16 +65,15 @@ public class ArtistResolutionService : IArtistResolutionService
                 }
             }
 
-            // 3. Fuzzy: derive prefix token and retrieve bounded pool
-            var prefixToken = DerivePrefixToken(candidate.Name);
-            if (string.IsNullOrEmpty(prefixToken))
+            // 3. Fuzzy: bounded pool from the ArtistSearch FTS index (REQ-SFT-19), then scored
+            if (string.IsNullOrWhiteSpace(candidate.Name))
             {
-                _logger.LogDebug("Artist '{Name}' has empty prefix token — returning NoMatch", candidate.Name);
+                _logger.LogDebug("Artist name is blank — returning NoMatch");
                 return new ArtistResolution(ResolutionKind.NoMatch, null, []);
             }
 
-            var pool = await artistRepository.GetFuzzyCandidatePoolAsync(
-                prefixToken, SimilarityConstants.PoolSize, ct) ?? [];
+            var pool = await artistRepository.SearchNameCandidatesAsync(
+                candidate.Name, SimilarityConstants.PoolSize, ct) ?? [];
 
             var scored = pool
                 .Select(a => (ArtistId: a.Id, a.Name, Score: _scorer.Score(candidate.Name, a.Name)))
@@ -92,25 +91,4 @@ public class ArtistResolutionService : IArtistResolutionService
             _logger.LogDebug("Artist '{Name}' — NoMatch", candidate.Name);
             return new ArtistResolution(ResolutionKind.NoMatch, null, []);
         }, ct);
-
-    // ── Helpers ──────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Derives the first whitespace-delimited token of <paramref name="name"/>,
-    /// capped at <see cref="SimilarityConstants.PrefixTokenMaxLen"/> characters.
-    /// Returns an empty string for null/whitespace input.
-    /// </summary>
-    internal static string DerivePrefixToken(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return string.Empty;
-
-        var trimmed = name.Trim();
-        var spaceIdx = trimmed.IndexOf(' ');
-        var token = spaceIdx < 0 ? trimmed : trimmed[..spaceIdx];
-
-        return token.Length > SimilarityConstants.PrefixTokenMaxLen
-            ? token[..SimilarityConstants.PrefixTokenMaxLen]
-            : token;
-    }
 }
