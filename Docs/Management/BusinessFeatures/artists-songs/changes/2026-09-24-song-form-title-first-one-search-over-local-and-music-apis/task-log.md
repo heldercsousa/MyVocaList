@@ -1292,3 +1292,8 @@ Consumer wiring (`INetworkStatus` into the suggestion services) is task 4.1b/4.2
 - `ConstrainedInternet` / `Internet` not visible in the Context7 snippet; compiled successfully, so the pinned MAUI defines them.
 - Inherited state: none (fresh branch from develop; the Red was written in this session).
 - Requested spec notes: none required by this task.
+
+## Wave 2026-11-04 (3.9 + 4.1a + 4.1c) — Verifier + merge (orchestrator)
+- **4.1c:** Red `94fb324d`, Green `0b18fd0c`. Verifier **PASS** (0 blockers; W1 Green SHA missing from the section — recorded here). Merged `a190b2a0`. Post-merge develop: `dotnet build: 6 projects, 0 errors`; `Aprovado! – Com falha: 0, Aprovado: 693, Total: 693`.
+- **3.9:** spec-gap note `26303575` (unowned `ISongRepository` decorator + no logger in `SongRepository`; orchestrator chose Option A, tasks.md `55d906e9`), Red `de57f010`, Green `bb924232`. Verifier (Opus) **CONDITIONAL PASS**, 0 blockers; W1–W5 recorded in tasks.md 3.9. Merged `f3770a83`. Post-merge develop: `0 errors`; `Aprovado! – Com falha: 0, Aprovado: 719, Total: 719`.
+- **4.1a:** Red `a5c9cc7c`, Green `17c4aaed`. Verifier **CONDITIONAL PASS**: blocker 1 = `{}` stripping beyond REQ-SFT-12 → fixed by orchestrator ITF `de13e317` (1 file, 1 line; DeezerProvider 18/18; the first hook run had one intermittent failure, full suite 706/706 on re-run). Verifier build line: `Compilação com êxito. 0 Erro(s)`. Merged `bc81f9e4` (task-log conflict = both sides appended; resolved keeping both, ITF line moved into § 4.1a). Post-merge develop: pre-commit hook build + tests green; `Aprovado! – Com falha: 0, Aprovado: 737, Total: 737`.
