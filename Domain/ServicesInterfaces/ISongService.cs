@@ -60,11 +60,39 @@ public interface ISongService
     /// <param name="urls">Zero or more streaming/YouTube URLs to attach atomically.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns><c>(true, message, song)</c> on success; <c>(false, reason, null)</c> on failure.</returns>
+    [Obsolete("Use the (int? artistId, string? newArtistName, …) overload — REQ-SFT-18. Removed in task 5.3b.")]
     Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
         int artistId, string title, string version, string? featuredArtists, string? lyrics,
         string? externalId, string? externalProvider,
         IEnumerable<string> urls,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Creates a song — and, when <paramref name="newArtistName"/> is supplied, its new artist — and
+    /// the supplied URLs in ONE unit of work (REQ-SFT-18). Exactly one of
+    /// <paramref name="artistId"/> / <paramref name="newArtistName"/> must be supplied, else
+    /// <c>(false, "Artist is required", null)</c> (REQ-SFT-21). A new artist is created through
+    /// <c>IArtistService.CreateArtistAsync</c> resolved from the unit of work's scope (ambient join;
+    /// a collated duplicate name is refused with that service's message, REQ-SFT-52), then
+    /// <c>IUnitOfWork.FlushAsync</c> materialises its id (REQ-UOW-35) before the song is staged. Any
+    /// later failure — tuple or exception — rolls both back. An external identity already held by
+    /// another song is rejected before any artist is created (REQ-SFT-26).
+    /// </summary>
+    /// <param name="artistId">Id of an existing original/copyright artist; null when <paramref name="newArtistName"/> is used.</param>
+    /// <param name="newArtistName">Name of an artist to create in this unit of work; null/blank when <paramref name="artistId"/> is used.</param>
+    /// <param name="title">Song title.</param>
+    /// <param name="version">Variant label; empty string = canonical version.</param>
+    /// <param name="featuredArtists">Optional featured-artist names.</param>
+    /// <param name="lyrics">Optional lyrics text.</param>
+    /// <param name="externalId">Optional external provider song id.</param>
+    /// <param name="externalProvider">Optional external provider name.</param>
+    /// <param name="urls">Zero or more streaming/YouTube URLs to attach atomically.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns><c>(true, message, song)</c> on success; <c>(false, reason, null)</c> on failure.</returns>
+    Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
+        int? artistId, string? newArtistName, string title, string version,
+        string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
+        IEnumerable<string> urls, CancellationToken ct = default);
 
     /// <summary>
     /// Returns the full song entity for the given id, including FeaturedArtists, Lyrics, Version

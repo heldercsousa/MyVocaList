@@ -602,7 +602,7 @@ public class SongServiceTests
         var sut = CreateSut();
 
         var (success, _, song) = await sut.CreateSongWithUrlsAsync(
-            1, "Bohemian Rhapsody", "", null, null, null, null,
+            1, null, "Bohemian Rhapsody", "", null, null, null, null,
             ["https://youtube.com/watch?v=abc12345678", "https://youtube.com/watch?v=def12345678"]);
 
         Assert.True(success);
@@ -622,7 +622,7 @@ public class SongServiceTests
         var sut = CreateSut();
 
         var (success, message, song) = await sut.CreateSongWithUrlsAsync(
-            1, "Existing Song", "", null, null, null, null,
+            1, null, "Existing Song", "", null, null, null, null,
             ["https://youtube.com/watch?v=abc12345678"]);
 
         Assert.False(success);
@@ -640,11 +640,64 @@ public class SongServiceTests
         var sut = CreateSut();
 
         var (success, _, song) = await sut.CreateSongWithUrlsAsync(
-            1, "Bohemian Rhapsody", "", null, null, null, null,
+            1, null, "Bohemian Rhapsody", "", null, null, null, null,
             []);
 
         Assert.True(success);
         Assert.NotNull(song);
         _urlRepoMock.Verify(r => r.AddAsync(It.IsAny<SongKaraokeUrl>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-21: neither artistId nor newArtistName supplied -> "Artist is required", nothing written
+    public async Task CreateSongWithUrlsAsync_NeitherArtistIdNorNewName_FailsArtistRequired()
+    {
+        SetupArtistAndDuplicateCheck(1);
+        var sut = CreateSut();
+
+        var (success, message, song) = await sut.CreateSongWithUrlsAsync(
+            null, null, "Bohemian Rhapsody", "", null, null, null, null, []);
+
+        Assert.False(success);
+        Assert.Equal("Artist is required", message);
+        Assert.Null(song);
+        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+        _artistRepoMock.Verify(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-21: both artistId and newArtistName supplied -> "Artist is required", nothing written
+    public async Task CreateSongWithUrlsAsync_BothArtistIdAndNewName_FailsArtistRequired()
+    {
+        SetupArtistAndDuplicateCheck(1);
+        var sut = CreateSut();
+
+        var (success, message, song) = await sut.CreateSongWithUrlsAsync(
+            1, "New Artist", "Bohemian Rhapsody", "", null, null, null, null, []);
+
+        Assert.False(success);
+        Assert.Equal("Artist is required", message);
+        Assert.Null(song);
+        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+        _artistRepoMock.Verify(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-26: external identity already held by another song -> rejected, song never staged
+    public async Task CreateSongWithUrlsAsync_ExternalIdentityHeldByAnotherSong_FailsWithMessage()
+    {
+        SetupArtistAndDuplicateCheck(1);
+        _songRepoMock.Setup(r => r.ExistsByExternalIdentityAsync(
+                         "deezer", "123", It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(true);
+        var sut = CreateSut();
+
+        var (success, message, song) = await sut.CreateSongWithUrlsAsync(
+            1, null, "Bohemian Rhapsody", "", null, null, "123", "deezer", []);
+
+        Assert.False(success);
+        Assert.Equal("This music-database song is already in your library", message);
+        Assert.Null(song);
+        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }
