@@ -108,7 +108,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   REQ-SFT-08 bound expires, so local options wait at most 3,000 ms (Q16).
   > **Spec updated 2026-09-26:** Q16 RESOLVED. The shared Field does **not** gain an append capability in this pipeline (orchestrator decision under Helder's pre-authorisation of 2026-09-25, applying the Q16 recommendation). The fallback is the behaviour: the Field shows local and remote options together once Deezer answers or the REQ-SFT-08 bound expires, so local options wait at most 3,000 ms. Same for the Artist form (REQ-SFT-47). Plan: `plan.md` § 0.3 D1.
 - **REQ-SFT-08: Remote wait bound.** A Deezer call that has not completed within 3,000 ms
-  `[Proposed — confirm]` SHALL be cancelled and treated as a failure (REQ-SFT-06).
+  `[Confirmed — Helder 2026-11-04]` SHALL be cancelled and treated as a failure (REQ-SFT-06).
 - **REQ-SFT-09: Latest query wins.** Options from an earlier, slower query SHALL never replace options
   of a later query (carry-over of REQ-ACREATE-13 / REQ-ACF-26).
 
@@ -117,7 +117,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-10: Local pick opens the song.** Given add mode, When the user picks a local option,
   Then the add form is replaced by that song's edit form (Back from it returns to the page the add
   form was opened from, not to the add form).
-- **REQ-SFT-11: Unsaved data on a local pick** `[Proposed — confirm]`. IF, at the moment of a local
+- **REQ-SFT-11: Unsaved data on a local pick** `[Confirmed — Helder 2026-11-04]`. IF, at the moment of a local
   pick, Artist, Version, Featured Artists, Lyrics or the buffered YouTube list holds user input,
   THEN a `dx:BottomSheet` SHALL ask "Open '<title>'? What you entered here will be discarded." with
   **Open** and **Keep editing**. Open → REQ-SFT-10. Keep editing (or Back / scrim) → the sheet closes,
@@ -133,7 +133,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   provider's name and no local id, and the artist is created on Save (REQ-SFT-18).
 - **REQ-SFT-14: X after a Deezer pick.** When the user taps X on Title **or** on Artist after a remote
   pick, the pending external identity SHALL be cleared, because the record is no longer the picked
-  Deezer song `[Proposed — confirm for Artist]`. X on Title also empties and unlocks Title; X on
+  Deezer song `[Confirmed for Artist — Helder 2026-11-04]`. X on Title also empties and unlocks Title; X on
   Artist also empties and unlocks Artist. The other field keeps its value and state.
 
 ### D. No pick
@@ -195,7 +195,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   **Open existing** and **Save as new version**. Open existing → REQ-SFT-10 navigation (no extra
   prompt; the user chose it). Save as new version → requires a non-empty Version (AC-1.2 validation
   and message unchanged).
-- **REQ-SFT-23: Possible duplicates** `[Proposed — confirm]`. Given no exact duplicate, When Save finds
+- **REQ-SFT-23: Possible duplicates** `[Confirmed — Helder 2026-11-04]`. Given no exact duplicate, When Save finds
   similar titles for the same artist (existing fuzzy step, score ≥ 0.82), Then the sheet lists them
   (tap a row → open that song, REQ-SFT-10) and offers **Save as new song**, which saves with no
   Version requirement.
@@ -249,7 +249,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   rename and delete, from the next query after the write commits.
 - **REQ-SFT-35: Deezer query shape.** The system SHALL send Deezer the typed text as a plain query,
   with no `track:`/`artist:` qualifiers.
-- **REQ-SFT-36: MusicBrainz** `[OPEN — Helder decides; recommendation: drop]`. The title search and
+- **REQ-SFT-36: MusicBrainz** `[Decided — drop, Helder 2026-11-04]`. The title search and
   the Artist-form search SHALL NOT query MusicBrainz; Deezer is the only remote provider. Rationale in `design.md` § Decision: MusicBrainz.
 
 ### I. Tracking-field simplification (approved, README third round item 4)
@@ -311,7 +311,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-49: Deezer artist pick fills the name only.** Picking a Deezer artist fills Name with the
   provider's name and puts it in the picked state; X empties and unlocks it. Nothing is written
   before Save; Save uses the existing create rules (non-empty, ≤ 60, no collated duplicate).
-  **Storing the Deezer artist id** `[OPEN — Helder decides]`: recommended **not stored**. Reason: no
+  **Storing the Deezer artist id** `[Decided — not stored, Helder 2026-11-04]`: recommended **not stored**. Reason: no
   flow reads `Artist.ExternalId` (REQ-SFT-40, README third round item 4), song-side dedup uses the
   collated name, and a write-only column would revive the machinery just removed. Revisit only when
   an artist re-import or sync feature needs it.
@@ -399,21 +399,24 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 
 ## Open questions for Helder
 
-- **Q1 (REQ-SFT-36):** MusicBrainz: drop from all Field searches and delete the provider (recommended),
-  or keep it behind Deezer?
-- **Q2 (REQ-SFT-11):** confirm the discard prompt on a local pick when other fields hold input.
-- **Q4 (REQ-SFT-23):** confirm "Save as new song" (no Version needed) for fuzzy-only matches.
-- **Q5:** Deezer returns `title_short` and `title_version` besides `title`. Keep Title = full `title`
-  (current reading of your "tap X and retype" ruling), or fill Title = `title_short` and
-  Version = `title_version`? Default: full title, Version untouched.
-- **Q6 (REQ-SFT-14):** confirm that X on Artist also drops the pending external identity.
-- **Q7 (REQ-SFT-08):** confirm the 3,000 ms remote bound.
-- **Q8 (ranking key):** option (a) is chosen. Measured: the existing scorer's `TokenSetRatio` puts
-  "Cry" (100) above "Don't Cry" (94) for "dont cry", which fails REQ-SFT-30. `design.md` § 6.3 uses
-  FuzzySharp `TokenSortRatio` through the same scorer class and normalisation. Confirm.
-- **Q10 (REQ-SFT-49):** store the Deezer artist id on the Artist form? Recommended: no.
-- **Q11:** `NestedUnitOfWorkTests` exercises only the deleted `CommitAsync` methods. Port 4 of its 5
-  tests to the new 2-level save path and delete the 5th (artist external identity, REQ-UOW-09)?
+- **Answered by Helder 2026-11-04 (G4 round).** Guiding principle he stated: *keep it simple — the MVP
+  validates the basic business features and whether the community finds them valuable.*
+  - **Q1 → drop MusicBrainz** (REQ-SFT-36): Deezer is the only remote provider; the provider is deleted.
+  - **Q2 → confirmed** (REQ-SFT-11): the discard sheet is shown. Helder's long-term note (not in scope): a later
+    stage may move records to a central DB with local and cloud copies and restrict edits.
+  - **Q4 → confirmed** (REQ-SFT-23): "Save as new song", no Version required.
+  - **Q5 → PENDING clarification** (Helder answered "A", then added that persisting Version makes sense —
+    a candidate unique key artist + title + version, usable as a YouTube query). Orchestrator asked
+    2026-11-04 which applies. Also asked: does Deezer offer lyrics.
+  - **Q6 → confirmed** (REQ-SFT-14): X on Artist also drops the pending external identity.
+  - **Q7 → 3,000 ms confirmed** (REQ-SFT-08), **plus a new ask:** the field must tell the cases apart with
+    their own message — at least *device offline* vs *Deezer unavailable* (Helder: "no internet connection
+    also results the same"; messages to be improved). Wording and case list PENDING Helder's approval;
+    REQ-SFT-06/08 to be amended once approved.
+  - **Q8 → confirmed:** ranking uses `TokenSortRatio` via `ISimilarityScorer.RankScore` (merged in 2.2).
+  - **Q10 → not stored** (REQ-SFT-49): only the name is saved.
+  - **Q11 → confirmed:** port 4 of the 5 `NestedUnitOfWorkTests` to the new save path; delete the 5th
+    (artist external identity, REQ-UOW-09).
 - **Q16 (REQ-SFT-07): RESOLVED 2026-09-26: fallback accepted; no append capability (see the note under REQ-SFT-07).** Original question: if the shared Field cannot append options, accept the fallback (local options
   wait up to 3,000 ms for Deezer)?
 
