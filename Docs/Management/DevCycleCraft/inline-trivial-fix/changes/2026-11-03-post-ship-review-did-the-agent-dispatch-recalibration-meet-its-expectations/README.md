@@ -29,6 +29,15 @@ Reviews the closed item [Recalibrate agent-dispatch settings](../2026-08-18-reca
 
 `/doctor` checks installation and settings health only; use it to confirm the hooks still load, not to answer #1, #2 or #4.
 
+## Also review — settings changes of 2026-11-03
+
+5. Settings commit `chore(settings): …` (this date) holds up:
+   - TaskCreated/TaskCompleted agent hooks removed; `active-task.json` deleted, `changed-files.txt` untracked (orphan check still reads it).
+   - `settings.local.json` untracked; its UserPromptSubmit gate moved to `settings.json`, stale Stop dup dropped, allow list 154 → 55.
+   - Hook scripts on `$CLAUDE_PROJECT_DIR` (BUG-072); `Bash(...)` matchers → `hook-bash-filter.py`.
+   - New: `protect-generated.py` guard, heartbeat 60 s throttle, force-push / `reset --hard` deny rules, Playwright pinned, `microsoft-learn` MCP.
+   - Check: hooks fire, no false blocks, `/context` lower.
+
 ## Outcome
 
 - All met → close ✅ with a one-line summary here.
