@@ -1,6 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Infra.Collation;
 
@@ -9,11 +13,25 @@ namespace MyVocaList.Infra.Repository;
 /// <inheritdoc />
 public class SongRepository : ISongRepository
 {
-    private readonly AppDbContext _db;
+    private const string TitleSearchSql =
+        """
+        SELECT s.Id AS SongId, s.Title AS Title, s.Version AS Version, s.ArtistId AS ArtistId,
+               a.Name AS ArtistName, s.ExternalProvider AS ExternalProvider, s.ExternalId AS ExternalId
+        FROM SongSearch
+        JOIN Songs s ON s.Id = SongSearch.rowid
+        JOIN Artists a ON a.Id = s.ArtistId
+        WHERE SongSearch MATCH @m
+        ORDER BY bm25(SongSearch, 10.0, 1.0), length(s.Title)
+        LIMIT @take
+        """;
 
-    public SongRepository(AppDbContext db)
+    private readonly AppDbContext _db;
+    private readonly ILogger<SongRepository> _logger;
+
+    public SongRepository(AppDbContext db, ILogger<SongRepository>? logger = null)
     {
         _db = db;
+        _logger = logger ?? NullLogger<SongRepository>.Instance;
     }
 
     /// <inheritdoc />
@@ -140,6 +158,83 @@ public class SongRepository : ISongRepository
                  s.ExternalProvider == provider &&
                  s.ExternalId == externalId,
             ct);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesAsync(
+        string query, int take, CancellationToken ct)
+    {
+        var match = FtsQueryBuilder.BuildTrigramMatch(query);
+        if (match is null)
+        {
+            // REQ-SFT-33: no word of >= 3 chars - collated title prefix, still DB-side.
+            var pattern = (query ?? string.Empty).Trim() + "%";
+            return await _db.Songs
+                .AsNoTracking()
+                .Where(s => EF.Functions.Like(
+                    EF.Functions.Collate(s.Title, CollationConstants.Default),
+                    EF.Functions.Collate(pattern, CollationConstants.Default)))
+                .OrderBy(s => s.Title.Length)
+                .Take(take)
+                .Select(s => new SongSearchHit(
+                    s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId))
+                .ToListAsync(ct);
+        }
+
+        try
+        {
+            return await _db.Database
+                .SqlQueryRaw<SongSearchHit>(
+                    TitleSearchSql,
+                    new SqliteParameter("@m", match),
+                    new SqliteParameter("@take", take))
+                .ToListAsync(ct);
+        }
+        catch (SqliteException ex) when (ex.Message.Contains("no such table", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogError(ex, "SongSearch FTS index is missing; title search returns no candidates");
+            return [];
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<SongSearchHit>> FindByExternalIdsAsync(
+        string provider, IReadOnlyCollection<string> externalIds, CancellationToken ct)
+    {
+        if (externalIds is null || externalIds.Count == 0) return [];
+        var ids = externalIds.ToList();
+
+        return await _db.Songs
+            .AsNoTracking()
+            .Where(s => s.ExternalProvider == provider && ids.Contains(s.ExternalId))
+            .Select(s => new SongSearchHit(
+                s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId))
+            .ToListAsync(ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(
+        IReadOnlyCollection<(string Title, string ArtistName, string Version)> items, CancellationToken ct)
+    {
+        if (items is null || items.Count == 0) return [];
+
+        // One bounded indexed query per triple (the batch is at most a result page); collation decides every match.
+        var hits = new Dictionary<int, SongSearchHit>();
+        foreach (var (title, artistName, version) in items)
+        {
+            var matches = await _db.Songs
+                .AsNoTracking()
+                .Where(s =>
+                    EF.Functions.Collate(s.Title, CollationConstants.Default) == EF.Functions.Collate(title, CollationConstants.Default) &&
+                    EF.Functions.Collate(s.OriginalArtist.Name, CollationConstants.Default) == EF.Functions.Collate(artistName, CollationConstants.Default) &&
+                    EF.Functions.Collate(s.Version, CollationConstants.Default) == EF.Functions.Collate(version ?? string.Empty, CollationConstants.Default))
+                .Select(s => new SongSearchHit(
+                    s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId))
+                .ToListAsync(ct);
+            foreach (var m in matches) hits[m.SongId] = m;
+        }
+
+        return hits.Values.ToList();
+    }
 
     /// <inheritdoc />
     public Task AddAsync(Song song, CancellationToken ct)
