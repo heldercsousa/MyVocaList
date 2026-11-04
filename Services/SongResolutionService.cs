@@ -67,9 +67,7 @@ public class SongResolutionService : ISongResolutionService
                     return new SongResolution(
                         ResolutionKind.ExactExternalMatch,
                         byExternal.Id,
-                        [],
-                        [],
-                        false);
+                        []);
                 }
             }
 
@@ -78,7 +76,7 @@ public class SongResolutionService : ISongResolutionService
             {
                 _logger.LogDebug("Song '{Title}' — artist unresolved (Kind={Kind}); returning NoMatch",
                     candidate.Title, artistResolution.Kind);
-                return new SongResolution(ResolutionKind.NoMatch, null, [], [], false);
+                return new SongResolution(ResolutionKind.NoMatch, null, []);
             }
 
             // 2. Exact local match
@@ -91,7 +89,7 @@ public class SongResolutionService : ISongResolutionService
                 if (exactId is not null)
                 {
                     _logger.LogDebug("Song resolved via exact local match → song {SongId}", exactId.Value);
-                    return new SongResolution(ResolutionKind.ExactLocalMatch, exactId.Value, [], [], false);
+                    return new SongResolution(ResolutionKind.ExactLocalMatch, exactId.Value, []);
                 }
             }
 
@@ -121,12 +119,12 @@ public class SongResolutionService : ISongResolutionService
                 if (scored.Count > 0)
                 {
                     _logger.LogDebug("Song '{Title}' has {Count} fuzzy candidate(s)", candidate.Title, scored.Count);
-                    return new SongResolution(ResolutionKind.FuzzyCandidates, null, scored, [], false);
+                    return new SongResolution(ResolutionKind.FuzzyCandidates, null, scored);
                 }
             }
 
             _logger.LogDebug("Song '{Title}' — NoMatch", candidate.Title);
-            return new SongResolution(ResolutionKind.NoMatch, null, [], [], false);
+            return new SongResolution(ResolutionKind.NoMatch, null, []);
         }, ct);
 
     /// <summary>
