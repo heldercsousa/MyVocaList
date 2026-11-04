@@ -155,7 +155,7 @@
 
 ## Phase 5: Page migration
 
-- [ ] **T6: Migrate `PersonFormPage` Full Name onto `AutocompleteDXField`** [SEQUENTIAL, after T4 + T5]
+- [~] **T6: Migrate `PersonFormPage` Full Name onto `AutocompleteDXField`** [SEQUENTIAL, after T4 + T5]
   - One task, two files, so that the task commits only a green build (`workflow.md` Rule 3).
     Steps (incremental XAML rule):
     1. Edit `PersonFormPage.xaml`: replace `:19-43` with `<textfields:AutocompleteDXField x:Name="nameField" …/>`,
