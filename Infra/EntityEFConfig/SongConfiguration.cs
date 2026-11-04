@@ -57,7 +57,7 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
                .IsUnique()
                .HasDatabaseName("IX_Songs_ArtistId_Title_Version");
 
-        builder.HasIndex(s => s.ExternalId)
-               .HasDatabaseName("IX_Songs_ExternalId");
+        builder.HasIndex(s => new { s.ExternalProvider, s.ExternalId })
+               .IsUnique();
     }
 }
