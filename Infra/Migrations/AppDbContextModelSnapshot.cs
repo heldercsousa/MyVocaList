@@ -178,6 +178,8 @@ namespace MyVocaList.Infra.Migrations
                         .HasDatabaseName("IX_Artists_Name");
 
                     b.ToTable("Artists", (string)null);
+
+                    b.HasAnnotation("Sqlite:UseSqlReturningClause", false);
                 });
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.BackupHistory", b =>
@@ -401,6 +403,8 @@ namespace MyVocaList.Infra.Migrations
                         .HasDatabaseName("IX_Songs_ArtistId_Title_Version");
 
                     b.ToTable("Songs", (string)null);
+
+                    b.HasAnnotation("Sqlite:UseSqlReturningClause", false);
                 });
 
             modelBuilder.Entity("MyVocaList.Domain.Entity.SongKaraokeUrl", b =>
