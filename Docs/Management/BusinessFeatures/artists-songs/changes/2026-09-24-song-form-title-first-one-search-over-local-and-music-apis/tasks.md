@@ -201,6 +201,7 @@
 
 - [ ] **3.9 Title-field search query** [SEQUENTIAL — after 3.8]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `FindByTitleAndArtistNamesAsync` takes `(Title, ArtistName, Version)` triples (REQ-SFT-05(b) amended); its two tests become `…CollatedTripleEmptyVersion_Returns` and `…VersionMustMatch`.
+  > **Spec updated 2026-11-04 (orchestrator, implementor blocked: spec gap):** owned files extended to `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` (its private `ThrowOnAddSongRepository : ISongRepository` decorator gains the three forwarding members only — no assertion change), and `SongRepository` gains an optional `ILogger<SongRepository>? logger = null` constructor parameter (defaulting to `NullLogger<SongRepository>.Instance`) so the index-missing path can log at Error while the existing `new SongRepository(_db)` test call sites keep compiling; DI supplies the logger.
   - **Produces:** `SongSearchHit`; `SearchTitleCandidatesAsync`, `FindByExternalIdsAsync`, `FindByTitleAndArtistNamesAsync`.
   - **Files owned:** `Domain/ReadModels/SongSearchHit.cs`, `ISongRepository.cs`, `SongRepository.cs`, `MyVocaList.Tests/Integration/Repositories/SongRepositorySearchTests.cs` (new, uses `MigrateAsync`)
   - **Risk:** Medium. **Tests (B):** § 6.3 corpus subset: "dont cry"/"don cry"/"guns cry" include "Don't Cry"; "nao sei" hits; 2-char query uses the prefix path; `"` in a query is escaped.
