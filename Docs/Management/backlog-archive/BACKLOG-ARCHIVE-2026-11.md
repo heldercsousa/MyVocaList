@@ -7,6 +7,7 @@
 <!-- BACKLOG:GENERATED:BEGIN archive-business -->
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
+| 2026-09-21 | venuesSeedForTest migration ships ~504 fake venues and its Down wipes the table (under: **Venues CRUD**) | ✅ Fixed | Goal: A test-data seed migration sits in the production chain, so real installs get ~504 fake venues, and its Down() runs an unscoped DELETE FROM Venues that would destroy genuine user data on rollback. Gate: Decided 2026-11-04: guard the seed with #if DEBUG so Release builds insert nothing, and make Down() a no-op; no new migration (G3-safe). Pointer: `BusinessFeatures/venues/bugs/2026-09-21-BUG-080-venuesseedfortest-migration-ships-504-fake-venues-and-its-down-wipes-the-table/`. |
 <!-- BACKLOG:GENERATED:END archive-business -->
 
 ## Dev Cycle Craft
