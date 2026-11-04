@@ -727,7 +727,7 @@ None required. No `> **Spec updated**` note needed: the change is within REQ-SFT
 
 ### Checkpoint
 
-_(not started)_
+ITF: SFT-3.6a — Services/ArtistService.cs — root cause: `ArtistService.UpdateArtistAsync` still writes the retired flag (`artist.HasManualEdits = true;`, :107), the last writer before M1 drops the column (REQ-SFT-37) — expected 1 line(s).
 
 ## 3.6b
 
