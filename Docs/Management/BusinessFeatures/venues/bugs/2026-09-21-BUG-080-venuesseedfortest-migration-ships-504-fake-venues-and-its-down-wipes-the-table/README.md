@@ -1,7 +1,7 @@
 ---
 id: BUG-080
 title: venuesSeedForTest migration ships ~504 fake venues and its Down wipes the table
-status: 💡 Pending
+status: 🟡 In Progress
 severity: Major
 target: 2026-09-21
 section: BusinessFeatures

@@ -287,7 +287,11 @@ None.
 
 ### Checkpoint
 
-_(not started)_
+- 2026-11-04 (orchestrator) — **Pre-dispatch G3 checks (plan § 0.2.2), recorded before dispatching 3.1-Tester:**
+  1. `LEDGER.md` rows with a non-empty branch/worktree: none live. CATALOG-PROP = "— (spec only, no branch yet)", deferred by Helder 2026-11-04 (spec after SFT). BUG-080 = "— (no branch)"; its fix (dispatched in parallel with this task) adds **no** migration and edits only `20260211055225_venuesSeedForTest.cs` + a new test, so it is not a migration branch in the § 0.2.2 sense and shares no file with 3.1.
+  2. `git worktree list`: only the main tree `C:/Users/helde/source/repos/MyVocaList dae05832 [develop]`.
+  3. `git branch -a`: no local or remote branch name contains `catalog`, `catalog-prop`, `bug-080` or `venue`.
+  - **Result: clear to dispatch.** Worktree `.worktrees/sft-3.1`, branch `task/sft-3.1-new-artist-uow`, from develop `dae05832`. Role: Tester (W2), then a fresh Builder (Opus).
 
 ## 3.2a
 
