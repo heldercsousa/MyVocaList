@@ -9,7 +9,7 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
 {
     public void Configure(EntityTypeBuilder<Song> builder)
     {
-        builder.ToTable("Songs");
+        builder.ToTable("Songs", tb => tb.UseSqlReturningClause(false));
         builder.HasKey(s => s.Id);
         builder.Property(s => s.Id).ValueGeneratedOnAdd();
 
