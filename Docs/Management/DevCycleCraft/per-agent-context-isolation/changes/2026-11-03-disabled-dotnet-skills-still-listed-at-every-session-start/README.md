@@ -82,3 +82,6 @@ Fresh-process check (`claude -p`): 0 `dotnet-skills:*` skills/agents, `claude-co
 Main-session `/context` Skills **10k → 6.6k** measured after A + C (plugin still loaded there — `/clear` does not
 reload plugins; restart the process). Expected after restart ≈ 3.0k Skills, Custom agents 1.1k → 0.5k.
 Left: `cowork-plugin-management` (~0.24k) is synced from the claude.ai account — not repo-controllable.
+
+**Measured after restart (fresh process):** Skills **10k → 2.8k**, Custom agents **1.1k → 0.5k**. Session total only
+49.6k → 49.0k: System tools rose 18.3k → 25.4k across the same sessions (cause not investigated — not a skill lever).
