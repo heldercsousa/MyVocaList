@@ -305,6 +305,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hooks-redesign", "hooks-red
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\DevCycleCraft\hooks-redesign\plan.md = Docs\Management\DevCycleCraft\hooks-redesign\plan.md
 		Docs\Management\DevCycleCraft\hooks-redesign\README.md = Docs\Management\DevCycleCraft\hooks-redesign\README.md
+		Docs\Management\DevCycleCraft\hooks-redesign\task-log.md = Docs\Management\DevCycleCraft\hooks-redesign\task-log.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backlog-workflow-integration", "backlog-workflow-integration", "{A1B2C3D4-0001-4000-8000-000000000006}"

@@ -1,13 +1,14 @@
 ---
 id: BUG-083
 title: SQLite MCP fails to connect at session start
-status: 💡 Pending
+status: ✅ Fixed
 severity: Major
 target: 2026-11-03
 section: DevCycleCraft
 parent: hooks-redesign
 goal: The sqlite MCP server shows failed at every session start, yet uvx mcp-server-sqlite runs by hand. The MCP Availability Gate needs it before implementation work.
 gate: Server connects in a fresh session (/mcp shows connected) and a read-only query returns the schema.
+closed: 2026-11
 kind: bug
 ---
 
@@ -29,3 +30,19 @@ The sqlite MCP server shows failed at every session start, yet uvx mcp-server-sq
 
 Run `claude --debug` (or `--mcp-debug`) and read the sqlite startup error → fix → fresh session `/mcp` shows connected →
 `list_tables` works. Pin the package version (`mcp-server-sqlite==<x>`) per governance. Task-log entry required (Major).
+
+## Diagnosis (2026-11-03)
+
+| Item | Finding |
+|---|---|
+| Log | `%LOCALAPPDATA%/claude-cli-nodejs/Cache/<project>/mcp-logs-sqlite/*.jsonl` |
+| Error | `server.py:173 @server.list_resources()` → `AttributeError: 'Server' object has no attribute 'list_resources'` |
+| Root cause | Unpinned `uvx` resolved `mcp-server-sqlite 2025.4.25` (archived, last release) + `mcp 2.3.0` (breaking 2.x API) |
+| Fix | `.mcp.json`: `uvx --with mcp==1.30.0 mcp-server-sqlite==2025.4.25` (both pinned) |
+| Not the cause | `cmd /c`, db path, timeout (`--help` never imports the server, so the hand test passed) |
+
+## Verification
+
+| Session | `/mcp` sqlite | `list_tables` |
+|---|---|---|
+| Fresh #1 after fix (2026-11-04) | ✓ connected, 6 tools | ✓ 8 tables (`People`, `Venues`, `Events`, `EventParticipations`, …) |
