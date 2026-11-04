@@ -49,6 +49,17 @@ public interface IArtistRepository
     /// <returns>Matching artists, unordered; empty when no candidate matches.</returns>
     Task<IReadOnlyList<Artist>> GetByNamesCollatedAsync(IEnumerable<string> names, CancellationToken ct = default);
 
+    /// <summary>
+    /// REQ-SFT-19: up to <paramref name="take"/> artists from the ArtistSearch trigram index (OR of the
+    /// query's 3-char windows), best bm25 match first. A name with no word of 3+ characters falls back
+    /// to the collated name-prefix query. Returns an empty list when the index is missing.
+    /// </summary>
+    /// <param name="name">Raw typed artist name.</param>
+    /// <param name="take">Maximum number of rows to return.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>At most <paramref name="take"/> untracked artists.</returns>
+    Task<IReadOnlyList<Artist>> SearchNameCandidatesAsync(string name, int take, CancellationToken ct);
+
     Task AddAsync(Artist artist, CancellationToken ct);
     Task UpdateAsync(Artist artist, CancellationToken ct);
     Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct);
