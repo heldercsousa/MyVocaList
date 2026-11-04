@@ -218,12 +218,13 @@
   > **Spec updated 2026-09-26:** (D9) runs **after** 3.9, not `[P]`: 3.9 creates `Infra/Repository/FtsQueryBuilder.cs`, which 3.9b consumes.
   > **Spec updated 2026-11-04 (3.9b merge `02fc76b7`, Verifier PASS):** optional `ILogger<ArtistRepository>? logger = null` (same shape as 3.9); index-missing filter narrowed to "no such table" + "ArtistSearch". Follow-ups (minor): `RespectsTake` asserts `<= 1` (passes on empty — seed two matches and assert `== 1` when a task next owns `ArtistRepositorySearchTests.cs`); user-typed `%`/`_` act as LIKE wildcards in the prefix path (same as songs, "as today").
 
-- [ ] **3.9c `ArtistResolutionService` uses the FTS pool** [SEQUENTIAL — after 3.9b, 3.4]
+- [x] **3.9c `ArtistResolutionService` uses the FTS pool** [SEQUENTIAL — after 3.9b, 3.4]
   - **Produces:** fuzzy tier reads `SearchNameCandidatesAsync`; artist `GetFuzzyCandidatePoolAsync` and `DerivePrefixToken` (artist side) deleted.
   - **Files owned:** `Services/ArtistResolutionService.cs`, `MyVocaList.Tests/Unit/Services/ArtistResolutionServiceTests.cs`, `IArtistRepository.cs`, `ArtistRepository.cs`, `MyVocaList.Tests/Integration/Repositories/ArtistRepositoryResolutionTests.cs`
   - **Risk:** Medium. **Tests (A, Red first):** "Metalica" → `FuzzyCandidates` containing "Metallica" (score ≥ 0.82); rewrites/deletions per § 10.1.
   - **Demo:** service tests green.
   - **Review lane:** Elevated
+  > **Spec updated 2026-11-04 (3.9c merge `8163505b`, Verifier CONDITIONAL PASS):** `ArtistRepositoryResolutionTests.cs` deleted whole (its 3 tests were the artist `GetFuzzyCandidatePoolAsync` tests, authorised by plan § 10.1). **Follow-up W1:** no test runs the real `SimilarityScorer` on "Metalica"/"Metallica" (the service test mocks 0.94) — 3.10 / 5.3 must prove REQ-SFT-19 end to end, or add a `SimilarityScorerTests` case when a task next owns it.
 
 - [ ] **3.10 `SongService.SaveFromFormAsync`: every Save decision in the Service** [SEQUENTIAL — after 3.2c, 3.3, 3.9c, G4 Q3/Q4]
   - **Produces:** `SongFormSaveRequest`, `SongFormSaveOutcome` (+ `ArtistDecision`, `SongDecision`, `SaveField`), `ISongService.SaveFromFormAsync` (`design.md` § 3.5). Writes only through `CreateSongWithUrlsAsync`/`UpdateSongAsync`.

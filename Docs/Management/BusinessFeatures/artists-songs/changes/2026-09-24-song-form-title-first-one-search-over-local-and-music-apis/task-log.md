@@ -1396,3 +1396,4 @@ Note: the plan cited line numbers 73/101/128/152; actual tests were located by n
 - Tests: `Com falha: 0, Aprovado: 748, Total: 748` (baseline 751; delta -3 = -3 deleted repo tests, -1 deleted long-token test, +1 Metalica).
 - UnitOfWorkReadScopeTests still green (constructor unchanged).
 - No SafeAreaEdges/XAML touched. No tasks.md tick. No push.
+- **3.9c:** Red `1d20d01a`, Green `191c4410` (test file byte-identical Red→Green). Verifier (Opus) **CONDITIONAL PASS**, 0 blockers (W1 real-scorer proof → 3.10/5.3; W2 Green SHA recorded here; W3 deleted tests carried non-existent AC IDs 5.8–5.10, mapped to AC-5.2). Merged `8163505b`. Post-merge develop: `0 errors`; first full run `Com falha: 1, Aprovado: 747` (intermittent), re-run `Aprovado! – Com falha: 0, Aprovado: 748, Total: 748`.
