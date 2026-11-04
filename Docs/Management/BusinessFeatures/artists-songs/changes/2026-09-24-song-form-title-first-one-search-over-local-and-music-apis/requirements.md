@@ -405,14 +405,19 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   - **Q2 → confirmed** (REQ-SFT-11): the discard sheet is shown. Helder's long-term note (not in scope): a later
     stage may move records to a central DB with local and cloud copies and restrict edits.
   - **Q4 → confirmed** (REQ-SFT-23): "Save as new song", no Version required.
-  - **Q5 → PENDING clarification** (Helder answered "A", then added that persisting Version makes sense —
-    a candidate unique key artist + title + version, usable as a YouTube query). Orchestrator asked
-    2026-11-04 which applies. Also asked: does Deezer offer lyrics.
+  - **Q5 → B** (clarified 2026-11-04): a Deezer pick fills Title = `title_short` and Version =
+    `title_version`, and Version is persisted. Rationale (Helder): artist + title + version is the song's
+    identity (unique-key candidate) and the same three make a precise YouTube query. Lyrics: Deezer's public
+    API is believed not to return lyrics text — to be verified when the REQs are amended.
   - **Q6 → confirmed** (REQ-SFT-14): X on Artist also drops the pending external identity.
-  - **Q7 → 3,000 ms confirmed** (REQ-SFT-08), **plus a new ask:** the field must tell the cases apart with
-    their own message — at least *device offline* vs *Deezer unavailable* (Helder: "no internet connection
-    also results the same"; messages to be improved). Wording and case list PENDING Helder's approval;
-    REQ-SFT-06/08 to be amended once approved.
+  - **Q7 → 3,000 ms confirmed** (REQ-SFT-08), **plus a new ask (2026-11-04): two distinct messages** in the
+    field's supporting text, replacing the single "Online search unavailable":
+    1. Device offline → *"You're offline — showing songs from your library only."* — and the Deezer call is
+       skipped entirely (local results shown at once, no 3,000 ms wait).
+    2. Deezer timeout (> 3,000 ms) or any Deezer error → *"Online search isn't available right now —
+       showing your library only."*
+    Connectivity is read through an interface (no MAUI types in Services). REQ-SFT-06/08 and the Deezer-pick
+    REQs (Q5) are amended in the next spec step, then spec-reviewer, then Helder's approval.
   - **Q8 → confirmed:** ranking uses `TokenSortRatio` via `ISimilarityScorer.RankScore` (merged in 2.2).
   - **Q10 → not stored** (REQ-SFT-49): only the name is saved.
   - **Q11 → confirmed:** port 4 of the 5 `NestedUnitOfWorkTests` to the new save path; delete the 5th
