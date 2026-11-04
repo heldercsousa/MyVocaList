@@ -1,15 +1,5 @@
 namespace MyVocaList.Domain.Resolution;
 
-/// <summary>
-/// Describes a single field difference between the API-sourced candidate and the existing local record.
-/// Populated only when the target has <c>HasManualEdits = true</c>.
-/// Mergeable fields: Title, FeaturedArtists, Lyrics, Version — ArtistId is never mergeable here.
-/// </summary>
-public sealed record FieldDiff(
-    string Field,
-    string? ApiValue,
-    string? CurrentValue);
-
 /// <summary>A fuzzy candidate match for a song, scored by <c>ISimilarityScorer</c>.</summary>
 public sealed record SongMatch(
     int SongId,
@@ -27,10 +17,7 @@ public sealed record SongResolution(
     /// <summary>Set for <c>ExactExternalMatch</c> and <c>ExactLocalMatch</c> kinds.</summary>
     int? ExactMatchSongId,
     /// <summary>Populated when <c>Kind == FuzzyCandidates</c>.</summary>
-    IReadOnlyList<SongMatch> FuzzyCandidates,
-    /// <summary>Populated when the target record has <c>HasManualEdits = true</c>.</summary>
-    IReadOnlyList<FieldDiff> FieldDiffs,
-    bool TargetHasManualEdits);
+    IReadOnlyList<SongMatch> FuzzyCandidates);
 
 /// <summary>
 /// The full resolution outcome for an artist candidate.
