@@ -28,7 +28,6 @@ public interface ISongService
     /// <param name="title">New song title.</param>
     /// <param name="featuredArtists">Featured-artist names; null clears the field.</param>
     /// <param name="lyrics">Lyrics text; null clears the field.</param>
-    /// <param name="hasManualEdits">Whether the song now carries manual edits.</param>
     /// <param name="externalId">External provider song id; null = keep existing value.</param>
     /// <param name="externalProvider">External provider name; null = keep existing value.</param>
     /// <param name="version">Variant label (empty string = canonical); null = keep existing value (BUG-024).</param>
@@ -44,6 +43,29 @@ public interface ISongService
     /// </param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns><c>(true, message)</c> on success; <c>(false, reason)</c> on failure.</returns>
+    Task<(bool success, string message)> UpdateSongAsync(
+        int id, string title, string? featuredArtists, string? lyrics,
+        string? externalId = null, string? externalProvider = null, string? version = null,
+        int? artistId = null, string? newArtistName = null,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Legacy overload carrying the retired <c>hasManualEdits</c> flag. Forwards to the overload
+    /// without it and ignores the flag (REQ-SFT-37).
+    /// </summary>
+    /// <param name="id">Id of the song to update.</param>
+    /// <param name="title">New song title.</param>
+    /// <param name="featuredArtists">Featured-artist names; null clears the field.</param>
+    /// <param name="lyrics">Lyrics text; null clears the field.</param>
+    /// <param name="hasManualEdits">Ignored.</param>
+    /// <param name="externalId">External provider song id; null = keep existing value.</param>
+    /// <param name="externalProvider">External provider name; null = keep existing value.</param>
+    /// <param name="version">Variant label; null = keep existing value.</param>
+    /// <param name="artistId">Id of the original artist; null = keep existing value.</param>
+    /// <param name="newArtistName">Name of a not-yet-existing artist to create and link.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns><c>(true, message)</c> on success; <c>(false, reason)</c> on failure.</returns>
+    [Obsolete("hasManualEdits is retired (REQ-SFT-37); use the overload without it. Removed in 3.2c.")]
     Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics, bool hasManualEdits,
         string? externalId = null, string? externalProvider = null, string? version = null,

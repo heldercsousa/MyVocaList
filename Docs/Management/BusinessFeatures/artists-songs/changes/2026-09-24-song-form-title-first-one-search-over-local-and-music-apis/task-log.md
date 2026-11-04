@@ -543,6 +543,21 @@ _(not started)_
 
 - 2026-11-04 (orchestrator) — **Pre-dispatch G3 checks (plan § 0.2.2):** (1) LEDGER: no live branch (BUG-080 merged+closed; CATALOG-PROP deferred, no branch). (2) `git worktree list`: main only. (3) `git branch -a`: only `feat/uow-phase-4-1-catalog`, `feat/uow-phase-4-venue` (merged 2026-08-24). **Clear.** Worktree `.worktrees/sft-3.2b`, branch `task/sft-3.2b-remove-hasmanualedits`, from develop after 3.3b's merge.
 
+- 2026-11-04 (implementor) — **Status: To Review.** Inherited nothing (clean worktree). Context7 not needed (no external API). Not pushed (per briefing).
+  - `ISongService`: new overload without `hasManualEdits`; old overload kept `[Obsolete("... Removed in 3.2c.")]`. `SongService`: old overload forwards to the new one (flag ignored); `song.HasManualEdits = ...` writer removed; 3.2a logic and BUG-067 `OriginalArtist = null` untouched. `SongFormViewModel` call site drops the `true` argument. No CS0121 ambiguity.
+  - Edited `SongServiceTests.cs` (only the `hasManualEdits` argument dropped; no assertion/Times/return changed): UpdateSongAsync_ValidTitle_ReturnsSuccess, _SongNotFound_ReturnsFalse, _DuplicateTitleExcludingSelf_ReturnsFalse, _VersionChangedToNewVersionOfExistingTitle_Succeeds, _VersionChangedToExistingVersion_FailsDuplicate, _TitleEditedOnApiSourcedSong_KeepsExternalIdentity, _EditedTitleCollidesWithArtistTitleVersion_Rejected, _ExternalIdentityHeldByAnotherSong_Fails, _NewArtistName_CreatesArtistInSameUnitOfWork, _NewArtistCreationFails_ReturnsMessageAndDoesNotWrite, _BothArtistIdAndNewArtistName_Rejected, _WithLyrics_ReturnsSuccess, _WithExternalIdentity_PersistsProviderAndId, _WithNullExternalIdentity_DoesNotOverwriteExistingIdentity, _WithChangedArtistId_PersistsNewArtist, _NullArtistId_KeepsExistingArtist, _UnknownArtistId_ReturnsFalseAndDoesNotWrite, _ChangedArtistWithDuplicateTitle_ReturnsFalse, _WithVersion_PersistsVersion, _NullVersion_KeepsExistingVersion, _VersionTooLong_ReturnsFalse.
+  - Edited `SongFormViewModelTests.cs` (mock setups/verifies, `It.IsAny<bool>()` / `true` dropped; Times unchanged): SaveAsync_EditMode_SendsHydratedFieldsAndEditedVersion, SaveAsync_EditMode_ArtistChanged_SendsNewArtistIdToService, SaveAsync_EditMode_AfterHydration_PreservesArtistLink.
+  - **Superseded-test row (D6):** `SongFormViewModelTests.LoadSongForEdit_ApiImportedWithoutManualEdits_LocksArtistField` (BUG-024/BUG-008 setup, `HasManualEdits = false`) -> renamed `LoadSongForEdit_ApiImportedSong_LocksArtistField`, `HasManualEdits` removed from the setup, first comment line `// [AC] REQ-SFT-28: the stored artist loads in the picked state`; assertion (`IsArtistLocked`) unchanged.
+  - **Verification:** build `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` exit 0, 0 errors. Full suite: `Aprovado! - Com falha: 0, Aprovado: 671, Ignorado: 0, Total: 671` (baseline 671, delta 0). Census (os.walk, excl. obj/bin/Migrations): `hasManualEdits` only in ISongService.cs (4), SongService.cs (2), SongServiceUpdateIntegrationTests.cs (2), Bug068RegressionTests.cs (1). CS0618 for `UpdateSongAsync`: only SongServiceUpdateIntegrationTests.cs (52, 80) and Bug068RegressionTests.cs (31); other CS0618 hits are pre-existing `CreateSongWithUrlsAsync`.
+
+  ### Changed files
+  - `Domain/ServicesInterfaces/ISongService.cs`
+  - `Services/SongService.cs`
+  - `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
+  - `MyVocaList.Tests/Unit/Services/SongServiceTests.cs`
+  - `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`
+  - `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
+
 ## 3.2c
 
 ### Checkpoint
