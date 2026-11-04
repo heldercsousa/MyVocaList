@@ -6,7 +6,6 @@ public class Artist
     public string Name { get; set; }
     public string? ExternalProvider { get; set; }
     public string? ExternalId { get; set; }
-    public bool HasManualEdits { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
