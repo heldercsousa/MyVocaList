@@ -415,9 +415,49 @@ _(not started)_
 
 ## 5.1
 
-### Checkpoint
+**Status:** To Review
+**Started:** 2026-11-04 **Completed:** 2026-11-04
+**Plan:** plan.md § Task 5.1 · Level A · Review lane Elevated
 
-_(not started)_
+Context7 available; no new external API used (INavigationService is an existing project interface; pure deletion + one command). Inherited nothing (clean worktree).
+Emulator smoke deferred to Helder's device gate (agents never run an emulator).
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` (INavigationService ctor dependency (last param); `OpenExistingSongCommand`; removed merge/update-existing state, commands, `HandleCommitResultAsync`, `SelectedResolutionTargetId`, `_pendingResolution`, nested `MergeFieldRow` (was in the same file, no separate file))
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (merge sheet deleted; row button "Open existing" bound to `OpenExistingSongCommand`; "Save as new version" label)
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (**outside owned list, required**: removed merge-sheet sync/handlers that referenced the deleted `IsMergeSheetVisible` and `mergeSheet`; otherwise the page does not compile)
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (CreateSut passes `INavigationService` mock; new REQ-SFT-22 test; superseded test deleted)
+- `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` (`AddSingleton(Mock.Of<INavigationService>())` in the SongFormViewModel graph test + using)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
+
+### Red output (verbatim; compile-error Red, commit fffe4a66, Lane: RED)
+```
+SongFormViewModelTests.cs(26,20): error CS1729: 'SongFormViewModel' does not contain a constructor that takes 9 arguments
+SongFormViewModelTests.cs(47,19): error CS1061: 'SongFormViewModel' does not contain a definition for 'OpenExistingSongCommand' and no accessible extension method 'OpenExistingSongCommand' accepting a first argument of type 'SongFormViewModel' could be found
+```
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1`: 0 errors (NU1903 warnings only), 1 attempt.
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1`: `Aprovado! - Com falha: 0, Aprovado: 668, Ignorado: 0, Total: 668` (baseline 668; delta 0 = +1 new REQ-SFT-22 test, -1 superseded).
+- Step 3 census (Python scan) of `SongFormViewModel.cs`, `SongFormPage.xaml`, `SongFormViewModelTests.cs` for `CommitAsync(`, `ResolutionChoice`, `FieldDiff`, `MergeFieldRow`, `TargetHasManualEdits`, `ConfirmUpdateExisting`, `IsMergeSheetVisible`: `hits 0`.
+
+### AC matrix
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-SFT-22 Open existing navigates to `../song-form?songId=N`, sheet closes | `SongFormViewModel.OpenExistingSongAsync` / `OpenExistingSongCommand`; XAML buttons | `OpenExistingSong_FromResolutionSheet_NavigatesToEditFormReplacingAddForm` |
+| REQ-SFT-24 no overwrite path | `CommitAsync`, update-existing and merge flow removed from VM (census 0) | census |
+| REQ-SFT-38 no merge sheet | merge sheet, `MergeFieldRow`, rows/commands removed (VM, XAML, code-behind) | census; superseded test removed |
+
+### Superseded tests
+| Where (develop) | Test | Superseded AC | Replacing REQ |
+|---|---|---|---|
+| `SongFormViewModelTests.cs:602` (plan cites :707; line drift) | `ConfirmUpdateExisting_TargetHasManualEdits_PopulatesMergeRows` (deleted) | AC-4.2 | REQ-SFT-38 |
+| none found | tests of `ConfirmUpdateExistingCommand` / `SelectResolutionCandidateCommand`: none existed besides the above (census) | AC-1.1 "Update existing" | REQ-SFT-22/24 (covered by the new Open existing test) |
+
+### Deviations / notes
+- `SongFormPage.xaml.cs` edited though not in the owned list (mechanical removal, see above). Not a spec gap that blocks; flagging for review.
+- Candidate-row button relabelled "Open existing" (was "Select") and bound to `OpenExistingSongCommand`, so tapping a fuzzy-candidate row also opens that song (REQ-SFT-23 direction); the Save flow itself is replaced in 5.3.
+- Requested spec note: tasks.md 5.1 Files owned should list `SongFormPage.xaml.cs`; the `MergeFieldRow` file did not exist separately (nested class).
 
 ## 5.2
 

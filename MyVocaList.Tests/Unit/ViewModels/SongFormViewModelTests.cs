@@ -2,6 +2,8 @@
 using MyVocaList.Contracts.DTOs;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
+using MyVocaList.Navigation;
+using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -9,6 +11,8 @@ public class SongFormViewModelTests
 {
     private static SongKaraokeUrlDto MakeDto(string videoId = "abc123", int songId = 42) =>
         new(videoId, songId, 0, null, null, DateTime.UtcNow, null, false);
+
+    private readonly Mock<INavigationService> _navigationMock = new();
 
     private SongFormViewModel CreateSut(
         Mock<ISongKaraokeUrlService>? urlService = null,
@@ -27,7 +31,23 @@ public class SongFormViewModelTests
             new Mock<ILogger<SongFormViewModel>>().Object,
             (urlService ?? new Mock<ISongKaraokeUrlService>()).Object,
             (secureStorage ?? new Mock<ISecureStorageWrapper>()).Object,
-            messenger ?? new Mock<IMessenger>().Object);
+            messenger ?? new Mock<IMessenger>().Object,
+            _navigationMock.Object);
+    }
+
+    // ── Resolution sheet: Open existing (Task 5.1) ─────────────────────────
+
+    [Fact]
+    // [AC] REQ-SFT-22: Open existing on the resolution sheet opens the stored song's edit form in place of the add form.
+    public async Task OpenExistingSong_FromResolutionSheet_NavigatesToEditFormReplacingAddForm()
+    {
+        var sut = CreateSut();
+        var match = new SongMatch(77, "Creep", "", "Radiohead", 1.0);
+
+        await sut.OpenExistingSongCommand.ExecuteAsync(match);
+
+        _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=77"), Times.Once);
+        Assert.False(sut.IsResolutionSheetVisible);
     }
 
     // ── RemoveUrlAsync (edit mode) ─────────────────────────────────────────
@@ -593,40 +613,6 @@ public class SongFormViewModelTests
 
         Assert.Null(exception);
         Assert.False(sut.HasYouTubeApiKey);
-    }
-
-    // ── Resolution sheet: merge sheet state from FieldDiffs ───────────────
-
-    // [AC] AC-4.2 — target has manual edits → merge field rows populated
-    [Fact]
-    public async Task ConfirmUpdateExisting_TargetHasManualEdits_PopulatesMergeRows()
-    {
-        var diffs = new List<FieldDiff> { new("Title", "API Title", "Current Title") };
-        var resolution = new Mock<ISongResolutionService>();
-        var songService = new Mock<ISongService>();
-        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
-                   .Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
-                   .Returns((true, string.Empty));
-        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 77, [], diffs, true));
-
-        var sut = CreateSut(songService: songService, resolutionService: resolution);
-        sut.SongTitle = "Test Song";
-        sut.SelectedArtistId = 1;
-        sut.SelectedArtistName = "Artist";
-
-        // Trigger resolution
-        await sut.SaveCommand.ExecuteAsync(null);
-        Assert.True(sut.IsResolutionSheetVisible);
-
-        // Now confirm update
-        sut.SelectedResolutionTargetId = 77;
-        await sut.ConfirmUpdateExistingCommand.ExecuteAsync(null);
-
-        Assert.True(sut.IsMergeSheetVisible);
-        Assert.Single(sut.MergeFieldRows);
-        Assert.Equal("Title", sut.MergeFieldRows[0].Field);
     }
 
     // ── BUG-024: edit-mode hydration + full-data save (regression) ────────
