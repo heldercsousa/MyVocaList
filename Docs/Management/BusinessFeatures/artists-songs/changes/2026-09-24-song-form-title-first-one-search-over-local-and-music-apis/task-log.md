@@ -644,9 +644,46 @@ _(not started)_
 
 ## 3.5b
 
-### Checkpoint
+**Status:** To Review
+**Started:** 2026-11-04
+**Completed:** 2026-11-04
+**Lane:** Standard · Level C · Branch `task/sft-3.5b-artist-readmodel`
 
-_(not started)_
+### Context
+- Context7 unavailable this session; no new library API is introduced (positional record shrink only, existing EF projections). Verified via existing codebase patterns.
+- Inherited state: clean worktree at start (no prior edits).
+
+### Census (plan § 0.7 `os.walk` scan, before edits)
+Terms `['ArtistListItem(','ArtistListItemDto(','HasManualEdits']`. Owned-file hits: `ArtistListItemDto.cs:3,7`, `ArtistListItem.cs:10,12`, `ArtistRepository.cs:47,51,74`, `SongFormViewModelTests.cs:428,452,1054,1056,1097`, `ArtistSuggestionServiceTests.cs:50`. Plan line numbers for `SongFormViewModelTests.cs` (424, 448, 491, 1177, 1179, 1220) had drifted; located by content. No mapper uses `ArtistListItemDto` (no target-typed `new(` hit).
+Out-of-scope hits (untouched): `Domain/Entity/Artist.cs:9`, `Domain/Entity/Song.cs:14`, `Infra/EntityEFConfig/ArtistConfiguration.cs:33`, `Infra/EntityEFConfig/SongConfiguration.cs:48` (3.6b); `Services/ArtistService.cs:107` (3.6a); `Infra/Repository/CatalogRepository.cs:48`, `Infra/Repository/SongRepository.cs:46`, `Contracts/DTOs/List/SongListItemDto.cs:10` (3.5a).
+
+### Changed files:
+- `Domain/ReadModels/ArtistListItem.cs`
+- `Contracts/DTOs/List/ArtistListItemDto.cs`
+- `Infra/Repository/ArtistRepository.cs`
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`
+- `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section only)
+
+### Edits (post-edit re-read done for each)
+- `ArtistListItem(int Id, string Name, string ExternalProvider, int CatalogCount)`; `<param name="HasManualEdits">` XML doc removed.
+- `ArtistListItemDto(int Id, string Name, string? ExternalProvider, int CatalogCount)`.
+- `ArtistRepository.GetPagedAsync` projection and `SearchByNameAsync` projection: `HasManualEdits` argument removed; SQL still one statement (scalar `CatalogEntries.Count()` retained).
+- `SongFormViewModelTests.cs`: 5 positional constructions, `false` argument dropped (`:428, :452, :1054, :1056, :1097`). Assertions and expected values unchanged.
+- `ArtistSuggestionServiceTests.cs:50`: `false` argument dropped.
+
+### Test decision
+Level C (DTO/read-model plumbing, projection simplification). No new test. Existing suite covers the projections and the VM/Service paths that consume them. No AC is newly implemented here; REQ-SFT-37 is verified by the census and by the absence of the field from the read models. Superseded tests: none (no assertions changed).
+
+### Build notes
+Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` → 0 errors, 34 warnings (1st attempt, `ok dotnet build: 6 projects, 0 errors, 34 warnings`). Tests: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` → `Aprovado! – Com falha: 0, Aprovado: 671, Ignorado: 0, Total: 671` (baseline 671, delta 0). No flaky failures this run.
+Emulator smoke: deferred to Helder's device gate (not run; no `-t:Run`, no emulator).
+Census after edits: zero `HasManualEdits` / old-arity `ArtistListItem(` hits in owned files; remaining hits are only the out-of-scope files listed above.
+Commit SHA: see commit (recorded in handback).
+Files written and re-read: `ArtistListItem.cs` (7-12), `ArtistListItemDto.cs` (3-8), `ArtistRepository.cs` (43-74), `SongFormViewModelTests.cs` (428, 452, 1054, 1056, 1097), `ArtistSuggestionServiceTests.cs` (50).
+
+### Spec notes requested
+None required. No `> **Spec updated**` note needed: the change is within REQ-SFT-37 and plan § 3.5b as written.
 
 ## 3.6a
 

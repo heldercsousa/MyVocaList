@@ -48,7 +48,6 @@ public class ArtistRepository : IArtistRepository
                 a.Id,
                 a.Name,
                 a.ExternalProvider,
-                a.HasManualEdits,
                 a.CatalogEntries.Count()))             // Scalar subquery in one SQL statement
             .ToListAsync(ct);
 
@@ -71,7 +70,7 @@ public class ArtistRepository : IArtistRepository
         return await q
             .OrderBy(a => a.Name)
             .Take(maxResults)
-            .Select(a => new ArtistListItem(a.Id, a.Name, a.ExternalProvider, a.HasManualEdits, 0))
+            .Select(a => new ArtistListItem(a.Id, a.Name, a.ExternalProvider, 0))
             .ToListAsync(ct);
     }
 
