@@ -1,12 +1,13 @@
 ---
 id: system-tools-tokens-grew-18-3k-to-25-4k-across-fresh-sessions
 title: System tools tokens grew 18.3k to 25.4k across fresh sessions
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-03
 section: DevCycleCraft
 parent: per-agent-context-isolation
 goal: The always-loaded System tools block grew about 7k between sessions on 2026-11-03 and cancelled the skill-listing savings. Find what loads and cut what is unused.
 gate: Root cause named with /context evidence; each lever applied one at a time and measured in a fresh process.
+closed: 2026-11
 kind: change
 ---
 
@@ -24,7 +25,17 @@ The always-loaded System tools block grew about 7k between sessions on 2026-11-0
 | Fresh #3 (after plugin disable) | 25.4k | 2.8k | 0.5k | 49.0k |
 | Fresh #4 (baseline, no change; sqlite down) | 26.1k (+28.2k deferred) | 2.8k | 0.5k | 62.6k* |
 | Fresh #5 (2026-11-04, sqlite up after BUG-083 pin) | 25.4k (+28.2k deferred) | 2.8k | 0.5k | 49k |
-| Fresh #6 — lever 1: `deny: ["Artifact"]` (`settings.local.json`; Helder OK 2026-11-04) | _pending_ | | | |
+| Fresh #6 — lever 1: `deny: ["Artifact"]` (`settings.local.json`; Helder OK 2026-11-04) | **14.0k** (−11.4k) | 2.8k | 0.5k | **37.4k** (−11.6k) |
+
+## Result (2026-11-04)
+
+| Item | Finding |
+|---|---|
+| Root cause | `Artifact` built-in tool schema (~11k), always loaded; not used in this project |
+| Lever kept | `permissions.deny: ["Artifact"]` in `.claude/settings.local.json` — **gitignored, local-only**; re-apply on a new machine |
+| Revert | delete the `deny` entry |
+| Not applied | Bash/PowerShell shell lever — 14k is already below the 18.3k start-of-day; a shell deny risks the rtk Bash hook |
+| Residual | built-in `artifact-*` skills still listed (~390 tokens); left as-is |
 
 \* Total includes 14.9k Messages (measured mid-session). Deferred line is back in #4 → hypothesis "deferred vanished" not confirmed;
 #3's output may just have omitted it. Always-on extras in #4: Claude Docs MCP (3 tools loaded + 1.5k MCP instructions incl. Docs).
