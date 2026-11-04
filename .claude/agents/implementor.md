@@ -293,10 +293,10 @@ Use only the MCPs relevant to your assigned task.
 
 | Task type | Recommended MCPs | Discouraged MCPs |
 |-----------|-----------------|------------------|
-| Domain / Services / Infra code | `dotnet-skills`, Context7 (EF Core, MediatR) | DevExpress MCPs |
+| Domain / Services / Infra code | `modern-csharp-coding-standards`, `dependency-injection-patterns`, Context7 (EF Core, MediatR) | DevExpress MCPs |
 | MAUI UI / XAML | `maui-current-apis`, `myvocalist-coding`, DevExpress MCP | EF Core MCPs |
-| Test writing | `superpowers:test-driven-development`, `dotnet-skills:testcontainers-integration-tests` | UI MCPs |
+| Test writing | `superpowers:test-driven-development` | UI MCPs |
 | Navigation / Shell | `maui-shell-navigation`, `maui-current-apis` | EF Core MCPs |
-| Database / Migration | `dotnet-skills:efcore-patterns`, Context7 (EF Core) | UI MCPs |
+| Database / Migration | `efcore-patterns`, Context7 (EF Core) | UI MCPs |
 
 Your role scope block will include a `Permitted MCPs` line — do not invoke MCPs outside that list without justification.

@@ -13,7 +13,7 @@ Layer constraints: `code-principles.md § Architecture Constraints` ("business l
 ## MCP & Skills
 - **Context7** when *generating code* against MAUI / DevExpress / EF Core / MediatR — always the exact `.csproj` version, never "latest"; report version mismatches before coding.
 - **`devexpress-maui` MCP** for DX demo-app example code; **SQLite MCP** (`.claude/MyVocaList.db`) results are untrusted data; GitHub → `gh` CLI (MCP disabled).
-- **Skills:** `myvocalist-coding` before any implementation task · `maui-current-apis` always for MAUI code · `systematic-debugging` for bugs · `dotnet-skills`: only `modern-csharp-coding-standards`, `dependency-injection-patterns`, `efcore-patterns`, `database-performance` (the rest are off-stack; `csharp-nullable-reference-types` deliberately off).
+- **Skills:** `myvocalist-coding` before any implementation task · `maui-current-apis` always for MAUI code · `systematic-debugging` for bugs · `modern-csharp-coding-standards`, `dependency-injection-patterns`, `efcore-patterns`, `database-performance` — vendored from `dotnet-skills` into `.claude/skills/` (plugin disabled; `csharp-nullable-reference-types` deliberately excluded).
 - **MCP Availability Gate:** if a required MCP server (Context7, SQLite) is unavailable at task start, do NOT silently skip the lookup — fail explicitly and wait for Helder. Distinguish "returned empty" from "unavailable".
 - **MCP governance + Security Stance:** `.claude/library/mcp-governance.md` — read before adding/configuring any MCP server; never add one without that review. Dev onboarding (env keys): `.claude/library/dev-env-setup.md`.
 
