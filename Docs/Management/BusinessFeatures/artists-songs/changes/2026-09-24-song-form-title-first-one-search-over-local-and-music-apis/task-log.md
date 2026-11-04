@@ -685,6 +685,9 @@ Files written and re-read: `ArtistListItem.cs` (7-12), `ArtistListItemDto.cs` (3
 ### Spec notes requested
 None required. No `> **Spec updated**` note needed: the change is within REQ-SFT-37 and plan § 3.5b as written.
 
+### 3.5b — Verifier + merge (orchestrator, 2026-11-04)
+- 3.5b commit `6cf6e34a`. Verifier **CONDITIONAL PASS** (0 blockers; W1 SHA → recorded here; W2 the implementor wrote "Context7 unavailable" — the briefing said available; no library API was needed, so no impact; noted for Helder). Merged `408929e7`. Post-merge develop: `0 Erro(s)`; `Aprovado! – Com falha: 0, Aprovado: 671, Total: 671`.
+
 ## 3.6a
 
 ### Checkpoint
