@@ -1450,7 +1450,7 @@ Compiler output (`dotnet build MyVocaList.Tests -m:1`, first errors; the compile
 - this task-log section
 
 ### Green (Builder, Opus) - 2026-11-04
-**Status:** To Review (Architectural lane - Helder review before merge). Red `f4fd7de1` · Green: see the line below. Inherited: clean worktree, no half-done edits. Test file untouched (byte-identical to Red).
+**Status:** To Review (Architectural lane - Helder review before merge). Red `f4fd7de1` · Green `5250d0fc`. Inherited: clean worktree, no half-done edits. Test file untouched (byte-identical to Red).
 
 #### Implementation
 - `SaveFromFormAsync` (Services/SongService.cs): rule 1 title/version/artist-required validation OUTSIDE any unit of work (REQ-UOW-41); then ONE `ExecuteReadAsync` that holds rule 2 (`ResolveFormArtistAsync`: typed-name `IArtistService.ValidateNameInput` -> decision -> `IArtistResolutionService.ResolveAsync(new ArtistCandidate(trimmed text, null, null))`) and rule 3 (`RunSongGuardAsync`, add mode + `SongDecision.None` only); rule 4 (`ValidateVersionInput(v, isRequired: true)`) after the read; rule 5 calls `CreateSongWithUrlsAsync(int?, string?, ...)` / `UpdateSongAsync(..., externalId: null, externalProvider: null, ..., artistId, newArtistName)`. No write scope opened by the method itself.
