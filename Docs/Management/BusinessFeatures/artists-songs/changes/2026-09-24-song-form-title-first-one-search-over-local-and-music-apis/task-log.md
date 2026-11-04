@@ -943,20 +943,20 @@ REQ-SFT-19 and REQ-SFT-30…33 are enabled by this schema but exercised by the 3
 
 ## 3.9
 
-**Status:** blocked: spec gap (no code written; nothing committed except this note)
+**Status:** In progress (Red committed)
 
-### Spec gap: unowned ISongRepository implementer breaks the build; no logger in SongRepository
-**Location:** plan.md Task 3.9 Files list vs `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs:156` (`ThrowOnAddSongRepository : ISongRepository`, forwards every member to `_inner`).
-**Gap description:** (1) Adding 3 members to `ISongRepository` makes that private decorator fail to compile (CS0535 x3); the file is not in Files owned. (2) The plan wants a logged Error on "no such table: SongSearch", but `SongRepository` takes only `AppDbContext` (ctor used at `SongRepositoryTests.cs:17`, `SongRepositoryResolutionTests.cs:21`) and Infra has no logger anywhere.
-**Options:**
-- Option A: add the 3 forwarding members to `ThrowOnAddSongRepository` (file added to 3.9 ownership); log via an optional `ILogger<SongRepository>? logger = null` ctor parameter (DI resolves it, existing `new SongRepository(_db)` calls keep compiling).
-- Option B: split the decorator fix into a separate task; log through a different mechanism chosen by Helder.
-**Recommendation:** Option A, smallest change.
-**Blocking:** Yes
+### Orchestrator decision 2026-11-04 (Option A, recorded in tasks.md on develop 55d906e9)
+Also owned: `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` (only 3 forwarding members in `ThrowOnAddSongRepository`). `SongRepository` gets optional `ILogger<SongRepository>? logger = null`, stored as `logger ?? NullLogger<SongRepository>.Instance`.
+
+### Red output (dotnet test --filter SongRepositorySearchTests, compile errors, excerpt)
+- CS1061 `SongRepository` has no `SearchTitleCandidatesAsync` (lines 71, 79, 87, 97, 107, 124, 132, 151, 152)
+- CS1061 `SongRepository` has no `FindByExternalIdsAsync` (line 167)
+- CS1061 `SongRepository` has no `FindByTitleAndArtistNamesAsync` (lines 177, 188, 190)
+- CS0103 `FtsQueryBuilder` does not exist (lines 52, 60, 65)
 
 ### Checkpoint
-
-_(stopped before Red; worktree clean apart from this section)_
+Red committed. Next: Green (SongSearchHit, ISongRepository, SongRepository, FtsQueryBuilder, decorator forwarding members).
+Context manifest: SongRepositorySearchTests.cs; Domain/RepositoryInterface/ISongRepository.cs; Infra/Repository/SongRepository.cs; SongServiceNewArtistUnitOfWorkTests.cs; design.md 3.1/6.2.
 
 ## 3.9b
 
