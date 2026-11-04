@@ -421,6 +421,10 @@ Note on `FailureTupleAfterArtistStaged_WritesNothing`: the title is validated be
 
 _(not started)_
 
+### Verifier + merge (orchestrator, 2026-11-04)
+- Verifier **PASS** (0 blockers/warnings). Red reason `Expected ExactLocalMatch / Actual NoMatch` judged valid (same cause as the plan's id assert). Census `NestedUnitOfWorkTests`: 7 hits, all `//`/`///` provenance comments, no code reference — meets the zero-code-reference intent. Info: three unused constructor fields → folded into 3.3b (tasks.md note).
+- Merged `c59c61d1`. Post-merge develop: `0 Erro(s)`; `Aprovado! – Com falha: 0, Aprovado: 666, Total: 666` (678 − 12).
+
 ## 3.3b
 
 ### Checkpoint
