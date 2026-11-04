@@ -392,11 +392,28 @@ Note on `FailureTupleAfterArtistStaged_WritesNothing`: the title is validated be
 ### Spec notes requested
 - REQ-SFT-21: a blank/whitespace `newArtistName` is treated as not supplied.
 
+### Verifier Verdict — 2026-11-04 (recorded on develop by the orchestrator)
+**Result:** CONDITIONAL PASS (Opus verifier; build 0 errors; 677/677 re-run)
+- [PASS] Signatures match design.md § 3.2; `[Obsolete]` forwarder with `newArtistName: null`
+- [PASS] XOR guard outside the lambda; all repos/services from `sp`; REQ-SFT-26 before artist create; `FlushAsync` before the song is staged
+- [PASS] `4d4125be` test-only reorder, assertions/`[AC]` unchanged; the Green commit touches no test
+- [PASS] REQ-SFT-18/21/26/52 each covered
+- [PASS] All old-overload callers bind to the old overload (incl. `SongResolutionService.cs:216`)
+
+**W1 (applied):** CS0618 list completed — add `Services/SongResolutionService.cs(216)` (it binds to the old overload; a clean build shows the warning, the Builder's incremental build did not). Full list: `SongFormViewModel.cs(568)`, `SongResolutionService.cs(216)`, `Bug068RegressionTests.cs(128)`, `SongFormViewModelTests.cs(180, 199)`.
+**W2 (applied, matrix note):** `CreateSongWithUrlsAsync_FailureTupleAfterArtistStaged_WritesNothing` covers "a title failure writes nothing"; it does not stage an artist (title validation runs first). A post-flush failure *tuple* is unreachable on the new-artist path (a just-created artist has no songs, so the duplicate check cannot fire; invalid URLs are skipped), so REQ-SFT-18's rollback is fully exercised by `ThrowAfterArtistStaged_RollsBackBoth` (exception path, real SQLite). A rename is a Tester task, deferred (not blocking).
+**I1 (noted):** forwarding means the old overload now also enforces REQ-SFT-26 (new failure "This music-database song is already in your library" for the VM and `SongResolutionService` CreateNewVersion callers), consistent with REQ-SFT-26; "behaviour otherwise unchanged" is not literally true.
+**Merge:** `4748326b` (`--no-ff`) 2026-11-04. Post-merge on develop: `0 Erro(s)`; `Aprovado! – Com falha: 0, Aprovado: 677, Total: 677`.
+
 ## 3.2a
 
 ### Checkpoint
 
-_(not started)_
+- 2026-11-04 (orchestrator) — **Pre-dispatch G3 checks (plan § 0.2.2):**
+  1. `LEDGER.md` rows with a live branch: BUG-080 (`fix/bug-080-venue-seed-debug-only`) — touches only `Infra/Migrations/20260211055225_venuesSeedForTest.cs` (edit, no new migration, no snapshot), `MyVocaList.Tests/Integration/Migrations/VenuesSeedMigrationDownTests.cs`, its README (`git diff --name-only develop...` verified); no `SongService.cs`/`ISongService.cs`; not a migration-adding branch. CATALOG-PROP: deferred, no branch.
+  2. `git worktree list`: main (develop `4748326b`), `.worktrees/bug-080`, `.worktrees/sft-3.1` (merged; being removed).
+  3. `git branch -a` matches: `feat/uow-phase-4-1-catalog` and `feat/uow-phase-4-venue` — both merged into develop 2026-08-24 (UoW phases 4.1/4.4, `merge-base --is-ancestor` true), not live; `fix/bug-080-…` as in 1.
+  - **Result: clear to dispatch.** Worktree `.worktrees/sft-3.2a`, branch `task/sft-3.2a-update-version-uniqueness`, from develop after 3.1's merge.
 
 ## 3.3
 
