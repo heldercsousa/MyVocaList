@@ -58,8 +58,9 @@ public sealed record SongSearchHit(
 Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesAsync(string query, int take, CancellationToken ct);
 /// REQ-SFT-05(a): songs holding any of the given external ids for one provider.
 Task<IReadOnlyList<SongSearchHit>> FindByExternalIdsAsync(string provider, IReadOnlyCollection<string> externalIds, CancellationToken ct);
-/// REQ-SFT-05(b): collated (title, artist name) matches with the given version (""), batch.
-Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName)> pairs, string version, CancellationToken ct);
+/// REQ-SFT-05(b): collated (title, artist name, version) matches, batch. Amended 2026-11-04 (Q5 = B):
+/// the version comes per item from the Deezer row, no longer a single "" for the whole batch.
+Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName, string Version)> items, CancellationToken ct);
 /// REQ-SFT-42: the id of the collated (artist, title, version) match, or null. Replaces the
 /// Exists + pool re-match + OrdinalIgnoreCase path (SongResolutionService.cs:96-127).
 Task<int?> FindIdByTitleVersionForArtistAsync(int artistId, string title, string version, int? excludeId, CancellationToken ct);
@@ -114,13 +115,16 @@ it is left in place for its test fixtures and flagged as a follow-up, not change
 ### 3.3 Suggestion services
 
 ```csharp
-// Contracts/DTOs/Suggestions/SongSuggestionDto.cs: add Version ("" for remote) and
+// Contracts/DTOs/Suggestions/SongSuggestionDto.cs: add Version (remote: the normalised Deezer
+// title_version, "" when none — REQ-SFT-12, amended 2026-11-04) and
 // LocalArtistName (stored spelling; null when the artist is not local).
+// Contracts/DTOs/Suggestions/RemoteSearchStatus.cs (new, 2026-11-04, REQ-SFT-06/53)
+public enum RemoteSearchStatus { Ok, Offline, Unavailable }
 // Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs (new)
 public sealed record SongRemoteSearchResult(
     IReadOnlyList<SongSuggestionDto> Promoted,  // Deezer hits that exist locally, as local rows (REQ-SFT-05)
     IReadOnlyList<SongSuggestionDto> Remote,    // <= MaxSearchResults, not in the library
-    bool RemoteUnavailable);                    // REQ-SFT-06
+    RemoteSearchStatus Status);                 // REQ-SFT-06/53 (was bool RemoteUnavailable)
 
 // Services/ISongSuggestionService.cs: GetLocalAsync/GetRemoteAsync are replaced by two calls, so
 // local options can be shown before Deezer answers (REQ-SFT-07)
@@ -135,13 +139,16 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
    Rank with `RankScore(q, max over {title, title + " " + artist})`, stable over DB order; take 5.
 
 `SearchTitleRemoteAsync`:
-1. Below 3 characters → empty, no call.
+1. Below 3 characters → empty, no call, `Status = Ok`.
+1a. *(2026-11-04, REQ-SFT-53)* `INetworkStatus.HasInternetAccess` (§ 3.6) is `false` → empty,
+   **no provider call**, `Status = Offline`, log Information. Read once per call, never cached.
 2. Deezer `SearchSongsAsync(q)` **outside** any unit-of-work lambda (no open scope during HTTP,
    existing test `SongSuggestionThresholdTests.cs:128`), bounded by a linked CTS with
    `CancelAfter(3000)`. Caller cancellation → rethrow (stale query). Any other exception, the
-   timeout, or a provider-reported error (§ 3.4) → `RemoteUnavailable = true`, log Warning.
+   timeout, or a provider-reported error (§ 3.4) → `Status = Unavailable`, log Warning.
 3. Dedup in one `ExecuteReadAsync`: `FindByExternalIdsAsync("Deezer", ids)`, then
-   `FindByTitleAndArtistNamesAsync(pairs, "")` for the rest. A hit whose song id is not in
+   `FindByTitleAndArtistNamesAsync(triples)` for the rest, each triple = (Deezer `title_short`,
+   artist name, normalised version) per REQ-SFT-05(b)/12 *(2026-11-04: was pairs with version "")*. A hit whose song id is not in
    `shownLocalSongIds` goes to `Promoted`; either way the remote row is dropped. Tier (c) similarity
    dedup (`SongSuggestionService.cs:130-175`) is deleted: it hid other artists' songs.
 4. For remaining remote rows, resolve `LocalArtistId/LocalArtistName` by collated artist name in the
@@ -159,8 +166,19 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
   `artist:` qualifiers (REQ-SFT-35; `DeezerProvider.cs:47-50` today). `artistHint` is ignored and
   removed from the title-search path. Maps `id`, `title`, `artist.name` (Q5 may add `title_short`/
   `title_version`).
+  > **Spec updated 2026-11-04 (Q5 = B, REQ-SFT-12):** the provider is the anti-corruption boundary
+  > for Deezer's shape. `MusicSearchResultDto` (`Contracts/DTOs/MusicSearchResultDto.cs`) gains a
+  > trailing optional `string? Version = null` (optional so existing constructions, e.g.
+  > `MusicBrainzProvider` until 4.1b and test fixtures, still compile). `DeezerProvider` maps
+  > `SongTitle` = `title_short` (fallback `title` when `title_short` is missing or empty) and
+  > `Version` = `NormalizeVersion(title_version)`: trim, remove **one** enclosing `( )` or `[ ]` pair,
+  > trim again, `""` when missing or empty. It is a `private static` helper in `DeezerProvider`. This is
+  > data shaping of a provider field, not case/accent normalisation for search or deduplication, so the
+  > `constraints-registry.md` HARD RULE does not apply (dedup still compares through
+  > `EF.Functions.Collate`, REQ-SFT-05). Deezer exposes no lyrics text (verified on the live API
+  > 2026-11-04; requirements REQ-SFT-12 note), so nothing maps to `Lyrics`.
 - **Field surface used, no new option property:** the "In your library"/"Deezer" labels are inside
-  `AutocompleteSuggestion.SupportingText`; "Online search unavailable" is `AutocompleteDXField.SupportingText`
+  `AutocompleteSuggestion.SupportingText`; the online-search note (offline or unavailable, REQ-SFT-06, amended 2026-11-04) is `AutocompleteDXField.SupportingText`
   (REQ-ACF-12c), bound to `TitleSupportingText` / `NameSupportingText`. There is no status row.
 - **Append capability (REQ-SFT-07), requested from the dependency item.** DX `AsyncItemsSourceProvider`
   takes one result list per `ItemsRequested`, so the Field cannot show local options and add Deezer
@@ -222,12 +240,52 @@ Rules, in order (each a Level A test in `SongServiceSaveFromFormTests`):
 5. Write: add → `CreateSongWithUrlsAsync(artistId | null, newName | null, …)`; edit →
    `UpdateSongAsync(…, artistId | null, newName | null)`. Tuple `(false, msg)` → `Failed`; else `Saved`.
 
+### 3.6 Network status (new 2026-11-04, REQ-SFT-53)
+
+```csharp
+// Domain/ServicesInterfaces/INetworkStatus.cs (new) — no MAUI type in Domain or Services
+public interface INetworkStatus
+{
+    /// false only when the platform reports no internet route (NetworkAccess None or Local).
+    /// Unknown and ConstrainedInternet return true: the remote call is attempted, and a failure
+    /// yields RemoteSearchStatus.Unavailable (REQ-SFT-53). Read live on every call; never cached.
+    bool HasInternetAccess { get; }
+}
+
+// MyVocaList/Platform/MauiNetworkStatus.cs (new, app project) — the only MAUI-aware piece
+internal sealed class MauiNetworkStatus(IConnectivity connectivity) : INetworkStatus
+{
+    public bool HasInternetAccess =>
+        connectivity.NetworkAccess is not (NetworkAccess.None or NetworkAccess.Local);
+}
+```
+
+- `IConnectivity` / `NetworkAccess` are `Microsoft.Maui.Networking` (MAUI Essentials). Verified via Context7
+  against MAUI 10.0.20's `PublicAPI.Shipped.txt` 2026-11-04: `NetworkAccess` = `Unknown(0)`, `None(1)`,
+  `Local(2)`, `ConstrainedInternet(3)`, `Internet(4)`. The implementor re-checks against the `.csproj` pin.
+- DI in **`MauiProgram.cs`**, beside the other MAUI-only services (`INavigationService`, `MauiProgram.cs:107`),
+  **not** in `ServiceCollectionExtensions.AddAppServices`: the off-device DI tests build `AddAppServices`, and
+  touching `Connectivity.Current` there would throw off-device (the `AppInfo` failure class seen in COPY-YR).
+  `builder.Services.AddSingleton<IConnectivity>(_ => Connectivity.Current)` (factory: lazy) and
+  `builder.Services.AddSingleton<INetworkStatus, MauiNetworkStatus>()`. Singleton: stateless, reads the live
+  platform value. DI graph tests that resolve a suggestion service add `Mock.Of<INetworkStatus>()`, as they
+  already do for `INavigationService`.
+- Android needs the `ACCESS_NETWORK_STATE` permission for `Connectivity`. The implementor checks
+  `Platforms/Android/AndroidManifest.xml` and adds it if absent (it is a normal, install-time permission).
+- Consumers: `SongSuggestionService` and `ArtistSuggestionService` (constructor). Tests use
+  `Mock<INetworkStatus>`; the MAUI class gets a Level-C note (no unit test: it is a one-line platform
+  adapter; manual check in the on-device gate, airplane mode).
+- **Why not test-and-call (just let `HttpClient` fail)?** Offline would then wait for the DNS/connect
+  failure (often seconds on Android) and show the unavailable note instead of the offline note, which is
+  exactly the confusion Helder asked to remove (Q7).
+
 ## 4. ViewModel contract (`SongFormViewModel`)
 
 | Member | Kind | Purpose / REQ |
 |--------|------|---------------|
 | `TitleOptionSource` | `IMenuOptionSource` | Phase 1: `SearchTitleLocalAsync` → options (Headline title, SupportingText "artist · version · In your library"). Phase 2: `SearchTitleRemoteAsync` → promoted rows appended to local, then remote options ("artist · Deezer"). REQ-SFT-02…09 |
-| `TitleSupportingText` | observable → Field `SupportingText` | "Online search unavailable" while the current query's remote call failed; `""` otherwise (REQ-SFT-06) |
+| `TitleSupportingText` | observable → Field `SupportingText` | Mapped from the latest remote-step query's `RemoteSearchStatus` (REQ-SFT-06, amended 2026-11-04): `Offline` → "You're offline — showing songs from your library only."; `Unavailable` → "Online search isn't available right now — showing your library only."; `Ok` → `""`. A query below 3 characters leaves it unchanged; X / empty Title clears it. The two texts are `const string`s in the VM (UI text; one place) |
+| `ApplyRemotePick` (Version) | private | *(2026-11-04, Q5 = B)* sets `SongTitle` = the DTO title (`title_short`) and **`Version` = the DTO's normalised version** (overwrites, including with `""`); Version is not locked (REQ-SFT-12). Remote option SupportingText = "artist · version · Deezer", version part omitted when empty (REQ-SFT-04) |
 | `SongTitle` / `IsTitleLocked` | observable, TwoWay to Field | Title text and Locked state |
 | `IsTitleSearchEnabled` | `=> !IsEditMode` | REQ-SFT-27 |
 | (no `IsTitleReadOnly`) | — | Title is never read-only (REQ-SFT-27). The component's `IsReadOnly` has **no consumer in this spec**; it stays in the component (generic, already approved) for future use. One `AutocompleteDXField` serves both modes |
@@ -252,7 +310,8 @@ registration (`:156-158`), `CreateArtistInlineCommand`, `ExecuteNewSongSaveAsync
 ### 4.1 Artist form (`ArtistFormViewModel`, REQ-SFT-47…50)
 
 `IArtistSuggestionService` is reshaped like the song service: `SearchNameLocalAsync(query, ct)` and
-`SearchNameRemoteAsync(query, ct) → ArtistRemoteSearchResult(Remote, RemoteUnavailable)`.
+`SearchNameRemoteAsync(query, ct) → ArtistRemoteSearchResult(Remote, Status)` *(2026-11-04: `RemoteSearchStatus Status`
+replaces `bool RemoteUnavailable`; the offline check of § 3.3 step 1a applies)*.
 Local = the existing collated prefix search (`IArtistRepository.SearchByNameAsync`, ≤ 5; no ranking,
 so § 6.4 does not apply).
 
@@ -268,7 +327,7 @@ dropped (the local row stays). The similarity dedup tier (c) in `ArtistSuggestio
 | Member | Purpose |
 |--------|---------|
 | `NameOptionSource` (`IMenuOptionSource`) | Local options (SupportingText "In your library"), then Deezer options (SupportingText "Deezer") |
-| `NameSupportingText` | Field `SupportingText`: "Online search unavailable" on remote failure |
+| `NameSupportingText` | Field `SupportingText` mapped from `Status` as on the Song form; offline text "You're offline — showing artists from your library only." (Q18, proposed), unavailable text verbatim from the Song form (REQ-SFT-47 note, 2026-11-04) |
 | `ArtistName`, `IsNameLocked`, `IsNameSearchEnabled => !IsEditMode` | Field bindings |
 | `SelectNameCommand` | Local → `INavigationService.GoToAsync($"../{Routes.ArtistForm}?artistId={id}&artistName={escaped}")` (query shape as `ArtistFormViewModel.cs:203`); Deezer → fill `ArtistName`, lock |
 | `ClearNameCommand` | X: empty and unlock |
@@ -336,9 +395,11 @@ artists by collated name; a write-only value invites the "build on it" drift Hel
    enforces (artist, title, version) uniqueness, REQ-SFT-29).
 
 **F7: offline**
-1. Deezer throws, times out or returns an error body → `RemoteUnavailable = true`; local options stay;
-   `TitleSupportingText` = "Online search unavailable".
-2. Save paths use no network and are unaffected.
+1. *(2026-11-04)* `INetworkStatus.HasInternetAccess` is false → no Deezer call, `Status = Offline`;
+   local options at once; `TitleSupportingText` = the offline note.
+2. Deezer throws, times out or returns an error body → `Status = Unavailable`; local options stay;
+   `TitleSupportingText` = the unavailable note.
+3. Save paths use no network and are unaffected.
 
 **F8: Artist form, add mode**
 1. User types "metalica"; the Field shows local "Metallica" (if stored) and then Deezer artists.
@@ -498,6 +559,7 @@ Order M1 → M2 → M3 is mandatory (§ 6.2 consequence 1). Other in-flight migr
   `services.AddScoped<IArtistSuggestionService, ArtistSuggestionService>()`.
 - Remove `IMusicMetadataService`/`MusicMetadataService` (their only consumers are the two picker VMs).
 - If Q1 = drop: remove `MusicBrainzProvider` registration and class.
+- *(2026-11-04, § 3.6)* `MauiProgram.cs`: `IConnectivity` (factory over `Connectivity.Current`) and `INetworkStatus` → `MauiNetworkStatus`, both singletons; never in `AddAppServices`.
 - `MauiProgram.cs:130` and the Artist-picker equivalents: remove picker pages/VMs.
 - `AppShell.xaml.cs:32` (+ Artist picker route), `Routes.cs:19-20`: remove.
 
@@ -551,7 +613,7 @@ has no picker reference (checked).
 | `NestedUnitOfWorkTests.cs:22,66,105` | **port** to `CreateSongWithUrlsAsync(null, newArtistName, …)` with the same assertions (one row each; all-or-nothing on a throw; all-or-nothing on a failure tuple) | REQ-UOW-22/24 re-homed (Q11) |
 | `NestedUnitOfWorkTests.cs:146` (one `AppDbContext` across **three** nested levels) | **port, weakened honestly**: the new chain has **two** levels (`SongService.CreateSongWithUrlsAsync` → `ArtistService.CreateArtistAsync`), so the ported test proves one context across two levels. No production path nests three levels after this item | REQ-UOW-22 re-homed |
 | `NestedUnitOfWorkTests.cs:195` | delete | REQ-UOW-09 (**removed**, not re-homed) and AC-3.4 artist external identity → REQ-SFT-40 |
-| `SongSuggestionServiceTests.cs:35,57,94,119,145` | rewrite against `SearchTitleLocalAsync`/`SearchTitleRemoteAsync` (94: dedup now artist- and version-scoped; 145: `RemoteUnavailable = true`, local still returned) | REQ-FORMUX-03/05 → REQ-SFT-05/06 |
+| `SongSuggestionServiceTests.cs:35,57,94,119,145` | rewrite against `SearchTitleLocalAsync`/`SearchTitleRemoteAsync` (94: dedup now artist- and version-scoped; 145: `Status = Unavailable` (2026-11-04), local still returned) | REQ-FORMUX-03/05 → REQ-SFT-05/06 |
 | `SongSuggestionServiceTests.cs:76` (artist hint) | delete | REQ-SFT-35 (no hint) |
 | `SongSuggestionServiceTests.cs:170` (MusicBrainz → Deezer fallback) | delete if Q1 = drop | AC-4.2 provider order → REQ-SFT-36 |
 | `SongSuggestionThresholdTests.cs` (6) | retarget to `SearchTitleLocalAsync`/`SearchTitleRemoteAsync`, same assertions | REQ-UOW-51/52 kept |
