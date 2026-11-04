@@ -1071,7 +1071,7 @@ Not pushed; `tasks.md` not ticked (orchestrator).
 - Post-edit re-read: `ArtistRemoteSearchResult.cs` (lines 1-8) and `ServiceCollectionExtensions.cs` (lines 33-45) confirmed.
 
 ### Build notes
-Build: passed (0 errors) | Tests: 737 passed, 0 failed (delta 0) | Commit SHA: (see handback)
+Build: passed (0 errors) | Tests: 737 passed, 0 failed (delta 0) | Commit SHA: 36305a69 (refactor commit; pre-commit hook build+tests green)
 Files written and re-read: `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs`
 
 ## 4.2
