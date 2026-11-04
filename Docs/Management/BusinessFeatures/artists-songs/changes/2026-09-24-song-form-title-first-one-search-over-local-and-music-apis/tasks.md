@@ -197,10 +197,10 @@
   - **Demo:** migration tests green; the existing library is searchable.
   - **Review lane:** Architectural
   - **Orchestrator step:** add to `constraints-reference.md § EF Core / SQLite`: "Any migration that rebuilds Songs or Artists must recreate the FTS triggers in the same migration."
-  > **Spec updated 2026-11-04:** merged `eca9f708` (Verifier CONDITIONAL PASS); orchestrator step done (constraints-reference.md). **Follow-up (Verifier W1, not blocking):** `ArtistDelete_CascadeRemovesSongSearchRows` deletes EF-tracked songs, so SQLite's own `ON DELETE CASCADE` → `SongSearch_ad` path has no regression test (the Verifier probed it correct in SQLite). Add a test that seeds songs by raw SQL / a fresh context and deletes the artist via `ExecuteDeleteAsync` — candidate for the next task that owns `SongMigrationTests.cs` (none planned) or a small dedicated task; Helder to place it.
+  > **Spec updated 2026-11-04:** merged `eca9f708` (Verifier CONDITIONAL PASS); orchestrator step done (constraints-reference.md). **Follow-up (Verifier W1, not blocking):** `ArtistDelete_CascadeRemovesSongSearchRows` deletes EF-tracked songs, so SQLite's own `ON DELETE CASCADE` → `SongSearch_ad` path has no regression test (the Verifier probed it correct in SQLite). Add a test that seeds songs by raw SQL / a fresh context and deletes the artist via `ExecuteDeleteAsync` — candidate for the next task that owns `SongMigrationTests.cs` (none planned) or a small dedicated task; Helder to place it. **Helder 2026-11-04: not for the MVP — deferred to a future version (raw artist deletes outside EF do not happen in the MVP).**
 
 - [ ] **3.9 Title-field search query** [SEQUENTIAL — after 3.8]
-  > **Spec updated 2026-11-04 (plan § 0.3 D21, pending Helder's approval):** `FindByTitleAndArtistNamesAsync` takes `(Title, ArtistName, Version)` triples (REQ-SFT-05(b) amended); its two tests become `…CollatedTripleEmptyVersion_Returns` and `…VersionMustMatch`.
+  > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `FindByTitleAndArtistNamesAsync` takes `(Title, ArtistName, Version)` triples (REQ-SFT-05(b) amended); its two tests become `…CollatedTripleEmptyVersion_Returns` and `…VersionMustMatch`.
   - **Produces:** `SongSearchHit`; `SearchTitleCandidatesAsync`, `FindByExternalIdsAsync`, `FindByTitleAndArtistNamesAsync`.
   - **Files owned:** `Domain/ReadModels/SongSearchHit.cs`, `ISongRepository.cs`, `SongRepository.cs`, `MyVocaList.Tests/Integration/Repositories/SongRepositorySearchTests.cs` (new, uses `MigrateAsync`)
   - **Risk:** Medium. **Tests (B):** § 6.3 corpus subset: "dont cry"/"don cry"/"guns cry" include "Don't Cry"; "nao sei" hits; 2-char query uses the prefix path; `"` in a query is escaped.
@@ -243,7 +243,7 @@
   - **Files owned:** `Services/IMusicMetadataProvider.cs`, `Services/MusicProviderException.cs` (new), `Services/DeezerProvider.cs`, `MyVocaList.Tests/Unit/Services/DeezerProviderTests.cs` (new)
   - **Consumes:** 1.6. **Risk:** Medium. **Tests (B):** plain `search/track?q=` / `search/artist?q=`; HTTP 500, bad JSON, HTTP 200 error body throw; cancellation propagates.
   - **Demo:** provider tests green. **Review lane:** Standard
-  > **Spec updated 2026-11-04 (plan § 0.3 D21, PENDING Helder's approval of the Q5/Q7 amendment — do not dispatch before):** also owns `Contracts/DTOs/MusicSearchResultDto.cs` (trailing `string? Version = null`); the provider maps `title_short` (fallback `title`) and the normalised `title_version` (REQ-SFT-12); +3 tests. The provider does not check connectivity; the Q7 offline/unavailable split lives in 4.1c + 4.2/6.1.
+  > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** also owns `Contracts/DTOs/MusicSearchResultDto.cs` (trailing `string? Version = null`); the provider maps `title_short` (fallback `title`) and the normalised `title_version` (REQ-SFT-12); +3 tests. The provider does not check connectivity; the Q7 offline/unavailable split lives in 4.1c + 4.2/6.1.
 
 - [ ] **4.1c Network status abstraction** [P with 4.1a — sole writer of `MauiProgram.cs` in flight; after D21 approval] *(new 2026-11-04, plan § 0.3 D21)*
   - **Produces:** `INetworkStatus` (Domain), `RemoteSearchStatus { Ok, Offline, Unavailable }` (Contracts), `MauiNetworkStatus` (app project), registrations in `MauiProgram.cs` (REQ-SFT-53, `design.md` § 3.6).
@@ -256,7 +256,7 @@
   > **Spec updated 2026-11-04 (D21):** also after 4.1c; `ArtistRemoteSearchResult(Remote, RemoteSearchStatus Status)`.
 
 - [ ] **4.2 `SongSuggestionService` local and remote title search** [SEQUENTIAL — after 2.2, 3.9, 4.1]
-  > **Spec updated 2026-11-04 (plan § 0.3 D21, pending Helder's approval):** also after 4.1c; `SongRemoteSearchResult.Status` (`RemoteSearchStatus`) replaces `RemoteUnavailable`; `INetworkStatus` ctor dependency — offline → no Deezer call, `Offline` (REQ-SFT-53); dedup (b) uses (title_short, artist, version) triples; +5 tests (plan § Task 4.2).
+  > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** also after 4.1c; `SongRemoteSearchResult.Status` (`RemoteSearchStatus`) replaces `RemoteUnavailable`; `INetworkStatus` ctor dependency — offline → no Deezer call, `Offline` (REQ-SFT-53); dedup (b) uses (title_short, artist, version) triples; +5 tests (plan § Task 4.2).
   - **Produces:** `SearchTitleLocalAsync`, `SearchTitleRemoteAsync`, `SongRemoteSearchResult`; `SongSuggestionDto.Version`/`LocalArtistName`; ranking, dedup (a)/(b) with promotion, 3,000 ms bound; tier (c) and the C# re-filters deleted.
   - **Files owned:** `Services/ISongSuggestionService.cs`, `Services/SongSuggestionService.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`, `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new), `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`
   - **Risk:** High — core behaviour. **Tests (A, Red first):** REQ-SFT-04/05/06/08/09/30–32 at service level; local call makes no provider call (REQ-SFT-07); rewrites/deletions per § 10.1.
@@ -265,7 +265,7 @@
   > **Spec updated 2026-09-26:** (D16) consumes `SearchConstants.RemoteSearchTimeoutMilliseconds` (2.2) for the 3,000 ms bound. (D1) returns one list: local, then promoted, then remote (no append capability).
 
 - [ ] **4.3 Retarget threshold tests; register the service** [SEQUENTIAL — after 4.2]
-  > **Spec updated 2026-11-04 (plan § 0.3 D21, pending Helder's approval):** DI tests resolving the service add `Mock.Of<INetworkStatus>()` (registered in `MauiProgram.cs`, not `AddAppServices`).
+  > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** DI tests resolving the service add `Mock.Of<INetworkStatus>()` (registered in `MauiProgram.cs`, not `AddAppServices`).
   - **Files owned:** `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs`, `ISongSuggestionService.cs` (remove `GetLocalAsync`/`GetRemoteAsync`)
   - **Risk:** Low. **Demo:** `ISongSuggestionService` resolves from `AddAppServices`.
   - **Review lane:** Standard
@@ -284,7 +284,7 @@
   > **Spec updated 2026-11-04:** also owned `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (merge-sheet sync/handlers removed; the page did not compile otherwise). VM + XAML + code-behind were built together because the merge sheet's compiled bindings broke the one-file-then-build order (Verifier: acceptable). Merged `f687e72d` 2026-11-04; Verifier PASS; develop 668/668.
 
 - [ ] **5.2 VM: title search, picks, online-search note** [SEQUENTIAL — after 4.3, 5.1, G4 Q16]
-  > **Spec updated 2026-11-04 (plan § 0.3 D21, pending Helder's approval):** `TitleSupportingText` maps `Status` to the two approved notes (REQ-SFT-06); a remote pick sets Version from Deezer (REQ-SFT-12); remote option supporting text "artist · version · Deezer" (REQ-SFT-04); +4 tests.
+  > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `TitleSupportingText` maps `Status` to the two approved notes (REQ-SFT-06); a remote pick sets Version from Deezer (REQ-SFT-12); remote option supporting text "artist · version · Deezer" (REQ-SFT-04); +4 tests.
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
   - **Risk:** High. **Tests (A, Red first):** REQ-SFT-02…14 (option supporting texts incl. "In your library", local options before remote or the Q16 fallback, `TitleSupportingText` set/cleared, local pick → navigate, discard sheet, remote pick fills + locks, local artist match, X clears pending identity).
   - **Demo:** VM tests green.
@@ -330,7 +330,7 @@
 ## Phase 6 — Artist form name search (confirmed, fifth round)
 
 - [ ] **6.1 `ArtistSuggestionService` local and remote name search; register** [SEQUENTIAL — after 4.1, 4.3]
-  > **Spec updated 2026-11-04 (plan § 0.3 D21, pending Helder's approval):** `ArtistRemoteSearchResult.Status`; `INetworkStatus` ctor dependency; offline → no call, `Offline`; +1 test.
+  > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `ArtistRemoteSearchResult.Status`; `INetworkStatus` ctor dependency; offline → no call, `Offline`; +1 test.
   - **Produces:** `SearchNameLocalAsync`, `SearchNameRemoteAsync` + `ArtistRemoteSearchResult`; similarity dedup tier (c) and `FilterSimilar` deleted (`design.md` § 4.1).
   - **Consumes:** 4.1 (`DeezerProvider.SearchArtistsAsync` throws on failure; URL `search/artist?q=`).
   - **Files owned:** `Services/IArtistSuggestionService.cs`, `Services/ArtistSuggestionService.cs`, `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs`, `MyVocaList.Tests/Unit/Services/ArtistSuggestionThresholdTests.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs`
@@ -339,7 +339,7 @@
   - **Review lane:** Elevated
   > **Spec updated 2026-09-26:** (D20) runs **after 3.9b** too: `SearchNameLocalAsync` retrieves from `IArtistRepository.SearchNameCandidatesAsync` (FTS5 `ArtistSearch`) ranked by `ISimilarityScorer.RankScore`, take 5 (§ 6.4 exception extended to `ArtistSuggestionService`). (D18) `ArtistRemoteSearchResult` is created in 4.1b.
 - [ ] **6.2 `ArtistFormViewModel`: Name option source, local pick opens the artist, Deezer pick fills the name** [SEQUENTIAL — after 6.1, 1.2, G2, Q10]
-  > **Spec updated 2026-11-04 (plan § 0.3 D21, pending Helder's approval):** `NameSupportingText` maps `Status` to the artist offline note (Q18, proposed) / the unavailable note; +1 test.
+  > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `NameSupportingText` maps `Status` to the artist offline note (Q18, approved) / the unavailable note; +1 test.
   - **Files owned:** `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`, the Artist-form VM test file
   - **Risk:** Medium. **Tests (A, Red first):** REQ-SFT-47…50 (navigation via `INavigationService`; `NameSupportingText` on remote failure).
   - **Demo:** VM tests green.
