@@ -783,7 +783,7 @@ No other operation. Snapshot diff: only the two `b.Property<bool>("HasManualEdit
 
 ### Checkpoint
 
-_(not started)_
+- 2026-11-04 (orchestrator) — **Pre-dispatch G3 / § 0.2.2 checks (migration task):** (1) LEDGER: no live branch (CATALOG-PROP spec-only, deferred; BUG-080 merged with no migration). (2) `git worktree list`: main only. (3) `git branch -a --no-merged develop`: only `remotes/origin/worktree-agent-aaae95a5d8a6c56ec` (old agent branch, no G3 pattern). **Clear.** Snapshot rule: worktree from develop `5789f115` (includes M1 `20261104150926_DropHasManualEdits`). Worktree `.worktrees/sft-3.7`, branch `task/sft-3.7-m2-external-identity-unique`. Part A dispatched.
 
 ## 3.8
 
