@@ -425,7 +425,7 @@ public class SongFormViewModelTests
     public void SelectArtist_ExistingSuggestion_LocksField()
     {
         var sut = CreateSut();
-        var artist = new ArtistListItem(7, "Queen", string.Empty, false, 0);
+        var artist = new ArtistListItem(7, "Queen", string.Empty, 0);
         var suggestion = new AutocompleteSuggestion("Queen", artist.CatalogCountText, artist);
         Assert.False(sut.IsArtistLocked); // precondition
 
@@ -449,7 +449,7 @@ public class SongFormViewModelTests
     public void SelectArtist_ExistingSuggestion_ClosesDropdown()
     {
         var sut = CreateSut();
-        var artist = new ArtistListItem(7, "Queen", string.Empty, false, 0);
+        var artist = new ArtistListItem(7, "Queen", string.Empty, 0);
         var suggestion = new AutocompleteSuggestion("Queen", artist.CatalogCountText, artist);
         sut.IsArtistDropDownOpen = true; // simulate the popup being open before the select
 
@@ -1051,9 +1051,9 @@ public class SongFormViewModelTests
         var t1 = sut.SearchArtistsCommand.ExecuteAsync("que");   // older request (issued first)
         var t2 = sut.SearchArtistsCommand.ExecuteAsync("queen"); // newer request (issued second)
 
-        newer.SetResult([new ArtistListItem(2, "Queen", string.Empty, false, 3)]);   // newer completes first
+        newer.SetResult([new ArtistListItem(2, "Queen", string.Empty, 3)]);   // newer completes first
         await t2;
-        older.SetResult([new ArtistListItem(9, "Querido", string.Empty, false, 1)]); // older completes late
+        older.SetResult([new ArtistListItem(9, "Querido", string.Empty, 1)]); // older completes late
         await t1;
 
         var suggestion = Assert.Single(sut.ArtistSuggestions);
@@ -1094,7 +1094,7 @@ public class SongFormViewModelTests
         var artistService = new Mock<IArtistService>();
         artistService
             .Setup(s => s.SearchArtistsByNameAsync("queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync([new ArtistListItem(2, "Queen", string.Empty, false, 3)]);
+            .ReturnsAsync([new ArtistListItem(2, "Queen", string.Empty, 3)]);
 
         var sut = CreateSut(artistService: artistService);
 
