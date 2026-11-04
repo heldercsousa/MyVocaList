@@ -558,11 +558,15 @@ _(not started)_
   - `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`
   - `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
 
+### Verifier + merge (orchestrator, 2026-11-04)
+- Verifier **PASS** (every `UpdateSongAsync` Moq expression binds to the new overload; no EOL churn — `--stat` identical with `--ignore-cr-at-eol`; BUG-067 detach untouched). Commit `5c52a167`.
+- Merged `712affbd`. Post-merge develop: `0 Erro(s)`; `Aprovado! – Com falha: 0, Aprovado: 671, Total: 671`.
+
 ## 3.2c
 
 ### Checkpoint
 
-_(not started)_
+- 2026-11-04 (orchestrator) — **G3 checks:** LEDGER no live branch; `git worktree list` main only (+ `sft-3.2b` being removed, merged); `git branch -a` only the two merged 2026-08-24 UoW branches. **Clear.** Worktree `.worktrees/sft-3.2c`, branch `task/sft-3.2c-delete-obsolete-update`.
 
 ## 3.5a
 

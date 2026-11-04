@@ -135,7 +135,7 @@
   - **Demo:** census finds no `FieldDiff`/`TargetHasManualEdits`; suite green, count unchanged.
   - **Review lane:** Standard
 
-- [ ] **3.2b Remove `hasManualEdits` from `UpdateSongAsync` (production + unit tests)** [SEQUENTIAL — after 3.2a, 3.3]
+- [x] **3.2b Remove `hasManualEdits` from `UpdateSongAsync` (production + unit tests)** [SEQUENTIAL — after 3.2a, 3.3]
   - **Produces:** a new `UpdateSongAsync` overload without `hasManualEdits`; the old one kept, `[Obsolete]`, forwarding, so the build stays green; writer `SongService.cs:172` removed.
   - **Files owned:** `ISongService.cs`, `SongService.cs`, `SongFormViewModel.cs` (call site `:606`), `SongServiceTests.cs`, `SongFormViewModelTests.cs` (6 mock setups)
   - **Risk:** Low — mechanical. **Demo:** build 0 errors, 0 new warnings outside the 2 files left for 3.2c.
