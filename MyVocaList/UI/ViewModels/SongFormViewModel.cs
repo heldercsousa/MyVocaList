@@ -489,7 +489,7 @@ public partial class SongFormViewModel : ViewModelBase
         // form data" — it must be sent too, or a changed artist is silently discarded. The
         // artist-required guard above has already proven SelectedArtistId has a non-zero value.
         var (success, message) = await _songService.UpdateSongAsync(
-            SongId!.Value, title, FeaturedArtists?.Trim(), Lyrics?.Trim(), true,
+            SongId!.Value, title, FeaturedArtists?.Trim(), Lyrics?.Trim(),
             string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId,
             string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider,
             version,
