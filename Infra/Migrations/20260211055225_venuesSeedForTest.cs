@@ -10,6 +10,9 @@ namespace MyVocaList.Infra.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // BUG-080: the fake-venue seed is a dev/QA convenience; it must never reach user databases.
+            // Release builds run an empty Up().
+#if DEBUG
             var sqlBuilder = new StringBuilder();
 
             //Generate some ACCENTED and equivalent NO-ACCENTED entries for testing
@@ -101,12 +104,14 @@ namespace MyVocaList.Infra.Migrations
             }
 
             migrationBuilder.Sql(sqlBuilder.ToString());
+#endif
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("DELETE FROM Venues");
+            // BUG-080: intentional no-op. Rolling back this migration must never delete venues:
+            // after the seed ran, the table holds user-created rows that cannot be told apart from seed rows.
         }
     }
 }
