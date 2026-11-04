@@ -101,6 +101,83 @@ public class SongMigrationTests : IAsyncDisposable
         Assert.IsType<SqliteException>(ex is DbUpdateException ? ex.InnerException : ex);
     }
 
+    private static async Task<AppDbContext> MigratedToLatestMinusAsync(AppDbContext db, string migrationName)
+    {
+        var migrations = db.Database.GetMigrations().ToList();
+        if (!migrations.Any(m => m.EndsWith("_" + migrationName, StringComparison.Ordinal)))
+            throw new InvalidOperationException($"Migration '{migrationName}' not found.");
+        await db.GetService<IMigrator>().MigrateAsync(migrations.Single(m => m.EndsWith("_" + migrationName, StringComparison.Ordinal)));
+        return db;
+    }
+
+    private static Task InsertArtistAsync(AppDbContext db, int id, string name) => db.Database.ExecuteSqlRawAsync(
+        $"INSERT INTO Artists (Id, Name, CreatedAt, UpdatedAt) VALUES ({id}, '{name}', '2026-01-01 00:00:00', '2026-01-01 00:00:00')");
+
+    private static Task InsertSongAsync(AppDbContext db, int id, string title, string? provider, string? externalId)
+        => db.Database.ExecuteSqlRawAsync(
+            "INSERT INTO Songs (Id, ArtistId, Title, Version, ExternalProvider, ExternalId, CreatedAt, UpdatedAt) VALUES " +
+            $"({id}, 1, '{title}', '', {(provider is null ? "NULL" : $"'{provider}'")}, {(externalId is null ? "NULL" : $"'{externalId}'")}, '2026-01-01 00:00:00', '2026-01-01 00:00:00')");
+
+    [Fact]
+    public async Task M2_DuplicateIdentities_LowestIdKeepsIdentity_OthersClearedNotDeleted()
+    {
+        // [AC] REQ-SFT-39: duplicate (ExternalProvider, ExternalId) rows are deduplicated - lowest Id keeps the identity, the others are cleared, no row is deleted
+        var db = TestDbContextFactory.Create();
+        _contexts.Add(db);
+        await MigratedToLatestMinusAsync(db, DropHasManualEditsName);
+
+        await InsertArtistAsync(db, 1, "Metallica");
+        await InsertSongAsync(db, 1, "One", "Deezer", "3135556");
+        await InsertSongAsync(db, 2, "Two", "Deezer", "3135556");
+        await InsertSongAsync(db, 3, "Three", "Deezer", "3135556");
+        await InsertSongAsync(db, 4, "Four", "Deezer", "999");
+
+        await db.GetService<IMigrator>().MigrateAsync();
+
+        var rows = await db.Database.SqlQueryRaw<string>(
+            "SELECT Id || '|' || ArtistId || '|' || Title || '|' || Version || '|' || IFNULL(ExternalProvider, 'null') || '|' || IFNULL(ExternalId, 'null') AS Value FROM Songs ORDER BY Id").ToListAsync();
+        Assert.Equal(
+            ["1|1|One||Deezer|3135556", "2|1|Two||null|null", "3|1|Three||null|null", "4|1|Four||Deezer|999"],
+            rows);
+    }
+
+    [Fact]
+    public async Task M2_UniqueIndex_RejectsSecondSongWithSameIdentity()
+    {
+        // [AC] REQ-SFT-39: after migration a second song with the same (ExternalProvider, ExternalId) is rejected by a UNIQUE constraint
+        var db = await MigratedToAsync();
+        await InsertArtistAsync(db, 1, "Metallica");
+        await InsertSongAsync(db, 1, "One", "Deezer", "3135556");
+
+        var ex = await Assert.ThrowsAnyAsync<Exception>(() => InsertSongAsync(db, 2, "Two", "Deezer", "3135556"));
+        Assert.IsType<SqliteException>(ex is DbUpdateException ? ex.InnerException : ex);
+    }
+
+    [Fact]
+    public async Task M2_NullIdentities_AllowMany()
+    {
+        // [AC] REQ-SFT-39: songs without an external identity (NULL, NULL) remain unrestricted by the unique index
+        var db = await MigratedToAsync();
+        await InsertArtistAsync(db, 1, "Metallica");
+
+        await InsertSongAsync(db, 1, "One", null, null);
+        await InsertSongAsync(db, 2, "Two", null, null);
+
+        var count = await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM Songs").SingleAsync();
+        Assert.Equal(2, count);
+    }
+
+    [Fact]
+    public async Task M2_IndexName_IsComposite()
+    {
+        // [AC] REQ-SFT-39: the external identity index is the composite unique IX_Songs_ExternalProvider_ExternalId and the single-column IX_Songs_ExternalId is gone
+        var db = await MigratedToAsync();
+
+        Assert.True(await IsUniqueIndexAsync(db, "Songs", "IX_Songs_ExternalProvider_ExternalId"));
+        var names = await db.Database.SqlQueryRaw<string>("SELECT name AS Value FROM pragma_index_list('Songs')").ToListAsync();
+        Assert.DoesNotContain("IX_Songs_ExternalId", names);
+    }
+
     public async ValueTask DisposeAsync()
     {
         var paths = _contexts.Select(c => c.Database.GetDbConnection().DataSource).ToList();
