@@ -16,12 +16,14 @@ public class SongSuggestionThresholdTests
     private readonly Mock<IMusicMetadataProvider> _musicBrainzMock = new();
     private readonly Mock<IMusicMetadataProvider> _deezerMock = new();
     private readonly Mock<ISimilarityScorer> _scorerMock = new();
+    private readonly Mock<INetworkStatus> _networkStatusMock = new();
     private readonly Mock<ILogger<SongSuggestionService>> _loggerMock = new();
 
     public SongSuggestionThresholdTests()
     {
         _musicBrainzMock.SetupGet(p => p.ProviderName).Returns("MusicBrainz");
         _deezerMock.SetupGet(p => p.ProviderName).Returns("Deezer");
+        _networkStatusMock.SetupGet(n => n.HasInternetAccess).Returns(true);
     }
 
     private SongSuggestionService CreateSut() => new(
@@ -30,6 +32,7 @@ public class SongSuggestionThresholdTests
         PassthroughUnitOfWork.Over(_songRepoMock, _artistRepoMock),
         [_musicBrainzMock.Object, _deezerMock.Object],
         _scorerMock.Object,
+        _networkStatusMock.Object,
         _loggerMock.Object);
 
     // ── GetLocalAsync — REQ-UOW-51 ──────────────────────────────────────────
@@ -144,6 +147,7 @@ public class SongSuggestionThresholdTests
             uow,
             [_musicBrainzMock.Object, _deezerMock.Object],
             _scorerMock.Object,
+        _networkStatusMock.Object,
             _loggerMock.Object);
 
         var task = sut.GetRemoteAsync("Yesterday", null, []);
