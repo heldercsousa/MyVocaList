@@ -1,6 +1,6 @@
 # Design: Song form title-first, one search over local and music APIs
 
-> **Status: DRAFT, in review (2026-09-25).** Requirements: `requirements.md` (REQ-SFT-01…52).
+> **Status: DRAFT, in review (2026-09-25).** Requirements: `requirements.md` (REQ-SFT-01…53; Q5/Q7 amendment 2026-11-04 pending Helder's approval).
 > Evidence: `findings.md` (same folder) and a scratchpad probe run on 2026-09-24 against the app's
 > bundled SQLite build on desktop (§ 6.1; Android is gated by spike G5). Current-behaviour claims cite
 > `file:line` on `develop` at `f9a67f62`.
@@ -164,18 +164,18 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
   services are the catch boundary; no exception escapes a service.
 - `DeezerProvider.SearchSongsAsync`: `search/track?q={Uri.EscapeDataString(term)}` with no `track:`/
   `artist:` qualifiers (REQ-SFT-35; `DeezerProvider.cs:47-50` today). `artistHint` is ignored and
-  removed from the title-search path. Maps `id`, `title`, `artist.name` (Q5 may add `title_short`/
-  `title_version`).
+  removed from the title-search path. Maps `id`, `artist.name`, `title_short` (fallback `title`) and `title_version` (Q5 = B, decided 2026-11-04; see the note below).
   > **Spec updated 2026-11-04 (Q5 = B, REQ-SFT-12):** the provider is the anti-corruption boundary
   > for Deezer's shape. `MusicSearchResultDto` (`Contracts/DTOs/MusicSearchResultDto.cs`) gains a
   > trailing optional `string? Version = null` (optional so existing constructions, e.g.
   > `MusicBrainzProvider` until 4.1b and test fixtures, still compile). `DeezerProvider` maps
   > `SongTitle` = `title_short` (fallback `title` when `title_short` is missing or empty) and
-  > `Version` = `NormalizeVersion(title_version)`: trim, remove **one** enclosing `( )` or `[ ]` pair,
-  > trim again, `""` when missing or empty. It is a `private static` helper in `DeezerProvider`. This is
-  > data shaping of a provider field, not case/accent normalisation for search or deduplication, so the
-  > `constraints-registry.md` HARD RULE does not apply (dedup still compares through
-  > `EF.Functions.Collate`, REQ-SFT-05). Deezer exposes no lyrics text (verified on the live API
+  > `Version` = `NormalizeVersion(title_version)`: trim, then remove the outer brackets only when the value starts with `(` or `[` and that bracket's matching closer is the value's last character; trim again; otherwise keep it as is; `""` when missing or empty
+  > (`"(Live) (2011)"` and `"(Live]"` stay unchanged). It is a `private static` helper in `DeezerProvider`. This is
+  > provider data shaping at the boundary (removing Deezer's display brackets), not case/accent folding
+  > and not a `*Normalized` column. The shaped value is what gets stored and what REQ-SFT-05(b) compares,
+  > and that comparison's case/accent handling stays in the DB (`EF.Functions.Collate`), so the
+  > `constraints-registry.md` HARD RULE is respected. Deezer exposes no lyrics text (verified on the live API
   > 2026-11-04; requirements REQ-SFT-12 note), so nothing maps to `Lyrics`.
 - **Field surface used, no new option property:** the "In your library"/"Deezer" labels are inside
   `AutocompleteSuggestion.SupportingText`; the online-search note (offline or unavailable, REQ-SFT-06, amended 2026-11-04) is `AutocompleteDXField.SupportingText`
@@ -252,11 +252,14 @@ public interface INetworkStatus
     bool HasInternetAccess { get; }
 }
 
-// MyVocaList/Platform/MauiNetworkStatus.cs (new, app project) — the only MAUI-aware piece
-internal sealed class MauiNetworkStatus(IConnectivity connectivity) : INetworkStatus
+// MyVocaList/UI/Services/MauiNetworkStatus.cs (new, app project, beside INavigationService) — the only MAUI-aware piece
+public sealed class MauiNetworkStatus(IConnectivity connectivity) : INetworkStatus
 {
-    public bool HasInternetAccess =>
-        connectivity.NetworkAccess is not (NetworkAccess.None or NetworkAccess.Local);
+    public bool HasInternetAccess => IsInternetReachable(connectivity.NetworkAccess);
+
+    /// Pure mapping (REQ-SFT-53 / Q19), unit-tested as a Level B theory over all five values.
+    public static bool IsInternetReachable(NetworkAccess access) =>
+        access is not (NetworkAccess.None or NetworkAccess.Local);
 }
 ```
 
@@ -264,17 +267,20 @@ internal sealed class MauiNetworkStatus(IConnectivity connectivity) : INetworkSt
   against MAUI 10.0.20's `PublicAPI.Shipped.txt` 2026-11-04: `NetworkAccess` = `Unknown(0)`, `None(1)`,
   `Local(2)`, `ConstrainedInternet(3)`, `Internet(4)`. The implementor re-checks against the `.csproj` pin.
 - DI in **`MauiProgram.cs`**, beside the other MAUI-only services (`INavigationService`, `MauiProgram.cs:107`),
-  **not** in `ServiceCollectionExtensions.AddAppServices`: the off-device DI tests build `AddAppServices`, and
-  touching `Connectivity.Current` there would throw off-device (the `AppInfo` failure class seen in COPY-YR).
+  **not** in `ServiceCollectionExtensions.AddAppServices`, as a test-isolation choice: the off-device DI tests build
+  `AddAppServices`, and resolving anything that reaches `Connectivity.Current` there would throw off-device (the
+  `AppInfo` failure class seen in COPY-YR); keeping platform services in `MauiProgram.cs` keeps that graph MAUI-free.
   `builder.Services.AddSingleton<IConnectivity>(_ => Connectivity.Current)` (factory: lazy) and
   `builder.Services.AddSingleton<INetworkStatus, MauiNetworkStatus>()`. Singleton: stateless, reads the live
   platform value. DI graph tests that resolve a suggestion service add `Mock.Of<INetworkStatus>()`, as they
   already do for `INavigationService`.
-- Android needs the `ACCESS_NETWORK_STATE` permission for `Connectivity`. The implementor checks
-  `Platforms/Android/AndroidManifest.xml` and adds it if absent (it is a normal, install-time permission).
-- Consumers: `SongSuggestionService` and `ArtistSuggestionService` (constructor). Tests use
-  `Mock<INetworkStatus>`; the MAUI class gets a Level-C note (no unit test: it is a one-line platform
-  adapter; manual check in the on-device gate, airplane mode).
+- Android needs the `ACCESS_NETWORK_STATE` permission for `Connectivity`; it is already declared
+  (`Platforms/Android/AndroidManifest.xml:14`, spec-review 2026-11-04), so no manifest change.
+- Consumers: `SongSuggestionService` and `ArtistSuggestionService` (constructor). Service tests use
+  `Mock<INetworkStatus>` (Level A). The access-level mapping is a pure static method tested as a Level B
+  theory over all five `NetworkAccess` values (the test project references the app project, so the enum is
+  available); only the one-line `HasInternetAccess` delegation is untested (Level C). The on-device gate
+  checks airplane mode (None).
 - **Why not test-and-call (just let `HttpClient` fail)?** Offline would then wait for the DNS/connect
   failure (often seconds on Android) and show the unavailable note instead of the offline note, which is
   exactly the confusion Helder asked to remove (Q7).
@@ -283,7 +289,7 @@ internal sealed class MauiNetworkStatus(IConnectivity connectivity) : INetworkSt
 
 | Member | Kind | Purpose / REQ |
 |--------|------|---------------|
-| `TitleOptionSource` | `IMenuOptionSource` | Phase 1: `SearchTitleLocalAsync` → options (Headline title, SupportingText "artist · version · In your library"). Phase 2: `SearchTitleRemoteAsync` → promoted rows appended to local, then remote options ("artist · Deezer"). REQ-SFT-02…09 |
+| `TitleOptionSource` | `IMenuOptionSource` | Phase 1: `SearchTitleLocalAsync` → options (Headline title, SupportingText "artist · version · In your library"). Phase 2: `SearchTitleRemoteAsync` → promoted rows appended to local, then remote options ("artist · version · Deezer", version part omitted when empty; 2026-11-04). REQ-SFT-02…09 |
 | `TitleSupportingText` | observable → Field `SupportingText` | Mapped from the latest remote-step query's `RemoteSearchStatus` (REQ-SFT-06, amended 2026-11-04): `Offline` → "You're offline — showing songs from your library only."; `Unavailable` → "Online search isn't available right now — showing your library only."; `Ok` → `""`. A query below 3 characters leaves it unchanged; X / empty Title clears it. The two texts are `const string`s in the VM (UI text; one place) |
 | `ApplyRemotePick` (Version) | private | *(2026-11-04, Q5 = B)* sets `SongTitle` = the DTO title (`title_short`) and **`Version` = the DTO's normalised version** (overwrites, including with `""`); Version is not locked (REQ-SFT-12). Remote option SupportingText = "artist · version · Deezer", version part omitted when empty (REQ-SFT-04) |
 | `SongTitle` / `IsTitleLocked` | observable, TwoWay to Field | Title text and Locked state |
@@ -349,8 +355,8 @@ artists by collated name; a write-only value invites the "build on it" drift Hel
 1. User types "don cry"; after 300 ms the Field calls `TitleOptionSource`.
 2. Phase 1: local options render. Phase 2: when Deezer answers for the same query, promoted and remote
    options are appended (fallback per § 3.4).
-3. User taps "Don't Cry (Original)" / "Guns N' Roses · Deezer". The Field locks Title.
-4. `SelectTitleCommand` → `ApplyRemotePick`: `SongTitle` = provider title; `SelectedProvider/ExternalId`
+3. User taps "Don't Cry" / "Guns N' Roses · Original · Deezer" (Deezer `title` "Don't Cry (Original)"). The Field locks Title.
+4. `SelectTitleCommand` → `ApplyRemotePick`: `SongTitle` = `title_short` ("Don't Cry"); `Version` = normalised `title_version` ("Original"; 2026-11-04, REQ-SFT-12); `SelectedProvider/ExternalId`
    = ("Deezer", id); if `LocalArtistId` is set → `LockArtist(LocalArtistId, LocalArtistName)`; else
    `ArtistSearchText` = provider artist, `SelectedArtistId = null`, `IsArtistLocked = true`,
    dropdowns closed. No service write.
@@ -585,7 +591,9 @@ has no picker reference (checked).
 |------|-------|-------|
 | **A** (Red first) | `SongService.SaveFromFormAsync` rules 1–5 (collated reuse, near-duplicate → `ArtistChoiceNeeded`, new artist still runs the identity guard, decisions skip the right steps, REQ-SFT-41 regression); `SongService` new-artist write path, version-aware update (REQ-SFT-29 regression), external identity uniqueness; `SongSuggestionService` local/remote (order, dedup tiers, Deezer error body, thresholds, cancellation); `SongResolutionService` accent-only id (REQ-SFT-42 regression); `ArtistResolutionService` with FTS pool; VM outcome→sheet mapping, picks, edit-mode title; ranking examples of § 6.3 against `RankScore` | Moq for services/VM; real SQLite for the UoW atomicity tests |
 | **B** | Repository search/lookups on real SQLite **after `MigrateAsync`** (both FTS tables + 7 triggers: insert, title update, artist rename, bulk delete; "Metalica" retrieves "Metallica"); migrations M1–M3 (columns gone, unique index rejects a duplicate, M2 data fix via migrate-to-M1 → seed → migrate); `DeezerProvider` URL shape and failure propagation (HTTP 500, bad JSON, HTTP 200 + `error` object) with a fake `HttpMessageHandler` | real SQLite temp file (testing.md anti-patterns) |
-| **C** | Deletions, DI registration, XAML | build + census recorded in task-log; `AppServicesRegistrationTests` resolves `ISongSuggestionService` |
+| **B (2026-11-04)** | `DeezerProvider` field mapping (`title_short` fallback, `NormalizeVersion` theory); `MauiNetworkStatus.IsInternetReachable` theory over all five `NetworkAccess` values | fake `HttpMessageHandler`; pure static |
+| **A (2026-11-04)** | suggestion services: Offline (no provider call, Information log), Unavailable vs Offline, network status read per call; VM note mapping (two texts), pick fills Version, X resets pick-filled Version (Q21) | `Mock<INetworkStatus>` |
+| **C** | Deletions, DI registration, XAML; `MauiNetworkStatus.HasInternetAccess` delegation | build + census recorded in task-log; `AppServicesRegistrationTests` resolves `ISongSuggestionService` |
 | **E2E** | Helder on device | `tasks.md` final gate |
 
 ### 10.1 Existing tests: deleted or rewritten (each tied to a superseded AC; none silently removed)
