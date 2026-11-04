@@ -79,7 +79,7 @@ public class ArtistResolutionServiceTests
             .Setup(r => r.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Artist)null);
         _repoMock
-            .Setup(r => r.GetFuzzyCandidatePoolAsync("The", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
+            .Setup(r => r.SearchNameCandidatesAsync("The Beatle", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Artist> { new Artist { Id = 1, Name = "The Beatles" } });
         _scorerMock
             .Setup(s => s.Score("The Beatle", "The Beatles"))
@@ -107,7 +107,7 @@ public class ArtistResolutionServiceTests
             .Setup(r => r.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Artist)null);
         _repoMock
-            .Setup(r => r.GetFuzzyCandidatePoolAsync("Foo", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
+            .Setup(r => r.SearchNameCandidatesAsync("Foo Something", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Artist> { new Artist { Id = 5, Name = "Foobar" } });
         _scorerMock
             .Setup(s => s.Score(It.IsAny<string>(), It.IsAny<string>()))
@@ -134,7 +134,7 @@ public class ArtistResolutionServiceTests
             .Setup(r => r.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Artist)null);
         _repoMock
-            .Setup(r => r.GetFuzzyCandidatePoolAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.SearchNameCandidatesAsync("Unknown Artist", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Artist>());
 
         var candidate = new ArtistCandidate("Unknown Artist", null, null);
@@ -145,11 +145,12 @@ public class ArtistResolutionServiceTests
         Assert.Equal(ResolutionKind.NoMatch, result.Kind);
     }
 
-    // ── ResolveAsync — prefix-token derivation ────────────────────────────
+    // ── ResolveAsync — FTS pool ───────────────────────────────────────────
 
     [Fact]
-    // Design §4 N1: prefix token = first whitespace token, capped at PrefixTokenMaxLen.
-    public async Task ResolveAsync_LongMultiWordName_UsesFirstTokenCapped()
+    // [AC] REQ-SFT-19: GIVEN a typed/API name with a typo ("Metalica"), THEN the near-duplicate
+    // candidates come from the ArtistSearch FTS pool and "Metallica" is surfaced with score >= 0.82.
+    public async Task ResolveAsync_Metalica_ReturnsFuzzyCandidateMetallica()
     {
         _repoMock
             .Setup(r => r.GetByExternalIdAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -157,21 +158,19 @@ public class ArtistResolutionServiceTests
         _repoMock
             .Setup(r => r.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Artist)null);
-
-        // PrefixTokenMaxLen is 12, "BohemianRhap" is first 12 chars of "BohemianRhapsody"
-        string capturedToken = null;
         _repoMock
-            .Setup(r => r.GetFuzzyCandidatePoolAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Callback<string, int, CancellationToken>((token, _, _) => capturedToken = token)
-            .ReturnsAsync([]);
+            .Setup(r => r.SearchNameCandidatesAsync("Metalica", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<Artist> { new Artist { Id = 9, Name = "Metallica" } });
+        _scorerMock
+            .Setup(s => s.Score("Metalica", "Metallica"))
+            .Returns(0.94);
 
-        // Name starts with a 20-char first token — should be capped at 12
-        var candidate = new ArtistCandidate("BohemianRhapsodyBand More Text", null, null);
-        var sut = CreateSut();
+        var result = await CreateSut().ResolveAsync(new ArtistCandidate("Metalica", null, null));
 
-        await sut.ResolveAsync(candidate);
-
-        Assert.Equal("BohemianRhap", capturedToken); // 12 chars
+        Assert.Equal(ResolutionKind.FuzzyCandidates, result.Kind);
+        var candidate = Assert.Single(result.FuzzyCandidates);
+        Assert.Equal("Metallica", candidate.Name);
+        Assert.True(candidate.Score >= SimilarityConstants.DefaultThreshold);
     }
 
     [Fact]
@@ -189,7 +188,7 @@ public class ArtistResolutionServiceTests
 
         Assert.Equal(ResolutionKind.NoMatch, result.Kind);
         _repoMock.Verify(
-            r => r.GetFuzzyCandidatePoolAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            r => r.SearchNameCandidatesAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 }
