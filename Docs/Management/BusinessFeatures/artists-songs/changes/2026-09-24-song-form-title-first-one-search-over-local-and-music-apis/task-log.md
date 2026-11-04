@@ -1043,9 +1043,36 @@ ITF: SFT-4.1a — Services/DeezerProvider.cs — root cause: NormaliseVersion al
 
 ## 4.1b
 
-### Checkpoint
+**Status:** To Review
+**Started:** 2026-11-04 **Completed:** 2026-11-04
+**Plan:** plan.md § Task 4.1b · Level C · Review lane Standard · Model Haiku
 
-_(not started)_
+Inherited nothing (clean worktree on `task/sft-4.1b-drop-musicbrainz`, base develop `15038cf2`, ancestor verified).
+Level C (deletion + DTO record): no new tests (plan lists none); no-test decision recorded. No AC rows, so no traceability matrix.
+Deleted tests: none. Superseded tests: none. `Spec updated 2026-11-04 (D21)` note already present in `tasks.md` (4.1b entry); no spec write-back by this task.
+Not pushed; `tasks.md` not ticked (orchestrator).
+
+### Census
+- Pre-delete (os.walk, `*.cs`/`*.csproj`/`*.xaml`, excluding bin/obj/.git/.worktrees/Docs), whole-word `\bMusicBrainzProvider\b`: 5 hits, all in owned files (`MyVocaList/Extensions/ServiceCollectionExtensions.cs:34,48`; `Services/MusicBrainzProvider.cs:7,10,14`).
+- Substring `MusicBrainz` also matches string-name constants and tests (`MusicBrainzProviderName` in `Services/ArtistSuggestionService.cs:18,152`, `Services/SongSuggestionService.cs:19,98`; `"MusicBrainz"` provider-name literals in `MyVocaList.Tests/Unit/Services/*`). These reference the provider **name string**, not the type, and compile without the type, so no file outside the owned list was touched. Flagged for Helder: the string-name branches in the two suggestion services and their tests are dead-code candidates for 4.2/4.3/6.1 to retire.
+- Post-delete whole-word census: **ZERO HITS**.
+- `Services/*.cs` count: 29 before, 28 after (floor ≥ 25 met).
+
+### Changed files:
+- `Services/MusicBrainzProvider.cs` (deleted; `git rm`, staged)
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (removed `AddHttpClient<MusicBrainzProvider>` block and the `IMusicMetadataProvider` forward to `MusicBrainzProvider`; Deezer lines and BUG-082 comment kept)
+- `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs` (new: `public sealed record ArtistRemoteSearchResult(IReadOnlyList<ArtistSuggestionDto> Remote, RemoteSearchStatus Status)`, XML doc with param tags)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
+
+### Verification evidence
+- Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` → `ok dotnet build: 6 projects, 0 errors, 34 warnings (00:05:19.98)` (attempt 1, passed).
+- Focused: `dotnet test ... --filter "FullyQualifiedName~AppServicesRegistrationTests|FullyQualifiedName~ServicesDirectory"` → `Aprovado! – Com falha: 0, Aprovado: 5, Ignorado: 0, Total: 5`.
+- Full suite: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --no-build` → `Aprovado! – Com falha: 0, Aprovado: 737, Ignorado: 0, Total: 737`. Delta vs baseline 737/737: **0**.
+- Post-edit re-read: `ArtistRemoteSearchResult.cs` (lines 1-8) and `ServiceCollectionExtensions.cs` (lines 33-45) confirmed.
+
+### Build notes
+Build: passed (0 errors) | Tests: 737 passed, 0 failed (delta 0) | Commit SHA: 36305a69 (refactor commit; pre-commit hook build+tests green)
+Files written and re-read: `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs`
 
 ## 4.2
 
