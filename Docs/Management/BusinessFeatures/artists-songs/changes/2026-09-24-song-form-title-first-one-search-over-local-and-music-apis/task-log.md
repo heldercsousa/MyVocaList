@@ -293,6 +293,105 @@ None.
   3. `git branch -a`: no local or remote branch name contains `catalog`, `catalog-prop`, `bug-080` or `venue`.
   - **Result: clear to dispatch.** Worktree `.worktrees/sft-3.1`, branch `task/sft-3.1-new-artist-uow`, from develop `dae05832`. Role: Tester (W2), then a fresh Builder (Opus).
 
+- 2026-11-04 (Tester W2) - Step 1 + Step 2 done; Red committed. Build is a compile failure (expected). Now: STOP, hand back to orchestrator for the Builder (W3, Opus).
+
+### Tester notes (W2)
+
+- Context7 available; not needed (only existing test mechanics reused). Skills: myvocalist-coding.
+- Edited `SongServiceTests.cs`: the 3 existing `CreateSongWithUrlsAsync(artistId, ...)` calls (lines ~604, 624, 642 -> `artistId, null, ...`) moved to the new overload; +3 new unit tests. NOTE: the plan says "10 existing calls"; only 3 exist in this file (the others are in `SongFormViewModelTests.cs` / `Bug068RegressionTests.cs`, not owned; they keep compiling against the `[Obsolete]` old overload).
+- Created `SongServiceNewArtistUnitOfWorkTests.cs` (6 tests, own copy of the `ThrowOnAddSongRepository` decorator).
+- Superseded tests (NOT deleted; `NestedUnitOfWorkTests.cs` stays until 3.3): `:66` `CommitAsync_SongAddThrowsAfterArtistAlreadyCommitted_LeavesPartialArtistRow` (REQ-UOW-22) -> `CreateSongWithUrlsAsync_ThrowAfterArtistStaged_RollsBackBoth` (REQ-SFT-18); `:105` `..._LeavesPartialArtistRow` failure-tuple (REQ-UOW-24) -> `CreateSongWithUrlsAsync_FailureTupleAfterArtistStaged_WritesNothing` (REQ-SFT-18); `:22` -> `..._NewArtistName_PersistsOneArtistAndOneSong`; `:146` -> `..._UsesOneAppDbContextAcrossTwoLevels`.
+- Flag: the "failure tuple after artist staged" test uses the prescribed 101-char title; if the Builder validates the title BEFORE creating the artist (natural), that test passes without exercising rollback of a staged artist (weak but spec-prescribed).
+
+### Red output (verbatim, `dotnet test ... -m:1 --filter "FullyQualifiedName~SongServiceTests|FullyQualifiedName~SongServiceNewArtistUnitOfWorkTests"`; compiler is pt-BR localised)
+
+Compile failure. The expected CS1501 does NOT appear: the old overload is the only candidate with optional `ct`, so the 9-arg calls bind to it and fail with CS1503/CS9174/CS8130 instead.
+
+```
+SongServiceNewArtistUnitOfWorkTests.cs(20,13): error CS1503: Argumento 1: nao e possivel converter de "<nulo>" para "int"
+SongServiceNewArtistUnitOfWorkTests.cs(20,76): error CS1503: Argumento 8: nao e possivel converter de "string" para "System.Collections.Generic.IEnumerable<string>"
+SongServiceNewArtistUnitOfWorkTests.cs(20,94): error CS9174: Nao e possivel inicializar o tipo 'CancellationToken' com uma expressao de colecao porque o tipo nao e construivel.
+SongServiceNewArtistUnitOfWorkTests.cs(134,14): error CS8130: Nao e possivel inferir o tipo da variavel de desconstrucao digitada implicitamente 'holderOk'.
+SongServiceTests.cs(604,14): error CS8130: Nao e possivel inferir o tipo da variavel de desconstrucao digitada implicitamente 'success'.
+SongServiceTests.cs(606,13): error CS9174: Nao e possivel inicializar o tipo 'CancellationToken' com uma expressao de colecao porque o tipo nao e construivel.
+SongServiceTests.cs(659,13): error CS1503: Argumento 1: nao e possivel converter de "<nulo>" para "int"
+SongServiceTests.cs(696,66): error CS1503: Argumento 8: nao e possivel converter de "string" para "System.Collections.Generic.IEnumerable<string>"
+```
+(Accents transliterated; full set: CS1503, CS8130, CS8183, CS9174 across both files.)
+
+### Builder (W3) — Status: blocked: spec gap
+
+- 2026-11-04 (Builder W3, Opus) — branch `task/sft-3.1-new-artist-uow`, worktree `.worktrees/sft-3.1`. Step 3 implemented (new overload + `[Obsolete]` forwarder in `ISongService.cs` / `SongService.cs`), **left UNCOMMITTED in the worktree** (no Green commit: one Red test cannot pass for a reason inside the test). Context7 available; not needed (no new library API; `IUnitOfWork.FlushAsync` + ambient join verified from `Infra/UnitOfWork/UnitOfWork.cs` and the `ArtistResolutionService.CommitAsync` precedent).
+- Build (attempt 1): `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` → `6 projects, 0 errors, 35 warnings`.
+- Focused tests (`SongServiceTests|SongServiceNewArtistUnitOfWorkTests`): `Com falha: 1, Aprovado: 46, Total: 47`. Failing: `CreateSongWithUrlsAsync_NewArtist_UsesOneAppDbContextAcrossTwoLevels` — `Assert.Single() Failure: The collection contained 2 items`.
+- Also run (`--no-build`): `UnitOfWorkReadScopeTests|NestedUnitOfWorkTests|Bug068RegressionTests|SongFormViewModelTests` → `Com falha: 0, Aprovado: 65, Total: 65`. Full suite NOT run (stopped at the block).
+- New CS0618 warnings (old-overload call sites only): `MyVocaList/UI/ViewModels/SongFormViewModel.cs(568)`, `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs(128)`, `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs(180, 199)`.
+
+#### Spec gap: two-level context test records the window-scope SongService's constructor repositories
+**Location:** `SongServiceNewArtistUnitOfWorkTests.cs:81-106` (port of `NestedUnitOfWorkTests.cs:146`).
+**Gap description:** the helper `CreateWithNewArtist` calls `host.Resolve<ISongService>()` AFTER `observed.Clear()`, so constructing `SongService` resolves its constructor-injected `ISongRepository`/`IArtistRepository` from the host scope and records the host's `AppDbContext`; the unit of work's own context is the second distinct instance. The original test resolved the service BEFORE `observed.Clear()` (`NestedUnitOfWorkTests.cs:164` then `:177`). No production change can fix this without removing `SongService`'s constructor fields (constructor signature is pinned by `SongServiceTests.CreateSut` and by the architecture floor of governed constructor parameters).
+**Options:**
+- Option A: Tester resolves `var service = host.Resolve<ISongService>();` before `observed.Clear()` and calls `service.CreateSongWithUrlsAsync(null, "Two Level Join Artist", …)` directly — the test then measures only the unit of work's contexts, as the original did.
+- Option B: Builder alters `SongService`'s constructor — breaks every test's `CreateSut` and the architecture floors; out of scope.
+**Recommendation:** Option A, because it restores the original test's observation window and is a test-only change.
+**Blocking:** Yes — Builder must not edit tests.
+
+#### Note for the Verifier — `FailureTupleAfterArtistStaged_WritesNothing`
+With this implementation the title is validated (top of the lambda) BEFORE the artist is created, so the 101-char title fails before any artist is staged: the test passes but does NOT exercise a staged-artist rollback. The rollback of a flushed artist is exercised by `ThrowAfterArtistStaged_RollsBackBoth` (exception path) and `NewArtistNameCollatedDuplicate_FailsAndWritesNothing` covers the nested failure-tuple path.
+
+#### Implementation decisions (for review)
+- XOR check (`artistId.HasValue == !IsNullOrWhiteSpace(newArtistName)` → `"Artist is required"`) runs OUTSIDE the lambda (REQ-UOW-41: no DI scope for pure input validation); a blank `newArtistName` counts as not supplied.
+- Order inside the lambda: title validation → external-identity check (only when both `externalId` and `externalProvider` are non-blank; `ExistsByExternalIdentityAsync(provider, externalId, null, ct)`) → new artist via `IArtistService` from `sp` + `_uow.FlushAsync` (or existing artist lookup "Artist not found") → title/version duplicate check against the effective artist → stage song → stage URLs.
+- `_uow.FlushAsync` is called on the constructor field (it holds no `AppDbContext`; same rationale as `ArtistResolutionService.CommitAsync`).
+
+### Changed files (uncommitted)
+- `Domain/ServicesInterfaces/ISongService.cs`
+- `Services/SongService.cs`
+- this task-log section
+
+- Context manifest: `Services/SongService.cs` (impl) · `Domain/ServicesInterfaces/ISongService.cs` (surface) · `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` · `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` · `Infra/UnitOfWork/UnitOfWork.cs` (ambient join/flush) · `plan.md` § Task 3.1.
+
+### Tester correction (2026-11-04)
+
+- **What was wrong:** in `CreateSongWithUrlsAsync_NewArtist_UsesOneAppDbContextAcrossTwoLevels`, `observed.Clear()` ran before `CreateWithNewArtist(...)`, whose helper resolves `ISongService` after the clear. Constructing `SongService` from the host scope recorded the host's `AppDbContext`, so `Assert.Single` saw 2 contexts. The source test (`NestedUnitOfWorkTests.cs:164` then `:177`) resolves the service first and clears afterwards.
+- **Fix:** test-only. The test now resolves `var service = host.Resolve<ISongService>();` before `observed.Clear();` and calls `service.CreateSongWithUrlsAsync(null, "Two Level Join Artist", "Two Level Join Song", string.Empty, null, null, null, null, [])` directly, matching the helper's argument list. Comment added on the resolve line.
+- No assertion changed; AC REQ-SFT-18 unchanged. No production file touched (`ISongService.cs` / `SongService.cs` remain uncommitted, untouched).
+- Test output: `Aprovado!  – Com falha:     0, Aprovado:     6, Ignorado:     0, Total:     6, Duração: 12 s - MyVocaList.Tests.dll (net10.0)`
+
+### Builder (finishing) - Green (2026-11-04)
+
+Inherited: the previous Builder's uncommitted `ISongService.cs` / `SongService.cs`; reviewed against plan 3.1 Step 3 and design 3.2, kept unchanged (no deviations). Context7 not needed (no new API surface; existing `IUnitOfWork` / `IArtistService` patterns).
+
+### Changed files
+- `Domain/ServicesInterfaces/ISongService.cs` (new `int? artistId, string? newArtistName` overload; old overload `[Obsolete]`)
+- `Services/SongService.cs` (new overload implementation; old overload forwards with `newArtistName: null`)
+- `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` (Red 3dc296b1 + Tester fix 4d4125be, already committed)
+- `MyVocaList.Tests/Unit/Services/SongServiceTests.cs` (Red 3dc296b1, already committed)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
+
+### Verification evidence
+- Build: `ok dotnet build: 6 projects, 0 errors, 35 warnings (00:03:51.10)`
+- Focused (SongServiceTests + SongServiceNewArtistUnitOfWorkTests): `Aprovado!  - Com falha:     0, Aprovado:    47, Ignorado:     0, Total:    47`
+- Full suite: `Aprovado!  - Com falha:     0, Aprovado:   677, Ignorado:     0, Total:   677` (baseline 668, delta +9; no flaky re-run needed)
+
+### AC traceability matrix
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|-------------------------|-------------|
+| REQ-SFT-18 | Typed new artist + song + URLs persisted in one unit of work | `SongService.CreateSongWithUrlsAsync(int?, string?, ...)` (artist via `IArtistService` from `sp`, `_uow.FlushAsync`) | `CreateSongWithUrlsAsync_NewArtistName_PersistsOneArtistAndOneSong`, `_ThrowAfterArtistStaged_RollsBackBoth`, `_FailureTupleAfterArtistStaged_WritesNothing`, `_NewArtist_UsesOneAppDbContextAcrossTwoLevels` |
+| REQ-SFT-21 | Exactly one of artistId / newArtistName, else "Artist is required" | guard before `_uow.ExecuteAsync` | `CreateSongWithUrlsAsync_NeitherArtistIdNorNewName_FailsArtistRequired`, `_BothArtistIdAndNewName_FailsArtistRequired` |
+| REQ-SFT-26 | External identity held by another song rejected before any artist is created | `ExistsByExternalIdentityAsync` check ahead of the artist branch | `CreateSongWithUrlsAsync_ExternalIdentityHeldByAnotherSong_FailsWithMessage`, `_NewArtistAndIdentityHeld_CreatesNoArtist` |
+| REQ-SFT-52 | Collated duplicate artist name refused, nothing written | `IArtistService.CreateArtistAsync` failure tuple returned as-is | `CreateSongWithUrlsAsync_NewArtistNameCollatedDuplicate_FailsAndWritesNothing` |
+
+Note on `FailureTupleAfterArtistStaged_WritesNothing`: the title is validated before the artist is created, so this test does not exercise staged-artist rollback. That rollback is covered by `ThrowAfterArtistStaged_RollsBackBoth` and `NewArtistNameCollatedDuplicate_FailsAndWritesNothing`.
+
+### CS0618 warnings (old overload `int artistId`; allowed at call sites only)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs(568)` (production caller; migrated by a later task, overload removed in 5.3b)
+- `MyVocaList.Tests/Integration/UnitOfWork/Bug068RegressionTests.cs(128)`
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs(180, 199)`
+
+### Spec notes requested
+- REQ-SFT-21: a blank/whitespace `newArtistName` is treated as not supplied.
+
 ## 3.2a
 
 ### Checkpoint
