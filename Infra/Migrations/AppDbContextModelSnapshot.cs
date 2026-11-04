@@ -393,8 +393,8 @@ namespace MyVocaList.Infra.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ExternalId")
-                        .HasDatabaseName("IX_Songs_ExternalId");
+                    b.HasIndex("ExternalProvider", "ExternalId")
+                        .IsUnique();
 
                     b.HasIndex("ArtistId", "Title", "Version")
                         .IsUnique()

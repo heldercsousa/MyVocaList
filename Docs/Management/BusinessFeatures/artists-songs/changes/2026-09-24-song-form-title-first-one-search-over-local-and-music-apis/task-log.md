@@ -785,6 +785,65 @@ No other operation. Snapshot diff: only the two `b.Property<bool>("HasManualEdit
 
 - 2026-11-04 (orchestrator) — **Pre-dispatch G3 / § 0.2.2 checks (migration task):** (1) LEDGER: no live branch (CATALOG-PROP spec-only, deferred; BUG-080 merged with no migration). (2) `git worktree list`: main only. (3) `git branch -a --no-merged develop`: only `remotes/origin/worktree-agent-aaae95a5d8a6c56ec` (old agent branch, no G3 pattern). **Clear.** Snapshot rule: worktree from develop `5789f115` (includes M1 `20261104150926_DropHasManualEdits`). Worktree `.worktrees/sft-3.7`, branch `task/sft-3.7-m2-external-identity-unique`. Part A dispatched.
 
+### Part A (Sonnet implementor, 2026-11-04)
+**Status:** Part A Red done; model edit pending commit by scaffold flow. Context7 not needed (raw-SQL tests reuse the `SongMigrationTests` helpers). Inherited: clean worktree.
+
+Red (`dotnet test ... -m:1 --filter "FullyQualifiedName~SongMigrationTests"`): `Failed: 3, Passed: 4, Total: 7`.
+- `M2_UniqueIndex_RejectsSecondSongWithSameIdentity` FAIL: `Assert.ThrowsAny() Failure: No exception was thrown`
+- `M2_IndexName_IsComposite` FAIL: `Assert.True() Failure Expected: True Actual: False`
+- `M2_DuplicateIdentities_LowestIdKeepsIdentity_OthersClearedNotDeleted` FAIL: songs 2 and 3 still `Deezer|3135556` (expected `null|null`)
+- `M2_NullIdentities_AllowMany` PASS (guard: holds before and after M2); three `M1_*` PASS.
+
+### Changed files:
+- `MyVocaList.Tests/Integration/Migrations/SongMigrationTests.cs`
+- `Infra/EntityEFConfig/SongConfiguration.cs` (model edit; committed in the Part B Green commit)
+- this task-log section
+
+### Part B (Sonnet implementor, 2026-11-04)
+**Status:** To Review. Context7 not needed (no new API; raw `migrationBuilder.Sql` only). Inherited: Red `67327f7e`; uncommitted `SongConfiguration.cs` + orchestrator scaffold (migration, Designer, snapshot), reviewed and kept.
+
+**Step 3b - generated migration check: OK** (only the index swap; snapshot diff only swaps the index). Generated, verbatim:
+```csharp
+// Up
+migrationBuilder.DropIndex(name: "IX_Songs_ExternalId", table: "Songs");
+migrationBuilder.CreateIndex(name: "IX_Songs_ExternalProvider_ExternalId", table: "Songs",
+    columns: new[] { "ExternalProvider", "ExternalId" }, unique: true);
+// Down
+migrationBuilder.DropIndex(name: "IX_Songs_ExternalProvider_ExternalId", table: "Songs");
+migrationBuilder.CreateIndex(name: "IX_Songs_ExternalId", table: "Songs", column: "ExternalId");
+```
+**Step 4 - inserted in `Up` between DropIndex and CreateIndex:**
+```csharp
+migrationBuilder.Sql(
+    "UPDATE Songs SET ExternalId = NULL, ExternalProvider = NULL " +
+    "WHERE ExternalId IS NOT NULL AND ExternalProvider IS NOT NULL " +
+    "AND Id NOT IN (SELECT MIN(Id) FROM Songs WHERE ExternalId IS NOT NULL AND ExternalProvider IS NOT NULL " +
+    "GROUP BY ExternalProvider, ExternalId);");
+```
+`Down` got a comment only (cleared identities are not restored).
+
+### Changed files (Part B)
+- `Infra/EntityEFConfig/SongConfiguration.cs`
+- `Infra/Migrations/20261104154053_SongExternalIdentityUnique.cs`
+- `Infra/Migrations/20261104154053_SongExternalIdentityUnique.Designer.cs`
+- `Infra/Migrations/AppDbContextModelSnapshot.cs`
+- `MyVocaList.Tests/Integration/Migrations/SongMigrationTests.cs` (Red commit `67327f7e`, unchanged in Green)
+- this task-log section
+
+### Verification evidence (Part B)
+- `SongMigrationTests` filtered: `Aprovado! - Com falha: 0, Aprovado: 7, Total: 7`.
+- Full suite `-m:1`: `Aprovado! - Com falha: 0, Aprovado: 678, Total: 678` (baseline 674, delta +4).
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1`: `Build succeeded` (0 errors; NU1903 warnings only).
+- `dotnet ef migrations has-pending-model-changes`: "No changes have been made to the model since the last migration."
+
+### AC matrix (Part B)
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-SFT-39 unique (ExternalProvider, ExternalId) | `SongConfiguration` composite unique index; migration | `M2_UniqueIndex_RejectsSecondSongWithSameIdentity` |
+| REQ-SFT-39 index name | default `IX_Songs_ExternalProvider_ExternalId` | `M2_IndexName_IsComposite` |
+| REQ-SFT-39 lowest Id keeps identity, others cleared not deleted | `Up` dedupe SQL | `M2_DuplicateIdentities_LowestIdKeepsIdentity_OthersClearedNotDeleted` |
+| REQ-SFT-39 null identities unaffected | unique index ignores NULLs | `M2_NullIdentities_AllowMany` |
+
 ## 3.8
 
 ### Checkpoint
