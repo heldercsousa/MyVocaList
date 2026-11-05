@@ -226,7 +226,7 @@
   - **Review lane:** Elevated
   > **Spec updated 2026-11-04 (3.9c merge `8163505b`, Verifier CONDITIONAL PASS):** `ArtistRepositoryResolutionTests.cs` deleted whole (its 3 tests were the artist `GetFuzzyCandidatePoolAsync` tests, authorised by plan § 10.1). **Follow-up W1:** no test runs the real `SimilarityScorer` on "Metalica"/"Metallica" (the service test mocks 0.94) — 3.10 / 5.3 must prove REQ-SFT-19 end to end, or add a `SimilarityScorerTests` case when a task next owns it.
 
-- [ ] **3.10 `SongService.SaveFromFormAsync`: every Save decision in the Service** [SEQUENTIAL — after 3.2c, 3.3, 3.9c, G4 Q3/Q4]
+- [x] **3.10 `SongService.SaveFromFormAsync`: every Save decision in the Service** [SEQUENTIAL — after 3.2c, 3.3, 3.9c, G4 Q3/Q4]
   - **Produces:** `SongFormSaveRequest`, `SongFormSaveOutcome` (+ `ArtistDecision`, `SongDecision`, `SaveField`), `ISongService.SaveFromFormAsync` (`design.md` § 3.5). Writes only through `CreateSongWithUrlsAsync`/`UpdateSongAsync`.
   - **Files owned:** `Domain/Resolution/SongFormSaveRequest.cs` (new), `Domain/Resolution/SongFormSaveOutcome.cs` (new), `ISongService.cs`, `SongService.cs`, `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (new)
   - **Risk:** High — the constitutional business-logic boundary; CATALOG-PROP shares the file.
