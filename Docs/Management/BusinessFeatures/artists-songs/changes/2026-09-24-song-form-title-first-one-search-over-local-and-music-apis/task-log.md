@@ -1100,15 +1100,114 @@ Files written and re-read: `Contracts/DTOs/Suggestions/ArtistRemoteSearchResult.
 
 ## 4.2
 
-### Checkpoint
+**Status:** To Review (Builder Green done; see `### Green`).
 
-_(not started)_
+### Green (Builder)
+- Inherited: clean worktree at Red `008ef44d`; no half-done edits.
+- Tests: full suite `Aprovado! Com falha: 0, Aprovado: 757, Total: 757` (focused `SongSuggestion`: 33/33). `UnitOfWorkReadScopeTests` included, green.
+- Build: android app build did not finish in ~40 min under machine load (stopped, no error output); Services/Contracts compile via the test project (0 errors). E2E: not applicable (service unregistered until 4.3).
+- `SongSuggestionDto` census: all construction sites positional with 7 args; new `Version = ""` / `LocalArtistName = null` are trailing optional parameters, so no non-owned file changed.
+
+### Green changed files
+- `Services/ISongSuggestionService.cs`, `Services/SongSuggestionService.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`, `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new), this task-log section.
+
+### Design concern (implementation deviates in shape, not behaviour)
+Design § 3.3 step 3/4 describes batch `FindByTitleAndArtistNamesAsync(triples)` and a batch artist lookup. Mapping batch hits back to Deezer rows needs a C#-side case/accent-insensitive comparison, which the HARD RULE forbids (the Red test returns hit "creep"/"RADIOHEAD" for row "Creep"/"Radiohead"). Implemented instead one single-item collated repository call per row (triple) and per distinct artist name, all inside one `ExecuteReadAsync` (dedup) plus one (artist resolution). Up to ~25 cheap SQLite queries per remote search; the DB stays the sole decider. Provider with no `Deezer` entry yields `Unavailable`.
+
+### Checkpoint
+- Branch/worktree: `task/sft-4.2-song-suggestion-search` @ `.worktrees/sft-4.2` (base develop 6310f83d). Step 2 of 3 done (Tester Red). Next: Builder Green.
+- Last build: Red compile errors (below). Next command: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --filter "FullyQualifiedName~SongSuggestion"`.
+- Context manifest: `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs` (the Red); `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs` (ctor call); `Services/SongSuggestionService.cs`; `Services/ISongSuggestionService.cs`; `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`; `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new); design.md § 3.3.
+
+### Red output (`dotnet build MyVocaList.Tests -m:1`, compile errors; deduplicated)
+- CS1061 x7: `'SongSuggestionService' does not contain a definition for 'SearchTitleLocalAsync'` (SongSuggestionServiceTests.cs)
+- CS1061 x18: `'SongSuggestionService' does not contain a definition for 'SearchTitleRemoteAsync'` (SongSuggestionServiceTests.cs)
+- CS1729 x1: `'SongSuggestionService' does not contain a constructor that takes 7 arguments` (SongSuggestionServiceTests.cs:52)
+- CS1729 x2: same, SongSuggestionThresholdTests.cs:29 and :144
+- Not yet visible (masked by `var` inference, will surface once the methods exist): `SongSuggestionDto.Version`, `SongSuggestionDto.LocalArtistName`, `SongRemoteSearchResult`.
+
+### Constructor order (implementation decision; design § 3.3 does not fix it)
+`SongSuggestionService(ISongRepository, IArtistRepository, IUnitOfWork, IEnumerable<IMusicMetadataProvider>, ISimilarityScorer, INetworkStatus, ILogger<SongSuggestionService>)` - `INetworkStatus` between the scorer and the logger. Both test files use this order.
+
+### Superseded tests (old `SongSuggestionServiceTests.cs`; file was rewritten whole, line numbers differ from design § 10.1 which referenced an older revision)
+| Old test (line) | Action | Superseded AC | Replacing REQ / new test |
+|---|---|---|---|
+| `GetLocalAsync_TermMatchesRegisteredSongs_ReturnsTitleAndArtistName` (:35) | rewritten | REQ-FORMUX-22 | REQ-SFT-04 `SearchTitleLocalAsync_MapsVersionAndArtist` |
+| `GetLocalAsync_ManyMatches_ReturnsAtMostFive` (:57) | rewritten | REQ-FORMUX-22 | REQ-SFT-04 `SearchTitleLocalAsync_TakesAtMostFive` |
+| `GetRemoteAsync_ArtistHintProvided_PassedToProvider` (:76) | deleted | REQ-FORMUX-22 artistHint | REQ-SFT-35 (`QueriesDeezerOnlyWithoutHint` asserts null hint) |
+| `GetRemoteAsync_ResultTitleCollationEqualToLocal_IsExcluded` (:94) | rewritten (artist/version scoped) | REQ-FORMUX-03 | REQ-SFT-05 `..._MatchAlreadyShownLocally_DroppedNotPromoted`, `..._OtherArtistSameTitle_StaysRemote`, `..._Promoted` x3 |
+| `GetRemoteAsync_RemoteArtistExistsLocally_LocalArtistIdResolved` (:119) | rewritten | REQ-FORMUX-23 | REQ-SFT-13 `..._CarriesLocalArtistIdAndName` |
+| `GetRemoteAsync_AllProvidersFail_ReturnsEmptyAndLogs` (:145) | rewritten (`Status = Unavailable`) | REQ-FORMUX-05 | REQ-SFT-06 `..._ProviderThrows_StatusUnavailable_LogsWarning` |
+| `GetRemoteAsync_MusicBrainzEmpty_FallsBackToDeezer` (:170) | deleted | REQ-FORMUX-02 provider order | REQ-SFT-36 (Q1 = drop MusicBrainz) |
+
+Note: the legacy `GetLocalAsync`/`GetRemoteAsync` methods stay in production until 4.3 and are still exercised by `SongSuggestionThresholdTests.cs` (unchanged apart from the constructor call: new `Mock<INetworkStatus>` with `HasInternetAccess` explicitly `true`).
+
+### AC matrix (tests -> Builder implements)
+| AC | Test(s) |
+|---|---|
+| REQ-SFT-03 | `SearchTitleLocalAsync_BelowTwoTrimmedChars_ReturnsEmptyNoRepositoryCall` (theory x3), `SearchTitleRemoteAsync_BelowThreeTrimmedChars_NoProviderCall` (theory x2) |
+| REQ-SFT-30 | `SearchTitleLocalAsync_DontCry_DontCryFirst`, `_DonCry_DontCryFirst` |
+| REQ-SFT-32 | `SearchTitleLocalAsync_GunsCry_DontCryFirstViaArtist` |
+| REQ-SFT-04 | `SearchTitleLocalAsync_TakesAtMostFive`, `_MapsVersionAndArtist`, `SearchTitleRemoteAsync_TakesAtMostFiveRemote` |
+| REQ-SFT-07 | `SearchTitleLocalAsync_MakesNoProviderCall` |
+| REQ-SFT-05 | `ExternalIdentityMatchNotShown_Promoted`, `CollatedTitleArtistEmptyVersionMatch_Promoted`, `CollatedTitleArtistVersionMatch_Promoted`, `MatchAlreadyShownLocally_DroppedNotPromoted`, `OtherArtistSameTitle_StaysRemote` |
+| REQ-SFT-06 | `ProviderThrows_StatusUnavailable_LogsWarning`, `ZeroResults_StatusOk` |
+| REQ-SFT-08 | `ProviderSlowerThanBound_StatusUnavailable` (~3 s) |
+| REQ-SFT-09 | `CallerCancelled_Rethrows` |
+| REQ-SFT-53 | `Offline_NoProviderCall_StatusOffline_LogsInformation`, `OnlineButProviderThrows_StatusUnavailableNotOffline`, `ReadsNetworkStatusPerCall` |
+| REQ-SFT-12 | `RemoteRowCarriesVersion` |
+| REQ-SFT-13 | `RemoteRowArtistIsLocal_CarriesLocalArtistIdAndName` |
+| REQ-SFT-35/36 | `QueriesDeezerOnlyWithoutHint` (one AC line names both; 35 primary) |
+
+### Notes
+- Test-side decisions: ranking tests use the real `SimilarityScorer`; Moq repository defaults are set to explicit empty lists in the fixture; Moq predicates build triples via a `Triple(...)` helper (expression trees reject tuple literals).
+- Ranking tests (REQ-SFT-30/32) were not run (Red is compile-level); they use the same strings as the passing `SimilarityScorerTests.RankScore_*`.
+- `Mock<INetworkStatus>` default is false (= Offline): fixture sets true; only Offline test sets false.
+
+### Changed files:
+- `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs` (rewritten)
+- `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs` (constructor call only: +`Mock<INetworkStatus>`)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
 
 ## 4.3
 
-### Checkpoint
+**Status:** To Review
+**Started:** 2026-11-04 **Completed:** 2026-11-04
+**Plan:** plan.md § Task 4.3 - Level C + retargeted tests - Review lane Standard
 
-_(not started)_
+Inherited nothing (clean worktree). Context7 not needed (no new external API).
+
+### Changed files
+- `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs` (6 tests retargeted; MusicBrainz mock/literals removed)
+- `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` (new REQ-SFT-02 test, `Mock.Of<INetworkStatus>()`)
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (`AddScoped<ISongSuggestionService, SongSuggestionService>()`)
+- `Services/ISongSuggestionService.cs` (removed `GetLocalAsync`/`GetRemoteAsync`)
+- `Services/SongSuggestionService.cs` (deleted legacy `GetLocalAsync`/`GetRemoteAsync`, `FetchFromProvidersAsync`, `TrySearchAsync`, `DedupAsync`, `ResolveLocalArtistIdsAsync`, `MapLocal(SongListItemDto)`, consts `MaxSuggestions`/`MusicBrainzProviderName`; `SearchTitle*` untouched)
+- `Docs/.../task-log.md` (this section)
+
+### Red (commit 83ac2c20, Lane: RED)
+`AddAppServices_ResolvingSongSuggestionService_Succeeds`: `System.InvalidOperationException : No service for type 'MyVocaList.Services.ISongSuggestionService' has been registered.` (Failed 1, Passed 10 in the two filtered classes; the 6 retargeted threshold tests were green in Red because SearchTitle* already exist.)
+
+### Green
+Build: `0 Erro(s)`. Full suite: `Aprovado! - Com falha: 0, Aprovado: 769, Total: 769` (baseline 768 -> +1 new DI test).
+
+### Retargeted tests (same assertion intent; REQ-UOW-51/52 kept)
+| Old | New |
+|---|---|
+| GetLocalAsync_OneCharQuery_ReturnsEmptyAndNeverCallsRepository | SearchTitleLocalAsync_OneCharQuery_ReturnsEmptyAndNeverCallsRepository |
+| GetLocalAsync_TwoCharQuery_ReachesRepository | SearchTitleLocalAsync_TwoCharQuery_ReachesRepository |
+| GetLocalAsync_QueryTrimsBelowThreshold_ShortCircuits | SearchTitleLocalAsync_QueryTrimsBelowThreshold_ShortCircuits |
+| GetRemoteAsync_TwoCharQuery_ProviderNeverInvoked | SearchTitleRemoteAsync_TwoCharQuery_ProviderNeverInvoked |
+| GetRemoteAsync_ThreeCharQuery_ReachesProvider | SearchTitleRemoteAsync_ThreeCharQuery_ReachesProvider |
+| GetRemoteAsync_ProviderBlocks_NoOpenScopeDuringFetch | SearchTitleRemoteAsync_ProviderBlocks_NoOpenScopeDuringFetch |
+
+Adaptations forced by the new API: repo call `GetPagedAsync(1,5,..)` -> `SearchTitleCandidatesAsync(q, PoolSize, ..)`; result is `SongRemoteSearchResult` (asserts on Promoted/Remote); MusicBrainz mock dropped (Deezer-only, REQ-SFT-36); test 6 uses Deezer result + Find* repo setups instead of `GetByTitlesCollatedAsync`.
+
+### Census (Python os.walk)
+`GetLocalAsync(`/`GetRemoteAsync(`/`MusicBrainzProviderName`: zero hits in `ISongSuggestionService.cs`, `SongSuggestionService.cs`, `SongSuggestionThresholdTests.cs`. Remaining hits are only `ArtistSuggestionService`, `IArtistSuggestionService` and their tests (task 6.1). No song-side caller outside owned files. One `"MusicBrainz"` literal remains at `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs:31` (`_musicBrainzMock` provider-name setup) - not an owned file; reported for the orchestrator.
+
+### Verification evidence
+Post-edit diff re-read of all 5 source files. Not pushed; tasks.md not ticked.
 
 ## 5.1
 
@@ -1199,9 +1298,91 @@ _(not started)_
 
 ## 6.1
 
-### Checkpoint
+**Status:** To Review (Builder Green 2026-11-05). **Branch:** task/sft-6.1-artist-suggestions (base develop a55cbb52). Inherited: clean worktree. Context7 not needed (mirrors merged 4.2/4.3 patterns; no new library API).
 
-_(not started)_
+### Checkpoint
+Final (Builder, 2026-11-05): Green complete, build 0 errors (attempt 1), focused 32/32, full suite 773/773 (one BUG-076-style timing failure in `CrudListViewModelBaseTests.SearchText_Changed_DebouncesIntoFetchWithTrimmedQuery` on the first run, green on the single re-run). Commit and push pending at the time of this note; SHA in `git log`. Context manifest: Services/ArtistSuggestionService.cs; Services/IArtistSuggestionService.cs; MyVocaList/Extensions/ServiceCollectionExtensions.cs; MyVocaList/MauiProgram.cs (INetworkStatus, 4.1c); design.md § 4.1 + § 3.3 notes.
+
+### Red (compile error, `Lane: RED`, `--no-verify`) - `dotnet build MyVocaList.Tests -m:1`, distinct CS lines
+- CS1729: 'ArtistSuggestionService' does not contain a constructor that takes 6 arguments (ArtistSuggestionServiceTests.cs:49, ArtistSuggestionThresholdTests.cs:41)
+- CS1061: 'ArtistSuggestionService' does not contain a definition for 'SearchNameLocalAsync' (ServiceTests 103,125,150; ThresholdTests 60,78)
+- CS1061: ... 'SearchNameRemoteAsync' (ServiceTests 167..316; ThresholdTests 98,120,149)
+
+### Tests and ACs
+| Test | AC |
+|---|---|
+| SearchNameLocalAsync_BelowTwoTrimmedChars_ReturnsEmpty (theory) | REQ-SFT-03 |
+| SearchNameLocalAsync_UsesFtsCandidatesRankedMaxFive | REQ-SFT-47 |
+| SearchNameLocalAsync_Metalica_ReturnsLocalMetallicaFirst | REQ-SFT-47 |
+| SearchNameRemoteAsync_DeezerMetallica_DroppedWhenLocalMetallicaExists | REQ-SFT-48 |
+| SearchNameRemoteAsync_BelowThreeTrimmedChars_NoProviderCall (theory) | REQ-SFT-03 |
+| SearchNameRemoteAsync_DeezerNameCollatedMatchOfLocal_Dropped | REQ-SFT-48 |
+| SearchNameRemoteAsync_ProviderThrows_StatusUnavailable_LogsWarning | REQ-SFT-06 |
+| SearchNameRemoteAsync_ProviderSlowerThanBound_StatusUnavailable | REQ-SFT-08 |
+| SearchNameRemoteAsync_CallerCancelled_Rethrows | REQ-SFT-09 |
+| SearchNameRemoteAsync_ZeroResults_StatusOk | REQ-SFT-06 |
+| SearchNameRemoteAsync_Offline_NoProviderCall_StatusOffline_LogsInformation | REQ-SFT-53 |
+| SearchNameRemoteAsync_OnlineButProviderThrows_StatusUnavailableNotOffline | REQ-SFT-53 |
+| SearchNameRemoteAsync_ReadsNetworkStatusPerCall | REQ-SFT-53 |
+| AddAppServices_ResolvingArtistSuggestionService_Succeeds | REQ-SFT-47 |
+| Threshold: SearchNameLocalAsync_OneCharQuery_..., _QueryAtMinimumLength_ReachesRepository; SearchNameRemoteAsync_TwoCharQuery_..., _QueryAtMinimumRemoteLength_ReachesProvider, _WhileProviderFetchBlocks_NoScopeIsOpen | REQ-UOW-51 / 52 / 43 (retargeted, same assertions) |
+
+### Superseded tests
+| Test (original) | Action | Superseded AC -> replacing REQ |
+|---|---|---|
+| ArtistSuggestionServiceTests: GetLocalAsync_TermUnderTwoChars_ReturnsEmpty | rewritten as SearchNameLocalAsync_BelowTwoTrimmedChars_ReturnsEmpty | REQ-FORMUX-01 -> REQ-SFT-03 |
+| GetLocalAsync_ManyMatches_ReturnsAtMostFive | rewritten as ..._UsesFtsCandidatesRankedMaxFive | REQ-FORMUX-01 -> REQ-SFT-47 |
+| GetRemoteAsync_MusicBrainzReturnsResults_DeezerNeverCalled, _MusicBrainzEmpty_FallsBackToDeezer, _MusicBrainzThrows_FallsBackToDeezer | deleted (MusicBrainz-first order gone) | REQ-FORMUX-02 -> REQ-SFT-36 (Deezer only) |
+| GetRemoteAsync_ResultSharesExternalIdWithLocal_IsExcluded (tier a) | deleted | REQ-FORMUX-03(a) -> REQ-SFT-48 |
+| GetRemoteAsync_ResultNameCollationEqualToLocalDb_IsExcluded (tier b) | rewritten as ..._DeezerNameCollatedMatchOfLocal_Dropped | REQ-FORMUX-03(b) -> REQ-SFT-48 |
+| GetRemoteAsync_ResultSimilarAboveThresholdToLocal_IsExcluded, _ResultBelowThreshold_IsKept (tier c) | deleted | REQ-FORMUX-03(c) -> REQ-SFT-47/48 |
+| GetRemoteAsync_AllProvidersFail_ReturnsEmptyAndLogs | rewritten as ..._ProviderThrows_StatusUnavailable_LogsWarning | REQ-FORMUX-05 -> REQ-SFT-06 |
+| GetRemoteAsync_Cancelled_ThrowsOperationCanceled | rewritten as ..._CallerCancelled_Rethrows | REQ-FORMUX-02 -> REQ-SFT-09 |
+| FilterSimilar_ScoreAtThresholdNonExact_IsSimilar, _ScoreBelowThreshold_IsNotSimilar, _ExactMatch_IsNotSimilar | deleted (FilterSimilar removed) | REQ-FORMUX-10 -> REQ-SFT-47/48 |
+| ArtistSuggestionThresholdTests: 5 GetLocal/GetRemote tests | retargeted to SearchName* (same assertions) | REQ-UOW-51/52/43 unchanged |
+
+### Changed files:
+- `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs`
+- `MyVocaList.Tests/Unit/Services/ArtistSuggestionThresholdTests.cs`
+- this task-log section
+
+### Green (Builder)
+**Status:** To Review (pending orchestrator merge). Red `66a1e8fb`; Green SHA recorded in the commit that adds this block (see `git log`). Inherited: clean worktree.
+Implemented `SearchNameLocalAsync` / `SearchNameRemoteAsync` (mirrors `SongSuggestionService`): constructor exactly as the Red fixed it; local = `SearchNameCandidatesAsync(q, PoolSize)` inside `ExecuteReadAsync` (repo from `sp`), `RankScore`, stable order, take 5, `IsExactMatch=false`; remote = guard (<3 -> Ok), live `INetworkStatus` (Offline + Information log), Deezer only with linked 3000 ms CTS (caller cancel rethrown, else Unavailable + Warning), then one `GetByNamesCollatedAsync([name])` per distinct Deezer name in a single read scope, take 5. `GetLocalAsync`, `GetRemoteAsync`, `FilterSimilar`, `MusicBrainzProviderName` branch deleted. Registered `AddScoped<IArtistSuggestionService, ArtistSuggestionService>()` after the song registration. `ArtistSuggestionDto` doc example "MusicBrainz" removed.
+Census (os.walk, all .cs/.xaml excluding obj/bin/Docs/.claude): `ArtistSuggestionService|IArtistSuggestionService|FilterSimilar|MusicBrainzProviderName` outside `Services/` hit only the two 6.1 test files; no ViewModel/page callers (the interface was previously unregistered).
+Verification: focused `ArtistSuggestion|UnitOfWorkReadScope`: Failed 0, Passed 27. Full suite: Failed 0, Passed 773, Total 773 (baseline 769, +4 net from the Tester). One run hit the known BUG-076 flake (`CatalogRepositoryTests.InitializeAsync` ObjectDisposedException, 772/773); re-run 773/773 green.
+Changed files (Green): `Services/IArtistSuggestionService.cs`, `Services/ArtistSuggestionService.cs`, `Contracts/DTOs/Suggestions/ArtistSuggestionDto.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, `Docs/.../design.md` (one `> **Spec updated 2026-11-05**` note, § 4.1), this section.
+
+### Changed files:
+- `Services/IArtistSuggestionService.cs`
+- `Services/ArtistSuggestionService.cs`
+- `Contracts/DTOs/Suggestions/ArtistSuggestionDto.cs` (doc comment only)
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (one `AddScoped` line)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/design.md` (spec note)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
+
+### AC matrix (6.1)
+| AC ID | Criterion | Implementation | Test method |
+|---|---|---|---|
+| REQ-SFT-03 | Below 2 (local) / 3 (remote) trimmed chars → empty, no provider call | `ArtistSuggestionService.SearchNameLocalAsync`/`SearchNameRemoteAsync` guards | `SearchNameLocalAsync_BelowTwoTrimmedChars_ReturnsEmpty`, `SearchNameRemoteAsync_BelowThreeTrimmedChars_NoProviderCall` |
+| REQ-SFT-47 | Local FTS candidates, ranked, max 5 | `SearchNameCandidatesAsync` + `RankScore` + `Take(MaxSearchResults)` | `SearchNameLocalAsync_UsesFtsCandidatesRankedMaxFive`, `SearchNameLocalAsync_Metalica_ReturnsLocalMetallicaFirst` |
+| REQ-SFT-48 | Deezer name collated-equal to a local artist is dropped | per-name `GetByNamesCollatedAsync` in one read scope | `SearchNameRemoteAsync_DeezerMetallica_DroppedWhenLocalMetallicaExists`, `SearchNameRemoteAsync_DeezerNameCollatedMatchOfLocal_Dropped` |
+| REQ-SFT-06 | Failure → `Unavailable` + Warning; zero results → `Ok` | `TryFetchDeezerAsync` returns null on failure | `SearchNameRemoteAsync_ProviderThrows_StatusUnavailable_LogsWarning`, `SearchNameRemoteAsync_ZeroResults_StatusOk` |
+| REQ-SFT-08 | 3,000 ms bound | linked CTS `CancelAfter(RemoteSearchTimeoutMilliseconds)` | `SearchNameRemoteAsync_ProviderSlowerThanBound_StatusUnavailable` |
+| REQ-SFT-09 | Caller cancellation rethrown (stale query) | `catch (OperationCanceledException) when (ct.IsCancellationRequested)` | `SearchNameRemoteAsync_CallerCancelled_Rethrows` |
+| REQ-SFT-36 | Deezer only (no MusicBrainz-first path) | provider lookup by `ProviderName == "Deezer"` | `SearchNameRemoteAsync_*` (provider mock) |
+| REQ-SFT-53 | Offline → no provider call, `Offline`, Information log; live read per call; online throw ≠ Offline | `INetworkStatus.HasInternetAccess` read on each call | `SearchNameRemoteAsync_Offline_NoProviderCall_StatusOffline_LogsInformation`, `_OnlineButProviderThrows_StatusUnavailableNotOffline`, `_ReadsNetworkStatusPerCall` |
+| REQ-SFT-47 (DI) | `IArtistSuggestionService` resolves from `AddAppServices` | `ServiceCollectionExtensions` `AddScoped` line | `AddAppServices_ResolvingArtistSuggestionService_Succeeds` |
+
+### Verification evidence (6.1 Green, 2026-11-05)
+- `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -m:1`: 7 projects, 0 errors, 30 warnings (pre-existing package advisories). Attempt 1 of 3.
+- Focused `ArtistSuggestion|UnitOfWorkReadScope|AppServicesRegistration`: `Aprovado: 32, Com falha: 0, Total: 32`.
+- Full suite: run 1 `Com falha: 1, Aprovado: 772, Total: 773` (`CrudListViewModelBaseTests.SearchText_Changed_DebouncesIntoFetchWithTrimmedQuery`, timing test, not in this task's scope); re-run `Aprovado: 773, Com falha: 0, Total: 773`.
+- Tests were not edited (Builder must not modify tests); the Red commit `66a1e8fb` is the only test-file change.
+
+### Notes
+- Branch base is `develop` `a55cbb52`; `develop` has since advanced to `01e8fba9`, so `git merge-base --is-ancestor develop HEAD` is false. The orchestrator must rebase or merge before merging to develop.
+- Deviations: none from `design.md` § 4.1 / § 3.3 beyond the recorded spec note.
 
 ## 6.2
 
@@ -1397,6 +1578,132 @@ Note: the plan cited line numbers 73/101/128/152; actual tests were located by n
 - UnitOfWorkReadScopeTests still green (constructor unchanged).
 - No SafeAreaEdges/XAML touched. No tasks.md tick. No push.
 - **3.9c:** Red `1d20d01a`, Green `191c4410` (test file byte-identical Red→Green). Verifier (Opus) **CONDITIONAL PASS**, 0 blockers (W1 real-scorer proof → 3.10/5.3; W2 Green SHA recorded here; W3 deleted tests carried non-existent AC IDs 5.8–5.10, mapped to AC-5.2). Merged `8163505b`. Post-merge develop: `0 errors`; first full run `Com falha: 1, Aprovado: 747` (intermittent), re-run `Aprovado! – Com falha: 0, Aprovado: 748, Total: 748`.
+- **4.2:** Tester Red `008ef44d`, Builder Green `c4fab287` (`git diff 008ef44d..c4fab287 -- MyVocaList.Tests` empty). Builder's Android build hung ~40 min under load (stopped); orchestrator re-ran it on a quiet machine in the worktree: `dotnet build: 6 projects, 0 errors`. Verifier (Opus) **CONDITIONAL PASS**, 0 blockers: W1 per-item dedup + second read scope → design § 3.3 note (accepted); W2 SHAs recorded here (the worktree Checkpoint block is stale — superseded by this record); W3 no-provider branch accepted as Level C; W4 untested edges (empty Deezer title, identity+triple double match) noted; W5 `QueriesDeezerOnlyWithoutHint` carries REQ-SFT-35/36 as the plan table sanctions; W6 Tester did the § 10.1 deletions (authorised). Merged `b100ceb7`. Post-merge develop: `0 errors`; `Aprovado! – Com falha: 0, Aprovado: 768, Total: 768`.
+- **3.10 (NOT merged — Architectural lane, awaiting Helder's review):** Tester Red `f4fd7de1`, Builder (Opus) Green `5250d0fc` + docs `c9732823` on `task/sft-3.10-save-from-form`; test file byte-identical Red→Green; Builder: full suite 773/773, Android `0 Erro(s)`.
+  - Verifier (Opus) **CONDITIONAL PASS**, 0 blockers; focused 94/94. W1 artist write-path failures return `FailedField = None` (REQ-SFT-20 says Artist); W2 untested Builder branches ("Artist not found" `:510`, vanished exact match `:537`, malformed resolver results `:487/:555`); W3 edit mode: no typed-artist test, `SavedSongId` not asserted; W4 task-log says 24 tests (25); W5 branch behind develop — task-log append conflict only; W6 REQ-SFT-51 `ArtistChoiceNeeded(typed name, …)` vs § 3.5 record without it.
+  - Adversarial critic (Opus): no blocker; REQ-SFT-52/41 and no-partial-write attacks held; cancellation safe; no runtime DI cycle (by reading). **MAJOR spec gap:** after an `ExactExternalMatch` (REQ-SFT-25), "Save as new version" / "Save as new song" always fail ("This music-database song is already in your library") because the request still carries the Deezer identity and REQ-SFT-26 forbids a second holder (`SongService.cs:414-417`, `:271-273`). Minor: W1 again (route: CreateTyped + edited text equal to an existing artist); decision persistence/loop risk is a VM contract (5.3); typed name missing from `ArtistChoiceNeeded`; song guard identifies the artist by stored name (safe while `IX_Artists_Name` is unique under NOCASE_NOACCENT); no real-UoW integration test of SaveFromForm rollback; concurrent double-save → `DbUpdateException` (VM busy guard); wrong comment `SongService.cs:536-537` ("same read scope").
+- **4.3:** Red `83ac2c20`, Green `01a0adfe` (hook blocked the first two Green attempts on unnamed intermittent failures; third passed unchanged). Verifier **PASS** (6 threshold tests retargeted without weakening; legacy removal deletions-only; the `"MusicBrainz"` mock in `SongSuggestionServiceTests.cs:31` is a live `Times.Never` fixture for REQ-SFT-36 — keep; W1 possibly unused usings in `SongSuggestionService.cs`). Merged `4d9faa54`. Post-merge develop: `0 errors`; `Aprovado! – Com falha: 0, Aprovado: 769, Total: 769`.
+
+
+## 5.2
+
+**Task:** VM: title search, picks, online-search note. **Branch:** `task/sft-5.2-vm-title-search`. **Status:** To Review (Red `7b8e27a2`, test fix `bb5cd04e`, Green = this task's commit).
+
+### Red (Tester)
+
+Tests added to `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (36 test cases / 30 methods; no production code, no stubs). Inherited from earlier work: nothing (clean worktree at develop `a55cbb52`).
+
+Red output (compile error, as the plan expects), distinct messages `dotnet build MyVocaList.Tests -m:1`:
+
+```
+error CS1729: 'SongFormViewModel' does not contain a constructor that takes 10 arguments   (x2)
+error CS1061: 'SongFormViewModel' does not contain a definition for 'TitleOptionSource'      (x2)
+error CS1061: ... 'TitleSupportingText'      (x30)
+error CS1061: ... 'SelectTitleCommand'       (x30)
+error CS1061: ... 'ClearTitleCommand'        (x10)
+error CS1061: ... 'IsDiscardSheetVisible'    (x14)
+error CS1061: ... 'IsTitleLocked'            (x8)
+error CS1061: ... 'ConfirmOpenExistingCommand' (x2)
+error CS1061: ... 'KeepEditingCommand'       (x2)
+error CS1061: ... 'ArtistOptionSource'       (x2)
+```
+
+The dispatcher test (`TitleOptionSource_SetsNoteThroughUiThreadHelper`) was probed against the existing VM before the Red (a throwaway test calling `SearchArtistsCoreAsync("")`): installing a counting `IDispatcherProvider` via `DispatcherProvider.SetCurrent` plus `Application.Current = new Application()` makes `ViewModelBase.RunOnUiThread` dispatch once through the fake (`IsDispatchRequired = true`). Probe deleted, not committed. The test restores `Application.Current` in `finally`.
+
+### AC matrix
+
+| AC | Test method |
+|----|-------------|
+| REQ-SFT-04 | `TitleOptionSource_LocalHit_SupportingTextHasArtistVersionAndLibraryMarker`, `..._LocalHitEmptyVersion_OmitsVersionPart`, `..._RemoteHit_SupportingTextIsArtistVersionAndDeezer`, `..._RemoteHitEmptyVersion_OmitsVersionPart` |
+| REQ-SFT-05 | `TitleOptionSource_OrdersLocalThenPromotedThenRemote` |
+| REQ-SFT-09 | `TitleOptionSource_PassesShownLocalIdsAndToken`, `TitleOptionSource_CancelledQuery_DoesNotChangeTitleSupportingText` |
+| REQ-SFT-06 | `..._StatusUnavailable_SetsUnavailableNote`, `..._OfflineThenOk_ClearsNote`, `..._RemoteSucceedsAfterFailure_ClearsTitleSupportingText`, `..._QueryBelowRemoteThreshold_KeepsExistingNote`, `..._SetsNoteThroughUiThreadHelper`, `SongTitle_EmptiedByTyping_ClearsTitleSupportingText` (Theory "" / "   "), `ClearTitle_EmptiesNote` |
+| REQ-SFT-53 | `TitleOptionSource_StatusOffline_SetsOfflineNote` |
+| REQ-SFT-10 | `SelectTitle_LocalOptionNoOtherInput_NavigatesToEditForm` |
+| REQ-SFT-11 | `SelectTitle_LocalOptionWithOtherInput_ShowsDiscardSheetNoNavigation` (Theory x5), `ConfirmOpenExisting_FromDiscardSheet_Navigates`, `KeepEditing_RestoresTypedQueryUnlocked_NothingElseChanges`, `ClearTitle_AfterRemotePickThenLocalPick_NoDiscardSheetFromPickFilledVersion` |
+| REQ-SFT-12 | `SelectTitle_RemoteOption_FillsTitleAndArtistAndPendingIdentity_WritesNothing`, `SelectTitle_RemoteOption_SetsVersionFromDeezer_OverwritingTypedVersion` (Theory x2), `RemotePick_ClosesDropdowns` |
+| REQ-SFT-13 | `SelectTitle_RemoteOptionArtistIsLocal_LocksLocalArtist`, `SelectTitle_RemoteOptionArtistNotLocal_LocksTypedArtistWithNoId` |
+| REQ-SFT-14 | `ClearTitle_AfterRemotePick_ClearsPendingIdentity_KeepsArtist`, `ClearTitle_AfterRemotePick_ResetsUnchangedPickFilledVersion`, `ClearTitle_AfterRemotePick_KeepsVersionEditedAfterPick`, `ClearArtist_AfterRemotePick_ClearsPendingIdentity_KeepsTitle` |
+| REQ-SFT-16 | `ArtistOptionSource_ReturnsLocalArtistsOnly_NoRemoteCall` |
+
+Plan-table deviations (all additive): the plan's single `ClearTitle_EmptiesNote_AndClearsPendingIdentity_KeepsArtist` (REQ-SFT-06/14) is split into two single-AC tests (`ClearTitle_EmptiesNote` = 06; `ClearTitle_AfterRemotePick_ClearsPendingIdentity_KeepsArtist` = 14); the 3rd table row is split into remote-with-version and remote-empty-version methods; `ClearTitle_AfterRemotePickThenLocalPick_...` is tagged REQ-SFT-11 only (one AC per test; the 14 half is covered by `..._ResetsUnchangedPickFilledVersion`).
+
+### Superseded tests
+
+None in this task. The tests the plan names (`:486` / `:509`, `ResolveAndLockArtistAsync_*_ClosesDropdown`) were already deleted in Task 1.x (`RemotePick_ClosesDropdowns` is their replacement, REQ-SFT-12). Existing `CreateSut` was edited (one extra constructor argument, `_suggestionsMock.Object`) and a class constructor added that sets default search mocks; no existing test body changed.
+
+### Choices fixed by the Tester (design left open) — Builder must implement exactly
+
+1. Constructor: `ISongSuggestionService` is the **last** parameter, after `INavigationService` (10 arguments). `ISongResolutionService` stays (removed in 5.3).
+2. Option `Data` is the `SongSuggestionDto` itself for local, promoted and remote options; `SelectTitleCommand` dispatches on `dto.IsRemote` / `dto.LocalId`.
+3. `SongSuggestionDto` real members: `LocalId` (not `LocalSongId`), `Version`, `LocalArtistName`, `LocalArtistId`, `ExternalId`, `ExternalProvider`.
+4. Remote pick sets `SongTitle = dto.Title`, `IsTitleLocked = true`, `SongVersion = dto.Version` (overwrite, incl. `""`), `SelectedExternalId/SelectedProvider = dto.ExternalId/ExternalProvider`; local artist (`LocalArtistId` non-null) -> `LockArtist(LocalArtistId, LocalArtistName)`; otherwise `SelectedArtistId = null`, `ArtistSearchText = dto.ArtistName`, `IsArtistLocked = true`. Also `IsArtistDropDownOpen = false`, `ArtistSuggestions = []`. No service calls (tests use `VerifyNoOtherCalls` on `ISongService`/`IArtistService`), no navigation.
+5. `ClearTitleCommand` (`IRelayCommand`): `SongTitle = ""`, `IsTitleLocked = false`, `SelectedExternalId/SelectedProvider = ""`, `TitleSupportingText = ""`, Artist untouched; `SongVersion = ""` only if it still equals the value the last remote pick wrote (track it regardless of hydration state; reset the tracker on clear / when the user edits Version is irrelevant: compare current to the picked value).
+6. `ClearArtist` additionally clears `SelectedExternalId/SelectedProvider`; keeps Title, IsTitleLocked and Version.
+7. "Other input" for the discard sheet = `ArtistSearchText`, `SongVersion`, `FeaturedArtists`, `Lyrics` non-empty, or `KaraokeUrls.Count > 0` (any non-whitespace text counts). `SongTitle` itself is not "other input".
+8. Local pick -> if no other input: `INavigationService.GoToAsync($"../{Routes.SongForm}?songId={id}")`; else `IsDiscardSheetVisible = true` and remember the song id. `ConfirmOpenExistingCommand` (`IAsyncRelayCommand`, executed with a null parameter) hides the sheet and navigates; `KeepEditingCommand` (`IRelayCommand`) hides the sheet, sets `SongTitle` to the **last query passed to `TitleOptionSource.SearchAsync`** (the Field may have overwritten Title with the picked headline before the command fires), `IsTitleLocked = false`, changes nothing else, no navigation.
+9. `TitleOptionSource` option mapping: Headline = title; local/promoted SupportingText = `"artist · version · In your library"`, remote = `"artist · version · Deezer"` (version part and its separator omitted when empty). Note text is set only when `query.Trim().Length >= SearchConstants.MinimumRemoteQueryLength`, via `RunOnUiThread` (exactly one dispatch per qualifying query), after `ct.ThrowIfCancellationRequested()`. `OnSongTitleChanged` clears `TitleSupportingText` when the value is null/empty/whitespace.
+10. `ArtistOptionSource = new MenuOptionSource((q, ct) => SearchArtistsCoreAsync(q))` (local artists only; no create-new row; no `ISongSuggestionService` call).
+
+### Checkpoint (final)
+
+Builder complete: Green committed, build 0 errors, full suite 805/805 on rerun. Final entry at the end of this section.
+
+### Green (Builder) - first attempt, spec gap (RESOLVED, see final entry)
+
+Production code written in `MyVocaList/UI/ViewModels/SongFormViewModel.cs` (UNCOMMITTED in the worktree; pre-commit hook would fail). Focused run `SongFormViewModelTests`: Passed 86, Failed 1, Total 87. Only failure:
+`SelectTitle_RemoteOption_FillsTitleAndArtistAndPendingIdentity_WritesNothing` - `songService.VerifyNoOtherCalls()` fails on `ISongService.ShouldShowCharacterCounter(5)`.
+
+### Spec gap: VerifyNoOtherCalls on ISongService vs. character counter
+**Location:** SongFormViewModelTests.cs:446 (and Tester choice 4: "No service calls").
+**Gap description:** A remote pick sets `SongTitle`, which fires `OnSongTitleChanged` -> `UpdateCharacterCounter` -> `ISongService.ShouldShowCharacterCounter` (presentation helper existing since before 5.2; also keeps `CanLaunchYouTubeSearch` current). `VerifyNoOtherCalls` rejects that call although nothing is written.
+**Options:**
+- Option A: relax the test to verify no write/lookup calls (e.g. `Verify(Never)` on Create/Update/Resolve) or `songService.Setup(ShouldShowCharacterCounter)` as verifiable - keeps counter behaviour intact.
+- Option B: Builder bypasses `OnSongTitleChanged` for the pick (SetProperty on the backing field) - counter and YouTube-search enablement go stale after a pick; a functional regression.
+**Recommendation:** Option A (Tester amends the assertion); my production code is otherwise complete.
+**Blocking:** Yes — RESOLVED by `bb5cd04e` (Option A applied: explicit `Times.Never` checks; approval recorded in that commit message).
+
+### Changed files (Red, superseded by final entry):
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
+
+ITF: SFT-5.2-di — MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs — root cause: the 5.2 Green adds ISongSuggestionService to SongFormViewModel, whose SongSuggestionService needs INetworkStatus (registered in MauiProgram.cs), unmocked in the VM graph test — expected 2 line(s).
+
+### Green (Builder) — final
+
+**Status:** To Review. **Lane:** Elevated (VM, Tester Red `7b8e27a2`).
+
+Production code only: `MyVocaList/UI/ViewModels/SongFormViewModel.cs` implements the Tester's ten fixed choices (Red section). Test-side edits are not Builder edits: `bb5cd04e` (Helder-approved Option A: explicit `Times.Never` on write/lookup calls in `SelectTitle_RemoteOption_FillsTitleAndArtistAndPendingIdentity_WritesNothing`, and `Mock.Of<INetworkStatus>()` in the VM DI graph test, ITF lane, 2 lines).
+
+#### Changed files:
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
+
+#### AC traceability matrix
+
+| AC | Criterion (short) | Implementation location (`SongFormViewModel.cs`) | Test method(s) |
+|----|-------------------|--------------------------------------------------|----------------|
+| REQ-SFT-04 | Option supporting text: artist · version · library/Deezer | `ToTitleOption` | `TitleOptionSource_LocalHit_*`, `..._RemoteHit_*` |
+| REQ-SFT-05 | Order: local, promoted, remote | `SearchTitleAsync` (`local.Concat(remote.Promoted).Concat(remote.Remote)`) | `TitleOptionSource_OrdersLocalThenPromotedThenRemote` |
+| REQ-SFT-09 | Shown local ids passed; cancelled query leaves note untouched | `SearchTitleAsync` (`shownIds`, `ThrowIfCancellationRequested`) | `TitleOptionSource_PassesShownLocalIdsAndToken`, `..._CancelledQuery_DoesNotChangeTitleSupportingText` |
+| REQ-SFT-06 | Note set/cleared by status; cleared on empty title and on Clear | `SearchTitleAsync` (status switch), `OnSongTitleChanged`, `ClearTitle` | `..._StatusUnavailable_*`, `..._OfflineThenOk_*`, `..._RemoteSucceedsAfterFailure_*`, `..._QueryBelowRemoteThreshold_*`, `..._SetsNoteThroughUiThreadHelper`, `SongTitle_EmptiedByTyping_*`, `ClearTitle_EmptiesNote` |
+| REQ-SFT-53 | Offline note text | `OfflineNote` + `SearchTitleAsync` | `TitleOptionSource_StatusOffline_SetsOfflineNote` |
+| REQ-SFT-10 | Local pick, no other input → navigate | `SelectTitle` → `OpenSongAsync` | `SelectTitle_LocalOptionNoOtherInput_NavigatesToEditForm` |
+| REQ-SFT-11 | Local pick with other input → discard sheet; Open / Keep editing | `SelectTitle`, `HasOtherInput`, `ConfirmOpenExisting`, `KeepEditing` | `SelectTitle_LocalOptionWithOtherInput_*`, `ConfirmOpenExisting_*`, `KeepEditing_*`, `ClearTitle_AfterRemotePickThenLocalPick_*` |
+| REQ-SFT-12 | Remote pick fills title/version/locks; Deezer version overwrites | `SelectTitle` → `ApplyRemotePick` | `SelectTitle_RemoteOption_FillsTitleAndArtistAndPendingIdentity_WritesNothing`, `SelectTitle_RemoteOption_SetsVersionFromDeezer_*`, `RemotePick_ClosesDropdowns` |
+| REQ-SFT-13 | Remote artist local → lock; not local → lock typed name, no id | `ApplyRemotePick` (`LockArtist` / `SelectedArtistId = null`) | `SelectTitle_RemoteOptionArtistIsLocal_*`, `SelectTitle_RemoteOptionArtistNotLocal_*` |
+| REQ-SFT-14 | X on Title/Artist clears pending identity, keeps the other field | `ClearTitle`, `ClearArtist` (`SelectedExternalId`/`SelectedProvider` cleared) | `ClearTitle_AfterRemotePick_ClearsPendingIdentity_KeepsArtist`, `ClearTitle_AfterRemotePick_ResetsUnchangedPickFilledVersion`, `ClearTitle_AfterRemotePick_KeepsVersionEditedAfterPick`, `ClearArtist_AfterRemotePick_*` |
+| REQ-SFT-16 | Artist option source is local artists only | `ArtistOptionSource` → `SearchArtistOptionsAsync` → `SearchArtistsCoreAsync` | `ArtistOptionSource_ReturnsLocalArtistsOnly_NoRemoteCall` |
+
+#### Build notes
+Build: `dotnet build MyVocaList.sln` — 0 errors (1 attempt; warnings only: pre-existing NuGet vulnerability advisories on `System.Security.Cryptography.*` 10.0.10, out of scope). Note: first build run was backgrounded and its `tail` masked the code; a foreground rerun returned exit 0.
+Tests: full `dotnet test MyVocaList.Tests` run 1: 804 passed, 1 failed, 805 total — `Bug068RegressionTests.Song_CreateThenReadThenUpdate_DoesNotThrowTrackingConflict` (SQLite "Cannot access a disposed object" inside `EnsureCreated`; BUG-076 SQLite flake class, not in 5.2 scope). Rerun once (per briefing): **805 passed, 0 failed, 805 total**, exit 0.
+Files written and re-read: `SongFormViewModel.cs` (constructor, `TitleOptionSource`/`ArtistOptionSource`, `SelectTitle`, `ApplyRemotePick`, `ClearTitle`, `ConfirmOpenExisting`, `KeepEditing`, `OnSongTitleChanged` note clear); this task-log (heading, checkpoint, changed-files, final entry).
+
+#### Deviations and concerns (for Helder)
+- `SearchArtistOptionsAsync(string query, CancellationToken ct)` accepts `ct` but does not forward it (`SearchArtistsCoreAsync` has no cancellation parameter). Behaviour-neutral for 5.2 tests; flagged, not changed (out of scope to alter the artist search signature).
+- Spec gap "VerifyNoOtherCalls vs. character counter" is resolved by `bb5cd04e` (Option A). This Builder did not independently verify the approval; the commit message states it.
+- No spec write-back: all implementation choices are the Tester's fixed choices 1–10 in the Red section.
 
 ## 3.10
 

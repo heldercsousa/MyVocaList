@@ -261,7 +261,7 @@
   > **Spec updated 2026-11-04 (D21):** also after 4.1c; `ArtistRemoteSearchResult(Remote, RemoteSearchStatus Status)`.
   > **Spec updated 2026-11-04 (4.1b merge `1aee99f6`, Verifier PASS):** dead `"MusicBrainz"`-first branches remain in `SongSuggestionService.cs:19/98` and `ArtistSuggestionService.cs:18/152` (+ test literals in `ArtistSuggestionServiceTests.cs`); harmless (falls through to Deezer). **Retirement is explicit:** 4.2/4.3 remove the song-side `MusicBrainzProviderName` branch and literals; 6.1 removes the artist-side one and the `ArtistSuggestionDto.cs:10` doc example.
 
-- [ ] **4.2 `SongSuggestionService` local and remote title search** [SEQUENTIAL — after 2.2, 3.9, 4.1]
+- [x] **4.2 `SongSuggestionService` local and remote title search** [SEQUENTIAL — after 2.2, 3.9, 4.1]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** also after 4.1c; `SongRemoteSearchResult.Status` (`RemoteSearchStatus`) replaces `RemoteUnavailable`; `INetworkStatus` ctor dependency — offline → no Deezer call, `Offline` (REQ-SFT-53); dedup (b) uses (title_short, artist, version) triples; +5 tests (plan § Task 4.2).
   - **Produces:** `SearchTitleLocalAsync`, `SearchTitleRemoteAsync`, `SongRemoteSearchResult`; `SongSuggestionDto.Version`/`LocalArtistName`; ranking, dedup (a)/(b) with promotion, 3,000 ms bound; tier (c) and the C# re-filters deleted.
   - **Files owned:** `Services/ISongSuggestionService.cs`, `Services/SongSuggestionService.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`, `Contracts/DTOs/Suggestions/SongRemoteSearchResult.cs` (new), `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`
@@ -270,7 +270,7 @@
   - **Review lane:** Elevated
   > **Spec updated 2026-09-26:** (D16) consumes `SearchConstants.RemoteSearchTimeoutMilliseconds` (2.2) for the 3,000 ms bound. (D1) returns one list: local, then promoted, then remote (no append capability).
 
-- [ ] **4.3 Retarget threshold tests; register the service** [SEQUENTIAL — after 4.2]
+- [x] **4.3 Retarget threshold tests; register the service** [SEQUENTIAL — after 4.2]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** DI tests resolving the service add `Mock.Of<INetworkStatus>()` (registered in `MauiProgram.cs`, not `AddAppServices`).
   - **Files owned:** `MyVocaList.Tests/Unit/Services/SongSuggestionThresholdTests.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs`, `ISongSuggestionService.cs` (remove `GetLocalAsync`/`GetRemoteAsync`)
   - **Risk:** Low. **Demo:** `ISongSuggestionService` resolves from `AddAppServices`.
@@ -289,7 +289,7 @@
   > **Spec updated 2026-09-26:** (D2) runs before G2: it consumes no component surface. (D13) also owns `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` (adds `services.AddSingleton(Mock.Of<INavigationService>());` to the SongFormViewModel graph test; Level C).
   > **Spec updated 2026-11-04:** also owned `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (merge-sheet sync/handlers removed; the page did not compile otherwise). VM + XAML + code-behind were built together because the merge sheet's compiled bindings broke the one-file-then-build order (Verifier: acceptable). Merged `f687e72d` 2026-11-04; Verifier PASS; develop 668/668.
 
-- [ ] **5.2 VM: title search, picks, online-search note** [SEQUENTIAL — after 4.3, 5.1, G4 Q16]
+- [x] **5.2 VM: title search, picks, online-search note** [SEQUENTIAL — after 4.3, 5.1, G4 Q16]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `TitleSupportingText` maps `Status` to the two approved notes (REQ-SFT-06); a remote pick sets Version from Deezer (REQ-SFT-12); remote option supporting text "artist · version · Deezer" (REQ-SFT-04); +4 tests.
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
   - **Risk:** High. **Tests (A, Red first):** REQ-SFT-02…14 (option supporting texts incl. "In your library", local options before remote or the Q16 fallback, `TitleSupportingText` set/cleared, local pick → navigate, discard sheet, remote pick fills + locks, local artist match, X clears pending identity).
@@ -335,7 +335,7 @@
 
 ## Phase 6 — Artist form name search (confirmed, fifth round)
 
-- [ ] **6.1 `ArtistSuggestionService` local and remote name search; register** [SEQUENTIAL — after 4.1, 4.3]
+- [x] **6.1 `ArtistSuggestionService` local and remote name search; register** [SEQUENTIAL — after 4.1, 4.3]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `ArtistRemoteSearchResult.Status`; `INetworkStatus` ctor dependency; offline → no call, `Offline`; +1 test.
   - **Produces:** `SearchNameLocalAsync`, `SearchNameRemoteAsync` + `ArtistRemoteSearchResult`; similarity dedup tier (c) and `FilterSimilar` deleted (`design.md` § 4.1).
   - **Consumes:** 4.1 (`DeezerProvider.SearchArtistsAsync` throws on failure; URL `search/artist?q=`).
