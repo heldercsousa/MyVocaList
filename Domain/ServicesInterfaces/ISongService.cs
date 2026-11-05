@@ -1,5 +1,6 @@
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.Resolution;
 
 namespace MyVocaList.Domain.ServicesInterfaces;
 
@@ -97,6 +98,21 @@ public interface ISongService
         int? artistId, string? newArtistName, string title, string version,
         string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct = default);
+
+    /// <summary>
+    /// Takes every Song-form Save decision (REQ-SFT-51): validates the input, resolves the artist
+    /// (REQ-SFT-18/19/52, never with the song's external identity — REQ-SFT-41), runs the add-mode
+    /// song guard (REQ-SFT-22/23/25), then writes through <c>CreateSongWithUrlsAsync</c> /
+    /// <see cref="UpdateSongAsync"/> — the only write paths (REQ-SFT-46). Opens no write unit of work
+    /// itself; the resolution reads happen before the write.
+    /// </summary>
+    /// <param name="request">The form input and the user's sheet decisions.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>
+    /// <c>Saved</c> with the song id; <c>Failed</c> with the message (and field, for validation);
+    /// <c>ArtistChoiceNeeded</c> or <c>SongChoiceNeeded</c> with the candidates — nothing written.
+    /// </returns>
+    Task<SongFormSaveOutcome> SaveFromFormAsync(SongFormSaveRequest request, CancellationToken ct = default);
 
     /// <summary>
     /// Returns the full song entity for the given id, including FeaturedArtists, Lyrics, Version
