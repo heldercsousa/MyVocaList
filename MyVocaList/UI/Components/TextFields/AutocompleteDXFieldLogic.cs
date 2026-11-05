@@ -37,11 +37,14 @@ internal enum PickRoute
 /// </summary>
 internal static class AutocompleteDXFieldLogic
 {
-    /// <summary>Computes the current <see cref="FieldMode"/>. REQ-ACF-02, -03, -05a, -12b.</summary>
-    internal static FieldMode Mode(bool isReadOnly, bool isLocked, string? text) =>
+    /// <summary>
+    /// Computes the current <see cref="FieldMode"/>. With <paramref name="isPickLockEnabled"/> false the
+    /// lock flag is ignored, so only read-only wins over Editable. REQ-ACF-02, -03, -05a, -12b, -29.
+    /// </summary>
+    internal static FieldMode Mode(bool isReadOnly, bool isLocked, string? text, bool isPickLockEnabled = true) =>
         isReadOnly
             ? FieldMode.ReadOnly
-            : isLocked && !string.IsNullOrWhiteSpace(text)
+            : isPickLockEnabled && isLocked && !string.IsNullOrWhiteSpace(text)
                 ? FieldMode.Locked
                 : FieldMode.Editable;
 
@@ -64,9 +67,9 @@ internal static class AutocompleteDXFieldLogic
     internal static PickRoute RoutePick(object? selectedItem) =>
         selectedItem is AutocompleteSuggestion ? PickRoute.Select : PickRoute.None;
 
-    /// <summary>Decides whether a pick should lock the field. REQ-ACF-01.</summary>
-    internal static bool LockAfterPick(PickRoute route) =>
-        route == PickRoute.Select;
+    /// <summary>Decides whether a pick should lock the field. REQ-ACF-01, -29.</summary>
+    internal static bool LockAfterPick(PickRoute route, bool isPickLockEnabled = true) =>
+        isPickLockEnabled && route == PickRoute.Select;
 
     /// <summary>Decides whether a blur event should be forwarded. REQ-ACF-11, -12b, -17.</summary>
     internal static bool ShouldForwardBlur(object? selectedItem, FieldMode mode) =>
