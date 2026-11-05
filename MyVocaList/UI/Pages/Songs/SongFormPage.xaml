@@ -303,8 +303,9 @@
 
                 <BoxView Style="{StaticResource Divider}" />
 
-                <!-- Save as new version option -->
-                <VerticalStackLayout Padding="24,12" Spacing="8">
+                <!-- Save as new version option (exact duplicate only; REQ-SFT-22) -->
+                <VerticalStackLayout Padding="24,12" Spacing="8"
+                                     IsVisible="{Binding IsExactDuplicate}">
                     <Label Text="Or save as a new version:"
                            StyleClass="Body.Small"
                            TextColor="{StaticResource OnSurfaceVariant}" />
@@ -322,11 +323,85 @@
                                  Command="{Binding ConfirmSaveAsNewVersionCommand}" />
                 </VerticalStackLayout>
 
+                <!-- Save as new song option (possible duplicates only; REQ-SFT-23, no Version needed) -->
+                <VerticalStackLayout Padding="24,12" Spacing="8"
+                                     IsVisible="{Binding IsExactDuplicate, Converter={StaticResource InverseBoolConverter}}">
+                    <dx:DXButton Content="Save as new song"
+                                 Style="{StaticResource OutlinedButton}"
+                                 HorizontalOptions="Fill"
+                                 Command="{Binding ConfirmSaveAsNewSongCommand}" />
+                </VerticalStackLayout>
+
                 <BoxView Style="{StaticResource Divider}" />
 
                 <dx:DXButton Content="Cancel"
                              Style="{StaticResource BottomSheetCancelAction}"
                              Command="{Binding DismissResolutionSheetCommand}" />
+
+            </VerticalStackLayout>
+        </dx:BottomSheet>
+
+        <!-- ── Artist-match BottomSheet (Task 5.3, REQ-SFT-19) ─────────────────── -->
+        <!--
+            Shown when the Service finds near-duplicate artists for the typed name. Lists the
+            candidates best-first; the user chooses Use '<existing>', Create '<typed>' or Cancel.
+            Back or scrim saves nothing (DismissArtistMatchSheetCommand).
+        -->
+        <dx:BottomSheet x:Name="artistMatchSheet"
+                        AllowedState="HalfExpanded"
+                        HalfExpandedRatio="0.55"
+                        IsModal="True"
+                        ShowGrabber="True"
+                        AllowDismiss="False"
+                        BackgroundColor="{StaticResource Surface}"
+                        CornerRadius="28"
+                        StateChanged="OnArtistMatchSheetStateChanged">
+            <VerticalStackLayout Padding="0,0,0,24">
+
+                <Label Text="Similar artist found"
+                       Style="{StaticResource BottomSheetTitle}"
+                       Margin="24,20,24,8" />
+
+                <BoxView Style="{StaticResource Divider}" />
+
+                <!-- Candidate list (near-duplicate artists, best first) -->
+                <VerticalStackLayout Spacing="0"
+                                     BindableLayout.ItemsSource="{Binding ArtistMatchCandidates}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="resolution:ArtistMatch">
+                            <Grid ColumnDefinitions="*,Auto" Padding="24,12">
+                                <Label Grid.Column="0"
+                                       Text="{Binding Name}"
+                                       StyleClass="Body.Large"
+                                       TextColor="{StaticResource OnSurface}"
+                                       VerticalOptions="Center" />
+                                <dx:DXButton Grid.Column="1"
+                                             Content="{Binding Name, StringFormat='Use \'{0}\''}"
+                                             Style="{StaticResource OutlinedButton}"
+                                             Padding="16,0"
+                                             VerticalOptions="Center"
+                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=UseExistingArtistCommand}"
+                                             CommandParameter="{Binding .}" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <BoxView Style="{StaticResource Divider}" />
+
+                <!-- Create the typed name as a new artist -->
+                <VerticalStackLayout Padding="24,12" Spacing="8">
+                    <dx:DXButton Content="{Binding ArtistMatchTypedName, StringFormat='Create \'{0}\''}"
+                                 Style="{StaticResource OutlinedButton}"
+                                 HorizontalOptions="Fill"
+                                 Command="{Binding CreateTypedArtistCommand}" />
+                </VerticalStackLayout>
+
+                <BoxView Style="{StaticResource Divider}" />
+
+                <dx:DXButton Content="Cancel"
+                             Style="{StaticResource BottomSheetCancelAction}"
+                             Command="{Binding DismissArtistMatchSheetCommand}" />
 
             </VerticalStackLayout>
         </dx:BottomSheet>

@@ -1268,9 +1268,185 @@ _(not started)_
 
 ## 5.3
 
-### Checkpoint
+**Status:** Red committed (Tester, `9a41b361`); Green To Review (Builder, see `### Green (Builder, 2026-11-05)` below). Not `[x]` in tasks.md until the orchestrator ticks it.
+**Started:** 2026-11-05 **Completed (Red):** 2026-11-05
+**Plan:** tasks.md Phase 5 § 5.3 · Level A · Review lane Architectural · design.md § 3.5, § 4, § 10.1 · requirements.md REQ-SFT-15..27, 39, 46, 51..53.
+**Branch:** `task/sft-5.3-save-outcomes` (worktree `.worktrees/sft-5.3`, base develop `fddf8f44`).
 
-_(not started)_
+Scope: tests only (`MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`) and this log. No production code touched. The
+Red is a compile-level Red: the test file expects the new VM members and a VM constructor without `ISongResolutionService`.
+
+### Red output (verbatim; `rtk proxy dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -m:1`; compiler output is pt-BR localised; paths shortened to the file name)
+
+20 distinct errors, all in `SongFormViewModelTests.cs`, no error in any other file:
+
+```
+SongFormViewModelTests.cs(26,20): error CS7036: Não há nenhum argumento fornecido que corresponda ao parâmetro necessário 'songSuggestions' de 'SongFormViewModel.SongFormViewModel(IArtistService, ISongService, ISongResolutionService, ISnackbarComponent, ILogger<SongFormViewModel>, ISongKaraokeUrlService, ISecureStorageWrapper, IMessenger, INavigationService, ISongSuggestionService)'
+SongFormViewModelTests.cs(987,25): error CS1061: ‘SongFormViewModel’ não contém uma definição para "IsArtistMatchSheetVisible" e não foi possível encontrar nenhum método de extensão "IsArtistMatchSheetVisible" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(989,46): error CS1061: ‘SongFormViewModel’ não contém uma definição para "ArtistMatchCandidates" e não foi possível encontrar nenhum método de extensão "ArtistMatchCandidates" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1005,38): error CS1061: ‘SongFormViewModel’ não contém uma definição para "ArtistMatchTypedName" e não foi possível encontrar nenhum método de extensão "ArtistMatchTypedName" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1020,25): error CS1061: ‘SongFormViewModel’ não contém uma definição para "IsExactDuplicate" e não foi possível encontrar nenhum método de extensão "IsExactDuplicate" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1022,26): error CS1061: ‘SongFormViewModel’ não contém uma definição para "IsArtistMatchSheetVisible" e não foi possível encontrar nenhum método de extensão "IsArtistMatchSheetVisible" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1038,26): error CS1061: ‘SongFormViewModel’ não contém uma definição para "IsExactDuplicate" e não foi possível encontrar nenhum método de extensão "IsExactDuplicate" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1054,19): error CS1061: ‘SongFormViewModel’ não contém uma definição para "UseExistingArtistCommand" e não foi possível encontrar nenhum método de extensão "UseExistingArtistCommand" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1058,26): error CS1061: ‘SongFormViewModel’ não contém uma definição para "IsArtistMatchSheetVisible" e não foi possível encontrar nenhum método de extensão "IsArtistMatchSheetVisible" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1073,19): error CS1061: ‘SongFormViewModel’ não contém uma definição para "CreateTypedArtistCommand" e não foi possível encontrar nenhum método de extensão "CreateTypedArtistCommand" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1077,26): error CS1061: ‘SongFormViewModel’ não contém uma definição para "IsArtistMatchSheetVisible" e não foi possível encontrar nenhum método de extensão "IsArtistMatchSheetVisible" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1091,13): error CS1061: ‘SongFormViewModel’ não contém uma definição para "DismissArtistMatchSheetCommand" e não foi possível encontrar nenhum método de extensão "DismissArtistMatchSheetCommand" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1093,26): error CS1061: ‘SongFormViewModel’ não contém uma definição para "IsArtistMatchSheetVisible" e não foi possível encontrar nenhum método de extensão "IsArtistMatchSheetVisible" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1129,19): error CS1061: ‘SongFormViewModel’ não contém uma definição para "ConfirmSaveAsNewSongCommand" e não foi possível encontrar nenhum método de extensão "ConfirmSaveAsNewSongCommand" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1165,19): error CS1061: ‘SongFormViewModel’ não contém uma definição para "UseExistingArtistCommand" e não foi possível encontrar nenhum método de extensão "UseExistingArtistCommand" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1188,19): error CS1061: ‘SongFormViewModel’ não contém uma definição para "UseExistingArtistCommand" e não foi possível encontrar nenhum método de extensão "UseExistingArtistCommand" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1191,19): error CS1061: ‘SongFormViewModel’ não contém uma definição para "ConfirmSaveAsNewSongCommand" e não foi possível encontrar nenhum método de extensão "ConfirmSaveAsNewSongCommand" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1213,19): error CS1061: ‘SongFormViewModel’ não contém uma definição para "ConfirmSaveAsNewSongCommand" e não foi possível encontrar nenhum método de extensão "ConfirmSaveAsNewSongCommand" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1216,19): error CS1061: ‘SongFormViewModel’ não contém uma definição para "UseExistingArtistCommand" e não foi possível encontrar nenhum método de extensão "UseExistingArtistCommand" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+SongFormViewModelTests.cs(1236,19): error CS1061: ‘SongFormViewModel’ não contém uma definição para "UseExistingArtistCommand" e não foi possível encontrar nenhum método de extensão "UseExistingArtistCommand" que aceite um primeiro argumento do tipo ‘SongFormViewModel’ (você está se esquecendo de usar uma diretiva ou uma referência de assembly?)
+```
+
+The CS7036 error is the removed `ISongResolutionService` constructor slot (the VM still takes 10 parameters; the test passes the new 9).
+The CS1061 errors are the missing sheet members (see "Choices fixed by the tests").
+
+### Choices fixed by the tests (design left these open; Builder must implement exactly these names)
+
+| # | Member | Fixed as | Test(s) |
+|---|--------|----------|---------|
+| 1 | Artist sheet visibility | `bool IsArtistMatchSheetVisible` | `SaveCommand_ArtistChoiceNeeded_OpensArtistSheetWithCandidatesInOrder` |
+| 2 | Artist sheet candidates | `IReadOnlyList<ArtistMatch> ArtistMatchCandidates`, the outcome's order, no VM re-sort or re-cap | same |
+| 3 | Create-new row label source | `string ArtistMatchTypedName` = `outcome.TypedName` (the VM does not read the form text) | `SaveCommand_ArtistChoiceNeeded_ExposesOutcomeTypedNameForCreateAction` |
+| 4 | Use-existing action | `IAsyncRelayCommand<ArtistMatch> UseExistingArtistCommand` | `UseExistingArtistCommand_ReInvokesSaveWithUseExistingDecision` |
+| 5 | Create-typed action | `IAsyncRelayCommand CreateTypedArtistCommand` | `CreateTypedArtistCommand_ReInvokesSaveWithCreateTypedDecision` |
+| 6 | Artist sheet dismiss | `IRelayCommand DismissArtistMatchSheetCommand` | `DismissArtistMatchSheetCommand_SavesNothingAndHidesSheet` |
+| 7 | Duplicate vs possible duplicate | `bool IsExactDuplicate` (true for `SongChoiceNeeded(exact: true)`); the existing `IsResolutionSheetVisible` and `ResolutionCandidates` are reused | `SaveCommand_ExactSongChoice_...`, `SaveCommand_FuzzySongChoice_...` |
+| 8 | Save as new song | `IAsyncRelayCommand ConfirmSaveAsNewSongCommand`; sends `SongDecision.SaveAsNewSong` with no Version check in the VM | `ConfirmSaveAsNewSongCommand_ReInvokesSaveWithSaveAsNewSongDecisionWithoutVersion` |
+| 9 | Save as new version | existing `ConfirmSaveAsNewVersionCommand` now re-invokes with `SongDecision.SaveAsNewVersion`; the VM no longer validates the Version (the Service does, rule 4) | `ConfirmSaveAsNewVersionCommand_ReInvokesSaveWithSaveAsNewVersionDecision` |
+| 10 | Outcome `Saved` | snackbar `ShowSuccessAsync(any text)` + `INavigationService.GoToAsync("..")` (not `Shell.Current`) | `SaveCommand_SavedOutcome_ShowsSuccessSnackbar`, `..._NavigatesBack` |
+| 11 | Outcome `Failed(Title)` / `(Version)` / `(Artist)` | `TitleHasError`/`TitleErrorText`, `VersionHasError`/`VersionErrorText`, `ArtistHasError`/`ArtistErrorText` set to the service message; no navigation | `SaveCommand_Failed{Title,Version,Artist}_...` |
+| 12 | Outcome `Failed(None)` | general error = `ShowErrorAsync(message)`; no field flag is set | `SaveCommand_FailedNoField_ShowsGeneralErrorAndNoFieldError` |
+| 13 | Save decisions | `ArtistDecision` and `SongDecision` are held for the Save attempt and sent on every re-invocation (Helder 2026-11-05) | `Decisions_PersistAcrossReinvocations_WithinOneSaveAttempt` |
+| 14 | Clearing on user edit | a user edit of Artist (`ArtistSearchText`) or Title (`SongTitle`) clears **both** decisions (Helder 2026-11-05: "clears them") | `UserEdit_ClearsArtistDecision`, `UserEdit_ClearsSongDecision` (Theory: artist, title) |
+| 15 | **New Save attempt** | a user Save tap (`SaveCommand`) starts with no decisions. **VM-side assumption, not in the approved ruling; see Spec gap B** | `SaveCommand_NewAttempt_StartsWithNoDecisions` |
+| 16 | Artist short-circuit | the VM no longer blocks Save on an unpicked or missing Artist; `ArtistId` may be null and `ArtistText` carries the typed name to the service | `SaveCommand_BlankArtist_...`, `SaveCommand_TypedArtist_...` |
+| 17 | Request mapping | `SongId` = edit id or null; Title/Version/FeaturedArtists/Lyrics trimmed; `ArtistId` = `SelectedArtistId`; `ArtistText` = trimmed `ArtistSearchText` when no id; `ExternalId`/`ExternalProvider` = pending identity (null when empty). `PendingUrls` is not asserted by any test | request-asserting tests |
+| 18 | Title/Version pre-check kept | the VM keeps its existing Title/Version safety net before the call (unchanged test `SaveAsync_TitleNeverDirty_SafetyNetSetsTitleError`). Not stated in design § 4; kept to avoid silent change | `SaveAsync_TitleNeverDirty_...` (unchanged) |
+| 19 | Edit mode | the same `SaveFromFormAsync` path with `SongId` set; no `UpdateSongAsync` call from the VM | `SaveAsync_EditMode_*` (rewritten) |
+
+Not added (per brief): no test for the 5.2 Verifier obligation (`ArtistOptionSource` drops `ct`); 5.3 spec does not require it.
+
+### Superseded tests (pre-5.3 names and lines in the file before this commit)
+
+| Pre-5.3 test (line) | Action | Superseded AC | Replacing REQ / test |
+|---|---|---|---|
+| `SaveAsync_ServiceThrows_ShowsErrorSnackbar` (711) | rewritten: `SaveCommand_ServiceThrows_ShowsErrorSnackbar`, `SaveFromFormAsync` throws | AC-B5 | REQ-SFT-51 |
+| `SaveAsync_NoArtist_SetsArtistError_NoServiceCall` (736) | rewritten: `SaveCommand_BlankArtist_PassesToServiceAndShowsItsArtistError` (VM no longer short-circuits; the removed "Search and select…" text is not produced) | AC-10.4 / REQ-SFT-17 text | REQ-SFT-21, REQ-SFT-51 |
+| `SaveAsync_NoMatch_CallsCreateSongWithUrls` (757) | rewritten: `SaveCommand_NewSongNoDecision_CallsSaveFromFormInAddMode` (design § 10.1 `:174`) | AC-B5 / rule moved to the Service | REQ-SFT-51 |
+| `SaveAsync_ExactLocalMatch_SetsResolutionSheetVisible` (791) | rewritten: `SaveCommand_ExactSongChoice_OpensResolutionSheetAsExactDuplicate` (design § 10.1 `:208`) | AC-1.1/1.2 | REQ-SFT-22 |
+| `DismissResolutionSheetCommand_AfterExactLocalMatch_...` (821) | rewritten: `DismissResolutionSheetCommand_AfterExactSongChoice_SavesNothing` (design § 10.1 `:238`) | AC-1.1 (BUG-023 VM half) | REQ-SFT-22 |
+| `ConfirmSaveAsNewVersion_EmptyVersion_SetsVersionError` (848) | replaced: `SaveCommand_FailedVersion_...` (Service validates) + `ConfirmSaveAsNewVersionCommand_ReInvokes...` | AC-1.2 | REQ-SFT-22 |
+| `SaveAsync_EditMode_SendsHydratedFieldsAndEditedVersion` (1257) | rewritten: `SaveAsync_EditMode_SendsSongIdAndHydratedFieldsAndEditedVersion` (asserts `SaveFromFormAsync`, no `UpdateSongAsync`) | BUG-024 | REQ-SFT-51 |
+| `SaveAsync_EditMode_ArtistChanged_SendsNewArtistIdToService` (1301) | rewritten: same name, asserts `request.ArtistId == 9` | REQ-ACREATE-16 / BUG-067 | REQ-SFT-28 |
+| `SaveCommand_DoubleInvokedWhileSaving_CallsResolveOnlyOnce` (1573) | rewritten: `SaveCommand_DoubleInvokedWhileSaving_CallsSaveFromFormOnlyOnce` | BUG-049 | REQ-SFT-51 |
+| `SaveAsync_EditMode_AfterHydration_PreservesArtistLink` (1711) | rewritten: same name, asserts `request.ArtistId == 7` | BUG-055 | REQ-SFT-28 |
+| `CreateSut(... resolutionService ...)` parameter | removed (`ISongResolutionService` no longer a VM dependency) | — | REQ-SFT-51 (design § 4) |
+
+Kept unchanged: `SaveAsync_TitleNeverDirty_SafetyNetSetsTitleError`, `OpenExistingSong_FromResolutionSheet_...` (5.1), the 5.2 title tests, and all artist-blur and edit-hydration tests.
+
+### AC traceability (tests -> REQ; Green implementation location to fill in by the Builder)
+
+| REQ | Criterion (short) | Implementation location | Test method |
+|---|---|---|---|
+| REQ-SFT-15 | Failed(Title) message on Title | `SongFormViewModel.SaveAsync` mapping | `SaveCommand_FailedTitle_ShowsMessageOnTitleField` |
+| REQ-SFT-18 | Typed unpicked artist sent by name, no id | request builder | `SaveCommand_TypedArtist_SendsTrimmedNameWithoutArtistId` |
+| REQ-SFT-19 | Artist sheet: candidates best-first, typed name, Use / Create / Dismiss (no save) | artist sheet members | `..._OpensArtistSheetWithCandidatesInOrder`, `..._ExposesOutcomeTypedNameForCreateAction`, `UseExistingArtistCommand_...`, `CreateTypedArtistCommand_...`, `DismissArtistMatchSheetCommand_...` |
+| REQ-SFT-20 | Failed(Artist) service message on Artist | mapping | `SaveCommand_FailedArtist_ShowsServiceMessageOnArtistField` |
+| REQ-SFT-21 | Blank artist: Service decides, "Artist is required" | request builder (no VM short-circuit) | `SaveCommand_BlankArtist_PassesToServiceAndShowsItsArtistError` |
+| REQ-SFT-22 | Exact duplicate sheet: Open existing / Save as new version; Dismiss saves nothing; Version failure mapping | resolution sheet members | `SaveCommand_ExactSongChoice_...`, `ConfirmSaveAsNewVersionCommand_...`, `DismissResolutionSheetCommand_...`, `SaveCommand_FailedVersion_...` |
+| REQ-SFT-23 | Possible duplicates sheet: Save as new song, no Version needed | resolution sheet | `SaveCommand_FuzzySongChoice_...`, `ConfirmSaveAsNewSongCommand_...` |
+| REQ-SFT-25 | Picked Deezer identity travels with the save | request builder | `SaveCommand_AfterRemotePick_SendsPickedExternalIdentity` |
+| REQ-SFT-26 | Identity refusal shown as general error, no field error | mapping (None -> snackbar) | `SaveCommand_FailedNoField_ShowsGeneralErrorAndNoFieldError` |
+| REQ-SFT-28 | Edit mode: changed artist id and kept artist link reach the Service | request builder (edit) | `SaveAsync_EditMode_ArtistChanged_...`, `SaveAsync_EditMode_AfterHydration_...` |
+| REQ-SFT-46 | No write call from the VM except `SaveFromFormAsync` | VM (no write calls) | `SaveCommand_NewSong_WritesOnlyThroughSaveFromForm` |
+| REQ-SFT-51 | One Service call per Save; outcome mapping; decisions kept, cleared on edit, reset per attempt; double-tap; exception | `SaveCommand`, sheet actions | all remaining new/rewritten tests above |
+
+REQ-SFT-27 (edit-mode Title editable) and REQ-SFT-53 are not covered by 5.3 tests (no change to the Title field rules in this task; 5.4 covers edit-mode title).
+
+### Spec gap A (Blocking: No, documented assumption; for review)
+**Location:** requirements.md § F/E (REQ-SFT-51 is the only AC); design.md § 4 (Helder's 2026-11-05 approval).
+**Gap:** the approved VM behaviour "decisions persist within one Save attempt and clear on Artist or Title edit" has no dedicated AC ID.
+**Assumption:** traced to REQ-SFT-51 (its "calls the method again with the user's choice"). Tests `Decisions_PersistAcrossReinvocations_...` and `UserEdit_Clears*` encode it.
+**Recommendation:** add a one-line AC under REQ-SFT-51 so the trace is first-class. Not blocking because Helder approved the behaviour in writing.
+
+### Spec gap B (Blocking: No, VM-side assumption; for review)
+**Location:** design.md § 4 (Decisions are not addressed for a fresh Save tap).
+**Gap:** the approval does not say whether a new user Save tap starts with the previous decisions.
+**Options:** A: a new Save tap starts with no decisions (chosen; a Save attempt = one Save tap). B: decisions survive a new Save tap until an edit.
+**Recommendation:** Option A, because a dismissed sheet followed by Save must ask again. Tested by `SaveCommand_NewAttempt_StartsWithNoDecisions`.
+
+### Changed files
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (Red: CreateSut without `ISongResolutionService`; Save-section tests replaced / added; edit-mode Save tests moved to `SaveFromFormAsync`)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section; the 5.3 Checkpoint block replaced)
+
+### Verification evidence
+- `rtk proxy dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -m:1`: exit 1, 20 errors, all in `SongFormViewModelTests.cs` (listed above). The rest of the test project compiles.
+- No production file changed. No test run (the test project does not compile in Red).
+- `tasks.md` 5.3 box is NOT ticked by the Tester; it is ticked at Green.
+
+### Green (Builder, 2026-11-05)
+
+**Status:** To Review (Green). Red `9a41b361`. Builder does not tick `tasks.md` (orchestrator ticks it).
+**Branch:** `task/sft-5.3-save-outcomes`, worktree `.worktrees/sft-5.3`. Develop had moved (`fddf8f44` → `97a329e1`); merged before push (see Verification).
+
+### Changed files (Green)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` (production: Save maps outcomes; decisions; sheet actions; `ISongResolutionService` removed from the ctor; old decision code deleted)
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (XAML consequence: resolution sheet gets exact/fuzzy variants via `IsExactDuplicate`; new `artistMatchSheet` built from the resolution-sheet pattern, dx:BottomSheet + existing styles; no native dialog)
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (code-behind: `IsArtistMatchSheetVisible` → Show/Close sync, same guard pattern as the resolution sheet)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/requirements.md` (one `Spec updated 2026-11-05` note under REQ-SFT-51)
+- this task-log
+- No test file changed (Builder rule). `tasks.md` not edited (orchestrator).
+
+### Decisions beyond the Red's recorded choices (for review)
+1. **Save-attempt reset (assumption B, as Red):** `SaveCommand` clears both decisions before the call; sheet actions do not.
+2. **Clearing:** `ClearSaveDecisions()` runs from `OnSongTitleChanged` and a new `OnArtistSearchTextChanged` partial, so programmatic writes to those two properties also clear. Only the Save pipeline writes neither property, so no in-attempt clear happens by accident.
+3. **Failed(Version) during "Save as new version":** the duplicate sheet stays open and the version entry is revealed (`VersionEntryRequired`), so the user corrects it on the sheet (the old VM behaviour). Failed(Version) with no sheet choice closes the sheet as usual.
+4. **Failed(None):** `ShowErrorAsync(message)`, and both save sheets close.
+5. **Sheet titles:** exact → "This looks like an existing song" (existing text); fuzzy → "Possible duplicates" (from the REQ-SFT-23 name). These are the only new UI strings besides the artist sheet's "Similar artist found" (REQ-SFT-19 text), the button labels "Use '…'", "Create '…'", "Save as new song" (REQ-SFT-19/23 wording).
+6. **Saved snackbar text:** "Song created" / "Song updated" (existing texts), navigation via `INavigationService.GoToAsync("..")`.
+7. **`ArtistId`:** `SelectedArtistId` with 0 treated as no id (null). `ArtistText` is the trimmed `ArtistSearchText` only when no id.
+8. **Removed VM members** (no XAML consumer left): `IsSaveAsNewVersionMode` (unbound; was set only by the deleted resolve path), `_pendingCandidate`, `ExecuteNewSongSaveAsync`, `ExecuteEditSaveAsync`, `CommitNewSongAsync`.
+9. **Build order:** the XAML edit (`SongFormPage.xaml`) landed before the code-behind handler `OnArtistMatchSheetStateChanged` existed; the Android build was run only after both files were edited (the XAML compile needs the handler). Two files between builds, not one, for that reason.
+
+### Traceability (Green)
+| REQ | Criterion (short) | Implementation location | Test method(s) |
+|---|---|---|---|
+| REQ-SFT-15 | Failed(Title) on Title | `ApplyFailureAsync` (Title) | `SaveCommand_FailedTitle_ShowsMessageOnTitleField` |
+| REQ-SFT-18 | Typed unpicked artist sent by name, no id | `BuildSaveRequest` | `SaveCommand_TypedArtist_SendsTrimmedNameWithoutArtistId` |
+| REQ-SFT-19 | Artist sheet: candidates, typed name, Use / Create / Dismiss (no save) | `ApplyOutcomeAsync` (ArtistChoiceNeeded), `UseExistingArtistAsync`, `CreateTypedArtistAsync`, `DismissArtistMatchSheet`; XAML `artistMatchSheet` | `SaveCommand_ArtistChoiceNeeded_OpensArtistSheetWithCandidatesInOrder`, `..._ExposesOutcomeTypedNameForCreateAction`, `UseExistingArtistCommand_...`, `CreateTypedArtistCommand_...`, `DismissArtistMatchSheetCommand_...` |
+| REQ-SFT-20 | Failed(Artist) message on Artist | `ApplyFailureAsync` (Artist) | `SaveCommand_FailedArtist_ShowsServiceMessageOnArtistField` |
+| REQ-SFT-21 | Blank artist: Service decides | `RunSaveAsync` (no VM short-circuit), `BuildSaveRequest` | `SaveCommand_BlankArtist_PassesToServiceAndShowsItsArtistError` |
+| REQ-SFT-22 | Exact duplicate sheet: Open / Save as new version; Dismiss saves nothing; Version failure | `ApplyOutcomeAsync` (SongChoiceNeeded exact), `ConfirmSaveAsNewVersionAsync`, `DismissResolutionSheet`, `ApplyFailureAsync` (Version); XAML exact block | `SaveCommand_ExactSongChoice_...`, `ConfirmSaveAsNewVersionCommand_...`, `DismissResolutionSheetCommand_...`, `SaveCommand_FailedVersion_...` |
+| REQ-SFT-23 | Possible duplicates: Save as new song, no Version | `ApplyOutcomeAsync` (fuzzy), `ConfirmSaveAsNewSongAsync`; XAML fuzzy block | `SaveCommand_FuzzySongChoice_...`, `ConfirmSaveAsNewSongCommand_...` |
+| REQ-SFT-25 | Picked Deezer identity travels with the save | `BuildSaveRequest` (ExternalId/ExternalProvider) | `SaveCommand_AfterRemotePick_SendsPickedExternalIdentity` |
+| REQ-SFT-26 | Identity refusal = general error, no field error | `ApplyFailureAsync` (None → snackbar) | `SaveCommand_FailedNoField_ShowsGeneralErrorAndNoFieldError` |
+| REQ-SFT-28 | Edit mode: changed artist id and kept link reach the Service | `BuildSaveRequest` (SongId, ArtistId) | `SaveAsync_EditMode_ArtistChanged_SendsNewArtistIdToService`, `SaveAsync_EditMode_AfterHydration_PreservesArtistLink` |
+| REQ-SFT-46 | No write call from the VM except `SaveFromFormAsync` | VM has no create/update call (grep: none) | `SaveCommand_NewSong_WritesOnlyThroughSaveFromForm` |
+| REQ-SFT-51 | One Service call per Save; outcome mapping; decisions kept, cleared on edit, reset per attempt; double-tap; exception | `SaveAsync`, `RunSaveAsync`, `ApplyOutcomeAsync`, `ClearSaveDecisions`, the two clear hooks | `SaveCommand_ServiceThrows_...`, `SaveCommand_NewSongNoDecision_...`, `SaveCommand_Saved*`, `Decisions_PersistAcrossReinvocations_...`, `UserEdit_Clears*Decision`, `SaveCommand_NewAttempt_StartsWithNoDecisions`, `SaveCommand_DoubleInvokedWhileSaving_...`, `SaveAsync_EditMode_SendsSongIdAndHydratedFieldsAndEditedVersion`, `SaveAsync_TitleNeverDirty_SafetyNetSetsTitleError` (unchanged) |
+
+REQ-SFT-27 and REQ-SFT-53 are not covered by 5.3 (as Red).
+
+### Verification (Green)
+- `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` (attempt 1, before XAML): `0 Erro(s)`.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` (attempt 1, after XAML + code-behind): `0 Erro(s)`, `27 Aviso(s)` (NU1902/NU1903 package advisories, pre-existing), elapsed 00:10:51. Note: the run stalled in aapt2 for about 10 minutes before completing; no retry was needed.
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`: `Aprovado!  – Com falha: 0, Aprovado: 870, Ignorado: 0, Total: 870` (first run, no flake re-run needed). Test-project compile warnings only (pre-existing xUnit analyzers).
+- Census of added lines (`git diff HEAD`, 278 added lines, system grep): `ToLower|ToUpper|RemoveDiacritics|Normalized|OrdinalIgnoreCase|DisplayAlert|DisplayActionSheet|DisplayPromptAsync` → 0 hits.
+- Emulator: not run (Helder's check).
+- Develop moved (`97a329e1` → `324ff527` during the Green). Merged with `git merge develop` (no conflicts; `cd74e8d0` merge commit). `git merge-base --is-ancestor develop HEAD`: exit 0. Post-merge `dotnet test`: `Aprovado!  – Com falha: 0, Aprovado: 874, Ignorado: 0, Total: 874` (4 more tests from develop).
+- SHAs: Green commit `bdf4010b` (pre-commit hook ran the tests: 870 passed); merge `cd74e8d0`.
+
+### Open for review
+- Assumption B (fresh Save tap starts clean) is the Builder's, pending Helder's confirmation (noted in REQ-SFT-51 spec note).
+- The Red's assumption A (REQ-SFT-51 as the trace for the decision rule) stays; the spec note now records Helder's approval.
+
+### Checkpoint
+_(none; Green complete, awaiting commit/merge/push)_
 
 ## 5.4
 
