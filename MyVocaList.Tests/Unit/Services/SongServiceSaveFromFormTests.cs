@@ -116,6 +116,26 @@ public class SongServiceSaveFromFormTests
         => _songResolutionMock.Verify(
             r => r.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()), Times.Never);
 
+    private void VerifyLog(LogLevel level, Times times)
+        => _loggerMock.Verify(
+            l => l.Log(
+                level,
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<Exception?>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            times);
+
+    private void AssertArtistNotFoundWritesNothing(SongFormSaveOutcome outcome)
+    {
+        Assert.Equal(SongFormSaveKind.Failed, outcome.Kind);
+        Assert.Equal(SaveField.Artist, outcome.FailedField);
+        Assert.Equal("Artist not found", outcome.Message);
+        Assert.Null(outcome.SavedSongId);
+        VerifySongGuardNeverCalled();
+        VerifyNothingWritten();
+    }
+
     // ── Rule 1: validation ────────────────────────────────────────────────
 
     [Fact]
@@ -254,6 +274,21 @@ public class SongServiceSaveFromFormTests
     }
 
     [Fact]
+    // [AC] REQ-SFT-19: the artist-choice outcome carries the typed name trimmed (padding removed; case and
+    // accents untouched) so the sheet can show "Create '<typed>'" from the outcome alone.
+    public async Task SaveFromForm_TypedArtistNearDuplicate_OutcomeCarriesTrimmedTypedName()
+    {
+        _artistResolutionMock
+            .Setup(r => r.ResolveAsync(It.Is<ArtistCandidate>(c => c.Name == "Metalica"), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ArtistResolution(ResolutionKind.FuzzyCandidates, null, [(11, "Metallica", 0.9)]));
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: null, artistText: "  Metalica "));
+
+        Assert.Equal(SongFormSaveKind.ArtistChoiceNeeded, outcome.Kind);
+        Assert.Equal("Metalica", outcome.TypedName);
+    }
+
+    [Fact]
     // [AC] REQ-SFT-19: end to end with the real ArtistResolutionService and the real SimilarityScorer
     // (3.9c follow-up W1): "Metalica" against the stored "Metallica" yields ArtistChoiceNeeded with
     // Metallica scoring >= 0.82, and nothing is saved yet.
@@ -324,6 +359,36 @@ public class SongServiceSaveFromFormTests
             "Brand New Band", null, null, It.IsAny<CancellationToken>()), Times.Once);
         _artistRepoMock.Verify(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
         _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Equal(NewArtistId, AddedSong!.ArtistId);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-18: an exact artist kind without an id is not a match; the artist is created in the
+    // song's write as if no match existed.
+    public async Task SaveFromForm_ExactArtistKindWithoutId_FallsThroughToCreate()
+    {
+        SetupArtistResolution(ResolutionKind.ExactLocalMatch, exactId: null);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: null, artistText: "Brand New Band"));
+
+        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
+        _artistServiceMock.Verify(a => a.CreateArtistAsync(
+            "Brand New Band", null, null, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Equal(NewArtistId, AddedSong!.ArtistId);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-18: a fuzzy artist kind with an empty candidate list offers no choice; it is treated as
+    // no match and the artist is created in the song's write.
+    public async Task SaveFromForm_FuzzyArtistKindWithEmptyList_FallsThroughToCreate()
+    {
+        SetupArtistResolution(ResolutionKind.FuzzyCandidates);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: null, artistText: "Brand New Band"));
+
+        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
+        _artistServiceMock.Verify(a => a.CreateArtistAsync(
+            "Brand New Band", null, null, It.IsAny<CancellationToken>()), Times.Once);
         Assert.Equal(NewArtistId, AddedSong!.ArtistId);
     }
 
@@ -433,6 +498,84 @@ public class SongServiceSaveFromFormTests
         _songResolutionMock.Verify(r => r.ResolveAsync(
             It.Is<SongCandidate>(c => c.Artist.Name == "Queen" && c.Title == "Radio Ga Ga"),
             It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-51: a picked artist id with no stored row fails on the Artist field with "Artist not
+    // found" in the song guard; nothing is written.
+    public async Task SaveFromForm_PickedArtistMissingRow_FailsOnArtistNotFound()
+    {
+        _artistRepoMock
+            .Setup(r => r.GetByIdAsync(7, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Artist?)null);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: 7));
+
+        AssertArtistNotFoundWritesNothing(outcome);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-51: a "Use existing" decision whose artist id has no stored row fails on the Artist
+    // field with "Artist not found" in the song guard; nothing is written.
+    public async Task SaveFromForm_UseExistingArtistMissingRow_FailsOnArtistNotFound()
+    {
+        _artistRepoMock
+            .Setup(r => r.GetByIdAsync(7, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Artist?)null);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
+            artistId: null, artistText: "Metalica", artistDecision: new ArtistDecision.UseExisting(7)));
+
+        AssertArtistNotFoundWritesNothing(outcome);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-51: an exact collated artist match whose stored row has gone fails on the Artist field
+    // with "Artist not found" in the song guard; nothing is written.
+    public async Task SaveFromForm_ResolverExactArtistMissingRow_FailsOnArtistNotFound()
+    {
+        SetupArtistResolution(ResolutionKind.ExactLocalMatch, exactId: 7);
+        _artistRepoMock
+            .Setup(r => r.GetByIdAsync(7, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Artist?)null);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: null, artistText: "guns n' roses"));
+
+        AssertArtistNotFoundWritesNothing(outcome);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-22: an exact duplicate whose stored song can no longer be loaded is treated as no match
+    // (Warning logged); the write's own checks decide and the song is saved.
+    public async Task SaveFromForm_ExactDuplicateSongNotLoadable_TreatedAsNoMatchAndWrites()
+    {
+        _songResolutionMock
+            .Setup(r => r.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 55, []));
+        _songRepoMock
+            .Setup(r => r.GetByIdAsync(55, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Song?)null);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: 7));
+
+        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
+        Assert.Equal(SavedSongIdValue, outcome.SavedSongId);
+        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Once);
+        VerifyLog(LogLevel.Warning, Times.Once());
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-22: an exact song kind without an id is not a duplicate; the save proceeds to the write.
+    public async Task SaveFromForm_ExactSongKindWithoutId_ProceedsToWrite()
+    {
+        _songResolutionMock
+            .Setup(r => r.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, null, []));
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: 7));
+
+        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
+        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── Rules 3-4: song decisions ─────────────────────────────────────────
@@ -571,5 +714,70 @@ public class SongServiceSaveFromFormTests
         _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
         _artistRepoMock.Verify(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
         _artistRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // ── Write-time failures: which field owns the refusal (D2) ────────────
+
+    [Fact]
+    // [AC] REQ-SFT-20: when IArtistService refuses the artist created inside the song write (e.g. a collated
+    // duplicate), the save fails on the Artist field with the service's message and the song is not saved.
+    public async Task SaveFromForm_CreatedArtistRefused_FailsOnArtistAndSavesNothing()
+    {
+        const string serviceMessage = "An artist with this name already exists";
+        _artistServiceMock
+            .Setup(a => a.CreateArtistAsync("Brand New Band", null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((false, serviceMessage, (Artist?)null));
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: null, artistText: "Brand New Band"));
+
+        Assert.Equal(SongFormSaveKind.Failed, outcome.Kind);
+        Assert.Equal(SaveField.Artist, outcome.FailedField);
+        Assert.Equal(serviceMessage, outcome.Message);
+        Assert.Null(outcome.SavedSongId);
+        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+        _songRepoMock.Verify(r => r.UpdateAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+        _artistRepoMock.Verify(r => r.AddAsync(It.IsAny<Artist>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-51: a song-level refusal after the new artist was created in the same write (here the
+    // duplicate (artist, title, version) check) is not an Artist failure: Failed with SaveField.None and no
+    // saved id.
+    public async Task SaveFromForm_NewArtistThenSongRefused_FailsWithFieldNone()
+    {
+        _songRepoMock
+            .Setup(r => r.ExistsByTitleVersionForArtistAsync(NewArtistId, "Don't Cry", "", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(artistId: null, artistText: "Brand New Band"));
+
+        Assert.Equal(SongFormSaveKind.Failed, outcome.Kind);
+        Assert.Equal(SaveField.None, outcome.FailedField);
+        Assert.Equal("A song with this title and version already exists for this artist", outcome.Message);
+        Assert.Null(outcome.SavedSongId);
+        _artistServiceMock.Verify(a => a.CreateArtistAsync(
+            "Brand New Band", null, null, It.IsAny<CancellationToken>()), Times.Once);
+        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-26: a new artist saved as a new song (the user skipped the duplicate guard) whose external
+    // identity is already held fails with the identity message, SaveField.None, and creates no artist.
+    public async Task SaveFromForm_NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone()
+    {
+        _songRepoMock
+            .Setup(r => r.ExistsByExternalIdentityAsync(
+                DeezerProvider, DeezerTrackId, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
+            artistId: null, artistText: "Guns N' Roses", provider: DeezerProvider, externalId: DeezerTrackId,
+            songDecision: SongDecision.SaveAsNewSong));
+
+        Assert.Equal(SongFormSaveKind.Failed, outcome.Kind);
+        Assert.Equal(SaveField.None, outcome.FailedField);
+        Assert.Equal("This music-database song is already in your library", outcome.Message);
+        Assert.Null(outcome.SavedSongId);
+        VerifyNothingWritten();
     }
 }
