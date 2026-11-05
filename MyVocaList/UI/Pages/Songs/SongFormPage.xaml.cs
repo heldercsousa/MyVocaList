@@ -12,6 +12,7 @@ public partial class SongFormPage : ContentPage
     // ViewModel -> code-behind -> ViewModel round trip from looping when the sheet
     // is closed programmatically in response to the flag it was opened by.
     private bool _isSyncingResolutionSheet;
+    private bool _isSyncingArtistMatchSheet;
 
     public SongFormPage(SongFormViewModel viewModel)
     {
@@ -109,6 +110,48 @@ public partial class SongFormPage : ContentPage
             case nameof(SongFormViewModel.IsResolutionSheetVisible):
                 SyncResolutionSheetState();
                 break;
+            case nameof(SongFormViewModel.IsArtistMatchSheetVisible):
+                SyncArtistMatchSheetState();
+                break;
+        }
+    }
+
+    // Same pattern as the resolution sheet above (Task 5.3, REQ-SFT-19): the flag drives Show/Close.
+    private void SyncArtistMatchSheetState()
+    {
+        if (_isSyncingArtistMatchSheet) return;
+
+        _isSyncingArtistMatchSheet = true;
+        try
+        {
+            if (ViewModel.IsArtistMatchSheetVisible)
+                artistMatchSheet.Show(BottomSheetState.HalfExpanded, this);
+            else
+                artistMatchSheet.Close();
+        }
+        finally
+        {
+            _isSyncingArtistMatchSheet = false;
+        }
+    }
+
+    // Keeps IsArtistMatchSheetVisible consistent if the sheet closes itself (AllowDismiss is False;
+    // closing is driven by the ViewModel commands, so this is a safety net against divergence).
+    private void OnArtistMatchSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
+    {
+        if (_isSyncingArtistMatchSheet) return;
+
+        if (e.NewValue == BottomSheetState.Hidden && ViewModel.IsArtistMatchSheetVisible)
+        {
+            _isSyncingArtistMatchSheet = true;
+            try
+            {
+                ViewModel.IsArtistMatchSheetVisible = false;
+            }
+            finally
+            {
+                _isSyncingArtistMatchSheet = false;
+            }
         }
     }
 
