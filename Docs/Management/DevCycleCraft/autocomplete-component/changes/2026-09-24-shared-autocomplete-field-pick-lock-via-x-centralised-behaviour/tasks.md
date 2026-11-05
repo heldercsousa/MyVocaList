@@ -187,7 +187,7 @@
     2. Typing 1 char, or a space plus 1 char → no menu; 2 chars → up to 5 people after about 300 ms (REQ-ACF-13, -14, -15).
     3. Pick a person → that person's edit form replaces the page (no stacked form), with the name
        editable (REQ-ACF-03, -15, -20); no menu opens on the edit form (REQ-ACF-25).
-    4. *Informational only, not pass/fail:* just before navigation completes, the picked name cannot be edited and no menu reopens (REQ-ACF-01, -04). The window is short; the proof is T1 (B1–B6).
+    4. After a pick, the name is never read-only, not even before navigation completes, and no menu reopens (REQ-ACF-29, -24, -25). *(Run 1 wording, before Q3 was reversed: "informational: the picked name cannot be edited".)*
     5. X is visible whenever there is text, looks enabled, and there is no magnifier icon (REQ-ACF-07, -08, -10).
     6. Type a name, tap X → empty, focus kept, keyboard up (REQ-ACF-09).
     7. Type an invalid name and blur → the existing name validation shows; the text is kept (REQ-ACF-17, -19).
@@ -235,8 +235,9 @@
     3. Component: the `IsPickLockEnabled` BindableProperty (§ 3.1; propertyChanged → `ApplyMode`). `CurrentMode`
        and `OnSelectionChanged` pass it, and `OnSelectionChanged` writes `IsLocked` only when `LockAfterPick` is true.
        Update the XML doc of `IsLocked`. Build.
-    4. Component: the `TextChanged` handler with `Reason != UserInput` → close the menu and `SelectedItem = null`
-       (REQ-ACF-24). First confirm the DX 25.2 member names with Context7; on a mismatch, stop and escalate. Build.
+    4. Component: the `TextChanged` handler. `Reason != UserInput` → close the menu. Only
+       `Reason == ProgrammaticChange` also sets `SelectedItem = null`; `ItemSelected` never resets it, so the
+       pick routed by `OnSelectionChanged` is never lost (REQ-ACF-24). First confirm the DX 25.2 member names with Context7; on a mismatch, stop and escalate. Build.
     5. Component: the pick counter, and stale-result discard in `OnItemsRequested` (REQ-ACF-26). Build.
     6. Component: the `FocusEditor()` deferral (REQ-ACF-18). Build.
     7. `PersonFormPage.xaml`: `IsPickLockEnabled="False"`. Build, then run the full `dotnet test`.
@@ -244,7 +245,7 @@
     Record that no-test decision in the task-log. The existing tests stay unchanged (the parameters
     default to `true`).
   - **Files owned:** `AutocompleteDXFieldLogic.cs`, `AutocompleteDXField.xaml(.cs)`,
-    `AutocompleteDXFieldLogicTests.cs`, `PersonFormPage.xaml`
+    `AutocompleteDXFieldLogicTests.cs`, `PersonFormPage.xaml`, and its own `## T8` section of `task-log.md`
   - **Governance:** one consumer (PersonFormPage), not yet governed (census 2026-11-05, including the
     sft-* worktrees). If SFT binds SongFormPage before T8 merges, the four gates apply.
   - **Demo:** T7 re-run, lines 1–10 PASS on device. **Review lane:** Elevated
