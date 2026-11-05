@@ -297,12 +297,13 @@
   - **Review lane:** Elevated
   > **Spec updated 2026-09-26:** (D1) Q16 settled: `TitleOptionSource` awaits local, then remote (≤ 3,000 ms), and returns one list. (D2) runs before G2 (needs only `IMenuOptionSource`/`MenuOptionSource`, ACF T3 `83065e07`). (D19) 5.2 also creates `ArtistOptionSource` (`IMenuOptionSource` over the existing local artist search, local only, REQ-SFT-16).
 
-- [ ] **5.3 VM: Save maps service outcomes to sheets** [SEQUENTIAL — after 5.2, 3.10]
+- [x] **5.3 VM: Save maps service outcomes to sheets** [SEQUENTIAL — after 5.2, 3.10]
   - **Produces:** `SaveCommand` builds `SongFormSaveRequest` and maps `SongFormSaveOutcome`; artist-match and resolution sheets re-invoke with the user's decision; `ISongResolutionService` removed from the VM constructor; old decision code deleted.
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
   - **Risk:** High. **Tests (A, Red first):** one test per outcome kind → the right sheet/field/navigation; each sheet action re-invokes with the right decision; no write call other than `SaveFromFormAsync` (REQ-SFT-46/51). Rewrites of `:174,:208,:238` per § 10.1.
   - **Demo:** VM tests green.
   - **Review lane:** Architectural
+  > **Spec updated 2026-11-05:** also owned `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` and `SongFormPage.xaml.cs` (the artist-match sheet and the exact/fuzzy resolution-sheet variants cannot exist without them; Verifier: required). Merged `e1721279` 2026-11-05; Red `9a41b361`, Green `bdf4010b`; Verifier (Elevated) CONDITIONAL PASS, 0 blockers; develop 874/874. Helder confirmed assumption B (fresh Save tap starts clean → REQ-SFT-54) and the Builder's calls: clear hooks on `OnSongTitleChanged`/`OnArtistSearchTextChanged`; Failed(Version) with Save-as-new-version keeps the duplicate sheet open; Failed(None) = snackbar + sheets closed; strings "Similar artist found", "Use '…'", "Create '…'", "Save as new song", "Possible duplicates", "Song created"/"Song updated"; ArtistId 0 = null with ArtistText sent only when no id. **Device gate (Helder, 7.2):** artist sheet → Use/Create → Saved; exact-duplicate sheet with empty Version; fuzzy sheet → Save as new song; apostrophe strings; sheet back/scrim saves nothing; AutoCompleteEdit must not re-write Text (would clear decisions).
 
 - [ ] **5.3b Delete the forwarding `CreateSongWithUrlsAsync(int, …)` overload** [SEQUENTIAL — after 5.3, G3] *(new, plan § 0.3 D3)*
   - **Files owned:** `Domain/ServicesInterfaces/ISongService.cs`, `Services/SongService.cs`, and the remaining old-overload callers found by census (`SongResolutionService.cs`, `Bug068RegressionTests.cs` if still present)

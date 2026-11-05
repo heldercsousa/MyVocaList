@@ -367,7 +367,9 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   The ViewModel only maps `ArtistChoiceNeeded`/`SongChoiceNeeded` to BottomSheets and calls the method
   again with the user's choice. Each rule is tested at the Service (Level A); VM tests check the
   mapping only.
-  > **Spec updated 2026-11-05:** per Helder's approval, the ViewModel holds the artist and song decisions for one Save attempt and re-sends them on every re-invocation, clears both on an Artist or Title edit, and a fresh user Save tap starts with no decisions (the last point is a Builder assumption, flagged for Helder's review).
+  > **Spec updated 2026-11-05:** per Helder's approval, the ViewModel holds the artist and song decisions for one Save attempt and re-sends them on every re-invocation, clears both on an Artist or Title edit, and a fresh user Save tap starts with no decisions (confirmed by Helder 2026-11-05). Made a first-class criterion: REQ-SFT-54.
+- **REQ-SFT-54: Save decision lifecycle in the ViewModel** `[New 2026-11-05 — Helder, approved with 5.3]`. Within one Save attempt the ViewModel SHALL hold the artist decision and the song decision the user has chosen and send both on every re-invocation of the Save method (REQ-SFT-51). It SHALL clear both when the user edits the Artist or the Title field. A fresh user tap on Save SHALL start with no decisions, so a dismissed sheet is asked again.
+  > **Spec updated 2026-11-05:** the 5.3 tests that cover this are currently tagged REQ-SFT-51; re-tag to REQ-SFT-54 the next time those tests are touched (the Builder may not edit them).
 - **REQ-SFT-46: One write path.** Every song create and update from the Song form, including the
   artist it creates, SHALL go through `ISongService.CreateSongWithUrlsAsync` or
   `ISongService.UpdateSongAsync`, so CATALOG-PROP's propagation cannot be bypassed.
@@ -555,3 +557,4 @@ non-selectable row — the text itself was replaced by the two Q7 notes on 2026-
 | REQ-SFT-47…50 | `ArtistFormViewModel`, `ArtistSuggestionService` | VM + service tests (A) |
 | REQ-SFT-12 (Q5 mapping) | `DeezerProvider` (title_short, normalised title_version), `SongFormViewModel.ApplyRemotePick` | provider tests (B, fake handler), VM (A) |
 | REQ-SFT-53 | `INetworkStatus` / `MauiNetworkStatus`, `SongSuggestionService`, `ArtistSuggestionService` | service tests with `Mock<INetworkStatus>` (A); `MauiNetworkStatus.IsInternetReachable` theory (B); airplane-mode check in the device gate (7.2) |
+| REQ-SFT-54 | `SongFormViewModel` (`ClearSaveDecisions`, `OnSongTitleChanged`, `OnArtistSearchTextChanged`, `RunSaveAsync`) | `SongFormViewModelTests` 5.3 decision-lifecycle tests (A; currently tagged REQ-SFT-51); device check: AutoCompleteEdit must not re-write Text (7.2) |
