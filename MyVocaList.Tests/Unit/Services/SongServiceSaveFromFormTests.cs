@@ -761,9 +761,11 @@ public class SongServiceSaveFromFormTests
     }
 
     [Fact]
-    // [AC] REQ-SFT-26: a new artist saved as a new song (the user skipped the duplicate guard) whose external
-    // identity is already held fails with the identity message, SaveField.None, and creates no artist.
-    public async Task SaveFromForm_NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone()
+    // [AC] REQ-SFT-26: a new artist whose external identity is already held, with NO SaveAsNew* decision,
+    // fails with the identity message, SaveField.None, and creates no artist (the write-time refusal runs
+    // before the artist is created). Retargeted 2026-11-05 (ruling D1): the explicit SaveAsNewSong input
+    // was removed because D1 makes SaveAsNewSong write with a null identity; see the new D1 test below.
+    public async Task SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone()
     {
         _songRepoMock
             .Setup(r => r.ExistsByExternalIdentityAsync(
@@ -771,8 +773,7 @@ public class SongServiceSaveFromFormTests
             .ReturnsAsync(true);
 
         var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
-            artistId: null, artistText: "Guns N' Roses", provider: DeezerProvider, externalId: DeezerTrackId,
-            songDecision: SongDecision.SaveAsNewSong));
+            artistId: null, artistText: "Guns N' Roses", provider: DeezerProvider, externalId: DeezerTrackId));
 
         Assert.Equal(SongFormSaveKind.Failed, outcome.Kind);
         Assert.Equal(SaveField.None, outcome.FailedField);
@@ -819,6 +820,32 @@ public class SongServiceSaveFromFormTests
             songDecision: SongDecision.SaveAsNewSong));
 
         Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
+        Assert.NotNull(AddedSong);
+        Assert.Null(AddedSong!.ExternalProvider);
+        Assert.Null(AddedSong.ExternalId);
+        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-39: "Save as new song" for a NEW artist whose external identity is held by another song
+    // (ruling D1, 2026-11-05) succeeds: the artist is created, and the new row is written with a null
+    // external identity, which cannot collide with the held one.
+    public async Task SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity()
+    {
+        _songRepoMock
+            .Setup(r => r.ExistsByExternalIdentityAsync(
+                DeezerProvider, DeezerTrackId, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
+            artistId: null, artistText: "Guns N' Roses", provider: DeezerProvider, externalId: DeezerTrackId,
+            songDecision: SongDecision.SaveAsNewSong));
+
+        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
+        Assert.Equal(SaveField.None, outcome.FailedField);
+        Assert.Equal(SavedSongIdValue, outcome.SavedSongId);
+        _artistServiceMock.Verify(a => a.CreateArtistAsync(
+            "Guns N' Roses", null, null, It.IsAny<CancellationToken>()), Times.Once);
         Assert.NotNull(AddedSong);
         Assert.Null(AddedSong!.ExternalProvider);
         Assert.Null(AddedSong.ExternalId);

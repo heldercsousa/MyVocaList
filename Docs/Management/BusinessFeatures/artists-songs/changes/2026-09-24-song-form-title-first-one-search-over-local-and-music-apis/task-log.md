@@ -1899,3 +1899,59 @@ File: 36 -> 38 `[Fact]` tests (additive only; existing 36 unchanged).
 #### Changed files (follow-up #2)
 - `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (+~45, additive)
 - this task-log section
+
+### Red (Tester) — follow-up #3 2026-11-05
+
+Status: Red committed (`--no-verify`; tree does not compile on the `TypedName` member, carried from follow-up #1). Ruling D1 (Helder 2026-11-05, explicit): when the user explicitly chose `SaveAsNewVersion` or `SaveAsNewSong`, the new row is written with a NULL external identity and the save succeeds, even for a new artist and even when the identity is held by another song. The REQ-SFT-26 refusal stays only when no `SaveAsNew*` decision was made. Worktree `.worktrees/sft-3.10`, base `227dddd5`. No production code touched.
+
+#### Audit of the two D1-relevant existing tests
+
+| Test | Explicit SaveAsNew* decision? | Ruling impact | Action |
+|---|---|---|---|
+| `SaveFromForm_IdentityHeldByAnotherSong_FailsWithMessage` (REQ-SFT-26) | No (`SongDecision.None`, artist 7) | None: refusal is the ruled no-decision behaviour | Kept unchanged. Reaches the write-time refusal (`CreateSongWithUrlsAsync`, identity check before any artist creation) through the real `SaveFromFormAsync` flow: the song guard resolver mock returns NoMatch, so the write is reached. Reachable in production when the exact guard lookup misses (REQ-SFT-22 Warning path). |
+| `SaveFromForm_NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone` (REQ-SFT-26) | Yes (`SaveAsNewSong`) and expects Failed | Contradicts D1 | Amended (see below) |
+
+#### Changed tests
+
+1. **`SaveFromForm_NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone` → renamed `SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone`** (retarget, not weakening)
+   - Decision: retarget rather than amend to Saved. The original intent ("a new-artist refusal leaves no artist behind") is still reachable with NO explicit decision, so it is kept on that path.
+   - Input change: `songDecision: SongDecision.SaveAsNewSong` removed (default `None`). Nothing else in the request changed.
+   - Assertions: **unchanged** (`Failed`, `SaveField.None`, identity message, `SavedSongId` null, `VerifyNothingWritten()`). Ruling-driven change = the decision input only.
+   - AC comment updated to say the test is retargeted and why. Expected on current Green: **PASS** (the write-time refusal runs before `CreateArtistAsync`).
+2. **New test `SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity`** (D1 new-artist case, previously uncovered)
+   - Input: artist text "Guns N' Roses" (new artist), identity held, `SongDecision.SaveAsNewSong`.
+   - Expected: `Saved`, `SaveField.None`, `SavedSongIdValue`, `CreateArtistAsync` once, `AddAsync` once with `ExternalProvider` and `ExternalId` null.
+   - AC: REQ-SFT-39 (uniqueness of `(ExternalProvider, ExternalId)`; the ruling's null-identity rule).
+   - Expected on current Green: **FAIL** (identity passed through, write refused with "This music-database song is already in your library").
+
+Existing tests `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity` and `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity` (follow-up #2) are unchanged. Their expectation is already the ruled behaviour.
+
+#### Expected results on the current Green (read-only from `SongService.SaveFromFormAsync` / `CreateSongWithUrlsAsync`; not run, tree does not compile)
+
+| Test | Expected |
+|---|---|
+| `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity` | FAIL |
+| `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity` | FAIL |
+| `SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity` | FAIL |
+| `SaveFromForm_IdentityHeldByAnotherSong_FailsWithMessage` | PASS (unchanged) |
+| `SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone` | PASS (retargeted) |
+
+#### AC traceability (follow-up #3 rows)
+
+| AC | Criterion | Implementation location (Green) | Test(s) |
+|---|---|---|---|
+| REQ-SFT-26 | Held identity refused only with NO SaveAsNew* decision; refusal before artist creation | write-path identity check in `CreateSongWithUrlsAsync` (add path), decision-gated per D1 | `SaveFromForm_IdentityHeldByAnotherSong_FailsWithMessage`; `SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone` |
+| REQ-SFT-39 | SaveAsNew* writes null identity, even for a new artist | `SaveFromFormAsync` add path (identity nulled when decision is SaveAsNewVersion / SaveAsNewSong) | `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity`; `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity`; `SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity` |
+
+#### Notes for the Builder
+
+- With a NEW artist and SaveAsNewSong, the identity is nulled before `CreateSongWithUrlsAsync`, so no artist is created on the identity refusal path. The artist is created and the song saved, per D1.
+- Test names and comments: REQ-SFT-39 covers the null-identity rule. REQ-SFT-22/23 cover only the decision itself (unchanged from follow-up #2).
+
+#### Counts
+
+File: 38 -> 39 `[Fact]` tests (one added, one renamed and retargeted, none removed).
+
+#### Changed files (follow-up #3)
+- `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (one test retargeted, one test added)
+- this task-log section
