@@ -443,7 +443,15 @@ public class SongFormViewModelTests
         Assert.True(sut.IsArtistLocked);
         Assert.Equal("dz-99", sut.SelectedExternalId);
         Assert.Equal("Deezer", sut.SelectedProvider);
-        songService.VerifyNoOtherCalls();
+        // Explicit Never on the song-service writes and lookups; ShouldShowCharacterCounter (fired by
+        // setting SongTitle) is incidental UI feedback, not a write, so it is deliberately not verified.
+        songService.Verify(s => s.CreateSongAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.CreateSongWithUrlsAsync(It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.UpdateSongAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.DeleteSongsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.GetSongByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.ExistsByTitleForArtistAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.GetPagedSongsForListAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
         artistService.VerifyNoOtherCalls();
         _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
     }
