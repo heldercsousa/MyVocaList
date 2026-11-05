@@ -53,6 +53,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISimilarityScorer, Infra.Similarity.SimilarityScorer>();
         services.AddScoped<IArtistResolutionService, ArtistResolutionService>();
         services.AddScoped<ISongResolutionService, SongResolutionService>();
+        services.AddScoped<ISongSuggestionService, SongSuggestionService>();
+        services.AddScoped<IArtistSuggestionService, ArtistSuggestionService>();
 
         // YouTube Karaoke
         services.AddScoped<ISongKaraokeUrlRepository, SongKaraokeUrlRepository>();
