@@ -368,6 +368,38 @@ Helder tested `sft-g5-spike` (which predates T4 and uses the old per-page autoco
 
 ## T8 — T7 run 1 fixes + pick-lock opt-out
 
-### Checkpoint
+**Status:** To Review (device re-run of T7 pending)
+**Started / Completed:** 2026-11-05
 
-- (placeholder)
+### Checkpoint
+Done: steps 1-7 (all). Build 0 errors, tests 813/813. Next: commit + push. Manifest: none needed (work complete).
+
+### Changed files:
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs`
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml`
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml.cs`
+- `MyVocaList/UI/Pages/People/PersonFormPage.xaml`
+- `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs`
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md` (this section)
+
+### Verification evidence
+- Red: 4 new REQ-ACF-29 tests failed to compile (CS1739, no `isPickLockEnabled` parameter). Green: `AutocompleteDXFieldLogicTests` 43/43.
+- Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` passed, 0 errors (28 NU190x package-vulnerability warnings, pre-existing).
+- Tests: full `dotnet test` 813 passed, 0 failed (single run, no BUG-076 flake observed).
+- Context7 (DevExpress .NET MAUI): `AutoCompleteEditBase.TextChanged` is `EventHandler<AutoCompleteEditTextChangedEventArgs>` with `Reason`; `AutoCompleteEditTextChangeReason` = UserInput, ProgrammaticChange, ItemSelected. Matches the spec. (Docs list the NuGet as 26.1.5; the project's pinned version was not cross-checked against it.)
+- Observed `TextChanged` vs `SelectionChanged` event order: unknown (not determinable without a device); the T7 re-run will show it.
+
+### AC traceability (REQ-ACF-29)
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-ACF-29 | Opt-out: locked flag with text stays Editable | `AutocompleteDXFieldLogic.Mode(..., isPickLockEnabled)` | `Mode_PickLockDisabled_LockedWithText_ReturnsEditable` |
+| REQ-ACF-29 | Read-only still wins | same | `Mode_PickLockDisabled_ReadOnly_ReturnsReadOnly` |
+| REQ-ACF-29 | A pick does not lock | `LockAfterPick(route, isPickLockEnabled)`; `OnSelectionChanged` writes `IsLocked` only when true | `LockAfterPick_PickLockDisabled_Select_ReturnsFalse` |
+| REQ-ACF-29 | No pick, no lock | same | `LockAfterPick_PickLockDisabled_None_ReturnsFalse` |
+
+### Level C no-test decision (steps 3-7)
+UI glue with no extractable logic: the `IsPickLockEnabled` BindableProperty, `OnTextChanged` (REQ-ACF-24), pick counter and stale-result discard (REQ-ACF-26), `FocusEditor()` deferral (REQ-ACF-18), and `PersonFormPage.xaml` `IsPickLockEnabled="False"`. Verified by build and by the T7 device re-run.
+
+### Notes
+- `FocusEditor()` retry subscribes to `HandlerChanged` and `Loaded` (one-shot, both unsubscribed on the first ready signal; a handler-removal `HandlerChanged` is ignored).
+- Stale-result discard returns an empty array (not null), per the spec.
