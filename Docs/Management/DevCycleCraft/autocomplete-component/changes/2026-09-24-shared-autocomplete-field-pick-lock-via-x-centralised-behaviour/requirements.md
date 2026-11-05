@@ -62,6 +62,23 @@ Every agent uses these terms exactly. No synonyms.
   (`IsLocked = true`, written back to the consumer through the TwoWay binding), and the text cannot
   be changed by input: after any keystroke or paste, the text still equals the value shown at pick time.
   The system SHALL NOT offer a property that turns pick-lock off (Helder ruling Q3).
+
+  > **Spec updated 2026-11-05:** ruling Q3 is reversed (see § Helder rulings — 2026-11-05). REQ-ACF-01
+  > now applies only while `IsPickLockEnabled` is `true` (the default). See REQ-ACF-29.
+- **REQ-ACF-29: Pick-lock can be turned off for a field that edits the principal entity's own data.**
+  The component SHALL offer `IsPickLockEnabled` (bool, default `true`). WHILE it is `false`, the
+  field SHALL never enter the picked state:
+  (a) a pick routes to the consumer's select command, resets DX `SelectedItem` to `null` and closes
+  the menu (REQ-ACF-11b/e, REQ-ACF-23/25), but SHALL NOT set `IsLocked`;
+  (b) a consumer-set `IsLocked = true` is ignored (the mode stays `Editable`);
+  (c) the text stays editable in every situation, X behaves as on an unlocked field (REQ-ACF-09), and
+  blur forwarding is unchanged (REQ-ACF-17).
+  `IsReadOnly` (REQ-ACF-12b) and `IsSearchEnabled` (REQ-ACF-12a) are unaffected.
+  Rule of use: a field that names a **foreign entity** (Song → Artist) keeps the default `true`. A field
+  that holds the **principal entity's own data** (Person → Full Name) sets `false`, because forcing
+  an X tap before editing one's own data makes no sense (Helder, 2026-11-05).
+  Given `IsPickLockEnabled = false` and an option picked, When the user types, Then the text changes
+  and `IsLocked` is still `false`.
 - **REQ-ACF-02: Programmatic lock counts as picked.**
   WHEN a consumer sets `IsLocked = true` while the text is non-empty (e.g. edit-mode hydration),
   the system SHALL apply the picked state exactly as after a user pick (REQ-ACF-01 read-only rule,
@@ -193,6 +210,10 @@ Every agent uses these terms exactly. No synonyms.
   When the user picks one, Then the existing selection flow runs unchanged: a replacing navigation to
   that person's edit form (BUG-044, `PersonFormViewModel.cs:295-313`). The field locks for the
   moment before navigation (REQ-ACF-01); the edit form then opens unlocked (REQ-ACF-03).
+
+  > **Spec updated 2026-11-05:** the Person form sets `IsPickLockEnabled="False"` (REQ-ACF-29). Full Name
+  > is the principal entity's own data, so the field never locks, not even for the moment before
+  > navigation. The "Person form stays locked on screen" failure mode no longer applies.
 - **REQ-ACF-16: Person options come from the search's return value.**
   The Person form's option source SHALL return the search's result list directly and SHALL NOT read
   `PersonFormViewModel.Suggestions` after the call (the BUG-056 rule, which the Person glue violates
@@ -310,6 +331,23 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
 > current REQ-ACF-13. Old -22 (BUG-056) is the current REQ-ACF-22. The current REQ-ACF-15…18 are the
 > Person form ACs, and the current -21 is the Person 2-character gate.
 
+### Helder rulings — 2026-11-05 (after the T7 device gate)
+
+- **Q3 REVERSED: pick-lock gets a per-field opt-out.** "For the person form specifically, the component
+  must not block the entry in any situation given that it treats the main person data — name. Force
+  user to tap X (which will clear the entry) makes no sense in this context but only in context where
+  the entry is for informing a foreign entity, not the principal data." Shape chosen: an opt-out
+  property `IsPickLockEnabled`, default `true` (REQ-ACF-29). The Person form sets it to `false`.
+- **T7 line 8 accepted as designed.** The counter appears only above `ShowCounterAt` (180), and errors
+  stay up until the name is valid ("punish late, reward early", `.claude/library/dialogs-validation.md`
+  § Validation timing). Both match the app-wide standard, which Helder requires every form to follow.
+- **T7 line 10, placeholder:** the app uses placeholders on form fields. Full Name keeps "First and last
+  name". With a label set, DX shows the placeholder only on focus, as on the other Person fields, so the
+  autofocus fix (REQ-ACF-18) is what makes it visible on load.
+- **T7 line 9 fix reference:** the Song form Artist fix closes the menu on every programmatic text set
+  (`SongFormViewModel` `IsArtistDropDownOpen = false`) and resets `SelectedItem` after a pick and on
+  `OnAppearing` (`SongFormPage.xaml.cs`). The component must reproduce that pattern (REQ-ACF-24/25).
+
 ### Spec APPROVED — Helder, 2026-09-25
 
 Approved "as recommended", together with every open recommendation (Q10: the 300 ms debounce
@@ -330,3 +368,4 @@ process gates for this pipeline. On-device gates (T1 spike, T7 E2E) still requir
 | REQ-ACF-22 | `PersonFormViewModel.NameOptionSource` + component glue | T5 VM test + code review |
 | REQ-ACF-20, -21, -28 | `PersonFormViewModel` (unchanged members) | existing VM tests, unchanged |
 | REQ-ACF-23, -25, -26, -27 | component | T1 + T7 on-device, code review |
+| REQ-ACF-29 | component logic (`Mode`, `LockAfterPick`) + `PersonFormPage.xaml` | component logic tests (T8, Level A) + T7 re-run |
