@@ -1861,3 +1861,41 @@ Existing 25 tests: unchanged (the diff is additive: 208 insertions, 0 deletions)
 #### Changed files
 - `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (+208, additive)
 - this task-log section
+
+### Red (Tester, Haiku 5.5) - follow-up #2 2026-11-05
+Status: Red committed (`--no-verify`; tree does not compile on the `TypedName` member, carried from follow-up #1). Ruling D1 (Helder 2026-11-05) encoded. Worktree `.worktrees/sft-3.10`, base Red `86e6801c`. No production code touched.
+
+#### Existing coverage check (D1)
+No existing test asserts a NULL external identity on the SaveAsNew paths. The two SaveAsNew tests (`SaveFromForm_SaveAsNewVersionDecision_SkipsSongGuard_Writes`, `SaveFromForm_SaveAsNewSongDecision_SkipsSongGuard_NoVersionRequired`) pass no provider/external id, so they cannot observe the identity. Two tests were therefore added, none existing was changed.
+
+#### Compiler output (verbatim, `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --filter FullyQualifiedName~SongServiceSaveFromFormTests`)
+```
+SongServiceSaveFromFormTests.cs(288,42): error CS1061: 'SongFormSaveOutcome' does not contain a definition for 'TypedName' ...
+```
+The filtered run cannot execute until the Builder adds `TypedName` (D4). Expected results below are read from the Green source (`SongService.SaveFromFormAsync` / `CreateSongWithUrlsAsync`, read-only), not from a run.
+
+#### New tests (2) - `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs`
+| Test | AC | Expected on current Green |
+|---|---|---|
+| `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity` | REQ-SFT-39 | **FAIL**: `CreateSongWithUrlsAsync` (line ~271) refuses with "This music-database song is already in your library" because the request identity is passed through and the mock reports it held; expected `Saved`, null identity |
+| `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity` | REQ-SFT-39 | **FAIL**: same refusal path as above; expected `Saved`, null identity |
+
+Both tests set `ExistsByExternalIdentityAsync` to true (the original song holds the identity) and assert `Saved`, `AddedSong.ExternalProvider` null, `AddedSong.ExternalId` null, `AddAsync` once. The identity is observed through the repository write, because `CreateSongWithUrlsAsync` is the SUT's own method and not a mock. Both tests are expected to pass once the Green passes null identity on the SaveAsNew paths (the write-time check is skipped for a null identity).
+
+AC choice: REQ-SFT-39 for both, because the asserted property is the unique `(ExternalProvider, ExternalId)` rule. REQ-SFT-22 / 23 cover only the decision itself. Flagged for review; swap to REQ-SFT-22 / 23 if Helder prefers the decision as the AC.
+
+#### Conflict for Helder (not changed by this Red)
+- **Existing test `SaveFromForm_NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone` (REQ-SFT-26, line ~764)** asserts that a NEW artist saved as a NEW song whose identity is held FAILS with "This music-database song is already in your library" and creates no artist. D1 says the SaveAsNewSong row is written with NULL identity. Both cannot hold. The existing test was added in follow-up #1 (D2 negative), before D1. It is not the exact guard-hit case D1 describes (the guard was skipped by the decision), so D1 may or may not reach it.
+- **Blocking: Yes** for the Builder on the SaveAsNewSong path with a new artist. Recommendation: Helder confirms whether D1 applies to the skipped-guard case; if yes, the existing test at line ~764 needs a spec-level replacement (not a Builder edit). Not decided here.
+
+#### AC traceability (follow-up #2 rows)
+| AC | Criterion | Implementation location (Green) | Test(s) |
+|---|---|---|---|
+| REQ-SFT-39 | Second row from a SaveAsNew decision carries no held identity | `SaveFromFormAsync` add path (request identity to `CreateSongWithUrlsAsync` must become null on SaveAsNewVersion / SaveAsNewSong) | `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity`; `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity` |
+
+#### Counts
+File: 36 -> 38 `[Fact]` tests (additive only; existing 36 unchanged).
+
+#### Changed files (follow-up #2)
+- `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (+~45, additive)
+- this task-log section
