@@ -1298,10 +1298,10 @@ _(not started)_
 
 ## 6.1
 
-**Status:** Tester Red done (Builder pending). **Branch:** task/sft-6.1-artist-suggestions (base develop a55cbb52). Inherited: clean worktree. Context7 not needed (mirrors merged 4.2/4.3 patterns; no new library API).
+**Status:** To Review (Builder Green 2026-11-05). **Branch:** task/sft-6.1-artist-suggestions (base develop a55cbb52). Inherited: clean worktree. Context7 not needed (mirrors merged 4.2/4.3 patterns; no new library API).
 
 ### Checkpoint
-Red committed; next: Builder implements Green. Context manifest: plan.md Task 6.1; Services/ArtistSuggestionService.cs; Services/IArtistSuggestionService.cs; Services/SongSuggestionService.cs (reference); MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs; ArtistSuggestionThresholdTests.cs; Extensions/ServiceCollectionExtensions.cs (registration).
+Final (Builder, 2026-11-05): Green complete, build 0 errors (attempt 1), focused 32/32, full suite 773/773 (one BUG-076-style timing failure in `CrudListViewModelBaseTests.SearchText_Changed_DebouncesIntoFetchWithTrimmedQuery` on the first run, green on the single re-run). Commit and push pending at the time of this note; SHA in `git log`. Context manifest: Services/ArtistSuggestionService.cs; Services/IArtistSuggestionService.cs; MyVocaList/Extensions/ServiceCollectionExtensions.cs; MyVocaList/MauiProgram.cs (INetworkStatus, 4.1c); design.md § 4.1 + § 3.3 notes.
 
 ### Red (compile error, `Lane: RED`, `--no-verify`) - `dotnet build MyVocaList.Tests -m:1`, distinct CS lines
 - CS1729: 'ArtistSuggestionService' does not contain a constructor that takes 6 arguments (ArtistSuggestionServiceTests.cs:49, ArtistSuggestionThresholdTests.cs:41)
@@ -1345,6 +1345,44 @@ Red committed; next: Builder implements Green. Context manifest: plan.md Task 6.
 - `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceTests.cs`
 - `MyVocaList.Tests/Unit/Services/ArtistSuggestionThresholdTests.cs`
 - this task-log section
+
+### Green (Builder)
+**Status:** To Review (pending orchestrator merge). Red `66a1e8fb`; Green SHA recorded in the commit that adds this block (see `git log`). Inherited: clean worktree.
+Implemented `SearchNameLocalAsync` / `SearchNameRemoteAsync` (mirrors `SongSuggestionService`): constructor exactly as the Red fixed it; local = `SearchNameCandidatesAsync(q, PoolSize)` inside `ExecuteReadAsync` (repo from `sp`), `RankScore`, stable order, take 5, `IsExactMatch=false`; remote = guard (<3 -> Ok), live `INetworkStatus` (Offline + Information log), Deezer only with linked 3000 ms CTS (caller cancel rethrown, else Unavailable + Warning), then one `GetByNamesCollatedAsync([name])` per distinct Deezer name in a single read scope, take 5. `GetLocalAsync`, `GetRemoteAsync`, `FilterSimilar`, `MusicBrainzProviderName` branch deleted. Registered `AddScoped<IArtistSuggestionService, ArtistSuggestionService>()` after the song registration. `ArtistSuggestionDto` doc example "MusicBrainz" removed.
+Census (os.walk, all .cs/.xaml excluding obj/bin/Docs/.claude): `ArtistSuggestionService|IArtistSuggestionService|FilterSimilar|MusicBrainzProviderName` outside `Services/` hit only the two 6.1 test files; no ViewModel/page callers (the interface was previously unregistered).
+Verification: focused `ArtistSuggestion|UnitOfWorkReadScope`: Failed 0, Passed 27. Full suite: Failed 0, Passed 773, Total 773 (baseline 769, +4 net from the Tester). One run hit the known BUG-076 flake (`CatalogRepositoryTests.InitializeAsync` ObjectDisposedException, 772/773); re-run 773/773 green.
+Changed files (Green): `Services/IArtistSuggestionService.cs`, `Services/ArtistSuggestionService.cs`, `Contracts/DTOs/Suggestions/ArtistSuggestionDto.cs`, `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, `Docs/.../design.md` (one `> **Spec updated 2026-11-05**` note, § 4.1), this section.
+
+### Changed files:
+- `Services/IArtistSuggestionService.cs`
+- `Services/ArtistSuggestionService.cs`
+- `Contracts/DTOs/Suggestions/ArtistSuggestionDto.cs` (doc comment only)
+- `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (one `AddScoped` line)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/design.md` (spec note)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
+
+### AC matrix (6.1)
+| AC ID | Criterion | Implementation | Test method |
+|---|---|---|---|
+| REQ-SFT-03 | Below 2 (local) / 3 (remote) trimmed chars → empty, no provider call | `ArtistSuggestionService.SearchNameLocalAsync`/`SearchNameRemoteAsync` guards | `SearchNameLocalAsync_BelowTwoTrimmedChars_ReturnsEmpty`, `SearchNameRemoteAsync_BelowThreeTrimmedChars_NoProviderCall` |
+| REQ-SFT-47 | Local FTS candidates, ranked, max 5 | `SearchNameCandidatesAsync` + `RankScore` + `Take(MaxSearchResults)` | `SearchNameLocalAsync_UsesFtsCandidatesRankedMaxFive`, `SearchNameLocalAsync_Metalica_ReturnsLocalMetallicaFirst` |
+| REQ-SFT-48 | Deezer name collated-equal to a local artist is dropped | per-name `GetByNamesCollatedAsync` in one read scope | `SearchNameRemoteAsync_DeezerMetallica_DroppedWhenLocalMetallicaExists`, `SearchNameRemoteAsync_DeezerNameCollatedMatchOfLocal_Dropped` |
+| REQ-SFT-06 | Failure → `Unavailable` + Warning; zero results → `Ok` | `TryFetchDeezerAsync` returns null on failure | `SearchNameRemoteAsync_ProviderThrows_StatusUnavailable_LogsWarning`, `SearchNameRemoteAsync_ZeroResults_StatusOk` |
+| REQ-SFT-08 | 3,000 ms bound | linked CTS `CancelAfter(RemoteSearchTimeoutMilliseconds)` | `SearchNameRemoteAsync_ProviderSlowerThanBound_StatusUnavailable` |
+| REQ-SFT-09 | Caller cancellation rethrown (stale query) | `catch (OperationCanceledException) when (ct.IsCancellationRequested)` | `SearchNameRemoteAsync_CallerCancelled_Rethrows` |
+| REQ-SFT-36 | Deezer only (no MusicBrainz-first path) | provider lookup by `ProviderName == "Deezer"` | `SearchNameRemoteAsync_*` (provider mock) |
+| REQ-SFT-53 | Offline → no provider call, `Offline`, Information log; live read per call; online throw ≠ Offline | `INetworkStatus.HasInternetAccess` read on each call | `SearchNameRemoteAsync_Offline_NoProviderCall_StatusOffline_LogsInformation`, `_OnlineButProviderThrows_StatusUnavailableNotOffline`, `_ReadsNetworkStatusPerCall` |
+| REQ-SFT-47 (DI) | `IArtistSuggestionService` resolves from `AddAppServices` | `ServiceCollectionExtensions` `AddScoped` line | `AddAppServices_ResolvingArtistSuggestionService_Succeeds` |
+
+### Verification evidence (6.1 Green, 2026-11-05)
+- `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -m:1`: 7 projects, 0 errors, 30 warnings (pre-existing package advisories). Attempt 1 of 3.
+- Focused `ArtistSuggestion|UnitOfWorkReadScope|AppServicesRegistration`: `Aprovado: 32, Com falha: 0, Total: 32`.
+- Full suite: run 1 `Com falha: 1, Aprovado: 772, Total: 773` (`CrudListViewModelBaseTests.SearchText_Changed_DebouncesIntoFetchWithTrimmedQuery`, timing test, not in this task's scope); re-run `Aprovado: 773, Com falha: 0, Total: 773`.
+- Tests were not edited (Builder must not modify tests); the Red commit `66a1e8fb` is the only test-file change.
+
+### Notes
+- Branch base is `develop` `a55cbb52`; `develop` has since advanced to `01e8fba9`, so `git merge-base --is-ancestor develop HEAD` is false. The orchestrator must rebase or merge before merging to develop.
+- Deviations: none from `design.md` § 4.1 / § 3.3 beyond the recorded spec note.
 
 ## 6.2
 
