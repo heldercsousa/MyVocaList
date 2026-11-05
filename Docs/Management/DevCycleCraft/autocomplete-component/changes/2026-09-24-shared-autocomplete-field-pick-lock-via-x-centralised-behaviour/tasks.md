@@ -215,7 +215,7 @@
 > - Line 10 also checks that the "First and last name" placeholder shows on load (create mode) and
 >   that the T7-prep "Test" supporting text renders.
 
-- [ ] **T8: T7 run 1 fixes + pick-lock opt-out** `[SEQUENTIAL, after T7 run 1]` (added 2026-11-05)
+- [~] **T8: T7 run 1 fixes + pick-lock opt-out** `[SEQUENTIAL, after T7 run 1]` (added 2026-11-05)
   - **Behaviour:**
     - REQ-ACF-29: `IsPickLockEnabled` (default `true`) in the component and the logic class, and the
       Person form sets it to `false`.
