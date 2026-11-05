@@ -1438,6 +1438,8 @@ REQ-SFT-27 and REQ-SFT-53 are not covered by 5.3 (as Red).
 - `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`: `Aprovado!  – Com falha: 0, Aprovado: 870, Ignorado: 0, Total: 870` (first run, no flake re-run needed). Test-project compile warnings only (pre-existing xUnit analyzers).
 - Census of added lines (`git diff HEAD`, 278 added lines, system grep): `ToLower|ToUpper|RemoveDiacritics|Normalized|OrdinalIgnoreCase|DisplayAlert|DisplayActionSheet|DisplayPromptAsync` → 0 hits.
 - Emulator: not run (Helder's check).
+- Develop moved (`97a329e1` → `324ff527` during the Green). Merged with `git merge develop` (no conflicts; `cd74e8d0` merge commit). `git merge-base --is-ancestor develop HEAD`: exit 0. Post-merge `dotnet test`: `Aprovado!  – Com falha: 0, Aprovado: 874, Ignorado: 0, Total: 874` (4 more tests from develop).
+- SHAs: Green commit `bdf4010b` (pre-commit hook ran the tests: 870 passed); merge `cd74e8d0`.
 
 ### Open for review
 - Assumption B (fresh Save tap starts clean) is the Builder's, pending Helder's confirmation (noted in REQ-SFT-51 spec note).
