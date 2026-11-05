@@ -27,6 +27,7 @@
                           IsEndIconVisible="False"
                           EndIconColor="{StaticResource OnSurfaceVariant}"
                           SelectionChanged="OnSelectionChanged"
+                          TextChanged="OnTextChanged"
                           Unfocused="OnUnfocused"
                           EndIconClicked="OnEndIconClicked"
                           ClearIconClicked="OnClearIconClicked">
