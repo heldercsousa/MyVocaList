@@ -367,6 +367,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   The ViewModel only maps `ArtistChoiceNeeded`/`SongChoiceNeeded` to BottomSheets and calls the method
   again with the user's choice. Each rule is tested at the Service (Level A); VM tests check the
   mapping only.
+  > **Spec updated 2026-11-05:** per Helder's approval, the ViewModel holds the artist and song decisions for one Save attempt and re-sends them on every re-invocation, clears both on an Artist or Title edit, and a fresh user Save tap starts with no decisions (the last point is a Builder assumption, flagged for Helder's review).
 - **REQ-SFT-46: One write path.** Every song create and update from the Song form, including the
   artist it creates, SHALL go through `ISongService.CreateSongWithUrlsAsync` or
   `ISongService.UpdateSongAsync`, so CATALOG-PROP's propagation cannot be bypassed.

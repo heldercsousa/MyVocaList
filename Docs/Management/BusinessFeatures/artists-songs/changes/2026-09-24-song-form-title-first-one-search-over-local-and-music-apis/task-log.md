@@ -1268,7 +1268,7 @@ _(not started)_
 
 ## 5.3
 
-**Status:** Red committed (Tester). Green pending (Builder). Not yet `[x]` in tasks.md.
+**Status:** Red committed (Tester, `9a41b361`); Green To Review (Builder, see `### Green (Builder, 2026-11-05)` below). Not `[x]` in tasks.md until the orchestrator ticks it.
 **Started:** 2026-11-05 **Completed (Red):** 2026-11-05
 **Plan:** tasks.md Phase 5 § 5.3 · Level A · Review lane Architectural · design.md § 3.5, § 4, § 10.1 · requirements.md REQ-SFT-15..27, 39, 46, 51..53.
 **Branch:** `task/sft-5.3-save-outcomes` (worktree `.worktrees/sft-5.3`, base develop `fddf8f44`).
@@ -1390,8 +1390,61 @@ REQ-SFT-27 (edit-mode Title editable) and REQ-SFT-53 are not covered by 5.3 test
 - No production file changed. No test run (the test project does not compile in Red).
 - `tasks.md` 5.3 box is NOT ticked by the Tester; it is ticked at Green.
 
+### Green (Builder, 2026-11-05)
+
+**Status:** To Review (Green). Red `9a41b361`. Builder does not tick `tasks.md` (orchestrator ticks it).
+**Branch:** `task/sft-5.3-save-outcomes`, worktree `.worktrees/sft-5.3`. Develop had moved (`fddf8f44` → `97a329e1`); merged before push (see Verification).
+
+### Changed files (Green)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` (production: Save maps outcomes; decisions; sheet actions; `ISongResolutionService` removed from the ctor; old decision code deleted)
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (XAML consequence: resolution sheet gets exact/fuzzy variants via `IsExactDuplicate`; new `artistMatchSheet` built from the resolution-sheet pattern, dx:BottomSheet + existing styles; no native dialog)
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (code-behind: `IsArtistMatchSheetVisible` → Show/Close sync, same guard pattern as the resolution sheet)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/requirements.md` (one `Spec updated 2026-11-05` note under REQ-SFT-51)
+- this task-log
+- No test file changed (Builder rule). `tasks.md` not edited (orchestrator).
+
+### Decisions beyond the Red's recorded choices (for review)
+1. **Save-attempt reset (assumption B, as Red):** `SaveCommand` clears both decisions before the call; sheet actions do not.
+2. **Clearing:** `ClearSaveDecisions()` runs from `OnSongTitleChanged` and a new `OnArtistSearchTextChanged` partial, so programmatic writes to those two properties also clear. Only the Save pipeline writes neither property, so no in-attempt clear happens by accident.
+3. **Failed(Version) during "Save as new version":** the duplicate sheet stays open and the version entry is revealed (`VersionEntryRequired`), so the user corrects it on the sheet (the old VM behaviour). Failed(Version) with no sheet choice closes the sheet as usual.
+4. **Failed(None):** `ShowErrorAsync(message)`, and both save sheets close.
+5. **Sheet titles:** exact → "This looks like an existing song" (existing text); fuzzy → "Possible duplicates" (from the REQ-SFT-23 name). These are the only new UI strings besides the artist sheet's "Similar artist found" (REQ-SFT-19 text), the button labels "Use '…'", "Create '…'", "Save as new song" (REQ-SFT-19/23 wording).
+6. **Saved snackbar text:** "Song created" / "Song updated" (existing texts), navigation via `INavigationService.GoToAsync("..")`.
+7. **`ArtistId`:** `SelectedArtistId` with 0 treated as no id (null). `ArtistText` is the trimmed `ArtistSearchText` only when no id.
+8. **Removed VM members** (no XAML consumer left): `IsSaveAsNewVersionMode` (unbound; was set only by the deleted resolve path), `_pendingCandidate`, `ExecuteNewSongSaveAsync`, `ExecuteEditSaveAsync`, `CommitNewSongAsync`.
+9. **Build order:** the XAML edit (`SongFormPage.xaml`) landed before the code-behind handler `OnArtistMatchSheetStateChanged` existed; the Android build was run only after both files were edited (the XAML compile needs the handler). Two files between builds, not one, for that reason.
+
+### Traceability (Green)
+| REQ | Criterion (short) | Implementation location | Test method(s) |
+|---|---|---|---|
+| REQ-SFT-15 | Failed(Title) on Title | `ApplyFailureAsync` (Title) | `SaveCommand_FailedTitle_ShowsMessageOnTitleField` |
+| REQ-SFT-18 | Typed unpicked artist sent by name, no id | `BuildSaveRequest` | `SaveCommand_TypedArtist_SendsTrimmedNameWithoutArtistId` |
+| REQ-SFT-19 | Artist sheet: candidates, typed name, Use / Create / Dismiss (no save) | `ApplyOutcomeAsync` (ArtistChoiceNeeded), `UseExistingArtistAsync`, `CreateTypedArtistAsync`, `DismissArtistMatchSheet`; XAML `artistMatchSheet` | `SaveCommand_ArtistChoiceNeeded_OpensArtistSheetWithCandidatesInOrder`, `..._ExposesOutcomeTypedNameForCreateAction`, `UseExistingArtistCommand_...`, `CreateTypedArtistCommand_...`, `DismissArtistMatchSheetCommand_...` |
+| REQ-SFT-20 | Failed(Artist) message on Artist | `ApplyFailureAsync` (Artist) | `SaveCommand_FailedArtist_ShowsServiceMessageOnArtistField` |
+| REQ-SFT-21 | Blank artist: Service decides | `RunSaveAsync` (no VM short-circuit), `BuildSaveRequest` | `SaveCommand_BlankArtist_PassesToServiceAndShowsItsArtistError` |
+| REQ-SFT-22 | Exact duplicate sheet: Open / Save as new version; Dismiss saves nothing; Version failure | `ApplyOutcomeAsync` (SongChoiceNeeded exact), `ConfirmSaveAsNewVersionAsync`, `DismissResolutionSheet`, `ApplyFailureAsync` (Version); XAML exact block | `SaveCommand_ExactSongChoice_...`, `ConfirmSaveAsNewVersionCommand_...`, `DismissResolutionSheetCommand_...`, `SaveCommand_FailedVersion_...` |
+| REQ-SFT-23 | Possible duplicates: Save as new song, no Version | `ApplyOutcomeAsync` (fuzzy), `ConfirmSaveAsNewSongAsync`; XAML fuzzy block | `SaveCommand_FuzzySongChoice_...`, `ConfirmSaveAsNewSongCommand_...` |
+| REQ-SFT-25 | Picked Deezer identity travels with the save | `BuildSaveRequest` (ExternalId/ExternalProvider) | `SaveCommand_AfterRemotePick_SendsPickedExternalIdentity` |
+| REQ-SFT-26 | Identity refusal = general error, no field error | `ApplyFailureAsync` (None → snackbar) | `SaveCommand_FailedNoField_ShowsGeneralErrorAndNoFieldError` |
+| REQ-SFT-28 | Edit mode: changed artist id and kept link reach the Service | `BuildSaveRequest` (SongId, ArtistId) | `SaveAsync_EditMode_ArtistChanged_SendsNewArtistIdToService`, `SaveAsync_EditMode_AfterHydration_PreservesArtistLink` |
+| REQ-SFT-46 | No write call from the VM except `SaveFromFormAsync` | VM has no create/update call (grep: none) | `SaveCommand_NewSong_WritesOnlyThroughSaveFromForm` |
+| REQ-SFT-51 | One Service call per Save; outcome mapping; decisions kept, cleared on edit, reset per attempt; double-tap; exception | `SaveAsync`, `RunSaveAsync`, `ApplyOutcomeAsync`, `ClearSaveDecisions`, the two clear hooks | `SaveCommand_ServiceThrows_...`, `SaveCommand_NewSongNoDecision_...`, `SaveCommand_Saved*`, `Decisions_PersistAcrossReinvocations_...`, `UserEdit_Clears*Decision`, `SaveCommand_NewAttempt_StartsWithNoDecisions`, `SaveCommand_DoubleInvokedWhileSaving_...`, `SaveAsync_EditMode_SendsSongIdAndHydratedFieldsAndEditedVersion`, `SaveAsync_TitleNeverDirty_SafetyNetSetsTitleError` (unchanged) |
+
+REQ-SFT-27 and REQ-SFT-53 are not covered by 5.3 (as Red).
+
+### Verification (Green)
+- `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` (attempt 1, before XAML): `0 Erro(s)`.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` (attempt 1, after XAML + code-behind): `0 Erro(s)`, `27 Aviso(s)` (NU1902/NU1903 package advisories, pre-existing), elapsed 00:10:51. Note: the run stalled in aapt2 for about 10 minutes before completing; no retry was needed.
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`: `Aprovado!  – Com falha: 0, Aprovado: 870, Ignorado: 0, Total: 870` (first run, no flake re-run needed). Test-project compile warnings only (pre-existing xUnit analyzers).
+- Census of added lines (`git diff HEAD`, 278 added lines, system grep): `ToLower|ToUpper|RemoveDiacritics|Normalized|OrdinalIgnoreCase|DisplayAlert|DisplayActionSheet|DisplayPromptAsync` → 0 hits.
+- Emulator: not run (Helder's check).
+
+### Open for review
+- Assumption B (fresh Save tap starts clean) is the Builder's, pending Helder's confirmation (noted in REQ-SFT-51 spec note).
+- The Red's assumption A (REQ-SFT-51 as the trace for the decision rule) stays; the spec note now records Helder's approval.
+
 ### Checkpoint
-_(none; task Red complete)_
+_(none; Green complete, awaiting commit/merge/push)_
 
 ## 5.4
 

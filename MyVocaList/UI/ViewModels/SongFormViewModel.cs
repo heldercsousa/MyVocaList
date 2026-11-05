@@ -17,7 +17,6 @@ public partial class SongFormViewModel : ViewModelBase
 {
     private readonly IArtistService _artistService;
     private readonly ISongService _songService;
-    private readonly ISongResolutionService _songResolution;
     private readonly ISnackbarComponent _snackbarService;
     private readonly ILogger<SongFormViewModel> _logger;
     private readonly ISongKaraokeUrlService _karaokeUrlService;
@@ -99,15 +98,24 @@ public partial class SongFormViewModel : ViewModelBase
     private string? _pickFilledVersion;   // Version written by the last remote pick (Q21)
     private int? _pendingOpenSongId;      // local pick awaiting the discard-sheet decision
 
-    // ── Resolution sheet state (Task 4.5) ────────────────────────────────
+    // ── Save-outcome sheets (Task 5.3, REQ-SFT-19, REQ-SFT-22/23) ─────────
+    private const string ExactDuplicateSheetTitle = "This looks like an existing song";
+    private const string PossibleDuplicatesSheetTitle = "Possible duplicates";
+
     [ObservableProperty] private bool _isResolutionSheetVisible;
-    [ObservableProperty] private string _resolutionSheetTitle = "This looks like an existing song";
+    [ObservableProperty] private string _resolutionSheetTitle = ExactDuplicateSheetTitle;
     [ObservableProperty] private IReadOnlyList<SongMatch> _resolutionCandidates = [];
-    [ObservableProperty] private bool _isSaveAsNewVersionMode;
+    [ObservableProperty] private bool _isExactDuplicate;   // true: exact sheet (Save as new version); false: possible duplicates (Save as new song)
     [ObservableProperty] private bool _versionEntryRequired; // reveals version entry when "Save as new version"
 
-    // ── Stashed resolution context (survives between sheet steps) ─────────
-    private SongCandidate? _pendingCandidate;
+    [ObservableProperty] private bool _isArtistMatchSheetVisible;
+    [ObservableProperty] private IReadOnlyList<ArtistMatch> _artistMatchCandidates = [];
+    [ObservableProperty] private string _artistMatchTypedName = string.Empty;
+
+    // Decisions held for ONE Save attempt (REQ-SFT-51). A user Save tap starts a new attempt; a sheet
+    // choice re-invokes the Service with the decision set; an Artist or Title edit clears both.
+    private ArtistDecision _artistDecision = new ArtistDecision.None();
+    private SongDecision _songDecision = SongDecision.None;
 
     // Becomes true once the user edits each field. Guards blur validation so a pristine field the
     // user only tabbed through is not flagged prematurely (Form Validation Standard).
@@ -126,7 +134,6 @@ public partial class SongFormViewModel : ViewModelBase
     public SongFormViewModel(
         IArtistService artistService,
         ISongService songService,
-        ISongResolutionService songResolution,
         ISnackbarComponent snackbarService,
         ILogger<SongFormViewModel> logger,
         ISongKaraokeUrlService karaokeUrlService,
@@ -137,7 +144,6 @@ public partial class SongFormViewModel : ViewModelBase
     {
         _artistService = artistService;
         _songService = songService;
-        _songResolution = songResolution;
         _snackbarService = snackbarService;
         _logger = logger;
         _karaokeUrlService = karaokeUrlService;
@@ -163,10 +169,14 @@ public partial class SongFormViewModel : ViewModelBase
         RemoveUrlCommand = new AsyncRelayCommand<SongKaraokeUrlDto>(RemoveUrlAsync);
         GoToSettingsCommand = new AsyncRelayCommand(async () => await Shell.Current.GoToAsync("//settings"));
 
-        // Resolution sheet commands
+        // Duplicate-song and artist-match sheet commands
         OpenExistingSongCommand = new AsyncRelayCommand<SongMatch>(OpenExistingSongAsync);
         ConfirmSaveAsNewVersionCommand = new AsyncRelayCommand(ConfirmSaveAsNewVersionAsync);
+        ConfirmSaveAsNewSongCommand = new AsyncRelayCommand(ConfirmSaveAsNewSongAsync);
         DismissResolutionSheetCommand = new RelayCommand(DismissResolutionSheet);
+        UseExistingArtistCommand = new AsyncRelayCommand<ArtistMatch>(UseExistingArtistAsync);
+        CreateTypedArtistCommand = new AsyncRelayCommand(CreateTypedArtistAsync);
+        DismissArtistMatchSheetCommand = new RelayCommand(DismissArtistMatchSheet);
     }
 
     // ── Commands ──────────────────────────────────────────────────────────
@@ -181,11 +191,22 @@ public partial class SongFormViewModel : ViewModelBase
     public IAsyncRelayCommand<SongKaraokeUrlDto> RemoveUrlCommand { get; }
     public IAsyncRelayCommand GoToSettingsCommand { get; }
 
-    // Resolution sheet
+    // Duplicate-song sheet
     /// <summary>Opens the stored song's edit form in place of this add form (REQ-SFT-22/24).</summary>
     public IAsyncRelayCommand<SongMatch> OpenExistingSongCommand { get; }
+    /// <summary>"Save as new version": re-invokes the Service with SaveAsNewVersion (REQ-SFT-22).</summary>
     public IAsyncRelayCommand ConfirmSaveAsNewVersionCommand { get; }
+    /// <summary>"Save as new song": re-invokes the Service with SaveAsNewSong, no Version (REQ-SFT-23).</summary>
+    public IAsyncRelayCommand ConfirmSaveAsNewSongCommand { get; }
     public IRelayCommand DismissResolutionSheetCommand { get; }
+
+    // Artist-match sheet (REQ-SFT-19): display and re-invoke only; the Service decides
+    /// <summary>"Use '&lt;existing&gt;'": re-invokes the Service with UseExisting(id).</summary>
+    public IAsyncRelayCommand<ArtistMatch> UseExistingArtistCommand { get; }
+    /// <summary>"Create '&lt;typed&gt;'": re-invokes the Service with CreateTyped.</summary>
+    public IAsyncRelayCommand CreateTypedArtistCommand { get; }
+    /// <summary>Back or scrim: saves nothing and hides the sheet.</summary>
+    public IRelayCommand DismissArtistMatchSheetCommand { get; }
 
     /// <summary>
     /// Called by the page's <c>OnAppearing</c> once Shell has finished applying all
@@ -245,6 +266,8 @@ public partial class SongFormViewModel : ViewModelBase
 
     partial void OnSongTitleChanged(string value)
     {
+        ClearSaveDecisions();   // REQ-SFT-51: a Title edit clears the Save decisions
+
         if (string.IsNullOrWhiteSpace(value) && TitleSupportingText.Length > 0)
             TitleSupportingText = string.Empty;   // REQ-SFT-06: the Field never queries an empty string
 
@@ -290,6 +313,9 @@ public partial class SongFormViewModel : ViewModelBase
     {
         UpdateCanLaunchYouTubeSearch();
     }
+
+    /// <summary>REQ-SFT-51: an Artist edit clears the Save decisions (programmatic restores clear too).</summary>
+    partial void OnArtistSearchTextChanged(string value) => ClearSaveDecisions();
 
     // ── Artist autocomplete ───────────────────────────────────────────────
 
@@ -536,7 +562,7 @@ public partial class SongFormViewModel : ViewModelBase
 
     /// <summary>
     /// BUG-008/BUG-024: loads the full Song entity in edit mode and hydrates every field that
-    /// <c>UpdateSongAsync</c> persists (Title, Version, FeaturedArtists, Lyrics, external identity)
+    /// <c>SaveFromFormAsync</c> persists (Title, Version, FeaturedArtists, Lyrics, external identity)
     /// so Save cannot silently wipe stored data. Also loads karaoke URLs and determines
     /// IsArtistLocked (API-imported song: ExternalId set AND no manual edits).
     /// </summary>
@@ -551,7 +577,7 @@ public partial class SongFormViewModel : ViewModelBase
             return;
         }
 
-        // Stash external identity so ExecuteEditSaveAsync round-trips it unchanged.
+        // Stash external identity so the edit Save round-trips it unchanged.
         SelectedExternalId = song.ExternalId ?? string.Empty;
         SelectedProvider = song.ExternalProvider ?? string.Empty;
 
@@ -593,42 +619,46 @@ public partial class SongFormViewModel : ViewModelBase
 
     // ── Save orchestration (Task 4.4 BUG-005 + Task 4.5 resolution) ──────
 
+    /// <summary>
+    /// The user's Save tap (REQ-SFT-51). Every tap is a new Save attempt: both decisions start empty.
+    /// The Service decides everything; this method only maps its outcome to fields and sheets.
+    /// </summary>
     private async Task SaveAsync()
+    {
+        if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
+
+        ClearSaveDecisions();
+        await RunSaveAsync();
+    }
+
+    /// <summary>
+    /// Sends the form with the decisions held for this attempt and maps the outcome (REQ-SFT-51).
+    /// Shared by the Save tap and every sheet choice, so the decisions travel with each re-invocation.
+    /// </summary>
+    private async Task RunSaveAsync()
     {
         if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
 
         var title = SongTitle?.Trim() ?? string.Empty;
         var version = SongVersion?.Trim() ?? string.Empty;
 
-        // Safety net: re-run ALL field validators on Save, regardless of dirty state — an
-        // untouched required field (or one whose error was never surfaced) must still be caught.
-        // This also clears any stale Version error left over from the "Save as new version" flow.
+        // Safety net: re-run the Title and Version validators on every call, regardless of dirty
+        // state — an untouched required field must still be caught. The Version requirement for
+        // "Save as new version" is the Service's rule (REQ-SFT-22), not checked here.
         ApplyTitleValidation(title);
         ApplyVersionValidation(version);
 
         if (TitleHasError || VersionHasError)
             return;
 
-        if (!SelectedArtistId.HasValue || SelectedArtistId.Value == 0)
-        {
-            ArtistHasError = true;
-            ArtistErrorText = string.IsNullOrWhiteSpace(ArtistSearchText)
-                ? "Artist is required"
-                : "Search and select an artist from the list";
-            return;
-        }
-
         IsBusy = true;
         try
         {
-            if (IsEditMode)
-            {
-                await ExecuteEditSaveAsync(title, version);
-            }
-            else
-            {
-                await ExecuteNewSongSaveAsync(title, version);
-            }
+            ArtistHasError = false;   // a blank or unpicked Artist is the Service's decision (REQ-SFT-21)
+            ArtistErrorText = string.Empty;
+
+            var outcome = await _songService.SaveFromFormAsync(BuildSaveRequest(title, version));
+            await ApplyOutcomeAsync(outcome);
         }
         catch (Exception ex)
         {
@@ -642,96 +672,105 @@ public partial class SongFormViewModel : ViewModelBase
         }
     }
 
-    private async Task ExecuteEditSaveAsync(string title, string version)
+    /// <summary>
+    /// Builds the Service request from the form (REQ-SFT-18, REQ-SFT-25, REQ-SFT-28, REQ-SFT-46).
+    /// A picked artist travels as <c>ArtistId</c>; otherwise the trimmed typed name travels as
+    /// <c>ArtistText</c> and the Service resolves it.
+    /// </summary>
+    private SongFormSaveRequest BuildSaveRequest(string title, string version)
     {
-        // BUG-024: send the complete current form data — FeaturedArtists/Lyrics are hydrated by
-        // LoadSongForEditAsync, and the (possibly edited) Version is passed through explicitly.
-        // BUG-067 (REQ-ACREATE-16): the currently selected artist is part of "the complete current
-        // form data" — it must be sent too, or a changed artist is silently discarded. The
-        // artist-required guard above has already proven SelectedArtistId has a non-zero value.
-        var (success, message) = await _songService.UpdateSongAsync(
-            SongId!.Value, title, FeaturedArtists?.Trim(), Lyrics?.Trim(),
-            string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId,
-            string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider,
-            version,
-            SelectedArtistId);
-        if (success)
-        {
-            await _snackbarService.ShowSuccessAsync("Song updated");
-            await Shell.Current.GoToAsync("..");
-        }
-        else
-        {
-            TitleHasError = true;
-            TitleErrorText = message;
-        }
-    }
+        var artistId = SelectedArtistId is { } id && id != 0 ? id : (int?)null;
 
-    private async Task ExecuteNewSongSaveAsync(string title, string version)
-    {
-        // Build candidate for resolution engine
-        var candidate = new SongCandidate(
+        return new SongFormSaveRequest(
+            SongId,
             title,
             version,
             FeaturedArtists?.Trim(),
             Lyrics?.Trim(),
-            new ArtistCandidate(
-                SelectedArtistName ?? string.Empty,
-                string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider,
-                string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId),
+            artistId,
+            artistId.HasValue ? null : ArtistSearchText?.Trim(),
             string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider,
-            string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId);
+            string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId,
+            _pendingRawUrls.ToArray(),
+            _artistDecision,
+            _songDecision);
+    }
 
-        var resolution = await _songResolution.ResolveAsync(candidate);
-
-        if (resolution.Kind == ResolutionKind.NoMatch)
+    /// <summary>Maps the Service outcome to fields, sheets, the snackbar and navigation (REQ-SFT-51).</summary>
+    private async Task ApplyOutcomeAsync(SongFormSaveOutcome outcome)
+    {
+        switch (outcome.Kind)
         {
-            // Direct create — no duplicate concern
-            await CommitNewSongAsync(candidate, version);
-        }
-        else
-        {
-            // Store context and show resolution sheet
-            _pendingCandidate = candidate;
+            case SongFormSaveKind.Saved:
+                CloseSaveSheets();
+                await _snackbarService.ShowSuccessAsync(IsEditMode ? "Song updated" : "Song created");
+                await _navigationService.GoToAsync("..");
+                break;
 
-            var candidates = resolution.Kind == ResolutionKind.FuzzyCandidates
-                ? resolution.FuzzyCandidates
-                : resolution.ExactMatchSongId.HasValue
-                    ? [new SongMatch(resolution.ExactMatchSongId.Value, title, version, SelectedArtistName ?? string.Empty, 1.0)]
-                    : (IReadOnlyList<SongMatch>)[];
+            case SongFormSaveKind.Failed:
+                await ApplyFailureAsync(outcome);
+                break;
 
-            RunOnUiThread(() =>
-            {
-                ResolutionCandidates = candidates;
-                IsSaveAsNewVersionMode = false;
+            case SongFormSaveKind.ArtistChoiceNeeded:
+                IsResolutionSheetVisible = false;
+                ArtistMatchCandidates = outcome.ArtistCandidates;   // the Service's order, no re-sort or re-cap
+                ArtistMatchTypedName = outcome.TypedName;
+                IsArtistMatchSheetVisible = true;
+                break;
+
+            case SongFormSaveKind.SongChoiceNeeded:
+                IsArtistMatchSheetVisible = false;
+                IsExactDuplicate = outcome.IsExactSongMatch;
+                ResolutionSheetTitle = outcome.IsExactSongMatch ? ExactDuplicateSheetTitle : PossibleDuplicatesSheetTitle;
+                ResolutionCandidates = outcome.SongCandidates;
                 VersionEntryRequired = false;
                 IsResolutionSheetVisible = true;
-            });
+                break;
         }
     }
 
-    private async Task CommitNewSongAsync(SongCandidate candidate, string version)
+    private async Task ApplyFailureAsync(SongFormSaveOutcome outcome)
     {
-        var (success, message, _) = await _songService.CreateSongWithUrlsAsync(
-            SelectedArtistId!.Value,
-            candidate.Title,
-            version,
-            candidate.FeaturedArtists,
-            candidate.Lyrics,
-            candidate.ExternalId,
-            candidate.ExternalProvider,
-            _pendingRawUrls);
+        // A Version refusal during "Save as new version" keeps the duplicate sheet open and reveals
+        // the version entry, so the user corrects it there (the sheet is the origin of the choice).
+        var keepVersionSheet = outcome.FailedField == SaveField.Version
+                               && _songDecision == SongDecision.SaveAsNewVersion;
 
-        if (success)
+        IsArtistMatchSheetVisible = false;
+        IsResolutionSheetVisible = keepVersionSheet;
+        VersionEntryRequired = keepVersionSheet;
+
+        switch (outcome.FailedField)
         {
-            await _snackbarService.ShowSuccessAsync("Song created");
-            await Shell.Current.GoToAsync("..");
+            case SaveField.Title:
+                TitleHasError = true;
+                TitleErrorText = outcome.Message;
+                break;
+            case SaveField.Version:
+                VersionHasError = true;
+                VersionErrorText = outcome.Message;
+                break;
+            case SaveField.Artist:
+                ArtistHasError = true;
+                ArtistErrorText = outcome.Message;
+                break;
+            default:   // SaveField.None: a write refusal with no form field (REQ-SFT-26)
+                await _snackbarService.ShowErrorAsync(outcome.Message);
+                break;
         }
-        else
-        {
-            TitleHasError = true;
-            TitleErrorText = message;
-        }
+    }
+
+    private void CloseSaveSheets()
+    {
+        IsArtistMatchSheetVisible = false;
+        IsResolutionSheetVisible = false;
+        VersionEntryRequired = false;
+    }
+
+    private void ClearSaveDecisions()
+    {
+        _artistDecision = new ArtistDecision.None();
+        _songDecision = SongDecision.None;
     }
 
     // ── Resolution sheet actions ──────────────────────────────────────────
@@ -745,54 +784,57 @@ public partial class SongFormViewModel : ViewModelBase
         if (match is null) return;
 
         RunOnUiThread(() => IsResolutionSheetVisible = false);
-        _pendingCandidate = null;
 
         await _navigationService.GoToAsync($"../{Routes.SongForm}?songId={match.SongId}");
     }
 
-    /// <summary>User chose "Save as new version" — requires a non-empty Version (AC-1.2).</summary>
+    /// <summary>
+    /// "Save as new version" (REQ-SFT-22): holds the SaveAsNewVersion decision and re-invokes the
+    /// Service, which validates the Version (AC-1.2). The sheet closes on Saved; a Version refusal
+    /// keeps it open with the version entry revealed (see <see cref="ApplyFailureAsync"/>).
+    /// </summary>
     private async Task ConfirmSaveAsNewVersionAsync()
     {
-        var version = SongVersion?.Trim() ?? string.Empty;
+        _songDecision = SongDecision.SaveAsNewVersion;
+        await RunSaveAsync();
+    }
 
-        // AC-1.2: cannot create two rows with identical (ArtistId, Title, "")
-        // Version validation runs before candidate check so the UI error is always surfaced.
-        var (isValid, message) = _songService.ValidateVersionInput(version, isRequired: true);
-        if (!isValid)
-        {
-            VersionHasError = true;
-            VersionErrorText = message;
-            VersionEntryRequired = true;
-            return;
-        }
-
-        if (_pendingCandidate is null) return;
-
-        RunOnUiThread(() => IsResolutionSheetVisible = false);
-
-        IsBusy = true;
-        try
-        {
-            await CommitNewSongAsync(_pendingCandidate, version);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to save as new version");
-            await _snackbarService.ShowErrorAsync("Failed to save song. Please try again.");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+    /// <summary>"Save as new song" (REQ-SFT-23): holds the SaveAsNewSong decision; no Version is required.</summary>
+    private async Task ConfirmSaveAsNewSongAsync()
+    {
+        _songDecision = SongDecision.SaveAsNewSong;
+        IsResolutionSheetVisible = false;
+        await RunSaveAsync();
     }
 
     private void DismissResolutionSheet()
     {
         IsResolutionSheetVisible = false;
-        _pendingCandidate = null;
-        IsSaveAsNewVersionMode = false;
         VersionEntryRequired = false;
     }
+
+    // ── Artist-match sheet actions (REQ-SFT-19) ───────────────────────────
+
+    /// <summary>"Use '&lt;existing&gt;'": the song is saved with that artist; no resolution runs.</summary>
+    private async Task UseExistingArtistAsync(ArtistMatch? match)
+    {
+        if (match is null) return;
+
+        _artistDecision = new ArtistDecision.UseExisting(match.ArtistId);
+        IsArtistMatchSheetVisible = false;
+        await RunSaveAsync();
+    }
+
+    /// <summary>"Create '&lt;typed&gt;'": the save continues with a new artist; no resolution runs.</summary>
+    private async Task CreateTypedArtistAsync()
+    {
+        _artistDecision = new ArtistDecision.CreateTyped();
+        IsArtistMatchSheetVisible = false;
+        await RunSaveAsync();
+    }
+
+    /// <summary>Back or scrim: saves nothing; the form is unchanged.</summary>
+    private void DismissArtistMatchSheet() => IsArtistMatchSheetVisible = false;
 
     // ── Common helpers ────────────────────────────────────────────────────
 
