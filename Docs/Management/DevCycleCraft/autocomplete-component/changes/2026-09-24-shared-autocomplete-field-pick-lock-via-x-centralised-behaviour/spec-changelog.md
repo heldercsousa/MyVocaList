@@ -25,3 +25,4 @@ is made in place and listed here.
   - § 6 flows and state machine, § 7 INV-6/INV-7, § 10 test strategy.
 - **tasks.md:** T7 run 1 note, and the new T8 (fixes + opt-out).
 - **plan.md:** note on the "pick-lock always on" constraint.
+- 2026-11-05 (later): spec re-review PASS; should-fixes applied (REQ-ACF-24 ItemSelected vs ProgrammaticChange split, -29(c) read-only exception, -18 traceability row, T7 line 4 reworded, T8 owns its task-log section).

@@ -116,7 +116,11 @@ by Q3 and reinstated on 2026-11-05 (above).
 **Event-glue rules added after T7 run 1 (2026-11-05):**
 - **Programmatic text closes the menu (REQ-ACF-24, line 9).** The component handles the DX editor's
   `TextChanged`. When `Reason != UserInput` (consumer hydration, the text DX writes after a pick), it
-  sets `IsDropDownOpen = false` and `editor.SelectedItem = null`. This is the Song form Artist
+  sets `IsDropDownOpen = false`. Only when `Reason == ProgrammaticChange` does it also set
+  `editor.SelectedItem = null`. On `ItemSelected` it leaves `SelectedItem` alone, because
+  `OnSelectionChanged` routes the pick first and then resets it. That way the pick is never lost,
+  whatever order DX raises `TextChanged` and `SelectionChanged` in. The implementor logs the observed
+  order in the task-log. This is the Song form Artist
   pattern (`SongFormViewModel` `IsArtistDropDownOpen = false` on every programmatic assignment,
   `SongFormPage.xaml.cs` `SelectedItem = null`), and it does not depend on focus. Before coding, the
   implementor confirms the `TextChanged` event and the `AutoCompleteEditTextChangeReason` values
