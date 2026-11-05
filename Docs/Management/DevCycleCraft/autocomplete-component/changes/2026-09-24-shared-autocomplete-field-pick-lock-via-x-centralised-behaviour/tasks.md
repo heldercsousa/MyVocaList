@@ -223,9 +223,26 @@
     - REQ-ACF-24/25 (T7 line 9): programmatic text closes the menu and resets `SelectedItem`, and a stale
       in-flight request is dropped after a pick. This follows the Song form Artist pattern (`design.md`
       § 3.1, note 2026-11-05).
-  - **Tests (Level A):** `AutocompleteDXFieldLogicTests` adds `Mode(..., isPickLockEnabled: false)` → `Editable`,
-    `ReadOnly` still wins, and `LockAfterPick(Select, false)` → `false`. The existing tests stay unchanged
-    (the parameters default to `true`). Lines 1 and 9 are UI-only; their proof is the on-device T7 re-run.
+  - **Steps (TDD, one writer, branch `task/acf-t8-t7-fixes` @ `.worktrees/acf-t8`):**
+    1. Red: add the Level A tests to `AutocompleteDXFieldLogicTests`, tagged `// [AC] REQ-ACF-29`:
+       - `Mode(false, true, "Ana Silva", isPickLockEnabled: false)` → `Editable`;
+       - `Mode(true, true, "x", isPickLockEnabled: false)` → `ReadOnly`;
+       - `LockAfterPick(Select, false)` → `false`;
+       - `LockAfterPick(None, false)` → `false`.
+       Run them: they fail on compile or assert.
+    2. Green: `AutocompleteDXFieldLogic.Mode` / `LockAfterPick` gain `bool isPickLockEnabled = true` (`design.md` § 4).
+       The existing tests stay unchanged and green.
+    3. Component: the `IsPickLockEnabled` BindableProperty (§ 3.1; propertyChanged → `ApplyMode`). `CurrentMode`
+       and `OnSelectionChanged` pass it, and `OnSelectionChanged` writes `IsLocked` only when `LockAfterPick` is true.
+       Update the XML doc of `IsLocked`. Build.
+    4. Component: the `TextChanged` handler with `Reason != UserInput` → close the menu and `SelectedItem = null`
+       (REQ-ACF-24). First confirm the DX 25.2 member names with Context7; on a mismatch, stop and escalate. Build.
+    5. Component: the pick counter, and stale-result discard in `OnItemsRequested` (REQ-ACF-26). Build.
+    6. Component: the `FocusEditor()` deferral (REQ-ACF-18). Build.
+    7. `PersonFormPage.xaml`: `IsPickLockEnabled="False"`. Build, then run the full `dotnet test`.
+  - **Tests (Level A):** step 1. Steps 3–7 are UI glue (Level C: build + code review + the T7 re-run).
+    Record that no-test decision in the task-log. The existing tests stay unchanged (the parameters
+    default to `true`).
   - **Files owned:** `AutocompleteDXFieldLogic.cs`, `AutocompleteDXField.xaml(.cs)`,
     `AutocompleteDXFieldLogicTests.cs`, `PersonFormPage.xaml`
   - **Governance:** one consumer (PersonFormPage), not yet governed (census 2026-11-05, including the

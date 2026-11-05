@@ -23,6 +23,9 @@ Every task implicitly includes these. Values are copied from the spec or the pro
 - Minimum query length: `SearchConstants.MinimumLocalQueryLength` (= 2), measured on **trimmed** text. Never a literal.
 - Debounce: `SearchConstants.AutocompleteDebounceMilliseconds` (= 300, new in T2). Never a literal.
 - Pick-lock is always on. **No** `IsPickLockEnabled`, `CreateNewCommand` or `CreateNewNoun` property, and no create-new row (rulings Q1, Q3).
+  > **Spec updated 2026-11-05:** Q3 is reversed. `IsPickLockEnabled` (default `true`) is added by
+  > `tasks.md` T8 (REQ-ACF-29), and the Person form sets it to `false`. The rest of this plan is
+  > historical for T1–T7.
 - X colours: `{StaticResource OnSurfaceVariant}`, or `{StaticResource Error}` while `HasError` (REQ-ACF-08). Never the disabled style.
 - `SubmitIconVisibility="Never"` (REQ-ACF-10).
 - Component location: `MyVocaList/UI/Components/TextFields/`. Name: `AutocompleteDXField` (MD3 exception, `design.md` § 2).
