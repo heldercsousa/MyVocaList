@@ -338,6 +338,14 @@ Context7 / devexpress MCP not needed (no new DX API used beyond the T4 component
 
 - 2026-11-05: run 1 recorded. Spec amended (REQ-ACF-29, design § 3.1/§ 4 notes, T8 added). Next: T8
   on `task/acf-t8-t7-fixes`, then the T7 re-run with a T7-prep build.
+- 2026-11-05 (later):
+  - T8 `2b4bc57b`: branch build 0 errors and 813/813 tests; verifier PASS. Merged into develop as `97a329e1`.
+  - **Post-merge build/test NOT yet verified.** The run was killed by Claude Code's low-memory
+    reaper, not a failure. Do not tick T8 or remove `.worktrees/acf-t8` until develop is green.
+  - T7-prep: worktree `.worktrees/acf-t7-prep` (`spike/acf-t7-supporting-text`). The edit
+    `SupportingText="Test"` is applied but uncommitted, because its build was also reaped.
+  - Next: run the two builds one at a time (develop post-merge, then T7-prep), then the device re-run.
+  - Manifest: `tasks.md` § T7/T8, this file § T7/T8, `requirements.md` REQ-ACF-18/24/26/29.
 
 ### Run 1 — 2026-11-05 (Helder, Android, built from develop; the T7-prep build was never created)
 
