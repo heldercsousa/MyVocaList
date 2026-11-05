@@ -289,7 +289,7 @@
   > **Spec updated 2026-09-26:** (D2) runs before G2: it consumes no component surface. (D13) also owns `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` (adds `services.AddSingleton(Mock.Of<INavigationService>());` to the SongFormViewModel graph test; Level C).
   > **Spec updated 2026-11-04:** also owned `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (merge-sheet sync/handlers removed; the page did not compile otherwise). VM + XAML + code-behind were built together because the merge sheet's compiled bindings broke the one-file-then-build order (Verifier: acceptable). Merged `f687e72d` 2026-11-04; Verifier PASS; develop 668/668.
 
-- [ ] **5.2 VM: title search, picks, online-search note** [SEQUENTIAL — after 4.3, 5.1, G4 Q16]
+- [x] **5.2 VM: title search, picks, online-search note** [SEQUENTIAL — after 4.3, 5.1, G4 Q16]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `TitleSupportingText` maps `Status` to the two approved notes (REQ-SFT-06); a remote pick sets Version from Deezer (REQ-SFT-12); remote option supporting text "artist · version · Deezer" (REQ-SFT-04); +4 tests.
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
   - **Risk:** High. **Tests (A, Red first):** REQ-SFT-02…14 (option supporting texts incl. "In your library", local options before remote or the Q16 fallback, `TitleSupportingText` set/cleared, local pick → navigate, discard sheet, remote pick fills + locks, local artist match, X clears pending identity).
