@@ -255,4 +255,40 @@ public class AutocompleteDXFieldLogicTests
 
         Assert.False(result);
     }
+
+    // [AC] REQ-ACF-29: with pick-lock opted out, a locked flag with text is still Editable.
+    [Fact]
+    public void Mode_PickLockDisabled_LockedWithText_ReturnsEditable()
+    {
+        var mode = AutocompleteDXFieldLogic.Mode(isReadOnly: false, isLocked: true, "Ana Silva", isPickLockEnabled: false);
+
+        Assert.Equal(FieldMode.Editable, mode);
+    }
+
+    // [AC] REQ-ACF-29: opting out of pick-lock never overrides a page-set read-only state.
+    [Fact]
+    public void Mode_PickLockDisabled_ReadOnly_ReturnsReadOnly()
+    {
+        var mode = AutocompleteDXFieldLogic.Mode(isReadOnly: true, isLocked: true, "x", isPickLockEnabled: false);
+
+        Assert.Equal(FieldMode.ReadOnly, mode);
+    }
+
+    // [AC] REQ-ACF-29: with pick-lock opted out, a pick does not lock the field.
+    [Fact]
+    public void LockAfterPick_PickLockDisabled_Select_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.LockAfterPick(PickRoute.Select, isPickLockEnabled: false);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-29: with pick-lock opted out and no pick, no lock either.
+    [Fact]
+    public void LockAfterPick_PickLockDisabled_None_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.LockAfterPick(PickRoute.None, isPickLockEnabled: false);
+
+        Assert.False(result);
+    }
 }
