@@ -57,13 +57,15 @@ For commit discipline, task-log format, spec quality gates, and the spec decisio
 
 ### Subagent model default `[added 2026-11-03]`
 
-Every dispatch passes a `model` matched to difficulty. Agent frontmatter already defaults `implementor`, `verifier`, `spec-reviewer` and `plan-reviewer` to `sonnet`.
+Implementor dispatches pass NO `model` override: the `implementor` frontmatter is the only source of its model
+(an override beats the frontmatter). Raising an implementor above its frontmatter model needs Helder's OK, per dispatch.
+Other agents: pass a `model` matched to difficulty.
 
 | Work | Model |
 |------|-------|
 | Lookup / locate (`Explore`) | `haiku` |
 | Code tracing, routine implementation, verification, spec/plan review | `sonnet` (frontmatter default) |
-| Design, spec authoring, architecture trade-offs, a review the brief marks as judgment-heavy | `opus`, passed explicitly |
+| Design, spec authoring, architecture trade-offs, a review the brief marks as judgment-heavy (never an implementor) | `opus`, passed explicitly |
 
 ## Post-Wave Verification
 
@@ -558,7 +560,7 @@ Escalate to **Architectural** if ANY of these are true:
 
 ## Model Selection for Subagent Tasks
 
-Not all subagent tasks require Sonnet. Assigning `claude-haiku-4-5` to eligible tasks cuts token cost roughly 5× without quality loss — but only when the task genuinely fits Haiku's capability profile.
+Not all subagent tasks require Sonnet. Assigning `haiku` to eligible tasks cuts token cost roughly 5× without quality loss — but only when the task genuinely fits Haiku's capability profile.
 
 **Decision rule:** Default to Sonnet. Downgrade to Haiku only when ALL three conditions hold:
 1. The task type is in the Haiku-eligible list below
@@ -590,7 +592,7 @@ Add `Model: haiku` to the role scope block for eligible tasks:
 ```
 Role: Implementor
 Scope: Register new spec files in MyVocaList.sln
-Model: claude-haiku-4-5-20251001
+Model: haiku
 Files owned: MyVocaList.sln
 Files off-limits: all others
 ```

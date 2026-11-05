@@ -64,6 +64,8 @@ public class AppServicesRegistrationTests
             services.AddSingleton(Mock.Of<ISecureStorageWrapper>());
             services.AddSingleton<IMessenger>(new WeakReferenceMessenger());
             services.AddSingleton(Mock.Of<INavigationService>());
+            // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
+            services.AddSingleton(Mock.Of<INetworkStatus>());
             services.AddTransient<SongFormViewModel>();
         });
         using var scope = provider.CreateScope();
@@ -71,6 +73,22 @@ public class AppServicesRegistrationTests
         var viewModel = scope.ServiceProvider.GetRequiredService<SongFormViewModel>();
 
         Assert.NotNull(viewModel);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-02: the title search service resolves from AddAppServices
+    public void AddAppServices_ResolvingSongSuggestionService_Succeeds()
+    {
+        using var provider = BuildProvider(services =>
+        {
+            // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
+            services.AddSingleton(Mock.Of<INetworkStatus>());
+        });
+        using var scope = provider.CreateScope();
+
+        var service = scope.ServiceProvider.GetRequiredService<ISongSuggestionService>();
+
+        Assert.NotNull(service);
     }
 
     [Fact]
