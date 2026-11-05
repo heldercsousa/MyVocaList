@@ -161,6 +161,8 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
 
 > **Spec updated 2026-11-04 (4.2 merge `b100ceb7`, Verifier CONDITIONAL PASS):** steps 3–4 are implemented per item, not as one batch: one `FindByTitleAndArtistNamesAsync([triple])` per unmatched Deezer row (all inside the single dedup `ExecuteReadAsync`), then one `GetByNamesCollatedAsync([name])` per distinct remaining artist in a **second** read scope after take-5. Reason: mapping batch hits back to rows would need C#-side case/accent matching (HARD RULE); positional per-item calls keep the DB the only judge. Accepted (≤ ~25 + 5 indexed reads, single device). The defensive "no Deezer provider registered" branch returns `Unavailable` + Warning — accepted as Level-C plumbing (DI always registers Deezer; BUG-082 test). A batch repository method returning the input index is a possible later optimisation.
 
+> **Spec updated 2026-11-04 (6.1 Red `66a1e8fb`):** artist side mirrors the song side — `ArtistSuggestionService(IArtistRepository, IUnitOfWork, IEnumerable<IMusicMetadataProvider>, ISimilarityScorer, INetworkStatus, ILogger<ArtistSuggestionService>)`; `SearchNameLocalAsync(query, ct)` (FTS `SearchNameCandidatesAsync`, `RankScore(q, name)`, take 5) and `SearchNameRemoteAsync(query, ct)` → `ArtistRemoteSearchResult(Remote, Status)`; Deezer-only, offline/unavailable as § 3.6; the REQ-SFT-48 collated drop is one `GetByNamesCollatedAsync([name])` per Deezer row inside one read scope (same HARD-RULE reason as songs). `GetLocalAsync`/`GetRemoteAsync`/`FilterSimilar` and the MusicBrainz branch are deleted. `IsExactMatch` on local rows is not defined by the spec (left false; 6.2 decides whether the VM needs it).
+
 ### 3.4 Providers and the Field dependency
 
 - `IMusicMetadataProvider` contract change: `SearchSongsAsync`/`SearchArtistsAsync` **throw** on
@@ -330,6 +332,8 @@ registration (`:156-158`), `CreateArtistInlineCommand`, `ExecuteNewSongSaveAsync
 `DismissMergeSheetCommand`, `_selectedMergeTargetId`, `_pendingCandidate`/`_pendingResolution`,
 `MergeFieldRow`. The stale docstring at `:433` is rewritten.
 
+> **Spec updated 2026-11-04 (5.2 Red `7b8e27a2`) — choices fixed by the Tester:** `SongFormViewModel` takes `ISongSuggestionService` as its **last** constructor parameter (after `INavigationService`); option `Data` is the `SongSuggestionDto` (dispatch on `IsRemote` / `LocalId`); supporting text "artist · version · In your library" (local/promoted) or "artist · version · Deezer" (remote), version part omitted when empty; the note is set only for queries ≥ `MinimumRemoteQueryLength`, through one `RunOnUiThread`, after `ct.ThrowIfCancellationRequested()`; "other input" for the discard sheet (REQ-SFT-11) = non-empty Artist text, Version, Featured, Lyrics, or any YouTube URL; Keep editing restores the **last query** passed to the option source (the Field may already show the headline), unlocks Title, changes nothing else; X on Title resets Version only if it still equals the value the last pick wrote (Q21).
+
 ### 4.1 Artist form (`ArtistFormViewModel`, REQ-SFT-47…50)
 
 `IArtistSuggestionService` is reshaped like the song service: `SearchNameLocalAsync(query, ct)` and
@@ -346,6 +350,8 @@ so § 6.4 does not apply).
 failure handling as § 3.3. Dedup: a Deezer artist whose name is a collated match for a local artist is
 dropped (the local row stays). The similarity dedup tier (c) in `ArtistSuggestionService` and
 `FilterSimilar` lose their callers and are deleted: C# similarity must not deduplicate (§ 6.4 scope).
+
+> **Spec updated 2026-11-05 (6.1 Green):** the Deezer-row dedup runs as one `GetByNamesCollatedAsync([name])` per distinct remaining name inside a single read scope after the HTTP call (same positional-lookup decision as § 3.3 step 4, 4.2 merge note); a missing Deezer provider returns `Unavailable` + Warning (accepted Level-C plumbing, as in § 3.3).
 
 | Member | Purpose |
 |--------|---------|
