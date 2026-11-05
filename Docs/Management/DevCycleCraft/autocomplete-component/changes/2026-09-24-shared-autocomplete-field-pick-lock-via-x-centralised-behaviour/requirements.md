@@ -73,7 +73,7 @@ Every agent uses these terms exactly. No synonyms.
   `IsLocked`;
   (b) WHEN the consumer sets `IsLocked = true`, the system SHALL keep the field editable and SHALL NOT
   write `IsLocked` back (the consumer's value is left as set and has no effect);
-  (c) the text SHALL stay editable in every situation, X SHALL behave as on an unlocked field
+  (c) the text SHALL stay editable in every situation except while `IsReadOnly` is `true`, X SHALL behave as on an unlocked field
   (REQ-ACF-09), and blur forwarding SHALL be unchanged (REQ-ACF-17);
   (d) WHEN `IsPickLockEnabled` changes at runtime, the system SHALL re-apply the mode at once: `false`
   → editable whatever `IsLocked` says; `true` → the mode given by `IsLocked` and the text (REQ-ACF-02, -05a).
@@ -241,7 +241,7 @@ Every agent uses these terms exactly. No synonyms.
 | **REQ-ACF-21** (REQ-DXAC-02 gate) | Person search below 2 characters returns nothing. | `PersonFormViewModelTests.SearchPersonsCommand_ShortTerm_SetsEmptySuggestions` (unchanged) |
 | **REQ-ACF-22** (BUG-056) | Options come from the search's return value. | T5 VM test (REQ-ACF-16) + code review of the component's `ItemsRequested` glue |
 | **REQ-ACF-23** (BUG-061) | No option stays highlighted after a pick. | T7 on-device |
-| **REQ-ACF-24** (BUG-065/066) | Programmatic text changes never trigger a search and always close the menu. The component SHALL, on every DX `TextChanged` whose `Reason` is not `UserInput` (consumer hydration, and the text DX writes after a pick), set `IsDropDownOpen = false` and DX `SelectedItem = null`. This is the Song form Artist pattern, and it holds whether or not the editor is focused (T7 run 1, line 9). | T1 (programmatic lock button) + T7 on-device + code review. DX fires no `ItemsRequested` for programmatic text (BUG-065/066 IL evidence), so there is no component logic to unit-test. |
+| **REQ-ACF-24** (BUG-065/066) | Programmatic text changes never trigger a search and always close the menu. The component SHALL, on every DX `TextChanged` whose `Reason` is not `UserInput` (consumer hydration, and the text DX writes after a pick), set `IsDropDownOpen = false`. It SHALL also set DX `SelectedItem = null` when `Reason` is `ProgrammaticChange`, but not when it is `ItemSelected`: the pick path resets `SelectedItem` itself after routing (REQ-ACF-11b/e), so a pick is never lost whichever DX event fires first. This is the Song form Artist pattern, and it holds whether or not the editor is focused (T7 run 1, line 9). | T1 (programmatic lock button) + T7 on-device + code review. DX fires no `ItemsRequested` for programmatic text (BUG-065/066 IL evidence), so there is no component logic to unit-test. |
 | **REQ-ACF-25** (BUG-069, must stay fixed) | No menu reopens after a pick, and none opens on an edit-mode load. BUG-069 stopped reproducing after the BUG-081 merge (`2d70ac73`), confirmed by Helder on device 2026-09-24 (`Docs/Management/LEDGER.md`, INLINE-AC row, "Update 2026-09-24"; likely a side effect of dropping `IsReadOnly`). Any mechanism that brings `IsReadOnly` back must re-prove it. | T1 criterion B5 + T7 |
 | **REQ-ACF-26** (REQ-DXAC-07) | Latest query wins: a stale request never replaces newer options (DX cancellation token honoured after the await). A request still in flight when a pick is routed SHALL NOT reopen the menu: its result is discarded (T7 run 1, line 9). | Code review + T7 |
 | **REQ-ACF-27** (REQ-DXAC-06/12) | No DX client-side filtering. The Outlined form-field style (`MaterialStyles.xaml:74`) applies. | Code review + T7 |
@@ -316,7 +316,7 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
   **Supersedes** shipped inline-create REQ-ACREATE-02/03/10 (create-row behaviour); the
   create-on-save rule belongs to the song-form title-first item. REQ-ACF-15, REQ-ACF-16 and the
   create-row parts of REQ-ACF-21/22 must be rewritten or removed accordingly.
-- **Q3 RESOLVED: pick-lock ON everywhere, with no per-page switch.** Change it when a real need
+- **Q3 RESOLVED (reversed 2026-11-05, see below): pick-lock ON everywhere, with no per-page switch.** Change it when a real need
   appears. The Person form gets it too. Drop the opt-out property from the design (YAGNI).
 - **Q4 RESOLVED: location is `MyVocaList/UI/Components/`**, following its existing subfolder
   convention (`AppBars/`, `Lists/`, `Sheets/`, `States/`, `Toolbars/`). The frozen
@@ -370,7 +370,8 @@ process gates for this pipeline. On-device gates (T1 spike, T7 E2E) still requir
 | REQ-ACF-07/08/10 | component XAML | T7 on-device (DX rendering) |
 | REQ-ACF-11/12 | component + `PersonFormPage.xaml(.cs)` | code review checklist (T6) |
 | REQ-ACF-13/14 | `SearchConstants` + component | constants test (T2) + component logic test (T3) |
-| REQ-ACF-15…18 | `PersonFormViewModel` + `PersonFormPage` | VM tests (T5) + T7 |
+| REQ-ACF-15…17 | `PersonFormViewModel` + `PersonFormPage` | VM tests (T5) + T7 |
+| REQ-ACF-18 | `PersonFormPage.OnAppearing` + component `FocusEditor()` (deferred focus, T8) | T7 on-device |
 | REQ-ACF-19, -24 | component code-behind | code review + T1/T7 on-device |
 | REQ-ACF-22 | `PersonFormViewModel.NameOptionSource` + component glue | T5 VM test + code review |
 | REQ-ACF-20, -21, -28 | `PersonFormViewModel` (unchanged members) | existing VM tests, unchanged |
