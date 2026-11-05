@@ -2003,4 +2003,5 @@ File: 38 -> 39 `[Fact]` tests (one added, one renamed and retargeted, none remov
 - this task-log section
 
 #### Commit
-- Green commit: see the git log entry `Green follow-up` on `task/sft-3.10-save-from-form` (SHA recorded in the report to the orchestrator).
+- Green commit: `8705f0cf` (feat, code + spec + this entry). Then `develop` merged into the branch as `ab6a885c` (merge touched only `Docs/Management/LEDGER.md`; no code change after the verified build). Pushed to `origin/task/sft-3.10-save-from-form`.
+- Not merged to develop; `tasks.md` not ticked (orchestrator).
