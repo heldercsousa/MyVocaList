@@ -336,7 +336,26 @@ Context7 / devexpress MCP not needed (no new DX API used beyond the T4 component
 
 ### Checkpoint
 
-- (placeholder)
+- 2026-11-05: run 1 recorded. Spec amended (REQ-ACF-29, design § 3.1/§ 4 notes, T8 added). Next: T8
+  on `task/acf-t8-t7-fixes`, then the T7 re-run with a T7-prep build.
+
+### Run 1 — 2026-11-05 (Helder, Android, built from develop; the T7-prep build was never created)
+
+| Line | Result | Helder's note | Diagnosis (static, Explore subagent) |
+|------|--------|---------------|--------------------------------------|
+| 1 | **FAIL** | Full Name not focused on load | HYP: `FocusEditor()` (component) calls `editor.Focus()` from `OnAppearing` before the wrapped DX editor's handler is ready. The old unwrapped `nameField.Focus()` worked. |
+| 2 | PASS | | |
+| 3 | PASS | | |
+| 4 | info | "when page just loaded, entry is enabled for editing" | Consistent with REQ-ACF-03. Moot under REQ-ACF-29 (Person never locks). |
+| 5 | PASS | | |
+| 6 | PASS | | |
+| 7 | PASS | String without a space shows "Enter first and last name."; text kept | |
+| 8 | PASS (accepted) | No counter; errors stay until fixed | By design: the counter shows above 180 chars (`PersonService.cs:22`); reward-early re-validation (`dialogs-validation.md` § Validation timing) is app-wide and unchanged since cf096dc8^. Helder accepted it on 2026-11-05. |
+| 9 | **FAIL** | Picked item reappears in the menu after a pick, and on an edit-mode load | The component closes the menu on a pick but not on programmatic `Text` (hydration, post-pick DX text write). Possible in-flight request race. The Song form Artist pattern (close the menu on a programmatic set, reset `SelectedItem`) is the reference. |
+| 10 | **FAIL** | No placeholder in insert mode | `PlaceholderText` is forwarded. DX shows the placeholder only when focused with `LabelText` set, as on Birthday/Email, so this is a consequence of line 1. Supporting text not tested (no T7-prep build). |
+
+Severity: Minor for all (each has a workaround). Fixes in T8, no bug folders. Helder ruling of
+2026-11-05: Person Full Name never locks (REQ-ACF-29).
 
 
 ### T1c — 2026-11-03 (orchestrator)

@@ -109,6 +109,23 @@ and is also used internally after X (REQ-ACF-06).
 
 Removed by the rulings: `IsPickLockEnabled` (Q3), `CreateNewCommand`, `CreateNewNoun` (Q1).
 
+> **Spec updated 2026-11-05 (T7 outcome, Helder rulings 2026-11-05):**
+> - **`IsPickLockEnabled` is reinstated** (Q3 reversed, REQ-ACF-29): `bool`, OneWay, default `true`.
+>   It is passed to `Mode` and `LockAfterPick` (§ 4), and its propertyChanged re-runs `ApplyMode`.
+>   While it is `false`, `OnSelectionChanged` still runs `SelectCommand`, resets `SelectedItem` and
+>   closes the menu, but never writes `IsLocked`. `PersonFormPage.xaml` sets `IsPickLockEnabled="False"`.
+> - **Programmatic `Text` closes the menu (T7 line 9, REQ-ACF-24/25).** The Song form Artist pattern
+>   applies: every text change that is not user typing (consumer hydration, the text DX writes after a
+>   pick) closes the menu (`IsDropDownOpen = false`) and resets `SelectedItem = null`. Detect it in the
+>   `Text` propertyChanged while the inner editor is not focused, or via DX `TextChanged`
+>   `Reason != UserInput`, whichever the implementor confirms against DX 25.2. A request already in
+>   flight when the pick happens must not reopen the menu: `OnItemsRequested`'s async result is
+>   dropped when a pick has been routed since that request began.
+> - **`FocusEditor()` must succeed when called from `OnAppearing` (T7 line 1, REQ-ACF-18).** At that
+>   point the inner DX editor's handler may not be ready, so `editor.Focus()` returns `false`. When
+>   it returns `false` or `editor.Handler is null`, defer the focus until the editor is ready
+>   (`Dispatcher.Dispatch`, or once on `HandlerChanged`/`Loaded`). The page call stays unchanged.
+
 Constants are not properties. The component reads `SearchConstants.MinimumLocalQueryLength` and
 `SearchConstants.AutocompleteDebounceMilliseconds` via `x:Static`.
 
@@ -162,6 +179,16 @@ option source, the artist/title lock hydration, and deleting the Song glue
 | `bool LockAfterPick(PickRoute route)` | `route == Select`. There is no opt-out (Q3). | ACF-01 |
 | `bool ShouldForwardBlur(object? selectedItem, FieldMode mode)` | `selectedItem is null && mode == Editable`. | ACF-11c, -12b, -17 |
 | `string? TextToRestore(AutoCompleteEditTextChangeReason reason, FieldMode mode, string lockedText)` | *Only if mechanism C is accepted (§ 5).* `lockedText` when `reason == UserInput && mode == Locked`; else `null`. (Read-only always uses DX `IsReadOnly`, whichever mechanism is chosen.) | ACF-01 |
+
+> **Spec updated 2026-11-05 (REQ-ACF-29):** two signatures gain a trailing parameter whose default
+> keeps every existing call and test unchanged:
+> - `FieldMode Mode(bool isReadOnly, bool isLocked, string? text, bool isPickLockEnabled = true)`:
+>   `ReadOnly` if `isReadOnly`; else `Locked` if `isPickLockEnabled && isLocked && !IsNullOrWhiteSpace(text)`;
+>   else `Editable`.
+> - `bool LockAfterPick(PickRoute route, bool isPickLockEnabled = true)`: `route == Select && isPickLockEnabled`.
+>
+> New Level A tests cover the `false` case: `Mode` returns `Editable` for a locked field with text, and
+> `ReadOnly` still wins; `LockAfterPick(Select, false)` returns `false`.
 
 The code-behind maps DX events to these and calls `ICommand.CanExecute`/`Execute`. The options
 passed to DX are exactly the `IMenuOptionSource.SearchAsync` result, after

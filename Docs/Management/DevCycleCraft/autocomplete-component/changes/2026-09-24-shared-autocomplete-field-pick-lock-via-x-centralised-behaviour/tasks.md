@@ -205,6 +205,33 @@
   - **Demo:** Helder completes lines 1–10 on device without a failure.
   - **Review lane:** Architectural
 
+> **Spec updated 2026-11-05: T7 run 1 result.** PASS on lines 2, 3, 5, 6, 7. Line 4 (informational)
+> is moot under REQ-ACF-29, and line 8 is accepted as designed. **FAIL on lines 1, 9 and 10** (10 is a
+> consequence of 1, and the T7-prep supporting-text build was never deployed). Details:
+> `task-log.md` § T7. All failures are Minor. T8 fixes them, then T7 is re-run.
+> **Re-run checklist changes:**
+> - Line 4 becomes "after a pick, the name is never read-only, even before navigation" (REQ-ACF-29).
+> - Line 8 is confirmed against the app-wide validation standard.
+> - Line 10 also checks that the "First and last name" placeholder shows on load (create mode) and
+>   that the T7-prep "Test" supporting text renders.
+
+- [ ] **T8: T7 run 1 fixes + pick-lock opt-out** `[SEQUENTIAL, after T7 run 1]` (added 2026-11-05)
+  - **Behaviour:**
+    - REQ-ACF-29: `IsPickLockEnabled` (default `true`) in the component and the logic class, and the
+      Person form sets it to `false`.
+    - REQ-ACF-18 (T7 line 1, which also fixes line 10): `FocusEditor()` defers until the inner editor is ready.
+    - REQ-ACF-24/25 (T7 line 9): programmatic text closes the menu and resets `SelectedItem`, and a stale
+      in-flight request is dropped after a pick. This follows the Song form Artist pattern (`design.md`
+      § 3.1, note 2026-11-05).
+  - **Tests (Level A):** `AutocompleteDXFieldLogicTests` adds `Mode(..., isPickLockEnabled: false)` → `Editable`,
+    `ReadOnly` still wins, and `LockAfterPick(Select, false)` → `false`. The existing tests stay unchanged
+    (the parameters default to `true`). Lines 1 and 9 are UI-only; their proof is the on-device T7 re-run.
+  - **Files owned:** `AutocompleteDXFieldLogic.cs`, `AutocompleteDXField.xaml(.cs)`,
+    `AutocompleteDXFieldLogicTests.cs`, `PersonFormPage.xaml`
+  - **Governance:** one consumer (PersonFormPage), not yet governed (census 2026-11-05, including the
+    sft-* worktrees). If SFT binds SongFormPage before T8 merges, the four gates apply.
+  - **Demo:** T7 re-run, lines 1–10 PASS on device. **Review lane:** Elevated
+
 ## Handed over to the song-form title-first item (not tasks here)
 
 `BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/`
