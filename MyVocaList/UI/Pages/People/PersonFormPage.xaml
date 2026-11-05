@@ -25,6 +25,7 @@
                                             ErrorText="{Binding NameErrorText}"
                                             OptionSource="{Binding NameOptionSource}"
                                             SelectCommand="{Binding SuggestionSelectedCommand}"
+                                            IsPickLockEnabled="False"
                                             BlurWithoutPickCommand="{Binding ValidateNameCommand}" />
 
             <!-- Character counter -->
