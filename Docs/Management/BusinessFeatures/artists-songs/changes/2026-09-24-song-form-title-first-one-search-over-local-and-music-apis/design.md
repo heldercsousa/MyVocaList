@@ -351,6 +351,8 @@ failure handling as § 3.3. Dedup: a Deezer artist whose name is a collated matc
 dropped (the local row stays). The similarity dedup tier (c) in `ArtistSuggestionService` and
 `FilterSimilar` lose their callers and are deleted: C# similarity must not deduplicate (§ 6.4 scope).
 
+> **Spec updated 2026-11-05 (6.1 Green):** the Deezer-row dedup runs as one `GetByNamesCollatedAsync([name])` per distinct remaining name inside a single read scope after the HTTP call (same positional-lookup decision as § 3.3 step 4, 4.2 merge note); a missing Deezer provider returns `Unavailable` + Warning (accepted Level-C plumbing, as in § 3.3).
+
 | Member | Purpose |
 |--------|---------|
 | `NameOptionSource` (`IMenuOptionSource`) | Local options (SupportingText "In your library"), then Deezer options (SupportingText "Deezer") |
