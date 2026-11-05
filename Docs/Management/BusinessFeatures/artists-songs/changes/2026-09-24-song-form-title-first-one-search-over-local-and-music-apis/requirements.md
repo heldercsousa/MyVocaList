@@ -240,6 +240,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-20: Created-artist validation.** The created artist obeys `IArtistService` rules
   (non-empty after trim, ≤ 60 characters, no collated duplicate). A violation shows the service
   message on Artist and saves nothing.
+  > **Spec updated 2026-11-05:** an artist refused while it is created inside the song write returns `Failed(Artist, message)` and saves no song (ruling D2); a song-level refusal after the artist was created keeps field None.
 - **REQ-SFT-52: Never two artists with the same name** `[HARD RULE — Helder, sixth round]`. The system
   SHALL NOT create or rename an artist so that two artists share a name under the DB collation
   (`NOCASE_NOACCENT`). Enforced in the Services, on every artist create and rename path
@@ -282,6 +283,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-26: External identity is unique.** IF a save would give a second song the same external
   identity, THEN it SHALL fail with "This music-database song is already in your library" and save
   nothing. The database enforces the same rule (REQ-SFT-39).
+  > **Spec updated 2026-11-05:** the refusal applies only on the no-decision path. With an explicit `SaveAsNewVersion` or `SaveAsNewSong` the identity is nulled before the write and the save succeeds (ruling D1; see REQ-SFT-39).
 
 ### G. Edit mode
 
@@ -333,6 +335,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   same non-null `(ExternalProvider, ExternalId)`. Existing duplicates are resolved by the migration:
   the song with the lowest `Id` keeps the identity; the others keep their data and lose only the
   identity (set to null). No song row is deleted.
+  > **Spec updated 2026-11-05:** a row written from an explicit `SaveAsNewVersion` / `SaveAsNewSong` decision carries a NULL external identity, even for a new artist and even when the identity is held by another song; the save succeeds (ruling D1).
 - **REQ-SFT-40: Artist external columns frozen.** `Artist.ExternalId/ExternalProvider` stay in the
   schema. No flow in this item reads them. Nothing writes them unless Q10 (REQ-SFT-49) decides so.
 
@@ -367,6 +370,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-46: One write path.** Every song create and update from the Song form, including the
   artist it creates, SHALL go through `ISongService.CreateSongWithUrlsAsync` or
   `ISongService.UpdateSongAsync`, so CATALOG-PROP's propagation cannot be bypassed.
+  > **Spec updated 2026-11-05:** the public Create/Update methods are thin wrappers over private cores that hold their bodies; `SaveFromFormAsync` calls those cores, so they remain the only write bodies. The cores also return the failing form field (ruling D2). No public signature changed.
 
 ### L. Artist form name search (confirmed by Helder, fifth round)
 
