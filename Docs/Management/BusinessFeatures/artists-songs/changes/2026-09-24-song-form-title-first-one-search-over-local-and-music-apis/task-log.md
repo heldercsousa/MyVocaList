@@ -1704,3 +1704,304 @@ Files written and re-read: `SongFormViewModel.cs` (constructor, `TitleOptionSour
 - `SearchArtistOptionsAsync(string query, CancellationToken ct)` accepts `ct` but does not forward it (`SearchArtistsCoreAsync` has no cancellation parameter). Behaviour-neutral for 5.2 tests; flagged, not changed (out of scope to alter the artist search signature).
 - Spec gap "VerifyNoOtherCalls vs. character counter" is resolved by `bb5cd04e` (Option A). This Builder did not independently verify the approval; the commit message states it.
 - No spec write-back: all implementation choices are the Tester's fixed choices 1–10 in the Red section.
+
+## 3.10
+
+### Red (Tester, Sonnet) - 2026-11-04
+Status: Red committed (compile-error Red). No production stub. Not pushed, tasks.md not ticked.
+
+Compiler output (`dotnet build MyVocaList.Tests -m:1`, first errors; the compiler stops at declaration-level errors, the remaining missing members surface after the Builder adds the types):
+- `CS0246` x3 (types not found): `SongFormSaveRequest` (SongServiceSaveFromFormTests.cs(79,20)), `ArtistDecision` (87,9), `SongDecision` (88,9)
+- `CS0103` x1: `SongDecision` does not exist in the current context (88,37)
+
+### Tests (24) - all in `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs`
+| Test | AC |
+|---|---|
+| EmptyTitle_FailsOnTitle | REQ-SFT-15 |
+| EmptyArtist_FailsArtistRequired | REQ-SFT-21 |
+| NewArtistNameInvalid_FailsOnArtist | REQ-SFT-20 |
+| VersionOver60_FailsOnVersionField | REQ-SFT-12 |
+| TypedArtistExactCollatedMatch_ReusesExistingNeverCreates | REQ-SFT-52 |
+| DeezerFilledArtistExactCollatedMatch_ReusesExisting | REQ-SFT-18 |
+| TypedArtistPaddedCaseAccentVariant_ReusesExistingArtist | REQ-SFT-52 |
+| TypedArtistNearDuplicate_ReturnsArtistChoiceNeededTopThreeBestFirst | REQ-SFT-19 |
+| Metalica_RealResolutionAndScorer_ReturnsArtistChoiceNeeded (real ArtistResolutionService + SimilarityScorer; 3.9c W1) | REQ-SFT-19 |
+| UseExistingDecision_SkipsArtistResolution_UsesId | REQ-SFT-19 |
+| CreateTypedDecision_CreatesNewArtistViaWritePath | REQ-SFT-19 |
+| NoArtistMatch_CreatesNewArtistInSameWrite | REQ-SFT-18 |
+| ArtistResolution_NeverReceivesSongExternalIdentity | REQ-SFT-41 |
+| ExactDuplicateSong_ReturnsSongChoiceNeededExact | REQ-SFT-22 |
+| FuzzyDuplicateSong_ReturnsSongChoiceNeededNotExact | REQ-SFT-23 |
+| NewArtistWithHeldIdentity_ReturnsSongChoiceNeededExact_CreatesNothing | REQ-SFT-25 |
+| PickedArtist_SongGuardCandidateCarriesStoredArtistName | REQ-SFT-22 |
+| SaveAsNewVersionEmptyVersion_FailsOnVersion | REQ-SFT-22 |
+| SaveAsNewVersionDecision_SkipsSongGuard_Writes | REQ-SFT-22 |
+| SaveAsNewSongDecision_SkipsSongGuard_NoVersionRequired | REQ-SFT-23 |
+| EditMode_RunsNoSongGuard_CallsUpdateWithNullIdentity | REQ-SFT-27 |
+| WriteReturnsFailureTuple_ReturnsFailedWithMessage | REQ-SFT-51 |
+| IdentityHeldByAnotherSong_FailsWithMessage | REQ-SFT-26 |
+| Success_ReturnsSavedWithId | REQ-SFT-51 |
+| WritesOnlyThroughCreateOrUpdate | REQ-SFT-46 |
+
+### Choices fixed by the tests (design left open; record in design § 3.5)
+1. Constructor of `SongService` UNCHANGED; `IArtistService`, `IArtistResolutionService`, `ISongResolutionService` resolved from `sp`.
+2. Rule 1 order: title -> version (non-required `ValidateVersionInput`) -> artist required ("Artist is required") -> typed-name `IArtistService.ValidateNameInput` (only when artist is to be created: no ArtistId and decision not UseExisting) - all before any resolution.
+3. Song-guard candidate: `SongCandidate.Artist` = `ArtistCandidate(name, null, null)`; name = typed text for a new/resolved-by-text artist, the STORED name (`IArtistRepository.GetByIdAsync`) for a picked/UseExisting/resolved id (SongCandidate has no artist id).
+4. `SongChoiceNeeded` exact: `SongCandidates` holds one `SongMatch` for the exact song, loaded via `ISongRepository.GetByIdAsync(ExactMatchSongId)` (ExactLocalMatch and ExactExternalMatch both = exact). Fuzzy: resolver candidates in order.
+5. `ArtistChoiceNeeded`: candidates sorted by Score desc, take 3 (`ArtistMatch(ArtistId, Name, Score)`).
+6. Write failure `FailedField` is not asserted (None expected); success has `FailedField == None`, `Message` non-empty, `SavedSongId` = created song id.
+7. Edit mode passes `null` external identity to `UpdateSongAsync` even if the request carries one; artist rules (2) still apply.
+
+### Changed files
+- `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (new)
+- this task-log section
+
+### Green (Builder, Opus) - 2026-11-04
+**Status:** To Review (Architectural lane - Helder review before merge). Red `f4fd7de1` · Green `5250d0fc`. Inherited: clean worktree, no half-done edits. Test file untouched (byte-identical to Red).
+
+#### Implementation
+- `SaveFromFormAsync` (Services/SongService.cs): rule 1 title/version/artist-required validation OUTSIDE any unit of work (REQ-UOW-41); then ONE `ExecuteReadAsync` that holds rule 2 (`ResolveFormArtistAsync`: typed-name `IArtistService.ValidateNameInput` -> decision -> `IArtistResolutionService.ResolveAsync(new ArtistCandidate(trimmed text, null, null))`) and rule 3 (`RunSongGuardAsync`, add mode + `SongDecision.None` only); rule 4 (`ValidateVersionInput(v, isRequired: true)`) after the read; rule 5 calls `CreateSongWithUrlsAsync(int?, string?, ...)` / `UpdateSongAsync(..., externalId: null, externalProvider: null, ..., artistId, newArtistName)`. No write scope opened by the method itself.
+- All governed services/repositories (`IArtistService`, `IArtistResolutionService`, `ISongResolutionService`, `IArtistRepository`, `ISongRepository`) come from the read lambda's `sp`; constructor unchanged (6 params). Resolving `ISongResolutionService` at call time avoids the `SongResolutionService -> ISongService` constructor cycle.
+- The nested `ResolveAsync` calls open their own standalone read scopes (no ambient scope is published by a read; UnitOfWork Revision 12) - read-in-read, never write-in-read.
+- Private constants: `MaxArtistChoiceCandidates = 3`, `ExactSongMatchScore = 1.0`, `ArtistRequiredMessage`, `ArtistNotFoundMessage`. Private record `SaveFormResolution(StopOutcome, ArtistId, NewArtistName)` carries the read's result.
+
+#### Decisions not fixed by design § 3.5 / its 2026-11-04 note (for the Architectural review)
+1. **Stored artist missing in the song guard:** a picked / `UseExisting` / resolver-exact id whose artist row is not found -> `Failed(Artist, "Artist not found")` (same text the write path returns), nothing written.
+2. **Exact duplicate song not loadable:** if `GetByIdAsync(ExactMatchSongId)` returns null (same read scope, so only a concurrent delete) -> Warning log, guard treated as no match, the write's own checks decide.
+3. **Exact `SongMatch` fields:** `Score = 1.0` (`ExactSongMatchScore`), `ArtistName = OriginalArtist?.Name ?? guard artist name`.
+4. **Defensive kinds:** an exact artist/song kind with a null id, or a `FuzzyCandidates` kind with an empty list, falls through to "no match" (artist: create via the write path, where `IArtistService` still refuses a collated duplicate - REQ-SFT-52).
+5. **Name passed on:** `ValidateNameInput` receives the raw `ArtistText` (the service trims); the resolver, `CreateArtistAsync` (via `newArtistName`) and the song-guard `ArtistCandidate` receive `ArtistText.Trim()` (trim only, no case/accent folding).
+6. **Rule 4 position:** kept after rules 2-3 as § 3.5 orders them, so with `SaveAsNewVersion` an `ArtistChoiceNeeded` outcome wins over an empty-Version failure.
+7. Edit mode passes `request.Version` (non-null) to `UpdateSongAsync`; `SavedSongId` = `request.SongId`; write failures carry `FailedField = None`.
+
+#### AC traceability matrix
+| AC | Criterion | Implementation | Test(s) |
+|---|---|---|---|
+| REQ-SFT-12 | Version > 60 fails on Version | `SaveFromFormAsync` rule 1 | `SaveFromForm_VersionOver60_FailsOnVersionField` |
+| REQ-SFT-15 | Empty title fails on Title | rule 1 | `SaveFromForm_EmptyTitle_FailsOnTitle` |
+| REQ-SFT-18 | Exact collated artist reused; no match -> created in the same write | `ResolveFormArtistAsync` + `CreateSongWithUrlsAsync` | `DeezerFilledArtistExactCollatedMatch_ReusesExisting`, `NoArtistMatch_CreatesNewArtistInSameWrite` |
+| REQ-SFT-19 | Near-duplicate -> ArtistChoiceNeeded top 3; Use/Create decisions | `ResolveFormArtistAsync` | `TypedArtistNearDuplicate_...TopThreeBestFirst`, `Metalica_RealResolutionAndScorer_...`, `UseExistingDecision_...`, `CreateTypedDecision_...` |
+| REQ-SFT-20 | Invalid typed name fails on Artist with service message | `ResolveFormArtistAsync` (first check) | `NewArtistNameInvalid_FailsOnArtist` |
+| REQ-SFT-21 | Empty artist -> "Artist is required" | rule 1 | `EmptyArtist_FailsArtistRequired` |
+| REQ-SFT-22 | Exact duplicate -> SongChoiceNeeded exact; SaveAsNewVersion | `RunSongGuardAsync`, rule 4 | `ExactDuplicateSong_...`, `PickedArtist_SongGuardCandidateCarriesStoredArtistName`, `SaveAsNewVersionEmptyVersion_...`, `SaveAsNewVersionDecision_...` |
+| REQ-SFT-23 | Fuzzy duplicate -> SongChoiceNeeded not exact; SaveAsNewSong | `RunSongGuardAsync` | `FuzzyDuplicateSong_...`, `SaveAsNewSongDecision_...` |
+| REQ-SFT-25 | New artist still runs the identity guard | `RunSongGuardAsync` | `NewArtistWithHeldIdentity_...` |
+| REQ-SFT-26 | Held identity -> refusal message | write path | `IdentityHeldByAnotherSong_FailsWithMessage` |
+| REQ-SFT-27 | Edit: no guard, null identity to Update | rule 5 | `EditMode_RunsNoSongGuard_CallsUpdateWithNullIdentity` |
+| REQ-SFT-41 | Artist lookup never gets the song identity | `ResolveFormArtistAsync`, `RunSongGuardAsync` | `ArtistResolution_NeverReceivesSongExternalIdentity` |
+| REQ-SFT-46 | Writes only through Create/Update | rule 5 | `WritesOnlyThroughCreateOrUpdate` |
+| REQ-SFT-51 | Outcome mapping (Failed / Saved) | rule 5 | `WriteReturnsFailureTuple_...`, `Success_ReturnsSavedWithId` |
+| REQ-SFT-52 | Collated artist match reused, never C# folding | `ResolveFormArtistAsync` | `TypedArtistExactCollatedMatch_...`, `TypedArtistPaddedCaseAccentVariant_...` |
+
+#### Verification evidence (verbatim)
+- Focused (`SongServiceSaveFromFormTests|UnitOfWorkReadScopeTests`): `Aprovado!  – Com falha:     0, Aprovado:    29, Ignorado:     0, Total:    29`
+- Full suite: `Aprovado!  – Com falha:     0, Aprovado:   773, Ignorado:     0, Total:   773, Duração: 11 s - MyVocaList.Tests.dll (net10.0)` (baseline 748 at `65fdb63f` + 25 Red tests = 773, delta +25)
+- Android build (`-f net10.0-android -m:1`): `Compilação com êxito.` `28 Aviso(s)` `0 Erro(s)`
+- Census (Python substring scan of the 3 production files): `ToLower`, `ToUpper`, `RemoveDiacritics`, `Normalized`, `OrdinalIgnoreCase`, governed-field dereferences (`_songRepository.` etc.) -> 0 hits.
+- Superseded tests: none. Post-edit re-read done for all changed files.
+
+#### Changed files
+- `Domain/Resolution/SongFormSaveRequest.cs` (new)
+- `Domain/Resolution/SongFormSaveOutcome.cs` (new)
+- `Domain/ServicesInterfaces/ISongService.cs`
+- `Services/SongService.cs`
+- this task-log section
+
+### Red (Tester, Haiku 5.5) - follow-up 2026-11-05
+Status: Red committed (compile-error Red on the `TypedName` member; one runtime Red on D2). Rulings D2, D4, D6 from Helder 2026-11-05 encoded. `tasks.md` not ticked (orchestrator). Worktree `.worktrees/sft-3.10`, base Green `5250d0fc`.
+
+#### Compiler output (verbatim, `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -m:1`)
+```
+SongServiceSaveFromFormTests.cs(288,42): error CS1061: 'SongFormSaveOutcome' does not contain a definition for 'TypedName' and no accessible extension method 'TypedName' accepting a first argument of type 'SongFormSaveOutcome' could be found (are you missing a using directive or an assembly reference?)
+```
+The same failing compile also lists `(0,0)` diagnostics in files this change does not touch (`ArtistRepositorySearchTests.cs` CS8618/CS8765, `StringExtensionsTests.cs` CS8600, `ArtistServiceTests.cs` CS8620, `CrudListViewModelBaseTests.cs` CS8625, `SongFormViewModelTests.cs` CS0618). The build of this tree immediately before the `TypedName` test was added exited 0 (`7 projects, 0 errors, 30 warnings`) and did not report them, so they appear only on a failing compile. Flagged for Helder; out of scope.
+
+#### Runtime Red (D2, observed before the `TypedName` test was added)
+`dotnet test ... --filter FullyQualifiedName~SongServiceSaveFromFormTests` gave `Com falha: 1, Aprovado: 34, Total: 35`.
+- `SaveFromForm_CreatedArtistRefused_FailsOnArtistAndSavesNothing`: `Assert.Equal() Failure: Expected: Artist, Actual: None` (the FailedField assertion).
+- The two D2 negative tests (`NewArtistThenSongRefused_FailsWithFieldNone`, `NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone`) pass on the current Green code. They lock behaviour that already holds (Helder asked that non-artist failures keep `None`).
+- The D6 tests also pass on current Green: they encode Builder decisions already in place (characterization, not behavioural Red).
+
+#### New tests (11) - all in `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs`
+| Test | AC | Status on current Green |
+|---|---|---|
+| ExactArtistKindWithoutId_FallsThroughToCreate | REQ-SFT-18 | pass (D6-4) |
+| FuzzyArtistKindWithEmptyList_FallsThroughToCreate | REQ-SFT-18 | pass (D6-4) |
+| PickedArtistMissingRow_FailsOnArtistNotFound | REQ-SFT-51 | pass (D6-1) |
+| UseExistingArtistMissingRow_FailsOnArtistNotFound | REQ-SFT-51 | pass (D6-1) |
+| ResolverExactArtistMissingRow_FailsOnArtistNotFound | REQ-SFT-51 | pass (D6-1) |
+| ExactDuplicateSongNotLoadable_TreatedAsNoMatchAndWrites (Warning logged) | REQ-SFT-22 | pass (D6-2) |
+| ExactSongKindWithoutId_ProceedsToWrite | REQ-SFT-22 | pass (D6-4) |
+| CreatedArtistRefused_FailsOnArtistAndSavesNothing | REQ-SFT-20 | **RED** (FailedField None, expected Artist) - D2 |
+| NewArtistThenSongRefused_FailsWithFieldNone | REQ-SFT-51 | pass (D2 negative) |
+| NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone | REQ-SFT-26 | pass (D2 negative) |
+| TypedArtistNearDuplicate_OutcomeCarriesTrimmedTypedName | REQ-SFT-19 | **compile RED** (`TypedName` missing) - D4 |
+
+Existing 25 tests: unchanged (the diff is additive: 208 insertions, 0 deletions). Total in the file: 36. Two private helpers added: `VerifyLog` (same shape as `SongSuggestionServiceTests.VerifyLog`) and `AssertArtistNotFoundWritesNothing`.
+
+#### Choices fixed by the tests (follow-up)
+- **D2 signal (chosen): the origin of the failure, observed through the collaborator mocks, not the returned tuple.** `CreateSongWithUrlsAsync` returns `(false, msg, null)` for an artist-create refusal and for a song-level refusal alike, so no public signature exposes the field. The tests separate the two cases by where the refusal comes from. Artist-create refusal = `IArtistService.CreateArtistAsync` returns failure, expected `Failed(Artist, msg)`. Song-level refusal after the artist was created (`ExistsByTitleVersionForArtistAsync` true, or `ExistsByExternalIdentityAsync` true with SaveAsNewSong), expected `Failed(None, msg)`. No public signature needs to change, so this is not a `blocked: spec gap` stop. The tests are written at the `SaveFromFormAsync` boundary, so they do not fix the mechanism.
+  - Mechanism left to the Builder. Smallest candidate: a private write helper in `SongService` that returns the failing field alongside the tuple, used by the public `CreateSongWithUrlsAsync` / `UpdateSongAsync` wrappers. Public signatures unchanged.
+  - **Design concern (for Helder):** REQ-SFT-46 says Save writes "through `CreateSongWithUrlsAsync` or `UpdateSongAsync`". A private helper called from `SaveFromFormAsync` would bypass the public method names. If the Builder takes that route, the REQ-SFT-46 wording needs a one-line `Spec updated` note, or the helper must be the body the public methods delegate to. Not decided here.
+- **D4:** `SongFormSaveOutcome` gets a `TypedName` member (string), set on `ArtistChoiceNeeded` to the trimmed typed text (`"  Metalica "` becomes `"Metalica"`; no case/accent folding). How the member is added (positional parameter or init property) is the Builder's call; the test only needs `outcome.TypedName`.
+- **D6 (1):** a picked id, a `UseExisting` id, or a resolver-exact id with no stored row gives `Failed(Artist, "Artist not found")`, `SavedSongId` null, song guard not run, nothing written. Three facts, one per path, REQ-SFT-51.
+- **D6 (2):** an exact duplicate whose `ISongRepository.GetByIdAsync(ExactMatchSongId)` returns null proceeds to the write (`Saved`) and a `Warning` is logged once. REQ-SFT-22.
+- **D6 (4):** an exact artist kind with null `ExactMatchArtistId`, or a fuzzy artist kind with an empty list, creates the artist in the write; an exact song kind with null `ExactMatchSongId` proceeds to the write. REQ-SFT-18 / REQ-SFT-22.
+
+#### AC traceability (follow-up rows)
+| AC | Criterion | Implementation location (Green) | Test(s) |
+|---|---|---|---|
+| REQ-SFT-19 | ArtistChoiceNeeded carries the trimmed typed name | `ResolveFormArtistAsync` (outcome construction) + new `TypedName` member | `TypedArtistNearDuplicate_OutcomeCarriesTrimmedTypedName` (compile RED) |
+| REQ-SFT-20 | Artist refused at write time → Failed(Artist, service message), nothing saved | `SaveFromFormAsync` rule 5 mapping (needs the field signal, D2) | `CreatedArtistRefused_FailsOnArtistAndSavesNothing` (runtime RED) |
+| REQ-SFT-22 | Exact-guard lookup miss → no match, Warning | `RunSongGuardAsync` exact branch | `ExactDuplicateSongNotLoadable_TreatedAsNoMatchAndWrites`; `ExactSongKindWithoutId_ProceedsToWrite` |
+| REQ-SFT-18 | Defensive artist kinds → create | `ResolveFormArtistAsync` default branch | `ExactArtistKindWithoutId_FallsThroughToCreate`; `FuzzyArtistKindWithEmptyList_FallsThroughToCreate` |
+| REQ-SFT-26 | Identity held at write time (guard skipped) → None | write-path identity check | `NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone` |
+| REQ-SFT-51 | Non-artist failures keep None; artist-not-found → Artist | `RunSongGuardAsync` artist lookup; rule 5 mapping | `NewArtistThenSongRefused_FailsWithFieldNone`; `PickedArtistMissingRow_…`; `UseExistingArtistMissingRow_…`; `ResolverExactArtistMissingRow_…` |
+
+#### Changed files
+- `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (+208, additive)
+- this task-log section
+
+### Red (Tester, Haiku 5.5) - follow-up #2 2026-11-05
+Status: Red committed (`--no-verify`; tree does not compile on the `TypedName` member, carried from follow-up #1). Ruling D1 (Helder 2026-11-05) encoded. Worktree `.worktrees/sft-3.10`, base Red `86e6801c`. No production code touched.
+
+#### Existing coverage check (D1)
+No existing test asserts a NULL external identity on the SaveAsNew paths. The two SaveAsNew tests (`SaveFromForm_SaveAsNewVersionDecision_SkipsSongGuard_Writes`, `SaveFromForm_SaveAsNewSongDecision_SkipsSongGuard_NoVersionRequired`) pass no provider/external id, so they cannot observe the identity. Two tests were therefore added, none existing was changed.
+
+#### Compiler output (verbatim, `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --filter FullyQualifiedName~SongServiceSaveFromFormTests`)
+```
+SongServiceSaveFromFormTests.cs(288,42): error CS1061: 'SongFormSaveOutcome' does not contain a definition for 'TypedName' ...
+```
+The filtered run cannot execute until the Builder adds `TypedName` (D4). Expected results below are read from the Green source (`SongService.SaveFromFormAsync` / `CreateSongWithUrlsAsync`, read-only), not from a run.
+
+#### New tests (2) - `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs`
+| Test | AC | Expected on current Green |
+|---|---|---|
+| `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity` | REQ-SFT-39 | **FAIL**: `CreateSongWithUrlsAsync` (line ~271) refuses with "This music-database song is already in your library" because the request identity is passed through and the mock reports it held; expected `Saved`, null identity |
+| `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity` | REQ-SFT-39 | **FAIL**: same refusal path as above; expected `Saved`, null identity |
+
+Both tests set `ExistsByExternalIdentityAsync` to true (the original song holds the identity) and assert `Saved`, `AddedSong.ExternalProvider` null, `AddedSong.ExternalId` null, `AddAsync` once. The identity is observed through the repository write, because `CreateSongWithUrlsAsync` is the SUT's own method and not a mock. Both tests are expected to pass once the Green passes null identity on the SaveAsNew paths (the write-time check is skipped for a null identity).
+
+AC choice: REQ-SFT-39 for both, because the asserted property is the unique `(ExternalProvider, ExternalId)` rule. REQ-SFT-22 / 23 cover only the decision itself. Flagged for review; swap to REQ-SFT-22 / 23 if Helder prefers the decision as the AC.
+
+#### Conflict for Helder (not changed by this Red)
+- **Existing test `SaveFromForm_NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone` (REQ-SFT-26, line ~764)** asserts that a NEW artist saved as a NEW song whose identity is held FAILS with "This music-database song is already in your library" and creates no artist. D1 says the SaveAsNewSong row is written with NULL identity. Both cannot hold. The existing test was added in follow-up #1 (D2 negative), before D1. It is not the exact guard-hit case D1 describes (the guard was skipped by the decision), so D1 may or may not reach it.
+- **Blocking: Yes** for the Builder on the SaveAsNewSong path with a new artist. Recommendation: Helder confirms whether D1 applies to the skipped-guard case; if yes, the existing test at line ~764 needs a spec-level replacement (not a Builder edit). Not decided here.
+
+#### AC traceability (follow-up #2 rows)
+| AC | Criterion | Implementation location (Green) | Test(s) |
+|---|---|---|---|
+| REQ-SFT-39 | Second row from a SaveAsNew decision carries no held identity | `SaveFromFormAsync` add path (request identity to `CreateSongWithUrlsAsync` must become null on SaveAsNewVersion / SaveAsNewSong) | `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity`; `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity` |
+
+#### Counts
+File: 36 -> 38 `[Fact]` tests (additive only; existing 36 unchanged).
+
+#### Changed files (follow-up #2)
+- `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (+~45, additive)
+- this task-log section
+
+### Red (Tester) — follow-up #3 2026-11-05
+
+Status: Red committed (`--no-verify`; tree does not compile on the `TypedName` member, carried from follow-up #1). Ruling D1 (Helder 2026-11-05, explicit): when the user explicitly chose `SaveAsNewVersion` or `SaveAsNewSong`, the new row is written with a NULL external identity and the save succeeds, even for a new artist and even when the identity is held by another song. The REQ-SFT-26 refusal stays only when no `SaveAsNew*` decision was made. Worktree `.worktrees/sft-3.10`, base `227dddd5`. No production code touched.
+
+#### Audit of the two D1-relevant existing tests
+
+| Test | Explicit SaveAsNew* decision? | Ruling impact | Action |
+|---|---|---|---|
+| `SaveFromForm_IdentityHeldByAnotherSong_FailsWithMessage` (REQ-SFT-26) | No (`SongDecision.None`, artist 7) | None: refusal is the ruled no-decision behaviour | Kept unchanged. Reaches the write-time refusal (`CreateSongWithUrlsAsync`, identity check before any artist creation) through the real `SaveFromFormAsync` flow: the song guard resolver mock returns NoMatch, so the write is reached. Reachable in production when the exact guard lookup misses (REQ-SFT-22 Warning path). |
+| `SaveFromForm_NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone` (REQ-SFT-26) | Yes (`SaveAsNewSong`) and expects Failed | Contradicts D1 | Amended (see below) |
+
+#### Changed tests
+
+1. **`SaveFromForm_NewArtistIdentityHeldAfterGuardSkipped_FailsWithFieldNone` → renamed `SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone`** (retarget, not weakening)
+   - Decision: retarget rather than amend to Saved. The original intent ("a new-artist refusal leaves no artist behind") is still reachable with NO explicit decision, so it is kept on that path.
+   - Input change: `songDecision: SongDecision.SaveAsNewSong` removed (default `None`). Nothing else in the request changed.
+   - Assertions: **unchanged** (`Failed`, `SaveField.None`, identity message, `SavedSongId` null, `VerifyNothingWritten()`). Ruling-driven change = the decision input only.
+   - AC comment updated to say the test is retargeted and why. Expected on current Green: **PASS** (the write-time refusal runs before `CreateArtistAsync`).
+2. **New test `SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity`** (D1 new-artist case, previously uncovered)
+   - Input: artist text "Guns N' Roses" (new artist), identity held, `SongDecision.SaveAsNewSong`.
+   - Expected: `Saved`, `SaveField.None`, `SavedSongIdValue`, `CreateArtistAsync` once, `AddAsync` once with `ExternalProvider` and `ExternalId` null.
+   - AC: REQ-SFT-39 (uniqueness of `(ExternalProvider, ExternalId)`; the ruling's null-identity rule).
+   - Expected on current Green: **FAIL** (identity passed through, write refused with "This music-database song is already in your library").
+
+Existing tests `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity` and `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity` (follow-up #2) are unchanged. Their expectation is already the ruled behaviour.
+
+#### Expected results on the current Green (read-only from `SongService.SaveFromFormAsync` / `CreateSongWithUrlsAsync`; not run, tree does not compile)
+
+| Test | Expected |
+|---|---|
+| `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity` | FAIL |
+| `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity` | FAIL |
+| `SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity` | FAIL |
+| `SaveFromForm_IdentityHeldByAnotherSong_FailsWithMessage` | PASS (unchanged) |
+| `SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone` | PASS (retargeted) |
+
+#### AC traceability (follow-up #3 rows)
+
+| AC | Criterion | Implementation location (Green) | Test(s) |
+|---|---|---|---|
+| REQ-SFT-26 | Held identity refused only with NO SaveAsNew* decision; refusal before artist creation | write-path identity check in `CreateSongWithUrlsAsync` (add path), decision-gated per D1 | `SaveFromForm_IdentityHeldByAnotherSong_FailsWithMessage`; `SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone` |
+| REQ-SFT-39 | SaveAsNew* writes null identity, even for a new artist | `SaveFromFormAsync` add path (identity nulled when decision is SaveAsNewVersion / SaveAsNewSong) | `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity`; `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity`; `SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity` |
+
+#### Notes for the Builder
+
+- With a NEW artist and SaveAsNewSong, the identity is nulled before `CreateSongWithUrlsAsync`, so no artist is created on the identity refusal path. The artist is created and the song saved, per D1.
+- Test names and comments: REQ-SFT-39 covers the null-identity rule. REQ-SFT-22/23 cover only the decision itself (unchanged from follow-up #2).
+
+#### Counts
+
+File: 38 -> 39 `[Fact]` tests (one added, one renamed and retargeted, none removed).
+
+#### Changed files (follow-up #3)
+- `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (one test retargeted, one test added)
+- this task-log section
+
+### Green follow-up (Builder, Haiku 5.5) - 2026-11-05
+**Status:** To Review (Architectural lane; Helder review before merge). Base Red `456fa592` (develop merged in; `develop` is an ancestor of HEAD). Test file untouched (no edit to any test file). Ruling D1, D2, D4 implemented; D6 characterization tests kept green.
+
+#### Implementation
+- **D2 (shared private core, Services/SongService.cs):** the bodies of `CreateSongWithUrlsAsync(int?, string?, …)` and `UpdateSongAsync` moved to private `CreateSongWithUrlsCoreAsync` / `UpdateSongCoreAsync`, which return `(success, message, failedField)` from the same `_uow.ExecuteAsync` body. The public methods delegate to the core. The `[Obsolete]` `int` overload still forwards to the public `int?` overload. No public signature changed; `ISongService.cs` is untouched.
+- **Field mapping:** title validation `Title`; version validation `Version`; "Artist is required" XOR guard `Artist`; artist-create refusal `Artist`; artist-not-found `Artist`; identity held / title-version duplicate / song not found `None`; success `None`.
+- **D1 (SaveFromFormAsync rule 5):** when `SongDecision` is `SaveAsNewVersion` or `SaveAsNewSong`, `ExternalId` and `ExternalProvider` are set to null before `CreateSongWithUrlsCoreAsync` is called, so the REQ-SFT-26 write-time check sees no identity. With `SongDecision.None` the identity is passed through and the refusal stands. The nulling sits in the caller, before the write, as ruled.
+- **Update path:** `SaveFromFormAsync` edit mode calls `UpdateSongCoreAsync` and maps its `failedField` (edit mode still passes null identity, REQ-SFT-27).
+- **D4:** `Domain/Resolution/SongFormSaveOutcome.cs` gains `public string TypedName { get; init; } = string.Empty;`, a non-positional init property, so the primary constructor and all call sites are unchanged. `ResolveFormArtistAsync` sets it to the trimmed typed name (`request.ArtistText!.Trim()`, no folding) on `ArtistChoiceNeeded`.
+
+#### Decisions not fixed by design § 3.5 (logged for review; also in design § 3.5 "Spec updated 2026-11-05")
+1. **D2 mechanism:** a private core returning the failing field, with the public methods delegating to it (Helder's suggested mechanism; no public signature changed, so no `blocked: spec gap` stop was needed).
+2. **Edit path also returns the field** (`UpdateSongCoreAsync`), so D2 covers artist creation on update as well as on create.
+3. **"Artist is required" XOR guard in both cores reports `SaveField.Artist`.** `SaveFromFormAsync` never reaches it (rule 1 validates first).
+4. **D1 nulling lives in `SaveFromFormAsync`,** not in the create core, so direct callers of the public `CreateSongWithUrlsAsync` keep the identity check unchanged.
+5. **`TypedName` is an `init` property** rather than a positional parameter (keeps the constructor signature).
+6. **Public `CreateSongWithUrlsAsync` / `UpdateSongAsync` became `async` methods** that await their core (the XOR early return is now awaited rather than returned via `Task.FromResult`). Behaviour is unchanged; no exception path differs.
+7. **Rule 4 (SaveAsNewVersion empty-version check) position unchanged** from the 2026-11-04 Green decision 6.
+
+#### Verification evidence (verbatim)
+- `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` (first attempt; retry cap not used): `ok dotnet build: 7 projects, 0 errors, 153 warnings`. The `(0,0)` CS8618/CS8600 diagnostics that appeared on the Red failing compile are gone with the compile fixed.
+- Focused `FullyQualifiedName~SongServiceSaveFromFormTests|FullyQualifiedName~SongServiceNewArtistUnitOfWorkTests|FullyQualifiedName~SongServiceTests`: `Aprovado!  – Com falha:     0, Aprovado:    94, Ignorado:     0, Total:    94, Duração: 2 s - MyVocaList.Tests.dll (net10.0)`. This includes the previously failing `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity`, `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity`, `SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity`, `SaveFromForm_CreatedArtistRefused_FailsOnArtistAndSavesNothing` (D2 artist origin) and `TypedArtistNearDuplicate_OutcomeCarriesTrimmedTypedName` (D4).
+- Full suite `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --no-build`: `Aprovado!  – Com falha:     0, Aprovado:   848, Ignorado:     0, Total:   848, Duração: 9 s - MyVocaList.Tests.dll (net10.0)`. No BUG-076 flake observed in this run; no re-run needed.
+- Android `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1`: `ok dotnet build: 6 projects, 0 errors, 28 warnings`.
+- Census (`git diff` added lines in `SongService.cs` and `SongFormSaveOutcome.cs`) for `ToLower|ToUpper|RemoveDiacritics|Normalized|OrdinalIgnoreCase`: 0 hits.
+- Post-edit re-read done for every changed production section and for each spec note.
+
+#### AC traceability (follow-up rows)
+| AC | Criterion | Implementation location (follow-up Green) | Test(s) |
+|---|---|---|---|
+| REQ-SFT-20 | Artist refused while created inside the song write → `Failed(Artist, service msg)`, nothing saved (D2) | `CreateSongWithUrlsCoreAsync` artist-create branch returns `SaveField.Artist`; `SaveFromFormAsync` rule 5 maps `failedField` | `SaveFromForm_CreatedArtistRefused_FailsOnArtistAndSavesNothing` |
+| REQ-SFT-26 | Identity refusal only on the no-decision path, before artist creation | identity check in `CreateSongWithUrlsCoreAsync` (unchanged); decision-gated nulling in `SaveFromFormAsync` rule 5 (D1) | `SaveFromForm_IdentityHeldByAnotherSong_FailsWithMessage`; `SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone` |
+| REQ-SFT-39 | Explicit SaveAsNew* writes a NULL identity, even for a new artist or a held identity (D1) | `SaveFromFormAsync` rule 5: `ExternalId`/`ExternalProvider` null when `SongDecision` is `SaveAsNewVersion`/`SaveAsNewSong` | `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity`; `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity`; `SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity` |
+| REQ-SFT-46 | Writes only through Create/Update; cores hold the write bodies | public `CreateSongWithUrlsAsync` / `UpdateSongAsync` delegate to `CreateSongWithUrlsCoreAsync` / `UpdateSongCoreAsync`; `SaveFromFormAsync` calls the cores | `SaveFromForm_WritesOnlyThroughCreateOrUpdate` (existing, passes) |
+| REQ-SFT-52 | Collated artist match reused, never C# folding | no change in this follow-up (`ResolveFormArtistAsync` unchanged apart from `TypedName`) | existing `TypedArtistExactCollatedMatch_…`, `TypedArtistPaddedCaseAccentVariant_…` (pass) |
+| D2 | Failure origin: artist-create refusal = Artist; song-level refusal = None; no public signature change | core field mapping (see Implementation) | `SaveFromForm_CreatedArtistRefused_FailsOnArtistAndSavesNothing` (Artist); `SaveFromForm_NewArtistThenSongRefused_FailsWithFieldNone` and `SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone` (None) |
+| D4 | `ArtistChoiceNeeded` carries the trimmed typed name | `ResolveFormArtistAsync` sets `SongFormSaveOutcome.TypedName` | `SaveFromForm_TypedArtistNearDuplicate_OutcomeCarriesTrimmedTypedName` |
+| D6 | Characterization (kept green) | unchanged | the 11 D6 tests in `SongServiceSaveFromFormTests.cs` (pass) |
+
+#### Changed files
+- `Services/SongService.cs`
+- `Domain/Resolution/SongFormSaveOutcome.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/requirements.md` (spec write-back, 4 notes)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/design.md` (§ 3.5 spec write-back)
+- this task-log section
+
+#### Commit
+- Green commit: `8705f0cf` (feat, code + spec + this entry). Then `develop` merged into the branch as `ab6a885c` (merge touched only `Docs/Management/LEDGER.md`; no code change after the verified build). Pushed to `origin/task/sft-3.10-save-from-form`.
+- Not merged to develop; `tasks.md` not ticked (orchestrator).
