@@ -73,12 +73,31 @@ public partial class AutocompleteDXField : ContentView
 
     /// <summary>
     /// The picked state (TwoWay). Set <c>true</c> by the component on a pick and <c>false</c> on X;
-    /// a consumer may also set it (REQ-ACF-01, -02, -06). Always honoured: no opt-out (ruling Q3).
+    /// a consumer may also set it (REQ-ACF-01, -02, -06). Honoured unless <see cref="IsPickLockEnabled"/>
+    /// is <c>false</c>, which makes the field never lock (opt-out, REQ-ACF-29; ruling Q3 reversed 2026-11-05).
     /// </summary>
     public bool IsLocked
     {
         get => (bool)GetValue(IsLockedProperty);
         set => SetValue(IsLockedProperty, value);
+    }
+
+    // ── IsPickLockEnabled ──────────────────────────────────────────────────
+
+    /// <summary>Identifies the <see cref="IsPickLockEnabled"/> bindable property.</summary>
+    public static readonly BindableProperty IsPickLockEnabledProperty = BindableProperty.Create(
+        nameof(IsPickLockEnabled), typeof(bool), typeof(AutocompleteDXField), true,
+        propertyChanged: (b, _, _) => ((AutocompleteDXField)b).ApplyMode());
+
+    /// <summary>
+    /// Opt-out of pick-lock (REQ-ACF-29). <c>false</c> → a pick never locks the field and an
+    /// <see cref="IsLocked"/> value is ignored; the pick is still routed to <see cref="SelectCommand"/>.
+    /// Default <c>true</c>.
+    /// </summary>
+    public bool IsPickLockEnabled
+    {
+        get => (bool)GetValue(IsPickLockEnabledProperty);
+        set => SetValue(IsPickLockEnabledProperty, value);
     }
 
     // ── IsReadOnly ─────────────────────────────────────────────────────────
@@ -235,6 +254,9 @@ public partial class AutocompleteDXField : ContentView
         set => SetValue(BlurWithoutPickCommandProperty, value);
     }
 
+    // Counts routed picks; OnItemsRequested compares it before/after its await (REQ-ACF-26).
+    private int _pickCount;
+
     // ── Constructor ────────────────────────────────────────────────────────
 
     /// <summary>Creates the field in its default, editable state.</summary>
@@ -252,11 +274,36 @@ public partial class AutocompleteDXField : ContentView
     /// read-only (DX <c>EditBase.Focus()</c>). Replaces a page's direct <c>Focus()</c> call (REQ-ACF-18).
     /// </summary>
     /// <returns><c>true</c> if the editor received focus.</returns>
-    public bool FocusEditor() => editor.Focus();
+    public bool FocusEditor()
+    {
+        var focused = editor.Focus();
+        if (!focused || editor.Handler is null)
+            DeferFocusUntilReady();
+
+        return focused;
+    }
+
+    // REQ-ACF-18: Focus() is a no-op until the inner editor has a handler (T7 line 1/10). Retry once,
+    // when the editor is ready (HandlerChanged or Loaded, whichever fires first), then unsubscribe.
+    private void DeferFocusUntilReady()
+    {
+        void Retry(object sender, EventArgs e)
+        {
+            if (editor.Handler is null && sender is not VisualElement { IsLoaded: true })
+                return; // HandlerChanged fired for a removal; wait for the next signal.
+
+            editor.HandlerChanged -= Retry;
+            editor.Loaded -= Retry;
+            editor.Focus();
+        }
+
+        editor.HandlerChanged += Retry;
+        editor.Loaded += Retry;
+    }
 
     // ── Mode application (design.md § 4, § 5 mechanism B) ─────────────────
 
-    private FieldMode CurrentMode => AutocompleteDXFieldLogic.Mode(IsReadOnly, IsLocked, Text);
+    private FieldMode CurrentMode => AutocompleteDXFieldLogic.Mode(IsReadOnly, IsLocked, Text, IsPickLockEnabled);
 
     // Called from the Text, IsLocked and IsReadOnly callbacks, so the result does not depend on the
     // order in which the binding engine assigns them (Review Focus 4).
@@ -315,6 +362,7 @@ public partial class AutocompleteDXField : ContentView
         var text = e.Text; // the request's own text, not editor.Text
         var token = e.CancellationToken;
         var source = OptionSource;
+        var pickCountAtStart = _pickCount;
 
         if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, text))
         {
@@ -334,6 +382,10 @@ public partial class AutocompleteDXField : ContentView
                 var options = await source.SearchAsync(text, token);
                 token.ThrowIfCancellationRequested();
 
+                // REQ-ACF-26: a pick routed while this search ran must not reopen the menu.
+                if (pickCountAtStart != _pickCount)
+                    return Array.Empty<AutocompleteSuggestion>();
+
                 // Review Focus 1: the field may have locked (or search turned off) while the search ran.
                 if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, text))
                 {
@@ -351,6 +403,21 @@ public partial class AutocompleteDXField : ContentView
         };
     }
 
+    // REQ-ACF-24: text written in code (e.g. the consumer's SelectCommand writing the picked name)
+    // must close the menu; only ProgrammaticChange also resets SelectedItem. ItemSelected must not,
+    // or the pick routed by OnSelectionChanged would be lost. Observed event order: unknown until the
+    // T7 device re-run (see task-log T8).
+    private void OnTextChanged(object sender, AutoCompleteEditTextChangedEventArgs e)
+    {
+        if (e.Reason == AutoCompleteEditTextChangeReason.UserInput)
+            return;
+
+        IsDropDownOpen = false;
+
+        if (e.Reason == AutoCompleteEditTextChangeReason.ProgrammaticChange)
+            editor.SelectedItem = null;
+    }
+
     // Raised from the drop-down after DX has set SelectedItem (decompiled-DLL finding 5).
     // REQ-ACF-01, -11b, -11e, -23; BUG-061.
     private void OnSelectionChanged(object sender, EventArgs e)
@@ -361,7 +428,10 @@ public partial class AutocompleteDXField : ContentView
         if (route == PickRoute.None)
             return; // Review Focus 2: the SelectedItem = null reset re-enters here as a no-op.
 
-        IsLocked = AutocompleteDXFieldLogic.LockAfterPick(route);
+        _pickCount++; // REQ-ACF-26: invalidates in-flight option requests.
+
+        if (AutocompleteDXFieldLogic.LockAfterPick(route, IsPickLockEnabled))
+            IsLocked = true;
 
         var command = SelectCommand;
         if (command?.CanExecute(option) == true)
