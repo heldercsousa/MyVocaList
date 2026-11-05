@@ -780,4 +780,48 @@ public class SongServiceSaveFromFormTests
         Assert.Null(outcome.SavedSongId);
         VerifyNothingWritten();
     }
+
+    [Fact]
+    // [AC] REQ-SFT-39: "Save as new version" on an exact external-identity match writes the new row with a null
+    // external identity even though the request carries the held identity (ruling D1): the original song keeps
+    // it, so the unique (ExternalProvider, ExternalId) index is not violated by the second row.
+    public async Task SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity()
+    {
+        _songRepoMock
+            .Setup(r => r.ExistsByExternalIdentityAsync(
+                DeezerProvider, DeezerTrackId, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
+            artistId: 7, version: "Live", provider: DeezerProvider, externalId: DeezerTrackId,
+            songDecision: SongDecision.SaveAsNewVersion));
+
+        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
+        Assert.NotNull(AddedSong);
+        Assert.Null(AddedSong!.ExternalProvider);
+        Assert.Null(AddedSong.ExternalId);
+        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-39: "Save as new song" on an exact external-identity match writes the new row with a null
+    // external identity even though the request carries the held identity (ruling D1): the original song keeps
+    // it, so the unique (ExternalProvider, ExternalId) index is not violated by the second row.
+    public async Task SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity()
+    {
+        _songRepoMock
+            .Setup(r => r.ExistsByExternalIdentityAsync(
+                DeezerProvider, DeezerTrackId, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var outcome = await CreateSut().SaveFromFormAsync(NewRequest(
+            artistId: 7, version: "", provider: DeezerProvider, externalId: DeezerTrackId,
+            songDecision: SongDecision.SaveAsNewSong));
+
+        Assert.Equal(SongFormSaveKind.Saved, outcome.Kind);
+        Assert.NotNull(AddedSong);
+        Assert.Null(AddedSong!.ExternalProvider);
+        Assert.Null(AddedSong.ExternalId);
+        _songRepoMock.Verify(r => r.AddAsync(It.IsAny<Song>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
 }
