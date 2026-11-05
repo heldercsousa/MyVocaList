@@ -64,6 +64,8 @@ public class AppServicesRegistrationTests
             services.AddSingleton(Mock.Of<ISecureStorageWrapper>());
             services.AddSingleton<IMessenger>(new WeakReferenceMessenger());
             services.AddSingleton(Mock.Of<INavigationService>());
+            // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
+            services.AddSingleton(Mock.Of<INetworkStatus>());
             services.AddTransient<SongFormViewModel>();
         });
         using var scope = provider.CreateScope();
