@@ -1955,3 +1955,52 @@ File: 38 -> 39 `[Fact]` tests (one added, one renamed and retargeted, none remov
 #### Changed files (follow-up #3)
 - `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (one test retargeted, one test added)
 - this task-log section
+
+### Green follow-up (Builder, Haiku 5.5) - 2026-11-05
+**Status:** To Review (Architectural lane; Helder review before merge). Base Red `456fa592` (develop merged in; `develop` is an ancestor of HEAD). Test file untouched (no edit to any test file). Ruling D1, D2, D4 implemented; D6 characterization tests kept green.
+
+#### Implementation
+- **D2 (shared private core, Services/SongService.cs):** the bodies of `CreateSongWithUrlsAsync(int?, string?, …)` and `UpdateSongAsync` moved to private `CreateSongWithUrlsCoreAsync` / `UpdateSongCoreAsync`, which return `(success, message, failedField)` from the same `_uow.ExecuteAsync` body. The public methods delegate to the core. The `[Obsolete]` `int` overload still forwards to the public `int?` overload. No public signature changed; `ISongService.cs` is untouched.
+- **Field mapping:** title validation `Title`; version validation `Version`; "Artist is required" XOR guard `Artist`; artist-create refusal `Artist`; artist-not-found `Artist`; identity held / title-version duplicate / song not found `None`; success `None`.
+- **D1 (SaveFromFormAsync rule 5):** when `SongDecision` is `SaveAsNewVersion` or `SaveAsNewSong`, `ExternalId` and `ExternalProvider` are set to null before `CreateSongWithUrlsCoreAsync` is called, so the REQ-SFT-26 write-time check sees no identity. With `SongDecision.None` the identity is passed through and the refusal stands. The nulling sits in the caller, before the write, as ruled.
+- **Update path:** `SaveFromFormAsync` edit mode calls `UpdateSongCoreAsync` and maps its `failedField` (edit mode still passes null identity, REQ-SFT-27).
+- **D4:** `Domain/Resolution/SongFormSaveOutcome.cs` gains `public string TypedName { get; init; } = string.Empty;`, a non-positional init property, so the primary constructor and all call sites are unchanged. `ResolveFormArtistAsync` sets it to the trimmed typed name (`request.ArtistText!.Trim()`, no folding) on `ArtistChoiceNeeded`.
+
+#### Decisions not fixed by design § 3.5 (logged for review; also in design § 3.5 "Spec updated 2026-11-05")
+1. **D2 mechanism:** a private core returning the failing field, with the public methods delegating to it (Helder's suggested mechanism; no public signature changed, so no `blocked: spec gap` stop was needed).
+2. **Edit path also returns the field** (`UpdateSongCoreAsync`), so D2 covers artist creation on update as well as on create.
+3. **"Artist is required" XOR guard in both cores reports `SaveField.Artist`.** `SaveFromFormAsync` never reaches it (rule 1 validates first).
+4. **D1 nulling lives in `SaveFromFormAsync`,** not in the create core, so direct callers of the public `CreateSongWithUrlsAsync` keep the identity check unchanged.
+5. **`TypedName` is an `init` property** rather than a positional parameter (keeps the constructor signature).
+6. **Public `CreateSongWithUrlsAsync` / `UpdateSongAsync` became `async` methods** that await their core (the XOR early return is now awaited rather than returned via `Task.FromResult`). Behaviour is unchanged; no exception path differs.
+7. **Rule 4 (SaveAsNewVersion empty-version check) position unchanged** from the 2026-11-04 Green decision 6.
+
+#### Verification evidence (verbatim)
+- `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -m:1` (first attempt; retry cap not used): `ok dotnet build: 7 projects, 0 errors, 153 warnings`. The `(0,0)` CS8618/CS8600 diagnostics that appeared on the Red failing compile are gone with the compile fixed.
+- Focused `FullyQualifiedName~SongServiceSaveFromFormTests|FullyQualifiedName~SongServiceNewArtistUnitOfWorkTests|FullyQualifiedName~SongServiceTests`: `Aprovado!  – Com falha:     0, Aprovado:    94, Ignorado:     0, Total:    94, Duração: 2 s - MyVocaList.Tests.dll (net10.0)`. This includes the previously failing `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity`, `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity`, `SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity`, `SaveFromForm_CreatedArtistRefused_FailsOnArtistAndSavesNothing` (D2 artist origin) and `TypedArtistNearDuplicate_OutcomeCarriesTrimmedTypedName` (D4).
+- Full suite `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1 --no-build`: `Aprovado!  – Com falha:     0, Aprovado:   848, Ignorado:     0, Total:   848, Duração: 9 s - MyVocaList.Tests.dll (net10.0)`. No BUG-076 flake observed in this run; no re-run needed.
+- Android `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1`: `ok dotnet build: 6 projects, 0 errors, 28 warnings`.
+- Census (`git diff` added lines in `SongService.cs` and `SongFormSaveOutcome.cs`) for `ToLower|ToUpper|RemoveDiacritics|Normalized|OrdinalIgnoreCase`: 0 hits.
+- Post-edit re-read done for every changed production section and for each spec note.
+
+#### AC traceability (follow-up rows)
+| AC | Criterion | Implementation location (follow-up Green) | Test(s) |
+|---|---|---|---|
+| REQ-SFT-20 | Artist refused while created inside the song write → `Failed(Artist, service msg)`, nothing saved (D2) | `CreateSongWithUrlsCoreAsync` artist-create branch returns `SaveField.Artist`; `SaveFromFormAsync` rule 5 maps `failedField` | `SaveFromForm_CreatedArtistRefused_FailsOnArtistAndSavesNothing` |
+| REQ-SFT-26 | Identity refusal only on the no-decision path, before artist creation | identity check in `CreateSongWithUrlsCoreAsync` (unchanged); decision-gated nulling in `SaveFromFormAsync` rule 5 (D1) | `SaveFromForm_IdentityHeldByAnotherSong_FailsWithMessage`; `SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone` |
+| REQ-SFT-39 | Explicit SaveAsNew* writes a NULL identity, even for a new artist or a held identity (D1) | `SaveFromFormAsync` rule 5: `ExternalId`/`ExternalProvider` null when `SongDecision` is `SaveAsNewVersion`/`SaveAsNewSong` | `SaveFromForm_SaveAsNewVersionIdentityHeld_WritesNewRowWithNullIdentity`; `SaveFromForm_SaveAsNewSongIdentityHeld_WritesNewRowWithNullIdentity`; `SaveFromForm_NewArtistSaveAsNewSongIdentityHeld_CreatesArtistAndWritesNullIdentity` |
+| REQ-SFT-46 | Writes only through Create/Update; cores hold the write bodies | public `CreateSongWithUrlsAsync` / `UpdateSongAsync` delegate to `CreateSongWithUrlsCoreAsync` / `UpdateSongCoreAsync`; `SaveFromFormAsync` calls the cores | `SaveFromForm_WritesOnlyThroughCreateOrUpdate` (existing, passes) |
+| REQ-SFT-52 | Collated artist match reused, never C# folding | no change in this follow-up (`ResolveFormArtistAsync` unchanged apart from `TypedName`) | existing `TypedArtistExactCollatedMatch_…`, `TypedArtistPaddedCaseAccentVariant_…` (pass) |
+| D2 | Failure origin: artist-create refusal = Artist; song-level refusal = None; no public signature change | core field mapping (see Implementation) | `SaveFromForm_CreatedArtistRefused_FailsOnArtistAndSavesNothing` (Artist); `SaveFromForm_NewArtistThenSongRefused_FailsWithFieldNone` and `SaveFromForm_NewArtistIdentityHeldNoDecision_RefusedBeforeArtistCreated_FailsWithFieldNone` (None) |
+| D4 | `ArtistChoiceNeeded` carries the trimmed typed name | `ResolveFormArtistAsync` sets `SongFormSaveOutcome.TypedName` | `SaveFromForm_TypedArtistNearDuplicate_OutcomeCarriesTrimmedTypedName` |
+| D6 | Characterization (kept green) | unchanged | the 11 D6 tests in `SongServiceSaveFromFormTests.cs` (pass) |
+
+#### Changed files
+- `Services/SongService.cs`
+- `Domain/Resolution/SongFormSaveOutcome.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/requirements.md` (spec write-back, 4 notes)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/design.md` (§ 3.5 spec write-back)
+- this task-log section
+
+#### Commit
+- Green commit: see the git log entry `Green follow-up` on `task/sft-3.10-save-from-form` (SHA recorded in the report to the orchestrator).
