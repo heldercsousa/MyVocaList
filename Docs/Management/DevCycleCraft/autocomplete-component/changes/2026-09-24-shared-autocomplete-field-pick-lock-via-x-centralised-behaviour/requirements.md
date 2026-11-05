@@ -15,8 +15,9 @@
 
 ## Goal
 
-One reusable field component owns all autocomplete behaviour for the app. Once the user picks an
-option, its text is read-only until the user taps X. X looks enabled. Debounce and minimum-query
+One reusable field component owns all autocomplete behaviour for the app. By default, once the user
+picks an option, its text is read-only until the user taps X. A field that edits the principal
+entity's own data opts out and stays editable (REQ-ACF-29). X looks enabled. Debounce and minimum-query
 length come from shared constants. There is no "create new" row. The Person form's Full Name is the
 first consumer.
 
@@ -29,7 +30,8 @@ Every agent uses these terms exactly. No synonyms.
 | **Field** | The shared component this item builds, `AutocompleteDXField`. It implements the MD3/Material *exposed dropdown menu* pattern (a text field with a menu of options under it). Code name and folder: `design.md` § 2. |
 | **Option** | One row in the field's menu: a match returned by the consumer's search. The `AutocompleteSuggestion` record (`Contracts/Models/AutocompleteSuggestion.cs`). |
 | **Pick** | The user taps an option. |
-| **Picked state / locked** | The field holds a picked value, so its text is read-only. Entered by a pick, or when the consumer sets `IsLocked = true` programmatically (e.g. edit-mode hydration). Left only by X. |
+| **Picked state / locked** | The field holds a picked value, so its text is read-only. Entered by a pick, or when the consumer sets `IsLocked = true` programmatically (e.g. edit-mode hydration), **only while pick-lock is enabled**. Left only by X (or by turning pick-lock off). |
+| **Pick-lock enabled** | The per-field switch (`IsPickLockEnabled`, default on) that decides whether a pick locks the text. Off for a field holding the principal entity's own data (REQ-ACF-29). |
 | **Unlocked state** | Not locked. The text is editable. If search is enabled, typing searches. |
 | **Read-only** | The page-controlled state (`IsReadOnly`) in which the text is shown but cannot be changed, and there is no X and no search. Overrides locked and search enabled. |
 | **Search enabled** | The page-controlled switch (`IsSearchEnabled`) that turns option requests and the menu on or off, while keeping the field as a text field. |
@@ -41,7 +43,8 @@ Every agent uses these terms exactly. No synonyms.
 
 ## User stories
 
-- **US-1:** As the admin, once I have picked a value from a field's suggestions, I want its text
+- **US-1:** As the admin, once I have picked a value from a field that refers to another entity
+  (e.g. a song's artist), I want its text
   protected from accidental edits, so that a stray tap or keystroke cannot silently change it.
 - **US-2:** As the admin, I want one obvious control (X) to change a picked value, and I want it to
   look tappable.
@@ -53,34 +56,39 @@ Every agent uses these terms exactly. No synonyms.
 
 ## Acceptance criteria
 
-### A. Pick-lock (US-1): on for every instance, no opt-out
+### A. Pick-lock (US-1): on by default, per-field opt-out (REQ-ACF-29)
 
-- **REQ-ACF-01: A pick locks the text.**
-  Given an unlocked field with search enabled,
+- **REQ-ACF-01: A pick locks the text (pick-lock enabled).**
+  Given an unlocked field with search enabled and `IsPickLockEnabled = true` (the default),
   When the user picks an option,
   Then the component routes the pick to the consumer's select command, enters the picked state
   (`IsLocked = true`, written back to the consumer through the TwoWay binding), and the text cannot
   be changed by input: after any keystroke or paste, the text still equals the value shown at pick time.
-  The system SHALL NOT offer a property that turns pick-lock off (Helder ruling Q3).
-
-  > **Spec updated 2026-11-05:** ruling Q3 is reversed (see § Helder rulings — 2026-11-05). REQ-ACF-01
-  > now applies only while `IsPickLockEnabled` is `true` (the default). See REQ-ACF-29.
+  When pick-lock is disabled, REQ-ACF-29 applies instead (ruling Q3 reversed on 2026-11-05).
 - **REQ-ACF-29: Pick-lock can be turned off for a field that edits the principal entity's own data.**
   The component SHALL offer `IsPickLockEnabled` (bool, default `true`). WHILE it is `false`, the
-  field SHALL never enter the picked state:
-  (a) a pick routes to the consumer's select command, resets DX `SelectedItem` to `null` and closes
-  the menu (REQ-ACF-11b/e, REQ-ACF-23/25), but SHALL NOT set `IsLocked`;
-  (b) a consumer-set `IsLocked = true` is ignored (the mode stays `Editable`);
-  (c) the text stays editable in every situation, X behaves as on an unlocked field (REQ-ACF-09), and
-  blur forwarding is unchanged (REQ-ACF-17).
-  `IsReadOnly` (REQ-ACF-12b) and `IsSearchEnabled` (REQ-ACF-12a) are unaffected.
-  Rule of use: a field that names a **foreign entity** (Song → Artist) keeps the default `true`. A field
-  that holds the **principal entity's own data** (Person → Full Name) sets `false`, because forcing
-  an X tap before editing one's own data makes no sense (Helder, 2026-11-05).
-  Given `IsPickLockEnabled = false` and an option picked, When the user types, Then the text changes
-  and `IsLocked` is still `false`.
-- **REQ-ACF-02: Programmatic lock counts as picked.**
-  WHEN a consumer sets `IsLocked = true` while the text is non-empty (e.g. edit-mode hydration),
+  field SHALL never be in the picked state (`Mode` is never `Locked`):
+  (a) WHEN the user picks an option, the system SHALL route the pick to the consumer's select command,
+  reset DX `SelectedItem` to `null` and close the menu (REQ-ACF-11b/e, -23, -25), and SHALL NOT write
+  `IsLocked`;
+  (b) WHEN the consumer sets `IsLocked = true`, the system SHALL keep the field editable and SHALL NOT
+  write `IsLocked` back (the consumer's value is left as set and has no effect);
+  (c) the text SHALL stay editable in every situation, X SHALL behave as on an unlocked field
+  (REQ-ACF-09), and blur forwarding SHALL be unchanged (REQ-ACF-17);
+  (d) WHEN `IsPickLockEnabled` changes at runtime, the system SHALL re-apply the mode at once: `false`
+  → editable whatever `IsLocked` says; `true` → the mode given by `IsLocked` and the text (REQ-ACF-02, -05a).
+  `IsReadOnly` (REQ-ACF-12b, which still wins) and `IsSearchEnabled` (REQ-ACF-12a) are unaffected.
+  **Rule of use:** a field that names a **foreign entity** SHALL keep the default `true`. That includes
+  the Song form Artist; this item does not change it. A field that holds the **principal entity's
+  own data** sets `false`. That is the Person Full Name: forcing an X tap before editing one's own
+  data makes no sense (Helder, 2026-11-05).
+  Given `IsPickLockEnabled = false`, When the user picks an option, Then `SelectCommand` has run once
+  with that option, `SelectedItem` is `null`, the menu is closed and `IsLocked` is `false`; When the
+  user then types, Then the text changes.
+  Given `IsPickLockEnabled = false`, `IsLocked = true` and the text "Ana Silva", Then the text is
+  editable, X is visible and no search runs until the user types.
+- **REQ-ACF-02: Programmatic lock counts as picked (pick-lock enabled).**
+  WHEN `IsPickLockEnabled` is `true` and a consumer sets `IsLocked = true` while the text is non-empty (e.g. edit-mode hydration),
   the system SHALL apply the picked state exactly as after a user pick (REQ-ACF-01 read-only rule,
   REQ-ACF-04), and SHALL NOT issue a search for the programmatic text (BUG-065/066 carry-over).
 - **REQ-ACF-03: A field that was never picked stays editable.**
@@ -208,12 +216,9 @@ Every agent uses these terms exactly. No synonyms.
   whose name starts with the text (`IPersonService.SearchPersonsStartsWithAsync`), each showing the
   full name and its display identifier.
   When the user picks one, Then the existing selection flow runs unchanged: a replacing navigation to
-  that person's edit form (BUG-044, `PersonFormViewModel.cs:295-313`). The field locks for the
-  moment before navigation (REQ-ACF-01); the edit form then opens unlocked (REQ-ACF-03).
-
-  > **Spec updated 2026-11-05:** the Person form sets `IsPickLockEnabled="False"` (REQ-ACF-29). Full Name
-  > is the principal entity's own data, so the field never locks, not even for the moment before
-  > navigation. The "Person form stays locked on screen" failure mode no longer applies.
+  that person's edit form (BUG-044, `PersonFormViewModel.cs:295-313`). The Person form sets
+  `IsPickLockEnabled="False"` (REQ-ACF-29, Helder 2026-11-05). Full Name is the principal entity's
+  own data, so the field never locks, neither before navigation nor on the edit form.
 - **REQ-ACF-16: Person options come from the search's return value.**
   The Person form's option source SHALL return the search's result list directly and SHALL NOT read
   `PersonFormViewModel.Suggestions` after the call (the BUG-056 rule, which the Person glue violates
@@ -223,7 +228,9 @@ Every agent uses these terms exactly. No synonyms.
   (the dirty-field rules of the Form Validation Standard), exactly as today (`PersonFormPage.xaml.cs:57-61`).
 - **REQ-ACF-18: Create-mode autofocus is kept.**
   WHEN the New Singer form appears (not edit mode), the Full Name field SHALL receive focus
-  (`PersonFormPage.xaml.cs:28-30`).
+  (`PersonFormPage.xaml.cs:28-30`), with the keyboard shown and the placeholder visible. This holds
+  even when the hosted DX editor is not yet ready at the moment the page calls `FocusEditor()`: the
+  component SHALL then apply the focus as soon as the editor is ready (T7 run 1, line 1).
 
 ### G. Regression protection (carry-overs)
 
@@ -234,9 +241,9 @@ Every agent uses these terms exactly. No synonyms.
 | **REQ-ACF-21** (REQ-DXAC-02 gate) | Person search below 2 characters returns nothing. | `PersonFormViewModelTests.SearchPersonsCommand_ShortTerm_SetsEmptySuggestions` (unchanged) |
 | **REQ-ACF-22** (BUG-056) | Options come from the search's return value. | T5 VM test (REQ-ACF-16) + code review of the component's `ItemsRequested` glue |
 | **REQ-ACF-23** (BUG-061) | No option stays highlighted after a pick. | T7 on-device |
-| **REQ-ACF-24** (BUG-065/066) | Programmatic text changes never trigger a search and always close the menu. | T1 (programmatic lock button) + T7 on-device + code review. DX fires no `ItemsRequested` for programmatic text (BUG-065/066 IL evidence), so there is no component logic to unit-test. |
+| **REQ-ACF-24** (BUG-065/066) | Programmatic text changes never trigger a search and always close the menu. The component SHALL, on every DX `TextChanged` whose `Reason` is not `UserInput` (consumer hydration, and the text DX writes after a pick), set `IsDropDownOpen = false` and DX `SelectedItem = null`. This is the Song form Artist pattern, and it holds whether or not the editor is focused (T7 run 1, line 9). | T1 (programmatic lock button) + T7 on-device + code review. DX fires no `ItemsRequested` for programmatic text (BUG-065/066 IL evidence), so there is no component logic to unit-test. |
 | **REQ-ACF-25** (BUG-069, must stay fixed) | No menu reopens after a pick, and none opens on an edit-mode load. BUG-069 stopped reproducing after the BUG-081 merge (`2d70ac73`), confirmed by Helder on device 2026-09-24 (`Docs/Management/LEDGER.md`, INLINE-AC row, "Update 2026-09-24"; likely a side effect of dropping `IsReadOnly`). Any mechanism that brings `IsReadOnly` back must re-prove it. | T1 criterion B5 + T7 |
-| **REQ-ACF-26** (REQ-DXAC-07) | Latest query wins: a stale request never replaces newer options (DX cancellation token honoured after the await). | Code review + T7 |
+| **REQ-ACF-26** (REQ-DXAC-07) | Latest query wins: a stale request never replaces newer options (DX cancellation token honoured after the await). A request still in flight when a pick is routed SHALL NOT reopen the menu: its result is discarded (T7 run 1, line 9). | Code review + T7 |
 | **REQ-ACF-27** (REQ-DXAC-06/12) | No DX client-side filtering. The Outlined form-field style (`MaterialStyles.xaml:74`) applies. | Code review + T7 |
 | **REQ-ACF-28** (Person name rules) | Character counter, keystroke-while-in-error re-validation and hydration rules on `PersonName` are unchanged. | Existing `PersonFormViewModelTests` name tests (unchanged) |
 
@@ -255,11 +262,11 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
   VM behaviour (no new catch).
 - **Lock mechanism fails on a platform** (the text becomes editable in the picked state): this
   violates REQ-ACF-01. The spike (T1) and device gate (T7) catch it. iOS is not device-tested here.
-- **Consumer never binds `IsLocked`** (Person form): the component still locks on a pick and
+- **Consumer never binds `IsLocked`** (pick-lock enabled): the component still locks on a pick and
   unlocks on X by itself (TwoWay property with a local value), so pick-lock holds with no VM code.
-- **Person form stays locked on screen after a pick:** if `SuggestionSelectedAsync` returns early
-  (`PersonFormViewModel.cs:297`, suggestion data is not a `Person`) or the navigation fails, the Full
-  Name field remains in the picked state on the New Singer form. Harmless: X unlocks it (REQ-ACF-06).
+- **Person pick does not navigate:** if `SuggestionSelectedAsync` returns early
+  (`PersonFormViewModel.cs:297`, suggestion data is not a `Person`) or the navigation fails, the New
+  Singer form stays with the picked name in an editable field (REQ-ACF-29). Harmless.
 
 ## Supersedes (shipped specs are not edited)
 
