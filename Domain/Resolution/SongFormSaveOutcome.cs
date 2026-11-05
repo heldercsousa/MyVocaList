@@ -54,4 +54,12 @@ public sealed record SongFormSaveOutcome(
     int? SavedSongId,
     IReadOnlyList<ArtistMatch> ArtistCandidates,
     bool IsExactSongMatch,
-    IReadOnlyList<SongMatch> SongCandidates);
+    IReadOnlyList<SongMatch> SongCandidates)
+{
+    /// <summary>
+    /// The artist name the user typed, trimmed and nothing else (REQ-SFT-19, ruling D4). Set on
+    /// <see cref="SongFormSaveKind.ArtistChoiceNeeded"/> so the sheet can name the typed artist; empty for
+    /// every other outcome. An init property, not a positional parameter, so the constructor is unchanged.
+    /// </summary>
+    public string TypedName { get; init; } = string.Empty;
+}

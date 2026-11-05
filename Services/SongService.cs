@@ -119,43 +119,60 @@ public class SongService : ISongService
         }, ct);
 
     /// <inheritdoc />
-    public Task<(bool success, string message)> UpdateSongAsync(
+    public async Task<(bool success, string message)> UpdateSongAsync(
         int id, string title, string? featuredArtists, string? lyrics,
         string? externalId = null, string? externalProvider = null, string? version = null,
         int? artistId = null, string? newArtistName = null,
         CancellationToken ct = default)
     {
+        var (success, message, _) = await UpdateSongCoreAsync(
+            id, title, featuredArtists, lyrics, externalId, externalProvider, version,
+            artistId, newArtistName, ct);
+        return (success, message);
+    }
+
+    /// <summary>
+    /// The body of <see cref="UpdateSongAsync"/> (REQ-SFT-46: the only update write). It also returns the
+    /// form field a failure belongs to (REQ-SFT-51, D2); only <see cref="SaveFromFormAsync"/> reads it.
+    /// </summary>
+    private Task<(bool success, string message, SaveField failedField)> UpdateSongCoreAsync(
+        int id, string title, string? featuredArtists, string? lyrics,
+        string? externalId, string? externalProvider, string? version,
+        int? artistId, string? newArtistName,
+        CancellationToken ct)
+    {
         // REQ-SFT-28 / REQ-SFT-21: at most one of artistId / newArtistName (blank name = not
         // supplied). Pure input validation stays OUTSIDE the lambda (REQ-UOW-41).
         var hasNewArtistName = !string.IsNullOrWhiteSpace(newArtistName);
         if (artistId.HasValue && hasNewArtistName)
-            return Task.FromResult<(bool success, string message)>((false, "Artist is required"));
+            return Task.FromResult<(bool success, string message, SaveField failedField)>(
+                (false, "Artist is required", SaveField.Artist));
 
-        return _uow.ExecuteAsync<(bool success, string message)>(async sp =>
+        return _uow.ExecuteAsync<(bool success, string message, SaveField failedField)>(async sp =>
         {
             // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
             var songRepository = sp.GetRequiredService<ISongRepository>();
 
             var (isValid, message) = ValidateTitleInput(title);
             if (!isValid)
-                return (false, message);
+                return (false, message, SaveField.Title);
 
             if (version != null)
             {
                 var (versionValid, versionMessage) = ValidateVersionInput(version);
                 if (!versionValid)
-                    return (false, versionMessage);
+                    return (false, versionMessage, SaveField.Version);
             }
 
             var song = await songRepository.GetByIdAsync(id, ct);
             if (song == null)
-                return (false, "Song not found");
+                return (false, "Song not found", SaveField.None);
 
             // REQ-SFT-26: an external identity held by ANOTHER song (self excluded) is rejected before
             // any artist is created, so a refused save never leaves a new artist behind.
             if (!string.IsNullOrWhiteSpace(externalId) && !string.IsNullOrWhiteSpace(externalProvider)
                 && await songRepository.ExistsByExternalIdentityAsync(externalProvider, externalId, id, ct))
-                return (false, "This music-database song is already in your library");
+                return (false, "This music-database song is already in your library", SaveField.None);
 
             // BUG-067 (REQ-ACREATE-16): the artist FK used to be written on the create path only, so a
             // user changing the artist of a saved song lost the edit silently. null = keep existing
@@ -170,7 +187,7 @@ public class SongService : ISongService
                 var (artistCreated, artistMessage, createdArtist) =
                     await artistService.CreateArtistAsync(newArtistName!, ct: ct);
                 if (!artistCreated || createdArtist is null)
-                    return (false, artistMessage);
+                    return (false, artistMessage, SaveField.Artist);
 
                 // REQ-UOW-35: flush (not commit) so the generated Artist.Id exists; _uow holds no
                 // AppDbContext (it flushes the AMBIENT scope), so REQ-UOW-28 does not apply to it.
@@ -183,7 +200,7 @@ public class SongService : ISongService
                 var artistRepository = sp.GetRequiredService<IArtistRepository>();
                 var newArtist = await artistRepository.GetByIdAsync(artistId.Value, ct);
                 if (newArtist == null)
-                    return (false, "Artist not found");
+                    return (false, "Artist not found", SaveField.Artist);
             }
 
             // REQ-SFT-29 / REQ-SFT-27: uniqueness = (collated effective artist, title, effective
@@ -193,7 +210,7 @@ public class SongService : ISongService
             var effectiveVersion = version ?? song.Version ?? string.Empty;
             if (await songRepository.FindIdByTitleVersionForArtistAsync(
                     effectiveArtistId, title, effectiveVersion, id, ct) is not null)
-                return (false, "A song with this title and version already exists for this artist");
+                return (false, "A song with this title and version already exists for this artist", SaveField.None);
 
             // Song.Title/FeaturedArtists/Version trimming is enforced by the ValueConverter (design.md § D3).
             // BUG-067 under the unit-of-work pattern: SongRepository.GetByIdAsync eager-loads
@@ -223,7 +240,7 @@ public class SongService : ISongService
 
             await songRepository.UpdateAsync(song, ct);
             // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
-            return (true, $"Song updated to '{title}'");
+            return (true, $"Song updated to '{title}'", SaveField.None);
         }, ct);
     }
 
@@ -239,19 +256,36 @@ public class SongService : ISongService
             externalId, externalProvider, urls, ct);
 
     /// <inheritdoc />
-    public Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
+    public async Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
         int? artistId, string? newArtistName, string title, string version,
         string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct = default)
+    {
+        var (success, message, song, _) = await CreateSongWithUrlsCoreAsync(
+            artistId, newArtistName, title, version, featuredArtists, lyrics,
+            externalId, externalProvider, urls, ct);
+        return (success, message, song);
+    }
+
+    /// <summary>
+    /// The body of <c>CreateSongWithUrlsAsync(int?, string?, …)</c> (REQ-SFT-46: the only create write).
+    /// It also returns the form field a failure belongs to (REQ-SFT-51, D2): an artist refused while it
+    /// is created is <see cref="SaveField.Artist"/>; a song-level refusal after that is
+    /// <see cref="SaveField.None"/>. Only <see cref="SaveFromFormAsync"/> reads the field.
+    /// </summary>
+    private Task<(bool success, string message, Song? song, SaveField failedField)> CreateSongWithUrlsCoreAsync(
+        int? artistId, string? newArtistName, string title, string version,
+        string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
+        IEnumerable<string> urls, CancellationToken ct)
     {
         // REQ-SFT-21: exactly one of artistId / newArtistName. Pure input validation — it stays
         // OUTSIDE the lambda (REQ-UOW-41), so a rejected call opens no DI scope and writes nothing.
         var hasNewArtistName = !string.IsNullOrWhiteSpace(newArtistName);
         if (artistId.HasValue == hasNewArtistName)
-            return Task.FromResult<(bool success, string message, Song? song)>(
-                (false, "Artist is required", null));
+            return Task.FromResult<(bool success, string message, Song? song, SaveField failedField)>(
+                (false, "Artist is required", null, SaveField.Artist));
 
-        return _uow.ExecuteAsync<(bool success, string message, Song? song)>(async sp =>
+        return _uow.ExecuteAsync<(bool success, string message, Song? song, SaveField failedField)>(async sp =>
         {
             // REQ-UOW-28: all three repositories AND the nested URL service are resolved from the
             // lambda's own scope — never the constructor fields. All three repositories therefore
@@ -262,7 +296,7 @@ public class SongService : ISongService
 
             var (isValid, message) = ValidateTitleInput(title);
             if (!isValid)
-                return (false, message, null);
+                return (false, message, null, SaveField.Title);
 
             version ??= string.Empty;
 
@@ -270,7 +304,7 @@ public class SongService : ISongService
             // artist is created, so a refused save never leaves a new artist behind.
             if (!string.IsNullOrWhiteSpace(externalId) && !string.IsNullOrWhiteSpace(externalProvider)
                 && await songRepository.ExistsByExternalIdentityAsync(externalProvider, externalId, null, ct))
-                return (false, "This music-database song is already in your library", null);
+                return (false, "This music-database song is already in your library", null, SaveField.None);
 
             int effectiveArtistId;
             if (hasNewArtistName)
@@ -283,7 +317,7 @@ public class SongService : ISongService
                 var (artistCreated, artistMessage, newArtist) =
                     await artistService.CreateArtistAsync(newArtistName!, ct: ct);
                 if (!artistCreated || newArtist is null)
-                    return (false, artistMessage, null);
+                    return (false, artistMessage, null, SaveField.Artist);
 
                 // REQ-UOW-35: flush (not commit) so the generated Artist.Id exists before the song is
                 // staged. The transaction stays open — any later failure rolls the artist back too.
@@ -298,7 +332,7 @@ public class SongService : ISongService
                 var artistRepository = sp.GetRequiredService<IArtistRepository>();
                 var artist = await artistRepository.GetByIdAsync(artistId!.Value, ct);
                 if (artist == null)
-                    return (false, "Artist not found", null);
+                    return (false, "Artist not found", null, SaveField.Artist);
                 effectiveArtistId = artistId.Value;
             }
 
@@ -306,7 +340,7 @@ public class SongService : ISongService
             // SongConfiguration (design.md § D3) — not here. EF applies the same converter to this
             // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
             if (await songRepository.ExistsByTitleVersionForArtistAsync(effectiveArtistId, title, version, ct))
-                return (false, "A song with this title and version already exists for this artist", null);
+                return (false, "A song with this title and version already exists for this artist", null, SaveField.None);
 
             // Song.Title/Version/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
             var song = new Song
@@ -350,7 +384,7 @@ public class SongService : ISongService
 
             // REQ-UOW-07: the single commit — song + all URLs — is now owned by IUnitOfWork, which
             // saves the one shared context inside its explicit transaction (AC-6.2 preserved).
-            return (true, $"Song '{title}' created successfully", song);
+            return (true, $"Song '{title}' created successfully", song, SaveField.None);
         }, ct);
     }
 
@@ -406,31 +440,40 @@ public class SongService : ISongService
                 return SaveFailed(newVersionMessage, SaveField.Version);
         }
 
-        // Rule 5 (REQ-SFT-46 / REQ-SFT-51): write through the two write paths only; their failure
-        // tuple comes back as Failed with the message unchanged.
+        // Rule 5 (REQ-SFT-46 / REQ-SFT-51): write through the two write paths only (their shared bodies,
+        // see CreateSongWithUrlsCoreAsync / UpdateSongCoreAsync); a failure comes back as Failed with the
+        // message unchanged and the field the failing step belongs to (D2).
         if (isAddMode)
         {
-            var (created, createMessage, song) = await CreateSongWithUrlsAsync(
+            // REQ-SFT-39 (ruling D1, 2026-11-05): an explicit SaveAsNewVersion / SaveAsNewSong writes the new
+            // row with a NULL external identity, so the identity refusal (REQ-SFT-26) cannot apply to it.
+            // Nulled here, BEFORE the write, because the write-time check runs on whatever identity it gets.
+            // With no decision (SongDecision.None) the identity is passed through and the refusal stands.
+            var explicitSaveAsNew = request.SongDecision is SongDecision.SaveAsNewVersion or SongDecision.SaveAsNewSong;
+            var externalId = explicitSaveAsNew ? null : request.ExternalId;
+            var externalProvider = explicitSaveAsNew ? null : request.ExternalProvider;
+
+            var (created, createMessage, song, failedField) = await CreateSongWithUrlsCoreAsync(
                 resolved.ArtistId, resolved.NewArtistName, request.Title, request.Version,
-                request.FeaturedArtists, request.Lyrics, request.ExternalId, request.ExternalProvider,
+                request.FeaturedArtists, request.Lyrics, externalId, externalProvider,
                 request.PendingUrls ?? [], ct);
 
             return created && song is not null
                 ? SaveSucceeded(createMessage, song.Id)
-                : SaveFailed(createMessage, SaveField.None);
+                : SaveFailed(createMessage, failedField);
         }
 
         // REQ-SFT-27: edit mode passes a null external identity — the stored identity is kept,
         // whatever the request carries.
         var songId = request.SongId!.Value;
-        var (updated, updateMessage) = await UpdateSongAsync(
+        var (updated, updateMessage, updateFailedField) = await UpdateSongCoreAsync(
             songId, request.Title, request.FeaturedArtists, request.Lyrics,
             externalId: null, externalProvider: null, version: request.Version,
             artistId: resolved.ArtistId, newArtistName: resolved.NewArtistName, ct: ct);
 
         return updated
             ? SaveSucceeded(updateMessage, songId)
-            : SaveFailed(updateMessage, SaveField.None);
+            : SaveFailed(updateMessage, updateFailedField);
     }
 
     /// <summary>
@@ -482,7 +525,10 @@ public class SongService : ISongService
                     typedName, candidates.Count);
                 return SaveFormResolution.Stop(new SongFormSaveOutcome(
                     SongFormSaveKind.ArtistChoiceNeeded, string.Empty, SaveField.None, null,
-                    candidates, false, []));
+                    candidates, false, [])
+                {
+                    TypedName = typedName
+                });
 
             default:
                 // NoMatch: the artist is created inside the song's write (REQ-SFT-18). Should a
