@@ -1,8 +1,11 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Contracts.Messages;
+using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.UI.Collections;
+using MyVocaList.UI.Models;
 
 namespace MyVocaList.UI.ViewModels;
 
@@ -21,6 +24,7 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ISecureStorageWrapper _secureStorage;
     private readonly IMessenger _messenger;
     private readonly INavigationService _navigationService;
+    private readonly ISongSuggestionService _songSuggestions;
     private int _searchGeneration; // BUG-051: generation counter — guards SearchArtistsAsync against stale completions
 
     // ── Query properties ──────────────────────────────────────────────────
@@ -77,6 +81,24 @@ public partial class SongFormViewModel : ViewModelBase
     public string SelectedExternalId { get; private set; } = string.Empty;
     public string SelectedProvider { get; private set; } = string.Empty;
 
+    // ── Title-first search (Task 5.2, REQ-SFT-04..14, 16, 53) ─────────────
+    private const string OfflineNote = "You're offline — showing songs from your library only.";
+    private const string UnavailableNote = "Online search isn't available right now — showing your library only.";
+
+    /// <summary>Title field option source: local rows, then promoted, then Deezer (REQ-SFT-04/05).</summary>
+    public IMenuOptionSource TitleOptionSource { get; }
+
+    /// <summary>Artist field option source: local artists only, no remote call (REQ-SFT-16).</summary>
+    public IMenuOptionSource ArtistOptionSource { get; }
+
+    [ObservableProperty] private string _titleSupportingText = string.Empty;
+    [ObservableProperty] private bool _isTitleLocked;
+    [ObservableProperty] private bool _isDiscardSheetVisible;
+
+    private string _lastTitleQuery = string.Empty;
+    private string? _pickFilledVersion;   // Version written by the last remote pick (Q21)
+    private int? _pendingOpenSongId;      // local pick awaiting the discard-sheet decision
+
     // ── Resolution sheet state (Task 4.5) ────────────────────────────────
     [ObservableProperty] private bool _isResolutionSheetVisible;
     [ObservableProperty] private string _resolutionSheetTitle = "This looks like an existing song";
@@ -110,7 +132,8 @@ public partial class SongFormViewModel : ViewModelBase
         ISongKaraokeUrlService karaokeUrlService,
         ISecureStorageWrapper secureStorage,
         IMessenger messenger,
-        INavigationService navigationService)
+        INavigationService navigationService,
+        ISongSuggestionService songSuggestions)
     {
         _artistService = artistService;
         _songService = songService;
@@ -121,6 +144,10 @@ public partial class SongFormViewModel : ViewModelBase
         _secureStorage = secureStorage;
         _messenger = messenger;
         _navigationService = navigationService;
+        _songSuggestions = songSuggestions;
+
+        TitleOptionSource = new MenuOptionSource(SearchTitleAsync);
+        ArtistOptionSource = new MenuOptionSource(SearchArtistOptionsAsync);
 
         // BUG-049: explicit CanExecute tied to IsBusy — combined with the early-return guard in
         // SaveAsync — prevents a fast double-tap from firing SaveAsync twice concurrently, which
@@ -218,6 +245,9 @@ public partial class SongFormViewModel : ViewModelBase
 
     partial void OnSongTitleChanged(string value)
     {
+        if (string.IsNullOrWhiteSpace(value) && TitleSupportingText.Length > 0)
+            TitleSupportingText = string.Empty;   // REQ-SFT-06: the Field never queries an empty string
+
         // Counter counts the trimmed string — the same string ValidateTitleInput checks —
         // so trailing whitespace cannot inflate the count (counter threshold alignment).
         UpdateCharacterCounter(value?.Trim().Length ?? 0);
@@ -353,6 +383,137 @@ public partial class SongFormViewModel : ViewModelBase
         ArtistSuggestions = [];
         ArtistHasError = false;
         ArtistErrorText = string.Empty;
+        SelectedExternalId = string.Empty;   // REQ-SFT-14: the pending identity belongs to the pair
+        SelectedProvider = string.Empty;
+    }
+
+    // ── Title-first search and picks (Task 5.2) ───────────────────────────
+
+    private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchArtistOptionsAsync(string query, CancellationToken ct) =>
+        await SearchArtistsCoreAsync(query);
+
+    private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleAsync(string query, CancellationToken ct)
+    {
+        _lastTitleQuery = query;
+        var local = await _songSuggestions.SearchTitleLocalAsync(query, ct);
+        var shownIds = local.Where(d => d.LocalId.HasValue).Select(d => d.LocalId!.Value).ToList();
+        var remote = await _songSuggestions.SearchTitleRemoteAsync(query, shownIds, ct);
+
+        ct.ThrowIfCancellationRequested();   // stale query: never touch the note
+
+        if (query.Trim().Length >= SearchConstants.MinimumRemoteQueryLength)
+        {
+            var note = remote.Status switch
+            {
+                RemoteSearchStatus.Offline => OfflineNote,
+                RemoteSearchStatus.Unavailable => UnavailableNote,
+                _ => string.Empty
+            };
+            RunOnUiThread(() => TitleSupportingText = note);
+        }
+
+        return local.Concat(remote.Promoted).Concat(remote.Remote).Select(ToTitleOption).ToList();
+    }
+
+    private static AutocompleteSuggestion ToTitleOption(SongSuggestionDto dto)
+    {
+        var parts = new List<string> { dto.ArtistName };
+        if (!string.IsNullOrEmpty(dto.Version))
+            parts.Add(dto.Version);
+        parts.Add(dto.IsRemote ? "Deezer" : "In your library");
+        return new AutocompleteSuggestion(dto.Title, string.Join(" · ", parts), dto);
+    }
+
+    [RelayCommand]
+    private Task SelectTitle(AutocompleteSuggestion? option)
+    {
+        if (option?.Data is not SongSuggestionDto dto)
+            return Task.CompletedTask;
+
+        if (dto.IsRemote || !dto.LocalId.HasValue)
+        {
+            ApplyRemotePick(dto);
+            return Task.CompletedTask;
+        }
+
+        if (HasOtherInput())
+        {
+            _pendingOpenSongId = dto.LocalId;
+            IsDiscardSheetVisible = true;
+            return Task.CompletedTask;
+        }
+
+        return OpenSongAsync(dto.LocalId.Value);
+    }
+
+    private void ApplyRemotePick(SongSuggestionDto dto)
+    {
+        SongTitle = dto.Title;
+        IsTitleLocked = true;
+        SongVersion = dto.Version;
+        _pickFilledVersion = dto.Version;
+        SelectedExternalId = dto.ExternalId ?? string.Empty;
+        SelectedProvider = dto.ExternalProvider ?? string.Empty;
+
+        if (dto.LocalArtistId.HasValue)
+        {
+            LockArtist(dto.LocalArtistId.Value, dto.LocalArtistName ?? dto.ArtistName);
+            return;
+        }
+
+        SelectedArtistId = null;   // REQ-SFT-13: the artist is created on Save
+        SelectedArtistName = null;
+        ArtistSearchText = dto.ArtistName;
+        IsArtistDropDownOpen = false;
+        IsArtistLocked = true;
+        ArtistSuggestions = [];
+        ArtistHasError = false;
+        ArtistErrorText = string.Empty;
+    }
+
+    private bool HasOtherInput() =>
+        !string.IsNullOrWhiteSpace(ArtistSearchText)
+        || !string.IsNullOrWhiteSpace(SongVersion)
+        || !string.IsNullOrWhiteSpace(FeaturedArtists)
+        || !string.IsNullOrWhiteSpace(Lyrics)
+        || KaraokeUrls.Count > 0;
+
+    private Task OpenSongAsync(int songId) =>
+        _navigationService.GoToAsync($"../{Routes.SongForm}?songId={songId}");
+
+    /// <summary>Discard-sheet "Open": opens the picked song's edit form (REQ-SFT-11).</summary>
+    [RelayCommand]
+    private async Task ConfirmOpenExisting()
+    {
+        IsDiscardSheetVisible = false;
+        if (_pendingOpenSongId is not { } id)
+            return;
+        _pendingOpenSongId = null;
+        await OpenSongAsync(id);
+    }
+
+    /// <summary>Discard-sheet "Keep editing": restores the typed query, unlocked (REQ-SFT-11).</summary>
+    [RelayCommand]
+    private void KeepEditing()
+    {
+        IsDiscardSheetVisible = false;
+        _pendingOpenSongId = null;
+        SongTitle = _lastTitleQuery;
+        IsTitleLocked = false;
+    }
+
+    /// <summary>X on Title: empties and unlocks it, drops the pending identity, keeps Artist (REQ-SFT-06/14).</summary>
+    [RelayCommand]
+    private void ClearTitle()
+    {
+        SongTitle = string.Empty;
+        IsTitleLocked = false;
+        SelectedExternalId = string.Empty;
+        SelectedProvider = string.Empty;
+        TitleSupportingText = string.Empty;
+        if (_pickFilledVersion is not null && SongVersion == _pickFilledVersion)
+            SongVersion = string.Empty;
+        _pickFilledVersion = null;
     }
 
     /// <summary>
