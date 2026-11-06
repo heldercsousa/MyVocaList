@@ -2181,3 +2181,45 @@ File: 38 -> 39 `[Fact]` tests (one added, one renamed and retargeted, none remov
 #### Commit
 - Green commit: `8705f0cf` (feat, code + spec + this entry). Then `develop` merged into the branch as `ab6a885c` (merge touched only `Docs/Management/LEDGER.md`; no code change after the verified build). Pushed to `origin/task/sft-3.10-save-from-form`.
 - Not merged to develop; `tasks.md` not ticked (orchestrator).
+
+---
+## Task: SFT 5.3b — delete forwarding `CreateSongWithUrlsAsync(int, …)` overload; remove dead `IsExactMatch`
+**Plan:** `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/tasks.md` § 5.3b
+**Status:** To Review
+**Started:** 2026-11-06
+**Completed:** 2026-11-06
+**Risk:** Low · **Review lane:** Standard · **Test level:** C (pure deletion, no new behavior, no new tests)
+
+### Changed files:
+- `Domain/ServicesInterfaces/ISongService.cs` (commit 1)
+- `Services/SongService.cs` (commit 1)
+- `Contracts/DTOs/Suggestions/ArtistSuggestionDto.cs` (commit 2)
+- `Services/ArtistSuggestionService.cs` (commit 2)
+- this task-log section (commit 3)
+
+### Commits
+- `7bd8895d` refactor(sft): remove obsolete CreateSongWithUrlsAsync(int, ...) forwarder (5.3b)
+- `aaafb337` refactor(sft): remove dead ArtistSuggestionDto.IsExactMatch (5.3b)
+- task-log commit: see branch HEAD (`git log -1`)
+
+### What was removed (exact)
+- `ISongService.cs`: the XML `<summary>`/`<param>`/`<returns>` block and the `[Obsolete]` `CreateSongWithUrlsAsync(int artistId, string title, string version, string? featuredArtists, string? lyrics, string? externalId, string? externalProvider, IEnumerable<string> urls, CancellationToken ct = default)` declaration (22 lines removed from this file; 33 lines removed across both commit-1 files, `git show --stat 7bd8895d`).
+- `SongService.cs`: the `[Obsolete]` forwarder `CreateSongWithUrlsAsync(int artistId, …)` with its `/// <inheritdoc />` and expression body delegating to the `(int?, string?, …)` overload (11 lines).
+- `ArtistSuggestionDto.cs`: positional `bool IsExactMatch` parameter and its `<param name="IsExactMatch">` line.
+- `ArtistSuggestionService.cs`: trailing `false` argument at the two `new ArtistSuggestionDto(...)` sites (local ~line 62, remote ~line 110). `IsRemote` kept.
+
+### Census (Grep tool + raw grep, develop `0ef49dcf`, re-verified after the deletion)
+- Overload: no call site binds to the int-first overload in production or tests. Every caller passes nine or ten arguments with an int-or-null first argument and a string-or-null second argument, which only bind to `(int?, string?, …)`. Callers: `SongServiceTests.cs` (6), `SongServiceNewArtistUnitOfWorkTests.cs` (3), `Bug068RegressionTests.cs:128`, `SongFormViewModelTests.cs:447` (verify with `It.IsAny<int?>`). `SongResolutionService.cs` has no reference. Post-deletion Grep over `Services/` shows only the new overload and its in-doc reference.
+- `SongService.cs` ~271 (`/// The body of CreateSongWithUrlsAsync(int?, string?, …)`) and ~414 (comment mentioning `CreateSongWithUrlsAsync / UpdateSongAsync`) are about the surviving overload. They were read and judged correct; no edit needed. No `5.3b` "pending" wording remains in code (the only occurrences were in the two deleted `[Obsolete]` messages).
+- `IsExactMatch`: Grep over the worktree, excluding Docs and `.worktrees` siblings, finds only the DTO and the two constructor sites before the change, and none after. No XAML, no `.razor`, no branch, no test reads it. `ExactMatchArtistId` / `ExactMatchSongId` untouched. Historical mentions in shipped change folders (`2026-07-10-form-ux-redesign/`) are immutable and were not edited.
+
+### Verification evidence
+- Build (commit 1, `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj --no-incremental`): exit 0, 0 errors, **0 `CS0618`** (grep of full log).
+- Build (commit 2): 0 errors, 0 CS0618 across the rebuilt set (`0 Erro(s)`).
+- Tests: pre-commit hook ran the full `MyVocaList.Tests` suite before each commit: commit 1 **874 passed, 0 failed**; commit 2 **874 passed, 0 failed** (baseline develop 874/874). No flakes observed.
+- Test files were not edited (existing test callers already used the `(int?, …)` overload).
+
+### Surprises / notes
+- None blocking. `python3` is not installed on this host (only relevant to my scratch checkpoint edit; no project impact).
+- `tasks.md` not ticked and LEDGER not touched (orchestrator owns them), per briefing.
+- `.sln` unchanged (no `Docs/` files created or deleted).
