@@ -131,6 +131,9 @@ public partial class SongFormViewModel : ViewModelBase
     public bool IsEditMode => SongId.HasValue;
     public string PageTitle => IsEditMode ? "Edit Song" : "New Song";
 
+    /// <summary>REQ-SFT-27/02: Title is the search box in add mode only; edit mode shows plain editable text.</summary>
+    public bool IsTitleSearchEnabled => !IsEditMode;
+
     public SongFormViewModel(
         IArtistService artistService,
         ISongService songService,
@@ -259,6 +262,7 @@ public partial class SongFormViewModel : ViewModelBase
     partial void OnSongIdChanged(int? value)
     {
         OnPropertyChanged(nameof(IsEditMode));
+        OnPropertyChanged(nameof(IsTitleSearchEnabled));
         OnPropertyChanged(nameof(PageTitle));
         if (value.HasValue)
             _ = LoadSongForEditAsync(value.Value);
@@ -689,8 +693,9 @@ public partial class SongFormViewModel : ViewModelBase
             Lyrics?.Trim(),
             artistId,
             artistId.HasValue ? null : ArtistSearchText?.Trim(),
-            string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider,
-            string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId,
+            // REQ-SFT-27 / design F6: edit mode sends a null identity = keep the stored identity.
+            IsEditMode ? null : (string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider),
+            IsEditMode ? null : (string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId),
             _pendingRawUrls.ToArray(),
             _artistDecision,
             _songDecision);
