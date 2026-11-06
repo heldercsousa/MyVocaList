@@ -250,6 +250,43 @@
     sft-* worktrees). If SFT binds SongFormPage before T8 merges, the four gates apply.
   - **Demo:** T7 re-run, lines 1–10 PASS on device. **Review lane:** Elevated
 
+> **Spec updated 2026-11-06: T7 run 2 result.** PASS on lines 1, 3–7, 10. Line 8 confirmed as the
+> app-wide pattern. **FAIL on line 2** (" a" / "  a" shows a menu) and **line 9** (after a pick the
+> field keeps focus, the keyboard stays up, the cursor is at 0). Details: `task-log.md` § T7, "Run 2".
+> T9 fixes both, then T7 run 3 re-checks lines 2 and 9 only. Extra issues F1–F3 are under persons.
+
+- [ ] **T9: T7 run 2 fixes — search-text normalisation + pick drops focus** `[SEQUENTIAL, after T8]` (added 2026-11-06)
+  - **Behaviour:** REQ-ACF-13 (amended a/b/c) and REQ-ACF-30. Design: `design.md` § 3.1 "Event-glue
+    rules added after T7 run 2" and § 4.
+  - **Steps (TDD, one writer, branch `task/acf-t9-t7-run2-fixes` @ `.worktrees/acf-t9`):**
+    1. Diagnose line 2 first (`superpowers:systematic-debugging`): from the decompiled DX 25.2.4
+       assemblies, find why the "no request" branch still shows a menu (stale items / "no results"
+       row) for " a". Write the root cause in the task-log before any fix. If the fix needs XAML
+       outside the component or changes DX threshold semantics, stop and escalate.
+    2. Red: add Level A tests to `AutocompleteDXFieldLogicTests`:
+       - `// [AC] REQ-ACF-13`: `SearchQuery("  an  ")` → `"an"`; `SearchQuery("a   b")` → `"a b"`;
+         `SearchQuery(null)` → `""`; `ShouldRequestOptions(Editable, true, source, "  a")` → `false`;
+         `ShouldRequestOptions(Editable, true, source, "a  ")` → `false`; `ShouldRequestOptions(Editable, true, source, "a	")` → `false`;
+         `ShouldRequestOptions(Editable, true, source, " an ")` → `true`.
+       - `// [AC] REQ-ACF-30`: `ShouldForwardBlur(null, Editable, isPickBlur: true)` → `false`;
+         `ShouldForwardBlur(null, Editable, isPickBlur: false)` → `true` (the real blur after a pick-then-edit).
+       Run them: they fail on compile or assert.
+    3. Green: `SearchQuery` + the `ShouldRequestOptions` change + the `ShouldForwardBlur` parameter
+       (`design.md` § 4), using `NormalizeSearchQuery` from `MyVocaList.Extensions.Strings`. Existing
+       tests stay unchanged and green.
+    4. Component: `OnItemsRequested` uses `SearchQuery(e.Text)` for both checks and for `SearchAsync`;
+       apply the step 1 fix for REQ-ACF-13c. Build.
+    5. Component: REQ-ACF-30 in `OnSelectionChanged` / `OnUnfocused` (cursor to end, `Unfocus()`,
+       one-shot pick-blur flag). Confirm the DX 25.2 cursor member with Context7; on a mismatch, stop
+       and escalate. Build, then run the full `dotnet test`, then an Android build.
+  - **Tests (Level A):** step 2. Steps 4–5 are UI glue (Level C: build + code review + T7 run 3).
+    Record that no-test decision in the task-log.
+  - **Files owned:** `AutocompleteDXFieldLogic.cs`, `AutocompleteDXField.xaml(.cs)`,
+    `AutocompleteDXFieldLogicTests.cs`, and its own `## T9` section of `task-log.md`
+  - **Governance:** one consumer (PersonFormPage), not governed. Re-run the consumer grep before
+    starting; if SongFormPage binds the component first, the four gates apply.
+  - **Demo:** T7 run 3, lines 2 and 9 PASS on device. **Review lane:** Elevated
+
 ## Handed over to the song-form title-first item (not tasks here)
 
 `BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/`

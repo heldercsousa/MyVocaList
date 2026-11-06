@@ -148,7 +148,7 @@ Every agent uses these terms exactly. No synonyms.
   any of them:
   (a) the options-request glue (DX `ItemsRequested` handler);
   (b) routing a pick to the consumer's select command;
-  (c) forwarding blur-without-pick to the consumer's blur command;
+  (c) forwarding blur-without-pick to the consumer's blur command (the blur the component causes after a pick is not one, REQ-ACF-30c);
   (d) X handling and forwarding to the consumer's clear command;
   (e) resetting DX `SelectedItem` to `null` after every routed pick and on entering the picked state (BUG-061);
   (f) menu-open control (`IsDropDownOpen`);
@@ -201,6 +201,18 @@ Every agent uses these terms exactly. No synonyms.
   the constant, never a literal. Given an unlocked field, When the user types 1 character, or a space
   plus 1 character, Then no options are requested and the menu stays closed. When the trimmed text
   reaches 2 characters, Then options are requested once the debounce delay has passed.
+  *(Amended 2026-11-06, T7 run 2 line 2.)* "Trimmed" means the app-wide search normalisation
+  `StringExtensions.NormalizeSearchQuery` (`MyVocaList.Extensions/Strings/StringExtensions.cs:11`:
+  trim both ends, collapse inner whitespace runs to one space), the same helper the services use on
+  persist and search. The component SHALL:
+  (a) apply the length check to the normalised query;
+  (b) pass the normalised query, never the raw text, to `IMenuOptionSource.SearchAsync`;
+  (c) when the check fails, keep the menu closed: no options, no stale options from an earlier query,
+  and no "no results" row. DX `CharacterCountThreshold` counts raw characters, so DX still raises
+  the request for " a" or "  a"; the component must make that request show nothing.
+  Given an unlocked field, When the user types " a", "  a" or "a  ", Then no menu and no "no results"
+  row appear. When the user types "  an  ", Then the source receives "an".
+  No case or diacritic folding is added (constraints-registry § EF Core/SQLite HARD RULE).
 - **REQ-ACF-14: One shared debounce delay.**
   The debounce delay SHALL be `SearchConstants.AutocompleteDebounceMilliseconds = 300` (new), used by
   every instance. No consumer sets its own value. It replaces the literal `RequestDelay="300"` at
@@ -225,12 +237,24 @@ Every agent uses these terms exactly. No synonyms.
   today at `PersonFormPage.xaml.cs:44-45`).
 - **REQ-ACF-17: Person blur validation is unchanged.**
   WHEN the Full Name field blurs without a pick, the system SHALL run `ValidateNameCommand`
-  (the dirty-field rules of the Form Validation Standard), exactly as today (`PersonFormPage.xaml.cs:57-61`).
+  (the dirty-field rules of the Form Validation Standard), exactly as today (`PersonFormPage.xaml.cs:57-61`). The blur the component causes after a pick is not a blur without pick (REQ-ACF-30c).
 - **REQ-ACF-18: Create-mode autofocus is kept.**
   WHEN the New Singer form appears (not edit mode), the Full Name field SHALL receive focus
   (`PersonFormPage.xaml.cs:28-30`), with the keyboard shown and the placeholder visible. This holds
   even when the hosted DX editor is not yet ready at the moment the page calls `FocusEditor()`: the
   component SHALL then apply the focus as soon as the editor is ready (T7 run 1, line 1).
+- **REQ-ACF-30: A pick ends the input: the field drops focus (added 2026-11-06, T7 run 2 line 9).**
+  WHEN a pick is routed (REQ-ACF-11b), the component SHALL, after `SelectCommand` runs:
+  (a) move the cursor to the end of the field's text;
+  (b) remove focus from the editor, so the soft keyboard closes and the focused highlight goes;
+  (c) not forward that blur as a blur without pick: `BlurWithoutPickCommand` SHALL NOT run for it
+  (REQ-ACF-11c, -17). A later blur after the user edits again is forwarded as usual: Given a pick,
+  When the user taps the field, types, and blurs, Then `BlurWithoutPickCommand` runs.
+  (a) and (b) are verified on device (T7 run 3, line 9: keyboard closed, no highlight, cursor not at 0).
+  This holds with pick-lock on or off. Given the Person form, When the user picks a person, Then the
+  keyboard closes, no field stays highlighted, and `ValidateNameCommand` does not run for that pick.
+  When the user taps the field again, Then the cursor is never forced to position 0. Helder chose
+  option (b), "unfocus and close the keyboard", on 2026-11-06.
 
 ### G. Regression protection (carry-overs)
 
@@ -355,6 +379,20 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
   (`SongFormViewModel` `IsArtistDropDownOpen = false`) and resets `SelectedItem` after a pick and on
   `OnAppearing` (`SongFormPage.xaml.cs`). The component must reproduce that pattern (REQ-ACF-24/25).
 
+### Helder rulings — 2026-11-06 (after T7 run 2)
+
+- **Line 2:** "Search string must be trimmed at left and right, and extra spaces between words must be
+  replaced by 1 space only. There is a feature implemented in Extensions project that is used for this
+  purpose whenever data is persisted or searched. The same must happens in the autocomplete search."
+  → REQ-ACF-13 amended (`NormalizeSearchQuery`).
+- **Line 8:** the error stays until the field is fixed. That is the app-wide pattern and every entry,
+  autocomplete included, follows it. No change.
+- **Line 9:** after a pick the field keeps focus, the keyboard stays up and the cursor sits at 0.
+  Helder chose "unfocus and close the keyboard" → REQ-ACF-30.
+- **Extra issues F1–F3** (menu reappears on edit load / after a pick, duplicate singer without a pick,
+  birthday field) are tracked under persons, not here:
+  `Docs/Management/BusinessFeatures/persons/changes/2026-11-06-person-form-follow-ups-from-acf-t7-run-2/README.md`.
+
 ### Spec APPROVED — Helder, 2026-09-25
 
 Approved "as recommended", together with every open recommendation (Q10: the 300 ms debounce
@@ -377,3 +415,6 @@ process gates for this pipeline. On-device gates (T1 spike, T7 E2E) still requir
 | REQ-ACF-20, -21, -28 | `PersonFormViewModel` (unchanged members) | existing VM tests, unchanged |
 | REQ-ACF-23, -25, -26, -27 | component | T1 + T7 on-device, code review |
 | REQ-ACF-29 | component logic (`Mode`, `LockAfterPick`) + `PersonFormPage.xaml` | component logic tests (T8, Level A) + T7 re-run |
+| REQ-ACF-13 (a)(b) amended | component logic (`ShouldRequestOptions`, `SearchQuery`) + `OnItemsRequested` | component logic tests (T9, Level A) |
+| REQ-ACF-13 (c) | component `OnItemsRequested` glue | T7 run 3, line 2 |
+| REQ-ACF-30 | component logic (`ShouldForwardBlur`) + `OnSelectionChanged` / `OnUnfocused` | component logic test (T9, Level A) + T7 run 3, line 9 |

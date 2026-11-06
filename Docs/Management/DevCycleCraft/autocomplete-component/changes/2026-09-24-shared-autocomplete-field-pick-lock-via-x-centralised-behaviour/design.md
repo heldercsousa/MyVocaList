@@ -132,6 +132,27 @@ by Q3 and reinstated on 2026-11-05 (above).
   `editor.Handler is null` or `Focus()` returns `false`, it retries once the editor is ready, on its
   `HandlerChanged` or `Loaded`, whichever comes first, one-shot. The page call is unchanged.
 
+**Event-glue rules added after T7 run 2 (2026-11-06):**
+- **Normalised search text (REQ-ACF-13a/b).** `OnItemsRequested` computes
+  `query = AutocompleteDXFieldLogic.SearchQuery(e.Text)` once, uses it for both `ShouldRequestOptions`
+  checks, and passes it to `SearchAsync`.
+- **Below-threshold requests show nothing (REQ-ACF-13c).** Run 2 showed that with " a" / "  a" the
+  current "no request" branch (`NoOptions` returning `null` + `CloseMenuOnUiThread()`) still lets DX
+  show a menu: earlier results on the develop build, a "no results" row on the T7-prep build. The
+  root cause is not yet proven. Likely: DX opens its drop-down after the request delegate completes,
+  which is after our close, and a `null` result keeps the previous items or shows `NoResultsFoundText`.
+  T9 step 1 proves it (decompiled DX 25.2.4 `AsyncItemsSourceProvider` / `AutoCompleteEdit`, as in the
+  T4 decompiled-DLL findings), then applies the smallest fix that keeps the menu closed, for example
+  return an empty list and close the menu after DX has handled the result. A fix that needs XAML
+  outside the component, or a change in DX threshold semantics, is escalated to Helder first.
+- **A pick drops focus (REQ-ACF-30).** At the end of `OnSelectionChanged` (after `SelectCommand`,
+  the `SelectedItem` reset and the menu close), the component sets a one-shot `_pickBlurPending = true`,
+  moves the cursor to the end of the text (DX 25.2 member confirmed with Context7, e.g.
+  `CursorPosition`/`SelectionStart`), then calls `editor.Unfocus()`. `OnUnfocused` passes
+  `isPickBlur: _pickBlurPending` to `ShouldForwardBlur` and clears the flag. If no blur follows
+  (the editor was already unfocused), the flag is cleared on the next `UserInput` `TextChanged` or the
+  next focus, so a later real blur is never swallowed.
+
 Constants are not properties. The component reads `SearchConstants.MinimumLocalQueryLength` and
 `SearchConstants.AutocompleteDebounceMilliseconds` via `x:Static`.
 
@@ -180,10 +201,11 @@ option source, the artist/title lock hydration, and deleting the Song glue
 | `FieldMode Mode(bool isReadOnly, bool isLocked, string? text, bool isPickLockEnabled = true)` | `ReadOnly` if `isReadOnly` (**read-only wins**); else `Locked` if `isPickLockEnabled && isLocked && !string.IsNullOrWhiteSpace(text)`; else `Editable`. Every other rule and the lock mechanism use this, never the raw `IsLocked`/`IsReadOnly`. "Effectively locked" below means `Mode == Locked`. | ACF-05a, -12b |
 | `string BottomSupportingText(bool hasError, string? supportingText)` | `hasError ? "" : (supportingText ?? "")`. It is the value passed to DX `HelpText`; DX shows `ErrorText` while `HasError`. | ACF-12c |
 | `bool ShowClearIcon(FieldMode mode, string? text)` | `mode != ReadOnly && !string.IsNullOrEmpty(text)`. | ACF-07, -12b |
-| `bool ShouldRequestOptions(FieldMode mode, bool isSearchEnabled, IMenuOptionSource? source, string? query)` | `source != null && isSearchEnabled && mode == Editable && (query?.Trim().Length ?? 0) >= SearchConstants.MinimumLocalQueryLength`. The trimmed-length check is needed because DX `CharacterCountThreshold` counts raw characters (" a" would pass it). | ACF-04, -12a, -12b, -13 |
+| `string SearchQuery(string? text)` *(T9)* | `(text ?? "").NormalizeSearchQuery()` — the app-wide helper (`MyVocaList.Extensions/Strings/StringExtensions.cs`), never a local re-implementation. It is the text passed to `SearchAsync`. | ACF-13 (a)(b) |
+| `bool ShouldRequestOptions(FieldMode mode, bool isSearchEnabled, IMenuOptionSource? source, string? query)` | `source != null && isSearchEnabled && mode == Editable && SearchQuery(query).Length >= SearchConstants.MinimumLocalQueryLength` *(T9: was `query?.Trim().Length`)*. The normalised-length check is needed because DX `CharacterCountThreshold` counts raw characters (" a" would pass it). | ACF-04, -12a, -12b, -13 |
 | `PickRoute RoutePick(object? selectedItem)` | `Select` if `selectedItem is AutocompleteSuggestion`; else `None`. | ACF-11b |
 | `bool LockAfterPick(PickRoute route, bool isPickLockEnabled = true)` | `route == Select && isPickLockEnabled`. | ACF-01, -29 |
-| `bool ShouldForwardBlur(object? selectedItem, FieldMode mode)` | `selectedItem is null && mode == Editable`. | ACF-11c, -12b, -17 |
+| `bool ShouldForwardBlur(object? selectedItem, FieldMode mode, bool isPickBlur = false)` | `!isPickBlur && selectedItem is null && mode == Editable`. *(T9: `isPickBlur` is true for the one blur the component causes itself after a pick, REQ-ACF-30c.)* | ACF-11c, -12b, -17, -30 |
 | `string? TextToRestore(AutoCompleteEditTextChangeReason reason, FieldMode mode, string lockedText)` | *Only if mechanism C is accepted (§ 5).* `lockedText` when `reason == UserInput && mode == Locked`; else `null`. (Read-only always uses DX `IsReadOnly`, whichever mechanism is chosen.) | ACF-01 |
 
 The `isPickLockEnabled` parameters (2026-11-05, REQ-ACF-29) default to `true`, so every existing call

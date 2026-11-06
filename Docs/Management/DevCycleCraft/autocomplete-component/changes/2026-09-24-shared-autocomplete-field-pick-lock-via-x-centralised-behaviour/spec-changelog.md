@@ -26,3 +26,16 @@ is made in place and listed here.
 - **tasks.md:** T7 run 1 note, and the new T8 (fixes + opt-out).
 - **plan.md:** note on the "pick-lock always on" constraint.
 - 2026-11-05 (later): spec re-review PASS; should-fixes applied (REQ-ACF-24 ItemSelected vs ProgrammaticChange split, -29(c) read-only exception, -18 traceability row, T7 line 4 reworded, T8 owns its task-log section).
+
+## 2026-11-06: T7 run 2 outcome
+
+- **Trigger:** T7 run 2 (Helder, Android). Line 2 failed (" a" / "  a" shows a menu) and line 9
+  failed (after a pick the field keeps focus, the keyboard stays up, the cursor is at 0). Details:
+  `task-log.md` § T7, "Run 2".
+- **Rulings:** search text uses the app-wide `NormalizeSearchQuery`; line 8 confirmed as the
+  app-wide pattern; after a pick the field drops focus (Helder chose option (b)).
+- **requirements.md:** REQ-ACF-13 amended (a/b/c); new REQ-ACF-30; § Helder rulings — 2026-11-06;
+  traceability rows.
+- **design.md:** § 3.1 event-glue rules after T7 run 2; § 4 `SearchQuery`, `ShouldRequestOptions`,
+  `ShouldForwardBlur(…, isPickBlur)`.
+- **tasks.md:** T7 run 2 note and the new T9.
