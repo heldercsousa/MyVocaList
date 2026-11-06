@@ -2223,3 +2223,65 @@ File: 38 -> 39 `[Fact]` tests (one added, one renamed and retargeted, none remov
 - None blocking. `python3` is not installed on this host (only relevant to my scratch checkpoint edit; no project impact).
 - `tasks.md` not ticked and LEDGER not touched (orchestrator owns them), per briefing.
 - `.sln` unchanged (no `Docs/` files created or deleted).
+
+---
+## 5.4 Red: VM edit-mode title and hydration (Tester)
+**Plan:** `tasks.md` § Phase 5, task 5.4 (Red only; the Builder does Green)
+**Status:** Red (compile-level: `SongFormViewModel.IsTitleSearchEnabled` does not exist)
+**Branch:** `task/sft-5.4-vm-edit-mode` (base `develop`)
+
+### Changed files:
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
+
+### Red evidence
+- **Build (`dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj`):** exactly 2 errors, both `CS1061 SongFormViewModel does not contain a definition for IsTitleSearchEnabled` (`EditMode_TitleSearchIsDisabled_ForApiAndManualSongs`, `AddMode_TitleSearchIsEnabled`). The test project does not compile, so this commit is a compile-level Red and is committed with `--no-verify`.
+- **Runtime evidence (other new tests):** the two `IsTitleSearchEnabled` tests were excluded from a local build for this run only (guard reverted before commit). Filter `EditMode_|SaveCommand_NewAttempt|Decisions_|UserEdit_`: 13 run, 12 passed, 1 failed.
+  - **FAIL** `EditMode_SaveEditedTitle_SendsNewTitleAndKeepsIdentity(apiSourced: True)`: `Assert.Null()` on `request.ExternalId`, expected `null`, actual `"dz-99"`. Cause: `SongFormViewModel.BuildSaveRequest` forwards the hydrated `SelectedExternalId` / `SelectedProvider` in edit mode. design.md § 5 flow F6 says the edit form passes `null` for both ("keep existing"; `SongService.UpdateSongAsync` treats `null` as keep, `SongService.cs:235-239`).
+- **Already passing (regression guards, not Red):** `EditMode_TitleIsNotPickLocked_ForApiAndManualSongs` (x2), `EditMode_SaveEditedTitle_SendsNewTitleAndKeepsIdentity(apiSourced: False)`, `EditMode_Hydration_ShowsStoredTitle_AndQueriesNoTitleSearch` (x2), `EditMode_EditingTitle_QueriesNoTitleSearch`; the REQ-SFT-54 lifecycle tests below.
+
+### New and changed tests
+| Test | AC | State |
+|------|----|-------|
+| `EditMode_TitleSearchIsDisabled_ForApiAndManualSongs` (x2 rows) | REQ-SFT-27 | Red (compile, CS1061) |
+| `AddMode_TitleSearchIsEnabled` | REQ-SFT-02 | Red (compile, CS1061) |
+| `EditMode_SaveEditedTitle_SendsNewTitleAndKeepsIdentity` (x2 rows) | REQ-SFT-27 | API row Red (`ExternalId` "dz-99", expected null); manual row passes |
+| `EditMode_TitleIsNotPickLocked_ForApiAndManualSongs` (x2 rows) | REQ-SFT-27 | Passes (guard) |
+| `EditMode_Hydration_ShowsStoredTitle_AndQueriesNoTitleSearch` (x2 rows) | REQ-SFT-27 | Passes (guard) |
+| `EditMode_EditingTitle_QueriesNoTitleSearch` | REQ-SFT-27 | Passes (guard) |
+| `Decisions_PersistAcrossReinvocations_WithinOneSaveAttempt`, `UserEdit_ClearsArtistDecision` (x2), `UserEdit_ClearsSongDecision` (x2), `SaveCommand_NewAttempt_StartsWithNoDecisions` | REQ-SFT-54 (re-tagged from REQ-SFT-51, bodies unchanged) | Pass |
+
+Helper additions (test-only): `StoredSong(bool apiSourced)`, `CreateEditSutAsync(...)`, placed at the end of the test class under the `Task 5.4` section.
+
+### AC traceability matrix
+| AC | Criterion | Implementation location | Test method |
+|----|-----------|-------------------------|-------------|
+| REQ-SFT-27 | Title editable in edit mode, API and manual (no pick lock) | VM `IsTitleLocked` (the VM has no read-only member; `IsReadOnly` is page-level, 5.5) | `EditMode_TitleIsNotPickLocked_ForApiAndManualSongs` |
+| REQ-SFT-27 | Title search off in edit mode | VM `IsTitleSearchEnabled` (**missing**) | `EditMode_TitleSearchIsDisabled_ForApiAndManualSongs` |
+| REQ-SFT-27 | Edited title saved; identity kept (null = keep) | VM `BuildSaveRequest` (**edit-mode identity must be null**) | `EditMode_SaveEditedTitle_SendsNewTitleAndKeepsIdentity` |
+| REQ-SFT-27 | Hydration shows stored title; no title search | VM `LoadSongForEditAsync` | `EditMode_Hydration_ShowsStoredTitle_AndQueriesNoTitleSearch` |
+| REQ-SFT-27 | Editing title triggers no title search | VM `SongTitle` path | `EditMode_EditingTitle_QueriesNoTitleSearch` |
+| REQ-SFT-28 | Stored artist loads picked, no artist search | VM `LoadSongForEditAsync` | Existing, not duplicated: `LoadSongForEdit_ExistingSong_HydratesArtistAsLocked` (tagged REQ-ACREATE-14), `LoadSongForEdit_ApiImportedSong_LocksArtistField` (tagged REQ-SFT-28; asserts `IsArtistLocked` only) |
+| REQ-SFT-28 | Save after hydration keeps the artist link | VM `BuildSaveRequest` | Existing: `SaveAsync_EditMode_AfterHydration_PreservesArtistLink` (tagged REQ-SFT-28) |
+| REQ-SFT-02 | Title is the search box in add mode | VM `IsTitleSearchEnabled` (**missing**) | `AddMode_TitleSearchIsEnabled` |
+| REQ-SFT-01 | Field order Title, Artist, Version... | `SongFormPage.xaml` (5.5) | No VM test: the order is page markup. Covered at 5.5 (XAML + device check) |
+| REQ-SFT-54 | Decisions held for one attempt, re-sent, cleared on Artist/Title edit, fresh tap starts clean | VM `ClearSaveDecisions`, `RunSaveAsync` | `Decisions_PersistAcrossReinvocations_WithinOneSaveAttempt`, `UserEdit_ClearsArtistDecision`, `UserEdit_ClearsSongDecision`, `SaveCommand_NewAttempt_StartsWithNoDecisions` |
+
+### Items checked (task brief)
+1. **Read-only flag:** the VM has no `IsTitleReadOnly` / `IsReadOnly`. The closest existing member is `IsTitleLocked` (the remote-pick lock, REQ-SFT-06). The test asserts it is `false` in edit mode for both song kinds. This mapping is an assumption and is flagged for review.
+2. **`IsTitleSearchEnabled`:** the member does not exist yet (the design lists it as `=> !IsEditMode`). Red by compile error.
+3. **Save identity:** see Red evidence. The spec (design.md § 5 F6) is explicit that the edit form sends `null`. The VM currently sends the stored identity. Functionally harmless (same values written; the REQ-SFT-26 check excludes the song itself), but it does not match the spec.
+4. **Hydration:** covered by existing tests (artist) plus the new title/no-search tests above.
+5. **Stale docstring near `:433`:** not found. The test file has no read-only or pick-lock wording in any docstring or comment. Line 433 is now the comment on `SelectTitle_RemoteOption_FillsTitleAndArtistAndPendingIdentity_WritesNothing`, which is accurate. No change made.
+6. **`:787` HasManualEdits rewrite:** already done in 3.2b. No `HasManualEdits` references remain in the test file. `LoadSongForEdit_ApiImportedSong_LocksArtistField` is consistent with REQ-SFT-28.
+7. **REQ-SFT-54 re-tags:** done at `:1152`, `:1173`, `:1198`, `:1223` (comment-only).
+
+### Builder must change (production, Green)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs`:
+  1. Add `public bool IsTitleSearchEnabled => !IsEditMode;` and raise `PropertyChanged` for it inside `OnSongIdChanged` next to the existing `IsEditMode` notification.
+  2. In `BuildSaveRequest`, pass `null` for `ExternalProvider` and `ExternalId` when `IsEditMode` (keep existing). Add mode is unchanged.
+- No other production member is needed for these tests.
+
+### Notes
+- Commit uses `--no-verify` because the pre-commit hook runs the full test suite and the test project does not compile until the Builder adds `IsTitleSearchEnabled`.
+- Tests were not run against a full suite; the 13-test run above is the filtered subset.
