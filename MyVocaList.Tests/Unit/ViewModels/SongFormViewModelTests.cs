@@ -1149,7 +1149,7 @@ public class SongFormViewModelTests
         Assert.Single(requests);
     }
 
-    // [AC] REQ-SFT-51: within one Save attempt the VM keeps both decisions and sends them on every re-invocation.
+    // [AC] REQ-SFT-54: within one Save attempt the VM keeps both decisions and sends them on every re-invocation.
     [Fact]
     public async Task Decisions_PersistAcrossReinvocations_WithinOneSaveAttempt()
     {
@@ -1170,7 +1170,7 @@ public class SongFormViewModelTests
         Assert.Equal(SongDecision.SaveAsNewVersion, requests[2].SongDecision);
     }
 
-    // [AC] REQ-SFT-51: a user edit of Artist or Title clears the artist decision before the next re-invocation.
+    // [AC] REQ-SFT-54: a user edit of Artist or Title clears the artist decision before the next re-invocation.
     [Theory]
     [InlineData("artist")]
     [InlineData("title")]
@@ -1195,7 +1195,7 @@ public class SongFormViewModelTests
         Assert.Equal(SongDecision.SaveAsNewSong, requests[2].SongDecision);
     }
 
-    // [AC] REQ-SFT-51: a user edit of Artist or Title clears the song decision before the next re-invocation.
+    // [AC] REQ-SFT-54: a user edit of Artist or Title clears the song decision before the next re-invocation.
     [Theory]
     [InlineData("artist")]
     [InlineData("title")]
@@ -1220,7 +1220,7 @@ public class SongFormViewModelTests
         Assert.Equal(new ArtistDecision.UseExisting(3), requests[2].ArtistDecision);
     }
 
-    // [AC] REQ-SFT-51: a new Save attempt (the user's Save tap) starts with no decisions.
+    // [AC] REQ-SFT-54: a new Save attempt (the user's Save tap) starts with no decisions.
     [Fact]
     public async Task SaveCommand_NewAttempt_StartsWithNoDecisions()
     {
@@ -2105,5 +2105,118 @@ public class SongFormViewModelTests
         var request = Assert.Single(requests);
         Assert.Equal(42, request.SongId);
         Assert.Equal(7, request.ArtistId);
+    }
+
+    // ── Task 5.4: edit-mode title and hydration (REQ-SFT-27, REQ-SFT-02) ─────────────────────
+
+    /// <summary>A stored song: API-sourced (Deezer identity) or manual (no identity), artist "Queen".</summary>
+    private static Song StoredSong(bool apiSourced) => new()
+    {
+        Id = 42,
+        ArtistId = 7,
+        Title = "Stored Title",
+        ExternalId = apiSourced ? "dz-99" : null,
+        ExternalProvider = apiSourced ? "Deezer" : null,
+        OriginalArtist = new Artist { Id = 7, Name = "Queen" }
+    };
+
+    /// <summary>An edit-form VM hydrated from <paramref name="song"/>: Shell query applied, load awaited, hydration ended.</summary>
+    private async Task<SongFormViewModel> CreateEditSutAsync(
+        Song song, Mock<ISongService> songService, Mock<IArtistService>? artistService = null)
+    {
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(song.Id, It.IsAny<CancellationToken>())).ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage,
+            songService: songService, artistService: artistService);
+        sut.SongIdRaw = song.Id.ToString();
+        await Task.Yield();
+        sut.CompleteHydration();
+        return sut;
+    }
+
+    // [AC] REQ-SFT-27: in edit mode Title is editable text for an API-sourced and for a manual song; the VM never pick-locks it.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task EditMode_TitleIsNotPickLocked_ForApiAndManualSongs(bool apiSourced)
+    {
+        var song = StoredSong(apiSourced);
+        var sut = await CreateEditSutAsync(song, MakeSongServiceWithSong(song));
+
+        Assert.False(sut.IsTitleLocked);
+    }
+
+    // [AC] REQ-SFT-27: in edit mode Title has no search (IsTitleSearchEnabled is false) for an API-sourced and for a manual song.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task EditMode_TitleSearchIsDisabled_ForApiAndManualSongs(bool apiSourced)
+    {
+        var song = StoredSong(apiSourced);
+        var sut = await CreateEditSutAsync(song, MakeSongServiceWithSong(song));
+
+        Assert.False(sut.IsTitleSearchEnabled);
+    }
+
+    // [AC] REQ-SFT-02: in add mode Title is the search box (IsTitleSearchEnabled is true).
+    [Fact]
+    public void AddMode_TitleSearchIsEnabled()
+    {
+        var sut = CreateAddFormSut();
+
+        Assert.True(sut.IsTitleSearchEnabled);
+    }
+
+    // [AC] REQ-SFT-27: saving an edited Title sends the new title and leaves the external identity to the Service
+    // ("keep existing" = null, design.md § 5 flow F6). Manual-song row: identity is null already.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task EditMode_SaveEditedTitle_SendsNewTitleAndKeepsIdentity(bool apiSourced)
+    {
+        var song = StoredSong(apiSourced);
+        var requests = new List<SongFormSaveRequest>();
+        var songService = MakeSongServiceWithSong(song);
+        SetupSave(songService, requests, _ => SavedOutcome(42));
+        var sut = await CreateEditSutAsync(song, songService);
+
+        sut.SongTitle = "Corrected Title";
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        var request = Assert.Single(requests);
+        Assert.Equal(42, request.SongId);
+        Assert.Equal("Corrected Title", request.Title);
+        Assert.Null(request.ExternalId);
+        Assert.Null(request.ExternalProvider);
+    }
+
+    // [AC] REQ-SFT-27: edit-mode hydration shows the stored Title as editable text and queries no title search.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task EditMode_Hydration_ShowsStoredTitle_AndQueriesNoTitleSearch(bool apiSourced)
+    {
+        var song = StoredSong(apiSourced);
+        var sut = await CreateEditSutAsync(song, MakeSongServiceWithSong(song));
+
+        Assert.Equal("Stored Title", sut.SongTitle);
+        _suggestionsMock.Verify(s => s.SearchTitleLocalAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _suggestionsMock.Verify(s => s.SearchTitleRemoteAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // [AC] REQ-SFT-27: editing Title in edit mode (the Field has no search) never calls the title suggestion service.
+    [Fact]
+    public async Task EditMode_EditingTitle_QueriesNoTitleSearch()
+    {
+        var song = StoredSong(apiSourced: true);
+        var sut = await CreateEditSutAsync(song, MakeSongServiceWithSong(song));
+
+        sut.SongTitle = "Corrected Title";
+
+        _suggestionsMock.Verify(s => s.SearchTitleLocalAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _suggestionsMock.Verify(s => s.SearchTitleRemoteAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }
