@@ -1,4 +1,9 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Contracts.DTOs.Suggestions;
+using MyVocaList.Contracts.Models;
+using MyVocaList.Navigation;
+using MyVocaList.Services;
+using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -6,6 +11,7 @@ namespace MyVocaList.Tests.Unit.ViewModels;
 /// Level A tests for the Artist form validation standard (Task 05).
 /// Requirement IDs (R1–R8) are derived from the Form Validation Standard in
 /// `.claude/library/dialogs-validation.md` (sourced from the ui-form-validation-guide).
+/// Name search (Task 6.2, REQ-SFT-47…50, REQ-SFT-06/09) is covered from the "Name search" section onward.
 /// </summary>
 public class ArtistFormViewModelTests
 {
@@ -13,9 +19,12 @@ public class ArtistFormViewModelTests
     private readonly Mock<ISnackbarComponent> _snackMock = new();
     private readonly Mock<ILogger<ArtistFormViewModel>> _loggerMock = new();
     private readonly Mock<IMessenger> _messengerMock = new();
+    private readonly Mock<INavigationService> _navigationMock = new();
+    private readonly Mock<IArtistSuggestionService> _suggestionsMock = new();
 
     private ArtistFormViewModel CreateSut() =>
-        new(_serviceMock.Object, _snackMock.Object, _loggerMock.Object, _messengerMock.Object);
+        new(_serviceMock.Object, _snackMock.Object, _loggerMock.Object, _messengerMock.Object,
+            _navigationMock.Object, _suggestionsMock.Object);
 
     // ── Blur validation (ValidateNameCommand) ────────────────────────────────
 
@@ -239,5 +248,302 @@ public class ArtistFormViewModelTests
 
         _serviceMock.Verify(s => s.ShouldShowCharacterCounter(49), Times.Once);
         _serviceMock.Verify(s => s.ShouldShowCharacterCounter(55), Times.Never);
+    }
+
+    // ── Name search (Task 6.2: REQ-SFT-47…50, REQ-SFT-06, REQ-SFT-09) ──────────
+    // Notes are the Artist-form wording approved under Q18 (REQ-SFT-47) and the Song-form unavailable
+    // text, verbatim (REQ-SFT-47 note). Thresholds and dedup are owned by ArtistSuggestionService (6.1)
+    // and are not retested here.
+
+    private const string ArtistOfflineNote = "You're offline — showing artists from your library only.";
+    private const string UnavailableNote = "Online search isn't available right now — showing your library only.";
+
+    private static ArtistSuggestionDto LocalArtist(int id, string name) =>
+        new(id, name, null, null, false);
+
+    private static ArtistSuggestionDto RemoteArtist(string name, string externalId = "dz-9") =>
+        new(null, name, externalId, "Deezer", true);
+
+    private static AutocompleteSuggestion Pick(ArtistSuggestionDto dto) =>
+        new(dto.Name, string.Empty, dto);
+
+    private static IReadOnlyList<ArtistSuggestionDto> NoRows() => Array.Empty<ArtistSuggestionDto>();
+
+    private static ArtistRemoteSearchResult RemoteResult(RemoteSearchStatus status, params ArtistSuggestionDto[] rows) =>
+        new(rows, status);
+
+    /// <summary>An add-form VM past hydration (Shell has applied the query properties).</summary>
+    private ArtistFormViewModel CreateAddFormSut()
+    {
+        var sut = CreateSut();
+        sut.CompleteHydration();
+        return sut;
+    }
+
+    private void SetupNameSearch(string query, IReadOnlyList<ArtistSuggestionDto> local, ArtistRemoteSearchResult remote)
+    {
+        _suggestionsMock
+            .Setup(s => s.SearchNameLocalAsync(query, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(local);
+        _suggestionsMock
+            .Setup(s => s.SearchNameRemoteAsync(query, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(remote);
+    }
+
+    // ── Option source: local first, then Deezer ────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-SFT-47: local artist options come first ("In your library"), then Deezer options ("Deezer").
+    public async Task NameOptionSource_LocalThenRemote_LocalRowsFirstWithSupportingText()
+    {
+        var sut = CreateAddFormSut();
+        SetupNameSearch("metallica",
+            new[] { LocalArtist(5, "Metallica") },
+            RemoteResult(RemoteSearchStatus.Ok, RemoteArtist("Metallica Tribute")));
+
+        var options = await sut.NameOptionSource.SearchAsync("metallica", CancellationToken.None);
+
+        Assert.Collection(options,
+            o => { Assert.Equal("Metallica", o.Headline); Assert.Equal("In your library", o.SupportingText); },
+            o => { Assert.Equal("Metallica Tribute", o.Headline); Assert.Equal("Deezer", o.SupportingText); });
+    }
+
+    // ── Local pick opens the artist ────────────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-SFT-48: picking a local artist navigates to that artist's edit form, replacing the add form.
+    public async Task SelectName_LocalPick_NavigatesToArtistEditFormReplacingAddForm()
+    {
+        var sut = CreateAddFormSut();
+
+        await sut.SelectNameCommand.ExecuteAsync(Pick(LocalArtist(5, "Metallica")));
+
+        _navigationMock.Verify(n => n.GoToAsync($"../{Routes.ArtistForm}?artistId=5&artistName=Metallica"), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-48: the local artist name in the route is URI-escaped.
+    public async Task SelectName_LocalPickWithSpecialCharacters_EscapesArtistNameInRoute()
+    {
+        var sut = CreateAddFormSut();
+        const string name = "Guns N' Roses & Co";
+
+        await sut.SelectNameCommand.ExecuteAsync(Pick(LocalArtist(7, name)));
+
+        _navigationMock.Verify(
+            n => n.GoToAsync($"../{Routes.ArtistForm}?artistId=7&artistName={Uri.EscapeDataString(name)}"),
+            Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-48: a local pick only navigates; it does not fill Name or create anything.
+    public async Task SelectName_LocalPick_DoesNotFillNameOrCreate()
+    {
+        var sut = CreateAddFormSut();
+
+        await sut.SelectNameCommand.ExecuteAsync(Pick(LocalArtist(5, "Metallica")));
+
+        Assert.Equal(string.Empty, sut.ArtistName);
+        Assert.False(sut.IsNameLocked);
+        _serviceMock.Verify(
+            s => s.CreateArtistAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    // ── Deezer pick fills the name only ────────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-SFT-49: picking a Deezer artist fills Name with the provider's name and locks it; nothing navigates.
+    public async Task SelectName_DeezerPick_FillsNameAndLocksWithoutNavigating()
+    {
+        var sut = CreateAddFormSut();
+
+        await sut.SelectNameCommand.ExecuteAsync(Pick(RemoteArtist("Metallica Tribute")));
+
+        Assert.Equal("Metallica Tribute", sut.ArtistName);
+        Assert.True(sut.IsNameLocked);
+        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-49: the Deezer artist id and provider are not stored; Save creates the artist with the name only.
+    public async Task SelectName_DeezerPickThenSave_CreatesWithNameOnlyNoExternalIdentity()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectNameCommand.ExecuteAsync(Pick(RemoteArtist("Metallica Tribute", externalId: "dz-9")));
+        _serviceMock.Setup(s => s.ValidateNameInput("Metallica Tribute")).Returns((true, ""));
+        _serviceMock
+            .Setup(s => s.CreateArtistAsync("Metallica Tribute", null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, "Artist 'Metallica Tribute' created successfully", new Artist { Name = "Metallica Tribute" }));
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        _serviceMock.Verify(
+            s => s.CreateArtistAsync("Metallica Tribute", null, null, It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-49: X on Name empties the picked name and unlocks the field.
+    public async Task ClearName_AfterDeezerPick_EmptiesNameAndUnlocks()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectNameCommand.ExecuteAsync(Pick(RemoteArtist("Metallica Tribute")));
+
+        sut.ClearNameCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.ArtistName);
+        Assert.False(sut.IsNameLocked);
+    }
+
+    // ── Edit mode: no search, rename unchanged ─────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-SFT-47: in edit mode Name is not a search field (IsNameSearchEnabled is false).
+    public void IsNameSearchEnabled_EditMode_IsFalse()
+    {
+        var sut = CreateSut();
+        sut.ArtistId = 5;
+
+        Assert.False(sut.IsNameSearchEnabled);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-47: in add mode Name is the search field (IsNameSearchEnabled is true).
+    public void IsNameSearchEnabled_AddMode_IsTrue()
+    {
+        var sut = CreateSut();
+
+        Assert.True(sut.IsNameSearchEnabled);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-47: in edit mode the Name option source issues no search and returns no options.
+    public async Task NameOptionSource_EditMode_IssuesNoSearch()
+    {
+        var sut = CreateSut();
+        sut.ArtistId = 5;
+
+        var options = await sut.NameOptionSource.SearchAsync("metallica", CancellationToken.None);
+
+        Assert.Empty(options);
+        _suggestionsMock.Verify(s => s.SearchNameLocalAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _suggestionsMock.Verify(s => s.SearchNameRemoteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-47: in edit mode Name stays editable (rename unchanged): Save updates the artist.
+    public async Task SaveCommand_EditModeRename_CallsUpdate()
+    {
+        var sut = CreateAddFormSut();
+        sut.ArtistId = 5;
+        sut.ArtistName = "Metallica Live";
+        _serviceMock.Setup(s => s.ValidateNameInput("Metallica Live")).Returns((true, ""));
+        _serviceMock
+            .Setup(s => s.UpdateArtistAsync(5, "Metallica Live", It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, "Artist updated"));
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        _serviceMock.Verify(s => s.UpdateArtistAsync(5, "Metallica Live", It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    // ── NameSupportingText from the remote status ──────────────────────────────
+
+    [Fact]
+    // [AC] REQ-SFT-47: Offline status sets NameSupportingText to the artist offline note (Q18 wording).
+    public async Task NameOptionSource_StatusOffline_SetsArtistOfflineNote()
+    {
+        var sut = CreateAddFormSut();
+        SetupNameSearch("metallica", NoRows(), RemoteResult(RemoteSearchStatus.Offline));
+
+        await sut.NameOptionSource.SearchAsync("metallica", CancellationToken.None);
+
+        Assert.Equal(ArtistOfflineNote, sut.NameSupportingText);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-47: Unavailable status sets NameSupportingText to the unavailable note (Song-form text, verbatim).
+    public async Task NameOptionSource_StatusUnavailable_SetsUnavailableNote()
+    {
+        var sut = CreateAddFormSut();
+        SetupNameSearch("metallica", NoRows(), RemoteResult(RemoteSearchStatus.Unavailable));
+
+        await sut.NameOptionSource.SearchAsync("metallica", CancellationToken.None);
+
+        Assert.Equal(UnavailableNote, sut.NameSupportingText);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-06: an Ok status (including zero results) clears the note.
+    public async Task NameOptionSource_OfflineThenOk_ClearsNote()
+    {
+        var sut = CreateAddFormSut();
+        SetupNameSearch("metallica", NoRows(), RemoteResult(RemoteSearchStatus.Offline));
+        await sut.NameOptionSource.SearchAsync("metallica", CancellationToken.None);
+        Assert.Equal(ArtistOfflineNote, sut.NameSupportingText);
+
+        SetupNameSearch("metallica", NoRows(), RemoteResult(RemoteSearchStatus.Ok));
+        await sut.NameOptionSource.SearchAsync("metallica", CancellationToken.None);
+
+        Assert.Equal(string.Empty, sut.NameSupportingText);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-06: a query shorter than the remote threshold leaves the current note as it is.
+    public async Task NameOptionSource_ShortQueryAfterOffline_KeepsNote()
+    {
+        var sut = CreateAddFormSut();
+        SetupNameSearch("metallica", NoRows(), RemoteResult(RemoteSearchStatus.Offline));
+        await sut.NameOptionSource.SearchAsync("metallica", CancellationToken.None);
+
+        SetupNameSearch("me", NoRows(), RemoteResult(RemoteSearchStatus.Ok));
+        await sut.NameOptionSource.SearchAsync("me", CancellationToken.None);
+
+        Assert.Equal(ArtistOfflineNote, sut.NameSupportingText);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-06: emptying Name (X on Name) clears the note.
+    public async Task ClearName_ClearsNameSupportingText()
+    {
+        var sut = CreateAddFormSut();
+        SetupNameSearch("metallica", NoRows(), RemoteResult(RemoteSearchStatus.Unavailable));
+        await sut.NameOptionSource.SearchAsync("metallica", CancellationToken.None);
+        Assert.Equal(UnavailableNote, sut.NameSupportingText);
+
+        sut.ClearNameCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.NameSupportingText);
+    }
+
+    // ── Cancellation (latest query wins) ───────────────────────────────────────
+
+    [Fact]
+    // [AC] REQ-SFT-09: the caller's CancellationToken is forwarded to the remote call.
+    public async Task NameOptionSource_ForwardsCancellationTokenToRemote()
+    {
+        var sut = CreateAddFormSut();
+        using var cts = new CancellationTokenSource();
+        SetupNameSearch("metallica", NoRows(), RemoteResult(RemoteSearchStatus.Ok));
+
+        await sut.NameOptionSource.SearchAsync("metallica", cts.Token);
+
+        _suggestionsMock.Verify(s => s.SearchNameRemoteAsync("metallica", cts.Token), Times.Once);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-09: a cancelled (stale) query throws and never touches NameSupportingText.
+    public async Task NameOptionSource_CancelledQuery_ThrowsAndLeavesNoteUntouched()
+    {
+        var sut = CreateAddFormSut();
+        using var cts = new CancellationTokenSource();
+        SetupNameSearch("metallica", NoRows(), RemoteResult(RemoteSearchStatus.Unavailable));
+        cts.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => sut.NameOptionSource.SearchAsync("metallica", cts.Token));
+
+        Assert.Equal(string.Empty, sut.NameSupportingText);
     }
 }
