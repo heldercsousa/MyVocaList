@@ -2285,3 +2285,40 @@ Helper additions (test-only): `StoredSong(bool apiSourced)`, `CreateEditSutAsync
 ### Notes
 - Commit uses `--no-verify` because the pre-commit hook runs the full test suite and the test project does not compile until the Builder adds `IsTitleSearchEnabled`.
 - Tests were not run against a full suite; the 13-test run above is the filtered subset.
+
+## 5.4 Green: VM edit-mode title and hydration (Builder)
+**Plan:** `tasks.md` § Phase 5, task 5.4 (Green; Red at `3f2c83fc`)
+**Status:** To Review
+**Branch:** `task/sft-5.4-vm-edit-mode` (base `develop`)
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
+
+### Production change
+1. `public bool IsTitleSearchEnabled => !IsEditMode;` added after `PageTitle` (REQ-SFT-27/02). `OnSongIdChanged` raises `PropertyChanged` for it next to the `IsEditMode` notification. The file notifies `IsEditMode` manually (no `[NotifyPropertyChangedFor]`), so the new property follows that pattern.
+2. `BuildSaveRequest`: `ExternalProvider` and `ExternalId` are `null` when `IsEditMode` (keep stored identity, design.md § 5 F6). Add mode is unchanged.
+
+### Spec check (read-only)
+- `Services/SongService.cs:455-461`: `SaveFromFormAsync` edit path calls `UpdateSongCoreAsync` with `externalId: null, externalProvider: null`, and `UpdateSongCoreAsync` (lines 236-239) writes identity only when non-null. Null = keep, confirmed. The request's identity is not read in edit mode at all, so the VM change is behaviour-neutral at the DB level; it aligns the request with the spec.
+- `IsTitleLocked`: no `UI/` XAML or code-behind binds it (grep of `MyVocaList/UI`). The VM still sets it only on remote pick (`ApplyRemotePick`) and clears it on Keep editing / ClearTitle. Edit mode never sets it, so the Tester's `IsTitleLocked == false` assertion holds. Page-level read-only behaviour is 5.5.
+
+### Build and test evidence
+- `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj`: 0 errors (149 warnings, pre-existing package-advisory warnings).
+- Filter `SongFormViewModelTests` + `EditMode_|AddMode_|SaveCommand_NewAttempt|Decisions_|UserEdit_`: 19 passed, 0 failed.
+- Full `MyVocaList.Tests`: 884 passed, 0 failed, 0 skipped.
+
+### AC traceability (5.4 rows)
+| AC | Criterion | Implementation location | Test method |
+|----|-----------|-------------------------|-------------|
+| REQ-SFT-27 | Title not pick-locked in edit mode | VM `IsTitleLocked` untouched by edit hydration | `EditMode_TitleIsNotPickLocked_ForApiAndManualSongs` |
+| REQ-SFT-27 | Title search off in edit mode | VM `IsTitleSearchEnabled` | `EditMode_TitleSearchIsDisabled_ForApiAndManualSongs` |
+| REQ-SFT-27 | Edited title saved; identity kept (null) | VM `BuildSaveRequest` | `EditMode_SaveEditedTitle_SendsNewTitleAndKeepsIdentity` |
+| REQ-SFT-27 | Hydration shows stored title; no title search | VM `LoadSongForEditAsync` | `EditMode_Hydration_ShowsStoredTitle_AndQueriesNoTitleSearch` |
+| REQ-SFT-27 | Editing title triggers no title search | VM `SongTitle` path | `EditMode_EditingTitle_QueriesNoTitleSearch` |
+| REQ-SFT-02 | Title is the search box in add mode | VM `IsTitleSearchEnabled` | `AddMode_TitleSearchIsEnabled` |
+| REQ-SFT-54 | Decisions per attempt (regression guard) | VM `ClearSaveDecisions`, `RunSaveAsync` | `Decisions_*`, `UserEdit_*`, `SaveCommand_NewAttempt_StartsWithNoDecisions` |
+
+### Notes
+- Only the production VM file was edited; no test file, tasks.md, or LEDGER touched. `tasks.md` 5.4 checkbox is left for the orchestrator per the brief.
+- The Red commit used `--no-verify`; this Green commit runs the normal pre-commit hook.
