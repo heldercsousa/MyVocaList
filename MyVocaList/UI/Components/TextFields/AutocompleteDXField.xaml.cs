@@ -257,6 +257,10 @@ public partial class AutocompleteDXField : ContentView
     // Counts routed picks; OnItemsRequested compares it before/after its await (REQ-ACF-26).
     private int _pickCount;
 
+    // REQ-ACF-30: one-shot flag set when a pick drops focus, so the blur it causes is not forwarded.
+    // Cleared by that blur, by the next UserInput text change, or by the next focus.
+    private bool _pickBlurPending;
+
     // ── Constructor ────────────────────────────────────────────────────────
 
     /// <summary>Creates the field in its default, editable state.</summary>
@@ -359,12 +363,13 @@ public partial class AutocompleteDXField : ContentView
     // so UI-bound writes go through the Dispatcher. REQ-ACF-04, -12a, -12b, -13, -16, -22, -26.
     private void OnItemsRequested(object sender, ItemsRequestEventArgs e)
     {
-        var text = e.Text; // the request's own text, not editor.Text
+        // REQ-ACF-13 (a)(b): the request's own text, normalised once; used for both gates and the search.
+        var query = AutocompleteDXFieldLogic.SearchQuery(e.Text);
         var token = e.CancellationToken;
         var source = OptionSource;
         var pickCountAtStart = _pickCount;
 
-        if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, text))
+        if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, query))
         {
             e.RequestAsync = NoOptions;
             CloseMenuOnUiThread();
@@ -379,7 +384,7 @@ public partial class AutocompleteDXField : ContentView
             // cancelled request.
             try
             {
-                var options = await source.SearchAsync(text, token);
+                var options = await source.SearchAsync(query, token);
                 token.ThrowIfCancellationRequested();
 
                 // REQ-ACF-26: a pick routed while this search ran must not reopen the menu.
@@ -387,7 +392,7 @@ public partial class AutocompleteDXField : ContentView
                     return Array.Empty<AutocompleteSuggestion>();
 
                 // Review Focus 1: the field may have locked (or search turned off) while the search ran.
-                if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, text))
+                if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, query))
                 {
                     CloseMenuOnUiThread();
                     return null;
@@ -410,7 +415,17 @@ public partial class AutocompleteDXField : ContentView
     private void OnTextChanged(object sender, AutoCompleteEditTextChangedEventArgs e)
     {
         if (e.Reason == AutoCompleteEditTextChangeReason.UserInput)
+        {
+            _pickBlurPending = false; // REQ-ACF-30: the user is editing, so a later blur is a real one.
+
+            // REQ-ACF-13c: DX's own clear path uses the raw length, so a raw-long, normalised-short text
+            // (" a") never reaches it. Clear the list and close the menu at the keystroke, as DX does for
+            // raw-short text, so a stale list cannot show. OnItemsRequested keeps the normalised gate too.
+            if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, OptionSource, editor.Text))
+                ClearMenuOnKeystroke();
+
             return;
+        }
 
         IsDropDownOpen = false;
 
@@ -439,12 +454,21 @@ public partial class AutocompleteDXField : ContentView
 
         editor.SelectedItem = null;
         IsDropDownOpen = false;
+
+        // REQ-ACF-30 (b): a pick ends the input. Cursor to the end, then drop focus so the keyboard closes.
+        // The blur this causes is flagged, so OnUnfocused does not forward it as a blur without pick.
+        _pickBlurPending = true;
+        editor.CursorPosition = editor.Text?.Length ?? 0;
+        editor.Unfocus();
     }
 
-    // Blur forwarding only; the component never writes Text here (REQ-ACF-11c, -12b, -17, -19).
+    // REQ-ACF-30 (c): the pick-caused blur is not a blur without pick; any other blur is forwarded.
     private void OnUnfocused(object sender, FocusEventArgs e)
     {
-        if (!AutocompleteDXFieldLogic.ShouldForwardBlur(editor.SelectedItem, CurrentMode))
+        var isPickBlur = _pickBlurPending;
+        _pickBlurPending = false;
+
+        if (!AutocompleteDXFieldLogic.ShouldForwardBlur(editor.SelectedItem, CurrentMode, isPickBlur))
             return;
 
         var command = BlurWithoutPickCommand;
@@ -486,4 +510,16 @@ public partial class AutocompleteDXField : ContentView
     }
 
     private void CloseMenuOnUiThread() => Dispatcher.Dispatch(() => IsDropDownOpen = false);
+
+    // Same sequence DX uses for raw-short text (AsyncItemsSourceProvider): drop the list, stop the
+    // loading state, close the menu. Runs on the UI thread (TextChanged is raised there). REQ-ACF-13c.
+    private void ClearMenuOnKeystroke()
+    {
+        editor.ItemsSource = null;
+        editor.IsLoadingInProgress = false;
+        IsDropDownOpen = false;
+    }
+
+    // REQ-ACF-30: a new focus means the user is back in the field, so a pending pick-blur is stale.
+    private void OnFocused(object sender, FocusEventArgs e) => _pickBlurPending = false;
 }

@@ -1,5 +1,6 @@
 using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Constants;
+using MyVocaList.Extensions.Strings;
 using MyVocaList.UI.Models;
 
 namespace MyVocaList.UI.Components.TextFields;
@@ -56,12 +57,19 @@ internal static class AutocompleteDXFieldLogic
     internal static bool ShowClearIcon(FieldMode mode, string? text) =>
         mode != FieldMode.ReadOnly && !string.IsNullOrEmpty(text);
 
+    /// <summary>
+    /// The search text: edge-trimmed, inner whitespace runs collapsed to one space (app-wide helper,
+    /// never a local re-implementation). Whitespace only; no case or diacritic folding (HARD RULE).
+    /// REQ-ACF-13 (a)(b).
+    /// </summary>
+    internal static string SearchQuery(string? text) => (text ?? string.Empty).NormalizeSearchQuery();
+
     /// <summary>Decides whether a search request should be issued. REQ-ACF-04, -11, -12a, -12b, -13.</summary>
     internal static bool ShouldRequestOptions(FieldMode mode, bool isSearchEnabled, IMenuOptionSource? source, string? query) =>
         source != null
         && isSearchEnabled
         && mode == FieldMode.Editable
-        && (query?.Trim().Length ?? 0) >= SearchConstants.MinimumLocalQueryLength;
+        && SearchQuery(query).Length >= SearchConstants.MinimumLocalQueryLength;
 
     /// <summary>Routes a selection-changed value to a pick decision. REQ-ACF-11.</summary>
     internal static PickRoute RoutePick(object? selectedItem) =>
@@ -71,7 +79,11 @@ internal static class AutocompleteDXFieldLogic
     internal static bool LockAfterPick(PickRoute route, bool isPickLockEnabled = true) =>
         isPickLockEnabled && route == PickRoute.Select;
 
-    /// <summary>Decides whether a blur event should be forwarded. REQ-ACF-11, -12b, -17.</summary>
-    internal static bool ShouldForwardBlur(object? selectedItem, FieldMode mode) =>
-        selectedItem is null && mode == FieldMode.Editable;
+    /// <summary>
+    /// Decides whether a blur event should be forwarded. <paramref name="isPickBlur"/> is true for the one
+    /// blur the component causes itself after a pick (REQ-ACF-30c), which is never a blur without pick.
+    /// REQ-ACF-11, -12b, -17, -30.
+    /// </summary>
+    internal static bool ShouldForwardBlur(object? selectedItem, FieldMode mode, bool isPickBlur = false) =>
+        !isPickBlur && selectedItem is null && mode == FieldMode.Editable;
 }
