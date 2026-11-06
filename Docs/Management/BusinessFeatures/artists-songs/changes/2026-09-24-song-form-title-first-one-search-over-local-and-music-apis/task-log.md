@@ -2403,3 +2403,39 @@ Existing tests are unchanged apart from the constructor in `CreateSut`. Validati
 
 ### Spec gaps
 None blocking. Both tester decisions above are noted for review.
+
+---
+## 6.2 Green: ArtistFormViewModel name search (Builder)
+**Plan:** `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/plan.md`
+**Status:** To Review
+**Started:** 2026-11-06
+**Completed:** 2026-11-06
+
+### Changed files:
+- `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` (production only)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
+
+### Members added
+- Ctor: 2 new trailing params `INavigationService navigationService, IArtistSuggestionService artistSuggestions` (6 total, order per 6.2 Red).
+- `NameOptionSource` (`IMenuOptionSource`) = `new MenuOptionSource(SearchNameAsync)`; `SearchNameAsync` returns `[]` with no service call in edit mode; forwards `ct` to `SearchNameLocalAsync` / `SearchNameRemoteAsync`; `ct.ThrowIfCancellationRequested()` after the remote call; note set via `RunOnUiThread` only when trimmed query length >= `SearchConstants.MinimumRemoteQueryLength`; rows = local ("In your library") then remote ("Deezer").
+- `NameSupportingText`, `IsNameLocked` (observable props).
+- `IsNameSearchEnabled => !IsEditMode` (notified from `OnArtistIdChanged`).
+- `SelectNameCommand` (`[RelayCommand] Task SelectName(AutocompleteSuggestion?)`): local → `INavigationService.GoToAsync($"../{Routes.ArtistForm}?artistId=…&artistName={Uri.EscapeDataString(name)}")`; Deezer → `ArtistName`, `IsNameLocked = true`, nothing else.
+- `ClearNameCommand` (`[RelayCommand] void ClearName()`): `ArtistName` "", `IsNameLocked` false, `NameSupportingText` "".
+- Private consts `OfflineNote`, `UnavailableNote` (same text as the Song form).
+
+### Members removed
+- `SelectedExternalId`, `SelectedProvider`. Re-grepped the whole worktree (`*.cs`, `*.xaml`): no consumers outside this VM. `ArtistFormPage.xaml/.cs` do not reference them.
+
+### Unchanged
+- `SaveAsync` still calls `CreateArtistAsync(name)` (no identity; REQ-SFT-49). Existing validation, hydration, BUG-049 and rename paths untouched.
+
+### Build notes
+Build: passed (0 errors; `dotnet build MyVocaList.Tests`, 7 projects) | Tests: 902 passed, 0 failed (full `MyVocaList.Tests`); `ArtistFormViewModelTests`: 30 passed (12 existing + 18 new) | Commit SHA: see commit log of `task/sft-6.2-artist-form-vm`
+Android head not built (per brief). `ArtistFormPage` binds only members that still exist.
+Files written and re-read: `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` (lines 1–100 re-read after edits; members section re-read via build + tests)
+
+### Notes for review
+- **Duplicated note text:** `OfflineNote`/`UnavailableNote` are copied from `SongFormViewModel` (its constants are `private`, and this task must not edit that VM). Consider promoting them to one shared constant in a later task (not blocking).
+- **DI graph:** `IArtistSuggestionService` is registered scoped (`Extensions/ServiceCollectionExtensions.cs`), `ArtistFormViewModel` transient (`MauiProgram.cs`). `INavigationService` is already used by `SongFormViewModel`. `AppServicesRegistrationTests` passes in the full run; no test gap found.
+- **Tester assumption confirmed:** edit-mode search guard is implemented in `SearchNameAsync` (`IsEditMode` check).
