@@ -345,6 +345,15 @@ Context7 / devexpress MCP not needed (no new DX API used beyond the T4 component
   - T7-prep: worktree `.worktrees/acf-t7-prep` (`spike/acf-t7-supporting-text`). The edit
     `SupportingText="Test"` is applied but uncommitted, because its build was also reaped.
   - Next: run the two builds one at a time (develop post-merge, then T7-prep), then the device re-run.
+- 2026-11-05 (closure): **T8 post-merge verification satisfied by evidence, not by a fresh run.**
+  - The parallel SFT session's 5.3 Verifier built `03df3a34` for Android (0 errors) and ran the
+    full suite there (874/874). That commit already contains the T8 merge `97a329e1`.
+  - After the 5.3 merge (`e1721279`), develop ran 874/874.
+  - `git diff 03df3a34 develop -- *.cs *.xaml *.csproj` is empty, so develop's code equals the verified tree.
+  - T8 ticked. Worktree `acf-t8` removed and branch `task/acf-t8-t7-fixes` deleted.
+  - Governance re-census: `AutocompleteDXField` is still consumed only by `PersonFormPage.xaml`, so
+    it is not yet governed.
+  - T7-prep fast-forwarded to develop `a2cee866` (edit kept); its Android build is running alone.
   - Manifest: `tasks.md` § T7/T8, this file § T7/T8, `requirements.md` REQ-ACF-18/24/26/29.
 
 ### Run 1 — 2026-11-05 (Helder, Android, built from develop; the T7-prep build was never created)
