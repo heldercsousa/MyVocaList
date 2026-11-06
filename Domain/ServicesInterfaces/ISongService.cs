@@ -51,28 +51,6 @@ public interface ISongService
         CancellationToken ct = default);
 
     /// <summary>
-    /// Creates a song and atomically persists the supplied YouTube/streaming URLs in a single transaction.
-    /// Both repositories must share the same scoped <c>AppDbContext</c> so a single
-    /// <c>SaveChangesAsync</c> commits song and URLs together (AC-6.2).
-    /// </summary>
-    /// <param name="artistId">Id of the original/copyright artist (mandatory — INV-1).</param>
-    /// <param name="title">Song title.</param>
-    /// <param name="version">Variant label; empty string = canonical version.</param>
-    /// <param name="featuredArtists">Optional featured-artist names.</param>
-    /// <param name="lyrics">Optional lyrics text.</param>
-    /// <param name="externalId">Optional external provider song id.</param>
-    /// <param name="externalProvider">Optional external provider name.</param>
-    /// <param name="urls">Zero or more streaming/YouTube URLs to attach atomically.</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns><c>(true, message, song)</c> on success; <c>(false, reason, null)</c> on failure.</returns>
-    [Obsolete("Use the (int? artistId, string? newArtistName, …) overload — REQ-SFT-18. Removed in task 5.3b.")]
-    Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
-        int artistId, string title, string version, string? featuredArtists, string? lyrics,
-        string? externalId, string? externalProvider,
-        IEnumerable<string> urls,
-        CancellationToken ct = default);
-
-    /// <summary>
     /// Creates a song — and, when <paramref name="newArtistName"/> is supplied, its new artist — and
     /// the supplied URLs in ONE unit of work (REQ-SFT-18). Exactly one of
     /// <paramref name="artistId"/> / <paramref name="newArtistName"/> must be supplied, else
