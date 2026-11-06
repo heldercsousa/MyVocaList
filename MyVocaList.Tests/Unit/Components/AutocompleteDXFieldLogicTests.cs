@@ -291,4 +291,55 @@ public class AutocompleteDXFieldLogicTests
 
         Assert.False(result);
     }
+
+    // [AC] REQ-ACF-13: the search text is edge-trimmed and inner whitespace runs collapse to one space.
+    [Theory]
+    [InlineData("  an  ", "an")]
+    [InlineData("a   b", "a b")]
+    [InlineData(null, "")]
+    public void SearchQuery_TrimsAndCollapsesWhitespace(string? text, string expected)
+    {
+        var result = AutocompleteDXFieldLogic.SearchQuery(text);
+
+        Assert.Equal(expected, result);
+    }
+
+    // [AC] REQ-ACF-13: a normalised query below the minimum length never requests options, whatever the raw length.
+    [Theory]
+    [InlineData("  a")]
+    [InlineData("a  ")]
+    [InlineData("a\t")]
+    public void ShouldRequestOptions_NormalisedQueryBelowMinimum_ReturnsFalse(string query)
+    {
+        var result = AutocompleteDXFieldLogic.ShouldRequestOptions(FieldMode.Editable, isSearchEnabled: true, Source, query);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-13: a normalised query at the minimum length requests options, even with padding.
+    [Fact]
+    public void ShouldRequestOptions_PaddedTwoCharsNormalised_ReturnsTrue()
+    {
+        var result = AutocompleteDXFieldLogic.ShouldRequestOptions(FieldMode.Editable, isSearchEnabled: true, Source, " an ");
+
+        Assert.True(result);
+    }
+
+    // [AC] REQ-ACF-30: the one blur the component causes after a pick is not forwarded as a blur without pick.
+    [Fact]
+    public void ShouldForwardBlur_PickBlur_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.ShouldForwardBlur(null, FieldMode.Editable, isPickBlur: true);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-30: a real blur after a pick-then-edit is forwarded as usual.
+    [Fact]
+    public void ShouldForwardBlur_NotPickBlur_ReturnsTrue()
+    {
+        var result = AutocompleteDXFieldLogic.ShouldForwardBlur(null, FieldMode.Editable, isPickBlur: false);
+
+        Assert.True(result);
+    }
 }
