@@ -2322,3 +2322,84 @@ Helper additions (test-only): `StoredSong(bool apiSourced)`, `CreateEditSutAsync
 ### Notes
 - Only the production VM file was edited; no test file, tasks.md, or LEDGER touched. `tasks.md` 5.4 checkbox is left for the orchestrator per the brief.
 - The Red commit used `--no-verify`; this Green commit runs the normal pre-commit hook.
+
+
+---
+## 6.2 Red: ArtistFormViewModel name search (Tester, Red phase only)
+**Plan:** `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/plan.md`
+**Status:** Red committed (compile-level); awaiting Builder Green
+**Started:** 2026-11-06
+**Completed:** 2026-11-06 (Red only)
+
+### Changed files:
+- `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs` (existing file: usings, two mocks, `CreateSut` moved to the 6-argument constructor; 18 new tests appended under "Name search")
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md` (this section)
+
+### Red evidence
+`dotnet build MyVocaList.Tests -v q`: **33 errors, all in `ArtistFormViewModelTests.cs`, all "member missing"**; no unrelated compile errors. The test project cannot run until the Builder adds the members below, so the Red commit uses `--no-verify` (compile-level Red, permitted by the brief).
+- CS1729: `ArtistFormViewModel` has no 6-argument constructor (`INavigationService`, `IArtistSuggestionService` missing).
+- CS1061: missing `NameOptionSource`, `SelectNameCommand`, `ClearNameCommand`, `IsNameLocked`, `IsNameSearchEnabled`, `NameSupportingText`.
+
+### Tests added (18) and expected failure reason before Green
+| # | Test | AC | Fails today because |
+|---|------|----|--------------------|
+| 1 | `NameOptionSource_LocalThenRemote_LocalRowsFirstWithSupportingText` | REQ-SFT-47 | `NameOptionSource` missing |
+| 2 | `SelectName_LocalPick_NavigatesToArtistEditFormReplacingAddForm` | REQ-SFT-48 | `SelectNameCommand` missing; no `GoToAsync("../artist-form?artistId=5&artistName=Metallica")` |
+| 3 | `SelectName_LocalPickWithSpecialCharacters_EscapesArtistNameInRoute` | REQ-SFT-48 | as 2 (route escaping) |
+| 4 | `SelectName_LocalPick_DoesNotFillNameOrCreate` | REQ-SFT-48 | `SelectNameCommand`, `IsNameLocked` missing |
+| 5 | `SelectName_DeezerPick_FillsNameAndLocksWithoutNavigating` | REQ-SFT-49 | `SelectNameCommand`, `IsNameLocked` missing |
+| 6 | `SelectName_DeezerPickThenSave_CreatesWithNameOnlyNoExternalIdentity` | REQ-SFT-49 | `SelectNameCommand` missing; Save must call `CreateArtistAsync(name)` with null id/provider |
+| 7 | `ClearName_AfterDeezerPick_EmptiesNameAndUnlocks` | REQ-SFT-49 | `ClearNameCommand`, `IsNameLocked` missing |
+| 8 | `IsNameSearchEnabled_EditMode_IsFalse` | REQ-SFT-47 | `IsNameSearchEnabled` missing |
+| 9 | `IsNameSearchEnabled_AddMode_IsTrue` | REQ-SFT-47 | `IsNameSearchEnabled` missing |
+| 10 | `NameOptionSource_EditMode_IssuesNoSearch` | REQ-SFT-47 | `NameOptionSource` missing; source must return empty and call neither service in edit mode |
+| 11 | `SaveCommand_EditModeRename_CallsUpdate` | REQ-SFT-47 | Compile-only failure (6-arg ctor). Rename behaviour already exists: characterisation guard, not new behaviour |
+| 12 | `NameOptionSource_StatusOffline_SetsArtistOfflineNote` | REQ-SFT-47 | `NameOptionSource`, `NameSupportingText` missing |
+| 13 | `NameOptionSource_StatusUnavailable_SetsUnavailableNote` | REQ-SFT-47 | as 12 |
+| 14 | `NameOptionSource_OfflineThenOk_ClearsNote` | REQ-SFT-06 | as 12 |
+| 15 | `NameOptionSource_ShortQueryAfterOffline_KeepsNote` | REQ-SFT-06 | as 12 (note only set for trimmed length >= `SearchConstants.MinimumRemoteQueryLength`) |
+| 16 | `ClearName_ClearsNameSupportingText` | REQ-SFT-06 | `ClearNameCommand`, `NameSupportingText` missing |
+| 17 | `NameOptionSource_ForwardsCancellationTokenToRemote` | REQ-SFT-09 | `NameOptionSource` missing |
+| 18 | `NameOptionSource_CancelledQuery_ThrowsAndLeavesNoteUntouched` | REQ-SFT-09 | `NameOptionSource` missing; `ct.ThrowIfCancellationRequested()` must follow the remote call and precede the note update |
+
+Existing tests are unchanged apart from the constructor in `CreateSut`. Validation, hydration, Save and BUG-049 tests are not duplicated. Blank-query thresholds are owned by `ArtistSuggestionService` (6.1) and are not retested here.
+
+### Members the Builder must add (`MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`)
+- Constructor, 6 parameters, in this order: `(IArtistService, ISnackbarComponent, ILogger<ArtistFormViewModel>, IMessenger, INavigationService navigationService, IArtistSuggestionService artistSuggestions)`. Mirrors `SongFormViewModel` (5.2): navigation before the suggestion service, which is last.
+- `public IMenuOptionSource NameOptionSource { get; }`, built as `new MenuOptionSource(SearchNameAsync)` (`MenuOptionSource` and `IMenuOptionSource` exist in `MyVocaList.UI.Models`). `SearchNameAsync(string query, CancellationToken ct)` must:
+  - return empty and issue no service call when `IsEditMode`;
+  - call `SearchNameLocalAsync(query, ct)` and `SearchNameRemoteAsync(query, ct)`, forwarding `ct`;
+  - call `ct.ThrowIfCancellationRequested()` after the remote call and before touching the note;
+  - when `query.Trim().Length >= SearchConstants.MinimumRemoteQueryLength`, set `NameSupportingText` through `RunOnUiThread`: `Offline` → offline note, `Unavailable` → unavailable note, `Ok` → `string.Empty`;
+  - return `local` rows (`SupportingText` "In your library") followed by `remote.Remote` rows (`SupportingText` "Deezer"), each as `new AutocompleteSuggestion(Name, supporting, dto)`.
+- `[ObservableProperty] private string _nameSupportingText = string.Empty;` → `NameSupportingText`.
+- `[ObservableProperty] private bool _isNameLocked;` → `IsNameLocked`.
+- `public bool IsNameSearchEnabled => !IsEditMode;`
+- `[RelayCommand] private Task SelectName(AutocompleteSuggestion? option)`. It must be `Task`-returning so `SelectNameCommand` is an async command (`ExecuteAsync`). `Data` is `ArtistSuggestionDto`:
+  - local (`LocalId.HasValue` and not `IsRemote`) → `_navigationService.GoToAsync($"../{Routes.ArtistForm}?artistId={id}&artistName={Uri.EscapeDataString(name)}")`;
+  - remote → set `ArtistName = dto.Name`, `IsNameLocked = true`, touch nothing else (no navigation, no stored identity).
+- `[RelayCommand] private void ClearName()` → `ArtistName = string.Empty`, `IsNameLocked = false`, `NameSupportingText = string.Empty`.
+- Delete `SelectedExternalId` / `SelectedProvider` (REQ-SFT-49, Q10 not stored). Check their consumers in `ArtistFormPage.xaml.cs` before deleting; that page belongs to 6.3, so flag rather than edit.
+- `SaveAsync` stays `_artistService.CreateArtistAsync(name)` with no identity.
+- Note strings (exact; REQ-SFT-47 with Q18, and REQ-SFT-06 unavailable text):
+  - offline: `You're offline — showing artists from your library only.` (straight apostrophe, em dash U+2014)
+  - unavailable: `Online search isn't available right now — showing your library only.`
+
+### Tester decisions (non-blocking, for review)
+- Constructor parameter order mirrors the 5.2 precedent (the artist-form design does not state it). Recorded here, not in `design.md`.
+- Edit-mode "no search issued" (test 10) requires the source to guard on `IsEditMode`. The design only states `IsNameSearchEnabled => !IsEditMode`; the brief asks for no search, so this is treated as an assumption.
+
+### AC traceability (6.2)
+| AC | Criterion | Implementation location (Builder) | Test method |
+|----|-----------|-----------------------------------|-------------|
+| REQ-SFT-47 | Local first, Deezer second; edit mode not searchable; rename kept | `NameOptionSource`, `IsNameSearchEnabled` | tests 1, 8, 9, 10, 11 |
+| REQ-SFT-47 | Offline / unavailable artist wording | `NameSupportingText` mapping | tests 12, 13 |
+| REQ-SFT-48 | Local pick navigates to that artist, replacing the add form; route escaped; no fill | `SelectName` (local branch) | tests 2, 3, 4 |
+| REQ-SFT-49 | Deezer pick fills and locks; X unlocks; only the name is saved | `SelectName` (remote branch), `ClearName` | tests 5, 6, 7 |
+| REQ-SFT-06 | Ok clears note; short query keeps it; clearing Name clears it | threshold + `ClearName` | tests 14, 15, 16 |
+| REQ-SFT-09 | ct forwarded; stale query never touches note | `SearchNameAsync` | tests 17, 18 |
+| REQ-SFT-50 | Typed text saved unchanged (existing Save path) | unchanged `SaveAsync` | existing save tests (not duplicated) |
+| REQ-SFT-53 | Offline detection lives in the service (6.1) | none in VM | covered by 6.1 service tests |
+
+### Spec gaps
+None blocking. Both tester decisions above are noted for review.
