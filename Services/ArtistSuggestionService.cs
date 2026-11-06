@@ -59,7 +59,7 @@ public class ArtistSuggestionService : IArtistSuggestionService
         return hits
             .OrderByDescending(a => _scorer.RankScore(q, a.Name))
             .Take(SearchConstants.MaxSearchResults)
-            .Select(a => new ArtistSuggestionDto(a.Id, a.Name, null, null, false, false))
+            .Select(a => new ArtistSuggestionDto(a.Id, a.Name, null, null, false))
             .ToList();
     }
 
@@ -107,7 +107,7 @@ public class ArtistSuggestionService : IArtistSuggestionService
         var remote = rows
             .Where(r => !existing.Contains(r.ArtistName))
             .Take(SearchConstants.MaxSearchResults)
-            .Select(r => new ArtistSuggestionDto(null, r.ArtistName, r.ExternalId, r.Provider, true, false))
+            .Select(r => new ArtistSuggestionDto(null, r.ArtistName, r.ExternalId, r.Provider, true))
             .ToList();
         return new ArtistRemoteSearchResult(remote, RemoteSearchStatus.Ok);
     }
