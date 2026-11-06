@@ -9,11 +9,9 @@ namespace MyVocaList.Contracts.DTOs.Suggestions;
 /// <param name="ExternalId">External provider id (remote rows; also local rows that carry one).</param>
 /// <param name="ExternalProvider">Provider name (e.g. "Deezer").</param>
 /// <param name="IsRemote">True when sourced from a music metadata provider.</param>
-/// <param name="IsExactMatch">Collation-equal to the search term (computed at fetch time).</param>
 public sealed record ArtistSuggestionDto(
     int? LocalId,
     string Name,
     string? ExternalId,
     string? ExternalProvider,
-    bool IsRemote,
-    bool IsExactMatch);
+    bool IsRemote);

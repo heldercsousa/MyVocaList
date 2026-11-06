@@ -245,17 +245,6 @@ public class SongService : ISongService
     }
 
     /// <inheritdoc />
-    [Obsolete("Use the (int? artistId, string? newArtistName, …) overload — REQ-SFT-18. Removed in task 5.3b.")]
-    public Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
-        int artistId, string title, string version, string? featuredArtists, string? lyrics,
-        string? externalId, string? externalProvider,
-        IEnumerable<string> urls,
-        CancellationToken ct = default)
-        => CreateSongWithUrlsAsync(
-            (int?)artistId, newArtistName: null, title, version, featuredArtists, lyrics,
-            externalId, externalProvider, urls, ct);
-
-    /// <inheritdoc />
     public async Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
         int? artistId, string? newArtistName, string title, string version,
         string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
