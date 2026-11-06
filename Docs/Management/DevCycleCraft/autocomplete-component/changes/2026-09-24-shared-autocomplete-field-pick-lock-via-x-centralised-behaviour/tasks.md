@@ -255,7 +255,7 @@
 > field keeps focus, the keyboard stays up, the cursor is at 0). Details: `task-log.md` § T7, "Run 2".
 > T9 fixes both, then T7 run 3 re-checks lines 2 and 9 only. Extra issues F1–F3 are under persons.
 
-- [ ] **T9: T7 run 2 fixes — search-text normalisation + pick drops focus** `[SEQUENTIAL, after T8]` (added 2026-11-06)
+- [x] **T9: T7 run 2 fixes — search-text normalisation + pick drops focus** `[SEQUENTIAL, after T8]` (added 2026-11-06)
   - **Behaviour:** REQ-ACF-13 (amended a/b/c) and REQ-ACF-30. Design: `design.md` § 3.1 "Event-glue
     rules added after T7 run 2" and § 4.
   - **Steps (TDD, one writer, branch `task/acf-t9-t7-run2-fixes` @ `.worktrees/acf-t9`):**

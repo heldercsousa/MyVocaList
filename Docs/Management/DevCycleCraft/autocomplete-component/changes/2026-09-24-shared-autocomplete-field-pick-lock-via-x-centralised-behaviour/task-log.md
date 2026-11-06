@@ -512,3 +512,8 @@ Working theory (matches both observed symptoms): the native popup reacts to the 
 - Context7 (`/websites/devexpress_maui`): `AutoCompleteEdit.CursorPosition`, `SelectionStart`, `SelectionLength` confirmed for DX MAUI 25.2. No mismatch.
 - No Android emulator run in this session (E2E gate: device check is T7 run 3). Status `To Review` is set on that basis.
 - Spec drift: none. The design already specifies the rules implemented; the keystroke close (`ClearMenuOnKeystroke`) is the design's "close the menu" with a list clear, documented here as an implementation choice inside the REQ-ACF-13c fix.
+
+### Checkpoint — T9 merged (2026-11-06)
+- Verifier PASS on `88bdae85` (no must-fix). Merged into develop `--no-ff` as `e3c661a6`.
+- Post-merge `dotnet test MyVocaList.Tests` on develop: 911/911 passed.
+- Next: T7 run 3, lines 2 and 9 only (Helder, Android). Open assumption: the native popup stays closed for " a" (REQ-ACF-13c).
