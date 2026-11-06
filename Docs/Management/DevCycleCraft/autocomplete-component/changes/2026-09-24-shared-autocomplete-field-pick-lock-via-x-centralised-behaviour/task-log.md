@@ -436,3 +436,79 @@ Extra issues, per Helder's ruling, are recorded under Person as
 `BusinessFeatures/persons/changes/2026-11-06-person-form-follow-ups-from-acf-t7-run-2/` (F1 menu
 reappears, F2 duplicate singer, F3 birthday field), to be tackled in a later session.
 Still open in this item: line 2 (search-text normalisation) and the line 9 cursor/focus issue.
+
+## T9 — T7 run 2 fixes (search-text normalisation + pick drops focus)
+
+**Plan:** `tasks.md § T9` · **Status:** To Review · **Started:** 2026-11-06 · **Completed:** 2026-11-06 · **Branch:** `task/acf-t9-t7-run2-fixes` @ `.worktrees/acf-t9` (base `develop` `fd5901c4`)
+
+### Final entry (step 5 complete)
+
+### Changed files:
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs`
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml`
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml.cs`
+- `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs`
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md` (`## T9` section only)
+
+`tasks.md` is not in this task's files owned; its T9 box is left for the orchestrator (sequential-only file).
+
+### Root cause, REQ-ACF-13c (step 1, decompiled DX 25.2.4 Editors.dll)
+
+Decompiled from `~/.nuget/packages/devexpress.maui.editors/25.2.4/lib/net10.0-android35.0/DevExpress.Maui.Editors.dll` with ilspycmd (scratchpad only).
+
+Proven in managed code:
+1. `AsyncItemsSourceProvider.OnEditorTextChanged` gates on the **raw** `Editor.Text.Length >= CharacterCountThreshold` (2). For `" a"` (raw length 2) DX starts its debounce timer and raises `ItemsRequested`. The component is the only gate, so the normalised check must run there. The threshold itself is unchanged (no DX semantics change).
+2. The below-threshold branch only runs when the **raw** length is short. For a raw-long, normalised-short text (`" a"`, `"a "`) DX never takes its own "clear + close" path (`ItemsSource = null; IsLoadingInProgress = false; IsDropDownOpen = false`). The component's no-request branch is therefore the only thing that clears the list and closes the menu.
+3. The no-request branch does `e.RequestAsync = NoOptions` (returns `null`). `AsyncItemsSourceProvider.RequestItem.Run` then sets `editor.ItemsSource = null` **after** the debounce, on the UI thread. `CloseMenuOnUiThread()` is dispatched **before** that, from the timer thread. So the close runs before DX clears the list, and the list is cleared up to one debounce interval after the keystroke.
+4. `IsDropDownOpen = false` is a MAUI property write. `AutoCompleteEditBaseHandler.UpdateIsDropDownOpen` → `DismissDropDown` runs only on a value change (`UpdateValue("IsDropDownOpen")`). A close while the property is already `false` does nothing to a native popup.
+5. Native popup opening and the "no results" row are decided in the Java DX binding (`DXEditors`), which is not decompilable here (same limit as T4 finding 3). Not proven, see "Unproven" below.
+
+Working theory (matches both observed symptoms): the native popup reacts to the keystroke with the previous query's items (stale items, develop build); when the debounce expires the list is replaced with an empty `null` source and the menu is not reliably dismissed (no-results row, T7-prep build). The managed close is queued too early and does not clear the list.
+
+**Fix chosen (component-only, no XAML, no threshold change):** on a `UserInput` text change where `ShouldRequestOptions` is false, clear the list (`ItemsSource = null`), set `IsLoadingInProgress = false` and close the menu synchronously, which is the same sequence DX uses for raw-short text. `OnItemsRequested` keeps the normalised gate as the second guard.
+
+**Unproven, verified only on device (T7 run 3, line 2):** that the native popup stays closed for `" a"`. This is an assumption to review at `To Review`, `Blocking: No`.
+
+### Pick drops focus, REQ-ACF-30 (step 5)
+
+- DX 25.2.4 cursor member: `AutoCompleteEdit.CursorPosition` (public `int`, decompiled `AutoCompleteEdit.cs:167`). Context7 check: see the result line below.
+- Context7 (`/websites/devexpress_maui`, DX MAUI 25.2 docs): confirmed `AutoCompleteEdit.CursorPosition` (int) and `SelectionStart`/`SelectionLength`, matching the decompile. No mismatch, so no escalation.
+
+### Red evidence (step 2)
+
+- `dotnet test --filter AutocompleteDXFieldLogicTests` before Green: compile failure, CS0117 `SearchQuery` not defined, CS1739 `ShouldForwardBlur` has no `isPickBlur` parameter. The failure is on exactly the new symbols.
+
+### Green (step 3, logic)
+
+- `AutocompleteDXFieldLogic.SearchQuery` added (`NormalizeSearchQuery`); `ShouldRequestOptions` now uses `SearchQuery(query).Length`; `ShouldForwardBlur` gained `isPickBlur = false`.
+- `AutocompleteDXFieldLogicTests`: 52 passed, 0 failed (existing tests unchanged).
+
+### AC traceability matrix (T9)
+
+| AC | Criterion (short) | Implementation location | Test method |
+|----|-------------------|-------------------------|-------------|
+| REQ-ACF-13 (a)(b) | Search text trimmed, inner runs collapsed, null → "" | `AutocompleteDXFieldLogic.SearchQuery` | `SearchQuery_TrimsAndCollapsesWhitespace` (3 cases) |
+| REQ-ACF-13 (a)(b) | Normalised-short text never requests (`"  a"`, `"a  "`, `"a\t"`) | `ShouldRequestOptions` (uses `SearchQuery`) | `ShouldRequestOptions_NormalisedQueryBelowMinimum_ReturnsFalse` (3 cases), existing `ShouldRequestOptions_BelowTrimmedThreshold_ReturnsFalse` (unchanged) |
+| REQ-ACF-13 (a)(b) | Padded two-char query requests (`" an "`) | `ShouldRequestOptions` | `ShouldRequestOptions_PaddedTwoCharsNormalised_ReturnsTrue` |
+| REQ-ACF-13 (c) | Below-threshold request shows nothing | `OnItemsRequested` (gate on `query`, `SearchAsync(query)`), `OnTextChanged` UserInput → `ClearMenuOnKeystroke` | Level C: code review + T7 run 3 line 2 (device) |
+| REQ-ACF-30 (a)(b) | Pick: cursor to end, unfocus | `OnSelectionChanged` end (`CursorPosition`, `Unfocus()`) | Level C: code review + T7 run 3 line 9 (device) |
+| REQ-ACF-30 (c) | Pick-caused blur not forwarded | `ShouldForwardBlur(..., isPickBlur)`, `OnUnfocused` | `ShouldForwardBlur_PickBlur_ReturnsFalse` |
+| REQ-ACF-30 (c) | A real blur after pick-then-edit is forwarded | `OnTextChanged` UserInput and `OnFocused` clear `_pickBlurPending` | `ShouldForwardBlur_NotPickBlur_ReturnsTrue` (logic); flag lifecycle Level C |
+
+### Level C no-test decisions (recorded per testing.md)
+
+- `OnItemsRequested`, `OnTextChanged`, `OnSelectionChanged`, `OnUnfocused`, `OnFocused`, `ClearMenuOnKeystroke`, `Focused="OnFocused"` in XAML: UI glue with DX/native objects. No unit test. Verified by build (both TFMs' Android build) and T7 run 3 on device.
+
+### Root cause status and assumption (for review at To Review)
+
+- The managed-side mechanics are proven by the decompile (above). The native popup decision is in the DX Java binding and is not proven here.
+- **Assumption, `Blocking: No`:** clearing the list and closing the menu synchronously at the keystroke (for normalised-short text) keeps the menu closed for `" a"`. Verification: T7 run 3, line 2 on device.
+
+### Build notes
+
+- Build (`dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`): step 4 build succeeded, 0 errors; step 5 build (final code) exit 0, 0 compiler errors.
+- Tests: `dotnet test MyVocaList.Tests` 893 passed, 0 failed (includes 52 `AutocompleteDXFieldLogicTests` cases).
+- Note: there were two Android builds (after step 4 and after step 5), not one. The first was used to check the NormalizeSearchQuery reference compiles from the UI project (it does, transitively; no ProjectReference added).
+- Context7 (`/websites/devexpress_maui`): `AutoCompleteEdit.CursorPosition`, `SelectionStart`, `SelectionLength` confirmed for DX MAUI 25.2. No mismatch.
+- No Android emulator run in this session (E2E gate: device check is T7 run 3). Status `To Review` is set on that basis.
+- Spec drift: none. The design already specifies the rules implemented; the keystroke close (`ClearMenuOnKeystroke`) is the design's "close the menu" with a list clear, documented here as an implementation choice inside the REQ-ACF-13c fix.
