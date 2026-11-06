@@ -420,3 +420,19 @@ UI glue with no extractable logic: the `IsPickLockEnabled` BindableProperty, `On
 ### Notes
 - `FocusEditor()` retry subscribes to `HandlerChanged` and `Loaded` (one-shot, both unsubscribed on the first ready signal; a handler-removal `HandlerChanged` is ignored).
 - Stale-result discard returns an empty array (not null), per the spec.
+
+### Run 2 — 2026-11-06 (Helder, Android; lines 1–9 from develop, line 10 from `.worktrees/acf-t7-prep` @ `624ff33b`)
+
+| Line | develop | T7-prep | Note |
+|------|---------|---------|------|
+| 1 | PASS | PASS | Autofocus fixed (T8). |
+| 2 | **FAIL** | **FAIL** | "  a" (2 spaces + 1 char) searches and shows results (T7-prep: the "not found" row shows for 1 or 2 spaces + 1 char). Helder: the search string must be trimmed at both ends and inner runs of spaces collapsed to one, using the existing Extensions-project helper that is used on persist/search. REQ-ACF-13. |
+| 3–7 | PASS | PASS | |
+| 8 | PASS | PASS | The error stays until fixed. Helder confirms this is the app-wide pattern, and every entry (autocomplete included) must follow it. |
+| 9 | PASS with issue | same | After a pick, the entry stays focused (keyboard up, highlighted) with the cursor at position 0, so the user must move the cursor to edit. Plus extra issue F1 (menu reappears on an edit load and after a pick), which is still failing REQ-ACF-25. |
+| 10 | — | PASS | Placeholder on load, "Test" supporting text, and error replaces it. |
+
+Extra issues, per Helder's ruling, are recorded under Person as
+`BusinessFeatures/persons/changes/2026-11-06-person-form-follow-ups-from-acf-t7-run-2/` (F1 menu
+reappears, F2 duplicate singer, F3 birthday field), to be tackled in a later session.
+Still open in this item: line 2 (search-text normalisation) and the line 9 cursor/focus issue.
