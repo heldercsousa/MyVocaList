@@ -100,6 +100,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\README.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\README.md
 		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\requirements.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\requirements.md
 		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\design.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\design.md
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\plan.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\plan.md
+		Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\tasks.md = Docs\Management\DevCycleCraft\app-versioning\changes\2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode\tasks.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
