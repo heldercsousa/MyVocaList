@@ -150,6 +150,7 @@ These replace the T9 keystroke clear and the "close before DX" assumption below.
 - **RC-C: hide the soft keyboard explicitly (REQ-ACF-30b).** After `Unfocus()`, hide the IME through the MAUI
   soft-input API (`HideSoftInputAsync`, if the DX editor qualifies) or the Android `InputMethodManager` on the
   handler's platform view (`#if ANDROID`). Confirm the API with Context7 or MS Learn for MAUI 10.
+  > **Spec updated 2026-11-09:** T10 impl: the pick echo is `AutocompleteDXFieldLogic.IsPickEcho(query, _textAtPick)`; `_textAtPick` is set from `editor.Text` after `SelectCommand`, and a UserInput change that equals it is kept (DX reports the SelectCommand write as UserInput) — only a real edit clears it. RC-A uses the editor's `PropertyChanged` for `IsDropDownOpen` (no supported DX cancel-open API, see `task-log.md` § T10). RC-C uses `Microsoft.Maui.ITextInput.HideSoftInputAsync` when the editor qualifies, else the Android IME fallback.
 
 **Event-glue rules added after T7 run 2 (2026-11-06):**
 - **Normalised search text (REQ-ACF-13a/b).** `OnItemsRequested` computes
