@@ -53,11 +53,14 @@ public class SongSaveTrigramDuplicateTests : IAsyncLifetime
         _artistRepo
             .Setup(r => r.GetByIdAsync(_queen.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(_queen);
-        // The artist is given by id, so artist resolution must not be needed; a NoMatch default keeps
-        // the resolver's artist step inert if it is ever consulted.
+        // The save names the artist by id (ArtistId), so SongService never resolves it from text. The
+        // duplicate guard then resolves the STORED artist name ("Queen") through the resolver (REQ-SFT-41:
+        // the artist is never given by id to the resolver), so the resolver must report that name as the
+        // existing local artist; otherwise SongResolutionService returns NoMatch before the fuzzy step.
         _artistResolution
-            .Setup(a => a.ResolveAsync(It.IsAny<ArtistCandidate>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ArtistResolution(ResolutionKind.NoMatch, null, []));
+            .Setup(a => a.ResolveAsync(
+                It.Is<ArtistCandidate>(c => c.Name == _queen.Name), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ArtistResolution(ResolutionKind.ExactLocalMatch, _queen.Id, []));
     }
 
     public async Task DisposeAsync()
