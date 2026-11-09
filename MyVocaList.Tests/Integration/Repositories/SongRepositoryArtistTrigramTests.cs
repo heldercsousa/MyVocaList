@@ -70,7 +70,7 @@ public class SongRepositoryArtistTrigramTests : IAsyncLifetime
     }
 
     // [AC] REQ-SFT-23: the result is bounded by take (the candidate pool size) and stays scoped to the
-    // same artist. Rewritten from the retired GetFuzzyCandidatePoolAsync_RespectsArtistScopeAndTake
+    // same artist. Rewritten from the retired prefix-pool test RespectsArtistScopeAndTake
     // (old tag AC-5.6).
     // [BUG] BUG-085
     [Fact]
@@ -93,7 +93,7 @@ public class SongRepositoryArtistTrigramTests : IAsyncLifetime
 
     // [AC] REQ-SFT-23: a typo inside the FIRST word still finds the stored title, and a title that
     // only shares a prefix-like start with another stored title is not returned by the trigram match.
-    // Rewritten from the retired GetFuzzyCandidatePoolAsync_PrefixFilter_ReturnsOnlyMatchingPrefix
+    // Rewritten from the retired prefix-pool test PrefixFilter_ReturnsOnlyMatchingPrefix
     // (old tag AC-5.7: the prefix-only behaviour is retired by the REQ-SFT-23 note of 2026-11-09).
     // [BUG] BUG-085
     [Fact]
