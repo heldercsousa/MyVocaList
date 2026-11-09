@@ -100,6 +100,23 @@ Why chips rather than DevExpress `TabView`:
 The selected group is presentation state in `AboutViewModel`; the grouping itself comes from the
 `BuildInfo` helper. *Reversibility: easy.*
 
+**D11 — Start the `0.2.0-alpha` line before merging (REQ-BID-14).** *Found during planning on
+2026-11-09.*
+- `VersionCheckService` compares `AppInfo.VersionString` with the live manifest. The shipped
+  AC-UC-06 says a prerelease sorts below its release, and a test pins that.
+- Today `1.0.0` passes the check by accident. After piece 1 the version becomes
+  `0.1.0-alpha.0.N`, which is below `minRequiredVersion` `0.1.0`, so every dev build would hit the
+  forced-update gate.
+- The fix is the step `app-versioning/design.md` already prescribes, which was never run: start
+  the feature with `/sln-release minor alpha`, which creates tag `v0.2.0-alpha.0` on `develop`.
+  Builds then read `0.2.0-alpha.0.N`, above `0.1.0`, so the app shows no prompt.
+- No code change, and the shipped update-check spec is untouched.
+- **Gate:** `/sln-release` requires Helder's explicit confirmation before the tag is created and
+  pushed. The merge into `develop` waits for that tag. Without it, every build from `develop`
+  in any parallel session would hit the forced-update gate.
+*Reversibility: a pushed tag must never be deleted (`/sln-release` rule); later tags only move
+forward.*
+
 ## UI
 
 The page title stays `v{version}`. One supporting-text line goes under "Since 2025":

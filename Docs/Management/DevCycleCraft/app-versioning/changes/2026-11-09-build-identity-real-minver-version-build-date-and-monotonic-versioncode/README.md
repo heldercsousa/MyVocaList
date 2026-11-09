@@ -1,7 +1,7 @@
 ---
 id: build-identity-real-minver-version-build-date-and-monotonic-versioncode
 title: "Build identity: real MinVer version, build date and monotonic versionCode"
-status: 🗺️ Plan
+status: 🟡 In Progress
 target: 2026-11-09
 section: DevCycleCraft
 parent: app-versioning

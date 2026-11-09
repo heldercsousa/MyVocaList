@@ -55,6 +55,11 @@ contains in the history the project already keeps.
 - **REQ-BID-13** — IF the status snapshot cannot be produced at build time, THEN the build SHALL
   still succeed, and the About page SHALL omit both status groups.
 
+- **REQ-BID-14** — WHEN a build from `develop` that includes this change starts, against the live
+  `version-manifest.json` (`minRequiredVersion` `0.1.0`, `latestVersion` `0.1.0`), THE app
+  SHALL NOT show the forced-update ("no longer supported") gate or the update-available prompt.
+  *Added 2026-11-09 during planning, after the conflict described below was found.*
+
 ## Who build details are for
 
 They are for Helder's manual testing, not for end users. They answer four questions from the
