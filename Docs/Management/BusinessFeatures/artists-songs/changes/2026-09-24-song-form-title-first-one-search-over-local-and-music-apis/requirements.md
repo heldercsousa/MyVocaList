@@ -272,6 +272,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   similar titles for the same artist (existing fuzzy step, score ≥ 0.82), Then the sheet lists them
   (tap a row → open that song, REQ-SFT-10) and offers **Save as new song**, which saves with no
   Version requirement.
+  > **Spec updated 2026-11-09 (BUG-085, approved by Helder):** the "existing fuzzy step" candidate pool is no longer a forward first-word prefix match (a typed title longer than the stored one, e.g. "Patiencee" vs stored "Patience", found nothing). Candidates for the artist are retrieved from the song-title trigram index (OR of the typed title's 3-character windows, as REQ-SFT-34 does for artists), scoped to the same artist, then scored; the ≥ 0.82 threshold is unchanged. Given "Patience" is stored for an artist, When the user saves "Patiencee" for that artist, Then the Possible duplicates sheet lists "Patience" (and the reverse still lists "Patiencee").
 - **REQ-SFT-24: No overwrite.** No path SHALL overwrite a stored song with values typed or picked in
   an add form. ("Update existing" is removed.)
 - **REQ-SFT-25: A new artist does not skip the song guard.** WHEN the artist is being created by
