@@ -71,6 +71,14 @@ internal static class AutocompleteDXFieldLogic
         && mode == FieldMode.Editable
         && SearchQuery(query).Length >= SearchConstants.MinimumLocalQueryLength;
 
+    /// <summary>
+    /// Decides whether a request is the echo of a pick: its normalised query equals the normalised text the
+    /// pick left in the editor. DX issues that request ~300 ms after the consumer writes the picked name
+    /// (T7 run 3, line 9). The caller clears the pick text on the first real keystroke. REQ-ACF-25.
+    /// </summary>
+    internal static bool IsPickEcho(string? query, string? textAtPick) =>
+        textAtPick is not null && SearchQuery(query) == SearchQuery(textAtPick);
+
     /// <summary>Routes a selection-changed value to a pick decision. REQ-ACF-11.</summary>
     internal static PickRoute RoutePick(object? selectedItem) =>
         selectedItem is AutocompleteSuggestion ? PickRoute.Select : PickRoute.None;
