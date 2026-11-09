@@ -590,3 +590,50 @@ Scan of the SFT test files for other stale names (`CreateSongWithUrlsAsync(int`,
 2. Re-run the test-project build. It should compile with 0 errors. Then run `dotnet test` (all tests must pass).
 3. Shared note text: move the unavailable note to one shared constant in production. Keep the two offline notes separate. Do not change the test literals listed under Part 2.
 4. No test file edits are needed for Part 2.
+
+## Cleanup Green: remove dead repository member, share unavailable note, verify stale comments
+**Plan:** `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-09-cleanup-after-the-song-form-work-dead-repository-member-shared-note-text-stale-comments/README.md`
+**Status:** To Review
+**Branch:** `task/sft-cleanup-dead-member-shared-notes` (worktree `.worktrees/sft-cleanup`)
+**Started:** 2026-11-09
+**Completed:** 2026-11-09
+**Level:** C (pure refactor, no behaviour change; no new ACs). Existing tests from Red (`0a3bb4a2`, `dbc372f1`, `3a606de9`) are the regression net and were not edited.
+
+### Changed files:
+- `Domain/RepositoryInterface/ISongRepository.cs` — removed `GetFuzzyCandidatePoolAsync` declaration and its XML doc block (19 lines, no other member touched)
+- `Infra/Repository/SongRepository.cs` — removed `GetFuzzyCandidatePoolAsync` implementation (15 lines; inline query, no SQL constant or using existed solely for it)
+- `MyVocaList/UI/Constants/SearchNotes.cs` — new file, `public static class SearchNotes` with `const string Unavailable` (byte-identical text to the former private consts)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — private `UnavailableNote` removed; mapping uses `SearchNotes.Unavailable`; `using MyVocaList.UI.Constants;` added. `OfflineNote` kept (songs).
+- `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` — private `UnavailableNote` removed; mapping uses `SearchNotes.Unavailable`; `using` added; comment above `OfflineNote` reworded (offline wording stays local to artists). `OfflineNote` kept.
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md` — this section (Checkpoint block replaced)
+
+No test file, DI registration, csproj, SongFormPage*, ArtistFormPage*, AutocompleteDXField*, tasks.md, LEDGER or change README was touched.
+
+### Stale-comment audit (production `*.cs`, Grep tool; `rtk proxy grep` returned no output for this run, so the Grep tool is the census of record)
+- `GetFuzzyCandidatePoolAsync`, `DerivePrefixToken`, `PrefixTokenMaxLen`, `IsExactMatch`, `5.3b`: no hits in production `.cs`.
+- `CreateSongWithUrlsAsync(int`: no hit. The only hit is `Services/SongService.cs:260` (`CreateSongWithUrlsAsync(int?, string?, …)`), which names the **current** `int?` overload (`SongService.cs:248`). Accurate; **left unchanged**.
+- Verdict: no production comment needed a fix beyond the `ArtistFormViewModel` wording above.
+
+### Shared constant: location decision
+`MyVocaList/UI/Constants/SearchNotes.cs` (namespace `MyVocaList.UI.Constants`). Rationale: the text is user-facing UI copy, so it belongs in the UI layer, not `Domain/Constants/SearchConstants.cs` (domain thresholds) or `Contracts/AppConstants.cs`. The folder is not excluded by `MyVocaList.csproj` (the only compile excludes are `NovaPasta`, `Tmp`, `MauiProgram.cs`, `App.xaml.cs`, `UI\Components\AutocompleteField\**`), so the file is compiled by default globbing. No name collision with existing types.
+
+### Census: `GetFuzzyCandidatePoolAsync` after the change
+- Grep tool over the worktree (`*.cs`): zero hits in production or tests (only `Docs/` historical mentions remain, which are not edited, per the change README).
+- Build and test confirm no remaining reference.
+
+### Verification evidence
+- (a) `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -nodeReuse:false -m:1 -p:UseSharedCompilation=false`: 7 projects, **0 errors**, 31 warnings (NU/vulnerability advisories and pre-existing nullable warnings; none introduced by this change).
+- (b) `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --no-build`: **921 passed, 0 failed, 0 skipped** (exit 0). No known flakes triggered.
+- (c) `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android --no-restore -v q -nodeReuse:false -m:1 -p:UseSharedCompilation=false`: **6 projects, 0 errors**, 27 warnings; APK produced (`MyVocaList/bin/Debug/net10.0-android/com.myvocalist.apk`).
+- Literal check: `rtk proxy grep -rnF` confirms the unavailable note appears once in production (`SearchNotes.cs:9`) and the tests keep their own literals (`SongFormViewModelTests.cs:56`, `ArtistFormViewModelTests.cs:259`), matching byte-for-byte. Offline notes remain separate (`SongFormViewModel.cs:85`, `ArtistFormViewModel.cs:38`).
+- Files written and re-read: `ArtistFormViewModel.cs:36-38` (comment edit), `task-log.md` (checkpoint replaced).
+
+### Architecture check (read-only)
+`MyVocaList.Tests/Architecture/UnitOfWorkReadScopeTests.cs:68-75` lists `ISongResolutionService` in `GovernedDataServiceTypes`. `Domain/ServicesInterfaces/ISongResolutionService.cs:9` still declares that interface, so the list matches production. No change needed. (The full test run passed, including this test.)
+
+### Branch base note (not a blocker for this refactor)
+`develop` is 2 commits ahead of this branch's base (`9f9907cd`): `dde298d7` (docs(acf) T10 merged) and `814c0630` (fix(acf) T10 root-cause fixes). `git merge-base --is-ancestor develop HEAD` returns non-zero. Not rebased; the orchestrator should decide rebase vs. merge before merging this branch. Potential overlap: `814c0630` is an ACF/autocomplete fix that may touch files in `UI/Components/`, not the files here.
+
+### Design concern
+None. The shared constant is placed in the UI layer per the rationale above.
+Context manifest: Domain/RepositoryInterface/ISongRepository.cs · Infra/Repository/SongRepository.cs · MyVocaList/UI/Constants/SearchNotes.cs · MyVocaList/UI/ViewModels/SongFormViewModel.cs · MyVocaList/UI/ViewModels/ArtistFormViewModel.cs
