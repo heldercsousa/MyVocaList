@@ -36,3 +36,8 @@ Ruling: record these as tasks nested under the Person feature and tackle them in
 - [ ] **F3: birthday field is confusing and locale-bound.** Helder, who knows the field, still tried to
   type MM/YYYY instead of DD/MM, and other locales (e.g. Chinese) order dates differently. Needs a UX
   decision (input format, picker, locale-aware mask, or a different action) before any spec.
+
+> **Update 2026-11-09 (F1):** the "after a pick" half was moved into the ACF item and fixed there (T10, root cause RC-B:
+> missing `DisplayMember`). The "edit-mode load" half did not reproduce on the emulator: Helder's observation was
+> the same page after an in-place pick. See `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md`
+> § "Diagnostic run — emulator". Close F1 if T7 run 4 confirms it on the phone.
