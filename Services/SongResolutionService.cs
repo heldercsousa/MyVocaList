@@ -93,26 +93,25 @@ public class SongResolutionService : ISongResolutionService
                 }
             }
 
-            // 3. Fuzzy
-            var prefixToken = DerivePrefixToken(candidate.Title);
-            if (!string.IsNullOrEmpty(prefixToken))
+            // 3. Fuzzy (BUG-085, REQ-SFT-23): same-artist trigram pool over the WHOLE typed title
+            if (!string.IsNullOrWhiteSpace(candidate.Title))
             {
-                var pool = await songRepository.GetFuzzyCandidatePoolAsync(
-                    resolvedArtistId.Value, prefixToken, SimilarityConstants.PoolSize, ct) ?? [];
+                var pool = await songRepository.SearchTitleCandidatesForArtistAsync(
+                    resolvedArtistId.Value, candidate.Title, SimilarityConstants.PoolSize, ct) ?? [];
 
                 var scored = pool
-                    .Select(s => new
+                    .Select(h => new
                     {
-                        Song = s,
-                        Score = _scorer.Score(candidate.Title, s.Title)
+                        Hit = h,
+                        Score = _scorer.Score(candidate.Title, h.Title)
                     })
                     .Where(x => x.Score >= SimilarityConstants.DefaultThreshold)
                     .OrderByDescending(x => x.Score)
                     .Select(x => new SongMatch(
-                        x.Song.Id,
-                        x.Song.Title,
-                        x.Song.Version,
-                        x.Song.OriginalArtist?.Name ?? string.Empty,
+                        x.Hit.SongId,
+                        x.Hit.Title,
+                        x.Hit.Version,
+                        x.Hit.ArtistName,
                         x.Score))
                     .ToList();
 
@@ -126,23 +125,4 @@ public class SongResolutionService : ISongResolutionService
             _logger.LogDebug("Song '{Title}' — NoMatch", candidate.Title);
             return new SongResolution(ResolutionKind.NoMatch, null, []);
         }, ct);
-
-    /// <summary>
-    /// Derives the first whitespace-delimited token of <paramref name="title"/>,
-    /// capped at <see cref="SimilarityConstants.PrefixTokenMaxLen"/> characters.
-    /// Returns empty string for null/whitespace input (design §4 N1).
-    /// </summary>
-    internal static string DerivePrefixToken(string? title)
-    {
-        if (string.IsNullOrWhiteSpace(title))
-            return string.Empty;
-
-        var trimmed = title.Trim();
-        var spaceIdx = trimmed.IndexOf(' ');
-        var token = spaceIdx < 0 ? trimmed : trimmed[..spaceIdx];
-
-        return token.Length > SimilarityConstants.PrefixTokenMaxLen
-            ? token[..SimilarityConstants.PrefixTokenMaxLen]
-            : token;
-    }
 }
