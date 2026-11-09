@@ -42,7 +42,7 @@ public class AppServicesRegistrationTests
     }
 
     [Fact]
-    // [BUG] BUG-021: SongFormViewModel depends on ISongResolutionService, which transitively needs ISimilarityScorer
+    // [BUG] BUG-021: the ISongResolutionService registration must resolve, and it needs ISimilarityScorer (SongFormViewModel no longer injects ISongResolutionService)
     public void AddAppServices_ResolvingSongResolutionService_Succeeds()
     {
         using var provider = BuildProvider();
