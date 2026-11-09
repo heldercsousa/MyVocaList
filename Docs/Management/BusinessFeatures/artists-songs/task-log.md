@@ -475,7 +475,7 @@ Commit `test(song): ... (BUG-085 Red)` made with `--no-verify` (compile-level Re
 **Started:** 2026-11-09
 **Completed:** not committed (worktree `.worktrees/bug-085` left dirty for Helder's decision)
 
-### Spec gap: test mocks the artist resolver to NoMatch, so the fuzzy path is unreachable
+### Test defect (resolved in `f64e70d2`; originally reported as a spec gap): test mocks the artist resolver to NoMatch, so the fuzzy path is unreachable
 **Location:** `MyVocaList.Tests/Integration/Services/SongSaveTrigramDuplicateTests.cs` `InitializeAsync` (the `_artistResolution` setup returns `ArtistResolution(ResolutionKind.NoMatch, null, [])` for every input); production `Services/SongResolutionService.cs` lines 49-53 (INV-1: the artist is resolved first and fuzzy only runs when `resolvedArtistId` is set).
 **Gap description:** `SongService` passes the artist by id, but `SongResolutionService.ResolveAsync` always re-resolves the artist through `IArtistResolutionService` (SongCandidate carries no artist id, REQ-SFT-41). Under the test's NoMatch mock the resolver returns NoMatch before the fuzzy step, so `SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` returns `Saved` with the production fix in place.
 **Options:**
@@ -492,7 +492,7 @@ Commit `test(song): ... (BUG-085 Red)` made with `--no-verify` (compile-level Re
 - `Docs/Management/BusinessFeatures/artists-songs/task-log.md` — this section
 
 ### Build notes
-Build: passed (0 errors, 7 projects; 2 attempts — attempt 1 green, attempt 2 after a SQL fix below) | Tests: full suite 921 total, 920 passed, 1 failed (`SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate`, see spec gap) | Commit SHA: none
+Build: passed (0 errors, 7 projects; 2 attempts — attempt 1 green, attempt 2 after a SQL fix below) | Tests: first run 921 total, 920 passed, 1 failed (`SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate`, a test defect: see below); after the test correction `f64e70d2` the full suite is 921/921 | Commit SHA: `8b94d1e6` (production, committed by the orchestrator); Verifier (Standard) CONDITIONAL PASS, 0 blockers
 Targeted run (19 tests in the three BUG-085 classes): 18 passed, 1 failed (the spec-gap test).
 Files written and re-read: ISongRepository.cs (both edits), SongRepository.cs (SQL consts + search methods), SongResolutionService.cs (fuzzy block, file tail), SimilarityConstants.cs (tail). Census `DerivePrefixToken|PrefixTokenMaxLen` in `*.cs`: no remaining references.
 
@@ -506,7 +506,7 @@ The shared select constant had no trailing newline, so `...s.ArtistIdWHERE SongS
 | REQ-SFT-23 | same artist only | `TitleSearchForArtistSql` `s.ArtistId = @artistId` | `..._OtherArtistSameTitle_IsExcluded`, `..._RespectsArtistScopeAndTake` | pass |
 | REQ-SFT-23 | typo in first word / middle, unrelated excluded | trigram OR-match | `..._TypoInFirstWord_...`, `..._TypoInMiddle_StillRetrieves` (2 cases), `..._UnrelatedTitle_ReturnsEmpty` | pass |
 | REQ-SFT-23 | fuzzy pool uses whole title, 0.82 threshold, blank skipped | `SongResolutionService` fuzzy step | `SongResolutionServiceTests` (BUG-085 cases) | pass |
-| REQ-SFT-23 | save returns SongChoiceNeeded with stored near-duplicate | end-to-end | `SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` | FAIL (spec gap) |
+| REQ-SFT-23 | save returns SongChoiceNeeded with stored near-duplicate | end-to-end | `SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` | PASS after test correction `f64e70d2` (first run FAIL: test defect) |
 | REQ-SFT-33 | no 3-char word falls back to artist-scoped collated prefix | `SearchTitleCoreAsync` fallback with artist filter | `..._ShortTitle_UsesCollatedPrefixFallback` | pass |
 
 ### Surprises for review
