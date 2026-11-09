@@ -517,3 +517,13 @@ Working theory (matches both observed symptoms): the native popup reacts to the 
 - Verifier PASS on `88bdae85` (no must-fix). Merged into develop `--no-ff` as `e3c661a6`.
 - Post-merge `dotnet test MyVocaList.Tests` on develop: 911/911 passed.
 - Next: T7 run 3, lines 2 and 9 only (Helder, Android). Open assumption: the native popup stays closed for " a" (REQ-ACF-13c).
+
+### T7 run 3 (Helder, Android, develop `cbb126f7`, 2026-11-09) — lines 2 and 9 only
+
+| Line | Result | Helder's observation |
+|------|--------|----------------------|
+| 2 | **FAIL** | The "not found" row appeared in both cases: " a" / "  a" / "a  " (expected: no menu) and "  an  " (expected: results). |
+| 9 | **Partial** | PASS: field not highlighted, edit mode loads correctly, tapping a filled field puts the cursor exactly where tapped. FAIL: the keyboard did not close, and after tapping an item the search seems to run again: singers whose names match the picked name are shown. |
+
+- The line 9 failure overlaps F1 (`Docs/Management/BusinessFeatures/persons/changes/2026-11-06-person-form-follow-ups-from-acf-t7-run-2/README.md`: menu reappears on edit load and after a pick).
+- The T9 line-2 fix rested on an unproven assumption about the DX native popup (§ T9). Decompiled code alone has not explained the device behaviour, so the next step is on-device evidence (diagnostic logs), not another guess.
