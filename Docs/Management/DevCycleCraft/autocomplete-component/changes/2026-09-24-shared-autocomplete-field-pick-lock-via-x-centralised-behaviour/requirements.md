@@ -393,6 +393,14 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
   birthday field) are tracked under persons, not here:
   `Docs/Management/BusinessFeatures/persons/changes/2026-11-06-person-form-follow-ups-from-acf-t7-run-2/README.md`.
 
+### Helder rulings — 2026-11-09 (after T7 run 3)
+
+- The re-search after a pick (F1, "after a pick" half) is fixed here, not in the persons follow-up. Helder
+  first asked to check the Song form fix ("cause re-trigger the search when tapping an item was fixed there"). Its lock
+  mechanism does not apply to an unlocked field, but its `DisplayMember="Headline"` does (RC-B). Diagnosis by
+  on-device evidence (emulator) was accepted: no more fixes from decompiled code alone.
+- Line 9: the cursor landing where the user taps is correct (PASS).
+
 ### Spec APPROVED — Helder, 2026-09-25
 
 Approved "as recommended", together with every open recommendation (Q10: the 300 ms debounce
