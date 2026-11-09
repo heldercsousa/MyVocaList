@@ -467,3 +467,49 @@ Other Grep hits (SongServiceSaveFromFormTests, SongSuggestionThresholdTests) pin
 
 ### Commit
 Commit `test(song): ... (BUG-085 Red)` made with `--no-verify` (compile-level Red, see above).
+
+---
+## BUG-085 Green (Builder)
+**Plan:** bug fix (no plan.md); spec: REQ-SFT-23 and REQ-SFT-33 in `changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/requirements.md`
+**Status:** To Review (orchestrator note 2026-11-09: the block was a defect in the Tester's own test setup — the `_artistResolution` mock returned NoMatch so the fuzzy step was never reached — not a spec gap; corrected in `f64e70d2`, full suite 921/921; Builder's production change committed by the orchestrator)
+**Started:** 2026-11-09
+**Completed:** not committed (worktree `.worktrees/bug-085` left dirty for Helder's decision)
+
+### Spec gap: test mocks the artist resolver to NoMatch, so the fuzzy path is unreachable
+**Location:** `MyVocaList.Tests/Integration/Services/SongSaveTrigramDuplicateTests.cs` `InitializeAsync` (the `_artistResolution` setup returns `ArtistResolution(ResolutionKind.NoMatch, null, [])` for every input); production `Services/SongResolutionService.cs` lines 49-53 (INV-1: the artist is resolved first and fuzzy only runs when `resolvedArtistId` is set).
+**Gap description:** `SongService` passes the artist by id, but `SongResolutionService.ResolveAsync` always re-resolves the artist through `IArtistResolutionService` (SongCandidate carries no artist id, REQ-SFT-41). Under the test's NoMatch mock the resolver returns NoMatch before the fuzzy step, so `SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` returns `Saved` with the production fix in place.
+**Options:**
+- Option A: Tester changes the artist mock to `ArtistResolution(ResolutionKind.ExactLocalMatch, _queen.Id, [])` (the artist exists; the test's own comment says so) — the test then exercises the fixed path.
+- Option B: the resolver receives the artist id from SongService — contradicts REQ-SFT-41 and the single-resolution design; not recommended.
+**Recommendation:** Option A because the test asserts behaviour of the song guard, not artist resolution, and the artist is known to exist.
+**Blocking:** Yes — the Builder may not edit tests; the regression test (Critical/Major mandatory Red then Green) cannot reach Green until the mock is corrected.
+
+### Changed files (uncommitted, worktree)
+- `Domain/RepositoryInterface/ISongRepository.cs` — new `SearchTitleCandidatesForArtistAsync`; XML remark on `GetFuzzyCandidatePoolAsync` (unused after BUG-085, removal scheduled with the test wrapper)
+- `Infra/Repository/SongRepository.cs` — `TitleSearchSelectSql` shared SELECT, `TitleSearchSql` (unchanged text), new `TitleSearchForArtistSql`; `SearchTitleCandidatesAsync` and new `SearchTitleCandidatesForArtistAsync` both delegate to private `SearchTitleCoreAsync`
+- `Services/SongResolutionService.cs` — fuzzy step calls `SearchTitleCandidatesForArtistAsync(resolvedArtistId, candidate.Title, PoolSize)`, maps `SongSearchHit` to `SongMatch`, keeps `>= DefaultThreshold`, skips blank titles; `DerivePrefixToken` removed
+- `Domain/Resolution/SimilarityConstants.cs` — `PrefixTokenMaxLen` removed (now unused; outside the brief's enumerated list, removed because the brief asked for removal when unused)
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md` — this section
+
+### Build notes
+Build: passed (0 errors, 7 projects; 2 attempts — attempt 1 green, attempt 2 after a SQL fix below) | Tests: full suite 921 total, 920 passed, 1 failed (`SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate`, see spec gap) | Commit SHA: none
+Targeted run (19 tests in the three BUG-085 classes): 18 passed, 1 failed (the spec-gap test).
+Files written and re-read: ISongRepository.cs (both edits), SongRepository.cs (SQL consts + search methods), SongResolutionService.cs (fuzzy block, file tail), SimilarityConstants.cs (tail). Census `DerivePrefixToken|PrefixTokenMaxLen` in `*.cs`: no remaining references.
+
+### Defect found and fixed during Green
+The shared select constant had no trailing newline, so `...s.ArtistIdWHERE SongSearch` was one token and the SQL failed with `near "SongSearch"`. This also broke the existing global `SearchTitleCandidatesAsync`. Fixed by a trailing blank line in the raw literal (`TitleSearchSelectSql`). Lesson: raw-literal concatenation needs an explicit line break.
+
+### AC traceability (partial)
+| AC | Criterion | Implementation | Test | Result |
+|----|-----------|----------------|------|--------|
+| REQ-SFT-23 | typed title longer than stored finds it | `SongRepository.SearchTitleCoreAsync` (artist SQL) | `SongRepositoryArtistTrigramTests.SearchTitleCandidatesForArtistAsync_TypedTitleLongerThanStored_FindsStoredTitle` | pass |
+| REQ-SFT-23 | same artist only | `TitleSearchForArtistSql` `s.ArtistId = @artistId` | `..._OtherArtistSameTitle_IsExcluded`, `..._RespectsArtistScopeAndTake` | pass |
+| REQ-SFT-23 | typo in first word / middle, unrelated excluded | trigram OR-match | `..._TypoInFirstWord_...`, `..._TypoInMiddle_StillRetrieves` (2 cases), `..._UnrelatedTitle_ReturnsEmpty` | pass |
+| REQ-SFT-23 | fuzzy pool uses whole title, 0.82 threshold, blank skipped | `SongResolutionService` fuzzy step | `SongResolutionServiceTests` (BUG-085 cases) | pass |
+| REQ-SFT-23 | save returns SongChoiceNeeded with stored near-duplicate | end-to-end | `SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` | FAIL (spec gap) |
+| REQ-SFT-33 | no 3-char word falls back to artist-scoped collated prefix | `SearchTitleCoreAsync` fallback with artist filter | `..._ShortTitle_UsesCollatedPrefixFallback` | pass |
+
+### Surprises for review
+- `SongSearch` indexes two columns (`title`, `artist`), and `SongSearch MATCH @m` without a column filter also matches artist-name trigrams. The artist-scoped query inherits this (bounded by the `ArtistId` filter and the 0.82 scorer). A `title : @m` column filter would tighten it but changes the global query too, so it was not done.
+- Performance of the OR-of-trigrams on large libraries was not measured. The artist filter is applied after the FTS join, so FTS does the heavy lifting.
+- Empty table: FTS returns no rows, so the result is an empty list. The "no such table" catch is unchanged and shared.
