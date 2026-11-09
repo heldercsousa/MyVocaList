@@ -24,6 +24,12 @@ public partial class SongFormPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        // BUG-084: OnDisappearing unsubscribes the sheet-sync handler, so it must be re-attached on every
+        // appearance. Detach first so the handler is never registered twice.
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+
         titleEdit.Focus();
 
         // Shell has finished applying [QueryProperty] values for this navigation by the time
@@ -135,8 +141,10 @@ public partial class SongFormPage : ContentPage
         }
     }
 
-    // Keeps IsArtistMatchSheetVisible consistent if the sheet closes itself (AllowDismiss is False;
-    // closing is driven by the ViewModel commands, so this is a safety net against divergence).
+    // BUG-084: AllowDismiss is True, so a scrim tap, the Android Back key or a swipe hides the sheet
+    // without a ViewModel command. A user-initiated Hidden is routed through the same dismiss command the
+    // Cancel button uses, so nothing is saved and the flag resets. The guard makes Close() calls issued by
+    // the ViewModel (Sync*) re-enter harmlessly, and the IsVisible check makes late Hidden events a no-op.
     private void OnArtistMatchSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
     {
         if (_isSyncingArtistMatchSheet) return;
@@ -146,7 +154,7 @@ public partial class SongFormPage : ContentPage
             _isSyncingArtistMatchSheet = true;
             try
             {
-                ViewModel.IsArtistMatchSheetVisible = false;
+                ViewModel.DismissArtistMatchSheetCommand.Execute(null);
             }
             finally
             {
@@ -173,10 +181,9 @@ public partial class SongFormPage : ContentPage
         }
     }
 
-    // Syncs the sheet closing (e.g. Close() completing) back to the ViewModel flag so the two
-    // stay consistent. AllowDismiss="False" on the sheet means the user cannot swipe-dismiss;
-    // closing is always driven by a ViewModel command (Cancel/Confirm), so this is primarily a
-    // safety net against the flag and the visual state ever diverging.
+    // BUG-084: AllowDismiss is True, so scrim, Back and swipe hide the sheet without a ViewModel command.
+    // A user-initiated Hidden is routed through DismissResolutionSheetCommand (the Cancel path): nothing is
+    // saved, the flag and VersionEntryRequired reset. Sync-driven Close() calls are ignored by the guard.
     private void OnResolutionSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
     {
         if (_isSyncingResolutionSheet) return;
@@ -186,7 +193,7 @@ public partial class SongFormPage : ContentPage
             _isSyncingResolutionSheet = true;
             try
             {
-                ViewModel.IsResolutionSheetVisible = false;
+                ViewModel.DismissResolutionSheetCommand.Execute(null);
             }
             finally
             {
