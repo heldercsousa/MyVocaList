@@ -261,6 +261,14 @@ public partial class AutocompleteDXField : ContentView
     // Cleared by that blur, by the next UserInput text change, or by the next focus.
     private bool _pickBlurPending;
 
+    // RC-A (REQ-ACF-13c): the latest options request was rejected by the gate. DX opens the drop-down after
+    // the request delegate completes, so OnEditorPropertyChanged closes it again while this is set.
+    private bool _lastRequestRejected;
+
+    // RC-B (REQ-ACF-25): the text the last routed pick left in the editor. A request that echoes it is not a
+    // new search. Cleared by the first real edit (a UserInput change that is not the echo).
+    private string? _textAtPick;
+
     // ── Constructor ────────────────────────────────────────────────────────
 
     /// <summary>Creates the field in its default, editable state.</summary>
@@ -269,6 +277,7 @@ public partial class AutocompleteDXField : ContentView
         InitializeComponent();
         ApplyMode();
         ApplySupportingText();
+        editor.PropertyChanged += OnEditorPropertyChanged;
     }
 
     // ── Public API ─────────────────────────────────────────────────────────
@@ -369,13 +378,15 @@ public partial class AutocompleteDXField : ContentView
         var source = OptionSource;
         var pickCountAtStart = _pickCount;
 
-        if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, query))
+        // RC-B: the request DX issues for the picked name is an echo, not a new search (REQ-ACF-25).
+        if (AutocompleteDXFieldLogic.IsPickEcho(query, _textAtPick)
+            || !AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, query))
         {
-            e.RequestAsync = NoOptions;
-            CloseMenuOnUiThread();
+            RejectRequest(e);
             return;
         }
 
+        _lastRequestRejected = false;
         e.RequestAsync = async () =>
         {
             // DX awaits this delegate inside an async void with no try/catch (decompiled-DLL
@@ -394,6 +405,7 @@ public partial class AutocompleteDXField : ContentView
                 // Review Focus 1: the field may have locked (or search turned off) while the search ran.
                 if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, query))
                 {
+                    _lastRequestRejected = true;
                     CloseMenuOnUiThread();
                     return null;
                 }
@@ -408,6 +420,24 @@ public partial class AutocompleteDXField : ContentView
         };
     }
 
+    // RC-A (REQ-ACF-13c): a rejected request returns no items and is marked, so the drop-down DX opens
+    // after this delegate completes is closed again (OnEditorPropertyChanged). No supported DX API vetoes
+    // that open (DX 25.2.4 public ItemsRequestEventArgs has no cancel flag; see task-log § T10 Step 1).
+    private void RejectRequest(ItemsRequestEventArgs e)
+    {
+        _lastRequestRejected = true;
+        e.RequestAsync = NoOptions;
+        CloseMenuOnUiThread();
+    }
+
+    // RC-A: DX sets the editor's IsDropDownOpen itself after a request completes. While the latest request
+    // was rejected, close the menu again; CloseMenuOnUiThread dispatches, so the close runs after DX's write.
+    private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(AutoCompleteEdit.IsDropDownOpen) && editor.IsDropDownOpen && _lastRequestRejected)
+            CloseMenuOnUiThread();
+    }
+
     // REQ-ACF-24: text written in code (e.g. the consumer's SelectCommand writing the picked name)
     // must close the menu; only ProgrammaticChange also resets SelectedItem. ItemSelected must not,
     // or the pick routed by OnSelectionChanged would be lost. Observed event order: unknown until the
@@ -416,13 +446,14 @@ public partial class AutocompleteDXField : ContentView
     {
         if (e.Reason == AutoCompleteEditTextChangeReason.UserInput)
         {
-            _pickBlurPending = false; // REQ-ACF-30: the user is editing, so a later blur is a real one.
-
-            // REQ-ACF-13c: DX's own clear path uses the raw length, so a raw-long, normalised-short text
-            // (" a") never reaches it. Clear the list and close the menu at the keystroke, as DX does for
-            // raw-short text, so a stale list cannot show. OnItemsRequested keeps the normalised gate too.
-            if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, OptionSource, editor.Text))
-                ClearMenuOnKeystroke();
+            // RC-B: DX reports the text SelectCommand wrote after a pick as UserInput. That echo (the same
+            // normalised text as the pick) is not a keystroke, so it keeps the pick text and the pick-blur
+            // flag. Any other UserInput change is a real edit: it ends both (REQ-ACF-25, REQ-ACF-30).
+            if (!AutocompleteDXFieldLogic.IsPickEcho(editor.Text, _textAtPick))
+            {
+                _textAtPick = null;
+                _pickBlurPending = false;
+            }
 
             return;
         }
@@ -452,6 +483,9 @@ public partial class AutocompleteDXField : ContentView
         if (command?.CanExecute(option) == true)
             command.Execute(option);
 
+        // RC-B: the text the pick leaves in the editor; the echo request DX sends for it is rejected.
+        _textAtPick = editor.Text;
+
         editor.SelectedItem = null;
         IsDropDownOpen = false;
 
@@ -460,6 +494,29 @@ public partial class AutocompleteDXField : ContentView
         _pickBlurPending = true;
         editor.CursorPosition = editor.Text?.Length ?? 0;
         editor.Unfocus();
+
+        // RC-C (REQ-ACF-30b): Unfocus() does not hide the soft keyboard on Android; hide it explicitly.
+        _ = HideSoftKeyboardAsync();
+    }
+
+    // RC-C (REQ-ACF-30b): hide the IME after a pick. MAUI 10 SoftInputExtensions.HideSoftInputAsync where the
+    // editor is an ITextInput; otherwise the Android InputMethodManager on the handler's platform view.
+    private async Task HideSoftKeyboardAsync()
+    {
+        if (editor is Microsoft.Maui.ITextInput textInput)
+        {
+            await textInput.HideSoftInputAsync(CancellationToken.None);
+            return;
+        }
+
+#if ANDROID
+        if (editor.Handler?.PlatformView is Android.Views.View view
+            && view.Context?.GetSystemService(Android.Content.Context.InputMethodService)
+                is Android.Views.InputMethods.InputMethodManager inputMethodManager)
+        {
+            inputMethodManager.HideSoftInputFromWindow(view.WindowToken, Android.Views.InputMethods.HideSoftInputFlags.None);
+        }
+#endif
     }
 
     // REQ-ACF-30 (c): the pick-caused blur is not a blur without pick; any other blur is forwarded.
@@ -510,15 +567,6 @@ public partial class AutocompleteDXField : ContentView
     }
 
     private void CloseMenuOnUiThread() => Dispatcher.Dispatch(() => IsDropDownOpen = false);
-
-    // Same sequence DX uses for raw-short text (AsyncItemsSourceProvider): drop the list, stop the
-    // loading state, close the menu. Runs on the UI thread (TextChanged is raised there). REQ-ACF-13c.
-    private void ClearMenuOnKeystroke()
-    {
-        editor.ItemsSource = null;
-        editor.IsLoadingInProgress = false;
-        IsDropDownOpen = false;
-    }
 
     // REQ-ACF-30: a new focus means the user is back in the field, so a pending pick-blur is stale.
     private void OnFocused(object sender, FocusEventArgs e) => _pickBlurPending = false;
