@@ -527,3 +527,27 @@ Working theory (matches both observed symptoms): the native popup reacts to the 
 
 - The line 9 failure overlaps F1 (`Docs/Management/BusinessFeatures/persons/changes/2026-11-06-person-form-follow-ups-from-acf-t7-run-2/README.md`: menu reappears on edit load and after a pick).
 - The T9 line-2 fix rested on an unproven assumption about the DX native popup (§ T9). Decompiled code alone has not explained the device behaviour, so the next step is on-device evidence (diagnostic logs), not another guess.
+
+### Diagnostic run — emulator (2026-11-09)
+
+Throwaway logging build: branch `spike/acf-t7-run3-diag` (`d1e3f9e6`, local only), Debug APK on the AVD
+`pixel_5_-_api_36_0_1` (API 36), driven by the orchestrator through adb. Each failure seen on Helder's
+phone reproduced on the emulator. Root causes proven from the `ACF-DIAG` log lines:
+
+- **RC-A (line 2, "Not found" for " a"):** the gate rejects correctly (`OnItemsRequested raw=" a" query="a" gate=False`),
+  and we return `null` and close. 10–60 ms **after** the delegate completes, DX sets `IsDropDownOpen=True` itself,
+  with `ItemsSource=null`, which renders "Not found". The T9 keystroke clear (`ItemsSource=null`) made this worse. Our close runs
+  before DX's open, so it has no effect. DX opens the drop-down even when the editor is not focused.
+- **RC-B (line 9 / F1, search runs again after a pick):** the component sets no `DisplayMember`, so on
+  `ItemSelected` DX writes the item's `ToString()` (`"AutocompleteSuggestion { Headline = … }"`) into `Text`,
+  and the VM's `PersonName` receives it. `SelectCommand` then writes "Helder Sousa", and DX reports that change as
+  **`Reason=UserInput`**, so `AsyncItemsSourceProvider` issues a new request 300 ms later
+  (`OnItemsRequested raw="Helder Sousa" … editorFocused=False`). The request is not stale, because it started after the pick,
+  so the pick counter does not catch it. It returns 1 item and DX opens the menu while the field is unfocused. The
+  Song form never hit this: it sets `DisplayMember="Headline"` and locks after a pick.
+- **RC-C (line 9, keyboard stays up):** `Unfocus()` works (`IsFocused=False`, blur not forwarded), but the
+  IME stays visible (`dumpsys input_method` → `mInputShown=true`). Unfocus does not hide the soft keyboard.
+- **F1 edit-load half:** NOT reproduced. Opening the edit form from the Singers list (Edit selected)
+  logs only the hydration (`PersonName set … hydrating=true`) and no request, menu or keyboard. Helder's "edit mode"
+  observation is the same page after an in-place pick: its title becomes "Edit Singer", and the instance hash is unchanged.
+- Correct behaviour confirmed: "  He  " → query "He" → 1 result shown.

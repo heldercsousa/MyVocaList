@@ -39,3 +39,10 @@ is made in place and listed here.
 - **design.md:** § 3.1 event-glue rules after T7 run 2; § 4 `SearchQuery`, `ShouldRequestOptions`,
   `ShouldForwardBlur(…, isPickBlur)`.
 - **tasks.md:** T7 run 2 note and the new T9.
+
+## 2026-11-09: T7 run 3 outcome, emulator root causes
+
+- **Trigger:** T7 run 3: line 2 FAIL, line 9 partial. An emulator diagnostic run proved RC-A/B/C (`task-log.md`).
+- **requirements.md:** § Helder rulings — 2026-11-09 (F1 "after a pick" half fixed here; line 9 cursor PASS).
+- **design.md:** § 3.1 event-glue rules after the emulator diagnostic run (they supersede the T9 keystroke clear).
+- **tasks.md:** T7 run 3 note and the new T10.

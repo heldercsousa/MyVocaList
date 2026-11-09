@@ -132,6 +132,25 @@ by Q3 and reinstated on 2026-11-05 (above).
   `editor.Handler is null` or `Focus()` returns `false`, it retries once the editor is ready, on its
   `HandlerChanged` or `Loaded`, whichever comes first, one-shot. The page call is unchanged.
 
+**Event-glue rules added after the emulator diagnostic run (2026-11-09, root causes RC-A/B/C in `task-log.md`):**
+These replace the T9 keystroke clear and the "close before DX" assumption below.
+- **RC-A: a rejected request must not leave a menu open (REQ-ACF-13c).** DX opens the drop-down itself
+  after the request delegate completes, whatever it returns. The component records that the latest request
+  was rejected (`_lastRequestRejected`, set in the no-request branch, cleared when a request passes the gate).
+  When the editor's `IsDropDownOpen` becomes `true` while that flag is set, the component closes it again
+  (dispatched, so it runs after DX's own write). Before coding, check Context7 / the decompiled DLL for a DX-supported way to
+  stop the open or hide the "not found" row (e.g. a cancellable opening event). If one exists, prefer it and record which
+  was used. Remove the T9 `ClearMenuOnKeystroke` path (it nulled `ItemsSource`, which renders "Not found").
+- **RC-B: a pick must not trigger a new search (REQ-ACF-24, -25; F1 "after a pick").** Set
+  `DisplayMember="Headline"` on the inner `AutoCompleteEdit` (the Song form pattern), so DX writes the display
+  text, not `ToString()`, on `ItemSelected`. Also, defensively: after a routed pick, the component holds
+  `_textAtPick` (the `Text` after `SelectCommand` runs). A request whose normalised query equals the normalised
+  `_textAtPick`, with no `UserInput` keystroke since the pick, is rejected (RC-A then keeps the menu closed). The first
+  real keystroke clears `_textAtPick`.
+- **RC-C: hide the soft keyboard explicitly (REQ-ACF-30b).** After `Unfocus()`, hide the IME through the MAUI
+  soft-input API (`HideSoftInputAsync`, if the DX editor qualifies) or the Android `InputMethodManager` on the
+  handler's platform view (`#if ANDROID`). Confirm the API with Context7 or MS Learn for MAUI 10.
+
 **Event-glue rules added after T7 run 2 (2026-11-06):**
 - **Normalised search text (REQ-ACF-13a/b).** `OnItemsRequested` computes
   `query = AutocompleteDXFieldLogic.SearchQuery(e.Text)` once, uses it for both `ShouldRequestOptions`

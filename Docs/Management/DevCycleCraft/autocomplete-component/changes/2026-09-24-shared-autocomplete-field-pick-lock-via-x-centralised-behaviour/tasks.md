@@ -287,6 +287,27 @@
     starting; if SongFormPage binds the component first, the four gates apply.
   - **Demo:** T7 run 3, lines 2 and 9 PASS on device. **Review lane:** Elevated
 
+> **Spec updated 2026-11-09: T7 run 3 result.** Line 2 FAIL; line 9 partial (cursor PASS; keyboard
+> stays up, and the search runs again after a pick). The emulator diagnostic run proved root causes RC-A/B/C
+> (`task-log.md` § "Diagnostic run — emulator"). T10 fixes them.
+
+- [ ] **T10: Root-cause fixes RC-A/B/C (line 2, line 9, F1 after-pick)** `[SEQUENTIAL, after T9]` (added 2026-11-09)
+  - **Behaviour:** REQ-ACF-13c, -24/-25 (no search after a pick), -30b. Design: `design.md` § 3.1
+    "Event-glue rules added after the emulator diagnostic run".
+  - **Steps (one writer, branch `task/acf-t10-root-cause-fixes` @ `.worktrees/acf-t10`):**
+    1. Context7 / decompiled DX 25.2.4: is there a supported way to stop the drop-down opening (or hide "not
+       found") after a rejected request? Record the answer in the task-log.
+    2. RC-A: the rejected-request close guard (or the supported mechanism), and remove `ClearMenuOnKeystroke`. Build.
+    3. RC-B: `DisplayMember="Headline"` in `AutocompleteDXField.xaml`. Build. Then the `_textAtPick` request guard
+       (Level A: if it adds a logic function, test it first, tagged `// [AC] REQ-ACF-24`). Build.
+    4. RC-C: hide the soft keyboard after a pick. Confirm the MAUI 10 API with Context7 or MS Learn. Build.
+    5. Full `dotnet test`, then an Android Debug build.
+  - **Tests:** Level A only for any new pure logic; the rest is UI glue (Level C). It is verified by the orchestrator on the
+    emulator (adb script: " a", "  a", "a  ", "  He  ", pick → no menu, `mInputShown=false`), then on Helder's phone.
+  - **Files owned:** `AutocompleteDXFieldLogic.cs`, `AutocompleteDXField.xaml(.cs)`,
+    `AutocompleteDXFieldLogicTests.cs`, its own `## T10` section of `task-log.md`
+  - **Demo:** emulator run clean, then T7 run 4 (lines 2 and 9) on Helder's phone. **Review lane:** Elevated
+
 ## Handed over to the song-form title-first item (not tasks here)
 
 `BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/`
