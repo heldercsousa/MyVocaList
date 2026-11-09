@@ -339,3 +339,66 @@ Domain and Contracts projects compiled cleanly (0 errors in those projects). Thi
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-06-27 | ↳ Bug: navigate_next icon missing SVG → Glide FileNotFoundException on form pages ([BUG-017](BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops/task-log.md)) | ✅ Fixed | `navigate_next` had no SVG in Resources/Images/; replaced with `arrow_forward_outlined` (SVG confirmed present) in ArtistFormPage.xaml (1×) and SongFormPage.xaml (2×). Minor severity. Build PASS, 357 tests PASS. Commit on branch `fix/bug-017-navigate-next-icon`. |
+
+---
+## Task: BUG-084 — Song form sheets: scrim and Back do not dismiss; Cancel unreachable with many rows (Major)
+**Plan:** Docs/Management/BusinessFeatures/artists-songs/bugs/2026-11-09-BUG-084-song-form-sheets-scrim-and-back-do-not-dismiss-cancel-unreachable-with-many-rows/README.md
+**Status:** To Review
+**Started:** 2026-11-09
+**Completed:** 2026-11-09
+
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md` (this entry)
+
+### Root cause (verified against DX 25.2.4 XML docs)
+- Both sheets (`resolutionSheet`, `artistMatchSheet`) had `AllowDismiss="False"`, so scrim tap and the Android Back key were ignored; only the Cancel button closed them.
+- The sheet body was one unbounded `VerticalStackLayout` inside a `HalfExpandedRatio="0.55"` sheet with `AllowedState="HalfExpanded"` and no `ScrollView`, so with 3+ candidate rows the Cancel button was clipped below the sheet and could not be scrolled to.
+- `OnDisappearing` unsubscribed the ViewModel `PropertyChanged` handler and nothing re-subscribed it, so sheet sync stopped after the page reappeared.
+
+### Before / after (SongFormPage.xaml, both sheets)
+| Property / structure | Before | After | Why |
+|---|---|---|---|
+| `AllowDismiss` | `False` | `True` | Scrim tap, Back key and swipe dismiss the sheet (REQ-SFT-19/22/23) |
+| `AllowedState` | `HalfExpanded` | `All` | User can expand to full height when the list is long (DX enum: `All` / `FullExpanded` / `HalfExpanded`) |
+| `HalfExpandedRatio` | `0.55` | `0.7` | More visible body before the user needs to expand |
+| Sheet child | one `VerticalStackLayout` | `Grid RowDefinitions="*,Auto"` | Row 0 `ScrollView` holds title, candidate rows, action blocks; row 1 holds divider + Cancel, pinned |
+| Cancel / primary actions | inside the unbounded stack | row 0 scroll body (actions) / row 1 pinned (Cancel) | Cancel always reachable; actions reachable by scrolling |
+
+Bindings, commands, `Text` values and `x:DataType` are unchanged. The only content move is the divider that preceded Cancel, which now sits in row 1 above Cancel.
+
+### Before / after (SongFormPage.xaml.cs)
+- `OnAppearing`: `ViewModel.PropertyChanged -= OnViewModelPropertyChanged;` then `+=` (detach-first, so no double subscription). `OnDisappearing` unchanged.
+- `OnResolutionSheetStateChanged` / `OnArtistMatchSheetStateChanged`: on a user-initiated `Hidden` while the flag is still true, the handler now calls `ViewModel.DismissResolutionSheetCommand` / `DismissArtistMatchSheetCommand` instead of setting the flag directly. Scrim, Back and swipe therefore take the same path as the Cancel button (nothing saved; `VersionEntryRequired` also resets for the resolution sheet). The `Sync*` re-entrancy guards are unchanged, so ViewModel-driven `Close()` calls do not re-enter, and the `IsVisible` check keeps late `Hidden` events a no-op.
+- No ViewModel change was needed.
+
+### Build notes
+Build: passed (0 errors) | Tests: 911 passed, 0 failed | Commit SHA: see commit message
+- Android build: passed (0 errors, 27 pre-existing NuGet vulnerability warnings), run after each XAML step (resolutionSheet, then artistMatchSheet) and after the code-behind change.
+- Test project build: passed (0 errors). Full `MyVocaList.Tests` suite: 911 passed, 0 failed (baseline 902; the count increased with other develop work).
+- Environment note: the worktree needed `dotnet restore` once for `MyVocaList` and `MyVocaList.Tests`. Background `dotnet build` runs stalled with no output for more than an hour while other sessions' MSBuild and VBCSCompiler processes were running; a foreground build with `-nodeReuse:false -m:1 -p:UseSharedCompilation=false` completed in about 2.5 minutes.
+- Files written and re-read: `SongFormPage.xaml` (resolutionSheet block lines 257-351, artistMatchSheet block lines 359-~425), `SongFormPage.xaml.cs` (OnAppearing 24-45, artist handler 144-164, resolution handler 184-203).
+
+### Verification evidence (AC traceability)
+- REQ-SFT-19 (Back or scrim dismisses artist-match sheet, nothing saved): `AllowDismiss="True"` plus `DismissArtistMatchSheetCommand` routing. Needs device confirmation (see E2E).
+- REQ-SFT-22 (Back or scrim dismisses resolution sheet, nothing saved): `AllowDismiss="True"` plus `DismissResolutionSheetCommand` routing. Needs device confirmation.
+- REQ-SFT-23 (same as REQ-SFT-22 for the "Save as new song" branch): same path. Needs device confirmation.
+- No automated regression test was added. BUG-084 is Major and UI-only (`bug-tracking.md`: Major UI-only → manual E2E documented here).
+
+### Design concern (not blocking)
+- A `Hidden` event that DX raises asynchronously (after a ViewModel `Close()`) can arrive after the VM has already re-shown the same sheet. The `IsVisible` check cannot tell that apart from a real user dismissal, so the sheet would close in that rare sequence. This existed before the change (the handler already cleared the flag). It is a candidate for the device run; it is not caused by this fix.
+
+### Manual E2E checklist (Android S23, for Helder)
+1. Open the artist-match sheet (type a near-duplicate artist name, Save). Tap the scrim: the sheet closes, nothing is saved, and the form is unchanged.
+2. Repeat step 1 using the system Back key: the sheet closes, nothing is saved.
+3. Re-open the artist-match sheet (Save again). It opens. Cancel closes it.
+4. Create a long duplicate list (3+ rows) for the resolution sheet (Save with an existing song title). Scroll the sheet: every row is reachable, and Cancel is visible at the bottom without scrolling past it.
+5. On the same long list, tap Cancel: the sheet closes, nothing is saved.
+6. Re-open the resolution sheet after a dismissal (scrim or Back). It opens, and "Save as new version" and "Save as new song" remain reachable (scroll if needed).
+7. Leave the Song form (Back to the list) and return to the form (navigate to Add or Edit again), then trigger Save with a duplicate. The sheet still opens (verifies the `OnAppearing` resubscribe).
+8. Swipe the sheet down from half-expanded: it dismisses without saving. Drag up: it expands to full height (AllowedState All).
+
+### Out of scope (per briefing)
+- Discard sheet (5.6): VM-only, not touched.
+- Artist field, Title field, `AutocompleteDXField*`: not touched.
