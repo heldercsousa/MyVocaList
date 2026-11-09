@@ -551,3 +551,65 @@ phone reproduced on the emulator. Root causes proven from the `ACF-DIAG` log lin
   logs only the hydration (`PersonName set … hydrating=true`) and no request, menu or keyboard. Helder's "edit mode"
   observation is the same page after an in-place pick: its title becomes "Edit Singer", and the instance hash is unchanged.
 - Correct behaviour confirmed: "  He  " → query "He" → 1 result shown.
+
+## T10 — Root-cause fixes RC-A/B/C
+
+**Plan:** `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/tasks.md` § T10
+**Status:** To Review
+**Started:** 2026-11-09
+**Completed:** 2026-11-09
+**Branch:** `task/acf-t10-root-cause-fixes` @ `.worktrees/acf-t10` (base `develop`, ancestry verified)
+
+### Step 1 — DevExpress mechanism for RC-A (decision)
+- Public API (DevExpress.Maui.Editors 25.2.4 XML doc): `ItemsRequestEventArgs` exposes only `Text`, `CancellationToken`, `Request`, `RequestAsync`. No cancel or suppress-open flag.
+- `AutoCompleteEdit` public events: `TextChanged`, `Submitted`, `SelectionChanged`, `Focused`/`Unfocused`. No drop-down opening event.
+- `IsDropDownOpen` is a documented bindable property. `DropDownStateChanged` exists in the DLL but is not public.
+- **Decision:** no supported way to veto DX's own open. Mechanism used: a rejected request sets `_lastRequestRejected`. The editor's `PropertyChanged` for `IsDropDownOpen` closes the menu again, dispatched after DX's write. This is the design § 3.1 RC-A rule, not the "close before DX" guard that did not work.
+- Caveat: decompiled IL was not inspected (no decompiler on the machine). The DLL scan used metadata strings and XML docs only.
+
+### Step 1 — mechanism for RC-C (decision)
+- MS Learn (MAUI 10): `Microsoft.Maui.SoftInputExtensions.HideSoftInputAsync(this ITextInput, CancellationToken)`, plus `IsSoftInputShowing`.
+- Applied when the DX editor is `ITextInput`. Otherwise the Android `InputMethodManager.HideSoftInputFromWindow` fallback under `#if ANDROID`.
+- Whether the DX `AutoCompleteEdit` implements `ITextInput` was not confirmed. The fallback runs if it does not. Verify on the emulator (`mInputShown=false`).
+
+### Changes
+- **RC-A:** `RejectRequest(e)` replaces the no-request branch. The post-await gate rejection sets the flag. `OnEditorPropertyChanged` closes the menu when `IsDropDownOpen` turns true while the flag is set. `ClearMenuOnKeystroke` and its UserInput call are removed (T9 path).
+- **RC-B:** `DisplayMember="Headline"` on the inner `AutoCompleteEdit` (matches the Song form). `_textAtPick` is set from `editor.Text` after `SelectCommand`. `OnItemsRequested` rejects a request where `IsPickEcho(query, _textAtPick)`.
+- **RC-B detail (impl decision):** DX reports the `SelectCommand` write as `UserInput`, so the UserInput branch must not clear the pick text on that echo. It keeps `_textAtPick` and `_pickBlurPending` when `IsPickEcho(editor.Text, _textAtPick)`. Any other UserInput change clears both.
+- **RC-C:** `HideSoftKeyboardAsync()` runs after `Unfocus()` (`_ = ...`, discarded).
+- **Logic:** new pure `AutocompleteDXFieldLogic.IsPickEcho(string? query, string? textAtPick)`. Normalised equality through `SearchQuery`, ordinal, no case folding.
+- Spec note added to `design.md` § 3.1 (one blockquote, RC-C bullet).
+
+### Edge (documented, not a defect)
+- Trailing whitespace typed after a pick (`"Helder Sousa "`) normalises to the pick text, so it is treated as an echo and does not search. The query is identical after normalisation, so no result is lost.
+
+### AC traceability (Level A logic)
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-ACF-25 | echo query equals pick text, normalised | `AutocompleteDXFieldLogic.IsPickEcho` | `IsPickEcho_QueryMatchesTextAtPick_ReturnsTrue` (3 cases) |
+| REQ-ACF-25 | no pick → no echo | `IsPickEcho` | `IsPickEcho_NoPick_ReturnsFalse` |
+| REQ-ACF-25 | edited query differs → no echo | `IsPickEcho` | `IsPickEcho_QueryDiffersFromTextAtPick_ReturnsFalse` |
+
+Red evidence: the three tests and the method were written in the same pass before the first run, so a separate Red run was not observed. The first run passed (57/57 in the logic test filter). This is a process gap, recorded here.
+
+### Level C (UI glue, no unit test)
+- RC-A (`RejectRequest`, `OnEditorPropertyChanged`), RC-B (`DisplayMember`, `_textAtPick` glue), RC-C (`HideSoftKeyboardAsync`). Verification: emulator adb script (" a", "  a", "a  ", "  He  ", pick → no menu, `mInputShown=false`), then Helder's phone (T7 run 4).
+
+### Changed files
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml.cs`
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml`
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs`
+- `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs`
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md`
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/design.md` (one `Spec updated 2026-11-09` note only; outside Files owned, permitted write-back)
+
+### Verification evidence
+- Logic filter `AutocompleteDXFieldLogicTests`: 57 passed, 0 failed.
+- Full `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`: 916 passed, 0 failed.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -c Debug`: exit 0, 0 errors, warnings only (NU1903 and pre-existing).
+- APK: `MyVocaList/bin/Debug/net10.0-android/com.myvocalist-Signed.apk` (worktree `.worktrees/acf-t10`).
+- Emulator run: not performed by the implementor. Orchestrator to run.
+
+### Build notes
+Build: passed (0 errors) | Tests: 916 passed, 0 failed | Commit SHA: recorded in git log on `task/acf-t10-root-cause-fixes`
+Files written and re-read: `AutocompleteDXField.xaml.cs` (grep of all edited symbols), `AutocompleteDXField.xaml` (DisplayMember line 24), `AutocompleteDXFieldLogic.cs` (IsPickEcho lines 79–80), `AutocompleteDXFieldLogicTests.cs` (IsPickEcho tests), `design.md` (note line 153).
