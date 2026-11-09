@@ -2,6 +2,8 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:svc="clr-namespace:MyVocaList.Services;assembly=MyVocaList.Services"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
     x:Class="MyVocaList.UI.Pages.About.AboutPage"
     x:DataType="vm:AboutViewModel"
@@ -34,6 +36,11 @@
                     StyleClass="Body.Small"
                     HorizontalOptions="Center"
                     TextColor="{StaticResource OnSurfaceVariant}" />
+                <Label
+                    Text="{Binding BuildLine}"
+                    StyleClass="Body.Small"
+                    HorizontalOptions="Center"
+                    TextColor="{StaticResource OnSurfaceVariant}" />
             </VerticalStackLayout>
 
             <BoxView HeightRequest="1" BackgroundColor="{StaticResource OutlineVariant}" />
@@ -56,6 +63,46 @@
                     Text="{Binding Copyright}"
                     StyleClass="Body.Small"
                     TextColor="{StaticResource OnSurfaceVariant}" />
+            </VerticalStackLayout>
+
+            <!-- Build details — hidden when no build-details resource is embedded (ShowBuildDetails=false) -->
+            <VerticalStackLayout IsVisible="{Binding HasBuildDetails}" Spacing="8">
+                <BoxView HeightRequest="1" BackgroundColor="{StaticResource OutlineVariant}" />
+                <Label
+                    Text="Build details"
+                    StyleClass="Label.Large"
+                    TextColor="{StaticResource OnSurface}" />
+                <Label
+                    Text="{Binding BranchText}"
+                    StyleClass="Body.Medium"
+                    TextColor="{StaticResource OnSurface}" />
+                <Label
+                    Text="⚠ Built with uncommitted changes"
+                    IsVisible="{Binding IsDirty}"
+                    StyleClass="Body.Medium"
+                    TextColor="{StaticResource Error}" />
+                <dxe:ChoiceChipGroup
+                    ItemsSource="{Binding Groups}"
+                    DisplayMember="Label"
+                    SelectedItem="{Binding SelectedGroup, Mode=TwoWay}" />
+                <VerticalStackLayout
+                    BindableLayout.ItemsSource="{Binding SelectedGroup.Rows}"
+                    Spacing="4">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="svc:BuildRow">
+                            <VerticalStackLayout>
+                                <Label
+                                    Text="{Binding Text}"
+                                    StyleClass="Body.Medium"
+                                    TextColor="{StaticResource OnSurface}" />
+                                <Label
+                                    Text="{Binding SupportingText}"
+                                    StyleClass="Body.Small"
+                                    TextColor="{StaticResource OnSurfaceVariant}" />
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
             </VerticalStackLayout>
 
             <!-- What's New — hidden when HasReleaseNotes is false (stub phase) -->
