@@ -342,4 +342,34 @@ public class AutocompleteDXFieldLogicTests
 
         Assert.True(result);
     }
+
+    // [AC] REQ-ACF-25: the request DX issues for the text written after a pick (the picked name) is an echo.
+    [Theory]
+    [InlineData("Helder Sousa", "Helder Sousa")]
+    [InlineData("  Helder   Sousa ", "Helder Sousa")]
+    [InlineData("Helder Sousa", "  Helder Sousa  ")]
+    public void IsPickEcho_QueryMatchesTextAtPick_ReturnsTrue(string query, string textAtPick)
+    {
+        var result = AutocompleteDXFieldLogic.IsPickEcho(query, textAtPick);
+
+        Assert.True(result);
+    }
+
+    // [AC] REQ-ACF-25: with no routed pick there is no echo, so every request is judged on its own.
+    [Fact]
+    public void IsPickEcho_NoPick_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.IsPickEcho("Helder Sousa", null);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-25: a query that differs from the picked text (the user typed more) is not an echo.
+    [Fact]
+    public void IsPickEcho_QueryDiffersFromTextAtPick_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.IsPickEcho("Helder Sousa Silva", "Helder Sousa");
+
+        Assert.False(result);
+    }
 }
