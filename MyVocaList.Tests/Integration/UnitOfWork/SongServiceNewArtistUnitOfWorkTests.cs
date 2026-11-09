@@ -184,6 +184,9 @@ public class SongServiceNewArtistUnitOfWorkTests
         public Task<IReadOnlyList<Song>> GetFuzzyCandidatePoolAsync(int artistId, string titlePrefixToken, int take, CancellationToken ct = default)
             => _inner.GetFuzzyCandidatePoolAsync(artistId, titlePrefixToken, take, ct);
 
+        public Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesForArtistAsync(int artistId, string title, int take, CancellationToken ct = default)
+            => _inner.SearchTitleCandidatesForArtistAsync(artistId, title, take, ct);
+
         public Task<IReadOnlyList<Song>> GetByTitlesCollatedAsync(IEnumerable<string> titles, CancellationToken ct = default)
             => _inner.GetByTitlesCollatedAsync(titles, ct);
 

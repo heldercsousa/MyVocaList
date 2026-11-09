@@ -13,14 +13,25 @@ namespace MyVocaList.Infra.Repository;
 /// <inheritdoc />
 public class SongRepository : ISongRepository
 {
-    private const string TitleSearchSql =
+    private const string TitleSearchSelectSql =
         """
         SELECT s.Id AS SongId, s.Title AS Title, s.Version AS Version, s.ArtistId AS ArtistId,
                a.Name AS ArtistName, s.ExternalProvider AS ExternalProvider, s.ExternalId AS ExternalId
         FROM SongSearch
         JOIN Songs s ON s.Id = SongSearch.rowid
         JOIN Artists a ON a.Id = s.ArtistId
+
+        """;
+
+    private const string TitleSearchSql = TitleSearchSelectSql + """
         WHERE SongSearch MATCH @m
+        ORDER BY bm25(SongSearch, 10.0, 1.0), length(s.Title)
+        LIMIT @take
+        """;
+
+    // BUG-085 (REQ-SFT-23): same as TitleSearchSql, restricted to one artist.
+    private const string TitleSearchForArtistSql = TitleSearchSelectSql + """
+        WHERE SongSearch MATCH @m AND s.ArtistId = @artistId
         ORDER BY bm25(SongSearch, 10.0, 1.0), length(s.Title)
         LIMIT @take
         """;
@@ -160,8 +171,26 @@ public class SongRepository : ISongRepository
             ct);
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesAsync(
+    public Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesAsync(
         string query, int take, CancellationToken ct)
+        => SearchTitleCoreAsync(query, take, artistId: null, ct);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesForArtistAsync(
+        int artistId, string title, int take, CancellationToken ct = default)
+    {
+        // BUG-085: a blank typed title has no trigram windows; it must not fall back to a match-all prefix.
+        if (string.IsNullOrWhiteSpace(title)) return [];
+
+        return await SearchTitleCoreAsync(title, take, artistId, ct);
+    }
+
+    /// <summary>
+    /// Shared title search (REQ-SFT-02/23/33): FTS5 trigram OR-match when the query has a word of &gt;= 3 chars,
+    /// else the collated title prefix. <paramref name="artistId"/> null = global; otherwise scoped to that artist.
+    /// </summary>
+    private async Task<IReadOnlyList<SongSearchHit>> SearchTitleCoreAsync(
+        string query, int take, int? artistId, CancellationToken ct)
     {
         var match = FtsQueryBuilder.BuildTrigramMatch(query);
         if (match is null)
@@ -170,9 +199,10 @@ public class SongRepository : ISongRepository
             var pattern = (query ?? string.Empty).Trim() + "%";
             return await _db.Songs
                 .AsNoTracking()
-                .Where(s => EF.Functions.Like(
-                    EF.Functions.Collate(s.Title, CollationConstants.Default),
-                    EF.Functions.Collate(pattern, CollationConstants.Default)))
+                .Where(s => (artistId == null || s.ArtistId == artistId.Value) &&
+                            EF.Functions.Like(
+                                EF.Functions.Collate(s.Title, CollationConstants.Default),
+                                EF.Functions.Collate(pattern, CollationConstants.Default)))
                 .OrderBy(s => s.Title.Length)
                 .Take(take)
                 .Select(s => new SongSearchHit(
@@ -182,12 +212,20 @@ public class SongRepository : ISongRepository
 
         try
         {
-            return await _db.Database
-                .SqlQueryRaw<SongSearchHit>(
-                    TitleSearchSql,
-                    new SqliteParameter("@m", match),
-                    new SqliteParameter("@take", take))
-                .ToListAsync(ct);
+            return artistId is null
+                ? await _db.Database
+                    .SqlQueryRaw<SongSearchHit>(
+                        TitleSearchSql,
+                        new SqliteParameter("@m", match),
+                        new SqliteParameter("@take", take))
+                    .ToListAsync(ct)
+                : await _db.Database
+                    .SqlQueryRaw<SongSearchHit>(
+                        TitleSearchForArtistSql,
+                        new SqliteParameter("@m", match),
+                        new SqliteParameter("@take", take),
+                        new SqliteParameter("@artistId", artistId.Value))
+                    .ToListAsync(ct);
         }
         catch (SqliteException ex) when (ex.Message.Contains("no such table", StringComparison.OrdinalIgnoreCase))
         {
