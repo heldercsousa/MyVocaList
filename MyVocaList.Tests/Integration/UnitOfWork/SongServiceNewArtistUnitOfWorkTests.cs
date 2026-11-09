@@ -181,9 +181,6 @@ public class SongServiceNewArtistUnitOfWorkTests
         public Task<bool> ExistsByTitleVersionForArtistAsync(int artistId, string title, string version, int excludeId, CancellationToken ct = default)
             => _inner.ExistsByTitleVersionForArtistAsync(artistId, title, version, excludeId, ct);
 
-        public Task<IReadOnlyList<Song>> GetFuzzyCandidatePoolAsync(int artistId, string titlePrefixToken, int take, CancellationToken ct = default)
-            => _inner.GetFuzzyCandidatePoolAsync(artistId, titlePrefixToken, take, ct);
-
         public Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesForArtistAsync(int artistId, string title, int take, CancellationToken ct = default)
             => _inner.SearchTitleCandidatesForArtistAsync(artistId, title, take, ct);
 
