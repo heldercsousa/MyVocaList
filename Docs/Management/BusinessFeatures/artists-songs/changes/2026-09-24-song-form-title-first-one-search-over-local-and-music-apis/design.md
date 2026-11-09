@@ -730,3 +730,5 @@ before the song is staged, so the catalog hook needs no special case; an edit th
 artist is an ordinary reassignment to it. `SaveFromFormAsync` writes nothing itself, so it adds no
 path CATALOG-PROP must hook. No conflict with D1–D4 was found. Both items write
 `SongService.cs` and add migrations, so they are serialized (single writer); see `tasks.md`.
+
+> **Update 2026-11-09 (BUG-085):** the Save-time fuzzy song step no longer uses the first-word prefix pool. `ISongRepository.SearchTitleCandidatesForArtistAsync(artistId, title, take, ct)` retrieves same-artist candidates from the `SongSearch` trigram index (same `FtsQueryBuilder.BuildTrigramMatch` as the artist path; collated-prefix fallback for titles under 3 characters); `SongResolutionService` scores them with the unchanged 0.82 threshold. `GetFuzzyCandidatePoolAsync` is unused and queued for removal.
