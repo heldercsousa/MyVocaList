@@ -613,3 +613,15 @@ Red evidence: the three tests and the method were written in the same pass befor
 ### Build notes
 Build: passed (0 errors) | Tests: 916 passed, 0 failed | Commit SHA: recorded in git log on `task/acf-t10-root-cause-fixes`
 Files written and re-read: `AutocompleteDXField.xaml.cs` (grep of all edited symbols), `AutocompleteDXField.xaml` (DisplayMember line 24), `AutocompleteDXFieldLogic.cs` (IsPickEcho lines 79–80), `AutocompleteDXFieldLogicTests.cs` (IsPickEcho tests), `design.md` (note line 153).
+
+### Checkpoint — T10 emulator check + merge (2026-11-09)
+- Emulator (AVD `pixel_5_-_api_36_0_1`, Debug APK of `814c0630`, adb-driven by the orchestrator; screenshots
+  checked visually because `uiautomator` does not see the DX popup):
+  - " a", "  a", "a  " showed no menu.
+  - "  He  " showed 1 result.
+  - A pick reopened no menu; `mInputShown=false`; the field was not highlighted.
+  - After a pick, clearing the field and typing "he" showed results again.
+- The test run was interrupted once by an external reinstall of `com.myvocalist` (15:40:11, `installPackageLI`).
+  It was re-run from scratch.
+- Verifier PASS (no must-fix). Merged `--no-ff` as `3440d982`. `dotnet test` on develop: 926/926.
+- Next: T7 run 4 on Helder's phone (Release APK from develop), checking lines 2 and 9 only.

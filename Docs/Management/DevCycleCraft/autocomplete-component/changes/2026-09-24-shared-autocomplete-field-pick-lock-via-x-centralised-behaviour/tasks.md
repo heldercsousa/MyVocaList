@@ -291,7 +291,7 @@
 > stays up, and the search runs again after a pick). The emulator diagnostic run proved root causes RC-A/B/C
 > (`task-log.md` § "Diagnostic run — emulator"). T10 fixes them.
 
-- [ ] **T10: Root-cause fixes RC-A/B/C (line 2, line 9, F1 after-pick)** `[SEQUENTIAL, after T9]` (added 2026-11-09)
+- [x] **T10: Root-cause fixes RC-A/B/C (line 2, line 9, F1 after-pick)** `[SEQUENTIAL, after T9]` (added 2026-11-09)
   - **Behaviour:** REQ-ACF-13c, -24/-25 (no search after a pick), -30b. Design: `design.md` § 3.1
     "Event-glue rules added after the emulator diagnostic run".
   - **Steps (one writer, branch `task/acf-t10-root-cause-fixes` @ `.worktrees/acf-t10`):**
