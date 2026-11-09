@@ -21,6 +21,7 @@
                           HasError="{Binding HasError, Source={x:Reference self}}"
                           ErrorText="{Binding ErrorText, Source={x:Reference self}}"
                           IsDropDownOpen="{Binding IsDropDownOpen, Source={x:Reference self}, Mode=TwoWay}"
+                          DisplayMember="Headline"
                           SubmitIconVisibility="Never"
                           ClearIconColor="{StaticResource OnSurfaceVariant}"
                           EndIcon="close_outlined"
