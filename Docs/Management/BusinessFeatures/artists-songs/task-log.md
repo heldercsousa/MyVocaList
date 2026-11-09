@@ -513,3 +513,80 @@ The shared select constant had no trailing newline, so `...s.ArtistIdWHERE SongS
 - `SongSearch` indexes two columns (`title`, `artist`), and `SongSearch MATCH @m` without a column filter also matches artist-name trigrams. The artist-scoped query inherits this (bounded by the `ArtistId` filter and the 0.82 scorer). A `title : @m` column filter would tighten it but changes the global query too, so it was not done.
 - Performance of the OR-of-trigrams on large libraries was not measured. The artist filter is applied after the FTS join, so FTS does the heavy lifting.
 - Empty table: FTS returns no rows, so the result is an empty list. The "no such table" catch is unchanged and shared.
+
+---
+## Cleanup Red: dead repository member, shared note text, stale test comments
+**Plan:** `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-09-cleanup-after-the-song-form-work-dead-repository-member-shared-note-text-stale-comments/README.md`
+**Status:** To Review (test side; Builder owns production)
+**Branch:** `task/sft-cleanup-dead-member-shared-notes` (worktree `.worktrees/sft-cleanup`, base `develop`)
+**Started:** 2026-11-09
+**Completed:** 2026-11-09
+
+### Changed files:
+- `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` — removed the `GetFuzzyCandidatePoolAsync` delegate from `ThrowOnAddSongRepository` (compile-level Red)
+- `MyVocaList.Tests/Integration/Repositories/SongRepositoryArtistTrigramTests.cs` — two historical comments reworded to drop the removed member name (comment-only)
+- `MyVocaList.Tests/Integration/Repositories/SongRepositoryResolutionTests.cs` — one historical comment reworded (comment-only)
+- `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` — stale BUG-021 comment corrected (comment-only)
+- `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTests.cs` — stale `ExecuteEditSaveAsync` comment corrected (comment-only)
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md` — this section
+
+Commits: `0a3bb4a2` (Part 1, `--no-verify`), `dbc372f1` (Part 3, `--no-verify`).
+`--no-verify` reason: the test project does not compile until the Builder removes `ISongRepository.GetFuzzyCandidatePoolAsync`; the pre-commit hook builds the test project. Allowed for compile-level Red per `testing.md`.
+
+### Build notes
+Build: FAILED as expected (1 error, 34 warnings). Command: `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -nodeReuse:false -m:1 -p:UseSharedCompilation=false`
+- Only error: `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs(156,53): error CS0535: 'SongServiceNewArtistUnitOfWorkTests.ThrowOnAddSongRepository' does not implement interface member 'ISongRepository.GetFuzzyCandidatePoolAsync(int, string, int, CancellationToken)'`
+- The 34 warnings are existing nullable/NU warnings (CS8625, CS8765 in `CrudListViewModelBaseTests.cs`, NU1902/NU1903 advisories). None are caused by this change.
+- Tests: not run (project does not compile). Expected to pass once the Builder deletes the interface member and the `SongRepository` implementation.
+Files written and re-read: all five edited `.cs` files re-read after edit; census re-run shows no `GetFuzzyCandidatePoolAsync` or `ExecuteEditSaveAsync` in `MyVocaList.Tests/`.
+
+### Census: `GetFuzzyCandidatePoolAsync` (Grep tool and `rtk proxy grep -rn`, both agree)
+Production (Builder deletes):
+- `Domain/RepositoryInterface/ISongRepository.cs:56` — interface declaration
+- `Infra/Repository/SongRepository.cs:126` — implementation
+- No production caller remains (`Services/`, `UI/`, `MyVocaList/` are clean).
+
+Tests (this change):
+- `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs:184-185` — delegate in `ThrowOnAddSongRepository`. Removed.
+- No Moq `Setup(...GetFuzzyCandidatePoolAsync...)` exists in the test tree. No repository test pins the member's behaviour (the old prefix-pool tests were already rewritten as `SearchTitleCandidatesForArtistAsync` tests under REQ-SFT-23). Nothing needed a stop.
+- Comment-only mentions, reworded: `SongRepositoryArtistTrigramTests.cs:73`, `:96`, `SongRepositoryResolutionTests.cs:104`.
+
+Docs (not touched by this task, listed for the Builder): `design.md:734` says the member is "unused and queued for removal"; `task-log.md:488` and the BUG-085 README mention it historically. Shipped change folders and `song-import-resolution/` docs are historical and are not edited.
+
+### Part 2: shared note text (findings, no test edits needed)
+Literals asserted in tests (tests keep their own private consts; they do not read the VM consts):
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs:55` `OfflineNoteText` = "You're offline — showing songs from your library only."
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs:56` `UnavailableNoteText` = "Online search isn't available right now — showing your library only."
+- `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs:258` `ArtistOfflineNote` = "You're offline — showing artists from your library only."
+- `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs:259` `UnavailableNote` = "Online search isn't available right now — showing your library only."
+
+Assertions on the unavailable text (must keep passing after the Builder moves the note to one shared constant):
+- SongFormViewModelTests.cs:202, 239, 273, 277, 346 (`UnavailableNoteText`)
+- ArtistFormViewModelTests.cs:474, 513 (`UnavailableNote`)
+
+Assertions on the offline notes (kept separate by the Builder):
+- SongFormViewModelTests.cs:214, 224, 254, 262, 296, 331 (`OfflineNoteText`)
+- ArtistFormViewModelTests.cs:462, 484, 503 (`ArtistOfflineNote`)
+
+Reflection: none reads `OfflineNote` / `UnavailableNote` from the VMs. The only reflection in the test tree is `AppServicesRegistrationTests.cs:107` reading `_httpClient` (unrelated) and `UnitOfWorkMocks.cs:54` reading `Mock.Object`.
+
+Verdict: no test change is needed for Part 2. The literals stay as literals (the contract). The Builder may consolidate the unavailable note in production; the test-side literals must stay byte-identical (em dash U+2014, straight apostrophe in "You're").
+
+### Part 3: stale comments
+(a) `AppServicesRegistrationTests.cs:45`. Verified: the `SongFormViewModel` constructor (`UI/ViewModels/SongFormViewModel.cs:137`) takes no `ISongResolutionService`. The test still resolves `ISongResolutionService` from DI, which needs `ISimilarityScorer` (registered at `Extensions/ServiceCollectionExtensions.cs:53`). Comment rewritten to say that.
+(b) `SongServiceUpdateIntegrationTests.cs:51`. The comment cited `SongFormViewModel.ExecuteEditSaveAsync`, which no longer exists; the form saves via `SongService.SaveFromFormAsync` (`SongFormViewModel.cs:664`). Comment rewritten; the test still calls `UpdateSongAsync` directly, and the comment says so.
+
+Scan of the SFT test files for other stale names (`CreateSongWithUrlsAsync(int`, `IsExactMatch`, `GetFuzzyCandidatePoolAsync`, `DerivePrefixToken`, `HasManualEdits`, `5.3b`, `ExecuteEditSaveAsync`):
+- `GetFuzzyCandidatePoolAsync` in comments: 3 hits, fixed.
+- `ExecuteEditSaveAsync`: 1 hit, fixed.
+- `CreateSongWithUrlsAsync(int`, `IsExactMatch`, `DerivePrefixToken`, `5.3b`: no hits.
+- `HasManualEdits`: hits in `Integration/Migrations/SongMigrationTests.cs` only. These are correct: the M1 migration test asserts the column is dropped (REQ-SFT-37). Not stale; not changed.
+
+### Design concern
+`MyVocaList.Tests/Architecture/UnitOfWorkReadScopeTests.cs:73` lists `ISongResolutionService` by name. Not touched (outside this task); the Builder should confirm that list still matches production after the cleanup.
+
+### Builder instructions
+1. Delete `ISongRepository.GetFuzzyCandidatePoolAsync` (`Domain/RepositoryInterface/ISongRepository.cs:56`) and `SongRepository.GetFuzzyCandidatePoolAsync` (`Infra/Repository/SongRepository.cs:126`), along with any SQL constant used only by it. Also remove its XML remark in `ISongRepository.cs`.
+2. Re-run the test-project build. It should compile with 0 errors. Then run `dotnet test` (all tests must pass).
+3. Shared note text: move the unavailable note to one shared constant in production. Keep the two offline notes separate. Do not change the test literals listed under Part 2.
+4. No test file edits are needed for Part 2.
