@@ -41,6 +41,11 @@ public interface ISongRepository
     /// <paramref name="titlePrefixToken"/> under collation (index-friendly prefix query).
     /// Used as the pre-filter before in-memory fuzzy scoring.
     /// </summary>
+    /// <remarks>
+    /// Unused in production after BUG-085 (the Possible duplicates step now uses
+    /// <see cref="SearchTitleCandidatesForArtistAsync"/>). Kept only because the test wrapper
+    /// SongServiceNewArtistUnitOfWorkTests still delegates to it; scheduled for removal together with that wrapper.
+    /// </remarks>
     /// <param name="artistId">Scope: original artist of the song.</param>
     /// <param name="titlePrefixToken">
     /// First whitespace-delimited token of the candidate title, capped at 12 chars.
@@ -89,6 +94,20 @@ public interface ISongRepository
     /// <param name="ct">Cancellation token.</param>
     /// <returns>At most <paramref name="take"/> rows in DB relevance order (bm25, then shorter title).</returns>
     Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesAsync(string query, int take, CancellationToken ct);
+
+    /// <summary>
+    /// REQ-SFT-23 (BUG-085): same-artist near-duplicate candidates for the Possible duplicates step.
+    /// Same strategy as <see cref="SearchTitleCandidatesAsync"/> (FTS5 trigram OR-match over the whole typed
+    /// title, else collated title prefix; REQ-SFT-33), restricted to songs of <paramref name="artistId"/>.
+    /// Unlike the retired forward-prefix pool, a typed title longer than the stored one still matches.
+    /// </summary>
+    /// <param name="artistId">Scope: original artist of the song.</param>
+    /// <param name="title">Whole typed title (not a prefix token); blank returns an empty list.</param>
+    /// <param name="take">Maximum number of rows to return (pool size).</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>At most <paramref name="take"/> rows of the artist, in DB relevance order (bm25, then shorter title).</returns>
+    Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesForArtistAsync(
+        int artistId, string title, int take, CancellationToken ct = default);
 
     /// <summary>REQ-SFT-05(a): songs holding any of the given external ids for one provider.</summary>
     /// <param name="provider">External provider name (e.g. "Deezer").</param>
