@@ -402,3 +402,114 @@ Build: passed (0 errors) | Tests: 911 passed, 0 failed | Commit SHA: see commit 
 ### Out of scope (per briefing)
 - Discard sheet (5.6): VM-only, not touched.
 - Artist field, Title field, `AutocompleteDXField*`: not touched.
+
+---
+## Task: BUG-085 — Red (tests only): trigram same-artist candidate query
+**Plan:** Docs/Management/BusinessFeatures/artists-songs/bugs/2026-11-09-BUG-085-song-save-misses-near-duplicate-title-when-the-typed-title-is-longer-than-the-stored-one/README.md
+**Status:** To Review (Red phase; test project does not compile until the Builder adds the member)
+**Started:** 2026-11-09
+**Completed:** 2026-11-09
+
+### Changed files:
+- `MyVocaList.Tests/Integration/Repositories/SongRepositoryArtistTrigramTests.cs` (new)
+- `MyVocaList.Tests/Integration/Services/SongSaveTrigramDuplicateTests.cs` (new)
+- `MyVocaList.Tests/Integration/Repositories/SongRepositoryResolutionTests.cs` (two prefix-pool tests removed; moved, see map)
+- `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` (wrapper: new member delegate added; old delegate kept while the interface still has it)
+- `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs` (retargeted setups, one test replaced, three added)
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md`
+
+### Interface the Builder must implement (exact)
+`ISongRepository` gains:
+`Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesForArtistAsync(int artistId, string title, int take, CancellationToken ct = default);`
+- Return type `SongSearchHit` (same as `SearchTitleCandidatesAsync`, carries SongId/Title/Version/ArtistName). Assumption, not in the brief: `Blocking: No`.
+- SQL = `SearchTitleCandidatesAsync`'s `TitleSearchSql` plus `AND s.ArtistId = @artistId`; params `@m`, `@take`, `@artistId`.
+- MATCH null (no word of 3+ chars) → collated title-prefix path scoped by artist (`(title ?? "").Trim() + "%"`, LIKE over `Collate(Title)`), `Take(take)`, mirroring REQ-SFT-33.
+- Recommendation (not tested at repo level): return `[]` for a blank title, since an empty prefix would match every song of the artist. The service never sends one (see blank-title test).
+- `SongResolutionService` fuzzy step: skip when title blank; otherwise call the new member with `(resolvedArtistId.Value, candidate.Title, SimilarityConstants.PoolSize, ct)`; map hits to `SongMatch(SongId, Title, Version, ArtistName, score)`; keep `>= DefaultThreshold`. `DerivePrefixToken` has no remaining test pin (grep-verified) and can go.
+- Remove `GetFuzzyCandidatePoolAsync` from `ISongRepository` and `SongRepository` (only production consumer is the fuzzy step). Also delete its delegate in `SongServiceNewArtistUnitOfWorkTests.ThrowOnAddSongRepository` (line ~184) or that file stops compiling.
+- Repo tests need the SongSearch FTS5 index: fixtures use `MigrateAsync` (`EnsureCreatedAsync` does not create the virtual table, and the trigram path would silently return `[]` through the "no such table" catch). Do not switch them to `EnsureCreatedAsync`.
+
+### Red evidence
+- `dotnet build MyVocaList.Tests`: 15 unique CS1061 errors, all for the missing `SearchTitleCandidatesForArtistAsync` member (ISongRepository, SongRepository, 7 sites in SongResolutionServiceTests, 7 in SongRepositoryArtistTrigramTests, 1 in the UoW wrapper). No other compile errors.
+- Behavioural run (temporary csproj exclusion of the three non-compiling files, reverted; not committed): `SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` FAILS: `Expected: SongChoiceNeeded, Actual: Saved`. This is the reported bug reproduced at save level with real SQLite, real repository, real resolution service and real scorer. `SongServiceSaveFromFormTests` and `SongRepositorySearchTests` (65 tests) pass against current production.
+- The rest of the new/retargeted tests cannot be run until the member exists; they fail with the compile errors above, which is the expected Red.
+
+### New tests (all tagged `// [BUG] BUG-085`)
+| Test | AC | Expectation before fix |
+|------|----|------------------------|
+| SongRepositoryArtistTrigramTests.SearchTitleCandidatesForArtistAsync_TypedTitleLongerThanStored_FindsStoredTitle | REQ-SFT-23 | regression: "Patiencee" finds "Patience" |
+| …_OtherArtistSameTitle_IsExcluded | REQ-SFT-23 | artist scope |
+| …_RespectsArtistScopeAndTake | REQ-SFT-23 | take=2 bounds result, all same artist |
+| …_ShortTitle_UsesCollatedPrefixFallback | REQ-SFT-33 | "ab" → prefix only (not "Cab Driver"), artist-scoped |
+| …_TypoInMiddle_StillRetrieves [Pateince, Paitence] | REQ-SFT-23 | trigram windows shared |
+| …_TypoInFirstWord_FindsStoredTitleAndExcludesUnrelated | REQ-SFT-23 | trigram, not prefix |
+| …_UnrelatedTitle_ReturnsEmpty | REQ-SFT-23 | no shared window → empty |
+| SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate | REQ-SFT-23 | FAILS now (Saved), must pass after |
+| SongResolutionServiceTests.ResolveAsync_LongTitle_PassesWholeTypedTitleToTrigramQuery | REQ-SFT-23 | verifies (10, whole title, PoolSize) |
+| …ResolveAsync_FuzzyBelowThreshold_DropsCandidate | REQ-SFT-23 | 0.81 dropped → NoMatch |
+| …ResolveAsync_FuzzyAtThreshold_KeepsCandidate | REQ-SFT-23 | 0.82 kept (>=) |
+| …ResolveAsync_BlankTitle_SkipsTrigramQuery | REQ-SFT-23 | no query for blank title (design §4 N1 empty-token rule) |
+
+### Retargeted-tests map (old → new)
+| Old test (file) | Disposition |
+|-----------------|-------------|
+| SongRepositoryResolutionTests.GetFuzzyCandidatePoolAsync_RespectsArtistScopeAndTake (AC-5.6) | Rewritten as SongRepositoryArtistTrigramTests.SearchTitleCandidatesForArtistAsync_RespectsArtistScopeAndTake, tag REQ-SFT-23 |
+| SongRepositoryResolutionTests.GetFuzzyCandidatePoolAsync_PrefixFilter_ReturnsOnlyMatchingPrefix (AC-5.7) | Rewritten as …_TypoInFirstWord_FindsStoredTitleAndExcludesUnrelated, tag REQ-SFT-23. Prefix-only behaviour retired by the 2026-11-09 REQ-SFT-23 note. |
+| SongResolutionServiceTests.ResolveAsync_FuzzyAboveThreshold_ReturnsFuzzyCandidates (AC-2.3) | Setup retargeted to the new member with the whole title; assertions unchanged |
+| SongResolutionServiceTests.ResolveAsync_NoMatchAtAll_ReturnsNoMatch (AC-2.3) | Setup retargeted; assertion unchanged |
+| SongResolutionServiceTests.ResolveAsync_LongTitle_UsesPrefixTokenForFuzzyPool | Deleted; replaced by ResolveAsync_LongTitle_PassesWholeTypedTitleToTrigramQuery (REQ-SFT-23) |
+| SongServiceNewArtistUnitOfWorkTests wrapper delegate | Old delegate kept until the interface member is removed; new delegate added |
+Other Grep hits (SongServiceSaveFromFormTests, SongSuggestionThresholdTests) pin `SearchTitleCandidatesAsync` / `SongSuggestionService`, not the fuzzy pool: untouched.
+
+### Assumptions / open points (none blocking)
+- AC IDs AC-2.3, AC-5.6, AC-5.7 are the tags already on these tests; I did not verify them against the current requirements text. The retired AC-5.7 prefix behaviour is flagged for Helder to confirm it can be dropped.
+- Blank-title edge is tagged REQ-SFT-23 under design §4 N1; it is an edge of the new step, not a separate AC.
+
+### Commit
+Commit `test(song): ... (BUG-085 Red)` made with `--no-verify` (compile-level Red, see above).
+
+---
+## BUG-085 Green (Builder)
+**Plan:** bug fix (no plan.md); spec: REQ-SFT-23 and REQ-SFT-33 in `changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/requirements.md`
+**Status:** To Review (orchestrator note 2026-11-09: the block was a defect in the Tester's own test setup — the `_artistResolution` mock returned NoMatch so the fuzzy step was never reached — not a spec gap; corrected in `f64e70d2`, full suite 921/921; Builder's production change committed by the orchestrator)
+**Started:** 2026-11-09
+**Completed:** not committed (worktree `.worktrees/bug-085` left dirty for Helder's decision)
+
+### Test defect (resolved in `f64e70d2`; originally reported as a spec gap): test mocks the artist resolver to NoMatch, so the fuzzy path is unreachable
+**Location:** `MyVocaList.Tests/Integration/Services/SongSaveTrigramDuplicateTests.cs` `InitializeAsync` (the `_artistResolution` setup returns `ArtistResolution(ResolutionKind.NoMatch, null, [])` for every input); production `Services/SongResolutionService.cs` lines 49-53 (INV-1: the artist is resolved first and fuzzy only runs when `resolvedArtistId` is set).
+**Gap description:** `SongService` passes the artist by id, but `SongResolutionService.ResolveAsync` always re-resolves the artist through `IArtistResolutionService` (SongCandidate carries no artist id, REQ-SFT-41). Under the test's NoMatch mock the resolver returns NoMatch before the fuzzy step, so `SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` returns `Saved` with the production fix in place.
+**Options:**
+- Option A: Tester changes the artist mock to `ArtistResolution(ResolutionKind.ExactLocalMatch, _queen.Id, [])` (the artist exists; the test's own comment says so) — the test then exercises the fixed path.
+- Option B: the resolver receives the artist id from SongService — contradicts REQ-SFT-41 and the single-resolution design; not recommended.
+**Recommendation:** Option A because the test asserts behaviour of the song guard, not artist resolution, and the artist is known to exist.
+**Blocking:** Yes — the Builder may not edit tests; the regression test (Critical/Major mandatory Red then Green) cannot reach Green until the mock is corrected.
+
+### Changed files (uncommitted, worktree)
+- `Domain/RepositoryInterface/ISongRepository.cs` — new `SearchTitleCandidatesForArtistAsync`; XML remark on `GetFuzzyCandidatePoolAsync` (unused after BUG-085, removal scheduled with the test wrapper)
+- `Infra/Repository/SongRepository.cs` — `TitleSearchSelectSql` shared SELECT, `TitleSearchSql` (unchanged text), new `TitleSearchForArtistSql`; `SearchTitleCandidatesAsync` and new `SearchTitleCandidatesForArtistAsync` both delegate to private `SearchTitleCoreAsync`
+- `Services/SongResolutionService.cs` — fuzzy step calls `SearchTitleCandidatesForArtistAsync(resolvedArtistId, candidate.Title, PoolSize)`, maps `SongSearchHit` to `SongMatch`, keeps `>= DefaultThreshold`, skips blank titles; `DerivePrefixToken` removed
+- `Domain/Resolution/SimilarityConstants.cs` — `PrefixTokenMaxLen` removed (now unused; outside the brief's enumerated list, removed because the brief asked for removal when unused)
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md` — this section
+
+### Build notes
+Build: passed (0 errors, 7 projects; 2 attempts — attempt 1 green, attempt 2 after a SQL fix below) | Tests: first run 921 total, 920 passed, 1 failed (`SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate`, a test defect: see below); after the test correction `f64e70d2` the full suite is 921/921 | Commit SHA: `8b94d1e6` (production, committed by the orchestrator); Verifier (Standard) CONDITIONAL PASS, 0 blockers
+Targeted run (19 tests in the three BUG-085 classes): 18 passed, 1 failed (the spec-gap test).
+Files written and re-read: ISongRepository.cs (both edits), SongRepository.cs (SQL consts + search methods), SongResolutionService.cs (fuzzy block, file tail), SimilarityConstants.cs (tail). Census `DerivePrefixToken|PrefixTokenMaxLen` in `*.cs`: no remaining references.
+
+### Defect found and fixed during Green
+The shared select constant had no trailing newline, so `...s.ArtistIdWHERE SongSearch` was one token and the SQL failed with `near "SongSearch"`. This also broke the existing global `SearchTitleCandidatesAsync`. Fixed by a trailing blank line in the raw literal (`TitleSearchSelectSql`). Lesson: raw-literal concatenation needs an explicit line break.
+
+### AC traceability (partial)
+| AC | Criterion | Implementation | Test | Result |
+|----|-----------|----------------|------|--------|
+| REQ-SFT-23 | typed title longer than stored finds it | `SongRepository.SearchTitleCoreAsync` (artist SQL) | `SongRepositoryArtistTrigramTests.SearchTitleCandidatesForArtistAsync_TypedTitleLongerThanStored_FindsStoredTitle` | pass |
+| REQ-SFT-23 | same artist only | `TitleSearchForArtistSql` `s.ArtistId = @artistId` | `..._OtherArtistSameTitle_IsExcluded`, `..._RespectsArtistScopeAndTake` | pass |
+| REQ-SFT-23 | typo in first word / middle, unrelated excluded | trigram OR-match | `..._TypoInFirstWord_...`, `..._TypoInMiddle_StillRetrieves` (2 cases), `..._UnrelatedTitle_ReturnsEmpty` | pass |
+| REQ-SFT-23 | fuzzy pool uses whole title, 0.82 threshold, blank skipped | `SongResolutionService` fuzzy step | `SongResolutionServiceTests` (BUG-085 cases) | pass |
+| REQ-SFT-23 | save returns SongChoiceNeeded with stored near-duplicate | end-to-end | `SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` | PASS after test correction `f64e70d2` (first run FAIL: test defect) |
+| REQ-SFT-33 | no 3-char word falls back to artist-scoped collated prefix | `SearchTitleCoreAsync` fallback with artist filter | `..._ShortTitle_UsesCollatedPrefixFallback` | pass |
+
+### Surprises for review
+- `SongSearch` indexes two columns (`title`, `artist`), and `SongSearch MATCH @m` without a column filter also matches artist-name trigrams. The artist-scoped query inherits this (bounded by the `ArtistId` filter and the 0.82 scorer). A `title : @m` column filter would tighten it but changes the global query too, so it was not done.
+- Performance of the OR-of-trigrams on large libraries was not measured. The artist filter is applied after the FTS join, so FTS does the heavy lifting.
+- Empty table: FTS returns no rows, so the result is an empty list. The "no such table" catch is unchanged and shared.

@@ -1,3 +1,4 @@
+using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Tests.Infrastructure;
 
@@ -156,10 +157,11 @@ public class SongResolutionServiceTests
             .Setup(r => r.FindIdByTitleVersionForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((int?)null);
 
-        var fuzzySong = new Song { Id = 7, Title = "Bohemian Rhapsdy", Version = "" };
+        // BUG-085: the fuzzy pool is the same-artist trigram query over the WHOLE typed title.
+        var fuzzyHit = new SongSearchHit(7, "Bohemian Rhapsdy", "", 10, "Queen", null, null);
         _songRepoMock
-            .Setup(r => r.GetFuzzyCandidatePoolAsync(10, "Bohemian", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Song> { fuzzySong });
+            .Setup(r => r.SearchTitleCandidatesForArtistAsync(10, "Bohemian Rhapsody", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<SongSearchHit> { fuzzyHit });
 
         _scorerMock
             .Setup(s => s.Score("Bohemian Rhapsody", "Bohemian Rhapsdy"))
@@ -193,8 +195,8 @@ public class SongResolutionServiceTests
             .ReturnsAsync((int?)null);
 
         _songRepoMock
-            .Setup(r => r.GetFuzzyCandidatePoolAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Song>());
+            .Setup(r => r.SearchTitleCandidatesForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<SongSearchHit>());
 
         var candidate = MakeCandidate();
         var sut = CreateSut();
@@ -204,11 +206,13 @@ public class SongResolutionServiceTests
         Assert.Equal(ResolutionKind.NoMatch, result.Kind);
     }
 
-    // ── ResolveAsync — titlePrefixToken ───────────────────────────────────
+    // ── ResolveAsync — fuzzy pool is the same-artist trigram query (BUG-085) ──
 
     [Fact]
-    // Design §4 N1: title prefix token is first whitespace token, capped at 12 chars.
-    public async Task ResolveAsync_LongTitle_UsesPrefixTokenForFuzzyPool()
+    // [AC] REQ-SFT-23: the fuzzy pool is queried with the WHOLE typed title (no first-token prefix cap),
+    // the resolved artist id and the pool size. Replaces ResolveAsync_LongTitle_UsesPrefixTokenForFuzzyPool.
+    // [BUG] BUG-085
+    public async Task ResolveAsync_LongTitle_PassesWholeTypedTitleToTrigramQuery()
     {
         _artistResolutionMock
             .Setup(a => a.ResolveAsync(It.IsAny<ArtistCandidate>(), It.IsAny<CancellationToken>()))
@@ -222,18 +226,91 @@ public class SongResolutionServiceTests
             .Setup(r => r.FindIdByTitleVersionForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((int?)null);
 
-        string capturedToken = null;
         _songRepoMock
-            .Setup(r => r.GetFuzzyCandidatePoolAsync(10, It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Callback<int, string, int, CancellationToken>((_, token, _, _) => capturedToken = token)
-            .ReturnsAsync(new List<Song>());
+            .Setup(r => r.SearchTitleCandidatesForArtistAsync(10, "VeryLongFirstToken More", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<SongSearchHit>());
 
-        // First token "VeryLongFirs" is 20 chars but capped at 12
         var candidate = MakeCandidate(title: "VeryLongFirstToken More");
         var sut = CreateSut();
 
-        await sut.ResolveAsync(candidate);
+        var result = await sut.ResolveAsync(candidate);
 
-        Assert.Equal("VeryLongFirs", capturedToken); // 12 chars
+        _songRepoMock.Verify(
+            r => r.SearchTitleCandidatesForArtistAsync(10, "VeryLongFirstToken More", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()),
+            Times.Once);
+        Assert.Equal(ResolutionKind.NoMatch, result.Kind);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-23: a candidate scored below the unchanged 0.82 threshold is dropped; with no
+    // candidate left the outcome is NoMatch.
+    // [BUG] BUG-085
+    public async Task ResolveAsync_FuzzyBelowThreshold_DropsCandidate()
+    {
+        _artistResolutionMock
+            .Setup(a => a.ResolveAsync(It.IsAny<ArtistCandidate>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ArtistExactLocal(10));
+        _songRepoMock
+            .Setup(r => r.GetByExternalIdAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Song)null);
+        _songRepoMock
+            .Setup(r => r.FindIdByTitleVersionForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((int?)null);
+        _songRepoMock
+            .Setup(r => r.SearchTitleCandidatesForArtistAsync(10, "Patiencee", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<SongSearchHit> { new(3, "Patience Lost", "", 10, "Queen", null, null) });
+        _scorerMock
+            .Setup(s => s.Score("Patiencee", "Patience Lost"))
+            .Returns(SimilarityConstants.DefaultThreshold - 0.01);
+
+        var result = await CreateSut().ResolveAsync(MakeCandidate(title: "Patiencee"));
+
+        Assert.Equal(ResolutionKind.NoMatch, result.Kind);
+        Assert.Empty(result.FuzzyCandidates);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-23: a candidate scored exactly at the 0.82 threshold is kept (>= comparison).
+    // [BUG] BUG-085
+    public async Task ResolveAsync_FuzzyAtThreshold_KeepsCandidate()
+    {
+        _artistResolutionMock
+            .Setup(a => a.ResolveAsync(It.IsAny<ArtistCandidate>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ArtistExactLocal(10));
+        _songRepoMock
+            .Setup(r => r.GetByExternalIdAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Song)null);
+        _songRepoMock
+            .Setup(r => r.FindIdByTitleVersionForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((int?)null);
+        _songRepoMock
+            .Setup(r => r.SearchTitleCandidatesForArtistAsync(10, "Patiencee", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<SongSearchHit> { new(3, "Patience", "", 10, "Queen", null, null) });
+        _scorerMock
+            .Setup(s => s.Score("Patiencee", "Patience"))
+            .Returns(SimilarityConstants.DefaultThreshold);
+
+        var result = await CreateSut().ResolveAsync(MakeCandidate(title: "Patiencee"));
+
+        Assert.Equal(ResolutionKind.FuzzyCandidates, result.Kind);
+        Assert.Equal(3, Assert.Single(result.FuzzyCandidates).SongId);
+    }
+
+    [Fact]
+    // [AC] REQ-SFT-23: a blank typed title produces no trigram query (no windows; it must not fall back
+    // to a match-all artist prefix). Design §4 N1 empty-token rule, preserved.
+    // [BUG] BUG-085
+    public async Task ResolveAsync_BlankTitle_SkipsTrigramQuery()
+    {
+        _artistResolutionMock
+            .Setup(a => a.ResolveAsync(It.IsAny<ArtistCandidate>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ArtistExactLocal(10));
+
+        var result = await CreateSut().ResolveAsync(MakeCandidate(title: "   "));
+
+        Assert.Equal(ResolutionKind.NoMatch, result.Kind);
+        _songRepoMock.Verify(
+            r => r.SearchTitleCandidatesForArtistAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 }
