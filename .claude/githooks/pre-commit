@@ -89,6 +89,22 @@ if [ -n "$DOCS_TOUCHED" ]; then
   echo "pre-commit: documented-command guard passed."
 fi
 
+# --- Process checks (sln drift, SafeAreaEdges, task-log Changed files) ---
+# Deterministic checks over the staged state for rules that were prose-only:
+# Docs/ <-> MyVocaList.sln registration (incl. moves/deletes), ContentPage
+# SafeAreaEdges="Container", and 'To Review' task-log entries without
+# '### Changed files'. Details: .claude/scripts/process_checks.py.
+if printf '%s
+' "$STAGED" | grep -Eq '^Docs/|^MyVocaList\.sln$|\.xaml$'; then
+  if ! python .claude/scripts/process_checks.py --staged; then
+    echo ""
+    echo "pre-commit: BLOCKED by process checks (see above)."
+    echo "            To commit anyway: git commit --no-verify"
+    exit 1
+  fi
+  echo "pre-commit: process checks passed."
+fi
+
 # --- Ledger row-length gate ---
 # LEDGER.md is read at every session start; a multi-thousand-character row
 # costs tokens on every read. Deterministic length check, so safe to block on.
