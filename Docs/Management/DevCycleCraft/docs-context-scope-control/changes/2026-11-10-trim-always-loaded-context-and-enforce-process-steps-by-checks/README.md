@@ -25,11 +25,11 @@ Always-loaded rules text 12,696 -> 10,019 tokens (est. bytes/2.6); per-prompt, S
 |------|----------------|----------------|--------|
 | Code edit off a task branch; native dialogs; BACKLOG hand-edit | Guards 1/2, protect-generated, `regen --check` | none | enforced |
 | `.sln` registration of moved/deleted `Docs/` files | auto-register on `Write` only | pre-commit check on staged `Docs/` adds, moves, deletes | done 2026-11-10 (`process_checks.py`, pre-commit) |
-| `SafeAreaEdges="Container"` on every ContentPage | nothing | pre-commit check on staged `.xaml` | done 2026-11-10 (`process_checks.py`, pre-commit) |
+| `SafeAreaEdges="Container"`, or `"All"` on pages with text input (ruling 2026-11-10; waiver list dropped) | nothing | pre-commit check on staged `.xaml` | done 2026-11-10 (`process_checks.py`, pre-commit) |
 | `To Review` task-log entry without `### Changed files` | nothing | pre-commit check on staged `task-log.md` | done 2026-11-10 (`process_checks.py`, pre-commit) |
 | `tasks.md` box checked at commit | nothing | advisory in Stop hook | proposed |
 | LEDGER row per live task branch | row length only | advisory: `git worktree list` branches without a row | proposed |
 | `// [AC] REQ-` comment on tests | nothing | advisory scan of changed test files | proposed |
 | Governed-component edit (4 gates) | nothing | block governed-list files unless an approval marker exists | proposed |
 | No C#-side string normalization | nothing | advisory grep (false positives likely) | proposed |
-| **Unregistered work** (a commit of work with no BACKLOG item) | nothing | `commit-msg` hook: non-trivial commits (touching `.claude/`, `CLAUDE.md`, `Docs/Management/**` specs, or `.cs`/`.xaml`) need an `Item: <id>` trailer that resolves via `backlog_gen.py query`; `fix:`/`docs:` single-file commits exempt | proposed |
+| **Unregistered work** (a commit of work with no BACKLOG item) | nothing | `commit-msg` hook: `Item: <backlog-id>` trailer required on feat/refactor/perf/amend, exempt docs/chore/merge/fix (Helder ruling 2026-11-10) | done 2026-11-10 |
