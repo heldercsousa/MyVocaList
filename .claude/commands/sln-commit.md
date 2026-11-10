@@ -57,6 +57,8 @@ If `skip`, continue with no tag change.
    - detail 1
    - detail 2
 
+   Item: <backlog-id>      <- required for feat/refactor/perf/amend (commit-msg hook); omit for docs/chore/merge/fix
+
    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
    ```
    Types: `feat:` `fix:` `refactor:` `docs:` `perf:` `test:`
