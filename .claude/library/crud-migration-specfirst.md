@@ -9,7 +9,7 @@ Use when migrating an existing CRUD list page to `CrudListView` (or building a n
 **XAML**
 - [ ] Root element is `<pages:CrudListPageBase>` with `xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"`
 - [ ] `xmlns:views="clr-namespace:MyVocaList.UI.Components"` declared for CrudListView
-- [ ] `SafeAreaEdges="Container"` present on the root element
+- [ ] `SafeAreaEdges="Container"` (or `"All"` on pages with text input) present on the root element
 - [ ] `Shell.BackButtonBehavior IsVisible="False" IsEnabled="False"` present
 - [ ] `Shell.TitleView` contains `Grid` with `SmallAppBar` + `SearchAppBar`
 - [ ] Single `<views:CrudListView>` element as page content — no manual ShimmerView, DXCollectionView, FloatingToolbar, EmptyState, or BottomSheet in the page XAML
