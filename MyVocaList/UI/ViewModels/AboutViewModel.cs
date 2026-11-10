@@ -41,12 +41,15 @@ public sealed partial class AboutViewModel : ViewModelBase
         using var stream = assembly.GetManifestResourceStream(BuildInfo.DetailsResourceName);
         var details = BuildInfo.ReadDetails(stream, identity.ShortSha);
 
+        using var statusStream = assembly.GetManifestResourceStream(BuildInfo.StatusResourceName);
+        var status = BuildInfo.ReadStatus(statusStream);
+
         Version = $"v{identity.Version}";
         BuildLine = $"Build {identity.ShortSha} · {identity.BuiltAtLocal}";
         HasBuildDetails = details is not null;
         BranchText = details is null ? "" : $"Branch: {details.Branch}";
         IsDirty = details?.IsDirty ?? false;
-        Groups = BuildInfo.ToGroups(details, null);
+        Groups = BuildInfo.ToGroups(details, status);
 
         var index = BuildInfo.DefaultGroupIndex(Groups);
         SelectedGroup = index >= 0 ? Groups[index] : null;

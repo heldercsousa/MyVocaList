@@ -8,12 +8,14 @@ import os
 import re
 import sys
 import unicodedata
+from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import render  # noqa: E402
 from frontmatter import FrontmatterError, parse  # noqa: E402
-from model import STATUSES, Item, TERMINAL, order_items, validate, validate_warnings  # noqa: E402
+from model import (DONE, FIXED, IN_PROGRESS, STATUSES, Item, TERMINAL,  # noqa: E402
+                   order_items, validate, validate_warnings)
 
 MANAGEMENT = os.path.join("Docs", "Management")
 ARCHIVE_DIR = "backlog-archive"
@@ -237,6 +239,43 @@ def cmd_query(root, statuses):
     else:
         for line in lines:
             _emit(line)
+    return 0
+
+
+def _flat(text):
+    """One tab-separated field: tabs and line breaks become spaces."""
+    return " ".join((text or "").replace("\t", " ").replace("\r", " ").replace("\n", " ").split())
+
+
+def _snapshot_gate(item):
+    """Gate source: the `gate` key, else the text after `Gate:` in `goal`, else ''."""
+    if item.gate:
+        return _flat(item.gate)
+    match = re.search(r"Gate:(.*)", item.goal or "")
+    return _flat(match.group(1)) if match else ""
+
+
+def snapshot_lines(root, month):
+    """Read-only build snapshot lines (design piece 8, REQ-BID-11..13).
+
+    `P<TAB>title<TAB>gate` for each In Progress item; `D<TAB>title` for each
+    done item closed in `month` (YYYY-MM). Malformed READMEs are skipped by
+    walk() and never fatal. Nothing is written.
+    """
+    items, _errors = walk(root)
+    lines = []
+    for it in order_items(items):
+        title = _flat((it.title or "").replace("**", ""))
+        if it.status == IN_PROGRESS:
+            lines.append("P\t{0}\t{1}".format(title, _snapshot_gate(it)))
+        elif it.status in (DONE, FIXED) and it.closed == month:
+            lines.append("D\t{0}".format(title))
+    return lines
+
+
+def cmd_snapshot(root, month):
+    for line in snapshot_lines(root, month):
+        _emit(line)
     return 0
 
 
@@ -546,6 +585,10 @@ def build_parser():
     status.add_argument("item_id")
     status.add_argument("new_status")
     status.add_argument("--closed", help="YYYY-MM, required for a terminal status")
+
+    snapshot = sub.add_parser("snapshot", help="print the build status snapshot (read-only)")
+    snapshot.add_argument("--month", default=None,
+                          help="YYYY-MM for done items (default: current month)")
     return parser
 
 
@@ -564,6 +607,8 @@ def main(argv=None):
         return cmd_renumber(args.root, args.item_id)
     if args.verb == "status":
         return cmd_status(args.root, args.item_id, args.new_status, args.closed)
+    if args.verb == "snapshot":
+        return cmd_snapshot(args.root, args.month or datetime.now().strftime("%Y-%m"))
     build_parser().print_help()
     return 0
 

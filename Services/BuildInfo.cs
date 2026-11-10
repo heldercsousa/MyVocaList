@@ -103,6 +103,41 @@ public static class BuildInfo
         return new BuildDetails(name, uncommitted, commits);
     }
 
+    /// <summary>
+    /// Reads the build-time status snapshot: <c>P\ttitle\tgate</c> for in-progress items and
+    /// <c>D\ttitle</c> for items done this month. Malformed lines are skipped; an empty stream
+    /// yields a status with no items (the About page then hides both groups).
+    /// </summary>
+    public static BuildStatus? ReadStatus(Stream? stream)
+    {
+        if (stream is null) return null;
+
+        string text;
+        using (var reader = new StreamReader(stream, Encoding.UTF8))
+            text = reader.ReadToEnd();
+
+        var inProgress = new List<BuildStatusItem>();
+        var done = new List<string>();
+
+        foreach (var raw in text.Split('\n'))
+        {
+            var fields = raw.TrimEnd('\r').Split('\t');
+            if (fields.Length < 2 || string.IsNullOrWhiteSpace(fields[1])) continue;
+
+            switch (fields[0])
+            {
+                case "P":
+                    inProgress.Add(new BuildStatusItem(fields[1], fields.Length >= 3 ? fields[2] : ""));
+                    break;
+                case "D":
+                    done.Add(fields[1]);
+                    break;
+            }
+        }
+
+        return new BuildStatus(inProgress, done);
+    }
+
     public static IReadOnlyList<BuildGroup> ToGroups(BuildDetails? details, BuildStatus? status)
     {
         var groups = new List<BuildGroup>();

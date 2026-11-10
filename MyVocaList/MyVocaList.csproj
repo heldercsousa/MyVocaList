@@ -214,6 +214,16 @@
 		<ItemGroup>
 			<EmbeddedResource Include="$(_BidDetailsFile)" LogicalName="build-details.txt" />
 		</ItemGroup>
+		<!-- Status snapshot (REQ-BID-11..13). Delete first so a failed run never embeds a stale snapshot.
+		     The root argument is the repo root, because Exec runs in the project directory. An empty file is safe (no items). -->
+		<PropertyGroup>
+			<_BidStatusFile>$(IntermediateOutputPath)build-status.txt</_BidStatusFile>
+		</PropertyGroup>
+		<Delete Files="$(_BidStatusFile)" />
+		<Exec Command="python &quot;$(MSBuildThisFileDirectory)../.claude/scripts/backlog/backlog_gen.py&quot; --root &quot;$(MSBuildThisFileDirectory)..&quot; snapshot &gt; &quot;$(_BidStatusFile)&quot;" ContinueOnError="true" IgnoreExitCode="true" />
+		<ItemGroup Condition="Exists('$(_BidStatusFile)')">
+			<EmbeddedResource Include="$(_BidStatusFile)" LogicalName="build-status.txt" />
+		</ItemGroup>
 	</Target>
 
 </Project>
