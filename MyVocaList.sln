@@ -690,6 +690,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Management", "Management", 
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\BACKLOG.md = Docs\Management\BACKLOG.md
 		Docs\Management\LEDGER.md = Docs\Management\LEDGER.md
+		Docs\Management\LEDGER-archive.md = Docs\Management\LEDGER-archive.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backup-restore", "backup-restore", "{FA1234BC-0001-4000-8000-000000000011}"

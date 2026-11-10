@@ -625,3 +625,16 @@ Files written and re-read: `AutocompleteDXField.xaml.cs` (grep of all edited sym
   It was re-run from scratch.
 - Verifier PASS (no must-fix). Merged `--no-ff` as `3440d982`. `dotnet test` on develop: 926/926.
 - Next: T7 run 4 on Helder's phone (Release APK from develop), checking lines 2 and 9 only.
+
+
+## Ledger detail moved from LEDGER.md (2026-11-10) — AC-FIELD
+
+> Verbatim text of the former ledger row, moved so the ledger stays one short line per item (`/sln-ledger § Row-length rule`). Nothing was dropped.
+
+- **Feature / Bug:** Shared autocomplete field: pick-lock via X, centralised behaviour and constants (+ BUG-070 copy)
+- **Phase / Step:** T1 verdict **B**; T2–T6 merged, all Verifier PASS (T6 `91f87884`, 2026-11-04); T3-C cancelled. Helder chose to keep the pick-lock (2026-11-03). Only T7 remains.
+- **Branch:** develop
+- **Worktree:** —
+- **Status:** blocked: awaiting Helder T7 on device
+- **Last commit:** 91f87884
+- **Next action:** **STOP T7:** Helder runs the on-device E2E gate on the Person form (focus on open, "jo" lists people, pick opens that person's edit form, field locked until X, blur validation). Pre-existing: `PersonFormPage.xaml` has `SafeAreaEdges="All"` not `"Container"` — awaiting Helder whether to fix separately.

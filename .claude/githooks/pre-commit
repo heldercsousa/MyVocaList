@@ -89,5 +89,22 @@ if [ -n "$DOCS_TOUCHED" ]; then
   echo "pre-commit: documented-command guard passed."
 fi
 
+# --- Ledger row-length gate ---
+# LEDGER.md is read at every session start; a multi-thousand-character row
+# costs tokens on every read. Deterministic length check, so safe to block on.
+# Rule + limit: `.claude/commands/sln-ledger.md § Row-length rule`.
+if printf '%s
+' "$STAGED" | grep -Eq '^Docs/Management/LEDGER\.md$'; then
+  echo "pre-commit: LEDGER.md staged — checking row lengths..."
+  if ! python .claude/scripts/ledger-row-guard.py --check; then
+    echo ""
+    echo "pre-commit: BLOCKED — a LEDGER.md row is too long. Move detail to the"
+    echo "            item's task-log.md/README.md and keep one status line."
+    echo "            To commit anyway: git commit --no-verify"
+    exit 1
+  fi
+  echo "pre-commit: ledger row lengths OK."
+fi
+
 echo "pre-commit: commit allowed."
 exit 0
