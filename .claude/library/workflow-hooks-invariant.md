@@ -14,7 +14,8 @@ The hooks in `.claude/settings.json` enforce specific rules from this document.
 | `PostCompact` hook | Context compaction event | Session resume — re-read spec reminder |
 | `PostToolUse` hook (Services files) | Edit to a Services/*.cs file | testing.md — TDD reminder for service changes |
 | `SessionStart` hook | New session begins | Hook health verification |
-| `pre-commit` (`process_checks.py`) | Staged `Docs/`, `MyVocaList.sln` or `.xaml` | `.sln` registration incl. moves/deletes; `SafeAreaEdges="Container"` on ContentPages; `To Review` task-log entries need `### Changed files` |
+| `pre-commit` (`process_checks.py`) | Staged `Docs/`, `MyVocaList.sln` or `.xaml` | `.sln` registration incl. moves/deletes; `SafeAreaEdges="Container"` (or `"All"` on pages with text input) on ContentPages; `To Review` task-log entries need `### Changed files` |
+| `commit-msg` (`process_checks.py`) | Every commit | `feat:`/`refactor:`/`perf:`/`amend:` need an `Item: <backlog-id>` trailer naming a registered item; docs/chore/merge/fix exempt |
 | `pre-commit` (`ledger-row-guard.py`) | Staged `LEDGER.md` | Ledger row length (max 450 chars) |
 
 ### Self-enforced rules (no hook — agent must apply consciously)

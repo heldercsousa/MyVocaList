@@ -9,12 +9,16 @@ Three deterministic checks over the STAGED state (the git index), run from
                PostToolUse hook only auto-registers new files written via `Write`).
                Rule: constraints-registry.md § Visual Studio Solution (HARD GATE).
 2. safearea -- a staged .xaml whose root element is `ContentPage` must carry
-               `SafeAreaEdges="Container"` (CLAUDE.md § Constitutional Constraints).
-               Files in SAFEAREA_KNOWN_VIOLATIONS predate this check and are waived
-               until fixed; remove an entry when its page is corrected.
+               `SafeAreaEdges="Container"`, or `"All"` (Container + SoftInput) on pages with
+               text input (CLAUDE.md § Constitutional Constraints; Microsoft Learn "Safe area
+               layout", .NET MAUI 10). `Container` on a page with a direct text-input element fails.
 3. tasklog  -- a task-log entry that this commit adds or edits and whose status is
                `To Review` must contain a `### Changed files` section
                (workflow.md Rule 5). Untouched legacy entries are never judged.
+
+A fourth check runs from the commit-msg hook (`--commit-msg <file>`):
+4. item     -- feat:/refactor:/perf:/amend: commits need an `Item: <backlog-id>` trailer that
+               resolves to a registered item README id. docs:, chore:, merge:, fix: are exempt.
 
 Exit 1 with a readable message per problem; exit 0 otherwise. Bypass: `--no-verify`.
 """
@@ -22,13 +26,16 @@ import re
 import subprocess
 import sys
 
-# Pages that already use SafeAreaEdges="All" when this check was added (2026-11-10).
-# Awaiting Helder's ruling (see AC-FIELD ledger detail); delete entries as they are fixed.
-SAFEAREA_KNOWN_VIOLATIONS = {
-    "MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml",
-    "MyVocaList/UI/Pages/People/PersonFormPage.xaml",
-    "MyVocaList/UI/Pages/Venues/VenueFormPage.xaml",
+# Elements that open the soft keyboard; a page containing one must use SafeAreaEdges="All"
+# (Container + SoftInput). Direct children only - inputs hidden inside custom components
+# are not detected, so "All" is also accepted on pages where none is found.
+_TEXT_INPUTS = {
+    "Entry", "Editor", "SearchBar", "TextEdit", "MultilineEdit", "PasswordEdit",
+    "NumericEdit", "AutoCompleteEdit", "AutocompleteDXField", "AutocompleteField",
 }
+
+# Commit subjects (type before ':' or '(') that must carry an `Item: <backlog-id>` trailer.
+ITEM_REQUIRED_TYPES = {"feat", "refactor", "perf", "amend"}
 
 _SLN_ENTRY = re.compile(r"(Docs/[^=\r\n]+?) = ")
 
@@ -53,15 +60,58 @@ def _root_tag(xaml):
 
 
 def check_safearea(path, xaml):
-    if path in SAFEAREA_KNOWN_VIOLATIONS:
-        return None
     name, attrs = _root_tag(xaml)
     if name.split(":")[-1] != "ContentPage":
         return None
-    if re.search(r'SafeAreaEdges\s*=\s*"Container"', attrs):
-        return None
-    return (f"safearea: '{path}' root ContentPage lacks SafeAreaEdges=\"Container\" "
-            "(MAUI 10 defaults to None - CLAUDE.md Constitutional Constraints).")
+    m = re.search(r'SafeAreaEdges\s*=\s*"(\w+)"', attrs)
+    value = m.group(1) if m else None
+    if value not in ("Container", "All"):
+        return (f"safearea: '{path}' root ContentPage must declare SafeAreaEdges=\"Container\" "
+                "(or \"All\" on pages with text input); MAUI 10 defaults to None.")
+    body = re.sub(r"<!--.*?-->", "", xaml, flags=re.S)
+    tags = {t.split(":")[-1] for t in re.findall(r"<\s*([\w:.]+)", body)}
+    if value == "Container" and tags & _TEXT_INPUTS:
+        return (f"safearea: '{path}' has text input ({', '.join(sorted(tags & _TEXT_INPUTS))}) but "
+                "SafeAreaEdges=\"Container\" - use \"All\" (Container + SoftInput) so the keyboard "
+                "does not cover the fields.")
+    return None
+
+
+_ITEM_ID = re.compile(r"^id:\s*(\S+)\s*$", re.M)
+
+
+def backlog_ids(root="Docs/Management"):
+    import os
+    ids = set()
+    for d, _, files in os.walk(root):
+        if "README.md" in files:
+            try:
+                with open(os.path.join(d, "README.md"), encoding="utf-8-sig") as f:
+                    head = f.read(1500)
+            except OSError:
+                continue
+            if head.startswith("---"):
+                m = _ITEM_ID.search(head.split("---")[1] if head.count("---") >= 2 else head)
+                if m:
+                    ids.add(m.group(1))
+    return ids
+
+
+def check_item_trailer(message, known_ids):
+    subject = next((l for l in message.splitlines() if l.strip() and not l.startswith("#")), "")
+    m = re.match(r"([a-z]+)(\([^)]*\))?!?:", subject)
+    if not m or m.group(1) not in ITEM_REQUIRED_TYPES:
+        return []
+    refs = []
+    for l in message.splitlines():
+        t = re.match(r"Items?:\s*(.+)$", l.strip())
+        if t:
+            refs += [x for x in re.split(r"[,\s]+", t.group(1)) if x]
+    if not refs:
+        return [f"item: '{m.group(1)}:' commits need an 'Item: <backlog-id>' trailer "
+                "(register the work first: backlog_gen.py register). Exempt: docs, chore, merge, fix."]
+    unknown = [r for r in refs if r not in known_ids]
+    return [f"item: '{r}' is not a registered backlog item id (see item README frontmatter)." for r in unknown]
 
 
 def check_tasklog(path, content, added_lines):
@@ -116,6 +166,16 @@ def run_staged():
 
 
 def main():
+    if "--commit-msg" in sys.argv:
+        path = sys.argv[sys.argv.index("--commit-msg") + 1]
+        with open(path, encoding="utf-8", errors="replace") as f:
+            problems = check_item_trailer(f.read(), backlog_ids())
+        if problems:
+            print("commit-msg: FAILED")
+            for p in problems:
+                print("  " + p)
+            return 1
+        return 0
     if "--staged" not in sys.argv:
         print(__doc__)
         return 0
