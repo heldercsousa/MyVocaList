@@ -56,3 +56,52 @@
 ### Build notes
 Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -c Release` 0 errors | Tests: 943 passed, 0 failed (17 new BuildInfoTests)
 Not done: E2E on emulator/device (About page visual) — requires manual verification (Check build).
+
+---
+## Task 2: Status snapshot (pieces 8–9; REQ-BID-11…13)
+**Plan:** `plan.md` (this folder)
+**Status:** To Review
+**Started:** 2026-11-09
+**Completed:** 2026-11-09
+
+### Changed files:
+- `.claude/scripts/backlog/backlog_gen.py` (`snapshot` verb, `snapshot_lines`, `cmd_snapshot`)
+- `.claude/scripts/backlog/tests/test_backlog_gen.py` (`SnapshotTests`, 8 tests)
+- `Services/BuildInfo.cs` (`ReadStatus`)
+- `MyVocaList.Tests/Unit/Services/BuildInfoTests.cs` (7 new tests)
+- `MyVocaList/UI/ViewModels/AboutViewModel.cs` (reads status, passes it to `ToGroups`)
+- `MyVocaList/MyVocaList.csproj` (`WriteBuildDetails`: delete, snapshot Exec, embed `build-status.txt`)
+- `Docs/Management/DevCycleCraft/app-versioning/changes/2026-11-09-build-identity-real-minver-version-build-date-and-monotonic-versioncode/design.md` (spec note: explicit `--root`)
+- `Docs/.../task-log.md` (this entry)
+
+### Red evidence (observed before implementation)
+- Python: `AttributeError: module 'backlog_gen' has no attribute 'cmd_snapshot'`, 8 of 8 snapshot tests errored.
+- C#: `error CS0117: "BuildInfo" não contém uma definição para "ReadStatus"` (7 new tests, compile failure).
+
+### Deviations
+- `pytest` was not installed in the environment; installed it with `pip install pytest` to run the exit command. The `unittest` run gives the same result (180 OK).
+- The snapshot Exec passes `--root "<repo root>"`, because Exec runs in the project directory. Recorded in `design.md`.
+- `ToGroups` already accepted a status in Task 1, so only `ReadStatus` was new in C#.
+- `DoneThisMonth` includes `✅ Fixed` as well as `✅ Done` (both are `✅`, per design piece 8).
+
+### Evidence
+- `python -m pytest .claude/scripts/backlog/tests -q`: 180 passed, 0 failed.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`: 0 errors (after fixing one XML comment that contained `--`).
+- `dotnet test MyVocaList.Tests`: 950 passed, 0 failed (943 before + 7 new).
+- `obj/Debug/net10.0-android/build-status.txt`: 18 lines, first lines:
+  - `D	venuesSeedForTest migration ships ~504 fake venues and its Down wipes the table`
+  - `P	Song artist field — correctness fixes + inline "create new artist"	on-device re-run #5 failed 2026-08-02 — …`
+  - `P	Song form title-first — one search over local and music APIs	Helder's on-device E2E gate (plan § 7.2).`
+- Target run: `dotnet msbuild … -t:WriteBuildDetails -v:d` shows the Delete and the snapshot Exec, and the file is produced.
+- Emulator check: not run (About page UI change needs manual verification, `Check build`).
+
+### AC traceability
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-BID-11 in-progress list + gate | `snapshot_lines` P branch; `ReadStatus` | `test_snapshot_in_progress_line`, `test_snapshot_gate_from_goal`, `test_snapshot_empty_gate`; `ReadStatus_InProgressWithGate`, `ReadStatus_EmptyGate`, `ToGroups_WithStatus_AddsInProgressAndDone` |
+| REQ-BID-12 done this month | `snapshot_lines` D branch | `test_snapshot_done_this_month`, `test_snapshot_non_done_terminal_excluded`, `test_snapshot_other_month_excluded`; `ReadStatus_Done` |
+| REQ-BID-13 failure tolerated, groups omitted | Delete + ContinueOnError Exec; conditional embed; `ReadStatus(null)` → null; malformed lines skipped | `test_snapshot_empty_tree_prints_nothing_exit_0`, `test_snapshot_never_writes_backlog`; `ReadStatus_NullStream_ReturnsNull`, `ReadStatus_MalformedLines_Ignored`, `DefaultGroupIndex_InProgressPresent_SelectsIt` |
+
+### Build notes
+Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` 0 errors | Tests: Python 180 passed; .NET 950 passed, 0 failed | Commit SHA: (see commit)
+Files written and re-read: `backlog_gen.py` (snapshot block, parser, main dispatch); `test_backlog_gen.py` (SnapshotTests); `Services/BuildInfo.cs` (ReadStatus); `BuildInfoTests.cs` (new tests); `AboutViewModel.cs` (status read, ToGroups call); `MyVocaList.csproj` (WriteBuildDetails tail); `design.md` (spec note)

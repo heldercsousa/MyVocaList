@@ -188,4 +188,80 @@ public class BuildInfoTests
         // [AC] REQ-BID-10: no groups -> no selection
         Assert.Equal(-1, BuildInfo.DefaultGroupIndex(new List<BuildGroup>()));
     }
+
+    [Fact]
+    public void ReadStatus_InProgressWithGate()
+    {
+        // [AC] REQ-BID-11: in-progress item shows its title and gate
+        var s = BuildInfo.ReadStatus(Utf8("P\tAlpha\tVerify on device\nD\tDone one\n"));
+
+        Assert.Single(s!.InProgress);
+        Assert.Equal("Alpha", s.InProgress[0].Title);
+        Assert.Equal("Verify on device", s.InProgress[0].Gate);
+    }
+
+    [Fact]
+    public void ReadStatus_EmptyGate()
+    {
+        // [AC] REQ-BID-11: in-progress item with an empty gate field keeps an empty gate
+        var s = BuildInfo.ReadStatus(Utf8("P\tAlpha\t\n"));
+
+        Assert.Single(s!.InProgress);
+        Assert.Equal("", s.InProgress[0].Gate);
+    }
+
+    [Fact]
+    public void ReadStatus_Done()
+    {
+        // [AC] REQ-BID-12: done-this-month titles are kept in file order
+        var s = BuildInfo.ReadStatus(Utf8("D\tDone one\nD\tDone two\n"));
+
+        Assert.Equal(new[] { "Done one", "Done two" }, s!.DoneThisMonth);
+    }
+
+    [Fact]
+    public void ReadStatus_MalformedLines_Ignored()
+    {
+        // [AC] REQ-BID-13: lines that do not match P/D shapes are skipped, not fatal
+        var s = BuildInfo.ReadStatus(Utf8("garbage line\nP\tOk\tg\nX\tnope\n"));
+
+        Assert.Single(s!.InProgress);
+        Assert.Equal("Ok", s.InProgress[0].Title);
+        Assert.Empty(s.DoneThisMonth);
+    }
+
+    [Fact]
+    public void ReadStatus_NullStream_ReturnsNull()
+    {
+        // [AC] REQ-BID-13: no status resource -> no status, nothing throws
+        Assert.Null(BuildInfo.ReadStatus(null));
+    }
+
+    [Fact]
+    public void ToGroups_WithStatus_AddsInProgressAndDone()
+    {
+        // [AC] REQ-BID-11: in-progress row's supporting text is its gate
+        // [AC] REQ-BID-12: done rows appear under the Done group
+        var status = BuildInfo.ReadStatus(Utf8("P\tAlpha\tVerify on device\nD\tDone one\n"));
+
+        var groups = BuildInfo.ToGroups(null, status);
+
+        Assert.Equal(new[] { "inprogress", "done" }, groups.Select(g => g.Key).ToArray());
+        Assert.Equal("In progress (1)", groups[0].Label);
+        Assert.Equal("Done (1)", groups[1].Label);
+        Assert.Equal("Verify on device", groups[0].Rows[0].SupportingText);
+        Assert.Equal("", groups[1].Rows[0].SupportingText);
+    }
+
+    [Fact]
+    public void DefaultGroupIndex_InProgressPresent_SelectsIt()
+    {
+        // [AC] REQ-BID-11: with an in-progress group present it is the default chip
+        var clean = BuildInfo.ReadDetails(Utf8("#branch\ndevelop\n#uncommitted\n#commits\nfeat: a\n"), Sha7);
+        var status = BuildInfo.ReadStatus(Utf8("P\tAlpha\tg\n"));
+
+        var groups = BuildInfo.ToGroups(clean, status);
+
+        Assert.Equal("inprogress", groups[BuildInfo.DefaultGroupIndex(groups)].Key);
+    }
 }
