@@ -105,3 +105,10 @@ Not done: E2E on emulator/device (About page visual) — requires manual verific
 ### Build notes
 Build: `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` 0 errors | Tests: Python 180 passed; .NET 950 passed, 0 failed | Commit SHA: (see commit)
 Files written and re-read: `backlog_gen.py` (snapshot block, parser, main dispatch); `test_backlog_gen.py` (SnapshotTests); `Services/BuildInfo.cs` (ReadStatus); `BuildInfoTests.cs` (new tests); `AboutViewModel.cs` (status read, ToGroups call); `MyVocaList.csproj` (WriteBuildDetails tail); `design.md` (spec note)
+
+---
+## Minor UI fix: About build-chip selected state and wrapping (task/bid-chips)
+- Severity Minor, no folder; commit message is the artifact.
+- Cause: ChoiceChipGroup used DevExpress default chip colours (no selected contrast on dark theme) and no `IsMultiline`, so the row overflowed; the default group margin offset it from the content margin.
+- Fix (`AboutPage.xaml` only): `IsMultiline="True"`, `Margin="0"`, `ChipTextColor`/`ChipSelectedBackgroundColor`/`ChipSelectedTextColor` bound to MD3 tokens (`OnSurface`, `SecondaryContainer`, `OnSecondaryContainer`).
+- Verification: Android build 0 errors (exit 0); `dotnet test --filter BuildInfo` 24 passed. Emulator visual check not run (orchestrator deploys): selected state and x-offset need on-device confirmation.
