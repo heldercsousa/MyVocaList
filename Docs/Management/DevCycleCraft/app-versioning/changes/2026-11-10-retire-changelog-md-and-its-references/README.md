@@ -1,12 +1,13 @@
 ---
 id: retire-changelog-md-and-its-references
 title: Retire changelog.md and its references
-status: 💡 Pending
+status: ✅ Done
 target: 2026-11-10
 section: DevCycleCraft
 parent: app-versioning
 goal: The project changelog is archived and no guideline, command or agent asks anyone to update it.
 gate: Helder reviews the amended context files.
+closed: 2026-11
 kind: change
 ---
 
