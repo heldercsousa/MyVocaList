@@ -182,3 +182,16 @@ OK
 Four stale `agent-*` worktrees are genuinely misbased and 378 commits behind. Removing them is an irreversible action not authorised by this briefing — flagging only.
 
 Committed in the worktree. Not pushed, not merged, per briefing.
+
+
+## Ledger detail moved from LEDGER.md (2026-11-10) — ITF
+
+> Verbatim text of the former ledger row, moved so the ledger stays one short line per item (`/sln-ledger § Row-length rule`). Nothing was dropped.
+
+- **Feature / Bug:** Inline Trivial Fix lane — bounded orchestrator inline-edit exception
+- **Phase / Step:** Rules amended + Guard 3 merged (verifier CONDITIONAL PASS, all findings resolved); worktree-base-check false-positive fix merged; 38/38 green on develop; worktrees removed
+- **Branch:** merged into develop
+- **Worktree:** —
+- **Status:** merged
+- **Last commit:** a4c198a
+- **Next action:** Helder: observe the FIRST LIVE ITF FIX end-to-end (last open gate) — opportunistic, waits for a qualifying fix. Full resume instructions incl. how to recognise/run one: `DevCycleCraft/inline-trivial-fix/handoff.md`. Also awaiting a decision on the 4 misbased `agent-*` worktrees (1 unmerged commit each — listed in that handoff).
