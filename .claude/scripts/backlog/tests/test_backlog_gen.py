@@ -633,5 +633,83 @@ class ArchiveSectionResolutionTests(unittest.TestCase):
             render._section_from_path("DevCycleCraft/craft/"), "DevCycleCraft")
 
 
+class SnapshotTests(unittest.TestCase):
+    """`snapshot` is read-only: it prints P/D lines and never writes BACKLOG."""
+
+    def setUp(self):
+        self.root = tempfile.mkdtemp()
+        self.mgmt = os.path.join(self.root, "Docs", "Management")
+        write(os.path.join(self.mgmt, "BACKLOG.md"), BACKLOG_SKELETON)
+
+    def tearDown(self):
+        shutil.rmtree(self.root, ignore_errors=True)
+
+    def _snapshot(self, month="2026-11"):
+        original, buffer = sys.stdout, io.StringIO()
+        sys.stdout = buffer
+        try:
+            code = backlog_gen.cmd_snapshot(self.root, month)
+        finally:
+            sys.stdout = original
+        self.assertEqual(code, 0)
+        return buffer.getvalue()
+
+    def _feature(self, name, **over):
+        write(os.path.join(self.mgmt, "BusinessFeatures", name, "README.md"),
+              readme(**over))
+
+    def test_snapshot_in_progress_line(self):
+        # [AC] REQ-BID-11: in-progress items list as P<TAB>title<TAB>gate, title without **
+        self._feature("alpha", id="F-1", title="**Alpha** beta",
+                      status="\U0001F7E1 In Progress", gate="Verify on device")
+        self.assertEqual(self._snapshot(), "P\tAlpha beta\tVerify on device\n")
+
+    def test_snapshot_gate_from_goal(self):
+        # [AC] REQ-BID-11: gate falls back to the text after "Gate:" in goal, trimmed
+        self._feature("alpha", id="F-1", title="Alpha",
+                      status="\U0001F7E1 In Progress",
+                      goal="Do the thing. Gate:   device check ")
+        self.assertEqual(self._snapshot(), "P\tAlpha\tdevice check\n")
+
+    def test_snapshot_empty_gate(self):
+        # [AC] REQ-BID-11: an in-progress item with no gate has an empty third field
+        self._feature("alpha", id="F-1", title="Alpha",
+                      status="\U0001F7E1 In Progress", goal="No gate here.")
+        self.assertEqual(self._snapshot(), "P\tAlpha\t\n")
+
+    def test_snapshot_done_this_month(self):
+        # [AC] REQ-BID-12: a done item closed in the requested month prints D<TAB>title
+        self._feature("alpha", id="F-1", title="Alpha done",
+                      status="✅ Done", closed="2026-11")
+        self.assertEqual(self._snapshot(), "D\tAlpha done\n")
+
+    def test_snapshot_non_done_terminal_excluded(self):
+        # [AC] REQ-BID-12: terminal statuses other than done are not listed
+        self._feature("alpha", id="F-1", title="Alpha old",
+                      status="\U0001F535 Superseded", closed="2026-11")
+        self.assertEqual(self._snapshot(), "")
+
+    def test_snapshot_other_month_excluded(self):
+        # [AC] REQ-BID-12: a done item closed in another month is not listed
+        self._feature("alpha", id="F-1", title="Alpha old",
+                      status="✅ Done", closed="2026-10")
+        self.assertEqual(self._snapshot(), "")
+
+    def test_snapshot_empty_tree_prints_nothing_exit_0(self):
+        # [AC] REQ-BID-13: an empty tree prints nothing and exits 0
+        self.assertEqual(self._snapshot(), "")
+
+    def test_snapshot_never_writes_backlog(self):
+        # [AC] REQ-BID-13: snapshot is read-only; BACKLOG.md is byte-identical afterwards
+        self._feature("alpha", id="F-1", title="Alpha",
+                      status="\U0001F7E1 In Progress", gate="g")
+        path = os.path.join(self.mgmt, "BACKLOG.md")
+        with open(path, encoding="utf-8") as fh:
+            before = fh.read()
+        self._snapshot()
+        with open(path, encoding="utf-8") as fh:
+            self.assertEqual(fh.read(), before)
+
+
 if __name__ == "__main__":
     unittest.main()
