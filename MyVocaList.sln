@@ -109,7 +109,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Changelog\changelog.md = Docs\Changelog\changelog.md
+		Docs\Changelog\Archive\changelog-2025-2026.md = Docs\Changelog\Archive\changelog-2025-2026.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Design", "Design", "{2C8F9F52-D9DE-4986-BA2B-8901C35DE5F4}"

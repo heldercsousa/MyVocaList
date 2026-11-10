@@ -185,6 +185,10 @@
           {
             "type": "command",
             "command": "python \"$CLAUDE_PROJECT_DIR/.claude/scripts/library-size-guard.py\" 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/scripts/ledger-row-guard.py\" 2>/dev/null || true"
           }
         ]
       },
@@ -224,7 +228,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'CONTEXT RESTORED — Non-negotiables: (1) dotnet build after every change, fix all errors before next file. (2) Never use DisplayAlert/DisplayActionSheet/DisplayPromptAsync. (3) DevExpress-first — check devexpress-patterns.md before any UI work. (4) SafeAreaEdges=Container on all ContentPages (.NET MAUI 10). (5) Subagent-driven, worktree-isolated flow — never skip to implementation: Spec → spec-review → Plan → plan-review → Implement → implementation-review. Each stage AND its review runs in a dedicated subagent (spec-reviewer after the spec, plan-reviewer after the plan, code review after implementation), always inside a git worktree. Two narrow orchestrator lanes replace a dispatch: the read lane (grep + read at most 2 source files to confirm a diagnosis) and the ITF lane for a diagnosed 1-file / <=5-line fix (/sln-itf). (6) English only in code, comments, logs, UI text. (7) After every completed task: /sln-review → /sln-commit (stage, commit, push). SPEC RE-READ REMINDER: After context compaction, re-read the active feature spec (Docs/Management/[BusinessFeatures|DevCycleCraft]/<feature>/design.md and requirements.md) before continuing — compaction discards loaded spec context and continuing without re-reading risks spec drift.'"
+            "command": "echo 'CONTEXT RESTORED — Re-read CLAUDE.md Constitutional Constraints and the active feature spec (Docs/Management/[BusinessFeatures|DevCycleCraft]/<feature>/design.md + requirements.md) before continuing; compaction discards loaded spec context. Workflow: workflow.md Rule 2 (subagent + worktree flow, read lane, ITF lane); after each task /sln-review then /sln-commit.'"
           }
         ]
       }
@@ -234,7 +238,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import subprocess,os; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); r=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); status=r.stdout; lines=[l[3:] for l in status.splitlines()]; status.strip() and print('\\u26a0\\ufe0f UNCOMMITTED CHANGES — run dotnet build && dotnet test, then /sln-commit with a descriptive message. (Auto-commit was removed from this hook: Stop fires after every response turn, not only true session end, so it was silently pushing unverified/partial work to the current branch under a misleading \\'build+test green\\' message. See BACKLOG.md 2026-06-27 entry for the identical failure mode in a different hook.)'); status.strip() and any('task-log' in l for l in lines) and not any('BACKLOG.md' in l for l in lines) and print('\\u26a0\\ufe0f task-log files changed but Docs/Management/BACKLOG.md was not updated — update it if a feature phase completed.')\" 2>/dev/null || true"
+            "command": "python -c \"import subprocess,os; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); r=subprocess.run(['git','status','--porcelain'],cwd=proj,capture_output=True,text=True); status=r.stdout; lines=[l[3:] for l in status.splitlines()]; status.strip() and print('WARNING: UNCOMMITTED CHANGES - build + test, then /sln-commit.'); status.strip() and any('task-log' in l for l in lines) and not any(l.endswith('README.md') for l in lines) and print('WARNING: task-log changed but no item README.md - if a feature phase completed, run backlog_gen.py status.')\" 2>/dev/null || true"
           }
         ]
       },
@@ -260,7 +264,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import json,sys,re; d=json.load(sys.stdin); p=d.get('prompt',''); matched=re.search(r'\\\\b(implement|build|write|create|code|add|fix|update|resume|continue|start|finish|complete|go ahead)\\\\b', p, re.I); matched and print('{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"WORKFLOW GATE: (1) Read Docs/Management/[BusinessFeatures|DevCycleCraft]/[feature]/design.md + requirements.md BEFORE any code. (2) Feature work is subagent-driven, in a git worktree: Spec, Plan, Implement AND the review of each run in dedicated subagents (spec-reviewer after the spec, plan-reviewer after the plan, code review after implementation). Do NOT dispatch for trivia: the orchestrator may grep + read at most 2 source files to confirm a diagnosis (read lane), and applies a diagnosed 1-file / at most 5-line fix itself via /sln-itf (ITF lane). (3) Run /sln-commit after every completed task. (4) Before ending any session where a feature phase completed: update the item status with backlog_gen.py status (never hand-edit BACKLOG.md rows).\\\"}}')\" 2>/dev/null || true"
+            "command": "python -c \"import json,sys,re; d=json.load(sys.stdin); p=d.get('prompt',''); matched=re.search(r'\\\\b(implement|build|write|create|code|add|fix|update|resume|continue|start|finish|complete|go ahead)\\\\b', p, re.I); matched and print('{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"WORKFLOW GATE: read the feature design.md + requirements.md before code; feature work is subagent-driven in a worktree (CLAUDE.md Roles, workflow.md Rule 2); /sln-commit after each task.\\\"}}')\" 2>/dev/null || true"
           }
         ]
       }
