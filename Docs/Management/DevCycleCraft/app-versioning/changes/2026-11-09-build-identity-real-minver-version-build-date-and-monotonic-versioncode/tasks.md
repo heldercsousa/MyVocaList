@@ -16,6 +16,6 @@ Haiku.
   `develop` (D11, REQ-BID-14). This must happen before any merge.
 - [x] **G2** — Merge into `develop`, then check the version and that no update prompt appears
   (orchestrator).
-- [ ] **G3** — Helder checks the About page and the Android version name on the S23. This happens
+- [x] **G3** — Helder checks the About page and the Android version name on the S23. This happens
   only after G1 and G2: a build from before the tag reads `0.1.0-alpha` and hits the
   forced-update gate.
