@@ -26,7 +26,7 @@ If the user chooses `minor` or `patch`:
 
 If `skip`, continue with no tag change.
 
-> **When NOT to prompt:** spec-only commits, docs-only commits, rule/CLAUDE.md updates, bug fixes, changelog-only commits, plan files. The prompt is for feature implementation sessions only.
+> **When NOT to prompt:** spec-only commits, docs-only commits, rule/CLAUDE.md updates, bug fixes, plan files. The prompt is for feature implementation sessions only.
 
 ## Pre-Commit Checklist
 - [ ] Build is clean: run `/sln-build` and confirm 0 errors
@@ -45,18 +45,12 @@ If `skip`, continue with no tag change.
 1. **Build check**: Run `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`. Stop if errors.
 
 2. **Stage changes**: Stage specific files — never `git add -A` blindly. Review what is being staged.
-   - Include ALL changed files: code, specs (`Docs/specs/`), plans (`Docs/Management/[section-or-filing-dir]/[feature]/plan.md`, `Docs/DevEnv/plans/`), rules (`.claude/rules/`), `CLAUDE.md`, command files (`.claude/commands/`), and changelog.
+   - Include ALL changed files: code, specs (`Docs/specs/`), plans (`Docs/Management/[section-or-filing-dir]/[feature]/plan.md`, `Docs/DevEnv/plans/`), rules (`.claude/rules/`), `CLAUDE.md`, and command files (`.claude/commands/`).
    - Any file touched as part of the task belongs in the commit.
 
 3. **Review staged diff**: Run `git diff --cached --stat` to confirm staged files are intentional.
 
-4. **Update changelog**: Update `Docs/Changelog/changelog.md` with a new entry:
-   ```
-   - **MM/dd/yyyy** - <type> - <description>
-   ```
-   Types: `feat` `fix` `refactor` `docs` `perf` `test`
-
-5. **Generate commit message** following this format:
+4. **Generate commit message** following this format:
    ```
    <type>: <summary>
 
@@ -67,10 +61,8 @@ If `skip`, continue with no tag change.
    ```
    Types: `feat:` `fix:` `refactor:` `docs:` `perf:` `test:`
 
-6. **Commit**: `git commit` with the generated message (use HEREDOC).
+5. **Commit**: `git commit` with the generated message (use HEREDOC).
 
-7. **Push**: `git push` to remote.
+6. **Push**: `git push` to remote.
 
-8. **Confirm**: Report the commit hash and what was pushed.
-
-9. **Run changelog command**: After committing, always run `/sln-changelog` to verify the changelog entry.
+7. **Confirm**: Report the commit hash and what was pushed.
