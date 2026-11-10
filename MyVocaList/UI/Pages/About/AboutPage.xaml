@@ -84,7 +84,12 @@
                 <dxe:ChoiceChipGroup
                     ItemsSource="{Binding Groups}"
                     DisplayMember="Label"
-                    SelectedItem="{Binding SelectedGroup, Mode=TwoWay}" />
+                    SelectedItem="{Binding SelectedGroup, Mode=TwoWay}"
+                    IsMultiline="True"
+                    Margin="0"
+                    ChipTextColor="{StaticResource OnSurface}"
+                    ChipSelectedBackgroundColor="{StaticResource SecondaryContainer}"
+                    ChipSelectedTextColor="{StaticResource OnSecondaryContainer}" />
                 <VerticalStackLayout
                     BindableLayout.ItemsSource="{Binding SelectedGroup.Rows}"
                     Spacing="4">
