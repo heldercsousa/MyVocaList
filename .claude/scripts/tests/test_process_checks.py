@@ -14,8 +14,11 @@ def _load():
 BS = chr(92)
 PAGE_OK = '<?xml version="1.0"?>\n<ContentPage xmlns="x" SafeAreaEdges="Container">\n</ContentPage>'
 PAGE_NONE = '<?xml version="1.0"?>\n<ContentPage xmlns="x">\n</ContentPage>'
-PAGE_ALL = '<ContentPage xmlns="x" SafeAreaEdges="All"/>'
 VIEW = '<ContentView xmlns="x"></ContentView>'
+PAGE_FORM_CONTAINER = '<ContentPage xmlns:dxe="y" SafeAreaEdges="Container"><dxe:TextEdit/></ContentPage>'
+PAGE_FORM_ALL = '<ContentPage xmlns:dxe="y" SafeAreaEdges="All"><dxe:TextEdit/></ContentPage>'
+PAGE_NO_INPUT_ALL = '<ContentPage SafeAreaEdges="All"><Label/></ContentPage>'
+PAGE_NONE_VALUE = '<ContentPage SafeAreaEdges="None"><Label/></ContentPage>'
 
 
 class SlnCheck(unittest.TestCase):
@@ -45,24 +48,76 @@ class SafeAreaCheck(unittest.TestCase):
     def setUpClass(cls):
         cls.m = _load()
 
-    def test_container_passes(self):
+    def test_container_without_input_passes(self):
         self.assertIsNone(self.m.check_safearea("P.xaml", PAGE_OK))
 
     def test_missing_fails(self):
-        self.assertIn("lacks", self.m.check_safearea("P.xaml", PAGE_NONE))
+        self.assertIn("must declare", self.m.check_safearea("P.xaml", PAGE_NONE))
 
-    def test_all_fails_for_new_page(self):
-        self.assertIsNotNone(self.m.check_safearea("New.xaml", PAGE_ALL))
+    def test_none_value_fails(self):
+        self.assertIn("must declare", self.m.check_safearea("P.xaml", PAGE_NONE_VALUE))
 
-    def test_known_violation_is_waived(self):
-        known = next(iter(self.m.SAFEAREA_KNOWN_VIOLATIONS))
-        self.assertIsNone(self.m.check_safearea(known, PAGE_ALL))
+    def test_all_on_text_input_page_passes(self):
+        self.assertIsNone(self.m.check_safearea("P.xaml", PAGE_FORM_ALL))
+
+    def test_container_on_text_input_page_fails(self):
+        out = self.m.check_safearea("P.xaml", PAGE_FORM_CONTAINER)
+        self.assertIn("text input", out)
+        self.assertIn("TextEdit", out)
+
+    def test_all_without_detected_input_passes(self):
+        self.assertIsNone(self.m.check_safearea("P.xaml", PAGE_NO_INPUT_ALL))
 
     def test_non_page_root_ignored(self):
         self.assertIsNone(self.m.check_safearea("V.xaml", VIEW))
 
     def test_comment_before_root_does_not_confuse(self):
-        self.assertIsNotNone(self.m.check_safearea("P.xaml", "<!-- <ContentPage SafeAreaEdges=\"Container\"> -->\n" + PAGE_NONE))
+        xaml = '<!-- <ContentPage SafeAreaEdges="Container"> -->\n' + PAGE_NONE
+        self.assertIsNotNone(self.m.check_safearea("P.xaml", xaml))
+
+    def test_commented_out_input_not_counted(self):
+        xaml = '<ContentPage SafeAreaEdges="Container"><!-- <dxe:TextEdit/> --><Label/></ContentPage>'
+        self.assertIsNone(self.m.check_safearea("P.xaml", xaml))
+
+
+class ItemTrailerCheck(unittest.TestCase):
+    IDS = {"trim-context", "ledger-cleanup"}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.m = _load()
+
+    def _c(self, msg):
+        return self.m.check_item_trailer(msg, self.IDS)
+
+    def test_required_types_without_trailer_fail(self):
+        for t in ("feat", "refactor", "perf", "amend"):
+            self.assertEqual(1, len(self._c(t + ": something\n\nbody")), t)
+
+    def test_scoped_and_breaking_subjects_are_recognised(self):
+        self.assertEqual(1, len(self._c("feat(ui)!: x")))
+
+    def test_exempt_types_pass_without_trailer(self):
+        for t in ("docs", "chore", "merge", "fix", "test"):
+            self.assertEqual([], self._c(t + ": something"), t)
+
+    def test_non_conventional_subject_passes(self):
+        self.assertEqual([], self._c("Merge branch 'x' into develop"))
+
+    def test_known_item_passes(self):
+        self.assertEqual([], self._c("feat: x\n\nItem: trim-context"))
+
+    def test_unknown_item_fails(self):
+        out = self._c("feat: x\n\nItem: nope")
+        self.assertEqual(1, len(out))
+        self.assertIn("nope", out[0])
+
+    def test_multiple_items_all_checked(self):
+        self.assertEqual([], self._c("amend: x\n\nItems: trim-context, ledger-cleanup"))
+        self.assertEqual(1, len(self._c("amend: x\n\nItems: trim-context, bogus")))
+
+    def test_comment_lines_ignored_when_finding_subject(self):
+        self.assertEqual(1, len(self._c("# comment\nfeat: x")))
 
 
 LOG_BAD = "# log\n\n---\n## Task: T1\n**Status:** To Review\n\n### Build notes\nx\n"
@@ -91,8 +146,7 @@ class TaskLogCheck(unittest.TestCase):
 
     def test_only_the_touched_entry_is_judged(self):
         two = LOG_BAD + "\n## Task: T2\n**Status:** To Review\n\n### Changed files:\n- `b.cs`\n"
-        out = self.m.check_tasklog("task-log.md", two, {12})
-        self.assertEqual([], out)
+        self.assertEqual([], self.m.check_tasklog("task-log.md", two, {12}))
 
 
 if __name__ == "__main__":
