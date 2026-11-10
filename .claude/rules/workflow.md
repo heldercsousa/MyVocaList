@@ -38,7 +38,7 @@ Orchestrator only; **a fix that qualifies goes through ITF — dispatching for i
 Never concurrent writers: `MauiProgram.cs`, `AppShell.xaml(.cs)`, `AppDbContext.cs`, `Migrations/*`, `GlobalUsings.cs`, `Directory.Build.props`, spec `tasks.md`. Rationale and the ITF soft/hard split: `workflow-rule-2.md § Sequential-only file registry`.
 
 ## Rule 3 — Commit After Every Task
-**`/sln-commit` after every completed task** (Stop hook warns on uncommitted changes). Complete = 0 build errors + tests pass + `tasks.md` box checked. Before committing: demo verifiable · new types registered in `MauiProgram.cs` · AC evidence in the task-log · **`.sln` registration of every created/moved/deleted `Docs/` file — BLOCKING**. Session end: reconcile touched specs (in-place note if unshipped, `changes/` folder if shipped), update frontmatter + `backlog_gen.py regen`. Review: automatic under `subagent-driven-development`, otherwise `/sln-review`. Detail: `workflow-rule-3.md`.
+**`/sln-commit` after every completed task** (Stop hook warns on uncommitted changes). Complete = 0 build errors + tests pass + `tasks.md` box checked. `feat:`/`refactor:`/`perf:`/`amend:` commits carry an `Item: <backlog-id>` trailer (commit-msg hook). Before committing: demo verifiable · new types registered in `MauiProgram.cs` · AC evidence in the task-log · **`.sln` registration of every created/moved/deleted `Docs/` file — BLOCKING**. Session end: reconcile touched specs (in-place note if unshipped, `changes/` folder if shipped), update frontmatter + `backlog_gen.py regen`. Review: automatic under `subagent-driven-development`, otherwise `/sln-review`. Detail: `workflow-rule-3.md`.
 
 ### Bug Fix Pattern — commit message as spec
 ```

@@ -50,7 +50,7 @@ After every task ask what should improve CLAUDE.md, a rules file or a command; u
 - **Native dialogs** `[Unamendable]` — NEVER `DisplayAlert` / `DisplayActionSheet` / `DisplayPromptAsync`; use `dx:BottomSheet`.
 - **UI Component Priority** `[Unamendable]` — DevExpress first; stock MAUI only when DevExpress has no equivalent.
 - **MD3 terminology** — component names, style keys, BindableProperty names and rules docs use official m3.material.io terms; fetch the docs when unsure, never invent names.
-- **SafeAreaEdges** — add `SafeAreaEdges="Container"` to every `ContentPage` (MAUI 10 defaults to `None`).
+- **SafeAreaEdges** — every `ContentPage` declares `SafeAreaEdges="Container"`, or `"All"` (Container + SoftInput) on pages with text input (MAUI 10 defaults to `None`). Pre-commit checked.
 - **Incremental edits** — XAML/UI: edit ONE file → build → fix → next. Never batch.
 
 ## Amending These Rules
