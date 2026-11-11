@@ -317,7 +317,7 @@
     1. Red: `ShowsMenu` tests (null, empty, one option), tagged `// [AC] REQ-ACF-31`. Run, confirm they fail to compile/fail.
     2. Green: `AutocompleteDXFieldLogic.ShowsMenu`. Run the tests.
     3. Glue: in `OnItemsRequested`'s delegate, an empty result → `_lastRequestRejected = true`, `CloseMenuOnUiThread()`,
-       return an empty list. Build.
+       return the (empty or null) options. Build.
     4. Full `dotnet test`, then an Android Debug build.
   - **Tests:** Level A for `ShowsMenu`; the glue is Level C, verified by the orchestrator on the emulator ("aa" with
     no match → no menu; "He" → menu; menu open then a non-matching query → menu closes), then T7 run 5 on Helder's phone.
