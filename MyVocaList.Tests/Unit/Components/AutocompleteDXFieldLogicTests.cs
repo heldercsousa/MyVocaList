@@ -372,4 +372,31 @@ public class AutocompleteDXFieldLogicTests
 
         Assert.False(result);
     }
+
+    // [AC] REQ-ACF-31: a search that returns no options (null) keeps the menu closed.
+    [Fact]
+    public void ShowsMenu_NullOptions_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.ShowsMenu(null);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-31: a search that returns an empty list keeps the menu closed (no "Not found" row).
+    [Fact]
+    public void ShowsMenu_EmptyOptions_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.ShowsMenu([]);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-31: a search that returns at least one option opens the menu.
+    [Fact]
+    public void ShowsMenu_OneOption_ReturnsTrue()
+    {
+        var result = AutocompleteDXFieldLogic.ShowsMenu([Suggestion]);
+
+        Assert.True(result);
+    }
 }
