@@ -211,11 +211,11 @@ Every agent uses these terms exactly. No synonyms.
   and no "no results" row. DX `CharacterCountThreshold` counts raw characters, so DX still raises
   the request for " a" or "  a"; the component must make that request show nothing.
   Given an unlocked field, When the user types " a", "  a" or "a  ", Then no menu and no "no results"
-  row appear. When the user types "  an  ", Then the source receives "an".
+  row appear. When the user types "  an  ", Then the source receives "an". An empty result for a valid query: REQ-ACF-31.
   No case or diacritic folding is added (constraints-registry § EF Core/SQLite HARD RULE).
 - **REQ-ACF-31: No "no results" row, ever (added 2026-11-10, T7 run 4 line 1).**
   WHEN a search returns no options, the component SHALL keep the menu closed: no "Not found" / "no results"
-  row and no stale options from an earlier query. This holds for every consumer, in every context (Helder ruling
+  row and no stale options from an earlier query. This holds for every consumer that uses the component, in every context (Helder ruling
   2026-11-10: "'Not Found' must be removed from everywhere, no matter the context"). An empty result already tells
   the user nothing matched. Given an unlocked field, When the user types "aa" or "aaa" and no option matches,
   Then no menu appears. When the user then types text that matches, Then the menu opens with those options.

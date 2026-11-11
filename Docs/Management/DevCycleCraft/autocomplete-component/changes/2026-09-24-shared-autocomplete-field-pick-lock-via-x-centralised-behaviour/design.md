@@ -176,7 +176,7 @@ These replace the T9 keystroke clear and the "close before DX" assumption below.
 **Event-glue rule added after T7 run 4 (2026-11-10):**
 - **Empty results show nothing (REQ-ACF-31).** In the `RequestAsync` delegate, after the existing post-await
   checks, when `!AutocompleteDXFieldLogic.ShowsMenu(options)` the component sets `_lastRequestRejected = true`,
-  calls `CloseMenuOnUiThread()` and returns an empty result, exactly as a rejected request (RC-A). The
+  calls `CloseMenuOnUiThread()` and returns the (empty or null) options, exactly as a rejected request (RC-A). The
   `OnEditorPropertyChanged` guard then closes the drop-down DX opens after the delegate completes, so the
   "no results" row never renders. A later request with options resets the flag at its start, as today.
   A DX property that only blanks the text (e.g. `NoResultsFoundText = ""`) is not enough: an empty row would still open.
