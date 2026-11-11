@@ -67,3 +67,41 @@ Commit `bf1f4baf` on `feature/crud-list-selection-gestures`.
 - `crud-appbar-list-toolbar.md` (List Layout: Gestures law, Never list; FloatingToolbar law: selection-mode visibility, 2 slots, `IsSelected` toggles only), `m3-floating-toolbar.md` (toggle-tonal selected state, no MD3 minimum, contextual use), `crud-listview.md`, `crud-checklists.md`, `dx-collectionview.md`, `testing-conventions.md`, `testing-test-types.md` (stale `CanEditSelected`/`EditSelected` references), `component-safety-gate.md` (`ListItemCheckbox` governed).
 - Needs Helder's human review (context-file authorship rule).
 - Landed on the feature branch, not develop: the develop pre-commit documented-command guard fails on another session's nested worktree `.claude/worktrees/agent-ae30a6ef9c3387d12` (32 backlog_gen + 37 lease invocations in its docs). That environment issue was left untouched, since the worktree is not ours. The laws take effect at merge, together with the code.
+
+## 2026-11-11 — T5 Verification — awaiting Helder on-device gate
+
+Branch `feature/crud-list-selection-gestures` pushed (head `8df8ef14`). Fresh `verifier` subagent: **CONDITIONAL PASS** (no Critical/Major; tests 967/967).
+
+### AC traceability matrix
+| AC | Implementation | Test / verification |
+|---|---|---|
+| REQ-CLSG-01 | `CrudListViewModelBase` item-tap handler | `TapItem_InBrowseMode_NavigatesToEditAndDoesNotSelect`, `TapItem_NonTItemParameter_IsNoOp` |
+| REQ-CLSG-01b | same | `TapItem_InSelectionMode_DoesNotNavigate` |
+| REQ-CLSG-02 | `OnItemLongPressed` → `BeginSelection` | `LongPressItem_InBrowseMode_SelectsExactlyThatItemAndEntersSelectionMode`, `LongPressItem_NonTItemParameter_IsNoOp` |
+| REQ-CLSG-03 | DX native `Multiple` + `CrudListView.ApplySelectionMode` | device |
+| REQ-CLSG-04a | `OnSelectedCountChanged` | `OnSelectionChangedToZero_LeavesSelectionMode` |
+| REQ-CLSG-04b | `ToggleSelectAll` | `SelectAllToggle_WhenAllSelected_ClearsSelectionAndLeavesSelectionMode` |
+| REQ-CLSG-04c | `RequestDelete` closure | `ConfirmedDeleteOfSelection_ClearsSelectionAndLeavesSelectionMode` |
+| REQ-CLSG-04d | `LoadFirstPageAsync` | `Reload_InSelectionMode_ClearsSelectionAndLeavesSelectionMode` |
+| REQ-CLSG-05a | `ToggleItemSelection` + `ListItemCheckbox` | `ToggleItemSelection_InBrowseMode_SelectsItemWithoutNavigating`, `ToggleItemSelection_NonTItemParameter_IsNoOp`; device (checkbox tap) |
+| REQ-CLSG-05b | `ToggleItemSelection` | `ToggleItemSelection_InSelectionMode_TogglesItemAndLeavesModeWhenEmpty` |
+| REQ-CLSG-06 | `OpenItemActions` + `itemActionsSheet` | `LongPressItem_InSelectionMode_OpensItemActionsAndKeepsSelection` |
+| REQ-CLSG-07 | `EditItemAsync` | `EditItemAction_HidesSheetClearsTargetAndNavigatesToTarget` |
+| REQ-CLSG-08 | `DeleteItem` + `RequestDelete` + sheet hand-off | `DeleteItemAction_HidesSheetOpensConfirmForExactlyThatItem` |
+| REQ-CLSG-09 | `CrudListView.xaml` toolbar | device |
+| REQ-CLSG-10 | `CrudListView.xaml` toolbar `IsVisible` | device |
+| REQ-CLSG-11 | `FloatingToolbar.ApplySelectedState` | device |
+| REQ-CLSG-12 | `HandleBack` + `CrudListPageBase.OnBackButtonPressed` | `HandleBack_ConsumesLayersInOrderThenReturnsFalse`; device (back key) |
+| REQ-CLSG-13 | 4 page XAMLs | review: grep 8 `ListItemCheckbox`, 0 `dx:CheckEdit` |
+| REQ-CLSG-14 | unchanged row buttons (DXButton consumes touch) | device |
+
+### Verifier warnings (Minor, accepted / tracked)
+1. `CrudListView` has no unsubscribe on `Unloaded` (old VM is unsubscribed on BindingContext change; pages are shell-cached) — accepted.
+2. `OnSelectionChanged(int)` sets `SelectedCount` without `RunOnUiThread`; safe because the view dispatches to the UI thread — accepted.
+3. Case C (DX `Tap` in a later cycle than `SelectionChanged`) — device checklist step 4; fallback `TapAfterSelectionChangeGuard` in design.md.
+4. Test nits: 04a test leaves `SelectedItems` populated; non-`TItem` tests reuse AC IDs (extra tests, same AC) — accepted.
+
+### Pending — Helder
+- On-device checklist (`plan.md § Verification`, steps 1–10 on all 4 pages).
+- Human review of the T4 `amend:` library changes (`8df8ef14`).
+- After a reported pass: merge `feature/crud-list-selection-gestures` → develop (pre-authorised), set status ✅.
