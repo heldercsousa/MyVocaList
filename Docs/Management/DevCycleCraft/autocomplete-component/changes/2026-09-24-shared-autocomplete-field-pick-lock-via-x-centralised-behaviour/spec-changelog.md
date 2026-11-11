@@ -54,3 +54,11 @@ is made in place and listed here.
 - **requirements.md:** new REQ-ACF-31; § Helder rulings — 2026-11-10; traceability row.
 - **design.md:** § 3.1 event-glue rule after T7 run 4; § 4 `ShowsMenu`.
 - **tasks.md:** T7 run 4 note and the new T11.
+
+## 2026-11-11: T7 run 5 outcome, component-owned search
+
+- **Trigger:** T7 run 5: "Not found" flashes on every no-match search (T11 closes after DX has opened).
+- **Root cause:** DX `AsyncItemsSourceProvider` shows the drop-down while loading; native→MAUI open-state sync can be skipped.
+- **requirements.md:** REQ-ACF-31 amended (no transient frame, no blink while typing); § Helder rulings — 2026-11-11; traceability row.
+- **design.md:** § 3.1 event-glue rules from T12 (supersede the RC-A guard and the T11 empty-result branch).
+- **tasks.md:** T7 run 5 note and the new T12.

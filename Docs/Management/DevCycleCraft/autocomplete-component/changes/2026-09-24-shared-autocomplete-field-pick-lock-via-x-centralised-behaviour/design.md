@@ -181,6 +181,24 @@ These replace the T9 keystroke clear and the "close before DX" assumption below.
   "no results" row never renders. A later request with options resets the flag at its start, as today.
   A DX property that only blanks the text (e.g. `NoResultsFoundText = ""`) is not enough: an empty row would still open.
 
+**Event-glue rules from T12 (2026-11-11, T7 run 5) — they supersede the RC-A close guard and the T11 empty-result rule:**
+- **Why.** Decompiled DX 25.2.4: `AsyncItemsSourceProvider.RequestItem.Run` sets `IsLoadingInProgress = true` before it
+  awaits the request, and the native control shows the drop-down while loading, so a no-match search renders "Not
+  found" for the length of the search. The native→MAUI `IsDropDownOpen` sync is skipped while the handler's locker is
+  held, so a close after the fact can be a no-op ("Not found" stuck open on the emulator). Evidence: `task-log.md` § T7 run 5.
+- **The component owns the search.** No `AsyncItemsSourceProvider`; `LoadingProgressMode="Manual"` and the component
+  never sets `IsLoadingInProgress`. On a `UserInput` `TextChanged` (`RestartSearch`): cancel the pending search
+  (own `CancellationTokenSource`, latest search only); compute `query = SearchQuery(text)`; if the pick echo
+  (`IsPickEcho`) or `!ShouldRequestOptions(...)` → clear `ItemsSource`, close the menu, stop; else keep the menu as it
+  is and start `RunSearchAsync`: `Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds)`, `SearchAsync(query, ct)`,
+  the REQ-ACF-26 pick-count check, the `ShouldRequestOptions` re-check, then on the UI thread: `ShowsMenu(options)` →
+  `ItemsSource = options; IsDropDownOpen = true`; else `ItemsSource = null; IsDropDownOpen = false`.
+- **Cancel points.** A programmatic text change, a routed pick and the editor's blur cancel the pending search, so a
+  late result never opens the menu on a field the user has left.
+- **Removed:** `OnItemsRequested`, `NoOptions`, `RejectRequest`, `_lastRequestRejected`, the `OnEditorPropertyChanged`
+  close guard (RC-A) and the T11 empty-result branch. `ShowsMenu` (§ 4) stays the decision. REQ-ACF-14 is kept: the
+  debounce is the same shared constant, now applied by the component instead of DX `RequestDelay`.
+
 Constants are not properties. The component reads `SearchConstants.MinimumLocalQueryLength` and
 `SearchConstants.AutocompleteDebounceMilliseconds` via `x:Static`.
 
