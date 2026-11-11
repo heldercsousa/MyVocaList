@@ -181,7 +181,7 @@
 
 ## Phase 6: Device gate
 
-- [ ] **T7: On-device E2E gate (Helder, Android, Person form)** [SEQUENTIAL, after T6]
+- [x] **T7: On-device E2E gate (Helder, Android, Person form)** [SEQUENTIAL, after T6]
   - Checklist, recorded in the task-log with pass/fail per line:
     1. New Singer: the Full Name field has focus on open (REQ-ACF-18).
     2. Typing 1 char, or a space plus 1 char → no menu; 2 chars → up to 5 people after about 300 ms (REQ-ACF-13, -14, -15).

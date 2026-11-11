@@ -23,7 +23,7 @@ Ruling: record these as tasks nested under the Person feature and tackle them in
 
 ## Tasks (not started; triage severity and spec each before fixing)
 
-- [ ] **F1: autocomplete menu reappears on an edit-mode load and after a pick.** It still reproduces after
+- [x] **F1 (closed 2026-11-11, ACF T7 runs 4 and 6): autocomplete menu reappears on an edit-mode load and after a pick.** It still reproduces after
   ACF T8, which added "programmatic text closes the menu" (REQ-ACF-24/25). The Song form Artist fix is
   the reference (`SongFormViewModel` `IsArtistDropDownOpen = false` on every programmatic assignment,
   plus `SelectedItem = null` in `SongFormPage.xaml.cs` `OnAppearing`). The fix lives in the shared
@@ -41,3 +41,6 @@ Ruling: record these as tasks nested under the Person feature and tackle them in
 > missing `DisplayMember`). The "edit-mode load" half did not reproduce on the emulator: Helder's observation was
 > the same page after an in-place pick. See `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md`
 > § "Diagnostic run — emulator". Close F1 if T7 run 4 confirms it on the phone.
+
+> **Update 2026-11-11 (F1 closed):** Helder confirmed on the phone (ACF T7 run 4 line 9 and run 6 line 4) that a pick
+> loads edit mode with the keyboard closed and no new search. F2 and F3 stay open.
