@@ -123,21 +123,6 @@ public class SongRepository : ISongRepository
             ct);
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<Song>> GetFuzzyCandidatePoolAsync(
-        int artistId, string titlePrefixToken, int take, CancellationToken ct = default)
-    {
-        var pattern = titlePrefixToken + "%";
-        return await _db.Songs
-            .Where(s => s.ArtistId == artistId &&
-                        EF.Functions.Like(
-                            EF.Functions.Collate(s.Title, CollationConstants.Default),
-                            pattern))
-            .Take(take)
-            .AsNoTracking()
-            .ToListAsync(ct);
-    }
-
-    /// <inheritdoc />
     public async Task<IReadOnlyList<Song>> GetByTitlesCollatedAsync(
         IEnumerable<string> titles, CancellationToken ct = default)
     {

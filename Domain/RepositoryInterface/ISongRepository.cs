@@ -37,25 +37,6 @@ public interface ISongRepository
     Task<bool> ExistsByTitleVersionForArtistAsync(int artistId, string title, string version, int excludeId, CancellationToken ct = default);
 
     /// <summary>
-    /// Returns a bounded pool of songs for a given artist whose title starts with
-    /// <paramref name="titlePrefixToken"/> under collation (index-friendly prefix query).
-    /// Used as the pre-filter before in-memory fuzzy scoring.
-    /// </summary>
-    /// <remarks>
-    /// Unused in production after BUG-085 (the Possible duplicates step now uses
-    /// <see cref="SearchTitleCandidatesForArtistAsync"/>). Kept only because the test wrapper
-    /// SongServiceNewArtistUnitOfWorkTests still delegates to it; scheduled for removal together with that wrapper.
-    /// </remarks>
-    /// <param name="artistId">Scope: original artist of the song.</param>
-    /// <param name="titlePrefixToken">
-    /// First whitespace-delimited token of the candidate title, capped at 12 chars.
-    /// </param>
-    /// <param name="take">Maximum number of rows to return (default pool size: 50).</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>At most <paramref name="take"/> songs matching the prefix, unordered.</returns>
-    Task<IReadOnlyList<Song>> GetFuzzyCandidatePoolAsync(int artistId, string titlePrefixToken, int take, CancellationToken ct = default);
-
-    /// <summary>
     /// Returns all songs whose title is collation-equal (case- and accent-insensitive) to any
     /// of the given <paramref name="titles"/>, resolved in a single batch query.
     /// Used for remote-suggestion dedup tier (b) — REQ-FORMUX-03.
