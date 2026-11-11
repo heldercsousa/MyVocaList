@@ -780,3 +780,16 @@ Covers REQ-ACF-04, -12a/b, -22, -24/-25, -30 by unchanged code paths (no edits t
   | He → Hel (`blink.sh`, dark frames) | 0 of 255 | 0 of 134 | 0 (no blink) |
 
   REQ-ACF-31 pass criterion met. Develop baseline before T12: aaa/zq 12-13 frames of "Not found", stuck open.
+
+## T7 run 6 (Helder, phone, 2026-11-11) — PASS
+
+Fresh build of develop (`77b408f6`). Helder: "All 4 are tested and worked as expected".
+
+| # | Check | Result |
+|---|---|---|
+| 1 | "aa", "aaa": no list and no "Not found", not even briefly (REQ-ACF-31) | PASS |
+| 2 | "He" then "l": list shows the name, no blink (REQ-ACF-31) | PASS |
+| 3 | Regression lines 2-4: " a" nothing; "  He  " and "helder s" find the singer (REQ-ACF-13) | PASS |
+| 4 | Line 9: pick → edit mode, keyboard closed, no re-search (REQ-ACF-30, -24/-25) | PASS |
+
+T7 gate passed (runs 1-6 cover lines 1-10). F1 in the persons follow-up is closed.
