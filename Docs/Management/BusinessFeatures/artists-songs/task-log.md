@@ -637,3 +637,10 @@ No test file, DI registration, csproj, SongFormPage*, ArtistFormPage*, Autocompl
 ### Design concern
 None. The shared constant is placed in the UI layer per the rationale above.
 Context manifest: Domain/RepositoryInterface/ISongRepository.cs · Infra/Repository/SongRepository.cs · MyVocaList/UI/Constants/SearchNotes.cs · MyVocaList/UI/ViewModels/SongFormViewModel.cs · MyVocaList/UI/ViewModels/ArtistFormViewModel.cs
+
+### Cleanup — closed 2026-11-10
+
+Merged `357a6813` (Verifier PASS, 0 blockers; develop 926/926 after merging ACF T10 and other develop work). Branches and worktree removed.
+
+- **Unreproduced flake:** `SongRepositoryArtistTrigramTests.SearchTitleCandidatesForArtistAsync_TypoInFirstWord_FindsStoredTitleAndExcludesUnrelated` failed once in a pre-commit run; 11 isolated and full-suite runs passed. No ordering dependence found. Hypothesis: under load the swallowed "no such table" path in `SearchTitleCoreAsync` returns an empty list. Same family as the earlier `GetFuzzyCandidatePoolAsync_RespectsArtistScopeAndTake` flake. If it recurs: capture the test output; a test-side check that the SongSearch table exists after migrate needs Helder's approval.
+- **Doc hygiene (not changed):** `song-import-resolution/design.md` lines 117 and 174 still describe the removed method; that spec is shipped and immutable.
