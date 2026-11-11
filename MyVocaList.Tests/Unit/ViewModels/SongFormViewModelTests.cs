@@ -395,9 +395,9 @@ public class SongFormViewModelTests
         Assert.Equal("Live 2011", sut.SongVersion);
     }
 
-    // [AC] REQ-SFT-11: after X on Title a pick-filled Version never triggers the discard sheet (Q21).
+    // [AC] REQ-SFT-10: after X on Title a local pick still navigates to the edit form (Q21).
     [Fact]
-    public async Task ClearTitle_AfterRemotePickThenLocalPick_NoDiscardSheetFromPickFilledVersion()
+    public async Task ClearTitle_AfterRemotePickThenLocalPick_StillNavigates()
     {
         var sut = CreateAddFormSut();
         await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live")));
@@ -406,7 +406,6 @@ public class SongFormViewModelTests
 
         await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
 
-        Assert.False(sut.IsDiscardSheetVisible);
         _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=42"), Times.Once);
     }
 
@@ -521,75 +520,21 @@ public class SongFormViewModelTests
         await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
 
         _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=42"), Times.Once);
-        Assert.False(sut.IsDiscardSheetVisible);
     }
 
-    // [AC] REQ-SFT-11: a local pick with user input in Artist, Version, Featured, Lyrics or the YouTube list asks first.
-    [Theory]
-    [InlineData("Artist")]
-    [InlineData("Version")]
-    [InlineData("Featured")]
-    [InlineData("Lyrics")]
-    [InlineData("YouTube")]
-    public async Task SelectTitle_LocalOptionWithOtherInput_ShowsDiscardSheetNoNavigation(string field)
+    // [AC] REQ-SFT-10: a local pick always navigates, even when Artist, Version or Lyrics hold input (no discard guard).
+    [Fact]
+    public async Task SelectTitle_LocalOptionWithOtherInput_StillNavigates()
     {
         var sut = CreateAddFormSut();
         sut.SongTitle = "cre";
-        FillOtherInput(sut, field);
-
-        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
-
-        Assert.True(sut.IsDiscardSheetVisible);
-        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
-    }
-
-    private static void FillOtherInput(SongFormViewModel sut, string field)
-    {
-        switch (field)
-        {
-            case "Artist": sut.ArtistSearchText = "Radio"; break;
-            case "Version": sut.SongVersion = "Live"; break;
-            case "Featured": sut.FeaturedArtists = "Someone"; break;
-            case "Lyrics": sut.Lyrics = "Some lyrics"; break;
-            case "YouTube": sut.KaraokeUrls.Add(MakeDto("vid-1", 0)); break;
-            default: throw new ArgumentOutOfRangeException(nameof(field), field, null);
-        }
-    }
-
-    // [AC] REQ-SFT-11: Open on the discard sheet opens the picked song's edit form.
-    [Fact]
-    public async Task ConfirmOpenExisting_FromDiscardSheet_Navigates()
-    {
-        var sut = CreateAddFormSut();
+        sut.ArtistSearchText = "Radio";
         sut.SongVersion = "Live";
-        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
-        Assert.True(sut.IsDiscardSheetVisible);
+        sut.Lyrics = "Some lyrics";
 
-        await sut.ConfirmOpenExistingCommand.ExecuteAsync(null);
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
 
         _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=42"), Times.Once);
-        Assert.False(sut.IsDiscardSheetVisible);
-    }
-
-    // [AC] REQ-SFT-11: Keep editing closes the sheet and restores the typed query, unlocked; nothing else changes.
-    [Fact]
-    public async Task KeepEditing_RestoresTypedQueryUnlocked_NothingElseChanges()
-    {
-        var sut = CreateAddFormSut();
-        SetupSearch([LocalDto(42, "Creep")], [], []);
-        await SearchTitle(sut, "cre");                  // the typed query
-        sut.SongTitle = "Creep";                        // the Field writes the picked headline into Title
-        sut.SongVersion = "Live";
-        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42, "Creep")));
-        Assert.True(sut.IsDiscardSheetVisible);
-
-        sut.KeepEditingCommand.Execute(null);
-
-        Assert.False(sut.IsDiscardSheetVisible);
-        Assert.Equal("cre", sut.SongTitle);
-        Assert.False(sut.IsTitleLocked);
-        Assert.Equal("Live", sut.SongVersion);
-        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
     }
 
     // [AC] REQ-SFT-16: the Artist option source searches local artists only and never calls Deezer.
