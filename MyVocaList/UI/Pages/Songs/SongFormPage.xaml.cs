@@ -11,7 +11,6 @@ public partial class SongFormPage : ContentPage
     // is closed programmatically in response to the flag it was opened by.
     private bool _isSyncingResolutionSheet;
     private bool _isSyncingArtistMatchSheet;
-    private bool _isSyncingDiscardSheet;
 
     public SongFormPage(SongFormViewModel viewModel)
     {
@@ -60,9 +59,6 @@ public partial class SongFormPage : ContentPage
             case nameof(SongFormViewModel.IsArtistMatchSheetVisible):
                 SyncArtistMatchSheetState();
                 break;
-            case nameof(SongFormViewModel.IsDiscardSheetVisible):
-                SyncDiscardSheetState();
-                break;
         }
     }
 
@@ -103,44 +99,6 @@ public partial class SongFormPage : ContentPage
             finally
             {
                 _isSyncingArtistMatchSheet = false;
-            }
-        }
-    }
-
-    // Discard sheet (Task 5.6, REQ-SFT-11): same flag-driven Show/Close pattern as the sheets above.
-    private void SyncDiscardSheetState()
-    {
-        if (_isSyncingDiscardSheet) return;
-
-        _isSyncingDiscardSheet = true;
-        try
-        {
-            if (ViewModel.IsDiscardSheetVisible)
-                discardSheet.Show(BottomSheetState.HalfExpanded, this);
-            else
-                discardSheet.Close();
-        }
-        finally
-        {
-            _isSyncingDiscardSheet = false;
-        }
-    }
-
-    // REQ-SFT-11: Back, scrim or swipe behave like "Keep editing" (nothing is opened or saved).
-    private void OnDiscardSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
-    {
-        if (_isSyncingDiscardSheet) return;
-
-        if (e.NewValue == BottomSheetState.Hidden && ViewModel.IsDiscardSheetVisible)
-        {
-            _isSyncingDiscardSheet = true;
-            try
-            {
-                ViewModel.KeepEditingCommand.Execute(null);
-            }
-            finally
-            {
-                _isSyncingDiscardSheet = false;
             }
         }
     }

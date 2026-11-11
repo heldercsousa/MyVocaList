@@ -92,11 +92,8 @@ public partial class SongFormViewModel : ViewModelBase
 
     [ObservableProperty] private string _titleSupportingText = string.Empty;
     [ObservableProperty] private bool _isTitleLocked;
-    [ObservableProperty] private bool _isDiscardSheetVisible;
 
-    private string _lastTitleQuery = string.Empty;
     private string? _pickFilledVersion;   // Version written by the last remote pick (Q21)
-    private int? _pendingOpenSongId;      // local pick awaiting the discard-sheet decision
 
     // ── Save-outcome sheets (Task 5.3, REQ-SFT-19, REQ-SFT-22/23) ─────────
     private const string ExactDuplicateSheetTitle = "This looks like an existing song";
@@ -424,7 +421,6 @@ public partial class SongFormViewModel : ViewModelBase
 
     private async Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitleAsync(string query, CancellationToken ct)
     {
-        _lastTitleQuery = query;
         var local = await _songSuggestions.SearchTitleLocalAsync(query, ct);
         var shownIds = local.Where(d => d.LocalId.HasValue).Select(d => d.LocalId!.Value).ToList();
         var remote = await _songSuggestions.SearchTitleRemoteAsync(query, shownIds, ct);
@@ -466,13 +462,7 @@ public partial class SongFormViewModel : ViewModelBase
             return Task.CompletedTask;
         }
 
-        if (HasOtherInput())
-        {
-            _pendingOpenSongId = dto.LocalId;
-            IsDiscardSheetVisible = true;
-            return Task.CompletedTask;
-        }
-
+        // REQ-SFT-10: a local pick always opens the edit form; other input is not guarded.
         return OpenSongAsync(dto.LocalId.Value);
     }
 
@@ -501,36 +491,8 @@ public partial class SongFormViewModel : ViewModelBase
         ArtistErrorText = string.Empty;
     }
 
-    private bool HasOtherInput() =>
-        !string.IsNullOrWhiteSpace(ArtistSearchText)
-        || !string.IsNullOrWhiteSpace(SongVersion)
-        || !string.IsNullOrWhiteSpace(FeaturedArtists)
-        || !string.IsNullOrWhiteSpace(Lyrics)
-        || KaraokeUrls.Count > 0;
-
     private Task OpenSongAsync(int songId) =>
         _navigationService.GoToAsync($"../{Routes.SongForm}?songId={songId}");
-
-    /// <summary>Discard-sheet "Open": opens the picked song's edit form (REQ-SFT-11).</summary>
-    [RelayCommand]
-    private async Task ConfirmOpenExisting()
-    {
-        IsDiscardSheetVisible = false;
-        if (_pendingOpenSongId is not { } id)
-            return;
-        _pendingOpenSongId = null;
-        await OpenSongAsync(id);
-    }
-
-    /// <summary>Discard-sheet "Keep editing": restores the typed query, unlocked (REQ-SFT-11).</summary>
-    [RelayCommand]
-    private void KeepEditing()
-    {
-        IsDiscardSheetVisible = false;
-        _pendingOpenSongId = null;
-        SongTitle = _lastTitleQuery;
-        IsTitleLocked = false;
-    }
 
     /// <summary>X on Title: empties and unlocks it, drops the pending identity, keeps Artist (REQ-SFT-06/14).</summary>
     [RelayCommand]
