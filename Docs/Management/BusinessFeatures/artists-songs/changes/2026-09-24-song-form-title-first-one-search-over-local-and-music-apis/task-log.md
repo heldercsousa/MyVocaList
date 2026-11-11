@@ -2462,3 +2462,49 @@ Files written and re-read: `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` (li
 - **Registered separately (not SFT scope):** song list shows artist + version + featured artists; post-MVP: group songs by artist, similar records in autocomplete results, AI intent matching for mistyped titles. Changes folder: `BusinessFeatures/artists-songs/changes/2026-11-09-*`.
 - **Flakes:** `SongServiceReadScopeTests.GetSongByIdAsync_ExistingSong_ReturnsSong` and `SongRepositoryArtistTrigramTests…TypoInFirstWord…` each failed once under the pre-commit hook and pass alone; track with BUG-076. Details in the artists-songs `task-log.md` § Cleanup — closed.
 - **Still open with Helder (from the older list):** (a) `orchestrator.md:563` "Default to Sonnet" wording; (b) verifier/critic dispatches pass no `model` override; (c) `sln-ledger.md` frontmatter `model: haiku`; (d) `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` name check. Re-check each before acting, they may be closed already.
+
+## 5.5
+
+**Status:** To Review (on-device gate pending: Helder)
+**Worktree:** `agent-ae30a6ef9c3387d12` (branch `task/sft-5.5-song-form-fields`, base develop `e4ad0d52`)
+**Started/Completed:** 2026-11-11
+
+Scope: UI only (Files owned: `SongFormPage.xaml`, `SongFormPage.xaml.cs`). `AutocompleteDXField.xaml`, its `.xaml.cs` and `AutocompleteDXFieldLogic.cs` are untouched (governed component). DX docked menu as-is (ruling e4ad0d52): no full-screen search, no add-new row. Order: XAML → build (expected code-behind errors only) → code-behind → build.
+
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` — Title is the first `textfields:AutocompleteDXField` (`IsSearchEnabled`, `SupportingText`, `IsLocked`, option/select/clear commands, `BlurWithoutPickCommand="{Binding ValidateTitleCommand}"`); the title counter sits under it; Artist is an `AutocompleteDXField` (local options, `IsLocked`, `BlurWithoutPickCommand`) after the counter; the Artist `dxe:AutoCompleteEdit` (with its create-row template and `AsyncItemsSourceProvider`) and the `dxe:TextEdit` Title are removed; `xmlns:textfields` added; `SafeAreaEdges="All"` kept.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — removed `OnArtistItemsRequested`, `OnArtistSelectionChanged`, `OnArtistUnfocused`, `OnArtistClearIconClicked`, `OnTitleUnfocused` and the `artistEdit.SelectedItem` use; `OnAppearing` focuses `titleField.FocusEditor()`; `using DevExpress.Maui.Editors;` and `using MyVocaList.Contracts.Models;` dropped (no longer used).
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/tasks.md` — 5.5 ticked, implementation notes below.
+- this file.
+
+### Implementation decisions (spec-level, see tasks.md 5.5 note)
+- **Title blur validation:** `AutocompleteDXField` has no generic blur event; it forwards blur to `BlurWithoutPickCommand` only in Editable mode without a pick (`AutocompleteDXFieldLogic.ShouldForwardBlur`). Bound to the existing `ValidateTitleCommand`, which keeps the VM's first-check-on-blur behaviour with no VM change. In edit mode (IsSearchEnabled false, Editable) the blur still forwards, so edit-mode title validation runs too.
+- **Title length:** `MaxCharacterCount="250"` dropped (the field exposes no such property). The rule is `SongService.ValidateTitleInput` (max 100, `MaxTitleLength`) plus the counter. Before: a 250-character hard keystroke cap; now: no hard cap, the error shows on blur, on Save, and while in error. Flagged for review.
+- **Artist drop-down:** `IsDropDownOpen` is not bound. The field closes its own menu when locked or read-only (`ApplyMode`), so `IsArtistDropDownOpen` is no longer read by the page (VM member left in place; dead-member cleanup belongs to a later VM task).
+- **Edit-mode artist lock (REQ-SFT-28):** the VM hydrates `IsArtistLocked = true` (`SongFormViewModel.cs:615`); the field's `IsLocked` binding renders it read-only, X unlocks, as for any pick.
+- The BUG-064 comment (artist error label) was removed with the artist `AutoCompleteEdit` it described.
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|----------------|-------------|
+| REQ-SFT-01 | Field order Title, Artist, Version, Featured, Lyrics, YouTube | `SongFormPage.xaml` (order of elements) | Build + XAML re-read; device gate (demo) |
+| REQ-SFT-02 | Title is the search box in add mode | `titleField` `IsSearchEnabled="{Binding IsTitleSearchEnabled}"` | VM tests (`IsTitleSearchEnabled`, 5.4); device gate |
+| REQ-SFT-27 | Edit mode: Title is editable text for every song, no search menu | `titleField` `IsSearchEnabled` false in edit mode; `IsLocked` not set in edit mode | VM tests (5.4: no read-only, `IsTitleSearchEnabled` false); device gate |
+| REQ-SFT-16 | Artist options local only | `artistField` `OptionSource="{Binding ArtistOptionSource}"` (5.2 VM) | VM tests (5.2); device gate |
+| REQ-SFT-28 | Edit-mode artist loads locked | `artistField` `IsLocked="{Binding IsArtistLocked}"` (VM hydration) | VM hydration test (`LoadSongForEdit_*_LocksArtistField`, 3.2b/5.1); device gate |
+| REQ-ACF-11 | No Song autocomplete glue in code-behind or XAML | census (plan Step 5) → PASS | census below |
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` (after XAML edit): 5 errors, all `SongFormPage.xaml.cs` (`titleEdit`/`artistEdit` not in context): expected per D17.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` (after code-behind edit): `ok dotnet build: 6 projects, 0 errors, 27 warnings` (warnings = pre-existing NU1902/NU1903 advisories).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1`: `Aprovado! – Com falha: 0, Aprovado: 953, Ignorado: 0, Total: 953`. Neither known BUG-076 flake fired, so no isolated rerun was needed.
+- REQ-ACF-11 census (plan Step 5, Python): `PASS`.
+- `SafeAreaEdges="All"` still declared (SongFormPage.xaml:17). Native dialog census (`DisplayAlert|DisplayActionSheet|DisplayPromptAsync`) in the two files: 0 hits.
+- Files written and re-read: `SongFormPage.xaml` (lines 1-130 re-read after the Title and Artist edits), `SongFormPage.xaml.cs` (lines 1-55 re-read after the rewrite).
+- **Not verified:** E2E emulator gate (plan Step 6) and the on-device demo are Helder's device gate. No device verification is claimed here.
+
+### Notes for review
+- Blur-as-validation via `BlurWithoutPickCommand` reuses a command whose name says "without pick" for the Title; the field offers no other blur hook. Acceptable, flagged.
+- The title length cap change (above) is the only user-visible behaviour change beyond the spec's layout.
+
+---

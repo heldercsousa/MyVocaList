@@ -319,12 +319,13 @@
   - **Review lane:** Standard
   > **Spec updated 2026-09-26:** (D2) runs before G2. (D6) the `:787` rewrite moved to 3.2b.
 
-- [ ] **5.5 Page: field order, Title and Artist Fields** [SEQUENTIAL — after 5.4]
+- [x] **5.5 Page: field order, Title and Artist Fields** [SEQUENTIAL — after 5.4]
   - **Files owned:** `SongFormPage.xaml`
   - **Risk:** Medium (XAML). Title and Artist are `AutocompleteDXField` (`UI/Components/TextFields/`); Title binds `IsSearchEnabled` and `SupportingText` to the VM (`IsReadOnly` unused).
   - **Demo:** New Song shows Title first as a search box; Edit Song shows Title as editable text with no search menu, for every song.
   - **Review lane:** Standard
   > **Spec updated 2026-09-26:** (D17) 5.5 also owns `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (former 5.7): replacing the Artist `AutoCompleteEdit` breaks the build until the code-behind glue is deleted (XAML → build → code-behind). Waits for ACF T4 (G2).
+  > **Spec updated 2026-11-11:** Title blur validation is bound to `BlurWithoutPickCommand="{Binding ValidateTitleCommand}"` (the field's only blur hook; forwards in Editable mode). `MaxCharacterCount` is not carried over: the 100-character rule is `ValidateTitleInput` plus the counter. `IsDropDownOpen` is not bound (the field closes its own menu when locked). Impl decisions, not a REQ change. Device gate (New Song Title first; Edit Song Title editable, artist locked) pending Helder. Implemented on `task/sft-5.5-song-form-fields`; task-log § 5.5.
 
 - [ ] **5.6 Page: sheets (discard, near-duplicate artist, resolution)** [SEQUENTIAL — after 5.5]
   - **Files owned:** `SongFormPage.xaml`
