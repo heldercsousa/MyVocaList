@@ -114,6 +114,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\requirements.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\requirements.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\task-log.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\task-log.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\tasks.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-11-crud-list-selection-gestures\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\design.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\tasks.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-song-title-limit-raised-from-100-to-250-characters\tasks.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
