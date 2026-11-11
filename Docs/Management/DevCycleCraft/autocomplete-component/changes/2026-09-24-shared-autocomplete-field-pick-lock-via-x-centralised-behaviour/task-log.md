@@ -707,3 +707,15 @@ Glue (code-behind `RequestAsync` → RC-A guard) is not unit-testable; covered b
   | "He" → "Hex" (menu open, then no match) | menu closes | PASS |
 
 - Next: T7 run 5 on Helder's phone (line 1: "aa" / "aaa" show nothing).
+
+## T7 run 5 (Helder, phone, 2026-11-11) — line 1 FAIL (flash)
+
+- "aa" / "aaa": "Not found" animates in and out for a fraction of a second on every no-match search. T11 closes the menu only after DX has opened it.
+
+### Root cause (decompiled DX 25.2.4 `DevExpress.Maui.Editors.dll`, ilspycmd, scratchpad only)
+
+1. `AsyncItemsSourceProvider.RequestItem.Run` sets `editor.IsLoadingInProgress = true` **before** awaiting the request, then `ItemsSource = result`, then `IsLoadingInProgress = false`. The handler maps `IsLoadingInProgress` to the native `LoadingInProcess`; the native control shows the drop-down while loading, so a no-match search renders "Not found" for the duration of the search. A rejected request completes synchronously (same frame), which is why REQ-ACF-13c (" a") passes on the phone.
+2. `AutoCompleteEditBaseHandler.OnControlDropDownStateChanged` syncs the native state to `IsDropDownOpen` only through `Locker.DoLockedActionIfNotLocked`, and `UpdateIsLoadingInProcess` locks that locker. The MAUI property can therefore stay out of sync with the native popup, and `IsDropDownOpen = false` is then a no-op (finding 4 of the T9 decompile).
+3. Emulator evidence (screen recording, frame brightness under the field; scratchpad `flash.sh`): after a "He" search with results, "aaa" and "zq" show "Not found" from the request onwards and it **stays open** (≥ 2.5 s, 12-13 frames). A first "aa" in a fresh form showed nothing. State-dependent, consistent with 2.
+
+**Conclusion:** no close-after-open fix can be flash-free. The drop-down must never be opened by DX's loading path. Candidate: the component runs the search itself (own debounce + cancellation) and opens the list only when there are options (`FilteredItemsSourceProvider` itself opens with `IsDropDownOpen = true`). Spike `spike/acf-t12-own-search` @ `.worktrees/acf-t12-spike` proves it on the emulator before any spec change.
