@@ -59,9 +59,7 @@
                                          Style="{StaticResource StandardIconButton}"
                                          Command="{Binding Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}, Path=BindingContext.LaunchYouTubeSearchCommand}"
                                          CommandParameter="{Binding .}" />
-                            <dx:CheckEdit IsChecked="False"
-                                          InputTransparent="True"
-                                          VerticalOptions="Center" />
+                            <lists:ListItemCheckbox VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
@@ -82,10 +80,7 @@
                                          Style="{StaticResource StandardIconButton}"
                                          Command="{Binding Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}, Path=BindingContext.LaunchYouTubeSearchCommand}"
                                          CommandParameter="{Binding .}" />
-                            <dx:CheckEdit IsChecked="True"
-                                          CheckedCheckBoxColor="{dx:ThemeColor Primary}"
-                                          InputTransparent="True"
-                                          VerticalOptions="Center" />
+                            <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
