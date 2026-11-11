@@ -3,7 +3,7 @@
 > DRY Onion: VM base → shared components → pages. Code tasks run in a worktree on branch `feature/crud-list-selection-gestures`, cut from `develop`. Incremental XAML rule: edit one file, build, then move to the next. Every task ends with a green build and green tests.
 > Waves: W1 = T1 · W2 = T2a ∥ T2b · W3 = T2c · W4 = T3 · then T4 (develop) · T5.
 
-- [ ] **T1 — VM base + interface, additive only (TDD, Level A)**
+- [x] **T1 — VM base + interface, additive only (TDD, Level A)**
   - Scope: add every *added* member of `design.md § Contracts` to `ICrudListViewModel` and `CrudListViewModelBase`. Removals belong to T2c.
   - `RequestBatchDelete` becomes `RequestDelete(IList<TItem>)`. `DeleteSelectedCommand` keeps its behavior.
   - `OnSelectedCountChanged` sets `IsSelectionMode`.
@@ -11,17 +11,17 @@
   - Produces: selection-mode VM contract · Consumes: nothing · Risk: Medium · Review lane: Elevated
   - Files owned: `CrudListViewModelBase.cs`, `ICrudListViewModel.cs`, `CrudListViewModelBaseTests.cs`
   - ACs: REQ-CLSG-01, 01b, 02, 04a–d, 05a–b, 06, 07, 08, 12 · Demo: `dotnet test` green with the new tests
-- [ ] **T2a — New `ListItemCheckbox` component** [P with T2b]
+- [x] **T2a — New `ListItemCheckbox` component** [P with T2b]
   - Scope: per `design.md § ListItemCheckbox`. Not governed yet (0 consumers).
   - Produces: `ListItemCheckbox` · Consumes: T1 (`ToggleItemSelectionCommand`) · Risk: Low · Review lane: Standard
   - Files owned: `UI/Components/Lists/ListItemCheckbox.xaml`, `ListItemCheckbox.xaml.cs`
   - ACs: REQ-CLSG-05a/b (UI half) · Demo: Android build green
-- [ ] **T2b — `FloatingToolbar` toggle colors + `BottomSheetMenuItem` style** [P with T2a]
+- [x] **T2b — `FloatingToolbar` toggle colors + `BottomSheetMenuItem` style** [P with T2a]
   - Scope: per `design.md § FloatingToolbar` and `§ Style`. Includes the comment updates.
   - Produces: toggle-tonal selected state; menu item style · Consumes: nothing · Risk: Low (single consumer) · Review lane: Standard
   - Files owned: `UI/Components/Toolbars/FloatingToolbar.xaml.cs`, `Resources/Styles/MaterialStyles.xaml`
   - ACs: REQ-CLSG-11 · Demo: Android build green
-- [ ] **T2c — Governed: `CrudListView` + removal of Edit-selected**
+- [x] **T2c — Governed: `CrudListView` + removal of Edit-selected**
   - Scope: all of `design.md § CrudListView`, in this order:
     1. gestures
     2. dead `ItemTapCommand` removal
@@ -46,12 +46,12 @@
        | ArtistsPage | leading checkbox + trailing catalog button: catalog tap must not select/navigate | checklist 1–9 on Artists |
        | SongsPage | YouTube button; `PrimaryFabCommand` FAB switching; subtitle "N selected" | checklist 1–9 on Songs; FAB unchanged |
     4. Helder approval: granted in advance on 2026-11-11 ("you're already authorized in advance to do anything needed… I trust you"), plus plan approval (ExitPlanMode) on 2026-11-11.
-- [ ] **T3 — Pages + back button**
+- [x] **T3 — Pages + back button**
   - Scope: replace the 8 `dx:CheckEdit` with `lists:ListItemCheckbox`, in the order Venues → People → Artists → Songs, building after each page. `CrudListPageBase.OnBackButtonPressed` → `HandleBack()`. Delete the unwired leftovers `CrudListPageBase.OnSelectionChanged`, `OnCollectionViewScrolled` and `OnConfirmSheetStateChanged`; grep 2026-11-11 found no XAML wiring, since the handlers of the same name in `CrudListView.xaml` bind to `CrudListView`'s own code-behind.
   - Produces: final UI · Consumes: T2a, T2c · Risk: Medium · Review lane: Elevated
   - Files owned: `VenuesPage.xaml`, `PeoplePage.xaml`, `ArtistsPage.xaml`, `SongsPage.xaml`, `CrudListPageBase.cs`
   - ACs: REQ-CLSG-05, 12, 13, 14 · Demo: checkbox tap selects from browse mode
-- [ ] **T4 — Guideline amendments** (`amend:` commit on develop, after T3)
+- [x] **T4 — Guideline amendments** (`amend:` commit `8df8ef14` on the feature branch — see task-log)
   - `.claude/library/crud-appbar-list-toolbar.md`:
     - List Layout law: dynamic `SelectionMode` owned by `CrudListView`, and drop the "Never: SelectionMode.None / mode toggle" bullets;
     - FloatingToolbar law: visible only in selection mode, 2 slots, `IsSelected` only on toggles.
