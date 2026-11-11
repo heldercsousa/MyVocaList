@@ -308,6 +308,23 @@
     `AutocompleteDXFieldLogicTests.cs`, its own `## T10` section of `task-log.md`
   - **Demo:** emulator run clean, then T7 run 4 (lines 2 and 9) on Helder's phone. **Review lane:** Elevated
 
+> **Spec updated 2026-11-10: T7 run 4 result.** Lines 2, 3, 4 PASS; line 1 PASS for 1 character, but "aa" /
+> "aaa" (valid queries, no match) show DX's "Not found" row. Helder ruled it must never show (REQ-ACF-31). T11.
+
+- [ ] **T11: No "no results" row (REQ-ACF-31)** `[SEQUENTIAL, after T10]` (added 2026-11-10)
+  - **Behaviour:** REQ-ACF-31. Design: `design.md` § 3.1 "Event-glue rule added after T7 run 4", § 4 `ShowsMenu`.
+  - **Steps (one writer, branch `task/acf-t11-no-results-row` @ `.worktrees/acf-t11`):**
+    1. Red: `ShowsMenu` tests (null, empty, one option), tagged `// [AC] REQ-ACF-31`. Run, confirm they fail to compile/fail.
+    2. Green: `AutocompleteDXFieldLogic.ShowsMenu`. Run the tests.
+    3. Glue: in `OnItemsRequested`'s delegate, an empty result → `_lastRequestRejected = true`, `CloseMenuOnUiThread()`,
+       return an empty list. Build.
+    4. Full `dotnet test`, then an Android Debug build.
+  - **Tests:** Level A for `ShowsMenu`; the glue is Level C, verified by the orchestrator on the emulator ("aa" with
+    no match → no menu; "He" → menu; menu open then a non-matching query → menu closes), then T7 run 5 on Helder's phone.
+  - **Files owned:** `AutocompleteDXFieldLogic.cs`, `AutocompleteDXField.xaml.cs`, `AutocompleteDXFieldLogicTests.cs`,
+    its own `## T11` section of `task-log.md`. Not `SongFormPage` (out of scope, another session).
+  - **Demo:** emulator run clean, then T7 run 5 (line 1) on Helder's phone. **Review lane:** Standard
+
 ## Handed over to the song-form title-first item (not tasks here)
 
 `BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/`

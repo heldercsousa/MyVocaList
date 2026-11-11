@@ -173,6 +173,14 @@ These replace the T9 keystroke clear and the "close before DX" assumption below.
   (the editor was already unfocused), the flag is cleared on the next `UserInput` `TextChanged` or the
   next focus, so a later real blur is never swallowed.
 
+**Event-glue rule added after T7 run 4 (2026-11-10):**
+- **Empty results show nothing (REQ-ACF-31).** In the `RequestAsync` delegate, after the existing post-await
+  checks, when `!AutocompleteDXFieldLogic.ShowsMenu(options)` the component sets `_lastRequestRejected = true`,
+  calls `CloseMenuOnUiThread()` and returns an empty result, exactly as a rejected request (RC-A). The
+  `OnEditorPropertyChanged` guard then closes the drop-down DX opens after the delegate completes, so the
+  "no results" row never renders. A later request with options resets the flag at its start, as today.
+  A DX property that only blanks the text (e.g. `NoResultsFoundText = ""`) is not enough: an empty row would still open.
+
 Constants are not properties. The component reads `SearchConstants.MinimumLocalQueryLength` and
 `SearchConstants.AutocompleteDebounceMilliseconds` via `x:Static`.
 
@@ -223,6 +231,7 @@ option source, the artist/title lock hydration, and deleting the Song glue
 | `bool ShowClearIcon(FieldMode mode, string? text)` | `mode != ReadOnly && !string.IsNullOrEmpty(text)`. | ACF-07, -12b |
 | `string SearchQuery(string? text)` *(T9)* | `(text ?? "").NormalizeSearchQuery()` — the app-wide helper (`MyVocaList.Extensions/Strings/StringExtensions.cs`), never a local re-implementation. It is the text passed to `SearchAsync`. | ACF-13 (a)(b) |
 | `bool ShouldRequestOptions(FieldMode mode, bool isSearchEnabled, IMenuOptionSource? source, string? query)` | `source != null && isSearchEnabled && mode == Editable && SearchQuery(query).Length >= SearchConstants.MinimumLocalQueryLength` *(T9: was `query?.Trim().Length`)*. The normalised-length check is needed because DX `CharacterCountThreshold` counts raw characters (" a" would pass it). | ACF-04, -12a, -12b, -13 |
+| `bool ShowsMenu(IReadOnlyList<AutocompleteSuggestion>? options)` *(T11)* | `options is { Count: > 0 }`. When false, the request is treated like a rejected one (RC-A close guard), so DX never shows its "no results" row. | ACF-31 |
 | `PickRoute RoutePick(object? selectedItem)` | `Select` if `selectedItem is AutocompleteSuggestion`; else `None`. | ACF-11b |
 | `bool LockAfterPick(PickRoute route, bool isPickLockEnabled = true)` | `route == Select && isPickLockEnabled`. | ACF-01, -29 |
 | `bool ShouldForwardBlur(object? selectedItem, FieldMode mode, bool isPickBlur = false)` | `!isPickBlur && selectedItem is null && mode == Editable`. *(T9: `isPickBlur` is true for the one blur the component causes itself after a pick, REQ-ACF-30c.)* | ACF-11c, -12b, -17, -30 |
