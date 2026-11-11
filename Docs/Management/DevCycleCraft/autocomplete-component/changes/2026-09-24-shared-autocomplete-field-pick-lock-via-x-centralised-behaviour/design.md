@@ -206,6 +206,11 @@ These replace the T9 keystroke clear and the "close before DX" assumption below.
 - **Removed:** `OnItemsRequested`, `NoOptions`, `RejectRequest`, `_lastRequestRejected`, the `OnEditorPropertyChanged`
   close guard (RC-A) and the T11 empty-result branch. `ShowsMenu` (§ 4) stays the decision. REQ-ACF-14 is kept: the
   debounce is the same shared constant, now applied by the component instead of DX `RequestDelay`.
+  > **Spec updated 2026-11-11:** T12 impl: the blur cancel is in `OnUnfocused` and the pick cancel in `OnSelectionChanged`
+  > (after `_pickCount++`). `RunSearchAsync` disposes its own CTS in `finally`; `CancelSearch` only cancels and forgets
+  > the reference, so it never touches a disposed CTS. The `ItemsSource`/close write for a rejected query lives in
+  > `RestartSearch`; a qualifying query leaves the menu as it is, so stale options may stay visible for the debounce
+  > window until the new options replace them (the amended REQ-ACF-31 allows this).
 
 Constants are not properties. The component reads `SearchConstants.MinimumLocalQueryLength` and
 `SearchConstants.AutocompleteDebounceMilliseconds` via `x:Static`.
