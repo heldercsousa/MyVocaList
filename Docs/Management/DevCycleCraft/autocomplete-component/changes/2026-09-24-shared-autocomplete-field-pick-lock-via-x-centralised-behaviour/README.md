@@ -1,12 +1,13 @@
 ---
 id: shared-autocomplete-field-pick-lock-via-x-centralised-behaviour
 title: Shared autocomplete field — pick-lock via X, centralised behaviour
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-09-24
 section: DevCycleCraft
 parent: autocomplete-component
 goal: "One reusable DX autocomplete owns all autocomplete behaviour app-wide: a picked option is read-only until X is tapped, X looks enabled, and timing and threshold use shared constants."
-gate: "Component merged; T6 moves the Person form Full Name onto it, then Helder passes the on-device gate T7 (Person form, pick-lock)."
+gate: Component merged; T6 moves the Person form Full Name onto it, then Helder passes the on-device gate T7 (Person form, pick-lock).
+closed: 2026-11
 kind: change
 ---
 

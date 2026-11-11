@@ -100,45 +100,10 @@ public class SongRepositoryResolutionTests : IAsyncLifetime
         await Assert.ThrowsAsync<DbUpdateException>(() => _db.SaveChangesAsync());
     }
 
-    // ── GetFuzzyCandidatePoolAsync ─────────────────────────────────────────
-
-    // [AC] AC-5.6: GetFuzzyCandidatePoolAsync respects artist scope and take limit
-    [Fact]
-    public async Task GetFuzzyCandidatePoolAsync_RespectsArtistScopeAndTake()
-    {
-        var artist1 = await SeedArtistAsync("Queen");
-        var artist2 = await SeedArtistAsync("Quentin Music");
-        _db.Songs.AddRange(
-            MakeSong(artist1.Id, "Bohemian Rhapsody", ""),
-            MakeSong(artist1.Id, "Bohemian Anniversary", ""),
-            MakeSong(artist1.Id, "Somebody to Love", ""),
-            MakeSong(artist2.Id, "Bohemian Dreams", ""));
-        await _db.SaveChangesAsync();
-
-        var pool = await _repo.GetFuzzyCandidatePoolAsync(artist1.Id, "Bohe", 2, CancellationToken.None);
-
-        Assert.True(pool.Count <= 2);
-        Assert.All(pool, s => Assert.Equal(artist1.Id, s.ArtistId));
-    }
-
-    // [AC] AC-5.7: GetFuzzyCandidatePoolAsync returns only songs whose title starts with the prefix token
-    [Fact]
-    public async Task GetFuzzyCandidatePoolAsync_PrefixFilter_ReturnsOnlyMatchingPrefix()
-    {
-        var artist = await SeedArtistAsync("Led Zeppelin");
-        _db.Songs.AddRange(
-            MakeSong(artist.Id, "Stairway to Heaven", ""),
-            MakeSong(artist.Id, "Black Dog", ""),
-            MakeSong(artist.Id, "Stairway Alternate", "Live"));
-        await _db.SaveChangesAsync();
-
-        var pool = await _repo.GetFuzzyCandidatePoolAsync(artist.Id, "Stair", 50, CancellationToken.None);
-
-        Assert.Equal(2, pool.Count);
-        Assert.All(pool, s => Assert.StartsWith("Stairway", s.Title, StringComparison.OrdinalIgnoreCase));
-    }
-
     // ── Helpers ───────────────────────────────────────────────────────────
+    // BUG-085: the prefix-pool candidate tests that lived here were retired and
+    // rewritten as SongRepositoryArtistTrigramTests (SearchTitleCandidatesForArtistAsync, REQ-SFT-23).
+    // They moved there because that class uses MigrateAsync (SongSearch FTS index present).
 
     private async Task<Artist> SeedArtistAsync(string name)
     {

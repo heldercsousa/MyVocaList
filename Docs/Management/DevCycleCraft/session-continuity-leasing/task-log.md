@@ -136,3 +136,16 @@
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-06-13 | ↳ Context-Size Self-Monitoring & Auto-Clear Advisory | 💡 Pending | Orchestrator advises Helder when context is large enough to clear, emits a continuation prompt + handoff file, and optionally self-interrupts the session. Companion to auto-resume (one ends a bloated session cleanly, the other resumes it). Feasibility: agent can't read exact token count, but CC surfaces context usage + supports a Stop/periodic hook that fires the advisory + writes handoff. Research mechanism + token budget. Design context in `session-continuity-leasing/design.md § Companion task`. |
+
+
+## Ledger detail moved from LEDGER.md (2026-11-10) — SC-ENH
+
+> Verbatim text of the former ledger row, moved so the ledger stays one short line per item (`/sln-ledger § Row-length rule`). Nothing was dropped.
+
+- **Feature / Bug:** Session Continuity enhancements (Phase 8, Tasks 11–15)
+- **Phase / Step:** complete — verifier PASS; cleanup executed (30→8 worktrees, form-ux merged `f00543a`, 478/478)
+- **Branch:** develop (tooling scripts + docs only, no app code)
+- **Worktree:** —
+- **Status:** to review
+- **Last commit:** 68e1852
+- **Next action:** Helder: run two-terminal live demo (last open gate); optionally direct the 4 leftover agent worktrees

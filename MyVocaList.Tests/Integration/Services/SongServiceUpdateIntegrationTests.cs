@@ -48,7 +48,7 @@ public class SongServiceUpdateIntegrationTests
         var hydrationRead = await songRepo.GetByIdAsync(songId, CancellationToken.None);
         Assert.NotNull(hydrationRead);
 
-        // Simulate Save — SongFormViewModel.ExecuteEditSaveAsync -> SongService.UpdateSongAsync.
+        // Simulate Save — direct call to SongService.UpdateSongAsync (the form's save now goes through SongService.SaveFromFormAsync).
         var (success, message) = await songService.UpdateSongAsync(
             songId, "Some Title", featuredArtists: null, lyrics: null,
             artistId: newArtistId, ct: CancellationToken.None);

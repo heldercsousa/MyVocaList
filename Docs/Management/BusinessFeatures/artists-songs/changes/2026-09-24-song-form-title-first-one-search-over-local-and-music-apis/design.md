@@ -161,7 +161,7 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
 
 > **Spec updated 2026-11-04 (4.2 merge `b100ceb7`, Verifier CONDITIONAL PASS):** steps 3–4 are implemented per item, not as one batch: one `FindByTitleAndArtistNamesAsync([triple])` per unmatched Deezer row (all inside the single dedup `ExecuteReadAsync`), then one `GetByNamesCollatedAsync([name])` per distinct remaining artist in a **second** read scope after take-5. Reason: mapping batch hits back to rows would need C#-side case/accent matching (HARD RULE); positional per-item calls keep the DB the only judge. Accepted (≤ ~25 + 5 indexed reads, single device). The defensive "no Deezer provider registered" branch returns `Unavailable` + Warning — accepted as Level-C plumbing (DI always registers Deezer; BUG-082 test). A batch repository method returning the input index is a possible later optimisation.
 
-> **Spec updated 2026-11-04 (6.1 Red `66a1e8fb`):** artist side mirrors the song side — `ArtistSuggestionService(IArtistRepository, IUnitOfWork, IEnumerable<IMusicMetadataProvider>, ISimilarityScorer, INetworkStatus, ILogger<ArtistSuggestionService>)`; `SearchNameLocalAsync(query, ct)` (FTS `SearchNameCandidatesAsync`, `RankScore(q, name)`, take 5) and `SearchNameRemoteAsync(query, ct)` → `ArtistRemoteSearchResult(Remote, Status)`; Deezer-only, offline/unavailable as § 3.6; the REQ-SFT-48 collated drop is one `GetByNamesCollatedAsync([name])` per Deezer row inside one read scope (same HARD-RULE reason as songs). `GetLocalAsync`/`GetRemoteAsync`/`FilterSimilar` and the MusicBrainz branch are deleted. `IsExactMatch` on local rows is not defined by the spec (left false; 6.2 decides whether the VM needs it).
+> **Spec updated 2026-11-04 (6.1 Red `66a1e8fb`):** artist side mirrors the song side — `ArtistSuggestionService(IArtistRepository, IUnitOfWork, IEnumerable<IMusicMetadataProvider>, ISimilarityScorer, INetworkStatus, ILogger<ArtistSuggestionService>)`; `SearchNameLocalAsync(query, ct)` (FTS `SearchNameCandidatesAsync`, `RankScore(q, name)`, take 5) and `SearchNameRemoteAsync(query, ct)` → `ArtistRemoteSearchResult(Remote, Status)`; Deezer-only, offline/unavailable as § 3.6; the REQ-SFT-48 collated drop is one `GetByNamesCollatedAsync([name])` per Deezer row inside one read scope (same HARD-RULE reason as songs). `GetLocalAsync`/`GetRemoteAsync`/`FilterSimilar` and the MusicBrainz branch are deleted. `IsExactMatch` on local rows is not defined by the spec (left false; 6.2 decides whether the VM needs it). **Update 2026-11-06 (Helder):** nothing reads it, so 5.3b removes `ArtistSuggestionDto.IsExactMatch`; 6.2 adds a flag only if it needs one.
 
 ### 3.4 Providers and the Field dependency
 
@@ -200,6 +200,14 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
   > **Spec updated 2026-09-26:** Q16 RESOLVED — the append capability is **not** requested; the fallback above is
   > the design (`TitleOptionSource` and `NameOptionSource` await local, then remote, and return one list).
   > Orchestrator decision under Helder's pre-authorisation of 2026-09-25; plan § 0.3 D1.
+
+  > **Spec updated 2026-11-11 (ACF close-out):** the reason given above ("DX `AsyncItemsSourceProvider` takes one result
+  > list per `ItemsRequested`") no longer holds: since ACF T12 the `AutocompleteDXField` runs the search itself and DX's
+  > async provider is not used. The decision is unchanged and now confirmed by Helder (2026-11-11): no loading indicator
+  > while Deezer answers; the options are shown when the response arrives (one list per `SearchAsync`, REQ-SFT-08 bound).
+  > Consequences of the shared component for this form: a search with no options shows nothing (no "no results" row,
+  > REQ-ACF-31); while a new query runs, an already open menu keeps the previous query's options until the new list
+  > replaces them (ACF design § 3.1 T12), which on the Title field can last up to the 3,000 ms bound.
 
 ### 3.5 Save decisions in the Service (`ISongService.SaveFromFormAsync`, REQ-SFT-51)
 
@@ -258,6 +266,14 @@ Rules, in order (each a Level A test in `SongServiceSaveFromFormTests`):
 > 6. **Edit mode** runs no song guard and always passes `null` external identity to `UpdateSongAsync` (stored identity kept, even if the request carries a different one); artist rules still apply.
 > 7. Write failure `(false, msg)` → `Failed`, message as returned, `SavedSongId = null`; success → `Saved`, `SavedSongId` = new id, `FailedField = None`, non-empty message.
 > `SaveFromForm_Metalica_RealResolutionAndScorer_ReturnsArtistChoiceNeeded` uses the real `ArtistResolutionService` + `SimilarityScorer` and closes the 3.9c W1 follow-up.
+
+> **Spec updated 2026-11-05 (3.10 follow-up; Helder rulings D1, D2, D4; Helder approved all 14 choices and decisions below on 2026-11-05):**
+> - **Tester choices 1–7** (the 2026-11-04 note above, items 1–7) are approved as written. The follow-up tests add: (D2) the failure origin is observed through the collaborator mocks, not a changed tuple: an artist-create refusal is `Failed(Artist, msg)`; a song-level refusal after the artist was created is `Failed(None, msg)`; (D6-1) a picked, `UseExisting` or resolver-exact artist id with no stored row is `Failed(Artist, "Artist not found")`, nothing written; (D6-2) an exact duplicate song that cannot be loaded is treated as no match (Warning logged) and the write decides; (D6-4) defensive kinds (exact artist or exact song without an id, fuzzy artist with an empty list) fall through to the write.
+> - **Ruling D1 (SaveAsNew* writes a NULL identity):** `SaveFromFormAsync` rule 5 sets `ExternalId` and `ExternalProvider` to null before the create write when `SongDecision` is `SaveAsNewVersion` or `SaveAsNewSong`. The write-time identity refusal (REQ-SFT-26) therefore runs only on the no-decision path. This holds for a new artist too: the artist is created and the song saved.
+> - **Ruling D2 (failure origin, shared private core):** the public `CreateSongWithUrlsAsync` (both overloads) and `UpdateSongAsync` keep their signatures. Their bodies moved to private `CreateSongWithUrlsCoreAsync` / `UpdateSongCoreAsync`, which return `(success, message, failedField)` from the same unit-of-work body. The public methods delegate to the cores, so the cores are the only write bodies (REQ-SFT-46). `SaveFromFormAsync` calls the cores and maps the field into `Failed(field, msg)`. Field mapping: title and version validation give `Title` / `Version`; artist-create refusal and artist-not-found give `Artist`; identity held, title/version duplicate and song not found give `None`.
+> - **Ruling D4:** `SongFormSaveOutcome.TypedName` (string) is the trimmed typed artist name, with no case or accent folding, set on `ArtistChoiceNeeded`. It is a non-positional `init` property with default `""`, so the record's primary constructor and every existing call site are unchanged.
+> - **Builder decisions (3.10 Green `5250d0fc`, items 1–7) are approved as written** in the task-log Green entry.
+> - **Decisions not fixed by design (follow-up, for review):** (a) the edit path also returns the failing field from `UpdateSongCoreAsync`, so D2 covers artist creation on update as well as on create; (b) the "Artist is required" guard in both cores reports `Artist`; (c) the D1 nulling lives in the caller (`SaveFromFormAsync`), so direct callers of the public `CreateSongWithUrlsAsync` keep the identity check unchanged; (d) the `TypedName` member is an `init` property rather than a positional parameter, to keep the constructor signature.
 
 ### 3.6 Network status (new 2026-11-04, REQ-SFT-53)
 
@@ -350,6 +366,8 @@ so § 6.4 does not apply).
 failure handling as § 3.3. Dedup: a Deezer artist whose name is a collated match for a local artist is
 dropped (the local row stays). The similarity dedup tier (c) in `ArtistSuggestionService` and
 `FilterSimilar` lose their callers and are deleted: C# similarity must not deduplicate (§ 6.4 scope).
+
+> **Spec updated 2026-11-05 (6.1 Green):** the Deezer-row dedup runs as one `GetByNamesCollatedAsync([name])` per distinct remaining name inside a single read scope after the HTTP call (same positional-lookup decision as § 3.3 step 4, 4.2 merge note); a missing Deezer provider returns `Unavailable` + Warning (accepted Level-C plumbing, as in § 3.3).
 
 | Member | Purpose |
 |--------|---------|
@@ -720,3 +738,5 @@ before the song is staged, so the catalog hook needs no special case; an edit th
 artist is an ordinary reassignment to it. `SaveFromFormAsync` writes nothing itself, so it adds no
 path CATALOG-PROP must hook. No conflict with D1–D4 was found. Both items write
 `SongService.cs` and add migrations, so they are serialized (single writer); see `tasks.md`.
+
+> **Update 2026-11-09 (BUG-085):** the Save-time fuzzy song step no longer uses the first-word prefix pool. `ISongRepository.SearchTitleCandidatesForArtistAsync(artistId, title, take, ct)` retrieves same-artist candidates from the `SongSearch` trigram index (same `FtsQueryBuilder.BuildTrigramMatch` as the artist path; collated-prefix fallback for titles under 3 characters); `SongResolutionService` scores them with the unchanged 0.82 threshold. `GetFuzzyCandidatePoolAsync` is unused and queued for removal.

@@ -1,6 +1,6 @@
-using System.Collections;
 using System.ComponentModel;
 using DevExpress.Maui.Editors;
+using MyVocaList.Domain.Constants;
 
 namespace MyVocaList.UI.Components.TextFields;
 
@@ -73,12 +73,31 @@ public partial class AutocompleteDXField : ContentView
 
     /// <summary>
     /// The picked state (TwoWay). Set <c>true</c> by the component on a pick and <c>false</c> on X;
-    /// a consumer may also set it (REQ-ACF-01, -02, -06). Always honoured: no opt-out (ruling Q3).
+    /// a consumer may also set it (REQ-ACF-01, -02, -06). Honoured unless <see cref="IsPickLockEnabled"/>
+    /// is <c>false</c>, which makes the field never lock (opt-out, REQ-ACF-29; ruling Q3 reversed 2026-11-05).
     /// </summary>
     public bool IsLocked
     {
         get => (bool)GetValue(IsLockedProperty);
         set => SetValue(IsLockedProperty, value);
+    }
+
+    // ── IsPickLockEnabled ──────────────────────────────────────────────────
+
+    /// <summary>Identifies the <see cref="IsPickLockEnabled"/> bindable property.</summary>
+    public static readonly BindableProperty IsPickLockEnabledProperty = BindableProperty.Create(
+        nameof(IsPickLockEnabled), typeof(bool), typeof(AutocompleteDXField), true,
+        propertyChanged: (b, _, _) => ((AutocompleteDXField)b).ApplyMode());
+
+    /// <summary>
+    /// Opt-out of pick-lock (REQ-ACF-29). <c>false</c> → a pick never locks the field and an
+    /// <see cref="IsLocked"/> value is ignored; the pick is still routed to <see cref="SelectCommand"/>.
+    /// Default <c>true</c>.
+    /// </summary>
+    public bool IsPickLockEnabled
+    {
+        get => (bool)GetValue(IsPickLockEnabledProperty);
+        set => SetValue(IsPickLockEnabledProperty, value);
     }
 
     // ── IsReadOnly ─────────────────────────────────────────────────────────
@@ -235,6 +254,17 @@ public partial class AutocompleteDXField : ContentView
         set => SetValue(BlurWithoutPickCommandProperty, value);
     }
 
+    // Counts routed picks; RunSearchAsync compares it before/after its await (REQ-ACF-26).
+    private int _pickCount;
+
+    // REQ-ACF-30: one-shot flag set when a pick drops focus, so the blur it causes is not forwarded.
+    // Cleared by that blur, by the next UserInput text change, or by the next focus.
+    private bool _pickBlurPending;
+
+    // RC-B (REQ-ACF-25): the text the last routed pick left in the editor. A request that echoes it is not a
+    // new search. Cleared by the first real edit (a UserInput change that is not the echo).
+    private string? _textAtPick;
+
     // ── Constructor ────────────────────────────────────────────────────────
 
     /// <summary>Creates the field in its default, editable state.</summary>
@@ -252,11 +282,36 @@ public partial class AutocompleteDXField : ContentView
     /// read-only (DX <c>EditBase.Focus()</c>). Replaces a page's direct <c>Focus()</c> call (REQ-ACF-18).
     /// </summary>
     /// <returns><c>true</c> if the editor received focus.</returns>
-    public bool FocusEditor() => editor.Focus();
+    public bool FocusEditor()
+    {
+        var focused = editor.Focus();
+        if (!focused || editor.Handler is null)
+            DeferFocusUntilReady();
+
+        return focused;
+    }
+
+    // REQ-ACF-18: Focus() is a no-op until the inner editor has a handler (T7 line 1/10). Retry once,
+    // when the editor is ready (HandlerChanged or Loaded, whichever fires first), then unsubscribe.
+    private void DeferFocusUntilReady()
+    {
+        void Retry(object sender, EventArgs e)
+        {
+            if (editor.Handler is null && sender is not VisualElement { IsLoaded: true })
+                return; // HandlerChanged fired for a removal; wait for the next signal.
+
+            editor.HandlerChanged -= Retry;
+            editor.Loaded -= Retry;
+            editor.Focus();
+        }
+
+        editor.HandlerChanged += Retry;
+        editor.Loaded += Retry;
+    }
 
     // ── Mode application (design.md § 4, § 5 mechanism B) ─────────────────
 
-    private FieldMode CurrentMode => AutocompleteDXFieldLogic.Mode(IsReadOnly, IsLocked, Text);
+    private FieldMode CurrentMode => AutocompleteDXFieldLogic.Mode(IsReadOnly, IsLocked, Text, IsPickLockEnabled);
 
     // Called from the Text, IsLocked and IsReadOnly callbacks, so the result does not depend on the
     // order in which the binding engine assigns them (Review Focus 4).
@@ -301,54 +356,121 @@ public partial class AutocompleteDXField : ContentView
         editor.HelpText = AutocompleteDXFieldLogic.BottomSupportingText(HasError, SupportingText);
     }
 
-    // ── DX event adapters (REQ-ACF-11) ─────────────────────────────────────
+    // ── Own search (REQ-ACF-31 amended, T12): the component runs the search itself on each user keystroke ──
+    // DX's AsyncItemsSourceProvider is not used: it sets IsLoadingInProgress before the request, which opens
+    // the drop-down while loading and renders "Not found" (task-log § T7 run 5). LoadingProgressMode="Manual"
+    // in the XAML, and this component never sets IsLoadingInProgress.
 
-    // DX invokes Request() when neither delegate is assigned (NRE inside its async-void runner),
-    // so the "no request" branch hands it a delegate that returns null = no items
-    // (decompiled-DLL finding 1, T4 checkpoint).
-    private static readonly Func<Task<IEnumerable>> NoOptions = static () => Task.FromResult<IEnumerable>(null);
+    // The latest search only. Cancelled by a new keystroke, a programmatic text change, a routed pick and blur.
+    private CancellationTokenSource? _searchCts;
 
-    // Raised on a System.Threading.Timer thread when RequestDelay > 0 (decompiled-DLL finding 3),
-    // so UI-bound writes go through the Dispatcher. REQ-ACF-04, -12a, -12b, -13, -16, -22, -26.
-    private void OnItemsRequested(object sender, ItemsRequestEventArgs e)
+    // A rejected query (pick echo, below threshold, no source, search off, locked or read-only) clears the list
+    // and closes the menu at once. A qualifying query leaves an open menu as it is, so there is no close-and-
+    // reopen blink while typing; RunSearchAsync replaces the options when the search completes.
+    private void RestartSearch()
     {
-        var text = e.Text; // the request's own text, not editor.Text
-        var token = e.CancellationToken;
-        var source = OptionSource;
+        CancelSearch();
 
-        if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, text))
+        var query = AutocompleteDXFieldLogic.SearchQuery(editor.Text);
+        if (AutocompleteDXFieldLogic.IsPickEcho(query, _textAtPick)
+            || !AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, OptionSource, query))
         {
-            e.RequestAsync = NoOptions;
-            CloseMenuOnUiThread();
+            editor.ItemsSource = null;
+            IsDropDownOpen = false;
             return;
         }
 
-        e.RequestAsync = async () =>
+        var cts = new CancellationTokenSource();
+        _searchCts = cts;
+        _ = RunSearchAsync(query, _pickCount, cts);
+    }
+
+    // Cancels the pending or in-flight search. The CTS itself is disposed by the RunSearchAsync that owns it.
+    private void CancelSearch()
+    {
+        _searchCts?.Cancel();
+        _searchCts = null;
+    }
+
+    // Started from a UI event. Every await below captures the UI synchronization context (no ConfigureAwait(false)),
+    // so the continuations after each await, including the editor writes, run on the UI thread. Keep it that way.
+    // REQ-ACF-04, -12a, -12b, -13, -14, -16, -22, -26, -31.
+    private async Task RunSearchAsync(string query, int pickCountAtStart, CancellationTokenSource cts)
+    {
+        var token = cts.Token;
+        try
         {
-            // DX awaits this delegate inside an async void with no try/catch (decompiled-DLL
-            // finding 2), so cancellation is caught here: allowed try-catch pattern 1
-            // (code-style-reference.md § Exception Handling). DX itself drops the result of a
-            // cancelled request.
-            try
-            {
-                var options = await source.SearchAsync(text, token);
-                token.ThrowIfCancellationRequested();
+            await Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds, token);
 
-                // Review Focus 1: the field may have locked (or search turned off) while the search ran.
-                if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, text))
-                {
-                    CloseMenuOnUiThread();
-                    return null;
-                }
+            var source = OptionSource;
+            if (source is null)
+                return;
 
-                return options; // exactly this query's options (BUG-056)
-            }
-            catch (OperationCanceledException)
+            var options = await source.SearchAsync(query, token);
+
+            // No await between this check and the writes below, so a cancel that landed during the search
+            // is seen here and nothing is written for a superseded query.
+            token.ThrowIfCancellationRequested();
+
+            // REQ-ACF-26: a pick routed while this search ran must not reopen the menu (the pick already closed it).
+            if (pickCountAtStart != _pickCount)
+                return;
+
+            // Review Focus 1: the field may have locked (or search turned off) while the search ran.
+            if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, query))
+                return;
+
+            if (AutocompleteDXFieldLogic.ShowsMenu(options))
             {
-                // Cancellation requested (a newer query superseded this one) — silently return.
-                return null;
+                editor.ItemsSource = options;
+                IsDropDownOpen = true;
             }
-        };
+            else
+            {
+                editor.ItemsSource = null;
+                IsDropDownOpen = false;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Superseded by a newer keystroke, a programmatic change, a pick or blur; the newer flow owns the menu state.
+        }
+        finally
+        {
+            // This run owns cts: release it, and forget the reference if it is still the latest search.
+            if (ReferenceEquals(_searchCts, cts))
+                _searchCts = null;
+
+            cts.Dispose();
+        }
+    }
+
+    // REQ-ACF-24: text written in code (e.g. the consumer's SelectCommand writing the picked name)
+    // must close the menu; only ProgrammaticChange also resets SelectedItem. ItemSelected must not,
+    // or the pick routed by OnSelectionChanged would be lost. Observed event order: unknown until the
+    // T7 device re-run (see task-log T8).
+    private void OnTextChanged(object sender, AutoCompleteEditTextChangedEventArgs e)
+    {
+        if (e.Reason == AutoCompleteEditTextChangeReason.UserInput)
+        {
+            // RC-B: DX reports the text SelectCommand wrote after a pick as UserInput. That echo (the same
+            // normalised text as the pick) is not a keystroke, so it keeps the pick text and the pick-blur
+            // flag. Any other UserInput change is a real edit: it ends both (REQ-ACF-25, REQ-ACF-30).
+            if (!AutocompleteDXFieldLogic.IsPickEcho(editor.Text, _textAtPick))
+            {
+                _textAtPick = null;
+                _pickBlurPending = false;
+            }
+
+            RestartSearch(); // the component owns the search (REQ-ACF-13, -14, -31)
+            return;
+        }
+
+        CancelSearch();
+        IsDropDownOpen = false;
+
+        if (e.Reason == AutoCompleteEditTextChangeReason.ProgrammaticChange)
+            editor.SelectedItem = null;
     }
 
     // Raised from the drop-down after DX has set SelectedItem (decompiled-DLL finding 5).
@@ -361,20 +483,62 @@ public partial class AutocompleteDXField : ContentView
         if (route == PickRoute.None)
             return; // Review Focus 2: the SelectedItem = null reset re-enters here as a no-op.
 
-        IsLocked = AutocompleteDXFieldLogic.LockAfterPick(route);
+        _pickCount++; // REQ-ACF-26: invalidates in-flight option requests.
+        CancelSearch(); // T12: a pending search must not open the menu after the pick.
+
+        if (AutocompleteDXFieldLogic.LockAfterPick(route, IsPickLockEnabled))
+            IsLocked = true;
 
         var command = SelectCommand;
         if (command?.CanExecute(option) == true)
             command.Execute(option);
 
+        // RC-B: the text the pick leaves in the editor; the echo request DX sends for it is rejected.
+        _textAtPick = editor.Text;
+
         editor.SelectedItem = null;
         IsDropDownOpen = false;
+
+        // REQ-ACF-30 (b): a pick ends the input. Cursor to the end, then drop focus so the keyboard closes.
+        // The blur this causes is flagged, so OnUnfocused does not forward it as a blur without pick.
+        _pickBlurPending = true;
+        editor.CursorPosition = editor.Text?.Length ?? 0;
+        editor.Unfocus();
+
+        // RC-C (REQ-ACF-30b): Unfocus() does not hide the soft keyboard on Android; hide it explicitly.
+        _ = HideSoftKeyboardAsync();
     }
 
-    // Blur forwarding only; the component never writes Text here (REQ-ACF-11c, -12b, -17, -19).
+    // RC-C (REQ-ACF-30b): hide the IME after a pick. MAUI 10 SoftInputExtensions.HideSoftInputAsync where the
+    // editor is an ITextInput; otherwise the Android InputMethodManager on the handler's platform view.
+    private async Task HideSoftKeyboardAsync()
+    {
+        if (editor is Microsoft.Maui.ITextInput textInput)
+        {
+            await textInput.HideSoftInputAsync(CancellationToken.None);
+            return;
+        }
+
+#if ANDROID
+        if (editor.Handler?.PlatformView is Android.Views.View view
+            && view.Context?.GetSystemService(Android.Content.Context.InputMethodService)
+                is Android.Views.InputMethods.InputMethodManager inputMethodManager)
+        {
+            inputMethodManager.HideSoftInputFromWindow(view.WindowToken, Android.Views.InputMethods.HideSoftInputFlags.None);
+        }
+#endif
+    }
+
+    // REQ-ACF-30 (c): the pick-caused blur is not a blur without pick; any other blur is forwarded.
     private void OnUnfocused(object sender, FocusEventArgs e)
     {
-        if (!AutocompleteDXFieldLogic.ShouldForwardBlur(editor.SelectedItem, CurrentMode))
+        // T12: a search still pending when the user leaves the field must not open the menu afterwards.
+        CancelSearch();
+
+        var isPickBlur = _pickBlurPending;
+        _pickBlurPending = false;
+
+        if (!AutocompleteDXFieldLogic.ShouldForwardBlur(editor.SelectedItem, CurrentMode, isPickBlur))
             return;
 
         var command = BlurWithoutPickCommand;
@@ -415,5 +579,6 @@ public partial class AutocompleteDXField : ContentView
             command.Execute(null);
     }
 
-    private void CloseMenuOnUiThread() => Dispatcher.Dispatch(() => IsDropDownOpen = false);
+    // REQ-ACF-30: a new focus means the user is back in the field, so a pending pick-blur is stale.
+    private void OnFocused(object sender, FocusEventArgs e) => _pickBlurPending = false;
 }
