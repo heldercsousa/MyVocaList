@@ -164,12 +164,11 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-10: Local pick opens the song.** Given add mode, When the user picks a local option,
   Then the add form is replaced by that song's edit form (Back from it returns to the page the add
   form was opened from, not to the add form).
-- **REQ-SFT-11: Unsaved data on a local pick** `[Confirmed — Helder 2026-11-04]`. IF, at the moment of a local
-  pick, Artist, Version, Featured Artists, Lyrics or the buffered YouTube list holds user input,
-  THEN a `dx:BottomSheet` SHALL ask "Open '<title>'? What you entered here will be discarded." with
-  **Open** and **Keep editing**. Open → REQ-SFT-10. Keep editing (or Back / scrim) → the sheet closes,
-  Title shows the text the user had typed, unlocked, and nothing else changes. With no such input,
-  REQ-SFT-10 runs with no sheet.
+- **REQ-SFT-11: Unsaved data on a local pick** `[Withdrawn — Helder 2026-11-11]`. The discard
+  `dx:BottomSheet` ("Open '<title>'? What you entered here will be discarded.") is removed: the 2026-11-11
+  device test showed it never appeared, and Helder chose to drop it. A local pick ALWAYS runs REQ-SFT-10
+  with no sheet, whatever the other fields hold (their input is replaced by the opened song). The
+  `DiscardSheetTitle` follow-up is void.
 - **REQ-SFT-12: New Deezer pick fills the form.** Given add mode, When the user picks a remote option,
   Then:
   - **Title** = Deezer's `title_short` (the title without its version suffix); if `title_short` is
