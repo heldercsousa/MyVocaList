@@ -126,13 +126,16 @@ by Q3 and reinstated on 2026-11-05 (above).
   implementor confirms the `TextChanged` event and the `AutoCompleteEditTextChangeReason` values
   on DX 25.2 (Context7). If they differ, it stops and escalates; it does not swap the mechanism.
 - **Stale request after a pick (REQ-ACF-26).** The component keeps a pick counter (`int`).
-  `OnItemsRequested` captures it when the request starts. After the await, if the counter has
-  changed, it returns an empty list and the menu stays closed.
+  `RunSearchAsync` *(T12; was `OnItemsRequested`)* captures it when the search starts. After the await, if the
+  counter has changed, it drops the result and the menu stays closed.
 - **Deferred focus (REQ-ACF-18, lines 1 and 10).** `FocusEditor()` calls `editor.Focus()`. When
   `editor.Handler is null` or `Focus()` returns `false`, it retries once the editor is ready, on its
   `HandlerChanged` or `Loaded`, whichever comes first, one-shot. The page call is unchanged.
 
 **Event-glue rules added after the emulator diagnostic run (2026-11-09, root causes RC-A/B/C in `task-log.md`):**
+> **T12 (2026-11-11):** the RC-A close guard (`_lastRequestRejected`, `OnEditorPropertyChanged`) and the RC-B *request*
+> guard's hook (`OnItemsRequested`) are superseded by "Event-glue rules from T12" below. `DisplayMember="Headline"`,
+> `IsPickEcho`/`_textAtPick` (now checked in `RestartSearch`) and RC-C stay as written.
 These replace the T9 keystroke clear and the "close before DX" assumption below.
 - **RC-A: a rejected request must not leave a menu open (REQ-ACF-13c).** DX opens the drop-down itself
   after the request delegate completes, whatever it returns. The component records that the latest request
@@ -153,6 +156,9 @@ These replace the T9 keystroke clear and the "close before DX" assumption below.
   > **Spec updated 2026-11-09:** T10 impl: the pick echo is `AutocompleteDXFieldLogic.IsPickEcho(query, _textAtPick)`; `_textAtPick` is set from `editor.Text` after `SelectCommand`, and a UserInput change that equals it is kept (DX reports the SelectCommand write as UserInput) — only a real edit clears it. RC-A uses the editor's `PropertyChanged` for `IsDropDownOpen` (no supported DX cancel-open API, see `task-log.md` § T10). RC-C uses `Microsoft.Maui.ITextInput.HideSoftInputAsync` when the editor qualifies, else the Android IME fallback.
 
 **Event-glue rules added after T7 run 2 (2026-11-06):**
+> **T12 (2026-11-11):** wherever these bullets name `OnItemsRequested` or DX's request, read `RestartSearch` /
+> `RunSearchAsync`; the below-threshold bullet's mechanism is superseded (a rejected query clears `ItemsSource` and closes
+> the menu in `RestartSearch`). The pick-drop-focus bullet stays.
 - **Normalised search text (REQ-ACF-13a/b).** `OnItemsRequested` computes
   `query = AutocompleteDXFieldLogic.SearchQuery(e.Text)` once, uses it for both `ShouldRequestOptions`
   checks, and passes it to `SearchAsync`.
@@ -186,8 +192,10 @@ These replace the T9 keystroke clear and the "close before DX" assumption below.
   awaits the request, and the native control shows the drop-down while loading, so a no-match search renders "Not
   found" for the length of the search. The native→MAUI `IsDropDownOpen` sync is skipped while the handler's locker is
   held, so a close after the fact can be a no-op ("Not found" stuck open on the emulator). Evidence: `task-log.md` § T7 run 5.
-- **The component owns the search.** No `AsyncItemsSourceProvider`; `LoadingProgressMode="Manual"` and the component
-  never sets `IsLoadingInProgress`. On a `UserInput` `TextChanged` (`RestartSearch`): cancel the pending search
+- **The component owns the search.** No `AsyncItemsSourceProvider`; `LoadingProgressMode="Manual"` (DX 25.2 docs via
+  Context7, recorded in the spike findings: `Auto` shows a wait indicator on text change, `Manual` only when
+  `IsLoadingInProgress` is set) and the component never sets `IsLoadingInProgress`. A null `OptionSource`, a locked or
+  read-only field, or search disabled all fail `ShouldRequestOptions`, so they take the rejected path (REQ-ACF-04, -12a/b). On a `UserInput` `TextChanged` (`RestartSearch`): cancel the pending search
   (own `CancellationTokenSource`, latest search only); compute `query = SearchQuery(text)`; if the pick echo
   (`IsPickEcho`) or `!ShouldRequestOptions(...)` → clear `ItemsSource`, close the menu, stop; else keep the menu as it
   is and start `RunSearchAsync`: `Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds)`, `SearchAsync(query, ct)`,
@@ -304,7 +312,7 @@ explicitly accept C under Q5 before it is built. `IsReadOnly` stays `false`, so 
 built-in clear icon is live (proven on device after BUG-081). While locked:
 (a) `TextChanged` with `Reason == UserInput` → restore `lockedText` (`TextToRestore`, documented
 `Reason` enum);
-(b) `ItemsRequested` → no request (`ShouldRequestOptions`), and `IsDropDownOpen = false`;
+(b) a keystroke → no search (`ShouldRequestOptions`, T12: in `RestartSearch`), and `IsDropDownOpen = false`;
 (c) `Focused` → `Unfocus()` so the soft keyboard is dismissed.
 The spike measures its weaknesses against the thresholds in tasks.md T1 (C1–C5): typed characters
 visible in recorded frames, keyboard visible time, paste, long-press selection, IME composition, and
@@ -369,15 +377,18 @@ sets `SubmitIconVisibility="Never"`. Nothing in the app handles `Submitted`/`Sub
 
 ```
 UNLOCKED, search enabled, typing:
-  keystroke ─► DX debounce (AutocompleteDebounceMilliseconds) ─► ItemsRequested
-     ─► ShouldRequestOptions? no ─► nothing; menu stays closed
-                              yes ─► OptionSource.SearchAsync(text, ct) ─► ct check ─► menu shows options
+  keystroke (UserInput) ─► RestartSearch: cancel pending search; query = SearchQuery(text)
+     ─► IsPickEcho or ShouldRequestOptions = false ─► ItemsSource = null, menu closed
+     ─► else (menu left as is) ─► RunSearchAsync: delay AutocompleteDebounceMilliseconds ─► SearchAsync(query, ct)
+        ─► ct / pick-count / ShouldRequestOptions re-check ─► ShowsMenu? yes ─► ItemsSource = options, menu open
+                                                                         no  ─► ItemsSource = null, menu closed
+  (T12: no DX AsyncItemsSourceProvider, no loading indicator; LoadingProgressMode="Manual", IsLoadingInProgress never set)
 
 READ-ONLY (IsReadOnly=true; wins over IsLocked/IsSearchEnabled):
-  text shown ─► DX IsReadOnly=true, no clear/end icon ─► tap/keys/paste: nothing ─► no ItemsRequested search, no menu ─► blur: nothing
+  text shown ─► DX IsReadOnly=true, no clear/end icon ─► tap/keys/paste: nothing ─► no search (ShouldRequestOptions = false), no menu ─► blur: nothing
 
 SEARCH DISABLED (IsSearchEnabled=false):
-  keystroke ─► ItemsRequested ─► ShouldRequestOptions = false ─► nothing; IsDropDownOpen=false
+  keystroke ─► RestartSearch ─► ShouldRequestOptions = false ─► ItemsSource = null; IsDropDownOpen=false
 
 PICK:
   SelectionChanged ─► RoutePick = Select ─► pickCounter++ (stale in-flight results discarded)
@@ -390,19 +401,22 @@ PICK:
    the field never locks, and the new page is editable.)
 
 PROGRAMMATIC TEXT (any Reason ≠ UserInput, e.g. edit-mode hydration):
-  ─► no search (DX) ─► IsDropDownOpen = false, SelectedItem = null (REQ-ACF-24, Song Artist pattern)
+  ─► no search (RestartSearch runs on UserInput only; pending search cancelled) ─► IsDropDownOpen = false, SelectedItem = null (REQ-ACF-24, Song Artist pattern)
+
+BLUR (T12):
+  ─► pending search cancelled, so a late result never opens the menu on a field the user has left
 
 LOCKED:
   tap text / long-press / keys / paste ─► B: nothing (read-only)  |  C: reverted, Unfocus
   blur             ─► ShouldForwardBlur = false ─► nothing
-  ItemsRequested   ─► ShouldRequestOptions = false ─► nothing (REQ-ACF-04 / BUG-069)
+  keystroke        ─► RestartSearch ─► ShouldRequestOptions = false ─► nothing (REQ-ACF-04 / BUG-069)
   tap X            ─► Text = "" ─► IsLocked = false ─► ClearCommand (if bound) ─► FocusEditor()
 
 UNLOCKED, tap X (text non-empty):
   DX clears Text (built-in clear icon) ─► ClearCommand (if bound) ─► focus stays
 
 PROGRAMMATIC LOCK (consumer sets Text + IsLocked=true, e.g. hydration):
-  DX fires no ItemsRequested for programmatic text (BUG-065/066 IL evidence)
+  programmatic text starts no search (RestartSearch runs on UserInput only; pending search cancelled)
   ─► component applies the lock (if text non-empty) ─► SelectedItem = null, IsDropDownOpen = false
 ```
 

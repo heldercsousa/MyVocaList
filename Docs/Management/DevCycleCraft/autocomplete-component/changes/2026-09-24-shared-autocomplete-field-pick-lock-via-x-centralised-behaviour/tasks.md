@@ -340,6 +340,8 @@
     4. Remove dead code (§ 3.1 "Removed"). The T11 `ShowsMenu` tests stay. Full `dotnet test`, Android Debug build.
   - **Tests:** no new pure logic expected (Level C glue); if a pure function is added, Level A test first. Emulator by the
     orchestrator (`flash.sh`: aa/aaa/zq/Hex/" a" lit=0; He lit>0; He→Hel no blink; pick → list stays closed), then T7 run 6.
+    Manual emulator checks (Level C, justified in the task-log): blur while a search is pending → no menu (blur cancel);
+    pick while a search is pending → menu stays closed (REQ-ACF-26); pick drops focus (REQ-ACF-30).
   - **Files owned:** `AutocompleteDXField.xaml(.cs)`, its own `## T12` section of `task-log.md`.
   - **Demo:** emulator clean, then T7 run 6 (line 1, plus a regression pass of lines 2-4 and 9). **Review lane:** Elevated
 
