@@ -339,3 +339,308 @@ Domain and Contracts projects compiled cleanly (0 errors in those projects). Thi
 | Target | Feature/Item | Status | Notes |
 |--------|--------------|--------|-------|
 | 2026-06-27 | ↳ Bug: navigate_next icon missing SVG → Glide FileNotFoundException on form pages ([BUG-017](BusinessFeatures/artists-songs/bugs/2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops/task-log.md)) | ✅ Fixed | `navigate_next` had no SVG in Resources/Images/; replaced with `arrow_forward_outlined` (SVG confirmed present) in ArtistFormPage.xaml (1×) and SongFormPage.xaml (2×). Minor severity. Build PASS, 357 tests PASS. Commit on branch `fix/bug-017-navigate-next-icon`. |
+
+---
+## Task: BUG-084 — Song form sheets: scrim and Back do not dismiss; Cancel unreachable with many rows (Major)
+**Plan:** Docs/Management/BusinessFeatures/artists-songs/bugs/2026-11-09-BUG-084-song-form-sheets-scrim-and-back-do-not-dismiss-cancel-unreachable-with-many-rows/README.md
+**Status:** To Review
+**Started:** 2026-11-09
+**Completed:** 2026-11-09
+
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md` (this entry)
+
+### Root cause (verified against DX 25.2.4 XML docs)
+- Both sheets (`resolutionSheet`, `artistMatchSheet`) had `AllowDismiss="False"`, so scrim tap and the Android Back key were ignored; only the Cancel button closed them.
+- The sheet body was one unbounded `VerticalStackLayout` inside a `HalfExpandedRatio="0.55"` sheet with `AllowedState="HalfExpanded"` and no `ScrollView`, so with 3+ candidate rows the Cancel button was clipped below the sheet and could not be scrolled to.
+- `OnDisappearing` unsubscribed the ViewModel `PropertyChanged` handler and nothing re-subscribed it, so sheet sync stopped after the page reappeared.
+
+### Before / after (SongFormPage.xaml, both sheets)
+| Property / structure | Before | After | Why |
+|---|---|---|---|
+| `AllowDismiss` | `False` | `True` | Scrim tap, Back key and swipe dismiss the sheet (REQ-SFT-19/22/23) |
+| `AllowedState` | `HalfExpanded` | `All` | User can expand to full height when the list is long (DX enum: `All` / `FullExpanded` / `HalfExpanded`) |
+| `HalfExpandedRatio` | `0.55` | `0.7` | More visible body before the user needs to expand |
+| Sheet child | one `VerticalStackLayout` | `Grid RowDefinitions="*,Auto"` | Row 0 `ScrollView` holds title, candidate rows, action blocks; row 1 holds divider + Cancel, pinned |
+| Cancel / primary actions | inside the unbounded stack | row 0 scroll body (actions) / row 1 pinned (Cancel) | Cancel always reachable; actions reachable by scrolling |
+
+Bindings, commands, `Text` values and `x:DataType` are unchanged. The only content move is the divider that preceded Cancel, which now sits in row 1 above Cancel.
+
+### Before / after (SongFormPage.xaml.cs)
+- `OnAppearing`: `ViewModel.PropertyChanged -= OnViewModelPropertyChanged;` then `+=` (detach-first, so no double subscription). `OnDisappearing` unchanged.
+- `OnResolutionSheetStateChanged` / `OnArtistMatchSheetStateChanged`: on a user-initiated `Hidden` while the flag is still true, the handler now calls `ViewModel.DismissResolutionSheetCommand` / `DismissArtistMatchSheetCommand` instead of setting the flag directly. Scrim, Back and swipe therefore take the same path as the Cancel button (nothing saved; `VersionEntryRequired` also resets for the resolution sheet). The `Sync*` re-entrancy guards are unchanged, so ViewModel-driven `Close()` calls do not re-enter, and the `IsVisible` check keeps late `Hidden` events a no-op.
+- No ViewModel change was needed.
+
+### Build notes
+Build: passed (0 errors) | Tests: 911 passed, 0 failed | Commit SHA: see commit message
+- Android build: passed (0 errors, 27 pre-existing NuGet vulnerability warnings), run after each XAML step (resolutionSheet, then artistMatchSheet) and after the code-behind change.
+- Test project build: passed (0 errors). Full `MyVocaList.Tests` suite: 911 passed, 0 failed (baseline 902; the count increased with other develop work).
+- Environment note: the worktree needed `dotnet restore` once for `MyVocaList` and `MyVocaList.Tests`. Background `dotnet build` runs stalled with no output for more than an hour while other sessions' MSBuild and VBCSCompiler processes were running; a foreground build with `-nodeReuse:false -m:1 -p:UseSharedCompilation=false` completed in about 2.5 minutes.
+- Files written and re-read: `SongFormPage.xaml` (resolutionSheet block lines 257-351, artistMatchSheet block lines 359-~425), `SongFormPage.xaml.cs` (OnAppearing 24-45, artist handler 144-164, resolution handler 184-203).
+
+### Verification evidence (AC traceability)
+- REQ-SFT-19 (Back or scrim dismisses artist-match sheet, nothing saved): `AllowDismiss="True"` plus `DismissArtistMatchSheetCommand` routing. Needs device confirmation (see E2E).
+- REQ-SFT-22 (Back or scrim dismisses resolution sheet, nothing saved): `AllowDismiss="True"` plus `DismissResolutionSheetCommand` routing. Needs device confirmation.
+- REQ-SFT-23 (same as REQ-SFT-22 for the "Save as new song" branch): same path. Needs device confirmation.
+- No automated regression test was added. BUG-084 is Major and UI-only (`bug-tracking.md`: Major UI-only → manual E2E documented here).
+
+### Design concern (not blocking)
+- A `Hidden` event that DX raises asynchronously (after a ViewModel `Close()`) can arrive after the VM has already re-shown the same sheet. The `IsVisible` check cannot tell that apart from a real user dismissal, so the sheet would close in that rare sequence. This existed before the change (the handler already cleared the flag). It is a candidate for the device run; it is not caused by this fix.
+
+### Manual E2E checklist (Android S23, for Helder)
+1. Open the artist-match sheet (type a near-duplicate artist name, Save). Tap the scrim: the sheet closes, nothing is saved, and the form is unchanged.
+2. Repeat step 1 using the system Back key: the sheet closes, nothing is saved.
+3. Re-open the artist-match sheet (Save again). It opens. Cancel closes it.
+4. Create a long duplicate list (3+ rows) for the resolution sheet (Save with an existing song title). Scroll the sheet: every row is reachable, and Cancel is visible at the bottom without scrolling past it.
+5. On the same long list, tap Cancel: the sheet closes, nothing is saved.
+6. Re-open the resolution sheet after a dismissal (scrim or Back). It opens, and "Save as new version" and "Save as new song" remain reachable (scroll if needed).
+7. Leave the Song form (Back to the list) and return to the form (navigate to Add or Edit again), then trigger Save with a duplicate. The sheet still opens (verifies the `OnAppearing` resubscribe).
+8. Swipe the sheet down from half-expanded: it dismisses without saving. Drag up: it expands to full height (AllowedState All).
+
+### Out of scope (per briefing)
+- Discard sheet (5.6): VM-only, not touched.
+- Artist field, Title field, `AutocompleteDXField*`: not touched.
+
+---
+## Task: BUG-085 — Red (tests only): trigram same-artist candidate query
+**Plan:** Docs/Management/BusinessFeatures/artists-songs/bugs/2026-11-09-BUG-085-song-save-misses-near-duplicate-title-when-the-typed-title-is-longer-than-the-stored-one/README.md
+**Status:** To Review (Red phase; test project does not compile until the Builder adds the member)
+**Started:** 2026-11-09
+**Completed:** 2026-11-09
+
+### Changed files:
+- `MyVocaList.Tests/Integration/Repositories/SongRepositoryArtistTrigramTests.cs` (new)
+- `MyVocaList.Tests/Integration/Services/SongSaveTrigramDuplicateTests.cs` (new)
+- `MyVocaList.Tests/Integration/Repositories/SongRepositoryResolutionTests.cs` (two prefix-pool tests removed; moved, see map)
+- `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` (wrapper: new member delegate added; old delegate kept while the interface still has it)
+- `MyVocaList.Tests/Unit/Services/SongResolutionServiceTests.cs` (retargeted setups, one test replaced, three added)
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md`
+
+### Interface the Builder must implement (exact)
+`ISongRepository` gains:
+`Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesForArtistAsync(int artistId, string title, int take, CancellationToken ct = default);`
+- Return type `SongSearchHit` (same as `SearchTitleCandidatesAsync`, carries SongId/Title/Version/ArtistName). Assumption, not in the brief: `Blocking: No`.
+- SQL = `SearchTitleCandidatesAsync`'s `TitleSearchSql` plus `AND s.ArtistId = @artistId`; params `@m`, `@take`, `@artistId`.
+- MATCH null (no word of 3+ chars) → collated title-prefix path scoped by artist (`(title ?? "").Trim() + "%"`, LIKE over `Collate(Title)`), `Take(take)`, mirroring REQ-SFT-33.
+- Recommendation (not tested at repo level): return `[]` for a blank title, since an empty prefix would match every song of the artist. The service never sends one (see blank-title test).
+- `SongResolutionService` fuzzy step: skip when title blank; otherwise call the new member with `(resolvedArtistId.Value, candidate.Title, SimilarityConstants.PoolSize, ct)`; map hits to `SongMatch(SongId, Title, Version, ArtistName, score)`; keep `>= DefaultThreshold`. `DerivePrefixToken` has no remaining test pin (grep-verified) and can go.
+- Remove `GetFuzzyCandidatePoolAsync` from `ISongRepository` and `SongRepository` (only production consumer is the fuzzy step). Also delete its delegate in `SongServiceNewArtistUnitOfWorkTests.ThrowOnAddSongRepository` (line ~184) or that file stops compiling.
+- Repo tests need the SongSearch FTS5 index: fixtures use `MigrateAsync` (`EnsureCreatedAsync` does not create the virtual table, and the trigram path would silently return `[]` through the "no such table" catch). Do not switch them to `EnsureCreatedAsync`.
+
+### Red evidence
+- `dotnet build MyVocaList.Tests`: 15 unique CS1061 errors, all for the missing `SearchTitleCandidatesForArtistAsync` member (ISongRepository, SongRepository, 7 sites in SongResolutionServiceTests, 7 in SongRepositoryArtistTrigramTests, 1 in the UoW wrapper). No other compile errors.
+- Behavioural run (temporary csproj exclusion of the three non-compiling files, reverted; not committed): `SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` FAILS: `Expected: SongChoiceNeeded, Actual: Saved`. This is the reported bug reproduced at save level with real SQLite, real repository, real resolution service and real scorer. `SongServiceSaveFromFormTests` and `SongRepositorySearchTests` (65 tests) pass against current production.
+- The rest of the new/retargeted tests cannot be run until the member exists; they fail with the compile errors above, which is the expected Red.
+
+### New tests (all tagged `// [BUG] BUG-085`)
+| Test | AC | Expectation before fix |
+|------|----|------------------------|
+| SongRepositoryArtistTrigramTests.SearchTitleCandidatesForArtistAsync_TypedTitleLongerThanStored_FindsStoredTitle | REQ-SFT-23 | regression: "Patiencee" finds "Patience" |
+| …_OtherArtistSameTitle_IsExcluded | REQ-SFT-23 | artist scope |
+| …_RespectsArtistScopeAndTake | REQ-SFT-23 | take=2 bounds result, all same artist |
+| …_ShortTitle_UsesCollatedPrefixFallback | REQ-SFT-33 | "ab" → prefix only (not "Cab Driver"), artist-scoped |
+| …_TypoInMiddle_StillRetrieves [Pateince, Paitence] | REQ-SFT-23 | trigram windows shared |
+| …_TypoInFirstWord_FindsStoredTitleAndExcludesUnrelated | REQ-SFT-23 | trigram, not prefix |
+| …_UnrelatedTitle_ReturnsEmpty | REQ-SFT-23 | no shared window → empty |
+| SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate | REQ-SFT-23 | FAILS now (Saved), must pass after |
+| SongResolutionServiceTests.ResolveAsync_LongTitle_PassesWholeTypedTitleToTrigramQuery | REQ-SFT-23 | verifies (10, whole title, PoolSize) |
+| …ResolveAsync_FuzzyBelowThreshold_DropsCandidate | REQ-SFT-23 | 0.81 dropped → NoMatch |
+| …ResolveAsync_FuzzyAtThreshold_KeepsCandidate | REQ-SFT-23 | 0.82 kept (>=) |
+| …ResolveAsync_BlankTitle_SkipsTrigramQuery | REQ-SFT-23 | no query for blank title (design §4 N1 empty-token rule) |
+
+### Retargeted-tests map (old → new)
+| Old test (file) | Disposition |
+|-----------------|-------------|
+| SongRepositoryResolutionTests.GetFuzzyCandidatePoolAsync_RespectsArtistScopeAndTake (AC-5.6) | Rewritten as SongRepositoryArtistTrigramTests.SearchTitleCandidatesForArtistAsync_RespectsArtistScopeAndTake, tag REQ-SFT-23 |
+| SongRepositoryResolutionTests.GetFuzzyCandidatePoolAsync_PrefixFilter_ReturnsOnlyMatchingPrefix (AC-5.7) | Rewritten as …_TypoInFirstWord_FindsStoredTitleAndExcludesUnrelated, tag REQ-SFT-23. Prefix-only behaviour retired by the 2026-11-09 REQ-SFT-23 note. |
+| SongResolutionServiceTests.ResolveAsync_FuzzyAboveThreshold_ReturnsFuzzyCandidates (AC-2.3) | Setup retargeted to the new member with the whole title; assertions unchanged |
+| SongResolutionServiceTests.ResolveAsync_NoMatchAtAll_ReturnsNoMatch (AC-2.3) | Setup retargeted; assertion unchanged |
+| SongResolutionServiceTests.ResolveAsync_LongTitle_UsesPrefixTokenForFuzzyPool | Deleted; replaced by ResolveAsync_LongTitle_PassesWholeTypedTitleToTrigramQuery (REQ-SFT-23) |
+| SongServiceNewArtistUnitOfWorkTests wrapper delegate | Old delegate kept until the interface member is removed; new delegate added |
+Other Grep hits (SongServiceSaveFromFormTests, SongSuggestionThresholdTests) pin `SearchTitleCandidatesAsync` / `SongSuggestionService`, not the fuzzy pool: untouched.
+
+### Assumptions / open points (none blocking)
+- AC IDs AC-2.3, AC-5.6, AC-5.7 are the tags already on these tests; I did not verify them against the current requirements text. The retired AC-5.7 prefix behaviour is flagged for Helder to confirm it can be dropped.
+- Blank-title edge is tagged REQ-SFT-23 under design §4 N1; it is an edge of the new step, not a separate AC.
+
+### Commit
+Commit `test(song): ... (BUG-085 Red)` made with `--no-verify` (compile-level Red, see above).
+
+---
+## BUG-085 Green (Builder)
+**Plan:** bug fix (no plan.md); spec: REQ-SFT-23 and REQ-SFT-33 in `changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/requirements.md`
+**Status:** To Review (orchestrator note 2026-11-09: the block was a defect in the Tester's own test setup — the `_artistResolution` mock returned NoMatch so the fuzzy step was never reached — not a spec gap; corrected in `f64e70d2`, full suite 921/921; Builder's production change committed by the orchestrator)
+**Started:** 2026-11-09
+**Completed:** not committed (worktree `.worktrees/bug-085` left dirty for Helder's decision)
+
+### Test defect (resolved in `f64e70d2`; originally reported as a spec gap): test mocks the artist resolver to NoMatch, so the fuzzy path is unreachable
+**Location:** `MyVocaList.Tests/Integration/Services/SongSaveTrigramDuplicateTests.cs` `InitializeAsync` (the `_artistResolution` setup returns `ArtistResolution(ResolutionKind.NoMatch, null, [])` for every input); production `Services/SongResolutionService.cs` lines 49-53 (INV-1: the artist is resolved first and fuzzy only runs when `resolvedArtistId` is set).
+**Gap description:** `SongService` passes the artist by id, but `SongResolutionService.ResolveAsync` always re-resolves the artist through `IArtistResolutionService` (SongCandidate carries no artist id, REQ-SFT-41). Under the test's NoMatch mock the resolver returns NoMatch before the fuzzy step, so `SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` returns `Saved` with the production fix in place.
+**Options:**
+- Option A: Tester changes the artist mock to `ArtistResolution(ResolutionKind.ExactLocalMatch, _queen.Id, [])` (the artist exists; the test's own comment says so) — the test then exercises the fixed path.
+- Option B: the resolver receives the artist id from SongService — contradicts REQ-SFT-41 and the single-resolution design; not recommended.
+**Recommendation:** Option A because the test asserts behaviour of the song guard, not artist resolution, and the artist is known to exist.
+**Blocking:** Yes — the Builder may not edit tests; the regression test (Critical/Major mandatory Red then Green) cannot reach Green until the mock is corrected.
+
+### Changed files (uncommitted, worktree)
+- `Domain/RepositoryInterface/ISongRepository.cs` — new `SearchTitleCandidatesForArtistAsync`; XML remark on `GetFuzzyCandidatePoolAsync` (unused after BUG-085, removal scheduled with the test wrapper)
+- `Infra/Repository/SongRepository.cs` — `TitleSearchSelectSql` shared SELECT, `TitleSearchSql` (unchanged text), new `TitleSearchForArtistSql`; `SearchTitleCandidatesAsync` and new `SearchTitleCandidatesForArtistAsync` both delegate to private `SearchTitleCoreAsync`
+- `Services/SongResolutionService.cs` — fuzzy step calls `SearchTitleCandidatesForArtistAsync(resolvedArtistId, candidate.Title, PoolSize)`, maps `SongSearchHit` to `SongMatch`, keeps `>= DefaultThreshold`, skips blank titles; `DerivePrefixToken` removed
+- `Domain/Resolution/SimilarityConstants.cs` — `PrefixTokenMaxLen` removed (now unused; outside the brief's enumerated list, removed because the brief asked for removal when unused)
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md` — this section
+
+### Build notes
+Build: passed (0 errors, 7 projects; 2 attempts — attempt 1 green, attempt 2 after a SQL fix below) | Tests: first run 921 total, 920 passed, 1 failed (`SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate`, a test defect: see below); after the test correction `f64e70d2` the full suite is 921/921 | Commit SHA: `8b94d1e6` (production, committed by the orchestrator); Verifier (Standard) CONDITIONAL PASS, 0 blockers
+Targeted run (19 tests in the three BUG-085 classes): 18 passed, 1 failed (the spec-gap test).
+Files written and re-read: ISongRepository.cs (both edits), SongRepository.cs (SQL consts + search methods), SongResolutionService.cs (fuzzy block, file tail), SimilarityConstants.cs (tail). Census `DerivePrefixToken|PrefixTokenMaxLen` in `*.cs`: no remaining references.
+
+### Defect found and fixed during Green
+The shared select constant had no trailing newline, so `...s.ArtistIdWHERE SongSearch` was one token and the SQL failed with `near "SongSearch"`. This also broke the existing global `SearchTitleCandidatesAsync`. Fixed by a trailing blank line in the raw literal (`TitleSearchSelectSql`). Lesson: raw-literal concatenation needs an explicit line break.
+
+### AC traceability (partial)
+| AC | Criterion | Implementation | Test | Result |
+|----|-----------|----------------|------|--------|
+| REQ-SFT-23 | typed title longer than stored finds it | `SongRepository.SearchTitleCoreAsync` (artist SQL) | `SongRepositoryArtistTrigramTests.SearchTitleCandidatesForArtistAsync_TypedTitleLongerThanStored_FindsStoredTitle` | pass |
+| REQ-SFT-23 | same artist only | `TitleSearchForArtistSql` `s.ArtistId = @artistId` | `..._OtherArtistSameTitle_IsExcluded`, `..._RespectsArtistScopeAndTake` | pass |
+| REQ-SFT-23 | typo in first word / middle, unrelated excluded | trigram OR-match | `..._TypoInFirstWord_...`, `..._TypoInMiddle_StillRetrieves` (2 cases), `..._UnrelatedTitle_ReturnsEmpty` | pass |
+| REQ-SFT-23 | fuzzy pool uses whole title, 0.82 threshold, blank skipped | `SongResolutionService` fuzzy step | `SongResolutionServiceTests` (BUG-085 cases) | pass |
+| REQ-SFT-23 | save returns SongChoiceNeeded with stored near-duplicate | end-to-end | `SongSaveTrigramDuplicateTests.SaveFromFormAsync_LongerTypedTitle_ListsStoredNearDuplicate` | PASS after test correction `f64e70d2` (first run FAIL: test defect) |
+| REQ-SFT-33 | no 3-char word falls back to artist-scoped collated prefix | `SearchTitleCoreAsync` fallback with artist filter | `..._ShortTitle_UsesCollatedPrefixFallback` | pass |
+
+### Surprises for review
+- `SongSearch` indexes two columns (`title`, `artist`), and `SongSearch MATCH @m` without a column filter also matches artist-name trigrams. The artist-scoped query inherits this (bounded by the `ArtistId` filter and the 0.82 scorer). A `title : @m` column filter would tighten it but changes the global query too, so it was not done.
+- Performance of the OR-of-trigrams on large libraries was not measured. The artist filter is applied after the FTS join, so FTS does the heavy lifting.
+- Empty table: FTS returns no rows, so the result is an empty list. The "no such table" catch is unchanged and shared.
+
+---
+## Cleanup Red: dead repository member, shared note text, stale test comments
+**Plan:** `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-09-cleanup-after-the-song-form-work-dead-repository-member-shared-note-text-stale-comments/README.md`
+**Status:** To Review (test side; Builder owns production)
+**Branch:** `task/sft-cleanup-dead-member-shared-notes` (worktree `.worktrees/sft-cleanup`, base `develop`)
+**Started:** 2026-11-09
+**Completed:** 2026-11-09
+
+### Changed files:
+- `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs` — removed the `GetFuzzyCandidatePoolAsync` delegate from `ThrowOnAddSongRepository` (compile-level Red)
+- `MyVocaList.Tests/Integration/Repositories/SongRepositoryArtistTrigramTests.cs` — two historical comments reworded to drop the removed member name (comment-only)
+- `MyVocaList.Tests/Integration/Repositories/SongRepositoryResolutionTests.cs` — one historical comment reworded (comment-only)
+- `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` — stale BUG-021 comment corrected (comment-only)
+- `MyVocaList.Tests/Integration/Services/SongServiceUpdateIntegrationTests.cs` — stale `ExecuteEditSaveAsync` comment corrected (comment-only)
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md` — this section
+
+Commits: `0a3bb4a2` (Part 1, `--no-verify`), `dbc372f1` (Part 3, `--no-verify`).
+`--no-verify` reason: the test project does not compile until the Builder removes `ISongRepository.GetFuzzyCandidatePoolAsync`; the pre-commit hook builds the test project. Allowed for compile-level Red per `testing.md`.
+
+### Build notes
+Build: FAILED as expected (1 error, 34 warnings). Command: `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -nodeReuse:false -m:1 -p:UseSharedCompilation=false`
+- Only error: `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs(156,53): error CS0535: 'SongServiceNewArtistUnitOfWorkTests.ThrowOnAddSongRepository' does not implement interface member 'ISongRepository.GetFuzzyCandidatePoolAsync(int, string, int, CancellationToken)'`
+- The 34 warnings are existing nullable/NU warnings (CS8625, CS8765 in `CrudListViewModelBaseTests.cs`, NU1902/NU1903 advisories). None are caused by this change.
+- Tests: not run (project does not compile). Expected to pass once the Builder deletes the interface member and the `SongRepository` implementation.
+Files written and re-read: all five edited `.cs` files re-read after edit; census re-run shows no `GetFuzzyCandidatePoolAsync` or `ExecuteEditSaveAsync` in `MyVocaList.Tests/`.
+
+### Census: `GetFuzzyCandidatePoolAsync` (Grep tool and `rtk proxy grep -rn`, both agree)
+Production (Builder deletes):
+- `Domain/RepositoryInterface/ISongRepository.cs:56` — interface declaration
+- `Infra/Repository/SongRepository.cs:126` — implementation
+- No production caller remains (`Services/`, `UI/`, `MyVocaList/` are clean).
+
+Tests (this change):
+- `MyVocaList.Tests/Integration/UnitOfWork/SongServiceNewArtistUnitOfWorkTests.cs:184-185` — delegate in `ThrowOnAddSongRepository`. Removed.
+- No Moq `Setup(...GetFuzzyCandidatePoolAsync...)` exists in the test tree. No repository test pins the member's behaviour (the old prefix-pool tests were already rewritten as `SearchTitleCandidatesForArtistAsync` tests under REQ-SFT-23). Nothing needed a stop.
+- Comment-only mentions, reworded: `SongRepositoryArtistTrigramTests.cs:73`, `:96`, `SongRepositoryResolutionTests.cs:104`.
+
+Docs (not touched by this task, listed for the Builder): `design.md:734` says the member is "unused and queued for removal"; `task-log.md:488` and the BUG-085 README mention it historically. Shipped change folders and `song-import-resolution/` docs are historical and are not edited.
+
+### Part 2: shared note text (findings, no test edits needed)
+Literals asserted in tests (tests keep their own private consts; they do not read the VM consts):
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs:55` `OfflineNoteText` = "You're offline — showing songs from your library only."
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs:56` `UnavailableNoteText` = "Online search isn't available right now — showing your library only."
+- `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs:258` `ArtistOfflineNote` = "You're offline — showing artists from your library only."
+- `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs:259` `UnavailableNote` = "Online search isn't available right now — showing your library only."
+
+Assertions on the unavailable text (must keep passing after the Builder moves the note to one shared constant):
+- SongFormViewModelTests.cs:202, 239, 273, 277, 346 (`UnavailableNoteText`)
+- ArtistFormViewModelTests.cs:474, 513 (`UnavailableNote`)
+
+Assertions on the offline notes (kept separate by the Builder):
+- SongFormViewModelTests.cs:214, 224, 254, 262, 296, 331 (`OfflineNoteText`)
+- ArtistFormViewModelTests.cs:462, 484, 503 (`ArtistOfflineNote`)
+
+Reflection: none reads `OfflineNote` / `UnavailableNote` from the VMs. The only reflection in the test tree is `AppServicesRegistrationTests.cs:107` reading `_httpClient` (unrelated) and `UnitOfWorkMocks.cs:54` reading `Mock.Object`.
+
+Verdict: no test change is needed for Part 2. The literals stay as literals (the contract). The Builder may consolidate the unavailable note in production; the test-side literals must stay byte-identical (em dash U+2014, straight apostrophe in "You're").
+
+### Part 3: stale comments
+(a) `AppServicesRegistrationTests.cs:45`. Verified: the `SongFormViewModel` constructor (`UI/ViewModels/SongFormViewModel.cs:137`) takes no `ISongResolutionService`. The test still resolves `ISongResolutionService` from DI, which needs `ISimilarityScorer` (registered at `Extensions/ServiceCollectionExtensions.cs:53`). Comment rewritten to say that.
+(b) `SongServiceUpdateIntegrationTests.cs:51`. The comment cited `SongFormViewModel.ExecuteEditSaveAsync`, which no longer exists; the form saves via `SongService.SaveFromFormAsync` (`SongFormViewModel.cs:664`). Comment rewritten; the test still calls `UpdateSongAsync` directly, and the comment says so.
+
+Scan of the SFT test files for other stale names (`CreateSongWithUrlsAsync(int`, `IsExactMatch`, `GetFuzzyCandidatePoolAsync`, `DerivePrefixToken`, `HasManualEdits`, `5.3b`, `ExecuteEditSaveAsync`):
+- `GetFuzzyCandidatePoolAsync` in comments: 3 hits, fixed.
+- `ExecuteEditSaveAsync`: 1 hit, fixed.
+- `CreateSongWithUrlsAsync(int`, `IsExactMatch`, `DerivePrefixToken`, `5.3b`: no hits.
+- `HasManualEdits`: hits in `Integration/Migrations/SongMigrationTests.cs` only. These are correct: the M1 migration test asserts the column is dropped (REQ-SFT-37). Not stale; not changed.
+
+### Design concern
+`MyVocaList.Tests/Architecture/UnitOfWorkReadScopeTests.cs:73` lists `ISongResolutionService` by name. Not touched (outside this task); the Builder should confirm that list still matches production after the cleanup.
+
+### Builder instructions
+1. Delete `ISongRepository.GetFuzzyCandidatePoolAsync` (`Domain/RepositoryInterface/ISongRepository.cs:56`) and `SongRepository.GetFuzzyCandidatePoolAsync` (`Infra/Repository/SongRepository.cs:126`), along with any SQL constant used only by it. Also remove its XML remark in `ISongRepository.cs`.
+2. Re-run the test-project build. It should compile with 0 errors. Then run `dotnet test` (all tests must pass).
+3. Shared note text: move the unavailable note to one shared constant in production. Keep the two offline notes separate. Do not change the test literals listed under Part 2.
+4. No test file edits are needed for Part 2.
+
+## Cleanup Green: remove dead repository member, share unavailable note, verify stale comments
+**Plan:** `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-09-cleanup-after-the-song-form-work-dead-repository-member-shared-note-text-stale-comments/README.md`
+**Status:** To Review
+**Branch:** `task/sft-cleanup-dead-member-shared-notes` (worktree `.worktrees/sft-cleanup`)
+**Started:** 2026-11-09
+**Completed:** 2026-11-09
+**Level:** C (pure refactor, no behaviour change; no new ACs). Existing tests from Red (`0a3bb4a2`, `dbc372f1`, `3a606de9`) are the regression net and were not edited.
+
+### Changed files:
+- `Domain/RepositoryInterface/ISongRepository.cs` — removed `GetFuzzyCandidatePoolAsync` declaration and its XML doc block (19 lines, no other member touched)
+- `Infra/Repository/SongRepository.cs` — removed `GetFuzzyCandidatePoolAsync` implementation (15 lines; inline query, no SQL constant or using existed solely for it)
+- `MyVocaList/UI/Constants/SearchNotes.cs` — new file, `public static class SearchNotes` with `const string Unavailable` (byte-identical text to the former private consts)
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` — private `UnavailableNote` removed; mapping uses `SearchNotes.Unavailable`; `using MyVocaList.UI.Constants;` added. `OfflineNote` kept (songs).
+- `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` — private `UnavailableNote` removed; mapping uses `SearchNotes.Unavailable`; `using` added; comment above `OfflineNote` reworded (offline wording stays local to artists). `OfflineNote` kept.
+- `Docs/Management/BusinessFeatures/artists-songs/task-log.md` — this section (Checkpoint block replaced)
+
+No test file, DI registration, csproj, SongFormPage*, ArtistFormPage*, AutocompleteDXField*, tasks.md, LEDGER or change README was touched.
+
+### Stale-comment audit (production `*.cs`, Grep tool; `rtk proxy grep` returned no output for this run, so the Grep tool is the census of record)
+- `GetFuzzyCandidatePoolAsync`, `DerivePrefixToken`, `PrefixTokenMaxLen`, `IsExactMatch`, `5.3b`: no hits in production `.cs`.
+- `CreateSongWithUrlsAsync(int`: no hit. The only hit is `Services/SongService.cs:260` (`CreateSongWithUrlsAsync(int?, string?, …)`), which names the **current** `int?` overload (`SongService.cs:248`). Accurate; **left unchanged**.
+- Verdict: no production comment needed a fix beyond the `ArtistFormViewModel` wording above.
+
+### Shared constant: location decision
+`MyVocaList/UI/Constants/SearchNotes.cs` (namespace `MyVocaList.UI.Constants`). Rationale: the text is user-facing UI copy, so it belongs in the UI layer, not `Domain/Constants/SearchConstants.cs` (domain thresholds) or `Contracts/AppConstants.cs`. The folder is not excluded by `MyVocaList.csproj` (the only compile excludes are `NovaPasta`, `Tmp`, `MauiProgram.cs`, `App.xaml.cs`, `UI\Components\AutocompleteField\**`), so the file is compiled by default globbing. No name collision with existing types.
+
+### Census: `GetFuzzyCandidatePoolAsync` after the change
+- Grep tool over the worktree (`*.cs`): zero hits in production or tests (only `Docs/` historical mentions remain, which are not edited, per the change README).
+- Build and test confirm no remaining reference.
+
+### Verification evidence
+- (a) `dotnet build MyVocaList.Tests/MyVocaList.Tests.csproj -nodeReuse:false -m:1 -p:UseSharedCompilation=false`: 7 projects, **0 errors**, 31 warnings (NU/vulnerability advisories and pre-existing nullable warnings; none introduced by this change).
+- (b) `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --no-build`: **921 passed, 0 failed, 0 skipped** (exit 0). No known flakes triggered.
+- (c) `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android --no-restore -v q -nodeReuse:false -m:1 -p:UseSharedCompilation=false`: **6 projects, 0 errors**, 27 warnings; APK produced (`MyVocaList/bin/Debug/net10.0-android/com.myvocalist.apk`).
+- Literal check: `rtk proxy grep -rnF` confirms the unavailable note appears once in production (`SearchNotes.cs:9`) and the tests keep their own literals (`SongFormViewModelTests.cs:56`, `ArtistFormViewModelTests.cs:259`), matching byte-for-byte. Offline notes remain separate (`SongFormViewModel.cs:85`, `ArtistFormViewModel.cs:38`).
+- Files written and re-read: `ArtistFormViewModel.cs:36-38` (comment edit), `task-log.md` (checkpoint replaced).
+
+### Architecture check (read-only)
+`MyVocaList.Tests/Architecture/UnitOfWorkReadScopeTests.cs:68-75` lists `ISongResolutionService` in `GovernedDataServiceTypes`. `Domain/ServicesInterfaces/ISongResolutionService.cs:9` still declares that interface, so the list matches production. No change needed. (The full test run passed, including this test.)
+
+### Branch base note (not a blocker for this refactor)
+`develop` is 2 commits ahead of this branch's base (`9f9907cd`): `dde298d7` (docs(acf) T10 merged) and `814c0630` (fix(acf) T10 root-cause fixes). `git merge-base --is-ancestor develop HEAD` returns non-zero. Not rebased; the orchestrator should decide rebase vs. merge before merging this branch. Potential overlap: `814c0630` is an ACF/autocomplete fix that may touch files in `UI/Components/`, not the files here.
+
+### Design concern
+None. The shared constant is placed in the UI layer per the rationale above.
+Context manifest: Domain/RepositoryInterface/ISongRepository.cs · Infra/Repository/SongRepository.cs · MyVocaList/UI/Constants/SearchNotes.cs · MyVocaList/UI/ViewModels/SongFormViewModel.cs · MyVocaList/UI/ViewModels/ArtistFormViewModel.cs
+
+### Cleanup — closed 2026-11-10
+
+Merged `357a6813` (Verifier PASS, 0 blockers; develop 926/926 after merging ACF T10 and other develop work). Branches and worktree removed.
+
+- **Unreproduced flake:** `SongRepositoryArtistTrigramTests.SearchTitleCandidatesForArtistAsync_TypoInFirstWord_FindsStoredTitleAndExcludesUnrelated` failed once in a pre-commit run; 11 isolated and full-suite runs passed. No ordering dependence found. Hypothesis: under load the swallowed "no such table" path in `SearchTitleCoreAsync` returns an empty list. Same family as the earlier `GetFuzzyCandidatePoolAsync_RespectsArtistScopeAndTake` flake. If it recurs: capture the test output; a test-side check that the SongSearch table exists after migrate needs Helder's approval.
+- **Doc hygiene (not changed):** `song-import-resolution/design.md` lines 117 and 174 still describe the removed method; that spec is shipped and immutable.

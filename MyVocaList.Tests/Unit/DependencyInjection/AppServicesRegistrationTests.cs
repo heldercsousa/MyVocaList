@@ -42,7 +42,7 @@ public class AppServicesRegistrationTests
     }
 
     [Fact]
-    // [BUG] BUG-021: SongFormViewModel depends on ISongResolutionService, which transitively needs ISimilarityScorer
+    // [BUG] BUG-021: the ISongResolutionService registration must resolve, and it needs ISimilarityScorer (SongFormViewModel no longer injects ISongResolutionService)
     public void AddAppServices_ResolvingSongResolutionService_Succeeds()
     {
         using var provider = BuildProvider();
@@ -64,6 +64,8 @@ public class AppServicesRegistrationTests
             services.AddSingleton(Mock.Of<ISecureStorageWrapper>());
             services.AddSingleton<IMessenger>(new WeakReferenceMessenger());
             services.AddSingleton(Mock.Of<INavigationService>());
+            // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
+            services.AddSingleton(Mock.Of<INetworkStatus>());
             services.AddTransient<SongFormViewModel>();
         });
         using var scope = provider.CreateScope();

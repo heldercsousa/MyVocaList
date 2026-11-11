@@ -255,4 +255,148 @@ public class AutocompleteDXFieldLogicTests
 
         Assert.False(result);
     }
+
+    // [AC] REQ-ACF-29: with pick-lock opted out, a locked flag with text is still Editable.
+    [Fact]
+    public void Mode_PickLockDisabled_LockedWithText_ReturnsEditable()
+    {
+        var mode = AutocompleteDXFieldLogic.Mode(isReadOnly: false, isLocked: true, "Ana Silva", isPickLockEnabled: false);
+
+        Assert.Equal(FieldMode.Editable, mode);
+    }
+
+    // [AC] REQ-ACF-29: opting out of pick-lock never overrides a page-set read-only state.
+    [Fact]
+    public void Mode_PickLockDisabled_ReadOnly_ReturnsReadOnly()
+    {
+        var mode = AutocompleteDXFieldLogic.Mode(isReadOnly: true, isLocked: true, "x", isPickLockEnabled: false);
+
+        Assert.Equal(FieldMode.ReadOnly, mode);
+    }
+
+    // [AC] REQ-ACF-29: with pick-lock opted out, a pick does not lock the field.
+    [Fact]
+    public void LockAfterPick_PickLockDisabled_Select_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.LockAfterPick(PickRoute.Select, isPickLockEnabled: false);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-29: with pick-lock opted out and no pick, no lock either.
+    [Fact]
+    public void LockAfterPick_PickLockDisabled_None_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.LockAfterPick(PickRoute.None, isPickLockEnabled: false);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-13: the search text is edge-trimmed and inner whitespace runs collapse to one space.
+    [Theory]
+    [InlineData("  an  ", "an")]
+    [InlineData("a   b", "a b")]
+    [InlineData(null, "")]
+    public void SearchQuery_TrimsAndCollapsesWhitespace(string? text, string expected)
+    {
+        var result = AutocompleteDXFieldLogic.SearchQuery(text);
+
+        Assert.Equal(expected, result);
+    }
+
+    // [AC] REQ-ACF-13: a normalised query below the minimum length never requests options, whatever the raw length.
+    [Theory]
+    [InlineData("  a")]
+    [InlineData("a  ")]
+    [InlineData("a\t")]
+    public void ShouldRequestOptions_NormalisedQueryBelowMinimum_ReturnsFalse(string query)
+    {
+        var result = AutocompleteDXFieldLogic.ShouldRequestOptions(FieldMode.Editable, isSearchEnabled: true, Source, query);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-13: a normalised query at the minimum length requests options, even with padding.
+    [Fact]
+    public void ShouldRequestOptions_PaddedTwoCharsNormalised_ReturnsTrue()
+    {
+        var result = AutocompleteDXFieldLogic.ShouldRequestOptions(FieldMode.Editable, isSearchEnabled: true, Source, " an ");
+
+        Assert.True(result);
+    }
+
+    // [AC] REQ-ACF-30: the one blur the component causes after a pick is not forwarded as a blur without pick.
+    [Fact]
+    public void ShouldForwardBlur_PickBlur_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.ShouldForwardBlur(null, FieldMode.Editable, isPickBlur: true);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-30: a real blur after a pick-then-edit is forwarded as usual.
+    [Fact]
+    public void ShouldForwardBlur_NotPickBlur_ReturnsTrue()
+    {
+        var result = AutocompleteDXFieldLogic.ShouldForwardBlur(null, FieldMode.Editable, isPickBlur: false);
+
+        Assert.True(result);
+    }
+
+    // [AC] REQ-ACF-25: the request DX issues for the text written after a pick (the picked name) is an echo.
+    [Theory]
+    [InlineData("Helder Sousa", "Helder Sousa")]
+    [InlineData("  Helder   Sousa ", "Helder Sousa")]
+    [InlineData("Helder Sousa", "  Helder Sousa  ")]
+    public void IsPickEcho_QueryMatchesTextAtPick_ReturnsTrue(string query, string textAtPick)
+    {
+        var result = AutocompleteDXFieldLogic.IsPickEcho(query, textAtPick);
+
+        Assert.True(result);
+    }
+
+    // [AC] REQ-ACF-25: with no routed pick there is no echo, so every request is judged on its own.
+    [Fact]
+    public void IsPickEcho_NoPick_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.IsPickEcho("Helder Sousa", null);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-25: a query that differs from the picked text (the user typed more) is not an echo.
+    [Fact]
+    public void IsPickEcho_QueryDiffersFromTextAtPick_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.IsPickEcho("Helder Sousa Silva", "Helder Sousa");
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-31: a search that returns no options (null) keeps the menu closed.
+    [Fact]
+    public void ShowsMenu_NullOptions_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.ShowsMenu(null);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-31: a search that returns an empty list keeps the menu closed (no "Not found" row).
+    [Fact]
+    public void ShowsMenu_EmptyOptions_ReturnsFalse()
+    {
+        var result = AutocompleteDXFieldLogic.ShowsMenu([]);
+
+        Assert.False(result);
+    }
+
+    // [AC] REQ-ACF-31: a search that returns at least one option opens the menu.
+    [Fact]
+    public void ShowsMenu_OneOption_ReturnsTrue()
+    {
+        var result = AutocompleteDXFieldLogic.ShowsMenu([Suggestion]);
+
+        Assert.True(result);
+    }
 }

@@ -14,14 +14,13 @@ namespace MyVocaList.Services;
 /// <inheritdoc />
 public class ArtistSuggestionService : IArtistSuggestionService
 {
-    private const int MaxResults = 5;
-    private const string MusicBrainzProviderName = "MusicBrainz";
     private const string DeezerProviderName = "Deezer";
 
     private readonly IArtistRepository _artistRepository;
     private readonly IUnitOfWork _uow;
     private readonly IReadOnlyList<IMusicMetadataProvider> _providers;
     private readonly ISimilarityScorer _scorer;
+    private readonly INetworkStatus _networkStatus;
     private readonly ILogger<ArtistSuggestionService> _logger;
 
     public ArtistSuggestionService(
@@ -29,161 +28,117 @@ public class ArtistSuggestionService : IArtistSuggestionService
         IUnitOfWork uow,
         IEnumerable<IMusicMetadataProvider> providers,
         ISimilarityScorer scorer,
+        INetworkStatus networkStatus,
         ILogger<ArtistSuggestionService> logger)
     {
         _artistRepository = artistRepository;
         _uow = uow;
-        _providers = providers as IReadOnlyList<IMusicMetadataProvider> ?? providers.ToList();
+        _providers = providers.ToList();
         _scorer = scorer;
+        _networkStatus = networkStatus;
         _logger = logger;
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<ArtistSuggestionDto>> GetLocalAsync(string term, CancellationToken ct = default)
+    // [AC] REQ-SFT-03/47: guard on the trimmed query OUTSIDE the lambda (no scope, no SQL below 2 chars);
+    // the DB candidate pool is re-ranked in memory (ordering only, design § 6.4).
+    public async Task<IReadOnlyList<ArtistSuggestionDto>> SearchNameLocalAsync(string query, CancellationToken ct = default)
     {
-        var trimmed = term.NormalizeSearchQuery();
-        // REQ-UOW-41/51: the guard stays OUTSIDE the lambda — a sub-threshold query creates no DI
-        // scope and issues no SQL.
-        if (trimmed.Length < SearchConstants.MinimumLocalQueryLength)
+        var q = query.NormalizeSearchQuery();
+        if (q.Length < SearchConstants.MinimumLocalQueryLength)
             return [];
 
-        // [AC] REQ-UOW-38: local read scoped through IUnitOfWork.
-        return await _uow.ExecuteReadAsync(async sp =>
+        // REQ-UOW-37/38: repository resolved from the lambda's own scope, never the constructor field.
+        var hits = await _uow.ExecuteReadAsync(async sp =>
         {
-            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
             var artistRepository = sp.GetRequiredService<IArtistRepository>();
-            var matches = await artistRepository.SearchByNameAsync(trimmed, MaxResults, ct);
-            var exact = await artistRepository.GetByNameAsync(trimmed, ct);
-
-            return matches
-                .Select(a => new ArtistSuggestionDto(
-                    LocalId: a.Id,
-                    Name: a.Name,
-                    ExternalId: null,
-                    ExternalProvider: null,
-                    IsRemote: false,
-                    IsExactMatch: exact is not null && exact.Id == a.Id))
-                .ToList() as IReadOnlyList<ArtistSuggestionDto>;
+            return await artistRepository.SearchNameCandidatesAsync(q, SimilarityConstants.PoolSize, ct);
         }, ct);
+
+        // OrderByDescending is stable, so equal scores keep the DB (bm25) order.
+        return hits
+            .OrderByDescending(a => _scorer.RankScore(q, a.Name))
+            .Take(SearchConstants.MaxSearchResults)
+            .Select(a => new ArtistSuggestionDto(a.Id, a.Name, null, null, false))
+            .ToList();
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<ArtistSuggestionDto>> GetRemoteAsync(
-        string term, IReadOnlyList<ArtistSuggestionDto> localResults, CancellationToken ct = default)
+    // [AC] REQ-SFT-03/06/08/09/36/47/48/53
+    public async Task<ArtistRemoteSearchResult> SearchNameRemoteAsync(string query, CancellationToken ct = default)
     {
-        var normalizedTerm = term.NormalizeSearchQuery();
-        // REQ-UOW-52: remote provider fetches require a longer minimum query than local DB
-        // searches — a 2-char remote lookup is too unbounded/costly against third-party APIs.
-        if (normalizedTerm.Length < SearchConstants.MinimumRemoteQueryLength)
-            return [];
+        var q = query.NormalizeSearchQuery();
+        if (q.Length < SearchConstants.MinimumRemoteQueryLength)
+            return new ArtistRemoteSearchResult([], RemoteSearchStatus.Ok);
 
-        var fetched = await FetchFromProvidersAsync(normalizedTerm, ct);
-        if (fetched.Count == 0)
-            return [];
+        // Read live on every call, never cached (REQ-SFT-53).
+        if (!_networkStatus.HasInternetAccess)
+        {
+            _logger.LogInformation("Remote artist search skipped: device has no internet access");
+            return new ArtistRemoteSearchResult([], RemoteSearchStatus.Offline);
+        }
 
-        // Tier (a) — REQ-FORMUX-03: drop results whose (Provider, ExternalId) matches a local suggestion.
-        var afterExternalId = fetched.Where(r => !HasExternalIdMatch(r, localResults)).ToList();
-        if (afterExternalId.Count == 0)
-            return [];
+        var raw = await TryFetchDeezerAsync(q, ct);
+        if (raw is null)
+            return new ArtistRemoteSearchResult([], RemoteSearchStatus.Unavailable);
+        if (raw.Count == 0)
+            return new ArtistRemoteSearchResult([], RemoteSearchStatus.Ok);
 
-        // Tier (b) — REQ-FORMUX-03: drop results whose name is collation-equal to a local artist,
-        // resolved via a single batch DB call.
-        var candidateNames = afterExternalId
-            .Select(r => r.ArtistName)
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .Distinct()
-            .ToList();
+        var rows = raw.Where(r => !string.IsNullOrWhiteSpace(r.ArtistName)).ToList();
+        var names = rows.Select(r => r.ArtistName).Distinct().ToList();
 
-        // [AC] REQ-UOW-38/43: only the DB call is scoped — the provider/HTTP fetch above already
-        // completed outside any unit-of-work scope, so no DI scope is held open across the network
-        // round-trip.
-        IReadOnlyList<Artist> collatedMatches = candidateNames.Count > 0
-            ? await _uow.ExecuteReadAsync(async sp =>
+        // No HTTP inside the read scope: the fetch above has completed (REQ-UOW-43). One collated lookup per
+        // name — the DB, not C#, decides which Deezer names already exist locally (HARD RULE).
+        var existing = names.Count == 0
+            ? new HashSet<string>()
+            : await _uow.ExecuteReadAsync(async sp =>
             {
-                // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
                 var artistRepository = sp.GetRequiredService<IArtistRepository>();
-                return await artistRepository.GetByNamesCollatedAsync(candidateNames, ct) ?? [];
-            }, ct)
-            : [];
+                var found = new HashSet<string>();
+                foreach (var name in names)
+                {
+                    var matches = await artistRepository.GetByNamesCollatedAsync([name], ct);
+                    if (matches is { Count: > 0 })
+                        found.Add(name);
+                }
+                return found;
+            }, ct);
 
-        var collatedNames = collatedMatches
-            .Select(a => a.Name)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        var afterCollation = afterExternalId
-            .Where(r => !collatedNames.Contains(r.ArtistName))
+        var remote = rows
+            .Where(r => !existing.Contains(r.ArtistName))
+            .Take(SearchConstants.MaxSearchResults)
+            .Select(r => new ArtistSuggestionDto(null, r.ArtistName, r.ExternalId, r.Provider, true))
             .ToList();
-        if (afterCollation.Count == 0)
-            return [];
-
-        // Tier (c) — REQ-FORMUX-03: drop results scoring >= DefaultThreshold against any local suggestion.
-        var afterSimilarity = afterCollation
-            .Where(r => localResults.All(l => _scorer.Score(r.ArtistName, l.Name) < SimilarityConstants.DefaultThreshold))
-            .ToList();
-
-        return afterSimilarity
-            .Take(MaxResults)
-            .Select(r => new ArtistSuggestionDto(
-                LocalId: null,
-                Name: r.ArtistName,
-                ExternalId: r.ExternalId,
-                ExternalProvider: r.Provider,
-                IsRemote: true,
-                IsExactMatch: false))
-            .ToList();
+        return new ArtistRemoteSearchResult(remote, RemoteSearchStatus.Ok);
     }
 
-    /// <inheritdoc />
-    public IReadOnlyList<ArtistSuggestionDto> FilterSimilar(string typedName, IReadOnlyList<ArtistSuggestionDto> fetched)
+    // ── Helpers ──────────────────────────────────────────────────────────
+
+    /// <summary>Returns null on any failure/timeout (Unavailable); rethrows caller cancellation.</summary>
+    private async Task<IReadOnlyList<MusicSearchResultDto>?> TryFetchDeezerAsync(string q, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(typedName) || fetched is null || fetched.Count == 0)
-            return [];
-
-        return fetched
-            .Where(f => !f.IsExactMatch)
-            .Where(f => _scorer.Score(typedName, f.Name) >= SimilarityConstants.DefaultThreshold)
-            .ToList();
-    }
-
-    // ── Helpers ──────────────────────────────────────────────────────────────
-
-    private async Task<IReadOnlyList<MusicSearchResultDto>> FetchFromProvidersAsync(string term, CancellationToken ct)
-    {
-        var musicBrainz = _providers.FirstOrDefault(p => p.ProviderName == MusicBrainzProviderName);
-        var results = await TrySearchAsync(musicBrainz, term, ct);
-        if (results.Count > 0)
-            return results;
-
         var deezer = _providers.FirstOrDefault(p => p.ProviderName == DeezerProviderName);
-        return await TrySearchAsync(deezer, term, ct);
-    }
+        if (deezer is null)
+        {
+            _logger.LogWarning("Deezer provider is not registered; remote artist search unavailable");
+            return null;
+        }
 
-    private async Task<IReadOnlyList<MusicSearchResultDto>> TrySearchAsync(
-        IMusicMetadataProvider? provider, string term, CancellationToken ct)
-    {
-        if (provider is null)
-            return [];
-
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        linked.CancelAfter(SearchConstants.RemoteSearchTimeoutMilliseconds);
         try
         {
-            var results = await provider.SearchArtistsAsync(term, ct);
+            var results = await deezer.SearchArtistsAsync(q, linked.Token);
             return results?.ToList() ?? [];
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
-            // Cancellation is not a provider failure — propagate so stale lookups are discarded.
             throw;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Artist provider {Provider} failed for term '{Term}'", provider.ProviderName, term);
-            return [];
+            _logger.LogWarning(ex, "Deezer artist search failed or timed out for query '{Query}'", q);
+            return null;
         }
     }
-
-    private static bool HasExternalIdMatch(MusicSearchResultDto remote, IReadOnlyList<ArtistSuggestionDto> localResults) =>
-        !string.IsNullOrWhiteSpace(remote.ExternalId) &&
-        localResults.Any(l =>
-            string.Equals(l.ExternalProvider, remote.Provider, StringComparison.Ordinal) &&
-            string.Equals(l.ExternalId, remote.ExternalId, StringComparison.Ordinal));
 }

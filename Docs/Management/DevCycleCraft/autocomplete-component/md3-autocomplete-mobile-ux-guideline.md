@@ -1,5 +1,9 @@
 # MD3 Autocomplete — Mobile UX Guideline (Early / Expected-Behavior Reference)
 
+> **ABANDONED 2026-11-11 (Helder ruling):** the full-screen Search View on compact windows will not be built. The app uses the DevExpress
+> `AutoCompleteEdit` docked menu via `AutocompleteDXField`, without customisation. Kept as history only. Current rule:
+> `.claude/library/ux-patterns.md` § Autocomplete.
+
 > **Status:** Early guideline — registered *as is* to anchor the expected behavior for the
 > **AutocompleteField Component Evaluation** task (see `README.md` step 2.2.1).
 > **Source:** Research by Gemini 3 Pro, gathered from the official Material Design 3 documentation

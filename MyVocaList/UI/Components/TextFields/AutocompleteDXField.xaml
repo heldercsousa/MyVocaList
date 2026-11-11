@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
-    xmlns:constants="clr-namespace:MyVocaList.Domain.Constants;assembly=MyVocaList.Domain"
     x:Class="MyVocaList.UI.Components.TextFields.AutocompleteDXField"
     x:Name="self">
 
@@ -21,12 +20,16 @@
                           HasError="{Binding HasError, Source={x:Reference self}}"
                           ErrorText="{Binding ErrorText, Source={x:Reference self}}"
                           IsDropDownOpen="{Binding IsDropDownOpen, Source={x:Reference self}, Mode=TwoWay}"
+                          DisplayMember="Headline"
+                          LoadingProgressMode="Manual"
                           SubmitIconVisibility="Never"
                           ClearIconColor="{StaticResource OnSurfaceVariant}"
                           EndIcon="close_outlined"
                           IsEndIconVisible="False"
                           EndIconColor="{StaticResource OnSurfaceVariant}"
                           SelectionChanged="OnSelectionChanged"
+                          TextChanged="OnTextChanged"
+                          Focused="OnFocused"
                           Unfocused="OnUnfocused"
                           EndIconClicked="OnEndIconClicked"
                           ClearIconClicked="OnClearIconClicked">
@@ -39,11 +42,6 @@
                 <Setter Property="EndIconColor" Value="{StaticResource Error}" />
             </DataTrigger>
         </dxe:AutoCompleteEdit.Triggers>
-        <dxe:AutoCompleteEdit.ItemsSourceProvider>
-            <dxe:AsyncItemsSourceProvider RequestDelay="{x:Static constants:SearchConstants.AutocompleteDebounceMilliseconds}"
-                                          CharacterCountThreshold="{x:Static constants:SearchConstants.MinimumLocalQueryLength}"
-                                          ItemsRequested="OnItemsRequested" />
-        </dxe:AutoCompleteEdit.ItemsSourceProvider>
         <dxe:AutoCompleteEdit.ItemTemplate>
             <DataTemplate x:DataType="models:AutocompleteSuggestion">
                 <VerticalStackLayout Padding="16,8">

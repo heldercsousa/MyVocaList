@@ -13,7 +13,7 @@
     x:DataType="vm:SongFormViewModel"
     Title="{Binding PageTitle}"
     BackgroundColor="{StaticResource Surface}"
-    SafeAreaEdges="Container">
+    SafeAreaEdges="All">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Save" Command="{Binding SaveCommand}" />
@@ -255,80 +255,173 @@
             Lists exact/fuzzy candidates; user chooses Open existing, Save as new version, or Cancel.
         -->
         <dx:BottomSheet x:Name="resolutionSheet"
-                        AllowedState="HalfExpanded"
-                        HalfExpandedRatio="0.55"
+                        AllowedState="All"
+                        HalfExpandedRatio="0.7"
                         IsModal="True"
                         ShowGrabber="True"
-                        AllowDismiss="False"
+                        AllowDismiss="True"
                         BackgroundColor="{StaticResource Surface}"
                         CornerRadius="28"
                         StateChanged="OnResolutionSheetStateChanged">
-            <VerticalStackLayout Padding="0,0,0,24">
+            <!-- BUG-084: body scrolls; Cancel is pinned in row 1 so a long candidate list cannot push it out of reach. -->
+            <Grid RowDefinitions="*,Auto">
 
-                <Label Text="{Binding ResolutionSheetTitle}"
-                       Style="{StaticResource BottomSheetTitle}"
-                       Margin="24,20,24,8" />
+                <ScrollView Grid.Row="0">
+                    <VerticalStackLayout Padding="0,0,0,8">
 
-                <BoxView Style="{StaticResource Divider}" />
+                        <Label Text="{Binding ResolutionSheetTitle}"
+                               Style="{StaticResource BottomSheetTitle}"
+                               Margin="24,20,24,8" />
 
-                <!-- Candidate list (exact or fuzzy matches) -->
-                <VerticalStackLayout Spacing="0"
-                                     BindableLayout.ItemsSource="{Binding ResolutionCandidates}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="resolution:SongMatch">
-                            <Grid ColumnDefinitions="*,Auto" Padding="24,12">
-                                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                    <Label Text="{Binding Title}"
-                                           StyleClass="Body.Large"
-                                           TextColor="{StaticResource OnSurface}" />
-                                    <Label Text="{Binding ArtistName}"
-                                           StyleClass="Body.Small"
-                                           TextColor="{StaticResource OnSurfaceVariant}" />
-                                    <Label Text="{Binding Version}"
-                                           StyleClass="Body.Small"
-                                           TextColor="{StaticResource OnSurfaceVariant}"
-                                           IsVisible="{Binding Version, Converter={StaticResource IsNotNullConverter}}" />
-                                </VerticalStackLayout>
-                                <dx:DXButton Grid.Column="1"
-                                             Content="Open existing"
-                                             Style="{StaticResource OutlinedButton}"
-                                             Padding="16,0"
-                                             VerticalOptions="Center"
-                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=OpenExistingSongCommand}"
-                                             CommandParameter="{Binding .}" />
-                            </Grid>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
+                        <BoxView Style="{StaticResource Divider}" />
+
+                        <!-- Candidate list (exact or fuzzy matches) -->
+                        <VerticalStackLayout Spacing="0"
+                                             BindableLayout.ItemsSource="{Binding ResolutionCandidates}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="resolution:SongMatch">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="24,12">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Title}"
+                                                   StyleClass="Body.Large"
+                                                   TextColor="{StaticResource OnSurface}" />
+                                            <Label Text="{Binding ArtistName}"
+                                                   StyleClass="Body.Small"
+                                                   TextColor="{StaticResource OnSurfaceVariant}" />
+                                            <Label Text="{Binding Version}"
+                                                   StyleClass="Body.Small"
+                                                   TextColor="{StaticResource OnSurfaceVariant}"
+                                                   IsVisible="{Binding Version, Converter={StaticResource IsNotNullConverter}}" />
+                                        </VerticalStackLayout>
+                                        <dx:DXButton Grid.Column="1"
+                                                     Content="Open existing"
+                                                     Style="{StaticResource OutlinedButton}"
+                                                     Padding="16,0"
+                                                     VerticalOptions="Center"
+                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=OpenExistingSongCommand}"
+                                                     CommandParameter="{Binding .}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <BoxView Style="{StaticResource Divider}" />
+
+                        <!-- Save as new version option (exact duplicate only; REQ-SFT-22) -->
+                        <VerticalStackLayout Padding="24,12" Spacing="8"
+                                             IsVisible="{Binding IsExactDuplicate}">
+                            <Label Text="Or save as a new version:"
+                                   StyleClass="Body.Small"
+                                   TextColor="{StaticResource OnSurfaceVariant}" />
+                            <!-- Version entry — revealed when user taps Save As New Version -->
+                            <dxe:TextEdit Text="{Binding SongVersion, Mode=TwoWay}"
+                                          LabelText="Version label (required)"
+                                          PlaceholderText="e.g. Live, Acoustic, Remix 2010"
+                                          HasError="{Binding VersionHasError}"
+                                          ErrorText="{Binding VersionErrorText}"
+                                          IsVisible="{Binding VersionEntryRequired}"
+                                          Unfocused="OnVersionUnfocused" />
+                            <dx:DXButton Content="Save as new version"
+                                         Style="{StaticResource OutlinedButton}"
+                                         HorizontalOptions="Fill"
+                                         Command="{Binding ConfirmSaveAsNewVersionCommand}" />
+                        </VerticalStackLayout>
+
+                        <!-- Save as new song option (possible duplicates only; REQ-SFT-23, no Version needed) -->
+                        <VerticalStackLayout Padding="24,12" Spacing="8"
+                                             IsVisible="{Binding IsExactDuplicate, Converter={StaticResource InverseBoolConverter}}">
+                            <dx:DXButton Content="Save as new song"
+                                         Style="{StaticResource OutlinedButton}"
+                                         HorizontalOptions="Fill"
+                                         Command="{Binding ConfirmSaveAsNewSongCommand}" />
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <VerticalStackLayout Grid.Row="1" Padding="0,0,0,24">
+                    <BoxView Style="{StaticResource Divider}" />
+
+                    <dx:DXButton Content="Cancel"
+                                 Style="{StaticResource BottomSheetCancelAction}"
+                                 Command="{Binding DismissResolutionSheetCommand}" />
                 </VerticalStackLayout>
 
-                <BoxView Style="{StaticResource Divider}" />
+            </Grid>
+        </dx:BottomSheet>
 
-                <!-- Save as new version option -->
-                <VerticalStackLayout Padding="24,12" Spacing="8">
-                    <Label Text="Or save as a new version:"
-                           StyleClass="Body.Small"
-                           TextColor="{StaticResource OnSurfaceVariant}" />
-                    <!-- Version entry — revealed when user taps Save As New Version -->
-                    <dxe:TextEdit Text="{Binding SongVersion, Mode=TwoWay}"
-                                  LabelText="Version label (required)"
-                                  PlaceholderText="e.g. Live, Acoustic, Remix 2010"
-                                  HasError="{Binding VersionHasError}"
-                                  ErrorText="{Binding VersionErrorText}"
-                                  IsVisible="{Binding VersionEntryRequired}"
-                                  Unfocused="OnVersionUnfocused" />
-                    <dx:DXButton Content="Save as new version"
-                                 Style="{StaticResource OutlinedButton}"
-                                 HorizontalOptions="Fill"
-                                 Command="{Binding ConfirmSaveAsNewVersionCommand}" />
+        <!-- ── Artist-match BottomSheet (Task 5.3, REQ-SFT-19) ─────────────────── -->
+        <!--
+            Shown when the Service finds near-duplicate artists for the typed name. Lists the
+            candidates best-first; the user chooses Use '<existing>', Create '<typed>' or Cancel.
+            Back or scrim saves nothing (DismissArtistMatchSheetCommand).
+        -->
+        <dx:BottomSheet x:Name="artistMatchSheet"
+                        AllowedState="All"
+                        HalfExpandedRatio="0.7"
+                        IsModal="True"
+                        ShowGrabber="True"
+                        AllowDismiss="True"
+                        BackgroundColor="{StaticResource Surface}"
+                        CornerRadius="28"
+                        StateChanged="OnArtistMatchSheetStateChanged">
+            <!-- BUG-084: body scrolls; Cancel is pinned in row 1 so a long candidate list cannot push it out of reach. -->
+            <Grid RowDefinitions="*,Auto">
+
+                <ScrollView Grid.Row="0">
+                    <VerticalStackLayout Padding="0,0,0,8">
+
+                        <Label Text="Similar artist found"
+                               Style="{StaticResource BottomSheetTitle}"
+                               Margin="24,20,24,8" />
+
+                        <BoxView Style="{StaticResource Divider}" />
+
+                        <!-- Candidate list (near-duplicate artists, best first) -->
+                        <VerticalStackLayout Spacing="0"
+                                             BindableLayout.ItemsSource="{Binding ArtistMatchCandidates}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="resolution:ArtistMatch">
+                                    <Grid ColumnDefinitions="*,Auto" Padding="24,12">
+                                        <Label Grid.Column="0"
+                                               Text="{Binding Name}"
+                                               StyleClass="Body.Large"
+                                               TextColor="{StaticResource OnSurface}"
+                                               VerticalOptions="Center" />
+                                        <dx:DXButton Grid.Column="1"
+                                                     Content="{Binding Name, StringFormat='Use \'{0}\''}"
+                                                     Style="{StaticResource OutlinedButton}"
+                                                     Padding="16,0"
+                                                     VerticalOptions="Center"
+                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SongFormViewModel}}, Path=UseExistingArtistCommand}"
+                                                     CommandParameter="{Binding .}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <BoxView Style="{StaticResource Divider}" />
+
+                        <!-- Create the typed name as a new artist -->
+                        <VerticalStackLayout Padding="24,12" Spacing="8">
+                            <dx:DXButton Content="{Binding ArtistMatchTypedName, StringFormat='Create \'{0}\''}"
+                                         Style="{StaticResource OutlinedButton}"
+                                         HorizontalOptions="Fill"
+                                         Command="{Binding CreateTypedArtistCommand}" />
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <VerticalStackLayout Grid.Row="1" Padding="0,0,0,24">
+                    <BoxView Style="{StaticResource Divider}" />
+
+                    <dx:DXButton Content="Cancel"
+                                 Style="{StaticResource BottomSheetCancelAction}"
+                                 Command="{Binding DismissArtistMatchSheetCommand}" />
                 </VerticalStackLayout>
 
-                <BoxView Style="{StaticResource Divider}" />
-
-                <dx:DXButton Content="Cancel"
-                             Style="{StaticResource BottomSheetCancelAction}"
-                             Command="{Binding DismissResolutionSheetCommand}" />
-
-            </VerticalStackLayout>
+            </Grid>
         </dx:BottomSheet>
 
     </Grid>

@@ -137,6 +137,8 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   rejects it, the fallback is: the Field shows local and remote together once Deezer answers or the
   REQ-SFT-08 bound expires, so local options wait at most 3,000 ms (Q16).
   > **Spec updated 2026-09-26:** Q16 RESOLVED. The shared Field does **not** gain an append capability in this pipeline (orchestrator decision under Helder's pre-authorisation of 2026-09-25, applying the Q16 recommendation). The fallback is the behaviour: the Field shows local and remote options together once Deezer answers or the REQ-SFT-08 bound expires, so local options wait at most 3,000 ms. Same for the Artist form (REQ-SFT-47). Plan: `plan.md` § 0.3 D1.
+  > **Spec updated 2026-11-11:** Helder confirmed the fallback: no loading indicator while Deezer answers; options are
+  > shown when the response arrives. See `design.md` § 3.4 note of the same date.
 - **REQ-SFT-08: Remote wait bound.** A Deezer call that has not completed within 3,000 ms
   `[Confirmed — Helder 2026-11-04]` SHALL be cancelled and treated as a failure: status Unavailable,
   the unavailable note (REQ-SFT-06 case 2). When the device is offline the call is never made
@@ -240,6 +242,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-20: Created-artist validation.** The created artist obeys `IArtistService` rules
   (non-empty after trim, ≤ 60 characters, no collated duplicate). A violation shows the service
   message on Artist and saves nothing.
+  > **Spec updated 2026-11-05:** an artist refused while it is created inside the song write returns `Failed(Artist, message)` and saves no song (ruling D2); a song-level refusal after the artist was created keeps field None.
 - **REQ-SFT-52: Never two artists with the same name** `[HARD RULE — Helder, sixth round]`. The system
   SHALL NOT create or rename an artist so that two artists share a name under the DB collation
   (`NOCASE_NOACCENT`). Enforced in the Services, on every artist create and rename path
@@ -271,6 +274,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   similar titles for the same artist (existing fuzzy step, score ≥ 0.82), Then the sheet lists them
   (tap a row → open that song, REQ-SFT-10) and offers **Save as new song**, which saves with no
   Version requirement.
+  > **Spec updated 2026-11-09 (BUG-085, approved by Helder):** the "existing fuzzy step" candidate pool is no longer a forward first-word prefix match (a typed title longer than the stored one, e.g. "Patiencee" vs stored "Patience", found nothing). Candidates for the artist are retrieved from the song-title trigram index (OR of the typed title's 3-character windows, as REQ-SFT-34 does for artists), scoped to the same artist, then scored; the ≥ 0.82 threshold is unchanged. Given "Patience" is stored for an artist, When the user saves "Patiencee" for that artist, Then the Possible duplicates sheet lists "Patience" (and the reverse still lists "Patiencee").
 - **REQ-SFT-24: No overwrite.** No path SHALL overwrite a stored song with values typed or picked in
   an add form. ("Update existing" is removed.)
 - **REQ-SFT-25: A new artist does not skip the song guard.** WHEN the artist is being created by
@@ -282,6 +286,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-26: External identity is unique.** IF a save would give a second song the same external
   identity, THEN it SHALL fail with "This music-database song is already in your library" and save
   nothing. The database enforces the same rule (REQ-SFT-39).
+  > **Spec updated 2026-11-05:** the refusal applies only on the no-decision path. With an explicit `SaveAsNewVersion` or `SaveAsNewSong` the identity is nulled before the write and the save succeeds (ruling D1; see REQ-SFT-39).
 
 ### G. Edit mode
 
@@ -333,6 +338,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   same non-null `(ExternalProvider, ExternalId)`. Existing duplicates are resolved by the migration:
   the song with the lowest `Id` keeps the identity; the others keep their data and lose only the
   identity (set to null). No song row is deleted.
+  > **Spec updated 2026-11-05:** a row written from an explicit `SaveAsNewVersion` / `SaveAsNewSong` decision carries a NULL external identity, even for a new artist and even when the identity is held by another song; the save succeeds (ruling D1).
 - **REQ-SFT-40: Artist external columns frozen.** `Artist.ExternalId/ExternalProvider` stay in the
   schema. No flow in this item reads them. Nothing writes them unless Q10 (REQ-SFT-49) decides so.
 
@@ -364,9 +370,13 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   The ViewModel only maps `ArtistChoiceNeeded`/`SongChoiceNeeded` to BottomSheets and calls the method
   again with the user's choice. Each rule is tested at the Service (Level A); VM tests check the
   mapping only.
+  > **Spec updated 2026-11-05:** per Helder's approval, the ViewModel holds the artist and song decisions for one Save attempt and re-sends them on every re-invocation, clears both on an Artist or Title edit, and a fresh user Save tap starts with no decisions (confirmed by Helder 2026-11-05). Made a first-class criterion: REQ-SFT-54.
+- **REQ-SFT-54: Save decision lifecycle in the ViewModel** `[New 2026-11-05 — Helder, approved with 5.3]`. Within one Save attempt the ViewModel SHALL hold the artist decision and the song decision the user has chosen and send both on every re-invocation of the Save method (REQ-SFT-51). It SHALL clear both when the user edits the Artist or the Title field. A fresh user tap on Save SHALL start with no decisions, so a dismissed sheet is asked again.
+  > **Spec updated 2026-11-05:** the 5.3 tests that cover this are currently tagged REQ-SFT-51; re-tag to REQ-SFT-54 the next time those tests are touched (the Builder may not edit them).
 - **REQ-SFT-46: One write path.** Every song create and update from the Song form, including the
   artist it creates, SHALL go through `ISongService.CreateSongWithUrlsAsync` or
   `ISongService.UpdateSongAsync`, so CATALOG-PROP's propagation cannot be bypassed.
+  > **Spec updated 2026-11-05:** the public Create/Update methods are thin wrappers over private cores that hold their bodies; `SaveFromFormAsync` calls those cores, so they remain the only write bodies. The cores also return the failing form field (ruling D2). No public signature changed.
 
 ### L. Artist form name search (confirmed by Helder, fifth round)
 
@@ -550,3 +560,4 @@ non-selectable row — the text itself was replaced by the two Q7 notes on 2026-
 | REQ-SFT-47…50 | `ArtistFormViewModel`, `ArtistSuggestionService` | VM + service tests (A) |
 | REQ-SFT-12 (Q5 mapping) | `DeezerProvider` (title_short, normalised title_version), `SongFormViewModel.ApplyRemotePick` | provider tests (B, fake handler), VM (A) |
 | REQ-SFT-53 | `INetworkStatus` / `MauiNetworkStatus`, `SongSuggestionService`, `ArtistSuggestionService` | service tests with `Mock<INetworkStatus>` (A); `MauiNetworkStatus.IsInternetReachable` theory (B); airplane-mode check in the device gate (7.2) |
+| REQ-SFT-54 | `SongFormViewModel` (`ClearSaveDecisions`, `OnSongTitleChanged`, `OnArtistSearchTextChanged`, `RunSaveAsync`) | `SongFormViewModelTests` 5.3 decision-lifecycle tests (A; currently tagged REQ-SFT-51); device check: AutoCompleteEdit must not re-write Text (7.2) |
