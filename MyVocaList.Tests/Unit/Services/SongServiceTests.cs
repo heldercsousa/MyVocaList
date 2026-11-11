@@ -46,7 +46,7 @@ public class SongServiceTests
     public void ValidateTitleInput_TitleTooLong_ReturnsFalse()
     {
         var sut = CreateSut();
-        var title = new string('x', 101); // exceeds 100-char limit
+        var title = new string('x', 251); // exceeds 250-char limit (REQ-STL-01)
         var (isValid, message) = sut.ValidateTitleInput(title);
         Assert.False(isValid);
         Assert.NotEmpty(message);
@@ -61,35 +61,47 @@ public class SongServiceTests
     }
 
     [Fact]
-    public void ValidateTitleInput_MaxLength100_ReturnsTrue()
+    // [AC] AC-STL-01: a 250-char title is valid
+    public void ValidateTitleInput_MaxLength250_ReturnsTrue()
     {
         var sut = CreateSut();
-        var title = new string('x', 100);
+        var title = new string('x', 250);
         var (isValid, _) = sut.ValidateTitleInput(title);
         Assert.True(isValid);
+    }
+
+    [Fact]
+    // [AC] AC-STL-01: 251 chars is rejected with the 250 message
+    public void ValidateTitleInput_251Chars_ReturnsFalseWith250Message()
+    {
+        var sut = CreateSut();
+        var (isValid, message) = sut.ValidateTitleInput(new string('x', 251));
+        Assert.False(isValid);
+        Assert.Equal("Title is too long. Maximum 250 characters.", message);
     }
 
     // ── GetCharacterCounterInfo ───────────────────────────────────────────
 
     [Fact]
-    // [AC] Counter threshold alignment (Form Validation Standard): the counter reports an error
-    // only when ValidateTitleInput would reject the same length. 100 chars is valid → no error.
-    public void GetCharacterCounterInfo_AtMaxLength100_IsNotError()
+    // [AC] AC-STL-02 / Counter threshold alignment (Form Validation Standard): the counter reports an error
+    // only when ValidateTitleInput would reject the same length. 250 chars is valid → no error.
+    public void GetCharacterCounterInfo_AtMaxLength250_IsNotError()
     {
         var sut = CreateSut();
 
-        var (_, _, isError) = sut.GetCharacterCounterInfo(100);
+        var (text, _, isError) = sut.GetCharacterCounterInfo(250);
 
+        Assert.Equal("250/250", text);
         Assert.False(isError);
     }
 
     [Fact]
-    // [AC] Counter threshold alignment: 101 chars is rejected by the validator → counter error.
+    // [AC] Counter threshold alignment: 251 chars is rejected by the validator → counter error.
     public void GetCharacterCounterInfo_OverMaxLength_IsError()
     {
         var sut = CreateSut();
 
-        var (_, _, isError) = sut.GetCharacterCounterInfo(101);
+        var (_, _, isError) = sut.GetCharacterCounterInfo(251);
 
         Assert.True(isError);
     }
@@ -168,7 +180,7 @@ public class SongServiceTests
     public async Task CreateSongAsync_TitleTooLong_ReturnsFalse()
     {
         var sut = CreateSut();
-        var title = new string('x', 101);
+        var title = new string('x', 251);
 
         var (success, message, song) = await sut.CreateSongAsync(1, title);
 
