@@ -334,6 +334,12 @@
   - **Review lane:** Standard
   > **Spec updated 2026-09-26:** waits for ACF T4 (G2) via 5.5.
 
+- [ ] **5.8 Page + VM: remove the discard sheet (REQ-SFT-11 withdrawn)** [SEQUENTIAL — after 5.6]
+  > **Spec updated 2026-11-11:** Helder dropped the discard sheet after the device test. A local pick always navigates to the edit form (REQ-SFT-10). Remove `discardSheet` from `SongFormPage.xaml`, its Show/Close sync from `.xaml.cs`, and `IsDiscardSheetVisible`/`ConfirmOpenExistingCommand`/`KeepEditingCommand` plus the unsaved-input check from the VM. Keep the near-duplicate artist and resolution sheets. Update tests: delete discard-sheet tests, add one that a local pick navigates even when Artist/Version/Lyrics hold input.
+  - **Files owned:** `SongFormPage.xaml`, `SongFormPage.xaml.cs`, `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
+  - **Risk:** Medium. **Demo:** pick a local song with other fields filled → edit form opens directly.
+  - **Review lane:** Standard
+
 - [CANCELLED: folded into 5.5 (plan § 0.3 D17)] **5.7 Code-behind: delete the Song autocomplete glue** [SEQUENTIAL — after 5.6]
   - **Files owned:** `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs`
   - **Risk:** Low. **Demo:** REQ-ACF-11 check: no `OnArtistItemsRequested`/`OnArtistSelectionChanged`/`OnArtistUnfocused`/`OnArtistClearIconClicked`, no `artistEdit.SelectedItem`.
