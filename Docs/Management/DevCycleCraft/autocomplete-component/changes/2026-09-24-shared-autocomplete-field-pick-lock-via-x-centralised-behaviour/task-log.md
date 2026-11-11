@@ -664,7 +664,32 @@ Files written and re-read: `AutocompleteDXField.xaml.cs` (grep of all edited sym
 
 4. **Helder approval:** 2026-11-10, "Go with T11 automatically, from spec into development. 'Not Found' must be removed from everywhere, no matter the context."
 
-### Checkpoint
+### Implementation (2026-11-10)
 
-- Step: spec written (REQ-ACF-31, design § 3.1/§ 4, T11). Next: spec-reviewer → implementor in `.worktrees/acf-t11`.
-- Context manifest: requirements.md, design.md, tasks.md, task-log.md, `AutocompleteDXField.xaml.cs`, `AutocompleteDXFieldLogic.cs`, `AutocompleteDXFieldLogicTests.cs`.
+- **Red:** three tests `ShowsMenu_NullOptions_ReturnsFalse`, `ShowsMenu_EmptyOptions_ReturnsFalse`, `ShowsMenu_OneOption_ReturnsTrue` added to `AutocompleteDXFieldLogicTests.cs`, each tagged `// [AC] REQ-ACF-31`. Run failed to compile (CS0117, `ShowsMenu` missing), as expected.
+- **Green:** `internal static bool ShowsMenu(IReadOnlyList<AutocompleteSuggestion>? options) => options is { Count: > 0 };` added to `AutocompleteDXFieldLogic.cs` with XML doc. `AutocompleteDXFieldLogicTests`: 60 passed, 0 failed.
+- **Glue:** `AutocompleteDXField.xaml.cs` `OnItemsRequested` RequestAsync delegate, after the Review Focus 1 re-check and before `return options;`: if `!ShowsMenu(options)` → `_lastRequestRejected = true; CloseMenuOnUiThread(); return options;`. `_lastRequestRejected = false;` reset at request start unchanged. Re-read at lines 405-422: edit present, placement correct.
+- **No other files touched.** SongFormPage not modified. No existing tests edited. No normalisation added.
+
+### Changed files:
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXFieldLogic.cs`
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml.cs`
+- `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs`
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md`
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/tasks.md` (T11 box ticked)
+
+### Verification evidence
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`: exit 0, **953 passed, 0 failed, 0 skipped** (includes the 3 new REQ-ACF-31 tests).
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -c Debug`: exit 0, **0 errors**, 27 warnings (all NU1903 package-vulnerability advisories, none from this change).
+- **E2E emulator: not run in this session.** Demo per tasks.md is "emulator run clean, then T7 run 5 on Helder's phone." Manual verification required: "aa" → no menu; "He" → menu opens (PersonFormPage `nameField`).
+
+### AC traceability (REQ-ACF-31)
+
+| AC ID | Criterion | Implementation location | Test method |
+|---|---|---|---|
+| REQ-ACF-31 | An empty or null search result never shows the DX "Not found" row; the menu stays closed via the rejected-request guard | `AutocompleteDXFieldLogic.ShowsMenu`; `AutocompleteDXField.xaml.cs` `OnItemsRequested` RequestAsync | `ShowsMenu_NullOptions_ReturnsFalse`, `ShowsMenu_EmptyOptions_ReturnsFalse`, `ShowsMenu_OneOption_ReturnsTrue` |
+
+Glue (code-behind `RequestAsync` → RC-A guard) is not unit-testable; covered by the emulator check above.
+
+### Commit
+**Status:** To Review. Committed on `task/acf-t11-no-results-row` with `Item: ACF`. Not pushed, not merged.
