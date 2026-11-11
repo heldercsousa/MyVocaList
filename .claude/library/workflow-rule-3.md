@@ -50,4 +50,15 @@ Before ending any session in which implementation occurred:
 - "Did I make a decision that future agents will need to know?"
 - "Is the spec now more ambiguous than before my session?"
 
+### Item close-out checklist
+
+When an item's last gate passes and its status moves to ✅ Done, in the same commit as the status change:
+
+1. **Status banners:** the `Status:` lines at the top of `README.md`, `requirements.md` and `design.md` say "approved <date>; shipped and closed <date>", not "draft" or "in review".
+2. **spec-changelog.md:** every post-approval edit to `requirements.md` / `design.md` has an entry. Check with `git log --oneline -- <folder>/requirements.md <folder>/design.md` against the entries.
+3. **tasks.md:** every box is `[x]` or `[CANCELLED: reason]`, and the result of the final gate run is recorded, like the earlier runs.
+4. **task-log.md:** no task section still says `To Review` or `Check build`; each says Done with its merge SHA. No "pending" left in traceability rows. Every open question is answered or marked declined.
+5. **LEDGER:** the item's row moves to Completed (`/sln-ledger`).
+6. **Follow-ups:** each one is registered (`backlog_gen.py register`) or marked declined. None is left as "register if Helder wants".
+
 ---

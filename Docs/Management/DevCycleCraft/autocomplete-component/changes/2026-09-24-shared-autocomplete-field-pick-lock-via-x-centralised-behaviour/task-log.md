@@ -850,3 +850,6 @@ Helder asked for a gap check after close-out; findings and resolutions:
 - **Second consumer:** confirmed `SongFormPage` binds `AutocompleteDXField` for Title and Artist on branch
   `task/sft-5.5-song-form-fields` (`6f7b6bbf`, worktree `agent-ae30a6ef9c3387d12`, not merged yet). On merge the
   component becomes governed; the song-form item adds it to `component-safety-gate.md`.
+
+- ITF: ITF-docs-guard-worktrees — `.claude/scripts/backlog/tests/test_command_docs_guard.py` — root cause: `_doc_files` globs `.claude/**/*.md`, which includes full repo copies under `.claude/worktrees/`, so a live agent worktree blocks every `.claude/` docs commit — expected 2 line(s).
+- ITF closed: fixed in `f6a4127a` (guard tests 15/15; filter leaves 0 worktree files of 117).
