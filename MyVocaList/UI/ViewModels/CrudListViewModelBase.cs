@@ -50,14 +50,12 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     public bool IsEmpty => !IsInitialLoading && Items.Count == 0;
     public virtual bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
-    public bool CanEditSelected => SelectedCount == 1;
     public bool CanDeleteSelected => SelectedCount > 0;
     public bool IsAllSelected => Items.Count > 0 && SelectedCount == Items.Count;
 
     public IAsyncRelayCommand RefreshCommand { get; }
     public IRelayCommand LoadMoreCommand { get; }
     public IRelayCommand DeleteSelectedCommand { get; }
-    public IAsyncRelayCommand EditSelectedCommand { get; }
     public IRelayCommand SelectAllCommand { get; }
     public IAsyncRelayCommand ConfirmActionCommand { get; }
     public IRelayCommand DismissConfirmCommand { get; }
@@ -75,7 +73,6 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
         LoadMoreCommand = new RelayCommand(() => _ = LoadMoreAsync());
         DeleteSelectedCommand = new RelayCommand(() => RequestDelete(SelectedItems.ToList()), () => CanDeleteSelected);
-        EditSelectedCommand = new AsyncRelayCommand(ExecuteEditSelectedAsync, () => CanEditSelected);
         SelectAllCommand = new RelayCommand(ToggleSelectAll);
         ConfirmActionCommand = new AsyncRelayCommand(ExecuteConfirmActionAsync);
         DismissConfirmCommand = new RelayCommand(DismissConfirmSheet);
@@ -95,11 +92,9 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     partial void OnSelectedCountChanged(int value)
     {
-        OnPropertyChanged(nameof(CanEditSelected));
         OnPropertyChanged(nameof(CanDeleteSelected));
         OnPropertyChanged(nameof(IsAllSelected));
         DeleteSelectedCommand.NotifyCanExecuteChanged();
-        EditSelectedCommand.NotifyCanExecuteChanged();
         IsSelectionMode = value > 0;
         OnSelectedCountUpdated(value);
     }
@@ -259,19 +254,6 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
             }
             catch (OperationCanceledException) { }
         }, token);
-    }
-
-    private async Task ExecuteEditSelectedAsync()
-    {
-        var item = SelectedItems.FirstOrDefault();
-        if (item == null) return;
-
-        RunOnUiThread(() =>
-        {
-            SelectedItems.ClearRange();
-            SelectedCount = 0;
-        });
-        await NavigateToEditAsync(item);
     }
 
     private void RequestDelete(IList<TItem> items)
