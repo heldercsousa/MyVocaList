@@ -799,3 +799,18 @@ T7 gate passed (runs 1-6 cover lines 1-10). F1 in the persons follow-up is close
 A fresh agent (no implementation access) implemented the component from `requirements.md` + `design.md` + `AutocompleteDXFieldLogicTests.cs`. It matched the delivered design: component-owned search (`Task.Delay` debounce, `LoadingProgressMode="Manual"`, no `AsyncItemsSourceProvider`), `DisplayMember="Headline"`, `IsPickEcho` (identical expression), keyboard hide (`HideSoftInputAsync` + `InputMethodManager`), cursor to end, X via `EndIcon="close_outlined"`.
 
 **Divergences: 1.** It set `CharacterCountThreshold="1"` on the editor, because the spec was silent on DX threshold properties after T12. Fixed: design § 3.1 T12 now states that no DX threshold or delay property is set. Other listed choices were equivalent behaviour (e.g. clearing the menu itself on X instead of relying on the DX clear plus the rejected path). Verdict 0-1: the spec describes the implementation; close the feature.
+
+## Guideline updates after close-out (2026-11-11)
+
+Helder asked to record the T12 lesson and to check every guideline (`CLAUDE.md`, `.claude/rules/`, `.claude/library/`, `.claude/agents/`, `.claude/commands/`, `.claude/exception-registry.md`) for stale autocomplete content. Guidelines were re-read first (last change before this: `e5087ca0`, 2026-11-10). Grep for `AsyncItemsSourceProvider`, `ItemsRequested`, `RequestDelay`, `CharacterCountThreshold`, `IsLoadingInProgress`, `Not found`, `autocomplete`.
+
+### Changed files
+
+- `.claude/library/constraints-reference.md` § DevExpress / UI: new entry — DX `AsyncItemsSourceProvider` shows the drop-down while loading; use the component-owned search.
+- `.claude/library/ux-patterns.md` § Autocomplete: factual status note (shared component is `AutocompleteDXField`; Q1 no create row; REQ-ACF-31 no no-results row). The rule itself is unchanged; open question for Helder recorded.
+- `.claude/library/m3-components.md` § Search — autocomplete stub: same pointer.
+- `.claude/exception-registry.md`: the 2026-07-11 "DevExpress-first" exception (hand-rolled `AutocompleteField`) marked closed/superseded.
+
+No change needed: `CLAUDE.md`, `.claude/rules/*` (no autocomplete specifics), `component-safety-gate.md` (`AutocompleteDXField` has one consumer, so it is not governed yet; the song-form item adds it when the Song form binds), `crud-listview.md`, `bug-tracking-reference.md`, `testing-tdd-roles.md` (historical mentions only). No new `Docs/` files, so no `.sln` change.
+
+**Open for Helder:** does the compact-window full-screen Search View rule (`ux-patterns.md`) apply to `AutocompleteDXField`? Today it shows a docked menu on phones, as approved in this item.
