@@ -19,6 +19,6 @@
         <dx:CheckEdit
             InputTransparent="True"
             IsChecked="{Binding IsChecked, Source={x:Reference self}}"
-            CheckedCheckBoxColor="{StaticResource Primary}" />
+            CheckedCheckBoxColor="{dx:ThemeColor Primary}" />
     </dx:DXButton>
 </ContentView>
