@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using MyVocaList.Contracts.DTOs;
+using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Navigation;
@@ -19,20 +20,19 @@ public class SongFormViewModelTests
         Mock<ISnackbarComponent>? snackbar = null,
         Mock<ISecureStorageWrapper>? secureStorage = null,
         Mock<ISongService>? songService = null,
-        Mock<ISongResolutionService>? resolutionService = null,
         Mock<IArtistService>? artistService = null,
         IMessenger? messenger = null)
     {
         return new SongFormViewModel(
             (artistService ?? new Mock<IArtistService>()).Object,
             (songService ?? new Mock<ISongService>()).Object,
-            (resolutionService ?? new Mock<ISongResolutionService>()).Object,
             (snackbar ?? new Mock<ISnackbarComponent>()).Object,
             new Mock<ILogger<SongFormViewModel>>().Object,
             (urlService ?? new Mock<ISongKaraokeUrlService>()).Object,
             (secureStorage ?? new Mock<ISecureStorageWrapper>()).Object,
             messenger ?? new Mock<IMessenger>().Object,
-            _navigationMock.Object);
+            _navigationMock.Object,
+            _suggestionsMock.Object);
     }
 
     // ── Resolution sheet: Open existing (Task 5.1) ─────────────────────────
@@ -48,6 +48,568 @@ public class SongFormViewModelTests
 
         _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=77"), Times.Once);
         Assert.False(sut.IsResolutionSheetVisible);
+    }
+
+    // ── Task 5.2: title search, picks, online-search note ──────────────────
+
+    private const string OfflineNoteText = "You're offline — showing songs from your library only.";
+    private const string UnavailableNoteText = "Online search isn't available right now — showing your library only.";
+
+    private readonly Mock<ISongSuggestionService> _suggestionsMock = new();
+
+    public SongFormViewModelTests() => SetupSearch([], [], []);
+
+    private static SongSuggestionDto LocalDto(
+        int id, string title = "Creep", string artist = "Radiohead", string version = "", int? artistId = 1) =>
+        new(id, title, artist, artistId, null, null, false, version, artist);
+
+    private static SongSuggestionDto RemoteDto(
+        string title = "Creep", string artist = "Radiohead", string version = "",
+        int? localArtistId = null, string? localArtistName = null, string externalId = "dz-1") =>
+        new(null, title, artist, localArtistId, externalId, "Deezer", true, version, localArtistName);
+
+    private void SetupSearch(
+        IReadOnlyList<SongSuggestionDto> local,
+        IReadOnlyList<SongSuggestionDto> promoted,
+        IReadOnlyList<SongSuggestionDto> remote,
+        RemoteSearchStatus status = RemoteSearchStatus.Ok)
+    {
+        _suggestionsMock
+            .Setup(s => s.SearchTitleLocalAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(local);
+        _suggestionsMock
+            .Setup(s => s.SearchTitleRemoteAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SongRemoteSearchResult(promoted, remote, status));
+    }
+
+    private void SetupRemoteStatus(string query, RemoteSearchStatus status) =>
+        _suggestionsMock
+            .Setup(s => s.SearchTitleRemoteAsync(query, It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new SongRemoteSearchResult([], [], status));
+
+    /// <summary>An add-form VM past hydration (Shell has applied the query properties).</summary>
+    private SongFormViewModel CreateAddFormSut(
+        Mock<ISongService>? songService = null, Mock<IArtistService>? artistService = null)
+    {
+        var sut = CreateSut(songService: songService, artistService: artistService);
+        sut.CompleteHydration();
+        return sut;
+    }
+
+    private static Task<IReadOnlyList<AutocompleteSuggestion>> SearchTitle(
+        SongFormViewModel sut, string query, CancellationToken ct = default) =>
+        sut.TitleOptionSource.SearchAsync(query, ct);
+
+    /// <summary>An option as the Field hands it back to SelectTitleCommand: Data is the SongSuggestionDto.</summary>
+    private static AutocompleteSuggestion Pick(SongSuggestionDto dto) =>
+        new(dto.Title, string.Empty, dto);
+
+    // [AC] REQ-SFT-04: a local option shows "artist · version · In your library".
+    [Fact]
+    public async Task TitleOptionSource_LocalHit_SupportingTextHasArtistVersionAndLibraryMarker()
+    {
+        SetupSearch([LocalDto(1, "Creep", "Radiohead", "Pablo Honey")], [], []);
+        var sut = CreateAddFormSut();
+
+        var options = await SearchTitle(sut, "creep");
+
+        var option = Assert.Single(options);
+        Assert.Equal("Creep", option.Headline);
+        Assert.Equal("Radiohead · Pablo Honey · In your library", option.SupportingText);
+    }
+
+    // [AC] REQ-SFT-04: a local option with an empty Version omits the version part.
+    [Fact]
+    public async Task TitleOptionSource_LocalHitEmptyVersion_OmitsVersionPart()
+    {
+        SetupSearch([LocalDto(1, "Creep", "Radiohead", "")], [], []);
+        var sut = CreateAddFormSut();
+
+        var options = await SearchTitle(sut, "creep");
+
+        Assert.Equal("Radiohead · In your library", Assert.Single(options).SupportingText);
+    }
+
+    // [AC] REQ-SFT-04: a remote option shows "artist · version · Deezer" (D21).
+    [Fact]
+    public async Task TitleOptionSource_RemoteHit_SupportingTextIsArtistVersionAndDeezer()
+    {
+        SetupSearch([], [], [RemoteDto("Creep", "Radiohead", "Live")]);
+        var sut = CreateAddFormSut();
+
+        var options = await SearchTitle(sut, "creep");
+
+        var option = Assert.Single(options);
+        Assert.Equal("Creep", option.Headline);
+        Assert.Equal("Radiohead · Live · Deezer", option.SupportingText);
+    }
+
+    // [AC] REQ-SFT-04: a remote option with an empty Version omits the version part (D21).
+    [Fact]
+    public async Task TitleOptionSource_RemoteHitEmptyVersion_OmitsVersionPart()
+    {
+        SetupSearch([], [], [RemoteDto("Creep", "Radiohead", "")]);
+        var sut = CreateAddFormSut();
+
+        var options = await SearchTitle(sut, "creep");
+
+        Assert.Equal("Radiohead · Deezer", Assert.Single(options).SupportingText);
+    }
+
+    // [AC] REQ-SFT-05: one row per song; local first, then promoted (local rows), then remote.
+    [Fact]
+    public async Task TitleOptionSource_OrdersLocalThenPromotedThenRemote()
+    {
+        SetupSearch(
+            [LocalDto(1, "Local One")],
+            [LocalDto(2, "Promoted Two")],
+            [RemoteDto("Remote Three")]);
+        var sut = CreateAddFormSut();
+
+        var options = await SearchTitle(sut, "song");
+
+        Assert.Equal(["Local One", "Promoted Two", "Remote Three"], options.Select(o => o.Headline));
+        Assert.Equal(1, Assert.IsType<SongSuggestionDto>(options[0].Data).LocalId);
+        Assert.Equal(2, Assert.IsType<SongSuggestionDto>(options[1].Data).LocalId);
+        Assert.True(Assert.IsType<SongSuggestionDto>(options[2].Data).IsRemote);
+    }
+
+    // [AC] REQ-SFT-09: the remote step receives the shown local ids and the caller's token (latest query wins).
+    [Fact]
+    public async Task TitleOptionSource_PassesShownLocalIdsAndToken()
+    {
+        SetupSearch([LocalDto(5), LocalDto(6, "Other")], [], []);
+        var sut = CreateAddFormSut();
+        using var cts = new CancellationTokenSource();
+
+        await SearchTitle(sut, "creep", cts.Token);
+
+        _suggestionsMock.Verify(s => s.SearchTitleLocalAsync("creep", cts.Token), Times.Once);
+        _suggestionsMock.Verify(
+            s => s.SearchTitleRemoteAsync("creep", It.Is<IReadOnlyCollection<int>>(ids => ids.SequenceEqual(new[] { 5, 6 })), cts.Token),
+            Times.Once);
+    }
+
+    // [AC] REQ-SFT-06: Unavailable status shows the unavailable note, exact text (D21).
+    [Fact]
+    public async Task TitleOptionSource_StatusUnavailable_SetsUnavailableNote()
+    {
+        SetupSearch([LocalDto(1)], [], [], RemoteSearchStatus.Unavailable);
+        var sut = CreateAddFormSut();
+
+        await SearchTitle(sut, "creep");
+
+        Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-53: Offline status shows the offline note, exact text (D21).
+    [Fact]
+    public async Task TitleOptionSource_StatusOffline_SetsOfflineNote()
+    {
+        SetupSearch([LocalDto(1)], [], [], RemoteSearchStatus.Offline);
+        var sut = CreateAddFormSut();
+
+        await SearchTitle(sut, "creep");
+
+        Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-06: a later Ok query clears the offline note (D21).
+    [Fact]
+    public async Task TitleOptionSource_OfflineThenOk_ClearsNote()
+    {
+        var sut = CreateAddFormSut();
+        SetupSearch([], [], [], RemoteSearchStatus.Offline);
+        await SearchTitle(sut, "creep");
+        Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+
+        SetupSearch([], [], [], RemoteSearchStatus.Ok);
+        await SearchTitle(sut, "creep");
+
+        Assert.Equal(string.Empty, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-06: a remote query that succeeds after a failure clears the unavailable note.
+    [Fact]
+    public async Task TitleOptionSource_RemoteSucceedsAfterFailure_ClearsTitleSupportingText()
+    {
+        var sut = CreateAddFormSut();
+        SetupSearch([], [], [], RemoteSearchStatus.Unavailable);
+        await SearchTitle(sut, "creep");
+        Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
+
+        SetupSearch([], [], [RemoteDto()], RemoteSearchStatus.Ok);
+        await SearchTitle(sut, "creep");
+
+        Assert.Equal(string.Empty, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-09: a stale (cancelled) query never touches the note (Review Focus 4).
+    [Fact]
+    public async Task TitleOptionSource_CancelledQuery_DoesNotChangeTitleSupportingText()
+    {
+        var sut = CreateAddFormSut();
+        SetupSearch([], [], [], RemoteSearchStatus.Offline);
+        await SearchTitle(sut, "creep");
+        Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+
+        SetupSearch([], [], [], RemoteSearchStatus.Ok);
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+        try { await SearchTitle(sut, "creeps", cts.Token); }
+        catch (OperationCanceledException) { /* a stale query may surface as cancellation */ }
+
+        Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-06: a query below 3 characters (no remote call ran) leaves the current note as it is.
+    [Fact]
+    public async Task TitleOptionSource_QueryBelowRemoteThreshold_KeepsExistingNote()
+    {
+        var sut = CreateAddFormSut();
+        SetupRemoteStatus("don", RemoteSearchStatus.Unavailable);
+        SetupRemoteStatus("do", RemoteSearchStatus.Ok);   // the service answers Ok, without a call, below 3 characters
+        await SearchTitle(sut, "don");
+        Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
+
+        await SearchTitle(sut, "do");
+
+        Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-06: the note is set through the VM's UI-thread helper (observable never set off the UI thread).
+    [Fact]
+    public async Task TitleOptionSource_SetsNoteThroughUiThreadHelper()
+    {
+        var provider = new CountingDispatcherProvider();
+        Microsoft.Maui.Dispatching.DispatcherProvider.SetCurrent(provider);
+        var previous = Microsoft.Maui.Controls.Application.Current;
+        Microsoft.Maui.Controls.Application.Current = new Microsoft.Maui.Controls.Application();
+        try
+        {
+            SetupSearch([], [], [], RemoteSearchStatus.Offline);
+            var sut = CreateAddFormSut();
+            var before = provider.Dispatcher.DispatchCount;
+
+            await SearchTitle(sut, "creep");
+
+            Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+            Assert.Equal(1, provider.Dispatcher.DispatchCount - before);
+        }
+        finally
+        {
+            Microsoft.Maui.Controls.Application.Current = previous;
+        }
+    }
+
+    private sealed class CountingDispatcherProvider : Microsoft.Maui.Dispatching.IDispatcherProvider
+    {
+        public CountingDispatcher Dispatcher { get; } = new();
+        public Microsoft.Maui.Dispatching.IDispatcher GetForCurrentThread() => Dispatcher;
+    }
+
+    /// <summary>Reports dispatch as required so every RunOnUiThread call is counted, then runs inline.</summary>
+    private sealed class CountingDispatcher : Microsoft.Maui.Dispatching.IDispatcher
+    {
+        public int DispatchCount { get; private set; }
+        public bool IsDispatchRequired => true;
+        public bool Dispatch(Action action) { DispatchCount++; action(); return true; }
+        public bool DispatchDelayed(TimeSpan delay, Action action) { action(); return true; }
+        public Microsoft.Maui.Dispatching.IDispatcherTimer CreateTimer() => throw new NotSupportedException();
+    }
+
+    // [AC] REQ-SFT-06: emptying Title by typing clears the note (the Field never queries an empty string).
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task SongTitle_EmptiedByTyping_ClearsTitleSupportingText(string emptied)
+    {
+        var sut = CreateAddFormSut();
+        sut.SongTitle = "creep";
+        SetupSearch([], [], [], RemoteSearchStatus.Offline);
+        await SearchTitle(sut, "creep");
+        Assert.Equal(OfflineNoteText, sut.TitleSupportingText);
+
+        sut.SongTitle = emptied;
+
+        Assert.Equal(string.Empty, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-06: X on Title clears the note.
+    [Fact]
+    public async Task ClearTitle_EmptiesNote()
+    {
+        var sut = CreateAddFormSut();
+        sut.SongTitle = "creep";
+        SetupSearch([], [], [], RemoteSearchStatus.Unavailable);
+        await SearchTitle(sut, "creep");
+        Assert.Equal(UnavailableNoteText, sut.TitleSupportingText);
+
+        sut.ClearTitleCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.TitleSupportingText);
+    }
+
+    // [AC] REQ-SFT-14: X on Title clears the pending identity, empties and unlocks Title, keeps Artist.
+    [Fact]
+    public async Task ClearTitle_AfterRemotePick_ClearsPendingIdentity_KeepsArtist()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live", localArtistId: 7, localArtistName: "Radiohead")));
+        Assert.Equal("dz-1", sut.SelectedExternalId);
+
+        sut.ClearTitleCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.SelectedExternalId);
+        Assert.Equal(string.Empty, sut.SelectedProvider);
+        Assert.Equal(string.Empty, sut.SongTitle);
+        Assert.False(sut.IsTitleLocked);
+        Assert.Equal(7, sut.SelectedArtistId);
+        Assert.Equal("Radiohead", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+    }
+
+    // [AC] REQ-SFT-14: X on Title resets a Version that still holds the pick-written value (Q21).
+    [Fact]
+    public async Task ClearTitle_AfterRemotePick_ResetsUnchangedPickFilledVersion()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live")));
+        Assert.Equal("Live", sut.SongVersion);
+
+        sut.ClearTitleCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.SongVersion);
+    }
+
+    // [AC] REQ-SFT-14: X on Title keeps a Version the user edited after the pick (Q21).
+    [Fact]
+    public async Task ClearTitle_AfterRemotePick_KeepsVersionEditedAfterPick()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live")));
+        sut.SongVersion = "Live 2011";
+
+        sut.ClearTitleCommand.Execute(null);
+
+        Assert.Equal("Live 2011", sut.SongVersion);
+    }
+
+    // [AC] REQ-SFT-11: after X on Title a pick-filled Version never triggers the discard sheet (Q21).
+    [Fact]
+    public async Task ClearTitle_AfterRemotePickThenLocalPick_NoDiscardSheetFromPickFilledVersion()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live")));
+        sut.ClearArtistCommand.Execute(null);   // the pick also filled Artist; only the Version is under test
+        sut.ClearTitleCommand.Execute(null);
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
+
+        Assert.False(sut.IsDiscardSheetVisible);
+        _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=42"), Times.Once);
+    }
+
+    // [AC] REQ-SFT-12: a remote pick overwrites Version with the Deezer value, including "" (Q20).
+    [Theory]
+    [InlineData("Demo", "", "")]
+    [InlineData("Demo", "Live", "Live")]
+    public async Task SelectTitle_RemoteOption_SetsVersionFromDeezer_OverwritingTypedVersion(
+        string typedVersion, string deezerVersion, string expected)
+    {
+        var sut = CreateAddFormSut();
+        sut.SongVersion = typedVersion;
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", deezerVersion)));
+
+        Assert.Equal(expected, sut.SongVersion);
+    }
+
+    // [AC] REQ-SFT-12: a remote pick fills Title, Artist and the pending identity, and writes nothing.
+    [Fact]
+    public async Task SelectTitle_RemoteOption_FillsTitleAndArtistAndPendingIdentity_WritesNothing()
+    {
+        var songService = new Mock<ISongService>();
+        var artistService = new Mock<IArtistService>();
+        var sut = CreateAddFormSut(songService, artistService);
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live", externalId: "dz-99")));
+
+        Assert.Equal("Creep", sut.SongTitle);
+        Assert.True(sut.IsTitleLocked);
+        Assert.Equal("Radiohead", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+        Assert.Equal("dz-99", sut.SelectedExternalId);
+        Assert.Equal("Deezer", sut.SelectedProvider);
+        // Explicit Never on the song-service writes and lookups; ShouldShowCharacterCounter (fired by
+        // setting SongTitle) is incidental UI feedback, not a write, so it is deliberately not verified.
+        songService.Verify(s => s.CreateSongAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.CreateSongWithUrlsAsync(It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.UpdateSongAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.DeleteSongsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.GetSongByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.ExistsByTitleForArtistAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()), Times.Never);
+        songService.Verify(s => s.GetPagedSongsForListAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        artistService.VerifyNoOtherCalls();
+        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    // [AC] REQ-SFT-13: a provider artist that is a local artist is picked as that local artist.
+    [Fact]
+    public async Task SelectTitle_RemoteOptionArtistIsLocal_LocksLocalArtist()
+    {
+        var sut = CreateAddFormSut();
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "radiohead", localArtistId: 7, localArtistName: "Radiohead")));
+
+        Assert.Equal(7, sut.SelectedArtistId);
+        Assert.Equal("Radiohead", sut.SelectedArtistName);
+        Assert.Equal("Radiohead", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+    }
+
+    // [AC] REQ-SFT-13: a provider artist that is not local is picked by its name with no id (created on Save).
+    [Fact]
+    public async Task SelectTitle_RemoteOptionArtistNotLocal_LocksTypedArtistWithNoId()
+    {
+        var sut = CreateAddFormSut();
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", localArtistId: null, localArtistName: null)));
+
+        Assert.Null(sut.SelectedArtistId);
+        Assert.Equal("Radiohead", sut.ArtistSearchText);
+        Assert.True(sut.IsArtistLocked);
+    }
+
+    // [AC] REQ-SFT-12: a remote pick closes the artist dropdown and empties its suggestions.
+    [Fact]
+    public async Task RemotePick_ClosesDropdowns()
+    {
+        var sut = CreateAddFormSut();
+        sut.IsArtistDropDownOpen = true;
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto(localArtistId: 7, localArtistName: "Radiohead")));
+
+        Assert.False(sut.IsArtistDropDownOpen);
+        Assert.Empty(sut.ArtistSuggestions);
+    }
+
+    // [AC] REQ-SFT-14: X on Artist after a remote pick clears the pending identity and keeps Title and Version (Q21).
+    [Fact]
+    public async Task ClearArtist_AfterRemotePick_ClearsPendingIdentity_KeepsTitle()
+    {
+        var sut = CreateAddFormSut();
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto("Creep", "Radiohead", "Live", localArtistId: 7, localArtistName: "Radiohead")));
+
+        sut.ClearArtistCommand.Execute(null);
+
+        Assert.Equal(string.Empty, sut.SelectedExternalId);
+        Assert.Equal(string.Empty, sut.SelectedProvider);
+        Assert.Equal("Creep", sut.SongTitle);
+        Assert.True(sut.IsTitleLocked);
+        Assert.Equal("Live", sut.SongVersion);
+        Assert.False(sut.IsArtistLocked);
+    }
+
+    // [AC] REQ-SFT-10: a local pick with no other input replaces the add form with the song's edit form.
+    [Fact]
+    public async Task SelectTitle_LocalOptionNoOtherInput_NavigatesToEditForm()
+    {
+        var sut = CreateAddFormSut();
+        sut.SongTitle = "cre";
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
+
+        _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=42"), Times.Once);
+        Assert.False(sut.IsDiscardSheetVisible);
+    }
+
+    // [AC] REQ-SFT-11: a local pick with user input in Artist, Version, Featured, Lyrics or the YouTube list asks first.
+    [Theory]
+    [InlineData("Artist")]
+    [InlineData("Version")]
+    [InlineData("Featured")]
+    [InlineData("Lyrics")]
+    [InlineData("YouTube")]
+    public async Task SelectTitle_LocalOptionWithOtherInput_ShowsDiscardSheetNoNavigation(string field)
+    {
+        var sut = CreateAddFormSut();
+        sut.SongTitle = "cre";
+        FillOtherInput(sut, field);
+
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
+
+        Assert.True(sut.IsDiscardSheetVisible);
+        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    private static void FillOtherInput(SongFormViewModel sut, string field)
+    {
+        switch (field)
+        {
+            case "Artist": sut.ArtistSearchText = "Radio"; break;
+            case "Version": sut.SongVersion = "Live"; break;
+            case "Featured": sut.FeaturedArtists = "Someone"; break;
+            case "Lyrics": sut.Lyrics = "Some lyrics"; break;
+            case "YouTube": sut.KaraokeUrls.Add(MakeDto("vid-1", 0)); break;
+            default: throw new ArgumentOutOfRangeException(nameof(field), field, null);
+        }
+    }
+
+    // [AC] REQ-SFT-11: Open on the discard sheet opens the picked song's edit form.
+    [Fact]
+    public async Task ConfirmOpenExisting_FromDiscardSheet_Navigates()
+    {
+        var sut = CreateAddFormSut();
+        sut.SongVersion = "Live";
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42)));
+        Assert.True(sut.IsDiscardSheetVisible);
+
+        await sut.ConfirmOpenExistingCommand.ExecuteAsync(null);
+
+        _navigationMock.Verify(n => n.GoToAsync($"../{Routes.SongForm}?songId=42"), Times.Once);
+        Assert.False(sut.IsDiscardSheetVisible);
+    }
+
+    // [AC] REQ-SFT-11: Keep editing closes the sheet and restores the typed query, unlocked; nothing else changes.
+    [Fact]
+    public async Task KeepEditing_RestoresTypedQueryUnlocked_NothingElseChanges()
+    {
+        var sut = CreateAddFormSut();
+        SetupSearch([LocalDto(42, "Creep")], [], []);
+        await SearchTitle(sut, "cre");                  // the typed query
+        sut.SongTitle = "Creep";                        // the Field writes the picked headline into Title
+        sut.SongVersion = "Live";
+        await sut.SelectTitleCommand.ExecuteAsync(Pick(LocalDto(42, "Creep")));
+        Assert.True(sut.IsDiscardSheetVisible);
+
+        sut.KeepEditingCommand.Execute(null);
+
+        Assert.False(sut.IsDiscardSheetVisible);
+        Assert.Equal("cre", sut.SongTitle);
+        Assert.False(sut.IsTitleLocked);
+        Assert.Equal("Live", sut.SongVersion);
+        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    // [AC] REQ-SFT-16: the Artist option source searches local artists only and never calls Deezer.
+    [Fact]
+    public async Task ArtistOptionSource_ReturnsLocalArtistsOnly_NoRemoteCall()
+    {
+        var artistService = new Mock<IArtistService>();
+        artistService
+            .Setup(s => s.SearchArtistsByNameAsync("queen", It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new ArtistListItem(2, "Queen", string.Empty, 3)]);
+        var sut = CreateAddFormSut(artistService: artistService);
+
+        var options = await sut.ArtistOptionSource.SearchAsync("queen", CancellationToken.None);
+
+        var option = Assert.Single(options);
+        Assert.Equal("Queen", option.Headline);
+        Assert.False(option.IsCreateNew);
+        _suggestionsMock.Verify(
+            s => s.SearchTitleRemoteAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     // ── RemoveUrlAsync (edit mode) ─────────────────────────────────────────
@@ -140,163 +702,544 @@ public class SongFormViewModelTests
         Assert.Contains(sut.KaraokeUrls, u => u.VideoId == "abc123");
     }
 
-    // ── BUG-005: SaveAsync exception catch ────────────────────────────────
+    // ── Task 5.3: Save maps service outcomes to sheets (REQ-SFT-51) ───────
 
-    // [AC] AC-B5 — service throws → error snackbar shown, no crash
-    [Fact]
-    public async Task SaveAsync_ServiceThrows_ShowsErrorSnackbar()
+    private static SongFormSaveOutcome SavedOutcome(int id = 5) =>
+        new(SongFormSaveKind.Saved, "Song created", SaveField.None, id, [], false, []);
+
+    private static SongFormSaveOutcome FailedOutcome(SaveField field, string message) =>
+        new(SongFormSaveKind.Failed, message, field, null, [], false, []);
+
+    private static SongFormSaveOutcome ArtistChoiceOutcome(string typed, params ArtistMatch[] candidates) =>
+        new(SongFormSaveKind.ArtistChoiceNeeded, string.Empty, SaveField.None, null, candidates, false, [])
+        {
+            TypedName = typed
+        };
+
+    private static SongFormSaveOutcome SongChoiceOutcome(bool exact, params SongMatch[] songs) =>
+        new(SongFormSaveKind.SongChoiceNeeded, string.Empty, SaveField.None, null, [], exact, songs);
+
+    private static SongMatch SongMatchOf(int id) => new(id, "Creep", string.Empty, "Radiohead", 1.0);
+
+    /// <summary>Records every SaveFromFormAsync request and answers it with <paramref name="decide"/>.</summary>
+    private static void SetupSave(
+        Mock<ISongService> songService,
+        List<SongFormSaveRequest> requests,
+        Func<SongFormSaveRequest, SongFormSaveOutcome> decide)
+    {
+        songService.Setup(s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()))
+            .Returns((SongFormSaveRequest r, CancellationToken _) =>
+            {
+                requests.Add(r);
+                return Task.FromResult(decide(r));
+            });
+    }
+
+    /// <summary>Song service with title and version validation passing, so the VM safety net lets Save through.</summary>
+    private static Mock<ISongService> SaveService(
+        List<SongFormSaveRequest> requests, Func<SongFormSaveRequest, SongFormSaveOutcome> decide)
     {
         var songService = new Mock<ISongService>();
-        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
-                   .Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
-                   .Returns((true, string.Empty));
-        var resolution = new Mock<ISongResolutionService>();
-        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
-                  .ThrowsAsync(new InvalidOperationException("DB context error"));
+        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>())).Returns((true, string.Empty));
+        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>())).Returns((true, string.Empty));
+        SetupSave(songService, requests, decide);
+        return songService;
+    }
+
+    private static void FillAddForm(
+        SongFormViewModel sut, string title = "Creep", string artist = "Radiohead", string version = "")
+    {
+        sut.SongTitle = title;
+        sut.SongVersion = version;
+        sut.ArtistSearchText = artist;
+    }
+
+    /// <summary>A user edit of the Artist or Title field (typed text, not a programmatic restore).</summary>
+    private static void EditField(SongFormViewModel sut, string field)
+    {
+        if (field == "artist")
+            sut.ArtistSearchText = "Other artist";
+        else
+            sut.SongTitle = "Other title";
+    }
+
+    // [AC] REQ-SFT-51: a Service exception shows the error snackbar and resets IsBusy (old AC-B5 carried over).
+    [Fact]
+    public async Task SaveCommand_ServiceThrows_ShowsErrorSnackbar()
+    {
+        var songService = new Mock<ISongService>();
+        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>())).Returns((true, string.Empty));
+        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>())).Returns((true, string.Empty));
+        songService.Setup(s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()))
+                   .ThrowsAsync(new InvalidOperationException("DB context error"));
         var snackbar = new Mock<ISnackbarComponent>();
 
-        var sut = CreateSut(snackbar: snackbar, songService: songService, resolutionService: resolution);
-        sut.SongTitle = "Test Song";
-        sut.SelectedArtistId = 1;
-        sut.SelectedArtistName = "Artist";
+        var sut = CreateSut(snackbar: snackbar, songService: songService);
+        FillAddForm(sut);
 
         await sut.SaveCommand.ExecuteAsync(null);
 
         snackbar.Verify(s => s.ShowErrorAsync(It.Is<string>(m => m.Contains("Failed to save"))), Times.Once);
-        Assert.False(sut.IsBusy); // IsBusy reset in finally
+        Assert.False(sut.IsBusy);
     }
 
-    // [AC] AC-B5 — validation failure (no artist) → does not reach service, no crash
+    // [AC] REQ-SFT-21: a blank Artist is not blocked by the VM; the Service refuses it with "Artist is required".
     [Fact]
-    public async Task SaveAsync_NoArtist_SetsArtistError_NoServiceCall()
+    public async Task SaveCommand_BlankArtist_PassesToServiceAndShowsItsArtistError()
     {
-        var songService = new Mock<ISongService>();
-        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
-                   .Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
-                   .Returns((true, string.Empty));
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => FailedOutcome(SaveField.Artist, "Artist is required"));
         var sut = CreateSut(songService: songService);
-        sut.SongTitle = "Test Song";
-        // SelectedArtistId not set
+        FillAddForm(sut, artist: "   ");
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        var request = Assert.Single(requests);
+        Assert.Null(request.ArtistId);
+        Assert.True(sut.ArtistHasError);
+        Assert.Equal("Artist is required", sut.ArtistErrorText);
+    }
+
+    // [AC] REQ-SFT-18: a typed, unpicked Artist is sent by its trimmed name with no ArtistId, and sets no artist error.
+    [Fact]
+    public async Task SaveCommand_TypedArtist_SendsTrimmedNameWithoutArtistId()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, title: "  Creep  ", artist: "  Metalica  ", version: " Live ");
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        var request = Assert.Single(requests);
+        Assert.Null(request.SongId);
+        Assert.Equal("Creep", request.Title);
+        Assert.Equal("Live", request.Version);
+        Assert.Null(request.ArtistId);
+        Assert.Equal("Metalica", request.ArtistText);
+        Assert.IsType<ArtistDecision.None>(request.ArtistDecision);
+        Assert.Equal(SongDecision.None, request.SongDecision);
+        Assert.False(sut.ArtistHasError);
+    }
+
+    // [AC] REQ-SFT-25: the picked Deezer identity travels with the save so the song guard can run on it.
+    [Fact]
+    public async Task SaveCommand_AfterRemotePick_SendsPickedExternalIdentity()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        sut.SelectTitleCommand.Execute(Pick(RemoteDto(title: "Don't Cry", artist: "Guns N' Roses", externalId: "3135556")));
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        var request = Assert.Single(requests);
+        Assert.Equal("3135556", request.ExternalId);
+        Assert.Equal("Deezer", request.ExternalProvider);
+    }
+
+    // [AC] REQ-SFT-46: Save writes only through SaveFromFormAsync; the VM never calls a create or update write.
+    [Fact]
+    public async Task SaveCommand_NewSong_WritesOnlyThroughSaveFromForm()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut);
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Single(requests);
+        var writes = songService.Invocations
+            .Select(i => i.Method.Name)
+            .Where(n => n is "CreateSongAsync" or "CreateSongWithUrlsAsync" or "UpdateSongAsync");
+        Assert.Empty(writes);
+    }
+
+    // [AC] REQ-SFT-51: add-mode Save calls SaveFromFormAsync once with SongId null and no decisions.
+    [Fact]
+    public async Task SaveCommand_NewSongNoDecision_CallsSaveFromFormInAddMode()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, title: "Test Song", artist: "Artist");
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        var request = Assert.Single(requests);
+        Assert.Null(request.SongId);
+        Assert.Equal("Test Song", request.Title);
+        Assert.IsType<ArtistDecision.None>(request.ArtistDecision);
+        Assert.Equal(SongDecision.None, request.SongDecision);
+    }
+
+    // [AC] REQ-SFT-51: a Saved outcome shows the success snackbar.
+    [Fact]
+    public async Task SaveCommand_SavedOutcome_ShowsSuccessSnackbar()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => SavedOutcome());
+        var snackbar = new Mock<ISnackbarComponent>();
+        var sut = CreateSut(snackbar: snackbar, songService: songService);
+        FillAddForm(sut);
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        snackbar.Verify(s => s.ShowSuccessAsync(It.IsAny<string>()), Times.Once);
+    }
+
+    // [AC] REQ-SFT-51: a Saved outcome navigates back through INavigationService (never Shell.Current).
+    [Fact]
+    public async Task SaveCommand_SavedOutcome_NavigatesBack()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut);
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        _navigationMock.Verify(n => n.GoToAsync(".."), Times.Once);
+    }
+
+    // [AC] REQ-SFT-15: a Failed(Title) outcome shows its message on the Title field and does not navigate.
+    [Fact]
+    public async Task SaveCommand_FailedTitle_ShowsMessageOnTitleField()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => FailedOutcome(SaveField.Title, "Song title is required"));
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut);
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.TitleHasError);
+        Assert.Equal("Song title is required", sut.TitleErrorText);
+        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    // [AC] REQ-SFT-22: a Failed(Version) outcome shows its message on the Version field (AC-1.2 text unchanged).
+    [Fact]
+    public async Task SaveCommand_FailedVersion_ShowsMessageOnVersionField()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests,
+            _ => FailedOutcome(SaveField.Version, "A version label is required (e.g. Live, Acoustic, Remix)"));
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut);
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(sut.VersionHasError);
+        Assert.Equal("A version label is required (e.g. Live, Acoustic, Remix)", sut.VersionErrorText);
+    }
+
+    // [AC] REQ-SFT-20: a Failed(Artist) outcome (created-artist validation) shows the service message on Artist.
+    [Fact]
+    public async Task SaveCommand_FailedArtist_ShowsServiceMessageOnArtistField()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests,
+            _ => FailedOutcome(SaveField.Artist, "Artist name must be 60 characters or fewer"));
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, artist: "Metalica");
 
         await sut.SaveCommand.ExecuteAsync(null);
 
         Assert.True(sut.ArtistHasError);
-        songService.Verify(s => s.CreateSongAsync(
-            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
-            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        Assert.Equal("Artist name must be 60 characters or fewer", sut.ArtistErrorText);
     }
 
-    // [AC] AC-B5 — NoMatch path → CreateSongWithUrlsAsync called
+    // [AC] REQ-SFT-26: a Failed(None) outcome (write refusal) shows its message as a general error and sets no field error.
     [Fact]
-    public async Task SaveAsync_NoMatch_CallsCreateSongWithUrls()
+    public async Task SaveCommand_FailedNoField_ShowsGeneralErrorAndNoFieldError()
     {
-        var songService = new Mock<ISongService>();
-        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
-                   .Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
-                   .Returns((true, string.Empty));
-        songService.Setup(s => s.CreateSongWithUrlsAsync(
-            It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>(),
-            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-            It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((true, "Song created", (Song?)null));
-
-        var resolution = new Mock<ISongResolutionService>();
-        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new SongResolution(ResolutionKind.NoMatch, null, []));
-
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests,
+            _ => FailedOutcome(SaveField.None, "This music-database song is already in your library"));
         var snackbar = new Mock<ISnackbarComponent>();
-
-        var sut = CreateSut(snackbar: snackbar, songService: songService, resolutionService: resolution);
-        sut.SongTitle = "Test Song";
-        sut.SelectedArtistId = 1;
-        sut.SelectedArtistName = "Artist";
+        var sut = CreateSut(snackbar: snackbar, songService: songService);
+        FillAddForm(sut);
 
         await sut.SaveCommand.ExecuteAsync(null);
 
-        songService.Verify(s => s.CreateSongWithUrlsAsync(
-            1, "Test Song", It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
-            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<IEnumerable<string>>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+        snackbar.Verify(s => s.ShowErrorAsync("This music-database song is already in your library"), Times.Once);
+        Assert.False(sut.TitleHasError);
+        Assert.False(sut.VersionHasError);
+        Assert.False(sut.ArtistHasError);
     }
 
-    // [AC] AC-1.1/1.2 — resolution returns ExactLocalMatch → resolution sheet shown
+    // [AC] REQ-SFT-19: ArtistChoiceNeeded opens the artist-match sheet with the candidates best-first and saves nothing.
     [Fact]
-    public async Task SaveAsync_ExactLocalMatch_SetsResolutionSheetVisible()
+    public async Task SaveCommand_ArtistChoiceNeeded_OpensArtistSheetWithCandidatesInOrder()
     {
-        var songService = new Mock<ISongService>();
-        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
-                   .Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
-                   .Returns((true, string.Empty));
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => ArtistChoiceOutcome("Metalica",
+            new ArtistMatch(3, "Metallica", 0.94),
+            new ArtistMatch(8, "Metalic", 0.81),
+            new ArtistMatch(11, "Metalika", 0.78)));
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, artist: "Metalica");
 
-        var resolution = new Mock<ISongResolutionService>();
-        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 99, []));
+        await sut.SaveCommand.ExecuteAsync(null);
 
-        var sut = CreateSut(songService: songService, resolutionService: resolution);
-        sut.SongTitle = "Test Song";
-        sut.SelectedArtistId = 1;
-        sut.SelectedArtistName = "Artist";
+        Assert.True(sut.IsArtistMatchSheetVisible);
+        Assert.False(sut.IsResolutionSheetVisible);
+        Assert.Equal(new[] { 3, 8, 11 }, sut.ArtistMatchCandidates.Select(c => c.ArtistId));
+        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    // [AC] REQ-SFT-19: the artist sheet exposes the outcome's TypedName for the "Create '<typed>'" action.
+    [Fact]
+    public async Task SaveCommand_ArtistChoiceNeeded_ExposesOutcomeTypedNameForCreateAction()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests,
+            _ => ArtistChoiceOutcome("Metalica", new ArtistMatch(3, "Metallica", 0.94)));
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, artist: "  Metalica ");
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal("Metalica", sut.ArtistMatchTypedName);
+    }
+
+    // [AC] REQ-SFT-22: an exact duplicate opens the resolution sheet as the duplicate sheet and saves nothing.
+    [Fact]
+    public async Task SaveCommand_ExactSongChoice_OpensResolutionSheetAsExactDuplicate()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => SongChoiceOutcome(true, SongMatchOf(9)));
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut);
 
         await sut.SaveCommand.ExecuteAsync(null);
 
         Assert.True(sut.IsResolutionSheetVisible);
-        Assert.Equal(1, sut.ResolutionCandidates.Count);
+        Assert.True(sut.IsExactDuplicate);
+        Assert.Equal(9, Assert.Single(sut.ResolutionCandidates).SongId);
+        Assert.False(sut.IsArtistMatchSheetVisible);
     }
 
-    // [AC] AC-1.1/1.2 — BUG-023 regression guard: the resolution sheet's Cancel button is
-    // bound to DismissResolutionSheetCommand, which the SongFormPage code-behind relies on to
-    // close resolutionSheet (see SongFormPage.xaml.cs OnViewModelPropertyChanged). This test
-    // proves the VM half of that round trip: the flag the view observes must flip back to false
-    // once the sheet is opened and then dismissed. The XAML binding restoration itself is not
-    // unit-testable — see BUG-023 task-log for the required manual E2E verification step.
+    // [AC] REQ-SFT-23: similar titles open the resolution sheet as possible duplicates, not as an exact duplicate.
     [Fact]
-    public async Task DismissResolutionSheetCommand_AfterExactLocalMatch_SetsIsResolutionSheetVisibleFalse()
+    public async Task SaveCommand_FuzzySongChoice_OpensResolutionSheetAsPossibleDuplicates()
     {
-        var songService = new Mock<ISongService>();
-        songService.Setup(s => s.ValidateTitleInput(It.IsAny<string>()))
-                   .Returns((true, string.Empty));
-        songService.Setup(s => s.ValidateVersionInput(It.IsAny<string>(), It.IsAny<bool>()))
-                   .Returns((true, string.Empty));
-
-        var resolution = new Mock<ISongResolutionService>();
-        resolution.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new SongResolution(ResolutionKind.ExactLocalMatch, 99, []));
-
-        var sut = CreateSut(songService: songService, resolutionService: resolution);
-        sut.SongTitle = "Test Song";
-        sut.SelectedArtistId = 1;
-        sut.SelectedArtistName = "Artist";
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests,
+            _ => SongChoiceOutcome(false, SongMatchOf(9), SongMatchOf(10)));
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut);
 
         await sut.SaveCommand.ExecuteAsync(null);
-        Assert.True(sut.IsResolutionSheetVisible); // precondition: sheet was opened by the duplicate-title flow
+
+        Assert.True(sut.IsResolutionSheetVisible);
+        Assert.False(sut.IsExactDuplicate);
+        Assert.Equal(2, sut.ResolutionCandidates.Count);
+    }
+
+    // [AC] REQ-SFT-19: "Use '<existing>'" re-invokes SaveFromFormAsync with UseExisting(id) and closes the sheet.
+    [Fact]
+    public async Task UseExistingArtistCommand_ReInvokesSaveWithUseExistingDecision()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, r => r.ArtistDecision is ArtistDecision.None
+            ? ArtistChoiceOutcome("Metalica", new ArtistMatch(3, "Metallica", 0.94))
+            : SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, artist: "Metalica");
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        await sut.UseExistingArtistCommand.ExecuteAsync(new ArtistMatch(3, "Metallica", 0.94));
+
+        Assert.Equal(2, requests.Count);
+        Assert.Equal(new ArtistDecision.UseExisting(3), requests[1].ArtistDecision);
+        Assert.False(sut.IsArtistMatchSheetVisible);
+    }
+
+    // [AC] REQ-SFT-19: "Create '<typed>'" re-invokes SaveFromFormAsync with CreateTyped and closes the sheet.
+    [Fact]
+    public async Task CreateTypedArtistCommand_ReInvokesSaveWithCreateTypedDecision()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, r => r.ArtistDecision is ArtistDecision.None
+            ? ArtistChoiceOutcome("Metalica", new ArtistMatch(3, "Metallica", 0.94))
+            : SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, artist: "Metalica");
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        await sut.CreateTypedArtistCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, requests.Count);
+        Assert.IsType<ArtistDecision.CreateTyped>(requests[1].ArtistDecision);
+        Assert.False(sut.IsArtistMatchSheetVisible);
+    }
+
+    // [AC] REQ-SFT-19: Back or scrim on the artist sheet saves nothing and navigates nowhere.
+    [Fact]
+    public async Task DismissArtistMatchSheetCommand_SavesNothingAndHidesSheet()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests,
+            _ => ArtistChoiceOutcome("Metalica", new ArtistMatch(3, "Metallica", 0.94)));
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, artist: "Metalica");
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        sut.DismissArtistMatchSheetCommand.Execute(null);
+
+        Assert.False(sut.IsArtistMatchSheetVisible);
+        Assert.Single(requests);
+        _navigationMock.Verify(n => n.GoToAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    // [AC] REQ-SFT-22: "Save as new version" re-invokes SaveFromFormAsync with SaveAsNewVersion (the Service checks the Version).
+    [Fact]
+    public async Task ConfirmSaveAsNewVersionCommand_ReInvokesSaveWithSaveAsNewVersionDecision()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, r => r.SongDecision == SongDecision.None
+            ? SongChoiceOutcome(true, SongMatchOf(9))
+            : SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, version: "Live");
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        await sut.ConfirmSaveAsNewVersionCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, requests.Count);
+        Assert.Equal(SongDecision.SaveAsNewVersion, requests[1].SongDecision);
+        Assert.False(sut.IsResolutionSheetVisible);
+    }
+
+    // [AC] REQ-SFT-23: "Save as new song" re-invokes SaveFromFormAsync with SaveAsNewSong; no Version is required.
+    [Fact]
+    public async Task ConfirmSaveAsNewSongCommand_ReInvokesSaveWithSaveAsNewSongDecisionWithoutVersion()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, r => r.SongDecision == SongDecision.None
+            ? SongChoiceOutcome(false, SongMatchOf(9))
+            : SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, version: string.Empty);
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        await sut.ConfirmSaveAsNewSongCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, requests.Count);
+        Assert.Equal(SongDecision.SaveAsNewSong, requests[1].SongDecision);
+        Assert.False(sut.IsResolutionSheetVisible);
+    }
+
+    // [AC] REQ-SFT-22: Back or scrim on the duplicate sheet saves nothing and hides the sheet.
+    [Fact]
+    public async Task DismissResolutionSheetCommand_AfterExactSongChoice_SavesNothing()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, _ => SongChoiceOutcome(true, SongMatchOf(9)));
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut);
+        await sut.SaveCommand.ExecuteAsync(null);
 
         sut.DismissResolutionSheetCommand.Execute(null);
 
         Assert.False(sut.IsResolutionSheetVisible);
+        Assert.Single(requests);
     }
 
-    // [AC] AC-1.2 — save as new version with empty Version is blocked
+    // [AC] REQ-SFT-54: within one Save attempt the VM keeps both decisions and sends them on every re-invocation.
     [Fact]
-    public async Task ConfirmSaveAsNewVersion_EmptyVersion_SetsVersionError()
+    public async Task Decisions_PersistAcrossReinvocations_WithinOneSaveAttempt()
     {
-        var songService = new Mock<ISongService>();
-        songService.Setup(s => s.ValidateVersionInput(string.Empty, true))
-                   .Returns((false, "A version label is required (e.g. Live, Acoustic, Remix)"));
-
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, r => r.ArtistDecision is ArtistDecision.None
+            ? ArtistChoiceOutcome("Metalica", new ArtistMatch(3, "Metallica", 0.94))
+            : r.SongDecision == SongDecision.None
+                ? SongChoiceOutcome(true, SongMatchOf(9))
+                : SavedOutcome());
         var sut = CreateSut(songService: songService);
-        sut.SongTitle = "Test Song";
-        sut.SelectedArtistId = 1;
-        sut.SelectedArtistName = "Artist";
-        sut.SongVersion = ""; // empty
-
+        FillAddForm(sut, artist: "Metalica", version: "Live");
+        await sut.SaveCommand.ExecuteAsync(null);
+        await sut.UseExistingArtistCommand.ExecuteAsync(new ArtistMatch(3, "Metallica", 0.94));
         await sut.ConfirmSaveAsNewVersionCommand.ExecuteAsync(null);
 
-        Assert.True(sut.VersionHasError);
-        Assert.False(string.IsNullOrEmpty(sut.VersionErrorText));
+        Assert.Equal(3, requests.Count);
+        Assert.Equal(new ArtistDecision.UseExisting(3), requests[2].ArtistDecision);
+        Assert.Equal(SongDecision.SaveAsNewVersion, requests[2].SongDecision);
+    }
+
+    // [AC] REQ-SFT-54: a user edit of Artist or Title clears the artist decision before the next re-invocation.
+    [Theory]
+    [InlineData("artist")]
+    [InlineData("title")]
+    public async Task UserEdit_ClearsArtistDecision(string edit)
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, r => r.ArtistDecision is ArtistDecision.None
+            ? ArtistChoiceOutcome("Metalica", new ArtistMatch(3, "Metallica", 0.94))
+            : r.SongDecision == SongDecision.None
+                ? SongChoiceOutcome(true, SongMatchOf(9))
+                : SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, artist: "Metalica");
+        await sut.SaveCommand.ExecuteAsync(null);
+        await sut.UseExistingArtistCommand.ExecuteAsync(new ArtistMatch(3, "Metallica", 0.94));
+
+        EditField(sut, edit);
+        await sut.ConfirmSaveAsNewSongCommand.ExecuteAsync(null);
+
+        Assert.Equal(3, requests.Count);
+        Assert.IsType<ArtistDecision.None>(requests[2].ArtistDecision);
+        Assert.Equal(SongDecision.SaveAsNewSong, requests[2].SongDecision);
+    }
+
+    // [AC] REQ-SFT-54: a user edit of Artist or Title clears the song decision before the next re-invocation.
+    [Theory]
+    [InlineData("artist")]
+    [InlineData("title")]
+    public async Task UserEdit_ClearsSongDecision(string edit)
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, r => r.SongDecision == SongDecision.None
+            ? SongChoiceOutcome(false, SongMatchOf(9))
+            : r.ArtistDecision is ArtistDecision.None
+                ? ArtistChoiceOutcome("Metalica", new ArtistMatch(3, "Metallica", 0.94))
+                : SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, artist: "Metalica");
+        await sut.SaveCommand.ExecuteAsync(null);
+        await sut.ConfirmSaveAsNewSongCommand.ExecuteAsync(null);
+
+        EditField(sut, edit);
+        await sut.UseExistingArtistCommand.ExecuteAsync(new ArtistMatch(3, "Metallica", 0.94));
+
+        Assert.Equal(3, requests.Count);
+        Assert.Equal(SongDecision.None, requests[2].SongDecision);
+        Assert.Equal(new ArtistDecision.UseExisting(3), requests[2].ArtistDecision);
+    }
+
+    // [AC] REQ-SFT-54: a new Save attempt (the user's Save tap) starts with no decisions.
+    [Fact]
+    public async Task SaveCommand_NewAttempt_StartsWithNoDecisions()
+    {
+        var requests = new List<SongFormSaveRequest>();
+        var songService = SaveService(requests, r => r.ArtistDecision is ArtistDecision.None
+            ? ArtistChoiceOutcome("Metalica", new ArtistMatch(3, "Metallica", 0.94))
+            : r.SongDecision == SongDecision.None
+                ? SongChoiceOutcome(true, SongMatchOf(9))
+                : SavedOutcome());
+        var sut = CreateSut(songService: songService);
+        FillAddForm(sut, artist: "Metalica");
+        await sut.SaveCommand.ExecuteAsync(null);
+        await sut.UseExistingArtistCommand.ExecuteAsync(new ArtistMatch(3, "Metallica", 0.94));
+
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        Assert.Equal(3, requests.Count);
+        Assert.IsType<ArtistDecision.None>(requests[2].ArtistDecision);
+        Assert.Equal(SongDecision.None, requests[2].SongDecision);
     }
 
     // ── BUG-008: artist blur-clear ─────────────────────────────────────────
@@ -687,10 +1630,9 @@ public class SongFormViewModelTests
     }
 
     [Fact]
-    // [AC] BUG-024: edit-mode Save must send the complete current form data — hydrated
-    // FeaturedArtists and Lyrics plus the user's edited Version — to UpdateSongAsync.
-    // Before the fix it sent empty FeaturedArtists/Lyrics and ignored Version entirely.
-    public async Task SaveAsync_EditMode_SendsHydratedFieldsAndEditedVersion()
+    // [AC] REQ-SFT-51: edit-mode Save hands the complete form to SaveFromFormAsync with the song id: hydrated
+    // FeaturedArtists and Lyrics plus the user's edited Version (BUG-024 carried over).
+    public async Task SaveAsync_EditMode_SendsSongIdAndHydratedFieldsAndEditedVersion()
     {
         var song = new Song
         {
@@ -701,12 +1643,9 @@ public class SongFormViewModelTests
             FeaturedArtists = "Feat A",
             Lyrics = "Stored lyrics"
         };
+        var requests = new List<SongFormSaveRequest>();
         var songService = MakeSongServiceWithSong(song);
-        songService.Setup(s => s.UpdateSongAsync(
-                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
+        SetupSave(songService, requests, _ => SavedOutcome(42));
         var secureStorage = new Mock<ISecureStorageWrapper>();
         secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
         var urlService = new Mock<ISongKaraokeUrlService>();
@@ -723,17 +1662,17 @@ public class SongFormViewModelTests
 
         await sut.SaveCommand.ExecuteAsync(null);
 
-        songService.Verify(s => s.UpdateSongAsync(
-            42, "Stored Title", "Feat A", "Stored lyrics",
-            null, null, "Acoustic",
-            It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
+        var request = Assert.Single(requests);
+        Assert.Equal(42, request.SongId);
+        Assert.Equal("Stored Title", request.Title);
+        Assert.Equal("Feat A", request.FeaturedArtists);
+        Assert.Equal("Stored lyrics", request.Lyrics);
+        Assert.Equal("Acoustic", request.Version);
     }
 
     [Fact]
-    // [AC] REQ-ACREATE-16: BUG-067 — after the user unlocks the Artist field and picks a
-    // different artist, edit-mode Save must forward the CURRENT SelectedArtistId to the service.
-    // Before the fix ExecuteEditSaveAsync could not send the artist at all (no parameter existed),
-    // so the change was silently lost.
+    // [AC] REQ-SFT-28: after X and a new pick in edit mode, Save sends the new artist id to SaveFromFormAsync
+    // (REQ-ACREATE-16 carried over).
     public async Task SaveAsync_EditMode_ArtistChanged_SendsNewArtistIdToService()
     {
         var song = new Song
@@ -743,12 +1682,9 @@ public class SongFormViewModelTests
             Title = "Stored Title",
             OriginalArtist = new Artist { Id = 7, Name = "Queen" }
         };
+        var requests = new List<SongFormSaveRequest>();
         var songService = MakeSongServiceWithSong(song);
-        songService.Setup(s => s.UpdateSongAsync(
-                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
+        SetupSave(songService, requests, _ => SavedOutcome(42));
         var secureStorage = new Mock<ISecureStorageWrapper>();
         secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
         var urlService = new Mock<ISongKaraokeUrlService>();
@@ -767,10 +1703,9 @@ public class SongFormViewModelTests
 
         await sut.SaveCommand.ExecuteAsync(null);
 
-        songService.Verify(s => s.UpdateSongAsync(
-            42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(),
-            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-            9, It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
+        var request = Assert.Single(requests);
+        Assert.Equal(42, request.SongId);
+        Assert.Equal(9, request.ArtistId);
     }
 
     // ── Title field: blur-first validation (Form Validation Standard, Task 04) ────
@@ -1003,20 +1938,18 @@ public class SongFormViewModelTests
     // ── Re-entrancy guard (BUG-049) ────────────────────────────────────────
 
     [Fact]
-    // [AC] BUG-049: a fast double-tap on Save while a save is in flight must not fire the
-    // resolution service call twice (which caused a duplicate "GoToAsync("..")" that overshot
-    // the nav stack root).
-    public async Task SaveCommand_DoubleInvokedWhileSaving_CallsResolveOnlyOnce()
+    // [AC] REQ-SFT-51: a fast double-tap on Save while a save is in flight calls SaveFromFormAsync once
+    // (BUG-049 guard carried over).
+    public async Task SaveCommand_DoubleInvokedWhileSaving_CallsSaveFromFormOnlyOnce()
     {
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput("Yesterday")).Returns((true, ""));
         songService.Setup(s => s.ValidateVersionInput(string.Empty, false)).Returns((true, ""));
-        var resolutionService = new Mock<ISongResolutionService>();
-        var gate = new TaskCompletionSource<SongResolution>();
-        resolutionService.Setup(s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()))
-                         .Returns(gate.Task);
+        var gate = new TaskCompletionSource<SongFormSaveOutcome>();
+        songService.Setup(s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()))
+                   .Returns(gate.Task);
 
-        var sut = CreateSut(songService: songService, resolutionService: resolutionService);
+        var sut = CreateSut(songService: songService);
         sut.CompleteHydration();
         sut.SongTitle = "Yesterday";
         sut.SelectedArtistId = 5;
@@ -1024,11 +1957,11 @@ public class SongFormViewModelTests
         var firstCall = sut.SaveCommand.ExecuteAsync(null);
         var secondCall = sut.SaveCommand.ExecuteAsync(null);   // simulates the second tap of a double-tap
 
-        gate.SetResult(new SongResolution(ResolutionKind.NoMatch, null, []));
+        gate.SetResult(SavedOutcome());
         await Task.WhenAll(firstCall, secondCall);
 
-        resolutionService.Verify(
-            s => s.ResolveAsync(It.IsAny<SongCandidate>(), It.IsAny<CancellationToken>()), Times.Once);
+        songService.Verify(
+            s => s.SaveFromFormAsync(It.IsAny<SongFormSaveRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── BUG-051: stale-search race ──────────────────────────────────────────
@@ -1140,9 +2073,8 @@ public class SongFormViewModelTests
             Times.Never());
     }
 
-    // [AC] BUG-055: after edit-mode hydration the artist link is preserved — Save passes the
-    // artist-required guard without the user re-selecting, so UpdateSongAsync is invoked (the
-    // service keeps the loaded song's ArtistId). Before the fix the guard blocked Save.
+    // [AC] REQ-SFT-28: the stored artist loads locked; Save after hydration sends its id, so the artist link is kept
+    // (BUG-055 carried over).
     [Fact]
     public async Task SaveAsync_EditMode_AfterHydration_PreservesArtistLink()
     {
@@ -1153,12 +2085,9 @@ public class SongFormViewModelTests
             Title = "Stored Title",
             OriginalArtist = new Artist { Id = 7, Name = "Queen" }
         };
+        var requests = new List<SongFormSaveRequest>();
         var songService = MakeSongServiceWithSong(song);
-        songService.Setup(s => s.UpdateSongAsync(
-                It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-                It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((false, "stop before navigation")); // avoid Shell.Current in unit test
+        SetupSave(songService, requests, _ => SavedOutcome(42));
         var secureStorage = new Mock<ISecureStorageWrapper>();
         secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
         var urlService = new Mock<ISongKaraokeUrlService>();
@@ -1173,9 +2102,121 @@ public class SongFormViewModelTests
         await sut.SaveCommand.ExecuteAsync(null);
 
         Assert.False(sut.ArtistHasError);
-        songService.Verify(s => s.UpdateSongAsync(
-            42, "Stored Title", It.IsAny<string?>(), It.IsAny<string?>(),
-            It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
-            It.IsAny<int?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
+        var request = Assert.Single(requests);
+        Assert.Equal(42, request.SongId);
+        Assert.Equal(7, request.ArtistId);
+    }
+
+    // ── Task 5.4: edit-mode title and hydration (REQ-SFT-27, REQ-SFT-02) ─────────────────────
+
+    /// <summary>A stored song: API-sourced (Deezer identity) or manual (no identity), artist "Queen".</summary>
+    private static Song StoredSong(bool apiSourced) => new()
+    {
+        Id = 42,
+        ArtistId = 7,
+        Title = "Stored Title",
+        ExternalId = apiSourced ? "dz-99" : null,
+        ExternalProvider = apiSourced ? "Deezer" : null,
+        OriginalArtist = new Artist { Id = 7, Name = "Queen" }
+    };
+
+    /// <summary>An edit-form VM hydrated from <paramref name="song"/>: Shell query applied, load awaited, hydration ended.</summary>
+    private async Task<SongFormViewModel> CreateEditSutAsync(
+        Song song, Mock<ISongService> songService, Mock<IArtistService>? artistService = null)
+    {
+        var secureStorage = new Mock<ISecureStorageWrapper>();
+        secureStorage.Setup(s => s.GetAsync(It.IsAny<string>())).ReturnsAsync((string?)null);
+        var urlService = new Mock<ISongKaraokeUrlService>();
+        urlService.Setup(s => s.GetUrlsForSongAsync(song.Id, It.IsAny<CancellationToken>())).ReturnsAsync([]);
+
+        var sut = CreateSut(urlService: urlService, secureStorage: secureStorage,
+            songService: songService, artistService: artistService);
+        sut.SongIdRaw = song.Id.ToString();
+        await Task.Yield();
+        sut.CompleteHydration();
+        return sut;
+    }
+
+    // [AC] REQ-SFT-27: in edit mode Title is editable text for an API-sourced and for a manual song; the VM never pick-locks it.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task EditMode_TitleIsNotPickLocked_ForApiAndManualSongs(bool apiSourced)
+    {
+        var song = StoredSong(apiSourced);
+        var sut = await CreateEditSutAsync(song, MakeSongServiceWithSong(song));
+
+        Assert.False(sut.IsTitleLocked);
+    }
+
+    // [AC] REQ-SFT-27: in edit mode Title has no search (IsTitleSearchEnabled is false) for an API-sourced and for a manual song.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task EditMode_TitleSearchIsDisabled_ForApiAndManualSongs(bool apiSourced)
+    {
+        var song = StoredSong(apiSourced);
+        var sut = await CreateEditSutAsync(song, MakeSongServiceWithSong(song));
+
+        Assert.False(sut.IsTitleSearchEnabled);
+    }
+
+    // [AC] REQ-SFT-02: in add mode Title is the search box (IsTitleSearchEnabled is true).
+    [Fact]
+    public void AddMode_TitleSearchIsEnabled()
+    {
+        var sut = CreateAddFormSut();
+
+        Assert.True(sut.IsTitleSearchEnabled);
+    }
+
+    // [AC] REQ-SFT-27: saving an edited Title sends the new title and leaves the external identity to the Service
+    // ("keep existing" = null, design.md § 5 flow F6). Manual-song row: identity is null already.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task EditMode_SaveEditedTitle_SendsNewTitleAndKeepsIdentity(bool apiSourced)
+    {
+        var song = StoredSong(apiSourced);
+        var requests = new List<SongFormSaveRequest>();
+        var songService = MakeSongServiceWithSong(song);
+        SetupSave(songService, requests, _ => SavedOutcome(42));
+        var sut = await CreateEditSutAsync(song, songService);
+
+        sut.SongTitle = "Corrected Title";
+        await sut.SaveCommand.ExecuteAsync(null);
+
+        var request = Assert.Single(requests);
+        Assert.Equal(42, request.SongId);
+        Assert.Equal("Corrected Title", request.Title);
+        Assert.Null(request.ExternalId);
+        Assert.Null(request.ExternalProvider);
+    }
+
+    // [AC] REQ-SFT-27: edit-mode hydration shows the stored Title as editable text and queries no title search.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task EditMode_Hydration_ShowsStoredTitle_AndQueriesNoTitleSearch(bool apiSourced)
+    {
+        var song = StoredSong(apiSourced);
+        var sut = await CreateEditSutAsync(song, MakeSongServiceWithSong(song));
+
+        Assert.Equal("Stored Title", sut.SongTitle);
+        _suggestionsMock.Verify(s => s.SearchTitleLocalAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _suggestionsMock.Verify(s => s.SearchTitleRemoteAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    // [AC] REQ-SFT-27: editing Title in edit mode (the Field has no search) never calls the title suggestion service.
+    [Fact]
+    public async Task EditMode_EditingTitle_QueriesNoTitleSearch()
+    {
+        var song = StoredSong(apiSourced: true);
+        var sut = await CreateEditSutAsync(song, MakeSongServiceWithSong(song));
+
+        sut.SongTitle = "Corrected Title";
+
+        _suggestionsMock.Verify(s => s.SearchTitleLocalAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _suggestionsMock.Verify(s => s.SearchTitleRemoteAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<int>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

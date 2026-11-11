@@ -226,7 +226,7 @@
   - **Review lane:** Elevated
   > **Spec updated 2026-11-04 (3.9c merge `8163505b`, Verifier CONDITIONAL PASS):** `ArtistRepositoryResolutionTests.cs` deleted whole (its 3 tests were the artist `GetFuzzyCandidatePoolAsync` tests, authorised by plan § 10.1). **Follow-up W1:** no test runs the real `SimilarityScorer` on "Metalica"/"Metallica" (the service test mocks 0.94) — 3.10 / 5.3 must prove REQ-SFT-19 end to end, or add a `SimilarityScorerTests` case when a task next owns it.
 
-- [ ] **3.10 `SongService.SaveFromFormAsync`: every Save decision in the Service** [SEQUENTIAL — after 3.2c, 3.3, 3.9c, G4 Q3/Q4]
+- [x] **3.10 `SongService.SaveFromFormAsync`: every Save decision in the Service** [SEQUENTIAL — after 3.2c, 3.3, 3.9c, G4 Q3/Q4]
   - **Produces:** `SongFormSaveRequest`, `SongFormSaveOutcome` (+ `ArtistDecision`, `SongDecision`, `SaveField`), `ISongService.SaveFromFormAsync` (`design.md` § 3.5). Writes only through `CreateSongWithUrlsAsync`/`UpdateSongAsync`.
   - **Files owned:** `Domain/Resolution/SongFormSaveRequest.cs` (new), `Domain/Resolution/SongFormSaveOutcome.cs` (new), `ISongService.cs`, `SongService.cs`, `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormTests.cs` (new)
   - **Risk:** High — the constitutional business-logic boundary; CATALOG-PROP shares the file.
@@ -289,7 +289,7 @@
   > **Spec updated 2026-09-26:** (D2) runs before G2: it consumes no component surface. (D13) also owns `MyVocaList.Tests/Unit/DependencyInjection/AppServicesRegistrationTests.cs` (adds `services.AddSingleton(Mock.Of<INavigationService>());` to the SongFormViewModel graph test; Level C).
   > **Spec updated 2026-11-04:** also owned `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (merge-sheet sync/handlers removed; the page did not compile otherwise). VM + XAML + code-behind were built together because the merge sheet's compiled bindings broke the one-file-then-build order (Verifier: acceptable). Merged `f687e72d` 2026-11-04; Verifier PASS; develop 668/668.
 
-- [ ] **5.2 VM: title search, picks, online-search note** [SEQUENTIAL — after 4.3, 5.1, G4 Q16]
+- [x] **5.2 VM: title search, picks, online-search note** [SEQUENTIAL — after 4.3, 5.1, G4 Q16]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `TitleSupportingText` maps `Status` to the two approved notes (REQ-SFT-06); a remote pick sets Version from Deezer (REQ-SFT-12); remote option supporting text "artist · version · Deezer" (REQ-SFT-04); +4 tests.
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
   - **Risk:** High. **Tests (A, Red first):** REQ-SFT-02…14 (option supporting texts incl. "In your library", local options before remote or the Q16 fallback, `TitleSupportingText` set/cleared, local pick → navigate, discard sheet, remote pick fills + locks, local artist match, X clears pending identity).
@@ -297,18 +297,22 @@
   - **Review lane:** Elevated
   > **Spec updated 2026-09-26:** (D1) Q16 settled: `TitleOptionSource` awaits local, then remote (≤ 3,000 ms), and returns one list. (D2) runs before G2 (needs only `IMenuOptionSource`/`MenuOptionSource`, ACF T3 `83065e07`). (D19) 5.2 also creates `ArtistOptionSource` (`IMenuOptionSource` over the existing local artist search, local only, REQ-SFT-16).
 
-- [ ] **5.3 VM: Save maps service outcomes to sheets** [SEQUENTIAL — after 5.2, 3.10]
+- [x] **5.3 VM: Save maps service outcomes to sheets** [SEQUENTIAL — after 5.2, 3.10]
   - **Produces:** `SaveCommand` builds `SongFormSaveRequest` and maps `SongFormSaveOutcome`; artist-match and resolution sheets re-invoke with the user's decision; `ISongResolutionService` removed from the VM constructor; old decision code deleted.
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
   - **Risk:** High. **Tests (A, Red first):** one test per outcome kind → the right sheet/field/navigation; each sheet action re-invokes with the right decision; no write call other than `SaveFromFormAsync` (REQ-SFT-46/51). Rewrites of `:174,:208,:238` per § 10.1.
   - **Demo:** VM tests green.
   - **Review lane:** Architectural
+  > **Spec updated 2026-11-05:** also owned `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` and `SongFormPage.xaml.cs` (the artist-match sheet and the exact/fuzzy resolution-sheet variants cannot exist without them; Verifier: required). Merged `e1721279` 2026-11-05; Red `9a41b361`, Green `bdf4010b`; Verifier (Elevated) CONDITIONAL PASS, 0 blockers; develop 874/874. Helder confirmed assumption B (fresh Save tap starts clean → REQ-SFT-54) and the Builder's calls: clear hooks on `OnSongTitleChanged`/`OnArtistSearchTextChanged`; Failed(Version) with Save-as-new-version keeps the duplicate sheet open; Failed(None) = snackbar + sheets closed; strings "Similar artist found", "Use '…'", "Create '…'", "Save as new song", "Possible duplicates", "Song created"/"Song updated"; ArtistId 0 = null with ArtistText sent only when no id. **Device gate (Helder, 7.2):** artist sheet → Use/Create → Saved; exact-duplicate sheet with empty Version; fuzzy sheet → Save as new song; apostrophe strings; sheet back/scrim saves nothing; AutoCompleteEdit must not re-write Text (would clear decisions).
 
-- [ ] **5.3b Delete the forwarding `CreateSongWithUrlsAsync(int, …)` overload** [SEQUENTIAL — after 5.3, G3] *(new, plan § 0.3 D3)*
+- [x] **5.3b Delete the forwarding `CreateSongWithUrlsAsync(int, …)` overload** [SEQUENTIAL — after 5.3, G3] *(new, plan § 0.3 D3)*
   - **Files owned:** `Domain/ServicesInterfaces/ISongService.cs`, `Services/SongService.cs`, and the remaining old-overload callers found by census (`SongResolutionService.cs`, `Bug068RegressionTests.cs` if still present)
   - **Consumes:** 5.3. **Risk:** Low. **Demo:** census finds no call to the obsolete overload; build 0 errors, no `CS0618`. **Review lane:** Standard
+  > **Merged `74cf55cc` 2026-11-06** (commits `7bd8895d`, `aaafb337`, `69689462`); Verifier (Standard) PASS, 0 blockers; develop 874/874.
+  > **Spec updated 2026-11-06 (Helder: "if nothing depends on it, get rid of it"):** census (develop `0ef49dcf`, Grep + raw grep agree) found **no** call site binding to the int-first overload (declarations only: `ISongService.cs:69`, `SongService.cs:249-256`; `SongResolutionService.cs` has no reference; `Bug068RegressionTests.cs:128` binds to the new overload), and `ArtistSuggestionDto.IsExactMatch` is written as a hardcoded `false` at two sites and read nowhere (no XAML, no branch, no test). 5.3b therefore also **removes `IsExactMatch`** (positional member of `ArtistSuggestionDto` + the two constructor arguments in `ArtistSuggestionService.cs`, one commit apart from the overload deletion). Added to Files owned: `Contracts/DTOs/Suggestions/ArtistSuggestionDto.cs`, `Services/ArtistSuggestionService.cs`. 6.2 no longer decides `IsExactMatch` (closed here); if 6.2 later needs an exact-match flag it adds one with a test.
 
-- [ ] **5.4 VM: edit-mode title and hydration** [SEQUENTIAL — after 5.3]
+- [x] **5.4 VM: edit-mode title and hydration** [SEQUENTIAL — after 5.3]
+  > **Merged `cb3ebd8d` 2026-11-06** (Red `3f2c83fc`, Green `50dfa54e`); Verifier (Standard) CONDITIONAL PASS, 0 blockers (warning: the two "queries no title search" guard tests only fail if the VM gains a direct suggestion-service call — the Field-off proof is `IsTitleSearchEnabled` + the 5.5 XAML binding); develop 884/884. Delivered: `IsTitleSearchEnabled => !IsEditMode` (raised with `IsEditMode`) and `BuildSaveRequest` sends null external identity in edit mode (= keep; `SongService.SaveFromFormAsync` ignores it on edit, so behaviour-neutral in the DB). The edited title goes through `SaveFromFormAsync` (not `UpdateSongAsync` as originally worded). Stale docstring `:433` did not exist; `:787` was done in 3.2b. The four decision-lifecycle tests re-tagged REQ-SFT-54. **5.5 must bind `IsTitleSearchEnabled` in `SongFormPage.xaml`** (no consumer yet).
   - **Files owned:** `SongFormViewModel.cs`, `SongFormViewModelTests.cs`
   - **Risk:** Low. **Tests (A, Red first):** in edit mode Title is editable (no read-only flag) for API-sourced **and** manual songs, and an edited title is sent to `UpdateSongAsync` with `null` external identity (keep); `IsTitleSearchEnabled` false in edit mode; rewrite `:787`; stale docstring `:433` fixed.
   - **Demo:** VM tests green.
@@ -335,7 +339,7 @@
 
 ## Phase 6 — Artist form name search (confirmed, fifth round)
 
-- [ ] **6.1 `ArtistSuggestionService` local and remote name search; register** [SEQUENTIAL — after 4.1, 4.3]
+- [x] **6.1 `ArtistSuggestionService` local and remote name search; register** [SEQUENTIAL — after 4.1, 4.3]
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `ArtistRemoteSearchResult.Status`; `INetworkStatus` ctor dependency; offline → no call, `Offline`; +1 test.
   - **Produces:** `SearchNameLocalAsync`, `SearchNameRemoteAsync` + `ArtistRemoteSearchResult`; similarity dedup tier (c) and `FilterSimilar` deleted (`design.md` § 4.1).
   - **Consumes:** 4.1 (`DeezerProvider.SearchArtistsAsync` throws on failure; URL `search/artist?q=`).
@@ -344,7 +348,8 @@
   - **Demo:** service tests green; `IArtistSuggestionService` resolves.
   - **Review lane:** Elevated
   > **Spec updated 2026-09-26:** (D20) runs **after 3.9b** too: `SearchNameLocalAsync` retrieves from `IArtistRepository.SearchNameCandidatesAsync` (FTS5 `ArtistSearch`) ranked by `ISimilarityScorer.RankScore`, take 5 (§ 6.4 exception extended to `ArtistSuggestionService`). (D18) `ArtistRemoteSearchResult` is created in 4.1b.
-- [ ] **6.2 `ArtistFormViewModel`: Name option source, local pick opens the artist, Deezer pick fills the name** [SEQUENTIAL — after 6.1, 1.2, G2, Q10]
+- [x] **6.2 `ArtistFormViewModel`: Name option source, local pick opens the artist, Deezer pick fills the name** [SEQUENTIAL — after 6.1, 1.2, G2, Q10]
+  > **Merged `e8eff07e` 2026-11-06** (Red `44a582fc`, Green `e979d5f6`); Verifier (Standard) CONDITIONAL PASS, 0 blockers; develop 902/902. Delivered: `NameOptionSource`, `NameSupportingText`, `IsNameLocked`, `IsNameSearchEnabled`, `SelectNameCommand`, `ClearNameCommand`; ctor + `INavigationService`, `IArtistSuggestionService`; `SelectedExternalId`/`SelectedProvider` removed (Q10: only the name is saved). **For 6.3 (page wiring):** (1) bind `NameOptionSource`, `NameSupportingText`, `IsNameSearchEnabled`, `SelectNameCommand`, `ClearNameCommand` in `ArtistFormPage.xaml`; (2) confirm the Field's clear (X) routes through `ClearNameCommand` and that typing the Name to empty also clears `NameSupportingText` — the VM clears it only in `ClearName` (the Song form clears in `OnSongTitleChanged`); if not, add the clear in the VM (Verifier warning 3); (3) no test covers `ct` forwarding to `SearchNameLocalAsync` (code forwards it). Cleanup candidate: the offline/unavailable note strings are duplicated between the Song and Artist form VMs (private consts) — one shared constant in a later task.
   > **Spec updated 2026-11-04 (plan § 0.3 D21, approved by Helder 2026-11-04):** `NameSupportingText` maps `Status` to the artist offline note (Q18, approved) / the unavailable note; +1 test.
   - **Files owned:** `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`, the Artist-form VM test file
   - **Risk:** Medium. **Tests (A, Red first):** REQ-SFT-47…50 (navigation via `INavigationService`; `NameSupportingText` on remote failure).
@@ -361,6 +366,7 @@
 
 - [ ] **7.1 Spec ritual + traceability matrix** (orchestrator): fill `requirements.md` § Traceability; task-log matrix; README frontmatter status; `backlog_gen.py regen`; `.sln` check.
 - [ ] **7.2 On-device E2E gate — Helder** (Android). Stop and hand off; nothing merges before Helder's pass.
+  > **Partial device run 2026-11-09 (Samsung S23, develop `cbb126f7`; pages for 5.5/6.3 not wired, so items 2–6, 6b, 11 not run):** PASS — upgrade intact (#1); artist sheet Use/Create, collated "metallica" attach, apostrophe strings (#7, #12); exact-duplicate sheet and Save as new version (#9); fuzzy sheet Save as new song; edit title/version rules (#8, D2/D3); no "Search music database" row (#10). FAIL — **BUG-084** (scrim and system Back do not dismiss the sheets, only Cancel does; with several rows in "Possible duplicates" the Cancel button is not visible/scrollable); **BUG-085** (stored "Patience", saving "Patiencee" for the same artist raises no sheet, while the reverse does). Observations: (a) exact-duplicate sheet lists only the collated (artist, title, version) match — per REQ-SFT-22 the same title with a different Version is not a duplicate, so this is as specified; (b) "test C" vs stored "Test A" showed the fuzzy sheet (score ≥ 0.82 on very short titles) — noted, no change; (c) in edit mode the Artist text is editable without pressing X, contradicting REQ-SFT-28's picked/locked state — belongs to 5.5; (d) Deezer search not exercised: no UI path calls it until 5.5/6.3 (diagnosis in progress). Registered: song-list artist+version line (change), post-MVP group-by-artist (change), post-MVP typo-tolerant autocomplete results (change).
   1. Upgrade an existing install: songs, artists and YouTube links intact (M1–M3).
   2. New Song: Title is first. Type "don cry" → "Don't Cry" local first, "Guns N' Roses · In your library"; version rows distinguishable; local options appear before Deezer's.
   3. Tap the local row → the edit form of that song opens; Back returns to the Songs list.

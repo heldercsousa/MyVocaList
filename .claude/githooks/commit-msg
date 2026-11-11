@@ -1,0 +1,5 @@
+#!/bin/sh
+# Item-trailer gate: feat:/refactor:/perf:/amend: commits must name a registered backlog item
+# ("Item: <id>"). Exempt: docs, chore, merge, fix. Bypass: git commit --no-verify.
+# Rule + tests: .claude/scripts/process_checks.py
+exec python .claude/scripts/process_checks.py --commit-msg "$1"

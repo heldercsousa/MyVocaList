@@ -1,5 +1,6 @@
 using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Constants;
+using MyVocaList.Extensions.Strings;
 using MyVocaList.UI.Models;
 
 namespace MyVocaList.UI.Components.TextFields;
@@ -37,11 +38,14 @@ internal enum PickRoute
 /// </summary>
 internal static class AutocompleteDXFieldLogic
 {
-    /// <summary>Computes the current <see cref="FieldMode"/>. REQ-ACF-02, -03, -05a, -12b.</summary>
-    internal static FieldMode Mode(bool isReadOnly, bool isLocked, string? text) =>
+    /// <summary>
+    /// Computes the current <see cref="FieldMode"/>. With <paramref name="isPickLockEnabled"/> false the
+    /// lock flag is ignored, so only read-only wins over Editable. REQ-ACF-02, -03, -05a, -12b, -29.
+    /// </summary>
+    internal static FieldMode Mode(bool isReadOnly, bool isLocked, string? text, bool isPickLockEnabled = true) =>
         isReadOnly
             ? FieldMode.ReadOnly
-            : isLocked && !string.IsNullOrWhiteSpace(text)
+            : isPickLockEnabled && isLocked && !string.IsNullOrWhiteSpace(text)
                 ? FieldMode.Locked
                 : FieldMode.Editable;
 
@@ -53,22 +57,47 @@ internal static class AutocompleteDXFieldLogic
     internal static bool ShowClearIcon(FieldMode mode, string? text) =>
         mode != FieldMode.ReadOnly && !string.IsNullOrEmpty(text);
 
+    /// <summary>
+    /// The search text: edge-trimmed, inner whitespace runs collapsed to one space (app-wide helper,
+    /// never a local re-implementation). Whitespace only; no case or diacritic folding (HARD RULE).
+    /// REQ-ACF-13 (a)(b).
+    /// </summary>
+    internal static string SearchQuery(string? text) => (text ?? string.Empty).NormalizeSearchQuery();
+
     /// <summary>Decides whether a search request should be issued. REQ-ACF-04, -11, -12a, -12b, -13.</summary>
     internal static bool ShouldRequestOptions(FieldMode mode, bool isSearchEnabled, IMenuOptionSource? source, string? query) =>
         source != null
         && isSearchEnabled
         && mode == FieldMode.Editable
-        && (query?.Trim().Length ?? 0) >= SearchConstants.MinimumLocalQueryLength;
+        && SearchQuery(query).Length >= SearchConstants.MinimumLocalQueryLength;
+
+    /// <summary>
+    /// Decides whether a request is the echo of a pick: its normalised query equals the normalised text the
+    /// pick left in the editor. DX issues that request ~300 ms after the consumer writes the picked name
+    /// (T7 run 3, line 9). The caller clears the pick text on the first real keystroke. REQ-ACF-25.
+    /// </summary>
+    internal static bool IsPickEcho(string? query, string? textAtPick) =>
+        textAtPick is not null && SearchQuery(query) == SearchQuery(textAtPick);
 
     /// <summary>Routes a selection-changed value to a pick decision. REQ-ACF-11.</summary>
     internal static PickRoute RoutePick(object? selectedItem) =>
         selectedItem is AutocompleteSuggestion ? PickRoute.Select : PickRoute.None;
 
-    /// <summary>Decides whether a pick should lock the field. REQ-ACF-01.</summary>
-    internal static bool LockAfterPick(PickRoute route) =>
-        route == PickRoute.Select;
+    /// <summary>Decides whether a pick should lock the field. REQ-ACF-01, -29.</summary>
+    internal static bool LockAfterPick(PickRoute route, bool isPickLockEnabled = true) =>
+        isPickLockEnabled && route == PickRoute.Select;
 
-    /// <summary>Decides whether a blur event should be forwarded. REQ-ACF-11, -12b, -17.</summary>
-    internal static bool ShouldForwardBlur(object? selectedItem, FieldMode mode) =>
-        selectedItem is null && mode == FieldMode.Editable;
+    /// <summary>
+    /// Decides whether a blur event should be forwarded. <paramref name="isPickBlur"/> is true for the one
+    /// blur the component causes itself after a pick (REQ-ACF-30c), which is never a blur without pick.
+    /// REQ-ACF-11, -12b, -17, -30.
+    /// </summary>
+    internal static bool ShouldForwardBlur(object? selectedItem, FieldMode mode, bool isPickBlur = false) =>
+        !isPickBlur && selectedItem is null && mode == FieldMode.Editable;
+
+    /// <summary>
+    /// Decides whether a search result opens the drop-down. A null or empty result keeps the menu closed, so
+    /// DevExpress never shows its "Not found" row. REQ-ACF-31.
+    /// </summary>
+    internal static bool ShowsMenu(IReadOnlyList<AutocompleteSuggestion>? options) => options is { Count: > 0 };
 }

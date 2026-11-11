@@ -32,7 +32,7 @@
 - `SwipeContainer.FullSwipeMode="AllItems"` does NOT exist — valid values are `None`, `Start`, `End`, `Both`
 - `DXCollectionView.IndicatorColor` defaults to invisible on dark themes — always set explicitly
 - `ShimmerView` needs `await Task.Yield()` before data load so skeleton renders first
-- `.NET MAUI 10`: `ContentPage` defaults to `SafeAreaEdges="None"` — add `SafeAreaEdges="Container"` explicitly
+- `.NET MAUI 10`: `ContentPage` defaults to `SafeAreaEdges="None"` — add `SafeAreaEdges="Container"` explicitly (`"All"` on pages with text input)
 - Compiled bindings inside `x:DataType` DataTemplates: use a typed `ViewModel` property on the page, not `BindingContext.X`
 - `DXCollectionView.Scrolled` event args type is `DXCollectionViewScrolledEventArgs` (NOT `CollectionViewScrolledEventArgs`); vertical offset property is `e.Offset` (NOT `e.VerticalOffset`):
   ```csharp

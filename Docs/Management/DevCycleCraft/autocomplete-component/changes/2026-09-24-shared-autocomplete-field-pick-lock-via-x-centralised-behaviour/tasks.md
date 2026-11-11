@@ -181,13 +181,13 @@
 
 ## Phase 6: Device gate
 
-- [ ] **T7: On-device E2E gate (Helder, Android, Person form)** [SEQUENTIAL, after T6]
+- [x] **T7: On-device E2E gate (Helder, Android, Person form)** [SEQUENTIAL, after T6]
   - Checklist, recorded in the task-log with pass/fail per line:
     1. New Singer: the Full Name field has focus on open (REQ-ACF-18).
     2. Typing 1 char, or a space plus 1 char → no menu; 2 chars → up to 5 people after about 300 ms (REQ-ACF-13, -14, -15).
     3. Pick a person → that person's edit form replaces the page (no stacked form), with the name
        editable (REQ-ACF-03, -15, -20); no menu opens on the edit form (REQ-ACF-25).
-    4. *Informational only, not pass/fail:* just before navigation completes, the picked name cannot be edited and no menu reopens (REQ-ACF-01, -04). The window is short; the proof is T1 (B1–B6).
+    4. After a pick, the name is never read-only, not even before navigation completes, and no menu reopens (REQ-ACF-29, -24, -25). *(Run 1 wording, before Q3 was reversed: "informational: the picked name cannot be edited".)*
     5. X is visible whenever there is text, looks enabled, and there is no magnifier icon (REQ-ACF-07, -08, -10).
     6. Type a name, tap X → empty, focus kept, keyboard up (REQ-ACF-09).
     7. Type an invalid name and blur → the existing name validation shows; the text is kept (REQ-ACF-17, -19).
@@ -204,6 +204,146 @@
   - **Files owned:** `…/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md`, `MyVocaList.sln`
   - **Demo:** Helder completes lines 1–10 on device without a failure.
   - **Review lane:** Architectural
+
+> **Spec updated 2026-11-05: T7 run 1 result.** PASS on lines 2, 3, 5, 6, 7. Line 4 (informational)
+> is moot under REQ-ACF-29, and line 8 is accepted as designed. **FAIL on lines 1, 9 and 10** (10 is a
+> consequence of 1, and the T7-prep supporting-text build was never deployed). Details:
+> `task-log.md` § T7. All failures are Minor. T8 fixes them, then T7 is re-run.
+> **Re-run checklist changes:**
+> - Line 4 becomes "after a pick, the name is never read-only, even before navigation" (REQ-ACF-29).
+> - Line 8 is confirmed against the app-wide validation standard.
+> - Line 10 also checks that the "First and last name" placeholder shows on load (create mode) and
+>   that the T7-prep "Test" supporting text renders.
+
+- [x] **T8: T7 run 1 fixes + pick-lock opt-out** `[SEQUENTIAL, after T7 run 1]` (added 2026-11-05)
+  - **Behaviour:**
+    - REQ-ACF-29: `IsPickLockEnabled` (default `true`) in the component and the logic class, and the
+      Person form sets it to `false`.
+    - REQ-ACF-18 (T7 line 1, which also fixes line 10): `FocusEditor()` defers until the inner editor is ready.
+    - REQ-ACF-24/25 (T7 line 9): programmatic text closes the menu and resets `SelectedItem`, and a stale
+      in-flight request is dropped after a pick. This follows the Song form Artist pattern (`design.md`
+      § 3.1, note 2026-11-05).
+  - **Steps (TDD, one writer, branch `task/acf-t8-t7-fixes` @ `.worktrees/acf-t8`):**
+    1. Red: add the Level A tests to `AutocompleteDXFieldLogicTests`, tagged `// [AC] REQ-ACF-29`:
+       - `Mode(false, true, "Ana Silva", isPickLockEnabled: false)` → `Editable`;
+       - `Mode(true, true, "x", isPickLockEnabled: false)` → `ReadOnly`;
+       - `LockAfterPick(Select, false)` → `false`;
+       - `LockAfterPick(None, false)` → `false`.
+       Run them: they fail on compile or assert.
+    2. Green: `AutocompleteDXFieldLogic.Mode` / `LockAfterPick` gain `bool isPickLockEnabled = true` (`design.md` § 4).
+       The existing tests stay unchanged and green.
+    3. Component: the `IsPickLockEnabled` BindableProperty (§ 3.1; propertyChanged → `ApplyMode`). `CurrentMode`
+       and `OnSelectionChanged` pass it, and `OnSelectionChanged` writes `IsLocked` only when `LockAfterPick` is true.
+       Update the XML doc of `IsLocked`. Build.
+    4. Component: the `TextChanged` handler. `Reason != UserInput` → close the menu. Only
+       `Reason == ProgrammaticChange` also sets `SelectedItem = null`; `ItemSelected` never resets it, so the
+       pick routed by `OnSelectionChanged` is never lost (REQ-ACF-24). First confirm the DX 25.2 member names with Context7; on a mismatch, stop and escalate. Build.
+    5. Component: the pick counter, and stale-result discard in `OnItemsRequested` (REQ-ACF-26). Build.
+    6. Component: the `FocusEditor()` deferral (REQ-ACF-18). Build.
+    7. `PersonFormPage.xaml`: `IsPickLockEnabled="False"`. Build, then run the full `dotnet test`.
+  - **Tests (Level A):** step 1. Steps 3–7 are UI glue (Level C: build + code review + the T7 re-run).
+    Record that no-test decision in the task-log. The existing tests stay unchanged (the parameters
+    default to `true`).
+  - **Files owned:** `AutocompleteDXFieldLogic.cs`, `AutocompleteDXField.xaml(.cs)`,
+    `AutocompleteDXFieldLogicTests.cs`, `PersonFormPage.xaml`, and its own `## T8` section of `task-log.md`
+  - **Governance:** one consumer (PersonFormPage), not yet governed (census 2026-11-05, including the
+    sft-* worktrees). If SFT binds SongFormPage before T8 merges, the four gates apply.
+  - **Demo:** T7 re-run, lines 1–10 PASS on device. **Review lane:** Elevated
+
+> **Spec updated 2026-11-06: T7 run 2 result.** PASS on lines 1, 3–7, 10. Line 8 confirmed as the
+> app-wide pattern. **FAIL on line 2** (" a" / "  a" shows a menu) and **line 9** (after a pick the
+> field keeps focus, the keyboard stays up, the cursor is at 0). Details: `task-log.md` § T7, "Run 2".
+> T9 fixes both, then T7 run 3 re-checks lines 2 and 9 only. Extra issues F1–F3 are under persons.
+
+- [x] **T9: T7 run 2 fixes — search-text normalisation + pick drops focus** `[SEQUENTIAL, after T8]` (added 2026-11-06)
+  - **Behaviour:** REQ-ACF-13 (amended a/b/c) and REQ-ACF-30. Design: `design.md` § 3.1 "Event-glue
+    rules added after T7 run 2" and § 4.
+  - **Steps (TDD, one writer, branch `task/acf-t9-t7-run2-fixes` @ `.worktrees/acf-t9`):**
+    1. Diagnose line 2 first (`superpowers:systematic-debugging`): from the decompiled DX 25.2.4
+       assemblies, find why the "no request" branch still shows a menu (stale items / "no results"
+       row) for " a". Write the root cause in the task-log before any fix. If the fix needs XAML
+       outside the component or changes DX threshold semantics, stop and escalate.
+    2. Red: add Level A tests to `AutocompleteDXFieldLogicTests`:
+       - `// [AC] REQ-ACF-13`: `SearchQuery("  an  ")` → `"an"`; `SearchQuery("a   b")` → `"a b"`;
+         `SearchQuery(null)` → `""`; `ShouldRequestOptions(Editable, true, source, "  a")` → `false`;
+         `ShouldRequestOptions(Editable, true, source, "a  ")` → `false`; `ShouldRequestOptions(Editable, true, source, "a	")` → `false`;
+         `ShouldRequestOptions(Editable, true, source, " an ")` → `true`.
+       - `// [AC] REQ-ACF-30`: `ShouldForwardBlur(null, Editable, isPickBlur: true)` → `false`;
+         `ShouldForwardBlur(null, Editable, isPickBlur: false)` → `true` (the real blur after a pick-then-edit).
+       Run them: they fail on compile or assert.
+    3. Green: `SearchQuery` + the `ShouldRequestOptions` change + the `ShouldForwardBlur` parameter
+       (`design.md` § 4), using `NormalizeSearchQuery` from `MyVocaList.Extensions.Strings`. Existing
+       tests stay unchanged and green.
+    4. Component: `OnItemsRequested` uses `SearchQuery(e.Text)` for both checks and for `SearchAsync`;
+       apply the step 1 fix for REQ-ACF-13c. Build.
+    5. Component: REQ-ACF-30 in `OnSelectionChanged` / `OnUnfocused` (cursor to end, `Unfocus()`,
+       one-shot pick-blur flag). Confirm the DX 25.2 cursor member with Context7; on a mismatch, stop
+       and escalate. Build, then run the full `dotnet test`, then an Android build.
+  - **Tests (Level A):** step 2. Steps 4–5 are UI glue (Level C: build + code review + T7 run 3).
+    Record that no-test decision in the task-log.
+  - **Files owned:** `AutocompleteDXFieldLogic.cs`, `AutocompleteDXField.xaml(.cs)`,
+    `AutocompleteDXFieldLogicTests.cs`, and its own `## T9` section of `task-log.md`
+  - **Governance:** one consumer (PersonFormPage), not governed. Re-run the consumer grep before
+    starting; if SongFormPage binds the component first, the four gates apply.
+  - **Demo:** T7 run 3, lines 2 and 9 PASS on device. **Review lane:** Elevated
+
+> **Spec updated 2026-11-09: T7 run 3 result.** Line 2 FAIL; line 9 partial (cursor PASS; keyboard
+> stays up, and the search runs again after a pick). The emulator diagnostic run proved root causes RC-A/B/C
+> (`task-log.md` § "Diagnostic run — emulator"). T10 fixes them.
+
+- [x] **T10: Root-cause fixes RC-A/B/C (line 2, line 9, F1 after-pick)** `[SEQUENTIAL, after T9]` (added 2026-11-09)
+  - **Behaviour:** REQ-ACF-13c, -24/-25 (no search after a pick), -30b. Design: `design.md` § 3.1
+    "Event-glue rules added after the emulator diagnostic run".
+  - **Steps (one writer, branch `task/acf-t10-root-cause-fixes` @ `.worktrees/acf-t10`):**
+    1. Context7 / decompiled DX 25.2.4: is there a supported way to stop the drop-down opening (or hide "not
+       found") after a rejected request? Record the answer in the task-log.
+    2. RC-A: the rejected-request close guard (or the supported mechanism), and remove `ClearMenuOnKeystroke`. Build.
+    3. RC-B: `DisplayMember="Headline"` in `AutocompleteDXField.xaml`. Build. Then the `_textAtPick` request guard
+       (Level A: if it adds a logic function, test it first, tagged `// [AC] REQ-ACF-24`). Build.
+    4. RC-C: hide the soft keyboard after a pick. Confirm the MAUI 10 API with Context7 or MS Learn. Build.
+    5. Full `dotnet test`, then an Android Debug build.
+  - **Tests:** Level A only for any new pure logic; the rest is UI glue (Level C). It is verified by the orchestrator on the
+    emulator (adb script: " a", "  a", "a  ", "  He  ", pick → no menu, `mInputShown=false`), then on Helder's phone.
+  - **Files owned:** `AutocompleteDXFieldLogic.cs`, `AutocompleteDXField.xaml(.cs)`,
+    `AutocompleteDXFieldLogicTests.cs`, its own `## T10` section of `task-log.md`
+  - **Demo:** emulator run clean, then T7 run 4 (lines 2 and 9) on Helder's phone. **Review lane:** Elevated
+
+> **Spec updated 2026-11-10: T7 run 4 result.** Lines 2, 3, 4 PASS; line 1 PASS for 1 character, but "aa" /
+> "aaa" (valid queries, no match) show DX's "Not found" row. Helder ruled it must never show (REQ-ACF-31). T11.
+
+- [x] **T11: No "no results" row (REQ-ACF-31)** `[SEQUENTIAL, after T10]` (added 2026-11-10)
+  - **Behaviour:** REQ-ACF-31. Design: `design.md` § 3.1 "Event-glue rule added after T7 run 4", § 4 `ShowsMenu`.
+  - **Steps (one writer, branch `task/acf-t11-no-results-row` @ `.worktrees/acf-t11`):**
+    1. Red: `ShowsMenu` tests (null, empty, one option), tagged `// [AC] REQ-ACF-31`. Run, confirm they fail to compile/fail.
+    2. Green: `AutocompleteDXFieldLogic.ShowsMenu`. Run the tests.
+    3. Glue: in `OnItemsRequested`'s delegate, an empty result → `_lastRequestRejected = true`, `CloseMenuOnUiThread()`,
+       return the (empty or null) options. Build.
+    4. Full `dotnet test`, then an Android Debug build.
+  - **Tests:** Level A for `ShowsMenu`; the glue is Level C, verified by the orchestrator on the emulator ("aa" with
+    no match → no menu; "He" → menu; menu open then a non-matching query → menu closes), then T7 run 5 on Helder's phone.
+  - **Files owned:** `AutocompleteDXFieldLogic.cs`, `AutocompleteDXField.xaml.cs`, `AutocompleteDXFieldLogicTests.cs`,
+    its own `## T11` section of `task-log.md`. Not `SongFormPage` (out of scope, another session).
+  - **Demo:** emulator run clean, then T7 run 5 (line 1) on Helder's phone. **Review lane:** Standard
+
+> **Spec updated 2026-11-11: T7 run 5 result.** Line 1 FAIL: "Not found" flashes on every no-match search. Root cause:
+> DX's async provider opens the drop-down while loading (`task-log.md` § T7 run 5). Spike `spike/acf-t12-own-search`
+> (component-owned search) proved 0 visible frames on the emulator. T12.
+
+- [x] **T12: Component-owned search, no DX loading popup (REQ-ACF-31 amended)** `[SEQUENTIAL, after T11]` (added 2026-11-11)
+  - **Behaviour:** REQ-ACF-31 (no transient frame, no blink while typing), with -04, -12a/b, -13, -14, -22, -24/-25, -26, -30
+    unchanged. Design: `design.md` § 3.1 "Event-glue rules from T12".
+  - **Steps (one writer, branch `task/acf-t12-own-search` @ `.worktrees/acf-t12`):**
+    1. Start from the spike diff (`spike/acf-t12-own-search`, commit c5f986e1; code only, not its task-log/findings files).
+    2. Change the spike's `RestartSearch` so a qualifying query keeps the menu open (no close on each keystroke); only a
+       rejected query or an empty result closes it.
+    3. Cancel the pending search on blur (and keep the programmatic-change and pick cancels). Build.
+    4. Remove dead code (§ 3.1 "Removed"). The T11 `ShowsMenu` tests stay. Full `dotnet test`, Android Debug build.
+  - **Tests:** no new pure logic expected (Level C glue); if a pure function is added, Level A test first. Emulator by the
+    orchestrator (`flash.sh`: aa/aaa/zq/Hex/" a" lit=0; He lit>0; He→Hel no blink; pick → list stays closed), then T7 run 6.
+    Manual emulator checks (Level C, justified in the task-log): blur while a search is pending → no menu (blur cancel);
+    pick while a search is pending → menu stays closed (REQ-ACF-26); pick drops focus (REQ-ACF-30).
+  - **Files owned:** `AutocompleteDXField.xaml(.cs)`, its own `## T12` section of `task-log.md`.
+  - **Demo:** emulator clean, then T7 run 6 (line 1, plus a regression pass of lines 2-4 and 9). **Review lane:** Elevated
 
 ## Handed over to the song-form title-first item (not tasks here)
 

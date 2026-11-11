@@ -14,7 +14,4 @@ public static class SimilarityConstants
 
     /// <summary>Maximum number of DB rows retrieved in a single candidate pool query.</summary>
     public const int PoolSize = 50;
-
-    /// <summary>Maximum character length of the title/name prefix token sent to the DB LIKE query.</summary>
-    public const int PrefixTokenMaxLen = 12;
 }

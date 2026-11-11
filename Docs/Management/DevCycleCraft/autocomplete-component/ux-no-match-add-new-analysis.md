@@ -1,5 +1,9 @@
 # UX Analysis — Autocomplete "No Match → Add New" Affordance
 
+> **ABANDONED 2026-11-11 (Helder ruling):** the no-match `Add "<typed text>"` row will not be built. The app uses the DevExpress
+> `AutoCompleteEdit` docked menu via `AutocompleteDXField`, without customisation. Kept as history only. Current rule:
+> `.claude/library/ux-patterns.md` § Autocomplete.
+
 > **Task:** BACKLOG DevCycleCraft row *Autocomplete "no match → add new" UX analysis* (registered by Helder 2026-07-15).
 > **Status:** Analysis complete — recommendation ready for Helder review. Analysis-only: no code changed.
 > **Scope:** shared solution for every `AutocompleteField` consumer (today: PersonFormPage Full Name, SongFormPage Artist).

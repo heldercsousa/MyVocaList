@@ -25,9 +25,11 @@ IPersonService.SearchPersonsStartsWithAsync   (unchanged)
 ```
 
 - **Business logic stays in the ViewModel/Service** (REQ-ACF-12). The component forwards to commands.
-- **Pick-lock is component-owned** and always on (Helder ruling Q3). `IsLocked` is a TwoWay
+- **Pick-lock is component-owned** and on by default. Ruling Q3 ("always on") was reversed on
+  2026-11-05: `IsPickLockEnabled = false` turns it off for a field holding the principal entity's
+  own data (the Person form, REQ-ACF-29). While it is enabled, `IsLocked` is a TwoWay
   BindableProperty: the component sets it `true` on a pick and `false` on X. A consumer may bind it,
-  to read it or to set it programmatically (hydration), or leave it unbound (the Person form).
+  to read it or to set it programmatically (hydration), or leave it unbound.
 - **No create concept** (Helder ruling Q1). Unpicked text is the consumer's business on Save.
 - **Pure decision logic** lives in a static, UI-free class, unit-testable at Level A. The
   code-behind only adapts DX events to it.
@@ -92,7 +94,8 @@ The test project references the MAUI head (`MyVocaList.Tests.csproj:33-34`), and
 |----------|------|------|---------|---------------|
 | `LabelText` / `PlaceholderText` | `string` | OneWay | `""` | Label and placeholder. |
 | `Text` | `string` | **TwoWay** | `""` | Editor text (Person: `PersonName`). |
-| `IsLocked` | `bool` | **TwoWay** | `false` | Picked state. Set `true` by the component on a pick and `false` on X; a consumer may also set it (REQ-ACF-01/02/06). Always honoured, with no opt-out (Q3). |
+| `IsLocked` | `bool` | **TwoWay** | `false` | Picked state. Set `true` by the component on a pick and `false` on X; a consumer may also set it (REQ-ACF-01/02/06). Honoured only while `IsPickLockEnabled` is `true`. |
+| `IsPickLockEnabled` | `bool` | OneWay | `true` | Per-field pick-lock switch (REQ-ACF-29). `false` → `Mode` is never `Locked`; a pick never writes `IsLocked`; a consumer-set `IsLocked` has no effect. propertyChanged re-runs `ApplyMode`. Person: `False`. Song Artist: default. |
 | `IsReadOnly` | `bool` | OneWay | `false` | Page-set read-only state: text shown; no typing, no X, no search, no menu, no blur forwarding. **Wins over `IsLocked` and `IsSearchEnabled`** (REQ-ACF-12b). Hides the inherited name on purpose: `ContentView` has no `IsReadOnly`, and the name matches DX `EditBase.IsReadOnly` and MAUI `InputView.IsReadOnly`. Implemented by setting the inner editor's `IsReadOnly=true`, `ClearIconVisibility=Never` and `IsEndIconVisible=false`. |
 | `SupportingText` | `string` | OneWay | `""` | Generic text under the field (REQ-ACF-12c). Passed to the DX editor's own `HelpText` (documented `EditBase.HelpText`, "assistive label" below the field, Context7 DX MAUI, 2026-09-25), so no extra Label is needed. The component sets `HelpText = BottomSupportingText(HasError, SupportingText)` (§ 4), which guarantees that the error wins whatever DX does when both are set. Named after the MD3 term *supporting text*, not the MD2 "helper text" or DX's `HelpText` (CLAUDE.md MD3-terminology rule). It is unrelated to `AutocompleteSuggestion.SupportingText` (an option's second line). |
 | `IsSearchEnabled` | `bool` | OneWay | `true` | Page switch: `false` → no option requests, no menu; the rest of the field is unchanged (REQ-ACF-12a). |
@@ -107,7 +110,109 @@ Public method: `bool FocusEditor()` focuses the inner editor, which shows the ke
 (DX `EditBase.Focus()`). It replaces `nameField.Focus()` at `PersonFormPage.xaml.cs:30` (REQ-ACF-18)
 and is also used internally after X (REQ-ACF-06).
 
-Removed by the rulings: `IsPickLockEnabled` (Q3), `CreateNewCommand`, `CreateNewNoun` (Q1).
+Removed by the rulings: `CreateNewCommand`, `CreateNewNoun` (Q1). `IsPickLockEnabled` was removed
+by Q3 and reinstated on 2026-11-05 (above).
+
+**Event-glue rules added after T7 run 1 (2026-11-05):**
+- **Programmatic text closes the menu (REQ-ACF-24, line 9).** The component handles the DX editor's
+  `TextChanged`. When `Reason != UserInput` (consumer hydration, the text DX writes after a pick), it
+  sets `IsDropDownOpen = false`. Only when `Reason == ProgrammaticChange` does it also set
+  `editor.SelectedItem = null`. On `ItemSelected` it leaves `SelectedItem` alone, because
+  `OnSelectionChanged` routes the pick first and then resets it. That way the pick is never lost,
+  whatever order DX raises `TextChanged` and `SelectionChanged` in. The implementor logs the observed
+  order in the task-log. This is the Song form Artist
+  pattern (`SongFormViewModel` `IsArtistDropDownOpen = false` on every programmatic assignment,
+  `SongFormPage.xaml.cs` `SelectedItem = null`), and it does not depend on focus. Before coding, the
+  implementor confirms the `TextChanged` event and the `AutoCompleteEditTextChangeReason` values
+  on DX 25.2 (Context7). If they differ, it stops and escalates; it does not swap the mechanism.
+- **Stale request after a pick (REQ-ACF-26).** The component keeps a pick counter (`int`).
+  `RunSearchAsync` *(T12; was `OnItemsRequested`)* captures it when the search starts. After the await, if the
+  counter has changed, it drops the result and the menu stays closed.
+- **Deferred focus (REQ-ACF-18, lines 1 and 10).** `FocusEditor()` calls `editor.Focus()`. When
+  `editor.Handler is null` or `Focus()` returns `false`, it retries once the editor is ready, on its
+  `HandlerChanged` or `Loaded`, whichever comes first, one-shot. The page call is unchanged.
+
+**Event-glue rules added after the emulator diagnostic run (2026-11-09, root causes RC-A/B/C in `task-log.md`):**
+> **T12 (2026-11-11):** the RC-A close guard (`_lastRequestRejected`, `OnEditorPropertyChanged`) and the RC-B *request*
+> guard's hook (`OnItemsRequested`) are superseded by "Event-glue rules from T12" below. `DisplayMember="Headline"`,
+> `IsPickEcho`/`_textAtPick` (now checked in `RestartSearch`) and RC-C stay as written.
+These replace the T9 keystroke clear and the "close before DX" assumption below.
+- **RC-A: a rejected request must not leave a menu open (REQ-ACF-13c).** DX opens the drop-down itself
+  after the request delegate completes, whatever it returns. The component records that the latest request
+  was rejected (`_lastRequestRejected`, set in the no-request branch, cleared when a request passes the gate).
+  When the editor's `IsDropDownOpen` becomes `true` while that flag is set, the component closes it again
+  (dispatched, so it runs after DX's own write). Before coding, check Context7 / the decompiled DLL for a DX-supported way to
+  stop the open or hide the "not found" row (e.g. a cancellable opening event). If one exists, prefer it and record which
+  was used. Remove the T9 `ClearMenuOnKeystroke` path (it nulled `ItemsSource`, which renders "Not found").
+- **RC-B: a pick must not trigger a new search (REQ-ACF-24, -25; F1 "after a pick").** Set
+  `DisplayMember="Headline"` on the inner `AutoCompleteEdit` (the Song form pattern), so DX writes the display
+  text, not `ToString()`, on `ItemSelected`. Also, defensively: after a routed pick, the component holds
+  `_textAtPick` (the `Text` after `SelectCommand` runs). A request whose normalised query equals the normalised
+  `_textAtPick`, with no `UserInput` keystroke since the pick, is rejected (RC-A then keeps the menu closed). The first
+  real keystroke clears `_textAtPick`.
+- **RC-C: hide the soft keyboard explicitly (REQ-ACF-30b).** After `Unfocus()`, hide the IME through the MAUI
+  soft-input API (`HideSoftInputAsync`, if the DX editor qualifies) or the Android `InputMethodManager` on the
+  handler's platform view (`#if ANDROID`). Confirm the API with Context7 or MS Learn for MAUI 10.
+  > **Spec updated 2026-11-09:** T10 impl: the pick echo is `AutocompleteDXFieldLogic.IsPickEcho(query, _textAtPick)`; `_textAtPick` is set from `editor.Text` after `SelectCommand`, and a UserInput change that equals it is kept (DX reports the SelectCommand write as UserInput) — only a real edit clears it. RC-A uses the editor's `PropertyChanged` for `IsDropDownOpen` (no supported DX cancel-open API, see `task-log.md` § T10). RC-C uses `Microsoft.Maui.ITextInput.HideSoftInputAsync` when the editor qualifies, else the Android IME fallback.
+
+**Event-glue rules added after T7 run 2 (2026-11-06):**
+> **T12 (2026-11-11):** wherever these bullets name `OnItemsRequested` or DX's request, read `RestartSearch` /
+> `RunSearchAsync`; the below-threshold bullet's mechanism is superseded (a rejected query clears `ItemsSource` and closes
+> the menu in `RestartSearch`). The pick-drop-focus bullet stays.
+- **Normalised search text (REQ-ACF-13a/b).** `OnItemsRequested` computes
+  `query = AutocompleteDXFieldLogic.SearchQuery(e.Text)` once, uses it for both `ShouldRequestOptions`
+  checks, and passes it to `SearchAsync`.
+- **Below-threshold requests show nothing (REQ-ACF-13c).** Run 2 showed that with " a" / "  a" the
+  current "no request" branch (`NoOptions` returning `null` + `CloseMenuOnUiThread()`) still lets DX
+  show a menu: earlier results on the develop build, a "no results" row on the T7-prep build. The
+  root cause is not yet proven. Likely: DX opens its drop-down after the request delegate completes,
+  which is after our close, and a `null` result keeps the previous items or shows `NoResultsFoundText`.
+  T9 step 1 proves it (decompiled DX 25.2.4 `AsyncItemsSourceProvider` / `AutoCompleteEdit`, as in the
+  T4 decompiled-DLL findings), then applies the smallest fix that keeps the menu closed, for example
+  return an empty list and close the menu after DX has handled the result. A fix that needs XAML
+  outside the component, or a change in DX threshold semantics, is escalated to Helder first.
+- **A pick drops focus (REQ-ACF-30).** At the end of `OnSelectionChanged` (after `SelectCommand`,
+  the `SelectedItem` reset and the menu close), the component sets a one-shot `_pickBlurPending = true`,
+  moves the cursor to the end of the text (DX 25.2 member confirmed with Context7, e.g.
+  `CursorPosition`/`SelectionStart`), then calls `editor.Unfocus()`. `OnUnfocused` passes
+  `isPickBlur: _pickBlurPending` to `ShouldForwardBlur` and clears the flag. If no blur follows
+  (the editor was already unfocused), the flag is cleared on the next `UserInput` `TextChanged` or the
+  next focus, so a later real blur is never swallowed.
+
+**Event-glue rule added after T7 run 4 (2026-11-10):**
+- **Empty results show nothing (REQ-ACF-31).** In the `RequestAsync` delegate, after the existing post-await
+  checks, when `!AutocompleteDXFieldLogic.ShowsMenu(options)` the component sets `_lastRequestRejected = true`,
+  calls `CloseMenuOnUiThread()` and returns the (empty or null) options, exactly as a rejected request (RC-A). The
+  `OnEditorPropertyChanged` guard then closes the drop-down DX opens after the delegate completes, so the
+  "no results" row never renders. A later request with options resets the flag at its start, as today.
+  A DX property that only blanks the text (e.g. `NoResultsFoundText = ""`) is not enough: an empty row would still open.
+
+**Event-glue rules from T12 (2026-11-11, T7 run 5) — they supersede the RC-A close guard and the T11 empty-result rule:**
+- **Why.** Decompiled DX 25.2.4: `AsyncItemsSourceProvider.RequestItem.Run` sets `IsLoadingInProgress = true` before it
+  awaits the request, and the native control shows the drop-down while loading, so a no-match search renders "Not
+  found" for the length of the search. The native→MAUI `IsDropDownOpen` sync is skipped while the handler's locker is
+  held, so a close after the fact can be a no-op ("Not found" stuck open on the emulator). Evidence: `task-log.md` § T7 run 5.
+- **The component owns the search.** No `AsyncItemsSourceProvider`; `LoadingProgressMode="Manual"` (DX 25.2 docs via
+  Context7, recorded in the spike findings: `Auto` shows a wait indicator on text change, `Manual` only when
+  `IsLoadingInProgress` is set) and the component never sets `IsLoadingInProgress`. A null `OptionSource`, a locked or
+  read-only field, or search disabled all fail `ShouldRequestOptions`, so they take the rejected path (REQ-ACF-04, -12a/b).
+  No DX `CharacterCountThreshold` or `RequestDelay` is set anywhere (they belong to the removed provider); the minimum
+  length is `ShouldRequestOptions` on the normalised query and the debounce is `RunSearchAsync`'s delay. On a `UserInput` `TextChanged` (`RestartSearch`): cancel the pending search
+  (own `CancellationTokenSource`, latest search only); compute `query = SearchQuery(text)`; if the pick echo
+  (`IsPickEcho`) or `!ShouldRequestOptions(...)` → clear `ItemsSource`, close the menu, stop; else keep the menu as it
+  is and start `RunSearchAsync`: `Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds)`, `SearchAsync(query, ct)`,
+  the REQ-ACF-26 pick-count check, the `ShouldRequestOptions` re-check, then on the UI thread: `ShowsMenu(options)` →
+  `ItemsSource = options; IsDropDownOpen = true`; else `ItemsSource = null; IsDropDownOpen = false`.
+- **Cancel points.** A programmatic text change, a routed pick and the editor's blur cancel the pending search, so a
+  late result never opens the menu on a field the user has left.
+- **Removed:** `OnItemsRequested`, `NoOptions`, `RejectRequest`, `_lastRequestRejected`, the `OnEditorPropertyChanged`
+  close guard (RC-A) and the T11 empty-result branch. `ShowsMenu` (§ 4) stays the decision. REQ-ACF-14 is kept: the
+  debounce is the same shared constant, now applied by the component instead of DX `RequestDelay`.
+  > **Spec updated 2026-11-11:** T12 impl: the blur cancel is in `OnUnfocused` and the pick cancel in `OnSelectionChanged`
+  > (after `_pickCount++`). `RunSearchAsync` disposes its own CTS in `finally`; `CancelSearch` only cancels and forgets
+  > the reference, so it never touches a disposed CTS. The `ItemsSource`/close write for a rejected query lives in
+  > `RestartSearch`; a qualifying query leaves the menu as it is, so stale options may stay visible for the debounce
+  > window until the new options replace them (the amended REQ-ACF-31 allows this).
 
 Constants are not properties. The component reads `SearchConstants.MinimumLocalQueryLength` and
 `SearchConstants.AutocompleteDebounceMilliseconds` via `x:Static`.
@@ -154,14 +259,19 @@ option source, the artist/title lock hydration, and deleting the Song glue
 
 | Function | Rule | REQ |
 |----------|------|-----|
-| `FieldMode Mode(bool isReadOnly, bool isLocked, string? text)` | `ReadOnly` if `isReadOnly` (**read-only wins**); else `Locked` if `isLocked && !string.IsNullOrWhiteSpace(text)`; else `Editable`. Every other rule and the lock mechanism use this, never the raw `IsLocked`/`IsReadOnly`. "Effectively locked" below means `Mode == Locked`. | ACF-05a, -12b |
+| `FieldMode Mode(bool isReadOnly, bool isLocked, string? text, bool isPickLockEnabled = true)` | `ReadOnly` if `isReadOnly` (**read-only wins**); else `Locked` if `isPickLockEnabled && isLocked && !string.IsNullOrWhiteSpace(text)`; else `Editable`. Every other rule and the lock mechanism use this, never the raw `IsLocked`/`IsReadOnly`. "Effectively locked" below means `Mode == Locked`. | ACF-05a, -12b |
 | `string BottomSupportingText(bool hasError, string? supportingText)` | `hasError ? "" : (supportingText ?? "")`. It is the value passed to DX `HelpText`; DX shows `ErrorText` while `HasError`. | ACF-12c |
 | `bool ShowClearIcon(FieldMode mode, string? text)` | `mode != ReadOnly && !string.IsNullOrEmpty(text)`. | ACF-07, -12b |
-| `bool ShouldRequestOptions(FieldMode mode, bool isSearchEnabled, IMenuOptionSource? source, string? query)` | `source != null && isSearchEnabled && mode == Editable && (query?.Trim().Length ?? 0) >= SearchConstants.MinimumLocalQueryLength`. The trimmed-length check is needed because DX `CharacterCountThreshold` counts raw characters (" a" would pass it). | ACF-04, -12a, -12b, -13 |
+| `string SearchQuery(string? text)` *(T9)* | `(text ?? "").NormalizeSearchQuery()` — the app-wide helper (`MyVocaList.Extensions/Strings/StringExtensions.cs`), never a local re-implementation. It is the text passed to `SearchAsync`. | ACF-13 (a)(b) |
+| `bool ShouldRequestOptions(FieldMode mode, bool isSearchEnabled, IMenuOptionSource? source, string? query)` | `source != null && isSearchEnabled && mode == Editable && SearchQuery(query).Length >= SearchConstants.MinimumLocalQueryLength` *(T9: was `query?.Trim().Length`)*. The normalised-length check is needed because DX `CharacterCountThreshold` counts raw characters (" a" would pass it). | ACF-04, -12a, -12b, -13 |
+| `bool ShowsMenu(IReadOnlyList<AutocompleteSuggestion>? options)` *(T11)* | `options is { Count: > 0 }`. When false, the request is treated like a rejected one (RC-A close guard), so DX never shows its "no results" row. | ACF-31 |
 | `PickRoute RoutePick(object? selectedItem)` | `Select` if `selectedItem is AutocompleteSuggestion`; else `None`. | ACF-11b |
-| `bool LockAfterPick(PickRoute route)` | `route == Select`. There is no opt-out (Q3). | ACF-01 |
-| `bool ShouldForwardBlur(object? selectedItem, FieldMode mode)` | `selectedItem is null && mode == Editable`. | ACF-11c, -12b, -17 |
+| `bool LockAfterPick(PickRoute route, bool isPickLockEnabled = true)` | `route == Select && isPickLockEnabled`. | ACF-01, -29 |
+| `bool ShouldForwardBlur(object? selectedItem, FieldMode mode, bool isPickBlur = false)` | `!isPickBlur && selectedItem is null && mode == Editable`. *(T9: `isPickBlur` is true for the one blur the component causes itself after a pick, REQ-ACF-30c.)* | ACF-11c, -12b, -17, -30 |
 | `string? TextToRestore(AutoCompleteEditTextChangeReason reason, FieldMode mode, string lockedText)` | *Only if mechanism C is accepted (§ 5).* `lockedText` when `reason == UserInput && mode == Locked`; else `null`. (Read-only always uses DX `IsReadOnly`, whichever mechanism is chosen.) | ACF-01 |
+
+The `isPickLockEnabled` parameters (2026-11-05, REQ-ACF-29) default to `true`, so every existing call
+and test is unchanged. The component's `CurrentMode` and `OnSelectionChanged` pass the property's value.
 
 The code-behind maps DX events to these and calls `ICommand.CanExecute`/`Execute`. The options
 passed to DX are exactly the `IMenuOptionSource.SearchAsync` result, after
@@ -209,7 +319,7 @@ explicitly accept C under Q5 before it is built. `IsReadOnly` stays `false`, so 
 built-in clear icon is live (proven on device after BUG-081). While locked:
 (a) `TextChanged` with `Reason == UserInput` → restore `lockedText` (`TextToRestore`, documented
 `Reason` enum);
-(b) `ItemsRequested` → no request (`ShouldRequestOptions`), and `IsDropDownOpen = false`;
+(b) a keystroke → no search (`ShouldRequestOptions`, T12: in `RestartSearch`), and `IsDropDownOpen = false`;
 (c) `Focused` → `Unfocus()` so the soft keyboard is dismissed.
 The spike measures its weaknesses against the thresholds in tasks.md T1 (C1–C5): typed characters
 visible in recorded frames, keyboard visible time, paste, long-press selection, IME composition, and
@@ -274,33 +384,46 @@ sets `SubmitIconVisibility="Never"`. Nothing in the app handles `Submitted`/`Sub
 
 ```
 UNLOCKED, search enabled, typing:
-  keystroke ─► DX debounce (AutocompleteDebounceMilliseconds) ─► ItemsRequested
-     ─► ShouldRequestOptions? no ─► nothing; menu stays closed
-                              yes ─► OptionSource.SearchAsync(text, ct) ─► ct check ─► menu shows options
+  keystroke (UserInput) ─► RestartSearch: cancel pending search; query = SearchQuery(text)
+     ─► IsPickEcho or ShouldRequestOptions = false ─► ItemsSource = null, menu closed
+     ─► else (menu left as is) ─► RunSearchAsync: delay AutocompleteDebounceMilliseconds ─► SearchAsync(query, ct)
+        ─► ct / pick-count / ShouldRequestOptions re-check ─► ShowsMenu? yes ─► ItemsSource = options, menu open
+                                                                         no  ─► ItemsSource = null, menu closed
+  (T12: no DX AsyncItemsSourceProvider, no loading indicator; LoadingProgressMode="Manual", IsLoadingInProgress never set)
 
 READ-ONLY (IsReadOnly=true; wins over IsLocked/IsSearchEnabled):
-  text shown ─► DX IsReadOnly=true, no clear/end icon ─► tap/keys/paste: nothing ─► no ItemsRequested search, no menu ─► blur: nothing
+  text shown ─► DX IsReadOnly=true, no clear/end icon ─► tap/keys/paste: nothing ─► no search (ShouldRequestOptions = false), no menu ─► blur: nothing
 
 SEARCH DISABLED (IsSearchEnabled=false):
-  keystroke ─► ItemsRequested ─► ShouldRequestOptions = false ─► nothing; IsDropDownOpen=false
+  keystroke ─► RestartSearch ─► ShouldRequestOptions = false ─► ItemsSource = null; IsDropDownOpen=false
 
 PICK:
-  SelectionChanged ─► RoutePick = Select ─► IsLocked = true (TwoWay → consumer, if bound)
+  SelectionChanged ─► RoutePick = Select ─► pickCounter++ (stale in-flight results discarded)
+     ─► LockAfterPick(route, IsPickLockEnabled)? yes ─► IsLocked = true (TwoWay → consumer, if bound)
+                                                 no  ─► IsLocked untouched (REQ-ACF-29)
      ─► SelectCommand(option) ─► SelectedItem = null (BUG-061) ─► IsDropDownOpen = false
-     ─► lock mechanism applied (B or C)
-  (Person: SuggestionSelectedCommand navigates away with a replacing route; the new page starts unlocked.)
+     ─► lock mechanism applied (B), only if locked
+  DX then writes the option text (TextChanged, Reason ≠ UserInput) ─► IsDropDownOpen = false, SelectedItem = null
+  (Person, IsPickLockEnabled=False: SuggestionSelectedCommand navigates away with a replacing route;
+   the field never locks, and the new page is editable.)
+
+PROGRAMMATIC TEXT (any Reason ≠ UserInput, e.g. edit-mode hydration):
+  ─► no search (RestartSearch runs on UserInput only; pending search cancelled) ─► IsDropDownOpen = false, SelectedItem = null (REQ-ACF-24, Song Artist pattern)
+
+BLUR (T12):
+  ─► pending search cancelled, so a late result never opens the menu on a field the user has left
 
 LOCKED:
   tap text / long-press / keys / paste ─► B: nothing (read-only)  |  C: reverted, Unfocus
   blur             ─► ShouldForwardBlur = false ─► nothing
-  ItemsRequested   ─► ShouldRequestOptions = false ─► nothing (REQ-ACF-04 / BUG-069)
+  keystroke        ─► RestartSearch ─► ShouldRequestOptions = false ─► nothing (REQ-ACF-04 / BUG-069)
   tap X            ─► Text = "" ─► IsLocked = false ─► ClearCommand (if bound) ─► FocusEditor()
 
 UNLOCKED, tap X (text non-empty):
   DX clears Text (built-in clear icon) ─► ClearCommand (if bound) ─► focus stays
 
 PROGRAMMATIC LOCK (consumer sets Text + IsLocked=true, e.g. hydration):
-  DX fires no ItemsRequested for programmatic text (BUG-065/066 IL evidence)
+  programmatic text starts no search (RestartSearch runs on UserInput only; pending search cancelled)
   ─► component applies the lock (if text non-empty) ─► SelectedItem = null, IsDropDownOpen = false
 ```
 
@@ -308,12 +431,14 @@ State machine (component view; `Mode` from § 4; `IsReadOnly=true` overrides eve
 
 ```
 Unlocked-Empty     --type (trimmed ≥ 2, search on)--> Unlocked-Searching
-Unlocked-Searching --pick--> Locked
+Unlocked-Searching --pick, pick-lock enabled--> Locked
+Unlocked-Searching --pick, pick-lock disabled--> Unlocked-Text (menu closed)
+Locked             --IsPickLockEnabled set false--> Unlocked-Text (Mode = Editable: REQ-ACF-29d)
 Unlocked-*         --blur (no pick)--> Unlocked-Text (BlurWithoutPickCommand)
 Unlocked-*         --X--> Unlocked-Empty (focus kept)
 Locked             --X--> Unlocked-Empty (focused, keyboard up)
 Locked             --any other user input--> Locked (no change)
-(any, text ≠ "")   --consumer sets IsLocked=true--> Locked
+(any, text ≠ "")   --consumer sets IsLocked=true, pick-lock enabled--> Locked
 Locked             --consumer empties Text--> Unlocked-Empty (Mode = Editable: REQ-ACF-05a)
 ```
 
@@ -327,6 +452,8 @@ Locked             --consumer empties Text--> Unlocked-Empty (Mode = Editable: R
 - **INV-3:** after any routed pick, DX `SelectedItem == null`.
 - **INV-4:** `IsSearchEnabled == false` ⇒ 0 search calls and the menu closed.
 - **INV-5:** no consumer page code-behind handles DX autocomplete events for a field hosted by the component.
+- **INV-6:** `IsPickLockEnabled == false` ⇒ `Mode != Locked` in every state, and the component never writes `IsLocked` (REQ-ACF-29).
+- **INV-7:** after any text change with `Reason != UserInput`, the menu is closed and `SelectedItem == null` (REQ-ACF-24).
 - **Post (X on locked):** text empty, `IsLocked == false`, consumer clear command run, editor focused.
 
 ## 8. Shared constants
@@ -361,13 +488,13 @@ purpose; the song-form item may wrap them in a `MenuOptionSource`.
 
 | Level | What | Where |
 |-------|------|-------|
-| **A** | `AutocompleteDXFieldLogic`: every row of § 4 with all branches (read-only × locked × search on/off, with read-only winning; locked/unlocked, locked + empty/whitespace text, `ShowClearIcon`, search on/off, null source, trimmed length 1 vs 2 incl. " a", pick routing, blur forwarding, `Reason` × locked if C). Each test tagged `// [AC] REQ-ACF-NN`. | `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs` |
+| **A** | `AutocompleteDXFieldLogic`: every row of § 4 with all branches (read-only × locked × search on/off, with read-only winning; locked/unlocked, locked + empty/whitespace text, `ShowClearIcon`, search on/off, null source, trimmed length 1 vs 2 incl. " a", pick routing, blur forwarding, `Reason` × locked if C; **REQ-ACF-29:** `Mode(…, isPickLockEnabled: false)` → `Editable` for locked + text, `ReadOnly` still wins, and `LockAfterPick(Select, false)` → `false`). Each test tagged `// [AC] REQ-ACF-NN`. | `MyVocaList.Tests/Unit/Components/AutocompleteDXFieldLogicTests.cs` |
 | **A** | `PersonFormViewModel.NameOptionSource.SearchAsync` returns exactly `SearchPersonsCoreAsync`'s list (REQ-ACF-16); `SearchPersonsCoreAsync` returns empty below the threshold, on the **trimmed** term (" a"), without calling the service; the token is passed to the service. | `PersonFormViewModelTests.cs` |
 | **B** | `SearchConstants.AutocompleteDebounceMilliseconds == 300`. | `SongSuggestionThresholdTests.cs` or new `SearchConstantsTests.cs` |
 | **C** | Component XAML shell, BindableProperty plumbing, Person page swap: build + manual E2E; the no-test decision recorded in the task-log. | — |
 | **Regression** | All existing `PersonFormViewModelTests` and `PersonFormViewModelBug044Tests` stay green unchanged (REQ-ACF-20/21/28). | full `dotnet test` |
 | **Spike (T1)** | Lock mechanism, X enablement, BUG-069 (B5). | throwaway page (tasks.md T1) |
-| **Manual E2E (T7, Helder, Android)** | REQ-ACF-01…10, -13, -15, -17, -18, -23, -25, -27. REQ-ACF-12a has no consumer that turns search off in this item: it is covered at Level A here and on device by the song-form item (Title in edit mode). | task-log |
+| **Manual E2E (T7, Helder, Android)** | REQ-ACF-01…10, -13, -15, -17, -18, -23, -24, -25, -26, -27, -29 (Person never locks). Pick-lock-enabled behaviour (REQ-ACF-01/05/06) is re-verified on device by the song-form item. REQ-ACF-12a has no consumer that turns search off in this item: it is covered at Level A here and on device by the song-form item (Title in edit mode). | task-log |
 
 Not testable at the VM seam: read-only rendering, X enablement and colour, keyboard behaviour, the
 missing submit icon, `SelectedItem` highlight, and menu timing. T1 and T7 cover these.

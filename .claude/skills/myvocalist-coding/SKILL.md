@@ -35,6 +35,6 @@ Project-specific coding rules for the MyVocaList .NET MAUI app. Read the relevan
 - **DevExpress first**: Read `devexpress-patterns.md` before reaching for stock MAUI or a custom component.
 - **No native dialogs**: Never `DisplayAlert`, `DisplayActionSheet`, `DisplayPromptAsync`. Use `dx:BottomSheet`.
 - **MD3 terminology**: Component names, style keys, and BindableProperty names must match official MD3 spec (m3.material.io). No invented names.
-- **SafeAreaEdges**: Every `ContentPage` needs `SafeAreaEdges="Container"` — MAUI 10 breaking change default is `None`.
+- **SafeAreaEdges**: Every `ContentPage` needs `SafeAreaEdges="Container"`, or `"All"` on pages with text input — MAUI 10 breaking change default is `None`.
 - **Incremental UI edits**: Edit ONE XAML file → build → fix errors → then next file. Never batch UI changes.
 - **Language**: All code, comments, logs, and UI text in English only.

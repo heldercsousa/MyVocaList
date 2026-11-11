@@ -1,7 +1,6 @@
 # Component Change Governance — Routing Table
 
-> Language rule: English only — see `CLAUDE.md § Constitutional Constraints`.
-> **This file is a routing table.** Full detail (governed-component list, four-gate specifics, artifacts template, no-bundling rationale) lives in `.claude/library/component-safety-gate.md`, loaded on demand via the `myvocalist-coding` skill map. The non-negotiables below stay inline because they are `[HARD RULE]` and must never be missed.
+> Full detail (governed-component list, four-gate specifics, artifacts template, no-bundling rationale): `.claude/library/component-safety-gate.md`. The non-negotiables below stay inline (`[HARD RULE]`).
 
 A change to any **governed component** (a custom UI component consumed by 2+ pages/views — e.g. `SearchAppBar`, `SmallAppBar`, `ListItem`, `EmptyState`, `AutocompleteField`, `CrudListView`) ripples across every consumer. Such a change is a deliberate, tracked, reviewed act — never a side effect of a feature task.
 
@@ -18,10 +17,4 @@ A governed-component change may NEVER be bundled into a feature/bug/other task. 
 
 ## Scope trigger
 
-A component becomes governed **the moment a second consumer binds to it** — add it to the list in `component-safety-gate.md` in the same commit. A brand-new component with no consumers is NOT governed (normal feature workflow).
-
-| Need | Source |
-|------|--------|
-| Governed-component list, four-gate detail, required-artifacts template, relationship to `workflow.md` Rules 1–2 | `.claude/library/component-safety-gate.md` |
-
-> Authorship + approval provenance: `.claude/library/authorship-log.md`.
+A component becomes governed **the moment a second consumer binds to it** — add it to the list in `component-safety-gate.md` in the same commit. A brand-new component with no consumers is NOT governed.

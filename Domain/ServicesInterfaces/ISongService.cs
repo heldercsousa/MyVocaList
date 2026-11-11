@@ -1,5 +1,6 @@
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.Resolution;
 
 namespace MyVocaList.Domain.ServicesInterfaces;
 
@@ -50,28 +51,6 @@ public interface ISongService
         CancellationToken ct = default);
 
     /// <summary>
-    /// Creates a song and atomically persists the supplied YouTube/streaming URLs in a single transaction.
-    /// Both repositories must share the same scoped <c>AppDbContext</c> so a single
-    /// <c>SaveChangesAsync</c> commits song and URLs together (AC-6.2).
-    /// </summary>
-    /// <param name="artistId">Id of the original/copyright artist (mandatory — INV-1).</param>
-    /// <param name="title">Song title.</param>
-    /// <param name="version">Variant label; empty string = canonical version.</param>
-    /// <param name="featuredArtists">Optional featured-artist names.</param>
-    /// <param name="lyrics">Optional lyrics text.</param>
-    /// <param name="externalId">Optional external provider song id.</param>
-    /// <param name="externalProvider">Optional external provider name.</param>
-    /// <param name="urls">Zero or more streaming/YouTube URLs to attach atomically.</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns><c>(true, message, song)</c> on success; <c>(false, reason, null)</c> on failure.</returns>
-    [Obsolete("Use the (int? artistId, string? newArtistName, …) overload — REQ-SFT-18. Removed in task 5.3b.")]
-    Task<(bool success, string message, Song? song)> CreateSongWithUrlsAsync(
-        int artistId, string title, string version, string? featuredArtists, string? lyrics,
-        string? externalId, string? externalProvider,
-        IEnumerable<string> urls,
-        CancellationToken ct = default);
-
-    /// <summary>
     /// Creates a song — and, when <paramref name="newArtistName"/> is supplied, its new artist — and
     /// the supplied URLs in ONE unit of work (REQ-SFT-18). Exactly one of
     /// <paramref name="artistId"/> / <paramref name="newArtistName"/> must be supplied, else
@@ -97,6 +76,21 @@ public interface ISongService
         int? artistId, string? newArtistName, string title, string version,
         string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct = default);
+
+    /// <summary>
+    /// Takes every Song-form Save decision (REQ-SFT-51): validates the input, resolves the artist
+    /// (REQ-SFT-18/19/52, never with the song's external identity — REQ-SFT-41), runs the add-mode
+    /// song guard (REQ-SFT-22/23/25), then writes through <c>CreateSongWithUrlsAsync</c> /
+    /// <see cref="UpdateSongAsync"/> — the only write paths (REQ-SFT-46). Opens no write unit of work
+    /// itself; the resolution reads happen before the write.
+    /// </summary>
+    /// <param name="request">The form input and the user's sheet decisions.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>
+    /// <c>Saved</c> with the song id; <c>Failed</c> with the message (and field, for validation);
+    /// <c>ArtistChoiceNeeded</c> or <c>SongChoiceNeeded</c> with the candidates — nothing written.
+    /// </returns>
+    Task<SongFormSaveOutcome> SaveFromFormAsync(SongFormSaveRequest request, CancellationToken ct = default);
 
     /// <summary>
     /// Returns the full song entity for the given id, including FeaturedArtists, Lyrics, Version

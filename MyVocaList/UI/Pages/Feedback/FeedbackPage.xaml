@@ -9,7 +9,7 @@
     x:DataType="vm:FeedbackViewModel"
     Title="Send Feedback"
     BackgroundColor="{StaticResource Surface}"
-    SafeAreaEdges="Container">
+    SafeAreaEdges="All">
 
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="16">
