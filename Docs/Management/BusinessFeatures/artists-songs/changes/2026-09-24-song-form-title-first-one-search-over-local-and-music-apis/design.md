@@ -201,6 +201,14 @@ Task<SongRemoteSearchResult> SearchTitleRemoteAsync(
   > the design (`TitleOptionSource` and `NameOptionSource` await local, then remote, and return one list).
   > Orchestrator decision under Helder's pre-authorisation of 2026-09-25; plan § 0.3 D1.
 
+  > **Spec updated 2026-11-11 (ACF close-out):** the reason given above ("DX `AsyncItemsSourceProvider` takes one result
+  > list per `ItemsRequested`") no longer holds: since ACF T12 the `AutocompleteDXField` runs the search itself and DX's
+  > async provider is not used. The decision is unchanged and now confirmed by Helder (2026-11-11): no loading indicator
+  > while Deezer answers; the options are shown when the response arrives (one list per `SearchAsync`, REQ-SFT-08 bound).
+  > Consequences of the shared component for this form: a search with no options shows nothing (no "no results" row,
+  > REQ-ACF-31); while a new query runs, an already open menu keeps the previous query's options until the new list
+  > replaces them (ACF design § 3.1 T12), which on the Title field can last up to the 3,000 ms bound.
+
 ### 3.5 Save decisions in the Service (`ISongService.SaveFromFormAsync`, REQ-SFT-51)
 
 ```csharp

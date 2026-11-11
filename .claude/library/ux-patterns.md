@@ -95,45 +95,25 @@ Empty state containers must be **vertically centered**, not top-aligned:
 
 Never use `VerticalOptions="Start"` for empty/error/loading placeholder states.
 
-## Autocomplete — Responsive Full-Screen Expansion (MD3)
+## Autocomplete — DevExpress docked menu, no customisation (Helder ruling 2026-11-11)
 
-> Authoritative encoding of BACKLOG ① *Autocomplete Mobile UX Pattern — Full-Screen Expansion Guideline*
-> (2026-07-15), written from the proven concept: `AutocompleteField` + `AutocompleteMobileField`, first
-> applied on PersonFormPage. Early research input: `Docs/Management/DevCycleCraft/autocomplete-component/md3-autocomplete-mobile-ux-guideline.md`.
-> MD3 currency verified 2026-07-15 against m3.material.io/components/search/guidelines.
-> ⏳ Pending Helder authorship review (CLAUDE.md § Continuous Enhancement — Authorship).
+**Rule:** every autocomplete uses the shared `UI/Components/TextFields/AutocompleteDXField` (DevExpress `AutoCompleteEdit`)
+with its docked menu below the field, on every window size. Use what the DX editor offers; do not add customisation
+that needs complex code or time (Helder, 2026-11-11: "We will use what DX one have available and avoid any
+customization that would required complex coding and time spent").
 
-> **Status note (2026-11-11, factual — the rule below is unchanged):** the app's shared autocomplete is now
-> `UI/Components/TextFields/AutocompleteDXField` (DevExpress `AutoCompleteEdit`, docked menu on every window size;
-> first consumer PersonFormPage). The `AutocompleteField` + `AutocompleteMobileField` family described here is frozen
-> (ACF design § 2.1). Two Helder rulings for `AutocompleteDXField` differ from this section: **no create-new row**
-> (ruling Q1 — creating from unpicked text happens on Save) and **no "no results"/"Not found" row, ever** (REQ-ACF-31).
-> Open for Helder: whether the compact full-screen Search View rule applies to `AutocompleteDXField`.
-> Spec: `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/`.
+- **No full-screen Search View on phones.** It would need a custom component; DX has no such mode. The former
+  "Responsive Full-Screen Expansion" rule (2026-07-15, `AutocompleteField` + `AutocompleteMobileField`, now frozen) is
+  abandoned.
+- **No create-new / `Add "<typed text>"` row.** Unpicked text is handled by the consumer on Save (ACF ruling Q1; the
+  Song form creates artists automatically at Save). The former no-match add-new affordance is abandoned.
+- **No "no results" / "Not found" row and no loading indicator.** The menu opens only when there are options
+  (REQ-ACF-31). A slow third-party search (e.g. Deezer) shows its options when the response arrives.
+- Behaviour (debounce, minimum length, pick, X, blur, keyboard) is owned by the component, never by a page.
+  Spec: `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/`.
+  DX constraint behind the no-loading rule: `constraints-reference.md` § DevExpress / UI.
 
-**Rule — responsive by window size class, per the MD3 Search guidelines** (suggestions/results are
-full-screen on compact windows, docked on larger ones):
-
-| Window size class | Autocomplete presentation |
-|-------------------|---------------------------|
-| **Compact** (< 600dp width — phone portrait) | **Full-screen Search View** pushed modally: search input in an AppBar-style header, back affordance, results fill the space between input and keyboard. In this codebase: `AutocompleteMobileField`, triggered by `AutocompleteField` when `IDeviceInfo.Idiom == Phone`. |
-| **Medium/Expanded** (≥ 600dp — tablet, desktop) | **Exposed-dropdown / docked overlay** below the input (results list anchored to the field). In this codebase: `AutocompleteField`'s overlay card, unchanged. |
-
-Why: on a compact window the keyboard consumes ~40–50% of the height; a dropdown anchored mid-page
-leaves room for 1–2 rows — unusable. Full-screen expansion (Google Maps / Gmail / Android Settings
-search) gives the results list the whole area between input and keyboard.
-
-Implementation invariants (proven by BUG-040…045/047 fixes — do not regress):
-
-- **Auto-focus + keyboard raise** on Search View appear must be deferred past the push animation (`Dispatcher.DispatchDelayed`), or Android drops focus (BUG-040).
-- **Reopen guard**: dismissing the Search View refocuses the underlying field — a one-shot suppression (`MobileFieldReopenGuard`) must swallow that refocus or the view reopens/duplicates (BUG-041/042).
-- **Trim-safe wiring**: the dynamically-instantiated mobile view must use event-driven wiring, never reflection `SetBinding` (linker trims it in Release — BUG-043).
-- **Programmatic-text guard**: ViewModel hydration of `Text` (Edit-mode load) must NOT trigger the suggestion search — only user-driven input does (BUG-047).
-- Every dismissal path (in-view back, hardware back, system gesture) must raise `Cancelled` → `BlurredWithoutSelectionCommand` so typed text is preserved and validation runs.
-- **No-match → add-new affordance:** an explicit `Add "<typed text>"` action row (creatable-autocomplete pattern), never back-button-only — analysis + spec input: `Docs/Management/DevCycleCraft/autocomplete-component/ux-no-match-add-new-analysis.md` (implementation pending, governed-component gates apply).
-
-MD3 terminology: **Search bar → Search view** (m3.material.io/components/search); the docked variant
-maps to MD3 *Menus — filtering* / exposed dropdown.
+MD3 terminology: the docked menu maps to MD3 *Menus — filtering* / exposed dropdown (m3.material.io/components/menus).
 
 ## Badge / Chip Pattern (event count)
 

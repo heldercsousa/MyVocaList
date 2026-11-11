@@ -429,6 +429,13 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
   triggered and find nothing" → FAIL. REQ-ACF-31 amended (no transient frame). Under the 2026-11-10 go-ahead ("Go with
   T11 automatically, from spec into development"), the fix continues as T12 without a new gate.
 
+### Helder ruling — 2026-11-11 (after close-out: UX scope)
+
+- "The fullscreen search for autocomplete would required a custom autocomplete component. I decided to use the DX
+  component over creating a custom one for pragmatism." The full-screen Search View and the no-match add-new row are
+  abandoned app-wide; use what DX offers, no complex customisation. Song form: no loading indicator while Deezer answers.
+  Recorded in `.claude/library/ux-patterns.md` § Autocomplete.
+
 ### Spec APPROVED — Helder, 2026-09-25
 
 Approved "as recommended", together with every open recommendation (Q10: the 300 ms debounce
