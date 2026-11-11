@@ -329,7 +329,7 @@
 > DX's async provider opens the drop-down while loading (`task-log.md` § T7 run 5). Spike `spike/acf-t12-own-search`
 > (component-owned search) proved 0 visible frames on the emulator. T12.
 
-- [ ] **T12: Component-owned search, no DX loading popup (REQ-ACF-31 amended)** `[SEQUENTIAL, after T11]` (added 2026-11-11)
+- [x] **T12: Component-owned search, no DX loading popup (REQ-ACF-31 amended)** `[SEQUENTIAL, after T11]` (added 2026-11-11)
   - **Behaviour:** REQ-ACF-31 (no transient frame, no blink while typing), with -04, -12a/b, -13, -14, -22, -24/-25, -26, -30
     unchanged. Design: `design.md` § 3.1 "Event-glue rules from T12".
   - **Steps (one writer, branch `task/acf-t12-own-search` @ `.worktrees/acf-t12`):**
