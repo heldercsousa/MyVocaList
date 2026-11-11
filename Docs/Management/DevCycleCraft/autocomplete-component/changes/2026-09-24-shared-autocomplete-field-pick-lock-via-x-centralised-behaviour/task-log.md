@@ -638,3 +638,14 @@ Files written and re-read: `AutocompleteDXField.xaml.cs` (grep of all edited sym
 - **Status:** blocked: awaiting Helder T7 on device
 - **Last commit:** 91f87884
 - **Next action:** **STOP T7:** Helder runs the on-device E2E gate on the Person form (focus on open, "jo" lists people, pick opens that person's edit form, field locked until X, blur validation). Pre-existing: `PersonFormPage.xaml` has `SafeAreaEdges="All"` not `"Container"` — awaiting Helder whether to fix separately.
+
+### T7 run 4 (Helder, phone, Release APK from develop, 2026-11-10)
+
+| # | Check | Result |
+|---|-------|--------|
+| 1 | Short text shows no menu | PASS for "a". New observation: "aa" and "aaa" (valid queries with no match) show DX's "Not found" row. |
+| 2 | Padded / multi-space query | PASS: "helder      s" finds "Helder Sousa". "H e l" finds nothing; Helder confirms this pattern is out of scope. |
+| 3 | Pick → no menu reopens, keyboard closes, no highlight | PASS |
+| 4 | Search works again after a pick | PASS |
+
+- Open question raised by Helder: is the "Not found" row useful at all? An empty result already says nothing was found.
