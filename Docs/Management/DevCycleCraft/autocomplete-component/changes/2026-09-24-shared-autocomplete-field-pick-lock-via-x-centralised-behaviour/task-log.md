@@ -719,3 +719,47 @@ Glue (code-behind `RequestAsync` → RC-A guard) is not unit-testable; covered b
 3. Emulator evidence (screen recording, frame brightness under the field; scratchpad `flash.sh`): after a "He" search with results, "aaa" and "zq" show "Not found" from the request onwards and it **stays open** (≥ 2.5 s, 12-13 frames). A first "aa" in a fresh form showed nothing. State-dependent, consistent with 2.
 
 **Conclusion:** no close-after-open fix can be flash-free. The drop-down must never be opened by DX's loading path. Candidate: the component runs the search itself (own debounce + cancellation) and opens the list only when there are options (`FilteredItemsSourceProvider` itself opens with `IsDropDownOpen = true`). Spike `spike/acf-t12-own-search` @ `.worktrees/acf-t12-spike` proves it on the emulator before any spec change.
+
+## T12 — Component-owned search (REQ-ACF-31 amended)
+
+**Status:** To Review
+**Plan:** `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/tasks.md` § T12
+**Started:** 2026-11-11
+**Completed:** 2026-11-11
+**Branch:** `task/acf-t12-own-search` (worktree `.worktrees/acf-t12`), from develop f2d6bf68. Spike base: `c5f986e1` (code files only).
+
+### Changed files
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml.cs`
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml`
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/tasks.md` (T12 ticked)
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/design.md` (one `Spec updated 2026-11-11` note, § 3.1 T12 block)
+- `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/task-log.md` (this section)
+
+### What changed vs the spike (c5f986e1)
+- `RestartSearch`: a qualifying query no longer clears `ItemsSource` or closes the menu; it cancels the pending search and starts `RunSearchAsync`. Only a rejected query (pick echo, `ShouldRequestOptions` false, empty or below-threshold text) clears `ItemsSource`, closes the menu and cancels the pending search.
+- Blur: `OnUnfocused` calls `CancelSearch()` first. Pick: `OnSelectionChanged` calls `CancelSearch()` after `_pickCount++`. Programmatic text change: already cancelled in `OnTextChanged` (spike).
+- `RunSearchAsync`: comment states the UI-context continuation rule (no `ConfigureAwait(false)`), and a `finally` disposes its own `CancellationTokenSource` and clears `_searchCts` if it is still the latest. `CancelSearch` only cancels and forgets the reference, so no disposed CTS is ever cancelled.
+- Dead code: confirmed absent (`OnItemsRequested`, `NoOptions`, `RejectRequest`, `_lastRequestRejected`, `OnEditorPropertyChanged` and its subscription, `CloseMenuOnUiThread`, T11 empty-result branch). `ShowsMenu` and its T11 tests kept.
+- XAML: removed the now-unused `xmlns:constants` declaration (spike had removed its only use). Spike's `LoadingProgressMode="Manual"` and removed `AsyncItemsSourceProvider` kept.
+- Comments: spike labels ("spike B'") removed from production comments; RC-A references gone.
+
+### Build notes
+Build: passed (0 errors, 27 warnings; `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -c Debug`) | Tests: 953 passed, 0 failed (`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`) | Commit SHA: see git log on branch
+- The two SongRepositoryArtistTrigramTests SQLite failures the spike saw did not reproduce in this run (953/953 passed). No develop comparison needed; not investigated further.
+- Emulator: not run (orchestrator). Demo per tasks.md: `flash.sh` (aa/aaa/zq/Hex/" a" lit=0; He lit>0; He→Hel no blink; pick → list stays closed), then T7 run 6.
+- Two background builds were started during this task; the first build's `tail` pipe hid its exit code, so the result above comes from a clean rerun (`build1.log`, `dotnet` EXIT=0).
+
+### Level C justification (no new test for the glue)
+- The change is event glue (DX editor events, `CancellationTokenSource` lifetime, UI-thread continuation). No new pure logic was added; decisions stay in `AutocompleteDXFieldLogic` (`ShowsMenu`, `ShouldRequestOptions`, `IsPickEcho`, `SearchQuery`), which already have Level A tests from T9/T11.
+- Per `testing.md § TDD Level Guidance`, glue with no pure logic is Level C. The DX editor, its events and the UI thread cannot be exercised in a unit test without mocking DX, and mocking DX would only test the mock.
+- Behaviour is verified on the emulator instead (orchestrator): REQ-ACF-31 frame count, plus manual checks for blur-while-pending, pick-while-pending (REQ-ACF-26) and pick-drops-focus (REQ-ACF-30).
+
+### AC traceability (T12)
+| AC ID | Criterion | Implementation location | Test method |
+|-------|-----------|-------------------------|-------------|
+| REQ-ACF-31 (amended) | No transient frame, no loading indicator, no blink while typing; rejected query closes | `AutocompleteDXField.xaml.cs` `RestartSearch`, `RunSearchAsync`; `AutocompleteDXField.xaml` `LoadingProgressMode="Manual"` | Emulator: `flash.sh` 0 frames (orchestrator); T7 run 6 pending. Logic: `ShowsMenu` tests (T11) |
+| REQ-ACF-13c | Below-threshold / rejected query leaves no menu | `RestartSearch` rejected branch; `ShouldRequestOptions` | Logic tests (T9/T11); emulator " a" lit=0 |
+| REQ-ACF-26 | A pick while a search is pending keeps the menu closed | `OnSelectionChanged` `_pickCount++` + `CancelSearch()`; `RunSearchAsync` pick-count check | Level C glue; emulator check (orchestrator) |
+| REQ-ACF-14 | Shared debounce constant applied by the component | `RunSearchAsync` `Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds)` | Level C glue; constant value covered by existing constants usage |
+
+Covers REQ-ACF-04, -12a/b, -22, -24/-25, -30 by unchanged code paths (no edits to their logic); regression pass deferred to the orchestrator's emulator run (T7 run 6, lines 2-4 and 9).
