@@ -37,7 +37,7 @@ Every agent uses these terms exactly. No synonyms.
 | **Search enabled** | The page-controlled switch (`IsSearchEnabled`) that turns option requests and the menu on or off, while keeping the field as a text field. |
 | **Clear icon (X)** | The trailing icon that removes the value (MD3 text-field *trailing icon*). In DevExpress: the built-in `ClearIcon`, or the substitute chosen in `design.md` § 5. |
 | **Submit icon** | The DevExpress `AutoCompleteEdit` default trailing magnifier icon (`SubmitIcon`/`SubmitIconVisibility`). |
-| **Debounce delay** | The pause after the last keystroke before the field requests options (DX `AsyncItemsSourceProvider.RequestDelay`). |
+| **Debounce delay** | The pause after the last keystroke before the field requests options (the component's own debounce since T12; was DX `AsyncItemsSourceProvider.RequestDelay`). |
 | **Minimum query length** | The trimmed character count below which the field requests no options. |
 | **Blur** | The field loses focus (`Unfocused`). |
 
@@ -146,7 +146,7 @@ Every agent uses these terms exactly. No synonyms.
 - **REQ-ACF-11: One component owns the glue.**
   The component SHALL own all of the following, and no consumer page's code-behind SHALL contain
   any of them:
-  (a) the options-request glue (DX `ItemsRequested` handler);
+  (a) the options-request glue (the component's own search since T12; was the DX `ItemsRequested` handler);
   (b) routing a pick to the consumer's select command;
   (c) forwarding blur-without-pick to the consumer's blur command (the blur the component causes after a pick is not one, REQ-ACF-30c);
   (d) X handling and forwarding to the consumer's clear command;
@@ -208,7 +208,7 @@ Every agent uses these terms exactly. No synonyms.
   (a) apply the length check to the normalised query;
   (b) pass the normalised query, never the raw text, to `IMenuOptionSource.SearchAsync`;
   (c) when the check fails, keep the menu closed: no options, no stale options from an earlier query,
-  and no "no results" row. DX `CharacterCountThreshold` counts raw characters, so DX still raises
+  and no "no results" row. *(T12: the component owns the search, so this DX note is historical.)* DX `CharacterCountThreshold` counts raw characters, so DX still raises
   the request for " a" or "  a"; the component must make that request show nothing.
   Given an unlocked field, When the user types " a", "  a" or "a  ", Then no menu and no "no results"
   row appear. When the user types "  an  ", Then the source receives "an". An empty result for a valid query: REQ-ACF-31.
@@ -223,6 +223,10 @@ Every agent uses these terms exactly. No synonyms.
   *(Amended 2026-11-11, T7 run 5.)* "Never" includes a transient frame: the row must not flash in and out, and no
   loading indicator or empty drop-down is shown while a search runs. While the user keeps typing a query that still
   qualifies, the open menu stays open (no close-and-reopen blink) until the new options replace the old ones.
+  Pass criterion: a screen recording of the area under the field (scratchpad `flash.sh`) has **0 frames** with a light
+  drop-down. Given an unlocked field after a search that showed options, When the user types "aa", "aaa" or "zq"
+  (no match), Then 0 frames show a drop-down. Given the menu shows "Helder Sousa" for "He", When the user types "l",
+  Then no recorded frame between the keystroke and the new options shows the area under the field without the menu.
 - **REQ-ACF-14: One shared debounce delay.**
   The debounce delay SHALL be `SearchConstants.AutocompleteDebounceMilliseconds = 300` (new), used by
   every instance. No consumer sets its own value. It replaces the literal `RequestDelay="300"` at
@@ -273,7 +277,7 @@ Every agent uses these terms exactly. No synonyms.
 | **REQ-ACF-19** (REQ-DXAC-03) | Typed text is never cleared or replaced by the control on blur, menu dismiss or focus change. | Code review (the component writes `Text` only on X, and on the C-mechanism revert while locked) + T7 on-device |
 | **REQ-ACF-20** (BUG-044) | Picking a person replaces the page (no stacked form). | `PersonFormViewModelBug044Tests.SuggestionSelected_NavigatesWithReplacingRelativeRoute_NotAStackedPush` (unchanged) |
 | **REQ-ACF-21** (REQ-DXAC-02 gate) | Person search below 2 characters returns nothing. | `PersonFormViewModelTests.SearchPersonsCommand_ShortTerm_SetsEmptySuggestions` (unchanged) |
-| **REQ-ACF-22** (BUG-056) | Options come from the search's return value. | T5 VM test (REQ-ACF-16) + code review of the component's `ItemsRequested` glue |
+| **REQ-ACF-22** (BUG-056) | Options come from the search's return value. | T5 VM test (REQ-ACF-16) + code review of the component's search glue (`RunSearchAsync` since T12) |
 | **REQ-ACF-23** (BUG-061) | No option stays highlighted after a pick. | T7 on-device |
 | **REQ-ACF-24** (BUG-065/066) | Programmatic text changes never trigger a search and always close the menu. The component SHALL, on every DX `TextChanged` whose `Reason` is not `UserInput` (consumer hydration, and the text DX writes after a pick), set `IsDropDownOpen = false`. It SHALL also set DX `SelectedItem = null` when `Reason` is `ProgrammaticChange`, but not when it is `ItemSelected`: the pick path resets `SelectedItem` itself after routing (REQ-ACF-11b/e), so a pick is never lost whichever DX event fires first. This is the Song form Artist pattern, and it holds whether or not the editor is focused (T7 run 1, line 9). | T1 (programmatic lock button) + T7 on-device + code review. DX fires no `ItemsRequested` for programmatic text (BUG-065/066 IL evidence), so there is no component logic to unit-test. |
 | **REQ-ACF-25** (BUG-069, must stay fixed) | No menu reopens after a pick, and none opens on an edit-mode load. BUG-069 stopped reproducing after the BUG-081 merge (`2d70ac73`), confirmed by Helder on device 2026-09-24 (`Docs/Management/LEDGER.md`, INLINE-AC row, "Update 2026-09-24"; likely a side effect of dropping `IsReadOnly`). Any mechanism that brings `IsReadOnly` back must re-prove it. | T1 criterion B5 + T7 |
@@ -447,8 +451,8 @@ process gates for this pipeline. On-device gates (T1 spike, T7 E2E) still requir
 | REQ-ACF-20, -21, -28 | `PersonFormViewModel` (unchanged members) | existing VM tests, unchanged |
 | REQ-ACF-23, -25, -26, -27 | component | T1 + T7 on-device, code review |
 | REQ-ACF-29 | component logic (`Mode`, `LockAfterPick`) + `PersonFormPage.xaml` | component logic tests (T8, Level A) + T7 re-run |
-| REQ-ACF-13 (a)(b) amended | component logic (`ShouldRequestOptions`, `SearchQuery`) + `OnItemsRequested` | component logic tests (T9, Level A) |
-| REQ-ACF-13 (c) | component `OnItemsRequested` glue | T7 run 3, line 2 |
+| REQ-ACF-13 (a)(b) amended | component logic (`ShouldRequestOptions`, `SearchQuery`) + `RestartSearch`/`RunSearchAsync` (T12) | component logic tests (T9, Level A) |
+| REQ-ACF-13 (c) | component `RestartSearch` rejected path (T12) | T7 run 3, line 2 |
 | REQ-ACF-30 | component logic (`ShouldForwardBlur`) + `OnSelectionChanged` / `OnUnfocused` | component logic test (T9, Level A) + T7 run 3, line 9 |
-| REQ-ACF-31 | component logic (`ShowsMenu`) + `OnItemsRequested` (empty result → close guard) | component logic test (T11, Level A) + emulator + T7 run 5, line 1 |
+| REQ-ACF-31 | component logic (`ShowsMenu`) + `RunSearchAsync` empty-result branch (T12; T11's close guard removed) | component logic test (T11, Level A) + emulator + T7 run 5, line 1 |
 | REQ-ACF-31 (amended, no transient frame) | component-owned search (`RestartSearch` / `RunSearchAsync`, design § 3.1 T12) | emulator frame count (`flash.sh`) + T7 run 6, line 1 |
