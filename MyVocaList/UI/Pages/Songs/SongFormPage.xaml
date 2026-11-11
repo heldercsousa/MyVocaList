@@ -388,6 +388,55 @@
             </Grid>
         </dx:BottomSheet>
 
+        <!-- ── Discard BottomSheet (Task 5.6, REQ-SFT-11) ───────────────────────── -->
+        <!--
+            Shown when a local Title pick happens while other fields hold user input. Open replaces the
+            form with the picked song's edit form; Keep editing (and Back / scrim, via code-behind) restores
+            the typed query and changes nothing else (KeepEditingCommand).
+        -->
+        <dx:BottomSheet x:Name="discardSheet"
+                        AllowedState="HalfExpanded"
+                        HalfExpandedRatio="0.4"
+                        IsModal="True"
+                        ShowGrabber="True"
+                        AllowDismiss="True"
+                        BackgroundColor="{StaticResource Surface}"
+                        CornerRadius="28"
+                        StateChanged="OnDiscardSheetStateChanged">
+            <Grid RowDefinitions="*,Auto">
+
+                <VerticalStackLayout Grid.Row="0" Padding="0,0,0,8">
+
+                    <Label Text="Open this song?"
+                           Style="{StaticResource BottomSheetTitle}"
+                           Margin="24,20,24,8" />
+
+                    <BoxView Style="{StaticResource Divider}" />
+
+                    <Label Text="What you entered here will be discarded."
+                           StyleClass="Body.Large"
+                           TextColor="{StaticResource OnSurfaceVariant}"
+                           Margin="24,16" />
+
+                    <dx:DXButton Content="Open"
+                                 Style="{StaticResource OutlinedButton}"
+                                 HorizontalOptions="Fill"
+                                 Margin="24,0"
+                                 Command="{Binding ConfirmOpenExistingCommand}" />
+
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Row="1" Padding="0,0,0,24">
+                    <BoxView Style="{StaticResource Divider}" />
+
+                    <dx:DXButton Content="Keep editing"
+                                 Style="{StaticResource BottomSheetCancelAction}"
+                                 Command="{Binding KeepEditingCommand}" />
+                </VerticalStackLayout>
+
+            </Grid>
+        </dx:BottomSheet>
+
     </Grid>
 
 </ContentPage>
