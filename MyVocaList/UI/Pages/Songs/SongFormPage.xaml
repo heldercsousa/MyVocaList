@@ -13,7 +13,7 @@
     x:DataType="vm:SongFormViewModel"
     Title="{Binding PageTitle}"
     BackgroundColor="{StaticResource Surface}"
-    SafeAreaEdges="Container">
+    SafeAreaEdges="All">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Save" Command="{Binding SaveCommand}" />

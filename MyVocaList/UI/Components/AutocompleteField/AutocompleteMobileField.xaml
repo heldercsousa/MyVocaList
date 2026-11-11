@@ -9,7 +9,7 @@
     xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
     x:Class="MyVocaList.UI.Components.AutocompleteField.AutocompleteMobileField"
     x:Name="self"
-    SafeAreaEdges="Container"
+    SafeAreaEdges="All"
     BackgroundColor="{StaticResource Surface}">
 
     <Grid RowDefinitions="Auto,*">
