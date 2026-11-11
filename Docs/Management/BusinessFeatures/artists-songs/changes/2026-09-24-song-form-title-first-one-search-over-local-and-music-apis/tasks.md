@@ -327,7 +327,8 @@
   > **Spec updated 2026-09-26:** (D17) 5.5 also owns `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` (former 5.7): replacing the Artist `AutoCompleteEdit` breaks the build until the code-behind glue is deleted (XAML → build → code-behind). Waits for ACF T4 (G2).
   > **Spec updated 2026-11-11:** Title blur validation is bound to `BlurWithoutPickCommand="{Binding ValidateTitleCommand}"` (the field's only blur hook; forwards in Editable mode). `MaxCharacterCount` is not carried over: the 100-character rule is `ValidateTitleInput` plus the counter. `IsDropDownOpen` is not bound (the field closes its own menu when locked). Impl decisions, not a REQ change. Device gate (New Song Title first; Edit Song Title editable, artist locked) pending Helder. Implemented on `task/sft-5.5-song-form-fields`; task-log § 5.5.
 
-- [ ] **5.6 Page: sheets (discard, near-duplicate artist, resolution)** [SEQUENTIAL — after 5.5]
+- [x] **5.6 Page: sheets (discard, near-duplicate artist, resolution)** [SEQUENTIAL — after 5.5]
+  > **Spec updated 2026-11-11:** the artist-match and resolution sheets already existed (5.3); 5.6 added only the discard `dx:BottomSheet` ("Open"/"Keep editing", Back/scrim = Keep editing) plus its Show/Close sync in `SongFormPage.xaml.cs`. Sheet text is static ("Open this song?" / "What you entered here will be discarded.") because the VM has no member exposing the picked song's title; REQ-SFT-11 wants "Open '<title>'?" (gap, see task-log § 5.6). Device gate pending Helder.
   - **Files owned:** `SongFormPage.xaml`
   - **Risk:** Medium. **Demo:** each sheet opens from its trigger and Back dismisses it with no save.
   - **Review lane:** Standard
