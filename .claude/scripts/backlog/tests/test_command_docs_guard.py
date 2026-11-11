@@ -365,6 +365,8 @@ def scan_and_validate(md_text, parser_map):
 
 def _doc_files(root):
     files = sorted(glob.glob(os.path.join(root, ".claude", "**", "*.md"), recursive=True))
+    worktrees = os.path.normpath(os.path.join(root, ".claude", "worktrees")) + os.sep  # agent worktrees = full repo copies
+    files = [f for f in files if not os.path.normpath(f).startswith(worktrees)]
     claude_md = os.path.join(root, "CLAUDE.md")
     if os.path.exists(claude_md):
         files.append(claude_md)
