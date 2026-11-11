@@ -2508,3 +2508,24 @@ Scope: UI only (Files owned: `SongFormPage.xaml`, `SongFormPage.xaml.cs`). `Auto
 - The title length cap change (above) is the only user-visible behaviour change beyond the spec's layout.
 
 ---
+
+## Task: 5.5 device retest — Title field shows no Deezer menu and no note (debugging)
+**Status:** To Review (root cause NOT confirmed; hardening + diagnostics only)
+**Started/Completed:** 2026-11-11
+
+### Evidence
+- Real-stack tests (`MyVocaList.Tests/Integration/Services/SongSuggestionTitleSearchRealStackTests.cs`): real `DeezerProvider` over a fake handler serving the device payload shape (unicode escape, `title_version`, extra fields), production DI composition, real temp-file SQLite, empty and populated library, and `SongFormViewModel.TitleOptionSource` through the same stack. All three PASS on Windows: Deezer rows parse, dedupe lookups run, 3 options returned, no note. Hypothesis 2 (JSON parsing) is refuted; hypothesis 1 (dedupe exception) is not reproduced with a healthy repository.
+- Confirmed latent defect (new unit test, failed before / passes after): any exception in the dedupe or artist-resolution stage of `SearchTitleRemoteAsync` (and a throwing `INetworkStatus`) escapes unguarded, is swallowed by the fire-and-forget `AutocompleteDXField.RunSearchAsync`, and yields exactly the reported symptom: no menu and no note (the note is only set after the call returns). Not proven to be the device cause.
+- Fix (non-governed code): `SongSuggestionService.SearchTitleRemoteAsync` now degrades to `Unavailable` with a Warning log on any non-cancellation failure; an Information log records raw/promoted/remote counts per query.
+
+### Changed files:
+- `Services/SongSuggestionService.cs`
+- `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`
+- `MyVocaList.Tests/Integration/Services/SongSuggestionTitleSearchRealStackTests.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
+
+### Device retest reading guide
+After the retest: note "Online search isn't available..." appears => the exception is now surfaced; logcat Warning `Remote title search failed for query` carries the cause. No note and no menu => the remote path returned Ok with zero options (check Information line `Remote title search ... N from Deezer`) or the request never completed.
+
+### Build notes
+Build: passed (0 errors) | Tests: 957 passed, 0 failed (one transient SQLite EnsureCreated failure seen once in the new integration test under parallel run; 3 later full runs green)
