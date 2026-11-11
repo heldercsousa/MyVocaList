@@ -215,18 +215,16 @@ Before dispatching any wave, verify that the spec being implemented is still cur
 
 | File | Reason |
 |------|--------|
-| `Docs/Changelog/changelog.md` | Every parallel agent appends to the same section — causes a merge conflict on every wave |
 | `MyVocaList.sln` | Parallel agents create duplicate solution folders with colliding GUIDs when each tries to register its own new files |
 
-**Rule:** Parallel subagents must include these two files in their `Files off-limits` list. The main agent adds the changelog entry and `.sln` registrations manually after merging each worktree branch.
+**Rule:** Parallel subagents must include this file in their `Files off-limits` list. The main agent adds the `.sln` registrations manually after merging each worktree branch.
 
 **Post-merge checklist (main agent, after every parallel wave merge):**
 1. Read each subagent's task-log to find newly created files
-2. Add one `changelog.md` entry per feature/phase merged
-3. Add each new file to the correct `.sln` solution folder (see `constraints-registry.md § Visual Studio Solution`)
-4. Commit these two files together: `git commit -m "chore: post-merge changelog + sln registration — [wave description]"`
+2. Add each new file to the correct `.sln` solution folder (see `constraints-registry.md § Visual Studio Solution`)
+3. Commit it: `git commit -m "chore: post-merge sln registration — [wave description]"`
 
-**For sequential subagents** (single writer, no parallel risk): changelog and .sln updates are permitted in the subagent's own commit as usual.
+**For sequential subagents** (single writer, no parallel risk): .sln updates are permitted in the subagent's own commit as usual.
 
 ---
 
@@ -392,7 +390,7 @@ After a parallel wave completes, merge commits in dependency order — Domain �
 
 ## Git Worktrees as Isolation Primitive — MANDATORY for ALL Implementation Work
 
-**This rule is not opt-in. Amended 2026-07-14: any task that edits code files (`.cs`, `.xaml`, `.xaml.cs`) — single-subagent tasks and bug fixes included, not just parallel waves — MUST run in a git worktree on a task branch, never directly on `develop` or `main`.** `constitutional-guard.py` blocks code edits on develop/main. `develop` remains the docs + integration branch: specs, task-logs, BACKLOG.md, LEDGER.md, and changelog are committed there directly (docs edits on develop are allowed and expected).
+**This rule is not opt-in. Amended 2026-07-14: any task that edits code files (`.cs`, `.xaml`, `.xaml.cs`) — single-subagent tasks and bug fixes included, not just parallel waves — MUST run in a git worktree on a task branch, never directly on `develop` or `main`.** `constitutional-guard.py` blocks code edits on develop/main. `develop` remains the docs + integration branch: specs, task-logs, BACKLOG.md, and LEDGER.md are committed there directly (docs edits on develop are allowed and expected).
 
 **Why mandatory:** (a) Parallel subagents sharing the same working tree collide on `git add`/`git commit` — one session unstages the other's files between `git add` and `git commit`, making both commits incomplete. Not recoverable without re-running the task. (b) Even a single agent working on develop locks the branch: unfinished code blocks docs commits, ledger updates, and other sessions from using develop as the stable integration point.
 
@@ -423,7 +421,7 @@ git worktree remove .worktrees/agent-2
 - Each subagent pushes before stopping so the main agent can pull
 - Worktree directories live at `.worktrees/<name>` (project-local, gitignored) — not outside the repo
 - Sequential code tasks within the same feature may share ONE worktree/branch (state continuity) — but still never run on develop/main directly
-- Docs-only tasks (specs, task-log, BACKLOG, changelog) run on develop in the main working tree — no worktree needed
+- Docs-only tasks (specs, task-log, BACKLOG) run on develop in the main working tree — no worktree needed
 - Before dispatching any parallel wave, verify `.worktrees/` is gitignored: `git check-ignore -q .worktrees`
 
 See `superpowers:using-git-worktrees` skill for full setup protocol (Step 0 detection, native vs. manual decision, baseline verification).
