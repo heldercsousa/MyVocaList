@@ -124,6 +124,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results\README.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-song-identity-by-lyric-version-de-duplication-and-richer-deezer-data-in-the-song-ux\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-song-identity-by-lyric-version-de-duplication-and-richer-deezer-data-in-the-song-ux\README.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
