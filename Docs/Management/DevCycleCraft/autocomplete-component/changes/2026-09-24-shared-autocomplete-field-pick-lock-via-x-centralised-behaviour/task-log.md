@@ -793,3 +793,9 @@ Fresh build of develop (`77b408f6`). Helder: "All 4 are tested and worked as exp
 | 4 | Line 9: pick → edit mode, keyboard closed, no re-search (REQ-ACF-30, -24/-25) | PASS |
 
 T7 gate passed (runs 1-6 cover lines 1-10). F1 in the persons follow-up is closed.
+
+## Rebuild test (close-out, 2026-11-11)
+
+A fresh agent (no implementation access) implemented the component from `requirements.md` + `design.md` + `AutocompleteDXFieldLogicTests.cs`. It matched the delivered design: component-owned search (`Task.Delay` debounce, `LoadingProgressMode="Manual"`, no `AsyncItemsSourceProvider`), `DisplayMember="Headline"`, `IsPickEcho` (identical expression), keyboard hide (`HideSoftInputAsync` + `InputMethodManager`), cursor to end, X via `EndIcon="close_outlined"`.
+
+**Divergences: 1.** It set `CharacterCountThreshold="1"` on the editor, because the spec was silent on DX threshold properties after T12. Fixed: design § 3.1 T12 now states that no DX threshold or delay property is set. Other listed choices were equivalent behaviour (e.g. clearing the menu itself on X instead of relying on the DX clear plus the rejected path). Verdict 0-1: the spec describes the implementation; close the feature.
