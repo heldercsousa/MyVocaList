@@ -693,3 +693,17 @@ Glue (code-behind `RequestAsync` → RC-A guard) is not unit-testable; covered b
 
 ### Commit
 **Status:** To Review. Committed as `bfe4e6a6` on `task/acf-t11-no-results-row` with `Item: shared-autocomplete-field-pick-lock-via-x-centralised-behaviour` (the commit-msg hook rejects `Item: ACF`: not a registered backlog id). Not pushed, not merged.
+
+### T11 merge + emulator check (2026-11-10)
+
+- Verifier: PASS. Merged `--no-ff` into develop as `25ccbdbc`. Android Debug build from develop: 0 errors.
+- Emulator (AVD `pixel_5_-_api_36_0_1`, New Singer, one singer "Helder Sousa" in the DB), visual screenshots:
+
+  | Input | Expected | Result |
+  |---|---|---|
+  | "aa" (no match) | no menu, no "Not found" | PASS |
+  | "aaa" (no match) | no menu, no "Not found" | PASS |
+  | "He" | menu with "Helder Sousa" | PASS |
+  | "He" → "Hex" (menu open, then no match) | menu closes | PASS |
+
+- Next: T7 run 5 on Helder's phone (line 1: "aa" / "aaa" show nothing).
