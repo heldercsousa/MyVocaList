@@ -46,3 +46,11 @@ is made in place and listed here.
 - **requirements.md:** § Helder rulings — 2026-11-09 (F1 "after a pick" half fixed here; line 9 cursor PASS).
 - **design.md:** § 3.1 event-glue rules after the emulator diagnostic run (they supersede the T9 keystroke clear).
 - **tasks.md:** T7 run 3 note and the new T10.
+
+## 2026-11-10: T7 run 4 outcome, no "no results" row
+
+- **Trigger:** T7 run 4: lines 2-4 PASS; "aa" / "aaa" with no match show DX's "Not found" row.
+- **Ruling:** the row must never show, in any context (Helder). Scope: component + Person form; `SongFormPage` excluded.
+- **requirements.md:** new REQ-ACF-31; § Helder rulings — 2026-11-10; traceability row.
+- **design.md:** § 3.1 event-glue rule after T7 run 4; § 4 `ShowsMenu`.
+- **tasks.md:** T7 run 4 note and the new T11.
