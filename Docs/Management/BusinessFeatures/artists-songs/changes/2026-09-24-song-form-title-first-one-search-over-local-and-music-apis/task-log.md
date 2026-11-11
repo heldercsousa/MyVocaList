@@ -2529,3 +2529,36 @@ After the retest: note "Online search isn't available..." appears => the excepti
 
 ### Build notes
 Build: passed (0 errors) | Tests: 957 passed, 0 failed (one transient SQLite EnsureCreated failure seen once in the new integration test under parallel run; 3 later full runs green)
+
+## 5.6
+
+**Status:** To Review (on-device gate pending: Helder)
+**Worktree:** `agent-ad879706306c7edc1` (branch `task/sft-5.6-song-form-sheets`, base develop `0415c2d9`)
+**Completed:** 2026-11-11
+
+Scope: the artist-match sheet and the resolution sheet already existed on develop (5.3, BUG-084). The only missing sheet was the discard sheet (REQ-SFT-11); 5.6 adds it. The three sheets are `dx:BottomSheet`; no native dialogs.
+
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` - new `discardSheet` (Open -> `ConfirmOpenExistingCommand`, Keep editing -> `KeepEditingCommand`).
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` - `IsDiscardSheetVisible` -> Show/Close sync (same guard pattern as the other sheets) and `OnDiscardSheetStateChanged` (Back/scrim/swipe = `KeepEditingCommand`). Needed: `dx:BottomSheet` has no bindable open property.
+- `Docs/.../changes/2026-09-24-.../tasks.md` - 5.6 ticked + note.
+- this file.
+
+### Spec gap: picked song title missing in discard sheet
+**Location:** requirements.md REQ-SFT-11; SongFormViewModel (no member for the pending song's title).
+**Gap description:** REQ-SFT-11 asks "Open '<title>'? What you entered here will be discarded."; the VM keeps only `_pendingOpenSongId`, so the title cannot be bound.
+**Options:** A: add a VM member (e.g. `DiscardSheetTitle`) in a VM task - exact REQ text. B: keep static text.
+**Recommendation:** A (small VM + test follow-up).
+**Blocking:** No - proceeded with B: heading "Open this song?", body "What you entered here will be discarded."
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|----------------|-------------|
+| REQ-SFT-11 | Discard sheet with Open / Keep editing; Back/scrim = Keep editing | `discardSheet`, `OnDiscardSheetStateChanged`, VM commands (5.2) | VM tests (existing, `SongFormViewModelTests` 524-588); device gate |
+| REQ-SFT-19 | Artist-match sheet, Back saves nothing | existing (5.3/BUG-084) | VM tests; device gate |
+| REQ-SFT-22/23 | Resolution sheet variants, Back saves nothing | existing (5.3/BUG-084) | VM tests; device gate |
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1`: 6 projects, 0 errors, 34 warnings.
+- `dotnet test MyVocaList.Tests -m:1`: 957 passed, 0 failed (no flake fired). `SafeAreaEdges="All"` untouched; native dialog census 0 hits.
+- **Not verified:** on-device behaviour (Helder's gate).
