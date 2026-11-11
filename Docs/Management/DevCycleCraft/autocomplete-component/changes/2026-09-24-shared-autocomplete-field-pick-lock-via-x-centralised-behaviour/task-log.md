@@ -649,3 +649,22 @@ Files written and re-read: `AutocompleteDXField.xaml.cs` (grep of all edited sym
 | 4 | Search works again after a pick | PASS |
 
 - Open question raised by Helder: is the "Not found" row useful at all? An empty result already says nothing was found.
+
+## T11 — No "no results" row (REQ-ACF-31)
+
+### Governance (component-change-governance, four gates)
+
+1. **Dedicated task:** T11. MD3 review: the M3 menu spec has no "no results" item; a menu shows only selectable items, so closing on an empty result is consistent with m3.material.io/components/menus.
+2. **Consumer map** (grep `AutocompleteDXField` in `MyVocaList/**/*.xaml`, 2026-11-10): `MyVocaList/UI/Pages/People/PersonFormPage.xaml:20` (`nameField`). Only consumer. `SongFormPage` does not use the component.
+3. **Risk:**
+
+   | Consumer | What could break | Verification |
+   |---|---|---|
+   | PersonFormPage `nameField` | a query with matches also closes (guard flag stuck) | emulator: "aa" → no menu, then "He" → menu opens |
+
+4. **Helder approval:** 2026-11-10, "Go with T11 automatically, from spec into development. 'Not Found' must be removed from everywhere, no matter the context."
+
+### Checkpoint
+
+- Step: spec written (REQ-ACF-31, design § 3.1/§ 4, T11). Next: spec-reviewer → implementor in `.worktrees/acf-t11`.
+- Context manifest: requirements.md, design.md, tasks.md, task-log.md, `AutocompleteDXField.xaml.cs`, `AutocompleteDXFieldLogic.cs`, `AutocompleteDXFieldLogicTests.cs`.

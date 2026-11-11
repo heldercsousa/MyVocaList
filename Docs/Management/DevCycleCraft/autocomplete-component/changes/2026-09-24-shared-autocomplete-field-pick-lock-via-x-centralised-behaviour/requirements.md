@@ -213,6 +213,13 @@ Every agent uses these terms exactly. No synonyms.
   Given an unlocked field, When the user types " a", "  a" or "a  ", Then no menu and no "no results"
   row appear. When the user types "  an  ", Then the source receives "an".
   No case or diacritic folding is added (constraints-registry § EF Core/SQLite HARD RULE).
+- **REQ-ACF-31: No "no results" row, ever (added 2026-11-10, T7 run 4 line 1).**
+  WHEN a search returns no options, the component SHALL keep the menu closed: no "Not found" / "no results"
+  row and no stale options from an earlier query. This holds for every consumer, in every context (Helder ruling
+  2026-11-10: "'Not Found' must be removed from everywhere, no matter the context"). An empty result already tells
+  the user nothing matched. Given an unlocked field, When the user types "aa" or "aaa" and no option matches,
+  Then no menu appears. When the user then types text that matches, Then the menu opens with those options.
+  When the menu shows options and the next query matches nothing, Then the menu closes.
 - **REQ-ACF-14: One shared debounce delay.**
   The debounce delay SHALL be `SearchConstants.AutocompleteDebounceMilliseconds = 300` (new), used by
   every instance. No consumer sets its own value. It replaces the literal `RequestDelay="300"` at
@@ -401,6 +408,14 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
   on-device evidence (emulator) was accepted: no more fixes from decompiled code alone.
 - Line 9: the cursor landing where the user taps is correct (PASS).
 
+### Helder rulings — 2026-11-10 (after T7 run 4)
+
+- Lines 2, 3, 4 PASS. "H e l" (spaced letters) not finding "Helder" is out of scope: "I don't want to cover that".
+- Line 1: "aa" / "aaa" show DX's "Not found" row. Helder: the row is redundant (no results already says nothing
+  was found); "'Not Found' must be removed from everywhere, no matter the context" → REQ-ACF-31, T11. Scope: the
+  shared component and the Person form. `SongFormPage` is out of scope (another session owns it; it does not use the
+  component yet) and gets the behaviour when it migrates.
+
 ### Spec APPROVED — Helder, 2026-09-25
 
 Approved "as recommended", together with every open recommendation (Q10: the 300 ms debounce
@@ -426,3 +441,4 @@ process gates for this pipeline. On-device gates (T1 spike, T7 E2E) still requir
 | REQ-ACF-13 (a)(b) amended | component logic (`ShouldRequestOptions`, `SearchQuery`) + `OnItemsRequested` | component logic tests (T9, Level A) |
 | REQ-ACF-13 (c) | component `OnItemsRequested` glue | T7 run 3, line 2 |
 | REQ-ACF-30 | component logic (`ShouldForwardBlur`) + `OnSelectionChanged` / `OnUnfocused` | component logic test (T9, Level A) + T7 run 3, line 9 |
+| REQ-ACF-31 | component logic (`ShowsMenu`) + `OnItemsRequested` (empty result → close guard) | component logic test (T11, Level A) + emulator + T7 run 5, line 1 |
