@@ -311,7 +311,7 @@
 > **Spec updated 2026-11-10: T7 run 4 result.** Lines 2, 3, 4 PASS; line 1 PASS for 1 character, but "aa" /
 > "aaa" (valid queries, no match) show DX's "Not found" row. Helder ruled it must never show (REQ-ACF-31). T11.
 
-- [ ] **T11: No "no results" row (REQ-ACF-31)** `[SEQUENTIAL, after T10]` (added 2026-11-10)
+- [x] **T11: No "no results" row (REQ-ACF-31)** `[SEQUENTIAL, after T10]` (added 2026-11-10)
   - **Behaviour:** REQ-ACF-31. Design: `design.md` § 3.1 "Event-glue rule added after T7 run 4", § 4 `ShowsMenu`.
   - **Steps (one writer, branch `task/acf-t11-no-results-row` @ `.worktrees/acf-t11`):**
     1. Red: `ShowsMenu` tests (null, empty, one option), tagged `// [AC] REQ-ACF-31`. Run, confirm they fail to compile/fail.

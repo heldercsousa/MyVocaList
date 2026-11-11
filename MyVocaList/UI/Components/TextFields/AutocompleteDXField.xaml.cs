@@ -410,6 +410,15 @@ public partial class AutocompleteDXField : ContentView
                     return null;
                 }
 
+                // REQ-ACF-31: an empty result is handled like a rejected request, so the RC-A guard in
+                // OnEditorPropertyChanged closes the drop-down DX opens for it (no "Not found" row).
+                if (!AutocompleteDXFieldLogic.ShowsMenu(options))
+                {
+                    _lastRequestRejected = true;
+                    CloseMenuOnUiThread();
+                    return options;
+                }
+
                 return options; // exactly this query's options (BUG-056)
             }
             catch (OperationCanceledException)
