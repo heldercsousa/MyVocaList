@@ -19,7 +19,7 @@ One reusable DX autocomplete owns all autocomplete behaviour app-wide: a picked 
 ## Origin
 
 Helder, on-device, 2026-09-24, while verifying BUG-081. All points below are his, recorded as
-requirements input for the spec. **Status: spec drafted (`requirements.md`, `design.md`, `tasks.md`), in review.**
+requirements input for the spec. **Status: approved by Helder 2026-09-25; shipped and closed 2026-11-11 (T7 run 6 PASS, Rebuild Test 0-1 divergence fixed). Shipped spec: immutable; later changes go in a dated `changes/` folder beside it.**
 
 ## Behaviour Helder requires (app-wide default for every autocomplete field)
 
