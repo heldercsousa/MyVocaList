@@ -1,7 +1,7 @@
 namespace MyVocaList.UI.Components.Toolbars;
 
 /// <summary>
-/// M3 Floating Toolbar — a persistent pill-shaped container holding up to 5 page-specific
+/// M3 Floating Toolbar — a pill-shaped container holding up to 5 page-specific
 /// icon-only action buttons. Floats above page content at the bottom of the screen.
 /// </summary>
 /// <remarks>
@@ -13,14 +13,17 @@ public partial class FloatingToolbar : ContentView
 {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    /// <summary>Applies the MD3 selected/unselected state colors to a vibrant toolbar icon button.</summary>
+    /// <summary>
+    /// Applies the MD3 toggle-tonal selected/unselected state colors to a vibrant toolbar icon button.
+    /// </summary>
     private void ApplySelectedState(DXButton button, bool isSelected)
     {
         // Vibrant toolbar bg = SecondaryContainer.
-        // Selected: Primary bg + OnPrimary icon (contrasts against SecondaryContainer).
+        // Selected: SurfaceContainer bg + OnSurface icon (MD3 toggle tonal state; not Primary,
+        //           because the FAB is the only Primary-emphasized action: "Emphasize one action at a time").
         // Unselected: transparent bg + OnSecondaryContainer icon (default).
-        var bgKey = isSelected ? "Primary" : null;
-        var iconKey = isSelected ? "OnPrimary" : "OnSecondaryContainer";
+        var bgKey = isSelected ? "SurfaceContainer" : null;
+        var iconKey = isSelected ? "OnSurface" : "OnSecondaryContainer";
 
         button.BackgroundColor = bgKey != null &&
             Application.Current?.Resources.TryGetValue(bgKey, out var bg) == true
@@ -77,8 +80,8 @@ public partial class FloatingToolbar : ContentView
             propertyChanged: (b, _, n) => ((FloatingToolbar)b).ApplySelectedState(((FloatingToolbar)b).action1Button, (bool)n));
 
     /// <summary>
-    /// When true, applies Primary background and OnPrimary icon color to indicate an
-    /// active/toggled state. Contrasts against the SecondaryContainer toolbar background.
+    /// When true, applies the SurfaceContainer background and OnSurface icon color (MD3 toggle-tonal
+    /// selected state). Contrasts against the SecondaryContainer toolbar background.
     /// </summary>
     public bool Action1IsSelected
     {
