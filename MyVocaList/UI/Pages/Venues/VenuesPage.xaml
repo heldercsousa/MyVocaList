@@ -53,9 +53,7 @@
                         <lists:ListItemLeadingIcon Icon="place_outlined" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
-                        <dx:CheckEdit IsChecked="False"
-                                      InputTransparent="True"
-                                      VerticalOptions="Center" />
+                        <lists:ListItemCheckbox VerticalOptions="Center" />
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
@@ -69,10 +67,7 @@
                         <lists:ListItemLeadingIcon Icon="place_outlined" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
-                        <dx:CheckEdit IsChecked="True"
-                                      CheckedCheckBoxColor="{dx:ThemeColor Primary}"
-                                      InputTransparent="True"
-                                      VerticalOptions="Center" />
+                        <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
