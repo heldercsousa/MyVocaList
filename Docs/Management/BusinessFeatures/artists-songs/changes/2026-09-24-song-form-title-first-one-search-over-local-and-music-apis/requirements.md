@@ -212,7 +212,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 ### D. No pick
 
 - **REQ-SFT-15: Typed text is the title.** When the user leaves Title without picking, the typed text
-  stays and is the title. Save applies the existing title rules only (required; ≤ 100 characters,
+  stays and is the title. Save applies the existing title rules only (required; ≤ 100 characters [limit raised to 250 by change 2026-11-11-song-title-limit-raised-from-100-to-250-characters],
   `SongService.ValidateTitleInput`). There is no other handling of unpicked title text.
 
 ### E. Artist
@@ -408,7 +408,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 
 | Field | Rule | Source (unchanged unless noted) |
 |-------|------|------|
-| Title | required; ≤ 100 chars after trim | `SongService.ValidateTitleInput` |
+| Title | required; ≤ 100 chars after trim (→ 250, see change 2026-11-11-song-title-limit-raised-from-100-to-250-characters) | `SongService.ValidateTitleInput` |
 | Version | optional; ≤ 60; required for "Save as new version"; a Deezer pick fills it (REQ-SFT-12) | `SongService.ValidateVersionInput` |
 | Artist | required; typed name ≤ 60, non-empty after trim, no collated duplicate when created | `IArtistService` |
 | Song identity | unique `(ArtistId, Title, Version)` collated, on create **and** update | DB index + REQ-SFT-29 (update: changed) |
