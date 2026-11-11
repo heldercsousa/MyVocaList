@@ -20,7 +20,6 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
     // Selection state
     int SelectedCount { get; }
     bool IsAllSelected { get; }
-    bool CanEditSelected { get; }
     bool CanDeleteSelected { get; }
     bool IsSelectionMode { get; }
 
@@ -37,7 +36,6 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
 
     // Toolbar commands
     IRelayCommand SelectAllCommand { get; }
-    IAsyncRelayCommand EditSelectedCommand { get; }
     IRelayCommand DeleteSelectedCommand { get; }
 
     // Confirm bottom sheet

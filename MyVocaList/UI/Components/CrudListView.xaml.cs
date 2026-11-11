@@ -97,15 +97,6 @@ public partial class CrudListView : ContentView
             typeof(CrudListView), null,
             propertyChanged: (b, _, n) => ((CrudListView)b).OnFilterContentChanged(n as View));
 
-    /// <summary>
-    /// Optional Tap command for DXCollectionView. When non-null, wires the Tap event.
-    /// Use for pages that navigate on item tap (e.g. SongsPage).
-    /// </summary>
-    public static readonly BindableProperty ItemTapCommandProperty =
-        BindableProperty.Create(nameof(ItemTapCommand), typeof(System.Windows.Input.ICommand),
-            typeof(CrudListView), null,
-            propertyChanged: (b, _, n) => ((CrudListView)b).OnItemTapCommandChanged(n as System.Windows.Input.ICommand));
-
     // -------------------------------------------------------------------------
     // CLR wrappers
     // -------------------------------------------------------------------------
@@ -194,17 +185,16 @@ public partial class CrudListView : ContentView
         set => SetValue(FilterContentProperty, value);
     }
 
-    public System.Windows.Input.ICommand ItemTapCommand
-    {
-        get => (System.Windows.Input.ICommand)GetValue(ItemTapCommandProperty);
-        set => SetValue(ItemTapCommandProperty, value);
-    }
-
     // -------------------------------------------------------------------------
     // ViewModel reference (cast from BindingContext when set)
     // -------------------------------------------------------------------------
 
     private MyVocaList.UI.ViewModels.ICrudListViewModel _viewModel;
+
+    /// <summary>
+    /// Set when the confirm sheet must open after the item actions sheet has hidden (sheet hand-off).
+    /// </summary>
+    private bool _showConfirmWhenActionsHidden;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -239,7 +229,10 @@ public partial class CrudListView : ContentView
         _viewModel = BindingContext as MyVocaList.UI.ViewModels.ICrudListViewModel;
 
         if (_viewModel != null)
+        {
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            ApplySelectionMode();
+        }
     }
 
     private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -247,9 +240,51 @@ public partial class CrudListView : ContentView
         if (e.PropertyName == nameof(MyVocaList.UI.ViewModels.ICrudListViewModel.ConfirmSheetState))
         {
             if (_viewModel.ConfirmSheetState == BottomSheetState.Hidden)
+            {
+                _showConfirmWhenActionsHidden = false;
                 confirmSheet.Close();
+            }
+            else if (itemActionsSheet.State != BottomSheetState.Hidden)
+            {
+                // Only one sheet at a time: the confirm sheet opens once the item actions sheet has hidden.
+                _showConfirmWhenActionsHidden = true;
+            }
             else
+            {
                 confirmSheet.Show(_viewModel.ConfirmSheetState, null);
+            }
+        }
+        else if (e.PropertyName == nameof(MyVocaList.UI.ViewModels.ICrudListViewModel.IsSelectionMode))
+        {
+            ApplySelectionMode();
+        }
+        else if (e.PropertyName == nameof(MyVocaList.UI.ViewModels.ICrudListViewModel.ItemActionsSheetState))
+        {
+            if (_viewModel.ItemActionsSheetState == BottomSheetState.Hidden)
+                itemActionsSheet.Close();
+            else
+                itemActionsSheet.Show(_viewModel.ItemActionsSheetState, null);
+        }
+    }
+
+    /// <summary>
+    /// Maps the ViewModel's IsSelectionMode to the DXCollectionView selection mode (design I4).
+    /// When entering selection mode, the view's SelectedItems is reassigned to the ViewModel collection
+    /// so DX reflects the VM state after the switch.
+    /// </summary>
+    private void ApplySelectionMode()
+    {
+        if (collectionView == null || _viewModel == null)
+            return;
+
+        if (_viewModel.IsSelectionMode)
+        {
+            collectionView.SelectionMode = Microsoft.Maui.Controls.SelectionMode.Multiple;
+            collectionView.SelectedItems = SelectedItemsSource;
+        }
+        else
+        {
+            collectionView.SelectionMode = Microsoft.Maui.Controls.SelectionMode.None;
         }
     }
 
@@ -276,14 +311,6 @@ public partial class CrudListView : ContentView
         filterContentHost.IsVisible = hasFilter;
     }
 
-    private void OnItemTapCommandChanged(System.Windows.Input.ICommand newCommand)
-    {
-        // Unwire then re-wire so multiple calls are safe
-        collectionView.Tap -= OnCollectionViewItemTapped;
-        if (newCommand != null)
-            collectionView.Tap += OnCollectionViewItemTapped;
-    }
-
     // -------------------------------------------------------------------------
     // DXCollectionView event handlers
     // -------------------------------------------------------------------------
@@ -294,15 +321,35 @@ public partial class CrudListView : ContentView
             _viewModel.IsScrolled = e.Offset > 0;
     }
 
+    /// <summary>
+    /// DX selection changed. The count is read inside the dispatched action, not before it, so a stale
+    /// queued value (for example the 0 raised by the None to Multiple switch) cannot override the settled state.
+    /// </summary>
     private void OnSelectionChanged(object sender, CollectionViewSelectionChangedEventArgs e)
     {
-        var count = (collectionView.SelectedItems as System.Collections.ICollection)?.Count ?? 0;
-        _viewModel?.OnSelectionChanged(count);
+        Dispatcher.Dispatch(() => _viewModel?.OnSelectionChanged(CurrentSelectedCount()));
     }
 
-    private void OnCollectionViewItemTapped(object sender, CollectionViewGestureEventArgs e)
+    private int CurrentSelectedCount() =>
+        (collectionView.SelectedItems as System.Collections.ICollection)?.Count ?? 0;
+
+    /// <summary>
+    /// Tap on an item. Forwards to the ViewModel, which navigates in browse mode and is a no-op in selection mode.
+    /// </summary>
+    private void OnItemTap(object sender, CollectionViewGestureEventArgs e)
     {
-        ItemTapCommand?.Execute(e.Item);
+        if (_viewModel?.ItemTapCommand is { } command && command.CanExecute(e.Item))
+            command.Execute(e.Item);
+    }
+
+    /// <summary>
+    /// Press-and-hold on an item. Forwards to the ViewModel, which starts selection in browse mode
+    /// and opens the item actions sheet in selection mode.
+    /// </summary>
+    private void OnItemLongPress(object sender, CollectionViewGestureEventArgs e)
+    {
+        if (_viewModel?.ItemLongPressCommand is { } command && command.CanExecute(e.Item))
+            command.Execute(e.Item);
     }
 
     // -------------------------------------------------------------------------
@@ -317,6 +364,27 @@ public partial class CrudListView : ContentView
             _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
         {
             _viewModel.ConfirmSheetState = BottomSheetState.Hidden;
+        }
+    }
+
+    /// <summary>
+    /// Item actions sheet state changed. A swipe-dismiss is synced back to the ViewModel, and a pending
+    /// confirm sheet is shown once the item actions sheet has hidden.
+    /// </summary>
+    private void OnItemActionsSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
+    {
+        if (e.NewValue != BottomSheetState.Hidden)
+            return;
+
+        // Sheet closed by gesture (swipe-down) — sync back to ViewModel
+        if (_viewModel != null && _viewModel.ItemActionsSheetState != BottomSheetState.Hidden)
+            _viewModel.DismissItemActionsCommand.Execute(null);
+
+        if (_showConfirmWhenActionsHidden)
+        {
+            _showConfirmWhenActionsHidden = false;
+            if (_viewModel != null && _viewModel.ConfirmSheetState != BottomSheetState.Hidden)
+                confirmSheet.Show(_viewModel.ConfirmSheetState, null);
         }
     }
 }
