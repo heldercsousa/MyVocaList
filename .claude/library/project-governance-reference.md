@@ -92,7 +92,7 @@ Before proposing anything that touches UI, styles, or components, inspect ALL of
 | Native dialogs banned | `DisplayAlert`/`DisplayActionSheet`/`DisplayPromptAsync` bypass the app's theme, violate MD3 interaction patterns, and on Android are not dismissible via back gesture. |
 | UI Component Priority (DevExpress first) | Mixing component libraries produces visual inconsistency and theming conflicts. Blazor Hybrid + MudBlazor is under post-MVP evaluation; DevExpress-first stays in full effect until that spike produces a go decision. |
 | MD3 terminology | Invented names require mental translation and break cross-reference with m3.material.io. |
-| SafeAreaEdges="Container" | .NET MAUI 10 defaults `ContentPage` to `SafeAreaEdges="None"`; content renders behind the status bar/notch without it. |
+| SafeAreaEdges="Container" (or "All" on pages with text input) | .NET MAUI 10 defaults `ContentPage` to `SafeAreaEdges="None"`; content renders behind the status bar/notch without it. `All` = Container + SoftInput (keyboard avoidance). |
 | Incremental XAML edits | XAML errors cascade — batching edits hides which change introduced the error. |
 
 **Constitutional role.** A spec is checked against CLAUDE.md before it is written: architecture

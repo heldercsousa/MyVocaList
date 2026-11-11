@@ -203,3 +203,16 @@ change must modify.
 **Still true and unchanged:** the spec-writer was never completed. This folder still holds `README.md`
 only. D1–D4 remain closed and valid; the next session must write `requirements.md` / `design.md` from
 them, then spec-reviewer, then Helder's approval gate, then plan.
+
+
+## Ledger detail moved from LEDGER.md (2026-11-10) — CATALOG-PROP
+
+> Verbatim text of the former ledger row, moved so the ledger stays one short line per item (`/sln-ledger § Row-length rule`). Nothing was dropped.
+
+- **Feature / Bug:** Song writes propagate to the artist catalog
+- **Phase / Step:** Status 📋 Spec. All four design decisions closed by Helder 2026-08-24 and recorded in the change folder's `README.md`: D1 catalog = the performer relation, authorship implies a mandatory derived row; D2 reassignment moves the derived row and derived rows are read-only to the user, guarded in Services; D3 UoW 4.1 first (**done**, merged above); D4 existing data backfilled once by an EF migration. Two trace findings the spec must own: `SongService` writes nothing to `Catalog` today, and `SongFormViewModel` has NO latent catalog wiring — the original "SongFormPage already anticipates this" belief is unsubstantiated, the only hit being a cosmetic count label in the artist autocomplete. Also noted: `SongsViewModel.AddToCatalogAsync` is an empty `// TODO Phase 15` stub.
+- **Branch:** — (spec only, no branch yet)
+- **Worktree:** —
+- **Status:** deferred (Helder 2026-11-04: spec after SFT is done)
+- **Last commit:** e91947f6
+- **Next action:** **Audit 2026-08-25 — KEEP, do not delete.** Checked against the in-flight `READ-SCOPE` change on the suspicion the two overlapped: **they do not conflict.** READ-SCOPE is infrastructure (routing existing reads through `IUnitOfWork`, no behaviour change); this is unbuilt business behaviour (the derived-catalog-row invariant), and D1–D4 are the only record of Helder's domain decisions. Two things did change: **D3's premise sentence is now stale** — it says `CatalogService` has no `IUnitOfWork`, but Phase 4.1 landed and `CatalogService.cs:17` is now `(ICatalogRepository, IUnitOfWork, ILogger)`, so D3's gate is **satisfied**; and a **new sequencing constraint** — READ-SCOPE's Waves 4.2/4.3 own `SongService.cs` and `CatalogService.cs`, the two files this item must modify, so it is **not dispatchable until READ-SCOPE's Wave 4 is committed**, and the propagation code must be written in the `sp`-resolved lambda shape or Wave 7's architecture test will reject it. Recorded in the item's `README.md § Status check`. Also still true: the spec-writer was NEVER completed — the folder still holds `README.md` only.** The session diverted to the UoW read-scoping work (row `READ-SCOPE`) and this item did not progress. D1–D4 remain closed and valid; the next session must actually write `requirements.md`/`design.md` from them, then spec-reviewer, then Helder's approval gate, then plan. **G3 two-way note (SFT, 2026-09-26):** do not dispatch a task touching SongService.cs/ISongService.cs/Infra/Migrations/ while a task/sft-* branch owning those files (3.1, 3.2a–c, 3.10, 5.3b, 3.6b, 3.7, 3.8) is live; check LEDGER + git worktree list + git branch -a (SFT plan § 0.2.2).
