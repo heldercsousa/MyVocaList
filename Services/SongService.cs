@@ -18,7 +18,7 @@ public class SongService : ISongService
     private readonly IUnitOfWork _uow;
     private readonly ILogger<SongService> _logger;
 
-    public int MaxTitleLength => 100;
+    public int MaxTitleLength => 250;
     public int ShowCounterAt => 80;
     public int MaxVersionLength => 60;
 

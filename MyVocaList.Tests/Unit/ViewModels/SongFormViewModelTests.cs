@@ -1729,11 +1729,11 @@ public class SongFormViewModelTests
     // [AC] R1: On blur, a dirty invalid title field surfaces an inline error.
     public void ValidateTitleCommand_DirtyInvalidField_SetsError()
     {
-        var tooLong = new string('x', 101); // exceeds 100-char limit; differs from the default "" so
+        var tooLong = new string('x', 251); // exceeds 250-char limit; differs from the default "" so
                                             // the property-changed handler actually fires
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(tooLong))
-                   .Returns((false, "Title is too long. Maximum 100 characters."));
+                   .Returns((false, "Title is too long. Maximum 250 characters."));
         var sut = CreateSut(songService: songService);
         sut.CompleteHydration();
         sut.SongTitle = tooLong;
@@ -1741,7 +1741,7 @@ public class SongFormViewModelTests
         sut.ValidateTitleCommand.Execute(null);
 
         Assert.True(sut.TitleHasError);
-        Assert.Equal("Title is too long. Maximum 100 characters.", sut.TitleErrorText);
+        Assert.Equal("Title is too long. Maximum 250 characters.", sut.TitleErrorText);
     }
 
     [Fact]
@@ -1778,10 +1778,10 @@ public class SongFormViewModelTests
     // [AC] R2: While in error, a keystroke that makes the field valid clears the error immediately.
     public void OnSongTitleChanged_WhileInError_ClearsErrorWhenValid()
     {
-        var tooLong = new string('x', 101); // differs from the default "" so the handler fires
+        var tooLong = new string('x', 251); // differs from the default "" so the handler fires
         var songService = new Mock<ISongService>();
         songService.Setup(s => s.ValidateTitleInput(tooLong))
-                   .Returns((false, "Title is too long. Maximum 100 characters."));
+                   .Returns((false, "Title is too long. Maximum 250 characters."));
         var sut = CreateSut(songService: songService);
         sut.CompleteHydration();
         sut.SongTitle = tooLong;
@@ -1800,7 +1800,7 @@ public class SongFormViewModelTests
     // field dirty, so a pre-filled invalid value does not flash an error before the user interacts.
     public void OnSongTitleChanged_DuringHydration_DoesNotDirtyOrValidateOnBlur()
     {
-        var tooLong = new string('x', 101); // differs from the default "" so the handler fires
+        var tooLong = new string('x', 251); // differs from the default "" so the handler fires
         var songService = new Mock<ISongService>();
         var sut = CreateSut(songService: songService); // _isHydrating still true — CompleteHydration() not called
 
