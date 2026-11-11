@@ -103,6 +103,14 @@ Never use `VerticalOptions="Start"` for empty/error/loading placeholder states.
 > MD3 currency verified 2026-07-15 against m3.material.io/components/search/guidelines.
 > ⏳ Pending Helder authorship review (CLAUDE.md § Continuous Enhancement — Authorship).
 
+> **Status note (2026-11-11, factual — the rule below is unchanged):** the app's shared autocomplete is now
+> `UI/Components/TextFields/AutocompleteDXField` (DevExpress `AutoCompleteEdit`, docked menu on every window size;
+> first consumer PersonFormPage). The `AutocompleteField` + `AutocompleteMobileField` family described here is frozen
+> (ACF design § 2.1). Two Helder rulings for `AutocompleteDXField` differ from this section: **no create-new row**
+> (ruling Q1 — creating from unpicked text happens on Save) and **no "no results"/"Not found" row, ever** (REQ-ACF-31).
+> Open for Helder: whether the compact full-screen Search View rule applies to `AutocompleteDXField`.
+> Spec: `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/`.
+
 **Rule — responsive by window size class, per the MD3 Search guidelines** (suggestions/results are
 full-screen on compact windows, docked on larger ones):
 
