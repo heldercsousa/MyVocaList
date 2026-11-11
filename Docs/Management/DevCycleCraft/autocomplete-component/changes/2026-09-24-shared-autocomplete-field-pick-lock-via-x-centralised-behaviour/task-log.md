@@ -692,4 +692,4 @@ Files written and re-read: `AutocompleteDXField.xaml.cs` (grep of all edited sym
 Glue (code-behind `RequestAsync` → RC-A guard) is not unit-testable; covered by the emulator check above.
 
 ### Commit
-**Status:** To Review. Committed on `task/acf-t11-no-results-row` with `Item: ACF`. Not pushed, not merged.
+**Status:** To Review. Committed as `bfe4e6a6` on `task/acf-t11-no-results-row` with `Item: shared-autocomplete-field-pick-lock-via-x-centralised-behaviour` (the commit-msg hook rejects `Item: ACF`: not a registered backlog id). Not pushed, not merged.
