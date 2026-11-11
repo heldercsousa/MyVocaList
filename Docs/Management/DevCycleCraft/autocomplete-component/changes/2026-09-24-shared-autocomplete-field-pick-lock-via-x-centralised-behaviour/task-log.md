@@ -744,7 +744,7 @@ Glue (code-behind `RequestAsync` → RC-A guard) is not unit-testable; covered b
 - Comments: spike labels ("spike B'") removed from production comments; RC-A references gone.
 
 ### Build notes
-Build: passed (0 errors, 27 warnings; `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -c Debug`) | Tests: 953 passed, 0 failed (`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`) | Commit SHA: see git log on branch
+Build: passed (0 errors, 27 warnings; `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -c Debug`) | Tests: 953 passed, 0 failed (`dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`) | Commit SHA: b5504214
 - The two SongRepositoryArtistTrigramTests SQLite failures the spike saw did not reproduce in this run (953/953 passed). No develop comparison needed; not investigated further.
 - Emulator: not run (orchestrator). Demo per tasks.md: `flash.sh` (aa/aaa/zq/Hex/" a" lit=0; He lit>0; He→Hel no blink; pick → list stays closed), then T7 run 6.
 - Two background builds were started during this task; the first build's `tail` pipe hid its exit code, so the result above comes from a clean rerun (`build1.log`, `dotnet` EXIT=0).
@@ -763,3 +763,20 @@ Build: passed (0 errors, 27 warnings; `dotnet build MyVocaList/MyVocaList.csproj
 | REQ-ACF-14 | Shared debounce constant applied by the component | `RunSearchAsync` `Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds)` | Level C glue; constant value covered by existing constants usage |
 
 Covers REQ-ACF-04, -12a/b, -22, -24/-25, -30 by unchanged code paths (no edits to their logic); regression pass deferred to the orchestrator's emulator run (T7 run 6, lines 2-4 and 9).
+
+### T12 review + emulator check (orchestrator, 2026-11-11)
+
+- **Verifier:** conditional PASS, no blockers. Warning 5 (`_ = RunSearchAsync(...)` catches only cancellation): no change. `code-style-reference.md § Exception Handling` forbids a try-catch for what `GlobalExceptionHandler` already logs, and category 2 (`TaskScheduler.UnobservedTaskException`) logs a failed search as Error. Warning 8 (SHA) fixed above.
+- **Emulator** (worktree build, New Singer, one singer "Helder Sousa"), `flash.sh` lit frames / max brightness, two runs:
+
+  | Input | Run 1 | Run 2 | Expected |
+  |---|---|---|---|
+  | aa | 0 / 38 | 0 / 38 | 0 |
+  | He | 17 / 232 | 15 / 232 | > 0 (list) |
+  | aaa | 0 / 38 | 0 / 38 | 0 |
+  | zq | 0 / 38 | 0 / 38 | 0 |
+  | Hex | 0 / 38 | 0 / 38 | 0 |
+  | " a" | 0 / 38 | 0 / 38 | 0 |
+  | He → Hel (`blink.sh`, dark frames) | 0 of 255 | 0 of 134 | 0 (no blink) |
+
+  REQ-ACF-31 pass criterion met. Develop baseline before T12: aaa/zq 12-13 frames of "Not found", stuck open.
