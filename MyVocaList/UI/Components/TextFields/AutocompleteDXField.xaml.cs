@@ -1,6 +1,6 @@
-using System.Collections;
 using System.ComponentModel;
 using DevExpress.Maui.Editors;
+using MyVocaList.Domain.Constants;
 
 namespace MyVocaList.UI.Components.TextFields;
 
@@ -254,16 +254,12 @@ public partial class AutocompleteDXField : ContentView
         set => SetValue(BlurWithoutPickCommandProperty, value);
     }
 
-    // Counts routed picks; OnItemsRequested compares it before/after its await (REQ-ACF-26).
+    // Counts routed picks; RunSearchAsync compares it before/after its await (REQ-ACF-26).
     private int _pickCount;
 
     // REQ-ACF-30: one-shot flag set when a pick drops focus, so the blur it causes is not forwarded.
     // Cleared by that blur, by the next UserInput text change, or by the next focus.
     private bool _pickBlurPending;
-
-    // RC-A (REQ-ACF-13c): the latest options request was rejected by the gate. DX opens the drop-down after
-    // the request delegate completes, so OnEditorPropertyChanged closes it again while this is set.
-    private bool _lastRequestRejected;
 
     // RC-B (REQ-ACF-25): the text the last routed pick left in the editor. A request that echoes it is not a
     // new search. Cleared by the first real edit (a UserInput change that is not the echo).
@@ -277,7 +273,6 @@ public partial class AutocompleteDXField : ContentView
         InitializeComponent();
         ApplyMode();
         ApplySupportingText();
-        editor.PropertyChanged += OnEditorPropertyChanged;
     }
 
     // ── Public API ─────────────────────────────────────────────────────────
@@ -361,90 +356,93 @@ public partial class AutocompleteDXField : ContentView
         editor.HelpText = AutocompleteDXFieldLogic.BottomSupportingText(HasError, SupportingText);
     }
 
-    // ── DX event adapters (REQ-ACF-11) ─────────────────────────────────────
+    // ── Own search (REQ-ACF-31 amended, T12): the component runs the search itself on each user keystroke ──
+    // DX's AsyncItemsSourceProvider is not used: it sets IsLoadingInProgress before the request, which opens
+    // the drop-down while loading and renders "Not found" (task-log § T7 run 5). LoadingProgressMode="Manual"
+    // in the XAML, and this component never sets IsLoadingInProgress.
 
-    // DX invokes Request() when neither delegate is assigned (NRE inside its async-void runner),
-    // so the "no request" branch hands it a delegate that returns null = no items
-    // (decompiled-DLL finding 1, T4 checkpoint).
-    private static readonly Func<Task<IEnumerable>> NoOptions = static () => Task.FromResult<IEnumerable>(null);
+    // The latest search only. Cancelled by a new keystroke, a programmatic text change, a routed pick and blur.
+    private CancellationTokenSource? _searchCts;
 
-    // Raised on a System.Threading.Timer thread when RequestDelay > 0 (decompiled-DLL finding 3),
-    // so UI-bound writes go through the Dispatcher. REQ-ACF-04, -12a, -12b, -13, -16, -22, -26.
-    private void OnItemsRequested(object sender, ItemsRequestEventArgs e)
+    // A rejected query (pick echo, below threshold, no source, search off, locked or read-only) clears the list
+    // and closes the menu at once. A qualifying query leaves an open menu as it is, so there is no close-and-
+    // reopen blink while typing; RunSearchAsync replaces the options when the search completes.
+    private void RestartSearch()
     {
-        // REQ-ACF-13 (a)(b): the request's own text, normalised once; used for both gates and the search.
-        var query = AutocompleteDXFieldLogic.SearchQuery(e.Text);
-        var token = e.CancellationToken;
-        var source = OptionSource;
-        var pickCountAtStart = _pickCount;
+        CancelSearch();
 
-        // RC-B: the request DX issues for the picked name is an echo, not a new search (REQ-ACF-25).
+        var query = AutocompleteDXFieldLogic.SearchQuery(editor.Text);
         if (AutocompleteDXFieldLogic.IsPickEcho(query, _textAtPick)
-            || !AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, query))
+            || !AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, OptionSource, query))
         {
-            RejectRequest(e);
+            editor.ItemsSource = null;
+            IsDropDownOpen = false;
             return;
         }
 
-        _lastRequestRejected = false;
-        e.RequestAsync = async () =>
+        var cts = new CancellationTokenSource();
+        _searchCts = cts;
+        _ = RunSearchAsync(query, _pickCount, cts);
+    }
+
+    // Cancels the pending or in-flight search. The CTS itself is disposed by the RunSearchAsync that owns it.
+    private void CancelSearch()
+    {
+        _searchCts?.Cancel();
+        _searchCts = null;
+    }
+
+    // Started from a UI event. Every await below captures the UI synchronization context (no ConfigureAwait(false)),
+    // so the continuations after each await, including the editor writes, run on the UI thread. Keep it that way.
+    // REQ-ACF-04, -12a, -12b, -13, -14, -16, -22, -26, -31.
+    private async Task RunSearchAsync(string query, int pickCountAtStart, CancellationTokenSource cts)
+    {
+        var token = cts.Token;
+        try
         {
-            // DX awaits this delegate inside an async void with no try/catch (decompiled-DLL
-            // finding 2), so cancellation is caught here: allowed try-catch pattern 1
-            // (code-style-reference.md § Exception Handling). DX itself drops the result of a
-            // cancelled request.
-            try
+            await Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds, token);
+
+            var source = OptionSource;
+            if (source is null)
+                return;
+
+            var options = await source.SearchAsync(query, token);
+
+            // No await between this check and the writes below, so a cancel that landed during the search
+            // is seen here and nothing is written for a superseded query.
+            token.ThrowIfCancellationRequested();
+
+            // REQ-ACF-26: a pick routed while this search ran must not reopen the menu (the pick already closed it).
+            if (pickCountAtStart != _pickCount)
+                return;
+
+            // Review Focus 1: the field may have locked (or search turned off) while the search ran.
+            if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, query))
+                return;
+
+            if (AutocompleteDXFieldLogic.ShowsMenu(options))
             {
-                var options = await source.SearchAsync(query, token);
-                token.ThrowIfCancellationRequested();
-
-                // REQ-ACF-26: a pick routed while this search ran must not reopen the menu.
-                if (pickCountAtStart != _pickCount)
-                    return Array.Empty<AutocompleteSuggestion>();
-
-                // Review Focus 1: the field may have locked (or search turned off) while the search ran.
-                if (!AutocompleteDXFieldLogic.ShouldRequestOptions(CurrentMode, IsSearchEnabled, source, query))
-                {
-                    _lastRequestRejected = true;
-                    CloseMenuOnUiThread();
-                    return null;
-                }
-
-                // REQ-ACF-31: an empty result is handled like a rejected request, so the RC-A guard in
-                // OnEditorPropertyChanged closes the drop-down DX opens for it (no "Not found" row).
-                if (!AutocompleteDXFieldLogic.ShowsMenu(options))
-                {
-                    _lastRequestRejected = true;
-                    CloseMenuOnUiThread();
-                    return options;
-                }
-
-                return options; // exactly this query's options (BUG-056)
+                editor.ItemsSource = options;
+                IsDropDownOpen = true;
             }
-            catch (OperationCanceledException)
+            else
             {
-                // Cancellation requested (a newer query superseded this one) — silently return.
-                return null;
+                editor.ItemsSource = null;
+                IsDropDownOpen = false;
             }
-        };
-    }
+        }
+        catch (OperationCanceledException)
+        {
+            // Superseded by a newer keystroke, a programmatic change, a pick or blur; the newer flow owns the menu state.
+        }
+        finally
+        {
+            // This run owns cts: release it, and forget the reference if it is still the latest search.
+            if (ReferenceEquals(_searchCts, cts))
+                _searchCts = null;
 
-    // RC-A (REQ-ACF-13c): a rejected request returns no items and is marked, so the drop-down DX opens
-    // after this delegate completes is closed again (OnEditorPropertyChanged). No supported DX API vetoes
-    // that open (DX 25.2.4 public ItemsRequestEventArgs has no cancel flag; see task-log § T10 Step 1).
-    private void RejectRequest(ItemsRequestEventArgs e)
-    {
-        _lastRequestRejected = true;
-        e.RequestAsync = NoOptions;
-        CloseMenuOnUiThread();
-    }
-
-    // RC-A: DX sets the editor's IsDropDownOpen itself after a request completes. While the latest request
-    // was rejected, close the menu again; CloseMenuOnUiThread dispatches, so the close runs after DX's write.
-    private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(AutoCompleteEdit.IsDropDownOpen) && editor.IsDropDownOpen && _lastRequestRejected)
-            CloseMenuOnUiThread();
+            cts.Dispose();
+        }
     }
 
     // REQ-ACF-24: text written in code (e.g. the consumer's SelectCommand writing the picked name)
@@ -464,9 +462,11 @@ public partial class AutocompleteDXField : ContentView
                 _pickBlurPending = false;
             }
 
+            RestartSearch(); // the component owns the search (REQ-ACF-13, -14, -31)
             return;
         }
 
+        CancelSearch();
         IsDropDownOpen = false;
 
         if (e.Reason == AutoCompleteEditTextChangeReason.ProgrammaticChange)
@@ -484,6 +484,7 @@ public partial class AutocompleteDXField : ContentView
             return; // Review Focus 2: the SelectedItem = null reset re-enters here as a no-op.
 
         _pickCount++; // REQ-ACF-26: invalidates in-flight option requests.
+        CancelSearch(); // T12: a pending search must not open the menu after the pick.
 
         if (AutocompleteDXFieldLogic.LockAfterPick(route, IsPickLockEnabled))
             IsLocked = true;
@@ -531,6 +532,9 @@ public partial class AutocompleteDXField : ContentView
     // REQ-ACF-30 (c): the pick-caused blur is not a blur without pick; any other blur is forwarded.
     private void OnUnfocused(object sender, FocusEventArgs e)
     {
+        // T12: a search still pending when the user leaves the field must not open the menu afterwards.
+        CancelSearch();
+
         var isPickBlur = _pickBlurPending;
         _pickBlurPending = false;
 
@@ -574,8 +578,6 @@ public partial class AutocompleteDXField : ContentView
         if (command?.CanExecute(null) == true)
             command.Execute(null);
     }
-
-    private void CloseMenuOnUiThread() => Dispatcher.Dispatch(() => IsDropDownOpen = false);
 
     // REQ-ACF-30: a new focus means the user is back in the field, so a pending pick-blur is stale.
     private void OnFocused(object sender, FocusEventArgs e) => _pickBlurPending = false;
