@@ -2562,3 +2562,18 @@ Scope: the artist-match sheet and the resolution sheet already existed on develo
 - `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1`: 6 projects, 0 errors, 34 warnings.
 - `dotnet test MyVocaList.Tests -m:1`: 957 passed, 0 failed (no flake fired). `SafeAreaEdges="All"` untouched; native dialog census 0 hits.
 - **Not verified:** on-device behaviour (Helder's gate).
+
+## Task: SFT 5.8 — remove discard BottomSheet
+**Status:** To Review (device check pending Helder)
+**Completed:** 2026-11-11 · branch `task/sft-5.8-remove-discard-sheet` · commit `686d5aa3`
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs`
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`
+### AC traceability
+| AC | Criterion | Implementation | Test |
+|---|---|---|---|
+| REQ-SFT-10 | A local pick always opens the edit form | `SongFormViewModel.SelectTitle` | `SelectTitle_LocalOptionNoOtherInput_NavigatesToEditForm`, `SelectTitle_LocalOptionWithOtherInput_StillNavigates`, `ClearTitle_AfterRemotePickThenLocalPick_StillNavigates` |
+| REQ-SFT-11 | Withdrawn 2026-11-11 | Discard sheet and members removed (also dead `_lastTitleQuery`) | Discard tests deleted |
+Build: Android 0 errors · Tests: 953 passed, 0 failed.
