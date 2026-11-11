@@ -137,6 +137,8 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
   rejects it, the fallback is: the Field shows local and remote together once Deezer answers or the
   REQ-SFT-08 bound expires, so local options wait at most 3,000 ms (Q16).
   > **Spec updated 2026-09-26:** Q16 RESOLVED. The shared Field does **not** gain an append capability in this pipeline (orchestrator decision under Helder's pre-authorisation of 2026-09-25, applying the Q16 recommendation). The fallback is the behaviour: the Field shows local and remote options together once Deezer answers or the REQ-SFT-08 bound expires, so local options wait at most 3,000 ms. Same for the Artist form (REQ-SFT-47). Plan: `plan.md` § 0.3 D1.
+  > **Spec updated 2026-11-11:** Helder confirmed the fallback: no loading indicator while Deezer answers; options are
+  > shown when the response arrives. See `design.md` § 3.4 note of the same date.
 - **REQ-SFT-08: Remote wait bound.** A Deezer call that has not completed within 3,000 ms
   `[Confirmed — Helder 2026-11-04]` SHALL be cancelled and treated as a failure: status Unavailable,
   the unavailable note (REQ-SFT-06 case 2). When the device is offline the call is never made

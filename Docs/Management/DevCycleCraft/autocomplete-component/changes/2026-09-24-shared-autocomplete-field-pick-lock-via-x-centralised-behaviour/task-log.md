@@ -814,3 +814,17 @@ Helder asked to record the T12 lesson and to check every guideline (`CLAUDE.md`,
 No change needed: `CLAUDE.md`, `.claude/rules/*` (no autocomplete specifics), `component-safety-gate.md` (`AutocompleteDXField` has one consumer, so it is not governed yet; the song-form item adds it when the Song form binds), `crud-listview.md`, `bug-tracking-reference.md`, `testing-tdd-roles.md` (historical mentions only). No new `Docs/` files, so no `.sln` change.
 
 **Open for Helder:** does the compact-window full-screen Search View rule (`ux-patterns.md`) apply to `AutocompleteDXField`? Today it shows a docked menu on phones, as approved in this item.
+
+## Guideline update 2 — Helder UX ruling (2026-11-11)
+
+Ruling: no full-screen autocomplete, no add-new row, no loading indicator for Deezer; use DX as is. The Song form now creates artists automatically at Save (develop `bec7378f`, `bdf4010b`); the `IsCreateNew` template still in `SongFormPage.xaml:45-78` is dead and is deleted by the song-form item when the page moves to `AutocompleteDXField`.
+
+### Changed files
+
+- `.claude/library/ux-patterns.md`: autocomplete section rewritten to the ruling (old full-screen rule and add-new affordance removed).
+- `.claude/library/m3-components.md`: autocomplete stub points to the new section.
+- `Docs/Management/DevCycleCraft/autocomplete-component/md3-autocomplete-mobile-ux-guideline.md`, `ux-no-match-add-new-analysis.md`: ABANDONED banners.
+- Song-form item `design.md` (§ 3.4 append-capability note) and `requirements.md` (REQ-SFT-07): the stale `AsyncItemsSourceProvider` reason corrected; decision unchanged and confirmed.
+- This item's `requirements.md`: § Helder ruling — 2026-11-11 (UX scope).
+
+Re-evaluation of concern 4 (song-form design): the outdated reason does not change the decision (Q16 fallback = one list when Deezer answers), and the ruling confirms it. One consequence noted for the song-form gate: an open menu keeps the previous query's options until the new list arrives, up to the 3,000 ms bound on Title.
