@@ -42,3 +42,18 @@ Storage options (local bytes vs URL vs on-demand) are evaluated in the sibling i
 4. De-duplicating Deezer rows: collapse by (artist, main title) and keep one row, or keep versions but group them? What does a user lose if a wanted version is hidden?
 5. Does this change REQ-SFT-35 (plain Deezer query, `Take(5)`) or the duplicate-guard rules in the SFT spec, and does it need a migration?
 6. Sequencing against: song-writes-propagate-to-artist-catalog (waits on SFT), the 250-character title limit change (on hold), and the artwork item.
+
+## Helder's answers, 2026-11-11 (same session, after the device test)
+These answer the questions above; still to be turned into a spec in a later session, no code before that.
+1. **Identity:** title + artist + lyric.
+2. **Existing records are kept.** Any singer history attached to them is kept for statistics.
+3. **Lyric from Deezer:** if Deezer has a lyric to retrieve, it should be retrieved **automatically when adding** a new song.
+   - **When editing:** warn the user about any difference between the retrieved lyric and the stored one, and ask whether to **replace** the stored lyric or **create a new record** with a different title that indicates the version of the lyric. Expected to be rare.
+   - **If the lyric does not come from Deezer:** the only source is manual typing. Importing from files is a separate post-MVP item (`../2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc/`).
+4. **Collapsing Deezer version rows is acceptable.** No audio is used, only the lyric, so audio versions make no difference to MyVocaList. Deezer audio is not tracked. Only **YouTube** URLs carry the version concern, because a singer may want a specific version of the song.
+5. **Process:** when a spec is already marked done, the change is a nested `changes/` item under the original, carrying all dev-cycle docs the guidelines require.
+6. **250-character title limit:** simpler; handled in its own task (`../2026-11-11-song-title-limit-raised-from-100-to-250-characters/`).
+7. **Related items** (Version/Featured fields evaluation, artwork, this one) may be discussed together.
+
+### Open point to verify before any spec
+Whether Deezer's public API returns lyrics at all. The track payload seen on 2026-11-11 had no lyric field; this is not confirmed either way. If it does not, the lyric part of the identity key must come from manual entry or file import.
