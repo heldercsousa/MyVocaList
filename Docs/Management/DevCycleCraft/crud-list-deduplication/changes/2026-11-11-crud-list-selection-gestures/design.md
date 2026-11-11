@@ -153,7 +153,7 @@ Removed: `EditSelectedCommand`, `CanEditSelected`, `ExecuteEditSelectedAsync`.
                          Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}}"
                CommandParameter="{Binding}">
       <dx:CheckEdit InputTransparent="True" IsChecked="{Binding IsChecked, Source={x:Reference self}}"
-                    CheckedCheckBoxColor="{StaticResource Primary}" />
+                    CheckedCheckBoxColor="{dx:ThemeColor Primary}" />
   </dx:DXButton>
 </ContentView>
 ```
