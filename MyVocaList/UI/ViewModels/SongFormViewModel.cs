@@ -5,6 +5,7 @@ using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.UI.Collections;
+using MyVocaList.UI.Constants;
 using MyVocaList.UI.Models;
 
 namespace MyVocaList.UI.ViewModels;
@@ -82,7 +83,6 @@ public partial class SongFormViewModel : ViewModelBase
 
     // ── Title-first search (Task 5.2, REQ-SFT-04..14, 16, 53) ─────────────
     private const string OfflineNote = "You're offline — showing songs from your library only.";
-    private const string UnavailableNote = "Online search isn't available right now — showing your library only.";
 
     /// <summary>Title field option source: local rows, then promoted, then Deezer (REQ-SFT-04/05).</summary>
     public IMenuOptionSource TitleOptionSource { get; }
@@ -436,7 +436,7 @@ public partial class SongFormViewModel : ViewModelBase
             var note = remote.Status switch
             {
                 RemoteSearchStatus.Offline => OfflineNote,
-                RemoteSearchStatus.Unavailable => UnavailableNote,
+                RemoteSearchStatus.Unavailable => SearchNotes.Unavailable,
                 _ => string.Empty
             };
             RunOnUiThread(() => TitleSupportingText = note);

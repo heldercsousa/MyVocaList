@@ -3,6 +3,7 @@ using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Contracts.Models;
 using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.ReadModels;
+using MyVocaList.UI.Constants;
 using MyVocaList.UI.Models;
 
 namespace MyVocaList.UI.ViewModels;
@@ -33,10 +34,8 @@ public partial class ArtistFormViewModel : ViewModelBase
     [ObservableProperty] private bool _hasDuplicateSuggestions;
 
     // ── Name search (Task 6.2, REQ-SFT-47…50, REQ-SFT-06/09) ──────────────
-    // Wording mirrors the Song form's notes (SongFormViewModel); duplicated because that constant is
-    // private to the Song VM and this task must not edit it.
+    // Offline wording stays local (artists); the unavailable note is SearchNotes.Unavailable (UI/Constants), shared with the Song form.
     private const string OfflineNote = "You're offline — showing artists from your library only.";
-    private const string UnavailableNote = "Online search isn't available right now — showing your library only.";
 
     /// <summary>Name field option source: local artists ("In your library"), then Deezer ("Deezer") (REQ-SFT-47).</summary>
     public IMenuOptionSource NameOptionSource { get; }
@@ -231,7 +230,7 @@ public partial class ArtistFormViewModel : ViewModelBase
             var note = remote.Status switch
             {
                 RemoteSearchStatus.Offline => OfflineNote,
-                RemoteSearchStatus.Unavailable => UnavailableNote,
+                RemoteSearchStatus.Unavailable => SearchNotes.Unavailable,
                 _ => string.Empty
             };
             RunOnUiThread(() => NameSupportingText = note);

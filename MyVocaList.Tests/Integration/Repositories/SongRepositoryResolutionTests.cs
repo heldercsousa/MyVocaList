@@ -101,7 +101,7 @@ public class SongRepositoryResolutionTests : IAsyncLifetime
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
-    // BUG-085: the GetFuzzyCandidatePoolAsync (prefix pool) tests that lived here were retired and
+    // BUG-085: the prefix-pool candidate tests that lived here were retired and
     // rewritten as SongRepositoryArtistTrigramTests (SearchTitleCandidatesForArtistAsync, REQ-SFT-23).
     // They moved there because that class uses MigrateAsync (SongSearch FTS index present).
 
