@@ -94,4 +94,10 @@ internal static class AutocompleteDXFieldLogic
     /// </summary>
     internal static bool ShouldForwardBlur(object? selectedItem, FieldMode mode, bool isPickBlur = false) =>
         !isPickBlur && selectedItem is null && mode == FieldMode.Editable;
+
+    /// <summary>
+    /// Decides whether a search result opens the drop-down. A null or empty result keeps the menu closed, so
+    /// DevExpress never shows its "Not found" row. REQ-ACF-31.
+    /// </summary>
+    internal static bool ShowsMenu(IReadOnlyList<AutocompleteSuggestion>? options) => options is { Count: > 0 };
 }
