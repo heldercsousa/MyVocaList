@@ -325,6 +325,24 @@
     its own `## T11` section of `task-log.md`. Not `SongFormPage` (out of scope, another session).
   - **Demo:** emulator run clean, then T7 run 5 (line 1) on Helder's phone. **Review lane:** Standard
 
+> **Spec updated 2026-11-11: T7 run 5 result.** Line 1 FAIL: "Not found" flashes on every no-match search. Root cause:
+> DX's async provider opens the drop-down while loading (`task-log.md` § T7 run 5). Spike `spike/acf-t12-own-search`
+> (component-owned search) proved 0 visible frames on the emulator. T12.
+
+- [ ] **T12: Component-owned search, no DX loading popup (REQ-ACF-31 amended)** `[SEQUENTIAL, after T11]` (added 2026-11-11)
+  - **Behaviour:** REQ-ACF-31 (no transient frame, no blink while typing), with -04, -12a/b, -13, -14, -22, -24/-25, -26, -30
+    unchanged. Design: `design.md` § 3.1 "Event-glue rules from T12".
+  - **Steps (one writer, branch `task/acf-t12-own-search` @ `.worktrees/acf-t12`):**
+    1. Start from the spike diff (`spike/acf-t12-own-search`, commit c5f986e1; code only, not its task-log/findings files).
+    2. Change the spike's `RestartSearch` so a qualifying query keeps the menu open (no close on each keystroke); only a
+       rejected query or an empty result closes it.
+    3. Cancel the pending search on blur (and keep the programmatic-change and pick cancels). Build.
+    4. Remove dead code (§ 3.1 "Removed"). The T11 `ShowsMenu` tests stay. Full `dotnet test`, Android Debug build.
+  - **Tests:** no new pure logic expected (Level C glue); if a pure function is added, Level A test first. Emulator by the
+    orchestrator (`flash.sh`: aa/aaa/zq/Hex/" a" lit=0; He lit>0; He→Hel no blink; pick → list stays closed), then T7 run 6.
+  - **Files owned:** `AutocompleteDXField.xaml(.cs)`, its own `## T12` section of `task-log.md`.
+  - **Demo:** emulator clean, then T7 run 6 (line 1, plus a regression pass of lines 2-4 and 9). **Review lane:** Elevated
+
 ## Handed over to the song-form title-first item (not tasks here)
 
 `BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/`

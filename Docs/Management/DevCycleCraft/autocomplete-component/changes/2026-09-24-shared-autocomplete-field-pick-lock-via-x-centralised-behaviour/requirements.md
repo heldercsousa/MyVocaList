@@ -220,6 +220,9 @@ Every agent uses these terms exactly. No synonyms.
   the user nothing matched. Given an unlocked field, When the user types "aa" or "aaa" and no option matches,
   Then no menu appears. When the user then types text that matches, Then the menu opens with those options.
   When the menu shows options and the next query matches nothing, Then the menu closes.
+  *(Amended 2026-11-11, T7 run 5.)* "Never" includes a transient frame: the row must not flash in and out, and no
+  loading indicator or empty drop-down is shown while a search runs. While the user keeps typing a query that still
+  qualifies, the open menu stays open (no close-and-reopen blink) until the new options replace the old ones.
 - **REQ-ACF-14: One shared debounce delay.**
   The debounce delay SHALL be `SearchConstants.AutocompleteDebounceMilliseconds = 300` (new), used by
   every instance. No consumer sets its own value. It replaces the literal `RequestDelay="300"` at
@@ -416,6 +419,12 @@ Unchanged. Person name rules stay in `IPersonService` (`Validate…Input`). The 
   shared component and the Person form. `SongFormPage` is out of scope (another session owns it; it does not use the
   component yet) and gets the behaviour when it migrates.
 
+### Helder rulings — 2026-11-11 (after T7 run 5)
+
+- Line 1: "'Not found' appears and then disappears; it gets visible for a fraction of second ... everytime search is
+  triggered and find nothing" → FAIL. REQ-ACF-31 amended (no transient frame). Under the 2026-11-10 go-ahead ("Go with
+  T11 automatically, from spec into development"), the fix continues as T12 without a new gate.
+
 ### Spec APPROVED — Helder, 2026-09-25
 
 Approved "as recommended", together with every open recommendation (Q10: the 300 ms debounce
@@ -442,3 +451,4 @@ process gates for this pipeline. On-device gates (T1 spike, T7 E2E) still requir
 | REQ-ACF-13 (c) | component `OnItemsRequested` glue | T7 run 3, line 2 |
 | REQ-ACF-30 | component logic (`ShouldForwardBlur`) + `OnSelectionChanged` / `OnUnfocused` | component logic test (T9, Level A) + T7 run 3, line 9 |
 | REQ-ACF-31 | component logic (`ShowsMenu`) + `OnItemsRequested` (empty result → close guard) | component logic test (T11, Level A) + emulator + T7 run 5, line 1 |
+| REQ-ACF-31 (amended, no transient frame) | component-owned search (`RestartSearch` / `RunSearchAsync`, design § 3.1 T12) | emulator frame count (`flash.sh`) + T7 run 6, line 1 |
