@@ -84,9 +84,7 @@ In MD3 component anatomy, **"body"** refers to a **structural container or slot*
 
 ## Search — autocomplete (cross-ref stub)
 
-Responsive autocomplete rule (compact → full-screen Search View / larger → docked exposed dropdown),
-component invariants, and the no-match `Add "<typed text>"` affordance:
-**`ux-patterns.md § Autocomplete — Responsive Full-Screen Expansion (MD3)`**.
-Components: `AutocompleteField` (docked) + `AutocompleteMobileField` (Search View) — governed, four-gate rule applies.
-**Since 2026-11-11** the shared autocomplete is `AutocompleteDXField` (DevExpress `AutoCompleteEdit`; no create-new row,
-no "no results" row); the family above is frozen. See the status note in `ux-patterns.md` § Autocomplete.
+Shared component `AutocompleteDXField` (DevExpress `AutoCompleteEdit`, docked menu = MD3 exposed dropdown / filtering
+menu) on every window size; no full-screen Search View, no create-new row, no "no results" row (Helder ruling
+2026-11-11). Rule: **`ux-patterns.md § Autocomplete — DevExpress docked menu, no customisation`**. The
+`AutocompleteField` + `AutocompleteMobileField` family is frozen.
