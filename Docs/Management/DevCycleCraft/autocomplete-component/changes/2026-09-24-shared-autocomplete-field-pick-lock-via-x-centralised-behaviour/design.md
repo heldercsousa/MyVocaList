@@ -195,7 +195,9 @@ These replace the T9 keystroke clear and the "close before DX" assumption below.
 - **The component owns the search.** No `AsyncItemsSourceProvider`; `LoadingProgressMode="Manual"` (DX 25.2 docs via
   Context7, recorded in the spike findings: `Auto` shows a wait indicator on text change, `Manual` only when
   `IsLoadingInProgress` is set) and the component never sets `IsLoadingInProgress`. A null `OptionSource`, a locked or
-  read-only field, or search disabled all fail `ShouldRequestOptions`, so they take the rejected path (REQ-ACF-04, -12a/b). On a `UserInput` `TextChanged` (`RestartSearch`): cancel the pending search
+  read-only field, or search disabled all fail `ShouldRequestOptions`, so they take the rejected path (REQ-ACF-04, -12a/b).
+  No DX `CharacterCountThreshold` or `RequestDelay` is set anywhere (they belong to the removed provider); the minimum
+  length is `ShouldRequestOptions` on the normalised query and the debounce is `RunSearchAsync`'s delay. On a `UserInput` `TextChanged` (`RestartSearch`): cancel the pending search
   (own `CancellationTokenSource`, latest search only); compute `query = SearchQuery(text)`; if the pick echo
   (`IsPickEcho`) or `!ShouldRequestOptions(...)` → clear `ItemsSource`, close the menu, stop; else keep the menu as it
   is and start `RunSearchAsync`: `Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds)`, `SearchAsync(query, ct)`,
