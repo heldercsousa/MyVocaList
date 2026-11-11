@@ -17,7 +17,7 @@
 
 ## .NET MAUI
 
-- **SafeAreaEdges default:** `.NET MAUI 10` breaking change — `ContentPage` defaults to `SafeAreaEdges="None"`. Every `ContentPage` must declare `SafeAreaEdges="Container"` explicitly or content will render behind the status bar / notch. (CLAUDE.md)
+- **SafeAreaEdges default:** `.NET MAUI 10` breaking change — `ContentPage` defaults to `SafeAreaEdges="None"`. Every `ContentPage` must declare `SafeAreaEdges="Container"`, or `"All"` on pages with text input, or content renders behind the status bar / notch (and, without SoftInput, under the keyboard). `All` = system bars + notch + keyboard (Microsoft Learn, "Safe area layout", .NET MAUI 10). Enforced by `process_checks.py`. (CLAUDE.md)
 - **Incremental XAML edits:** Edit one XAML file → build → fix before editing the next. Rationale: XAML parser errors cascade across files, making the error source ambiguous when batching changes. (CLAUDE.md Constitutional Constraints)
 
 ---

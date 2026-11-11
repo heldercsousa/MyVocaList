@@ -12,12 +12,21 @@ The main agent updates the ledger at every one of these moments, on `develop`:
 3. **Merge** — branch merged into develop: status `merged`, move row to Completed.
 4. **Session end** — before stopping, every Active row must reflect reality (`Next action` filled in).
 
+## Row-length rule `[HARD RULE]`
+
+A ledger row is **one short status line**: what it is, where it stands, the next action, and a pointer to the item folder. **Max 450 characters per table row.**
+- History, rulings, verifier findings, merge narratives and "updated on <date>" chains do NOT go in the ledger — append them to the item's `task-log.md` (or `README.md` for a change/spec item) and point to it. Never delete detail; move it.
+- Update a row by **replacing** its text, not appending to it.
+- Merged/closed → move the row to `Completed` (one line: id, branch, date + merge sha, test count). Closed rows from an earlier month move verbatim to `Docs/Management/LEDGER-archive.md` at the next `update`.
+- Enforced by `.claude/scripts/ledger-row-guard.py` (pre-commit gate, blocks; PostToolUse warning on edit). Check manually: `python .claude/scripts/ledger-row-guard.py --check`.
+
 ## `update` (default)
 
 1. `git branch -a --no-merged develop` + `git worktree list` — enumerate live task branches/worktrees.
 2. For each Active row: verify the branch still exists; refresh `Last commit` (`git log -1 --format=%h <branch>`); reconcile `Status` with the task-log entry for that task.
-3. For each live task branch with NO row: add one (this is drift — note it).
-4. Commit the ledger on develop: `git add Docs/Management/LEDGER.md && git commit -m "docs: ledger update — <what changed>"` (push with the session's normal flow).
+3. Archive: move Completed rows older than the current month to `LEDGER-archive.md`; shorten any row over the limit (detail → item task-log).
+4. For each live task branch with NO row: add one (this is drift — note it).
+5. Commit the ledger on develop: `git add Docs/Management/LEDGER.md && git commit -m "docs: ledger update — <what changed>"` (push with the session's normal flow).
 
 > The ledger is docs — it is ALWAYS edited and committed on develop, never inside a worktree (workflow.md Rule 2, Docs land on develop).
 
