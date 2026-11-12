@@ -78,6 +78,26 @@ public class SongSuggestionService : ISongSuggestionService
         if (q.Length < SearchConstants.MinimumRemoteQueryLength)
             return new SongRemoteSearchResult([], [], RemoteSearchStatus.Ok);
 
+        // Any failure of the remote path degrades to Unavailable with a logged warning, so the caller
+        // shows the note instead of losing the whole option list to an exception (REQ-SFT-06).
+        try
+        {
+            return await SearchTitleRemoteCoreAsync(q, shownLocalSongIds, ct);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Remote title search failed for query '{Query}'", q);
+            return new SongRemoteSearchResult([], [], RemoteSearchStatus.Unavailable);
+        }
+    }
+
+    private async Task<SongRemoteSearchResult> SearchTitleRemoteCoreAsync(
+        string q, IReadOnlyCollection<int> shownLocalSongIds, CancellationToken ct)
+    {
         // Read live on every call, never cached (REQ-SFT-53).
         if (!_networkStatus.HasInternetAccess)
         {
@@ -104,6 +124,9 @@ public class SongSuggestionService : ISongSuggestionService
 
         var top = remaining.Take(SearchConstants.MaxSearchResults).ToList();
         var remote = await ResolveLocalArtistsAsync(top, ct);
+        _logger.LogInformation(
+            "Remote title search '{Query}': {Raw} from Deezer, {Promoted} matched the library, {Remote} remote options",
+            q, raw.Count, promoted.Count, remote.Count);
         return new SongRemoteSearchResult(promoted, remote, RemoteSearchStatus.Ok);
     }
 

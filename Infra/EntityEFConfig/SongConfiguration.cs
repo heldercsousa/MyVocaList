@@ -18,7 +18,7 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
         // D3 (design.md § D3): trim-on-save enforced here, not in SongService Create/Update.
         builder.Property(s => s.Title)
                .IsRequired()
-               .HasMaxLength(100)
+               .HasMaxLength(250)
                .HasConversion(TrimValueConverters.Required)
                .UseCollation(CollationConstants.Default);
 

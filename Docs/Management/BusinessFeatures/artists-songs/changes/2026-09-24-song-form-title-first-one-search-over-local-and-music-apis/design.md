@@ -402,11 +402,10 @@ artists by collated name; a write-only value invites the "build on it" drift Hel
 
 **F2: add mode, pick an existing song** (REQ-SFT-10/11)
 1. User taps a local option (song id N).
-2. If no other field holds input → `INavigationService.GoToAsync($"../{Routes.SongForm}?songId={N}")`
+2. Always (REQ-SFT-11 withdrawn 2026-11-11; no discard sheet) → `INavigationService.GoToAsync($"../{Routes.SongForm}?songId={N}")`
    (Shell pops the add form and pushes the edit form; `LoadSongForEditAsync` hydrates everything,
    including the artist from the entity, `SongFormViewModel.cs:469-477`).
-3. Else show the discard sheet. Open → step 2. Keep editing → `SongTitle` = the typed query,
-   `IsTitleLocked = false` (a programmatic unlock; REQ-ACF-05 constrains user actions only).
+3. ~~Discard sheet~~ removed 2026-11-11 (REQ-SFT-11 withdrawn).
 
 **F3: Save, existing artist** (REQ-SFT-22/23/51)
 1. VM builds the request (`ArtistId` set, decisions `None`) and calls `SaveFromFormAsync`.
