@@ -364,7 +364,7 @@
   - **Demo:** VM tests green.
   - **Review lane:** Standard
   > **Spec updated 2026-09-26:** (D2) runs before G2 (VM only; consumes `IMenuOptionSource`).
-- [ ] **6.3 `ArtistFormPage`: Name as the Field** [SEQUENTIAL — after 6.2]
+- [CANCELLED: moved 2026-11-11 to its own change `changes/2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3/` (Helder: keep tasks atomic)] **6.3 `ArtistFormPage`: Name as the Field** [SEQUENTIAL — after 6.2]
   - **Files owned:** `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml`, `ArtistFormPage.xaml.cs`
   - **Risk:** Medium. **Demo:** typing "metalica" on New Artist lists "Metallica" (local, "In your library") and Deezer artists; tapping "Metallica" opens it.
   - **Review lane:** Standard
@@ -375,19 +375,12 @@
 - [ ] **7.1 Spec ritual + traceability matrix** (orchestrator): fill `requirements.md` § Traceability; task-log matrix; README frontmatter status; `backlog_gen.py regen`; `.sln` check.
 - [ ] **7.2 On-device E2E gate — Helder** (Android). Stop and hand off; nothing merges before Helder's pass.
   > **Partial device run 2026-11-09 (Samsung S23, develop `cbb126f7`; pages for 5.5/6.3 not wired, so items 2–6, 6b, 11 not run):** PASS — upgrade intact (#1); artist sheet Use/Create, collated "metallica" attach, apostrophe strings (#7, #12); exact-duplicate sheet and Save as new version (#9); fuzzy sheet Save as new song; edit title/version rules (#8, D2/D3); no "Search music database" row (#10). FAIL — **BUG-084** (scrim and system Back do not dismiss the sheets, only Cancel does; with several rows in "Possible duplicates" the Cancel button is not visible/scrollable); **BUG-085** (stored "Patience", saving "Patiencee" for the same artist raises no sheet, while the reverse does). Observations: (a) exact-duplicate sheet lists only the collated (artist, title, version) match — per REQ-SFT-22 the same title with a different Version is not a duplicate, so this is as specified; (b) "test C" vs stored "Test A" showed the fuzzy sheet (score ≥ 0.82 on very short titles) — noted, no change; (c) in edit mode the Artist text is editable without pressing X, contradicting REQ-SFT-28's picked/locked state — belongs to 5.5; (d) Deezer search not exercised: no UI path calls it until 5.5/6.3 (diagnosis in progress). Registered: song-list artist+version line (change), post-MVP group-by-artist (change), post-MVP typo-tolerant autocomplete results (change).
-  1. Upgrade an existing install: songs, artists and YouTube links intact (M1–M3).
-  2. New Song: Title is first. Type "don cry" → "Don't Cry" local first, "Guns N' Roses · In your library"; version rows distinguishable; local options appear before Deezer's.
-  3. Tap the local row → the edit form of that song opens; Back returns to the Songs list.
-  4. Type "sweet chld o mine" → Deezer rows marked "Deezer". Pick one not in the library → Title and Artist filled and locked; X on Title empties it.
-  5. Pick a Deezer song whose artist is not local → Save → song and artist both created; artist's catalog behaviour per CATALOG-PROP if landed.
-  6. Airplane mode → local options appear at once (no 3 s wait), and the text under Title reads "You're offline — showing songs from your library only."; Save works. Airplane mode off → the next query clears the note (REQ-SFT-06/53, D21).
-6b. Type "creep live" → pick the Deezer "Creep" row whose supporting text reads "Radiohead · Live · Deezer" → Title "Creep", Version "Live"; Save stores both (REQ-SFT-04/12, D21).
-  7. Type "Metalica" as artist (with "Metallica" stored) → Save → near-duplicate sheet offers "Use 'Metallica'"; Use and Create both behave; Back saves nothing. Repeat with a Deezer pick whose artist is a near-duplicate of a local one.
-  8. Edit an imported song: fix its Title → saves; reopen → new title, still linked to Deezer (same YouTube links). Edit a manual song's Title to a title that artist already has with the same Version → duplicate message. Change Version of a title that exists → saves.
-  12. Type an existing artist's name in another case/accent ("metallica") → Save → the song attaches to "Metallica"; no second artist appears in the Artists list.
-  9. Save a duplicate by hand → Open existing / Save as new version.
-  10. No "Search music database" row on Song or Artist forms; "Search YouTube (API)" unchanged.
-  11. New Artist: type "metalica" → local "Metallica" first; tap it → its edit form opens. Pick a Deezer artist → Name filled and locked; Save creates it; a collated duplicate shows the existing message.
+  > **Rewritten 2026-11-11 (Helder):** items already passed on device (2026-11-09 and the 2026-11-11 runs: upgrade, Title-first search, Deezer rows, local pick, Deezer pick fills and locks, artist change in edit, artist sheet Use/Create, duplicate sheets, 250-char limit) are dropped; the discard sheet is gone (5.8); item 11 moved with 6.3. Remaining checks:
+  1. **BUG-084:** scrim and system Back dismiss the artist near-duplicate and the Possible-duplicates sheets, and Cancel is reachable with several rows.
+  2. **BUG-085:** with "Patience" stored, saving "Patiencee" for the same artist raises the sheet, as the reverse order does.
+  3. **Offline:** airplane mode → local options appear at once and the note "You're offline — showing songs from your library only." shows under Title; Save works; airplane mode off → the next query clears the note (REQ-SFT-06/53).
+  4. **Deezer artist near-duplicate:** pick a Deezer song whose artist is a near-duplicate of a local one → Save → the artist sheet appears (REQ-SFT-04/12).
+  5. Local pick with other fields filled opens the edit form directly (5.8).
 
 ## Coordination
 
