@@ -72,7 +72,7 @@ public class VenueServiceTests
 Generic scaffolding (mock fields + `CreateSut()` factory, `[Fact]`/`[Theory]`, command-execution pattern, mocking MAUI services table) → **`maui-unit-testing` skill § ViewModel Testing Pattern**. Project-specific test targets for MyVocaList list ViewModels:
 
 - `InitializeAsync` with an empty service result must set `IsEmptyNoVenues` true, `IsEmptyNoResults` false, `IsInitialLoading` false (empty-state flag family — every CRUD list VM has the equivalent trio).
-- `OnSelectionChanged(n)` drives the derived-state family: `CanEditSelected`/`CanDeleteSelected` gates and `AppBarTitle` ("1 selected" at n=1; the page title, e.g. "Venues", at n=0).
+- `OnSelectionChanged(n)` drives the derived-state family: `CanDeleteSelected`/`IsSelectionMode` gates and `AppBarTitle` ("1 selected" at n=1; the page title, e.g. "Venues", at n=0).
 - Service mocks return the project's paged-tuple shape, e.g. `.ReturnsAsync((Enumerable.Empty<VenueListItemDto>(), 0))`.
 
 **ViewModel test constraints:**

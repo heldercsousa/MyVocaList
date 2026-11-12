@@ -261,6 +261,18 @@
         <Setter Property="HeightRequest" Value="56" />
     </Style>
 
+    <!-- MD3: Bottom sheet — menu item (list layout), bodyLarge -->
+    <Style x:Key="BottomSheetMenuItem" TargetType="dx:DXButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+        <Setter Property="IconColor" Value="{StaticResource OnSurfaceVariant}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="HorizontalContentAlignment" Value="Start" />
+        <Setter Property="HeightRequest" Value="56" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
     <!-- Neon glow effect — primary (critical actions) -->
     <Style x:Key="NeonGlowPrimary" TargetType="Shadow">
         <Setter Property="Radius" Value="8" />

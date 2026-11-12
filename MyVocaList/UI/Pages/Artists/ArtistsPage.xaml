@@ -60,9 +60,7 @@
                                 SupportingText="{Binding CatalogCountText}"
                                 IsSelected="False">
                     <lists:ListItem.LeadingContent>
-                        <dx:CheckEdit IsChecked="False"
-                                      InputTransparent="True"
-                                      VerticalOptions="Center" />
+                        <lists:ListItemCheckbox VerticalOptions="Center" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <dx:DXButton Style="{StaticResource StandardIconButton}"
@@ -82,10 +80,7 @@
                                 SupportingText="{Binding CatalogCountText}"
                                 IsSelected="True">
                     <lists:ListItem.LeadingContent>
-                        <dx:CheckEdit IsChecked="True"
-                                      CheckedCheckBoxColor="{dx:ThemeColor Primary}"
-                                      InputTransparent="True"
-                                      VerticalOptions="Center" />
+                        <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <dx:DXButton Style="{StaticResource StandardIconButton}"

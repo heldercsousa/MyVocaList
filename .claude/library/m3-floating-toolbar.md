@@ -6,7 +6,9 @@
 
 > **M3 Expressive component.** The floating toolbar (and "vibrant" color scheme) are M3 Expressive features — not in standard M3. "Vibrant" is the official spec term (confirmed via m3.material.io 2026-04-04).
 >
-> **Color design decision.** Official M3 Expressive vibrant uses `PrimaryContainer` bg + `OnPrimaryContainer` icons. This project uses `SecondaryContainer` bg + `OnSecondaryContainer` icons — a deliberate choice for better contrast in the indigo dark theme. The selected-state contrast (Primary bg + OnPrimary icon) applies against SecondaryContainer, not PrimaryContainer.
+> **Color design decision.** Official M3 Expressive vibrant uses `PrimaryContainer` bg + `OnPrimaryContainer` icons. This project uses `SecondaryContainer` bg + `OnSecondaryContainer` icons — a deliberate choice for better contrast in the indigo dark theme.
+>
+> **Selected (toggle) state — amended 2026-11-11.** Selected = MD3 vibrant "Toggle tonal button: (Surface container, On surface)" → `SurfaceContainer` bg + `OnSurface` icon (was `Primary`/`OnPrimary`). Reason: MD3 Toolbars guidelines — "Don't emphasize multiple buttons with bold, primary colors, such as a button and FAB together. Emphasize one action at a time." The paired FAB is the single `Primary` action.
 >
 > **Height.** Confirmed from official MD3 measurements: floating toolbar = **64dp**. FAB = 56dp. Default padding = 8dp. Slot spacing = 4dp. FAB gap = 8dp. Screen margins: 16dp minimum left/right, 16dp above OS bottom bar (40dp total including OS bar). Confirmed via official spec images 2026-04-06.
 
@@ -28,10 +30,12 @@
 | Icon button tap zone | **48×48dp** (confirmed by spec: "minimum 48×48dp target area") |
 | Icon size | 24dp (DXButton default) |
 | Icon color (rest) | **OnSecondaryContainer** |
-| Icon bg (selected) | **Primary** |
-| Icon color (selected) | **OnPrimary** |
-| Max slots | 5 |
-| Scroll animation | NOT used — persistent by design (valid per M3 spec; animation adds threading risk) |
+| Icon bg (selected) | **SurfaceContainer** (toggle tonal) |
+| Icon color (selected) | **OnSurface** |
+| Min slots | none in MD3 (no minimum stated on any toolbar page, verified 2026-11-11) |
+| Max slots | 5 (component); MD3: "Be cautious of including too many controls" |
+| Scroll animation | NOT used (valid per M3 spec; animation adds threading risk) |
+| Visibility (CRUD lists) | selection mode only — contextual actions |
 | Position | See FAB Coexistence below |
 
 ### Color tokens (dark mode — project vibrant)
@@ -43,12 +47,12 @@
 | OnPrimary | `#15267B` |
 
 ### When to use
-- 2–5 page-specific actions (edit, delete, format, share, select-all)
-- Use SmallAppBar trailing Action1–3 slots when ≤ 3 actions suffice
-- Hide toolbar when contextual action bar (multi-select Shell.TitleView) is active
+- Contextual, page-specific actions (MD3: "best used for contextual actions relevant to the body content or the specific page") — e.g. CRUD list selection actions (Select all, Delete)
+- Paired with a FAB: "A FAB can be placed next to a floating toolbar to present one high-priority action alongside a unified set of toolbar actions."
 
 ### When NOT to use
 - Single action → use FAB instead
+- App bar is for 1–2 essential page actions; "If the product has many actions, place those in a toolbar" (MD3 App bars)
 - Navigation actions → use Shell flyout
 - ≤ 3 actions already covered by SmallAppBar trailing slots
 
@@ -73,7 +77,7 @@ BindableProperties per slot (N = 1–5):
 - `ActionNIcon` (string) — slot hidden when null/empty
 - `ActionNCommand` (ICommand)
 - `ActionNDescription` (string) — SemanticProperties.Description for TalkBack
-- `ActionNIsSelected` (bool) — applies `Primary` bg + `OnPrimary` icon when selected (contrasts against vibrant bg)
+- `ActionNIsSelected` (bool) — toggle actions only; applies `SurfaceContainer` bg + `OnSurface` icon (MD3 toggle tonal) when selected
 
 ### Page integration pattern
 

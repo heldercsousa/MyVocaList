@@ -20,12 +20,22 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
     // Selection state
     int SelectedCount { get; }
     bool IsAllSelected { get; }
-    bool CanEditSelected { get; }
     bool CanDeleteSelected { get; }
+    bool IsSelectionMode { get; }
+
+    // Gesture commands (REQ-CLSG-01..07)
+    IAsyncRelayCommand<object> ItemTapCommand { get; }
+    IRelayCommand<object> ItemLongPressCommand { get; }
+    IRelayCommand<object> ToggleItemSelectionCommand { get; }
+
+    // Item actions bottom sheet (REQ-CLSG-06..08)
+    BottomSheetState ItemActionsSheetState { get; set; }
+    IAsyncRelayCommand EditItemCommand { get; }
+    IRelayCommand DeleteItemCommand { get; }
+    IRelayCommand DismissItemActionsCommand { get; }
 
     // Toolbar commands
     IRelayCommand SelectAllCommand { get; }
-    IAsyncRelayCommand EditSelectedCommand { get; }
     IRelayCommand DeleteSelectedCommand { get; }
 
     // Confirm bottom sheet
@@ -38,4 +48,7 @@ public interface ICrudListViewModel : System.ComponentModel.INotifyPropertyChang
     // Lifecycle
     Task InitializeAsync();
     void OnSelectionChanged(int count);
+
+    // Back handling (REQ-CLSG-12): true = consumed
+    bool HandleBack();
 }
