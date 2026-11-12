@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:pages="clr-namespace:MyVocaList.UI.Pages.Base"
+    x:Class="MyVocaList.UI.Components.Lists.ListItemCheckbox"
+    x:Name="self">
+
+    <dx:DXButton
+        BackgroundColor="Transparent"
+        WidthRequest="48"
+        HeightRequest="48"
+        Padding="0"
+        SemanticProperties.Description="Select"
+        Command="{Binding BindingContext.ToggleItemSelectionCommand, Source={RelativeSource AncestorType={x:Type pages:CrudListPageBase}}}"
+        CommandParameter="{Binding .}">
+
+        <dx:CheckEdit
+            InputTransparent="True"
+            IsChecked="{Binding IsChecked, Source={x:Reference self}}"
+            CheckedCheckBoxColor="{dx:ThemeColor Primary}" />
+    </dx:DXButton>
+</ContentView>
