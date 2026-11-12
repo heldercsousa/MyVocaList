@@ -70,6 +70,11 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
         OnPropertyChanged(nameof(AppBarTitle));
         OnPropertyChanged(nameof(PrimaryFabCommand));
         AddToCatalogCommand.NotifyCanExecuteChanged();
+
+        // BUG-086: a Shell-cached page that receives a new artist context (query applied without OnAppearing)
+        // must reload. Before the first load, InitializeAsync (OnAppearing) performs that load instead.
+        if (!IsInitialLoading)
+            _ = ReloadAsync();
     }
 
     protected override Task<(IEnumerable<SongListItemDto> items, int totalCount)> FetchPageAsync(
