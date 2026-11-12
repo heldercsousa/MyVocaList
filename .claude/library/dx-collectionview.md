@@ -49,6 +49,8 @@ Bind to `SelectedItemsRaw` in XAML.
 
 Canonical pattern: long press enters multi-select, short tap navigates (normal mode) or is handled natively by DXCollectionView (multi-select mode).
 
+> **CRUD list pages (2026-11-11):** this pattern is implemented once in `CrudListView` + `CrudListViewModelBase` (law: `crud-appbar-list-toolbar.md § Gestures`). The handlers below are the generic DX reference. On CRUD pages, actions go in the `FloatingToolbar` (Select all, Delete) and the item actions bottom sheet (Edit / Delete), not in the Shell.TitleView contextual bar shown further down. That bar is retired for CRUD pages, and no toolbar Edit action exists.
+
 ### Event wiring
 ```xml
 Tap="OnItemTapped"
