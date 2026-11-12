@@ -1,12 +1,13 @@
 ---
 id: song-form-title-first-one-search-over-local-and-music-apis
 title: Song form title-first — one search over local and music APIs
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-09-24
 section: BusinessFeatures
 parent: artists-songs
 goal: Title becomes the first field and searches local songs and music APIs by title or artist; a pick fills title and artist, or opens an existing song for editing.
 gate: Helder's on-device E2E gate (plan § 7.2).
+closed: 2026-11
 kind: change
 ---
 

@@ -537,12 +537,14 @@ sixth round; Q9 (YouTube search out of scope, fifth round); Q12 (the "In your li
 the option supporting text, and "Online search unavailable" is the Field's `SupportingText`; no
 non-selectable row — the text itself was replaced by the two Q7 notes on 2026-11-04, REQ-SFT-06).
 
-## Traceability seed (filled at implementation)
+## Traceability (closed 2026-11-11)
+
+> Filled during implementation (rows below) and reconciled at close-out. REQ-SFT-11 was withdrawn on 2026-11-11 (task 5.8): no implementation, no test. The `ArtistFormPage` Name field (former task 6.3) moved to `changes/2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3/`; the page-level part of REQ-SFT-47…50 is traced there. Task-log matrices per task hold the test method names.
 
 | AC | Implementation location | Test |
 |----|-------------------------|------|
 | REQ-SFT-02…09 | `SongSuggestionService.SearchTitleLocalAsync`/`SearchTitleRemoteAsync`, `SongRepository.SearchTitleCandidatesAsync`, `SongFormViewModel.TitleOptionSource` | `SongSuggestionServiceTests` (A), `SongRepositorySearchTests` (B, real SQLite), VM tests |
-| REQ-SFT-10…14 | `SongFormViewModel` pick handlers | `SongFormViewModelTests` (A) |
+| REQ-SFT-10, 12…14 (11 withdrawn) | `SongFormViewModel` pick handlers | `SongFormViewModelTests` (A) |
 | REQ-SFT-15…21, 25, 28, 51 | `SongService.SaveFromFormAsync` (rules), `SongService` create/update (writes), `SongFormViewModel` (outcome → sheet mapping) | `SongServiceSaveFromFormTests` (A), UoW integration (A), VM mapping (A) |
 | REQ-SFT-19 (retrieval) | `ArtistRepository.SearchNameCandidatesAsync`, `ArtistResolutionService` | repo test (B, migrated SQLite: "Metalica" → "Metallica") + service (A) |
 | REQ-SFT-22…24, 42 | `SongResolutionService.ResolveAsync`, `SongRepository.FindIdByTitleVersionForArtistAsync` | `SongResolutionServiceTests` (A), repo test (B) |

@@ -2577,3 +2577,6 @@ Scope: the artist-match sheet and the resolution sheet already existed on develo
 | REQ-SFT-10 | A local pick always opens the edit form | `SongFormViewModel.SelectTitle` | `SelectTitle_LocalOptionNoOtherInput_NavigatesToEditForm`, `SelectTitle_LocalOptionWithOtherInput_StillNavigates`, `ClearTitle_AfterRemotePickThenLocalPick_StillNavigates` |
 | REQ-SFT-11 | Withdrawn 2026-11-11 | Discard sheet and members removed (also dead `_lastTitleQuery`) | Discard tests deleted |
 Build: Android 0 errors · Tests: 953 passed, 0 failed.
+
+## Task: SFT 7.1 + 7.2 — close-out
+**Completed:** 2026-11-11. 7.1: traceability section reconciled (REQ-SFT-11 withdrawn; 6.3 moved to its own change). 7.2: Helder's on-device pass of the Song form build (develop `686d5aa3`): 5.8 checks 1–3 ok; "7.2 keeps working fine" (no itemised per-check results recorded for BUG-084/085, offline and Deezer-artist near-duplicate; open them as bugs if they reproduce). Feature set to ✅; develop merged to main.
