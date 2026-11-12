@@ -35,23 +35,7 @@ public class PersonsViewModelTests
         Assert.Equal("3 selected", sut.AppBarTitle);
     }
 
-    // ── CanEditSelected / CanDeleteSelected ───────────────────────────────
-
-    [Fact]
-    public void CanEditSelected_WhenOneSelected_IsTrue()
-    {
-        var sut = CreateSut();
-        sut.OnSelectionChanged(1);
-        Assert.True(sut.CanEditSelected);
-    }
-
-    [Fact]
-    public void CanEditSelected_WhenTwoSelected_IsFalse()
-    {
-        var sut = CreateSut();
-        sut.OnSelectionChanged(2);
-        Assert.False(sut.CanEditSelected);
-    }
+    // ── CanDeleteSelected ─────────────────────────────────────────────────
 
     [Fact]
     public void CanDeleteSelected_WhenOneOrMoreSelected_IsTrue()

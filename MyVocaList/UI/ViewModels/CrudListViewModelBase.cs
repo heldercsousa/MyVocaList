@@ -25,6 +25,11 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
     [ObservableProperty] private bool _isInitialLoading = true;
     [ObservableProperty] private string _confirmMessage = string.Empty;
     [ObservableProperty] private string _confirmActionText = "Delete";
+    [ObservableProperty] private bool _isSelectionMode;
+    [ObservableProperty] private BottomSheetState _itemActionsSheetState = BottomSheetState.Hidden;
+
+    /// <summary>The item the item actions sheet acts on; <c>default</c> when the sheet is closed.</summary>
+    protected TItem ItemActionsTarget { get; private set; }
 
     protected abstract ObservableRangeCollection<TItem> Items { get; }
     protected abstract ObservableRangeCollection<TItem> SelectedItems { get; }
@@ -45,17 +50,21 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     public bool IsEmpty => !IsInitialLoading && Items.Count == 0;
     public virtual bool IsEmptyNoResults => IsEmpty && !string.IsNullOrWhiteSpace(SearchText);
-    public bool CanEditSelected => SelectedCount == 1;
     public bool CanDeleteSelected => SelectedCount > 0;
     public bool IsAllSelected => Items.Count > 0 && SelectedCount == Items.Count;
 
     public IAsyncRelayCommand RefreshCommand { get; }
     public IRelayCommand LoadMoreCommand { get; }
     public IRelayCommand DeleteSelectedCommand { get; }
-    public IAsyncRelayCommand EditSelectedCommand { get; }
     public IRelayCommand SelectAllCommand { get; }
     public IAsyncRelayCommand ConfirmActionCommand { get; }
     public IRelayCommand DismissConfirmCommand { get; }
+    public IAsyncRelayCommand<object> ItemTapCommand { get; }
+    public IRelayCommand<object> ItemLongPressCommand { get; }
+    public IRelayCommand<object> ToggleItemSelectionCommand { get; }
+    public IAsyncRelayCommand EditItemCommand { get; }
+    public IRelayCommand DeleteItemCommand { get; }
+    public IRelayCommand DismissItemActionsCommand { get; }
 
     protected CrudListViewModelBase(ILogger logger)
     {
@@ -63,11 +72,16 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         _appBarNavigationCommand = new Command(() => { });
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
         LoadMoreCommand = new RelayCommand(() => _ = LoadMoreAsync());
-        DeleteSelectedCommand = new RelayCommand(RequestBatchDelete, () => CanDeleteSelected);
-        EditSelectedCommand = new AsyncRelayCommand(ExecuteEditSelectedAsync, () => CanEditSelected);
+        DeleteSelectedCommand = new RelayCommand(() => RequestDelete(SelectedItems.ToList()), () => CanDeleteSelected);
         SelectAllCommand = new RelayCommand(ToggleSelectAll);
         ConfirmActionCommand = new AsyncRelayCommand(ExecuteConfirmActionAsync);
         DismissConfirmCommand = new RelayCommand(DismissConfirmSheet);
+        ItemTapCommand = new AsyncRelayCommand<object>(OnItemTappedAsync);
+        ItemLongPressCommand = new RelayCommand<object>(OnItemLongPressed);
+        ToggleItemSelectionCommand = new RelayCommand<object>(ToggleItemSelection);
+        EditItemCommand = new AsyncRelayCommand(EditItemAsync);
+        DeleteItemCommand = new RelayCommand(DeleteItem);
+        DismissItemActionsCommand = new RelayCommand(CloseItemActions);
     }
 
     partial void OnSearchTextChanged(string value)
@@ -78,11 +92,10 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
 
     partial void OnSelectedCountChanged(int value)
     {
-        OnPropertyChanged(nameof(CanEditSelected));
         OnPropertyChanged(nameof(CanDeleteSelected));
         OnPropertyChanged(nameof(IsAllSelected));
         DeleteSelectedCommand.NotifyCanExecuteChanged();
-        EditSelectedCommand.NotifyCanExecuteChanged();
+        IsSelectionMode = value > 0;
         OnSelectedCountUpdated(value);
     }
 
@@ -243,29 +256,15 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         }, token);
     }
 
-    private async Task ExecuteEditSelectedAsync()
+    private void RequestDelete(IList<TItem> items)
     {
-        var item = SelectedItems.FirstOrDefault();
-        if (item == null) return;
+        if (items.Count == 0) return;
 
-        RunOnUiThread(() =>
-        {
-            SelectedItems.ClearRange();
-            SelectedCount = 0;
-        });
-        await NavigateToEditAsync(item);
-    }
-
-    private void RequestBatchDelete()
-    {
-        var selectedItems = SelectedItems.ToList();
-        if (selectedItems.Count == 0) return;
-
-        ConfirmMessage = BuildDeleteConfirmMessage(selectedItems);
+        ConfirmMessage = BuildDeleteConfirmMessage(items);
         ConfirmActionText = "Delete";
         _pendingConfirmAction = async () =>
         {
-            await ExecuteDeleteAsync(selectedItems);
+            await ExecuteDeleteAsync(items);
             RunOnUiThread(() =>
             {
                 SelectedItems.ClearRange();
@@ -311,9 +310,113 @@ public abstract partial class CrudListViewModelBase<TItem> : ViewModelBase, ICru
         });
     }
 
+    /// <inheritdoc />
     public void OnSelectionChanged(int count)
     {
         SelectedCount = count;
+    }
+
+    /// <inheritdoc />
+    public bool HandleBack()
+    {
+        if (ItemActionsSheetState != BottomSheetState.Hidden)
+        {
+            CloseItemActions();
+            return true;
+        }
+
+        if (ConfirmSheetState != BottomSheetState.Hidden)
+        {
+            DismissConfirmSheet();
+            return true;
+        }
+
+        if (IsSelectionMode)
+        {
+            RunOnUiThread(() =>
+            {
+                SelectedItems.ClearRange();
+                SelectedCount = 0;
+            });
+            return true;
+        }
+
+        return false;
+    }
+
+    private Task OnItemTappedAsync(object parameter)
+    {
+        if (IsSelectionMode || parameter is not TItem item)
+            return Task.CompletedTask;
+
+        return NavigateToEditAsync(item);
+    }
+
+    private void OnItemLongPressed(object parameter)
+    {
+        if (parameter is not TItem item) return;
+
+        if (!IsSelectionMode)
+            BeginSelection(item);
+        else
+            OpenItemActions(item);
+    }
+
+    private void ToggleItemSelection(object parameter)
+    {
+        if (parameter is not TItem item) return;
+
+        if (!IsSelectionMode)
+        {
+            BeginSelection(item);
+            return;
+        }
+
+        RunOnUiThread(() =>
+        {
+            if (!SelectedItems.Remove(item))
+                SelectedItems.Add(item);
+            SelectedCount = SelectedItems.Count;
+        });
+    }
+
+    private void BeginSelection(TItem item)
+    {
+        // Set first so the view switches DX selection to Multiple before the item is added.
+        IsSelectionMode = true;
+        RunOnUiThread(() =>
+        {
+            SelectedItems.ReplaceRange([item]);
+            SelectedCount = 1;
+        });
+    }
+
+    private void OpenItemActions(TItem item)
+    {
+        ItemActionsTarget = item;
+        ItemActionsSheetState = BottomSheetState.HalfExpanded;
+    }
+
+    private void CloseItemActions()
+    {
+        ItemActionsSheetState = BottomSheetState.Hidden;
+        ItemActionsTarget = default;
+    }
+
+    private async Task EditItemAsync()
+    {
+        var target = ItemActionsTarget;
+        CloseItemActions();
+        if (target is not null)
+            await NavigateToEditAsync(target);
+    }
+
+    private void DeleteItem()
+    {
+        var target = ItemActionsTarget;
+        CloseItemActions();
+        if (target is not null)
+            RequestDelete([target]);
     }
 
     private void NotifyEmptyStates()
