@@ -105,3 +105,14 @@ Branch `feature/crud-list-selection-gestures` pushed (head `8df8ef14`). Fresh `v
 - On-device checklist (`plan.md § Verification`, steps 1–10 on all 4 pages).
 - Human review of the T4 `amend:` library changes (`8df8ef14`).
 - After a reported pass: merge `feature/crud-list-selection-gestures` → develop (pre-authorised), set status ✅.
+
+## T5 — Verify + hand-off (2026-11-12) — Done
+
+- Helder's device check: T1, T2a, T2b, T2c, T3 OK; T4 guideline files reviewed via paths.
+- Merged `feature/crud-list-selection-gestures` into develop on Helder's instruction. Verification on merged develop: `dotnet test` 967/967 passed; Android build 0 errors (27 warnings).
+- **Deviation:** REQ-CLSG-06 (long-press in selection mode) does nothing on device. Carried into "CrudListView: one list mode at a time", which redefines it as a toggle (no menu).
+- Superseded parts (item actions bottom sheet, ListItemCheckbox placement) are replaced by the registered ListItem, overflow menu and overflow button tasks.
+
+### Changed files
+- None in T5 (merge only); `tasks.md`, `task-log.md`, README status.
+
