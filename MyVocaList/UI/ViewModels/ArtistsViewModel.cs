@@ -1,6 +1,8 @@
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Navigation;
 using MyVocaList.UI.Collections;
+using MyVocaList.UI.Services;
 
 namespace MyVocaList.UI.ViewModels;
 
@@ -9,6 +11,7 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItem>
 {
     private readonly IArtistService _artistService;
     private readonly ISnackbarComponent _snackbarService;
+    private readonly INavigationService _navigationService;
 
     [ObservableProperty] private ArtistRoleFilter _roleFilter = ArtistRoleFilter.All;
     [ObservableProperty] private System.Collections.IList _selectedRoleFilters = new List<object>();
@@ -16,16 +19,18 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItem>
     public ArtistsViewModel(
         IArtistService artistService,
         ISnackbarComponent snackbarService,
+        INavigationService navigationService,
         ILogger<ArtistsViewModel> logger) : base(logger)
     {
         _artistService = artistService;
         _snackbarService = snackbarService;
+        _navigationService = navigationService;
 
         Artists = [];
         SelectedArtists = [];
 
         AddArtistCommand = new AsyncRelayCommand(NavigateToAddAsync);
-        ViewCatalogCommand = new RelayCommand<ArtistListItem>(NavigateToCatalog);
+        ViewCatalogCommand = new AsyncRelayCommand<ArtistListItem>(NavigateToCatalogAsync);
     }
 
     public ObservableRangeCollection<ArtistListItem> Artists { get; }
@@ -34,7 +39,7 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItem>
     public System.Collections.IList SelectedArtistsRaw => SelectedArtists;
 
     public IAsyncRelayCommand AddArtistCommand { get; }
-    public IRelayCommand<ArtistListItem> ViewCatalogCommand { get; }
+    public IAsyncRelayCommand<ArtistListItem> ViewCatalogCommand { get; }
 
     public string Mode
     {
@@ -118,10 +123,12 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItem>
         OnPropertyChanged(nameof(IsEmptyNoResults));
     }
 
-    private void NavigateToCatalog(ArtistListItem artist)
+    // BUG-086: absolute route (the hidden "songs" flyout item is not a registered relative route) and awaited,
+    // so a failed navigation surfaces instead of being discarded.
+    private async Task NavigateToCatalogAsync(ArtistListItem? artist)
     {
         if (artist == null) return;
-        _ = Shell.Current.GoToAsync(
-            $"{Routes.Songs}?artistId={artist.Id}&artistName={Uri.EscapeDataString(artist.Name)}");
+        await _navigationService.GoToAsync(
+            $"//{Routes.Songs}?artistId={artist.Id}&artistName={Uri.EscapeDataString(artist.Name)}");
     }
 }
