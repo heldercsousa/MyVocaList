@@ -6,7 +6,7 @@ target: 2026-11-12
 section: BusinessFeatures
 parent: artists-songs
 goal: Replace the trailing catalog button with the shared overflow button; Open catalog becomes an item actions menu entry, next to Edit and Delete. The checkbox stays leading.
-gate: Starts after the CrudListView, ListItemCheckbox and overflow button changes are done; Helder passes it on device.
+gate: Starts after the ListItem, menu, overflow button and CrudListView changes are done; Helder passes it on device.
 kind: change
 ---
 
