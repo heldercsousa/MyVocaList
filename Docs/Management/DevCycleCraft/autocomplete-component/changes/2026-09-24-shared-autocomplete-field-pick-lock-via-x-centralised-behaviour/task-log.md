@@ -35,7 +35,7 @@ item 1. Full facts: `findings.md` § Environment.
 
 ## T2
 
-**Status:** To Review
+**Status:** Done — merged into develop as `78b2b735`; item closed 2026-11-11 (T7 run 6 PASS)
 
 **Summary:** Added `SearchConstants.AutocompleteDebounceMilliseconds = 300` constant (REQ-ACF-14) via test-first TDD (Red → Green → Build).
 
@@ -74,7 +74,7 @@ item 1. Full facts: `findings.md` § Environment.
 
 ## T3
 
-**Status:** To Review
+**Status:** Done — merged into develop as `83065e07`; item closed 2026-11-11 (T7 run 6 PASS)
 
 ### Changed files:
 - `MyVocaList/UI/Models/IMenuOptionSource.cs` (new, Tester) — `IMenuOptionSource` + `MenuOptionSource` adapter, complete (contract only).
@@ -172,7 +172,7 @@ Files written and re-read: `AutocompleteDXFieldLogic.cs` re-read in full after t
 
 ## T5
 
-**Status:** To Review
+**Status:** Done — merged into develop as `7d228c41`; item closed 2026-11-11 (T7 run 6 PASS)
 **Started:** 2026-09-26
 **Completed:** 2026-09-26
 
@@ -237,7 +237,7 @@ None. `git push origin HEAD` was not attempted per the briefing (orchestrator me
 ## T4
 
 **Plan:** `plan.md` § Task T4
-**Status:** Check build (E2E: the component is on no page yet; first on-device proof is T7. The emulator was not run, per the machine-load constraint.)
+**Status:** Done — merged into develop as `0d74b4a6`; item closed 2026-11-11 (T7 run 6 PASS)
 **Started:** 2026-11-03 (first implementor, stopped after Step 2 by machine restarts) · **Resumed/Completed:** 2026-11-03
 
 ### Resume review (partial work inherited)
@@ -310,7 +310,7 @@ Build: passed (0 errors) | Tests: 679 passed, 0 failed | Commit: the head of bra
 
 ## T6
 
-**Status:** To Review (E2E: not run - no emulator per briefing; device gate is T7)
+**Status:** Done — merged into develop as `91f87884`; item closed 2026-11-11 (T7 run 6 PASS)
 **Started/Completed:** 2026-11-04
 
 Replaced the Full Name `dxe:AutoCompleteEdit` in `PersonFormPage.xaml` with `textfields:AutocompleteDXField` (bindings per plan T6; `IsLocked` unbound; character counter untouched). Added `xmlns:textfields`. Code-behind: deleted `OnNameItemsRequested`, `OnNameSelectionChanged`, `OnNameUnfocused`; focus call is now `nameField.FocusEditor()`; birthday/email blur handlers kept. Line numbers in the plan matched the file (XAML 19-43, cs 33-61, focus at 30).
@@ -385,7 +385,7 @@ Helder tested `sft-g5-spike` (which predates T4 and uses the old per-page autoco
 
 ## T8 — T7 run 1 fixes + pick-lock opt-out
 
-**Status:** To Review (device re-run of T7 pending)
+**Status:** Done — merged into develop as `97a329e1`; item closed 2026-11-11 (T7 run 6 PASS)
 **Started / Completed:** 2026-11-05
 
 ### Checkpoint
@@ -439,7 +439,7 @@ Still open in this item: line 2 (search-text normalisation) and the line 9 curso
 
 ## T9 — T7 run 2 fixes (search-text normalisation + pick drops focus)
 
-**Plan:** `tasks.md § T9` · **Status:** To Review · **Started:** 2026-11-06 · **Completed:** 2026-11-06 · **Branch:** `task/acf-t9-t7-run2-fixes` @ `.worktrees/acf-t9` (base `develop` `fd5901c4`)
+**Plan:** `tasks.md § T9` · **Status:** Done — merged into develop as `e3c661a6`; item closed 2026-11-11 (T7 run 6 PASS) · **Started:** 2026-11-06 · **Completed:** 2026-11-06 · **Branch:** `task/acf-t9-t7-run2-fixes` @ `.worktrees/acf-t9` (base `develop` `fd5901c4`)
 
 ### Final entry (step 5 complete)
 
@@ -555,7 +555,7 @@ phone reproduced on the emulator. Root causes proven from the `ACF-DIAG` log lin
 ## T10 — Root-cause fixes RC-A/B/C
 
 **Plan:** `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/tasks.md` § T10
-**Status:** To Review
+**Status:** Done — merged into develop as `3440d982`; item closed 2026-11-11 (T7 run 6 PASS)
 **Started:** 2026-11-09
 **Completed:** 2026-11-09
 **Branch:** `task/acf-t10-root-cause-fixes` @ `.worktrees/acf-t10` (base `develop`, ancestry verified)
@@ -635,7 +635,7 @@ Files written and re-read: `AutocompleteDXField.xaml.cs` (grep of all edited sym
 - **Phase / Step:** T1 verdict **B**; T2–T6 merged, all Verifier PASS (T6 `91f87884`, 2026-11-04); T3-C cancelled. Helder chose to keep the pick-lock (2026-11-03). Only T7 remains.
 - **Branch:** develop
 - **Worktree:** —
-- **Status:** blocked: awaiting Helder T7 on device
+- **Status:** blocked: awaiting Helder T7 on device *(historical; T7 passed 2026-11-11 run 6, item closed — see § Close-out bookkeeping)*
 - **Last commit:** 91f87884
 - **Next action:** **STOP T7:** Helder runs the on-device E2E gate on the Person form (focus on open, "jo" lists people, pick opens that person's edit form, field locked until X, blur validation). Pre-existing: `PersonFormPage.xaml` has `SafeAreaEdges="All"` not `"Container"` — awaiting Helder whether to fix separately.
 
@@ -692,7 +692,7 @@ Files written and re-read: `AutocompleteDXField.xaml.cs` (grep of all edited sym
 Glue (code-behind `RequestAsync` → RC-A guard) is not unit-testable; covered by the emulator check above.
 
 ### Commit
-**Status:** To Review. Committed as `bfe4e6a6` on `task/acf-t11-no-results-row` with `Item: shared-autocomplete-field-pick-lock-via-x-centralised-behaviour` (the commit-msg hook rejects `Item: ACF`: not a registered backlog id). Not pushed, not merged.
+**Status:** Done — merged into develop as `25ccbdbc`; item closed 2026-11-11 (T7 run 6 PASS). Committed as `bfe4e6a6` on `task/acf-t11-no-results-row` with `Item: shared-autocomplete-field-pick-lock-via-x-centralised-behaviour` (the commit-msg hook rejects `Item: ACF`: not a registered backlog id).
 
 ### T11 merge + emulator check (2026-11-10)
 
@@ -722,7 +722,7 @@ Glue (code-behind `RequestAsync` → RC-A guard) is not unit-testable; covered b
 
 ## T12 — Component-owned search (REQ-ACF-31 amended)
 
-**Status:** To Review
+**Status:** Done — merged into develop as `77b408f6`; item closed 2026-11-11 (T7 run 6 PASS)
 **Plan:** `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-09-24-shared-autocomplete-field-pick-lock-via-x-centralised-behaviour/tasks.md` § T12
 **Started:** 2026-11-11
 **Completed:** 2026-11-11
@@ -757,7 +757,7 @@ Build: passed (0 errors, 27 warnings; `dotnet build MyVocaList/MyVocaList.csproj
 ### AC traceability (T12)
 | AC ID | Criterion | Implementation location | Test method |
 |-------|-----------|-------------------------|-------------|
-| REQ-ACF-31 (amended) | No transient frame, no loading indicator, no blink while typing; rejected query closes | `AutocompleteDXField.xaml.cs` `RestartSearch`, `RunSearchAsync`; `AutocompleteDXField.xaml` `LoadingProgressMode="Manual"` | Emulator: `flash.sh` 0 frames (orchestrator); T7 run 6 pending. Logic: `ShowsMenu` tests (T11) |
+| REQ-ACF-31 (amended) | No transient frame, no loading indicator, no blink while typing; rejected query closes | `AutocompleteDXField.xaml.cs` `RestartSearch`, `RunSearchAsync`; `AutocompleteDXField.xaml` `LoadingProgressMode="Manual"` | Emulator: `flash.sh` 0 frames (orchestrator); T7 run 6 PASS (2026-11-11). Logic: `ShowsMenu` tests (T11) |
 | REQ-ACF-13c | Below-threshold / rejected query leaves no menu | `RestartSearch` rejected branch; `ShouldRequestOptions` | Logic tests (T9/T11); emulator " a" lit=0 |
 | REQ-ACF-26 | A pick while a search is pending keeps the menu closed | `OnSelectionChanged` `_pickCount++` + `CancelSearch()`; `RunSearchAsync` pick-count check | Level C glue; emulator check (orchestrator) |
 | REQ-ACF-14 | Shared debounce constant applied by the component | `RunSearchAsync` `Task.Delay(SearchConstants.AutocompleteDebounceMilliseconds)` | Level C glue; constant value covered by existing constants usage |
@@ -828,3 +828,28 @@ Ruling: no full-screen autocomplete, no add-new row, no loading indicator for De
 - This item's `requirements.md`: § Helder ruling — 2026-11-11 (UX scope).
 
 Re-evaluation of concern 4 (song-form design): the outdated reason does not change the decision (Q16 fallback = one list when Deezer answers), and the ruling confirms it. One consequence noted for the song-form gate: an open menu keeps the previous query's options until the new list arrives, up to the 3,000 ms bound on Title.
+
+## Close-out bookkeeping (2026-11-11)
+
+Helder asked for a gap check after close-out; findings and resolutions:
+
+- **LEDGER:** the `AC-FIELD` row still read "blocked: Helder T7". Moved to Completed (T12 merge `77b408f6`, develop 953/953).
+  Its pending question (`PersonFormPage` `SafeAreaEdges="All"` → `"Container"`) is moot: `CLAUDE.md` requires `"All"` on
+  pages with text input, so `"All"` is correct.
+- **Status banners:** `README.md`, `requirements.md` and `design.md` still said draft. Real status, from evidence: approved
+  2026-09-25 (this log's header); all tasks merged (T2 `78b2b735`, T3 `83065e07`, T4 `0d74b4a6`, T5 `7d228c41`,
+  T6 `91f87884`, T8 `97a329e1`, T9 `e3c661a6`, T10 `3440d982`, T11 `25ccbdbc`, T12 `77b408f6`; T3-C cancelled);
+  T7 run 6 PASS; Rebuild Test closed. Banners now say shipped and closed 2026-11-11.
+- **spec-changelog.md:** two post-approval edits were unlogged (`b590190d` design § 3.1, `e4ad0d52` Helder UX ruling).
+  Both added; Helder confirmed the 2026-11-11 ruling is correct.
+- **tasks.md:** T7 run 6 result note added, like runs 1-5.
+- **Task statuses in this log:** every "To Review" / "Check build" status set to Done with its merge SHA.
+- **Follow-ups:** registered as `autocompletedxfield-is-the-app-wide-autocomplete-pattern-whatever-page-uses-it` (Helder: the component is the pattern, whatever page uses it).
+- **Open question "full-screen Search View for `AutocompleteDXField`?":** **declined by Helder** (2026-11-11). The docked
+  DX menu stays.
+- **Second consumer:** confirmed `SongFormPage` binds `AutocompleteDXField` for Title and Artist on branch
+  `task/sft-5.5-song-form-fields` (`6f7b6bbf`, worktree `agent-ae30a6ef9c3387d12`, not merged yet). On merge the
+  component becomes governed; the song-form item adds it to `component-safety-gate.md`.
+
+- ITF: ITF-docs-guard-worktrees — `.claude/scripts/backlog/tests/test_command_docs_guard.py` — root cause: `_doc_files` globs `.claude/**/*.md`, which includes full repo copies under `.claude/worktrees/`, so a live agent worktree blocks every `.claude/` docs commit — expected 2 line(s).
+- ITF closed: fixed in `f6a4127a` (guard tests 15/15; filter leaves 0 worktree files of 117).

@@ -194,6 +194,26 @@ public class SongRepositorySearchTests : IAsyncLifetime
         Assert.Equal("Live", Assert.Single(live).Version);
     }
 
+    // [AC] AC-STL-04 (REQ-STL-04): a 250-char title is found by exact (collated triple) and trigram search
+    [Fact]
+    public async Task LongTitle250Chars_FoundByExactAndTrigramSearch()
+    {
+        const string head = "Zanzibar Quixotic Remastered Medley (feat. Marmalade Orchestra) - Live at the Grand Hall ";
+        var title = (head + new string('z', 250)).Substring(0, 250).TrimEnd();
+        title = title.PadRight(250, 'q');
+        Assert.Equal(250, title.Length);
+        var artist = await SeedArtistAsync("Long Title Artist");
+        _db.Songs.Add(MakeSong(artist.Id, title, ""));
+        await _db.SaveChangesAsync();
+
+        var exact = await _repo.FindByTitleAndArtistNamesAsync(
+            [(title.ToUpperInvariant(), "long title artist", "")], CancellationToken.None);
+        var trigram = await _repo.SearchTitleCandidatesAsync("zanzibar quixotic marmalade", 50, CancellationToken.None);
+
+        Assert.Equal(title, Assert.Single(exact).Title);
+        Assert.Contains(trigram, h => h.Title == title);
+    }
+
     private async Task<Artist> SeedArtistAsync(string name)
     {
         var artist = new Artist { Name = name, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };

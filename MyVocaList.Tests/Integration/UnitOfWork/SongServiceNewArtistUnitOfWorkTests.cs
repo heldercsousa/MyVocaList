@@ -58,12 +58,12 @@ public class SongServiceNewArtistUnitOfWorkTests
 
     // [AC] REQ-SFT-18: a failure TUPLE after the artist was staged writes nothing (0/0 rows).
     // Rewritten from NestedUnitOfWorkTests:105 (REQ-UOW-24 -> REQ-SFT-18), assertion inverted as
-    // above. Same injection as the original: a 101-char title (SongService.MaxTitleLength == 100).
+    // above. Same injection as the original: a 251-char title (SongService.MaxTitleLength == 250).
     [Fact]
     public async Task CreateSongWithUrlsAsync_FailureTupleAfterArtistStaged_WritesNothing()
     {
         await using var host = UnitOfWorkTestHost.Create();
-        var tooLongTitle = new string('x', 101);
+        var tooLongTitle = new string('x', 251);
 
         var (success, message, song) = await CreateWithNewArtist(host, "Failure Tuple Artist", tooLongTitle);
 
