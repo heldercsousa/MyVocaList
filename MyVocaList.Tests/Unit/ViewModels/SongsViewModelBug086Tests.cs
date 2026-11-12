@@ -64,4 +64,34 @@ public class SongsViewModelBug086Tests
         _songMock.Verify(s => s.GetPagedSongsForListAsync(It.IsAny<int>(), It.IsAny<int>(),
                         It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
+
+    // BUG-086 regression (round 2, reproduced on emulator): the Shell applies query values in URL order, so
+    // artistId lands before artistName. The title must be re-notified when ArtistName arrives; otherwise the
+    // bound title keeps the PREVIOUS artist's name (tapping Bravo's catalog showed "Alpha Artist").
+    [Fact]
+    public async Task ArtistNameArrivingAfterArtistId_RaisesAppBarTitleWithNewName()
+    {
+        SetupEmptyGlobalAndCatalog();
+        _catalogMock.Setup(c => c.GetPagedCatalogForArtistAsync(It.IsAny<int>(), It.IsAny<int>(),
+                        It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync((Enumerable.Empty<SongListItemDto>(), 0));
+
+        var sut = CreateSut();
+        await sut.InitializeAsync();
+        sut.ArtistIdRaw = "1";
+        sut.ArtistName = "Alpha Artist";
+
+        var notifiedTitles = new List<string>();
+        sut.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(SongsViewModel.AppBarTitle))
+                notifiedTitles.Add(sut.AppBarTitle);
+        };
+
+        sut.ArtistIdRaw = "2";
+        sut.ArtistName = "Bravo Band";
+
+        Assert.Equal("Bravo Band", sut.AppBarTitle);
+        Assert.Equal("Bravo Band", notifiedTitles[^1]);
+    }
 }
