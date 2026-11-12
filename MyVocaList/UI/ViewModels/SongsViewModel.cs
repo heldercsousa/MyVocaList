@@ -77,6 +77,10 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
             _ = ReloadAsync();
     }
 
+    // BUG-086 round 2: the Shell applies query values in URL order (artistId before artistName), so the title
+    // must be re-notified when the name arrives; otherwise the bound title keeps the previous artist's name.
+    partial void OnArtistNameChanged(string value) => OnPropertyChanged(nameof(AppBarTitle));
+
     protected override Task<(IEnumerable<SongListItemDto> items, int totalCount)> FetchPageAsync(
         int page, int pageSize, string query, CancellationToken ct)
         => IsCatalogMode
