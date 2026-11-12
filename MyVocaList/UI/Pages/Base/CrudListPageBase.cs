@@ -30,13 +30,6 @@ public abstract class CrudListPageBase : ContentPage
     {
     }
 
-    protected void OnConfirmSheetStateChanged(object sender, ValueChangedEventArgs<BottomSheetState> e)
-    {
-        if (e.NewValue == BottomSheetState.Hidden &&
-            ListViewModel.ConfirmSheetState != BottomSheetState.Hidden)
-            ListViewModel.ConfirmSheetState = BottomSheetState.Hidden;
-    }
-
     protected override void OnAppearing()
     {
         // PHASE2-INSTRUMENTATION: remove after page-load-frozen is closed.
@@ -73,22 +66,6 @@ public abstract class CrudListPageBase : ContentPage
         }
     }
 
-    protected void OnCollectionViewScrolled(object sender, DXCollectionViewScrolledEventArgs e)
-        => ListViewModel.IsScrolled = e.Offset > 0;
-
-    protected void OnSelectionChanged(object sender, CollectionViewSelectionChangedEventArgs e)
-    {
-        var count = ((sender as DXCollectionView)?.SelectedItems as System.Collections.ICollection)?.Count ?? 0;
-        ListViewModel.OnSelectionChanged(count);
-    }
-
     protected override bool OnBackButtonPressed()
-    {
-        if (ListViewModel.ConfirmSheetState != BottomSheetState.Hidden)
-        {
-            ListViewModel.ConfirmSheetState = BottomSheetState.Hidden;
-            return true;
-        }
-        return base.OnBackButtonPressed();
-    }
+        => ListViewModel.HandleBack() || base.OnBackButtonPressed();
 }

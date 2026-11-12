@@ -19,11 +19,12 @@ Every list ViewModel shall have:
 | `bool IsScrolled` | Drives `IsElevated` on both app bars |
 | `int SelectedCount` | Updated by `OnSelectionChanged` in code-behind |
 | `string AppBarTitle` | Derived: entity name or "N selected" |
-| `bool CanEditSelected` | `SelectedCount == 1` (if edit is supported) |
+| `bool IsSelectionMode` | `SelectedCount > 0` — inherited from `CrudListViewModelBase` (drives DX `SelectionMode` + toolbar visibility) |
 | `bool CanDeleteSelected` | `SelectedCount > 0` (if delete is supported) |
 | `BottomSheetState ConfirmSheetState` | Drives `ConfirmSheet` component (if destructive action exists) |
 | `RefreshCommand`, `LoadMoreCommand`, `AddCommand` | Standard list commands |
-| `EditSelectedCommand`, `DeleteSelectedCommand`, `SelectAllCommand` | Action commands (adapt to page needs) |
+| `DeleteSelectedCommand`, `SelectAllCommand` | Toolbar commands (inherited) |
+| `ItemTapCommand`, `ItemLongPressCommand`, `ToggleItemSelectionCommand`, `EditItemCommand`, `DeleteItemCommand` | Gesture / item-actions commands (inherited; page only implements `NavigateToEditAsync`, `ExecuteDeleteAsync`, `BuildDeleteConfirmMessage`) |
 | `OpenSearchCommand`, `CloseSearchCommand` | Search commands (omit if no search) |
 
 > **CrudListView binding notes:**

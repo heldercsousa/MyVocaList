@@ -53,7 +53,8 @@ All list rows use the `ListItem` component. No card layouts, no custom `DXBorder
 ### Standard configuration
 ```xml
 <dxcv:DXCollectionView
-    SelectionMode="Multiple"
+    SelectionMode="None"                     <!-- switched to Multiple by CrudListView in selection mode -->
+    Tap="OnItemTap" LongPress="OnItemLongPress"
     IndicatorColor="{StaticResource Primary}"
     Margin="0,0,0,88"
     Scrolled="OnCollectionViewScrolled"
@@ -69,7 +70,7 @@ All list rows use the `ListItem` component. No card layouts, no custom `DXBorder
     <dxcv:DXCollectionView.SelectedItemTemplate>
         <DataTemplate x:DataType="dto:MyDto">
             <lists:ListItem Headline="{Binding Name}" IsSelected="True">
-                <!-- Same structure, CheckEdit IsChecked="True", CheckedCheckBoxColor set -->
+                <!-- Same structure, <lists:ListItemCheckbox IsChecked="True" /> -->
             </lists:ListItem>
         </DataTemplate>
     </dxcv:DXCollectionView.SelectedItemTemplate>
@@ -84,32 +85,42 @@ All list rows use the `ListItem` component. No card layouts, no custom `DXBorder
 | `Headline` | Any string binding | Required — always populated |
 | `SupportingText` | Optional — add when a second line of info helps the user | Drives 2-line or 3-line list item height |
 | `Overline` | Optional — label above headline | Use sparingly; reserved for category/type labels |
-| `TrailingContent` | `CheckEdit` (selection) / independent action button / metadata label / omitted | Multi-action: use a `DXButton` with its own `Command` |
-| Selection | Always-on `SelectionMode.Multiple` (hardcoded in XAML) | Do not add mode-toggle logic |
+| `TrailingContent` (or `LeadingContent`) | `ListItemCheckbox` (MD3 trailing selection control) / independent action button / metadata label / omitted | Multi-action: use a `DXButton` with its own `Command` |
+| Selection | Owned by `CrudListView` + `CrudListViewModelBase` (see Gestures below) | Pages add no selection or gesture logic |
+
+### Gestures — law (since 2026-11-11, `crud-list-deduplication/changes/2026-11-11-crud-list-selection-gestures/`)
+| Mode | Tap item | Long-press item | Tap `ListItemCheckbox` |
+|---|---|---|---|
+| Browse (0 selected; DX `SelectionMode=None`) | open edit form | select item → selection mode | select item → selection mode |
+| Selection (≥1; DX `SelectionMode=Multiple`) | toggle item | item actions sheet (modal bottom sheet: Edit / Delete for that item) | toggle item |
+
+The mode switch is a `CrudListView` concern driven by VM `IsSelectionMode`, never a page concern. Back in selection mode clears the selection (`HandleBack()`).
 
 ### Never
-- Do not wrap list rows in `SwipeContainer` for delete. Delete is through the `FloatingToolbar`.
-- Do not use `SelectionMode.None` or mode-toggle patterns. Selection is always on.
-- Do not put `SelectionMode` in the ViewModel. It is a constant — hardcode it in XAML.
+- Do not wrap list rows in `SwipeContainer` for delete. Delete is through the `FloatingToolbar` (selection) or the item actions sheet (single item).
+- Do not set `SelectionMode` or handle `Tap`/`LongPress` in a page — `CrudListView` owns them.
+- Do not use a raw `dx:CheckEdit` as the row selection control — use `ListItemCheckbox` (it toggles on tap and consumes the touch).
+- Do not add a per-row overflow/menu button for item actions — MD3 multi-select list items "can't have secondary nested actions"; use the item actions sheet (press-and-hold).
 
 ---
 
 ## FloatingToolbar — Laws and Variants
 
 > **Note:** Writing `FloatingToolbar` + FAB directly in page XAML is the old pattern. As of Step 7,
-> CrudListView owns the toolbar and FAB. The standard slot assignments (Action1=SelectAll,
-> Action2=Edit, Action3=Delete) are hardcoded in CrudListView. For pages with different action
+> CrudListView owns the toolbar and FAB. The standard slot assignments (Action1=Select all,
+> Action2=Delete) are hardcoded in CrudListView. For pages with different action
 > needs, this section will be expanded when CrudListView gains configurable toolbar slots.
 
 ### Law
-Every list page that has page-level actions uses `FloatingToolbar`, always centered at the bottom with `Margin="0,0,0,16"`. The toolbar is always visible — slots enable/disable via command `CanExecute`, not by hiding the toolbar.
+Every list page that has selection actions uses `FloatingToolbar` (MD3: "best used for contextual actions"), centered at the bottom with `Margin="0,0,0,16"` and paired with the FAB (MD3 "Floating toolbar with FAB"). On CRUD list pages the toolbar is **visible only in selection mode** (`IsVisible="{Binding IsSelectionMode}"`); in browse mode only the FAB shows. MD3 sets no minimum action count — two actions + FAB is compliant (verified on m3.material.io 2026-11-11).
 
 ### Standard slot assignments (Venues reference)
 | Slot | Action | CanExecute |
 |------|--------|-----------|
-| Action1 | Select All (toggle) | Always enabled |
-| Action2 | Edit | `SelectedCount == 1` |
-| Action3 | Delete | `SelectedCount > 0` |
+| Action1 | Select all (toggle; clears when all selected) | Always enabled |
+| Action2 | Delete selected | `SelectedCount > 0` |
+
+Editing is tap-to-edit (browse mode) or the item actions sheet (selection mode) — there is no toolbar Edit action.
 
 ### Variants — allowed adaptations
 
@@ -122,11 +133,7 @@ Every list page that has page-level actions uses `FloatingToolbar`, always cente
 | Select All not needed | Replace slot 1 with the most common action for this entity |
 
 ### IsSelected visual feedback
-Always wire `ActionNIsSelected` to the relevant CanExecute property so the user sees which actions are active:
-```xml
-Action2IsSelected="{Binding CanEditSelected}"
-Action3IsSelected="{Binding CanDeleteSelected}"
-```
+`ActionNIsSelected` is for **toggle** actions only (e.g. `Action1IsSelected="{Binding IsAllSelected}"`); its selected state is MD3 vibrant "toggle tonal" (`SurfaceContainer` / `OnSurface`). Never wire it to a `CanExecute` property — enablement comes from `CanExecute`, and MD3 says "Don't emphasize multiple buttons with bold, primary colors, such as a button and FAB together" (the FAB is the one `Primary` action).
 
 ### FAB coexistence
 FAB is placed to the RIGHT of `FloatingToolbar` inside a shared `HorizontalStackLayout`:

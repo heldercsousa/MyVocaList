@@ -58,7 +58,7 @@
   - `.claude/library/m3-floating-toolbar.md`: selected = toggle tonal; FAB emphasis rule; MD3 quotes.
   - `.claude/library/component-safety-gate.md`: add `ListItemCheckbox` to the governed list.
   - Produces: updated laws · Consumes: T3 · Files owned: the 3 library files · Review lane: Elevated (Helder reviews at hand-off; authorship rule)
-- [ ] **T5 — Verify + hand-off**
+- [x] **T5 — Verify + hand-off** (merged 2026-11-12 on Helder's instruction; deviation REQ-CLSG-06 carried forward, see task-log)
   - Android build with 0 errors; full `dotnet test`; `verifier` subagent; AC traceability matrix in `task-log.md`; push the branch.
   - Helder runs the on-device checklist (`plan.md § Verification`). Merge into develop after the reported pass, then set status ✅.
   - Produces: merge-ready branch · Consumes: T1–T4
