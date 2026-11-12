@@ -57,13 +57,15 @@
                        IsLoadMoreEnabled="{Binding HasMoreItems}"
                        LoadMoreCommand="{Binding LoadMoreCommand}"
                        IndicatorColor="{StaticResource Primary}"
-                       SelectionMode="Multiple"
+                       SelectionMode="None"
                        UseRippleEffect="True"
                        ItemSeparatorThickness="0"
                        Margin="0,0,0,88"
                        ItemTemplate="{Binding ItemTemplate, Source={x:Reference self}}"
                        SelectedItemTemplate="{Binding SelectedItemTemplate, Source={x:Reference self}}"
                        Scrolled="OnCollectionViewScrolled"
+                       Tap="OnItemTap"
+                       LongPress="OnItemLongPress"
                        SelectionChanged="OnSelectionChanged" />
             </dx:ShimmerView.Content>
         </dx:ShimmerView>
@@ -90,18 +92,14 @@
                                Spacing="8">
             <toolbars:FloatingToolbar
                 VerticalOptions="Center"
+                IsVisible="{Binding IsSelectionMode}"
                 Action1Icon="done_all_outlined"
                 Action1Command="{Binding SelectAllCommand}"
                 Action1Description="Select all"
                 Action1IsSelected="{Binding IsAllSelected}"
-                Action2Icon="edit_outlined"
-                Action2Command="{Binding EditSelectedCommand}"
-                Action2Description="Edit selected"
-                Action2IsSelected="{Binding CanEditSelected}"
-                Action3Icon="delete_outlined"
-                Action3Command="{Binding DeleteSelectedCommand}"
-                Action3Description="Delete selected"
-                Action3IsSelected="{Binding CanDeleteSelected}" />
+                Action2Icon="delete_outlined"
+                Action2Command="{Binding DeleteSelectedCommand}"
+                Action2Description="Delete selected" />
             <dx:DXButton Style="{StaticResource Fab}"
                          Icon="{Binding FabIcon, Source={x:Reference self}}"
                          VerticalOptions="Center"
@@ -134,6 +132,29 @@
                 <dx:DXButton Content="Cancel"
                              Style="{StaticResource BottomSheetCancelAction}"
                              Command="{Binding DismissConfirmCommand}" />
+            </VerticalStackLayout>
+        </dx:BottomSheet>
+
+        <!-- Item actions BottomSheet (press-and-hold in selection mode) — state driven by ICrudListViewModel.ItemActionsSheetState -->
+        <dx:BottomSheet x:Name="itemActionsSheet"
+                        Grid.Row="2"
+                        AllowedState="HalfExpanded"
+                        HalfExpandedRatio="0.22"
+                        IsModal="True"
+                        ShowGrabber="True"
+                        AllowDismiss="True"
+                        BackgroundColor="{StaticResource Surface}"
+                        CornerRadius="28"
+                        StateChanged="OnItemActionsSheetStateChanged">
+            <VerticalStackLayout Padding="0,8">
+                <dx:DXButton Style="{StaticResource BottomSheetMenuItem}"
+                             Icon="edit_outlined"
+                             Content="Edit"
+                             Command="{Binding EditItemCommand}" />
+                <dx:DXButton Style="{StaticResource BottomSheetMenuItem}"
+                             Icon="delete_outlined"
+                             Content="Delete"
+                             Command="{Binding DeleteItemCommand}" />
             </VerticalStackLayout>
         </dx:BottomSheet>
 

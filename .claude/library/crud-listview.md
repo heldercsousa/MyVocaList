@@ -11,10 +11,11 @@ As of Step 7 of the CRUD list deduplication effort, all **new** CRUD list pages 
 CrudListView owns the following elements internally. Pages must **not** add these themselves:
 
 - `ShimmerView` wrapping `DXCollectionView` (6 `SkeletonBone` bones)
-- `DXCollectionView` with `SelectionMode="Multiple"`, `IsPullToRefreshEnabled`, `IsLoadMoreEnabled`, `Margin="0,0,0,88"`, `Scrolled`, `SelectionChanged` events, optional `Tap` event (via `ItemTapCommand`)
-- `FloatingToolbar` (Action1=SelectAll, Action2=Edit, Action3=Delete) + FAB — centered, `Margin="0,0,0,16"`
+- `DXCollectionView` with dynamic `SelectionMode` (`None` in browse mode, `Multiple` in selection mode — driven by VM `IsSelectionMode`), `IsPullToRefreshEnabled`, `IsLoadMoreEnabled`, `Margin="0,0,0,88"`, `Scrolled`, `SelectionChanged` (dispatched), `Tap` → `ItemTapCommand`, `LongPress` → `ItemLongPressCommand` (gesture law: `crud-appbar-list-toolbar.md § Gestures`)
+- `FloatingToolbar` (Action1=Select all, Action2=Delete selected; visible only in selection mode) + FAB — centered, `Margin="0,0,0,16"`
 - Two `EmptyState` components: "no items" (entity-specific text/icon) and "no results" (`search_outlined`)
 - Confirm `BottomSheet` (`HalfExpandedRatio="0.28"`, `AllowedState="HalfExpanded"`)
+- Item actions `BottomSheet` (modal; menu items Edit / Delete for `ItemActionsTarget`, style `BottomSheetMenuItem`) — opened by long-press in selection mode
 - Optional `FilterContent` slot (Row 0 of internal Grid, hidden until set)
 
 ### BindableProperties
@@ -33,7 +34,8 @@ CrudListView owns the following elements internally. Pages must **not** add thes
 | `FabDescription` | `string` | `""` | Yes | `SemanticProperties.Description` for accessibility |
 | `FabIcon` | `string` | `"add_outlined"` | Optional | Override only when not the default add action |
 | `FilterContent` | `View` | `null` | Optional | Any view shown above the list (e.g. `FilterChipGroup`) |
-| `ItemTapCommand` | `ICommand` | `null` | Optional | DXCollectionView Tap command; wired only when non-null |
+
+(The former `ItemTapCommand` BindableProperty was removed 2026-11-11 — tap handling is the VM's `ItemTapCommand`.)
 
 **Why `IsEmptyNoItems` is a BindableProperty but `IsEmptyNoResults` is not:** `IsEmptyNoResults` is named identically in all ViewModels and is part of `ICrudListViewModel`, so CrudListView binds to it directly via BindingContext. `IsEmptyNoItems` is named differently per VM (`IsEmptyNoVenues`, `IsEmptyNoArtists`, etc.) and therefore must be passed from the page.
 
@@ -60,13 +62,24 @@ public interface ICrudListViewModel : INotifyPropertyChanged
     // Selection state
     int SelectedCount { get; }
     bool IsAllSelected { get; }
-    bool CanEditSelected { get; }
     bool CanDeleteSelected { get; }
+    bool IsSelectionMode { get; }
+
+    // Gestures (CrudListView forwards DX Tap/LongPress; ListItemCheckbox → Toggle)
+    IAsyncRelayCommand<object> ItemTapCommand { get; }
+    IRelayCommand<object> ItemLongPressCommand { get; }
+    IRelayCommand<object> ToggleItemSelectionCommand { get; }
 
     // Toolbar commands
     IRelayCommand SelectAllCommand { get; }
-    IAsyncRelayCommand EditSelectedCommand { get; }
     IRelayCommand DeleteSelectedCommand { get; }
+
+    // Item actions bottom sheet
+    BottomSheetState ItemActionsSheetState { get; set; }
+    IAsyncRelayCommand EditItemCommand { get; }
+    IRelayCommand DeleteItemCommand { get; }
+    IRelayCommand DismissItemActionsCommand { get; }
+    bool HandleBack();
 
     // Confirm bottom sheet
     BottomSheetState ConfirmSheetState { get; set; }
