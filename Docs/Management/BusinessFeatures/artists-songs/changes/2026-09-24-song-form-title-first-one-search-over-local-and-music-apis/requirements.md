@@ -164,12 +164,11 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 - **REQ-SFT-10: Local pick opens the song.** Given add mode, When the user picks a local option,
   Then the add form is replaced by that song's edit form (Back from it returns to the page the add
   form was opened from, not to the add form).
-- **REQ-SFT-11: Unsaved data on a local pick** `[Confirmed — Helder 2026-11-04]`. IF, at the moment of a local
-  pick, Artist, Version, Featured Artists, Lyrics or the buffered YouTube list holds user input,
-  THEN a `dx:BottomSheet` SHALL ask "Open '<title>'? What you entered here will be discarded." with
-  **Open** and **Keep editing**. Open → REQ-SFT-10. Keep editing (or Back / scrim) → the sheet closes,
-  Title shows the text the user had typed, unlocked, and nothing else changes. With no such input,
-  REQ-SFT-10 runs with no sheet.
+- **REQ-SFT-11: Unsaved data on a local pick** `[Withdrawn — Helder 2026-11-11]`. The discard
+  `dx:BottomSheet` ("Open '<title>'? What you entered here will be discarded.") is removed: the 2026-11-11
+  device test showed it never appeared, and Helder chose to drop it. A local pick ALWAYS runs REQ-SFT-10
+  with no sheet, whatever the other fields hold (their input is replaced by the opened song). The
+  `DiscardSheetTitle` follow-up is void.
 - **REQ-SFT-12: New Deezer pick fills the form.** Given add mode, When the user picks a remote option,
   Then:
   - **Title** = Deezer's `title_short` (the title without its version suffix); if `title_short` is
@@ -212,7 +211,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 ### D. No pick
 
 - **REQ-SFT-15: Typed text is the title.** When the user leaves Title without picking, the typed text
-  stays and is the title. Save applies the existing title rules only (required; ≤ 100 characters,
+  stays and is the title. Save applies the existing title rules only (required; ≤ 100 characters [limit raised to 250 by change 2026-11-11-song-title-limit-raised-from-100-to-250-characters],
   `SongService.ValidateTitleInput`). There is no other handling of unpicked title text.
 
 ### E. Artist
@@ -408,7 +407,7 @@ API-edit-tracking machinery (`HasManualEdits`, merge sheet) and both picker page
 
 | Field | Rule | Source (unchanged unless noted) |
 |-------|------|------|
-| Title | required; ≤ 100 chars after trim | `SongService.ValidateTitleInput` |
+| Title | required; ≤ 100 chars after trim (→ 250, see change 2026-11-11-song-title-limit-raised-from-100-to-250-characters) | `SongService.ValidateTitleInput` |
 | Version | optional; ≤ 60; required for "Save as new version"; a Deezer pick fills it (REQ-SFT-12) | `SongService.ValidateVersionInput` |
 | Artist | required; typed name ≤ 60, non-empty after trim, no collated duplicate when created | `IArtistService` |
 | Song identity | unique `(ArtistId, Title, Version)` collated, on create **and** update | DB index + REQ-SFT-29 (update: changed) |
@@ -538,12 +537,14 @@ sixth round; Q9 (YouTube search out of scope, fifth round); Q12 (the "In your li
 the option supporting text, and "Online search unavailable" is the Field's `SupportingText`; no
 non-selectable row — the text itself was replaced by the two Q7 notes on 2026-11-04, REQ-SFT-06).
 
-## Traceability seed (filled at implementation)
+## Traceability (closed 2026-11-11)
+
+> Filled during implementation (rows below) and reconciled at close-out. REQ-SFT-11 was withdrawn on 2026-11-11 (task 5.8): no implementation, no test. The `ArtistFormPage` Name field (former task 6.3) moved to `changes/2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3/`; the page-level part of REQ-SFT-47…50 is traced there. Task-log matrices per task hold the test method names.
 
 | AC | Implementation location | Test |
 |----|-------------------------|------|
 | REQ-SFT-02…09 | `SongSuggestionService.SearchTitleLocalAsync`/`SearchTitleRemoteAsync`, `SongRepository.SearchTitleCandidatesAsync`, `SongFormViewModel.TitleOptionSource` | `SongSuggestionServiceTests` (A), `SongRepositorySearchTests` (B, real SQLite), VM tests |
-| REQ-SFT-10…14 | `SongFormViewModel` pick handlers | `SongFormViewModelTests` (A) |
+| REQ-SFT-10, 12…14 (11 withdrawn) | `SongFormViewModel` pick handlers | `SongFormViewModelTests` (A) |
 | REQ-SFT-15…21, 25, 28, 51 | `SongService.SaveFromFormAsync` (rules), `SongService` create/update (writes), `SongFormViewModel` (outcome → sheet mapping) | `SongServiceSaveFromFormTests` (A), UoW integration (A), VM mapping (A) |
 | REQ-SFT-19 (retrieval) | `ArtistRepository.SearchNameCandidatesAsync`, `ArtistResolutionService` | repo test (B, migrated SQLite: "Metalica" → "Metallica") + service (A) |
 | REQ-SFT-22…24, 42 | `SongResolutionService.ResolveAsync`, `SongRepository.FindIdByTitleVersionForArtistAsync` | `SongResolutionServiceTests` (A), repo test (B) |

@@ -9,6 +9,7 @@
     xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
     xmlns:dtoList="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:resolution="clr-namespace:MyVocaList.Domain.Resolution;assembly=MyVocaList.Domain"
+    xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
     x:Class="MyVocaList.UI.Pages.Songs.SongFormPage"
     x:DataType="vm:SongFormViewModel"
     Title="{Binding PageTitle}"
@@ -25,73 +26,22 @@
         <ScrollView>
             <VerticalStackLayout Padding="24" Spacing="16">
 
-                <dxe:AutoCompleteEdit x:Name="artistEdit"
-                                      LabelText="Artist"
-                                      PlaceholderText="Search artists..."
-                                      Text="{Binding ArtistSearchText, Mode=TwoWay}"
-                                      DisplayMember="Headline"
-                                      HasError="{Binding ArtistHasError}"
-                                      ErrorText="{Binding ArtistErrorText}"
-                                      IsDropDownOpen="{Binding IsArtistDropDownOpen, Mode=TwoWay}"
-                                      ClearIconVisibility="Auto"
-                                      SelectionChanged="OnArtistSelectionChanged"
-                                      Unfocused="OnArtistUnfocused"
-                                      ClearIconClicked="OnArtistClearIconClicked">
-                    <dxe:AutoCompleteEdit.ItemsSourceProvider>
-                        <dxe:AsyncItemsSourceProvider RequestDelay="300"
-                                                      CharacterCountThreshold="1"
-                                                      ItemsRequested="OnArtistItemsRequested" />
-                    </dxe:AutoCompleteEdit.ItemsSourceProvider>
-                    <dxe:AutoCompleteEdit.ItemTemplate>
-                        <DataTemplate x:DataType="models:AutocompleteSuggestion">
-                            <VerticalStackLayout>
-                                <BoxView Style="{StaticResource Divider}"
-                                         IsVisible="{Binding IsCreateNew}" />
-                                <HorizontalStackLayout Padding="16,8" Spacing="8">
-                                    <Label Text="➕"
-                                           StyleClass="Body.Large"
-                                           TextColor="{StaticResource Primary}"
-                                           VerticalOptions="Center"
-                                           IsVisible="{Binding IsCreateNew}" />
-                                    <VerticalStackLayout>
-                                        <Label StyleClass="Body.Large"
-                                               IsVisible="{Binding IsCreateNew}">
-                                            <Label.FormattedText>
-                                                <FormattedString>
-                                                    <Span Text="Add &quot;" />
-                                                    <Span Text="{Binding Headline}" />
-                                                    <Span Text="&quot; as a new artist" />
-                                                </FormattedString>
-                                            </Label.FormattedText>
-                                        </Label>
-                                        <Label Text="{Binding Headline}"
-                                               StyleClass="Body.Large"
-                                               IsVisible="{Binding IsCreateNew, Converter={StaticResource InverseBoolConverter}}" />
-                                        <Label Text="{Binding SupportingText}"
-                                               StyleClass="Body.Medium"
-                                               TextColor="{StaticResource OnSurfaceVariant}"
-                                               IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
-                                    </VerticalStackLayout>
-                                </HorizontalStackLayout>
-                            </VerticalStackLayout>
-                        </DataTemplate>
-                    </dxe:AutoCompleteEdit.ItemTemplate>
-                </dxe:AutoCompleteEdit>
-
-                <!-- BUG-064: removed the separate error Label added for BUG-057 — the DX editor's
-                     own HasError/ErrorText (bound above, lines 33-34) now surfaces the message
-                     on-device, so the standalone Label duplicated the exact same text underneath it.
-                     ArtistErrorText/ArtistHasError stay in the ViewModel; the control's bindings are
-                     the sole remaining consumer. -->
-
-                <dxe:TextEdit x:Name="titleEdit"
-                              Text="{Binding SongTitle, Mode=TwoWay}"
-                              LabelText="Title"
-                              PlaceholderText="Enter song title"
-                              MaxCharacterCount="250"
-                              HasError="{Binding TitleHasError}"
-                              ErrorText="{Binding TitleErrorText}"
-                              Unfocused="OnTitleUnfocused" />
+                <!-- Title is the first field (REQ-SFT-01). Add mode: the search box over local songs and
+                     Deezer (REQ-SFT-02). Edit mode: plain editable text for every song (IsSearchEnabled
+                     false, REQ-SFT-27). Blur validation runs ValidateTitle (the VM's first check). -->
+                <textfields:AutocompleteDXField x:Name="titleField"
+                                                LabelText="Title"
+                                                PlaceholderText="Enter song title"
+                                                Text="{Binding SongTitle, Mode=TwoWay}"
+                                                IsLocked="{Binding IsTitleLocked, Mode=TwoWay}"
+                                                IsSearchEnabled="{Binding IsTitleSearchEnabled}"
+                                                SupportingText="{Binding TitleSupportingText}"
+                                                HasError="{Binding TitleHasError}"
+                                                ErrorText="{Binding TitleErrorText}"
+                                                OptionSource="{Binding TitleOptionSource}"
+                                                SelectCommand="{Binding SelectTitleCommand}"
+                                                ClearCommand="{Binding ClearTitleCommand}"
+                                                BlurWithoutPickCommand="{Binding ValidateTitleCommand}" />
 
                 <Label Text="{Binding CharacterCounterText}"
                        IsVisible="{Binding ShowCharacterCounter}"
@@ -110,6 +60,20 @@
                         </DataTrigger>
                     </Label.Triggers>
                 </Label>
+
+                <!-- Artist (REQ-SFT-01): local artists only (REQ-SFT-16). Locked in edit mode (REQ-SFT-28).
+                     A pick or create-on-Save is decided by the VM and the Service, never by the field. -->
+                <textfields:AutocompleteDXField x:Name="artistField"
+                                                LabelText="Artist"
+                                                PlaceholderText="Search artists..."
+                                                Text="{Binding ArtistSearchText, Mode=TwoWay}"
+                                                IsLocked="{Binding IsArtistLocked, Mode=TwoWay}"
+                                                HasError="{Binding ArtistHasError}"
+                                                ErrorText="{Binding ArtistErrorText}"
+                                                OptionSource="{Binding ArtistOptionSource}"
+                                                SelectCommand="{Binding SelectArtistCommand}"
+                                                ClearCommand="{Binding ClearArtistCommand}"
+                                                BlurWithoutPickCommand="{Binding ArtistBlurredWithoutSelectionCommand}" />
 
                 <!-- Version field (Task 4.5 — empty = canonical version) -->
                 <dxe:TextEdit Text="{Binding SongVersion, Mode=TwoWay}"

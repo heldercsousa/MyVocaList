@@ -342,6 +342,24 @@ public class SongSuggestionServiceTests
     }
 
     [Fact]
+    public async Task SearchTitleRemoteAsync_DedupeLookupThrows_StatusUnavailable_LogsWarning_DoesNotThrow()
+    {
+        // [AC] REQ-SFT-06: any failure after the Deezer fetch (library dedupe) degrades to Unavailable + Warning, never an exception
+        SetupDeezer(new MusicSearchResultDto("1", "Deezer", "Niska", "Commando", null, ""));
+        _songRepoMock
+            .Setup(r => r.FindByExternalIdsAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<string>>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("collation failure"));
+        var sut = CreateSut();
+
+        var result = await sut.SearchTitleRemoteAsync("commando", []);
+
+        Assert.Equal(RemoteSearchStatus.Unavailable, result.Status);
+        Assert.Empty(result.Remote);
+        Assert.Empty(result.Promoted);
+        VerifyLog(LogLevel.Warning, Times.AtLeastOnce());
+    }
+
+    [Fact]
     public async Task SearchTitleRemoteAsync_ProviderSlowerThanBound_StatusUnavailable()
     {
         // [AC] REQ-SFT-08: a call not complete within the bound (3,000 ms) ends as Unavailable

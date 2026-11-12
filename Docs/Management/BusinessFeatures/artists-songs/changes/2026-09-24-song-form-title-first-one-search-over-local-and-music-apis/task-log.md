@@ -2462,3 +2462,121 @@ Files written and re-read: `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs` (li
 - **Registered separately (not SFT scope):** song list shows artist + version + featured artists; post-MVP: group songs by artist, similar records in autocomplete results, AI intent matching for mistyped titles. Changes folder: `BusinessFeatures/artists-songs/changes/2026-11-09-*`.
 - **Flakes:** `SongServiceReadScopeTests.GetSongByIdAsync_ExistingSong_ReturnsSong` and `SongRepositoryArtistTrigramTests…TypoInFirstWord…` each failed once under the pre-commit hook and pass alone; track with BUG-076. Details in the artists-songs `task-log.md` § Cleanup — closed.
 - **Still open with Helder (from the older list):** (a) `orchestrator.md:563` "Default to Sonnet" wording; (b) verifier/critic dispatches pass no `model` override; (c) `sln-ledger.md` frontmatter `model: haiku`; (d) `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` name check. Re-check each before acting, they may be closed already.
+
+## 5.5
+
+**Status:** To Review (on-device gate pending: Helder)
+**Worktree:** `agent-ae30a6ef9c3387d12` (branch `task/sft-5.5-song-form-fields`, base develop `e4ad0d52`)
+**Started/Completed:** 2026-11-11
+
+Scope: UI only (Files owned: `SongFormPage.xaml`, `SongFormPage.xaml.cs`). `AutocompleteDXField.xaml`, its `.xaml.cs` and `AutocompleteDXFieldLogic.cs` are untouched (governed component). DX docked menu as-is (ruling e4ad0d52): no full-screen search, no add-new row. Order: XAML → build (expected code-behind errors only) → code-behind → build.
+
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` — Title is the first `textfields:AutocompleteDXField` (`IsSearchEnabled`, `SupportingText`, `IsLocked`, option/select/clear commands, `BlurWithoutPickCommand="{Binding ValidateTitleCommand}"`); the title counter sits under it; Artist is an `AutocompleteDXField` (local options, `IsLocked`, `BlurWithoutPickCommand`) after the counter; the Artist `dxe:AutoCompleteEdit` (with its create-row template and `AsyncItemsSourceProvider`) and the `dxe:TextEdit` Title are removed; `xmlns:textfields` added; `SafeAreaEdges="All"` kept.
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` — removed `OnArtistItemsRequested`, `OnArtistSelectionChanged`, `OnArtistUnfocused`, `OnArtistClearIconClicked`, `OnTitleUnfocused` and the `artistEdit.SelectedItem` use; `OnAppearing` focuses `titleField.FocusEditor()`; `using DevExpress.Maui.Editors;` and `using MyVocaList.Contracts.Models;` dropped (no longer used).
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/tasks.md` — 5.5 ticked, implementation notes below.
+- this file.
+
+### Implementation decisions (spec-level, see tasks.md 5.5 note)
+- **Title blur validation:** `AutocompleteDXField` has no generic blur event; it forwards blur to `BlurWithoutPickCommand` only in Editable mode without a pick (`AutocompleteDXFieldLogic.ShouldForwardBlur`). Bound to the existing `ValidateTitleCommand`, which keeps the VM's first-check-on-blur behaviour with no VM change. In edit mode (IsSearchEnabled false, Editable) the blur still forwards, so edit-mode title validation runs too.
+- **Title length:** `MaxCharacterCount="250"` dropped (the field exposes no such property). The rule is `SongService.ValidateTitleInput` (max 100, `MaxTitleLength`) plus the counter. Before: a 250-character hard keystroke cap; now: no hard cap, the error shows on blur, on Save, and while in error. Flagged for review.
+- **Artist drop-down:** `IsDropDownOpen` is not bound. The field closes its own menu when locked or read-only (`ApplyMode`), so `IsArtistDropDownOpen` is no longer read by the page (VM member left in place; dead-member cleanup belongs to a later VM task).
+- **Edit-mode artist lock (REQ-SFT-28):** the VM hydrates `IsArtistLocked = true` (`SongFormViewModel.cs:615`); the field's `IsLocked` binding renders it read-only, X unlocks, as for any pick.
+- The BUG-064 comment (artist error label) was removed with the artist `AutoCompleteEdit` it described.
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|----------------|-------------|
+| REQ-SFT-01 | Field order Title, Artist, Version, Featured, Lyrics, YouTube | `SongFormPage.xaml` (order of elements) | Build + XAML re-read; device gate (demo) |
+| REQ-SFT-02 | Title is the search box in add mode | `titleField` `IsSearchEnabled="{Binding IsTitleSearchEnabled}"` | VM tests (`IsTitleSearchEnabled`, 5.4); device gate |
+| REQ-SFT-27 | Edit mode: Title is editable text for every song, no search menu | `titleField` `IsSearchEnabled` false in edit mode; `IsLocked` not set in edit mode | VM tests (5.4: no read-only, `IsTitleSearchEnabled` false); device gate |
+| REQ-SFT-16 | Artist options local only | `artistField` `OptionSource="{Binding ArtistOptionSource}"` (5.2 VM) | VM tests (5.2); device gate |
+| REQ-SFT-28 | Edit-mode artist loads locked | `artistField` `IsLocked="{Binding IsArtistLocked}"` (VM hydration) | VM hydration test (`LoadSongForEdit_*_LocksArtistField`, 3.2b/5.1); device gate |
+| REQ-ACF-11 | No Song autocomplete glue in code-behind or XAML | census (plan Step 5) → PASS | census below |
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` (after XAML edit): 5 errors, all `SongFormPage.xaml.cs` (`titleEdit`/`artistEdit` not in context): expected per D17.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1` (after code-behind edit): `ok dotnet build: 6 projects, 0 errors, 27 warnings` (warnings = pre-existing NU1902/NU1903 advisories).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj -m:1`: `Aprovado! – Com falha: 0, Aprovado: 953, Ignorado: 0, Total: 953`. Neither known BUG-076 flake fired, so no isolated rerun was needed.
+- REQ-ACF-11 census (plan Step 5, Python): `PASS`.
+- `SafeAreaEdges="All"` still declared (SongFormPage.xaml:17). Native dialog census (`DisplayAlert|DisplayActionSheet|DisplayPromptAsync`) in the two files: 0 hits.
+- Files written and re-read: `SongFormPage.xaml` (lines 1-130 re-read after the Title and Artist edits), `SongFormPage.xaml.cs` (lines 1-55 re-read after the rewrite).
+- **Not verified:** E2E emulator gate (plan Step 6) and the on-device demo are Helder's device gate. No device verification is claimed here.
+
+### Notes for review
+- Blur-as-validation via `BlurWithoutPickCommand` reuses a command whose name says "without pick" for the Title; the field offers no other blur hook. Acceptable, flagged.
+- The title length cap change (above) is the only user-visible behaviour change beyond the spec's layout.
+
+---
+
+## Task: 5.5 device retest — Title field shows no Deezer menu and no note (debugging)
+**Status:** To Review (root cause NOT confirmed; hardening + diagnostics only)
+**Started/Completed:** 2026-11-11
+
+### Evidence
+- Real-stack tests (`MyVocaList.Tests/Integration/Services/SongSuggestionTitleSearchRealStackTests.cs`): real `DeezerProvider` over a fake handler serving the device payload shape (unicode escape, `title_version`, extra fields), production DI composition, real temp-file SQLite, empty and populated library, and `SongFormViewModel.TitleOptionSource` through the same stack. All three PASS on Windows: Deezer rows parse, dedupe lookups run, 3 options returned, no note. Hypothesis 2 (JSON parsing) is refuted; hypothesis 1 (dedupe exception) is not reproduced with a healthy repository.
+- Confirmed latent defect (new unit test, failed before / passes after): any exception in the dedupe or artist-resolution stage of `SearchTitleRemoteAsync` (and a throwing `INetworkStatus`) escapes unguarded, is swallowed by the fire-and-forget `AutocompleteDXField.RunSearchAsync`, and yields exactly the reported symptom: no menu and no note (the note is only set after the call returns). Not proven to be the device cause.
+- Fix (non-governed code): `SongSuggestionService.SearchTitleRemoteAsync` now degrades to `Unavailable` with a Warning log on any non-cancellation failure; an Information log records raw/promoted/remote counts per query.
+
+### Changed files:
+- `Services/SongSuggestionService.cs`
+- `MyVocaList.Tests/Unit/Services/SongSuggestionServiceTests.cs`
+- `MyVocaList.Tests/Integration/Services/SongSuggestionTitleSearchRealStackTests.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/task-log.md`
+
+### Device retest reading guide
+After the retest: note "Online search isn't available..." appears => the exception is now surfaced; logcat Warning `Remote title search failed for query` carries the cause. No note and no menu => the remote path returned Ok with zero options (check Information line `Remote title search ... N from Deezer`) or the request never completed.
+
+### Build notes
+Build: passed (0 errors) | Tests: 957 passed, 0 failed (one transient SQLite EnsureCreated failure seen once in the new integration test under parallel run; 3 later full runs green)
+
+## 5.6
+
+**Status:** To Review (on-device gate pending: Helder)
+**Worktree:** `agent-ad879706306c7edc1` (branch `task/sft-5.6-song-form-sheets`, base develop `0415c2d9`)
+**Completed:** 2026-11-11
+
+Scope: the artist-match sheet and the resolution sheet already existed on develop (5.3, BUG-084). The only missing sheet was the discard sheet (REQ-SFT-11); 5.6 adds it. The three sheets are `dx:BottomSheet`; no native dialogs.
+
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` - new `discardSheet` (Open -> `ConfirmOpenExistingCommand`, Keep editing -> `KeepEditingCommand`).
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs` - `IsDiscardSheetVisible` -> Show/Close sync (same guard pattern as the other sheets) and `OnDiscardSheetStateChanged` (Back/scrim/swipe = `KeepEditingCommand`). Needed: `dx:BottomSheet` has no bindable open property.
+- `Docs/.../changes/2026-09-24-.../tasks.md` - 5.6 ticked + note.
+- this file.
+
+### Spec gap: picked song title missing in discard sheet
+**Location:** requirements.md REQ-SFT-11; SongFormViewModel (no member for the pending song's title).
+**Gap description:** REQ-SFT-11 asks "Open '<title>'? What you entered here will be discarded."; the VM keeps only `_pendingOpenSongId`, so the title cannot be bound.
+**Options:** A: add a VM member (e.g. `DiscardSheetTitle`) in a VM task - exact REQ text. B: keep static text.
+**Recommendation:** A (small VM + test follow-up).
+**Blocking:** No - proceeded with B: heading "Open this song?", body "What you entered here will be discarded."
+
+### AC matrix
+| AC ID | Criterion | Implementation | Test method |
+|-------|-----------|----------------|-------------|
+| REQ-SFT-11 | Discard sheet with Open / Keep editing; Back/scrim = Keep editing | `discardSheet`, `OnDiscardSheetStateChanged`, VM commands (5.2) | VM tests (existing, `SongFormViewModelTests` 524-588); device gate |
+| REQ-SFT-19 | Artist-match sheet, Back saves nothing | existing (5.3/BUG-084) | VM tests; device gate |
+| REQ-SFT-22/23 | Resolution sheet variants, Back saves nothing | existing (5.3/BUG-084) | VM tests; device gate |
+
+### Verification evidence
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -m:1`: 6 projects, 0 errors, 34 warnings.
+- `dotnet test MyVocaList.Tests -m:1`: 957 passed, 0 failed (no flake fired). `SafeAreaEdges="All"` untouched; native dialog census 0 hits.
+- **Not verified:** on-device behaviour (Helder's gate).
+
+## Task: SFT 5.8 — remove discard BottomSheet
+**Status:** To Review (device check pending Helder)
+**Completed:** 2026-11-11 · branch `task/sft-5.8-remove-discard-sheet` · commit `686d5aa3`
+### Changed files:
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs`
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs`
+### AC traceability
+| AC | Criterion | Implementation | Test |
+|---|---|---|---|
+| REQ-SFT-10 | A local pick always opens the edit form | `SongFormViewModel.SelectTitle` | `SelectTitle_LocalOptionNoOtherInput_NavigatesToEditForm`, `SelectTitle_LocalOptionWithOtherInput_StillNavigates`, `ClearTitle_AfterRemotePickThenLocalPick_StillNavigates` |
+| REQ-SFT-11 | Withdrawn 2026-11-11 | Discard sheet and members removed (also dead `_lastTitleQuery`) | Discard tests deleted |
+Build: Android 0 errors · Tests: 953 passed, 0 failed.
+
+## Task: SFT 7.1 + 7.2 — close-out
+**Completed:** 2026-11-11. 7.1: traceability section reconciled (REQ-SFT-11 withdrawn; 6.3 moved to its own change). 7.2: Helder's on-device pass of the Song form build (develop `686d5aa3`): 5.8 checks 1–3 ok; "7.2 keeps working fine" (no itemised per-check results recorded for BUG-084/085, offline and Deezer-artist near-duplicate; open them as bugs if they reproduce). Feature set to ✅; develop merged to main.

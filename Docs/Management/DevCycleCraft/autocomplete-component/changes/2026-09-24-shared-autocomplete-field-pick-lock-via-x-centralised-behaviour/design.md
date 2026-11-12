@@ -1,6 +1,6 @@
 # Design: AutocompleteDXField, the shared autocomplete field (pick-lock via X, centralised behaviour)
 
-> **Status: DRAFT, revised 2026-09-24 after Helder's rulings** (requirements § Helder rulings).
+> **Status: approved by Helder 2026-09-25; shipped and closed 2026-11-11 (T7 run 6 PASS, Rebuild Test 0-1 divergence fixed). Shipped spec: immutable; later changes go in a dated `changes/` folder beside it. Post-approval changes: `spec-changelog.md`.** Rulings: requirements § Helder rulings.
 > Requirements: `requirements.md` (REQ-ACF-*). Every current-behaviour claim cites `file:line` on
 > `develop`. DevExpress version pinned from `Directory.Packages.props`:
 > **DevExpress.Maui.Editors 25.2.4** (central package management). MAUI Controls 10.0.41.

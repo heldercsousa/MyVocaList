@@ -1,7 +1,7 @@
 # Spec changelog: AutocompleteDXField (pick-lock via X, centralised behaviour)
 
-Post-approval changes (spec approved by Helder on 2026-09-25). The spec is not shipped, so each change
-is made in place and listed here.
+Post-approval changes (spec approved by Helder on 2026-09-25). Until close-out each change was made in place and listed
+here. **Shipped and closed 2026-11-11:** the spec is now immutable; later changes go in a dated `changes/` folder.
 
 ## 2026-11-05: T7 run 1 outcome, Q3 reversed
 
@@ -62,3 +62,18 @@ is made in place and listed here.
 - **requirements.md:** REQ-ACF-31 amended (no transient frame, no blink while typing); § Helder rulings — 2026-11-11; traceability row.
 - **design.md:** § 3.1 event-glue rules from T12 (supersede the RC-A guard and the T11 empty-result branch).
 - **tasks.md:** T7 run 5 note and the new T12.
+
+## 2026-11-11: close-out, Rebuild Test divergence
+
+- **Trigger:** Rebuild Test (`task-log.md` § Rebuild test): the fresh agent set `CharacterCountThreshold="1"`, because the
+  spec was silent on DX threshold properties after T12.
+- **design.md:** § 3.1 T12 block states that no DX `CharacterCountThreshold` or `RequestDelay` is set; the minimum length is
+  `ShouldRequestOptions` on the normalised query and the debounce is `RunSearchAsync`'s delay (`b590190d`).
+- **requirements.md / tasks.md:** no change.
+
+## 2026-11-11: Helder ruling, UX scope (after close-out)
+
+- **Ruling:** no full-screen Search View and no no-match add-new row, app-wide; use what DX offers. Song form: no loading
+  indicator while Deezer answers.
+- **requirements.md:** § Helder ruling — 2026-11-11 (after close-out: UX scope) (`e4ad0d52`).
+- **design.md / tasks.md:** no change. Also recorded in `.claude/library/ux-patterns.md` § Autocomplete.

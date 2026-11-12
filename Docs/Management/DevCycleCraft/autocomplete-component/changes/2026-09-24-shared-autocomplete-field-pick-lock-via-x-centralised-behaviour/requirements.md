@@ -1,7 +1,7 @@
 # Requirements: AutocompleteDXField, the shared autocomplete field (pick-lock via X, centralised behaviour)
 
-> **Status: DRAFT, revised 2026-09-24 after Helder's two rounds of rulings** (recorded verbatim in
-> § Helder rulings below). Drafted by a subagent from Helder's on-device requirements in `README.md`
+> **Status: approved by Helder 2026-09-25; shipped and closed 2026-11-11 (T7 run 6 PASS, Rebuild Test 0-1 divergence fixed). Shipped spec: immutable; later changes go in a dated `changes/` folder beside it. Post-approval changes: `spec-changelog.md`.** Rulings are recorded verbatim in
+> § Helder rulings below. Drafted by a subagent from Helder's on-device requirements in `README.md`
 > (same folder).
 >
 > Dated change spec under `autocomplete-component`, per the SDD Invariant. The shipped specs it

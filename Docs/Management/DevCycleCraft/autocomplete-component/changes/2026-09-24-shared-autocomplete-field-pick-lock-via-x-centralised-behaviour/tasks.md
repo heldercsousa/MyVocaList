@@ -345,6 +345,10 @@
   - **Files owned:** `AutocompleteDXField.xaml(.cs)`, its own `## T12` section of `task-log.md`.
   - **Demo:** emulator clean, then T7 run 6 (line 1, plus a regression pass of lines 2-4 and 9). **Review lane:** Elevated
 
+> **Spec updated 2026-11-11: T7 run 6 result.** PASS on all 4 checks (line 1 "aa"/"aaa" no flash; "He"→"Hel" no blink;
+> regression lines 2-4; line 9). T7 gate passed (runs 1-6 cover lines 1-10). Details: `task-log.md` § T7 run 6.
+> Item closed 2026-11-11 after the Rebuild Test.
+
 ## Handed over to the song-form title-first item (not tasks here)
 
 `BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-one-search-over-local-and-music-apis/`
@@ -359,6 +363,9 @@ owns:
 - On-device proof of REQ-ACF-05 (a)–(g) and REQ-ACF-06 on a real locked field.
 
 ## Follow-ups (register separately if Helder wants them)
+
+> **2026-11-11:** both registered as one item, `autocompletedxfield-is-the-app-wide-autocomplete-pattern-whatever-page-uses-it` (Helder: the component is the
+> pattern, whatever page uses it). See `task-log.md` § Close-out bookkeeping.
 
 - A shared constant for the list-search debounce (`CrudListViewModelBase.cs:238`).
 - `ArtistFormPage` duplicate suggestions onto the component (candidate).

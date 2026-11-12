@@ -380,7 +380,7 @@ namespace MyVocaList.Infra.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(100)
+                        .HasMaxLength(250)
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
