@@ -1,7 +1,8 @@
 ---
 id: crud-list-selection-gestures
 title: CRUD list selection gestures
-status: 🟡 In Progress
+status: ✅ Done
+closed: 2026-11
 target: 2026-11-11
 section: DevCycleCraft
 parent: crud-list-deduplication

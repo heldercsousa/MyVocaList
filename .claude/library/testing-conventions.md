@@ -40,7 +40,7 @@ if (await _repo.ExistsByNameAsync(name)) return (false, "Duplicate", null); // t
 ### ViewModel — focus on observable state
 Test what the ViewModel exposes to the view, not how it calls services internally:
 - `[ObservableProperty]` values after commands run
-- Derived `bool` properties (`CanEditSelected`, `IsEmptyNoVenues`, `IsAllSelected`)
+- Derived `bool` properties (`CanDeleteSelected`, `IsEmptyNoVenues`, `IsAllSelected`)
 - `AppBarTitle` string derived from `SelectedCount`
 
 ### Repository — always test the query, not just CRUD
