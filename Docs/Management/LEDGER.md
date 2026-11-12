@@ -10,7 +10,6 @@
 
 | ID | Feature / Bug | Phase / Step | Branch | Worktree | Status | Last commit | Next action |
 |----|---------------|--------------|--------|----------|--------|-------------|-------------|
-| SFT | Song form title-first — one search over local + music APIs | 6.3 + 7.x pending; merged through 5.8 (discard sheet removed) + title limit 250, 2026-11-11 (953/953) | develop (docs) | — | 🟡 in progress | 686d5aa3 | 250 limit + sheets device-checked; 5.8 needs a quick device check; 6.3 held (ownership vs ACF item). Detail: `BusinessFeatures/artists-songs/changes/2026-09-24-song-form-title-first-…/task-log.md` § Ledger detail |
 | ITF | Inline Trivial Fix lane — bounded orchestrator inline-edit exception | merged; 38/38 green; one gate left | develop | — | merged | a4c198a | Helder observes the FIRST live ITF fix end-to-end; decide on 4 misbased `agent-*` worktrees. Detail: `DevCycleCraft/inline-trivial-fix/handoff.md` + task-log § Ledger detail |
 | SC-ENH | Session Continuity enhancements (Phase 8, Tasks 11–15) | complete, verifier PASS | develop (tooling + docs) | — | to review | 68e1852 | Helder runs the two-terminal live demo; optionally directs the 4 leftover agent worktrees. Detail: `DevCycleCraft/session-continuity-leasing/task-log.md` § Ledger detail |
 | CATALOG-PROP | Song writes propagate to the artist catalog | 📋 spec; D1–D4 closed, `requirements.md`/`design.md` not yet written | — | — | deferred (spec after SFT) | e91947f6 | Write spec from D1–D4, then spec-reviewer + Helder gate. Do not dispatch while an `sft-*` branch owns `SongService`/Migrations. Detail: `BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-…/README.md` § Ledger detail |
@@ -21,6 +20,7 @@ Closed rows from earlier months: `LEDGER-archive.md`. SFT merge detail: the SFT 
 
 | ID | Feature / Bug | Branch | Merged into develop | Commit |
 |----|---------------|--------|---------------------|--------|
+| SFT | Song form title-first (5.5, 5.6, 5.8, title 250; 6.3 moved out) | task/sft-5.5…5.8, task/title-limit-250 | 2026-11-11 | 686d5aa3 |
 | AC-FIELD | Shared autocomplete field: pick-lock via X, centralised behaviour | develop (T2–T12 merged; T3-C cancelled) | 2026-11-11 closed; T7 run 6 PASS, Rebuild Test 0-1; develop 953/953. Detail: item `task-log.md` § Close-out bookkeeping | 77b408f6 |
 | BID | Build identity — MinVer version + About build details (app-versioning) | develop | 2026-11-10 closed; G3 PASS on S23 (`v0.2.0-alpha.0.4`); follow-ups: release-tag discipline, changelog retirement | 4a839cbe |
 | SFT-CLEAN | cleanup: dead repository member, shared note text, stale comments | `task/sft-cleanup-dead-member-shared-notes` (deleted) | 2026-11-10 merge; Verifier PASS; develop 926/926; one unreproduced flake, see task-log | 357a6813 |
