@@ -1,16 +1,16 @@
 ---
 id: list-item-overflow-menu-button-new-component-opening-the-item-actions-sheet
-title: "List item overflow menu button: new component opening the item actions sheet"
+title: "List item overflow icon button in the ListItem trailing slot, opening the item actions sheet"
 status: 💡 Pending
 target: 2026-11-12
 section: DevCycleCraft
 parent: crud-list-deduplication
-goal: New trailing icon button (MD3 overflow menu) that opens the shared item actions sheet with Edit, Delete and page-specific actions. Shown in browse mode only.
+goal: "An MD3 icon button placed in ListItem TrailingContent by each row template, opening the shared item actions sheet; shown in browse mode only. Not a slot component: a reusable view only if the four row templates would otherwise repeat its command binding."
 gate: Spec and MD3 review approved by Helder.
 kind: change
 ---
 
-# List item overflow menu button: new component opening the item actions sheet
+# List item overflow icon button in the ListItem trailing slot, opening the item actions sheet
 
-New trailing icon button (MD3 overflow menu) that opens the shared item actions sheet with Edit, Delete and page-specific actions. Shown in browse mode only.
+An MD3 icon button placed in ListItem TrailingContent by each row template, opening the shared item actions sheet; shown in browse mode only. Not a slot component: a reusable view only if the four row templates would otherwise repeat its command binding.
 
