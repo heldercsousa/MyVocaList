@@ -59,3 +59,55 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 - `Docs/Management/DevCycleCraft/m3-lists/changes/2026-11-13-listitem-leading-media-placeholder-on-listitemleadingimage-and-new-listitemleadingavatar/README.md`
 - `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-11-13-autocompletedxfield-option-rows-optional-leading-image-or-avatar-and-trailing-text/README.md`
 - `Docs/Management/BACKLOG.md` (generated), `MyVocaList.sln` (registration)
+
+## T1 — ImageUrl on Song and Artist (2026-11-13) — To Review
+
+**Plan:** `plan.md § T1`
+**Status:** To Review
+**Started:** 2026-11-13
+**Completed:** 2026-11-13
+
+### What was done
+- `Song.ImageUrl`, `Artist.ImageUrl` (`string?`), new `Domain/Rules/ImageUrlRules.cs` (`MaxLength = 500`; `Normalize`: trim, null when empty, over 500, or not an absolute https URI).
+- `SongConfiguration` / `ArtistConfiguration`: `ImageUrl` optional, `HasMaxLength(ImageUrlRules.MaxLength)`.
+- Migration `AddImageUrlToSongsAndArtists`: `Up` = two `AddColumn` (nullable TEXT). `Down` = two raw `ALTER TABLE ... DROP COLUMN`.
+
+### Rollback finding and decision
+- The generated `Down` used `DropColumn`. On SQLite, EF rebuilds the table, which failed with `error in trigger SongSearch_artist_au: no such table: main.Songs` because the M3 FTS triggers reference Songs/Artists. This broke `SongMigrationTests.M3_Down_DropsTablesAndTriggers` (existing test, untouched).
+- Decision (orchestrator, under Helder's 2026-11-13 autonomy instruction): native `ALTER TABLE ... DROP COLUMN` in `Down`. No index, trigger or view references `ImageUrl`, so the in-place drop is allowed.
+
+### Deviations
+1. `collation: "NOCASE_NOACCENT"` is on both new columns. The brief said "no collation". `AppDbContext.SetDatabaseCollation` applies it to every string property by convention; accepted, not overridden per column.
+2. `Down` uses raw SQL instead of `DropColumn` (decision above).
+3. `Domain/Rules/` is a new folder.
+
+### Changed files
+- `Domain/Entity/Song.cs`
+- `Domain/Entity/Artist.cs`
+- `Domain/Rules/ImageUrlRules.cs` (new)
+- `Infra/EntityEFConfig/SongConfiguration.cs`
+- `Infra/EntityEFConfig/ArtistConfiguration.cs`
+- `Infra/Migrations/20261113032549_AddImageUrlToSongsAndArtists.cs` (new)
+- `Infra/Migrations/20261113032549_AddImageUrlToSongsAndArtists.Designer.cs` (new)
+- `Infra/Migrations/AppDbContextModelSnapshot.cs`
+- `MyVocaList.Tests/Unit/Domain/ImageUrlRulesTests.cs` (new)
+- `MyVocaList.Tests/Integration/Migrations/ImageUrlMigrationTests.cs` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results/task-log.md`
+
+### Verification
+- Red, unit: `ImageUrlRulesTests` with a stub `Normalize` (returns input): 8 failed, 4 passed (assertion failures).
+- Red, migration: `ImageUrlMigrationTests` with properties but no migration: `PendingModelChangesWarning` (column missing).
+- Red, rollback: `ImageUrl_RollbackToBeforeMigration_DropsColumnsKeepsTriggersAndRows` against the `DropColumn` Down: `error in trigger SongSearch_artist_au: no such table: main.Songs`.
+- Green: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → 984 passed, 0 failed, 0 skipped (baseline 967; +12 rules, +5 migration).
+- `M3_Down_DropsTablesAndTriggers` passes unedited with the native Down.
+
+### AC traceability
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-ART-03 | Only absolute https URLs ≤ 500 chars kept; trimmed; others null | `ImageUrlRules.Normalize`, `MaxLength` | `Normalize_HttpsUrl_IsKept`, `Normalize_HttpsUrlWithSurroundingSpaces_IsTrimmed`, `Normalize_NotAnHttpsUrl_ReturnsNull` (theory), `Normalize_UrlOfExactlyMaxLength_IsKept`, `Normalize_UrlOverMaxLength_ReturnsNull`, `MaxLength_Is500` |
+| REQ-ART-05 | Nullable `ImageUrl` on Song and Artist, URL only | entities, configs, migration `Up` | `ImageUrl_ColumnsExistOnSongsAndArtists`, `ImageUrl_ColumnsAreNullableText`, `ImageUrl_SongAndArtistSavedWithoutValue_ReadBackNull`, `ImageUrl_ValueRoundTripsOnSongAndArtist` |
+| REQ-ART-05 | Rollback drops columns, keeps triggers and rows | migration `Down` | `ImageUrl_RollbackToBeforeMigration_DropsColumnsKeepsTriggersAndRows` |
+
+### Notes for T2 / T5
+- `using MyVocaList.Domain.Rules;` is needed where `ImageUrlRules` is used (no global using added).
+- Migration `Down` is a raw statement; any future migration that rebuilds `Songs`/`Artists` on SQLite will hit the same FTS trigger issue.
