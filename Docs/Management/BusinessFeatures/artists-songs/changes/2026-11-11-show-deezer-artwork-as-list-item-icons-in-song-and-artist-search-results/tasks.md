@@ -11,7 +11,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 
 ## Phase 1 — Domain and Infra
 - [x] T1 `ImageUrl` on `Song` and `Artist`, `ImageUrlRules`, EF configuration, migration `AddImageUrlToSongsAndArtists`. (REQ-ART-03, 05)
-- [ ] T2 Read models and projections: `SongListItemDto` (+`Version`, `ImageUrl`, `SupportingText`), `SongSearchHit`, `ArtistListItem`; `SongRepository`, `CatalogRepository`, `ArtistRepository`. Depends on T1. (REQ-ART-06, 10, 19, 20)
+- [x] T2 Read models and projections: `SongListItemDto` (+`Version`, `ImageUrl`, `SupportingText`), `SongSearchHit`, `ArtistListItem`; `SongRepository`, `CatalogRepository`, `ArtistRepository`. Depends on T1. (REQ-ART-06, 10, 19, 20)
 
 ## Phase 2 — Services
 - [ ] T3 `DeezerProvider` + `MusicSearchResultDto`: map images and album. Depends on T1. (REQ-ART-01, 02, 03, 04)
