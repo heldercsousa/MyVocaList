@@ -99,7 +99,11 @@ ArtistRepository ──► ArtistListItem (+ImageUrl, real CatalogCount in searc
 ### 3.2 Infra
 
 - `SongConfiguration` / `ArtistConfiguration`: `ImageUrl` optional, `HasMaxLength(ImageUrlRules.MaxLength)`.
-  No index, no collation (never searched).
+  No index (never searched).
+  > **Updated 2026-11-13 (T1):** the columns carry the `NOCASE_NOACCENT` collation, because
+  > `AppDbContext` applies it to every string property by convention. Accepted: nothing searches them.
+  > The migration `Down` uses the native `ALTER TABLE ... DROP COLUMN` (EF's `DropColumn` rebuilds the
+  > table on SQLite, which the search triggers block).
 - Migration `AddImageUrlToSongsAndArtists`: two nullable TEXT columns. The FTS tables and triggers of
   `AddSearchIndexes` are not touched (they index title and name only).
 - Projections (single SQL statement each, no per-row query):
