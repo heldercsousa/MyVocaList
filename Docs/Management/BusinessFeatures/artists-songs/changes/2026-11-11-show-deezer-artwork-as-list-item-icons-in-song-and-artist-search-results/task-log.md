@@ -10,10 +10,10 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 (D1…D17). The device check (T11) is his.
 
 ### Checkpoint
-- **Phase:** T2 done, `To Review` (see `## T2`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
-- **Last build/test:** `dotnet test` → 1005 passed, 0 failed; Android build 0 errors.
-- **Next:** commit T2 (no push) → orchestrator review; then T3 (Deezer provider).
-- **Context manifest:** `plan.md § T2`, `requirements.md` (REQ-ART-06/10/19/20), `design.md § 3.1–3.3`, `Contracts/DTOs/List/SongListItemDto.cs`, `Domain/ReadModels/SongSearchHit.cs`, `Domain/ReadModels/ArtistListItem.cs`, `Infra/Repository/SongRepository.cs`, `Infra/Repository/CatalogRepository.cs`, `Infra/Repository/ArtistRepository.cs` (all under the worktree root).
+- **Phase:** T3 `To Review` (see `## T3`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
+- **Last build/test:** `dotnet test` → 1018 passed, 0 failed.
+- **Next:** commit T3 (no push) → orchestrator review; then T4 (suggestion services).
+- **Context manifest:** `plan.md § T4`, `design.md § 3.4`, `Contracts/DTOs/MusicSearchResultDto.cs`, `Services/DeezerProvider.cs` (all under the worktree root).
 
 ## T0 — Evaluation and spec (2026-11-13) — Done
 
@@ -177,3 +177,64 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 - T4: `ArtistListItem.ImageUrl` is filled by `SearchByNameAsync`, so the Artist suggestion local mapping can copy it (REQ-ART-24 says local stays null until the Artist form item; the decision is for T4 to apply).
 - T8/T9: `SongListItemDto.SupportingText` already implements REQ-ART-20; the Songs list template can bind it directly. `ImageUrl` is the row image (song else artist), so no fallback logic is needed in XAML.
 - `ArtistListItem.CatalogCountText` now reads real counts in search results.
+
+## T3 — Deezer provider maps images and album (2026-11-13) — To Review
+
+**Plan:** `plan.md § T3`
+**Status:** To Review
+**Started:** 2026-11-13
+**Completed:** 2026-11-13
+
+### Changed files
+- `Contracts/DTOs/MusicSearchResultDto.cs` (trailing optional `ImageUrl`, `ArtistImageUrl`, `AlbumTitle`)
+- `Services/DeezerProvider.cs` (private records gain `album`, `artist.picture_medium`, artist `picture_medium`; `ImageUrlRules.Normalize` on each URL; `NormaliseAlbumTitle` trims and nulls blanks)
+- `MyVocaList.Tests/Unit/Services/DeezerProviderImageTests.cs` (new, 13 tests, own JSON builder and stub handler)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results/task-log.md`
+
+`DeezerProviderTests.cs` is not edited. No new HTTP request is made.
+
+### Verification
+- **Red 1 (compile):** new test file against the unchanged DTO: `CS1061 'MusicSearchResultDto' does not contain a definition for 'ImageUrl'`.
+- **Red 2 (assertions):** after the DTO change and before the mapping: 6 failed, 7 passed. The 6 failures were the value assertions (cover, artist picture, album title, http cover, empty cover). The 7 passing tests assert null outcomes or request counts, which the unmapped code already satisfies. They are regression guards, not new behaviour.
+- One Red-phase failure came from my own test input (a track with no artist object gave an empty `ArtistName`). I corrected the test input before the mapping; the assertion was not changed.
+- **Green:** `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → 1018 passed, 0 failed, 0 skipped (1005 baseline + 13 new). Build 0 errors.
+- Android build not run: no MAUI head project touched.
+
+### AC traceability
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-ART-01 | Track carries cover, artist picture and album title | `DeezerProvider.SearchSongsAsync` | `DeezerProviderImageTests`: `SearchSongsAsync_TrackWithAlbumAndArtistPicture_MapsCoverArtistPictureAndAlbumTitle`, `SearchSongsAsync_AlbumTitleSurroundedBySpaces_IsTrimmed` |
+| REQ-ART-01 | Missing album, album title, or null fields give null, search succeeds | nullable records, `?.` | `SearchSongsAsync_NoAlbumTitle_AlbumTitleIsNullAndSearchSucceeds` (3 cases), `SearchSongsAsync_NoAlbumObjectNoArtistPicture_ImagesAreNullAndSearchSucceeds`, `SearchSongsAsync_NullAlbumAndNullArtistPicture_ImagesAreNullAndSearchSucceeds` |
+| REQ-ART-02 | Artist result carries `picture_medium` | `DeezerProvider.SearchArtistsAsync` | `SearchArtistsAsync_MapsPictureMediumAsImageUrl`, `SearchArtistsAsync_NoPictureMedium_ImageUrlIsNull` |
+| REQ-ART-03 | Non-https or empty cover is no image; blank album title is null | `ImageUrlRules.Normalize`, `NormaliseAlbumTitle` | `SearchSongsAsync_EmptyCoverAndBlankAlbumTitle_ImageNullAndAlbumTitleNull`, `SearchSongsAsync_HttpCover_IsDroppedAsNoImage` |
+| REQ-ART-04 | One request per search | unchanged request path | `SearchSongsAsync_OneSearch_MakesExactlyOneRequest`, `SearchArtistsAsync_OneSearch_MakesExactlyOneRequest` |
+
+Every test's first line carries its `// [AC]` line. Coverage stays at the provider boundary.
+
+### Private JSON records (verbatim)
+```csharp
+private record DeezerArtist(
+    [property: JsonPropertyName("id")] long Id,
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("picture_medium")] string? PictureMedium);
+private record DeezerTrack(
+    [property: JsonPropertyName("id")] long Id,
+    [property: JsonPropertyName("title")] string Title,
+    [property: JsonPropertyName("title_short")] string? TitleShort,
+    [property: JsonPropertyName("title_version")] string? TitleVersion,
+    [property: JsonPropertyName("artist")] DeezerTrackArtist? Artist,
+    [property: JsonPropertyName("album")] DeezerTrackAlbum? Album);
+private record DeezerTrackArtist(
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("picture_medium")] string? PictureMedium);
+private record DeezerTrackAlbum(
+    [property: JsonPropertyName("title")] string? Title,
+    [property: JsonPropertyName("cover_medium")] string? CoverMedium);
+```
+
+### Design concern
+None. Implementation decision (not in design.md): a whitespace-only album title maps to null (`design.md § 3.4` says "null when empty"). This is the trimmed-empty reading; no spec change made.
+
+### Build notes
+Build: passed (0 errors) | Tests: 1018 passed, 0 failed | Commit SHA: (see commit)
+Files written and re-read: `Contracts/DTOs/MusicSearchResultDto.cs`, `Services/DeezerProvider.cs` (both sections), `MyVocaList.Tests/Unit/Services/DeezerProviderImageTests.cs` (test fixed after first Red; re-read the artist-field change)
