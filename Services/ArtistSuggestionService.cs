@@ -107,7 +107,7 @@ public class ArtistSuggestionService : IArtistSuggestionService
         var remote = rows
             .Where(r => !existing.Contains(r.ArtistName))
             .Take(SearchConstants.MaxSearchResults)
-            .Select(r => new ArtistSuggestionDto(null, r.ArtistName, r.ExternalId, r.Provider, true))
+            .Select(r => new ArtistSuggestionDto(null, r.ArtistName, r.ExternalId, r.Provider, true, r.ImageUrl))
             .ToList();
         return new ArtistRemoteSearchResult(remote, RemoteSearchStatus.Ok);
     }

@@ -48,10 +48,10 @@
         <views:CrudListView.ItemTemplate>
             <DataTemplate x:DataType="dto:SongListItemDto">
                 <lists:ListItem Headline="{Binding Title}"
-                                SupportingText="{Binding FeaturedArtists}"
+                                SupportingText="{Binding SupportingText}"
                                 IsSelected="False">
                     <lists:ListItem.LeadingContent>
-                        <lists:ListItemLeadingIcon Icon="music_note_outlined" />
+                        <lists:ListItemLeadingImage ImageSource="{Binding ImageUrl}" PlaceholderIcon="music_note_outlined" Margin="0,8" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
@@ -69,10 +69,10 @@
         <views:CrudListView.SelectedItemTemplate>
             <DataTemplate x:DataType="dto:SongListItemDto">
                 <lists:ListItem Headline="{Binding Title}"
-                                SupportingText="{Binding FeaturedArtists}"
+                                SupportingText="{Binding SupportingText}"
                                 IsSelected="True">
                     <lists:ListItem.LeadingContent>
-                        <lists:ListItemLeadingIcon Icon="music_note_outlined" />
+                        <lists:ListItemLeadingImage ImageSource="{Binding ImageUrl}" PlaceholderIcon="music_note_outlined" Margin="0,8" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">

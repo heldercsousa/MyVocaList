@@ -9,9 +9,11 @@ namespace MyVocaList.Contracts.DTOs.Suggestions;
 /// <param name="ExternalId">External provider id (remote rows; also local rows that carry one).</param>
 /// <param name="ExternalProvider">Provider name (e.g. "Deezer").</param>
 /// <param name="IsRemote">True when sourced from a music metadata provider.</param>
+/// <param name="ImageUrl">Artist image URL for remote rows; null for local rows (REQ-ART-24).</param>
 public sealed record ArtistSuggestionDto(
     int? LocalId,
     string Name,
     string? ExternalId,
     string? ExternalProvider,
-    bool IsRemote);
+    bool IsRemote,
+    string? ImageUrl = null);

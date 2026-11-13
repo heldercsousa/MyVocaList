@@ -132,9 +132,10 @@ public class SongSuggestionService : ISongSuggestionService
 
     // ── Helpers ──────────────────────────────────────────────────────────
 
+    // Promoted rows also come through here, so they carry the stored images and no album (REQ-ART-06).
     private static SongSuggestionDto MapLocal(SongSearchHit hit) => new(
         hit.SongId, hit.Title, hit.ArtistName, hit.ArtistId, hit.ExternalId, hit.ExternalProvider,
-        false, hit.Version ?? string.Empty, hit.ArtistName);
+        false, hit.Version ?? string.Empty, hit.ArtistName, hit.ImageUrl, hit.ArtistImageUrl, null);
 
     /// <summary>Returns null on any failure/timeout (Unavailable); rethrows caller cancellation.</summary>
     private async Task<IReadOnlyList<MusicSearchResultDto>?> TryFetchDeezerAsync(string q, CancellationToken ct)
@@ -230,7 +231,7 @@ public class SongSuggestionService : ISongSuggestionService
                 resolved.TryGetValue(r.ArtistName, out artist);
             return new SongSuggestionDto(
                 null, r.SongTitle ?? string.Empty, r.ArtistName, artist?.Id, r.ExternalId, r.Provider,
-                true, r.Version ?? string.Empty, artist?.Name);
+                true, r.Version ?? string.Empty, artist?.Name, r.ImageUrl, r.ArtistImageUrl, r.AlbumTitle);
         }).ToList();
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.Rules;
 using MyVocaList.Infra.Collation;
 
 namespace MyVocaList.Infra.EntityEFConfig;
@@ -29,6 +30,11 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
         builder.Property(a => a.ExternalProvider)
                .IsRequired(false)
                .HasMaxLength(50);
+
+        // REQ-ART-05: URL only, nullable, never searched (no index, no collation).
+        builder.Property(a => a.ImageUrl)
+               .IsRequired(false)
+               .HasMaxLength(ImageUrlRules.MaxLength);
 
         builder.Property(a => a.CreatedAt).IsRequired();
         builder.Property(a => a.UpdatedAt).IsRequired();

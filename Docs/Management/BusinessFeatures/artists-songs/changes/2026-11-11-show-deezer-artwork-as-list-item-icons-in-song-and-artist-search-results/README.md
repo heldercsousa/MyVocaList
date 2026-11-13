@@ -1,7 +1,7 @@
 ---
 id: show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results
 title: Show Deezer artwork as list-item icons in song and artist search results
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-11
 section: BusinessFeatures
 parent: artists-songs
