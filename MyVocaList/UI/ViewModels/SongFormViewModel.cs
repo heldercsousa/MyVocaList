@@ -94,6 +94,12 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isTitleLocked;
 
     private string? _pickFilledVersion;   // Version written by the last remote pick (Q21)
+    private string? _pendingImageUrl;        // REQ-ART-11: Deezer cover held between a pick and Save
+    private string? _pendingArtistImageUrl;  // REQ-ART-11: Deezer artist picture held between a pick and Save
+    private const string SongPlaceholderIcon = "music_note_outlined";
+    private const string ArtistPlaceholderIcon = "account_circle_outlined";
+    private const string LibrarySourceText = "Library";
+    private const string DeezerSourceText = "Deezer";
 
     // ── Save-outcome sheets (Task 5.3, REQ-SFT-19, REQ-SFT-22/23) ─────────
     private const string ExactDuplicateSheetTitle = "This looks like an existing song";
@@ -339,7 +345,7 @@ public partial class SongFormViewModel : ViewModelBase
         var gen = Interlocked.Increment(ref _searchGeneration); // BUG-051: guards against a slower earlier query clobbering a newer one
         var results = await _artistService.SearchArtistsByNameAsync(term, maxResults: 5);
         var mapped = results
-            .Select(a => new AutocompleteSuggestion(a.Name, a.CatalogCountText, a))
+            .Select(ToArtistOption)
             .ToList();
         // Only the latest query updates the shared observable state; the provider for THIS query
         // still receives its own results below (DX cancels stale provider requests via its token).
@@ -347,6 +353,15 @@ public partial class SongFormViewModel : ViewModelBase
             RunOnUiThread(() => ArtistSuggestions = mapped);
         return mapped;
     }
+
+    /// <summary>REQ-ART-09/10: a leading avatar, the real catalog count, no trailing text.</summary>
+    private static AutocompleteSuggestion ToArtistOption(ArtistListItem artist) =>
+        new(artist.Name, artist.CatalogCountText, artist)
+        {
+            LeadingKind = AutocompleteLeadingKind.Avatar,
+            ImageUrl = artist.ImageUrl,
+            PlaceholderIcon = ArtistPlaceholderIcon
+        };
 
     private void SelectArtist(AutocompleteSuggestion suggestion)
     {
@@ -412,6 +427,8 @@ public partial class SongFormViewModel : ViewModelBase
         ArtistErrorText = string.Empty;
         SelectedExternalId = string.Empty;   // REQ-SFT-14: the pending identity belongs to the pair
         SelectedProvider = string.Empty;
+        _pendingImageUrl = null;             // REQ-ART-13: X on Artist drops both pending images
+        _pendingArtistImageUrl = null;
     }
 
     // ── Title-first search and picks (Task 5.2) ───────────────────────────
@@ -443,11 +460,24 @@ public partial class SongFormViewModel : ViewModelBase
 
     private static AutocompleteSuggestion ToTitleOption(SongSuggestionDto dto)
     {
-        var parts = new List<string> { dto.ArtistName };
-        if (!string.IsNullOrEmpty(dto.Version))
+        // REQ-ART-07: artist · version · album; album only on Deezer rows, never when it repeats the title.
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(dto.ArtistName))
+            parts.Add(dto.ArtistName);
+        if (!string.IsNullOrWhiteSpace(dto.Version))
             parts.Add(dto.Version);
-        parts.Add(dto.IsRemote ? "Deezer" : "In your library");
-        return new AutocompleteSuggestion(dto.Title, string.Join(" · ", parts), dto);
+        if (dto.IsRemote
+            && !string.IsNullOrWhiteSpace(dto.AlbumTitle)
+            && !string.Equals(dto.AlbumTitle, dto.Title, StringComparison.OrdinalIgnoreCase))
+            parts.Add(dto.AlbumTitle);
+
+        return new AutocompleteSuggestion(dto.Title, string.Join(" · ", parts), dto)
+        {
+            LeadingKind = AutocompleteLeadingKind.Image,
+            ImageUrl = dto.RowImageUrl,
+            PlaceholderIcon = SongPlaceholderIcon,
+            TrailingText = dto.IsRemote ? DeezerSourceText : LibrarySourceText   // REQ-ART-08
+        };
     }
 
     [RelayCommand]
@@ -474,6 +504,8 @@ public partial class SongFormViewModel : ViewModelBase
         _pickFilledVersion = dto.Version;
         SelectedExternalId = dto.ExternalId ?? string.Empty;
         SelectedProvider = dto.ExternalProvider ?? string.Empty;
+        _pendingImageUrl = dto.ImageUrl;             // REQ-ART-11: the cover, not the row-image fallback
+        _pendingArtistImageUrl = dto.ArtistImageUrl;
 
         if (dto.LocalArtistId.HasValue)
         {
@@ -506,6 +538,7 @@ public partial class SongFormViewModel : ViewModelBase
         if (_pickFilledVersion is not null && SongVersion == _pickFilledVersion)
             SongVersion = string.Empty;
         _pickFilledVersion = null;
+        _pendingImageUrl = null;             // REQ-ART-13: X on Title drops the song image, keeps the artist image
     }
 
     /// <summary>
@@ -660,7 +693,10 @@ public partial class SongFormViewModel : ViewModelBase
             IsEditMode ? null : (string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId),
             _pendingRawUrls.ToArray(),
             _artistDecision,
-            _songDecision);
+            _songDecision,
+            // REQ-ART-11/17: pending Deezer images travel in add mode only; the Service applies the rules.
+            ImageUrl: IsEditMode ? null : _pendingImageUrl,
+            ArtistImageUrl: IsEditMode ? null : _pendingArtistImageUrl);
     }
 
     /// <summary>Maps the Service outcome to fields, sheets, the snackbar and navigation (REQ-SFT-51).</summary>

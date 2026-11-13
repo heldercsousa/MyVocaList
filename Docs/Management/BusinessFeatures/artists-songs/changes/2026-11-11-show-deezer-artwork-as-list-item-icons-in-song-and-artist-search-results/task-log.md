@@ -10,10 +10,10 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 (D1…D17). The device check (T11) is his.
 
 ### Checkpoint
-- **Phase:** T7 `To Review` (see `## T7`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
-- **Last build/test:** android build 0 errors; `dotnet test` -> 1045 passed, 0 failed.
-- **Next:** orchestrator review of T7; then T8 (SongFormViewModel sets LeadingKind/ImageUrl/PlaceholderIcon/TrailingText).
-- **Context manifest:** `plan.md § T8`, `design.md § 3.7`, `Contracts/Models/AutocompleteSuggestion.cs`, `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml`.
+- **Phase:** T8 `To Review` (see `## T8`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
+- **Last build/test:** android build 0 errors; `dotnet test` -> 1071 passed, 0 failed.
+- **Next:** orchestrator review of T8; then T9 (`SongsPage.xaml`).
+- **Context manifest:** `plan.md § T9`, `design.md § 3.6`, `MyVocaList/UI/Pages/Songs/SongsPage.xaml`, `Contracts/DTOs/List/SongListItemDto.cs`, `MyVocaList/UI/Components/Lists/ListItemLeadingImage.xaml`.
 
 ## T0 — Evaluation and spec (2026-11-13) — Done
 
@@ -454,3 +454,52 @@ Component record (four gates, approval pre-authorised): `Docs/Management/DevCycl
 | REQ-ART-06 | `LeadingKind.Image`, `HasLeadingImage`, row template col 0 | `LeadingKindImage_SetsOnlyHasLeadingImage` |
 | REQ-ART-08 | `LeadingKind.Avatar`, `HasLeadingAvatar` | `LeadingKindAvatar_SetsOnlyHasLeadingAvatar` |
 | REQ-ART-09 | defaults `None`/null, constructor unchanged | `Defaults_...`, `ThreeArgumentConstructor_...` |
+
+## T8 — Song form options show images; picks carry pending images (2026-11-13) — To Review
+
+### What was done
+`SongFormViewModel` only (design.md § 3.5):
+- `ToTitleOption`: `LeadingKind = Image`, `ImageUrl = RowImageUrl`, placeholder `music_note_outlined`, trailing text `Library` / `Deezer`; supporting text = non-blank artist, version, album joined by ` · `; album only for remote rows, non-blank and not equal to the title (`OrdinalIgnoreCase`).
+- New `ToArtistOption`: `LeadingKind = Avatar`, `ImageUrl = ArtistListItem.ImageUrl`, placeholder `account_circle_outlined`, supporting text `CatalogCountText`, no trailing text.
+- Private fields `_pendingImageUrl` / `_pendingArtistImageUrl`: set in `ApplyRemotePick` from `dto.ImageUrl` (cover) and `dto.ArtistImageUrl`; `ClearTitle` clears the song one; `ClearArtist` clears both; `BuildSaveRequest` sends both by name in add mode, null in edit mode. Not cleared by Save/sheets.
+- Icon names and source words are `private const` strings.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelImageTests.cs` (new, 26 tests)
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelTests.cs` (four planned edits)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results/task-log.md`
+
+### Verification
+- Red (new file, before the production change): 21 failed, 5 passed of 26. Failures were assertions, e.g. Expected "Ramones · 1999 Remaster · Greatest Hits" / Actual "Ramones · 1999 Remaster · Deezer"; Expected Avatar / Actual None; Expected "Deezer" / Actual null; Expected cover URL / Actual null. The 5 that passed assert behaviour the old code already met (null images in the no-pick, X-on-Artist, local-pick, edit-mode and second-pick-with-nulls cases) or are guards. One test (`SelectTitle_RemoteOption_Leaves...`) first failed for a wrong reason (`VerifyNoOtherCalls` tripped on the incidental `ShouldShowCharacterCounter`); fixed in the test by verifying the write methods Never, as the existing REQ-SFT-12 test does.
+- After the production change: the only failing tests in the suite were exactly the four planned ones (1067 passed, 4 failed), each on its supporting-text assertion only.
+- Final: `dotnet test` 1071 passed, 0 failed (1045 baseline + 26 new); `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` 0 errors. `ArtistFormViewModelTests` untouched and green.
+- E2E emulator: not run (device check is T11).
+
+### The four edited existing tests (`SongFormViewModelTests.cs`; names unchanged)
+| Test | Before (expected) | After (expected) | Failure shown before the edit |
+|------|-------------------|------------------|-------------------------------|
+| `TitleOptionSource_LocalHit_SupportingTextHasArtistVersionAndLibraryMarker` | `Radiohead · Pablo Honey · In your library` | `Radiohead · Pablo Honey` + `TrailingText == "Library"` | Expected "Radiohead · Pablo Honey · In your library" / Actual "Radiohead · Pablo Honey" |
+| `TitleOptionSource_LocalHitEmptyVersion_OmitsVersionPart` | `Radiohead · In your library` | `Radiohead` + `TrailingText == "Library"` | Expected "Radiohead · In your library" / Actual "Radiohead" |
+| `TitleOptionSource_RemoteHit_SupportingTextIsArtistVersionAndDeezer` | `Radiohead · Live · Deezer` | `Radiohead · Live` + `TrailingText == "Deezer"` | Expected "Radiohead · Live · Deezer" / Actual "Radiohead · Live" |
+| `TitleOptionSource_RemoteHitEmptyVersion_OmitsVersionPart` | `Radiohead · Deezer` | `Radiohead` + `TrailingText == "Deezer"` | Expected "Radiohead · Deezer" / Actual "Radiohead" |
+
+The `[AC]` lines were renamed from REQ-SFT-04 to REQ-ART-07/08.
+
+### AC table
+| AC | Implementation | Test methods (`SongFormViewModelImageTests` unless noted) |
+|----|----------------|------------------------------------------------------------|
+| REQ-ART-06 | `ToTitleOption` | `TitleOption_LocalRowWithSongImage_...`, `TitleOption_RemoteRowWithoutCover_FallsBackToArtistImage`, `TitleOption_RowWithNoImages_...` |
+| REQ-ART-07 | `ToTitleOption` | `TitleOption_RemoteRow_SupportingTextIsArtistVersionAlbum`, `..._LocalRowEmptyVersion_...`, `..._AlbumEqualToTitleIgnoringCase_OmitsAlbum` (x2), `..._AlbumDiffersByAccent_KeepsAlbum`, `..._LocalRowCarryingAlbum_IgnoresAlbum`, `..._RemoteRowBlankAlbum_OmitsAlbum`; the four edited tests |
+| REQ-ART-08 | `ToTitleOption` | `TitleOption_LocalRow_TrailingText...`, `TitleOption_RemoteRow_TrailingText...`; the four edited tests |
+| REQ-ART-09 | `ToArtistOption` | `ArtistOption_WithImage_...`, `ArtistOption_WithoutImage_...` |
+| REQ-ART-10 | `ToArtistOption` | `ArtistOption_WithImage_...` |
+| REQ-ART-11 | `ApplyRemotePick`, `BuildSaveRequest` | `Save_AfterDeezerPick_RequestCarriesCoverNotFallbackAndArtistImage`, `Save_AfterDeezerPickWithoutCover_...`, `Save_AfterTwoDeezerPicks_SecondReplacesBothImages` |
+| REQ-ART-12 | `ApplyRemotePick` (touches no other field) | `SelectTitle_RemoteOption_LeavesFeaturedLyricsAndKaraokeUrlsAndWritesNothing` |
+| REQ-ART-13 | `ClearTitle`, `ClearArtist` | `Save_AfterDeezerPickThenXOnTitle_...`, `Save_AfterDeezerPickThenXOnArtist_...` |
+| REQ-ART-14 | `SelectArtist` unchanged | `Save_DeezerPickThenXOnArtistThenLocalArtistPick_SendsNoImages`, `Save_LocalArtistPickWithNoDeezerPick_...`, `Save_LocalArtistPickAfterDeezerPick_KeepsPendingImages` |
+| REQ-ART-17 | `BuildSaveRequest` | `Save_EditModeAfterDeezerPick_SendsNullImages` |
+| REQ-ART-18 | pending fields untouched by Save/sheets | `Save_AfterNeedsDecisionOutcome_NextRequestStillCarriesBothImages`, `Save_AfterFailedOutcome_NextSaveStillCarriesBothImages` |
+
+### Spec gaps / deviations
+None. REQ-ART-14 "a local Title pick starts a form with no pending image" holds by construction (a local pick navigates to a fresh edit form); no extra test.
