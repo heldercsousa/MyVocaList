@@ -10,10 +10,10 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 (D1…D17). The device check (T11) is his.
 
 ### Checkpoint
-- **Phase:** T5 `To Review` (see `## T5`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
-- **Last build/test:** `dotnet test` -> 1041 passed, 0 failed (baseline 1027 + 14 new).
-- **Next:** orchestrator review of T5; then T6/T7/T8.
-- **Context manifest:** `plan.md § T8`, `design.md § 3.4`, `Domain/Resolution/SongFormSaveRequest.cs`, `Services/SongService.cs`.
+- **Phase:** T6 `To Review` (see `## T6`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
+- **Last build/test:** android build 0 errors; `dotnet test` -> 1041 passed, 0 failed.
+- **Next:** orchestrator review of T6; then T7 (AutocompleteDXField rows) / T8.
+- **Context manifest:** `plan.md § T7`, `design.md § 3.7`, `MyVocaList/UI/Components/Lists/ListItemLeadingImage.xaml`, `ListItemLeadingAvatar.xaml`, `UI/Components/TextFields/AutocompleteDXField.xaml`.
 
 ## T0 — Evaluation and spec (2026-11-13) — Done
 
@@ -363,3 +363,51 @@ A created artist gets the picture before its first flush.
 | `NoMatch` (new artist created) | true |
 | `Stop` (invalid name, fuzzy choice needed) | false (no write happens) |
 
+
+## T6 — ListItemLeadingImage placeholder and ListItemLeadingAvatar (2026-11-13) — To Review
+
+**Plan:** `plan.md § T6`
+**Component record (four gates):** `Docs/Management/DevCycleCraft/m3-lists/changes/2026-11-13-listitem-leading-media-placeholder-on-listitemleadingimage-and-new-listitemleadingavatar/README.md`
+**Status:** To Review
+**Started:** 2026-11-13
+**Completed:** 2026-11-13
+
+### What was done
+- `ListItemLeadingImage`: new BindableProperty `PlaceholderIcon` (`string`, default null). Content is now a `Grid` with a 24x24 `dx:DXImage` (`TintColor` = `OnSurfaceVariant`, `IsVisible` via `IsNotNullConverter`) UNDER the existing `Image`. A `DataTrigger` on the `Border` sets `BackgroundColor` = `SurfaceContainerHighest` only while `PlaceholderIcon` is not null. `ImageSource`, `Aspect`, 56x56 and `RoundRectangle 4` unchanged. No code-behind state machine.
+- `ListItemLeadingAvatar` (new): 40x40 `Border` with `StrokeShape="Ellipse"` (clips content), `SurfaceContainerHighest` background, 24x24 tinted `dx:DXImage` under an `AspectFill` `Image`. BindableProperties `ImageSource` and `PlaceholderIcon` (default `account_circle_outlined`).
+- Resource keys verified by Grep: `SurfaceContainerHighest` and `OnSurfaceVariant` exist in `Resources/Styles/MaterialColors.xaml`; `IsNotNullConverter` is registered in `App.xaml`; `Resources/Images/account_circle_outlined.svg` exists.
+- No consumer page edited; `ListItem.xaml` untouched.
+
+### Container decision: MAUI `Border`, not `dx:DXBorder`
+Context7 `/websites/devexpress_maui` (docs.devexpress.com/MAUI/DevExpress.Maui.Core.DXViewBase.IsClippedToBounds and `.CornerRadius`): `CornerRadius` is documented only as "the corner radius", and clipping of children is a separate opt-in property, `IsClippedToBounds` (default not stated). The docs do not confirm that `DXBorder` clips content to rounded corners, so the record's fallback applies: MAUI `Border` with a round `StrokeShape`, same precedent as `ListItemLeadingImage`.
+
+### Caching note (REQ-ART-23)
+Microsoft Learn, "Image" -> "Load a remote image" / "Image caching" (learn.microsoft.com/dotnet/maui/user-interface/controls/image#load-a-remote-image): a string URI assigned to an `ImageSource` converts implicitly to a `UriImageSource`; "Caching of downloaded images is enabled by default, with cached images being stored for 1 day"; `CachingEnabled` default `true`, `CacheValidity` default 1 day.
+
+### Consumer map and per-consumer risk (copied from the component record)
+| Consumer | Usage |
+|----------|-------|
+| `MyVocaList/UI/Pages/Songs/YouTubeSearchPage.xaml:60` | `ImageSource="{Binding ThumbnailUrl}" Aspect="AspectFill"`; does not set `PlaceholderIcon` |
+
+`ListItemLeadingAvatar` has no consumer yet. Successors: `AutocompleteDXField` option row (image and avatar) and `SongsPage` (image).
+
+| Consumer | What could break | Verification |
+|----------|------------------|--------------|
+| `YouTubeSearchPage` | Thumbnail size, crop or background changes if the default path is not identical | Device (T11): YouTube search results show thumbnails as before (56 dp, rounded 4, no grey background, no icon) |
+
+With `PlaceholderIcon` null: Border background trigger inactive (transparent), DXImage `IsVisible` false and its `Source` null, `Image` identical to before. The only structural difference is the extra `Grid` wrapper (single full-size child); it needs the T11 device check.
+
+### Level-C decision
+Level C (pure XAML, no logic): no unit test. The ACs (REQ-ART-22/23) are verified on device in T11.
+
+### Changed files
+- `MyVocaList/UI/Components/Lists/ListItemLeadingImage.xaml`
+- `MyVocaList/UI/Components/Lists/ListItemLeadingImage.xaml.cs`
+- `MyVocaList/UI/Components/Lists/ListItemLeadingAvatar.xaml` (new)
+- `MyVocaList/UI/Components/Lists/ListItemLeadingAvatar.xaml.cs` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results/task-log.md`
+
+### Verification
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`: after `ListItemLeadingImage` -> 0 errors (27+ NU1903 warnings, pre-existing); after `ListItemLeadingAvatar` -> 0 errors.
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` -> 1041 passed, 0 failed.
+- Emulator/device run not done (T11 is the device check); status stays To Review.
