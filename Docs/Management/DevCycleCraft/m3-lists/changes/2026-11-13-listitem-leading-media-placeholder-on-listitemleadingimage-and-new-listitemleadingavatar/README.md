@@ -1,7 +1,7 @@
 ---
 id: listitem-leading-media-placeholder-on-listitemleadingimage-and-new-listitemleadingavatar
 title: "ListItem leading media: placeholder on ListItemLeadingImage and new ListItemLeadingAvatar"
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-13
 section: DevCycleCraft
 parent: m3-lists
@@ -61,4 +61,3 @@ Decision taken by the orchestrator; Helder can overrule it after the device chec
 ## Governance list
 `ListItemLeadingImage` gets more consumers and `ListItemLeadingAvatar` its first ones in the successor
 tasks; both are added to the governed list in `.claude/library/component-safety-gate.md` in this work.
-

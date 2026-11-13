@@ -1,7 +1,7 @@
 ---
 id: autocompletedxfield-option-rows-optional-leading-image-or-avatar-and-trailing-text
 title: "AutocompleteDXField option rows: optional leading image or avatar and trailing text"
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-13
 section: DevCycleCraft
 parent: autocomplete-component
@@ -69,4 +69,3 @@ today) and tests. All use the three-argument constructor, which is unchanged.
 ## Gate 4 — approval
 Pre-authorised by Helder on 2026-11-13 ("take decisions by yourself … don't ask me anything").
 Decision taken by the orchestrator; Helder can overrule it after the device check.
-

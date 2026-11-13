@@ -536,3 +536,122 @@ None. REQ-ART-14 "a local Title pick starts a form with no pending image" holds 
 
 ### Design concern
 None.
+
+
+## T10 — Close-out (2026-11-13)
+
+### Commits (branch `feature/deezer-artwork`)
+
+| Task | Commit | Tests after (passed / failed / skipped) |
+|------|--------|------------------------------------------|
+| T0 spec | `e2b1a1e6` | 967 / 0 / 0 (baseline) |
+| T1 | `b7dd4026` | 984 / 0 / 0 |
+| T2 | `35be849f` | 1005 / 0 / 0 |
+| T3 | `714ca54f` | 1018 / 0 / 0 |
+| T4 | `f048005b` | 1027 / 0 / 0 |
+| T5 | `7278b5ae` | 1041 / 0 / 0 |
+| T6 (component, own item) | `85aa8ff2` | 1041 / 0 / 0, Android build 0 errors |
+| T7 (component, own item) | `24413deb` | 1045 / 0 / 0, Android build 0 errors |
+| T8 | `7fe23c46` | 1071 / 0 / 0, Android build 0 errors |
+| T9 | `bdd6eb67` | 1071 / 0 / 0, Android build 0 errors |
+
+### Independent verification (fresh `verifier`, 2026-11-13)
+
+Verdict: **PASS WITH ISSUES**, no blocker. Its own runs: `dotnet test` 1071 passed, 0 failed, 0 skipped;
+`dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` 0 errors (27 existing NuGet audit warnings).
+Confirmed: every REQ-ART has an implementation; every criterion that needs a test has one starting with
+its `[AC]` line; the only edited existing tests are the four planned ones; the component commits match
+their records and are separate commits with their own `Item:` trailer; `ListItem.xaml`,
+`AutocompleteDXField.xaml.cs` and `AutocompleteDXFieldLogic.cs` are untouched.
+
+Issues it raised and what was done:
+
+| # | Issue | Outcome |
+|---|-------|---------|
+| D1 | Task entries lack the commit SHA | Fixed: commit table above |
+| D2 | The new columns carry the `NOCASE_NOACCENT` collation (global convention), while `design.md § 3.2` said "no collation" | Fixed: note added to `design.md § 3.2`; behaviour accepted (nothing searches the columns) |
+| D3 | Close-out docs not committed at verification time | Fixed by the close-out commit |
+| D4 | No real-SQLite test that the fill of an existing artist's image is persisted by the real unit of work | Fixed: see `## T10a` below |
+| D5 | `SongFormViewModelTests.TitleOptionSource_SetsNoteThroughUiThreadHelper` failed once during T4 on a stale binary and has passed in every full run since | Not reproduced; noted here. If it recurs, check the generation guard of the UI-thread note |
+| D6 | Cosmetic: the doc comment of `AutocompleteSuggestion.TrailingText` says "e.g. album title" (it carries the source word); in `ImageUrlRulesTests` the `[AC]` comment sits above the `[Theory]` attribute | Left as is (comment-only); to tidy the next time those files are touched |
+
+`dotnet ef migrations has-pending-changes` could not run (installed tool 9.0.6 against EF Core 10). The
+migration is covered by `ImageUrlMigrationTests` (5 tests, real SQLite), including the rollback.
+
+### Decisions taken during implementation (orchestrator, under the 2026-11-13 instruction)
+
+- **Migration rollback (T1).** EF's `DropColumn` rebuilds the table on SQLite, which fails while the
+  search triggers of `AddSearchIndexes` reference `Songs` / `Artists` (the existing test
+  `M3_Down_DropsTablesAndTriggers` caught it). `Down` uses the native `ALTER TABLE … DROP COLUMN`
+  instead. No existing test was edited. Any future migration that makes EF rebuild `Songs` or
+  `Artists` will meet the same problem.
+- **Avatar container (T6).** MAUI `Border` with an ellipse shape, not `dx:DXBorder`: the DevExpress docs
+  do not state that `DXBorder` clips its content to rounded corners (the record allowed this fallback).
+- **Four superseded tests (T8)** updated to REQ-ART-07/08 as planned in `design.md § 6`.
+
+### Traceability matrix
+
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-ART-01 | Track search carries cover, artist picture, album | `Services/DeezerProvider.cs` (track mapping, `NormaliseAlbumTitle`) | `DeezerProviderImageTests.SearchSongsAsync_TrackWithAlbumAndArtistPicture_MapsCoverArtistPictureAndAlbumTitle`, `…_NoAlbumObjectNoArtistPicture_…`, `…_NullAlbumAndNullArtistPicture_…`, `…_NoAlbumTitle_…`, `…_AlbumTitleSurroundedBySpaces_IsTrimmed` |
+| REQ-ART-02 | Artist search carries the picture | `DeezerProvider.cs` (artist mapping) | `SearchArtistsAsync_MapsPictureMediumAsImageUrl`, `SearchArtistsAsync_NoPictureMedium_ImageUrlIsNull` |
+| REQ-ART-03 | Only image URLs are kept | `Domain/Rules/ImageUrlRules.cs`; used by `DeezerProvider`, `SongService.SaveFromFormAsync` | `ImageUrlRulesTests` (12); `DeezerProviderImageTests.SearchSongsAsync_HttpCover_IsDroppedAsNoImage`, `…_EmptyCoverAndBlankAlbumTitle_…`; `SongServiceSaveFromFormImageTests.SaveFromForm_InvalidUrls_AreStoredAsNull` |
+| REQ-ART-04 | No extra request | one request per search in `DeezerProvider` | `SearchSongsAsync_OneSearch_MakesExactlyOneRequest`, `SearchArtistsAsync_OneSearch_MakesExactlyOneRequest` |
+| REQ-ART-05 | `ImageUrl` on `Song` and `Artist`, URL only | `Domain/Entity/Song.cs`, `Artist.cs`; EF configurations; migration `20261113032549_AddImageUrlToSongsAndArtists` | `ImageUrlMigrationTests` (5) |
+| REQ-ART-06 | Title option leading image: song, else artist, else placeholder | `SongFormViewModel.ToTitleOption`; `SongSuggestionDto.RowImageUrl`; `SongRepository` (all `SongSearchHit` builders); `SongSuggestionService`; `AutocompleteDXField.xaml` option row | `SongFormViewModelImageTests.TitleOption_LocalRowWithSongImage_…`, `…_RemoteRowWithoutCover_FallsBackToArtistImage`, `…_RowWithNoImages_…`; `SongSuggestionServiceImageTests` (6, incl. promoted row); `SongSearchHitImageTests` (6); `AutocompleteSuggestionTests.LeadingKindImage_SetsOnlyHasLeadingImage` |
+| REQ-ART-07 | Supporting text `artist · version · album` | `SongFormViewModel.ToTitleOption` | `TitleOption_RemoteRow_SupportingTextIsArtistVersionAlbum`, `…_LocalRowEmptyVersion_…`, `…_AlbumEqualToTitleIgnoringCase_OmitsAlbum`, `…_AlbumDiffersByAccent_KeepsAlbum`, `…_LocalRowCarryingAlbum_IgnoresAlbum`, `…_RemoteRowBlankAlbum_OmitsAlbum`; the four edited `SongFormViewModelTests` |
+| REQ-ART-08 | Source is the trailing text | `SongFormViewModel.ToTitleOption`; option row trailing label | `TitleOption_LocalRow_TrailingTextIsLibrary…`, `TitleOption_RemoteRow_TrailingTextIsDeezer…`; the four edited tests |
+| REQ-ART-09 | Artist option leading avatar | `SongFormViewModel` artist option; `ListItemLeadingAvatar.xaml`; option row | `ArtistOption_WithImage_IsAvatarWithPlaceholderAndCatalogCountText`, `ArtistOption_WithoutImage_HasNullImageAndStillThePlaceholder`; `AutocompleteSuggestionTests.LeadingKindAvatar_SetsOnlyHasLeadingAvatar` |
+| REQ-ART-10 | Real catalog count on Artist options | `Infra/Repository/ArtistRepository.cs` (`SearchByNameAsync`, `GetPagedAsync`) | `ArtistListItemProjectionTests.SearchByNameAsync_ArtistWithThreeCatalogEntries_ReturnsRealCountAndImage`, `…_NoCatalogNoImage_ReturnsZeroAndNull`, `GetPagedAsync_CarriesArtistImage` |
+| REQ-ART-11 | Deezer pick sets the pending images | `SongFormViewModel.ApplyRemotePick`, `BuildSaveRequest` | `Save_AfterDeezerPick_RequestCarriesCoverNotFallbackAndArtistImage`, `Save_AfterDeezerPickWithoutCover_SongImageStaysNullEvenThoughRowShowsArtistImage`, `Save_AfterTwoDeezerPicks_SecondReplacesBothImages` |
+| REQ-ART-12 | A pick touches nothing else, writes nothing | `SongFormViewModel.ApplyRemotePick` | `SelectTitle_RemoteOption_LeavesFeaturedLyricsAndKaraokeUrlsAndWritesNothing` |
+| REQ-ART-13 | X clears the pending images | `SongFormViewModel.ClearTitle`, `ClearArtist` | `Save_AfterDeezerPickThenXOnTitle_DropsSongImageKeepsArtistImage`, `Save_AfterDeezerPickThenXOnArtist_DropsBothImages` |
+| REQ-ART-14 | Local pick unchanged | `SongFormViewModel.SelectArtist`; local Title pick navigates to a fresh form | `Save_LocalArtistPickAfterDeezerPick_KeepsPendingImages`, `Save_DeezerPickThenXOnArtistThenLocalArtistPick_SendsNoImages`, `Save_LocalArtistPickWithNoDeezerPick_SendsNoImages` |
+| REQ-ART-15 | New song stores its image | `Services/SongService.cs` (`SaveFromFormAsync`, `CreateSongWithUrlsCoreAsync`) | `SaveFromForm_AddWithPendingImage_StoresImageOnSong`, `…_AddWithoutPendingImage_StoresNull`, `…_AddWithExplicitSaveAsNew_NullsIdentityButKeepsImage` |
+| REQ-ART-16 | Artist image fills an empty artist only | `SongService.cs` (`ResolveFormArtistAsync`, `SaveFormResolution.FillArtistImage`, create helper) | `SaveFromForm_ArtistCreatedByPlainPath_GetsArtistImage`, `…_ArtistCreatedByCreateTypedDecision_GetsArtistImage`, `…_ExistingArtistByIdWithoutImage_IsFilled`, `…_ExistingArtistByExactNameWithoutImage_IsFilled`, `…_ExistingArtistWithImage_IsNeverChanged`, `…_ArtistChosenByUseExistingDecision_IsNeverChanged`; real SQLite: see T10a |
+| REQ-ART-17 | Edit mode never changes the song image | `SongService.cs` edit path; `SongFormViewModel.BuildSaveRequest` | `SaveFromForm_EditModeWithImages_LeavesStoredImagesUnchanged`, `Save_EditModeAfterDeezerPick_SendsNullImages` |
+| REQ-ART-18 | Failed Save stores nothing; pending images kept | `SongService.cs` (fill after refusals); `SongFormViewModel` | `SaveFromForm_NeedsDecision_ChangesNoImage`, `SaveFromForm_FailedWrite_ChangesNoImage`, `Save_AfterNeedsDecisionOutcome_NextRequestStillCarriesBothImages`, `Save_AfterFailedOutcome_NextSaveStillCarriesBothImages` |
+| REQ-ART-19 | Songs list leading image | `SongRepository.GetPagedAsync`, `CatalogRepository` paged query; `SongsPage.xaml` both templates | Data: `SongListItemProjectionTests` (6). On screen: **manual E2E, T11** |
+| REQ-ART-20 | Songs list supporting text | `Contracts/DTOs/List/SongListItemDto.cs` (`SupportingText`); `SongsPage.xaml` | `SongListItemDtoTests` (6) |
+| REQ-ART-21 | 72 dp row | `SongsPage.xaml` (`Margin="0,8"` on the 56 dp image) | **manual E2E, T11** (Level C, no unit test) |
+| REQ-ART-22 | Placeholder covers every gap | `ListItemLeadingImage.xaml`, `ListItemLeadingAvatar.xaml` | **manual E2E, T11** (Level C, no unit test) |
+| REQ-ART-23 | Loaded images are reused | URL string → `UriImageSource`, caching on by default, validity 1 day (Microsoft Learn, MAUI Image, "Load a remote image") | **manual E2E, T11** |
+| REQ-ART-24 | Remote artist suggestions carry the image | `ArtistSuggestionDto`; `ArtistSuggestionService` | `ArtistSuggestionServiceImageTests` (3) |
+
+### Backlog and governance
+
+- Governed list (`.claude/library/component-safety-gate.md`): added `ListItemLeadingImage` (now 3 consumers:
+  `YouTubeSearchPage`, `AutocompleteDXField`, `SongsPage`) and `AutocompleteDXField` (3 consumers, was
+  missing). `ListItemLeadingAvatar` has one consumer (`AutocompleteDXField`) and becomes governed with its second.
+- Follow-up items registered (💡): "Backfill Deezer images for songs and artists saved before the artwork
+  item"; "Artists list rows show the artist picture as a leading avatar".
+- "Song list item shows artist name, version and featured artists" (2026-11-09): delivered by REQ-ART-20;
+  set 🟡 until the device check.
+- This item and the two component items stay 🟡 In Progress until Helder's device check (T11).
+
+## Device check (T11 — Helder)
+
+An emulator was connected during this session (`emulator-5554`). The build was **not** installed on it:
+another session is testing BUG-086 on the same device, and installing this branch would replace its app
+and migrate its database. Nothing below has been seen on a screen yet.
+
+Install the `develop` build, then:
+
+1. **Songs list** (REQ-ART-19, 20, 21): every row shows a grey square with a music note (no song has an
+   image yet); the second line reads "artist · version · feat. …"; rows are taller than before (72 dp)
+   and the YouTube button and checkbox still work; selecting a row keeps the image.
+2. **New Song → Title** (REQ-ART-06, 07, 08): type "commando ramones". Deezer rows show a cover, the
+   second line shows "Ramones · 1999 Remaster · Greatest Hits", and "Deezer" sits at the right. Local rows
+   show "Library". Check that the menu rows grow to fit the cover (not confirmed against the DevExpress
+   docs) and that the list is still usable above the keyboard.
+3. **Pick a Deezer row and Save** (REQ-ART-11, 15, 16): back in the Songs list the new song shows its
+   cover. New Song → Artist: typing that artist shows its picture in a circle; other artists show the
+   person icon; the second line shows the real catalog count (REQ-ART-09, 10).
+4. **X after a pick** (REQ-ART-13): pick a Deezer row, tap X on Title, type a title by hand, Save: the
+   song shows the artist's picture (no cover). Pick a Deezer row, tap X on Artist, pick another artist,
+   Save: the song shows that artist's picture if it has one, else the music note.
+5. **Offline** (REQ-ART-22, 23): open the Songs list online, turn on airplane mode, leave and reopen the
+   list: covers seen before still show; a row never seen shows the placeholder, with no error.
+6. **Unchanged consumers** (component Gate 3): YouTube search results show thumbnails as before (no grey
+   background, no icon); New Person → Full Name menu rows look as before (long names now end with "…").
+7. **Edit a song** (REQ-ART-17): open the saved song, change the Version, Save: its cover is unchanged.
