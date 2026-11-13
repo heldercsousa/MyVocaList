@@ -655,3 +655,28 @@ Install the `develop` build, then:
 6. **Unchanged consumers** (component Gate 3): YouTube search results show thumbnails as before (no grey
    background, no icon); New Person → Full Name menu rows look as before (long names now end with "…").
 7. **Edit a song** (REQ-ART-17): open the saved song, change the Version, Save: its cover is unchanged.
+
+## T10a — Real-SQLite tests for the image save rules (2026-11-13) — To Review
+
+**What:** six real-stack tests (`UnitOfWorkTestHost`: production `AddAppServices` composition, real SQLite temp file, real repositories and unit of work; assertions re-read with a fresh context). They exposed a defect in T5 code, fixed here as T5 rework (unshipped, so not a tracked bug).
+
+**Defect:** filling an existing artist's empty `ImageUrl` (REQ-ART-16, by `ArtistId` and by exact name) was silently lost. `ArtistRepository.GetByIdAsync` returns the artist detached (NoTracking default; `AsTracking` removed on purpose in b2afd095), so the assignment in `CreateSongWithUrlsCoreAsync` never reached `SaveChangesAsync`. The T5 unit tests mock the repository and could not see it.
+
+**Fix (option a/b):** same pattern as `PersonService`/`VenueService`: explicit `IArtistRepository.UpdateAsync(existingArtist, ct)` (existing method, no interface change) right after the assignment, still after every refusal and inside the unit of work (staged, saved by the single commit; REQ-ART-18 holds).
+
+**Red:** `SaveFromFormAsync_ExistingArtistByIdWithoutImage_FillsArtistImage` and `SaveFromFormAsync_ExistingArtistByExactNameWithoutImage_FillsArtistImage` failed with `Expected: "https://cdn-images.dzcdn.net/images/artis"··· / Actual: null`. The other tests passed first time (characterisation); flipping one expected value each made them fail, then restored.
+
+### Changed files:
+- `Services/SongService.cs`
+- `MyVocaList.Tests/Integration/Services/SongServiceSaveFromFormImageRealStackTests.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results/task-log.md`
+
+### Verification
+`dotnet test MyVocaList.Tests`: 1077 passed, 0 failed (baseline 1071 + 6). `dotnet build MyVocaList -f net10.0-android`: 0 errors. Existing unit tests unedited and green.
+
+| AC | Test |
+|----|------|
+| REQ-ART-15, 16 (new artist) | `SaveFromFormAsync_AddModeNewArtist_PersistsSongAndArtistImages` |
+| REQ-ART-16 | `..._ExistingArtistByIdWithoutImage_FillsArtistImage`, `..._ExistingArtistByExactNameWithoutImage_FillsArtistImage`, `..._ExistingArtistWithImage_KeepsStoredArtistImage` |
+| REQ-ART-17 | `SaveFromFormAsync_EditMode_KeepsStoredImagesAndPersistsEdit` |
+| REQ-ART-18 | `SaveFromFormAsync_RefusedDuplicateSave_LeavesArtistImageNull` |

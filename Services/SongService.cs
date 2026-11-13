@@ -339,10 +339,14 @@ public class SongService : ISongService
                 return (false, "A song with this title and version already exists for this artist", null, SaveField.None);
 
             // REQ-ART-16 / REQ-ART-18: an existing artist is only ever filled, never overwritten, and only
-            // once every refusal above has passed. The entity is tracked by this scope's context, so the
-            // unit of work's save persists the assignment.
+            // once every refusal above has passed. Explicit UpdateAsync: GetByIdAsync returns the artist
+            // detached (DbContext-wide QueryTrackingBehavior.NoTracking, commit b2afd095), so mutating it
+            // alone is a silent no-op at save time (same pattern as PersonService/VenueService updates).
             if (fillArtistImage && artistImageUrl is not null && existingArtist is { ImageUrl: null })
+            {
                 existingArtist.ImageUrl = artistImageUrl;
+                await sp.GetRequiredService<IArtistRepository>().UpdateAsync(existingArtist, ct);
+            }
 
             // Song.Title/Version/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
             var song = new Song
