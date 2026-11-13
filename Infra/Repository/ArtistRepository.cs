@@ -62,7 +62,8 @@ public class ArtistRepository : IArtistRepository
                 a.Id,
                 a.Name,
                 a.ExternalProvider,
-                a.CatalogEntries.Count()))             // Scalar subquery in one SQL statement
+                a.CatalogEntries.Count(),              // Scalar subquery in one SQL statement
+                a.ImageUrl))
             .ToListAsync(ct);
 
         return (rawItems, totalCount);
@@ -84,7 +85,7 @@ public class ArtistRepository : IArtistRepository
         return await q
             .OrderBy(a => a.Name)
             .Take(maxResults)
-            .Select(a => new ArtistListItem(a.Id, a.Name, a.ExternalProvider, 0))
+            .Select(a => new ArtistListItem(a.Id, a.Name, a.ExternalProvider, a.CatalogEntries.Count(), a.ImageUrl))
             .ToListAsync(ct);
     }
 
