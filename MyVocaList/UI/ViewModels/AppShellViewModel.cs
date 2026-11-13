@@ -8,7 +8,7 @@ namespace MyVocaList.UI.ViewModels;
 /// </summary>
 public class AppShellViewModel : ViewModelBase
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly INavigationService _navigationService;
     private readonly IWhatsNewService _whatsNewService;
     private readonly IVersionCheckService _versionCheckService;
 
@@ -24,11 +24,11 @@ public class AppShellViewModel : ViewModelBase
     public event Action? ExitRequested;
 
     public AppShellViewModel(
-        IServiceProvider serviceProvider,
+        INavigationService navigationService,
         IWhatsNewService whatsNewService,
         IVersionCheckService versionCheckService)
     {
-        _serviceProvider = serviceProvider;
+        _navigationService = navigationService;
         _whatsNewService = whatsNewService;
         _versionCheckService = versionCheckService;
         NavigateCommand = new AsyncRelayCommand<string>(route => NavigateAsync(route!));
@@ -63,24 +63,7 @@ public class AppShellViewModel : ViewModelBase
             return;
         }
 
-        var queryIndex = route.IndexOf('?');
-        var baseRoute = queryIndex >= 0 ? route[..queryIndex] : route;
-        var queryString = queryIndex >= 0 ? route[(queryIndex + 1)..] : null;
-
-        if (!NavigationConfig.PageTypes.TryGetValue(baseRoute, out var pageType))
-            return;
-
-        var page = (Page)_serviceProvider.GetRequiredService(pageType);
-        await Shell.Current.Navigation.PushAsync(page);
-
-        if (queryString is not null && page.BindingContext is IQueryAttributable attributable)
-        {
-            var queryParams = queryString
-                .Split('&', StringSplitOptions.RemoveEmptyEntries)
-                .Select(p => p.Split('=', 2))
-                .Where(p => p.Length == 2)
-                .ToDictionary(p => p[0], p => (object)p[1]);
-            attributable.ApplyQueryAttributes(queryParams);
-        }
+        // BUG-086 round 3: flyout pages and in-app sub-pages share one push mechanism (INavigationService.PushAsync).
+        await _navigationService.PushAsync(route);
     }
 }
