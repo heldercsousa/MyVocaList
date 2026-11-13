@@ -10,10 +10,10 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 (D1…D17). The device check (T11) is his.
 
 ### Checkpoint
-- **Phase:** T3 `To Review` (see `## T3`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
-- **Last build/test:** `dotnet test` → 1018 passed, 0 failed.
-- **Next:** commit T3 (no push) → orchestrator review; then T4 (suggestion services).
-- **Context manifest:** `plan.md § T4`, `design.md § 3.4`, `Contracts/DTOs/MusicSearchResultDto.cs`, `Services/DeezerProvider.cs` (all under the worktree root).
+- **Phase:** T4 `To Review` (see `## T4`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`. T4 commit is the latest `feat(artwork)` commit on the branch.
+- **Last build/test:** `dotnet test` → 1027 passed, 0 failed (baseline 1018 + 9 new).
+- **Next:** orchestrator review of T4; then T5 (save rules).
+- **Context manifest:** `plan.md § T5`, `design.md § 3.4`, `Domain/Resolution/SongFormSaveRequest.cs`, `Services/SongService.cs` (all under the worktree root).
 
 ## T0 — Evaluation and spec (2026-11-13) — Done
 
@@ -238,3 +238,84 @@ None. Implementation decision (not in design.md): a whitespace-only album title 
 ### Build notes
 Build: passed (0 errors) | Tests: 1018 passed, 0 failed | Commit SHA: (see commit)
 Files written and re-read: `Contracts/DTOs/MusicSearchResultDto.cs`, `Services/DeezerProvider.cs` (both sections), `MyVocaList.Tests/Unit/Services/DeezerProviderImageTests.cs` (test fixed after first Red; re-read the artist-field change)
+
+## T4 — Suggestion DTOs and services carry images and album (2026-11-13) — To Review
+
+**Plan:** `plan.md § T4`
+**Status:** To Review
+**Started:** 2026-11-13
+**Completed:** 2026-11-13
+
+### What was done
+- `SongSuggestionDto`: trailing optional `ImageUrl = null`, `ArtistImageUrl = null`, `AlbumTitle = null`; computed `RowImageUrl => ImageUrl ?? ArtistImageUrl`. Moved to a record with a body (positional parameters unchanged).
+- `ArtistSuggestionDto`: trailing optional `ImageUrl = null`.
+- `SongSuggestionService.MapLocal` copies `hit.ImageUrl`, `hit.ArtistImageUrl` and passes `null` for album. Promoted rows go through `MapLocal`, so they carry the stored images (T2 fills the lookups). Remote mapping in `ResolveLocalArtistsAsync` copies `r.ImageUrl`, `r.ArtistImageUrl`, `r.AlbumTitle`.
+- `ArtistSuggestionService.SearchNameRemoteAsync` remote mapping copies `r.ImageUrl`. The local mapping is unchanged, so `ImageUrl` stays null (REQ-ART-24).
+- No change to dedup, promotion, ordering, limits, thresholds or status logic.
+
+### Deviations
+- None against the spec. The new test files need `using MyVocaList.Domain.Resolution;` for `SimilarityConstants` (the existing test file gets it another way); a build fix, not a design change.
+
+### Red evidence
+- New tests written first: `Unit/Services/SongSuggestionServiceImageTests.cs` (6 tests) and `Unit/Services/ArtistSuggestionServiceImageTests.cs` (3 tests).
+- Red run: `dotnet test` failed to compile with CS1061 on `SongSuggestionDto` for `ImageUrl`, `ArtistImageUrl`, `AlbumTitle` and `RowImageUrl`. The captured output was cut at 40 lines, so the matching `ArtistSuggestionDto.ImageUrl` errors are not in the record. These are compile-level reds, the same kind as T2.
+- Behaviour assertions were observed only after the DTO change (Green run below).
+
+### Verification
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → 1027 passed, 0 failed, 0 skipped (baseline 1018, +9 new). Build 0 errors.
+- Existing tests: none edited, none failing. One intermediate run (against a stale binary, the test project did not compile at that point) showed a single failure in `SongFormViewModelTests.TitleOptionSource_SetsNoteThroughUiThreadHelper` (expected 1, actual 2). The test passed when run alone and in the next full run (1027 passed). The ViewModel is not touched by T4. Possibly flaky under parallel UI-thread helper timing; not investigated further.
+- Android build not run: no MAUI head project touched.
+
+### AC traceability
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-ART-06 | Local title option carries the hit's song image and artist image; no album | `MapLocal` | `SearchTitleLocalAsync_HitWithBothImages_OptionCarriesSongAndArtistImage` |
+| REQ-ART-06 | Row image falls back to the artist image when the song has none; null when neither | `SongSuggestionDto.RowImageUrl` | `SearchTitleLocalAsync_NoSongImage_RowImageFallsBackToArtistImage`, `SearchTitleLocalAsync_NoImages_RowImageIsNull` |
+| REQ-ART-06 | Remote title option carries cover, artist picture and album | `ResolveLocalArtistsAsync` mapping | `SearchTitleRemoteAsync_RemoteTitleOption_CarriesCoverArtistImageAndAlbum` |
+| REQ-ART-06 | Remote option without a cover falls back to the artist picture | `RowImageUrl` | `SearchTitleRemoteAsync_RemoteTitleOptionNoCover_RowImageFallsBackToArtistPicture` |
+| REQ-ART-06 | Promoted row carries the stored images, not Deezer's, and no album | `MapLocal` via `FindByExternalIdsAsync` | `SearchTitleRemoteAsync_PromotedRow_CarriesStoredImagesNotDeezerImages` |
+| REQ-ART-24 | Remote artist suggestion carries the picture | `ArtistSuggestionService` remote mapping | `SearchNameRemoteAsync_RemoteArtistSuggestion_CarriesArtistImage` |
+| REQ-ART-24 | Remote artist without picture carries null | `ArtistSuggestionDto.ImageUrl` default | `SearchNameRemoteAsync_RemoteArtistWithoutPicture_ImageUrlIsNull` |
+| REQ-ART-24 | Local artist suggestion keeps ImageUrl null | unchanged local mapping | `SearchNameLocalAsync_StoredArtistWithImage_LocalSuggestionImageIsNull` |
+
+### Final record declarations (verbatim)
+```csharp
+public sealed record SongSuggestionDto(
+    int? LocalId,
+    string Title,
+    string ArtistName,
+    int? LocalArtistId,
+    string? ExternalId,
+    string? ExternalProvider,
+    bool IsRemote,
+    string Version = "",
+    string? LocalArtistName = null,
+    string? ImageUrl = null,
+    string? ArtistImageUrl = null,
+    string? AlbumTitle = null)
+{
+    /// <summary>The image a row shows: the song image, else the artist image, else null (REQ-ART-06).</summary>
+    public string? RowImageUrl => ImageUrl ?? ArtistImageUrl;
+}
+
+public sealed record ArtistSuggestionDto(
+    int? LocalId,
+    string Name,
+    string? ExternalId,
+    string? ExternalProvider,
+    bool IsRemote,
+    string? ImageUrl = null);
+```
+
+### Changed files
+- `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`
+- `Contracts/DTOs/Suggestions/ArtistSuggestionDto.cs`
+- `Services/SongSuggestionService.cs`
+- `Services/ArtistSuggestionService.cs`
+- `MyVocaList.Tests/Unit/Services/SongSuggestionServiceImageTests.cs` (new)
+- `MyVocaList.Tests/Unit/Services/ArtistSuggestionServiceImageTests.cs` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results/task-log.md`
+
+### Notes for T8
+- `SongSuggestionDto.RowImageUrl` is the row image for the Title option (REQ-ART-06). `AlbumTitle` is non-null only on remote rows.
+- Local artist options (`ArtistSuggestionDto.ImageUrl`) stay null until the Artist form item, per REQ-ART-24. The ViewModel must set `Avatar` placeholder for them anyway.
