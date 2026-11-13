@@ -104,7 +104,7 @@ public class SongFormViewModelTests
     private static AutocompleteSuggestion Pick(SongSuggestionDto dto) =>
         new(dto.Title, string.Empty, dto);
 
-    // [AC] REQ-SFT-04: a local option shows "artist · version · In your library".
+    // [AC] REQ-ART-07/08: a local option shows "artist · version"; the source "Library" is the trailing text.
     [Fact]
     public async Task TitleOptionSource_LocalHit_SupportingTextHasArtistVersionAndLibraryMarker()
     {
@@ -115,10 +115,11 @@ public class SongFormViewModelTests
 
         var option = Assert.Single(options);
         Assert.Equal("Creep", option.Headline);
-        Assert.Equal("Radiohead · Pablo Honey · In your library", option.SupportingText);
+        Assert.Equal("Radiohead · Pablo Honey", option.SupportingText);
+        Assert.Equal("Library", option.TrailingText);
     }
 
-    // [AC] REQ-SFT-04: a local option with an empty Version omits the version part.
+    // [AC] REQ-ART-07/08: a local option with an empty Version omits the version part; the trailing text is "Library".
     [Fact]
     public async Task TitleOptionSource_LocalHitEmptyVersion_OmitsVersionPart()
     {
@@ -127,10 +128,12 @@ public class SongFormViewModelTests
 
         var options = await SearchTitle(sut, "creep");
 
-        Assert.Equal("Radiohead · In your library", Assert.Single(options).SupportingText);
+        var option = Assert.Single(options);
+        Assert.Equal("Radiohead", option.SupportingText);
+        Assert.Equal("Library", option.TrailingText);
     }
 
-    // [AC] REQ-SFT-04: a remote option shows "artist · version · Deezer" (D21).
+    // [AC] REQ-ART-07/08: a remote option shows "artist · version"; the source "Deezer" is the trailing text.
     [Fact]
     public async Task TitleOptionSource_RemoteHit_SupportingTextIsArtistVersionAndDeezer()
     {
@@ -141,10 +144,11 @@ public class SongFormViewModelTests
 
         var option = Assert.Single(options);
         Assert.Equal("Creep", option.Headline);
-        Assert.Equal("Radiohead · Live · Deezer", option.SupportingText);
+        Assert.Equal("Radiohead · Live", option.SupportingText);
+        Assert.Equal("Deezer", option.TrailingText);
     }
 
-    // [AC] REQ-SFT-04: a remote option with an empty Version omits the version part (D21).
+    // [AC] REQ-ART-07/08: a remote option with an empty Version omits the version part; the trailing text is "Deezer".
     [Fact]
     public async Task TitleOptionSource_RemoteHitEmptyVersion_OmitsVersionPart()
     {
@@ -153,7 +157,9 @@ public class SongFormViewModelTests
 
         var options = await SearchTitle(sut, "creep");
 
-        Assert.Equal("Radiohead · Deezer", Assert.Single(options).SupportingText);
+        var option = Assert.Single(options);
+        Assert.Equal("Radiohead", option.SupportingText);
+        Assert.Equal("Deezer", option.TrailingText);
     }
 
     // [AC] REQ-SFT-05: one row per song; local first, then promoted (local rows), then remote.
