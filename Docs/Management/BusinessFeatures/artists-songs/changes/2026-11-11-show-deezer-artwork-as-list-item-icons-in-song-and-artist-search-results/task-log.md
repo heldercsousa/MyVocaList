@@ -10,9 +10,9 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 (D1…D17). The device check (T11) is his.
 
 ### Checkpoint
-- **Phase:** T8 `To Review` (see `## T8`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
+- **Phase:** T9 `To Review` (see `## T9`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
 - **Last build/test:** android build 0 errors; `dotnet test` -> 1071 passed, 0 failed.
-- **Next:** orchestrator review of T8; then T9 (`SongsPage.xaml`).
+- **Next:** commit T9 (no push); orchestrator review of T9.
 - **Context manifest:** `plan.md § T9`, `design.md § 3.6`, `MyVocaList/UI/Pages/Songs/SongsPage.xaml`, `Contracts/DTOs/List/SongListItemDto.cs`, `MyVocaList/UI/Components/Lists/ListItemLeadingImage.xaml`.
 
 ## T0 — Evaluation and spec (2026-11-13) — Done
@@ -503,3 +503,36 @@ The `[AC]` lines were renamed from REQ-SFT-04 to REQ-ART-07/08.
 
 ### Spec gaps / deviations
 None. REQ-ART-14 "a local Title pick starts a form with no pending image" holds by construction (a local pick navigates to a fresh edit form); no extra test.
+
+## T9 — Songs list rows show the image and name the artist (2026-11-13) — To Review
+
+**Plan:** `plan.md § T9`
+**Status:** To Review
+**Started:** 2026-11-13
+**Completed:** 2026-11-13
+
+### What was done
+`SongsPage.xaml` only, both `DataTemplate`s (`ItemTemplate` and `SelectedItemTemplate`):
+- Leading content: `ListItemLeadingIcon Icon="music_note_outlined"` replaced by
+  `ListItemLeadingImage ImageSource="{Binding ImageUrl}" PlaceholderIcon="music_note_outlined" Margin="0,8"`
+  (row image = song image, else artist image, else null, from `SongListItemDto.ImageUrl`).
+- `SupportingText` changed from `{Binding FeaturedArtists}` to `{Binding SupportingText}` (artist · version · feat. featured, REQ-ART-20).
+- Trailing content, `IsSelected` / `IsChecked`, commands, `CrudListView` attributes and `SongsViewModel` untouched.
+
+### Changed files
+- `MyVocaList/UI/Pages/Songs/SongsPage.xaml`
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results/task-log.md`
+
+### Verification
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 0 errors (warnings only, pre-existing NU1902/NU1903).
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → 1071 passed, 0 failed, 0 skipped (baseline 1071).
+- Re-read both templates after the edits: both show the new bindings, nothing else changed.
+
+### Level-C no-test decision
+- REQ-ART-19 (row image and supporting text on screen): pure XAML binding, no logic; the data is covered by T2 projection tests. On-screen check is T11.
+- REQ-ART-21 (72 dp row via `Margin="0,8"` on the 56 dp leading image): no unit test; verified on device in T11.
+- REQ-ART-22 (grey placeholder container and icon when no image): no unit test; verified on device in T11.
+- No emulator run here (device check is T11). Status stays `To Review`.
+
+### Design concern
+None.
