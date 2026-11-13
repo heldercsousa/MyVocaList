@@ -16,7 +16,8 @@ public class SongRepository : ISongRepository
     private const string TitleSearchSelectSql =
         """
         SELECT s.Id AS SongId, s.Title AS Title, s.Version AS Version, s.ArtistId AS ArtistId,
-               a.Name AS ArtistName, s.ExternalProvider AS ExternalProvider, s.ExternalId AS ExternalId
+               a.Name AS ArtistName, s.ExternalProvider AS ExternalProvider, s.ExternalId AS ExternalId,
+               s.ImageUrl AS ImageUrl, a.ImageUrl AS ArtistImageUrl
         FROM SongSearch
         JOIN Songs s ON s.Id = SongSearch.rowid
         JOIN Artists a ON a.Id = s.ArtistId
@@ -71,7 +72,9 @@ public class SongRepository : ISongRepository
                 s.ArtistId,
                 s.OriginalArtist.Name,
                 s.FeaturedArtists,
-                s.ExternalProvider))
+                s.ExternalProvider,
+                s.Version,
+                s.ImageUrl ?? s.OriginalArtist.ImageUrl))
             .ToListAsync(ct);
 
         return (items, totalCount);
@@ -191,7 +194,8 @@ public class SongRepository : ISongRepository
                 .OrderBy(s => s.Title.Length)
                 .Take(take)
                 .Select(s => new SongSearchHit(
-                    s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId))
+                    s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId,
+                    s.ImageUrl, s.OriginalArtist.ImageUrl))
                 .ToListAsync(ct);
         }
 
@@ -230,7 +234,8 @@ public class SongRepository : ISongRepository
             .AsNoTracking()
             .Where(s => s.ExternalProvider == provider && ids.Contains(s.ExternalId))
             .Select(s => new SongSearchHit(
-                s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId))
+                s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId,
+                s.ImageUrl, s.OriginalArtist.ImageUrl))
             .ToListAsync(ct);
     }
 
@@ -251,7 +256,8 @@ public class SongRepository : ISongRepository
                     EF.Functions.Collate(s.OriginalArtist.Name, CollationConstants.Default) == EF.Functions.Collate(artistName, CollationConstants.Default) &&
                     EF.Functions.Collate(s.Version, CollationConstants.Default) == EF.Functions.Collate(version ?? string.Empty, CollationConstants.Default))
                 .Select(s => new SongSearchHit(
-                    s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId))
+                    s.Id, s.Title, s.Version, s.ArtistId, s.OriginalArtist.Name, s.ExternalProvider, s.ExternalId,
+                    s.ImageUrl, s.OriginalArtist.ImageUrl))
                 .ToListAsync(ct);
             foreach (var m in matches) hits[m.SongId] = m;
         }
