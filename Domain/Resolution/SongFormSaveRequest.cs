@@ -16,6 +16,8 @@ namespace MyVocaList.Domain.Resolution;
 /// <param name="PendingUrls">Karaoke URLs to attach when the song is created.</param>
 /// <param name="ArtistDecision">The user's answer to the near-duplicate artist sheet, if any.</param>
 /// <param name="SongDecision">The user's answer to the duplicate-song sheet, if any.</param>
+/// <param name="ImageUrl">Pending Deezer cover for the song (add mode only, REQ-ART-15); normalised by the Service.</param>
+/// <param name="ArtistImageUrl">Pending Deezer artist picture, applied under the REQ-ART-16 rule; normalised by the Service.</param>
 public sealed record SongFormSaveRequest(
     int? SongId,
     string Title, string Version, string? FeaturedArtists, string? Lyrics,
@@ -24,7 +26,9 @@ public sealed record SongFormSaveRequest(
     string? ExternalProvider, string? ExternalId,
     IReadOnlyList<string> PendingUrls,
     ArtistDecision ArtistDecision,
-    SongDecision SongDecision);
+    SongDecision SongDecision,
+    string? ImageUrl = null,
+    string? ArtistImageUrl = null);
 
 /// <summary>The user's answer to the near-duplicate artist sheet (REQ-SFT-19).</summary>
 public abstract record ArtistDecision

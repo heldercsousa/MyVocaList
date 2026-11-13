@@ -265,7 +265,8 @@ public class SongService : ISongService
     private Task<(bool success, string message, Song? song, SaveField failedField)> CreateSongWithUrlsCoreAsync(
         int? artistId, string? newArtistName, string title, string version,
         string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
-        IEnumerable<string> urls, CancellationToken ct)
+        IEnumerable<string> urls, CancellationToken ct,
+        string? songImageUrl = null, string? artistImageUrl = null, bool fillArtistImage = false)
     {
         // REQ-SFT-21: exactly one of artistId / newArtistName. Pure input validation — it stays
         // OUTSIDE the lambda (REQ-UOW-41), so a rejected call opens no DI scope and writes nothing.
@@ -296,6 +297,7 @@ public class SongService : ISongService
                 return (false, "This music-database song is already in your library", null, SaveField.None);
 
             int effectiveArtistId;
+            Artist? existingArtist = null;
             if (hasNewArtistName)
             {
                 // REQ-SFT-18 / REQ-UOW-28: the nested service is resolved from sp, so its own
@@ -307,6 +309,10 @@ public class SongService : ISongService
                     await artistService.CreateArtistAsync(newArtistName!, ct: ct);
                 if (!artistCreated || newArtist is null)
                     return (false, artistMessage, null, SaveField.Artist);
+
+                // REQ-ART-16: an artist created by this Save carries the pending picture from its first flush.
+                if (artistImageUrl is not null)
+                    newArtist.ImageUrl = artistImageUrl;
 
                 // REQ-UOW-35: flush (not commit) so the generated Artist.Id exists before the song is
                 // staged. The transaction stays open — any later failure rolls the artist back too.
@@ -322,6 +328,7 @@ public class SongService : ISongService
                 var artist = await artistRepository.GetByIdAsync(artistId!.Value, ct);
                 if (artist == null)
                     return (false, "Artist not found", null, SaveField.Artist);
+                existingArtist = artist;
                 effectiveArtistId = artistId.Value;
             }
 
@@ -330,6 +337,12 @@ public class SongService : ISongService
             // WHERE parameter, so an untrimmed check value still matches trimmed stored rows.
             if (await songRepository.ExistsByTitleVersionForArtistAsync(effectiveArtistId, title, version, ct))
                 return (false, "A song with this title and version already exists for this artist", null, SaveField.None);
+
+            // REQ-ART-16 / REQ-ART-18: an existing artist is only ever filled, never overwritten, and only
+            // once every refusal above has passed. The entity is tracked by this scope's context, so the
+            // unit of work's save persists the assignment.
+            if (fillArtistImage && artistImageUrl is not null && existingArtist is { ImageUrl: null })
+                existingArtist.ImageUrl = artistImageUrl;
 
             // Song.Title/Version/FeaturedArtists trimming is enforced by the ValueConverter (design.md § D3).
             var song = new Song
@@ -341,6 +354,7 @@ public class SongService : ISongService
                 Lyrics = lyrics,
                 ExternalId = externalId,
                 ExternalProvider = externalProvider,
+                ImageUrl = songImageUrl,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -382,6 +396,10 @@ public class SongService : ISongService
         SongFormSaveRequest request, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(request);
+
+        // REQ-ART-03: both pending image URLs are normalised once, up front; an invalid value becomes null.
+        var songImageUrl = MyVocaList.Domain.Rules.ImageUrlRules.Normalize(request.ImageUrl);
+        var artistImageUrl = MyVocaList.Domain.Rules.ImageUrlRules.Normalize(request.ArtistImageUrl);
 
         // Rule 1 (REQ-SFT-15 / REQ-SFT-12 / REQ-SFT-21): pure input validation — it stays OUTSIDE any
         // unit of work (REQ-UOW-41), so a rejected save opens no DI scope. The typed-artist-name rule
@@ -445,7 +463,8 @@ public class SongService : ISongService
             var (created, createMessage, song, failedField) = await CreateSongWithUrlsCoreAsync(
                 resolved.ArtistId, resolved.NewArtistName, request.Title, request.Version,
                 request.FeaturedArtists, request.Lyrics, externalId, externalProvider,
-                request.PendingUrls ?? [], ct);
+                request.PendingUrls ?? [], ct,
+                songImageUrl, artistImageUrl, resolved.FillArtistImage);
 
             return created && song is not null
                 ? SaveSucceeded(createMessage, song.Id)
@@ -478,7 +497,7 @@ public class SongService : ISongService
             return SaveFormResolution.Proceed(pickedArtistId, newArtistName: null);
 
         if (request.ArtistDecision is ArtistDecision.UseExisting useExisting)
-            return SaveFormResolution.Proceed(useExisting.ArtistId, newArtistName: null);
+            return SaveFormResolution.Proceed(useExisting.ArtistId, newArtistName: null, fillArtistImage: false);
 
         // Rule 1, last check (REQ-SFT-20): the artist may be created, so the typed name is validated
         // with IArtistService's own rules before any resolution or write — never duplicated here.
@@ -602,12 +621,16 @@ public class SongService : ISongService
     /// Intermediate result of the <see cref="SaveFromFormAsync"/> read: either an outcome that ends the
     /// save (<see cref="StopOutcome"/>), or the artist to write with — an existing id XOR a new name.
     /// </summary>
-    private sealed record SaveFormResolution(SongFormSaveOutcome? StopOutcome, int? ArtistId, string? NewArtistName)
+    private sealed record SaveFormResolution(
+        SongFormSaveOutcome? StopOutcome, int? ArtistId, string? NewArtistName, bool FillArtistImage)
     {
-        public static SaveFormResolution Stop(SongFormSaveOutcome outcome) => new(outcome, null, null);
+        public static SaveFormResolution Stop(SongFormSaveOutcome outcome) => new(outcome, null, null, false);
 
-        public static SaveFormResolution Proceed(int? artistId, string? newArtistName)
-            => new(null, artistId, newArtistName);
+        /// <param name="fillArtistImage">
+        /// REQ-ART-16: false only for an artist chosen through <c>ArtistDecision.UseExisting</c>.
+        /// </param>
+        public static SaveFormResolution Proceed(int? artistId, string? newArtistName, bool fillArtistImage = true)
+            => new(null, artistId, newArtistName, fillArtistImage);
     }
 
     /// <inheritdoc />
