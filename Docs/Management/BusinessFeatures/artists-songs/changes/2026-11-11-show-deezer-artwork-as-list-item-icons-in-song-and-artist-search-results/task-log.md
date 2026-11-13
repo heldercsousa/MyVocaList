@@ -10,10 +10,10 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 (D1…D17). The device check (T11) is his.
 
 ### Checkpoint
-- **Phase:** T6 `To Review` (see `## T6`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
-- **Last build/test:** android build 0 errors; `dotnet test` -> 1041 passed, 0 failed.
-- **Next:** orchestrator review of T6; then T7 (AutocompleteDXField rows) / T8.
-- **Context manifest:** `plan.md § T7`, `design.md § 3.7`, `MyVocaList/UI/Components/Lists/ListItemLeadingImage.xaml`, `ListItemLeadingAvatar.xaml`, `UI/Components/TextFields/AutocompleteDXField.xaml`.
+- **Phase:** T7 `To Review` (see `## T7`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
+- **Last build/test:** android build 0 errors; `dotnet test` -> 1045 passed, 0 failed.
+- **Next:** orchestrator review of T7; then T8 (SongFormViewModel sets LeadingKind/ImageUrl/PlaceholderIcon/TrailingText).
+- **Context manifest:** `plan.md § T8`, `design.md § 3.7`, `Contracts/Models/AutocompleteSuggestion.cs`, `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml`.
 
 ## T0 — Evaluation and spec (2026-11-13) — Done
 
@@ -411,3 +411,46 @@ Level C (pure XAML, no logic): no unit test. The ACs (REQ-ART-22/23) are verifie
 - `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`: after `ListItemLeadingImage` -> 0 errors (27+ NU1903 warnings, pre-existing); after `ListItemLeadingAvatar` -> 0 errors.
 - `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` -> 1041 passed, 0 failed.
 - Emulator/device run not done (T11 is the device check); status stays To Review.
+
+## T7 — AutocompleteDXField option row: leading image or avatar and trailing text (2026-11-13) — To Review
+
+Component record (four gates, approval pre-authorised): `Docs/Management/DevCycleCraft/autocomplete-component/changes/2026-11-13-autocompletedxfield-option-rows-optional-leading-image-or-avatar-and-trailing-text/README.md`.
+
+### What was done
+- `AutocompleteSuggestion`: optional `init` properties `LeadingKind` (default `None`), `ImageUrl`, `PlaceholderIcon`, `TrailingText`; computed `HasLeadingImage`, `HasLeadingAvatar`. New enum `AutocompleteLeadingKind { None, Image, Avatar }` in its own file. Constructor and `IsCreateNew` unchanged.
+- `AutocompleteDXField.xaml`: only the option row `DataTemplate` rewritten as `Grid Auto,*,Auto` (`Padding="16,8"`): `ListItemLeadingImage` / `ListItemLeadingAvatar` in column 0 (12 dp right margin, centred), the two labels in column 1 (`MaxLines=1`, `TailTruncation`), `Label.Small` trailing text in column 2 (12 dp left margin, hidden when null). Added `lists` xmlns. `Label.Small` exists (`MaterialStyles.xaml:163`).
+- The string -> `ImageSource` compiled binding compiled without error (same as `YouTubeSearchPage`). No code-behind or logic touched.
+- Not verified here: DX `AutoCompleteEdit` rows growing to template content (72 dp for image rows); device check (T11).
+
+### Consumer map and per-consumer risk (from the component record)
+| Consumer | Options built by |
+|----------|------------------|
+| `SongFormPage.xaml:32` (`titleField`) | `SongFormViewModel.ToTitleOption` |
+| `SongFormPage.xaml:66` (`artistField`) | `SongFormViewModel.cs:342` |
+| `PersonFormPage.xaml:20` (`nameField`) | `PersonFormViewModel.cs:301` |
+
+| Consumer | What could break | Verification |
+|----------|------------------|--------------|
+| `PersonFormPage` `nameField` | Row height/text position; long text now ellipsised instead of wrapped | Device: Person menu unchanged for normal names; unit tests green |
+| `SongFormPage` `titleField` | Taller rows (72 dp); pick, lock, X must work | Device (T11) |
+| `SongFormPage` `artistField` | Row gains avatar (56 dp row) | Device (T11) |
+| `ArtistFormViewModel` options | None (not bound to a page) | Build |
+
+### Changed files
+- `Contracts/Models/AutocompleteSuggestion.cs`
+- `Contracts/Models/AutocompleteLeadingKind.cs` (new)
+- `MyVocaList/UI/Components/TextFields/AutocompleteDXField.xaml`
+- `MyVocaList.Tests/Unit/Contracts/AutocompleteSuggestionTests.cs` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results/task-log.md`
+
+### Verification
+- Red: test file added first; build failed with CS0103/CS1061 for the missing `AutocompleteLeadingKind`, `LeadingKind`, `ImageUrl`, `PlaceholderIcon`, `TrailingText`.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`: 0 errors.
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj`: 1045 passed, 0 failed (1041 baseline + 4 new).
+
+### AC table
+| AC | Implementation | Test |
+|----|----------------|------|
+| REQ-ART-06 | `LeadingKind.Image`, `HasLeadingImage`, row template col 0 | `LeadingKindImage_SetsOnlyHasLeadingImage` |
+| REQ-ART-08 | `LeadingKind.Avatar`, `HasLeadingAvatar` | `LeadingKindAvatar_SetsOnlyHasLeadingAvatar` |
+| REQ-ART-09 | defaults `None`/null, constructor unchanged | `Defaults_...`, `ThreeArgumentConstructor_...` |
