@@ -123,12 +123,13 @@ public partial class ArtistsViewModel : CrudListViewModelBase<ArtistListItem>
         OnPropertyChanged(nameof(IsEmptyNoResults));
     }
 
-    // BUG-086: absolute route (the hidden "songs" flyout item is not a registered relative route) and awaited,
-    // so a failed navigation surfaces instead of being discarded.
+    // BUG-086: the catalog is PUSHED on top of this list (not an absolute "//songs" route, which replaces the stack
+    // and makes Songs the root page: hamburger instead of back, and device back closes the app). Awaited, so a failed
+    // navigation surfaces instead of being discarded.
     private async Task NavigateToCatalogAsync(ArtistListItem? artist)
     {
         if (artist == null) return;
-        await _navigationService.GoToAsync(
-            $"//{Routes.Songs}?artistId={artist.Id}&artistName={Uri.EscapeDataString(artist.Name)}");
+        await _navigationService.PushAsync(
+            $"{Routes.Songs}?artistId={artist.Id}&artistName={Uri.EscapeDataString(artist.Name)}");
     }
 }

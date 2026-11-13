@@ -139,3 +139,124 @@ songs), Bravo Band (1 catalog song), Charlie Choir (0). Reinstalling the APK res
 - `MyVocaList/UI/ViewModels/SongsViewModel.cs`
 - `MyVocaList.Tests/Unit/ViewModels/SongsViewModelBug086Tests.cs`
 - `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028/task-log.md`
+
+---
+## Task: BUG-086 round 3 — catalog page back arrow, exit confirmation, empty title (emulator)
+**Plan:** Docs/Management/BusinessFeatures/artists-songs/bugs/2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028/README.md
+**Status:** To Review (emulator-verified except (1) on a catalog with real rows; see Round 3 result)
+
+### Checkpoint (final)
+- Step 6 of 6 complete: code, tests (975 passed), Release build + install, emulator verification, task-log. Commit and push pending (see Build notes).
+- Context manifest: `UI/ViewModels/ArtistsViewModel.cs`, `UI/ViewModels/SongsViewModel.cs`, `UI/Services/INavigationService.cs`, `UI/Services/NavigationService.cs`, `UI/ViewModels/AppShellViewModel.cs`, `UI/Pages/Songs/SongsPage.xaml.cs`, `MyVocaList.Tests/Unit/ViewModels/ArtistsViewModelBug086Tests.cs`, `MyVocaList.Tests/Unit/ViewModels/SongsViewModelBug086Tests.cs`
+
+### Emulator repro (Release build, pixel_5 android-36, package com.myvocalist, pre-fix)
+- (2) reproduced: catalog page "Zed Quartet" shows the hamburger (`Open navigation drawer` at 77,213) and no back arrow.
+- (3) reproduced: device BACK on the catalog page (`KEYCODE_BACK`) leaves the app to the launcher (Google search screen). No "Exit MyVocaList?" sheet appears. Stack was [Songs] only.
+- Control: device BACK on Venues root shows "Exit MyVocaList?" (exit confirmation works on the root).
+- (1) NOT reproduced: artist "Zed Quartet" (0 catalog rows, created via Artist form + Song form) shows title "Zed Quartet" and "No song registered", on warm and cold start. Artist "Ana&Co" also shows its title. Song creation through UI did not add catalog rows (Phase 15 stub).
+**Started:** 2026-11-12
+**Branch:** `fix/bug-086-round3` (worktree `agent-adac9fdc44e3d19cd`, based on `fix/bug-086-round2` e39010d2); no code changed
+
+### Checkpoint
+- Branch/worktree: `fix/bug-086-round3` in `.claude/worktrees/agent-adac9fdc44e3d19cd`, clean (no commits yet)
+- Step 1 of 6 (last completed: branch created, code read; BLOCKED at start-emulator: no Android emulator binary on this machine)
+- Last build/test state: none run in round 3 (round 2 base: 972 passed)
+- Blocker: `adb` exists (`C:\Android\platform-tools\adb.exe`), but `emulator.exe` is not on PATH and not found under `C:\Android`, `C:\Program Files\Android`, `C:\Users\helde\AppData\Local\Android` or the registry. AVD `pixel_5_-_api_36_0_1` exists in `C:\Users\helde\.android\avd` but its system image (`system-images\android-36\google_apis\x86_64`) is missing; `adb devices` lists no device.
+- Next command once an SDK with `emulator.exe` is restored: `emulator -avd pixel_5_-_api_36_0_1`
+- Context manifest:
+  - `MyVocaList/UI/ViewModels/AppShellViewModel.cs` — flyout push path (PushAsync, query applied after push)
+  - `MyVocaList/UI/Pages/Base/CrudListPageBase.cs` — OnNavigatedTo forces hamburger (governed; do not edit)
+  - `MyVocaList/UI/ViewModels/SongsViewModel.cs` — catalog mode, title, reload guards
+  - `MyVocaList/UI/ViewModels/ArtistsViewModel.cs` — NavigateToCatalogAsync (GoToAsync `//songs`)
+  - `MyVocaList/UI/Services/INavigationService.cs` + `NavigationService.cs` — navigation seam
+  - `MyVocaList/AppShell.xaml` + `AppShell.xaml.cs` — hidden `songs` FlyoutItem; OnBackButtonPressed fallback
+  - `MyVocaList/UI/Pages/Venues/VenuesPage.xaml.cs` — exit confirmation at root
+  - `MyVocaList/Navigation/NavigationConfig.cs` — PageTypes map
+
+### Round 3 result (emulator, Release build, fixed)
+**Root cause (confirmed on emulator):** the catalog was reached by an absolute `//songs?...` route, which replaces the Shell
+navigation stack. Songs became the root page: the hamburger was shown (CrudListPageBase forces it), and device back on the
+root Songs page closed the app (no "Exit MyVocaList?" sheet). Confirmed on the pre-fix build with `KEYCODE_BACK`.
+
+**Fix:**
+- `INavigationService.PushAsync(route)` / `PopAsync()` (new). `NavigationService` (constructor takes `IServiceProvider`,
+  DI-resolves the page, applies the query BEFORE `PushAsync`, unescapes values, then pushes). Same mechanism as the flyout.
+- `AppShellViewModel.NavigateAsync` (non-exit routes) delegates to `INavigationService.PushAsync` (constructor takes `INavigationService`, not `IServiceProvider`).
+- `ArtistsViewModel.NavigateToCatalogAsync` calls `PushAsync("songs?artistId=..&artistName=..")` (awaited, no discard).
+- `SongsViewModel` implements `IQueryAttributable` (`ApplyQueryAttributes`), takes `INavigationService`, and adds `ApplyAppBarNavigation()`:
+  catalog mode shows `arrow_back_outlined` whose command pops the page. Global mode is unchanged.
+- `SongsPage.OnNavigatedTo` override calls `ApplyAppBarNavigation()` AFTER `base.OnNavigatedTo` (CrudListPageBase is governed and unchanged).
+- `[QueryProperty]` attributes kept (the hidden `songs` FlyoutItem route still resolves).
+- `AppShell.xaml(.cs)`, `MauiProgram.cs`, `CrudListPageBase`, `CrudListViewModelBase` are NOT changed. Exit confirmation was not changed: it works because Venues stays the Shell root.
+
+**Tests (Red seen first):** Red = `dotnet test --filter Bug086` failed to compile (CS1061 `PushAsync`, `PopAsync`, `ApplyQueryAttributes`,
+`ApplyAppBarNavigation`; CS1729 ctor arity). Green: Bug086 filter 8 passed, 0 failed. Full suite 975 passed, 0 failed.
+New: `ApplyQueryAttributes_BeforeFirstLoad_InitialLoadTargetsThatArtistWithTitle`, `ApplyQueryAttributes_ArtistWithZeroCatalogRows_KeepsNameAsTitle`,
+`ApplyAppBarNavigation_CatalogMode_ShowsBackArrowThatPopsPage`. Updated: `ArtistsViewModelBug086Tests` now asserts `PushAsync` (was `GoToAsync("//songs")`).
+
+**Emulator evidence (pre-fix build, same flow):**
+- (2) hamburger on the catalog page ("Zed Quartet", 0 catalog rows): reproduced.
+- (3) device back on the catalog page: app left to the launcher, no exit sheet: reproduced.
+- Control: device back on Venues root shows "Exit MyVocaList?".
+- (1) empty title: NOT reproduced. "Zed Quartet" and "Ana&Co" (created via the Artist form, zero catalog rows) show their name on warm and cold start.
+
+**Emulator evidence (fixed build):**
+- (2) catalog "Ana&Co": title "Ana&Co", back arrow (`arrow_back_outlined`) at top-left, no hamburger. Cold start "Zed Quartet": title "Zed Quartet", back arrow.
+- Arrow tap on catalog returns to the Artists list (Zed catalog → Artists list).
+- (3) device back from catalog → Artists list (app stays open). Device back from Artists → Venues. Device back on Venues → "Exit MyVocaList?" sheet (Cancel closes it; app stays open).
+- Flyout Songs (global): title "Songs", hamburger, "No song registered" (DB was reset by reinstall; no songs).
+- Device back from global Songs → Venues (no exit).
+- logcat: 0 `FATAL EXCEPTION` / `F AndroidRuntime` lines for the app process.
+- Not verified on emulator: catalog with real catalog rows (no UI path creates catalog rows; Phase 15 stub). Round 2 data showed rows display via the same code path, unchanged here.
+- Note: the emulator DB was reset by the reinstall; the two artists were recreated through the Artist form.
+
+**Still open for Helder (device check):**
+1. Catalog page: back arrow shown; arrow and device back return to Artists; device back from Artists/Venues shows exit sheet.
+2. Title for an artist with catalog rows (cannot be seeded from the UI) — expected to show the name.
+3. Global Songs from the flyout: "Songs" with hamburger.
+
+### Traceability (round 3)
+| AC / case | Implementation | Test / evidence |
+|-----------|----------------|-----------------|
+| artists-songs AC-9.1 (catalog opens for that artist) | `ArtistsViewModel.NavigateToCatalogAsync` → `INavigationService.PushAsync` | `ArtistsViewModelBug086Tests.ViewCatalog_PushesRelativeSongsRouteWithArtistContext`; emulator (Zed, Ana&Co) |
+| BUG-086 r3 (2) back arrow in catalog | `SongsViewModel.ApplyAppBarNavigation`, `SongsPage.OnNavigatedTo` | `ApplyAppBarNavigation_CatalogMode_ShowsBackArrowThatPopsPage`; emulator screenshot 22 |
+| BUG-086 r3 (3) device back / exit sheet | Push keeps Venues as Shell root (no change to AppShell) | emulator: back to Artists, back to Venues, exit sheet on Venues |
+| BUG-086 r3 (1) title on first load (query before push) | `SongsViewModel.ApplyQueryAttributes` before `PushAsync` | `ApplyQueryAttributes_BeforeFirstLoad_InitialLoadTargetsThatArtistWithTitle`; emulator title on cold start |
+| zero catalog rows keeps name as title | — | `ApplyQueryAttributes_ArtistWithZeroCatalogRows_KeepsNameAsTitle`; emulator "Zed Quartet" + "No song registered" |
+
+### Changed files:
+- `MyVocaList/UI/Services/INavigationService.cs`
+- `MyVocaList/UI/Services/NavigationService.cs`
+- `MyVocaList/UI/ViewModels/AppShellViewModel.cs`
+- `MyVocaList/UI/ViewModels/ArtistsViewModel.cs`
+- `MyVocaList/UI/ViewModels/SongsViewModel.cs`
+- `MyVocaList/UI/Pages/Songs/SongsPage.xaml.cs`
+- `MyVocaList.Tests/Unit/ViewModels/ArtistsViewModelBug086Tests.cs`
+- `MyVocaList.Tests/Unit/ViewModels/SongsViewModelBug086Tests.cs`
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028/task-log.md`
+
+### Build notes (round 3)
+Build: `dotnet build MyVocaList/MyVocaList.csproj -c Release -f net10.0-android -t:Install` exit 0 (install verified: lastUpdateTime updated, versionName 0.2.0-alpha.0.52) | Tests: 975 passed, 0 failed | Commit SHA: see branch head `fix/bug-086-round3`
+Files re-read after edit: `NavigationService.cs` and `INavigationService.cs` (written in full, content as intended), `AppShellViewModel.cs` (lines 1-70 read after edit), `SongsPage.xaml.cs` (Edit applied, then built).
+
+### Earlier proposal (superseded by the implementation above)
+
+### Static diagnosis from code reading (hypotheses, NOT reproduced)
+- **(2) hamburger instead of back:** `CrudListPageBase.OnNavigatedTo` (`UI/Pages/Base/CrudListPageBase.cs`) unconditionally sets
+  `AppBarNavigationIcon = "menu_outlined"` and the hamburger command on every navigation. Its comment states CRUD lists are
+  always top-level, and the catalog is the first pushed CRUD sub-page. The catalog page therefore always shows the hamburger.
+  Fixing this inside the base class touches a governed component (`component-safety-gate.md`), so it is out of bugfix scope.
+- **(3) device back closes the app:** `ArtistsViewModel.NavigateToCatalogAsync` uses the absolute `//songs?...` route. An absolute
+  route replaces the navigation stack, so Songs becomes the root page. `AppShell.OnBackButtonPressed` shows the exit confirmation
+  only when `CurrentPage is VenuesPage` at root, so back on a root Songs page exits without confirmation. The flyout path
+  (`AppShellViewModel.NavigateAsync`) uses `PushAsync` on top of Venues, so the stack keeps Venues as the confirmation root.
+- **(1) empty title:** the round-2 fix covers the stale-name case. A separate cause is possible on the push path: the query is
+  applied after `PushAsync`, and `OnAppearing` (which starts `InitializeAsync`) may run before the query arrives. Title and list
+  ordering on device is unverified.
+
+### Proposal (needs Helder's decision, not implemented)
+1. Route the catalog through a push-based method on `INavigationService` (resolve the page, apply the query BEFORE `PushAsync`,
+   then push), reusing the `AppShellViewModel.NavigateAsync` logic. This keeps Venues as the stack root (fixes 3).
+2. Make the back/hamburger choice context-aware. A `SongsPage` override of `OnNavigatedTo` could set the back arrow in catalog mode
+   after `base.OnNavigatedTo`, which avoids editing the governed base class. This needs a design decision (page override vs. governed change).
+3. Re-verify (1) on the emulator once it is available, using a freshly created artist and songs.
