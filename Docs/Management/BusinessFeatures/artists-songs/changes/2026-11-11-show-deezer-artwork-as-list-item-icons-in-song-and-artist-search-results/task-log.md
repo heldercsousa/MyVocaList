@@ -554,6 +554,7 @@ None.
 | T7 (component, own item) | `24413deb` | 1045 / 0 / 0, Android build 0 errors |
 | T8 | `7fe23c46` | 1071 / 0 / 0, Android build 0 errors |
 | T9 | `bdd6eb67` | 1071 / 0 / 0, Android build 0 errors |
+| T10a (fix found by the real-SQLite tests) | `04f0f329` | 1077 / 0 / 0, Android build 0 errors |
 
 ### Independent verification (fresh `verifier`, 2026-11-13)
 
@@ -571,7 +572,7 @@ Issues it raised and what was done:
 | D1 | Task entries lack the commit SHA | Fixed: commit table above |
 | D2 | The new columns carry the `NOCASE_NOACCENT` collation (global convention), while `design.md § 3.2` said "no collation" | Fixed: note added to `design.md § 3.2`; behaviour accepted (nothing searches the columns) |
 | D3 | Close-out docs not committed at verification time | Fixed by the close-out commit |
-| D4 | No real-SQLite test that the fill of an existing artist's image is persisted by the real unit of work | Fixed: see `## T10a` below |
+| D4 | No real-SQLite test that the fill of an existing artist's image is persisted by the real unit of work | Done as T10a, and it found a real defect: the fill was silently lost (the artist is read untracked under the NoTracking default). Fixed in `04f0f329` with an explicit `IArtistRepository.UpdateAsync`, the pattern `PersonService` and `VenueService` use. See `## T10a` |
 | D5 | `SongFormViewModelTests.TitleOptionSource_SetsNoteThroughUiThreadHelper` failed once during T4 on a stale binary and has passed in every full run since | Not reproduced; noted here. If it recurs, check the generation guard of the UI-thread note |
 | D6 | Cosmetic: the doc comment of `AutocompleteSuggestion.TrailingText` says "e.g. album title" (it carries the source word); in `ImageUrlRulesTests` the `[AC]` comment sits above the `[Theory]` attribute | Left as is (comment-only); to tidy the next time those files are touched |
 

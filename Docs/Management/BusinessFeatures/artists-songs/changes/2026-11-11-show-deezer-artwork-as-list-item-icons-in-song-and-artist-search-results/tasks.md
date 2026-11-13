@@ -27,6 +27,6 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] T9 `SongsPage.xaml`: leading image, supporting text, 72 dp row. Depends on T2, T6. (REQ-ART-19, 20, 21)
 
 ## Phase 5 — Close-out
-- [ ] T10a Real-SQLite test: the artist image fill is persisted by the real unit of work (verifier D4). (REQ-ART-16)
-- [ ] T10 Full test run, Android build, verifier, traceability matrix, governed-list update, follow-up items registered, merge to `develop`.
+- [x] T10a Real-SQLite test: the artist image fill is persisted by the real unit of work (verifier D4). (REQ-ART-16)
+- [x] T10 Full test run, Android build, verifier, traceability matrix, governed-list update, follow-up items registered, merge to `develop`.
 - [ ] T11 **Device check (Helder)** — checklist in `task-log.md § Device check`. (REQ-ART-21, 22, 23 and the component Gate 3 rows)
