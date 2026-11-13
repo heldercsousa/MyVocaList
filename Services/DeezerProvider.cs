@@ -1,4 +1,5 @@
 using MyVocaList.Contracts.DTOs;
+using MyVocaList.Domain.Rules;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 
@@ -24,7 +25,16 @@ public sealed class DeezerProvider : IMusicMetadataProvider
     {
         var response = await GetAsync<DeezerArtist>($"search/artist?q={Uri.EscapeDataString(term)}", ct);
         return response.Data?.Take(MaxResults)
-            .Select(a => new MusicSearchResultDto(a.Id.ToString(), ProviderName, a.Name, null, null))
+            .Select(a => new MusicSearchResultDto(
+                a.Id.ToString(),
+                ProviderName,
+                a.Name,
+                null,
+                null,
+                null,
+                ImageUrlRules.Normalize(a.PictureMedium),
+                null,
+                null))
             .ToList()
             ?? [];
     }
@@ -41,7 +51,10 @@ public sealed class DeezerProvider : IMusicMetadataProvider
                 t.Artist?.Name ?? string.Empty,
                 string.IsNullOrWhiteSpace(t.TitleShort) ? t.Title : t.TitleShort,
                 null,
-                NormaliseVersion(t.TitleVersion)))
+                NormaliseVersion(t.TitleVersion),
+                ImageUrlRules.Normalize(t.Album?.CoverMedium),
+                ImageUrlRules.Normalize(t.Artist?.PictureMedium),
+                NormaliseAlbumTitle(t.Album?.Title)))
             .ToList()
             ?? [];
     }
@@ -91,18 +104,34 @@ public sealed class DeezerProvider : IMusicMetadataProvider
         return value;
     }
 
+    /// <summary>Trims the album title; null when absent or blank (REQ-ART-01).</summary>
+    private static string? NormaliseAlbumTitle(string? raw)
+    {
+        var value = raw?.Trim();
+        return string.IsNullOrEmpty(value) ? null : value;
+    }
+
     private record DeezerError(
         [property: JsonPropertyName("message")] string? Message,
         [property: JsonPropertyName("code")] int? Code);
     private record DeezerListResponse<T>(
         [property: JsonPropertyName("data")] List<T>? Data,
         [property: JsonPropertyName("error")] DeezerError? Error);
-    private record DeezerArtist([property: JsonPropertyName("id")] long Id, [property: JsonPropertyName("name")] string Name);
+    private record DeezerArtist(
+        [property: JsonPropertyName("id")] long Id,
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("picture_medium")] string? PictureMedium);
     private record DeezerTrack(
         [property: JsonPropertyName("id")] long Id,
         [property: JsonPropertyName("title")] string Title,
         [property: JsonPropertyName("title_short")] string? TitleShort,
         [property: JsonPropertyName("title_version")] string? TitleVersion,
-        [property: JsonPropertyName("artist")] DeezerTrackArtist? Artist);
-    private record DeezerTrackArtist([property: JsonPropertyName("name")] string Name);
+        [property: JsonPropertyName("artist")] DeezerTrackArtist? Artist,
+        [property: JsonPropertyName("album")] DeezerTrackAlbum? Album);
+    private record DeezerTrackArtist(
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("picture_medium")] string? PictureMedium);
+    private record DeezerTrackAlbum(
+        [property: JsonPropertyName("title")] string? Title,
+        [property: JsonPropertyName("cover_medium")] string? CoverMedium);
 }
