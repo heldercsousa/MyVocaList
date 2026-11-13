@@ -1,4 +1,5 @@
 using MyVocaList.Contracts.DTOs.List;
+using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
 
@@ -11,10 +12,11 @@ public class SongsViewModelBug086Tests
     private readonly Mock<ICatalogService> _catalogMock = new();
     private readonly Mock<ISongService> _songMock = new();
     private readonly Mock<ISnackbarComponent> _snackMock = new();
+    private readonly Mock<INavigationService> _navigationMock = new();
     private readonly Mock<ILogger<SongsViewModel>> _loggerMock = new();
 
     private SongsViewModel CreateSut() =>
-        new(_catalogMock.Object, _songMock.Object, _snackMock.Object, _loggerMock.Object);
+        new(_catalogMock.Object, _songMock.Object, _snackMock.Object, _navigationMock.Object, _loggerMock.Object);
 
     private void SetupEmptyGlobalAndCatalog()
     {
@@ -93,5 +95,66 @@ public class SongsViewModelBug086Tests
 
         Assert.Equal("Bravo Band", sut.AppBarTitle);
         Assert.Equal("Bravo Band", notifiedTitles[^1]);
+    }
+
+    // BUG-086 round 3 (emulator): the catalog is pushed with its artist context APPLIED BEFORE the page appears
+    // (IQueryAttributable), so the first load already targets that artist and the title is the artist name.
+    // [AC] artists-songs AC-9.1: the catalog shows that artist's songs under the artist name.
+    [Fact]
+    public async Task ApplyQueryAttributes_BeforeFirstLoad_InitialLoadTargetsThatArtistWithTitle()
+    {
+        SetupEmptyGlobalAndCatalog();
+        _catalogMock.Setup(c => c.GetPagedCatalogForArtistAsync(It.IsAny<int>(), It.IsAny<int>(),
+                        It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync((Enumerable.Empty<SongListItemDto>(), 0));
+
+        var sut = CreateSut();
+        sut.ApplyQueryAttributes(new Dictionary<string, object>
+        {
+            ["artistId"] = "5",
+            ["artistName"] = "Echo Choir",
+        });
+        await sut.InitializeAsync();
+
+        _catalogMock.Verify(c => c.GetPagedCatalogForArtistAsync(5, 1, It.IsAny<int>(),
+                        It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
+        _songMock.Verify(s => s.GetPagedSongsForListAsync(It.IsAny<int>(), It.IsAny<int>(),
+                        It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        Assert.True(sut.IsCatalogMode);
+        Assert.Equal("Echo Choir", sut.AppBarTitle);
+    }
+
+    // BUG-086 round 3 (emulator): a catalog opened from an artist with zero catalog rows keeps the artist name in the
+    // title (the empty list is the empty state, not a missing title).
+    [Fact]
+    public async Task ApplyQueryAttributes_ArtistWithZeroCatalogRows_KeepsNameAsTitle()
+    {
+        SetupEmptyGlobalAndCatalog();
+        _catalogMock.Setup(c => c.GetPagedCatalogForArtistAsync(It.IsAny<int>(), It.IsAny<int>(),
+                        It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync((Enumerable.Empty<SongListItemDto>(), 0));
+
+        var sut = CreateSut();
+        sut.ApplyQueryAttributes(new Dictionary<string, object> { ["artistId"] = "9", ["artistName"] = "Zed Quartet" });
+        await sut.InitializeAsync();
+
+        Assert.Equal("Zed Quartet", sut.AppBarTitle);
+        Assert.True(sut.IsEmptyNoSongs);
+    }
+
+    // BUG-086 round 3 (emulator): in catalog mode the page shows a BACK arrow (not the hamburger), and the arrow pops
+    // the pushed page back to the Artists list.
+    [Fact]
+    public void ApplyAppBarNavigation_CatalogMode_ShowsBackArrowThatPopsPage()
+    {
+        var sut = CreateSut();
+        sut.ApplyQueryAttributes(new Dictionary<string, object> { ["artistId"] = "2", ["artistName"] = "Bravo Band" });
+        _navigationMock.Setup(n => n.PopAsync()).Returns(Task.CompletedTask);
+
+        sut.ApplyAppBarNavigation();
+        sut.AppBarNavigationCommand.Execute(null);
+
+        Assert.Equal("arrow_back_outlined", sut.AppBarNavigationIcon);
+        _navigationMock.Verify(n => n.PopAsync(), Times.Once);
     }
 }
