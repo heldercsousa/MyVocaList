@@ -10,9 +10,10 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 (D1…D17). The device check (T11) is his.
 
 ### Checkpoint
-- **Phase:** T0 spec — spec and plan reviews running.
-- **Next:** apply review fixes → commit docs → dispatch T1.
-- **Context manifest:** `requirements.md`, `design.md`, `plan.md`, `tasks.md`, this file, the two component READMEs (paths in `tasks.md`).
+- **Phase:** T2 done, `To Review` (see `## T2`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
+- **Last build/test:** `dotnet test` → 1005 passed, 0 failed; Android build 0 errors.
+- **Next:** commit T2 (no push) → orchestrator review; then T3 (Deezer provider).
+- **Context manifest:** `plan.md § T2`, `requirements.md` (REQ-ART-06/10/19/20), `design.md § 3.1–3.3`, `Contracts/DTOs/List/SongListItemDto.cs`, `Domain/ReadModels/SongSearchHit.cs`, `Domain/ReadModels/ArtistListItem.cs`, `Infra/Repository/SongRepository.cs`, `Infra/Repository/CatalogRepository.cs`, `Infra/Repository/ArtistRepository.cs` (all under the worktree root).
 
 ## T0 — Evaluation and spec (2026-11-13) — Done
 
@@ -111,3 +112,68 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 ### Notes for T2 / T5
 - `using MyVocaList.Domain.Rules;` is needed where `ImageUrlRules` is used (no global using added).
 - Migration `Down` is a raw statement; any future migration that rebuilds `Songs`/`Artists` on SQLite will hit the same FTS trigger issue.
+
+## T2 — Read models and projections (2026-11-13) — To Review
+
+**Plan:** `plan.md § T2`
+**Status:** To Review
+**Started:** 2026-11-13
+**Completed:** 2026-11-13
+
+### What was done
+- `SongListItemDto`: trailing optional `Version = null`, `ImageUrl = null`; computed `SupportingText` = non-empty parts of artist name, version, `"feat. " + featured`, joined by `" · "`. Each part is trimmed before the emptiness check (whitespace-only counts as empty).
+- `SongSearchHit`: trailing optional `ImageUrl = null`, `ArtistImageUrl = null`.
+- `ArtistListItem`: trailing optional `ImageUrl = null`.
+- Projections (all `IQueryable` `new` calls pass every argument explicitly, CS0854):
+  - `SongRepository.cs`:
+    - `TitleSearchSelectSql` (raw SQL, lines 18–20): adds `s.ImageUrl AS ImageUrl, a.ImageUrl AS ArtistImageUrl` (aliases `s`/`a` are the existing `Songs s` / `Artists a` joins).
+    - `GetPagedAsync` (lines 69–77): adds `s.Version`, `s.ImageUrl ?? s.OriginalArtist.ImageUrl`.
+    - `SearchTitleCoreAsync` EF prefix fallback (lines 196–198): `s.ImageUrl, s.OriginalArtist.ImageUrl`.
+    - `FindByExternalIdsAsync` (lines 236–238): same two values.
+    - `FindByTitleAndArtistNamesAsync` (lines 258–260): same two values.
+  - `CatalogRepository.cs` `GetPagedByArtistAsync` (lines 41–49): same projection change as `GetPagedAsync`.
+  - `ArtistRepository.cs`:
+    - `GetPagedAsync` (lines 61–66): adds `a.ImageUrl`.
+    - `SearchByNameAsync` (line 88): `a.CatalogEntries.Count()` replaces the constant 0; adds `a.ImageUrl`.
+- Grep for `new SongListItemDto(|new SongSearchHit(|new ArtistListItem(` found no other projection sites. The remaining sites are plain (non-expression) constructions in tests and keep the optional arguments.
+
+### Deviations
+- None against the spec. The `SupportingText` trimming of each part is an implementation detail within REQ-ART-20 ("non-empty parts"); recorded here, no spec change needed.
+
+### Red evidence
+- New tests written before the production change. `dotnet test` failed to compile with the expected missing-member errors: CS1061 (`SupportingText`, `Version`, `ImageUrl`, `ArtistImageUrl` not defined on `SongListItemDto`, `SongSearchHit`, `ArtistListItem`) and CS1739 (no parameter `Version` on `SongListItemDto`). These are compile-level reds, not assertion-level; the projection assertions were not separately observed failing.
+- A test-side compile error (missing `using Microsoft.EntityFrameworkCore;` for `MigrateAsync` in `ArtistListItemProjectionTests.cs`) was fixed before the Green run.
+
+### Verification
+- `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → 1005 passed, 0 failed, 0 skipped (baseline 984; +21 new: 6 `SongListItemDtoTests`, 6 `SongListItemProjectionTests`, 6 `SongSearchHitImageTests`, 3 `ArtistListItemProjectionTests`).
+- No existing test edited; no existing test failed.
+- `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 0 errors, 27 warnings (NU1903 vulnerability warnings, pre-existing).
+
+### Changed files
+- `Contracts/DTOs/List/SongListItemDto.cs`
+- `Domain/ReadModels/SongSearchHit.cs`
+- `Domain/ReadModels/ArtistListItem.cs`
+- `Infra/Repository/SongRepository.cs`
+- `Infra/Repository/CatalogRepository.cs`
+- `Infra/Repository/ArtistRepository.cs`
+- `MyVocaList.Tests/Unit/Contracts/SongListItemDtoTests.cs` (new)
+- `MyVocaList.Tests/Integration/Repositories/SongListItemProjectionTests.cs` (new)
+- `MyVocaList.Tests/Integration/Repositories/SongSearchHitImageTests.cs` (new)
+- `MyVocaList.Tests/Integration/Repositories/ArtistListItemProjectionTests.cs` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results/task-log.md`
+
+### AC traceability
+| AC | Criterion | Implementation | Test |
+|----|-----------|----------------|------|
+| REQ-ART-06 | Title option hits carry song image and artist image (FTS raw SQL, artist-scoped FTS, EF prefix fallback) | `TitleSearchSelectSql`, `SearchTitleCoreAsync` | `SongSearchHitImageTests`: `SearchTitleCandidatesAsync_FtsPath_CarriesBothImageUrls`, `SearchTitleCandidatesForArtistAsync_FtsPath_CarriesBothImageUrls`, `SearchTitleCandidatesAsync_PrefixPath_CarriesImageUrlsAndNullSongImage`, `SearchTitleCandidatesAsync_PrefixPath_SongWithImage_CarriesSongImage` |
+| REQ-ART-06 | Promoted-row lookups carry both URLs | `FindByExternalIdsAsync`, `FindByTitleAndArtistNamesAsync` | `SongSearchHitImageTests`: `FindByExternalIdsAsync_CarriesBothImageUrls`, `FindByTitleAndArtistNamesAsync_CarriesBothImageUrls` |
+| REQ-ART-10 | Artist search returns real catalog count (3) and image | `ArtistRepository.SearchByNameAsync` | `ArtistListItemProjectionTests`: `SearchByNameAsync_ArtistWithThreeCatalogEntries_ReturnsRealCountAndImage`, `SearchByNameAsync_NoCatalogNoImage_ReturnsZeroAndNull`, `GetPagedAsync_CarriesArtistImage` |
+| REQ-ART-19 | Row image = song image, else artist image, else null (plain list and catalog) | `SongRepository.GetPagedAsync`, `CatalogRepository.GetPagedByArtistAsync` | `SongListItemProjectionTests`: `GetPagedAsync_SongWithImage_RowImageIsSongImage`, `GetPagedAsync_SongWithoutImageArtistWithImage_RowImageIsArtistImage`, `GetPagedAsync_NeitherHasImage_RowImageIsNull`, `GetPagedByArtistAsync_SongWithImageAndVersion_CarriesImageAndVersion`, `GetPagedByArtistAsync_SongWithoutImage_FallsBackToOriginalArtistImage` |
+| REQ-ART-19 | Version carried into the list item (plain and catalog) | `SongListItemDto.Version`, projections | `SongListItemProjectionTests`: `GetPagedAsync_SongWithVersion_CarriesVersion`, `GetPagedByArtistAsync_SongWithImageAndVersion_CarriesImageAndVersion` |
+| REQ-ART-20 | Supporting text: artist only / artist+version / artist+featured / all three / empty artist / whitespace parts | `SongListItemDto.SupportingText` | `SongListItemDtoTests`: `SupportingText_ArtistOnly_IsArtistName`, `SupportingText_ArtistAndVersion_IsArtistDotVersion`, `SupportingText_ArtistAndFeatured_IsArtistDotFeat`, `SupportingText_AllThree_IsInOrder`, `SupportingText_EmptyArtistName_OmitsArtistPart`, `SupportingText_WhitespaceParts_AreOmitted` |
+
+### Notes for T4 / T8 / T9
+- T4: `SongSearchHit.ImageUrl` / `ArtistImageUrl` are filled by every lookup, so `SongSuggestionService.MapLocal` can copy them directly; promoted rows carry the stored images.
+- T4: `ArtistListItem.ImageUrl` is filled by `SearchByNameAsync`, so the Artist suggestion local mapping can copy it (REQ-ART-24 says local stays null until the Artist form item; the decision is for T4 to apply).
+- T8/T9: `SongListItemDto.SupportingText` already implements REQ-ART-20; the Songs list template can bind it directly. `ImageUrl` is the row image (song else artist), so no fallback logic is needed in XAML.
+- `ArtistListItem.CatalogCountText` now reads real counts in search results.

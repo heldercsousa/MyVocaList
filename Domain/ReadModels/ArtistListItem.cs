@@ -8,7 +8,8 @@ namespace MyVocaList.Domain.ReadModels;
 /// <param name="Name">Artist display name</param>
 /// <param name="ExternalProvider">Source provider (e.g. "musicbrainz")</param>
 /// <param name="CatalogCount">Number of songs in the catalog for this artist</param>
-public record ArtistListItem(int Id, string Name, string ExternalProvider, int CatalogCount)
+/// <param name="ImageUrl">Stored artist image URL, or null (REQ-ART-10).</param>
+public record ArtistListItem(int Id, string Name, string ExternalProvider, int CatalogCount, string? ImageUrl = null)
 {
     /// <summary>Human-readable catalog count text for UI display.</summary>
     public string CatalogCountText => CatalogCount == 0
