@@ -10,7 +10,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] T0 Evaluation, MD3 evidence (`findings.md`), requirements, design, component records, plan; spec and plan reviews.
 
 ## Phase 1 — Domain and Infra
-- [ ] T1 `ImageUrl` on `Song` and `Artist`, `ImageUrlRules`, EF configuration, migration `AddImageUrlToSongsAndArtists`. (REQ-ART-03, 05)
+- [x] T1 `ImageUrl` on `Song` and `Artist`, `ImageUrlRules`, EF configuration, migration `AddImageUrlToSongsAndArtists`. (REQ-ART-03, 05)
 - [ ] T2 Read models and projections: `SongListItemDto` (+`Version`, `ImageUrl`, `SupportingText`), `SongSearchHit`, `ArtistListItem`; `SongRepository`, `CatalogRepository`, `ArtistRepository`. Depends on T1. (REQ-ART-06, 10, 19, 20)
 
 ## Phase 2 — Services
