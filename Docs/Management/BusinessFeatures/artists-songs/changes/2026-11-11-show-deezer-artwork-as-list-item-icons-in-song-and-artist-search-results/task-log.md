@@ -10,10 +10,10 @@ marked "pre-authorised" rests on that instruction. The decisions taken for him a
 (D1…D17). The device check (T11) is his.
 
 ### Checkpoint
-- **Phase:** T4 `To Review` (see `## T4`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`. T4 commit is the latest `feat(artwork)` commit on the branch.
-- **Last build/test:** `dotnet test` → 1027 passed, 0 failed (baseline 1018 + 9 new).
-- **Next:** orchestrator review of T4; then T5 (save rules).
-- **Context manifest:** `plan.md § T5`, `design.md § 3.4`, `Domain/Resolution/SongFormSaveRequest.cs`, `Services/SongService.cs` (all under the worktree root).
+- **Phase:** T5 `To Review` (see `## T5`). Worktree `.claude/worktrees/deezer-artwork`, branch `feature/deezer-artwork`.
+- **Last build/test:** `dotnet test` -> 1041 passed, 0 failed (baseline 1027 + 14 new).
+- **Next:** orchestrator review of T5; then T6/T7/T8.
+- **Context manifest:** `plan.md § T8`, `design.md § 3.4`, `Domain/Resolution/SongFormSaveRequest.cs`, `Services/SongService.cs`.
 
 ## T0 — Evaluation and spec (2026-11-13) — Done
 
@@ -319,3 +319,47 @@ public sealed record ArtistSuggestionDto(
 ### Notes for T8
 - `SongSuggestionDto.RowImageUrl` is the row image for the Title option (REQ-ART-06). `AlbumTitle` is non-null only on remote rows.
 - Local artist options (`ArtistSuggestionDto.ImageUrl`) stay null until the Artist form item, per REQ-ART-24. The ViewModel must set `Avatar` placeholder for them anyway.
+
+## T5 — Save stores the song image and fills an empty artist image (2026-11-13) — To Review
+
+Level A (full TDD). `SongFormSaveRequest` gains trailing optional `ImageUrl` / `ArtistImageUrl`. `SaveFromFormAsync`
+normalises both with `ImageUrlRules.Normalize` first. `CreateSongWithUrlsCoreAsync` (private) gains optional
+`songImageUrl`, `artistImageUrl`, `fillArtistImage`; `UpdateSongCoreAsync` and the public `ISongService` / `CreateSongWithUrlsAsync`
+signatures are unchanged. Everything runs inside the existing unit of work.
+
+Implementation note: an existing artist is filled only after every refusal in the create path has passed (artist
+found, title/version duplicate check), so a refused Save does not even dirty the tracked entity (REQ-ART-18).
+A created artist gets the picture before its first flush.
+
+### Changed files
+- `Domain/Resolution/SongFormSaveRequest.cs`
+- `Services/SongService.cs`
+- `MyVocaList.Tests/Unit/Services/SongServiceSaveFromFormImageTests.cs` (new)
+- `Docs/Management/BusinessFeatures/artists-songs/changes/2026-11-11-show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results/task-log.md`
+
+### Verification
+- Red (request record compiling, service untouched): 7 of the 14 new tests failed on assertions with `Expected: <url> Actual: null`
+  (add with image, both save-as-new cases, created artist plain + `CreateTyped`, existing artist by id, by exact name, invalid-URL test excluded since null is the expected value).
+  The remaining tests assert "unchanged / null" and pass by construction before the change; they guard the rules once it exists.
+- Intermediate Green: `FailedWrite_ChangesNoImage` failed because the fill ran before the duplicate refusal; the fill was moved after the refusals.
+- Final: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj` → 1041 passed, 0 failed (baseline 1027 + 14).
+
+### AC table
+| AC | Test methods |
+|----|--------------|
+| REQ-ART-15 | `SaveFromForm_AddWithPendingImage_StoresImageOnSong`, `SaveFromForm_AddWithoutPendingImage_StoresNull`, `SaveFromForm_AddWithExplicitSaveAsNew_NullsIdentityButKeepsImage` (2 cases) |
+| REQ-ART-16 | `..._ArtistCreatedByPlainPath_GetsArtistImage`, `..._ArtistCreatedByCreateTypedDecision_GetsArtistImage`, `..._ExistingArtistByIdWithoutImage_IsFilled`, `..._ExistingArtistByExactNameWithoutImage_IsFilled`, `..._ExistingArtistWithImage_IsNeverChanged`, `..._ArtistChosenByUseExistingDecision_IsNeverChanged` |
+| REQ-ART-17 | `SaveFromForm_EditModeWithImages_LeavesStoredImagesUnchanged` |
+| REQ-ART-18 | `SaveFromForm_NeedsDecision_ChangesNoImage`, `SaveFromForm_FailedWrite_ChangesNoImage` |
+| REQ-ART-03 | `SaveFromForm_InvalidUrls_AreStoredAsNull` |
+
+### Artist resolution branch -> `FillArtistImage`
+| Branch in `ResolveFormArtistAsync` | `FillArtistImage` |
+|---|---|
+| `request.ArtistId` picked | true |
+| `ArtistDecision.UseExisting` | **false** |
+| `ArtistDecision.CreateTyped` (new artist created) | true |
+| Exact collated match (`ExactLocalMatch` / `ExactExternalMatch`) | true |
+| `NoMatch` (new artist created) | true |
+| `Stop` (invalid name, fuzzy choice needed) | false (no write happens) |
+
