@@ -14,6 +14,19 @@ public partial class ListItemLeadingImage : ContentView
         typeof(ListItemLeadingImage),
         defaultValue: Aspect.AspectFill);
 
+    /// <summary>Icon name shown under the image (grey container). Null: no icon and no container background.</summary>
+    public static readonly BindableProperty PlaceholderIconProperty = BindableProperty.Create(
+        nameof(PlaceholderIcon),
+        typeof(string),
+        typeof(ListItemLeadingImage),
+        defaultValue: null);
+
+    public string PlaceholderIcon
+    {
+        get => (string)GetValue(PlaceholderIconProperty);
+        set => SetValue(PlaceholderIconProperty, value);
+    }
+
     public ImageSource ImageSource
     {
         get => (ImageSource)GetValue(ImageSourceProperty);
