@@ -1,7 +1,7 @@
 ---
 id: song-form-picture-at-the-top-title-and-artist-as-tap-to-edit-text-artist-editable-in-edit-mode
 title: "Song form: picture at the top, Title and Artist as tap-to-edit text, Artist editable in edit mode"
-status: 🟢 Ready
+status: 🟡 In Progress
 target: 2026-11-13
 section: BusinessFeatures
 parent: artists-songs
