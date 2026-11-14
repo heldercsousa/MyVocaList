@@ -57,6 +57,15 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<PlaceLookupGate>();
         services.AddScoped<IPlaceLookupService, PlaceLookupService>();
 
+        // Venue picture from a map pick (REQ-VEN-38..40). Same typed-client rule as the Nominatim client above (BUG-082).
+        services.AddHttpClient<VenuePictureLookupService>(client =>
+        {
+            client.BaseAddress = new Uri("https://www.wikidata.org/");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)");
+            client.Timeout = TimeSpan.FromMilliseconds(MyVocaList.Domain.Constants.SearchConstants.PlaceLookupTimeoutMilliseconds);
+        });
+        services.AddScoped<IVenuePictureLookupService>(sp => sp.GetRequiredService<VenuePictureLookupService>());
+
         // Lyrics source (LRCLIB). Same typed-client pattern as Deezer above (BUG-082): the interface
         // resolves through the typed-client factory, never AddScoped<ILyricsProvider, LrclibLyricsProvider>().
         services.AddHttpClient<LrclibLyricsProvider>(client =>
