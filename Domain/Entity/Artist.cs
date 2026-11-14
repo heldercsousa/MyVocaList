@@ -6,6 +6,8 @@ public class Artist
     public string Name { get; set; }
     public string? ExternalProvider { get; set; }
     public string? ExternalId { get; set; }
+    /// <summary>Absolute https picture URL, or null (REQ-ART-05). Bytes are never stored.</summary>
+    public string? ImageUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

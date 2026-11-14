@@ -37,6 +37,7 @@ Docs/Management/[BusinessFeatures|DevCycleCraft|cross-cutting|milestones]/[featu
 - BACKLOG placement follows the `section:` frontmatter, not the folder. **BACKLOG rows are GENERATED — never hand-edit** (hook-blocked). Register with `backlog_gen.py register`; work set: `python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"`. Schema + verbs: `.claude/library/backlog-generator.md`.
 - **Skill-default overrides:** `brainstorming` writes `design.md`, `writing-plans` writes `plan.md`, task-logs go to `task-log.md` — all in the feature folder above, never `docs/superpowers/`.
 - **Never glob-scan `Docs/`** — read the active feature folder by explicit path. UI/component audits inspect every page, component and rules file, not just those mentioned (`project-governance-reference.md § Scope of inspection`).
+- **Task-log rotation:** `task-log.md` is capped at 300 lines (`tasklog-size-guard.py`). When exceeded, move closed/merged entries to `task-log-archive-YYYY-MM.md` in the same folder (mirroring `backlog-archive/`), keeping only active tasks and open manual device checklists.
 
 ## Continuous Enhancement
 After every task ask what should improve CLAUDE.md, a rules file or a command; update the most specialized file (`project-governance-reference.md § Continuous Enhancement`).
