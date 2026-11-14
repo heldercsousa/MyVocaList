@@ -68,11 +68,12 @@ public partial class VenueMapPickerPage : ContentPage
         switch (type)
         {
             case "ready":
-                await ViewModel.InitializeAsync();
+                // The web view raises this event off the UI thread; the ViewModel state is bound to views.
+                await MainThread.InvokeOnMainThreadAsync(() => ViewModel.InitializeAsync());
                 break;
 
             case "tap":
-                await ViewModel.OnMapTappedAsync(lat, lon);
+                await MainThread.InvokeOnMainThreadAsync(() => ViewModel.OnMapTappedAsync(lat, lon));
                 break;
 
             default:
