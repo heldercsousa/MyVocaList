@@ -3,6 +3,7 @@ using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Domain.Rules;
 using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Extensions.Strings;
@@ -109,6 +110,43 @@ public class ArtistService : IArtistService
             // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
             return (true, $"Artist updated to '{name.Trim()}'");
         }, ct);
+
+    /// <inheritdoc />
+    public Task<Artist?> GetArtistByIdAsync(int id, CancellationToken ct = default)
+        => _uow.ExecuteReadAsync<Artist?>(async sp =>
+        {
+            // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field. The read is
+            // untracked through the DbContext-wide QueryTrackingBehavior.NoTracking default.
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
+            return await artistRepository.GetByIdAsync(id, ct);
+        }, ct);
+
+    /// <inheritdoc />
+    public Task<(bool success, string message)> SetArtistImageAsync(
+        int id, string? imageReference, CancellationToken ct = default)
+    {
+        // REQ-PIC-02: pure normalisation stays OUTSIDE the lambda (REQ-UOW-41); an invalid value becomes null.
+        var reference = ImageReferenceRules.Normalize(imageReference);
+
+        return _uow.ExecuteAsync<(bool success, string message)>(async sp =>
+        {
+            // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+            var artistRepository = sp.GetRequiredService<IArtistRepository>();
+
+            var artist = await artistRepository.GetByIdAsync(id, ct);
+            if (artist == null)
+                return (false, "Artist not found");
+
+            artist.ImageUrl = reference;
+            artist.UpdatedAt = DateTime.UtcNow;
+
+            // Explicit UpdateAsync: GetByIdAsync returns the artist detached (NoTracking default), so the
+            // mutation alone would be lost at save time (artwork item T10a, commit 04f0f329).
+            await artistRepository.UpdateAsync(artist, ct);
+            // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
+            return (true, reference is null ? "Artist picture removed" : "Artist picture saved");
+        }, ct);
+    }
 
     /// <inheritdoc />
     public Task<(bool success, string message)> DeleteArtistsAsync(

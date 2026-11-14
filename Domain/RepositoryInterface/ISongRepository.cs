@@ -103,6 +103,9 @@ public interface ISongRepository
     /// <param name="ct">Cancellation token.</param>
     Task<IReadOnlyList<SongSearchHit>> FindByTitleAndArtistNamesAsync(IReadOnlyCollection<(string Title, string ArtistName, string Version)> items, CancellationToken ct);
 
+    /// <summary>Every stored <c>local:</c> image reference of a song (REQ-PIC-11 orphan sweep).</summary>
+    Task<List<string>> GetLocalImageReferencesAsync(CancellationToken ct = default);
+
     Task AddAsync(Song song, CancellationToken ct);
     Task UpdateAsync(Song song, CancellationToken ct);
     Task DeleteAsync(IEnumerable<int> ids, CancellationToken ct);

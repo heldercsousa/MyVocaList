@@ -43,7 +43,7 @@ public class VenueServiceTests
     public void ValidateNameInput_NameTooLong_ReturnsInvalid()
     {
         var sut = CreateSut();
-        var name = new string('x', 31); // exceeds 30-char limit
+        var name = new string('x', 61); // exceeds 60-char limit
 
         var (isValid, message) = sut.ValidateNameInput(name);
 
@@ -77,12 +77,12 @@ public class VenueServiceTests
     }
 
     [Fact]
-    // [AC] Counter threshold alignment: 31 chars is rejected by the validator → counter error.
+    // [AC] Counter threshold alignment: 61 chars is rejected by the validator → counter error.
     public void GetCharacterCounterInfo_OverMaxLength_IsError()
     {
         var sut = CreateSut();
 
-        var (_, _, isError) = sut.GetCharacterCounterInfo(31);
+        var (_, _, isError) = sut.GetCharacterCounterInfo(61);
 
         Assert.True(isError);
     }
@@ -93,7 +93,7 @@ public class VenueServiceTests
     public async Task CreateVenueAsync_NameTooLong_ReturnsFalse()
     {
         var sut = CreateSut();
-        var name = new string('x', 31);
+        var name = new string('x', 61);
 
         var (success, message) = await sut.CreateVenueAsync(name);
 
