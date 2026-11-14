@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MyVocaList.UI.Pages.Venues.VenueMapPickerPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:venues="clr-namespace:MyVocaList.Contracts.DTOs.Venues;assembly=MyVocaList.Contracts"
+    xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    x:DataType="vm:VenueMapPickerViewModel"
+    Title="Pick the venue location"
+    BackgroundColor="{StaticResource Surface}"
+    SafeAreaEdges="All">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- Search: runs on submit only (REQ-VEN-25), never per keystroke -->
+        <dxe:TextEdit Grid.Row="0"
+                      Text="{Binding SearchText, Mode=TwoWay}"
+                      PlaceholderText="{Binding SearchPlaceholder}"
+                      ReturnType="Search"
+                      ReturnCommand="{Binding SearchCommand}"
+                      Margin="16,8" />
+
+        <!-- Results list: visible while there are results -->
+        <dx:DXCollectionView Grid.Row="1"
+                             ItemsSource="{Binding Results}"
+                             IsVisible="{Binding Results.Count, Converter={StaticResource IsNotZeroConverter}}"
+                             MaximumHeightRequest="240"
+                             UseRippleEffect="True">
+            <dx:DXCollectionView.ItemTemplate>
+                <DataTemplate x:DataType="venues:VenuePlace">
+                    <lists:ListItem
+                        Headline="{Binding Name}"
+                        SupportingText="{Binding AddressLine}">
+                        <lists:ListItem.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectResultCommand}"
+                                CommandParameter="{Binding .}" />
+                        </lists:ListItem.GestureRecognizers>
+                    </lists:ListItem>
+                </DataTemplate>
+            </dx:DXCollectionView.ItemTemplate>
+        </dx:DXCollectionView>
+
+        <Label Grid.Row="1"
+               Text="No place found."
+               IsVisible="{Binding HasNoResults}"
+               StyleClass="Body.Small"
+               Margin="16,8" />
+
+        <!-- Map area: web map, or the offline text when there is no internet -->
+        <Grid Grid.Row="2">
+            <HybridWebView x:Name="mapView"
+                           HybridRoot="venuemap"
+                           DefaultFile="index.html"
+                           IsVisible="{Binding IsOffline, Converter={StaticResource InverseBoolConverter}}" />
+
+            <Label Text="{Binding OfflineText}"
+                   IsVisible="{Binding IsOffline}"
+                   StyleClass="Body.Small"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   Margin="24" />
+
+            <ActivityIndicator IsRunning="{Binding IsSearching}"
+                               IsVisible="{Binding IsSearching}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Start"
+                               Margin="0,8" />
+
+            <ActivityIndicator IsRunning="{Binding IsLookingUp}"
+                               IsVisible="{Binding IsLookingUp}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Start"
+                               Margin="0,8" />
+        </Grid>
+
+        <!-- Bottom panel: the selected place or point, with the confirm action -->
+        <Border Grid.Row="3"
+                IsVisible="{Binding IsPanelVisible}"
+                BackgroundColor="{StaticResource SurfaceContainerLow}"
+                Padding="16">
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{Binding PanelTitle}" StyleClass="Title.Medium" />
+                <Label Text="{Binding PanelText}" StyleClass="Body.Small" />
+                <dx:DXButton Content="{Binding ConfirmText}"
+                             Command="{Binding ConfirmCommand}"
+                             Style="{StaticResource FilledButton}"
+                             HorizontalOptions="Fill" />
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+</ContentPage>
