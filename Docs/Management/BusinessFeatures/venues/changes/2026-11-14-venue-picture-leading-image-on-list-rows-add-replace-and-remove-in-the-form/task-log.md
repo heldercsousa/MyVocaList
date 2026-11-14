@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — V1a, V1b, V2, V2m done (a63f5564); V7a done (54865d1f). V3a dispatched in worktree `venue-profile`; V7b in worktree `venue-map`. Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
+- 2026-11-14 — V1a..V3a done on `venue-profile` (f5cd7d5d); V7a, V7b done on `venue-map` (6ba88e74). Running: V3b (`venue-profile`), V7c (`venue-map`). Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -104,6 +104,26 @@
 | REQ-VEN-32 | street order by country, fallbacks for road, line 2, city, region; cuts to maximum; accents kept | `NominatimAddressMapper.ToPlace`, `BuildStreet` | `ToPlace_NumberFirstCountry_…`, `…_CommaCountryBrazil_…`, `…_OtherCountry_…`, fallback and cut tests |
 | REQ-VEN-26 | place name only for venue categories; one-line address | `BuildName`, `BuildAddressLine` | `ToPlace_VenueCategory_KeepsName` (7), `…_NonVenueCategory_…`, `…_AllFourParts_…`, `…_NoAddressParts_…` |
 | REQ-VEN-30 | name cut to 60 | `Cut` | `ToPlace_LongName_CutTo60Characters` |
+
+## 2026-11-14 — V3a Repository and migration test (Done)
+
+### Changed files
+- `Domain/RepositoryInterface/IVenueRepository.cs`, `Infra/Repository/VenueRepository.cs` (`AddressExistsAsync`, `GetLocalImageReferencesAsync`)
+- `Infra/Migrations/20261114133332_AddVenueProfile.cs` (`Down` only: nine native `ALTER TABLE "Venues" DROP COLUMN` statements)
+- New tests `Integration/Migrations/VenueProfileMigrationTests.cs` (3), `Integration/Repositories/VenueRepositoryAddressTests.cs` (10)
+
+### Verification evidence
+- Commit `f5cd7d5d` on `feature/venue-profile`. Red: test project failed to compile on the two missing repository members. `dotnet test` 1357 passed, 0 failed. Orchestrator re-check: diff holds only the five files; query read against `design.md § 2.3`; the 13 new tests pass.
+- The case- and accent-insensitive duplicate test passes with plain `==` on the collated columns (real SQLite), as the design assumed.
+- Known limit, kept: the migration tests pass with either `Down` body, so they do not prove the native statements are needed. The native form is kept because it never rebuilds `Venues`, which the events tables reference.
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-VEN-20 | six equal fields refuse; case and accents ignored; null equals only null; line 2 distinguishes; own id excluded | `VenueRepository.AddressExistsAsync` | `AddressExistsAsync_SameSixFields_…`, `…_DifferentLetterCaseAndAccents_…`, `…_OnlyLine2Differs_…`, `…_NullLine2OnBothSides_…`, `…_DifferentCity_…`, `…_StoredPostalCodeSearchedNull_…`, `…_ExcludeIdOfTheOnlyMatch_…`, `…_ExcludeIdOfAnotherVenue_…` |
+| REQ-VEN-21 | empty address never collides | guard in `AddressExistsAsync` | `…_EmptyAddress_ReturnsFalseEvenWithEmptyVenuesStored` |
+| REQ-VEN-04 | local venue references listed | `GetLocalImageReferencesAsync` | `GetLocalImageReferencesAsync_ReturnsOnlyLocalVenueReferences` |
+| REQ-VEN-05 | existing rows kept with null columns; collation on text columns; rollback | migration | `AddVenueProfile_ExistingVenues_…`, `…_Up_AddsNineNullableColumns_…`, `…_Down_DropsNineColumns…` |
 
 ## Device check (Helder) — V10
 
