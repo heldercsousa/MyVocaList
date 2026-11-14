@@ -28,6 +28,7 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly ISongSuggestionService _songSuggestions;
     private readonly IImageStore _imageStore;
     private readonly IPhotoPicker _photoPicker;
+    private readonly ISongLyricsService _songLyricsService;
     private int _searchGeneration; // BUG-051: generation counter — guards SearchArtistsAsync against stale completions
 
     // ── Query properties ──────────────────────────────────────────────────
@@ -69,6 +70,11 @@ public partial class SongFormViewModel : ViewModelBase
 
     // ── Lyrics ────────────────────────────────────────────────────────────
     [ObservableProperty] private string? _lyrics;
+    [ObservableProperty] private bool _isLyricsLoading;
+    /// <summary>The running lyrics lookup; tests await it. The pick itself never awaits it (design § 2.5).</summary>
+    public Task LyricsLookupTask { get; private set; } = Task.CompletedTask;
+    /// <summary>REQ-LYR-09: the Lyrics placeholder while a lookup runs.</summary>
+    public string LyricsPlaceholder => IsLyricsLoading ? "Looking for lyrics…" : "Song lyrics (optional)";
 
     // ── YouTube URLs ──────────────────────────────────────────────────────
     [ObservableProperty] private ObservableRangeCollection<SongKaraokeUrlDto> _karaokeUrls = [];
@@ -97,6 +103,8 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isTitleLocked;
 
     private string? _pickFilledVersion;   // Version written by the last remote pick (Q21)
+    private CancellationTokenSource? _lyricsLookupCts;   // REQ-LYR-10: the running lyrics lookup, if any
+    private string? _pickFilledLyrics;                   // REQ-LYR-11/12: the Lyrics text the last lookup wrote
     private string? _pendingImageUrl;        // REQ-ART-11: Deezer cover held between a pick and Save
     private string? _pendingArtistImageUrl;  // REQ-ART-11: Deezer artist picture held between a pick and Save
     private const string SongPlaceholderIcon = "music_note_outlined";
@@ -186,9 +194,11 @@ public partial class SongFormViewModel : ViewModelBase
         INavigationService navigationService,
         ISongSuggestionService songSuggestions,
         IImageStore imageStore,
-        IPhotoPicker photoPicker)
+        IPhotoPicker photoPicker,
+        ISongLyricsService songLyricsService)
     {
         _artistService = artistService;
+        _songLyricsService = songLyricsService;
         _songService = songService;
         _snackbarService = snackbarService;
         _logger = logger;
@@ -476,6 +486,8 @@ public partial class SongFormViewModel : ViewModelBase
     [RelayCommand]
     private void ClearArtist()
     {
+        CancelLyricsLookup();            // REQ-LYR-10
+        DropUntouchedPickFilledLyrics(); // REQ-LYR-11
         SelectedArtistId = null;
         SelectedArtistName = null;
         ArtistSearchText = string.Empty;
@@ -579,6 +591,7 @@ public partial class SongFormViewModel : ViewModelBase
         _imageRemoved = false;                       // REQ-PIC-20: a later pick sets a picture again
         _pickedTitle = dto.Title;                    // REQ-PIC-27: the identity survives an unchanged Title
         NotifyFormImageChanged();                    // REQ-PIC-19: an upload stays first
+        StartLyricsLookup(dto);                      // REQ-LYR-01: before the artist branch, so every pick starts it
 
         if (dto.LocalArtistId.HasValue)
         {
@@ -598,6 +611,82 @@ public partial class SongFormViewModel : ViewModelBase
         ArtistErrorText = string.Empty;
     }
 
+    // ── Lyrics lookup on a Deezer pick (REQ-LYR-01…04, 09…13) ───────────
+
+    partial void OnIsLyricsLoadingChanged(bool value) => OnPropertyChanged(nameof(LyricsPlaceholder));
+
+    /// <summary>
+    /// Starts the lyrics lookup for a Deezer pick. Cancels a running lookup first; drops pick-filled lyrics
+    /// the user did not touch (a new pick replaces them, REQ-LYR-12); starts nothing when Lyrics holds text
+    /// (REQ-LYR-04). The pick does not await the lookup.
+    /// </summary>
+    private void StartLyricsLookup(SongSuggestionDto dto)
+    {
+        CancelLyricsLookup();
+        DropUntouchedPickFilledLyrics();
+        if (!string.IsNullOrWhiteSpace(Lyrics))
+            return;
+
+        var cts = new CancellationTokenSource();
+        _lyricsLookupCts = cts;
+        IsLyricsLoading = true;
+        LyricsLookupTask = RunLyricsLookupAsync(
+            new LyricsQuery(dto.Title, dto.ArtistName, dto.AlbumTitle, dto.DurationSeconds), cts);
+    }
+
+    /// <summary>
+    /// Awaits the lookup and hands its answer to the UI thread. A cancelled lookup is the expected outcome of
+    /// REQ-LYR-10 and is swallowed; the service never throws any other exception for a lookup.
+    /// </summary>
+    private async Task RunLyricsLookupAsync(LyricsQuery query, CancellationTokenSource cts)
+    {
+        string? found;
+        try
+        {
+            found = await _songLyricsService.FindLyricsAsync(query, cts.Token);
+        }
+        catch (OperationCanceledException) when (cts.IsCancellationRequested)
+        {
+            return;
+        }
+
+        RunOnUiThread(() => ApplyLyricsAnswer(cts, found));
+    }
+
+    /// <summary>
+    /// Writes a lookup answer into the form only while that lookup is still the current one (REQ-LYR-10):
+    /// a stale answer touches nothing, so a newer pick keeps its hint.
+    /// </summary>
+    private void ApplyLyricsAnswer(CancellationTokenSource cts, string? found)
+    {
+        if (!ReferenceEquals(_lyricsLookupCts, cts) || cts.IsCancellationRequested)
+            return;
+
+        IsLyricsLoading = false;
+        if (found is not null && string.IsNullOrWhiteSpace(Lyrics))
+        {
+            Lyrics = found;
+            _pickFilledLyrics = found;   // REQ-LYR-11/12: remembered so X or a new pick can take it back
+        }
+    }
+
+    /// <summary>Cancels the running lyrics lookup, drops its token and clears the hint (REQ-LYR-10).</summary>
+    private void CancelLyricsLookup()
+    {
+        _lyricsLookupCts?.Cancel();
+        _lyricsLookupCts?.Dispose();
+        _lyricsLookupCts = null;
+        IsLyricsLoading = false;
+    }
+
+    /// <summary>REQ-LYR-11/12: removes pick-filled lyrics only while the field still equals them (exact comparison).</summary>
+    private void DropUntouchedPickFilledLyrics()
+    {
+        if (_pickFilledLyrics is not null && string.Equals(Lyrics, _pickFilledLyrics, StringComparison.Ordinal))
+            Lyrics = null;
+        _pickFilledLyrics = null;
+    }
+
     private Task OpenSongAsync(int songId) =>
         _navigationService.GoToAsync($"../{Routes.SongForm}?songId={songId}");
 
@@ -605,6 +694,8 @@ public partial class SongFormViewModel : ViewModelBase
     [RelayCommand]
     private void ClearTitle()
     {
+        CancelLyricsLookup();            // REQ-LYR-10
+        DropUntouchedPickFilledLyrics(); // REQ-LYR-11
         SongTitle = string.Empty;
         IsTitleLocked = false;
         SelectedExternalId = string.Empty;
@@ -766,6 +857,7 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private async Task SaveAsync()
     {
+        CancelLyricsLookup();   // REQ-LYR-10: Save starts; a late lookup answer must not reach the form
         if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
 
         ClearSaveDecisions();

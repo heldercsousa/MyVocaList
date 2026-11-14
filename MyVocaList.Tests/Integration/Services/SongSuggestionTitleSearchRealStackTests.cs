@@ -102,7 +102,8 @@ public class SongSuggestionTitleSearchRealStackTests
             new Mock<INavigationService>().Object,
             host.Resolve<ISongSuggestionService>(),
             TestImageStore.PassThrough().Object,
-            new Mock<IPhotoPicker>().Object);
+            new Mock<IPhotoPicker>().Object,
+            new Mock<ISongLyricsService>().Object);
         vm.CompleteHydration();
 
         var options = await vm.TitleOptionSource.SearchAsync("commando", CancellationToken.None);
