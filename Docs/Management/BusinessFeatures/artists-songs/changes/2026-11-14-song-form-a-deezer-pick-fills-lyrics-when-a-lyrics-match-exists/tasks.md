@@ -10,10 +10,10 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] L0 Research (Deezer API, LRCLIB API), code map, requirements, design, backlog item.
 
 ## Phase 1 — Services
-- [~] L1 **Duration through the suggestion DTOs.** (REQ-LYR-01) Size note: six files, two of them one-parameter record changes.
+- [x] L1 **Duration through the suggestion DTOs.** (REQ-LYR-01) Size note: six files, two of them one-parameter record changes.
   - Files owned: `Contracts/DTOs/MusicSearchResultDto.cs`, `Contracts/DTOs/Suggestions/SongSuggestionDto.cs`, `Services/DeezerProvider.cs`, `Services/SongSuggestionService.cs`, new tests `MyVocaList.Tests/Unit/Services/DeezerProviderDurationTests.cs`, `MyVocaList.Tests/Unit/Services/SongSuggestionServiceDurationTests.cs`.
   - Demo: a `search/track` row with `"duration": 215` yields a remote `SongSuggestionDto` with `DurationSeconds == 215`.
-- [ ] L2a **LRCLIB provider.** After L1. (REQ-LYR-03, 15)
+- [~] L2a **LRCLIB provider.** After L1. (REQ-LYR-03, 15)
   - Files owned: new `Contracts/DTOs/LyricsQuery.cs`, `Services/ILyricsProvider.cs`, new `Services/LrclibLyricsProvider.cs`, new test `MyVocaList.Tests/Unit/Services/LrclibLyricsProviderTests.cs`.
   - Demo: a stub returning LRCLIB JSON yields the plain lyrics; a 404 stub yields null; a 500 stub throws.
 - [ ] L2b **Lyrics service and DI.** After L2a. (REQ-LYR-02, 03, 05, 06, 07, 08, 15)
