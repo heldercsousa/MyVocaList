@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — V1a..V3a done on `venue-profile` (f5cd7d5d); V7a, V7b done on `venue-map` (6ba88e74). Running: V3b (`venue-profile`), V7c (`venue-map`). Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
+- 2026-11-14 — V1a..V3b done on `venue-profile` (ddaeed6f); V7a..V7c done on `venue-map` (573ae33b); both branches hold `develop` with the lyrics feature. Running: V4a (`venue-profile`), V8 (`venue-map`). Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -124,6 +124,46 @@
 | REQ-VEN-21 | empty address never collides | guard in `AddressExistsAsync` | `…_EmptyAddress_ReturnsFalseEvenWithEmptyVenuesStored` |
 | REQ-VEN-04 | local venue references listed | `GetLocalImageReferencesAsync` | `GetLocalImageReferencesAsync_ReturnsOnlyLocalVenueReferences` |
 | REQ-VEN-05 | existing rows kept with null columns; collation on text columns; rollback | migration | `AddVenueProfile_ExistingVenues_…`, `…_Up_AddsNineNullableColumns_…`, `…_Down_DropsNineColumns…` |
+
+## 2026-11-14 — V3b Image store and sweep know venues (Done)
+
+### Changed files
+- `Services/ImageStore.cs` (sweep loops over `ImageReferenceRules.Folders`), `Services/ImageMaintenanceService.cs` (venue references join the live set; constructor gains `IVenueRepository`)
+- New tests `Unit/Services/ImageStoreVenueTests.cs` (7), `Unit/Services/ImageMaintenanceServiceVenueTests.cs` (2)
+- Planned exception, wider than planned: `ImageMaintenanceServiceTests.cs` gained a venue repository mock (empty list), passed to the constructor and to the unit-of-work stub, because the service resolves its repositories from the unit-of-work scope. No assertion changed.
+
+### Verification evidence
+- Commit `28d1c69d` on `feature/venue-profile`. Red: the two sweep tests failed because `venues/` was not scanned; five import/display tests were green before any change (import already used `FolderOf`). The two `ImageMaintenanceServiceVenueTests` were not seen red (they would not compile before the constructor change). `dotnet test` 1366 passed, 0 failed.
+- One unrelated test (`ArtistSuggestionServiceTests.SearchNameRemoteAsync_CallerCancelled_Rethrows`) failed once in the commit hook and passed on the next run and alone; treated as a timing flake, not investigated.
+- Kept as found: the sweep matches live files by name across folders, not per folder (names are random GUIDs).
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-VEN-02 | venue import writes both files under `venues/`; failure message; display paths | `ImageStore.ImportAsync` (unchanged) | `ImportAsync_Venue_WritesBothFilesUnderVenuesAndReturnsVenueReference`, `ImportAsync_Venue_ProcessorThrows_…`, `ResolveDisplaySource_VenueReference_UsesVenuesFolder` |
+| REQ-VEN-04 | referenced venue files survive; old orphans deleted; young orphans kept; live set includes venues | `ImageStore.DeleteUnreferencedAsync`, `ImageMaintenanceService.SweepOrphansAsync` | `DeleteUnreferencedAsync_…` (4), `SweepOrphansAsync_…` (2) |
+
+## 2026-11-14 — V7c Place lookup gate, service, DI (Done)
+
+### Changed files
+- New `Domain/ServicesInterfaces/IPlaceLookupService.cs`, `Services/Places/PlaceLookupGate.cs`, `Services/Places/PlaceLookupService.cs`; `Domain/Constants/SearchConstants.cs` (`PlaceLookupTimeoutMilliseconds`); `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (Nominatim typed client, `IGeocodingProvider`, `TimeProvider`, gate singleton, `IPlaceLookupService`)
+- New tests `Unit/Services/Places/PlaceLookupGateTests.cs` (6), `PlaceLookupServiceTests.cs` (17); one test added to `AppServicesRegistrationTests.cs`
+
+### Verification evidence
+- Commit `2827ab2c` on `feature/venue-map`. Red: 24 failed against compile-only stubs. `dotnet test` 1411 passed, 0 failed.
+- `develop` (with the lyrics feature) merged into `feature/venue-map` as `573ae33b`: three add/add conflicts (`ServiceCollectionExtensions.cs`, `SearchConstants.cs`, `AppServicesRegistrationTests.cs`) resolved by keeping both sides; full suite 1478 passed. `develop` merged into `feature/venue-profile` as `ddaeed6f`: 1433 passed.
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-VEN-25 | search: 3-character minimum, 5 results, order kept | `PlaceLookupService.SearchAsync` | `SearchAsync_TwoCharacters_…`, `…_ThreeCharacters_…`, `…_TwoRecords_…`, `…_EmptyAnswer_…` |
+| REQ-VEN-26 | reverse: mapped place with the tapped coordinates | `ReverseCoreAsync` | `ReverseAsync_RecordWithAddress_ReturnsFoundWithTappedCoordinates` |
+| REQ-VEN-27 | nothing found → `NoAddress` with coordinates | `NoAddressAt` | `ReverseAsync_ProviderReturnsNull_…`, `…_RecordWithEmptyAddress_…` |
+| REQ-VEN-28 | failure, offline, 5,000 ms bound → `Unavailable`; caller cancel rethrown | catch chain | `…_ProviderThrowsHttpRequestException_…`, `…_Offline_…` (2), `…_ProviderNeverAnswers_…`, `…_CallerCancelled_…`, `SearchAsync_ProviderThrows_…` |
+| REQ-VEN-34 | 1 request per second; last 100 answers remembered; failures not remembered; language; client identification | `PlaceLookupGate.RunAsync`, DI | `RunAsync_…` (6), `ReverseAsync_SamePointTwice_…`, `…_FailedThenSameReverse_…`, `…_PassesCurrentUICultureAsLanguage`, `SearchAsync_SameTextTwice_…`, `AddAppServices_PlaceLookup_…` |
+
+### Decisions made in the task (kept)
+- An answer that arrives after the 5,000 ms bound counts as unavailable and is not remembered. The search minimum (3) and limit (5) are private constants of the service.
 
 ## Device check (Helder) — V10
 
