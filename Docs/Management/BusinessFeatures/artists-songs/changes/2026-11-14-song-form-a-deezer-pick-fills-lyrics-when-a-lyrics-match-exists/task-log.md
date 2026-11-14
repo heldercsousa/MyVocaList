@@ -1,7 +1,7 @@
 # Task log: a Deezer pick fills Lyrics
 
 ### Checkpoint
-- 2026-11-14 — L1 done (5fd8ad0c). L2a dispatched in worktree `deezer-lyrics`. Next: L2b, L3.
+- 2026-11-14 — L1, L2a done (d55981cf). L2b dispatched in worktree `deezer-lyrics`. Next: L3.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — L0 Research and spec (Done)
@@ -35,6 +35,27 @@
 | REQ-LYR-01 | duration 215 → `DurationSeconds == 215` | `DeezerProvider.SearchSongsAsync` | `DeezerProviderDurationTests.SearchSongsAsync_DurationPresent_MapsToDurationSeconds` |
 | REQ-LYR-01 | missing / 0 / negative → null | `DeezerProvider.NormaliseDuration` | `…_DurationMissing_…`, `…_DurationZero_…`, `…_DurationNegative_…` |
 | REQ-LYR-01 | remote row carries the duration; local row null | `SongSuggestionService.ResolveLocalArtistsAsync`, `MapLocal` | `SongSuggestionServiceDurationTests` (3 tests) |
+
+## 2026-11-14 — L2a LRCLIB provider (Done)
+
+### Changed files
+- New `Contracts/DTOs/LyricsQuery.cs`; `Services/ILyricsProvider.cs` (signature replaced; no other reference existed); new `Services/LrclibLyricsProvider.cs`
+- New tests `Unit/Services/LrclibLyricsProviderTests.cs` (17)
+
+### Verification evidence
+- Commit `d55981cf` on `feature/deezer-lyrics`. Red: 17 failed on a `NotImplementedException` scaffold; green: 17 passed. Android build 0 errors; `dotnet test` 1301 passed, 0 failed.
+- Orchestrator re-check: diff holds only the four files; provider source read against `design.md § 2.4`; provider tests 17 passed.
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-LYR-01 | title, artist, album, duration sent, escaped; album/duration omitted when blank or outside 1–3600 | `LrclibLyricsProvider.BuildUrl` | `FetchLyricsAsync_FullQuery_…`, `…_NullAlbumAndNullDuration_…`, `…_BlankAlbum_…`, `…_DurationOutsideOneToOneHour_…`, `…_DurationAtBounds_…` |
+| REQ-LYR-02 | match returns the text | `FetchLyricsAsync` | `…_200WithPlainLyrics_ReturnsTextUnchanged` |
+| REQ-LYR-03 | instrumental, null, blank, 404 → null | `FetchLyricsAsync` | `…_200Instrumental_…`, `…_200NullPlainLyrics_…`, `…_200WhitespacePlainLyrics_…`, `…_404TrackNotFound_…` |
+| REQ-LYR-07 | 500 / 429 / bad body / cancel surface to the service | `FetchLyricsAsync` | `…_500_…`, `…_429_…`, `…_200UnreadableBody_…`, `…_CancelledToken_…` |
+
+### Decisions made in the task (kept)
+- `instrumental` is read as `bool?` (a missing member counts as not instrumental). A 404 is not logged. The Warning log carries the request URL, as `DeezerProvider` does.
 
 ## Device check (Helder) — L4
 
