@@ -41,7 +41,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] V4a **`VenueService` save and read.** After V3b. (REQ-VEN-10, 11, 14..17, 19..22, 33, 36)
   - Files owned: `Domain/ServicesInterfaces/IVenueService.cs`, `Services/VenueService.cs`, new `MyVocaList.Tests/Unit/Services/VenueServiceSaveTests.cs`, planned exceptions in `VenueServiceTests.cs` (30 → 60 limit and counter thresholds).
   - Demo: `SaveVenueAsync` with a duplicate address returns `(false, "There is another venue registered at this address", AddressLine1)`.
-- [~] V4b **List DTO and mapper.** After V4a. (REQ-VEN-06, 18)
+- [x] V4b **List DTO and mapper.** After V4a. (REQ-VEN-06, 18)
   - Files owned: `Contracts/DTOs/List/VenueListItemDto.cs`, `Services/Mappers/VenueMapper.cs`, new `MyVocaList.Tests/Unit/Services/VenueMapperTests.cs`.
   - Demo: a venue with street and city maps to `AddressSummary` "street, city" and carries `ImageUrl`.
 - [x] V7a **Nominatim provider.** After V1b, worktree `venue-map`. (REQ-VEN-34)
@@ -58,16 +58,16 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] V8 **`VenueMapPickerViewModel` and its plumbing.** After V7c, worktree `venue-map`. (REQ-VEN-24..31) Size note: seven files; four are a constant, a message record, a two-member interface and its `Preferences` wrapper, and one is an icon.
   - Files owned: new `MyVocaList/UI/ViewModels/VenueMapPickerViewModel.cs`, `MyVocaList/UI/Services/IMapPickerPreferences.cs`, `MauiMapPickerPreferences.cs`, `MyVocaList/UI/Messages/VenuePlacePickedMessage.cs`, `MyVocaList/Navigation/Routes.cs` (one constant), `MyVocaList/Resources/Images/map_outlined.svg` (if missing), new `Unit/ViewModels/VenueMapPickerViewModelTests.cs`.
   - Demo: a tap with the lookup stubbed to a known place sets the panel title to its name and the button to "Use this place".
-- [ ] V5a **`VenueFormViewModel`.** After V4b and V8 (`venue-map` merged into `venue-profile`). (REQ-VEN-08..11, 14, 17, 19, 20, 23, 30, 31, 33)
+- [~] V5a **`VenueFormViewModel`.** After V4b and V8 (`venue-map` merged into `venue-profile`). (REQ-VEN-08..11, 14, 17, 19, 20, 23, 30, 31, 33)
   - Files owned: `MyVocaList/UI/ViewModels/VenueFormViewModel.cs`, new `Unit/ViewModels/VenueFormViewModelProfileTests.cs`, planned exceptions in `VenueFormViewModelTests.cs`.
   - Demo: Save with only Country filled sets the Street address error to "Street address is required."; a picked-place message fills the six fields.
 - [ ] V5b **Venue pages.** After V5a. (REQ-VEN-06, 07, 09, 12, 18, 22, 23) One XAML file at a time: edit → build → next.
   - Files owned: `MyVocaList/UI/Pages/Venues/VenueFormPage.xaml`, `VenueFormPage.xaml.cs`, `MyVocaList/UI/Pages/Venues/VenuesPage.xaml`.
   - Demo: add mode shows the default venue image, "Add picture", the Address heading, "Pick on map" and six fields; list rows show the picture or the default image and "street, city".
-- [~] V9a **Map web assets.** After V8. (REQ-VEN-26, 34)
+- [x] V9a **Map web assets.** After V8. (REQ-VEN-26, 34)
   - Files owned: new `MyVocaList/Resources/Raw/venuemap/*` (`index.html`, `map.js`, Leaflet 1.9.4 files, `LICENSE-leaflet.txt`).
   - Demo: `index.html` opened in a desktop browser shows the OpenStreetMap map with the attribution; a click logs a `tap` message.
-- [ ] V9b **`VenueMapPickerPage` and registration.** After V5b and V9a; sole writer of `MauiProgram.cs` and `AppShell.xaml.cs` in this feature. (REQ-VEN-23..29, 34, 35)
+- [~] V9b **`VenueMapPickerPage` and registration.** After V5b and V9a; sole writer of `MauiProgram.cs` and `AppShell.xaml.cs` in this feature. (REQ-VEN-23..29, 34, 35)
   - Files owned: new `MyVocaList/UI/Pages/Venues/VenueMapPickerPage.xaml` + `.xaml.cs`, `MyVocaList/AppShell.xaml.cs`, `MyVocaList/MauiProgram.cs`, new `MyVocaList.Tests/Architecture/NoLocationPermissionTests.cs`.
   - Demo: Venue form → "Pick on map" → map shows → tap a street → panel shows the address → "Use this place" → the form fields are filled.
 

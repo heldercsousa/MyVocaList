@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — V1a..V4a done on `venue-profile` (2662058b); V7a..V8 done on `venue-map` (5f11acd2). Running: V4b (`venue-profile`), V9a (`venue-map`). Next: merge `venue-map` into `venue-profile`, then V5a, V5b, V9b, V9c. Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
+- 2026-11-14 — `venue-map` merged into `venue-profile` (1581 tests pass). Running: V5a (`venue-profile`), V9b (`venue-map`). Next: V5b, merge, V9c. Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -194,6 +194,32 @@ REQ-VEN-24..31 → `VenueMapPickerViewModelTests` (full matrix at V9c). REQ-VEN-
 
 ### Decisions
 - Constructor takes `INavigationService` (back navigation testable). Preferences use `IPreferences`, keys `map_picker_last_lat` / `map_picker_last_lon`. The `q` value is not copied into the search field. Registration of the page, ViewModel and preferences is V9b.
+
+## 2026-11-14 — V4b List DTO and mapper (Done)
+
+### Changed files
+- `Contracts/DTOs/List/VenueListItemDto.cs` (+`ImageUrl`, `AddressSummary`), `Services/Mappers/VenueMapper.cs`, `MyVocaList.Tests/Unit/Services/VenueMapperTests.cs` (new, 5 tests).
+
+### Verification evidence
+- Commit `a38a24ba` on `feature/venue-profile`. Red: compile failure on the missing members. Green: full suite 1480 passed, 0 failed.
+
+### Traceability
+REQ-VEN-06, 18 → `VenueMapperTests`.
+
+## 2026-11-14 — V9a Map web assets (Done)
+
+### Changed files
+- `MyVocaList/Resources/Raw/venuemap/` (new): `index.html`, `map.js`, Leaflet 1.9.4 files unmodified (`leaflet.js`, `leaflet.css`, `images/*`), `LICENSE-leaflet.txt`. The existing `MauiAsset` glob covers the folder; `.csproj` unchanged.
+
+### Verification evidence
+- Commit `d93440cf` on `feature/venue-map`. Full suite 1498 passed. Level C (static assets): no test; behaviour is checked on the emulator at V9c. Bootstrap tag `_framework/hybridwebview.js` taken from the Microsoft Learn HybridWebView page for .NET MAUI 10.
+
+### Decisions
+- First view is the world at zoom 2 until the first `view` message. Leaflet's default attribution prefix is kept.
+
+## 2026-11-14 — Merge `venue-map` into `venue-profile`
+
+- Merge commit on `feature/venue-profile`, no conflicts. Full suite 1581 passed, 0 failed.
 
 ## Device check (Helder) — V10
 
