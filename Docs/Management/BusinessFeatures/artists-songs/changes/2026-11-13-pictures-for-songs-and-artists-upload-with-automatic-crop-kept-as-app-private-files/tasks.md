@@ -31,11 +31,11 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] T8 **Lists.** `ArtistsPage.xaml` leading avatar + trailing checkbox; `SongsPage.xaml` through the converter; `ListItemLeadingAvatar` added to the governed list. Depends on T1. (REQ-PIC-38, 39) — worktree `form-pictures-ui`
 
 ## Wave 3 (parallel, two worktrees; after Wave 2 is merged)
-- [~] T4 **`SongFormViewModel`**: form picture, pick / remove, save request, releasing picks, option pictures. Depends on T1, T3. (REQ-PIC-17..22, 27, 28, 31, 39) — worktree `form-pictures`
-- [~] T5 **`SongFormPage.xaml`**: wrappers and picture field. After T4, same worktree. Depends on T2a, T2b. (REQ-PIC-12, 23..26)
+- [x] T4 **`SongFormViewModel`**: form picture, pick / remove, save request, releasing picks, option pictures. Depends on T1, T3. (REQ-PIC-17..22, 27, 28, 31, 39) — worktree `form-pictures`
+- [x] T5 **`SongFormPage.xaml`**: wrappers and picture field. After T4, same worktree. Depends on T2a, T2b. (REQ-PIC-12, 23..26)
 - [x] T6 **`ArtistFormViewModel`**: picture, Deezer pick keeps the picture, option avatars, save. Depends on T1, T3. (REQ-PIC-34..37) — worktree `form-pictures-ui`
 - [x] T7 **`ArtistFormPage.xaml`**: Name as the autocomplete field in the wrapper, picture field; both new components added to the governed list. After T6, same worktree. (REQ-PIC-12, 33)
 
 ## Close-out
-- [ ] T9 Merge, full test run, Android build, verifier, traceability matrix, statuses, merge to `develop`.
+- [~] T9 Merge, full test run, Android build, verifier, traceability matrix, statuses, merge to `develop`.
 - [ ] T10 **Device check (Helder)** — checklist in `task-log.md § Device check`.
