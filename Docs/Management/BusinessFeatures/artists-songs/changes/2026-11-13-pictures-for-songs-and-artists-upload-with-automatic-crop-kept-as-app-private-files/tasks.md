@@ -37,5 +37,5 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] T7 **`ArtistFormPage.xaml`**: Name as the autocomplete field in the wrapper, picture field; both new components added to the governed list. After T6, same worktree. (REQ-PIC-12, 33)
 
 ## Close-out
-- [~] T9 Merge, full test run, Android build, verifier, traceability matrix, statuses, merge to `develop`.
+- [x] T9 Merge, full test run, Android build, verifier, traceability matrix, statuses, merge to `develop`.
 - [ ] T10 **Device check (Helder)** — checklist in `task-log.md § Device check`.

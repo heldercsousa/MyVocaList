@@ -170,6 +170,8 @@ This spec covers six backlog items (see `tasks.md § Items`). Predecessor spec: 
 - **REQ-PIC-33: Name is the autocomplete field.** Name SHALL be the shared autocomplete field: in
   add mode it lists local artists first, then Deezer artists; a local pick opens that artist's edit
   form; a Deezer pick fills Name in the picked state. In edit mode it is plain editable text.
+  The field does not stop typing at 60 characters; a longer Name is refused by the existing length
+  rule and the counter (amended 2026-11-14).
   (Delivers the item `../2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3/`.)
 - **REQ-PIC-34: Name options show the avatar.** Each Name option SHALL show a leading avatar
   (40 x 40 dp circle) with the artist's picture, or the placeholder, for local and Deezer rows.
@@ -180,8 +182,9 @@ This spec covers six backlog items (see `tasks.md § Items`). Predecessor spec: 
   picture's reference. Edit mode: changed only when the user uploaded or removed a picture.
   A failed Save stores nothing.
 - **REQ-PIC-37: Name as tap-to-edit text.** Name follows REQ-PIC-23 to 26. Releasing a picked Deezer
-  Name by a tap keeps the text; the external identity and the Deezer picture are kept only when the
-  Name is unchanged at Save.
+  Name by a tap keeps the text. The Deezer picture is the form picture only while the Name equals
+  the picked name, so the form always shows what Save would store. The Artist form stores no
+  external identity (REQ-SFT-49). (Amended 2026-11-14.)
 
 ### H. Lists and options
 
@@ -193,7 +196,10 @@ This spec covers six backlog items (see `tasks.md § Items`). Predecessor spec: 
 - **REQ-PIC-39: Uploaded pictures show everywhere.** Songs list rows, Artists list rows and the
   options of Title, Artist and Name SHALL show an uploaded picture through its thumbnail file, by
   the same row-image rule as today (REQ-ART-06, 09, 19).
-- **REQ-PIC-40: A Deezer pick persists the artist picture.** Song form: unchanged (REQ-ART-16).
+- **REQ-PIC-40: A Deezer pick persists the artist picture.** Song form: unchanged (REQ-ART-16)
+  in add mode. A save in edit mode that creates an artist, or moves the song to an artist without
+  a picture, stores the sent artist picture on that artist; an unchanged artist is never changed.
+  The Song form sends no artist picture in edit mode (amended 2026-11-14).
   Artist form: REQ-PIC-36. No other path stores a Deezer picture.
 
 ## Validation rules
