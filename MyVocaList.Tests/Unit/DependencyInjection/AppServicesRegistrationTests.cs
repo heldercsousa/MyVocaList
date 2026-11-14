@@ -66,6 +66,9 @@ public class AppServicesRegistrationTests
             services.AddSingleton(Mock.Of<INavigationService>());
             // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
             services.AddSingleton(Mock.Of<INetworkStatus>());
+            // IImageStore and IPhotoPicker are registered in MauiProgram.cs (platform paths, MediaPicker) — mocked here.
+            services.AddSingleton(Mock.Of<IImageStore>());
+            services.AddSingleton(Mock.Of<IPhotoPicker>());
             services.AddTransient<SongFormViewModel>();
         });
         using var scope = provider.CreateScope();
