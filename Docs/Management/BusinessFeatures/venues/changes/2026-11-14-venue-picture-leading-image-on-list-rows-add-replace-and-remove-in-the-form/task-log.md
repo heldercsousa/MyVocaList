@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — All tasks through V5a and V9b are merged on `feature/venue-profile` (02e4bfe2, 1603 tests pass). Running: V5b (venue pages, first Android build). Next: V9c close-out. `feature/venue-map` is fully merged and no longer used.
+- 2026-11-14 — All code tasks done and merged to `develop` (b33703ff): 1603 tests pass, Android build 0 errors. Open: V10 device check by Helder (checklist at the end of this file). The three venue items stay In Progress until then.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -251,6 +251,37 @@ REQ-VEN-35 → `NoLocationPermissionTests`. Page behaviour (REQ-VEN-23..31, 34):
 ### Decisions
 - Page title "Pick the venue location" through `ContentPage.Title`. Two activity indicators (search, tap lookup). Search on submit through `ReturnCommand`.
 - Open point passed to V5b: the raw-message handler must ignore a malformed message instead of throwing.
+
+## 2026-11-14 — V5b Venue pages (Done)
+
+### Changed files
+- `MyVocaList/UI/Pages/Venues/VenueFormPage.xaml` (name limit 60, picture field, "Address" heading, "Pick on map" button and helper text, six address fields); `VenuesPage.xaml` (leading image, address as supporting text); `VenueMapPickerPage.xaml.cs` (a malformed map message is logged and ignored).
+
+### Verification evidence
+- Commit `2bbdcfa1`. Full suite 1603 passed, 0 failed. Android build (`net10.0-android`, Debug): 0 errors.
+
+### Decisions
+- The list reference for `ListItemLeadingImage` was `SongsPage.xaml` (the artists list uses an avatar). Postal code has no keyboard restriction.
+
+## 2026-11-14 — V9c Close-out (Done; device check open)
+
+### Verification evidence
+- Verifier subagent on `4f144a1f`: PASS WITH FIXES, no blocker. Fixes applied in `1a9e5053`: picture is a rounded square (removed `IsCircle`, REQ-VEN-07); search end icon bound to `SearchCommand` (REQ-VEN-25); a failed edit load is logged and shown in a snackbar (REQ-VEN-17). Not changed: the messenger registration is weak and is not unregistered.
+- After the fixes: full suite 1603 passed, 0 failed; Android build 0 errors, 27 warnings (existing NuGet advisories).
+- Merged to `develop` as `b33703ff`. Governed components unchanged against `develop`.
+- No emulator was running: the screens were not exercised. This is the device check (V10) below.
+
+### Traceability (summary; one test class per row holds one test per criterion)
+| AC | Implementation | Tests |
+|----|----------------|-------|
+| REQ-VEN-01..05 | `Venue`, `VenueConfiguration`, migration `AddVenueProfile`, `ImageStore`, `ImageMaintenanceService`, `VenueRepository` | `VenueProfileMigrationTests`, venue repository tests, `ImageStoreTests`, `ImageMaintenanceServiceTests` (01: through 05) |
+| REQ-VEN-06, 18 | `VenueMapper`, `VenueAddressRules.Summary`, `VenuesPage.xaml` | `VenueMapperTests`, `VenueAddressRulesTests` |
+| REQ-VEN-07, 12 | `VenueFormPage.xaml` | UI only: device check |
+| REQ-VEN-08..11, 17, 23 | `VenueFormViewModel` | `VenueFormViewModelProfileTests`, `VenueFormViewModelTests` |
+| REQ-VEN-10, 11, 13..17, 19..22, 33, 36 | `VenueService`, `VenueAddressRules`, `VenueRepository.AddressExistsAsync` | `VenueServiceSaveTests`, `VenueServiceTests`, `VenueAddressRulesTests`, venue repository tests |
+| REQ-VEN-24..31 | `VenueMapPickerViewModel`, `VenuePlaceRules` | `VenueMapPickerViewModelTests`, `VenuePlaceRulesTests` |
+| REQ-VEN-28, 29, 32, 34 | `Services/Places/*`, DI registration | Nominatim provider, address mapper, gate and lookup service tests, `AppServicesRegistrationTests` |
+| REQ-VEN-35 | no location API or permission | `NoLocationPermissionTests` |
 
 ## Device check (Helder) — V10
 
