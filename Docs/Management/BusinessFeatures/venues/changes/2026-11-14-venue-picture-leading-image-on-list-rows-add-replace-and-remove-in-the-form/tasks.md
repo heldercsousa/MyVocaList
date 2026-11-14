@@ -23,17 +23,17 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] V1a **Contracts.** (REQ-VEN-10, 12, 26, 30) Size note: eight records/enums of one to three lines each, no logic, no tests (Level C).
   - Files owned: new `Contracts/DTOs/Venues/VenueAddress.cs`, `VenueField.cs`, `VenueSaveRequest.cs`, `VenueEditDto.cs`, `VenuePlace.cs`, `PlaceLookupStatus.cs`, `PlaceLookupResult.cs`, `PlaceSearchResult.cs`.
   - Demo: the solution builds with the new types.
-- [~] V1b **Address and place rules.** After V1a. (REQ-VEN-13..16, 18, 24, 30, 33)
+- [x] V1b **Address and place rules.** After V1a. (REQ-VEN-13..16, 18, 24, 30, 33)
   - Files owned: new `Domain/Rules/VenueAddressRules.cs`, `Domain/Rules/VenuePlaceRules.cs`, new tests `MyVocaList.Tests/Unit/Domain/VenueAddressRulesTests.cs`, `VenuePlaceRulesTests.cs`.
   - Demo: `VenueAddressRules.Validate` of an address with only a country returns `(false, "Street address is required.", AddressLine1)`.
-- [ ] V2 **Entity, EF configuration, venue image references.** After V1b. (REQ-VEN-01, 03, 22) Size note: two of the files change by one member each.
+- [x] V2 **Entity, EF configuration, venue image references.** After V1b. (REQ-VEN-01, 03, 22) Size note: two of the files change by one member each.
   - Files owned: `Domain/Entity/Venue.cs`, `Infra/EntityEFConfig/VenueConfiguration.cs`, `Domain/Rules/ImageOwnerKind.cs`, `Domain/Rules/ImageReferenceRules.cs`, new `MyVocaList.Tests/Unit/Domain/ImageReferenceRulesVenueTests.cs`, and the existing image-reference test that pins `songs` / `artists` as the only folders, if one exists (planned exception, `design.md § 7`).
   - Demo: `ImageReferenceRules.Normalize("local:venues/" + 32 hex)` returns the same value.
-- [ ] V2m **Migration `AddVenueProfile`** (orchestrator: `dotnet ef migrations add`; generates the migration, its Designer file and `AppDbContextModelSnapshot.cs` — none of them hand-written). After V2.
-- [ ] V3a **Repository and migration test.** After V2m. (REQ-VEN-04, 05, 20, 21)
+- [x] V2m **Migration `AddVenueProfile`** (orchestrator: `dotnet ef migrations add`; generates the migration, its Designer file and `AppDbContextModelSnapshot.cs` — none of them hand-written). After V2.
+- [x] V3a **Repository and migration test.** After V2m. (REQ-VEN-04, 05, 20, 21)
   - Files owned: `Infra/Migrations/*_AddVenueProfile.cs` (hand adjustments to `Up`/`Down` only, per `design.md § 2.3`), `Domain/RepositoryInterface/IVenueRepository.cs`, `Infra/Repository/VenueRepository.cs`, new tests `Integration/Migrations/VenueProfileMigrationTests.cs`, `Integration/Repositories/VenueRepositoryAddressTests.cs`.
   - Demo: two venues with addresses equal but for case and accents → `AddressExistsAsync` is true.
-- [ ] V3b **Image store and sweep know venues.** After V3a. (REQ-VEN-02, 04)
+- [~] V3b **Image store and sweep know venues.** After V3a. (REQ-VEN-02, 04)
   - Files owned: `Services/ImageStore.cs`, `Services/ImageMaintenanceService.cs`, new tests `Unit/Services/ImageStoreVenueTests.cs`, `Unit/Services/ImageMaintenanceServiceVenueTests.cs`, constructor argument in existing `ImageMaintenanceService` tests (planned exception).
   - Demo: a file under `images/venues/` referenced by a venue survives the sweep; an unreferenced one older than 24 h is deleted.
 
@@ -44,13 +44,13 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [ ] V4b **List DTO and mapper.** After V4a. (REQ-VEN-06, 18)
   - Files owned: `Contracts/DTOs/List/VenueListItemDto.cs`, `Services/Mappers/VenueMapper.cs`, new `MyVocaList.Tests/Unit/Services/VenueMapperTests.cs`.
   - Demo: a venue with street and city maps to `AddressSummary` "street, city" and carries `ImageUrl`.
-- [ ] V7a **Nominatim provider.** After V1b, worktree `venue-map`. (REQ-VEN-34)
+- [x] V7a **Nominatim provider.** After V1b, worktree `venue-map`. (REQ-VEN-34)
   - Files owned: new `Services/Places/IGeocodingProvider.cs`, `GeocodingRecord.cs`, `NominatimGeocodingProvider.cs`, new test `Unit/Services/Places/NominatimGeocodingProviderTests.cs`.
   - Demo: a stubbed reverse answer yields a `GeocodingRecord` with its `address` keys; an `error` body yields null; a 500 throws.
-- [ ] V7b **Address mapper.** After V7a, worktree `venue-map`. (REQ-VEN-32)
+- [x] V7b **Address mapper.** After V7a, worktree `venue-map`. (REQ-VEN-32)
   - Files owned: new `Services/Places/NominatimAddressMapper.cs`, new test `Unit/Services/Places/NominatimAddressMapperTests.cs`.
   - Demo: a Brazilian record with `road` "Rua Augusta" and `house_number` "100" maps to Street address "Rua Augusta, 100".
-- [ ] V7c **Place lookup gate, service, DI.** After V7b, worktree `venue-map`. (REQ-VEN-25, 27, 28, 34) Size note: seven files; the constant and the DI test are one-line additions.
+- [~] V7c **Place lookup gate, service, DI.** After V7b, worktree `venue-map`. (REQ-VEN-25, 27, 28, 34) Size note: seven files; the constant and the DI test are one-line additions.
   - Files owned: new `Domain/ServicesInterfaces/IPlaceLookupService.cs`, `Services/Places/PlaceLookupGate.cs`, `Services/Places/PlaceLookupService.cs`, `Domain/Constants/SearchConstants.cs` (one constant), `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, new tests `Unit/Services/Places/PlaceLookupGateTests.cs`, `PlaceLookupServiceTests.cs`, one added test in `Unit/DependencyInjection/AppServicesRegistrationTests.cs`.
   - Demo: two reverse lookups 100 ms apart are sent 1,000 ms apart with fake time; the same lookup twice sends one request.
 

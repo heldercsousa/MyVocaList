@@ -116,4 +116,26 @@ public class AppServicesRegistrationTests
             Assert.Contains("MyVocaList", httpClient.DefaultRequestHeaders.UserAgent.ToString());
         }
     }
+
+    [Fact]
+    // [AC] REQ-LYR-15: the LRCLIB client resolves with its base address and identified User-Agent; ISongLyricsService resolves
+    public void AddAppServices_ResolvingLyricsProvider_HasConfiguredHttpClientAndSongLyricsService()
+    {
+        using var provider = BuildProvider(services =>
+        {
+            // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
+            services.AddSingleton(Mock.Of<INetworkStatus>());
+        });
+        using var scope = provider.CreateScope();
+
+        var lyricsProvider = scope.ServiceProvider.GetRequiredService<ILyricsProvider>();
+        var httpClientField = typeof(LrclibLyricsProvider)
+            .GetField("_httpClient", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(httpClientField);
+
+        var httpClient = Assert.IsType<HttpClient>(httpClientField!.GetValue(lyricsProvider));
+        Assert.Equal(new Uri("https://lrclib.net/"), httpClient.BaseAddress);
+        Assert.Contains("MyVocaList/1.0", httpClient.DefaultRequestHeaders.UserAgent.ToString());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<ISongLyricsService>());
+    }
 }
