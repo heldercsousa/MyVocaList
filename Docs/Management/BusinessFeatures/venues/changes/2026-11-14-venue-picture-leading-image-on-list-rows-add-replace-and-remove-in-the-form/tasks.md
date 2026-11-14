@@ -30,10 +30,10 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
   - Files owned: `Domain/Entity/Venue.cs`, `Infra/EntityEFConfig/VenueConfiguration.cs`, `Domain/Rules/ImageOwnerKind.cs`, `Domain/Rules/ImageReferenceRules.cs`, new `MyVocaList.Tests/Unit/Domain/ImageReferenceRulesVenueTests.cs`, and the existing image-reference test that pins `songs` / `artists` as the only folders, if one exists (planned exception, `design.md § 7`).
   - Demo: `ImageReferenceRules.Normalize("local:venues/" + 32 hex)` returns the same value.
 - [x] V2m **Migration `AddVenueProfile`** (orchestrator: `dotnet ef migrations add`; generates the migration, its Designer file and `AppDbContextModelSnapshot.cs` — none of them hand-written). After V2.
-- [~] V3a **Repository and migration test.** After V2m. (REQ-VEN-04, 05, 20, 21)
+- [x] V3a **Repository and migration test.** After V2m. (REQ-VEN-04, 05, 20, 21)
   - Files owned: `Infra/Migrations/*_AddVenueProfile.cs` (hand adjustments to `Up`/`Down` only, per `design.md § 2.3`), `Domain/RepositoryInterface/IVenueRepository.cs`, `Infra/Repository/VenueRepository.cs`, new tests `Integration/Migrations/VenueProfileMigrationTests.cs`, `Integration/Repositories/VenueRepositoryAddressTests.cs`.
   - Demo: two venues with addresses equal but for case and accents → `AddressExistsAsync` is true.
-- [ ] V3b **Image store and sweep know venues.** After V3a. (REQ-VEN-02, 04)
+- [~] V3b **Image store and sweep know venues.** After V3a. (REQ-VEN-02, 04)
   - Files owned: `Services/ImageStore.cs`, `Services/ImageMaintenanceService.cs`, new tests `Unit/Services/ImageStoreVenueTests.cs`, `Unit/Services/ImageMaintenanceServiceVenueTests.cs`, constructor argument in existing `ImageMaintenanceService` tests (planned exception).
   - Demo: a file under `images/venues/` referenced by a venue survives the sweep; an unreferenced one older than 24 h is deleted.
 
