@@ -48,3 +48,26 @@ Commits `9e02d3be`, `59d62d7c` on `feature/form-pictures`.
 - Full suite: 1147 passed, 0 failed (70 new).
 - Not verified off device: photo picker, crop, EXIF rotation, output sizes, permission prompt, start-up sweep (T10).
 - Android build (`dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`, coordinator, at `59d62d7c`): 0 errors, 34 warnings, 3 min 44 s.
+
+## T2a / T2b — TapToEditField and ImagePickerField (2026-11-13) — To Review
+
+Commits `5da6447c` (T2a), `92c49ae8` (T2b) on `feature/form-pictures-ui`.
+
+### Changed files
+- `MyVocaList/UI/Components/TextFields/TapToEditField.xaml`, `.xaml.cs`, `TapToEditFieldLogic.cs` (new)
+- `MyVocaList/UI/Components/Media/ImagePickerField.xaml`, `.xaml.cs` (new)
+- `MyVocaList/Resources/Styles/MaterialStyles.xaml` (`Headline.Medium`: 28 sp, line height 1.29 = 36/28)
+- `MyVocaList.Tests/Unit/Components/TapToEditFieldLogicTests.cs` (20 cases)
+- No existing component was changed.
+
+### Implementation decisions (beyond `design.md` § 2.5)
+- **Focus also starts editing:** when the inner editor gains focus, `IsEditing` becomes true. Without it, a blank field would switch to text at the first typed character.
+- **A pick ends editing one dispatcher turn later**, so `AutocompleteDXField` finishes its own pick handling before its host is hidden.
+- **A focused editor is unfocused before it is hidden**, so the keyboard is not left open.
+- `TapToEditField` exposes a read-only `IsEditorVisible` for pages. `TapToEditFieldLogic` also holds `ShouldReleasePick`, `ShouldEndEditingAfterBlur` and `BlurSettleMilliseconds = 250`.
+- `ImagePickerField` buttons are 48 dp high (touch target) where the form's other buttons use the style's 40 dp. "Remove picture" uses the existing `TextButton` style.
+- No unit test for `ImagePickerField` (pure XAML, level C).
+
+### Verification evidence
+- Android build: 0 errors. Suite on that branch: 1097 passed, 0 failed (20 new).
+- Device-only behaviours (focus and keyboard timing, pick versus blur order, hiding a focused editor) are listed in § Device check.

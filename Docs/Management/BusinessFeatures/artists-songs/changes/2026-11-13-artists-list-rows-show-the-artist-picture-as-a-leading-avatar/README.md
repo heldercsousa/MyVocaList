@@ -1,7 +1,7 @@
 ---
 id: artists-list-rows-show-the-artist-picture-as-a-leading-avatar
 title: Artists list rows show the artist picture as a leading avatar
-status: 🟢 Ready
+status: 🟡 In Progress
 target: 2026-11-13
 section: BusinessFeatures
 parent: artists-songs
