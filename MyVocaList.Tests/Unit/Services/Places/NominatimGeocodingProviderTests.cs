@@ -55,7 +55,7 @@ public class NominatimGeocodingProviderTests
             await provider.ReverseAsync(-23.5614, -46.6559, "pt-BR");
 
             var uri = Assert.Single(handler.Requests);
-            Assert.Equal("/reverse?format=jsonv2&lat=-23.561400&lon=-46.655900&zoom=18&addressdetails=1&accept-language=pt-BR", uri.PathAndQuery);
+            Assert.Equal("/reverse?format=jsonv2&lat=-23.561400&lon=-46.655900&zoom=18&addressdetails=1&accept-language=pt-BR&extratags=1", uri.PathAndQuery);
         }
         finally
         {
@@ -72,7 +72,7 @@ public class NominatimGeocodingProviderTests
         await provider.SearchAsync("Bar Brahma São Paulo", "en-US", 5);
 
         var uri = Assert.Single(handler.Requests);
-        Assert.Equal("/search?format=jsonv2&q=Bar%20Brahma%20S%C3%A3o%20Paulo&limit=5&addressdetails=1&accept-language=en-US", uri.PathAndQuery);
+        Assert.Equal("/search?format=jsonv2&q=Bar%20Brahma%20S%C3%A3o%20Paulo&limit=5&addressdetails=1&accept-language=en-US&extratags=1", uri.PathAndQuery);
     }
 
     [Fact]

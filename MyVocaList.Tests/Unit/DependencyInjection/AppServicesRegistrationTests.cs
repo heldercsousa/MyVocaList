@@ -148,6 +148,27 @@ public class AppServicesRegistrationTests
     }
 
     [Fact]
+    // [AC] REQ-VEN-40: the picture resolver's client has the Wikidata base address and the app User-Agent
+    public void AddAppServices_VenuePictureLookup_HasConfiguredHttpClient()
+    {
+        using var provider = BuildProvider(services =>
+        {
+            // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
+            services.AddSingleton(Mock.Of<INetworkStatus>());
+        });
+
+        using var scope = provider.CreateScope();
+        var resolver = scope.ServiceProvider.GetRequiredService<IVenuePictureLookupService>();
+
+        var httpClientField = resolver.GetType()
+            .GetField("_httpClient", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(httpClientField);
+        var httpClient = (HttpClient)httpClientField!.GetValue(resolver)!;
+        Assert.Equal(new Uri("https://www.wikidata.org/"), httpClient.BaseAddress);
+        Assert.Contains("MyVocaList/1.0", httpClient.DefaultRequestHeaders.UserAgent.ToString());
+    }
+
+    [Fact]
     // [AC] REQ-LYR-15: the LRCLIB client resolves with its base address and identified User-Agent; ISongLyricsService resolves
     public void AddAppServices_ResolvingLyricsProvider_HasConfiguredHttpClientAndSongLyricsService()
     {
