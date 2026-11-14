@@ -1117,7 +1117,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stitch-output", "stitch-out
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BUG-017-artistscrud-emulator-debug-often-stops", "BUG-017-artistscrud-emulator-debug-often-stops", "{B92F4F42-00C3-44C3-BC6E-E340782C7183}"
 	ProjectSection(SolutionItems) = preProject
-		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\artistis-crud-manual-tests-log.txt
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\plan.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\plan.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-06-27-BUG-017-artistscrud-emulator-debug-often-stops\README.md
 	EndProjectSection
