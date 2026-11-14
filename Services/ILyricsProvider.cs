@@ -1,10 +1,13 @@
+using MyVocaList.Contracts.DTOs;
+
 namespace MyVocaList.Services;
 
 /// <summary>
-/// Placeholder interface for future lyrics API integration.
-/// No implementation is registered in DI until a provider is selected via spike task.
+/// Source of song lyrics (LRCLIB for the Deezer pick flow). No consumer until the lyrics service is wired.
 /// </summary>
 public interface ILyricsProvider
 {
-    Task<string?> FetchLyricsAsync(string title, string? artistName, CancellationToken ct = default);
+    /// <summary>Plain lyrics of the best record for the query, or null when the source has no usable record.</summary>
+    /// <remarks>Throws on transport or protocol failure; rethrows <see cref="OperationCanceledException"/>.</remarks>
+    Task<string?> FetchLyricsAsync(LyricsQuery query, CancellationToken ct = default);
 }
