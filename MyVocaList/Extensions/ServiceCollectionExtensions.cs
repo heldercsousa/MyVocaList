@@ -1,6 +1,8 @@
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.UnitOfWork;
 using MyVocaList.Infra.Repository;
+using MyVocaList.Services.Places;
 
 namespace MyVocaList.Extensions;
 
@@ -41,6 +43,19 @@ public static class ServiceCollectionExtensions
         // independent instance through ActivatorUtilities, bypassing the typed HttpClient pipeline
         // above and injecting an unconfigured HttpClient (no BaseAddress/User-Agent) (BUG-082).
         services.AddScoped<IMusicMetadataProvider>(sp => sp.GetRequiredService<DeezerProvider>());
+
+        // Place lookup (venue map picker, REQ-VEN-25..28, 34). Same typed-client rule as Deezer above (BUG-082):
+        // the provider is resolved through its typed HttpClient, never AddScoped<IGeocodingProvider, NominatimGeocodingProvider>().
+        services.AddHttpClient<NominatimGeocodingProvider>(client =>
+        {
+            client.BaseAddress = new Uri("https://nominatim.openstreetmap.org/");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)");
+        });
+        services.AddScoped<IGeocodingProvider>(sp => sp.GetRequiredService<NominatimGeocodingProvider>());
+        // One gate for every scope: the usage rules (1 request per second, 100 remembered answers) are app-wide.
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<PlaceLookupGate>();
+        services.AddScoped<IPlaceLookupService, PlaceLookupService>();
 
         // Lyrics source (LRCLIB). Same typed-client pattern as Deezer above (BUG-082): the interface
         // resolves through the typed-client factory, never AddScoped<ILyricsProvider, LrclibLyricsProvider>().

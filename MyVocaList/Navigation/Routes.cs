@@ -10,6 +10,7 @@ public static class Routes
     public const string About = "about";
     public const string Exit = "exit";
     public const string VenueForm = "venue-form";
+    public const string VenueMapPicker = "venue-map-picker";
     public const string PersonForm = "person-form";
     public const string ArtistForm = "artist-form";
     public const string Songs = "songs";
