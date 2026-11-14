@@ -16,5 +16,4 @@
 	<uses-permission android:name="android.permission.VIBRATE" />
 	<!-- Needed for picking a photo (REQ-PIC-05); no camera permission: pictures are never captured. -->
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-	<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 </manifest>
