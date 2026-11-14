@@ -1,8 +1,8 @@
 # Task log: pictures and tap-to-edit names in the Song and Artist forms
 
 ### Checkpoint
-- **Now:** T4, T5 (Song form) running in `form-pictures`; T6, T7 done in `form-pictures-ui`.
-- **Next:** merge both branches, then T9 close-out.
+- **Now:** T9 close-out: branches merged (`574e549d`), full test run and Android build on the merged branch.
+- **Next:** verifier, traceability matrix, merge to `develop`, release build to Google Drive, then T10 device check (Helder).
 - **Context manifest:** `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## T0 — Spec (2026-11-13) — Done
@@ -144,3 +144,32 @@ Commits `1debc4ed` (T6), `f3b4b9ab` (T7) on `feature/form-pictures-ui`.
 - Android build: 0 errors, 34 warnings. Suite on that branch: 1243 passed, 0 failed.
 - Tests per requirement: REQ-PIC-34 (3), 16 (1), 05 (1), 10 (1), 35 (11), 36 (10), 37 (4).
 - Not checked on a device (§ Device check).
+
+## T4 / T5 — Song form (2026-11-14) — To Review
+
+Commits `61cfda0c` (T4), `23a1982a` (T5) on `feature/form-pictures`.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs`
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`, `.xaml.cs`
+- `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelPictureTests.cs` (new, 34 cases), `MyVocaList.Tests/Infrastructure/TestImageStore.cs` (new)
+
+### Existing test files touched (exception, no assertion changed)
+- `SongFormViewModelTests.cs`, `SongFormViewModelImageTests.cs`, `SongSuggestionTitleSearchRealStackTests.cs`: the constructor call gains `IImageStore`, `IPhotoPicker`.
+- `Unit/DependencyInjection/AppServicesRegistrationTests.cs`: two mock registrations (`IImageStore`, `IPhotoPicker`) added, as that test already does for the other services registered only in `MauiProgram.cs`. Helder to confirm.
+
+### Implementation decisions (beyond `design.md`)
+- Constructor gains `IImageStore`, `IPhotoPicker`. New members: `FormImageSource`, `FormImageThumbnailSource`, `HasFormImage`, `ImageHintText`, `IsImageBusy`, `IsTitleEditing`, `IsArtistEditing`, `PickImageCommand`, `RemoveImageCommand`.
+- **Save request:** `ImageUrl` is always the form picture; `ImageChanged` is true only in edit mode after an upload or a remove; `ArtistImageUrl` is never sent in edit mode.
+- **Title release:** the Deezer identity is sent only in add mode and only while the Title equals the picked title. A release clears nothing.
+- **Artist release:** unlocking outside hydration and outside X sets `SelectedArtistId = 0` and keeps the text, so Save sends the text.
+- **Deezer artist picture** is sent only while the Artist text equals the picked artist name.
+- An exception from the platform picker is caught, logged and shown as "Could not use this picture.".
+- `OnAppearing` focuses the Title only in add mode while its editor is visible; in edit mode the song loads after `OnAppearing`.
+- The two picture sources are strings (as `SongsPage` binds them).
+
+### Verification evidence
+- Android build: 0 errors. Suite on that branch: 1246 passed, 0 failed.
+- Tests per requirement: REQ-PIC-17 (2), 18 (5), 13 (1), 16 (1), 19 (2), 20 (4), 21 (4), 22 (1), 10 (1), 05 (1), 15 (1), 27 (2), 28 (3), 31 (3), 32 (1), 39 (2).
+- Flaky, not caused by this work: `SongRepositoryTests` and `VenueRepositoryTests` fail now and then with `SqliteException: SQLite Error 5` and pass on rerun.
+- REQ-PIC-30 and the blur timing are component behaviour, checked on a device only.
