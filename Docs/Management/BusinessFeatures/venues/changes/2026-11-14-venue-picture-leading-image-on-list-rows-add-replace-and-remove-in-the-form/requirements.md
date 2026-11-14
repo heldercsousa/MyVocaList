@@ -241,3 +241,27 @@ Venues CRUD `../../requirements.md` (AC-n.m) and the pictures spec
 | Venues AC-3.2 (edit form pre-populated with the current name) | **Extended** by REQ-VEN-17. |
 | Venues "Out of Scope: venue address, geolocation" | **Replaced** by this spec. |
 | REQ-PIC-09 / 11 (folders `songs/`, `artists/`) | **Extended** by REQ-VEN-02, 04 (`venues/`). |
+
+## Addendum 2026-11-14 — Venue picture from a map pick (REQ-VEN-37..40)
+
+This addendum replaces the earlier statement that a venue logo cannot come from the map. OpenStreetMap places sometimes name a Wikidata entry, a Wikimedia Commons file or an image address. When they do, the app can fetch a picture.
+
+### REQ-VEN-37 — A looked-up place carries its picture source
+- Every place lookup (reverse and search) asks the provider for the extra tags of the place.
+- A place carries a picture source made of three optional values: a Wikidata id (tag `brand:wikidata` first, else `wikidata`; accepted only when it matches `Q` followed by digits), a Commons file name (tag `wikimedia_commons`, only when it starts with `File:`), and an image address (tag `image`, only when it is an absolute `https` address).
+- Given a place with `brand:wikidata = Q918151` and `wikidata = Q1`, then the Wikidata id is `Q918151`.
+- Given a place with no such tags, then the picture source is empty.
+
+### REQ-VEN-38 — "Use this place" fills the picture when the form has none
+- When a confirmed place reaches the form, and the form shows no picture (no stored picture and no picked picture), and the place has a picture source, the app resolves one picture address, downloads it and stores it through the same path as a photo picked by the user (centre square crop, same size limits and compression). The picture field then shows it as a changed picture; "Replace picture" and "Remove picture" work as for a picked photo.
+- Resolution order: (1) Wikidata id: the logo statement (P154), else the image statement (P18), read with one request to the Wikidata claims API; the file is fetched from `https://commons.wikimedia.org/wiki/Special:FilePath/<file>?width=512`. (2) Commons file name, fetched the same way. (3) The image address.
+- Given the form already shows a picture, when a place with a picture source is confirmed, then the picture is unchanged and no picture request is sent.
+- Given a place with an empty picture source, then no picture request is sent.
+- The address and name fill (REQ-VEN-30) never waits for the picture: the fields fill first.
+
+### REQ-VEN-39 — A picture that cannot be fetched is skipped silently
+- Given no internet access, an answer slower than 5,000 ms, an answer that is not an image, or a store refusal, then the form keeps no picture, shows no error, and the address fill is unaffected. The failure is logged.
+
+### REQ-VEN-40 — Usage rules for the picture requests
+- Requests to Wikidata and Commons carry the User-Agent `MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)`.
+- Picture requests are sent only after the user confirms a place, at most one resolution per confirmed place.
