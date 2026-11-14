@@ -24,7 +24,8 @@ public class ArtistFormViewModelTests
 
     private ArtistFormViewModel CreateSut() =>
         new(_serviceMock.Object, _snackMock.Object, _loggerMock.Object, _messengerMock.Object,
-            _navigationMock.Object, _suggestionsMock.Object);
+            _navigationMock.Object, _suggestionsMock.Object,
+            new Mock<IImageStore>().Object, new Mock<IPhotoPicker>().Object);
 
     // ── Blur validation (ValidateNameCommand) ────────────────────────────────
 
