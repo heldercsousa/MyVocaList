@@ -1,7 +1,7 @@
 ---
 id: venue-form-pick-the-place-on-a-map-to-fill-address-and-name
 title: "Venue form: pick the place on a map to fill address and name"
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-14
 section: BusinessFeatures
 parent: venues
