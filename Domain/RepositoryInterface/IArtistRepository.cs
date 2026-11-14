@@ -15,6 +15,9 @@ public interface IArtistRepository
     /// <summary>Returns artists whose name starts with the query (max results).</summary>
     Task<IEnumerable<ArtistListItem>> SearchByNameAsync(string query, int maxResults, CancellationToken ct);
 
+    /// <summary>Every stored <c>local:</c> image reference of an artist (REQ-PIC-11 orphan sweep).</summary>
+    Task<List<string>> GetLocalImageReferencesAsync(CancellationToken ct = default);
+
     Task<Artist> GetByIdAsync(int id, CancellationToken ct);
     Task<Artist> GetByExternalIdAsync(string externalId, string provider, CancellationToken ct);
 
