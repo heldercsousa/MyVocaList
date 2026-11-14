@@ -28,6 +28,8 @@ namespace MyVocaList.UI.ViewModels
         private readonly IImageStore _imageStore;
         private readonly IPhotoPicker _photoPicker;
         private readonly IMessenger _messenger;
+        private readonly IVenuePictureLookupService _pictureLookup;
+        private readonly IRemoteImageFetcher _remoteImageFetcher;
 
         // Shell passes all query parameters as strings; parse manually to avoid InvalidCastException.
         public string VenueIdRaw { set => VenueId = int.TryParse(value, out var id) ? id : null; }
@@ -71,6 +73,7 @@ namespace MyVocaList.UI.ViewModels
         private string? _uploadedImageReference;   // picked or taken in this form; stored on Save
         private string? _storedImageReference;     // edit mode: the venue's stored picture
         private bool _imageRemoved;                // "Remove picture" until a later pick
+        private int _pictureChoiceVersion;         // bumps on each user pick or removal; a late map-pick picture is dropped when it changed
         [ObservableProperty] private bool _isImageBusy;
 
         // Becomes true once the user edits the name field. Guards blur validation so a pristine
@@ -110,7 +113,9 @@ namespace MyVocaList.UI.ViewModels
             ILogger<VenueFormViewModel> logger,
             IImageStore imageStore,
             IPhotoPicker photoPicker,
-            IMessenger messenger)
+            IMessenger messenger,
+            IVenuePictureLookupService pictureLookup,
+            IRemoteImageFetcher remoteImageFetcher)
         {
             _venueService = venueService;
             _snackbarService = snackbarService;
@@ -118,6 +123,8 @@ namespace MyVocaList.UI.ViewModels
             _imageStore = imageStore;
             _photoPicker = photoPicker;
             _messenger = messenger;
+            _pictureLookup = pictureLookup;
+            _remoteImageFetcher = remoteImageFetcher;
 
             // REQ-VEN-30: the map picker sends the confirmed place; the form takes it in.
             _messenger.Register<VenuePlacePickedMessage>(this,
@@ -265,6 +272,7 @@ namespace MyVocaList.UI.ViewModels
 
                 _uploadedImageReference = reference;
                 _imageRemoved = false;
+                _pictureChoiceVersion++;
                 NotifyFormImageChanged();
             }
             catch (Exception ex)
@@ -285,6 +293,7 @@ namespace MyVocaList.UI.ViewModels
         {
             _uploadedImageReference = null;
             _imageRemoved = true;
+            _pictureChoiceVersion++;
             NotifyFormImageChanged();
         }
 
@@ -329,7 +338,56 @@ namespace MyVocaList.UI.ViewModels
             Country = address.Country;
             Latitude = latitude;
             Longitude = longitude;
+
+            // REQ-VEN-38: the picture is fetched after the fields are filled, and only when the form has none.
+            if (!HasFormImage && !IsImageBusy && HasPictureSource(place.PictureSource))
+                _ = FillPictureFromPlaceAsync(place.PictureSource!);
         });
+
+        /// <summary>
+        /// REQ-VEN-38, 39: resolves, downloads and imports the place's picture through the same store call as a picked photo.
+        /// Every failure is silent for the user and logged. A pick or removal made meanwhile wins over the late picture.
+        /// </summary>
+        private async Task FillPictureFromPlaceAsync(VenuePictureSource source)
+        {
+            var choiceVersion = _pictureChoiceVersion;
+            IsImageBusy = true;
+            try
+            {
+                var address = await _pictureLookup.ResolveAsync(source);
+                if (address is null)
+                    return;
+
+                await using var picture = await _remoteImageFetcher.FetchAsync(address);
+                if (picture is null)
+                    return;
+
+                var (success, message, reference) = await _imageStore.ImportAsync(picture, ImageOwnerKind.Venue);
+                if (!success || reference is null)
+                {
+                    _logger.LogWarning("Venue picture from the picked place was refused: {Message}", message);
+                    return;
+                }
+
+                if (choiceVersion != _pictureChoiceVersion || HasFormImage)
+                    return;   // the user picked or removed a picture while this ran
+
+                _uploadedImageReference = reference;
+                _imageRemoved = false;
+                NotifyFormImageChanged();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Filling the venue picture from the picked place failed");
+            }
+            finally
+            {
+                IsImageBusy = false;
+            }
+        }
+
+        private static bool HasPictureSource(VenuePictureSource? source) =>
+            source is { } s && (s.WikidataId is not null || s.CommonsFile is not null || s.ImageUrl is not null);
 
         // ── Edit load (REQ-VEN-17) ────────────────────────────────────────────
 
