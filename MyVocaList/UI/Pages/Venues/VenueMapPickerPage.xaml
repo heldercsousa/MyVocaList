@@ -21,6 +21,8 @@
                       PlaceholderText="{Binding SearchPlaceholder}"
                       ReturnType="Search"
                       ReturnCommand="{Binding SearchCommand}"
+                      EndIcon="search_outlined"
+                      EndIconCommand="{Binding SearchCommand}"
                       Margin="16,8" />
 
         <!-- Results list: visible while there are results -->
