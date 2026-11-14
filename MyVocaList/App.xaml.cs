@@ -62,7 +62,27 @@ namespace MyVocaList
 
                 await dbContext.Database.MigrateAsync();
             });
+
+            // REQ-PIC-11: the schema exists now, so the sweep can read the image references.
+            // Fire-and-forget on purpose: start-up is never blocked by file housekeeping.
+            _ = SweepOrphanImagesAsync();
         }
+
+        private Task SweepOrphanImagesAsync()
+            => Task.Run(async () =>
+            {
+                try
+                {
+                    using var scope = _serviceProvider.CreateScope();
+                    var maintenance = scope.ServiceProvider.GetRequiredService<IImageMaintenanceService>();
+                    await maintenance.SweepOrphansAsync(CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    // Background housekeeping: a failure is logged and never thrown; the next start retries.
+                    _serviceProvider.GetService<ILogger<App>>()?.LogWarning(ex, "Orphan image sweep failed");
+                }
+            });
 
         private async Task WarmUpDevExpressAsync()
         {
