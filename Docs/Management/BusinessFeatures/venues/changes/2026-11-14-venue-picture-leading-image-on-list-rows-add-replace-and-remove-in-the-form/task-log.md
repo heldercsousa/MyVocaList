@@ -363,6 +363,13 @@ Coverage note: the picture comes only when the OpenStreetMap place names a Wikid
 - iOS: `dotnet build -f net10.0-ios -c Debug` compiles with 0 errors on this Windows machine (compile only; running it needs a Mac). This covers the `#elif IOS` web view User-Agent code.
 - Not possible in this session: a run on a physical phone (no device was connected to `adb`) and a run on iOS.
 
+## 2026-11-14 — Emulator check, fourth pass (Done)
+
+- Second logo fill: search "Starbucks Times Square New York" → select → "Use this place" on a blank form: name "Starbucks", address on Broadway, and a picture filled ("Replace picture" / "Remove picture" shown); saved as `local:venues/ffda00caddc94da2ae3c954e38bcd549`.
+- Replace picture in edit mode: venue "Zz Edit Replace" saved with `local:venues/c5e69aced22f467f91532c278030d820`; reopened, "Replace picture", Save ("Venue updated"): the row now holds `local:venues/2e120bc147914e5cadb7701bab12f181`.
+- A scripted attempt of the same step on the Starbucks venue left the reference unchanged; the careful rerun above shows the step works, so that attempt was a scripting miss (the picker tap did not land), not an app defect.
+- Decision (Claude, under the standing authorisation): a map-picked logo keeps the established centre-square crop of artist and song pictures, as the request states. A wide logo loses its sides; fitting it whole would be a new change.
+
 ## Device check (Helder) — V10
 
 1. Venues list: seeded venues show the default image; a venue with a picture shows it; a venue with an address shows "street, city" under the name.
