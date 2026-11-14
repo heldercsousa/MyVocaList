@@ -1,4 +1,4 @@
-# Deploy Android Command (`/sln-deploy-android`)
+# Deploy to Google Drive Command (`/sln-deploy-googledrive`)
 
 Build a signed release APK and upload it to Google Drive.
 
