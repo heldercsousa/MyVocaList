@@ -1,7 +1,7 @@
 # Task log: a Deezer pick fills Lyrics
 
 ### Checkpoint
-- 2026-11-14 — L1 done (5fd8ad0c). L2a dispatched in worktree `deezer-lyrics`. Next: L2b, L3.
+- 2026-11-14 — L1, L2a, L2b done (77f66917). L3 dispatched in worktree `deezer-lyrics`. Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs once at close-out.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — L0 Research and spec (Done)
@@ -35,6 +35,51 @@
 | REQ-LYR-01 | duration 215 → `DurationSeconds == 215` | `DeezerProvider.SearchSongsAsync` | `DeezerProviderDurationTests.SearchSongsAsync_DurationPresent_MapsToDurationSeconds` |
 | REQ-LYR-01 | missing / 0 / negative → null | `DeezerProvider.NormaliseDuration` | `…_DurationMissing_…`, `…_DurationZero_…`, `…_DurationNegative_…` |
 | REQ-LYR-01 | remote row carries the duration; local row null | `SongSuggestionService.ResolveLocalArtistsAsync`, `MapLocal` | `SongSuggestionServiceDurationTests` (3 tests) |
+
+## 2026-11-14 — L2a LRCLIB provider (Done)
+
+### Changed files
+- New `Contracts/DTOs/LyricsQuery.cs`; `Services/ILyricsProvider.cs` (signature replaced; no other reference existed); new `Services/LrclibLyricsProvider.cs`
+- New tests `Unit/Services/LrclibLyricsProviderTests.cs` (17)
+
+### Verification evidence
+- Commit `d55981cf` on `feature/deezer-lyrics`. Red: 17 failed on a `NotImplementedException` scaffold; green: 17 passed. Android build 0 errors; `dotnet test` 1301 passed, 0 failed.
+- Orchestrator re-check: diff holds only the four files; provider source read against `design.md § 2.4`; provider tests 17 passed.
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-LYR-01 | title, artist, album, duration sent, escaped; album/duration omitted when blank or outside 1–3600 | `LrclibLyricsProvider.BuildUrl` | `FetchLyricsAsync_FullQuery_…`, `…_NullAlbumAndNullDuration_…`, `…_BlankAlbum_…`, `…_DurationOutsideOneToOneHour_…`, `…_DurationAtBounds_…` |
+| REQ-LYR-02 | match returns the text | `FetchLyricsAsync` | `…_200WithPlainLyrics_ReturnsTextUnchanged` |
+| REQ-LYR-03 | instrumental, null, blank, 404 → null | `FetchLyricsAsync` | `…_200Instrumental_…`, `…_200NullPlainLyrics_…`, `…_200WhitespacePlainLyrics_…`, `…_404TrackNotFound_…` |
+| REQ-LYR-07 | 500 / 429 / bad body / cancel surface to the service | `FetchLyricsAsync` | `…_500_…`, `…_429_…`, `…_200UnreadableBody_…`, `…_CancelledToken_…` |
+
+### Decisions made in the task (kept)
+- `instrumental` is read as `bool?` (a missing member counts as not instrumental). A 404 is not logged. The Warning log carries the request URL, as `DeezerProvider` does.
+
+## 2026-11-14 — L2b Lyrics service and DI (Done)
+
+### Changed files
+- New `Services/ISongLyricsService.cs`, `Services/SongLyricsService.cs`; `Domain/Constants/SearchConstants.cs` (`LyricsLookupTimeoutMilliseconds`, `LyricsMaxLength`); `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (LRCLIB typed client, `ILyricsProvider`, `ISongLyricsService`)
+- New tests `Unit/Services/SongLyricsServiceTests.cs` (21); one test added to `Unit/DependencyInjection/AppServicesRegistrationTests.cs`
+
+### Verification evidence
+- Commit `77f66917` on `feature/deezer-lyrics`. Red: 21 failed on a `NotImplementedException` stub. The implementor was stopped by a full disk (C: at 0 bytes) before the full run and the commit; the orchestrator freed space (build output of this session's worktrees), read the service against `design.md § 2.3`, ran the full suite (1323 passed, 0 failed) and committed.
+- The Android-target build was not run in this worktree (disk space); it runs once at close-out (L3c).
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-LYR-02 | match returned trimmed | `SongLyricsService.AcceptLyrics` | `FindLyricsAsync_MatchWithSurroundingWhiteSpace_ReturnsTrimmedText` |
+| REQ-LYR-03 | no match / blank → null | `AcceptLyrics` | `…_BothAttemptsNoMatch_…`, `…_WhiteSpaceOnlyAnswer_…` |
+| REQ-LYR-05 | 10,000 kept, 10,001 → null | `AcceptLyrics` | `…_TextOfExactlyMaxLength_IsKept`, `…_TextOneOverMaxLength_ReturnsNull` |
+| REQ-LYR-06 | 5,000 ms bound over both attempts | linked token + `CancelAfter` | `…_ProviderNeverAnswers_ReturnsNullAfterBound`, `…_BoundCoversBothAttempts_…` |
+| REQ-LYR-07 | offline no call; failure → null; caller cancel rethrown | guards and catch chain | `…_Offline_…`, `…_ProviderThrowsHttpRequestException_…`, `…_CallerCancelled…` (2) |
+| REQ-LYR-08 | one retry without album and duration, only after a no-match | `HasAlbumOrDuration` | `…_BareQueryNoMatch_…`, `…_NoMatchWithAlbumOrDuration_…` (3), `…_BlankAlbumAndNoDuration_…`, `…_FirstAttemptReturnsText_…` |
+| REQ-LYR-15 | LRCLIB client has base address and `User-Agent` | `AddAppServices` | `AddAppServices_ResolvingLyricsProvider_HasConfiguredHttpClientAndSongLyricsService` |
+
+### Decisions made in the task (kept)
+- A blank album counts as no album. A blank-only first answer is not retried. An over-limit answer is logged at Information without its content.
 
 ## Device check (Helder) — L4
 

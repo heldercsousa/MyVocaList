@@ -57,6 +57,16 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<PlaceLookupGate>();
         services.AddScoped<IPlaceLookupService, PlaceLookupService>();
 
+        // Lyrics source (LRCLIB). Same typed-client pattern as Deezer above (BUG-082): the interface
+        // resolves through the typed-client factory, never AddScoped<ILyricsProvider, LrclibLyricsProvider>().
+        services.AddHttpClient<LrclibLyricsProvider>(client =>
+        {
+            client.BaseAddress = new Uri("https://lrclib.net/");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)");
+        });
+        services.AddScoped<ILyricsProvider>(sp => sp.GetRequiredService<LrclibLyricsProvider>());
+        services.AddScoped<ISongLyricsService, SongLyricsService>();
+
         // Services
         services.AddScoped<IVenueService, VenueService>();
         services.AddScoped<IPersonService, PersonService>();

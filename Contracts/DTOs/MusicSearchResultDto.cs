@@ -9,4 +9,5 @@ public record MusicSearchResultDto(
     string? Version = null,
     string? ImageUrl = null,
     string? ArtistImageUrl = null,
-    string? AlbumTitle = null);
+    string? AlbumTitle = null,
+    int? DurationSeconds = null);
