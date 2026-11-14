@@ -1,7 +1,7 @@
 ---
 id: venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form
 title: "Venue picture: leading image on list rows, add, replace and remove in the form"
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-14
 section: BusinessFeatures
 parent: venues
