@@ -33,12 +33,12 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] V3a **Repository and migration test.** After V2m. (REQ-VEN-04, 05, 20, 21)
   - Files owned: `Infra/Migrations/*_AddVenueProfile.cs` (hand adjustments to `Up`/`Down` only, per `design.md § 2.3`), `Domain/RepositoryInterface/IVenueRepository.cs`, `Infra/Repository/VenueRepository.cs`, new tests `Integration/Migrations/VenueProfileMigrationTests.cs`, `Integration/Repositories/VenueRepositoryAddressTests.cs`.
   - Demo: two venues with addresses equal but for case and accents → `AddressExistsAsync` is true.
-- [~] V3b **Image store and sweep know venues.** After V3a. (REQ-VEN-02, 04)
+- [x] V3b **Image store and sweep know venues.** After V3a. (REQ-VEN-02, 04)
   - Files owned: `Services/ImageStore.cs`, `Services/ImageMaintenanceService.cs`, new tests `Unit/Services/ImageStoreVenueTests.cs`, `Unit/Services/ImageMaintenanceServiceVenueTests.cs`, constructor argument in existing `ImageMaintenanceService` tests (planned exception).
   - Demo: a file under `images/venues/` referenced by a venue survives the sweep; an unreferenced one older than 24 h is deleted.
 
 ## Phase 2 — Services
-- [ ] V4a **`VenueService` save and read.** After V3b. (REQ-VEN-10, 11, 14..17, 19..22, 33, 36)
+- [~] V4a **`VenueService` save and read.** After V3b. (REQ-VEN-10, 11, 14..17, 19..22, 33, 36)
   - Files owned: `Domain/ServicesInterfaces/IVenueService.cs`, `Services/VenueService.cs`, new `MyVocaList.Tests/Unit/Services/VenueServiceSaveTests.cs`, planned exceptions in `VenueServiceTests.cs` (30 → 60 limit and counter thresholds).
   - Demo: `SaveVenueAsync` with a duplicate address returns `(false, "There is another venue registered at this address", AddressLine1)`.
 - [ ] V4b **List DTO and mapper.** After V4a. (REQ-VEN-06, 18)
@@ -50,12 +50,12 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] V7b **Address mapper.** After V7a, worktree `venue-map`. (REQ-VEN-32)
   - Files owned: new `Services/Places/NominatimAddressMapper.cs`, new test `Unit/Services/Places/NominatimAddressMapperTests.cs`.
   - Demo: a Brazilian record with `road` "Rua Augusta" and `house_number` "100" maps to Street address "Rua Augusta, 100".
-- [~] V7c **Place lookup gate, service, DI.** After V7b, worktree `venue-map`. (REQ-VEN-25, 27, 28, 34) Size note: seven files; the constant and the DI test are one-line additions.
+- [x] V7c **Place lookup gate, service, DI.** After V7b, worktree `venue-map`. (REQ-VEN-25, 27, 28, 34) Size note: seven files; the constant and the DI test are one-line additions.
   - Files owned: new `Domain/ServicesInterfaces/IPlaceLookupService.cs`, `Services/Places/PlaceLookupGate.cs`, `Services/Places/PlaceLookupService.cs`, `Domain/Constants/SearchConstants.cs` (one constant), `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, new tests `Unit/Services/Places/PlaceLookupGateTests.cs`, `PlaceLookupServiceTests.cs`, one added test in `Unit/DependencyInjection/AppServicesRegistrationTests.cs`.
   - Demo: two reverse lookups 100 ms apart are sent 1,000 ms apart with fake time; the same lookup twice sends one request.
 
 ## Phase 3 — UI
-- [ ] V8 **`VenueMapPickerViewModel` and its plumbing.** After V7c, worktree `venue-map`. (REQ-VEN-24..31) Size note: seven files; four are a constant, a message record, a two-member interface and its `Preferences` wrapper, and one is an icon.
+- [~] V8 **`VenueMapPickerViewModel` and its plumbing.** After V7c, worktree `venue-map`. (REQ-VEN-24..31) Size note: seven files; four are a constant, a message record, a two-member interface and its `Preferences` wrapper, and one is an icon.
   - Files owned: new `MyVocaList/UI/ViewModels/VenueMapPickerViewModel.cs`, `MyVocaList/UI/Services/IMapPickerPreferences.cs`, `MauiMapPickerPreferences.cs`, `MyVocaList/UI/Messages/VenuePlacePickedMessage.cs`, `MyVocaList/Navigation/Routes.cs` (one constant), `MyVocaList/Resources/Images/map_outlined.svg` (if missing), new `Unit/ViewModels/VenueMapPickerViewModelTests.cs`.
   - Demo: a tap with the lookup stubbed to a known place sets the panel title to its name and the button to "Use this place".
 - [ ] V5a **`VenueFormViewModel`.** After V4b and V8 (`venue-map` merged into `venue-profile`). (REQ-VEN-08..11, 14, 17, 19, 20, 23, 30, 31, 33)
