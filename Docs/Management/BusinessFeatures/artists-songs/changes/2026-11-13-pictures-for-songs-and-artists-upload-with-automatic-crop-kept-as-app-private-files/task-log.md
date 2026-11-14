@@ -1,8 +1,8 @@
 # Task log: pictures and tap-to-edit names in the Song and Artist forms
 
 ### Checkpoint
-- **Now:** T9 close-out: branches merged (`574e549d`), full test run and Android build on the merged branch.
-- **Next:** verifier, traceability matrix, merge to `develop`, release build to Google Drive, then T10 device check (Helder).
+- **Now:** T9 done; `feature/form-pictures` merged to `develop`; release build to Google Drive.
+- **Next:** T10 device check (Helder).
 - **Context manifest:** `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## T0 — Spec (2026-11-13) — Done
@@ -173,3 +173,107 @@ Commits `61cfda0c` (T4), `23a1982a` (T5) on `feature/form-pictures`.
 - Tests per requirement: REQ-PIC-17 (2), 18 (5), 13 (1), 16 (1), 19 (2), 20 (4), 21 (4), 22 (1), 10 (1), 05 (1), 15 (1), 27 (2), 28 (3), 31 (3), 32 (1), 39 (2).
 - Flaky, not caused by this work: `SongRepositoryTests` and `VenueRepositoryTests` fail now and then with `SqliteException: SQLite Error 5` and pass on rerun.
 - REQ-PIC-30 and the blur timing are component behaviour, checked on a device only.
+
+## T9 — Close-out (2026-11-14) — To Review
+
+Merged branch `feature/form-pictures` at `574e549d` (contains `feature/form-pictures-ui`).
+
+### Changed files
+- `requirements.md`: REQ-PIC-33, 37 and 40 amended (see "Spec amendments").
+- `tasks.md`, `task-log.md`; README frontmatter of the backlog items (statuses).
+
+### Verification evidence
+- Full suite at `574e549d` (coordinator): 1277 passed, 0 failed.
+- Android build at `574e549d` (coordinator, `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`): 0 errors, 27 warnings, 2 min.
+- Independent verifier (read the diff `develop...feature/form-pictures`, ran nothing): **PASS WITH FINDINGS**. No Critical or Major defect, no spec contradiction, no non-negotiable violated, no governed component modified, no existing assertion changed beyond the declared one (`ArtistSuggestionServiceImageTests.cs`).
+
+### Verifier findings (all Minor, not fixed in this change)
+1. `Services/ImageStore.cs` `TryDelete` catches only `IOException`. An `UnauthorizedAccessException` during cleanup would escape `ImportAsync`; both view models still show "Could not use this picture.".
+2. `ArtistFormViewModel` starts `LoadArtistForEditAsync` without awaiting and without a catch. A failed load shows no stored picture and is not logged.
+3. `Services/ImageMaintenanceService.cs` injects two repositories it never uses (it resolves them from the unit-of-work scope).
+4. `SongFormViewModel.BuildSaveRequest` compares the untrimmed Title with the picked title; a trailing space drops the Deezer identity.
+5. The edit-mode artist-picture paths in `SongService` cannot be reached from the Song form, which sends no artist picture in edit mode.
+
+### Spec amendments (2026-11-14, spec not shipped: amended in place)
+- **REQ-PIC-33:** the Name field no longer stops typing at 60 characters; the length rule and the counter refuse a longer Name. A typing cap needs a change to the governed `AutocompleteDXField` (own task).
+- **REQ-PIC-37:** the Artist form stores no external identity (REQ-SFT-49); the Deezer picture is the form picture only while the Name equals the picked name.
+- **REQ-PIC-40:** the edit-mode artist-picture rule of `SongService` is now stated.
+
+### AC traceability matrix
+Test classes: IRR `ImageReferenceRulesTests`, IST `ImageStoreTests`, IMS `ImageMaintenanceServiceTests`, LIR `LocalImageReferencesRepositoryTests`, SFP `SongFormViewModelPictureTests`, AFI `ArtistFormViewModelImageTests`, SSP `SongServiceSaveFromFormPictureTests`, SSR `SongServiceSaveFromFormPictureRealStackTests`, ASP `ArtistServicePictureTests`, ASI `ArtistSuggestionServiceImageTests`, TTF `TapToEditFieldLogicTests`. "Device" = XAML or platform only, checked in § Device check.
+
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-PIC-01 | One value in `ImageUrl`, no new column | `ImageReferenceRules` | IRR |
+| REQ-PIC-02 | Invalid reference becomes null | `ImageReferenceRules.Normalize`, `SongService`, `ArtistService.SetArtistImageAsync` | IRR, ASP, SSP, SSR |
+| REQ-PIC-03 | Display source by size | `ImageReferenceRules.ToDisplaySource` | IRR, IST |
+| REQ-PIC-04 | Deezer picture stays a URL | `ToDisplaySource`, `Normalize` | IRR (through 02, 03) |
+| REQ-PIC-05 | Pick from the library; cancel changes nothing | `MauiPhotoPicker`, both `PickImage` | SFP, AFI; picker: Device |
+| REQ-PIC-06 | Centred square crop | `PlatformImageProcessor` | Device |
+| REQ-PIC-07 | 256 / 512 px, JPEG 0.75 / 0.80 | `ImageReferenceRules`, `ImageStore` | IRR, IST; no enlarging: Device |
+| REQ-PIC-08 | EXIF orientation | `MauiPhotoPicker` | Device |
+| REQ-PIC-09 | App-private files, random names | `AppImagePaths`, `ImageStore.ImportAsync` | IRR, IST |
+| REQ-PIC-10 | Failure and 25 MB limit keep no file | `ImageStore`, view model snackbar | IST, SFP, AFI |
+| REQ-PIC-11 | Orphan sweep after 24 h | `ImageMaintenanceService`, `ImageStore.DeleteUnreferencedAsync`, repositories, `App.xaml.cs` | IMS, IST, LIR |
+| REQ-PIC-12 | Picture field position | `SongFormPage.xaml`, `ArtistFormPage.xaml` | Device |
+| REQ-PIC-13 | 120 dp, shape, large size | `ImagePickerField`, `FormImageSource` | SFP; shape: Device |
+| REQ-PIC-14 | Placeholder by default | `ImagePickerField` | AFI; Device |
+| REQ-PIC-15 | Add / Replace / Remove | `ImagePickerField`, view model commands | SFP; buttons: Device |
+| REQ-PIC-16 | Hint only without a picture | `ImagePickerField`, `ImageHintText` | SFP, AFI |
+| REQ-PIC-17 | Nothing stored before Save | view model commands | SFP |
+| REQ-PIC-18 | Song form picture order | `SongFormViewModel.FormImageReference` | SFP |
+| REQ-PIC-19 | An upload outlives picks | `ApplyRemotePick`, `ClearTitle` | SFP, AFI |
+| REQ-PIC-20 | Remove | `RemoveImage` | SFP, AFI |
+| REQ-PIC-21 | Save stores the form picture | `BuildSaveRequest`, `SongService` | SSP, SSR, SFP |
+| REQ-PIC-22 | A failed Save keeps the form picture | `SongService`, view model | SSP, SSR, SFP |
+| REQ-PIC-23 | Text state | `TapToEditFieldLogic.ShowsText`, `TapToEditField` | TTF; type size: Device |
+| REQ-PIC-24 | Editor state | same | TTF |
+| REQ-PIC-25 | Entering the text state | `TapToEditField`, `ShouldEndEditingAfterBlur` | TTF; timing: Device |
+| REQ-PIC-26 | A tap opens the editor, text kept | `TapToEditField`, `ShouldReleasePick` | TTF, SFP, AFI; keyboard: Device |
+| REQ-PIC-27 | Releasing a picked Title | `BuildSaveRequest` | SFP |
+| REQ-PIC-28 | Releasing a picked Artist | `OnIsArtistLockedChanged` | SFP |
+| REQ-PIC-29 | Search rules unchanged | unchanged members | existing REQ-SFT tests |
+| REQ-PIC-30 | Reusable component | `TapToEditField` | TTF; Device |
+| REQ-PIC-31 | Artist of a stored song can change | `OnIsArtistLockedChanged`, `SongService` | SFP, SSR |
+| REQ-PIC-32 | No duplicate by changing the artist | `SongService` | SSR, SSP, SFP |
+| REQ-PIC-33 | Name is the autocomplete field | `ArtistFormPage.xaml`, `SelectName` | existing REQ-SFT tests; Device |
+| REQ-PIC-34 | Name options show the avatar | `ArtistSuggestionService`, `ToNameOption` | ASI, AFI |
+| REQ-PIC-35 | Artist form picture | `ArtistFormViewModel.FormImageReference` | AFI |
+| REQ-PIC-36 | Save stores the artist picture | `ArtistFormViewModel.Save`, `ArtistService` | AFI, ASP |
+| REQ-PIC-37 | Name as tap-to-edit text | `ArtistFormViewModel`, `ArtistFormPage.xaml` | AFI |
+| REQ-PIC-38 | Artists list avatar, trailing checkbox | `ArtistsPage.xaml` | Device |
+| REQ-PIC-39 | Uploaded pictures show everywhere | `ImageReferenceConverter`, option mappers | SFP, AFI |
+| REQ-PIC-40 | A Deezer pick persists the artist picture | `SongService`, Artist form | SSR, SSP |
+
+## Device check (T10, Helder)
+
+Nothing in this change was run on a device.
+
+**Pictures (both forms)**
+- [ ] "Add picture" or a tap on the picture opens the photo library. Cancel changes nothing.
+- [ ] A landscape and a portrait photo are cropped to the centre and shown upright (EXIF).
+- [ ] With a picture: "Replace picture" and "Remove picture" show and the hint is hidden. Without one: placeholder, "Add picture" and the hint.
+- [ ] A corrupt file shows one "Could not use this picture." and leaves the picture unchanged.
+- [ ] Android 12 or lower asks for the storage permission; Android 13+ asks for none.
+- [ ] Uploaded pictures show from their files (form, lists, options).
+
+**Song form**
+- [ ] New song: Title editor has the keyboard; placeholder picture with the hint; Artist is an empty editor.
+- [ ] Deezer Title pick: Title becomes large text with the edit icon, the cover shows, Artist becomes text, the keyboard closes.
+- [ ] A tap on the Title or Artist text opens the editor with the text and the cursor in it. Blur without a change shows no error.
+- [ ] Saving with a changed Title stores the song without the Deezer identity; the cover is still stored.
+- [ ] Edit mode: Title and Artist open as text, no keyboard, stored picture shown.
+- [ ] Edit mode: pick another artist and save (song relinked); type a new artist and save (created); move to an artist that already has this title and version (error on Artist).
+- [ ] Upload, then a Deezer pick or X on Title: the upload stays. Remove, then a Deezer pick: the cover is set again.
+- [ ] Edit mode: Save without touching the picture keeps it; Remove then Save clears it; upload then Save replaces it.
+
+**Artist form**
+- [ ] Add mode: Name editor focused; options show avatars for local and Deezer rows.
+- [ ] Deezer pick: Name becomes Headline Medium text; the picture shows in the circle. Changing the Name removes the Deezer picture; X on Name keeps an upload.
+- [ ] Save in add mode stores the picture; edit mode shows it; Remove then Save clears it.
+- [ ] Edit mode: Name opens as text; a tap allows a rename; no search runs.
+- [ ] A Name over 60 characters shows the error and the counter; the duplicate-suggestion buttons still work.
+
+**Lists**
+- [ ] Artists rows: leading avatar or placeholder, row height unchanged, checkbox trailing after the catalog button, selection and the catalog button still work.
+- [ ] Songs rows show uploaded pictures.
