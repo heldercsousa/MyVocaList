@@ -32,9 +32,38 @@ public partial class VenueMapPickerPage : ContentPage
 
     private async void OnRawMessageReceived(object? sender, HybridWebViewRawMessageReceivedEventArgs e)
     {
-        using var document = JsonDocument.Parse(e.Message);
-        var root = document.RootElement;
-        var type = root.GetProperty("type").GetString();
+        string? type;
+        double lat = 0;
+        double lon = 0;
+
+        // A malformed or incomplete message from the web map is logged and ignored (it must not crash the page).
+        try
+        {
+            using var document = JsonDocument.Parse(e.Message);
+            var root = document.RootElement;
+            type = root.GetProperty("type").GetString();
+
+            if (type == "tap")
+            {
+                lat = root.GetProperty("lat").GetDouble();
+                lon = root.GetProperty("lon").GetDouble();
+            }
+        }
+        catch (JsonException ex)
+        {
+            Debug.WriteLine($"VenueMapPickerPage: malformed map message ignored: {ex.Message}");
+            return;
+        }
+        catch (KeyNotFoundException ex)
+        {
+            Debug.WriteLine($"VenueMapPickerPage: incomplete map message ignored: {ex.Message}");
+            return;
+        }
+        catch (InvalidOperationException ex)
+        {
+            Debug.WriteLine($"VenueMapPickerPage: map message with wrong value kind ignored: {ex.Message}");
+            return;
+        }
 
         switch (type)
         {
@@ -43,7 +72,7 @@ public partial class VenueMapPickerPage : ContentPage
                 break;
 
             case "tap":
-                await ViewModel.OnMapTappedAsync(root.GetProperty("lat").GetDouble(), root.GetProperty("lon").GetDouble());
+                await ViewModel.OnMapTappedAsync(lat, lon);
                 break;
 
             default:
