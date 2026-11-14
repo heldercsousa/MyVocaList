@@ -19,7 +19,7 @@ After step 4, env vars are **automatically available** to Claude Code on every r
 
 > **Design note:** `.env.local` is the source of truth for key rotation across the team. Each dev maintains their own `.env.local` (never committed). The script is a one-time bridge to the registry.
 
-## Android Release Signing (`/sln-deploy-android`)
+## Android Release Signing (`/sln-deploy-googledrive`)
 
 Required to build a signed APK and upload it to Google Drive.
 
