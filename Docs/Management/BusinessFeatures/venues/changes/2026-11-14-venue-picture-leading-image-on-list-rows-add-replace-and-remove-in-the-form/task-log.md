@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — V1a, V1b done (983c4723). V2 dispatched in worktree `venue-profile`; V7a dispatched in worktree `venue-map`. Next: V2m migration (orchestrator), V3a; V7b.
+- 2026-11-14 — V1a, V1b, V2, V2m done (a63f5564); V7a done (54865d1f). V3a dispatched in worktree `venue-profile`; V7b in worktree `venue-map`. Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -56,6 +56,39 @@
 
 ### Decisions made in the task (kept)
 - Length checks use the trimmed length. `Merge` trims the place name and returns "" when both names are blank; a null place address keeps the form's address. Zoom constants are public (`PlaceZoom` 17, `LastPlaceZoom` 15, `WorldZoom` 2).
+
+## 2026-11-14 — V2 Entity, EF configuration, venue image references + V2m migration (Done)
+
+### Changed files
+- `Domain/Entity/Venue.cs` (nine nullable members), `Infra/EntityEFConfig/VenueConfiguration.cs` (Name 60; address columns with default collation and `TrimValueConverters.Optional`; coordinates REAL; `ImageUrl` as on Song/Artist; no index)
+- `Domain/Rules/ImageOwnerKind.cs` (`Venue`), `Domain/Rules/ImageReferenceRules.cs` (`VenuesFolder`, `public static IReadOnlyList<string> Folders`, explicit `FolderOf`, parser loops over `Folders`)
+- New `Infra/Migrations/20261114133332_AddVenueProfile.cs` + Designer, `AppDbContextModelSnapshot.cs` (generated with `dotnet ef migrations add`)
+- New test `Unit/Domain/ImageReferenceRulesVenueTests.cs` (10)
+
+### Verification evidence
+- Commit `a63f5564` on `feature/venue-profile`. Red: the new tests failed to compile on `ImageOwnerKind.Venue` and `ImageReferenceRules.Folders`. The implementor was stopped by a full disk before the full run and the commit; the orchestrator freed space, read the diff, saw the expected `PendingModelChangesWarning` failures before the migration, generated the migration and ran the full suite: 1344 passed, 0 failed.
+- The generated `Up` holds nine `AddColumn` calls (text columns with collation `NOCASE_NOACCENT`) and no change to `Name` (SQLite does not store the length). `Down` still uses EF `DropColumn`; V3a replaces it with native statements. No existing test was edited (the planned exception was not needed).
+- The Android-target build was not run in this worktree (disk space); it runs at V5b / V9c.
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-VEN-03 | `local:venues/<32 hex>` valid; malformed → null; display paths | `ImageReferenceRules` | `ImageReferenceRulesVenueTests` (10) |
+| REQ-VEN-01, 05, 22 | columns, null for existing rows, name 60 | `Venue`, `VenueConfiguration`, migration | Level C here; migration test in V3a, service test in V4a |
+
+## 2026-11-14 — V7a Nominatim provider (Done)
+
+### Changed files
+- New `Services/Places/IGeocodingProvider.cs`, `GeocodingRecord.cs`, `NominatimGeocodingProvider.cs` (namespace `MyVocaList.Services.Places`)
+- New test `Unit/Services/Places/NominatimGeocodingProviderTests.cs` (18)
+
+### Verification evidence
+- Commit `54865d1f` on `feature/venue-map`. The implementor was stopped by the usage limit after writing the files; the orchestrator read the provider against `design.md § 2.5`, ran the full suite (1348 passed, 0 failed) and committed.
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-VEN-25, 26, 27, 28, 34 | search and reverse request shape, mapping, nothing found, failures surface | `NominatimGeocodingProvider` | `NominatimGeocodingProviderTests` (18) |
 
 ## Device check (Helder) — V10
 
