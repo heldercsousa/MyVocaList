@@ -356,6 +356,13 @@ The emulator had restarted from an older saved state with an old app version; th
 
 Coverage note: the picture comes only when the OpenStreetMap place names a Wikidata entry, a Commons file or an image address. "Bar Brahma" has none, so its picture stays empty by design.
 
+## 2026-11-14 — Emulator check, third pass, and iOS compile (Done)
+
+- Replace picture: new venue "Zz Replace Check" → "Add picture" stored `8d5b…`; "Replace picture" stored a second file `b0b9…`; after Save the row holds `local:venues/b0b9dcaebddb4c5aa8fb15432a0b0730` (read from the app database).
+- Stored picture treatment: the saved files are 512 x 512 px (26 KB) and 256 x 256 px (10 KB) JPEG. A map-picked logo goes through the same `IImageStore.ImportAsync` call, so it gets the same centre-square crop and compression as artist and song pictures (the wide Hard Rock Cafe logo lost its sides, as that crop does).
+- iOS: `dotnet build -f net10.0-ios -c Debug` compiles with 0 errors on this Windows machine (compile only; running it needs a Mac). This covers the `#elif IOS` web view User-Agent code.
+- Not possible in this session: a run on a physical phone (no device was connected to `adb`) and a run on iOS.
+
 ## Device check (Helder) — V10
 
 1. Venues list: seeded venues show the default image; a venue with a picture shows it; a venue with an address shows "street, city" under the name.
