@@ -54,7 +54,8 @@ public sealed class DeezerProvider : IMusicMetadataProvider
                 NormaliseVersion(t.TitleVersion),
                 ImageUrlRules.Normalize(t.Album?.CoverMedium),
                 ImageUrlRules.Normalize(t.Artist?.PictureMedium),
-                NormaliseAlbumTitle(t.Album?.Title)))
+                NormaliseAlbumTitle(t.Album?.Title),
+                NormaliseDuration(t.Duration)))
             .ToList()
             ?? [];
     }
@@ -111,6 +112,9 @@ public sealed class DeezerProvider : IMusicMetadataProvider
         return string.IsNullOrEmpty(value) ? null : value;
     }
 
+    /// <summary>Track length in seconds; null when absent or not positive (REQ-LYR-01).</summary>
+    private static int? NormaliseDuration(int? seconds) => seconds is > 0 ? seconds : null;
+
     private record DeezerError(
         [property: JsonPropertyName("message")] string? Message,
         [property: JsonPropertyName("code")] int? Code);
@@ -127,7 +131,8 @@ public sealed class DeezerProvider : IMusicMetadataProvider
         [property: JsonPropertyName("title_short")] string? TitleShort,
         [property: JsonPropertyName("title_version")] string? TitleVersion,
         [property: JsonPropertyName("artist")] DeezerTrackArtist? Artist,
-        [property: JsonPropertyName("album")] DeezerTrackAlbum? Album);
+        [property: JsonPropertyName("album")] DeezerTrackAlbum? Album,
+        [property: JsonPropertyName("duration")] int? Duration);
     private record DeezerTrackArtist(
         [property: JsonPropertyName("name")] string Name,
         [property: JsonPropertyName("picture_medium")] string? PictureMedium);

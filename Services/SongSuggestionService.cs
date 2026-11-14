@@ -231,7 +231,8 @@ public class SongSuggestionService : ISongSuggestionService
                 resolved.TryGetValue(r.ArtistName, out artist);
             return new SongSuggestionDto(
                 null, r.SongTitle ?? string.Empty, r.ArtistName, artist?.Id, r.ExternalId, r.Provider,
-                true, r.Version ?? string.Empty, artist?.Name, r.ImageUrl, r.ArtistImageUrl, r.AlbumTitle);
+                true, r.Version ?? string.Empty, artist?.Name, r.ImageUrl, r.ArtistImageUrl, r.AlbumTitle,
+                r.DurationSeconds);
         }).ToList();
     }
 }
