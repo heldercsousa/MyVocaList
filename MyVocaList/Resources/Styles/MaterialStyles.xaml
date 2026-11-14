@@ -124,6 +124,13 @@
         <Setter Property="FontSize" Value="32" />
     </Style>
 
+    <!-- MD3 headline medium: 28 sp, line height 36 sp (LineHeight is a multiplier in MAUI: 36 / 28 ≈ 1.29) -->
+    <Style TargetType="Label" Class="Headline.Medium">
+        <Setter Property="FontFamily" Value="RobotoRegular" />
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="LineHeight" Value="1.29" />
+    </Style>
+
     <Style TargetType="Label" Class="Title.Medium">
         <Setter Property="FontFamily" Value="RobotoMedium" />
         <Setter Property="FontSize" Value="16" />
