@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
+    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
     xmlns:models="clr-namespace:MyVocaList.Contracts.Models;assembly=MyVocaList.Contracts"
     x:Class="MyVocaList.UI.Components.TextFields.AutocompleteDXField"
     x:Name="self">
@@ -44,13 +45,41 @@
         </dxe:AutoCompleteEdit.Triggers>
         <dxe:AutoCompleteEdit.ItemTemplate>
             <DataTemplate x:DataType="models:AutocompleteSuggestion">
-                <VerticalStackLayout Padding="16,8">
-                    <Label Text="{Binding Headline}" StyleClass="Body.Large" />
-                    <Label Text="{Binding SupportingText}"
-                           StyleClass="Body.Medium"
+                <!-- MD3 menu item: optional leading image/avatar (col 0), text (col 1), trailing text (col 2).
+                     LeadingKind None + null TrailingText = text only (columns 0 and 2 collapse to zero width). -->
+                <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,8">
+                    <lists:ListItemLeadingImage Grid.Column="0"
+                                                IsVisible="{Binding HasLeadingImage}"
+                                                ImageSource="{Binding ImageUrl}"
+                                                PlaceholderIcon="{Binding PlaceholderIcon}"
+                                                Margin="0,0,12,0"
+                                                VerticalOptions="Center" />
+                    <lists:ListItemLeadingAvatar Grid.Column="0"
+                                                 IsVisible="{Binding HasLeadingAvatar}"
+                                                 ImageSource="{Binding ImageUrl}"
+                                                 PlaceholderIcon="{Binding PlaceholderIcon}"
+                                                 Margin="0,0,12,0"
+                                                 VerticalOptions="Center" />
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                        <Label Text="{Binding Headline}"
+                               StyleClass="Body.Large"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation" />
+                        <Label Text="{Binding SupportingText}"
+                               StyleClass="Body.Medium"
+                               TextColor="{StaticResource OnSurfaceVariant}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation"
+                               IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="2"
+                           Text="{Binding TrailingText}"
+                           StyleClass="Label.Small"
                            TextColor="{StaticResource OnSurfaceVariant}"
-                           IsVisible="{Binding SupportingText, Converter={StaticResource IsNotNullConverter}}" />
-                </VerticalStackLayout>
+                           Margin="12,0,0,0"
+                           VerticalOptions="Center"
+                           IsVisible="{Binding TrailingText, Converter={StaticResource IsNotNullConverter}}" />
+                </Grid>
             </DataTemplate>
         </dxe:AutoCompleteEdit.ItemTemplate>
     </dxe:AutoCompleteEdit>

@@ -1,3 +1,4 @@
+using MyVocaList.Contracts.DTOs.Venues;
 using MyVocaList.Contracts.DTOs.List;
 
 namespace MyVocaList.Domain.ServicesInterfaces
@@ -14,5 +15,8 @@ namespace MyVocaList.Domain.ServicesInterfaces
             int pageNumber,
             int pageSize,
             string query = null);
+        Task<VenueEditDto?> GetVenueForEditAsync(int id, CancellationToken ct = default);
+        Task<(bool success, string message, VenueField field)> SaveVenueAsync(VenueSaveRequest request, CancellationToken ct = default);
+        (bool isValid, string message, VenueField field) ValidateAddressInput(VenueAddress address);
     }
 }
