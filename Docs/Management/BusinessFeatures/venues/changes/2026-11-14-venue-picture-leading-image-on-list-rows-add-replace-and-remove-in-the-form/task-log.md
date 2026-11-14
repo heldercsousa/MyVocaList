@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — `venue-map` merged into `venue-profile` (1581 tests pass). Running: V5a (`venue-profile`), V9b (`venue-map`). Next: V5b, merge, V9c. Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
+- 2026-11-14 — All tasks through V5a and V9b are merged on `feature/venue-profile` (02e4bfe2, 1603 tests pass). Running: V5b (venue pages, first Android build). Next: V9c close-out. `feature/venue-map` is fully merged and no longer used.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -220,6 +220,37 @@ REQ-VEN-06, 18 → `VenueMapperTests`.
 ## 2026-11-14 — Merge `venue-map` into `venue-profile`
 
 - Merge commit on `feature/venue-profile`, no conflicts. Full suite 1581 passed, 0 failed.
+
+## 2026-11-14 — V5a VenueFormViewModel (Done)
+
+### Changed files
+- `MyVocaList/UI/ViewModels/VenueFormViewModel.cs` (rewritten); `MyVocaList.Tests/Unit/ViewModels/VenueFormViewModelProfileTests.cs` (new, 16 tests); `VenueFormViewModelTests.cs` (planned exceptions: constructor arguments; two tests now verify `SaveVenueAsync` instead of `CreateVenueAsync`, one gained a `ValidateAddressInput` stub).
+
+### Verification evidence
+- Commit `1cbfcb97` on `feature/venue-profile`. Red: test project did not compile. Green: full suite 1600 passed on rerun; the first run had one failure in `SongMigrationTests.FullMigrate_AllSevenFtsTriggersExist`, which passes alone and on rerun (unrelated, flaky).
+
+### Traceability
+REQ-VEN-07..12, 14, 17, 19, 20, 23, 30, 31 → `VenueFormViewModelProfileTests` (full matrix at V9c).
+
+### Decisions
+- `PickOnMapCommand` navigates with `Shell.Current`, as the form's existing navigation does; the route string is the public `MapPickerRoute`. The navigation call itself has no unit test.
+- The address is validated through `ValidateAddressInput` before the save call, so a field error shows without a write attempt.
+- The 60-character cut of a picked place name is in `NominatimAddressMapper` (`VenueNameMax`), not in `VenuePlaceRules.Merge`.
+
+## 2026-11-14 — V9b VenueMapPickerPage and registration (Done)
+
+### Changed files
+- `MyVocaList/UI/Pages/Venues/VenueMapPickerPage.xaml(.cs)` (new); `MyVocaList/AppShell.xaml.cs` (route); `MyVocaList/MauiProgram.cs` (page, ViewModel, `IMapPickerPreferences`); `MyVocaList.Tests/Architecture/NoLocationPermissionTests.cs` (new, 3 tests).
+
+### Verification evidence
+- Commit `9bb864c2` on `feature/venue-map`; merged into `feature/venue-profile` (`02e4bfe2`), full suite 1603 passed, 0 failed. The platform code that sets the web view User-Agent (`#if ANDROID` / `#elif IOS`) is not compiled by the test build; the Android build at V5b covers the Android part.
+
+### Traceability
+REQ-VEN-35 → `NoLocationPermissionTests`. Page behaviour (REQ-VEN-23..31, 34): emulator and device check.
+
+### Decisions
+- Page title "Pick the venue location" through `ContentPage.Title`. Two activity indicators (search, tap lookup). Search on submit through `ReturnCommand`.
+- Open point passed to V5b: the raw-message handler must ignore a malformed message instead of throwing.
 
 ## Device check (Helder) — V10
 
