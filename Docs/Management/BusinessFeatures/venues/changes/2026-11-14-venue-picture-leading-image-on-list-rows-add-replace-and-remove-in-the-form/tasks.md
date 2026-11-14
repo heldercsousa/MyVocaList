@@ -73,4 +73,4 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 
 ## Close-out
 - [x] V9c Merge, full test run, Android build, emulator check, verifier, traceability matrix, statuses, merge to `develop`.
-- [ ] V10 **Device check (Helder)** — checklist in `task-log.md § Device check`.
+- [x] V10 **Device check (Helder)** — checklist in `task-log.md § Device check`.
