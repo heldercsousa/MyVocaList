@@ -335,7 +335,19 @@ namespace MyVocaList.UI.ViewModels
 
         private async Task LoadAsync(int venueId)
         {
-            var venue = await _venueService.GetVenueForEditAsync(venueId);
+            VenueEditDto? venue;
+            try
+            {
+                venue = await _venueService.GetVenueForEditAsync(venueId);
+            }
+            catch (Exception ex)
+            {
+                // Fire-and-forget load: a failure must be observed here, or the form would stay blank silently.
+                _logger.LogError(ex, "Loading venue {VenueId} for edit failed", venueId);
+                await _snackbarService.ShowErrorAsync("The venue couldn't be loaded. Try again.");
+                return;
+            }
+
             if (venue is null)
             {
                 await _snackbarService.ShowErrorAsync(VenueNotFoundMessage);
