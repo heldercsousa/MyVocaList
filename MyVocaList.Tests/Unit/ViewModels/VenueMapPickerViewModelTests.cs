@@ -215,6 +215,24 @@ public class VenueMapPickerViewModelTests
         Assert.False(h.Sut.IsSearching);
     }
 
+    // [AC] REQ-VEN-25: The results list is shown while a search has places and hidden once one is selected.
+    [Fact]
+    public async Task SearchCommand_WithPlaces_ShowsResultsUntilOneIsSelected()
+    {
+        var h = new Harness();
+        var place = MakePlace("Bar A");
+        h.Sut.SearchText = "Bar";
+        h.Lookup.Setup(s => s.SearchAsync("Bar", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new PlaceSearchResult(PlaceLookupStatus.Found, [place]));
+
+        await h.Sut.SearchCommand.ExecuteAsync(null);
+        var shownAfterSearch = h.Sut.HasResults;
+        h.Sut.SelectResultCommand.Execute(place);
+
+        Assert.True(shownAfterSearch);
+        Assert.False(h.Sut.HasResults);
+    }
+
     // [AC] REQ-VEN-25: A search that finds nothing sets HasNoResults (the page shows "No place found.").
     [Fact]
     public async Task SearchCommand_NoPlaces_SetsHasNoResults()

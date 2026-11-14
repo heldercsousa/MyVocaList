@@ -79,6 +79,8 @@ public sealed partial class VenueMapPickerViewModel : ViewModelBase
     [ObservableProperty] private bool _isSearching;
     [ObservableProperty] private bool _isLookingUp;
     [ObservableProperty] private bool _hasNoResults;
+    // The results list is shown from this flag: the collection raises no Count change on ReplaceRange/ClearRange.
+    [ObservableProperty] private bool _hasResults;
     [ObservableProperty] private VenuePlace? _selectedPlace;
     [ObservableProperty] private bool _isPanelVisible;
     [ObservableProperty] private string _panelTitle = string.Empty;
@@ -147,6 +149,7 @@ public sealed partial class VenueMapPickerViewModel : ViewModelBase
             await RunOnUiThreadAsync(() =>
             {
                 Results.ReplaceRange(places);
+                HasResults = places.Count > 0;
                 HasNoResults = result.Status == PlaceLookupStatus.Found && places.Count == 0;
                 if (result.Status == PlaceLookupStatus.Unavailable)
                 {
@@ -174,6 +177,7 @@ public sealed partial class VenueMapPickerViewModel : ViewModelBase
         CancelPendingTap();
         SelectedPlace = place;
         Results.ClearRange();
+        HasResults = false;
         HasNoResults = false;
         ShowPlacePanel(place);
         ViewRequested?.Invoke(this, new MapView(place.Latitude, place.Longitude, VenuePlaceRules.PlaceZoom, true));
@@ -190,6 +194,7 @@ public sealed partial class VenueMapPickerViewModel : ViewModelBase
         var ct = cts.Token;
 
         Results.ClearRange();
+        HasResults = false;
         HasNoResults = false;
         IsLookingUp = true;
 
