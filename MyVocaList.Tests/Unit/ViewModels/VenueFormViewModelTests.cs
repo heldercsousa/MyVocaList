@@ -18,7 +18,8 @@ public class VenueFormViewModelTests
 
     private VenueFormViewModel CreateSut() =>
         new(_serviceMock.Object, _snackMock.Object, _loggerMock.Object,
-            new Mock<IImageStore>().Object, new Mock<IPhotoPicker>().Object, new WeakReferenceMessenger());
+            new Mock<IImageStore>().Object, new Mock<IPhotoPicker>().Object, new WeakReferenceMessenger(),
+            new Mock<IVenuePictureLookupService>().Object, new Mock<IRemoteImageFetcher>().Object);
 
     // ── Blur validation (ValidateNameCommand) ────────────────────────────────
 
