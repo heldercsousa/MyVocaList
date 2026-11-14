@@ -4,6 +4,7 @@ using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Navigation;
+using MyVocaList.Tests.Infrastructure;
 using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -32,7 +33,9 @@ public class SongFormViewModelTests
             (secureStorage ?? new Mock<ISecureStorageWrapper>()).Object,
             messenger ?? new Mock<IMessenger>().Object,
             _navigationMock.Object,
-            _suggestionsMock.Object);
+            _suggestionsMock.Object,
+            TestImageStore.PassThrough().Object,
+            new Mock<IPhotoPicker>().Object);
     }
 
     // ── Resolution sheet: Open existing (Task 5.1) ─────────────────────────

@@ -134,12 +134,20 @@ public class SongService : ISongService
     /// <summary>
     /// The body of <see cref="UpdateSongAsync"/> (REQ-SFT-46: the only update write). It also returns the
     /// form field a failure belongs to (REQ-SFT-51, D2); only <see cref="SaveFromFormAsync"/> reads it.
+    /// The trailing picture parameters are passed by <see cref="SaveFromFormAsync"/> only; their defaults
+    /// keep <see cref="UpdateSongAsync"/> unchanged (it never touches a picture).
     /// </summary>
+    /// <param name="imageChanged">REQ-PIC-21: true = <paramref name="songImageReference"/> replaces the stored reference.</param>
+    /// <param name="songImageReference">The already-normalised song reference (null removes the picture).</param>
+    /// <param name="artistImageUrl">The already-normalised pending artist picture (REQ-ART-16 in edit mode).</param>
+    /// <param name="fillArtistImage">False for an artist chosen through <c>ArtistDecision.UseExisting</c>.</param>
     private Task<(bool success, string message, SaveField failedField)> UpdateSongCoreAsync(
         int id, string title, string? featuredArtists, string? lyrics,
         string? externalId, string? externalProvider, string? version,
         int? artistId, string? newArtistName,
-        CancellationToken ct)
+        CancellationToken ct,
+        bool imageChanged = false, string? songImageReference = null,
+        string? artistImageUrl = null, bool fillArtistImage = false)
     {
         // REQ-SFT-28 / REQ-SFT-21: at most one of artistId / newArtistName (blank name = not
         // supplied). Pure input validation stays OUTSIDE the lambda (REQ-UOW-41).
@@ -178,6 +186,7 @@ public class SongService : ISongService
             // user changing the artist of a saved song lost the edit silently. null = keep existing
             // (same semantics as version/externalId below); a supplied id must exist.
             var effectiveArtistId = artistId ?? song.ArtistId;
+            Artist? changedToExistingArtist = null;
             if (hasNewArtistName)
             {
                 // REQ-SFT-28 / REQ-UOW-28: resolved from sp, so the nested service's ExecuteAsync JOINS
@@ -188,6 +197,11 @@ public class SongService : ISongService
                     await artistService.CreateArtistAsync(newArtistName!, ct: ct);
                 if (!artistCreated || createdArtist is null)
                     return (false, artistMessage, SaveField.Artist);
+
+                // REQ-ART-16 in edit mode (REQ-PIC-40): an artist created by this Save carries the pending
+                // picture from its first flush (tracked Added entity, so no explicit UpdateAsync is needed).
+                if (artistImageUrl is not null)
+                    createdArtist.ImageUrl = artistImageUrl;
 
                 // REQ-UOW-35: flush (not commit) so the generated Artist.Id exists; _uow holds no
                 // AppDbContext (it flushes the AMBIENT scope), so REQ-UOW-28 does not apply to it.
@@ -201,16 +215,31 @@ public class SongService : ISongService
                 var newArtist = await artistRepository.GetByIdAsync(artistId.Value, ct);
                 if (newArtist == null)
                     return (false, "Artist not found", SaveField.Artist);
+                changedToExistingArtist = newArtist;
             }
 
             // REQ-SFT-29 / REQ-SFT-27: uniqueness = (collated effective artist, title, effective
             // version) excluding this song; null version = keep the stored one. Title/Version trimming
             // is enforced by the EF ValueConverter (design.md § D3), which also applies to this WHERE
-            // parameter.
+            // parameter. The check runs on the EFFECTIVE artist, so it also refuses an artist change
+            // that would duplicate another song (REQ-PIC-32); that refusal belongs to the Artist field
+            // (the message is unchanged, so UpdateSongAsync, which drops the field, behaves as before).
             var effectiveVersion = version ?? song.Version ?? string.Empty;
             if (await songRepository.FindIdByTitleVersionForArtistAsync(
                     effectiveArtistId, title, effectiveVersion, id, ct) is not null)
-                return (false, "A song with this title and version already exists for this artist", SaveField.None);
+                return (false, "A song with this title and version already exists for this artist",
+                    effectiveArtistId != song.ArtistId ? SaveField.Artist : SaveField.None);
+
+            // REQ-ART-16 in edit mode (REQ-PIC-40): an existing artist the song is MOVED to is only ever
+            // filled, never overwritten, and only after every refusal above (REQ-PIC-22). An unchanged
+            // artist is never filled (pinned by SaveFromForm_EditModeWithImages_LeavesStoredImagesUnchanged).
+            // Explicit UpdateAsync: GetByIdAsync returns the artist detached (NoTracking default), so
+            // mutating it alone is a silent no-op at save time (artwork item T10a, commit 04f0f329).
+            if (fillArtistImage && artistImageUrl is not null && changedToExistingArtist is { ImageUrl: null })
+            {
+                changedToExistingArtist.ImageUrl = artistImageUrl;
+                await sp.GetRequiredService<IArtistRepository>().UpdateAsync(changedToExistingArtist, ct);
+            }
 
             // Song.Title/FeaturedArtists/Version trimming is enforced by the ValueConverter (design.md § D3).
             // BUG-067 under the unit-of-work pattern: SongRepository.GetByIdAsync eager-loads
@@ -237,6 +266,10 @@ public class SongService : ISongService
                 song.ExternalId = externalId;
             if (externalProvider != null)
                 song.ExternalProvider = externalProvider;
+
+            // REQ-PIC-21: the stored reference changes only when the form uploaded or removed a picture.
+            if (imageChanged)
+                song.ImageUrl = songImageReference;
 
             await songRepository.UpdateAsync(song, ct);
             // SaveChangesAsync deleted — the single save is owned by IUnitOfWork (REQ-UOW-10).
@@ -401,8 +434,10 @@ public class SongService : ISongService
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        // REQ-ART-03: both pending image URLs are normalised once, up front; an invalid value becomes null.
-        var songImageUrl = MyVocaList.Domain.Rules.ImageUrlRules.Normalize(request.ImageUrl);
+        // REQ-ART-03 / REQ-PIC-02: both pending images are normalised once, up front; an invalid value becomes
+        // null. The song picture may be an image URL or a local reference (an upload); the artist picture stays
+        // an image URL only, because the Song form never uploads an artist picture (design § 1 P19).
+        var songImageUrl = MyVocaList.Domain.Rules.ImageReferenceRules.Normalize(request.ImageUrl);
         var artistImageUrl = MyVocaList.Domain.Rules.ImageUrlRules.Normalize(request.ArtistImageUrl);
 
         // Rule 1 (REQ-SFT-15 / REQ-SFT-12 / REQ-SFT-21): pure input validation — it stays OUTSIDE any
@@ -476,12 +511,15 @@ public class SongService : ISongService
         }
 
         // REQ-SFT-27: edit mode passes a null external identity — the stored identity is kept,
-        // whatever the request carries.
+        // whatever the request carries. REQ-PIC-21: the song picture is written only when the form changed
+        // it; REQ-PIC-40: the pending artist picture follows the REQ-ART-16 rule inside the same write.
         var songId = request.SongId!.Value;
         var (updated, updateMessage, updateFailedField) = await UpdateSongCoreAsync(
             songId, request.Title, request.FeaturedArtists, request.Lyrics,
             externalId: null, externalProvider: null, version: request.Version,
-            artistId: resolved.ArtistId, newArtistName: resolved.NewArtistName, ct: ct);
+            artistId: resolved.ArtistId, newArtistName: resolved.NewArtistName, ct: ct,
+            imageChanged: request.ImageChanged, songImageReference: songImageUrl,
+            artistImageUrl: artistImageUrl, fillArtistImage: resolved.FillArtistImage);
 
         return updated
             ? SaveSucceeded(updateMessage, songId)

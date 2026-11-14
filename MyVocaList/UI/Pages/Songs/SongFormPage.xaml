@@ -10,6 +10,7 @@
     xmlns:dtoList="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
     xmlns:resolution="clr-namespace:MyVocaList.Domain.Resolution;assembly=MyVocaList.Domain"
     xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
+    xmlns:media="clr-namespace:MyVocaList.UI.Components.Media"
     x:Class="MyVocaList.UI.Pages.Songs.SongFormPage"
     x:DataType="vm:SongFormViewModel"
     Title="{Binding PageTitle}"
@@ -26,22 +27,30 @@
         <ScrollView>
             <VerticalStackLayout Padding="24" Spacing="16">
 
-                <!-- Title is the first field (REQ-SFT-01). Add mode: the search box over local songs and
-                     Deezer (REQ-SFT-02). Edit mode: plain editable text for every song (IsSearchEnabled
-                     false, REQ-SFT-27). Blur validation runs ValidateTitle (the VM's first check). -->
-                <textfields:AutocompleteDXField x:Name="titleField"
-                                                LabelText="Title"
-                                                PlaceholderText="Enter song title"
-                                                Text="{Binding SongTitle, Mode=TwoWay}"
-                                                IsLocked="{Binding IsTitleLocked, Mode=TwoWay}"
-                                                IsSearchEnabled="{Binding IsTitleSearchEnabled}"
-                                                SupportingText="{Binding TitleSupportingText}"
-                                                HasError="{Binding TitleHasError}"
-                                                ErrorText="{Binding TitleErrorText}"
-                                                OptionSource="{Binding TitleOptionSource}"
-                                                SelectCommand="{Binding SelectTitleCommand}"
-                                                ClearCommand="{Binding ClearTitleCommand}"
-                                                BlurWithoutPickCommand="{Binding ValidateTitleCommand}" />
+                <!-- Title is the first field (REQ-SFT-01). A defined Title shows as Headline Medium text; a tap
+                     opens the editor with the text kept and releases a picked Title (REQ-PIC-23..27). Add mode:
+                     the search box over local songs and Deezer (REQ-SFT-02). Edit mode: plain editable text for
+                     every song (IsSearchEnabled false, REQ-SFT-27, REQ-PIC-29). Blur validation runs
+                     ValidateTitle (the VM's first check). -->
+                <textfields:TapToEditField x:Name="titleTapField"
+                                           Text="{Binding SongTitle}"
+                                           TextStyleClass="Headline.Medium"
+                                           HasError="{Binding TitleHasError}"
+                                           IsEditing="{Binding IsTitleEditing, Mode=TwoWay}">
+                    <textfields:AutocompleteDXField x:Name="titleField"
+                                                    LabelText="Title"
+                                                    PlaceholderText="Enter song title"
+                                                    Text="{Binding SongTitle, Mode=TwoWay}"
+                                                    IsLocked="{Binding IsTitleLocked, Mode=TwoWay}"
+                                                    IsSearchEnabled="{Binding IsTitleSearchEnabled}"
+                                                    SupportingText="{Binding TitleSupportingText}"
+                                                    HasError="{Binding TitleHasError}"
+                                                    ErrorText="{Binding TitleErrorText}"
+                                                    OptionSource="{Binding TitleOptionSource}"
+                                                    SelectCommand="{Binding SelectTitleCommand}"
+                                                    ClearCommand="{Binding ClearTitleCommand}"
+                                                    BlurWithoutPickCommand="{Binding ValidateTitleCommand}" />
+                </textfields:TapToEditField>
 
                 <Label Text="{Binding CharacterCounterText}"
                        IsVisible="{Binding ShowCharacterCounter}"
@@ -61,19 +70,38 @@
                     </Label.Triggers>
                 </Label>
 
-                <!-- Artist (REQ-SFT-01): local artists only (REQ-SFT-16). Locked in edit mode (REQ-SFT-28).
-                     A pick or create-on-Save is decided by the VM and the Service, never by the field. -->
-                <textfields:AutocompleteDXField x:Name="artistField"
-                                                LabelText="Artist"
-                                                PlaceholderText="Search artists..."
-                                                Text="{Binding ArtistSearchText, Mode=TwoWay}"
-                                                IsLocked="{Binding IsArtistLocked, Mode=TwoWay}"
-                                                HasError="{Binding ArtistHasError}"
-                                                ErrorText="{Binding ArtistErrorText}"
-                                                OptionSource="{Binding ArtistOptionSource}"
-                                                SelectCommand="{Binding SelectArtistCommand}"
-                                                ClearCommand="{Binding ClearArtistCommand}"
-                                                BlurWithoutPickCommand="{Binding ArtistBlurredWithoutSelectionCommand}" />
+                <!-- Song picture, directly below Title (REQ-PIC-12..16): 120 dp rounded square, upload,
+                     replace and remove; nothing is stored before Save (REQ-PIC-17). -->
+                <media:ImagePickerField ImageSource="{Binding FormImageSource}"
+                                        ThumbnailSource="{Binding FormImageThumbnailSource}"
+                                        PlaceholderIcon="music_note_outlined"
+                                        HasImage="{Binding HasFormImage}"
+                                        HintText="{Binding ImageHintText}"
+                                        PickCommand="{Binding PickImageCommand}"
+                                        RemoveCommand="{Binding RemoveImageCommand}"
+                                        IsBusy="{Binding IsImageBusy}" />
+
+                <!-- Artist (REQ-SFT-01): local artists only (REQ-SFT-16, REQ-PIC-29). A defined Artist shows as
+                     Title Large text; a tap opens the editor with the text kept and releases the picked artist, in
+                     add and edit mode, so the artist of a stored song can be changed (REQ-PIC-23..28, 31). A pick
+                     or the resolution of the typed name on Save is decided by the VM and the Service. -->
+                <textfields:TapToEditField x:Name="artistTapField"
+                                           Text="{Binding ArtistSearchText}"
+                                           TextStyleClass="Title.Large"
+                                           HasError="{Binding ArtistHasError}"
+                                           IsEditing="{Binding IsArtistEditing, Mode=TwoWay}">
+                    <textfields:AutocompleteDXField x:Name="artistField"
+                                                    LabelText="Artist"
+                                                    PlaceholderText="Search artists..."
+                                                    Text="{Binding ArtistSearchText, Mode=TwoWay}"
+                                                    IsLocked="{Binding IsArtistLocked, Mode=TwoWay}"
+                                                    HasError="{Binding ArtistHasError}"
+                                                    ErrorText="{Binding ArtistErrorText}"
+                                                    OptionSource="{Binding ArtistOptionSource}"
+                                                    SelectCommand="{Binding SelectArtistCommand}"
+                                                    ClearCommand="{Binding ClearArtistCommand}"
+                                                    BlurWithoutPickCommand="{Binding ArtistBlurredWithoutSelectionCommand}" />
+                </textfields:TapToEditField>
 
                 <!-- Version field (Task 4.5 — empty = canonical version) -->
                 <dxe:TextEdit Text="{Binding SongVersion, Mode=TwoWay}"
