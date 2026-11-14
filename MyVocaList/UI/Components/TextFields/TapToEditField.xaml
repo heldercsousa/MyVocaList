@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    x:Class="MyVocaList.UI.Components.TextFields.TapToEditField"
+    x:Name="self">
+
+    <!-- Tap-to-edit wrapper (REQ-PIC-23..26, 30): EITHER the text presentation OR the wrapped editor shows,
+         never both. Which one is decided by TapToEditFieldLogic.ShowsText and applied in code-behind
+         (ApplyState), never by triggers. The editor sits in its own host, so the host is toggled and a
+         consumer binding on the editor's IsVisible is never fought. -->
+    <Grid>
+        <!-- Text state: a tappable row, at least 48 dp high, value + trailing edit icon. -->
+        <Grid x:Name="textPresenter"
+              ColumnDefinitions="*,Auto"
+              ColumnSpacing="8"
+              MinimumHeightRequest="48"
+              IsVisible="False"
+              SemanticProperties.Description="{Binding Text, Source={x:Reference self}}"
+              SemanticProperties.Hint="Double tap to edit">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnTextTapped" />
+            </Grid.GestureRecognizers>
+
+            <Label x:Name="textLabel"
+                   Grid.Column="0"
+                   Text="{Binding Text, Source={x:Reference self}}"
+                   MaxLines="{Binding MaxLines, Source={x:Reference self}}"
+                   LineBreakMode="TailTruncation"
+                   TextColor="{StaticResource OnSurface}"
+                   VerticalOptions="Center" />
+
+            <dx:DXImage Grid.Column="1"
+                        Source="edit_outlined"
+                        TintColor="{StaticResource OnSurfaceVariant}"
+                        WidthRequest="24"
+                        HeightRequest="24"
+                        VerticalOptions="Center"
+                        IsVisible="{Binding IsEditIconVisible, Source={x:Reference self}}" />
+        </Grid>
+
+        <!-- Editor state: the wrapped editor (the Editor content property) is placed here in code-behind. -->
+        <ContentView x:Name="editorHost" />
+    </Grid>
+</ContentView>
