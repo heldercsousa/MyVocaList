@@ -1,7 +1,7 @@
 ---
 id: song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists
 title: "Song form: a Deezer pick fills Lyrics when a lyrics match exists"
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-14
 section: BusinessFeatures
 parent: artists-songs

@@ -132,8 +132,12 @@ Venues CRUD `../../requirements.md` (AC-n.m) and the pictures spec
 
 - **REQ-VEN-22: Name limit raised to 60.** The venue name maximum SHALL be 60 characters (was 30), so a
   place name from the map fits. Longer names are refused with "Name is too long. Maximum 60
-  characters." The character counter appears above 50 characters, turns to the warning colour from 56
-  and to the error colour at 60. Minimum 2 characters is unchanged.
+  characters." The character counter appears above 50 characters and turns to the warning colour from
+  56; as today, the error colour shows only for a length above the maximum, so a 60-character name
+  shows the warning colour and is saved. Minimum 2 characters is unchanged.
+- **REQ-VEN-36: Success messages are unchanged.** A successful add returns "Venue '{name}' successfully
+  created!" (AC-1.7) and a successful edit returns "Venue name successfully updated to '{name}'!"
+  (AC-3.5), whatever fields changed; the form keeps its snackbars "Venue created" / "Venue updated".
 
 ### F. Map picker
 
@@ -143,11 +147,15 @@ Venues CRUD `../../requirements.md` (AC-n.m) and the pictures spec
 - **REQ-VEN-24: The picker opens centred on what is known.** WHEN the user taps the button, the map
   picker opens centred on the first that exists of: (1) the form's coordinates, zoom 17; (2) the first
   search result for the form's non-empty address (fields joined by ", "), zoom 17; (3) the last place
-  the user confirmed on this device, zoom 15; (4) the whole world, zoom 2.
+  the user confirmed on this device, zoom 15; (4) the whole world, zoom 2. Cases (1) and (2) show the
+  marker at the centre. IF the search of case (2) finds nothing or is unavailable, THEN case (3) applies.
+  That search is one lookup and obeys REQ-VEN-34.
 - **REQ-VEN-25: Search.** The picker SHALL show a search field "Search a place or address". WHEN the
   user submits text of 3 or more characters (keyboard search key or the search icon), the system
   performs one search lookup and lists at most 5 results (name and address line). Tapping a result
-  centres the map on it, zoom 17, and selects it as the place. No lookup is sent while the user types.
+  centres the map on it, zoom 17, moves the marker there, hides the result list and shows the result in
+  the bottom panel as the selected place (REQ-VEN-26 panel); no reverse lookup is sent for it. IF the
+  search finds nothing, THEN the list area reads "No place found." No lookup is sent while the user types.
 - **REQ-VEN-26: Tap selects a point.** WHEN the user taps the map, a marker moves to the point and the
   system performs one reverse lookup for it. A panel at the bottom then shows the place: its name when
   it is a known place, its address on one line, and the button "Use this place".
@@ -167,7 +175,9 @@ Venues CRUD `../../requirements.md` (AC-n.m) and the pictures spec
     address fields are unchanged;
   - WHEN the place has a name and the form's Name is blank, Name becomes the place name; a non-blank
     Name is never changed.
-  Nothing is stored before Save. Every filled field stays editable.
+  Nothing is stored before Save. Every filled field stays editable. A place name longer than 60
+  characters arrives cut to 60. A place with a city but no street fills the fields as they are; Save then
+  asks for the street (REQ-VEN-14), which the user types.
 - **REQ-VEN-31: Back changes nothing.** Leaving the picker with Back SHALL leave the form unchanged.
 - **REQ-VEN-32: Address fields from map data.** The six fields SHALL be built from the address service's
   answer by the rules of `design.md § 2.5` (street and house number ordered by country; first existing
@@ -177,8 +187,10 @@ Venues CRUD `../../requirements.md` (AC-n.m) and the pictures spec
   coordinates are kept (they mark where the user pointed).
 - **REQ-VEN-34: Service usage rules.** Every request to the address service SHALL carry the
   `User-Agent` `MyVocaList/1.0 (https://github.com/heldercsousa/myvocalist)`; the app SHALL send at
-  most 1 request per second; an identical lookup repeated within the app session is answered from
-  memory without a request. The map SHALL show the attribution "© OpenStreetMap contributors" at all times.
+  most 1 request per second; a lookup identical to one of the last 100 answered lookups of the app
+  session is answered from memory without a request (failed lookups are not remembered, so a retry
+  sends a request). The 5,000 ms bound of REQ-VEN-28 starts when the request is sent, not while it
+  waits for its turn. The map SHALL show the attribution "© OpenStreetMap contributors" at all times.
 - **REQ-VEN-35: No location permission.** The map picker SHALL not request the device location.
 
 ## Validation rules
