@@ -1,8 +1,8 @@
 # Task log: pictures and tap-to-edit names in the Song and Artist forms
 
 ### Checkpoint
-- **Now:** Wave 1 dispatch (T1 image infrastructure, T2a/T2b components).
-- **Next:** merge Wave 1, then Wave 2 (T3 services, T8 lists).
+- **Now:** Wave 2 closing (T8 lists) and Wave 3 first half (T4, T5 Song form), resumed 2026-11-14 after the usage limit.
+- **Next:** merge, then T6, T7 (Artist form), then T9 close-out.
 - **Context manifest:** `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## T0 — Spec (2026-11-13) — Done
@@ -71,3 +71,29 @@ Commits `5da6447c` (T2a), `92c49ae8` (T2b) on `feature/form-pictures-ui`.
 ### Verification evidence
 - Android build: 0 errors. Suite on that branch: 1097 passed, 0 failed (20 new).
 - Device-only behaviours (focus and keyboard timing, pick versus blur order, hiding a focused editor) are listed in § Device check.
+
+## T3 — Services (2026-11-13) — To Review
+
+Commit `0d4f44d5` on `feature/form-pictures`.
+
+### Changed files
+- Domain: `Resolution/SongFormSaveRequest.cs` (`bool ImageChanged = false`), `ServicesInterfaces/IArtistService.cs` (`GetArtistByIdAsync`, `SetArtistImageAsync`)
+- Contracts: `DTOs/Suggestions/ArtistSuggestionDto.cs`
+- Services: `SongService.cs`, `ArtistService.cs`, `ArtistSuggestionService.cs`
+- Tests (new): `SongServiceSaveFromFormPictureTests`, `SongServiceSaveFromFormPictureRealStackTests`, `ArtistServicePictureTests`
+
+### Implementation decisions
+- The song picture goes through `ImageReferenceRules.Normalize`. In edit mode it is written only when `ImageChanged` is true; the default `false` keeps every existing caller and test unchanged.
+- An artist change in edit mode that collides with an existing song returns `Failed` on `SaveField.Artist` with "A song with this title and version already exists for this artist".
+- In edit mode the artist picture is written only for an artist created or moved to by that save, not when the artist is unchanged.
+- `SetArtistImageAsync` returns `(bool success, string message)`.
+
+### Existing test file touched (exception)
+- `Unit/Services/ArtistSuggestionServiceImageTests.cs`: one test asserted that local rows carry no picture (REQ-ART-24). REQ-PIC-34 replaces that behaviour, so the assertion and the test name changed. Helder to confirm.
+
+### Doubts for review
+- The rule "artist picture only for an artist created or moved to in edit mode" has no requirement of its own; its tests are tagged REQ-PIC-40.
+- The collision message is the same text used for the same-artist duplicate.
+
+### Verification evidence
+- Full suite on `feature/form-pictures`: 1192 passed, 0 failed.
