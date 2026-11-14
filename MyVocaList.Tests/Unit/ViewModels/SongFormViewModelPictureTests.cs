@@ -56,7 +56,8 @@ public class SongFormViewModelPictureTests
             _navigationMock.Object,
             _suggestionsMock.Object,
             _imageStoreMock.Object,
-            _pickerMock.Object);
+            _pickerMock.Object,
+            new Mock<ISongLyricsService>().Object);
         sut.CompleteHydration();
         return sut;
     }
