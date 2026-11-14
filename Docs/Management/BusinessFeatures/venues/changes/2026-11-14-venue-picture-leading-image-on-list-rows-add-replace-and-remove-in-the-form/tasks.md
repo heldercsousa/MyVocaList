@@ -47,10 +47,10 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] V7a **Nominatim provider.** After V1b, worktree `venue-map`. (REQ-VEN-34)
   - Files owned: new `Services/Places/IGeocodingProvider.cs`, `GeocodingRecord.cs`, `NominatimGeocodingProvider.cs`, new test `Unit/Services/Places/NominatimGeocodingProviderTests.cs`.
   - Demo: a stubbed reverse answer yields a `GeocodingRecord` with its `address` keys; an `error` body yields null; a 500 throws.
-- [~] V7b **Address mapper.** After V7a, worktree `venue-map`. (REQ-VEN-32)
+- [x] V7b **Address mapper.** After V7a, worktree `venue-map`. (REQ-VEN-32)
   - Files owned: new `Services/Places/NominatimAddressMapper.cs`, new test `Unit/Services/Places/NominatimAddressMapperTests.cs`.
   - Demo: a Brazilian record with `road` "Rua Augusta" and `house_number` "100" maps to Street address "Rua Augusta, 100".
-- [ ] V7c **Place lookup gate, service, DI.** After V7b, worktree `venue-map`. (REQ-VEN-25, 27, 28, 34) Size note: seven files; the constant and the DI test are one-line additions.
+- [~] V7c **Place lookup gate, service, DI.** After V7b, worktree `venue-map`. (REQ-VEN-25, 27, 28, 34) Size note: seven files; the constant and the DI test are one-line additions.
   - Files owned: new `Domain/ServicesInterfaces/IPlaceLookupService.cs`, `Services/Places/PlaceLookupGate.cs`, `Services/Places/PlaceLookupService.cs`, `Domain/Constants/SearchConstants.cs` (one constant), `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, new tests `Unit/Services/Places/PlaceLookupGateTests.cs`, `PlaceLookupServiceTests.cs`, one added test in `Unit/DependencyInjection/AppServicesRegistrationTests.cs`.
   - Demo: two reverse lookups 100 ms apart are sent 1,000 ms apart with fake time; the same lookup twice sends one request.
 

@@ -90,6 +90,21 @@
 |----|-----------|----------------|-------|
 | REQ-VEN-25, 26, 27, 28, 34 | search and reverse request shape, mapping, nothing found, failures surface | `NominatimGeocodingProvider` | `NominatimGeocodingProviderTests` (18) |
 
+## 2026-11-14 — V7b Address mapper (Done)
+
+### Changed files
+- New `Services/Places/NominatimAddressMapper.cs`; new test `Unit/Services/Places/NominatimAddressMapperTests.cs` (39)
+
+### Verification evidence
+- Commit `6ba88e74` on `feature/venue-map`. Red: 33 of 39 failed on assertions against an empty stub. `dotnet test` 1387 passed, 0 failed. Orchestrator re-check: diff holds only the two files; mapper tests 39 passed.
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-VEN-32 | street order by country, fallbacks for road, line 2, city, region; cuts to maximum; accents kept | `NominatimAddressMapper.ToPlace`, `BuildStreet` | `ToPlace_NumberFirstCountry_…`, `…_CommaCountryBrazil_…`, `…_OtherCountry_…`, fallback and cut tests |
+| REQ-VEN-26 | place name only for venue categories; one-line address | `BuildName`, `BuildAddressLine` | `ToPlace_VenueCategory_KeepsName` (7), `…_NonVenueCategory_…`, `…_AllFourParts_…`, `…_NoAddressParts_…` |
+| REQ-VEN-30 | name cut to 60 | `Cut` | `ToPlace_LongName_CutTo60Characters` |
+
 ## Device check (Helder) — V10
 
 1. Venues list: seeded venues show the default image; a venue with a picture shows it; a venue with an address shows "street, city" under the name.
