@@ -26,25 +26,32 @@
                       Margin="16,8" />
 
         <!-- Results list: visible while there are results -->
-        <dx:DXCollectionView Grid.Row="1"
-                             ItemsSource="{Binding Results}"
-                             IsVisible="{Binding Results.Count, Converter={StaticResource IsNotZeroConverter}}"
-                             MaximumHeightRequest="240"
-                             UseRippleEffect="True">
-            <dx:DXCollectionView.ItemTemplate>
-                <DataTemplate x:DataType="venues:VenuePlace">
-                    <lists:ListItem
-                        Headline="{Binding Name}"
-                        SupportingText="{Binding AddressLine}">
-                        <lists:ListItem.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectResultCommand}"
-                                CommandParameter="{Binding .}" />
-                        </lists:ListItem.GestureRecognizers>
-                    </lists:ListItem>
-                </DataTemplate>
-            </dx:DXCollectionView.ItemTemplate>
-        </dx:DXCollectionView>
+        <!-- BindableLayout, not DXCollectionView: a tap recognizer inside a DXCollectionView row does not fire (emulator check). -->
+        <ScrollView Grid.Row="1"
+                    IsVisible="{Binding HasResults}"
+                    MaximumHeightRequest="240">
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Results}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="venues:VenuePlace">
+                        <VerticalStackLayout Padding="16,12" Spacing="2">
+                            <VerticalStackLayout.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:VenueMapPickerViewModel}}, Path=SelectResultCommand, x:DataType=vm:VenueMapPickerViewModel}"
+                                    CommandParameter="{Binding .}" />
+                            </VerticalStackLayout.GestureRecognizers>
+                            <Label Text="{Binding Name}"
+                                   StyleClass="Body.Large"
+                                   TextColor="{StaticResource OnSurface}"
+                                   LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding AddressLine}"
+                                   StyleClass="Body.Small"
+                                   TextColor="{StaticResource OnSurfaceVariant}"
+                                   LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </ScrollView>
 
         <Label Grid.Row="1"
                Text="No place found."
