@@ -18,3 +18,32 @@ After step 4, env vars are **automatically available** to Claude Code on every r
 **If keys change:** update `.env.local`, then re-run the script and repeat step 4. Env vars are only read from `.env.local` during script execution; afterward they live in the registry.
 
 > **Design note:** `.env.local` is the source of truth for key rotation across the team. Each dev maintains their own `.env.local` (never committed). The script is a one-time bridge to the registry.
+
+## Android Release Signing (`/sln-deploy-android`)
+
+Required to build a signed APK and upload it to Google Drive.
+
+**One-time per machine:**
+1. Create a keystore (once per developer — keep it outside the repo):
+   ```powershell
+   keytool -genkey -v -keystore C:\Users\<you>\keystrokes\myvocalist-release.jks -alias myvocalist -keyalg RSA -keysize 2048 -validity 10000
+   ```
+2. Configure rclone with Google Drive (remote name must be `googledrive`):
+   ```powershell
+   rclone config   # new remote → drive → blank client_id/secret → use auto config
+   ```
+3. Add your passwords to `.env.local` (copy from `.env.local.example`) and run `load-env.ps1`:
+   ```
+   ANDROID_KEYSTORE_PASS=<keystore password>
+   ANDROID_KEY_PASS=<key password>   # same as keystore password if you pressed Enter
+   ```
+   Then: `. .\.claude\scripts\load-env.ps1` and restart terminals.
+
+**Variables registered by this setup:**
+
+| Variable | Purpose |
+|---|---|
+| `ANDROID_KEYSTORE_PASS` | Keystore file password (read by MSBuild at publish time) |
+| `ANDROID_KEY_PASS` | Key entry password (same value if not set separately) |
+
+The keystore path and alias are hardcoded in `MyVocaList/MyVocaList.csproj` (Release Android PropertyGroup). If the keystore moves, update both the `.csproj` and this file.

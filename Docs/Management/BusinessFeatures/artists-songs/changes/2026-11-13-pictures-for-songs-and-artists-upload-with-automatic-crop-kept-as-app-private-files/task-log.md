@@ -1,7 +1,7 @@
 # Task log: pictures and tap-to-edit names in the Song and Artist forms
 
 ### Checkpoint
-- **Now:** Wave 3 running (T4, T5 Song form in `form-pictures`; T6, T7 Artist form in `form-pictures-ui`).
+- **Now:** T4, T5 (Song form) running in `form-pictures`; T6, T7 done in `form-pictures-ui`.
 - **Next:** merge both branches, then T9 close-out.
 - **Context manifest:** `requirements.md`, `design.md`, `tasks.md` (this folder).
 
@@ -115,3 +115,32 @@ Commit `45911696` on `feature/form-pictures-ui`.
 ### Verification evidence
 - Android build: 0 errors. Suite on that branch (before the T3 merge): 1167 passed, 0 failed.
 - No unit test (pure XAML, level C). Row height, placeholder, selection and the catalog button are in § Device check.
+
+## T6 / T7 — Artist form (2026-11-14) — To Review
+
+Commits `1debc4ed` (T6), `f3b4b9ab` (T7) on `feature/form-pictures-ui`.
+
+### Changed files
+- `MyVocaList/UI/ViewModels/ArtistFormViewModel.cs`
+- `MyVocaList/UI/Pages/Artists/ArtistFormPage.xaml`, `.xaml.cs`
+- `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelImageTests.cs` (new, 31 cases)
+- `MyVocaList.Tests/Unit/ViewModels/ArtistFormViewModelTests.cs` (constructor call in `CreateSut()` only; no assertion changed)
+- `.claude/library/component-safety-gate.md` (`TapToEditField`, `ImagePickerField` added to the governed list)
+
+### Implementation decisions (beyond `design.md`)
+- Constructor gains `IImageStore`, `IPhotoPicker`. New members: `IsNameEditing`, `IsImageBusy`, `FormImageSource`, `FormImageThumbnailSource`, `HasFormImage`, `ImageHintText`, `PickImageCommand`, `RemoveImageCommand`.
+- **The Deezer picture follows the Name text:** it is the form picture only while the trimmed Name equals the picked name. Editing the Name removes it from the form, so the form always shows what Save would store.
+- **Picture store fails after a successful create:** the message shows and the form becomes the edit form of the new artist with the picture still pending, so a second Save cannot create a duplicate.
+- **Picture store fails after a successful update:** the message shows and the form stays open; the rename is already saved (two service calls).
+- Edit mode loads the artist only for its picture; the Name still comes from the route parameter.
+- Add mode focuses the Name editor on open while it is visible; blur validation runs through `BlurWithoutPickCommand`.
+- The duplicate-suggestion template uses `readModels:ArtistListItem`.
+
+### Doubts for review
+- **Typing is no longer capped at 60 characters.** The old `TextEdit` had `MaxCharacterCount="60"`; `AutocompleteDXField` has no such property. The validator and the counter still reject a longer name. A cap needs a governed-component change (own task).
+- **REQ-PIC-37 against REQ-SFT-49:** REQ-PIC-37 mentions keeping the external identity; REQ-SFT-49 and its existing test say the Artist form stores none. The implementation follows REQ-SFT-49: only the picture is kept. REQ-PIC-37 wording to be corrected.
+
+### Verification evidence
+- Android build: 0 errors, 34 warnings. Suite on that branch: 1243 passed, 0 failed.
+- Tests per requirement: REQ-PIC-34 (3), 16 (1), 05 (1), 10 (1), 35 (11), 36 (10), 37 (4).
+- Not checked on a device (§ Device check).
