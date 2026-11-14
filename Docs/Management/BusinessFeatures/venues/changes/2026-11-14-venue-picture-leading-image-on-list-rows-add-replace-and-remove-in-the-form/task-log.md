@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — Reopened for Phase 6 (venue picture from a map pick, REQ-VEN-37..40): V11 running in worktree `venue-profile`, then V12 and an emulator pass of the remaining flows (name fill into a blank Name, remove picture then save).
+- 2026-11-14 — Complete, including Phase 6 (venue picture from a map pick). Merged to `develop` (46e41532): 1652 tests pass, Android build 0 errors, all flows checked on the Android emulator (two "Emulator check" entries). The checklist at the end stays as an optional pass on a physical phone.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -310,6 +310,51 @@ REQ-VEN-35 → `NoLocationPermissionTests`. Page behaviour (REQ-VEN-23..31, 34):
 | Offline | Picker shows "The map needs an internet connection." |
 
 Not checked on the emulator: iOS, removing a picture then saving, the 61-character name (unit-tested).
+
+## 2026-11-14 — V11 Picture source and resolver (Done)
+
+### Changed files
+- `Contracts/DTOs/Venues/VenuePictureSource.cs` (new), `VenuePlace.cs` (+`PictureSource`); `Services/Places/GeocodingRecord.cs`, `NominatimGeocodingProvider.cs` (`extratags=1`), `NominatimAddressMapper.cs`; `Domain/ServicesInterfaces/IVenuePictureLookupService.cs`, `Services/Places/VenuePictureLookupService.cs` (new); DI registration; tests under `Unit/Services/Places/` and one DI test.
+
+### Verification evidence
+- Commit `d5cd6c37`. Full suite 1638 passed, 1 failed (`SongMigrationTests.M1_TableRebuild_KeepsUniqueCollatedIndexes`, unrelated, passes alone; green in the V12 run). The implementor did not observe a red run (implementation written before the first run).
+- Planned exception: two expected request addresses in `NominatimGeocodingProviderTests.cs` gained `&extratags=1`.
+
+### Traceability
+REQ-VEN-37 → mapper and provider tests; REQ-VEN-39, 40 → `VenuePictureLookupService` tests, `AddAppServices_VenuePictureLookup_HasConfiguredHttpClient`.
+
+### Decisions
+- An invalid `brand:wikidata` does not fall back to `wikidata`. A failed Wikidata request ends the resolution (no fall-through to the Commons file or image address). The resolver returns the address only; the download is V12.
+
+## 2026-11-14 — V12 Form fills the picture from a confirmed place (Done)
+
+### Changed files
+- `MyVocaList/UI/ViewModels/VenueFormViewModel.cs`; `Domain/ServicesInterfaces/IRemoteImageFetcher.cs`, `Services/RemoteImageFetcher.cs` (new: https only, image content type, 25 MB cap, 5,000 ms bound, app User-Agent); `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (registration); tests `VenueFormViewModelProfileTests.cs` (+8), `RemoteImageFetcherTests.cs` (new, 5); constructor arguments in `VenueFormViewModelTests.cs` (planned exception).
+
+### Verification evidence
+- Commit `544fcd8e`, merged to `develop` as `46e41532`. Red: the fill test and the fetch test failed against stubs. Green: full suite 1652 passed, 0 failed. Android build 0 errors.
+- No reusable download existed (the song form keeps the Deezer cover as a remote address), so `IRemoteImageFetcher` was added; the bytes go through `IImageStore.ImportAsync(stream, ImageOwnerKind.Venue)`, the same crop and compression as a picked photo.
+- Open: no DI test resolves `IRemoteImageFetcher` (Level C; the emulator run below exercises the real registration).
+
+### Traceability
+REQ-VEN-38, 39 → `VenueFormViewModelProfileTests` (PlacePicked_* tests), `RemoteImageFetcherTests`.
+
+### Decisions
+- While the picture is being fetched the picture buttons are busy, so the user cannot pick at the same time; a removal during the fetch wins over the late result.
+
+## 2026-11-14 — Emulator check, second pass (current build `544fcd8e`) (Done)
+
+The emulator had restarted from an older saved state with an old app version; the current build was reinstalled before these checks.
+
+| Step | Result on the emulator |
+|------|------------------------|
+| Search "Blue Note Jazz Club New York" → select → "Use this place" on a blank form | Name filled "Blue Note Jazz Club"; address "131 West 3rd Street", "Manhattan", "New York" |
+| "Change on map" on that form | Map opens on the stored point with a marker (zoomed in on the street) |
+| Tap venue icons drawn on the map | Panel shows the commercial name and address: "Village Underground" (West 3rd Street) and a "... Shack" (MacDougal Street); a third icon answered "Selected place" with an address only |
+| Add picture → Save → reopen → Remove picture → Save → reopen | Form shows "Add picture" again; the list row falls back to the default image |
+| Search "Hard Rock Cafe London" → select → "Use this place" on a blank form | Name, address and the Hard Rock Cafe logo filled (centre square crop); "Replace picture" / "Remove picture" shown; saved as `_l.jpg` 34 KB and `_t.jpg` 14 KB |
+
+Coverage note: the picture comes only when the OpenStreetMap place names a Wikidata entry, a Commons file or an image address. "Bar Brahma" has none, so its picture stays empty by design.
 
 ## Device check (Helder) — V10
 
