@@ -109,6 +109,7 @@ public static class MauiProgram
         // off-device DI test graph never resolves Connectivity.Current (design.md § 3.6).
         builder.Services.AddSingleton<IConnectivity>(_ => Connectivity.Current);
         builder.Services.AddSingleton<INetworkStatus, MyVocaList.UI.Services.MauiNetworkStatus>();
+        builder.Services.AddSingleton<MyVocaList.UI.Services.IMapPickerPreferences, MyVocaList.UI.Services.MauiMapPickerPreferences>();
         // REQ-PIC-05..11: picture upload. Kept here (not in AddAppServices) because ImageStoreOptions reads
         // FileSystem.AppDataDirectory and IImageProcessor / IPhotoPicker are platform-bound, so the
         // off-device DI test graph never resolves them. IImageMaintenanceService lives here too: it needs IImageStore.
@@ -139,9 +140,11 @@ public static class MauiProgram
         builder.Services.AddTransient<SongsViewModel>();
         builder.Services.AddTransient<SongFormViewModel>();
         builder.Services.AddTransient<YouTubeSearchViewModel>();
+        builder.Services.AddTransient<VenueMapPickerViewModel>();
 
         // Pages
         builder.Services.AddTransient<VenueFormPage>();
+        builder.Services.AddTransient<VenueMapPickerPage>();
         builder.Services.AddTransient<PersonFormPage>();
         builder.Services.AddTransient<VenuesPage>();
         builder.Services.AddTransient<PeoplePage>();
