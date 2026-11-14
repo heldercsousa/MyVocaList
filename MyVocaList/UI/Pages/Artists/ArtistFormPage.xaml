@@ -5,8 +5,9 @@
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
-    xmlns:dtoList="clr-namespace:MyVocaList.Contracts.DTOs.List;assembly=MyVocaList.Contracts"
-    xmlns:lists="clr-namespace:MyVocaList.UI.Components.Lists"
+    xmlns:readModels="clr-namespace:MyVocaList.Domain.ReadModels;assembly=MyVocaList.Domain"
+    xmlns:textfields="clr-namespace:MyVocaList.UI.Components.TextFields"
+    xmlns:media="clr-namespace:MyVocaList.UI.Components.Media"
     x:Class="MyVocaList.UI.Pages.Artists.ArtistFormPage"
     x:DataType="vm:ArtistFormViewModel"
     Title="{Binding PageTitle}"
@@ -16,14 +17,29 @@
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="16">
 
-            <dxe:TextEdit x:Name="nameEdit"
-                          Text="{Binding ArtistName, Mode=TwoWay}"
-                          LabelText="Artist Name"
-                          PlaceholderText="Enter artist name"
-                          MaxCharacterCount="60"
-                          HasError="{Binding NameHasError}"
-                          ErrorText="{Binding NameErrorText}"
-                          Unfocused="OnNameUnfocused" />
+            <!-- Name (REQ-PIC-33, 37): the shared autocomplete field. Add mode: local artists, then Deezer;
+                 a local pick opens that artist, a Deezer pick fills Name in the picked state. Edit mode:
+                 plain editable text (IsSearchEnabled false). A defined Name reads as Headline Medium text
+                 and a tap opens the editor (REQ-PIC-23..26). Blur validation runs ValidateName. -->
+            <textfields:TapToEditField x:Name="nameTapToEdit"
+                                       Text="{Binding ArtistName}"
+                                       TextStyleClass="Headline.Medium"
+                                       HasError="{Binding NameHasError}"
+                                       IsEditing="{Binding IsNameEditing, Mode=TwoWay}">
+                <textfields:AutocompleteDXField x:Name="nameField"
+                                                LabelText="Artist Name"
+                                                PlaceholderText="Enter artist name"
+                                                Text="{Binding ArtistName, Mode=TwoWay}"
+                                                IsLocked="{Binding IsNameLocked, Mode=TwoWay}"
+                                                IsSearchEnabled="{Binding IsNameSearchEnabled}"
+                                                SupportingText="{Binding NameSupportingText}"
+                                                HasError="{Binding NameHasError}"
+                                                ErrorText="{Binding NameErrorText}"
+                                                OptionSource="{Binding NameOptionSource}"
+                                                SelectCommand="{Binding SelectNameCommand}"
+                                                ClearCommand="{Binding ClearNameCommand}"
+                                                BlurWithoutPickCommand="{Binding ValidateNameCommand}" />
+            </textfields:TapToEditField>
 
             <Label Text="{Binding CharacterCounterText}"
                    IsVisible="{Binding ShowCharacterCounter}"
@@ -43,6 +59,18 @@
                 </Label.Triggers>
             </Label>
 
+            <!-- Form picture (REQ-PIC-12..16, 35): a 120 dp circle directly below Name. The ViewModel owns
+                 which picture is shown, the buttons' state (HasFormImage) and the commands. -->
+            <media:ImagePickerField ImageSource="{Binding FormImageSource}"
+                                    ThumbnailSource="{Binding FormImageThumbnailSource}"
+                                    PlaceholderIcon="account_circle_outlined"
+                                    IsCircle="True"
+                                    HasImage="{Binding HasFormImage}"
+                                    HintText="{Binding ImageHintText}"
+                                    PickCommand="{Binding PickImageCommand}"
+                                    RemoveCommand="{Binding RemoveImageCommand}"
+                                    IsBusy="{Binding IsImageBusy}" />
+
             <!-- Duplicate suggestions from local catalog -->
             <VerticalStackLayout IsVisible="{Binding HasDuplicateSuggestions}" Spacing="4">
                 <Label Text="Artist already exists in your catalog:"
@@ -50,7 +78,7 @@
                        TextColor="{StaticResource Warning}" />
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding DuplicateSuggestions}" Spacing="4">
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="dtoList:ArtistListItemDto">
+                        <DataTemplate x:DataType="readModels:ArtistListItem">
                             <dx:DXButton Content="{Binding Name}"
                                          Style="{StaticResource OutlinedButton}"
                                          HorizontalOptions="Start"
