@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using MyVocaList.Contracts.DTOs.Venues;
 using MyVocaList.Domain.Rules;
 
@@ -27,6 +28,11 @@ public static class NominatimAddressMapper
         "amenity", "leisure", "tourism", "shop", "club", "craft", "office",
     };
 
+    private const string CommonsPrefix = "File:";
+
+    // REQ-VEN-37: a Wikidata id is Q followed by digits only.
+    private static readonly Regex WikidataIdPattern = new("^Q[0-9]+$", RegexOptions.CultureInvariant);
+
     private static readonly string[] RoadKeys = ["road", "pedestrian", "footway"];
     private static readonly string[] Line2Keys = ["suburb", "neighbourhood", "quarter", "city_district"];
     private static readonly string[] CityKeys = ["city", "town", "village", "municipality", "hamlet", "county"];
@@ -51,8 +57,37 @@ public static class NominatimAddressMapper
             record.Longitude,
             venueAddress,
             BuildName(record),
-            BuildAddressLine(line1, city, region, country, record.DisplayName));
+            BuildAddressLine(line1, city, region, country, record.DisplayName),
+            BuildPictureSource(record.ExtraTags));
     }
+
+    /// <summary>
+    /// REQ-VEN-37: picture references from the extra tags. Always returns a source; all three members are null when
+    /// no tag is accepted. A tag that is present but invalid is rejected; it does not fall back to the other tag.
+    /// </summary>
+    private static VenuePictureSource BuildPictureSource(IReadOnlyDictionary<string, string>? tags)
+    {
+        if (tags is null)
+            return new VenuePictureSource(null, null, null);
+
+        var wikidataId = TagValue(tags, "brand:wikidata") ?? TagValue(tags, "wikidata");
+        if (wikidataId is not null && !WikidataIdPattern.IsMatch(wikidataId))
+            wikidataId = null;
+
+        string? commonsFile = null;
+        var commons = TagValue(tags, "wikimedia_commons");
+        if (commons is not null && commons.StartsWith(CommonsPrefix, StringComparison.Ordinal))
+            commonsFile = Trimmed(commons[CommonsPrefix.Length..]);
+
+        var imageUrl = TagValue(tags, "image");
+        if (imageUrl is not null && !(Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps))
+            imageUrl = null;
+
+        return new VenuePictureSource(wikidataId, commonsFile, imageUrl);
+    }
+
+    private static string? TagValue(IReadOnlyDictionary<string, string> tags, string key) =>
+        tags.TryGetValue(key, out var raw) ? Trimmed(raw) : null;
 
     private static string? BuildStreet(IReadOnlyDictionary<string, string> address)
     {

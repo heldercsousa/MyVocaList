@@ -20,12 +20,15 @@ public class VenueFormViewModelProfileTests
     private readonly Mock<IImageStore> _imageStoreMock = new();
     private readonly Mock<IPhotoPicker> _photoPickerMock = new();
     private readonly WeakReferenceMessenger _messenger = new();
+    private readonly Mock<IVenuePictureLookupService> _pictureLookupMock = new();
+    private readonly Mock<IRemoteImageFetcher> _fetcherMock = new();
 
     private const string StubbedFailure = "stubbed failure — avoids Shell.Current in test context";
 
     private VenueFormViewModel CreateSut() =>
         new(_serviceMock.Object, _snackMock.Object, _loggerMock.Object,
-            _imageStoreMock.Object, _photoPickerMock.Object, _messenger);
+            _imageStoreMock.Object, _photoPickerMock.Object, _messenger,
+            _pictureLookupMock.Object, _fetcherMock.Object);
 
     private void StubPickedPhoto(string reference)
     {
@@ -350,5 +353,164 @@ public class VenueFormViewModelProfileTests
 
         Assert.Equal(-23.5, sut.Latitude);
         Assert.Equal(-46.6, sut.Longitude);
+    }
+
+    // ── Picture from a map pick (REQ-VEN-38, 39) ──────────────────────────────
+
+    private const string FetchedReference = "local:venues/0123456789abcdef0123456789abcdef";
+    private static readonly Uri PictureUri = new("https://commons.wikimedia.org/wiki/Special:FilePath/Bar.png?width=512");
+    private static readonly VenuePictureSource WikidataSource = new("Q918151", null, null);
+    private static readonly VenuePlace PlaceWithPicture =
+        new(-23.5613, -46.6565, VenueAddress.Empty, null, "Rua Augusta, 100", WikidataSource);
+
+    private void StubPictureWork(bool importSucceeds = true)
+    {
+        _pictureLookupMock.Setup(p => p.ResolveAsync(It.IsAny<VenuePictureSource>(), It.IsAny<CancellationToken>()))
+                          .ReturnsAsync(PictureUri);
+        _fetcherMock.Setup(f => f.FetchAsync(PictureUri, It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(new MemoryStream());
+        _imageStoreMock.Setup(i => i.ImportAsync(It.IsAny<Stream>(), ImageOwnerKind.Venue, It.IsAny<CancellationToken>()))
+                       .ReturnsAsync(importSucceeds
+                           ? (true, string.Empty, FetchedReference)
+                           : (false, "Could not use this picture.", (string?)null));
+    }
+
+    /// <summary>The picture work runs without being awaited by the field fill; wait until it has finished.</summary>
+    private static async Task SettleAsync(VenueFormViewModel sut)
+    {
+        for (var i = 0; i < 400 && sut.IsImageBusy; i++)
+            await Task.Delay(5);
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-38: a confirmed place with a picture source fills the picture when the form has none, as a changed picture.
+    public async Task PlacePicked_FormHasNoPicture_FillsPictureFromPlace()
+    {
+        var sut = CreateSut();
+        StubPictureWork();
+
+        _messenger.Send(new VenuePlacePickedMessage(PlaceWithPicture));
+        await SettleAsync(sut);
+
+        Assert.True(sut.HasFormImage);
+        Assert.Equal(FetchedReference, sut.FormImageReference);
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-38: a form that already shows a picture keeps it, and no picture request is sent.
+    public async Task PlacePicked_FormAlreadyHasPicture_KeepsItAndSendsNoRequest()
+    {
+        var sut = CreateSut();
+        StubPickedPhoto("local:venues/picked");
+        await sut.PickImageCommand.ExecuteAsync(null);
+        StubPictureWork();
+
+        _messenger.Send(new VenuePlacePickedMessage(PlaceWithPicture));
+        await SettleAsync(sut);
+
+        Assert.Equal("local:venues/picked", sut.FormImageReference);
+        _pictureLookupMock.Verify(p => p.ResolveAsync(It.IsAny<VenuePictureSource>(), It.IsAny<CancellationToken>()), Times.Never);
+        _fetcherMock.Verify(f => f.FetchAsync(It.IsAny<Uri>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-38: a place with an empty picture source sends no picture request.
+    public async Task PlacePicked_EmptyPictureSource_SendsNoRequest()
+    {
+        var sut = CreateSut();
+        StubPictureWork();
+        var place = new VenuePlace(-23.5, -46.6, VenueAddress.Empty, null, "Somewhere", new VenuePictureSource(null, null, null));
+
+        _messenger.Send(new VenuePlacePickedMessage(place));
+        await SettleAsync(sut);
+
+        Assert.False(sut.HasFormImage);
+        _pictureLookupMock.Verify(p => p.ResolveAsync(It.IsAny<VenuePictureSource>(), It.IsAny<CancellationToken>()), Times.Never);
+        _imageStoreMock.Verify(i => i.ImportAsync(It.IsAny<Stream>(), It.IsAny<ImageOwnerKind>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-39: when no picture address resolves, the form keeps no picture and shows no error.
+    public async Task PlacePicked_ResolverReturnsNull_KeepsNoPictureAndShowsNoError()
+    {
+        var sut = CreateSut();
+        _pictureLookupMock.Setup(p => p.ResolveAsync(It.IsAny<VenuePictureSource>(), It.IsAny<CancellationToken>()))
+                          .ReturnsAsync((Uri?)null);
+
+        _messenger.Send(new VenuePlacePickedMessage(PlaceWithPicture));
+        await SettleAsync(sut);
+
+        Assert.False(sut.HasFormImage);
+        _snackMock.Verify(s => s.ShowErrorAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-39: a picture that cannot be downloaded is skipped silently: no picture, no error.
+    public async Task PlacePicked_DownloadReturnsNothing_KeepsNoPictureAndShowsNoError()
+    {
+        var sut = CreateSut();
+        StubPictureWork();
+        _fetcherMock.Setup(f => f.FetchAsync(PictureUri, It.IsAny<CancellationToken>()))
+                    .ReturnsAsync((Stream?)null);
+
+        _messenger.Send(new VenuePlacePickedMessage(PlaceWithPicture));
+        await SettleAsync(sut);
+
+        Assert.False(sut.HasFormImage);
+        _snackMock.Verify(s => s.ShowErrorAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-39: a store refusal of the fetched picture is skipped silently: no picture, no error.
+    public async Task PlacePicked_ImportRefused_KeepsNoPictureAndShowsNoError()
+    {
+        var sut = CreateSut();
+        StubPictureWork(importSucceeds: false);
+
+        _messenger.Send(new VenuePlacePickedMessage(PlaceWithPicture));
+        await SettleAsync(sut);
+
+        Assert.False(sut.HasFormImage);
+        _snackMock.Verify(s => s.ShowErrorAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-39: a failing picture step leaves the address and name fill in place; the fields never wait for the picture.
+    public async Task PlacePicked_PictureWorkThrows_FieldsStayFilled()
+    {
+        var sut = CreateSut();
+        _pictureLookupMock.Setup(p => p.ResolveAsync(It.IsAny<VenuePictureSource>(), It.IsAny<CancellationToken>()))
+                          .ThrowsAsync(new InvalidOperationException("stubbed picture failure"));
+        var place = new VenuePlace(-23.5613, -46.6565,
+            new VenueAddress("Rua Augusta, 100", null, "São Paulo", "SP", "01304-000", "Brasil"),
+            null, "Rua Augusta, 100, São Paulo", WikidataSource);
+
+        _messenger.Send(new VenuePlacePickedMessage(place));
+        await SettleAsync(sut);
+
+        Assert.Equal("Rua Augusta, 100", sut.AddressLine1);
+        Assert.Equal("São Paulo", sut.City);
+        Assert.Equal(-23.5613, sut.Latitude);
+        Assert.False(sut.HasFormImage);
+        _snackMock.Verify(s => s.ShowErrorAsync(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-38: a removal the user makes while the picture is fetched is not overwritten by the late picture.
+    public async Task PlacePicked_UserRemovesWhileFetching_LatePictureDoesNotOverwrite()
+    {
+        var sut = CreateSut();
+        var importResult = new TaskCompletionSource<(bool success, string message, string? reference)>();
+        StubPictureWork();
+        _imageStoreMock.Setup(i => i.ImportAsync(It.IsAny<Stream>(), ImageOwnerKind.Venue, It.IsAny<CancellationToken>()))
+                       .Returns(importResult.Task);
+
+        _messenger.Send(new VenuePlacePickedMessage(PlaceWithPicture));
+        sut.RemoveImageCommand.Execute(null);
+        importResult.SetResult((true, string.Empty, FetchedReference));
+        await SettleAsync(sut);
+
+        Assert.False(sut.HasFormImage);
+        Assert.Null(sut.FormImageReference);
     }
 }
