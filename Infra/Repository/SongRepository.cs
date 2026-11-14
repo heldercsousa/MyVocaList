@@ -81,6 +81,14 @@ public class SongRepository : ISongRepository
     }
 
     /// <inheritdoc />
+    public Task<List<string>> GetLocalImageReferencesAsync(CancellationToken ct = default)
+        // Prefix filter on a technical value, not search or de-duplication (design § 2.3).
+        => _db.Songs.AsNoTracking()
+            .Where(s => s.ImageUrl != null && s.ImageUrl.StartsWith("local:"))
+            .Select(s => s.ImageUrl!)
+            .ToListAsync(ct);
+
+    /// <inheritdoc />
     public async Task<Song> GetByIdAsync(int id, CancellationToken ct)
         // BUG-055: eager-load OriginalArtist so edit-mode hydration can show the stored artist name.
         // Tracked query (callers mutate + save); the extra join is harmless for read-only callers.
