@@ -28,7 +28,11 @@ public partial class SongFormPage : ContentPage
         ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
 
-        titleField.FocusEditor();
+        // REQ-PIC-25: a stored or pre-filled Title opens as text with no keyboard; only the editor state is focused.
+        // Edit mode never focuses: the stored song loads asynchronously, so the Title can still be blank here,
+        // and the focus would keep the wrapper in the editor state after the load (IsEditing = true).
+        if (!ViewModel.IsEditMode && titleTapField.IsEditorVisible)
+            titleField.FocusEditor();
 
         // Shell has finished applying [QueryProperty] values for this navigation by the time
         // OnAppearing runs — end the hydration window so subsequent edits are tracked as dirty.
