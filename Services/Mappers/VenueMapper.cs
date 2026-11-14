@@ -1,5 +1,7 @@
 using MyVocaList.Contracts.DTOs.List;
+using MyVocaList.Contracts.DTOs.Venues;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.Rules;
 
 namespace MyVocaList.Services.Mappers;
 
@@ -17,7 +19,10 @@ public static class VenueMapper
         {
             Id = venue.Id,
             Name = venue.Name,
-            EventCount = eventCount
+            EventCount = eventCount,
+            ImageUrl = venue.ImageUrl,
+            AddressSummary = VenueAddressRules.Summary(new VenueAddress(
+                venue.AddressLine1, venue.AddressLine2, venue.City, venue.Region, venue.PostalCode, venue.Country))
         };
     }
 }
