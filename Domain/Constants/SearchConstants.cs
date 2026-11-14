@@ -39,4 +39,11 @@ public static class SearchConstants
     /// completed within this bound is abandoned so local options wait at most 3,000 ms (design § 0.3 D16).
     /// </summary>
     public const int RemoteSearchTimeoutMilliseconds = 3000;
+
+    /// <summary>
+    /// Upper bound, in milliseconds, on one place lookup (reverse or search) against the geocoding provider.
+    /// REQ-VEN-28: a lookup not completed within this bound is abandoned and reported as Unavailable.
+    /// The bound starts when the request is sent, so time spent waiting for the usage-rule turn does not count.
+    /// </summary>
+    public const int PlaceLookupTimeoutMilliseconds = 5000;
 }
