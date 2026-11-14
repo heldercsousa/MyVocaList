@@ -26,7 +26,7 @@ public sealed class NominatimGeocodingProvider : IGeocodingProvider
     {
         var lat = latitude.ToString("F6", CultureInfo.InvariantCulture);
         var lon = longitude.ToString("F6", CultureInfo.InvariantCulture);
-        var url = $"reverse?format=jsonv2&lat={lat}&lon={lon}&zoom=18&addressdetails=1&accept-language={Uri.EscapeDataString(language)}";
+        var url = $"reverse?format=jsonv2&lat={lat}&lon={lon}&zoom=18&addressdetails=1&accept-language={Uri.EscapeDataString(language)}&extratags=1";
 
         var place = await GetAsync<NominatimPlace>(url, ct);
         // An error member means nothing is at this point (REQ-VEN-27); presence is tested, not the value.
@@ -38,7 +38,7 @@ public sealed class NominatimGeocodingProvider : IGeocodingProvider
     /// <inheritdoc />
     public async Task<IReadOnlyList<GeocodingRecord>> SearchAsync(string text, string language, int limit, CancellationToken ct = default)
     {
-        var url = $"search?format=jsonv2&q={Uri.EscapeDataString(text)}&limit={limit.ToString(CultureInfo.InvariantCulture)}&addressdetails=1&accept-language={Uri.EscapeDataString(language)}";
+        var url = $"search?format=jsonv2&q={Uri.EscapeDataString(text)}&limit={limit.ToString(CultureInfo.InvariantCulture)}&addressdetails=1&accept-language={Uri.EscapeDataString(language)}&extratags=1";
 
         var places = await GetAsync<List<NominatimPlace>>(url, ct);
         if (places is null)
@@ -81,13 +81,24 @@ public sealed class NominatimGeocodingProvider : IGeocodingProvider
             }
         }
 
+        var extraTags = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (place.ExtraTags.ValueKind == JsonValueKind.Object)
+        {
+            foreach (var property in place.ExtraTags.EnumerateObject())
+            {
+                if (property.Value.ValueKind == JsonValueKind.String && property.Value.GetString() is { } value)
+                    extraTags[property.Name] = value;
+            }
+        }
+
         return new GeocodingRecord(
             latitude,
             longitude,
             AsString(place.Name),
             AsString(place.Category),
             AsString(place.DisplayName),
-            address);
+            address,
+            extraTags);
     }
 
     private static bool TryParseCoordinate(JsonElement value, out double result)
@@ -109,5 +120,6 @@ public sealed class NominatimGeocodingProvider : IGeocodingProvider
         [property: JsonPropertyName("category")] JsonElement Category,
         [property: JsonPropertyName("display_name")] JsonElement DisplayName,
         [property: JsonPropertyName("address")] JsonElement Address,
-        [property: JsonPropertyName("error")] JsonElement Error);
+        [property: JsonPropertyName("error")] JsonElement Error,
+        [property: JsonPropertyName("extratags")] JsonElement ExtraTags);
 }
