@@ -1,6 +1,6 @@
 # Deploy Debug Build to Google Drive Command (`/sln-deploy-googledrive-debug`)
 
-Build a **Debug** APK and upload it to Google Drive. Same steps as `/sln-deploy-googledrive`, with the Debug configuration.
+Build a **Debug** APK and upload it to Google Drive. All logic lives in `MyVocaList/Platforms/Android/deployGoogleDriveDebug.bat`, so Helder can also run it himself, outside Claude Code (double-click or from any terminal).
 
 **Manual only:** run this command only when Helder asks for it. It is not a step of any workflow, close-out or other command.
 
@@ -16,62 +16,23 @@ Build a **Debug** APK and upload it to Google Drive. Same steps as `/sln-deploy-
 
 **Signatures do not mix:** Android refuses to update a release install with a debug APK, and the reverse (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). Uninstall the app once when changing between the two; this deletes the app's data on the device. A debug APK updates a build deployed from Visual Studio on this machine, because both use the same debug key.
 
-The rclone remote is `googledrive`, destination folder: `MyVocaList/releases`.
+The Debug configuration embeds the assemblies into the APK (`EmbedAssembliesIntoApk` in the `.csproj`), so the file installs and runs on its own, without Visual Studio.
 
 ## Steps
 
-### 1. Guard — confirm before building
-
-Print exactly:
-```
-About to build a Debug APK and upload to Google Drive (MyVocaList/releases). Confirm? (yes/no)
-```
-
-Stop if the answer is not `yes`.
-
-### 2. Guard — verify rclone remote exists
-
-```powershell
-rclone listremotes | Select-String "googledrive"
-```
-
-Stop with a clear message if `googledrive:` is not listed.
-
-### 3. Build the Debug APK
-
-```powershell
-dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android -c Debug
-```
-
-This must exit with code 0. Stop on any build error — do not proceed to upload.
-
-The Debug configuration embeds the assemblies into the APK (`EmbedAssembliesIntoApk` in the `.csproj`), so the file installs and runs on its own, without Visual Studio.
-
-### 4. Find the APK
-
-```powershell
-$apk = Get-ChildItem -Path "MyVocaList/bin/Debug/net10.0-android" -Filter "*-Signed.apk" | Select-Object -First 1
-```
-
-Stop with a clear message if it is not found. Report the full path found.
-
-### 5. Upload to Google Drive
-
-The Debug and Release builds produce the same file name, so upload under a distinct name. Never overwrite the release APK.
-
-```powershell
-rclone copyto "$($apk.FullName)" "googledrive:MyVocaList/releases/com.myvocalist-debug.apk" --progress
-```
-
-### 6. Report
-
-Print:
-```
-Debug APK uploaded: googledrive:MyVocaList/releases/com.myvocalist-debug.apk
-Build version: <version from the build output or `git describe --tags --always`>
-```
+1. **Guard — confirm.** Print exactly, and stop if the answer is not `yes`:
+   ```
+   About to build a Debug APK and upload to Google Drive (MyVocaList/releases). Confirm? (yes/no)
+   ```
+2. **Run** (the script no longer prompts):
+   ```powershell
+   cmd /c "MyVocaList\Platforms\Android\deployGoogleDriveDebug.bat"
+   ```
+   The script checks the rclone remote, builds Debug, finds `*-Signed.apk` and uploads it as `com.myvocalist-debug.apk` (never overwriting the release APK). It exits non-zero on any failure; report the failing step and stop.
+3. **Report** the script's `Debug APK uploaded: ...` line plus the version (`git describe --tags --always`).
 
 ## Notes
 
-- `scope: drive.file` on the rclone remote means Drive only shows files rclone itself created — this is intentional (least-privilege).
+- rclone remote `googledrive`, folder `MyVocaList/releases`. `scope: drive.file` means Drive only shows files rclone itself created — intentional (least-privilege).
 - The debug key belongs to this machine (`%LOCALAPPDATA%\Xamarin\Mono for Android\debug.keystore`). A debug APK built on another machine has another signature.
+- On failure the script calls `pause` so a double-clicked window stays open. Under Claude Code that would hang: if the run times out, treat it as a failure.
