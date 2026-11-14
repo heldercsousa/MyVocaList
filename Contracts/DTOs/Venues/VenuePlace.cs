@@ -8,4 +8,5 @@ namespace MyVocaList.Contracts.DTOs.Venues;
 /// <param name="Address">Address fields found for the point; each may be blank.</param>
 /// <param name="Name">Place name; null when the point is not a known place.</param>
 /// <param name="AddressLine">One-line address shown in the picker panel and result rows.</param>
-public sealed record VenuePlace(double Latitude, double Longitude, VenueAddress Address, string? Name, string AddressLine);
+/// <param name="PictureSource">Open-data picture references of the place (REQ-VEN-37); null when not mapped from a lookup.</param>
+public sealed record VenuePlace(double Latitude, double Longitude, VenueAddress Address, string? Name, string AddressLine, VenuePictureSource? PictureSource = null);
