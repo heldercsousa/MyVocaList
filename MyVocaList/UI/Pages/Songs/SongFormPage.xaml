@@ -115,7 +115,7 @@
                               LabelText="Featured Artists"
                               PlaceholderText="e.g. feat. Ivete Sangalo" />
 
-                <Editor Placeholder="Song lyrics (optional)"
+                <Editor Placeholder="{Binding LyricsPlaceholder}"
                         Text="{Binding Lyrics, Mode=TwoWay}"
                         MaxLength="10000"
                         AutoSize="TextChanges"
