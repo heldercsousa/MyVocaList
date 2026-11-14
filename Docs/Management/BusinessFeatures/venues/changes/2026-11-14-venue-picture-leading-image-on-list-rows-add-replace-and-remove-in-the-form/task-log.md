@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — V1a done (feb9ea48). V1b dispatched in worktree `venue-profile`. Next: V2, then migration V2m; V7a in worktree `venue-map` after V1b.
+- 2026-11-14 — V1a, V1b done (983c4723). V2 dispatched in worktree `venue-profile`; V7a dispatched in worktree `venue-map`. Next: V2m migration (orchestrator), V3a; V7b.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -31,6 +31,31 @@
 ### Verification evidence
 - Commit `feb9ea48` on `feature/venue-profile`. Android build 0 errors; `dotnet test` 1277 passed, 0 failed (baseline). Orchestrator re-check: diff holds only the eight files; Contracts project builds.
 - Level C (records and enums, no logic): no unit test. Namespace `MyVocaList.Contracts.DTOs.Venues`.
+
+## 2026-11-14 — V1b Address and place rules (Done)
+
+### Changed files
+- New `Domain/Rules/VenueAddressRules.cs`, `Domain/Rules/VenuePlaceRules.cs` (holds `MapView`)
+- New tests `Unit/Domain/VenueAddressRulesTests.cs`, `Unit/Domain/VenuePlaceRulesTests.cs` (53 cases)
+
+### Verification evidence
+- Commit `983c4723` on `feature/venue-profile`. Red: test project failed to compile on the missing types. Android build 0 errors; `dotnet test` 1330 passed, 0 failed.
+- Orchestrator re-check: diff holds only the four files; rule tests 53 passed; `VenueAddressRules` read against REQ-VEN-13..16 (order, messages, exact maximum valid).
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-VEN-13 | empty address is valid | `VenueAddressRules.IsEmpty`, `Validate` | `IsEmpty_*`, `Validate_EmptyAddress_IsValid` |
+| REQ-VEN-14 | street and city required, street first | `Validate` | `Validate_OnlyCountry_*`, `Validate_BlankCity_*`, `Validate_BlankLine1AndBlankCity_ReportsLine1First` |
+| REQ-VEN-15 | maximum lengths and message | `Validate` | `Validate_EveryFieldAtMaximum_IsValid`, `Validate_OneCharacterOverMaximum_ReportsTooLong` (6) |
+| REQ-VEN-16 | trim, blank → null | `Normalize` | `Normalize_*` (3) |
+| REQ-VEN-18 | "street, city" summary | `Summary` | `Summary_*` |
+| REQ-VEN-24 | search text; first view priority | `ToSearchText`, `VenuePlaceRules.FirstView` | `ToSearchText_*` (3), `FirstView_*` (4) |
+| REQ-VEN-30 | merge of a picked place | `VenuePlaceRules.Merge` | `Merge_*` (7) |
+| REQ-VEN-33 | coordinate pair and range | `NormalizeCoordinates` | `NormalizeCoordinates_*` |
+
+### Decisions made in the task (kept)
+- Length checks use the trimmed length. `Merge` trims the place name and returns "" when both names are blank; a null place address keeps the form's address. Zoom constants are public (`PlaceZoom` 17, `LastPlaceZoom` 15, `WorldZoom` 2).
 
 ## Device check (Helder) — V10
 
