@@ -75,6 +75,12 @@ public sealed record PlaceSearchResult(PlaceLookupStatus Status, IReadOnlyList<V
   - `string? Summary(VenueAddress address)` — REQ-VEN-18.
   - `string? ToSearchText(VenueAddress address)` — non-blank fields joined by ", " (REQ-VEN-24); null when empty.
   - `(double? latitude, double? longitude) NormalizeCoordinates(double? latitude, double? longitude)` — validation table.
+- `Domain/Rules/VenuePlaceRules.cs` (new, static, pure; the rules of REQ-VEN-24 and REQ-VEN-30 live here, not in a ViewModel):
+  - `public sealed record MapView(double Latitude, double Longitude, int Zoom, bool ShowMarker);` (same file)
+  - `MapView FirstView((double latitude, double longitude)? formCoordinates, VenuePlace? addressSearchHit, (double latitude, double longitude)? lastPlace)`
+    — form coordinates → zoom 17 with marker; else search hit → zoom 17 with marker; else last place → zoom 15, no marker; else `(0, 0)`, zoom 2, no marker.
+  - `(string name, VenueAddress address, double latitude, double longitude) Merge(string? currentName, VenueAddress currentAddress, VenuePlace place)`
+    — coordinates from the place; address from the place when it has at least one non-blank field, else the current one; name from the place only when the current name is blank and the place has a name.
 - `Domain/Rules/ImageOwnerKind.cs`: adds `Venue`. `Domain/Rules/ImageReferenceRules.cs`: `VenuesFolder = "venues"`;
   `FolderOf`, the local-reference parser and every folder list accept it (REQ-VEN-03).
 - `IVenueRepository` gains:
@@ -108,15 +114,16 @@ public sealed record PlaceSearchResult(PlaceLookupStatus Status, IReadOnlyList<V
 ### 2.4 Services
 
 - `VenueService`:
-  - `MaxInputLength => 60`, `ShowCounterAt => 50`, warning from 56 (REQ-VEN-22).
+  - `MaxInputLength => 60`, `ShowCounterAt => 50`, warning when the length is above 55; the error flag keeps
+    its existing rule (length above the maximum) (REQ-VEN-22).
   - `GetVenueForEditAsync`: read unit of work, `GetByIdAsync`, maps to `VenueEditDto`; null when missing.
   - `SaveVenueAsync` (one unit of work): (1) `ValidateNameInput` → failure with `VenueField.Name`;
     (2) `VenueAddressRules.Normalize` + `Validate` → failure with its field; (3) edit mode: load, missing →
     `(false, "Venue not found", None)`; (4) name duplicate (`GetByNameAsync`, own id excluded) → `Name`;
     (5) address not empty and `AddressExistsAsync` → `(false, "There is another venue registered at this address", AddressLine1)`;
     (6) assign name, address, `NormalizeCoordinates`, and the image: add mode `ImageReferenceRules.Normalize(request.ImageReference)`;
-    edit mode only when `request.ImageChanged`; (7) `AddAsync` or explicit `UpdateAsync`. Success messages:
-    "Venue '{name}' successfully created!" / "Venue '{name}' successfully updated!".
+    edit mode only when `request.ImageChanged`; (7) `AddAsync` or explicit `UpdateAsync`. Success messages
+    are the existing ones (REQ-VEN-36): "Venue '{name}' successfully created!" / "Venue name successfully updated to '{name}'!".
   - `CreateVenueAsync(string)` and `UpdateVenueAsync(int, string)` keep their signatures and messages; an update
     by name leaves every other column unchanged.
   - `ValidateAddressInput` → `VenueAddressRules.Validate(VenueAddressRules.Normalize(address))`.
@@ -132,7 +139,11 @@ public sealed record PlaceSearchResult(PlaceLookupStatus Status, IReadOnlyList<V
   - `NominatimGeocodingProvider` (typed `HttpClient`), `NominatimAddressMapper` (static, pure: `GeocodingRecord` → `VenuePlace`, § 2.5).
   - `PlaceLookupGate` (singleton): serialises requests, waits so that two requests start at least 1,000 ms
     apart (`TimeProvider`), and keeps the last 100 answers in memory keyed by the request (coordinates rounded
-    to 5 decimals + language, or trimmed search text + language) (REQ-VEN-34).
+    to 5 decimals + language, or trimmed search text + language) (REQ-VEN-34). Only answered lookups
+    (`Found`, `NoAddress`, search lists) are kept; a failure is never cached. Shape:
+    `Task<T> RunAsync<T>(string key, Func<CancellationToken, Task<T>> send, CancellationToken ct)` — a cache hit
+    returns without waiting; otherwise it waits for its turn, then calls `send`. The 5,000 ms bound is applied by
+    the service **inside** `send`, so waiting for a turn does not consume it.
   - `PlaceLookupService` (`IPlaceLookupService`), constructor `(IGeocodingProvider, PlaceLookupGate, INetworkStatus, ILogger<PlaceLookupService>)`:
     offline → `Unavailable` without a request; linked CTS with `CancelAfter(PlaceLookupTimeoutMilliseconds = 5000)`
     (`SearchConstants`); provider null or a record with no usable address field → `NoAddress` (place with
@@ -169,7 +180,7 @@ Mapping (`NominatimAddressMapper`), keys read from `address`:
   `shop`, `club`, `craft`, `office`; else null (a road or a building number is not a venue name).
 - **AddressLine** (panel and result rows): Street address, City, Region, Country joined by ", " (blank parts
   skipped); when all are blank, the record's `display_name`.
-- Each value is cut to its field maximum (a cut value stays editable in the form).
+- Each address value is cut to its field maximum and the name is cut to 60 characters (a cut value stays editable in the form).
 
 ### 2.6 App (MAUI project)
 
@@ -205,11 +216,17 @@ Mapping (`NominatimAddressMapper`), keys read from `address`:
   guard (BUG-049) and the existing snackbars "Venue created" / "Venue updated".
 - `PickOnMapCommand`: `GoToAsync` to `Routes.VenueMapPicker` with `lat`, `lon` (when set) and `q`
   (`VenueAddressRules.ToSearchText`), invariant culture, escaped.
-- Receives `VenuePlacePickedMessage` → `ApplyPlace(place)` (REQ-VEN-30) on the UI thread.
+- Receives `VenuePlacePickedMessage` → on the UI thread assigns the result of `VenuePlaceRules.Merge` to Name, the
+  six fields and the coordinates (REQ-VEN-30). The ViewModel holds no merge rule of its own.
+- Editing an address field by hand never clears `Latitude` / `Longitude` (REQ-VEN-33).
 
 **`VenueMapPickerViewModel`** — constructor `(IPlaceLookupService, IMapPickerPreferences, INetworkStatus, IMessenger, ILogger<…>)`.
-- Query properties `lat`, `lon`, `q`. `InitializeAsync` decides the first view (REQ-VEN-24) and raises `ViewRequested(lat, lon, zoom, marker)`.
-- `SearchText`, `SearchCommand` (REQ-VEN-25), `Results` (`ObservableRangeCollection<VenuePlace>`), `SelectResultCommand`.
+- Query properties `lat`, `lon`, `q`. `InitializeAsync`: when there are no form coordinates and `q` is not blank it
+  runs one `SearchAsync(q)` and takes the first place (none or unavailable → null); it then raises
+  `ViewRequested(MapView)` with `VenuePlaceRules.FirstView(...)` (REQ-VEN-24). The ViewModel holds no priority rule of its own.
+- `SearchText`, `SearchCommand` (REQ-VEN-25), `Results` (`ObservableRangeCollection<VenuePlace>`), `HasNoResults`,
+  `SelectResultCommand` (sets `SelectedPlace` from the result, clears `Results`, raises `ViewRequested` zoom 17 with marker; no reverse lookup).
+- Back (REQ-VEN-31): the ViewModel sends `VenuePlacePickedMessage` only from `ConfirmCommand`.
 - `OnMapTappedAsync(lat, lon)`: cancels the previous lookup, `IsLookingUp = true`, reverse lookup, sets `SelectedPlace`,
   `PanelTitle`, `PanelText`, `ConfirmText` (REQ-VEN-26, 27, 28).
 - `ConfirmCommand`: stores `LastPlace`, sends `VenuePlacePickedMessage`, navigates back.
@@ -219,17 +236,17 @@ Mapping (`NominatimAddressMapper`), keys read from `address`:
 
 - `VenueFormPage.xaml` (stays `ContentPage`, `SafeAreaEdges="All"`, `ScrollView`): Name (`MaxCharacterCount="60"`) and
   counter → `media:ImagePickerField` (`PlaceholderIcon="nightlife_outlined"`) → `Label` "Address" (`Title.Medium`) →
-  `dx:DXButton` "Pick on map" (tonal style when the theme has one, else `OutlinedButton`; icon `map_outlined`) →
+  `dx:DXButton` "Pick on map" (style `FilledTonalButton`, icon `map_outlined`, full width) →
   helper `Label` (`Body.Small`, `OnSurfaceVariant`) → six `dxe:TextEdit` (label, `MaxCharacterCount`, `HasError`,
   `ErrorText`) → Cancel / Save. `OnAppearing` focuses Name only in add mode with a blank Name.
 - `VenuesPage.xaml`, both templates: `lists:ListItemLeadingImage` with
   `ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}"`, `PlaceholderIcon="nightlife_outlined"`,
-  `Margin="0,8"`; `ListItem` supporting text bound to `AddressSummary` (the implementor uses the `ListItem`
-  property the Songs rows use for their second line). Trailing checkbox unchanged.
+  `Margin="0,8"`; `ListItem` `SupportingText="{Binding AddressSummary}"`. Trailing checkbox unchanged.
 - `VenueMapPickerPage.xaml` (new `ContentPage`, `SafeAreaEdges="All"`, title "Pick the venue location"): rows:
   search `dxe:TextEdit` (end icon search, `ReturnType="Search"`); results `dx:DXCollectionView` of `lists:ListItem`
-  (visible when there are results); `HybridWebView` (`HybridRoot="venuemap"`) or the offline `Label`; bottom panel
-  (`Border`, `SurfaceContainer`): title, text, `dx:DXButton` (`FilledButton`). Code-behind only bridges raw
+  (visible when there are results) or the `Label` "No place found."; `HybridWebView` (`HybridRoot="venuemap"`) or the
+  offline `Label`; bottom panel (`dx:DXBorder`, `SurfaceContainer`; the implementor confirms `DXBorder` in
+  DevExpress.Maui.Core 25.2.4, else stock `Border` as `SongFormPage.xaml` uses): title, text, `dx:DXButton` (`FilledButton`). Code-behind only bridges raw
   messages ↔ ViewModel and sets the user agent.
 
 ## 3. Interaction flows
@@ -244,7 +261,8 @@ Mapping (`NominatimAddressMapper`), keys read from `address`:
 ## 4. Invariants and postconditions
 
 - No two venues have equal names; no two venues with a non-empty address have six equal address fields
-  (enforced on every `SaveVenueAsync`, `CreateVenueAsync`, `UpdateVenueAsync`).
+  (name: enforced on every `SaveVenueAsync`, `CreateVenueAsync`, `UpdateVenueAsync`; address: on every
+  `SaveVenueAsync`, the only method that writes an address).
 - A stored address is empty, or has Street address and City.
 - `Latitude` and `Longitude` are both null or both in range.
 - `Venue.ImageUrl` is null, an image URL, or a well-formed local reference.
@@ -254,8 +272,8 @@ Mapping (`NominatimAddressMapper`), keys read from `address`:
 ## 5. Governed components
 
 - `ImagePickerField`, `ListItemLeadingImage`, `ListItem`, `CrudListView`: **used as they are, not changed**.
-  `VenueFormPage` becomes a consumer of `ImagePickerField`; `VenuesPage` a consumer of `ListItemLeadingImage`
-  (consumer lists in `component-safety-gate.md` are updated in the same commits, if that file lists consumers).
+  `VenueFormPage` becomes a consumer of `ImagePickerField`; `VenuesPage` a consumer of `ListItemLeadingImage`.
+  `component-safety-gate.md` lists components, not consumers, so it needs no edit; consumer maps are grepped when a component changes.
 - If a task finds it cannot meet a requirement without changing a governed component, it stops and reports.
 
 ## 6. Error handling
@@ -268,19 +286,21 @@ Expected failures return tuples / statuses. Only `PlaceLookupService` (provider 
 | Area | Level | Tests |
 |------|-------|-------|
 | `VenueAddressRules` | A | normalise, empty, validate (each branch and order), summary, search text, coordinates (REQ-VEN-13..16, 18, 24, 33) |
+| `VenuePlaceRules` | A | `FirstView` four cases in priority order; `Merge`: address replaced only when the place has one, name only when blank, coordinates always (REQ-VEN-24, 30) |
 | `ImageReferenceRules` (venue) | A | `local:venues/…` accepted, traversal rejected, display paths (REQ-VEN-03) |
 | `ImageStore` / `ImageMaintenanceService` | A / B | import writes under `venues/`; sweep keeps referenced venue files, deletes old orphans there (REQ-VEN-02, 04) |
-| Migration | B | real SQLite: columns added as null, existing rows kept, seed untouched (REQ-VEN-05); model has no pending changes |
+| Migration | B | real SQLite: columns added as null with collation `NOCASE_NOACCENT` on the text columns, existing rows kept, seed untouched (REQ-VEN-05); model has no pending changes |
 | `VenueRepository` | B | real SQLite: `AddressExistsAsync` (case, accents, null vs null, line 2 differs, `excludeId`), local references (REQ-VEN-20, 21, 04) |
-| `VenueService` | A | `SaveVenueAsync` every step and field routing, image rules add/edit, coordinates, `GetVenueForEditAsync`, name 60 and counter (REQ-VEN-10, 11, 14, 15, 16, 17, 19, 20, 21, 22) |
+| `VenueService` | A | `SaveVenueAsync` every step and field routing, image rules add/edit, coordinates saved in add and edit mode, `GetVenueForEditAsync`, name 60, counter hidden at 50, shown at 51, warning at 56 and 60, both success messages (REQ-VEN-10, 11, 14, 15, 16, 17, 19, 20, 21, 22, 33, 36) |
 | `VenueMapper` | B | `ImageUrl`, `AddressSummary` (REQ-VEN-06, 18) |
 | `NominatimAddressMapper` | A | the three street orders, fallbacks, name by category, cut to maximum (REQ-VEN-32) |
 | `NominatimGeocodingProvider` | A | stub handler: URLs, `error` body → null, non-200 throws (REQ-VEN-34) |
-| `PlaceLookupGate` / `PlaceLookupService` | A | 1 s spacing with fake time, cache hit sends no request, offline, bound, statuses, short search text (REQ-VEN-25, 27, 28, 34) |
-| `VenueFormViewModel` | A | picture (REQ-VEN-08..11), edit load (17), field error routing (14, 19, 20), `ApplyPlace` (30), map button text (23) |
-| `VenueMapPickerViewModel` | A | first view order (24), search (25), tap (26, 27, 28), confirm (30), offline (29) |
-| DI | B | new services resolve; Nominatim client has base address and `User-Agent` |
-| Pages, `map.js`, user agent | C | no unit test; emulator check + device check V10 |
+| `PlaceLookupGate` / `PlaceLookupService` | A | 1 s spacing with fake time, cache hit sends no request, a failure is not cached, the bound does not include the wait, offline, bound, statuses, short search text (REQ-VEN-25, 27, 28, 34) |
+| `VenueFormViewModel` | A | picture (REQ-VEN-08..11), edit load (17), field error routing (14, 19, 20), a picked-place message fills the form through `VenuePlaceRules.Merge` (30), no message → form unchanged (31), a hand edit of an address field keeps the coordinates (33), map button text (23) |
+| `VenueMapPickerViewModel` | A | first view (24, including a failed address search), search and result selection without reverse lookup (25), tap (26, 27, 28), confirm sends the message and stores the last place (30), no message without confirm (31), offline (29) |
+| DI | B | new services resolve; Nominatim client has base address and `User-Agent` (REQ-VEN-34) |
+| Platform manifests | B | architecture test: `AndroidManifest.xml` has no `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION`, `Info.plist` has no `NSLocation…` key (REQ-VEN-35) |
+| Pages, `map.js`, user agent | C | no unit test; emulator check + device check V10 cover field order, labels and input limits (REQ-VEN-12, 15), list rows (06, 18), attribution (34) |
 
 Every test carries `// [AC] REQ-VEN-NN: …`. Existing tests are not edited. **Planned exceptions** (each
 superseded by a requirement of this spec, listed in the task-log when touched):
