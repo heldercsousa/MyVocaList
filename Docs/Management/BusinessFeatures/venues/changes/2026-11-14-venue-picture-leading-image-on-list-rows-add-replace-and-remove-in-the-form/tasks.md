@@ -77,5 +77,5 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 
 ## Phase 6 — Venue picture from a map pick (added 2026-11-14)
 
-- [~] V11 **Picture source and resolver.** (REQ-VEN-37, 39, 40) Provider `extratags=1`, `GeocodingRecord` tags, mapper → `VenuePictureSource`, `VenuePlace.PictureSource`, `IVenuePictureLookupService` + implementation + DI, tests.
-- [ ] V12 **Form fills the picture from a confirmed place.** After V11. (REQ-VEN-38, 39) `VenueFormViewModel` + tests; Android build; emulator check of the whole pick flow.
+- [x] V11 **Picture source and resolver.** (REQ-VEN-37, 39, 40) Provider `extratags=1`, `GeocodingRecord` tags, mapper → `VenuePictureSource`, `VenuePlace.PictureSource`, `IVenuePictureLookupService` + implementation + DI, tests.
+- [x] V12 **Form fills the picture from a confirmed place.** After V11. (REQ-VEN-38, 39) `VenueFormViewModel` + tests; Android build; emulator check of the whole pick flow.
