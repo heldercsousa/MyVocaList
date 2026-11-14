@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using MyVocaList.Contracts.DTOs.Venues;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
+using MyVocaList.Domain.Rules;
 using MyVocaList.Infra.Collation;
 
 namespace MyVocaList.Infra.Repository
@@ -174,5 +176,43 @@ namespace MyVocaList.Infra.Repository
 
             return (items, totalCount);
         }
+
+        /// <summary>
+        /// Checks whether another venue has all six address fields equal. Plain == on the six columns: EF Core's
+        /// null semantics make a null value match only NULL, and the column collation NOCASE_NOACCENT ignores letter
+        /// case and accents, so no C# normalisation is needed. The caller passes a normalised address; an empty
+        /// address never collides and returns false without a query (REQ-VEN-20, 21).
+        /// </summary>
+        public async Task<bool> AddressExistsAsync(VenueAddress address, int? excludeId, CancellationToken ct = default)
+        {
+            if (VenueAddressRules.IsEmpty(address))
+                return false;
+
+            var line1 = address.Line1;
+            var line2 = address.Line2;
+            var city = address.City;
+            var region = address.Region;
+            var postalCode = address.PostalCode;
+            var country = address.Country;
+
+            return await _context.Venues.AnyAsync(v =>
+                (excludeId == null || v.Id != excludeId)
+                && v.AddressLine1 == line1
+                && v.AddressLine2 == line2
+                && v.City == city
+                && v.Region == region
+                && v.PostalCode == postalCode
+                && v.Country == country, ct);
+        }
+
+        /// <summary>
+        /// Gets every stored local image reference of venues (REQ-VEN-04).
+        /// </summary>
+        public Task<List<string>> GetLocalImageReferencesAsync(CancellationToken ct = default)
+            // Prefix filter on a technical value, not search or de-duplication (design § 2.3).
+            => _context.Venues.AsNoTracking()
+                .Where(v => v.ImageUrl != null && v.ImageUrl.StartsWith("local:"))
+                .Select(v => v.ImageUrl!)
+                .ToListAsync(ct);
     }
 }

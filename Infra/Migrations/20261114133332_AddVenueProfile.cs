@@ -82,41 +82,17 @@ namespace MyVocaList.Infra.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "AddressLine1",
-                table: "Venues");
-
-            migrationBuilder.DropColumn(
-                name: "AddressLine2",
-                table: "Venues");
-
-            migrationBuilder.DropColumn(
-                name: "City",
-                table: "Venues");
-
-            migrationBuilder.DropColumn(
-                name: "Country",
-                table: "Venues");
-
-            migrationBuilder.DropColumn(
-                name: "ImageUrl",
-                table: "Venues");
-
-            migrationBuilder.DropColumn(
-                name: "Latitude",
-                table: "Venues");
-
-            migrationBuilder.DropColumn(
-                name: "Longitude",
-                table: "Venues");
-
-            migrationBuilder.DropColumn(
-                name: "PostalCode",
-                table: "Venues");
-
-            migrationBuilder.DropColumn(
-                name: "Region",
-                table: "Venues");
+            // EF's DropColumn rebuilds the table on SQLite; Venues is the parent of the events tables' foreign keys,
+            // so the native statement drops each column in place. No index, trigger or view references these columns.
+            migrationBuilder.Sql("ALTER TABLE \"Venues\" DROP COLUMN \"AddressLine1\";");
+            migrationBuilder.Sql("ALTER TABLE \"Venues\" DROP COLUMN \"AddressLine2\";");
+            migrationBuilder.Sql("ALTER TABLE \"Venues\" DROP COLUMN \"City\";");
+            migrationBuilder.Sql("ALTER TABLE \"Venues\" DROP COLUMN \"Country\";");
+            migrationBuilder.Sql("ALTER TABLE \"Venues\" DROP COLUMN \"ImageUrl\";");
+            migrationBuilder.Sql("ALTER TABLE \"Venues\" DROP COLUMN \"Latitude\";");
+            migrationBuilder.Sql("ALTER TABLE \"Venues\" DROP COLUMN \"Longitude\";");
+            migrationBuilder.Sql("ALTER TABLE \"Venues\" DROP COLUMN \"PostalCode\";");
+            migrationBuilder.Sql("ALTER TABLE \"Venues\" DROP COLUMN \"Region\";");
         }
     }
 }
