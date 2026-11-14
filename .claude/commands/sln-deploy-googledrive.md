@@ -2,6 +2,8 @@
 
 Build a signed release APK and upload it to Google Drive.
 
+**Manual only:** run this command only when Helder asks for it. It is not a step of any workflow, close-out or other command. Debug variant: `/sln-deploy-googledrive-debug`.
+
 ## Prerequisites (one-time setup)
 
 Two environment variables must be set in Windows (System → Advanced → Environment Variables):
