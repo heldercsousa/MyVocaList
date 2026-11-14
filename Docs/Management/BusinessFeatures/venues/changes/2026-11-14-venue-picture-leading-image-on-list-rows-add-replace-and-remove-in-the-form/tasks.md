@@ -61,7 +61,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] V5a **`VenueFormViewModel`.** After V4b and V8 (`venue-map` merged into `venue-profile`). (REQ-VEN-08..11, 14, 17, 19, 20, 23, 30, 31, 33)
   - Files owned: `MyVocaList/UI/ViewModels/VenueFormViewModel.cs`, new `Unit/ViewModels/VenueFormViewModelProfileTests.cs`, planned exceptions in `VenueFormViewModelTests.cs`.
   - Demo: Save with only Country filled sets the Street address error to "Street address is required."; a picked-place message fills the six fields.
-- [~] V5b **Venue pages.** After V5a. (REQ-VEN-06, 07, 09, 12, 18, 22, 23) One XAML file at a time: edit → build → next.
+- [x] V5b **Venue pages.** After V5a. (REQ-VEN-06, 07, 09, 12, 18, 22, 23) One XAML file at a time: edit → build → next.
   - Files owned: `MyVocaList/UI/Pages/Venues/VenueFormPage.xaml`, `VenueFormPage.xaml.cs`, `MyVocaList/UI/Pages/Venues/VenuesPage.xaml`.
   - Demo: add mode shows the default venue image, "Add picture", the Address heading, "Pick on map" and six fields; list rows show the picture or the default image and "street, city".
 - [x] V9a **Map web assets.** After V8. (REQ-VEN-26, 34)
@@ -72,5 +72,5 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
   - Demo: Venue form → "Pick on map" → map shows → tap a street → panel shows the address → "Use this place" → the form fields are filled.
 
 ## Close-out
-- [ ] V9c Merge, full test run, Android build, emulator check, verifier, traceability matrix, statuses, merge to `develop`.
+- [x] V9c Merge, full test run, Android build, emulator check, verifier, traceability matrix, statuses, merge to `develop`.
 - [ ] V10 **Device check (Helder)** — checklist in `task-log.md § Device check`.
