@@ -46,7 +46,6 @@
             <media:ImagePickerField ImageSource="{Binding FormImageSource}"
                                     ThumbnailSource="{Binding FormImageThumbnailSource}"
                                     PlaceholderIcon="nightlife_outlined"
-                                    IsCircle="True"
                                     HasImage="{Binding HasFormImage}"
                                     HintText="{Binding ImageHintText}"
                                     PickCommand="{Binding PickImageCommand}"
