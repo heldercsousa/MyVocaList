@@ -93,7 +93,7 @@ public class ImageStore : IImageStore
         var cutoff = DateTime.UtcNow - minimumAge;
         var deleted = 0;
 
-        foreach (var folder in new[] { ImageReferenceRules.SongsFolder, ImageReferenceRules.ArtistsFolder })
+        foreach (var folder in ImageReferenceRules.Folders)
         {
             ct.ThrowIfCancellationRequested();
             var directory = Path.Combine(_options.RootDirectory, folder);
