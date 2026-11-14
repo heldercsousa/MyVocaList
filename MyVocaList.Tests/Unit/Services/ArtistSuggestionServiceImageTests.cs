@@ -79,9 +79,9 @@ public class ArtistSuggestionServiceImageTests
     }
 
     [Fact]
-    public async Task SearchNameLocalAsync_StoredArtistWithImage_LocalSuggestionImageIsNull()
+    public async Task SearchNameLocalAsync_StoredArtistWithImage_LocalSuggestionCarriesTheImage()
     {
-        // [AC] REQ-ART-24: a local artist suggestion keeps ImageUrl null, even when the stored artist has an image
+        // [AC] REQ-PIC-34: a local artist suggestion carries the stored artist picture (replaces REQ-ART-24's null)
         _repoMock
             .Setup(r => r.SearchNameCandidatesAsync("metallica", SimilarityConstants.PoolSize, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Artist> { new() { Id = 2, Name = "Metallica", ImageUrl = "https://stored/artist.jpg" } });
@@ -91,6 +91,6 @@ public class ArtistSuggestionServiceImageTests
 
         var local = Assert.Single(result);
         Assert.Equal(2, local.LocalId);
-        Assert.Null(local.ImageUrl);
+        Assert.Equal("https://stored/artist.jpg", local.ImageUrl);
     }
 }

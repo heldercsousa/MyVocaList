@@ -55,11 +55,12 @@ public class ArtistSuggestionService : IArtistSuggestionService
             return await artistRepository.SearchNameCandidatesAsync(q, SimilarityConstants.PoolSize, ct);
         }, ct);
 
-        // OrderByDescending is stable, so equal scores keep the DB (bm25) order.
+        // OrderByDescending is stable, so equal scores keep the DB (bm25) order. REQ-PIC-34: a local row carries
+        // the stored artist picture reference (image URL or local reference); the UI resolves it for display.
         return hits
             .OrderByDescending(a => _scorer.RankScore(q, a.Name))
             .Take(SearchConstants.MaxSearchResults)
-            .Select(a => new ArtistSuggestionDto(a.Id, a.Name, null, null, false))
+            .Select(a => new ArtistSuggestionDto(a.Id, a.Name, null, null, false, a.ImageUrl))
             .ToList();
     }
 
