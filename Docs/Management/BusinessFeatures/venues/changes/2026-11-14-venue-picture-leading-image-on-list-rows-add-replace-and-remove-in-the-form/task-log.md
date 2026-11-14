@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — Phase 0 done: spec written. Next: spec review, then V1 in worktree `venue-profile`.
+- 2026-11-14 — V1a done (feb9ea48). V1b dispatched in worktree `venue-profile`. Next: V2, then migration V2m; V7a in worktree `venue-map` after V1b.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -22,6 +22,15 @@
   `ImageStore` and `ImageMaintenanceService` know only songs and artists; the DEBUG seed inserts 504 venues
   with possibly repeated names; no map, location or WebView code exists.
 - The tasks file doubles as the plan (files owned + demo per task); no separate `plan.md`.
+
+## 2026-11-14 — V1a Contracts (Done)
+
+### Changed files
+- `Contracts/DTOs/Venues/` (new): `VenueAddress.cs`, `VenueField.cs`, `VenueSaveRequest.cs`, `VenueEditDto.cs`, `VenuePlace.cs`, `PlaceLookupStatus.cs`, `PlaceLookupResult.cs`, `PlaceSearchResult.cs`.
+
+### Verification evidence
+- Commit `feb9ea48` on `feature/venue-profile`. Android build 0 errors; `dotnet test` 1277 passed, 0 failed (baseline). Orchestrator re-check: diff holds only the eight files; Contracts project builds.
+- Level C (records and enums, no logic): no unit test. Namespace `MyVocaList.Contracts.DTOs.Venues`.
 
 ## Device check (Helder) — V10
 

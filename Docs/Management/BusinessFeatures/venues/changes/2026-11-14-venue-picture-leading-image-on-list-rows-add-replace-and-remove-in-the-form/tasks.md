@@ -20,10 +20,10 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] V0 Research (maps and geocoding providers and their terms, .NET MAUI `HybridWebView`), code map, requirements, design, backlog items, spec review.
 
 ## Phase 1 — Contracts, Domain, Infra
-- [~] V1a **Contracts.** (REQ-VEN-10, 12, 26, 30) Size note: eight records/enums of one to three lines each, no logic, no tests (Level C).
+- [x] V1a **Contracts.** (REQ-VEN-10, 12, 26, 30) Size note: eight records/enums of one to three lines each, no logic, no tests (Level C).
   - Files owned: new `Contracts/DTOs/Venues/VenueAddress.cs`, `VenueField.cs`, `VenueSaveRequest.cs`, `VenueEditDto.cs`, `VenuePlace.cs`, `PlaceLookupStatus.cs`, `PlaceLookupResult.cs`, `PlaceSearchResult.cs`.
   - Demo: the solution builds with the new types.
-- [ ] V1b **Address and place rules.** After V1a. (REQ-VEN-13..16, 18, 24, 30, 33)
+- [~] V1b **Address and place rules.** After V1a. (REQ-VEN-13..16, 18, 24, 30, 33)
   - Files owned: new `Domain/Rules/VenueAddressRules.cs`, `Domain/Rules/VenuePlaceRules.cs`, new tests `MyVocaList.Tests/Unit/Domain/VenueAddressRulesTests.cs`, `VenuePlaceRulesTests.cs`.
   - Demo: `VenueAddressRules.Validate` of an address with only a country returns `(false, "Street address is required.", AddressLine1)`.
 - [ ] V2 **Entity, EF configuration, venue image references.** After V1b. (REQ-VEN-01, 03, 22) Size note: two of the files change by one member each.
