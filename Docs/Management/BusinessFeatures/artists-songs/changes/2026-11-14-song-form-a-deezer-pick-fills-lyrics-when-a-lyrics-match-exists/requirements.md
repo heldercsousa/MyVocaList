@@ -23,7 +23,7 @@ lyrics therefore come from a second source, looked up with the data of the Deeze
 
 | Term | Meaning |
 |------|---------|
-| **Deezer pick** | Picking a Title option whose `SongSuggestionDto.IsRemote` is true (REQ-SFT-12). |
+| **Deezer pick** | Picking a Title option that fills the form instead of opening a stored song (REQ-SFT-12): every pick handled by `ApplyRemotePick`, whether or not the picked artist already exists in the library. |
 | **Lyrics lookup** | One search for the lyrics of a Deezer pick: at most two HTTP requests to the lyrics source. |
 | **Lyrics source** | LRCLIB (`https://lrclib.net`), a free lyrics database with a public API and no API key. |
 | **Lyrics match** | A lyrics-source record for the picked title and artist with non-blank plain lyrics of at most 10,000 characters. |
@@ -54,6 +54,8 @@ lyrics therefore come from a second source, looked up with the data of the Deeze
   - Given a non-blank Lyrics field at pick time, Then no lyrics lookup is started.
   - Given the user types in Lyrics while a lookup runs, When the answer arrives, Then the Lyrics field
     SHALL keep the typed text.
+  - The test is the field's value when the answer arrives: a field the user typed in and emptied again
+    is blank and is filled.
 - **REQ-LYR-05: Lyrics over the limit are not used.**
   IF the matched plain lyrics, trimmed, are longer than 10,000 characters, THEN the Lyrics field SHALL
   stay blank. (A cut text would be stored as if complete.)
@@ -74,7 +76,8 @@ lyrics therefore come from a second source, looked up with the data of the Deeze
   it reads "Song lyrics (optional)" as today. The field stays editable during the lookup.
 - **REQ-LYR-10: A new pick or X cancels the lookup.**
   WHEN the user makes another Deezer pick, taps X on Title, taps X on Artist, or Save starts, the
-  running lookup SHALL be cancelled and its answer SHALL never change the form.
+  running lookup SHALL be cancelled and its answer SHALL never change the form. A cancelled lookup is
+  not restarted, also when Save does not complete (validation error, resolution sheet).
 - **REQ-LYR-11: X removes untouched pick-filled lyrics.**
   WHEN the user taps X on Title or X on Artist and the Lyrics field still equals the pick-filled
   lyrics, the Lyrics field SHALL become blank. Lyrics the user edited after the fill are kept.

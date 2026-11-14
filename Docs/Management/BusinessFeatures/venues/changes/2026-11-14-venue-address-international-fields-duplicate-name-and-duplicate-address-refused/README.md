@@ -1,7 +1,7 @@
 ---
 id: venue-address-international-fields-duplicate-name-and-duplicate-address-refused
 title: "Venue address: international fields, duplicate name and duplicate address refused"
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-14
 section: BusinessFeatures
 parent: venues
