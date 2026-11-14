@@ -60,15 +60,18 @@
                                 SupportingText="{Binding CatalogCountText}"
                                 IsSelected="False">
                     <lists:ListItem.LeadingContent>
-                        <lists:ListItemCheckbox VerticalOptions="Center" />
+                        <lists:ListItemLeadingAvatar ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
-                        <dx:DXButton Style="{StaticResource StandardIconButton}"
-                                     Icon="queue_music_outlined"
-                                     SemanticProperties.Description="View catalog"
-                                     Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
-                                     CommandParameter="{Binding .}"
-                                     InputTransparent="False" />
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <dx:DXButton Style="{StaticResource StandardIconButton}"
+                                         Icon="queue_music_outlined"
+                                         SemanticProperties.Description="View catalog"
+                                         Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
+                                         CommandParameter="{Binding .}"
+                                         InputTransparent="False" />
+                            <lists:ListItemCheckbox VerticalOptions="Center" />
+                        </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
@@ -80,15 +83,18 @@
                                 SupportingText="{Binding CatalogCountText}"
                                 IsSelected="True">
                     <lists:ListItem.LeadingContent>
-                        <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
+                        <lists:ListItemLeadingAvatar ImageSource="{Binding ImageUrl, Converter={StaticResource ImageReferenceConverter}}" />
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
-                        <dx:DXButton Style="{StaticResource StandardIconButton}"
-                                     Icon="queue_music_outlined"
-                                     SemanticProperties.Description="View catalog"
-                                     Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
-                                     CommandParameter="{Binding .}"
-                                     InputTransparent="False" />
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <dx:DXButton Style="{StaticResource StandardIconButton}"
+                                         Icon="queue_music_outlined"
+                                         SemanticProperties.Description="View catalog"
+                                         Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
+                                         CommandParameter="{Binding .}"
+                                         InputTransparent="False" />
+                            <lists:ListItemCheckbox IsChecked="True" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
                     </lists:ListItem.TrailingContent>
                 </lists:ListItem>
             </DataTemplate>
