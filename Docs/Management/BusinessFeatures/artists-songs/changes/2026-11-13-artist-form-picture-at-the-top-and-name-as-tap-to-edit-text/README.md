@@ -1,7 +1,7 @@
 ---
 id: artist-form-picture-at-the-top-and-name-as-tap-to-edit-text
 title: "Artist form: picture at the top and Name as tap-to-edit text"
-status: 🟢 Ready
+status: 🟡 In Progress
 target: 2026-11-13
 section: BusinessFeatures
 parent: artists-songs

@@ -1,8 +1,8 @@
 # Task log: pictures and tap-to-edit names in the Song and Artist forms
 
 ### Checkpoint
-- **Now:** Wave 2 closing (T8 lists) and Wave 3 first half (T4, T5 Song form), resumed 2026-11-14 after the usage limit.
-- **Next:** merge, then T6, T7 (Artist form), then T9 close-out.
+- **Now:** Wave 3 running (T4, T5 Song form in `form-pictures`; T6, T7 Artist form in `form-pictures-ui`).
+- **Next:** merge both branches, then T9 close-out.
 - **Context manifest:** `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## T0 — Spec (2026-11-13) — Done
@@ -97,3 +97,21 @@ Commit `0d4f44d5` on `feature/form-pictures`.
 
 ### Verification evidence
 - Full suite on `feature/form-pictures`: 1192 passed, 0 failed.
+
+## T8 — List rows (2026-11-14) — To Review
+
+Commit `45911696` on `feature/form-pictures-ui`.
+
+### Changed files
+- `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml`: leading `ListItemLeadingAvatar` bound to `ImageUrl` through `ImageReferenceConverter`; the checkbox moved to the trailing slot, after the catalog button (button unchanged, BUG-086 untouched).
+- `MyVocaList/UI/Pages/Songs/SongsPage.xaml`: both templates bind the leading image through `ImageReferenceConverter`.
+- `.claude/library/component-safety-gate.md`: `ListItemLeadingAvatar` added to the governed list (second consumer).
+
+### Implementation decisions
+- No margin on the avatar; the 40 dp circle is centred by `ListItem`.
+- No governed component was changed. `ArtistsPage.xaml.cs` has no reference to the checkbox or the leading slot.
+- Process deviation: the two XAML files were built once together, not one build per file.
+
+### Verification evidence
+- Android build: 0 errors. Suite on that branch (before the T3 merge): 1167 passed, 0 failed.
+- No unit test (pure XAML, level C). Row height, placeholder, selection and the catalog button are in § Device check.
