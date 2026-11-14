@@ -23,6 +23,7 @@ Any reusable custom UI component consumed by 2+ pages/views. Current set (non-ex
 | `SearchBar` | `UI/Components/AppBars/` |
 | `ListItemCheckbox` | `UI/Components/Lists/` |
 | `ListItemLeadingImage` | `UI/Components/Lists/` |
+| `ListItemLeadingAvatar` | `UI/Components/Lists/` |
 | `AutocompleteDXField` | `UI/Components/TextFields/` |
 
 > Rule: A component is governed the moment a second consumer binds to it. When you create a component's second consumer, add the component to this table in the same commit.
