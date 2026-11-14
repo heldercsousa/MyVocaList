@@ -16,12 +16,12 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] L2a **LRCLIB provider.** After L1. (REQ-LYR-03, 15)
   - Files owned: new `Contracts/DTOs/LyricsQuery.cs`, `Services/ILyricsProvider.cs`, new `Services/LrclibLyricsProvider.cs`, new test `MyVocaList.Tests/Unit/Services/LrclibLyricsProviderTests.cs`.
   - Demo: a stub returning LRCLIB JSON yields the plain lyrics; a 404 stub yields null; a 500 stub throws.
-- [~] L2b **Lyrics service and DI.** After L2a. (REQ-LYR-02, 03, 05, 06, 07, 08, 15)
+- [x] L2b **Lyrics service and DI.** After L2a. (REQ-LYR-02, 03, 05, 06, 07, 08, 15)
   - Files owned: new `Services/ISongLyricsService.cs`, new `Services/SongLyricsService.cs`, `Domain/Constants/SearchConstants.cs` (two constants), `MyVocaList/Extensions/ServiceCollectionExtensions.cs`, new test `MyVocaList.Tests/Unit/Services/SongLyricsServiceTests.cs`, one added test in `Unit/DependencyInjection/AppServicesRegistrationTests.cs`.
   - Demo: `FindLyricsAsync(new LyricsQuery("Imagine", "John Lennon"))` with a provider stub yields the trimmed lyrics; offline yields null with no provider call.
 
 ## Phase 2 — UI
-- [ ] L3 **`SongFormViewModel` + placeholder.** After L2b. (REQ-LYR-01, 02, 04, 09, 10, 11, 12, 13, 14) Size note: two production files; four existing test files change by one constructor argument each.
+- [~] L3 **`SongFormViewModel` + placeholder.** After L2b. (REQ-LYR-01, 02, 04, 09, 10, 11, 12, 13, 14) Size note: two production files; four existing test files change by one constructor argument each.
   - Files owned: `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (one attribute), new tests `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelLyricsTests.cs`, constructor argument in `SongFormViewModelTests.cs`, `SongFormViewModelImageTests.cs`, `SongFormViewModelPictureTests.cs` and `Integration/Services/SongSuggestionTitleSearchRealStackTests.cs` (planned exception, `design.md § 6`).
   - Demo: add mode, pick a Deezer row for a well-known song → Lyrics fills within 5 s; pick with lyrics already typed → typed text stays.
 
