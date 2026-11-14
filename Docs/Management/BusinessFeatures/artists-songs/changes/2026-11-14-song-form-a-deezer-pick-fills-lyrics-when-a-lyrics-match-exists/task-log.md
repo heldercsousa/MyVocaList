@@ -121,7 +121,7 @@
 ## 2026-11-14 — Emulator check (Android, Pixel 5 API 36) (Done)
 
 - New song → typed "Bohemian Rhapsody" → picked the first Deezer option (Queen · A Night At The Opera): Title, Artist and picture filled, and the Lyrics field filled with "Is this the real life? Is this just fantasy? ...". Build from `develop` content (venue branch tip `a4369a4c`).
-- Not checked on the emulator: a pick with no lyrics match (unit-tested: the field stays empty).
+- Second pass (build `544fcd8e`): typed "Asturias Leyenda" and picked the first Deezer option, an instrumental with no lyrics match: Title, Artist and picture filled, and the Lyrics field stayed empty (placeholder "Song lyrics (optional)" shown).
 
 ## Device check (Helder) — L4
 
