@@ -8,12 +8,17 @@ public class ImageMaintenanceServiceTests
     private readonly Mock<IImageStore> _store = new();
     private readonly Mock<ISongRepository> _songs = new();
     private readonly Mock<IArtistRepository> _artists = new();
+    private readonly Mock<IVenueRepository> _venues = new();
+
+    public ImageMaintenanceServiceTests()
+        => _venues.Setup(r => r.GetLocalImageReferencesAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
 
     private ImageMaintenanceService CreateSut() => new(
         _songs.Object,
         _artists.Object,
+        _venues.Object,
         _store.Object,
-        PassthroughUnitOfWork.Over(_songs, _artists),
+        PassthroughUnitOfWork.Over(_songs, _artists, _venues),
         NullLogger<ImageMaintenanceService>.Instance);
 
     [Fact]

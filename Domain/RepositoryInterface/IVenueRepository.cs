@@ -1,3 +1,4 @@
+using MyVocaList.Contracts.DTOs.Venues;
 using MyVocaList.Domain.Entity;
 
 namespace MyVocaList.Domain.RepositoryInterface
@@ -38,5 +39,21 @@ namespace MyVocaList.Domain.RepositoryInterface
             int pageNumber,
             int pageSize,
             string? query = null);
+
+        /// <summary>
+        /// Checks whether another venue has all six address fields equal (case and accent insensitive under the
+        /// database collation; a blank field equals only a blank field). The caller passes a normalised address;
+        /// an empty address never collides and returns false without a query (REQ-VEN-20, 21).
+        /// </summary>
+        /// <param name="address">Normalised, non-empty address to look for</param>
+        /// <param name="excludeId">Id of the venue being edited, or null when adding</param>
+        /// <param name="ct">Cancellation token</param>
+        Task<bool> AddressExistsAsync(VenueAddress address, int? excludeId, CancellationToken ct = default);
+
+        /// <summary>
+        /// Gets every stored local image reference of venues (<c>ImageUrl</c> starting with <c>local:</c>),
+        /// used by the start-up orphan sweep (REQ-VEN-04)
+        /// </summary>
+        Task<List<string>> GetLocalImageReferencesAsync(CancellationToken ct = default);
     }
 }

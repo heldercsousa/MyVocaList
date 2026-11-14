@@ -1,3 +1,8 @@
+using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Contracts.DTOs.Venues;
+using MyVocaList.Domain.ServicesInterfaces;
+using MyVocaList.UI.Services;
+
 namespace MyVocaList.Tests.Unit.ViewModels;
 
 /// <summary>
@@ -12,7 +17,8 @@ public class VenueFormViewModelTests
     private readonly Mock<ILogger<VenueFormViewModel>> _loggerMock = new();
 
     private VenueFormViewModel CreateSut() =>
-        new(_serviceMock.Object, _snackMock.Object, _loggerMock.Object);
+        new(_serviceMock.Object, _snackMock.Object, _loggerMock.Object,
+            new Mock<IImageStore>().Object, new Mock<IPhotoPicker>().Object, new WeakReferenceMessenger());
 
     // ── Blur validation (ValidateNameCommand) ────────────────────────────────
 
@@ -124,7 +130,7 @@ public class VenueFormViewModelTests
 
         Assert.True(sut.NameHasError);
         Assert.Equal("Name is too short. Minimum is 2 characters.", sut.NameErrorText);
-        _serviceMock.Verify(s => s.CreateVenueAsync(It.IsAny<string>()), Times.Never);
+        _serviceMock.Verify(s => s.SaveVenueAsync(It.IsAny<VenueSaveRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     // ── Re-entrancy guard (BUG-049) ────────────────────────────────────────────
@@ -140,16 +146,20 @@ public class VenueFormViewModelTests
         sut.VenueName = "Jazz Club";
         _serviceMock.Setup(s => s.ValidateNameInput("Jazz Club")).Returns((true, ""));
 
-        var gate = new TaskCompletionSource<(bool, string)>();
-        _serviceMock.Setup(s => s.CreateVenueAsync("Jazz Club")).Returns(gate.Task);
+        _serviceMock.Setup(s => s.ValidateAddressInput(It.IsAny<VenueAddress>()))
+                    .Returns((true, string.Empty, VenueField.None));
+
+        var gate = new TaskCompletionSource<(bool, string, VenueField)>();
+        _serviceMock.Setup(s => s.SaveVenueAsync(It.IsAny<VenueSaveRequest>(), It.IsAny<CancellationToken>()))
+                    .Returns(gate.Task);
 
         var firstCall = sut.SaveCommand.ExecuteAsync(null);
         var secondCall = sut.SaveCommand.ExecuteAsync(null);   // simulates the second tap of a double-tap
 
-        gate.SetResult((false, "stubbed failure — avoids Shell.Current in test context"));
+        gate.SetResult((false, "stubbed failure — avoids Shell.Current in test context", VenueField.None));
         await Task.WhenAll(firstCall, secondCall);
 
-        _serviceMock.Verify(s => s.CreateVenueAsync("Jazz Club"), Times.Once);
+        _serviceMock.Verify(s => s.SaveVenueAsync(It.IsAny<VenueSaveRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── Character counter — counts the same (trimmed) string the validator checks ─

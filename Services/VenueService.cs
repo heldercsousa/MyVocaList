@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using MyVocaList.Contracts.DTOs.List;
+using MyVocaList.Contracts.DTOs.Venues;
 using MyVocaList.Domain.Entity;
+using MyVocaList.Domain.Rules;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.ServicesInterfaces;
 using MyVocaList.Domain.UnitOfWork;
@@ -19,8 +21,9 @@ namespace MyVocaList.Services
         private readonly ILogger<VenueService> _logger;
 
         // Validation constants
-        public int MaxInputLength => 30;  // Limit according to EF configuration
-        public int ShowCounterAt => 25;   // When to show counter
+        public int MaxInputLength => 60;  // Limit according to EF configuration (REQ-VEN-22)
+        public int ShowCounterAt => 50;   // When to show counter (REQ-VEN-22)
+        private const int WarningAbove = 55; // Counter turns to the warning colour from 56 (REQ-VEN-22)
 
         public VenueService(
             IVenueRepository venueRepository,
@@ -208,6 +211,110 @@ namespace MyVocaList.Services
             });
         }
 
+        #region Save and edit (REQ-VEN-10..22, 33, 36)
+
+        public Task<VenueEditDto?> GetVenueForEditAsync(int id, CancellationToken ct = default)
+        {
+            return _uow.ExecuteReadAsync<VenueEditDto?>(async sp =>
+            {
+                // REQ-UOW-37: resolved from the lambda's own scope — never the constructor field.
+                var venueRepository = sp.GetRequiredService<IVenueRepository>();
+
+                var venue = await venueRepository.GetByIdAsync(id);
+                if (venue == null)
+                    return null;
+
+                var address = new VenueAddress(
+                    venue.AddressLine1, venue.AddressLine2, venue.City,
+                    venue.Region, venue.PostalCode, venue.Country);
+
+                return new VenueEditDto(venue.Id, venue.Name, venue.ImageUrl, address, venue.Latitude, venue.Longitude);
+            }, ct);
+        }
+
+        public async Task<(bool success, string message, VenueField field)> SaveVenueAsync(
+            VenueSaveRequest request,
+            CancellationToken ct = default)
+        {
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+
+            // Pure rules stay OUTSIDE the unit-of-work lambda (REQ-UOW-41); the order of the checks is REQ-VEN-14/19/20.
+            var nameValidation = ValidateNameInput(request.Name);
+            if (!nameValidation.isValid)
+                return (false, nameValidation.message, VenueField.Name);
+
+            var address = VenueAddressRules.Normalize(request.Address);
+            var addressValidation = VenueAddressRules.Validate(address);
+            if (!addressValidation.isValid)
+                return (false, addressValidation.message, addressValidation.field);
+
+            var trimmedName = request.Name.Trim();
+            var (latitude, longitude) = VenueAddressRules.NormalizeCoordinates(request.Latitude, request.Longitude);
+            var imageReference = ImageReferenceRules.Normalize(request.ImageReference);
+
+            return await _uow.ExecuteAsync<(bool success, string message, VenueField field)>(async sp =>
+            {
+                // REQ-UOW-28: resolved from the lambda's own scope — never the constructor field.
+                var venueRepository = sp.GetRequiredService<IVenueRepository>();
+
+                Venue? venue = null;
+                if (request.Id is int editId)
+                {
+                    venue = await venueRepository.GetByIdAsync(editId);
+                    if (venue == null)
+                        return (false, "Venue not found", VenueField.None);
+                }
+
+                // Venue.Name trimming is enforced by the EF Core ValueConverter (design.md § D3), as in the other paths.
+                var sameName = await venueRepository.GetByNameAsync(trimmedName);
+                if (sameName != null && (request.Id is not int ownId || sameName.Id != ownId))
+                    return (false, "There is another venue registered with this name", VenueField.Name);
+
+                if (!VenueAddressRules.IsEmpty(address)
+                    && await venueRepository.AddressExistsAsync(address, request.Id, ct))
+                    return (false, "There is another venue registered at this address", VenueField.AddressLine1);
+
+                if (venue == null)
+                {
+                    var created = new Venue { Name = request.Name, ImageUrl = imageReference };
+                    ApplyAddressAndCoordinates(created, address, latitude, longitude);
+                    await venueRepository.AddAsync(created);
+                    // SaveChangesAsync is owned by IUnitOfWork (REQ-UOW-10).
+
+                    return (true, $"Venue '{trimmedName}' successfully created!", VenueField.None);
+                }
+
+                venue.Name = request.Name;
+                ApplyAddressAndCoordinates(venue, address, latitude, longitude);
+                if (request.ImageChanged)
+                    venue.ImageUrl = imageReference;
+
+                // Explicit UpdateAsync: the entity was loaded untracked (NoTracking default), see UpdateVenueAsync.
+                await venueRepository.UpdateAsync(venue);
+
+                return (true, $"Venue name successfully updated to '{trimmedName}'!", VenueField.None);
+            }, ct);
+        }
+
+        public (bool isValid, string message, VenueField field) ValidateAddressInput(VenueAddress address)
+            => VenueAddressRules.Validate(VenueAddressRules.Normalize(address));
+
+        private static void ApplyAddressAndCoordinates(
+            Venue venue, VenueAddress address, double? latitude, double? longitude)
+        {
+            // The address is already normalised: blank fields are null.
+            venue.AddressLine1 = address.Line1;
+            venue.AddressLine2 = address.Line2;
+            venue.City = address.City;
+            venue.Region = address.Region;
+            venue.PostalCode = address.PostalCode;
+            venue.Country = address.Country;
+            venue.Latitude = latitude;
+            venue.Longitude = longitude;
+        }
+
+        #endregion
+
         #region Utilities
 
         public bool ShouldShowCharacterCounter(int currentLength) => currentLength > ShowCounterAt;
@@ -215,7 +322,7 @@ namespace MyVocaList.Services
         public (string text, bool isWarning, bool isError) GetCharacterCounterInfo(int currentLength)
         {
             string text = $"{currentLength}/{MaxInputLength}";
-            bool isWarning = currentLength > 27;
+            bool isWarning = currentLength > WarningAbove;
             // Error only when ValidateNameInput would reject the same length (counter threshold
             // alignment, Form Validation Standard) — exactly MaxInputLength is still valid.
             bool isError = currentLength > MaxInputLength;

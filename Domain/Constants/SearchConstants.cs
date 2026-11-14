@@ -41,6 +41,13 @@ public static class SearchConstants
     public const int RemoteSearchTimeoutMilliseconds = 3000;
 
     /// <summary>
+    /// Upper bound, in milliseconds, on one place lookup (reverse or search) against the geocoding provider.
+    /// REQ-VEN-28: a lookup not completed within this bound is abandoned and reported as Unavailable.
+    /// The bound starts when the request is sent, so time spent waiting for the usage-rule turn does not count.
+    /// </summary>
+    public const int PlaceLookupTimeoutMilliseconds = 5000;
+
+    /// <summary>
     /// Upper bound, in milliseconds, on one lyrics lookup, covering both attempts together (REQ-LYR-06).
     /// A lookup not finished within this bound ends with no match.
     /// </summary>
