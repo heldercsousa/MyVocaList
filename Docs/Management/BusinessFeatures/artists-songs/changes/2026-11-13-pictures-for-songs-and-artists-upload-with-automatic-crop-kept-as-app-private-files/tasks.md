@@ -27,7 +27,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] T2b **`ImagePickerField`**. After T2a, same worktree. (REQ-PIC-13..16)
 
 ## Wave 2 (parallel, two worktrees; after Wave 1 is merged)
-- [~] T3 **Services.** `SongFormSaveRequest.ImageChanged`, `SongService` (local references, edit-mode picture, edit-mode artist collision, artist image on an artist created in edit mode), `IArtistService.GetArtistByIdAsync` / `SetArtistImageAsync`, `ArtistSuggestionService` local pictures. Depends on T1. (REQ-PIC-02, 21, 22, 32, 34, 36) — worktree `form-pictures`
+- [x] T3 **Services.** `SongFormSaveRequest.ImageChanged`, `SongService` (local references, edit-mode picture, edit-mode artist collision, artist image on an artist created in edit mode), `IArtistService.GetArtistByIdAsync` / `SetArtistImageAsync`, `ArtistSuggestionService` local pictures. Depends on T1. (REQ-PIC-02, 21, 22, 32, 34, 36) — worktree `form-pictures`
 - [~] T8 **Lists.** `ArtistsPage.xaml` leading avatar + trailing checkbox; `SongsPage.xaml` through the converter; `ListItemLeadingAvatar` added to the governed list. Depends on T1. (REQ-PIC-38, 39) — worktree `form-pictures-ui`
 
 ## Wave 3 (parallel, two worktrees; after Wave 2 is merged)
