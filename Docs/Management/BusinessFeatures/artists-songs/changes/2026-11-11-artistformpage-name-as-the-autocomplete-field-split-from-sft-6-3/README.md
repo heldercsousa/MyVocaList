@@ -1,7 +1,7 @@
 ---
 id: artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3
 title: ArtistFormPage Name as the autocomplete field (split from SFT 6.3)
-status: 🟢 Ready
+status: 🟡 In Progress
 target: 2026-11-11
 section: BusinessFeatures
 parent: artists-songs
