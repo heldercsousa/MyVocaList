@@ -16,6 +16,7 @@ namespace MyVocaList.Contracts.DTOs.Suggestions;
 /// <param name="ImageUrl">Song image URL (album cover); null when none (REQ-ART-06).</param>
 /// <param name="ArtistImageUrl">Artist image URL; null when none (REQ-ART-06).</param>
 /// <param name="AlbumTitle">Album title; set on remote rows only, null when none (REQ-ART-07).</param>
+/// <param name="DurationSeconds">Track duration in seconds; set on remote rows only, null when none (REQ-LYR-01).</param>
 public sealed record SongSuggestionDto(
     int? LocalId,
     string Title,
@@ -28,7 +29,8 @@ public sealed record SongSuggestionDto(
     string? LocalArtistName = null,
     string? ImageUrl = null,
     string? ArtistImageUrl = null,
-    string? AlbumTitle = null)
+    string? AlbumTitle = null,
+    int? DurationSeconds = null)
 {
     /// <summary>The image a row shows: the song image, else the artist image, else null (REQ-ART-06).</summary>
     public string? RowImageUrl => ImageUrl ?? ArtistImageUrl;
