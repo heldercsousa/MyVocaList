@@ -1,11 +1,12 @@
 ---
 id: song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists
 title: "Song form: a Deezer pick fills Lyrics when a lyrics match exists"
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-14
 section: BusinessFeatures
 parent: artists-songs
 goal: Picking a Deezer song fills the empty Lyrics field from LRCLIB; no match leaves it empty.
+closed: 2026-11
 kind: change
 ---
 

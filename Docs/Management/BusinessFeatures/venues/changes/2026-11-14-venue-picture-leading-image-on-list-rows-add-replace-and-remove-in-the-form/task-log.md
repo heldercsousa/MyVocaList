@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — All code tasks done and merged to `develop` (b33703ff): 1603 tests pass, Android build 0 errors. Open: V10 device check by Helder (checklist at the end of this file). The three venue items stay In Progress until then.
+- 2026-11-14 — Complete. Merged to `develop` (21ba511b): 1604 tests pass, Android build 0 errors, flows checked on the Android emulator (entry "Emulator check"). The device checklist at the end stays as an optional confirmation on a physical phone.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -282,6 +282,34 @@ REQ-VEN-35 → `NoLocationPermissionTests`. Page behaviour (REQ-VEN-23..31, 34):
 | REQ-VEN-24..31 | `VenueMapPickerViewModel`, `VenuePlaceRules` | `VenueMapPickerViewModelTests`, `VenuePlaceRulesTests` |
 | REQ-VEN-28, 29, 32, 34 | `Services/Places/*`, DI registration | Nominatim provider, address mapper, gate and lookup service tests, `AppServicesRegistrationTests` |
 | REQ-VEN-35 | no location API or permission | `NoLocationPermissionTests` |
+
+## 2026-11-14 — Emulator check (Android, Pixel 5 API 36) and fixes (Done)
+
+### Found on the emulator and fixed (commit `a4369a4c`, merged to `develop` as `21ba511b`)
+- Tapping the map closed the app: the web view raises its message event off the UI thread. `VenueMapPickerPage.xaml.cs` now marshals `ready` and `tap` to the UI thread.
+- Search results never showed: visibility was bound to `Results.Count`, which `ReplaceRange` does not notify. `VenueMapPickerViewModel.HasResults` added (test `SearchCommand_WithPlaces_ShowsResultsUntilOneIsSelected`).
+- A result row did not react to a tap: rows are now a `BindableLayout` (not `DXCollectionView`), and the row command binds to the ViewModel by ancestor type.
+
+### Changed files
+- `MyVocaList/UI/Pages/Venues/VenueMapPickerPage.xaml(.cs)`, `MyVocaList/UI/ViewModels/VenueMapPickerViewModel.cs`, `MyVocaList.Tests/Unit/ViewModels/VenueMapPickerViewModelTests.cs`.
+
+### Verification evidence (after the fixes; full suite 1604 passed, Android build 0 errors)
+| Step | Result on the emulator |
+|------|------------------------|
+| Venues list | Existing venues show the default venue image; a venue with an address shows "street, city" under the name |
+| New venue form | Picture field with "Add picture" and hint; "Address" heading; "Pick on map" with helper text; six address fields with counters |
+| Map picker | Map tiles with "© OpenStreetMap contributors"; search "Bar Brahma Sao Paulo" lists two places with addresses |
+| Select a result | Marker placed; panel "Bar Brahma", its address, "Use this place" |
+| Tap the map | Panel "Selected place", "Rua dos Timbiras, 421, São Paulo, São Paulo, Brazil" |
+| Use this place | Back on the form: all six fields filled (street, line 2, city, region, postal code, country); button reads "Change on map" |
+| Save | Venue saved; list row shows "Rua dos Timbiras, 421, São Paulo" |
+| Duplicate name (other letter case) | Refused on Name: "There is another venue registered with this name" |
+| Duplicate address (other case, no accents) | Refused on Street address: "There is another venue registered at this address" |
+| Edit mode | Stored name and address loaded; "Change on map" opens on the stored point with a marker |
+| Picture | Photo picked, cropped to the centre square; "Replace picture" / "Remove picture" shown; saved as `files/images/venues/<id>_l.jpg` (13 KB) and `_t.jpg` (5 KB); list row shows it |
+| Offline | Picker shows "The map needs an internet connection." |
+
+Not checked on the emulator: iOS, removing a picture then saving, the 61-character name (unit-tested).
 
 ## Device check (Helder) — V10
 

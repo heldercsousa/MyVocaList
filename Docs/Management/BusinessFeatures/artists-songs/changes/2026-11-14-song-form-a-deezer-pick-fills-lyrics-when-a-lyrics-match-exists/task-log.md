@@ -1,7 +1,7 @@
 # Task log: a Deezer pick fills Lyrics
 
 ### Checkpoint
-- 2026-11-14 — L1..L3 and close-out L3c done; merged into `develop` (fd6aab7e). Open: L4 device check (Helder).
+- 2026-11-14 — Complete. On `develop`; the Deezer pick filling Lyrics was confirmed on the Android emulator (entry "Emulator check").
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — L0 Research and spec (Done)
@@ -117,6 +117,11 @@
 - Merged into `develop` as `fd6aab7e` and pushed.
 - All fifteen requirements have at least one test (matrices in the L1, L2a, L2b and L3 entries above); REQ-LYR-15 is covered by the DI test of L2b.
 - Not verified here: the behaviour on a device against the live LRCLIB service. That is L4 (Helder), checklist below. The item stays In Progress until then.
+
+## 2026-11-14 — Emulator check (Android, Pixel 5 API 36) (Done)
+
+- New song → typed "Bohemian Rhapsody" → picked the first Deezer option (Queen · A Night At The Opera): Title, Artist and picture filled, and the Lyrics field filled with "Is this the real life? Is this just fantasy? ...". Build from `develop` content (venue branch tip `a4369a4c`).
+- Not checked on the emulator: a pick with no lyrics match (unit-tested: the field stays empty).
 
 ## Device check (Helder) — L4
 

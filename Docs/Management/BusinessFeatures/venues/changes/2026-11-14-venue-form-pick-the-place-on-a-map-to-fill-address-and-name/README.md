@@ -1,11 +1,12 @@
 ---
 id: venue-form-pick-the-place-on-a-map-to-fill-address-and-name
 title: "Venue form: pick the place on a map to fill address and name"
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-14
 section: BusinessFeatures
 parent: venues
 goal: An OpenStreetMap picker fills the address, and the name when the point is a known place.
+closed: 2026-11
 kind: change
 ---
 

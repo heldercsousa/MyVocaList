@@ -27,4 +27,4 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 
 ## Close-out
 - [x] L3c Merge to `develop`, full test run, Android build, traceability matrix, status.
-- [ ] L4 **Device check (Helder)** — checklist in `task-log.md § Device check`.
+- [x] L4 **Device check (Helder)** — checklist in `task-log.md § Device check`.

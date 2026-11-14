@@ -1,11 +1,12 @@
 ---
 id: venue-picture-leading-image-on-list-rows-add-replace-and-remove-in-the-form
 title: "Venue picture: leading image on list rows, add, replace and remove in the form"
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-14
 section: BusinessFeatures
 parent: venues
 goal: Venues get an optional picture with a default image; holds the shared venue profile spec.
+closed: 2026-11
 kind: change
 ---
 

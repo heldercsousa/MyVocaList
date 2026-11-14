@@ -1,11 +1,12 @@
 ---
 id: venue-address-international-fields-duplicate-name-and-duplicate-address-refused
 title: "Venue address: international fields, duplicate name and duplicate address refused"
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-14
 section: BusinessFeatures
 parent: venues
 goal: Venue form gains address fields that fit most countries; the same address on two venues is refused.
+closed: 2026-11
 kind: change
 ---
 
