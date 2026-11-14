@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — Complete. Merged to `develop` (21ba511b): 1604 tests pass, Android build 0 errors, flows checked on the Android emulator (entry "Emulator check"). The device checklist at the end stays as an optional confirmation on a physical phone.
+- 2026-11-14 — Reopened for Phase 6 (venue picture from a map pick, REQ-VEN-37..40): V11 running in worktree `venue-profile`, then V12 and an emulator pass of the remaining flows (name fill into a blank Name, remove picture then save).
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)

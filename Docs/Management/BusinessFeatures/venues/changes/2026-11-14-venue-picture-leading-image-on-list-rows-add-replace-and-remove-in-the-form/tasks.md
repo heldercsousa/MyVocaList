@@ -74,3 +74,8 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 ## Close-out
 - [x] V9c Merge, full test run, Android build, emulator check, verifier, traceability matrix, statuses, merge to `develop`.
 - [x] V10 **Device check (Helder)** — checklist in `task-log.md § Device check`.
+
+## Phase 6 — Venue picture from a map pick (added 2026-11-14)
+
+- [~] V11 **Picture source and resolver.** (REQ-VEN-37, 39, 40) Provider `extratags=1`, `GeocodingRecord` tags, mapper → `VenuePictureSource`, `VenuePlace.PictureSource`, `IVenuePictureLookupService` + implementation + DI, tests.
+- [ ] V12 **Form fills the picture from a confirmed place.** After V11. (REQ-VEN-38, 39) `VenueFormViewModel` + tests; Android build; emulator check of the whole pick flow.
