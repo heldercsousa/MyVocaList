@@ -24,6 +24,7 @@ public partial class AppShell : Shell
         WeakReferenceMessenger.Default.Register<ShowUpdateRequiredMessage>(this, OnShowUpdateRequired);
 
         Routing.RegisterRoute(Routes.VenueForm, typeof(VenueFormPage));
+        Routing.RegisterRoute(Routes.VenueMapPicker, typeof(VenueMapPickerPage));
         Routing.RegisterRoute(Routes.PersonForm, typeof(PersonFormPage));
         Routing.RegisterRoute(Routes.ArtistForm, typeof(ArtistFormPage));
         Routing.RegisterRoute(Routes.SongForm, typeof(SongFormPage));
