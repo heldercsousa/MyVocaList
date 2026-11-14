@@ -46,4 +46,16 @@ public static class SearchConstants
     /// The bound starts when the request is sent, so time spent waiting for the usage-rule turn does not count.
     /// </summary>
     public const int PlaceLookupTimeoutMilliseconds = 5000;
+
+    /// <summary>
+    /// Upper bound, in milliseconds, on one lyrics lookup, covering both attempts together (REQ-LYR-06).
+    /// A lookup not finished within this bound ends with no match.
+    /// </summary>
+    public const int LyricsLookupTimeoutMilliseconds = 5000;
+
+    /// <summary>
+    /// Maximum length, in characters, of lyrics after trimming (REQ-LYR-05). Longer text is treated as no
+    /// match, because a cut text would be stored as if it were complete. Exactly this length is kept.
+    /// </summary>
+    public const int LyricsMaxLength = 10000;
 }
