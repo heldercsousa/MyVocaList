@@ -10,6 +10,9 @@
          never both. Which one is decided by TapToEditFieldLogic.ShowsText and applied in code-behind
          (ApplyState), never by triggers. The editor sits in its own host, so the host is toggled and a
          consumer binding on the editor's IsVisible is never fought. -->
+    <!-- Explicit Content: the class content property is Editor (for consumers), so an implicit root
+         child here would be assigned to Editor and hosted inside itself (BUG-087). -->
+    <ContentView.Content>
     <Grid>
         <!-- Text state: a tappable row, at least 48 dp high, value + trailing edit icon. -->
         <Grid x:Name="textPresenter"
@@ -43,4 +46,5 @@
         <!-- Editor state: the wrapped editor (the Editor content property) is placed here in code-behind. -->
         <ContentView x:Name="editorHost" />
     </Grid>
+    </ContentView.Content>
 </ContentView>
