@@ -13,6 +13,7 @@ public class ImageMaintenanceService : IImageMaintenanceService
 
     private readonly ISongRepository _songRepository;
     private readonly IArtistRepository _artistRepository;
+    private readonly IVenueRepository _venueRepository;
     private readonly IImageStore _imageStore;
     private readonly IUnitOfWork _uow;
     private readonly ILogger<ImageMaintenanceService> _logger;
@@ -20,12 +21,14 @@ public class ImageMaintenanceService : IImageMaintenanceService
     public ImageMaintenanceService(
         ISongRepository songRepository,
         IArtistRepository artistRepository,
+        IVenueRepository venueRepository,
         IImageStore imageStore,
         IUnitOfWork uow,
         ILogger<ImageMaintenanceService> logger)
     {
         _songRepository = songRepository;
         _artistRepository = artistRepository;
+        _venueRepository = venueRepository;
         _imageStore = imageStore;
         _uow = uow;
         _logger = logger;
@@ -39,7 +42,8 @@ public class ImageMaintenanceService : IImageMaintenanceService
             // Resolved from the lambda's own scope — never a constructor field.
             var songs = await sp.GetRequiredService<ISongRepository>().GetLocalImageReferencesAsync(ct);
             var artists = await sp.GetRequiredService<IArtistRepository>().GetLocalImageReferencesAsync(ct);
-            return songs.Concat(artists).Distinct(StringComparer.Ordinal).ToList();
+            var venues = await sp.GetRequiredService<IVenueRepository>().GetLocalImageReferencesAsync(ct);
+            return songs.Concat(artists).Concat(venues).Distinct(StringComparer.Ordinal).ToList();
         }, ct);
 
         var deleted = await _imageStore.DeleteUnreferencedAsync(references, MinimumOrphanAge, ct);
