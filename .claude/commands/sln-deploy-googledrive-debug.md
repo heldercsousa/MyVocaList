@@ -11,7 +11,7 @@ Build a **Debug** APK and upload it to Google Drive. All logic lives in `MyVocaL
 | Signing | Debug key of this machine; no password needed | Release keystore; needs `ANDROID_KEYSTORE_PASS` and `ANDROID_KEY_PASS` |
 | Speed on the device | Slower (no optimisation) — do not use it to judge performance | Representative of real speed |
 | Debug-only data | Present (e.g. the 500-venue seed, `#if DEBUG`) | Absent |
-| File on Drive | `com.myvocalist-debug.apk` | `com.myvocalist-Signed.apk` |
+| File on Drive | `com.myvocalist-debug-<yyyyMMdd-HHmmss>-<commit>.apk` | `com.myvocalist-release-<yyyyMMdd-HHmmss>-<commit>.apk` |
 | Size | About 110 MB | About 63 MB |
 
 **Signatures do not mix:** Android refuses to update a release install with a debug APK, and the reverse (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`). Uninstall the app once when changing between the two; this deletes the app's data on the device. A debug APK updates a build deployed from Visual Studio on this machine, because both use the same debug key.
@@ -28,7 +28,7 @@ The Debug configuration embeds the assemblies into the APK (`EmbedAssembliesInto
    ```powershell
    cmd /c "MyVocaList\Platforms\Android\deployGoogleDriveDebug.bat"
    ```
-   The script checks the rclone remote, builds Debug, finds `*-Signed.apk` and uploads it as `com.myvocalist-debug.apk` (never overwriting the release APK). It exits non-zero on any failure; report the failing step and stop.
+   The script checks the rclone remote, builds Debug, finds `*-Signed.apk` and uploads it as `com.myvocalist-debug-<yyyyMMdd-HHmmss>-<commit>.apk`. The date-time (local, taken at upload) makes every upload unique, so no earlier debug or release APK is overwritten; the short commit hash tells which code the build came from. Old files accumulate on Drive — delete them there by hand when no longer needed. It exits non-zero on any failure; report the failing step and stop.
 3. **Report** the script's `Debug APK uploaded: ...` line plus the version (`git describe --tags --always`).
 
 ## Notes

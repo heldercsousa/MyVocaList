@@ -14,8 +14,8 @@ Build a signed release APK and upload it to Google Drive. All logic lives in `My
    ```powershell
    cmd /c "MyVocaList\Platforms\Android\deployGoogleDriveRelease.bat"
    ```
-   The script checks the env vars and the rclone remote, publishes, finds `*-Signed.apk` and uploads. It exits non-zero on any failure; report the failing step and stop.
-3. **Report** the line the script prints: `APK uploaded: googledrive:MyVocaList/releases/<filename>`.
+   The script checks the env vars and the rclone remote, publishes, finds `*-Signed.apk` and uploads it as `com.myvocalist-release-<yyyyMMdd-HHmmss>-<commit>.apk`. The date-time (local, taken at upload) makes every upload unique, so no earlier APK is overwritten; the short commit hash tells which code the build came from. Old files accumulate on Drive — delete them there by hand when no longer needed. It exits non-zero on any failure; report the failing step and stop.
+3. **Report** the line the script prints: `APK uploaded: googledrive:MyVocaList/releases/com.myvocalist-release-<yyyyMMdd-HHmmss>-<commit>.apk`.
 
 ## Notes
 
