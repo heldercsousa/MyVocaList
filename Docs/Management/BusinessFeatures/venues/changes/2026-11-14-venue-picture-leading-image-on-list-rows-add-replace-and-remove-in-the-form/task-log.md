@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — V1a..V3b done on `venue-profile` (ddaeed6f); V7a..V7c done on `venue-map` (573ae33b); both branches hold `develop` with the lyrics feature. Running: V4a (`venue-profile`), V8 (`venue-map`). Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
+- 2026-11-14 — V1a..V4a done on `venue-profile` (2662058b); V7a..V8 done on `venue-map` (5f11acd2). Running: V4b (`venue-profile`), V9a (`venue-map`). Next: merge `venue-map` into `venue-profile`, then V5a, V5b, V9b, V9c. Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -164,6 +164,36 @@
 
 ### Decisions made in the task (kept)
 - An answer that arrives after the 5,000 ms bound counts as unavailable and is not remembered. The search minimum (3) and limit (5) are private constants of the service.
+
+## 2026-11-14 — V4a VenueService save and read (Done)
+
+### Changed files
+- `Domain/ServicesInterfaces/IVenueService.cs`, `Services/VenueService.cs` — `GetVenueForEditAsync`, `SaveVenueAsync`, `ValidateAddressInput`; name limit 60, counter above 50, warning above 55.
+- `MyVocaList.Tests/Unit/Services/VenueServiceSaveTests.cs` (new, 42 tests); `VenueServiceTests.cs` (planned exception: three tests 31 → 61).
+
+### Verification evidence
+- Commit `2662058b` on `feature/venue-profile`. Red: 39 failed of 58 against throwing stubs. Green: full suite 1475 passed, 0 failed. Orchestrator read `VenueService.cs`: check order name → address → load → duplicate name → duplicate address → write, as design § 2.4.
+
+### Traceability
+REQ-VEN-10, 11, 13..17, 19..22, 33, 36 → `VenueServiceSaveTests` (one test per criterion row; full matrix at V9c).
+
+### Decisions
+- `GetVenueForEditAsync` maps inside the service (mapper file belongs to V4b). The stored name is written as given; the EF converter trims it.
+
+## 2026-11-14 — V8 VenueMapPickerViewModel and plumbing (Done)
+
+### Changed files
+- `MyVocaList/UI/ViewModels/VenueMapPickerViewModel.cs`, `UI/Services/IMapPickerPreferences.cs`, `UI/Services/MauiMapPickerPreferences.cs`, `UI/Messages/VenuePlacePickedMessage.cs` (new); `Navigation/Routes.cs` (`VenueMapPicker`); `Resources/Images/map_outlined.svg` (new, hand-drawn outline, not the Material glyph).
+- `MyVocaList.Tests/Unit/ViewModels/VenueMapPickerViewModelTests.cs` (new, 20 tests).
+
+### Verification evidence
+- Commit `5f11acd2` on `feature/venue-map` (contains merge `573ae33b`). Red: 18 failed of 20 against a stub. Green: full suite 1498 passed, 0 failed. Orchestrator read the ViewModel: no location API, one message only on confirm, newer tap cancels the older lookup.
+
+### Traceability
+REQ-VEN-24..31 → `VenueMapPickerViewModelTests` (full matrix at V9c). REQ-VEN-35: by inspection here; architecture test in V9b.
+
+### Decisions
+- Constructor takes `INavigationService` (back navigation testable). Preferences use `IPreferences`, keys `map_picker_last_lat` / `map_picker_last_lon`. The `q` value is not copied into the search field. Registration of the page, ViewModel and preferences is V9b.
 
 ## Device check (Helder) — V10
 
