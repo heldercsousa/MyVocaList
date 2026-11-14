@@ -1,7 +1,7 @@
 # Task log: venue profile — picture, address and map pick
 
 ### Checkpoint
-- 2026-11-14 — V1a..V3a done on `venue-profile` (f5cd7d5d); V7a, V7b done on `venue-map` (6ba88e74). Running: V3b (`venue-profile`), V7c (`venue-map`). Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs at V5b and V9c.
+- 2026-11-14 — All tasks through V5a and V9b are merged on `feature/venue-profile` (02e4bfe2, 1603 tests pass). Running: V5b (venue pages, first Android build). Next: V9c close-out. `feature/venue-map` is fully merged and no longer used.
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — V0 Research and spec (Done)
@@ -124,6 +124,133 @@
 | REQ-VEN-21 | empty address never collides | guard in `AddressExistsAsync` | `…_EmptyAddress_ReturnsFalseEvenWithEmptyVenuesStored` |
 | REQ-VEN-04 | local venue references listed | `GetLocalImageReferencesAsync` | `GetLocalImageReferencesAsync_ReturnsOnlyLocalVenueReferences` |
 | REQ-VEN-05 | existing rows kept with null columns; collation on text columns; rollback | migration | `AddVenueProfile_ExistingVenues_…`, `…_Up_AddsNineNullableColumns_…`, `…_Down_DropsNineColumns…` |
+
+## 2026-11-14 — V3b Image store and sweep know venues (Done)
+
+### Changed files
+- `Services/ImageStore.cs` (sweep loops over `ImageReferenceRules.Folders`), `Services/ImageMaintenanceService.cs` (venue references join the live set; constructor gains `IVenueRepository`)
+- New tests `Unit/Services/ImageStoreVenueTests.cs` (7), `Unit/Services/ImageMaintenanceServiceVenueTests.cs` (2)
+- Planned exception, wider than planned: `ImageMaintenanceServiceTests.cs` gained a venue repository mock (empty list), passed to the constructor and to the unit-of-work stub, because the service resolves its repositories from the unit-of-work scope. No assertion changed.
+
+### Verification evidence
+- Commit `28d1c69d` on `feature/venue-profile`. Red: the two sweep tests failed because `venues/` was not scanned; five import/display tests were green before any change (import already used `FolderOf`). The two `ImageMaintenanceServiceVenueTests` were not seen red (they would not compile before the constructor change). `dotnet test` 1366 passed, 0 failed.
+- One unrelated test (`ArtistSuggestionServiceTests.SearchNameRemoteAsync_CallerCancelled_Rethrows`) failed once in the commit hook and passed on the next run and alone; treated as a timing flake, not investigated.
+- Kept as found: the sweep matches live files by name across folders, not per folder (names are random GUIDs).
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-VEN-02 | venue import writes both files under `venues/`; failure message; display paths | `ImageStore.ImportAsync` (unchanged) | `ImportAsync_Venue_WritesBothFilesUnderVenuesAndReturnsVenueReference`, `ImportAsync_Venue_ProcessorThrows_…`, `ResolveDisplaySource_VenueReference_UsesVenuesFolder` |
+| REQ-VEN-04 | referenced venue files survive; old orphans deleted; young orphans kept; live set includes venues | `ImageStore.DeleteUnreferencedAsync`, `ImageMaintenanceService.SweepOrphansAsync` | `DeleteUnreferencedAsync_…` (4), `SweepOrphansAsync_…` (2) |
+
+## 2026-11-14 — V7c Place lookup gate, service, DI (Done)
+
+### Changed files
+- New `Domain/ServicesInterfaces/IPlaceLookupService.cs`, `Services/Places/PlaceLookupGate.cs`, `Services/Places/PlaceLookupService.cs`; `Domain/Constants/SearchConstants.cs` (`PlaceLookupTimeoutMilliseconds`); `MyVocaList/Extensions/ServiceCollectionExtensions.cs` (Nominatim typed client, `IGeocodingProvider`, `TimeProvider`, gate singleton, `IPlaceLookupService`)
+- New tests `Unit/Services/Places/PlaceLookupGateTests.cs` (6), `PlaceLookupServiceTests.cs` (17); one test added to `AppServicesRegistrationTests.cs`
+
+### Verification evidence
+- Commit `2827ab2c` on `feature/venue-map`. Red: 24 failed against compile-only stubs. `dotnet test` 1411 passed, 0 failed.
+- `develop` (with the lyrics feature) merged into `feature/venue-map` as `573ae33b`: three add/add conflicts (`ServiceCollectionExtensions.cs`, `SearchConstants.cs`, `AppServicesRegistrationTests.cs`) resolved by keeping both sides; full suite 1478 passed. `develop` merged into `feature/venue-profile` as `ddaeed6f`: 1433 passed.
+
+### Traceability
+| AC | Criterion | Implementation | Tests |
+|----|-----------|----------------|-------|
+| REQ-VEN-25 | search: 3-character minimum, 5 results, order kept | `PlaceLookupService.SearchAsync` | `SearchAsync_TwoCharacters_…`, `…_ThreeCharacters_…`, `…_TwoRecords_…`, `…_EmptyAnswer_…` |
+| REQ-VEN-26 | reverse: mapped place with the tapped coordinates | `ReverseCoreAsync` | `ReverseAsync_RecordWithAddress_ReturnsFoundWithTappedCoordinates` |
+| REQ-VEN-27 | nothing found → `NoAddress` with coordinates | `NoAddressAt` | `ReverseAsync_ProviderReturnsNull_…`, `…_RecordWithEmptyAddress_…` |
+| REQ-VEN-28 | failure, offline, 5,000 ms bound → `Unavailable`; caller cancel rethrown | catch chain | `…_ProviderThrowsHttpRequestException_…`, `…_Offline_…` (2), `…_ProviderNeverAnswers_…`, `…_CallerCancelled_…`, `SearchAsync_ProviderThrows_…` |
+| REQ-VEN-34 | 1 request per second; last 100 answers remembered; failures not remembered; language; client identification | `PlaceLookupGate.RunAsync`, DI | `RunAsync_…` (6), `ReverseAsync_SamePointTwice_…`, `…_FailedThenSameReverse_…`, `…_PassesCurrentUICultureAsLanguage`, `SearchAsync_SameTextTwice_…`, `AddAppServices_PlaceLookup_…` |
+
+### Decisions made in the task (kept)
+- An answer that arrives after the 5,000 ms bound counts as unavailable and is not remembered. The search minimum (3) and limit (5) are private constants of the service.
+
+## 2026-11-14 — V4a VenueService save and read (Done)
+
+### Changed files
+- `Domain/ServicesInterfaces/IVenueService.cs`, `Services/VenueService.cs` — `GetVenueForEditAsync`, `SaveVenueAsync`, `ValidateAddressInput`; name limit 60, counter above 50, warning above 55.
+- `MyVocaList.Tests/Unit/Services/VenueServiceSaveTests.cs` (new, 42 tests); `VenueServiceTests.cs` (planned exception: three tests 31 → 61).
+
+### Verification evidence
+- Commit `2662058b` on `feature/venue-profile`. Red: 39 failed of 58 against throwing stubs. Green: full suite 1475 passed, 0 failed. Orchestrator read `VenueService.cs`: check order name → address → load → duplicate name → duplicate address → write, as design § 2.4.
+
+### Traceability
+REQ-VEN-10, 11, 13..17, 19..22, 33, 36 → `VenueServiceSaveTests` (one test per criterion row; full matrix at V9c).
+
+### Decisions
+- `GetVenueForEditAsync` maps inside the service (mapper file belongs to V4b). The stored name is written as given; the EF converter trims it.
+
+## 2026-11-14 — V8 VenueMapPickerViewModel and plumbing (Done)
+
+### Changed files
+- `MyVocaList/UI/ViewModels/VenueMapPickerViewModel.cs`, `UI/Services/IMapPickerPreferences.cs`, `UI/Services/MauiMapPickerPreferences.cs`, `UI/Messages/VenuePlacePickedMessage.cs` (new); `Navigation/Routes.cs` (`VenueMapPicker`); `Resources/Images/map_outlined.svg` (new, hand-drawn outline, not the Material glyph).
+- `MyVocaList.Tests/Unit/ViewModels/VenueMapPickerViewModelTests.cs` (new, 20 tests).
+
+### Verification evidence
+- Commit `5f11acd2` on `feature/venue-map` (contains merge `573ae33b`). Red: 18 failed of 20 against a stub. Green: full suite 1498 passed, 0 failed. Orchestrator read the ViewModel: no location API, one message only on confirm, newer tap cancels the older lookup.
+
+### Traceability
+REQ-VEN-24..31 → `VenueMapPickerViewModelTests` (full matrix at V9c). REQ-VEN-35: by inspection here; architecture test in V9b.
+
+### Decisions
+- Constructor takes `INavigationService` (back navigation testable). Preferences use `IPreferences`, keys `map_picker_last_lat` / `map_picker_last_lon`. The `q` value is not copied into the search field. Registration of the page, ViewModel and preferences is V9b.
+
+## 2026-11-14 — V4b List DTO and mapper (Done)
+
+### Changed files
+- `Contracts/DTOs/List/VenueListItemDto.cs` (+`ImageUrl`, `AddressSummary`), `Services/Mappers/VenueMapper.cs`, `MyVocaList.Tests/Unit/Services/VenueMapperTests.cs` (new, 5 tests).
+
+### Verification evidence
+- Commit `a38a24ba` on `feature/venue-profile`. Red: compile failure on the missing members. Green: full suite 1480 passed, 0 failed.
+
+### Traceability
+REQ-VEN-06, 18 → `VenueMapperTests`.
+
+## 2026-11-14 — V9a Map web assets (Done)
+
+### Changed files
+- `MyVocaList/Resources/Raw/venuemap/` (new): `index.html`, `map.js`, Leaflet 1.9.4 files unmodified (`leaflet.js`, `leaflet.css`, `images/*`), `LICENSE-leaflet.txt`. The existing `MauiAsset` glob covers the folder; `.csproj` unchanged.
+
+### Verification evidence
+- Commit `d93440cf` on `feature/venue-map`. Full suite 1498 passed. Level C (static assets): no test; behaviour is checked on the emulator at V9c. Bootstrap tag `_framework/hybridwebview.js` taken from the Microsoft Learn HybridWebView page for .NET MAUI 10.
+
+### Decisions
+- First view is the world at zoom 2 until the first `view` message. Leaflet's default attribution prefix is kept.
+
+## 2026-11-14 — Merge `venue-map` into `venue-profile`
+
+- Merge commit on `feature/venue-profile`, no conflicts. Full suite 1581 passed, 0 failed.
+
+## 2026-11-14 — V5a VenueFormViewModel (Done)
+
+### Changed files
+- `MyVocaList/UI/ViewModels/VenueFormViewModel.cs` (rewritten); `MyVocaList.Tests/Unit/ViewModels/VenueFormViewModelProfileTests.cs` (new, 16 tests); `VenueFormViewModelTests.cs` (planned exceptions: constructor arguments; two tests now verify `SaveVenueAsync` instead of `CreateVenueAsync`, one gained a `ValidateAddressInput` stub).
+
+### Verification evidence
+- Commit `1cbfcb97` on `feature/venue-profile`. Red: test project did not compile. Green: full suite 1600 passed on rerun; the first run had one failure in `SongMigrationTests.FullMigrate_AllSevenFtsTriggersExist`, which passes alone and on rerun (unrelated, flaky).
+
+### Traceability
+REQ-VEN-07..12, 14, 17, 19, 20, 23, 30, 31 → `VenueFormViewModelProfileTests` (full matrix at V9c).
+
+### Decisions
+- `PickOnMapCommand` navigates with `Shell.Current`, as the form's existing navigation does; the route string is the public `MapPickerRoute`. The navigation call itself has no unit test.
+- The address is validated through `ValidateAddressInput` before the save call, so a field error shows without a write attempt.
+- The 60-character cut of a picked place name is in `NominatimAddressMapper` (`VenueNameMax`), not in `VenuePlaceRules.Merge`.
+
+## 2026-11-14 — V9b VenueMapPickerPage and registration (Done)
+
+### Changed files
+- `MyVocaList/UI/Pages/Venues/VenueMapPickerPage.xaml(.cs)` (new); `MyVocaList/AppShell.xaml.cs` (route); `MyVocaList/MauiProgram.cs` (page, ViewModel, `IMapPickerPreferences`); `MyVocaList.Tests/Architecture/NoLocationPermissionTests.cs` (new, 3 tests).
+
+### Verification evidence
+- Commit `9bb864c2` on `feature/venue-map`; merged into `feature/venue-profile` (`02e4bfe2`), full suite 1603 passed, 0 failed. The platform code that sets the web view User-Agent (`#if ANDROID` / `#elif IOS`) is not compiled by the test build; the Android build at V5b covers the Android part.
+
+### Traceability
+REQ-VEN-35 → `NoLocationPermissionTests`. Page behaviour (REQ-VEN-23..31, 34): emulator and device check.
+
+### Decisions
+- Page title "Pick the venue location" through `ContentPage.Title`. Two activity indicators (search, tap lookup). Search on submit through `ReturnCommand`.
+- Open point passed to V5b: the raw-message handler must ignore a malformed message instead of throwing.
 
 ## Device check (Helder) — V10
 
