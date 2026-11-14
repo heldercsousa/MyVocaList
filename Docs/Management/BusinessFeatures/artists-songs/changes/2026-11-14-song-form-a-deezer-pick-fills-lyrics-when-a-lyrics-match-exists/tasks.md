@@ -21,10 +21,10 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
   - Demo: `FindLyricsAsync(new LyricsQuery("Imagine", "John Lennon"))` with a provider stub yields the trimmed lyrics; offline yields null with no provider call.
 
 ## Phase 2 — UI
-- [~] L3 **`SongFormViewModel` + placeholder.** After L2b. (REQ-LYR-01, 02, 04, 09, 10, 11, 12, 13, 14) Size note: two production files; four existing test files change by one constructor argument each.
+- [x] L3 **`SongFormViewModel` + placeholder.** After L2b. (REQ-LYR-01, 02, 04, 09, 10, 11, 12, 13, 14) Size note: two production files; four existing test files change by one constructor argument each.
   - Files owned: `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (one attribute), new tests `MyVocaList.Tests/Unit/ViewModels/SongFormViewModelLyricsTests.cs`, constructor argument in `SongFormViewModelTests.cs`, `SongFormViewModelImageTests.cs`, `SongFormViewModelPictureTests.cs` and `Integration/Services/SongSuggestionTitleSearchRealStackTests.cs` (planned exception, `design.md § 6`).
   - Demo: add mode, pick a Deezer row for a well-known song → Lyrics fills within 5 s; pick with lyrics already typed → typed text stays.
 
 ## Close-out
-- [ ] L3c Merge to `develop`, full test run, Android build, traceability matrix, status.
+- [x] L3c Merge to `develop`, full test run, Android build, traceability matrix, status.
 - [ ] L4 **Device check (Helder)** — checklist in `task-log.md § Device check`.

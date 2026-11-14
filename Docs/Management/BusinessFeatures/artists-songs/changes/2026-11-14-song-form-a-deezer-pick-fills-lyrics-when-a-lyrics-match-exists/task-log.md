@@ -1,7 +1,7 @@
 # Task log: a Deezer pick fills Lyrics
 
 ### Checkpoint
-- 2026-11-14 — L1, L2a, L2b done (77f66917). L3 dispatched in worktree `deezer-lyrics`. Disk C: is nearly full: worktree tasks run `dotnet test` only; the Android build runs once at close-out.
+- 2026-11-14 — L1..L3 and close-out L3c done; merged into `develop` (fd6aab7e). Open: L4 device check (Helder).
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — L0 Research and spec (Done)
@@ -80,6 +80,43 @@
 
 ### Decisions made in the task (kept)
 - A blank album counts as no album. A blank-only first answer is not retried. An over-limit answer is logged at Information without its content.
+
+## 2026-11-14 — L3 `SongFormViewModel` + placeholder (Done)
+
+### Changed files
+- `MyVocaList/UI/ViewModels/SongFormViewModel.cs` (constructor gains `ISongLyricsService`; `StartLyricsLookup`, `RunLyricsLookupAsync`, `ApplyLyricsAnswer`, `CancelLyricsLookup`, `DropUntouchedPickFilledLyrics`, `LyricsLookupTask`, `IsLyricsLoading`, `LyricsPlaceholder`; hooks in `ApplyRemotePick`, `ClearTitle`, `ClearArtist`, `SaveAsync`)
+- `MyVocaList/UI/Pages/Songs/SongFormPage.xaml` (`Placeholder="{Binding LyricsPlaceholder}"`)
+- New tests `Unit/ViewModels/SongFormViewModelLyricsTests.cs` (21)
+- Planned exception (constructor argument only): `SongFormViewModelTests.cs`, `SongFormViewModelImageTests.cs`, `SongFormViewModelPictureTests.cs`, `Integration/Services/SongSuggestionTitleSearchRealStackTests.cs`
+
+### Verification evidence
+- Commit `1b5fadc6` on `feature/deezer-lyrics`. Red: 14 of 21 failed because no lookup started (the 7 green ones are no-op cases). `dotnet test` 1344 passed, 0 failed. `SelectTitle_RemoteOption_LeavesFeaturedLyricsAndKaraokeUrlsAndWritesNothing` unedited and green.
+- Orchestrator re-check: diff read line by line against `design.md § 2.5`; the four existing test files changed by the constructor argument only.
+
+### Traceability
+| AC | Criterion | Implementation | Tests (`SongFormViewModelLyricsTests`) |
+|----|-----------|----------------|-------|
+| REQ-LYR-01 | every pick starts one lookup with title, artist, album, duration | `ApplyRemotePick` → `StartLyricsLookup` (before the artist branch) | `PickWithoutLocalArtist_StartsOneLookupWithThePicksFields`, `PickWithLocalArtist_StartsOneLookupToo` |
+| REQ-LYR-02 | match fills blank Lyrics | `ApplyLyricsAnswer` | `Match_FillsEmptyLyrics` |
+| REQ-LYR-03 | no match leaves it blank | `ApplyLyricsAnswer` | `NoMatch_LeavesLyricsBlank` |
+| REQ-LYR-04 | typed lyrics never replaced; emptied field filled | `StartLyricsLookup`, `ApplyLyricsAnswer` | `NonBlankLyricsAtPickTime_StartsNoLookup`, `TypedWhileLookupPending_…`, `TypedThenEmptiedWhileLookupPending_…` |
+| REQ-LYR-09 | placeholder texts | `LyricsPlaceholder` | `LyricsPlaceholder_ReadsLookingForLyricsWhilePending_IdleOtherwise`, `LyricsPlaceholder_RaisesPropertyChanged…` |
+| REQ-LYR-10 | new pick, X, Save cancel; late answer ignored | `CancelLyricsLookup`, guard in `ApplyLyricsAnswer` | `SecondPick_CancelsFirstLookup_…`, `ClearTitle_CancelsTheLookup_…`, `ClearArtist_CancelsTheLookup_…`, `Save_CancelsTheLookup_…` |
+| REQ-LYR-11 | X removes untouched pick-filled lyrics | `DropUntouchedPickFilledLyrics` | `ClearTitle_AfterFill_…` (2), `ClearArtist_AfterFill_…` (2) |
+| REQ-LYR-12 | second pick replaces untouched fill | `StartLyricsLookup` | `SecondPick_AfterFill_…`, `SecondPick_AfterFillAndEdit_…` |
+| REQ-LYR-13 | nothing stored before Save | lookup writes `Lyrics` only | `Lookup_CallsNoSaveMethodOfSongService_DuringOrAfter` |
+| REQ-LYR-14 | local pick starts no lookup | by construction | `LocalPick_NavigatesAndStartsNoLookup` |
+
+### Decisions made in the task (kept)
+- A lookup fill is a plain write of `Lyrics`: the field has no dirty flag or validation, so the fill behaves like typing.
+- `CancelLyricsLookup()` runs before the `IsBusy` guard of `SaveAsync`, so every Save tap cancels.
+
+## 2026-11-14 — L3c Close-out (Done; device check pending)
+
+- `develop` merged into `feature/deezer-lyrics`; Android build `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`: 0 errors, 34 warnings (package advisories and DevExpress evaluation notices); full suite 1344 passed, 0 failed.
+- Merged into `develop` as `fd6aab7e` and pushed.
+- All fifteen requirements have at least one test (matrices in the L1, L2a, L2b and L3 entries above); REQ-LYR-15 is covered by the DI test of L2b.
+- Not verified here: the behaviour on a device against the live LRCLIB service. That is L4 (Helder), checklist below. The item stays In Progress until then.
 
 ## Device check (Helder) — L4
 
