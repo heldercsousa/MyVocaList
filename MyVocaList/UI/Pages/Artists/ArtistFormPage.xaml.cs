@@ -19,12 +19,10 @@ public partial class ArtistFormPage : ContentPage
         // OnAppearing runs — end the hydration window so subsequent edits are tracked as dirty.
         _viewModel.CompleteHydration();
 
-        // Focus the name field only in create mode
-        if (!_viewModel.IsEditMode)
-            nameEdit.Focus();
+        // Focus the name field only in create mode, and only while it shows its editor: a defined Name
+        // shows as text (REQ-PIC-25) and opens by a tap. Blur validation is bound in XAML
+        // (BlurWithoutPickCommand → ValidateNameCommand).
+        if (!_viewModel.IsEditMode && nameTapToEdit.IsEditorVisible)
+            nameField.FocusEditor();
     }
-
-    // Bridges the MAUI Unfocused (blur) event to the ViewModel's validation command.
-    private void OnNameUnfocused(object sender, FocusEventArgs e) =>
-        _viewModel.ValidateNameCommand.Execute(null);
 }

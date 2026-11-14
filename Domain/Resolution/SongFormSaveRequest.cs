@@ -16,8 +16,17 @@ namespace MyVocaList.Domain.Resolution;
 /// <param name="PendingUrls">Karaoke URLs to attach when the song is created.</param>
 /// <param name="ArtistDecision">The user's answer to the near-duplicate artist sheet, if any.</param>
 /// <param name="SongDecision">The user's answer to the duplicate-song sheet, if any.</param>
-/// <param name="ImageUrl">Pending Deezer cover for the song (add mode only, REQ-ART-15); normalised by the Service.</param>
+/// <param name="ImageUrl">
+/// The song's form picture reference: an image URL or a local reference (REQ-PIC-21). Add mode: stored on the
+/// new song. Edit mode: stored only when <paramref name="ImageChanged"/> is true. Normalised by the Service
+/// (REQ-PIC-02).
+/// </param>
 /// <param name="ArtistImageUrl">Pending Deezer artist picture, applied under the REQ-ART-16 rule; normalised by the Service.</param>
+/// <param name="ImageChanged">
+/// Edit mode only: true when the user uploaded or removed the song picture, so the stored reference becomes
+/// <paramref name="ImageUrl"/> (null removes it). False keeps the stored reference whatever
+/// <paramref name="ImageUrl"/> holds (REQ-PIC-21). Ignored in add mode.
+/// </param>
 public sealed record SongFormSaveRequest(
     int? SongId,
     string Title, string Version, string? FeaturedArtists, string? Lyrics,
@@ -28,7 +37,8 @@ public sealed record SongFormSaveRequest(
     ArtistDecision ArtistDecision,
     SongDecision SongDecision,
     string? ImageUrl = null,
-    string? ArtistImageUrl = null);
+    string? ArtistImageUrl = null,
+    bool ImageChanged = false);
 
 /// <summary>The user's answer to the near-duplicate artist sheet (REQ-SFT-19).</summary>
 public abstract record ArtistDecision

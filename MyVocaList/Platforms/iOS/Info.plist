@@ -4,6 +4,8 @@
 <dict>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MyVocaList uses your photos to set song and artist pictures.</string>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>1</integer>

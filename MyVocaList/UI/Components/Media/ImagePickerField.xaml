@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    x:Class="MyVocaList.UI.Components.Media.ImagePickerField"
+    x:Name="self">
+
+    <!-- Form picture field (REQ-PIC-13..16): a centred column of the 120 dp picture, the actions and the
+         size hint. Button and hint visibility, enabled state and the frame shape are applied in
+         code-behind (ApplyState / ApplyShape), never by triggers. -->
+    <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+
+        <!-- The picture: RoundRectangle 12 (song) or Ellipse (artist), set in code from IsCircle.
+             Layering copies ListItemLeadingImage: the placeholder sits under the thumbnail, the thumbnail
+             under the large picture. A loaded picture covers what is under it; a missing or failed one
+             leaves it visible (REQ-PIC-14). A tap runs PickCommand (REQ-PIC-15). -->
+        <Border x:Name="pictureFrame"
+                WidthRequest="120"
+                HeightRequest="120"
+                HorizontalOptions="Center"
+                Stroke="Transparent"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="{StaticResource SurfaceContainerHighest}"
+                SemanticProperties.Description="Picture"
+                SemanticProperties.Hint="Double tap to choose a picture">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnPictureTapped" />
+            </Border.GestureRecognizers>
+
+            <Grid>
+                <dx:DXImage Source="{Binding PlaceholderIcon, Source={x:Reference self}}"
+                            TintColor="{StaticResource OnSurfaceVariant}"
+                            WidthRequest="48"
+                            HeightRequest="48"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+
+                <Image Source="{Binding ThumbnailSource, Source={x:Reference self}}"
+                       Aspect="AspectFill"
+                       WidthRequest="120"
+                       HeightRequest="120" />
+
+                <Image Source="{Binding ImageSource, Source={x:Reference self}}"
+                       Aspect="AspectFill"
+                       WidthRequest="120"
+                       HeightRequest="120" />
+            </Grid>
+        </Border>
+
+        <!-- The actions (REQ-PIC-15): "Add picture" with no picture; "Replace picture" + "Remove picture" with one.
+             HeightRequest 48 keeps the touch target at 48 dp. -->
+        <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+            <dx:DXButton x:Name="addButton"
+                         Content="Add picture"
+                         Style="{StaticResource OutlinedButton}"
+                         HeightRequest="48"
+                         Padding="24,0"
+                         Command="{Binding PickCommand, Source={x:Reference self}}" />
+
+            <dx:DXButton x:Name="replaceButton"
+                         Content="Replace picture"
+                         Style="{StaticResource OutlinedButton}"
+                         HeightRequest="48"
+                         Padding="24,0"
+                         IsVisible="False"
+                         Command="{Binding PickCommand, Source={x:Reference self}}" />
+
+            <dx:DXButton x:Name="removeButton"
+                         Content="Remove picture"
+                         Style="{StaticResource TextButton}"
+                         HeightRequest="48"
+                         Padding="12,0"
+                         IsVisible="False"
+                         Command="{Binding RemoveCommand, Source={x:Reference self}}" />
+        </HorizontalStackLayout>
+
+        <!-- The size hint (REQ-PIC-16): only while there is no picture and the text is not empty. -->
+        <Label x:Name="hintLabel"
+               Text="{Binding HintText, Source={x:Reference self}}"
+               StyleClass="Body.Small"
+               TextColor="{StaticResource OnSurfaceVariant}"
+               HorizontalTextAlignment="Center"
+               HorizontalOptions="Center"
+               IsVisible="False" />
+    </VerticalStackLayout>
+</ContentView>

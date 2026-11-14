@@ -90,6 +90,14 @@ public class ArtistRepository : IArtistRepository
     }
 
     /// <inheritdoc />
+    public Task<List<string>> GetLocalImageReferencesAsync(CancellationToken ct = default)
+        // Prefix filter on a technical value, not search or de-duplication (design § 2.3).
+        => _db.Artists.AsNoTracking()
+            .Where(a => a.ImageUrl != null && a.ImageUrl.StartsWith("local:"))
+            .Select(a => a.ImageUrl!)
+            .ToListAsync(ct);
+
+    /// <inheritdoc />
     public async Task<Artist> GetByIdAsync(int id, CancellationToken ct)
         => await _db.Artists.FirstOrDefaultAsync(a => a.Id == id, ct);
 

@@ -3,6 +3,7 @@ using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
 using MyVocaList.Navigation;
+using MyVocaList.Tests.Infrastructure;
 using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.ViewModels;
@@ -29,7 +30,9 @@ public class SongFormViewModelImageTests
             new Mock<ISecureStorageWrapper>().Object,
             new Mock<IMessenger>().Object,
             _navigationMock.Object,
-            _suggestionsMock.Object);
+            _suggestionsMock.Object,
+            TestImageStore.PassThrough().Object,
+            new Mock<IPhotoPicker>().Object);
         sut.CompleteHydration();
         return sut;
     }
