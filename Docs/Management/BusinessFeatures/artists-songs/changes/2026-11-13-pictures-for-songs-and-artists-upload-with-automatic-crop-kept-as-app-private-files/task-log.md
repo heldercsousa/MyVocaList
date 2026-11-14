@@ -32,7 +32,7 @@ Commits `9e02d3be`, `59d62d7c` on `feature/form-pictures`.
 - Infra: `Repository/SongRepository.cs`, `ArtistRepository.cs`
 - Services: `ImageStore.cs`, `ImageMaintenanceService.cs`
 - App: `UI/Services/IPhotoPicker.cs`, `MauiPhotoPicker.cs`, `PlatformImageProcessor.cs`, `AppImagePaths.cs`, `UI/Converters/ImageReferenceConverter.cs`, `App.xaml`, `App.xaml.cs`, `MauiProgram.cs`, `Platforms/Android/AndroidManifest.xml`, `Platforms/iOS/Info.plist`
-- Tests (new): `ImageReferenceRulesTests` (41), `ImageStoreTests` (15), `ImageMaintenanceServiceTests` (2), `LocalImageReferencesRepositoryTests` (4, real SQLite)
+- Tests (new): `ImageReferenceRulesTests`, `ImageStoreTests`, `ImageMaintenanceServiceTests` (2), `LocalImageReferencesRepositoryTests` (4, real SQLite); 70 cases in total
 
 ### Implementation decisions
 - All image services are registered in `MauiProgram.cs` (not `AddAppServices`): the store needs the platform-bound options and processor.
