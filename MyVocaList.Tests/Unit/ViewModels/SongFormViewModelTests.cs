@@ -35,7 +35,8 @@ public class SongFormViewModelTests
             _navigationMock.Object,
             _suggestionsMock.Object,
             TestImageStore.PassThrough().Object,
-            new Mock<IPhotoPicker>().Object);
+            new Mock<IPhotoPicker>().Object,
+            new Mock<ISongLyricsService>().Object);
     }
 
     // ── Resolution sheet: Open existing (Task 5.1) ─────────────────────────
