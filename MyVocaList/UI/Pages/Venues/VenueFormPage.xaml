@@ -5,6 +5,7 @@
     xmlns:dx="http://schemas.devexpress.com/maui"
     xmlns:dxe="clr-namespace:DevExpress.Maui.Editors;assembly=DevExpress.Maui.Editors"
     xmlns:vm="clr-namespace:MyVocaList.UI.ViewModels"
+    xmlns:media="clr-namespace:MyVocaList.UI.Components.Media"
     x:Class="MyVocaList.UI.Pages.Venues.VenueFormPage"
     x:DataType="vm:VenueFormViewModel"
     Title="{Binding PageTitle}"
@@ -18,7 +19,7 @@
                           Text="{Binding VenueName, Mode=TwoWay}"
                           LabelText="Venue Name"
                           PlaceholderText="Enter venue name"
-                          MaxCharacterCount="30"
+                          MaxCharacterCount="60"
                           HasError="{Binding NameHasError}"
                           ErrorText="{Binding NameErrorText}"
                           Unfocused="OnNameUnfocused" />
@@ -40,6 +41,68 @@
                     </DataTrigger>
                 </Label.Triggers>
             </Label>
+
+            <!-- Form picture (REQ-VEN-08..11): the ViewModel owns which picture is shown, the buttons' state and the commands. -->
+            <media:ImagePickerField ImageSource="{Binding FormImageSource}"
+                                    ThumbnailSource="{Binding FormImageThumbnailSource}"
+                                    PlaceholderIcon="nightlife_outlined"
+                                    IsCircle="True"
+                                    HasImage="{Binding HasFormImage}"
+                                    HintText="{Binding ImageHintText}"
+                                    PickCommand="{Binding PickImageCommand}"
+                                    RemoveCommand="{Binding RemoveImageCommand}"
+                                    IsBusy="{Binding IsImageBusy}" />
+
+            <!-- Address section (REQ-VEN-12, 23) -->
+            <Label Text="Address"
+                   StyleClass="Title.Medium"
+                   TextColor="{StaticResource OnSurface}" />
+
+            <dx:DXButton Content="{Binding MapButtonText}"
+                         Icon="map_outlined"
+                         Style="{StaticResource FilledTonalButton}"
+                         HorizontalOptions="Fill"
+                         Command="{Binding PickOnMapCommand}" />
+
+            <Label Text="Find the place on the map to fill the address, or type it below."
+                   StyleClass="Body.Small"
+                   TextColor="{StaticResource OnSurfaceVariant}" />
+
+            <dxe:TextEdit Text="{Binding AddressLine1, Mode=TwoWay}"
+                          LabelText="Street address"
+                          MaxCharacterCount="100"
+                          HasError="{Binding AddressLine1HasError}"
+                          ErrorText="{Binding AddressLine1ErrorText}" />
+
+            <dxe:TextEdit Text="{Binding AddressLine2, Mode=TwoWay}"
+                          LabelText="Address line 2 (optional)"
+                          MaxCharacterCount="100"
+                          HasError="{Binding AddressLine2HasError}"
+                          ErrorText="{Binding AddressLine2ErrorText}" />
+
+            <dxe:TextEdit Text="{Binding City, Mode=TwoWay}"
+                          LabelText="City"
+                          MaxCharacterCount="80"
+                          HasError="{Binding CityHasError}"
+                          ErrorText="{Binding CityErrorText}" />
+
+            <dxe:TextEdit Text="{Binding Region, Mode=TwoWay}"
+                          LabelText="State / Province / Region"
+                          MaxCharacterCount="80"
+                          HasError="{Binding RegionHasError}"
+                          ErrorText="{Binding RegionErrorText}" />
+
+            <dxe:TextEdit Text="{Binding PostalCode, Mode=TwoWay}"
+                          LabelText="Postal code"
+                          MaxCharacterCount="20"
+                          HasError="{Binding PostalCodeHasError}"
+                          ErrorText="{Binding PostalCodeErrorText}" />
+
+            <dxe:TextEdit Text="{Binding Country, Mode=TwoWay}"
+                          LabelText="Country"
+                          MaxCharacterCount="60"
+                          HasError="{Binding CountryHasError}"
+                          ErrorText="{Binding CountryErrorText}" />
 
             <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
                 <dx:DXButton Content="Cancel"
