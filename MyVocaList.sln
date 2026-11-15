@@ -133,6 +133,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line\README.md
 		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3\README.md
 		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\README.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\README.md
+		Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\task-log.md = Docs\Management\BusinessFeatures\artists-songs\bugs\2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028\task-log.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-app-bar-in-selection-mode-songs-shows-title-plus-count-the-other-lists-only-the-count\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-app-bar-in-selection-mode-songs-shows-title-plus-count-the-other-lists-only-the-count\README.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-people-and-venues-list-rows-keep-an-empty-leading-slot-inset\README.md
 		Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-selection-checkbox-slot-trailing-when-it-is-the-only-control-leading-otherwise\README.md = Docs\Management\DevCycleCraft\crud-list-deduplication\changes\2026-11-12-crud-list-selection-checkbox-slot-trailing-when-it-is-the-only-control-leading-otherwise\README.md
@@ -1334,6 +1335,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "singer-self-registration", 
 		Docs\Management\cross-cutting\singer-self-registration\README.md = Docs\Management\cross-cutting\singer-self-registration\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "music-sourcing-strategy", "music-sourcing-strategy", "{FA1234BC-0001-4000-8000-0000000000D5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\README.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\README.md
+		Docs\Management\BusinessFeatures\music-sourcing-strategy\estrategia-gemini-2026-11-14.md = Docs\Management\BusinessFeatures\music-sourcing-strategy\estrategia-gemini-2026-11-14.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "social-features", "social-features", "{FA1234BC-0001-4000-8000-00000000005D}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\social-features\README.md = Docs\Management\cross-cutting\social-features\README.md
@@ -1627,6 +1634,7 @@ Global
 		{FA1234BC-0001-4000-8000-00000000005A} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005B} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005C} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D5} = {8AB01C9F-E0FD-49D5-AE2C-E27AD8C8F05D}
 		{FA1234BC-0001-4000-8000-00000000005D} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005E} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005F} = {FA1234BC-0001-4000-8000-000000000057}

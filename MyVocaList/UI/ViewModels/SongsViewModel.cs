@@ -1,14 +1,16 @@
 using MyVocaList.UI.Collections;
+using MyVocaList.UI.Services;
 
 namespace MyVocaList.UI.ViewModels;
 
 [QueryProperty(nameof(ArtistIdRaw), "artistId")]
 [QueryProperty(nameof(ArtistName), "artistName")]
-public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
+public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>, IQueryAttributable
 {
     private readonly ICatalogService _catalogService;
     private readonly ISongService _songService;
     private readonly ISnackbarComponent _snackbarService;
+    private readonly INavigationService _navigationService;
 
     [ObservableProperty] private int _artistId;
     [ObservableProperty] private string _artistName = string.Empty;
@@ -19,11 +21,13 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
         ICatalogService catalogService,
         ISongService songService,
         ISnackbarComponent snackbarService,
+        INavigationService navigationService,
         ILogger<SongsViewModel> logger) : base(logger)
     {
         _catalogService = catalogService;
         _songService = songService;
         _snackbarService = snackbarService;
+        _navigationService = navigationService;
 
         Songs = [];
         SelectedSongs = [];
@@ -32,7 +36,31 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
         AddToCatalogCommand = new AsyncRelayCommand(AddToCatalogAsync, () => IsCatalogMode);
         RemoveFromCatalogCommand = new AsyncRelayCommand<SongListItemDto>(RemoveFromCatalogAsync, _ => IsCatalogMode);
         LaunchYouTubeSearchCommand = new AsyncRelayCommand<SongListItemDto>(LaunchYouTubeSearchAsync);
-        GoBackCommand = new AsyncRelayCommand(() => Shell.Current.GoToAsync(".."));
+        GoBackCommand = new AsyncRelayCommand(() => _navigationService.PopAsync());
+    }
+
+    /// <summary>
+    /// Receives the artist context when the catalog is PUSHED (INavigationService.PushAsync), before the page appears,
+    /// so the first OnAppearing load already targets that artist.
+    /// </summary>
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.TryGetValue("artistId", out var id))
+            ArtistIdRaw = id?.ToString() ?? string.Empty;
+        if (query.TryGetValue("artistName", out var name))
+            ArtistName = name?.ToString() ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Catalog mode is a pushed sub-page: it shows a BACK arrow that pops back to the Artists list (device back does the same).
+    /// Global mode is a top-level flyout page and keeps the hamburger set by CrudListPageBase, so nothing changes here.
+    /// </summary>
+    public void ApplyAppBarNavigation()
+    {
+        if (!IsCatalogMode) return;
+
+        AppBarNavigationIcon = "arrow_back_outlined";
+        AppBarNavigationCommand = GoBackCommand;
     }
 
     public ObservableRangeCollection<SongListItemDto> Songs { get; }
@@ -70,7 +98,16 @@ public partial class SongsViewModel : CrudListViewModelBase<SongListItemDto>
         OnPropertyChanged(nameof(AppBarTitle));
         OnPropertyChanged(nameof(PrimaryFabCommand));
         AddToCatalogCommand.NotifyCanExecuteChanged();
+
+        // BUG-086: a Shell-cached page that receives a new artist context (query applied without OnAppearing)
+        // must reload. Before the first load, InitializeAsync (OnAppearing) performs that load instead.
+        if (!IsInitialLoading)
+            _ = ReloadAsync();
     }
+
+    // BUG-086 round 2: the Shell applies query values in URL order (artistId before artistName), so the title
+    // must be re-notified when the name arrives; otherwise the bound title keeps the previous artist's name.
+    partial void OnArtistNameChanged(string value) => OnPropertyChanged(nameof(AppBarTitle));
 
     protected override Task<(IEnumerable<SongListItemDto> items, int totalCount)> FetchPageAsync(
         int page, int pageSize, string query, CancellationToken ct)
