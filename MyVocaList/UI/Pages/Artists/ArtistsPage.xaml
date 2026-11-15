@@ -64,7 +64,7 @@
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <dx:DXButton Style="{StaticResource StandardIconButton}"
+                            <dx:DXButton x:DataType="{x:Null}" Style="{StaticResource StandardIconButton}"
                                          Icon="queue_music_outlined"
                                          SemanticProperties.Description="View catalog"
                                          Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
@@ -87,7 +87,7 @@
                     </lists:ListItem.LeadingContent>
                     <lists:ListItem.TrailingContent>
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <dx:DXButton Style="{StaticResource StandardIconButton}"
+                            <dx:DXButton x:DataType="{x:Null}" Style="{StaticResource StandardIconButton}"
                                          Icon="queue_music_outlined"
                                          SemanticProperties.Description="View catalog"
                                          Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"
