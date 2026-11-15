@@ -1,11 +1,12 @@
 ---
 id: show-deezer-artwork-as-list-item-icons-in-song-and-artist-search-results
 title: Show Deezer artwork as list-item icons in song and artist search results
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-11
 section: BusinessFeatures
 parent: artists-songs
 goal: "Deezer returns cover and artist pictures; show them as MD3 list-item leading or trailing images in title and artist searches and in the CRUD lists. Gate: evaluate first whether to store the image locally, store only the URL, or render another way."
+closed: 2026-11
 kind: change
 ---
 

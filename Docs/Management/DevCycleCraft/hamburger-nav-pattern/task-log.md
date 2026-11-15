@@ -47,14 +47,14 @@ Structural fix (icon assignment, command wiring, unconditional hamburger) verifi
 | REQ-HNAV-02′ | Tap opens the drawer | `_openDrawerCommand` | Emulator: tap at root and on pushed Singers → drawer shown |
 | REQ-HNAV-03 | Hardware back unchanged | untouched `OnBackButtonPressed` overrides | Emulator: device back on pushed Singers → pops to Venues; on root Venues → "Exit MyVocaList?" sheet; form → device back and on-screen back → Venues with one icon |
 | REQ-HNAV-04 | No hand-written animation | none added | Code review of the diff |
-| REQ-HNAV-05 | Songs catalog mode shows the back arrow in the native slot | `SyncNavigationBehavior` follows `SongsViewModel.ApplyAppBarNavigation` | **Not verified** — catalog mode exists only on `fix/bug-086-round3`; check after the branches meet |
+| REQ-HNAV-05 | Songs catalog mode shows the back arrow in the native slot | `SyncNavigationBehavior` follows `SongsViewModel.ApplyAppBarNavigation` | Emulator, after merging `develop` (BUG-086 merged) into the branch: Artists → "View catalog" → back arrow in the native slot, single toolbar button; tap pops to Artists |
 
 Level C (page lifecycle, `Shell.Current`) — no unit test, per `testing.md`.
 
 ### Verification evidence
 - `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android` → 0 errors (27 pre-existing NuGet/DX warnings).
 - `dotnet test` → 1652 passed, 0 failed.
-- Android emulator (dark theme), build installed from the worktree: all rows above except REQ-HNAV-05.
+- Android emulator (dark theme), build installed from the worktree: all rows above (REQ-HNAV-05 on the build that includes `develop` at `dd42b143`).
 - Not checked: light theme tint, delete-confirm sheet dismiss on device back, a physical device.
 - First attempt (XAML binding on `BackButtonBehavior`) failed on the emulator — dead back arrow; see the spec's "Rejected" note.
 
@@ -63,4 +63,4 @@ Level C (page lifecycle, `Shell.Current`) — no unit test, per `testing.md`.
 - [ ] Each list page from the menu: one hamburger, no back-arrow flash
 - [ ] Device back: pushed list pops; root Venues asks to exit; delete-confirm sheet dismisses first
 - [ ] Light theme: icon tint readable
-- [ ] After merge with BUG-086 round 3: Artists → catalog shows a back arrow that pops
+- [ ] Artists → catalog shows a back arrow that pops (emulator-checked by Claude 2026-11-15)
