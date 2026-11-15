@@ -681,3 +681,7 @@ Install the `develop` build, then:
 | REQ-ART-16 | `..._ExistingArtistByIdWithoutImage_FillsArtistImage`, `..._ExistingArtistByExactNameWithoutImage_FillsArtistImage`, `..._ExistingArtistWithImage_KeepsStoredArtistImage` |
 | REQ-ART-17 | `SaveFromFormAsync_EditMode_KeepsStoredImagesAndPersistsEdit` |
 | REQ-ART-18 | `SaveFromFormAsync_RefusedDuplicateSave_LeavesArtistImageNull` |
+
+## 2026-11-15 - T11 Device check (Done)
+
+Helder ran the device check on a physical device and reported it passed. No per-step notes were recorded.
