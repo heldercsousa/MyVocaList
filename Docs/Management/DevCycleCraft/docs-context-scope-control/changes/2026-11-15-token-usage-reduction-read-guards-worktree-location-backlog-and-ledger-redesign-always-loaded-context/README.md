@@ -28,7 +28,7 @@ The findings below this section are the original handover text, kept as recorded
 | B | One location, `.claude/worktrees/`; other locations are refused by `bash-guard.py`; `worktree.baseRef: head` | `54ea4336` |
 | C | Reminders use the JSON forms that are delivered; TDD inline reminder deleted | `766077cb` |
 | D (backlog) | Live rows are `Target, Feature, Status`; header is one paragraph. `BACKLOG.md` 35.2 KB to 8.3 KB | `c80dda4d` |
-| E (settings) | WORKFLOW GATE regex narrowed; dead `PostCompact` echo replaced by a `SessionStart` `compact` line; 3 Artifact skills off (the tool is denied here) | this commit |
+| E (settings) | WORKFLOW GATE regex narrowed; dead `PostCompact` echo replaced by a `SessionStart` `compact` line; 3 Artifact skills off (the tool is denied here) | `b577259d` |
 
 ### Helder's direction for D and E (2026-11-15, during the session)
 
