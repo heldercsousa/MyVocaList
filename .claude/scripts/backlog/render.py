@@ -28,6 +28,11 @@ ARCHIVE_SECTIONS = tuple(section for section, _region in ARCHIVE_REGIONS)
 
 TABLE_HEAD_BUSINESS = "| Target | Feature | Status | Notes |\n|--------|---------|--------|-------|"
 TABLE_HEAD_CRAFT = "| Target | Activity | Status | Notes |\n|--------|----------|--------|-------|"
+# Live BACKLOG tables are slim (2026-11-15): Target | Label | Status. Goal, gate and the folder
+# pointer stay in each item's README frontmatter; `backlog_gen.py query` prints the pointer.
+# Archive tables keep the Notes column: they are the grep target for past BUG-NNN lookups.
+TABLE_HEAD_BUSINESS_SLIM = "| Target | Feature | Status |\n|--------|---------|--------|"
+TABLE_HEAD_CRAFT_SLIM = "| Target | Activity | Status |\n|--------|----------|--------|"
 TABLE_HEAD_ARCHIVE = "| Target | Feature/Item | Status | Notes |\n|--------|--------------|--------|-------|"
 
 
@@ -35,14 +40,21 @@ class RenderError(Exception):
     """Raised when a required generated fence is missing."""
 
 
-def render_row(item, archived=False, parent_title=None):
-    """One markdown table row. Archived rows drop depth arrows (design section 3)."""
+def render_row(item, archived=False, parent_title=None, slim=False):
+    """One markdown table row. Archived rows drop depth arrows (design section 3).
+
+    `slim` (live BACKLOG only) drops the Notes cell: Target | Label | Status.
+    """
     # Separator artifacts (REQ-SEV-17). Column order is Target | Label | Status
     # | Notes -- the milestone's marker belongs in the Status cell, matching
     # the frozen fixture's `| 2026-06 | | 🏁 **MVP release** | |`.
     if item.kind == "milestone":
+        if slim:
+            return "| {0} | | {1} |".format(item.target, item.status_label())
         return "| {0} | | {1} | |".format(item.target, item.status_label())
     if item.kind == "group":
+        if slim:
+            return "| {0} | **{1}** | — |".format(item.target, item.title)
         return "| {0} | **{1}** | — | {2} |".format(item.target, item.title, item.goal or "")
 
     if archived:
@@ -56,6 +68,9 @@ def render_row(item, archived=False, parent_title=None):
         label = "{0} {1}".format(ARROW * item.depth, item.title)
     else:
         label = item.title
+
+    if slim and not archived:
+        return "| {0} | {1} | {2} |".format(item.target, label, item.status)
 
     notes = "Goal: {0}".format(item.goal)
     if item.gate:
@@ -72,13 +87,13 @@ def render_row(item, archived=False, parent_title=None):
     return "| {0} | {1} | {2} | {3} |".format(item.target, label, status_cell, notes)
 
 
-def render_table(items, head=TABLE_HEAD_BUSINESS, archived=False, titles_by_id=None):
+def render_table(items, head=TABLE_HEAD_BUSINESS, archived=False, titles_by_id=None, slim=False):
     """Ordered rows under a table header."""
     titles_by_id = titles_by_id or {}
     rows = [head]
     for it in order_items(items):
         parent_title = titles_by_id.get(it.parent) if archived else None
-        rows.append(render_row(it, archived=archived, parent_title=parent_title))
+        rows.append(render_row(it, archived=archived, parent_title=parent_title, slim=slim))
     return "\n".join(rows)
 
 
@@ -102,8 +117,9 @@ def render_backlog(existing_text, items):
     craft = [i for i in active if _section_of(i, items) == "DevCycleCraft"]
 
     out = splice(existing_text, "business-features",
-                 render_table(business, TABLE_HEAD_BUSINESS))
-    out = splice(out, "dev-cycle-craft", render_table(craft, TABLE_HEAD_CRAFT))
+                 render_table(business, TABLE_HEAD_BUSINESS_SLIM, slim=True))
+    out = splice(out, "dev-cycle-craft",
+                 render_table(craft, TABLE_HEAD_CRAFT_SLIM, slim=True))
     return out
 
 

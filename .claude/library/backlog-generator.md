@@ -29,6 +29,28 @@ overwritten on the next regeneration, not merge-conflicted.
 | Refresh the rendered file | `backlog_gen.py regen` (`--check` = verify only, writes nothing) |
 | Find the active work set | `backlog_gen.py query --status "🟡,🟢"` |
 
+## Row and frontmatter rules
+
+Moved here from the `BACKLOG.md` header on 2026-11-15.
+
+- **Live rows are slim:** `| Target | Feature | Status |`. Goal, gate and the folder pointer are not rendered; they stay in the item `README.md` frontmatter and `query` prints the pointer. **Target** is the registration date (or the originally targeted month), never reinterpreted.
+- **`goal:` and `gate:` stay short** (together at most 3 sentences, about 50 words): what the item delivers in business terms, and the single thing holding it (owner + what).
+- **Banned from frontmatter text:** commit hashes, file paths, root-cause narrative, review verdicts, test counts, step trails, AC numbers. Branch and phase tracking belongs to `LEDGER.md`; execution history to the item's `task-log.md`.
+- **Archive rotation:** an item reaching `✅ Done` / `✅ Fixed` / superseded-closed moves to `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-YYYY-MM.md`, keyed by its `closed:` month. A Done sub-row archives independently of a still-active parent. Archive rows keep the Notes cell (Goal, Gate, Pointer).
+- **Lookups:** past `BUG-NNN` and feature history live in `backlog-archive/`; grep those files too.
+- **Fences:** the `<!-- BACKLOG:GENERATED:BEGIN/END -->` comment lines are the generator's markers. Removing one makes `regen` fail.
+
+| Status | Meaning |
+|--------|---------|
+| `💡 Pending` | Captured, not yet evaluated |
+| `📋 Spec` | Approved, spec being written |
+| `🗺️ Plan` | Spec approved, plan being written |
+| `🟢 Ready` | Plan approved, dispatchable |
+| `🟡 In Progress` | Implementation underway |
+| `🔵 Deferred` | Paused, reason documented |
+| `🔴 Blocked` | Cannot proceed, dependency named |
+| `✅ Done` | Shipped; the row moves to `backlog-archive/` |
+
 A pre-commit gate runs `regen --check` on any commit touching a `Docs/Management/**/README.md`,
 `BACKLOG.md`, or an archive file, and blocks the commit if the rendered files are stale.
 
