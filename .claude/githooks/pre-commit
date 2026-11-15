@@ -131,8 +131,9 @@ if printf '%s
   echo "pre-commit: task-log.md staged — checking the 300-line cap..."
   if ! python .claude/scripts/tasklog-size-guard.py --check; then
     echo ""
-    echo "pre-commit: BLOCKED — a staged task-log.md is over 300 lines. Rotate its"
-    echo "            closed entries to task-log-archive-YYYY-MM.md in the same folder."
+    echo "pre-commit: BLOCKED — a staged task-log.md is over 300 lines and has closed"
+    echo "            entries. Run: python .claude/scripts/tasklog_rotate.py <that file>"
+    echo "            (moves only closed entries; open ones stay), then stage and retry."
     echo "            To commit anyway: git commit --no-verify"
     exit 1
   fi
