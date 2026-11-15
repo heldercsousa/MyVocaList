@@ -23,11 +23,47 @@ public abstract class CrudListPageBase : ContentPage
         => (long)((System.Diagnostics.Stopwatch.GetTimestamp() - startTimestamp)
             * 1000.0 / System.Diagnostics.Stopwatch.Frequency);
 
+    // The leading icon (hamburger, or a back arrow on a pushed sub-page) is drawn in Shell's native
+    // navigation slot — the one form pages use for their back arrow — not by SmallAppBar. With a
+    // Command set, Shell shows IconOverride there at any stack depth; hardware back still reaches
+    // OnBackButtonPressed. Kept in code: a XAML binding on BackButtonBehavior did not refresh.
+    private readonly BackButtonBehavior _navigationBehavior = new();
+    private readonly Command _openDrawerCommand = new(() => Shell.Current.FlyoutIsPresented = true);
+
     protected void AttachViewModel()
-        => ListViewModel.PropertyChanged += OnViewModelPropertyChanged;
+    {
+        ListViewModel.PropertyChanged += OnViewModelPropertyChanged;
+
+        // Before the first frame, or a pushed page flashes Shell's default back arrow.
+        ApplyHamburgerNavigation();
+        SyncNavigationBehavior();
+        Shell.SetBackButtonBehavior(this, _navigationBehavior);
+    }
+
+    /// <summary>Gives the ViewModel the hamburger icon and the open-drawer command.</summary>
+    private void ApplyHamburgerNavigation()
+    {
+        // CRUD list pages are top-level menu destinations (see hamburger-nav-pattern/design.md
+        // § Classification principle) → the hamburger. A list shown as a pushed sub-page overrides
+        // both properties after base.OnNavigatedTo (see SongsViewModel.ApplyAppBarNavigation).
+        ListViewModel.AppBarNavigationIcon = "menu_outlined";
+        ListViewModel.AppBarNavigationCommand = _openDrawerCommand;
+    }
+
+    /// <summary>Copies the ViewModel's navigation icon and command to the Shell-native navigation slot.</summary>
+    private void SyncNavigationBehavior()
+    {
+        _navigationBehavior.IconOverride = string.IsNullOrEmpty(ListViewModel.AppBarNavigationIcon)
+            ? null
+            : ImageSource.FromFile(ListViewModel.AppBarNavigationIcon);
+        _navigationBehavior.Command = ListViewModel.AppBarNavigationCommand;
+    }
 
     private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
+        if (e.PropertyName is nameof(ICrudListViewModel.AppBarNavigationIcon)
+            or nameof(ICrudListViewModel.AppBarNavigationCommand))
+            SyncNavigationBehavior();
     }
 
     protected override void OnAppearing()
@@ -54,16 +90,7 @@ public abstract class CrudListPageBase : ContentPage
         Serilog.Log.ForContext("SourceContext", GetType().Name)
             .Information("[PageLoad] {Page} navigatedTo={Ms}ms (ctor→OnNavigatedTo)", GetType().Name, navigatedMs);
 
-        if (ListViewModel is ICrudListViewModel vm)
-        {
-            // CRUD list pages are exclusively top-level menu destinations (see
-            // hamburger-nav-pattern/design.md § Classification principle) → always the hamburger.
-            // If a future feature ever pushes a CRUD list as a non-top-level sub-page, replace this
-            // with an explicit "is my route in the top-level menu set?" check (design.md § Assumption).
-            vm.AppBarNavigationIcon = "menu_outlined";
-            vm.AppBarNavigationCommand = new Command(
-                () => Shell.Current.FlyoutIsPresented = true);
-        }
+        ApplyHamburgerNavigation();
     }
 
     protected override bool OnBackButtonPressed()
