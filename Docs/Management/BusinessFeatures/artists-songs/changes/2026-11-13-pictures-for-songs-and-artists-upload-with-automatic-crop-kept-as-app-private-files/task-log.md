@@ -247,6 +247,8 @@ Test classes: IRR `ImageReferenceRulesTests`, IST `ImageStoreTests`, IMS `ImageM
 
 ## Device check (T10, Helder)
 
+**Result (2026-11-15):** Helder reported the form-picture work ready and asked to close it (T10). No per-step notes were recorded.
+
 Nothing in this change was run on a device.
 
 **Pictures (both forms)**
