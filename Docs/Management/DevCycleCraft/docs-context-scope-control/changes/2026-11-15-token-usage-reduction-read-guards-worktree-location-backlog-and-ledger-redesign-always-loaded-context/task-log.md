@@ -6,7 +6,7 @@ Plan: `plan.md` (approved by Helder 2026-11-15; workstreams A, B, C now; D and E
 
 - **Updated:** 2026-11-15
 - **Branch / worktree:** develop / main tree (hooks and docs only)
-- **Step:** Steps 1 to 4 done (A, B, C); D and E next
+- **Step:** A, B, C done; D and E done in part. Next: discuss the "Pending Helder" list in `README.md`
 - **Context manifest:** `plan.md` · `README.md` (this item) · `.claude/settings.json` · `.claude/scripts/backlog/render.py` · `CLAUDE.md`
 
 ## Steps 2 + 3 — B, A1, A4: one worktree location, worktree-aware guard, Bash notice
@@ -94,3 +94,21 @@ So every reminder listed in workstream C was invisible to the model, and so is t
 - `python -m unittest test_read_budget`: 12 tests, OK.
 - Live: `Read Docs/Management/BACKLOG.md` with no limit was denied with the query hint (144 lines, 35.2 KB).
 - Piped payloads: `BACKLOG.md` with `offset 1, limit 30` allowed; garbage stdin allowed (fail-open).
+
+## Step 5 — D (backlog) and E (settings), partial
+
+**Status:** Done for the parts listed (2026-11-15); the rest is "Pending Helder" in `README.md`.
+
+### Changed files
+
+- `.claude/scripts/backlog/render.py`, `.claude/scripts/backlog/tests/test_render.py`: slim live rows (3 new tests)
+- `Docs/Management/BACKLOG.md`: regenerated; header reduced
+- `.claude/library/backlog-generator.md`: row and frontmatter rules, status table
+- `.claude/settings.json`: `UserPromptSubmit` regex; `PostCompact` removed, `SessionStart` `compact` added, health check list updated; `artifact-*` skills off
+- `.claude/library/workflow-hooks-invariant.md`: two rows
+
+### Verification evidence
+
+- Generator tests: 183 OK. `backlog_gen.py regen --check`: clean. `BACKLOG.md`: 35,182 to 8,322 bytes.
+- Each changed hook command was run under Git Bash: health check prints OK; the compact line prints; the prompt gate fires for "implement task 3", "resume SFT", "start the next wave", "start a task" and stays silent for "continue", "fix the typo and add a note", "what does this code do?", "let us start".
+- Not checked live: the `SessionStart` `compact` hook (it needs a real compaction) and the `artifact-*` overrides (they need a fresh process).

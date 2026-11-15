@@ -69,7 +69,10 @@
     "schedule": "user-invocable-only",
     "init": "user-invocable-only",
     "keybindings-help": "user-invocable-only",
-    "fewer-permission-prompts": "user-invocable-only"
+    "fewer-permission-prompts": "user-invocable-only",
+    "artifact-design": "off",
+    "artifact-diagramming": "off",
+    "artifact-capabilities": "off"
   },
   "hooks": {
     "TaskCreated": [
@@ -219,7 +222,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import os,json; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); settings=os.path.join(proj,'.claude','settings.json'); data=json.load(open(settings,encoding='utf-8')); hooks=data.get('hooks',{}); expected=['TaskCreated','PreToolUse','PostToolUse','PostCompact','Stop','SessionStart','UserPromptSubmit']; missing=[h for h in expected if h not in hooks]; print('HOOK HEALTH OK — all expected hooks present.') if not missing else print('HOOK HEALTH WARNING — missing hooks: '+', '.join(missing)+'. Review .claude/settings.json before proceeding.')\" 2>/dev/null || echo 'HOOK HEALTH CHECK — could not verify hooks (settings.json unreadable or Python unavailable).'"
+            "command": "python -c \"import os,json; proj=os.environ.get('CLAUDE_PROJECT_DIR','.'); settings=os.path.join(proj,'.claude','settings.json'); data=json.load(open(settings,encoding='utf-8')); hooks=data.get('hooks',{}); expected=['TaskCreated','PreToolUse','PostToolUse','Stop','SessionStart','UserPromptSubmit']; missing=[h for h in expected if h not in hooks]; print('HOOK HEALTH OK — all expected hooks present.') if not missing else print('HOOK HEALTH WARNING — missing hooks: '+', '.join(missing)+'. Review .claude/settings.json before proceeding.')\" 2>/dev/null || echo 'HOOK HEALTH CHECK — could not verify hooks (settings.json unreadable or Python unavailable).'"
           },
           {
             "type": "command",
@@ -234,14 +237,13 @@
             "command": "python \"$CLAUDE_PROJECT_DIR/.claude/scripts/backlog/session_marker.py\" 2>/dev/null || true"
           }
         ]
-      }
-    ],
-    "PostCompact": [
+      },
       {
+        "matcher": "compact",
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'CONTEXT RESTORED — Re-read CLAUDE.md Constitutional Constraints and the active feature spec (Docs/Management/[BusinessFeatures|DevCycleCraft]/<feature>/design.md + requirements.md) before continuing; compaction discards loaded spec context. Workflow: workflow.md Rule 2 (subagent + worktree flow, read lane, ITF lane); after each task /sln-review then /sln-commit.'"
+            "command": "echo 'AFTER COMPACTION: before continuing, re-read the active item task-log Checkpoint block and only its manifest files; re-read its design.md and requirements.md before any code or dispatch.'"
           }
         ]
       }
@@ -277,7 +279,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import json,sys,re; d=json.load(sys.stdin); p=d.get('prompt',''); matched=re.search(r'\\\\b(implement|build|write|create|code|add|fix|update|resume|continue|start|finish|complete|go ahead)\\\\b', p, re.I); matched and print('{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"WORKFLOW GATE: read the feature design.md + requirements.md before code; feature work is subagent-driven in a worktree (CLAUDE.md Roles, workflow.md Rule 2); /sln-commit after each task.\\\"}}')\" 2>/dev/null || true"
+            "command": "python -c \"import json,sys,re; d=json.load(sys.stdin); p=d.get('prompt',''); matched=re.search(r'\\\\b(implement|dispatch|resume)\\\\b|\\\\bstart (the |a )?(next )?(task|feature|wave|coding)\\\\b', p, re.I); matched and print('{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"WORKFLOW GATE: read the feature design.md + requirements.md before code; feature work is subagent-driven in a worktree (CLAUDE.md Roles, workflow.md Rule 2); /sln-commit after each task.\\\"}}')\" 2>/dev/null || true"
           }
         ]
       }

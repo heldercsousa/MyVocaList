@@ -17,6 +17,8 @@ The hooks in `.claude/settings.json` enforce specific rules from this document.
 | `PreToolUse` `Write\|Edit` (`delegate-reminder.py`) | Main agent edits a code file with no ITF declaration | Rule 2 — ITF or dispatch. Silent for subagents |
 | `PostToolUse` (`worktree-base-check.py`) | Worktree created | Rule 2 — reports only a branch forked from `main` |
 | `SessionStart` hook | New session begins | Hook health verification |
+| `SessionStart` hook, matcher `compact` | After a compaction | One line: re-read the task-log Checkpoint and the active spec. Replaced the `PostCompact` echo on 2026-11-15 (that event's output reaches nobody) |
+| `UserPromptSubmit` hook | Prompt names implementation work (`implement`, `dispatch`, `resume`, `start the task/feature/wave`) | WORKFLOW GATE line (Rule 1, Rule 2). Narrowed on 2026-11-15; it used to fire on `add`, `fix`, `update`, `write`, `continue` |
 | `pre-commit` (`process_checks.py`) | Staged `Docs/`, `MyVocaList.sln` or `.xaml` | `.sln` registration incl. moves/deletes; `SafeAreaEdges="Container"` (or `"All"` on pages with text input) on ContentPages; `To Review` task-log entries need `### Changed files` |
 | `commit-msg` (`process_checks.py`) | Every commit | `feat:`/`refactor:`/`perf:`/`amend:` need an `Item: <backlog-id>` trailer naming a registered item; docs/chore/merge/fix exempt |
 | `pre-commit` (`ledger-row-guard.py`) | Staged `LEDGER.md` | Ledger row length (max 450 chars) |
