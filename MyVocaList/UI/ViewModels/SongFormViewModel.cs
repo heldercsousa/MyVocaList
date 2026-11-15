@@ -4,6 +4,7 @@ using MyVocaList.Contracts.Messages;
 using MyVocaList.Domain.Constants;
 using MyVocaList.Domain.ReadModels;
 using MyVocaList.Domain.Resolution;
+using MyVocaList.Domain.Rules;
 using MyVocaList.UI.Collections;
 using MyVocaList.UI.Constants;
 using MyVocaList.UI.Models;
@@ -25,6 +26,9 @@ public partial class SongFormViewModel : ViewModelBase
     private readonly IMessenger _messenger;
     private readonly INavigationService _navigationService;
     private readonly ISongSuggestionService _songSuggestions;
+    private readonly IImageStore _imageStore;
+    private readonly IPhotoPicker _photoPicker;
+    private readonly ISongLyricsService _songLyricsService;
     private int _searchGeneration; // BUG-051: generation counter — guards SearchArtistsAsync against stale completions
 
     // ── Query properties ──────────────────────────────────────────────────
@@ -66,6 +70,11 @@ public partial class SongFormViewModel : ViewModelBase
 
     // ── Lyrics ────────────────────────────────────────────────────────────
     [ObservableProperty] private string? _lyrics;
+    [ObservableProperty] private bool _isLyricsLoading;
+    /// <summary>The running lyrics lookup; tests await it. The pick itself never awaits it (design § 2.5).</summary>
+    public Task LyricsLookupTask { get; private set; } = Task.CompletedTask;
+    /// <summary>REQ-LYR-09: the Lyrics placeholder while a lookup runs.</summary>
+    public string LyricsPlaceholder => IsLyricsLoading ? "Looking for lyrics…" : "Song lyrics (optional)";
 
     // ── YouTube URLs ──────────────────────────────────────────────────────
     [ObservableProperty] private ObservableRangeCollection<SongKaraokeUrlDto> _karaokeUrls = [];
@@ -94,6 +103,49 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isTitleLocked;
 
     private string? _pickFilledVersion;   // Version written by the last remote pick (Q21)
+    private CancellationTokenSource? _lyricsLookupCts;   // REQ-LYR-10: the running lyrics lookup, if any
+    private string? _pickFilledLyrics;                   // REQ-LYR-11/12: the Lyrics text the last lookup wrote
+    private string? _pendingImageUrl;        // REQ-ART-11: Deezer cover held between a pick and Save
+    private string? _pendingArtistImageUrl;  // REQ-ART-11: Deezer artist picture held between a pick and Save
+    private const string SongPlaceholderIcon = "music_note_outlined";
+    private const string ArtistPlaceholderIcon = "account_circle_outlined";
+    private const string LibrarySourceText = "Library";
+    private const string DeezerSourceText = "Deezer";
+
+    // ── Form picture (REQ-PIC-17..22) ─────────────────────────────────────
+    private const string ImageHint = "Square picture (1:1), 512 x 512 px or larger. Other shapes are cropped to the centre.";
+    private const string ImagePickFailedMessage = "Could not use this picture.";
+
+    private string? _uploadedImageReference;   // REQ-PIC-18 (1): the picture uploaded in this form
+    private string? _storedImageReference;     // REQ-PIC-18 (2), edit mode: the song's stored picture
+    private bool _imageRemoved;                // REQ-PIC-20: "Remove picture" until a later pick or upload
+
+    [ObservableProperty] private bool _isImageBusy;
+    [ObservableProperty] private bool _isTitleEditing;    // TwoWay with the Title TapToEditField (REQ-PIC-25/26)
+    [ObservableProperty] private bool _isArtistEditing;   // TwoWay with the Artist TapToEditField (REQ-PIC-25/26)
+
+    // REQ-PIC-27/28: what the last Deezer pick wrote, so a release by a tap keeps a pending value only while
+    // the text is unchanged. Exact (ordinal) comparisons that choose which pending value Save sends; they are
+    // not search or de-duplication.
+    private string? _pickedTitle;
+    private string? _pickedArtistName;
+    private bool _isClearingArtist;   // ClearArtist unlocks the field itself: not a release by a tap
+
+    /// <summary>The form picture's reference (REQ-PIC-18, 20): upload, else stored (edit) or pending Deezer cover (add).</summary>
+    private string? FormImageReference =>
+        _imageRemoved ? null : _uploadedImageReference ?? (IsEditMode ? _storedImageReference : _pendingImageUrl);
+
+    /// <summary>Display source of the form picture, large size (REQ-PIC-13); null shows the placeholder.</summary>
+    public string? FormImageSource => _imageStore.ResolveDisplaySource(FormImageReference, ImageSize.Large);
+
+    /// <summary>Display source of the form picture, thumbnail size, drawn under the large one.</summary>
+    public string? FormImageThumbnailSource => _imageStore.ResolveDisplaySource(FormImageReference, ImageSize.Thumbnail);
+
+    /// <summary>True when the form has a picture (REQ-PIC-15/16 switch the buttons and the hint).</summary>
+    public bool HasFormImage => FormImageReference is not null;
+
+    /// <summary>REQ-PIC-16: the size hint shown while there is no form picture.</summary>
+    public string ImageHintText => ImageHint;
 
     // ── Save-outcome sheets (Task 5.3, REQ-SFT-19, REQ-SFT-22/23) ─────────
     private const string ExactDuplicateSheetTitle = "This looks like an existing song";
@@ -140,9 +192,13 @@ public partial class SongFormViewModel : ViewModelBase
         ISecureStorageWrapper secureStorage,
         IMessenger messenger,
         INavigationService navigationService,
-        ISongSuggestionService songSuggestions)
+        ISongSuggestionService songSuggestions,
+        IImageStore imageStore,
+        IPhotoPicker photoPicker,
+        ISongLyricsService songLyricsService)
     {
         _artistService = artistService;
+        _songLyricsService = songLyricsService;
         _songService = songService;
         _snackbarService = snackbarService;
         _logger = logger;
@@ -151,6 +207,8 @@ public partial class SongFormViewModel : ViewModelBase
         _messenger = messenger;
         _navigationService = navigationService;
         _songSuggestions = songSuggestions;
+        _imageStore = imageStore;
+        _photoPicker = photoPicker;
 
         TitleOptionSource = new MenuOptionSource(SearchTitleAsync);
         ArtistOptionSource = new MenuOptionSource(SearchArtistOptionsAsync);
@@ -261,6 +319,7 @@ public partial class SongFormViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(IsTitleSearchEnabled));
         OnPropertyChanged(nameof(PageTitle));
+        NotifyFormImageChanged();   // REQ-PIC-18: the mode decides the second source of the form picture
         if (value.HasValue)
             _ = LoadSongForEditAsync(value.Value);
     }
@@ -339,7 +398,7 @@ public partial class SongFormViewModel : ViewModelBase
         var gen = Interlocked.Increment(ref _searchGeneration); // BUG-051: guards against a slower earlier query clobbering a newer one
         var results = await _artistService.SearchArtistsByNameAsync(term, maxResults: 5);
         var mapped = results
-            .Select(a => new AutocompleteSuggestion(a.Name, a.CatalogCountText, a))
+            .Select(ToArtistOption)
             .ToList();
         // Only the latest query updates the shared observable state; the provider for THIS query
         // still receives its own results below (DX cancels stale provider requests via its token).
@@ -348,10 +407,35 @@ public partial class SongFormViewModel : ViewModelBase
         return mapped;
     }
 
+    /// <summary>REQ-ART-09/10: a leading avatar, the real catalog count, no trailing text. REQ-PIC-39: thumbnail source.</summary>
+    private AutocompleteSuggestion ToArtistOption(ArtistListItem artist) =>
+        new(artist.Name, artist.CatalogCountText, artist)
+        {
+            LeadingKind = AutocompleteLeadingKind.Avatar,
+            ImageUrl = _imageStore.ResolveDisplaySource(artist.ImageUrl, ImageSize.Thumbnail),
+            PlaceholderIcon = ArtistPlaceholderIcon
+        };
+
     private void SelectArtist(AutocompleteSuggestion suggestion)
     {
         if (suggestion?.Data is not ArtistListItem artist) return;
         LockArtist(artist.Id, artist.Name);
+    }
+
+    /// <summary>
+    /// REQ-PIC-28/31: the Artist's tap-to-edit wrapper releases a picked artist by setting
+    /// <see cref="IsArtistLocked"/> to false and keeping the text. The local id is dropped so Save sends
+    /// the text and the Service resolves it (exact match → same artist, near duplicates → sheet, else
+    /// create). Not a release: hydration (it only ever locks) and <see cref="ClearArtist"/> (X), which
+    /// resets the selection itself. A later pick locks again through <see cref="LockArtist"/>.
+    /// </summary>
+    partial void OnIsArtistLockedChanged(bool value)
+    {
+        if (value || _isHydrating || _isClearingArtist)
+            return;
+
+        SelectedArtistId = 0;
+        SelectedArtistName = null;
     }
 
     /// <summary>
@@ -402,16 +486,31 @@ public partial class SongFormViewModel : ViewModelBase
     [RelayCommand]
     private void ClearArtist()
     {
+        CancelLyricsLookup();            // REQ-LYR-10
+        DropUntouchedPickFilledLyrics(); // REQ-LYR-11
         SelectedArtistId = null;
         SelectedArtistName = null;
         ArtistSearchText = string.Empty;
         IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic clear
-        IsArtistLocked = false;
+        _isClearingArtist = true;     // REQ-PIC-28: this unlock is X, not a release by a tap
+        try
+        {
+            IsArtistLocked = false;
+        }
+        finally
+        {
+            _isClearingArtist = false;
+        }
         ArtistSuggestions = [];
         ArtistHasError = false;
         ArtistErrorText = string.Empty;
         SelectedExternalId = string.Empty;   // REQ-SFT-14: the pending identity belongs to the pair
         SelectedProvider = string.Empty;
+        _pendingImageUrl = null;             // REQ-ART-13: X on Artist drops both pending images
+        _pendingArtistImageUrl = null;
+        _pickedTitle = null;
+        _pickedArtistName = null;
+        NotifyFormImageChanged();            // REQ-PIC-19: an upload stays the form picture
     }
 
     // ── Title-first search and picks (Task 5.2) ───────────────────────────
@@ -441,13 +540,26 @@ public partial class SongFormViewModel : ViewModelBase
         return local.Concat(remote.Promoted).Concat(remote.Remote).Select(ToTitleOption).ToList();
     }
 
-    private static AutocompleteSuggestion ToTitleOption(SongSuggestionDto dto)
+    private AutocompleteSuggestion ToTitleOption(SongSuggestionDto dto)
     {
-        var parts = new List<string> { dto.ArtistName };
-        if (!string.IsNullOrEmpty(dto.Version))
+        // REQ-ART-07: artist · version · album; album only on Deezer rows, never when it repeats the title.
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(dto.ArtistName))
+            parts.Add(dto.ArtistName);
+        if (!string.IsNullOrWhiteSpace(dto.Version))
             parts.Add(dto.Version);
-        parts.Add(dto.IsRemote ? "Deezer" : "In your library");
-        return new AutocompleteSuggestion(dto.Title, string.Join(" · ", parts), dto);
+        if (dto.IsRemote
+            && !string.IsNullOrWhiteSpace(dto.AlbumTitle)
+            && !string.Equals(dto.AlbumTitle, dto.Title, StringComparison.OrdinalIgnoreCase))
+            parts.Add(dto.AlbumTitle);
+
+        return new AutocompleteSuggestion(dto.Title, string.Join(" · ", parts), dto)
+        {
+            LeadingKind = AutocompleteLeadingKind.Image,
+            ImageUrl = _imageStore.ResolveDisplaySource(dto.RowImageUrl, ImageSize.Thumbnail),   // REQ-PIC-39
+            PlaceholderIcon = SongPlaceholderIcon,
+            TrailingText = dto.IsRemote ? DeezerSourceText : LibrarySourceText   // REQ-ART-08
+        };
     }
 
     [RelayCommand]
@@ -474,21 +586,105 @@ public partial class SongFormViewModel : ViewModelBase
         _pickFilledVersion = dto.Version;
         SelectedExternalId = dto.ExternalId ?? string.Empty;
         SelectedProvider = dto.ExternalProvider ?? string.Empty;
+        _pendingImageUrl = dto.ImageUrl;             // REQ-ART-11: the cover, not the row-image fallback
+        _pendingArtistImageUrl = dto.ArtistImageUrl;
+        _imageRemoved = false;                       // REQ-PIC-20: a later pick sets a picture again
+        _pickedTitle = dto.Title;                    // REQ-PIC-27: the identity survives an unchanged Title
+        NotifyFormImageChanged();                    // REQ-PIC-19: an upload stays first
+        StartLyricsLookup(dto);                      // REQ-LYR-01: before the artist branch, so every pick starts it
 
         if (dto.LocalArtistId.HasValue)
         {
             LockArtist(dto.LocalArtistId.Value, dto.LocalArtistName ?? dto.ArtistName);
+            _pickedArtistName = ArtistSearchText;    // REQ-PIC-28
             return;
         }
 
         SelectedArtistId = null;   // REQ-SFT-13: the artist is created on Save
         SelectedArtistName = null;
         ArtistSearchText = dto.ArtistName;
+        _pickedArtistName = ArtistSearchText;        // REQ-PIC-28
         IsArtistDropDownOpen = false;
         IsArtistLocked = true;
         ArtistSuggestions = [];
         ArtistHasError = false;
         ArtistErrorText = string.Empty;
+    }
+
+    // ── Lyrics lookup on a Deezer pick (REQ-LYR-01…04, 09…13) ───────────
+
+    partial void OnIsLyricsLoadingChanged(bool value) => OnPropertyChanged(nameof(LyricsPlaceholder));
+
+    /// <summary>
+    /// Starts the lyrics lookup for a Deezer pick. Cancels a running lookup first; drops pick-filled lyrics
+    /// the user did not touch (a new pick replaces them, REQ-LYR-12); starts nothing when Lyrics holds text
+    /// (REQ-LYR-04). The pick does not await the lookup.
+    /// </summary>
+    private void StartLyricsLookup(SongSuggestionDto dto)
+    {
+        CancelLyricsLookup();
+        DropUntouchedPickFilledLyrics();
+        if (!string.IsNullOrWhiteSpace(Lyrics))
+            return;
+
+        var cts = new CancellationTokenSource();
+        _lyricsLookupCts = cts;
+        IsLyricsLoading = true;
+        LyricsLookupTask = RunLyricsLookupAsync(
+            new LyricsQuery(dto.Title, dto.ArtistName, dto.AlbumTitle, dto.DurationSeconds), cts);
+    }
+
+    /// <summary>
+    /// Awaits the lookup and hands its answer to the UI thread. A cancelled lookup is the expected outcome of
+    /// REQ-LYR-10 and is swallowed; the service never throws any other exception for a lookup.
+    /// </summary>
+    private async Task RunLyricsLookupAsync(LyricsQuery query, CancellationTokenSource cts)
+    {
+        string? found;
+        try
+        {
+            found = await _songLyricsService.FindLyricsAsync(query, cts.Token);
+        }
+        catch (OperationCanceledException) when (cts.IsCancellationRequested)
+        {
+            return;
+        }
+
+        RunOnUiThread(() => ApplyLyricsAnswer(cts, found));
+    }
+
+    /// <summary>
+    /// Writes a lookup answer into the form only while that lookup is still the current one (REQ-LYR-10):
+    /// a stale answer touches nothing, so a newer pick keeps its hint.
+    /// </summary>
+    private void ApplyLyricsAnswer(CancellationTokenSource cts, string? found)
+    {
+        if (!ReferenceEquals(_lyricsLookupCts, cts) || cts.IsCancellationRequested)
+            return;
+
+        IsLyricsLoading = false;
+        if (found is not null && string.IsNullOrWhiteSpace(Lyrics))
+        {
+            Lyrics = found;
+            _pickFilledLyrics = found;   // REQ-LYR-11/12: remembered so X or a new pick can take it back
+        }
+    }
+
+    /// <summary>Cancels the running lyrics lookup, drops its token and clears the hint (REQ-LYR-10).</summary>
+    private void CancelLyricsLookup()
+    {
+        _lyricsLookupCts?.Cancel();
+        _lyricsLookupCts?.Dispose();
+        _lyricsLookupCts = null;
+        IsLyricsLoading = false;
+    }
+
+    /// <summary>REQ-LYR-11/12: removes pick-filled lyrics only while the field still equals them (exact comparison).</summary>
+    private void DropUntouchedPickFilledLyrics()
+    {
+        if (_pickFilledLyrics is not null && string.Equals(Lyrics, _pickFilledLyrics, StringComparison.Ordinal))
+            Lyrics = null;
+        _pickFilledLyrics = null;
     }
 
     private Task OpenSongAsync(int songId) =>
@@ -498,6 +694,8 @@ public partial class SongFormViewModel : ViewModelBase
     [RelayCommand]
     private void ClearTitle()
     {
+        CancelLyricsLookup();            // REQ-LYR-10
+        DropUntouchedPickFilledLyrics(); // REQ-LYR-11
         SongTitle = string.Empty;
         IsTitleLocked = false;
         SelectedExternalId = string.Empty;
@@ -506,6 +704,69 @@ public partial class SongFormViewModel : ViewModelBase
         if (_pickFilledVersion is not null && SongVersion == _pickFilledVersion)
             SongVersion = string.Empty;
         _pickFilledVersion = null;
+        _pickedTitle = null;
+        _pendingImageUrl = null;             // REQ-ART-13: X on Title drops the song image, keeps the artist image
+        NotifyFormImageChanged();            // REQ-PIC-19: an upload stays the form picture
+    }
+
+    // ── Form picture commands (REQ-PIC-05, 10, 15, 17, 20) ────────────────
+
+    /// <summary>
+    /// "Add picture" / "Replace picture" / a tap on the picture: picks one photo and imports it as an
+    /// uploaded picture. Cancel changes nothing; an unusable photo shows the store's message and keeps
+    /// the form picture (REQ-PIC-10). Nothing is written to the song before Save (REQ-PIC-17).
+    /// </summary>
+    [RelayCommand]
+    private async Task PickImage()
+    {
+        if (IsImageBusy)
+            return;   // re-entry guard: one pick and import at a time
+
+        IsImageBusy = true;
+        try
+        {
+            await using var photo = await _photoPicker.PickPhotoAsync();
+            if (photo is null)
+                return;   // REQ-PIC-05: cancelled
+
+            var (success, message, reference) = await _imageStore.ImportAsync(photo, ImageOwnerKind.Song);
+            if (!success || reference is null)
+            {
+                await _snackbarService.ShowErrorAsync(message);
+                return;
+            }
+
+            _uploadedImageReference = reference;
+            _imageRemoved = false;
+            NotifyFormImageChanged();
+        }
+        catch (Exception ex)
+        {
+            // The platform picker can fail (no picker activity, permission); the form stays usable (REQ-PIC-10).
+            _logger.LogError(ex, "Picking a song picture failed");
+            await _snackbarService.ShowErrorAsync(ImagePickFailedMessage);
+        }
+        finally
+        {
+            IsImageBusy = false;
+        }
+    }
+
+    /// <summary>"Remove picture" (REQ-PIC-20): no form picture; edit mode marks the stored picture for removal.</summary>
+    [RelayCommand]
+    private void RemoveImage()
+    {
+        _uploadedImageReference = null;
+        _pendingImageUrl = null;
+        _imageRemoved = true;
+        NotifyFormImageChanged();
+    }
+
+    private void NotifyFormImageChanged()
+    {
+        OnPropertyChanged(nameof(FormImageSource));
+        OnPropertyChanged(nameof(FormImageThumbnailSource));
+        OnPropertyChanged(nameof(HasFormImage));
     }
 
     /// <summary>
@@ -574,7 +835,12 @@ public partial class SongFormViewModel : ViewModelBase
                     IsArtistDropDownOpen = false; // BUG-065/066: dismiss the popup for this programmatic hydration
                 }
 
-                IsArtistLocked = true; // edit-mode artist is locked (REQ-ACREATE-14); user cannot change it inline
+                // The stored artist shows as a pick (REQ-ACREATE-14); a tap on the Artist text releases it so
+                // the artist of a stored song can be changed (REQ-PIC-31, OnIsArtistLockedChanged).
+                IsArtistLocked = true;
+
+                _storedImageReference = song.ImageUrl;   // REQ-PIC-18 (2): edit mode shows the stored picture
+                NotifyFormImageChanged();
             }
             finally
             {
@@ -591,6 +857,7 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private async Task SaveAsync()
     {
+        CancelLyricsLookup();   // REQ-LYR-10: Save starts; a late lookup answer must not reach the form
         if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
 
         ClearSaveDecisions();
@@ -647,6 +914,14 @@ public partial class SongFormViewModel : ViewModelBase
     {
         var artistId = SelectedArtistId is { } id && id != 0 ? id : (int?)null;
 
+        // REQ-PIC-27: after a release by a tap the Deezer identity travels only with the unchanged picked title.
+        var keepsIdentity = !IsEditMode && string.Equals(SongTitle, _pickedTitle, StringComparison.Ordinal);
+
+        // REQ-PIC-28: the Deezer artist picture travels only while the Artist text is the picked name.
+        var artistImage = !IsEditMode && string.Equals(ArtistSearchText, _pickedArtistName, StringComparison.Ordinal)
+            ? _pendingArtistImageUrl
+            : null;
+
         return new SongFormSaveRequest(
             SongId,
             title,
@@ -656,11 +931,16 @@ public partial class SongFormViewModel : ViewModelBase
             artistId,
             artistId.HasValue ? null : ArtistSearchText?.Trim(),
             // REQ-SFT-27 / design F6: edit mode sends a null identity = keep the stored identity.
-            IsEditMode ? null : (string.IsNullOrEmpty(SelectedProvider) ? null : SelectedProvider),
-            IsEditMode ? null : (string.IsNullOrEmpty(SelectedExternalId) ? null : SelectedExternalId),
+            keepsIdentity && !string.IsNullOrEmpty(SelectedProvider) ? SelectedProvider : null,
+            keepsIdentity && !string.IsNullOrEmpty(SelectedExternalId) ? SelectedExternalId : null,
             _pendingRawUrls.ToArray(),
             _artistDecision,
-            _songDecision);
+            _songDecision,
+            // REQ-PIC-21: the form picture; edit mode stores it only when uploaded or removed (ImageChanged).
+            ImageUrl: FormImageReference,
+            // REQ-ART-16: the Deezer artist picture exists in add mode only (edit mode has no Deezer pick).
+            ArtistImageUrl: artistImage,
+            ImageChanged: IsEditMode && (_uploadedImageReference is not null || _imageRemoved));
     }
 
     /// <summary>Maps the Service outcome to fields, sheets, the snackbar and navigation (REQ-SFT-51).</summary>

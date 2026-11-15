@@ -193,6 +193,9 @@ public class SongServiceNewArtistUnitOfWorkTests
         public Task<bool> ExistsByExternalIdentityAsync(string provider, string externalId, int? excludeId, CancellationToken ct)
             => _inner.ExistsByExternalIdentityAsync(provider, externalId, excludeId, ct);
 
+        public Task<List<string>> GetLocalImageReferencesAsync(CancellationToken ct = default)
+            => _inner.GetLocalImageReferencesAsync(ct);
+
         public Task<IReadOnlyList<SongSearchHit>> SearchTitleCandidatesAsync(string query, int take, CancellationToken ct)
             => _inner.SearchTitleCandidatesAsync(query, take, ct);
 

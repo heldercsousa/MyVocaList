@@ -110,6 +110,15 @@
             "command": "python \"$CLAUDE_PROJECT_DIR/.claude/scripts/delegate-reminder.py\" 2>/dev/null || true"
           }
         ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/scripts/read-slice-guard.py\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -189,6 +198,10 @@
           {
             "type": "command",
             "command": "python \"$CLAUDE_PROJECT_DIR/.claude/scripts/ledger-row-guard.py\" 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/scripts/tasklog-size-guard.py\" 2>/dev/null || true"
           }
         ]
       },

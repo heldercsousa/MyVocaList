@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 using MyVocaList.Extensions;
 using MyVocaList.Infra;
+using MyVocaList.Services.Places;
 using MyVocaList.UI.Services;
 
 namespace MyVocaList.Tests.Unit.DependencyInjection;
@@ -66,6 +67,9 @@ public class AppServicesRegistrationTests
             services.AddSingleton(Mock.Of<INavigationService>());
             // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
             services.AddSingleton(Mock.Of<INetworkStatus>());
+            // IImageStore and IPhotoPicker are registered in MauiProgram.cs (platform paths, MediaPicker) — mocked here.
+            services.AddSingleton(Mock.Of<IImageStore>());
+            services.AddSingleton(Mock.Of<IPhotoPicker>());
             services.AddTransient<SongFormViewModel>();
         });
         using var scope = provider.CreateScope();
@@ -112,5 +116,78 @@ public class AppServicesRegistrationTests
             Assert.NotNull(httpClient.BaseAddress);
             Assert.Contains("MyVocaList", httpClient.DefaultRequestHeaders.UserAgent.ToString());
         }
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-34: Nominatim client configured (base address, User-Agent); IPlaceLookupService resolves; the gate is one instance across scopes
+    public void AddAppServices_PlaceLookup_ResolvesWithConfiguredClientAndSingletonGate()
+    {
+        using var provider = BuildProvider(services =>
+        {
+            // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
+            services.AddSingleton(Mock.Of<INetworkStatus>());
+        });
+
+        using var firstScope = provider.CreateScope();
+        var geocoding = firstScope.ServiceProvider.GetRequiredService<IGeocodingProvider>();
+        var lookup = firstScope.ServiceProvider.GetRequiredService<IPlaceLookupService>();
+        var firstGate = firstScope.ServiceProvider.GetRequiredService<PlaceLookupGate>();
+        using var secondScope = provider.CreateScope();
+        var secondGate = secondScope.ServiceProvider.GetRequiredService<PlaceLookupGate>();
+
+        Assert.IsType<NominatimGeocodingProvider>(geocoding);
+        Assert.NotNull(lookup);
+        Assert.Same(firstGate, secondGate);
+
+        var httpClientField = geocoding.GetType()
+            .GetField("_httpClient", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(httpClientField);
+        var httpClient = (HttpClient)httpClientField!.GetValue(geocoding)!;
+        Assert.Equal(new Uri("https://nominatim.openstreetmap.org/"), httpClient.BaseAddress);
+        Assert.Contains("MyVocaList/1.0", httpClient.DefaultRequestHeaders.UserAgent.ToString());
+    }
+
+    [Fact]
+    // [AC] REQ-VEN-40: the picture resolver's client has the Wikidata base address and the app User-Agent
+    public void AddAppServices_VenuePictureLookup_HasConfiguredHttpClient()
+    {
+        using var provider = BuildProvider(services =>
+        {
+            // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
+            services.AddSingleton(Mock.Of<INetworkStatus>());
+        });
+
+        using var scope = provider.CreateScope();
+        var resolver = scope.ServiceProvider.GetRequiredService<IVenuePictureLookupService>();
+
+        var httpClientField = resolver.GetType()
+            .GetField("_httpClient", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(httpClientField);
+        var httpClient = (HttpClient)httpClientField!.GetValue(resolver)!;
+        Assert.Equal(new Uri("https://www.wikidata.org/"), httpClient.BaseAddress);
+        Assert.Contains("MyVocaList/1.0", httpClient.DefaultRequestHeaders.UserAgent.ToString());
+    }
+
+    [Fact]
+    // [AC] REQ-LYR-15: the LRCLIB client resolves with its base address and identified User-Agent; ISongLyricsService resolves
+    public void AddAppServices_ResolvingLyricsProvider_HasConfiguredHttpClientAndSongLyricsService()
+    {
+        using var provider = BuildProvider(services =>
+        {
+            // INetworkStatus is registered in MauiProgram.cs, not AddAppServices — mocked here (D21).
+            services.AddSingleton(Mock.Of<INetworkStatus>());
+        });
+
+        using var scope = provider.CreateScope();
+
+        var lyricsProvider = scope.ServiceProvider.GetRequiredService<ILyricsProvider>();
+        var httpClientField = typeof(LrclibLyricsProvider)
+            .GetField("_httpClient", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(httpClientField);
+
+        var httpClient = Assert.IsType<HttpClient>(httpClientField!.GetValue(lyricsProvider));
+        Assert.Equal(new Uri("https://lrclib.net/"), httpClient.BaseAddress);
+        Assert.Contains("MyVocaList/1.0", httpClient.DefaultRequestHeaders.UserAgent.ToString());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<ISongLyricsService>());
     }
 }

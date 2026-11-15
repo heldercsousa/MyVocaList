@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dx="http://schemas.devexpress.com/maui"
+    x:Class="MyVocaList.UI.Components.Lists.ListItemLeadingAvatar"
+    x:Name="self">
+
+    <!-- MAUI Border, not dx:DXBorder: the DevExpress docs do not state that DXBorder clips children to its rounded corners. -->
+    <Border
+        StrokeShape="Ellipse"
+        Stroke="Transparent"
+        BackgroundColor="{StaticResource SurfaceContainerHighest}"
+        WidthRequest="40"
+        HeightRequest="40">
+
+        <!-- Placeholder icon sits under the image: a loaded image covers it, a missing or failed one leaves it visible. -->
+        <Grid>
+            <dx:DXImage
+                Source="{Binding PlaceholderIcon, Source={x:Reference self}}"
+                TintColor="{StaticResource OnSurfaceVariant}"
+                WidthRequest="24"
+                HeightRequest="24"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+
+            <Image
+                Source="{Binding ImageSource, Source={x:Reference self}}"
+                Aspect="AspectFill"
+                WidthRequest="40"
+                HeightRequest="40" />
+        </Grid>
+
+    </Border>
+</ContentView>
