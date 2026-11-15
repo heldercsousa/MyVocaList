@@ -260,3 +260,31 @@ Files re-read after edit: `NavigationService.cs` and `INavigationService.cs` (wr
 2. Make the back/hamburger choice context-aware. A `SongsPage` override of `OnNavigatedTo` could set the back arrow in catalog mode
    after `base.OnNavigatedTo`, which avoids editing the governed base class. This needs a design decision (page override vs. governed change).
 3. Re-verify (1) on the emulator once it is available, using a freshly created artist and songs.
+
+---
+## Task: BUG-086 round 4 — catalog page does not open after the develop merge (trailing catalog button inert)
+**Status:** To Review
+**Branch:** `fix/bug-086-round4` (from `fix/bug-086-round3` tip 3c4f4e14)
+**Started / Completed:** 2026-11-15
+
+### Reproduction (emulator pixel_5 API 36, Debug build, unmodified 3c4f4e14)
+- Artists list -> tap the trailing "View catalog" button on any row: nothing happens (no navigation, no edit page, no snackbar, no log line). Tapping the row opens the edit form and tapping the adjacent "Select" checkbox button enters selection mode, so the tap reaches the row; only the catalog button is dead.
+- The global Songs page opens fine from the flyout, so DI, route registration, SongsPage/SongsViewModel construction and NavigationService are NOT the cause.
+- Temporary instrumentation (`Android.Util.Log`, removed again) showed that `ViewCatalogCommand.CanExecute` and `NavigateToCatalogAsync` were never invoked on tap: the DXButton's `Command` binding was never applied (button commands are unbound).
+
+### Root cause
+`ArtistsPage` declares `x:DataType` on the item DataTemplate (compiled bindings). The develop merge (CLSG T3 + avatar) moved the catalog DXButton into a `HorizontalStackLayout` beside `ListItemCheckbox`, still inside the typed template. The button's `Command="{Binding Source={x:Reference page}, Path=BindingContext.ViewCatalogCommand}"` is a source-relative binding on an untyped `BindingContext` path, which the compiled-binding context of the template breaks: the binding resolves to nothing, the button has no command, and the tap is swallowed silently. (`ListItemCheckbox` works because it lives in its own component without a template `x:DataType`.) Same RelativeSource form also failed while the template type was inherited, which excluded the binding source as the cause.
+
+### Fix (ArtistsPage.xaml only; both templates)
+`x:DataType="{x:Null}"` on both catalog `dx:DXButton`s so the source-relative command binding is evaluated by reflection. Command text and CommandParameter unchanged. No governed component, AppShell or MauiProgram edits.
+
+### Verification
+- Emulator (Debug, `-t:Install`): Artists -> View catalog on Black Sabbath opens the catalog page titled "Black Sabbath" with the back arrow and empty state "No song registered"; device back returns to Artists; second artist (Frances Correia) opens its catalog too. Log shows `SongsViewModel fetch/initAsync` and `SongsPage navigatedTo`.
+- Unit tests: not testable (XAML binding resolution in a DataTemplate; no unit seam). Manual E2E above is the regression evidence. Full suite: 1660 passed, 0 failed.
+
+### Changed files:
+- `MyVocaList/UI/Pages/Artists/ArtistsPage.xaml`
+- `Docs/Management/BusinessFeatures/artists-songs/bugs/2026-11-12-BUG-086-artists-list-trailing-catalog-button-does-nothing-successor-of-bug-015-019-028/task-log.md`
+
+### Residual risk
+Other pages that put a source-relative command binding on a button inside a typed DataTemplate could have the same silent failure; not audited (none use `x:Reference page` in Pages/). Debug APK note: install with `dotnet build -t:Install` (the `-Signed.apk` alone is not self-contained for fast deployment).
