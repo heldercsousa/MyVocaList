@@ -1299,6 +1299,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "singer-self-registration", 
 		Docs\Management\cross-cutting\singer-self-registration\README.md = Docs\Management\cross-cutting\singer-self-registration\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "music-sourcing-strategy", "music-sourcing-strategy", "{FA1234BC-0001-4000-8000-0000000000D5}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\cross-cutting\music-sourcing-strategy\README.md = Docs\Management\cross-cutting\music-sourcing-strategy\README.md
+		Docs\Management\cross-cutting\music-sourcing-strategy\estrategia-gemini-2026-11-14.md = Docs\Management\cross-cutting\music-sourcing-strategy\estrategia-gemini-2026-11-14.md
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "social-features", "social-features", "{FA1234BC-0001-4000-8000-00000000005D}"
 	ProjectSection(SolutionItems) = preProject
 		Docs\Management\cross-cutting\social-features\README.md = Docs\Management\cross-cutting\social-features\README.md
@@ -1592,6 +1598,7 @@ Global
 		{FA1234BC-0001-4000-8000-00000000005A} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005B} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005C} = {FA1234BC-0001-4000-8000-000000000057}
+		{FA1234BC-0001-4000-8000-0000000000D5} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005D} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005E} = {FA1234BC-0001-4000-8000-000000000057}
 		{FA1234BC-0001-4000-8000-00000000005F} = {FA1234BC-0001-4000-8000-000000000057}
