@@ -1,11 +1,12 @@
 ---
 id: autocompletedxfield-option-rows-optional-leading-image-or-avatar-and-trailing-text
 title: "AutocompleteDXField option rows: optional leading image or avatar and trailing text"
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-13
 section: DevCycleCraft
 parent: autocomplete-component
 goal: "An option may carry a leading image (56dp square) or avatar (40dp circle) and a short trailing text; options without them render as today. Needed by the Deezer artwork item. Gate: four-gate component record in this folder; device check that the Person form menu is unchanged."
+closed: 2026-11
 kind: change
 ---
 

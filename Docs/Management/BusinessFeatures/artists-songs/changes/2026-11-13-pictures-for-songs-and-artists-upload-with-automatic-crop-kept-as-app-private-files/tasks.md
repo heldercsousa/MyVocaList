@@ -38,4 +38,4 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 
 ## Close-out
 - [x] T9 Merge, full test run, Android build, verifier, traceability matrix, statuses, merge to `develop`.
-- [ ] T10 **Device check (Helder)** — checklist in `task-log.md § Device check`.
+- [x] T10 **Device check (Helder)** — checklist in `task-log.md § Device check`.

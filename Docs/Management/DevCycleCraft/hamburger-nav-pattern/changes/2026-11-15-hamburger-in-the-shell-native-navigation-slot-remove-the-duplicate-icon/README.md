@@ -1,11 +1,12 @@
 ---
 id: hamburger-in-the-shell-native-navigation-slot-remove-the-duplicate-icon
 title: Hamburger in the Shell-native navigation slot - remove the duplicate icon
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-15
 parent: hamburger-nav-pattern
 goal: Show exactly one leading icon on the 4 CRUD list pages, in the Shell-native navigation slot (same slot as the form back arrow), and make it open the drawer; today the first navigation node draws two hamburgers and the native one is dead.
 gate: Helder passes the emulator/device checklist.
+closed: 2026-11
 kind: change
 ---
 
@@ -121,3 +122,7 @@ Evidence is recorded in `../../task-log.md`.
   root it is "Open navigation drawer".
 - Device back on a Venues page reached through the menu (pushed) shows the exit confirmation instead
   of popping, because `VenuesPage.OnBackButtonPressed` always does. Behavior predates this change.
+
+## Close-out (2026-11-15)
+
+Merged to `develop` as `a3d743e9` (full suite 1660 passed, Android build 0 errors on the merged tree). Helder reported the checklist passed and asked to close the item.

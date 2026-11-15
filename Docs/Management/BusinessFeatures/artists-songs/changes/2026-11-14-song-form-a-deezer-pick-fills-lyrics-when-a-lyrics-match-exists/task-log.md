@@ -1,7 +1,7 @@
 # Task log: a Deezer pick fills Lyrics
 
 ### Checkpoint
-- 2026-11-14 — Complete. On `develop`; the Deezer pick filling Lyrics was confirmed on the Android emulator (entry "Emulator check").
+- 2026-11-15 — Complete. On `develop` and `main`. Device check (L4) passed on a physical device (Helder, 2026-11-15).
 - Context manifest: `requirements.md`, `design.md`, `tasks.md` (this folder).
 
 ## 2026-11-14 — L0 Research and spec (Done)
@@ -124,6 +124,8 @@
 - Second pass (build `544fcd8e`): typed "Asturias Leyenda" and picked the first Deezer option, an instrumental with no lyrics match: Title, Artist and picture filled, and the Lyrics field stayed empty (placeholder "Song lyrics (optional)" shown).
 
 ## Device check (Helder) — L4
+
+**Result (2026-11-15):** Helder ran this checklist on a physical device and reported it passed. No per-step notes were recorded.
 
 1. Songs → add → type a well-known title → pick a Deezer row: Lyrics shows "Looking for lyrics…" and then the lyrics.
 2. Pick a Deezer row for an obscure or instrumental track: Lyrics stays empty, no message.
