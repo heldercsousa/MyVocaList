@@ -122,5 +122,22 @@ if printf '%s
   echo "pre-commit: ledger row lengths OK."
 fi
 
+# --- Task-log size gate ---
+# A task-log.md over 300 lines costs tokens on every read. Checks only the
+# task-log.md files staged in this commit (staged content), whatever tool
+# wrote them. Rule: CLAUDE.md "Task-log rotation".
+if printf '%s
+' "$STAGED" | grep -Eq '(^|/)task-log\.md$'; then
+  echo "pre-commit: task-log.md staged — checking the 300-line cap..."
+  if ! python .claude/scripts/tasklog-size-guard.py --check; then
+    echo ""
+    echo "pre-commit: BLOCKED — a staged task-log.md is over 300 lines. Rotate its"
+    echo "            closed entries to task-log-archive-YYYY-MM.md in the same folder."
+    echo "            To commit anyway: git commit --no-verify"
+    exit 1
+  fi
+  echo "pre-commit: task-log size OK."
+fi
+
 echo "pre-commit: commit allowed."
 exit 0
