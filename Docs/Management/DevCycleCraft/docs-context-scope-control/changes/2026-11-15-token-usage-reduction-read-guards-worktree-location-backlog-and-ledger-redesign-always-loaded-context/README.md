@@ -1,7 +1,7 @@
 ---
 id: token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context
 title: "Token-usage reduction: read guards, worktree location, backlog and ledger redesign, always-loaded context"
-status: 💡 Pending
+status: 🟡 In Progress
 target: 2026-11-15
 section: DevCycleCraft
 parent: docs-context-scope-control
