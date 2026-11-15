@@ -176,6 +176,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Itens de Solução", "Itens
 		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-address-international-fields-duplicate-name-and-duplicate-address-refused\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-address-international-fields-duplicate-name-and-duplicate-address-refused\README.md
 		Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-form-pick-the-place-on-a-map-to-fill-address-and-name\README.md = Docs\Management\BusinessFeatures\venues\changes\2026-11-14-venue-form-pick-the-place-on-a-map-to-fill-address-and-name\README.md
 		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-14-targeted-file-reads-and-task-log-rotation-hooks\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-14-targeted-file-reads-and-task-log-rotation-hooks\README.md
+		Docs\Management\DevCycleCraft\hamburger-nav-pattern\changes\2026-11-15-hamburger-in-the-shell-native-navigation-slot-remove-the-duplicate-icon\README.md = Docs\Management\DevCycleCraft\hamburger-nav-pattern\changes\2026-11-15-hamburger-in-the-shell-native-navigation-slot-remove-the-duplicate-icon\README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{E9A5FC59-0C8C-49B6-9845-7870FA3CD098}"
