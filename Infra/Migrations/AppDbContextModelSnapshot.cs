@@ -158,6 +158,11 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
@@ -373,6 +378,11 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
                     b.Property<string>("Lyrics")
                         .HasMaxLength(10000)
                         .HasColumnType("TEXT")
@@ -472,9 +482,50 @@ namespace MyVocaList.Infra.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AddressLine1")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("AddressLine2")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(30)
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("PostalCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE_NOACCENT");
+
+                    b.Property<string>("Region")
+                        .HasMaxLength(80)
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
