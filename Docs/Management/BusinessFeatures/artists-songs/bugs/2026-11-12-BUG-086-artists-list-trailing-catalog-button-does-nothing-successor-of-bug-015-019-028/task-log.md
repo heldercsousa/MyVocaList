@@ -288,3 +288,9 @@ Files re-read after edit: `NavigationService.cs` and `INavigationService.cs` (wr
 
 ### Residual risk
 Other pages that put a source-relative command binding on a button inside a typed DataTemplate could have the same silent failure; not audited (none use `x:Reference page` in Pages/). Debug APK note: install with `dotnet build -t:Install` (the `-Signed.apk` alone is not self-contained for fast deployment).
+
+## Close-out — 2026-11-15
+**Status:** Done. Helder verified on device with the Debug APK built from `fix/bug-086-round4` (1dad8e16): (1) the trailing catalog button opens the artist's catalog; (2) the app bar shows the artist name and a back arrow; (3) device back returns to Artists and still asks for exit confirmation at the first nav node.
+**Rounds:** 1 awaited navigation; 2 app-bar title ordering; 3 push-based navigation with back arrow (INavigationService.PushAsync/PopAsync); 4 `x:DataType="{x:Null}"` on both catalog buttons after the develop merge broke the command binding.
+**Merged:** `fix/bug-086-round4` into `develop`. Round branches and worktrees removed.
+**Open follow-ups (not part of this bug):** catalog FAB (`AddToCatalogAsync`) is a Phase 15 stub; catalog with real rows never seen; empty-state wording in catalog mode; other pages with source-relative bindings in typed templates not audited.
