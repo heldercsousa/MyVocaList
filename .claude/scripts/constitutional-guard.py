@@ -87,7 +87,7 @@ _ITF_SEQUENTIAL_FILES = _ITF_SEQUENTIAL_SOFT | _ITF_SEQUENTIAL_HARD
 def _branch_guard(file_path: str) -> int:
     """Block code edits when the file's checkout is on develop/main.
 
-    Worktrees carry their own task branch, so edits inside .worktrees/<name>
+    Worktrees carry their own task branch, so edits inside .claude/worktrees/<name>
     pass automatically. Fail-open on any git error (fresh clone, detached
     HEAD during rebase, git missing) so the guard never breaks the workflow.
     """
@@ -111,7 +111,7 @@ def _branch_guard(file_path: str) -> int:
                 f"Fix: create/enter a worktree based on develop "
                 f"(EnterWorktree, then verify base: "
                 f"`git merge-base --is-ancestor develop HEAD`; or "
-                f"`git worktree add .worktrees/<name> -b <branch> develop`) "
+                f"`git worktree add .claude/worktrees/<name> -b <branch> develop`) "
                 f"and make the edit there.\n"
                 f"Docs/spec/task-log/BACKLOG edits on develop are allowed "
                 f"and unaffected by this guard.\n"

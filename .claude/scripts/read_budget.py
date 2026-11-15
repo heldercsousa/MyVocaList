@@ -5,6 +5,7 @@ slices: an explicit `limit` of at most MAX_SLICE_LINES lines, and at most MAX_SL
 Lines alone are not enough: `Docs/Management/BACKLOG.md` is ~140 lines and ~35 KB.
 """
 import os
+import re
 
 MAX_FULL_LINES = 200
 MAX_FULL_BYTES = 12_000
@@ -24,8 +25,21 @@ def norm(path: str) -> str:
     return path.replace("\\", "/")
 
 
+_WORKTREE = re.compile(r"(?:^|/)\.claude/worktrees/[^/]+/")
+
+
 def is_exempt(path: str) -> bool:
+    """Exempt paths are judged relative to their checkout.
+
+    A worktree lives under `.claude/worktrees/<name>/`; that prefix must not make every source
+    file in it exempt, so it is stripped first. The worktree's own `.claude/` stays exempt.
+    """
     p = norm(path)
+    m = None
+    for m in _WORKTREE.finditer(p):
+        pass
+    if m:
+        p = p[m.end():]
     return any(seg in p for seg in EXEMPT_SEGMENTS) or p.lower().endswith(EXEMPT_SUFFIXES)
 
 
