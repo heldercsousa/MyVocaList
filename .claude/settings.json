@@ -119,6 +119,15 @@
             "command": "python \"$CLAUDE_PROJECT_DIR/.claude/scripts/read-slice-guard.py\""
           }
         ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/scripts/bash-guard.py\" 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -294,5 +303,8 @@
     "superpowers@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": false
   },
-  "plansDirectory": "Docs/Management"
+  "plansDirectory": "Docs/Management",
+  "worktree": {
+    "baseRef": "head"
+  }
 }
