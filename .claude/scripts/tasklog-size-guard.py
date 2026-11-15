@@ -1,20 +1,24 @@
 """Task-log size guard.
 
-A `task-log.md` is capped at 300 lines (CLAUDE.md, "Task-log rotation"). Over the cap, closed/merged
-entries move to `task-log-archive-YYYY-MM.md` in the same folder; the header and active/open entries stay.
+A `task-log.md` is capped at 300 lines (CLAUDE.md, "Task-log rotation"). Over the cap, entries that are
+READY move to `task-log-archive-YYYY-MM.md` in the same folder; open entries always stay. What counts
+as ready is decided by `tasklog_rotate.py` (explicit status markers), never by judgment.
 
 Modes:
-  python tasklog-size-guard.py --check   -> pre-commit: exit 1 when a STAGED task-log.md is over the cap.
-                                            Counts the staged content, so it covers every write path
-                                            (Edit/Write tools, Bash, scripts). Untouched logs are not checked.
-  python tasklog-size-guard.py (stdin)   -> PostToolUse hook (Edit|Write): when the edited file is an
-                                            oversize task-log.md, returns the notice as additionalContext
-                                            so the model sees it (plain stdout is not shown to the model).
+  python tasklog-size-guard.py --check   -> pre-commit: exit 1 when a STAGED task-log.md is over the cap
+                                            AND has entries ready to rotate. Over the cap with only open
+                                            entries -> warning, commit allowed (nothing may be rotated).
+                                            Counts the staged content, so it covers every write path.
+  python tasklog-size-guard.py (stdin)   -> PostToolUse hook (Edit|Write): same test on the edited file;
+                                            the notice is returned as additionalContext so the model sees it.
 """
 import json
 import os
 import subprocess
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import tasklog_rotate  # noqa: E402
 
 MAX_TASKLOG_LINES = 300
 NAME = "task-log.md"
@@ -25,14 +29,19 @@ def is_tasklog(path: str) -> bool:
     return p == NAME or p.endswith("/" + NAME)
 
 
-def notice(path: str, lines: int) -> str:
+def notice(path: str, lines: int, ready: int) -> str:
     p = path.replace("\\", "/")
-    folder = os.path.dirname(p) or "."
+    if ready:
+        return (
+            f"TASK-LOG ROTATION REQUIRED: `{p}` is {lines} lines (cap: {MAX_TASKLOG_LINES}) and {ready} "
+            f"entries are ready to rotate. Run: python .claude/scripts/tasklog_rotate.py \"{p}\" "
+            "(add --dry-run to preview). It moves only closed entries and keeps open ones. "
+            "Do not move entries by hand and do not read the whole file."
+        )
     return (
-        f"TASK-LOG ROTATION REQUIRED: `{p}` is {lines} lines (cap: {MAX_TASKLOG_LINES}). "
-        f"Move closed/merged entries into `{folder}/task-log-archive-YYYY-MM.md` (register a new archive "
-        "file in MyVocaList.sln), keeping only the header and active/open entries. Do not read the whole "
-        "file to do it: list the `## ` headings with Grep and move line ranges with a script."
+        f"TASK-LOG OVER CAP, NOTHING TO ROTATE: `{p}` is {lines} lines (cap: {MAX_TASKLOG_LINES}) but every "
+        "entry is still open (To Review, Checkpoint, open checklist). Leave them in place; rotate with "
+        "tasklog_rotate.py once entries are marked Done or the item is closed."
     )
 
 
@@ -43,17 +52,21 @@ def git(*args: str) -> str:
 
 def check_staged() -> int:
     staged = git("-c", "core.quotepath=false", "diff", "--cached", "--name-only", "--diff-filter=ACMR")
-    bad = []
+    failed = False
     for path in staged.splitlines():
         if not is_tasklog(path):
             continue
-        lines = len(git("show", ":" + path).splitlines())
-        if lines > MAX_TASKLOG_LINES:
-            bad.append(notice(path, lines))
-    if bad:
-        print("tasklog-size-guard: FAILED\n  " + "\n  ".join(bad))
-        return 1
-    return 0
+        text = git("show", ":" + path)
+        lines = len(text.splitlines())
+        if lines <= MAX_TASKLOG_LINES:
+            continue
+        ready = tasklog_rotate.ready_count(text, os.path.dirname(path) or ".")
+        if ready:
+            failed = True
+            print("tasklog-size-guard: FAILED\n  " + notice(path, lines, ready))
+        else:
+            print("tasklog-size-guard: WARNING\n  " + notice(path, lines, ready))
+    return 1 if failed else 0
 
 
 def hook() -> int:
@@ -64,13 +77,15 @@ def hook() -> int:
     fp = (payload.get("tool_input") or {}).get("file_path") or ""
     if not is_tasklog(fp) or not os.path.isfile(fp):
         return 0
-    with open(fp, encoding="utf-8", errors="ignore") as f:
-        lines = sum(1 for _ in f)
+    with open(fp, encoding="utf-8", errors="ignore", newline="") as f:
+        text = f.read()
+    lines = len(text.splitlines())
     if lines > MAX_TASKLOG_LINES:
+        ready = tasklog_rotate.ready_count(text, os.path.dirname(fp) or ".")
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "PostToolUse",
-                "additionalContext": notice(fp, lines),
+                "additionalContext": notice(fp, lines, ready),
             }
         }))
     return 0
