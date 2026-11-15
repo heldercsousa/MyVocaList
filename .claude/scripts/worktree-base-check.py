@@ -15,15 +15,16 @@ MISBASED (real workflow.md Rule 2 violation)
     commit -- so it is misbased. If MB is a develop-only commit, `MB in main`
     is false and the branch is correctly based.
 
-BEHIND (advisory only, NOT a violation)
+BEHIND (NOT a violation, never reported)
     Correctly forked from develop but N commits behind because develop has
     advanced since. This is the normal state of any worktree older than a
-    day. Never suggest removing/recreating such a worktree -- it may hold
-    unmerged commits, and deleting it is data loss.
+    day, so the hook stays silent about it.
 
-Warn-only (exit 0 always, message on stdout). Fail-open on any error.
+Warn-only (exit 0 always). A MISBASED finding is returned as JSON
+additionalContext so the model sees it. Fail-open on any error.
 No repo mutation.
 """
+import json
 import os
 import subprocess
 import sys
@@ -91,19 +92,19 @@ def main() -> int:
             entry = (p, br.stdout.strip() or "detached", n)
             (misbased if state == "misbased" else behind).append(entry)
 
-        for p, br, _n in misbased:
-            print(f"WORKTREE BASE VIOLATION - {p} (branch `{br}`) was forked "
-                  f"from main's history, not develop (workflow.md Rule 2 "
-                  f"[HARD RULE]).")
+        # BEHIND is the normal state of an older worktree: not reported.
         if misbased:
-            print("Rebase onto develop, or -- only if the branch has no commits "
-                  "you need -- recreate it with "
-                  "`git worktree add <path> -b <branch> develop`. "
-                  "Check `git log develop..HEAD` before discarding anything.")
-        for p, br, n in behind:
-            print(f"note: {p} (branch `{br}`) is correctly based on develop but "
-                  f"is {n} commit(s) behind it. Not a violation. To catch up: "
-                  f"`git merge --ff-only develop` (or rebase onto develop).")
+            lines = [f"WORKTREE BASE VIOLATION - {p} (branch `{br}`) was forked "
+                     f"from main's history, not develop (workflow.md Rule 2 "
+                     f"[HARD RULE])." for p, br, _n in misbased]
+            lines.append("Rebase onto develop, or -- only if the branch has no commits "
+                         "you need -- recreate it with "
+                         "`git worktree add <path> -b <branch> develop`. "
+                         "Check `git log develop..HEAD` before discarding anything.")
+            # JSON additionalContext: plain stdout from a tool hook does not reach the model.
+            print(json.dumps({"hookSpecificOutput": {
+                "hookEventName": "PostToolUse",
+                "additionalContext": "\n".join(lines)}}))
     except Exception:
         pass
     return 0

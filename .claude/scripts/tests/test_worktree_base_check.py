@@ -92,11 +92,7 @@ class WorktreeBaseCheckTests(unittest.TestCase):
 
         rc, out = _run_main(self.repo)
         self.assertEqual(rc, 0)
-        self.assertIn("correctly based on develop", out)
-        self.assertIn("2 commit(s) behind", out)
-        self.assertNotIn("VIOLATION", out)
-        self.assertNotIn("worktree remove", out)
-        self.assertNotIn("recreate", out)
+        self.assertEqual(out, "")  # behind is normal: the hook stays silent
 
     def test_branch_cut_from_main_is_misbased(self):
         wt = _add_worktree(self.repo, "wt-bad", "main")

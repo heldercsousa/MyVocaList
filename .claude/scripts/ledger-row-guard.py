@@ -6,11 +6,14 @@ task-log.md / README.md.
 
 Modes:
   python ledger-row-guard.py --check    -> CLI / pre-commit: exit 1 when any row is too long
-  python ledger-row-guard.py (stdin)    -> PostToolUse hook: warn-only when the edited file is LEDGER.md
+  python ledger-row-guard.py (stdin)    -> PostToolUse hook: warn-only (additionalContext) when the edited file is LEDGER.md
 """
 import json
 import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import hook_out  # noqa: E402
 
 LIMIT = 450
 LEDGER = os.path.join("Docs", "Management", "LEDGER.md")
@@ -44,7 +47,7 @@ def main():
             return 0
         bad = long_rows(fp)
         if bad:
-            print("LEDGER ROW-LENGTH WARNING:\n" + report(bad))
+            hook_out.additional_context("PostToolUse", "LEDGER ROW-LENGTH WARNING:\n" + report(bad))
         return 0
     root = os.environ.get("CLAUDE_PROJECT_DIR", ".")
     path = os.path.join(root, LEDGER)
