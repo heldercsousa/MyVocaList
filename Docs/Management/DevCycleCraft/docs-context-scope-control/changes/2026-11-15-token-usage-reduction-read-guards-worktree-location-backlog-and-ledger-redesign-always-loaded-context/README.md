@@ -53,7 +53,7 @@ The findings below this section are the original handover text, kept as recorded
 8. **Memory index (1.2k tokens).** Entries that a rule already states: "Docs belong on develop", "Read lane + ITF over dispatch", "Token-scoped library reads", "Route subagents to cheaper models". Candidates for removal.
 9. **Leftover clean-up (workstream B).** Table in `task-log.md`: 3 empty folders, `.worktrees/_orch` (22 scratch files), 7 + 30 `worktree-agent-*` branches with no unique commits. Nothing was deleted.
 10. **`.sln` auto-registration.** The `PostToolUse` `Write` hook did not register this item's `task-log.md`; it was added by hand. Not investigated.
-11. **Measure of success.** `/context` at a fresh process start, before and after, is still to be taken by Helder.
+11. **Measure of success.** Taken on 2026-11-15 from a fresh headless process (`claude -p "/context"`), after the changes: total 32.1k tokens at the first prompt; memory files 12.2k (before: about 12k; unchanged, because the `CLAUDE.md`, rules and memory-index reductions are still at the gate); skills 2.5k (before: 2.9k); messages 1.4k (no "before" figure was recorded). File sizes: `BACKLOG.md` 35,182 to 8,322 bytes; `LEDGER.md` 11,882 (unchanged); `CLAUDE.md` 8,279 (unchanged). The saving of this session is therefore in reads (backlog, guarded slices, worktree files) and in per-prompt hook text, not yet in the always-loaded 12k.
 
 ## Already done (2026-11-14 and 15)
 
