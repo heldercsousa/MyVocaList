@@ -1,97 +1,50 @@
 # MyVocaList — Product Backlog
 
-> **Product backlog — a PO-level business artifact.** Business features are ordered by target delivery date. Every feature begins as `💡 Pending` and is promoted through the lifecycle below.
->
-> **When to read:** At the start of any new feature cycle (workflow.md Rule 1 step 0) and when resuming a session with no active handoff file (Rule 7).
->
-> **Who updates statuses:** The main agent updates this file at each workflow milestone. Subagents do not touch BACKLOG.md.
+> Generated view of the active items, ordered by target. Each row comes from the item's `README.md` frontmatter: **never hand-edit a row** (the next `regen` overwrites it; pre-commit blocks a stale file). Goal, gate and folder of an item are in its `README.md`. Agents do not read this file: they run `python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"`. Closed items: `backlog-archive/`. Commands, frontmatter rules and status meanings: `.claude/library/backlog-generator.md`.
 
-> ## ⚠️ THE ROWS IN THIS FILE ARE GENERATED — read before editing any row
->
-> *(Single-branch ownership retired 2026-07-26: `feature/backlog-migration` merged into `develop`.
-> The generated-artifact write-ownership protocol is still under definition — Spec Evolution T13d.)*
->
-> The rows in this file are **generated** from each item's `README.md` frontmatter. Between the
-> `<!-- BACKLOG:GENERATED:BEGIN … -->` / `END` markers, **a hand-edit is not a merge conflict — it is
-> silently overwritten** on the next `regen`. An edit inside a fence can be lost without warning.
-> A pre-commit gate (`regen --check`) blocks a commit that leaves this file stale.
->
-> **To change a row:** edit that item's `README.md` frontmatter (or use
-> `python .claude/scripts/backlog/backlog_gen.py status <ID> "<status>"`), never the row itself.
-> **To add an item:** `backlog_gen.py register …` — it creates the folder, README and `.sln` entry
-> together.
-> **If you must touch a fenced row directly:** coordinate via `LEDGER.md` first (until T13d lands).
->
-> Everything **outside** the fences — this header, the row rules, the status reference — is
-> hand-written and preserved byte-for-byte by the generator. Editing here is always safe.
-
-## Row rules (agents: do NOT re-fatten this file)
-
-- **Template:** `| Target | Feature/Item | Status | Notes |`. **Target** = registration date (or originally targeted month) — carried over unchanged, never reinterpreted.
-- **Notes column: max 3 sentences / ~50 words**, containing only: **Goal** (what the item delivers and why, in business terms), **Gate/blocker** (the single thing holding it — owner + what), and **one Pointer** (`Docs/Management/.../[feature]/` path where all technical detail lives).
-- **Banned from rows:** commit hashes, file paths beyond the single pointer, root-cause narrative, review verdicts, test counts, per-step status trails, token measurements, AC numbers. Branch/phase tracking belongs to `LEDGER.md`; execution history to the feature's `task-log.md`; displaced narratives of folder-less items to `Docs/Management/cross-cutting-log.md`.
-- **Archive rotation:** rows reaching `✅ Done` / `✅ Fixed` / superseded-closed move (slimmed to the same template) to `Docs/Management/backlog-archive/BACKLOG-ARCHIVE-YYYY-MM.md`, keyed by completion month; a Done sub-row archives independently of a still-active parent. Only active statuses (💡 📋 🗺️ 🟢 🟡 🔵 🔴) remain here.
-- **Lookups:** past BUG-NNN / feature history lives in `backlog-archive/` — grep those files too.
-- Rule pointer: `workflow.md` Rule 1 references this header as the authoritative row template.
-
----
-
-## Status reference
-
-| Status | Meaning |
-|--------|---------|
-| `💡 Pending` | Captured, not yet evaluated |
-| `📋 Spec` | Approved — spec being written |
-| `🗺️ Plan` | Spec approved — plan being written |
-| `🟢 Ready` | Plan approved — dispatchable |
-| `🟡 In Progress` | Implementation underway |
-| `🔵 Deferred` | Paused — reason documented |
-| `🔴 Blocked` | Cannot proceed — dependency named |
-| `✅ Done` | Shipped — row moves to `backlog-archive/` |
-
----
+Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In Progress → ✅ Done · 🔵 Deferred · 🔴 Blocked
 
 ## Business Features
 
 <!-- BACKLOG:GENERATED:BEGIN business-features -->
-| Target | Feature | Status | Notes |
-|--------|---------|--------|-------|
-| 2026-03 | ↳ Bug: Venues list fetch slow — 2.2s paged query (BUG-012) | 💡 Pending | Goal: restore fast venue list loading (N+1 query suspected). Pointer: `BusinessFeatures/venues/bugs/2026-03-01-BUG-012-venuesviewmodel-fetch-slow/`. |
-| 2026-05 | **Artists & Songs Catalog** | 🔴 Blocked | Goal: full artist/song catalog management. Gate: BUG-068 (Critical) — an EF Core tracking conflict aborts every edit-mode song save; smoke test 16C.1 must re-run green before phases 16C.2–16C.5 resume. Pointer: `BusinessFeatures/artists-songs/`. |
-| 2026-07-21 | ↳ **Song artist field — correctness fixes + inline "create new artist"** | 🟡 In Progress | Goal: make the Song Artist autocomplete correct (folding in BUG-050, BUG-051, BUG-052 and retain-text) and add inline create-new-artist (➕ row), closing BUG-027. Gate: on-device re-run #5 failed 2026-08-02 — an EF Core tracking conflict blocks every edit-mode save; three split fix sessions plus a green re-run gate closeout. Pointer: `BusinessFeatures/artists-songs/changes/2026-07-21-inline-artist-create/task-log.md`. |
-| 2026-07-03 | ↳ BUG-030: ArtistFormPage search strip UX unclear (spec gap) | 🔵 Deferred | Goal: resolve the search-strip spec gap on the Artist form. Gate: Answered by Helder 2026-07-10: the element must disappear from both forms — folded into the Form UX Redesign. Pointer: `BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear/`. |
-| 2026-07-10 | ↳ **Artist & Song Form UX Redesign — autocomplete, similar-match warning, search-strip removal** | 🔵 Deferred | Goal: friction-free artist/song name entry (local + API autocomplete, never clear typed text, similar-match warning before create). Gate: parked by Helder only — the autocomplete foundations that once gated it are both retired; partial work sits on branch `feature/form-ux-redesign`. Now also owns cancelled BUG-028, BUG-029, BUG-031 and BUG-032. Pointer: `BusinessFeatures/artists-songs/changes/2026-07-10-form-ux-redesign/`. |
-| 2026-08-04 | ↳ Song writes propagate to the artist catalog | 📋 Spec | Goal: Creating a song must also create the matching record in that artist's catalog, and editing a song must be reflected there. Today the two can drift apart. Gate: Deferred by Helder 2026-11-04 — spec waits until the song-form title-first item is done, so catalog decisions are not built on song entities still changing. Pointer: `BusinessFeatures/artists-songs/changes/2026-08-04-song-writes-propagate-to-the-artist-catalog/`. |
-| 2026-11-09 | ↳ Post-MVP: AI intent matching for mistyped titles and artists | 💡 Pending | Goal: An AI step ranks or suggests the intended song or artist when the typed text is wrong, next to the fuzzy matcher that stays as the offline baseline and duplicate guard. Gate: Post-MVP; design first: re-rank versus embeddings versus cloud fallback, offline behaviour, privacy, cost. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-09-post-mvp-ai-intent-matching-for-mistyped-titles-and-artists/`. |
-| 2026-11-09 | ↳ Post-MVP: group Songs list by artist | 💡 Pending | Goal: Add an optional group-by-artist mode to the Songs list. Gate: Post-MVP; design before any code. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-09-post-mvp-group-songs-list-by-artist/`. |
-| 2026-11-09 | ↳ Post-MVP: show similar records in autocomplete results | 💡 Pending | Goal: Autocomplete results also list similar (typo-tolerant) records alongside exact matches so a mistyped entry can still be picked. Gate: Post-MVP; design before any code. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-09-post-mvp-show-similar-records-in-autocomplete-results/`. |
-| 2026-11-09 | ↳ Song list item shows artist name, version and featured artists | 🟡 In Progress | Goal: The Song list secondary line appends the artist name (truncated when needed) and the version, keeping the featured artists. Gate: Device: list rows show artist plus version plus featured artists, truncated cleanly. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-09-song-list-item-shows-artist-name-version-and-featured-artists/`. |
-| 2026-11-11 | ↳ ArtistFormPage Name as the autocomplete field (split from SFT 6.3) | 🟡 In Progress | Goal: Typing metalica on New Artist lists Metallica from the library first, then Deezer artists. A local pick opens its edit form; a Deezer pick fills and locks Name. Waits for the shared autocomplete work in the other terminal. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-11-artistformpage-name-as-the-autocomplete-field-split-from-sft-6-3/`. |
-| 2026-11-11 | ↳ Discuss showing long song titles in list items (MD3-compliant, secondary text line) | 💡 Pending | Goal: Long titles are truncated in the list, so records sharing a prefix look identical. Decide an MD3-compliant way to show more of the title, such as the secondary text line, possibly freed by removing Version and Featured artists. Confirm against the official Material Design 3 list docs. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-11-discuss-showing-long-song-titles-in-list-items-md3-compliant-secondary-text-line/`. |
-| 2026-11-11 | ↳ Discuss: song identity by lyric, version de-duplication and richer Deezer data in the song UX | 💡 Pending | Goal: Decide whether versions of one song (live, remaster, featured artist) should count as one record keyed on lyric, hide near-duplicate Deezer versions, and use Deezer cover art in lists and forms. Gate: discussion with Helder first; nothing designed or built before it. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-11-discuss-song-identity-by-lyric-version-de-duplication-and-richer-deezer-data-in-the-song-ux/`. |
-| 2026-11-11 | ↳ Evaluate removing the Song form Version and Featured artists fields | 💡 Pending | Goal: Version and featured-artists fields may be over-engineering; evaluate dropping one or both to make SongFormPage cleaner. Evaluation only, no work now. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-11-evaluate-removing-the-song-form-version-and-featured-artists-fields/`. |
-| 2026-11-11 | ↳ Post-MVP: import an artist's song catalog from files (PDF etc.) | 💡 Pending | Goal: An artist uploads files such as PDFs holding their song catalog; the app extracts title, artist and lyric, registers the songs as that artist's catalog, and skips songs already registered, attaching them to the uploading artist's catalog. Gate: Post-MVP; design before any code. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-11-post-mvp-import-an-artist-s-song-catalog-from-files-pdf-etc/`. |
-| 2026-11-11 | ↳ Song title limit raised from 100 to 250 characters | 💡 Pending | Goal: Song titles imported from music APIs or written in other cultures can exceed 100 characters; the title limit becomes 250 across validation, counter, EF model and tests. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-11-song-title-limit-raised-from-100-to-250-characters/`. |
-| 2026-11-12 | ↳ Artists list rows: catalog action moves into the overflow menu | 💡 Pending | Goal: Replace the trailing catalog button with the shared overflow button; Open catalog becomes an item actions menu entry, next to Edit and Delete. The checkbox stays leading. Gate: Starts after the ListItem, menu, overflow button and CrudListView changes are done; Helder passes it on device. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-12-artists-list-rows-catalog-action-moves-into-the-overflow-menu/`. |
-| 2026-11-12 | ↳ Data model simplification — merge Artist into Person, catalog as an auto-filled grid (discussion) | 💡 Pending | Goal: Helder's 2026-11-12 ideas: one Person entity replaces Artist, the catalog becomes a grouped editable grid, and catalogs fill from karaoke participations. The DB is not in production, so a migration is cheap now. Gate: Helder opens the discussion; nothing is designed or built before it. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-12-data-model-simplification-merge-artist-into-person-catalog-as-an-auto-filled-grid-discussion/`. |
-| 2026-11-12 | ↳ Songs list rows: YouTube action moves into the overflow menu, checkbox moves leading | 💡 Pending | Goal: Replace the trailing YouTube button with the shared overflow button; the YouTube action becomes an item actions menu entry, and the checkbox moves to the leading slot. Gate: Starts after the ListItem, menu, overflow button and CrudListView changes are done; Helder passes it on device. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-12-songs-list-rows-youtube-action-moves-into-the-overflow-menu-checkbox-moves-leading/`. |
-| 2026-11-13 | ↳ Backfill Deezer images for songs and artists saved before the artwork item | 💡 Pending | Goal: Songs and artists saved before 2026-11-13, or typed without a Deezer pick, have no image. Fetch and store their image URLs from Deezer. Gate: spec first: which records qualify, when it runs, request limits, and a matching rule that avoids wrong pictures. Pointer: `BusinessFeatures/artists-songs/changes/2026-11-13-backfill-deezer-images-for-songs-and-artists-saved-before-the-artwork-item/`. |
-| 2026-06 | **Queue Entry Point Redesign — QueuePage as CRUD event list** | 💡 Pending | Goal: QueuePage becomes the CRUD list of events (FAB creates a queue; tap opens QueueManagementPage); EventsPage deleted. Gate: audit 2026-07-15 found NO implementation ever landed (registration only) — QueueManagementPage is unreachable in the app; Helder to re-prioritize. Pointer: `BusinessFeatures/queue-management/task-log.md`. |
-| 2026-06 | **User Tutorial/Learning** | 💡 Pending | Goal: lowest-effort first tutorial version, updated as features ship. Pointer: `cross-cutting/user-tutorial-learning/`. |
-| 2026-06 | **Website** | 💡 Pending | Goal: evaluate a site for marketing/documentation/community — myvocalist.com / myvocalist.app. Pointer: `cross-cutting/website/`. |
-| 2026-06 | | 🏁 **MVP release** | |
-| — | **Data Backup & Restore — Tier 2 (WiFi Mirror)** | 💡 Pending | Goal: second device on the same WiFi mirrors data in real time; fresh installs restore in one tap. Gate: Tier 1 shipped (done). Pointer: `BusinessFeatures/backup-restore/design.md`. |
-| 2026-08-04 | ↳ RestoreFromBundleAsync overwrites the live SQLite file while AppDbContext holds it open | 💡 Pending | Goal: BackupService.RestoreFromBundleAsync:137 does File.Copy(snapshotFile, _dbPath, overwrite: true) on the same path AppDbContext's connection string points at, with no context dispose and no connection close. Gate: Found during UOW plan verification 2026-08-04; unrelated to the unit-of-work rollout and deliberately excluded from it. Pointer: `BusinessFeatures/backup-restore/bugs/2026-08-04-BUG-073-restorefrombundleasync-overwrites-the-live-sqlite-file-while-appdbcontext-holds-it-open/`. |
-| 2026-11-13 | ↳ Backups include uploaded pictures | 💡 Pending | Goal: Uploaded song and artist pictures are files outside the database, so a backup restored on another device shows placeholders. Decide whether backups carry the picture files. Gate: Spec first. Pointer: `BusinessFeatures/backup-restore/changes/2026-11-13-backups-include-uploaded-pictures/`. |
-| — | **Singer self-registration** | 💡 Pending | Goal: singers register via public link / kiosk / own device connected to the host. Pointer: `cross-cutting/singer-self-registration/`. |
-| — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending | Goal: evaluate possibilities for YouTube compliance, AI pre-fill, Bandokê and BYO audio (not decided). Gate: Discuss with Helder before any action. Pointer: `BusinessFeatures/music-sourcing-strategy/`. |
-| — | **Social features** | 💡 Pending | Goal: post-event sharing, singer stats. Pointer: `cross-cutting/social-features/`. |
-| 2026-07-03 | **Cross-cutting** | — | Bugs with no single parent business feature |
-| 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) on render teardown (Major) | 💡 Pending | Goal: confirm whether the crash is a real defect or debugger-teardown noise (Release logcat investigation first). Pointer: `BusinessFeatures/cross-cutting/bugs/2026-07-03-BUG-026-hwui-sigabrt-render-teardown/`. |
-| 2026-09-19 | ↳ DbLoadGate removal dropped its _currentPage serialisation role | 💡 Pending | Goal: Gate removal accounted for only one of the gate's two documented responsibilities; LoadFirstPageAsync can now reset _currentPage while a LoadMoreAsync is in flight, risking a duplicated or skipped page. Gate: Helder rules whether this is a real regression; if so a guard is added and a regression test proves the interleaving. Pointer: `cross-cutting/read-model-notracking-guidelines/bugs/2026-09-19-BUG-079-dbloadgate-removal-dropped-its-currentpage-serialisation-role/`. |
-| 2026-11-06 | ↳ Person form follow-ups from ACF T7 run 2 | 💡 Pending | Goal: Fix three Person-form issues Helder found on device 2026-11-06: menu reappears on edit load and after a pick, duplicate singer saved without a pick, confusing birthday field. Gate: Helder passes each fix on device. Pointer: `BusinessFeatures/persons/changes/2026-11-06-person-form-follow-ups-from-acf-t7-run-2/`. |
-| 2026-11-12 | ↳ People list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending | Goal: Adopt the shared row layout: leading ListItemCheckbox, trailing overflow button, and text at the 16dp label padding with no reserved leading space. Gate: Starts after the ListItem, menu, overflow button and CrudListView changes are done; Helder passes it on device. Pointer: `BusinessFeatures/persons/changes/2026-11-12-people-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset/`. |
-| 2026-11-12 | ↳ Venues list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending | Goal: Adopt the shared row layout: leading ListItemCheckbox, trailing overflow button, and text at the 16dp label padding with no reserved leading space. Gate: Starts after the ListItem, menu, overflow button and CrudListView changes are done; Helder passes it on device. Pointer: `BusinessFeatures/venues/changes/2026-11-12-venues-list-rows-leading-checkbox-trailing-overflow-button-no-empty-leading-inset/`. |
+| Target | Feature | Status |
+|--------|---------|--------|
+| 2026-03 | ↳ Bug: Venues list fetch slow — 2.2s paged query (BUG-012) | 💡 Pending |
+| 2026-05 | **Artists & Songs Catalog** | 🔴 Blocked |
+| 2026-07-21 | ↳ **Song artist field — correctness fixes + inline "create new artist"** | 🟡 In Progress |
+| 2026-07-03 | ↳ BUG-030: ArtistFormPage search strip UX unclear (spec gap) | 🔵 Deferred |
+| 2026-07-10 | ↳ **Artist & Song Form UX Redesign — autocomplete, similar-match warning, search-strip removal** | 🔵 Deferred |
+| 2026-08-04 | ↳ Song writes propagate to the artist catalog | 📋 Spec |
+| 2026-11-09 | ↳ Post-MVP: AI intent matching for mistyped titles and artists | 💡 Pending |
+| 2026-11-09 | ↳ Post-MVP: group Songs list by artist | 💡 Pending |
+| 2026-11-09 | ↳ Post-MVP: show similar records in autocomplete results | 💡 Pending |
+| 2026-11-09 | ↳ Song list item shows artist name, version and featured artists | 🟡 In Progress |
+| 2026-11-11 | ↳ ArtistFormPage Name as the autocomplete field (split from SFT 6.3) | 🟡 In Progress |
+| 2026-11-11 | ↳ Discuss showing long song titles in list items (MD3-compliant, secondary text line) | 💡 Pending |
+| 2026-11-11 | ↳ Discuss: song identity by lyric, version de-duplication and richer Deezer data in the song UX | 💡 Pending |
+| 2026-11-11 | ↳ Evaluate removing the Song form Version and Featured artists fields | 💡 Pending |
+| 2026-11-11 | ↳ Post-MVP: import an artist's song catalog from files (PDF etc.) | 💡 Pending |
+| 2026-11-11 | ↳ Song title limit raised from 100 to 250 characters | 💡 Pending |
+| 2026-11-12 | ↳ Artists list rows: catalog action moves into the overflow menu | 💡 Pending |
+| 2026-11-12 | ↳ Data model simplification — merge Artist into Person, catalog as an auto-filled grid (discussion) | 💡 Pending |
+| 2026-11-12 | ↳ Songs list rows: YouTube action moves into the overflow menu, checkbox moves leading | 💡 Pending |
+| 2026-11-13 | ↳ Backfill Deezer images for songs and artists saved before the artwork item | 💡 Pending |
+| 2026-06 | **Queue Entry Point Redesign — QueuePage as CRUD event list** | 💡 Pending |
+| 2026-06 | **User Tutorial/Learning** | 💡 Pending |
+| 2026-06 | **Website** | 💡 Pending |
+| 2026-06 | | 🏁 **MVP release** |
+| — | **Data Backup & Restore — Tier 2 (WiFi Mirror)** | 💡 Pending |
+| 2026-08-04 | ↳ RestoreFromBundleAsync overwrites the live SQLite file while AppDbContext holds it open | 💡 Pending |
+| 2026-11-13 | ↳ Backups include uploaded pictures | 💡 Pending |
+| — | **Singer self-registration** | 💡 Pending |
+| — | **Music sourcing strategy — Deezer / LRCLIB / YouTube / Bandokê / BYO Audio** | 💡 Pending |
+| — | **Social features** | 💡 Pending |
+| 2026-07-03 | **Cross-cutting** | — |
+| 2026-07-03 | ↳ BUG-026: HWUI native crash (SIGABRT) on render teardown (Major) | 💡 Pending |
+| 2026-09-19 | ↳ DbLoadGate removal dropped its _currentPage serialisation role | 💡 Pending |
+| 2026-11-06 | ↳ Person form follow-ups from ACF T7 run 2 | 💡 Pending |
+| 2026-11-12 | ↳ People list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending |
+| 2026-11-12 | ↳ Venues list rows: leading checkbox, trailing overflow button, no empty leading inset | 💡 Pending |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ---
@@ -101,44 +54,44 @@
 > Infrastructure, tooling, architecture, and process improvements that support business feature delivery.
 
 <!-- BACKLOG:GENERATED:BEGIN dev-cycle-craft -->
-| Target | Activity | Status | Notes |
-|--------|----------|--------|-------|
-| 2026-07-12 | **Inline Trivial Fix (ITF) lane — bounded orchestrator inline-edit exception** | 🟡 In Progress | Goal: let the orchestrator apply a fully-diagnosed 1-file/≤5-line fix inline instead of paying a ~25–35k-token subagent round-trip. Gate: Helder observes the first live ITF fix end-to-end before ✅ — opportunistic, waits for a qualifying fix. Pointer: `DevCycleCraft/inline-trivial-fix/`. |
-| 2026-11-03 | ↳ Post-ship review — did the agent-dispatch recalibration meet its expectations | 💡 Pending | Goal: After a few work sessions, confirm the 2026-11-03 dispatch recalibration works: trivial fixes take the ITF lane and the trimmed context stays small. Gate: Done when a clean Lane: ITF commit exists and no trivial-fix dispatch is found in recent sessions; otherwise open a follow-up. Pointer: `DevCycleCraft/inline-trivial-fix/changes/2026-11-03-post-ship-review-did-the-agent-dispatch-recalibration-meet-its-expectations/`. |
-| 2026-05 | **Inline Undo Pattern — UX Standard** | 💡 Pending | Goal: snackbar Undo (commit-first) standard for all inline destructive actions inside forms. Pointer: `cross-cutting/inline-undo-pattern/`. |
-| 2026-06-27 | **Mandatory Worktree Rule Enforcement — ALL Subagent Work** | 💡 Pending | Goal: worktrees mandatory for every dispatch. Gate: largely delivered 2026-07-14 via the branch-lock-avoidance work — confirm remaining rule-doc updates then close. Pointer: `cross-cutting/mandatory-worktree-rule-enforcement/`. |
-| 2026-06 | **IAsyncRelayCommand Standardization** | 💡 Pending | Goal: one async-command pattern across all ViewModels (picker VMs are the reference). Pointer: `cross-cutting/iasyncrelaycommand-standardization/`. |
-| 2026-07-19 | **`MyVocaList.Extensions` layer guidelines — placement criteria + rules-file promotion** | 💡 Pending | Goal: formalize when a helper belongs in the new dependency-free `MyVocaList.Extensions` project (created by D4 above) vs. Services/Domain, beyond the one worked example. Gate: Unblocked 2026-08-04 — the project now exists and is in use on develop; what remains is promoting the criteria into a rules or library file. Pointer: `DevCycleCraft/extensions-layer-guidelines/`. |
-| 2026-06 | **Bug: Shell navigation swallows button tap animations** | 💡 Pending | Goal: let tap animations complete before Shell navigation begins (affects all flyout items). Pointer: `cross-cutting/shell-navigation-tap-animations/`. |
-| 2026-06-12 | CRUD page structural reduction — lazy BottomSheet + lazy SearchAppBar | 💡 Pending | Goal: faster Debug page loads; deferred — Release already instantaneous. Pointer: `cross-cutting/crud-page-structural-reduction/`. |
-| — | **UI-2nd-refactor** | 📋 Spec | Goal: centralized UI codebase for mobile/windows/web — Blazor Hybrid + MudBlazor + shared RCL long-term direction. Gate: explicitly post-MVP (Helder decision 2026-07-19); first web need ships as a plain Blazor web app sharing Services. Pointer: `DevCycleCraft/UI-2nd-refactor/2026-07-19-post-mvp-sequencing-decision.md`. |
-| 2026-06-12 | Large-volume data stress test (1–2 year seed) | 💡 Pending | Goal: verify list/search/queue performance at 1–2 years of realistic data; mandatory before MVP ship. Pointer: `cross-cutting/large-volume-data-stress-test/`. |
-| 2026-11-04 | ↳ Dev and QA data tooling — seed and empty app data on demand | 💡 Pending | Goal: Post-MVP idea to discuss: give developers and QA a way to fill the app with seed data or empty it, per build or test context, so testing needs no manual data entry. Gate: Post-MVP — Helder opens the discussion; nothing is designed or built before that. Pointer: `cross-cutting/large-volume-data-stress-test/changes/2026-11-04-dev-and-qa-data-tooling-seed-and-empty-app-data-on-demand/`. |
-| 2026-06-12 | Cross-device / OS version compatibility test | 💡 Pending | Goal: min-API through Android 16, multiple sizes and OEM skins, via device farms; mandatory before MVP ship. Pointer: `cross-cutting/cross-device-os-compatibility-test/`. |
-| 2026-06-12 | Play Store + Samsung Galaxy Store pre-submission compliance | 💡 Pending | Goal: pass store automated pre-review (target API, permissions, data safety, assets). Pointer: `cross-cutting/store-presubmission-compliance/`. |
-| 2026-06-12 | Full pre-release mobile testing checklist (all categories) | 💡 Pending | Goal: tick off every pre-release test category before MVP public release. Pointer: `cross-cutting/pre-release-mobile-testing-checklist/`. |
-| 2026-11-04 | ↳ Screen coverage — keyboard, safe area and snackbars hiding inputs and bottom bars | 💡 Pending | Goal: Make sure the keyboard, system bars and success/error snackbars never hide what the user is typing or the list bottom bar's buttons; test every page and settle the SafeAreaEdges rule. Gate: Later, not now — Helder: test every page on device first; the always-Container SafeAreaEdges rule is suspected wrong. Pointer: `cross-cutting/pre-release-mobile-testing-checklist/changes/2026-11-04-screen-coverage-keyboard-safe-area-and-snackbars-hiding-inputs-and-bottom-bars/`. |
-| 2026-06-13 | **Session Continuity — Task Leasing & Auto-Resume** | 🟡 In Progress | Goal: lease-based collision safety + auto-resume across sessions; merged to develop. Gate: Helder live two-terminal demo (row below) before ✅. Pointer: `DevCycleCraft/session-continuity-leasing/`. |
-| 2026-06-27 | **Infra Repository Folder Consolidation** | 💡 Pending | Goal: merge `Infra/Repository/` and `Infra/Repositories/` into one folder (moves + namespaces only). Pointer: `cross-cutting/infra-repository-folder-consolidation/`. |
-| 2026-06-27 | **Read Model + Global NoTracking Pattern — Guidelines Update** | 💡 Pending | Goal: encode the BUG-018 canonical patterns into the library rules. Gate: BUG-018 on-device smoke test. Pointer: `cross-cutting/read-model-notracking-guidelines/`. |
-| 2026-08-03 | ↳ DbContext lifetime & unit-of-work pattern — MAUI has no per-page scope | 🟡 In Progress | Goal: AddDbContext registers Scoped but MAUI never creates a scope, so one AppDbContext lives for the whole app session and leaks tracked entities between operations (root cause of BUG-068). Establish one correct unit-of-work pattern with minimal repeated code. Gate: Phase 3.5 dissolved by the Event/Queue deletion; Phase 4+ is unblocked and all that remains. Pointer: `cross-cutting/read-model-notracking-guidelines/changes/2026-08-03-dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope/`. |
-| 2026-08-18 | ↳ Flaky ObjectDisposedException in the UOW SQLite test harness | 💡 Pending | Goal: Integration tests intermittently fail with ObjectDisposedException on SQLitePCL.sqlite3 during EnsureCreated, landing on a different test each run; affected tests pass in isolation. Gate: Suspected pooling/disposal interaction in the temp-file SQLite harness. Threatens the Phase 3.1 suite-green gate, whose whole value is a trustworthy signal. Pointer: `cross-cutting/read-model-notracking-guidelines/bugs/2026-08-18-BUG-076-flaky-objectdisposedexception-in-the-uow-sqlite-test-harness/`. |
-| 2026-08-24 | ↳ Service read paths still use the captive AppDbContext; one of them tracks | 💡 Pending | Goal: Service read methods call the constructor-injected repository, which holds the app-lifetime AppDbContext that has no scope. ArtistRepository.GetByIdAsync is the only .AsTracking() read in the repository layer, and ArtistService.GetDeleteConfirmationAsync reaches it outside any unit of work. Pointer: `cross-cutting/read-model-notracking-guidelines/bugs/2026-08-24-BUG-078-service-read-paths-still-use-the-captive-appdbcontext-one-of-them-tracks/`. |
-| 2026-06-27 | **CRUD Read Model Refactoring — Persons, Songs, Venues** | 💡 Pending | Goal: apply the read-model pattern to the remaining CRUD entities and retire the list DTOs. Gate: Guidelines Update done first. Pointer: `cross-cutting/crud-read-model-refactoring/`. |
-| 2026-06-30 | **Form validation** | 🟡 In Progress | Goal: establish and apply validation patterns to all form entries (guide + 5 form updates shipped; open bugs below). Pointer: `DevCycleCraft/ui-form-validation-guide/`. |
-| 2026-08-04 | ↳ Pre-commit test gate blocks the RED-first commit that bug-tracking mandates | 💡 Pending | Goal: The pre-commit hook refuses any commit containing a failing test, but a Critical bug's regression test must be committed before its fix. The two rules cannot both be obeyed. Gate: Found during UOW Phase 0; Helder authorised the no-verify bypass for RED commits as an interim workaround. Pointer: `DevCycleCraft/hooks-redesign/bugs/2026-08-04-BUG-074-pre-commit-test-gate-blocks-the-red-first-commit-that-bug-tracking-mandates/`. |
-| 2026-08-18 | ↳ Pre-commit hook inoperative in worktrees: dotnet test without --no-restore aborts on NETSDK1147 | 💡 Pending | Goal: The pre-commit hook runs dotnet test without --no-restore; in a worktree the restore fails with NETSDK1147, so the hook exits before running a single test. Gate: Found in UOW Phase 2. The test gate silently does not run in any worktree, and every worktree commit needs --no-verify for an unrelated reason. Pointer: `DevCycleCraft/hooks-redesign/bugs/2026-08-18-BUG-075-pre-commit-hook-inoperative-in-worktrees-dotnet-test-without-no-restore-aborts-on-netsdk1147/`. |
-| 2026-09-18 | ↳ Pre-commit hook: allow TDD Red commits without --no-verify | 💡 Pending | Goal: Teach the pre-commit hook to skip the test gate when a commit is a declared TDD Red, so a deliberately failing test can be committed without bypassing the hook wholesale. Gate: Helder approves the Red-marker mechanism; a Red commit passes the hook unaided and a genuinely broken commit still fails it. Pointer: `DevCycleCraft/hooks-redesign/changes/2026-09-18-pre-commit-hook-allow-tdd-red-commits-without-no-verify/`. |
-| 2026-11-03 | ↳ Move the Playwright MCP token to .env.local | 💡 Pending | Goal: The token is plain text in the user settings env block, and .env.local holds a different value. Gate: Helder: put the working token in .env.local, run load-env.ps1, delete the env block from the user settings, restart. Pointer: `DevCycleCraft/hooks-redesign/changes/2026-11-03-move-the-playwright-mcp-token-to-env-local/`. |
-| 2026-11-03 | ↳ Rotate the DevExpress license key | 💡 Pending | Goal: The key sat in a tracked settings.local.json allow rule, so it is in git history. Rotate it in the DevExpress portal. Gate: Helder: new key issued and DevExpress_License.txt updated; old key revoked. Pointer: `DevCycleCraft/hooks-redesign/changes/2026-11-03-rotate-the-devexpress-license-key/`. |
-| 2026-11-09 | ↳ Release tag discipline — mechanically enforced tag creation | 💡 Pending | Goal: A tag is created and pushed at every mandatory moment, and the build or a hook fails when one is missing, so no session can skip it. Gate: Helder approves the trigger list and the enforcement points. Pointer: `DevCycleCraft/app-versioning/changes/2026-11-09-release-tag-discipline-mechanically-enforced-tag-creation/`. |
-| 2026-11-11 | ↳ AutocompleteDXField is the app-wide autocomplete pattern, whatever page uses it | 💡 Pending | Goal: Every autocomplete or suggestion field in the app uses AutocompleteDXField, and its timing uses shared constants: no page-level DX AutoCompleteEdit glue and no literal debounce values. Gate: A census finds no raw AutoCompleteEdit or suggestion glue outside the component (Artist form included), and the list-search debounce uses a shared constant. Pointer: `DevCycleCraft/autocomplete-component/changes/2026-11-11-autocompletedxfield-is-the-app-wide-autocomplete-pattern-whatever-page-uses-it/`. |
-| 2026-11-12 | ↳↳ Correct the MD3 list, selection and toolbar rules in the library guidelines with verbatim official quotes | 💡 Pending | Goal: Rewrite the library rules on list modes, checkbox placement, selection gestures and the floating toolbar so each cites a verbatim m3.material.io quote and its URL, replacing rules not found in the official docs. Gate: Helder reviews (context-file authorship rule). Pointer: `DevCycleCraft/crud-list-deduplication/changes/2026-11-11-crud-list-selection-gestures/changes/2026-11-12-correct-the-md3-list-selection-and-toolbar-rules-in-the-library-guidelines-with-verbatim-official-quotes/`. |
-| 2026-11-12 | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending | Goal: In selection mode, the Songs SmallAppBar shows the page title with 'N selected' as a subtitle, while Venues, People and Artists replace the title with 'N selected'. Pick one MD3-compliant pattern (check the official app bar docs) and apply it to all four lists. Gate: MD3 docs confirm the pattern; Helder approves Pointer: `DevCycleCraft/crud-list-deduplication/changes/2026-11-12-crud-list-app-bar-in-selection-mode-songs-shows-title-plus-count-the-other-lists-only-the-count/`. |
-| 2026-11-12 | ↳ CRUD list FAB: placement, size and color when alone and when paired with the floating toolbar | 💡 Pending | Goal: With nothing selected the FAB sits alone at the bottom center, colored like the drawer text. Confirm in the MD3 FAB and toolbar docs its position, size and color role, alone and beside the floating toolbar. Gate: MD3 docs confirm the layout; Helder approves Pointer: `DevCycleCraft/crud-list-deduplication/changes/2026-11-12-crud-list-fab-placement-size-and-color-when-alone-and-when-paired-with-the-floating-toolbar/`. |
-| 2026-11-12 | ↳ CrudListView: one list mode at a time (multi-action browse, multi-select selection) with toolbar Edit for exactly one | 💡 Pending | Goal: Browse: tap edits, long-press starts selection, trailing overflow icon button opens the item actions overflow menu (an MD3 menu, not a bottom sheet). Selection: tap and long-press toggle, overflow hidden (MD3: multi-select items can't have nested actions); toolbar is Select all, Edit (exactly one selected) and Delete. Gate: Four component-governance gates; Helder approves before coding. Pointer: `DevCycleCraft/crud-list-deduplication/changes/2026-11-12-crudlistview-one-list-mode-at-a-time-multi-action-browse-multi-select-selection-with-toolbar-edit-for-exactly-one/`. |
-| 2026-11-12 | ↳ List item overflow icon button in the ListItem trailing slot, opening the item actions menu | 💡 Pending | Goal: An MD3 icon button placed in ListItem TrailingContent by each row template, opening the MD3 overflow menu; shown in browse mode only. Not a slot component: a reusable view only if the four row templates would otherwise repeat its command binding. Gate: Spec and MD3 review approved by Helder. Pointer: `DevCycleCraft/crud-list-deduplication/changes/2026-11-12-list-item-overflow-menu-button-new-component-opening-the-item-actions-sheet/`. |
-| 2026-11-12 | ↳ MD3 overflow menu for list item actions | 💡 Pending | Goal: The list item overflow icon button opens an MD3 menu (overflow menu use case) with Edit, Delete and page-specific actions, using MD3 menu terminology and the denser vertical menu tokens. Expressive motion is out of scope unless DevExpress provides it built-in. Gate: MD3 review plus DevExpress-first check; Helder approves before coding. Pointer: `DevCycleCraft/crud-list-deduplication/changes/2026-11-12-md3-overflow-menu-for-list-item-actions/`. |
-| 2026-11-12 | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending | Goal: ListItem itself hides a leading or trailing slot that has no content, and the content slot takes the freed width. Spacing moves to the List - Common tokens: leading and trailing 16dp, between 12dp, top and bottom 10dp. Gate: Governed component (33 usages in 8 files): four gates; Helder approves before coding. Pointer: `DevCycleCraft/m3-lists/changes/2026-11-12-listitem-empty-slots-not-rendered-content-fills-the-freed-width-spacing-aligned-to-md3-list-common-tokens/`. |
-| 2026-11-15 | ↳ Token-usage reduction: read guards, worktree location, backlog and ledger redesign, always-loaded context | 🟡 In Progress | Goal: Cut the tokens spent on reading without losing accuracy: fix the read guard gaps, settle one worktree location, slim or replace the backlog and ledger reads, and shrink what loads at every session start and compaction. Gate: Helder approves the plan for each workstream before any rule or context file changes. Pointer: `DevCycleCraft/docs-context-scope-control/changes/2026-11-15-token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context/`. |
+| Target | Activity | Status |
+|--------|----------|--------|
+| 2026-07-12 | **Inline Trivial Fix (ITF) lane — bounded orchestrator inline-edit exception** | 🟡 In Progress |
+| 2026-11-03 | ↳ Post-ship review — did the agent-dispatch recalibration meet its expectations | 💡 Pending |
+| 2026-05 | **Inline Undo Pattern — UX Standard** | 💡 Pending |
+| 2026-06-27 | **Mandatory Worktree Rule Enforcement — ALL Subagent Work** | 💡 Pending |
+| 2026-06 | **IAsyncRelayCommand Standardization** | 💡 Pending |
+| 2026-07-19 | **`MyVocaList.Extensions` layer guidelines — placement criteria + rules-file promotion** | 💡 Pending |
+| 2026-06 | **Bug: Shell navigation swallows button tap animations** | 💡 Pending |
+| 2026-06-12 | CRUD page structural reduction — lazy BottomSheet + lazy SearchAppBar | 💡 Pending |
+| — | **UI-2nd-refactor** | 📋 Spec |
+| 2026-06-12 | Large-volume data stress test (1–2 year seed) | 💡 Pending |
+| 2026-11-04 | ↳ Dev and QA data tooling — seed and empty app data on demand | 💡 Pending |
+| 2026-06-12 | Cross-device / OS version compatibility test | 💡 Pending |
+| 2026-06-12 | Play Store + Samsung Galaxy Store pre-submission compliance | 💡 Pending |
+| 2026-06-12 | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
+| 2026-11-04 | ↳ Screen coverage — keyboard, safe area and snackbars hiding inputs and bottom bars | 💡 Pending |
+| 2026-06-13 | **Session Continuity — Task Leasing & Auto-Resume** | 🟡 In Progress |
+| 2026-06-27 | **Infra Repository Folder Consolidation** | 💡 Pending |
+| 2026-06-27 | **Read Model + Global NoTracking Pattern — Guidelines Update** | 💡 Pending |
+| 2026-08-03 | ↳ DbContext lifetime & unit-of-work pattern — MAUI has no per-page scope | 🟡 In Progress |
+| 2026-08-18 | ↳ Flaky ObjectDisposedException in the UOW SQLite test harness | 💡 Pending |
+| 2026-08-24 | ↳ Service read paths still use the captive AppDbContext; one of them tracks | 💡 Pending |
+| 2026-06-27 | **CRUD Read Model Refactoring — Persons, Songs, Venues** | 💡 Pending |
+| 2026-06-30 | **Form validation** | 🟡 In Progress |
+| 2026-08-04 | ↳ Pre-commit test gate blocks the RED-first commit that bug-tracking mandates | 💡 Pending |
+| 2026-08-18 | ↳ Pre-commit hook inoperative in worktrees: dotnet test without --no-restore aborts on NETSDK1147 | 💡 Pending |
+| 2026-09-18 | ↳ Pre-commit hook: allow TDD Red commits without --no-verify | 💡 Pending |
+| 2026-11-03 | ↳ Move the Playwright MCP token to .env.local | 💡 Pending |
+| 2026-11-03 | ↳ Rotate the DevExpress license key | 💡 Pending |
+| 2026-11-09 | ↳ Release tag discipline — mechanically enforced tag creation | 💡 Pending |
+| 2026-11-11 | ↳ AutocompleteDXField is the app-wide autocomplete pattern, whatever page uses it | 💡 Pending |
+| 2026-11-12 | ↳↳ Correct the MD3 list, selection and toolbar rules in the library guidelines with verbatim official quotes | 💡 Pending |
+| 2026-11-12 | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
+| 2026-11-12 | ↳ CRUD list FAB: placement, size and color when alone and when paired with the floating toolbar | 💡 Pending |
+| 2026-11-12 | ↳ CrudListView: one list mode at a time (multi-action browse, multi-select selection) with toolbar Edit for exactly one | 💡 Pending |
+| 2026-11-12 | ↳ List item overflow icon button in the ListItem trailing slot, opening the item actions menu | 💡 Pending |
+| 2026-11-12 | ↳ MD3 overflow menu for list item actions | 💡 Pending |
+| 2026-11-12 | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
+| 2026-11-15 | ↳ Token-usage reduction: read guards, worktree location, backlog and ledger redesign, always-loaded context | 🟡 In Progress |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->
