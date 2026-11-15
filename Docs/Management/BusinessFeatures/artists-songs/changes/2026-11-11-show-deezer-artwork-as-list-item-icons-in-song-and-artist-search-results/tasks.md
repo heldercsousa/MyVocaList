@@ -29,4 +29,4 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 ## Phase 5 — Close-out
 - [x] T10a Real-SQLite test: the artist image fill is persisted by the real unit of work (verifier D4). (REQ-ART-16)
 - [x] T10 Full test run, Android build, verifier, traceability matrix, governed-list update, follow-up items registered, merge to `develop`.
-- [ ] T11 **Device check (Helder)** — checklist in `task-log.md § Device check`. (REQ-ART-21, 22, 23 and the component Gate 3 rows)
+- [x] T11 **Device check (Helder)** — checklist in `task-log.md § Device check`. (REQ-ART-21, 22, 23 and the component Gate 3 rows)

@@ -1,11 +1,12 @@
 ---
 id: listitem-leading-media-placeholder-on-listitemleadingimage-and-new-listitemleadingavatar
 title: "ListItem leading media: placeholder on ListItemLeadingImage and new ListItemLeadingAvatar"
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-13
 section: DevCycleCraft
 parent: m3-lists
 goal: "ListItemLeadingImage shows a placeholder icon when its image is missing or fails to load, and a new ListItemLeadingAvatar (40dp circle) shows a picture with the same fallback. Needed by the Deezer artwork item. Gate: four-gate component record in this folder; device check that YouTube search thumbnails are unchanged."
+closed: 2026-11
 kind: change
 ---
 
