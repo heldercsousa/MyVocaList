@@ -10,13 +10,18 @@ The hooks in `.claude/settings.json` enforce specific rules from this document.
 
 | Hook | Trigger | Rule enforced |
 |------|---------|---------------|
-| `Stop` hook | Session ends with uncommitted changes | Rule 3 — Commit After Every Task; also triggers Verifier dispatch reminder |
-| `PostCompact` hook | Context compaction event | Session resume — re-read spec reminder |
-| `PostToolUse` hook (Services files) | Edit to a Services/*.cs file | testing.md — TDD reminder for service changes |
+| `Stop` hook (`uncommitted-warning.py --stop`) | Turn ends with uncommitted changes | Rule 3 — Commit After Every Task. Shown to Helder only (`systemMessage`) |
+| `PostToolUse` `Agent` (`uncommitted-warning.py --after-agent`) | A subagent returned and the main checkout is dirty | Rule 3 — the model is told to `/sln-commit` |
+| `PreToolUse` `Read` (`read-slice-guard.py`) | Read of a file over 200 lines or 12 KB without a `limit` <= 250 | Token budget — read in slices; `BACKLOG.md` → `backlog_gen.py query` |
+| `PreToolUse` `Bash\|PowerShell` (`bash-guard.py`) | `git worktree add` outside `.claude/worktrees/` (blocked); `cat`-like read of an over-budget file (note only) | Rule 2 — one worktree location; token budget |
+| `PreToolUse` `Write\|Edit` (`delegate-reminder.py`) | Main agent edits a code file with no ITF declaration | Rule 2 — ITF or dispatch. Silent for subagents |
+| `PostToolUse` (`worktree-base-check.py`) | Worktree created | Rule 2 — reports only a branch forked from `main` |
 | `SessionStart` hook | New session begins | Hook health verification |
 | `pre-commit` (`process_checks.py`) | Staged `Docs/`, `MyVocaList.sln` or `.xaml` | `.sln` registration incl. moves/deletes; `SafeAreaEdges="Container"` (or `"All"` on pages with text input) on ContentPages; `To Review` task-log entries need `### Changed files` |
 | `commit-msg` (`process_checks.py`) | Every commit | `feat:`/`refactor:`/`perf:`/`amend:` need an `Item: <backlog-id>` trailer naming a registered item; docs/chore/merge/fix exempt |
 | `pre-commit` (`ledger-row-guard.py`) | Staged `LEDGER.md` | Ledger row length (max 450 chars) |
+
+**Writing a hook message (delivery rule, Claude Code hooks reference, checked 2026-11-15):** plain `print` output reaches the model only from `UserPromptSubmit` and `SessionStart` hooks. From any tool hook (`PreToolUse`, `PostToolUse`) or `Stop` hook it reaches nobody. Use `.claude/scripts/hook_out.py`: `additional_context` (the model sees it, costs tokens each time), `system_message` (Helder sees it), `deny` (blocks the tool call). The former TDD reminder on Services edits was removed on 2026-11-15: it never fired in a worktree, and `testing.md § TDD within SDD` carries the rule.
 
 ### Self-enforced rules (no hook — agent must apply consciously)
 
