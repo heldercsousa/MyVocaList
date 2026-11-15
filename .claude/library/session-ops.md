@@ -187,7 +187,7 @@ A ping is a 30-second edit — never batch pings "for later"; later may not come
 ```markdown
 ### Checkpoint (live — overwrite on each ping)
 **Pinged:** YYYY-MM-DD HH:MM
-**Branch / worktree:** <branch> / <.worktrees/name or main tree>
+**Branch / worktree:** <branch> / <.claude/worktrees/name or main tree>
 **Step:** <N of M> — last completed: <one line> — now attempting: <one line>
 **Build/test state:** <last known: build 0 errors | test failure X | not yet run>
 **Next command:** <the literal next command or edit, e.g. "dotnet test after fixing VenueServiceTests.Save_...">
