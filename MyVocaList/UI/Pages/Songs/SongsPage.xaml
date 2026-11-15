@@ -16,20 +16,10 @@
     BackgroundColor="{StaticResource Surface}"
     SafeAreaEdges="Container">
 
-    <!-- Suppress Shell's native back/hamburger icon.
-         IsVisible=False: hides the Shell-rendered nav icon.
-         IsEnabled=False: prevents Shell from intercepting the hardware back event so OnBackButtonPressed fires.
-         OnBackButtonPressed handles all back/dismiss navigation (confirm sheet → default). -->
-    <Shell.BackButtonBehavior>
-        <BackButtonBehavior IsVisible="False" IsEnabled="False" />
-    </Shell.BackButtonBehavior>
-
     <Shell.TitleView>
         <appbars:SmallAppBar
             Title="{Binding AppBarTitle}"
             Subtitle="{Binding AppBarSubtitle}"
-            NavigationIcon="{Binding AppBarNavigationIcon}"
-            NavigationCommand="{Binding AppBarNavigationCommand}"
             IsElevated="{Binding IsScrolled}" />
     </Shell.TitleView>
 
