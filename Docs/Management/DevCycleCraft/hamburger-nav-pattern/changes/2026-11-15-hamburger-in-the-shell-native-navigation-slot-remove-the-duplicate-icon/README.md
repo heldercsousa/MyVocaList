@@ -110,7 +110,7 @@ itself through the existing `HasNavigationIcon`. The component four-gate therefo
 3. Menu → Singers / Artists / Songs / Venues: one hamburger in the left slot, no back-arrow flash, tap opens the drawer.
 4. Device back: root Venues → exit sheet; pushed list → pops; delete-confirm sheet open → dismisses it.
 5. Icon tint follows `Shell.ForegroundColor` in light and dark theme; the title sits right after the icon.
-6. Songs catalog mode (Artists → catalog) shows the back arrow and pops — after merge with `fix/bug-086-round3`, where that mode lives.
+6. Songs catalog mode (Artists → catalog) shows the back arrow and pops.
 
 Evidence is recorded in `../../task-log.md`.
 
