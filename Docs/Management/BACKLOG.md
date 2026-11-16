@@ -11,7 +11,6 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 |--------|---------|--------|
 | 2026-05 | **Artists & Songs Catalog** | 🔴 Blocked |
 | 2026-08-04 | ↳ Song writes propagate to the artist catalog | 📋 Spec |
-| 2026-11-11 | ↳ ArtistFormPage Name as the autocomplete field (split from SFT 6.3) | 🟡 In Progress |
 | 2026-11-11 | ↳ Discuss showing long song titles in list items (MD3-compliant, secondary text line) | 💡 Pending |
 | 2026-11-11 | ↳ Discuss: song identity by lyric, version de-duplication and richer Deezer data in the song UX | 💡 Pending |
 | 2026-11-11 | ↳ Evaluate removing the Song form Version and Featured artists fields | 💡 Pending |
