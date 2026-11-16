@@ -27,6 +27,9 @@ public static class SearchConstants
     /// </summary>
     public const int MaxSearchResults = 5;
 
+    /// <summary>Rows kept and grouped out of one Deezer track answer (REQ-SLD-10).</summary>
+    public const int RemoteSongFetchCount = 25;
+
     /// <summary>
     /// Debounce delay, in milliseconds, before an autocomplete field requests options after the last keystroke.
     /// REQ-ACF-14 (shared autocomplete field); makes REQ-DXAC-07's ≈300 ms concrete. One value for every autocomplete
