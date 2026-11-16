@@ -1,15 +1,16 @@
 ---
 id: BUG-030
 title: "BUG-030: ArtistFormPage search strip UX unclear (spec gap)"
-status: "🔵 Deferred"
+status: 🔵 Superseded
 target: 2026-07-03
 section: BusinessFeatures
 parent: artists-songs
-kind: bug
-order: 160
-goal: "resolve the search-strip spec gap on the Artist form."
+goal: resolve the search-strip spec gap on the Artist form.
 gate: "Answered by Helder 2026-07-10: the element must disappear from both forms — folded into the Form UX Redesign."
 pointer: BusinessFeatures/artists-songs/bugs/2026-07-03-BUG-030-artistformpage-search-strip-ux-unclear/
+closed: 2026-11
+order: 160
+kind: bug
 ---
 
 # BUG-030: ArtistFormPage search strip UX unclear (spec gap)
@@ -35,3 +36,8 @@ into the Form UX Redesign.
 > REQ-SEV-01). The row's pointer moves from the shared `artists-songs` task-log to this
 > folder. **Nothing was removed from that task-log** (REQ-SEV-27); it remains the
 > narrative record and is linked above.
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup. The search strip was removed. Reopen it by registering a new item if the work is wanted again.
