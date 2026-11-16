@@ -105,11 +105,14 @@ public class SongSuggestionService : ISongSuggestionService
             return new SongRemoteSearchResult([], [], RemoteSearchStatus.Offline);
         }
 
-        var raw = await TryFetchDeezerAsync(q, ct);
-        if (raw is null)
+        var fetched = await TryFetchDeezerAsync(q, ct);
+        if (fetched is null)
             return new SongRemoteSearchResult([], [], RemoteSearchStatus.Unavailable);
-        if (raw.Count == 0)
+        if (fetched.Count == 0)
             return new SongRemoteSearchResult([], [], RemoteSearchStatus.Ok);
+
+        // One row per song group, before the library check (REQ-SLD-06 to 09, 10).
+        var raw = CollapseSongGroups(fetched.Take(SearchConstants.RemoteSongFetchCount).ToList());
 
         // No HTTP inside the read scope: the fetch above has completed (REQ-UOW-43).
         var (promotedHits, remaining) = await _uow.ExecuteReadAsync(
@@ -126,11 +129,49 @@ public class SongSuggestionService : ISongSuggestionService
         var remote = await ResolveLocalArtistsAsync(top, ct);
         _logger.LogInformation(
             "Remote title search '{Query}': {Raw} from Deezer, {Promoted} matched the library, {Remote} remote options",
-            q, raw.Count, promoted.Count, remote.Count);
+            q, fetched.Count, promoted.Count, remote.Count);
         return new SongRemoteSearchResult(promoted, remote, RemoteSearchStatus.Ok);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
+
+    // Groups rows by (Deezer artist id, short title), compared ordinally with no text rewriting (HARD RULE).
+    // A row without an artist id, or without a title, is its own group. The kept row is the first blank-version
+    // row of its group, else the first row; it takes the group's first position and carries no version (REQ-SLD-06 to 08, 11).
+    private static List<MusicSearchResultDto> CollapseSongGroups(IReadOnlyList<MusicSearchResultDto> rows)
+    {
+        var groups = new List<List<MusicSearchResultDto>>();
+        var groupsByArtist = new Dictionary<string, Dictionary<string, List<MusicSearchResultDto>>>(StringComparer.Ordinal);
+
+        foreach (var row in rows)
+        {
+            if (string.IsNullOrWhiteSpace(row.ExternalArtistId) || row.SongTitle is null)
+            {
+                groups.Add([row]);
+                continue;
+            }
+
+            if (!groupsByArtist.TryGetValue(row.ExternalArtistId, out var byTitle))
+            {
+                byTitle = new Dictionary<string, List<MusicSearchResultDto>>(StringComparer.Ordinal);
+                groupsByArtist[row.ExternalArtistId] = byTitle;
+            }
+
+            if (!byTitle.TryGetValue(row.SongTitle, out var group))
+            {
+                group = [];
+                byTitle[row.SongTitle] = group;
+                groups.Add(group);
+            }
+
+            group.Add(row);
+        }
+
+        return groups
+            .Select(group => group.FirstOrDefault(r => string.IsNullOrWhiteSpace(r.Version)) ?? group[0])
+            .Select(kept => kept with { Version = string.Empty })
+            .ToList();
+    }
 
     // Promoted rows also come through here, so they carry the stored images and no album (REQ-ART-06).
     private static SongSuggestionDto MapLocal(SongSearchHit hit) => new(
