@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.List;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
@@ -108,6 +109,7 @@ public class SongService : ISongService
                 Title = title,
                 FeaturedArtists = featuredArtists,
                 Lyrics = lyrics,
+                LyricsOrigin = MyVocaList.Domain.Rules.LyricsOriginRules.OnCreate(lyrics, null),
                 ExternalId = externalId,
                 ExternalProvider = externalProvider,
                 CreatedAt = DateTime.UtcNow,
@@ -260,6 +262,7 @@ public class SongService : ISongService
             song.ArtistId = effectiveArtistId;
             song.Title = title;
             song.FeaturedArtists = featuredArtists;
+            song.LyricsOrigin = MyVocaList.Domain.Rules.LyricsOriginRules.OnUpdate(song.Lyrics, song.LyricsOrigin, lyrics);
             song.Lyrics = lyrics;
             song.UpdatedAt = DateTime.UtcNow;
 
@@ -306,7 +309,8 @@ public class SongService : ISongService
         int? artistId, string? newArtistName, string title, string version,
         string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct,
-        string? songImageUrl = null, string? artistImageUrl = null, bool fillArtistImage = false)
+        string? songImageUrl = null, string? artistImageUrl = null, bool fillArtistImage = false,
+        LyricsLookupResult? pickLyricsLookup = null)
     {
         // REQ-SFT-21: exactly one of artistId / newArtistName. Pure input validation — it stays
         // OUTSIDE the lambda (REQ-UOW-41), so a rejected call opens no DI scope and writes nothing.
@@ -396,6 +400,7 @@ public class SongService : ISongService
                 Version = version,
                 FeaturedArtists = featuredArtists,
                 Lyrics = lyrics,
+                LyricsOrigin = MyVocaList.Domain.Rules.LyricsOriginRules.OnCreate(lyrics, pickLyricsLookup),
                 ExternalId = externalId,
                 ExternalProvider = externalProvider,
                 ImageUrl = songImageUrl,
@@ -525,7 +530,7 @@ public class SongService : ISongService
                 resolved.ArtistId, resolved.NewArtistName, request.Title, request.Version,
                 request.FeaturedArtists, request.Lyrics, externalId, externalProvider,
                 request.PendingUrls ?? [], ct,
-                songImageUrl, artistImageUrl, resolved.FillArtistImage);
+                songImageUrl, artistImageUrl, resolved.FillArtistImage, request.PickLyricsLookup);
 
             return created && song is not null
                 ? SaveSucceeded(createMessage, song.Id)
