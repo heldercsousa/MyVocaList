@@ -51,6 +51,19 @@
 | C27 | Album part of a Deezer option row | Stays (REQ-ART-07) | Only the version label was decided | Low |
 | C28 | The form sends the Deezer provider and id as a pair | Both when the pick is held, neither otherwise; decided during T10 | Before, each part was sent on its own check, so a half identity was possible in theory. A half identity is no identity everywhere else (duplicate check, unique index, `IsDeezerSong`). Deezer rows always carry both, so only a theoretical case changes | Low |
 
+### 1.3 Added after the merge (2026-11-16)
+
+Helder decided: wrap the edit-mode load so a failure cannot leave the form half-usable, and show a loading indicator that does not block the screen (REQ-SLD-32 to 34).
+
+| # | Question | Decision (Claude, overrule if wanted) | Why |
+|---|----------|----------------------------------------|-----|
+| C29 | Which indicator | `dx:ShimmerView` around the form's field area, as the lists and the YouTube search page already use | DevExpress first; the house pattern for a first load |
+| C30 | What a failed load does | Message through the existing snackbar component, then navigate back | An edit form without its stored values must not stay open: Save would overwrite stored data with blanks (the BUG-008/024 risk) |
+| C31 | "Song not found" | Treated like a failed load (today: logged, form left open and empty) | Same risk, same answer |
+| C32 | Save while loading | Ignored (REQ-SLD-33) | Same risk |
+
+Design: `SongFormViewModel` gains `IsSongLoading` (true from the moment edit mode is entered until `LoadSongForEditAsync` ends, in a `try/finally`); the load body is wrapped in `try/catch` that logs, shows the message and navigates back through the navigation service the ViewModel already uses; `SaveAsync` returns at once while `IsSongLoading`. `SongFormPage.xaml` wraps the field area in `dx:ShimmerView` bound to `IsSongLoading`, with a loading view of a few rounded blocks. No shared component is edited. Tests: ViewModel unit tests for the flag (pending load, completed load), Save ignored while loading, failed load and not-found (message shown once, navigation back, no save); the shimmer itself is a device check.
+
 ## 2. Approaches considered
 
 **Songs list search**
