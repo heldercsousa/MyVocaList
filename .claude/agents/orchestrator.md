@@ -404,25 +404,25 @@ If not OK, recreate the worktree explicitly from develop (manual form below).
 
 **Manual fallback (only when EnterWorktree is unavailable or based the worktree on the wrong branch):**
 ```bash
-git worktree add .worktrees/agent-1 -b task/agent-1 develop
-git worktree add .worktrees/agent-2 -b task/agent-2 develop
+git worktree add .claude/worktrees/agent-1 -b task/agent-1 develop
+git worktree add .claude/worktrees/agent-2 -b task/agent-2 develop
 ```
 
-> Verify `.worktrees/` is in `.gitignore` before creating. Add it if missing — unignored worktree directories pollute `git status`.
+> Verify `.claude/worktrees/` is in `.gitignore` before creating. Add it if missing — unignored worktree directories pollute `git status`.
 
 **Cleanup (after all subagent commits are merged):**
 ```bash
-git worktree remove .worktrees/agent-1
-git worktree remove .worktrees/agent-2
+git worktree remove .claude/worktrees/agent-1
+git worktree remove .claude/worktrees/agent-2
 ```
 
 **Rules:**
 - Each subagent commits only within its own worktree — never touches the main working tree
 - Each subagent pushes before stopping so the main agent can pull
-- Worktree directories live at `.worktrees/<name>` (project-local, gitignored) — not outside the repo
+- Worktree directories live at `.claude/worktrees/<name>` (project-local, gitignored) — not outside the repo
 - Sequential code tasks within the same feature may share ONE worktree/branch (state continuity) — but still never run on develop/main directly
 - Docs-only tasks (specs, task-log, BACKLOG) run on develop in the main working tree — no worktree needed
-- Before dispatching any parallel wave, verify `.worktrees/` is gitignored: `git check-ignore -q .worktrees`
+- Before dispatching any parallel wave, verify `.claude/worktrees/` is gitignored: `git check-ignore -q .claude/worktrees`
 
 See `superpowers:using-git-worktrees` skill for full setup protocol (Step 0 detection, native vs. manual decision, baseline verification).
 

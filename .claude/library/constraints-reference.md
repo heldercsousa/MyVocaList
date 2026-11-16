@@ -38,6 +38,8 @@
 
 - **Solution item registration — HARD GATE:** Any file created, moved, or deleted in `Docs/` or `.claude/` **must** be reflected in `MyVocaList.sln` in the same commit. Missing entries make files invisible in VS Solution Explorer. This is not optional and is checked in the subagent exit checklist.
 
+  **Logical folder = physical folder (Helder ruling 2026-11-15):** a `Docs\` file is listed under the Solution Folder chain that mirrors its directory (`Docs > Management > <section> > <feature> > changes > <slug>`). `.claude/scripts/sln_nest.py` holds the placement logic: `backlog_gen.py register` and the `PostToolUse` `Write` hook (`sln-register-doc.py`) call it, and `python .claude/scripts/sln_nest.py [--dry-run]` repairs every misplaced entry (it creates missing folders with path-derived GUIDs). Prefer the script to hand edits.
+
   **When to act:**
   - **Create** a file → add `RelativePath\file = RelativePath\file` to the matching Solution Folder's `ProjectSection(SolutionItems)`. If no folder exists for the feature yet, create one with a new GUID.
   - **Move** a file → remove the old path entry, add the new path entry.

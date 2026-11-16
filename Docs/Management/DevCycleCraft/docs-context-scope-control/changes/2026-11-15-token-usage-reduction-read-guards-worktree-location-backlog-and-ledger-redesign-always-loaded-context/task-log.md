@@ -1,0 +1,135 @@
+# Task log — Token-usage reduction
+
+Plan: `plan.md` (approved by Helder 2026-11-15; workstreams A, B, C now; D and E after a brainstorm).
+
+### Checkpoint
+
+- **Updated:** 2026-11-15
+- **Branch / worktree:** develop / main tree (hooks and docs only)
+- **Step:** item closed 2026-11-15; nothing in flight
+- **Context manifest:** `plan.md` · `README.md` (this item) · `.claude/settings.json` · `.claude/scripts/backlog/render.py` · `CLAUDE.md`
+
+## Steps 2 + 3 — B, A1, A4: one worktree location, worktree-aware guard, Bash notice
+
+**Status:** Done (2026-11-15), commit `54ea4336`. Leftover clean-up is **pending Helder** (below).
+
+### Changed files
+
+- `.gitignore`, `.claude/settings.json` (`worktree.baseRef: head`; `bash-guard.py` on `PreToolUse` `Bash|PowerShell`)
+- `.claude/agents/orchestrator.md`, `.claude/library/workflow-rule-2.md`, `.claude/library/session-ops.md`, `.claude/commands/sln-ledger.md`, `.claude/scripts/constitutional-guard.py`, `Docs/Management/LEDGER.md` (column note): `.worktrees/` → `.claude/worktrees/`
+- `.claude/scripts/bash-guard.py` (new), `.claude/scripts/hook_out.py` (new), `.claude/scripts/read_budget.py`, `.claude/scripts/tests/test_bash_guard.py` (new)
+
+### Verification evidence
+
+- Live: `git worktree add ../MyVocaList-guard-test ...` was denied; nothing was created.
+- Live: `cat` of a 300-line scratch file returned the READ BUDGET note and still ran.
+- A false positive was found and fixed before the commit: a commit message that only mentioned the command was blocked. The guard now ignores heredoc bodies and matches only at the start of a command (regression test added).
+- 12 tests in `test_bash_guard.py`, OK.
+
+### Leftovers found (read-only checks; nothing deleted) — pending Helder
+
+| What | Finding |
+|------|---------|
+| `.worktrees/safearea-all`, `.claude/worktrees/agent-a277ea963132adde0`, `.claude/worktrees/develop-merge` | Empty folders, not checkouts. |
+| `.worktrees/_orch` | 22 untracked scratch files (logs, briefing notes, small scripts), newest 2026-11-04. Not a checkout. |
+| 7 `worktree-agent-*` branches not merged into `develop` | Each holds 0 commits that are not already in `develop` or `main` (their tips are "Merge develop into main" commits). |
+| 30 `worktree-agent-*` branches merged into `develop` | No live worktree. |
+
+After the clean-up, the `.worktrees/` line can leave `.gitignore`.
+
+## Step 4 — C: reminders that did not reach the model
+
+**Status:** Done (2026-11-15)
+
+### C1 — delivery rule (Claude Code hooks reference, read 2026-11-15)
+
+> "On these events, your plain-text stdout reaches Claude or the compaction summary: `UserPromptSubmit`, `UserPromptExpansion`, `SessionStart`, and `PostModelSwitch`: Claude Code adds plain-text stdout as context that Claude can see and act on. [...] `PreCompact`: your stdout becomes instructions for the compaction summary."
+
+> "When a subagent calls a tool, tool events such as `PreToolUse` and `PostToolUse` fire the same configured hooks as in the main conversation, and the input carries the `agent_id` and `agent_type` common input fields that identify the subagent."
+
+> "PostCompact hooks have no decision control." (and `systemMessage` is discarded there)
+
+So every reminder listed in workstream C was invisible to the model, and so is the `PostCompact` echo.
+
+### Changed files
+
+- `.claude/scripts/library-size-guard.py`, `.claude/scripts/ledger-row-guard.py` (hook mode): `additionalContext`
+- `.claude/scripts/delegate-reminder.py`: `additionalContext`; silent when the input has `agent_id`
+- `.claude/scripts/worktree-base-check.py` + its test: reports MISBASED only, as `additionalContext`; BEHIND notes removed
+- `.claude/scripts/uncommitted-warning.py` (new): replaces the two inline one-liners (`--after-agent` → model; `--stop` → `systemMessage` for Helder)
+- `.claude/scripts/backlog/orphan_check.py`: `systemMessage`
+- `.claude/settings.json`: inline TDD reminder deleted (it never matched a worktree path; home of the rule: `testing.md § TDD within SDD`)
+- `.claude/library/workflow-hooks-invariant.md`: hook table and the delivery rule
+
+### Verification evidence
+
+- `.claude/scripts/tests`: 99 tests OK; `lease/tests`: 46 OK; `backlog/tests`: 180 OK.
+- Piped payloads: delegate reminder prints JSON for the main agent and nothing with `agent_id`; `uncommitted-warning.py --stop` prints `systemMessage`; `--after-agent` prints `additionalContext`.
+- Not checked live: the library and ledger notes (they fire only on an over-limit edit). They use the same JSON form as the task-log guard, which was seen to reach the model on 2026-11-14.
+
+### Open point — pending Helder
+
+- `PostCompact` echo ("CONTEXT RESTORED ...") reaches nobody. Options: delete it, or move a one-line version to a `SessionStart` hook with matcher `compact` (that event's output does reach the model). Part of workstream E.
+
+## Step 1 — A2 + A3: slice cap and size budget
+
+**Status:** Done (2026-11-15)
+
+### Changed files
+
+- `.claude/scripts/read_budget.py` (new): budgets and `decide(path, offset, limit)`
+- `.claude/scripts/read-slice-guard.py`: now a thin wrapper over `read_budget.decide`
+- `.claude/scripts/tests/test_read_budget.py` (new): 12 tests
+
+### What changed
+
+- Full read allowed only within 200 lines **and** 12 KB.
+- Over budget: `limit` is required and capped at 250 lines; `offset` alone no longer passes.
+- A slice is also capped at 20 KB, measured on the actual lines requested. The plan said "about 12 KB"; 20 KB was chosen so a 250-line slice of ordinary code (about 50 to 80 bytes per line) is not refused.
+- `BACKLOG.md` denial points to `backlog_gen.py query`.
+- New: files with a NUL byte in the first 8 KB (images) and `.pdf` / `.ipynb` pass. Before, an image over 200 "lines" could be denied by accident.
+
+### Verification evidence
+
+- `python -m unittest test_read_budget`: 12 tests, OK.
+- Live: `Read Docs/Management/BACKLOG.md` with no limit was denied with the query hint (144 lines, 35.2 KB).
+- Piped payloads: `BACKLOG.md` with `offset 1, limit 30` allowed; garbage stdin allowed (fail-open).
+
+## Step 5 — D (backlog) and E (settings), partial
+
+**Status:** Done for the parts listed (2026-11-15); the rest is "Pending Helder" in `README.md`.
+
+### Changed files
+
+- `.claude/scripts/backlog/render.py`, `.claude/scripts/backlog/tests/test_render.py`: slim live rows (3 new tests)
+- `Docs/Management/BACKLOG.md`: regenerated; header reduced
+- `.claude/library/backlog-generator.md`: row and frontmatter rules, status table
+- `.claude/settings.json`: `UserPromptSubmit` regex; `PostCompact` removed, `SessionStart` `compact` added, health check list updated; `artifact-*` skills off
+- `.claude/library/workflow-hooks-invariant.md`: two rows
+
+### Verification evidence
+
+- Generator tests: 183 OK. `backlog_gen.py regen --check`: clean. `BACKLOG.md`: 35,182 to 8,322 bytes.
+- Each changed hook command was run under Git Bash: health check prints OK; the compact line prints; the prompt gate fires for "implement task 3", "resume SFT", "start the next wave", "start a task" and stays silent for "continue", "fix the typo and add a note", "what does this code do?", "let us start".
+- Not checked live: the `SessionStart` `compact` hook (it needs a real compaction) and the `artifact-*` overrides (they need a fresh process).
+
+## Step 6 — Remaining D and E work after Helder's decisions
+
+**Status:** Done (2026-11-15)
+
+### Changed files
+
+- Ledger (`de18316a`): `.claude/scripts/ledger_rotate.py` (new), `tests/test_ledger_rotate.py` (new), `ledger-row-guard.py`, `LEDGER.md`, `LEDGER-archive.md`, `.claude/commands/sln-ledger.md`
+- Post-MVP (`0e4e4275`): `backlog/model.py`, `backlog/render.py`, `backlog/backlog_gen.py`, `backlog/tests/test_horizon.py` (new), `BACKLOG-POST-MVP.md` (new), 4 item `README.md`, `.claude/githooks/pre-commit`, `backlog-generator.md`
+- Solution view (`97909bfc`): `.claude/scripts/sln_nest.py` (new), `sln-register-doc.py` (new, replaces `sync-docs-to-sln.ps1`), `tests/test_sln_nest.py` (new), `MyVocaList.sln`, `constraints-reference.md`
+- `CLAUDE.md` (`c6be7255`): `CLAUDE.md`, `session-ops.md`, `project-governance-reference.md`
+
+### Verification evidence
+
+- Ledger: 11 tests OK. Dry run listed 44 rows; after the run the ledger diff holds 0 added lines and 44 removed, the archive gained the 44 rows; 3 recent rows and the Active table stay. The guard fails on the pre-rotation ledger ("47 Completed rows, 44 can be rotated") and passes after.
+- Post-MVP: 10 tests OK (193 generator tests in total). `regen --check` clean. `query --horizon post-mvp` lists the 4 items; the default query does not.
+- Solution view: 10 tests OK. `dotnet sln list` identical before and after (7 projects). `process_checks.py` passes. 337 `Project` and 337 `EndProject` lines; project GUIDs unique. A second run reports 0 misplaced. The Write hook was exercised on a scratch file: it was listed under its mirrored folder; the scratch file and the entry were then removed.
+- The solution file was already malformed before this work: two folder blocks without `EndProject` and two stray `EndProject` lines. The script repaired them.
+- `CLAUDE.md`: 7 `[HARD RULE]`/`[Unamendable]` markers before and after; Helder approved the diff before the commit.
+- Clean-up: each of the 37 branches was re-checked for commits outside `develop` and `main` (0) immediately before deletion.
+- Context: `claude -p "/context"` from a fresh process, figures in `README.md`.

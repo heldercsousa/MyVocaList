@@ -134,6 +134,33 @@ class BacklogTests(unittest.TestCase):
         self.assertIn("Active", out)
         self.assertNotIn("Shipped", out)
 
+    def test_live_rows_are_slim_three_cells_without_notes(self):
+        """Live BACKLOG rows carry Target | Label | Status only (2026-11-15):
+        goal, gate and pointer stay in the item README frontmatter."""
+        text = (
+            "<!-- BACKLOG:GENERATED:BEGIN business-features -->\n"
+            "<!-- BACKLOG:GENERATED:END business-features -->\n"
+            "<!-- BACKLOG:GENERATED:BEGIN dev-cycle-craft -->\n"
+            "<!-- BACKLOG:GENERATED:END dev-cycle-craft -->\n"
+        )
+        out = render_backlog(text, [item(id="a", title="Active", gate="Waiting.")])
+        self.assertIn("| Target | Feature | Status |\n", out)
+        self.assertNotIn("Notes", out)
+        for marker in ("Goal:", "Gate:", "Pointer:"):
+            self.assertNotIn(marker, out)
+        row = [ln for ln in out.splitlines() if "Active" in ln][0]
+        self.assertEqual(row.count("|"), 4)
+
+    def test_slim_row_keeps_depth_arrows_and_status(self):
+        child = item(_path="BusinessFeatures/feat/bugs/2026-07-21-BUG-1-x/")
+        row = render_row(child, slim=True)
+        self.assertTrue(row.endswith("| {0} |".format(child.status)))
+        self.assertEqual(row.count("|"), 4)
+
+    def test_archived_rows_keep_the_notes_cell_even_when_slim_is_asked(self):
+        done = item(id="d", title="Shipped", status="✅ Done", closed="2026-07")
+        self.assertIn("Pointer:", render_row(done, archived=True, slim=True))
+
 
 class BacklogDeferredTests(unittest.TestCase):
     def test_deferred_item_stays_in_the_live_file(self):
