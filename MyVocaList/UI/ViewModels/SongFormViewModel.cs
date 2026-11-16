@@ -189,10 +189,11 @@ public partial class SongFormViewModel : ViewModelBase
         !IsEditMode && SongIdentityRules.IsDeezerSong(SelectedProvider, SelectedExternalId)
         && string.Equals(SongTitle, _pickedTitle, StringComparison.Ordinal);
 
-    /// <summary>REQ-SLD-12/14: the Artist is plain text. Edit mode: the loaded song is a Deezer song. Add mode: the pick is held.</summary>
-    public bool IsArtistFrozen => IsEditMode ? _storedIsDeezerSong : HoldsDeezerPick;
+    /// <summary>REQ-SLD-12/14: the Artist is plain text. Edit mode: frozen until the stored song has loaded, then while it is a Deezer song. Add mode: the pick is held.</summary>
+    public bool IsArtistFrozen => IsEditMode ? (!_storedSongLoaded || _storedIsDeezerSong) : HoldsDeezerPick;
     public bool IsArtistEditable => !IsArtistFrozen;   // for the page, no converter needed
 
+    private bool _storedSongLoaded;     // false until LoadSongForEditAsync has set the stored song (or found none)
     private bool _storedIsDeezerSong;   // set in LoadSongForEditAsync from the loaded entity
     private int _storedArtistId;        // set in LoadSongForEditAsync
 
@@ -339,6 +340,8 @@ public partial class SongFormViewModel : ViewModelBase
 
     partial void OnSongIdChanged(int? value)
     {
+        _storedSongLoaded = false;          // a new song id: the stored song of the previous id no longer counts
+        _storedIsDeezerSong = false;
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(IsTitleSearchEnabled));
         OnPropertyChanged(nameof(PageTitle));
@@ -832,6 +835,8 @@ public partial class SongFormViewModel : ViewModelBase
         if (song is null)
         {
             _logger.LogWarning("Edit mode: song {SongId} not found during hydration", songId);
+            _storedSongLoaded = true;   // nothing stored to freeze the Artist for: the form stays editable
+            RunOnUiThread(NotifyArtistFrozenChanged);
             return;
         }
 
@@ -842,6 +847,7 @@ public partial class SongFormViewModel : ViewModelBase
         // REQ-SLD-12/30: the frozen state and the stored artist come from the loaded entity, not from the pick fields.
         _storedIsDeezerSong = SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId);
         _storedArtistId = song.ArtistId;
+        _storedSongLoaded = true;   // set before the UI block below, whose NotifyArtistFrozenChanged raises the change
 
         RunOnUiThread(() =>
         {
