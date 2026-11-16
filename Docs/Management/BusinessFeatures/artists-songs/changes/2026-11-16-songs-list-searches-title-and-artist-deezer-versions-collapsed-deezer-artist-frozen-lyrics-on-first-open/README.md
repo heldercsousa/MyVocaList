@@ -1,7 +1,7 @@
 ---
 id: songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open
 title: Songs list searches title and artist; Deezer versions collapsed; Deezer artist frozen; lyrics on first open
-status: 📋 Spec
+status: 🗺️ Plan
 target: 2026-11-16
 section: BusinessFeatures
 parent: artists-songs
