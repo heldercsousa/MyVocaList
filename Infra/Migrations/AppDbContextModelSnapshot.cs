@@ -388,6 +388,10 @@ namespace MyVocaList.Infra.Migrations
                         .HasColumnType("TEXT")
                         .UseCollation("NOCASE_NOACCENT");
 
+                    b.Property<string>("LyricsOrigin")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(250)

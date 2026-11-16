@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.List;
+using MyVocaList.Contracts.Enums;
 using MyVocaList.Domain.Entity;
 using MyVocaList.Domain.RepositoryInterface;
 using MyVocaList.Domain.Resolution;
@@ -30,6 +32,7 @@ public class SongService : ISongService
 
     private const string ArtistRequiredMessage = "Artist is required";
     private const string ArtistNotFoundMessage = "Artist not found";
+    private const string DeezerArtistFrozenMessage = "The artist of a song from the music database cannot be changed.";
 
     public SongService(
         ISongRepository songRepository,
@@ -45,6 +48,83 @@ public class SongService : ISongService
         _urlService = urlService;
         _uow = uow;
         _logger = logger;
+    }
+
+    /// <inheritdoc />
+    public async Task<string?> EnsureLyricsAsync(int songId, CancellationToken ct = default)
+    {
+        // Step 1 (read scope, REQ-SLD-19, 24): the preconditions, in order. Any failure returns null with no request.
+        // The lyrics service is resolved here, after the preconditions, with the non-throwing GetService: a missing
+        // registration means no lookup, and no other SongService path resolves it.
+        var request = await _uow.ExecuteReadAsync<(LyricsQuery query, ISongLyricsService lyrics)?>(async sp =>
+        {
+            var song = await sp.GetRequiredService<ISongRepository>().GetByIdAsync(songId, ct);
+            if (song is null
+                || !MyVocaList.Domain.Rules.LyricsOriginRules.NeedsLookupOnOpen(
+                    song.ExternalProvider, song.ExternalId, song.Lyrics, song.LyricsOrigin))
+                return null;
+
+            var title = song.Title;
+            var artistName = song.OriginalArtist?.Name;
+            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(artistName))
+                return null;
+
+            var lyricsService = sp.GetService<ISongLyricsService>();
+            if (lyricsService is null)
+                return null;
+
+            return (new LyricsQuery(title, artistName), lyricsService);
+        }, ct);
+
+        if (request is not { } found)
+            return null;
+
+        // Step 2 (no unit of work open, REQ-SLD-20): the lookup may take seconds, so no scope, context or
+        // transaction is held while it runs. The lyrics service and its provider hold nothing the scope disposes
+        // (a network-status reader and an HTTP client from the factory), which is why the instance may be used
+        // after the read scope has closed; the HTTP wait must not hold a scope open.
+        // Caller cancellation propagates as OperationCanceledException.
+        var answer = await found.lyrics.LookupLyricsAsync(found.query, ct);
+        if (answer.Status == LyricsLookupStatus.NoAnswer)
+            return null;
+
+        // Step 3 (write scope, not cancellable: the answer is already in hand). The song is re-read; a change made
+        // meanwhile (lyrics typed, origin recorded) wins and nothing is saved.
+        try
+        {
+            var stored = await _uow.ExecuteAsync<(bool success, string message, string? lyrics)>(async sp =>
+            {
+                var songRepository = sp.GetRequiredService<ISongRepository>();
+                var song = await songRepository.GetByIdAsync(songId, CancellationToken.None);
+                if (song is null)
+                    return (false, "Song not found", null);
+
+                if (!string.IsNullOrWhiteSpace(song.Lyrics) || song.LyricsOrigin is not null)
+                    return (false, string.Empty, song.Lyrics);
+
+                // BUG-067 (see UpdateSongCoreAsync): the eager-loaded artist navigation is detached before the write.
+                song.OriginalArtist = null;
+                if (answer.Status == LyricsLookupStatus.Found)
+                {
+                    song.Lyrics = answer.Lyrics;
+                    song.LyricsOrigin = LyricsOrigin.LyricsSource;
+                }
+                else
+                {
+                    song.LyricsOrigin = LyricsOrigin.NoneFound;
+                }
+
+                await songRepository.UpdateAsync(song, CancellationToken.None);
+                return (true, string.Empty, answer.Status == LyricsLookupStatus.Found ? answer.Lyrics : null);
+            }, CancellationToken.None);
+
+            return stored.lyrics;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lyrics found on open could not be stored for song {SongId}", songId);
+            return null;
+        }
     }
 
     /// <inheritdoc />
@@ -107,6 +187,7 @@ public class SongService : ISongService
                 Title = title,
                 FeaturedArtists = featuredArtists,
                 Lyrics = lyrics,
+                LyricsOrigin = MyVocaList.Domain.Rules.LyricsOriginRules.OnCreate(lyrics, null),
                 ExternalId = externalId,
                 ExternalProvider = externalProvider,
                 CreatedAt = DateTime.UtcNow,
@@ -175,6 +256,12 @@ public class SongService : ISongService
             var song = await songRepository.GetByIdAsync(id, ct);
             if (song == null)
                 return (false, "Song not found", SaveField.None);
+
+            // REQ-SLD-15: the artist of a Deezer song cannot change, whatever the caller sends; checked before
+            // the identity check and before any artist is created. The title stays editable (REQ-SLD-17).
+            if (MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId)
+                && (hasNewArtistName || (artistId.HasValue && artistId.Value != song.ArtistId)))
+                return (false, DeezerArtistFrozenMessage, SaveField.Artist);
 
             // REQ-SFT-26: an external identity held by ANOTHER song (self excluded) is rejected before
             // any artist is created, so a refused save never leaves a new artist behind.
@@ -253,6 +340,7 @@ public class SongService : ISongService
             song.ArtistId = effectiveArtistId;
             song.Title = title;
             song.FeaturedArtists = featuredArtists;
+            song.LyricsOrigin = MyVocaList.Domain.Rules.LyricsOriginRules.OnUpdate(song.Lyrics, song.LyricsOrigin, lyrics);
             song.Lyrics = lyrics;
             song.UpdatedAt = DateTime.UtcNow;
 
@@ -299,7 +387,8 @@ public class SongService : ISongService
         int? artistId, string? newArtistName, string title, string version,
         string? featuredArtists, string? lyrics, string? externalId, string? externalProvider,
         IEnumerable<string> urls, CancellationToken ct,
-        string? songImageUrl = null, string? artistImageUrl = null, bool fillArtistImage = false)
+        string? songImageUrl = null, string? artistImageUrl = null, bool fillArtistImage = false,
+        LyricsLookupResult? pickLyricsLookup = null)
     {
         // REQ-SFT-21: exactly one of artistId / newArtistName. Pure input validation — it stays
         // OUTSIDE the lambda (REQ-UOW-41), so a rejected call opens no DI scope and writes nothing.
@@ -389,6 +478,7 @@ public class SongService : ISongService
                 Version = version,
                 FeaturedArtists = featuredArtists,
                 Lyrics = lyrics,
+                LyricsOrigin = MyVocaList.Domain.Rules.LyricsOriginRules.OnCreate(lyrics, pickLyricsLookup),
                 ExternalId = externalId,
                 ExternalProvider = externalProvider,
                 ImageUrl = songImageUrl,
@@ -462,6 +552,21 @@ public class SongService : ISongService
         // the SongResolutionService -> ISongService constructor cycle.
         var resolved = await _uow.ExecuteReadAsync<SaveFormResolution>(async sp =>
         {
+            // REQ-SLD-15 / REQ-SLD-30: in edit mode the artist of a Deezer song is the stored one. The id is
+            // compared, never the typed text; a match needs no artist resolution at all.
+            if (!isAddMode)
+            {
+                var songRepository = sp.GetRequiredService<ISongRepository>();
+                var storedSong = await songRepository.GetByIdAsync(request.SongId!.Value, ct);
+                if (storedSong is not null
+                    && MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(storedSong.ExternalProvider, storedSong.ExternalId))
+                {
+                    return request.ArtistId == storedSong.ArtistId
+                        ? SaveFormResolution.Proceed(storedSong.ArtistId, null, fillArtistImage: false)
+                        : SaveFormResolution.Stop(SaveFailed(DeezerArtistFrozenMessage, SaveField.Artist));
+                }
+            }
+
             var artistStep = await ResolveFormArtistAsync(sp, request, ct);
             if (artistStep.StopOutcome is not null)
                 return artistStep;
@@ -503,7 +608,7 @@ public class SongService : ISongService
                 resolved.ArtistId, resolved.NewArtistName, request.Title, request.Version,
                 request.FeaturedArtists, request.Lyrics, externalId, externalProvider,
                 request.PendingUrls ?? [], ct,
-                songImageUrl, artistImageUrl, resolved.FillArtistImage);
+                songImageUrl, artistImageUrl, resolved.FillArtistImage, request.PickLyricsLookup);
 
             return created && song is not null
                 ? SaveSucceeded(createMessage, song.Id)
