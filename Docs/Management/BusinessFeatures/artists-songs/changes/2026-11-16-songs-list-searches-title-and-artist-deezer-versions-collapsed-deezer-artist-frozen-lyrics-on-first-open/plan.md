@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Tasks are tracked in `tasks.md` in this folder.
 
-> **Status: APPROVED 2026-11-16 under Helder's advance authorisation of the same day.** Section 8 lists the open points the planning pass raised and how each was decided; the decisions are also in `design.md § 1.2` (C20 to C27). Where a task text and section 8 differ, section 8 wins.
+> **Status: APPROVED 2026-11-16 under Helder's advance authorisation of the same day.** Section 8 lists the open points the planning pass raised and how each was decided (also in `design.md § 1.2`, C20 to C27); section 9 lists the fixes from the plan review. Where a task text differs from section 8 or 9, those sections win.
 
 **Deezer API check (spec task 0):** the official reference is behind a login wall and could not be read. From a recorded real answer in `MyVocaList.Tests/Integration/Services/SongSuggestionTitleSearchRealStackTests.cs`: the default answer has 25 rows, paging uses `index`, and each row carries `artist.id`. A `limit` parameter is named only by unofficial sources, so it is **not sent** (section 8, item 1).
 
@@ -54,7 +54,7 @@
 | `Infra/Migrations/<timestamp>_AddSongLyricsOrigin.cs` (+ `.Designer.cs`, `AppDbContextModelSnapshot.cs`) | create / generated | Nullable column, no backfill |
 | `Infra/Repository/SongRepository.cs` | modify | Paged full-text list search inside `GetPagedAsync` |
 | `Services/ISongLyricsService.cs`, `Services/SongLyricsService.cs` | modify | `LookupLyricsAsync`; `FindLyricsAsync` wraps it |
-| `Services/DeezerProvider.cs` | modify | Read `artist.id`; ask for and keep 25 track rows |
+| `Services/DeezerProvider.cs` | modify | Read `artist.id`; keep up to 25 track rows |
 | `Services/SongSuggestionService.cs` | modify | Collapse song groups before the library check; blank version |
 | `Contracts/DTOs/Suggestions/SongSuggestionDto.cs` | modify (doc comment only) | `Version` remark no longer says "normalised Deezer version" |
 | `Domain/ServicesInterfaces/ISongService.cs` | modify | `EnsureLyricsAsync` |
@@ -297,7 +297,7 @@ Run: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --filter "FullyQualif
 
 ---
 
-### T6 — `DeezerProvider`: artist id and 25 track rows (Services)
+### T6 — `DeezerProvider`: artist id and up to 25 track rows (Services)
 **Risk:** B. **[P] with T4, T5.** After T2.
 
 **Files**
@@ -320,7 +320,7 @@ Run: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --filter "FullyQualif
 4. `SearchSongsAsync_AnswerOfThirtyRows_KeepsTwentyFive` — REQ-SLD-10.
 5. `SearchArtistsAsync_StillAsksPlainQueryAndKeepsFive` — REQ-SLD-10.
 6. Red, implement, green; no existing test is edited; run every `DeezerProvider*` class.
-7. Commit `feat(services): Deezer track search reads the artist id and asks for 25 rows`.
+7. Commit `feat(services): Deezer track search reads the artist id and keeps up to 25 rows`.
 
 Run: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --filter "FullyQualifiedName~DeezerProvider"`
 
@@ -708,7 +708,7 @@ Run: `dotnet test MyVocaList.Tests/MyVocaList.Tests.csproj --filter "FullyQualif
 |---|---|---|---|
 | T7 | `Unit/Services/SongSuggestionServiceTests.cs` → `SearchTitleRemoteAsync_RemoteRowCarriesVersion` | REQ-SFT-12 (Version) replaced by REQ-SLD-08; asserts `creep.Version == "Live"` | Remove; replaced by `SearchTitleRemoteAsync_KeptRow_HasBlankVersion` |
 | T7 | same file → `SearchTitleRemoteAsync_CollatedTitleArtistVersionMatch_Promoted` | REQ-SFT-05 is now applied with a blank version (REQ-SLD-09); the test expects the triple `("Creep","Radiohead","Live")` | Remove; replaced by `_LibraryCheckUsesBlankVersion` and `_LibrarySongOnlyAsLive_GroupStaysRemote` |
-| T7 | `Integration/Services/SongSuggestionTitleSearchRealStackTests.cs` → `SearchTitleRemoteAsync_EmptyLibrary_ReturnsDeezerOptionsWithOkStatus` | Line 67 asserts `r.Version == "Ao Vivo"` (REQ-SFT-04 note, REQ-SFT-12) | Change that one assertion to `r.Version == ""`; the count of 3 holds (three different artist ids). The sibling `..._PopulatedLibrary_...` was not read in full; run it and treat it the same way if it asserts a version |
+| T7 | `Integration/Services/SongSuggestionTitleSearchRealStackTests.cs` → `SearchTitleRemoteAsync_EmptyLibrary_ReturnsDeezerOptionsWithOkStatus` | Line 67 asserts `r.Version == "Ao Vivo"` (REQ-SFT-04 note, REQ-SFT-12) | Change that one assertion to `r.Version == ""`; the count of 3 holds (three different artist ids). The sibling `..._PopulatedLibrary_...` asserts no version and needs no change (§ 9 item 1) |
 | T10 | `Unit/ViewModels/SongFormViewModelTests.cs` → `SelectTitle_RemoteOption_SetsVersionFromDeezer_OverwritingTypedVersion` | REQ-SFT-12 (Version) replaced by REQ-SLD-08 | Remove; replaced by `DeezerPick_LeavesTheVersionAsTheUserLeftIt` |
 | T10 | same file → `ClearArtist_AfterRemotePick_ClearsPendingIdentity_KeepsTitle` | Asserts `SongVersion == "Live"` after a pick (REQ-SFT-12). The scenario, X on Artist after a Deezer pick, is also removed by the REQ-PIC row of the table | Remove the Version assertion only; the rest still passes |
 
@@ -755,4 +755,46 @@ Decided by Claude under Helder's advance authorisation (2026-11-16); recorded in
 | 15 | Lookup on open after leaving and returning to the same form instance | Not restarted on that instance; the next open starts it. Accepted. |
 | 16 | Up to 25 rows reach the library check | Accepted; checked on the device. |
 
-**To verify while implementing (not known at plan time):** the exact `dotnet ef -p` path; whether `SqlQueryRaw<SongListItemDto>` binds the record directly (else a private row record); whether `SongServiceReadScopeTests` counts repository calls in the edit read scope (if it does and T8a's extra read changes the count, stop and report — do not edit that test); the second test in `SongSuggestionTitleSearchRealStackTests`.
+**To verify while implementing (not known at plan time):** the exact `dotnet ef -p` path; whether `SqlQueryRaw<SongListItemDto>` binds the record directly (else a private row record); whether `SongServiceReadScopeTests` counts repository calls in the edit read scope (if it does and T8a's extra read changes the count, stop and report — do not edit that test).
+
+## 9. Fixes from the plan review (2026-11-16)
+
+A fresh plan reviewer returned "pass with fixes", no blocking finding. This section, like § 8, wins over any earlier task text.
+
+1. **T7, sibling real-stack test.** `SongSuggestionTitleSearchRealStackTests` → the `..._PopulatedLibrary_...` test asserts only `Ok` and `NotEmpty` (read by the reviewer). It needs **no change**. T7 changes exactly one assertion in that file: `r.Version == "Ao Vivo"` becomes `r.Version == ""`.
+2. **T9 is split.**
+   - **T9a** — `EnsureLyricsAsync` and the optional constructor parameter, with the unit tests (steps 1 to 9). Files: `Domain/ServicesInterfaces/ISongService.cs`, `Services/SongService.cs`, `Unit/Services/SongServiceEnsureLyricsTests.cs`.
+   - **T9b** — real-stack tests (steps 10, 11) and the DI test. Files: `Integration/Services/SongServiceEnsureLyricsRealStackTests.cs`, `Unit/DependencyInjection/AppServicesRegistrationTests.cs`. No production file unless a test exposes a defect in T9a's code.
+   - **DI test:** `AppServices_SongService_ReceivesTheLyricsService` — `// [AC] REQ-SLD-19`: build the provider the way the other tests of that file do, resolve `ISongService`, read the private field `_lyricsService` of `SongService` by reflection, assert it is not null.
+3. **T11 is split.**
+   - **T11a** — lookup on open: trigger, hint, answer applied or kept, `CancelLyricsLookupOnOpen` (steps 1 to 7; REQ-SLD-19, 21, 23, 24, 25).
+   - **T11b** — Save waits for the lookup on open, `_pickLyricsLookup`, the pick outcome in the request, and the mock re-point in `SongFormViewModelLyricsTests` (steps 8 to 15; REQ-SLD-26, 31).
+4. **T11a, task property.** The existing `LyricsLookupTask` (pick lookup) is **not** reused. The lookup on open is exposed as a new `public Task<string?> LyricsOnOpenTask { get; private set; }` (initially a completed task with null). New tests await `LyricsOnOpenTask`; existing tests keep awaiting `LyricsLookupTask`.
+5. **T11b, mock re-point rule.** In `SongFormViewModelLyricsTests` the helpers set up `LookupLyricsAsync` in place of `FindLyricsAsync`: a null answer maps to `LyricsLookupResult.NoAnswer`, a non-null text maps to `LyricsLookupResult.Found(text)`. `Verify` calls change the method name only. No assertion on form behaviour and no `[AC]` line changes.
+6. **T3, hand-off.** The Builder adds the property, the mapping and the three tests, sees them fail, commits (`feat(infra): lyrics origin property and mapping` with the Item trailer) and reports `blocked: needs migration`. The main agent then, in the worktree: runs `dotnet ef migrations add AddSongLyricsOrigin` (first try `-p Infra/MyVocaList.Infra.csproj`; the working form is recorded in the task-log), replaces the generated `Down` body with the raw `ALTER TABLE ... DROP COLUMN` statement given in T3, runs the T3 test filter and `has-pending-changes`, and commits `feat(infra): lyrics origin column on songs`.
+7. **T4, literal SQL and parameters.** Parameters are `@m`, `@take`, `@skip`. The count joins the same tables as the page query, so a stale index row cannot make the count exceed the rows:
+
+```sql
+-- ListSearchSql
+SELECT s.Id AS Id, s.Title AS Title, s.ArtistId AS OriginalArtistId, a.Name AS OriginalArtistName,
+       s.FeaturedArtists AS FeaturedArtists, s.ExternalProvider AS ExternalProvider, s.Version AS Version,
+       COALESCE(s.ImageUrl, a.ImageUrl) AS ImageUrl
+FROM SongSearch
+JOIN Songs s ON s.Id = SongSearch.rowid
+JOIN Artists a ON a.Id = s.ArtistId
+WHERE SongSearch MATCH @m
+ORDER BY bm25(SongSearch, 10.0, 1.0), length(s.Title), s.Id
+LIMIT @take OFFSET @skip
+
+-- ListSearchCountSql
+SELECT count(*) AS Value
+FROM SongSearch
+JOIN Songs s ON s.Id = SongSearch.rowid
+JOIN Artists a ON a.Id = s.ArtistId
+WHERE SongSearch MATCH @m
+```
+
+   Column aliases follow the property names of the row type actually bound (verify against `SongListItemDto`). The blank test stays the existing `string.IsNullOrEmpty(query)`; the Service already turns white space into null.
+8. **T11a, the ViewModel and the rule.** The ViewModel only calls the Domain predicate `LyricsOriginRules.NeedsLookupOnOpen` to decide whether to show the hint and start the call; `EnsureLyricsAsync` checks the same preconditions itself and is the authority.
+9. **Device checklist, one more line.** Leaving the form for a child page (picture picker, YouTube search) while the lookup runs cancels it; lyrics then arrive on the next open of the song.
+10. **`tasks.md` T14** points at plan T13 item 6 until the task-log exists; T13 copies the checklist into `task-log.md § Device check`.
