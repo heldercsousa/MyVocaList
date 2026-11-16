@@ -15,10 +15,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import render  # noqa: E402
 from frontmatter import FrontmatterError, parse  # noqa: E402
 from model import (DONE, FIXED, IN_PROGRESS, STATUSES, Item, TERMINAL,  # noqa: E402
-                   order_items, validate, validate_warnings)
+                   HORIZON_POST_MVP, is_post_mvp, order_items, validate,
+                   validate_warnings)
 
 MANAGEMENT = os.path.join("Docs", "Management")
 ARCHIVE_DIR = "backlog-archive"
+POST_MVP_FILE = "BACKLOG-POST-MVP.md"
 
 BUG_ID = re.compile(r"\bBUG-(\d{1,4})\b")
 
@@ -107,6 +109,15 @@ def _render_all(root, items):
     if not os.path.exists(backlog_path):
         raise IOError("BACKLOG.md not found at {0}".format(backlog_path))
     outputs[backlog_path] = render.render_backlog(_read(backlog_path), items)
+
+    # Post-MVP items live in their own generated file. It is written when it
+    # already exists (so removing the last post-MVP item empties its tables) or
+    # when at least one active item carries the horizon.
+    post_path = os.path.join(root, MANAGEMENT, POST_MVP_FILE)
+    has_post = any(is_post_mvp(i, items) and i.status not in TERMINAL for i in items)
+    if os.path.exists(post_path) or has_post:
+        existing = _read(post_path) if os.path.exists(post_path) else render.POST_MVP_TEMPLATE
+        outputs[post_path] = render.render_post_mvp(existing, items)
 
     titles = dict((i.id, i.title) for i in items if i.id)
     for month, month_items in render.bucket_by_month(items).items():
@@ -217,14 +228,21 @@ def _status_tokens(statuses):
     return tokens
 
 
-def query_lines(root, statuses):
-    """Compact active-work lines. Never raises on a bad file (REQ-SEV-21a)."""
+def query_lines(root, statuses, horizon="mvp"):
+    """Compact active-work lines. Never raises on a bad file (REQ-SEV-21a).
+
+    `horizon`: "mvp" (default) leaves post-MVP items out, "post-mvp" lists only
+    them, "all" lists both.
+    """
     items, errors = walk(root)
     for err in errors:
         sys.stderr.write("warning: skipped {0}\n".format(err))
     tokens = _status_tokens(statuses)
     rows = [i for i in items
             if not tokens or any(i.status.startswith(t) for t in tokens)]
+    if horizon != "all":
+        want_post = horizon == HORIZON_POST_MVP
+        rows = [i for i in rows if is_post_mvp(i, items) == want_post]
     lines = []
     for it in order_items(rows):
         lines.append("{0} {1}  {2}{3}  → {4}".format(
@@ -232,8 +250,8 @@ def query_lines(root, statuses):
     return lines
 
 
-def cmd_query(root, statuses):
-    lines = query_lines(root, statuses)
+def cmd_query(root, statuses, horizon="mvp"):
+    lines = query_lines(root, statuses, horizon)
     if not lines:
         _emit("no items match")
     else:
@@ -411,7 +429,7 @@ def sln_add_entry(sln_text, rel_path):
 
 
 def cmd_register(root, section, parent, kind, severity, title, goal, gate,
-                 today=None, item_id=None):
+                 today=None, item_id=None, horizon=None):
     """Create an item folder + README + .sln entry atomically, then regenerate."""
     import datetime
     today = today or datetime.date.today().isoformat()
@@ -454,6 +472,8 @@ def cmd_register(root, section, parent, kind, severity, title, goal, gate,
         keys["parent"] = parent
     if section:
         keys["section"] = section
+    if horizon:
+        keys["horizon"] = horizon
 
     readme_path = os.path.join(folder, "README.md")
     rel_readme = os.path.relpath(readme_path, root).replace("\\", "/")
@@ -564,6 +584,8 @@ def build_parser():
     query = sub.add_parser("query", help="list items by status")
     query.add_argument("--status", default="",
                        help="comma-separated statuses, e.g. \"\U0001F7E1 In Progress,\U0001F7E2 Ready\"")
+    query.add_argument("--horizon", choices=("mvp", HORIZON_POST_MVP, "all"), default="mvp",
+                       help="mvp (default): leave post-MVP items out; post-mvp: only them; all: both")
 
     register = sub.add_parser("register", help="create a new item folder")
     register.add_argument("--section")
@@ -573,6 +595,8 @@ def build_parser():
     register.add_argument("--title", required=True)
     register.add_argument("--goal", required=True)
     register.add_argument("--gate")
+    register.add_argument("--horizon", choices=(HORIZON_POST_MVP,),
+                          help="mark the item post-MVP (rendered in BACKLOG-POST-MVP.md)")
     register.add_argument("--id", dest="item_id", help="assert the expected id")
     # REQ-SEV-11a / design section 3: --renumber belongs to `register`, and when
     # present it is the ONLY argument needed, so the otherwise-required flags
@@ -598,11 +622,11 @@ def main(argv=None):
     if args.verb == "regen":
         return cmd_regen(args.root, check=args.check)
     if args.verb == "query":
-        return cmd_query(args.root, args.status.split(","))
+        return cmd_query(args.root, args.status.split(","), args.horizon)
     if args.verb == "register":
         return cmd_register(args.root, args.section, args.parent, args.kind,
                             args.severity, args.title, args.goal, args.gate,
-                            item_id=args.item_id)
+                            item_id=args.item_id, horizon=args.horizon)
     if args.verb == "renumber":
         return cmd_renumber(args.root, args.item_id)
     if args.verb == "status":

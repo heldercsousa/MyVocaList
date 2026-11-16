@@ -1,6 +1,6 @@
 # MyVocaList — Product Backlog
 
-> Generated view of the active items, ordered by target. Each row comes from the item's `README.md` frontmatter: **never hand-edit a row** (the next `regen` overwrites it; pre-commit blocks a stale file). Goal, gate and folder of an item are in its `README.md`. Agents do not read this file: they run `python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"`. Closed items: `backlog-archive/`. Commands, frontmatter rules and status meanings: `.claude/library/backlog-generator.md`.
+> Generated view of the active items, ordered by target. Each row comes from the item's `README.md` frontmatter: **never hand-edit a row** (the next `regen` overwrites it; pre-commit blocks a stale file). Goal, gate and folder of an item are in its `README.md`. Agents do not read this file: they run `python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"`. Closed items: `backlog-archive/`. Post-MVP items: `BACKLOG-POST-MVP.md`. Commands, frontmatter rules and status meanings: `.claude/library/backlog-generator.md`.
 
 Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In Progress → ✅ Done · 🔵 Deferred · 🔴 Blocked
 
@@ -15,15 +15,11 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-07-03 | ↳ BUG-030: ArtistFormPage search strip UX unclear (spec gap) | 🔵 Deferred |
 | 2026-07-10 | ↳ **Artist & Song Form UX Redesign — autocomplete, similar-match warning, search-strip removal** | 🔵 Deferred |
 | 2026-08-04 | ↳ Song writes propagate to the artist catalog | 📋 Spec |
-| 2026-11-09 | ↳ Post-MVP: AI intent matching for mistyped titles and artists | 💡 Pending |
-| 2026-11-09 | ↳ Post-MVP: group Songs list by artist | 💡 Pending |
-| 2026-11-09 | ↳ Post-MVP: show similar records in autocomplete results | 💡 Pending |
 | 2026-11-09 | ↳ Song list item shows artist name, version and featured artists | 🟡 In Progress |
 | 2026-11-11 | ↳ ArtistFormPage Name as the autocomplete field (split from SFT 6.3) | 🟡 In Progress |
 | 2026-11-11 | ↳ Discuss showing long song titles in list items (MD3-compliant, secondary text line) | 💡 Pending |
 | 2026-11-11 | ↳ Discuss: song identity by lyric, version de-duplication and richer Deezer data in the song UX | 💡 Pending |
 | 2026-11-11 | ↳ Evaluate removing the Song form Version and Featured artists fields | 💡 Pending |
-| 2026-11-11 | ↳ Post-MVP: import an artist's song catalog from files (PDF etc.) | 💡 Pending |
 | 2026-11-11 | ↳ Song title limit raised from 100 to 250 characters | 💡 Pending |
 | 2026-11-12 | ↳ Artists list rows: catalog action moves into the overflow menu | 💡 Pending |
 | 2026-11-12 | ↳ Data model simplification — merge Artist into Person, catalog as an auto-filled grid (discussion) | 💡 Pending |
