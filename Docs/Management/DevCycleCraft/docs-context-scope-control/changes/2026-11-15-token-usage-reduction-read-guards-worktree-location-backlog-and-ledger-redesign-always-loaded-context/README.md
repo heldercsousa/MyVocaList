@@ -42,9 +42,9 @@ From fresh headless processes (`claude -p "/context"`), 2026-11-15:
 
 | Figure | Before | After |
 |--------|--------|-------|
-| Total at the first prompt | not recorded | 31.6k tokens |
+| Total at the first prompt | 31.9k tokens (fresh headless process on the pre-change commit `f8752731`, taken 2026-11-15 in a temporary worktree: memory files 12k, skills 2.5k) | 31.6k tokens |
 | Memory files | about 12k (12.2k measured mid-session) | 11.7k |
-| Skills listing | 2.9k | 2.5k |
+| Skills listing | 2.5k headless (2.9k was an interactive-session figure, not comparable) | 2.5k |
 | `CLAUDE.md` | 8,279 bytes (3.3k tokens) | 7,573 bytes (3.0k tokens) |
 | `BACKLOG.md` | 35,182 bytes | 8,000 bytes |
 | `LEDGER.md` | 11,882 bytes | 4,467 bytes |

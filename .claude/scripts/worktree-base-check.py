@@ -50,6 +50,10 @@ def classify(proj, path):
     """Return (state, detail) where state is 'clean' | 'behind' | 'misbased'."""
     if _ok(["git", "-C", path, "merge-base", "--is-ancestor", "develop", "HEAD"], proj):
         return ("clean", 0)
+    # A branch already merged into develop has no work of its own left; its fork point
+    # is also in main after a release merge, which used to read as "misbased".
+    if _ok(["git", "-C", path, "merge-base", "--is-ancestor", "HEAD", "develop"], proj):
+        return ("clean", 0)
 
     mb = run(["git", "-C", path, "merge-base", "develop", "HEAD"], proj)
     if mb.returncode != 0 or not mb.stdout.strip():
