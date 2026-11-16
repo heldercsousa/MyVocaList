@@ -81,15 +81,20 @@
                                         RemoveCommand="{Binding RemoveImageCommand}"
                                         IsBusy="{Binding IsImageBusy}" />
 
-                <!-- Artist (REQ-SFT-01): local artists only (REQ-SFT-16, REQ-PIC-29). A defined Artist shows as
+                <!-- Artist (REQ-SFT-01): a Deezer song shows the artist as plain text that cannot be edited
+                     (REQ-SLD-12); a local-only song keeps the tap-to-edit field (REQ-SLD-13). A defined Artist shows as
                      Title Large text; a tap opens the editor with the text kept and releases the picked artist, in
                      add and edit mode, so the artist of a stored song can be changed (REQ-PIC-23..28, 31). A pick
                      or the resolution of the typed name on Save is decided by the VM and the Service. -->
+                <Label Text="{Binding ArtistSearchText}"
+                       StyleClass="Title.Large"
+                       IsVisible="{Binding IsArtistFrozen}" />
                 <textfields:TapToEditField x:Name="artistTapField"
                                            Text="{Binding ArtistSearchText}"
                                            TextStyleClass="Title.Large"
                                            HasError="{Binding ArtistHasError}"
-                                           IsEditing="{Binding IsArtistEditing, Mode=TwoWay}">
+                                           IsEditing="{Binding IsArtistEditing, Mode=TwoWay}"
+                                           IsVisible="{Binding IsArtistEditable}">
                     <textfields:AutocompleteDXField x:Name="artistField"
                                                     LabelText="Artist"
                                                     PlaceholderText="Search artists..."
