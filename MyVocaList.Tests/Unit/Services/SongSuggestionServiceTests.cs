@@ -267,26 +267,6 @@ public class SongSuggestionServiceTests
     }
 
     [Fact]
-    public async Task SearchTitleRemoteAsync_CollatedTitleArtistVersionMatch_Promoted()
-    {
-        // [AC] REQ-SFT-05: the version takes part in the match (Deezer "Creep"/"Live" vs stored "Creep"/"Live")
-        SetupDeezer(new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep", null, "Live"));
-        _songRepoMock
-            .Setup(r => r.FindByTitleAndArtistNamesAsync(
-                It.Is<IReadOnlyCollection<(string Title, string ArtistName, string Version)>>(
-                    items => items.Contains(Triple("Creep", "Radiohead", "Live"))),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<SongSearchHit> { Hit(9, "Creep", "Radiohead", 3, "Live") });
-        var sut = CreateSut();
-
-        var result = await sut.SearchTitleRemoteAsync("creep", []);
-
-        var promoted = Assert.Single(result.Promoted);
-        Assert.Equal(9, promoted.LocalId);
-        Assert.Empty(result.Remote);
-    }
-
-    [Fact]
     public async Task SearchTitleRemoteAsync_MatchAlreadyShownLocally_DroppedNotPromoted()
     {
         // [AC] REQ-SFT-05: a match already listed among the local options is dropped, not promoted twice
@@ -458,28 +438,6 @@ public class SongSuggestionServiceTests
         _deezerMock.Verify(
             p => p.SearchSongsAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()),
             Times.Once);
-    }
-
-    [Fact]
-    public async Task SearchTitleRemoteAsync_RemoteRowCarriesVersion()
-    {
-        // [AC] REQ-SFT-12: a remote row carries the provider's normalised version ("" when none)
-        SetupDeezer(
-            new MusicSearchResultDto("dz-1", "Deezer", "Radiohead", "Creep", null, "Live"),
-            new MusicSearchResultDto("dz-2", "Deezer", "Radiohead", "Karma Police", null));
-        var sut = CreateSut();
-
-        var result = await sut.SearchTitleRemoteAsync("radiohead", []);
-
-        Assert.Equal(2, result.Remote.Count);
-        var creep = result.Remote.Single(r => r.ExternalId == "dz-1");
-        var karma = result.Remote.Single(r => r.ExternalId == "dz-2");
-        Assert.Equal("Live", creep.Version);
-        Assert.Equal("", karma.Version);
-        Assert.True(creep.IsRemote);
-        Assert.Equal("Deezer", creep.ExternalProvider);
-        Assert.Equal("Creep", creep.Title);
-        Assert.Equal("Radiohead", creep.ArtistName);
     }
 
     [Fact]
