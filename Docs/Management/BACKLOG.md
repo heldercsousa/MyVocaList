@@ -89,5 +89,5 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-11-12 | ↳ List item overflow icon button in the ListItem trailing slot, opening the item actions menu | 💡 Pending |
 | 2026-11-12 | ↳ MD3 overflow menu for list item actions | 💡 Pending |
 | 2026-11-12 | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
-| 2026-11-15 | ↳ Token-usage reduction: read guards, worktree location, backlog and ledger redesign, always-loaded context | 🟡 In Progress |
+| 2026-11-15 | ↳ Always-loaded context: path-scoped rules spike and superpowers plugin cost | 💡 Pending |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->

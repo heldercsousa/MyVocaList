@@ -1,12 +1,13 @@
 ---
 id: token-usage-reduction-read-guards-worktree-location-backlog-and-ledger-redesign-always-loaded-context
 title: "Token-usage reduction: read guards, worktree location, backlog and ledger redesign, always-loaded context"
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-11-15
 section: DevCycleCraft
 parent: docs-context-scope-control
 goal: "Cut the tokens spent on reading without losing accuracy: fix the read guard gaps, settle one worktree location, slim or replace the backlog and ledger reads, and shrink what loads at every session start and compaction."
 gate: Helder approves the plan for each workstream before any rule or context file changes.
+closed: 2026-11
 kind: change
 ---
 
@@ -15,45 +16,54 @@ kind: change
 Cut the tokens spent on reading without losing accuracy: fix the read guard gaps, settle one worktree location, slim or replace the backlog and ledger reads, and shrink what loads at every session start and compaction.
 
 
-## Status (2026-11-15, end of the implementation session)
+## Status — closed 2026-11-15
 
-Workstreams A, B and C are done. D and E are done in part; the rest is specified in `requirements.md` and `design.md` (spec-reviewer: PASS WITH FINDINGS, findings applied 2026-11-15), is listed under
-"Pending Helder" and waits for a discussion. Plan: `plan.md`. Evidence per step: `task-log.md`.
-The findings below this section are the original handover text, kept as recorded.
+All five workstreams are done, except two points Helder did not select; those moved to the
+follow-up item `../2026-11-15-always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost/`. Plan: `plan.md`. Spec for D and E: `requirements.md`, `design.md`.
+Evidence per step: `task-log.md`. The findings below this section are the original handover text.
 
 | Workstream | Result | Commit |
 |------------|--------|--------|
 | A2, A3 | Full read only within 200 lines and 12 KB; `limit` required and capped at 250 lines; slice capped at 20 KB; `BACKLOG.md` denial points to `query` | `108ef530` |
-| A1, A4 | Source files inside `.claude/worktrees/<name>/` are guarded; `cat`-like Bash reads of a large file get a note (never blocked) | `54ea4336` |
-| B | One location, `.claude/worktrees/`; other locations are refused by `bash-guard.py`; `worktree.baseRef: head` | `54ea4336` |
+| A1, A4 | Source files inside `.claude/worktrees/<name>/` are guarded; `cat`-like shell reads of a large file get a note (never blocked) | `54ea4336` |
+| B | One location, `.claude/worktrees/`; other locations refused by `bash-guard.py`; `worktree.baseRef: head`; 3 empty folders and 37 `worktree-agent-*` branches deleted (Helder ruling) | `54ea4336` |
 | C | Reminders use the JSON forms that are delivered; TDD inline reminder deleted | `766077cb` |
-| D (backlog) | Live rows are `Target, Feature, Status`; header is one paragraph. `BACKLOG.md` 35.2 KB to 8.3 KB | `c80dda4d` |
-| E (settings) | WORKFLOW GATE regex narrowed; dead `PostCompact` echo replaced by a `SessionStart` `compact` line; 3 Artifact skills off (the tool is denied here) | `b577259d` |
+| D backlog | Live rows are `Target, Feature, Status`; header is one paragraph | `c80dda4d` |
+| D post-MVP | `horizon: post-mvp` items render into `BACKLOG-POST-MVP.md`; `query --horizon` | `0e4e4275` |
+| D ledger | `ledger_rotate.py`: Completed rows move verbatim to the archive when the branch is gone or 7 days after merge; cap of 15 at pre-commit | `de18316a` |
+| Solution view | Solution folders mirror the `Docs/` tree; `register` and the Write hook place new files the same way | `97909bfc` |
+| E settings | WORKFLOW GATE regex narrowed; dead `PostCompact` echo replaced by a `SessionStart` `compact` line; 3 Artifact skills off | `b577259d` |
+| E `CLAUDE.md` | Four cuts, approved by Helder on the diff | `c6be7255` |
+| E memory index | 3 entries removed (each stated by a rules file); "Token-scoped library reads" kept, because the ruling against line offsets exists only there | (outside the repo) |
 
-### Helder's direction for D and E (2026-11-15, during the session)
+### Measure of success
 
-- The Feature column is enough; notes and the folder path are not needed in a backlog row. **Done.**
-- Post-MVP items could live in their own backlog, read only when needed. **Pending 1.**
-- `<!-- -->` lines are unneeded. **Not done on purpose:** the only comment lines in `BACKLOG.md` are the four generator fences; `regen` fails without them.
-- The top sections of `BACKLOG.md` spend tokens without need. **Done** (moved to `.claude/library/backlog-generator.md`).
-- Statuses could be short codes without icons. **Pending 2.**
-- `LEDGER.md` is crucial; treat with caution; a safe reduction is welcome. **Pending 3.**
-- Many `plan.md`, `README.md`, `task-log.md` files appear flat under "Itens de Solução" in Visual Studio. **Diagnosed, pending 4.**
-- `CLAUDE.md` should be analysed anyway. **Analysed, pending 5.**
+From fresh headless processes (`claude -p "/context"`), 2026-11-15:
 
-### Pending Helder (nothing below was changed)
+| Figure | Before | After |
+|--------|--------|-------|
+| Total at the first prompt | not recorded | 31.6k tokens |
+| Memory files | about 12k (12.2k measured mid-session) | 11.7k |
+| Skills listing | 2.9k | 2.5k |
+| `CLAUDE.md` | 8,279 bytes (3.3k tokens) | 7,573 bytes (3.0k tokens) |
+| `BACKLOG.md` | 35,182 bytes | 8,000 bytes |
+| `LEDGER.md` | 11,882 bytes | 4,467 bytes |
 
-1. **Post-MVP backlog.** Post-MVP items are marked only by a "Post-MVP:" title prefix (5 live rows). A separate file needs a frontmatter key (for example `horizon: post-mvp`) and a second generated file. Decide the key and the file name.
-2. **Short status codes.** The status text with its icon is stored in every item frontmatter, in the archives, in `query --status`, and in several rules files; a pre-commit test checks documented commands against it. Changing it is a wide migration for about 10 bytes per row. Recommendation: keep the statuses as they are.
-3. **Ledger.** `LEDGER.md` is 11.9 KB; about 9 KB is the "Completed (this month)" table (45 merged rows). Only the Active table (3 rows) is needed to resume work. Proposal: move a row to `LEDGER-archive.md` (verbatim) when its branch is merged and deleted, instead of at month end. No row is lost; the rule text in the ledger header and `/sln-ledger` changes.
-4. **Flat files in the Visual Studio solution view.** Measured: 157 `Docs/` files sit in the root "Itens de Solução" solution folder. The files are in the right folders on disk. Cause: `backlog_gen.py register` adds each new item `README.md` to the first `SolutionItems` section of `MyVocaList.sln`, and the files added later follow it. Fix: one script moves the 157 entries into nested solution folders (creating about 150 of them), and `register` plus `sync-docs-to-sln.ps1` target the nested folder. Decide how deep the solution folders should go (one per feature, or one per change/bug folder). Close Visual Studio while it runs.
-5. **`CLAUDE.md` (3.1k tokens).** Candidates to cut, each with its home: the Task-log rotation bullet (the guard now gives the instruction); the Commands list (the skills listing already names every `sln-` command); "Planned" and "Post-MVP" stack notes (not needed in every session); the read-scope bullet in Roles (`orchestrator.md` holds it). Estimated saving about 1,100 bytes (roughly 0.4k tokens); an earlier estimate of 0.6k to 0.9k was too high. Needs an `amend:` commit and your review of the wording.
-6. **Rules files on demand.** `testing.md`, `code-principles.md`, `component-change-governance.md` and `constraints-registry.md` (3.8k tokens together) could carry a `paths:` scope so they load only when code or test files are read. Not verified: how a path-scoped rule reaches a subagent working in a worktree. Needs a test in a fresh process before any change.
-7. **Superpowers plugin.** Its session-start text and skill bodies are a fixed cost; `CLAUDE.md` relies on four of its skills (`brainstorming`, `writing-plans`, `verification-before-completion`, `systematic-debugging`). Keep or replace is your decision. Plugin skills ignore `skillOverrides`, so they cannot be switched off one by one.
-8. **Memory index (1.2k tokens).** Entries that a rule already states: "Docs belong on develop", "Read lane + ITF over dispatch", "Token-scoped library reads", "Route subagents to cheaper models". Candidates for removal.
-9. **Leftover clean-up (workstream B).** Table in `task-log.md`: 3 empty folders, `.worktrees/_orch` (22 scratch files), 7 + 30 `worktree-agent-*` branches with no unique commits. Nothing was deleted.
-10. **`.sln` auto-registration.** The `PostToolUse` `Write` hook did not register this item's `task-log.md`; it was added by hand. Not investigated.
-11. **Measure of success.** Taken on 2026-11-15 from a fresh headless process (`claude -p "/context"`), after the changes: total 32.1k tokens at the first prompt; memory files 12.2k (before: about 12k; unchanged, because the `CLAUDE.md`, rules and memory-index reductions are still at the gate); skills 2.5k (before: 2.9k); messages 1.4k (no "before" figure was recorded). File sizes: `BACKLOG.md` 35,182 to 8,322 bytes; `LEDGER.md` 11,882 (unchanged); `CLAUDE.md` 8,279 (unchanged). The saving of this session is therefore in reads (backlog, guarded slices, worktree files) and in per-prompt hook text, not yet in the always-loaded 12k.
+The larger saving is in reads, not in the always-loaded part: a full `BACKLOG.md` read (about 9k tokens) is now refused, the ledger read costs about a third, `limit: 5000` no longer reads a whole file, and files inside a worktree are guarded. AC-05.3 set 7,300 bytes for `CLAUDE.md`; the result is 7,573 because the sentence that tells `/sln-review` from the built-in `/review` was kept.
+
+### Helder's decisions (2026-11-15)
+
+- Ledger rotation: as specified. Solution view: logical folder equals physical folder, for every file. `CLAUDE.md` cuts, memory prune and the post-MVP file: approved. Leftovers: delete the empty folders and the branches, keep `.worktrees/_orch`.
+- Short status codes: not asked again; the recommendation stands (keep the statuses).
+- Not selected, moved to the follow-up item: the path-scoped rules spike (REQ-TUR-06) and the superpowers cost measurement (REQ-TUR-09).
+
+### Open points left on purpose
+
+1. `.worktrees/_orch` (22 untracked scratch files from 2026-11-04) is kept for Helder to look at. The `.worktrees/` line stays in `.gitignore` until it is removed.
+2. 24 `worktree-agent-*` branches still exist on `origin`. Only local branches were covered by the ruling.
+3. `MyVocaList.sln` starts with two byte-order marks. This was so before this item and was left as found.
+4. `CLAUDE.md` says hand-edits of BACKLOG rows are "hook-blocked". No hook blocks the edit; the pre-commit `regen --check` catches the stale file. The wording was not changed.
+5. Not checked live: the `SessionStart` `compact` hook (needs a real compaction) and Visual Studio opening the re-nested solution (checked with `dotnet sln list` and the pre-commit check only).
 
 ## Already done (2026-11-14 and 15)
 
