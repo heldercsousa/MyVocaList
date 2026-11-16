@@ -59,6 +59,12 @@ public class SongConfiguration : IEntityTypeConfiguration<Song>
                .HasColumnType("TEXT")
                .HasMaxLength(10000);
 
+        // REQ-SLD-28: nullable, no default, no backfill; null = not recorded. Stored as the enum name (pattern: BackupHistoryConfiguration).
+        builder.Property(s => s.LyricsOrigin)
+               .IsRequired(false)
+               .HasConversion<string>()
+               .HasMaxLength(20);
+
         builder.HasIndex(s => new { s.ArtistId, s.Title, s.Version })
                .IsUnique()
                .HasDatabaseName("IX_Songs_ArtistId_Title_Version");
