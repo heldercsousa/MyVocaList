@@ -52,16 +52,16 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] T10 **`SongFormViewModel`: frozen artist, no Version on a pick.** After T7, T8a. (REQ-SLD-08, 12, 13, 14, 17, 30) Level A.
   - Files owned: `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, new test `Unit/ViewModels/SongFormViewModelFrozenArtistTests.cs`; the existing tests named in plan § 7 and § 8 item 4 (superseded ACs).
   - Demo: after a Deezer pick `IsArtistFrozen` is true; changing the Title text or X on Title makes it false and keeps the artist text.
-- [~] T11a **`SongFormViewModel`: lyrics on open.** After T9a, T10. (REQ-SLD-19, 21, 23, 24, 25) Level A. (plan § 9 items 3, 4, 8)
+- [x] T11a **`SongFormViewModel`: lyrics on open.** After T9a, T10. (REQ-SLD-19, 21, 23, 24, 25) Level A. (plan § 9 items 3, 4, 8)
   - Files owned: `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, new test `Unit/ViewModels/SongFormViewModelLyricsOnOpenTests.cs`.
   - Demo: opening a Deezer song without lyrics starts one lookup, shows the hint and fills the blank field.
-- [~] T11b **`SongFormViewModel`: Save waits, pick outcome in the request.** After T11a. (REQ-SLD-26, 31) Level A. (plan § 9 items 3, 5)
+- [x] T11b **`SongFormViewModel`: Save waits, pick outcome in the request.** After T11a. (REQ-SLD-26, 31) Level A. (plan § 9 items 3, 5)
   - Files owned: `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `Unit/ViewModels/SongFormViewModelLyricsOnOpenTests.cs`; mock re-point in `Unit/ViewModels/SongFormViewModelLyricsTests.cs` (planned exception, plan § 8 item 3).
   - Demo: Save pressed during the lookup waits for it; the save request carries the pick lookup outcome.
-- [ ] T12 **Page: plain artist text when frozen.** After T11b. (REQ-SLD-08, 12, 13, 23) Level C, device check. One XAML file, then build.
+- [x] T12 **Page: plain artist text when frozen.** After T11b. (REQ-SLD-08, 12, 13, 23) Level C, device check. One XAML file, then build.
   - Files owned: `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`, `MyVocaList/UI/Pages/Songs/SongFormPage.xaml.cs`.
   - Demo: a Deezer song shows the artist as plain Title Large text; a local-only song keeps the tap-to-edit field.
 
 ## Close-out
-- [ ] T13 Full test run, Android build, pending-model-changes check, traceability matrix, review, merge to `develop`, status.
-- [ ] T14 **Device check (Helder)** — checklist in `plan.md` T13 item 6 and § 9 item 9; T13 copies it into `task-log.md § Device check`.
+- [x] T13 Full test run, Android build, pending-model-changes check, traceability matrix, review, merge to `develop`, status.
+- [ ] T14 **Device check (Helder)** — checklist in `task-log.md § Device check`.

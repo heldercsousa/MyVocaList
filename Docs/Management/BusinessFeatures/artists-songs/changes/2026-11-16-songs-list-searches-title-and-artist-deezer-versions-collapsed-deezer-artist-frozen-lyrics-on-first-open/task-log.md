@@ -5,11 +5,26 @@ Branch `feature/songs-list-deezer`, worktree `.claude/worktrees/songs-list-deeze
 
 ### Checkpoint
 
-- **Updated:** 2026-11-16, after T10.
-- **Phase:** 4 — UI. T11a and T11b dispatched to one implementor (sequential).
-- **Done:** T0 to T10. Task branch at 6bea2b54, pushed. Full suite 1,801 passed, 0 failed.
-- **Next:** T12 (page), T13 (close-out: Android build, review, merge), then Helder's device check (T14).
-- **Context manifest (≤ 8 files):** `plan.md`, `tasks.md`, `requirements.md`, `design.md`, this file.
+- **Updated:** 2026-11-16, after the merge.
+- **Phase:** close-out done. **Waiting for Helder's device check (T14).** The item stays In Progress until then.
+- **Done:** T0 to T13. Branch `feature/songs-list-deezer` (head efa30c1b) merged into `develop` as 1631fca9. Full suite on merged `develop`: 1,823 passed, 0 failed. Android build of the branch head: 0 errors.
+- **Next:** T14 device check by Helder; then status Done, worktree removal, and the separate time-boxed trial of the Deezer section in the Songs list.
+- **Context manifest (≤ 8 files):** `tasks.md`, `requirements.md`, `design.md`, this file.
+
+## Device check (T14, Helder)
+
+Build from `develop` at or after 1631fca9. The database gets one new migration (`AddSongLyricsOrigin`) on first start.
+
+- [ ] **Songs list search by artist.** Type an artist name of 3 or more letters: that artist's songs appear, best match first. Type 1 or 2 letters: songs whose title starts with them, by title. Scroll a long result: no song twice.
+- [ ] **One Deezer row per song.** In the song form (add), search a well-known title: each song appears once, with no "Live"/"Remix" label; the row still shows artist and album with "Deezer".
+- [ ] **Deezer pick.** Pick a Deezer row: the artist is plain text and cannot be tapped; Version stays as you left it (blank on a fresh form). Tap X on Title: the artist becomes the editable field again and keeps its text. Pick again, then change the Title text by hand: the artist becomes editable.
+- [ ] **Edit a Deezer song.** Save, reopen: the artist is plain text from the first moment and cannot be edited; the title can; Save works and shows no artist sheet.
+- [ ] **Edit a local-only song.** A song typed by hand keeps the tap-to-edit artist; changing its artist still works.
+- [ ] **Lyrics on first open.** Open an older Deezer song that has no lyrics, online: "Looking for lyrics…" shows and lyrics arrive. Go back without saving, switch to airplane mode, reopen: the lyrics are there.
+- [ ] **Lyrics, no match.** Open a Deezer song the lyrics source does not know: the hint disappears, no message; reopening does not show the hint again.
+- [ ] **Typing wins.** Open a Deezer song without lyrics and type lyrics at once, then Save: your text is stored.
+- [ ] **Leaving during the lookup.** Open a Deezer song without lyrics and immediately open the picture picker or the YouTube search: lyrics may not arrive on that screen; they arrive on the next open.
+- [ ] **Look of the frozen artist.** The plain artist text has the same size, colour and position as the editable artist's text state (not verified on a device by the agents).
 
 ## T0 — Spec and plan (2026-11-16) — Done
 
@@ -107,4 +122,90 @@ Decisions taken for him are C1 to C27 in `design.md § 1.2`. The ones most worth
 | `SongFormViewModelTests.cs` | `SelectTitle_RemoteOption_SetsVersionFromDeezer_OverwritingTypedVersion` | removed | REQ-SFT-12 (Version) replaced by REQ-SLD-08 |
 | `SongFormViewModelTests.cs` | `ClearArtist_AfterRemotePick_ClearsPendingIdentity_KeepsTitle` | one assertion removed (Version "Live") | same |
 | `SongFormViewModelTests.cs` | `ClearTitle_AfterRemotePick_ResetsUnchangedPickFilledVersion` | removed | C23; REQ-SFT-14 Version reset no longer applies |
+
+## T11a, T11b, T12, T13 (2026-11-16) — To Review
+
+### Changed files
+
+| Task | Commit | Files |
+|------|--------|-------|
+| T11a | 5915c90a | `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, new test `Unit/ViewModels/SongFormViewModelLyricsOnOpenTests.cs` |
+| T11b | 3d6a0391 | `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `Unit/ViewModels/SongFormViewModelLyricsOnOpenTests.cs`; mock re-point in `Unit/ViewModels/SongFormViewModelLyricsTests.cs` (C22) |
+| T12 | 860f857d | `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`, `SongFormPage.xaml.cs` |
+| T13 (review fix) | efa30c1b | `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, tests added to `SongFormViewModelFrozenArtistTests.cs` and `SongFormViewModelLyricsOnOpenTests.cs` |
+| T13 (merge) | 1631fca9 | merge of `feature/songs-list-deezer` into `develop` |
+
+### Verification evidence
+
+- T11a: `SongFormViewModel` filter 220 passed; full suite 1,811 passed, 0 failed. 4 tests red on assertion first, 3 guards.
+- T11b: filter 229 passed; full suite 1,820 passed, 0 failed (two runs). 3 red first, 5 guards.
+- T12: Android build `dotnet build MyVocaList/MyVocaList.csproj -f net10.0-android`: 0 errors, 34 warnings (NuGet advisories) after the XAML edit; 0 errors after the code-behind edit. Full suite 1,820 passed. Level C: no automated test, device check.
+- Review fix: `EditMode_BeforeTheSongHasLoaded_ArtistIsFrozen` red first (`Expected: True, Actual: False`); `LookupOnOpen_AnswerForAnotherSong_IsNotApplied` shown able to fail by removing the guard and restoring it. Full suite 1,823 passed.
+- Final head efa30c1b: Android build 0 errors, 34 warnings (run by the main agent).
+- Merged `develop` (1631fca9): full suite 1,823 passed, 0 failed (run by the main agent).
+
+### Independent verification (fresh verifier, branch head 860f857d)
+
+Verdict: **pass with findings**, no blocking or major finding. Every REQ-SLD criterion has an implementation path and a test or a plan note; the suite passed in three runs (1,820 each); the existing tests changed are exactly those in the table above plus the C22 re-point (no assertion, name or `[AC]` line changed); no governed component, native dialog, text normalisation or sequential-only file (beyond the migration) in the diff; search text is parameterised and escaped; no path found that loses or overwrites typed lyrics; the C24 claim (the lyrics service holds nothing its scope disposes) holds.
+
+| Finding (all minor) | Outcome |
+|---------------------|---------|
+| The "still shows that song" guard of REQ-SLD-21 had no test | Fixed: test added (efa30c1b) |
+| Opening a Deezer song showed the editable artist until the load finished | Fixed: edit mode is frozen until the song has loaded (efa30c1b) |
+| `OnDisappearing` cancelling the lookup has no test | Device check line |
+| C25 gap (add mode: change the Title, edit the artist, type the picked title back) | Open, for Helder |
+| Save that fails validation after cancelling the lookup on open does not restart it | As specified (REQ-SLD-31); lyrics arrive on the next open |
+| Empty-title rows with one artist id would merge | Left; Deezer sends no empty titles |
+| Blank-query list order has no id tie-breaker; `%` and `_` in a short search act as wildcards | Both older than this item; not changed |
+
+### Open points for Helder
+
+1. **C25** (see above) — close it by changing the identity rule of REQ-PIC-27/28, or accept it.
+2. **Load failure in edit mode.** If loading the song throws (not "not found"), the artist stays frozen on that form and the exception is unobserved, as the load already was before this item. Wrap the load in try/finally, or leave it.
+3. **Intermittent test.** The pre-commit hook failed once on the T2 commit and once on the T11b commit and passed on an unchanged retry; the failing test name was not captured. Eleven later full runs were green. A guess, not shown: new ViewModel tests that poll a background task with a 5 s cap depend on thread-pool timing.
+4. **Attribution.** Commits 646efce9 and 3d5aff4a are signed "Claude Fable 5.2" although that implementor reported running on Haiku (briefing error). Rewriting them would need a history rewrite of merged commits; not done.
+5. Decisions C1 to C28 in `design.md § 1.2`, in particular C14, C16, C17, C22, C23, C24 (revised), C27, C28.
+
+### Deviations from strict TDD (T11a to T13)
+
+- Tests of existing behaviour passed before the change and are recorded as guards. `Save_BlankFieldAndStoredMatch_SendsTheMatch` does not prove ordering by itself; the wait test does.
+- `EditMode_LocalOnlySongAfterLoad_ArtistBecomesEditableAndNotifies` has no captured red run.
+
+## Traceability matrix (REQ-SLD)
+
+Implementation locations are files and members; tests are classes (method names in `plan.md § 6`).
+
+| AC | Criterion (short) | Implementation | Tests |
+|----|-------------------|----------------|-------|
+| 01 | List searches title and artist | `SongRepository.GetPagedAsync` (full-text branch, prefix branch, missing-table fallback) | `SongRepositoryListSearchTests` |
+| 02 | Order of results | same, `ListSearchSql` order | `SongRepositoryListSearchTests` |
+| 03 | Paging kept, disjoint | same, LIMIT/OFFSET, count with the same joins | `SongRepositoryListSearchTests` |
+| 04 | Empty states kept | same (empty result); existing `SongsViewModel` | `SongRepositoryListSearchTests`; device check |
+| 05 | Catalog mode unchanged | nothing edited | none (level C) |
+| 06 | One row per song group | `SongSuggestionService.CollapseSongGroups`; `DeezerProvider` (artist id) | `SongSuggestionServiceGroupingTests`, `DeezerProviderArtistIdTests` |
+| 07 | Which row is kept | `CollapseSongGroups` | `SongSuggestionServiceGroupingTests` |
+| 08 | A pick carries no version | `CollapseSongGroups` (blank version); `SongFormViewModel.ApplyRemotePick` | `SongSuggestionServiceGroupingTests`, `SongFormViewModelFrozenArtistTests`; device check |
+| 09 | Grouping before the library check | `SongSuggestionService` remote search order | `SongSuggestionServiceGroupingTests` |
+| 10 | Up to 25 rows grouped, URL unchanged | `DeezerProvider.SearchSongsAsync`, `SearchConstants.RemoteSongFetchCount` | `DeezerProviderArtistIdTests`, `SongSuggestionServiceGroupingTests` |
+| 11 | No artist id, own group | `CollapseSongGroups`; `DeezerProvider` | same two classes |
+| 12 | Deezer artist is plain text | `SongIdentityRules.IsDeezerSong`; `SongFormViewModel.IsArtistFrozen`; `SongFormPage.xaml` | `SongIdentityRulesTests`, `SongFormViewModelFrozenArtistTests`; device check |
+| 13 | Local-only artist editable | same; `SongService` (no refusal) | `SongIdentityRulesTests`, `SongServiceArtistFreezeTests`, `SongFormViewModelFrozenArtistTests`; device check |
+| 14 | Releasing the pick releases the artist | `SongFormViewModel.HoldsDeezerPick`, `NotifyArtistFrozenChanged` | `SongFormViewModelFrozenArtistTests` |
+| 15 | Service refuses an artist change | `SongService.SaveFromFormAsync` (edit), `UpdateSongCoreAsync` | `SongServiceArtistFreezeTests` |
+| 16 | Save decisions are not edits | `SongService` add path (unchanged) | `SongServiceArtistFreezeTests` |
+| 17 | Title stays editable | `SongService` (no title rule); `SongFormViewModel` | `SongServiceArtistFreezeTests`, `SongFormViewModelFrozenArtistTests` |
+| 18 | Saved as new is local-only | `SongService` add path | `SongServiceArtistFreezeTests`, `SongServiceLyricsOriginTests` |
+| 19 | Open starts one lookup | `LyricsOriginRules.NeedsLookupOnOpen`; `SongService.EnsureLyricsAsync`; `SongFormViewModel.LoadSongForEditAsync` | `LyricsOriginRulesTests`, `SongServiceEnsureLyricsTests`, `SongFormViewModelLyricsOnOpenTests` |
+| 20 | A match is stored at once | `SongService.EnsureLyricsAsync`; `SongLyricsService.LookupLyricsAsync` | `SongServiceEnsureLyricsTests`, `SongServiceEnsureLyricsRealStackTests`, `SongLyricsServiceLookupTests` |
+| 21 | A match fills the open form | `SongFormViewModel.ApplyLyricsOnOpenAnswer` | `SongFormViewModelLyricsOnOpenTests` |
+| 22 | Definite no match recorded | `SongLyricsService.LookupLyricsAsync`; `EnsureLyricsAsync`; column mapping | `SongLyricsServiceLookupTests`, `SongServiceEnsureLyricsTests`, real-stack tests, `LyricsOriginMigrationTests` |
+| 23 | No answer, tried again later | same; `SongFormViewModel.CancelLyricsLookupOnOpen`; page `OnDisappearing` | `SongLyricsServiceLookupTests`, `SongServiceEnsureLyricsTests`, `SongFormViewModelLyricsOnOpenTests`; device check |
+| 24 | Scope of the trigger | `NeedsLookupOnOpen`; `EnsureLyricsAsync` preconditions | `LyricsOriginRulesTests`, `SongServiceEnsureLyricsTests`, real-stack tests, `SongFormViewModelLyricsOnOpenTests` |
+| 25 | Looking-for-lyrics hint | `SongFormViewModel` (hint state) | `SongFormViewModelLyricsOnOpenTests` |
+| 26 | Origin on Save, add mode | `LyricsOriginRules.OnCreate`; `SongService` create paths; `SongFormViewModel.BuildSaveRequest` | `LyricsOriginRulesTests`, `SongServiceLyricsOriginTests`, `SongFormViewModelLyricsOnOpenTests` |
+| 27 | Origin on Save, edit mode | `LyricsOriginRules.OnUpdate`; `SongService.UpdateSongCoreAsync` | `LyricsOriginRulesTests`, `SongServiceLyricsOriginTests` |
+| 28 | Songs stored before | migration `AddSongLyricsOrigin` | `LyricsOriginMigrationTests` |
+| 29 | Lookup keeps the REQ-LYR rules | `SongLyricsService.LookupLyricsAsync` | `SongLyricsServiceLookupTests`; existing `SongLyricsServiceTests` unchanged |
+| 30 | Frozen edit sends the stored artist | `SongFormViewModel.BuildSaveRequest`, `InitializeArtistField`; `SongService.SaveFromFormAsync` | `SongFormViewModelFrozenArtistTests`, `SongServiceArtistFreezeTests` |
+| 31 | Save waits for the lookup on open | `SongFormViewModel.SaveAsync` (wait step) | `SongFormViewModelLyricsOnOpenTests`; stored origins by `SongServiceLyricsOriginTests` |
 
