@@ -1,12 +1,13 @@
 ---
 id: release-tag-discipline-mechanically-enforced-tag-creation
 title: Release tag discipline — mechanically enforced tag creation
-status: 💡 Pending
+status: 🔵 Superseded
 target: 2026-11-09
 section: DevCycleCraft
 parent: app-versioning
 goal: A tag is created and pushed at every mandatory moment, and the build or a hook fails when one is missing, so no session can skip it.
 gate: Helder approves the trigger list and the enforcement points.
+closed: 2026-11
 kind: change
 ---
 
@@ -85,3 +86,8 @@ script create it? (b) how does the hook know an item is a milestone (frontmatter
 - `workflow.md`: one never-miss line — tags are created at the `/sln-release` moments; build and
   hooks enforce them.
 - Use `superpowers:writing-skills` if the commands are restructured.
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup, although the item was still useful and not delivered. Reopen it by registering a new item if the work is wanted again.

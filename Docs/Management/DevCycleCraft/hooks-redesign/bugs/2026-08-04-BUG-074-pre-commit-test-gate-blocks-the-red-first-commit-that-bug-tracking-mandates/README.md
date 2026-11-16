@@ -1,13 +1,14 @@
 ---
 id: BUG-074
 title: Pre-commit test gate blocks the RED-first commit that bug-tracking mandates
-status: 💡 Pending
+status: 🔵 Superseded
 severity: Major
 target: 2026-08-04
 section: DevCycleCraft
 parent: hooks-redesign
 goal: The pre-commit hook refuses any commit containing a failing test, but a Critical bug's regression test must be committed before its fix. The two rules cannot both be obeyed.
 gate: Found during UOW Phase 0; Helder authorised the no-verify bypass for RED commits as an interim workaround.
+closed: 2026-11
 kind: bug
 ---
 
@@ -82,3 +83,8 @@ and may belong in the task-log/review lane instead.
 
 Amending the two rules files follows `CLAUDE.md § Amending These Rules` (`amend:` prefix + changelog).
 
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup, although the item was still useful and not delivered. Reopen it by registering a new item if the work is wanted again.
