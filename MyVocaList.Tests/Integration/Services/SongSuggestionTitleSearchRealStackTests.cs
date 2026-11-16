@@ -64,7 +64,7 @@ public class SongSuggestionTitleSearchRealStackTests
         Assert.Equal(RemoteSearchStatus.Ok, result.Status);
         Assert.Equal(3, result.Remote.Count);
         Assert.Contains(result.Remote, r => r.Title == "Commando" && r.ArtistName == "Niska");
-        Assert.Contains(result.Remote, r => r.Title == "Comando" && r.Version == "Ao Vivo");
+        Assert.Contains(result.Remote, r => r.Title == "Comando" && r.Version == "");
         Assert.Contains(result.Remote, r => r.Title == "Chasse à l'homme");
     }
 

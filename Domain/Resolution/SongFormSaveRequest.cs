@@ -1,3 +1,5 @@
+using MyVocaList.Contracts.DTOs;
+
 namespace MyVocaList.Domain.Resolution;
 
 /// <summary>
@@ -27,6 +29,10 @@ namespace MyVocaList.Domain.Resolution;
 /// <paramref name="ImageUrl"/> (null removes it). False keeps the stored reference whatever
 /// <paramref name="ImageUrl"/> holds (REQ-PIC-21). Ignored in add mode.
 /// </param>
+/// <param name="PickLyricsLookup">
+/// The pick lookup of the held Deezer pick (REQ-LYR-02), or null when there is none. Used by the add-mode lyrics origin
+/// (REQ-SLD-26); ignored in edit mode.
+/// </param>
 public sealed record SongFormSaveRequest(
     int? SongId,
     string Title, string Version, string? FeaturedArtists, string? Lyrics,
@@ -38,7 +44,8 @@ public sealed record SongFormSaveRequest(
     SongDecision SongDecision,
     string? ImageUrl = null,
     string? ArtistImageUrl = null,
-    bool ImageChanged = false);
+    bool ImageChanged = false,
+    LyricsLookupResult? PickLyricsLookup = null);
 
 /// <summary>The user's answer to the near-duplicate artist sheet (REQ-SFT-19).</summary>
 public abstract record ArtistDecision
