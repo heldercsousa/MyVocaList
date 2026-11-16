@@ -57,3 +57,5 @@ These answer the questions above; still to be turned into a spec in a later sess
 
 ### Open point to verify before any spec
 Whether Deezer's public API returns lyrics at all. The track payload seen on 2026-11-11 had no lyric field; this is not confirmed either way. If it does not, the lyric part of the identity key must come from manual entry or file import.
+
+Update 2026-11-16: answer 4 (collapsing Deezer version rows) is taken up by `../2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open/`. The open point above is answered: the Deezer public API returns no lyrics; LRCLIB is the lyrics source (see `../2026-11-14-song-form-a-deezer-pick-fills-lyrics-when-a-lyrics-match-exists/`).

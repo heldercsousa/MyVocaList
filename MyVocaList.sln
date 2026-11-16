@@ -1988,6 +1988,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-15-always-loaded-co
 		Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost\README.md = Docs\Management\DevCycleCraft\docs-context-scope-control\changes\2026-11-15-always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-16-songs-list-searches-deezer-one-tap-saves-a-thin-song-row-lyrics-copy-with-edit-mark", "2026-11-16-songs-list-searches-deezer-one-tap-saves-a-thin-song-row-lyrics-copy-with-edit-mark", "{A7F0B821-1B0C-550F-A72E-0F7502BB6679}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-deezer-one-tap-saves-a-thin-song-row-lyrics-copy-with-edit-mark\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-deezer-one-tap-saves-a-thin-song-row-lyrics-copy-with-edit-mark\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-16-send-corrected-lyrics-back-to-lrclib", "2026-11-16-send-corrected-lyrics-back-to-lrclib", "{E97B9141-1344-5B4D-93A8-0C3823B6E2EB}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-send-corrected-lyrics-back-to-lrclib\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-send-corrected-lyrics-back-to-lrclib\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open", "2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open", "{C70D1D55-6B49-5D3A-9151-A2D66D8A5AD4}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\README.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\README.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\requirements.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\requirements.md
+		Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\design.md = Docs\Management\BusinessFeatures\artists-songs\changes\2026-11-16-songs-list-searches-title-and-artist-deezer-versions-collapsed-deezer-artist-frozen-lyrics-on-first-open\design.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2413,6 +2430,9 @@ Global
 		{59AC753C-B093-5D60-AB34-05AD3BCD77F6} = {E192492E-8D42-599B-844A-78FA6124DA0E}
 		{3E6041DA-9147-51DE-AEA9-045E2D5E9AB5} = {E192492E-8D42-599B-844A-78FA6124DA0E}
 		{2F0297B6-7811-5F5B-B39C-225AAA695026} = {47E1E835-6E93-5164-9B6F-74B16DBE4FA6}
+		{A7F0B821-1B0C-550F-A72E-0F7502BB6679} = {FA1234BC-0001-4000-8000-00000000007F}
+		{E97B9141-1344-5B4D-93A8-0C3823B6E2EB} = {FA1234BC-0001-4000-8000-00000000007F}
+		{C70D1D55-6B49-5D3A-9151-A2D66D8A5AD4} = {FA1234BC-0001-4000-8000-00000000007F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7EE1A88B-B001-4EC7-99CB-CEB69F38571C}

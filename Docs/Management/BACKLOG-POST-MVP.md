@@ -11,6 +11,7 @@
 | 2026-11-09 | ↳ group Songs list by artist | 💡 Pending |
 | 2026-11-09 | ↳ show similar records in autocomplete results | 💡 Pending |
 | 2026-11-11 | ↳ import an artist's song catalog from files (PDF etc.) | 💡 Pending |
+| 2026-11-16 | ↳ Send corrected lyrics back to LRCLIB | 💡 Pending |
 <!-- BACKLOG:GENERATED:END business-features -->
 
 ## Dev Cycle Craft
