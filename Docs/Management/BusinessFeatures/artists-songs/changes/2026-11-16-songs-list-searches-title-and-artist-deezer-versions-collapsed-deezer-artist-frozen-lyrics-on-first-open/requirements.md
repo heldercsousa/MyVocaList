@@ -94,7 +94,7 @@ Four changes that came out of the 2026-11-16 discussion about how Deezer data is
   IF every row of the group has a version label, THEN the kept row is the first row of the group.
 - **REQ-SLD-08: A Deezer pick carries no version.**
   WHEN the user makes a Deezer pick, the Version field SHALL stay as the user left it (blank on a fresh
-  form), and the Deezer option row SHALL show the artist name and "Deezer" without a version label.
+  form), and the Deezer option row SHALL show no version label (its other parts are unchanged).
   The Version field itself stays, for songs and versions the user types.
 - **REQ-SLD-09: Grouping comes before the library check.**
   The check that hides Deezer rows already in the library (REQ-SFT-05) SHALL run on the kept rows, with
@@ -104,9 +104,9 @@ Four changes that came out of the 2026-11-16 discussion about how Deezer data is
   version.
 - **REQ-SLD-10: Enough rows to group.**
   The Deezer track search SHALL group all rows of one Deezer answer, up to a named limit of 25 rows,
-  and then show up to the existing maximum of remote rows (REQ-SFT-04). WHEN the Deezer API offers a
-  page-size parameter, the request SHALL ask for that number of rows; otherwise the rows of the
-  default answer are used. The Deezer artist search is unchanged.
+  and then show up to the existing maximum of remote rows (REQ-SFT-04). The request to Deezer is
+  unchanged (REQ-SFT-35): the rows of Deezer's default answer are used, 25 as observed. The Deezer
+  artist search is unchanged.
 - **REQ-SLD-11: A row without a Deezer artist id is its own group.**
   IF a Deezer row has no artist id (absent or blank), THEN it SHALL be shown as its own row and never
   merged.
@@ -192,8 +192,9 @@ Four changes that came out of the 2026-11-16 discussion about how Deezer data is
   3. else *none found* when the pick lookup of the held pick got a definite "no match";
   4. else *not recorded* (blank lyrics and no answer: offline, failure, a lookup still running at
      Save and therefore cancelled by REQ-LYR-10, or no pick at all).
-  The rules are tried in this order. A pick lookup whose pick was released (X, REQ-LYR-11, or a newer
-  pick, REQ-LYR-12) counts as no lookup. The origin does not depend on whether the song is stored as a
+  The rules are tried in this order. A pick lookup whose pick was released by X on Title or Artist
+  (REQ-LYR-11) or replaced by a newer pick (REQ-LYR-12) counts as no lookup. A changed Title text
+  does not drop it: lyrics that still equal what the lyrics source returned keep that origin. The origin does not depend on whether the song is stored as a
   Deezer song or as a local-only song.
 - **REQ-SLD-27: Lyrics origin on Save, edit mode.**
   WHEN a stored song is saved and the saved lyrics differ from the lyrics stored at that moment, the
@@ -231,7 +232,7 @@ Four changes that came out of the 2026-11-16 discussion about how Deezer data is
 
 | Situation | Behaviour |
 |-----------|-----------|
-| Full-text index not present (first run before it is built) | The Songs list search falls back to the collated title prefix, as the form search does today |
+| Full-text index not present (first run before it is built) | The Songs list search falls back to the collated title prefix. The form search keeps its current behaviour |
 | Deezer answer with only labelled versions of a song | One row, the first one, shown without the label (REQ-SLD-07, 08) |
 | Update request that changes the artist of a Deezer song | Refused, nothing stored (REQ-SLD-15) |
 | Offline, timeout or lyrics-source failure on first open | No message, nothing recorded, tried again on the next open (REQ-SLD-23) |
@@ -267,7 +268,7 @@ Four changes that came out of the 2026-11-16 discussion about how Deezer data is
 | REQ-SFT-37 ("No manual-edit flag … SHALL NOT exist") | **Narrowed**: a lyrics origin is stored for the Lyrics field only (REQ-SLD-26 to 28). No flag exists for any other field. |
 | REQ-PIC-23, 26, 28, 31 (Artist text state with edit icon; a tap on Artist opens the editor and releases the pick; the artist of a stored song can be changed) | **Limited to local-only songs** by REQ-SLD-12, 13, 15. After a Deezer pick the Artist cannot be tapped or cleared, so releasing a picked artist by a tap or by X on Artist no longer happens while the pick is held. |
 | REQ-PIC-27 (changing the Title text after a pick saves a song with no external identity) | **Kept, and extended** by REQ-SLD-14: the Artist becomes editable at that moment. |
-| REQ-SFT-14 (X on Title: "the other field keeps its value and state") | **Extended** by REQ-SLD-14: the Artist keeps its value; its state changes from plain text to the editable field. |
+| REQ-SFT-14 (X on Title: "the other field keeps its value and state"; X resets a Version the pick filled) | **Extended** by REQ-SLD-14: the Artist keeps its value; its state changes from plain text to the editable field. The Version reset no longer applies, because a pick fills no Version (REQ-SLD-08). |
 | REQ-SFT-46 (one write path for a song) | **Extended**: the lookup on open writes lyrics and lyrics origin only, inside the song service, through the same unit of work. Lyrics are not part of any identity, duplicate or catalog rule, so no other check of the write path applies. |
 | REQ-LYR-13 ("Nothing is stored before Save") | **Kept for the pick lookup in add mode.** The lookup on open stores a match at once (REQ-SLD-20). |
 | REQ-LYR-14 (edit mode starts no lookup) and REQ-LYR "Out of scope" (no lyrics for songs already stored) | **Replaced** for Deezer songs with blank lyrics by REQ-SLD-19, 24, 28. |
