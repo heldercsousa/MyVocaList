@@ -96,8 +96,6 @@ Console/**
 **/[Dd]ocs/**/*.gif
 **/[Dd]ocs/**/*.svg
 
-# Changelog archive
-**/[Dd]ocs/[Cc]hangelog/[Aa]rchive/**
 
 # AI learning documentation (personal learning, not for Claude Code)
 **/[Dd]ocs/[Gg]uides/[Aa][Ii]/**
@@ -129,8 +127,6 @@ Docs/DevEnv/**
 Docs/Management/DevCycleCraft/sdd/**
 # Completed session plans and task-logs: injected into briefings by explicit path when needed
 Docs/superpowers/plans/**
-# Changelog: historical record, not needed during feature work
-Docs/Changelog/**
 # Old Plans folder: superseded by superpowers/plans/
 Docs/Plans/**
 

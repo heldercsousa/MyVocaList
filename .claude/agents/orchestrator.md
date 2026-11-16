@@ -234,7 +234,6 @@ Before dispatching any wave, verify that the spec being implemented is still cur
 - Tell the subagent which files to read; let its own `Read` calls bring the content into its context.
 - Pasting rule file content into a briefing multiplies token cost by the number of subagents — never do it.
 - Pre-read the spec yourself and hand the subagent concrete, scoped instructions (not "based on what you find").
-- **Library files:** name the smallest section file that covers the need (`dx-*`, `crud-*`, `m3-*`, `workflow-rule-N`; the family index lists them). Never brief a whole family, and never give line offsets into a library file: offsets go stale when the file is edited (Helder ruling 2026-07-14).
 
 **Exception:** Committed interface/DTO signatures produced in the previous wave may be included verbatim under a `## Contracts from previous wave` block — these are bounded committed code, not rule file content.
 
