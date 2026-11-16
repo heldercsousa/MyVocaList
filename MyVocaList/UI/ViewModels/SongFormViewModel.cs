@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MyVocaList.Contracts.DTOs;
 using MyVocaList.Contracts.DTOs.Suggestions;
 using MyVocaList.Contracts.Messages;
 using MyVocaList.Domain.Constants;
@@ -107,6 +108,7 @@ public partial class SongFormViewModel : ViewModelBase
     private CancellationTokenSource? _lyricsLookupCts;   // REQ-LYR-10: the running lyrics lookup, if any
     private CancellationTokenSource? _openLyricsLookupCts;   // REQ-SLD-19/23: the lookup on open of this form, if one was started
     private string? _pickFilledLyrics;                   // REQ-LYR-11/12: the Lyrics text the last lookup wrote
+    private LyricsLookupResult? _pickLyricsLookup;       // REQ-SLD-26: the outcome of the pick lookup of the held pick
     private string? _pendingImageUrl;        // REQ-ART-11: Deezer cover held between a pick and Save
     private string? _pendingArtistImageUrl;  // REQ-ART-11: Deezer artist picture held between a pick and Save
     private const string SongPlaceholderIcon = "music_note_outlined";
@@ -510,6 +512,7 @@ public partial class SongFormViewModel : ViewModelBase
     private void ClearArtist()
     {
         CancelLyricsLookup();            // REQ-LYR-10
+        _pickLyricsLookup = null;        // REQ-SLD-26: X on Artist drops the pick and its outcome
         DropUntouchedPickFilledLyrics(); // REQ-LYR-11
         SelectedArtistId = null;
         SelectedArtistName = null;
@@ -646,6 +649,7 @@ public partial class SongFormViewModel : ViewModelBase
     private void StartLyricsLookup(SongSuggestionDto dto)
     {
         CancelLyricsLookup();
+        _pickLyricsLookup = null;   // REQ-SLD-26: a newer pick replaces the outcome of the held pick
         DropUntouchedPickFilledLyrics();
         if (!string.IsNullOrWhiteSpace(Lyrics))
             return;
@@ -663,30 +667,31 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private async Task RunLyricsLookupAsync(LyricsQuery query, CancellationTokenSource cts)
     {
-        string? found;
+        LyricsLookupResult answer;
         try
         {
-            found = await _songLyricsService.FindLyricsAsync(query, cts.Token);
+            answer = await _songLyricsService.LookupLyricsAsync(query, cts.Token);
         }
         catch (OperationCanceledException) when (cts.IsCancellationRequested)
         {
             return;
         }
 
-        RunOnUiThread(() => ApplyLyricsAnswer(cts, found));
+        RunOnUiThread(() => ApplyLyricsAnswer(cts, answer));
     }
 
     /// <summary>
     /// Writes a lookup answer into the form only while that lookup is still the current one (REQ-LYR-10):
     /// a stale answer touches nothing, so a newer pick keeps its hint.
     /// </summary>
-    private void ApplyLyricsAnswer(CancellationTokenSource cts, string? found)
+    private void ApplyLyricsAnswer(CancellationTokenSource cts, LyricsLookupResult answer)
     {
         if (!ReferenceEquals(_lyricsLookupCts, cts) || cts.IsCancellationRequested)
             return;
 
+        _pickLyricsLookup = answer;   // REQ-SLD-26: kept for Save; a Title text change does not clear it
         IsLyricsLoading = false;
-        if (found is not null && string.IsNullOrWhiteSpace(Lyrics))
+        if (answer is { Status: LyricsLookupStatus.Found, Lyrics: { } found } && string.IsNullOrWhiteSpace(Lyrics))
         {
             Lyrics = found;
             _pickFilledLyrics = found;   // REQ-LYR-11/12: remembered so X or a new pick can take it back
@@ -718,6 +723,7 @@ public partial class SongFormViewModel : ViewModelBase
     private void ClearTitle()
     {
         CancelLyricsLookup();            // REQ-LYR-10
+        _pickLyricsLookup = null;        // REQ-SLD-26: X on Title drops the pick and its outcome
         DropUntouchedPickFilledLyrics(); // REQ-LYR-11
         SongTitle = string.Empty;
         IsTitleLocked = false;
@@ -948,8 +954,21 @@ public partial class SongFormViewModel : ViewModelBase
         CancelLyricsLookup();   // REQ-LYR-10: Save starts; a late lookup answer must not reach the form
         if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
 
+        await WaitForLyricsOnOpenAsync();   // REQ-SLD-31: the write never races a lookup on open
+        if (IsBusy) return;   // a second tap during the wait is the same Save
+
         ClearSaveDecisions();
         await RunSaveAsync();
+    }
+
+    /// <summary>
+    /// REQ-SLD-31: stops a lookup on open that still runs and waits for it to end. The answer is applied on the UI
+    /// thread before the task ends (REQ-SLD-21), so a stored match reaches the request.
+    /// </summary>
+    private async Task WaitForLyricsOnOpenAsync()
+    {
+        CancelLyricsLookupOnOpen();
+        await LyricsOnOpenTask;
     }
 
     /// <summary>
@@ -1033,7 +1052,9 @@ public partial class SongFormViewModel : ViewModelBase
             ImageUrl: FormImageReference,
             // REQ-ART-16: the Deezer artist picture exists in add mode only (edit mode has no Deezer pick).
             ArtistImageUrl: artistImage,
-            ImageChanged: IsEditMode && (_uploadedImageReference is not null || _imageRemoved));
+            ImageChanged: IsEditMode && (_uploadedImageReference is not null || _imageRemoved),
+            // REQ-SLD-26: the outcome of the held pick's lookup; the Service decides the origin from it.
+            PickLyricsLookup: IsEditMode ? null : _pickLyricsLookup);
     }
 
     /// <summary>Maps the Service outcome to fields, sheets, the snackbar and navigation (REQ-SFT-51).</summary>

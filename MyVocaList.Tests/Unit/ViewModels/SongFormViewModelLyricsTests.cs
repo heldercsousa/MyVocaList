@@ -43,18 +43,22 @@ public class SongFormViewModelLyricsTests
 
     /// <summary>Every lookup stays pending until the test completes its <see cref="Lookup.Answer"/>.</summary>
     private void AnswerLater() =>
-        _lyricsMock.Setup(s => s.FindLyricsAsync(It.IsAny<LyricsQuery>(), It.IsAny<CancellationToken>()))
-            .Returns((LyricsQuery query, CancellationToken ct) =>
+        _lyricsMock.Setup(s => s.LookupLyricsAsync(It.IsAny<LyricsQuery>(), It.IsAny<CancellationToken>()))
+            .Returns(async (LyricsQuery query, CancellationToken ct) =>
             {
                 var answer = new TaskCompletionSource<string?>();
                 _lookups.Add(new Lookup(query, ct, answer));
-                return answer.Task;
+                return ToResult(await answer.Task);
             });
 
     /// <summary>Every lookup answers at once with <paramref name="lyrics"/>.</summary>
     private void AnswerNow(string? lyrics) =>
-        _lyricsMock.Setup(s => s.FindLyricsAsync(It.IsAny<LyricsQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(lyrics);
+        _lyricsMock.Setup(s => s.LookupLyricsAsync(It.IsAny<LyricsQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ToResult(lyrics));
+
+    /// <summary>A null answer is "no answer" (REQ-SLD-23 shape); a text is a found match.</summary>
+    private static LyricsLookupResult ToResult(string? lyrics) =>
+        lyrics is null ? LyricsLookupResult.NoAnswer : LyricsLookupResult.Found(lyrics);
 
     /// <summary>Save service whose validation passes and whose save succeeds.</summary>
     private static Mock<ISongService> SaveService()
@@ -90,7 +94,7 @@ public class SongFormViewModelLyricsTests
 
         await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto()));
 
-        _lyricsMock.Verify(s => s.FindLyricsAsync(
+        _lyricsMock.Verify(s => s.LookupLyricsAsync(
             new LyricsQuery("Creep", "Radiohead", "Pablo Honey", 238), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -103,7 +107,7 @@ public class SongFormViewModelLyricsTests
 
         await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto(localArtistId: 3, localArtistName: "Radiohead")));
 
-        _lyricsMock.Verify(s => s.FindLyricsAsync(
+        _lyricsMock.Verify(s => s.LookupLyricsAsync(
             new LyricsQuery("Creep", "Radiohead", "Pablo Honey", 238), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -147,7 +151,7 @@ public class SongFormViewModelLyricsTests
 
         await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto()));
 
-        _lyricsMock.Verify(s => s.FindLyricsAsync(It.IsAny<LyricsQuery>(), It.IsAny<CancellationToken>()), Times.Never);
+        _lyricsMock.Verify(s => s.LookupLyricsAsync(It.IsAny<LyricsQuery>(), It.IsAny<CancellationToken>()), Times.Never);
         Assert.Equal("Typed before the pick", sut.Lyrics);
     }
 
@@ -395,7 +399,7 @@ public class SongFormViewModelLyricsTests
         await sut.SelectTitleCommand.ExecuteAsync(Pick(RemoteDto(title: "Creep (Live)")));
 
         Assert.Equal("Edited after the fill", sut.Lyrics);
-        _lyricsMock.Verify(s => s.FindLyricsAsync(It.IsAny<LyricsQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+        _lyricsMock.Verify(s => s.LookupLyricsAsync(It.IsAny<LyricsQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     // ── Nothing is stored before Save (REQ-LYR-13) ────────────────────────
@@ -427,7 +431,7 @@ public class SongFormViewModelLyricsTests
 
         await sut.SelectTitleCommand.ExecuteAsync(Pick(new SongSuggestionDto(7, "Creep", "Radiohead", 1, null, null, false)));
 
-        _lyricsMock.Verify(s => s.FindLyricsAsync(It.IsAny<LyricsQuery>(), It.IsAny<CancellationToken>()), Times.Never);
+        _lyricsMock.Verify(s => s.LookupLyricsAsync(It.IsAny<LyricsQuery>(), It.IsAny<CancellationToken>()), Times.Never);
         _navigationMock.Verify(n => n.GoToAsync(It.Is<string>(route => route.Contains("songId=7"))), Times.Once);
     }
 }
