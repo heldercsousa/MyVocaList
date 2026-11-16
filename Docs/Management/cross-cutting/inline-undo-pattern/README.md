@@ -2,7 +2,8 @@
 id: inline-undo-pattern
 title: "**Inline Undo Pattern — UX Standard**"
 status: "💡 Pending"
-target: 2026-05
+target: —
+horizon: post-mvp
 section: DevCycleCraft
 kind: feature
 order: 40

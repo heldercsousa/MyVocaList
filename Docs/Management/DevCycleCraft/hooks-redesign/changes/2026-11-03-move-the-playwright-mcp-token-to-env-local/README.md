@@ -2,7 +2,7 @@
 id: move-the-playwright-mcp-token-to-env-local
 title: Move the Playwright MCP token to .env.local
 status: 💡 Pending
-target: 2026-11-03
+target: —
 section: DevCycleCraft
 parent: hooks-redesign
 goal: The token is plain text in the user settings env block, and .env.local holds a different value.

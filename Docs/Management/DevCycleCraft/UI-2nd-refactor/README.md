@@ -3,6 +3,7 @@ id: UI-2nd-refactor
 title: "**UI-2nd-refactor**"
 status: "📋 Spec"
 target: —
+horizon: post-mvp
 section: DevCycleCraft
 kind: feature
 order: 290

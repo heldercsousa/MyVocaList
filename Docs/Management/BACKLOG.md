@@ -56,19 +56,15 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 |--------|----------|--------|
 | 2026-07-12 | **Inline Trivial Fix (ITF) lane — bounded orchestrator inline-edit exception** | 🟡 In Progress |
 | 2026-11-03 | ↳ Post-ship review — did the agent-dispatch recalibration meet its expectations | 💡 Pending |
-| 2026-05 | **Inline Undo Pattern — UX Standard** | 💡 Pending |
 | 2026-06-27 | **Mandatory Worktree Rule Enforcement — ALL Subagent Work** | 💡 Pending |
 | 2026-06 | **IAsyncRelayCommand Standardization** | 💡 Pending |
 | 2026-07-19 | **`MyVocaList.Extensions` layer guidelines — placement criteria + rules-file promotion** | 💡 Pending |
 | 2026-06 | **Bug: Shell navigation swallows button tap animations** | 💡 Pending |
 | 2026-06-12 | CRUD page structural reduction — lazy BottomSheet + lazy SearchAppBar | 💡 Pending |
-| — | **UI-2nd-refactor** | 📋 Spec |
 | 2026-06-12 | Large-volume data stress test (1–2 year seed) | 💡 Pending |
-| 2026-11-04 | ↳ Dev and QA data tooling — seed and empty app data on demand | 💡 Pending |
-| 2026-06-12 | Cross-device / OS version compatibility test | 💡 Pending |
-| 2026-06-12 | Play Store + Samsung Galaxy Store pre-submission compliance | 💡 Pending |
-| 2026-06-12 | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
-| 2026-11-04 | ↳ Screen coverage — keyboard, safe area and snackbars hiding inputs and bottom bars | 💡 Pending |
+| — | Play Store + Samsung Galaxy Store pre-submission compliance | 💡 Pending |
+| — | Full pre-release mobile testing checklist (all categories) | 💡 Pending |
+| — | ↳ Screen coverage — keyboard, safe area and snackbars hiding inputs and bottom bars | 💡 Pending |
 | 2026-06-13 | **Session Continuity — Task Leasing & Auto-Resume** | 🟡 In Progress |
 | 2026-06-27 | **Infra Repository Folder Consolidation** | 💡 Pending |
 | 2026-06-27 | **Read Model + Global NoTracking Pattern — Guidelines Update** | 💡 Pending |
@@ -80,16 +76,16 @@ Statuses: 💡 Pending → 📋 Spec → 🗺️ Plan → 🟢 Ready → 🟡 In
 | 2026-08-04 | ↳ Pre-commit test gate blocks the RED-first commit that bug-tracking mandates | 💡 Pending |
 | 2026-08-18 | ↳ Pre-commit hook inoperative in worktrees: dotnet test without --no-restore aborts on NETSDK1147 | 💡 Pending |
 | 2026-09-18 | ↳ Pre-commit hook: allow TDD Red commits without --no-verify | 💡 Pending |
-| 2026-11-03 | ↳ Move the Playwright MCP token to .env.local | 💡 Pending |
-| 2026-11-03 | ↳ Rotate the DevExpress license key | 💡 Pending |
 | 2026-11-09 | ↳ Release tag discipline — mechanically enforced tag creation | 💡 Pending |
 | 2026-11-11 | ↳ AutocompleteDXField is the app-wide autocomplete pattern, whatever page uses it | 💡 Pending |
 | 2026-11-12 | ↳↳ Correct the MD3 list, selection and toolbar rules in the library guidelines with verbatim official quotes | 💡 Pending |
-| 2026-11-12 | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
 | 2026-11-12 | ↳ CRUD list FAB: placement, size and color when alone and when paired with the floating toolbar | 💡 Pending |
 | 2026-11-12 | ↳ CrudListView: one list mode at a time (multi-action browse, multi-select selection) with toolbar Edit for exactly one | 💡 Pending |
 | 2026-11-12 | ↳ List item overflow icon button in the ListItem trailing slot, opening the item actions menu | 💡 Pending |
 | 2026-11-12 | ↳ MD3 overflow menu for list item actions | 💡 Pending |
-| 2026-11-12 | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
-| 2026-11-15 | ↳ Always-loaded context: path-scoped rules spike and superpowers plugin cost | 💡 Pending |
+| — | ↳ CRUD list app bar in selection mode: Songs shows title plus count, the other lists only the count | 💡 Pending |
+| — | ↳ Move the Playwright MCP token to .env.local | 💡 Pending |
+| — | ↳ Rotate the DevExpress license key | 💡 Pending |
+| — | ↳ ListItem: empty slots not rendered, content fills the freed width; spacing aligned to MD3 List - Common tokens | 💡 Pending |
+| — | ↳ Always-loaded context: path-scoped rules spike and superpowers plugin cost | 💡 Pending |
 <!-- BACKLOG:GENERATED:END dev-cycle-craft -->

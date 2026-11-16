@@ -2,7 +2,7 @@
 id: rotate-the-devexpress-license-key
 title: Rotate the DevExpress license key
 status: 💡 Pending
-target: 2026-11-03
+target: —
 section: DevCycleCraft
 parent: hooks-redesign
 goal: The key sat in a tracked settings.local.json allow rule, so it is in git history. Rotate it in the DevExpress portal.
