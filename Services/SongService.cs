@@ -30,6 +30,7 @@ public class SongService : ISongService
 
     private const string ArtistRequiredMessage = "Artist is required";
     private const string ArtistNotFoundMessage = "Artist not found";
+    private const string DeezerArtistFrozenMessage = "The artist of a song from the music database cannot be changed.";
 
     public SongService(
         ISongRepository songRepository,
@@ -175,6 +176,12 @@ public class SongService : ISongService
             var song = await songRepository.GetByIdAsync(id, ct);
             if (song == null)
                 return (false, "Song not found", SaveField.None);
+
+            // REQ-SLD-15: the artist of a Deezer song cannot change, whatever the caller sends; checked before
+            // the identity check and before any artist is created. The title stays editable (REQ-SLD-17).
+            if (MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId)
+                && (hasNewArtistName || (artistId.HasValue && artistId.Value != song.ArtistId)))
+                return (false, DeezerArtistFrozenMessage, SaveField.Artist);
 
             // REQ-SFT-26: an external identity held by ANOTHER song (self excluded) is rejected before
             // any artist is created, so a refused save never leaves a new artist behind.
@@ -462,6 +469,21 @@ public class SongService : ISongService
         // the SongResolutionService -> ISongService constructor cycle.
         var resolved = await _uow.ExecuteReadAsync<SaveFormResolution>(async sp =>
         {
+            // REQ-SLD-15 / REQ-SLD-30: in edit mode the artist of a Deezer song is the stored one. The id is
+            // compared, never the typed text; a match needs no artist resolution at all.
+            if (!isAddMode)
+            {
+                var songRepository = sp.GetRequiredService<ISongRepository>();
+                var storedSong = await songRepository.GetByIdAsync(request.SongId!.Value, ct);
+                if (storedSong is not null
+                    && MyVocaList.Domain.Rules.SongIdentityRules.IsDeezerSong(storedSong.ExternalProvider, storedSong.ExternalId))
+                {
+                    return request.ArtistId == storedSong.ArtistId
+                        ? SaveFormResolution.Proceed(storedSong.ArtistId, null, fillArtistImage: false)
+                        : SaveFormResolution.Stop(SaveFailed(DeezerArtistFrozenMessage, SaveField.Artist));
+                }
+            }
+
             var artistStep = await ResolveFormArtistAsync(sp, request, ct);
             if (artistStep.StopOutcome is not null)
                 return artistStep;
