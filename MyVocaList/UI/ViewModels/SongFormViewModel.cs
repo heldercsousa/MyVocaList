@@ -102,7 +102,6 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private string _titleSupportingText = string.Empty;
     [ObservableProperty] private bool _isTitleLocked;
 
-    private string? _pickFilledVersion;   // Version written by the last remote pick (Q21)
     private CancellationTokenSource? _lyricsLookupCts;   // REQ-LYR-10: the running lyrics lookup, if any
     private string? _pickFilledLyrics;                   // REQ-LYR-11/12: the Lyrics text the last lookup wrote
     private string? _pendingImageUrl;        // REQ-ART-11: Deezer cover held between a pick and Save
@@ -179,6 +178,25 @@ public partial class SongFormViewModel : ViewModelBase
 
     public bool IsEditMode => SongId.HasValue;
     public string PageTitle => IsEditMode ? "Edit Song" : "New Song";
+
+    /// <summary>Add mode: a Save now would store the pick's external identity (REQ-PIC-27, REQ-SLD-14).</summary>
+    private bool HoldsDeezerPick =>
+        !IsEditMode && SongIdentityRules.IsDeezerSong(SelectedProvider, SelectedExternalId)
+        && string.Equals(SongTitle, _pickedTitle, StringComparison.Ordinal);
+
+    /// <summary>REQ-SLD-12/14: the Artist is plain text. Edit mode: the loaded song is a Deezer song. Add mode: the pick is held.</summary>
+    public bool IsArtistFrozen => IsEditMode ? _storedIsDeezerSong : HoldsDeezerPick;
+    public bool IsArtistEditable => !IsArtistFrozen;   // for the page, no converter needed
+
+    private bool _storedIsDeezerSong;   // set in LoadSongForEditAsync from the loaded entity
+    private int _storedArtistId;        // set in LoadSongForEditAsync
+
+    /// <summary>Raises the change of the frozen state; called wherever the pick, the Title or the stored song changes it.</summary>
+    private void NotifyArtistFrozenChanged()
+    {
+        OnPropertyChanged(nameof(IsArtistFrozen));
+        OnPropertyChanged(nameof(IsArtistEditable));
+    }
 
     /// <summary>REQ-SFT-27/02: Title is the search box in add mode only; edit mode shows plain editable text.</summary>
     public bool IsTitleSearchEnabled => !IsEditMode;
@@ -319,6 +337,7 @@ public partial class SongFormViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(IsTitleSearchEnabled));
         OnPropertyChanged(nameof(PageTitle));
+        NotifyArtistFrozenChanged();
         NotifyFormImageChanged();   // REQ-PIC-18: the mode decides the second source of the form picture
         if (value.HasValue)
             _ = LoadSongForEditAsync(value.Value);
@@ -335,6 +354,7 @@ public partial class SongFormViewModel : ViewModelBase
         // so trailing whitespace cannot inflate the count (counter threshold alignment).
         UpdateCharacterCounter(value?.Trim().Length ?? 0);
         UpdateCanLaunchYouTubeSearch();
+        NotifyArtistFrozenChanged();   // REQ-SLD-14: a Title text change away from the picked title releases the artist
 
         if (_isHydrating)
             return;   // edit-mode pre-population — do not mark dirty
@@ -511,6 +531,7 @@ public partial class SongFormViewModel : ViewModelBase
         _pickedTitle = null;
         _pickedArtistName = null;
         NotifyFormImageChanged();            // REQ-PIC-19: an upload stays the form picture
+        NotifyArtistFrozenChanged();
     }
 
     // ── Title-first search and picks (Task 5.2) ───────────────────────────
@@ -582,14 +603,13 @@ public partial class SongFormViewModel : ViewModelBase
     {
         SongTitle = dto.Title;
         IsTitleLocked = true;
-        SongVersion = dto.Version;
-        _pickFilledVersion = dto.Version;
         SelectedExternalId = dto.ExternalId ?? string.Empty;
         SelectedProvider = dto.ExternalProvider ?? string.Empty;
         _pendingImageUrl = dto.ImageUrl;             // REQ-ART-11: the cover, not the row-image fallback
         _pendingArtistImageUrl = dto.ArtistImageUrl;
         _imageRemoved = false;                       // REQ-PIC-20: a later pick sets a picture again
         _pickedTitle = dto.Title;                    // REQ-PIC-27: the identity survives an unchanged Title
+        NotifyArtistFrozenChanged();                 // REQ-SLD-14: the pick now holds the identity
         NotifyFormImageChanged();                    // REQ-PIC-19: an upload stays first
         StartLyricsLookup(dto);                      // REQ-LYR-01: before the artist branch, so every pick starts it
 
@@ -701,12 +721,10 @@ public partial class SongFormViewModel : ViewModelBase
         SelectedExternalId = string.Empty;
         SelectedProvider = string.Empty;
         TitleSupportingText = string.Empty;
-        if (_pickFilledVersion is not null && SongVersion == _pickFilledVersion)
-            SongVersion = string.Empty;
-        _pickFilledVersion = null;
         _pickedTitle = null;
         _pendingImageUrl = null;             // REQ-ART-13: X on Title drops the song image, keeps the artist image
         NotifyFormImageChanged();            // REQ-PIC-19: an upload stays the form picture
+        NotifyArtistFrozenChanged();
     }
 
     // ── Form picture commands (REQ-PIC-05, 10, 15, 17, 20) ────────────────
@@ -775,6 +793,10 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     public void InitializeArtistField()
     {
+        // REQ-SLD-30: the stored artist of a Deezer song is loaded from the entity; catalog query values must not replace it.
+        if (IsEditMode && _storedIsDeezerSong)
+            return;
+
         if (ArtistId > 0)
         {
             SelectedArtistId = ArtistId;
@@ -807,6 +829,10 @@ public partial class SongFormViewModel : ViewModelBase
         // Stash external identity so the edit Save round-trips it unchanged.
         SelectedExternalId = song.ExternalId ?? string.Empty;
         SelectedProvider = song.ExternalProvider ?? string.Empty;
+
+        // REQ-SLD-12/30: the frozen state and the stored artist come from the loaded entity, not from the pick fields.
+        _storedIsDeezerSong = SongIdentityRules.IsDeezerSong(song.ExternalProvider, song.ExternalId);
+        _storedArtistId = song.ArtistId;
 
         RunOnUiThread(() =>
         {
@@ -846,6 +872,7 @@ public partial class SongFormViewModel : ViewModelBase
             {
                 _isHydrating = wasHydrating;
             }
+            NotifyArtistFrozenChanged();
         });
     }
 
@@ -912,10 +939,15 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private SongFormSaveRequest BuildSaveRequest(string title, string version)
     {
-        var artistId = SelectedArtistId is { } id && id != 0 ? id : (int?)null;
+        // REQ-SLD-30: a frozen (Deezer) song in edit mode sends the stored artist id, never artist text or a decision.
+        var frozenEdit = IsEditMode && IsArtistFrozen;
+        var artistId = frozenEdit
+            ? (int?)_storedArtistId
+            : SelectedArtistId is { } id && id != 0 ? id : (int?)null;
 
-        // REQ-PIC-27: after a release by a tap the Deezer identity travels only with the unchanged picked title.
-        var keepsIdentity = !IsEditMode && string.Equals(SongTitle, _pickedTitle, StringComparison.Ordinal);
+        // REQ-PIC-27 / REQ-SLD-14: the Deezer identity travels as a pair, and only while HoldsDeezerPick
+        // (one source of truth with the frozen state of the screen).
+        var holdsIdentity = HoldsDeezerPick;
 
         // REQ-PIC-28: the Deezer artist picture travels only while the Artist text is the picked name.
         var artistImage = !IsEditMode && string.Equals(ArtistSearchText, _pickedArtistName, StringComparison.Ordinal)
@@ -931,10 +963,10 @@ public partial class SongFormViewModel : ViewModelBase
             artistId,
             artistId.HasValue ? null : ArtistSearchText?.Trim(),
             // REQ-SFT-27 / design F6: edit mode sends a null identity = keep the stored identity.
-            keepsIdentity && !string.IsNullOrEmpty(SelectedProvider) ? SelectedProvider : null,
-            keepsIdentity && !string.IsNullOrEmpty(SelectedExternalId) ? SelectedExternalId : null,
+            holdsIdentity ? SelectedProvider : null,
+            holdsIdentity ? SelectedExternalId : null,
             _pendingRawUrls.ToArray(),
-            _artistDecision,
+            frozenEdit ? new ArtistDecision.None() : _artistDecision,
             _songDecision,
             // REQ-PIC-21: the form picture; edit mode stores it only when uploaded or removed (ImageChanged).
             ImageUrl: FormImageReference,
