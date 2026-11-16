@@ -64,4 +64,7 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 
 ## Close-out
 - [x] T13 Full test run, Android build, pending-model-changes check, traceability matrix, review, merge to `develop`, status.
+- [x] T15 **Song form: loading indicator and wrapped load.** (REQ-SLD-32, 33, 34) Level A for the ViewModel, device check for the shimmer. Added 2026-11-16 on Helder's decision.
+  - Files owned: `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `MyVocaList/UI/Pages/Songs/SongFormPage.xaml`, new test `Unit/ViewModels/SongFormViewModelLoadingTests.cs`.
+  - Demo: opening a stored song shows a shimmer until it has loaded; a failed load shows "This song could not be loaded." and goes back.
 - [ ] T14 **Device check (Helder)** — checklist in `task-log.md § Device check`.
