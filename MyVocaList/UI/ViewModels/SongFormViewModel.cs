@@ -48,6 +48,7 @@ public partial class SongFormViewModel : ViewModelBase
     [ObservableProperty] private bool _isCharacterCounterWarning;
     [ObservableProperty] private bool _isCharacterCounterError;
     [ObservableProperty] private bool _isBusy;
+    [ObservableProperty] private bool _isSongLoading;   // REQ-SLD-32: edit-mode load of the stored song is running
 
     // ── Version field (Task 4.5) ──────────────────────────────────────────
     [ObservableProperty] private string _songVersion = string.Empty;
@@ -119,6 +120,7 @@ public partial class SongFormViewModel : ViewModelBase
     // ── Form picture (REQ-PIC-17..22) ─────────────────────────────────────
     private const string ImageHint = "Square picture (1:1), 512 x 512 px or larger. Other shapes are cropped to the centre.";
     private const string ImagePickFailedMessage = "Could not use this picture.";
+    private const string SongLoadFailedMessage = "This song could not be loaded.";   // REQ-SLD-34
 
     private string? _uploadedImageReference;   // REQ-PIC-18 (1): the picture uploaded in this form
     private string? _storedImageReference;     // REQ-PIC-18 (2), edit mode: the song's stored picture
@@ -342,6 +344,7 @@ public partial class SongFormViewModel : ViewModelBase
     {
         _storedSongLoaded = false;          // a new song id: the stored song of the previous id no longer counts
         _storedIsDeezerSong = false;
+        IsSongLoading = value.HasValue;     // REQ-SLD-32: edit mode shows the placeholder until the load ends
         OnPropertyChanged(nameof(IsEditMode));
         OnPropertyChanged(nameof(IsTitleSearchEnabled));
         OnPropertyChanged(nameof(PageTitle));
@@ -829,6 +832,37 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private async Task LoadSongForEditAsync(int songId)
     {
+        try
+        {
+            if (await HydrateStoredSongAsync(songId))
+                return;
+
+            // REQ-SLD-34: a missing song is a failed load, the same as an exception.
+            await FailSongLoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Loading song {SongId} for edit failed", songId);
+            await FailSongLoadAsync();
+        }
+        finally
+        {
+            IsSongLoading = false;   // REQ-SLD-32: the placeholder ends however the load ended
+        }
+    }
+
+    /// <summary>REQ-SLD-34: the message through the snackbar, then back to where the form was opened from. Nothing is stored.</summary>
+    private async Task FailSongLoadAsync()
+    {
+        await _snackbarService.ShowErrorAsync(SongLoadFailedMessage);
+        await _navigationService.GoToAsync("..");
+    }
+
+    /// <summary>
+    /// Hydrates the form from the stored song. Returns false when the song does not exist (the caller treats it as a failed load).
+    /// </summary>
+    private async Task<bool> HydrateStoredSongAsync(int songId)
+    {
         await LoadKaraokeUrlsAsync();
 
         var song = await _songService.GetSongByIdAsync(songId);
@@ -837,7 +871,7 @@ public partial class SongFormViewModel : ViewModelBase
             _logger.LogWarning("Edit mode: song {SongId} not found during hydration", songId);
             _storedSongLoaded = true;   // nothing stored to freeze the Artist for: the form stays editable
             RunOnUiThread(NotifyArtistFrozenChanged);
-            return;
+            return false;
         }
 
         // Stash external identity so the edit Save round-trips it unchanged.
@@ -894,6 +928,7 @@ public partial class SongFormViewModel : ViewModelBase
         if (_openLyricsLookupCts is null
             && LyricsOriginRules.NeedsLookupOnOpen(song.ExternalProvider, song.ExternalId, song.Lyrics, song.LyricsOrigin))
             StartLyricsLookupOnOpen(songId);
+        return true;
     }
 
     /// <summary>Called by the page when the form is left: asks the lookup on open to stop (REQ-SLD-23).</summary>
@@ -957,6 +992,7 @@ public partial class SongFormViewModel : ViewModelBase
     /// </summary>
     private async Task SaveAsync()
     {
+        if (IsSongLoading) return;   // REQ-SLD-33: a Save of a form not yet filled would overwrite the stored song with blanks
         CancelLyricsLookup();   // REQ-LYR-10: Save starts; a late lookup answer must not reach the form
         if (IsBusy) return;   // BUG-049: re-entrancy guard, defense-in-depth alongside CanExecute
 
