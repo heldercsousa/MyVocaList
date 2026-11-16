@@ -416,6 +416,17 @@ def sln_add_entry(sln_text, rel_path):
     win_path = rel_path.replace("/", "\\")
     if win_path in sln_text:
         return sln_text
+    # Preferred: list the file under the solution folder that mirrors its physical
+    # folder (creating missing folders), so Visual Studio shows the disk tree
+    # (2026-11-15). A .sln the nester cannot parse falls back to the first section.
+    try:
+        scripts_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if scripts_dir not in sys.path:
+            sys.path.append(scripts_dir)
+        import sln_nest
+        return sln_nest.place(sln_text, [win_path])
+    except Exception:
+        pass
     # Match the marker newline-agnostically: _read_sln is byte-preserving, so a
     # VS-written .sln DOES reach here with CRLF. The inserted line must copy the
     # surrounding line ending or the file gains a mixed-EOL row.
