@@ -513,7 +513,6 @@ $RECYCLE.BIN/
 # Local debug/temp artifacts
 temp/
 nul
-.worktrees/
 .claude/worktrees/
 
 # ITF lane declaration marker (transient, per-worktree) — workflow.md Rule 2

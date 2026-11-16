@@ -57,15 +57,13 @@ The larger saving is in reads, not in the always-loaded part: a full `BACKLOG.md
 - Short status codes: not asked again; the recommendation stands (keep the statuses).
 - Not selected, moved to the follow-up item: the path-scoped rules spike (REQ-TUR-06) and the superpowers cost measurement (REQ-TUR-09).
 
-### Open points left on purpose
+### Open points — all closed on 2026-11-16
 
-1. `.worktrees/_orch` (22 untracked scratch files from 2026-11-04) is kept for Helder to look at. The `.worktrees/` line stays in `.gitignore` until it is removed.
-2. 24 `worktree-agent-*` branches still exist on `origin`. Only local branches were covered by the ruling.
-3. `MyVocaList.sln` starts with two byte-order marks. This was so before this item and was left as found.
-4. `CLAUDE.md` says hand-edits of BACKLOG rows are "hook-blocked". No hook blocks the edit; the pre-commit `regen --check` catches the stale file. The wording was not changed.
-5. Checked on 2026-11-16: the `SessionStart` `compact` hook delivers its line after a real `/compact` (headless session). The re-nested solution converts with the official parser (`dotnet sln migrate`): 7 projects, 715 `Docs` files, each in the folder matching its directory. That check found a regression of the 2026-11-15 re-nesting, three solution folders differing only by letter case from existing ones, fixed in `88349be4`. Still not done: opening the solution in the Visual Studio window itself.
-6. The "Token-scoped library reads" memory note is removed too (2026-11-16): its rule is now in `orchestrator.md § Briefing Protocol`.
-7. `worktree-base-check.py` reported 8 worktrees as forked from `main` whose branches are simply merged into `develop`. Fixed in `e95a562e`: a merged branch is not reported.
+1. `.worktrees/_orch`: Helder saw the list of its 22 files (commit-message drafts, test output captures, one briefing note and five one-off helper scripts, all from the SFT work merged on 2026-11-11) and ruled to delete them. The `.worktrees/` folder and its `.gitignore` line are gone.
+2. Remote `worktree-agent-*` branches: all 24 deleted on `origin` (Helder ruling). 23 held no commit outside `develop` and `main`. One held a commit unique by hash only (2026-07-01, form-validation standard); its content was compared line by line and is on `develop`, except one sentence in `dialogs-validation.md` that was reworded later. Helder approved its deletion separately.
+3. Visual Studio: the solution was loaded in Visual Studio 18 Insiders from the command line (`devenv.com MyVocaList.sln /Command "File.Exit" /Log`). Exit code 0; the activity log shows a `SolutionLoad` run; its 5 error entries concern C++ components, a source-control user option and the recent-projects list, none the solution file; the `.sln` was not modified by the load. Solution Explorer itself was not looked at by a person.
+4. The official parser check, the compaction-hook test, the "before" measurement and the base-check fix: see `task-log.md § Step 7`.
+5. Left as found, by choice: `MyVocaList.sln` starts with two byte-order marks; `CLAUDE.md` says hand-edits of BACKLOG rows are "hook-blocked" although only the pre-commit staleness check catches them.
 
 ## Already done (2026-11-14 and 15)
 
