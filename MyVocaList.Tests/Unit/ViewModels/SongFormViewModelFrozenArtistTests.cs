@@ -321,4 +321,43 @@ public class SongFormViewModelFrozenArtistTests
         Assert.Equal(7, request.ArtistId);
         Assert.Equal("Bohemian Rhapsody (Remastered)", request.Title);
     }
+
+    // [AC] REQ-SLD-12: in edit mode the Artist stays plain text until the stored song has loaded, so a Deezer song is never shown editable.
+    [Fact]
+    public async Task EditMode_BeforeTheSongHasLoaded_ArtistIsFrozen()
+    {
+        var load = new TaskCompletionSource<Song?>();
+        var songService = SaveService();
+        songService.Setup(s => s.GetSongByIdAsync(DeezerSong().Id, It.IsAny<CancellationToken>())).Returns(load.Task);
+        var sut = CreateSut(songService);
+
+        sut.SongIdRaw = DeezerSong().Id.ToString();
+        await Task.Yield();
+
+        Assert.True(sut.IsArtistFrozen);
+        Assert.False(sut.IsArtistEditable);
+    }
+
+    // [AC] REQ-SLD-13: once a local-only song has loaded in edit mode its Artist is editable, and the change is raised.
+    [Fact]
+    public async Task EditMode_LocalOnlySongAfterLoad_ArtistBecomesEditableAndNotifies()
+    {
+        var load = new TaskCompletionSource<Song?>();
+        var songService = SaveService();
+        songService.Setup(s => s.GetSongByIdAsync(LocalOnlySong().Id, It.IsAny<CancellationToken>())).Returns(load.Task);
+        var sut = CreateSut(songService);
+        sut.SongIdRaw = LocalOnlySong().Id.ToString();
+        await Task.Yield();
+
+        var raised = new List<string?>();
+        sut.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        load.SetResult(LocalOnlySong());
+        for (var i = 0; i < 500 && !raised.Contains(nameof(SongFormViewModel.IsArtistEditable)); i++)
+            await Task.Delay(10);
+
+        Assert.Contains(nameof(SongFormViewModel.IsArtistEditable), raised);
+        Assert.True(sut.IsArtistEditable);
+        Assert.False(sut.IsArtistFrozen);
+    }
 }
