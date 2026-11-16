@@ -98,7 +98,7 @@ Order of work follows the layers: Contracts and Domain, then Infra, then Service
 - **Migration** `AddSongLyricsOrigin`: nullable column on `Songs`, no default, no backfill (REQ-SLD-28). `Migrations/*` and `AppDbContext.cs` are sequential-only files: one writer.
 - `SongConfiguration`: map the enum (stored as a short string so the database stays readable).
 - `ISongRepository` / `SongRepository`: new paged search for the list (REQ-SLD-01 to 04), built on the existing `SearchTitleCoreAsync` logic:
-  (As built, per C21: this lives inside the existing `GetPagedAsync`, with no new interface member.)
+  (Superseded in shape by C21: this lives inside the existing `GetPagedAsync`, with no new interface member.)
   - full-text branch: the existing `SongSearch MATCH` query with the existing `bm25(SongSearch, 10.0, 1.0), length(s.Title)` order, plus `s.Id` as a last tie-breaker so pages never overlap, `LIMIT/OFFSET`, and a count query with the same `MATCH`;
   - prefix branch (no word of 3+ characters, or the index table is missing): today's `GetPagedAsync` query;
   - projection to `SongListItemDto` exactly as `GetPagedAsync` does (including `s.ImageUrl ?? artist.ImageUrl`).
