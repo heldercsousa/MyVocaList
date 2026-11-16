@@ -219,6 +219,21 @@ Four changes that came out of the 2026-11-16 discussion about how Deezer data is
   (REQ-LYR-05) and the client identification (REQ-LYR-15) apply. With title and artist only, one
   request is sent (REQ-LYR-08 has nothing to drop).
 
+### E. Loading a stored song into the form (added 2026-11-16, Helder)
+
+- **REQ-SLD-32: Loading indicator in edit mode.** (Helder)
+  WHILE the Song form loads a stored song, the form SHALL show a shimmer placeholder in place of its
+  fields. The screen is not blocked: back navigation works during the load. WHEN the load ends, the
+  placeholder is replaced by the filled fields. Add mode shows no placeholder.
+- **REQ-SLD-33: Save does nothing while the song loads.**
+  WHILE the Song form loads a stored song, Save SHALL NOT start. (A Save of a form that is not yet
+  filled would overwrite stored data with blanks.)
+- **REQ-SLD-34: A failed load closes the form with a message.** (Helder: "wrap the load")
+  IF loading the stored song fails with an error, or the song no longer exists, THEN the placeholder
+  ends, the failure is logged, the form SHALL show the message "This song could not be loaded." and
+  navigate back to where it was opened from. Nothing is stored. The form is never left open in edit
+  mode without its stored values.
+
 ## Validation rules
 
 | Field | Rule | Where |
