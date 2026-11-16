@@ -99,6 +99,35 @@ class PlaceTests(unittest.TestCase):
         self.assertEqual(where(out)["Docs\\Management\\feat\\bugs\\b1\\README.md"],
                          "Docs/Management/feat/bugs/b1")
 
+    def test_folder_names_match_case_insensitively(self):
+        """Regression 2026-11-16: `Docs/Management` exists, so a path spelled with another
+        case must reuse it, never create a second folder beside it."""
+        out = sn.place(sln(), ["Docs\\management\\x.md"])
+        self.assertEqual(len(sn.Sln(out).folders()), len(sn.Sln(sln()).folders()))
+        self.assertEqual(sn.case_duplicates(out), 0)
+        self.assertEqual(sn.misplaced(out), sn.misplaced(sln()))
+
+    def test_case_variant_duplicate_folders_are_merged_with_their_children(self):
+        dup = "{00000000-0000-0000-0000-0000000000E1}"
+        child = "{00000000-0000-0000-0000-0000000000E2}"
+        blocks = ('Project("' + FT + '") = "management", "management", "' + dup + '"\n'
+                  "\tProjectSection(SolutionItems) = preProject\n"
+                  "\t\tDocs\\Management\\dup.md = Docs\\Management\\dup.md\n"
+                  "\tEndProjectSection\nEndProject\n"
+                  'Project("' + FT + '") = "kid", "kid", "' + child + '"\n'
+                  "\tProjectSection(SolutionItems) = preProject\n"
+                  "\t\tDocs\\Management\\kid\\k.md = Docs\\Management\\kid\\k.md\n"
+                  "\tEndProjectSection\nEndProject\n")
+        nested = "\t\t" + dup + " = " + DOCS + "\n\t\t" + child + " = " + dup + "\n"
+        text = sln(extra_blocks=blocks, nested_extra=nested)
+        self.assertEqual(sn.case_duplicates(text), 1)
+        out = sn.place(text, [])
+        self.assertEqual(sn.case_duplicates(out), 0)
+        self.assertNotIn(dup, out)
+        self.assertEqual(where(out)["Docs\\Management\\dup.md"], "Docs/Management")
+        self.assertEqual(where(out)["Docs\\Management\\kid\\k.md"], "Docs/Management/kid")
+        self.assertEqual(sn.docs_entries(out), sn.docs_entries(text))
+
     def test_malformed_blocks_are_repaired(self):
         # The shape found in MyVocaList.sln: a block lost its EndProject (the next Project
         # line starts while it is open) and a stray EndProject follows a later block.
