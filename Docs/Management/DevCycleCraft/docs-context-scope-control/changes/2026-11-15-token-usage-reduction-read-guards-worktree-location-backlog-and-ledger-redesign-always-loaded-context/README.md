@@ -44,7 +44,7 @@ From fresh headless processes (`claude -p "/context"`), 2026-11-15:
 |--------|--------|-------|
 | Total at the first prompt | 31.9k tokens (fresh headless process on the pre-change commit `f8752731`, taken 2026-11-15 in a temporary worktree: memory files 12k, skills 2.5k) | 31.6k tokens |
 | Memory files | about 12k (12.2k measured mid-session) | 11.7k |
-| Skills listing | 2.5k headless (2.9k was an interactive-session figure, not comparable) | 2.5k |
+| Skills listing | 2.5k headless (2.9k was an interactive-session figure, not comparable; switching off the three Artifact skills shows no measured saving) | 2.5k |
 | `CLAUDE.md` | 8,279 bytes (3.3k tokens) | 7,573 bytes (3.0k tokens) |
 | `BACKLOG.md` | 35,182 bytes | 8,000 bytes |
 | `LEDGER.md` | 11,882 bytes | 4,467 bytes |
@@ -63,7 +63,9 @@ The larger saving is in reads, not in the always-loaded part: a full `BACKLOG.md
 2. 24 `worktree-agent-*` branches still exist on `origin`. Only local branches were covered by the ruling.
 3. `MyVocaList.sln` starts with two byte-order marks. This was so before this item and was left as found.
 4. `CLAUDE.md` says hand-edits of BACKLOG rows are "hook-blocked". No hook blocks the edit; the pre-commit `regen --check` catches the stale file. The wording was not changed.
-5. Not checked live: the `SessionStart` `compact` hook (needs a real compaction) and Visual Studio opening the re-nested solution (checked with `dotnet sln list` and the pre-commit check only).
+5. Checked on 2026-11-16: the `SessionStart` `compact` hook delivers its line after a real `/compact` (headless session). The re-nested solution converts with the official parser (`dotnet sln migrate`): 7 projects, 715 `Docs` files, each in the folder matching its directory. That check found a regression of the 2026-11-15 re-nesting, three solution folders differing only by letter case from existing ones, fixed in `88349be4`. Still not done: opening the solution in the Visual Studio window itself.
+6. The "Token-scoped library reads" memory note is removed too (2026-11-16): its rule is now in `orchestrator.md § Briefing Protocol`.
+7. `worktree-base-check.py` reported 8 worktrees as forked from `main` whose branches are simply merged into `develop`. Fixed in `e95a562e`: a merged branch is not reported.
 
 ## Already done (2026-11-14 and 15)
 

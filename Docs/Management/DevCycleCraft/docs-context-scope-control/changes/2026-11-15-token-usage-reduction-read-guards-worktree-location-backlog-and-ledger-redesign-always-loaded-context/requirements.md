@@ -96,6 +96,10 @@ Lower the tokens an agent spends on backlog, ledger and always-loaded context, w
 - AC-11.1: `README.md` records `/context` (memory files, skills, messages) from a fresh process before and after the E changes.
 - AC-11.2: `README.md` records the byte size of `BACKLOG.md`, `LEDGER.md` and `CLAUDE.md` before and after (BACKLOG: 35,182 to 8,322, done).
 
+## Gate
+
+Helder decided D-1, D-3, D-4, D-5 and D-8 on 2026-11-15 through the decision questions asked in the implementation session, and approved the `CLAUDE.md` diff before its commit. D-4 was ruled stricter than recommended (every file under the solution folder of its own directory). D-6 and D-7 were not selected and moved to the follow-up item. D-2 was not asked again; the statuses are unchanged.
+
 ## Decisions for Helder
 
 | # | Decision | Recommendation |
