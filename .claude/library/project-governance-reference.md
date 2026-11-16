@@ -67,7 +67,6 @@ Before proposing anything that touches UI, styles, or components, inspect ALL of
 
 **Excluded from glob scans (access by explicit path only; `.claudeignore`-enforced):**
 - `Docs/Management/DevCycleCraft/sdd/**` — SDD theory, 96 files (spec-, plan-, impl- prefixes), reference material only
-- `Docs/Changelog/**` — historical changelog
 - `Docs/Plans/**` — legacy plans folder
 
 ## Tool Selection
