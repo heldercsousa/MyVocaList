@@ -5,7 +5,7 @@
 ## App
 Karaoke queue management for live events: one active queue at a time, round-based progression; admin registers singers, tracks participation/absence, reorders the queue, estimates completion. Two queue modes: Mechanical Karaoke and Bandokê (live instrumental).
 
-**Stack:** .NET MAUI · net10.0-android · net10.0-ios · C# · CommunityToolkit.Mvvm · Serilog · EF Core · SQLite · DevExpress MAUI — **exact versions come from the `.csproj`, never from this file**. **Planned:** MediatR · FluentValidation (not registered). **Post-MVP:** Blazor Hybrid + MudBlazor + shared RCL under evaluation (`Docs/Management/DevCycleCraft/UI-2nd-refactor/`).
+**Stack:** .NET MAUI · net10.0-android · net10.0-ios · C# · CommunityToolkit.Mvvm · Serilog · EF Core · SQLite · DevExpress MAUI — **exact versions come from the `.csproj`, never from this file**.
 
 ## Architecture
 Layer constraints: `code-principles.md § Architecture Constraints` ("business logic in Services" is unamendable). `Directory.Build.props` holds usings shared across 2+ projects; each project's `GlobalUsings.cs` holds usings shared within it.
@@ -23,7 +23,7 @@ Layer constraints: `code-principles.md § Architecture Constraints` ("business l
 
 ## Commands
 **`[HARD RULE]`** every project command in `.claude/commands/` carries the `sln-` prefix.
-`/sln-build` · `/sln-release` · `/sln-commit` · `/sln-itf` · `/sln-ledger` · `/sln-docs-sync` · `/sln-review` (this solution's task output; built-in `/review` is for GitHub PRs). Each command file holds its own procedure.
+`/sln-review` reviews this solution's task output (built-in `/review` is for GitHub PRs). Each command file holds its own procedure.
 **Before any completion claim:** `superpowers:verification-before-completion`.
 
 ## Docs/ Folder Layout (canonical)
@@ -37,7 +37,6 @@ Docs/Management/[BusinessFeatures|DevCycleCraft|cross-cutting|milestones]/[featu
 - BACKLOG placement follows the `section:` frontmatter, not the folder. **BACKLOG rows are GENERATED — never hand-edit** (hook-blocked). Register with `backlog_gen.py register`; work set: `python .claude/scripts/backlog/backlog_gen.py query --status "🟡,🟢"`. Schema + verbs: `.claude/library/backlog-generator.md`.
 - **Skill-default overrides:** `brainstorming` writes `design.md`, `writing-plans` writes `plan.md`, task-logs go to `task-log.md` — all in the feature folder above, never `docs/superpowers/`.
 - **Never glob-scan `Docs/`** — read the active feature folder by explicit path. UI/component audits inspect every page, component and rules file, not just those mentioned (`project-governance-reference.md § Scope of inspection`).
-- **Task-log rotation:** `task-log.md` is capped at 300 lines (`tasklog-size-guard.py`). When exceeded, move closed/merged entries to `task-log-archive-YYYY-MM.md` in the same folder (mirroring `backlog-archive/`), keeping only active tasks and open manual device checklists.
 
 ## Continuous Enhancement
 After every task ask what should improve CLAUDE.md, a rules file or a command; update the most specialized file (`project-governance-reference.md § Continuous Enhancement`).
@@ -60,4 +59,4 @@ Changing `CLAUDE.md` or `.claude/rules/`: (1) state what is wrong and why; (2) n
 ## Roles
 - **Helder** — Architect and Technical Auditor: defines approaches, reviews, makes trade-offs.
 - **Claude Code** — Implementation Specialist: codes, debugs, documents; never makes architectural decisions unilaterally.
-- **Orchestrator read-scope** `[HARD RULE — amended 2026-11-03]`: as the main/orchestrator agent, do not explore source code — flows, surveys and consumer maps (plan mode included) go to an Explore/Plan subagent. Grep + read at most 2 source files per written question to *confirm* a diagnosis (read lane); apply a diagnosed 1-file / ≤ 5-line fix via `/sln-itf` instead of dispatching. See `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
+- **Orchestrator read-scope** `[HARD RULE — amended 2026-11-03]`: as the main/orchestrator agent, do not explore source code — flows, surveys and consumer maps (plan mode included) go to an Explore/Plan subagent. Read lane and ITF bounds: `.claude/agents/orchestrator.md § Orchestrator Read-Scope`.
