@@ -5,7 +5,7 @@ Everything outside a BACKLOG:GENERATED fence is preserved byte-for-byte
 (REQ-SEV-14/20); everything inside is a total function of the items, which is
 what makes regeneration idempotent (REQ-SEV-13).
 """
-from model import TERMINAL, SUPERSEDED, DUPLICATE, order_items
+from model import TERMINAL, SUPERSEDED, DUPLICATE, is_post_mvp, order_items
 
 # Statuses whose archive Status cell carries a `(closed <month>)` suffix
 # reconstructed from the item's `closed:` key -- the single source of truth for
@@ -110,9 +110,36 @@ def splice(text, region_name, new_body):
     return "{0}\n{1}\n{2}".format(head, new_body, tail)
 
 
+POST_MVP_TEMPLATE = """# MyVocaList — Post-MVP Backlog
+
+> Generated view of the active items marked `horizon: post-mvp` in their `README.md` frontmatter. Read it only when planning beyond the MVP. Same rules as `BACKLOG.md`: never hand-edit a row. Agents: `python .claude/scripts/backlog/backlog_gen.py query --horizon post-mvp`.
+
+## Business Features
+
+<!-- BACKLOG:GENERATED:BEGIN business-features -->
+<!-- BACKLOG:GENERATED:END business-features -->
+
+## Dev Cycle Craft
+
+<!-- BACKLOG:GENERATED:BEGIN dev-cycle-craft -->
+<!-- BACKLOG:GENERATED:END dev-cycle-craft -->
+"""
+
+
 def render_backlog(existing_text, items):
-    """Splice both live tables. Terminal items are excluded (REQ-SEV-16)."""
-    active = [i for i in items if i.status not in TERMINAL]
+    """Splice both live tables. Terminal items are excluded (REQ-SEV-16), and so
+    are post-MVP items: they render into BACKLOG-POST-MVP.md (`render_post_mvp`)."""
+    return _render_live(existing_text, items, post_mvp=False)
+
+
+def render_post_mvp(existing_text, items):
+    """Splice both live tables of BACKLOG-POST-MVP.md with the active post-MVP items."""
+    return _render_live(existing_text, items, post_mvp=True)
+
+
+def _render_live(existing_text, items, post_mvp):
+    active = [i for i in items
+              if i.status not in TERMINAL and is_post_mvp(i, items) == post_mvp]
     business = [i for i in active if _section_of(i, items) == "BusinessFeatures"]
     craft = [i for i in active if _section_of(i, items) == "DevCycleCraft"]
 
