@@ -49,6 +49,7 @@
 | C25 | Add mode: change the Title, edit the artist, type the picked title back | Not closed; the form holds the pick again with the edited artist | Closing it changes the identity rule of REQ-PIC-27/28. **Known gap for Helder** | Low |
 | C26 | Pick outcome after a changed Title text | Kept; dropped only by X and by a newer pick | Lyrics that still equal the lyrics source's text are a source copy | Low |
 | C27 | Album part of a Deezer option row | Stays (REQ-ART-07) | Only the version label was decided | Low |
+| C28 | The form sends the Deezer provider and id as a pair | Both when the pick is held, neither otherwise; decided during T10 | Before, each part was sent on its own check, so a half identity was possible in theory. A half identity is no identity everywhere else (duplicate check, unique index, `IsDeezerSong`). Deezer rows always carry both, so only a theoretical case changes | Low |
 
 ## 2. Approaches considered
 

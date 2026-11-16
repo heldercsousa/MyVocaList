@@ -41,21 +41,21 @@ Markers: `[ ]` available · `[~]` claimed · `[x]` committed.
 - [x] T8b **Lyrics origin on create and update.** After T3, T8a. (REQ-SLD-18, 26, 27) Level A.
   - Files owned: `Services/SongService.cs`, new test `Unit/Services/SongServiceLyricsOriginTests.cs`.
   - Demo: saving changed lyrics in edit mode stores origin `User`; unchanged lyrics keep the origin.
-- [~] T9a **`EnsureLyricsAsync`.** After T5, T8b. (REQ-SLD-19, 20, 22, 23, 24, 29) Level A.
+- [x] T9a **`EnsureLyricsAsync`.** After T5, T8b. (REQ-SLD-19, 20, 22, 23, 24, 29) Level A.
   - Files owned: `Domain/ServicesInterfaces/ISongService.cs`, `Services/SongService.cs` (lyrics service resolved inside the method, plan § 8 item 5 as revised), new test `Unit/Services/SongServiceEnsureLyricsTests.cs`.
   - Demo: a match is stored with origin `LyricsSource`; a definite no-match stores `NoneFound`; the HTTP lookup runs outside any unit-of-work scope.
-- [ ] T9b **`EnsureLyricsAsync` on the real stack.** After T9a. (REQ-SLD-19, 20, 24) Level A. (plan § 9 item 2)
+- [x] T9b **`EnsureLyricsAsync` on the real stack.** After T9a. (REQ-SLD-19, 20, 24) Level A. (plan § 9 item 2)
   - Files owned: new test `Integration/Services/SongServiceEnsureLyricsRealStackTests.cs`.
   - Demo: lyrics and origin are read back from a fresh context through the real unit of work.
 
 ## Phase 4 — UI
-- [ ] T10 **`SongFormViewModel`: frozen artist, no Version on a pick.** After T7, T8a. (REQ-SLD-08, 12, 13, 14, 17, 30) Level A.
+- [x] T10 **`SongFormViewModel`: frozen artist, no Version on a pick.** After T7, T8a. (REQ-SLD-08, 12, 13, 14, 17, 30) Level A.
   - Files owned: `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, new test `Unit/ViewModels/SongFormViewModelFrozenArtistTests.cs`; the existing tests named in plan § 7 and § 8 item 4 (superseded ACs).
   - Demo: after a Deezer pick `IsArtistFrozen` is true; changing the Title text or X on Title makes it false and keeps the artist text.
-- [ ] T11a **`SongFormViewModel`: lyrics on open.** After T9a, T10. (REQ-SLD-19, 21, 23, 24, 25) Level A. (plan § 9 items 3, 4, 8)
+- [~] T11a **`SongFormViewModel`: lyrics on open.** After T9a, T10. (REQ-SLD-19, 21, 23, 24, 25) Level A. (plan § 9 items 3, 4, 8)
   - Files owned: `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, new test `Unit/ViewModels/SongFormViewModelLyricsOnOpenTests.cs`.
   - Demo: opening a Deezer song without lyrics starts one lookup, shows the hint and fills the blank field.
-- [ ] T11b **`SongFormViewModel`: Save waits, pick outcome in the request.** After T11a. (REQ-SLD-26, 31) Level A. (plan § 9 items 3, 5)
+- [~] T11b **`SongFormViewModel`: Save waits, pick outcome in the request.** After T11a. (REQ-SLD-26, 31) Level A. (plan § 9 items 3, 5)
   - Files owned: `MyVocaList/UI/ViewModels/SongFormViewModel.cs`, `Unit/ViewModels/SongFormViewModelLyricsOnOpenTests.cs`; mock re-point in `Unit/ViewModels/SongFormViewModelLyricsTests.cs` (planned exception, plan § 8 item 3).
   - Demo: Save pressed during the lookup waits for it; the save request carries the pick lookup outcome.
 - [ ] T12 **Page: plain artist text when frozen.** After T11b. (REQ-SLD-08, 12, 13, 23) Level C, device check. One XAML file, then build.
