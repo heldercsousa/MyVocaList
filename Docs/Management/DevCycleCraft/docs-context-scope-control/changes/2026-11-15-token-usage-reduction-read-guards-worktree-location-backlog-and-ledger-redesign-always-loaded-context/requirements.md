@@ -1,6 +1,6 @@
 # Requirements — Token-usage reduction, workstreams D and E (remaining part)
 
-Status: draft for Helder's gate. Nothing in this file is implemented unless marked **Done**.
+Status: decided by Helder on 2026-11-15 and implemented, except REQ-TUR-06 and REQ-TUR-09, which moved to `../2026-11-15-always-loaded-context-path-scoped-rules-spike-and-superpowers-plugin-cost/`. Results: `README.md § Status`.
 
 Brainstorm input: Helder's written direction of 2026-11-15 (quoted in `README.md § Helder's direction for D and E`), the measurements in `README.md`, and the hooks and worktrees references read on 2026-11-15. Helder asked for autonomous work with open points left pending, so each open decision is listed in § Decisions for Helder with a recommendation instead of being asked one by one.
 
@@ -27,7 +27,7 @@ Lower the tokens an agent spends on backlog, ledger and always-loaded context, w
 - AC-02.1: the text above the first fence in `BACKLOG.md` is at most 12 lines.
 - AC-02.2: each rule removed from the header is present in `.claude/library/backlog-generator.md`.
 
-**REQ-TUR-03 — Post-MVP items live in their own generated file.**
+**REQ-TUR-03 — Post-MVP items live in their own generated file. Done (`0e4e4275`); four items carried the title prefix, not five.**
 - AC-03.1: an item whose frontmatter has `horizon: post-mvp` is rendered in `Docs/Management/BACKLOG-POST-MVP.md` and not in `BACKLOG.md`.
 - AC-03.2: an item without the key is rendered as today.
 - AC-03.3: a post-MVP item reaching a terminal status is archived exactly as any other item.
@@ -41,7 +41,7 @@ Lower the tokens an agent spends on backlog, ledger and always-loaded context, w
 
 ### D — Ledger
 
-**REQ-TUR-04 — A merged row leaves the ledger when its branch is gone.**
+**REQ-TUR-04 — A merged row leaves the ledger when its branch is gone. Done (`de18316a`).**
 - AC-04.1: a row stays in `LEDGER.md § Completed` when neither move condition of AC-04.1b holds: its branch is not confirmed gone, and its merge date is less than 7 days old or cannot be parsed. After a rotation `§ Completed` holds only such rows.
 - AC-04.1b: a row moves only when (1) its merge date parses and is 7 or more days old, or (2) its branch is confirmed gone: the branch cell names exactly one branch and either carries the text `(deleted)` or the branch is absent from both `git branch --list` and `git branch -r --list`. A branch cell that is empty, `—`, `develop`, or names more than one branch never confirms "gone"; such a row can move only by condition (1).
 - AC-04.2: every row moved out is appended to `LEDGER-archive.md` with identical text (no row is edited or dropped). The script checks that rows in `§ Completed` before equals rows left plus rows appended, and writes nothing when the counts differ.
@@ -53,14 +53,14 @@ Lower the tokens an agent spends on backlog, ledger and always-loaded context, w
 
 ### E — Always-loaded context
 
-**REQ-TUR-05 — `CLAUDE.md` carries only what every session needs.**
+**REQ-TUR-05 — `CLAUDE.md` carries only what every session needs. Done (`c6be7255`); AC-05.3 missed by 273 bytes, see `README.md`.**
 - AC-05.1: each sentence removed has a named home, listed old-text to home in the `amend:` commit body.
 - AC-05.2: no `[HARD RULE]` or `[Unamendable]` item is removed or reworded. In particular the `sln-` prefix `[HARD RULE]` line, the "Before any completion claim" line and the first sentence of the Orchestrator read-scope bullet stay.
 - AC-05.3: `CLAUDE.md` is at most 7,300 bytes (today 8,279); the four cuts in `design.md § E1` are estimated at about 1,100 bytes together.
 - AC-05.5: before a sentence is removed, its home file is opened and the sentence (or its content) is confirmed there; where the home does not yet state it, the text is added to the home in the same commit.
 - AC-05.4: Helder has reviewed the diff before the commit (authorship rule).
 
-**REQ-TUR-06 — Rules that apply only to code load only with code, if that is safe.**
+**REQ-TUR-06 — Rules that apply only to code load only with code, if that is safe. Moved to the follow-up item.**
 - AC-06.1: a spike records, from fresh processes, whether a rules file with a `paths:` scope (a) is absent from `/context` at session start, (b) loads when the main agent reads a matching file, (c) reaches an `implementor` subagent working under `.claude/worktrees/<name>/`.
 - AC-06.1b: pass and fail per question. (a) passes when the file is not listed under memory files in `/context` of a fresh process. (b) passes when it is listed after the main agent reads a matching file. (c) passes when the subagent quotes, word for word, a marker sentence that exists only in that file. Any other outcome is a fail for that question.
 - AC-06.2: a rules file is path-scoped only if (a), (b) and (c) all pass. If (c) fails, nothing is scoped and the result goes back to Helder.
@@ -71,19 +71,19 @@ Lower the tokens an agent spends on backlog, ledger and always-loaded context, w
 - AC-07.2: it is emitted for "implement task 3", "resume SFT", "start the next wave".
 - AC-07.3: no hook is registered on an event whose output is not delivered (`PostCompact`).
 
-**REQ-TUR-08 — The memory index holds no entry that a rule already states.**
+**REQ-TUR-08 — The memory index holds no entry that a rule already states. Done (3 entries removed, 1 kept).**
 - AC-08.1: each removed entry names the rule file and section that states it.
 - AC-08.2: no entry recording a Helder ruling that exists nowhere else is removed.
 - AC-08.3: after the change every link in `MEMORY.md` points to an existing file, and every memory file is linked.
 
-**REQ-TUR-09 — Superpowers plugin: its fixed cost is measured before any decision.**
+**REQ-TUR-09 — Superpowers plugin: its fixed cost is measured before any decision. Moved to the follow-up item.**
 - AC-09.1: `/context` is recorded from two fresh processes, plugin on and plugin off (messages and skills lines).
 - AC-09.2: the four skills `CLAUDE.md` relies on (`brainstorming`, `writing-plans`, `verification-before-completion`, `systematic-debugging`) remain available, either through the plugin or as vendored copies in `.claude/skills/`. Check: each of the four names appears in the skills listing of a fresh process.
 - AC-09.3: the plugin's fixed cost is the difference, in tokens, of the `/context` total at the first prompt of a fresh process between plugin on and plugin off.
 
 ### Cross-cutting
 
-**REQ-TUR-10 — Solution view mirrors the folder tree.**
+**REQ-TUR-10 — Solution view mirrors the folder tree. Done (`97909bfc`). Helder ruled a stricter form than D-4: every file sits under the solution folder of its own directory.**
 - AC-10.1: no `Docs\` file is listed in the root "Itens de Solução" solution folder.
 - AC-10.2: `process_checks.py --staged` (sln check) passes after the move.
 - AC-10.3: `dotnet sln MyVocaList.sln list` returns the same project list before and after.
@@ -92,7 +92,7 @@ Lower the tokens an agent spends on backlog, ledger and always-loaded context, w
 - AC-10.7: entries keep their full relative path as the entry text, so two `README.md` files under the same `bugs` or `changes` solution folder stay distinct entries; the script fails if two entries would be identical.
 - AC-10.5: the GUID counter rule in `constraints-reference.md § Visual Studio Solution (.sln)` is followed for every new solution folder.
 
-**REQ-TUR-11 — Measure.**
+**REQ-TUR-11 — Measure. Done (`README.md § Measure of success`).**
 - AC-11.1: `README.md` records `/context` (memory files, skills, messages) from a fresh process before and after the E changes.
 - AC-11.2: `README.md` records the byte size of `BACKLOG.md`, `LEDGER.md` and `CLAUDE.md` before and after (BACKLOG: 35,182 to 8,322, done).
 
