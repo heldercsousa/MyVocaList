@@ -1,13 +1,14 @@
 ---
 id: BUG-076
 title: Flaky ObjectDisposedException in the UOW SQLite test harness
-status: 💡 Pending
+status: 🔵 Superseded
 severity: Major
 target: 2026-08-18
 section: DevCycleCraft
 parent: read-model-notracking-guidelines
 goal: Integration tests intermittently fail with ObjectDisposedException on SQLitePCL.sqlite3 during EnsureCreated, landing on a different test each run; affected tests pass in isolation.
 gate: Suspected pooling/disposal interaction in the temp-file SQLite harness. Threatens the Phase 3.1 suite-green gate, whose whole value is a trustworthy signal.
+closed: 2026-11
 kind: bug
 ---
 
@@ -189,3 +190,8 @@ symptom (`ObjectDisposedException` on the native `sqlite3` handle), always green
 >
 > Likely area: a `DbContext`/connection disposed while an async EF operation is still in flight in the
 > test harness's teardown. The fix is a test-infrastructure concern, not production code.
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup, although the item was still useful and not delivered. Reopen it by registering a new item if the work is wanted again.

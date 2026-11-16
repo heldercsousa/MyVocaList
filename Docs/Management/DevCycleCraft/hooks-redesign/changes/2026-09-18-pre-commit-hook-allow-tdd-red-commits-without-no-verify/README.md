@@ -1,12 +1,13 @@
 ---
 id: pre-commit-hook-allow-tdd-red-commits-without-no-verify
 title: "Pre-commit hook: allow TDD Red commits without --no-verify"
-status: 💡 Pending
+status: 🔵 Superseded
 target: 2026-09-18
 section: DevCycleCraft
 parent: hooks-redesign
 goal: Teach the pre-commit hook to skip the test gate when a commit is a declared TDD Red, so a deliberately failing test can be committed without bypassing the hook wholesale.
 gate: Helder approves the Red-marker mechanism; a Red commit passes the hook unaided and a genuinely broken commit still fails it.
+closed: 2026-11
 kind: change
 ---
 
@@ -44,3 +45,8 @@ could proceed the same day; **this item is C**, the durable fix, deferred to its
   the build gate and every other check still run.
 - A commit without the trailer whose tests fail must still be rejected (negative test required).
 - On landing, retire Option A from `workflow.md § Rule 3` and close the exception-registry entry.
+
+
+## Observation
+
+Closed on 2026-11-16 at Helder's explicit request during the backlog cleanup, although the item was still useful and not delivered. Reopen it by registering a new item if the work is wanted again.
