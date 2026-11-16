@@ -1,12 +1,13 @@
 ---
 id: dbcontext-lifetime-unit-of-work-pattern-maui-has-no-per-page-scope
 title: DbContext lifetime & unit-of-work pattern — MAUI has no per-page scope
-status: 🟡 In Progress
+status: ✅ Done
 target: 2026-08-03
 section: DevCycleCraft
 parent: read-model-notracking-guidelines
 goal: AddDbContext registers Scoped but MAUI never creates a scope, so one AppDbContext lives for the whole app session and leaks tracked entities between operations (root cause of BUG-068). Establish one correct unit-of-work pattern with minimal repeated code.
-gate: "Phase 3.5 dissolved by the Event/Queue deletion; Phase 4+ is unblocked and all that remains."
+gate: Phase 3.5 dissolved by the Event/Queue deletion; Phase 4+ is unblocked and all that remains.
+closed: 2026-11
 kind: change
 ---
 
